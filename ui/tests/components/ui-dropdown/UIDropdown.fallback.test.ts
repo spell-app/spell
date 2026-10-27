@@ -2,10 +2,10 @@ import { describe, expect, it } from "vite-plus/test"
 
 import { Fixture } from "spell/test-helpers/Fixture"
 import { expectAccessible } from "spell/test-helpers/A11y"
-import { FallbackStub, type StubHost } from "spell-ui/test-helpers/FallbackStub"
-import type { DropdownChangeDetail } from "spell-ui/components/components.types"
+import { FallbackStub, type StubHost } from "spell/ui/test-helpers/FallbackStub"
+import type { DropdownChangeDetail } from "spell/ui/components/components.types"
 
-import { DropdownFallback } from "spell-ui/components/ui-dropdown/UIDropdown.fallback"
+import { DropdownFallback } from "spell/ui/components/ui-dropdown/UIDropdown.fallback"
 
 FallbackStub.define(
   "x-fb-dropdown",

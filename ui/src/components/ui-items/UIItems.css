@@ -129,7 +129,7 @@
   }
   /*
    * Shadow DOM:  the root is always an only child, so the DOM element's position decides.
-   * - `:not([data-ui])`:  in a static server render (`spell-ui/static`) the root REPLACES the DOM element,
+   * - `:not([data-ui])`:  in a static server render (`spell/ui/static`) the root REPLACES the DOM element,
    *   so this would zero the DOM element's own margin;  the root's `.ui.items` rules above give it there,
    *   as in static markup.
    */

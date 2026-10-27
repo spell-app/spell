@@ -1,6 +1,6 @@
 import { isServer, type JSX } from "@solidjs/web"
 
-import { E, UI, UIT } from "spell-ui/core"
+import { E, UI, UIT } from "spell/ui/core"
 import { transitionVocabulary } from "./UITransition.en"
 
 import transitionCSS from "./UITransition.css?inline"
@@ -125,7 +125,7 @@ export class UITransition extends E.UIComponent<typeof transitionVocabulary> {
   private box?: HTMLDivElement
 
   render(): JSX.Element {
-    // a server render (`spell-ui/static`) never calls `ref`:  first paint's `hidden` as an attribute
+    // a server render (`spell/ui/static`) never calls `ref`:  first paint's `hidden` as an attribute
     if (isServer)
       return (
         <div class={this.rootClass} part={this.partForName("transition")} hidden={!this.willBeVisible || undefined}>

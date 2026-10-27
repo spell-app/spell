@@ -1,15 +1,15 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { colorsCSS, foundationCSS } from "spell-ui/styles"
+import { colorsCSS, foundationCSS } from "spell/ui/styles"
 
 import { Fixture } from "spell/test-helpers/Fixture"
-import { Sheets } from "spell-ui/test-helpers/Sheets"
+import { Sheets } from "spell/ui/test-helpers/Sheets"
 
-import { loaderVocabulary } from "spell-ui/components/ui-loader/UILoader.en"
-import { Painted } from "spell-ui/test-helpers/Painted"
+import { loaderVocabulary } from "spell/ui/components/ui-loader/UILoader.en"
+import { Painted } from "spell/ui/test-helpers/Painted"
 
-import loaderCSS from "spell-ui/components/ui-loader/UILoader.css?inline"
-import loaderRaw from "spell-ui/components/ui-loader/UILoader.css?raw"
+import loaderCSS from "spell/ui/components/ui-loader/UILoader.css?inline"
+import loaderRaw from "spell/ui/components/ui-loader/UILoader.css?raw"
 
 /**
  * `UILoader.css` on its own, before any element exists:  the sheet's source rules, the computed styles of the

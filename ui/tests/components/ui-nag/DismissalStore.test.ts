@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, onTestFinished, test, vi } from "vite-plus/test"
 
-import { DismissalStore, type DismissalStoreProps } from "spell-ui/components/ui-nag/DismissalStore"
+import { DismissalStore, type DismissalStoreProps } from "spell/ui/components/ui-nag/DismissalStore"
 
 /** The item / cookie name every test stores under. */
 const KEY = "dismissal-store-test"

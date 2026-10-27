@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it } from "vite-plus/test"
 
-import { ExampleSource } from "spell-ui/components/ui-example/ExampleSource"
-import { SitePatch } from "spell-ui/site/_src/SitePatch"
+import { ExampleSource } from "spell/ui/components/ui-example/ExampleSource"
+import { SitePatch } from "spell/ui/site/_src/SitePatch"
 
 /**
  * `SitePatch`:  an edit to the shown page's file, patched into its `main` (epic `epic-engine` P40).

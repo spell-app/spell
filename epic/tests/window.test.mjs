@@ -66,7 +66,7 @@ const {
   withoutStay,
   withStay,
   worktreeOf
-} = await import("spell-epic/window.mjs")
+} = await import("spell/epic/window.mjs")
 
 /** The temp registry folder:  spell-epic's bridges' (`Window.registry`). */
 const dir = mkdtempSync(join(tmpdir(), "spell-windows-"))
@@ -207,7 +207,7 @@ test("a worktree's window:  the main root first, then the worktree's root, then 
   // the file's in the content folder's windows/ongoing (epic-eject P13):  paths relative to it
   assert.deepEqual(workspace.folders, [
     { path: "../../../spell-app", name: "spell-app" },
-    { path: "../../../spell-app/.claude/worktrees/seo", name: "⎇ seo" },
+    { path: "../../../app/.claude/worktrees/seo", name: "⎇ seo" },
     // `[]` on a machine without `../spell-app-dev`
     ...Window.sharedFolder(dirname(Window.worktreeFile("seo")))
   ])
@@ -909,7 +909,7 @@ test("handoff:  refused, no record written, when the end-of-turn hook won't run;
     // this session's prompt hook never marked it:  its hooks aren't loaded
     assert.throws(() => Window.handoff(name, SESSION), /can't move .* hooks haven't run/)
     assert.equal(existsSync(Window.handoffFile(SESSION)), false)
-    // marked, but Claude Code looks for the plugin in a folder that's gone (r20:  spell-app's old spell-epic/)
+    // marked, but Claude Code looks for the plugin in a folder that's gone (r20:  spell-app's old epic/)
     sawHooks(SESSION)
     pluginListsAt(join(claudeHome, "gone-spell-epic"))
     assert.throws(() => Window.handoff(name, SESSION), /gone-spell-epic, which is gone/)

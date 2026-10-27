@@ -1,8 +1,8 @@
 /** Core's `send()` and `input` (epic `elemental-spell` P9):  an event up a thing's chain, and the mouse and keys. */
 import { describe, test, expect, beforeEach } from "vite-plus/test"
 
-import { core, send, Thing, List, App } from "spell-parser/core"
-import { chainOf, handlerOf, SentEvent } from "spell-parser/core/sending"
+import { core, send, Thing, List, App } from "spell/parser/core"
+import { chainOf, handlerOf, SentEvent } from "spell/parser/core/sending"
 
 class Card extends Thing {
   heard: string[] = []

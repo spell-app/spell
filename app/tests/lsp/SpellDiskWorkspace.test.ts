@@ -4,10 +4,10 @@ import { tmpdir } from "os"
 import { resolve } from "path"
 import { fileURLToPath, pathToFileURL } from "url"
 
-import { SP } from "spell-parser/spell"
-import { LSP } from "spell-app/lsp"
-import { locationForDiskPath } from "spell-app/spaces/server/node/projects/disk-fetch"
-import { SpellDiskWorkspace } from "spell-app/lsp/SpellDiskWorkspace"
+import { SP } from "spell/parser/spell"
+import { LSP } from "spell/app/lsp"
+import { locationForDiskPath } from "spell/app/spaces/server/node/projects/disk-fetch"
+import { SpellDiskWorkspace } from "spell/app/lsp/SpellDiskWorkspace"
 
 /**
  * A fresh checkout's editor, opening a project that imports one nobody has compiled yet (epic `elemental-spell` C13):

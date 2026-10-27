@@ -4,8 +4,8 @@ import { tmpdir } from "os"
 import { dirname, resolve } from "path"
 import { fileURLToPath, pathToFileURL } from "url"
 
-import { CLI } from "spell-app/cli"
-import environment from "spell-app/spaces/server/node/environment"
+import { CLI } from "spell/app/cli"
+import environment from "spell/app/spaces/server/node/environment"
 
 /** cli's own folder, `src/cli/`. */
 const CLI_SRC_DIR = resolve(fileURLToPath(import.meta.url), "..", "..")
@@ -91,7 +91,7 @@ export async function speedtestCommand(
 
 /**
  * One side of the comparison.
- * - `checkout`:  the spell-parser checkout `speedTest.mts` times:  ours (`spell-parser/spell`'s), or the temp one
+ * - `checkout`:  the spell-parser checkout `speedTest.mts` times:  ours (`spell/parser/spell`'s), or the temp one
  * - `results`:  each run's, so far
  */
 type Side = {
@@ -201,9 +201,9 @@ export function speedTable(totals: Pick<SideTotal, "label" | "average" | "min" |
 ////////////////
 
 /**
- * A temp git worktree of spell-parser (the repo of our `spell-parser/spell`) at `ref`, ready to time:  the top repo's
+ * A temp git worktree of spell-parser (the repo of our `spell/parser/spell`) at `ref`, ready to time:  the top repo's
  * `node_modules` linked in (epic `repo-split` P7:  one install for every repo), so its packages from the OTHER repos
- * (`spell/util`) are ours, its own (`spell-parser/parser` ...) its own.
+ * (`spell/util`) are ours, its own (`spell/parser/parser` ...) its own.
  * - A `ref` with different dependencies may not run.
  * - `removeCheckout()` when done.
  */

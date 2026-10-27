@@ -2,8 +2,8 @@ import { untrack } from "solid-js"
 import { isServer, type JSX } from "@solidjs/web"
 
 // Import directly to avoid circular import
-import { lazy, proto, protoMerged } from "spell-ui/util"
-import { E, UI, type UIT } from "spell-ui/core"
+import { lazy, proto, protoMerged } from "spell/ui/util"
+import { E, UI, type UIT } from "spell/ui/core"
 // Import directly to avoid circular import:  spell-element imports nothing of Spell UI, so it has always loaded first
 import { UIComponent, cssState, watches, onChange, state, untracked } from "spell/element"
 // Import directly to avoid circular import
@@ -36,7 +36,7 @@ import { SOURCE_LOADER_TAG, SOURCE_MESSAGE_TAG } from "./elements.types"
  * - Imports the core as `E` / `UI` / `UIT`, except what its class definition reads:
  *   the base class, `elementSetup.DOMElement`, the decorators and the status tags come directly
  *   (WWOD §4 › "Circular imports").
- *   - NEVER a value from `spell-ui/components`:  the vocabulary pieces it relies on (`UIT.Source*`) only as types.
+ *   - NEVER a value from `spell/ui/components`:  the vocabulary pieces it relies on (`UIT.Source*`) only as types.
  ****************/
 export abstract class LoadableComponent<V extends E.ComponentVocabulary = E.ComponentVocabulary>
   extends UIComponent<V>

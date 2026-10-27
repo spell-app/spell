@@ -1,7 +1,7 @@
 /**
  * The English vocabulary of `<ui-flag>`:  every name the tag uses.
  * - Its tag, attributes (each with its kind and allowed values), parts and texts.
- *   The shape is `ComponentVocabulary` (`spell-ui/vocabulary`).
+ *   The shape is `ComponentVocabulary` (`spell/ui/vocabulary`).
  * - The attributes become Fomantic's class words, in Fomantic's order (`ClassBuilder`):
  *   `<ui-flag country="fr" size="large">` => `ui large flag fr`.
  *   - The country is CONTENT:  the Unicode flag emoji (`🇫🇷`),
@@ -22,7 +22,7 @@
  *   a translation adds its own names next to them (they're data, not vocabulary names).
  */
 
-import type { ComponentVocabulary } from "spell-ui/vocabulary"
+import type { ComponentVocabulary } from "spell/ui/vocabulary"
 
 /****************
  * ### `flagVocabulary`

@@ -1,8 +1,8 @@
 import { Show } from "solid-js"
 import { isServer, type JSX } from "@solidjs/web"
 
-import { E, UI } from "spell-ui/core"
-import { UIRoot } from "spell-ui/components/ui-root"
+import { E, UI } from "spell/ui/core"
+import { UIRoot } from "spell/ui/components/ui-root"
 import { pageVocabulary } from "./UIPage.en"
 
 import pageCSS from "./UIPage.css?inline"

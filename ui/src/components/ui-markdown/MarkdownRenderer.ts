@@ -1,4 +1,4 @@
-import { E } from "spell-ui/core"
+import { E } from "spell/ui/core"
 import type { MarkdownEngine } from "./MarkdownEngine"
 import type { MarkdownSanitizer } from "./MarkdownSanitizer"
 

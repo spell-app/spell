@@ -1,6 +1,6 @@
 /**
  * Every name `<ui-modal>` uses:  tag, attributes (kind + allowed values), events, slots, parts, states, texts.
- * Schema:  `E.ComponentVocabulary` (`spell-ui/vocabulary`).
+ * Schema:  `E.ComponentVocabulary` (`spell/ui/vocabulary`).
  * - Class words come out through `ClassBuilder`, in Fomantic's grammar:
  *   `<ui-modal size="tiny" appearance="basic" vertical-align="top" visible>` => `ui tiny basic top aligned active modal`;
  *   `active`, Fomantic's shown-modal class, is the element's own while it shows (the shared `visible` / `hidden`).
@@ -15,7 +15,7 @@
  *   `closable="false"` also brings back Fomantic's `closable: false` (dismissal `none`), unless `closedby` is set.
  */
 
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /****************
  * ### `<ui-modal>`

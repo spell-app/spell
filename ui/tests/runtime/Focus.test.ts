@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vite-plus/test"
 
 import { Fixture } from "spell/test-helpers/Fixture"
-import { Focus } from "spell-ui/runtime/Focus"
+import { Focus } from "spell/ui/runtime/Focus"
 
 const focus = new Focus()
 

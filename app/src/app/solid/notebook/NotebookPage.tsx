@@ -3,11 +3,11 @@ import { render, type JSX } from "@solidjs/web"
 
 import { setDebugGlobal } from "spell/util"
 import { after } from "spell/element"
-import { UI } from "spell-ui/core"
-import { SP } from "spell-parser/spell"
+import { UI } from "spell/ui/core"
+import { SP } from "spell/parser/spell"
 // Import directly:  the barrel brings the site header and the section editor too
 import { PagePatch } from "spell/server/site/PagePatch"
-import { appTexts } from "spell-app/app/ui/AppTexts"
+import { appTexts } from "spell/app/app/ui/AppTexts"
 import { NotebookController, type KeyedCell } from "./NotebookController"
 import { ExampleCode, ExampleDescription, NotebookCell } from "./NotebookCell"
 import { CellTools } from "./NotebookCellTools"
@@ -16,8 +16,8 @@ import { showNotebook } from "./NotebookHeader"
 import { SpellExample } from "./SpellExample"
 
 // the docs site's look:  the section titles', the subtitle's and the tabs panel's, as a component page draws them
-import "spell-ui/docs-components/docs-sections.css"
-import "spell-ui/docs-components/docs-page.css"
+import "spell/ui/docs-components/docs-sections.css"
+import "spell/ui/docs-components/docs-page.css"
 import "./NotebookPage.css"
 
 /****************

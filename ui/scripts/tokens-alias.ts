@@ -5,18 +5,18 @@
  *   write the alias, and every read in the family's sheets reads the alias.  See `ComponentTokens.convert()`.
  * - Without `--write` it only prints:  the notes to review, and every OTHER file still naming a converted token
  *   (other sheets' reads, tests, examples, docs) -- those need a human, see the recipe.
- * - NOTE: imports the leaf file, not the `spell-ui/styles` barrel (whose `?inline` imports only Vite understands).
+ * - NOTE: imports the leaf file, not the `spell/ui/styles` barrel (whose `?inline` imports only Vite understands).
  */
 import { readdirSync, readFileSync, writeFileSync } from "node:fs"
 import { join } from "node:path"
 import { parseArgs } from "node:util"
 
-import { ComponentTokens } from "spell-ui/styles/ComponentTokens"
+import { ComponentTokens } from "spell/ui/styles/ComponentTokens"
 import { Terminal } from "spell/element-tools/Terminal"
 import type { GeneratedOutput } from "spell/element-tools/generatedFiles"
-import { SITE_PAGES, SPELL_UI_ROOT } from "spell-ui/tools/tools.types"
+import { SITE_PAGES, SPELL_UI_ROOT } from "spell/ui/tools/tools.types"
 
-import { formatted } from "spell-ui/tools/generatedFiles"
+import { formatted } from "spell/ui/tools/generatedFiles"
 
 /****************
  * ### `AliasTokensCommand`

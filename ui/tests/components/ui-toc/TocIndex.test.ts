@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test } from "vite-plus/test"
 
-import { TocIndex } from "spell-ui/components/ui-toc/TocIndex"
-import type { TocEntry } from "spell-ui/components/ui-toc/UIToc.types"
+import { TocIndex } from "spell/ui/components/ui-toc/TocIndex"
+import type { TocEntry } from "spell/ui/components/ui-toc/UIToc.types"
 
 /** Two sections:  `types` holding `button` and `group` (holding `or`), and `states` with nothing under it. */
 const TREE: TocEntry[] = [entryOf("types", [entryOf("button"), entryOf("group", [entryOf("or")])]), entryOf("states")]

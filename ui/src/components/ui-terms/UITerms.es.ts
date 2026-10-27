@@ -1,4 +1,4 @@
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /**
  * `<ui-terms>` in Spanish:  `<es-terminos>`, with the names and texts only it uses (from `UITerms.en.ts`).

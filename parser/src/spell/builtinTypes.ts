@@ -17,8 +17,8 @@
  */
 
 import { snakeCase } from "spell/util"
-import { P } from "spell-parser/parser"
-import { SP } from "spell-parser/spell"
+import { P } from "spell/parser/parser"
+import { SP } from "spell/parser/spell"
 
 /**
  * The docs of `id`, which every thing and list has (epic `people-and-orgs`, Q9):

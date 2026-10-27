@@ -31,9 +31,9 @@ import { existsSync, readFileSync, readdirSync, writeFileSync } from "node:fs"
 import { homedir } from "node:os"
 import { join } from "node:path"
 
-import { parseVerbArgs, stringFlag } from "spell-epic/command/command.types"
-import { EpicConfig } from "spell-epic/config/EpicConfig"
-import { DataFile } from "spell-epic/data/DataFile"
+import { parseVerbArgs, stringFlag } from "spell/epic/command/command.types"
+import { EpicConfig } from "spell/epic/config/EpicConfig"
+import { DataFile } from "spell/epic/data/DataFile"
 import { SRV } from "spell/server"
 import { PageServer, pageServerRoot } from "spell/server/page"
 

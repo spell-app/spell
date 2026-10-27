@@ -4,9 +4,9 @@ import { render } from "@solidjs/web"
 
 import { reactiveObject } from "spell/util"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
-import type { SPACES } from "spell-app/spaces"
-import { editor, type EditorStore } from "spell-app/app/editor"
-import { editorPrefs } from "spell-app/app/editorPrefs"
+import type { SPACES } from "spell/app/spaces"
+import { editor, type EditorStore } from "spell/app/app/editor"
+import { editorPrefs } from "spell/app/app/editorPrefs"
 import {
   ProjectDropdown,
   ProjectMenu,
@@ -15,7 +15,7 @@ import {
   SplitPanel,
   normalizeSizes,
   uiReady
-} from "spell-app/app/solid"
+} from "spell/app/app/solid"
 
 /**
  * The pages' shell in the browser (P8):  `<SplitPanel>` (sizes, dragging a sizer), `<SpellPage>`,

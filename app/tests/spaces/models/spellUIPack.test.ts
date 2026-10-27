@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { parseSpellProject } from "spell-parser/spell/test"
-import { SPACES } from "spell-app/spaces"
+import { parseSpellProject } from "spell/parser/spell/test"
+import { SPACES } from "spell/app/spaces"
 
 /** Spell UI, as a spellx drawing names its components bare (epic `elemental-spell` P7, Q46). */
 describe("SPELL_UI_PACK", () => {

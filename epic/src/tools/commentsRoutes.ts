@@ -5,7 +5,7 @@
  *   - selected text:  ⌘ I, or the floating bullhorn
  *   - the page's side:  `_assets/spell-doc-runtime.js`, "Comments"
  *   - no Claude needed, so it works on a plane
- *   - its shape and every change to it:  `CommentList` (`spell-epic/tool/CommentList`)
+ *   - its shape and every change to it:  `CommentList` (`spell/epic/tool/CommentList`)
  * - Where it's kept (`inboxOf()`):
  *   - a docs page's:  its own inbox file, `<page>.inbox.json5` beside it (`GuideInbox`);
  *     its Send hands them to the session of the epic the page belongs to (below);
@@ -78,8 +78,8 @@ import { join } from "node:path"
 
 import { SRV } from "spell/server"
 import { COMPONENTS_PREFIX, type RouteModule } from "spell/server/page"
-import { EpicConfig } from "spell-epic/config/EpicConfig"
-import { DataFile } from "spell-epic/data/DataFile"
+import { EpicConfig } from "spell/epic/config/EpicConfig"
+import { DataFile } from "spell/epic/data/DataFile"
 import {
   CommentList,
   CommentsError,
@@ -87,11 +87,11 @@ import {
   type CommentPlace,
   type IdentifiedComment,
   type Turn
-} from "spell-epic/tool/CommentList"
-import { GuideInbox } from "spell-epic/tool/GuideInbox"
-import { ReviewInbox } from "spell-epic/tool/ReviewInbox"
-import { ReviewStart } from "spell-epic/tool/ReviewStart"
-import { SeeAlso } from "spell-epic/tool/SeeAlso"
+} from "spell/epic/tool/CommentList"
+import { GuideInbox } from "spell/epic/tool/GuideInbox"
+import { ReviewInbox } from "spell/epic/tool/ReviewInbox"
+import { ReviewStart } from "spell/epic/tool/ReviewStart"
+import { SeeAlso } from "spell/epic/tool/SeeAlso"
 
 import { rowsFile } from "./choicesRoutes"
 

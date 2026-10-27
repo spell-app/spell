@@ -1,9 +1,9 @@
 import { describe, expect, test } from "vite-plus/test"
 
 import { Fixture } from "spell/test-helpers/Fixture"
-import { PAGE } from "spell-ui/test-helpers/docsSearch.fixtures"
+import { PAGE } from "spell/ui/test-helpers/docsSearch.fixtures"
 
-import { PageOutline } from "spell-ui/components/ui-toc/PageOutline"
+import { PageOutline } from "spell/ui/components/ui-toc/PageOutline"
 
 describe("PageOutline.sections()", () => {
   test("lists titled sections as the search file does:  a top section's tab, an inner one's parent index", () => {

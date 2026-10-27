@@ -1,4 +1,4 @@
-import { PhaseTakes } from "spell-epic/tool/PhaseTakes"
+import { PhaseTakes } from "spell/epic/tool/PhaseTakes"
 
 import type { Migration, MigrationContext } from "./migrations.types"
 

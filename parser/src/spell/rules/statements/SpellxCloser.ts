@@ -1,7 +1,7 @@
 import { proto } from "spell/util"
-import { P } from "spell-parser/parser"
+import { P } from "spell/parser/parser"
 // Import directly to avoid circular import:  read as the class is defined, while the `SP` barrel loads its rules
-import { SpellxCloserToken } from "spell-parser/spell/SpellxTokens"
+import { SpellxCloserToken } from "spell/parser/spell/SpellxTokens"
 
 /**
  * `spellx_closer` rule:  a spellx closer on its own line, `</>` or `</property>` (epic `elemental-spell` P6).

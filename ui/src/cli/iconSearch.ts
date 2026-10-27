@@ -1,6 +1,6 @@
 /**
  * The icons `spell-ui` ships, by the names `UI.icons` knows them by -- for `spell icon`.
- * - Read from each built-in pack's `pack.js` (`spell-ui/icons`, `BuiltInPacks`), named as the runtime names them:
+ * - Read from each built-in pack's `pack.js` (`spell/ui/icons`, `BuiltInPacks`), named as the runtime names them:
  *   `IconName.claim()`.  An icon no name reaches is left out.
  * - Search keywords from ui's `data/search.json` (its `terms`), keyed by Font Awesome file name, e.g. `bell` -> `alarm`.
  * - Found by `IconName.search()`, the one search `<ui-icon-picker>` and the docs' icon browser use too.
@@ -9,7 +9,7 @@ import { readFileSync } from "node:fs"
 import { dirname, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 
-import { BuiltInIconPacks, BuiltInPacks, IconName, type IconPackIndex, type IconSearchFile } from "spell-ui/icons"
+import { BuiltInIconPacks, BuiltInPacks, IconName, type IconPackIndex, type IconSearchFile } from "spell/ui/icons"
 
 /** ui's search keywords:  `src/icons/data/search.json`, beside `icon-packs/`. */
 const SEARCH_FILE = resolve(dirname(fileURLToPath(BuiltInPacks.url("fa7-free"))), "..", "..", "data", "search.json")

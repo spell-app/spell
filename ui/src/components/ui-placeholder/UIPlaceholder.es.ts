@@ -1,4 +1,4 @@
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /**
  * `<ui-placeholder>` in Spanish:  `<es-esqueleto>`, with the names and texts only it uses (from `UIPlaceholder.en.ts`).

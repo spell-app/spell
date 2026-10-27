@@ -21,8 +21,8 @@ import { basename, dirname, join, relative } from "node:path"
 
 import { parseHTML } from "linkedom"
 
-import { parseVerbArgs } from "spell-epic/command/command.types.ts"
-import { DataFile } from "spell-epic/data/DataFile.ts"
+import { parseVerbArgs } from "spell/epic/command/command.types.ts"
+import { DataFile } from "spell/epic/data/DataFile.ts"
 import { CONTENT, GUIDES, PACKAGE, TOOLS, fromTemplate, pagePath, serialize, templateFile, tidy } from "./pages.js"
 
 const { positional, flags } = parseVerbArgs(process.argv.slice(2), ["dryRun"])

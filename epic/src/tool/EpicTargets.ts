@@ -3,8 +3,8 @@ import { dirname, join } from "node:path"
 
 import { parseHTML } from "linkedom"
 
-import { EpicConfig } from "spell-epic/config/EpicConfig"
-import { EpicAddress, PageTargets, SAGA_SCHEME, type Landing, type TargetAnswer } from "spell-epic/links"
+import { EpicConfig } from "spell/epic/config/EpicConfig"
+import { EpicAddress, PageTargets, SAGA_SCHEME, type Landing, type TargetAnswer } from "spell/epic/links"
 
 import { Sagas } from "./Sagas"
 import { ServedFolders } from "./ServedFolders"
@@ -38,7 +38,7 @@ export class EpicTargets {
   constructor(root: string) {
     this.content = EpicConfig.contentOf(root)
     this.sagas = new Sagas(root)
-    // a set in spell-epic (Epic UI's `spell-epic/src/docs`) is THIS engine's, which serves it, from any checkout
+    // a set in spell-epic (Epic UI's `epic/src/docs`) is THIS engine's, which serves it, from any checkout
     const folderOf = (dir: string) =>
       dir.startsWith(ENGINE_LINK) && !existsSync(join(root, ENGINE_LINK))
         ? join(ServedFolders.ENGINE, dir.slice(ENGINE_LINK.length))
@@ -233,7 +233,7 @@ const TEST_ACTION = /\sclass="[^"]*\bepic-test-action\b/
 /** The page server's show route (`showRoutes.ts`):  `/api/docs/show?path=<page>`. */
 const SHOW_ROUTE = "/api/docs/show?"
 
-/** A checkout's link to spell-epic, where spell-app's served sets name its folders (`spell-epic/src/docs`). */
+/** A checkout's link to spell-epic, where spell-app's served sets name its folders (`epic/src/docs`). */
 const ENGINE_LINK = "spell-epic/"
 
 /** A worktree's pages, as the main checkout's page server serves them. */

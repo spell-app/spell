@@ -3,13 +3,13 @@
 import { parseHTML } from "linkedom"
 import { beforeAll, describe, expect, it } from "vite-plus/test"
 
-import { StaticRender } from "spell-ui/static"
-import { UIContent } from "spell-ui/components/ui-parts/UIContent"
-import { UIHeader } from "spell-ui/components/ui-parts/UIHeader"
-import { UIFlyout } from "spell-ui/components/ui-flyout/UIFlyout"
+import { StaticRender } from "spell/ui/static"
+import { UIContent } from "spell/ui/components/ui-parts/UIContent"
+import { UIHeader } from "spell/ui/components/ui-parts/UIHeader"
+import { UIFlyout } from "spell/ui/components/ui-flyout/UIFlyout"
 
 /**
- * `<ui-flyout>` rendered statically (`spell-ui/static`):
+ * `<ui-flyout>` rendered statically (`spell/ui/static`):
  * `UIFlyout` loads WITHOUT the modal family's barrel (no `customElements` in node),
  * and renders `DialogComponent`'s closed `<dialog>` with the flyout's classes.
  */

@@ -3,13 +3,13 @@ import { afterEach, describe, expect, test, vi } from "vite-plus/test"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import { expectAccessible } from "spell/test-helpers/A11y"
 
-import "spell-ui/components/ui-icon"
-import "spell-ui/components/ui-card"
-import "spell-ui/components/ui-label"
-import "spell-ui/components/ui-button"
-import "spell-epic/components/epic-cards"
+import "spell/ui/components/ui-icon"
+import "spell/ui/components/ui-card"
+import "spell/ui/components/ui-label"
+import "spell/ui/components/ui-button"
+import "spell/epic/components/epic-cards"
 
-import type { SagaEpic } from "spell-epic/components/epic-cards/EpicCards.types"
+import type { SagaEpic } from "spell/epic/components/epic-cards/EpicCards.types"
 
 /** An epic serving the saga:  `phases` its phases' statuses, updated today unless `updated` says otherwise. */
 function epic(name: string, phases: string[], extra: Partial<SagaEpic["facts"]> = {}): SagaEpic {

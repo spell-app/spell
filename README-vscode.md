@@ -126,8 +126,8 @@ declare module "@solidjs/web/types/jsx.js" {
 The buttons beside TS do the same for JavaScript and Python,
 and the ▶ after them runs the project in a panel next to its code.
 
-All of that is one extension, Spell, built from spell-app's [vscode/](https://github.com/spell-app/spell-app/tree/main/vscode) folder.
-A second, Spell Epic, from [spell-epic](https://github.com/spell-app/spell-epic/blob/main/README.md), puts the epic page you're reviewing,
+All of that is one extension, Spell, built from spell-app's [vscode/](https://github.com/spell-app/spell/tree/main/app/vscode) folder.
+A second, Spell Epic, from [spell-epic](https://github.com/spell-app/spell/blob/main/epic/README.md), puts the epic page you're reviewing,
 and the docs, in a side bar beside your code.
 They're separate on purpose:  you can write Spell without the epic tooling, and review an epic without Spell.
 Here to install them?  [Skip to it](#two-you-build-the-rest-from-the-marketplace).
@@ -202,7 +202,7 @@ It picks ONE, when the server starts, and keeps it until the server restarts:
 2. else the window's folders, its FIRST folder last:  the first folder that leads to a checkout wins
 3. else the checkout the extension was built in, for a `.spell` file opened in a window with no checkout
 
-- A folder leads to a checkout when it's spell-app itself, holds `spell-app/` (the kit, or an epic's worktree of it),
+- A folder leads to a checkout when it's spell-app itself, holds `app/` (the kit, or an epic's worktree of it),
   or is anywhere inside one of those.
 - The Output panel's Spell channel says which it picked, and why:
   `Language server from <checkout>:  window folder <folder>`.
@@ -243,7 +243,7 @@ and `spell` on your `PATH` ([README-cli.md](README-cli.md#setting-it-up), "Setti
 3. Spell Epic, for the epic pages and the docs beside your code:
 
    ```sh
-   cd ~/www/spell/spell-epic/vscode
+   cd ~/www/spell/epic/vscode
    yarn install        # once:  it's a yarn project of its own
    yarn package        # builds it, then writes spell-epic.vsix
    code --install-extension spell-epic.vsix
@@ -253,7 +253,7 @@ and `spell` on your `PATH` ([README-cli.md](README-cli.md#setting-it-up), "Setti
    - No script installs it for you:  install it again after a change you want in every window.
 4. From the Marketplace, Oxc at least (the table below):  `code --install-extension oxc.oxc-vscode`.
 5. Open the kit, `code ~/www/spell`, and any `.spell` or `.spellx` file in it:
-   `spell-app/spaces/@spell/examples/Solitaire/Solitaire.spellx`, say.
+   `app/spaces/@spell/examples/Solitaire/Solitaire.spellx`, say.
    With epics, every window opens from a window file instead ([below](#windows-and-worktrees)).
 
 Neither of Spell's two is on the Marketplace:  like the rest of Spell today, they run from a checkout of the kit.
@@ -278,7 +278,7 @@ spell-app marks both unwanted, and pins its formatter to Oxc for each language.
 
 The colours start in the grammar inside the `.vsix`;  everything else comes from your checkout, as it is on disk.
 A `.spellx` file, Spell's tag-shaped form, gets all of it too, plus one view of its own:
-[its page](https://github.com/spell-app/spell-parser/blob/main/README-spellx.md) says what the tags mean.
+[its page](https://github.com/spell-app/spell/blob/main/parser/README-spellx.md) says what the tags mean.
 
 - **Colours.**  Spell's grammar,
   with the `<css>` and `<markdown>` blocks inside a template coloured as CSS and Markdown.
@@ -288,7 +288,7 @@ A `.spellx` file, Spell's tag-shaped form, gets all of it too, plus one view of 
   - `.spell` and `.spellx` files indent with tabs.
   - A `.spellx` file's tag heads (`<property "suit">`) are coloured as the Spell they read as.
 - **The language server:**  errors as you type, hover, completion, go to definition and references, rename,
-  an outline.  [Its page](https://github.com/spell-app/spell-app/blob/main/README-lsp.md) lists every feature.
+  an outline.  [Its page](https://github.com/spell-app/spell/blob/main/app/README-lsp.md) lists every feature.
 - **TS, JS, PY:**  the code the file compiles to, beside it and read-only, as above.
   - The writers `spell compile` uses:
     JavaScript is the target the editor runs, TypeScript is `ts/solid`, Python is `py`.
@@ -403,11 +403,11 @@ spell-ui adds a single setting;  the kit, spell-parser and spell-epic ship none.
 
 | File | What it holds |
 | --- | --- |
-| spell-app's [extensions.json](https://github.com/spell-app/spell-app/blob/main/.vscode/extensions.json) | Oxc recommended;  Prettier and ESLint (`esbenp.prettier-vscode`, `dbaeumer.vscode-eslint`) marked unwanted |
-| spell-app's [settings.json](https://github.com/spell-app/spell-app/blob/main/.vscode/settings.json) | Oxc lints as you type and formats on save, pinned for each language;  `.json5` read as JSON with comments;  schemas for people's files;  what search skips |
-| spell-app's [launch.json](https://github.com/spell-app/spell-app/blob/main/.vscode/launch.json) | "Run Spell Extension", on F5:  a new window running the extension from `vscode/`, open on the Solitaire example |
-| spell-app's [tasks.json](https://github.com/spell-app/spell-app/blob/main/.vscode/tasks.json) | "Build Spell Extension", which F5 runs first:  `yarn install && yarn build` in `vscode/` |
-| spell-ui's [settings.json](https://github.com/spell-app/spell-ui/blob/main/.vscode/settings.json) | a link in the Markdown preview opens its file in the editor |
+| spell-app's [extensions.json](https://github.com/spell-app/spell/blob/main/app/.vscode/extensions.json) | Oxc recommended;  Prettier and ESLint (`esbenp.prettier-vscode`, `dbaeumer.vscode-eslint`) marked unwanted |
+| spell-app's [settings.json](https://github.com/spell-app/spell/blob/main/app/.vscode/settings.json) | Oxc lints as you type and formats on save, pinned for each language;  `.json5` read as JSON with comments;  schemas for people's files;  what search skips |
+| spell-app's [launch.json](https://github.com/spell-app/spell/blob/main/app/.vscode/launch.json) | "Run Spell Extension", on F5:  a new window running the extension from `vscode/`, open on the Solitaire example |
+| spell-app's [tasks.json](https://github.com/spell-app/spell/blob/main/app/.vscode/tasks.json) | "Build Spell Extension", which F5 runs first:  `yarn install && yarn build` in `vscode/` |
+| spell-ui's [settings.json](https://github.com/spell-app/spell/blob/main/ui/.vscode/settings.json) | a link in the Markdown preview opens its file in the editor |
 
 **The catch:  VS Code reads a folder's `.vscode/` only when that folder is one of the window's top-level folders.**
 The kit's window and every epic's window are rooted at the kit, which ships none:
@@ -446,7 +446,7 @@ else a checkout's own (4747 for the main checkout).
 - **Review** (`spellEpic.reviewView`, the checklist):  the epic page under review (`/epic review <name>`),
   its details pages, test runs.
   You mark items on it, and a listening Claude session acts on your marks
-  ([the review loop](https://github.com/spell-app/spell-epic/blob/main/README-pages.md)).
+  ([the review loop](https://github.com/spell-app/spell/blob/main/epic/README-pages.md)).
   "Review:  Open Epic..." picks any registered repo's epic, from any window.
 - **Epic Docs** (`spellEpic.docView`, the hat):  any guide or docs page, reloading as it changes
   (`epic pages open <page> --vs`, `epic open <epic>`, `/spell-docs`).
@@ -464,7 +464,7 @@ the prompt is typed in, never sent, so you press Enter.
 
 - Every id it has is `spellEpic.*` (`spell-app.spell-epic`), so it runs beside the Spell extension.
 - Its buttons, which server serves which page, and every operation of the bridge:
-  [its own page](https://github.com/spell-app/spell-epic/blob/main/README-vscode.md).
+  [its own page](https://github.com/spell-app/spell/blob/main/epic/README-vscode.md).
 
 ## Windows and worktrees
 
@@ -541,7 +541,7 @@ Or the session STAYS:  same window, now titled `⎇ <name>` and tinted (`epic wi
 and `epic window close <name>` closes it and deletes its file.
 A window the session stayed in gets its title and colours back (`epic window stay --end`).
 
-- Every `epic window` verb:  [spell-epic's README-cli.md](https://github.com/spell-app/spell-epic/blob/main/README-cli.md).
+- Every `epic window` verb:  [spell-epic's README-cli.md](https://github.com/spell-app/spell/blob/main/epic/README-cli.md).
 - The skills and hooks behind the moves:  [README-agents.md](README-agents.md), "Skills and hooks".
 
 <details>
@@ -572,21 +572,21 @@ an epic's worktree runs both for you (`extraInstalls`, in the epic settings).
     never from a branch behind `main`, since every window runs the one install.
 - **Spell Epic:**  `yarn check` and `yarn package` in spell-epic's `vscode/`, then install the `.vsix`.
   spell-epic's `yarn test` runs its tests (`yarn test:vscode` alone).
-  [Its source](https://github.com/spell-app/spell-epic/tree/main/vscode/src), and the rest:  [its page](https://github.com/spell-app/spell-epic/blob/main/README-vscode.md).
+  [Its source](https://github.com/spell-app/spell/tree/main/epic/vscode/src), and the rest:  [its page](https://github.com/spell-app/spell/blob/main/epic/README-vscode.md).
 
 | Spell's file | What's in it |
 | --- | --- |
-| [extension.ts](https://github.com/spell-app/spell-app/blob/main/vscode/src/extension.ts) | starts the language server, and the TS, JS and PY views |
-| [ElementsHelp.ts](https://github.com/spell-app/spell-app/blob/main/vscode/src/ElementsHelp.ts) | custom elements' slot, part and dashed-attribute help in `.tsx` and `.jsx` files:  shows what the kit's `JsxElementHelp` finds |
-| [spellAppRoot.ts](https://github.com/spell-app/spell-app/blob/main/vscode/src/spellAppRoot.ts) | which checkout to run:  plain node, no `vscode`, so a script can check it |
-| [RunnerPanel.ts](https://github.com/spell-app/spell-app/blob/main/vscode/src/RunnerPanel.ts) | Run Project's panel |
-| [build.mjs](https://github.com/spell-app/spell-app/blob/main/vscode/build.mjs) | the esbuild bundle, `out/extension.js`, with the kit's elements help and TypeScript 6 inside;  the HTML and CSS data, copied into `out/data/`;  the version check;  Run Project's runner, through spell-app's `yarn build:runner` |
-| [syntaxes/](https://github.com/spell-app/spell-app/tree/main/vscode/syntaxes) | the two grammars:  Spell's, and CSS in JavaScript's `` css`...` `` templates |
-| [package.json](https://github.com/spell-app/spell-app/blob/main/vscode/package.json) | the commands, menus, settings, language and HTML and CSS data VS Code reads |
+| [extension.ts](https://github.com/spell-app/spell/blob/main/app/vscode/src/extension.ts) | starts the language server, and the TS, JS and PY views |
+| [ElementsHelp.ts](https://github.com/spell-app/spell/blob/main/app/vscode/src/ElementsHelp.ts) | custom elements' slot, part and dashed-attribute help in `.tsx` and `.jsx` files:  shows what the kit's `JsxElementHelp` finds |
+| [spellAppRoot.ts](https://github.com/spell-app/spell/blob/main/app/vscode/src/spellAppRoot.ts) | which checkout to run:  plain node, no `vscode`, so a script can check it |
+| [RunnerPanel.ts](https://github.com/spell-app/spell/blob/main/app/vscode/src/RunnerPanel.ts) | Run Project's panel |
+| [build.mjs](https://github.com/spell-app/spell/blob/main/app/vscode/build.mjs) | the esbuild bundle, `out/extension.js`, with the kit's elements help and TypeScript 6 inside;  the HTML and CSS data, copied into `out/data/`;  the version check;  Run Project's runner, through spell-app's `yarn build:runner` |
+| [syntaxes/](https://github.com/spell-app/spell/tree/main/app/vscode/syntaxes) | the two grammars:  Spell's, and CSS in JavaScript's `` css`...` `` templates |
+| [package.json](https://github.com/spell-app/spell/blob/main/app/vscode/package.json) | the commands, menus, settings, language and HTML and CSS data VS Code reads |
 
 - `yarn package` writes `spell-language.vsix`, with `vsce`:
   only the bundle, the HTML and CSS data, the manifest, the grammars, the language settings and the icons go in it.
-- The language server is spell-app's [server.ts](https://github.com/spell-app/spell-app/blob/main/src/lsp/server.ts), run by `tsx`.
+- The language server is spell-app's [server.ts](https://github.com/spell-app/spell/blob/main/app/src/lsp/server.ts), run by `tsx`.
 
 ## 🌱 Coming
 
@@ -595,9 +595,9 @@ an epic's worktree runs both for you (`extraInstalls`, in the epic settings).
 
 ## See also
 
-- [spell-app's README-lsp.md](https://github.com/spell-app/spell-app/blob/main/README-lsp.md):  the language server under the extension,
+- [spell-app's README-lsp.md](https://github.com/spell-app/spell/blob/main/app/README-lsp.md):  the language server under the extension,
   every feature it answers
-- [spell-epic's README-vscode.md](https://github.com/spell-app/spell-epic/blob/main/README-vscode.md):  Spell Epic in full,
+- [spell-epic's README-vscode.md](https://github.com/spell-app/spell/blob/main/epic/README-vscode.md):  Spell Epic in full,
   its servers and the window bridge
 - [README-development.md](README-development.md):  worktrees and the checks, day to day
 - [README-agents.md](README-agents.md):  Claude Code, and the skills and hooks that move sessions between windows

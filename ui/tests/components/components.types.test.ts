@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { UIT } from "spell-ui/core"
+import { UIT } from "spell/ui/core"
 
 describe("Flags.emojiFor()", () => {
   test("draws a two-letter code as its regional-indicator pair, in any case", () => {

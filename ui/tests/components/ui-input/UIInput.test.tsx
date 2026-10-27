@@ -1,14 +1,14 @@
 import { describe, expect, it, onTestFinished } from "vite-plus/test"
 import { userEvent } from "vite-plus/test/browser"
 
-import type { DOMFormControl } from "spell-ui/elements"
+import type { DOMFormControl } from "spell/ui/elements"
 import { expectAccessible } from "spell/test-helpers/A11y"
 
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 
-import "spell-ui/components/ui-input"
-import "spell-ui/components/ui-button"
-import "spell-ui/components/ui-icon"
+import "spell/ui/components/ui-input"
+import "spell/ui/components/ui-button"
+import "spell/ui/components/ui-icon"
 
 /** Element-markup rewrites of every example, by path. */
 const EXAMPLES = import.meta.glob<string>("/src/components/ui-input/examples/elements/*.html", {
@@ -494,7 +494,7 @@ describe("<ui-textarea grow>", () => {
   /** Run `test` twice:  with the browser's `field-sizing`, and measuring, as a browser without it does. */
   const bothWays = (name: string, test: (args: Awaited<ReturnType<typeof growing>>) => Promise<void>) => {
     it.each([["field-sizing"], ["measuring"]])(`${name} (%s)`, async (way) => {
-      const { UI } = await import("spell-ui/core")
+      const { UI } = await import("spell/ui/core")
       const supports = UI.browser.supports
       const had = supports.fieldSizing
       if (way === "measuring") supports.fieldSizing = false

@@ -1,17 +1,17 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { colorsCSS, foundationCSS } from "spell-ui/styles"
+import { colorsCSS, foundationCSS } from "spell/ui/styles"
 
 import { Fixture } from "spell/test-helpers/Fixture"
-import { Sheets } from "spell-ui/test-helpers/Sheets"
+import { Sheets } from "spell/ui/test-helpers/Sheets"
 
-import { transitionVocabulary } from "spell-ui/components/ui-transition/UITransition.en"
+import { transitionVocabulary } from "spell/ui/components/ui-transition/UITransition.en"
 
-import buttonCSS from "spell-ui/components/ui-button/UIButton.css?inline"
-import segmentCSS from "spell-ui/components/ui-segment/UISegment.css?inline"
-import transitionCSS from "spell-ui/components/ui-transition/UITransition.css?inline"
-import transitionRaw from "spell-ui/components/ui-transition/UITransition.css?raw"
-import animationsRaw from "spell-ui/styles/animations.css?raw"
+import buttonCSS from "spell/ui/components/ui-button/UIButton.css?inline"
+import segmentCSS from "spell/ui/components/ui-segment/UISegment.css?inline"
+import transitionCSS from "spell/ui/components/ui-transition/UITransition.css?inline"
+import transitionRaw from "spell/ui/components/ui-transition/UITransition.css?raw"
+import animationsRaw from "spell/ui/styles/animations.css?raw"
 
 /**
  * `UITransition.css` (plus `animations.css`, which owns Fomantic's transition states) on its own:

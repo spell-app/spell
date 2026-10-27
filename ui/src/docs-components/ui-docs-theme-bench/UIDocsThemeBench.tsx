@@ -3,8 +3,8 @@ import { isServer, type JSX } from "@solidjs/web"
 
 // Import directly:  in `core`'s util barrel the pref store cost every page 1.9 kB
 import { PrefStore } from "spell/util/persist/PrefStore"
-import { E, UI, UIT } from "spell-ui/core"
-import { ThemePreference } from "spell-ui/components/ui-theme-menu/ThemePreference"
+import { E, UI, UIT } from "spell/ui/core"
+import { ThemePreference } from "spell/ui/components/ui-theme-menu/ThemePreference"
 import { BenchBridge } from "./BenchBridge"
 import { BenchColor } from "./BenchColor"
 import { BenchEdits } from "./BenchEdits"
@@ -1219,7 +1219,7 @@ type FrameWindow = Window & {
 }
 
 /** The module name a page shares Spell UI's core by (`SpellUI.packModules`). */
-const CORE_MODULE = "spell-ui/core"
+const CORE_MODULE = "spell/ui/core"
 
 /** Everything, for a page just loaded (or the editor just listening). */
 const ALL_PARTS: DressParts = { theme: true, scheme: true, css: true, titles: true, fullMonty: true, look: true }

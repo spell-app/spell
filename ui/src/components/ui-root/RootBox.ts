@@ -1,6 +1,6 @@
 import { isServer } from "@solidjs/web"
 
-import { UIT } from "spell-ui/core"
+import { UIT } from "spell/ui/core"
 
 /****************
  * ### `RootBox`

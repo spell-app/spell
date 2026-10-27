@@ -1,10 +1,10 @@
 import { localTime } from "spell/util/time"
 import { SRV } from "spell/server"
 
-import { DataFile } from "spell-epic/data/DataFile"
+import { DataFile } from "spell/epic/data/DataFile"
 // By file:  the definitions' barrel loads every vocabulary, which reading an inbox doesn't need
-import { isItemId } from "spell-epic/definitions/definitions.types"
-import { PageStages, PhaseIds, type PageStage } from "spell-epic/phases"
+import { isItemId } from "spell/epic/definitions/definitions.types"
+import { PageStages, PhaseIds, type PageStage } from "spell/epic/phases"
 
 import { CommentList, type Comment, type IdentifiedComment } from "./CommentList"
 

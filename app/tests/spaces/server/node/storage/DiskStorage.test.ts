@@ -3,8 +3,8 @@ import { tmpdir } from "os"
 import { resolve } from "path"
 import { afterAll, describe, test, expect, vi } from "vite-plus/test"
 
-import { DiskStorage } from "spell-app/spaces/server/node/storage/DiskStorage"
-import { editJSON5, json5Edited, readJSON5, writeJSON5 } from "spell-app/spaces/server/node/storage/json5"
+import { DiskStorage } from "spell/app/spaces/server/node/storage/DiskStorage"
+import { editJSON5, json5Edited, readJSON5, writeJSON5 } from "spell/app/spaces/server/node/storage/json5"
 
 /**
  * Spaces' storage on the disk, and its JSON5 editing (epic `people-and-orgs` P8):  on a temporary folder.

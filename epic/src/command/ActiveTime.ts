@@ -1,4 +1,4 @@
-import { Transcript, type TranscriptBlock } from "spell-epic/config/Transcript.ts"
+import { Transcript, type TranscriptBlock } from "spell/epic/config/Transcript.ts"
 
 import type { TimeSpan } from "./command.types"
 

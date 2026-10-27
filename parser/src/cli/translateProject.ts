@@ -38,24 +38,24 @@ import { fileURLToPath } from "node:url"
 import { keepingCommentsIn, readJSON5File } from "spell/util/node/json5"
 import { CLI } from "spell/cli"
 import type { SRV } from "spell/server"
-import { SP } from "spell-parser/spell"
-import type { TranslateOptions } from "spell-parser/cli"
-import { claudeRunnerFor, type ChosenRunner } from "spell-parser/cli/claudeRunners"
+import { SP } from "spell/parser/spell"
+import type { TranslateOptions } from "spell/parser/cli"
+import { claudeRunnerFor, type ChosenRunner } from "spell/parser/cli/claudeRunners"
 import {
   NamesReview,
   openCommandRun,
   reviewTimeoutMs,
   type ReviewRun,
   type ReviewRunOpener
-} from "spell-parser/cli/NamesReview"
-import { ElementNames } from "spell-parser/spell/translate/ElementNames"
-import { FixUps, type FixUpFile, type FixUpLine } from "spell-parser/spell/translate/FixUps"
-import { NamesGlossary } from "spell-parser/spell/translate/NamesGlossary"
-import { NamesPass, type NamesStage } from "spell-parser/spell/translate/NamesPass"
-import { NamesSeeder } from "spell-parser/spell/translate/NamesSeeder"
-import { ShapeCheck } from "spell-parser/spell/translate/ShapeCheck"
-import { TranslationNames } from "spell-parser/spell/translate/TranslationNames"
-import { Translator } from "spell-parser/spell/translate/Translator"
+} from "spell/parser/cli/NamesReview"
+import { ElementNames } from "spell/parser/spell/translate/ElementNames"
+import { FixUps, type FixUpFile, type FixUpLine } from "spell/parser/spell/translate/FixUps"
+import { NamesGlossary } from "spell/parser/spell/translate/NamesGlossary"
+import { NamesPass, type NamesStage } from "spell/parser/spell/translate/NamesPass"
+import { NamesSeeder } from "spell/parser/spell/translate/NamesSeeder"
+import { ShapeCheck } from "spell/parser/spell/translate/ShapeCheck"
+import { TranslationNames } from "spell/parser/spell/translate/TranslationNames"
+import { Translator } from "spell/parser/spell/translate/Translator"
 import type {
   AskingPass,
   ClaudeEffort,
@@ -74,7 +74,7 @@ import type {
   TranslatedFile,
   TranslationChecker,
   UIVocabulary
-} from "spell-parser/spell/translate/translate.types"
+} from "spell/parser/spell/translate/translate.types"
 
 /** A parsed project to translate:  what spell-app's command hands `translateProject()`. */
 export type TranslateSource = {

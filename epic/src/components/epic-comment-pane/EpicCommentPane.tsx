@@ -7,7 +7,7 @@ import { E } from "spell/element"
 import { epicCommentPaneVocabulary } from "./EpicCommentPane.en"
 
 import paneCSS from "./EpicCommentPane.css?inline"
-import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
+import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 
 /****************
  * ### `EpicCommentPane`

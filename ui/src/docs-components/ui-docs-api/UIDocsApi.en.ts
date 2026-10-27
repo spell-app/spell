@@ -1,14 +1,14 @@
 /**
  * The English vocabulary of `<ui-docs-api>`:  every name the tag uses.
  * - Its tag, attributes, events, slots, parts, states and texts.
- *   The shape is `E.ComponentVocabulary` (`spell-ui/vocabulary`).
+ *   The shape is `E.ComponentVocabulary` (`spell/ui/vocabulary`).
  * - A DOC-ONLY element (`src/docs-components/`):  filed under the `documentation` topic,
  *   left out of the component list, and loaded by `<ui-root>` like any family.
  * - No class words:  `ui api` only;  the data's progress is `:state(loading)` / `:state(error)`.
  * - Texts:  every title, column header and message the tables show;  the data's own descriptions are English.
  */
 
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 import { ApiOnlyValues } from "./UIDocsApi.types"
 
 /****************

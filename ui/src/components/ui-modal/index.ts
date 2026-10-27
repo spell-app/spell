@@ -5,17 +5,17 @@
  *     and those parts and `<ui-button>` too (`UI.modals.*` builds its dialogs from them)
  *   - registers `ModalDialogs` as `UI.modals`' provider once the runtime has loaded,
  *     so `UI.modals.confirm()` / `alert()` / `prompt()` work
- * - Also exports `DialogComponent`, the base `<ui-flyout>` (`spell-ui/components/ui-flyout`) builds on.
- * - Also the library's `spell-ui/ui-modal` entry (its size is in `notes/report.md`).
+ * - Also exports `DialogComponent`, the base `<ui-flyout>` (`spell/ui/components/ui-flyout`) builds on.
+ * - Also the library's `spell/ui/ui-modal` entry (its size is in `notes/report.md`).
  */
 
-import { E, UI } from "spell-ui/core"
+import { E, UI } from "spell/ui/core"
 import { DialogComponent } from "./DialogComponent"
 import { UIModal } from "./UIModal"
 import { ModalDialogs } from "./ModalDialogs"
 
-import "spell-ui/components/ui-parts"
-import "spell-ui/components/ui-button"
+import "spell/ui/components/ui-parts"
+import "spell/ui/components/ui-button"
 
 UIModal.define()
 if (E.isBrowser()) void UI.load().then(() => UI.modals.register(new ModalDialogs()))

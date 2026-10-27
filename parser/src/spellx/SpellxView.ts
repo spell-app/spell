@@ -1,6 +1,6 @@
-import { P } from "spell-parser/parser"
-import { SP } from "spell-parser/spell"
-import { SX } from "spell-parser/spellx"
+import { P } from "spell/parser/parser"
+import { SP } from "spell/parser/spell"
+import { SX } from "spell/parser/spellx"
 
 /**
  * A `.spellx` file's CHUNK TREE, built from the tokens spell's own parser reads it as (epic `elemental-spell` P6, J30):
@@ -13,7 +13,7 @@ import { SX } from "spell-parser/spellx"
  *   - Its diagnostics are what the tokenizer noted on them (`SP.spellxErrorOf()`):  spellx's own mistakes.
  *     What the RULES say of a body is the parsed file's (`SP.SpellFile.errors`).
  * - Pure, and cheap:  no scope, no rules, nothing compiled;  every body stays raw spell text.
- * - Above `spell-parser/spell` in the import graph:  it uses the language's tokenizer there;  `spell` never imports it.
+ * - Above `spell/parser/spell` in the import graph:  it uses the language's tokenizer there;  `spell` never imports it.
  */
 export class SpellxView {
   /**

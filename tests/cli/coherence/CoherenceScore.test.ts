@@ -33,9 +33,9 @@ write(
   'test("one", () => {})\ntest.skip("two", () => {})\n  it.each([1])("three", () => {})\n'
 )
 commit("", "2026-10-25T10:00:00")
-write("spell-ui/package.json", JSON.stringify({ name: "spell-ui" }))
-write("spell-ui/src/Watcher.ts", `${COPY}\nreload()\n`)
-write("spell-ui/tests/a.test.ts", 'it("a", () => {})\n')
+write("ui/package.json", JSON.stringify({ name: "spell-ui" }))
+write("ui/src/Watcher.ts", `${COPY}\nreload()\n`)
+write("ui/tests/a.test.ts", 'it("a", () => {})\n')
 commit("spell-ui", "2026-10-25T10:00:00")
 write("src/server/Another.ts", `${COPY}\n`)
 
@@ -61,7 +61,7 @@ describe("CoherenceScore, over a made-up checkout", () => {
     expect(watching!.files).toEqual({
       "src/server/CommandRun.ts": 1,
       "src/server/Another.ts": 1,
-      "spell-ui/src/Watcher.ts": 1
+      "ui/src/Watcher.ts": 1
     })
     expect(watching!.copies).toBe(3)
   })
@@ -96,7 +96,7 @@ describe("users from the code map", () => {
     nodes: [
       { id: "home", label: "LiveReload", file_type: "code", source_file: "src/server/LiveReload.ts" },
       { id: "user", label: "CommandRun.ts", file_type: "code", source_file: "src/server/CommandRun.ts" },
-      { id: "ui", label: "Watcher.ts", file_type: "code", source_file: "spell-ui/src/Watcher.ts" },
+      { id: "ui", label: "Watcher.ts", file_type: "code", source_file: "ui/src/Watcher.ts" },
       { id: "test", label: "Run.test.ts", file_type: "code", source_file: "src/server/Run.test.ts" },
       { id: "self", label: "LiveReload.ts", file_type: "code", source_file: "src/server/LiveReload.ts" }
     ],
@@ -110,7 +110,7 @@ describe("users from the code map", () => {
 
   test("each file linking into a home, once;  never the home itself or a test", () => {
     expect(usersInMap(MAP, ["src/server/LiveReload.ts"]).sort()).toEqual([
-      "spell-ui/src/Watcher.ts",
+      "ui/src/Watcher.ts",
       "src/server/CommandRun.ts"
     ])
   })
@@ -130,10 +130,10 @@ describe("the score's sums", () => {
   })
 
   test("a path left out:  a file, a folder, or a glob", () => {
-    expect(isUnder("spell-ui/src/a/B.ts", "spell-ui/src/a")).toBe(true)
-    expect(isUnder("spell-ui/src/ab/B.ts", "spell-ui/src/a")).toBe(false)
-    expect(isUnder("spell-ui/src/a/UIB.fallback.ts", "spell-ui/src/**.fallback.ts")).toBe(true)
-    expect(isUnder("spell-ui/src/a/UIB.ts", "spell-ui/src/**.fallback.ts")).toBe(false)
+    expect(isUnder("ui/src/a/B.ts", "ui/src/a")).toBe(true)
+    expect(isUnder("ui/src/ab/B.ts", "ui/src/a")).toBe(false)
+    expect(isUnder("ui/src/a/UIB.fallback.ts", "ui/src/**.fallback.ts")).toBe(true)
+    expect(isUnder("ui/src/a/UIB.ts", "ui/src/**.fallback.ts")).toBe(false)
   })
 })
 

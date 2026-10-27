@@ -2,15 +2,15 @@ import { Show } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
 import { E } from "spell/element"
-import { UIRoot, type RootVocabulary } from "spell-ui/components/ui-root"
-// Import directly, NOT through the `spell-parser/spell` barrel, which would pull in the whole parser.
-import { SpellUrls } from "spell-parser/spell/SpellUrls"
+import { UIRoot, type RootVocabulary } from "spell/ui/components/ui-root"
+// Import directly, NOT through the `spell/parser/spell` barrel, which would pull in the whole parser.
+import { SpellUrls } from "spell/parser/spell/SpellUrls"
 // Import directly:  spell's project groups alone (for `@spell/examples/...`), without spaces' or spell's barrels
-import "spell-app/spaces/models/projectGroups"
-// Import directly, NOT through the `spell-app/app/runner` barrel, which would pull in `runCompiled()`, and so `core`.
-import { SPELL_COMPILED_EVENT, type SpellCompiled } from "spell-app/app/runner/runner.types"
-import { adoptShadowStyles } from "spell-app/app/runner/shadowStyles"
-import { appTexts } from "spell-app/app/ui/AppTexts"
+import "spell/app/spaces/models/projectGroups"
+// Import directly, NOT through the `spell/app/app/runner` barrel, which would pull in `runCompiled()`, and so `core`.
+import { SPELL_COMPILED_EVENT, type SpellCompiled } from "spell/app/app/runner/runner.types"
+import { adoptShadowStyles } from "spell/app/app/runner/shadowStyles"
+import { appTexts } from "spell/app/app/ui/AppTexts"
 import {
   SpellAppRunner,
   PUSHED_FOR,
@@ -20,13 +20,13 @@ import {
   pushedSource,
   type SpellAppControls,
   type SpellAppSource
-} from "spell-app/app/runner/SpellAppRunner"
+} from "spell/app/app/runner/SpellAppRunner"
 import { spellViewerVocabulary } from "./SpellViewer.en"
 
 import "./SpellViewer.css"
 
 // Every Solid computation follows spell cells.
-import "spell-app/app/solid/cellsBridge"
+import "spell/app/app/solid/cellsBridge"
 
 /****************
  * ### `DOMSpellViewerElement`
@@ -388,7 +388,7 @@ function srcSource(src: string): SpellAppSource {
 
 /**
  * End of a compiled project's file name:  `SP.COMPILED_JS_SUFFIX`.
- * - NOTE: copies, NOT imported:  `spell-parser/spell` would pull the whole parser into the bundle.
+ * - NOTE: copies, NOT imported:  `spell/parser/spell` would pull the whole parser into the bundle.
  */
 const COMPILED_JS = ".spell.js"
 

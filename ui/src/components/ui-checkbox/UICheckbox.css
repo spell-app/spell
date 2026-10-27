@@ -134,7 +134,7 @@
   }
   /*
    * Shrink-wrapped, as an `inline-block` already is:  a no-op inside the DOM element, but a static render's root
-   * (`spell-ui/static`) IS the flex / grid item the DOM element was, and would stretch.
+   * (`spell/ui/static`) IS the flex / grid item the DOM element was, and would stretch.
    */
   .ui.checkbox:not(.invisible) {
     inline-size: fit-content;

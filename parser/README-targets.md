@@ -45,7 +45,7 @@ The same program gives the same file every time, and a snapshot test pins it, ch
 And the three agree.
 Every frozen test project is compiled to JavaScript, TypeScript and Python, then run headless from the same seed,
 and each must print the same thing, line for line, its drawing included:
-that's [the core contract test](https://github.com/spell-app/spell-app/blob/main/tests/cli/contract.test.ts).
+that's [the core contract test](https://github.com/spell-app/spell/blob/main/app/tests/cli/contract.test.ts).
 The edge:  Python runs seven of the nine:  the to-do app is still beyond its writer (below),
 and Solitario, the Spanish example, compiles to Python but isn't run under it yet.
 
@@ -80,7 +80,7 @@ flowchart LR
   js -- .spell.js --> core["@spell/core<br/>the core, on Solid"]
   ts -- .spell.tsx --> core
   el -- .elements.spell.js --> core
-  lib -- .lib.ts --> model["spell-parser/core/model<br/>the core, without Solid"]
+  lib -- .lib.ts --> model["spell/parser/core/model<br/>the core, without Solid"]
   py -- .spell.py --> spc["spell_core<br/>the core's Python twin"]
   %% the Spell look:  yarn mermaid:pretty
   classDef default fill:#EFECFB,stroke:#6550CA,stroke-width:1.5px,color:#1A1C27,rx:8px,ry:8px
@@ -109,7 +109,7 @@ It also holds what changes from one language to the next:
 | --- | --- | --- | --- |
 | `js/solid` | [`JSWriter`](src/parser/writers/JSWriter.ts) | `<Project>.spell.js` | `@spell/core`, spell-parser's core |
 | `ts/solid` | [`TSWriter`](src/parser/writers/TSWriter.ts), on `JSWriter` | `<Project>.spell.tsx` | `@spell/core`;  `@spell/elements` for a view's element |
-| `ts/lib` | [`LibraryWriter`](src/parser/writers/LibraryWriter.ts), on `TSWriter` | `<Project>.lib.ts`, beside the source, committed | `spell-parser/core/model`:  the core with no drawing, so no Solid |
+| `ts/lib` | [`LibraryWriter`](src/parser/writers/LibraryWriter.ts), on `TSWriter` | `<Project>.lib.ts`, beside the source, committed | `spell/parser/core/model`:  the core with no drawing, so no Solid |
 | `py` | [`PyWriter`](src/py/PyWriter.ts), on [`PyBaseWriter`](src/py/PyBaseWriter.ts) | `<Project>.spell.py` and its words, `<Project>.py.en.json5`;  beside the source, for a program that draws, its web app, `<Project>.app.py` | `spell_core` |
 | `py`, a program that draws | [`ElementsWriter`](src/py/ElementsWriter.ts), on `JSWriter` | its page, in JavaScript:  `<Project>.elements.spell.js` | `@spell/core` |
 
@@ -206,7 +206,7 @@ The cost:
 
 Sometimes the program isn't the point, the types are.
 The editor keeps the people and orgs of its "You" panel as Spell,
-in [People.spell](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/library/people/People.spell):
+in [People.spell](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/library/people/People.spell):
 
 ```spell
 a person is a thing:
@@ -217,10 +217,10 @@ a person is a thing:
 ```
 
 Its project file asks for `"targets": ["ts/lib"]`, and the compile writes
-[people.lib.ts](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/library/people/people.lib.ts) beside it:
+[people.lib.ts](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/library/people/people.lib.ts) beside it:
 
 ```ts
-import { Thing, List, prop } from "spell-parser/core/model"
+import { Thing, List, prop } from "spell/parser/core/model"
 ...
 export class Person extends Thing {
   static savedInFile = true
@@ -234,19 +234,19 @@ export class Person extends Thing {
   accessor emails!: List<string>
 ```
 
-spell-app's [people store](https://github.com/spell-app/spell-app/blob/main/src/spaces/server/node/people/PeopleStore.ts) imports it like any other
-TypeScript, by package name:  `import * as People from "spell-app/spaces/@spell/library/people/people.lib.ts"`.
+spell-app's [people store](https://github.com/spell-app/spell/blob/main/app/src/spaces/server/node/people/PeopleStore.ts) imports it like any other
+TypeScript, by package name:  `import * as People from "spell/app/spaces/@spell/library/people/people.lib.ts"`.
 
 - It's `TSWriter`'s TypeScript, with the program's top-level steps left out:
   headings, tests, `print`, the things it makes.
   So importing it runs nothing but the class declarations.
-- Its core comes from `spell-parser/core/model`, and only what it uses:
+- Its core comes from `spell/parser/core/model`, and only what it uses:
   no Solid, and a thing it makes joins no program's list.
 - One file, its own types, with no `.d.ts` beside it.
   Vite, `tsx` and `tsc` import it as they import any TypeScript;
   a browser page with no build step, or plain node, can't load it as is.
 - It's committed, and marked generated, so GitHub folds it in a pull request's diff.
-  [A test](https://github.com/spell-app/spell-app/blob/main/tests/spaces/library/people.test.ts) fails when it isn't what the Spell compiles to now:
+  [A test](https://github.com/spell-app/spell/blob/main/app/tests/spaces/library/people.test.ts) fails when it isn't what the Spell compiles to now:
   the fix is `spell compile @spell/library/people`.
 
 Compile a program as a library and you see what's left:
@@ -260,7 +260,7 @@ spell compile @spell/examples/fizzbuzz --target ts/lib --stdout
 
 ```text
 ✓ @spell/examples/fizzbuzz
-import { core } from "spell-parser/core/model"
+import { core } from "spell/parser/core/model"
 
 /** File FizzBuzz.spell */
 export function playFizzbuzz() {
@@ -283,7 +283,7 @@ Ask it to, and it says so (below, "Choosing a target").
 ## Python:  Python's own words, on Python's own core
 
 Everything Spell has for Python is in [src/py/](src/py/), in two halves:
-- its TypeScript files WRITE Python:  `spell-parser/py`, the writers above
+- its TypeScript files WRITE Python:  `spell/parser/py`, the writers above
 - [src/py/core/](src/py/core/) is `spell_core`, what compiled Python imports:
   `from spell_core import core, Thing, List, App, prop, h`
 
@@ -337,7 +337,7 @@ node dumps its insides, `Card { Symbol(props): Map(3) {...}, ... }`.
 
 A program that draws runs as a web app, without `--no-browser`:
 - Its Python runs on Quart, served by `spell_quart`, which is spell-app's
-  ([README-spaces](https://github.com/spell-app/spell-app/blob/main/README-spaces.md)).
+  ([README-spaces](https://github.com/spell-app/spell/blob/main/app/README-spaces.md)).
   `spell run` serves it and opens it in your browser, until Ctrl-C.
 - Its page draws from the state Python sends:  the whole state when it opens, then a patch after each change,
   a game per visitor.
@@ -378,9 +378,9 @@ have, grouped by why (44 names):
 | remembered props:  a Python program keeps none yet | 1 |
 | not decided yet:  a word of Python's own, a browser's only, or ported when a program needs it | 16 |
 
-And the [todos-form-based](https://github.com/spell-app/spell-app/tree/main/spaces/@spell/test/todos-form-based/) test project has no Python snapshot:
+And the [todos-form-based](https://github.com/spell-app/spell/tree/main/app/spaces/@spell/test/todos-form-based/) test project has no Python snapshot:
 the Python writer can't write its function's named arguments yet.
-Its Spell, [todo.spell](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/test/todos-form-based/todo.spell):
+Its Spell, [todo.spell](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/test/todos-form-based/todo.spell):
 
 ```spell
 to create a new task (with title as text, completed as a choice)

@@ -114,7 +114,7 @@
   /*
    * Scroller:  around the slot;  spaced by the DOM element's position, since the table is always an only child.
    * - In the shadow root the DOM element carries that spacing (above), so the scroller has none.
-   *   `:not([data-ui])`:  a static server render's scroller (`spell-ui/static`) REPLACES the DOM element, and keeps it.
+   *   `:not([data-ui])`:  a static server render's scroller (`spell/ui/static`) REPLACES the DOM element, and keeps it.
    * - `--_ui-table-row-height` here too:  the scroller's scrolling heights read it (the table's alias is below it).
    */
   .scroller {

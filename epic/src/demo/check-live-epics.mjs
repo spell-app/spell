@@ -63,7 +63,7 @@ if (!process.env.CHECK_LIVE_UNDER_TSX) {
 const { BrowserPage } = await import("spell/element-tools/BrowserPage")
 const { DemoServer } = await import("./DemoServer.ts")
 const { bundleRoutes } = await import("./demoPages.mjs")
-const { EpicConfig } = await import("spell-epic/config/EpicConfig.ts")
+const { EpicConfig } = await import("spell/epic/config/EpicConfig.ts")
 
 /** What the reader types into the note box. */
 const NOTE = "half-typed note"

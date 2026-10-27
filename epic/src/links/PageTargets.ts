@@ -1,4 +1,4 @@
-import { PhaseIds } from "spell-epic/phases"
+import { PhaseIds } from "spell/epic/phases"
 
 import { EpicAddress } from "./EpicAddress"
 import type { Landing, PagePhase } from "./links.types"

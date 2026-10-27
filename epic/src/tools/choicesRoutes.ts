@@ -3,7 +3,7 @@
  * listed in the repo root's `package.json` `"pageServer": { "routes": [...] }`.
  * - A SYNTAX-CHOICES PAGE:  a table of names Claude recommends, one row per use site, each pre-filled in a box Owen
  *   types over (`epic choices`, `choices.js`)
- *   - the page's `<epic-choices-bar>` posts here (`spell-epic/answers` `ChoicesForm`),
+ *   - the page's `<epic-choices-bar>` posts here (`spell/epic/answers` `ChoicesForm`),
  *     and so does the spell syntax guide's bar (`_assets/spell-syntax.js`)
  * - `GET /api/docs/choices/draft?page=<path>` -- what was typed so far, `{ draft: ChoicesDraft | null }`:
  *   the page restores it on load
@@ -32,7 +32,7 @@
  */
 import { readFileSync } from "node:fs"
 
-import { DataFile } from "spell-epic/data/DataFile"
+import { DataFile } from "spell/epic/data/DataFile"
 import { SRV } from "spell/server"
 import type { RouteModule } from "spell/server/page"
 

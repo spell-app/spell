@@ -70,24 +70,24 @@ describe.skipIf(!CONTENT || !existsSync(join(CONTENT, CONTENT_SETTINGS)))(
       // the component sets:  their address, a worktree's, and their folder's (in the kit, beside spell-app:  `/_beside/...`,
       // or a file:// page)
       ["/components/ui/", "Spell/UI"],
-      ["/spell-ui/docs/ui-card.html", "Spell/UI"],
+      ["/ui/docs/ui-card.html", "Spell/UI"],
       ["/components/ui/ui-card.html", "Spell/UI"],
-      ["/_beside/spell-ui/site/index.html", "Spell/UI"],
-      ["/_beside/spell-ui/docs/ui-card.html", "Spell/UI"],
-      ["/Users/owen/www/spell/spell-ui/docs/ui-card.html", "Spell/UI"],
+      ["/_beside/ui/site/index.html", "Spell/UI"],
+      ["/_beside/ui/docs/ui-card.html", "Spell/UI"],
+      ["/Users/owen/www/spell/ui/docs/ui-card.html", "Spell/UI"],
       ["/worktrees/w/components/ui/ui-card.html", "Spell/UI"],
       ["/components/epics/", "Epic/UI"],
       ["/components/epics/epic-item.html", "Epic/UI"],
       ["/worktrees/w/components/epics/epic-item.html", "Epic/UI"],
-      ["/_beside/spell-epic/src/docs/epic-item.html", "Epic/UI"],
-      ["/Users/owen/www/spell/spell-epic/src/docs/index.html", "Epic/UI"],
+      ["/_beside/epic/src/docs/epic-item.html", "Epic/UI"],
+      ["/Users/owen/www/spell/epic/src/docs/index.html", "Epic/UI"],
       ["/components/app/", "App/UI"],
       ["/components/app/spell-viewer.html", "App/UI"],
       ["/worktrees/w/components/app/", "App/UI"],
       // App UI's folder, spell-app's:  served from the kit's root, a worktree's, or from disk
-      ["/spell-app/app/docs/index.html", "App/UI"],
-      ["/worktrees/w/spell-app/app/docs/index.html", "App/UI"],
-      ["/Users/owen/www/spell/spell-app/app/docs/index.html", "App/UI"],
+      ["/app/app/docs/index.html", "App/UI"],
+      ["/worktrees/w/app/app/docs/index.html", "App/UI"],
+      ["/Users/owen/www/spell/app/app/docs/index.html", "App/UI"],
       // the brand's element set lights the Brand tab
       ["/components/brand/", "Brand"],
       ["/components/brand/brand-logo.html", "Brand"],
@@ -129,9 +129,9 @@ describe.skipIf(!CONTENT || !existsSync(join(CONTENT, CONTENT_SETTINGS)))(
       ["/packages/docs/epics/seo/seo.html", "Epics"],
       ["/packages/docs/solid/solid-2.html", undefined],
       // other folders' files
-      ["/_beside/spell-ui/AGENTS.md", undefined],
+      ["/_beside/ui/AGENTS.md", undefined],
       ["/Users/owen/www/spell/src/server/AGENTS.md", undefined],
-      ["/Users/owen/www/spell/spell-app/src/app/docs.ts", undefined]
+      ["/Users/owen/www/spell/app/src/app/docs.ts", undefined]
     ])("light %s:  %s", (path, tab) => {
       expect(litName(path)).toBe(tab)
     })

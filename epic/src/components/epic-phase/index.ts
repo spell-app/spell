@@ -4,7 +4,7 @@
  * - Defines the family `<epic-phase>` draws in its shadow root first:  `<epic-review>`.
  * - A request's thumbnails open in Spell UI's `<ui-zoom>`, which `<ui-root>` loads like any Spell UI tag.
  */
-import "spell-epic/components/epic-review"
+import "spell/epic/components/epic-review"
 
 import { EpicPhase } from "./EpicPhase"
 import { EpicField } from "./EpicField"

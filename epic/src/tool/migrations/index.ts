@@ -1,5 +1,5 @@
 /**
- * The epic page migrations (`spell-epic/tool/migrations`):  the registry, its steps and their types.
+ * The epic page migrations (`spell/epic/tool/migrations`):  the registry, its steps and their types.
  */
 export { ChangesAfterGoal } from "./ChangesAfterGoal"
 export { DoneCardsClose } from "./DoneCardsClose"

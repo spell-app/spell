@@ -1,15 +1,15 @@
 import { describe, expect, it, onTestFinished } from "vite-plus/test"
 import { page } from "vite-plus/test/browser"
 
-import { foundationCSS } from "spell-ui/styles"
+import { foundationCSS } from "spell/ui/styles"
 
 import { Fixture } from "spell/test-helpers/Fixture"
-import { Sheets } from "spell-ui/test-helpers/Sheets"
+import { Sheets } from "spell/ui/test-helpers/Sheets"
 
-import { containerVocabulary } from "spell-ui/components/ui-container/UIContainer.en"
+import { containerVocabulary } from "spell/ui/components/ui-container/UIContainer.en"
 
-import containerCSS from "spell-ui/components/ui-container/UIContainer.css?inline"
-import containerRaw from "spell-ui/components/ui-container/UIContainer.css?raw"
+import containerCSS from "spell/ui/components/ui-container/UIContainer.css?inline"
+import containerRaw from "spell/ui/components/ui-container/UIContainer.css?raw"
 
 /**
  * `UIContainer.css` on its own, before any element exists:  the sheet's source rules and the computed widths of the

@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from "vite-plus/test"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import type { DOMElement } from "spell/element"
 
-import "spell-ui"
+import "spell/ui"
 
 /** `ElementFixture.breakRender()` must break ANY element, including one with no `keyOnly` attribute. */
 describe("ElementFixture.breakRender()", () => {

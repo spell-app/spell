@@ -1,4 +1,4 @@
-import { after } from "spell-ui/util"
+import { after } from "spell/ui/util"
 
 import {
   answerOf,

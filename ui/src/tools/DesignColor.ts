@@ -1,6 +1,6 @@
 import { hexToRgb, oklchToRgb, rgbToHex, rgbToOklch } from "spell/util/color"
 import { clamp } from "spell/util/number"
-import { CssText } from "spell-ui/styles/CssText"
+import { CssText } from "spell/ui/styles/CssText"
 
 /****************
  * ### `DesignColor`

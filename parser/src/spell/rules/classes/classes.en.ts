@@ -4,8 +4,8 @@
  * - Registered in the order the rules were registered before (`index.ts`):  a tie between two rules goes to the first.
  * - Another language registers the same classes with its own syntax, in `classes.<lang>.ts` (epic `spanish`).
  */
-import { P } from "spell-parser/parser"
-import { Wording } from "spell-parser/spell/rules/expressions"
+import { P } from "spell/parser/parser"
+import { Wording } from "spell/parser/spell/rules/expressions"
 
 import { classes } from "./classes.parser"
 import { AThingsProperty } from "./AThingsProperty"

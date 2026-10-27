@@ -15,7 +15,7 @@ import type { ComponentSet, EngineRoute, PageServerSettings } from "spell/server
  *   (`CONTENT_SETTINGS`:  the site's tabs, the writable folders), then each child repo its `repos.json5` lists that's
  *   installed, in that order (`settingsParts()`);  outside a kit, `root`'s own.
  * - Every path in a part is relative to ITS repo's folder;  here they come back relative to `root`
- *   (`spell-ui`'s `"docs"` is `spell-ui/docs` from the kit, `../spell-ui/docs` from spell-app).
+ *   (`spell-ui`'s `"docs"` is `ui/docs` from the kit, `../ui/docs` from spell-app).
  * - How the parts merge (`mergeSettings()`):  the lists end to end, in repo order;  the maps (`componentSets`,
  *   `engineRoutes`, `localCopies`) entry by entry, a later repo's entry winning.
  * - Read fresh on each call:  a server reads it once as it starts, the tools as they need it.
@@ -218,8 +218,8 @@ export function componentSets(settings: PageServerSettings): ComponentSet[] {
 
 /**
  * Page `file`'s ADDRESS, when it's in a component set's folder of checkout `root`:  `/components/ui/ui-button.html`
- * for `<root>/spell-ui/docs/ui-button.html`;  `undefined` for any other file.
- * - what every link to a set's page must name:  served from its folder's own path (`/spell-ui/docs/ui-button.html`),
+ * for `<root>/ui/docs/ui-button.html`;  `undefined` for any other file.
+ * - what every link to a set's page must name:  served from its folder's own path (`/ui/docs/ui-button.html`),
  *   the page loads none of the `_assets/` it finds beside its address, and shows as unstyled text (epic `epic-engine`
  *   I136)
  * - each segment URL-encoded;  a worktree's page is this under `/worktrees/<w>` (`mainServerUrl()`)
@@ -243,7 +243,7 @@ export function componentSetAddressOf(
 
 /**
  * The file component-set ADDRESS `address` names in checkout `root` (`componentSetAddressOf()` turned round):
- * `<root>/spell-ui/docs/ui-button.html` for `/components/ui/ui-button.html`;  `undefined` for any other path.
+ * `<root>/ui/docs/ui-button.html` for `/components/ui/ui-button.html`;  `undefined` for any other path.
  * - `address`:  a URL path, encoded or not
  */
 export function componentSetFileOf(
@@ -264,7 +264,7 @@ export function componentSetFileOf(
 /**
  * The engine routes `settings` name (`"engineRoutes"`), each as a URL prefix and the URL path its folder is served at
  * (`folderUrl()`), both ending `/`:  `"/_epic/pack/": "x/__pack"` => `["/_epic/pack/", "/x/__pack/"]`;
- * `"../spell-epic/src/tools/_assets"` => `"/_beside/spell-epic/src/tools/_assets/"`.
+ * `"../epic/src/tools/_assets"` => `"/_beside/epic/src/tools/_assets/"`.
  */
 export function engineRoutes(settings: PageServerSettings): EngineRoute[] {
   return Object.entries(settings.engineRoutes ?? {}).map(([route, folder]) => [
@@ -276,8 +276,8 @@ export function engineRoutes(settings: PageServerSettings): EngineRoute[] {
 /**
  * Where the folders a page server serves from OUTSIDE its checkout are, as URL paths:  `/_beside/<folder>/`, the
  * folder's path from the checkout's PARENT (epic `repo-split` P8).
- * - e.g. settings read for spell-app's folder (`pageServerSettings()`) name `../spell-ui/docs`:
- *   Spell UI's component set, in the repo beside it, served at `/_beside/spell-ui/docs/`
+ * - e.g. settings read for spell-app's folder (`pageServerSettings()`) name `../ui/docs`:
+ *   Spell UI's component set, in the repo beside it, served at `/_beside/ui/docs/`
  *   - a page server of the kit has none:  every repo is inside it (epic `repo-split` P16)
  * - only the folders its settings name (`besideFolders()`), each mounted on its own:  never the parent folder whole
  */
@@ -285,7 +285,7 @@ export const BESIDE_PREFIX = "/_beside"
 
 /**
  * The URL path a settings folder (relative to the checkout) is served at, no trailing `/`:  inside the checkout its
- * own path (`app/docs` => `/app/docs`), beside it under `BESIDE_PREFIX` (`../spell-ui/docs` => `/_beside/spell-ui/docs`).
+ * own path (`app/docs` => `/app/docs`), beside it under `BESIDE_PREFIX` (`../ui/docs` => `/_beside/ui/docs`).
  * - the checkout itself:  `""`
  * - throws a `TypeError` for one further up than the checkout's parent (`../../x`)
  */
@@ -299,7 +299,7 @@ export function folderUrl(folder: string): string {
   return `${BESIDE_PREFIX}/${beside}`
 }
 
-/** Is settings folder `folder` outside the checkout (`../spell-ui/docs`)? */
+/** Is settings folder `folder` outside the checkout (`../ui/docs`)? */
 export function isBeside(folder: string): boolean {
   return folderUrl(folder).startsWith(`${BESIDE_PREFIX}/`)
 }

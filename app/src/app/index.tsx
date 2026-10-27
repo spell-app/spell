@@ -1,16 +1,16 @@
 import { render } from "@solidjs/web"
 
 // Import parser bits
-import "spell-parser/parser"
-import { editor } from "spell-app/app/editor"
-import { AppTexts } from "spell-app/app/ui/AppTexts"
-import { EditorTheme, ErrorNotice, Notice, addAppIconsPageWide } from "spell-app/app/solid"
-import { Routes } from "spell-app/app/pages/routes"
-import { isStaticBuild } from "spell-app/app/static/staticBuild"
-import { staticFiles } from "spell-app/app/static/StaticFiles"
+import "spell/parser/parser"
+import { editor } from "spell/app/app/editor"
+import { AppTexts } from "spell/app/app/ui/AppTexts"
+import { EditorTheme, ErrorNotice, Notice, addAppIconsPageWide } from "spell/app/app/solid"
+import { Routes } from "spell/app/app/pages/routes"
+import { isStaticBuild } from "spell/app/app/static/staticBuild"
+import { staticFiles } from "spell/app/app/static/StaticFiles"
 
 // Solid follows spell cells:  BEFORE anything renders
-import "spell-app/app/solid/cellsBridge"
+import "spell/app/app/solid/cellsBridge"
 
 // The static build (the public preview) reads its files from the build and keeps edits in the browser;
 // every other build has debug globals for hacking in the browser's console (`debug.ts`).
@@ -22,8 +22,8 @@ else void import("./debug").catch((error) => console.error("debug globals:", err
 AppTexts.namePageLanguage()
 
 // Programs run on the runtime `editor` loads -- start loading it now.
-// - It registers the `UI` / `SUI` tags spell JSX draws with, NOT the editor's `spell-app/app/solid`.
-// - NEVER import `spell-parser/core` here:  see `spellRuntime.ts`.
+// - It registers the `UI` / `SUI` tags spell JSX draws with, NOT the editor's `spell/app/app/solid`.
+// - NEVER import `spell/parser/core` here:  see `spellRuntime.ts`.
 void editor.loadRuntime()
 
 // The editor's icon names are Fomantic's, page-wide too:  its dialogs open on `<body>`, outside `index.html`'s `<ui-root>`.

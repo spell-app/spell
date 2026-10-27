@@ -5,7 +5,7 @@ import { localMinutes } from "spell/util/time"
 import { Git } from "spell/server/Git"
 import { RealPath } from "spell/server/RealPath"
 import { CLI } from "spell/cli"
-import { EpicConfig } from "spell-epic/config/EpicConfig"
+import { EpicConfig } from "spell/epic/config/EpicConfig"
 
 import {
   EXIT,

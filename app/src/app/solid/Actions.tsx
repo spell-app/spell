@@ -1,13 +1,13 @@
 import { Match, Show, Switch, omit } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
-import type { UIButtonAttributes } from "spell-ui/jsx"
-import { SPACES } from "spell-app/spaces"
-import { editor, runtimeConsole } from "spell-app/app/editor"
-import { appTexts } from "spell-app/app/ui/AppTexts"
-import type * as Modals from "spell-app/app/solid/modals"
-import { tracked } from "spell-app/app/solid"
-import { isStaticBuild } from "spell-app/app/static/staticBuild"
+import type { UIButtonAttributes } from "spell/ui/jsx"
+import { SPACES } from "spell/app/spaces"
+import { editor, runtimeConsole } from "spell/app/app/editor"
+import { appTexts } from "spell/app/app/ui/AppTexts"
+import type * as Modals from "spell/app/app/solid/modals"
+import { tracked } from "spell/app/app/solid"
+import { isStaticBuild } from "spell/app/app/static/staticBuild"
 
 /****************
  * ### `<Action>`

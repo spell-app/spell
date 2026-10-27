@@ -17,7 +17,7 @@ import path from "node:path"
 import { build } from "vite"
 
 import { SRV } from "spell/server"
-import { SITE_ASSETS } from "spell-ui/vite.site.config.ts"
+import { SITE_ASSETS } from "spell/ui/vite.site.config.ts"
 import { Terminal } from "spell/element-tools/Terminal"
 
 SRV.Bundle.clearOutput(SITE_ASSETS)

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { type MenuOption, MenuOptions, markedPieces } from "spell-ui/elements"
+import { type MenuOption, MenuOptions, markedPieces } from "spell/ui/elements"
 
 /** Small option list with accents, a disabled option and value / text differences. */
 const OPTIONS: MenuOption[] = [

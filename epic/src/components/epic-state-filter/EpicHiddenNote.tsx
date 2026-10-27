@@ -1,11 +1,11 @@
 import type { JSX } from "@solidjs/web"
 
-import { E } from "spell-ui/core"
+import { E } from "spell/ui/core"
 
 import { epicHiddenNoteVocabulary } from "./EpicHiddenNote.en"
 import { SHOW_ALL } from "./EpicStateFilter.types"
 
-import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
+import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 import noteCSS from "./EpicHiddenNote.css?inline"
 
 /****************

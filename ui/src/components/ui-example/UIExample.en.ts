@@ -1,13 +1,13 @@
 /**
  * The English vocabulary of `<ui-example>`:  every name the tag uses.
  * - Its tag, attributes, events, slots, parts, states and texts.
- *   The shape is `E.ComponentVocabulary` (`spell-ui/vocabulary`).
+ *   The shape is `E.ComponentVocabulary` (`spell/ui/vocabulary`).
  * - The docs site's `<ui-docs-example>` until epic `ui-gaps` P14 made it a component (from epic `epic-engine` P14):
  *   the old tag is renamed by `spell ui rename` (`OldNames`), and its old `header` is `heading`.
  * - Class words:  `bare`, `variation` (`ui bare example`);  the open state is `:state(open)`, not a class.
  */
 
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /****************
  * ### `exampleVocabulary`

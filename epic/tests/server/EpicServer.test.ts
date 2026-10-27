@@ -15,8 +15,8 @@ import { componentSets, type ComponentSetSetting } from "spell/server/page"
 import type { SiteTab } from "spell/server/site/site.types"
 import { ask } from "spell/server/test/serve"
 
-import { EpicServer, ROUTE_MODULES, SOURCES } from "spell-epic/server/EpicServer"
-import { RepoList } from "spell-epic/server/RepoList"
+import { EpicServer, ROUTE_MODULES, SOURCES } from "spell/epic/server/EpicServer"
+import { RepoList } from "spell/epic/server/RepoList"
 
 /** This checkout:  the engine served. */
 const ENGINE = resolve(import.meta.dirname, "../..")
@@ -47,7 +47,7 @@ function repo(top: string, name: string): string {
  */
 const SETS: Record<string, ComponentSetSetting> = {
   ui: { name: "Spell UI", dir: "packages/ui/docs", assets: "packages/ui/site/_assets" },
-  epics: { name: "Epic UI", dir: "spell-epic/src/docs", assets: "packages/ui/site/_assets" },
+  epics: { name: "Epic UI", dir: "epic/src/docs", assets: "packages/ui/site/_assets" },
   app: { name: "App UI", dir: "packages/app/docs", assets: "packages/ui/site/_assets" },
   brand: { name: "Brand", dir: "packages/brand/docs", assets: "packages/ui/site/_assets" }
 }
@@ -258,7 +258,7 @@ describe("EpicServer", () => {
   // `epic pages offline --fix` by `HIGHLIGHT_JS`:  the same two URLs
   test("its highlight.js swap is the one its settings give the kit's page server (`localCopies`)", async () => {
     const { readFileSync } = await import("node:fs")
-    const { HIGHLIGHT_JS } = await import("spell-epic/server/server.types")
+    const { HIGHLIGHT_JS } = await import("spell/epic/server/server.types")
     const json = JSON.parse(readFileSync(join(ENGINE, "package.json"), "utf8")) as {
       pageServer: { localCopies: Record<string, string> }
     }

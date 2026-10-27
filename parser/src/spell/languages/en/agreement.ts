@@ -7,7 +7,7 @@
  * - `the` agrees with everything;  English types have no gender.
  * - The same rule picks a message's example's article (`article()`):  `an apple has ...`.
  */
-import type { SP } from "spell-parser/spell"
+import type { SP } from "spell/parser/spell"
 
 /** English's article agreement:  see the file's docstring. */
 export const englishAgreement: SP.ArticleAgreement = {

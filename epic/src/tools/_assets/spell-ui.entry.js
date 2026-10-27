@@ -45,17 +45,17 @@
 
 import "spell-ui:icons"
 import "spell-ui:emoji"
-import { UI, ThemePreference } from "spell-ui"
+import { UI, ThemePreference } from "spell/ui"
 import * as solidH from "@solidjs/h"
 import * as solidWeb from "@solidjs/web"
 import * as solid from "solid-js"
-import * as uiCore from "spell-ui/core"
-import * as uiForms from "spell-ui/forms"
-import * as uiRoot from "spell-ui/components/ui-root"
-import * as uiCode from "spell-ui/components/ui-code"
-import * as uiMarkdown from "spell-ui/components/ui-markdown"
-import * as imageZoom from "spell-ui/components/ui-zoom/ImageZoom"
-import { PackHotSwap } from "spell-ui/hot"
+import * as uiCore from "spell/ui/core"
+import * as uiForms from "spell/ui/forms"
+import * as uiRoot from "spell/ui/components/ui-root"
+import * as uiCode from "spell/ui/components/ui-code"
+import * as uiMarkdown from "spell/ui/components/ui-markdown"
+import * as imageZoom from "spell/ui/components/ui-zoom/ImageZoom"
+import { PackHotSwap } from "spell/ui/hot"
 import "spell-ui:lazy"
 import "./spell-ui-sources.js"
 import "./spell-doc-runtime.js"
@@ -66,23 +66,23 @@ import { defineSite } from "spell/server/site"
 PackHotSwap.install()
 
 export { UI }
-export { registerPack } from "spell-ui"
+export { registerPack } from "spell/ui"
 
 /**
  * What a component pack imports, by the specifier its build leaves external => the page's copy of that module.
  * - The keys are the import names themselves, as every repo's source writes them (epic `repo-split` P14, Q45):
  *   the kit's `PACK_MODULES` (`spell/element-tools/packModules`) and spell-app's shared-Solid builds read them.
  * - `spell/element`, what the packs' elements are written on:  Spell UI's core module, which carries all of it
- *   (`spell-ui/core` re-exports it, and its `E` holds every name spell-element's `E` does), so a page has one.
- * - `spell-ui/components/ui-root` is for `<spell-viewer>` / `<spell-editor>`'s scripts (`spell-solid-shared.js`,
+ *   (`spell/ui/core` re-exports it, and its `E` holds every name spell-element's `E` does), so a page has one.
+ * - `spell/ui/components/ui-root` is for `<spell-viewer>` / `<spell-editor>`'s scripts (`spell-solid-shared.js`,
  *   spell-app's `app/vite.solid.config.ts`), not for packs:  `<spell-viewer>` is a root, a subclass of `UIRoot`.
  * - `@solidjs/h` likewise:  what compiled spell draws with (`spell-runtime.js`, through `spell-solid-shared.js`),
  *   so a program on a docs page draws with the page's one Solid.
- * - `spell-ui/components/ui-code` and `spell-ui/components/ui-markdown` likewise (epic `repo-split` P2):  the families spell's
+ * - `spell/ui/components/ui-code` and `spell/ui/components/ui-markdown` likewise (epic `repo-split` P2):  the families spell's
  *   own `<spell-code>` / `<spell-markdown>` (spell-app's app package, `spell-code.js` / `spell-markdown.js`) EXTEND,
  *   through `spell-ui-shared.js`, so they extend THIS page's `UICode` / `UIMarkdown`:  one Spell UI.  Without them
  *   those scripts stop with an error saying so.  Not packs' externals:  the epics pack imports neither.
- * - `spell-ui/components/ui-zoom/ImageZoom`:  the page's zoom for its screenshots (epic `ui-gaps` P14), the same one the
+ * - `spell/ui/components/ui-zoom/ImageZoom`:  the page's zoom for its screenshots (epic `ui-gaps` P14), the same one the
  *   docs runtime wires up, which `<epic-field>`'s request thumbnails open in.
  */
 export const packModules = Object.freeze({
@@ -90,12 +90,12 @@ export const packModules = Object.freeze({
   "@solidjs/web": solidWeb,
   "@solidjs/h": solidH,
   "spell/element": uiCore,
-  "spell-ui/core": uiCore,
-  "spell-ui/forms": uiForms,
-  "spell-ui/components/ui-root": uiRoot,
-  "spell-ui/components/ui-code": uiCode,
-  "spell-ui/components/ui-markdown": uiMarkdown,
-  "spell-ui/components/ui-zoom/ImageZoom": imageZoom
+  "spell/ui/core": uiCore,
+  "spell/ui/forms": uiForms,
+  "spell/ui/components/ui-root": uiRoot,
+  "spell/ui/components/ui-code": uiCode,
+  "spell/ui/components/ui-markdown": uiMarkdown,
+  "spell/ui/components/ui-zoom/ImageZoom": imageZoom
 })
 
 /**

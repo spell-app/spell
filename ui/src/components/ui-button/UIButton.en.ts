@@ -1,6 +1,6 @@
 /**
  * Every name `<ui-button>`, `<ui-buttons>` and `<ui-or>` use:  tags, attributes (kind + allowed values),
- * events, slots, parts, states, texts.  Schema:  `E.ComponentVocabulary` (`spell-ui/vocabulary`).
+ * events, slots, parts, states, texts.  Schema:  `E.ComponentVocabulary` (`spell/ui/vocabulary`).
  * - Class words come out through `ClassBuilder`, in Fomantic's grammar:
  *   `<ui-button size="small" color="primary" appearance="basic">` => `ui small basic primary button`.  `UIButton.css` keys on those words.
  * - Group context needs NO element help:  `<ui-buttons appearance="basic">` renders `ui basic buttons`,
@@ -12,7 +12,7 @@
  *   each old switch still works, through the attribute's `replaces`.
  */
 
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 import { ATTACH_CLASSES, COLOR_SWITCHES } from "./UIButton.types"
 
 /****************

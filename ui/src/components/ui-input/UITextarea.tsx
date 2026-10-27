@@ -1,6 +1,6 @@
 import type { JSX } from "@solidjs/web"
 
-import { E, UI } from "spell-ui/core"
+import { E, UI } from "spell/ui/core"
 import { textareaVocabulary } from "./UITextarea.en"
 import { InputFallback } from "./UIInput.fallback"
 import { TextControl } from "./TextControl"

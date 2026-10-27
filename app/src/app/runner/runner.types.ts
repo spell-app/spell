@@ -1,6 +1,6 @@
-import type { LSP } from "spell-app/lsp"
-import type { SP } from "spell-parser/spell"
-import type { UI } from "spell-app/app/ui"
+import type { LSP } from "spell/app/lsp"
+import type { SP } from "spell/parser/spell"
+import type { UI } from "spell/app/app/ui"
 
 // ## Messages
 //  between `<VSCodeRunner>` and the VS Code extension's `RunnerPanel`.

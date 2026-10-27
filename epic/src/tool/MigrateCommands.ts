@@ -2,7 +2,7 @@ import { spawnSync } from "node:child_process"
 import { existsSync } from "node:fs"
 import { dirname, join, relative, resolve } from "node:path"
 
-import { stringFlag } from "spell-epic/command/command.types"
+import { stringFlag } from "spell/epic/command/command.types"
 
 import { PlanDocError } from "./planDoc.types"
 

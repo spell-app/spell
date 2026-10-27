@@ -12,7 +12,7 @@ description: Start the spell web servers of this checkout that aren't running --
    - It waits for the editor:  up to 90s, since vite may be building its dependency cache.
    - Then it checks Spell UI's docs, by asking for their bundle, `/components/ui/_assets/site.js`.
      - They're static pages the page server serves at `/components/ui/`:
-       their pages (`../spell-ui/docs/`), with this branch's built `_assets/` (from `../spell-ui/site/`) laid over them.
+       their pages (`../ui/docs/`), with this branch's built `_assets/` (from `../ui/site/`) laid over them.
      - The bundle is NOT committed.
        The page server builds it (and the brand pages' bundle) when it starts, if stale,
        and the request waits for that.

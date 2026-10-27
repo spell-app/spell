@@ -3,7 +3,7 @@ import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { afterAll, describe, expect, test } from "vite-plus/test"
 
-import { Transcript } from "spell-epic/config/Transcript"
+import { Transcript } from "spell/epic/config/Transcript"
 
 /** A throwaway folder of transcripts. */
 const DIR = mkdtempSync(join(tmpdir(), "transcript-"))

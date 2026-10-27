@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { IconLabels } from "spell-ui/components/ui-icon/UIIcon.types"
+import { IconLabels } from "spell/ui/components/ui-icon/UIIcon.types"
 
 describe("IconLabels.applyTo()", () => {
   test("names the element an image by `label`", () => {

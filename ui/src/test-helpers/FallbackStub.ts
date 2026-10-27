@@ -1,4 +1,4 @@
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /**
  * Throwaway host element for `*.fallback.test.ts`:  an open shadow root that "failed" and renders its fallback.

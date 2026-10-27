@@ -4,7 +4,7 @@
  * The `/voice` skill starts from its list, rewrites each guide, then stamps it done here.
  *
  *     epic pages voice
- *     voice:  readme  /Users/owen/www/spell/spell-epic/voices/readme.md
+ *     voice:  readme  /Users/owen/www/spell/epic/voices/readme.md
  *     guides/solid/solid-2.html     6120 words
  *     guides/server.html            2210 words
  *     2 guides to go over, 51 done
@@ -25,7 +25,7 @@ import { readFileSync, writeFileSync } from "node:fs"
 import { basename, resolve } from "node:path"
 
 import { localDate } from "spell/util/time.ts"
-import { EpicConfig } from "spell-epic/config/EpicConfig.ts"
+import { EpicConfig } from "spell/epic/config/EpicConfig.ts"
 
 import { GUIDES, ROOT, findPages, pageFile, pagePath } from "./pages.js"
 

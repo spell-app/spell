@@ -1,7 +1,7 @@
 import { NONE } from "spell/util"
-import { P } from "spell-parser/parser"
-import { SP } from "spell-parser/spell"
-import { Wording } from "spell-parser/spell/rules/expressions"
+import { P } from "spell/parser/parser"
+import { SP } from "spell/parser/spell"
+import { Wording } from "spell/parser/spell/rules/expressions"
 import { SpellType } from "./SpellType"
 
 /**

@@ -1,6 +1,6 @@
 import { proto } from "spell/util"
-import { P } from "spell-parser/parser"
-import { Priority } from "spell-parser/spell/rules/rules.types"
+import { P } from "spell/parser/parser"
+import { Priority } from "spell/parser/spell/rules/rules.types"
 
 /**
  * `implied_it` rule:  `it` LEFT OUT, before `is`, where the language drops its subject (epic `spanish` J96).

@@ -3,11 +3,11 @@ import { homedir } from "node:os"
 import { join } from "node:path"
 
 // By relative path, `.ts` and all:  the `UserPromptSubmit` hook loads this file with plain `node` (types stripped)
-import { LOOKS, worktreeOf } from "spell-epic/window.mjs"
+import { LOOKS, worktreeOf } from "spell/epic/window.mjs"
 import { TITLE_ICONS } from "./command.types.ts"
-import { EpicRepo, type EpicHome } from "spell-epic/config/EpicRepo.ts"
-import { ClaudeHome } from "spell-epic/config/ClaudeHome.ts"
-import { Transcript } from "spell-epic/config/Transcript.ts"
+import { EpicRepo, type EpicHome } from "spell/epic/config/EpicRepo.ts"
+import { ClaudeHome } from "spell/epic/config/ClaudeHome.ts"
+import { Transcript } from "spell/epic/config/Transcript.ts"
 
 /****************
  * ### `PromptGate`

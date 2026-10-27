@@ -1,16 +1,16 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { colorsCSS, foundationCSS } from "spell-ui/styles"
+import { colorsCSS, foundationCSS } from "spell/ui/styles"
 
 import { Fixture } from "spell/test-helpers/Fixture"
-import { Sheets } from "spell-ui/test-helpers/Sheets"
+import { Sheets } from "spell/ui/test-helpers/Sheets"
 
-import { segmentsVocabulary } from "spell-ui/components/ui-segment/UISegments.en"
-import { segmentVocabulary } from "spell-ui/components/ui-segment/UISegment.en"
-import { Painted } from "spell-ui/test-helpers/Painted"
+import { segmentsVocabulary } from "spell/ui/components/ui-segment/UISegments.en"
+import { segmentVocabulary } from "spell/ui/components/ui-segment/UISegment.en"
+import { Painted } from "spell/ui/test-helpers/Painted"
 
-import segmentCSS from "spell-ui/components/ui-segment/UISegment.css?inline"
-import segmentRaw from "spell-ui/components/ui-segment/UISegment.css?raw"
+import segmentCSS from "spell/ui/components/ui-segment/UISegment.css?inline"
+import segmentRaw from "spell/ui/components/ui-segment/UISegment.css?raw"
 
 /**
  * `UISegment.css` on its own, before any element exists:  the sheet's source rules, the computed styles of the

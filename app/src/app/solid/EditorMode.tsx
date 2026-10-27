@@ -1,9 +1,9 @@
 import { For, createSignal } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
-import { editor } from "spell-app/app/editor"
-import { editorPrefs } from "spell-app/app/editorPrefs"
-import { appTexts, type AppTextKey } from "spell-app/app/ui/AppTexts"
+import { editor } from "spell/app/app/editor"
+import { editorPrefs } from "spell/app/app/editorPrefs"
+import { appTexts, type AppTextKey } from "spell/app/app/ui/AppTexts"
 
 /****************
  * ### `EditorMode`

@@ -14,9 +14,9 @@ import {
   type PickFields,
   type ReviewAction,
   type Running
-} from "spell-epic/review"
+} from "spell/epic/review"
 
-import { NO_LIVE_REVIEW, type LiveReview } from "spell-epic/components/epic-item/EpicItem.types"
+import { NO_LIVE_REVIEW, type LiveReview } from "spell/epic/components/epic-item/EpicItem.types"
 
 import { PAGE_TAG, REVIEWING, type ReviewFill } from "./EpicReview.types"
 

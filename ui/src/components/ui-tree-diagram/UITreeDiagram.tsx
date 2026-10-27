@@ -1,7 +1,7 @@
 import { For, Show, type Accessor } from "solid-js"
 import { isServer, type JSX } from "@solidjs/web"
 
-import { E } from "spell-ui/core"
+import { E } from "spell/ui/core"
 import { treeDiagramVocabulary } from "./UITreeDiagram.en"
 import { TreeData } from "./TreeData"
 import { TreeLayout } from "./TreeLayout"

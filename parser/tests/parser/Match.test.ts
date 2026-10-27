@@ -1,8 +1,8 @@
 import { describe, test, expect, expectTypeOf } from "vite-plus/test"
 import { proto } from "spell/util"
-import { P, Match, Parser } from "spell-parser/parser"
+import { P, Match, Parser } from "spell/parser/parser"
 // These tests define rules with rulex `syntax`, so they must opt into the rulex parser.
-import "spell-parser/parser/rulex"
+import "spell/parser/parser/rulex"
 
 class word extends P.TokenType {
   @proto static tokenType = P.WordToken

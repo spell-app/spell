@@ -19,9 +19,9 @@ import { afterAll, beforeAll, describe, test, expect, onTestFinished, vi } from 
 
 import { SRV } from "spell/server"
 import { pageServerRoot } from "spell/server/page/settings"
-import { buildFolderFor } from "spell-app/spaces/server/node/projects/project-utils"
-import { SP } from "spell-parser/spell"
-import { fixturePath, fixtureFolder } from "spell-app/spaces/test"
+import { buildFolderFor } from "spell/app/spaces/server/node/projects/project-utils"
+import { SP } from "spell/parser/spell"
+import { fixturePath, fixtureFolder } from "spell/app/spaces/test"
 
 /**
  * The real `spell` command, end to end:  the kit's `bin/spell.mjs` run as a separate process, as a user would,
@@ -477,7 +477,7 @@ describe("spell compile:  editor pages (epic property-editor P7, Q19)", () => {
     expect(status).toBe(0)
     expect(stderr).toContain("Card.editor.js")
     const module = readFileSync(resolve(compiled, "Card.editor.js"), "utf8")
-    expect(module).toContain('import "spell-ui/ui-property-editor"')
+    expect(module).toContain('import "spell/ui/ui-property-editor"')
     expect(module).toContain('customElements.define("card-editor", CardEditor)')
     expect(module).not.toContain("source=")
   }, 30_000)

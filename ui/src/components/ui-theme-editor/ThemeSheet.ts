@@ -1,4 +1,4 @@
-import { UI, type UIT } from "spell-ui/core"
+import { UI, type UIT } from "spell/ui/core"
 import { EDITS_SHEET, GLASS_THEMES, WALLPAPER_THEME, type ThemeEditorText } from "./UIThemeEditor.types"
 
 /****************

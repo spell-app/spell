@@ -4,9 +4,9 @@
  * - Change it, then `spell pack build epics`:  the pack's catalog is read from here.
  */
 
-import type { EpicVocabulary } from "spell-epic/definitions"
+import type { EpicVocabulary } from "spell/epic/definitions"
 
-import { ACTIONS_CHILD, ACTIONS_SLOT_SPEC } from "spell-epic/components/epic-item/Fold.types"
+import { ACTIONS_CHILD, ACTIONS_SLOT_SPEC } from "spell/epic/components/epic-item/Fold.types"
 
 import { PANEL_PARTS, PANEL_STATES } from "./EpicPanel.types"
 

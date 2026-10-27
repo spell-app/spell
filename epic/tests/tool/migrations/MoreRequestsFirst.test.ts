@@ -4,7 +4,7 @@
 import { parseHTML } from "linkedom"
 import { describe, expect, test } from "vite-plus/test"
 
-import { Migrations } from "spell-epic/tool/migrations/Migrations"
+import { Migrations } from "spell/epic/tool/migrations/Migrations"
 
 /** The step under test. */
 const STEP = Migrations.named("more-requests-first")!

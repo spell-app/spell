@@ -4,7 +4,7 @@ import { expectAccessible } from "spell/test-helpers/A11y"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import type { DOMElement } from "spell/element"
 
-import "spell-ui/components/ui-keys"
+import "spell/ui/components/ui-keys"
 
 /** A `<ui-keys>` with `attributes`;  its caps' text and its spoken name. */
 async function keys(attributes: string) {

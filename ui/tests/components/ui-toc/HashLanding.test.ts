@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, test } from "vite-plus/test"
 
-import { HashLanding } from "spell-ui/components/ui-toc/HashLanding"
+import { HashLanding } from "spell/ui/components/ui-toc/HashLanding"
 
 /** A page of `html` in a fresh frame:  each test its own document, so its own landing. */
 async function pageOf(html: string): Promise<Document> {

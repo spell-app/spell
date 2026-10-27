@@ -10,9 +10,9 @@ import { fileURLToPath } from "node:url"
 
 import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
 
-import { EpicDocs } from "spell-epic/tool/EpicDocs"
-import { PlanDoc } from "spell-epic/tool/PlanDoc"
-import { PlanDocFiles } from "spell-epic/tool/PlanDocFiles"
+import { EpicDocs } from "spell/epic/tool/EpicDocs"
+import { PlanDoc } from "spell/epic/tool/PlanDoc"
+import { PlanDocFiles } from "spell/epic/tool/PlanDocFiles"
 
 /** The tool's test fixtures:  `epic-plan.html`, a fresh doc in `<epic-*>` markup. */
 const FIXTURES = fileURLToPath(new URL("fixtures", import.meta.url))

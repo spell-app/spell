@@ -1,12 +1,12 @@
 /**
  * Every name `<spell-markdown>` adds to `<ui-markdown>`'s:  its tag, and what it is.
- * Schema:  `E.ComponentVocabulary` (`spell-ui/core`).
+ * Schema:  `E.ComponentVocabulary` (`spell/ui/core`).
  * - `<spell-markdown>` is a `<ui-markdown>` (`SpellMarkdown extends UIMarkdown`):
  *   its whole vocabulary is `<ui-markdown>`'s names, with these in place (`SpellMarkdown.vocabulary`).
  * - Pure data:  `import type` only, so node can read it (the component pack's catalog, `vite.element.config.ts`).
  */
 
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /****************
  * ### `<spell-markdown>`

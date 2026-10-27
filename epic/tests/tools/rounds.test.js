@@ -8,9 +8,9 @@ import { join } from "node:path"
 import { parseHTML } from "linkedom"
 import { afterAll, beforeAll, expect, test } from "vite-plus/test"
 
-import { DataFile } from "spell-epic/data/DataFile.ts"
-import { SeeAlso } from "spell-epic/tool/SeeAlso"
-import { createPage as createChoices, newRound as choicesRound, rowsFile } from "spell-epic/tools/choices.js"
+import { DataFile } from "spell/epic/data/DataFile.ts"
+import { SeeAlso } from "spell/epic/tool/SeeAlso"
+import { createPage as createChoices, newRound as choicesRound, rowsFile } from "spell/epic/tools/choices.js"
 import {
   answerFile,
   createPage,
@@ -19,8 +19,8 @@ import {
   newRound,
   noAnswerYet,
   readAnswer
-} from "spell-epic/tools/details.js"
-import { formatRound, nearCopyOf, roundsOf } from "spell-epic/tools/rounds.js"
+} from "spell/epic/tools/details.js"
+import { formatRound, nearCopyOf, roundsOf } from "spell/epic/tools/rounds.js"
 
 let docs
 

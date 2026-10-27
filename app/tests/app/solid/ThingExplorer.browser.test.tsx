@@ -3,10 +3,10 @@ import { flush } from "solid-js"
 import { render } from "@solidjs/web"
 
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
-import { core, Thing, List } from "spell-parser/core"
-import type { ThingExplorerState } from "spell-app/app/ui/ui.types"
-import { uiReady } from "spell-app/app/solid/loadUI"
-import { ThingExplorer } from "spell-app/app/solid/ThingExplorer"
+import { core, Thing, List } from "spell/parser/core"
+import type { ThingExplorerState } from "spell/app/app/ui/ui.types"
+import { uiReady } from "spell/app/app/solid/loadUI"
+import { ThingExplorer } from "spell/app/app/solid/ThingExplorer"
 
 /**
  * The Solid `<ThingExplorer>` LIVE, in the browser:  Solid's client build, so a change shows after `flush()`.

@@ -8,7 +8,7 @@
 import { writeFileSync } from "fs"
 import { resolve } from "path"
 
-import { builtInTemplateFiles } from "spell-parser/spell/node/builtInTemplateFiles"
+import { builtInTemplateFiles } from "spell/parser/spell/node/builtInTemplateFiles"
 
 for (const { path, text } of builtInTemplateFiles()) {
   const file = resolve(import.meta.dirname, "..", "..", "..", path)

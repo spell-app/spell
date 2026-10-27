@@ -1,5 +1,5 @@
 /**
- * Shared types, constants and small error classes for `spell-ui/runtime`.
+ * Shared types, constants and small error classes for `spell/ui/runtime`.
  * - The BOTTOM of the runtime's import graph:  every service imports it, it imports none of them.
  * - Runtime-light:  `import type` only (plus `package.json`'s `version`, a string), so the eager half (`load.ts`:
  *   the `UI` accessor + `loadUI`, in every page's `core.js`) stays tiny and the service classes stay in the lazily
@@ -9,7 +9,7 @@
 import type { Temporal } from "temporal-polyfill"
 
 // No alias reaches `package.json` (outside `src/`):  the one relative import.  Bundlers keep `version` alone.
-import { version } from "spell-ui/package.json"
+import { version } from "spell/ui/package.json"
 import type { UIRuntime } from "./UIRuntime"
 
 ////////////////
@@ -740,7 +740,7 @@ export const CODE_LANGUAGES_EVENT = "ui-languages-changed"
 
 /**
  * A highlight.js language definition:  `(hljs) => Language` (highlight.js's own "language function").
- * - Typed loosely so `spell-ui/runtime` needn't import highlight.js's types:  `ui-code` hands it to `hljs.registerLanguage`.
+ * - Typed loosely so `spell/ui/runtime` needn't import highlight.js's types:  `ui-code` hands it to `hljs.registerLanguage`.
  */
 export type CodeGrammar = (hljs: any) => object
 

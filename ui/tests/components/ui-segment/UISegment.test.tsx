@@ -4,11 +4,11 @@ import { expectAccessible } from "spell/test-helpers/A11y"
 
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import type { DOMElement } from "spell/element"
-import { Painted } from "spell-ui/test-helpers/Painted"
+import { Painted } from "spell/ui/test-helpers/Painted"
 
-import "spell-ui/components/ui-segment"
-import "spell-ui/components/ui-parts"
-import "spell-ui/components/ui-label"
+import "spell/ui/components/ui-segment"
+import "spell/ui/components/ui-parts"
+import "spell/ui/components/ui-label"
 
 /** Examples whose original fragment fails axe `heading-order` too (see `notes/report.md`). */
 const HEADING_DEMOS = ["parts/examples/elements/header.html", "segment/examples/elements/variations.html"]

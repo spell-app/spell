@@ -1,7 +1,7 @@
 /**
  * The English vocabulary of `<ui-emoji>`:  every name the tag uses.
  * - Its tag, attributes (each with its kind and allowed values), parts and states.
- *   The shape is `E.ComponentVocabulary` (`spell-ui/vocabulary`).
+ *   The shape is `E.ComponentVocabulary` (`spell/ui/vocabulary`).
  * - The attributes become class words (`ClassBuilder`):
  *   `<ui-emoji name="smile" size="large" link>` => `ui large link emoji`.
  *   Fomantic's own markup is `<em data-emoji=":smile:" class="large link">` (no `ui`, no noun),
@@ -18,7 +18,7 @@
  *   - `label=""` (bare):  decorative, `aria-hidden`
  */
 
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /****************
  * ### `emojiVocabulary`

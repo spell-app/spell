@@ -1,15 +1,15 @@
 import { For, Show } from "solid-js"
 import { Dynamic, isServer, type JSX } from "@solidjs/web"
 
-import { E, UI } from "spell-ui/core"
+import { E, UI } from "spell/ui/core"
 // the family barrels, not the leaves:  the lib build then imports `ui-form.js` / `ui-section.js`
 // (SIDE EFFECT:  defines the form and section families:  the editor is a form, and draws a section)
-import { DOMFormElement, FormBinding, UIForm } from "spell-ui/components/ui-form"
-import "spell-ui/components/ui-section"
-import type { formVocabulary } from "spell-ui/components/ui-form/UIForm.en"
-import { sectionVocabulary } from "spell-ui/components/ui-section/UISection.en"
-import { PropertyEditorPages, PropertySchemas } from "spell-ui/property"
-import type { ComponentVocabulary, PropertySchema } from "spell-ui/vocabulary"
+import { DOMFormElement, FormBinding, UIForm } from "spell/ui/components/ui-form"
+import "spell/ui/components/ui-section"
+import type { formVocabulary } from "spell/ui/components/ui-form/UIForm.en"
+import { sectionVocabulary } from "spell/ui/components/ui-section/UISection.en"
+import { PropertyEditorPages, PropertySchemas } from "spell/ui/property"
+import type { ComponentVocabulary, PropertySchema } from "spell/ui/vocabulary"
 import { propertyEditorVocabulary } from "./UIPropertyEditor.en"
 import {
   GROUP_SELECTOR,

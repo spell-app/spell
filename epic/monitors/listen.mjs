@@ -6,6 +6,6 @@
  * - else:  the plugin's monitor (`monitors.json`), which Claude Code starts only in a terminal session
  * - Plain `node`, by path:  it must stay small (`InboxPoller`'s header says why).
  */
-import { InboxPoller } from "spell-epic/tool/InboxPoller.mjs"
+import { InboxPoller } from "spell/epic/tool/InboxPoller.mjs"
 
 process.exitCode = await new InboxPoller({ mode: process.argv.includes("--hook") ? "hook" : "monitor" }).run()

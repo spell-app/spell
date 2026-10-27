@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { compiledFixture, compiledFixtureWithMap, fixtureProjectNames } from "spell-app/spaces/test"
+import { compiledFixture, compiledFixtureWithMap, fixtureProjectNames } from "spell/app/spaces/test"
 
 /**
  * Source maps over every fixture project (epic `elemental-spell` P14):  compiled with its map, each project's code is

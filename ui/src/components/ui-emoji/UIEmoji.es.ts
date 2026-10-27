@@ -1,4 +1,4 @@
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /**
  * `<ui-emoji>` in Spanish:  `<es-emoji>`, with the names and texts only it uses (from `UIEmoji.en.ts`).

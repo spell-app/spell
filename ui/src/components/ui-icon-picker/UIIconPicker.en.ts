@@ -1,15 +1,15 @@
 /**
  * Every name `<ui-icon-picker>` uses:  tag, attributes (kind + allowed values), events, parts, states, texts.
- * Schema:  `E.ComponentVocabulary` (`spell-ui/vocabulary`).
- * - Pure data:  node imports it (`yarn site:data`, `yarn gen:root`), so `spell-ui/core` for types only.
+ * Schema:  `E.ComponentVocabulary` (`spell/ui/vocabulary`).
+ * - Pure data:  node imports it (`yarn site:data`, `yarn gen:root`), so `spell/ui/core` for types only.
  * - Class words come out through `ClassBuilder`, on the shadow field:
  *   `<ui-icon-picker size="small" fluid>` => `ui small fluid icon picker`.
  * - `value` is an icon NAME (`star`, `address book`), typed `icon`:
  *   so a property editor draws an icon picker for the picker's own value too.
  */
 
-import type { E } from "spell-ui/core"
-import * as UIT from "spell-ui/components/components.types"
+import type { E } from "spell/ui/core"
+import * as UIT from "spell/ui/components/components.types"
 
 /****************
  * ### `<ui-icon-picker>`

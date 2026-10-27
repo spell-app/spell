@@ -1,5 +1,5 @@
 /**
- * Barrel for the `spell` command-line tool's Ink screens -- flattened into `spell-app/cli`, use them as `CLI.X`.
+ * Barrel for the `spell` command-line tool's Ink screens -- flattened into `spell/app/cli`, use them as `CLI.X`.
  */
 export * from "./StatusList"
 export * from "./StatusReporter"

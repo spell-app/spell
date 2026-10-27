@@ -1,6 +1,6 @@
 import type { JSX } from "@solidjs/web"
 
-import { E, UIT } from "spell-ui/core"
+import { E, UIT } from "spell/ui/core"
 import { loaderVocabulary } from "./UILoader.en"
 
 import loaderCSS from "./UILoader.css?inline"
@@ -50,7 +50,7 @@ export class UILoader extends E.UIComponent<typeof loaderVocabulary> {
    * The element's accessible name:  the `loading` text while nothing is slotted.
    * - Waits for `isReady`:
    *   the text reads `UI.i18n` (via `translationForKey()`), which exists once the runtime loads.
-   * - A server render (`spell-ui/static`) applies it too.
+   * - A server render (`spell/ui/static`) applies it too.
    */
   @E.aria("label")
   protected get accessibleName(): string | undefined {

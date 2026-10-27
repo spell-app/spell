@@ -7,7 +7,7 @@
  *   - Spell's own parser reads the file (P6:  each tag as its code-spell twin);  this tree is what it SAYS, for the
  *     editor, the notebook (P12) and agents, which walk it (`SpellxFile.walk()`).
  */
-import type { SP } from "spell-parser/spell"
+import type { SP } from "spell/parser/spell"
 
 ////////////////
 // ## Spans

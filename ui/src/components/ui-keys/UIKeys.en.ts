@@ -1,7 +1,7 @@
 /**
  * The English vocabulary of `<ui-keys>`:  every name the tag uses.
  * - Its tag, attributes (each with its kind and allowed values), slots, parts, states and texts.
- *   The shape is `E.ComponentVocabulary` (`spell-ui/vocabulary`).
+ *   The shape is `E.ComponentVocabulary` (`spell/ui/vocabulary`).
  * - Key caps for a keyboard shortcut (epic `ui-gaps` P9):  `<ui-keys shortcut="mod+S">` shows ⌘S on a Mac,
  *   Ctrl S elsewhere.
  * - `mod` (or `modifier`) is ⌘ on a Mac and Ctrl elsewhere, as the runtime's `Chord` reads it;
@@ -10,7 +10,7 @@
  *   for (off a Mac:  Ctrl, Shift ...;  the space bar everywhere), `keyCapTexts`, which `<ui-action>` shares.
  */
 
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /**
  * The words of the key caps a keyboard prints no symbol for:  every modifier and named key off a Mac, the space bar

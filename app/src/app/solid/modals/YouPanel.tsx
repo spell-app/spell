@@ -3,10 +3,10 @@ import { render } from "@solidjs/web"
 
 import { KnownFormat, LoadableFile, parseJSON } from "spell/util"
 
-import type { SPACES } from "spell-app/spaces"
-import { UI as SpellUI } from "spell-ui"
-import { appTexts } from "spell-app/app/ui/AppTexts"
-import { uiReady } from "spell-app/app/solid/loadUI"
+import type { SPACES } from "spell/app/spaces"
+import { UI as SpellUI } from "spell/ui"
+import { appTexts } from "spell/app/app/ui/AppTexts"
+import { uiReady } from "spell/app/app/solid/loadUI"
 
 import "./YouPanel.css"
 

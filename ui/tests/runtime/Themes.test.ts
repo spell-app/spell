@@ -1,9 +1,9 @@
 import { describe, expect, onTestFinished, test } from "vite-plus/test"
 
-import { UI, type Themes } from "spell-ui/runtime"
-import { ThemeHarness } from "spell-ui/test-helpers/ThemeHarness"
+import { UI, type Themes } from "spell/ui/runtime"
+import { ThemeHarness } from "spell/ui/test-helpers/ThemeHarness"
 
-import "spell-ui/components/ui-button"
+import "spell/ui/components/ui-button"
 
 ////////////////
 // ## The sheets

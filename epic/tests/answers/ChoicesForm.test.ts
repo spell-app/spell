@@ -1,13 +1,13 @@
 import { afterEach, describe, expect, test, vi } from "vite-plus/test"
 
-import { ChoicesForm } from "spell-epic/answers/ChoicesForm"
+import { ChoicesForm } from "spell/epic/answers/ChoicesForm"
 import {
   ANSWER_RETRY_MS,
   CHOICES_KEY_PREFIX,
   CHOICES_SAVE_MS,
   type ChoiceRowPart,
   type ChoicesDraft
-} from "spell-epic/answers/answers.types"
+} from "spell/epic/answers/answers.types"
 
 ////////////////
 // ## Fakes

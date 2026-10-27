@@ -1,4 +1,4 @@
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /**
  * `<ui-repeat>` in Spanish:  `<es-repetir>`, with the names and texts only it uses (from `UIRepeat.en.ts`).

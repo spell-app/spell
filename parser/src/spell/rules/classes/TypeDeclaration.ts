@@ -1,11 +1,11 @@
 import { kebabCase, proto } from "spell/util"
-import { P } from "spell-parser/parser"
-import { SP } from "spell-parser/spell"
-import { Synonyms } from "spell-parser/spell/rules/expressions"
-import { Priority } from "spell-parser/spell/rules/rules.types"
+import { P } from "spell/parser/parser"
+import { SP } from "spell/parser/spell"
+import { Synonyms } from "spell/parser/spell/rules/expressions"
+import { Priority } from "spell/parser/spell/rules/rules.types"
 // Import directly to avoid circular import
-import { SpellStatement } from "spell-parser/spell/rules/Statement"
-import { SpellType } from "spell-parser/spell/rules/types/SpellType"
+import { SpellStatement } from "spell/parser/spell/rules/Statement"
+import { SpellType } from "spell/parser/spell/rules/types/SpellType"
 
 /**
  * A statement declaring a type -- which may take an OUTLINE body:

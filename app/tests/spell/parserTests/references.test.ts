@@ -1,7 +1,7 @@
 import { describe, test, expect } from "vite-plus/test"
 
-import { parseSpellProject } from "spell-parser/spell/test"
-import { loadFixtureProject } from "spell-app/spaces/test"
+import { parseSpellProject } from "spell/parser/spell/test"
+import { loadFixtureProject } from "spell/app/spaces/test"
 
 /**
  * Spell's words for one thing, by its name or its place, in the frozen `thing-references` project:

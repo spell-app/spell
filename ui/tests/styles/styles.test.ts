@@ -1,20 +1,20 @@
 import { describe, expect, it, onTestFinished } from "vite-plus/test"
 
-import { AnimationNames } from "spell-ui/runtime"
-import { breakpoints, colorsCSS, foundationCSS, pageCSS, sizes, utilitiesCSS } from "spell-ui/styles"
-import { StyleGenerator } from "spell-ui/styles/StyleGenerator"
+import { AnimationNames } from "spell/ui/runtime"
+import { breakpoints, colorsCSS, foundationCSS, pageCSS, sizes, utilitiesCSS } from "spell/ui/styles"
+import { StyleGenerator } from "spell/ui/styles/StyleGenerator"
 
 import { Fixture } from "spell/test-helpers/Fixture"
 
-import layersRaw from "spell-ui/styles/layers.css?raw"
-import tokensRaw from "spell-ui/styles/tokens.css?raw"
-import colorsRaw from "spell-ui/styles/colors.css?raw"
-import sizesRaw from "spell-ui/styles/sizes.css?raw"
-import utilitiesRaw from "spell-ui/styles/utilities.css?raw"
-import animationsRaw from "spell-ui/styles/animations.css?raw"
-import mediaRaw from "spell-ui/styles/media.css?raw"
-import classicThemeCSS from "spell-ui/styles/themes/classic.css?inline"
-import darkThemeCSS from "spell-ui/styles/themes/dark.css?inline"
+import layersRaw from "spell/ui/styles/layers.css?raw"
+import tokensRaw from "spell/ui/styles/tokens.css?raw"
+import colorsRaw from "spell/ui/styles/colors.css?raw"
+import sizesRaw from "spell/ui/styles/sizes.css?raw"
+import utilitiesRaw from "spell/ui/styles/utilities.css?raw"
+import animationsRaw from "spell/ui/styles/animations.css?raw"
+import mediaRaw from "spell/ui/styles/media.css?raw"
+import classicThemeCSS from "spell/ui/styles/themes/classic.css?inline"
+import darkThemeCSS from "spell/ui/styles/themes/dark.css?inline"
 
 /**
  * The CSS foundation, in a real browser:  sheets adopted into the document and into shadow roots.

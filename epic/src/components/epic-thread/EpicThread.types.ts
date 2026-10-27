@@ -5,7 +5,7 @@
  * - Data only:  nothing here runs.  The vocabularies read it too.
  */
 
-import type { EpicJSXAttributes } from "spell-epic/components/epic-page/EpicPage.types"
+import type { EpicJSXAttributes } from "spell/epic/components/epic-page/EpicPage.types"
 
 ////////////////
 // ## A thread

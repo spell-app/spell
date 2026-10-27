@@ -1,4 +1,4 @@
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /**
  * `<ui-column>` in Spanish:  `<es-columna>`, with the names and texts only it uses (from `UIColumn.en.ts`).

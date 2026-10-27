@@ -1,7 +1,7 @@
 import { onCleanup } from "solid-js"
 
-import { E, UI, UIT } from "spell-ui/core"
-import { F } from "spell-ui/forms"
+import { E, UI, UIT } from "spell/ui/core"
+import { F } from "spell/ui/forms"
 import { radioVocabulary } from "./UIRadio.en"
 import { CheckControl } from "./CheckControl"
 import { RadioGroup } from "./RadioGroup"

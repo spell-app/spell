@@ -11,7 +11,7 @@ import { DIST, DOC_FILES, PublishedPackage, type BuildReport, type PackedPackage
  * the kit's element code INSIDE it.
  * - So a page loads EITHER this or `spell/ui/...` from `spell`, never both:  both together carry the element code
  *   twice (its README says so).
- * - Its names:  `spell-ui` (every family), `spell-ui/core`, `spell-ui/ui-button` ...:  `exports` over `dist/`.
+ * - Its names:  `spell-ui` (every family), `spell/ui/core`, `spell/ui/ui-button` ...:  `exports` over `dist/`.
  * - Its dependencies:  the folder's own runtime ones but `spell` (built in);  Solid as a peer, as the build leaves it
  *   out (`SOLID_EXTERNAL`).
  * - Built from the folder's `package.json` (its name, `spell-ui`) and `dist/`;  the checkout's files never change.

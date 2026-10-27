@@ -51,7 +51,7 @@ VS Code's [Language Server Extension Guide](https://code.visualstudio.com/api/la
 shows the shape.
 
 Spell's is ONE class, `SpellLanguageService`, with a method per request,
-imported as `spell-app/lsp`.
+imported as `spell/app/lsp`.
 Three places call it:  the editor in your browser, VS Code, and the `spell` command line.
 
 ## The command line and the editor can't disagree
@@ -242,8 +242,8 @@ The service is a set of readers over that record.
   offsets are what the incremental parse keeps exact.
   A character is a UTF-16 code unit, the protocol's default.
 - How the parse builds scope, and re-parses after an edit:
-  [spell-parser's parser page](https://github.com/spell-app/spell-parser/blob/main/README-parser.md);
-  the service's side, "Language server" in [spell-parser's PARSING.md](https://github.com/spell-app/spell-parser/blob/main/src/spell/PARSING.md).
+  [spell-parser's parser page](https://github.com/spell-app/spell/blob/main/parser/README-parser.md);
+  the service's side, "Language server" in [spell-parser's PARSING.md](https://github.com/spell-app/spell/blob/main/parser/src/spell/PARSING.md).
 
 The one reader that isn't the parser:  VS Code paints the first colours from a TextMate grammar,
 before the server answers, and the server's colours repaint them
@@ -470,7 +470,7 @@ yarn vp test run --project lsp                           # its tests:  149, in s
   it stops on parse errors, as the server won't write a pack then either.
 - It runs from source:  no build.  Restart the server to run your change.
 - It MUST stay safe to run in a browser:  the editor's Monaco calls the same service in the page.
-  The node-only files are left out of its entry, `spell-app/lsp`:
+  The node-only files are left out of its entry, `spell/app/lsp`:
   the disk workspace, the server's process, its stdio guard and the scope pack script.
   [barrel.test.ts](tests/lsp/barrel.test.ts) checks the entry still loads.
 - It uses spell-parser and spaces;  it never imports the app or the command line.
@@ -490,13 +490,13 @@ yarn vp test run --project lsp                           # its tests:  149, in s
 | [lsp.types.ts](src/lsp/lsp.types.ts) | the shared types:  `FileAddresses`, the custom requests' shapes, the scope tree's |
 | [server.ts](src/lsp/server.ts), [stdioGuard.ts](src/lsp/stdioGuard.ts) | the process `yarn lsp:start` runs, and what keeps its stdout for the protocol |
 | [scopes.ts](src/lsp/scopes.ts) | `yarn lsp:scopes` |
-| [index.ts](src/lsp/index.ts) | the entry, `spell-app/lsp`, namespace `LSP`:  browser-safe |
+| [index.ts](src/lsp/index.ts) | the entry, `spell/app/lsp`, namespace `LSP`:  browser-safe |
 
 ## See also
 
 - [The editor and the runners](README-app.md):  the browser editor, whose Monaco calls the service in the page
 - [The kit's VS Code page](https://github.com/spell-app/spell/blob/main/README-vscode.md):  installing the extension, its commands and settings,
   and which checkout's server a window runs
-- [spell-parser's parser page](https://github.com/spell-app/spell-parser/blob/main/README-parser.md):  the parse every answer here is read from
+- [spell-parser's parser page](https://github.com/spell-app/spell/blob/main/parser/README-parser.md):  the parse every answer here is read from
 - [The command line](https://github.com/spell-app/spell/blob/main/README-cli.md#spell-parser):  the commands that share the service
 - [Spaces](README-spaces.md):  where the disk workspace finds projects, and what an address is

@@ -3,10 +3,10 @@ import { describe, expect, it } from "vite-plus/test"
 import { expectAccessible } from "spell/test-helpers/A11y"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import type { DOMElement } from "spell/element"
-import type { UIToolbar } from "spell-ui/components/ui-toolbar"
-import { UIMenu } from "spell-ui/components/ui-menu"
+import type { UIToolbar } from "spell/ui/components/ui-toolbar"
+import { UIMenu } from "spell/ui/components/ui-menu"
 
-import "spell-ui/components/ui-toolbar"
+import "spell/ui/components/ui-toolbar"
 
 /** Element-markup examples, by path. */
 const EXAMPLES = import.meta.glob<string>("/src/components/ui-toolbar/examples/elements/*.html", {

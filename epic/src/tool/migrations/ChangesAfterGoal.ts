@@ -1,5 +1,5 @@
-import { Markup } from "spell-epic/markup"
-import { PlanAnchors } from "spell-epic/tool/PlanAnchors"
+import { Markup } from "spell/epic/markup"
+import { PlanAnchors } from "spell/epic/tool/PlanAnchors"
 
 import type { Migration, MigrationContext } from "./migrations.types"
 

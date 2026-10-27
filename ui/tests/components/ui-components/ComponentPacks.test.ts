@@ -1,14 +1,14 @@
 import { describe, expect, it, vi } from "vite-plus/test"
 
-import * as core from "spell-ui/core"
+import * as core from "spell/ui/core"
 import { Fixture } from "spell/test-helpers/Fixture"
 import type { DOMElement } from "spell/element"
 
-import { ComponentPacks, registerPack } from "spell-ui/components/ui-components"
-import { PackHotSwap } from "spell-ui/hot"
-import type { RootFailure, UIRoot } from "spell-ui/components/ui-root"
+import { ComponentPacks, registerPack } from "spell/ui/components/ui-components"
+import { PackHotSwap } from "spell/ui/hot"
+import type { RootFailure, UIRoot } from "spell/ui/components/ui-root"
 
-import "spell-ui/components/ui-root"
+import "spell/ui/components/ui-root"
 
 ////////////////
 // ## Fixtures
@@ -33,7 +33,7 @@ const MISSING_PACK = "http://127.0.0.1:1/missing.pack.js"
 type XPackGlobal = { __xPack?: { runs: number; cards: Set<DOMElement> } }
 
 // what the docs bundle puts on `window.SpellUI`, for the packs' classic scripts
-Object.assign(globalThis, { SpellUI: { registerPack, packModules: { "spell-ui/core": core } } })
+Object.assign(globalThis, { SpellUI: { registerPack, packModules: { "spell/ui/core": core } } })
 
 /** The test pack's state, once it ran. */
 function xPack() {

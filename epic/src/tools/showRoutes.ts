@@ -25,7 +25,7 @@ import { escapeHTML } from "spell/util/string"
 import { SRV } from "spell/server"
 import type { RouteModule } from "spell/server/page"
 
-import { Window } from "spell-epic/window.mjs"
+import { Window } from "spell/epic/window.mjs"
 import { openUrlInChrome } from "./pages.js"
 
 /** How long after answering before VS Code is brought forward, in ms:  the tab closes first. */

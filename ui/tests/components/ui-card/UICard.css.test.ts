@@ -1,17 +1,17 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { colorsCSS, foundationCSS } from "spell-ui/styles"
+import { colorsCSS, foundationCSS } from "spell/ui/styles"
 
 import { Fixture } from "spell/test-helpers/Fixture"
-import { Sheets } from "spell-ui/test-helpers/Sheets"
+import { Sheets } from "spell/ui/test-helpers/Sheets"
 
-import { cardVocabulary } from "spell-ui/components/ui-card/UICard.en"
-import { cardsVocabulary } from "spell-ui/components/ui-card/UICards.en"
+import { cardVocabulary } from "spell/ui/components/ui-card/UICard.en"
+import { cardsVocabulary } from "spell/ui/components/ui-card/UICards.en"
 
-import iconCSS from "spell-ui/components/ui-icon/UIIcon.css?inline"
-import partsCSS from "spell-ui/components/ui-parts/UIParts.css?inline"
-import cardCSS from "spell-ui/components/ui-card/UICard.css?inline"
-import cardRaw from "spell-ui/components/ui-card/UICard.css?raw"
+import iconCSS from "spell/ui/components/ui-icon/UIIcon.css?inline"
+import partsCSS from "spell/ui/components/ui-parts/UIParts.css?inline"
+import cardCSS from "spell/ui/components/ui-card/UICard.css?inline"
+import cardRaw from "spell/ui/components/ui-card/UICard.css?raw"
 
 /**
  * `UICard.css` on its own, before any element exists:  the sheet's source rules, and the computed styles of the

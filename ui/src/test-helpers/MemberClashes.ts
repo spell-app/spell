@@ -1,7 +1,7 @@
 import type { DOMElement, UIComponentClass } from "spell/element"
-import type { ComponentVocabulary } from "spell-ui/vocabulary"
-import { E } from "spell-ui/core"
-import { F } from "spell-ui/forms"
+import type { ComponentVocabulary } from "spell/ui/vocabulary"
+import { E } from "spell/ui/core"
+import { F } from "spell/ui/forms"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 
 /****************

@@ -7,7 +7,7 @@
  *   `poner X a una nueva lista de texto`, `una carta es una cosa`.
  * - Where English writes `a {type}`, Spanish writes `{aType}`:  the code picks `un` or `una` by the type's gender.
  */
-import type { SP } from "spell-parser/spell"
+import type { SP } from "spell/parser/spell"
 
 /** Spanish's parser messages, by English's keys. */
 export const spanishParserMessages: Partial<SP.ParserMessages> = {

@@ -1,7 +1,7 @@
 import { describe, test, expect } from "vite-plus/test"
 
-import { spellParser } from "spell-parser/spell"
-import { SpellStatement } from "spell-parser/spell/rules/Statement"
+import { spellParser } from "spell/parser/spell"
+import { SpellStatement } from "spell/parser/spell/rules/Statement"
 
 /**
  * Inline statements change scope ONLY when the line's statement wins -- see `commitStatement()`.

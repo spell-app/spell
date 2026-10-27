@@ -3,8 +3,8 @@
  * - the method-signature data its rules build (`method_signature`, the `method_arg`s) and its definitions read
  * - what its generated call-site rules are declared with, and the operands an operator one compiles
  */
-import type { P } from "spell-parser/parser"
-import type { SpellExpressionProps } from "spell-parser/spell/rules/expressions"
+import type { P } from "spell/parser/parser"
+import type { SpellExpressionProps } from "spell/parser/spell/rules/expressions"
 
 /**
  * Data `MethodSignature`'s `parse()` builds into `match.data`, then `MethodDefinition.processSignature()`

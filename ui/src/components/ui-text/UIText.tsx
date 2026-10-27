@@ -1,7 +1,7 @@
 import { Show } from "solid-js"
 import { Dynamic, type JSX } from "@solidjs/web"
 
-import { E, UIT } from "spell-ui/core"
+import { E, UIT } from "spell/ui/core"
 import { textVocabulary } from "./UIText.en"
 import type { UILink } from "./UILink"
 

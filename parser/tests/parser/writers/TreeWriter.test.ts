@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { P } from "spell-parser/parser"
+import { P } from "spell/parser/parser"
 
 /**
  * `TreeWriter`:  AST => boxes for `<ui-tree-diagram>`.  Built from hand-made ASTs, so no language is needed:  spell's

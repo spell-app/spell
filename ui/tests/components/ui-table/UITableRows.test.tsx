@@ -5,7 +5,7 @@ import type { DOMElement } from "spell/element"
 import { expectAccessible } from "spell/test-helpers/A11y"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 
-import "spell-ui/components/ui-table"
+import "spell/ui/components/ui-table"
 
 /** `<ui-table>` DOM element, with the properties these tests set. */
 type TableDOMElement = DOMElement & { sortColumn?: number; sortDirection?: string }

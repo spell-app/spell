@@ -1,10 +1,10 @@
 import { proto } from "spell/util"
-import { P } from "spell-parser/parser"
-import { SP } from "spell-parser/spell"
-import { Priority } from "spell-parser/spell/rules/rules.types"
-import { getKnownType } from "spell-parser/spell/rules/types"
+import { P } from "spell/parser/parser"
+import { SP } from "spell/parser/spell"
+import { Priority } from "spell/parser/spell/rules/rules.types"
+import { getKnownType } from "spell/parser/spell/rules/types"
 // Import directly to avoid circular import
-import { SpellStatement } from "spell-parser/spell/rules/Statement"
+import { SpellStatement } from "spell/parser/spell/rules/Statement"
 
 /**
  * `define_menu` rule:  a template's named MENU, a list of its actions (epic `elemental-spell` P10, Q34, Q41).

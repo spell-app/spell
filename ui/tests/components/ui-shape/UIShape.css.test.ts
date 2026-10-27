@@ -1,14 +1,14 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { colorsCSS, foundationCSS } from "spell-ui/styles"
+import { colorsCSS, foundationCSS } from "spell/ui/styles"
 
 import { Fixture } from "spell/test-helpers/Fixture"
-import { Sheets } from "spell-ui/test-helpers/Sheets"
+import { Sheets } from "spell/ui/test-helpers/Sheets"
 
-import { shapeVocabulary } from "spell-ui/components/ui-shape/UIShape.en"
+import { shapeVocabulary } from "spell/ui/components/ui-shape/UIShape.en"
 
-import shapeCSS from "spell-ui/components/ui-shape/UIShape.css?inline"
-import shapeRaw from "spell-ui/components/ui-shape/UIShape.css?raw"
+import shapeCSS from "spell/ui/components/ui-shape/UIShape.css?inline"
+import shapeRaw from "spell/ui/components/ui-shape/UIShape.css?raw"
 
 /**
  * `UIShape.css` on its own, before any element exists:  the sheet's source rules and the computed styles of the

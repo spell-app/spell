@@ -1,4 +1,4 @@
-import { E } from "spell-ui/core"
+import { E } from "spell/ui/core"
 import { checkboxVocabulary } from "./UICheckbox.en"
 import { radioVocabulary } from "./UIRadio.en"
 import { type CheckPartName } from "./UICheckbox.types"

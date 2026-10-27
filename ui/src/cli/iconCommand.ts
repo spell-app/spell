@@ -2,7 +2,7 @@ import { styleText } from "node:util"
 
 import { CLI } from "spell/cli"
 import { SRV } from "spell/server"
-import { SITE_ADDRESS, ensurePageServer } from "spell-ui/tools/pageServer"
+import { SITE_ADDRESS, ensurePageServer } from "spell/ui/tools/pageServer"
 
 import type { IconsOptions } from "./cli.types"
 import { type IconInfo, loadIcons, searchIcons } from "./iconSearch"

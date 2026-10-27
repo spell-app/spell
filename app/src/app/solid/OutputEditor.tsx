@@ -1,10 +1,10 @@
 import { Loading, Show } from "solid-js"
 
-import { SP } from "spell-parser/spell"
-import { SX } from "spell-parser/spellx"
-import { editor } from "spell-app/app/editor"
-import { appTexts } from "spell-app/app/ui/AppTexts"
-import { ErrorBoundary, MenuHeader, PanelMenu, Submenu, tracked } from "spell-app/app/solid"
+import { SP } from "spell/parser/spell"
+import { SX } from "spell/parser/spellx"
+import { editor } from "spell/app/app/editor"
+import { appTexts } from "spell/app/app/ui/AppTexts"
+import { ErrorBoundary, MenuHeader, PanelMenu, Submenu, tracked } from "spell/app/app/solid"
 import { LazyMonaco } from "./LazyMonaco"
 
 import "./OutputEditor.css"

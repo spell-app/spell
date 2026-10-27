@@ -36,9 +36,9 @@ import { readJSON5File } from "spell/util/node/json5"
 import { escapeHTML } from "spell/util/string"
 
 import { Terminal } from "spell/element-tools/Terminal"
-import { SITE_DATA, SITE_PAGES, SPELL_UI_ROOT } from "spell-ui/tools/tools.types"
+import { SITE_DATA, SITE_PAGES, SPELL_UI_ROOT } from "spell/ui/tools/tools.types"
 
-import { STATUS_TEXT } from "spell-ui/tools/generatedFiles"
+import { STATUS_TEXT } from "spell/ui/tools/generatedFiles"
 import { SiteSections } from "./site-sections.ts"
 
 /**
@@ -47,7 +47,7 @@ import { SiteSections } from "./site-sections.ts"
  * - Spell UI never imports spell-epic (it's above):  this only reads one of its files.
  */
 const TEMPLATE = path.join(
-  path.dirname(fileURLToPath(import.meta.resolve("spell-epic/package.json"))),
+  path.dirname(fileURLToPath(import.meta.resolve("spell/epic/package.json"))),
   "templates/spell-ui-docs.html"
 )
 

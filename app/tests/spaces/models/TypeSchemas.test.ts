@@ -3,8 +3,8 @@ import path from "node:path"
 import JSON5 from "json5"
 import { describe, expect, it } from "vite-plus/test"
 
-import { compiledSpellProject } from "spell-parser/spell/test"
-import { SPACES } from "spell-app/spaces"
+import { compiledSpellProject } from "spell/parser/spell/test"
+import { SPACES } from "spell/app/spaces"
 
 /**
  * The Solitaire example's compiled declarations, as its fixture snapshot pins them:  its cards, deck and piles among them.

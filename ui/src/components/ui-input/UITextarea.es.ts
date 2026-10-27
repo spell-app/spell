@@ -1,4 +1,4 @@
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /**
  * `<ui-textarea>` in Spanish:  `<es-area-texto>`, with the names and texts only it uses (from `UITextarea.en.ts`).

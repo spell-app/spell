@@ -4,7 +4,7 @@ import { expectAccessible } from "spell/test-helpers/A11y"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import type { DOMElement } from "spell/element"
 
-import "spell-ui/components/ui-quote"
+import "spell/ui/components/ui-quote"
 
 /** A `<ui-quote>` with `attributes`, in a paragraph;  its shadow quote. */
 async function quote(attributes = "") {

@@ -1,13 +1,13 @@
 import { For, Show } from "solid-js"
 import { isServer, type JSX } from "@solidjs/web"
 
-import { E, UI, UIT } from "spell-ui/core"
-import { F } from "spell-ui/forms"
+import { E, UI, UIT } from "spell/ui/core"
+import { F } from "spell/ui/forms"
 import { dropdownVocabulary } from "./UIDropdown.en"
 import { DropdownFallback } from "./UIDropdown.fallback"
 import { SlottedItems } from "./SlottedItems"
 
-import buttonCSS from "spell-ui/components/ui-button/UIButton.css?inline"
+import buttonCSS from "spell/ui/components/ui-button/UIButton.css?inline"
 import dropdownCSS from "./UIDropdown.css?inline"
 
 /****************
@@ -33,7 +33,7 @@ import dropdownCSS from "./UIDropdown.css?inline"
  * - An option's `flag` draws through `UIT.Flags`, the rule `<ui-flag>` draws with.
  *   Fomantic's country names (`france`) are `<ui-flag>`'s alone, so a flag that isn't a code shows as its text.
  *
- * - In a static server render (`spell-ui/static`):
+ * - In a static server render (`spell/ui/static`):
  *   - the menu is closed, with its rows rendered (their text is in the page)
  *   - the `<ui-item>`s are dropped
  *   - the value goes in hidden inputs, so a static form submits it

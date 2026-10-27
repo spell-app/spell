@@ -1,7 +1,7 @@
 /**
  * The English vocabulary of `<ui-ad>`:  every name the tag uses.
  * - Its tag, attributes (each with its kind and allowed values), slots, parts and texts.
- *   The shape is `ComponentVocabulary` (`spell-ui/vocabulary`).
+ *   The shape is `ComponentVocabulary` (`spell/ui/vocabulary`).
  * - The attributes become Fomantic's class words, in Fomantic's order (`ClassBuilder`):
  *   `<ui-ad unit="medium rectangle" align="center">` => `ui medium rectangle centered ad`.
  *   `UIAd.css` keys on those phrases (`[class*="medium rectangle"]`).
@@ -11,7 +11,7 @@
  *   to show instead (Fomantic's `data-text`).
  */
 
-import type { ComponentVocabulary } from "spell-ui/vocabulary"
+import type { ComponentVocabulary } from "spell/ui/vocabulary"
 
 /****************
  * ### `adVocabulary`

@@ -1,8 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vite-plus/test"
 
-import { ApiError } from "spell-ui/runtime"
+import { ApiError } from "spell/ui/runtime"
 
-import { Api } from "spell-ui/runtime/Api"
+import { Api } from "spell/ui/runtime/Api"
 
 describe("Api.url()", () => {
   const api = new Api()

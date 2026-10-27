@@ -1,8 +1,8 @@
 import { Show, onCleanup } from "solid-js"
 
-import { editor } from "spell-app/app/editor"
-import { appTexts } from "spell-app/app/ui/AppTexts"
-import { Actions, MenuHeader, PanelMenu, Submenu } from "spell-app/app/solid"
+import { editor } from "spell/app/app/editor"
+import { appTexts } from "spell/app/app/ui/AppTexts"
+import { Actions, MenuHeader, PanelMenu, Submenu } from "spell/app/app/solid"
 import { AppContainer } from "./AppContainer"
 
 import "./AppRoot.css"

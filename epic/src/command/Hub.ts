@@ -1,8 +1,8 @@
 import { resolve } from "node:path"
 
 import { CLI } from "spell/cli"
-import { RepoList } from "spell-epic/server/RepoList"
-import { DEFAULT_EPIC_PORT, PID_FILE } from "spell-epic/server/server.types"
+import { RepoList } from "spell/epic/server/RepoList"
+import { DEFAULT_EPIC_PORT, PID_FILE } from "spell/epic/server/server.types"
 
 import { EXIT, EpicCommandError, parseVerbArgs } from "./command.types"
 
@@ -22,7 +22,7 @@ import { EXIT, EpicCommandError, parseVerbArgs } from "./command.types"
  * - `url <file>`:  ensure it runs, then print the URL that serves `<file>` (a page in a registered repo's content)
  *
  * - Its repos:  `epic repo` (`Repos`).
- * - Its files:  `~/.spell-epic/` (`server.json`, `server.log`).
+ * - Its files:  `~/.epic/` (`server.json`, `server.log`).
  * - The server's code loads on first use (a dynamic `import()`):  the other verbs don't pay for it.
  ****************/
 export class Hub {
@@ -84,7 +84,7 @@ export class Hub {
     if (!new RepoList({ home: this.home }).repos().length)
       throw new EpicCommandError("no repos to serve yet:  epic repo add <checkout>")
     const [{ EpicServer }, { SRV }] = await Promise.all([
-      import("spell-epic/server/EpicServer"),
+      import("spell/epic/server/EpicServer"),
       import("spell/server")
     ])
     try {
@@ -98,7 +98,7 @@ export class Hub {
   /** Serve in the foreground until `Ctrl-C`;  resolves to 0 once stopped. */
   private async serve(port: number): Promise<number> {
     const [{ EpicServer }, { SRV }] = await Promise.all([
-      import("spell-epic/server/EpicServer"),
+      import("spell/epic/server/EpicServer"),
       import("spell/server")
     ])
     const server = await new EpicServer({ home: this.home }).start({ port })

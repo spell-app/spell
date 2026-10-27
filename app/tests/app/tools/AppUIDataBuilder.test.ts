@@ -4,9 +4,9 @@ import path from "node:path"
 import { describe, expect, test } from "vite-plus/test"
 
 import { keepingCommentsIn } from "spell/util/node/json5"
-import { SiteDataBuilder } from "spell-ui/tools/SiteDataBuilder"
+import { SiteDataBuilder } from "spell/ui/tools/SiteDataBuilder"
 
-import { AppUIDataBuilder } from "spell-app/app/tools/AppUIDataBuilder"
+import { AppUIDataBuilder } from "spell/app/app/tools/AppUIDataBuilder"
 
 /** The pages read from a vocabulary, not a `file`:  the component file whose banner names the page. */
 const VOCABULARY_FAMILY_FILES = {

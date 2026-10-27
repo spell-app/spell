@@ -1,7 +1,7 @@
 import { parseHTML } from "linkedom"
 import { describe, expect, test } from "vite-plus/test"
 
-import { ServerIds } from "spell-ui/static"
+import { ServerIds } from "spell/ui/static"
 
 describe("ServerIds.next()", () => {
   test("skips ids the page being rendered already has", () => {

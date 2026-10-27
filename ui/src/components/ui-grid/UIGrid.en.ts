@@ -1,7 +1,7 @@
 /**
  * The English vocabulary of `<ui-grid>`:  every name the tag uses.
  * - Its tag, attributes (each with its kind and allowed values), slots and parts.
- *   The shape is `E.ComponentVocabulary` (`spell-ui/vocabulary`).
+ *   The shape is `E.ComponentVocabulary` (`spell/ui/vocabulary`).
  * - Class words come out through `ClassBuilder`, in Fomantic's grammar:
  *   `<ui-grid columns="3" divided="vertically" stackable>` => `ui stackable vertically divided three column grid`,
  *   `<ui-column width="4" width-mobile="16">` => `ui four wide sixteen wide mobile column`.
@@ -11,8 +11,8 @@
  *   inherited tokens (`--_grid-*`), see `UIGrid.css`.
  */
 
-import type { E } from "spell-ui/core"
-import * as UIT from "spell-ui/components/components.types"
+import type { E } from "spell/ui/core"
+import * as UIT from "spell/ui/components/components.types"
 import { OnlyDevices } from "./UIGrid.types"
 
 /** `reversed` targets on a grid:  a device, optionally `vertically` (the lines, not the columns). */

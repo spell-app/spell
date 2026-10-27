@@ -1,12 +1,12 @@
 import { Show, createMemo } from "solid-js"
 import { isServer, type JSX } from "@solidjs/web"
 
-import { E } from "spell-ui/core"
+import { E } from "spell/ui/core"
 
-import { PlanDates } from "spell-epic/dates"
-import { PhaseIds } from "spell-epic/phases"
+import { PlanDates } from "spell/epic/dates"
+import { PhaseIds } from "spell/epic/phases"
 // its view of the review inbox:  the file, not `epic-review`'s barrel (`index.ts` defines that family)
-import { ReviewState } from "spell-epic/components/epic-review/ReviewState"
+import { ReviewState } from "spell/epic/components/epic-review/ReviewState"
 import {
   CHOSEN,
   REVIEW_BUTTONS,
@@ -14,7 +14,7 @@ import {
   TODO_BUTTONS,
   stopIfOwn,
   type ReviewShows
-} from "spell-epic/components/epic-review/EpicReview.types"
+} from "spell/epic/components/epic-review/EpicReview.types"
 
 import { AnswerThread } from "./AnswerThread"
 import { epicItemVocabulary } from "./EpicItem.en"

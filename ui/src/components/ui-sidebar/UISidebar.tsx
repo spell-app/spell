@@ -1,7 +1,7 @@
 import { Show } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
-import { E, UI, UIT } from "spell-ui/core"
+import { E, UI, UIT } from "spell/ui/core"
 import { sidebarVocabulary } from "./UISidebar.en"
 import type { UIPushable } from "./UIPushable"
 import { CENTER, type SidebarVocabulary } from "./UISidebar.types"

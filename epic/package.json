@@ -369,7 +369,7 @@
       "epics": {
         "name": "Epic UI",
         "dir": "src/docs",
-        "assets": "../spell-ui/site/_assets"
+        "assets": "../ui/site/_assets"
       }
     },
     "engineRoutes": {

@@ -1,7 +1,7 @@
 import { Box, Text } from "ink"
 import { Spinner } from "@inkjs/ui"
 
-import type { CLI } from "spell-app/cli"
+import type { CLI } from "spell/app/cli"
 
 /****************
  * ### `<StatusList>`

@@ -1,8 +1,8 @@
 import { describe, expect, it, test } from "vite-plus/test"
 
-import { E } from "spell-ui/core"
-import { ComponentDefinitions } from "spell-ui/components/ComponentDefinitions"
-import { ROOT_CATALOG } from "spell-ui/components/ui-root/UIRoot.catalog"
+import { E } from "spell/ui/core"
+import { ComponentDefinitions } from "spell/ui/components/ComponentDefinitions"
+import { ROOT_CATALOG } from "spell/ui/components/ui-root/UIRoot.catalog"
 import { SkeletonText } from "spell/element/SkeletonText"
 
 /**
@@ -50,7 +50,7 @@ describe("ROOT_CATALOG's skeletons", () => {
  */
 describe("ROOT_CATALOG's early definitions", () => {
   // every family of the library, defined:  its own tags' classes say what they observe
-  const families = import("spell-ui")
+  const families = import("spell/ui")
 
   test("every tag lists its attributes, and says whether it's a form control as its component does", async () => {
     await families

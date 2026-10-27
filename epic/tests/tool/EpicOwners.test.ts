@@ -10,9 +10,9 @@ import { fileURLToPath } from "node:url"
 
 import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
 
-import { EpicOwners } from "spell-epic/tool/EpicOwners"
-import { PlanDoc } from "spell-epic/tool/PlanDoc"
-import { PlanDocFiles } from "spell-epic/tool/PlanDocFiles"
+import { EpicOwners } from "spell/epic/tool/EpicOwners"
+import { PlanDoc } from "spell/epic/tool/PlanDoc"
+import { PlanDocFiles } from "spell/epic/tool/PlanDocFiles"
 
 /** The tool's test fixtures:  `epic-plan.html`, a fresh doc in `<epic-*>` markup. */
 const FIXTURES = fileURLToPath(new URL("fixtures", import.meta.url))
@@ -26,7 +26,7 @@ describe("EpicOwners rules", () => {
       "edits src/a.ts.",
       "src/a.ts, then"
     ]
-    const no = ["spell-epic/src/a.ts", "src/a.tsx", "src/a.ts/", "src/a.ts.bak", "xsrc/a.ts", "my-src/a.ts"]
+    const no = ["epic/src/a.ts", "src/a.tsx", "src/a.ts/", "src/a.ts.bak", "xsrc/a.ts", "my-src/a.ts"]
     expect(yes.filter((text) => !EpicOwners.names(text, "src/a.ts"))).toEqual([])
     expect(no.filter((text) => EpicOwners.names(text, "src/a.ts"))).toEqual([])
   })
@@ -42,7 +42,7 @@ describe("EpicOwners rules", () => {
 
   test("pathOf():  slashes, no leading ./, an absolute path from the root", () => {
     expect(EpicOwners.pathOf("./src/a.ts", "/r")).toBe("src/a.ts")
-    expect(EpicOwners.pathOf("/r/spell-ui/src/b.ts", "/r")).toBe("spell-ui/src/b.ts")
+    expect(EpicOwners.pathOf("/r/ui/src/b.ts", "/r")).toBe("ui/src/b.ts")
   })
 })
 

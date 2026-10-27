@@ -8,7 +8,7 @@ import { E } from "spell/element"
 import { epicQuestionVocabulary } from "./EpicQuestion.en"
 
 import questionCSS from "./EpicQuestion.css?inline"
-import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
+import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 
 export class EpicQuestion extends E.UIComponent<typeof epicQuestionVocabulary> {
   @E.proto static vocabulary = epicQuestionVocabulary
@@ -38,7 +38,7 @@ export interface EpicQuestion extends E.AttributeValues<typeof epicQuestionVocab
 const LABEL = "label"
 ```
 
-_All of [EpicQuestion.tsx](https://github.com/spell-app/spell-epic/blob/main/src/components/epic-question/EpicQuestion.tsx), from the epic pages,
+_All of [EpicQuestion.tsx](https://github.com/spell-app/spell/blob/main/epic/src/components/epic-question/EpicQuestion.tsx), from the epic pages,
 with only its class docstring left out._
 
 Put the question inside it, as its own children:
@@ -135,7 +135,7 @@ _The page talks to the DOM element;  the component draws into its shadow root;  
 Splitting them is what buys the rest:
 - it works from plain HTML and from any framework, with no wrapper;
   Spell UI checks plain JavaScript, React, Solid and Vue, each on a page run in a headless browser,
-  and Svelte's isn't checked yet ([Spell UI's README-frameworks.md](https://github.com/spell-app/spell-ui/blob/main/README-frameworks.md))
+  and Svelte's isn't checked yet ([Spell UI's README-frameworks.md](https://github.com/spell-app/spell/blob/main/ui/README-frameworks.md))
 - state survives a move or a re-sort, because the node is the same node
 - each element is its own error boundary:  an uncaught error would otherwise halt Solid for the whole page
 - the page can be rendered as plain HTML, with no script at all
@@ -196,14 +196,14 @@ export class EpicSort extends E.UIComponent<typeof epicSortVocabulary> {
 }
 ```
 
-_Shortened from [EpicSort.tsx](https://github.com/spell-app/spell-epic/blob/main/src/components/epic-list/EpicSort.tsx):  `...` marks what's left out._
+_Shortened from [EpicSort.tsx](https://github.com/spell-app/spell/blob/main/epic/src/components/epic-list/EpicSort.tsx):  `...` marks what's left out._
 
 Click Date, and `pick()` writes `this.sort`.
 In React, that `setSort` would run the component again, build both buttons anew, diff them and patch the DOM.
 Here, `render()` doesn't run again, and neither does `<For>`.
 The only code that runs again is the bindings that read `inUse()`,
 so the only DOM that changes is each button's `selected` attribute and its spoken name.
-[Its test](https://github.com/spell-app/spell-epic/blob/main/tests/components/epic-list/EpicSort.test.tsx) clicks Date and checks exactly that,
+[Its test](https://github.com/spell-app/spell/blob/main/epic/tests/components/epic-list/EpicSort.test.tsx) clicks Date and checks exactly that,
 and the `epic-sort` event the page hears.
 
 ```mermaid
@@ -227,11 +227,11 @@ _No second render, no diff:  a write goes straight to the node that shows it._
   - A Solid memo would hand back the old value there, so `@E.derived` is a cache of its own, not a memo.
 - 1,000 `<ui-button>`s put in a page at once are all built, rendered and ready in about 80 ms:
   the median of nine runs, after a warm-up, in Spell UI's
-  [button benchmark](https://github.com/spell-app/spell-ui/blob/main/tests/components/ui-button/UIButton.perf.test.tsx).
+  [button benchmark](https://github.com/spell-app/spell/blob/main/ui/tests/components/ui-button/UIButton.perf.test.tsx).
 - A write reaches the screen in the next frame.
   Typing "united sta" into a searching `<ui-dropdown>` of 1,000 options, a letter at a time,
   each keystroke's update took under 7 ms, about 3 on average, on the last recorded run;
-  [its benchmark](https://github.com/spell-app/spell-ui/blob/main/tests/components/ui-dropdown/UIDropdown.perf.test.tsx)
+  [its benchmark](https://github.com/spell-app/spell/blob/main/ui/tests/components/ui-dropdown/UIDropdown.perf.test.tsx)
   fails when the average reaches a frame, 16 ms.
 
 The cost is one rule, Solid 2's:  NEVER change state while Solid is drawing,
@@ -260,7 +260,7 @@ this.send("ui-change", { count })
 - An attribute's `kind` says how its text reads and what it draws.
   `<ui-container>`'s `text` is `keyOnly`, so `<ui-container text>` draws `ui text container`,
   and `text="no"` a plain `ui container`:
-  [its test](https://github.com/spell-app/spell-ui/blob/main/tests/components/ui-container/UIContainer.test.tsx) checks both.
+  [its test](https://github.com/spell-app/spell/blob/main/ui/tests/components/ui-container/UIContainer.test.tsx) checks both.
 - `as const satisfies E.ComponentVocabulary` keeps every name a literal type:
   so a typo, `this.partForName("cuont")`, fails `tsc`.
 - One line gives a component a typed getter per attribute:
@@ -284,7 +284,7 @@ And because every name is in one place, a tag can be translated whole, in two ha
 - `<ui-root lang="es">` names a page Spanish, and its components load as `es-*` tags.
 
 **Not yet:**  a third language.
-How Spell UI reads them:  [README-runtime.md](https://github.com/spell-app/spell-ui/blob/main/README-runtime.md).
+How Spell UI reads them:  [README-runtime.md](https://github.com/spell-app/spell/blob/main/ui/README-runtime.md).
 
 ## What every element gets without asking
 
@@ -474,12 +474,12 @@ The set's docs data comes after;  `spell-pack check` exits 1 while any of it is 
   So a pack leaves the shared modules out, and borrows the page's copies, by their npm names:
 
   ```ts
-  PACK_MODULES = ["solid-js", "@solidjs/web", "spell/element", "spell-ui/core", "spell-ui/forms",
-    "spell-ui/components/ui-zoom/ImageZoom"]
+  PACK_MODULES = ["solid-js", "@solidjs/web", "spell/element", "spell/ui/core", "spell/ui/forms",
+    "spell/ui/components/ui-zoom/ImageZoom"]
   ```
 
   - The page offers them under those same names, in `SpellUI.packModules`;
-    the docs site adds the families a pack may extend, by theirs (`spell-ui/components/ui-code`).
+    the docs site adds the families a pack may extend, by theirs (`spell/ui/components/ui-code`).
   - Any other Spell UI or Solid import fails the pack's build, rather than ship a second copy.
 
 - A pack's elements extend the page's one `UIComponent`:
@@ -527,7 +527,7 @@ The sheets themselves are shared, never copied:
 one `CSSStyleSheet` per sheet, adopted by every shadow root that needs it, in layers.
 - The layers run `ui.reset`, `ui.tokens`, `ui.base`, `ui.components`, `ui.utilities`, `ui.theme`, `ui.app`:
   later layers win whatever the specificity, and a page's own unlayered CSS beats them all.
-- The rest of theming:  [Spell UI's README-themes.md](https://github.com/spell-app/spell-ui/blob/main/README-themes.md).
+- The rest of theming:  [Spell UI's README-themes.md](https://github.com/spell-app/spell/blob/main/ui/README-themes.md).
 
 ### Restyling your whole site with the app stylesheet
 
@@ -560,7 +560,7 @@ its rules go in `ui.app`, the last layer, as below.
 | Put it in | When |
 | --- | --- |
 | tokens, on `:root` or any ancestor | a value every element shares:  a colour, the font size, a radius |
-| a theme file | a whole look you'd switch to and back, page-wide:  [README-themes.md](https://github.com/spell-app/spell-ui/blob/main/README-themes.md) |
+| a theme file | a whole look you'd switch to and back, page-wide:  [README-themes.md](https://github.com/spell-app/spell/blob/main/ui/README-themes.md) |
 | the app stylesheet | this site's own changes to how components are drawn inside |
 
 ## Testing it:  a real browser, never jsdom
@@ -580,7 +580,7 @@ test("a small `Question` label over its text;  the text is its own light childre
 })
 ```
 
-_From [EpicQuestion.test.tsx](https://github.com/spell-app/spell-epic/blob/main/tests/components/epic-question/EpicQuestion.test.tsx):
+_From [EpicQuestion.test.tsx](https://github.com/spell-app/spell/blob/main/epic/tests/components/epic-question/EpicQuestion.test.tsx):
 `QUESTION` is the markup above, `part()` finds a shadow part by name._
 
 `ElementFixture.render()` waits for every element's `ready`, then runs Solid's `flush()`,
@@ -656,7 +656,7 @@ How it works:
   - [`JsxElementHelp`](src/element-tools/jsx-help/JsxElementHelp.ts) finds the completions and warnings,
     as plain data for any editor
   - [`ElementCatalog`](src/element-tools/jsx-help/ElementCatalog.ts) reads the manifests
-- The app's VS Code extension shows them ([`ElementsHelp`](https://github.com/spell-app/spell-app/blob/main/vscode/src/ElementsHelp.ts)):
+- The app's VS Code extension shows them ([`ElementsHelp`](https://github.com/spell-app/spell/blob/main/app/vscode/src/ElementsHelp.ts)):
   completions as you type `"`, warnings in the Problems list as you edit.
   - Its log, the manifests it found and anything that failed:  the "Spell Elements" output.
 - The editor's own TypeScript stays TypeScript 7:  nothing to switch, no "Use Workspace Version".
@@ -669,15 +669,15 @@ How it works:
 
 | Set | What it is | Its elements |
 | --- | --- | --- |
-| Spell UI | the host:  the runtime, `<ui-root>`, the styles and icons, `registerPack()` | 62 families, `<ui-accordion>` ... `<ui-visibility>`:  [spell-ui's README](https://github.com/spell-app/spell-ui/blob/main/README.md) |
-| spell-epic | a pack, prefix `epic-`:  every epic page loads it | 36 families, `<epic-page>`, `<epic-item>`, `<epic-thread>` ...:  [spell-epic's README](https://github.com/spell-app/spell-epic/blob/main/README.md) |
-| spell-app | a root subclass, `<spell-viewer>`, loading its own tags;  `<spell-editor>`;  each view's element in a Spell program (`<solitaire-card>`) | [spell-app's README](https://github.com/spell-app/spell-app/blob/main/README.md) |
+| Spell UI | the host:  the runtime, `<ui-root>`, the styles and icons, `registerPack()` | 62 families, `<ui-accordion>` ... `<ui-visibility>`:  [spell-ui's README](https://github.com/spell-app/spell/blob/main/ui/README.md) |
+| spell-epic | a pack, prefix `epic-`:  every epic page loads it | 36 families, `<epic-page>`, `<epic-item>`, `<epic-thread>` ...:  [spell-epic's README](https://github.com/spell-app/spell/blob/main/epic/README.md) |
+| spell-app | a root subclass, `<spell-viewer>`, loading its own tags;  `<spell-editor>`;  each view's element in a Spell program (`<solitaire-card>`) | [spell-app's README](https://github.com/spell-app/spell/blob/main/app/README.md) |
 
 - Spell UI's core re-exports this whole framework, plus its own pieces:
   `E.IconGlyph`, `E.LoadableBody`, `E.NativeFallback`, `E.Converters` ...
-  So a Spell UI family imports `E` from `spell-ui/core`.
+  So a Spell UI family imports `E` from `spell/ui/core`.
 - A pack's element files import `E` from `spell/element`, as `<epic-question>` does,
-  or from `spell-ui/core` when they use Spell UI's own pieces, as `<epic-sort>` does:
+  or from `spell/ui/core` when they use Spell UI's own pieces, as `<epic-sort>` does:
   the same names, and Spell UI's on top.
 
 ## What it costs, and what it won't do
@@ -811,8 +811,8 @@ and the page server running ([README-server.md](README-server.md)).
 
 ## See also
 
-- [spell-ui's README](https://github.com/spell-app/spell-ui/blob/main/README.md):  the elements built on this, and the runtime they need
-- [spell-ui's README-runtime.md](https://github.com/spell-app/spell-ui/blob/main/README-runtime.md):  the runtime's half of every element, from words to
+- [spell-ui's README](https://github.com/spell-app/spell/blob/main/ui/README.md):  the elements built on this, and the runtime they need
+- [spell-ui's README-runtime.md](https://github.com/spell-app/spell/blob/main/ui/README-runtime.md):  the runtime's half of every element, from words to
   the static render
 - [README-util.md](README-util.md):  the generic helpers and the reactive engine underneath
 - [README-toolchain.md](README-toolchain.md):  the decorator pre-pass and the lint guard

@@ -1,9 +1,9 @@
 import DOMPurify from "dompurify"
 import { describe, expect, it, onTestFinished } from "vite-plus/test"
 
-import { SourceError } from "spell-ui/runtime/runtime.types"
+import { SourceError } from "spell/ui/runtime/runtime.types"
 
-import { MarkdownSanitizer } from "spell-ui/components/ui-markdown/MarkdownSanitizer"
+import { MarkdownSanitizer } from "spell/ui/components/ui-markdown/MarkdownSanitizer"
 
 describe("MarkdownSanitizer.sanitize()", () => {
   it("drops scripts and handlers, and keeps `ui-*` tags only when asked", () => {

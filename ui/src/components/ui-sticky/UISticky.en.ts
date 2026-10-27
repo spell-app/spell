@@ -1,12 +1,12 @@
 /**
  * Every name `<ui-sticky>` uses:  tag, attributes (kind + allowed values), events, slots, parts, states, texts.
- * Schema:  `E.ComponentVocabulary` (`spell-ui/vocabulary`).
+ * Schema:  `E.ComponentVocabulary` (`spell/ui/vocabulary`).
  * - Class words come out through `ClassBuilder`:  `<ui-sticky pushing>` => `ui pushing sticky`.
  * - Stuck-ness is a STATE (`:state(stuck)`, `:state(bound)`), not a class:  CSS `position: sticky` does the sticking,
  *   the element only reports it.
  */
 
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /****************
  * ### `<ui-sticky>`

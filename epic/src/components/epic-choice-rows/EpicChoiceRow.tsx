@@ -1,9 +1,9 @@
 import { For, Show } from "solid-js"
 import { isServer, type JSX } from "@solidjs/web"
 
-import { E } from "spell-ui/core"
+import { E } from "spell/ui/core"
 
-import { ChoicesForm, keepOneLine, stopNewLine, type ChoiceRowPart } from "spell-epic/answers"
+import { ChoicesForm, keepOneLine, stopNewLine, type ChoiceRowPart } from "spell/epic/answers"
 
 import { epicChoiceRowVocabulary } from "./EpicChoiceRow.en"
 import { ROW_TAG, ROWS_TAG } from "./EpicChoiceRows.types"

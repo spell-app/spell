@@ -1,7 +1,7 @@
 // Import directly to avoid circular import
-import { proto } from "spell-ui/util"
-import { after, type Prettify } from "spell-ui/util"
-import * as UIT from "spell-ui/components/components.types"
+import { proto } from "spell/ui/util"
+import { after, type Prettify } from "spell/ui/util"
+import * as UIT from "spell/ui/components/components.types"
 
 import { CssDisplay, type AnimateOptions, type AnimationDirection, type AnimationName } from "./runtime.types"
 import type { Browser } from "./Browser"

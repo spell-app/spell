@@ -1,5 +1,5 @@
 import { proto } from "spell/util"
-import { P } from "spell-parser/parser"
+import { P } from "spell/parser/parser"
 
 /**
  * `type_specifier_instance` rule:  `as a new thing` / `as a new list of tasks` --

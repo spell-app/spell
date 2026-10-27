@@ -6,11 +6,11 @@ import { expectAccessible } from "spell/test-helpers/A11y"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import type { DOMElement } from "spell/element"
 
-import "spell-ui/components/ui-menu"
-import "spell-ui/components/ui-parts"
-import "spell-ui/components/ui-icon"
-import "spell-ui/components/ui-segment"
-import "spell-ui/components/ui-dropdown"
+import "spell/ui/components/ui-menu"
+import "spell/ui/components/ui-parts"
+import "spell/ui/components/ui-icon"
+import "spell/ui/components/ui-segment"
+import "spell/ui/components/ui-dropdown"
 
 /** Element-markup rewrites of every example, by path. */
 const EXAMPLES = import.meta.glob<string>("/src/components/ui-menu/examples/elements/*.html", {

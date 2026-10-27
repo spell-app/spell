@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { ColorProbe } from "spell-ui/docs-components/ui-docs-tokens/ColorProbe"
+import { ColorProbe } from "spell/ui/docs-components/ui-docs-tokens/ColorProbe"
 
 describe("ColorProbe.hexFor()", () => {
   test("reads any CSS colour back as #rrggbb", () => {

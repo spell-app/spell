@@ -1,4 +1,4 @@
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /**
  * `<ui-flag>` in Spanish:  `<es-bandera>`, with the names and texts only it uses (from `UIFlag.en.ts`).

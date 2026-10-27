@@ -1,16 +1,16 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { colorsCSS, foundationCSS } from "spell-ui/styles"
+import { colorsCSS, foundationCSS } from "spell/ui/styles"
 
 import { Fixture } from "spell/test-helpers/Fixture"
-import { Sheets } from "spell-ui/test-helpers/Sheets"
+import { Sheets } from "spell/ui/test-helpers/Sheets"
 
-import { statisticsVocabulary } from "spell-ui/components/ui-statistic/UIStatistics.en"
-import { statisticVocabulary } from "spell-ui/components/ui-statistic/UIStatistic.en"
+import { statisticsVocabulary } from "spell/ui/components/ui-statistic/UIStatistics.en"
+import { statisticVocabulary } from "spell/ui/components/ui-statistic/UIStatistic.en"
 
-import statisticCSS from "spell-ui/components/ui-statistic/UIStatistic.css?inline"
-import statisticRaw from "spell-ui/components/ui-statistic/UIStatistic.css?raw"
-import partsCSS from "spell-ui/components/ui-parts/UIParts.css?inline"
+import statisticCSS from "spell/ui/components/ui-statistic/UIStatistic.css?inline"
+import statisticRaw from "spell/ui/components/ui-statistic/UIStatistic.css?raw"
+import partsCSS from "spell/ui/components/ui-parts/UIParts.css?inline"
 
 /**
  * `UIStatistic.css` (with `UIParts.css`, which draws the values and labels) on the class-grammar examples:

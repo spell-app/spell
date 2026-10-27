@@ -1,4 +1,4 @@
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /**
  * `<ui-segments>` in Spanish:  `<es-segmentos>`, with the names and texts only it uses (from `UISegments.en.ts`).

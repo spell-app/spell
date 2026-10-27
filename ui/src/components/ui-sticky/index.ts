@@ -1,7 +1,7 @@
 /**
  * The sticky family:  defines `<ui-sticky>` and exports its component, `UISticky`.
  * - SIDE EFFECT:  importing it defines the tag.
- * - Also the library's `spell-ui/ui-sticky` entry (its size is in `notes/report.md`).
+ * - Also the library's `spell/ui/ui-sticky` entry (its size is in `notes/report.md`).
  */
 
 import { UISticky } from "./UISticky"

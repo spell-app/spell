@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { MD } from "spell-parser/markdown"
+import { MD } from "spell/parser/markdown"
 
 /** `block`'s tree as nested `kind[...]` strings, leaf lines in quotes. */
 function shape(block: MD.Block): unknown {

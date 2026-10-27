@@ -1,5 +1,5 @@
 import { proto } from "spell/util"
-import { P } from "spell-parser/parser"
+import { P } from "spell/parser/parser"
 
 /**
  * `the_property_of_a_thing` rule:  `the color of a card` -- one of two `type_property` spellings,

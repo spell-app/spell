@@ -3,11 +3,11 @@ import { afterEach, beforeEach, describe, expect, test, vi } from "vite-plus/tes
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import { expectAccessible } from "spell/test-helpers/A11y"
 
-import { ReviewClient, type Inbox } from "spell-epic/review"
+import { ReviewClient, type Inbox } from "spell/epic/review"
 
-import "spell-ui/components/ui-button"
-import "spell-ui/components/ui-icon"
-import "spell-epic/components/epic-change"
+import "spell/ui/components/ui-button"
+import "spell/ui/components/ui-icon"
+import "spell/epic/components/epic-change"
 
 ////////////////
 // ## Fakes

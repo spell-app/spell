@@ -1,12 +1,12 @@
 import { Dynamic, type JSX } from "@solidjs/web"
 
 // Import directly to avoid circular import
-import { protoMerged } from "spell-ui/util"
-import { E } from "spell-ui/core"
+import { protoMerged } from "spell/ui/util"
+import { E } from "spell/ui/core"
 // Import directly to avoid circular import:  spell-element imports nothing of Spell UI, so it has always loaded first
 import { UIComponent } from "spell/element"
 
-import partsCSS from "spell-ui/components/ui-parts/UIParts.css?inline"
+import partsCSS from "spell/ui/components/ui-parts/UIParts.css?inline"
 
 /****************
  * ### `PartComponent`
@@ -25,7 +25,7 @@ import partsCSS from "spell-ui/components/ui-parts/UIParts.css?inline"
  * - Every part adopts `UIParts.css`;  `elementSetup.isAPart` makes them transparent to other parts' climbs.
  * - The one element-core class that loads a family's file (`UIParts.css`):
  *   every part family shares the sheet, so it lands in `core`.
- *   It imports nothing else of `spell-ui/components`.
+ *   It imports nothing else of `spell/ui/components`.
  ****************/
 export abstract class PartComponent<V extends E.ComponentVocabulary = E.ComponentVocabulary> extends UIComponent<V> {
   @protoMerged static elementSetup: Partial<E.ElementSetup> = { styleSheets: { parts: partsCSS }, isAPart: true }

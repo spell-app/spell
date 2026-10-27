@@ -1,4 +1,4 @@
-import type { SP } from "spell-parser/spell"
+import type { SP } from "spell/parser/spell"
 import { NAMES_KINDS, TranslationNames } from "./TranslationNames"
 import type {
   ClaudeEffort,

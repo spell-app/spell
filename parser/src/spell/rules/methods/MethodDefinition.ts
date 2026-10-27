@@ -1,12 +1,12 @@
 import { kebabCase, proto } from "spell/util"
-import { P } from "spell-parser/parser"
-import { SP } from "spell-parser/spell"
-import { Wording } from "spell-parser/spell/rules/expressions"
+import { P } from "spell/parser/parser"
+import { SP } from "spell/parser/spell"
+import { Wording } from "spell/parser/spell/rules/expressions"
 // Through the folder:  read only when called, once the folder has loaded
-import { DrawnLines } from "spell-parser/spell/rules/classes"
+import { DrawnLines } from "spell/parser/spell/rules/classes"
 // Import directly to avoid circular import
-import { SpellStatement, type SpellStatementProps } from "spell-parser/spell/rules/Statement"
-import { SubjectRule } from "spell-parser/spell/rules/types"
+import { SpellStatement, type SpellStatementProps } from "spell/parser/spell/rules/Statement"
+import { SubjectRule } from "spell/parser/spell/rules/types"
 import { ActionDetail } from "./ActionDetail"
 import { DynamicMethodRule } from "./DynamicMethodRule"
 import { MethodInfixRule } from "./MethodInfixRule"

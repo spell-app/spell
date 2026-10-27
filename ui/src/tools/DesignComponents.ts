@@ -6,7 +6,7 @@ import { dedent, escapeHTML, indented } from "spell/util/string"
 
 import { ElementManifests } from "./ElementManifests.ts"
 import { FamilyExamples } from "./FamilyExamples.ts"
-import type { SiteAttribute, SiteDataFile, SiteFamily, SiteTag } from "spell-ui/docs-components/docs-components.types"
+import type { SiteAttribute, SiteDataFile, SiteFamily, SiteTag } from "spell/ui/docs-components/docs-components.types"
 import { COMPONENTS, type DesignExample, type DesignFamily, type DesignSource } from "./tools.types.ts"
 
 /****************

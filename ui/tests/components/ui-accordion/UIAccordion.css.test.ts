@@ -1,15 +1,15 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { foundationCSS } from "spell-ui/styles"
+import { foundationCSS } from "spell/ui/styles"
 
 import { Fixture } from "spell/test-helpers/Fixture"
-import { Sheets } from "spell-ui/test-helpers/Sheets"
+import { Sheets } from "spell/ui/test-helpers/Sheets"
 
-import { accordionVocabulary } from "spell-ui/components/ui-accordion/UIAccordion.en"
+import { accordionVocabulary } from "spell/ui/components/ui-accordion/UIAccordion.en"
 
-import accordionCSS from "spell-ui/components/ui-accordion/UIAccordion.css?inline"
-import accordionRaw from "spell-ui/components/ui-accordion/UIAccordion.css?raw"
-import segmentCSS from "spell-ui/components/ui-segment/UISegment.css?inline"
+import accordionCSS from "spell/ui/components/ui-accordion/UIAccordion.css?inline"
+import accordionRaw from "spell/ui/components/ui-accordion/UIAccordion.css?raw"
+import segmentCSS from "spell/ui/components/ui-segment/UISegment.css?inline"
 
 /**
  * `UIAccordion.css` on its own, before any element exists:  the sheet's source rules and the computed styles of the

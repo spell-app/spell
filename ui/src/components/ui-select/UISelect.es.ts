@@ -1,4 +1,4 @@
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /**
  * `<ui-select>` in Spanish:  `<es-selector>`, with the names and texts only it uses (from `UISelect.en.ts`).

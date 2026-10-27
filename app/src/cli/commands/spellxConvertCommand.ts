@@ -1,8 +1,8 @@
 import { writeFileSync } from "fs"
 
-import { SP } from "spell-parser/spell"
-import { SX } from "spell-parser/spellx"
-import { CLI } from "spell-app/cli"
+import { SP } from "spell/parser/spell"
+import { SX } from "spell/parser/spellx"
+import { CLI } from "spell/app/cli"
 
 /**
  * `spell spellx convert [projects...]`:  write each `.spell` file as SPELLX, the same program in tags

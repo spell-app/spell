@@ -2,7 +2,7 @@ import { fileURLToPath } from "node:url"
 
 import { VocabularyFiles } from "spell/element-tools/VocabularyFiles"
 import type { AttributeSpec, ComponentVocabulary } from "spell/element/vocabulary.types"
-import { SharedVocabulary } from "spell-ui/vocabulary"
+import { SharedVocabulary } from "spell/ui/vocabulary"
 
 /****************
  * ### `OldNames`

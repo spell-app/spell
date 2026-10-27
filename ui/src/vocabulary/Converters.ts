@@ -1,4 +1,4 @@
-import { Warnings } from "spell-ui/util"
+import { Warnings } from "spell/ui/util"
 import type { EnumOptions, ValueSetName } from "spell/element/vocabulary.types"
 import { ValueSets } from "./ValueSets"
 
@@ -16,7 +16,7 @@ import { ValueSets } from "./ValueSets"
  *   - `getAttribute()` returns it for an absent attribute
  *   - `ElementDefinition.attributeText()` returns it to remove one (`booleanToAttribute()`)
  *   - everything of ours that means "none" is `undefined`
- * - Imports only `spell-ui/util` and its folder's peers:  no DOM, no element layer.
+ * - Imports only `spell/ui/util` and its folder's peers:  no DOM, no element layer.
  ****************/
 export class Converters {
   ////////////////

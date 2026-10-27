@@ -1,8 +1,8 @@
 import { basename, join } from "node:path"
 import { describe, expect, test } from "vite-plus/test"
 
-import { FamilyExamples } from "spell-ui/tools/FamilyExamples"
-import { COMPONENTS, SPELL_UI_ROOT } from "spell-ui/tools/tools.types"
+import { FamilyExamples } from "spell/ui/tools/FamilyExamples"
+import { COMPONENTS, SPELL_UI_ROOT } from "spell/ui/tools/tools.types"
 
 /** Spell UI's families. */
 const FAMILIES = join(SPELL_UI_ROOT, COMPONENTS)

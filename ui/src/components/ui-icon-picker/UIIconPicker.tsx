@@ -1,8 +1,8 @@
 import { For, Show } from "solid-js"
 import { isServer, type JSX } from "@solidjs/web"
 
-import { E, UI, UIT } from "spell-ui/core"
-import { F } from "spell-ui/forms"
+import { E, UI, UIT } from "spell/ui/core"
+import { F } from "spell/ui/forms"
 import { IconCatalog, type IconChoice, type IconGroup, type IconSearchWords } from "./IconCatalog"
 import { iconPickerVocabulary } from "./UIIconPicker.en"
 import { IconPickerFallback } from "./UIIconPicker.fallback"

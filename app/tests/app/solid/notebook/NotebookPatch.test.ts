@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { CellRunner, ChunkTreeAdapter } from "spell-app/app/solid/notebook/NotebookPatch"
-import type { PageCell } from "spell-app/app/solid/notebook/NotebookPageCells"
+import { CellRunner, ChunkTreeAdapter } from "spell/app/app/solid/notebook/NotebookPatch"
+import type { PageCell } from "spell/app/app/solid/notebook/NotebookPageCells"
 
 /** Cells of `codes`:  `kind:code`, e.g. `prose:# A counter`. */
 function cells(...codes: string[]): PageCell[] {

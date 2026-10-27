@@ -4,12 +4,12 @@ import { flush } from "solid-js"
 import { render } from "@solidjs/web"
 
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
-import type { FromRunnerMessage, SpellCompiled, ToRunnerMessage } from "spell-app/app/runner/runner.types"
-import { uiReady } from "spell-app/app/solid/loadUI"
-import { SpellAppRunner, type SpellAppControls, type SpellAppSource } from "spell-app/app/runner/SpellAppRunner"
-import { RunnerSplit } from "spell-app/app/runner/RunnerSplit"
-import { VSCodeRunner } from "spell-app/app/runner/VSCodeRunner"
-import type { DOMSpellViewerElement } from "spell-app/app/components/spell-viewer"
+import type { FromRunnerMessage, SpellCompiled, ToRunnerMessage } from "spell/app/app/runner/runner.types"
+import { uiReady } from "spell/app/app/solid/loadUI"
+import { SpellAppRunner, type SpellAppControls, type SpellAppSource } from "spell/app/app/runner/SpellAppRunner"
+import { RunnerSplit } from "spell/app/app/runner/RunnerSplit"
+import { VSCodeRunner } from "spell/app/app/runner/VSCodeRunner"
+import type { DOMSpellViewerElement } from "spell/app/app/components/spell-viewer"
 
 /**
  * The Solid runners, in the browser:
@@ -23,12 +23,12 @@ import type { DOMSpellViewerElement } from "spell-app/app/components/spell-viewe
  *   As compiled spell writes it, a value that can change is a function (`() => this.count`).
  * - `adoptShadowStyles()` is stubbed:  the test server doesn't serve `static/` (Semantic UI, Lato).
  */
-vi.mock("spell-app/app/runner/loadRuntime", async (importOriginal) => {
-  const original = await importOriginal<typeof import("spell-app/app/runner/loadRuntime")>()
+vi.mock("spell/app/app/runner/loadRuntime", async (importOriginal) => {
+  const original = await importOriginal<typeof import("spell/app/app/runner/loadRuntime")>()
   return { ...original, loadRuntime: testRuntime }
 })
-vi.mock("spell-app/app/runner/shadowStyles", async (importOriginal) => {
-  const original = await importOriginal<typeof import("spell-app/app/runner/shadowStyles")>()
+vi.mock("spell/app/app/runner/shadowStyles", async (importOriginal) => {
+  const original = await importOriginal<typeof import("spell/app/app/runner/shadowStyles")>()
   return { ...original, adoptShadowStyles: async () => {} }
 })
 
@@ -815,7 +815,7 @@ describe("<RunnerSplit>", () => {
 
 describe("<spell-viewer>", () => {
   test("defined once;  `width` / `height` set its inline size", async () => {
-    await import("spell-app/app/components/spell-viewer")
+    await import("spell/app/app/components/spell-viewer")
     expect(customElements.get("spell-viewer")).toBeDefined()
     const app = await mountApp(`<spell-viewer width="300px" height="200px"></spell-viewer>`)
     expect(app.style.width).toBe("300px")
@@ -910,7 +910,7 @@ describe("<spell-viewer>", () => {
 /** The runtime, as `loadRuntime()` would hand it over -- see the file's docs. */
 async function testRuntime() {
   const url = new URL("/src/app/runner/spellRuntime.ts", location.href).href
-  const runtime = (await import(/* @vite-ignore */ url)) as typeof import("spell-app/app/runner/spellRuntime")
+  const runtime = (await import(/* @vite-ignore */ url)) as typeof import("spell/app/app/runner/spellRuntime")
   testCore = runtime.core
   return { runtime, coreUrl: url, release: () => {} }
 }
@@ -929,7 +929,7 @@ function topLevelNames(): string[] {
 }
 
 /** The test runtime's `core`, once a runner has loaded it -- see `testRuntime()`. */
-let testCore: (typeof import("spell-app/app/runner/spellRuntime"))["core"] | undefined
+let testCore: (typeof import("spell/app/app/runner/spellRuntime"))["core"] | undefined
 
 /**
  * The Solitaire example, as a runner runs it:  its compiled javascript, its blessed snapshot as text
@@ -1091,7 +1091,7 @@ function tellRunner(message: ToRunnerMessage) {
 /** Add `<spell-viewer>` markup `html` to the page;  removed after the test. */
 async function mountApp(html: string): Promise<DOMSpellViewerElement> {
   await uiReady
-  await import("spell-app/app/components/spell-viewer")
+  await import("spell/app/app/components/spell-viewer")
   const holder = document.createElement("div")
   holder.innerHTML = html
   const app = holder.firstElementChild as DOMSpellViewerElement

@@ -3,7 +3,7 @@ import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { afterAll, describe, expect, test } from "vite-plus/test"
 
-import { ClaudeHome } from "spell-epic/config/ClaudeHome"
+import { ClaudeHome } from "spell/epic/config/ClaudeHome"
 
 /** A throwaway Claude Code folder:  never the real `~/.claude`. */
 const HOME = realpathSync(mkdtempSync(join(tmpdir(), "claude-home-")))

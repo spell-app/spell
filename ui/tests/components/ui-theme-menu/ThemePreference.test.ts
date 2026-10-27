@@ -1,10 +1,10 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from "vite-plus/test"
 
 import { COLOR_SCHEME_KEY, OLD_COLOR_SCHEME_KEYS } from "spell/util/persist"
-import { UI } from "spell-ui/runtime"
+import { UI } from "spell/ui/runtime"
 
-import { ThemePreference } from "spell-ui/components/ui-theme-menu/ThemePreference"
-import { DEFAULT_THEME, SCHEME_SWITCHING, THEME_KEYS } from "spell-ui/components/ui-theme-menu/UIThemeMenu.types"
+import { ThemePreference } from "spell/ui/components/ui-theme-menu/ThemePreference"
+import { DEFAULT_THEME, SCHEME_SWITCHING, THEME_KEYS } from "spell/ui/components/ui-theme-menu/UIThemeMenu.types"
 
 beforeEach(async () => {
   // the real OS's scheme never matters

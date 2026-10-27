@@ -1,7 +1,7 @@
 import { Show, untrack } from "solid-js"
 import { Dynamic, isServer, type JSX } from "@solidjs/web"
 
-import { E, UI, UIT } from "spell-ui/core"
+import { E, UI, UIT } from "spell/ui/core"
 import { itemVocabulary } from "./UIItem.en"
 
 import itemCSS from "./UIItem.css?inline"
@@ -325,7 +325,7 @@ export class UIItem extends E.UIComponent<typeof itemVocabulary> implements E.Co
 
   /**
    * An unowned item's render:  just its content, the bare `<slot>`.
-   * - Server render (`spell-ui/static`):  wrapped in a `<span>`, the DOM element's stand-in
+   * - Server render (`spell/ui/static`):  wrapped in a `<span>`, the DOM element's stand-in
    *   (`:host`'s `display: contents` reaches it as the root).
    * - Why:  the flattener hands a DOM element's `slot` to its render's FIRST element only,
    *   so a rich dropdown item (`<b>Bold</b> one`, assigned to its row's named slot)

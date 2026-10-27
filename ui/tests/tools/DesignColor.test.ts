@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { DesignColor } from "spell-ui/tools/DesignColor"
+import { DesignColor } from "spell/ui/tools/DesignColor"
 
 describe("DesignColor.parse()", () => {
   test("parses and writes hex", () => {

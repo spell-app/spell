@@ -2,12 +2,12 @@
 
 import { beforeAll, describe, expect, it } from "vite-plus/test"
 
-import { StaticRender } from "spell-ui/static"
-import { UIItem } from "spell-ui/components/ui-item/UIItem"
-import { UIDropdown } from "spell-ui/components/ui-dropdown/UIDropdown"
+import { StaticRender } from "spell/ui/static"
+import { UIItem } from "spell/ui/components/ui-item/UIItem"
+import { UIDropdown } from "spell/ui/components/ui-dropdown/UIDropdown"
 
 /**
- * `<ui-dropdown>` in a static server render (`spell-ui/static`):  the combobox, the menu CLOSED but its rows rendered
+ * `<ui-dropdown>` in a static server render (`spell/ui/static`):  the combobox, the menu CLOSED but its rows rendered
  * from the `<ui-item>` children (their text is in the page), and the value as hidden inputs.
  */
 describe("<ui-dropdown> static render", () => {

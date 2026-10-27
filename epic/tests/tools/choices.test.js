@@ -16,8 +16,8 @@ import {
   isChoicesPage,
   readRows,
   rowsFile
-} from "spell-epic/tools/choices.js"
-import { answerFile, createPage as createDetailsPage, waitForAnswer } from "spell-epic/tools/details.js"
+} from "spell/epic/tools/choices.js"
+import { answerFile, createPage as createDetailsPage, waitForAnswer } from "spell/epic/tools/details.js"
 
 let docs
 

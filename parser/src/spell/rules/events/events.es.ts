@@ -5,9 +5,9 @@
  * - Registered in the same order as `events.en.ts`:  a tie between two rules goes to the first.
  * - Its tests compile to the same javascript as English's:  the same program, said in Spanish.
  */
-import { P } from "spell-parser/parser"
-import { SpellParser } from "spell-parser/spell/SpellParser"
-import { Synonyms } from "spell-parser/spell/rules/expressions"
+import { P } from "spell/parser/parser"
+import { SpellParser } from "spell/parser/spell/SpellParser"
+import { Synonyms } from "spell/parser/spell/rules/expressions"
 
 import { DeclareEvent } from "./DeclareEvent"
 import { EventWords } from "./EventWords"

@@ -3,7 +3,7 @@
  * - Data only:  nothing here runs.  `<epic-section>` reads it too:  it lists the new items waiting to be made.
  */
 
-import type { NewKind } from "spell-epic/review"
+import type { NewKind } from "spell/epic/review"
 
 import type { epicNewItemVocabulary } from "./EpicNewItem.en"
 

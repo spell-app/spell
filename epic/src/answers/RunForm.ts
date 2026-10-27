@@ -9,7 +9,7 @@ import type {
   RunStatus
 } from "spell/server/runs/runs.types"
 
-import { PageStore, ServerLink, clockOf, sentence, type ServerLinkOptions } from "spell-epic/review"
+import { PageStore, ServerLink, clockOf, sentence, type ServerLinkOptions } from "spell/epic/review"
 
 import { DraftSaver } from "./DraftSaver"
 import { RUN_POLL_MS, RUN_SAVE_MS, RUNS_API, type SendFill } from "./answers.types"
@@ -38,7 +38,7 @@ import { RUN_POLL_MS, RUN_SAVE_MS, RUNS_API, type SendFill } from "./answers.typ
  *   - a reload never takes back what he gave and hasn't saved yet:  his rows win over the server's
  * - Node-safe at import:  no `window` / `document` touched until `forPage()` or `watch()`;  `fetch` comes in through
  *   `ServerLinkOptions`, so tests stub it.
- * - Position in the import graph:  `spell-epic/review` (the link), `spell-epic/dates`, its peers, and the kit's run
+ * - Position in the import graph:  `spell/epic/review` (the link), `spell/epic/dates`, its peers, and the kit's run
  *   types (`spell/server/runs/runs.types`, types only).  NEVER imports Solid or Spell UI.
  ****************/
 export class RunForm extends PageStore {

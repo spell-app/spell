@@ -1,4 +1,4 @@
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /**
  * `<ui-cell>` in Spanish:  `<es-celda>`, with the names and texts only it uses (from `UICell.en.ts`).

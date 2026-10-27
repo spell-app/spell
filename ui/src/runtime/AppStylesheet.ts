@@ -1,4 +1,4 @@
-import { after, Warnings, type CancelablePromise } from "spell-ui/util"
+import { after, Warnings, type CancelablePromise } from "spell/ui/util"
 
 import { answerOf, APP_STYLESHEET_ID, fetchText, LAYER_ORDER, type FetchFailure } from "./runtime.types"
 

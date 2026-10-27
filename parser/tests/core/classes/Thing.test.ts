@@ -1,7 +1,7 @@
 import { describe, test, expect, vi, afterEach } from "vite-plus/test"
 
 import { observe } from "spell/util"
-import { core, Thing, List } from "spell-parser/core"
+import { core, Thing, List } from "spell/parser/core"
 
 /**
  * A thing written the way spell compiles one:  each property a getter / setter pair over `getProp` / `setProp`.

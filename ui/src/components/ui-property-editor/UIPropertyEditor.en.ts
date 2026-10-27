@@ -9,9 +9,9 @@
  * - The shape is `E.ComponentVocabulary`.  Pure data:  `import type` only (`passThrough()` too).
  */
 
-import type { E } from "spell-ui/core"
-import { formVocabulary } from "spell-ui/components/ui-form/UIForm.en"
-import { sectionVocabulary } from "spell-ui/components/ui-section/UISection.en"
+import type { E } from "spell/ui/core"
+import { formVocabulary } from "spell/ui/components/ui-form/UIForm.en"
+import { sectionVocabulary } from "spell/ui/components/ui-section/UISection.en"
 import { passThrough } from "./UIPropertyEditor.types"
 
 /** The editor's own attributes. */

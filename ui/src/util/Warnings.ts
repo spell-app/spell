@@ -6,7 +6,7 @@
  * - Message format, WWOD §19 › "Message format":  `[spell-ui] <source>:  <what happened>`, then the data as
  *   separate arguments, so the console shows them as objects.  `source` names who warns:  a tag (`<ui-root>`), a
  *   runtime service (`UI.icons`), a method (`Converters.enumValue()`).
- * - Plain DOM-free JS:  no Solid, no runtime;  lives in `spell-ui/util`, so `core` and every lazy chunk can use it.
+ * - Plain DOM-free JS:  no Solid, no runtime;  lives in `spell/ui/util`, so `core` and every lazy chunk can use it.
  * - STATIC and instance-free on purpose:  nothing to configure per caller.
  ****************/
 export class Warnings {

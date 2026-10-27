@@ -1,4 +1,4 @@
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /**
  * `<ui-calendar>` in Spanish:  `<es-calendario>`, with the names and texts only it uses (from `UICalendar.en.ts`).

@@ -1,7 +1,7 @@
 import { For, Show, createEffect, createMemo, createSignal } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
-// Import directly, NOT through the `spell-app/lsp` barrel, which would pull the language service into the bundle.
+// Import directly, NOT through the `spell/app/lsp` barrel, which would pull the language service into the bundle.
 import {
   SCOPE_MEMBER_GROUPS,
   type ScopeDetails,
@@ -11,9 +11,9 @@ import {
   type SetDescriptionParams,
   firstLine,
   scopeSegment
-} from "spell-app/lsp/lsp.types"
-import type { ScopeOrder } from "spell-app/app/ui/ui.types"
-import { appTexts, type AppTextKey } from "spell-app/app/ui/AppTexts"
+} from "spell/app/lsp/lsp.types"
+import type { ScopeOrder } from "spell/app/app/ui/ui.types"
+import { appTexts, type AppTextKey } from "spell/app/app/ui/AppTexts"
 import { Markdown } from "./Markdown"
 
 /****************

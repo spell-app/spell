@@ -6,8 +6,8 @@
  * - Pure data:  node reads it (`yarn site:data`, `yarn gen:root`).
  */
 
-import type { E } from "spell-ui/core"
-import { rootVocabulary } from "spell-ui/components/ui-root/UIRoot.en"
+import type { E } from "spell/ui/core"
+import { rootVocabulary } from "spell/ui/components/ui-root/UIRoot.en"
 
 /****************
  * ### `pageOwnVocabulary`

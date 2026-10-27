@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { I18n } from "spell-ui/runtime/I18n"
+import { I18n } from "spell/ui/runtime/I18n"
 
 ////////////////
 // ## Strings

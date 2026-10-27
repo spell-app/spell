@@ -1,13 +1,13 @@
 import { describe, test, expect, beforeEach } from "vite-plus/test"
 import { renderToString } from "@solidjs/web"
 
-import { core, Thing, List } from "spell-parser/core"
-import type { ThingOrder } from "spell-app/app/ui/ui.types"
-import type { SP } from "spell-parser/spell"
-import { ThingExplorer, memberWords } from "spell-app/app/solid/ThingExplorer"
+import { core, Thing, List } from "spell/parser/core"
+import type { ThingOrder } from "spell/app/app/ui/ui.types"
+import type { SP } from "spell/parser/spell"
+import { ThingExplorer, memberWords } from "spell/app/app/solid/ThingExplorer"
 
 /**
- * The Solid `<ThingExplorer>` drawn as HTML -- the same cases as React's `spell-app/app/ui/ThingExplorer.test.tsx`.
+ * The Solid `<ThingExplorer>` drawn as HTML -- the same cases as React's `app/app/ui/ThingExplorer.test.tsx`.
  * - Node, so Solid's SERVER build:  `renderToString`, no DOM.  The explorer reads things synchronously, through
  *   `tracked()`, so we draw `<ThingExplorer>` itself -- no snapshot step.
  * - Live updates need Solid's client build:  `ThingExplorer.browser.test.tsx`.

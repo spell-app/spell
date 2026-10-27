@@ -6,10 +6,10 @@ import { checkoutOf } from "spell/server/checkout"
 import { Git } from "spell/server/Git"
 import { RealPath } from "spell/server/RealPath"
 import { CLI } from "spell/cli"
-import { EpicConfig } from "spell-epic/config/EpicConfig"
-import { EpicRepo } from "spell-epic/config/EpicRepo"
-import { SessionFolders } from "spell-epic/config/SessionFolders"
-import { URGENT_STATES } from "spell-epic/list/EpicState"
+import { EpicConfig } from "spell/epic/config/EpicConfig"
+import { EpicRepo } from "spell/epic/config/EpicRepo"
+import { SessionFolders } from "spell/epic/config/SessionFolders"
+import { URGENT_STATES } from "spell/epic/list/EpicState"
 
 import {
   EXIT,
@@ -34,7 +34,7 @@ import { LeftoverFolders } from "./LeftoverFolders"
 import { MainMerge } from "./MainMerge"
 import { Sessions } from "./Sessions"
 import { Shared } from "./Shared"
-import { tsxImports } from "spell-epic/tools/packageDir"
+import { tsxImports } from "spell/epic/tools/packageDir"
 
 /****************
  * ### `Worktrees`
@@ -576,7 +576,7 @@ export class Worktrees {
   }
 
   /**
-   * What epic page `file`'s state is read from (`spell-epic/list/EpicState` `EpicFacts`),
+   * What epic page `file`'s state is read from (`spell/epic/list/EpicState` `EpicFacts`),
    * from its skeleton's markup, with no parsing library (`PlanFacts`).
    * - `phases`:  each `<epic-phase status>`
    * - `updated`, `future`, `standing`:  `<epic-page updated future standing>`

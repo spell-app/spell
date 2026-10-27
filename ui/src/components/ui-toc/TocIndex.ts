@@ -1,6 +1,6 @@
-// `spell-ui/util` by name, never the `spell-ui/core` entry:  node scripts load this file (see the class docs)
-import { beforeNextPaint, slug } from "spell-ui/util"
-import * as UIT from "spell-ui/components/components.types"
+// `spell/ui/util` by name, never the `spell/ui/core` entry:  node scripts load this file (see the class docs)
+import { beforeNextPaint, slug } from "spell/ui/util"
+import * as UIT from "spell/ui/components/components.types"
 import { PageOutline } from "./PageOutline"
 import {
   EXAMPLE_TAG,
@@ -18,7 +18,7 @@ import {
  * ### `TocIndex`
  * The page side of `<ui-toc>`:  which content it follows, the sections and entries in it, the one in view.
  * - Plain DOM, no Solid:  node scripts load it by path (`scripts/site-sections.ts`, `src/tools/SiteCheck.ts`),
- *   so it NEVER imports a value from `spell-ui/core`.
+ *   so it NEVER imports a value from `spell/ui/core`.
  * - Static only:  pure reads (and id writes) of the DOM it's given.
  * - Entries form a tree:  level 2 headings and top-level `<ui-section>`s,
  *   then what's under each (examples, level 3 headings, nested sections), as deep as the sections nest.

@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { APP_TEXTS } from "spell-app/app/ui/AppTexts.en"
-import { appTexts } from "spell-app/app/ui/AppTexts"
+import { APP_TEXTS } from "spell/app/app/ui/AppTexts.en"
+import { appTexts } from "spell/app/app/ui/AppTexts"
 
 /**
  * The editor's texts in English, under node:  no Spell UI runtime, so `appTexts` reads `APP_TEXTS` itself.

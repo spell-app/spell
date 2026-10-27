@@ -1,5 +1,5 @@
 /**
- * Shared types for `spell-ui/styles`:  the shapes of the global scales in `styles.en.ts`, and of the sheet
+ * Shared types for `spell/ui/styles`:  the shapes of the global scales in `styles.en.ts`, and of the sheet
  * declarations `StyleGenerator` writes and `ComponentTokens` reads.
  * - The BOTTOM of the folder's import graph:  `import type` only (the vocabulary, `Prettify`), so it erases
  *   completely;  node reads it with the vocabulary (`yarn gen:styles`).
@@ -9,7 +9,7 @@
  *   is one vocabulary entry plus `yarn gen:styles` -- no type to update by hand.
  */
 
-import type { Prettify } from "spell-ui/util"
+import type { Prettify } from "spell/ui/util"
 import type {
   borderAlphas,
   breakpoints,

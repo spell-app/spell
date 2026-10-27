@@ -1,6 +1,6 @@
 import type { JSX } from "@solidjs/web"
 
-import { E } from "spell-ui/core"
+import { E } from "spell/ui/core"
 import { EmojiData } from "./EmojiData"
 import { emojiVocabulary } from "./UIEmoji.en"
 
@@ -59,7 +59,7 @@ export class UIEmoji extends E.UIComponent<typeof emojiVocabulary> {
 
   /**
    * Load every emoji `html` names (`<ui-emoji name="...">`), so a static server render of it draws them.
-   * - MUST be awaited before `StaticRender.fragment(html)` / `page(html)` (`spell-ui/static`):
+   * - MUST be awaited before `StaticRender.fragment(html)` / `page(html)` (`spell/ui/static`):
    *   that render is synchronous and draws only names already loaded (`EmojiData.peek()`);
    *   a browser loads them after first paint instead.
    * - In every name set that ships:  which one an element uses depends on its `<ui-root emoji>`, unknown in markup.

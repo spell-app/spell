@@ -5,8 +5,8 @@
  * - Change it, then `spell pack build epics`:  the pack's catalog is read from here.
  */
 
-import type { EpicVocabulary } from "spell-epic/definitions"
-import { PageStages } from "spell-epic/phases"
+import type { EpicVocabulary } from "spell/epic/definitions"
+import { PageStages } from "spell/epic/phases"
 
 /****************
  * ### `<epic-page>`
@@ -207,7 +207,7 @@ export const epicPageVocabulary = {
     {
       name: "state",
       description:
-        "The step label while the epic has a state, its icon and colour the state's (`spell-epic/list/EpicState`):  " +
+        "The step label while the epic has a state, its icon and colour the state's (`spell/epic/list/EpicState`):  " +
         "in progress (blue half circle), errors (red:  every phase done, items need you), paused (grey:  phases " +
         "left, untouched for days);  why on hover.  None for a future epic or a done one:  FUTURE or DONE says so."
     },

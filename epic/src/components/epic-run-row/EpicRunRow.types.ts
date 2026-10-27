@@ -6,7 +6,7 @@
 
 import type { RunOutcome } from "spell/server/runs/runs.types"
 
-import type { EpicJSXAttributes } from "spell-epic/components/epic-page/EpicPage.types"
+import type { EpicJSXAttributes } from "spell/epic/components/epic-page/EpicPage.types"
 
 /** A row answered:  the event its owner hears and saves on (`@E.on(RUN_ANSWER)`). */
 export const RUN_ANSWER = "epic-run-answered"

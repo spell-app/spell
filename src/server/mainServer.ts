@@ -154,7 +154,7 @@ export function worktreePath(file: string): WorktreePath | undefined {
 export type WorktreePath = { main: string; root: string; worktree: string; path: string[] }
 
 /**
- * Where the main page server lists the running epics:  spell-epic's route module answers it (`spell-epic/src/list/runningRoutes.ts`).
+ * Where the main page server lists the running epics:  spell-epic's route module answers it (`epic/src/list/runningRoutes.ts`).
  * - here, not imported from epics:  this package is a leaf
  */
 export const RUNNING_EPICS_API = "/api/epics/running"

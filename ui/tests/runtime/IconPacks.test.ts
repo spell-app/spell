@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vite-plus/test"
 
-import { BuiltInPacks } from "spell-ui/icons"
-import { IconPacks } from "spell-ui/runtime/IconPacks"
+import { BuiltInPacks } from "spell/ui/icons"
+import { IconPacks } from "spell/ui/runtime/IconPacks"
 
 /** The stroke-style (Lucide-like) fixture pack:  `bell`, `sun` (aliases `light`, `day`), 24 x 24. */
 const STROKE = new URL("/src/test-helpers/fixtures/stroke-pack/pack.js", location.href).href

@@ -4,7 +4,7 @@
  * - Change it, then `spell pack build epics`:  the pack's catalog is read from here.
  */
 
-import type { EpicVocabulary } from "spell-epic/definitions"
+import type { EpicVocabulary } from "spell/epic/definitions"
 
 import { NEW_ITEM_KINDS, NEW_ITEM_TEXTS, NEW_KIND_TEXTS } from "./EpicNewItem.types"
 

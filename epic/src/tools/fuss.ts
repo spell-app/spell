@@ -39,7 +39,7 @@ import { extname, join, relative, resolve } from "node:path"
 import { escapeRegExp } from "spell/util/string.ts"
 import { checkoutOf } from "spell/server/checkout"
 import { Git } from "spell/server/Git"
-import { EpicConfig } from "spell-epic/config/EpicConfig.ts"
+import { EpicConfig } from "spell/epic/config/EpicConfig.ts"
 
 /**
  * The checker:  finds the misses in a file's text, and the files to check.
@@ -307,9 +307,9 @@ function pathWhy(paths: string[], format: Format): string {
 /**
  * Whether `token` is a file path a reader would open, not a name:
  * - a file in a folder (`tools/fuss.ts`), or a file and its line (`fuss.ts:12`)
- * - 3 or more parts from a top folder of the checkout or a package (`spell-ui/src/core`)
+ * - 3 or more parts from a top folder of the checkout or a package (`ui/src/core`)
  * - NOT:
- *   - a folder alone (`src/`, `src/tools/`), a package (`spell-ui`), an import name (`spell-epic/tool`)
+ *   - a folder alone (`src/`, `src/tools/`), a package (`spell-ui`), an import name (`spell/epic/tool`)
  *   - a URL, a route (`/api/review`), a date (`10/9/26`), a file alone (`fuss.ts`), or words like "read/write/check"
  */
 function isFilePath(token: string): boolean {

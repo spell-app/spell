@@ -1,6 +1,6 @@
 import { proto } from "spell/util"
-import { P } from "spell-parser/parser"
-import { Wording } from "spell-parser/spell/rules/expressions"
+import { P } from "spell/parser/parser"
+import { Wording } from "spell/parser/spell/rules/expressions"
 
 /**
  * `type_specifier_enum` rule:  specifies a property's allowed values as an enumeration,

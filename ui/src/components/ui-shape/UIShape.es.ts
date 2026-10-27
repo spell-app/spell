@@ -1,4 +1,4 @@
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /**
  * `<ui-shape>` in Spanish:  `<es-forma>`, with the names and texts only it uses (from `UIShape.en.ts`).

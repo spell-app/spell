@@ -1,8 +1,8 @@
 import { For, Show } from "solid-js"
 import { isServer, type JSX } from "@solidjs/web"
 
-import { E, UI, UIT } from "spell-ui/core"
-import { F } from "spell-ui/forms"
+import { E, UI, UIT } from "spell/ui/core"
+import { F } from "spell/ui/forms"
 import { calendarVocabulary } from "./UICalendar.en"
 import { CalendarFallback } from "./UICalendar.fallback"
 import { CalendarDates } from "./CalendarDates"
@@ -17,7 +17,7 @@ import {
   type Vocabulary
 } from "./UICalendar.types"
 
-import inputCSS from "spell-ui/components/ui-input/UIInput.css?inline"
+import inputCSS from "spell/ui/components/ui-input/UIInput.css?inline"
 import calendarCSS from "./UICalendar.css?inline"
 
 /****************
@@ -546,7 +546,7 @@ export class UICalendar extends F.FormComponent<Vocabulary> {
     )
   }
 
-  /** Server render only (`spell-ui/static`):  the field's `STATIC_CONTROL` mark;  `{}` in a browser. */
+  /** Server render only (`spell/ui/static`):  the field's `STATIC_CONTROL` mark;  `{}` in a browser. */
   private get staticControl(): Record<string, unknown> {
     return isServer ? { [UIT.STATIC_CONTROL]: "" } : {}
   }
@@ -785,7 +785,7 @@ export class UICalendar extends F.FormComponent<Vocabulary> {
   /**
    * Load `Temporal` before a static server render, so its pickers render in full (header, grid, cells):
    * the render is synchronous, and node has no `Temporal`, so `UI.i18n` loads `temporal-polyfill` (`loadTemporal()`).
-   * - Called by `StaticRender.prepare(html)` (`spell-ui/static`) for a page with this tag.
+   * - Called by `StaticRender.prepare(html)` (`spell/ui/static`) for a page with this tag.
    *   NEVER in a browser, where the constructor loads it after first paint.
    * - STATIC:  it runs before any calendar exists (`SSR.StaticPreload`).
    * - NOTE: "today" (highlight, starting page) is then the RENDER's day.

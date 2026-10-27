@@ -72,8 +72,8 @@ import { waitUntil } from "spell/util/timing"
 // Import directly:  through the `SRV` barrel, the Linker's HTML parser (~700 KB) lands in this bundle (I58)
 import { serverAt } from "spell/server/PidFile"
 
-import { EpicConfig } from "spell-epic/config/EpicConfig"
-import { RepoList } from "spell-epic/server/RepoList"
+import { EpicConfig } from "spell/epic/config/EpicConfig"
+import { RepoList } from "spell/epic/server/RepoList"
 
 import { fileForPath, planDocsOf, samePage, stamped } from "./docUrls"
 

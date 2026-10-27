@@ -1,15 +1,15 @@
 import { beforeEach, describe, expect, it } from "vite-plus/test"
 
-import { UI, type VisibilityCalculations } from "spell-ui/runtime"
-import { nextFrame } from "spell-ui/util"
+import { UI, type VisibilityCalculations } from "spell/ui/runtime"
+import { nextFrame } from "spell/ui/util"
 import { expectAccessible } from "spell/test-helpers/A11y"
 
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import { Fixture } from "spell/test-helpers/Fixture"
 import type { DOMElement } from "spell/element"
 
-import "spell-ui/components/ui-visibility"
-import "spell-ui/components/ui-segment"
+import "spell/ui/components/ui-visibility"
+import "spell/ui/components/ui-segment"
 
 /** Element-markup rewrites of every example, by path. */
 const EXAMPLES = import.meta.glob<string>("/src/components/ui-visibility/examples/elements/*.html", {

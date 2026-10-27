@@ -1,4 +1,4 @@
-import { P } from "spell-parser/parser"
+import { P } from "spell/parser/parser"
 
 /**
  * `rule_suggestion` rule:  what to say when a property's rule is broken, in place of the rule's own words.

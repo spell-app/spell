@@ -1,7 +1,7 @@
 import { describe, test, expect } from "vite-plus/test"
 
 import { thing } from "spell/util"
-import { Thing, List } from "spell-parser/core"
+import { Thing, List } from "spell/parser/core"
 
 /**
  * Construction order:  `create()` runs exactly once per instance, and never before a field it sets is initialized.

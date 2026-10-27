@@ -359,7 +359,7 @@ export type ElementSetup = {
    * - Default none.
    * - For a value that never changes;  one that follows state is an `@aria` getter, which wins once its effect runs
    *   (`<ui-card>`'s role follows its group).
-   * - A server render (`spell-ui/static`) gets it too:  a `listitem` becomes an `<li>`.
+   * - A server render (`spell/ui/static`) gets it too:  a `listitem` becomes an `<li>`.
    */
   aria: Readonly<Partial<Record<AriaName, string>>>
 
@@ -528,7 +528,7 @@ export const ERRORED_STATE = "errored"
 /**
  * What a component set's runtime hands spell-element as it loads (`SpellSolid.install()`):
  * the services the element bases call, so spell-element never imports the set that draws with them.
- * - Spell UI's:  `packages/ui/src/elements/SpellUISettings.ts`, installed as `spell-ui/core` loads.
+ * - Spell UI's:  `packages/ui/src/elements/SpellUISettings.ts`, installed as `spell/ui/core` loads.
  * - Every element of the page uses the same ones:  a page has one spell-element.
  */
 export type SpellSolidSettings = {

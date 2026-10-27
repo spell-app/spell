@@ -20,7 +20,7 @@ import { E } from "spell/element"
  * - One instance per tag;  the canonical tag and each translated alias get their own.
  * - The vocabulary layer itself is the page's runtime's:  Spell UI's, reached through `SpellSolid.settings.words`.
  *   - the registry of names, the value sets, the converters, the class words
- * - No Solid, no DOM:  so the server render (`spell-ui/static`) builds one in node.
+ * - No Solid, no DOM:  so the server render (`spell/ui/static`) builds one in node.
  ****************/
 export class ElementDefinition {
   /** Canonical vocabulary. */

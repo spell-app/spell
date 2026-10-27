@@ -4,10 +4,10 @@ import { fileURLToPath } from "node:url"
 import JSON5 from "json5"
 import { describe, expect, test } from "vite-plus/test"
 
-import { SP } from "spell-parser/spell"
-import { NamesGlossary } from "spell-parser/spell/translate/NamesGlossary"
-import { TranslationNames } from "spell-parser/spell/translate/TranslationNames"
-import type { GlossaryData, NamesData } from "spell-parser/spell/translate/translate.types"
+import { SP } from "spell/parser/spell"
+import { NamesGlossary } from "spell/parser/spell/translate/NamesGlossary"
+import { TranslationNames } from "spell/parser/spell/translate/TranslationNames"
+import type { GlossaryData, NamesData } from "spell/parser/spell/translate/translate.types"
 
 /**
  * The shared names glossary (epic `spanish` P26):  names other projects chose, looked up before asking `claude`,
@@ -136,7 +136,7 @@ describe("NamesGlossary:  names every project shares", () => {
   })
 
   test("Spanish's glossary reads, every entry says where it came from, and Owen's Solitario choices are in it", () => {
-    const file = fileURLToPath(import.meta.resolve("spell-parser/spell/languages/es/glossary.json5"))
+    const file = fileURLToPath(import.meta.resolve("spell/parser/spell/languages/es/glossary.json5"))
     const data = JSON5.parse(readFileSync(file, "utf8")) as GlossaryData
     const entries = [...Object.values(data.names ?? {}), ...Object.values(data.phrases ?? {})]
     expect(entries.every((entry) => entry.name && /^(reviewed|seed:|learned:|drafted)/.test(entry.from))).toBe(true)

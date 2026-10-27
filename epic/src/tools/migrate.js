@@ -2,9 +2,9 @@
  * MIGRATE the docs' pages, by page KIND (epic `epic-workflow`, P8;  J44):
  * each kind's named, dated, idempotent steps, oldest first, on each page of that kind, under its lock;
  * a report per page that changed.
- * - the epic page's steps are the `epic` tool's (`spell-epic/tool/migrations`, `Migrations`):
+ * - the epic page's steps are the `epic` tool's (`spell/epic/tool/migrations`, `Migrations`):
  *   this file holds the OTHER kinds', and `epic migrate` runs it as a child for them (`MigrateCommands`)
- * - `KINDS`:  every page kind, the same list as `PAGE_KINDS` in `spell-epic/tool/migrations` (`migrate.test.ts` checks)
+ * - `KINDS`:  every page kind, the same list as `PAGE_KINDS` in `spell/epic/tool/migrations` (`migrate.test.ts` checks)
  * - `pageKind()`:  which kind a page is, from where it lives and what it loads
  * - `STEPS`:  the steps, as steps of their kind:
  *   - `components-not-markup`:  `to-components.js`, a page's bare tables and `<details>` asides in components
@@ -33,20 +33,20 @@ import { basename, dirname, isAbsolute, join, relative, resolve, sep } from "nod
 import { parseHTML } from "linkedom"
 
 import { FileLock } from "spell/server/FileLock"
-import { parseVerbArgs, stringFlag } from "spell-epic/command/command.types.ts"
-import { EpicConfig } from "spell-epic/config/EpicConfig.ts"
-import { DataFile } from "spell-epic/data/DataFile.ts"
-import { engineUrlFor } from "spell-epic/server/server.types.ts"
+import { parseVerbArgs, stringFlag } from "spell/epic/command/command.types.ts"
+import { EpicConfig } from "spell/epic/config/EpicConfig.ts"
+import { DataFile } from "spell/epic/data/DataFile.ts"
+import { engineUrlFor } from "spell/epic/server/server.types.ts"
 import { rowsFile } from "./choices.js"
 import { listPages } from "./details.js"
 import { findPages, formattedAlready, pageFile, ROOT, serialize, tidy } from "./pages.js"
 import { convertMarkup, hasMarkup } from "./to-components.js"
 import { linkerFor, linkerUnder } from "./doc-links.js"
-import { RootLinks } from "spell-epic/tool/migrations/RootLinks"
-import { RepoList } from "spell-epic/server/RepoList"
+import { RootLinks } from "spell/epic/tool/migrations/RootLinks"
+import { RepoList } from "spell/epic/server/RepoList"
 
 /**
- * Every page kind, by its key:  `spell-epic/tool/migrations` `PAGE_KINDS`, kept the same.
+ * Every page kind, by its key:  `spell/epic/tool/migrations` `PAGE_KINDS`, kept the same.
  * - keys, typed on the command line (`epic migrate detail`);  what's printed is the kind's name (`KIND_NAMES`)
  */
 export const KINDS = [

@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { BuiltInPacks } from "spell-ui/icons/BuiltInPacks"
+import { BuiltInPacks } from "spell/ui/icons/BuiltInPacks"
 
 describe("BuiltInPacks.url()", () => {
   test("`assets` re-points built-in packs:  `<assets>icon-packs/<id>/pack.js`", () => {

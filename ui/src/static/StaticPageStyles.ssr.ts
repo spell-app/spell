@@ -1,6 +1,6 @@
 import postcss, { type AtRule, type Rule } from "postcss"
 
-import { SSR } from "spell-ui/static"
+import { SSR } from "spell/ui/static"
 
 /****************
  * ### `StaticPageStyles`
@@ -16,7 +16,7 @@ import { SSR } from "spell-ui/static"
  *   unlayered page rule beats every `ui.*` layer.
  * - NOTE: approximate for `::part()`:  the shadow boundary limited it to H's own parts, `H [part~="p"]` also
  *   reaches parts of components nested inside H.
- * - Node only (`spell-ui/static`, postcss):  strings in, strings out, no DOM;  NEVER imported by a component or `spell-ui`.
+ * - Node only (`spell/ui/static`, postcss):  strings in, strings out, no DOM;  NEVER imported by a component or `spell-ui`.
  ****************/
 export class StaticPageStyles {
   /** `css` rewritten;  `tags`:  rendered tag => kind (`ui-card` => `card`). */

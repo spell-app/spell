@@ -1,7 +1,7 @@
 import { withoutAccents } from "spell/util/string"
-import { SP } from "spell-parser/spell"
-import { ROOT_CATALOG } from "spell-ui/components/ui-root/UIRoot.catalog"
-import { es } from "spell-ui/components/components.es"
+import { SP } from "spell/parser/spell"
+import { ROOT_CATALOG } from "spell/ui/components/ui-root/UIRoot.catalog"
+import { es } from "spell/ui/components/components.es"
 
 /**
  * Spell UI as a spellx drawing names its components, bare (epic `elemental-spell` P7, Q46):

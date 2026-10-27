@@ -7,7 +7,7 @@ import { describe, expect, test } from "vite-plus/test"
  * `package.json`'s `exports`:  an explicit key for EVERY folder barrel (`src/<folder>/index.ts`), before `"./*"`
  * (epic `repo-split` P14).
  * - Why:  `tsx`, run from ANOTHER repo (through the `node_modules/spell-ui` link), finds a file without its extension
- *   but not a folder's `index`;  so `spell-ui/property` needs its own key, where `spell-ui/property/PropertyEditorPages`
+ *   but not a folder's `index`;  so `spell/ui/property` needs its own key, where `spell/ui/property/PropertyEditorPages`
  *   doesn't.
  * - The package's own barrel, `src/index.ts`, is `"."`.
  * - A new family (`src/components/ui-<name>/`) or folder adds its key.

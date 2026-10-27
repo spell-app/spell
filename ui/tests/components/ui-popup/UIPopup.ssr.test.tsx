@@ -3,12 +3,12 @@
 import { parseHTML } from "linkedom"
 import { beforeAll, describe, expect, it } from "vite-plus/test"
 
-import { StaticRender } from "spell-ui/static"
-import { UIButton } from "spell-ui/components/ui-button/UIButton"
-import { UIPopup } from "spell-ui/components/ui-popup/UIPopup"
+import { StaticRender } from "spell/ui/static"
+import { UIButton } from "spell/ui/components/ui-button/UIButton"
+import { UIPopup } from "spell/ui/components/ui-popup/UIPopup"
 
 /**
- * `<ui-popup>` rendered statically (`spell-ui/static`):  a hidden popover box right after its target,
+ * `<ui-popup>` rendered statically (`spell/ui/static`):  a hidden popover box right after its target,
  * as phrasing content, related to the target by id as the element's ARIA does.
  */
 describe("<ui-popup> static render", () => {

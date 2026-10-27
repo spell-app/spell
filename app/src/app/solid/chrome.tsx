@@ -1,7 +1,7 @@
 import { Show, omit } from "solid-js"
 
-import type { UIDropdownJSXAttributes, UIItemJSXAttributes, UIMenuJSXAttributes } from "spell-ui/jsx"
-import { AppMark, on } from "spell-app/app/solid"
+import type { UIDropdownJSXAttributes, UIItemJSXAttributes, UIMenuJSXAttributes } from "spell/ui/jsx"
+import { AppMark, on } from "spell/app/app/solid"
 
 import "./chrome.css"
 
@@ -10,7 +10,7 @@ import "./chrome.css"
 //  - Menus are `<ui-menu>` of `<ui-item>`s;  a sub-menu is a `<ui-menu position>` inside one.
 //  - The `<ui-*>` elements themselves are `display: contents`:
 //    style their boxes with `::part(menu)` / `::part(item)`, never the element.
-//  - Same names and props as the React app's `chrome.tsx` (`spell-app/app/ui/chrome.tsx`) had.
+//  - Same names and props as the React app's `chrome.tsx` (`app/app/ui/chrome.tsx`) had.
 //
 
 /****************

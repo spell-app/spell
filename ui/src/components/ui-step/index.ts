@@ -1,9 +1,9 @@
 /**
  * The step family:  defines `<ui-steps>` and `<ui-step>`, and exports their components, `UISteps` and `UIStep`.
  * - SIDE EFFECT:  importing it defines the tags.
- * - Also the library's `spell-ui/ui-step` entry (its size is in `notes/report.md`).
+ * - Also the library's `spell/ui/ui-step` entry (its size is in `notes/report.md`).
  * - NOTE: slotted step content is the generic parts (`<ui-content>`, `<ui-title>`, `<ui-description>`):
- *   load `spell-ui/ui-parts` for them;  the `header` / `description` shorthands need nothing more.
+ *   load `spell/ui/ui-parts` for them;  the `header` / `description` shorthands need nothing more.
  */
 
 import { UISteps } from "./UISteps"

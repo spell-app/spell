@@ -2,11 +2,11 @@ import { describe, expect, test, vi } from "vite-plus/test"
 
 import { A11y } from "spell/test-helpers/A11y"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
-import { UI } from "spell-ui/core"
+import { UI } from "spell/ui/core"
 import type { DOMElement, UIComponent } from "spell/element"
-import type { UISearch } from "spell-ui/components/ui-search/UISearch"
+import type { UISearch } from "spell/ui/components/ui-search/UISearch"
 
-import "spell-ui"
+import "spell/ui"
 
 /**
  * The shared states every element takes, though its vocabulary may not name them

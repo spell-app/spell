@@ -1,6 +1,6 @@
 import { isServer } from "@solidjs/web"
 
-import { E } from "spell-ui/core"
+import { E } from "spell/ui/core"
 import type { SiteDataFile } from "./docs-components.types"
 import { SiteData } from "./SiteData"
 

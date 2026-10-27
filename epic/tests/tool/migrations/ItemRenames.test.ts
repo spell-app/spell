@@ -12,12 +12,12 @@ import { parseHTML } from "linkedom"
 import { afterEach, describe, expect, test, vi } from "vite-plus/test"
 
 import { SRV } from "spell/server"
-import { DataFile } from "spell-epic/data/DataFile"
-import { ContentRelink, ItemRenames, Migrations } from "spell-epic/tool/migrations"
-import { PlanDoc } from "spell-epic/tool/PlanDoc"
-import { PlanDocCommands } from "spell-epic/tool/PlanDocCommands"
-import { PlanDocFiles } from "spell-epic/tool/PlanDocFiles"
-import { ReviewInbox } from "spell-epic/tool/ReviewInbox"
+import { DataFile } from "spell/epic/data/DataFile"
+import { ContentRelink, ItemRenames, Migrations } from "spell/epic/tool/migrations"
+import { PlanDoc } from "spell/epic/tool/PlanDoc"
+import { PlanDocCommands } from "spell/epic/tool/PlanDocCommands"
+import { PlanDocFiles } from "spell/epic/tool/PlanDocFiles"
+import { ReviewInbox } from "spell/epic/tool/ReviewInbox"
 
 /** The step under test. */
 const STEP = Migrations.named("item-renames")!

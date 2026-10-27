@@ -1,6 +1,6 @@
 /**
  * Every name `<ui-dropdown>` uses:  tag, attributes (kind + allowed values), events, slots,
- * parts, states, texts.  Schema:  `ComponentVocabulary` (`spell-ui/vocabulary`).
+ * parts, states, texts.  Schema:  `ComponentVocabulary` (`spell/ui/vocabulary`).
  * - Class words come out through `ClassBuilder`, in Fomantic's grammar:
  *   `<ui-dropdown search selection pointing="top left">` => `ui search selection top left pointing dropdown`.
  *   `UIDropdown.css` keys on those words.
@@ -8,8 +8,8 @@
  *   slotted `<ui-item>`s or the `value` / `text` attributes carry what SSR must show.
  */
 
-import type { ComponentVocabulary } from "spell-ui/vocabulary"
-import * as UIT from "spell-ui/components/components.types"
+import type { ComponentVocabulary } from "spell/ui/vocabulary"
+import * as UIT from "spell/ui/components/components.types"
 
 /****************
  * ### `<ui-dropdown>`
@@ -226,7 +226,7 @@ export const dropdownVocabulary = {
       group: "form",
       kind: "json",
       reflect: false,
-      description: "Options as a PROPERTY:  `MenuOption[]` (`spell-ui/elements`);  added after slotted `<ui-item>`s."
+      description: "Options as a PROPERTY:  `MenuOption[]` (`spell/ui/elements`);  added after slotted `<ui-item>`s."
     }
   ],
   events: [

@@ -2,7 +2,7 @@
 
 import { defineConfig } from "@playwright/test"
 
-import { environment } from "spell-ui/tools/environment"
+import { environment } from "spell/ui/tools/environment"
 import { VisualSettings } from "./VisualSettings.ts"
 
 /**

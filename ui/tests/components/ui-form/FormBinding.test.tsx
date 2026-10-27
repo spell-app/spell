@@ -2,10 +2,10 @@ import { afterEach, describe, expect, it, vi } from "vite-plus/test"
 import { userEvent } from "vite-plus/test/browser"
 
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
-import type { DOMFormElement } from "spell-ui/components/ui-form/UIForm"
-import type { FormSaveDetail } from "spell-ui/components/components.types"
+import type { DOMFormElement } from "spell/ui/components/ui-form/UIForm"
+import type { FormSaveDetail } from "spell/ui/components/components.types"
 
-import "spell-ui"
+import "spell/ui"
 
 ////////////////
 // ## Helpers

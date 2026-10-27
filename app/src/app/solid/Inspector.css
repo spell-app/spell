@@ -8,7 +8,7 @@
  */
 
 /* Spell UI's breakpoints (`@custom-media`), inlined at build time */
-@import "spell-ui/styles/media.css";
+@import "spell/ui/styles/media.css";
 
 /* a card's inside, in the brand's theme:  filling its card */
 .Inspector {

@@ -2,8 +2,8 @@ import { parseHTML } from "linkedom"
 import { afterEach, beforeEach, describe, expect, test, vi } from "vite-plus/test"
 
 import { observe } from "spell/util"
-import { App, core, List, Thing } from "spell-parser/core"
-import { listenForUndoKeys } from "spell-parser/core/ui"
+import { App, core, List, Thing } from "spell/parser/core"
+import { listenForUndoKeys } from "spell/parser/core/ui"
 
 /**
  * Undo and redo in a running program (`undoing.ts`):  a card game, written the way compiled spell writes it,

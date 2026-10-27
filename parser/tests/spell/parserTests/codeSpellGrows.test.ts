@@ -1,7 +1,7 @@
 import { describe, test, expect } from "vite-plus/test"
 
-import { SP } from "spell-parser/spell"
-import { parseSpellProject, runSpellFiles } from "spell-parser/spell/test"
+import { SP } from "spell/parser/spell"
+import { parseSpellProject, runSpellFiles } from "spell/parser/spell/test"
 
 /**
  * What code spell learned so it can say all spellx can (epic `elemental-spell` P5):  each spellx tag has a twin line.

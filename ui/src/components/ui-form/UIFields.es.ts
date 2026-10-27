@@ -1,4 +1,4 @@
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /**
  * `<ui-fields>` in Spanish:  `<es-campos>`, with the names and texts only it uses (from `UIFields.en.ts`).

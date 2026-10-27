@@ -1,7 +1,7 @@
 /**
  * The English vocabulary of `<ui-image>`:  every name the tag uses.
  * - Its tag, attributes (each with its kind and allowed values), slots, parts and states.
- *   The shape is `E.ComponentVocabulary` (`spell-ui/vocabulary`).
+ *   The shape is `E.ComponentVocabulary` (`spell/ui/vocabulary`).
  * - The attributes become Fomantic's class words, in Fomantic's order (`ClassBuilder`):
  *   `<ui-image size="small" appearance="rounded" floated="right" vertical-align="top">` =>
  *   `ui small rounded right floated top aligned image`.
@@ -13,7 +13,7 @@
  * - NOT the generic content part `<ui-image>` of cards / items (`plan.md`):  those land with their owners.
  */
 
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /****************
  * ### `imageVocabulary`

@@ -1,5 +1,5 @@
-import { P } from "spell-parser/parser"
-import { SP } from "spell-parser/spell"
+import { P } from "spell/parser/parser"
+import { SP } from "spell/parser/spell"
 
 /**
  * The CODE SPELL a `.spellx` file means, as text (epic `elemental-spell` P8, Q70):
@@ -16,7 +16,7 @@ import { SP } from "spell-parser/spell"
  * - A drawing's markup as code spell writes it:  a bare component name as its tag (`<text>` => `<ui-text>`, through
  *   `componentTag`), each `</>` naming what it closes.
  * - Pure:  no scope, no rules;  only the language's spellx tokenizer and twin words.
- * - Above `spell-parser/spell` in the import graph, as the rest of `SX`.
+ * - Above `spell/parser/spell` in the import graph, as the rest of `SX`.
  */
 export class CodeSpellWriter {
   /**

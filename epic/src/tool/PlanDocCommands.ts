@@ -2,11 +2,11 @@ import { spawnSync } from "node:child_process"
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs"
 import { basename, dirname, join, relative, resolve } from "node:path"
 
-import { parseVerbArgs, stringFlag } from "spell-epic/command/command.types"
-import { WorkTime } from "spell-epic/command/WorkTime"
-import { Markup } from "spell-epic/markup"
-import { PageStages } from "spell-epic/phases"
-import { fromTemplate } from "spell-epic/tools/pages.js"
+import { parseVerbArgs, stringFlag } from "spell/epic/command/command.types"
+import { WorkTime } from "spell/epic/command/WorkTime"
+import { Markup } from "spell/epic/markup"
+import { PageStages } from "spell/epic/phases"
+import { fromTemplate } from "spell/epic/tools/pages.js"
 import {
   OPEN_KINDS,
   PlanDocError,
@@ -45,7 +45,7 @@ import { TestCommands } from "./TestCommands"
  * `<command> <name> ...`, the `epic` tool in its own order (`epic <verb> <epic>#<id>` turns into it:  `planDocArgs()`):
  * edit the structured parts of an epic page, `epics/<name>/<name>.plan.html`.
  * Used by the `/epic` skill and its agents.
- * - what's data:  `PLAN-DOC.md` beside this;  the elements:  `spell-epic/definitions`
+ * - what's data:  `PLAN-DOC.md` beside this;  the elements:  `spell/epic/definitions`
  * - Commands:  `create`, `add-phase`, `phase`, `rename`, `estimate`, `add`, `calm`, `decide`, `choose`, `close`,
  *   `cancel`, `reopen`, `commit`, `commits`, `log`, `bedtime`, `prompt`, `summary`, `docs`, `decisions`,
  *   `owns`, `lint`, `open`, `migrate`, `split`, `join`, `inbox`, `details`, `summarize`, `status`, `original`
@@ -71,7 +71,7 @@ import { TestCommands } from "./TestCommands"
  * - output goes straight to `process.stdout` / `stderr`,
  *   never `console.*`, which the `spell` CLI silences (`packages/cli/src/consoleGuard.ts`)
  *   - `run()` resolves to the exit code instead of exiting
- * - Node only:  NOT in the `spell-epic` barrel, imported by path (`spell-epic/tool/PlanDocCommands`).
+ * - Node only:  NOT in the `spell-epic` barrel, imported by path (`spell/epic/tool/PlanDocCommands`).
  *   - Runs the docs tools' scripts as children, as their command lines run them:
  *     the docs index, `check-spell.js`, `open.js`
  *   - Imports their helpers (`tools/pages.js` `fromTemplate()`).

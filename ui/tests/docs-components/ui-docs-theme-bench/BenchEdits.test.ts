@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { BenchEdits } from "spell-ui/docs-components/ui-docs-theme-bench/BenchEdits"
-import { BenchTokens } from "spell-ui/docs-components/ui-docs-theme-bench/BenchTokens"
-import type { BenchEditSet } from "spell-ui/docs-components/ui-docs-theme-bench/UIDocsThemeBench.types"
+import { BenchEdits } from "spell/ui/docs-components/ui-docs-theme-bench/BenchEdits"
+import { BenchTokens } from "spell/ui/docs-components/ui-docs-theme-bench/BenchTokens"
+import type { BenchEditSet } from "spell/ui/docs-components/ui-docs-theme-bench/UIDocsThemeBench.types"
 
 /** Two small theme files:  `base`, and `kid` on it. */
 const tokens = new BenchTokens({

@@ -18,10 +18,10 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 - How the kit finds them:  `package.json`'s `"spell": { "commands": "./src/cli/commands.ts" }`.
   - [commands.ts](commands.ts) adds each command to the `spell` program it's handed (commander), and nothing more.
   - It MUST load fast:  `spell help` loads every repo's list.
-    So each action imports its work when it runs:  `(await import("spell-ui/cli/iconCommand")).iconCommand(...)`.
+    So each action imports its work when it runs:  `(await import("spell/ui/cli/iconCommand")).iconCommand(...)`.
   - The kit's `spell commands` check reads its TEXT:  keep each name a literal at its `.command("...")` call,
     and each group (`pack`, `design`) a `const`.
-- The code:  this folder, imported as `spell-ui/cli/<file>`, by its package name (epic `repo-split` P14).
+- The code:  this folder, imported as `spell/ui/cli/<file>`, by its package name (epic `repo-split` P14).
   - Node code:  Spell UI's node settings type-check it (`tsconfig.node.json`).
   - Each command's work is `(args, options) => Promise<exitCode>`, run through the kit's `CLI.runCommand()`.
     A `CLI.CliError` prints its message, anything else its stack.
@@ -35,7 +35,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - `spell design`'s tools are other repos' scripts, RUN, never imported (`CLI.runTool()`):
     - Spell UI's own [design-build.ts](../../scripts/design-build.ts)
     - spell-brand's `design-bundle` / `design-check`
-    - spell-epic's [design.js](../../../spell-epic/src/tools/design.js)
+    - spell-epic's [design.js](../../../epic/src/tools/design.js)
 - `spell pack create <name>` makes `spell-<name>/`, a pack that is a repo of its own, laid out as spell-brand is.
   - From [templates/](templates/README.md);  the kit needs no wiring (its `spell-*` workspaces), only the
     commands page gets the new repo's scripts.

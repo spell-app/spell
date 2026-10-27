@@ -1,5 +1,5 @@
 /**
- * Loose types and constants of `spell-epic/dates`.
+ * Loose types and constants of `spell/epic/dates`.
  * - Data only:  nothing here runs.
  */
 

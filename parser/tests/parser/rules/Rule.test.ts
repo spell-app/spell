@@ -1,8 +1,8 @@
 import { describe, test, expect } from "vite-plus/test"
 import { proto } from "spell/util"
-import { P, Match, Parser, Tokenizer, WhitespacePolicy } from "spell-parser/parser"
+import { P, Match, Parser, Tokenizer, WhitespacePolicy } from "spell/parser/parser"
 // These tests define rules with rulex `syntax`, so they must opt into the rulex parser.
-import "spell-parser/parser/rulex"
+import "spell/parser/parser/rulex"
 
 const tokenizer = new Tokenizer({
   whitespacePolicy: WhitespacePolicy.NONE

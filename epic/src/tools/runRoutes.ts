@@ -39,8 +39,8 @@ import { fileURLToPath } from "node:url"
 import { parseHTML } from "linkedom"
 
 import { escapeHTML } from "spell/util/string"
-import { DataFile } from "spell-epic/data/DataFile"
-import { RUNS_API } from "spell-epic/answers"
+import { DataFile } from "spell/epic/data/DataFile"
+import { RUNS_API } from "spell/epic/answers"
 import { SRV } from "spell/server"
 import type { RouteModule } from "spell/server/page"
 import {
@@ -53,8 +53,8 @@ import {
   type RunPage
 } from "spell/server/runs/runs.types"
 
-import { EpicConfig } from "spell-epic/config/EpicConfig"
-import type { ContentRouteContext } from "spell-epic/list/runningRoutes"
+import { EpicConfig } from "spell/epic/config/EpicConfig"
+import type { ContentRouteContext } from "spell/epic/list/runningRoutes"
 
 import { saveData } from "./detailsRoutes"
 

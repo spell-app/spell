@@ -5,7 +5,7 @@
 import { parseHTML } from "linkedom"
 import { describe, expect, test } from "vite-plus/test"
 
-import { PhaseIds } from "spell-epic/phases/PhaseIds"
+import { PhaseIds } from "spell/epic/phases/PhaseIds"
 
 /** A page of three phases:  one with a stable id, one renamed since (its id from its old name), one old (`p3`). */
 function page(): Document {

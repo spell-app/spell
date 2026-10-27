@@ -9,7 +9,7 @@
  *   - singular:  the other way;  a word that can't be told by rule is in `IRREGULAR`
  * - Only parsing and compiling load it:  a compiled program never inflects.
  */
-import { P } from "spell-parser/parser"
+import { P } from "spell/parser/parser"
 
 /** Spanish's inflector:  see the file's docstring. */
 export const spanishInflector = new P.Inflector({

@@ -1,14 +1,14 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { foundationCSS } from "spell-ui/styles"
+import { foundationCSS } from "spell/ui/styles"
 
 import { Fixture } from "spell/test-helpers/Fixture"
-import { Sheets } from "spell-ui/test-helpers/Sheets"
+import { Sheets } from "spell/ui/test-helpers/Sheets"
 
-import { emojiVocabulary } from "spell-ui/components/ui-emoji/UIEmoji.en"
+import { emojiVocabulary } from "spell/ui/components/ui-emoji/UIEmoji.en"
 
-import emojiCSS from "spell-ui/components/ui-emoji/UIEmoji.css?inline"
-import emojiRaw from "spell-ui/components/ui-emoji/UIEmoji.css?raw"
+import emojiCSS from "spell/ui/components/ui-emoji/UIEmoji.css?inline"
+import emojiRaw from "spell/ui/components/ui-emoji/UIEmoji.css?raw"
 
 /**
  * `UIEmoji.css` on the class-grammar examples:  the source rules, the glyph box, Fomantic's size ladder, states.

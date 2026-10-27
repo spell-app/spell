@@ -2,9 +2,9 @@ import { For, Show, createEffect, createMemo } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
 import { CustomError } from "spell/util"
-import { editor } from "spell-app/app/editor"
-import { appTexts } from "spell-app/app/ui/AppTexts"
-import { on, tracked } from "spell-app/app/solid"
+import { editor } from "spell/app/app/editor"
+import { appTexts } from "spell/app/app/ui/AppTexts"
+import { on, tracked } from "spell/app/app/solid"
 
 /****************
  * ### `<ErrorDisplay>`

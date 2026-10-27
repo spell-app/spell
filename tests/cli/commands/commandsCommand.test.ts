@@ -25,22 +25,22 @@ write(
   "cli/commands.ts",
   'const server = spell\n  .command("server")\nserver.command("start")\nspell.command("pony")\n'
 )
-write(ROOT, "spell-parser/package.json", {
+write(ROOT, "parser/package.json", {
   name: "spell-parser",
   spell: { commands: "./cli/commands.ts" },
   scripts: { test: "x" }
 })
-write(ROOT, "spell-parser/cli/commands.ts", 'spell\n  .command("compile")\n')
-write(ROOT, "spell-ui/package.json", { name: "spell-ui" })
-write(ROOT, "spell-ui/site/package.json", { scripts: { dev: "astro dev" } })
+write(ROOT, "spell/parser/cli/commands.ts", 'spell\n  .command("compile")\n')
+write(ROOT, "ui/package.json", { name: "spell-ui" })
+write(ROOT, "ui/site/package.json", { scripts: { dev: "astro dev" } })
 // the `epic` command's verbs and the plugin's skills:  spell-epic's
-write(ROOT, "spell-epic/package.json", { name: "spell-epic" })
+write(ROOT, "epic/package.json", { name: "spell-epic" })
 write(
   ROOT,
-  "spell-epic/src/cli/EpicProgram.ts",
+  "epic/src/cli/EpicProgram.ts",
   'epic\n  .command("send")\nconst inbox = epic.command("inbox")\ninbox.command("watch")\n'
 )
-write(ROOT, "spell-epic/skills/epic/SKILL.md", "---\nname: epic\n---")
+write(ROOT, "epic/skills/epic/SKILL.md", "---\nname: epic\n---")
 write(ROOT, ".claude/skills/isolate/SKILL.md", "---\nname: isolate\n---")
 write(ROOT, ".claude/skills/solid-2/SKILL.md", "---\nname: solid-2\n---")
 write(HOME, ".claude/skills/session/SKILL.md", "---\nname: session\n---")

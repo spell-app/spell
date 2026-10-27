@@ -10,8 +10,8 @@ import { afterAll, beforeAll, expect, test } from "vite-plus/test"
 import { PageServer } from "spell/server/page"
 import { ask } from "spell/server/test/serve"
 
-import { AskListeners } from "spell-epic/tools/AskListeners"
-import detailsRoutes, { type DetailsAnswer, type DetailsDraft } from "spell-epic/tools/detailsRoutes"
+import { AskListeners } from "spell/epic/tools/AskListeners"
+import detailsRoutes, { type DetailsAnswer, type DetailsDraft } from "spell/epic/tools/detailsRoutes"
 
 let root: string
 let server: PageServer

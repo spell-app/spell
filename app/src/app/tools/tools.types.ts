@@ -5,7 +5,7 @@
  *   draw it with Spell UI's docs elements (`<ui-docs-nav>`, `<ui-docs-api>`).
  */
 
-import type { SiteDataBuilder } from "spell-ui/tools/SiteDataBuilder"
+import type { SiteDataBuilder } from "spell/ui/tools/SiteDataBuilder"
 
 ////////////////
 // ## The data file

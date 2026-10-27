@@ -2,9 +2,9 @@ import { afterEach, describe, expect, test } from "vite-plus/test"
 import { userEvent } from "vite-plus/test/browser"
 
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
-import type { SP } from "spell-parser/spell"
-import type { SPACES } from "spell-app/spaces"
-import { openProjectSettings } from "spell-app/app/pages/ProjectSettings"
+import type { SP } from "spell/parser/spell"
+import type { SPACES } from "spell/app/spaces"
+import { openProjectSettings } from "spell/app/app/pages/ProjectSettings"
 
 /**
  * `<ProjectSettings>` in the browser:  a property editor on a project's settings, saved through its group.

@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { NotebookKeys } from "spell-app/app/solid/notebook/NotebookKeys"
-import type { PageCell } from "spell-app/app/solid/notebook/NotebookPageCells"
+import { NotebookKeys } from "spell/app/app/solid/notebook/NotebookKeys"
+import type { PageCell } from "spell/app/app/solid/notebook/NotebookPageCells"
 
 /** Cells of `codes`, each a prose cell:  the keys follow code alone. */
 function cells(...codes: string[]): PageCell[] {

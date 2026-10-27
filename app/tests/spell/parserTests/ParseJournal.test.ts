@@ -1,8 +1,8 @@
 import { describe, test, expect } from "vite-plus/test"
 
-import { P } from "spell-parser/parser"
-import { SP } from "spell-parser/spell"
-import { loadCodeSpellTwin } from "spell-app/spaces/test"
+import { P } from "spell/parser/parser"
+import { SP } from "spell/parser/spell"
+import { loadCodeSpellTwin } from "spell/app/spaces/test"
 
 /**
  * `P.ParseJournal` MUST take back everything parsing changes in shared state, and put it all back again.

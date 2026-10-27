@@ -3,7 +3,7 @@ import { basename, dirname, join, relative } from "node:path"
 
 import { Git } from "spell/server/Git"
 import { CLI } from "spell/cli"
-import { EpicConfig, type EpicSettings } from "spell-epic/config/EpicConfig"
+import { EpicConfig, type EpicSettings } from "spell/epic/config/EpicConfig"
 
 import { EXIT, EpicCommandError, parseVerbArgs } from "./command.types"
 import { Shared } from "./Shared"

@@ -4,17 +4,17 @@ import { fileURLToPath } from "node:url"
 
 import { describe, expect, test } from "vite-plus/test"
 
-import { Markup } from "spell-epic/markup"
-import { PhaseIds } from "spell-epic/phases"
+import { Markup } from "spell/epic/markup"
+import { PhaseIds } from "spell/epic/phases"
 
-import { PlanDocError } from "spell-epic/tool/planDoc.types"
+import { PlanDocError } from "spell/epic/tool/planDoc.types"
 
-import { EpicTests } from "spell-epic/tool/EpicTests"
-import { ItemPicker } from "spell-epic/tool/ItemPicker"
-import { PlanCommits } from "spell-epic/tool/PlanCommits"
-import { PlanDoc } from "spell-epic/tool/PlanDoc"
-import { PlanItem } from "spell-epic/tool/PlanItem"
-import { PlanTime } from "spell-epic/tool/PlanTime"
+import { EpicTests } from "spell/epic/tool/EpicTests"
+import { ItemPicker } from "spell/epic/tool/ItemPicker"
+import { PlanCommits } from "spell/epic/tool/PlanCommits"
+import { PlanDoc } from "spell/epic/tool/PlanDoc"
+import { PlanItem } from "spell/epic/tool/PlanItem"
+import { PlanTime } from "spell/epic/tool/PlanTime"
 
 /**
  * The epic pages these tests read, tracked beside them (`fixtures/`):  `epic-plan.html`, a new doc in `<epic-*>` markup

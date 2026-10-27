@@ -30,7 +30,7 @@ import { json5Edited } from "spell/util/node/json5"
  *   So a plain JSON reader still parses one that has no comments.
  * - Writes are atomic (a temp file renamed over it), and take no lock:  a caller that shares the file holds its own
  *   (`SRV.FileLock`, on the `.json5` name), as `ReviewInbox.update()` does.
- * - The kit's since epic `epic-eject` I5 (it was `spell-epic/data/DataFile`;  the assembler's until `repo-split` P14):
+ * - The kit's since epic `epic-eject` I5 (it was `spell/epic/data/DataFile`;  the assembler's until `repo-split` P14):
  *   the CLI reads the commands page's data with it (`spell commands`, `spell pack create`), and spell-epic's tooling
  *   imports it from here.
  * - Node only (`node:fs`):  `SRV.DataFile`, or by its own path (`spell/server/DataFile`), which loads only it.

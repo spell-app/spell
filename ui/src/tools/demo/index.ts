@@ -10,12 +10,12 @@
  * - A page script, served by Vite, which resolves Spell UI by its package name.
  */
 
-import { UI } from "spell-ui/runtime"
-import { StubOwner } from "spell-ui/test-helpers/StubOwner"
+import { UI } from "spell/ui/runtime"
+import { StubOwner } from "spell/ui/test-helpers/StubOwner"
 
 import { FamilySheets } from "./FamilySheets.ts"
 
-import "spell-ui"
+import "spell/ui"
 
 /** Original fragments, by path. */
 const ORIGINALS = import.meta.glob<string>("/src/components/*/examples/*.html", {

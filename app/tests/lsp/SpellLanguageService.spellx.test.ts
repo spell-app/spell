@@ -5,12 +5,12 @@ import { resolve } from "path"
 import { pathToFileURL } from "url"
 import type { DocumentSymbol, Position, SemanticTokens } from "vscode-languageserver"
 
-import { SP } from "spell-parser/spell"
-import { LSP } from "spell-app/lsp"
-import { SpellDiskWorkspace } from "spell-app/lsp/SpellDiskWorkspace"
+import { SP } from "spell/parser/spell"
+import { LSP } from "spell/app/lsp"
+import { SpellDiskWorkspace } from "spell/app/lsp/SpellDiskWorkspace"
 
 /** spell-parser's spellx pair fixtures:  each `X.spellx` beside the `X.spell` it means. */
-const PAIRS = resolve(import.meta.dirname, "../../../spell-parser/tests/spell/spellx")
+const PAIRS = resolve(import.meta.dirname, "../../../parser/tests/spell/spellx")
 
 /**
  * The language service over a SPELLX file, spell's tag-shaped form (epic `elemental-spell` P8):

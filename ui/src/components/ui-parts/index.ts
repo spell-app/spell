@@ -2,7 +2,7 @@
  * The generic content parts family:  defines the 13 part tags (`<ui-content>`, `<ui-header>`, `<ui-meta>` ...)
  * and exports their components.
  * - SIDE EFFECT:  importing it defines the tags.
- * - Also the library's `spell-ui/ui-parts` entry (its size is in `notes/report.md`).
+ * - Also the library's `spell/ui/ui-parts` entry (its size is in `notes/report.md`).
  */
 
 import { UIContent } from "./UIContent"

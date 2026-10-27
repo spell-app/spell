@@ -134,18 +134,18 @@ describe("ReadmeCheck.checkLink():  links into another repo", () => {
   }
 
   test("flags a relative link into another repo, naming the GitHub URL to write", () => {
-    expect(findings(kitWithChild(), "[themes](spell-ui/README-themes.md)")).toEqual([
-      "cross-repo  spell-ui/README-themes.md:  write https://github.com/spell-app/spell-ui/blob/main/README-themes.md"
+    expect(findings(kitWithChild(), "[themes](ui/README-themes.md)")).toEqual([
+      "cross-repo  ui/README-themes.md:  write https://github.com/spell-app/spell/blob/main/ui/README-themes.md"
     ])
   })
 
   test("checks a GitHub URL into one of our repos against its checkout, anchors included", () => {
     const root = kitWithChild()
-    const url = "https://github.com/spell-app/spell-ui/blob/main/README-themes.md"
+    const url = "https://github.com/spell-app/spell/blob/main/ui/README-themes.md"
     expect(findings(root, `[themes](${url}#dark-mode)`)).toEqual([])
     expect(findings(root, `[themes](${url}#light-mode)`).map((each) => each.split("  ")[0])).toEqual(["anchor"])
     expect(
-      findings(root, `[gone](https://github.com/spell-app/spell-ui/blob/main/README-gone.md)`).map(
+      findings(root, `[gone](https://github.com/spell-app/spell/blob/main/ui/README-gone.md)`).map(
         (each) => each.split("  ")[0]
       )
     ).toEqual(["link"])

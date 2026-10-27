@@ -176,7 +176,7 @@ Read the right-hand column first:  when an address misbehaves, it says where to 
 | `/ui/...` | a 404, never a redirect:  the content folder still holds Spell UI's old docs there, for older checkouts | the content repo's `gone` |
 | `/api/server` | the server's facts:  what `spell server status` printed, above | the kit |
 | `/api/...` | every other call (below) | the kit, and the route modules |
-| anything else | the kit's own files, and every repo's inside it:  `/spell-app/app/docs/index.html` | the kit |
+| anything else | the kit's own files, and every repo's inside it:  `/app/app/docs/index.html` | the kit |
 
 <details>
 <summary>Every call under <code>/api/</code>, and which module answers it</summary>
@@ -198,13 +198,13 @@ the rest of `/api/` is the editor's:  spell-app's module is listed last, and see
 | `/api/docs/choices/...` | a choices page's answers and drafts | `choicesRoutes` |
 | `/api/docs/comments`, `/api/docs/comments/send` | comments on any docs page or epic page, and their Send | `commentsRoutes` |
 | `/api/docs/show` | shows a page in VS Code's side bar, or in Chrome | `showRoutes` |
-| `/api/projects/...`, `/api/compile/...`, `/api/people/...` | the editor's API, bodies in JSON5 ([spell-app's README-spaces.md](https://github.com/spell-app/spell-app/blob/main/README-spaces.md)) | spell-app's `appRoutes` |
+| `/api/projects/...`, `/api/compile/...`, `/api/people/...` | the editor's API, bodies in JSON5 ([spell-app's README-spaces.md](https://github.com/spell-app/spell/blob/main/app/README-spaces.md)) | spell-app's `appRoutes` |
 
 - `airplaneRoutes` answers no address:  it tells every page, as it's served, when airplane mode is on
   (`window.SPELL_SERVER.airplane`).
 - Every write from a page needs the server's per-run token and the server's own origin.
   The editor's API is the exception, with no token:  its one check is the origin.
-- What epic pages, details pages and comments are:  [spell-epic's pages](https://github.com/spell-app/spell-epic/blob/main/README-pages.md).
+- What epic pages, details pages and comments are:  [spell-epic's pages](https://github.com/spell-app/spell/blob/main/epic/README-pages.md).
 
 </details>
 
@@ -421,8 +421,8 @@ _The server knows nothing of epics:  a route module tells it where the worktrees
 - The content folder is served after each worktree's own files, at its address:
   `/worktrees/<w>/epics/...` works, from one shared copy.
 - A child repo's file in an epic's worktree is the kit worktree's, since that's whose server it is:
-  `spell server url spell-app/README.md`, in an epic's worktree named `readme`, printed
-  `http://127.0.0.1:4747/worktrees/readme/spell-app/README.md`.
+  `spell server url app/README.md`, in an epic's worktree named `readme`, printed
+  `http://127.0.0.1:4747/worktrees/readme/app/README.md`.
 
 ## Writing a page:  one set of steps for every tool
 
@@ -527,7 +527,7 @@ ui-site:  current
 
 | Bundle | Built by | Into |
 | --- | --- | --- |
-| `ui-site` | `yarn site:bundle` in spell-ui | `spell-ui/site/_assets/` |
+| `ui-site` | `yarn site:bundle` in spell-ui | `ui/site/_assets/` |
 
 Why not commit them:  that folder holds 138 files, 76 of them with a content hash in the name (`UIButton-Cm4_3xKY.js`).
 Every Spell UI change deleted and re-added most of them, in every diff and every merge.
@@ -650,7 +650,7 @@ Adding a new step:
 
 🌱 Coming:
 - The rest of the page server's page-building code moves in beside these steps, so other tools can build on it.
-- One list of the content areas:  spell-epic's docs tools ([pages.js](https://github.com/spell-app/spell-epic/blob/main/src/tools/pages.js)) keep their own,
+- One list of the content areas:  spell-epic's docs tools ([pages.js](https://github.com/spell-app/spell/blob/main/epic/src/tools/pages.js)) keep their own,
   for `findPages()`, beside the one `Linker` indexes.
 
 </details>
@@ -672,7 +672,7 @@ Spell UI's whole part:
 }
 ```
 
-_From [spell-ui's package.json](https://github.com/spell-app/spell-ui/blob/main/package.json):
+_From [spell-ui's package.json](https://github.com/spell-app/spell/blob/main/ui/package.json):
 its site bundle, built on demand, and its component set, at `/components/ui/`._
 
 `pageServerSettings()` merges the parts as the server starts, in a fixed order:
@@ -681,7 +681,7 @@ its site bundle, built on demand, and its component set, at `/components/ui/`._
 3. each child repo's that's installed, lowest first, as the kit's [repos.json5](repos.json5) lists them
 
 Each part's paths are read from its own repo's folder, so spell-ui writes `docs`, and the server serves
-`spell-ui/docs`.
+`ui/docs`.
 The lists are laid end to end, in that order;  in the maps (`componentSets`, `engineRoutes`, `localCopies`),
 a later repo's entry wins.
 A repo that isn't cloned brings nothing, and the server runs with whatever is there.
@@ -689,9 +689,9 @@ A repo that isn't cloned brings nothing, and the server runs with whatever is th
 | Whose part | What it adds |
 | --- | --- |
 | the content repo's | the folders pages may save into (`writable`:  `epics`, `guides`, `pages`);  `gone`, the old `/ui` address;  `siteTabs`, the header's tabs |
-| [spell-ui's](https://github.com/spell-app/spell-ui/blob/main/package.json) | its site bundle (`bundles`), and the Spell UI set at `/components/ui/` |
-| [spell-epic's](https://github.com/spell-app/spell-epic/blob/main/package.json) | its ten route modules;  the folders live reload watches;  the Epic UI set at `/components/epics/`;  `/_epic/assets/`, `/_epic/pack/` and `/templates/`;  the local copy of highlight.js |
-| [spell-app's](https://github.com/spell-app/spell-app/blob/main/package.json) | its route module, `appRoutes`;  the `spell-language.js` page script;  `/element/`, its element bundles (`engineRoutes`);  the App UI set at `/components/app/` ([what it serves](https://github.com/spell-app/spell-app/blob/main/README-page-server.md)) |
+| [spell-ui's](https://github.com/spell-app/spell/blob/main/ui/package.json) | its site bundle (`bundles`), and the Spell UI set at `/components/ui/` |
+| [spell-epic's](https://github.com/spell-app/spell/blob/main/epic/package.json) | its ten route modules;  the folders live reload watches;  the Epic UI set at `/components/epics/`;  `/_epic/assets/`, `/_epic/pack/` and `/templates/`;  the local copy of highlight.js |
+| [spell-app's](https://github.com/spell-app/spell/blob/main/app/package.json) | its route module, `appRoutes`;  the `spell-language.js` page script;  `/element/`, its element bundles (`engineRoutes`);  the App UI set at `/components/app/` ([what it serves](https://github.com/spell-app/spell/blob/main/app/README-page-server.md)) |
 
 - The content repo isn't public, so its file is named here, not linked.
 - `localCopies` is how pages load offline.
@@ -765,13 +765,13 @@ export default helloRoutes
 
 | Id | Name | Served at | Its pages | Whose part |
 | --- | --- | --- | --- | --- |
-| `ui` | Spell UI | `/components/ui/` | [spell-ui's docs/](https://github.com/spell-app/spell-ui/tree/main/docs) | spell-ui's |
-| `epics` | Epic UI | `/components/epics/` | [spell-epic's src/docs/](https://github.com/spell-app/spell-epic/tree/main/src/docs) | spell-epic's |
-| `app` | App UI | `/components/app/` | [spell-app's app/docs/](https://github.com/spell-app/spell-app/tree/main/app/docs) | spell-app's |
+| `ui` | Spell UI | `/components/ui/` | [spell-ui's docs/](https://github.com/spell-app/spell/tree/main/ui/docs) | spell-ui's |
+| `epics` | Epic UI | `/components/epics/` | [spell-epic's src/docs/](https://github.com/spell-app/spell/tree/main/epic/src/docs) | spell-epic's |
+| `app` | App UI | `/components/app/` | [spell-app's app/docs/](https://github.com/spell-app/spell/tree/main/app/app/docs) | spell-app's |
 
-- Every set's site bundle is Spell UI's, `spell-ui/site/_assets`:
+- Every set's site bundle is Spell UI's, `ui/site/_assets`:
   its pages load `site.js` and `site.css` from their own `_assets/`.
-  What's in it:  [Spell UI's site](https://github.com/spell-app/spell-ui/blob/main/README-site.md).
+  What's in it:  [Spell UI's site](https://github.com/spell-app/spell/blob/main/ui/README-site.md).
 - `/components/ui` without its slash redirects to `/components/ui/`, so the pages' relative links hold.
 
 </details>
@@ -809,7 +809,7 @@ A route is a file and one line, in the repo whose code it serves.
 
 1. Write a route module:  a file whose default export is `{ name, setup() }`, a `RouteModule` from
    `spell/server/page` (above).
-   - spell-app's [appRoutes.ts](https://github.com/spell-app/spell-app/blob/main/src/spaces/server/node/routes/appRoutes.ts)
+   - spell-app's [appRoutes.ts](https://github.com/spell-app/spell/blob/main/app/src/spaces/server/node/routes/appRoutes.ts)
      is a real one.
 2. Add its path to `routes` in that repo's `package.json`, written from the repo's own folder.
    - Routes run in order, all before any file:  an early module can shadow a later one's address.
@@ -933,9 +933,9 @@ _Real answers from a running page server, one line per request in the order aske
 `spell_quart`, a Quart app (Flask's asyncio twin), in spell-app's spaces.
 It runs ONE program, a game per visitor;  this one serves a whole checkout, and never runs your program at all.
 How it keeps each visitor's game, and what a restart costs it:
-[spell-app's README-spaces.md](https://github.com/spell-app/spell-app/blob/main/README-spaces.md#the-python-server), beside
-[its folder](https://github.com/spell-app/spell-app/tree/main/src/spaces/server/py), a uv project.
-What compiling to Python writes beside the program:  [spell-parser's README-targets.md](https://github.com/spell-app/spell-parser/blob/main/README-targets.md).
+[spell-app's README-spaces.md](https://github.com/spell-app/spell/blob/main/app/README-spaces.md#the-python-server), beside
+[its folder](https://github.com/spell-app/spell/tree/main/app/src/spaces/server/py), a uv project.
+What compiling to Python writes beside the program:  [spell-parser's README-targets.md](https://github.com/spell-app/spell/blob/main/parser/README-targets.md).
 
 ## Commands:  `spell server` and `spell bundle`
 
@@ -1038,9 +1038,9 @@ The docs site needs a checkout with the content folder beside it, and this page 
 
 ## See also
 
-- [spell-app's README-page-server.md](https://github.com/spell-app/spell-app/blob/main/README-page-server.md):  what the app's part adds,
+- [spell-app's README-page-server.md](https://github.com/spell-app/spell/blob/main/app/README-page-server.md):  what the app's part adds,
   the editor and its API
 - [README-element.md](README-element.md):  the element framework, whose packs and component pages this server serves
-- [spell-epic's README](https://github.com/spell-app/spell-epic/blob/main/README.md):  the epic pages, and the route modules that serve them
+- [spell-epic's README](https://github.com/spell-app/spell/blob/main/epic/README.md):  the epic pages, and the route modules that serve them
 - [README-cli.md](README-cli.md#the-kit):  `spell server`, `spell bundle` and the kit's other commands
 - [README.md](README.md#setup-from-zero):  setup from zero, if nothing above has run for you yet

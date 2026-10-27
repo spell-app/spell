@@ -1,4 +1,4 @@
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /**
  * The words of the key caps (`keyCapTexts`), in Spanish:  as Spanish keyboards print them.

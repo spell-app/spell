@@ -1,7 +1,7 @@
 /**
  * Every name `<ui-search>` uses:  tag, attributes (kind + allowed values), events, slots, parts, states, texts.
- * Schema:  `E.ComponentVocabulary` (`spell-ui/vocabulary`).
- * - Pure data:  node imports it (`yarn site:data`, `yarn gen:root`), so `spell-ui/core` for types only,
+ * Schema:  `E.ComponentVocabulary` (`spell/ui/vocabulary`).
+ * - Pure data:  node imports it (`yarn site:data`, `yarn gen:root`), so `spell/ui/core` for types only,
  *   `UIT` by value straight from `components.types`.
  * - Class words come out through `ClassBuilder`, in Fomantic's grammar:
  *   `<ui-search category fluid align="right">` => `ui category fluid right aligned search`.
@@ -10,8 +10,8 @@
  *   first paint never needs it -- the input and its `value` are all SSR must show.
  */
 
-import type { E } from "spell-ui/core"
-import * as UIT from "spell-ui/components/components.types"
+import type { E } from "spell/ui/core"
+import * as UIT from "spell/ui/components/components.types"
 
 /****************
  * ### `<ui-search>`

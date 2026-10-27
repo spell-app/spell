@@ -1,4 +1,4 @@
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /**
  * `<ui-toast>` in Spanish:  `<es-notificacion>`, with the names and texts only it uses (from `UIToast.en.ts`).

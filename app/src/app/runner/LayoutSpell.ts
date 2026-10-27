@@ -2,9 +2,9 @@ import { createEffect } from "solid-js"
 
 import { camelCase, dedent, snakeCase } from "spell/util"
 import { E } from "spell/element"
-import { P } from "spell-parser/parser"
-import { SP } from "spell-parser/spell"
-import type { Core } from "spell-parser/core"
+import { P } from "spell/parser/parser"
+import { SP } from "spell/parser/spell"
+import type { Core } from "spell/parser/core"
 import { SpellElement } from "./SpellElement"
 import {
   LAYOUT_HOLE as HOLE,

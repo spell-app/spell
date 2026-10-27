@@ -1,12 +1,12 @@
 /**
  * The English vocabulary of `<ui-quote>`:  every name the tag uses.
  * - Its tag, attributes (each with its kind and allowed values), slots, parts and states.
- *   The shape is `E.ComponentVocabulary` (`spell-ui/vocabulary`).
+ *   The shape is `E.ComponentVocabulary` (`spell/ui/vocabulary`).
  * - A quotation (epic `ui-gaps` P9):  a block quote by default, or `inline`, inside a sentence.
  * - Its look is the Markdown pages' block quote:  a bar on its leading edge, muted text.
  */
 
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /****************
  * ### `quoteVocabulary`

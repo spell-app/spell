@@ -15,7 +15,7 @@ Spell's claude.ai DESIGN SYSTEM is generated from the code, so Claude Design dra
   - The record is `design-system.json`, in the `brand/` folder of spell-app-dev, beside this repo.
   - Private:  only Owen can open it, until he shares it.
 - What it holds:  the system's project folder, in Spell UI's build, git-ignored:
-  [design-system/project/](../spell-ui/build/design-system/project/).
+  [design-system/project/](../ui/build/design-system/project/).
   - Written by `spell design build`:
     - the README and `tokens.json`
     - `index.d.ts`, in `components/`
@@ -88,7 +88,7 @@ Spell's claude.ai DESIGN SYSTEM is generated from the code, so Claude Design dra
      - handlers
      - unwrapped `<sc-if>` / `<sc-for>`
    - Fix those by hand:  real text for holes, a small script for behaviour.
-4. Finish:  as [spell-epic's AGENTS.md](../spell-epic/src/AGENTS.md), "Finishing a page".
+4. Finish:  as [spell-epic's AGENTS.md](../epic/src/AGENTS.md), "Finishing a page".
    - Its checks:
      - `doc-links`
      - `vp fmt`
@@ -134,13 +134,13 @@ Spell's claude.ai DESIGN SYSTEM is generated from the code, so Claude Design dra
 ## `/design` alone:  a page in VS Code
 
 1. Read the system's rules and the elements' shapes LOCALLY:
-   - [the system's README](../spell-ui/build/design-system/project/README.md), in Spell UI's build
+   - [the system's README](../ui/build/design-system/project/README.md), in Spell UI's build
      (run `spell design build` if it's missing)
    - then, beside it in `components/`:
      - each card you'll use:  the README in its `<Family>/` folder
      - `index.d.ts`
    - VS Code autocompletes `<ui-*>` tags and attributes
-     from [html-custom-data.json](../../../../spell-ui/docs/__data/html-custom-data.json), in Spell UI's site data.
+     from [html-custom-data.json](../../../../ui/docs/__data/html-custom-data.json), in Spell UI's site data.
 2. Start the page from a template (`epic pages create ...`),
    or as `/design pull` writes one (the bundle, and the site header for its depth).
    - Write plain `<ui-*>` markup:  every component the system has.

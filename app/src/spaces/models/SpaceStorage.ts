@@ -2,9 +2,9 @@
  * Where spaces' files are kept:  people's, orgs', their projects' (epic `people-and-orgs` P8, J4).
  * - Paths are `/`-separated and RELATIVE to the storage's own root, as spell-spaces lays it out:
  *   `@spell/owen@/__me.json5`, `@three-degrees/__org.json5`.
- * - The disk is the first:  `DiskStorage` (`spell-app/spaces/server/node/storage/DiskStorage`), on spell-spaces.
+ * - The disk is the first:  `DiskStorage` (`spell/app/spaces/server/node/storage/DiskStorage`), on spell-spaces.
  *   S3 or Git can replace it later, behind this same interface.
- * - Text in, text out:  reading and writing JSON5 so its comments stay is `spell-app/spaces/server/node/storage/json5`'s.
+ * - Text in, text out:  reading and writing JSON5 so its comments stay is `spell/app/spaces/server/node/storage/json5`'s.
  * - Types only:  safe in a browser, where nothing implements it.
  */
 export interface SpaceStorage {

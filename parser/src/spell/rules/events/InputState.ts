@@ -1,8 +1,8 @@
 import { proto } from "spell/util"
-import { P } from "spell-parser/parser"
+import { P } from "spell/parser/parser"
 // Import directly to avoid circular import
-import { SpellExpression } from "spell-parser/spell/rules/expressions/SpellExpression"
-import { Negatable } from "spell-parser/spell/rules/expressions"
+import { SpellExpression } from "spell/parser/spell/rules/expressions/SpellExpression"
+import { Negatable } from "spell/parser/spell/rules/expressions"
 
 /**
  * `input_state` rule:  the mouse and the keys, readable anywhere -- core's `input`, `input.ts`.

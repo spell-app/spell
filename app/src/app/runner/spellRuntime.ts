@@ -43,7 +43,7 @@ import {
   endPosition,
   withSpellPositions,
   type TestResult
-} from "spell-parser/core"
+} from "spell/parser/core"
 import { runCompiled, appIsMounted, unmountApp, type RunCompiledOptions } from "./runCompiled"
 import { installSpellElements } from "./SpellElement"
 import { E as UIElements, SpellElement } from "./spellElements"

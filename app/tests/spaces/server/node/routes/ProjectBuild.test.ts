@@ -6,9 +6,9 @@ import { dirname, join } from "node:path"
 import { PassThrough } from "node:stream"
 import { afterAll, afterEach, beforeEach, describe, expect, test, vi } from "vite-plus/test"
 
-import { locationForDiskPath } from "spell-app/spaces/server/node/projects/disk-fetch"
-import { SP } from "spell-parser/spell"
-import { ProjectBuild } from "spell-app/spaces/server/node/routes/ProjectBuild"
+import { locationForDiskPath } from "spell/app/spaces/server/node/projects/disk-fetch"
+import { SP } from "spell/parser/spell"
+import { ProjectBuild } from "spell/app/spaces/server/node/routes/ProjectBuild"
 
 ////////////////
 // ## Fakes

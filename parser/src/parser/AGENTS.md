@@ -1,7 +1,7 @@
 # AGENTS.md
 
 This file provides guidance to AI coding agents (Claude Code, Codex, and others)
-when working with code in this folder, `src/parser/` of the `spell-parser` package (`spell-parser/parser`).
+when working with code in this folder, `src/parser/` of the `spell-parser` package (`spell/parser/parser`).
 
 **READ the repo root's [AGENTS.md](../../AGENTS.md) and [WWOD](../../agents/wwod/WWOD.md) FIRST:**
 the repo's layout, and the house style every package shares.
@@ -9,18 +9,18 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 
 ## Overview
 
-- The generic rule-based parser, `spell-parser/parser` (`P`):
+- The generic rule-based parser, `spell/parser/parser` (`P`):
   - tokenizer, rules and `Parser`, `Match`
   - scopes, ASTs, incremental parsing
-  - It knows NO language:  the spell language on it is the spell folder (`spell-parser/spell`).
+  - It knows NO language:  the spell language on it is the spell folder (`spell/parser/spell`).
 - [PARSING.md](../spell/PARSING.md), the map of the parse pipeline, is still in the spell folder.
   - Read it BEFORE digging into parser internals.
   - A change to the parsing mechanism HERE updates it too
     ([spell's AGENTS.md](../spell/AGENTS.md), "How parsing works").
-- Rulex (the rule-syntax language) is `spell-parser/parser/rulex`:
+- Rulex (the rule-syntax language) is `spell/parser/parser/rulex`:
   an OPT-IN side-effect import, that registers itself on `Parser.rulexParser`.
   - The barrel NEVER pulls it in.
-- `spell-parser/parser/test` ([test/](test/)) holds the helpers language packages use to test their rules:
+- `spell/parser/parser/test` ([test/](test/)) holds the helpers language packages use to test their rules:
   `unitTestModuleRules()` and others.
   - Each rule test checks the javascript and TypeScript writers, `{ input, js, ts }` (`P.RuleTest`).
   - Blessing writes each test's `js` and `ts` into its source.
@@ -28,7 +28,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - [`RuleTestSource`](test/RuleTestSource.ts) does it:  node-only, loaded only then.
   - Tests that need the SPELL grammar are not here:  they're in spell's tests, `tests/spell/parserTests/`.
 - Depends only on `spell/util` (and what that re-exports).
-  NEVER import `spell-parser/spell`, or anything above it.
+  NEVER import `spell/parser/spell`, or anything above it.
 - `writers/` writes ASTs out as a target's code.
   The AST classes never write output themselves.
   - `P.Writer`:  one method per AST class, found by class name (so `keepNames`, below)
@@ -57,11 +57,11 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         - Written by `elementClassFor()`.
   - `P.LibraryWriter` (epic `people-and-orgs`):
     a project's classes alone, as a TypeScript LIBRARY other code imports
-    - The `ts/lib` target:  `P.TSWriter`, minus the program's top-level steps, its core `spell-parser/core/model`.
+    - The `ts/lib` target:  `P.TSWriter`, minus the program's top-level steps, its core `spell/parser/core/model`.
     - One file, `<Project>.lib.ts`, its own types:  no `.d.ts` beside it.
     - `P.isDeclaration()` says what's kept:  classes, what's added to them, comments.
       Python's page writer keeps the same.
-  - Python's writers are `spell-parser/py`'s ([py's AGENTS.md](../py/AGENTS.md)), built on these:
+  - Python's writers are `spell/parser/py`'s ([py's AGENTS.md](../py/AGENTS.md)), built on these:
     - `PY.PyWriter`, on `P.ProgramWriter`
     - `PY.ElementsWriter`, on `P.JSWriter`
   - [jsShapes.ts](writers/jsShapes.ts):  the pure helpers every program writer shares, `P.jsShapes`
@@ -74,7 +74,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     none of which compile Solid's JSX.
   - ASTs only write TEXT (`compile()`), JSX included.
     - The app shows compiled JavaScript in Monaco.
-    - Solid's compiler builds the TypeScript target's JSX later (`spell-parser/spell/node/buildTsx`).
+    - Solid's compiler builds the TypeScript target's JSX later (`spell/parser/spell/node/buildTsx`).
 - "Parser rules" (how to write a rule class + its `syntax` + `tests`) is in [spell's AGENTS.md](../spell/AGENTS.md).
   - The rules there are spell's, on this folder's `Rule`.
   - See also the top docstring in [Rule.ts](rules/Rule.ts).
@@ -83,13 +83,13 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - e.g. `ListAddRelative` => `list_add_relative`
   - `P.Rule.ruleNameFor()` works it out.
   - The builds, app's:
-    - [vite.config.ts](../../../spell-app/app/vite.config.ts)
-    - [vite.editor.config.ts](../../../spell-app/app/vite.editor.config.ts)
-  - Pinned by app's [build.test.ts](../../../spell-app/tests/app/build.test.ts).
+    - [vite.config.ts](../../../app/app/vite.config.ts)
+    - [vite.editor.config.ts](../../../app/app/vite.editor.config.ts)
+  - Pinned by app's [build.test.ts](../../../app/tests/app/build.test.ts).
 
 ## Imports
 
-- As WWOD §4 (examples there are ours):  `import { P } from "spell-parser/parser"`.
+- As WWOD §4 (examples there are ours):  `import { P } from "spell/parser/parser"`.
 - [barrel.test.ts](../../tests/parser/barrel.test.ts) is the smoke test for circular imports through the barrel:
   run it after moving files.
   - The tests live in the repo's `tests/parser/`, at the same paths as the code under `src/parser/`.
@@ -105,4 +105,4 @@ As WWOD §12, plus:
 
 As WWOD §8, plus our self-namespace:
 
-- `P` ~== `spell-parser/parser`
+- `P` ~== `spell/parser/parser`

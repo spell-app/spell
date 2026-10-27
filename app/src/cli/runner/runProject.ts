@@ -9,16 +9,16 @@
  * - `test`:  loads it quietly, then calls each `test ...` function it exports which hasn't already run
  *   (`core.runTests()`, which the runners' Run Tests share), and reports each one:  ✓, or ✗ with the checks that
  *   failed.  Exits 1 if any failed.
- * - NEVER imports `spell-app/cli`'s values:  this process needs only spell's runtime
+ * - NEVER imports `spell/app/cli`'s values:  this process needs only spell's runtime
  *   (and the app's `testReportsOf()`, plain data, for `spec.reports`).
  */
 import chalk from "chalk"
 import { format } from "util"
 
 import { bridgeSolid } from "spell/util"
-import { App, core, type TestResult } from "spell-parser/core"
-import { testReportsOf } from "spell-app/app/runner/testResults"
-import type { CLI } from "spell-app/cli"
+import { App, core, type TestResult } from "spell/parser/core"
+import { testReportsOf } from "spell/app/app/runner/testResults"
+import type { CLI } from "spell/app/cli"
 
 const spec = JSON.parse(process.env.SPELL_RUN!) as CLI.RunSpec
 /** What the project tried to do which needs a browser, e.g. `start the game`. */

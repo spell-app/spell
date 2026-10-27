@@ -1,9 +1,9 @@
 import semver from "semver"
 import { describe, test, expect } from "vite-plus/test"
 
-import { P } from "spell-parser/parser"
-import { SP } from "spell-parser/spell"
-import { compiledSpellProject, parseSpellProject } from "spell-parser/spell/test"
+import { P } from "spell/parser/parser"
+import { SP } from "spell/parser/spell"
+import { compiledSpellProject, parseSpellProject } from "spell/parser/spell/test"
 
 /**
  * A project's declarations:  marked inline while compiling, then split out into its declarations file.

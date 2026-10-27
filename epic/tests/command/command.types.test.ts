@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { EpicCommandError, duration, parseVerbArgs, stringFlag } from "spell-epic/command/command.types"
+import { EpicCommandError, duration, parseVerbArgs, stringFlag } from "spell/epic/command/command.types"
 
 /**
  * The ONE reader of every `epic` verb's and docs tool's command line (epic `coherence` P20):  its flags, their values,

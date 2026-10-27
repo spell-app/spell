@@ -1,7 +1,7 @@
 import { parseHTML } from "linkedom"
 import { afterEach, describe, expect, test, vi } from "vite-plus/test"
 
-import { AnswerForm } from "spell-epic/answers/AnswerForm"
+import { AnswerForm } from "spell/epic/answers/AnswerForm"
 import {
   ANSWER_RETRY_MS,
   DETAILS_SAVE_MS,
@@ -11,7 +11,7 @@ import {
   type PageAnswer,
   type PartLabels,
   type SentAnswer
-} from "spell-epic/answers/answers.types"
+} from "spell/epic/answers/answers.types"
 
 ////////////////
 // ## Fakes

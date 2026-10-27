@@ -4,10 +4,10 @@ import { tmpdir } from "os"
 import { join, resolve } from "path"
 import { describe, test, expect } from "vite-plus/test"
 
-import { P } from "spell-parser/parser"
-import { PY } from "spell-parser/py"
-import { SP } from "spell-parser/spell"
-import { parseSpellProject } from "spell-parser/spell/test"
+import { P } from "spell/parser/parser"
+import { PY } from "spell/parser/py"
+import { SP } from "spell/parser/spell"
+import { parseSpellProject } from "spell/parser/spell/test"
 
 /**
  * spell's rounding, `round price up`, as each platform says it (epic `python-target` P24, Owen on Q29):

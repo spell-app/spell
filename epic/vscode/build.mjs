@@ -4,7 +4,7 @@
  * build, here, rather than leaving every window's extension dead (epic `epic-engine` I76).
  * - `ENGINE_ROOT` is the spell-epic checkout this file sits in:  an INSTALLED copy (in VS Code's extensions folder)
  *   still knows whose `epic` command restarts the epic server.  Move the checkout and you must rebuild.
- * - Every repo's files by their package names (`spell/server`, `spell-epic/server/RepoList`;  epic `repo-split`
+ * - Every repo's files by their package names (`spell/server`, `spell/epic/server/RepoList`;  epic `repo-split`
  *   P14), found as their source files by the kit's `sourceNames()`, which `buildExtension()` bundles with:
  *   esbuild alone finds neither a name without its extension nor a folder's `index.ts`.
  * - Its own settings for every file it bundles, `tsconfig.json`.

@@ -1,8 +1,8 @@
 import { Show, createSignal, getOwner, onCleanup, runWithOwner, type Owner } from "solid-js"
 import { render } from "@solidjs/web"
 
-import { E } from "spell-ui/core"
-import { ExampleSource } from "spell-ui/components/ui-example/ExampleSource"
+import { E } from "spell/ui/core"
+import { ExampleSource } from "spell/ui/components/ui-example/ExampleSource"
 
 /****************
  * ### `NotebookOriginal`

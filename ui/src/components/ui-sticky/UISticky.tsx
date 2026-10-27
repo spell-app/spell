@@ -1,6 +1,6 @@
 import { isServer, type JSX } from "@solidjs/web"
 
-import { E, UIT } from "spell-ui/core"
+import { E, UIT } from "spell/ui/core"
 import { stickyVocabulary } from "./UISticky.en"
 
 import stickyCSS from "./UISticky.css?inline"
@@ -148,7 +148,7 @@ export class UISticky extends E.UIComponent<StickyVocabulary> {
         <slot />
       </div>
     )
-    // a server render (`spell-ui/static`):  the box alone, the root;  CSS sticks it, nothing observes
+    // a server render (`spell/ui/static`):  the box alone, the root;  CSS sticks it, nothing observes
     if (isServer) return box
     return (
       <>

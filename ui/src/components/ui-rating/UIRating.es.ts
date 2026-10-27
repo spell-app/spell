@@ -1,4 +1,4 @@
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /**
  * `<ui-rating>` in Spanish:  `<es-valoracion>`, with the names and texts only it uses (from `UIRating.en.ts`).

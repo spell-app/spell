@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, onTestFinished, vi } from "vite-plus/test"
 import { userEvent } from "vite-plus/test/browser"
-import { Keys } from "spell-ui/test-helpers/Keys"
+import { Keys } from "spell/ui/test-helpers/Keys"
 
 import { expectAccessible } from "spell/test-helpers/A11y"
 import { Fixture } from "spell/test-helpers/Fixture"
@@ -8,12 +8,12 @@ import { Fixture } from "spell/test-helpers/Fixture"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import { Viewport } from "spell/test-helpers/Viewport"
 import type { DOMElement } from "spell/element"
-import { ParentLink } from "spell-ui/core"
+import { ParentLink } from "spell/ui/core"
 
-import "spell-ui/components/ui-step"
-import "spell-ui/components/ui-parts"
-import "spell-ui/components/ui-icon"
-import "spell-ui/components/ui-segment"
+import "spell/ui/components/ui-step"
+import "spell/ui/components/ui-parts"
+import "spell/ui/components/ui-icon"
+import "spell/ui/components/ui-segment"
 
 /** Element-markup rewrites of every example, by path. */
 const EXAMPLES = import.meta.glob<string>("/src/components/ui-step/examples/elements/*.html", {

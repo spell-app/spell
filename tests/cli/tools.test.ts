@@ -7,8 +7,8 @@ import { CLI } from "spell/cli"
 
 describe("toolArgs()", () => {
   test("plain node:  just the script, in the tool's checkout", () => {
-    expect(CLI.toolArgs({ tool: "spell-epic/src/tools/design.js" }, "/kit")).toEqual([
-      "/kit/spell-epic/src/tools/design.js"
+    expect(CLI.toolArgs({ tool: "epic/src/tools/design.js" }, "/kit")).toEqual([
+      "/kit/epic/src/tools/design.js"
     ])
   })
   test("tsx:  the kit's loader first, then the run-time alias hook", () => {

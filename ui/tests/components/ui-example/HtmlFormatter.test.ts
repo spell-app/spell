@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { HtmlFormatter } from "spell-ui/components/ui-example/HtmlFormatter"
+import { HtmlFormatter } from "spell/ui/components/ui-example/HtmlFormatter"
 
 describe("HtmlFormatter.format()", () => {
   test.each([

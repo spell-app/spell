@@ -4,8 +4,8 @@
  * - Keywords typed without their accent (`si`, `numero`) are accepted too (Owen, the bedtime page, 2026-10-22):
  *   each list holds both spellings where people drop one.
  */
-import type { P } from "spell-parser/parser"
-import type { SP } from "spell-parser/spell"
+import type { P } from "spell/parser/parser"
+import type { SP } from "spell/parser/spell"
 
 /** Spanish's words:  see `SP.LanguageWords` for what each list is for. */
 export const spanishWords: SP.LanguageWords = {

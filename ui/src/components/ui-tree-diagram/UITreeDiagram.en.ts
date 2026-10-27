@@ -1,14 +1,14 @@
 /**
  * The English vocabulary of `<ui-tree-diagram>`:  every name the tag uses.
  * - Its tag, attributes (each with its kind and allowed values), parts and texts.
- *   The shape is `ComponentVocabulary` (`spell-ui/vocabulary`).
+ *   The shape is `ComponentVocabulary` (`spell/ui/vocabulary`).
  * - Ours, not Fomantic's:  first drawn for spell's parse trees, but GENERIC.
  * - One rich property, `tree` (a `TreeDiagramNode`, `UITreeDiagram.types.ts`);
  *   a static page gives it as a `<script type="application/json">` child instead.
  * - No class words:  the class grammar is `ui tree diagram`, plus `empty` with nothing to draw.
  */
 
-import type { ComponentVocabulary } from "spell-ui/vocabulary"
+import type { ComponentVocabulary } from "spell/ui/vocabulary"
 
 /****************
  * ### `treeDiagramVocabulary`

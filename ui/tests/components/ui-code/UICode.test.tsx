@@ -1,12 +1,12 @@
 import { afterEach, beforeAll, describe, expect, it, vi } from "vite-plus/test"
 
-import { UI } from "spell-ui/runtime"
+import { UI } from "spell/ui/runtime"
 import { expectAccessible } from "spell/test-helpers/A11y"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 
-import type { DOMCodeElement } from "spell-ui/components/ui-code/UICode"
+import type { DOMCodeElement } from "spell/ui/components/ui-code/UICode"
 
-import "spell-ui/components/ui-code"
+import "spell/ui/components/ui-code"
 
 /** Element-markup rewrites of every example, by path. */
 const EXAMPLES = import.meta.glob<string>("/src/components/ui-code/examples/elements/*.html", {

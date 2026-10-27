@@ -1,4 +1,4 @@
-import { E } from "spell-ui/core"
+import { E } from "spell/ui/core"
 import {
   BENCH_MESSAGE,
   type BenchMessage,

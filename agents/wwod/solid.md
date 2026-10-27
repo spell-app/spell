@@ -16,7 +16,7 @@ From:  original WWOD §18 ("Svelte / UI"), rewritten for Solid 2 (D9).
 - **Small one-job components, composed:**
   - one component, one job;  a parent reads as its layout:  `<InputRoot>` is `<InputToolbar>` over
     `<InputEditor>`, whose error path is `<FallbackEditor>` (`packages/app/src/solid/InputEditor.tsx`)
-  - pieces several app components share live in `spell-app/app/solid`:  `chrome.tsx`'s `<PanelMenu>` / `<Submenu>` /
+  - pieces several app components share live in `spell/app/app/solid`:  `chrome.tsx`'s `<PanelMenu>` / `<Submenu>` /
     `<DropdownLabel>`;  `<TreeRow>`, shared by `<TypeExplorer>` and `<ThingExplorer>`
   - generic beyond the app (no spell, no `editor`) => a `ui-*` element in `spell-ui`, written as
     `packages/ui/AGENTS.md` says;  when:  WWOD §8 › "Promotion path".  NEVER without an intensive design review
@@ -26,7 +26,7 @@ From:  original WWOD §18 ("Svelte / UI"), rewritten for Solid 2 (D9).
     each host only feeds them (a runtime copy's objects, messages to the extension)
 
 - **Singletons by import, per-subtree values by context:**
-  - app-wide services are module imports, read where used:  `import { editor } from "spell-app/app/editor"`, then
+  - app-wide services are module imports, read where used:  `import { editor } from "spell/app/app/editor"`, then
     `editor.file` in JSX or a `tracked()`.  ONE copy of each per page bundle, never handed down through context
   - context only for a value that differs per subtree:  `ConsoleInspectorContext` (`ConsoleLines.tsx`), read with
     `useContext()` in the component body:  it needs an OWNER -- at module scope it throws `NoOwnerError`, default
@@ -44,8 +44,8 @@ From:  original WWOD §18 ("Svelte / UI"), rewritten for Solid 2 (D9).
   - one `type <Name>Props` per component, directly BELOW it (WWOD §9 › "Props types live with their class"):
     exported with an exported component, private otherwise (`ScopeTreeNodeProps`);  NEVER `interface`
   - every prop docstring'd (WWOD §6), its default stated:  ``Default:  `true`.``
-  - prop types reuse the feature's own types:  `tree?: ScopeNode` (`spell-app/lsp`), `state?: TypeExplorerState`
-    (`spell-app/app/ui/ui.types`) -- never a parallel shape
+  - prop types reuse the feature's own types:  `tree?: ScopeNode` (`spell/app/lsp`), `state?: TypeExplorerState`
+    (`spell/app/app/ui/ui.types`) -- never a parallel shape
   - a `class` prop is typed as Solid types it, so callers pass any form:
     `class: JSX.HTMLAttributes<HTMLDivElement>["class"]` (`TreeRowProps`)
     - TODO:  a short `ClassValue` type for it, like Svelte's (`cx`)
@@ -124,7 +124,7 @@ function update(changed: TypeExplorerState) {
 
 - **Events:  `onClick`, or `on()` for `ui-*`:**
   - native events:  `onClick` / `onInput` ...;  `ui-*` events:  `ref={on<Detail>("ui-change", handler)}`, with
-    our `on()` (`spell-app/app/solid`, `on.ts`), not Solid 1's removed `on()` -- never a hand-rolled listener ref.  Why:
+    our `on()` (`spell/app/app/solid`, `on.ts`), not Solid 1's removed `on()` -- never a hand-rolled listener ref.  Why:
     `solid-2.md` "DOM and `spell-ui` elements"
   - a handler that does more than one call is a named `function` at the bottom (`choose()` in `FileDropdown.tsx`)
   - NOT:  `use:` directives (`use:activate`) -- gone in Solid 2;  a ref directive factory (`on()`) instead
@@ -168,7 +168,7 @@ function update(changed: TypeExplorerState) {
 - **`<ErrorBoundary>` around every region that can fail alone:**
   - every viewer of program-driven data (editors, explorers, consoles) gets one.  Why:  `REACTIVITY_HALTED`
     (`solid-2.md` "The model in six bullets")
-  - the app's `<ErrorBoundary>` (`spell-app/app/solid`, `ErrorBoundary.tsx`), not a bare `<Errored>`:  it brings the
+  - the app's `<ErrorBoundary>` (`spell/app/app/solid`, `ErrorBoundary.tsx`), not a bare `<Errored>`:  it brings the
     default `<ErrorDisplay>`, wraps non-`Error` throws, and runs `onError` outside any owner, so `onError` may write
   - `onError` reports (`editor.showError()`);  `fallback` DEGRADES rather than apologises:  `<FallbackEditor>` keeps
     editing in plain text, without the colouring that may be what threw
@@ -227,7 +227,7 @@ function FileInputEditor() {
     tags defined, a `<Loading>` around it), why an import skips a barrel
 
 - **Dialogs:**
-  - a message, a yes / no, or one field:  `UI.modals`, e.g. `alert()`, `confirm()`, `prompt()` (`spell-app/app/solid/modals`,
+  - a message, a yes / no, or one field:  `UI.modals`, e.g. `alert()`, `confirm()`, `prompt()` (`spell/app/app/solid/modals`,
     `dialogs.ts`), behind `editor.alert()` ...
   - per-field logic, or a body of its own:  a real component, opened by a function that mounts it, resolves a
     `Promise` with the answer and disposes it, e.g. `<Chooser>` + `openChooser()` (`modals/Chooser.tsx`)

@@ -1,5 +1,5 @@
 /**
- * Barrel for `spell-ui/docs-components` -- the DOC-ONLY elements:
+ * Barrel for `spell/ui/docs-components` -- the DOC-ONLY elements:
  * `<ui-docs-*>` widgets Spell UI's docs site (its pages:  the shared `ui/*.html`) is built from,
  * on top of the real components.
  * - What they are:  element families written EXACTLY like a component family,
@@ -27,17 +27,17 @@
  *   and import their families in its barrel (a root only loads the light DOM's).
  * - `package.json` `sideEffects` lists every `./src/docs-components/<family>/index.ts`:
  *   without it a bundler drops each barrel's `define()` (the family chunk loads, the tag stays undefined, no error).
- * - Imports:  shared code from `spell-ui/core` as any family;
- *   docs-only shared code (`SiteData`, `SiteDataLoad`) from `spell-ui/docs-components/<file>`.
+ * - Imports:  shared code from `spell/ui/core` as any family;
+ *   docs-only shared code (`SiteData`, `SiteDataLoad`) from `spell/ui/docs-components/<file>`.
  * - Real components now, once docs widgets:
- *   - the theme menu, since epic `debut` P17:  `<ui-theme-menu>` (`spell-ui/components/ui-theme-menu`),
+ *   - the theme menu, since epic `debut` P17:  `<ui-theme-menu>` (`spell/ui/components/ui-theme-menu`),
  *     with the remembered theme and scheme, `ThemePreference`
  *   - the page's contents and the live example, since epic `ui-gaps` P14:  `<ui-toc>` and `<ui-example>`
- *     (`spell-ui/components/ui-toc`, `spell-ui/components/ui-example`);  a docs widget may use them, never the
+ *     (`spell/ui/components/ui-toc`, `spell/ui/components/ui-example`);  a docs widget may use them, never the
  *     other way round
  *   - what they share with the docs widgets is `UIT`'s:  `HeadingLevels`, `CODE_SPAN`, `TocMarks`
  * - NOTE:  this barrel defines NOTHING:  types, `SiteData` and `SiteDataLoad` only.
- *   Import a family (`spell-ui/docs-components/ui-docs-api`) to define its tags.
+ *   Import a family (`spell/ui/docs-components/ui-docs-api`) to define its tags.
  */
 
 export * from "./docs-components.types"

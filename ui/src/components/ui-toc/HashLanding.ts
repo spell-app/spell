@@ -1,5 +1,5 @@
-// `spell-ui/util` by name, never the `spell-ui/core` entry:  plain DOM, as `TocIndex` beside it
-import { after, nextFrame } from "spell-ui/util"
+// `spell/ui/util` by name, never the `spell/ui/core` entry:  plain DOM, as `TocIndex` beside it
+import { after, nextFrame } from "spell/ui/util"
 import { TocIndex } from "./TocIndex"
 import { SECTION_TAG, TABS_TAG } from "./UIToc.types"
 

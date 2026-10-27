@@ -1,12 +1,12 @@
 import { For, Show, createEffect, createMemo, createSignal, omit } from "solid-js"
 
-import { SP } from "spell-parser/spell"
-import type { UIMenuJSXAttributes } from "spell-ui/jsx"
-import { SPACES } from "spell-app/spaces"
-import { editor } from "spell-app/app/editor"
-import { appTexts, type GroupWords } from "spell-app/app/ui/AppTexts"
-import { Actions, PROJECT_ICON, on, tracked } from "spell-app/app/solid"
-import { isStaticBuild } from "spell-app/app/static/staticBuild"
+import { SP } from "spell/parser/spell"
+import type { UIMenuJSXAttributes } from "spell/ui/jsx"
+import { SPACES } from "spell/app/spaces"
+import { editor } from "spell/app/app/editor"
+import { appTexts, type GroupWords } from "spell/app/app/ui/AppTexts"
+import { Actions, PROJECT_ICON, on, tracked } from "spell/app/app/solid"
+import { isStaticBuild } from "spell/app/app/static/staticBuild"
 
 import "./ProjectDropdown.css"
 

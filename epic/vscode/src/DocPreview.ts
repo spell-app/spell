@@ -37,8 +37,8 @@ import { componentSetAddressOf, pageServerRoot } from "spell/server/page/setting
 import { PidFile } from "spell/server/PidFile"
 import { WebServer } from "spell/server/WebServer"
 
-import { RepoList } from "spell-epic/server/RepoList"
-import { ENGINE_ROUTES, PID_FILE } from "spell-epic/server/server.types"
+import { RepoList } from "spell/epic/server/RepoList"
+import { ENGINE_ROUTES, PID_FILE } from "spell/epic/server/server.types"
 
 import { DocView, docsIndex, type DocViewName } from "./DocView"
 import { PREVIEW_PATH, isLoopback, stamped } from "./docUrls"

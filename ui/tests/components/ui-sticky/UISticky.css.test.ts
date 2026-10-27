@@ -1,15 +1,15 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { foundationCSS } from "spell-ui/styles"
-import { nextFrame } from "spell-ui/util"
+import { foundationCSS } from "spell/ui/styles"
+import { nextFrame } from "spell/ui/util"
 
 import { Fixture } from "spell/test-helpers/Fixture"
-import { Sheets } from "spell-ui/test-helpers/Sheets"
+import { Sheets } from "spell/ui/test-helpers/Sheets"
 
-import { stickyVocabulary } from "spell-ui/components/ui-sticky/UISticky.en"
+import { stickyVocabulary } from "spell/ui/components/ui-sticky/UISticky.en"
 
-import stickyCSS from "spell-ui/components/ui-sticky/UISticky.css?inline"
-import stickyRaw from "spell-ui/components/ui-sticky/UISticky.css?raw"
+import stickyCSS from "spell/ui/components/ui-sticky/UISticky.css?inline"
+import stickyRaw from "spell/ui/components/ui-sticky/UISticky.css?raw"
 
 /**
  * `UISticky.css` on its own:  the sheet's source rules, and the light-DOM examples sticking with no element at all.

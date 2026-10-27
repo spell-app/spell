@@ -7,7 +7,7 @@ import { describe, expect, test } from "vite-plus/test"
 
 import { SRV } from "spell/server"
 
-import { NotesError, PageNotes, htmlOf } from "spell-epic/tools/PageNotes.js"
+import { NotesError, PageNotes, htmlOf } from "spell/epic/tools/PageNotes.js"
 
 /** When the notes are written:  2026-10-10 14:02, local. */
 const NOW = new Date(2026, 9, 10, 14, 2)

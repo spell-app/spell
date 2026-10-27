@@ -1,7 +1,7 @@
 import { Show } from "solid-js"
 import { isServer, type JSX } from "@solidjs/web"
 
-import { E } from "spell-ui/core"
+import { E } from "spell/ui/core"
 import { videoVocabulary } from "./UIVideo.en"
 // Import directly to avoid circular import:  the base class
 import { MediaPlayer } from "./MediaPlayer"

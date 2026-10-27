@@ -26,10 +26,10 @@
  */
 import { setTimeout as sleep } from "node:timers/promises"
 
-import { EpicCommandError, duration, parseVerbArgs, stringFlag } from "spell-epic/command/command.types"
-import { WorkTime } from "spell-epic/command/WorkTime"
-import { PlanDocFiles } from "spell-epic/tool/PlanDocFiles"
-import { PlanTime } from "spell-epic/tool/PlanTime"
+import { EpicCommandError, duration, parseVerbArgs, stringFlag } from "spell/epic/command/command.types"
+import { WorkTime } from "spell/epic/command/WorkTime"
+import { PlanDocFiles } from "spell/epic/tool/PlanDocFiles"
+import { PlanTime } from "spell/epic/tool/PlanTime"
 
 import { AgentList, AgentListError, type RunningAgent, type Untold } from "./AgentList"
 import { ROOT } from "./pages.js"

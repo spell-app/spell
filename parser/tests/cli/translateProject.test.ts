@@ -7,10 +7,10 @@ import { afterEach, beforeEach, describe, expect, test, vi } from "vite-plus/tes
 
 import { CLI } from "spell/cli"
 import type { SRV } from "spell/server"
-import { parseSpellProject } from "spell-parser/spell/test"
-import { translateProject, translationOf, type TranslateSource } from "spell-parser/cli/translateProject"
-import type { TranslateOptions } from "spell-parser/cli"
-import type { ReviewRunOpener } from "spell-parser/cli/NamesReview"
+import { parseSpellProject } from "spell/parser/spell/test"
+import { translateProject, translationOf, type TranslateSource } from "spell/parser/cli/translateProject"
+import type { TranslateOptions } from "spell/parser/cli"
+import type { ReviewRunOpener } from "spell/parser/cli/NamesReview"
 import type {
   ClaudeRunner,
   GlossaryData,
@@ -18,7 +18,7 @@ import type {
   NamesData,
   NamesFile,
   SourceFile
-} from "spell-parser/spell/translate/translate.types"
+} from "spell/parser/spell/translate/translate.types"
 
 /**
  * `spell translate`'s three passes end to end (epic `spanish` P25):  names, lines, fix-ups --

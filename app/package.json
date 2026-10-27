@@ -115,7 +115,7 @@
       "app": {
         "name": "App UI",
         "dir": "app/docs",
-        "assets": "../spell-ui/site/_assets"
+        "assets": "../ui/site/_assets"
       }
     },
     "engineRoutes": {

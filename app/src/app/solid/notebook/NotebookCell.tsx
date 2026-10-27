@@ -1,8 +1,8 @@
 import { For, Loading, Match, Show, Switch, createEffect, onCleanup } from "solid-js"
-import type { monaco } from "spell-app/app/ui/monaco"
+import type { monaco } from "spell/app/app/ui/monaco"
 
-import { appTexts } from "spell-app/app/ui/AppTexts"
-import { LazyMonaco } from "spell-app/app/solid/LazyMonaco"
+import { appTexts } from "spell/app/app/ui/AppTexts"
+import { LazyMonaco } from "spell/app/app/solid/LazyMonaco"
 import type { NotebookController } from "./NotebookController"
 import type { CodeView } from "./NotebookCode"
 import type { PageCell } from "./NotebookPageCells"

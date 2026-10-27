@@ -1,4 +1,4 @@
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /**
  * `<ui-sticky>` in Spanish:  `<es-pegado>`, with the names and texts only it uses (from `UISticky.en.ts`).

@@ -1,4 +1,4 @@
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /**
  * `<ui-example>` in Spanish:  `<es-ejemplo>` (epic `epic-engine` Q23), with the names and texts only it uses

@@ -19,7 +19,7 @@ import { fileURLToPath } from "node:url"
 try {
   const input = JSON.parse(readFileSync(0, "utf8") || "{}")
   // loaded in here, so a config that won't read never fails the hook
-  const { EpicConfig } = await import("spell-epic/config/EpicConfig.ts")
+  const { EpicConfig } = await import("spell/epic/config/EpicConfig.ts")
   const config = input.cwd && EpicConfig.of(input.cwd)
   if (config && existsSync(config.file)) {
     const skill = fileURLToPath(new URL("../skills/isolate/SKILL.md", import.meta.url))

@@ -3,7 +3,7 @@
  * - Data only:  vocabularies import it, so nothing here runs;  it imports only data (`Fold.types.ts`).
  */
 
-import { ACTIONS_PART_SPEC } from "spell-epic/components/epic-item/Fold.types"
+import { ACTIONS_PART_SPEC } from "spell/epic/components/epic-item/Fold.types"
 
 /** The panel's parts, which every subclass's vocabulary lists. */
 export const PANEL_PARTS = [

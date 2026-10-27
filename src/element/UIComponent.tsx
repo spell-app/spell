@@ -150,7 +150,7 @@ export abstract class UIComponent<V extends E.ComponentVocabulary = E.ComponentV
 
   /**
    * Built once per element, the first time the element is connected (`UIComponent.mount()`).
-   * - Two arguments in a row, not one object:  the server render (`spell-ui/static`) builds components the same way.
+   * - Two arguments in a row, not one object:  the server render (`spell/ui/static`) builds components the same way.
    * - It runs while Solid is drawing:  don't change state here (see the class docs).
    */
   constructor(domElement: DOMElement, definition: E.ElementDefinition) {

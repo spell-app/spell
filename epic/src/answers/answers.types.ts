@@ -1,5 +1,5 @@
 /**
- * Types and constants of `spell-epic/answers`:  the pages Claude makes for Owen to answer ON, as their elements keep
+ * Types and constants of `spell/epic/answers`:  the pages Claude makes for Owen to answer ON, as their elements keep
  * them (epic `epic-workflow` P12).
  * - a DETAILS page:  questions (`<epic-ask>`), comment and notes boxes (`<epic-text-box>`), Send (`<epic-send>`)
  * - a CHOICE page:  rows (`<epic-choice-row>`) and their bar (`<epic-choices-bar>`)

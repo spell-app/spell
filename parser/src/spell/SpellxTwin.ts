@@ -1,5 +1,5 @@
-import { P } from "spell-parser/parser"
-import { SP } from "spell-parser/spell"
+import { P } from "spell/parser/parser"
+import { SP } from "spell/parser/spell"
 
 /**
  * Code spell's TWIN of a spellx tag line:  the line it reads as (epic `elemental-spell` P6, Q69 A).

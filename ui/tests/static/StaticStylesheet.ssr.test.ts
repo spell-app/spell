@@ -1,15 +1,15 @@
 import postcss from "postcss"
 import { beforeAll, describe, expect, it } from "vite-plus/test"
 
-import { StaticRender, StaticStylesheet } from "spell-ui/static"
-import { UICard } from "spell-ui/components/ui-card/UICard"
-import { UICards } from "spell-ui/components/ui-card/UICards"
-import { UIItem } from "spell-ui/components/ui-item/UIItem"
-import { UIList } from "spell-ui/components/ui-list/UIList"
-import { UIMenu } from "spell-ui/components/ui-menu/UIMenu"
-import { UIContent } from "spell-ui/components/ui-parts/UIContent"
-import { UIHeader } from "spell-ui/components/ui-parts/UIHeader"
-import { UISegment } from "spell-ui/components/ui-segment/UISegment"
+import { StaticRender, StaticStylesheet } from "spell/ui/static"
+import { UICard } from "spell/ui/components/ui-card/UICard"
+import { UICards } from "spell/ui/components/ui-card/UICards"
+import { UIItem } from "spell/ui/components/ui-item/UIItem"
+import { UIList } from "spell/ui/components/ui-list/UIList"
+import { UIMenu } from "spell/ui/components/ui-menu/UIMenu"
+import { UIContent } from "spell/ui/components/ui-parts/UIContent"
+import { UIHeader } from "spell/ui/components/ui-parts/UIHeader"
+import { UISegment } from "spell/ui/components/ui-segment/UISegment"
 
 ////////////////
 // ## The page's sheet

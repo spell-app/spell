@@ -1,8 +1,8 @@
 /**
  * The English vocabulary of `<ui-loader>`:  every name the tag uses.
  * - Its tag, attributes (each with its kind and allowed values), slots, parts, states and texts.
- *   The shape is `E.ComponentVocabulary` (`spell-ui/vocabulary`).
- * - Pure data:  node imports it (`yarn site:data`, `yarn gen:root`), so `spell-ui/core` for types only.
+ *   The shape is `E.ComponentVocabulary` (`spell/ui/vocabulary`).
+ * - Pure data:  node imports it (`yarn site:data`, `yarn gen:root`), so `spell/ui/core` for types only.
  * - The attributes become Fomantic's class words, in Fomantic's order (`ClassBuilder`):
  *   `<ui-loader size="large" color="red" speed="slow" visible inline>` => `ui large red slow inline active loader`.
  * - `active` is Fomantic's shown-loader class:
@@ -14,7 +14,7 @@
  *   - the spinner is decorative
  */
 
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /****************
  * ### `loaderVocabulary`

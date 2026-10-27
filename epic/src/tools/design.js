@@ -23,8 +23,8 @@ import { parseHTML } from "linkedom"
 
 import { escapeHTML } from "spell/util/string.ts"
 import { localDate } from "spell/util/time.ts"
-import { parseVerbArgs } from "spell-epic/command/command.types.ts"
-import { ENGINE_ROUTES } from "spell-epic/server/server.types.ts"
+import { parseVerbArgs } from "spell/epic/command/command.types.ts"
+import { ENGINE_ROUTES } from "spell/epic/server/server.types.ts"
 import { packageDir } from "./packageDir.ts"
 import { CONTENT, ROOT, pageFile } from "./pages.js"
 

@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { IconName } from "spell-ui/icons/IconName"
+import { IconName } from "spell/ui/icons/IconName"
 
 ////////////////
 // ## Spelling

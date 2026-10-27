@@ -1,18 +1,18 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { colorsCSS, foundationCSS } from "spell-ui/styles"
+import { colorsCSS, foundationCSS } from "spell/ui/styles"
 
 import { Fixture } from "spell/test-helpers/Fixture"
-import { Sheets } from "spell-ui/test-helpers/Sheets"
+import { Sheets } from "spell/ui/test-helpers/Sheets"
 
-import { placeholderHeaderVocabulary } from "spell-ui/components/ui-placeholder/UIPlaceholderHeader.en"
-import { placeholderImageVocabulary } from "spell-ui/components/ui-placeholder/UIPlaceholderImage.en"
-import { placeholderLineVocabulary } from "spell-ui/components/ui-placeholder/UIPlaceholderLine.en"
-import { placeholderParagraphVocabulary } from "spell-ui/components/ui-placeholder/UIPlaceholderParagraph.en"
-import { placeholderVocabulary } from "spell-ui/components/ui-placeholder/UIPlaceholder.en"
+import { placeholderHeaderVocabulary } from "spell/ui/components/ui-placeholder/UIPlaceholderHeader.en"
+import { placeholderImageVocabulary } from "spell/ui/components/ui-placeholder/UIPlaceholderImage.en"
+import { placeholderLineVocabulary } from "spell/ui/components/ui-placeholder/UIPlaceholderLine.en"
+import { placeholderParagraphVocabulary } from "spell/ui/components/ui-placeholder/UIPlaceholderParagraph.en"
+import { placeholderVocabulary } from "spell/ui/components/ui-placeholder/UIPlaceholder.en"
 
-import placeholderCSS from "spell-ui/components/ui-placeholder/UIPlaceholder.css?inline"
-import placeholderRaw from "spell-ui/components/ui-placeholder/UIPlaceholder.css?raw"
+import placeholderCSS from "spell/ui/components/ui-placeholder/UIPlaceholder.css?inline"
+import placeholderRaw from "spell/ui/components/ui-placeholder/UIPlaceholder.css?raw"
 
 /**
  * `UIPlaceholder.css` on its own, before any element exists:  the sheet's source rules, the computed styles of the

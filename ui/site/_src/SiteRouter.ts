@@ -1,8 +1,8 @@
-import { E, UI } from "spell-ui/core"
+import { E, UI } from "spell/ui/core"
 // Leaves, not barrels:  a family's barrel defines its tags, which `<ui-root>` does on first use
-import { RootLoader } from "spell-ui/components/ui-root/RootLoader"
-import { ExampleSource } from "spell-ui/components/ui-example/ExampleSource"
-import { NavIndex } from "spell-ui/docs-components/ui-docs-nav/NavIndex"
+import { RootLoader } from "spell/ui/components/ui-root/RootLoader"
+import { ExampleSource } from "spell/ui/components/ui-example/ExampleSource"
+import { NavIndex } from "spell/ui/docs-components/ui-docs-nav/NavIndex"
 import { serverConfig } from "spell/server/site"
 import type { SitePatch } from "./SitePatch"
 import { SiteSections } from "./SiteSections"

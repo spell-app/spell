@@ -19,7 +19,7 @@ export class Invoker {
    */
   static resolve(domElement: Element, id: string | undefined): Element | undefined {
     if (!id) return undefined
-    // duck-typed, not `instanceof Document / ShadowRoot`:  the static render resolves ids in node (`spell-ui/static`)
+    // duck-typed, not `instanceof Document / ShadowRoot`:  the static render resolves ids in node (`spell/ui/static`)
     const root = domElement.getRootNode() as Partial<Document>
     return typeof root.getElementById === "function" ? (root.getElementById(id) ?? undefined) : undefined
   }

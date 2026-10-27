@@ -6,9 +6,9 @@
  * - Its tests compile to the same javascript as English's:  the same program, said in Spanish.
  * - A keyword with a written accent is accepted without it too:  `(más|mas)`, `(pequeño|pequeno)`.
  */
-import { P } from "spell-parser/parser"
-import { SpellParser } from "spell-parser/spell/SpellParser"
-import { Wording } from "spell-parser/spell/rules/expressions"
+import { P } from "spell/parser/parser"
+import { SpellParser } from "spell/parser/spell/SpellParser"
+import { Wording } from "spell/parser/spell/rules/expressions"
 
 import { AbsoluteValue } from "./AbsoluteValue"
 import { DividedBy } from "./DividedBy"

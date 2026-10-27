@@ -1,11 +1,11 @@
 /**
  * The English vocabulary of `<ui-breadcrumb>`:  every name the tag uses.
  * - Its tag, attributes (each with its kind and allowed values), events, slots, parts, states and texts.
- *   The shape is `E.ComponentVocabulary` (`spell-ui/vocabulary`).
+ *   The shape is `E.ComponentVocabulary` (`spell/ui/vocabulary`).
  * - How the family's attributes become class words:  `UIBreadcrumbs.en.ts`.
  */
 
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /****************
  * ### `breadcrumbVocabulary`

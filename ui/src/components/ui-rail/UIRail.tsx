@@ -1,6 +1,6 @@
 import type { JSX } from "@solidjs/web"
 
-import { E } from "spell-ui/core"
+import { E } from "spell/ui/core"
 import { railVocabulary } from "./UIRail.en"
 
 import railCSS from "./UIRail.css?inline"

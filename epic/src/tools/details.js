@@ -46,7 +46,7 @@ import { parseHTML } from "linkedom"
 
 import { clamp } from "spell/util/number.ts"
 import { localDate } from "spell/util/time.ts"
-import { duration, parseVerbArgs } from "spell-epic/command/command.types.ts"
+import { duration, parseVerbArgs } from "spell/epic/command/command.types.ts"
 import {
   ASK,
   CHOICES,
@@ -60,7 +60,7 @@ import {
   questionSection
 } from "./answerPages.js"
 import { AskListeners } from "./AskListeners.ts"
-import { DataFile } from "spell-epic/data/DataFile.ts"
+import { DataFile } from "spell/epic/data/DataFile.ts"
 import { CONTENT, ROOT, fromTemplate, inContent, openInVSCode, serialize } from "./pages.js"
 import {
   archiveAnswer,

@@ -2,8 +2,8 @@ import { readFileSync } from "node:fs"
 import { basename, join } from "node:path"
 import { parseHTML } from "linkedom"
 
-import { PageOutline } from "spell-ui/components/ui-toc/PageOutline"
-import type { SiteSearchFile, SiteSearchPage } from "spell-ui/docs-components/docs-components.types"
+import { PageOutline } from "spell/ui/components/ui-toc/PageOutline"
+import type { SiteSearchFile, SiteSearchPage } from "spell/ui/docs-components/docs-components.types"
 import { sitePages } from "./tools.types.ts"
 
 /****************

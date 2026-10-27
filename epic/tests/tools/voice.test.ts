@@ -4,7 +4,7 @@
  */
 import { describe, expect, test } from "vite-plus/test"
 
-import { PageVoice } from "spell-epic/tools/voice"
+import { PageVoice } from "spell/epic/tools/voice"
 
 /** A guide's head, as the durable template writes it. */
 const PAGE = [

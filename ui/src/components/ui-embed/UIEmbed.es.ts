@@ -1,4 +1,4 @@
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /**
  * `<ui-embed>` in Spanish:  `<es-incrustado>`, with the names and texts only it uses (from `UIEmbed.en.ts`).

@@ -127,7 +127,7 @@ Compile both, and `diff` finds the same JavaScript, member for member, but for t
 - In an outline, `it` and `its` mean the template its first line names, and a blank like `(rank)` finds its own list;
   a sentence names both.
 - A file may mix the two:
-  in [Solitaire's game](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/examples/Solitaire/Solitaire.spellx), one block of plain Spell holds its play, `to play a card`, a sentence,
+  in [Solitaire's game](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/examples/Solitaire/Solitaire.spellx), one block of plain Spell holds its play, `to play a card`, a sentence,
   and what a pile does while a card is dragged over it, an outline under `a pile:`.
 - That the two compile the same is a test's job, [outline.test.ts](tests/spell/parserTests/outline.test.ts),
   not a hope.
@@ -266,7 +266,7 @@ Its first line is how you call it, with each blank's type in brackets:
 - An action may be written in any file, yet be a method of a template another file declares:
   a class takes its members from every file of the project.
   - E.g. Solitaire's `to play a card` is a method of `Card`, which its `Card.spellx` declares
-    ([Solitaire.spellx](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/examples/Solitaire/Solitaire.spellx)).
+    ([Solitaire.spellx](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/examples/Solitaire/Solitaire.spellx)).
 - An action that pauses (`pause for 50 msec`) compiles to an `async` method,
   and its caller waits for it only when it says `wait for`:  that's what makes Solitaire's deal animate, card by card.
 - An action can be used above its definition, or from an earlier file:
@@ -332,7 +332,7 @@ a "tableau" is a pile where:
 ```
 
 _Solitaire's tableau as it was once written, its rules and its other styles left out:
-each card in the column but the last shows only its top.  Today [its styles.css](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/examples/Solitaire/styles.css) lays the piles out._
+each card in the column but the last shows only its top.  Today [its styles.css](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/examples/Solitaire/styles.css) lays the piles out._
 
 ```js
 export class Tableau extends Pile {
@@ -343,14 +343,14 @@ export class Tableau extends Pile {
 - A tag's name is its app's, then its template's:  the tableau is `<solitaire-tableau>`.
 - `to draw it` returns markup, with Spell inside its braces:
   `<text color={its color}>{its picture}</text>`, the front of
-  [Solitaire's Card.spellx](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/examples/Solitaire/Card.spellx).
+  [Solitaire's Card.spellx](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/examples/Solitaire/Card.spellx).
   - A click on the card is its own handler there, `<on click>`, whose body is `play it`.
 - The element's attributes are its card's properties, and its methods call its card's:
   the TypeScript target writes that element out as a class, `CardElement`
   ([README-targets](README-targets.md#the-card-line-by-line)).
 - `draw each card in the deck` draws each in turn:  `core.drawItems(deck)`.
 - A thing has ONE drawing, its `to draw it`:  a card face down checks its own direction there,
-  in the two sided view it's built on ([Solitaire's Card.spellx](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/examples/Solitaire/Card.spellx), below).
+  in the two sided view it's built on ([Solitaire's Card.spellx](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/examples/Solitaire/Card.spellx), below).
   - In an outline, `- to "draw it":` takes markup as its body, no `return` needed;
     `- to draw it:` unquoted takes a method's body, which returns it.
   - In that body, a line of markup IS what it draws, with no `return`:  the lines around it pick which,
@@ -378,7 +378,7 @@ export class Tableau extends Pile {
     `drawItsPlaceholder()`, e.g. a stock pile's face-down card (Spanish:  `para dibujar su marcador`)
 - A viewable list's element numbers its items for CSS:  each one's `--index`, from 0, and its own `--count`,
   so a pile can lay its cards out with no code
-  ([Solitaire's styles.css](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/examples/Solitaire/styles.css)).
+  ([Solitaire's styles.css](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/examples/Solitaire/styles.css)).
 - A thing that moves from one list to another glides there on the page.
 - A viewable list's wrapper may have named places a child can fill,
   `<children name="header"/>`, filled by a child written `<h3 in="header">`.
@@ -490,7 +490,7 @@ export function testCardSetup() {
   On a copy of the Solitaire example (a compile writes beside a project's source):
 
 ```sh
-cp -R ~/www/spell/spell-app/spaces/@spell/examples/Solitaire try/
+cp -R ~/www/spell/app/spaces/@spell/examples/Solitaire try/
 cd try
 spell test ./Solitaire
 ```
@@ -526,7 +526,7 @@ Every thing has an `id`, built in:  nobody declares it.
 - A thing saves as readable JSON, its type first:
   the format is the runtime's ([README-core](README-core.md#the-pieces--one-object-built-as-it-loads), "JSON").
 - Saved in its own file, each person is a file of their own;
-  saved inline, a small thing stays inside what holds it ([people](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/test/people/People.spell)).
+  saved inline, a small thing stays inside what holds it ([people](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/test/people/People.spell)).
 
 One thing of a running program is named by its template, then its name or its place:
 
@@ -536,7 +536,7 @@ One thing of a running program is named by its template, then its name or its pl
 | In Spell | `print the name of tableau T1` | `print the name of the first tableau` |
 | Compiled | `core.thingNamed(Tableau, "T1")?.name` | `core.thingAtPlace(Tableau, 1)?.name` |
 
-- From [thing-references](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/test/thing-references/ThingReferences.spell),
+- From [thing-references](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/test/thing-references/ThingReferences.spell),
   which also names two tableaus `T1`:  a reference to `T1` warns, and finds the first.
 
 A project, and each file in it, has an ADDRESS:  a group, then the project, then the file.
@@ -552,7 +552,7 @@ A project, and each file in it, has an ADDRESS:  a group, then the project, then
 ```
 
 - The groups (`@spell/examples`, `@spell/library`, `@spell/test`) are spell-app's spaces',
-  which tells Spell where each one's folder is ([README-spaces](https://github.com/spell-app/spell-app/blob/main/README-spaces.md)).
+  which tells Spell where each one's folder is ([README-spaces](https://github.com/spell-app/spell/blob/main/app/README-spaces.md)).
 - A project outside every group is `@local/<folders>`:  the card above, compiled in `try/`, was `@local/try/solitaire`.
 
 ## The compiler
@@ -629,7 +629,7 @@ All four, and what each writes:  [README-targets](README-targets.md).
 From code:
 
 ```ts
-import { SP } from "spell-parser/spell"
+import { SP } from "spell/parser/spell"
 
 SP.spellParser.compile("print 1 + 2", "statement") // => "core.console.log(1 + 2)"
 ```
@@ -639,26 +639,26 @@ SP.spellParser.compile("print 1 + 2", "statement") // => "core.console.log(1 + 2
 
 ## The frozen test projects
 
-Seven projects in spell-app's [spaces/@spell/test/](https://github.com/spell-app/spell-app/tree/main/spaces/@spell/test/)
+Seven projects in spell-app's [spaces/@spell/test/](https://github.com/spell-app/spell/tree/main/app/spaces/@spell/test/)
 pin what Spell does, line for line:
 each has a snapshot of every target's output beside it, and a test fails on any change.
 They're NEVER edited to follow the live examples, which people change.
 
 | Project | What it shows |
 | --- | --- |
-| [fizzbuzz](https://github.com/spell-app/spell-app/tree/main/spaces/@spell/test/fizzbuzz/) | a loop, `if` / `otherwise`, `print` |
-| [counter](https://github.com/spell-app/spell-app/tree/main/spaces/@spell/test/counter/) | a counter, drawn as a button that counts its clicks:  a frozen library, for `counter-app` to import |
-| [counter-app](https://github.com/spell-app/spell-app/tree/main/spaces/@spell/test/counter-app/) | that library's counter, made and drawn:  one project importing another |
-| [lists-from-zero](https://github.com/spell-app/spell-app/tree/main/spaces/@spell/test/lists-from-zero/) | a rack of five tiles, its lists counting from 0 |
-| [thing-references](https://github.com/spell-app/spell-app/tree/main/spaces/@spell/test/thing-references/) | naming one thing:  `tableau T1`, `the first tableau` |
-| [people](https://github.com/spell-app/spell-app/tree/main/spaces/@spell/test/people/) | people and what they keep, as a TypeScript library |
-| [todos-form-based](https://github.com/spell-app/spell-app/tree/main/spaces/@spell/test/todos-form-based/) | a to-do app drawn with Spell UI's form elements |
+| [fizzbuzz](https://github.com/spell-app/spell/tree/main/app/spaces/@spell/test/fizzbuzz/) | a loop, `if` / `otherwise`, `print` |
+| [counter](https://github.com/spell-app/spell/tree/main/app/spaces/@spell/test/counter/) | a counter, drawn as a button that counts its clicks:  a frozen library, for `counter-app` to import |
+| [counter-app](https://github.com/spell-app/spell/tree/main/app/spaces/@spell/test/counter-app/) | that library's counter, made and drawn:  one project importing another |
+| [lists-from-zero](https://github.com/spell-app/spell/tree/main/app/spaces/@spell/test/lists-from-zero/) | a rack of five tiles, its lists counting from 0 |
+| [thing-references](https://github.com/spell-app/spell/tree/main/app/spaces/@spell/test/thing-references/) | naming one thing:  `tableau T1`, `the first tableau` |
+| [people](https://github.com/spell-app/spell/tree/main/app/spaces/@spell/test/people/) | people and what they keep, as a TypeScript library |
+| [todos-form-based](https://github.com/spell-app/spell/tree/main/app/spaces/@spell/test/todos-form-based/) | a to-do app drawn with Spell UI's form elements |
 
 Two examples are tested the same way, but as they are, never as frozen copies:
-[Solitaire](https://github.com/spell-app/spell-app/tree/main/spaces/@spell/examples/Solitaire/), a whole game,
-and [Solitario](https://github.com/spell-app/spell-app/tree/main/spaces/@spell/examples/Solitario/), the same game in Spanish.
+[Solitaire](https://github.com/spell-app/spell/tree/main/app/spaces/@spell/examples/Solitaire/), a whole game,
+and [Solitario](https://github.com/spell-app/spell/tree/main/app/spaces/@spell/examples/Solitario/), the same game in Spanish.
 - Their snapshots are spell-app's tests', not beside the example:
-  [`tests/spell/__examples__/`](https://github.com/spell-app/spell-app/tree/main/tests/spell/__examples__/).
+  [`tests/spell/__examples__/`](https://github.com/spell-app/spell/tree/main/app/tests/spell/__examples__/).
 - A change to an example changes its snapshots, blessed again with it.
 
 The snapshots, for a project `<Project>`:
@@ -682,13 +682,13 @@ The snapshots, for a project `<Project>`:
 - They and their tests are spell-app's, beside its other `@spell` groups:
   so a test project can import another `@spell` project, and Spell's own tests never read a repo above it.
 - `yarn spell:test:fixtures` checks them all, in spell-app
-  ([fixtures.test.ts](https://github.com/spell-app/spell-app/blob/main/tests/spell/test/fixtures.test.ts), [typescript.test.ts](https://github.com/spell-app/spell-app/blob/main/tests/spell/test/typescript.test.ts),
-  [python.test.ts](https://github.com/spell-app/spell-app/blob/main/tests/spell/test/python.test.ts)).
+  ([fixtures.test.ts](https://github.com/spell-app/spell/blob/main/app/tests/spell/test/fixtures.test.ts), [typescript.test.ts](https://github.com/spell-app/spell/blob/main/app/tests/spell/test/typescript.test.ts),
+  [python.test.ts](https://github.com/spell-app/spell/blob/main/app/tests/spell/test/python.test.ts)).
 - After a deliberate change:  `yarn spell:test:fixtures:bless` there, then read the diff.  The diff is the review.
 - Add a test project by copying a project in:  every folder there with a project file is one.
 - In tests, read them with `loadFixtureProject()`, `fixturePath()` and `fixtureProjectId()`,
-  from spell-app's `spell-app/spaces/test`:  by name, a frozen project's or a tested example's (`Solitaire`).
-- Spell's own tests here write their projects inline, with `parseSpellProject()` from `spell-parser/spell/test`.
+  from spell-app's `spell/app/spaces/test`:  by name, a frozen project's or a tested example's (`Solitaire`).
+- Spell's own tests here write their projects inline, with `parseSpellProject()` from `spell/parser/spell/test`.
 - They're the group `@spell/test`, which the app lists in dev only.
 
 ## Adding a rule
@@ -737,10 +737,10 @@ A test pins every rule's name, module and registration order, so a renamed class
 
 ```ts
 import { proto } from "spell/util"
-import { P } from "spell-parser/parser"
+import { P } from "spell/parser/parser"
 // Import directly to avoid circular import
-import { SpellStatement } from "spell-parser/spell/rules/Statement"
-import { Wording } from "spell-parser/spell/rules/expressions"
+import { SpellStatement } from "spell/parser/spell/rules/Statement"
+import { Wording } from "spell/parser/spell/rules/expressions"
 
 /**
  * `pause` rule:  delay for a certain amount of time, e.g. `pause for 2 seconds`.
@@ -811,14 +811,14 @@ Where projects live, and the editor, the language server and the extension peopl
 all on one language service built on this parser ([what isn't in this repo](README.md#whats-not-here)).
 Two seams show when you work in this folder:
 - **Project groups:**  Spell's registry of groups starts empty.
-  spell-app's spaces registers `@spell/examples` and the rest ([README-spaces](https://github.com/spell-app/spell-app/blob/main/README-spaces.md)),
+  spell-app's spaces registers `@spell/examples` and the rest ([README-spaces](https://github.com/spell-app/spell/blob/main/app/README-spaces.md)),
   and Spell never imports spaces.
 - **Projects on disk:**  Spell holds none, not even the frozen test projects:  they're spell-app's too.
 
 And what IS here, though you might look elsewhere:
 - **The highlighter:**  `SP.SpellHighlighter.spans(text)` colours a snippet with no project,
   for `<ui-code language="spell">`.
-- **Node-only helpers**, never in the entry (`spell-parser/spell/node/...`):
+- **Node-only helpers**, never in the entry (`spell/parser/spell/node/...`):
   the TypeScript check and its build, pyright, the syntax table.
 
 ## 🌱 Coming:  mixins, and Spell UI written in Spell

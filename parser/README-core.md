@@ -55,7 +55,7 @@ Spell compiles the line to the same call every time, and that call is tested onc
 expected draws.
 
 [The parser](README-parser.md) reads the English, [a writer](README-targets.md) turns it into code,
-and this is what the code calls:  `spell-parser/core`, one of [spell-parser's](README.md) six folders.
+and this is what the code calls:  `spell/parser/core`, one of [spell-parser's](README.md) six folders.
 It's ONE object, `core`, of 143 helpers (`core.getRange(1, 100)`, `core.randomItemOf(deck)`,
 `core.move(card, tableau)` ...), and the classes a program's templates extend.
 Every `core.` in compiled JavaScript is a call into it;  compiled Python's go to its twin, `spell_core`.
@@ -109,7 +109,7 @@ a page's runner in the browser, node's module hooks under `spell run`
 (below, ["Who may import it"](#who-may-import-it--one-copy-per-running-app)).
 
 FizzBuzz shows what the core is for.
-Here are its three kinds of line ([the frozen test project](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/test/fizzbuzz/FizzBuzz.spell)),
+Here are its three kinds of line ([the frozen test project](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/test/fizzbuzz/FizzBuzz.spell)),
 and what each becomes:
 
 ```mermaid
@@ -146,8 +146,8 @@ _FizzBuzz's three kinds of line:  in JavaScript each one calls the core, in Pyth
 - Nor one test for each of Spell's type names:  `core.isOfType(number / 15, "integer")`.
 - Nor a console that knows how to print a card:  `core.console.log()`.
 - Python has a word for all three, so FizzBuzz's Python imports nothing:
-  [its snapshot](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/test/fizzbuzz/fizzbuzz.snapshot.py) has one import line,
-  `from __future__ import annotations`, where [the JavaScript's](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/test/fizzbuzz/fizzbuzz.snapshot.js)
+  [its snapshot](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/test/fizzbuzz/fizzbuzz.snapshot.py) has one import line,
+  `from __future__ import annotations`, where [the JavaScript's](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/test/fizzbuzz/fizzbuzz.snapshot.js)
   imports the core.
 
 Both writers keep one rule:  the language's own word where it has one, the core only where it doesn't.
@@ -250,7 +250,7 @@ Each module of the folder adds its helpers to the one object as it loads, so imp
 | seeded random | `core.seedRandom(n)`:  everything random after it repeats, run after run | [ParkMiller.ts](src/core/ParkMiller.ts) |
 | the console, tests | `print`, `expect`, `to test ...`, and assertions | [console.ts](src/core/console.ts), [assert.ts](src/core/assert.ts), [tests.ts](src/core/tests.ts) |
 | messages | what the core says to the person running a program, in the program's language:  English built in, another language's from the project's words file | [messages.ts](src/core/messages.ts) |
-| the model alone | the core without drawing, for libraries:  `spell-parser/core/model` | [model.ts](src/core/model.ts) |
+| the model alone | the core without drawing, for libraries:  `spell/parser/core/model` | [model.ts](src/core/model.ts) |
 | the method list | every name on the core, for another language's core to match;  and the script that writes it | [coreDeclarations.ts](src/core/coreDeclarations.ts), [writeCoreDeclarations.ts](src/core/writeCoreDeclarations.ts) |
 
 Its tests are in [tests/core/](tests/core/), at the same paths as the code.
@@ -301,7 +301,7 @@ A reader of only a derived value hears of a change on a microtask, and only the 
 `the first card of the deck` is the first card, and `card 2 of the deck` the second, as a person counts.
 JavaScript and Python count from 0, and so does the runtime.
 The compiler bridges the two;  here's Klondike's deal, from the
-[Solitaire](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/examples/Solitaire/Solitaire.spellx) example:
+[Solitaire](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/examples/Solitaire/Solitaire.spellx) example:
 
 ```spell
 for row from 1 to 7
@@ -367,7 +367,7 @@ The core itself counts from 0, and has no idea where a project counts from.
 That's on purpose:  counting is the language's business, and the output stays each platform's own.
 So a project can count from 0 instead, with `"listsStartAt": 0` in its project file, and only the compiled numbers
 change:  `card 0 of the deck` is the ace of clubs, and so, still, is `the first card of the deck`
-(the [lists-from-zero](https://github.com/spell-app/spell-app/tree/main/spaces/@spell/test/lists-from-zero/) test project).
+(the [lists-from-zero](https://github.com/spell-app/spell/tree/main/app/spaces/@spell/test/lists-from-zero/) test project).
 
 The edge:  only Spell's own lines count from 1.
 JavaScript you write by hand that calls a compiled class gets the platform's indexes:
@@ -514,7 +514,7 @@ flowchart LR
     a1["a &lt;spell-viewer&gt;"] --> r1["spell-runtime.js<br/>its own core"]
     a2["another &lt;spell-viewer&gt;"] --> r2["spell-runtime.js<br/>its own core"]
   end
-  ed["the editor, the parser, the language"] -. "types only" .-> types["spell-parser/core/core.types"]
+  ed["the editor, the parser, the language"] -. "types only" .-> types["spell/parser/core/core.types"]
   %% the Spell look:  yarn mermaid:pretty
   classDef default fill:#EFECFB,stroke:#6550CA,stroke-width:1.5px,color:#1A1C27,rx:8px,ry:8px
   classDef data fill:#F1E7D4,stroke:#C9B48A,stroke-width:1.5px,color:#1A1C27,rx:2px,ry:2px
@@ -525,7 +525,7 @@ _Two apps on one page, two cores;  everything else reads only the types._
 
 Compiled JavaScript and TypeScript import it as `@spell/core`.
 In a page, ONLY the runner in `spell-app` imports the core's code:
-[spellRuntime.ts](https://github.com/spell-app/spell-app/blob/main/src/app/runner/spellRuntime.ts) bundles it as `spell-runtime.js`,
+[spellRuntime.ts](https://github.com/spell-app/spell/blob/main/app/src/app/runner/spellRuntime.ts) bundles it as `spell-runtime.js`,
 the one module in each runner's bundle (the `<spell-viewer>` element's, the VS Code runner's, the web app's)
 that holds the runtime's code.
 Each `<spell-viewer>` then imports a fresh copy, from a `blob:` URL of its own,
@@ -533,13 +533,13 @@ with its own console, event listeners, running state and mount point.
 So a program never runs on whatever else the page loaded, nor on another app's core.
 
 Everything else, the editor, the parser and the language among them, imports only the core's TYPES
-(`import type` from `spell-parser/core/core.types`), which erase to nothing.
-Two tests in `spell-app` hold that line, [element.build.test.ts](https://github.com/spell-app/spell-app/blob/main/tests/app/runner/element.build.test.ts)
-and [build.test.ts](https://github.com/spell-app/spell-app/blob/main/tests/app/build.test.ts):
+(`import type` from `spell/parser/core/core.types`), which erase to nothing.
+Two tests in `spell-app` hold that line, [element.build.test.ts](https://github.com/spell-app/spell/blob/main/app/tests/app/runner/element.build.test.ts)
+and [build.test.ts](https://github.com/spell-app/spell/blob/main/app/tests/app/build.test.ts):
 import the core's code anywhere else, and it lands in a shared chunk, or loads twice.
 
 Three more rules, each with its reason:
-- `spell-parser/core/model` is the one other entry:  the core without drawing, so no Solid and no running program's
+- `spell/parser/core/model` is the one other entry:  the core without drawing, so no Solid and no running program's
   things.
   A compiled TypeScript library (the `ts/lib` target) imports it, and so may the server and the app:
   a library's things are plain data, and belong to no program.
@@ -551,8 +551,8 @@ Where `@spell/core` points, by where the program runs:
 
 | Where | `@spell/core` is | Who points it |
 | --- | --- | --- |
-| a page:  the editor, VS Code, a `<spell-viewer>` | that app's own `spell-runtime.js` | the runner, rewriting the import:  `linkModule()` in [runCompiled.ts](https://github.com/spell-app/spell-app/blob/main/src/app/runner/runCompiled.ts) |
-| node:  `spell run`, `spell test` | the core's source | node module hooks, which do the job of a page's import map:  [hooks.mjs](https://github.com/spell-app/spell-app/blob/main/src/cli/runner/hooks.mjs) |
+| a page:  the editor, VS Code, a `<spell-viewer>` | that app's own `spell-runtime.js` | the runner, rewriting the import:  `linkModule()` in [runCompiled.ts](https://github.com/spell-app/spell/blob/main/app/src/app/runner/runCompiled.ts) |
+| node:  `spell run`, `spell test` | the core's source | node module hooks, which do the job of a page's import map:  [hooks.mjs](https://github.com/spell-app/spell/blob/main/app/src/cli/runner/hooks.mjs) |
 | the type check | the core's source | [typecheck.ts](src/spell/node/typecheck.ts) |
 
 ## Working on it
@@ -603,4 +603,4 @@ These guides need a checkout with the content folder beside it, and the page ser
 - [README-spell](README-spell.md):  the sentences behind each call, from types and lists to saving by id
 - [core's AGENTS.md](src/core/AGENTS.md):  the rules for changing the core, in full
 - [the kit's README-util](https://github.com/spell-app/spell/blob/main/README-util.md):  the cells under every thing's properties
-- [spell-app's README-app](https://github.com/spell-app/spell-app/blob/main/README-app.md):  the runner that gives each app its own copy
+- [spell-app's README-app](https://github.com/spell-app/spell/blob/main/app/README-app.md):  the runner that gives each app its own copy

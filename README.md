@@ -243,12 +243,12 @@ and runs them right beside the text.
 - Fast Refresh keeps your component's state across an edit.
   Spell keeps what the program MADE:  change a rule mid-game, and the cards stay on the table.
 - The clever part is underneath:  a parser that knows no language at all.
-  Each rule is a class with a syntax string, written in [Rulex](https://github.com/spell-app/spell-parser/blob/main/README-rulex.md);
+  Each rule is a class with a syntax string, written in [Rulex](https://github.com/spell-app/spell/blob/main/parser/README-rulex.md);
   no grammar file, no generated code.
-  [GitHub's Markdown](https://github.com/spell-app/spell-parser/blob/main/README-markdown.md) runs on it too, and passes all 670 of 670 spec examples.
+  [GitHub's Markdown](https://github.com/spell-app/spell/blob/main/parser/README-markdown.md) runs on it too, and passes all 670 of 670 spec examples.
 - Spell reads Spanish too:  a file says so in its name, `Carta.es.spell`, and its sentences compile to the same targets.
   Solitario, the Solitaire example written again in Spanish, deals and passes the same tests
-  ([Spell in Spanish](https://github.com/spell-app/spell-parser/blob/main/README-spanish.md)).
+  ([Spell in Spanish](https://github.com/spell-app/spell/blob/main/parser/README-spanish.md)).
   🌱 Norwegian and Portuguese are next.
 
 ### A component is a real element on the page
@@ -262,7 +262,7 @@ attributes, properties and events on the outside, a component behind it drawing 
   A thousand `<ui-button>`s are built, rendered and ready in about 80 ms (the median of the last recorded run).
 - So it works from plain HTML and from any framework, React included, with no wrapper,
   and each element is its own error boundary.
-- [Spell UI](https://github.com/spell-app/spell-ui/blob/main/README.md) is about sixty families of these, on [the kit's element framework](README-element.md).
+- [Spell UI](https://github.com/spell-app/spell/blob/main/ui/README.md) is about sixty families of these, on [the kit's element framework](README-element.md).
   A page imports ONE, `<ui-root>`, and it loads each of the others the first time the page uses it.
 - Your program's things are elements too:  that card is a `view`, so it draws as its own `<solitaire-card>`.
 - The catch:  Spell UI isn't on npm yet (below, "Coming").
@@ -294,9 +294,9 @@ _"Why doesn't it do that already???"_
   - English-like languages were tried before:  COBOL and AppleScript were easy to read, hard to write.
     Now an AI does the writing, so code a person can read is worth more than it was, not less.
 - Many languages, many targets:  English and Spanish in;  JavaScript, TypeScript and Python out today.
-  The language:  [spell-parser's README](https://github.com/spell-app/spell-parser/blob/main/README.md).
+  The language:  [spell-parser's README](https://github.com/spell-app/spell/blob/main/parser/README.md).
 - 🌱 An environment where you build by moving things around, not only by typing:  coming.
-  The editor today:  [spell-app's README](https://github.com/spell-app/spell-app/blob/main/README.md).
+  The editor today:  [spell-app's README](https://github.com/spell-app/spell/blob/main/app/README.md).
 
 Where that stands, plainly:
 - **Real today:**  the language and its three target languages, the editor that runs as you type,
@@ -319,10 +319,10 @@ Why five, and not one:  each repo is one thing, with its own tests and its own C
 | Repo | What it is |
 | --- | --- |
 | `spell`, this one | the bottom of every repo:  shared helpers, the toolchain, the page server, the element framework, the command line's base;  and the one install |
-| [spell-parser](https://github.com/spell-app/spell-parser/blob/main/README.md) | the language:  a rule-based parser, Spell's rules, the runtime compiled programs run on, and its writers for JavaScript, TypeScript and Python |
-| [spell-ui](https://github.com/spell-app/spell-ui/blob/main/README.md) | Spell UI:  web components for any page or framework, loaded on demand |
-| [spell-epic](https://github.com/spell-app/spell-epic/blob/main/README.md) | epics and sagas:  plan on a page, build in a worktree, review on the page;  a Claude Code plugin |
-| [spell-app](https://github.com/spell-app/spell-app/blob/main/README.md) | the Spell app:  the live editor, spaces for projects, the language server, the VS Code extension |
+| [spell-parser](https://github.com/spell-app/spell/blob/main/parser/README.md) | the language:  a rule-based parser, Spell's rules, the runtime compiled programs run on, and its writers for JavaScript, TypeScript and Python |
+| [spell-ui](https://github.com/spell-app/spell/blob/main/ui/README.md) | Spell UI:  web components for any page or framework, loaded on demand |
+| [spell-epic](https://github.com/spell-app/spell/blob/main/epic/README.md) | epics and sagas:  plan on a page, build in a worktree, review on the page;  a Claude Code plugin |
+| [spell-app](https://github.com/spell-app/spell/blob/main/app/README.md) | the Spell app:  the live editor, spaces for projects, the language server, the VS Code extension |
 
 - The kit is always there;  `yarn clone` brings the rest, each with the repos it needs ([repos.json5](repos.json5)).
 - Each child repo is its own git repo, git-ignored here, and this catches everybody once:
@@ -482,10 +482,10 @@ yarn clone spell-app     # spell-app, and every repo it needs or runs
 
 ```text
 ~/www/spell/                    the kit (git repo spell):  src/ tests/ bin/ scripts/ tools/ agents/
-~/www/spell/spell-parser/         each child repo:  its own git repo, git-ignored by the kit
-~/www/spell/spell-ui/
-~/www/spell/spell-epic/
-~/www/spell/spell-app/
+~/www/spell/parser/         each child repo:  its own git repo, git-ignored by the kit
+~/www/spell/ui/
+~/www/spell/epic/
+~/www/spell/app/
 ~/www/spell/node_modules/       the ONE install:  node_modules/spell links to the kit, each spell-* is a workspace
 ~/www/spell/dist-types/         built declarations, for the type checks (git-ignored)
 ~/www/spell/spell.epics/        the content folder:  guides, epic pages, sagas, the logs (yours, local only)
@@ -509,7 +509,7 @@ yarn clone spell-app     # spell-app, and every repo it needs or runs
 Each of these runs as soon as setup is done, and what it printed on a real run is under it.
 They work outward:  one line, one program, the same program in Python, the editor, then the components.
 
-**One line, and how Spell reads it** ([spell-parser's README-spell.md](https://github.com/spell-app/spell-parser/blob/main/README-spell.md)):
+**One line, and how Spell reads it** ([spell-parser's README-spell.md](https://github.com/spell-app/spell/blob/main/parser/README-spell.md)):
 most of us never meet our compiler, but this one shows its work.
 
 ```sh
@@ -542,9 +542,9 @@ That's its match tree:  each indented line is a rule that matched, inside the on
 The last line is the JavaScript it compiles to.
 
 **A whole program, under node** ([README-cli.md](README-cli.md)).
-[FizzBuzz.spell](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/examples/fizzbuzz/FizzBuzz.spell) is eight lines:
+[FizzBuzz.spell](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/examples/fizzbuzz/FizzBuzz.spell) is eight lines:
 a loop from 1 to 100, an "if" for fizzbuzz, and an "otherwise if" each for fizz and buzz
-([spell-parser's front page](https://github.com/spell-app/spell-parser/blob/main/README.md#fizzbuzz) has all eight, beside what they compile to).
+([spell-parser's front page](https://github.com/spell-app/spell/blob/main/parser/README.md#fizzbuzz) has all eight, beside what they compile to).
 Run it;  a program with a UI would open in your browser, and `--no-browser` skips anything that needs one.
 
 ```sh
@@ -568,7 +568,7 @@ spell run @spell/examples/fizzbuzz --no-browser
 
 </details>
 
-**The same program, in Python** ([spell-parser's README-targets.md](https://github.com/spell-app/spell-parser/blob/main/README-targets.md)).
+**The same program, in Python** ([spell-parser's README-targets.md](https://github.com/spell-app/spell/blob/main/parser/README-targets.md)).
 Not a word-for-word port, but line for line, the way a person would write it:
 "for each number from 1 to 100" comes out as `range(1, 101)`, and each "otherwise if" as an `elif`.
 
@@ -603,7 +603,7 @@ play_fizzbuzz()
 
 </details>
 
-**The editor, on Solitaire:**  it runs the program as you type ([spell-app's README-app.md](https://github.com/spell-app/spell-app/blob/main/README-app.md)).
+**The editor, on Solitaire:**  it runs the program as you type ([spell-app's README-app.md](https://github.com/spell-app/spell/blob/main/app/README-app.md)).
 It opens a browser (`--headless` only prints the address);  Ctrl-C stops it.
 
 ```sh
@@ -629,7 +629,7 @@ When the page server is already running, its line ends "(already running)".
 
 _The program on the left, the game it's running on the right:  edit the left, and two seconds later the right follows._
 
-This game's [Solitaire.spellx](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/examples/Solitaire/Solitaire.spellx) is written in spellx, Spell in tags,
+This game's [Solitaire.spellx](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/examples/Solitaire/Solitaire.spellx) is written in spellx, Spell in tags,
 and its cards, deck and piles are files of its own beside it.
 A tableau says what it can take:
 `return its color is not the color of the card and its value is the value of the card + 1`.
@@ -670,7 +670,7 @@ spell test @spell/examples/Solitaire
 </details>
 
 **Every Spell UI example on one page**, the plain class markup on the left, the elements on the right
-([spell-ui's README](https://github.com/spell-app/spell-ui/blob/main/README.md)):
+([spell-ui's README](https://github.com/spell-app/spell/blob/main/ui/README.md)):
 
 ```sh
 cd ~/www/spell/spell-ui
@@ -689,7 +689,7 @@ yarn dev
 
 </details>
 
-- It opens [the demo page](https://github.com/spell-app/spell-ui/blob/main/src/tools/demo/index.html), at `/src/tools/demo/index.html`, in your browser;
+- It opens [the demo page](https://github.com/spell-app/spell/blob/main/ui/src/tools/demo/index.html), at `/src/tools/demo/index.html`, in your browser;
   the port may be the next free one.
 
 ## What the kit itself holds
@@ -816,38 +816,38 @@ The links into a child repo work in a checkout, where it's cloned inside the kit
 | [README-development.md](README-development.md) | <ul><li>a change from branch to merged, in eight steps</li><li>workspaces, with three differences;  the checks, and what "done" means</li><li>tests in a second tree;  one name per file</li><li>working across repos with one branch name;  CI by branch name</li><li>where to change what;  the papercuts;  every script</li></ul> |
 | [README-vscode.md](README-vscode.md) | <ul><li>the Spell extension, which runs the Spell on your disk</li><li>two extensions you build, the rest from the Marketplace</li><li>what it does for a `.spell` file;  the settings the repos ship</li><li>Spell Epic, the pages beside your code;  windows and worktrees</li><li>working on the extensions</li></ul> |
 | [README-agents.md](README-agents.md) | <ul><li>the first minute of an epic, and what's different here</li><li>what an agent reads, in order;  WWOD, and citing its rules;  do this, not that</li><li>the three logs</li><li>epics on a page;  the epic plugin, its skills and hooks</li><li>what's Claude-specific, and 🌱 other agents</li></ul> |
-| [spell-parser/README.md](https://github.com/spell-app/spell-parser/blob/main/README.md) | <ul><li>English you can run:  FizzBuzz, and what it compiles to</li><li>a parser that knows no language;  languages in, targets out</li><li>the pipeline, nine steps;  sentences or an outline, one meaning</li><li>try it in two minutes;  the language commands;  the pieces</li><li>Spell in Spanish;  🌱 a third language, more targets, any program read back as Spell</li></ul> |
-| [spell-parser/README-parser.md](https://github.com/spell-app/spell-parser/blob/main/README-parser.md) | <ul><li>rules as classes, for any language, by contrast with parser generators</li><li>one line through six stages:  tokens, rules, matches, the Spell tree, output, running it</li><li>how a choice is settled, and how earlier lines teach later ones</li><li>parsers for other languages, a date one in 23 lines</li><li>testing rules;  what it costs</li></ul> |
-| [spell-parser/README-rulex.md](https://github.com/spell-app/spell-parser/blob/main/README-rulex.md) | <ul><li>Rulex, regular expressions for words, by contrast with the ones you know</li><li>three real rules from Spell's grammar</li><li>your program writes Rulex too</li><li>what it can't say, and when it compiles</li><li>the cheat sheet</li></ul> |
-| [spell-parser/README-markdown.md](https://github.com/spell-app/spell-parser/blob/main/README-markdown.md) | <ul><li>Markdown on Spell's parser:  a heading is a rule, not a regular expression</li><li>Rulex says what a line is;  code does the rest</li><li>three functions, six options</li><li>exact, but slower and bigger than marked;  who draws with it</li><li>the spec as its scoreboard</li></ul> |
-| [spell-parser/README-spell.md](https://github.com/spell-app/spell-parser/blob/main/README-spell.md) | <ul><li>what the language can say:  two styles, one meaning</li><li>the whole language, module by module</li><li>what a line can say:  templates, aliases, actions, lists, drawing, events, tests</li><li>the compiler;  the frozen test projects;  adding a rule</li><li>🌱 mixins, and Spell UI written in Spell</li></ul> |
-| [spell-parser/README-core.md](https://github.com/spell-app/spell-parser/blob/main/README-core.md) | <ul><li>what compiled Spell runs on:  one import, for what JavaScript has no word for</li><li>a template is a class, and the class is the core's</li><li>its pieces:  one object, built as it loads</li><li>three things a reader trips on, the Python runtime beside it</li><li>who may import it:  one copy per running app</li></ul> |
-| [spell-parser/README-targets.md](https://github.com/spell-app/spell-parser/blob/main/README-targets.md) | <ul><li>one program, four targets, and what each costs</li><li>one tree, a writer per language;  the card, line by line</li><li>TypeScript as Solid developers write it;  a library for code that isn't Spell</li><li>Python in Python's own words;  choosing a target</li><li>🌱 WebAssembly, and a program on node mirrored in the page</li></ul> |
-| [spell-parser/README-spanish.md](https://github.com/spell-app/spell-parser/blob/main/README-spanish.md) | <ul><li>Spell in Spanish:  Solitario beside Solitaire, line for line</li><li>a file's name says its language;  mixing languages in a project</li><li>what works:  the grammar, article warnings, messages, Spell UI, the editor</li><li>one set of rules, two sets of words;  keeping them in step</li><li>the edges</li></ul> |
-| [spell-ui/README.md](https://github.com/spell-app/spell-ui/blob/main/README.md) | <ul><li>Spell UI, by contrast with other component libraries</li><li>thirty seconds, two ways;  `<ui-root>`, the top of every page</li><li>component packs;  the 62 families;  other ways to load</li><li>what it costs and assumes;  working on it</li><li>every page of Spell UI</li></ul> |
-| [spell-ui/README-components.md](https://github.com/spell-app/spell-ui/blob/main/README-components.md) | <ul><li>a family is a folder, and a row</li><li>when two families look alike</li><li>the catalogue of every family</li><li>how a family is laid out, and adding one</li><li>written from the data</li></ul> |
-| [spell-ui/README-frameworks.md](https://github.com/spell-app/spell-ui/blob/main/README-frameworks.md) | <ul><li>the contract:  four rules every element keeps</li><li>plain JavaScript, React 19, Vue 3 and Solid 2;  Svelte, Angular and Preact</li><li>types:  your editor knows every tag, and Solid's JSX does too</li><li>using it today, with an import map</li><li>what the smoke pages prove</li></ul> |
-| [spell-ui/README-migrating.md](https://github.com/spell-app/spell-ui/blob/main/README-migrating.md) | <ul><li>from Semantic UI, Fomantic UI or Semantic UI React</li><li>your classes moved inside:  a whole card, three ways</li><li>every class word becomes an attribute, and what changes under the words</li><li>from Semantic UI React:  the same words, no wrappers</li><li>moving a page by hand today;  🌱 the migration tool</li></ul> |
-| [spell-ui/README-runtime.md](https://github.com/spell-app/spell-ui/blob/main/README-runtime.md) | <ul><li>one runtime per page, not one per tree</li><li>eighteen services, one field each</li><li>vocabularies and localization;  icons, and your own set</li><li>styles;  the static render, from Python too</li><li>Spell UI's half of the element core</li></ul> |
-| [spell-ui/README-themes.md](https://github.com/spell-app/spell-ui/blob/main/README-themes.md) | <ul><li>theming, by contrast with MUI and Tailwind</li><li>what ships:  tokens, dark mode and the themes</li><li>four recipes, from sitewide defaults to the app stylesheet</li><li>🌱 picking and making themes</li></ul> |
-| [spell-ui/README-site.md](https://github.com/spell-app/spell-ui/blob/main/README-site.md) | <ul><li>the docs site, viewed with one command</li><li>a page is its head and one `main`;  writing one, flat</li><li>the scripts, and checking in a real browser</li><li>the tools and the visual tests</li><li>Spell UI's `spell` commands</li></ul> |
-| [spell-epic/README.md](https://github.com/spell-app/spell-epic/blob/main/README.md) | <ul><li>epics and sagas:  an epic's life, by contrast with tickets, pull requests and chat</li><li>try it:  a small epic, start to finish</li><li>ids you can say;  a page you act on, beside your code</li><li>built from Spell UI;  the `epic` command and the skills</li><li>beyond Spell;  working on it;  the pages</li></ul> |
-| [spell-epic/README-pages.md](https://github.com/spell-app/spell-epic/blob/main/README-pages.md) | <ul><li>your first review, in four moves</li><li>the header and toolbar;  nine sections and their ids</li><li>a review round:  marks, comments, test runs, colours</li><li>the other pages, from the same parts</li><li>the `<epic-*>` elements</li></ul> |
-| [spell-epic/README-skills.md](https://github.com/spell-app/spell-epic/blob/main/README-skills.md) | <ul><li>seventeen skills you type, eight hooks that run by themselves</li><li>planning and review;  worktrees and sessions</li><li>background and offline</li><li>what the hooks do, and the prompt gate first</li><li>two names for every skill in Claude Code</li></ul> |
-| [spell-epic/README-cli.md](https://github.com/spell-app/spell-epic/blob/main/README-cli.md) | <ul><li>the `epic` command:  six you'll actually type</li><li>an address is a page and an id</li><li>one copy of the code;  a session wakes when its `wait` exits</li><li>`--help`, and every verb by group</li><li>where it stops</li></ul> |
-| [spell-epic/README-vscode.md](https://github.com/spell-app/spell-epic/blob/main/README-vscode.md) | <ul><li>the Spell Epic extension, installed in three commands and a reload</li><li>two views, each a page that stays</li><li>which server answers, the first of four</li><li>the window bridge:  a session finds its own window</li><li>working on it</li></ul> |
-| [spell-epic/README-adopting.md](https://github.com/spell-app/spell-epic/blob/main/README-adopting.md) | <ul><li>epics in a repo that isn't Spell:  the plans live beside it</li><li>setting it up, in three steps and an extension</li><li>the content folder, the config file, the worktrees</li><li>your own AGENTS.md;  one epic server per machine</li><li>what's still Spell-shaped</li></ul> |
-| [spell-app/README.md](https://github.com/spell-app/spell-app/blob/main/README.md) | <ul><li>the Spell app;  spaces:  every project has an owner and an address</li><li>the live loop, from a keystroke to the app changing</li><li>what you can do today, and 🌱 the ambition</li><li>five example apps;  its folders, a page each</li><li>setup from zero;  working on it</li></ul> |
-| [spell-app/README-app.md](https://github.com/spell-app/spell-app/blob/main/README-app.md) | <ul><li>the editor and the runners:  four elements, for any page</li><li>one runner, three places;  a runtime per program</li><li>the editor:  one object behind every pane</li><li>the builds:  one Solid per page</li><li>App UI, a page for every component</li></ul> |
-| [spell-app/README-examples.md](https://github.com/spell-app/spell-app/blob/main/README-examples.md) | <ul><li>six example apps, simplest first, and the four parts of each</li><li>FizzBuzz:  a loop, and printing</li><li>Task List:  things that draw themselves, a list, and a property editor</li><li>Solitaire, in spellx and drawn</li><li>ideas for your own;  the frozen test projects</li></ul> |
-| [spell-app/README-spaces.md](https://github.com/spell-app/spell-app/blob/main/README-spaces.md) | <ul><li>spaces, where projects and people live</li><li>addresses:  the folder is in the name</li><li>setting up your own</li><li>the models, the servers, and Python's</li><li>people and orgs;  🌱 sign-in and permissions</li></ul> |
-| [spell-app/README-lsp.md](https://github.com/spell-app/spell-app/blob/main/README-lsp.md) | <ul><li>the language server:  the command line and the editor can't disagree</li><li>one service, three places it runs</li><li>the compiler's parse, through one queue</li><li>what it answers, request by request;  scope packs</li><li>where it stops;  🌱 moving to spell-parser, and `spell lsp`</li></ul> |
-| [spell-app/README-page-server.md](https://github.com/spell-app/spell-app/blob/main/README-page-server.md) | <ul><li>spell-app's part of the kit's page server:  three settings</li><li>what its route module serves:  the editor, its API, `/element/`</li><li>the editor's record;  running it</li></ul> |
+| [parser/README.md](https://github.com/spell-app/spell/blob/main/parser/README.md) | <ul><li>English you can run:  FizzBuzz, and what it compiles to</li><li>a parser that knows no language;  languages in, targets out</li><li>the pipeline, nine steps;  sentences or an outline, one meaning</li><li>try it in two minutes;  the language commands;  the pieces</li><li>Spell in Spanish;  🌱 a third language, more targets, any program read back as Spell</li></ul> |
+| [parser/README-parser.md](https://github.com/spell-app/spell/blob/main/parser/README-parser.md) | <ul><li>rules as classes, for any language, by contrast with parser generators</li><li>one line through six stages:  tokens, rules, matches, the Spell tree, output, running it</li><li>how a choice is settled, and how earlier lines teach later ones</li><li>parsers for other languages, a date one in 23 lines</li><li>testing rules;  what it costs</li></ul> |
+| [parser/README-rulex.md](https://github.com/spell-app/spell/blob/main/parser/README-rulex.md) | <ul><li>Rulex, regular expressions for words, by contrast with the ones you know</li><li>three real rules from Spell's grammar</li><li>your program writes Rulex too</li><li>what it can't say, and when it compiles</li><li>the cheat sheet</li></ul> |
+| [parser/README-markdown.md](https://github.com/spell-app/spell/blob/main/parser/README-markdown.md) | <ul><li>Markdown on Spell's parser:  a heading is a rule, not a regular expression</li><li>Rulex says what a line is;  code does the rest</li><li>three functions, six options</li><li>exact, but slower and bigger than marked;  who draws with it</li><li>the spec as its scoreboard</li></ul> |
+| [parser/README-spell.md](https://github.com/spell-app/spell/blob/main/parser/README-spell.md) | <ul><li>what the language can say:  two styles, one meaning</li><li>the whole language, module by module</li><li>what a line can say:  templates, aliases, actions, lists, drawing, events, tests</li><li>the compiler;  the frozen test projects;  adding a rule</li><li>🌱 mixins, and Spell UI written in Spell</li></ul> |
+| [parser/README-core.md](https://github.com/spell-app/spell/blob/main/parser/README-core.md) | <ul><li>what compiled Spell runs on:  one import, for what JavaScript has no word for</li><li>a template is a class, and the class is the core's</li><li>its pieces:  one object, built as it loads</li><li>three things a reader trips on, the Python runtime beside it</li><li>who may import it:  one copy per running app</li></ul> |
+| [parser/README-targets.md](https://github.com/spell-app/spell/blob/main/parser/README-targets.md) | <ul><li>one program, four targets, and what each costs</li><li>one tree, a writer per language;  the card, line by line</li><li>TypeScript as Solid developers write it;  a library for code that isn't Spell</li><li>Python in Python's own words;  choosing a target</li><li>🌱 WebAssembly, and a program on node mirrored in the page</li></ul> |
+| [parser/README-spanish.md](https://github.com/spell-app/spell/blob/main/parser/README-spanish.md) | <ul><li>Spell in Spanish:  Solitario beside Solitaire, line for line</li><li>a file's name says its language;  mixing languages in a project</li><li>what works:  the grammar, article warnings, messages, Spell UI, the editor</li><li>one set of rules, two sets of words;  keeping them in step</li><li>the edges</li></ul> |
+| [ui/README.md](https://github.com/spell-app/spell/blob/main/ui/README.md) | <ul><li>Spell UI, by contrast with other component libraries</li><li>thirty seconds, two ways;  `<ui-root>`, the top of every page</li><li>component packs;  the 62 families;  other ways to load</li><li>what it costs and assumes;  working on it</li><li>every page of Spell UI</li></ul> |
+| [ui/README-components.md](https://github.com/spell-app/spell/blob/main/ui/README-components.md) | <ul><li>a family is a folder, and a row</li><li>when two families look alike</li><li>the catalogue of every family</li><li>how a family is laid out, and adding one</li><li>written from the data</li></ul> |
+| [ui/README-frameworks.md](https://github.com/spell-app/spell/blob/main/ui/README-frameworks.md) | <ul><li>the contract:  four rules every element keeps</li><li>plain JavaScript, React 19, Vue 3 and Solid 2;  Svelte, Angular and Preact</li><li>types:  your editor knows every tag, and Solid's JSX does too</li><li>using it today, with an import map</li><li>what the smoke pages prove</li></ul> |
+| [ui/README-migrating.md](https://github.com/spell-app/spell/blob/main/ui/README-migrating.md) | <ul><li>from Semantic UI, Fomantic UI or Semantic UI React</li><li>your classes moved inside:  a whole card, three ways</li><li>every class word becomes an attribute, and what changes under the words</li><li>from Semantic UI React:  the same words, no wrappers</li><li>moving a page by hand today;  🌱 the migration tool</li></ul> |
+| [ui/README-runtime.md](https://github.com/spell-app/spell/blob/main/ui/README-runtime.md) | <ul><li>one runtime per page, not one per tree</li><li>eighteen services, one field each</li><li>vocabularies and localization;  icons, and your own set</li><li>styles;  the static render, from Python too</li><li>Spell UI's half of the element core</li></ul> |
+| [ui/README-themes.md](https://github.com/spell-app/spell/blob/main/ui/README-themes.md) | <ul><li>theming, by contrast with MUI and Tailwind</li><li>what ships:  tokens, dark mode and the themes</li><li>four recipes, from sitewide defaults to the app stylesheet</li><li>🌱 picking and making themes</li></ul> |
+| [ui/README-site.md](https://github.com/spell-app/spell/blob/main/ui/README-site.md) | <ul><li>the docs site, viewed with one command</li><li>a page is its head and one `main`;  writing one, flat</li><li>the scripts, and checking in a real browser</li><li>the tools and the visual tests</li><li>Spell UI's `spell` commands</li></ul> |
+| [epic/README.md](https://github.com/spell-app/spell/blob/main/epic/README.md) | <ul><li>epics and sagas:  an epic's life, by contrast with tickets, pull requests and chat</li><li>try it:  a small epic, start to finish</li><li>ids you can say;  a page you act on, beside your code</li><li>built from Spell UI;  the `epic` command and the skills</li><li>beyond Spell;  working on it;  the pages</li></ul> |
+| [epic/README-pages.md](https://github.com/spell-app/spell/blob/main/epic/README-pages.md) | <ul><li>your first review, in four moves</li><li>the header and toolbar;  nine sections and their ids</li><li>a review round:  marks, comments, test runs, colours</li><li>the other pages, from the same parts</li><li>the `<epic-*>` elements</li></ul> |
+| [epic/README-skills.md](https://github.com/spell-app/spell/blob/main/epic/README-skills.md) | <ul><li>seventeen skills you type, eight hooks that run by themselves</li><li>planning and review;  worktrees and sessions</li><li>background and offline</li><li>what the hooks do, and the prompt gate first</li><li>two names for every skill in Claude Code</li></ul> |
+| [epic/README-cli.md](https://github.com/spell-app/spell/blob/main/epic/README-cli.md) | <ul><li>the `epic` command:  six you'll actually type</li><li>an address is a page and an id</li><li>one copy of the code;  a session wakes when its `wait` exits</li><li>`--help`, and every verb by group</li><li>where it stops</li></ul> |
+| [epic/README-vscode.md](https://github.com/spell-app/spell/blob/main/epic/README-vscode.md) | <ul><li>the Spell Epic extension, installed in three commands and a reload</li><li>two views, each a page that stays</li><li>which server answers, the first of four</li><li>the window bridge:  a session finds its own window</li><li>working on it</li></ul> |
+| [epic/README-adopting.md](https://github.com/spell-app/spell/blob/main/epic/README-adopting.md) | <ul><li>epics in a repo that isn't Spell:  the plans live beside it</li><li>setting it up, in three steps and an extension</li><li>the content folder, the config file, the worktrees</li><li>your own AGENTS.md;  one epic server per machine</li><li>what's still Spell-shaped</li></ul> |
+| [app/README.md](https://github.com/spell-app/spell/blob/main/app/README.md) | <ul><li>the Spell app;  spaces:  every project has an owner and an address</li><li>the live loop, from a keystroke to the app changing</li><li>what you can do today, and 🌱 the ambition</li><li>five example apps;  its folders, a page each</li><li>setup from zero;  working on it</li></ul> |
+| [app/README-app.md](https://github.com/spell-app/spell/blob/main/app/README-app.md) | <ul><li>the editor and the runners:  four elements, for any page</li><li>one runner, three places;  a runtime per program</li><li>the editor:  one object behind every pane</li><li>the builds:  one Solid per page</li><li>App UI, a page for every component</li></ul> |
+| [app/README-examples.md](https://github.com/spell-app/spell/blob/main/app/README-examples.md) | <ul><li>six example apps, simplest first, and the four parts of each</li><li>FizzBuzz:  a loop, and printing</li><li>Task List:  things that draw themselves, a list, and a property editor</li><li>Solitaire, in spellx and drawn</li><li>ideas for your own;  the frozen test projects</li></ul> |
+| [app/README-spaces.md](https://github.com/spell-app/spell/blob/main/app/README-spaces.md) | <ul><li>spaces, where projects and people live</li><li>addresses:  the folder is in the name</li><li>setting up your own</li><li>the models, the servers, and Python's</li><li>people and orgs;  🌱 sign-in and permissions</li></ul> |
+| [app/README-lsp.md](https://github.com/spell-app/spell/blob/main/app/README-lsp.md) | <ul><li>the language server:  the command line and the editor can't disagree</li><li>one service, three places it runs</li><li>the compiler's parse, through one queue</li><li>what it answers, request by request;  scope packs</li><li>where it stops;  🌱 moving to spell-parser, and `spell lsp`</li></ul> |
+| [app/README-page-server.md](https://github.com/spell-app/spell/blob/main/app/README-page-server.md) | <ul><li>spell-app's part of the kit's page server:  three settings</li><li>what its route module serves:  the editor, its API, `/element/`</li><li>the editor's record;  running it</li></ul> |
 
 ## See also
 
 - [AGENTS.md](AGENTS.md):  the rules for working on the kit and across repos, before you change a line
 - [README-development.md](README-development.md):  once you're set up, how the work goes day to day
-- [spell-parser's README](https://github.com/spell-app/spell-parser/blob/main/README.md):  the language, if the card hooked you
-- [spell-app's README](https://github.com/spell-app/spell-app/blob/main/README.md):  the editor, if the cards on the table did
+- [spell-parser's README](https://github.com/spell-app/spell/blob/main/parser/README.md):  the language, if the card hooked you
+- [spell-app's README](https://github.com/spell-app/spell/blob/main/app/README.md):  the editor, if the cards on the table did
 - [README-cli.md](README-cli.md):  every command, once you've outgrown the five things you tried

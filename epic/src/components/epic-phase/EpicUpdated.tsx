@@ -1,18 +1,18 @@
 import { Show } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
-import { E } from "spell-ui/core"
+import { E } from "spell/ui/core"
 
-import { PlanDates } from "spell-epic/dates"
+import { PlanDates } from "spell/epic/dates"
 // the fold pieces every `<epic-*>` fold shares:  their files, not `epic-item`'s barrel (which would define it here)
-import { FOLDS, Fold } from "spell-epic/components/epic-item/Fold"
+import { FOLDS, Fold } from "spell/epic/components/epic-item/Fold"
 
 import { epicUpdatedVocabulary } from "./EpicUpdated.en"
 import { ICON, LABEL, TEXT } from "./EpicPhase.types"
 
 import fieldCSS from "./EpicField.css?inline"
-import foldCSS from "spell-epic/components/epic-item/Fold.css?inline"
-import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
+import foldCSS from "spell/epic/components/epic-item/Fold.css?inline"
+import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 
 /****************
  * ### `EpicUpdated`

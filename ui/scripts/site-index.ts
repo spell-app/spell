@@ -19,13 +19,13 @@ import { parseArgs } from "node:util"
 import { readJSON5File } from "spell/util/node/json5"
 import { escapeHTML, slug } from "spell/util/string"
 
-import type { SiteDataFile, SiteTag } from "spell-ui/docs-components/docs-components.types"
-import { NavIndex } from "spell-ui/docs-components/ui-docs-nav/NavIndex"
+import type { SiteDataFile, SiteTag } from "spell/ui/docs-components/docs-components.types"
+import { NavIndex } from "spell/ui/docs-components/ui-docs-nav/NavIndex"
 import { Terminal } from "spell/element-tools/Terminal"
 import { spliceGenerated, writeOrCheck } from "spell/element-tools/generatedFiles"
-import { SITE_DATA, SITE_PAGES, SPELL_UI_ROOT } from "spell-ui/tools/tools.types"
+import { SITE_DATA, SITE_PAGES, SPELL_UI_ROOT } from "spell/ui/tools/tools.types"
 
-import { STATUS_TEXT, withoutTicks } from "spell-ui/tools/generatedFiles"
+import { STATUS_TEXT, withoutTicks } from "spell/ui/tools/generatedFiles"
 import { SiteSections } from "./site-sections.ts"
 
 /****************

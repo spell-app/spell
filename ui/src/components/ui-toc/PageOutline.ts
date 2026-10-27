@@ -1,4 +1,4 @@
-import * as UIT from "spell-ui/components/components.types"
+import * as UIT from "spell/ui/components/components.types"
 import type { OutlineSection } from "./UIToc.types"
 
 /****************
@@ -23,7 +23,7 @@ import type { OutlineSection } from "./UIToc.types"
  * - every tab's sections, the hidden panes' too:  landing on one selects its tab (the site's router)
  * - Its links are `#id`:  the page shown, whatever its URL.
  * - Plain DOM, no Solid, no globals (node's linkedom runs it too).
- *   - NEVER imports a value from `spell-ui/core`, which node can't load.
+ *   - NEVER imports a value from `spell/ui/core`, which node can't load.
  *   - Cheap enough to read on every search.
  * - Static only:  pure reads of the DOM it's given.
  * - It imports nothing of the search:  the site's sticky sections and table of contents load it with the page, the

@@ -15,8 +15,8 @@ import { afterAll, beforeAll, beforeEach, describe, expect, test } from "vite-pl
 import { PageServer } from "spell/server/page"
 import { ask } from "spell/server/test/serve"
 
-import { ReviewInbox } from "spell-epic/tool/ReviewInbox"
-import reviewRoutes from "spell-epic/tool/reviewRoutes"
+import { ReviewInbox } from "spell/epic/tool/ReviewInbox"
+import reviewRoutes from "spell/epic/tool/reviewRoutes"
 
 let root: string
 let server: PageServer

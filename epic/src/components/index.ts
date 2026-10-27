@@ -1,5 +1,5 @@
 /**
- * `spell-epic/components` barrel:  every `<epic-*>` element of the `epics` pack,
+ * `spell/epic/components` barrel:  every `<epic-*>` element of the `epics` pack,
  * each defined (SIDE EFFECT) as its folder's barrel is imported.
  * - `spell pack add epics <tag>` adds a family, and its line here.
  * - The pack's script doesn't import this:

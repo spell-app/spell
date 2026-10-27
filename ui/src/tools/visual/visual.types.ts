@@ -4,10 +4,10 @@
  *   classes and `VisualMarkups`, so the fixture page (`Fixture.ts`, in the browser) can import it too.
  */
 
-import type { VisualHooks } from "spell-ui/test-helpers/test.types"
+import type { VisualHooks } from "spell/ui/test-helpers/test.types"
 import type { VisualSettings } from "./VisualSettings.ts"
 
-export type { VisualOs } from "spell-ui/tools/environment"
+export type { VisualOs } from "spell/ui/tools/environment"
 
 ////////////////
 // ## Run

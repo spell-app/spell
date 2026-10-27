@@ -1,4 +1,4 @@
-import * as UIT from "spell-ui/components/components.types"
+import * as UIT from "spell/ui/components/components.types"
 
 import { sharedEs } from "./SharedVocabulary.es"
 import type { AttributeSpec, ComponentVocabulary, SharedDictionary, StateSpec } from "spell/element/vocabulary.types"

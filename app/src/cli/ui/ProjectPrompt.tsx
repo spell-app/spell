@@ -2,7 +2,7 @@ import { Box, Text, render, useInput, type Key as InkKey } from "ink"
 import { useCallback, useEffect, useRef, useState } from "react"
 import chalk from "chalk"
 
-import { CLI } from "spell-app/cli"
+import { CLI } from "spell/app/cli"
 
 /** Most completions shown at once. */
 const MAX_SHOWN = 10

@@ -1,16 +1,16 @@
 import { afterEach, beforeEach, describe, expect, it, onTestFinished } from "vite-plus/test"
 import { userEvent } from "vite-plus/test/browser"
-import { Keys } from "spell-ui/test-helpers/Keys"
+import { Keys } from "spell/ui/test-helpers/Keys"
 
-import { UI } from "spell-ui/runtime"
-import type { ModalCloseDetail } from "spell-ui/components/components.types"
+import { UI } from "spell/ui/runtime"
+import type { ModalCloseDetail } from "spell/ui/components/components.types"
 import { expectAccessible } from "spell/test-helpers/A11y"
 import { Fixture } from "spell/test-helpers/Fixture"
 
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import type { DOMElement } from "spell/element"
 
-import "spell-ui/components/ui-flyout"
+import "spell/ui/components/ui-flyout"
 
 /** Element-markup rewrites of every example, by path. */
 const EXAMPLES = import.meta.glob<string>("/src/components/ui-flyout/examples/elements/*.html", {

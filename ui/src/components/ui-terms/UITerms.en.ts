@@ -1,12 +1,12 @@
 /**
  * The English vocabulary of `<ui-terms>`:  every name the tag uses.
  * - Its tag, attributes (each with its kind and allowed values), slots, parts and states.
- *   The shape is `E.ComponentVocabulary` (`spell-ui/vocabulary`).
+ *   The shape is `E.ComponentVocabulary` (`spell/ui/vocabulary`).
  * - A list of terms and what they are (epic `ui-gaps` P12):  `Suit:  hearts`, `Rank:  queen`.
  *   HTML's `<dl>`, for a drawing, which holds no native HTML.
  */
 
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /****************
  * ### `termsVocabulary`

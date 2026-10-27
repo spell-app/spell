@@ -5,14 +5,14 @@
  * - `placeholderData()` and `QuotedPropertyFormulaBits`:
  *   what `quoted_property_formula` and the `QuotedPropertyRule` it makes both work with
  */
-import { P } from "spell-parser/parser"
+import { P } from "spell/parser/parser"
 
 /**
  * Ad-hoc fields this module sets and reads on `P.ScopeVariable`,
  * for a property defined `as one of a, b, c` (see `define_property_has`).
  * - Augmented here:  `P.ScopeVariableProps` doesn't cover them, and only this module uses them.
  */
-declare module "spell-parser/parser/scope/ScopeVariable" {
+declare module "spell/parser/parser/scope/ScopeVariable" {
   // NOTE: MUST stay an `interface`:  module augmentation merges into the declared `ScopeVariable`,
   // and a `type` can't merge.  A documented exception to the "always use `type`" rule.
   interface ScopeVariable {

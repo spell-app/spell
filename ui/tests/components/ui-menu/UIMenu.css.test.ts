@@ -1,17 +1,17 @@
 import { describe, expect, it, onTestFinished } from "vite-plus/test"
 import { page } from "vite-plus/test/browser"
 
-import { colorsCSS, foundationCSS } from "spell-ui/styles"
-import { itemVocabulary } from "spell-ui/components/ui-item"
+import { colorsCSS, foundationCSS } from "spell/ui/styles"
+import { itemVocabulary } from "spell/ui/components/ui-item"
 
 import { Fixture } from "spell/test-helpers/Fixture"
-import { Sheets } from "spell-ui/test-helpers/Sheets"
+import { Sheets } from "spell/ui/test-helpers/Sheets"
 
-import { menuVocabulary } from "spell-ui/components/ui-menu/UIMenu.en"
+import { menuVocabulary } from "spell/ui/components/ui-menu/UIMenu.en"
 
-import itemCSS from "spell-ui/components/ui-item/UIItem.css?inline"
-import menuCSS from "spell-ui/components/ui-menu/UIMenu.css?inline"
-import menuRaw from "spell-ui/components/ui-menu/UIMenu.css?raw"
+import itemCSS from "spell/ui/components/ui-item/UIItem.css?inline"
+import menuCSS from "spell/ui/components/ui-menu/UIMenu.css?inline"
+import menuRaw from "spell/ui/components/ui-menu/UIMenu.css?raw"
 
 /**
  * `UIMenu.css` on its own, before any element exists:  the sheet's source rules, the computed styles of the

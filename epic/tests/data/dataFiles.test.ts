@@ -9,19 +9,19 @@ import { dirname, join } from "node:path"
 
 import { afterAll, describe, expect, test } from "vite-plus/test"
 
-import { FAVORITES_FILE } from "spell-epic/list/EpicCards"
-import { RunningEpics } from "spell-epic/list/RunningEpics"
-import { setFavorite } from "spell-epic/tool/epicRoutes"
-import { GuideInbox } from "spell-epic/tool/GuideInbox"
-import { ReviewInbox } from "spell-epic/tool/ReviewInbox"
-import { Sagas } from "spell-epic/tool/Sagas"
+import { FAVORITES_FILE } from "spell/epic/list/EpicCards"
+import { RunningEpics } from "spell/epic/list/RunningEpics"
+import { setFavorite } from "spell/epic/tool/epicRoutes"
+import { GuideInbox } from "spell/epic/tool/GuideInbox"
+import { ReviewInbox } from "spell/epic/tool/ReviewInbox"
+import { Sagas } from "spell/epic/tool/Sagas"
 
-import { AgentList } from "spell-epic/tools/AgentList"
-import { isChoicesPage, readRows } from "spell-epic/tools/choices.js"
-import { saveAnswer as saveChoices } from "spell-epic/tools/choicesRoutes"
-import { readAnswer, readDraft } from "spell-epic/tools/details.js"
-import { saveAnswer as saveDetails } from "spell-epic/tools/detailsRoutes"
-import { GuideChanges } from "spell-epic/tools/GuideChanges"
+import { AgentList } from "spell/epic/tools/AgentList"
+import { isChoicesPage, readRows } from "spell/epic/tools/choices.js"
+import { saveAnswer as saveChoices } from "spell/epic/tools/choicesRoutes"
+import { readAnswer, readDraft } from "spell/epic/tools/details.js"
+import { saveAnswer as saveDetails } from "spell/epic/tools/detailsRoutes"
+import { GuideChanges } from "spell/epic/tools/GuideChanges"
 
 const root = mkdtempSync(join(tmpdir(), "data-files-"))
 afterAll(() => rmSync(root, { recursive: true, force: true }))

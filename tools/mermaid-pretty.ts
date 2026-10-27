@@ -230,7 +230,7 @@ export function kindFor(id: string, label: string): Kind | undefined {
   return id === "data" ? "data" : undefined
 }
 
-/** a label that starts with a repo's name, not one of its packages (`spell-parser/core` isn't a repo) */
+/** a label that starts with a repo's name, not one of its packages (`spell/parser/core` isn't a repo) */
 const REPO_LABEL = /^(spell-(parser|ui|brand|epic|app)|the kit)(?![/\w'’-])/i
 
 /** the kit's name, `spell`, as a label's whole first line (`spell<br/>util · server`):  `spell compile` is a command */

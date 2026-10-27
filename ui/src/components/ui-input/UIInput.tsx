@@ -1,13 +1,13 @@
 import { Show } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
-import { E, UIT } from "spell-ui/core"
+import { E, UIT } from "spell/ui/core"
 import { inputVocabulary } from "./UIInput.en"
 import { InputFallback } from "./UIInput.fallback"
 import { TextControl } from "./TextControl"
 import { LABEL_CLASSES, type CommonAttributes, type LabelPlace, type Vocabulary } from "./UIInput.types"
 
-import labelCSS from "spell-ui/components/ui-label/UILabel.css?inline"
+import labelCSS from "spell/ui/components/ui-label/UILabel.css?inline"
 import inputCSS from "./UIInput.css?inline"
 
 /****************

@@ -1,14 +1,14 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { colorsCSS, foundationCSS, tokensCSS } from "spell-ui/styles"
+import { colorsCSS, foundationCSS, tokensCSS } from "spell/ui/styles"
 
 import { Fixture } from "spell/test-helpers/Fixture"
-import { Sheets } from "spell-ui/test-helpers/Sheets"
+import { Sheets } from "spell/ui/test-helpers/Sheets"
 
-import { textVocabulary } from "spell-ui/components/ui-text/UIText.en"
+import { textVocabulary } from "spell/ui/components/ui-text/UIText.en"
 
-import textCSS from "spell-ui/components/ui-text/UIText.css?inline"
-import textRaw from "spell-ui/components/ui-text/UIText.css?raw"
+import textCSS from "spell/ui/components/ui-text/UIText.css?inline"
+import textRaw from "spell/ui/components/ui-text/UIText.css?raw"
 
 /**
  * `UIText.css` on its own, before any element exists:

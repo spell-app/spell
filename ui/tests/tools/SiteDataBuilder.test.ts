@@ -5,9 +5,9 @@ import { describe, expect, it } from "vite-plus/test"
 
 import { keepingCommentsIn as asWritten, readJSON5File } from "spell/util/node/json5"
 import { writeOrCheck } from "spell/element-tools/generatedFiles"
-import type { SitePagesFile } from "spell-ui/docs-components/docs-components.types"
-import { SiteDataBuilder } from "spell-ui/tools/SiteDataBuilder"
-import { SITE_PAGES } from "spell-ui/tools/tools.types"
+import type { SitePagesFile } from "spell/ui/docs-components/docs-components.types"
+import { SiteDataBuilder } from "spell/ui/tools/SiteDataBuilder"
+import { SITE_PAGES } from "spell/ui/tools/tools.types"
 
 /**
  * The site's committed data is what `yarn site:data` would write now.

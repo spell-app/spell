@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { ThemeMenu } from "spell-ui/components/ui-theme-menu/ThemeMenu"
+import { ThemeMenu } from "spell/ui/components/ui-theme-menu/ThemeMenu"
 
 describe("ThemeMenu.entries", () => {
   test("lists the themes it's given, in order, each titled, with its description:  nothing else", () => {

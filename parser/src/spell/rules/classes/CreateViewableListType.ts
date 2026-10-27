@@ -1,6 +1,6 @@
 import { proto } from "spell/util"
-import type { P } from "spell-parser/parser"
-import { SpellType } from "spell-parser/spell/rules/types"
+import type { P } from "spell/parser/parser"
+import { SpellType } from "spell/parser/spell/rules/types"
 // Import directly to avoid circular import
 import { CreateListType } from "./CreateListType"
 

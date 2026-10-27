@@ -3,7 +3,7 @@ import { describe, expect, it } from "vite-plus/test"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import type { DOMElement } from "spell/element"
 
-import "spell-ui"
+import "spell/ui"
 
 /**
  * The old attribute names (`AttributeSpec.replaces`) worked from epic `ui-gaps` P2 until P13:  now they do nothing.

@@ -1,29 +1,29 @@
 import { For, Show } from "solid-js"
 import { isServer, type JSX } from "@solidjs/web"
 
-import { E } from "spell-ui/core"
+import { E } from "spell/ui/core"
 
 import type { RunAnswers, RunColumn, RunEffortChoice, RunPass, RunProgress, RunRow } from "spell/server/runs/runs.types"
 
-import { clockOf } from "spell-epic/review"
-import { RunForm, type SendFill } from "spell-epic/answers"
-import { RUN_ANSWER, type RunAnswerDetail } from "spell-epic/components/epic-run-row/EpicRunRow.types"
+import { clockOf } from "spell/epic/review"
+import { RunForm, type SendFill } from "spell/epic/answers"
+import { RUN_ANSWER, type RunAnswerDetail } from "spell/epic/components/epic-run-row/EpicRunRow.types"
 import {
   SEND_ASKED,
   type SendAskedDetail,
   type SendState
-} from "spell-epic/components/epic-send-buttons/EpicSendButtons.types"
+} from "spell/epic/components/epic-send-buttons/EpicSendButtons.types"
 
 import { epicRunVocabulary } from "./EpicRun.en"
 
 import runCSS from "./EpicRun.css?inline"
-import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
+import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 
 /****************
  * ### `EpicRun`
  * The component behind `<epic-run>`:  a run page's body (epic `epic-engine` P23).  A command stopped to ask Owen,
  * through the kit's `SRV.CommandRun`, and waits for his Send.
- * - Draws the page's `RunForm` (`spell-epic/answers`), for the run `run` names:
+ * - Draws the page's `RunForm` (`spell/epic/answers`), for the run `run` names:
  *   - who is waiting:  the command, with a green dot, while its heartbeat is fresh;  else why nobody is
  *   - the command's line about what it asks (`description`)
  *   - the STATUS CARD (epic `epic-engine` P25), when the command writes passes or offers an effort:

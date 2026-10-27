@@ -1,4 +1,4 @@
-import { P } from "spell-parser/parser"
+import { P } from "spell/parser/parser"
 
 /**
  * Walks over a rule's syntax:  what every rule-reading tool asks of a rule, answered once.

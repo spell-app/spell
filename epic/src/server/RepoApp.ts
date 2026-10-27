@@ -5,7 +5,7 @@ import { delimiter, dirname, join } from "node:path"
 import { escapeHTML } from "spell/util/string"
 import type { SRV } from "spell/server"
 
-import { EpicConfig, type EpicApp } from "spell-epic/config/EpicConfig"
+import { EpicConfig, type EpicApp } from "spell/epic/config/EpicConfig"
 
 import { APP_API, type AppStatus, type Repo } from "./server.types"
 

@@ -23,8 +23,8 @@ import { execFileSync } from "node:child_process"
 import path from "node:path"
 import { build, type Rolldown } from "vite"
 
-import { ensurePageServer } from "spell-ui/tools/pageServer"
-import { SPELL_UI_ROOT } from "spell-ui/tools/tools.types"
+import { ensurePageServer } from "spell/ui/tools/pageServer"
+import { SPELL_UI_ROOT } from "spell/ui/tools/tools.types"
 import { Terminal } from "spell/element-tools/Terminal"
 
 execFileSync("yarn", ["site:bundle"], { cwd: SPELL_UI_ROOT, stdio: "inherit" })

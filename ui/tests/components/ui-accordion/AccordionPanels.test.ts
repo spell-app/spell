@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { AccordionPanels } from "spell-ui/components/ui-accordion/AccordionPanels"
+import { AccordionPanels } from "spell/ui/components/ui-accordion/AccordionPanels"
 
 ////////////////
 // ## AccordionPanels.read()

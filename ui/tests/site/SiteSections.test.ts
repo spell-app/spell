@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it } from "vite-plus/test"
 
-import { SiteSections } from "spell-ui/site/_src/SiteSections"
-import { FOLDS_KEY, OLD_FOLDS_KEY } from "spell-ui/site/_src/site.types"
+import { SiteSections } from "spell/ui/site/_src/SiteSections"
+import { FOLDS_KEY, OLD_FOLDS_KEY } from "spell/ui/site/_src/site.types"
 
 /**
  * `SiteSections`' folds:  what the viewer opened or closed comes back on the next visit (epic `epic-engine` I142).

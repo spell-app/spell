@@ -8,7 +8,7 @@ import { Git } from "spell/server/Git"
 import { DesignBrand } from "./DesignBrand.ts"
 import { DesignComponents } from "./DesignComponents.ts"
 import { DesignTokens } from "./DesignTokens.ts"
-import type { SiteDataFile } from "spell-ui/docs-components/docs-components.types"
+import type { SiteDataFile } from "spell/ui/docs-components/docs-components.types"
 import {
   COMPONENTS,
   SITE_DATA,

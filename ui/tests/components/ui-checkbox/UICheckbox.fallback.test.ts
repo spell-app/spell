@@ -2,9 +2,9 @@ import { describe, expect, it } from "vite-plus/test"
 
 import { Fixture } from "spell/test-helpers/Fixture"
 import { expectAccessible } from "spell/test-helpers/A11y"
-import { FallbackStub, type StubHost } from "spell-ui/test-helpers/FallbackStub"
+import { FallbackStub, type StubHost } from "spell/ui/test-helpers/FallbackStub"
 
-import { CheckboxFallback } from "spell-ui/components/ui-checkbox/UICheckbox.fallback"
+import { CheckboxFallback } from "spell/ui/components/ui-checkbox/UICheckbox.fallback"
 
 FallbackStub.define(
   "x-fb-checkbox",

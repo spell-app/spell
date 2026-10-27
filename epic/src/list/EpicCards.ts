@@ -36,7 +36,7 @@
  */
 import { escapeHTML } from "spell/util/string.ts"
 import { localMinutes } from "spell/util/time.ts"
-import { PlanDates } from "spell-epic/dates/PlanDates.ts"
+import { PlanDates } from "spell/epic/dates/PlanDates.ts"
 import { epicStateFor, type EpicFacts, type EpicState } from "./EpicState.ts"
 
 /** The Epics page's groups, in the page's order. */
@@ -55,7 +55,7 @@ export const FAVORITES_FILE = "epics/favorites.json5"
 export const EPIC_CARDS_START = "<!-- running-epics -->"
 export const EPIC_CARDS_END = "<!-- running-epics:end -->"
 
-/** A saga, as a card's label and the chips draw it:  `sagas/sagas.json5`'s fields (`spell-epic/tool/Sagas`). */
+/** A saga, as a card's label and the chips draw it:  `sagas/sagas.json5`'s fields (`spell/epic/tool/Sagas`). */
 export type SagaLook = {
   /** `drawable-spell` */
   id: string

@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vite-plus/test"
 
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
-import { RootLoader } from "spell-ui/components/ui-root"
+import { RootLoader } from "spell/ui/components/ui-root"
 
-import "spell-ui"
+import "spell/ui"
 
 describe("<ui-property-editor> in another language", () => {
   it("a Spanish editor's properties find it, and read its schema:  `<es-editor-propiedades>` (outline-spell P29)", async () => {

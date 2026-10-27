@@ -3,9 +3,9 @@ import { For, Show, createContext, createMemo, useContext } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
 import { Observable } from "spell/util"
-import type { ConsoleLine as ConsoleLineData, SpellConsoleGroup } from "spell-parser/core/console"
+import type { ConsoleLine as ConsoleLineData, SpellConsoleGroup } from "spell/parser/core/console"
 
-// Import directly, NOT through the `spell-app/app/solid` barrel, which pulls in the editor
+// Import directly, NOT through the `spell/app/app/solid` barrel, which pulls in the editor
 import { tracked } from "./tracked"
 
 import "./spell.css"
@@ -15,7 +15,7 @@ import "./ConsoleLines.css"
 //  ## Lines of `core.console`, drawn as a collapsible tree
 //
 //  NOTE: imports nothing of the editor's, the parser's or `spell-ui`'s, so the VS Code runner
-//  (`spell-app/app/runner`) can show a console without pulling them in.  What the editor knows beyond plain
+//  (`spell/app/app/runner`) can show a console without pulling them in.  What the editor knows beyond plain
 //  values -- e.g. parser `Match`es -- comes in through `ConsoleInspectorContext`, see `<ConsoleViewer>`.
 //
 

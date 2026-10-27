@@ -1,7 +1,7 @@
 /**
  * The English vocabulary of `<ui-comment>`:  every name the tag uses.
  * - Its tag, attributes (each with its kind and allowed values), slots, parts and states.
- *   The shape is `E.ComponentVocabulary` (`spell-ui/vocabulary`).
+ *   The shape is `E.ComponentVocabulary` (`spell/ui/vocabulary`).
  * - Class words come out through `ClassBuilder`, in Fomantic's grammar:
  *   `<ui-comments threaded appearance="minimal" size="small">` => `ui small minimal threaded comments`;  a comment has no `ui`
  *   (`<ui-comment collapsed>` => `collapsed comment`).  `UIComment.css` keys on those.
@@ -11,7 +11,7 @@
  *   of replies.
  */
 
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /****************
  * ### `commentVocabulary`

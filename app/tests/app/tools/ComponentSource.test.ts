@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { ComponentSource } from "spell-app/app/tools/ComponentSource"
+import { ComponentSource } from "spell/app/app/tools/ComponentSource"
 
 /** A file with a documented component, a helper and a component with no banner. */
 const PANEL = `

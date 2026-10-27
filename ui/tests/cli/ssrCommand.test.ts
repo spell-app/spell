@@ -15,7 +15,7 @@ import { fileURLToPath } from "node:url"
 import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
 
 import { CLI } from "spell/cli"
-import { coverageLine, readCoverage, staticPages } from "spell-ui/cli/ssrCommand"
+import { coverageLine, readCoverage, staticPages } from "spell/ui/cli/ssrCommand"
 
 /** The real `spell` command, the kit's:  `spell ssr` renders in a child process, through Vite. */
 const SPELL = resolve(dirname(fileURLToPath(import.meta.resolve("spell/package.json"))), "bin/spell.mjs")

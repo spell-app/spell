@@ -1,15 +1,15 @@
 import { userEvent } from "vite-plus/test/browser"
 import { afterEach, beforeAll, describe, expect, it, onTestFinished, vi } from "vite-plus/test"
 
-import { UI } from "spell-ui/runtime"
+import { UI } from "spell/ui/runtime"
 import { expectAccessible } from "spell/test-helpers/A11y"
 
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import type { DOMElement } from "spell/element"
-import type { AccordionToggleDetail } from "spell-ui/components/components.types"
+import type { AccordionToggleDetail } from "spell/ui/components/components.types"
 
-import "spell-ui/components/ui-accordion"
-import "spell-ui/components/ui-segment"
+import "spell/ui/components/ui-accordion"
+import "spell/ui/components/ui-segment"
 
 /** Element-markup rewrites of every example, by path. */
 const EXAMPLES = import.meta.glob<string>("/src/components/ui-accordion/examples/elements/*.html", {

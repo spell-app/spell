@@ -1,7 +1,7 @@
 import { describe, expect, it, onTestFinished } from "vite-plus/test"
 
-import { UI } from "spell-ui/runtime"
-import { ThemeHarness } from "spell-ui/test-helpers/ThemeHarness"
+import { UI } from "spell/ui/runtime"
+import { ThemeHarness } from "spell/ui/test-helpers/ThemeHarness"
 
 /*
  * Every custom property a theme sheet sets, as the page computes it, light and dark (epic `debut` P18).

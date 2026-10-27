@@ -16,7 +16,7 @@ import { tmpdir } from "os"
 import { dirname, join } from "path"
 import { afterAll, describe, expect, test } from "vite-plus/test"
 
-import { Shared } from "spell-epic/command/Shared"
+import { Shared } from "spell/epic/command/Shared"
 
 /**
  * A throwaway repo `spell-app` with a shared repo beside it, `spell-app-dev`.

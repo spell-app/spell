@@ -1,15 +1,15 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { colorsCSS, foundationCSS } from "spell-ui/styles"
+import { colorsCSS, foundationCSS } from "spell/ui/styles"
 
 import { Fixture } from "spell/test-helpers/Fixture"
-import { Sheets } from "spell-ui/test-helpers/Sheets"
+import { Sheets } from "spell/ui/test-helpers/Sheets"
 
-import { flyoutVocabulary } from "spell-ui/components/ui-flyout/UIFlyout.en"
+import { flyoutVocabulary } from "spell/ui/components/ui-flyout/UIFlyout.en"
 
-import buttonCSS from "spell-ui/components/ui-button/UIButton.css?inline"
-import flyoutCSS from "spell-ui/components/ui-flyout/UIFlyout.css?inline"
-import flyoutRaw from "spell-ui/components/ui-flyout/UIFlyout.css?raw"
+import buttonCSS from "spell/ui/components/ui-button/UIButton.css?inline"
+import flyoutCSS from "spell/ui/components/ui-flyout/UIFlyout.css?inline"
+import flyoutRaw from "spell/ui/components/ui-flyout/UIFlyout.css?raw"
 
 /**
  * `UIFlyout.css` on its own, before any element exists:  the sheet's source rules and the computed styles of the

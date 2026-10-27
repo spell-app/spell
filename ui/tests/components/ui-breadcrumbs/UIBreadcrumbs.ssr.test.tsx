@@ -2,12 +2,12 @@
 
 import { beforeAll, describe, expect, it } from "vite-plus/test"
 
-import { ServerRuntime, StaticRender } from "spell-ui/static"
-import { UIBreadcrumbs } from "spell-ui/components/ui-breadcrumbs/UIBreadcrumbs"
-import { UIBreadcrumb } from "spell-ui/components/ui-breadcrumbs/UIBreadcrumb"
+import { ServerRuntime, StaticRender } from "spell/ui/static"
+import { UIBreadcrumbs } from "spell/ui/components/ui-breadcrumbs/UIBreadcrumbs"
+import { UIBreadcrumb } from "spell/ui/components/ui-breadcrumbs/UIBreadcrumb"
 
 /**
- * `<ui-breadcrumbs>` / `<ui-breadcrumb>` in the static server render (`spell-ui/static`, seo plan P3):
+ * `<ui-breadcrumbs>` / `<ui-breadcrumb>` in the static server render (`spell/ui/static`, seo plan P3):
  * the class grammar's semantic form, `<nav><ol><li><span class="divider"></span><a class="section">`.
  */
 describe("<ui-breadcrumbs> static render", () => {

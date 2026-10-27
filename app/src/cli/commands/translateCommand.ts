@@ -3,8 +3,8 @@ import { basename, dirname, join, resolve } from "path"
 import { fileURLToPath } from "url"
 
 import { readJSON5File } from "spell/util/node/json5"
-import { SP } from "spell-parser/spell"
-import type { TranslateSource } from "spell-parser/cli/translateProject"
+import { SP } from "spell/parser/spell"
+import type { TranslateSource } from "spell/parser/cli/translateProject"
 import type {
   DeclarationStatement,
   ImportedProject,
@@ -13,9 +13,9 @@ import type {
   SourceFile,
   TranslationChecker,
   UIVocabulary
-} from "spell-parser/spell/translate/translate.types"
-import { LSP } from "spell-app/lsp"
-import { CLI } from "spell-app/cli"
+} from "spell/parser/spell/translate/translate.types"
+import { LSP } from "spell/app/lsp"
+import { CLI } from "spell/app/cli"
 
 /**
  * `spell translate [project] --to <lang>`:  write a project in another language (epic `spanish` P24-P25).
@@ -33,7 +33,7 @@ export async function translateCommand(
   options: CLI.TranslateOptions
 ): Promise<number> {
   const project = await CLI.projectFor(session, args[0] ?? (await session.defaultProject()))
-  const { translateProject } = await import("spell-parser/cli/translateProject")
+  const { translateProject } = await import("spell/parser/cli/translateProject")
   return translateProject(await translateSourceFor(session, project, options), options)
 }
 
@@ -143,7 +143,7 @@ async function uiVocabulary(lang: string): Promise<UIVocabulary | undefined> {
     return undefined
   }
   if (!existsSync(dictionaryFile)) return undefined
-  const { Vocabulary, SharedVocabulary, ValueSets } = await import("spell-ui/vocabulary")
+  const { Vocabulary, SharedVocabulary, ValueSets } = await import("spell/ui/vocabulary")
   const dictionary = (await import(dictionaryFile)) as Record<string, unknown>
   const registry = new Vocabulary()
   const components = dirname(dictionaryFile)

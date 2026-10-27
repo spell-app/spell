@@ -1,5 +1,5 @@
-import type { E } from "spell-ui/core"
-import { SSR } from "spell-ui/static"
+import type { E } from "spell/ui/core"
+import { SSR } from "spell/ui/static"
 
 /****************
  * ### `StaticCatalog`
@@ -9,7 +9,7 @@ import { SSR } from "spell-ui/static"
  *   calls `customElements.define()`.
  * - Its callers:  `spell ssr` (`StaticDocument`), the visual tests' `--static` pages (`StaticFixture`), the `ssr` tests.
  *   Each runs under Vite, which finds the files (`import.meta.glob()`);  the publish build expands the glob too.
- * - Node only, like all of `spell-ui/static`;  NEVER imported by a component or `spell-ui`.
+ * - Node only, like all of `spell/ui/static`;  NEVER imported by a component or `spell-ui`.
  *   Loading it loads no family:  `define()` does.
  * - Its own file, not a static on `StaticRender`, on purpose:  the engine stays free of family imports (it renders
  *   what it's given), and the list changes for a different reason (a family becoming server-ready) than the engine.

@@ -3,15 +3,15 @@
 import { parseHTML } from "linkedom"
 import { beforeAll, describe, expect, it } from "vite-plus/test"
 
-import { StaticRender } from "spell-ui/static"
-import { UIButton } from "spell-ui/components/ui-button/UIButton"
-import { UIActions } from "spell-ui/components/ui-parts/UIActions"
-import { UIContent } from "spell-ui/components/ui-parts/UIContent"
-import { UIHeader } from "spell-ui/components/ui-parts/UIHeader"
-import { UIModal } from "spell-ui/components/ui-modal/UIModal"
+import { StaticRender } from "spell/ui/static"
+import { UIButton } from "spell/ui/components/ui-button/UIButton"
+import { UIActions } from "spell/ui/components/ui-parts/UIActions"
+import { UIContent } from "spell/ui/components/ui-parts/UIContent"
+import { UIHeader } from "spell/ui/components/ui-parts/UIHeader"
+import { UIModal } from "spell/ui/components/ui-modal/UIModal"
 
 /**
- * `<ui-modal>` rendered statically (`spell-ui/static`):
+ * `<ui-modal>` rendered statically (`spell/ui/static`):
  * - a CLOSED `<dialog>`:  its initial state, since opening needs JS (or an invoker command)
  * - its content in the HTML
  * - named by its heading, through an id

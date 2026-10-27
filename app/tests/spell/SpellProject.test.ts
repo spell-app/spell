@@ -1,8 +1,8 @@
 import { describe, test, expect } from "vite-plus/test"
 
-import { P } from "spell-parser/parser"
-import { parseSpellProject, summarize } from "spell-parser/spell/test"
-import { loadFixtureProject } from "spell-app/spaces/test"
+import { P } from "spell/parser/parser"
+import { parseSpellProject, summarize } from "spell/parser/spell/test"
+import { loadFixtureProject } from "spell/app/spaces/test"
 
 /**
  * Whole-project parse of the Solitaire example, `@spell/examples/Solitaire`, written in spellx.

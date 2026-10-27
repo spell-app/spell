@@ -18,7 +18,7 @@
 import type { Command } from "commander"
 
 import { CLI } from "spell/cli"
-import type { LanguageCommand, LanguageCommands } from "spell-parser/cli"
+import type { LanguageCommand, LanguageCommands } from "spell/parser/cli"
 
 export default function languageCommands(spell: Command): void {
   spell

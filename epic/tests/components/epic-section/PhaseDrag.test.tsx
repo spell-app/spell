@@ -2,11 +2,11 @@ import { afterEach, describe, expect, test, vi } from "vite-plus/test"
 
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 
-import { PhaseDrag } from "spell-epic/components/epic-section/PhaseDrag"
+import { PhaseDrag } from "spell/epic/components/epic-section/PhaseDrag"
 
-import "spell-ui/components/ui-section"
-import "spell-epic/components/epic-section"
-import "spell-epic/components/epic-phase"
+import "spell/ui/components/ui-section"
+import "spell/epic/components/epic-section"
+import "spell/epic/components/epic-phase"
 
 /** The Phases section:  P1 done, P2-P4 to do. */
 const SECTION =

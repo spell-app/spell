@@ -2,9 +2,9 @@ import { describe, expect, it } from "vite-plus/test"
 
 import { Fixture } from "spell/test-helpers/Fixture"
 import type { DOMElement } from "spell/element"
-import type { UIRoot } from "spell-ui/components/ui-root"
+import type { UIRoot } from "spell/ui/components/ui-root"
 
-import "spell-ui/components/ui-root"
+import "spell/ui/components/ui-root"
 
 /**
  * `<es-menu encogible>`:  `<ui-menu shrinkable>` in Spanish, its family loaded by the root, as a page loads it.

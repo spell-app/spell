@@ -4,7 +4,7 @@ import { resolve } from "path"
 import { fileURLToPath } from "url"
 import { afterAll, describe, test, expect } from "vite-plus/test"
 
-import { CLI } from "spell-app/cli"
+import { CLI } from "spell/app/cli"
 
 /**
  * Each type of a compiled library, as JSON Schema for VS Code (`CLI.writeSchemas()`, epic `people-and-orgs` P5):

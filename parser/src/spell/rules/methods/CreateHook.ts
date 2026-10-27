@@ -1,7 +1,7 @@
 import { proto } from "spell/util"
-import { P } from "spell-parser/parser"
-import { Wording } from "spell-parser/spell/rules/expressions"
-import { Priority } from "spell-parser/spell/rules/rules.types"
+import { P } from "spell/parser/parser"
+import { Wording } from "spell/parser/spell/rules/expressions"
+import { Priority } from "spell/parser/spell/rules/rules.types"
 import type { MethodSignatureData } from "./methods.shared"
 // Import directly to avoid circular import
 import { ToDoSomething } from "./ToDoSomething"

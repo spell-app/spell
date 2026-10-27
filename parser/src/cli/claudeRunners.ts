@@ -19,7 +19,7 @@ import type {
   ClaudeOptions,
   ClaudeRunner,
   EffortTier
-} from "spell-parser/spell/translate/translate.types"
+} from "spell/parser/spell/translate/translate.types"
 
 /** A Claude runner the command picked, and what the report calls it. */
 export type ChosenRunner = { run: ClaudeRunner; via: string }

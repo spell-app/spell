@@ -4,7 +4,7 @@
  * styles what's left, linked or inline.
  * - Loaded through Vite's SSR (`StaticRenderer`, `server.ssrLoadModule(StaticRenderer.DOCUMENT)`), NEVER by node
  *   directly:  the components' JSX must compile for the server, as for `visual/StaticFixture.ts`.
- * - Node only, like `spell-ui/static`, which it reaches through `SSR`:  the Vite server resolves it.
+ * - Node only, like `spell/ui/static`, which it reaches through `SSR`:  the Vite server resolves it.
  */
 
 import { existsSync, readFileSync } from "node:fs"
@@ -13,7 +13,7 @@ import { parseHTML } from "linkedom"
 import { transform } from "lightningcss"
 import postcss from "postcss"
 
-import { SSR } from "spell-ui/static"
+import { SSR } from "spell/ui/static"
 
 import type {
   StaticCoverage,

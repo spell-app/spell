@@ -6,7 +6,7 @@
  *   and `themes/theme.schema.json`, from the theme tree.
  * - The generated sheets are COMMITTED, so consumers need no build step;  rerun after any vocabulary or theme change.
  * - `--check`:  write nothing;  exit 1 if a sheet is stale.
- * - NOTE: imports the generators' leaf files, not the `spell-ui/styles` barrel -- the barrel pulls in `?raw` / `?inline`
+ * - NOTE: imports the generators' leaf files, not the `spell/ui/styles` barrel -- the barrel pulls in `?raw` / `?inline`
  *   CSS imports that only Vite understands.
  */
 import { readdirSync } from "node:fs"
@@ -14,13 +14,13 @@ import { fileURLToPath } from "node:url"
 import { parseArgs } from "node:util"
 
 import { readJSON5File } from "spell/util/node/json5"
-import { StyleGenerator } from "spell-ui/styles/StyleGenerator"
-import { ThemeFile } from "spell-ui/styles/ThemeFile"
-import type { ThemeData } from "spell-ui/styles/styles.types"
+import { StyleGenerator } from "spell/ui/styles/StyleGenerator"
+import { ThemeFile } from "spell/ui/styles/ThemeFile"
+import type { ThemeData } from "spell/ui/styles/styles.types"
 import { Terminal } from "spell/element-tools/Terminal"
 import { type GeneratedOutput, writeOrCheck } from "spell/element-tools/generatedFiles"
 
-import { formatted } from "spell-ui/tools/generatedFiles"
+import { formatted } from "spell/ui/tools/generatedFiles"
 
 /****************
  * ### `GenStylesCommand`

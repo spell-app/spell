@@ -1,7 +1,7 @@
 import { copyFileSync, existsSync, mkdirSync } from "node:fs"
 import { dirname, extname, join, resolve } from "node:path"
 
-import { stringFlag } from "spell-epic/command/command.types"
+import { stringFlag } from "spell/epic/command/command.types"
 
 import { kindNamed, PlanDocError } from "./planDoc.types"
 

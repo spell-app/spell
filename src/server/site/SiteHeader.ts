@@ -168,7 +168,7 @@ export class SiteHeader extends HTMLElement {
    * Absolute path of the page's source file, for VS Code;  `undefined` when unknown (a proxied page).
    * - served:  the file the server served (`SPELL_SERVER.source`), wherever it lives
    *   - e.g. a guide, from the content folder:  `.../spell-app.epics/guides/x.html`
-   *   - epic `epic-engine` I42:  `root` + `file` gave `.../spell-app/guides/x.html`, which doesn't exist
+   *   - epic `epic-engine` I42:  `root` + `file` gave `.../app/guides/x.html`, which doesn't exist
    *     since the guides moved to the content folder (epic `epic-eject` P12;  `file` is the page's path in it)
    * - a server from before `source`:  `root` + `file`, right for the checkout's own pages
    */

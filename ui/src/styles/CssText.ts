@@ -6,7 +6,7 @@
  * - Quoted text (`[title="a)"]`, `url(")")`) and escaped characters (`\(`) never count as brackets.
  * - Pure text in, text out:  no DOM, no postcss, no imports, so browser code and node tools share it.
  *   Spell UI holds no parser of its own (nothing of spell), so this small reader is its one.
- * - Build / test time and the static render only:  left out of the `spell-ui/styles` barrel, import the leaf file.
+ * - Build / test time and the static render only:  left out of the `spell/ui/styles` barrel, import the leaf file.
  * - STATIC and instance-free on purpose:  a text is all it reads.
  ****************/
 export class CssText {

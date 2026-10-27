@@ -4,7 +4,7 @@ import { page as browser, userEvent } from "vite-plus/test/browser"
 import { expectAccessible } from "spell/test-helpers/A11y"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import type { DOMElement } from "spell/element"
-import { UIPage } from "spell-ui/components/ui-page"
+import { UIPage } from "spell/ui/components/ui-page"
 
 /** A whole page frame:  every region filled. */
 const FULL =

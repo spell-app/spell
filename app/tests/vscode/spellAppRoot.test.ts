@@ -5,7 +5,7 @@ import { afterAll, describe, expect, test } from "vite-plus/test"
 
 import { fakeMainCheckout, fakeWorktree } from "spell/server/test/checkouts"
 
-import { findSpellApp } from "spell-app/vscode/src/spellAppRoot.ts"
+import { findSpellApp } from "spell/app/vscode/src/spellAppRoot.ts"
 
 /**
  * Which spell-app checkout the VS Code extension runs (`findSpellApp()`), on made-up checkouts laid out like Owen's:

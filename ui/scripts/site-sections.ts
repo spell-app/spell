@@ -51,13 +51,13 @@ import { readJSON5File } from "spell/util/node/json5"
 
 import { Terminal } from "spell/element-tools/Terminal"
 import { type GeneratedOutput, writeOrCheck } from "spell/element-tools/generatedFiles"
-import type { SiteDataFile, SiteTag } from "spell-ui/docs-components/docs-components.types"
-import { ApiModel } from "spell-ui/docs-components/ui-docs-api/ApiModel"
-import { docsApiVocabulary } from "spell-ui/docs-components/ui-docs-api/UIDocsApi.en"
-import type { ApiSectionId } from "spell-ui/docs-components/ui-docs-api/UIDocsApi.types"
-import { TocIndex } from "spell-ui/components/ui-toc/TocIndex"
-import { environment } from "spell-ui/tools/environment"
-import { SITE_DATA, SPELL_UI_ROOT, sitePages } from "spell-ui/tools/tools.types"
+import type { SiteDataFile, SiteTag } from "spell/ui/docs-components/docs-components.types"
+import { ApiModel } from "spell/ui/docs-components/ui-docs-api/ApiModel"
+import { docsApiVocabulary } from "spell/ui/docs-components/ui-docs-api/UIDocsApi.en"
+import type { ApiSectionId } from "spell/ui/docs-components/ui-docs-api/UIDocsApi.types"
+import { TocIndex } from "spell/ui/components/ui-toc/TocIndex"
+import { environment } from "spell/ui/tools/environment"
+import { SITE_DATA, SPELL_UI_ROOT, sitePages } from "spell/ui/tools/tools.types"
 
 /****************
  * ### `SiteSections`

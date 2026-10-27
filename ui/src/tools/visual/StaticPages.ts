@@ -4,7 +4,7 @@ import { readFileSync } from "node:fs"
 import type { IncomingMessage, ServerResponse } from "node:http"
 import type { Plugin, ViteDevServer } from "vite"
 
-import { StaticRenderer } from "spell-ui/tools/StaticRenderer"
+import { StaticRenderer } from "spell/ui/tools/StaticRenderer"
 import { VisualSettings } from "./VisualSettings.ts"
 
 /****************

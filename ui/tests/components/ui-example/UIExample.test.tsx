@@ -4,9 +4,9 @@ import { expectAccessible } from "spell/test-helpers/A11y"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import type { DOMElement } from "spell/element"
 
-import { ExampleSource } from "spell-ui/components/ui-example/ExampleSource"
+import { ExampleSource } from "spell/ui/components/ui-example/ExampleSource"
 
-import "spell-ui/components/ui-example"
+import "spell/ui/components/ui-example"
 
 /** Element-markup examples, by path. */
 const EXAMPLES = import.meta.glob<string>("/src/components/ui-example/examples/elements/*.html", {

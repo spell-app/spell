@@ -2,10 +2,10 @@ import { afterAll, describe, expect, test } from "vite-plus/test"
 import { flush } from "solid-js"
 import { render } from "@solidjs/web"
 
-import { UI } from "spell-ui/core"
-import { appTexts } from "spell-app/app/ui/AppTexts"
-import { uiReady } from "spell-app/app/solid/loadUI"
-import { TypeExplorer } from "spell-app/app/solid/TypeExplorer"
+import { UI } from "spell/ui/core"
+import { appTexts } from "spell/app/app/ui/AppTexts"
+import { uiReady } from "spell/app/app/solid/loadUI"
+import { TypeExplorer } from "spell/app/app/solid/TypeExplorer"
 
 /**
  * The editor in Spanish (epic `spanish` P13):

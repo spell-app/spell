@@ -1,7 +1,7 @@
 /**
  * The English vocabulary of `<ui-steps>`:  every name the tag uses.
  * - Its tag, attributes (each with its kind and allowed values), slots, parts, states and texts.
- *   The shape is `E.ComponentVocabulary` (`spell-ui/vocabulary`).
+ *   The shape is `E.ComponentVocabulary` (`spell/ui/vocabulary`).
  * - Class words come out through `ClassBuilder`, in Fomantic's grammar:
  *   `<ui-steps ordered direction="vertical-right" widths="3">` => `ui ordered right vertical three steps`;
  *   `<ui-step selected completed>` => `completed active step` (a step has no `ui`, as Fomantic's `.ui.steps > .step`).
@@ -14,8 +14,8 @@
  *   `HTMLElement` property, as the popup's `header`) and `description`.
  */
 
-import type { E } from "spell-ui/core"
-import * as UIT from "spell-ui/components/components.types"
+import type { E } from "spell/ui/core"
+import * as UIT from "spell/ui/components/components.types"
 
 /****************
  * ### `stepsVocabulary`

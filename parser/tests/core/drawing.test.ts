@@ -4,8 +4,8 @@ import { render } from "@solidjs/web"
 import { describe, test, expect, vi, beforeAll, beforeEach, afterEach } from "vite-plus/test"
 
 import { bridgeSolid } from "spell/util"
-import { core, App, Thing, List, ViewableList, prop, drawn, h } from "spell-parser/core"
-import { isElementThunk, type Drawing } from "spell-parser/core/drawing"
+import { core, App, Thing, List, ViewableList, prop, drawn, h } from "spell/parser/core"
+import { isElementThunk, type Drawing } from "spell/parser/core/drawing"
 
 // counts each error boundary drawn:  `drawing.ts` makes one with `createComponent(Errored, ...)`
 vi.mock("solid-js", async (importOriginal) => {

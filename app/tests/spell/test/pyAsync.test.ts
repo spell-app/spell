@@ -1,8 +1,8 @@
 import { writeFileSync } from "fs"
 import { describe, test, expect } from "vite-plus/test"
 
-import { PY } from "spell-parser/py"
-import { compiledFixture } from "spell-app/spaces/test"
+import { PY } from "spell/parser/py"
+import { compiledFixture } from "spell/app/spaces/test"
 
 /**
  * The `py` target's writer, `PY.PyWriter`, on asyncio (epic `python-target` P11, one target since P22):  a function that waits is

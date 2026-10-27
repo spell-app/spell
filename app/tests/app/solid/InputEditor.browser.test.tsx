@@ -3,15 +3,15 @@ import { flush } from "solid-js"
 import { render } from "@solidjs/web"
 
 import { reactiveObject } from "spell/util"
-import type { SP } from "spell-parser/spell"
+import type { SP } from "spell/parser/spell"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
-import { editor, type EditorStore } from "spell-app/app/editor"
-import type * as UIT from "spell-app/app/ui/ui.types"
-import { uiReady } from "spell-app/app/solid"
-import { FileDropdown } from "spell-app/app/solid/FileDropdown"
-import { InputEditor, InputRoot } from "spell-app/app/solid/InputEditor"
-import { LazyMonaco } from "spell-app/app/solid/LazyMonaco"
-import { OutputEditor } from "spell-app/app/solid/OutputEditor"
+import { editor, type EditorStore } from "spell/app/app/editor"
+import type * as UIT from "spell/app/app/ui/ui.types"
+import { uiReady } from "spell/app/app/solid"
+import { FileDropdown } from "spell/app/app/solid/FileDropdown"
+import { InputEditor, InputRoot } from "spell/app/app/solid/InputEditor"
+import { LazyMonaco } from "spell/app/app/solid/LazyMonaco"
+import { OutputEditor } from "spell/app/app/solid/OutputEditor"
 
 /**
  * The Solid source editors on real Monaco, in the browser:
@@ -67,7 +67,7 @@ describe("<InputEditor>", () => {
     setEditor("file", fakeFile("test-project/one.js", "one\n"))
     const dispose = await mountKept(() => <InputEditor />)
     const inputEditor = await waitForInputEditor(dispose.host)
-    const { monaco } = await import("spell-app/app/solid/monaco")
+    const { monaco } = await import("spell/app/app/solid/monaco")
     expect(monaco.editor.getEditors()).toContain(inputEditor)
     dispose()
     expect(monaco.editor.getEditors()).not.toContain(inputEditor)
@@ -99,7 +99,7 @@ describe("<InputEditor>", () => {
 
 describe("<OutputEditor>", () => {
   test("shows the compiled javascript, read-only;  its own model goes with it", async () => {
-    const { monaco } = await import("spell-app/app/solid/monaco")
+    const { monaco } = await import("spell/app/app/solid/monaco")
     const modelsBefore = monaco.editor.getModels().length
     const file = fakeFile("test-project/one.js", "")
     Object.assign(file, { compiled: "export const one = 1" })

@@ -1,7 +1,7 @@
 /**
  * The English vocabulary of `<ui-item>`:  every name the tag uses.
  * - Its tag, attributes (each with its kind and allowed values), slots, parts and states.
- *   The shape is `E.ComponentVocabulary` (`spell-ui/vocabulary`).
+ *   The shape is `E.ComponentVocabulary` (`spell/ui/vocabulary`).
  * - ONE generic item, as Fomantic's `.item` is shared by dropdown, list and menu:  it renders by OWNER
  *   (`PartContext`), never `ui-list-item` / `ui-menu-item`.  See `notes/grammar.md`, "Items".
  * - Class words come out through `ClassBuilder`, no `ui`:
@@ -12,7 +12,7 @@
  *   in a list or menu they see through it to their owner.
  */
 
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /****************
  * ### `itemVocabulary`

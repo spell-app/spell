@@ -10,7 +10,7 @@
  */
 import { realpathSync } from "node:fs"
 
-import { CheckoutPatches } from "spell-epic/command/CheckoutPatches.ts"
+import { CheckoutPatches } from "spell/epic/command/CheckoutPatches.ts"
 
 try {
   const folder = process.argv[2] ?? process.cwd()

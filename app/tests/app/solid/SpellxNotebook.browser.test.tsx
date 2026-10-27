@@ -3,8 +3,8 @@ import { flush } from "solid-js"
 import { render } from "@solidjs/web"
 
 import { PrefStore } from "spell/util/persist/PrefStore"
-import { uiReady } from "spell-app/app/solid/loadUI"
-import { SpellxNotebook } from "spell-app/app/solid/SpellxNotebook"
+import { uiReady } from "spell/app/app/solid/loadUI"
+import { SpellxNotebook } from "spell/app/app/solid/SpellxNotebook"
 
 /**
  * `<SpellxNotebook>` in the browser (epic `elemental-spell` P11):  a `.spellx` file as cards;  edits come back as the

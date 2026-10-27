@@ -1,6 +1,6 @@
 import { describe, test, expect } from "vite-plus/test"
 
-import { P } from "spell-parser/parser"
+import { P } from "spell/parser/parser"
 
 /**
  * Each output language names things by its own map (`P.Naming`, epic `drawable-thing` P11):

@@ -1,13 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vite-plus/test"
 
-import type { OverlayEntry } from "spell-ui/runtime"
+import type { OverlayEntry } from "spell/ui/runtime"
 
 import { Fixture } from "spell/test-helpers/Fixture"
-import { Browser } from "spell-ui/runtime/Browser"
-import { Focus } from "spell-ui/runtime/Focus"
-import { Keyboard } from "spell-ui/runtime/Keyboard"
-import { Overlays } from "spell-ui/runtime/Overlays"
-import { Styles } from "spell-ui/runtime/Styles"
+import { Browser } from "spell/ui/runtime/Browser"
+import { Focus } from "spell/ui/runtime/Focus"
+import { Keyboard } from "spell/ui/runtime/Keyboard"
+import { Overlays } from "spell/ui/runtime/Overlays"
+import { Styles } from "spell/ui/runtime/Styles"
 
 let keyboard: Keyboard
 let styles: Styles

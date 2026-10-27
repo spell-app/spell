@@ -1,7 +1,7 @@
 import { describe, test, expect } from "vite-plus/test"
 
-import { solidSample } from "spell-parser/spell/test"
-import { CLI } from "spell-app/cli"
+import { solidSample } from "spell/parser/spell/test"
+import { CLI } from "spell/app/cli"
 
 /**
  * `runCode()` on Solid TypeScript (the `ts/solid` target's `.tsx`):  built first (`buildTsx()`), then run as any

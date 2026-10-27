@@ -14,12 +14,12 @@ afterAll(() => rmSync(CHECKOUT, { recursive: true, force: true }))
 
 write("repos.json5", "{ repos: [{ name: 'spell-ui' }] }")
 write("package.json", JSON.stringify({ name: "spell" }))
-write("spell-ui/package.json", JSON.stringify({ name: "spell-ui" }))
+write("ui/package.json", JSON.stringify({ name: "spell-ui" }))
 write("src/util/json5.ts", "export function readJSON5File() {}\n")
 write("src/parser/index.ts", 'export * as P from "."\nexport * from "./Tokenizer"\n')
 write("src/parser/Tokenizer.ts", "export class Tokenizer {}\n")
 write(
-  "spell-ui/src/Reader.ts",
+  "ui/src/Reader.ts",
   [
     'import { readJSON5File } from "spell/util/json5"',
     'import { P } from "spell/parser"',
@@ -73,7 +73,7 @@ describe("CodeMap.merge()", () => {
     expect(merged.nodes.find((node) => node.label === "Reader.ts")).toMatchObject({
       id: "spell-ui::src_reader",
       repo: "spell-ui",
-      source_file: "spell-ui/src/Reader.ts"
+      source_file: "ui/src/Reader.ts"
     })
   })
 

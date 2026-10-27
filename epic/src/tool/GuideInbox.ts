@@ -1,6 +1,6 @@
 import { SRV } from "spell/server"
 
-import { DataFile } from "spell-epic/data/DataFile"
+import { DataFile } from "spell/epic/data/DataFile"
 
 import { CommentList, CommentsError, type Comment, type IdentifiedComment } from "./CommentList"
 

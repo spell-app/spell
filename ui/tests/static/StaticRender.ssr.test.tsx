@@ -2,18 +2,18 @@
 
 import { beforeAll, describe, expect, it } from "vite-plus/test"
 
-import { StaticRender, StaticStylesheet } from "spell-ui/static"
-import { UIButton } from "spell-ui/components/ui-button/UIButton"
-import { UICard } from "spell-ui/components/ui-card/UICard"
-import { UICards } from "spell-ui/components/ui-card/UICards"
-import { UIItem } from "spell-ui/components/ui-item/UIItem"
-import { UIList } from "spell-ui/components/ui-list/UIList"
-import { UIContent } from "spell-ui/components/ui-parts/UIContent"
-import { UIDescription } from "spell-ui/components/ui-parts/UIDescription"
-import { UIHeader } from "spell-ui/components/ui-parts/UIHeader"
-import { UIMeta } from "spell-ui/components/ui-parts/UIMeta"
-import { UISection } from "spell-ui/components/ui-section/UISection"
-import { UISegment } from "spell-ui/components/ui-segment/UISegment"
+import { StaticRender, StaticStylesheet } from "spell/ui/static"
+import { UIButton } from "spell/ui/components/ui-button/UIButton"
+import { UICard } from "spell/ui/components/ui-card/UICard"
+import { UICards } from "spell/ui/components/ui-card/UICards"
+import { UIItem } from "spell/ui/components/ui-item/UIItem"
+import { UIList } from "spell/ui/components/ui-list/UIList"
+import { UIContent } from "spell/ui/components/ui-parts/UIContent"
+import { UIDescription } from "spell/ui/components/ui-parts/UIDescription"
+import { UIHeader } from "spell/ui/components/ui-parts/UIHeader"
+import { UIMeta } from "spell/ui/components/ui-parts/UIMeta"
+import { UISection } from "spell/ui/components/ui-section/UISection"
+import { UISegment } from "spell/ui/components/ui-segment/UISegment"
 
 /**
  * `StaticRender` on the first families it rendered (epic `seo`, P1:  button, segment, card + parts, list + items,

@@ -1,23 +1,23 @@
 import { $fetch, UIError, Observable, prop, CONFIRM } from "spell/util"
 
-import { P } from "spell-parser/parser"
-import { SP } from "spell-parser/spell"
-import { SPACES } from "spell-app/spaces"
-import type { SpellConsole } from "spell-parser/core/console"
-import type { LSP } from "spell-app/lsp"
-import type { SpellRuntime } from "spell-app/app/runner"
-import type * as UIT from "spell-app/app/ui/ui.types"
-import type { monaco } from "spell-app/app/ui/monaco"
+import { P } from "spell/parser/parser"
+import { SP } from "spell/parser/spell"
+import { SPACES } from "spell/app/spaces"
+import type { SpellConsole } from "spell/parser/core/console"
+import type { LSP } from "spell/app/lsp"
+import type { SpellRuntime } from "spell/app/app/runner"
+import type * as UIT from "spell/app/app/ui/ui.types"
+import type { monaco } from "spell/app/app/ui/monaco"
 // NOTE: types only:  the dialogs themselves load on first use, see `dialogs()`.
-import type * as Modals from "spell-app/app/solid/modals"
-import { navigate } from "spell-app/app/pages/navigation"
-import { THEME_PAGE } from "spell-app/app/pages/pages.types"
-import { appTexts } from "spell-app/app/ui/AppTexts"
-import { editorPrefs } from "spell-app/app/editorPrefs"
+import type * as Modals from "spell/app/app/solid/modals"
+import { navigate } from "spell/app/app/pages/navigation"
+import { THEME_PAGE } from "spell/app/app/pages/pages.types"
+import { appTexts } from "spell/app/app/ui/AppTexts"
+import { editorPrefs } from "spell/app/app/editorPrefs"
 // Import directly, NOT through the runner barrel, which brings the runners
-import { wordsOfLanguages } from "spell-app/app/runner/words"
-import { isStaticBuild } from "spell-app/app/static/staticBuild"
-import { staticFiles } from "spell-app/app/static/StaticFiles"
+import { wordsOfLanguages } from "spell/app/app/runner/words"
+import { isStaticBuild } from "spell/app/app/static/staticBuild"
+import { staticFiles } from "spell/app/app/static/StaticFiles"
 
 ////////////////
 // ## The editor
@@ -27,7 +27,7 @@ import { staticFiles } from "spell-app/app/static/StaticFiles"
  * The editor:  what the app shows -- project root, project, file, selection, notices -- and everything it does.
  * - Its state is spell cells (`@prop`):
  *   `editor.x = y` anywhere, and Solid code reading `editor.x` re-runs
- *   (through the cells bridge, `spell-app/app/solid/cellsBridge`).
+ *   (through the cells bridge, `spell/app/app/solid/cellsBridge`).
  *   A read right after a write sees it.
  * - ONE instance, `editor`, below.
  * - NOTE: methods say `editor.x`, NEVER `this`:  they're handed around unbound, e.g. `setTimeout(editor.compileApp)`.
@@ -112,12 +112,12 @@ export class EditorStore extends Observable {
   showProjectSettings(): void {
     const { project, projectRoot } = editor
     if (!project || !projectRoot) return
-    void import("spell-app/app/pages/ProjectSettings")
+    void import("spell/app/app/pages/ProjectSettings")
       .then(({ openProjectSettings }) => openProjectSettings(project, projectRoot, (error) => editor.showError(error)))
       .catch((error) => editor.showError(error))
   }
 
-  // TODO: these are referenced by `spell-app/app/solid`'s `Actions` but not yet implemented.
+  // TODO: these are referenced by `spell/app/app/solid`'s `Actions` but not yet implemented.
   /** Show help. TODO: not yet implemented. */
   showHelp(): void {
     console.warn("TODO: editor.showHelp() not yet implemented")
@@ -410,7 +410,7 @@ export class EditorStore extends Observable {
     // the Things tab's words:  a words file per language its files are in, the one it speaks first
     editor.programWords = wordsOfLanguages(project.wordsFiles.map((file) => SP.SpellWords.read(file.contents ?? "")))
     if (lang && lang !== "en") {
-      const { RootLoader } = await import("spell-ui/components/ui-root")
+      const { RootLoader } = await import("spell/ui/components/ui-root")
       // oxlint-disable-next-line react-hooks/rules-of-hooks -- Spell UI's `useLanguage()` is no React hook
       await RootLoader.useLanguage(lang)
     }
@@ -521,7 +521,7 @@ export class EditorStore extends Observable {
   /**
    * Hand over the scope explorer on the editor's in-page language service:  `LazyMonaco` does, once Monaco loads.
    * - NOT spell state.
-   * - Handed over, not made here:  `spell-app/lsp` is in Monaco's lazy chunk, and `editor.ts` is in the main one.
+   * - Handed over, not made here:  `spell/app/lsp` is in Monaco's lazy chunk, and `editor.ts` is in the main one.
    * - SIDE EFFECT:  works out the current project's tree at once.
    */
   setScopeExplorer(explorer: LSP.ScopeExplorer): void {
@@ -685,7 +685,7 @@ export class EditorStore extends Observable {
    * Make a property editor PAGE for one of current `project`'s types, and show it (epic `property-editor` P6).
    * - e.g. `Card.editor.html`, for its type `Card`
    * - No `type`:  asks which (`choose()`), of the types its declarations list;  cancelled:  nothing happens.
-   * - What it writes, and from what:  `PropertyEditorFiles` (`spell-app/app/ui/PropertyEditorFiles`).
+   * - What it writes, and from what:  `PropertyEditorFiles` (`spell/app/app/ui/PropertyEditorFiles`).
    *   - the type's schema:  the running program's class when it runs this project, else its declarations
    *   - a name that's taken:  `Card2.editor.html`, never the page that's there
    * - Through a DYNAMIC `import()`:  `editor.ts` stays free of `spell-ui`.
@@ -697,7 +697,7 @@ export class EditorStore extends Observable {
     // its group's words, for the errors:  `Example Solitaire has no types yet`
     const named = { ...appTexts.groupWords(editor.projectRoot), name: project.title }
     try {
-      const { PropertyEditorFiles } = await import("spell-app/app/ui/PropertyEditorFiles")
+      const { PropertyEditorFiles } = await import("spell/app/app/ui/PropertyEditorFiles")
       if (!type) {
         const types = await PropertyEditorFiles.typesOf(project)
         if (!types.length) throw new UIError(appTexts.text("noTypesYet", named))
@@ -729,7 +729,7 @@ export class EditorStore extends Observable {
   }
 
   /**
-   * Get the user's answer to some question:  a `<ui-modal>` (`spell-app/app/solid/modals`, on `spell-ui`).
+   * Get the user's answer to some question:  a `<ui-modal>` (`spell/app/app/solid/modals`, on `spell-ui`).
    * - `props`, or just the `message` string, for the other defaults:
    *   - `message` (required):  message to show
    *   - `header` (optional):  header for the dialog;  default:  no header
@@ -782,7 +782,7 @@ export class EditorStore extends Observable {
   }
   /**
    * Remember `inputEditor`, showing `editor.file`, in our `<InputEditor onMount />` event.
-   * - `api` is Monaco itself, handed over as Monaco is loaded lazily -- see `spell-app/app/solid`'s `LazyMonaco`.
+   * - `api` is Monaco itself, handed over as Monaco is loaded lazily -- see `spell/app/app/solid`'s `LazyMonaco`.
    * - SIDE EFFECT:  adds our save / reload / compile keys, and follows its cursor + scrolling into `selection`.
    *   Monaco disposes of both with the editor.
    */
@@ -933,7 +933,7 @@ const parsedImports = new WeakSet<SP.SpellProject>()
 
 /**
  * `core` of the runtime programs run on -- `undefined` until it's loaded, see `editor.loadRuntime()`.
- * - NOT an import of `spell-parser/core`:  the app MUST NOT load one of its own, see `spellRuntime.ts`.
+ * - NOT an import of `spell/parser/core`:  the app MUST NOT load one of its own, see `spellRuntime.ts`.
  * - A function, NOT a getter on `editor`:  callers outside the editor read it too.
  * - Reads `editor.runtimeLoaded`, so a reader calling it re-runs once it's loaded.
  */
@@ -1034,11 +1034,11 @@ function onInputCursor(event: UIT.EditorScrollInfo["event"]): void {
 }
 
 /**
- * The app's dialogs (`spell-app/app/solid/modals`), loaded on first use.
+ * The app's dialogs (`spell/app/app/solid/modals`), loaded on first use.
  * - Dynamic:  they bring Solid and `spell-ui`, which `editor.ts` -- imported by nearly everything -- shouldn't.
  */
 function dialogs() {
-  return import("spell-app/app/solid/modals")
+  return import("spell/app/app/solid/modals")
 }
 
 ////////////////

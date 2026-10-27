@@ -1,4 +1,4 @@
-import { PhaseNumbers } from "spell-epic/tool/PhaseNumbers"
+import { PhaseNumbers } from "spell/epic/tool/PhaseNumbers"
 
 import type { Migration, MigrationContext } from "./migrations.types"
 

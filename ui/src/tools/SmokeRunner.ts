@@ -20,7 +20,7 @@ import { Terminal } from "spell/element-tools/Terminal"
  *   - `/dist/`, `/vendor/` -- the library build and the vendored peers (`yarn vendor`)
  *   - `/src/tools/` -- host pages (`frameworks/*.html`), the compiled Solid host app, the extra pages
  *   - `/src/test-helpers/` -- `PerfRun.ts`, transpiled on the fly
- * - Every page gets ONE import map (`importMap`):  the vendored peers, `spell-ui/...` => `/dist/...`.
+ * - Every page gets ONE import map (`importMap`):  the vendored peers, `spell/ui/...` => `/dist/...`.
  *   - The Solid host app resolves `solid-js` / `@solidjs/web` through it too,
  *     so it shares one copy with the components.
  * - Pages, in order:

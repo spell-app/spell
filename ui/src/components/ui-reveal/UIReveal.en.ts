@@ -1,6 +1,6 @@
 /**
  * Every name `<ui-reveal>` uses:  tag, attributes (kind + allowed values), slots, parts, states.
- * Schema:  `E.ComponentVocabulary` (`spell-ui/vocabulary`).
+ * Schema:  `E.ComponentVocabulary` (`spell/ui/vocabulary`).
  * - Class words come out through `ClassBuilder`, in Fomantic's grammar:
  *   `<ui-reveal move="right" instant>` => `ui instant right move reveal`.
  *   `UIReveal.css` keys on single words (`.move.right`), so the phrase order is free.
@@ -10,7 +10,7 @@
  * - `active` keeps Fomantic's word:  it means REVEALED, not chosen, so it isn't a `selected`.
  */
 
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /****************
  * ### `<ui-reveal>`

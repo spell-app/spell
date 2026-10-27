@@ -20,9 +20,9 @@ import {
   spellPosition,
   endPosition,
   withSpellPositions
-} from "spell-parser/core"
-import { P } from "spell-parser/parser"
-import { SP } from "spell-parser/spell"
+} from "spell/parser/core"
+import { P } from "spell/parser/parser"
+import { SP } from "spell/parser/spell"
 
 import { parseSpellProject } from "./parseSpellProject"
 

@@ -1,40 +1,40 @@
 import { describe, expect, it } from "vite-plus/test"
 
 import * as spellElement from "spell/element"
-import * as core from "spell-ui/core"
-import * as forms from "spell-ui/forms"
-import * as elements from "spell-ui/elements"
+import * as core from "spell/ui/core"
+import * as forms from "spell/ui/forms"
+import * as elements from "spell/ui/elements"
 
 /**
  * Load-order smoke test for the two shared lib entries (WWOD §8 › "Barrels").
- * - The element-core files import `spell-ui/core` back as `E` (and the `forms` files `spell-ui/forms` as `F`):
+ * - The element-core files import `spell/ui/core` back as `E` (and the `forms` files `spell/ui/forms` as `F`):
  *   a cycle, on purpose.
  *   A binding the cycle leaves `undefined` slips past `tsc` and the bundler alike;  this catches it.
- * - Entered through `spell-ui/core`, as every component file does.
- *   The folder's other tests enter through the `spell-ui/elements` barrel (whose first class file is `ClassBuilder`),
+ * - Entered through `spell/ui/core`, as every component file does.
+ *   The folder's other tests enter through the `spell/ui/elements` barrel (whose first class file is `ClassBuilder`),
  *   so both routes run.
  * - NOTE: entering at a leaf the core reads while it evaluates would throw:
  *   e.g. `spell-ui/elements/UIComponent`, which `PartComponent` extends,
  *   is still mid-load when the core reaches its reader.
  *   Nothing imports one by path but `core.ts` / `forms.ts`, and nothing may.
  */
-describe("spell-ui/core and spell-ui/forms load order", () => {
-  it("every export of spell-ui/core is live", () => {
+describe("spell/ui/core and spell/ui/forms load order", () => {
+  it("every export of spell/ui/core is live", () => {
     expect(Object.keys(core).length).toBeGreaterThan(50)
     expect(undefinedExports(core)).toEqual([])
   })
 
-  it("every export of spell-ui/forms is live", () => {
+  it("every export of spell/ui/forms is live", () => {
     expect(Object.keys(forms).length).toBeGreaterThan(5)
     expect(undefinedExports(forms)).toEqual([])
   })
 
-  it("E holds the very objects spell-ui/core exports", () => {
+  it("E holds the very objects spell/ui/core exports", () => {
     expect(Object.keys(core.E).sort()).toEqual(Object.keys(core).sort())
     expect(differentExports(core.E, core)).toEqual([])
   })
 
-  it("F holds the very objects spell-ui/forms exports", () => {
+  it("F holds the very objects spell/ui/forms exports", () => {
     expect(Object.keys(forms.F).sort()).toEqual(Object.keys(forms).sort())
     expect(differentExports(forms.F, forms)).toEqual([])
   })
@@ -56,7 +56,7 @@ describe("spell-ui/core and spell-ui/forms load order", () => {
     expect(core.LoadableComponent.prototype.elementSetup.DOMElement).toBe(core.DOMLoadableElement)
   })
 
-  it("spell-ui/elements hands out the same objects as the entries", () => {
+  it("spell/ui/elements hands out the same objects as the entries", () => {
     const entries: Record<string, unknown> = { ...core, ...forms }
     const different = Object.keys(elements).filter(
       (name) => (elements as Record<string, unknown>)[name] !== entries[name]
@@ -67,11 +67,11 @@ describe("spell-ui/core and spell-ui/forms load order", () => {
 
 /**
  * `spell/element`, what every set's elements are written on, through Spell UI's core.
- * - `spell-ui/core` re-exports every name, so its `E` holds them too.
+ * - `spell/ui/core` re-exports every name, so its `E` holds them too.
  * - A component pack that imports `spell/element` reads Spell UI's core module from the page (`SpellUI.packModules`):
  *   ONE copy on a page.
  */
-describe("spell-ui/core and spell/element", () => {
+describe("spell/ui/core and spell/element", () => {
   it("Spell UI's core carries every name, the same objects:  its E is a superset", () => {
     const fromCore = core as Record<string, unknown>
     const missing = Object.keys(spellElement).filter((name) => name !== "E" && !(name in core))

@@ -1,8 +1,8 @@
-import { P } from "spell-parser/parser"
+import { P } from "spell/parser/parser"
 
-import { SPELL_BASE_TYPES, type CoreMessages } from "spell-parser/core/core.types"
-import { SP } from "spell-parser/spell"
-import { PARSER_MESSAGES } from "spell-parser/spell/languages/en/parserMessages"
+import { SPELL_BASE_TYPES, type CoreMessages } from "spell/parser/core/core.types"
+import { SP } from "spell/parser/spell"
+import { PARSER_MESSAGES } from "spell/parser/spell/languages/en/parserMessages"
 
 /**
  * A LANGUAGE PACK:  everything spell needs to read programs written in one human language (epic `spanish`).

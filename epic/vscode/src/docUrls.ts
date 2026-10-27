@@ -14,7 +14,7 @@ import type { SRV } from "spell/server"
 import { RealPath } from "spell/server/RealPath"
 
 // With its `.ts`:  plain `node` adds no extension to a name
-import { ENGINE_PREFIX, ENGINE_ROUTES, type EpicServerInfo } from "spell-epic/server/server.types.ts"
+import { ENGINE_PREFIX, ENGINE_ROUTES, type EpicServerInfo } from "spell/epic/server/server.types.ts"
 
 /** The extension's id, `<publisher>.<name>`:  its `vscode://` URIs start with it. */
 export const EXTENSION_ID = "spell-app.spell-epic"

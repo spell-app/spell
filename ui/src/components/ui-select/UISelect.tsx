@@ -1,12 +1,12 @@
 import { For, Show } from "solid-js"
 import { isServer, type JSX } from "@solidjs/web"
 
-import { E, UI, UIT } from "spell-ui/core"
-import { F } from "spell-ui/forms"
+import { E, UI, UIT } from "spell/ui/core"
+import { F } from "spell/ui/forms"
 // REFACTOR: `SlottedItems` reads `<ui-item>`s as data for the dropdown AND the select;
 // it belongs to the `item` family (next to `itemVocabulary`),
 // which would also spare the bundle a shared dropdown / select chunk
-import { SlottedItems } from "spell-ui/components/ui-dropdown/SlottedItems"
+import { SlottedItems } from "spell/ui/components/ui-dropdown/SlottedItems"
 import { selectVocabulary } from "./UISelect.en"
 import { SelectFallback } from "./UISelect.fallback"
 import { DIVIDER, PLACEHOLDER, type SelectBlock, type Vocabulary } from "./UISelect.types"
@@ -277,7 +277,7 @@ export class UISelect extends F.FormComponent<Vocabulary> {
   }
 
   /**
-   * The select's extra attributes in a server render (`spell-ui/static`):  its `name`, so it submits without script.
+   * The select's extra attributes in a server render (`spell/ui/static`):  its `name`, so it submits without script.
    * - `{}` in a browser, where the DOM element submits (`ElementInternals`).
    */
   private get staticSelect(): Record<string, unknown> {

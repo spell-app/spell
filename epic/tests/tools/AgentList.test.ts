@@ -7,7 +7,7 @@ import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { afterAll, describe, expect, test } from "vite-plus/test"
 
-import { AgentList, AgentListError } from "spell-epic/tools/AgentList"
+import { AgentList, AgentListError } from "spell/epic/tools/AgentList"
 
 const SCRATCH = realpathSync(mkdtempSync(join(tmpdir(), "agent-list-")))
 afterAll(() => rmSync(SCRATCH, { recursive: true, force: true }))

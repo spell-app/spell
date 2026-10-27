@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { NotebookCode } from "spell-app/app/solid/notebook/NotebookCode"
+import { NotebookCode } from "spell/app/app/solid/notebook/NotebookCode"
 
 /** A notebook's code views (epic `elemental-spell` P16):  html is spellx with each bare name's tag, and back. */
 describe("NotebookCode", () => {

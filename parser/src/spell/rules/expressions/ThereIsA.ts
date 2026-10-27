@@ -1,5 +1,5 @@
 import { proto } from "spell/util"
-import { P } from "spell-parser/parser"
+import { P } from "spell/parser/parser"
 
 import { Negatable } from "./Negatable"
 import { SpellExpression } from "./SpellExpression"

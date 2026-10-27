@@ -1,10 +1,10 @@
 import { readFileSync } from "node:fs"
 import { join } from "node:path"
 
-import { ComponentTokens } from "spell-ui/styles/ComponentTokens"
-import type { TokenDeclaration } from "spell-ui/styles/styles.types"
+import { ComponentTokens } from "spell/ui/styles/ComponentTokens"
+import type { TokenDeclaration } from "spell/ui/styles/styles.types"
 import { FamilyTokens } from "./FamilyTokens.ts"
-import type { SiteFoundationGroup, SiteToken, SiteTokenType } from "spell-ui/docs-components/docs-components.types"
+import type { SiteFoundationGroup, SiteToken, SiteTokenType } from "spell/ui/docs-components/docs-components.types"
 
 /****************
  * ### `FoundationTokens`

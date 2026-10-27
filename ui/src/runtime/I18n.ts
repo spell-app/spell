@@ -1,5 +1,5 @@
-import { once } from "spell-ui/util"
-import type { Dictionary } from "spell-ui/vocabulary"
+import { once } from "spell/ui/util"
+import type { Dictionary } from "spell/ui/vocabulary"
 
 import {
   EN_STRINGS,

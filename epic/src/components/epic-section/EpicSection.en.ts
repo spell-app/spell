@@ -8,12 +8,12 @@
  * - `kind`'s values are `overview-part`, `SectionIds`' keys, then `report`:  `Definitions.test.ts` checks they agree.
  */
 
-import type { EpicVocabulary } from "spell-epic/definitions"
+import type { EpicVocabulary } from "spell/epic/definitions"
 
-import { ACTIONS_CHILD, ACTIONS_SLOT_SPEC } from "spell-epic/components/epic-item/Fold.types"
+import { ACTIONS_CHILD, ACTIONS_SLOT_SPEC } from "spell/epic/components/epic-item/Fold.types"
 // the review controls an Overview sub-section draws, as `<epic-item>` does;  the waiting new items of Todos and Questions
-import { NEW_KIND_TEXTS, NEW_LIST_TEXTS } from "spell-epic/components/epic-new-item/EpicNewItem.types"
-import { REVIEW_PARTS } from "spell-epic/components/epic-review/EpicReview.types"
+import { NEW_KIND_TEXTS, NEW_LIST_TEXTS } from "spell/epic/components/epic-new-item/EpicNewItem.types"
+import { REVIEW_PARTS } from "spell/epic/components/epic-review/EpicReview.types"
 
 import { FOLD_EVENTS, FOLD_OPEN_ATTRIBUTE, FOLD_PARTS, FOLD_STATES, FOLD_TEXTS } from "./EpicSection.types"
 

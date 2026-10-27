@@ -2,7 +2,7 @@
  * What the app and the server say about people, over `/api/people/...` (epic `people-and-orgs` P9).
  * - Plain JSON, so the app needs no people library to show one.
  * - Types only:  safe in a browser.
- * - The server's side:  `PeopleStore` (`spell-app/spaces/server/node/people/PeopleStore`), and its routes.
+ * - The server's side:  `PeopleStore` (`spell/app/spaces/server/node/people/PeopleStore`), and its routes.
  */
 
 /** A person, as the "You" panel shows them:  `GET /api/people/me`'s `person`. */

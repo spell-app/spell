@@ -1,17 +1,17 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { colorsCSS, foundationCSS } from "spell-ui/styles"
+import { colorsCSS, foundationCSS } from "spell/ui/styles"
 
 import { Fixture } from "spell/test-helpers/Fixture"
-import { Sheets } from "spell-ui/test-helpers/Sheets"
+import { Sheets } from "spell/ui/test-helpers/Sheets"
 
-import { inputVocabulary } from "spell-ui/components/ui-input/UIInput.en"
-import { textareaVocabulary } from "spell-ui/components/ui-input/UITextarea.en"
+import { inputVocabulary } from "spell/ui/components/ui-input/UIInput.en"
+import { textareaVocabulary } from "spell/ui/components/ui-input/UITextarea.en"
 
-import buttonCSS from "spell-ui/components/ui-button/UIButton.css?inline"
-import labelCSS from "spell-ui/components/ui-label/UILabel.css?inline"
-import inputCSS from "spell-ui/components/ui-input/UIInput.css?inline"
-import inputRaw from "spell-ui/components/ui-input/UIInput.css?raw"
+import buttonCSS from "spell/ui/components/ui-button/UIButton.css?inline"
+import labelCSS from "spell/ui/components/ui-label/UILabel.css?inline"
+import inputCSS from "spell/ui/components/ui-input/UIInput.css?inline"
+import inputRaw from "spell/ui/components/ui-input/UIInput.css?raw"
 
 /**
  * `UIInput.css` on its own, before any element exists:  the sheet's source rules and the computed styles of the

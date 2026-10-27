@@ -9,7 +9,7 @@ import { fmtConfig, packageLint } from "spell/toolchain/lint"
  *   `spell/element-tools/ComponentPack`), on the kit's `elementBaseConfig()`.
  * - Tests:  `vitest.config.ts` beside this.
  * - `src/components/__pack/` is generated:  not ours to lint.
- * - No aliases:  every file is imported by its package name (`spell-__pack__/components`, `spell-ui/core`),
+ * - No aliases:  every file is imported by its package name (`spell-__pack__/components`, `spell/ui/core`),
  *   which Vite finds through each package's `exports`.
  */
 export default defineConfig({

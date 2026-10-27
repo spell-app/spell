@@ -1,6 +1,6 @@
 import { describe, test, expect } from "vite-plus/test"
 
-import { LSP } from "spell-app/lsp"
+import { LSP } from "spell/app/lsp"
 
 /** A type with a `<css>` block in its outline, as P4 of epic `drawable-thing` writes it. */
 const CARD = [

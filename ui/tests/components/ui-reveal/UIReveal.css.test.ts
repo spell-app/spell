@@ -1,14 +1,14 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { foundationCSS } from "spell-ui/styles"
+import { foundationCSS } from "spell/ui/styles"
 
 import { Fixture } from "spell/test-helpers/Fixture"
-import { Sheets } from "spell-ui/test-helpers/Sheets"
+import { Sheets } from "spell/ui/test-helpers/Sheets"
 
-import { revealVocabulary } from "spell-ui/components/ui-reveal/UIReveal.en"
+import { revealVocabulary } from "spell/ui/components/ui-reveal/UIReveal.en"
 
-import revealCSS from "spell-ui/components/ui-reveal/UIReveal.css?inline"
-import revealRaw from "spell-ui/components/ui-reveal/UIReveal.css?raw"
+import revealCSS from "spell/ui/components/ui-reveal/UIReveal.css?inline"
+import revealRaw from "spell/ui/components/ui-reveal/UIReveal.css?raw"
 
 /**
  * `UIReveal.css` on the class-grammar examples:  the source rules, the stacked contents, and what each type does

@@ -1,5 +1,5 @@
-import { isItemId } from "spell-epic/definitions"
-import { Markup } from "spell-epic/markup"
+import { isItemId } from "spell/epic/definitions"
+import { Markup } from "spell/epic/markup"
 
 import type { Migration, MigrationContext } from "./migrations.types"
 

@@ -24,8 +24,8 @@ import path from "node:path"
 
 import { NodePackage } from "spell/element-tools/NodePackage"
 import { Terminal } from "spell/element-tools/Terminal"
-import { emojiChunkFor } from "spell-ui/components/ui-emoji/UIEmoji.types"
-import { SPELL_UI_ROOT } from "spell-ui/tools/tools.types"
+import { emojiChunkFor } from "spell/ui/components/ui-emoji/UIEmoji.types"
+import { SPELL_UI_ROOT } from "spell/ui/tools/tools.types"
 
 /****************
  * ### `EmojiGenerator`

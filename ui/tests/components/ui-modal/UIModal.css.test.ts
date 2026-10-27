@@ -2,16 +2,16 @@ import { describe, expect, it, onTestFinished } from "vite-plus/test"
 import { page } from "vite-plus/test/browser"
 
 import { escapeRegExp } from "spell/util/string"
-import { colorsCSS, foundationCSS } from "spell-ui/styles"
+import { colorsCSS, foundationCSS } from "spell/ui/styles"
 
 import { Fixture } from "spell/test-helpers/Fixture"
-import { Sheets } from "spell-ui/test-helpers/Sheets"
+import { Sheets } from "spell/ui/test-helpers/Sheets"
 
-import { modalVocabulary } from "spell-ui/components/ui-modal/UIModal.en"
+import { modalVocabulary } from "spell/ui/components/ui-modal/UIModal.en"
 
-import buttonCSS from "spell-ui/components/ui-button/UIButton.css?inline"
-import modalCSS from "spell-ui/components/ui-modal/UIModal.css?inline"
-import modalRaw from "spell-ui/components/ui-modal/UIModal.css?raw"
+import buttonCSS from "spell/ui/components/ui-button/UIButton.css?inline"
+import modalCSS from "spell/ui/components/ui-modal/UIModal.css?inline"
+import modalRaw from "spell/ui/components/ui-modal/UIModal.css?raw"
 
 /**
  * `UIModal.css` on its own, before any element exists:  the sheet's source rules, the computed styles of the

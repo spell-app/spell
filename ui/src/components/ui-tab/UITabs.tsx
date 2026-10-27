@@ -1,15 +1,15 @@
 import { For, Show, flush, type Accessor } from "solid-js"
 import { isServer, type JSX } from "@solidjs/web"
 
-import { E, UI, UIT } from "spell-ui/core"
+import { E, UI, UIT } from "spell/ui/core"
 import { tabsVocabulary } from "./UITabs.en"
 import { tabVocabulary } from "./UITab.en"
 import { UITab } from "./UITab"
 import { BASIC, MENU, type TabOwner, type TabPaneState } from "./UITab.types"
 // The menu family's, beside its sheet (below):  the tab list draws a segmented menu's thumb
-import { SegmentedThumb } from "spell-ui/components/ui-menu/SegmentedThumb"
+import { SegmentedThumb } from "spell/ui/components/ui-menu/SegmentedThumb"
 
-import menuCSS from "spell-ui/components/ui-menu/UIMenu.css?inline"
+import menuCSS from "spell/ui/components/ui-menu/UIMenu.css?inline"
 import tabCSS from "./UITab.css?inline"
 
 /****************
@@ -470,7 +470,7 @@ export class UITabs extends E.UIComponent<typeof tabsVocabulary> implements TabO
 
   /**
    * One tab:  a `<button role="tab">` in the menu's item grammar, controlling `pane`.
-   * - `aria-controls`:  element reflection in a browser;  in a server render (`spell-ui/static`), the pane's id.
+   * - `aria-controls`:  element reflection in a browser;  in a server render (`spell/ui/static`), the pane's id.
    * - SIDE EFFECT in a server render:
    *   gives the pane (the render's parsed copy) an id if it has none, which the static output keeps.
    */

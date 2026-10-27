@@ -9,7 +9,7 @@ import { join } from "node:path"
 
 import { writeOrCheck } from "spell/element-tools/generatedFiles"
 import { Terminal } from "spell/element-tools/Terminal"
-import { EpicUISite } from "spell-epic/site/EpicUISite"
+import { EpicUISite } from "spell/epic/site/EpicUISite"
 
 const site = new EpicUISite()
 const isCheck = process.argv.includes("--check")

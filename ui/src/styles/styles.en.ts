@@ -7,7 +7,7 @@
  * - Key `default` means "the unsuffixed token", e.g. `fonts.default` => `--ui-font-family`.
  * - Lengths are `em` of the local font size or px -- NEVER rem (the page can redefine it).
  * - PURE DATA, near the bottom of the folder's import graph:  it imports `styles.types` as types only, so node reads
- *   it (`yarn gen:styles`, the docs site's token tables) and `spell-ui/styles` re-exports it as plain values.
+ *   it (`yarn gen:styles`, the docs site's token tables) and `spell/ui/styles` re-exports it as plain values.
  */
 
 import type {

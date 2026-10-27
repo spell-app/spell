@@ -1,7 +1,7 @@
 /**
  * Every name `<ui-select>` uses:  tag, attributes (kind + allowed values), events, slots, parts, states, texts.
- * Schema:  `E.ComponentVocabulary` (`spell-ui/vocabulary`).
- * - Pure data:  node imports it (`yarn site:data`, `yarn gen:root`), so `spell-ui/core` for types only.
+ * Schema:  `E.ComponentVocabulary` (`spell/ui/vocabulary`).
+ * - Pure data:  node imports it (`yarn site:data`, `yarn gen:root`), so `spell/ui/core` for types only.
  * - Class words come out through `ClassBuilder`:
  *   `<ui-select size="small" fluid state="error">` => `ui small error fluid select`, on the shadow `<select>`.
  *   `UISelect.css` keys on those words.
@@ -14,8 +14,8 @@
  *   slotted `<ui-item>`s or the `value` / `placeholder` attributes carry what SSR must show.
  */
 
-import type { E } from "spell-ui/core"
-import * as UIT from "spell-ui/components/components.types"
+import type { E } from "spell/ui/core"
+import * as UIT from "spell/ui/components/components.types"
 
 /****************
  * ### `<ui-select>`
@@ -93,7 +93,7 @@ export const selectVocabulary = {
       group: "form",
       kind: "json",
       reflect: false,
-      description: "Options as a PROPERTY:  `MenuOption[]` (`spell-ui/elements`);  added after slotted `<ui-item>`s."
+      description: "Options as a PROPERTY:  `MenuOption[]` (`spell/ui/elements`);  added after slotted `<ui-item>`s."
     }
   ],
   events: [

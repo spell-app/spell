@@ -1,9 +1,9 @@
 import type { PrefForgetRequest, PrefKeysAnswer, PrefLoadAnswer, PrefSaveRequest } from "spell/util"
 import type { SRV } from "spell/server"
-import { HOME_ORG, LOCAL_PERSON } from "spell-app/spaces/models/projectGroups"
-import environment from "spell-app/spaces/server/node/environment"
-import { queryText, respondWithJSON } from "spell-app/spaces/server/node/projects/response-utils"
-import { DiskStorage } from "spell-app/spaces/server/node/storage/DiskStorage"
+import { HOME_ORG, LOCAL_PERSON } from "spell/app/spaces/models/projectGroups"
+import environment from "spell/app/spaces/server/node/environment"
+import { queryText, respondWithJSON } from "spell/app/spaces/server/node/projects/response-utils"
+import { DiskStorage } from "spell/app/spaces/server/node/storage/DiskStorage"
 import { SpacePrefs, type PrefPerson } from "./SpacePrefs"
 
 /**

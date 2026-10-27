@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { StaticCatalog, StaticFamilies, StaticRender } from "spell-ui/static"
+import { StaticCatalog, StaticFamilies, StaticRender } from "spell/ui/static"
 
 /** The catalog `spell ssr` and the visual tests define:  every supported family, each rendering on its own. */
 describe("StaticCatalog.define()", () => {

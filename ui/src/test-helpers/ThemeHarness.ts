@@ -1,6 +1,6 @@
 import { onTestFinished } from "vite-plus/test"
 
-import { UI } from "spell-ui/runtime"
+import { UI } from "spell/ui/runtime"
 
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 
@@ -11,7 +11,7 @@ import { ElementFixture } from "spell/test-helpers/ElementFixture"
  *   element's shadow root that `selector` matches, and its computed style.  Themes MUST be asserted there:  the
  *   class-grammar half of a sheet only reaches component markup through the shadow root.
  * - `ThemeHarness.page(html, selector)`:  the same for class-grammar markup in the page (static examples).
- * - A test file imports the families its cases render (`import "spell-ui/components/ui-<name>"`).
+ * - A test file imports the families its cases render (`import "spell/ui/components/ui-<name>"`).
  */
 export class ThemeHarness {
   /**

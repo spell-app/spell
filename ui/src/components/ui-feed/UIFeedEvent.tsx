@@ -1,7 +1,7 @@
 import { Show } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
-import { E, UIT } from "spell-ui/core"
+import { E, UIT } from "spell/ui/core"
 import type { UIFeed } from "./UIFeed"
 import { eventVocabulary } from "./UIFeedEvent.en"
 
@@ -65,7 +65,7 @@ export class UIFeedEvent extends E.UIComponent<typeof eventVocabulary> {
     )
   }
 
-  /** A list item in a feed;  a server render (`spell-ui/static`) applies it too, so the event becomes an `<li>`. */
+  /** A list item in a feed;  a server render (`spell/ui/static`) applies it too, so the event becomes an `<li>`. */
   @E.aria("role")
   protected get ariaRole(): string | undefined {
     return this.context.owner ? "listitem" : undefined

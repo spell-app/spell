@@ -1,7 +1,7 @@
 /**
  * The flag family:  defines `<ui-flag>` and exports its component, `UIFlag`.
  * - SIDE EFFECT:  importing it defines the tag.
- * - Also the library's `spell-ui/ui-flag` entry (its size is in `notes/report.md`).
+ * - Also the library's `spell/ui/ui-flag` entry (its size is in `notes/report.md`).
  * - It exports `FlagCountry` (the `country` resolver) too, for pages that want the emoji or the code alone.
  */
 

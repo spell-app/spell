@@ -1,7 +1,7 @@
 import { For, Show } from "solid-js"
 
-import { appTexts, type AppTextKey } from "spell-app/app/ui/AppTexts"
-import { on } from "spell-app/app/solid/on"
+import { appTexts, type AppTextKey } from "spell/app/app/ui/AppTexts"
+import { on } from "spell/app/app/solid/on"
 import { NEW_CELL_KINDS, type NewCellKind, type NotebookController } from "./NotebookController"
 
 import "./NotebookCellTools.css"

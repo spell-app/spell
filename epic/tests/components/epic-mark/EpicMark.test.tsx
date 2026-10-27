@@ -3,11 +3,11 @@ import { describe, expect, test, vi } from "vite-plus/test"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import { expectAccessible } from "spell/test-helpers/A11y"
 
-import { ReviewClient, type Inbox } from "spell-epic/review"
+import { ReviewClient, type Inbox } from "spell/epic/review"
 
-import "spell-epic/components/epic-mark"
-import "spell-epic/components/epic-page"
-import "spell-epic/components/epic-item"
+import "spell/epic/components/epic-mark"
+import "spell/epic/components/epic-page"
+import "spell/epic/components/epic-item"
 
 /** `<epic-mark>`'s chip in its shadow root. */
 function chipOf(mark: Element): HTMLElement {

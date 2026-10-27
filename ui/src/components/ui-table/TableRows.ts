@@ -1,4 +1,4 @@
-import { E, UI } from "spell-ui/core"
+import { E, UI } from "spell/ui/core"
 
 /****************
  * ### `TableRows`

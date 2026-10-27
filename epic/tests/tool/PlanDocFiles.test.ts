@@ -10,12 +10,12 @@ import { fileURLToPath } from "node:url"
 
 import { afterAll, afterEach, beforeAll, describe, expect, test } from "vite-plus/test"
 
-import { Markup } from "spell-epic/markup"
+import { Markup } from "spell/epic/markup"
 
-import { PlanDocError } from "spell-epic/tool/planDoc.types"
+import { PlanDocError } from "spell/epic/tool/planDoc.types"
 
-import { PlanDoc } from "spell-epic/tool/PlanDoc"
-import { PlanDocFiles } from "spell-epic/tool/PlanDocFiles"
+import { PlanDoc } from "spell/epic/tool/PlanDoc"
+import { PlanDocFiles } from "spell/epic/tool/PlanDocFiles"
 
 /** The tracked fixtures:  a new doc in `<epic-*>` markup, and one in the old markup. */
 const FIXTURES = fileURLToPath(new URL("fixtures", import.meta.url))
@@ -163,7 +163,7 @@ describe("PlanDocFiles", () => {
   })
 })
 
-// epic `epic-engine` I134:  links handed over as a part file holds them (`../../../spell-ui/...`) landed one folder too
+// epic `epic-engine` I134:  links handed over as a part file holds them (`../../../ui/...`) landed one folder too
 // high (`../../../../`);  from a worktree as from the main checkout
 describe("PlanDocFiles links written as from a part", () => {
   // its real path:  git names the checkouts by theirs (macOS's temp folder is behind a link)
@@ -176,14 +176,14 @@ describe("PlanDocFiles links written as from a part", () => {
 
   /** The links a phase's plan is written with, as the agents wrote them:  a part's, the page's, and a missing one. */
   const PLAN =
-    '<p><a href="../../../spell-ui/src/x.ts">as the part</a>, <a href="../../spell-ui/src/x.ts">as the page</a>, ' +
-    '<a href="../../../spell-ui/src/gone.ts">missing</a>, <a href="../../../spell-ui/src/x.ts#L3">a line</a></p>'
+    '<p><a href="../../../ui/src/x.ts">as the part</a>, <a href="../../ui/src/x.ts">as the page</a>, ' +
+    '<a href="../../../ui/src/gone.ts">missing</a>, <a href="../../../ui/src/x.ts#L3">a line</a></p>'
 
   beforeAll(async () => {
     // the kit, with its content folder inside it (git-ignored) and a child repo's file;  an epic's worktree beside it
     write(main, ".epic/config.json5", JSON.stringify({ contentFolder: "spell.epics" }))
     git(main, "init", "-q", "-b", "main")
-    commit(main, "kit", { ".gitignore": "spell.epics\n", "yarn.lock": "", "spell-ui/src/x.ts": "x" })
+    commit(main, "kit", { ".gitignore": "spell.epics\n", "yarn.lock": "", "ui/src/x.ts": "x" })
     git(main, "worktree", "add", "-q", "-b", "x", worktree)
     mkdirSync(join(content, "epics", "x"), { recursive: true })
     const plan = PlanDoc.parse(readFileSync(join(FIXTURES, "epic-plan.html"), "utf8"), NOW)
@@ -205,11 +205,11 @@ describe("PlanDocFiles links written as from a part", () => {
   test("each lands as the part file holds it, from the main checkout and from a worktree alike", async () => {
     // root paths (epic `epic-engine` P46), whichever way they were handed over
     const expected = [
-      "/spell-ui/src/x.ts",
-      "/spell-ui/src/x.ts",
+      "/ui/src/x.ts",
+      "/ui/src/x.ts",
       // missing either way, and above the root as the page reads it:  left as it was handed over, so `epic lint` names it
-      "../../../../spell-ui/src/gone.ts",
-      "/spell-ui/src/x.ts#L3"
+      "../../../../ui/src/gone.ts",
+      "/ui/src/x.ts#L3"
     ]
     expect(await hrefsFrom(main)).toEqual(expected)
     expect(await hrefsFrom(worktree)).toEqual(expected)

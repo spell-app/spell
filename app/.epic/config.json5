@@ -1,5 +1,5 @@
 // Where this repo keeps its epic things (epic `epic-eject` P4):  its folders, branch and windows.
-// - Read by spell-epic's `EpicConfig` (spell-epic/src/config/EpicConfig.ts).
+// - Read by spell-epic's `EpicConfig` (epic/src/config/EpicConfig.ts).
 // - Folders are relative to the MAIN checkout:
 //   every worktree reads the main checkout's copy of this file.
 // - A key left out takes its default:  these are the defaults.
@@ -58,7 +58,7 @@
   // The epic engine:  the spell-epic checkout, which every checkout links in at its root as `spell-epic`
   // (`epic shared link`, and the worktree hook through it;  only where `.gitignore` ignores `spell-epic`).
   // - Since epic `repo-split` P8 it's beside this repo in the top repo `spell`:  the page server's settings name its
-  //   route modules and folders there (`../spell-epic/...`, the root `package.json`'s `"pageServer"`), not through
+  //   route modules and folders there (`../epic/...`, the root `package.json`'s `"pageServer"`), not through
   //   the link.
   // - `""`:  no link.
   "engineFolder": "../spell-epic",

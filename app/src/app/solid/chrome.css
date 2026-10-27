@@ -5,7 +5,7 @@
  */
 
 /* Spell UI's breakpoints (`@custom-media`), inlined at build time */
-@import "spell-ui/styles/media.css";
+@import "spell/ui/styles/media.css";
 
 /* `<PanelMenu>`:  over the panel below it */
 ui-menu.PanelMenu::part(menu) {

@@ -33,7 +33,7 @@
  * - Matching (`ReadmeTest.matches()`):  line by line, trailing spaces and blank lines ignored, colours stripped.
  *   - `...` alone on a line:  any lines, or none
  *   - `...` inside a line:  any text there (a time, a hash, a port)
- * - The `spell` and `epic` it runs are THIS checkout's (`bin/spell.mjs`, `spell-epic/bin/epic`), never the ones on
+ * - The `spell` and `epic` it runs are THIS checkout's (`bin/spell.mjs`, `epic/bin/epic`), never the ones on
  *   the `PATH`:  they're the main checkout's.
  * - Exit status 1 when an example fails, 0 when all pass.
  */
@@ -201,7 +201,7 @@ export class ReadmeTest {
 
 /** One example on a page:  its commands and the output its fold says they print. */
 export type ReadmeExample = {
-  /** the page, from the kit's root (`spell-parser/README.md`) */
+  /** the page, from the kit's root (`parser/README.md`) */
   page: string
   /** the `sh` block's first line on the page */
   line: number

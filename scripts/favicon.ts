@@ -6,7 +6,7 @@
  *   - `src/server/site/favicon.ts` -- the SVG and PNGs as strings, what `WebServer` serves at `/favicon.*` and the
  *     site header puts on `file://` pages.  Strings, not files:  the VS Code extension bundles `WebServer` (esbuild),
  *     where a file beside the source isn't there at run time.
- *   - `spell-app/app/static/favicon/` -- the app's copies, which vite serves (and bundles into `dist/`);  spell-app
+ *   - `app/app/static/favicon/` -- the app's copies, which vite serves (and bundles into `dist/`);  spell-app
  *     found as a package, as node finds it from here, and skipped when it isn't installed
  * - PNGs:  headless Chromium (Playwright, the repo root's) screenshots of the SVG.
  *   - `favicon-32.png`:  the SVG as is, for browsers without SVG favicons
@@ -28,7 +28,7 @@ const KIT = fileURLToPath(new URL("..", import.meta.url))
 /** spell-app's folder, as node finds the package from here;  `undefined`:  not installed. */
 const APP = packageRootFor("spell-app", KIT)
 
-/** The app's copies:  `spell-app/app/static/favicon/`. */
+/** The app's copies:  `app/app/static/favicon/`. */
 const APP_DIR = APP && join(APP, "app", "static", "favicon")
 
 /** The brand's aubergine (`--spell-aubergine`, `--violet-900`). */

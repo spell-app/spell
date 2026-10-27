@@ -1,10 +1,10 @@
 import { describe, expect, test } from "vite-plus/test"
-import { describeParseErrors, describeWarnings, unitTestModuleRules } from "spell-parser/spell/test"
-import { P } from "spell-parser/parser"
-import { SP, spellParser } from "spell-parser/spell"
-import { Precedence } from "spell-parser/spell/rules/expressions"
-import { Priority } from "spell-parser/spell/rules/rules.types"
-import { core } from "spell-parser/core"
+import { describeParseErrors, describeWarnings, unitTestModuleRules } from "spell/parser/spell/test"
+import { P } from "spell/parser/parser"
+import { SP, spellParser } from "spell/parser/spell"
+import { Precedence } from "spell/parser/spell/rules/expressions"
+import { Priority } from "spell/parser/spell/rules/rules.types"
+import { core } from "spell/parser/core"
 
 describe("testing spell module expressions", () => {
   unitTestModuleRules(spellParser, "expressions", core.resetRuntime)

@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, test, vi } from "vite-plus/test"
 
-import { PageStore } from "spell-epic/review/PageStore"
+import { PageStore } from "spell/epic/review/PageStore"
 
 ////////////////
 // ## Stores under test

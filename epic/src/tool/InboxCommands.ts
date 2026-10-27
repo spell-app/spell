@@ -2,8 +2,8 @@ import { existsSync, readFileSync } from "node:fs"
 import { relative, resolve } from "node:path"
 import { setTimeout as sleep } from "node:timers/promises"
 
-import { EpicCommandError, duration, stringFlag } from "spell-epic/command/command.types"
-import { PageInboxes } from "spell-epic/tools/PageInboxes"
+import { EpicCommandError, duration, stringFlag } from "spell/epic/command/command.types"
+import { PageInboxes } from "spell/epic/tools/PageInboxes"
 
 import { PlanDocError, type ItemDescription, type KeptNote, type MarkResult, type OptionCard } from "./planDoc.types"
 

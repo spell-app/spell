@@ -1,14 +1,14 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { foundationCSS } from "spell-ui/styles"
+import { foundationCSS } from "spell/ui/styles"
 
 import { Fixture } from "spell/test-helpers/Fixture"
-import { Sheets } from "spell-ui/test-helpers/Sheets"
+import { Sheets } from "spell/ui/test-helpers/Sheets"
 
-import { treeDiagramVocabulary } from "spell-ui/components/ui-tree-diagram/UITreeDiagram.en"
+import { treeDiagramVocabulary } from "spell/ui/components/ui-tree-diagram/UITreeDiagram.en"
 
-import treeDiagramCSS from "spell-ui/components/ui-tree-diagram/UITreeDiagram.css?inline"
-import treeDiagramRaw from "spell-ui/components/ui-tree-diagram/UITreeDiagram.css?raw"
+import treeDiagramCSS from "spell/ui/components/ui-tree-diagram/UITreeDiagram.css?inline"
+import treeDiagramRaw from "spell/ui/components/ui-tree-diagram/UITreeDiagram.css?raw"
 
 /**
  * `UITreeDiagram.css` on its own, before any element exists:  the sheet's source rules, and the computed styles of

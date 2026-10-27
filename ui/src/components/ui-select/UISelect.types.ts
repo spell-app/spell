@@ -1,11 +1,11 @@
 /**
  * Constants and types of the `ui-select` family:  what its component (`UISelect`) and its native fallback
  * (`SelectFallback`) share.
- * - Pure data:  types only (`spell-ui/core`, the vocabulary), so node can load it (`yarn site:data`).
+ * - Pure data:  types only (`spell/ui/core`, the vocabulary), so node can load it (`yarn site:data`).
  * - Its other class words and part names are module constants below the one class that uses them.
  */
 
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 import type { selectVocabulary } from "./UISelect.en"
 
 ////////////////

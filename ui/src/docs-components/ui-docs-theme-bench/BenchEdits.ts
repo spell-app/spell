@@ -1,5 +1,5 @@
-// Import directly:  the `spell-ui/styles` barrel carries every foundation sheet as text, which the bench never needs
-import { ThemeFile } from "spell-ui/styles/ThemeFile"
+// Import directly:  the `spell/ui/styles` barrel carries every foundation sheet as text, which the bench never needs
+import { ThemeFile } from "spell/ui/styles/ThemeFile"
 import { BenchTokens } from "./BenchTokens"
 import type { BenchEditSet, TokenEdit } from "./UIDocsThemeBench.types"
 

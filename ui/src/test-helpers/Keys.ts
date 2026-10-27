@@ -1,6 +1,6 @@
 import { userEvent } from "vite-plus/test/browser"
 
-import { UI } from "spell-ui/runtime"
+import { UI } from "spell/ui/runtime"
 
 /**
  * Keyboard helpers for tests that must behave the same in every browser.

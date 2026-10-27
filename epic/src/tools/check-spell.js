@@ -46,7 +46,7 @@ import { tmpdir } from "node:os"
 import { join } from "node:path"
 
 import { BrowserPage } from "spell/element-tools/BrowserPage"
-import { parseVerbArgs, stringFlag } from "spell-epic/command/command.types.ts"
+import { parseVerbArgs, stringFlag } from "spell/epic/command/command.types.ts"
 
 import { PACK_TAG, openPage, settle } from "./browserPage.js"
 import { browserUrlFor, componentSetAddress, pageFile } from "./pages.js"

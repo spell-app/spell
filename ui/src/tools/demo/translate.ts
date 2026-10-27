@@ -3,8 +3,8 @@
  * - `es-cambiado` / `es-seleccionado` events are logged.
  */
 
-import { UI } from "spell-ui"
-import { es } from "spell-ui/components/components.es"
+import { UI } from "spell/ui"
+import { es } from "spell/ui/components/components.es"
 
 const ui = await UI.load()
 ui.vocabulary.defineComponents({ prefix: "es", dictionary: es })

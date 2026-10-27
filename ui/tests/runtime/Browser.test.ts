@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vite-plus/test"
 
 import { DARK_QUERY } from "spell/util/persist"
-import { Browser } from "spell-ui/runtime/Browser"
+import { Browser } from "spell/ui/runtime/Browser"
 
 ////////////////
 // ## Instance flags

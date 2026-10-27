@@ -1,4 +1,4 @@
-import { PlanTime } from "spell-epic/tool/PlanTime"
+import { PlanTime } from "spell/epic/tool/PlanTime"
 
 import type { Migration, MigrationContext } from "./migrations.types"
 

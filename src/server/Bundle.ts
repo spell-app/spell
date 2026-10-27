@@ -167,7 +167,7 @@ export class Bundle {
   }
 
   /**
-   * Its source files, sorted, by name:  a package's by its npm name and its path in it (`spell-ui/src/core.ts`,
+   * Its source files, sorted, by name:  a package's by its npm name and its path in it (`ui/src/core.ts`,
    * `spell/src/element/index.ts`),
    * anything else by its path from the install's root (`yarn.lock`);  `/`-separated.
    * - every file under `spec.sources`, minus `SKIPPED` (tests, snapshots, dot files, the icon packs)
@@ -198,7 +198,7 @@ export class Bundle {
     const found: Array<[string, string]> = []
     for (const source of this.spec.sources) {
       // a package by its npm name:  scoped (`@scope/name/src`), or unscoped when one's installed by that name
-      // (`spell-ui/src`, `spell/src/element`, epic `repo-split` P9 / P11 / P14);  else a path from the install's root
+      // (`ui/src`, `spell/src/element`, epic `repo-split` P9 / P11 / P14);  else a path from the install's root
       // (`yarn.lock`)
       const named = /^(@[^/]+\/[^/]+|[^@./][^/]*)(?:\/(.*))?$/.exec(source)
       const folder = named && packageRootFor(named[1]!, this.root)

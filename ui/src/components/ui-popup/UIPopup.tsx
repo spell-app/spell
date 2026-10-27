@@ -1,7 +1,7 @@
 import { Show } from "solid-js"
 import { isServer, type JSX } from "@solidjs/web"
 
-import { E, UI, UIT } from "spell-ui/core"
+import { E, UI, UIT } from "spell/ui/core"
 import { popupVocabulary } from "./UIPopup.en"
 
 import popupCSS from "./UIPopup.css?inline"
@@ -399,7 +399,7 @@ export class UIPopup extends E.UIComponent<Vocabulary> {
   }
 
   /**
-   * `popover` of the ROOT in a server render (`spell-ui/static`), where the root replaces the DOM element:
+   * `popover` of the ROOT in a server render (`spell/ui/static`), where the root replaces the DOM element:
    * hidden until opened, in the HTML.
    * - `auto` for a click popup:  light dismiss and Escape without JS, once something opens it (`popovertarget`).
    * - `manual` for the rest (`hint` isn't everywhere, and an unknown value means `manual`).
@@ -454,7 +454,7 @@ export class UIPopup extends E.UIComponent<Vocabulary> {
   }
 
   /**
-   * The static markup of a server render (`spell-ui/static`), where the root replaces the DOM element:
+   * The static markup of a server render (`spell/ui/static`), where the root replaces the DOM element:
    * - a popover itself (`serverPopover`):  hidden until opened, in the HTML
    * - PHRASING content (`<span>`s):  a popup often sits in running text, after a `<dfn>` or a button in a `<p>`,
    *   where its DOM element was valid;  a `<div>` would close the `<p>` when a browser parses the page
@@ -482,7 +482,7 @@ export class UIPopup extends E.UIComponent<Vocabulary> {
   ////////////////
 
   /**
-   * `value` is an element:  by node type, since a server render (`spell-ui/static`) has no `Element` global.
+   * `value` is an element:  by node type, since a server render (`spell/ui/static`) has no `Element` global.
    * - STATIC:  pure.
    */
   private static isElement(value: unknown): value is Element {

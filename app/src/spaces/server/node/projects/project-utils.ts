@@ -11,12 +11,12 @@ import escapeRegExp from "lodash/escapeRegExp"
 import { basename, dirname, isAbsolute, relative, resolve, sep } from "path"
 
 import type { SRV } from "spell/server"
-import { json5Edited } from "spell-app/spaces/server/node/storage/json5"
-import environment from "spell-app/spaces/server/node/environment"
+import { json5Edited } from "spell/app/spaces/server/node/storage/json5"
+import environment from "spell/app/spaces/server/node/environment"
 
-import { SP } from "spell-parser/spell"
-import { hasProjectFile, projectFileFor } from "spell-parser/spell/node/projectFile"
-import { SPACES } from "spell-app/spaces"
+import { SP } from "spell/parser/spell"
+import { hasProjectFile, projectFileFor } from "spell/parser/spell/node/projectFile"
+import { SPACES } from "spell/app/spaces"
 
 import * as fileUtils from "./file-utils"
 import * as responseUtils from "./response-utils"
@@ -154,7 +154,7 @@ const TARGET_WORDS = Object.values(SP.TARGETS).flatMap(({ wordsSuffix }) => {
  *   - `<spell-spaces>/@spell/owen@/errors` => `build/spell-spaces/@spell/owen@/errors`
  * - In ANOTHER spell-app checkout (`checkoutHolding()`), e.g. a worktree's example opened by the main checkout's
  *   language server:  the same path under THAT checkout's `build/` (epic `spanish` P21)
- *   - `<worktree>/spell-app/spaces/@spell/examples/Solitaire` => `<worktree>/spell-app/build/spaces/@spell/...`
+ *   - `<worktree>/app/spaces/@spell/examples/Solitaire` => `<worktree>/spell-app/build/spaces/@spell/...`
  *   - Before, it went beside its source, untracked:  that server reads it as a `@local/<folder>` project.
  * - A project anywhere else -- a temporary `@local/<folder>` group, a VS Code workspace elsewhere:
  *   `projectFolder` itself, beside its source, as before `build/`.

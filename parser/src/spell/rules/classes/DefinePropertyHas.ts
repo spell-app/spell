@@ -1,8 +1,8 @@
 import { proto, upperFirst, type PropRule } from "spell/util"
-import { P } from "spell-parser/parser"
-import { SP } from "spell-parser/spell"
-import { Priority } from "spell-parser/spell/rules/rules.types"
-import { SubjectIts } from "spell-parser/spell/rules/types"
+import { P } from "spell/parser/parser"
+import { SP } from "spell/parser/spell"
+import { Priority } from "spell/parser/spell/rules/rules.types"
+import { SubjectIts } from "spell/parser/spell/rules/types"
 // Through the folder, not its own file:  importing its file would load it first,
 // but `outline_specifier_enum` registers AFTER us, and the registration order must not change.
 // Read only when called, once the folder has loaded.
@@ -13,10 +13,10 @@ import {
   PropertyBodyMust,
   QuotedPropertyFormula,
   TypeSpecifierTextKind
-} from "spell-parser/spell/rules/classes"
-import { QuotedTypeExpression } from "spell-parser/spell/rules/methods"
+} from "spell/parser/spell/rules/classes"
+import { QuotedTypeExpression } from "spell/parser/spell/rules/methods"
 // Import directly to avoid circular import
-import { SpellStatement } from "spell-parser/spell/rules/Statement"
+import { SpellStatement } from "spell/parser/spell/rules/Statement"
 
 /**
  * What may follow a property's declaration:  its RULES -- see `DefinePropertyHas.rulesOf()` (epic `property-editor` P9).

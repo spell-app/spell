@@ -2,7 +2,7 @@
  * The segment family:  defines `<ui-segment>` and `<ui-segments>`,
  * and exports their components, `UISegment` and `UISegments`.
  * - SIDE EFFECT:  importing it defines the tags.
- * - Also the library's `spell-ui/ui-segment` entry (its size is in `notes/report.md`).
+ * - Also the library's `spell/ui/ui-segment` entry (its size is in `notes/report.md`).
  */
 
 import { UISegment } from "./UISegment"

@@ -7,8 +7,8 @@
  *   - Except the text of what's checked, which `core.expect()` reports as written:  `el rank de it`.
  * - A keyword with a written accent is accepted without it too:  `(debería|deberia)`.
  */
-import { P } from "spell-parser/parser"
-import { SpellParser } from "spell-parser/spell/SpellParser"
+import { P } from "spell/parser/parser"
+import { SpellParser } from "spell/parser/spell/SpellParser"
 
 import { Echo } from "./Echo"
 import { EndTest } from "./EndTest"

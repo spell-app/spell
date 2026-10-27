@@ -1,6 +1,6 @@
 Claude Code loads the cross-model `AGENTS.md` (the kit, and the rules across repos) and WWOD here;  working in one of
 the kit's folders, its `CLAUDE.md` / `AGENTS.md` comes next (`server/AGENTS.md` ...);  in a child repo, that repo's
-own (`spell-ui/AGENTS.md` ...), then its folder's (`spell-parser/core/AGENTS.md` ...).
+own (`ui/AGENTS.md` ...), then its folder's (`spell/parser/core/AGENTS.md` ...).
 
 @AGENTS.md
 
@@ -11,14 +11,14 @@ The Claude-only rules, for every repo:
 In your own words, without jargon, narrate each step in the order it actually happens, and bold inline anything in the current PR that has drifted from my most recently stated intent.
 
 Questions that need a picture, or more than the AskUserQuestion modal holds (4 options per question, 4 questions):
-use `/details`, spell-epic's skill ([its folder](spell-epic/skills/details/)).
+use `/details`, spell-epic's skill ([its folder](epic/skills/details/)).
 - It's a page in VS Code's right side bar, which Owen answers on.
 
 Naming any docs page in a reply:  its side bar link, then its browser link (`• 🌐`), as `Title • 🌐`.
 - `epic pages link <page> --hash <id> --show` gives both.
 
 Delegated work (epic `skillz`, Owen, 2026-10-07):  every agent you start is NAMED and LISTED, as `/bg` does it.
-- The steps:  [the bg skill](spell-epic/skills/bg/SKILL.md), "Names", "When its notice arrives", "Redirects".
+- The steps:  [the bg skill](epic/skills/bg/SKILL.md), "Names", "When its notice arrives", "Redirects".
 - Before it starts:  `epic agents add <name> "<task>"`.
   - The full name it prints, `<epic>-<name>`, goes first in the `Agent` call's `description`.
 - When it's back:  `epic agents done <name>`.
@@ -30,7 +30,7 @@ Delegated work (epic `skillz`, Owen, 2026-10-07):  every agent you start is NAME
 
 Tooling requests (epic `epic-workflow`, Owen, 2026-10-11):  when Owen asks for a change to how he WORKS,
 not to what this session builds, SEND it, don't do it.
-- `/send` ([its folder](spell-epic/skills/send/)) writes it into the tooling home's epic (`epic home`),
+- `/send` ([its folder](epic/skills/send/)) writes it into the tooling home's epic (`epic home`),
   and wakes that epic's session.
 - Reply one line, "sent to `<home>` as r3", and carry on.
 - How he works:

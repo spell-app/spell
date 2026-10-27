@@ -6,7 +6,7 @@ import { definePlugin, defineRule, type ESTree, type Rule } from "vite-plus/lint
  * `spell`:  an oxlint plugin for the repos' own import rule, in every file of every repo
  * (WWOD §4, "ONE name per file";  epic `repo-split` P14, Q47).
  * - Every repo's code is under ONE `src/`, and every import of it is its package name plus its path under `src/`
- *   (`spell/util/string`, `spell-ui/components/ui-button/UIButton`), inside its own repo too.
+ *   (`spell/util/string`, `spell/ui/components/ui-button/UIButton`), inside its own repo too.
  * - Unlike `spell-ui/*` (`lint.patterns.ts`), which holds component files to Spell UI's patterns,
  *   this holds for EVERY file:  on in `lintBase` (`lint.ts`).
  * - Replaced `no-cross-package-import` and `no-cross-repo-alias` (P14), which knew each repo's layout and alias table.

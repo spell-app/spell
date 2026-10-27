@@ -1,5 +1,5 @@
 /**
- * `spell-parser/core/model`:  the core WITHOUT drawing, for code that uses spell's things as plain data,
+ * `spell/parser/core/model`:  the core WITHOUT drawing, for code that uses spell's things as plain data,
  * e.g. the server holding a `Person` (epic `people-and-orgs` P3).
  * - What a compiled LIBRARY imports, e.g. `people.lib.ts`:  the `ts/lib` target, `P.LibraryWriter`.
  * - The same `core`, `Thing` and `List` as the barrel, assembled from the same modules, minus:
@@ -11,7 +11,7 @@
  * - References by name or place ARE here (`references.ts`, `Person#owen`, P9, Q44).
  *   - They search what the caller hands `core.searchThings()`, e.g. the people store's people and orgs.
  * - So a `Loader` made here must be told the classes:  `new Loader({ entryFor, classNamed })`.
- * - NEVER import the barrel (`spell-parser/core`) from here, or from any module this loads:  it loads drawing.
+ * - NEVER import the barrel (`spell/parser/core`) from here, or from any module this loads:  it loads drawing.
  *   The modules below import each other directly for that reason.
  * - Loading the barrel too, in the same process, is fine:  it's the same modules, assembled once.
  */

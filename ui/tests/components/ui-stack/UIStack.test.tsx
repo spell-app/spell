@@ -3,7 +3,7 @@ import { describe, expect, it } from "vite-plus/test"
 import { expectAccessible } from "spell/test-helpers/A11y"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 
-import "spell-ui/components/ui-stack"
+import "spell/ui/components/ui-stack"
 
 /** Element-markup examples, by path. */
 const EXAMPLES = import.meta.glob<string>("/src/components/ui-stack/examples/elements/*.html", {
@@ -81,7 +81,7 @@ describe("<ui-stack>", () => {
 
 describe("<ui-stack> and its Spell UI children", () => {
   it("drops a child's own outside margins:  two headers in a row sit level", async () => {
-    await import("spell-ui/components/ui-parts")
+    await import("spell/ui/components/ui-parts")
     const host = await ElementFixture.render<HTMLElement>(
       `<ui-stack direction="horizontal" justify="between"><ui-header level="3">Go back</ui-header>` +
         `<ui-header level="3">Go forward</ui-header></ui-stack>`
@@ -94,7 +94,7 @@ describe("<ui-stack> and its Spell UI children", () => {
   })
 
   it("only for its own children:  a header inside a child keeps its margins", async () => {
-    await import("spell-ui/components/ui-segment")
+    await import("spell/ui/components/ui-segment")
     const host = await ElementFixture.render<HTMLElement>(
       `<ui-stack><ui-segment><p>x</p><ui-header level="3">Inside</ui-header></ui-segment></ui-stack>`
     )

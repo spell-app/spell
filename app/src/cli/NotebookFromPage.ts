@@ -1,10 +1,10 @@
 import { parseHTML } from "linkedom"
 
-import { SP } from "spell-parser/spell"
+import { SP } from "spell/parser/spell"
 
 /****************
  * ### `NotebookFromPage`
- * A Spell UI component page (`spell-ui/docs/ui-button.html`) as a project of notebooks, one per tab
+ * A Spell UI component page (`ui/docs/ui-button.html`) as a project of notebooks, one per tab
  * (epic `elemental-spell` P19):  `spell app notebook convert`.
  * - What it writes, by file name:
  *   - `<Tab>.spellx` per tab (`Examples.spellx`, `Usage.spellx` ...):  the page's title and subtitle, the tab bar,
@@ -26,7 +26,7 @@ import { SP } from "spell-parser/spell"
  *   Those inside an example's markup (the playground's markers) are left out.
  * - What it couldn't write as the page has it is in `warnings`, for a person to tidy by hand.
  * - Pure:  given the page's text, it returns the files' text, and writes nothing.
- *   Its bare names come from Spell UI's pack (`SP.ComponentPacks`), registered by `spell-app/spaces`.
+ *   Its bare names come from Spell UI's pack (`SP.ComponentPacks`), registered by `spell/app/spaces`.
  ****************/
 export class NotebookFromPage {
   /** What it couldn't write as the page has it:  one line each. */

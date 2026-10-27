@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { absoluteUrls } from "spell-app/app/runner"
+import { absoluteUrls } from "spell/app/app/runner"
 
 describe("absoluteUrls()", () => {
   test("makes relative `url()`s absolute -- a shadow root's adopted sheet resolves them against the PAGE", () => {

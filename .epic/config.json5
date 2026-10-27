@@ -1,6 +1,6 @@
 // The kit's epic settings (the top repo, `spell`, since epic `repo-split` P9):  where a session working HERE
 // (`~/www/spell`, every window's folder 1) keeps its epic things.
-// - Read by spell-epic's `EpicConfig` (spell-epic/src/config/EpicConfig.ts), as every repo's `.epic/config.json5` is:
+// - Read by spell-epic's `EpicConfig` (epic/src/config/EpicConfig.ts), as every repo's `.epic/config.json5` is:
 //   epic `epic-engine` P10 (spell-epic as a workspace of this install) and epic `repo-split` P9 (the multi-repo
 //   tooling) are what read it here.
 // - Folders are relative to the MAIN checkout of this repo:  `~/www/spell`.
@@ -31,7 +31,7 @@
   // The yarn projects of their OWN in an epic's worktree, outside the one install (epic `epic-engine` I65):
   // the two VS Code extensions.
   // - The hook runs "installCommand" in each, after the one above;  one that fails is a warning.
-  "extraInstalls": ["spell-epic/vscode", "spell-app/vscode"],
+  "extraInstalls": ["epic/vscode", "app/vscode"],
 
   // The VS Code windows (`epic window`).
   "windows": {

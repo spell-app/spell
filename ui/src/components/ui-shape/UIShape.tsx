@@ -1,6 +1,6 @@
 import { isServer, type JSX } from "@solidjs/web"
 
-import { E, UI, UIT } from "spell-ui/core"
+import { E, UI, UIT } from "spell/ui/core"
 import { SIDE, SIDES, type ShapeVocabulary } from "./UIShape.types"
 import { shapeVocabulary } from "./UIShape.en"
 
@@ -89,7 +89,7 @@ export class UIShape extends E.UIComponent<ShapeVocabulary> {
   /**
    * The sides changed:  start at `activeIndex` the first time, then show the current side, hide the rest.
    * - Once `isReady` (the sheets are in and the stage is drawn), as when this lived in `render()`.
-   * - Writes the DOM element's sides:  a static render (`spell-ui/static`) marks them once, before they render.
+   * - Writes the DOM element's sides:  a static render (`spell/ui/static`) marks them once, before they render.
    */
   @E.onChange("isReady", "sides", { writesDOMElement: true })
   protected onSidesChanged(isReady: boolean, sides: E.DOMElement[]) {
@@ -329,7 +329,7 @@ export class UIShape extends E.UIComponent<ShapeVocabulary> {
   }
 
   /**
-   * A `text` shape in a server render (`spell-ui/static`):
+   * A `text` shape in a server render (`spell/ui/static`):
    * its static output is PHRASING content (`<span>`s, as the class grammar's),
    * since the DOM element it replaces sits in running text --
    * a `<div>` would close an open `<p>` when a browser parses the page.

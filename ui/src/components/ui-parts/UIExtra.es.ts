@@ -1,4 +1,4 @@
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /**
  * `<ui-extra>` in Spanish:  `<es-extra>`, with the names and texts only it uses (from `UIExtra.en.ts`).

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { SiteSearchBuilder } from "spell-ui/tools/SiteSearchBuilder"
+import { SiteSearchBuilder } from "spell/ui/tools/SiteSearchBuilder"
 
 /**
  * `SiteSearchBuilder`:  a page's entry in `docs/__data/search.json5`, from its markup.

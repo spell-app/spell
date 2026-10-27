@@ -41,7 +41,7 @@ export type QuartAppSpec = {
 
 /**
  * End of a drawing half's file's name, which its route matches, e.g. `Solitaire.elements.spell.js`.
- * - `SP.ELEMENTS_JS_SUFFIX`, which `spell-parser/py` can't import:  `spell` imports us.
+ * - `SP.ELEMENTS_JS_SUFFIX`, which `spell/parser/py` can't import:  `spell` imports us.
  */
 const ELEMENTS_SUFFIX = ".elements.spell.js"
 

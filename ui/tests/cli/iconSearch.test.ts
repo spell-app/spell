@@ -1,7 +1,7 @@
 import { existsSync } from "node:fs"
 import { beforeAll, describe, test, expect } from "vite-plus/test"
 
-import { type IconInfo, loadIcons, searchIcons } from "spell-ui/cli/iconSearch"
+import { type IconInfo, loadIcons, searchIcons } from "spell/ui/cli/iconSearch"
 
 let icons: IconInfo[]
 beforeAll(async () => {

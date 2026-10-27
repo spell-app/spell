@@ -1,6 +1,6 @@
 import { proto } from "spell/util"
-import { P } from "spell-parser/parser"
-import { InfixOperatorSuffix, Precedence, Wording } from "spell-parser/spell/rules/expressions"
+import { P } from "spell/parser/parser"
+import { InfixOperatorSuffix, Precedence, Wording } from "spell/parser/spell/rules/expressions"
 
 /**
  * `is_gt_lt` rule:  `is greater than` or `is less than`, optionally `... or equal to`.

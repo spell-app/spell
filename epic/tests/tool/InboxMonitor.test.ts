@@ -9,10 +9,10 @@ import { fileURLToPath } from "node:url"
 
 import { afterAll, beforeEach, expect, test } from "vite-plus/test"
 
-import type { RunningSession } from "spell-epic/command/command.types"
-import { Sessions } from "spell-epic/command/Sessions"
-import { InboxMonitor } from "spell-epic/tool/InboxMonitor"
-import { LISTEN_STALE_MS, ReviewInbox } from "spell-epic/tool/ReviewInbox"
+import type { RunningSession } from "spell/epic/command/command.types"
+import { Sessions } from "spell/epic/command/Sessions"
+import { InboxMonitor } from "spell/epic/tool/InboxMonitor"
+import { LISTEN_STALE_MS, ReviewInbox } from "spell/epic/tool/ReviewInbox"
 
 /** The tool's test fixtures:  `epic-plan.html`, a fresh doc in `<epic-*>` markup. */
 const FIXTURES = fileURLToPath(new URL("fixtures", import.meta.url))

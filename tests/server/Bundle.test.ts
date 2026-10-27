@@ -122,7 +122,7 @@ describe("Bundle", () => {
   })
 })
 
-/** An install holding Spell UI's and the brand's packages, each its own repo beside the checkout, `spell-app/`. */
+/** An install holding Spell UI's and the brand's packages, each its own repo beside the checkout, `app/`. */
 function top(): string {
   const dir = mkdtempSync(join(tmpdir(), "assembler-bundles-"))
   install(dir, { "spell-ui": "spell-ui", "spell-brand": "spell-brand" })
@@ -131,7 +131,7 @@ function top(): string {
 }
 
 /** The two bundles' folders, as spell-app's root `package.json` names them. */
-const BUNDLES = ["../spell-ui/site/_assets", "../spell-brand/_assets/ui"]
+const BUNDLES = ["../ui/site/_assets", "../spell-brand/_assets/ui"]
 
 describe("a build script's steps", () => {
   // Spell UI's packs in its own folder, `ui/`, and a bundle's output folder, `site/out/`
@@ -186,7 +186,7 @@ describe("Bundle.all()", () => {
     expect(SRV.Bundle.all(repo).map((bundle) => bundle.name)).toEqual(["ui-site", "brand"])
     expect(SRV.Bundle.all(repo, ["brand", "ui-site"]).map((bundle) => bundle.outputDir)).toEqual([
       join(realpathSync(dir), "spell-brand/_assets/ui"),
-      join(realpathSync(dir), "spell-ui/site/_assets")
+      join(realpathSync(dir), "ui/site/_assets")
     ])
     expect(SRV.Bundle.all(repo).map((bundle) => bundle.output)).toEqual(BUNDLES)
     expect(() => SRV.Bundle.all(repo, ["nope"])).toThrow("Bundle.all():  no bundle 'nope';  bundles:  ui-site, brand")

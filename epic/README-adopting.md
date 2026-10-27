@@ -105,7 +105,7 @@ And a Spell checkout:  today `spell-epic` installs only inside one.
 
 Four commands, once per machine, the same as for Spell's own repos:
 [the kit's README-agents.md](https://github.com/spell-app/spell/blob/main/README-agents.md#the-epic-plugin) lists them and says what each does.
-- They install the plugin for the whole machine, straight from `spell-epic`'s folder.
+- They install the plugin for the whole machine, straight from `spell/epic`'s folder.
 - They link its skills in, for a bare `/epic`.
 - They put `epic` on your terminal's `PATH`.
 
@@ -378,7 +378,7 @@ epic hub url ~/www/my-app.epics/epics/seo/seo.plan.html
 - `epic hub url <file>` prints the address that serves any page of a registered repo, starting the server first.
 - In your repo, `epic server` is this server too:  a repo `epic init` set up has no page server of its own.
   Spell's own repos have one each, which runs beside it, never instead of it.
-- Its files are in `~/.spell-epic/`, a folder `SPELL_EPIC_HOME` moves:
+- Its files are in `~/.epic/`, a folder `SPELL_EPIC_HOME` moves:
   - `repos.json5`:  the repos
   - `server.json`:  its process
   - `server.log`

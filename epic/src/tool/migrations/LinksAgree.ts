@@ -1,7 +1,7 @@
-import { PhaseIds } from "spell-epic/phases"
-import { PlanAnchors } from "spell-epic/tool/PlanAnchors"
-import { PlanItem } from "spell-epic/tool/PlanItem"
-import { PlanMarkup } from "spell-epic/tool/PlanMarkup"
+import { PhaseIds } from "spell/epic/phases"
+import { PlanAnchors } from "spell/epic/tool/PlanAnchors"
+import { PlanItem } from "spell/epic/tool/PlanItem"
+import { PlanMarkup } from "spell/epic/tool/PlanMarkup"
 
 import type { Migration, MigrationContext } from "./migrations.types"
 

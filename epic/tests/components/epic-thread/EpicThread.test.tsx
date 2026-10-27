@@ -3,12 +3,12 @@ import { describe, expect, test } from "vite-plus/test"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import { expectAccessible } from "spell/test-helpers/A11y"
 
-import type { ThreadComment } from "spell-epic/comments"
-import type { DOMThreadElement } from "spell-epic/components/epic-thread"
+import type { ThreadComment } from "spell/epic/comments"
+import type { DOMThreadElement } from "spell/epic/components/epic-thread"
 
-import "spell-ui/components/ui-button"
-import "spell-ui/components/ui-icon"
-import "spell-epic/components/epic-thread"
+import "spell/ui/components/ui-button"
+import "spell/ui/components/ui-icon"
+import "spell/epic/components/epic-thread"
 
 /** `element`'s shadow part `name`. */
 function part(element: Element, name: string): HTMLElement {

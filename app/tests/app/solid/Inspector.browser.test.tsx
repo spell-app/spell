@@ -4,7 +4,7 @@ import { render } from "@solidjs/web"
 
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import { Viewport } from "spell/test-helpers/Viewport"
-import { Inspector, InspectorColumn, InspectorPane, isThing, itemsOf, uiReady } from "spell-app/app/solid"
+import { Inspector, InspectorColumn, InspectorPane, isThing, itemsOf, uiReady } from "spell/app/app/solid"
 
 /**
  * The Inspector (`Inspector.tsx`):  what a part of the app is, picking it, and the column that shows it.

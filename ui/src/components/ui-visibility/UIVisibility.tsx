@@ -1,6 +1,6 @@
 import { isServer, type JSX } from "@solidjs/web"
 
-import { E, UI, UIT } from "spell-ui/core"
+import { E, UI, UIT } from "spell/ui/core"
 import { visibilityVocabulary } from "./UIVisibility.en"
 
 import visibilityCSS from "./UIVisibility.css?inline"
@@ -132,7 +132,7 @@ export class UIVisibility extends E.UIComponent<VisibilityVocabulary> {
   }
 
   /**
-   * Static server render (`spell-ui/static`):  nothing will observe, so each `<img data-src>` gets its source now,
+   * Static server render (`spell/ui/static`):  nothing will observe, so each `<img data-src>` gets its source now,
    * with `loading="lazy"` (unless it says otherwise).
    * - Crawlers and no-JS readers see the image;  the browser defers it.
    * - SIDE EFFECT:  writes the DOM element's light-DOM images, which the flattener then moves into the root.

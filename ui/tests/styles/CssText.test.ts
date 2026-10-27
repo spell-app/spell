@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { CssText } from "spell-ui/styles/CssText"
+import { CssText } from "spell/ui/styles/CssText"
 
 describe("CssText.topLevel()", () => {
   test("the first (or last) character outside every bracket that passes, quotes and escapes skipped", () => {

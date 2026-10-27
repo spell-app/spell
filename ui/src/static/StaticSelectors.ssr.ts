@@ -1,5 +1,5 @@
-import { SSR } from "spell-ui/static"
-import { CssText } from "spell-ui/styles/CssText"
+import { SSR } from "spell/ui/static"
+import { CssText } from "spell/ui/styles/CssText"
 // Import directly to avoid circular import:  the constants below the class read them
 import { ROOT, SLOTTED } from "./static.types.ssr"
 
@@ -20,7 +20,7 @@ import { ROOT, SLOTTED } from "./static.types.ssr"
  * - every subject is anchored (`anchor()`):  it may be the root, and only `::slotted()` / `slot` subjects may be
  *   slotted
  * - Anything else (class grammar) is kept as written.
- * - Node only (`spell-ui/static`):  strings in, strings out, no DOM, no postcss;  NEVER imported by a component or
+ * - Node only (`spell/ui/static`):  strings in, strings out, no DOM, no postcss;  NEVER imported by a component or
  *   `spell-ui`.
  * - Reads a selector's brackets through `CssText`:  a quoted `)` or `]` (`[title="a)"]`) never ends one.
  ****************/

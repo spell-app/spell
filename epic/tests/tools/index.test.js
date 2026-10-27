@@ -16,8 +16,8 @@ import {
   replaceBetween,
   sameList,
   skeleton
-} from "spell-epic/tools/index.js"
-import { TEMPLATES, TOOLS } from "spell-epic/tools/pages.js"
+} from "spell/epic/tools/index.js"
+import { TEMPLATES, TOOLS } from "spell/epic/tools/pages.js"
 
 /** A described epic page (`describe()`'s shape) with `phases`, each a status. */
 function epic(name, statuses, updated = new Date().toISOString().slice(0, 10)) {

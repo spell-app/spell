@@ -7,8 +7,8 @@
 import { parseHTML } from "linkedom"
 import { describe, expect, test } from "vite-plus/test"
 
-import { UpdateSummary } from "spell-epic/tool/UpdateSummary"
-import { Migrations } from "spell-epic/tool/migrations/Migrations"
+import { UpdateSummary } from "spell/epic/tool/UpdateSummary"
+import { Migrations } from "spell/epic/tool/migrations/Migrations"
 
 /** A page holding one phase, linking nothing of the engine's. */
 function upToDateDoc(): Document {

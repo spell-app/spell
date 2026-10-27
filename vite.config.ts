@@ -8,7 +8,7 @@ import { fmtConfig, rootLint } from "spell/toolchain/lint"
  * - The settings live in the toolchain (`spell/toolchain/lint`), which every repo's config spreads too.
  * - The kit's ONE lint config (epic `repo-split` P14):  `yarn kit:lint` runs it over `src/`, `tests/`, `bin/`,
  *   `scripts/`, `tools/` and the configs.
- * - The child repos inside the kit (`spell-ui/` ...) are left out:  each lints by its own root config.
+ * - The child repos inside the kit (`ui/` ...) are left out:  each lints by its own root config.
  * - So are the design skills installed in `.agents/` (`skills-lock.json`):  kept as their author wrote them.
  * - Tests:  `vitest.config.ts` beside this, a project per folder.
  */

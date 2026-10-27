@@ -3,10 +3,10 @@ import type { JSX } from "@solidjs/web"
 
 import { E } from "spell/element"
 
-import { NEW_KINDS, NEW_TITLE_MAX, type NewItem, type NewKind } from "spell-epic/review"
+import { NEW_KINDS, NEW_TITLE_MAX, type NewItem, type NewKind } from "spell/epic/review"
 // the page's view of the review inbox, as the review controls': its file, not `epic-review`'s barrel
-import { ReviewState } from "spell-epic/components/epic-review/ReviewState"
-import type { DOMTextBoxElement } from "spell-epic/components/epic-text-box/EpicTextBox"
+import { ReviewState } from "spell/epic/components/epic-review/ReviewState"
+import type { DOMTextBoxElement } from "spell/epic/components/epic-text-box/EpicTextBox"
 
 import { epicNewItemVocabulary } from "./EpicNewItem.en"
 import {
@@ -21,7 +21,7 @@ import {
 } from "./EpicNewItem.types"
 
 import newItemCSS from "./EpicNewItem.css?inline"
-import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
+import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 
 /****************
  * ### `EpicNewItem`

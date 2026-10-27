@@ -6,7 +6,7 @@ import { afterAll, beforeAll, describe, expect, it, vi } from "vite-plus/test"
 import { PageServer } from "spell/server/page"
 import { ask } from "spell/server/test/serve"
 
-import { EPIC_CARDS_END } from "spell-epic/list/EpicCards"
+import { EPIC_CARDS_END } from "spell/epic/list/EpicCards"
 import {
   MARKER,
   RunningEpics,
@@ -14,8 +14,8 @@ import {
   titleNames,
   type TitledSession,
   type RunningEpic
-} from "spell-epic/list/RunningEpics"
-import runningRoutes from "spell-epic/list/runningRoutes"
+} from "spell/epic/list/RunningEpics"
+import runningRoutes from "spell/epic/list/runningRoutes"
 
 /**
  * An epic page in `<epic-*>` markup with `phases`, each `[status, header]` (`P2 · Title`), `updated` that day.

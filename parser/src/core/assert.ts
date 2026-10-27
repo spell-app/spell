@@ -5,7 +5,7 @@
 
 import isArrayLikeObject from "lodash/isArrayLikeObject"
 // Import directly, never through the barrel:
-// `spell-parser/core/model` loads this file, and must not load drawing (Solid)
+// `spell/parser/core/model` loads this file, and must not load drawing (Solid)
 import { core } from "./core"
 
 /** Callable `assert` function, plus extra assertion helpers hung off of it. */

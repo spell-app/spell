@@ -1,6 +1,6 @@
 import { proto } from "spell/util"
-import { P } from "spell-parser/parser"
-import { InfixOperatorSuffix, Precedence } from "spell-parser/spell/rules/expressions"
+import { P } from "spell/parser/parser"
+import { InfixOperatorSuffix, Precedence } from "spell/parser/spell/rules/expressions"
 
 /**
  * `gt_lt` rule:  `<`, `>`, `<=`, `>=` comparison, e.g. `salary > expenses`.

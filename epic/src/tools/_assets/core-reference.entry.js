@@ -7,16 +7,16 @@
  * - The data:  two JSON files, read from the checkout SERVING the page (the page's `ServerLink`, `getFile()`),
  *   so the page shows that checkout's core and can't go stale.
  *   Their paths are relative to the page, in `<body>`'s data attributes:
- *   - `data-core-declarations`:  `spell-parser/src/core/core.declarations.json5`, the core's method list
+ *   - `data-core-declarations`:  `parser/src/core/core.declarations.json5`, the core's method list
  *     (`yarn core:gen:declarations` in spell-parser, `coreDeclarations.ts`);  `{ provides, statements: [Statement] }`
- *   - `data-not-ported`:  `spell-parser/src/py/core/not_ported_yet.json5`, what spell_core doesn't have yet;
+ *   - `data-not-ported`:  `parser/src/py/core/not_ported_yet.json5`, what spell_core doesn't have yet;
  *     `{ about, groups: [{ why, names: [javascript name] }] }`.  Optional:  without it the Python column says "?"
  * - `Statement`, by its keys:
  *   - a method of `core`:  `{ kind: "method", name, of, module, params?: [{ name }], section?, description? }`
  *   - a property of `core`:  `{ property, of, module, section?, description? }`
  *   - a class compiled code imports:  `{ type, superType?, module, description? }`
  *   - a function compiled code imports:  `{ kind: "function", name, module, params?, description? }`
- *   - `module`:  the core's file under `spell-parser/src/core/`, without `.ts` (`classes` is `classes/index.ts`);
+ *   - `module`:  the core's file under `parser/src/core/`, without `.ts` (`classes` is `classes/index.ts`);
  *     `section`:  the `// ## Heading` it's under there
  * - Python's names, as spell-parser's `tests/py/core/tests/test_core_declarations.py` checks them:
  *   `snakeCase()` of the javascript name
@@ -41,7 +41,7 @@
  *   that exist:  the docs helpers' `el()`, `titleInside()` and start, the kit's `slug()`, `ServerLink`.
  */
 import { slug } from "spell/util/string"
-import { ServerLink } from "spell-epic/review"
+import { ServerLink } from "spell/epic/review"
 
 import { drawThenBoot, el, sectionNumber, titleInside, withCode as withCodeSpans } from "./spell-doc-helpers.js"
 
@@ -205,7 +205,7 @@ function nameParts(statement) {
 
 /** "in Python" cell:  ✓, or ✗ with why as its tooltip;  "?" without `not_ported_yet.json5`. */
 function ported(name, missing) {
-  if (!missing) return el("td", { title: "this checkout has no spell-parser/src/py/core/not_ported_yet.json5" }, "?")
+  if (!missing) return el("td", { title: "this checkout has no parser/src/py/core/not_ported_yet.json5" }, "?")
   const why = missing.get(name)
   if (why === undefined) return el("td", { class: "yes positive", title: "spell_core has it" }, "✓")
   return el("td", { class: "no negative", title: why }, "✗ not yet")
@@ -228,7 +228,7 @@ function notPortedList(statements, notPorted) {
     return el(
       "ui-message",
       { state: "warning", heading: "No list of what Python lacks" },
-      el("p", {}, "This checkout has no ", el("code", {}, "spell-parser/src/py/core/not_ported_yet.json5"), ".")
+      el("p", {}, "This checkout has no ", el("code", {}, "parser/src/py/core/not_ported_yet.json5"), ".")
     )
   const byName = new Map(statements.map((statement) => [jsName(statement), statement]))
   const items = (notPorted.groups ?? []).map((group) => {
@@ -298,7 +298,7 @@ function missingNames(notPorted) {
   return new Map((notPorted.groups ?? []).flatMap((group) => group.names.map((name) => [name, group.why])))
 }
 
-/** `module`'s file under `spell-parser/src/core/`:  `classes` is `classes/index.ts`. */
+/** `module`'s file under `parser/src/core/`:  `classes` is `classes/index.ts`. */
 function sourceFile(module) {
   return module === "classes" ? "classes/index.ts" : `${module}.ts`
 }

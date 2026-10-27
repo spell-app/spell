@@ -1,7 +1,7 @@
 import { For, Show } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
-import { E } from "spell-ui/core"
+import { E } from "spell/ui/core"
 
 import {
   AnswerForm,
@@ -11,7 +11,7 @@ import {
   type PageAnswer,
   type PartLabels,
   type SentAnswer
-} from "spell-epic/answers"
+} from "spell/epic/answers"
 
 import { epicTextBoxVocabulary } from "./EpicTextBox.en"
 

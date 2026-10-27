@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { Sheets } from "spell-ui/test-helpers/Sheets"
+import { Sheets } from "spell/ui/test-helpers/Sheets"
 
-import inspectorRaw from "spell-ui/docs-components/ui-docs-inspector/UIDocsInspector.css?raw"
+import inspectorRaw from "spell/ui/docs-components/ui-docs-inspector/UIDocsInspector.css?raw"
 
 /**
  * `UIDocsInspector.css`:  the sheet's source rules.

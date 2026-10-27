@@ -1,4 +1,4 @@
-import { E, type UIT } from "spell-ui/core"
+import { E, type UIT } from "spell/ui/core"
 import { CalendarDates } from "./CalendarDates"
 import type { DatePart, Moment, MomentFields, MomentLike } from "./UICalendar.types"
 

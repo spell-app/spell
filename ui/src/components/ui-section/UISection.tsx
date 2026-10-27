@@ -1,7 +1,7 @@
 import { Show } from "solid-js"
 import { Dynamic, isServer, type JSX } from "@solidjs/web"
 
-import { E, UI, UIT } from "spell-ui/core"
+import { E, UI, UIT } from "spell/ui/core"
 import { sectionVocabulary } from "./UISection.en"
 import { UISections } from "./UISections"
 import { FoldIconPlace, type SectionVocabulary } from "./UISection.types"

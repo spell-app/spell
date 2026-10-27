@@ -3,13 +3,13 @@
 import { parseHTML } from "linkedom"
 import { beforeAll, describe, expect, it } from "vite-plus/test"
 
-import { StaticRender } from "spell-ui/static"
-import { UIContent } from "spell-ui/components/ui-parts/UIContent"
-import { UITitle } from "spell-ui/components/ui-parts/UITitle"
-import { UIAccordion } from "spell-ui/components/ui-accordion/UIAccordion"
+import { StaticRender } from "spell/ui/static"
+import { UIContent } from "spell/ui/components/ui-parts/UIContent"
+import { UITitle } from "spell/ui/components/ui-parts/UITitle"
+import { UIAccordion } from "spell/ui/components/ui-accordion/UIAccordion"
 
 /**
- * `<ui-accordion>` rendered statically (`spell-ui/static`):  its `<details>` / `<summary>` pairs built from the light
+ * `<ui-accordion>` rendered statically (`spell/ui/static`):  its `<details>` / `<summary>` pairs built from the light
  * children, each child inside its panel, open panels open, an exclusive accordion's `name` unique on the page.
  */
 describe("<ui-accordion> static render", () => {

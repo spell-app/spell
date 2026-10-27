@@ -1,5 +1,5 @@
-import { E } from "spell-ui/core"
-import { F } from "spell-ui/forms"
+import { E } from "spell/ui/core"
+import { F } from "spell/ui/forms"
 // Import directly to avoid circular import:  spell-element imports nothing of Spell UI, so it has always loaded first
 import { state } from "spell/element"
 

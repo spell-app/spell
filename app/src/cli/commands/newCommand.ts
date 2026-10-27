@@ -1,10 +1,10 @@
 import { existsSync, mkdirSync, readdirSync, writeFileSync } from "fs"
 import { resolve } from "path"
 
-import environment from "spell-app/spaces/server/node/environment"
-import { SP } from "spell-parser/spell"
-import { hasProjectFile } from "spell-parser/spell/node/projectFile"
-import { CLI } from "spell-app/cli"
+import environment from "spell/app/spaces/server/node/environment"
+import { SP } from "spell/parser/spell"
+import { hasProjectFile } from "spell/parser/spell/node/projectFile"
+import { CLI } from "spell/app/cli"
 
 /**
  * `spell app create <name>` (`spell new` until epic `repo-split` P13):  make a spell project --

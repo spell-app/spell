@@ -47,7 +47,7 @@ export type CatalogElement = {
   tagName: string
   /** Its class's name, e.g. `UIPanel`:  tells which class in a family's folder renders it. */
   className: string
-  /** Absolute folder of its family, e.g. `.../spell-ui/src/components/ui-panel`. */
+  /** Absolute folder of its family, e.g. `.../ui/src/components/ui-panel`. */
   folder: string
   /** Its slots, the default one (`""`) included when the manifest lists it. */
   slots: ElementDoc[]

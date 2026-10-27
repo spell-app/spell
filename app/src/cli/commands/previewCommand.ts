@@ -1,5 +1,5 @@
 import { SRV } from "spell/server"
-import { CLI } from "spell-app/cli"
+import { CLI } from "spell/app/cli"
 
 /**
  * `spell app preview build | serve` (Owen's names, epic `debut` Q16):  the editor's static build, the public preview.

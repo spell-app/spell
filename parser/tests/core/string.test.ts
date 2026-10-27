@@ -1,5 +1,5 @@
 import { describe, test, expect } from "vite-plus/test"
-import { core } from "spell-parser/core"
+import { core } from "spell/parser/core"
 
 describe("core.unicode()", () => {
   test('the character with a code point;  "" for what\'s no code point', () => {

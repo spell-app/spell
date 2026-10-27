@@ -5,7 +5,7 @@
  *   roots.
  */
 
-import type { EpicJSXAttributes } from "spell-epic/components/epic-page/EpicPage.types"
+import type { EpicJSXAttributes } from "spell/epic/components/epic-page/EpicPage.types"
 
 /** A send asked for:  the event the owner hears and sends on (`@E.on(SEND_ASKED)`, `on-epic-send-asked`). */
 export const SEND_ASKED = "epic-send-saving"

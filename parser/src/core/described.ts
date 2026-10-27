@@ -9,7 +9,7 @@
  * - An action `undone as` something is ONE undo step:
  *   `describeAction()` declares it so (`declareAction()`, `undoing.ts`, C11).
  * - Kept per class, and inherited:  a joker has a card's actions, and may describe one again.
- * - Part of `core`:  imported by `spell-parser/core`'s barrel for its side effect.
+ * - Part of `core`:  imported by `spell/parser/core`'s barrel for its side effect.
  */
 import { core } from "./core"
 import { defineCoreModule } from "./core.types"

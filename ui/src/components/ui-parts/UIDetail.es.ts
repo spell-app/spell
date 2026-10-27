@@ -1,4 +1,4 @@
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /**
  * `<ui-detail>` in Spanish:  `<es-detalle>`, with the names and texts only it uses (from `UIDetail.en.ts`).

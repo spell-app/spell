@@ -1,16 +1,16 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { colorsCSS, foundationCSS } from "spell-ui/styles"
+import { colorsCSS, foundationCSS } from "spell/ui/styles"
 
 import { Fixture } from "spell/test-helpers/Fixture"
-import { Sheets } from "spell-ui/test-helpers/Sheets"
+import { Sheets } from "spell/ui/test-helpers/Sheets"
 
-import { sidebarVocabulary } from "spell-ui/components/ui-sidebar/UISidebar.en"
+import { sidebarVocabulary } from "spell/ui/components/ui-sidebar/UISidebar.en"
 
-import menuCSS from "spell-ui/components/ui-menu/UIMenu.css?inline"
-import segmentCSS from "spell-ui/components/ui-segment/UISegment.css?inline"
-import sidebarCSS from "spell-ui/components/ui-sidebar/UISidebar.css?inline"
-import sidebarRaw from "spell-ui/components/ui-sidebar/UISidebar.css?raw"
+import menuCSS from "spell/ui/components/ui-menu/UIMenu.css?inline"
+import segmentCSS from "spell/ui/components/ui-segment/UISegment.css?inline"
+import sidebarCSS from "spell/ui/components/ui-sidebar/UISidebar.css?inline"
+import sidebarRaw from "spell/ui/components/ui-sidebar/UISidebar.css?raw"
 
 /**
  * `UISidebar.css` on its own, before any element exists:  the sheet's source rules, the computed styles of the

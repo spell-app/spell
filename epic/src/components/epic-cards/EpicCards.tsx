@@ -1,9 +1,9 @@
 import { For, Show, createMemo } from "solid-js"
 import { isServer, type JSX } from "@solidjs/web"
 
-import { E } from "spell-ui/core"
-import { epicStateFor } from "spell-epic/list/EpicState"
-import { ServerLink } from "spell-epic/review"
+import { E } from "spell/ui/core"
+import { epicStateFor } from "spell/epic/list/EpicState"
+import { ServerLink } from "spell/epic/review"
 
 import { epicCardsVocabulary } from "./EpicCards.en"
 import { EPIC_FILE, SAGA_EPICS_API, type CardsProblem, type SagaEpic, type SagaEpicsAnswer } from "./EpicCards.types"
@@ -17,10 +17,10 @@ import cardsCSS from "./EpicCards.css?inline"
  * - THE EPICS PAGE'S OWN CARDS (epic `epic-engine` I39):  an `<epic-list no-favorites>` of `<epic-card>`s, drawn in
  *   its shadow root, so an epic looks and behaves the same on both pages (its mark, star, saga label, date)
  * - DRAWN FROM DATA, never a copy in the page:  the page server answers `GET /api/epics/saga?saga=<id>`
- *   (`spell-epic/tool/SagaEpics`), reading every epic page's `<epic-page saga>` as it's asked
+ *   (`spell/epic/tool/SagaEpics`), reading every epic page's `<epic-page saga>` as it's asked
  *   - asked again whenever an epic page changes (`spell-server:changed`):  an epic that joins the saga, finishes a phase
  *     or leaves shows at once
- * - each epic's state and group by the ONE rule the Epics page uses (`spell-epic/list/EpicState`, `<epic-list>`):
+ * - each epic's state and group by the ONE rule the Epics page uses (`spell/epic/list/EpicState`, `<epic-list>`):
  *   Active, Planning, Urgent, Done (no Favorites:  Owen's own list, on the Epics page);  an empty group isn't drawn;
  *   by title within each
  * - each card:  the state's mark (its why the tooltip), the linked title (its epic page, in that epic's tab), the

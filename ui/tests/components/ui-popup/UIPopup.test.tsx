@@ -1,19 +1,19 @@
 import { beforeEach, describe, expect, it, onTestFinished, vi } from "vite-plus/test"
 import { page, userEvent } from "vite-plus/test/browser"
-import { Keys } from "spell-ui/test-helpers/Keys"
+import { Keys } from "spell/ui/test-helpers/Keys"
 
-import { UI } from "spell-ui/runtime"
-import type { PopupOpenDetail } from "spell-ui/components/components.types"
+import { UI } from "spell/ui/runtime"
+import type { PopupOpenDetail } from "spell/ui/components/components.types"
 import { expectAccessible } from "spell/test-helpers/A11y"
 
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import type { DOMElement } from "spell/element"
 
-import "spell-ui/components/ui-popup"
-import "spell-ui/components/ui-button"
-import "spell-ui/components/ui-icon"
-import "spell-ui/components/ui-parts"
-import "spell-ui/components/ui-grid"
+import "spell/ui/components/ui-popup"
+import "spell/ui/components/ui-button"
+import "spell/ui/components/ui-icon"
+import "spell/ui/components/ui-parts"
+import "spell/ui/components/ui-grid"
 
 /** Element-markup rewrites of every example, by path. */
 const EXAMPLES = import.meta.glob<string>("/src/components/ui-popup/examples/elements/*.html", {

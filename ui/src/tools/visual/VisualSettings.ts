@@ -1,7 +1,7 @@
 /// <reference types="node" />
 
 import { NodePackage } from "spell/element-tools/NodePackage"
-import { SPELL_UI_ROOT } from "spell-ui/tools/tools.types"
+import { SPELL_UI_ROOT } from "spell/ui/tools/tools.types"
 import type { VisualBrowser, VisualOs } from "./visual.types.ts"
 
 /**

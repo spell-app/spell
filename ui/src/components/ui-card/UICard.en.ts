@@ -1,7 +1,7 @@
 /**
  * The English vocabulary of `<ui-card>`:  every name the tag uses.
  * - Its tag, attributes (each with its kind and allowed values), slots, parts, states and texts.
- *   The shape is `E.ComponentVocabulary` (`spell-ui/vocabulary`).
+ *   The shape is `E.ComponentVocabulary` (`spell/ui/vocabulary`).
  * - Class words come out through `ClassBuilder`, in Fomantic's grammar:
  *   `<ui-card appearance="raised" color="red" size="small">` => `ui small red raised card`;
  *   `<ui-cards columns="3" doubling stackable>` => `ui doubling stackable three cards`.  `UICard.css` keys on those.
@@ -11,7 +11,7 @@
  *   variations (`size`, `color`, `raised` ...) as its own classes, as Fomantic's `.ui.raised.cards > .card` has it.
  */
 
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /****************
  * ### `cardVocabulary`

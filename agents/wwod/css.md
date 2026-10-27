@@ -123,6 +123,6 @@ From:  original WWOD §19 ("CSS"), rewritten for plain `.css` and `spell-ui`'s t
   - pages, the docs and anything embeddable work at phone width (390px):  no horizontal scroll, nothing squeezed
   - breakpoints are `ui`'s `@custom-media` (`--ui-mobile`, `--ui-tablet` ...;  `packages/ui/src/styles/media.css`),
     never a bare px media query
-  - the checks fail on phone-width overflow:  `spell-epic/src/tools/check-spell.js` (docs pages), `yarn site:check`
+  - the checks fail on phone-width overflow:  `epic/src/tools/check-spell.js` (docs pages), `yarn site:check`
     (Spell UI's site)
   - NOT:  "desktop only, no mobile breakpoints" -- the docs, the Spell UI site and `<spell-viewer>` are read on phones

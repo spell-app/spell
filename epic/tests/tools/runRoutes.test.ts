@@ -11,8 +11,8 @@ import { PageServer } from "spell/server/page"
 import { ask } from "spell/server/test/serve"
 import type { RunAnswers, RunPage, RunWaiting } from "spell/server/runs/runs.types"
 
-import { DataFile } from "spell-epic/data/DataFile"
-import runRoutes, { type RunReply } from "spell-epic/tools/runRoutes"
+import { DataFile } from "spell/epic/data/DataFile"
+import runRoutes, { type RunReply } from "spell/epic/tools/runRoutes"
 
 ////////////////
 // ## Fixtures

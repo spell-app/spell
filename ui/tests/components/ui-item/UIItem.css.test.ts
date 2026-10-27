@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { foundationCSS } from "spell-ui/styles"
+import { foundationCSS } from "spell/ui/styles"
 
-import { Sheets } from "spell-ui/test-helpers/Sheets"
+import { Sheets } from "spell/ui/test-helpers/Sheets"
 
-import itemCSS from "spell-ui/components/ui-item/UIItem.css?inline"
-import itemRaw from "spell-ui/components/ui-item/UIItem.css?raw"
+import itemCSS from "spell/ui/components/ui-item/UIItem.css?inline"
+import itemRaw from "spell/ui/components/ui-item/UIItem.css?raw"
 
 /**
  * `UIItem.css` on its own:  the rules for the generic item's DOM element, and its resets.

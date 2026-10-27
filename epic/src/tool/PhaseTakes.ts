@@ -1,6 +1,6 @@
-import { isItemId } from "spell-epic/definitions"
-import { Markup } from "spell-epic/markup"
-import { PhaseIds } from "spell-epic/phases"
+import { isItemId } from "spell/epic/definitions"
+import { Markup } from "spell/epic/markup"
+import { PhaseIds } from "spell/epic/phases"
 
 /****************
  * ### `PhaseTakes`

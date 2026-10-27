@@ -1,7 +1,7 @@
 import { Show } from "solid-js"
 import { isServer, type JSX } from "@solidjs/web"
 
-import { E, UIT } from "spell-ui/core"
+import { E, UIT } from "spell/ui/core"
 import { formVocabulary } from "./UIForm.en"
 import { FormBinding } from "./FormBinding"
 import { FormFields } from "./FormFields"
@@ -124,7 +124,7 @@ export class DOMFormElement extends E.DOMElement<UIForm> {
  *   - else `values`
  *   - Why the box and caption:  bare JSON under a form reads as page text, and gets missed.
  *
- * - Static server render (`spell-ui/static`):  a `<form>` slotted inside it MERGES into the root,
+ * - Static server render (`spell/ui/static`):  a `<form>` slotted inside it MERGES into the root,
  *   which becomes `<form class="ui … form">` with the author's attributes (`mergedForm`).
  *   - That's Fomantic's own markup, so the form's rules reach its fields and messages,
  *     and the page still submits natively.

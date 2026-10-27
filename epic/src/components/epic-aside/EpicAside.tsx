@@ -5,7 +5,7 @@ import { EpicPanel } from "./EpicPanel"
 
 import panelCSS from "./EpicPanel.css?inline"
 import asideCSS from "./EpicAside.css?inline"
-import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
+import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 
 /****************
  * ### `EpicAside`

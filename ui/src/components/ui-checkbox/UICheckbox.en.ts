@@ -1,7 +1,7 @@
 /**
  * Every name `<ui-checkbox>` and `<ui-radio>` use:  tags, attributes (kind + allowed values), events, slots, parts,
- * states, texts.  Schema:  `E.ComponentVocabulary` (`spell-ui/vocabulary`).
- * - Pure data:  node imports it (`yarn site:data`, `yarn gen:root`), so `spell-ui/core` for types only.
+ * states, texts.  Schema:  `E.ComponentVocabulary` (`spell/ui/vocabulary`).
+ * - Pure data:  node imports it (`yarn site:data`, `yarn gen:root`), so `spell/ui/core` for types only.
  * - Class words come out through `ClassBuilder`, in Fomantic's grammar:
  *   `<ui-checkbox appearance="toggle" size="large" padding="none">` => `ui large toggle fitted checkbox`;
  *   a `<ui-radio>` is `ui radio checkbox` (the element adds `radio` unless its `appearance` is `slider` / `toggle`).
@@ -11,9 +11,9 @@
  *   The DOM element's class, `DOMCheckElement`, owns that name:  it is not a vocabulary attribute.
  */
 
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 import { LEADING_ATTRIBUTES, SHARED_ATTRIBUTES, SHARED_EVENTS, SHARED_PARTS } from "./UICheckbox.types"
-import * as UIT from "spell-ui/components/components.types"
+import * as UIT from "spell/ui/components/components.types"
 
 /****************
  * ### `<ui-checkbox>`

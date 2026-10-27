@@ -13,7 +13,7 @@ import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { afterAll, describe, expect, test } from "vite-plus/test"
 
-import { SessionFolders } from "spell-epic/config/SessionFolders"
+import { SessionFolders } from "spell/epic/config/SessionFolders"
 
 /** A throwaway Claude Code folder:  never the real `~/.claude`. */
 const HOME = realpathSync(mkdtempSync(join(tmpdir(), "session-folders-")))

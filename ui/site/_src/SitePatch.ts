@@ -1,6 +1,6 @@
-import { UI } from "spell-ui/core"
+import { UI } from "spell/ui/core"
 // A leaf, not the barrel:  the barrel defines `<ui-example>`, which `<ui-root>` does on first use
-import { ExampleSource } from "spell-ui/components/ui-example/ExampleSource"
+import { ExampleSource } from "spell/ui/components/ui-example/ExampleSource"
 import type { PageChange } from "spell/server/liveClient"
 import { PagePatch, serverConfig } from "spell/server/site"
 import { SiteSections } from "./SiteSections"

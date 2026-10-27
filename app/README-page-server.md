@@ -7,7 +7,7 @@
     { "src": "/element/spell-language.js", "file": "app/dist-element/spell-language.js", "skip": ["/components/"] }
   ],
   "componentSets": {
-    "app": { "name": "App UI", "dir": "app/docs", "assets": "../spell-ui/site/_assets" }
+    "app": { "name": "App UI", "dir": "app/docs", "assets": "../ui/site/_assets" }
   },
   "engineRoutes": { "/element/": "app/dist-element" }
 }

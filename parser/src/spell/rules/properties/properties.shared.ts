@@ -3,7 +3,7 @@
  * and how the `its_*` rules read `it`.
  */
 import { NONE } from "spell/util"
-import { P } from "spell-parser/parser"
+import { P } from "spell/parser/parser"
 
 /** What `its_*` rules stash on their matches. */
 export type ItsMatchData = {

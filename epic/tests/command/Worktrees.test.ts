@@ -4,9 +4,9 @@ import { tmpdir } from "os"
 import { join } from "path"
 import { afterAll, describe, expect, test } from "vite-plus/test"
 
-import { Parking } from "spell-epic/command/Parking"
-import { Stock } from "spell-epic/command/Stock"
-import { Worktrees } from "spell-epic/command/Worktrees"
+import { Parking } from "spell/epic/command/Parking"
+import { Stock } from "spell/epic/command/Stock"
+import { Worktrees } from "spell/epic/command/Worktrees"
 
 /** A throwaway repo:  `main` with one commit, branch `done` merged, branch `wip` one commit ahead in a worktree. */
 const MAIN = realpathSync(mkdtempSync(join(tmpdir(), "repo-")))

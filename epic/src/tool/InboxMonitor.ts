@@ -2,11 +2,11 @@ import { join } from "node:path"
 
 import { SRV } from "spell/server"
 
-import { EpicConfig } from "spell-epic/config/EpicConfig"
-import { SessionFolders } from "spell-epic/config/SessionFolders"
-import type { RunningSession } from "spell-epic/command/command.types"
-import { Sessions } from "spell-epic/command/Sessions"
-import { bareTitle } from "spell-epic/list/RunningEpics"
+import { EpicConfig } from "spell/epic/config/EpicConfig"
+import { SessionFolders } from "spell/epic/config/SessionFolders"
+import type { RunningSession } from "spell/epic/command/command.types"
+import { Sessions } from "spell/epic/command/Sessions"
+import { bareTitle } from "spell/epic/list/RunningEpics"
 
 import { GuideSends } from "./InboxCommands"
 import { PlanDocFiles } from "./PlanDocFiles"

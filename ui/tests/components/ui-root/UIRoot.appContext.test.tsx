@@ -2,8 +2,8 @@ import { onTestFinished, beforeAll, describe, expect, test } from "vite-plus/tes
 import { Dynamic, type JSX } from "@solidjs/web"
 
 import { UIComponent, type DOMElement, type UIComponentClass } from "spell/element"
-import type { ComponentVocabulary } from "spell-ui/vocabulary"
-import { UI } from "spell-ui/runtime"
+import type { ComponentVocabulary } from "spell/ui/vocabulary"
+import { UI } from "spell/ui/runtime"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 
 /**
@@ -82,7 +82,7 @@ describe("UIComponent.appContext", () => {
     root.innerHTML = `<${tag}></${tag}>`
     container().append(root)
     const before = appContextOf(root.querySelector(tag))
-    await import("spell-ui/components/ui-root")
+    await import("spell/ui/components/ui-root")
     await customElements.whenDefined("ui-root")
     root.insertAdjacentHTML("beforeend", `<${tag}></${tag}>`)
     await ElementFixture.settle(root)
@@ -95,7 +95,7 @@ describe("UIComponent.appContext", () => {
   })
 
   test("an element inside `<ui-root>` sees the root's `appContext`", async () => {
-    await import("spell-ui/components/ui-root")
+    await import("spell/ui/components/ui-root")
     const tag = defineElement("reader", () => <span />)
     const root = document.createElement("ui-root") as HTMLElement & { appContext?: unknown }
     root.appContext = APP
@@ -105,7 +105,7 @@ describe("UIComponent.appContext", () => {
   })
 
   test("through a shadow root:  an element another element draws sees it too", async () => {
-    await import("spell-ui/components/ui-root")
+    await import("spell/ui/components/ui-root")
     const inner = defineElement("inner", () => <span />)
     const outer = defineElement("outer", () => <Dynamic component={inner} />)
     const root = document.createElement("ui-root") as HTMLElement & { appContext?: unknown }
@@ -118,7 +118,7 @@ describe("UIComponent.appContext", () => {
   })
 
   test("the NEAREST `<ui-root>` wins", async () => {
-    await import("spell-ui/components/ui-root")
+    await import("spell/ui/components/ui-root")
     const tag = defineElement("reader", () => <span />)
     const NEAR = { theme: "light" }
     const outer = document.createElement("ui-root") as HTMLElement & { appContext?: unknown }
@@ -132,7 +132,7 @@ describe("UIComponent.appContext", () => {
   })
 
   test("a translated `<ui-root>` counts too", async () => {
-    const { UIRoot } = await import("spell-ui/components/ui-root")
+    const { UIRoot } = await import("spell/ui/components/ui-root")
     UIRoot.define("x-raiz")
     const tag = defineElement("reader", () => <span />)
     const root = document.createElement("x-raiz") as HTMLElement & { appContext?: unknown }
@@ -143,7 +143,7 @@ describe("UIComponent.appContext", () => {
   })
 
   test("outside any `<ui-root>`, or inside one that holds no value:  `null`", async () => {
-    await import("spell-ui/components/ui-root")
+    await import("spell/ui/components/ui-root")
     const tag = defineElement("reader", () => <span />)
     const outside = container()
     outside.innerHTML = `<${tag}></${tag}>`

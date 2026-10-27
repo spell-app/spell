@@ -4,16 +4,16 @@ import type { JSX } from "@solidjs/web"
 import { E } from "spell/element"
 
 // the fold pieces every `<epic-*>` fold shares:  their files, not `epic-item`'s barrel (which would define it here)
-import { FOLDS, Fold } from "spell-epic/components/epic-item/Fold"
+import { FOLDS, Fold } from "spell/epic/components/epic-item/Fold"
 // the item it's in, for whether its Choices say it already:  the file, not `epic-item`'s barrel
-import { ItemLink } from "spell-epic/components/epic-item/ItemLink"
+import { ItemLink } from "spell/epic/components/epic-item/ItemLink"
 
 import { epicAnswerVocabulary } from "./EpicAnswer.en"
 import { BODY, BODY_ID, EMPTY, HEADER, HEADING_SEPARATOR, LABEL_ID, TITLE_ID } from "./EpicAnswer.types"
 
 import answerCSS from "./EpicAnswer.css?inline"
-import foldCSS from "spell-epic/components/epic-item/Fold.css?inline"
-import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
+import foldCSS from "spell/epic/components/epic-item/Fold.css?inline"
+import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 
 /****************
  * ### `EpicAnswer`

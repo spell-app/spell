@@ -1,5 +1,5 @@
-import { E } from "spell-ui/core"
-import { UICode } from "spell-ui/components/ui-code"
+import { E } from "spell/ui/core"
+import { UICode } from "spell/ui/components/ui-code"
 import { spellCodeVocabulary } from "./SpellCode.en"
 
 /****************
@@ -30,7 +30,7 @@ const vocabulary = {
  *   So a `<ui-code language="spell">` beside it is coloured too.
  * - Its DOM element is `<ui-code>`'s, `DOMCodeElement` (`detectedLanguage`).
  * - On a page with Spell UI of its own (a docs page), it extends the PAGE's `UICode`:
- *   `spell-ui/components/ui-code` comes from `SpellUI.packModules` there (`spell-ui-shared.js`, `vite.solid.config.ts`).
+ *   `spell/ui/components/ui-code` comes from `SpellUI.packModules` there (`spell-ui-shared.js`, `vite.solid.config.ts`).
  * - SEE:  its App UI components page, `app/docs/spell-code.html` (`/components/app/spell-code.html`).
  ****************/
 export class SpellCode extends UICode {

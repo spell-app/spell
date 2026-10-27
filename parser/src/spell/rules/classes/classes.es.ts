@@ -14,9 +14,9 @@
  * - The Spanish verbs of a property's rule all start with `debe` (must), so `no debe estar vacío` reads as Spanish
  *   says it, the `no` before the verb:  `su title no debe estar vacío`, `, que debe ser un email`.
  */
-import { P } from "spell-parser/parser"
-import { SpellParser } from "spell-parser/spell/SpellParser"
-import { Wording } from "spell-parser/spell/rules/expressions"
+import { P } from "spell/parser/parser"
+import { SpellParser } from "spell/parser/spell/SpellParser"
+import { Wording } from "spell/parser/spell/rules/expressions"
 
 import { BelongsToOne } from "./BelongsToOne"
 import { CanBelongToMany } from "./CanBelongToMany"

@@ -5,7 +5,7 @@ import type { Styles } from "./Styles"
  * The theme sheets (`src/styles/themes/*.css`), loaded on demand, and the one switch that applies them, as
  * `UI.themes`:  `await UI.load()`, then `UI.themes.apply("merlot")`.
  * - In the runtime's lazy chunk (`UIRuntime` builds it), beside `UI.styles`, the registry it applies into.  Never in
- *   `spell-ui/styles`, which stays pure data:  code there needed Rolldown's helpers in a chunk `core` doesn't load, so
+ *   `spell/ui/styles`, which stays pure data:  code there needed Rolldown's helpers in a chunk `core` doesn't load, so
  *   every page fetched a `rolldown-runtime-<hash>.js` (epic `wwod-spell-ui`, I13).
  * - Registry:  a LITERAL `import.meta.glob()` of the themes folder (`THEME_LOADERS`), so a new `<name>.css` there is a
  *   theme with no edit anywhere.  Lazy:  each sheet is its own chunk, loaded the first time it's applied.

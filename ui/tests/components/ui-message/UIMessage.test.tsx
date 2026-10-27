@@ -1,16 +1,16 @@
 import { describe, expect, it, onTestFinished } from "vite-plus/test"
 
-import { PartOwnerTokens, type MessageDismissDetail } from "spell-ui/components/components.types"
-import { UI } from "spell-ui/runtime"
+import { PartOwnerTokens, type MessageDismissDetail } from "spell/ui/components/components.types"
+import { UI } from "spell/ui/runtime"
 import { expectAccessible } from "spell/test-helpers/A11y"
 
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import type { DOMElement } from "spell/element"
 
-import "spell-ui/components/ui-message"
-import "spell-ui/components/ui-parts"
-import "spell-ui/components/ui-icon"
-import "spell-ui/components/ui-segment"
+import "spell/ui/components/ui-message"
+import "spell/ui/components/ui-parts"
+import "spell/ui/components/ui-icon"
+import "spell/ui/components/ui-segment"
 
 /** Element-markup rewrites of every example, by path. */
 const EXAMPLES = import.meta.glob<string>("/src/components/ui-message/examples/elements/*.html", {

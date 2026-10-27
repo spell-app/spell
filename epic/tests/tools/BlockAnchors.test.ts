@@ -16,7 +16,7 @@ import {
   quoteIn,
   targetOf,
   textOf
-} from "spell-epic/tools/BlockAnchors.js"
+} from "spell/epic/tools/BlockAnchors.js"
 
 /** A guide:  a list before any section, a section with two tables, an aside and a code block, a nested section. */
 const PAGE = `<main class="spell-doc-main">

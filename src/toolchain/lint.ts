@@ -360,7 +360,7 @@ export const fmtConfig = {
     // Spell UI's hand-laid-out pages, their parts and data (spell-ui's `docs/`;
     // the shared `ui/` at the root until epic `people-and-orgs` P18:  until it merges, that folder too)
     "**/ui/docs/**",
-    "**/spell-ui/docs/**",
+    "**/ui/docs/**",
     "ui/**",
     "**/vendor/**",
     "*results.json",

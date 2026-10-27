@@ -28,42 +28,42 @@ describe("spell/no-parent-import", () => {
     valid: [
       // by package name, inside its own repo too
       at("src/element/a.ts", `import { kebabCase } from "spell/util/string"`),
-      at("spell-ui/src/runtime/Focus.ts", `import { E } from "spell/element"`),
+      at("ui/src/runtime/Focus.ts", `import { E } from "spell/element"`),
       // a same-folder peer
       at("src/element/a.ts", `import { DOMElement } from "./DOMElement"`),
       // a climb to a file outside `src/`:  a config, a glue tool
-      at("spell-app/app/vite.shared.ts", `import { x } from "../vite.config.ts"`),
+      at("app/app/vite.shared.ts", `import { x } from "../vite.config.ts"`),
       at("tests/tools/a.test.ts", `import { ReadmeCheck } from "../../tools/readme-check.ts"`),
-      at("spell-parser/tests/core/a.test.ts", `import { x } from "../../vitest.config.ts"`),
+      at("parser/tests/core/a.test.ts", `import { x } from "../../vitest.config.ts"`),
       // a glob names files, not a module
       at("tests/element/a.test.ts", `const files = import.meta.glob("../../src/element/**/*.ts")`),
       // a file path read, not imported
       at("src/server/a.ts", `const root = new URL("../..", import.meta.url)`),
       // a package name of another repo
-      at("spell-app/src/app/a.ts", `import { UI } from "spell-ui/core"`)
+      at("app/src/app/a.ts", `import { UI } from "spell/ui/core"`)
     ],
     invalid: [
       climbs("src/element/a.ts", `import { x } from "../util/string.ts"`, "spell/util/string"),
       climbs("src/element/a.ts", `import { U } from "../util"`, "spell/util"),
       climbs("tests/element/a.test.ts", `import { E } from "../../src/element/index.ts"`, "spell/element"),
-      climbs("spell-ui/tests/tools/a.test.ts", `import { Tool } from "../../src/tools/Tool.ts"`, "spell-ui/tools/Tool"),
-      climbs("spell-app/src/app/a.ts", "const m = await import(`../../../spell-ui/src/index.ts`)", "spell-ui"),
-      climbs("spell-app/src/app/a.ts", `export * from "../lsp/index.ts"`, "spell-app/lsp"),
-      climbs("spell-app/tests/app/a.test.ts", `vi.mock("../../src/spaces/index.ts")`, "spell-app/spaces"),
+      climbs("ui/tests/tools/a.test.ts", `import { Tool } from "../../src/tools/Tool.ts"`, "spell-ui/tools/Tool"),
+      climbs("app/src/app/a.ts", "const m = await import(`../../../ui/src/index.ts`)", "spell-ui"),
+      climbs("app/src/app/a.ts", `export * from "../lsp/index.ts"`, "spell/app/lsp"),
+      climbs("app/tests/app/a.test.ts", `vi.mock("../../src/spaces/index.ts")`, "spell/app/spaces"),
       climbs(
-        "spell-app/src/app/a.ts",
-        `type T = import("../../../spell-parser/src/core/model").Thing`,
-        "spell-parser/core/model"
+        "app/src/app/a.ts",
+        `type T = import("../../../parser/src/core/model").Thing`,
+        "spell/parser/core/model"
       ),
       climbs(
-        "spell-ui/src/a.ts",
+        "ui/src/a.ts",
         `declare module "../../src/element/vocabulary.types" {}`,
         "spell/element/vocabulary.types"
       ),
       climbs(
-        "spell-ui/src/components/ui-x/a.ts",
+        "ui/src/components/ui-x/a.ts",
         `import css from "../ui-parts/UIParts.css?inline"`,
-        "spell-ui/components/ui-parts/UIParts.css"
+        "spell/ui/components/ui-parts/UIParts.css"
       )
     ]
   })
@@ -73,16 +73,16 @@ describe("importNameFor():  a file's import name, by where it is", () => {
   test("a file under a package's src/:  the package name + its path, no extension, no index", () => {
     expect(importNameFor(join(KIT, "src/util/string.ts"))).toEqual({ pkg: "spell", name: "spell/util/string" })
     expect(importNameFor(join(KIT, "src/element/index.ts"))).toEqual({ pkg: "spell", name: "spell/element" })
-    expect(importNameFor(join(KIT, "spell-ui/src/components/ui-button/UIButton.tsx"))).toEqual({
+    expect(importNameFor(join(KIT, "ui/src/components/ui-button/UIButton.tsx"))).toEqual({
       pkg: "spell-ui",
-      name: "spell-ui/components/ui-button/UIButton"
+      name: "spell/ui/components/ui-button/UIButton"
     })
-    expect(importNameFor(join(KIT, "spell-ui/src/index.ts"))).toEqual({ pkg: "spell-ui", name: "spell-ui" })
+    expect(importNameFor(join(KIT, "ui/src/index.ts"))).toEqual({ pkg: "spell-ui", name: "spell-ui" })
   })
   test("outside any src/:  none", () => {
     expect(importNameFor(join(KIT, "tools/repos.ts"))).toBeUndefined()
-    expect(importNameFor(join(KIT, "spell-parser/vite.config.ts"))).toBeUndefined()
-    expect(importNameFor(join(KIT, "spell-ui/tests/a.test.ts"))).toBeUndefined()
+    expect(importNameFor(join(KIT, "parser/vite.config.ts"))).toBeUndefined()
+    expect(importNameFor(join(KIT, "ui/tests/a.test.ts"))).toBeUndefined()
   })
 })
 

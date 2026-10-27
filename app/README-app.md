@@ -24,7 +24,7 @@ The same code runs that calculator in three places:  in this element, in the edi
 and in VS Code's Run Project panel.
 It all lives in [src/app/](src/app/), Spell's editor:
 the web app where you write Spell on one side and watch it run on the other.
-It's [Solid](https://docs.solidjs.com/) 2 on [Spell UI](https://github.com/spell-app/spell-ui/blob/main/README.md)'s components,
+It's [Solid](https://docs.solidjs.com/) 2 on [Spell UI](https://github.com/spell-app/spell/blob/main/ui/README.md)'s components,
 with [Monaco](https://microsoft.github.io/monaco-editor/) for the text.
 
 Its server isn't in this folder:
@@ -58,7 +58,7 @@ written on [the kit's element framework](https://github.com/spell-app/spell/blob
 each has a folder of its own in [src/app/components/](src/app/components/).
 So a plain HTML page can hold one, as the demos below do.
 Inside a framework's page is another matter:  Spell UI's `<ui-dropdown>` has been checked in React, Solid and Vue
-([Spell UI and frameworks](https://github.com/spell-app/spell-ui/blob/main/README-frameworks.md)), and these four haven't been yet.
+([Spell UI and frameworks](https://github.com/spell-app/spell/blob/main/ui/README-frameworks.md)), and these four haven't been yet.
 
 | Tag | What it does | What you set |
 | --- | --- | --- |
@@ -153,7 +153,7 @@ Where it stops:
 - Leaving the page releases an element a moment later;  a move in one go keeps it.
 - On a page with Spell UI of its own, they borrow its copies through `SpellUI.packModules`.
   `<spell-code>` and `<spell-markdown>` borrow the families they extend too, so that page's `packModules`
-  must also name `spell-ui/components/ui-code` and `spell-ui/components/ui-markdown`,
+  must also name `spell/ui/components/ui-code` and `spell/ui/components/ui-markdown`,
   or they stop with an error saying so.
 
 </details>
@@ -244,7 +244,7 @@ The edges:
 
 ### Every program gets its own runtime
 
-Programs run on `spell-runtime.js`, a copy of [spell-parser's core](https://github.com/spell-app/spell-parser/blob/main/README-core.md) built into each bundle,
+Programs run on `spell-runtime.js`, a copy of [spell-parser's core](https://github.com/spell-app/spell/blob/main/parser/README-core.md) built into each bundle,
 never on one the page itself imported.
 Each `<spell-viewer>` loads a copy of its own.
 
@@ -292,7 +292,7 @@ It starts afresh instead, and says why on the console, when:
 
 And a run that throws doesn't cost you the game:
 the next good compile carries over the things of the last run that finished.
-How a thing comes over (a property added, dropped or retyped):  [spell-parser's core](https://github.com/spell-app/spell-parser/blob/main/README-core.md).
+How a thing comes over (a property added, dropped or retyped):  [spell-parser's core](https://github.com/spell-app/spell/blob/main/parser/README-core.md).
 
 ### A view is its own element
 
@@ -462,7 +462,7 @@ A `.spellx` file, Spell's tag-shaped form, gets a Text | Notebook switch in the 
   - VS Code's title bar has the same pair:  Show as Code Spell, Show as Spellx.
   - A project may list a `.spellx` file in its `__project.json5` with no `.spell` copy:  it opens, compiles and runs.
 - The notebook is [SpellxNotebook.tsx](src/app/solid/SpellxNotebook.tsx);
-  what the tags mean is [the spellx page](https://github.com/spell-app/spell-parser/blob/main/README-spellx.md).
+  what the tags mean is [the spellx page](https://github.com/spell-app/spell/blob/main/parser/README-spellx.md).
 
 ### The Inspector:  look inside the running app
 
@@ -577,7 +577,7 @@ The editor's keys, with Command on a Mac or Control elsewhere (either works on b
 - `Mod+Z` and `Mod+Shift+Z` belong to whatever has the focus:
   - in the code, Monaco's undo and redo
   - in the running app, the program's:  what it did, one action at a time
-    ([spell-parser's core](https://github.com/spell-app/spell-parser/blob/main/README-core.md));
+    ([spell-parser's core](https://github.com/spell-app/spell/blob/main/parser/README-core.md));
     a text field in it keeps its own
 
 </details>
@@ -636,7 +636,7 @@ spell app preview build
 ✓ @spell/examples/calculator  up to date
 ...
 ✓ @spell/guides/how-tic-tac-toe-works  up to date
-✓ Building the static editor  .../spell-app/app/dist-static
+✓ Building the static editor  .../app/app/dist-static
 @spell/examples:  @spell/examples/bill-splitter, @spell/examples/calculator, @spell/examples/fizzbuzz, ...
 @spell/guides:  @spell/guides/a-first-spell, @spell/guides/a-tour-of-spell, ...
 `spell app preview serve` shows it as a host would
@@ -661,7 +661,7 @@ spell app preview serve
 
 ```text
 http://127.0.0.1:4848/
-The static editor (.../spell-app/app/dist-static) is at http://127.0.0.1:4848/ -- Ctrl-C to stop
+The static editor (.../app/app/dist-static) is at http://127.0.0.1:4848/ -- Ctrl-C to stop
 ```
 
 </details>
@@ -779,7 +779,7 @@ It's 31 pages in seven groups, from the four web components through the panes an
 
 - Two rules that bite:
   - Never import Monaco statically outside its two folders, types aside:  one static import puts it in the main bundle.
-  - Only `spellRuntime.ts` imports `spell-parser/core` as a value:
+  - Only `spellRuntime.ts` imports `spell/parser/core` as a value:
     anywhere else, it lands in a chunk every app on the page shares, and the build tests fail.
 - The rest of the folder's rules:  [app's AGENTS.md](src/app/AGENTS.md).
   The checks every repo shares:  [README-development.md](https://github.com/spell-app/spell/blob/main/README-development.md).

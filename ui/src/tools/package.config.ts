@@ -1,7 +1,7 @@
 /// <reference types="node" />
 
 import { SPELL_UI_ROOT, type Bucket, type ImportMap, type PackageConfig } from "./tools.types.ts"
-import { COMPONENTS, ENTRIES, SHARED_ENTRIES, SOLID_EXTERNAL } from "spell-ui/vite.config.ts"
+import { COMPONENTS, ENTRIES, SHARED_ENTRIES, SOLID_EXTERNAL } from "spell/ui/vite.config.ts"
 import { VocabularyFiles } from "spell/element-tools/VocabularyFiles"
 
 /** Repo root, absolute, with a trailing slash (`SPELL_UI_ROOT`):  Vite's module ids start with it. */
@@ -57,13 +57,13 @@ export const PACKAGE: PackageConfig = {
 /**
  * Import map entries for `dist/` (the vendored Solid ones come from `vendor/importmap.json`).
  * - `spell-ui` ~== every family (`dist/index.js`);  `spell-ui/ui-<family>` one family;
- *   `spell-ui/core`, `spell-ui/forms`;  `spell-ui/api` the `E` / `V` namespaces.
+ *   `spell/ui/core`, `spell/ui/forms`;  `spell/ui/api` the `E` / `V` namespaces.
  */
 export const DIST_IMPORTS: ImportMap["imports"] = {
   "spell-ui": "/dist/index.js",
-  "spell-ui/core": "/dist/core.js",
-  "spell-ui/forms": "/dist/forms.js",
-  "spell-ui/api": "/dist/api.js",
+  "spell/ui/core": "/dist/core.js",
+  "spell/ui/forms": "/dist/forms.js",
+  "spell/ui/api": "/dist/api.js",
   ...Object.fromEntries(COMPONENTS.map((name) => [`spell-ui/${name}`, `/dist/${name}.js`]))
 }
 

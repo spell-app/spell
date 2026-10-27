@@ -1,16 +1,16 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { colorsCSS, foundationCSS } from "spell-ui/styles"
+import { colorsCSS, foundationCSS } from "spell/ui/styles"
 
 import { Fixture } from "spell/test-helpers/Fixture"
-import { Sheets } from "spell-ui/test-helpers/Sheets"
+import { Sheets } from "spell/ui/test-helpers/Sheets"
 
-import { UIT } from "spell-ui/core"
-import { FLAG_ALIASES } from "spell-ui/components/ui-flag/UIFlag.types"
-import { flagVocabulary } from "spell-ui/components/ui-flag/UIFlag.en"
+import { UIT } from "spell/ui/core"
+import { FLAG_ALIASES } from "spell/ui/components/ui-flag/UIFlag.types"
+import { flagVocabulary } from "spell/ui/components/ui-flag/UIFlag.en"
 
-import flagCSS from "spell-ui/components/ui-flag/UIFlag.css?inline"
-import flagRaw from "spell-ui/components/ui-flag/UIFlag.css?raw"
+import flagCSS from "spell/ui/components/ui-flag/UIFlag.css?inline"
+import flagRaw from "spell/ui/components/ui-flag/UIFlag.css?raw"
 
 /**
  * `UIFlag.css` on its own, before any element exists:  the sheet's source rules, the computed styles of the

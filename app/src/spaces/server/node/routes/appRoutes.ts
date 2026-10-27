@@ -1,5 +1,5 @@
 // FIRST:  defines `__PACKAGE_VERSION__`, which vite would, before anything reads it
-import "spell-parser/spell/node/packageVersion.node"
+import "spell/parser/spell/node/packageVersion.node"
 
 import { existsSync, readFileSync } from "fs"
 import JSON5 from "json5"

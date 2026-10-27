@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { handlersInSource } from "spell-app/app/solid/InspectorSource"
+import { handlersInSource } from "spell/app/app/solid/InspectorSource"
 
 /**
  * `handlersInSource()`:  the handlers an element was written with, found in the program's spell by its tag,

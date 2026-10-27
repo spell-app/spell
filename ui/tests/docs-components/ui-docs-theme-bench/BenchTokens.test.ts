@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { BenchTokens } from "spell-ui/docs-components/ui-docs-theme-bench/BenchTokens"
+import { BenchTokens } from "spell/ui/docs-components/ui-docs-theme-bench/BenchTokens"
 
 describe("BenchTokens.load()", () => {
   it("reads Spell's theme files, and their groups, the theme's own first", async () => {

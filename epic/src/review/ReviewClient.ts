@@ -46,7 +46,7 @@ import { ServerLink } from "./ServerLink"
 /****************
  * ### `ReviewClient`
  * A page's REVIEW INBOX, as the page sees it:  the marks Owen leaves on its items and Overview sections,
- * read from and written to the page server's review routes (`spell-epic/tool/reviewRoutes.ts`),
+ * read from and written to the page server's review routes (`spell/epic/tool/reviewRoutes.ts`),
  * one client per page (`forPage()`), a `PageStore` the elements follow (`subscribe()`).
  * - Who uses it:
  *   - the review controls (`<epic-review>`, drawn by `<epic-item>`, `<epic-section>` ...) draw from it
@@ -73,7 +73,7 @@ import { ServerLink } from "./ServerLink"
  * - Node-safe at import, and without `watch()`:  no `window` / `document` touched;
  *   the browser's services come in through `ReviewClientOptions`, so tests stub `fetch` and storage
  * - Position in the import graph:  its peers (types, `ServerLink`, `PageStore`) only;
- *   the inbox's types from `spell-epic/tool/ReviewInbox` (erased).
+ *   the inbox's types from `spell/epic/tool/ReviewInbox` (erased).
  *   NEVER imports Solid, Spell UI or the `spell-epic` barrel:  elements bridge its changes (`subscribe()`)
  *   into their own signals.
  ****************/

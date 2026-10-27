@@ -1,7 +1,7 @@
-import { SPELL_CLASSES } from "spell-parser/core/core.types"
-import { P } from "spell-parser/parser"
-import { SP } from "spell-parser/spell"
-import { LSP } from "spell-app/lsp"
+import { SPELL_CLASSES } from "spell/parser/core/core.types"
+import { P } from "spell/parser/parser"
+import { SP } from "spell/parser/spell"
+import { LSP } from "spell/app/lsp"
 
 /**
  * The live scope tree a project parses in, as plain `LSP.ScopeNode`s -- for scope explorers in editors.

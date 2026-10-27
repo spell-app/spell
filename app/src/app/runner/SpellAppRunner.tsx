@@ -1,12 +1,12 @@
 import { Match, Show, Switch, createEffect, createSignal, getOwner, onSettled, runWithOwner, untrack } from "solid-js"
 
-import type { LSP } from "spell-app/lsp"
-import type { SP } from "spell-parser/spell"
-import type { ThingExplorerState, TypeExplorerState } from "spell-app/app/ui/ui.types"
-import { appTexts, type AppTextKey } from "spell-app/app/ui/AppTexts"
-// Import directly, NOT through the `spell-app/app/solid` barrel, which pulls in the editor
-import { TypeExplorer } from "spell-app/app/solid/TypeExplorer"
-import { ThingExplorer } from "spell-app/app/solid/ThingExplorer"
+import type { LSP } from "spell/app/lsp"
+import type { SP } from "spell/parser/spell"
+import type { ThingExplorerState, TypeExplorerState } from "spell/app/app/ui/ui.types"
+import { appTexts, type AppTextKey } from "spell/app/app/ui/AppTexts"
+// Import directly, NOT through the `spell/app/app/solid` barrel, which pulls in the editor
+import { TypeExplorer } from "spell/app/app/solid/TypeExplorer"
+import { ThingExplorer } from "spell/app/app/solid/ThingExplorer"
 import { loadRuntime, type LoadedRuntime } from "./loadRuntime"
 import { fetchJSON, fetchText } from "./fetchFresh"
 import { languagesOf, mergedWords, wordsAt, wordsOfLanguages } from "./words"
@@ -15,7 +15,7 @@ import {
   scopesFromPacks,
   type CompiledDeclarations,
   type ScopesSource
-} from "spell-app/lsp/ScopesSource"
+} from "spell/app/lsp/ScopesSource"
 import { RunnerSplit, DEFAULT_SPLIT } from "./RunnerSplit"
 import { RunnerPane, type RunnerTab } from "./RunnerPane"
 import { RunnerConsole } from "./RunnerConsole"
@@ -45,8 +45,8 @@ import "./SpellAppRunner.css"
  *   They're loaded afresh after each run, as its imports are.
  * - `debug` and `fluid` are read once, to start;  `runtimeUrl` once per copy loaded.
  * - Its `<ui-*>` tags are the caller's to define, with Fomantic's icon names:
- *   `<spell-viewer>` is a root that loads them as they appear;  the VS Code runner imports `spell-app/app/solid/loadUI`.
- * - NEVER imports `spell-parser/core`:  it'd land in the bundle's shared chunk, so every app would share it.
+ *   `<spell-viewer>` is a root that loads them as they appear;  the VS Code runner imports `spell/app/app/solid/loadUI`.
+ * - NEVER imports `spell/parser/core`:  it'd land in the bundle's shared chunk, so every app would share it.
  *   Everything of spell's comes from this app's copy of the runtime.
  ****************/
 export function SpellAppRunner(props: SpellAppRunnerProps) {
@@ -215,7 +215,7 @@ export function SpellAppRunner(props: SpellAppRunnerProps) {
     const own = source.words || !source.wordsUrl ? source.words : await ownWords(source)
     // a program in another language draws with that language's tags (`<es-boton>`):  Spell UI defines them first
     if (own?.lang && own.lang !== "en") {
-      const { RootLoader } = await import("spell-ui/components/ui-root")
+      const { RootLoader } = await import("spell/ui/components/ui-root")
       // oxlint-disable-next-line react-hooks/rules-of-hooks -- Spell UI's `useLanguage()` is no React hook
       await RootLoader.useLanguage(own.lang)
     }

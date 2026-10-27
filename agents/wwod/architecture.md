@@ -36,7 +36,7 @@ From:  original WWOD §8, root `AGENTS.md` "Types / Exports" (files, barrels, na
     class name (`UIButton.tsx`, `UIButton.types.ts`, `UIButton.css`;  its vocabulary named for its language too,
     `UIButton.en.ts`), as any class file is named for its class.  SEE:  `packages/ui/AGENTS.md` "Overview".
   - A runnable script in a `scripts/` or `tools/` folder is named for its command, kebab-case:
-    `packages/ui/scripts/gen-styles.ts`, `spell-epic/src/tools/check-spell.js`.
+    `packages/ui/scripts/gen-styles.ts`, `epic/src/tools/check-spell.js`.
   - NEVER any other kebab-case name.  Existing ones (`packages/spell/src/node/disk-fetch.ts`, `file-utils.ts` ...)
     are `agents/CODE-DEBT.md` entries.
 
@@ -66,7 +66,7 @@ From:  original WWOD §8, root `AGENTS.md` "Types / Exports" (files, barrels, na
     - The ONE exception:  a `constants.ts` at a package's root, for its string sentinels (WWOD §9 › "String
       sentinels over booleans for modes").
   - Group with `// ## Group Name` headers -- SEE:  WWOD §6 › "Group headers".
-  - MUST be runtime-light:  `import type` only, apart from the package's utilities (`spell/util`, `spell-ui/util`).
+  - MUST be runtime-light:  `import type` only, apart from the package's utilities (`spell/util`, `spell/ui/util`).
     - Why:  a types file that imports VALUES from its folder's class files is a circular import.
   - Exception:  props types live in the defining file -- WWOD §9 › "Props types live with their class".
 
@@ -115,10 +115,10 @@ From:  original WWOD §8, root `AGENTS.md` "Types / Exports" (files, barrels, na
   - Barrels MUST NOT pull in optional sub-systems:  leave them OUT of the barrel, opted into by path --
     `spell/server/page/...`, `spell/server/test/...`
     (SEE:  the kit's `src/server/AGENTS.md` "NOT in the barrel, opt-in by path").
-    - Only a sub-system that must register itself is a side-effect import:  `import "spell-parser/parser/rulex"`
+    - Only a sub-system that must register itself is a side-effect import:  `import "spell/parser/parser/rulex"`
       registers on `Parser.rulexParser`.
   - A barrel loads in EVERY environment its package targets (browser, node ...):
-    - node-only and side-effect files stay OUT of it, imported by path, e.g. `spell-parser/spell/node/...`
+    - node-only and side-effect files stay OUT of it, imported by path, e.g. `spell/parser/spell/node/...`
     - nothing it loads touches an environment global (`window`, `document`, `process` ...) at module-evaluation
       time
     - each package's `AGENTS.md` lists its own left-out files
@@ -127,13 +127,13 @@ From:  original WWOD §8, root `AGENTS.md` "Types / Exports" (files, barrels, na
 
 - **ONE self-namespace per package:**
   - Each sub-system has ONE self-namespace, exported from its top barrel:  `export * as P from "."`
-    - each package's `AGENTS.md` lists its own, e.g. `P` ~== `spell-parser/parser`
+    - each package's `AGENTS.md` lists its own, e.g. `P` ~== `spell/parser/parser`
     - Exception:  namespace a file whose names would collide when flattened:
       `export * as render from "./renderAST"` + `export * as stringify from "./stringifyAST"`,
       which deliberately export the same names with different return types.
       - A code smell inside one package:  rename so the names don't collide instead, wherever you can.
     - Prefer a disambiguating affix over a namespace when the names allow it -- token and AST classes
-      are `WordToken` / `ASTLiteral` etc. and flatten straight into `spell-parser/parser`.
+      are `WordToken` / `ASTLiteral` etc. and flatten straight into `spell/parser/parser`.
     - NOTE:  `export *` through a circular barrel is riskier than a named re-export -- it must read the
       leaf's key list EAGERLY, so a mid-body leaf contributes nothing.  See `parser`'s `src/barrel.test.ts`.
   - Consumers:  SEE:  WWOD §4 › "ONE namespace per sub-system".
@@ -142,7 +142,7 @@ From:  original WWOD §8, root `AGENTS.md` "Types / Exports" (files, barrels, na
     rules) -- flatten it into the parent;  ONE per package.
 
 - **Promotion path:**  a helper generic enough to lose its feature vocabulary moves up, and is RENAMED on the way.
-  - Where to:  the package's own util (`spell-ui/util` ...) while one package uses it;
+  - Where to:  the package's own util (`spell/ui/util` ...) while one package uses it;
     `spell/util` ONLY once 2+ packages do.
     SEE:  the kit's `src/util/AGENTS.md` "Overview" for what may land there (generic files vs `spell/`;
     what lands in `spell/util` lands in `ui`'s bundle).

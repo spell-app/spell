@@ -1,4 +1,4 @@
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /**
  * `<ui-button>` in Spanish:  `<es-boton>`, with the names and texts only it uses (from `UIButton.en.ts`).

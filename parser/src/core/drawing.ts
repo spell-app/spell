@@ -19,7 +19,7 @@
  *   `spell-runtime.js` imports `solid-js`, `@solidjs/web` and `@solidjs/h` from the page's one shared Solid,
  *   `spell-solid.js`.
  *   - Spell state reaches Solid through the host's `bridgeSolid()` (`spell/util/reactive`).
- * - Part of `core`:  imported by `spell-parser/core`'s barrel for its side effect.
+ * - Part of `core`:  imported by `spell/parser/core`'s barrel for its side effect.
  */
 
 import h from "@solidjs/h"

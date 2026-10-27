@@ -1,5 +1,5 @@
 import { elementTagFor, viewAttributeFor } from "spell/util"
-import { P } from "spell-parser/parser"
+import { P } from "spell/parser/parser"
 // Import directly to avoid circular import
 import { JSWriter } from "./JSWriter"
 import * as jsText from "./jsText"
@@ -53,7 +53,7 @@ import { forEachNode, listNamedBy, typeCaseOf, type TSUndeclared, type WriterPro
  *   `class CardElement extends SpellElement<Card>`,
  *   handed to the page with `core.useElement(Card, CardElement)`.
  * - Spell's own built-ins stay `core` calls, so both targets print the same:
- *   `getItemAt(rank, 1)` counts from 1 (the core contract, `contract.test.ts` in `spell-parser/cli`).
+ *   `getItemAt(rank, 1)` counts from 1 (the core contract, `contract.test.ts` in `spell/parser/cli`).
  * - Sees the whole project first (`forProject()`, a `P.WriterProject`).
  *   `TSWriter.instance` alone knows nothing of it, e.g. writing one node in a test.
  * - Checked by `tsc` against `@spell/core`'s types:  see spell-app's `typescript.test.ts`, on the frozen test projects.
@@ -953,7 +953,7 @@ export class TSWriter extends JSWriter {
    * Each view type's tag, declared for the program's JSX (epic `drawable-thing` I7):
    * so a tag written by hand, e.g. `<solitaire-pile>`, type-checks.
    * - Loose:  HTML attributes, plus any attribute or `prop:` its element defines.
-   *   - Not so Spell UI's own `<ui-*>` tags:  `spell-ui/jsx` types those exactly.
+   *   - Not so Spell UI's own `<ui-*>` tags:  `spell/ui/jsx` types those exactly.
    */
   private elementTagsDeclaration(): string {
     const tags = [...this.elementTags].map(

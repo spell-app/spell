@@ -328,7 +328,7 @@ export type ReadmeExample = {
 }
 
 export type Finding = {
-  /** the page, from the kit's root:  `spell-ui/README.md` */
+  /** the page, from the kit's root:  `ui/README.md` */
   page: string
   /** its line, from 1 */
   line: number
@@ -458,7 +458,7 @@ const WORDS: Array<{ pattern: RegExp; rule: Rule; message: string }> = [
     message: "the run-time alias hook is deleted: every import is a package name"
   },
   { pattern: /\bno-cross-(?:repo-alias|package-import)\b/, rule: "word", message: "the alias lint rules are deleted" },
-  { pattern: /\bpackModuleKey\b/, rule: "word", message: "gone: a pack's module key is its npm name (spell-ui/core)" },
+  { pattern: /\bpackModuleKey\b/, rule: "word", message: "gone: a pack's module key is its npm name (spell/ui/core)" },
   { pattern: /\bspell dev\b/, rule: "word", message: "the command is gone (repo-split P13)" },
   { pattern: /\bsix (?:git )?repos\b/i, rule: "word", message: "five public repos" },
   {

@@ -477,7 +477,7 @@ nothing flickers. The tool's `EpicParts` does it; the markup (`source`, `part-id
 pages.js` `findPages()`, `spell ssr`): the docs' home page, `docs update` and link repairs never take
   a part for a page.
 - A part file: a one-line comment saying whose body it is, then the body's markup. Its links are ROOT PATHS, as the
-  skeleton's are (`/guides/x.html`, `/spell-ui/src/x.ts`;  epic `epic-engine` P46): the same text in a part and in
+  skeleton's are (`/guides/x.html`, `/ui/src/x.ts`;  epic `epic-engine` P46): the same text in a part and in
   its page, from any folder. Only a part's own `parts/` siblings go by name.
 - Edit a body's prose in its part file, at its real path (shared content). Structured edits stay commands.
 - Where each body goes is decided by rule on EVERY write: an item that gains details gets a part; a new Overview

@@ -463,7 +463,7 @@
         "favorite",
         "star"
       ],
-      "description": "One epic's card on the Epics page (epic `epic-engine` P3), in an `<epic-list>`:  its state's mark before its linked title, its description, its saga's label and meta line;  a star at its top right that stars or unstars it on the page server, and the day it was last worked on at its bottom right.  Written by `epic pages index` (`spell-epic/list/EpicCards` `epicCardHtml()`), its facts as attributes;  the page server marks it `running` and `favorite` as it serves the page.",
+      "description": "One epic's card on the Epics page (epic `epic-engine` P3), in an `<epic-list>`:  its state's mark before its linked title, its description, its saga's label and meta line;  a star at its top right that stars or unstars it on the page server, and the day it was last worked on at its bottom right.  Written by `epic pages index` (`spell/epic/list/EpicCards` `epicCardHtml()`), its facts as attributes;  the page server marks it `running` and `favorite` as it serves the page.",
       "noun": "card",
       "attributes": [
         {
@@ -2523,7 +2523,7 @@
         "saga chips",
         "favorites"
       ],
-      "description": "The Epics page's list (epic `epic-engine` P3):  its `<epic-card>`s in five groups -- Favorites, Active, Planning, Urgent, Done -- each under a heading with its count, by title within each or newest first (`<epic-sort>`);  above them a chip per saga, in the sagas' order, then No saga, each with its count:  a click shows only that saga's epics.  It never moves its cards:  it places and hides them from its shadow root.  Written by `epic pages index` (`spell-epic/list/EpicCards` `epicListHtml()`).",
+      "description": "The Epics page's list (epic `epic-engine` P3):  its `<epic-card>`s in five groups -- Favorites, Active, Planning, Urgent, Done -- each under a heading with its count, by title within each or newest first (`<epic-sort>`);  above them a chip per saga, in the sagas' order, then No saga, each with its count:  a click shows only that saga's epics.  It never moves its cards:  it places and hides them from its shadow root.  Written by `epic pages index` (`spell/epic/list/EpicCards` `epicListHtml()`).",
       "noun": "list",
       "attributes": [
         {
@@ -3600,7 +3600,7 @@
         },
         {
           "name": "state",
-          "description": "The step label while the epic has a state, its icon and colour the state's (`spell-epic/list/EpicState`):  in progress (blue half circle), errors (red:  every phase done, items need you), paused (grey:  phases left, untouched for days);  why on hover.  None for a future epic or a done one:  FUTURE or DONE says so."
+          "description": "The step label while the epic has a state, its icon and colour the state's (`spell/epic/list/EpicState`):  in progress (blue half circle), errors (red:  every phase done, items need you), paused (grey:  phases left, untouched for days);  why on hover.  None for a future epic or a done one:  FUTURE or DONE says so."
         },
         {
           "name": "review-line",

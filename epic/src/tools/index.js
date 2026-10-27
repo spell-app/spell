@@ -13,12 +13,12 @@
  * - The list pages (`LISTS`), each `<area>/index.html`,
  *   written between `<!-- index:start -->` and `<!-- index:end -->`.
  *   - a missing one is made from `skeleton()` first, so the rest of it is hand-authored after
- *   - Epics:  `epics/<name>/<name>.plan.html`, ONE `<epic-list>` of `<epic-card>`s (`spell-epic/list/EpicCards`,
+ *   - Epics:  `epics/<name>/<name>.plan.html`, ONE `<epic-list>` of `<epic-card>`s (`spell/epic/list/EpicCards`,
  *     epic `epic-engine` P3), which the elements draw:
  *     - five groups, alphabetical within each:  Favorites, Active, Planning, Urgent, Done
  *     - a row of saga chips above them (each saga's count;  a click filters by them)
  *     - each card's title after its state's mark, read from its phases, its "updated" date and the items that need Owen
- *       - the marks (`spell-epic/list/EpicState`):  in progress, errors, paused, future, done
+ *       - the marks (`spell/epic/list/EpicState`):  in progress, errors, paused, future, done
  *     - a star at its top right (`FAVORITES_FILE`), the day it was last worked on at its bottom right (`worked()`)
  *     - as it serves the page, the page server adds the running epics' cards,
  *       and marks every card `running` and `favorite` as they are now
@@ -55,12 +55,12 @@ import {
   eventTimesIn,
   lastWorked,
   favoritesIn
-} from "spell-epic/list/EpicCards.ts"
-import { URGENT_SELECTOR } from "spell-epic/list/EpicState.ts"
-import { PhaseIds } from "spell-epic/phases/PhaseIds.ts"
+} from "spell/epic/list/EpicCards.ts"
+import { URGENT_SELECTOR } from "spell/epic/list/EpicState.ts"
+import { PhaseIds } from "spell/epic/phases/PhaseIds.ts"
 import { COMPONENTS_PREFIX, componentSets, pageServerSettings } from "spell/server/page/settings"
-import { DataFile } from "spell-epic/data/DataFile.ts"
-import { Sagas } from "spell-epic/tool/Sagas.ts"
+import { DataFile } from "spell/epic/data/DataFile.ts"
+import { Sagas } from "spell/epic/tool/Sagas.ts"
 import { PageNotes } from "./PageNotes.js"
 import {
   BRAND,
@@ -80,7 +80,7 @@ import {
   pagePath,
   tidy
 } from "./pages.js"
-import { EpicConfig } from "spell-epic/config/EpicConfig.ts"
+import { EpicConfig } from "spell/epic/config/EpicConfig.ts"
 
 /** The home page, as a page path (`pages/index.html`). */
 const INDEX = pagePath(HOME)
@@ -123,7 +123,7 @@ const WRITING_DOCS = `<ui-section id="writing-docs" label="Writing docs" sticky 
 <ul>
 <li>Start from a template:  <code>epic pages create durable &lt;topic&gt;/&lt;topic&gt;.html --title "Title"</code>.</li>
 <li>An epic page:  run <code>/epic &lt;name&gt;</code> in Claude Code.  Never copy the plan template by hand.</li>
-<li>The rules:  spell-epic's <code title="spell-epic/src/AGENTS.md">src/AGENTS.md</code>, where these templates live (<code>epic pages template</code>
+<li>The rules:  spell-epic's <code title="epic/src/AGENTS.md">src/AGENTS.md</code>, where these templates live (<code>epic pages template</code>
 prints the folder).  How the pages work:  <a href="/guides/spell-docs/spell-docs.md">spell-docs.md</a>.</li>
 <li><code>pages create</code> lists the page on its area's page;  after renaming one or changing its title, run
 <code>epic pages index</code>.</li>
@@ -478,7 +478,7 @@ export function planOf(document) {
   }
 }
 
-/** What epic `page`'s state is read from (`describe()`'s shape;  `spell-epic/list/EpicState` `EpicFacts`). */
+/** What epic `page`'s state is read from (`describe()`'s shape;  `spell/epic/list/EpicState` `EpicFacts`). */
 function epicFacts(page) {
   return {
     phases: page.phases.map((phase) => phase.status),
@@ -793,7 +793,7 @@ ${list.extra ?? ""}
 /**
  * A list page's section:  a `<ui-section>` with the list's icon, and a card per page.
  * - id and header:  `list.section`'s when it has one (Brand:  its index has sections of its own), else the list's
- * - Epics:  ALWAYS its `<epic-list>` (`spell-epic/list/EpicCards` `epicListHtml()`), which groups, sorts and filters
+ * - Epics:  ALWAYS its `<epic-list>` (`spell/epic/list/EpicCards` `epicListHtml()`), which groups, sorts and filters
  *   its cards itself;  each card starred as `favorites` says (the starred epics' names) and naming its saga (`sagas`:
  *   the list, `readSagas()`);  the page server adds the running epics' cards between its markers
  * - Guides:  a section per saga, then Misc (`guideSections()`);  Sagas:  a card per saga (`sagaSection()`)
@@ -910,10 +910,10 @@ ${page.description ? `<ui-description>${escapeHTML(page.description)}</ui-descri
 }
 
 /**
- * An epic's card, on the list page in folder `from`, with the group it goes in (`spell-epic/list/EpicCards`
+ * An epic's card, on the list page in folder `from`, with the group it goes in (`spell/epic/list/EpicCards`
  * `epicCardHtml()`):  the state's mark, linked title, description, the active phase in the meta line, the star
  * (`favorites`:  the starred epics' names), the last-worked date, its saga's label (`sagas`:  the list).
- * - SAME markup as `RunningEpics`' running cards (`spell-epic/list/RunningEpics`):  both write them with
+ * - SAME markup as `RunningEpics`' running cards (`spell/epic/list/RunningEpics`):  both write them with
  *   `epicCardHtml()`
  */
 function epicCard(page, from, favorites, sagas = []) {

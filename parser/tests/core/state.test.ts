@@ -2,7 +2,7 @@ import { readFileSync } from "fs"
 import { resolve } from "path"
 import { describe, test, expect } from "vite-plus/test"
 
-import { core, StateMirror, StateWriter, Thing, List } from "spell-parser/core"
+import { core, StateMirror, StateWriter, Thing, List } from "spell/parser/core"
 
 /**
  * A program's state as JSON by id (`state.ts`):  written by a `StateWriter`, read into a `StateMirror`.

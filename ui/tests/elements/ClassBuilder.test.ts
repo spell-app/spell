@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, it, vi } from "vite-plus/test"
 
 import { type ClassInput } from "spell/element"
-import { ClassBuilder } from "spell-ui/elements"
-import type { ComponentVocabulary } from "spell-ui/vocabulary"
+import { ClassBuilder } from "spell/ui/elements"
+import type { ComponentVocabulary } from "spell/ui/vocabulary"
 
 afterEach(() => {
   vi.restoreAllMocks()

@@ -13,11 +13,11 @@ import { join } from "node:path"
 import { fileURLToPath } from "node:url"
 import { afterAll, describe, expect, test, vi } from "vite-plus/test"
 
-import { Requests } from "spell-epic/command/Requests"
-import { planDocArgs } from "spell-epic/command/epicArgs"
-import { PlanDoc } from "spell-epic/tool/PlanDoc"
-import { PlanDocCommands } from "spell-epic/tool/PlanDocCommands"
-import { PlanDocFiles } from "spell-epic/tool/PlanDocFiles"
+import { Requests } from "spell/epic/command/Requests"
+import { planDocArgs } from "spell/epic/command/epicArgs"
+import { PlanDoc } from "spell/epic/tool/PlanDoc"
+import { PlanDocCommands } from "spell/epic/tool/PlanDocCommands"
+import { PlanDocFiles } from "spell/epic/tool/PlanDocFiles"
 
 /** The tool's test fixtures:  `epic-plan.html`, a fresh doc in `<epic-*>` markup. */
 const FIXTURES = fileURLToPath(new URL("../tool/fixtures", import.meta.url))

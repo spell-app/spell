@@ -4,8 +4,8 @@
 import { parseHTML } from "linkedom"
 import { describe, expect, test } from "vite-plus/test"
 
-import { PhaseIds } from "spell-epic/phases"
-import { Migrations } from "spell-epic/tool/migrations/Migrations"
+import { PhaseIds } from "spell/epic/phases"
+import { Migrations } from "spell/epic/tool/migrations/Migrations"
 
 /** The step under test. */
 const STEP = Migrations.named("whole-phase-numbers")!

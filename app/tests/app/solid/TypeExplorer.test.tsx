@@ -1,12 +1,12 @@
 import { describe, test, expect } from "vite-plus/test"
 import { renderToString } from "@solidjs/web"
 
-import { buildScopeTree, type ScopeEntry } from "spell-app/lsp/lsp.types"
-import type { ScopeOrder } from "spell-app/app/ui/ui.types"
-import { TypeExplorer } from "spell-app/app/solid/TypeExplorer"
+import { buildScopeTree, type ScopeEntry } from "spell/app/lsp/lsp.types"
+import type { ScopeOrder } from "spell/app/app/ui/ui.types"
+import { TypeExplorer } from "spell/app/app/solid/TypeExplorer"
 
 /**
- * The Solid `<TypeExplorer>` drawn as HTML -- the same cases as React's `spell-app/app/ui/TypeExplorer.test.tsx`.
+ * The Solid `<TypeExplorer>` drawn as HTML -- the same cases as React's `app/app/ui/TypeExplorer.test.tsx`.
  * - Node, so Solid's SERVER build:  `renderToString`, no DOM, effects never run (details stay "Loading…").
  * - `<ui-*>` tags render as plain tags with their attributes:  nothing defines them here.
  */

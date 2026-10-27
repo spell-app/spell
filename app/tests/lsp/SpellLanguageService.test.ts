@@ -15,11 +15,11 @@ import {
   type TextEdit
 } from "vscode-languageserver"
 
-import { SP } from "spell-parser/spell"
-import { LSP } from "spell-app/lsp"
-import { SpellDiskWorkspace } from "spell-app/lsp/SpellDiskWorkspace"
-import environment from "spell-app/spaces/server/node/environment"
-import { fixtureFolder, lineOf } from "spell-app/spaces/test"
+import { SP } from "spell/parser/spell"
+import { LSP } from "spell/app/lsp"
+import { SpellDiskWorkspace } from "spell/app/lsp/SpellDiskWorkspace"
+import environment from "spell/app/spaces/server/node/environment"
+import { fixtureFolder, lineOf } from "spell/app/spaces/test"
 
 /**
  * The language service over a real project:  a temp copy of the Solitaire example, its cards, deck and piles too,

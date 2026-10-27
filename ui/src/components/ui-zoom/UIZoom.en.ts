@@ -1,13 +1,13 @@
 /**
  * The English vocabulary of `<ui-zoom>`:  every name the tag uses.
  * - Its tag, attributes (each with its kind and allowed values), slots, parts, states and texts.
- *   The shape is `E.ComponentVocabulary` (`spell-ui/vocabulary`).
+ *   The shape is `E.ComponentVocabulary` (`spell/ui/vocabulary`).
  * - Moved from the epics pack's `<epic-zoom>` (epic `ui-gaps` P14, from epic `epic-engine` P14 and its Q22):
  *   it zooms an image, as `<epic-zoom>` did, AND anything it wraps.
  * - No class words:  every attribute is property-only.
  */
 
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /****************
  * ### `zoomVocabulary`

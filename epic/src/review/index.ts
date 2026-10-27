@@ -1,5 +1,5 @@
 /**
- * `spell-epic/review`:  the page's server clients -- the review inbox's (`ReviewClient`) and the running agents'
+ * `spell/epic/review`:  the page's server clients -- the review inbox's (`ReviewClient`) and the running agents'
  * (`AgentsClient`), on the link both write through (`ServerLink`) -- their types and helpers;  the page's
  * countdown to Send (`SendCountdown`, epic `epic-engine` P20);  and the base of every page store the elements follow
  * (`PageStore`, epic `coherence` P22).

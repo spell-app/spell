@@ -12,8 +12,8 @@ import { afterAll, beforeAll, beforeEach, expect, test } from "vite-plus/test"
 import { PageServer } from "spell/server/page"
 import { ask } from "spell/server/test/serve"
 
-import { AgentList } from "spell-epic/tools/AgentList"
-import agentRoutes from "spell-epic/tools/agentRoutes"
+import { AgentList } from "spell/epic/tools/AgentList"
+import agentRoutes from "spell/epic/tools/agentRoutes"
 
 let root: string
 let server: PageServer

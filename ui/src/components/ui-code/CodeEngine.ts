@@ -32,7 +32,7 @@ import sqlLanguage from "highlight.js/lib/languages/sql"
 import swiftLanguage from "highlight.js/lib/languages/swift"
 
 // Import directly:  see the class docs
-import { SourceError, type CodeGrammar } from "spell-ui/runtime/runtime.types"
+import { SourceError, type CodeGrammar } from "spell/ui/runtime/runtime.types"
 
 /** A highlight.js language function, as its modules export it. */
 type LanguageFn = Parameters<typeof core.registerLanguage>[1]
@@ -110,10 +110,10 @@ const MORE_ALIASES: Readonly<Record<string, string>> = {
  * - Languages registered through `UI.code` join here when first used (`register()`).
  * - NEVER a value import but highlight.js and `SourceError`:  the docs bundler builds this file ALONE into a
  *   classic script (`CodeHighlighter.engineLoader`), which mustn't drag the family in again.
- * - Imports `SourceError` straight from `spell-ui/runtime/runtime.types` (built into `core.js`), and USES it:  a lazy
+ * - Imports `SourceError` straight from `spell/ui/runtime/runtime.types` (built into `core.js`), and USES it:  a lazy
  *   chunk that needs Rolldown's helpers (`__name`, from `keepNames`) without depending on core makes Rolldown split
  *   them into a `rolldown-runtime-<hash>.js` EVERY page loads (`yarn measure`'s `runtimeChunks`;  see
- *   `runtime/TemporalPolyfill.ts`).  Straight, not through `spell-ui/core`:  the docs bundler builds this file alone, and
+ *   `runtime/TemporalPolyfill.ts`).  Straight, not through `spell/ui/core`:  the docs bundler builds this file alone, and
  *   `runtime.types` is all it may pull in.
  ****************/
 export class CodeEngine {

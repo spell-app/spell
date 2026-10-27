@@ -8,7 +8,7 @@
  * - Which families:  `StaticFamilies`.  Every listed class is defined once, for every page (`StaticCatalog.define()`).
  */
 
-import { ServerRuntime, StaticCatalog, StaticFamilies, StaticRender, StaticStylesheet } from "spell-ui/static"
+import { ServerRuntime, StaticCatalog, StaticFamilies, StaticRender, StaticStylesheet } from "spell/ui/static"
 
 /** Element examples, by path;  lazy, a page renders one. */
 const ELEMENTS = import.meta.glob<string>("/src/components/*/examples/elements/*.html", {

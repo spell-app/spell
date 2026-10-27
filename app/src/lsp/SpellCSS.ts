@@ -28,7 +28,7 @@ import {
  * - Works from the TEXT, line by line, not the parse:
  *   so the spell editor's instant colouring, which never parses, uses the same lines (`SpellCSS.OPEN_LINE` ...).
  * - Spell's own rule for the block is `css_block`:  it compiles the CSS to the type's class.
- * - Browser-safe, like the rest of `spell-app/lsp`.
+ * - Browser-safe, like the rest of `spell/app/lsp`.
  */
 export class SpellCSS {
   /** A line that opens a CSS block:  `<css>` alone, indented to anything. */

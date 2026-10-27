@@ -185,7 +185,7 @@ export class PageServer {
         ...Object.assign({}, ...this.pageConfigs.map((add) => add(served)))
       })
     })
-    // the settings' folders OUTSIDE the checkout (`../spell-ui/docs`, in the repo beside it):  each mounted on its
+    // the settings' folders OUTSIDE the checkout (`../ui/docs`, in the repo beside it):  each mounted on its
     // own at `/_beside/<folder>/` (`folderUrl()`), so the overlays below can lead there (epic `repo-split` P8)
     for (const folder of besideFolders(settings))
       this.web.files.mount({ prefix: folderUrl(folder), dir: join(this.root, folder) })
@@ -622,7 +622,7 @@ const DEFAULT_WATCH = ["epics", "guides", "pages", "brand"]
  *   - the bundle then takes `/components/<set>/` as its site's root (the folder above its `_assets/`)
  * - `/components/<set>/<x>` -> its pages' folder (`dir`):  the set's pages, `__parts/` and `__data/`
  * - the same under `/worktrees/<w>/` (that worktree's set and bundle)
- *   - EXCEPT a folder outside the checkout (`../spell-ui/docs`, `isBeside()`):  the MAIN checkout's, served at
+ *   - EXCEPT a folder outside the checkout (`../ui/docs`, `isBeside()`):  the MAIN checkout's, served at
  *     `/_beside/...` (`folderUrl()`), from a worktree's address too;  a worktree of every repo is epic `repo-split` P9's
  * - a `StaticHandler` overlay:  served only when the file is there, else the path as asked (a 404)
  */

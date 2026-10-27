@@ -1,8 +1,8 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import type { SiteDataFile, SiteTag } from "spell-ui/docs-components"
+import type { SiteDataFile, SiteTag } from "spell/ui/docs-components"
 
-import { NavIndex } from "spell-ui/docs-components/ui-docs-nav/NavIndex"
+import { NavIndex } from "spell/ui/docs-components/ui-docs-nav/NavIndex"
 
 /** 5 components (one a sub-tag, one in progress), a docs tag, 4 topics (one unused). */
 const DATA = {

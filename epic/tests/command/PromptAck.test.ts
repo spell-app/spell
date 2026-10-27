@@ -9,7 +9,7 @@ import { join } from "node:path"
 
 import { afterAll, beforeEach, expect, test } from "vite-plus/test"
 
-import { BUSY_BEFORE_MS, PromptAck } from "spell-epic/command/PromptAck"
+import { BUSY_BEFORE_MS, PromptAck } from "spell/epic/command/PromptAck"
 
 const home = mkdtempSync(join(tmpdir(), "prompt-ack-home-"))
 const repo = mkdtempSync(join(tmpdir(), "prompt-ack-repo-"))

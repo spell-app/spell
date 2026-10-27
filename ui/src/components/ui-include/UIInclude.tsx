@@ -1,8 +1,8 @@
 import { Show } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
-import { E, type UIT } from "spell-ui/core"
-import { RootLoader } from "spell-ui/components/ui-root"
+import { E, type UIT } from "spell/ui/core"
+import { RootLoader } from "spell/ui/components/ui-root"
 import { includeVocabulary } from "./UIInclude.en"
 
 import includeCSS from "./UIInclude.css?inline"

@@ -2,11 +2,11 @@
 
 import { beforeAll, describe, expect, it } from "vite-plus/test"
 
-import { StaticRender } from "spell-ui/static"
-import { UIRoot } from "spell-ui/components/ui-root/UIRoot"
+import { StaticRender } from "spell/ui/static"
+import { UIRoot } from "spell/ui/components/ui-root/UIRoot"
 
 /**
- * `<ui-root>` in the static server render (`spell-ui/static`):  a plain wrapper carrying its classes,
+ * `<ui-root>` in the static server render (`spell/ui/static`):  a plain wrapper carrying its classes,
  * theme / box states and box style -- never hidden, no loader, no skeletons:  a static page has nothing to wait for.
  */
 describe("<ui-root> static render", () => {

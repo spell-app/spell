@@ -1,9 +1,9 @@
 import { afterEach, describe, test, expect } from "vite-plus/test"
 
-import { core, Thing, type ThingsToSearch } from "spell-parser/core/model"
+import { core, Thing, type ThingsToSearch } from "spell/parser/core/model"
 
 /**
- * References by name and place under `spell-parser/core/model`, which has no running program
+ * References by name and place under `spell/parser/core/model`, which has no running program
  * (epic `people-and-orgs` P9, Q44).
  * - They search what the caller hands `searchThings()`.
  * - This file loads the model ALONE, never the barrel.

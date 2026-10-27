@@ -1,7 +1,7 @@
 import { Git } from "spell/server/Git"
 import { CLI } from "spell/cli"
-import { RepoList, RepoListError } from "spell-epic/server/RepoList"
-import type { Repo } from "spell-epic/server/server.types"
+import { RepoList, RepoListError } from "spell/epic/server/RepoList"
+import type { Repo } from "spell/epic/server/server.types"
 
 import { EXIT, EpicCommandError, parseVerbArgs, stringFlag } from "./command.types"
 

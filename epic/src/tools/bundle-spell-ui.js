@@ -242,8 +242,8 @@ const ICONS = {
   "solid/rotate-left": ["rotate left", "undo alternate"], // Undo, in the toast after a comment's deleted
   "solid/plug": ["plug"],
   "solid/circle-play": ["circle play"],
-  "solid/circle-pause": ["circle pause"], // an epic's state:  paused (`spell-epic/list/EpicState`)
-  // an Epics card's star (`spell-epic/list/EpicCards`):  a favourite, or not;  the Favorites group's heading
+  "solid/circle-pause": ["circle pause"], // an epic's state:  paused (`spell/epic/list/EpicState`)
+  // an Epics card's star (`spell/epic/list/EpicCards`):  a favourite, or not;  the Favorites group's heading
   "solid/star": ["star"],
   "regular/star": ["star outline"],
   // epic pages' review (epic `review-review`):
@@ -259,7 +259,7 @@ const ICONS = {
 }
 
 /**
- * spell-epic's own names (`spell-epic/links`), which the docs runtime imports, and the kit's (`spell/util/persist`,
+ * spell-epic's own names (`spell/epic/links`), which the docs runtime imports, and the kit's (`spell/util/persist`,
  * which the epic pages' stores import since epic `prefs-and-undo`, and its files import each other by):  found as
  * their source files.  esbuild adds no extension to a package's `exports`, so `spell/util/class` failed.
  */
@@ -381,7 +381,7 @@ async function bundle() {
     legalComments: "eof",
     metafile: true,
     logLevel: "silent",
-    // the docs runtime's own imports of spell-epic (`spell-epic/links` ...), as their source files
+    // the docs runtime's own imports of spell-epic (`spell/epic/links` ...), as their source files
     plugins: [spellUiResolver(), sourceNames(SPELL_EPIC)]
   })
   checkOneSolid(result.metafile)
@@ -424,15 +424,15 @@ async function bundleShared(entry, outfile) {
 
 /**
  * esbuild plugin wiring the entry to UI:
- * - `spell-ui` ~== `dist/index.js`, `spell-ui/<entry>` ~== `dist/<entry>.js`,
- *   `spell-ui/components/ui-code` ~== `dist/ui-code.js`
+ * - `spell-ui` ~== `dist/index.js`, `ui/<entry>` ~== `dist/<entry>.js`,
+ *   `spell/ui/components/ui-code` ~== `dist/ui-code.js`
  *   (mirrors UI's published `exports`, its `package.json`'s `publishConfig`)
  * - Solid imports resolve from UI's root (`SOLID`), whoever imports them
  * - `spell-ui:icons`:  the generated icon registrations (`iconsModule()`)
  * - the page runtime:  an empty module until its file exists
  * - the plain-DOM leaves the runtime lands links with (`<ui-toc>`'s `TocIndex`, `HashLanding`;  epic `coherence`
  *   P11), the doc-only families' leaves, and the pure types they read:  from UI's SOURCE (`UI_SOURCE_ONLY`), as UI's
- *   lib build holds neither the leaves alone nor `src/docs-components/`;  what they import of `spell-ui/util` is
+ *   lib build holds neither the leaves alone nor `src/docs-components/`;  what they import of `spell/ui/util` is
  *   `dist/core.js`'s, the page's one copy
  */
 function spellUiResolver() {
@@ -497,7 +497,7 @@ function uiDistPath(specifier) {
     .slice("spell-ui".length)
     .replace(/^\//, "")
     .replace(/^components\/(ui-[a-z-]+)$/, "$1")
-    // `spell-ui/util` is all in `core` (`src/core.ts` re-exports it), and has no file of its own
+    // `spell/ui/util` is all in `core` (`src/core.ts` re-exports it), and has no file of its own
     .replace(/^util$/, "core")
   if (!sub) return join(UI_DIR, "dist/index.js")
   return join(UI_DIR, "dist", `${sub}.js`)
@@ -505,7 +505,7 @@ function uiDistPath(specifier) {
 
 /**
  * Source of `spell-ui:icons`:  each of `ICONS`' SVG text, `UI.icons.register()`ed under each of its names.
- * - Imports `UI` from `spell-ui/core` -- the same module `index.js` uses --
+ * - Imports `UI` from `spell/ui/core` -- the same module `index.js` uses --
  *   so this runs BEFORE any family defines (and so upgrades) its elements.
  * - Registers in the FIRST `UI.load()` callback:
  *   every element `await`s that same promise before drawing an icon, so the names are in place first.
@@ -518,7 +518,7 @@ function iconsModule() {
     return [names, readFileSync(path, "utf8")]
   })
   return [
-    `import { UI } from "spell-ui/core"`,
+    `import { UI } from "spell/ui/core"`,
     `const ICONS = ${JSON.stringify(icons)}`,
     `UI.load().then((ui) => {`,
     `  ui.icons.reset()`,
@@ -557,7 +557,7 @@ function baseUrlSource() {
  */
 function emojiModule() {
   return [
-    `import { EmojiData } from "spell-ui/components/ui-emoji"`,
+    `import { EmojiData } from "spell/ui/components/ui-emoji"`,
     baseUrlSource(),
     `const base = bundleUrl("emoji/")`,
     `const waiting = new Map()`,
@@ -704,7 +704,7 @@ async function writeLazyScripts() {
       minify: true,
       keepNames: true,
       legalComments: "eof",
-      // Spell UI's own names in its source (`spell-ui/runtime/runtime.types`, each engine's `SourceError`), found as
+      // Spell UI's own names in its source (`spell/ui/runtime/runtime.types`, each engine's `SourceError`), found as
       // their files;  its `tsconfig.json` for the rest (JSX, decorators)
       tsconfig: join(UI_DIR, "tsconfig.json"),
       plugins: [sourceNames()],
@@ -723,8 +723,8 @@ async function writeLazyScripts() {
  */
 function lazyModule() {
   return [
-    `import { CodeHighlighter } from "spell-ui/components/ui-code"`,
-    `import { MarkdownRenderer } from "spell-ui/components/ui-markdown"`,
+    `import { CodeHighlighter } from "spell/ui/components/ui-code"`,
+    `import { MarkdownRenderer } from "spell/ui/components/ui-markdown"`,
     baseUrlSource(),
     `const base = bundleUrl("lazy/")`,
     `const loading = new Map()`,

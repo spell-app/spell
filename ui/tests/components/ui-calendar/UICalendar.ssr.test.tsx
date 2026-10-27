@@ -2,11 +2,11 @@
 
 import { beforeAll, describe, expect, it } from "vite-plus/test"
 
-import { StaticRender } from "spell-ui/static"
-import { UICalendar } from "spell-ui/components/ui-calendar/UICalendar"
+import { StaticRender } from "spell/ui/static"
+import { UICalendar } from "spell/ui/components/ui-calendar/UICalendar"
 
 /**
- * `<ui-calendar>` in a static server render (`spell-ui/static`):  the text field showing the value as a browser formats
+ * `<ui-calendar>` in a static server render (`spell/ui/static`):  the text field showing the value as a browser formats
  * it, the ISO value as a hidden input (so a no-JS form submits it), the popup closed.
  * - The picker needs `Temporal`, which a server render may not have:  these hold either way.
  */

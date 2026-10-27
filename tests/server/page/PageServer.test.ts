@@ -25,14 +25,14 @@ import { ask } from "spell/server/test/serve"
 const SERVED = {
   componentSets: {
     ui: { name: "Spell UI", dir: "packages/ui/docs", assets: "packages/ui/site/_assets" },
-    epics: { name: "Epic UI", dir: "spell-epic/src/docs", assets: "packages/ui/site/_assets" },
+    epics: { name: "Epic UI", dir: "epic/src/docs", assets: "packages/ui/site/_assets" },
     app: { name: "App UI", dir: "packages/app/docs", assets: "packages/ui/site/_assets" },
     brand: { name: "Brand", dir: "packages/brand/docs", assets: "packages/ui/site/_assets" }
   },
   engineRoutes: {
-    "/_epic/assets/": "spell-epic/src/tools/_assets",
-    "/_epic/pack/": "spell-epic/src/components/__pack",
-    "/templates/": "spell-epic/templates"
+    "/_epic/assets/": "epic/src/tools/_assets",
+    "/_epic/pack/": "epic/src/components/__pack",
+    "/templates/": "epic/templates"
   }
 }
 
@@ -259,7 +259,7 @@ describe("PageServer", () => {
     expect(bare.status).toBe(302)
     expect(bare.headers.location).toBe("/components/epics/")
     // its long address is a plain folder:  no redirect (Q30)
-    expect((await ask(port, "GET", "/spell-epic/src/docs/index.html")).status).toBe(200)
+    expect((await ask(port, "GET", "/epic/src/docs/index.html")).status).toBe(200)
     expect(componentSetPath("/components/app/spell-viewer.html", server.componentSets)).toBe(
       "/packages/app/docs/spell-viewer.html"
     )
@@ -273,7 +273,7 @@ describe("PageServer", () => {
       "/worktrees/w/packages/ui/site/_assets/site.js"
     )
     expect(componentSetPath("/worktrees/w/components/epics/x.html", server.componentSets)).toBe(
-      "/worktrees/w/spell-epic/src/docs/x.html"
+      "/worktrees/w/epic/src/docs/x.html"
     )
     expect(componentSetPath("/components/epics", server.componentSets)).toBeUndefined()
     expect(componentSetPath("/components/nope/x.html", server.componentSets)).toBeUndefined()
@@ -559,7 +559,7 @@ describe("PageServer", () => {
     expect((await ask(port, "GET", "/_epic/pack/epics.pack.js")).text).toBe("// pack\n")
     expect((await ask(port, "GET", "/_epic/assets/missing.js")).status).toBe(404)
     expect(engineRoutePath("/_epic/assets/emoji/cldr/a.js", server.engineRoutes)).toBe(
-      "/spell-epic/src/tools/_assets/emoji/cldr/a.js"
+      "/epic/src/tools/_assets/emoji/cldr/a.js"
     )
     expect(engineRoutePath("/epics/x.html", server.engineRoutes)).toBeUndefined()
   })
@@ -571,10 +571,10 @@ describe("PageServer", () => {
     expect((await ask(port, "GET", "/templates/durable.html")).text).toContain("<title>Guide Template</title>")
     expect((await ask(port, "GET", "/templates/missing.html")).status).toBe(404)
     expect(engineRoutePath("/templates/goals/index.html", server.engineRoutes)).toBe(
-      "/spell-epic/templates/goals/index.html"
+      "/epic/templates/goals/index.html"
     )
     expect(engineRoutePath("/worktrees/seo/templates/durable.html", server.engineRoutes)).toBe(
-      "/spell-epic/templates/durable.html"
+      "/epic/templates/durable.html"
     )
     expect(engineRoutePath("/worktrees/seo/guides/x.html", server.engineRoutes)).toBeUndefined()
   })

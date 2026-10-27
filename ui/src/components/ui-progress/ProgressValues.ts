@@ -1,4 +1,4 @@
-import { E } from "spell-ui/core"
+import { E } from "spell/ui/core"
 import { LIST_SPLIT } from "./UIProgress.types"
 
 /****************

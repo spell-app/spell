@@ -23,12 +23,12 @@ import path from "node:path"
 import { fileURLToPath } from "node:url"
 import { parseArgs } from "node:util"
 
-import { FamilyFiles } from "spell-ui/tools/FamilyFiles"
+import { FamilyFiles } from "spell/ui/tools/FamilyFiles"
 import { RootCatalog } from "spell/element-tools/RootCatalog"
 import { Terminal } from "spell/element-tools/Terminal"
 import { writeOrCheck } from "spell/element-tools/generatedFiles"
 
-import { formatted } from "spell-ui/tools/generatedFiles"
+import { formatted } from "spell/ui/tools/generatedFiles"
 
 /** `src/components/`. */
 const COMPONENTS = fileURLToPath(new URL("../src/components/", import.meta.url))

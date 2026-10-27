@@ -22,8 +22,8 @@
 import { existsSync } from "node:fs"
 import { basename, dirname, join, resolve } from "node:path"
 
-import { EpicConfig } from "spell-epic/config/EpicConfig"
-import { DataFile } from "spell-epic/data/DataFile"
+import { EpicConfig } from "spell/epic/config/EpicConfig"
+import { DataFile } from "spell/epic/data/DataFile"
 import { SRV } from "spell/server"
 
 export class AgentList {

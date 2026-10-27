@@ -2,7 +2,7 @@ import { describe, expect, it, onTestFinished } from "vite-plus/test"
 
 import { Fixture } from "spell/test-helpers/Fixture"
 
-import { BenchBridge } from "spell-ui/docs-components/ui-docs-theme-bench/BenchBridge"
+import { BenchBridge } from "spell/ui/docs-components/ui-docs-theme-bench/BenchBridge"
 
 describe("BenchBridge.applyCss()", () => {
   it("lays the tuning last in <head>, changes it in place, and takes it away", () => {

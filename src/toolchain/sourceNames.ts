@@ -18,7 +18,7 @@ import type { Plugin } from "esbuild"
  *
  * - Why:  esbuild reads `package.json`'s `exports` as node does:  no extension added to `./src/*`, no folder's
  *   `index.ts` (epic `repo-split` I50).
- *   So by itself it can't find `spell-ui/runtime/runtime.types`, or `spell/server` (a folder).
+ *   So by itself it can't find `spell/ui/runtime/runtime.types`, or `spell/server` (a folder).
  * - Tries `<name>.ts`, `<name>.tsx`, `<name>/index.ts`, `<name>/index.tsx`, then the name as written, under the
  *   package's `src/`;  the package's own name alone is its `src/index.ts`.
  * - A name it can't find is left to esbuild's own resolver.

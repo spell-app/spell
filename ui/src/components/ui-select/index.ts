@@ -1,13 +1,13 @@
 /**
  * The select family:  defines `<ui-select>`, and exports its component.
- * - Also the `select` lib entry (`spell-ui/ui-select`), measured in `notes/report.md`.
- * - SIDE EFFECT:  importing it defines `<ui-item>` (through `spell-ui/components/ui-item`, first,
+ * - Also the `select` lib entry (`spell/ui/ui-select`), measured in `notes/report.md`.
+ * - SIDE EFFECT:  importing it defines `<ui-item>` (through `spell/ui/components/ui-item`, first,
  *   so the select can read upgraded items), then `<ui-select>`.
  */
 
 import { UISelect } from "./UISelect"
 
-import "spell-ui/components/ui-item"
+import "spell/ui/components/ui-item"
 
 UISelect.define()
 

@@ -53,8 +53,8 @@ if (!process.env.CHECK_JUMP_UNDER_TSX) {
 const { BrowserPage } = await import("spell/element-tools/BrowserPage")
 const { DemoServer } = await import("./DemoServer.ts")
 const { bundleRoutes } = await import("./demoPages.mjs")
-const { EpicConfig } = await import("spell-epic/config/EpicConfig.ts")
-const { pageFile } = await import("spell-epic/tools/pages.js")
+const { EpicConfig } = await import("spell/epic/config/EpicConfig.ts")
+const { pageFile } = await import("spell/epic/tools/pages.js")
 
 const args = process.argv.slice(2)
 const flag = (name, fallback) => (args.includes(name) ? args[args.indexOf(name) + 1] : fallback)

@@ -1,7 +1,7 @@
 /**
  * The EAGER half of the runtime:  `load()` and the `UI` accessor.
  * - In `core` (every page's `core.js`), so keep it small:  it imports only `./runtime.types`.
- * - Everything else in `spell-ui/runtime` is reached through a dynamic `import("./UIRuntime")`, so Vite splits the
+ * - Everything else in `spell/ui/runtime` is reached through a dynamic `import("./UIRuntime")`, so Vite splits the
  *   runtime into its own chunk and a component's static imports stay tiny.  NEVER statically import a
  *   service class here -- `import type` only.
  */

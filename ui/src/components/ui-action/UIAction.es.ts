@@ -1,5 +1,5 @@
-import type { E } from "spell-ui/core"
-import { keyCapTextsEs } from "spell-ui/components/ui-keys/UIKeys.es"
+import type { E } from "spell/ui/core"
+import { keyCapTextsEs } from "spell/ui/components/ui-keys/UIKeys.es"
 
 /**
  * `<ui-action>` in Spanish:  `<es-accion>`, with the names and texts only it uses (from `UIAction.en.ts`).

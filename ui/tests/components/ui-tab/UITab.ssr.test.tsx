@@ -3,12 +3,12 @@
 import { parseHTML } from "linkedom"
 import { beforeAll, describe, expect, it } from "vite-plus/test"
 
-import { StaticRender } from "spell-ui/static"
-import { UITab } from "spell-ui/components/ui-tab/UITab"
-import { UITabs } from "spell-ui/components/ui-tab/UITabs"
+import { StaticRender } from "spell/ui/static"
+import { UITab } from "spell/ui/components/ui-tab/UITab"
+import { UITabs } from "spell/ui/components/ui-tab/UITabs"
 
 /**
- * `<ui-tabs>` rendered statically (`spell-ui/static`):
+ * `<ui-tabs>` rendered statically (`spell/ui/static`):
  * the tab list built from the panes, the selected pane shown,
  * the others in the HTML but hidden (no `active`), tabs and panes related by ids.
  */

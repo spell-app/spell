@@ -1,7 +1,7 @@
 /**
  * The English vocabulary of `<ui-table>`:  every name the tag uses.
  * - Its tag, attributes (each with its kind and allowed values), events, slots, parts and texts.
- *   The shape is `E.ComponentVocabulary` (`spell-ui/vocabulary`).
+ *   The shape is `E.ComponentVocabulary` (`spell/ui/vocabulary`).
  * - Class words come out through `ClassBuilder`, in Fomantic's grammar, and are MIRRORED onto the slotted
  *   `<table>` (see `UITable`):  `<ui-table size="small" celled appearance="very-basic" stuck="head first">` =>
  *   `ui small celled very basic head stuck first stuck table`.
@@ -13,7 +13,7 @@
  *   the data-mode column list is `column-defs` (`columnDefs`), so the two never collide.
  */
 
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /****************
  * ### `tableVocabulary`

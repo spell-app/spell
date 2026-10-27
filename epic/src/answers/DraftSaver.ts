@@ -1,7 +1,7 @@
 // Import directly:  the persist barrel would bring the database and server places too
 import { PrefStore } from "spell/util/persist/PrefStore"
 import { StoragePlace } from "spell/util/persist/StoragePlace"
-import { clockOf, storageNow, type ServerLink, type StorageFinder } from "spell-epic/review"
+import { clockOf, storageNow, type ServerLink, type StorageFinder } from "spell/epic/review"
 
 import { ANSWER_RETRY_MS, type DraftState } from "./answers.types"
 
@@ -27,7 +27,7 @@ import { ANSWER_RETRY_MS, type DraftState } from "./answers.types"
  * - NOT on the kit's `after()` (the plan's wish):  `spell/element`'s leaves are neither shared with a pack nor allowed
  *   in the docs bundles (`bundle-spell-ui.js`), and this goes in both;  plain timers, cancelled the same way.
  * - Node-safe at import;  `window` only in `watch()`.
- * - Position in the import graph:  `spell-epic/review` (the link's type, `storageNow()`), its peer types, the kit's
+ * - Position in the import graph:  `spell/epic/review` (the link's type, `storageNow()`), its peer types, the kit's
  *   util.  NEVER imports Solid or Spell UI:  callers bridge `onChange` into their own state.
  ****************/
 export class DraftSaver {

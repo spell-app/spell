@@ -317,7 +317,7 @@ describe("DOMElement property values", () => {
     const tag = `x-dom-traducido-${tagCount}`
     const Class = define(tag, { lang: "es", attributes: { label: "etiqueta" } })
     // then the shared attributes;  their Spanish names are Spell UI's
-    // (`spell-ui/tests/test-helpers/translate.test.tsx`)
+    // (`ui/tests/test-helpers/translate.test.tsx`)
     expect(Class.observedAttributes[0]).toBe("etiqueta")
     expect(Class.observedAttributes).not.toContain("label")
     const host = await renderTag(tag, `etiqueta="A"`)

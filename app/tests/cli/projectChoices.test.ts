@@ -3,7 +3,7 @@ import { tmpdir } from "os"
 import { resolve } from "path"
 import { afterAll, describe, test, expect } from "vite-plus/test"
 
-import { CLI } from "spell-app/cli"
+import { CLI } from "spell/app/cli"
 
 /** Values of the choices for `text`. */
 async function values(text: string, recents: string[] = []) {

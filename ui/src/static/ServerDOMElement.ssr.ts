@@ -1,6 +1,6 @@
 /*! Derived from `@solidjs/element` and `component-register`:  MIT licence, (c) Ryan Carniato. */
-import type { E } from "spell-ui/core"
-import type { SSR } from "spell-ui/static"
+import type { E } from "spell/ui/core"
+import type { SSR } from "spell/ui/static"
 
 /****************
  * ### `ServerDOMElement`
@@ -16,7 +16,7 @@ import type { SSR } from "spell-ui/static"
  * - Lifecycle methods (`onConnect()` ...) never run:  nothing connects, resets or restores on a server.
  * - What a render left on the DOM element -- custom states, internals ARIA -- is kept for the flattener
  *   (`ServerDOMElement.stateFor()`), which writes it out as classes and attributes.
- * - Node only (`spell-ui/static`):  types only from `spell-ui/core`;  NEVER imported by a component or `spell-ui`.
+ * - Node only (`spell/ui/static`):  types only from `spell/ui/core`;  NEVER imported by a component or `spell-ui`.
  * - STATIC and instance-free:  the DOM element IS the element;  what it adds lives on the element and in `states`.
  * - Began as solid-element's `/server` entry, merged into its one user (epic `spell-element`, Q11).
  ****************/

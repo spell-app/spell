@@ -4,9 +4,9 @@ import { render } from "@solidjs/web"
 import { describe, test, expect, vi, beforeAll, beforeEach, afterEach } from "vite-plus/test"
 
 import { bridgeSolid } from "spell/util"
-import { core } from "spell-parser/core"
-import type { Drawing } from "spell-parser/core/drawing"
-import { parseSpellProject, registerTestComponentPack, runSpellFiles } from "spell-parser/spell/test"
+import { core } from "spell/parser/core"
+import type { Drawing } from "spell/parser/core/drawing"
+import { parseSpellProject, registerTestComponentPack, runSpellFiles } from "spell/parser/spell/test"
 
 /**
  * An IF-CHAIN INSIDE MARKUP, drawn (epic `elemental-spell`, Owen 2026-10-25:  "Inside an element:  hidden"):

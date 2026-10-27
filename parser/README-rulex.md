@@ -237,7 +237,7 @@ every sentence it understands matches a syntax like these, and a sentence that m
 <details>
 <summary>Run it yourself</summary>
 
-[The Solitaire example's card](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/examples/Solitaire/Card.spellx) has the
+[The Solitaire example's card](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/examples/Solitaire/Card.spellx) has the
 same alias, written `alias="is a (rank)"` on its rank, and Spell writes it the same syntax:
 
 ```sh
@@ -257,7 +257,7 @@ core.console.log(card.isARank("queen"))
 
 - A project writes its aliases' syntaxes down, so another project can register the same rules from data:
   that example's are in
-  [Solitaire.snapshot.declarations.json5](https://github.com/spell-app/spell-app/blob/main/tests/spell/__examples__/Solitaire/Solitaire.snapshot.declarations.json5),
+  [Solitaire.snapshot.declarations.json5](https://github.com/spell-app/spell/blob/main/app/tests/spell/__examples__/Solitaire/Solitaire.snapshot.declarations.json5),
   its test's copy of what a compile writes.
 - The code that builds an alias's syntax, word by word:
   [QuotedPropertyFormula.ts](src/spell/rules/classes/QuotedPropertyFormula.ts).
@@ -302,7 +302,7 @@ read:
 - It's opt-in, by one import, and the parser's own entry never pulls it in:
 
   ```ts
-  import "spell-parser/parser/rulex"
+  import "spell/parser/parser/rulex"
   ```
 
   Without it, registering a rule that has a `syntax` throws "Rulex parser is not installed".

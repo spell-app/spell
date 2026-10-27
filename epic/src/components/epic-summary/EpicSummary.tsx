@@ -2,12 +2,12 @@ import type { JSX } from "@solidjs/web"
 
 import { E } from "spell/element"
 
-import { STATUS_SLOT } from "spell-epic/components/epic-item/EpicItem.types"
+import { STATUS_SLOT } from "spell/epic/components/epic-item/EpicItem.types"
 
 import { epicSummaryVocabulary } from "./EpicSummary.en"
 
 import summaryCSS from "./EpicSummary.css?inline"
-import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
+import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 
 /****************
  * ### `EpicSummary`

@@ -21,7 +21,7 @@
  *   - the tools that run it (`update.js`, `pages.js` `tidy()`, goals' check) go through `pages.js` `docLinksRun()`
  * - A component set's pages link as from their SERVED address,
  *   so their links hold at `/worktrees/<w>/components/epics/` too.
- *   - e.g. `spell-epic/src/docs/`, served at `/components/epics/` (the checkout's `"pageServer"` `"componentSets"`,
+ *   - e.g. `epic/src/docs/`, served at `/components/epics/` (the checkout's `"pageServer"` `"componentSets"`,
  *     `ServedFolders`)
  *   - their links are written and checked from there (`Linker`'s `served`, `servedDir()`)
  * - `--check` also checks short addresses (`href="SAGA:/..."`) and `<epic-link>`s, which `Linker` leaves alone:
@@ -32,16 +32,16 @@ import { readFileSync, writeFileSync } from "node:fs"
 import { basename, dirname, join, relative, resolve as resolvePath } from "node:path"
 
 import { SRV } from "spell/server"
-import { RepoList } from "spell-epic/server/RepoList"
-import { EpicTargets } from "spell-epic/tool/EpicTargets"
-import { ServedFolders } from "spell-epic/tool/ServedFolders"
-import { RootLinks } from "spell-epic/tool/migrations/RootLinks"
+import { RepoList } from "spell/epic/server/RepoList"
+import { EpicTargets } from "spell/epic/tool/EpicTargets"
+import { ServedFolders } from "spell/epic/tool/ServedFolders"
+import { RootLinks } from "spell/epic/tool/migrations/RootLinks"
 
 import { CONTENT, PACKAGE, ROOT } from "./pages.js"
 
 /**
  * The folders served at another address under checkout `root` (`ServedFolders`):  the component sets'
- * (`{ "components/epics": "spell-epic/src/docs" }`), and the engine's templates, at `templates/`, so a guide's
+ * (`{ "components/epics": "epic/src/docs" }`), and the engine's templates, at `templates/`, so a guide's
  * `../templates/durable.html` checks against spell-epic's copy.  The `epic` tool's linker is told the same.
  */
 function servedUnder(root) {
@@ -52,7 +52,7 @@ function servedUnder(root) {
  * ONE linker, under the checkout the page server serves (`RepoList.linkRootOf()`:  the kit, for a child repo's
  * checkout;  or the command line's `--root`):  its bare-name index is built once per process.
  * - every link is a ROOT PATH from there (epic `epic-engine` P46):  a content page's, and this repo's own pages'
- *   (Epic UI's, the templates), `/spell-epic/src/...` alike
+ *   (Epic UI's, the templates), `/epic/src/...` alike
  * - before P46, this repo's own pages linked from this checkout, and only the content folder's from the kit (I22)
  */
 let linker = linkerUnder(new RepoList().linkRootOf(ROOT))

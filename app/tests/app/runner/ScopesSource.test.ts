@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { scopesFromPacks } from "spell-app/app/runner"
+import { scopesFromPacks } from "spell/app/app/runner"
 
 /** A scope pack's details, with `spell` and `compiled` worked out when shown -- see `scopesFromPacks()`. */
 describe("scopesFromPacks()", () => {

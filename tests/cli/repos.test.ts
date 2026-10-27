@@ -14,8 +14,8 @@ write(
   "{ repos: [{ name: 'spell-parser' }, { name: 'spell-ui' }, { name: 'spell-gone' }, { name: 'spell-app' }] }"
 )
 write("package.json", { name: "spell", version: "1.2.3", spell: { commands: "./cli/commands.ts" } })
-write("spell-parser/package.json", { name: "spell-parser", spell: { commands: "./cli/commands.ts" } })
-write("spell-ui/package.json", { name: "spell-ui" })
+write("parser/package.json", { name: "spell-parser", spell: { commands: "./cli/commands.ts" } })
+write("ui/package.json", { name: "spell-ui" })
 write("node_modules/spell-app/package.json", {
   name: "spell-app",
   spell: { commands: "./cli/commands.ts", hooks: "./cli/hooks.ts" }

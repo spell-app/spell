@@ -503,7 +503,7 @@ _Trimmed of its change time.  Its body waits in a part file;  the element draws 
 
 Epic UI is `spell-epic`'s set of these:  one component pack, `epics`, every tag starting `epic-`,
 48 tags in 36 families.
-The frame around them (sections, tables, buttons, icons) is [Spell UI](https://github.com/spell-app/spell-ui/blob/main/README.md)'s `<ui-*>` elements.
+The frame around them (sections, tables, buttons, icons) is [Spell UI](https://github.com/spell-app/spell/blob/main/ui/README.md)'s `<ui-*>` elements.
 44 of them have a docs page in the Epic UI set, at `/components/epics/<tag>.html`;
 the other four (`epic-review`, `epic-new-item`, `epic-agents`, `epic-thread-message`)
 are drawn only inside other elements.
@@ -571,7 +571,7 @@ _A page loads two scripts:  Spell UI's docs bundle, then the pack, which borrows
 
 - Spell UI's docs bundle, `/_epic/assets/spell-ui.js`, defines `<ui-root>`, which adds the pack's script.
 - The pack carries none of the shared code:  it takes `solid-js`, `@solidjs/web`, `spell/element`,
-  `spell-ui/core` and `spell-ui/forms` from the bundle, by those names, so a page has ONE Solid.
+  `spell/ui/core` and `spell/ui/forms` from the bundle, by those names, so a page has ONE Solid.
 - Both addresses are the engine's routes, served by the epic server and the kit's page server alike.
 - So a page needs one of those servers to draw at all, and the part files and review controls need it too.
   Opened straight from disk, a page shows exactly what its file holds:  its prose, unstyled.
@@ -585,7 +585,7 @@ If you find yourself writing a second copy of any of these, stop and reuse:
 
 - the pack's build, catalog and staleness check:  the kit's `spell-pack`
 - reading a vocabulary's tag and skeleton:  the kit's root catalog
-- the element authoring API:  `spell/element`, and Spell UI's `spell-ui/core`
+- the element authoring API:  `spell/element`, and Spell UI's `spell/ui/core`
 
 Adding a new element:
 

@@ -2,10 +2,10 @@
  * Types, tables and the error class of the epic tool:
  * `PlanReader` (reading a doc), `PlanDoc` (editing one in `<epic-*>` markup) and the command line.
  * Rules, ids and what's data:  `PLAN-DOC.md` beside this.
- * - At the BOTTOM of the tool folder's import graph:  `import type` only, apart from `spell-epic`'s definitions (data),
+ * - At the BOTTOM of the tool folder's import graph:  `import type` only, apart from `spell/epic`'s definitions (data),
  *   so nothing here loads a class module (WWOD §8).
  *   The graph:  `PlanReader` <- `PlanDoc` <- `PlanDocFiles` <- `PlanDocCommands`.
- * - The ELEMENTS (tags, attributes, which children go where) are `spell-epic/definitions`':
+ * - The ELEMENTS (tags, attributes, which children go where) are `spell/epic/definitions`':
  *   this file holds only what the tool adds on top --
  *   item kinds as the command line names them, review filters, result shapes.
  * - `Prettify<>` (the toolchain's global types, `spell/toolchain/types`, in `tsconfig.json`'s `"types"`)
@@ -14,7 +14,7 @@
 
 // By file, with its extension:  plain `node` loads this file (`Sagas`, for the docs index), and the barrel too would load
 // every vocabulary
-import { ItemLetters, type ItemSectionKind } from "spell-epic/definitions/definitions.types.ts"
+import { ItemLetters, type ItemSectionKind } from "spell/epic/definitions/definitions.types.ts"
 
 ////////////////
 // ## Errors

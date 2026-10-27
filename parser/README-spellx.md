@@ -141,8 +141,8 @@ The other form is a read-only view, written when you ask for it:
 - on a `.spellx` file, Show as Code Spell (VS Code's title bar;  the editor app's Code Spell tab)
 - Edits happen only in the real file, so the view always matches it.
 
-The showcases are written this way:  [Solitaire](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/examples/Solitaire/Card.spellx)
-and [Task List](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/examples/TaskList/TaskList.spellx),
+The showcases are written this way:  [Solitaire](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/examples/Solitaire/Card.spellx)
+and [Task List](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/examples/TaskList/TaskList.spellx),
 in the editor's examples.
 - Their card is a two sided view, drawing only its `<draw "front">` and `<draw "back">`;
   their filter, a toolbar of actions with `selected-when=`;  their game's moves, keys and a right-click menu.
@@ -151,7 +151,7 @@ in the editor's examples.
 Its tree, for a tool or an agent walking it:
 
 ```ts
-import { SX } from "spell-parser/spellx"
+import { SX } from "spell/parser/spellx"
 
 const file = SX.SpellxView.read(text, { path: "Card.spellx" })
 

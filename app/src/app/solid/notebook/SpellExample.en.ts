@@ -1,12 +1,12 @@
 /**
  * Every name `<spell-example>` adds to `<ui-example>`'s:  its tag, and its `name`.
- * Schema:  `E.ComponentVocabulary` (`spell-ui/core`).
+ * Schema:  `E.ComponentVocabulary` (`spell/ui/core`).
  * - `<spell-example>` is a `<ui-example>` (`SpellExample extends UIExample`):
  *   its whole vocabulary is the example's names, with these added (`SpellExample.vocabulary`, `SpellExample.tsx`).
  * - Pure data:  `import type` only.
  */
 
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /****************
  * ### `<spell-example>`

@@ -1,6 +1,6 @@
 import { describe, expect, onTestFinished, test } from "vite-plus/test"
 
-import { TableClassMirror } from "spell-ui/components/ui-table/TableClassMirror"
+import { TableClassMirror } from "spell/ui/components/ui-table/TableClassMirror"
 
 describe("TableClassMirror.mirrored()", () => {
   test("puts the element's phrase after the author's words, once", () => {

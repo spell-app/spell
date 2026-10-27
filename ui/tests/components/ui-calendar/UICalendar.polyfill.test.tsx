@@ -1,15 +1,15 @@
 import { beforeEach, describe, expect, it, vi } from "vite-plus/test"
 import { userEvent } from "vite-plus/test/browser"
 
-import { UI } from "spell-ui/runtime"
+import { UI } from "spell/ui/runtime"
 
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import type { DOMElement } from "spell/element"
 
-import { Browser } from "spell-ui/runtime/Browser"
-import { I18n } from "spell-ui/runtime/I18n"
+import { Browser } from "spell/ui/runtime/Browser"
+import { I18n } from "spell/ui/runtime/I18n"
 
-import "spell-ui/components/ui-calendar"
+import "spell/ui/components/ui-calendar"
 
 /**
  * `<ui-calendar>` in a browser WITHOUT `Temporal`:  the global is removed before any module runs (`vi.hoisted`,

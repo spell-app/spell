@@ -1,5 +1,5 @@
 /**
- * Shared types for `spell-ui/elements`, Spell UI's own half of the element core.
+ * Shared types for `spell/ui/elements`, Spell UI's own half of the element core.
  * - What makes an element at all is `spell/element`'s:  `UIComponent`, `DOMElement` and their types.
  * - Here:
  *   - the parts with no Solid:  class building, validation, menu options, shorthand, native fallbacks
@@ -13,7 +13,7 @@
  *     and a static initializer that reads one of its constants imports it directly (`LoadableComponent`).
  */
 
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 // a constant `SourceEvent` reads as it's made:  spell-element's types file, which loads nothing
 import { ERROR_EVENT } from "spell/element/elements.types"
 

@@ -4,7 +4,7 @@
  * - Pure data, at the bottom of the folder's imports:  `import type` only, so node can load it (`yarn gen:root`).
  */
 
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 import type { rootVocabulary } from "./UIRoot.en"
 
 ////////////////

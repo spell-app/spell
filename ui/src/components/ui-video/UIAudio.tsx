@@ -1,6 +1,6 @@
 import type { JSX } from "@solidjs/web"
 
-import { E } from "spell-ui/core"
+import { E } from "spell/ui/core"
 import { audioVocabulary } from "./UIAudio.en"
 // Import directly to avoid circular import:  the base class
 import { MediaPlayer } from "./MediaPlayer"

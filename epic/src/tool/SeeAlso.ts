@@ -1,8 +1,8 @@
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs"
 import { dirname, join, posix, relative, resolve, sep } from "node:path"
 
-import { EpicConfig } from "spell-epic/config/EpicConfig"
-import { DataFile } from "spell-epic/data/DataFile"
+import { EpicConfig } from "spell/epic/config/EpicConfig"
+import { DataFile } from "spell/epic/data/DataFile"
 
 /**
  * The STANDING epic for every page no epic owns (epic `epic-engine` T9, J7):  guides no epic claims, Epic UI's pages,

@@ -4,8 +4,8 @@ import { dirname, join } from "node:path"
 import { afterAll, afterEach, beforeEach, describe, expect, test, vi } from "vite-plus/test"
 
 import { DataFile } from "spell/server/DataFile"
-import { readPack } from "spell-ui/cli/packBuild"
-import { addElement, createPack, nextSteps } from "spell-ui/cli/packCreate"
+import { readPack } from "spell/ui/cli/packBuild"
+import { addElement, createPack, nextSteps } from "spell/ui/cli/packCreate"
 
 /**
  * A throwaway kit per test:  a kit's root files (`fixtures/kit/`), a `.yarnrc.yml`, and a small commands page,

@@ -1,10 +1,10 @@
 import type { JSX } from "@solidjs/web"
 
-import { E, UIT } from "spell-ui/core"
+import { E, UIT } from "spell/ui/core"
 import { tabVocabulary } from "./UITab.en"
 import { BASIC, type TabOwner, type TabPaneState } from "./UITab.types"
 
-import segmentCSS from "spell-ui/components/ui-segment/UISegment.css?inline"
+import segmentCSS from "spell/ui/components/ui-segment/UISegment.css?inline"
 import tabCSS from "./UITab.css?inline"
 
 /****************
@@ -97,7 +97,7 @@ export class UITab extends E.UIComponent<typeof tabVocabulary> {
   /**
    * How to show:  the owner's say, else its own attributes.
    * - `@derived`:  the owner's answer looks the pane up among the tabs, and four readers share it.
-   * - Lazy by nature, so a static render (`spell-ui/static`),
+   * - Lazy by nature, so a static render (`spell/ui/static`),
    *   which builds this pane before its later siblings, asks at render time.
    */
   @E.derived

@@ -2,11 +2,11 @@ import { existsSync, readdirSync, readFileSync } from "node:fs"
 import { basename, join } from "node:path"
 
 import { localDate } from "spell/util/time"
-import { bareTitle } from "spell-epic/command/command.types"
-import { ClaudeHome } from "spell-epic/config/ClaudeHome"
-import { EpicConfig } from "spell-epic/config/EpicConfig"
-import { Transcript } from "spell-epic/config/Transcript"
-import { ItemLetters } from "spell-epic/definitions"
+import { bareTitle } from "spell/epic/command/command.types"
+import { ClaudeHome } from "spell/epic/config/ClaudeHome"
+import { EpicConfig } from "spell/epic/config/EpicConfig"
+import { Transcript } from "spell/epic/config/Transcript"
+import { ItemLetters } from "spell/epic/definitions"
 
 /****************
  * ### `ReviewBackfill`

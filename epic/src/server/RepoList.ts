@@ -3,8 +3,8 @@ import { homedir } from "node:os"
 import { basename, dirname, isAbsolute, join, relative, resolve, sep } from "node:path"
 
 import { RealPath } from "spell/server/RealPath"
-import { EpicConfig } from "spell-epic/config/EpicConfig"
-import { DataFile } from "spell-epic/data/DataFile"
+import { EpicConfig } from "spell/epic/config/EpicConfig"
+import { DataFile } from "spell/epic/data/DataFile"
 
 import {
   encodedPath,
@@ -35,7 +35,7 @@ import {
  *   so a move there needs no second edit here.
  * - The DEFAULT repo is served at `/` as well as `/r/<name>/`:  the one named `default`, else the first added.
  * - `epic repo add | list | remove | default` edit it (`Repos`);  nothing else writes it.
- * - The folder:  `~/.spell-epic/`, or `SPELL_EPIC_HOME` (tests give a temp folder:  the real file is never touched).
+ * - The folder:  `~/.epic/`, or `SPELL_EPIC_HOME` (tests give a temp folder:  the real file is never touched).
  * - Takes no lock:  one person adds a repo now and then.
  ****************/
 export class RepoList {
@@ -132,12 +132,12 @@ export class RepoList {
    *   worktree, else the top's main)
    *   - since epic `repo-split` P16 the top's page server serves that content, from the top's root
    *   - before epic `readme` P14 this fell through to the first registered repo with the content (spell-app), so a
-   *     guide's `../../spell-ui/...` checked as missing, and `../spell-ui/...` as spell-app's
+   *     guide's `../../ui/...` checked as missing, and `../ui/...` as spell-app's
    * - `root` itself:
    *   - when it holds its own pages (`content` is `root`), or its repo is registered (spell-app, a worktree of it)
    *   - when no registered repo has `content` (another machine's list, a test's made-up checkout)
    * - ELSE the registered repo whose content folder `content` is:  spell-epic's epic pages are spell-app's content,
-   *   served by spell-app's page server under spell-app's checkout, where the engine's files are `spell-epic/...`
+   *   served by spell-app's page server under spell-app's checkout, where the engine's files are `spell/epic/...`
    *   (its `engineFolder` link), not this checkout's `src/...`
    * - `content`:  default `root`'s (`EpicConfig.contentOf()`)
    * - a list that won't read:  `root`

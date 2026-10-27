@@ -1,6 +1,6 @@
 import { Dynamic, type JSX } from "@solidjs/web"
 
-import { E, UIT } from "spell-ui/core"
+import { E, UIT } from "spell/ui/core"
 import { listVocabulary } from "./UIList.en"
 
 import listCSS from "./UIList.css?inline"

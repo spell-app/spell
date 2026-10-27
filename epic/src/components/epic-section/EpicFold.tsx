@@ -1,15 +1,15 @@
 import { Show } from "solid-js"
 import { isServer, type JSX } from "@solidjs/web"
 
-import { E } from "spell-ui/core"
+import { E } from "spell/ui/core"
 
-import { PhaseIds } from "spell-epic/phases"
+import { PhaseIds } from "spell/epic/phases"
 
 // Import directly:  the page's signals, not its family's barrel (which would define `<epic-page>` here)
-import { EpicPage } from "spell-epic/components/epic-page/EpicPage"
-import { SHOW_NOTE, stopIfOwn } from "spell-epic/components/epic-review/EpicReview.types"
+import { EpicPage } from "spell/epic/components/epic-page/EpicPage"
+import { SHOW_NOTE, stopIfOwn } from "spell/epic/components/epic-review/EpicReview.types"
 // the fold pieces every `<epic-*>` fold shares:  their files, not `epic-item`'s barrel
-import { Fold, expandAllUnder, foldAllUnder } from "spell-epic/components/epic-item/Fold"
+import { Fold, expandAllUnder, foldAllUnder } from "spell/epic/components/epic-item/Fold"
 
 import {
   BODY,
@@ -82,7 +82,7 @@ export class DOMEpicFoldElement extends E.DOMLoadableBodyElement<EpicFold<any>> 
  *   (`spell-doc-runtime.js` reads it):  its title as drawn, its icon, a section's count.
  * - SIDE EFFECT:  with `source`, replaces its own light children (a placeholder) with the part;
  *   listens for `hashchange` while connected.
- * - Position in the import graph:  `spell-ui/core` and `EpicPage` (for the page's signals) only;
+ * - Position in the import graph:  `spell/ui/core` and `EpicPage` (for the page's signals) only;
  *   subclasses in other families import THIS file directly, never the `epic-section` barrel.
  ****************/
 export abstract class EpicFold<V extends E.ComponentVocabulary> extends E.UIComponent<V> {

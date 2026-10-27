@@ -12,8 +12,8 @@ const REPOS: MappedRepo[] = [
 const FILES = new Set([
   "src/util/node/json5.ts",
   "src/cli/index.ts",
-  "spell-ui/src/components/ui-button/UIButton.tsx",
-  "spell-ui/src/index.ts"
+  "ui/src/components/ui-button/UIButton.tsx",
+  "ui/src/index.ts"
 ])
 
 describe("importsOf()", () => {
@@ -24,7 +24,7 @@ describe("importsOf()", () => {
       'import * as NS from "./peer"',
       'export * as P from "."',
       'export * from "./Rule"',
-      'import "spell-parser/parser/rulex"',
+      'import "spell/parser/parser/rulex"',
       "import {",
       "  CLI",
       '} from "spell/cli"'
@@ -43,7 +43,7 @@ describe("importsOf()", () => {
       { from: "./peer", names: [{ name: "NS", local: "NS", namespace: true }], line: 3 },
       { from: ".", names: [{ name: "P", local: "P", namespace: true }], line: 4 },
       { from: "./Rule", names: [], line: 5 },
-      { from: "spell-parser/parser/rulex", names: [], line: 6 },
+      { from: "spell/parser/parser/rulex", names: [], line: 6 },
       { from: "spell/cli", names: [{ name: "CLI", local: "CLI" }], line: 7 }
     ])
   })
@@ -61,8 +61,8 @@ describe("moduleFileFor()", () => {
     expect(fileFor("spell/util/node/json5")).toBe("src/util/node/json5.ts")
     expect(fileFor("spell/util/node/json5.ts")).toBe("src/util/node/json5.ts")
     expect(fileFor("spell/cli")).toBe("src/cli/index.ts")
-    expect(fileFor("spell-ui/components/ui-button/UIButton")).toBe("spell-ui/src/components/ui-button/UIButton.tsx")
-    expect(fileFor("spell-ui")).toBe("spell-ui/src/index.ts")
+    expect(fileFor("spell/ui/components/ui-button/UIButton")).toBe("ui/src/components/ui-button/UIButton.tsx")
+    expect(fileFor("spell-ui")).toBe("ui/src/index.ts")
   })
 
   test("NOT a library, a relative import, or a file that isn't there", () => {

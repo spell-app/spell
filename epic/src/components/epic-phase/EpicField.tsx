@@ -1,20 +1,20 @@
 import { Show } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
-import { E, UI } from "spell-ui/core"
+import { E, UI } from "spell/ui/core"
 
 // the fold pieces every `<epic-*>` fold shares:  their files, not `epic-item`'s barrel (which would define it here)
-import { FOLDS, Fold } from "spell-epic/components/epic-item/Fold"
+import { FOLDS, Fold } from "spell/epic/components/epic-item/Fold"
 // Spell UI's page zoom (the docs runtime's too):  its plain-DOM leaf alone, so the pack holds no second `<ui-zoom>`
-import { ImageZoom } from "spell-ui/components/ui-zoom/ImageZoom"
+import { ImageZoom } from "spell/ui/components/ui-zoom/ImageZoom"
 
 import { epicFieldVocabulary } from "./EpicField.en"
 import { ICON, LABEL, TEXT } from "./EpicPhase.types"
 
 import fieldCSS from "./EpicField.css?inline"
 import requestsPageCSS from "./EpicField.requests.css?inline"
-import foldCSS from "spell-epic/components/epic-item/Fold.css?inline"
-import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
+import foldCSS from "spell/epic/components/epic-item/Fold.css?inline"
+import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 
 /****************
  * ### `EpicField`

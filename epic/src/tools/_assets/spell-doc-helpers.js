@@ -10,7 +10,7 @@
  * - What they keep in the browser goes through the kit's `PrefStore` (generic:  no Spell UI either)
  */
 import { PrefStore } from "spell/util/persist/PrefStore"
-import { ServerLink } from "spell-epic/review"
+import { ServerLink } from "spell/epic/review"
 
 /** What types or picks:  a key pressed in one is the field's (paging, the jump key). */
 export const FIELDS = "input, textarea, select, ui-input, ui-select, ui-dropdown"

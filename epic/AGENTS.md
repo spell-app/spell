@@ -22,7 +22,7 @@ This file guides AI coding agents (Claude Code, Codex, and others) working in sp
   - the plugin's parts at the root:  `.claude-plugin/`, `skills/`, `hooks/`, `bin/epic`
 - [src/AGENTS.md](src/AGENTS.md) was written inside spell-app, as `packages/epics/AGENTS.md`.
   - Its links lead from where it is now:  the content folder's pages through `../../spell.epics/`,
-    the kit's and the other repos' files by their folders (`../../spell-ui/`, `../../agents/`).
+    the kit's and the other repos' files by their folders (`../../ui/`, `../../agents/`).
   - Some of its prose still speaks from spell-app's checkout, which serves the content folder's pages.
 - Its Solid code follows Spell's Solid 2 rules:  [solid-2.md](../spell.epics/guides/solid/solid-2.md), IN FULL first.
 - Skills:  the plugin's, a `SKILL.md` per skill in [the skills folder](skills/).
@@ -64,14 +64,14 @@ As WWOD §4, plus these.
 
 - ONE name per file, the same in every repo (epic `repo-split` P14, Q47):  the package name and the file's path under
   `src/`, no extension, inside this repo too.
-  - `spell-epic` (the barrel, `EP`), `spell-epic/markup`, `spell-epic/tool/PlanDoc`,
-    `spell-epic/components/epic-page`
+  - `spell-epic` (the barrel, `EP`), `spell/epic/markup`, `spell/epic/tool/PlanDoc`,
+    `spell/epic/components/epic-page`
   - Same-folder peers stay `./PlanItem`;  NEVER a `../` climb, NEVER a `$/` alias.
   - Files outside `src/` (`tests/`, `scripts/`, `hooks/`, the extension's `vscode/`) import `src/` the same way.
-    The one file code imports from OUTSIDE `src/` has an explicit `exports` key:  `spell-epic/vscode/src/docUrls.ts`,
+    The one file code imports from OUTSIDE `src/` has an explicit `exports` key:  `epic/vscode/src/docUrls.ts`,
     for its test.
 - How every tool finds them:  `package.json`'s `exports`, no alias table anywhere.
-  - TypeScript:  the `spell-epic-source` condition (`customConditions` in [tsconfig.json](tsconfig.json)) reads the
+  - TypeScript:  the `spell-source` condition (`customConditions` in [tsconfig.json](tsconfig.json)) reads the
     source.
   - Vite, Vitest, `tsx`:  `default`, the source, adding the extension themselves.
   - Every folder barrel has an explicit key (`"./markup"`, `"./components/epic-page"` ...):  `tsx`, run from another
@@ -79,10 +79,10 @@ As WWOD §4, plus these.
     extension but not a folder's `index`.
   - esbuild (the extension's build, the docs bundle's) finds neither by itself:  the kit's `sourceNames()`
     (`spell/toolchain/sourceNames`) finds our packages' names as their source files.
-- PLAIN `node` writes the extension, as it needs it (the `"./*.ts"` key):  `spell-epic/config/EpicConfig.ts`,
-  `spell-epic/window.mjs`, `spell-epic/tools/pages.js`.
+- PLAIN `node` writes the extension, as it needs it (the `"./*.ts"` key):  `spell/epic/config/EpicConfig.ts`,
+  `spell/epic/window.mjs`, `spell/epic/tools/pages.js`.
   - Plain node runs the hooks, the window script, and the docs tools' `.js` scripts (`details.js`, `update.js` ...):
     every file they load, of ours, imports this way, and of the kit's only its explicitly exported files
     (`spell/server/checkout`, `spell/server/DataFile` ...).
 - A page's pack modules (`spell-ui.entry.js`'s `packModules`) are keyed by the import names themselves
-  (`spell/element`, `spell-ui/core`;  epic `repo-split` P14, Q45):  what a pack's build leaves external.
+  (`spell/element`, `spell/ui/core`;  epic `repo-split` P14, Q45):  what a pack's build leaves external.

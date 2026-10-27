@@ -4,7 +4,7 @@
  * `DOMThreadElement`:  a comment's thread, as the docs runtime's comments draw it on every page.
  * - Defines the family a thread draws in its shadow root first:  `<epic-review>` (its answer pills).
  */
-import "spell-epic/components/epic-review"
+import "spell/epic/components/epic-review"
 
 import { DOMThreadElement, EpicThread } from "./EpicThread"
 import { EpicThreadMessage } from "./EpicThreadMessage"

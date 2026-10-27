@@ -20,9 +20,9 @@
  * - `POST /api/epics/favorite` `{ name, favorite }` -- stars (`true`) or unstars epic `name`;
  *   answers `{ favorites }`, every starred epic's name, sorted
  *   - 400:  no name, or not an epic's name (lower-kebab-case);  `favorite` not a boolean
- * - stored in ONE shared file, `epics/favorites.json5` (`spell-epic/list/EpicCards` `FAVORITES_FILE`), a list:
+ * - stored in ONE shared file, `epics/favorites.json5` (`spell/epic/list/EpicCards` `FAVORITES_FILE`), a list:
  *   every checkout reads the same one, and the shared repo commits it after the turn
- * - each card goes in its group by it as the page server serves the Epics page (`spell-epic/list/RunningEpics`);
+ * - each card goes in its group by it as the page server serves the Epics page (`spell/epic/list/RunningEpics`);
  *   `epic pages index` writes the stars and groups it says into the page
  * - no Claude needed:  it works on a plane
  *
@@ -61,13 +61,13 @@ import { join } from "node:path"
 import { slug } from "spell/util/string"
 import { SRV } from "spell/server"
 import type { RouteModule } from "spell/server/page"
-import { EpicConfig } from "spell-epic/config/EpicConfig"
-import { DataFile } from "spell-epic/data/DataFile"
-import { FAVORITES_FILE, favoritesIn } from "spell-epic/list/EpicCards"
-import type { ContentRouteContext } from "spell-epic/list/runningRoutes"
+import { EpicConfig } from "spell/epic/config/EpicConfig"
+import { DataFile } from "spell/epic/data/DataFile"
+import { FAVORITES_FILE, favoritesIn } from "spell/epic/list/EpicCards"
+import type { ContentRouteContext } from "spell/epic/list/runningRoutes"
 
 // the route `<epic-cards>` asks:  its family's types file (data only)
-import { SAGA_EPICS_API } from "spell-epic/components/epic-cards/EpicCards.types"
+import { SAGA_EPICS_API } from "spell/epic/components/epic-cards/EpicCards.types"
 
 import { EpicTests, TESTS_API } from "./EpicTests"
 import { PlanDocCommands } from "./PlanDocCommands"

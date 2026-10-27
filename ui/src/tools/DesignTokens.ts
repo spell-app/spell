@@ -1,10 +1,10 @@
 import { readFileSync } from "node:fs"
 import { join } from "node:path"
 
-import { CssText } from "spell-ui/styles/CssText"
+import { CssText } from "spell/ui/styles/CssText"
 import { DesignColor, type Oklch } from "./DesignColor.ts"
 import { FoundationTokens } from "./FoundationTokens.ts"
-import type { SiteFoundationGroup } from "spell-ui/docs-components/docs-components.types"
+import type { SiteFoundationGroup } from "spell/ui/docs-components/docs-components.types"
 import type { DesignSkip, DesignTokenRow, DesignTokensFile, DesignTypeStyle, ThemedValue } from "./tools.types.ts"
 
 /****************

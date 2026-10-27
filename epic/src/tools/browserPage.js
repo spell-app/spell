@@ -10,7 +10,7 @@
 import { BrowserPage } from "spell/element-tools/BrowserPage"
 
 // By its name with its `.ts`, its types stripped by `node` itself:  this runs under plain `node`
-import { engineFileFor } from "spell-epic/server/engineLinks.ts"
+import { engineFileFor } from "spell/epic/server/engineLinks.ts"
 import { PACKAGE } from "./pages.js"
 
 /**

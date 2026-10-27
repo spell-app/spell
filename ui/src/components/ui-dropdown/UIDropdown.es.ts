@@ -1,4 +1,4 @@
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /**
  * `<ui-dropdown>` in Spanish:  `<es-desplegable>`, with the names and texts only it uses (from `UIDropdown.en.ts`).

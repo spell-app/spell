@@ -16,10 +16,10 @@ import "./RunnerPane.css"
  *   - The tools sit OUTSIDE the toolbar, so the toolbar's own box is the track (`chrome.css`):
  *     its rounded ends stay put while the tabs scroll, the fade and the `‹` / `›` inside them.
  *   Whoever mounts a runner defines the `<ui-*>` tags,
- *   with `spell-app/app/solid/loadUI`, or a root around it (`<spell-viewer>`),
+ *   with `spell/app/app/solid/loadUI`, or a root around it (`<spell-viewer>`),
  *   and gives it Fomantic's icon names (`<ui-root icons="fomantic">`, `<spell-viewer>`'s default `icons`).
  * - HACK: each tab's icon is a slotted `<ui-icon>`, not the item's `icon`:
- *   `<ui-menu>` draws that at 0 x 0 (epic page I1, as `spell-app/app/solid`'s `<Action>`).
+ *   `<ui-menu>` draws that at 0 x 0 (epic page I1, as `spell/app/app/solid`'s `<Action>`).
  * - SEE:  its App UI components page, `app/docs/RunnerPane.html` (`/components/app/RunnerPane.html`).
  ****************/
 export function RunnerPane<Id extends string>(props: RunnerPaneProps<Id>) {

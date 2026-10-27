@@ -1,6 +1,6 @@
 import type { JSX } from "@solidjs/web"
 
-import { E } from "spell-ui/core"
+import { E } from "spell/ui/core"
 import { repeatVocabulary } from "./UIRepeat.en"
 import { FormBinding } from "./FormBinding"
 

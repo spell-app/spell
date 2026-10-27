@@ -3,7 +3,7 @@
 import { chromium, type Browser, type Page } from "@playwright/test"
 import { afterAll, beforeAll, describe, expect, it } from "vite-plus/test"
 
-import { StaticCatalog, StaticRender, StaticStylesheet } from "spell-ui/static"
+import { StaticCatalog, StaticRender, StaticStylesheet } from "spell/ui/static"
 
 /**
  * P4:  a static page works WITHOUT scripts where the platform allows.  Rendered in node, then opened in Chromium

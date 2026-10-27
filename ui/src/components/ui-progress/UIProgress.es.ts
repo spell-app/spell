@@ -1,4 +1,4 @@
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /**
  * `<ui-progress>` in Spanish:  `<es-progreso>`, with the names and texts only it uses (from `UIProgress.en.ts`).

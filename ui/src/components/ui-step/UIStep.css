@@ -192,7 +192,7 @@
 
   /* Group:  a bordered row of steps.
      - `container: none`:  the root is never the size container (its DOM element is, or in static markup its parent).
-       A static server render (`spell-ui/static`) moves the DOM element's `container` onto the root,
+       A static server render (`spell/ui/static`) moves the DOM element's `container` onto the root,
        where inline-size containment would shrink the inline-flex group to nothing. */
   .ui.steps {
     container: none;

@@ -1,4 +1,4 @@
-import { E } from "spell-ui/core"
+import { E } from "spell/ui/core"
 import { columnVocabulary } from "./UIColumn.en"
 import { GridPart } from "./GridPart"
 

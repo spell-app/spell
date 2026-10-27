@@ -42,11 +42,11 @@ import { fileURLToPath } from "node:url"
 
 import { clockTime } from "spell/util/time"
 import { RealPath } from "spell/server/RealPath"
-import { EpicConfig } from "spell-epic/config/EpicConfig"
+import { EpicConfig } from "spell/epic/config/EpicConfig"
 
-import { AirplaneMode } from "spell-epic/tools/AirplaneMode"
+import { AirplaneMode } from "spell/epic/tools/AirplaneMode"
 
-import { RunningEpics, sessionsTitledFor, type TitledSession } from "spell-epic/list/RunningEpics"
+import { RunningEpics, sessionsTitledFor, type TitledSession } from "spell/epic/list/RunningEpics"
 import { listenerOf } from "./InboxPoller.mjs"
 import { ReviewInbox, type InboxWoken, type PageInbox, type WakeClaim, type WokenState } from "./ReviewInbox"
 

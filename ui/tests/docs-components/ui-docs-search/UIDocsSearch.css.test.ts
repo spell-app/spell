@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { foundationCSS } from "spell-ui/styles"
+import { foundationCSS } from "spell/ui/styles"
 
-import { Sheets } from "spell-ui/test-helpers/Sheets"
+import { Sheets } from "spell/ui/test-helpers/Sheets"
 
-import searchCSS from "spell-ui/docs-components/ui-docs-search/UIDocsSearch.css?inline"
-import searchRaw from "spell-ui/docs-components/ui-docs-search/UIDocsSearch.css?raw"
+import searchCSS from "spell/ui/docs-components/ui-docs-search/UIDocsSearch.css?inline"
+import searchRaw from "spell/ui/docs-components/ui-docs-search/UIDocsSearch.css?raw"
 
 /**
  * `UIDocsSearch.css`:  the sheet's source rules, and its look on the shadow markup contract (a stand-in host).

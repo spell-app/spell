@@ -4,8 +4,8 @@ import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs"
 import path from "node:path"
 import { pathToFileURL } from "node:url"
 
-import { IconName } from "spell-ui/icons/IconName"
-import { ICON_PACK_INDEX, type IconPackEntry, type IconPackIndex } from "spell-ui/icons/icons.types"
+import { IconName } from "spell/ui/icons/IconName"
+import { ICON_PACK_INDEX, type IconPackEntry, type IconPackIndex } from "spell/ui/icons/icons.types"
 import { IconPackError, type IconPackProblem, type IconPackReport, type IconPackUnsafePolicy } from "./tools.types.ts"
 
 /****************

@@ -18,7 +18,7 @@
 import { existsSync } from "node:fs"
 import { join } from "node:path"
 
-import { DataFile } from "spell-epic/data/DataFile.ts"
+import { DataFile } from "spell/epic/data/DataFile.ts"
 import { SECTION_FLAGS, make, withCode } from "./answerPages.js"
 
 /** The attribute that marks a folded round's `<ui-section>`, its number. */

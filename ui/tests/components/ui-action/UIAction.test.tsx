@@ -3,12 +3,12 @@ import { describe, expect, it, vi } from "vite-plus/test"
 import { expectAccessible } from "spell/test-helpers/A11y"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import type { DOMElement } from "spell/element"
-import type { ActionToDraw, UIAction } from "spell-ui/components/ui-action"
-import { UIItem } from "spell-ui/components/ui-item"
-import { UI } from "spell-ui/core"
+import type { ActionToDraw, UIAction } from "spell/ui/components/ui-action"
+import { UIItem } from "spell/ui/components/ui-item"
+import { UI } from "spell/ui/core"
 
-import "spell-ui/components/ui-action"
-import "spell-ui/components/ui-menu"
+import "spell/ui/components/ui-action"
+import "spell/ui/components/ui-menu"
 
 /** A `<ui-action>`'s DOM element, with its `action` property. */
 type ActionElement = DOMElement & { component: UIAction; action?: ActionToDraw }

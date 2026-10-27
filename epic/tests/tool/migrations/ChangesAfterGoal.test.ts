@@ -4,8 +4,8 @@
 import { parseHTML } from "linkedom"
 import { describe, expect, test } from "vite-plus/test"
 
-import { Markup } from "spell-epic/markup"
-import { Migrations } from "spell-epic/tool/migrations/Migrations"
+import { Markup } from "spell/epic/markup"
+import { Migrations } from "spell/epic/tool/migrations/Migrations"
 
 /** The step under test. */
 const STEP = Migrations.named("changes-after-goal")!

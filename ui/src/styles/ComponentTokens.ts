@@ -14,7 +14,7 @@ import type { TokenDeclaration } from "./styles.types"
  *   - the browser test (`tests/test-helpers/componentTokens.test.ts`)
  *   - the codemod (`yarn tokens:alias`, `scripts/tokens-alias.ts`)
  *   - the docs site's token tables, in node (`src/tools/FamilyTokens.ts`, `src/tools/FoundationTokens.ts`)
- * - Build / test time only:  left out of the `spell-ui/styles` barrel, import the leaf file.
+ * - Build / test time only:  left out of the `spell/ui/styles` barrel, import the leaf file.
  * - A COMPONENT token is `--ui-<tag>` or `--ui-<tag>-*`, for a tag some vocabulary declares:
  *   `ui-button` => `--ui-button-radius`.
  *   - Minus the foundation's own names:  `--ui-text-color` is a token of `tokens.css`, not of `<ui-text>`.

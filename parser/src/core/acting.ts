@@ -15,7 +15,7 @@
  *     ready to draw:  a toolbar, the app's menu bar or a context menu draws the same list.
  *   - `core.menuBarOf(app)`:  the one its app names as its menu bar, `- its menu bar is "game menu"`.
  * - `undo` and `redo` are the app's own actions:  their titles follow the history, `Undo Turn Card`.
- * - Part of `core`:  imported by `spell-parser/core`'s barrel for its side effect.
+ * - Part of `core`:  imported by `spell/parser/core`'s barrel for its side effect.
  * - Knows nothing of the page:
  *   the runner calls it from its keys and clicks, and Spell UI's `<ui-action>` draws what `menuOf()` gives.
  */

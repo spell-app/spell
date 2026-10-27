@@ -1,10 +1,10 @@
 import { describe, expect, test } from "vite-plus/test"
 
 import { Fixture } from "spell/test-helpers/Fixture"
-import { DATA, PAGE, SEARCH, siteTag } from "spell-ui/test-helpers/docsSearch.fixtures"
+import { DATA, PAGE, SEARCH, siteTag } from "spell/ui/test-helpers/docsSearch.fixtures"
 
-import { PageOutline } from "spell-ui/components/ui-toc/PageOutline"
-import { SearchIndex } from "spell-ui/docs-components/ui-docs-search/SearchIndex"
+import { PageOutline } from "spell/ui/components/ui-toc/PageOutline"
+import { SearchIndex } from "spell/ui/docs-components/ui-docs-search/SearchIndex"
 
 /** The index of the test data and search file. */
 const INDEX = new SearchIndex({ data: DATA, search: SEARCH })

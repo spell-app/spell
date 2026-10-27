@@ -14,8 +14,8 @@ import { tmpdir } from "os"
 import { dirname, join } from "path"
 import { afterAll, describe, expect, test } from "vite-plus/test"
 
-import { type Generator } from "spell-epic/command/command.types"
-import { MainMerge } from "spell-epic/command/MainMerge"
+import { type Generator } from "spell/epic/command/command.types"
+import { MainMerge } from "spell/epic/command/MainMerge"
 
 /**
  * Throwaway repos:

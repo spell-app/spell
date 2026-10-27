@@ -1,8 +1,8 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import type { SiteTag } from "spell-ui/docs-components"
+import type { SiteTag } from "spell/ui/docs-components"
 
-import { ApiModel } from "spell-ui/docs-components/ui-docs-api/ApiModel"
+import { ApiModel } from "spell/ui/docs-components/ui-docs-api/ApiModel"
 
 /** `<x-button>`:  a plain attribute and a rich-data one. */
 const BUTTON = tagOf("x-button", {

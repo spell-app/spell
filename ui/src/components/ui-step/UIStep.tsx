@@ -1,10 +1,10 @@
 import { Show } from "solid-js"
 import { Dynamic, isServer, type JSX } from "@solidjs/web"
 
-import { E, UIT } from "spell-ui/core"
+import { E, UIT } from "spell/ui/core"
 import { stepVocabulary } from "./UIStep.en"
 
-import partsCSS from "spell-ui/components/ui-parts/UIParts.css?inline"
+import partsCSS from "spell/ui/components/ui-parts/UIParts.css?inline"
 import stepCSS from "./UIStep.css?inline"
 
 /****************
@@ -45,7 +45,7 @@ export class UIStep extends E.UIComponent<typeof stepVocabulary> {
   @E.protoMerged static elementSetup = {
     styleSheets: { step: stepCSS, parts: partsCSS },
     cssStates: ["completed"],
-    // one item of the group's ordered list;  a server render (`spell-ui/static`) makes the root an `<li>`
+    // one item of the group's ordered list;  a server render (`spell/ui/static`) makes the root an `<li>`
     aria: { role: "listitem" },
     // `disabled`:  its link or button is disabled
     disabled: "its own"
@@ -151,7 +151,7 @@ export class UIStep extends E.UIComponent<typeof stepVocabulary> {
       >
         <Show when={this.hasIcon}>
           <span class={UIT.ICON} part={this.partForName("icon")}>
-            {/* a server render (`spell-ui/static`) swaps the slot for its content, `hidden` and all:  leave it out */}
+            {/* a server render (`spell/ui/static`) swaps the slot for its content, `hidden` and all:  leave it out */}
             <Show when={!(isServer && this.completed)}>
               <slot name={this.slotForName("icon")} hidden={this.completed || undefined}>
                 {this.iconGlyph.svg}

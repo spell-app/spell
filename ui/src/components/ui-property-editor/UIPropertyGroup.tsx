@@ -1,11 +1,11 @@
 import { Show } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
-import { E } from "spell-ui/core"
+import { E } from "spell/ui/core"
 // the family barrel, not the leaf:  the lib build then imports `ui-panel.js` instead of splitting a shared chunk
 // (SIDE EFFECT:  defines `<ui-panel>`, and `<ui-section>` / `<ui-sections>`:  a group is a panel's band)
-import { UIPanel } from "spell-ui/components/ui-panel"
-import type { SectionVocabulary } from "spell-ui/components/ui-section/UISection.types"
+import { UIPanel } from "spell/ui/components/ui-panel"
+import type { SectionVocabulary } from "spell/ui/components/ui-section/UISection.types"
 import { propertyGroupVocabulary } from "./UIPropertyGroup.en"
 
 import groupCSS from "./UIPropertyGroup.css?inline"

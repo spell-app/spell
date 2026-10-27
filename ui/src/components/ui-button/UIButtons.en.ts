@@ -1,10 +1,10 @@
 /**
  * Every name `<ui-buttons>` uses:  tag, attributes (kind + allowed values), events, slots, parts, states,
- * texts.  Schema:  `E.ComponentVocabulary` (`spell-ui/vocabulary`).
+ * texts.  Schema:  `E.ComponentVocabulary` (`spell/ui/vocabulary`).
  * - The family's grammar notes are in `UIButton.en.ts`.
  */
 
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 import { ATTACH_CLASSES, COLOR_SWITCHES } from "./UIButton.types"
 
 /****************

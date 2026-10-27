@@ -1,4 +1,4 @@
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /**
  * `<ui-root>` in Spanish:  `<es-raiz>`, with the names and texts only it uses (from `UIRoot.en.ts`).

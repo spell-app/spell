@@ -4,7 +4,7 @@ import { join, relative } from "node:path"
 import { readJSON5File } from "spell/util/node/json5"
 import { dedent } from "spell/util/string"
 
-import type { SiteDataFile } from "spell-ui/docs-components/docs-components.types"
+import type { SiteDataFile } from "spell/ui/docs-components/docs-components.types"
 import { COMPONENTS, type DesignExample, type DesignSource } from "./tools.types.ts"
 
 /****************

@@ -4,8 +4,8 @@ import { fileURLToPath } from "node:url"
 import { describe, expect, test } from "vite-plus/test"
 
 import { readJSON5File } from "spell/util/node/json5"
-import type { SiteDataFile } from "spell-ui/docs-components/docs-components.types"
-import { ElementManifests } from "spell-ui/tools/ElementManifests"
+import type { SiteDataFile } from "spell/ui/docs-components/docs-components.types"
+import { ElementManifests } from "spell/ui/tools/ElementManifests"
 
 /** Spell UI's folder (the brand's manifests are checked in spell-brand's own tests:  it's above Spell UI). */
 const UI = fileURLToPath(new URL("../../", import.meta.url))

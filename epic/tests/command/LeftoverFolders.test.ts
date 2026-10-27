@@ -18,8 +18,8 @@ import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { afterAll, describe, expect, test } from "vite-plus/test"
 
-import { LeftoverFolders } from "spell-epic/command/LeftoverFolders"
-import { Worktrees } from "spell-epic/command/Worktrees"
+import { LeftoverFolders } from "spell/epic/command/LeftoverFolders"
+import { Worktrees } from "spell/epic/command/Worktrees"
 
 const TEMP = realpathSync(mkdtempSync(join(tmpdir(), "leftover-folders-")))
 const HOME = join(TEMP, "epic-home")

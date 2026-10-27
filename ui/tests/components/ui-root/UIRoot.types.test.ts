@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { RootTimeout } from "spell-ui/components/ui-root/UIRoot.types"
+import { RootTimeout } from "spell/ui/components/ui-root/UIRoot.types"
 
 describe("RootTimeout.parse()", () => {
   test.each([

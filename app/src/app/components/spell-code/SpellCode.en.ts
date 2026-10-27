@@ -1,12 +1,12 @@
 /**
  * Every name `<spell-code>` adds to `<ui-code>`'s:  its tag, and `language`'s default.
- * Schema:  `E.ComponentVocabulary` (`spell-ui/core`).
+ * Schema:  `E.ComponentVocabulary` (`spell/ui/core`).
  * - `<spell-code>` is a `<ui-code>` (`SpellCode extends UICode`):
  *   its whole vocabulary is `<ui-code>`'s names, with these in place (`SpellCode.vocabulary`, `SpellCode.tsx`).
  * - Pure data:  `import type` only, so node can read it (the component pack's catalog, `vite.element.config.ts`).
  */
 
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /****************
  * ### `<spell-code>`

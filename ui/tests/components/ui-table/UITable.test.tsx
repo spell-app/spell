@@ -1,14 +1,14 @@
 import { beforeEach, describe, expect, it, onTestFinished } from "vite-plus/test"
 import { page, userEvent } from "vite-plus/test/browser"
 
-import { UI } from "spell-ui/runtime"
-import type { TableColumn, TableRow, TableSortDetail } from "spell-ui/components/components.types"
+import { UI } from "spell/ui/runtime"
+import type { TableColumn, TableRow, TableSortDetail } from "spell/ui/components/components.types"
 import type { DOMElement } from "spell/element"
 import { expectAccessible } from "spell/test-helpers/A11y"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import { Viewport } from "spell/test-helpers/Viewport"
 
-import "spell-ui/components/ui-table"
+import "spell/ui/components/ui-table"
 
 /** Element-markup rewrites of every example, by path. */
 const EXAMPLES = import.meta.glob<string>("/src/components/ui-table/examples/elements/*.html", {

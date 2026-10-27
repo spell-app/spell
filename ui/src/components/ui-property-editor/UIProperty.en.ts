@@ -4,8 +4,8 @@
  * - The shape is `E.ComponentVocabulary`.  Pure data.
  */
 
-import type { E } from "spell-ui/core"
-import { fieldVocabulary } from "spell-ui/components/ui-form/UIField.en"
+import type { E } from "spell/ui/core"
+import { fieldVocabulary } from "spell/ui/components/ui-form/UIField.en"
 import { passThrough } from "./UIPropertyEditor.types"
 
 /****************

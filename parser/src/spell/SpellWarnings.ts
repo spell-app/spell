@@ -7,13 +7,13 @@
  * - Parse errors are the other kind of problem:  a line spell can't read (`SP.Block.getParseErrors()`).
  *   A line with a warning compiles as it is.
  * - Plain matches and their `data`, no scope of its own:
- *   imports only `spell/util`, `spell-parser/parser`, and `spell-parser/spell` (read at call time),
+ *   imports only `spell/util`, `spell/parser/parser`, and `spell/parser/spell` (read at call time),
  *   and `Synonyms`, the article word rules' class.
  */
 import { upperFirst } from "spell/util"
-import { P } from "spell-parser/parser"
-import { SP } from "spell-parser/spell"
-import { Synonyms } from "spell-parser/spell/rules/expressions"
+import { P } from "spell/parser/parser"
+import { SP } from "spell/parser/spell"
+import { Synonyms } from "spell/parser/spell/rules/expressions"
 
 /**
  * Notes warnings on matches while parsing, and gathers a file's back up.

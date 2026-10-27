@@ -1,7 +1,7 @@
 /**
  * Loose types and constants of the `epic-page` family;
  * and the JSX types of the tags every `<epic-*>` element draws in its shadow root.
- * - Spell UI's `<ui-*>` tags:  its exact types, generated (`spell-ui/jsx`), imported here.
+ * - Spell UI's `<ui-*>` tags:  its exact types, generated (`spell/ui/jsx`), imported here.
  * - The pack's own `<epic-*>` tags:  loose (`EpicJSXAttributes`), each family declaring the ones it draws.
  * - Data only:  nothing here runs.
  */
@@ -9,7 +9,7 @@
 import type { JSX } from "@solidjs/web"
 
 import type { E } from "spell/element"
-import type {} from "spell-ui/jsx"
+import type {} from "spell/ui/jsx"
 
 import type { epicPageVocabulary } from "./EpicPage.en"
 
@@ -232,14 +232,14 @@ export const ICON = "icon"
 
 /**
  * Loose attributes of an `<epic-*>` tag drawn in JSX:  HTML attributes, plus any attribute.
- * - Loose until the pack generates exact types, as Spell UI does (`spell-ui/jsx`).
+ * - Loose until the pack generates exact types, as Spell UI does (`spell/ui/jsx`).
  */
 export type EpicJSXAttributes = JSX.HTMLAttributes<HTMLElement> & { [attribute: string]: unknown }
 
 declare module "@solidjs/web/types/jsx.js" {
   namespace JSX {
     interface IntrinsicElements {
-      // the pack's own families it draws in its shadow root (Spell UI's:  `spell-ui/jsx`)
+      // the pack's own families it draws in its shadow root (Spell UI's:  `spell/ui/jsx`)
       "epic-new-item": EpicJSXAttributes
       "epic-agents": EpicJSXAttributes
       "epic-test-run": EpicJSXAttributes

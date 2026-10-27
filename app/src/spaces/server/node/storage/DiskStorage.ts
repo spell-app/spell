@@ -3,7 +3,7 @@ import { readdir, readFile } from "fs/promises"
 import { relative, sep } from "path"
 
 import { SRV } from "spell/server"
-import type { SpaceStorage } from "spell-app/spaces/models/SpaceStorage"
+import type { SpaceStorage } from "spell/app/spaces/models/SpaceStorage"
 
 /****************
  * ### `DiskStorage`

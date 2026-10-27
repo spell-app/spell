@@ -1,6 +1,6 @@
 import { describe, test, expect } from "vite-plus/test"
 
-import { P } from "spell-parser/parser"
+import { P } from "spell/parser/parser"
 
 /** A parser that only looks rules up by name:  all `leadingRules()` asks of one. */
 function parserWith(rules: Record<string, P.Rule>): P.Parser {

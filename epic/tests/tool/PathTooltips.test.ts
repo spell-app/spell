@@ -5,8 +5,8 @@
 import { parseHTML } from "linkedom"
 import { describe, expect, test } from "vite-plus/test"
 
-import { IncomingHtml } from "spell-epic/tool/IncomingHtml"
-import { PathTooltips } from "spell-epic/tool/PathTooltips"
+import { IncomingHtml } from "spell/epic/tool/IncomingHtml"
+import { PathTooltips } from "spell/epic/tool/PathTooltips"
 
 /** `html` rewritten, with what `rewrite()` said it did. */
 function rewritten(html: string): { html: string; done: string[] } {

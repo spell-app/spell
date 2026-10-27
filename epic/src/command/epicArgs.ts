@@ -1,13 +1,13 @@
 import { kebabCase } from "spell/util/string"
 // By file:  the definitions' barrel loads every vocabulary, and `epic` starts lean
-import { ItemLetters, isItemId } from "spell-epic/definitions/definitions.types"
-import { PhaseIds } from "spell-epic/phases"
+import { ItemLetters, isItemId } from "spell/epic/definitions/definitions.types"
+import { PhaseIds } from "spell/epic/phases"
 
 import { EpicCommandError, parseVerbArgs } from "./command.types"
 
 /**
  * How an `epic <verb> ...` command line becomes the `epic` tool's (`<verb> <name> ...`, its own order:  `PlanDocCommands`):
- * a thin translation, so the tool itself (`spell-epic/tool/PlanDocCommands`) keeps its arguments.
+ * a thin translation, so the tool itself (`spell/epic/tool/PlanDocCommands`) keeps its arguments.
  * - Owen's scheme (Command Review Page, 2026-10-12):  `epic <verb> <epic>#<id>` for anything inside an epic page
  *   - `seo`:  the page
  *   - `seo#J3`:  an item (or a comment, `seo#C3`, the old `cm3` read the same;  or an Overview section)

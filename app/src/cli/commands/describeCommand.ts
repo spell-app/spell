@@ -1,6 +1,6 @@
-import { SP } from "spell-parser/spell"
-import { LSP } from "spell-app/lsp"
-import { CLI } from "spell-app/cli"
+import { SP } from "spell/parser/spell"
+import { LSP } from "spell/app/lsp"
+import { CLI } from "spell/app/cli"
 
 /**
  * `spell describe [project] [name] [member]`:  what the Type Explorer shows, as text -- see `describeText.ts`.

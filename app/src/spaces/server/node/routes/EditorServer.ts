@@ -5,7 +5,7 @@ import { dirname, join } from "node:path"
 import { stripVTControlCharacters } from "node:util"
 
 import { SRV } from "spell/server"
-import environment from "spell-app/spaces/server/node/environment"
+import environment from "spell/app/spaces/server/node/environment"
 
 /**
  * The editor UI -- vite's dev server for the app's build folder, `app/` (what `yarn start:dev` runs), with hot reload -- as a child

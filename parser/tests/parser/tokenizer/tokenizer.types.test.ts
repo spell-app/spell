@@ -1,6 +1,6 @@
 import { describe, test, expect } from "vite-plus/test"
 
-import { P } from "spell-parser/parser"
+import { P } from "spell/parser/parser"
 
 describe("P.offsetForPosition()", () => {
   const text = "one\ntwo\n\nfour"

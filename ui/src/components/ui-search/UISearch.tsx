@@ -1,8 +1,8 @@
 import { For, Show } from "solid-js"
 import { isServer, type JSX } from "@solidjs/web"
 
-import { E, UI, UIT } from "spell-ui/core"
-import { F } from "spell-ui/forms"
+import { E, UI, UIT } from "spell/ui/core"
+import { F } from "spell/ui/forms"
 import { searchVocabulary } from "./UISearch.en"
 import { SearchFallback } from "./UISearch.fallback"
 import { SearchMatcher } from "./SearchMatcher"
@@ -16,7 +16,7 @@ import {
   type Vocabulary
 } from "./UISearch.types"
 
-import inputCSS from "spell-ui/components/ui-input/UIInput.css?inline"
+import inputCSS from "spell/ui/components/ui-input/UIInput.css?inline"
 import searchCSS from "./UISearch.css?inline"
 
 /****************
@@ -438,7 +438,7 @@ export class UISearch extends F.FormComponent<Vocabulary> {
   }
 
   /**
-   * Server render only (`spell-ui/static`):  the input's `name` (it holds the query, the value)
+   * Server render only (`spell/ui/static`):  the input's `name` (it holds the query, the value)
    * and the `STATIC_CONTROL` mark, so a static form submits it.
    * - `{}` in a browser, where the DOM element submits (`ElementInternals`).
    */

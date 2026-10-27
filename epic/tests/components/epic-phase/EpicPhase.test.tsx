@@ -1,21 +1,21 @@
 import { describe, expect, test, vi } from "vite-plus/test"
 import { userEvent } from "vite-plus/test/browser"
 
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import { expectAccessible } from "spell/test-helpers/A11y"
 
-import { ReviewClient, type Inbox } from "spell-epic/review"
+import { ReviewClient, type Inbox } from "spell/epic/review"
 
-import "spell-ui/components/ui-section"
-import "spell-epic/components/epic-section"
-import "spell-epic/components/epic-phase"
-import "spell-epic/components/epic-update"
-import "spell-epic/components/epic-item"
-import "spell-epic/components/epic-mark"
-import "spell-ui/components/ui-modal"
+import "spell/ui/components/ui-section"
+import "spell/epic/components/epic-section"
+import "spell/epic/components/epic-phase"
+import "spell/epic/components/epic-update"
+import "spell/epic/components/epic-item"
+import "spell/epic/components/epic-mark"
+import "spell/ui/components/ui-modal"
 // what a request's thumbnail opens in:  `<ui-root>` loads it on a page
-import "spell-ui/components/ui-zoom"
+import "spell/ui/components/ui-zoom"
 
 /** `host`'s inner `<ui-section>`. */
 function inner(host: Element): E.DOMElement {

@@ -1,18 +1,18 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { colorsCSS, foundationCSS } from "spell-ui/styles"
+import { colorsCSS, foundationCSS } from "spell/ui/styles"
 
 import { Fixture } from "spell/test-helpers/Fixture"
-import { Sheets } from "spell-ui/test-helpers/Sheets"
+import { Sheets } from "spell/ui/test-helpers/Sheets"
 
-import { itemsVocabulary } from "spell-ui/components/ui-items/UIItems.en"
+import { itemsVocabulary } from "spell/ui/components/ui-items/UIItems.en"
 
-import buttonCSS from "spell-ui/components/ui-button/UIButton.css?inline"
-import imageCSS from "spell-ui/components/ui-image/UIImage.css?inline"
-import partsCSS from "spell-ui/components/ui-parts/UIParts.css?inline"
-import segmentCSS from "spell-ui/components/ui-segment/UISegment.css?inline"
-import itemsCSS from "spell-ui/components/ui-items/UIItems.css?inline"
-import itemsRaw from "spell-ui/components/ui-items/UIItems.css?raw"
+import buttonCSS from "spell/ui/components/ui-button/UIButton.css?inline"
+import imageCSS from "spell/ui/components/ui-image/UIImage.css?inline"
+import partsCSS from "spell/ui/components/ui-parts/UIParts.css?inline"
+import segmentCSS from "spell/ui/components/ui-segment/UISegment.css?inline"
+import itemsCSS from "spell/ui/components/ui-items/UIItems.css?inline"
+import itemsRaw from "spell/ui/components/ui-items/UIItems.css?raw"
 
 /**
  * `UIItems.css` on its own, before any element exists:  the sheet's source rules, and the computed styles of the

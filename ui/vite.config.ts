@@ -5,12 +5,12 @@ import { createRequire } from "node:module"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
 
-// `.ts` written:  other repos' Vite configs import this one (`spell-ui/vite.config.ts`), and plain node loads it there,
+// `.ts` written:  other repos' Vite configs import this one (`spell/ui/vite.config.ts`), and plain node loads it there,
 // which adds no extension (the packages' `"./*.ts"` exports)
 import { elementBaseConfig } from "spell/element-tools/elementConfig.ts"
 import { hotElements } from "spell/element-tools/HotElements.ts"
 import { fmtConfig, packageLint } from "spell/toolchain/lint"
-import { environment } from "spell-ui/tools/environment.ts"
+import { environment } from "spell/ui/tools/environment.ts"
 
 /** Absolute path of `src/`. */
 const SRC = fileURLToPath(new URL("./src", import.meta.url))
@@ -150,7 +150,7 @@ export const SOLID_EXTERNAL = /^solid-js(\/|$)|^@solidjs\//
  * - The kit's element build settings (`elementBaseConfig()`, `spell/element-tools/elementConfig`), which every
  *   component pack's script is built on too (epic `repo-split` P10):  the decorator pre-pass BEFORE Solid's plugin,
  *   ONE Solid, Lightning CSS on the platform floor (`CSS_TARGETS`).
- *   - No aliases:  every file is imported by its package name (`spell-ui/components/ui-button/UIButton`), which Vite
+ *   - No aliases:  every file is imported by its package name (`spell/ui/components/ui-button/UIButton`), which Vite
  *     resolves through each package's `exports`.
  * - A FUNCTION, so every caller gets its own plugin instances.
  * - `SPELL_UI_SOLID_PROD=1` (`environment.isSolidProduction`, `src/tools/environment.ts`):
@@ -252,7 +252,7 @@ const FMT_IGNORE = ["docs/**", "site/_assets/**"]
  * goes to `emoji/<set>/<letter>-[hash].js`, so the two name sets' chunks are told apart:
  * - by a reader of `dist/`
  * - by the docs' single-file bundler, which loads them lazily instead of inlining them
- *   (`spell-epic/src/tools/bundle-spell-ui.js`)
+ *   (`epic/src/tools/bundle-spell-ui.js`)
  */
 function emojiChunkNames(chunk: { facadeModuleId: string | null; moduleIds: readonly string[] }): string {
   const data = EMOJI_DATA.exec(chunk.facadeModuleId ?? chunk.moduleIds[0] ?? "")
@@ -272,23 +272,23 @@ const EMOJI_DATA = /\/components\/ui-emoji\/data\/([\w-]+)\/(\w+)\.json$/
  *   - Spell UI's `src/` is included (but its node tools, its `spell` commands and its test helpers), with the kit's
  *     two folders.
  * - Then `beforeWriteFile` moves what the plugin wrote (the folders as they sit under `DECLARATIONS_ROOT`):
- *   - `dist/spell-ui/src/**` up to `dist/**`:  the families land in `dist/components/**`
+ *   - `dist/ui/src/**` up to `dist/**`:  the families land in `dist/components/**`
  *   - `dist/src/util/**` (the kit's `util/`) to `dist/_util/**` (not `dist/util/`:  that's Spell UI's `src/util/`)
  *   - `dist/src/element/**` (the kit's `element/`) to `dist/_spell-element/**`
  * - It also rewrites every import of a file that ships in `dist/` to a relative one (a `declare module`
- *   augmentation's too):  Spell UI's own (`spell-ui/core`, `spell-ui/components/ui-parts/UIParts`), and the kit's
+ *   augmentation's too):  Spell UI's own (`spell/ui/core`, `spell/ui/components/ui-parts/UIParts`), and the kit's
  *   `spell/util/...` and `spell/element/...`.
  *   - `pathsToAliases: false`:
- *     the plugin's own rewrite measures from the layout BEFORE the move, and gets `../spell-ui/src/...`.
+ *     the plugin's own rewrite measures from the layout BEFORE the move, and gets `../ui/src/...`.
  * - `?inline` CSS imports (`styles/index.ts`) become `declare const x: string`:  only `vite/client` types them.
  * - Why not `bundleTypes`:  it rolls each entry up on its own, so a class like `UIComponent` is copied into every entry
  *   that reaches it, and a class with private members is a DIFFERENT type in each copy.
- *   Per-file declarations keep one `UIComponent` for `spell-ui/core` and `spell-ui/ui-button` alike.
+ *   Per-file declarations keep one `UIComponent` for `spell/ui/core` and `spell/ui/ui-button` alike.
  * - `util` and `spell-element` are not published on their own, so their declarations ship inside `spell-ui`
  *   (`util`'s GENERIC ones only).
  *   NOT `util/spell/` or `util`'s barrel (which flattens it in):
  *   `exclude` lists them, and `src/util/index.ts` imports file by file.
- * - MUST end with no `spell-ui/...`, `spell/util` or `spell/element` in `dist/**.d.ts`, and no path
+ * - MUST end with no `spell/ui/...`, `spell/util` or `spell/element` in `dist/**.d.ts`, and no path
  *   outside `dist/`;  `yarn smoke` checks (`DeclarationCheck`).
  */
 export function declarations(): PluginOptions {
@@ -428,7 +428,7 @@ function hotElementsPlugin(): Plugin {
 /**
  * Copies the built-in icon packs, `src/icons/icon-packs/**` (SVGs + each `pack.js`), to `<dir>/**` in the build output,
  * next to the chunks, where `BuiltInPacks` looks via `import.meta.url` (`notes/icons.md`, "Shipping icons").
- * - Library build:  `BuiltInPacks` lives in `dist/core.js` (the `core` entry re-exports `spell-ui/icons`), so `dist/icon-packs/`.
+ * - Library build:  `BuiltInPacks` lives in `dist/core.js` (the `core` entry re-exports `spell/ui/icons`), so `dist/icon-packs/`.
  * - Docs site:  not this plugin:  `site/_assets/icon-packs` is a symlink to the source folder (`scripts/site-bundle.ts`).
  * - Copied as ASSETS, never bundled:  the runtime imports each `pack.js` by URL, on demand.
  * - Client builds only:  a server / prerender build needs no icon files.

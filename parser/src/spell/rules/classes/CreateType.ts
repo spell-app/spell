@@ -1,5 +1,5 @@
 import { proto } from "spell/util"
-import { P } from "spell-parser/parser"
+import { P } from "spell/parser/parser"
 import { isViewType } from "./classes.shared"
 import { TypeDeclaration } from "./TypeDeclaration"
 

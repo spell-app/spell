@@ -1,6 +1,6 @@
 /**
  * The English vocabulary of `<ui-toolbar>`:  `<ui-menu>`'s, under the toolbar's own tag, with its scroll buttons.
- * The shape is `E.ComponentVocabulary` (`spell-ui/vocabulary`).
+ * The shape is `E.ComponentVocabulary` (`spell/ui/vocabulary`).
  * - Built ON the menu's:  the same attributes, events, slots, states and owned parts,
  *   so an attribute the menu gains reaches the toolbar with no change here.
  * - Its own:  the `toolbar` box around the menu,
@@ -9,8 +9,8 @@
  * - The same noun (`menu`):  its items draw as a menu's, and `UIMenu.css` styles it.
  */
 
-import type { E } from "spell-ui/core"
-import { menuVocabulary } from "spell-ui/components/ui-menu/UIMenu.en"
+import type { E } from "spell/ui/core"
+import { menuVocabulary } from "spell/ui/components/ui-menu/UIMenu.en"
 
 /****************
  * ### `toolbarVocabulary`

@@ -9,10 +9,10 @@
 
 // Import directly:  the persist barrel would bring the database and server places too
 import { PrefStore } from "spell/util/persist/PrefStore"
-import { readEpicDate, epicGroupFor, type EpicGroupName } from "spell-epic/list/EpicCards"
-import { epicStateFor, type EpicFacts } from "spell-epic/list/EpicState"
+import { readEpicDate, epicGroupFor, type EpicGroupName } from "spell/epic/list/EpicCards"
+import { epicStateFor, type EpicFacts } from "spell/epic/list/EpicState"
 
-/** The page server's route that stars and unstars an epic (`spell-epic/tool/epicRoutes.ts`). */
+/** The page server's route that stars and unstars an epic (`spell/epic/tool/epicRoutes.ts`). */
 export const FAVORITE_API = "/api/epics/favorite"
 
 /**

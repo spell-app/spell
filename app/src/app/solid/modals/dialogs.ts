@@ -1,11 +1,11 @@
-import { UI as SpellUI, type ModalOptions } from "spell-ui"
-import { uiReady } from "spell-app/app/solid/loadUI"
+import { UI as SpellUI, type ModalOptions } from "spell/ui"
+import { uiReady } from "spell/app/app/solid/loadUI"
 import type {
   AlertModalProps,
   ChooserModalProps,
   ConfirmModalProps,
   PromptModalProps
-} from "spell-app/app/solid/modals"
+} from "spell/app/app/solid/modals"
 
 import { openChooser } from "./Chooser"
 

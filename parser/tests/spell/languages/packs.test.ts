@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { SP } from "spell-parser/spell"
-import { packSources } from "spell-parser/cli/packsCommand"
+import { SP } from "spell/parser/spell"
+import { packSources } from "spell/parser/cli/packsCommand"
 import {
   checkPack,
   checkPackModule,
@@ -10,7 +10,7 @@ import {
   TODO_MARKER,
   type PackModuleSource,
   type PackReport
-} from "spell-parser/spell/languages/packs"
+} from "spell/parser/spell/languages/packs"
 
 /**
  * The language packs' check and fix (epic `spanish` P7):  `spell translate check|fix`.
@@ -22,7 +22,7 @@ import {
 // ## A made-up module
 ////////////////
 
-const ENGLISH = `import { Negatable } from "spell-parser/spell/rules/expressions"
+const ENGLISH = `import { Negatable } from "spell/parser/spell/rules/expressions"
 
 import { _async } from "./async.parser"
 import { Await } from "./Await"
@@ -45,8 +45,8 @@ _async.addRule(Negatable.specialize({ ruleName: "exclusive_or_not" }), {
 })
 `
 
-const SPANISH = `import { SpellParser } from "spell-parser/spell/SpellParser"
-import { Negatable } from "spell-parser/spell/rules/expressions"
+const SPANISH = `import { SpellParser } from "spell/parser/spell/SpellParser"
+import { Negatable } from "spell/parser/spell/rules/expressions"
 
 import { Await } from "./Await"
 

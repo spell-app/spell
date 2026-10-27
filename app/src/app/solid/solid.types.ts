@@ -1,6 +1,6 @@
 /**
  * Types for the app's Solid code.
- * - `<ui-*>` tags in Solid JSX:  Spell UI's own types, exact (`spell-ui/jsx`, generated from its vocabularies).
+ * - `<ui-*>` tags in Solid JSX:  Spell UI's own types, exact (`spell/ui/jsx`, generated from its vocabularies).
  *   - Every attribute of every tag, with its values and hover docs.
  *   - Data goes as plain props:  an object or function becomes the element's property, `on-ui-changed` a listener
  *     (`spell/element`'s `RichAttributes`).
@@ -12,7 +12,7 @@
  */
 
 import type { JSX } from "@solidjs/web"
-import type {} from "spell-ui/jsx"
+import type {} from "spell/ui/jsx"
 
 declare module "@solidjs/web/types/jsx.js" {
   namespace JSX {

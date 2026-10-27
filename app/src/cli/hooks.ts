@@ -16,8 +16,8 @@ export default {
  * - `consoleGuard` FIRST, and everything else only after it:  spell logs as its modules load
  * - then the parser's version (`__PACKAGE_VERSION__`), before anything reads it
  */
-export async function loadApp(): Promise<typeof import("spell-app/cli/languageCommands")> {
-  await import("spell-app/cli/consoleGuard")
-  await import("spell-parser/spell/node/packageVersion.node")
-  return import("spell-app/cli/languageCommands")
+export async function loadApp(): Promise<typeof import("spell/app/cli/languageCommands")> {
+  await import("spell/app/cli/consoleGuard")
+  await import("spell/parser/spell/node/packageVersion.node")
+  return import("spell/app/cli/languageCommands")
 }

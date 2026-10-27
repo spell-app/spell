@@ -3,12 +3,12 @@ import { afterEach, describe, expect, test, vi } from "vite-plus/test"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import { expectAccessible } from "spell/test-helpers/A11y"
 
-import { AnswerForm } from "spell-epic/answers"
+import { AnswerForm } from "spell/epic/answers"
 
-import "spell-epic/components/epic-send"
-import "spell-epic/components/epic-text-box"
+import "spell/epic/components/epic-send"
+import "spell/epic/components/epic-text-box"
 // the boxes are `<ui-textarea grow>`s:  `<ui-root>` loads them on a page
-import "spell-ui/components/ui-input"
+import "spell/ui/components/ui-input"
 
 ////////////////
 // ## Fakes

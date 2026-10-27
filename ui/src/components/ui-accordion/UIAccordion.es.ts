@@ -1,4 +1,4 @@
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /**
  * `<ui-accordion>` in Spanish:  `<es-acordeon>`, with the names and texts only it uses (from `UIAccordion.en.ts`).

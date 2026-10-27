@@ -1,8 +1,8 @@
 import { describe, test, expect } from "vite-plus/test"
 import { proto } from "spell/util"
-import { P, Parser } from "spell-parser/parser"
+import { P, Parser } from "spell/parser/parser"
 // These tests define rules with rulex `syntax`, so they must opt into the rulex parser.
-import "spell-parser/parser/rulex"
+import "spell/parser/parser/rulex"
 
 /** Base class which sets an inherited `alias`, like a language's `Statement` would. */
 class TestStatement<

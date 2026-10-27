@@ -1,6 +1,6 @@
 /**
  * Every name `<spell-viewer>` adds to a root's:  tag, attributes, events, texts.
- * Schema:  `E.ComponentVocabulary` (`spell-ui/core`).
+ * Schema:  `E.ComponentVocabulary` (`spell/ui/core`).
  * - `<spell-viewer>` is a root (`UIRoot`):
  *   its whole vocabulary is `<ui-root>`'s names, then these (`SpellViewer.vocabulary`, `SpellViewer.tsx`).
  * - Where both name an attribute, this one wins:

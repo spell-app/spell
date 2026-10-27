@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { RUNTIME_KEY, UI, loadUI, type RuntimeGlobal } from "spell-ui/runtime"
+import { RUNTIME_KEY, UI, loadUI, type RuntimeGlobal } from "spell/ui/runtime"
 
-import { Modals } from "spell-ui/runtime/Modals"
-import { Toasts } from "spell-ui/runtime/Toasts"
-import { UIRuntime } from "spell-ui/runtime/UIRuntime"
+import { Modals } from "spell/ui/runtime/Modals"
+import { Toasts } from "spell/ui/runtime/Toasts"
+import { UIRuntime } from "spell/ui/runtime/UIRuntime"
 
 ////////////////
 // ## The instance

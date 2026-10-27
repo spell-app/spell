@@ -29,7 +29,7 @@
         <ui-container>
           <ui-menu icon class="site-page-links" aria-label="About this page">
             <ui-item
-              link="/spell-epic/src/tool/PLAN-DOC.md"
+              link="/epic/src/tool/PLAN-DOC.md"
               icon="book"
               aria-label="The markup rules, PLAN-DOC.md"
               title="The markup rules, PLAN-DOC.md"
@@ -59,20 +59,20 @@
           <p class="meta">
             Written for: anyone reading or writing an epic page's markup, or changing this element.<br />
             Status: <ui-label size="mini" color="green">built</ui-label> in
-            <a href="/spell-epic/src/components/epic-page/" target="src-spell-epic-src-components-epic-page"
-              ><code title="spell-epic/src/components/epic-page/">epic-page/</code></a
+            <a href="/epic/src/components/epic-page/" target="src-spell-epic-src-components-epic-page"
+              ><code title="epic/src/components/epic-page/">epic-page/</code></a
             >.<br />
             Its vocabulary (attributes, slots, parts, children):
             <a
-              href="/spell-epic/src/components/epic-page/EpicPage.en.ts"
+              href="/epic/src/components/epic-page/EpicPage.en.ts"
               target="src-spell-epic-src-components-epic-page-epicpage-en-ts"
-              ><code title="spell-epic/src/components/epic-page/EpicPage.en.ts">EpicPage.en.ts</code></a
+              ><code title="epic/src/components/epic-page/EpicPage.en.ts">EpicPage.en.ts</code></a
             >.<br />
             The component:
             <a
-              href="/spell-epic/src/components/epic-page/EpicPage.tsx"
+              href="/epic/src/components/epic-page/EpicPage.tsx"
               target="src-spell-epic-src-components-epic-page-epicpage-tsx"
-              ><code title="spell-epic/src/components/epic-page/EpicPage.tsx">EpicPage.tsx</code></a
+              ><code title="epic/src/components/epic-page/EpicPage.tsx">EpicPage.tsx</code></a
             >.
           </p>
 
@@ -687,7 +687,7 @@
               </li>
               <li><b>The bedtime label</b> (<code>bedtime</code> set): violet, Claude's voice, with a bed icon.</li>
               <li>
-                <b>The state mark</b>, by the same rule as the Epics list (<code>spell-epic/list/EpicState</code>, Owen
+                <b>The state mark</b>, by the same rule as the Epics list (<code>spell/epic/list/EpicState</code>, Owen
                 2026-10-10): in progress (blue: phases left, touched in the last 3 days or a session listening), errors
                 (red: every phase done, items need you), paused (grey: phases left, untouched for 3 days or more). Its
                 tooltip says why. None for a future epic or a done one: FUTURE and DONE say it.
@@ -762,9 +762,9 @@
               <li>
                 <code>epic create &lt;epic&gt; [--title ...] [--prompt ...] [--future]</code>: copies the
                 tool's template (<a
-                  href="/spell-epic/src/tool/templates/plan.html"
+                  href="/epic/src/tool/templates/plan.html"
                   target="src-spell-epic-src-tool-templates-plan-html"
-                  title="spell-epic/src/tool/templates/plan.html"
+                  title="epic/src/tool/templates/plan.html"
                   ><code>plan.html</code></a
                 >) and fills <code>epic</code>, <code>title</code>, <code>branch</code>, <code>worktree</code>,
                 <code>started</code> and <code>updated</code>. With <code>--future</code>: <code>future</code>, and no
@@ -794,9 +794,9 @@
               <li>
                 The rules for the doc's data:
                 <a
-                  href="/spell-epic/src/tool/PLAN-DOC.md"
+                  href="/epic/src/tool/PLAN-DOC.md"
                   target="src-spell-epic-src-tool-plan-doc-md"
-                  title="spell-epic/src/tool/PLAN-DOC.md"
+                  title="epic/src/tool/PLAN-DOC.md"
                   ><code>PLAN-DOC.md</code></a
                 >, "The page".
               </li>
@@ -830,9 +830,9 @@
               <li>
                 Made by <code>epic saga page &lt;id&gt;</code> from the tool's
                 <a
-                  href="/spell-epic/src/tool/templates/saga.html"
+                  href="/epic/src/tool/templates/saga.html"
                   target="src-spell-epic-src-tool-templates-saga-html"
-                  ><code title="spell-epic/src/tool/templates/saga.html">saga.html</code></a
+                  ><code title="epic/src/tool/templates/saga.html">saga.html</code></a
                 >; every <code>epic</code> verb edits it as <code>SAGA:/&lt;id&gt;</code>.
               </li>
             </ul>

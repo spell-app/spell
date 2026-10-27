@@ -23,12 +23,12 @@
  */
 import { existsSync, readFileSync } from "node:fs"
 
-import { parseVerbArgs, stringFlag } from "spell-epic/command/command.types"
-import { EpicAddress } from "spell-epic/links"
-import { EpicTargets } from "spell-epic/tool/EpicTargets"
+import { parseVerbArgs, stringFlag } from "spell/epic/command/command.types"
+import { EpicAddress } from "spell/epic/links"
+import { EpicTargets } from "spell/epic/tool/EpicTargets"
 import { SRV } from "spell/server"
 
-import { Window } from "spell-epic/window.mjs"
+import { Window } from "spell/epic/window.mjs"
 import { ROOT, ensurePageServer, pageFile, serverUrl } from "./pages.js"
 
 const { positional, flags } = parseVerbArgs(process.argv.slice(2))

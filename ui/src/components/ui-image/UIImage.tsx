@@ -1,7 +1,7 @@
 import { Show } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
-import { E } from "spell-ui/core"
+import { E } from "spell/ui/core"
 import { imageVocabulary } from "./UIImage.en"
 
 import imageCSS from "./UIImage.css?inline"
@@ -136,7 +136,7 @@ export class UIImage extends E.UIComponent<typeof imageVocabulary> {
   private showFullSize() {
     const image = this.domElement.shadowRoot?.querySelector("img")
     if (!image) return
-    void import("spell-ui/components/ui-zoom")
+    void import("spell/ui/components/ui-zoom")
       .then(({ ImageZoom }) => ImageZoom.show(image))
       .catch((error) => console.error(error))
   }

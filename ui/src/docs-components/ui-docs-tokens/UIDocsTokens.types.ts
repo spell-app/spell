@@ -5,7 +5,7 @@
  *   A constant only one class reads sits below that class.
  */
 
-import type { SiteToken } from "spell-ui/docs-components/docs-components.types"
+import type { SiteToken } from "spell/ui/docs-components/docs-components.types"
 import type { docsTokensVocabulary } from "./UIDocsTokens.en"
 
 ////////////////

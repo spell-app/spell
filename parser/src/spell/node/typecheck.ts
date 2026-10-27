@@ -11,7 +11,7 @@ import { fileURLToPath } from "url"
  * - `repoDir`:  spell-parser's root, holding its `src/` (`src/core/`, `src/py/` ...) and its `tests/`
  * - `coreDir`:  `core`'s folder, `src/core/`
  * - Spell's own folders only.
- *   Where PROJECTS are is spaces' (`spell-app/spaces/server/node/environment`), which spell never imports.
+ *   Where PROJECTS are is spaces' (`spell/app/spaces/server/node/environment`), which spell never imports.
  */
 export const CODE_FOLDERS = (() => {
   const srcDir = resolve(fileURLToPath(import.meta.url), "..", "..")
@@ -119,7 +119,7 @@ function nodeModulesDir(): string {
 }
 
 /**
- * `<ui-*>` tags' JSX types:  Spell UI's, exact (`spell-ui/jsx`, generated from its vocabularies), as the app uses them.
+ * `<ui-*>` tags' JSX types:  Spell UI's, exact (`spell/ui/jsx`, generated from its vocabularies), as the app uses them.
  * - So compiled spell's `<ui-button size="enormous">` is an error, as it is in the app's own code.
  * - Written into the checked folder as a file of its own (`UI_JSX_FILE`), naming them by package:
  *   spell-parser never imports Spell UI, a repo above it.
@@ -131,9 +131,9 @@ function nodeModulesDir(): string {
  *   fill (spellx's `<menu>`, epic `elemental-spell` P10).  `context-menu=` needs nothing:  JSX takes any dashed name.
  */
 const UI_JSX_TYPES = `import type { JSX } from "@solidjs/web"
-import type {} from "spell-ui/jsx"
+import type {} from "spell/ui/jsx"
 
-declare module "spell-ui/jsx" {
+declare module "spell/ui/jsx" {
   interface UIToolbarJSXAttributes {
     menu?: string
   }
@@ -165,8 +165,8 @@ const SPELL_ELEMENTS_SOURCE = "runner/spellElements.ts"
  * - spell-parser's settings (its root `tsconfig.json`),
  *   plus Solid's JSX and `<ui-*>`'s JSX types (`UI_JSX_FILE`):  see `typecheck()`.
  * - `@spell/elements` pointing at app's source (`APP_DIR`).
- * - ONE core:  the app's own imports of `spell-parser/core` go to the same source,
- *   by spell-parser's own condition (`spell-parser-source`, in the settings it extends).
+ * - ONE core:  the app's own imports of `spell/parser/core` go to the same source,
+ *   by spell-parser's own condition (`spell-source`, in the settings it extends).
  * - The other repos' packages (`spell/util`, `spell-ui` ...) by their declarations,
  *   through the folder's `node_modules` link (epic `repo-split` I12).
  */

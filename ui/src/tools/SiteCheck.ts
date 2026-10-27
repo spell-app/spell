@@ -7,8 +7,8 @@ import { parseArgs } from "node:util"
 import type { Browser, Page } from "playwright"
 
 import { BrowserPage, type BrowserPageProps } from "spell/element-tools/BrowserPage"
-import { FOLDS_KEY } from "spell-ui/site/_src/site.types"
-import { TocIndex } from "spell-ui/components/ui-toc/TocIndex"
+import { FOLDS_KEY } from "spell/ui/site/_src/site.types"
+import { TocIndex } from "spell/ui/components/ui-toc/TocIndex"
 import { KIT_ROOT, SITE_ADDRESS, ensurePageServer } from "./pageServer.ts"
 import { SITE_PAGES, SPELL_UI_ROOT, SiteCheckError, sitePages } from "./tools.types.ts"
 import { environment } from "./environment.ts"
@@ -47,7 +47,7 @@ import { Terminal } from "spell/element-tools/Terminal"
  * - Look at the screenshots too:  the checks can't see overlap, clipping or ugly wrapping.
  * - Throws `SiteCheckError` when it can't start:  no such page, or no page server serving the site (exit 2).
  * - Replaces the Astro site's `check` script.
- *   Model:  the docs' checker, `spell-epic/src/tools/check-spell.js`.
+ *   Model:  the docs' checker, `epic/src/tools/check-spell.js`.
  * - Node only;  reads the site's `FOLDS_KEY` (`site/_src/site.types.ts`, pure data) and `TocIndex.slug()`.
  ****************/
 export class SiteCheck {

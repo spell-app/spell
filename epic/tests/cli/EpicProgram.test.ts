@@ -5,10 +5,10 @@ import type { Command } from "commander"
 import JSON5 from "json5"
 import { describe, expect, test, vi } from "vite-plus/test"
 
-import { EpicProgram } from "spell-epic/cli/EpicProgram"
-import { GROUP_VERBS, VERB_FLAGS, type GroupName, type VerbFlags } from "spell-epic/cli/epicGroups"
-import { EpicCommandError } from "spell-epic/command/command.types"
-import { EpicConfig } from "spell-epic/config/EpicConfig"
+import { EpicProgram } from "spell/epic/cli/EpicProgram"
+import { GROUP_VERBS, VERB_FLAGS, type GroupName, type VerbFlags } from "spell/epic/cli/epicGroups"
+import { EpicCommandError } from "spell/epic/command/command.types"
+import { EpicConfig } from "spell/epic/config/EpicConfig"
 
 /**
  * The real `epic` command, end to end:  `bin/epic` run as a separate process, as a user would.

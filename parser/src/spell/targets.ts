@@ -1,5 +1,5 @@
-import { P } from "spell-parser/parser"
-import { PY } from "spell-parser/py"
+import { P } from "spell/parser/parser"
+import { PY } from "spell/parser/py"
 
 import { COMPILED_JS_SUFFIX, COMPILED_PY_SUFFIX, COMPILED_TSX_SUFFIX, ELEMENTS_JS_SUFFIX } from "./spell.types"
 
@@ -25,7 +25,7 @@ export type Target = {
   /** What its runtime can do. */
   can: TargetAbilities
   /**
-   * What checks its output after `spell compile`, a function in `spell-parser/spell/node`:
+   * What checks its output after `spell compile`, a function in `spell/parser/spell/node`:
    * - `tsc`:  `typecheck()`
    * - `pyright`:  `pyright()`
    */
@@ -68,7 +68,7 @@ export const TARGETS: Record<string, Target> = {
   "js/solid": { name: "js/solid", writer: P.JSWriter.instance, suffix: COMPILED_JS_SUFFIX, can: { draw: "dom" } },
   // Solid TypeScript, as a person writes it, on the same runtime:  JSX, decorators (`@prop`, `@drawn`)
   // - checked by `tsc`
-  // - never run as is:  it needs a build first (`buildTsx()` in `spell-parser/spell/node/buildTsx`)
+  // - never run as is:  it needs a build first (`buildTsx()` in `spell/parser/spell/node/buildTsx`)
   "ts/solid": {
     name: "ts/solid",
     writer: P.TSWriter.instance,
@@ -93,7 +93,7 @@ export const TARGETS: Record<string, Target> = {
   },
   // A LIBRARY (epic `people-and-orgs` P3):  the project's classes alone, as ONE TypeScript file,
   // for the repo's code to import
-  // - no drawing, no top-level steps, the core with no Solid (`spell-parser/core/model`)
+  // - no drawing, no top-level steps, the core with no Solid (`spell/parser/core/model`)
   // - `People.lib.ts`, committed beside its source and marked generated
   // - checked by `tsc`, as `ts/solid` is
   "ts/lib": {

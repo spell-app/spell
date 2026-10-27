@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vite-plus/test"
 
-import { Shorthand } from "spell-ui/elements"
+import { Shorthand } from "spell/ui/elements"
 
 afterEach(() => {
   vi.restoreAllMocks()

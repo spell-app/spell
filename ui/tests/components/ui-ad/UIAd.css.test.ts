@@ -1,14 +1,14 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { foundationCSS } from "spell-ui/styles"
+import { foundationCSS } from "spell/ui/styles"
 
 import { Fixture } from "spell/test-helpers/Fixture"
-import { Sheets } from "spell-ui/test-helpers/Sheets"
+import { Sheets } from "spell/ui/test-helpers/Sheets"
 
-import { adVocabulary } from "spell-ui/components/ui-ad/UIAd.en"
+import { adVocabulary } from "spell/ui/components/ui-ad/UIAd.en"
 
-import adCSS from "spell-ui/components/ui-ad/UIAd.css?inline"
-import adRaw from "spell-ui/components/ui-ad/UIAd.css?raw"
+import adCSS from "spell/ui/components/ui-ad/UIAd.css?inline"
+import adRaw from "spell/ui/components/ui-ad/UIAd.css?raw"
 
 /**
  * `UIAd.css` on the class-grammar examples:  the source rules, every unit's box, the test placeholder.

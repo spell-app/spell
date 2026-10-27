@@ -1,7 +1,7 @@
 import { upperFirst } from "spell/util"
-import { P } from "spell-parser/parser"
-import { SP } from "spell-parser/spell"
-import { SpellExpression } from "spell-parser/spell/rules/expressions"
+import { P } from "spell/parser/parser"
+import { SP } from "spell/parser/spell"
+import { SpellExpression } from "spell/parser/spell/rules/expressions"
 
 /**
  * Base for rules which READ a member off an object or `it`, e.g. `the short rank of the card`, `its suit`.

@@ -1,6 +1,6 @@
 import type { JSX } from "@solidjs/web"
 
-import { E } from "spell-ui/core"
+import { E } from "spell/ui/core"
 import { adVocabulary } from "./UIAd.en"
 
 import adCSS from "./UIAd.css?inline"

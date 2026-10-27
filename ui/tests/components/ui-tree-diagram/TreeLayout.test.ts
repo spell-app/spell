@@ -1,12 +1,12 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { TreeLayout } from "spell-ui/components/ui-tree-diagram/TreeLayout"
+import { TreeLayout } from "spell/ui/components/ui-tree-diagram/TreeLayout"
 import {
   TREE_DIAGRAM_METRICS,
   type TreeDiagramBox,
   type TreeDiagramLayout,
   type TreeDiagramNode
-} from "spell-ui/components/ui-tree-diagram/UITreeDiagram.types"
+} from "spell/ui/components/ui-tree-diagram/UITreeDiagram.types"
 
 ////////////////
 // ## Fixtures

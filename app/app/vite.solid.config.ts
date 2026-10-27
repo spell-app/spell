@@ -9,14 +9,14 @@ const SOLID_ENTRY = "\0spell-solid-entry"
 /** Virtual module of `SHARED_SOLID.ui`:  `ui`'s barrel, and `SpellUI.registerPack` for the page (`sharedEntries()`). */
 const UI_ENTRY = "\0spell-ui-entry"
 
-/** `spell-ui`'s element core, `spell-ui/core`:  in `SHARED_SOLID.solid`. */
-const UI_CORE = sourceOf("spell-ui/core.ts")
+/** `spell-ui`'s element core, `spell/ui/core`:  in `SHARED_SOLID.solid`. */
+const UI_CORE = sourceOf("spell/ui/core.ts")
 
 /**
- * `spell-ui`'s root family, `spell-ui/components/ui-root`:  in `SHARED_SOLID.solid`, as `<spell-viewer>` is a root.
+ * `spell-ui`'s root family, `spell/ui/components/ui-root`:  in `SHARED_SOLID.solid`, as `<spell-viewer>` is a root.
  * - Its loader imports every other family on demand:  each a lazy chunk of `ui/`.
  */
-const UI_ROOT = sourceOf("spell-ui/components/ui-root")
+const UI_ROOT = sourceOf("spell/ui/components/ui-root")
 
 /** `spell-ui`'s barrel, `spell-ui`:  in `SHARED_SOLID.ui`. */
 const UI_BARREL = sourceOf("spell-ui")
@@ -30,7 +30,7 @@ const EMOJI_DATA = /\/components\/ui-emoji\/data\/([\w-]+)\/(\w+)\.json$/
  * (two Solids on a page fail silently -- `solid-2.md`).
  * - Built by `yarn build:element` (FIRST, it empties `dist-element/`) and `yarn build:runner` (`--outDir dist-runner`).
  * - `spell-solid.js`:  `solid-js` and `@solidjs/web` (and `@solidjs/signals` under them),
- *   `ui`'s element core, `spell-ui/core` (`UIComponent`, `DOMElement` ...), and its root family (`UIRoot`),
+ *   `ui`'s element core, `spell/ui/core` (`UIComponent`, `DOMElement` ...), and its root family (`UIRoot`),
  *   which `<spell-viewer>` and `<spell-editor>` are defined on,
  *   and `@solidjs/h` (as `h`), which compiled spell draws with (`spell-runtime.js`).
  *   - Each is re-exported WHOLE:  the other builds can't tell this one which names they use.
@@ -55,7 +55,7 @@ const EMOJI_DATA = /\/components\/ui-emoji\/data\/([\w-]+)\/(\w+)\.json$/
  *   `sharedSolid()` in `vite.shared.ts`, which also lists what they may import.
  * - Icon packs (`appConfig({ iconPacks })`):  beside the chunk holding `BuiltInPacks`, wherever it lands.
  * - Fixed entry names, no hashes:  the other bundles name them.
- * - `keepNames` MUST stay on:  `ui` reads custom element class names (`spell-ui/vite.config.ts`).
+ * - `keepNames` MUST stay on:  `ui` reads custom element class names (`spell/ui/vite.config.ts`).
  * - Plugins, dedupe and CSS:  `appConfig()`, as `vite.config.ts`.
  */
 const shared = appConfig({ iconPacks: true })

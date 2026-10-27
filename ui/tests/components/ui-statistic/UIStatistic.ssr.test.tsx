@@ -2,12 +2,12 @@
 
 import { beforeAll, describe, expect, it } from "vite-plus/test"
 
-import { StaticRender } from "spell-ui/static"
-import { UIStatistic } from "spell-ui/components/ui-statistic/UIStatistic"
-import { UIStatistics } from "spell-ui/components/ui-statistic/UIStatistics"
-import { UIValue } from "spell-ui/components/ui-parts/UIValue"
+import { StaticRender } from "spell/ui/static"
+import { UIStatistic } from "spell/ui/components/ui-statistic/UIStatistic"
+import { UIStatistics } from "spell/ui/components/ui-statistic/UIStatistics"
+import { UIValue } from "spell/ui/components/ui-parts/UIValue"
 
-/** `<ui-statistic>` / `<ui-statistics>` in the static server render (`spell-ui/static`, seo plan P3). */
+/** `<ui-statistic>` / `<ui-statistics>` in the static server render (`spell/ui/static`, seo plan P3). */
 describe("<ui-statistic> static render", () => {
   beforeAll(() => {
     StaticRender.define(UIStatistic, UIStatistics, UIValue)

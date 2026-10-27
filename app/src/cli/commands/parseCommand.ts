@@ -1,7 +1,7 @@
 import chalk from "chalk"
 
-import type { SP } from "spell-parser/spell"
-import { CLI } from "spell-app/cli"
+import type { SP } from "spell/parser/spell"
+import { CLI } from "spell/app/cli"
 
 /**
  * `spell parse "<text>"`:  how spell reads a line -- its match tree, then the javascript it compiles to.

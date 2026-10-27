@@ -8,4 +8,4 @@
  * - NOTE: per-test DOM cleanup is NOT here -- `Fixture.render()` registers its own `afterEach`.
  */
 
-import "spell-ui/core"
+import "spell/ui/core"

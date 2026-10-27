@@ -1,6 +1,6 @@
 import { isServer, type JSX } from "@solidjs/web"
 
-import { E, UIT } from "spell-ui/core"
+import { E, UIT } from "spell/ui/core"
 import { pushableVocabulary } from "./UIPushable.en"
 import { CENTER, type PushableVocabulary } from "./UISidebar.types"
 

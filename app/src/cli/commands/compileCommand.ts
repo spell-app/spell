@@ -2,12 +2,12 @@ import { readFileSync } from "fs"
 import { basename, dirname, join, resolve } from "path"
 import { fileURLToPath } from "url"
 
-import { describeTypecheckError, typecheck } from "spell-parser/spell/node/typecheck"
-import { describePyrightError, pyright } from "spell-parser/spell/node/pyright"
-import { P } from "spell-parser/parser"
-import { SP } from "spell-parser/spell"
-import { buildFolderFor } from "spell-app/spaces/server/node/projects/project-utils"
-import { CLI } from "spell-app/cli"
+import { describeTypecheckError, typecheck } from "spell/parser/spell/node/typecheck"
+import { describePyrightError, pyright } from "spell/parser/spell/node/pyright"
+import { P } from "spell/parser/parser"
+import { SP } from "spell/parser/spell"
+import { buildFolderFor } from "spell/app/spaces/server/node/projects/project-utils"
+import { CLI } from "spell/app/cli"
 
 /**
  * `spell compile <project...>`:  compile each project (or lone spell file), showing progress and errors on stderr.
@@ -33,7 +33,7 @@ import { CLI } from "spell-app/cli"
  *   - the rest are listed as up to date
  *   - what counts:  `CLI.staleBecause()`
  *   - the page server runs it when it starts, for `@spell/examples` and `@spell/library`
- *     (`ProjectBuild`, in `spell-app/spaces`)
+ *     (`ProjectBuild`, in `spell/app/spaces`)
  * - Returns the exit code:  `EXIT.ERRORS` if anything had errors.
  *   Warnings, e.g. a property with no type (`SP.SpellWarnings`), are listed under the errors, never counted:
  *   a project with only warnings compiles clean, its scope pack too.

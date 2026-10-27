@@ -47,7 +47,7 @@ export class SlotContent {
 
   /**
    * Slot names with content, read from the DOM now.
-   * - No `Element` / `Node` globals:  the server render scans linkedom elements in node (`spell-ui/static`).
+   * - No `Element` / `Node` globals:  the server render scans linkedom elements in node (`spell/ui/static`).
    */
   private scan(): Set<string> {
     const names = new Set<string>()

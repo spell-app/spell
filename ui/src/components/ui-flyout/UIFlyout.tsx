@@ -1,6 +1,6 @@
-import { E, UIT } from "spell-ui/core"
+import { E, UIT } from "spell/ui/core"
 // Import the modal's FILE, not its barrel:  a server render loads this class without `customElements` (`index.ts`)
-import { DialogComponent } from "spell-ui/components/ui-modal/DialogComponent"
+import { DialogComponent } from "spell/ui/components/ui-modal/DialogComponent"
 import { flyoutVocabulary } from "./UIFlyout.en"
 
 import flyoutCSS from "./UIFlyout.css?inline"

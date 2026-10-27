@@ -2,10 +2,10 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs"
 import { basename, dirname, resolve } from "path"
 import { fileURLToPath, pathToFileURL } from "url"
 
-import { SP } from "spell-parser/spell"
-import environment from "spell-app/spaces/server/node/environment"
-import { installDiskFetch, locationForDiskPath } from "spell-app/spaces/server/node/projects/disk-fetch"
-import { LSP } from "spell-app/lsp"
+import { SP } from "spell/parser/spell"
+import environment from "spell/app/spaces/server/node/environment"
+import { installDiskFetch, locationForDiskPath } from "spell/app/spaces/server/node/projects/disk-fetch"
+import { LSP } from "spell/app/lsp"
 
 /**
  * The stdio language server's view of the editor's files:
@@ -18,7 +18,7 @@ import { LSP } from "spell-app/lsp"
  * - Every method that changes anything returns the spell files whose parse changed,
  *   so the server can publish their diagnostics.
  * - SIDE EFFECT (constructor):  makes EVERY `LoadableFile` load from disk -- see `installDiskFetch()`.
- * - NOTE: node-only, so deliberately NOT in the `spell-app/lsp` barrel:  import it from this file.
+ * - NOTE: node-only, so deliberately NOT in the `spell/app/lsp` barrel:  import it from this file.
  */
 export class SpellDiskWorkspace implements LSP.FileAddresses {
   /** Latest text of each open document, by URI. */

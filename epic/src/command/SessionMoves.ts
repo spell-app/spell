@@ -14,7 +14,7 @@ import { basename, dirname, join } from "node:path"
 
 // By package path, `.ts` and all:  the window script and the `UserPromptSubmit` hook load this file with plain `node`
 // (types stripped)
-import { ClaudeHome } from "spell-epic/config/ClaudeHome.ts"
+import { ClaudeHome } from "spell/epic/config/ClaudeHome.ts"
 
 /****************
  * ### `SessionMoves`
@@ -95,7 +95,7 @@ export class SessionMoves {
    * - the plugin turned off in `~/.claude/settings.json` (`enabledPlugins`)
    * - its marketplace's folder gone, in either list Claude Code keeps it in:  `~/.claude/settings.json`
    *   (`extraKnownMarketplaces`) and `~/.claude/plugins/known_marketplaces.json` (r20:  both named spell-app's old
-   *   `spell-epic/`, and every hook failed, "Plugin directory does not exist")
+   *   `epic/`, and every hook failed, "Plugin directory does not exist")
    * - the folder its hooks run from (`installed_plugins.json`'s `installPath`, the plugin install steps' step 5 link)
    *   gone, or without the end-of-turn hook
    * - a list missing, or the plugin not in it (a session run with `--plugin-dir`):  no problem said

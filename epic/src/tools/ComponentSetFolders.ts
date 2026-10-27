@@ -5,7 +5,7 @@ import { isAbsolute, join, relative, sep } from "node:path"
 // entry or a name with its `.ts`;  `settings.ts` is node built-ins only
 import { componentSets, pageServerSettings } from "spell/server/page/settings"
 
-import { EPIC_UI } from "spell-epic/server/server.types.ts"
+import { EPIC_UI } from "spell/epic/server/server.types.ts"
 
 /****************
  * ### `ComponentSetFolders`
@@ -15,7 +15,7 @@ import { EPIC_UI } from "spell-epic/server/server.types.ts"
  *   `componentSets()`), as the epic server's `componentSetMounts()` reads them:  spell-app's are Spell UI, Epic UI,
  *   App UI, Brand.
  *   - each in the folder the settings name, from checkout `root`:
- *     spell-app's `app/docs/`, or one in a repo beside it (`../spell-ui/docs`)
+ *     spell-app's `app/docs/`, or one in a repo beside it (`../ui/docs`)
  *   - except Epic UI:  the engine's own `src/docs/` (`epicUi`), wherever spell-epic is;  listed even when the
  *     settings don't name it (spell-epic's own checkout), since the epic server serves it for every repo
  * - Their pages take comments, in inbox files beside them (`commentsRoutes.ts`);

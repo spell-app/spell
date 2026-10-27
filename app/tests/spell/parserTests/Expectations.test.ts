@@ -1,7 +1,7 @@
 import { describe, test, expect } from "vite-plus/test"
 
-import { parseSpellProject } from "spell-parser/spell/test"
-import { loadFixtureProject } from "spell-app/spaces/test"
+import { parseSpellProject } from "spell/parser/spell/test"
+import { loadFixtureProject } from "spell/app/spaces/test"
 
 /**
  * `expectedAfter()` on a whole frozen project:  quick enough to ask on every keystroke.

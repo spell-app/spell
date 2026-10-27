@@ -1,5 +1,5 @@
 /**
- * Shared types for `spell-ui/util`.
+ * Shared types for `spell/ui/util`.
  * - Exported rather than ambient (parser's `app.d.ts` globals), so a package consumer's `.d.ts` stays
  *   self-contained and nothing leaks into the host app's global scope.
  */

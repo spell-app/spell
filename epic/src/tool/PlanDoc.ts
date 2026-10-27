@@ -9,9 +9,9 @@ import {
   type EpicData,
   type EpicTag,
   type PageSectionKind
-} from "spell-epic/definitions"
-import { Markup, type MarkupContent } from "spell-epic/markup"
-import { PageStages, PhaseIds, type PageStage } from "spell-epic/phases"
+} from "spell/epic/definitions"
+import { Markup, type MarkupContent } from "spell/epic/markup"
+import { PageStages, PhaseIds, type PageStage } from "spell/epic/phases"
 
 import {
   CALM_ID,

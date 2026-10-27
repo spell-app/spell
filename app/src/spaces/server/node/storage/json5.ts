@@ -17,7 +17,7 @@
 import JSON5 from "json5"
 
 import { json5Edited } from "spell/util/node/json5"
-import type { SpaceStorage } from "spell-app/spaces/models/SpaceStorage"
+import type { SpaceStorage } from "spell/app/spaces/models/SpaceStorage"
 
 export { json5Edited }
 

@@ -1,14 +1,14 @@
 import { afterAll, describe, expect, test } from "vite-plus/test"
 
-import { P } from "spell-parser/parser"
-import { SP } from "spell-parser/spell"
+import { P } from "spell/parser/parser"
+import { SP } from "spell/parser/spell"
 import {
   compiledSpellProject,
   incrementalSpellProject,
   parseSpellProject,
   summarize,
   summarizeIncremental
-} from "spell-parser/spell/test"
+} from "spell/parser/spell/test"
 
 /**
  * A file's language (epic `spanish` P19):  its name says it, `Carta.es.spell`;  a plain `Card.spell` is English.

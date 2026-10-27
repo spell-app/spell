@@ -8,8 +8,8 @@ import {
   summarize,
   summarizeIncremental,
   type SpellSourceFile
-} from "spell-parser/spell/test"
-import { SX } from "spell-parser/spellx"
+} from "spell/parser/spell/test"
+import { SX } from "spell/parser/spellx"
 
 /**
  * SPELLX read by spell's own rules, as a third style of spell (epic `elemental-spell` P6, Q69 A):

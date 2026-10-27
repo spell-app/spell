@@ -9,13 +9,13 @@ import { fileURLToPath } from "node:url"
 
 import { afterAll, afterEach, beforeEach, expect, test, vi } from "vite-plus/test"
 
-import { GuideInbox } from "spell-epic/tool/GuideInbox"
-import { PlanDoc } from "spell-epic/tool/PlanDoc"
-import { PlanDocCommands } from "spell-epic/tool/PlanDocCommands"
-import { PlanDocFiles } from "spell-epic/tool/PlanDocFiles"
-import { LISTEN_STALE_MS, ReviewInbox } from "spell-epic/tool/ReviewInbox"
+import { GuideInbox } from "spell/epic/tool/GuideInbox"
+import { PlanDoc } from "spell/epic/tool/PlanDoc"
+import { PlanDocCommands } from "spell/epic/tool/PlanDocCommands"
+import { PlanDocFiles } from "spell/epic/tool/PlanDocFiles"
+import { LISTEN_STALE_MS, ReviewInbox } from "spell/epic/tool/ReviewInbox"
 
-import { PageInboxes } from "spell-epic/tools/PageInboxes"
+import { PageInboxes } from "spell/epic/tools/PageInboxes"
 
 /** The tool's test fixtures:  `epic-plan.html`, a fresh doc in `<epic-*>` markup. */
 const FIXTURES = fileURLToPath(new URL("fixtures", import.meta.url))

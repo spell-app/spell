@@ -1,6 +1,6 @@
 import { onSettled } from "solid-js"
 
-import { editor } from "spell-app/app/editor"
+import { editor } from "spell/app/app/editor"
 
 /**
  * The editor page's keyboard shortcuts, OUTSIDE Monaco:  ONE `keydown` listener on `document`, added once the

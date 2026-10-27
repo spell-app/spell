@@ -1,19 +1,19 @@
 import { Show } from "solid-js"
 import { isServer, type JSX } from "@solidjs/web"
 
-import { E } from "spell-ui/core"
+import { E } from "spell/ui/core"
 
-import { AnswerForm, type ListenLine, type SendFill } from "spell-epic/answers"
+import { AnswerForm, type ListenLine, type SendFill } from "spell/epic/answers"
 import {
   SEND_ASKED,
   type SendAskedDetail,
   type SendState
-} from "spell-epic/components/epic-send-buttons/EpicSendButtons.types"
+} from "spell/epic/components/epic-send-buttons/EpicSendButtons.types"
 
 import { epicSendVocabulary } from "./EpicSend.en"
 
 import sendCSS from "./EpicSend.css?inline"
-import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
+import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 
 /****************
  * ### `EpicSend`

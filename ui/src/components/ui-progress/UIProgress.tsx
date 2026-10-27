@@ -1,7 +1,7 @@
 import { Repeat, Show } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
-import { E, UI, UIT } from "spell-ui/core"
+import { E, UI, UIT } from "spell/ui/core"
 import { ProgressValues } from "./ProgressValues"
 import { LIST_SPLIT } from "./UIProgress.types"
 import { progressVocabulary } from "./UIProgress.en"
@@ -157,7 +157,7 @@ export class UIProgress extends E.UIComponent<typeof progressVocabulary> {
     }
   }
 
-  /** The internals follow `ariaValues`;  `writesDOMElement`:  a server render (`spell-ui/static`) applies it too. */
+  /** The internals follow `ariaValues`;  `writesDOMElement`:  a server render (`spell/ui/static`) applies it too. */
   @E.onChange("ariaValues", { writesDOMElement: true })
   protected onAriaValuesChanged(aria: UIProgress["ariaValues"]) {
     if (!aria) return

@@ -1,4 +1,4 @@
-import { E } from "spell-ui/core"
+import { E } from "spell/ui/core"
 import { inputVocabulary } from "./UIInput.en"
 import { textareaVocabulary } from "./UITextarea.en"
 import { LABEL_CLASSES, type Vocabulary } from "./UIInput.types"

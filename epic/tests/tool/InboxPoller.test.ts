@@ -8,7 +8,7 @@ import { join } from "node:path"
 
 import { afterAll, expect, test } from "vite-plus/test"
 
-import { InboxPoller, listenerOf } from "spell-epic/tool/InboxPoller.mjs"
+import { InboxPoller, listenerOf } from "spell/epic/tool/InboxPoller.mjs"
 
 const folder = mkdtempSync(join(tmpdir(), "inbox-poller-"))
 const watched = join(folder, "x.inbox.json5")

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { MD } from "spell-parser/markdown"
+import { MD } from "spell/parser/markdown"
 
 /** `text`'s inline nodes as `kind[start,end)`, nested ones after `>`. */
 function spans(text: string) {
