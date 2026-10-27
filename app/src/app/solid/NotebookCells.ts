@@ -10,7 +10,7 @@ import { SX } from "spell/parser/spellx"
  * - Every edit returns the file's NEW TEXT, changing only the span it's about:  the rest of the file stays byte for
  *   byte.  The notebook hands it to the editor as typed text (`editor.onInputChanged()`), so the parse, the running
  *   program and the Text view follow.
- * - Plain TypeScript, no Solid:  `<SpellxNotebook>` draws these, and the tests check them in node.
+ * - Plain TypeScript, no Solid:  `<NotebookPage>`'s cells (`notebook/NotebookPageCells.ts`) use its text helpers, and the tests check them in node.
  */
 export class NotebookCells {
   /**
