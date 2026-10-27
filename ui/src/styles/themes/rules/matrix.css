@@ -1,0 +1,53 @@
+/*
+ * Matrix's rules:  what its values can't say, `@layer ui.theme` (epic `debut`).
+ * - A rules sheet of the Matrix theme (`matrix.theme.json5`, `"rules": ["modern", "states", "matrix"]`);  its sheet,
+ *   `matrix.css`, imports this one:  `yarn gen:styles` writes it.
+ * - In `rules/`, so no theme menu lists it (`UI.themes` reads the themes folder's top level only).
+ * - What's here:
+ *   - the page's own colour
+ *   - headings tightly tracked:  no heading token holds letter spacing
+ *   - the console's labels in the monospace, uppercase and spaced out:  eyebrows (a `sub` header, in the accent)
+ *     and a table's header row
+ */
+
+@layer ui.theme {
+  /* the page's own colour;  page only:  `:root` matches nothing inside a shadow root */
+  :root {
+    background-color: var(--ui-background);
+  }
+
+  /*******************************
+              Headings
+  *******************************/
+
+  /* big bold headings, tightly tracked;  smaller ones a little less */
+  :is(h1, h2, .ui.header):not(.sub) {
+    letter-spacing: -0.025em;
+    text-wrap-style: balance;
+  }
+  :is(h1, .ui.huge.header, .ui.massive.header) {
+    letter-spacing: -0.035em;
+  }
+
+  /*******************************
+         The console's labels
+  *******************************/
+
+  /* an eyebrow:  a sub header, in the monospace, uppercase, spaced out, in the accent */
+  .ui.sub.header {
+    color: var(--ui-primary-text);
+    font-family: var(--ui-font-family-mono);
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  /* a table's header row:  the monospace, uppercase, small and spaced out */
+  :is(.ui.table, :where(ui-table) > table) > thead > tr > th {
+    font-family: var(--ui-font-family-mono);
+    font-size: 0.75em;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+}

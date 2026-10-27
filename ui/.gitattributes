@@ -27,6 +27,7 @@ src/styles/themes/paper.css                                   linguist-generated
 src/styles/themes/midnight.css                                linguist-generated merge=binary
 src/styles/themes/crisp.css                                   linguist-generated merge=binary
 src/styles/themes/pop.css                                     linguist-generated merge=binary
+src/styles/themes/matrix.css                                  linguist-generated merge=binary
 src/styles/themes/palettes/apple.css                          linguist-generated merge=binary
 src/styles/themes/theme.schema.json                           linguist-generated merge=binary
 

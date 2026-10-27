@@ -5,7 +5,7 @@ import { ThemeMenu } from "spell-ui/components/ui-theme-menu/ThemeMenu"
 describe("ThemeMenu.entries", () => {
   test("lists the themes it's given, in order, each titled, with its description:  nothing else", () => {
     const menu = new ThemeMenu({
-      themes: ["spell", "glass", "fruity", "merlot", "paper", "midnight", "crisp", "pop"],
+      themes: ["spell", "glass", "fruity", "merlot", "paper", "midnight", "crisp", "pop", "matrix"],
       text: keyText
     })
     expect(menu.entries).toEqual([
@@ -16,7 +16,8 @@ describe("ThemeMenu.entries", () => {
       { value: "paper", text: "Paper", description: "paperDescription" },
       { value: "midnight", text: "Midnight", description: "midnightDescription" },
       { value: "crisp", text: "Crisp", description: "crispDescription" },
-      { value: "pop", text: "Pop", description: "popDescription" }
+      { value: "pop", text: "Pop", description: "popDescription" },
+      { value: "matrix", text: "Matrix", description: "matrixDescription" }
     ])
   })
 

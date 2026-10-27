@@ -20,14 +20,15 @@ import type { Styles } from "./Styles"
  *   - `classic`:  the base every Fomantic theme sits on;  `apply("classic")` applies it alone
  *   - `dark`:  a colour SCHEME, not a look;  switch it with `color-scheme` / `ui-dark` / `<ui-root theme>`, on top
  *     of any theme.  `apply("dark")` throws.
- *   - `spell`, `glass`, `fruity`, `merlot`, `paper`, `midnight`, `crisp` and `pop`:  OUR OWN themes (`own`), the ONE set every place lists
- *     (epic `debut` P17):
+ *   - `spell`, `glass`, `fruity`, `merlot`, `paper`, `midnight`, `crisp`, `pop` and `matrix`:
+ *     OUR OWN themes (`own`), the ONE set every place lists (epic `debut` P17):
  *     - `spell`:  the Spell brand, as Claude Design draws it
  *     - `glass`:  macOS's look today, translucent glass surfaces on a solid page
  *     - `fruity`:  Glass on a pastel wallpaper (it extends `glass`:  its sheet imports `glass.css`)
  *     - `merlot`:  a code studio in wine reds, flat panels a step off the page
  *     - `paper`, `midnight`, `crisp` and `pop` (epic `debut` P20):  warm and bookish, dark and glowing, high
  *       contrast (text at 7:1), playful stickers
+ *     - `matrix`:  a dark ops console, a mint accent, its labels in the monospace (Owen, 2026-10-26)
  *     - applied exactly like a Fomantic theme (on `classic`), but a picker lists them apart
  *     - written as DATA (epic `debut` P18):  each a theme file, `<name>.theme.json5`, its values in the theme tree's
  *       nested groups;  its sheet here is GENERATED from it (`ThemeFile`, `yarn gen:styles`), so this class still
@@ -48,7 +49,17 @@ export class Themes {
   readonly base = BASE
 
   /** our own themes (not Fomantic ports), in a picker's order:  applied like one */
-  readonly own: readonly string[] = ["spell", "glass", "fruity", "merlot", "paper", "midnight", "crisp", "pop"]
+  readonly own: readonly string[] = [
+    "spell",
+    "glass",
+    "fruity",
+    "merlot",
+    "paper",
+    "midnight",
+    "crisp",
+    "pop",
+    "matrix"
+  ]
 
   /** `UI.styles` names:  base slot and theme slot */
   readonly slots = { base: BASE, theme: "theme" } as const

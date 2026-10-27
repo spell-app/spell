@@ -51,7 +51,7 @@ import benchCSS from "./UIDocsThemeBench.css?inline"
  *     then the CHANGES, as the lines to put in the theme's file (`BenchEdits`)
  * - The theme:  the bench's menu is the docs site's (`ThemePreference`);  a pick there is made in every page too,
  *   as its own menu would, remembered there (`BenchPlace.themeKey`).
- *   - The bench itself always wears Glass (`CHROME_THEME`, `ThemePreference.wear()`), in the scheme picked:
+ *   - The bench itself always wears Fruity (`CHROME_THEME`, `ThemePreference.wear()`), in the scheme picked:
  *     only the pages in the frames change, and the tuning goes into the frames only.
  * - A tuning applies to the theme shown, live:  a sheet over each page (`BenchBridge.applyCss()`).
  *   - A token whose value differs between light and dark is tuned for the scheme shown.
@@ -82,7 +82,7 @@ export class UIDocsThemeBench extends E.UIComponent<DocsThemeBenchVocabulary> {
 
   /**
    * While connected:  follow the bench's menu, for the pages in its frames;
-   * the bench itself wears Glass whatever is picked (`CHROME_THEME`;  Owen, epic `debut`), in the scheme picked.
+   * the bench itself wears Fruity whatever is picked (`CHROME_THEME`;  Owen, epic `debut`), in the scheme picked.
    */
   @E.whileConnected
   protected followMenu() {
@@ -1102,9 +1102,10 @@ const ALL_PARTS: DressParts = { theme: true, scheme: true, css: true, titles: tr
 
 /**
  * The theme the bench's own bar, columns and frames' surrounds wear, whatever is picked for the pages in them
- * (Owen, epic `debut`:  "Make the \"chrome\" of the page ... stick to \"glass\"");  its tuning never reaches them.
+ * (Owen, epic `debut`:  "Make the \"chrome\" of the page ... stick to \"glass\"", then "Make outer theme \"fruity\"");
+ * its tuning never reaches them.
  */
-const CHROME_THEME = "glass"
+const CHROME_THEME = "fruity"
 
 /** The theme on a server, where there's no menu to read:  Spell UI's pages' own. */
 const DEFAULT_THEME = "spell"

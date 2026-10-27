@@ -199,19 +199,43 @@
   color: var(--ui-text-muted);
 }
 
-/* ### The tree:  a branch under its group, indented on a guide line, its title a step quieter */
+/*
+ * ### The tree:  each group a panel of its own under a title band, as the docs pages' sections;
+ * a branch inside it indented on a guide line, its title a step quieter.  Nesting reads by indent and line, not space.
+ */
 
+.group {
+  display: block;
+  /* no section's margins:  the column's gap spaces the groups, the panels' edges part them */
+  --ui-section-margin: 0;
+  --ui-section-content-padding: 0;
+  /* a step less than the column's corners around it */
+  border-radius: calc(var(--ui-radius-l, 12px) - 4px);
+  border: 1px solid var(--ui-border-color-internal, var(--ui-border-color));
+  background: color-mix(in oklab, var(--ui-surface) 55%, transparent);
+  overflow: clip;
+}
+/* the group's title band:  the docs pages' resting section title */
+.group::part(title) {
+  padding: 6px 8px;
+  background: var(--ui-section-title-background, var(--ui-surface-strong));
+  border-block-end: 1px solid var(--ui-border-color-internal, var(--ui-border-color));
+}
+.group::part(heading) {
+  font-size: 1em;
+}
 .branch {
   display: block;
-  margin-inline-start: 10px;
-  padding-inline-start: 6px;
+  --ui-section-margin: 0;
+  --ui-section-content-padding: 0;
+  margin-inline-start: 12px;
   border-inline-start: 1px solid var(--ui-border-color-internal, var(--ui-border-color));
 }
 .branch::part(title) {
-  padding-block: 4px;
+  padding: 4px 8px;
 }
 .branch::part(heading) {
-  font-size: 0.9em;
+  font-size: 0.85em;
   font-weight: 600;
   font-family: var(--ui-font-family-mono, monospace);
 }
@@ -226,8 +250,8 @@
 
 .token {
   display: grid;
-  gap: 6px;
-  padding: 10px 8px;
+  gap: 4px;
+  padding: 6px 8px;
   border-block-start: 1px solid var(--ui-border-color-internal, var(--ui-border-color));
 }
 .token.tuned {

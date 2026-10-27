@@ -33,6 +33,7 @@ describe("ThemeFile", () => {
       "crisp.css",
       "fruity.css",
       "glass.css",
+      "matrix.css",
       "merlot.css",
       "midnight.css",
       "palettes/apple.css",

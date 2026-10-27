@@ -68,9 +68,9 @@ class Own {
 }
 
 describe("Themes.own:  the one set", () => {
-  it("is Spell, Glass, Fruity, Merlot, Paper, Midnight, Crisp and Pop, in that order, each a sheet of the folder", async () => {
+  it("is Spell, Glass, Fruity, Merlot, Paper, Midnight, Crisp, Pop and Matrix, in that order, each a sheet of the folder", async () => {
     await UI.load()
-    expect(UI.themes.own).toEqual(["spell", "glass", "fruity", "merlot", "paper", "midnight", "crisp", "pop"])
+    expect(UI.themes.own).toEqual(["spell", "glass", "fruity", "merlot", "paper", "midnight", "crisp", "pop", "matrix"])
     for (const name of UI.themes.own) expect(UI.themes.sheets).toContain(name)
   })
 })
@@ -313,6 +313,29 @@ describe("pop.css", () => {
     await Own.use("pop")
     const box = await Own.primaryButton()
     expect(getComputedStyle(box).boxShadow).toMatch(/\) 0px 0px 0px 2px, .+\) 3px 3px 0px 2px$/)
+  })
+})
+
+describe("matrix.css", () => {
+  it("a deep mint primary in light, mint in dark;  8px buttons, the system font;  a near-black green page", async () => {
+    await Own.use("matrix")
+    const box = await Own.primaryButton()
+    const style = getComputedStyle(box)
+    expect(style).toMatchObject({ backgroundColor: "rgb(11, 117, 82)", borderTopLeftRadius: "8px" }) // #0b7552
+    expect(style.fontFamily).toMatch(/^system-ui/)
+    Own.dark(box)
+    await vi.waitFor(() => expect(getComputedStyle(box).backgroundColor).toBe("rgb(124, 229, 189)")) // #7ce5bd
+    expect(Own.color("--ui-background")).toBe("rgb(7, 16, 19)") // #071013
+  })
+
+  it("the console's labels:  a table's header row in the monospace, uppercase", async () => {
+    await Own.use("matrix")
+    const { style } = await ThemeHarness.page(
+      `<table class="ui table"><thead><tr><th>Port</th></tr></thead><tbody><tr><td>48</td></tr></tbody></table>`,
+      "th"
+    )
+    expect(style.textTransform).toBe("uppercase")
+    expect(style.fontFamily).toMatch(/^ui-monospace/)
   })
 })
 

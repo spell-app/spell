@@ -11,8 +11,8 @@ import { ThemeHarness } from "spell-ui/test-helpers/ThemeHarness"
  * - Names:  every `--name:` in the sheet as `UI.themes` loads it (its imports inlined), rules sheets' too.
  */
 
-/** The themes written from their files:  the first four converted (P18), the four new ones made so (P20). */
-const THEMES = ["spell", "glass", "fruity", "merlot", "paper", "midnight", "crisp", "pop"] as const
+/** The themes written from their files:  the first four converted (P18), the four new ones made so (P20), and Matrix. */
+const THEMES = ["spell", "glass", "fruity", "merlot", "paper", "midnight", "crisp", "pop", "matrix"] as const
 
 describe("theme values", () => {
   for (const name of THEMES) {
