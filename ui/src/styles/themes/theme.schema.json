@@ -46,6 +46,12 @@
             },
             "mono": {
               "$ref": "#/definitions/value"
+            },
+            "serif": {
+              "$ref": "#/definitions/value"
+            },
+            "rounded": {
+              "$ref": "#/definitions/value"
             }
           }
         },

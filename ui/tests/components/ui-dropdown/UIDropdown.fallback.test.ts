@@ -63,6 +63,16 @@ describe("DropdownFallback", () => {
     expect(select().querySelectorAll("option").length).toBe(4)
   })
 
+  it("reads its items as the component does:  an item's old names, `text` and `type`, read nothing (ui-gaps Q28)", () => {
+    const { select } = dropdown(`<x-fb-dropdown aria-label="x">
+      <ui-item type="header" text="Old" value="a" selected>Apple</ui-item>
+    </x-fb-dropdown>`)
+    expect([...select().options].map((option) => [option.value, option.textContent, option.selected])).toEqual([
+      ["a", "Apple", true]
+    ])
+    expect(select().querySelector("optgroup")).toBe(null)
+  })
+
   it("builds options from the `options` property", () => {
     const { host, select } = dropdown(`<x-fb-dropdown name="n" placeholder="Pick" value="y"></x-fb-dropdown>`)
     host.options = [

@@ -15,6 +15,7 @@ import { itemVocabulary } from "spell-ui/components/ui-item/UIItem.en"
  * - Plain items become `MenuOption`s:
  *   `value` (default `text`), `text` (default the text content), `description`,
  *   `icon`, `image`, `flag`, `disabled`, `selected` (or its alias `active`, as `UIItem` reads it).
+ *   - The ONE reader of an item, `entryOf()`:  the dropdown's and the select's, and their native fallbacks'.
  *   - The dropdown renders them in ITS shadow root,
  *     because the listbox must share a tree with the combobox for `aria-activedescendant`.
  * - RICH items (element children) keep their markup:
@@ -53,48 +54,102 @@ export class SlottedItems {
     })
   }
 
-  /** Every item child (`<ui-item>`, or a translated alias of it), read now. */
+  /** The values of the items marked `selected`:  the starting value, a list when `multiple`, else the first. */
+  selectedValue(isMultiple: boolean): string | string[] | undefined {
+    return SlottedItems.selectedValueIn(this.entries, isMultiple)
+  }
+
+  /** Every item child, read now. */
   private read(): E.MenuEntry[] {
-    const entries: E.MenuEntry[] = []
-    for (const element of this.domElement.children) {
-      const definition = E.UIComponent.registry.definitions.get(element.localName)
-      if (element.localName !== itemVocabulary.tag && definition?.vocabulary !== itemVocabulary) continue
-      entries.push(this.entry(element, definition))
-    }
-    return entries
+    return SlottedItems.itemsOf(this.domElement).map((element) => this.cachedEntryOf(element))
   }
 
   /** Entry for one `<ui-item>`, reusing the cached object when nothing changed. */
-  private entry(element: Element, definition: E.ElementDefinition | undefined): E.MenuEntry {
-    const read = <N extends E.AttributeName<typeof itemVocabulary>>(name: N) =>
-      SlottedItems.valueFor(element, definition, name)
-    const type = read("kind")
-    const isRich = element.children.length > 0
-    const text = (read("label") as string | undefined) ?? element.textContent?.trim() ?? ""
-    let next: E.MenuEntry
-    if (type === "header" || type === "divider") next = { type, text } satisfies E.MenuSeparator
-    else {
-      next = {
-        value: (read("value") as string | undefined) ?? text,
-        text,
-        description: read("description") as string | undefined,
-        // `""` is a bare `icon`:  an item has no icon of its own to default to
-        icon: (read("icon") as string | undefined) || undefined,
-        image: read("image"),
-        flag: read("flag"),
-        disabled: read("disabled") as boolean,
-        selected: (read("selected") as boolean) || E.Converters.boolean(element.getAttribute(UIT.ACTIVE), UIT.ACTIVE)
-      }
-    }
+  private cachedEntryOf(element: Element): E.MenuEntry {
+    const next = SlottedItems.entryOf(element)
     const cached = this.cache.get(element)
     const entry = cached && SlottedItems.isSameEntry(cached, next) ? cached : next
     this.cache.set(element, entry)
-    if (isRich && !("type" in entry)) {
+    if (element.children.length > 0 && !("type" in entry)) {
       let slot = this.slots.get(entry)
       if (!slot) this.slots.set(entry, (slot = `${SLOT_PREFIX}${++this.counter}`))
       if (element.slot !== slot) element.slot = slot
     }
     return entry
+  }
+
+  ////////////////
+  // ## Reading items:  plain DOM, so the native fallbacks read them too
+  ////////////////
+
+  /**
+   * The item children of `domElement`:  each `<ui-item>`, or a translated alias of it.
+   * - STATIC:  pure DOM reading, for the components and their native fallbacks alike.
+   */
+  static itemsOf(domElement: Element): Element[] {
+    return [...domElement.children].filter(
+      (element) =>
+        element.localName === itemVocabulary.tag || SlottedItems.definitionOf(element)?.vocabulary === itemVocabulary
+    )
+  }
+
+  /**
+   * What item `element` describes, read now:  an option, or a `header` / `divider`.
+   * - Its `label` (default its text content), `value` (default the label), and the rest of `MenuOption`.
+   * - STATIC:  pure DOM reading, as `itemsOf()`.
+   */
+  static entryOf(element: Element): E.MenuEntry {
+    const definition = SlottedItems.definitionOf(element)
+    const read = <N extends E.AttributeName<typeof itemVocabulary>>(name: N) =>
+      SlottedItems.valueFor(element, definition, name)
+    const type = read("kind")
+    const text = (read("label") as string | undefined) ?? element.textContent?.trim() ?? ""
+    if (type === "header" || type === "divider") return { type, text } satisfies E.MenuSeparator
+    return {
+      value: (read("value") as string | undefined) ?? text,
+      text,
+      description: read("description") as string | undefined,
+      // `""` is a bare `icon`:  an item has no icon of its own to default to
+      icon: (read("icon") as string | undefined) || undefined,
+      image: read("image"),
+      flag: read("flag"),
+      disabled: read("disabled") as boolean,
+      selected: (read("selected") as boolean) || E.Converters.boolean(element.getAttribute(UIT.ACTIVE), UIT.ACTIVE)
+    }
+  }
+
+  /**
+   * The chosen values a `value` holds, as a list:  a list as it is, a text split when `multiple` (`"a, b"`),
+   * nothing for `""` or no value.
+   * - The dropdown's and the select's chosen values, and their native fallbacks'.
+   * - STATIC:  pure.
+   */
+  static valuesIn(value: unknown, isMultiple: boolean): string[] {
+    if (Array.isArray(value)) return value.map(String)
+    if (typeof value !== "string" || value === "") return []
+    return isMultiple ? E.Converters.list(value) : [value]
+  }
+
+  /**
+   * The values of the options in `entries` marked `selected`:  a list when `multiple`, else the first;
+   * `undefined` for none.
+   * - STATIC:  pure, for the fallbacks' entries too.
+   */
+  static selectedValueIn(entries: readonly E.MenuEntry[], isMultiple: boolean): string | string[] | undefined {
+    const values = entries
+      .filter((entry): entry is E.MenuOption => !("type" in entry) && !!entry.selected)
+      .map((option) => option.value)
+    if (!values.length) return undefined
+    return isMultiple ? values : values[0]
+  }
+
+  /**
+   * `element`'s definition, by its tag:  a translated alias of `<ui-item>` has the item's vocabulary.
+   * - `undefined` while its family isn't registered:  then `entryOf()` reads the attributes by their English names.
+   * - STATIC:  pure.
+   */
+  private static definitionOf(element: Element): E.ElementDefinition | undefined {
+    return E.UIComponent.registry.definitions.get(element.localName)
   }
 
   /**

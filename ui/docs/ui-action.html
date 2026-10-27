@@ -66,21 +66,21 @@
             -->
             <ui-section id="examples-types" label="Types" sticky collapsible dividing>
               <ui-section id="examples-types-menu" label="Menu" sticky collapsible dividing>
-                <ui-example description="A menu of actions:  each its title, then its shortcut's keys.  `meta` is ⌘ on a Mac, Ctrl elsewhere.">
+                <ui-example description="A menu of actions:  each its title, then its shortcut's keys.  `mod` is ⌘ on a Mac, Ctrl elsewhere.">
                   <ui-menu direction="vertical" aria-label="Game">
-                    <ui-action icon="play" shortcut="meta+N">New game</ui-action>
+                    <ui-action icon="play" shortcut="mod+N">New game</ui-action>
                     <ui-action kind="divider"></ui-action>
-                    <ui-action icon="undo" shortcut="meta+Z">Undo Turn Card</ui-action>
-                    <ui-action icon="redo" shortcut="meta+shift+Z" disabled>Redo</ui-action>
+                    <ui-action icon="undo" shortcut="mod+Z">Undo Turn Card</ui-action>
+                    <ui-action icon="redo" shortcut="mod+shift+Z" disabled>Redo</ui-action>
                   </ui-menu>
                 </ui-example>
               </ui-section>
               <ui-section id="examples-types-toolbar" label="Toolbar" sticky collapsible dividing>
                 <ui-example description="The same actions as a toolbar's buttons.">
                   <ui-toolbar aria-label="Game">
-                    <ui-action icon="play" shortcut="meta+N">New game</ui-action>
-                    <ui-action icon="undo" shortcut="meta+Z">Undo</ui-action>
-                    <ui-action icon="redo" shortcut="meta+shift+Z" disabled>Redo</ui-action>
+                    <ui-action icon="play" shortcut="mod+N">New game</ui-action>
+                    <ui-action icon="undo" shortcut="mod+Z">Undo</ui-action>
+                    <ui-action icon="redo" shortcut="mod+shift+Z" disabled>Redo</ui-action>
                   </ui-toolbar>
                 </ui-example>
               </ui-section>
@@ -89,9 +89,9 @@
               <ui-section id="examples-states-disabled-and-selected" label="Disabled and selected" sticky collapsible dividing>
                 <ui-example description="Greyed while it can't be done (`disabled`, or its action not enabled);  ticked while it's on (`selected`).">
                   <ui-menu direction="vertical" aria-label="View">
-                    <ui-action shortcut="meta+1" selected>Show the grid</ui-action>
-                    <ui-action shortcut="meta+2">Show the rulers</ui-action>
-                    <ui-action shortcut="meta+3" disabled>Show the guides</ui-action>
+                    <ui-action shortcut="mod+1" selected>Show the grid</ui-action>
+                    <ui-action shortcut="mod+2">Show the rulers</ui-action>
+                    <ui-action shortcut="mod+3" disabled>Show the guides</ui-action>
                   </ui-menu>
                 </ui-example>
               </ui-section>
@@ -115,7 +115,7 @@
                   const undo = document.createElement("ui-action")
                   undo.action = {
                     get title() { return history.undoTitle },  // "Undo Turn Card"
-                    shortcut: "meta+Z",
+                    shortcut: "mod+Z",
                     get isEnabled() { return history.canUndo },
                     isSelected: false,
                     run: () => history.undo()

@@ -19,6 +19,8 @@
  *     - `SpellUISettings`:  what Spell UI hands `spell/element` (a side effect, below)
  *     - `IconGlyph`, `PartComponent` (the generic content parts)
  *     - `ClipboardCopy`:  a copy button's copy, then "Copied" for a moment
+ *     - `PopoverPanel`:  the panel a control opens under itself (dropdown, calendar, search, icon picker, a
+ *       shrinkable menu's overflow), a `Disclosure` with its popover, overlay entry and anchor
  *     - `RootSettings`:  what each `<ui-root>` sets for its subtree (icon packs, emoji)
  *     - the elements that show a text file:
  *       `DOMLoadableElement` + `LoadableComponent`, `SourceMarkup`,
@@ -67,6 +69,7 @@ export * from "spell-ui/elements/PartComponent"
 export * from "spell-ui/elements/RootSettings"
 export * from "spell-ui/elements/IconGlyph"
 export * from "spell-ui/elements/ClipboardCopy"
+export * from "spell-ui/elements/PopoverPanel"
 export * from "spell-ui/elements/DOMLoadableElement"
 export * from "spell-ui/elements/LoadableComponent"
 export * from "spell-ui/elements/SourceMarkup"

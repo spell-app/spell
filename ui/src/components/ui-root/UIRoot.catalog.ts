@@ -320,6 +320,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
     skeleton: { width: "16em", height: "2.25em" },
     attributes: ["base", "page", "shortcuts", "placeholder", "size"]
   },
+  "ui-docs-theme-bench": { folder: "ui-docs-theme-bench", skeleton: { height: "40em" }, attributes: [] },
   "ui-docs-tokens": {
     folder: "ui-docs-tokens",
     skeleton: {

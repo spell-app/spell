@@ -1,6 +1,6 @@
 import { E, UIT } from "spell-ui/core"
-import { itemVocabulary } from "spell-ui/components/ui-item/UIItem.en"
 import { dropdownVocabulary } from "./UIDropdown.en"
+import { SlottedItems } from "./SlottedItems"
 
 /****************
  * ### `DropdownFallback`
@@ -8,8 +8,8 @@ import { dropdownVocabulary } from "./UIDropdown.en"
  * so the chosen value(s) are still submitted and validated with the form.
  *
  * - Its shadow DOM:  a native `<select part="trigger select" class="ui … dropdown">`, `multiple` when `multiple`.
- * - The options come from the DOM element's `options` PROPERTY, then its light-DOM `<ui-item>`s
- *   (`header` => `<optgroup>`, `divider` skipped).
+ * - The options come from the DOM element's light-DOM `<ui-item>`s (`header` => `<optgroup>`, `divider` skipped),
+ *   read as the component reads them (`SlottedItems`), then its `options` PROPERTY.
  * - The chosen values come from the `value` property, else the attribute (a comma / space list).
  * - A single select starts with an empty `<option>` (the `placeholder` text) when nothing is chosen,
  *   so the browser doesn't silently choose the first option.
@@ -30,7 +30,7 @@ export class DropdownFallback extends E.NativeFallback<typeof dropdownVocabulary
     "`readonly` is a disabled select (the value still submits)"
   ]
 
-  /** The native select, once built, for `attached()`. */
+  /** The native select, once built, for `sync()`. */
   private select: HTMLSelectElement | undefined
 
   protected override build() {
@@ -46,27 +46,29 @@ export class DropdownFallback extends E.NativeFallback<typeof dropdownVocabulary
       "aria-readonly": this.flag("readonly") ? "true" : undefined
     })
     this.decorate(select, "trigger", SELECT_PART)
-    if (!select.hasAttribute("aria-label") && placeholder) select.setAttribute("aria-label", placeholder)
+    this.nameFromPlaceholder(select)
 
-    const chosen = this.chosen(domElement, isMultiple)
-    const choices = this.choices(domElement)
-    const picked = choices.filter((choice) => choice.type === UIT.ITEM && (choice.selected || chosen.has(choice.value)))
+    const chosen = new Set(SlottedItems.valuesIn(domElement.value ?? this.attr("value"), isMultiple))
+    const entries = [...SlottedItems.itemsOf(domElement).map(SlottedItems.entryOf), ...(domElement.options ?? [])]
+    const picked = entries.filter(
+      (entry): entry is E.MenuOption => !("type" in entry) && (!!entry.selected || chosen.has(entry.value))
+    )
     if (!isMultiple && !picked.length) {
       select.append(this.create("option", { value: "", selected: true }, placeholder ?? ""))
     }
 
     let group: HTMLElement = select
-    for (const choice of choices) {
-      if (choice.type === UIT.HEADER) select.append((group = this.create("optgroup", { label: choice.text })))
-      else if (choice.type === UIT.ITEM) {
-        const option = this.create("option", { value: choice.value, disabled: choice.disabled }, choice.text)
-        option.selected = picked.includes(choice) && (isMultiple || choice === picked[0])
+    for (const entry of entries) {
+      if (!("type" in entry)) {
+        const option = this.create("option", { value: entry.value, disabled: entry.disabled }, entry.text)
+        option.selected = picked.includes(entry) && (isMultiple || entry === picked[0])
         group.append(option)
-      }
+      } else if (entry.type === UIT.HEADER) select.append((group = this.create("optgroup", { label: entry.text })))
     }
 
     this.listen(select, "change", (event) => {
-      const value = this.sync(select, isMultiple)
+      this.sync()
+      const value = this.chosenValue()
       domElement.value = value
       this.send(CHANGE_EVENT, { value, originalEvent: event })
     })
@@ -74,93 +76,17 @@ export class DropdownFallback extends E.NativeFallback<typeof dropdownVocabulary
     return [select]
   }
 
-  /** The first form value and validity, which need the select attached. */
-  protected override attached() {
-    this.sync(this.select!, this.select!.multiple)
+  /** The select's value, and its validity (`required`). */
+  protected override sync() {
+    const { select } = this
+    if (select) this.syncForm({ value: this.chosenValue(), control: select })
   }
 
-  /** The values the DOM element says are chosen. */
-  private chosen(domElement: DropdownDOMElement, isMultiple: boolean): Set<string> {
-    const value = domElement.value ?? this.attr("value")
-    if (!value) return new Set()
-    if (Array.isArray(value)) return new Set(value.map(String))
-    return new Set(isMultiple ? E.Converters.list(String(value)) : [String(value)])
+  /** What the select has chosen:  a list when `multiple`, else one value (`""` for none). */
+  private chosenValue(): UIT.DropdownValue {
+    const select = this.select!
+    return select.multiple ? [...select.selectedOptions].map((option) => option.value) : select.value
   }
-
-  /** The `<ui-item>` children, then the `options` property, as one flat list. */
-  private choices(domElement: DropdownDOMElement): Choice[] {
-    const choices: Choice[] = []
-    for (const item of domElement.querySelectorAll(`:scope > ${itemVocabulary.tag}`)) {
-      // `label` and `kind`, or their old names `text` and `type` (epic `ui-gaps` P4)
-      const text =
-        DropdownFallback.itemAttribute(item, "label") ?? item.getAttribute(OLD_LABEL) ?? item.textContent?.trim() ?? ""
-      const type = DropdownFallback.itemAttribute(item, "kind") ?? item.getAttribute(OLD_KIND) ?? undefined
-      choices.push({
-        type: type === UIT.HEADER || type === DIVIDER ? type : UIT.ITEM,
-        text,
-        value: DropdownFallback.itemAttribute(item, "value") ?? text,
-        disabled: E.Converters.boolean(DropdownFallback.itemAttribute(item, "disabled"), "disabled"),
-        selected: E.Converters.boolean(DropdownFallback.itemAttribute(item, "selected"), "selected")
-      })
-    }
-    for (const option of domElement.options ?? []) {
-      choices.push({
-        type: UIT.ITEM,
-        text: option.text,
-        value: option.value,
-        disabled: !!option.disabled,
-        selected: !!option.selected
-      })
-    }
-    return choices
-  }
-
-  /** Copy the select's value (and validity) onto the DOM element;  return the value. */
-  private sync(select: HTMLSelectElement, isMultiple: boolean): UIT.DropdownValue {
-    const values = isMultiple
-      ? [...select.selectedOptions].map((option) => option.value)
-      : select.value
-        ? [select.value]
-        : []
-    const name = this.attr("name")
-    const internals = this.formInternals
-    if (internals) {
-      if (isMultiple) {
-        const data = new FormData()
-        for (const value of values) data.append(name ?? "", value)
-        internals.setFormValue(name ? data : null)
-      } else internals.setFormValue(name ? (values[0] ?? "") : null)
-      const isMissing = select.validity.valueMissing
-      internals.setValidity(isMissing ? { valueMissing: true } : {}, select.validationMessage, select)
-    }
-    return isMultiple ? values : (values[0] ?? "")
-  }
-
-  /**
-   * The `<ui-item>` attribute `name` of `item`, or `undefined`:  its `getAttribute()`, typed by the item's vocabulary.
-   * - Static:  pure, it needs no instance.
-   */
-  private static itemAttribute(item: Element, name: E.AttributeNameOf<typeof itemVocabulary>): string | undefined {
-    return item.getAttribute(name) ?? undefined
-  }
-}
-
-/** An item's `label`'s and `kind`'s old names. */
-const OLD_LABEL = "text"
-const OLD_KIND = "type"
-
-/** One option, header or divider, from either source. */
-type Choice = {
-  /** an option, a group header or a divider */
-  type: UIT.ItemType
-  /** the text shown */
-  text: string
-  /** the value submitted */
-  value: string
-  /** can't be chosen */
-  disabled: boolean
-  /** chosen by its own `selected` */
-  selected: boolean
 }
 
 /** What the fallback reads and writes of the DOM element:  all optional, the element may not have upgraded. */
@@ -173,9 +99,6 @@ type DropdownDOMElement = HTMLElement & {
 
 /** The select's second part name, beside the vocabulary's `trigger`:  `::part(select)` styles the native one. */
 const SELECT_PART = "select"
-
-/** The `<ui-item kind>` of a divider, which the select skips. */
-const DIVIDER = "divider"
 
 /** The event the select's `change` becomes. */
 const CHANGE_EVENT: E.EventName<typeof dropdownVocabulary> = "ui-changed"

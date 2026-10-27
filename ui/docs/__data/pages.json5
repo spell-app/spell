@@ -115,6 +115,11 @@
       "summary": "A docs search is a field that finds sections of the page shown, components, attributes and every page's sections as you type, and jumps to the one you pick;  `/` or Cmd / Ctrl+K focuses it from anywhere.",
       "status": "done"
     },
+    "ui-docs-theme-bench": {
+      "title": "Docs theme bench",
+      "summary": "A theme bench shows Spell's real pages side by side, every one in the theme you pick, and tunes the tokens behind their tabs, section titles and surfaces live:  then copy the changes into the theme's file.",
+      "status": "done"
+    },
     "ui-docs-tokens": {
       "title": "Docs tokens",
       "summary": "A token table lists the CSS custom properties of a component family, or of the whole foundation, with their defaults and a live swatch for each colour;  a playground adds inputs that restyle a live preview.",

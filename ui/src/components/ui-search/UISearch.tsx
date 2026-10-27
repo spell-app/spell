@@ -261,7 +261,7 @@ export class UISearch extends F.FormComponent<Vocabulary> {
    * The results, a popover panel on `isOpen`:  `ui-opening` / `ui-closing`, the overlay entry, the anchor.
    * - Never opens while disabled or readonly;  opening highlights the first result (`select-first-result`) or none.
    */
-  readonly popover = new F.PopoverPanel({
+  readonly popover = new E.PopoverPanel({
     component: this,
     member: "isOpen",
     restoreFocus: false,

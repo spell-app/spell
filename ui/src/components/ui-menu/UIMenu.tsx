@@ -412,8 +412,15 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
     this.folded = rows
   }
 
-  /** The overflow menu's open state:  its own, no events. */
-  readonly overflowMenu = new E.Disclosure()
+  /**
+   * The overflow menu:  its own open state (the menu sends no open or close events), a popover hung from its button,
+   * and its `UI.overlays` entry while open:  Escape or a click outside closes it, focus back on its button for Escape.
+   */
+  readonly overflowMenu = new E.PopoverPanel({
+    component: this,
+    restoreFocus: false,
+    onDismiss: (reason) => this.closeOverflow(reason === "escape")
+  })
 
   /** The overflow menu is open. */
   get isOverflowOpen(): boolean {
@@ -426,18 +433,10 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
   /** The overflow menu's box, while drawn. */
   private overflowPanel: HTMLElement | undefined
 
-  /** The overflow menu's `UI.overlays` entry while open:  Escape or a click outside closes it. */
-  private readonly overflowOverlay: E.OverlayEntry = {
-    element: this.domElement,
-    kind: "popover",
-    restoreFocus: false,
-    onDismiss: (reason) => this.closeOverflow(reason === "escape")
-  }
-
-  /** Its ids:  the anchor its menu hangs from, and the menu's `id` (the button's `aria-controls`). */
+  /** The overflow menu's `id`:  its button's `aria-controls`. */
   @E.lazy
-  get overflowIds(): { anchor: string; menu: string } {
-    return { anchor: `--${UI.ids.next(this.vocabulary.tag)}`, menu: UI.ids.next(this.vocabulary.tag) }
+  get overflowMenuId(): string {
+    return UI.ids.next(this.vocabulary.tag)
   }
 
   /** The overflow button's name and tooltip, and its menu's:  "More". */
@@ -459,27 +458,22 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
   })
 
   /**
-   * SIDE EFFECT:  the overflow menu shows in the top layer while open, with its `UI.overlays` entry,
-   * its chosen row (else its first) focused;  the cleanup hides it.
+   * SIDE EFFECT:  the overflow menu shows in the top layer while open, with its `UI.overlays` entry
+   * (`PopoverPanel.follow()`), its chosen row (else its first) focused;  the cleanup hides it.
    */
   @E.onChange("isOverflowOpen", "isConnected")
   protected onOverflowOpenChanged(isOpen: boolean, isConnected: boolean) {
-    const panel = this.overflowPanel
-    if (!isOpen || !isConnected || !panel) return
-    if (!panel.matches(POPOVER_OPEN)) panel.showPopover()
-    UI.overlays.open(this.overflowOverlay)
-    E.afterSolidUpdate(() =>
-      this.focusRow(
-        Math.max(
-          0,
-          this.folded.findIndex((row) => row.isSelected)
+    const hide = this.overflowMenu.follow(this.overflowPanel, isOpen && isConnected)
+    if (hide)
+      E.afterSolidUpdate(() =>
+        this.focusRow(
+          Math.max(
+            0,
+            this.folded.findIndex((row) => row.isSelected)
+          )
         )
       )
-    )
-    return () => {
-      if (panel.matches(POPOVER_OPEN)) panel.hidePopover()
-      UI.overlays.close(this.overflowOverlay)
-    }
+    return hide
   }
 
   /** Open the overflow menu, its rows read fresh. */
@@ -496,16 +490,9 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
     if (refocus) this.overflowButton?.focus()
   }
 
-  /** Its rows' boxes, in order. */
-  private get rowBoxes(): HTMLElement[] {
-    return [...(this.overflowPanel?.querySelectorAll<HTMLElement>(`:scope > .${ROW}`) ?? [])]
-  }
-
-  /** Focus row `index`, wrapping round. */
+  /** Focus row `index` of the overflow menu, as it opens. */
   private focusRow(index: number) {
-    const rows = this.rowBoxes
-    if (!rows.length) return
-    rows[(index + rows.length) % rows.length]!.focus()
+    this.overflowPanel?.querySelectorAll<HTMLElement>(ROWS)[index]?.focus()
   }
 
   /** The overflow button's keys:  ↓ opens it, as Enter and Space do (a click). */
@@ -516,20 +503,15 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
     this.openOverflow()
   }
 
-  /** The overflow menu's keys:  ↑ ↓ Home End move;  Escape closes it, focus back on its button;  Tab closes it. */
+  /**
+   * The overflow menu's keys:  ↑ ↓ Home End move, wrapping, past disabled rows (`UI.focus.arrowKey()`);
+   * Escape closes it, focus back on its button;  Tab closes it.
+   */
   @E.untracked
   private readonly onOverflowMenuKey = (event: KeyboardEvent) => {
-    const rows = this.rowBoxes
-    const at = rows.indexOf(event.composedPath()[0] as HTMLElement)
-    const move = (index: number) => {
-      event.preventDefault()
-      this.focusRow(index)
-    }
-    if (event.key === UIT.Key.arrowDown) move(at + 1)
-    else if (event.key === UIT.Key.arrowUp) move(at - 1)
-    else if (event.key === UIT.Key.home) move(0)
-    else if (event.key === UIT.Key.end) move(rows.length - 1)
-    else if (event.key === UIT.Key.escape) {
+    const container = event.currentTarget as HTMLElement
+    if (UI.focus.arrowKey(event, { container, items: ROWS, orientation: "vertical", tabindex: "left alone" })) return
+    if (event.key === UIT.Key.escape) {
       event.preventDefault()
       this.closeOverflow(true)
     } else if (event.key === UIT.Key.tab) this.closeOverflow(true)
@@ -553,11 +535,11 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
           type="button"
           class={OVERFLOW_ITEM_CLASS}
           part={this.partForName("overflow")}
-          style={{ "anchor-name": this.overflowIds.anchor }}
+          style={this.overflowMenu.anchorStyle}
           role={this.interactive ? "menuitem" : undefined}
           aria-haspopup="menu"
           aria-expanded={this.overflowMenu.ariaExpanded}
-          aria-controls={this.overflowIds.menu}
+          aria-controls={this.overflowMenuId}
           aria-label={this.isSegmented ? undefined : this.moreText}
           title={this.isSegmented ? this.chosen?.text : this.moreText}
           onClick={() => (this.isOverflowOpen ? this.closeOverflow() : this.openOverflow())}
@@ -604,12 +586,12 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
       <Show when={this.isShrinking && !isServer}>
         <div
           ref={(element: HTMLElement) => (this.overflowPanel = element)}
-          id={this.overflowIds.menu}
+          id={this.overflowMenuId}
           class={OVERFLOW_MENU_CLASS}
           part={this.partForName("overflow-menu")}
           role="menu"
           popover="manual"
-          style={{ "position-anchor": this.overflowIds.anchor }}
+          style={this.overflowMenu.panelStyle}
           aria-label={this.moreText}
           onKeyDown={this.onOverflowMenuKey}
         >
@@ -874,8 +856,8 @@ const DOT = "dot"
 const SELECTED_CLASS = "selected"
 const DISABLED_CLASS = "disabled"
 
-/** Selector of a popover in the top layer. */
-const POPOVER_OPEN = ":popover-open"
+/** Selector of the overflow menu's rows, in its box. */
+const ROWS = `:scope > .${ROW}`
 
 ////////////////
 // ## Item types

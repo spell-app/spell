@@ -1,9 +1,11 @@
 import { E, UI } from "spell-ui/core"
+// Import directly to avoid circular import:  spell-element imports nothing of Spell UI, so it has always loaded first
+import { Disclosure } from "spell/element"
 
 /****************
  * ### `PopoverPanel`
- * The panel a form control opens under itself:  a dropdown's menu, a calendar's popup, a search's results,
- * an icon picker's grid (epic `coherence` P8).
+ * The panel a control opens under itself:  a dropdown's menu, a calendar's popup, a search's results,
+ * an icon picker's grid (epic `coherence` P8), a shrinkable menu's overflow menu (P17).
  * - A `Disclosure` (the kit's `spell/element`):  the open state, `request()` with the cancelable
  *   `ui-opening` / `ui-closing`, `aria-expanded`;  plus, on top, what every such panel does the same way:
  *   - the box as a popover, shown in the top layer while it shows (`follow()`)
@@ -22,9 +24,10 @@ import { E, UI } from "spell-ui/core"
  *     return this.popover.follow(this.menu, isOpen && isConnected && isReady)
  *   }
  *   ```
- * - In the `forms` entry:  every control that opens one has a value.
+ * - In the `core` entry since epic `coherence` P17, beside `Disclosure`:  a menu opens one too, and it has no value
+ *   (in `forms`, every page with a shrinkable menu would load the form controls' chunk).
  ****************/
-export class PopoverPanel extends E.Disclosure {
+export class PopoverPanel extends Disclosure {
   constructor(private readonly panelSetup: PopoverPanelSetup) {
     super(panelSetup)
   }

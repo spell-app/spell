@@ -15,6 +15,8 @@ import { E } from "spell-ui/core"
  *   so the component's adopted sheet still styles it and light-DOM children still show.
  * - Subclasses set `@proto static vocabulary` (or `vocabularies`, one class for several tags) and implement `build()`;
  *   callers only use `render()`.
+ * - A form control's subclass also implements `sync()`, handing `syncForm()` its value and the native control
+ *   whose validity counts:  `render()` runs it once the nodes are attached, the subclass on each change.
  * - Reads the DOM ELEMENT'S ATTRIBUTES (reflected primitives), never its properties,
  *   except where a subclass says so (`dropdown`:  `value`, `options`).
  * - NOTE:  attribute names are canonical English;  a translated DOM element must map its attributes back first.
@@ -108,7 +110,7 @@ export abstract class NativeFallback<V extends E.ComponentVocabulary = E.Compone
   ): E.NativeFallbackHandle {
     const fallback = new this(props)
     props.root.replaceChildren(...fallback.build())
-    fallback.attached()
+    fallback.sync()
     props.internals?.states.add(E.ERRORED_STATE)
     return { dispose: () => fallback.dispose(), degraded: fallback.degraded }
   }
@@ -116,16 +118,10 @@ export abstract class NativeFallback<V extends E.ComponentVocabulary = E.Compone
   /**
    * Nodes to put in `root`:  the subclass's whole fallback, built from the DOM element's attributes.
    * - Called once, by `render()`, before the nodes are attached:
-   *   work that needs them in the document goes in `attached()`.
+   *   the form value and validity, which need them in the document, wait for `sync()`.
    * - An override that only builds needs no docstring.
    */
   protected abstract build(): Node[]
-
-  /**
-   * Runs once the built nodes are in `root`, for work that needs them attached, e.g. `setValidity(..., anchor)`.
-   * - Default:  nothing.
-   */
-  protected attached() {}
 
   /**
    * Remove every listener `listen()` added;  the DOM stays, so a later re-render can replace it.
@@ -185,6 +181,45 @@ export abstract class NativeFallback<V extends E.ComponentVocabulary = E.Compone
   }
 
   ////////////////
+  // ## The form
+  ////////////////
+
+  /**
+   * Report the form value and validity:  a form control's subclass calls `syncForm()` with its own.
+   * - Runs once the built nodes are attached (`render()`), as validity anchors on them;
+   *   then the subclass calls it on each change.
+   * - Default:  nothing (the button's fallback sets its value as it's clicked).
+   */
+  protected sync() {}
+
+  /**
+   * Give the DOM element's form `value`, and the validity of the native `control` holding it.
+   * - `value`:  text, several texts (one `FormData` entry each, under `name`), or `undefined` for nothing.
+   *   Without a `name`, nothing, as a native control.
+   * - `control`:  its validity is the DOM element's, anchored on it;  left out:  validity is left alone.
+   * - `valueMissing`:  the fallback's own "value missing", in place of the control's whole validity.
+   * - Does nothing on a DOM element that isn't form-associated.
+   */
+  protected syncForm({ value, control, valueMissing }: FallbackFormSync) {
+    const internals = this.formInternals
+    if (!internals) return
+    const name = this.domElement.getAttribute("name")
+    // `null`:  `setFormValue()`'s "submit nothing"
+    if (!name || value === undefined) internals.setFormValue(null)
+    else if (typeof value === "string") internals.setFormValue(value)
+    else {
+      const data = new FormData()
+      for (const each of value) data.append(name, each)
+      internals.setFormValue(data)
+    }
+    if (!control) return
+    if (valueMissing !== undefined) {
+      internals.setValidity(valueMissing ? { valueMissing } : {}, control.validationMessage, control)
+    } else if (control.validity.valid) internals.setValidity({})
+    else internals.setValidity(control.validity, control.validationMessage, control)
+  }
+
+  ////////////////
   // ## Building
   ////////////////
 
@@ -230,6 +265,15 @@ export abstract class NativeFallback<V extends E.ComponentVocabulary = E.Compone
       target.setAttribute("aria-busy", "true")
     }
     return target
+  }
+
+  /**
+   * Name `control` by the DOM element's `placeholder`, when nothing names it yet:  no `aria-label` of its own,
+   * nor one `decorate()` copied from the DOM element.
+   */
+  protected nameFromPlaceholder(control: Element) {
+    const placeholder = this.domElement.getAttribute(PLACEHOLDER)
+    if (!control.hasAttribute("aria-label") && placeholder) control.setAttribute("aria-label", placeholder)
   }
 
   /**
@@ -287,5 +331,18 @@ export type NativeFallbackProps = {
 /** Part names of vocabulary `V`, so `decorate()` can't misspell one. */
 export type PartNameOf<V extends { parts: readonly { name: string }[] }> = V["parts"][number]["name"]
 
+/** What a form control's fallback hands `syncForm()`:  its value, and the native control whose validity counts. */
+export type FallbackFormSync = {
+  /** what the form submits:  text, several texts (one entry each, under `name`), or `undefined` for nothing */
+  value: string | readonly string[] | undefined
+  /** the native control whose validity the DOM element reports, anchored on it;  left out:  none reported */
+  control?: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+  /** the fallback's own "value missing", where it works that out:  the control's other checks don't count */
+  valueMissing?: boolean
+}
+
 /** The busy-flag attribute name. */
 const LOADING = "loading"
+
+/** The attribute that names a control with no other name (`nameFromPlaceholder()`). */
+const PLACEHOLDER = "placeholder"

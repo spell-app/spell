@@ -31,6 +31,7 @@ export class UIHeader extends E.PartComponent<typeof headerVocabulary> {
         class={this.rootClass}
         part={this.partForName("header")}
         href={this.link}
+        target={this.link ? this.sharedTarget : undefined}
         role={this.link && this.level ? "heading" : undefined}
         aria-level={this.link ? this.level : undefined}
       >

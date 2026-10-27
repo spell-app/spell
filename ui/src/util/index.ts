@@ -20,8 +20,8 @@
  *   - Only what sits BELOW `core` imports it by name (`import { proto, suggest } from "spell-ui/util"`):
  *     `spell-ui/vocabulary`, `spell-ui/icons`, the runtime, types files.
  * - Also:
- *   - spell-element's timing helpers (`spell/element/timing`), to run a function later:
- *     `afterSolidUpdate()`, `beforeNextPaint()`, `soon()`, `after()`, `every()`
+ *   - the kit's timing helpers (`spell/util/timing`), to run a function later:
+ *     `afterSolidUpdate()`, `beforeNextPaint()`, `soon()`, `after()`, `every()`;  and to wait:  `waitUntil()`, `within()`
  *   - `Warnings` -- `ui`'s console warnings, its own
  *   - `LoadOnce` -- a load per key, once per page, with a choice of what a failure does
  */
@@ -33,6 +33,6 @@ export * from "spell/util/number"
 export * from "spell/util/string"
 export * from "spell/util/util.types"
 
-export * from "spell/element/timing"
+export * from "spell/util/timing"
 export * from "./Warnings"
 export * from "./LoadOnce"

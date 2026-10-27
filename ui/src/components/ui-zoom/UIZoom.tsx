@@ -35,6 +35,12 @@ export class UIZoom extends E.UIComponent<typeof zoomVocabulary> {
   @E.controlled("open")
   accessor isOpen = false
 
+  /**
+   * Opening and shutting it as a person does:  through `requestChange()`, so the page's own `open` wins;
+   * no events of its own (its modal's come out), and its button's `aria-expanded`.
+   */
+  readonly disclosure = new E.Disclosure({ component: this, member: "isOpen" })
+
   /** The room the view took in the page, kept while its content is in the modal. */
   @E.state accessor heldSize: { width: number; height: number } | undefined = undefined
 
@@ -78,7 +84,7 @@ export class UIZoom extends E.UIComponent<typeof zoomVocabulary> {
       const shrunk = view.querySelector<HTMLElement>(`.${SHRUNK}`)
       if (shrunk) this.fullWidth = Math.round(shrunk.getBoundingClientRect().width / this.shrinkRatio)
     }
-    this.requestChange("isOpen", true, () => true)
+    this.disclosure.open()
   }
 
   /** Shut (Escape, its close button, the backdrop):  an image's `src` goes, ready for the next;  content goes back. */
@@ -99,7 +105,7 @@ export class UIZoom extends E.UIComponent<typeof zoomVocabulary> {
   @E.untracked
   private shut() {
     if (this.src) this.domElement.removeAttribute("src")
-    if (this.isOpen) this.requestChange("isOpen", false, () => true)
+    this.disclosure.close()
   }
 
   render(): JSX.Element {
@@ -123,6 +129,7 @@ export class UIZoom extends E.UIComponent<typeof zoomVocabulary> {
               part={this.partForName("button")}
               aria-label={this.translationForKey("show")}
               aria-haspopup="dialog"
+              aria-expanded={this.disclosure.ariaExpanded}
               title={this.translationForKey("show")}
               onClick={() => this.showFullSize()}
             />

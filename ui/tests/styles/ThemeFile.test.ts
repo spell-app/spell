@@ -30,10 +30,14 @@ describe("ThemeFile", () => {
   it("keeps the theme sheets current (run `yarn gen:styles`)", () => {
     const sheets = ThemeFile.sheets(committedFiles())
     expect(Object.keys(sheets).sort()).toEqual([
+      "crisp.css",
       "fruity.css",
       "glass.css",
       "merlot.css",
+      "midnight.css",
       "palettes/apple.css",
+      "paper.css",
+      "pop.css",
       "spell.css"
     ])
     for (const [path, css] of Object.entries(sheets))

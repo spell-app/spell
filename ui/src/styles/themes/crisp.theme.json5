@@ -1,0 +1,207 @@
+// Crisp:  high contrast, for anyone who needs it, as a Spell UI theme.
+// - One of Spell's own themes, the set `UI.themes.own` lists;  applied ON TOP of `classic.css`,
+//   so every classic token it replaces is restated here.
+// - Its sheet, `crisp.css`, is GENERATED from this file:  `yarn gen:styles` (`ThemeFile`;  epic `debut` P18).
+//   What values can't say is in its rules sheets:  `rules/modern.css`, `rules/states.css` (its secondary's states), `rules/crisp.css` (no blur, no see-through).
+// - One of the four new themes (epic `debut` P20;  Owen:  "I like "Paper", "Midnight", "Crisp" and "Pop"").
+// - What makes it Crisp:
+//   - light:  pure white, black text, one strong blue;  dark:  pure black, white text, a light blue
+//   - text at 7:1 (WCAG AAA), not only AA's 4.5:1:  body and muted text on the page and its panels, and the primary's
+//     text on it (`CONTRAST_TEXT_AAA`, the contrast test)
+//   - 2px borders, a thick focus ring off the box;  NO shadows and nothing see-through:  every edge is a line
+//   - the system font;  4px controls, 8px cards and panels, 10px modals (the box round a thing always rounder)
+//   - Apple's system colours for the hues (its palette, `apple`):  every one AA on white and on black
+// - NOT picked by itself when the computer asks for more contrast (`prefers-contrast`):  a later question.
+// - NO font files ship:  every face is the platform's own.
+{
+  "$schema": "./theme.schema.json",
+  "palette": "apple",
+  "rules": ["modern", "states", "crisp"],
+  "own": {
+    "crisp-page": { "light": "#ffffff", "dark": "#000000" },
+    "crisp-inset": { "light": "#f0f0f0", "dark": "#141414" },
+    "crisp-line": { "light": "#1a1a1a", "dark": "#e6e6e6" },
+    "crisp-accent": { "light": "#0040c1", "dark": "#8cb6ff" },
+    "crisp-on-accent": { "light": "#ffffff", "dark": "#000000" },
+    "crisp-accent-wash": { "light": "#e3ebff", "dark": "#0d2552" }
+  },
+  "typography": {
+    "size": "16px",
+    "family": {
+      "body": "system-ui, -apple-system, \"Segoe UI\", \"Noto Sans\", Cantarell, Ubuntu, \"Helvetica Neue\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Noto Color Emoji\"",
+      "heading": "{typography.family.body}",
+      "mono": "ui-monospace, \"SF Mono\", Menlo, Consolas, monospace"
+    }
+  },
+  "radii": {
+    "s": "3px",
+    "m": "4px",
+    "l": "8px"
+  },
+  "text": {
+    "ink": { "light": "#000000", "dark": "#ffffff" },
+    "body": { "light": "#000000", "dark": "#ffffff" },
+    "strong": { "light": "#000000", "dark": "#ffffff" },
+    "muted": { "light": "#3b3b3b", "dark": "#cfcfcf" },
+    "light": { "light": "#454545", "dark": "#c2c2c2" }
+  },
+  "surfaces": {
+    // one colour for the page and its panels:  their 2px edges tell them apart, never a tint
+    "page": "{own.crisp-page}",
+    "panel": "{own.crisp-page}",
+    "inset": "{own.crisp-inset}",
+    "strong": "{own.crisp-page}",
+    "bar": "{surfaces.page}",
+    "code": "{own.crisp-inset}",
+    "highlight": "{own.crisp-accent-wash}"
+  },
+  "borders": {
+    "width": "2px",
+    "color": "{own.crisp-line}",
+    "strong": "{own.crisp-line}",
+    "internal": { "light": "#767676", "dark": "#8f8f8f" },
+    "selected": "{own.crisp-accent}",
+    "selected-strong": "{own.crisp-accent}"
+  },
+  "brand": {
+    "primary": {
+      // Primary:  one strong blue in light (white on it, 8.6:1), a light blue in dark (black on it)
+      "color": "{own.crisp-accent}",
+      "on": "{own.crisp-on-accent}",
+      "text": "{own.crisp-accent}",
+      "background": "{own.crisp-accent-wash}",
+      "inverted": "{own.crisp-accent}",
+      "inverted-on": "{own.crisp-on-accent}"
+    },
+    "secondary": {
+      // Secondary:  the ink itself;  its states a step lighter in light, darker in dark (`rules/states.css`)
+      "color": "{own.crisp-line}",
+      "on": { "light": "#ffffff", "dark": "#000000" },
+      "inverted": "{own.crisp-line}",
+      "inverted-on": { "light": "#ffffff", "dark": "#000000" },
+      "hover": { "light": "#333333", "dark": "#cccccc" },
+      "focus": { "light": "#333333", "dark": "#cccccc" },
+      "down": { "light": "#000000", "dark": "#ffffff" },
+      "active": { "light": "#000000", "dark": "#ffffff" }
+    },
+    "link": {
+      "color": "{own.crisp-accent}",
+      "hover": { "light": "#002a80", "dark": "#bcd5ff" }
+    },
+    "focus": {
+      // a thick ring, off the box, in the accent:  never lost against a border
+      "width": "3px",
+      "offset": "2px",
+      "color": "{own.crisp-accent}",
+      "border": "{own.crisp-accent}"
+    }
+  },
+  "shadows": {
+    // none:  every edge is a line
+    "ink": { "light": "#000000", "dark": "#000000" },
+    "subtle": "none",
+    "bottom": "none",
+    "raised": "none",
+    "floating": "none",
+    "floating-hover": "none",
+    "overlay": "none"
+  },
+  "components": {
+    "button": {
+      "radius": "{radii.m}",
+      "font-weight": 600
+    },
+    "input": {
+      "radius": "{radii.m}",
+      "background": "{own.crisp-page}",
+      "border-color": "{own.crisp-line}",
+      "border-color-hover": "{own.crisp-line}",
+      "border-color-focus": "{own.crisp-accent}"
+    },
+    "dropdown": {
+      "radius": "{radii.m}",
+      "border-color": "{own.crisp-line}"
+    },
+    "select": {
+      "background": "{components.input.background}",
+      "border-color": "{components.input.border-color}"
+    },
+    "menu": {
+      "radius": "{radii.m}",
+      "text-active-weight": 700,
+      "active-background": "{own.crisp-accent-wash}",
+      "active-color": "{text.strong}",
+      // tab bars:  a 2px ruled track, the chosen tab solid in the accent
+      "segmented-background": "{own.crisp-page}",
+      "segmented-border": "2px solid {own.crisp-line}",
+      "segmented-radius": "{radii.l}",
+      "segmented-padding": "2px",
+      "segmented-item-radius": "calc({radii.l} - 4px)",
+      "segmented-active-background": "{own.crisp-accent}",
+      "segmented-active-color": "{own.crisp-on-accent}",
+      "segmented-active-shadow": "none"
+    },
+    "card": {
+      "radius": "{radii.l}",
+      "border-color": "{own.crisp-line}",
+      "hover-border-color": "{own.crisp-accent}",
+      "shadow": "0 0 0 2px {own.crisp-line}",
+      "hover-shadow": "0 0 0 2px {own.crisp-accent}",
+      "raised-shadow": "0 0 0 2px {own.crisp-line}",
+      "raised-hover-shadow": "0 0 0 2px {own.crisp-accent}"
+    },
+    "segment": {
+      "radius": "{radii.l}",
+      "border-color": "{own.crisp-line}",
+      "shadow": "none",
+      "raised-shadow": "none"
+    },
+    "section": {
+      "radius": "{radii.l}",
+      "shadow": "none"
+    },
+    "panel": {
+      // a panel's edge:  2px of the line, as a ring, so it takes no room
+      "radius": "{radii.l}",
+      "shadow": "0 0 0 2px {own.crisp-line}"
+    },
+    "message": {
+      "radius": "{radii.l}"
+    },
+    "popup": {
+      "radius": "{radii.m}",
+      "border-color": "{own.crisp-line}",
+      "shadow": "0 0 0 2px {own.crisp-line}"
+    },
+    "toast": {
+      "shadow": "0 0 0 2px {own.crisp-line}"
+    },
+    "modal": {
+      "radius": "10px",
+      "shadow": "0 0 0 2px {own.crisp-line}",
+      "dimmer-filter": "none"
+    },
+    "dimmer": {
+      "background": { "light": "#00000099", "dark": "#000000cc" },
+      "blur": "none"
+    },
+    "bar": {
+      "panel-background": "{own.crisp-page}",
+      "filter": "none",
+      "rest-filter": "none"
+    },
+    "docs-nav": {
+      // the docs' side column (`<ui-docs-nav>`) black and white, not the classic ivory and brown
+      "background": "{own.crisp-page}",
+      "header-background": "{own.crisp-inset}",
+      "band-background": "{own.crisp-inset}",
+      "band-color": "{text.strong}",
+      "border-color": "{own.crisp-line}",
+      "current-background": "{own.crisp-accent-wash}",
+      "current-color": "{text.strong}"
+    },
+    "toolbar": {
+      "button-radius": "{radii.s}"
+    }
+  }
+}

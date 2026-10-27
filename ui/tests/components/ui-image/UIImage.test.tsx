@@ -95,6 +95,11 @@ describe("<ui-image> image", () => {
     expect(img.alt).toBe("Profile")
   })
 
+  it("opens its link in the shared `target`", async () => {
+    const { root } = await image(`<ui-image link="#photo" target="_blank" src="${SRC}" alt="Profile"></ui-image>`)
+    expect(root.getAttribute("target")).toBe("_blank")
+  })
+
   it("drops a disabled link's href, with aria-disabled and :state(disabled)", async () => {
     const { host, root } = await image(`<ui-image link="#x" disabled src="${SRC}" alt="X"></ui-image>`)
     expect(root.hasAttribute("href")).toBe(false)

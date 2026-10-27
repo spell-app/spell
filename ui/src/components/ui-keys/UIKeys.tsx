@@ -40,7 +40,7 @@ export class UIKeys extends E.UIComponent<typeof keysVocabulary> {
     return (this.shortcut ?? "")
       .split(/[\s,]+/)
       .filter(Boolean)
-      .map((chord) => chord.split(/(?<=.)\+/).filter(Boolean))
+      .map((chord) => UIKeys.keysOf(chord))
   }
 
   /** What a screen reader says:  "Command S, or Command Shift Z". */
@@ -71,9 +71,7 @@ export class UIKeys extends E.UIComponent<typeof keysVocabulary> {
 
   /** What one key's cap shows:  `mod` => ⌘ or Ctrl, `up` => ↑, `s` => S. */
   capFor(key: string): string {
-    const name = UIKeys.nameOf(key)
-    const caps = this.isApple ? APPLE_CAPS : OTHER_CAPS
-    return caps[name] ?? (name.length === 1 ? name.toUpperCase() : key)
+    return UIKeys.capOf(key, this.isApple)
   }
 
   /** What a screen reader says for one key:  `mod` => "Command" or "Control", a letter as itself. */
@@ -84,10 +82,33 @@ export class UIKeys extends E.UIComponent<typeof keysVocabulary> {
     return this.capFor(key)
   }
 
-  /** A key's name, lowercased, its aliases resolved:  `Cmd` => `meta`, `modifier` => `mod`, `Esc` => `escape`. */
+  /**
+   * One shortcut's keys, as written:  `"shift+mod+Z"` => `["shift", "mod", "Z"]`;  `"mod++"` ends in the `+` key.
+   * - Spell UI's one reading of a shortcut's keys, with `nameOf()`:  `<ui-action>` draws its caps through it too.
+   * - STATIC:  pure.
+   */
+  static keysOf(chord: string): string[] {
+    return chord.split(/(?<=.)\+/).filter(Boolean)
+  }
+
+  /**
+   * A key's name, lowercased, its aliases resolved:  `Cmd` => `meta`, `modifier` => `mod`, `Esc` => `escape`.
+   * - STATIC:  pure.
+   */
   static nameOf(key: string): string {
     const name = key.trim().toLowerCase()
     return ALIASES[name] ?? name
+  }
+
+  /**
+   * What `key`'s cap shows on a Mac (`isApple`) or elsewhere:  `mod` => ⌘ or Ctrl, `meta` => ⌘ or Meta, `s` => S.
+   * - Spell UI's one set of caps:  `<ui-action>` draws its shortcut's through it too.
+   * - STATIC:  pure.
+   */
+  static capOf(key: string, isApple: boolean): string {
+    const name = UIKeys.nameOf(key)
+    const caps = isApple ? APPLE_CAPS : OTHER_CAPS
+    return caps[name] ?? (name.length === 1 ? name.toUpperCase() : key.trim())
   }
 }
 

@@ -1,6 +1,6 @@
 import { describe, expect, it, onTestFinished } from "vite-plus/test"
 
-import { clipped, CONTRAST_LARGE, CONTRAST_TEXT, oklchToRgb } from "spell/util/color"
+import { clipped, CONTRAST_LARGE, CONTRAST_TEXT, CONTRAST_TEXT_AAA, oklchToRgb } from "spell/util/color"
 import { UI } from "spell-ui/runtime"
 import { hueAliases, hueStates, hues, semanticAliases, semanticColors } from "spell-ui/styles"
 
@@ -24,6 +24,8 @@ import utilitiesRaw from "spell-ui/styles/utilities.css?raw"
  * - Ratios via the kit's `contrast()` (clipped to sRGB, as axe does), so a pass here is a pass in the axe tests.
  * - Raw foundation sheets, so `light-dark()` survives whatever the Lightning CSS targets (see `styles.test.ts`);
  *   a theme is applied as a page applies it (`ThemeHarness.use()`).
+ * - Crisp, the high-contrast theme, holds its text to AAA's 7:1 (`CONTRAST_TEXT_AAA`, `TEXT_AT_AAA`):
+ *   body and muted text on the page and its panels, and the primary's text on it (epic `debut` P20).
  */
 
 /** Every colour name a component accepts:  hues, aliases, semantic colours and their aliases. */
@@ -36,6 +38,9 @@ const NAMES = [
 
 /** Palette hues and their aliases:  the colours with a `-border` role worth a 3:1 check. */
 const HUE_NAMES = new Set([...Object.keys(hues), ...Object.keys(hueAliases)])
+
+/** The themes whose text is held to AAA's 7:1, not AA's 4.5:1:  Crisp, the high-contrast one. */
+const TEXT_AT_AAA: ReadonlySet<string | undefined> = new Set(["crisp"])
 
 /** Scheme classes from `utilities.css`. */
 const SCHEMES = ["ui-light", "ui-dark"] as const
@@ -96,9 +101,14 @@ for (const theme of THEMES) {
     it.each(SCHEMES)("keeps text and muted text readable on the page and on its panels (%s)", async (scheme) => {
       await adoptFoundation(theme)
       const probe = renderProbe(scheme, "")
+      const minimum = TEXT_AT_AAA.has(theme) ? CONTRAST_TEXT_AAA : CONTRAST_TEXT
       const failures: string[] = []
       for (const text of ["--ui-text-color", "--ui-text-muted"]) {
-        for (const surface of TEXT_GROUNDS) failures.push(...check(probe, "text", text, surface, CONTRAST_TEXT))
+        for (const surface of TEXT_GROUNDS) failures.push(...check(probe, "text", text, surface, minimum))
+      }
+      if (TEXT_AT_AAA.has(theme)) {
+        const primary = renderProbe(scheme, "primary")
+        failures.push(...check(primary, "primary", "--ui-color-on", ["--ui-color"], minimum))
       }
       expect(failures).toEqual([])
     })

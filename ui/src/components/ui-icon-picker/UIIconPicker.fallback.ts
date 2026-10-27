@@ -22,7 +22,7 @@ export class IconPickerFallback extends E.NativeFallback<typeof iconPickerVocabu
     "`:state(invalid)`, form reset of the value, labels from `<label for>`"
   ]
 
-  /** The text box, once built, for `attached()`. */
+  /** The text box, once built, for `sync()`. */
   private control: HTMLInputElement | undefined
 
   protected override build() {
@@ -38,7 +38,7 @@ export class IconPickerFallback extends E.NativeFallback<typeof iconPickerVocabu
       autocomplete: "off"
     })
     this.decorate(control, "field")
-    if (!control.hasAttribute("aria-label") && placeholder) control.setAttribute("aria-label", placeholder)
+    this.nameFromPlaceholder(control)
     control.value = domElement.value ?? this.attr("value") ?? ""
     this.listen(control, "input", () => {
       domElement.value = control.value
@@ -52,19 +52,10 @@ export class IconPickerFallback extends E.NativeFallback<typeof iconPickerVocabu
     return [control]
   }
 
-  /** The first form value and validity, which need the text box attached. */
-  protected override attached() {
-    this.sync()
-  }
-
-  /** Copy the text box's value and validity onto the DOM element. */
-  private sync() {
-    const { control, formInternals } = this
-    if (!control || !formInternals) return
-    // `setFormValue()` takes `null` for "no value":  a platform boundary
-    formInternals.setFormValue(this.attr("name") && control.value ? control.value : null)
-    if (control.validity.valid) formInternals.setValidity({})
-    else formInternals.setValidity(control.validity, control.validationMessage, control)
+  /** The text box's value (none while empty) and validity. */
+  protected override sync() {
+    const { control } = this
+    if (control) this.syncForm({ value: control.value || undefined, control })
   }
 }
 

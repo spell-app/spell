@@ -24,7 +24,7 @@ export class RatingFallback extends E.NativeFallback<typeof ratingVocabulary> {
     "`:state(invalid)`, form reset of the value, labels from `<label for>`"
   ]
 
-  /** The native radios, once built, for `attached()`. */
+  /** The native radios, once built, for `sync()`. */
   private radios: HTMLInputElement[] = []
 
   protected override build() {
@@ -63,11 +63,6 @@ export class RatingFallback extends E.NativeFallback<typeof ratingVocabulary> {
     return [this.decorate(group, "rating")]
   }
 
-  /** The first form value and validity, which need the radios attached. */
-  protected override attached() {
-    this.sync()
-  }
-
   /** The radio of `point` was chosen. */
   private chose(point: number, originalEvent: Event) {
     ;(this.domElement as RatingDOMElement).value = point
@@ -76,16 +71,11 @@ export class RatingFallback extends E.NativeFallback<typeof ratingVocabulary> {
     this.send(this.vocabulary.events[0].name, detail)
   }
 
-  /** Copy the chosen radio and the group's validity onto the DOM element. */
-  private sync() {
-    const { formInternals, radios } = this
-    if (!formInternals || !radios.length) return
+  /** The chosen radio's number, and the group's validity (its first radio's). */
+  protected override sync() {
+    const { radios } = this
     const chosen = radios.find((radio) => radio.checked)
-    // `setFormValue()` takes `null` for "no value":  a platform boundary
-    formInternals.setFormValue(this.attr("name") && chosen ? chosen.value : null)
-    const [first] = radios
-    if (first!.validity.valid) formInternals.setValidity({})
-    else formInternals.setValidity(first!.validity, first!.validationMessage, first)
+    if (radios.length) this.syncForm({ value: chosen?.value, control: radios[0] })
   }
 
   /**

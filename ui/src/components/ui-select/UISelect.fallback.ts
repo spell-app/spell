@@ -1,5 +1,5 @@
 import { E, UIT } from "spell-ui/core"
-import { itemVocabulary } from "spell-ui/components/ui-item/UIItem.en"
+import { SlottedItems } from "spell-ui/components/ui-dropdown/SlottedItems"
 import { selectVocabulary } from "./UISelect.en"
 import { DIVIDER, PLACEHOLDER, type Vocabulary } from "./UISelect.types"
 
@@ -11,7 +11,7 @@ import { DIVIDER, PLACEHOLDER, type Vocabulary } from "./UISelect.types"
  * - Its shadow DOM:  the plain native `<select part="select" class="ui … select">`.
  *   It's what `<ui-select>` already is in a browser without the customizable select, minus the reactive model.
  * - The options come from the DOM element's light-DOM `<ui-item>`s (`header` => `<optgroup>`, `divider` => `<hr>`),
- *   then its `options` PROPERTY.
+ *   read as the component reads them (`SlottedItems`), then its `options` PROPERTY.
  * - The chosen values come from the `value` property, else the attribute (a comma / space list),
  *   else the `selected` items.
  * - A single select starts with an empty `<option>` (the `placeholder` text) when nothing is chosen,
@@ -31,7 +31,7 @@ export class SelectFallback extends E.NativeFallback<Vocabulary> {
     "vetoing a change by re-setting `value` in a `ui-changed` handler"
   ]
 
-  /** The native select, once built, for `attached()`. */
+  /** The native select, once built, for `sync()`. */
   private select: HTMLSelectElement | undefined
 
   protected override build() {
@@ -47,10 +47,10 @@ export class SelectFallback extends E.NativeFallback<Vocabulary> {
       "aria-readonly": this.flag("readonly") ? "true" : undefined
     })
     this.decorate(select, "select")
-    if (!select.hasAttribute("aria-label") && placeholder) select.setAttribute("aria-label", placeholder)
+    this.nameFromPlaceholder(select)
 
-    const choices = this.choices(domElement)
-    const chosen = this.chosen(domElement, choices)
+    const entries = [...SlottedItems.itemsOf(domElement).map(SlottedItems.entryOf), ...(domElement.options ?? [])]
+    const chosen = this.chosen(domElement, entries)
     if (!isMultiple && (placeholder !== undefined || !chosen.size)) {
       const empty = this.create(
         "option",
@@ -67,20 +67,20 @@ export class SelectFallback extends E.NativeFallback<Vocabulary> {
     }
 
     let group: HTMLElement = select
-    for (const choice of choices) {
-      if (choice.type === UIT.HEADER) {
-        select.append((group = this.create("optgroup", { label: choice.text, part: GROUP_PART })))
-      } else if (choice.type === DIVIDER) {
-        select.append(this.create("hr", { class: DIVIDER }))
-        group = select
-      } else {
+    for (const entry of entries) {
+      if (!("type" in entry)) {
         const option = this.create(
           "option",
-          { value: choice.value, disabled: choice.disabled, class: UIT.ITEM, part: OPTION_PART },
-          choice.text
+          { value: entry.value, disabled: entry.disabled, class: UIT.ITEM, part: OPTION_PART },
+          SelectFallback.optionText(entry)
         )
-        option.selected = chosen.has(choice.value)
+        option.selected = chosen.has(entry.value)
         group.append(option)
+      } else if (entry.type === UIT.HEADER) {
+        select.append((group = this.create("optgroup", { label: entry.text, part: GROUP_PART })))
+      } else {
+        select.append(this.create("hr", { class: DIVIDER }))
+        group = select
       }
     }
 
@@ -92,7 +92,8 @@ export class SelectFallback extends E.NativeFallback<Vocabulary> {
         return
       }
       shown = [...select.options].map((option) => option.selected)
-      const value = this.sync(select)
+      this.sync()
+      const value = this.chosenValue()
       domElement.value = value
       this.send(CHANGE_EVENT, { value, originalEvent: event })
     })
@@ -100,96 +101,43 @@ export class SelectFallback extends E.NativeFallback<Vocabulary> {
     return [select]
   }
 
-  /** The first form value and validity, which need the select attached. */
-  protected override attached() {
-    this.sync(this.select!)
+  /** The chosen values (none while nothing is), and "value missing" when `required` and nothing is chosen. */
+  protected override sync() {
+    const { select } = this
+    if (!select) return
+    const values = this.chosenValues()
+    const value = !values.length ? undefined : select.multiple ? values : values[0]
+    this.syncForm({ value, control: select, valueMissing: this.flag("required") && !values.length })
   }
 
   /** The values the DOM element says are chosen:  the `value` property, else the attribute, else `selected` items. */
-  private chosen(domElement: SelectDOMElement, choices: readonly Choice[]): Set<string> {
+  private chosen(domElement: SelectDOMElement, entries: readonly E.MenuEntry[]): Set<string> {
     const isMultiple = this.flag("multiple")
     const value = domElement.value ?? this.attr("value")
-    if (Array.isArray(value)) return new Set(value.map(String))
-    if (value != null && value !== "") return new Set(isMultiple ? E.Converters.list(String(value)) : [String(value)])
-    const picked = choices.filter((choice) => choice.type === UIT.ITEM && choice.selected).map((choice) => choice.value)
-    return new Set(isMultiple ? picked : picked.slice(0, 1))
+    const given = value != null && value !== "" ? value : SlottedItems.selectedValueIn(entries, isMultiple)
+    return new Set(SlottedItems.valuesIn(given, isMultiple))
   }
 
-  /** The `<ui-item>` children, then the `options` property, as one flat list. */
-  private choices(domElement: SelectDOMElement): Choice[] {
-    const choices: Choice[] = []
-    for (const item of domElement.querySelectorAll(`:scope > ${itemVocabulary.tag}`)) {
-      // `label` and `kind`, or their old names `text` and `type` (epic `ui-gaps` P4)
-      const text =
-        SelectFallback.itemAttribute(item, "label") ?? item.getAttribute(OLD_LABEL) ?? item.textContent?.trim() ?? ""
-      const type = SelectFallback.itemAttribute(item, "kind") ?? item.getAttribute(OLD_KIND) ?? undefined
-      const description = SelectFallback.itemAttribute(item, "description")
-      const flag = SelectFallback.itemAttribute(item, "flag")
-      choices.push({
-        type: type === UIT.HEADER || type === DIVIDER ? type : UIT.ITEM,
-        text: [flag ? UIT.Flags.emojiFor(flag) || flag : "", text, description ? ` ${description}` : ""].join(""),
-        value: SelectFallback.itemAttribute(item, "value") ?? text,
-        disabled: E.Converters.boolean(SelectFallback.itemAttribute(item, "disabled"), "disabled"),
-        selected: E.Converters.boolean(SelectFallback.itemAttribute(item, "selected"), "selected")
-      })
-    }
-    for (const option of domElement.options ?? []) {
-      choices.push({
-        type: UIT.ITEM,
-        text: option.description ? `${option.text} ${option.description}` : option.text,
-        value: option.value,
-        disabled: !!option.disabled,
-        selected: !!option.selected
-      })
-    }
-    return choices
+  /** What the select has chosen, the empty first option left out:  a list when `multiple`, else one value. */
+  private chosenValue(): UIT.SelectValue {
+    const values = this.chosenValues()
+    return this.select!.multiple ? values : (values[0] ?? "")
+  }
+
+  /** The chosen options' values, the empty first option left out. */
+  private chosenValues(): string[] {
+    return [...this.select!.selectedOptions].map((option) => option.value).filter((value) => value !== "")
   }
 
   /**
-   * Copy the select's value (and validity) onto the DOM element;  return the value.
-   * - `multiple` is the select's own.
-   */
-  private sync(select: HTMLSelectElement): UIT.SelectValue {
-    const values = [...select.selectedOptions].map((option) => option.value).filter((value) => value !== "")
-    const name = this.attr("name")
-    const internals = this.formInternals
-    if (internals) {
-      if (select.multiple) {
-        const data = new FormData()
-        for (const value of values) data.append(name ?? "", value)
-        internals.setFormValue(name && values.length ? data : null)
-      } else internals.setFormValue(name && values.length ? values[0]! : null)
-      const isMissing = this.flag("required") && !values.length
-      internals.setValidity(isMissing ? { valueMissing: true } : {}, select.validationMessage, select)
-    }
-    return select.multiple ? values : (values[0] ?? "")
-  }
-
-  /**
-   * The `<ui-item>` attribute `name` of `item`, or `undefined`:  its `getAttribute()`, typed by the item's vocabulary.
+   * An option's text as a plain select shows it:  its flag's emoji, its text, then its description.
    * - Static:  pure, it needs no instance.
    */
-  private static itemAttribute(item: Element, name: E.AttributeNameOf<typeof itemVocabulary>): string | undefined {
-    return item.getAttribute(name) ?? undefined
+  private static optionText(option: E.MenuOption): string {
+    const flag = option.flag as string | undefined
+    const description = option.description ? ` ${option.description}` : ""
+    return [flag ? UIT.Flags.emojiFor(flag) || flag : "", option.text, description].join("")
   }
-}
-
-/** An item's `label`'s and `kind`'s old names. */
-const OLD_LABEL = "text"
-const OLD_KIND = "type"
-
-/** One option, header or divider, from either source. */
-type Choice = {
-  /** an option, a group header or a divider */
-  type: UIT.ItemType
-  /** the text shown:  the flag emoji, the text and the description, as a plain select shows them */
-  text: string
-  /** the value submitted */
-  value: string
-  /** can't be chosen */
-  disabled: boolean
-  /** chosen by its own `selected` */
-  selected: boolean
 }
 
 /** What the fallback reads and writes of the DOM element:  all optional, the element may not have upgraded. */

@@ -137,7 +137,7 @@ So the scheme can change at any element, and everything below it follows, throug
 One name trips people up:  `theme` on `<ui-root>` is the colour SCHEME, `light` or `dark`.
 A look like `github` is applied with `UI.themes.apply()` (recipe 3).
 
-### The themes:  Spell's own four, on `classic`
+### The themes:  Spell's own eight, on `classic`
 
 Each theme is one sheet in [the themes folder](src/styles/themes/), and there's no list of them anywhere else:
 the runtime globs the folder, so dropping a `<name>.css` in makes a theme.
@@ -148,7 +148,7 @@ the runtime globs the folder, so dropping a `<name>.css` in makes a theme.
   [the archive folder](src/styles/themes/archive/) (epic `debut` P17):
   - in no bundle (the runtime globs only the themes folder's top level), no menu and no test
   - kept only to copy from, the way they were ported (below)
-- Spell's own four, `themes.own`, the one set every place offers:
+- Spell's own eight, `themes.own`, the one set every place offers:
   - `spell`:  Spell's own look, and the docs site's default:  serif headings with italic ledes, Spell Purple,
     pill buttons, an aubergine dark mode, and the brand's warm and inverse surfaces for Spell's own pages.
     It ships no font either:  the serif is whichever Palatino the system has.
@@ -159,9 +159,20 @@ the runtime globs the folder, so dropping a `<name>.css` in makes a theme.
   - `merlot`:  a code studio in wine reds:  flat panels on hairlines a step off the page, no glass,
     a warm gold primary on deep wine in dark, a maroon one on rose-grey in light.
     It's tokens only so far:  every family keeps `classic`'s shapes.
+  - `paper`:  warm and bookish, for reading:  a cream page, ink-brown text, an oxblood primary, a serif (Iowan Old
+    Style, then Palatino) for what you read and the system sans for controls, hairlines, 4px corners;
+    dark is lamplight, a deep brown page with cream text.
+  - `midnight`:  dark first, calm and glowing:  a blue-black page, panels a clear step lighter with softly lit edges,
+    a glowing teal primary;  light is dawn, a pale blue-grey with a deep teal.
+  - `crisp`:  high contrast, for anyone who needs it:  pure white or pure black, one strong blue, 2px borders,
+    a thick focus ring, no shadows and nothing see-through;  its text reaches 7:1 (WCAG AAA), not only 4.5:1.
+  - `pop`:  playful and colourful:  the rounded system font, a hot pink primary, and a sticker look:
+    thick ink outlines and a hard offset shadow on cards, panels and buttons;  dark is a deep plum page.
+  - Two more of Spell UI's font stacks came with them, for any theme to use:
+    `--ui-font-family-serif` (Palatino first) and `--ui-font-family-rounded`.
   - A theme remembered under an old name comes back under its new one (`Themes.RENAMED`):
     `studio` as `merlot`, `spell-brand` as `spell`.
-- Spell's own four are written as data:  a theme file each, `<name>.theme.json5`, beside its sheet.
+- Spell's own eight are written as data:  a theme file each, `<name>.theme.json5`, beside its sheet.
   - Its values sit in nested groups, as the token tables group them:  `surfaces > page`, `typography > family > body`.
     Each is one value, or a light one and a dark one.
   - A colour is written as hex, `#rrggbb`, or `#rrggbbaa` with its alpha:  `#ffffff59`, not `rgb(255 255 255 / 0.35)`.
@@ -186,6 +197,10 @@ the last column is what a theme restyles on purpose.
 | `spell` | Spell's own:  Palatino-family serif headings with italic ledes, a system sans body, Spell Purple, pill buttons, 16px cards, soft layered shadows, an aubergine dark mode.  Page-wide;  the docs site's default. | everything, through the global tokens |
 | `glass` | macOS today:  the system font, 15px, 8px buttons and 14px cards, a violet accent, Apple's system colours;  translucent glass surfaces on a solid page.  Page-wide. | everything, through the global tokens;  card, segment, section, menu, popup, dropdown, modal and toast get the blur |
 | `fruity` | `glass` over a soft pastel wallpaper:  three blurred colour washes behind the page.  Page-wide. | as `glass` |
+| `paper` | Warm and bookish:  a cream page, ink-brown text, an oxblood primary, a serif for reading, hairlines and 4px corners;  dark a lamplit brown.  Page-wide. | everything, through the global tokens |
+| `midnight` | Dark first:  a blue-black page, panels a step lighter with lit edges, a glowing teal primary, the system font, 10px corners;  light a pale blue-grey dawn.  Page-wide. | everything, through the global tokens |
+| `crisp` | High contrast:  pure white or black, one strong blue, 2px borders, a thick focus ring, no shadows;  text at 7:1.  Page-wide. | everything, through the global tokens |
+| `pop` | Playful:  the rounded font, a hot pink primary, thick ink outlines and a hard offset shadow (a sticker look), 16px cards;  dark a deep plum.  Page-wide. | everything, through the global tokens;  filled buttons get the sticker |
 | `merlot` | A code studio in wine reds:  the system font, flat panels joined by hairlines a step off the page, no glass;  a warm gold primary on deep wine in dark, a maroon one on pale rose-grey in light.  Page-wide;  tokens only so far. | everything, through the global tokens |
 | `classic` | Fomantic's original look, and the base of every theme above:  Lato, 14px, Fomantic's palette and size ratios, 4px radii.  Page-wide. | everything, through the global tokens |
 
@@ -267,10 +282,11 @@ await themes.apply(undefined) // no theme:  the plain default look
 - Both sheets sit in `ui.theme`, `classic` first, so the theme wins every tie by coming second.
 - One theme at a time:  each call replaces the last in place, and `apply(undefined)` takes both sheets away.
 - Two calls racing:  the last one called wins, even when the first one's chunk arrives later.
-- `themes.own` lists Spell UI's own four themes, `spell`, `glass`, `fruity` and `merlot`:
+- `themes.own` lists Spell UI's own eight themes, `spell`, `glass`, `fruity`, `merlot`, `paper`, `midnight`,
+  `crisp` and `pop`:
   the theme menu (`<ui-theme-menu>`) lists them, and nothing else.
 - A name it doesn't know throws a `TypeError` that lists the ones it does.
-- To let people pick:  `<ui-theme-menu>`, one palette button holding Spell's four themes and Light, Dark or Auto,
+- To let people pick:  `<ui-theme-menu>`, one palette button holding Spell's eight themes and Light, Dark or Auto,
   remembered for each viewer (`ThemePreference`);  every Spell place shows it.
   So does `apply("dark")`, since dark is a scheme (above):
 

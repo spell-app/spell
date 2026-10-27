@@ -271,6 +271,22 @@ export const fonts = {
     "Courier New",
     "monospace"
   ],
+  /**
+   * a serif for reading:  Palatino first, then the serifs most computers have
+   * - Paper reads it (Iowan Old Style before it), and the theme editor's "Palatino" (epic `debut` P20, J77)
+   */
+  serif: ["Palatino", "Palatino Linotype", "Book Antiqua", "P052", "URW Palladio L", "Georgia", "serif"],
+  /** a rounded sans, the platform's own where it has one:  Pop, and the theme editor's "Rounded" (J77) */
+  rounded: [
+    "ui-rounded",
+    "SF Pro Rounded",
+    "Arial Rounded MT",
+    "Varela Round",
+    "Quicksand",
+    "Nunito",
+    "system-ui",
+    "sans-serif"
+  ],
   /** colour emoji fonts, Firefox's own last:  what `<ui-emoji>` and every flag (`<ui-flag>`, menu rows) draw with */
   emoji: ["Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Twemoji Mozilla", "Segoe UI Symbol"]
 } as const satisfies Record<string, readonly string[]>
@@ -483,7 +499,13 @@ export const shadows = {
 export const themeTree = {
   typography: {
     size: "--ui-font-size",
-    family: { body: "--ui-font-family", heading: "--ui-font-family-heading", mono: "--ui-font-family-mono" },
+    family: {
+      body: "--ui-font-family",
+      heading: "--ui-font-family-heading",
+      mono: "--ui-font-family-mono",
+      serif: "--ui-font-family-serif",
+      rounded: "--ui-font-family-rounded"
+    },
     weight: tokensFor(fontWeights, "--ui-font-weight-"),
     "line-height": { body: "--ui-line-height", heading: "--ui-line-height-heading", tight: "--ui-line-height-tight" },
     ratio: { heading: "--ui-heading-ratio", caption: "--ui-caption-ratio" }

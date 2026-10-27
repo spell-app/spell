@@ -4,12 +4,19 @@ import { ThemeMenu } from "spell-ui/components/ui-theme-menu/ThemeMenu"
 
 describe("ThemeMenu.entries", () => {
   test("lists the themes it's given, in order, each titled, with its description:  nothing else", () => {
-    const menu = new ThemeMenu({ themes: ["spell", "glass", "fruity", "merlot"], text: keyText })
+    const menu = new ThemeMenu({
+      themes: ["spell", "glass", "fruity", "merlot", "paper", "midnight", "crisp", "pop"],
+      text: keyText
+    })
     expect(menu.entries).toEqual([
       { value: "spell", text: "Spell", description: "spellDescription" },
       { value: "glass", text: "Glass", description: "glassDescription" },
       { value: "fruity", text: "Fruity", description: "fruityDescription" },
-      { value: "merlot", text: "Merlot", description: "merlotDescription" }
+      { value: "merlot", text: "Merlot", description: "merlotDescription" },
+      { value: "paper", text: "Paper", description: "paperDescription" },
+      { value: "midnight", text: "Midnight", description: "midnightDescription" },
+      { value: "crisp", text: "Crisp", description: "crispDescription" },
+      { value: "pop", text: "Pop", description: "popDescription" }
     ])
   })
 
