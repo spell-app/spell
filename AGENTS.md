@@ -1,14 +1,14 @@
 # AGENTS.md
 
-This file guides AI coding agents (Claude Code, Codex, and others) working in the kit `spell`, `~/www/spell`,
-and across the child repos inside it.
+This file guides AI coding agents (Claude Code, Codex, and others) working in the kit `spell`, `~/www/spell`:
+ONE repo, its own `src/` and its folders `parser/`, `ui/`, `epic/` and `app/` (epic `repo-split` P20).
 
 **ALWAYS, before any code:  READ [WWOD](agents/wwod/WWOD.md), "What Would Owen Do?", the house style every repo shares.**
 - Then the `AGENTS.md` of the folder you're working in:
   - one of the kit's ([server's](src/server/AGENTS.md) ...)
-  - or a child repo's ([Spell UI's](ui/AGENTS.md) ...), and its package's
-- A rule lives in exactly ONE place:  this file holds what's about the kit and what's ACROSS repos;
-  each repo's, what's about it;  each folder's or package's, what's local to it.
+  - or one of its big folders' ([Spell UI's](ui/AGENTS.md) ...), and its sub-folder's
+- A rule lives in exactly ONE place:  this file holds what's about the kit and what's ACROSS its folders;
+  each big folder's, what's about it;  each sub-folder's, what's local to it.
 
 **If working with Solid (2.0):  READ [the Solid 2 rules](spell.epics/guides/solid/solid-2.md) IN FULL FIRST.**
 - Solid work is any of:
@@ -25,21 +25,28 @@ and suggest where it belongs before building it (below, "Commands").
 
 ## The kit
 
-- The bottom of every repo, and always there.  It holds:
-  - the code every repo stands on, under ONE `src/` (epic `repo-split` P14, Q47):
+- ONE git repo since epic `repo-split` P20.  It holds:
+  - the code everything stands on, under ONE `src/` (epic `repo-split` P14, Q47):
     its seven folders, in "The kit's folders" below
+  - four big folders beside `src/`, once child repos of their own:  `parser/`, `ui/`, `epic/`, `app/`
+    (below, "Which folder holds what")
   - the house style, WWOD, in [agents/wwod/](agents/wwod/) (below, "WWOD and the logs")
-  - the glue:  the ONE install for every repo, the list of repos, the commands over them
+  - the glue:  the ONE install, the list of repos beside it, the commands over its folders
     ([README.md](README.md) lists the files)
 - It's what three repos became (epic `repo-split` P9), each merged in with its history:
   - spell-util:  `util/`, `toolchain/`
   - spell-server:  `server/`, and `assembler/`, merged into the server in P14 (Q43)
   - spell-element:  `element/`, its tools and test helpers
   - and `cli/`, the `spell` command's base, from spell-app's CLI (epic `repo-split` P13)
+  - then, in P20, spell-parser, spell-ui, spell-epic and spell-app, as `parser/`, `ui/`, `epic/` and `app/`
+    - each merged in with its history:  [the merge script](tools/one-repo/one-repo.ts)
+    - each old commit's new SHA:  `tools/one-repo/commit-map-<folder>.txt`
 - ONE npm package, `spell` (Q35;  unscoped, Q36):  its root [package.json](package.json), one version.
-  - Every file is imported by ONE name, from the kit and every other repo:  the package's name and the file's path
-    under `src/`, no extension (`spell/util/string`, `spell/server/page`, `spell/element`).
-  - Its `exports` say so in one wildcard entry (below, "Imports");  a few explicit ones keep the toolchain's names.
+  - Every file is imported by ONE name, from anywhere:  the package's name and the file's path
+    under `src/`, no extension (`spell/util/string`, `spell/server/page`, `spell/element`);
+    a big folder's adds the folder (`spell/ui/components/ui-button`, `spell/parser/parser`).
+  - Its `exports` say so in one wildcard entry per folder (below, "Imports");
+    a few explicit ones keep the toolchain's names.
   - Outside `src/`, never imported:
     `tests/`, `bin/` (the kit's commands), `scripts/`, `tools/` (the glue), the configs.
   - Two TypeScript programs
@@ -52,17 +59,23 @@ and suggest where it belongs before building it (below, "Commands").
     ([vitest.config.ts](vitest.config.ts)).
   - `yarn install` runs a `postinstall` that links `node_modules/spell` to the kit:
     yarn links the root package nowhere by itself, and the kit's own files import it by that name.
-- Every child repo is its own git repo, cloned inside the kit and git-ignored here.
-  - Run git in the child repo you mean:  `git -C spell-ui status`.
-  - Here, git sees the kit's own:  `src/`, `tests/`, `bin/`, `scripts/`, `agents/`, the glue.
-- `yarn install` runs HERE, never in a child repo:  the child repos have no `yarn.lock`.
-  - A child repo's `.yarnrc.yml` is a copy of this one's, without `yarnPath`:  the yarn release is here.
+- Each big folder keeps a `package.json`:  a FOLDER MANIFEST, not a package of its own.
+  - It's a private yarn workspace of the kit's one install, still named `spell-parser`, `spell-ui`, `spell-epic`,
+    `spell-app`;  the kit lists them in its `workspaces`, lowest first (`kitFolders()`, in
+    [kitFolders.ts](src/server/kitFolders.ts)).
+  - It holds the folder's scripts (so `cd ui && yarn test` works), its settings (`"spell": { "commands", "hooks" }`,
+    `"pageServer"`, `"spellPack"`, `"spellTypes"`, `"spellPublish"`), and its dependencies at the kit's versions,
+    plus `spell` itself (`workspace:*`, for the bins).
+  - No `exports`:  the kit's hold every folder's names.
+    (epic's keeps its own only as a temporary `spell-epic/...` alias, until epic `epic-engine` P49.)
+- `yarn install` runs HERE, at the root, never in a folder:  ONE `yarn.lock`.
   - One copy of each package version (`nmHoistingLimits: none`), above all Solid:  pinned by `resolutions`.
   - Tool versions are bumped here (below, "Toolchain:  Vite+").
 
 ## The kit's folders
 
 Each folder of `src/` links to its own `AGENTS.md`:  read it before working there.
+The big folders beside `src/` (`parser/`, `ui/`, `epic/`, `app/`) have their own too:  below, "Which folder holds what".
 - Name:  how every file imports it, the kit's own included.
 - Namespace:  its self-namespace (WWOD §8).
 
@@ -95,9 +108,9 @@ Each folder of `src/` links to its own `AGENTS.md`:  read it before working ther
   - `test-helpers` use the DOM, Solid and `element`.
   - `cli` uses server, util's json5 and util's generic files (`spell/util/string`, `spell/util/number`);
     nothing in the kit imports `cli`.
-    - It names no child repo in its code:
+    - It names no big folder in its code:
       each one hands it its commands, by its `package.json` (`"spell": { "commands", "hooks" }`).
-  - Nothing in the kit imports a child repo:  every arrow points down.
+  - Nothing in `src/` imports a big folder:  every arrow points down.
 
 ## Commands
 
@@ -111,39 +124,51 @@ yarn kit:format       # oxfmt;  kit:format:check only checks
 yarn kit:review       # the finishing pass:  ts, lint:fix, format, test
 ```
 
-- And over every repo, the kit's first, then each child repo's, lowest first ([the repos tool](tools/repos.ts)):
+- And over everything, the kit's own (`kit:*`) first, then each folder's script, lowest first
+  ([the repos tool](tools/repos.ts)):
 
   ```sh
   yarn ts    yarn test    yarn lint    yarn review
   ```
 
-- Every child repo runs its own the same way, from its folder:
+- Every big folder runs its own the same way, from its folder:
   `yarn ts`, `yarn test`, `yarn lint`, `yarn review`.
-  - They're plain scripts over its one `src/`;
-    its declarations come from `spell-types`, a bin of the kit's beside `spell-pack`.
+  - They're plain scripts over its one `src/`, in its folder manifest.
+- `yarn clone`, `yarn pull`, `yarn status`, `yarn repos`:  over the repos BESIDE the kit only
+  ([repos.json5](repos.json5):  spell-brand).
+- The kit's rename codemods:
+  - `spell rename imports`:  rewrites old names to the folders' (`spell-ui/x` => `spell/ui/x` ...)
+  - `spell rename branches`:  carries an open epic's old child-repo branches into the folders
 - The kit's other scripts:  `yarn server` (`spell server`:  the page server), `yarn favicon` (server's icons),
   `yarn cli:install` (puts `spell` on your `PATH`).
 - The `spell` command:  the kit's `src/cli/` (its [AGENTS.md](src/cli/AGENTS.md)), run by [its bin](bin/spell.mjs);
   every command, every repo's:  [README-cli.md](README-cli.md).
-  - Every installed repo adds its own commands to it, named in its `package.json`'s `"spell": { "commands" }`;
-    `spell help` lists them, grouped by repo.
-  - A word two repos both want goes under each one's short name (`spell parser check`, `spell app check`).
-- The READMEs (every repo's `README.md` and `README-*.md`):
+  - Every big folder adds its own commands to it, named in its `package.json`'s `"spell": { "commands" }`;
+    `spell help` lists them, grouped by folder.
+  - A word two folders both want goes under each one's short name (`spell parser check`, `spell app check`).
+- `spell publish` publishes three packages:
+  - `spell`:  the one package, the kit and every folder, built into `dist/<folder>/`
+  - `spell-ui`:  Spell UI's Vite library build, the element code inside (Q63)
+  - `spell-epic`:  the epic plugin, its parts at its root, depending on `spell` (Q64)
+  - spell-parser and spell-app are held names, not published again (Q65).
+  - [marketplace.json](.claude-plugin/marketplace.json), at the root:  marketplace `spell`, plugin `epic` from
+    `spell-epic` (`/plugin install epic@spell`);  Owen's own machine keeps loading the plugin in place.
+- The READMEs (the root's and every big folder's `README.md` and `README-*.md`):
   - `yarn readme:check` (`spell readme check`) checks them
   - `yarn readme:test` (`spell readme test [page...]`) runs every example they print with an Output fold, and
     compares what it prints (epic `readme` P16;  WWOD §6)
   - `yarn readme:pictures` (`spell readme pictures [page...]`) draws each `html example` block they show, light and
     dark, into a picture under it;  the check fails a stale one (epic `ui-gaps` P14, from epic `epic-engine` Q28)
   - `yarn mermaid:pretty` styles their Mermaid pictures ([README-toolchain.md](README-toolchain.md))
-- Three ways to make a repo do something:  the `spell` CLI, Claude skills, yarn scripts.
+- Three ways to make the repo do something:  the `spell` CLI, Claude skills, yarn scripts.
   - Their map, one row per operation:  [the commands page](spell.epics/guides/dev/commands/commands.html).
     - Its data:  `commands.json5` beside it.
     - Shown by the page server:  `epic pages open guides/dev/commands/commands.html`.
   - Target:  the CLI drives everything.
-    - Repo tools are `spell <noun> <verb>`:  the kit's `spell`, every repo's commands under one name.
+    - Repo tools are `spell <noun> <verb>`:  the kit's `spell`, every folder's commands under one name.
       - e.g. `spell server start`, `spell pack build`, `spell app vscode`
     - Skills keep judgement and dialog, and call it.
-    - Yarn keeps each repo's own scripts, and aliases the rest.
+    - Yarn keeps each folder's own scripts, and aliases the rest.
 - **Owen asks for a new skill or `spell` command, or you're about to add, rename or remove a yarn script:**
   - READ [the commands guide](spell.epics/guides/dev/commands/commands.md) FIRST.
   - Then SUGGEST, before building:  where it belongs, its name, what it replaces,
@@ -167,7 +192,7 @@ yarn kit:review       # the finishing pass:  ts, lint:fix, format, test
 - Node 24 (`engines`).
 - The versions are the yarn `catalog:` in the kit's [.yarnrc.yml](.yarnrc.yml).
   - Bump them here, together:  `vite-plus` and every `catalog:` entry, to what `vp toolchain` lists.
-  - Then the child repos' copies of `.yarnrc.yml` (no `yarnPath`:  the yarn release lives once, here).
+  - Then spell-brand's copy of `.yarnrc.yml` (beside the kit, its own install).
   - NEVER pin one tool on its own.
 - In any repo, at its root:
 
@@ -178,7 +203,7 @@ yarn kit:review       # the finishing pass:  ts, lint:fix, format, test
   yarn vp check
   ```
 
-- `yarn review` is the finishing pass (WWOD §1):  a repo's, over its one `src/`;  the kit's, over every repo.
+- `yarn review` is the finishing pass (WWOD §1):  a folder's, over its one `src/`;  the root's, over everything.
   - It's about the same (`~==`) as all four of these (the kit's own:  `yarn kit:review`):
 
     ```sh
@@ -196,9 +221,9 @@ yarn kit:review       # the finishing pass:  ts, lint:fix, format, test
       ([the papercuts log](agents/PAPERCUTS.md), "## ui").
 - NEVER hard-code `<package>/node_modules/<dep>`:  yarn hoists to the kit's `node_modules`.
   - Node code resolves the package instead ([NodePackage](src/element-tools/NodePackage.ts)).
-  - Nor `<repo>/node_modules`:  a child repo has none, the install is the kit's.
+  - Nor `<folder>/node_modules`:  the install is the kit's.
 - Lint / format settings:  the toolchain's, `spell/toolchain/lint` ([lint.ts](src/toolchain/lint.ts)).
-  - Each repo's ONE `vite.config.ts`, at its root, spreads it in its lint and fmt blocks
+  - Each big folder's ONE `vite.config.ts`, at its root, spreads it in its lint and fmt blocks
     (the kit's:  [vite.config.ts](vite.config.ts)).
   - No `.oxlintrc.json` / `.oxfmtrc.json` any more.
   - Our own rules, two JS plugins beside [lint.ts](src/toolchain/lint.ts):
@@ -207,6 +232,8 @@ yarn kit:review       # the finishing pass:  ts, lint:fix, format, test
     - `lint.imports.ts`, everywhere:
       - `spell/no-parent-import` fails a module path starting `../` that lands in a package's `src/` (any repo's):
         its fix is the package name + path under `src/`;  `../` to a file outside `src/` (a config) is fine
+      - `spell/no-upward-import` fails an import that points UP the kit's folders, in `workspaces` order:
+        the kit's `src/`, then `parser/`, `ui/`, `epic/`, `app/`
     - Their tests:
       - spell-ui's [LintPatterns.test.ts](ui/tests/tools/LintPatterns.test.ts)
       - the kit's [lint.imports.test.ts](tests/toolchain/lint.imports.test.ts)

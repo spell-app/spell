@@ -1,0 +1,17 @@
+{
+  "name": "spell",
+  "description": "Spell's Claude Code plugins:  /plugin marketplace add spell-app/spell, then /plugin install epic@spell",
+  "owner": {
+    "name": "Owen Williams"
+  },
+  "plugins": [
+    {
+      "name": "epic",
+      "source": {
+        "source": "npm",
+        "package": "spell-epic"
+      },
+      "description": "Epics for Claude Code:  epic pages, worktrees and windows, the review loop and the epic command"
+    }
+  ]
+}
