@@ -473,7 +473,7 @@ Lost track?  `epic status`.
 | `epic worktree path <name>` | prints a worktree's folder, or where a new one would go;  a session enters it by name, never by this path, or Claude Code would ask |
 | `epic worktree remove <name>` | removes a worktree, its page and Vite servers stopped FIRST, and its session-folder link;  not its branch (`git branch -d` after);  `--force`:  git's, for one with changes |
 | `epic worktree repos [<name>]` | each repo's checkout in an epic's worktree (default:  this one):  its branch, what's uncommitted, how far it's ahead of and behind its base |
-| `epic worktree merge-main` | merges `main` into this checkout's branch, regenerating the generated files both sides changed, and commits;  then installs the packages when it changed `yarn.lock` (the repo's install command);  `--continue` after you resolve any other conflict (below);  `--json` |
+| `epic worktree merge-main` | merges `main` into this checkout's branch, regenerating the generated files both sides changed, and commits;  then installs the packages when it changed `yarn.lock` (the repo's install command), and renames Spell UI's old names the branch still writes (`spell ui rename`);  `--continue` after you resolve any other conflict (below);  `--json` |
 | `epic worktree patch [--all]` | gives this checkout (`--all`:  `main` and every worktree) the fixes its repo lists in `.epic/config.json5`'s `checkoutPatches` that it doesn't have yet:  a file copied from `main` and git-excluded, or a command run once;  `--dry-run`, `--json`;  the session-start hook runs it by itself |
 | `epic worktree move <name> \| --idle` | moves a worktree from the old place inside the repo, `.claude/worktrees`, to beside it;  `--idle`:  every one no session works in;  `--dry-run` |
 | `epic session list [<words> ...]` | lists this repo's saved Claude Code sessions, newest first, matching every word;  `--limit <n>`, `--all` |
@@ -501,6 +501,12 @@ Lost track?  `epic status`.
     resolve them, `git add` them, then `epic worktree merge-main --continue` finishes the merge.
   - In an epic's worktree of several repos, it merges every repo, the child repos lowest first,
     the top one (the kit, in Spell) last;  a repo that can't merge says FAILED, and the others go on.
+  - In a Spell kit, it then rewrites the old Spell UI names the branch's own files still write
+    (`spell ui rename --write`, from the kit's root), commits them on their own in each repo, and lists them
+    under `renamed old names in N file(s)`.
+    - The branch's files:  what the merged branch differs from `main` in.
+    - Never generated files, never the content folder.
+    - A kit with no `ui rename`, or a failure:  one line, `spell ui rename skipped:  ...`;  the merge stands.
 
 - A fix to how a checkout is SET UP (a VS Code file like `.ignore`, a command to run once) reaches every checkout at once
   through `checkoutPatches`, not when each branch merges `main`
