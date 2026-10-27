@@ -2,8 +2,8 @@
  * A notebook's page (`<NotebookPage>`, epic `elemental-spell` P16):  the page and its "On this page" column,
  * drawn as Spell UI's docs site draws a component page.  The page scrolls inside its pane (`.NotebookScroller`).
  * - NO background anywhere under the page:  only the pane's own glass shows (Owen, 2026-10-26:  "I don't want *any*
- *   background under the notebook page").  The section bars, the masthead, the contents and the examples' frames
- *   paint no fill;  a stuck section bar blurs what scrolls under it instead.
+ *   background under the notebook page").  The masthead and the contents paint no fill;
+ *   the section titles and the examples' frames keep the docs site's (below).
  * - No toolbar:  the notebook's tools are in the pane's header (`NotebookHeader.css`).
  */
 
@@ -144,27 +144,11 @@
 }
 
 /*
- * ## No background:  the docs site's fills cleared, the pane's glass showing through
- * - section bars:  no fill in place;  stuck, the pane's own glass (above), so what scrolls under its words is hidden
- *   and the bar still reads as the pane
- * - examples:  their frame keeps its border, no fill
+ * ## Section titles and examples:  the docs site's own look, left as it is (`docs-sections.css`, `<ui-example>`)
+ * - Owen, 2026-10-27:  the titles and the examples' frames look as they do in Spell UI's docs, not cleared
+ *   ("it really bugs me that the section title and example background look like [this] rather than the way they
+ *   do in the spell/ui docs");  only the page itself stays see-through
  */
-.NotebookPage ui-section[sticky]::part(title) {
-  background: none;
-  -webkit-backdrop-filter: none;
-  backdrop-filter: none;
-}
-.NotebookPage ui-section[sticky]:state(stuck)::part(title) {
-  background-color: var(--notebook-glass-color);
-  background-image: var(--notebook-glass-image);
-  background-attachment: scroll, fixed;
-}
-.NotebookPage :is(spell-example, ui-example) {
-  --ui-example-frame-background: transparent;
-  --ui-example-frame-filter: none;
-  --ui-example-frame-shadow: none;
-  --ui-example-demo-background: transparent;
-}
 
 /* the page's title and the line under it, as a component page's masthead (`<ui-header level="1">` and its sub header) */
 .NotebookMasthead {
