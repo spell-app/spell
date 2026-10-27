@@ -10,6 +10,8 @@
  *   (epic `readme` P16)
  * - `spell map install | status | build | query | explain | uses`:  a map of every repo's code, and one of the
  *   docs, asked through graphify (epic `coherence` P1)
+ * - `spell coherence score [--json] [--save] [--compare <snapshot | last>] [--at <revision>]`:  how coherent the
+ *   code is, from the catalog's searches (epic `coherence` P15)
  * - `spell publish [--dry-run]`:  every repo's npm package, built, packed and checked, then published, lowest first
  *   (epic `repo-split` P19)
  * - `spell pony`:  a pony, which proves `spell` runs with nothing else installed
@@ -185,6 +187,27 @@ export default function kitCommands(spell: Command): void {
     .argument("<name...>", "its name, as the map labels it")
     .option("--docs", "ask the docs map")
     .action((words: string[], options: CLI.MapOptions) => mapCommand("uses", words, options))
+
+  ////////////////
+  // ## Coherence
+  ////////////////
+
+  const coherence = spell
+    .command("coherence")
+    .description("how coherent the code is:  each catalog mechanism's copies left and users, scored 0-100")
+
+  coherence
+    .command("score")
+    .description("score the code:  copies, users and score per mechanism, the words' counts, each repo's tests")
+    .option("--json", "print the snapshot, or the comparison, as JSON")
+    .option("--save", "save a snapshot in the coherence epic's details/scores/ (the shared content)")
+    .option("--compare <snapshot>", "compare with a saved snapshot:  its name, or last")
+    .option("--at <revision>", 'the code as it was:  "main@{2026-10-25 14:00}" (each repo\'s), a kit commit, a time')
+    .action((options: CLI.CoherenceOptions) =>
+      CLI.runCommand(async () =>
+        (await import("spell/cli/commands/coherenceCommand")).coherenceCommand("score", options)
+      )
+    )
 
   ////////////////
   // ## Publishing

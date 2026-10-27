@@ -2,7 +2,8 @@ import { existsSync, readdirSync, statSync } from "node:fs"
 import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path"
 import { fileURLToPath, pathToFileURL } from "node:url"
 
-import { SRV, type ServedFile, type ServerInfo } from "spell/server"
+import { escapeRegExp } from "spell/util/string"
+import { SRV, type Handler, type ServedFile, type ServerInfo } from "spell/server"
 import type { SiteTab } from "spell/server/site/site.types"
 import {
   BundleBuild,
@@ -120,6 +121,12 @@ export class PageServer {
   /** whether the content folder is mounted under every worktree's address yet (`mountContentInWorktrees()`) */
   private contentInWorktrees = false
 
+  /**
+   * each worktree's bundles' build, by its folder:  begun at its first request through a component set's address
+   * (`worktreeBuildFor()`), then watching its sources, as this checkout's own do
+   */
+  private worktreeBuilds = new Map<string, BundleBuild>()
+
   /** what `/api/files` and `/api/pages` write through:  told the content folder by `serveContent()` */
   private writes: SRV.FileOperations
 
@@ -156,7 +163,11 @@ export class PageServer {
       token,
       live: true,
       mounts: [{ prefix: "/", dir: this.root }],
-      html: [(page) => this.withLocalCopies(page), (page, served) => this.withPageScripts(page, served)],
+      html: [
+        (page) => this.withLocalCopies(page),
+        (page, served) => this.withPageScripts(page, served),
+        (page, served) => this.withWorktreeLoads(page, served)
+      ],
       configure: (served) => ({
         root: this.root,
         branch: this.info.branch,
@@ -185,6 +196,8 @@ export class PageServer {
     const router = this.web.router
     // a request for a bundle's missing file waits while the bundles build (`start()`)
     router.use(this.bundles.wait)
+    // and a worktree's, at its component sets' addresses:  built by that worktree, as the request first comes (r35)
+    router.use(this.waitForWorktreeBundles)
     router.get("/", (_request, reply) => reply.redirect(DOCS_HOME))
     // what moved out of the shared content folder, which still holds it for older checkouts:  no redirect (Q30)
     for (const path of gone)
@@ -240,6 +253,7 @@ export class PageServer {
   /** stop:  the bundles' build, route modules' stops, the pid file (if ours), the server */
   async stop(): Promise<void> {
     this.bundles.stop()
+    for (const build of this.worktreeBuilds.values()) build.stop()
     for (const stop of this.stops) await Promise.resolve(stop()).catch(() => {})
     this.pidFile.removeIfOurs()
     await this.web.close()
@@ -397,6 +411,67 @@ export class PageServer {
     if (!tags) return page
     const end = page.search(/<\/body>/i)
     return end < 0 ? page + tags : page.slice(0, end) + tags + page.slice(end)
+  }
+
+  /**
+   * `page` as served from a worktree's address (`/worktrees/<w>/...`):  its root-path LOADS of a component set's address
+   * (`<script src="/components/ui/_assets/site.js">`) under the worktree's address too (`withWorktreeLoads()`).
+   * - so the page loads the worktree's site bundle, not this checkout's:  a tag new in the worktree is defined there
+   *   (epic `epic-engine` r35:  `<ui-zoom>` on ui-zoom.html, whose head said `/components/ui/_assets/`)
+   * - a page anywhere else:  as it is
+   */
+  withWorktreeLoads(page: string, served: ServedFile): string {
+    const address = WORKTREE_ADDRESS.exec(served.path)?.[0]
+    if (!address || !this.componentSets.length) return page
+    return withWorktreeLoads(
+      page,
+      address.slice(0, -1),
+      this.componentSets.map((set) => set.prefix)
+    )
+  }
+
+  /**
+   * The router handler:  a request at a worktree's component set address waits while that worktree's bundles build
+   * (`worktreeBuildFor()`), at most `BUNDLE_WAIT_MS`.
+   * - its pages too, not only a missing bundle file:  a page would otherwise load the worktree's OLD bundle
+   */
+  private waitForWorktreeBundles: Handler = async (request, _reply, next) => {
+    if (request.method === "GET" || request.method === "HEAD") await this.worktreeBuildFor(request.path)?.untilBuilt()
+    next()
+  }
+
+  /**
+   * The bundles' build of the worktree whose component set address URL path `path` is in
+   * (`/worktrees/<w>/components/<set>/...`);  else `undefined`.
+   * - begun at the first such request (`spell bundle --stale`, with the WORKTREE's own `spell`), then watching its
+   *   sources (`BundleBuild.watch()`):  a worktree's bundle is never committed, and only its own server built it before
+   * - SIDE EFFECT:  live reload watches the worktree's sets and their bundle at its address from then on
+   * - NEVER throws:  a worktree whose settings won't read builds nothing
+   */
+  worktreeBuildFor(path: string): BundleBuild | undefined {
+    const match = WORKTREE_ADDRESS.exec(path)
+    const name = match?.[1]
+    if (!match || !name || name === "." || name === "..") return undefined
+    const inside = path.slice(match[0].length - 1)
+    if (!this.componentSets.some((set) => inside.startsWith(`${set.prefix}/`))) return undefined
+    const root = this.worktrees.map((each) => join(each, name)).find((each) => existsSync(join(each, "package.json")))
+    if (!root) return undefined
+    let build = this.worktreeBuilds.get(root)
+    if (build) return build
+    try {
+      build = new BundleBuild({ root })
+    } catch (error) {
+      console.error(`bundles:  can't read worktree ${name}'s settings:`, error)
+      return undefined
+    }
+    this.worktreeBuilds.set(root, build)
+    for (const set of build.sets) {
+      const at = `${WORKTREES_PREFIX}${name}${set.prefix}`
+      if (!isBeside(set.dir)) this.web.live?.watch(join(root, set.dir), { servedAt: at })
+      if (!isBeside(set.assets)) this.web.live?.watch(join(root, set.assets), { servedAt: `${at}/${SET_ASSETS}` })
+    }
+    console.log(`bundles:  worktree ${name}`)
+    return build.start().watch()
   }
 
   /** Add `add`'s fields to every page's `window.SPELL_SERVER`, from a route module;  returns `this`. */
@@ -569,6 +644,42 @@ export function componentSetPath(path: string, sets: readonly ComponentSet[]): s
 export function withLocalCopies(page: string, copies: Record<string, string>): string {
   return Object.entries(copies).reduce((html, [cdn, local]) => html.replaceAll(cdn, local), page)
 }
+
+/**
+ * `page` (served at worktree address `address`, `/worktrees/<w>`) with its root-path LOADS of component set
+ * addresses `prefixes` (`/components/ui`) under that address:  `src="/components/ui/_assets/site.js"` =>
+ * `src="/worktrees/<w>/components/ui/_assets/site.js"`.
+ * - loads only:  `src`, `source`, `poster`, and a `<link>`'s `href`;  a link (`<a href>`) the live client lays under the
+ *   address as it's clicked (`worktreeHref()`)
+ * - never inside `<script>` or `<style>`:  a docs example's markup stays as written
+ * - a relative load (`_assets/site.js`) needs none of this:  it resolves under the address already
+ */
+export function withWorktreeLoads(page: string, address: string, prefixes: readonly string[]): string {
+  if (!prefixes.length) return page
+  const sets = prefixes.map((prefix) => escapeRegExp(prefix)).join("|")
+  const load = new RegExp(`(\\s(?:src|source|poster)=")(${sets})(?=/)`, "g")
+  const linkHref = new RegExp(`(\\shref=")(${sets})(?=/)`, "g")
+  const under = (_whole: string, start: string, prefix: string) => `${start}${address}${prefix}`
+  const tags = (part: string) =>
+    part.replace(START_TAG, (tag: string, name: string) => {
+      const loaded = tag.replace(load, under)
+      return name.toLowerCase() === "link" ? loaded.replace(linkHref, under) : loaded
+    })
+  const out: string[] = []
+  let last = 0
+  for (const body of page.matchAll(SCRIPT_OR_STYLE_BODY)) {
+    out.push(tags(page.slice(last, body.index)), body[0])
+    last = body.index + body[0].length
+  }
+  out.push(tags(page.slice(last)))
+  return out.join("")
+}
+
+/** A start tag:  `[1]` its name;  attribute values may hold `>`. */
+const START_TAG = /<([a-zA-Z][\w-]*)(?:[^>"]|"[^"]*")*>/g
+
+/** A `<script>` or `<style>` element's BODY (its start tag is a tag like any other, its text never touched). */
+const SCRIPT_OR_STYLE_BODY = /(?<=<(?:script|style)\b(?:[^>"]|"[^"]*")*>)[\s\S]*?(?=<\/(?:script|style)\s*>)/gi
 
 /**
  * The URL path an ENGINE ROUTE of `routes` serves from in this checkout;  else `undefined`.

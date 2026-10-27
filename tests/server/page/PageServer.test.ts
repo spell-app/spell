@@ -13,7 +13,8 @@ import {
   findById,
   folderUrl,
   replaceById,
-  urlPathOf
+  urlPathOf,
+  withWorktreeLoads
 } from "spell/server/page"
 import { ask } from "spell/server/test/serve"
 
@@ -50,6 +51,36 @@ const PAGE = `<!doctype html>
   </body>
 </html>
 `
+
+describe("withWorktreeLoads()", () => {
+  const SETS = ["/components/ui", "/components/epics"]
+
+  it("lays root-path loads of a set under the address:  src, source, poster, a <link>'s href", () => {
+    const page = [
+      `<link rel="stylesheet" href="/components/ui/_assets/site.css" />`,
+      `<script type="module" src="/components/epics/_assets/site.js"></script>`,
+      `<img src="/components/ui/images/x.png" title="a > b"><video poster="/components/ui/p.png"></video>`,
+      `<ui-components source="/components/ui/x.pack.js"></ui-components>`
+    ].join("\n")
+    expect(withWorktreeLoads(page, "/worktrees/w", SETS)).toBe(
+      page.replaceAll("/components/", "/worktrees/w/components/")
+    )
+  })
+
+  it("leaves links, other addresses, relative loads and script / style text as they are", () => {
+    const page = [
+      `<a href="/components/ui/ui-button.html">b</a>`,
+      `<script src="/_epic/assets/spell-comments.js"></script><script src="_assets/site.js"></script>`,
+      `<img src="/components/uix/x.png"><img src="/components/ui">`,
+      `<script type="text/plain"><img src="/components/ui/x.png"></script>`,
+      `<style>a { background: url("/components/ui/x.png") }</style>`
+    ].join("\n")
+    expect(withWorktreeLoads(page, "/worktrees/w", SETS)).toBe(page)
+    expect(withWorktreeLoads(`<img src="/components/ui/x.png">`, "/worktrees/w", [])).toBe(
+      `<img src="/components/ui/x.png">`
+    )
+  })
+})
 
 describe("replaceById()", () => {
   it("replaces one element, keeping every other byte", () => {
@@ -264,6 +295,40 @@ describe("PageServer", () => {
       worktrees: join(root, ".claude", "worktrees"),
       worktreesPath: "/.claude/worktrees/"
     })
+  })
+
+  // epic `epic-engine` r35:  a worktree page whose head said `/components/ui/_assets/site.js` loaded MAIN's bundle
+  it("lays a worktree page's root-path loads of a set under its address:  it loads the worktree's own bundle", async () => {
+    const worktree = join(root, ".claude", "worktrees", "w")
+    mkdirSync(join(worktree, "packages", "ui", "docs"), { recursive: true })
+    const head = `<link rel="stylesheet" href="/components/ui/_assets/site.css" /><script type="module" src="/components/ui/_assets/site.js"></script>`
+    writeFileSync(
+      join(worktree, "packages", "ui", "docs", "ui-new.html"),
+      `<!doctype html><head>${head}</head><p>new</p>\n`
+    )
+    writeFileSync(join(worktree, "packages", "ui", "site", "_assets", "site.js"), "// w\n")
+    const page = (await ask(port, "GET", "/worktrees/w/components/ui/ui-new.html")).text
+    expect(page).toContain(`<link rel="stylesheet" href="/worktrees/w/components/ui/_assets/site.css" />`)
+    expect(page).toContain(`<script type="module" src="/worktrees/w/components/ui/_assets/site.js"></script>`)
+    // which is the worktree's
+    expect((await ask(port, "GET", "/worktrees/w/components/ui/_assets/site.js")).text).toBe("// w\n")
+  })
+
+  it("starts a worktree's bundles' build at its first request through a set's address (worktreeBuildFor())", () => {
+    const worktree = join(root, ".claude", "worktrees", "w")
+    // not a checkout yet:  nothing to build
+    expect(server.worktreeBuildFor("/worktrees/w/components/ui/x.html")).toBeUndefined()
+    writeFileSync(join(worktree, "package.json"), "{}\n")
+    const build = server.worktreeBuildFor("/worktrees/w/components/ui/_assets/site.js")
+    expect(build?.root).toBe(worktree)
+    // one per worktree, from any of its sets
+    expect(server.worktreeBuildFor("/worktrees/w/components/epics/x.html")).toBe(build)
+    // not a set's address, nor a worktree's
+    expect(server.worktreeBuildFor("/worktrees/w/guides/x.html")).toBeUndefined()
+    expect(server.worktreeBuildFor("/components/ui/x.html")).toBeUndefined()
+    expect(server.worktreeBuildFor("/worktrees/../components/ui/x.html")).toBeUndefined()
+    expect(server.worktreeBuildFor("/worktrees/nope/components/ui/x.html")).toBeUndefined()
+    rmSync(join(worktree, "package.json"))
   })
 
   // epic `epic-eject` J28:  worktrees beside the repo, and those left in the old place, at the same URLs

@@ -48,7 +48,7 @@ const RENAMES: [RegExp, string][] = [
  * A line that tells of the rename, an old name then an arrow (or "is now", "became") and a new one:
  * left as it is, on main and on every branch (`(\`spell-lang\` => \`spell-parser\`, ...)`)
  */
-const RENAME_MENTION = /spell-(kit|lang)\b`?\s*(=>|->|→|is now|became|becomes)\s*`?spell/
+const RENAME_MENTION = /spell-(kit|lang)\b\/?`?\s*(=>|->|→|is now|is|became|becomes)\s*`?\/?spell/
 
 /** spell-lang's folder:  old name, new name. */
 const OLD_FOLDER = "spell-lang"
@@ -60,10 +60,11 @@ const NEW_URL = "git@github.com:spell-app/spell-parser.git"
 /**
  * Files never rewritten:  what a tool regenerates, and the files that name the old names on purpose
  * - this one;  the kit's install links (`tools/repos.ts`, which removes the old `node_modules/spell-kit`);
- *   spell-epic's lookup of the kit by either name (`packageDir.ts`, `command.types.ts`)
+ *   spell-epic's lookup of the kit by either name (`packageDir.ts`, `command.types.ts`);
+ *   the links that mend an old `spell-lang/` path to `spell-parser/` (the kit's `Linker`, spell-epic's `RootLinks`)
  */
 const SKIPPED =
-  /(^|\/)yarn\.lock$|^tools\/(rename-packages|repos)\.ts$|^src\/tools\/packageDir\.ts$|^src\/command\/command\.types\.ts$/
+  /(^|\/)yarn\.lock$|^tools\/(rename-packages|repos)\.ts$|^src\/tools\/packageDir\.ts$|^src\/command\/command\.types\.ts$|^src\/server\/Linker\.ts$|^tests\/server\/Linker\.test\.ts$|^src\/tool\/migrations\/RootLinks\.ts$/
 
 const dryRun = process.argv.includes("--dry-run")
 let changedFiles = 0

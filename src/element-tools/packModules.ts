@@ -19,6 +19,15 @@
  *   The page's is Spell UI's core module, which carries all of it, so a page has one (`packModules`).
  * - Any other Spell UI, `spell/element/...` or Solid import fails the build:
  *   a second copy of spell-element, Spell UI's core or Solid on a page breaks them.
+ * - `spell-ui/components/ui-zoom/ImageZoom`:  the page's ONE zoom for its screenshots (epic `ui-gaps` P14), which
+ *   `<epic-field>`'s request thumbnails open in;  plain DOM, but shared so a page has one rule and one zoom.
  * - Another one:  add it here AND to every page's `packModules` above.
  */
-export const PACK_MODULES = ["solid-js", "@solidjs/web", "spell/element", "spell-ui/core", "spell-ui/forms"]
+export const PACK_MODULES = [
+  "solid-js",
+  "@solidjs/web",
+  "spell/element",
+  "spell-ui/core",
+  "spell-ui/forms",
+  "spell-ui/components/ui-zoom/ImageZoom"
+]
