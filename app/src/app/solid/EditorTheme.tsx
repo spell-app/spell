@@ -52,8 +52,47 @@ export class EditorTheme {
       EditorTheme.follow(ThemePreference.chosen.theme)
       ThemePreference.subscribe((chosen) => EditorTheme.follow(chosen.theme))
       await ThemePreference.restore()
+      // framed by Spell UI's theme bench, while developing:  take its theme, its tuning and its "full view"
+      if (import.meta.env.DEV && window.parent !== window) {
+        const { BenchBridge } = await import("spell-ui/docs-components/ui-docs-theme-bench/BenchBridge")
+        BenchBridge.listen({
+          theme: (name) => ThemePreference.setTheme(name),
+          scheme: (scheme) => ThemePreference.setScheme(scheme),
+          fullMonty: () => EditorTheme.showFullView()
+        })
+      }
     } catch (error) {
       console.error("EditorTheme.restore():  couldn't apply the editor's theme", error)
+    }
+  }
+
+  /**
+   * The editor's full view, as the theme bench shows it (`<ui-docs-theme-bench>`, epic `debut`):
+   * Debug, the Inspector with every card, and a part picked:  a card, if the app draws one, else its first thing.
+   * - What's picked already stays.
+   * - Waits up to 3s for the app to draw something to pick;  nothing by then, nothing's picked.
+   * - NEVER throws:  `BenchBridge.listen()` catches and logs.
+   */
+  static async showFullView(): Promise<void> {
+    const [{ EditorMode }, { Inspector, INSPECTOR_PANELS }] = await Promise.all([
+      import("./EditorMode"),
+      import("./Inspector")
+    ])
+    EditorMode.show("debug")
+    for (const panel of INSPECTOR_PANELS) Inspector.setShown(panel, true)
+    if (Inspector.picked) return
+    for (let tries = 0; tries < PICK_TRIES; tries++) {
+      const area = Inspector.area
+      const things = (area ? Inspector.partsIn(area) : [])
+        .map((row) => Inspector.partFor(row.element))
+        .filter((part) => part && part.value !== part.element)
+      const card = things.find((part) => CARD.test(part!.value.constructor.name)) ?? things[0]
+      if (card) {
+        Inspector.pick(card.element)
+        Inspector.stopPicking()
+        return
+      }
+      await new Promise((resolve) => setTimeout(resolve, PICK_WAIT_MS))
     }
   }
 
@@ -128,3 +167,12 @@ export function AppMark(): JSX.Element {
     </ui-item>
   )
 }
+
+/** How many times `showFullView()` looks for a part to pick, while the app draws. */
+const PICK_TRIES = 30
+
+/** How long it waits between looks, ms:  3s in all. */
+const PICK_WAIT_MS = 100
+
+/** A drawn thing's class that's a card:  the full view picks one first. */
+const CARD = /card/i
