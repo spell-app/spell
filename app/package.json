@@ -77,7 +77,6 @@
     "wrap-ansi": "^9"
   },
   "devDependencies": {
-    "spell": "workspace:*",
     "@solidjs/vite-plugin": "3.0.0-next.51",
     "@types/fs-extra": "^11.0.4",
     "@types/lodash": "^4.17.17",
@@ -90,6 +89,7 @@
     "ink-testing-library": "^4",
     "playwright": "1.63.0",
     "pyright": "1.1.414",
+    "spell": "workspace:*",
     "typescript": "^7.0.2",
     "vite": "catalog:",
     "vite-plus": "catalog:",

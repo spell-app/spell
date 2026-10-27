@@ -307,7 +307,7 @@
     "docs:link": "tsx src/tools/link.ts",
     "/////// CORRECTNESS": "",
     "review": "yarn ts && yarn lint && yarn test && echo '== REVIEW PASSED\n===========\n'",
-    "ts": "echo '>>>>>>>>>>>\n>> RUNNING TSC' && spell-types --below && tsc && tsc -p tests && echo '<< TSC PASSED\n'",
+    "ts": "echo '>>>>>>>>>>>\n>> RUNNING TSC' && tsc && tsc -p tests && echo '<< TSC PASSED\n'",
     "lint": "echo '>>>>>>>>>>>\n>> LINTING WITH OXLINT' && vp lint --report-unused-disable-directives --max-warnings 0 src scripts tests vscode/src && echo '<< OXLINT PASSED\n'",
     "lint:fix": "vp lint --fix src scripts tests vscode/src",
     "format": "vp fmt src scripts tests vscode/src vscode/build.mjs vite.config.ts vitest.config.ts",
@@ -330,7 +330,6 @@
     "tsx": "4.20.3"
   },
   "devDependencies": {
-    "spell": "workspace:*",
     "@solidjs/h": "2.0.0-rc.17",
     "@solidjs/web": "2.0.0-rc.17",
     "@types/node": "^22.20.4",
@@ -339,6 +338,7 @@
     "esbuild": "^0.28.2",
     "playwright": "1.63.0",
     "solid-js": "2.0.0-rc.17",
+    "spell": "workspace:*",
     "typescript": "^7.0.2",
     "vite": "catalog:",
     "vite-plus": "catalog:",

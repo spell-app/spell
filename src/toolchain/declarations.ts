@@ -112,25 +112,31 @@ export class Declarations {
   }
 
   /**
-   * The programs of the repos BELOW `dir`'s package that it uses, lowest first:  what `spell-types --below` builds.
-   * - Found by the `workspace:` dependencies in each `package.json` (`spell`, `spell-ui` ...), through
-   *   `node_modules`.
+   * The programs of the packages BELOW `dir`'s that it reads, lowest first:  what `spell-types --below` builds.
+   * - A folder of the kit (its `package.json`'s `workspaces`, epic `repo-split` P20):  the kit's own, then each folder
+   *   before it in that list, lowest first (`ui/`:  the kit's, `parser/`'s).
+   * - Any other package (a project beside the kit, spell-brand):  the local packages it depends on (`workspace:`,
+   *   `portal:`, `link:` or `file:`), found through `node_modules`, theirs first;  a kit among them brings its folders
+   *   too, after its own.
    * - Only packages with `"spellTypes"`, each of its programs in its order.
    */
   static below(dir: string): Declarations[] {
     const repo = packageRootOf(realpathSync(resolve(dir)))
-    const order: string[] = []
-    const seen = new Set<string>()
-    const visit = (packageDir: string): void => {
-      if (seen.has(packageDir)) return
-      seen.add(packageDir)
-      for (const name of spellDependencies(packageDir)) {
-        const found = packageRootFor(name, packageDir)
-        if (found) visit(found)
+    const kit = kitAbove(repo)
+    const order: string[] = kit ? [kit, ...foldersOf(kit).slice(0, foldersOf(kit).indexOf(repo))] : []
+    if (!kit) {
+      const seen = new Set<string>()
+      const visit = (packageDir: string): void => {
+        if (seen.has(packageDir)) return
+        seen.add(packageDir)
+        for (const name of spellDependencies(packageDir)) {
+          const found = packageRootFor(name, packageDir)
+          if (found) visit(realpathSync(found))
+        }
+        order.push(packageDir, ...foldersOf(packageDir))
       }
-      order.push(packageDir)
+      visit(repo)
     }
-    visit(repo)
     return order
       .filter((packageDir) => packageDir !== repo && !isInside(packageDir, repo))
       .flatMap(
@@ -196,13 +202,33 @@ function packageRootOf(dir: string): string {
   }
 }
 
-/** The packages of this install `packageDir`'s `package.json` depends on (`workspace:` ones), every kind. */
+/**
+ * The LOCAL packages `packageDir`'s `package.json` depends on, every kind:  a workspace of this install, or a folder on
+ * this machine (`portal:`, `link:`, `file:`, as a project beside the kit names the kit).
+ */
 function spellDependencies(packageDir: string): string[] {
   const manifest = readJson5<Manifest>(join(packageDir, "package.json"))
   const all = { ...manifest.dependencies, ...manifest.devDependencies, ...manifest.peerDependencies }
   return Object.entries(all)
-    .filter(([, range]) => range.startsWith("workspace:"))
+    .filter(([, range]) => /^(workspace|portal|link|file):/.test(range))
     .map(([name]) => name)
+}
+
+/** The folders `packageDir`'s `package.json` lists as its `workspaces`, absolute, in order:  the kit's folders. */
+function foldersOf(packageDir: string): string[] {
+  const { workspaces } = readJson5<Manifest>(join(packageDir, "package.json"))
+  return (workspaces ?? [])
+    .filter((folder) => !folder.includes("*"))
+    .map((folder) => join(packageDir, folder))
+    .filter((folder) => existsSync(join(folder, "package.json")))
+}
+
+/** The kit `repo` is a folder of:  the nearest package above it that lists it in its `workspaces`;  else `undefined`. */
+function kitAbove(repo: string): string | undefined {
+  for (let at = dirname(repo); dirname(at) !== at; at = dirname(at)) {
+    if (existsSync(join(at, "package.json")) && foldersOf(at).includes(repo)) return at
+  }
+  return undefined
 }
 
 /** The TypeScript compiler's own script, this install's. */

@@ -8,8 +8,8 @@
 
 import type { Temporal } from "temporal-polyfill"
 
-// No alias reaches `package.json` (outside `src/`):  the one relative import.  Bundlers keep `version` alone.
-import { version } from "spell/ui/package.json"
+// The ONE package's version (epic `repo-split` P20):  `spell`'s own `package.json`.  Bundlers keep `version` alone.
+import { version } from "spell/package.json"
 import type { UIRuntime } from "./UIRuntime"
 
 ////////////////

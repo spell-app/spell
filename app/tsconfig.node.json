@@ -12,6 +12,11 @@
   "compilerOptions": {
     "target": "ES2020",
     "jsx": "react-jsx",
+    // The other folders by their built declarations, NOT their source (epic `repo-split` P20, Q59):  their `.tsx`
+    // is Solid's JSX, which this program's React JSX can't check.  So no `spell-source` here:  `spell-types --below`
+    // builds the kit's, parser's and ui's first;  this folder's own names still read its source (its `exports` have
+    // no `types`).
+    "customConditions": [],
     "jsxImportSource": "react",
     "types": ["node", "vite/client", "spell/toolchain/types"]
   },

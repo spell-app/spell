@@ -8,10 +8,10 @@ import { IMPORT_RULES, importNameFor } from "spell/toolchain/lint/imports"
 
 /**
  * The `spell/*` lint rule (`lint.imports.ts`, the toolchain's):  what it flags, and what it lets through.
- * - The rule reads where a file IS, so every case names its file (`at()`), in a made-up kit (`KIT`):
- *   the kit and three child repos, each one package with its code under ONE `src/`.
- * - Made up, not the kit on disk:  the rule finds a file's package by the nearest `package.json`,
- *   and the kit's CI clones no child repo.
+ * - The rules read where a file IS, so every case names its file (`at()`), in a made-up kit (`KIT`):
+ *   the kit and three of its folders (its `workspaces`, epic `repo-split` P20), each with its code under ONE `src/`,
+ *   and a project beside it.
+ * - Made up, not the kit on disk:  the rules find a file's package by the nearest `package.json`.
  */
 
 ////////////////
@@ -46,8 +46,8 @@ describe("spell/no-parent-import", () => {
       climbs("src/element/a.ts", `import { x } from "../util/string.ts"`, "spell/util/string"),
       climbs("src/element/a.ts", `import { U } from "../util"`, "spell/util"),
       climbs("tests/element/a.test.ts", `import { E } from "../../src/element/index.ts"`, "spell/element"),
-      climbs("ui/tests/tools/a.test.ts", `import { Tool } from "../../src/tools/Tool.ts"`, "spell-ui/tools/Tool"),
-      climbs("app/src/app/a.ts", "const m = await import(`../../../ui/src/index.ts`)", "spell-ui"),
+      climbs("ui/tests/tools/a.test.ts", `import { Tool } from "../../src/tools/Tool.ts"`, "spell/ui/tools/Tool"),
+      climbs("app/src/app/a.ts", "const m = await import(`../../../ui/src/index.ts`)", "spell/ui"),
       climbs("app/src/app/a.ts", `export * from "../lsp/index.ts"`, "spell/app/lsp"),
       climbs("app/tests/app/a.test.ts", `vi.mock("../../src/spaces/index.ts")`, "spell/app/spaces"),
       climbs(
@@ -69,15 +69,41 @@ describe("spell/no-parent-import", () => {
   })
 })
 
+describe("spell/no-upward-import", () => {
+  tester.run("no-upward-import", IMPORT_RULES["no-upward-import"], {
+    valid: [
+      // down:  a folder uses the kit, and the folders before it
+      at("app/src/app/a.ts", `import { UI } from "spell/ui/core"`),
+      at("app/tests/a.test.ts", `import { P } from "spell/parser/parser"`),
+      at("ui/src/a.ts", `import { E } from "spell/element"`),
+      at("src/server/a.ts", `import { kebabCase } from "spell/util/string"`),
+      // its own folder
+      at("ui/src/a.ts", `import { E } from "spell/ui/core"`),
+      // a library, a peer
+      at("parser/src/a.ts", `import chalk from "chalk"`),
+      at("parser/src/a.ts", `import { x } from "./b"`),
+      // a project beside the kit uses any of them
+      at("../lint-beside/src/a.ts", `import { UI } from "spell/app/app"`)
+    ],
+    invalid: [
+      upward("src/cli/a.ts", `import { UI } from "spell/ui/core"`, "ui", "the kit"),
+      upward("parser/src/a.ts", `import { UI } from "spell/ui/core"`, "ui", "parser"),
+      upward("ui/tests/a.test.ts", `vi.mock("spell/app/app")`, "app", "ui"),
+      upward("ui/vite.config.ts", "const m = await import(`spell/app/cli`)", "app", "ui")
+    ]
+  })
+})
+
 describe("importNameFor():  a file's import name, by where it is", () => {
   test("a file under a package's src/:  the package name + its path, no extension, no index", () => {
     expect(importNameFor(join(KIT, "src/util/string.ts"))).toEqual({ pkg: "spell", name: "spell/util/string" })
     expect(importNameFor(join(KIT, "src/element/index.ts"))).toEqual({ pkg: "spell", name: "spell/element" })
     expect(importNameFor(join(KIT, "ui/src/components/ui-button/UIButton.tsx"))).toEqual({
-      pkg: "spell-ui",
+      pkg: "spell/ui",
       name: "spell/ui/components/ui-button/UIButton"
     })
-    expect(importNameFor(join(KIT, "ui/src/index.ts"))).toEqual({ pkg: "spell-ui", name: "spell-ui" })
+    expect(importNameFor(join(KIT, "ui/src/index.ts"))).toEqual({ pkg: "spell/ui", name: "spell/ui" })
+    expect(importNameFor(join(`${KIT}/../lint-beside`, "src/a.ts"))).toEqual({ pkg: "beside", name: "beside/a" })
   })
   test("outside any src/:  none", () => {
     expect(importNameFor(join(KIT, "tools/repos.ts"))).toBeUndefined()
@@ -90,22 +116,31 @@ describe("importNameFor():  a file's import name, by where it is", () => {
 // ## Helpers
 ////////////////
 
-/** A made-up kit `spell`, holding three child repos:  a `package.json` each, all the rule reads. */
-const KIT = realpathSync(mkdtempSync(join(tmpdir(), "lint-imports-")))
-afterAll(() => rmSync(KIT, { recursive: true, force: true }))
-for (const [folder, name] of [
-  [".", "spell"],
-  ["spell-parser", "spell-parser"],
-  ["spell-ui", "spell-ui"],
-  ["spell-app", "spell-app"]
-]) {
+/**
+ * A made-up kit `spell`, its folders `parser/`, `ui/` and `app/`, and a project beside it:  a `package.json` each,
+ * all the rules read.
+ */
+const KIT = join(realpathSync(mkdtempSync(join(tmpdir(), "lint-imports-"))), "spell")
+afterAll(() => rmSync(join(KIT, ".."), { recursive: true, force: true }))
+for (const [folder, json] of [
+  [".", { name: "spell", workspaces: ["parser", "ui", "app"] }],
+  ["parser", { name: "spell-parser" }],
+  ["ui", { name: "spell-ui" }],
+  ["app", { name: "spell-app" }],
+  ["../lint-beside", { name: "beside" }]
+] as const) {
   mkdirSync(join(KIT, folder), { recursive: true })
-  writeFileSync(join(KIT, folder, "package.json"), JSON.stringify({ name }))
+  writeFileSync(join(KIT, folder, "package.json"), JSON.stringify(json))
 }
 
 /** A case:  `code`, in the file at `file` (from the made-up kit). */
 function at(file: string, code: string) {
   return { code, filename: join(KIT, file) }
+}
+
+/** A case `no-upward-import` flags once:  `target`'s, above `from`. */
+function upward(file: string, code: string, target: string, from: string) {
+  return { ...at(file, code), errors: [{ message: new RegExp(`is ${target}'s, above ${from}:`) }] }
 }
 
 /** A case the rule flags once, its message naming the import name `fix`. */

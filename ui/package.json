@@ -23,7 +23,7 @@
     "clean": "rm -rf ./.cache ./build ./dist ./dist-types ./coverage ./test-results ./vendor ./results ./src/tools/frameworks/solid/dist",
     "/////// CORRECTNESS": "",
     "review": "yarn ts && yarn lint:fix && yarn format && yarn test && echo '== REVIEW PASSED\n===========\n'",
-    "ts": "echo '>>>>>>>>>>>\\n>> RUNNING TSC' && spell-types --below && spell-types && tsc -p ./tests && tsc -p ./tests/cli && echo '<< TSC PASSED\\n'",
+    "ts": "echo '>>>>>>>>>>>\\n>> RUNNING TSC' && spell-types && tsc -p ./tests && tsc -p ./tests/cli && echo '<< TSC PASSED\\n'",
     "lint": "echo '>>>>>>>>>>>\\n>> LINTING WITH OXLINT' && vp lint --report-unused-disable-directives --max-warnings 0 src scripts site/_src && cd ./tests && vp lint --report-unused-disable-directives --max-warnings 0 . && echo '<< OXLINT PASSED\\n'",
     "lint:fix": "echo '>>>>>>>>>>>\\n>> LINTING WITH OXLINT --fix' && vp lint --fix src scripts site/_src && cd ./tests && vp lint --fix . && echo '<< OXLINT PASSED\\n'",
     "format": "echo '>>>>>>>>>>>\n>> FORMATTING WITH OXFMT' && vp fmt . && cd ./tests && vp fmt . && echo '<< OXFMT PASSED\n'",
@@ -77,7 +77,6 @@
     "temporal-polyfill": "^1.0.5"
   },
   "devDependencies": {
-    "spell": "workspace:*",
     "@custom-elements-manifest/analyzer": "^0.11.0",
     "@playwright/test": "1.63.0",
     "@solidjs/h": "2.0.0-rc.17",
@@ -95,6 +94,7 @@
     "lightningcss": "^1.33.0",
     "playwright": "1.63.0",
     "solid-js": "2.0.0-rc.17",
+    "spell": "workspace:*",
     "tsx": "4.20.3",
     "typescript": "^7.0.2",
     "vite": "catalog:",

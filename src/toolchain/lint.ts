@@ -95,7 +95,9 @@ export const lintBase = {
     // "ONE name per file";  epic `repo-split` P14).
     // - HERE, not in an `overrides` entry:  it holds for every file, so the kit's block and every package's
     //   (`packageLint()`) get it with the rest of `lintBase`, and it's on in tests too (`testLint` leaves it).
-    "spell/no-parent-import": "error"
+    "spell/no-parent-import": "error",
+    // An import up the kit's folders:  the kit, then its `workspaces` in order (epic `repo-split` P20)
+    "spell/no-upward-import": "error"
   }
 } satisfies OxlintConfig
 

@@ -10,6 +10,7 @@ import { definePlugin, defineRule, type ESTree, type Rule } from "vite-plus/lint
  * - Unlike `spell-ui/*` (`lint.patterns.ts`), which holds component files to Spell UI's patterns,
  *   this holds for EVERY file:  on in `lintBase` (`lint.ts`).
  * - Replaced `no-cross-package-import` and `no-cross-repo-alias` (P14), which knew each repo's layout and alias table.
+ * - `no-upward-import` (P20):  the kit's folders' order, down only, where the clone of each repo enforced it.
  */
 
 ////////////////
@@ -48,6 +49,40 @@ const noParentImport = defineRule({
       const target = path
       const named = importNameFor(resolve(dirname(file), target))
       if (named) context.report({ node, messageId: "climb", data: { path, pkg: named.pkg, name: named.name } })
+    })
+  }
+})
+
+/**
+ * An import that points UP the kit's folders (epic `repo-split` P20):  the kit's own `src/` is the bottom, then its
+ * folders in its `package.json`'s `workspaces` order (`parser`, `ui`, `epic`, `app`), each using only those below it.
+ * - It stands in for the clone that enforced it while they were repos of their own:  a repo only had the ones below.
+ * - `import { UI } from "spell/ui/core"` in `parser/src/` is up;  in `epic/src/`, down.
+ * - Every file of a folder counts as it:  its `src/`, tests, scripts and configs.
+ * - A file outside the kit (a project beside it, spell-brand) may use any of them, as any project of `spell` may.
+ */
+const noUpwardImport = defineRule({
+  meta: {
+    type: "problem",
+    docs: { description: "Imports point DOWN the kit's folders:  the kit's own, then its `workspaces`, in order" },
+    messages: {
+      up:
+        "`{{path}}` is {{target}}'s, above {{from}}:  imports point down the kit's folders ({{order}});  move what " +
+        "both need down, or this code up"
+    }
+  },
+  create(context) {
+    const place = placeOf(context.filename)
+    if (!place) return {}
+    return moduleVisitor((node, path) => {
+      const target = levelOf(place.kit, path)
+      if (target === undefined || target <= place.level) return
+      const names = ["the kit", ...place.kit.folders]
+      context.report({
+        node,
+        messageId: "up",
+        data: { path, target: names[target]!, from: names[place.level]!, order: names.join(", ") }
+      })
     })
   }
 })
@@ -105,20 +140,66 @@ export function importNameFor(path: string): { pkg: string; name: string } | und
   return { pkg: root.name, name: rest ? `${root.name}/${rest}` : root.name }
 }
 
-/** `packageRootOf()`'s answers, by folder. */
-const ROOTS = new Map<string, { dir: string; name: string } | undefined>()
+/** A kit:  its folder, its package's name, and its folders (`workspaces`), lowest first. */
+type Kit = { dir: string; name: string; folders: string[] }
 
-/** The package folder `dir` is in, and its name:  the nearest `package.json` up with a `name`;  `undefined`:  none. */
-function packageRootOf(dir: string): { dir: string; name: string } | undefined {
+/** Where file `file` sits in a kit:  the kit, and its level (0:  the kit's own;  `n`:  its `n`th folder). */
+function placeOf(file: string): { kit: Kit; level: number } | undefined {
+  const root = packageRootOf(dirname(file))
+  if (!root) return undefined
+  if (root.kit) return { kit: root.kit, level: root.kit.folders.indexOf(relative(root.kit.dir, root.dir)) + 1 }
+  const kit = kitAt(root.dir)
+  return kit ? { kit, level: 0 } : undefined
+}
+
+/** The level module path `path` names in `kit`:  `spell/ui/x` its folder's, `spell/x` the kit's;  else `undefined`. */
+function levelOf(kit: Kit, path: string): number | undefined {
+  if (path !== kit.name && !path.startsWith(`${kit.name}/`)) return undefined
+  const first = path.slice(kit.name.length + 1).split("/")[0]!
+  return kit.folders.indexOf(first) + 1
+}
+
+/** The kit at `dir`, when its `package.json` lists `workspaces` (its folders);  else `undefined`. */
+function kitAt(dir: string): Kit | undefined {
+  try {
+    const { name, workspaces } = JSON.parse(readFileSync(join(dir, "package.json"), "utf8")) as {
+      name?: string
+      workspaces?: unknown
+    }
+    if (!name || !Array.isArray(workspaces)) return undefined
+    return { dir, name, folders: workspaces.filter((each): each is string => typeof each === "string") }
+  } catch {
+    return undefined
+  }
+}
+
+/** `packageRootOf()`'s answers, by folder. */
+const ROOTS = new Map<string, PackageRoot | undefined>()
+
+/** A package's folder and the name its files are imported by;  `kit`:  the kit it's a folder of. */
+type PackageRoot = { dir: string; name: string; kit?: Kit }
+
+/**
+ * The package folder `dir` is in, and the name its files are imported by:  the nearest `package.json` up with a
+ * `name`;  `undefined`:  none.
+ * - A folder of a kit (one the package above it lists in its `workspaces`, epic `repo-split` P20) is the kit's:
+ *   `ui/src/core.ts` is `spell/ui/core`, never its own `package.json`'s `spell-ui/core`.
+ */
+function packageRootOf(dir: string): PackageRoot | undefined {
   if (ROOTS.has(dir)) return ROOTS.get(dir)
-  let found: { dir: string; name: string } | undefined
+  let found: PackageRoot | undefined
   for (let at = dir; dirname(at) !== at; at = dirname(at)) {
     const manifest = join(at, "package.json")
     if (!existsSync(manifest)) continue
     try {
       const { name } = JSON.parse(readFileSync(manifest, "utf8")) as { name?: string }
       if (name) {
-        found = { dir: at, name }
+        const kit = kitAt(dirname(at))
+        const folder = kit && relative(kit.dir, at).split(sep).join("/")
+        found =
+          kit && folder && kit.folders.includes(folder)
+            ? { dir: at, name: `${kit.name}/${folder}`, kit }
+            : { dir: at, name }
         break
       }
     } catch {
@@ -151,7 +232,8 @@ function isModuleCall(callee: ESTree.Node): boolean {
 
 /** The rule(s), by name:  `spell/<name>` in a config or a disable comment. */
 export const IMPORT_RULES = {
-  "no-parent-import": noParentImport
+  "no-parent-import": noParentImport,
+  "no-upward-import": noUpwardImport
 } satisfies Record<string, Rule>
 
 export default definePlugin({ meta: { name: "spell" }, rules: IMPORT_RULES })

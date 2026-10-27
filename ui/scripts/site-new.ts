@@ -42,13 +42,13 @@ import { STATUS_TEXT } from "spell/ui/tools/generatedFiles"
 import { SiteSections } from "./site-sections.ts"
 
 /**
- * The template, in spell-epic's `templates/` (epic `epic-eject` T11:  every template is the engine's), found by
- * PACKAGE through the kit's install, never by a path into its repo;  served at `/templates/spell-ui-docs.html`.
+ * The template, in the epic folder's `templates/` (epic `epic-eject` T11:  every template is the engine's), found
+ * through the ONE package `spell` (epic `repo-split` P20);  served at `/templates/spell-ui-docs.html`.
  * - Spell UI never imports spell-epic (it's above):  this only reads one of its files.
  */
 const TEMPLATE = path.join(
-  path.dirname(fileURLToPath(import.meta.resolve("spell/epic/package.json"))),
-  "templates/spell-ui-docs.html"
+  path.dirname(fileURLToPath(import.meta.resolve("spell/package.json"))),
+  "epic/templates/spell-ui-docs.html"
 )
 
 /** The template's own path prefix to the site's pages (it's served at `/templates/`, beside `/components/`). */
