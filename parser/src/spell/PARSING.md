@@ -1175,6 +1175,13 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
       each run of markup lines joined into one implicit fragment.
   - A tag's head may be named by a quoted name after its word in markup too, `<example "one counter">`:
     the parser's tokenizer reads it as `name="..."` (`quotedNameTags`).
+  - A COMMENT, `<!-- ... -->` (Owen, 2026-10-26), starting a line anywhere in the file:  a `SP.SpellxCommentToken` per
+    line, each a `CommentToken` as its `//` twin line is (`commentSymbol` `//`, its text without the marks).
+    - One over several lines keeps reading lines as the comment to its `-->` (`openComment`), and `breakIntoLines()`
+      puts each of its lines at its first line's indent, so they never make a block of their own.
+    - It ends the tags open deeper, as a `//` line does, but is never itself wrong where it sits.
+    - One never closed is `spellx-unclosed-comment`, on its first line.
+    - Inside markup it's the markup's own, a `P.JSXCommentToken` (below).
   - A line's closer may have a comment after it, `<property "value">1</>   // ace = 1`:
     the twin keeps it after its inline body, so it's the member's docstring, as on the twin line.
 - [`SpellxTwin`](SpellxTwin.ts), from `BlockLine.parse()`:  a tag's line, rewritten as its twin's tokens.
@@ -1202,6 +1209,16 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
     imports Spell UI.
   - No plain HTML:  a bare name nobody has is `spellx-unknown-component`;  a handler or `<for each>` inside an
     element, `spellx-tag-in-markup` (C29).
+- COMMENTS INSIDE MARKUP, in either form (`Tokenizer.markupComments`, on for spell;  Owen, 2026-10-26):
+  `<!-- ... -->` among an element's children, over any number of lines, and a line of its own starting `//`:
+  each ONE `P.JSXCommentToken`, which `jsxComment` ([SpellJSXComment.ts](rules/JSX/SpellJSXComment.ts)) parses to
+  nothing.
+  - Not in a raw-text tag (`<markdown>`, `<css>`):  their `<!--` and `//` are their text.
+  - `//` inside a line stays text (`http://...`).
+  - Between an if-chain's branches, and between a notebook's runs of markup (`SpellxTwin.joinMarkup()`), a comment
+    is skipped over, as blank text is.
+  - So spellx's `<!-- -->` in markup and code spell's `//` line compile the same;  `SX.CodeSpellWriter` writes one
+    alone on its lines as `//` lines, `SX.SpellxWriter` a drawing's `//` lines as `<!-- -->`.
 - An IF-CHAIN INSIDE MARKUP, in either form (epic `elemental-spell`, Owen 2026-10-25):
   `<text><if it is done>✓<otherwise>{its title}</></text>`.
   - The JSX tokenizer reads it (`Tokenizer.chainTags`, every language's words, `SP.CHAIN_TAGS`):  each branch a

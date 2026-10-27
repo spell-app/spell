@@ -447,6 +447,7 @@ exports[`rule names > spell's rules keep their names, modules and order 1`] = `
       "jsxText",
       "jsxEndTag",
       "jsxExpression",
+      "jsxComment",
     ],
     "list_guard": [
       "list_guard",
@@ -985,6 +986,7 @@ exports[`rule names > spell's rules keep their names, modules and order 1`] = `
     "its_property · properties · 1",
     "its_quoted_property · classes · 4",
     "jsxAttribute · JSX · 1",
+    "jsxComment · JSX · 1",
     "jsxElement · JSX · 1",
     "jsxEndTag · JSX · 1",
     "jsxExpression · JSX · 1",

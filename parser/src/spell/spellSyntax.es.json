@@ -5928,6 +5928,16 @@
           "aliases": ["jsxChild"]
         },
         {
+          "className": "SpellJSXComment",
+          "ruleNames": ["jsxComment"],
+          "internal": false,
+          "file": "src/spell/rules/JSX/SpellJSXComment.ts",
+          "line": 10,
+          "purpose": "A comment among markup's children, never drawn (epic `elemental-spell`, Owen 2026-10-26).",
+          "syntaxes": [],
+          "aliases": ["jsxChild"]
+        },
+        {
           "className": "SpellJSXAttribute",
           "ruleNames": ["jsxAttribute"],
           "internal": false,

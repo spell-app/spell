@@ -41,7 +41,10 @@ const SPELL_TOKENIZER_PROPS: P.TokenizerProps = {
   // an if-chain inside markup, `<text><if it is done>✓</></text>` (epic `elemental-spell`, Owen 2026-10-25):
   // each branch's elements are hidden while it isn't the one (`SpellJSX`);  every language's words, as its
   // `spellx.controls` say them (`SpellParser.test.ts` checks)
-  chainTags: CHAIN_TAGS
+  chainTags: CHAIN_TAGS,
+  // comments in markup, never drawn:  `<!-- ... -->`, and a line of its own starting `//`, in both forms (epic
+  // `elemental-spell`, Owen 2026-10-26)
+  markupComments: true
 }
 
 // Above the class:  read while this module is still loading (the built-in templates compile then)

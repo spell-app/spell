@@ -20,6 +20,7 @@ import { ExampleBlock } from "./ExampleBlock"
 import { MarkdownBlock } from "./MarkdownBlock"
 import { SpellJSX } from "./SpellJSX"
 import { SpellJSXAttribute } from "./SpellJSXAttribute"
+import { SpellJSXComment } from "./SpellJSXComment"
 import { SpellJSXEndTag } from "./SpellJSXEndTag"
 import { SpellJSXExpression } from "./SpellJSXExpression"
 import { SpellJSXFragment } from "./SpellJSXFragment"
@@ -410,3 +411,5 @@ JSXEs.addRule(SpellJSXText)
 JSXEs.addRule(SpellJSXEndTag)
 
 JSXEs.addRule(SpellJSXExpression)
+
+JSXEs.addRule(SpellJSXComment)

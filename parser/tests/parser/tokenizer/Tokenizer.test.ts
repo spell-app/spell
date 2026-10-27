@@ -3,6 +3,7 @@ import {
   CommentToken,
   IndentToken,
   JSXAttributeToken,
+  JSXCommentToken,
   JSXElementToken,
   JSXEndTagToken,
   JSXExpressionToken,
@@ -1211,6 +1212,51 @@ describe("tokenize() line / ch", () => {
   test("is absolute when tokenizing from a `start` offset", () => {
     const tokens = tokenizer.tokenize("skip\nme\nb", 5)
     expect(find(tokens, "b")).toMatchObject({ line: 2, ch: 0 })
+  })
+})
+
+describe("comments in markup (`markupComments`;  epic `elemental-spell`, Owen 2026-10-26)", () => {
+  const commenting = new Tokenizer({ markupComments: true, rawTextTags: ["markdown"] })
+  /** `text`'s one element's children, each as its class and value. */
+  const childrenOf = (tokenizer: Tokenizer, text: string) => {
+    const [element] = tokenizer.tokenize(text) as [JSXElementToken]
+    return (element.children ?? []).map((child) => [child.constructor.name, child.value])
+  }
+
+  test("`<!-- ... -->` among an element's children is ONE comment, its text without the marks", () => {
+    expect(childrenOf(commenting, "<div><!-- a note --><b/></div>")).toEqual([
+      ["JSXCommentToken", "a note"],
+      ["JSXElementToken", undefined],
+      ["JSXEndTagToken", undefined]
+    ])
+  })
+
+  test("over several lines, `<` and `{` inside it its own", () => {
+    const [element] = commenting.tokenize("<div>\n  <!--\n    a <b> {c}\n  -->\n  <b/>\n</div>") as [JSXElementToken]
+    const comment = element.children!.find((child) => child instanceof JSXCommentToken) as JSXCommentToken
+    expect(comment.value).toBe("a <b> {c}")
+    expect(comment.commentSymbol).toBe("<!--")
+    expect(comment.raw).toBe("<!--\n    a <b> {c}\n  -->")
+  })
+
+  test("a line of its own starting `//` is a comment;  `//` inside a line is text", () => {
+    expect(childrenOf(commenting, "<div>\n  // a note\n  see http://x\n</div>")).toEqual([
+      ["JSXTextToken", "\n  "],
+      ["JSXCommentToken", "a note"],
+      ["JSXTextToken", "\n  see http://x\n"],
+      ["JSXEndTagToken", undefined]
+    ])
+  })
+
+  test("a raw-text tag's `<!--` and `//` are its own text", () => {
+    expect(childrenOf(commenting, "<markdown>\n<!-- x -->\n// y\n</markdown>")).toEqual([
+      ["JSXTextToken", "\n<!-- x -->\n// y\n"],
+      ["JSXEndTagToken", undefined]
+    ])
+  })
+
+  test("off by default:  `//` is text", () => {
+    expect(childrenOf(new Tokenizer(), "<div>\n// y\n</div>")[0]).toEqual(["JSXTextToken", "\n// y\n"])
   })
 })
 

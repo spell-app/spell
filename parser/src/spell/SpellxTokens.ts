@@ -115,6 +115,17 @@ export type SpellxProseTokenProps = P.CommentTokenProps & {
   note?: SpellxNoteKind
 }
 
+/**
+ * A line of a spellx COMMENT, `<!-- ... -->`, on a line of its own (epic `elemental-spell`, Owen 2026-10-26):
+ * never drawn, anywhere in a file.
+ * - A comment over several lines is a token per line:  its first line's from `<!--`, its last line's to `-->`.
+ * - A `CommentToken` written as its code-spell twin is, `// ...`:  `commentSymbol` `//`, `value` its line's text
+ *   without `<!--` and `-->`.  So a comment above a member is its docstring, as `//` lines are.
+ * - Not prose:  a notebook draws its prose as markdown (`SP.SpellxProseToken`), never this.
+ * - Inside markup, a comment is the markup's own, `P.JSXCommentToken`.
+ */
+export class SpellxCommentToken extends P.CommentToken {}
+
 /** A spellx note:  a member's long `<description>`, or a `<comment>` among its lines. */
 type SpellxNoteKind = "description" | "comment"
 

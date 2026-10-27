@@ -117,6 +117,7 @@ reversible:`, and reads to the same tree as the English card.
   The twin's own words are the language's (`its {name} is one of {one-of}`, Spanish `su {name} es uno de {one-of}`);
   the name, the attribute values and a handler's phrase are the file's own tokens, right where they sit.
 - **Prose is markdown, headings included**, read as comments:  the lines just above a member are its docstring.
+- **A comment, `<!-- ... -->`, is one anywhere**, never drawn:  each of its lines reads as a `//` line.
   A `description=`, or a `<description>` first in a tag, is that tag's docstring too.
 - **A drawing's body is markup**, as plain Spell's is:  `<if>` chains and `<draw "front" />` placing a part are
   tags of their own between its elements.
@@ -235,11 +236,35 @@ Spell UI's `<ui-text>`, `<ui-button>`, `<es-boton>`.
 - `</>` closes any element, `<text>{its rank}</>`;  a name with `-` or a capital is left as written.
 - Plain Spell is untouched:  its drawings name tags as before.
 
-**Comments are attributes:**  a member's comment is its `description=`, its docstring as the comment above its twin is.
+**Comments are `<!-- ... -->`, anywhere:**  among a template's members, in a body, in a drawing's markup, in an
+`<html>` block, over as many lines as it takes.  Nothing in one is ever drawn.
+
+```html
+<draw>
+	<!-- GAP I23:  `right arrow` draws nothing yet -->
+	<segment>
+		<!--
+			Two buttons side by side:
+			the second one waits for the first.
+		-->
+		<button>Next</button>
+	</segment>
+</draw>
+```
+
+- Its plain Spell twin is a `//` line for each of its lines, so the two forms still compile the same.
+  Show as Code Spell writes it so;  `spell spellx convert` writes a drawing's `//` lines back as `<!-- -->`.
+- A comment just above a member is its docstring, as the `//` lines above its twin are.
+- Inside an element in plain Spell's markup too, a line of its own starting `//` is a comment, and so is
+  `<!-- ... -->`;  elsewhere in a line, `//` is text, `http://...`.
+- One never closed is an error on its first line:  without its `-->`, the rest of the file would be the comment.
+- Not inside a `<markdown>` block:  there `<!--` and `//` are the markdown's own text.
+- A `//` line still works outside markup, in a body of Spell, as every body is plain Spell.
+
+**A member's comment can be an attribute too:**  its `description=`, its docstring as the comment above its twin is.
 - Every member takes one:  a template, a property, an alias, an action, a drawing, a test, a menu, a group.
 - So does a handler, at the end of its phrase:  `<on click description="A click turns it over">`.
   `description=` and `group=` are its attributes there, never its phrase's words.
-- A comment inside a body is plain Spell's, `// ...`, as every body is.
 
 **Actions:**  `<action "deal" shortcut="meta+D" enabled-when="..." selected-when="..." icon="...">`, its details
 its attributes, each a line at the top of its twin's body (`- shortcut meta+D`).

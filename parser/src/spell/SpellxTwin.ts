@@ -260,11 +260,19 @@ export class SpellxTwin {
       item instanceof P.LineToken &&
       item.tokens.length > 0 &&
       item.tokens.every((token) => token instanceof P.JSXElementToken || token instanceof P.JSXFragmentToken)
+    // a comment line between two lines of markup (`<!-- ... -->`, `//`) is part of the run, and draws nothing
+    const isComment = (item: P.Token | undefined): boolean =>
+      item instanceof P.LineToken && item.tokens.length === 1 && item.tokens[0] instanceof P.CommentToken
     for (let index = 0; index < lines.length; index++) {
       let end = index
-      while (isMarkup(lines[end])) end++
+      while (isMarkup(lines[end])) {
+        end++
+        let after = end
+        while (isComment(lines[after])) after++
+        if (after > end && isMarkup(lines[after])) end = after
+      }
       if (end - index < 2) continue
-      const run = lines.slice(index, end) as P.LineToken[]
+      const run = (lines.slice(index, end) as P.LineToken[]).filter((line) => !isComment(line))
       const children = run.flatMap((line) =>
         line.tokens.flatMap((token) =>
           token instanceof P.JSXFragmentToken && token.record.isImplicit ? (token.children ?? []) : [token]
@@ -272,7 +280,7 @@ export class SpellxTwin {
       )
       const [first] = run
       const fragment = new P.JSXFragmentToken({ start: first!.start, raw: "", children, isImplicit: true })
-      lines.splice(index, run.length, new P.LineToken({ ...first!.record, tokens: [fragment] }))
+      lines.splice(index, end - index, new P.LineToken({ ...first!.record, tokens: [fragment] }))
     }
   }
 
