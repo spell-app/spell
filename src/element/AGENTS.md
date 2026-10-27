@@ -17,7 +17,7 @@ then [ui's AGENTS.md](../../spell-ui/AGENTS.md), "Solid authoring":  how an elem
   shadow events, hot reloading.
 - Its own repo, spell-element, from epic `repo-split` P8 (cut from spell-app with its history);
   merged into the kit with that history in P9.
-- Another repo imports it by its npm name, `spell/element` (`spell/element/timing` ...),
+- Another repo imports it by its npm name, `spell/element` (`spell/element/SkeletonText` ...),
   through the wildcard entry of the kit's `exports`.
 - The kit's own files import it by the same name (epic `repo-split` P14).
   - Its pack-module key is that name too, `spell/element`:
@@ -60,9 +60,10 @@ then [ui's AGENTS.md](../../spell-ui/AGENTS.md), "Solid authoring":  how an elem
     - `<ui-root pure>` turns the patch off
   - [HotDefinitions](HotDefinitions.ts):  hot reload of a set's elements:  in `yarn dev`, and on a page that swaps in a
     rebuilt component pack (Spell UI's `PackHotSwap`, epic `epic-engine` I116)
-  - [timing](timing.ts):  when to run something
+  - util's [timing](../util/timing.ts), re-exported:  when to run something
     - `afterSolidUpdate()`, `beforeNextPaint()`
-    - `soon()`, `after()`, `every()`
+    - `soon()`, `after()`, `every()`;  and waiting:  `waitUntil()`, `within()`
+    - this folder's until epic `coherence` P19:  util's now, so node code that may not load `spell/element` uses it
   - [SkeletonText](SkeletonText.ts):  a vocabulary's skeleton, written as one line of text, parsed in node
     - NOT in the barrel:  reached by path, `spell/element/SkeletonText`
     - Spell UI's (`src/vocabulary/`) until epic `repo-split` P10
@@ -172,7 +173,6 @@ As WWOD §4, plus:
   - `spell/element/elements.types` and `spell/element/vocabulary.types`:
     - where a set adds its names (below)
     - for node code that mustn't load the element layer (the vocabularies, the epics' definitions)
-  - `spell/element/timing`:  Spell UI's util barrel re-exports it
   - `spell/element/SkeletonText`:  node code that parses skeletons
   - `spell/element/HotDefinitions`:  the HMR plugin, [HotElements](../element-tools/HotElements.ts), injects it by its file path;
     Spell UI's `PackHotSwap` (its `spell-ui/hot` entry) imports it

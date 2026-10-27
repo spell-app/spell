@@ -619,6 +619,7 @@ And when you're in there:
 | [decorators.ts](src/util/decorators.ts) | `@proto`, `@protoMerged`, `@lazy`, `@once`, `forget()`, `@resets()` |
 | [class.ts](src/util/class.ts) | `hasOwnProp()`, `getSuperHierarchy()`, `hasDescriptor()` |
 | [string.ts](src/util/string.ts) | `kebabCase()`, `camelCase()`, `numberToWord()` (Fomantic's column words:  `4` is `"four"`), `levenshtein()`, `suggest()` |
+| [timing.ts](src/util/timing.ts) | when to run something:  `afterSolidUpdate()`, `beforeNextPaint()`, `soon()`, `after()`, `every()`;  waiting:  `waitUntil()`, `within()` |
 | [dom.ts](src/util/dom.ts) | `NodeType`, `byDocumentOrder()`, `isBrowser()`, `nextFrame()`, `whenDefined()`, `closestAcrossShadow()`, `flatParentFor()` |
 | [util.types.ts](src/util/util.types.ts) | `Constructor`, `AbstractClass`, `Prettify` |
 | [reactive/](src/util/reactive/) | the engine:  `cells.ts` (the page-wide context, tracking, `flushCells()`), `Cell`, `Derived`, `Reaction`, `extend.ts` (the records:  `getProp()` / `setProp()`, `getState()` / `setState()`, `reactiveObject()`, `typedJSON()`), `Schema`, `PropRules`, `decorators.ts` (`@prop`, `@state`, `@derived`), `bridges.ts` (`bridgeSolid()`, `observe()`) |

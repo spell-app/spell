@@ -255,8 +255,9 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
 - **Use it when:**  any request from a page or a client.  Callers never check `response.ok`.
 - **Flag:**  `response\.ok|\.ok\)` after a `fetch(`
 - **Score:**  `\b(response|answer|res)\.ok\b(?!\()|\(await fetch\([^)]*\)\)\.ok` · home `src/util/spell/$fetch.ts`
-  · not `spell-ui/src/`
+  · not `spell-ui/src/`, `src/server/liveClient.ts`
 - **Copies:**
+  - Fine:  `src/server/liveClient.ts`, served to pages as one function's text:  it imports nothing
   - the epic pages:  about a dozen reads checking `response.ok` themselves (sweep 1, epic-pages #1)
   - `--` in the app since epic `coherence` P14:  its runner and `editor.ts` ask `$fetch()` for `cache: "no-cache"`
   - NOT Spell UI:  `$fetch()` brings lodash and query-string into its bundles;  it has `fetchOk()` / `fetchText()`
@@ -283,12 +284,23 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
 ### Timing
 
 - **It is:**  `after(seconds, fn)`, `every(seconds, fn)`, `soon()`, `beforeNextPaint()`, `afterSolidUpdate()`
-  (`spell/element`, `src/element/timing.ts`):  the name says WHEN, each can be cancelled
-- **Use it when:**  anything later or repeated, in a page or on a server.
+  (`spell/util/timing`, `src/util/timing.ts`;  re-exported by `spell/element`):  the name says WHEN, each can be
+  cancelled;  and waiting:  `waitUntil(read, { timeout, every })` (until something is true), `within(promise, seconds)`
+  (a wait with a time limit)
+  - util's since epic `coherence` P19 (`spell/element`'s before):  imports nothing, so the kit's server and command
+    line, the parser's core and plain `node` may use it
+- **Use it when:**  anything later or repeated, or a wait, in a page or on a server.
   Spell UI's lint already fails a raw timer in a component.
 - **Flag:**  `setInterval\(|setTimeout\(`
-- **Score:**  `\b(setInterval|setTimeout)\(` · home `src/element/timing.ts`
+- **Score:**  `\b(setInterval|setTimeout)\(|from "node:timers/promises"|Atomics\.wait\(` · home `src/util/timing.ts`
+  · not `src/server/liveClient.ts`
 - **Copies:**  raw timers, outside Spell UI's components
+  - Fine:  `src/server/liveClient.ts`, served to pages as one function's text:  it imports nothing
+  - Fine:  `spell-epic/src/tool/InboxPoller.mjs`:  node's built-ins only, to stay small
+  - the node waits and timers sweep 2 found (epic-tools-kit #3, parser-app #2), left for after epic `repo-split` P20:
+    the kit's `PidFile`, `FileLock`, `LiveReload`, `CommandRun`, `BundleBuild`, `spell server`'s editor wait, `run.ts`'s
+    drain, `TaskList`;  spell-epic's `details.js`, `comments.ts`, `agents.ts`, `Parking`, `InboxCommands`, the window
+    script, `showRoutes`, `CheckoutServers`, the demo checks;  spell-app's `serveCommand.ts`, `runTarget.ts`
   - `spell-epic/src/answers/AnswerForm.ts`, `spell-epic/src/answers/RunForm.ts`,
     `spell-epic/src/answers/ChoicesForm.ts`
   - `spell-epic/src/review/ServerLink.ts`, `spell-epic/src/review/SendCountdown.ts`
@@ -654,10 +666,6 @@ code (epic `coherence`, Q4 and Q5).
 - **A file watcher:**  `LiveReload`'s watching half (debounce, ignore list), on its own, for the four raw watchers.
 - **Polling while the page is visible:**  `pollWhileVisible(fn, seconds)`, on `every()`, for any page.
   - The epic pages' copies use `ServerLink.watch()` (above) since epic `coherence` P9.
-- **Waiting until something is true** (node):  `waitUntil(read, { timeout, every })`:
-  `spell-epic/src/tools/details.js` (`waitForAnswer`), `spell-epic/src/tools/agents.ts` (`waitForRedirects`) and
-  `spell-epic/src/demo/check-test-run.mjs` (`waitFor`);  sweep 1 added eight more, the kit's `PidFile` and
-  `spell server` among them:  so its home is the kit.
 
 ## Fine as it is
 

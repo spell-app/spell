@@ -44,7 +44,7 @@ describe("spell/element", () => {
       import: "default"
     })
     const allowed =
-      /^(\.\/|\.$|spell\/element$|spell\/util\/(class|decorators|dom|string|util\.types)$|solid-js$|@solidjs\/web$)/
+      /^(\.\/|\.$|spell\/element$|spell\/util\/(class|decorators|dom|string|timing|util\.types)$|solid-js$|@solidjs\/web$)/
     const strays = Object.entries(sources).flatMap(([file, text]) =>
       [...text.matchAll(/^\s*(?:import|export)\b[^"']*?from\s+["']([^"']+)["']/gm)]
         .map((match) => match[1]!)

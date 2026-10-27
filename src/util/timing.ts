@@ -10,8 +10,13 @@
  *   - the name says WHEN `fn` runs, so a reader needn't know the event loop
  *   - `after()` and `every()` take SECONDS (`after(0.25, ...)`), not milliseconds
  *   - each returns a way to cancel, where one makes sense
- * - Plain JS, importing nothing:  safe to import anywhere, on a server too.
- *   Only `beforeNextPaint()` needs a browser to CALL.
+ * - And waiting:  `waitUntil(read, { timeout, every })` looks until something is true, `within(promise, seconds)` waits
+ *   for a promise at most so long
+ * - Plain JS, importing nothing:  safe to import anywhere, on a server too, and plain `node` loads it with its
+ *   extension (`spell/util/timing.ts`).  Only `beforeNextPaint()` needs a browser to CALL.
+ * - Its place:  util's generic files, so the kit's server and command line, the parser's core and every node tool may
+ *   use it;  `spell/element` re-exports it, as Spell UI's util barrel does (it was `spell/element`'s until epic
+ *   `coherence` P19)
  */
 
 ////////////////
@@ -108,3 +113,60 @@ export type CancelablePromise<T> = Promise<T> & {
   /** Stop the timer if it hasn't fired;  the promise rejects with an `AbortError`.  Does nothing after. */
   cancel(): void
 }
+
+////////////////
+// ## Waiting
+////////////////
+
+/**
+ * Wait until `read()` gives something truthy:  that value;  `undefined` once `timeout` seconds pass without one.
+ * - looks at once, then every `every` seconds (default 0.1), and once more at the deadline:  the wait between two
+ *   looks never runs past it
+ * - `read` may be async (`await waitUntil(() => server.status(), { timeout: 15 })`);  what it throws, this throws, so
+ *   a look that may fail catches its own error and answers `undefined`
+ * - for a server that starts, a process that ends, a lock that's free, a file that's written, an answer Owen gives
+ */
+export async function waitUntil<T>(
+  read: () => T | PromiseLike<T>,
+  { timeout, every = 0.1 }: WaitOptions
+): Promise<Truthy<T> | undefined> {
+  const deadline = Date.now() + timeout * 1000
+  for (;;) {
+    const value = await read()
+    if (value) return value as Truthy<T>
+    const left = deadline - Date.now()
+    if (left <= 0) return undefined
+    await after(Math.min(every, left / 1000))
+  }
+}
+
+/**
+ * Wait at most `seconds` for `promise`:  its value, or `undefined` when time runs out first.
+ * - what `promise` rejects with, this rejects with
+ * - its timer is cleared as soon as `promise` settles, so a quick answer leaves nothing running
+ * - `promise` carries on either way:  this only stops waiting for it
+ */
+export async function within<T>(promise: PromiseLike<T>, seconds: number): Promise<T | undefined> {
+  const timeUp = after(seconds)
+  try {
+    return await Promise.race([
+      promise,
+      timeUp.then(
+        () => undefined,
+        () => undefined
+      )
+    ])
+  } finally {
+    timeUp.cancel()
+  }
+}
+
+/**
+ * `waitUntil()`'s options, in seconds.
+ * - `timeout`:  how long to wait
+ * - `every`:  how long between two looks (default 0.1)
+ */
+export type WaitOptions = { timeout: number; every?: number }
+
+/** `T` without the values an `if` takes as false:  what `waitUntil()` answers with. */
+export type Truthy<T> = Exclude<T, false | 0 | "" | null | undefined>

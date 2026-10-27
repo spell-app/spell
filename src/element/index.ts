@@ -11,7 +11,7 @@
  * - `PartContext` and `OwnerContext`:  the generic content parts, and the elements they belong to
  * - `SpellSolid`:  the settings a set's runtime hands it as it loads (Spell UI's, as `spell-ui/core` loads)
  * - the vocabulary's types (`ComponentVocabulary` ...)
- * - `timing`:  when to run something (`afterSolidUpdate()`, `after()` ...)
+ * - `spell/util/timing`:  when to run something (`afterSolidUpdate()`, `after()`, `waitUntil()` ...), re-exported
  * - `spell/util`'s GENERIC helpers, as `spell-ui/util` has them (`@proto`, `@lazy`, `camelCase()` ...):
  *   a component file reads them through `E` too (`@E.proto`)
  * - It imports only `spell/util`'s generic files and Solid:  NEVER Spell UI, or any other package.
@@ -32,11 +32,11 @@ export * from "spell/util/class"
 export * from "spell/util/decorators"
 export * from "spell/util/dom"
 export * from "spell/util/string"
+export * from "spell/util/timing"
 export * from "spell/util/util.types"
 
 export * from "./vocabulary.types"
 export * from "./elements.types"
-export * from "./timing"
 export * from "./SpellSolid"
 
 export * from "./Reactive"
