@@ -52,8 +52,8 @@
               EXAMPLES:  ours, no Fomantic page (epic `property-editor` P4).
               - Each editor's `schema` and `value` are JSON attributes:  no script.
             -->
-            <ui-section id="examples-types" label="Types" sticky collapsible dividing>
-              <ui-section id="examples-types-from-a-schema" label="From a schema" sticky collapsible dividing>
+            <ui-section id="examples-types" label="Types" sticky="stack" collapsible dividing>
+              <ui-section id="examples-types-from-a-schema" label="From a schema" sticky="stack" collapsible dividing>
                 <ui-example
                   description="An empty editor draws one property per attribute of its `schema`, each with the control its type calls for, bound to `value`.  Type, tick, and watch the Bound object box."
                 >
@@ -70,7 +70,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-types-laid-out" label="Laid out" sticky collapsible dividing>
+              <ui-section id="examples-types-laid-out" label="Laid out" sticky="stack" collapsible dividing>
                 <ui-example
                   description="Lay it out with `<ui-property-group>`s and `<ui-property>`s.  Groups open and close, `as` picks a control, and `hint` goes under it;  a dotted `name` reaches into a nested thing.  The title is `label`, which draws a section around it."
                 >
@@ -97,7 +97,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-types-rules" label="Rules" sticky collapsible dividing>
+              <ui-section id="examples-types-rules" label="Rules" sticky="stack" collapsible dividing>
                 <ui-example
                   description="A schema's `rules` are checked as you leave each field (`validate=&quot;on leave&quot;`), each with its own message when it has one.  A spell type's rules arrive in this shape:  `- its version must match &quot;^\d+\.\d+\.\d+$&quot;, with suggestion &quot;Write it like 1.2.3&quot;`.  Clear the name, or type a letter into the version."
                 >
@@ -118,8 +118,8 @@
               </ui-section>
             </ui-section>
 
-            <ui-section id="examples-pages" label="Pages" sticky collapsible dividing>
-              <ui-section id="examples-pages-from-a-page" label="From a page" sticky collapsible dividing>
+            <ui-section id="examples-pages" label="Pages" sticky="stack" collapsible dividing>
+              <ui-section id="examples-pages-from-a-page" label="From a page" sticky="stack" collapsible dividing>
                 <ui-example
                   description="`source` loads the layout from a saved page, `Theme.editor.html`:  plain markup, its groups and properties, which the page holds instead of the editor.  `select` would take only part of it."
                 >
@@ -137,8 +137,8 @@
               </ui-section>
             </ui-section>
 
-            <ui-section id="examples-binding" label="Binding" sticky collapsible dividing>
-              <ui-section id="examples-binding-save-and-cancel" label="Save and Cancel" sticky collapsible dividing>
+            <ui-section id="examples-binding" label="Binding" sticky="stack" collapsible dividing>
+              <ui-section id="examples-binding-save-and-cancel" label="Save and Cancel" sticky="stack" collapsible dividing>
                 <ui-example
                   description="`apply=&quot;on save&quot;` holds every edit until Save;  Cancel drops them.  A property holding an edit has `:state(changed)`."
                 >
@@ -156,7 +156,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-binding-many-things" label="Many things" sticky collapsible dividing>
+              <ui-section id="examples-binding-many-things" label="Many things" sticky="stack" collapsible dividing>
                 <ui-example
                   description="A list as `value` edits every thing in it:  a property shows the value they agree on, else blank and Mixed.  A write sets all of them."
                 >
@@ -176,7 +176,7 @@
 
           <ui-tab value="usage" label="Usage">
             <!-- USAGE:  how to use it, the registry, accessibility. -->
-            <ui-section id="usage-using-it" label="Using it" sticky collapsible dividing>
+            <ui-section id="usage-using-it" label="Using it" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   A `<ui-property-editor>` is a [`<ui-form>`](ui-form.html) drawn from a SCHEMA:
@@ -200,7 +200,7 @@
                 </script>
               </ui-markdown>
             </ui-section>
-            <ui-section id="usage-controls-choices-and-rules" label="Controls, choices and rules" sticky collapsible dividing>
+            <ui-section id="usage-controls-choices-and-rules" label="Controls, choices and rules" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   `UI.propertyControls` is the page's registry of what properties are drawn and read with:
@@ -222,7 +222,7 @@
                 </script>
               </ui-code>
             </ui-section>
-            <ui-section id="usage-accessibility" label="Accessibility" sticky collapsible dividing>
+            <ui-section id="usage-accessibility" label="Accessibility" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   - Each property names its control after its label, and its errors are an alert.
@@ -234,35 +234,35 @@
 
           <ui-tab value="api" label="API">
             <!-- API:  generated from the vocabularies (`docs/__data/components.json5`);  nothing to write. -->
-            <ui-section id="api-tags" label="Tags" sticky collapsible dividing>
+            <ui-section id="api-tags" label="Tags" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-property-editor" only="tags"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-attributes" label="Attributes" sticky collapsible dividing>
+            <ui-section id="api-attributes" label="Attributes" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-property-editor" only="attributes"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-properties" label="Properties" sticky collapsible dividing>
+            <ui-section id="api-properties" label="Properties" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-property-editor" only="properties"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-events" label="Events" sticky collapsible dividing>
+            <ui-section id="api-events" label="Events" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-property-editor" only="events"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-slots" label="Slots" sticky collapsible dividing>
+            <ui-section id="api-slots" label="Slots" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-property-editor" only="slots"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-parts" label="Parts" sticky collapsible dividing>
+            <ui-section id="api-parts" label="Parts" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-property-editor" only="parts"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-states" label="States" sticky collapsible dividing>
+            <ui-section id="api-states" label="States" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-property-editor" only="states"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-texts" label="Texts" sticky collapsible dividing>
+            <ui-section id="api-texts" label="Texts" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-property-editor" only="texts"></ui-docs-api>
             </ui-section>
           </ui-tab>

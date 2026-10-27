@@ -59,8 +59,8 @@
               it on those pages):  the old page's content, restyled.  Every example is an item inside its owner, which loads its
               own family;  the owners' pages show them in full.
             -->
-            <ui-section id="examples-types" label="Types" sticky collapsible dividing>
-              <ui-section id="examples-types-in-a-dropdown" label="In a dropdown" sticky collapsible dividing>
+            <ui-section id="examples-types" label="Types" sticky="stack" collapsible dividing>
+              <ui-section id="examples-types-in-a-dropdown" label="In a dropdown" sticky="stack" collapsible dividing>
                 <ui-example
                   description="Inside a dropdown an item is data:  the dropdown reads its `value`, text, `icon`, `flag`, `description` and `selected`, and draws the option rows itself."
                 >
@@ -72,7 +72,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-types-in-a-list" label="In a list" sticky collapsible dividing>
+              <ui-section id="examples-types-in-a-list" label="In a list" sticky="stack" collapsible dividing>
                 <ui-example description="Inside a list an item is a list row.">
                   <ui-list divided>
                     <ui-item icon="users">Friends</ui-item>
@@ -82,7 +82,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-types-in-a-menu" label="In a menu" sticky collapsible dividing>
+              <ui-section id="examples-types-in-a-menu" label="In a menu" sticky="stack" collapsible dividing>
                 <ui-example description="Inside a menu an item is a menu item.">
                   <ui-menu appearance="pointing" aria-label="Item in a menu demo">
                     <ui-item link="#inbox" selected>Inbox</ui-item>
@@ -92,7 +92,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-types-in-an-items-view" label="In an Items view" sticky collapsible dividing>
+              <ui-section id="examples-types-in-an-items-view" label="In an Items view" sticky="stack" collapsible dividing>
                 <ui-example
                   description="Inside `<ui-items>` an item is a media object:  its `image` beside a `<ui-content>` of header, meta, description and extra."
                 >
@@ -112,7 +112,7 @@
               </ui-section>
             </ui-section>
 
-            <ui-section id="examples-content" label="Content" sticky collapsible dividing>
+            <ui-section id="examples-content" label="Content" sticky="stack" collapsible dividing>
               <ui-section
                 id="examples-content-link-button-or-block"
                 label="Link, button or block"
@@ -131,7 +131,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-content-icon-and-image" label="Icon and image" sticky collapsible dividing>
+              <ui-section id="examples-content-icon-and-image" label="Icon and image" sticky="stack" collapsible dividing>
                 <ui-example
                   description="`icon` takes an icon name, the `icon` slot any glyph, and `image` a URL shown as an avatar."
                 >
@@ -143,7 +143,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-content-content-parts" label="Content parts" sticky collapsible dividing>
+              <ui-section id="examples-content-content-parts" label="Content parts" sticky="stack" collapsible dividing>
                 <ui-example
                   description="An item can hold a `<ui-content>` with a `<ui-header>` and `<ui-description>`:  they take the list's look."
                 >
@@ -218,8 +218,8 @@
               </ui-section>
             </ui-section>
 
-            <ui-section id="examples-states" label="States" sticky collapsible dividing>
-              <ui-section id="examples-states-selected" label="Selected" sticky collapsible dividing>
+            <ui-section id="examples-states" label="States" sticky="stack" collapsible dividing>
+              <ui-section id="examples-states-selected" label="Selected" sticky="stack" collapsible dividing>
                 <ui-example
                   description="`selected` marks the chosen item:  the dropdown's value, or the list's or menu's current item.  Fomantic's word, `active`, works too in lists and menus."
                 >
@@ -234,7 +234,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-states-disabled" label="Disabled" sticky collapsible dividing>
+              <ui-section id="examples-states-disabled" label="Disabled" sticky="stack" collapsible dividing>
                 <ui-example description="A disabled item can't be chosen or followed.">
                   <ui-list appearance="link">
                     <ui-item link="#disabled">Enabled</ui-item>
@@ -248,8 +248,8 @@
               </ui-section>
             </ui-section>
 
-            <ui-section id="examples-variations" label="Variations" sticky collapsible dividing>
-              <ui-section id="examples-variations-colored" label="Colored" sticky collapsible dividing>
+            <ui-section id="examples-variations" label="Variations" sticky="stack" collapsible dividing>
+              <ui-section id="examples-variations-colored" label="Colored" sticky="stack" collapsible dividing>
                 <ui-example description="In a menu, an item's `color` tints it while selected.">
                   <ui-menu appearance="pointing" aria-label="Colored item demo">
                     <ui-item link="#colored" color="red" selected>Red</ui-item>
@@ -259,7 +259,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-variations-position" label="Position" sticky collapsible dividing>
+              <ui-section id="examples-variations-position" label="Position" sticky="stack" collapsible dividing>
                 <ui-example
                   description='In a menu, `position="right"` pushes an item (and those after it) to the far end.'
                 >
@@ -270,7 +270,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-variations-fitted" label="Fitted" sticky collapsible dividing>
+              <ui-section id="examples-variations-fitted" label="Fitted" sticky="stack" collapsible dividing>
                 <ui-example
                   description='In a menu, `padding="none"` takes away an item’s padding;  `none-x` or `none-y` keeps the other axis.'
                 >
@@ -286,7 +286,7 @@
 
           <ui-tab value="usage" label="Usage">
             <!-- USAGE:  how to use it (attributes in practice, events, framework snippets), keyboard, accessibility. -->
-            <ui-section id="usage-using-it" label="Using it" sticky collapsible dividing>
+            <ui-section id="usage-using-it" label="Using it" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   Fomantic shares one `.item` between dropdowns, lists and menus, and so does this library: there is one
@@ -307,7 +307,7 @@
               </ui-markdown>
             </ui-section>
 
-            <ui-section id="usage-events" label="Events" sticky collapsible dividing>
+            <ui-section id="usage-events" label="Events" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   An item fires no events of its own: its list or menu fires `ui-select` when a link or button item is activated
@@ -323,7 +323,7 @@
               </ui-code>
             </ui-section>
 
-            <ui-section id="usage-keyboard" label="Keyboard" sticky collapsible dividing>
+            <ui-section id="usage-keyboard" label="Keyboard" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   - A link or button item is a real `<a href>` or `<button>`: **Tab** reaches it, **Enter** follows or clicks it
@@ -335,7 +335,7 @@
               </ui-markdown>
             </ui-section>
 
-            <ui-section id="usage-accessibility" label="Accessibility" sticky collapsible dividing>
+            <ui-section id="usage-accessibility" label="Accessibility" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   - In a list the item is a `listitem`; in an `interactive` menu its box is a `menuitem` and the item itself has
@@ -356,26 +356,26 @@
 
           <ui-tab value="api" label="API">
             <!-- API:  generated from the vocabularies (`docs/__data/components.json5`);  nothing to write. -->
-            <ui-section id="api-attributes" label="Attributes" sticky collapsible dividing>
+            <ui-section id="api-attributes" label="Attributes" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-item" only="attributes"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-slots" label="Slots" sticky collapsible dividing>
+            <ui-section id="api-slots" label="Slots" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-item" only="slots"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-parts" label="Parts" sticky collapsible dividing>
+            <ui-section id="api-parts" label="Parts" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-item" only="parts"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-states" label="States" sticky collapsible dividing>
+            <ui-section id="api-states" label="States" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-item" only="states"></ui-docs-api>
             </ui-section>
           </ui-tab>
 
           <ui-tab value="theming" label="Theming">
             <!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
-            <ui-section id="theming-tokens" label="Tokens" sticky collapsible dividing>
+            <ui-section id="theming-tokens" label="Tokens" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   An item has no tokens of its own: its look comes from its owner, so theme it through the list, menu, dropdown or
@@ -398,7 +398,7 @@
               <ui-docs-tokens family="ui-item" playground></ui-docs-tokens>
             </ui-section>
 
-            <ui-section id="theming-themes" label="Themes" sticky collapsible dividing>
+            <ui-section id="theming-themes" label="Themes" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   No theme restyles items directly: a theme that restyles lists, menus or dropdowns restyles their items. The theme

@@ -19447,15 +19447,15 @@ export interface UIPanelAttributes {
    */
   "prop:foldIcon"?: "start" | "end"
   /**
-   * The title bar sticks while the section is on screen;  a sticky section inside another sticks just below its title.
-   * - takes:  flag (present / absent)
+   * The title bar sticks while the section is on screen;  a sticky section inside another sticks just below its title.  `sticky="stack"`:  the titles read as one stack of rounded bars, as the docs pages' sections do -- each level a step further in (`--ui-section-stack-reach`, `--ui-section-stack-step`), a section's first nested title tucked square under its own, a nested title stuck under its parent's a heavy round (the theme's large radius), and closed sections one after another flush, ONE group, round only at its top and bottom.  A plain `sticky` section right inside a stacked one joins its stack (not through another element, an example's).
+   * - takes:  flag, or `stack`
    */
-  sticky?: boolean | ""
+  sticky?: boolean | "" | "stack"
   /**
    * `sticky`, as the DOM element's property.
    * @deprecated write `sticky` -- `prop:` stays only for compiled spell
    */
-  "prop:sticky"?: boolean | ""
+  "prop:sticky"?: boolean | "" | "stack"
   /**
    * With `sticky`:  pixels between the top edge and a TOP-LEVEL section's stuck title (e.g. a page header's height);  nested sections work theirs out.
    * - takes:  number
@@ -19542,8 +19542,8 @@ export interface UIPanelAttributes {
    */
   "prop:block"?: boolean | ""
   /**
-   * The look, several words at once:  `bordered` (a box around the section, as a segment), `styled` (boxed as a styled accordion:  a tinted title bar over padded content), `raised` (with a box:  lifted with a shadow), `basic` (no box, rule or tint, whatever else is set).  Old names:  `bordered`, `styled`, `raised`, `basic`.
-   * - takes:  space-separated:  `bordered` · `styled` · `raised` · `basic`
+   * The look, several words at once:  `bordered` (a box around the section, as a segment), `styled` (boxed as a styled accordion:  a tinted title bar over padded content), `raised` (with a box:  lifted with a shadow), `basic` (no box, rule or tint, whatever else is set), `drawer` (the title a raised bar, the content a tinted panel attached under it that rolls open and closed, as an example's code under its demo).  Old names:  `bordered`, `styled`, `raised`, `basic`.
+   * - takes:  space-separated:  `bordered` · `styled` · `raised` · `basic` · `drawer`
    */
   appearance?: string
   /**
@@ -22331,15 +22331,15 @@ export interface UIPropertyEditorAttributes {
    */
   "prop:foldIcon"?: "start" | "end"
   /**
-   * The title bar sticks while the section is on screen;  a sticky section inside another sticks just below its title.
-   * - takes:  flag (present / absent)
+   * The title bar sticks while the section is on screen;  a sticky section inside another sticks just below its title.  `sticky="stack"`:  the titles read as one stack of rounded bars, as the docs pages' sections do -- each level a step further in (`--ui-section-stack-reach`, `--ui-section-stack-step`), a section's first nested title tucked square under its own, a nested title stuck under its parent's a heavy round (the theme's large radius), and closed sections one after another flush, ONE group, round only at its top and bottom.  A plain `sticky` section right inside a stacked one joins its stack (not through another element, an example's).
+   * - takes:  flag, or `stack`
    */
-  sticky?: boolean | ""
+  sticky?: boolean | "" | "stack"
   /**
    * `sticky`, as the DOM element's property.
    * @deprecated write `sticky` -- `prop:` stays only for compiled spell
    */
-  "prop:sticky"?: boolean | ""
+  "prop:sticky"?: boolean | "" | "stack"
   /**
    * With `sticky`:  pixels between the top edge and a TOP-LEVEL section's stuck title (e.g. a page header's height);  nested sections work theirs out.
    * - takes:  number
@@ -22416,8 +22416,8 @@ export interface UIPropertyEditorAttributes {
    */
   "prop:block"?: boolean | ""
   /**
-   * The look, several words at once:  `bordered` (a box around the section, as a segment), `styled` (boxed as a styled accordion:  a tinted title bar over padded content), `raised` (with a box:  lifted with a shadow), `basic` (no box, rule or tint, whatever else is set).  Old names:  `bordered`, `styled`, `raised`, `basic`.
-   * - takes:  space-separated:  `bordered` · `styled` · `raised` · `basic`
+   * The look, several words at once:  `bordered` (a box around the section, as a segment), `styled` (boxed as a styled accordion:  a tinted title bar over padded content), `raised` (with a box:  lifted with a shadow), `basic` (no box, rule or tint, whatever else is set), `drawer` (the title a raised bar, the content a tinted panel attached under it that rolls open and closed, as an example's code under its demo).  Old names:  `bordered`, `styled`, `raised`, `basic`.
+   * - takes:  space-separated:  `bordered` · `styled` · `raised` · `basic` · `drawer`
    */
   appearance?: string
   /**
@@ -22909,15 +22909,15 @@ export interface UIPropertyGroupAttributes {
    */
   "prop:foldIcon"?: "start" | "end"
   /**
-   * The title bar sticks while the section is on screen;  a sticky section inside another sticks just below its title.
-   * - takes:  flag (present / absent)
+   * The title bar sticks while the section is on screen;  a sticky section inside another sticks just below its title.  `sticky="stack"`:  the titles read as one stack of rounded bars, as the docs pages' sections do -- each level a step further in (`--ui-section-stack-reach`, `--ui-section-stack-step`), a section's first nested title tucked square under its own, a nested title stuck under its parent's a heavy round (the theme's large radius), and closed sections one after another flush, ONE group, round only at its top and bottom.  A plain `sticky` section right inside a stacked one joins its stack (not through another element, an example's).
+   * - takes:  flag, or `stack`
    */
-  sticky?: boolean | ""
+  sticky?: boolean | "" | "stack"
   /**
    * `sticky`, as the DOM element's property.
    * @deprecated write `sticky` -- `prop:` stays only for compiled spell
    */
-  "prop:sticky"?: boolean | ""
+  "prop:sticky"?: boolean | "" | "stack"
   /**
    * With `sticky`:  pixels between the top edge and a TOP-LEVEL section's stuck title (e.g. a page header's height);  nested sections work theirs out.
    * - takes:  number
@@ -23004,8 +23004,8 @@ export interface UIPropertyGroupAttributes {
    */
   "prop:block"?: boolean | ""
   /**
-   * The look, several words at once:  `bordered` (a box around the section, as a segment), `styled` (boxed as a styled accordion:  a tinted title bar over padded content), `raised` (with a box:  lifted with a shadow), `basic` (no box, rule or tint, whatever else is set).  Old names:  `bordered`, `styled`, `raised`, `basic`.
-   * - takes:  space-separated:  `bordered` · `styled` · `raised` · `basic`
+   * The look, several words at once:  `bordered` (a box around the section, as a segment), `styled` (boxed as a styled accordion:  a tinted title bar over padded content), `raised` (with a box:  lifted with a shadow), `basic` (no box, rule or tint, whatever else is set), `drawer` (the title a raised bar, the content a tinted panel attached under it that rolls open and closed, as an example's code under its demo).  Old names:  `bordered`, `styled`, `raised`, `basic`.
+   * - takes:  space-separated:  `bordered` · `styled` · `raised` · `basic` · `drawer`
    */
   appearance?: string
   /**
@@ -26465,15 +26465,15 @@ export interface UISectionAttributes {
    */
   "prop:foldIcon"?: "start" | "end"
   /**
-   * The title bar sticks while the section is on screen;  a sticky section inside another sticks just below its title.
-   * - takes:  flag (present / absent)
+   * The title bar sticks while the section is on screen;  a sticky section inside another sticks just below its title.  `sticky="stack"`:  the titles read as one stack of rounded bars, as the docs pages' sections do -- each level a step further in (`--ui-section-stack-reach`, `--ui-section-stack-step`), a section's first nested title tucked square under its own, a nested title stuck under its parent's a heavy round (the theme's large radius), and closed sections one after another flush, ONE group, round only at its top and bottom.  A plain `sticky` section right inside a stacked one joins its stack (not through another element, an example's).
+   * - takes:  flag, or `stack`
    */
-  sticky?: boolean | ""
+  sticky?: boolean | "" | "stack"
   /**
    * `sticky`, as the DOM element's property.
    * @deprecated write `sticky` -- `prop:` stays only for compiled spell
    */
-  "prop:sticky"?: boolean | ""
+  "prop:sticky"?: boolean | "" | "stack"
   /**
    * With `sticky`:  pixels between the top edge and a TOP-LEVEL section's stuck title (e.g. a page header's height);  nested sections work theirs out.
    * - takes:  number
@@ -26560,8 +26560,8 @@ export interface UISectionAttributes {
    */
   "prop:block"?: boolean | ""
   /**
-   * The look, several words at once:  `bordered` (a box around the section, as a segment), `styled` (boxed as a styled accordion:  a tinted title bar over padded content), `raised` (with a box:  lifted with a shadow), `basic` (no box, rule or tint, whatever else is set).  Old names:  `bordered`, `styled`, `raised`, `basic`.
-   * - takes:  space-separated:  `bordered` · `styled` · `raised` · `basic`
+   * The look, several words at once:  `bordered` (a box around the section, as a segment), `styled` (boxed as a styled accordion:  a tinted title bar over padded content), `raised` (with a box:  lifted with a shadow), `basic` (no box, rule or tint, whatever else is set), `drawer` (the title a raised bar, the content a tinted panel attached under it that rolls open and closed, as an example's code under its demo).  Old names:  `bordered`, `styled`, `raised`, `basic`.
+   * - takes:  space-separated:  `bordered` · `styled` · `raised` · `basic` · `drawer`
    */
   appearance?: string
   /**

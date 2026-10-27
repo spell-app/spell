@@ -119,10 +119,16 @@ export const sectionVocabulary = {
     {
       name: "sticky",
       group: "behaviour",
-      kind: "keyOnly",
+      kind: "keyOrValueAndKey",
+      values: ["stack"],
       description:
         "The title bar sticks while the section is on screen;  a sticky section inside another sticks just below " +
-        "its title."
+        'its title.  `sticky="stack"`:  the titles read as one stack of rounded bars, as the docs pages\' sections ' +
+        "do -- each level a step further in (`--ui-section-stack-reach`, `--ui-section-stack-step`), a section's " +
+        "first nested title tucked square under its own, a nested title stuck under its parent's a heavy round " +
+        "(the theme's large radius), and closed sections one after another flush, ONE group, round only at its top " +
+        "and bottom.  A plain `sticky` section right inside a stacked one joins its stack (not through another element, " +
+        "an example's)."
     },
     {
       name: "offset",
@@ -151,7 +157,7 @@ export const sectionVocabulary = {
       name: "appearance",
       group: "appearance",
       kind: "multiple",
-      values: ["bordered", "styled", "raised", "basic"],
+      values: ["bordered", "styled", "raised", "basic", "drawer"],
       // each word draws itself:  no key after it
       classes: {},
       replaces: [
@@ -163,8 +169,9 @@ export const sectionVocabulary = {
       description:
         "The look, several words at once:  `bordered` (a box around the section, as a segment), `styled` (boxed " +
         "as a styled accordion:  a tinted title bar over padded content), `raised` (with a box:  lifted with a " +
-        "shadow), `basic` (no box, rule or tint, whatever else is set).  Old names:  `bordered`, `styled`, " +
-        "`raised`, `basic`."
+        "shadow), `basic` (no box, rule or tint, whatever else is set), `drawer` (the title a raised bar, the " +
+        "content a tinted panel attached under it that rolls open and closed, as an example's code under its demo).  " +
+        "Old names:  `bordered`, `styled`, `raised`, `basic`."
     },
     {
       name: "padding",
@@ -292,6 +299,21 @@ export const sectionVocabulary = {
   states: [
     { name: "collapsed", description: "Closed." },
     { name: "stuck", description: "With `sticky`:  the title bar is stuck to the top." },
+    { name: "stacked", description: 'With `sticky="stack"` (or `sticky` right inside a stacked section):  a bar of the stack.' },
+    {
+      name: "tucked",
+      description: "Stacked:  the first thing in its enclosing section, its title right under that section's, square on top."
+    },
+    {
+      name: "tucks",
+      description: "Stacked:  its first nested section is tucked under its title, so its content has no room on top."
+    },
+    {
+      name: "after-closed",
+      description: "Stacked:  right after a closed section, nothing between:  no room above it."
+    },
+    { name: "joins-above", description: "Stacked and closed, right after a closed one:  square on top, in its group." },
+    { name: "joins-below", description: "Stacked and closed, right before a closed one:  square below, in its group." },
     { name: "animated", description: "Opens and closes with a height transition (`interpolate-size`)." },
     { name: "nested", description: "Nested in another section." },
     { name: "in-group", description: "Directly in a `<ui-sections>` group (no section between)." },

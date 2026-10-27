@@ -55,8 +55,8 @@
               `src/components/ui-parts/examples/elements/`), then its attributes.  The Content parts page
               (`ui-header.html`) shows every part together.
             -->
-            <ui-section id="examples-owners" label="Owners" sticky collapsible dividing>
-              <ui-section id="examples-owners-card" label="Card" sticky collapsible dividing>
+            <ui-section id="examples-owners" label="Owners" sticky="stack" collapsible dividing>
+              <ui-section id="examples-owners-card" label="Card" sticky="stack" collapsible dividing>
                 <ui-example description="A card's content blocks, divided from each other.">
                   <ui-card>
                     <ui-content>
@@ -71,7 +71,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-owners-item" label="Item" sticky collapsible dividing>
+              <ui-section id="examples-owners-item" label="Item" sticky="stack" collapsible dividing>
                 <ui-example description="An item's content is the column beside its image.">
                   <ui-items>
                     <ui-item image="../images/wireframe/image.png">
@@ -85,7 +85,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-owners-message" label="Message" sticky collapsible dividing>
+              <ui-section id="examples-owners-message" label="Message" sticky="stack" collapsible dividing>
                 <ui-example description="A message's content is the text beside its icon.">
                   <ui-message icon="inbox">
                     <ui-content>
@@ -96,7 +96,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-owners-list" label="List" sticky collapsible dividing>
+              <ui-section id="examples-owners-list" label="List" sticky="stack" collapsible dividing>
                 <ui-example description="A list item's content sits beside its icon.">
                   <ui-list spacing="lg">
                     <ui-item icon="github">
@@ -109,7 +109,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-owners-step" label="Step" sticky collapsible dividing>
+              <ui-section id="examples-owners-step" label="Step" sticky="stack" collapsible dividing>
                 <ui-example description="A step's content sits beside its icon.">
                   <ui-steps>
                     <ui-step icon="truck">
@@ -122,7 +122,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-owners-accordion" label="Accordion" sticky collapsible dividing>
+              <ui-section id="examples-owners-accordion" label="Accordion" sticky="stack" collapsible dividing>
                 <ui-example
                   description="An accordion's panels:  each `<ui-content>` shows while the title before it is open."
                 >
@@ -135,7 +135,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-owners-modal" label="Modal" sticky collapsible dividing>
+              <ui-section id="examples-owners-modal" label="Modal" sticky="stack" collapsible dividing>
                 <ui-example description="A modal's body:  `image` puts an image beside the description.">
                   <ui-button commandfor="content-modal" command="--show">Show</ui-button>
                   <ui-modal id="content-modal" closable>
@@ -153,8 +153,8 @@
               </ui-section>
             </ui-section>
 
-            <ui-section id="examples-variations" label="Variations" sticky collapsible dividing>
-              <ui-section id="examples-variations-text-alignment" label="Text Alignment" sticky collapsible dividing>
+            <ui-section id="examples-variations" label="Variations" sticky="stack" collapsible dividing>
+              <ui-section id="examples-variations-text-alignment" label="Text Alignment" sticky="stack" collapsible dividing>
                 <ui-example
                   description="In a card, `align` aligns one content block:  Fomantic's `center aligned content`."
                 >
@@ -198,7 +198,7 @@
           </ui-tab>
 
           <ui-tab value="usage" label="Usage">
-            <ui-section id="usage-using-it" label="Using it" sticky collapsible dividing>
+            <ui-section id="usage-using-it" label="Using it" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   `<ui-content>` is the main content block of its owner: a card's, an item's, a feed event's, a comment's, a modal's,
@@ -214,7 +214,7 @@
               </ui-markdown>
             </ui-section>
 
-            <ui-section id="usage-owners" label="Owners" sticky collapsible dividing>
+            <ui-section id="usage-owners" label="Owners" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   `<ui-content>` finds its nearest owner and sets `:state(in-<owner>)` on itself; `UIParts.css` styles it by that
@@ -240,7 +240,7 @@
               </ui-markdown>
             </ui-section>
 
-            <ui-section id="usage-accessibility" label="Accessibility" sticky collapsible dividing>
+            <ui-section id="usage-accessibility" label="Accessibility" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   - A neutral block with no role: the meaning comes from its owner and from the elements you put inside it.
@@ -252,19 +252,19 @@
 
           <ui-tab value="api" label="API">
             <!-- API:  generated from the vocabularies (`docs/__data/components.json5`);  nothing to write. -->
-            <ui-section id="api-attributes" label="Attributes" sticky collapsible dividing>
+            <ui-section id="api-attributes" label="Attributes" sticky="stack" collapsible dividing>
               <ui-docs-api tag="ui-content" only="attributes"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-slots" label="Slots" sticky collapsible dividing>
+            <ui-section id="api-slots" label="Slots" sticky="stack" collapsible dividing>
               <ui-docs-api tag="ui-content" only="slots"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-parts" label="Parts" sticky collapsible dividing>
+            <ui-section id="api-parts" label="Parts" sticky="stack" collapsible dividing>
               <ui-docs-api tag="ui-content" only="parts"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-states" label="States" sticky collapsible dividing>
+            <ui-section id="api-states" label="States" sticky="stack" collapsible dividing>
               <ui-docs-api tag="ui-content" only="states"></ui-docs-api>
             </ui-section>
           </ui-tab>

@@ -55,8 +55,8 @@
               `src/components/ui-parts/examples/elements/`), then its attributes.  The Content parts page
               (`ui-header.html`) shows every part together.
             -->
-            <ui-section id="examples-owners" label="Owners" sticky collapsible dividing>
-              <ui-section id="examples-owners-feed" label="Feed" sticky collapsible dividing>
+            <ui-section id="examples-owners" label="Owners" sticky="stack" collapsible dividing>
+              <ui-section id="examples-owners-feed" label="Feed" sticky="stack" collapsible dividing>
                 <ui-example description="A date above an event's summary, and one inline at its end.">
                   <ui-feed>
                     <ui-event>
@@ -78,7 +78,7 @@
               </ui-section>
             </ui-section>
 
-            <ui-section id="examples-content" label="Content" sticky collapsible dividing>
+            <ui-section id="examples-content" label="Content" sticky="stack" collapsible dividing>
               <ui-section
                 id="examples-content-machine-readable-date"
                 label="Machine-readable date"
@@ -105,7 +105,7 @@
           </ui-tab>
 
           <ui-tab value="usage" label="Usage">
-            <ui-section id="usage-using-it" label="Using it" sticky collapsible dividing>
+            <ui-section id="usage-using-it" label="Using it" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   `<ui-date>` says when something happened: a feed event's date, inline and small inside its summary or above it.
@@ -117,7 +117,7 @@
               </ui-markdown>
             </ui-section>
 
-            <ui-section id="usage-owners" label="Owners" sticky collapsible dividing>
+            <ui-section id="usage-owners" label="Owners" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   `<ui-date>` finds its nearest owner and sets `:state(in-<owner>)` on itself; `UIParts.css` styles it by that
@@ -130,7 +130,7 @@
               </ui-markdown>
             </ui-section>
 
-            <ui-section id="usage-accessibility" label="Accessibility" sticky collapsible dividing>
+            <ui-section id="usage-accessibility" label="Accessibility" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   - With `datetime` it renders a `<time datetime>`: the visible text ("3 days ago") is read aloud, the exact date is
@@ -143,19 +143,19 @@
 
           <ui-tab value="api" label="API">
             <!-- API:  generated from the vocabularies (`docs/__data/components.json5`);  nothing to write. -->
-            <ui-section id="api-attributes" label="Attributes" sticky collapsible dividing>
+            <ui-section id="api-attributes" label="Attributes" sticky="stack" collapsible dividing>
               <ui-docs-api tag="ui-date" only="attributes"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-slots" label="Slots" sticky collapsible dividing>
+            <ui-section id="api-slots" label="Slots" sticky="stack" collapsible dividing>
               <ui-docs-api tag="ui-date" only="slots"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-parts" label="Parts" sticky collapsible dividing>
+            <ui-section id="api-parts" label="Parts" sticky="stack" collapsible dividing>
               <ui-docs-api tag="ui-date" only="parts"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-states" label="States" sticky collapsible dividing>
+            <ui-section id="api-states" label="States" sticky="stack" collapsible dividing>
               <ui-docs-api tag="ui-date" only="states"></ui-docs-api>
             </ui-section>
           </ui-tab>

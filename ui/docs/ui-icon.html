@@ -60,14 +60,14 @@
               root loads the `fomantic` and `fa7-brands` packs, so Fomantic's names (`help`, `dont`, `add`, `home`)
               work here as written.
             -->
-            <ui-section id="examples-types" label="Types" sticky collapsible dividing>
+            <ui-section id="examples-types" label="Types" sticky="stack" collapsible dividing>
               <ui-message size="small"
                 >The icon set -- every icon with its name, by category, searchable -- is on the
                 <a href="icons.html">Icons</a> page. Icons are Font Awesome 7 Free SVG files, one per icon, loaded
                 on first use.</ui-message
               >
 
-              <ui-section id="examples-types-icon" label="Icon" sticky collapsible dividing>
+              <ui-section id="examples-types-icon" label="Icon" sticky="stack" collapsible dividing>
                 <ui-example
                   description="An icon is a glyph used to represent something else.  `name` is its name in words;  solid is the default set."
                 >
@@ -79,7 +79,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-types-outline" label="Outline" sticky collapsible dividing>
+              <ui-section id="examples-types-outline" label="Outline" sticky="stack" collapsible dividing>
                 <ui-example description="An `outline` word (or the `outline` attribute) names the regular icon.">
                   <ui-icon name="heart outline"></ui-icon>
                   <ui-icon name="bell outline"></ui-icon>
@@ -88,7 +88,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-types-brands" label="Brands" sticky collapsible dividing>
+              <ui-section id="examples-types-brands" label="Brands" sticky="stack" collapsible dividing>
                 <ui-example
                   description="Brand logos come in the `fa7-brands` pack, which a `<ui-root icons>` adds (this page has it)."
                 >
@@ -99,7 +99,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-types-card-suits" label="Card suits" sticky collapsible dividing>
+              <ui-section id="examples-types-card-suits" label="Card suits" sticky="stack" collapsible dividing>
                 <ui-example
                   description="The card suits answer to their plural names too:  `hearts`, `diamonds`.  `diamonds` is the suit even where Fomantic's names make `diamond` a gem, as on this page.  Font Awesome Free has no club or spade, so `clubs` and `spades` draw nothing."
                 >
@@ -109,22 +109,22 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-types-inline-with-text" label="Inline with text" sticky collapsible dividing>
+              <ui-section id="examples-types-inline-with-text" label="Inline with text" sticky="stack" collapsible dividing>
                 <ui-example description="An icon sits on the text baseline, one line tall.">
                   <p><ui-icon name="circle info"></ui-icon>Icons sit on the text baseline, one line tall.</p>
                 </ui-example>
               </ui-section>
             </ui-section>
 
-            <ui-section id="examples-states" label="States" sticky collapsible dividing>
-              <ui-section id="examples-states-disabled" label="Disabled" sticky collapsible dividing>
+            <ui-section id="examples-states" label="States" sticky="stack" collapsible dividing>
+              <ui-section id="examples-states-disabled" label="Disabled" sticky="stack" collapsible dividing>
                 <ui-example description="An icon can show that it is disabled.">
                   <ui-icon name="users" disabled></ui-icon>
                 </ui-example>
               </ui-section>
 
               <!-- GAP I23:  Fomantic's `notched circle` draws nothing;  the pack's name is `circle notched`. -->
-              <ui-section id="examples-states-loading" label="Loading" sticky collapsible dividing>
+              <ui-section id="examples-states-loading" label="Loading" sticky="stack" collapsible dividing>
                 <ui-example description="An icon can be used as a simple loader.">
                   <ui-icon name="spinner" loading></ui-icon>
                   <ui-icon name="circle notched" loading></ui-icon>
@@ -133,8 +133,8 @@
               </ui-section>
             </ui-section>
 
-            <ui-section id="examples-variations" label="Variations" sticky collapsible dividing>
-              <ui-section id="examples-variations-fitted" label="Fitted" sticky collapsible dividing>
+            <ui-section id="examples-variations" label="Variations" sticky="stack" collapsible dividing>
+              <ui-section id="examples-variations-fitted" label="Fitted" sticky="stack" collapsible dividing>
                 <ui-example description="An icon can be fitted, without any space to the left or right of it.">
                   Tight spacing
                   <ui-icon name="help" padding="none"></ui-icon>
@@ -142,7 +142,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-variations-size" label="Size" sticky collapsible dividing>
+              <ui-section id="examples-variations-size" label="Size" sticky="stack" collapsible dividing>
                 <ui-example description="An icon can vary in size.">
                   <ui-icon name="home" size="mini"></ui-icon>
                   <ui-icon name="home" size="tiny"></ui-icon>
@@ -160,7 +160,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-variations-link" label="Link" sticky collapsible dividing>
+              <ui-section id="examples-variations-link" label="Link" sticky="stack" collapsible dividing>
                 <ui-example>
                   <p slot="description">An icon can be formatted as a link.</p>
                   <ui-message slot="description" size="small"
@@ -172,14 +172,14 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-variations-flipped" label="Flipped" sticky collapsible dividing>
+              <ui-section id="examples-variations-flipped" label="Flipped" sticky="stack" collapsible dividing>
                 <ui-example description="An icon can be flipped.">
                   <ui-icon name="cloud" flipped="horizontally"></ui-icon>
                   <ui-icon name="cloud" flipped="vertically"></ui-icon>
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-variations-rotated" label="Rotated" sticky collapsible dividing>
+              <ui-section id="examples-variations-rotated" label="Rotated" sticky="stack" collapsible dividing>
                 <ui-example
                   description="An icon can be rotated:  `clockwise`, `counterclockwise`, or `halfway` (180°)."
                 >
@@ -189,7 +189,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-variations-circular" label="Circular" sticky collapsible dividing>
+              <ui-section id="examples-variations-circular" label="Circular" sticky="stack" collapsible dividing>
                 <ui-example description="An icon can be formatted to appear circular.">
                   <ui-icon name="users" appearance="circular"></ui-icon>
                   <ui-icon name="users" color="teal" appearance="circular"></ui-icon>
@@ -216,7 +216,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-variations-bordered" label="Bordered" sticky collapsible dividing>
+              <ui-section id="examples-variations-bordered" label="Bordered" sticky="stack" collapsible dividing>
                 <ui-example>
                   <p slot="description">An icon can be formatted to appear bordered.</p>
                   <ui-message slot="description" state="info" size="small"
@@ -242,7 +242,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-variations-colored" label="Colored" sticky collapsible dividing>
+              <ui-section id="examples-variations-colored" label="Colored" sticky="stack" collapsible dividing>
                 <ui-example description="An icon can be formatted with different colors.">
                   <ui-icon name="users" color="primary"></ui-icon>
                   <ui-icon name="users" color="secondary"></ui-icon>
@@ -262,7 +262,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-variations-inverted" label="Inverted" sticky collapsible dividing>
+              <ui-section id="examples-variations-inverted" label="Inverted" sticky="stack" collapsible dividing>
                 <ui-example description="An icon can have its colors inverted for contrast.">
                   <ui-segment inverted>
                     <ui-icon name="users" inverted></ui-icon>
@@ -285,8 +285,8 @@
               </ui-section>
             </ui-section>
 
-            <ui-section id="examples-groups" label="Groups" sticky collapsible dividing>
-              <ui-section id="examples-groups-icons" label="Icons" sticky collapsible dividing>
+            <ui-section id="examples-groups" label="Groups" sticky="stack" collapsible dividing>
+              <ui-section id="examples-groups-icons" label="Icons" sticky="stack" collapsible dividing>
                 <ui-example
                   description="Several icons can be used together as a group:  `<ui-icons>`, the first icon the base, the rest stacked on it."
                 >
@@ -303,7 +303,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-groups-corner-icon" label="Corner Icon" sticky collapsible dividing>
+              <ui-section id="examples-groups-corner-icon" label="Corner Icon" sticky="stack" collapsible dividing>
                 <ui-example description="A group of icons can display a smaller corner icon.">
                   <ui-icons size="huge">
                     <ui-icon name="puzzle"></ui-icon>
@@ -367,7 +367,7 @@
           </ui-tab>
 
           <ui-tab value="usage" label="Usage">
-            <ui-section id="usage-using-it" label="Using it" sticky collapsible dividing>
+            <ui-section id="usage-using-it" label="Using it" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   `name` is the only thing an icon needs: one name per icon, words separated by spaces (Font Awesome's dashed
@@ -384,7 +384,7 @@
               </ui-markdown>
             </ui-section>
 
-            <ui-section id="usage-icon-packs" label="Icon packs" sticky collapsible dividing>
+            <ui-section id="usage-icon-packs" label="Icon packs" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   A pack is a folder of SVG files plus a `pack.js` index; the page's packs are shared by every component. Font
@@ -409,7 +409,7 @@
               </ui-markdown>
             </ui-section>
 
-            <ui-section id="usage-keyboard" label="Keyboard" sticky collapsible dividing>
+            <ui-section id="usage-keyboard" label="Keyboard" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   An icon takes no focus and handles no keys, `link` or not: the `<a>` or `<button>` around it does.
@@ -417,7 +417,7 @@
               </ui-markdown>
             </ui-section>
 
-            <ui-section id="usage-accessibility" label="Accessibility" sticky collapsible dividing>
+            <ui-section id="usage-accessibility" label="Accessibility" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   - An icon is decorative by default: `aria-hidden="true"` on the host, so screen readers skip it.
@@ -434,29 +434,29 @@
           </ui-tab>
 
           <ui-tab value="api" label="API">
-            <ui-section id="api-tags" label="Tags" sticky collapsible dividing>
+            <ui-section id="api-tags" label="Tags" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-icon" only="tags"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-attributes" label="Attributes" sticky collapsible dividing>
+            <ui-section id="api-attributes" label="Attributes" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-icon" only="attributes"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-slots" label="Slots" sticky collapsible dividing>
+            <ui-section id="api-slots" label="Slots" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-icon" only="slots"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-parts" label="Parts" sticky collapsible dividing>
+            <ui-section id="api-parts" label="Parts" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-icon" only="parts"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-states" label="States" sticky collapsible dividing>
+            <ui-section id="api-states" label="States" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-icon" only="states"></ui-docs-api>
             </ui-section>
           </ui-tab>
 
           <ui-tab value="theming" label="Theming">
-            <ui-section id="theming-tokens" label="Tokens" sticky collapsible dividing>
+            <ui-section id="theming-tokens" label="Tokens" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   Theme with the public `--ui-icon-*` tokens: set one on the element, on any ancestor (a `<ui-icons>` group,
@@ -491,7 +491,7 @@
               </ui-docs-tokens>
             </ui-section>
 
-            <ui-section id="theming-themes" label="Themes" sticky collapsible dividing>
+            <ui-section id="theming-themes" label="Themes" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   A theme changes an icon's colour, not its glyph.  To change the glyphs themselves, add another icon

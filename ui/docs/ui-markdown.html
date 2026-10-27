@@ -57,8 +57,8 @@
               EXAMPLES:  ours only, no Fomantic page.  The old Astro page's examples (Types, Variations), restyled, plus the
               vocabulary's `breaks` and `sanitized`.  File shown:  `site/examples/readme.md`.
             -->
-            <ui-section id="examples-types" label="Types" sticky collapsible dividing>
-              <ui-section id="examples-types-markdown" label="Markdown" sticky collapsible dividing>
+            <ui-section id="examples-types" label="Types" sticky="stack" collapsible dividing>
+              <ui-section id="examples-types-markdown" label="Markdown" sticky="stack" collapsible dividing>
                 <ui-example>
                   <p slot="description">
                     Markdown renders <code>source</code> as GitHub does: tables, task lists, strikethrough, autolinks,
@@ -69,7 +69,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-types-inline-text" label="Inline text" sticky collapsible dividing>
+              <ui-section id="examples-types-inline-text" label="Inline text" sticky="stack" collapsible dividing>
                 <ui-example
                   description='Without `source`, markdown renders its own text:  a `<script type="text/markdown">` child keeps it exact, then dedented.'
                 >
@@ -85,15 +85,15 @@
               </ui-section>
             </ui-section>
 
-            <ui-section id="examples-variations" label="Variations" sticky collapsible dividing>
-              <ui-section id="examples-variations-size" label="Size" sticky collapsible dividing>
+            <ui-section id="examples-variations" label="Variations" sticky="stack" collapsible dividing>
+              <ui-section id="examples-variations-size" label="Size" sticky="stack" collapsible dividing>
                 <ui-example description="Markdown can be smaller or larger, as text is.">
                   <ui-markdown size="small">Smaller text, the *same* look.</ui-markdown>
                   <ui-markdown size="large">Larger text, the *same* look.</ui-markdown>
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-variations-line-breaks" label="Line breaks" sticky collapsible dividing>
+              <ui-section id="examples-variations-line-breaks" label="Line breaks" sticky="stack" collapsible dividing>
                 <ui-example
                   description="`breaks` makes a single newline a line break, as in GitHub comments;  by default it isn't, as in GitHub files."
                 >
@@ -113,7 +113,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-variations-editable" label="Editable" sticky collapsible dividing>
+              <ui-section id="examples-variations-editable" label="Editable" sticky="stack" collapsible dividing>
                 <ui-example
                   description="`editable` adds Write / Preview tabs:  a text box, and its preview, drawn as the rest of the element draws."
                 >
@@ -135,7 +135,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-variations-sanitized" label="Sanitized" sticky collapsible dividing>
+              <ui-section id="examples-variations-sanitized" label="Sanitized" sticky="stack" collapsible dividing>
                 <ui-example
                   description="Raw HTML is kept as written, `<ui-*>` elements included.  `sanitized` runs it through DOMPurify, loaded only then:  set it for text you didn't write."
                 >
@@ -157,7 +157,7 @@
 
           <ui-tab value="usage" label="Usage">
             <!-- USAGE:  from the old Astro page's Behaviour, plus the vocabulary's events and the shadow markup's a11y. -->
-            <ui-section id="usage-using-it" label="Using it" sticky collapsible dividing>
+            <ui-section id="usage-using-it" label="Using it" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   Write markdown inside `<ui-markdown>`, or point `source` at a file of this site. The text comes from, first match
@@ -174,7 +174,7 @@
               </ui-markdown>
             </ui-section>
 
-            <ui-section id="usage-rendering" label="Rendering" sticky collapsible dividing>
+            <ui-section id="usage-rendering" label="Rendering" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   - GitHub-flavoured: tables, task lists, strikethrough, autolinks.
@@ -201,7 +201,7 @@
               </ui-markdown>
             </ui-section>
 
-            <ui-section id="usage-events" label="Events" sticky collapsible dividing>
+            <ui-section id="usage-events" label="Events" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   - `ui-drawn` -- rendered: `{ headings }`.
@@ -222,7 +222,7 @@
               </ui-code>
             </ui-section>
 
-            <ui-section id="usage-keyboard" label="Keyboard" sticky collapsible dividing>
+            <ui-section id="usage-keyboard" label="Keyboard" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   Nothing of its own: links, task-list checkboxes and code blocks inside are ordinary tab stops. `editable`'s
@@ -231,7 +231,7 @@
               </ui-markdown>
             </ui-section>
 
-            <ui-section id="usage-accessibility" label="Accessibility" sticky collapsible dividing>
+            <ui-section id="usage-accessibility" label="Accessibility" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   - The markdown renders into a real `<article>` with real headings, lists and tables, so it reads like the page
@@ -247,30 +247,30 @@
 
           <ui-tab value="api" label="API">
             <!-- API:  generated from the vocabularies (`docs/__data/components.json5`);  nothing to write. -->
-            <ui-section id="api-attributes" label="Attributes" sticky collapsible dividing>
+            <ui-section id="api-attributes" label="Attributes" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-markdown" only="attributes"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-events" label="Events" sticky collapsible dividing>
+            <ui-section id="api-events" label="Events" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-markdown" only="events"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-parts" label="Parts" sticky collapsible dividing>
+            <ui-section id="api-parts" label="Parts" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-markdown" only="parts"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-states" label="States" sticky collapsible dividing>
+            <ui-section id="api-states" label="States" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-markdown" only="states"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-texts" label="Texts" sticky collapsible dividing>
+            <ui-section id="api-texts" label="Texts" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-markdown" only="texts"></ui-docs-api>
             </ui-section>
           </ui-tab>
 
           <ui-tab value="theming" label="Theming">
             <!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
-            <ui-section id="theming-tokens" label="Tokens" sticky collapsible dividing>
+            <ui-section id="theming-tokens" label="Tokens" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   Theme with the public `--ui-markdown-*` tokens: set one on the element, on any ancestor (`:root` for all
@@ -310,7 +310,7 @@
               </ui-docs-tokens>
             </ui-section>
 
-            <ui-section id="theming-themes" label="Themes" sticky collapsible dividing>
+            <ui-section id="theming-themes" label="Themes" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   Markdown is ours, not Fomantic's:  the theme menu in the header changes the page around it.  Its

@@ -53,7 +53,7 @@
             <!--
               EXAMPLES:  Fomantic's page, section by section, in its order (Types, Content, States, Variations,
               Groups ...).  Rules, the class-grammar mappings, gaps:  epics/spell-ui-pages/PAGES.md.
-              - A section:  `<ui-section id="examples-types" label="Types" sticky collapsible dividing>` around
+              - A section:  `<ui-section id="examples-types" label="Types" sticky="stack" collapsible dividing>` around
                 its examples;  ids spell out the nesting (`<tab>-<section>-<example>`, lowercase kebab of the headers).
               - An example:  its own nested section (`label` = the example's name) around
                 `<ui-example description="...">` and the live markup;  the markup IS the code shown.  A richer
@@ -64,8 +64,8 @@
               - A gap:  an HTML comment `GAP I<n>:  ...` BEFORE the example's section (a comment inside the example
                 shows in its code).
             -->
-            <ui-section id="examples-types" label="Types" sticky collapsible dividing>
-              <ui-section id="examples-types-toolbar" label="Toolbar" sticky collapsible dividing>
+            <ui-section id="examples-types" label="Types" sticky="stack" collapsible dividing>
+              <ui-section id="examples-types-toolbar" label="Toolbar" sticky="stack" collapsible dividing>
                 <ui-example description="A menu whose items don't fit scrolls sideways:  `‹` and `›` show at its ends while there's more that way.">
                   <ui-toolbar appearance="secondary" aria-label="Sections" style="max-width: 360px">
                     <ui-item link="#types" selected>Types</ui-item>
@@ -77,7 +77,7 @@
                   </ui-toolbar>
                 </ui-example>
               </ui-section>
-              <ui-section id="examples-types-segmented" label="Segmented" sticky collapsible dividing>
+              <ui-section id="examples-types-segmented" label="Segmented" sticky="stack" collapsible dividing>
                 <ui-example description="The segmented appearance:  a segmented control that scrolls;  its chosen thumb slides as the choice moves.">
                   <ui-toolbar appearance="segmented" aria-label="Views" style="max-width: 320px">
                     <ui-item selected>Examples</ui-item>
@@ -89,7 +89,7 @@
                   </ui-toolbar>
                 </ui-example>
               </ui-section>
-              <ui-section id="examples-types-everything-fits" label="Everything fits" sticky collapsible dividing>
+              <ui-section id="examples-types-everything-fits" label="Everything fits" sticky="stack" collapsible dividing>
                 <ui-example description="When every item fits, no buttons show:  it's a plain menu.">
                   <ui-toolbar appearance="secondary" aria-label="Short">
                     <ui-item link="#one" selected>One</ui-item>
@@ -98,7 +98,7 @@
                   </ui-toolbar>
                 </ui-example>
               </ui-section>
-              <ui-section id="examples-types-top-bar" label="Top bar" sticky collapsible dividing>
+              <ui-section id="examples-types-top-bar" label="Top bar" sticky="stack" collapsible dividing>
                 <ui-example
                   description="A bar's slots:  `icon` and `title` at the start, `center` taking the room left, `right` at the end.  A slot with nothing in it takes no room."
                 >
@@ -114,8 +114,8 @@
               </ui-section>
             </ui-section>
 
-            <ui-section id="examples-fitting-titles" label="Fitting titles" sticky collapsible dividing>
-              <ui-section id="examples-fitting-titles-shrinkable" label="Shrinkable" sticky collapsible dividing>
+            <ui-section id="examples-fitting-titles" label="Fitting titles" sticky="stack" collapsible dividing>
+              <ui-section id="examples-fitting-titles-shrinkable" label="Shrinkable" sticky="stack" collapsible dividing>
                 <ui-example
                   description="`shrinkable` fits the titles instead of scrolling:  drag the box's right edge narrower.  Whole, then the longest cut with `…`, then icons only, then one `…` button whose menu holds every item;  no `‹` / `›`.  The bell, an item with no words, stays at every width."
                 >
@@ -135,7 +135,7 @@
 
           <ui-tab value="usage" label="Usage">
             <!-- USAGE:  how to use it (attributes in practice, events, framework snippets), keyboard, accessibility. -->
-            <ui-section id="usage-using-it" label="Using it" sticky collapsible dividing>
+            <ui-section id="usage-using-it" label="Using it" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   Write a `<ui-toolbar>` as you'd write a `<ui-menu>`:  the same attributes and `<ui-item>`s.
@@ -153,14 +153,14 @@
                 </script>
               </ui-code>
             </ui-section>
-            <ui-section id="usage-keyboard" label="Keyboard" sticky collapsible dividing>
+            <ui-section id="usage-keyboard" label="Keyboard" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   As `<ui-menu>`'s:  Tab reaches each link item (an `interactive` toolbar is one Tab stop, the arrow keys between items).  Focusing an item scrolls it into view;  the `‹` / `›` buttons are for the pointer, out of the Tab order.  A `shrinkable` toolbar's `…` button takes the menu's keys (`<ui-menu>`, Keyboard).
                 </script>
               </ui-markdown>
             </ui-section>
-            <ui-section id="usage-accessibility" label="Accessibility" sticky collapsible dividing>
+            <ui-section id="usage-accessibility" label="Accessibility" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   A `<nav>` landmark, as `<ui-menu>`:  give it an `aria-label`.  The scroll buttons are named (Scroll back, Scroll on) but left out of the Tab order, since every item is reachable by keyboard.  A `shrinkable` toolbar's cut and hidden titles still name their items, and its `…` button is named "More" (`<ui-menu>`, Accessibility).
@@ -171,34 +171,34 @@
 
           <ui-tab value="api" label="API">
             <!-- API:  generated from the vocabularies (`site/_data/components.json5`);  nothing to write. -->
-            <ui-section id="api-attributes" label="Attributes" sticky collapsible dividing>
+            <ui-section id="api-attributes" label="Attributes" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-toolbar" only="attributes"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-events" label="Events" sticky collapsible dividing>
+            <ui-section id="api-events" label="Events" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-toolbar" only="events"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-slots" label="Slots" sticky collapsible dividing>
+            <ui-section id="api-slots" label="Slots" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-toolbar" only="slots"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-parts" label="Parts" sticky collapsible dividing>
+            <ui-section id="api-parts" label="Parts" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-toolbar" only="parts"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-states" label="States" sticky collapsible dividing>
+            <ui-section id="api-states" label="States" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-toolbar" only="states"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-texts" label="Texts" sticky collapsible dividing>
+            <ui-section id="api-texts" label="Texts" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-toolbar" only="texts"></ui-docs-api>
             </ui-section>
           </ui-tab>
 
           <ui-tab value="theming" label="Theming">
             <!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
-            <ui-section id="theming-tokens" label="Tokens" sticky collapsible dividing>
+            <ui-section id="theming-tokens" label="Tokens" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   Set a public `--ui-*` token on the element, any ancestor or `:root`; it inherits into the shadow
@@ -218,7 +218,7 @@
                 <!-- playground:end -->
               </ui-docs-tokens>
             </ui-section>
-            <ui-section id="theming-themes" label="Themes" sticky collapsible dividing>
+            <ui-section id="theming-themes" label="Themes" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   The theme menu above picks the theme for every page of the site:  Spell, Glass, Fruity or Merlot,

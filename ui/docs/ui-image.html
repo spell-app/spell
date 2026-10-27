@@ -58,10 +58,10 @@
               EXAMPLES:  Fomantic's image page, in its order (Types, States, Variations, Groups), plus our own extras (Inline,
               group variations).
             -->
-            <ui-section id="examples-types" label="Types" sticky collapsible dividing>
+            <ui-section id="examples-types" label="Types" sticky="stack" collapsible dividing>
               <!-- GAP I56:  `size="medium"` is the natural size, not Fomantic's 300px;  the page uses `size="large"` (450px) where Fomantic says medium. -->
               <!-- GAP I87:  Fomantic's 2nd and 3rd blocks wrap an <img> / an <svg> in `ui image`;  <ui-image> has no slot. -->
-              <ui-section id="examples-types-image" label="Image" sticky collapsible dividing>
+              <ui-section id="examples-types-image" label="Image" sticky="stack" collapsible dividing>
                 <ui-example>
                   <p slot="description">An image.</p>
                   <ui-message slot="description" size="small"
@@ -76,7 +76,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-types-image-link" label="Image Link" sticky collapsible dividing>
+              <ui-section id="examples-types-image-link" label="Image Link" sticky="stack" collapsible dividing>
                 <ui-example description="An image can be formatted to link to other content:  `link`.">
                   <ui-image
                     size="large"
@@ -86,7 +86,7 @@
                   ></ui-image>
                 </ui-example>
               </ui-section>
-              <ui-section id="examples-types-figure" label="Figure" sticky collapsible dividing>
+              <ui-section id="examples-types-figure" label="Figure" sticky="stack" collapsible dividing>
                 <ui-example
                   description="`caption` puts a caption under the picture:  the image becomes a figure (`<figure>`, `<figcaption>`), the caption no wider than the picture.  The `caption` slot is its rich version."
                 >
@@ -98,15 +98,15 @@
                   ></ui-image>
                 </ui-example>
               </ui-section>
-              <ui-section id="examples-types-zoom" label="Zoom" sticky collapsible dividing>
+              <ui-section id="examples-types-zoom" label="Zoom" sticky="stack" collapsible dividing>
                 <ui-example description="`zoom`:  a click (or Enter) shows it full size over the page, its alt text under it;  Escape closes it.  The page's one `<a href=&quot;ui-zoom.html&quot;>&lt;ui-zoom&gt;</a>` shows it.">
                   <ui-image zoom size="small" src="images/hello-light.png" alt="Hello, in the light theme"></ui-image>
                 </ui-example>
               </ui-section>
             </ui-section>
 
-            <ui-section id="examples-states" label="States" sticky collapsible dividing>
-              <ui-section id="examples-states-hidden" label="Hidden" sticky collapsible dividing>
+            <ui-section id="examples-states" label="States" sticky="stack" collapsible dividing>
+              <ui-section id="examples-states-hidden" label="Hidden" sticky="stack" collapsible dividing>
                 <ui-example
                   description="An image can be hidden:  the native `hidden` attribute (the box keeps no space)."
                 >
@@ -114,22 +114,22 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-states-disabled" label="Disabled" sticky collapsible dividing>
+              <ui-section id="examples-states-disabled" label="Disabled" sticky="stack" collapsible dividing>
                 <ui-example description="An image can show that it is disabled and cannot be selected.">
                   <ui-image disabled size="large" src="images/wireframe/image.png" alt=""></ui-image>
                 </ui-example>
               </ui-section>
             </ui-section>
 
-            <ui-section id="examples-variations" label="Variations" sticky collapsible dividing>
-              <ui-section id="examples-variations-avatar" label="Avatar" sticky collapsible dividing>
+            <ui-section id="examples-variations" label="Variations" sticky="stack" collapsible dividing>
+              <ui-section id="examples-variations-avatar" label="Avatar" sticky="stack" collapsible dividing>
                 <ui-example description="An image may be formatted to appear inline with text as an avatar.">
                   <ui-image avatar src="images/wireframe/square-image.png" alt=""></ui-image>
                   <span>Username</span>
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-variations-bordered" label="Bordered" sticky collapsible dividing>
+              <ui-section id="examples-variations-bordered" label="Bordered" sticky="stack" collapsible dividing>
                 <ui-example
                   description="An image may include a border to emphasize the edges of white or transparent content."
                 >
@@ -137,19 +137,19 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-variations-fluid" label="Fluid" sticky collapsible dividing>
+              <ui-section id="examples-variations-fluid" label="Fluid" sticky="stack" collapsible dividing>
                 <ui-example description="An image can take up the width of its container.">
                   <ui-image fluid src="images/wireframe/image.png" alt=""></ui-image>
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-variations-rounded" label="Rounded" sticky collapsible dividing>
+              <ui-section id="examples-variations-rounded" label="Rounded" sticky="stack" collapsible dividing>
                 <ui-example description="An image may appear rounded.">
                   <ui-image size="large" src="images/wireframe/square-image.png" alt="" appearance="rounded"></ui-image>
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-variations-circular" label="Circular" sticky collapsible dividing>
+              <ui-section id="examples-variations-circular" label="Circular" sticky="stack" collapsible dividing>
                 <ui-example description="An image may appear circular.">
                   <ui-image size="large" src="images/wireframe/square-image.png" alt="" appearance="circular"></ui-image>
                 </ui-example>
@@ -191,7 +191,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-variations-centered" label="Centered" sticky collapsible dividing>
+              <ui-section id="examples-variations-centered" label="Centered" sticky="stack" collapsible dividing>
                 <ui-example description="An image can appear centered in a content block.">
                   <ui-segment>
                     <ui-image align="center" size="large" src="images/wireframe/image.png" alt=""></ui-image>
@@ -217,7 +217,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-variations-spaced" label="Spaced" sticky collapsible dividing>
+              <ui-section id="examples-variations-spaced" label="Spaced" sticky="stack" collapsible dividing>
                 <ui-example
                   description="An image can specify that it needs an additional spacing to separate it from nearby content."
                 >
@@ -244,7 +244,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-variations-floated" label="Floated" sticky collapsible dividing>
+              <ui-section id="examples-variations-floated" label="Floated" sticky="stack" collapsible dividing>
                 <ui-example description="An image can sit to the left or right of other content.">
                   <ui-segment>
                     <ui-image size="small" floated="left" src="images/wireframe/text-image.png" alt=""></ui-image>
@@ -270,7 +270,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-variations-size" label="Size" sticky collapsible dividing>
+              <ui-section id="examples-variations-size" label="Size" sticky="stack" collapsible dividing>
                 <ui-example>
                   <p slot="description">An image may appear at different sizes.</p>
                   <ui-message slot="description" state="warning" size="small"
@@ -336,8 +336,8 @@
               </ui-section>
             </ui-section>
 
-            <ui-section id="examples-groups" label="Groups" sticky collapsible dividing>
-              <ui-section id="examples-groups-size" label="Size" sticky collapsible dividing>
+            <ui-section id="examples-groups" label="Groups" sticky="stack" collapsible dividing>
+              <ui-section id="examples-groups-size" label="Size" sticky="stack" collapsible dividing>
                 <ui-example
                   description="A group of images can be formatted to have the same size:  `<ui-images size>`."
                 >
@@ -358,7 +358,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-groups-group-variations" label="Group variations" sticky collapsible dividing>
+              <ui-section id="examples-groups-group-variations" label="Group variations" sticky="stack" collapsible dividing>
                 <ui-example
                   description="A group shares its shape, border and alignment with every image in it:  `avatar`, `circular`, `rounded`, `bordered`, `centered` ..."
                 >
@@ -379,7 +379,7 @@
           </ui-tab>
 
           <ui-tab value="usage" label="Usage">
-            <ui-section id="usage-using-it" label="Using it" sticky collapsible dividing>
+            <ui-section id="usage-using-it" label="Using it" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   `<ui-image>` renders a real `<img>`, so `src`, `alt`, `width`, `height` and `loading` work as they do on the native
@@ -396,7 +396,7 @@
               </ui-markdown>
             </ui-section>
 
-            <ui-section id="usage-keyboard" label="Keyboard" sticky collapsible dividing>
+            <ui-section id="usage-keyboard" label="Keyboard" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   A plain image takes no focus. A linked image (`link`) is a real link: **Tab** reaches it, **Enter** follows it;
@@ -405,7 +405,7 @@
               </ui-markdown>
             </ui-section>
 
-            <ui-section id="usage-accessibility" label="Accessibility" sticky collapsible dividing>
+            <ui-section id="usage-accessibility" label="Accessibility" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   - Give every image an `alt`. `alt=""` marks it decorative, so screen readers skip it; a missing `alt` stays
@@ -422,33 +422,33 @@
           </ui-tab>
 
           <ui-tab value="api" label="API">
-            <ui-section id="api-tags" label="Tags" sticky collapsible dividing>
+            <ui-section id="api-tags" label="Tags" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-image" only="tags"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-attributes" label="Attributes" sticky collapsible dividing>
+            <ui-section id="api-attributes" label="Attributes" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-image" only="attributes"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-slots" label="Slots" sticky collapsible dividing>
+            <ui-section id="api-slots" label="Slots" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-image" only="slots"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-parts" label="Parts" sticky collapsible dividing>
+            <ui-section id="api-parts" label="Parts" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-image" only="parts"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-states" label="States" sticky collapsible dividing>
+            <ui-section id="api-states" label="States" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-image" only="states"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-texts" label="Texts" sticky collapsible dividing>
+            <ui-section id="api-texts" label="Texts" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-image" only="texts"></ui-docs-api>
             </ui-section>
           </ui-tab>
 
           <ui-tab value="theming" label="Theming">
-            <ui-section id="theming-tokens" label="Tokens" sticky collapsible dividing>
+            <ui-section id="theming-tokens" label="Tokens" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   Theme with the public `--ui-image-*` tokens: set one on the element, on any ancestor (a `<ui-images>` group, a
@@ -482,7 +482,7 @@
               </ui-docs-tokens>
             </ui-section>
 
-            <ui-section id="theming-themes" label="Themes" sticky collapsible dividing>
+            <ui-section id="theming-themes" label="Themes" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   The theme menu above picks the theme for every page of the site:  Spell, Glass, Fruity or Merlot,

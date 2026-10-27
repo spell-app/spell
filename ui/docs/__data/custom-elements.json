@@ -18837,9 +18837,9 @@
             },
             {
               "name": "sticky",
-              "description": "The title bar sticks while the section is on screen;  a sticky section inside another sticks just below its title.",
+              "description": "The title bar sticks while the section is on screen;  a sticky section inside another sticks just below its title.  `sticky=\"stack\"`:  the titles read as one stack of rounded bars, as the docs pages' sections do -- each level a step further in (`--ui-section-stack-reach`, `--ui-section-stack-step`), a section's first nested title tucked square under its own, a nested title stuck under its parent's a heavy round (the theme's large radius), and closed sections one after another flush, ONE group, round only at its top and bottom.  A plain `sticky` section right inside a stacked one joins its stack (not through another element, an example's).",
               "type": {
-                "text": "boolean"
+                "text": "boolean | \"stack\""
               },
               "fieldName": "sticky"
             },
@@ -18886,7 +18886,7 @@
             },
             {
               "name": "appearance",
-              "description": "The look, several words at once:  `bordered` (a box around the section, as a segment), `styled` (boxed as a styled accordion:  a tinted title bar over padded content), `raised` (with a box:  lifted with a shadow), `basic` (no box, rule or tint, whatever else is set).  Old names:  `bordered`, `styled`, `raised`, `basic`.",
+              "description": "The look, several words at once:  `bordered` (a box around the section, as a segment), `styled` (boxed as a styled accordion:  a tinted title bar over padded content), `raised` (with a box:  lifted with a shadow), `basic` (no box, rule or tint, whatever else is set), `drawer` (the title a raised bar, the content a tinted panel attached under it that rolls open and closed, as an example's code under its demo).  Old names:  `bordered`, `styled`, `raised`, `basic`.",
               "type": {
                 "text": "string"
               },
@@ -19165,6 +19165,30 @@
             {
               "name": "stuck",
               "description": "With `sticky`:  the title bar is stuck to the top."
+            },
+            {
+              "name": "stacked",
+              "description": "With `sticky=\"stack\"` (or `sticky` right inside a stacked section):  a bar of the stack."
+            },
+            {
+              "name": "tucked",
+              "description": "Stacked:  the first thing in its enclosing section, its title right under that section's, square on top."
+            },
+            {
+              "name": "tucks",
+              "description": "Stacked:  its first nested section is tucked under its title, so its content has no room on top."
+            },
+            {
+              "name": "after-closed",
+              "description": "Stacked:  right after a closed section, nothing between:  no room above it."
+            },
+            {
+              "name": "joins-above",
+              "description": "Stacked and closed, right after a closed one:  square on top, in its group."
+            },
+            {
+              "name": "joins-below",
+              "description": "Stacked and closed, right before a closed one:  square below, in its group."
             },
             {
               "name": "animated",
@@ -24167,9 +24191,9 @@
             },
             {
               "name": "sticky",
-              "description": "The title bar sticks while the section is on screen;  a sticky section inside another sticks just below its title.",
+              "description": "The title bar sticks while the section is on screen;  a sticky section inside another sticks just below its title.  `sticky=\"stack\"`:  the titles read as one stack of rounded bars, as the docs pages' sections do -- each level a step further in (`--ui-section-stack-reach`, `--ui-section-stack-step`), a section's first nested title tucked square under its own, a nested title stuck under its parent's a heavy round (the theme's large radius), and closed sections one after another flush, ONE group, round only at its top and bottom.  A plain `sticky` section right inside a stacked one joins its stack (not through another element, an example's).",
               "type": {
-                "text": "boolean"
+                "text": "boolean | \"stack\""
               },
               "fieldName": "sticky"
             },
@@ -24208,7 +24232,7 @@
             },
             {
               "name": "appearance",
-              "description": "The look, several words at once:  `bordered` (a box around the section, as a segment), `styled` (boxed as a styled accordion:  a tinted title bar over padded content), `raised` (with a box:  lifted with a shadow), `basic` (no box, rule or tint, whatever else is set).  Old names:  `bordered`, `styled`, `raised`, `basic`.",
+              "description": "The look, several words at once:  `bordered` (a box around the section, as a segment), `styled` (boxed as a styled accordion:  a tinted title bar over padded content), `raised` (with a box:  lifted with a shadow), `basic` (no box, rule or tint, whatever else is set), `drawer` (the title a raised bar, the content a tinted panel attached under it that rolls open and closed, as an example's code under its demo).  Old names:  `bordered`, `styled`, `raised`, `basic`.",
               "type": {
                 "text": "string"
               },
@@ -24601,6 +24625,30 @@
               "description": "With `sticky`:  the title bar is stuck to the top."
             },
             {
+              "name": "stacked",
+              "description": "With `sticky=\"stack\"` (or `sticky` right inside a stacked section):  a bar of the stack."
+            },
+            {
+              "name": "tucked",
+              "description": "Stacked:  the first thing in its enclosing section, its title right under that section's, square on top."
+            },
+            {
+              "name": "tucks",
+              "description": "Stacked:  its first nested section is tucked under its title, so its content has no room on top."
+            },
+            {
+              "name": "after-closed",
+              "description": "Stacked:  right after a closed section, nothing between:  no room above it."
+            },
+            {
+              "name": "joins-above",
+              "description": "Stacked and closed, right after a closed one:  square on top, in its group."
+            },
+            {
+              "name": "joins-below",
+              "description": "Stacked and closed, right before a closed one:  square below, in its group."
+            },
+            {
               "name": "animated",
               "description": "Opens and closes with a height transition (`interpolate-size`)."
             },
@@ -24790,9 +24838,9 @@
             },
             {
               "name": "sticky",
-              "description": "The title bar sticks while the section is on screen;  a sticky section inside another sticks just below its title.",
+              "description": "The title bar sticks while the section is on screen;  a sticky section inside another sticks just below its title.  `sticky=\"stack\"`:  the titles read as one stack of rounded bars, as the docs pages' sections do -- each level a step further in (`--ui-section-stack-reach`, `--ui-section-stack-step`), a section's first nested title tucked square under its own, a nested title stuck under its parent's a heavy round (the theme's large radius), and closed sections one after another flush, ONE group, round only at its top and bottom.  A plain `sticky` section right inside a stacked one joins its stack (not through another element, an example's).",
               "type": {
-                "text": "boolean"
+                "text": "boolean | \"stack\""
               },
               "fieldName": "sticky"
             },
@@ -24839,7 +24887,7 @@
             },
             {
               "name": "appearance",
-              "description": "The look, several words at once:  `bordered` (a box around the section, as a segment), `styled` (boxed as a styled accordion:  a tinted title bar over padded content), `raised` (with a box:  lifted with a shadow), `basic` (no box, rule or tint, whatever else is set).  Old names:  `bordered`, `styled`, `raised`, `basic`.",
+              "description": "The look, several words at once:  `bordered` (a box around the section, as a segment), `styled` (boxed as a styled accordion:  a tinted title bar over padded content), `raised` (with a box:  lifted with a shadow), `basic` (no box, rule or tint, whatever else is set), `drawer` (the title a raised bar, the content a tinted panel attached under it that rolls open and closed, as an example's code under its demo).  Old names:  `bordered`, `styled`, `raised`, `basic`.",
               "type": {
                 "text": "string"
               },
@@ -25133,6 +25181,30 @@
             {
               "name": "stuck",
               "description": "With `sticky`:  the title bar is stuck to the top."
+            },
+            {
+              "name": "stacked",
+              "description": "With `sticky=\"stack\"` (or `sticky` right inside a stacked section):  a bar of the stack."
+            },
+            {
+              "name": "tucked",
+              "description": "Stacked:  the first thing in its enclosing section, its title right under that section's, square on top."
+            },
+            {
+              "name": "tucks",
+              "description": "Stacked:  its first nested section is tucked under its title, so its content has no room on top."
+            },
+            {
+              "name": "after-closed",
+              "description": "Stacked:  right after a closed section, nothing between:  no room above it."
+            },
+            {
+              "name": "joins-above",
+              "description": "Stacked and closed, right after a closed one:  square on top, in its group."
+            },
+            {
+              "name": "joins-below",
+              "description": "Stacked and closed, right before a closed one:  square below, in its group."
             },
             {
               "name": "animated",
@@ -27196,9 +27268,9 @@
             },
             {
               "name": "sticky",
-              "description": "The title bar sticks while the section is on screen;  a sticky section inside another sticks just below its title.",
+              "description": "The title bar sticks while the section is on screen;  a sticky section inside another sticks just below its title.  `sticky=\"stack\"`:  the titles read as one stack of rounded bars, as the docs pages' sections do -- each level a step further in (`--ui-section-stack-reach`, `--ui-section-stack-step`), a section's first nested title tucked square under its own, a nested title stuck under its parent's a heavy round (the theme's large radius), and closed sections one after another flush, ONE group, round only at its top and bottom.  A plain `sticky` section right inside a stacked one joins its stack (not through another element, an example's).",
               "type": {
-                "text": "boolean"
+                "text": "boolean | \"stack\""
               },
               "fieldName": "sticky"
             },
@@ -27245,7 +27317,7 @@
             },
             {
               "name": "appearance",
-              "description": "The look, several words at once:  `bordered` (a box around the section, as a segment), `styled` (boxed as a styled accordion:  a tinted title bar over padded content), `raised` (with a box:  lifted with a shadow), `basic` (no box, rule or tint, whatever else is set).  Old names:  `bordered`, `styled`, `raised`, `basic`.",
+              "description": "The look, several words at once:  `bordered` (a box around the section, as a segment), `styled` (boxed as a styled accordion:  a tinted title bar over padded content), `raised` (with a box:  lifted with a shadow), `basic` (no box, rule or tint, whatever else is set), `drawer` (the title a raised bar, the content a tinted panel attached under it that rolls open and closed, as an example's code under its demo).  Old names:  `bordered`, `styled`, `raised`, `basic`.",
               "type": {
                 "text": "string"
               },
@@ -27526,6 +27598,30 @@
               "description": "With `sticky`:  the title bar is stuck to the top."
             },
             {
+              "name": "stacked",
+              "description": "With `sticky=\"stack\"` (or `sticky` right inside a stacked section):  a bar of the stack."
+            },
+            {
+              "name": "tucked",
+              "description": "Stacked:  the first thing in its enclosing section, its title right under that section's, square on top."
+            },
+            {
+              "name": "tucks",
+              "description": "Stacked:  its first nested section is tucked under its title, so its content has no room on top."
+            },
+            {
+              "name": "after-closed",
+              "description": "Stacked:  right after a closed section, nothing between:  no room above it."
+            },
+            {
+              "name": "joins-above",
+              "description": "Stacked and closed, right after a closed one:  square on top, in its group."
+            },
+            {
+              "name": "joins-below",
+              "description": "Stacked and closed, right before a closed one:  square below, in its group."
+            },
+            {
               "name": "animated",
               "description": "Opens and closes with a height transition (`interpolate-size`)."
             },
@@ -27784,6 +27880,46 @@
               "name": "--ui-section-scrolling-height",
               "default": "var(--_section-scrolling-default, 15em)",
               "description": "Cap of a `scrolling` section's content; its default grows with the viewport (below): a value set from outside wins at every width."
+            },
+            {
+              "name": "--ui-section-drawer-radius",
+              "default": "var(--ui-radius-l)"
+            },
+            {
+              "name": "--ui-section-stack-reach-start",
+              "default": "var(--ui-section-stack-reach, 24px)"
+            },
+            {
+              "name": "--ui-section-stack-reach",
+              "default": "24px"
+            },
+            {
+              "name": "--ui-section-stack-step",
+              "default": "12px"
+            },
+            {
+              "name": "--ui-section-stack-reach-end",
+              "default": "var(--ui-section-stack-reach, 24px)"
+            },
+            {
+              "name": "--ui-section-stack-radius",
+              "default": "var(--ui-radius-m)"
+            },
+            {
+              "name": "--ui-section-drawer-title-background",
+              "default": "var(--ui-surface)"
+            },
+            {
+              "name": "--ui-section-drawer-inset",
+              "default": "0.5em"
+            },
+            {
+              "name": "--ui-section-drawer-background",
+              "default": "color-mix(in oklab, var(--ui-text-color) 3%, transparent)"
+            },
+            {
+              "name": "--ui-section-stack-stuck-radius",
+              "default": "var(--ui-radius-l)"
             }
           ]
         },

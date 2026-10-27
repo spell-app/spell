@@ -60,14 +60,14 @@
               default set;  the last example keeps Fomantic's own.  Each emoji is the reader's platform glyph, so screenshots
               differ between systems.
             -->
-            <ui-section id="examples-types" label="Types" sticky collapsible dividing>
+            <ui-section id="examples-types" label="Types" sticky="stack" collapsible dividing>
               <ui-message size="small" class="site-not-ported"
                 >Not ported: Fomantic's <code>&lt;em data-emoji&gt;</code> images from a CDN (Twemoji, JoyPixels) --
                 an emoji is the reader's own Unicode glyph, so there is no download and no per-emoji CSS (image sets:
                 I1).</ui-message
               >
               <!-- GAP I48:  Fomantic's Emojis tab (every emoji, searchable) has no widget to render it. -->
-              <ui-section id="examples-types-emoji" label="Emoji" sticky collapsible dividing>
+              <ui-section id="examples-types-emoji" label="Emoji" sticky="stack" collapsible dividing>
                 <ui-example
                   description="An emoji is a glyph used to represent something else.  `name` takes its CLDR name, Unicode's own."
                 >
@@ -84,7 +84,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-types-general" label="General" sticky collapsible dividing>
+              <ui-section id="examples-types-general" label="General" sticky="stack" collapsible dividing>
                 <ui-example>
                   <p slot="description">You can provide the emoji's name with or without colons.</p>
                   <ui-message slot="description" state="info" size="small"
@@ -105,7 +105,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-types-in-text" label="In text" sticky collapsible dividing>
+              <ui-section id="examples-types-in-text" label="In text" sticky="stack" collapsible dividing>
                 <ui-example
                   description="An emoji sits in running text at the size of the text.  `label` names one that means something else in context."
                 >
@@ -116,7 +116,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-types-decorative" label="Decorative" sticky collapsible dividing>
+              <ui-section id="examples-types-decorative" label="Decorative" sticky="stack" collapsible dividing>
                 <ui-example
                   description="An empty `label` marks an emoji as decoration, hidden from assistive technology."
                 >
@@ -125,8 +125,8 @@
               </ui-section>
             </ui-section>
 
-            <ui-section id="examples-states" label="States" sticky collapsible dividing>
-              <ui-section id="examples-states-disabled" label="Disabled" sticky collapsible dividing>
+            <ui-section id="examples-states" label="States" sticky="stack" collapsible dividing>
+              <ui-section id="examples-states-disabled" label="Disabled" sticky="stack" collapsible dividing>
                 <ui-example description="An emoji can show that it is disabled.">
                   <ui-segment size="massive" appearance="basic">
                     <ui-emoji name="anguished_face" disabled></ui-emoji>
@@ -134,7 +134,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-states-loading" label="Loading" sticky collapsible dividing>
+              <ui-section id="examples-states-loading" label="Loading" sticky="stack" collapsible dividing>
                 <ui-example
                   description="An emoji can be used as a simple loader.  It stands still when the reader asks for reduced motion."
                 >
@@ -147,8 +147,8 @@
               </ui-section>
             </ui-section>
 
-            <ui-section id="examples-variations" label="Variations" sticky collapsible dividing>
-              <ui-section id="examples-variations-size" label="Size" sticky collapsible dividing>
+            <ui-section id="examples-variations" label="Variations" sticky="stack" collapsible dividing>
+              <ui-section id="examples-variations-size" label="Size" sticky="stack" collapsible dividing>
                 <ui-example>
                   <p slot="description">An emoji can vary in size.</p>
                   <ui-message slot="description" size="small"
@@ -167,7 +167,7 @@
                   </ui-segment>
                 </ui-example>
               </ui-section>
-              <ui-section id="examples-variations-autosizing" label="Autosizing" sticky collapsible dividing>
+              <ui-section id="examples-variations-autosizing" label="Autosizing" sticky="stack" collapsible dividing>
                 <ui-example
                   description="If no specific size is given, every emoji is sized by the current element's font size."
                 >
@@ -184,7 +184,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-variations-link" label="Link" sticky collapsible dividing>
+              <ui-section id="examples-variations-link" label="Link" sticky="stack" collapsible dividing>
                 <ui-example>
                   <p slot="description">An emoji can be formatted as a link.</p>
                   <ui-message slot="description" size="small"
@@ -201,7 +201,7 @@
               </ui-section>
             </ui-section>
 
-            <ui-section id="examples-fomantic-s-names" label="Fomantic's names" sticky collapsible dividing>
+            <ui-section id="examples-fomantic-s-names" label="Fomantic's names" sticky="stack" collapsible dividing>
               <ui-section
                 id="examples-fomantic-s-names-fomantic-s-names"
                 label="Fomantic's names"
@@ -237,7 +237,7 @@
           </ui-tab>
 
           <ui-tab value="usage" label="Usage">
-            <ui-section id="usage-using-it" label="Using it" sticky collapsible dividing>
+            <ui-section id="usage-using-it" label="Using it" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   An emoji is the real Unicode character drawn by the reader's own emoji font, never an image: there is no image
@@ -253,7 +253,7 @@
               </ui-markdown>
             </ui-section>
 
-            <ui-section id="usage-name-sets-and-loading" label="Name sets and loading" sticky collapsible dividing>
+            <ui-section id="usage-name-sets-and-loading" label="Name sets and loading" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   The names load in small pieces, one per first letter, the first time a name starting with that letter is used;
@@ -277,7 +277,7 @@
               </ui-code>
             </ui-section>
 
-            <ui-section id="usage-keyboard" label="Keyboard" sticky collapsible dividing>
+            <ui-section id="usage-keyboard" label="Keyboard" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   An emoji takes no focus and handles no keys, `link` or not: the `<button>` or `<a>` around it does.
@@ -285,7 +285,7 @@
               </ui-markdown>
             </ui-section>
 
-            <ui-section id="usage-accessibility" label="Accessibility" sticky collapsible dividing>
+            <ui-section id="usage-accessibility" label="Accessibility" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   - By default the emoji is plain text, so assistive technology reads the character's own Unicode name in the
@@ -307,21 +307,21 @@
           </ui-tab>
 
           <ui-tab value="api" label="API">
-            <ui-section id="api-attributes" label="Attributes" sticky collapsible dividing>
+            <ui-section id="api-attributes" label="Attributes" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-emoji" only="attributes"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-parts" label="Parts" sticky collapsible dividing>
+            <ui-section id="api-parts" label="Parts" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-emoji" only="parts"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-states" label="States" sticky collapsible dividing>
+            <ui-section id="api-states" label="States" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-emoji" only="states"></ui-docs-api>
             </ui-section>
           </ui-tab>
 
           <ui-tab value="theming" label="Theming">
-            <ui-section id="theming-tokens" label="Tokens" sticky collapsible dividing>
+            <ui-section id="theming-tokens" label="Tokens" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   Theme with the public `--ui-emoji-*` tokens: set one on the element, on any ancestor (a region, `:root`), or on
@@ -360,7 +360,7 @@
               </ui-docs-tokens>
             </ui-section>
 
-            <ui-section id="theming-themes" label="Themes" sticky collapsible dividing>
+            <ui-section id="theming-themes" label="Themes" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   No theme restyles emoji. Fomantic's `joypixels` theme swaps its image set, which we don't have (image emoji

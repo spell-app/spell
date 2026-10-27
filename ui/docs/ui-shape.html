@@ -59,8 +59,8 @@
               Examples).  The direction buttons turn each shape through invoker commands (`commandfor` + `command="--flip-up"`
               ...):  no script.
             -->
-            <ui-section id="examples-types" label="Types" sticky collapsible dividing>
-              <ui-section id="examples-types-shape" label="Shape" sticky collapsible dividing>
+            <ui-section id="examples-types" label="Types" sticky="stack" collapsible dividing>
+              <ui-section id="examples-types-shape" label="Shape" sticky="stack" collapsible dividing>
                 <ui-example>
                   <p slot="description">
                     A shape is a three dimensional object including any flat content as a side: one
@@ -141,7 +141,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-types-cube" label="Cube" sticky collapsible dividing>
+              <ui-section id="examples-types-cube" label="Cube" sticky="stack" collapsible dividing>
                 <ui-example
                   description="A cube shape is formatted so that each side is the face of a cube:  `cube`."
                 >
@@ -199,7 +199,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-types-text" label="Text" sticky collapsible dividing>
+              <ui-section id="examples-types-text" label="Text" sticky="stack" collapsible dividing>
                 <ui-example>
                   <p slot="description">
                     A text shape is formatted to allow for sides of text to be displayed: <code>text</code>.
@@ -274,8 +274,8 @@
               </ui-section>
             </ui-section>
 
-            <ui-section id="examples-variations" label="Variations" sticky collapsible dividing>
-              <ui-section id="examples-variations-direction" label="Direction" sticky collapsible dividing>
+            <ui-section id="examples-variations" label="Variations" sticky="stack" collapsible dividing>
+              <ui-section id="examples-variations-direction" label="Direction" sticky="stack" collapsible dividing>
                 <ui-example
                   description="`direction` says which way `--next`, `--previous`, `next()` and `previous()` turn:  `up`, `down`, `left` (the default), `right`, `over` or `back`."
                 >
@@ -297,7 +297,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-variations-duration" label="Duration" sticky collapsible dividing>
+              <ui-section id="examples-variations-duration" label="Duration" sticky="stack" collapsible dividing>
                 <ui-example
                   description="`duration` sets the length of a flip:  ms or a CSS time;  Fomantic's 0.6s by default."
                 >
@@ -313,8 +313,8 @@
               </ui-section>
             </ui-section>
 
-            <ui-section id="examples-more-examples" label="More Examples" sticky collapsible dividing>
-              <ui-section id="examples-more-examples-shape-types" label="Shape Types" sticky collapsible dividing>
+            <ui-section id="examples-more-examples" label="More Examples" sticky="stack" collapsible dividing>
+              <ui-section id="examples-more-examples-shape-types" label="Shape Types" sticky="stack" collapsible dividing>
                 <ui-example>
                   <p slot="description">
                     Shapes do not have to be regular or have their sides match up in length and width to animate
@@ -383,7 +383,7 @@
 
           <ui-tab value="usage" label="Usage">
             <!-- USAGE:  how to use it (sides, flips, commands, methods, events), accessibility, framework snippets. -->
-            <ui-section id="usage-using-it" label="Using it" sticky collapsible dividing>
+            <ui-section id="usage-using-it" label="Using it" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   A shape's children are its sides: one `<ui-side>` per face, in order, as Fomantic's markup has a `.side` per
@@ -398,7 +398,7 @@
               </ui-markdown>
             </ui-section>
 
-            <ui-section id="usage-invoker-commands" label="Invoker commands" sticky collapsible dividing>
+            <ui-section id="usage-invoker-commands" label="Invoker commands" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   Turn a shape from a button with no script: `commandfor` is the shape's id, `command` what to do. Works on a
@@ -420,7 +420,7 @@
               </ui-code>
             </ui-section>
 
-            <ui-section id="usage-methods-and-events" label="Methods and events" sticky collapsible dividing>
+            <ui-section id="usage-methods-and-events" label="Methods and events" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   The host has Fomantic's behaviours as methods, each resolving once the turn has finished (`true`), or `false`
@@ -449,7 +449,7 @@
               </ui-markdown>
             </ui-section>
 
-            <ui-section id="usage-accessibility" label="Accessibility" sticky collapsible dividing>
+            <ui-section id="usage-accessibility" label="Accessibility" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   - Only the side shown is in the accessibility tree; the others are hidden.
@@ -462,7 +462,7 @@
               </ui-markdown>
             </ui-section>
 
-            <ui-section id="usage-framework-usage" label="Framework usage" sticky collapsible dividing>
+            <ui-section id="usage-framework-usage" label="Framework usage" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   Bind `active-index` and listen for `ui-animated`, or call the methods through a ref.
@@ -501,34 +501,34 @@
 
           <ui-tab value="api" label="API">
             <!-- API:  generated from the vocabularies (`docs/__data/components.json5`);  nothing to write. -->
-            <ui-section id="api-tags" label="Tags" sticky collapsible dividing>
+            <ui-section id="api-tags" label="Tags" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-shape" only="tags"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-attributes" label="Attributes" sticky collapsible dividing>
+            <ui-section id="api-attributes" label="Attributes" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-shape" only="attributes"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-events" label="Events" sticky collapsible dividing>
+            <ui-section id="api-events" label="Events" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-shape" only="events"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-slots" label="Slots" sticky collapsible dividing>
+            <ui-section id="api-slots" label="Slots" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-shape" only="slots"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-parts" label="Parts" sticky collapsible dividing>
+            <ui-section id="api-parts" label="Parts" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-shape" only="parts"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-states" label="States" sticky collapsible dividing>
+            <ui-section id="api-states" label="States" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-shape" only="states"></ui-docs-api>
             </ui-section>
           </ui-tab>
 
           <ui-tab value="theming" label="Theming">
             <!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
-            <ui-section id="theming-tokens" label="Tokens" sticky collapsible dividing>
+            <ui-section id="theming-tokens" label="Tokens" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   Theme with the public `--ui-shape-*` tokens on the shape or any ancestor; `::part(shape)` works too. Style the
@@ -567,7 +567,7 @@
               </ui-docs-tokens>
             </ui-section>
 
-            <ui-section id="theming-themes" label="Themes" sticky collapsible dividing>
+            <ui-section id="theming-themes" label="Themes" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   The theme menu in the header (Spell, Glass, Fruity, Merlot, Paper, Midnight, Crisp, Pop, Matrix) restyles the cards, headers and images

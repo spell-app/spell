@@ -21968,8 +21968,13 @@
           "name": "sticky",
           "description": {
             "kind": "markdown",
-            "value": "The title bar sticks while the section is on screen;  a sticky section inside another sticks just below its title.\n\nTakes:  flag (present / absent)"
-          }
+            "value": "The title bar sticks while the section is on screen;  a sticky section inside another sticks just below its title.  `sticky=\"stack\"`:  the titles read as one stack of rounded bars, as the docs pages' sections do -- each level a step further in (`--ui-section-stack-reach`, `--ui-section-stack-step`), a section's first nested title tucked square under its own, a nested title stuck under its parent's a heavy round (the theme's large radius), and closed sections one after another flush, ONE group, round only at its top and bottom.  A plain `sticky` section right inside a stacked one joins its stack (not through another element, an example's).\n\nTakes:  flag, or `stack`"
+          },
+          "values": [
+            {
+              "name": "stack"
+            }
+          ]
         },
         {
           "name": "offset",
@@ -22089,7 +22094,7 @@
           "name": "appearance",
           "description": {
             "kind": "markdown",
-            "value": "The look, several words at once:  `bordered` (a box around the section, as a segment), `styled` (boxed as a styled accordion:  a tinted title bar over padded content), `raised` (with a box:  lifted with a shadow), `basic` (no box, rule or tint, whatever else is set).  Old names:  `bordered`, `styled`, `raised`, `basic`.\n\nTakes:  space-separated:  `bordered` · `styled` · `raised` · `basic`"
+            "value": "The look, several words at once:  `bordered` (a box around the section, as a segment), `styled` (boxed as a styled accordion:  a tinted title bar over padded content), `raised` (with a box:  lifted with a shadow), `basic` (no box, rule or tint, whatever else is set), `drawer` (the title a raised bar, the content a tinted panel attached under it that rolls open and closed, as an example's code under its demo).  Old names:  `bordered`, `styled`, `raised`, `basic`.\n\nTakes:  space-separated:  `bordered` · `styled` · `raised` · `basic` · `drawer`"
           },
           "values": [
             {
@@ -22103,6 +22108,9 @@
             },
             {
               "name": "basic"
+            },
+            {
+              "name": "drawer"
             }
           ]
         },
@@ -25062,8 +25070,13 @@
           "name": "sticky",
           "description": {
             "kind": "markdown",
-            "value": "The title bar sticks while the section is on screen;  a sticky section inside another sticks just below its title.\n\nTakes:  flag (present / absent)"
-          }
+            "value": "The title bar sticks while the section is on screen;  a sticky section inside another sticks just below its title.  `sticky=\"stack\"`:  the titles read as one stack of rounded bars, as the docs pages' sections do -- each level a step further in (`--ui-section-stack-reach`, `--ui-section-stack-step`), a section's first nested title tucked square under its own, a nested title stuck under its parent's a heavy round (the theme's large radius), and closed sections one after another flush, ONE group, round only at its top and bottom.  A plain `sticky` section right inside a stacked one joins its stack (not through another element, an example's).\n\nTakes:  flag, or `stack`"
+          },
+          "values": [
+            {
+              "name": "stack"
+            }
+          ]
         },
         {
           "name": "offset",
@@ -25150,7 +25163,7 @@
           "name": "appearance",
           "description": {
             "kind": "markdown",
-            "value": "The look, several words at once:  `bordered` (a box around the section, as a segment), `styled` (boxed as a styled accordion:  a tinted title bar over padded content), `raised` (with a box:  lifted with a shadow), `basic` (no box, rule or tint, whatever else is set).  Old names:  `bordered`, `styled`, `raised`, `basic`.\n\nTakes:  space-separated:  `bordered` · `styled` · `raised` · `basic`"
+            "value": "The look, several words at once:  `bordered` (a box around the section, as a segment), `styled` (boxed as a styled accordion:  a tinted title bar over padded content), `raised` (with a box:  lifted with a shadow), `basic` (no box, rule or tint, whatever else is set), `drawer` (the title a raised bar, the content a tinted panel attached under it that rolls open and closed, as an example's code under its demo).  Old names:  `bordered`, `styled`, `raised`, `basic`.\n\nTakes:  space-separated:  `bordered` · `styled` · `raised` · `basic` · `drawer`"
           },
           "values": [
             {
@@ -25164,6 +25177,9 @@
             },
             {
               "name": "basic"
+            },
+            {
+              "name": "drawer"
             }
           ]
         },
@@ -25584,8 +25600,13 @@
           "name": "sticky",
           "description": {
             "kind": "markdown",
-            "value": "The title bar sticks while the section is on screen;  a sticky section inside another sticks just below its title.\n\nTakes:  flag (present / absent)"
-          }
+            "value": "The title bar sticks while the section is on screen;  a sticky section inside another sticks just below its title.  `sticky=\"stack\"`:  the titles read as one stack of rounded bars, as the docs pages' sections do -- each level a step further in (`--ui-section-stack-reach`, `--ui-section-stack-step`), a section's first nested title tucked square under its own, a nested title stuck under its parent's a heavy round (the theme's large radius), and closed sections one after another flush, ONE group, round only at its top and bottom.  A plain `sticky` section right inside a stacked one joins its stack (not through another element, an example's).\n\nTakes:  flag, or `stack`"
+          },
+          "values": [
+            {
+              "name": "stack"
+            }
+          ]
         },
         {
           "name": "offset",
@@ -25705,7 +25726,7 @@
           "name": "appearance",
           "description": {
             "kind": "markdown",
-            "value": "The look, several words at once:  `bordered` (a box around the section, as a segment), `styled` (boxed as a styled accordion:  a tinted title bar over padded content), `raised` (with a box:  lifted with a shadow), `basic` (no box, rule or tint, whatever else is set).  Old names:  `bordered`, `styled`, `raised`, `basic`.\n\nTakes:  space-separated:  `bordered` · `styled` · `raised` · `basic`"
+            "value": "The look, several words at once:  `bordered` (a box around the section, as a segment), `styled` (boxed as a styled accordion:  a tinted title bar over padded content), `raised` (with a box:  lifted with a shadow), `basic` (no box, rule or tint, whatever else is set), `drawer` (the title a raised bar, the content a tinted panel attached under it that rolls open and closed, as an example's code under its demo).  Old names:  `bordered`, `styled`, `raised`, `basic`.\n\nTakes:  space-separated:  `bordered` · `styled` · `raised` · `basic` · `drawer`"
           },
           "values": [
             {
@@ -25719,6 +25740,9 @@
             },
             {
               "name": "basic"
+            },
+            {
+              "name": "drawer"
             }
           ]
         },
@@ -29565,8 +29589,13 @@
           "name": "sticky",
           "description": {
             "kind": "markdown",
-            "value": "The title bar sticks while the section is on screen;  a sticky section inside another sticks just below its title.\n\nTakes:  flag (present / absent)"
-          }
+            "value": "The title bar sticks while the section is on screen;  a sticky section inside another sticks just below its title.  `sticky=\"stack\"`:  the titles read as one stack of rounded bars, as the docs pages' sections do -- each level a step further in (`--ui-section-stack-reach`, `--ui-section-stack-step`), a section's first nested title tucked square under its own, a nested title stuck under its parent's a heavy round (the theme's large radius), and closed sections one after another flush, ONE group, round only at its top and bottom.  A plain `sticky` section right inside a stacked one joins its stack (not through another element, an example's).\n\nTakes:  flag, or `stack`"
+          },
+          "values": [
+            {
+              "name": "stack"
+            }
+          ]
         },
         {
           "name": "offset",
@@ -29686,7 +29715,7 @@
           "name": "appearance",
           "description": {
             "kind": "markdown",
-            "value": "The look, several words at once:  `bordered` (a box around the section, as a segment), `styled` (boxed as a styled accordion:  a tinted title bar over padded content), `raised` (with a box:  lifted with a shadow), `basic` (no box, rule or tint, whatever else is set).  Old names:  `bordered`, `styled`, `raised`, `basic`.\n\nTakes:  space-separated:  `bordered` · `styled` · `raised` · `basic`"
+            "value": "The look, several words at once:  `bordered` (a box around the section, as a segment), `styled` (boxed as a styled accordion:  a tinted title bar over padded content), `raised` (with a box:  lifted with a shadow), `basic` (no box, rule or tint, whatever else is set), `drawer` (the title a raised bar, the content a tinted panel attached under it that rolls open and closed, as an example's code under its demo).  Old names:  `bordered`, `styled`, `raised`, `basic`.\n\nTakes:  space-separated:  `bordered` · `styled` · `raised` · `basic` · `drawer`"
           },
           "values": [
             {
@@ -29700,6 +29729,9 @@
             },
             {
               "name": "basic"
+            },
+            {
+              "name": "drawer"
             }
           ]
         },

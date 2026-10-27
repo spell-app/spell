@@ -7828,6 +7828,76 @@
       }
     },
     {
+      "name": "--ui-section-drawer-radius",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-section>`'s token.  Default:  `var(--ui-radius-l)`"
+      }
+    },
+    {
+      "name": "--ui-section-stack-reach-start",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-section>`'s token.  Default:  `var(--ui-section-stack-reach, 24px)`"
+      }
+    },
+    {
+      "name": "--ui-section-stack-reach",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-section>`'s token.  Default:  `24px`"
+      }
+    },
+    {
+      "name": "--ui-section-stack-step",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-section>`'s token.  Default:  `12px`"
+      }
+    },
+    {
+      "name": "--ui-section-stack-reach-end",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-section>`'s token.  Default:  `var(--ui-section-stack-reach, 24px)`"
+      }
+    },
+    {
+      "name": "--ui-section-stack-radius",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-section>`'s token.  Default:  `var(--ui-radius-m)`"
+      }
+    },
+    {
+      "name": "--ui-section-drawer-title-background",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-section>`'s token.  Default:  `var(--ui-surface)`"
+      }
+    },
+    {
+      "name": "--ui-section-drawer-inset",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-section>`'s token.  Default:  `0.5em`"
+      }
+    },
+    {
+      "name": "--ui-section-drawer-background",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-section>`'s token.  Default:  `color-mix(in oklab, var(--ui-text-color) 3%, transparent)`"
+      }
+    },
+    {
+      "name": "--ui-section-stack-stuck-radius",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-section>`'s token.  Default:  `var(--ui-radius-l)`"
+      }
+    },
+    {
       "name": "--ui-segment-background",
       "description": {
         "kind": "markdown",
@@ -11255,6 +11325,13 @@
       }
     },
     {
+      "name": ":state(after-closed)",
+      "description": {
+        "kind": "markdown",
+        "value": "Custom state of:\n\n- `<ui-panel>`:  Stacked:  right after a closed section, nothing between:  no room above it.\n- `<ui-property-editor>`:  Stacked:  right after a closed section, nothing between:  no room above it.\n- `<ui-property-group>`:  Stacked:  right after a closed section, nothing between:  no room above it.\n- `<ui-section>`:  Stacked:  right after a closed section, nothing between:  no room above it."
+      }
+    },
+    {
       "name": ":state(animated)",
       "description": {
         "kind": "markdown",
@@ -11815,6 +11892,20 @@
       }
     },
     {
+      "name": ":state(joins-above)",
+      "description": {
+        "kind": "markdown",
+        "value": "Custom state of:\n\n- `<ui-panel>`:  Stacked and closed, right after a closed one:  square on top, in its group.\n- `<ui-property-editor>`:  Stacked and closed, right after a closed one:  square on top, in its group.\n- `<ui-property-group>`:  Stacked and closed, right after a closed one:  square on top, in its group.\n- `<ui-section>`:  Stacked and closed, right after a closed one:  square on top, in its group."
+      }
+    },
+    {
+      "name": ":state(joins-below)",
+      "description": {
+        "kind": "markdown",
+        "value": "Custom state of:\n\n- `<ui-panel>`:  Stacked and closed, right before a closed one:  square below, in its group.\n- `<ui-property-editor>`:  Stacked and closed, right before a closed one:  square below, in its group.\n- `<ui-property-group>`:  Stacked and closed, right before a closed one:  square below, in its group.\n- `<ui-section>`:  Stacked and closed, right before a closed one:  square below, in its group."
+      }
+    },
+    {
       "name": ":state(leaving)",
       "description": {
         "kind": "markdown",
@@ -12039,6 +12130,13 @@
       }
     },
     {
+      "name": ":state(stacked)",
+      "description": {
+        "kind": "markdown",
+        "value": "Custom state of:\n\n- `<ui-panel>`:  With `sticky=\"stack\"` (or `sticky` right inside a stacked section):  a bar of the stack.\n- `<ui-property-editor>`:  With `sticky=\"stack\"` (or `sticky` right inside a stacked section):  a bar of the stack.\n- `<ui-property-group>`:  With `sticky=\"stack\"` (or `sticky` right inside a stacked section):  a bar of the stack.\n- `<ui-section>`:  With `sticky=\"stack\"` (or `sticky` right inside a stacked section):  a bar of the stack."
+      }
+    },
+    {
       "name": ":state(statistic)",
       "description": {
         "kind": "markdown",
@@ -12078,6 +12176,20 @@
       "description": {
         "kind": "markdown",
         "value": "Custom state of:\n\n- `<ui-field>`:  In the success state.\n- `<ui-fields>`:  In the success state.\n- `<ui-form>`:  In the success state.\n- `<ui-property>`:  In the success state.\n- `<ui-property-editor>`:  In the success state."
+      }
+    },
+    {
+      "name": ":state(tucked)",
+      "description": {
+        "kind": "markdown",
+        "value": "Custom state of:\n\n- `<ui-panel>`:  Stacked:  the first thing in its enclosing section, its title right under that section's, square on top.\n- `<ui-property-editor>`:  Stacked:  the first thing in its enclosing section, its title right under that section's, square on top.\n- `<ui-property-group>`:  Stacked:  the first thing in its enclosing section, its title right under that section's, square on top.\n- `<ui-section>`:  Stacked:  the first thing in its enclosing section, its title right under that section's, square on top."
+      }
+    },
+    {
+      "name": ":state(tucks)",
+      "description": {
+        "kind": "markdown",
+        "value": "Custom state of:\n\n- `<ui-panel>`:  Stacked:  its first nested section is tucked under its title, so its content has no room on top.\n- `<ui-property-editor>`:  Stacked:  its first nested section is tucked under its title, so its content has no room on top.\n- `<ui-property-group>`:  Stacked:  its first nested section is tucked under its title, so its content has no room on top.\n- `<ui-section>`:  Stacked:  its first nested section is tucked under its title, so its content has no room on top."
       }
     },
     {

@@ -12,15 +12,6 @@
   /* the docs site's text size, the theme's (the editor's own is a little smaller) */
   font-size: var(--ui-font-size);
   line-height: var(--ui-line-height);
-  /*
-   * a section title's bar reaches out past the column, as a component page's does (`docs-sections.css`):
-   * the gutter's width, so a top-level bar stands 28px out (12px in from the pane's edge), a nested one 12px out:
-   * each bar wider than what it holds (Owen, 2026-10-27:  "outdent button header so it is bigger than the content")
-   */
-  --ui-docs-section-reach-start: var(--notebook-gutter);
-  --ui-docs-section-reach-end: var(--notebook-gutter);
-  /* its ends the theme's pill, as its tab bar's (Owen, 2026-10-27:  "pill sides to match the theme") */
-  --ui-docs-section-radius: var(--ui-menu-segmented-radius, var(--ui-radius-m));
   /* its own width decides its layout, not the window's:  it shares the window with the code */
   container-type: inline-size;
   position: relative;
@@ -147,6 +138,19 @@
 }
 
 /*
+ * a section's title bar, a bar of `<ui-section sticky="stack">`'s stack:  reaching out past the column as a component
+ * page's does, a top-level one 28px out (12px in from the pane's edge), a nested one 12px out:  each bar wider than
+ * what it holds (Owen, 2026-10-27:  "outdent button header so it is bigger than the content");  its ends the theme's
+ * pill, as its tab bar's ("pill sides to match the theme")
+ */
+.NotebookPage ui-section[sticky]:not(spell-example ui-section) {
+  --ui-section-stack-reach-start: calc(var(--notebook-gutter) - 12px);
+  --ui-section-stack-reach-end: calc(var(--notebook-gutter) - 12px);
+  --ui-section-stack-step: 16px;
+  --ui-section-stack-radius: var(--ui-menu-segmented-radius, var(--ui-radius-m));
+}
+
+/*
  * ## Section titles and examples:  the docs site's own look, left as it is (`docs-sections.css`, `<ui-example>`)
  * - Owen, 2026-10-27:  the titles and the examples' frames look as they do in Spell UI's docs, not cleared
  *   ("it really bugs me that the section title and example background look like [this] rather than the way they
@@ -185,72 +189,14 @@
   border-bottom: none;
 }
 /*
- * a page section whose first drawing opens with a nested section:  that title tucked right under its own, square on
- * top, as the site's (`docs-sections.css` does it for a section that's its parent's first child;  here cells stand
- * between them)
- * - its first cell is its heading's, which draws nothing:  the nested section is in the one after it
+ * no room between a closed section and the one right after it, each in a cell of its own:  the stack says which
+ * (`<ui-section sticky="stack">`'s `after-closed`), the cells give up their own room
  */
-.NotebookSection:has(> .NotebookCell .NotebookResult > ui-section[sticky]:first-child)::part(content) {
-  padding-block-start: 0;
-}
-.NotebookSection
-  > .NotebookCell:nth-child(1 of .NotebookCell):empty
-  + .NotebookCell
-  .NotebookResult
-  > ui-section[sticky]:first-child::part(title) {
-  border-start-start-radius: 0;
-  border-start-end-radius: 0;
-}
-.NotebookSection
-  > .NotebookCell:nth-child(1 of .NotebookCell):empty
-  + .NotebookCell
-  .NotebookResult
-  > ui-section[sticky]:first-child::part(section) {
+.NotebookCell:has(> * > .NotebookResult > ui-section:state(after-closed):first-child) {
   margin-block-start: 0;
 }
-/*
- * a nested title while stuck:  a heavy round under it, the theme's large radius, not its pill (Owen, 2026-10-27:
- * "Comments is too rounded when stuck, make it just a heavy round")
- */
-.NotebookPage ui-section ui-section[sticky]:state(stuck)::part(title) {
-  border-end-start-radius: var(--ui-radius-l);
-  border-end-end-radius: var(--ui-radius-l);
-}
-/*
- * folded sections one after another, each in a cell of its own:  ONE group, flush, round only at its top and bottom,
- * as `docs-sections.css` does for sections side by side (Owen, 2026-10-27:  "Card and Item should be stuck together
- * when closed");  an open one splits it
- */
-.NotebookCell:has(> * > .NotebookResult > ui-section[sticky]:state(collapsed):last-child):has(
-    + .NotebookCell > * > .NotebookResult > ui-section[sticky]:state(collapsed):first-child
-  ) {
+.NotebookCell:has(+ .NotebookCell > * > .NotebookResult > ui-section:state(after-closed):first-child) {
   margin-block-end: 0;
-}
-.NotebookCell:has(> * > .NotebookResult > ui-section[sticky]:state(collapsed):last-child)
-  + .NotebookCell:has(> * > .NotebookResult > ui-section[sticky]:state(collapsed):first-child) {
-  margin-block-start: 0;
-}
-.NotebookCell:has(+ .NotebookCell > * > .NotebookResult > ui-section[sticky]:state(collapsed):first-child)
-  > *
-  > .NotebookResult
-  > ui-section[sticky]:state(collapsed):last-child::part(title) {
-  border-end-start-radius: 0;
-  border-end-end-radius: 0;
-}
-.NotebookCell:has(> * > .NotebookResult > ui-section[sticky]:state(collapsed):last-child)
-  + .NotebookCell
-  > *
-  > .NotebookResult
-  > ui-section[sticky]:state(collapsed):first-child::part(section) {
-  margin-block-start: 0;
-}
-.NotebookCell:has(> * > .NotebookResult > ui-section[sticky]:state(collapsed):last-child)
-  + .NotebookCell
-  > *
-  > .NotebookResult
-  > ui-section[sticky]:state(collapsed):first-child::part(title) {
-  border-start-start-radius: 0;
-  border-start-end-radius: 0;
 }
 /* ... nor a title's room:  it has none to show (its padding stood 7.5px over the section tabs) */
 .NotebookResult ui-section:not([label], :has(> [slot="label"]))::part(title) {

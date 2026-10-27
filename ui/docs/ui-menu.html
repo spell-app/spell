@@ -60,8 +60,8 @@
               Every top-level menu is a `<nav>` landmark, so each example names its menu with its own `aria-label`.
               `GAP I<n>` comments mark examples a widget can't render yet (plan-doc issues).
             -->
-            <ui-section id="examples-types" label="Types" sticky collapsible dividing>
-              <ui-section id="examples-types-menu" label="Menu" sticky collapsible dividing>
+            <ui-section id="examples-types" label="Types" sticky="stack" collapsible dividing>
+              <ui-section id="examples-types-menu" label="Menu" sticky="stack" collapsible dividing>
                 <ui-example>
                   <p slot="description">
                     A menu:  <code>items</code> divides its width evenly between that many items.
@@ -151,7 +151,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-types-secondary-menu" label="Secondary Menu" sticky collapsible dividing>
+              <ui-section id="examples-types-secondary-menu" label="Secondary Menu" sticky="stack" collapsible dividing>
                 <ui-example
                   description='A menu can adjust its appearance to de-emphasize its contents.  A nested `<ui-menu position="right">` holds the items at the far end.'
                 >
@@ -169,7 +169,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-types-pointing" label="Pointing" sticky collapsible dividing>
+              <ui-section id="examples-types-pointing" label="Pointing" sticky="stack" collapsible dividing>
                 <ui-example
                   description="A menu can point to show its relationship to nearby content.  With `secondary` too, the active item is underlined."
                 >
@@ -202,7 +202,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-types-tabbed" label="Tabbed" sticky collapsible dividing>
+              <ui-section id="examples-types-tabbed" label="Tabbed" sticky="stack" collapsible dividing>
                 <ui-example>
                   <p slot="description">
                     A menu can be formatted to show tabs of information: <code>tabular</code> (Fomantic 2.10 renamed it
@@ -288,7 +288,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-types-text" label="Text" sticky collapsible dividing>
+              <ui-section id="examples-types-text" label="Text" sticky="stack" collapsible dividing>
                 <ui-example description="A menu can be formatted for text content.">
                   <ui-menu appearance="text" aria-label="Sort">
                     <ui-item kind="header">Sort By</ui-item>
@@ -299,7 +299,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-types-segmented" label="Segmented" sticky collapsible dividing>
+              <ui-section id="examples-types-segmented" label="Segmented" sticky="stack" collapsible dividing>
                 <ui-example
                   description='A menu can be a segmented control, a bordered group of joined items:  `appearance="segmented"`.  The selected item is filled with the primary colour, or the menu&apos;s `color`.  It moves `selected` to the item chosen itself (cancel `ui-select` to keep the old one).'
                 >
@@ -342,7 +342,7 @@
                   </ui-menu>
                 </ui-example>
               </ui-section>
-              <ui-section id="examples-types-appearance" label="Appearance" sticky collapsible dividing>
+              <ui-section id="examples-types-appearance" label="Appearance" sticky="stack" collapsible dividing>
                 <ui-example
                   description='The look is `appearance`, several words at once:  `tabular`, `pointing`, `secondary`, `text`, `segmented`, `link`, `borderless`.  The older booleans (`<ui-menu appearance="pointing">`, `secondary` ...) are its old names, and still work.  They combine:  `appearance="pointing" secondary` ~== `secondary pointing`.'
                 >
@@ -355,7 +355,7 @@
               </ui-section>
 
               <!-- GAP I81:  the item labels sit inline after the text, not floated right. -->
-              <ui-section id="examples-types-vertical-menu" label="Vertical Menu" sticky collapsible dividing>
+              <ui-section id="examples-types-vertical-menu" label="Vertical Menu" sticky="stack" collapsible dividing>
                 <ui-example>
                   <p slot="description">A vertical menu displays elements vertically.</p>
                   <ui-message slot="description" state="warning" size="small"
@@ -423,7 +423,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-types-pagination" label="Pagination" sticky collapsible dividing>
+              <ui-section id="examples-types-pagination" label="Pagination" sticky="stack" collapsible dividing>
                 <ui-example
                   description="A pagination menu is specially formatted to present links to pages of content.  Its items are interactive, so one without a `link` is a button."
                 >
@@ -437,7 +437,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-types-menubar" label="Menubar" sticky collapsible dividing>
+              <ui-section id="examples-types-menubar" label="Menubar" sticky="stack" collapsible dividing>
                 <ui-example
                   description="`interactive` makes an application menubar instead of a navigation landmark:  one Tab stop, arrow keys between the items.  Try it with the keyboard."
                 >
@@ -451,8 +451,8 @@
               </ui-section>
             </ui-section>
 
-            <ui-section id="examples-content" label="Content" sticky collapsible dividing>
-              <ui-section id="examples-content-header" label="Header" sticky collapsible dividing>
+            <ui-section id="examples-content" label="Content" sticky="stack" collapsible dividing>
+              <ui-section id="examples-content-header" label="Header" sticky="stack" collapsible dividing>
                 <ui-example
                   description='A menu item may include a header or may itself be a header:  `type="header"` makes an item a header.'
                 >
@@ -500,7 +500,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-content-text" label="Text" sticky collapsible dividing>
+              <ui-section id="examples-content-text" label="Text" sticky="stack" collapsible dividing>
                 <ui-example description="A vertical menu item can include any type of text content.">
                   <ui-menu direction="vertical" aria-label="Offers">
                     <ui-item link="#promotions">
@@ -519,7 +519,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-content-input" label="Input" sticky collapsible dividing>
+              <ui-section id="examples-content-input" label="Input" sticky="stack" collapsible dividing>
                 <ui-example description="A menu item can contain an input inside of it.">
                   <ui-menu aria-label="Navigate">
                     <ui-item>
@@ -534,7 +534,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-content-button" label="Button" sticky collapsible dividing>
+              <ui-section id="examples-content-button" label="Button" sticky="stack" collapsible dividing>
                 <ui-example description="A menu item can contain a button inside of it.">
                   <ui-menu aria-label="Account actions">
                     <ui-item><ui-button color="primary">Sign up</ui-button></ui-item>
@@ -543,7 +543,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-content-link-item" label="Link Item" sticky collapsible dividing>
+              <ui-section id="examples-content-link-item" label="Link Item" sticky="stack" collapsible dividing>
                 <ui-example
                   description='A menu may contain a link item, or an item formatted as if it is a link:  `link` renders a link, `appearance="link"` a button for actions you handle in script.'
                 >
@@ -554,7 +554,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-content-dropdown-item" label="Dropdown Item" sticky collapsible dividing>
+              <ui-section id="examples-content-dropdown-item" label="Dropdown Item" sticky="stack" collapsible dividing>
                 <ui-example description="An item may contain a nested menu in a dropdown.">
                   <ui-menu direction="vertical" aria-label="Categories">
                     <ui-item>
@@ -569,7 +569,7 @@
               </ui-section>
 
               <!-- GAP I69:  opened, the `fluid` popup collapses its `<ui-grid>` to a sliver, not the menu's width. -->
-              <ui-section id="examples-content-popup-menu" label="Popup Menu" sticky collapsible dividing>
+              <ui-section id="examples-content-popup-menu" label="Popup Menu" sticky="stack" collapsible dividing>
                 <ui-example
                   description="A menu item may show a large menu, or additional content using a popup:  a `<ui-popup>` right after the item opens from it."
                 >
@@ -618,7 +618,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-content-search" label="Search" sticky collapsible dividing>
+              <ui-section id="examples-content-search" label="Search" sticky="stack" collapsible dividing>
                 <ui-example description="A menu can contain a search input.">
                   <ui-menu aria-label="Animals">
                     <ui-item>
@@ -631,7 +631,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-content-menu" label="Menu" sticky collapsible dividing>
+              <ui-section id="examples-content-menu" label="Menu" sticky="stack" collapsible dividing>
                 <ui-example
                   description='A menu may contain another menu group in the same level as menu items:  `position="right"` pushes it to the far end.'
                 >
@@ -646,7 +646,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-content-sub-menu" label="Sub Menu" sticky collapsible dividing>
+              <ui-section id="examples-content-sub-menu" label="Sub Menu" sticky="stack" collapsible dividing>
                 <ui-example
                   description="A menu item may contain another menu nested inside that acts as a grouped sub-menu."
                 >
@@ -676,8 +676,8 @@
               </ui-section>
             </ui-section>
 
-            <ui-section id="examples-states" label="States" sticky collapsible dividing>
-              <ui-section id="examples-states-hover" label="Hover" sticky collapsible dividing>
+            <ui-section id="examples-states" label="States" sticky="stack" collapsible dividing>
+              <ui-section id="examples-states-hover" label="Hover" sticky="stack" collapsible dividing>
                 <ui-example>
                   <p slot="description">A menu item can be hovered.</p>
                   <ui-message slot="description" state="warning" size="small"
@@ -691,7 +691,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-states-active" label="Active" sticky collapsible dividing>
+              <ui-section id="examples-states-active" label="Active" sticky="stack" collapsible dividing>
                 <ui-example
                   description="A menu item can be active:  `selected` is the attribute;  Fomantic's `active` works too."
                 >
@@ -701,7 +701,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-states-disabled" label="Disabled" sticky collapsible dividing>
+              <ui-section id="examples-states-disabled" label="Disabled" sticky="stack" collapsible dividing>
                 <ui-example description="A menu item can be disabled.">
                   <ui-menu padding="compact" aria-label="Disabled">
                     <ui-item disabled>Link</ui-item>
@@ -710,8 +710,8 @@
               </ui-section>
             </ui-section>
 
-            <ui-section id="examples-variations" label="Variations" sticky collapsible dividing>
-              <ui-section id="examples-variations-fixed" label="Fixed" sticky collapsible dividing>
+            <ui-section id="examples-variations" label="Variations" sticky="stack" collapsible dividing>
+              <ui-section id="examples-variations-fixed" label="Fixed" sticky="stack" collapsible dividing>
                 <ui-example>
                   <p slot="description">
                     A menu can be fixed to a side of its context:  <code>fixed</code> is top, bottom, left or right (with
@@ -735,7 +735,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-variations-stackable" label="Stackable" sticky collapsible dividing>
+              <ui-section id="examples-variations-stackable" label="Stackable" sticky="stack" collapsible dividing>
                 <ui-example>
                   <p slot="description">A menu can stack at mobile resolutions.</p>
                   <ui-message slot="description" state="info" size="small"
@@ -750,7 +750,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-variations-inverted" label="Inverted" sticky collapsible dividing>
+              <ui-section id="examples-variations-inverted" label="Inverted" sticky="stack" collapsible dividing>
                 <ui-example description="A menu may have its colors inverted to show greater contrast.">
                   <ui-menu inverted aria-label="Inverted">
                     <ui-item link="#home" selected>Home</ui-item>
@@ -792,7 +792,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-variations-colored" label="Colored" sticky collapsible dividing>
+              <ui-section id="examples-variations-colored" label="Colored" sticky="stack" collapsible dividing>
                 <ui-example
                   description="Additional colors can be specified:  an item's `color` tints it while selected."
                 >
@@ -957,7 +957,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-variations-icons" label="Icons" sticky collapsible dividing>
+              <ui-section id="examples-variations-icons" label="Icons" sticky="stack" collapsible dividing>
                 <ui-example description="A menu may have just icons.  An icon-only item needs an `aria-label`.">
                   <ui-menu icon aria-label="Media">
                     <ui-item link="#games" icon="gamepad" aria-label="Games"></ui-item>
@@ -973,7 +973,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-variations-labeled-icon" label="Labeled Icon" sticky collapsible dividing>
+              <ui-section id="examples-variations-labeled-icon" label="Labeled Icon" sticky="stack" collapsible dividing>
                 <ui-example
                   description="A menu may have labeled icons:  `labeled` puts a large icon above each item's text."
                 >
@@ -991,7 +991,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-variations-fluid" label="Fluid" sticky collapsible dividing>
+              <ui-section id="examples-variations-fluid" label="Fluid" sticky="stack" collapsible dividing>
                 <ui-example
                   description="A vertical menu may take the size of its container.  (A horizontal menu does this by default.)"
                 >
@@ -1003,7 +1003,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-variations-compact" label="Compact" sticky collapsible dividing>
+              <ui-section id="examples-variations-compact" label="Compact" sticky="stack" collapsible dividing>
                 <ui-example description="A menu can take up only the space necessary to fit its content.">
                   <ui-menu padding="compact" aria-label="Media, compact">
                     <ui-item link="#games" icon="gamepad">Games</ui-item>
@@ -1020,7 +1020,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-variations-evenly-divided" label="Evenly Divided" sticky collapsible dividing>
+              <ui-section id="examples-variations-evenly-divided" label="Evenly Divided" sticky="stack" collapsible dividing>
                 <ui-example description='A menu may divide its items evenly by either using `items="equal"` ...'>
                   <ui-menu items="equal" aria-label="Listing, equal">
                     <ui-item link="#buy">Buy</ui-item>
@@ -1037,7 +1037,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-variations-equal" label="Equal" sticky collapsible dividing>
+              <ui-section id="examples-variations-equal" label="Equal" sticky="stack" collapsible dividing>
                 <ui-example
                   description='`equal` makes every item the same width, counted from the items themselves:  each as wide as the widest, the menu hugging them.  `items="3"` / `items="equal"` above are the older, count-based spellings.'
                 >
@@ -1056,7 +1056,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-variations-alignment" label="Alignment" sticky collapsible dividing>
+              <ui-section id="examples-variations-alignment" label="Alignment" sticky="stack" collapsible dividing>
                 <ui-example
                   description='`align` places the items:  `left`, `center` or `right` packs them at that end of the bar;  `fluid` makes them fill it.'
                 >
@@ -1115,7 +1115,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-variations-attached" label="Attached" sticky collapsible dividing>
+              <ui-section id="examples-variations-attached" label="Attached" sticky="stack" collapsible dividing>
                 <ui-example description="A menu may be attached to other content segments.">
                   <ui-menu appearance="tabular" attach="top" aria-label="Attached tabs">
                     <ui-item link="#tab-1" selected>Tab 1</ui-item>
@@ -1144,7 +1144,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-variations-size" label="Size" sticky collapsible dividing>
+              <ui-section id="examples-variations-size" label="Size" sticky="stack" collapsible dividing>
                 <ui-example description="A menu can vary in size.">
                   <ui-menu size="mini" aria-label="Mini">
                     <ui-item link="#home" selected>Home</ui-item>
@@ -1284,8 +1284,8 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-variations-items" label="Items" sticky collapsible dividing>
-                <ui-section id="examples-variations-items-fitted" label="Fitted" sticky collapsible dividing>
+              <ui-section id="examples-variations-items" label="Items" sticky="stack" collapsible dividing>
+                <ui-section id="examples-variations-items-fitted" label="Fitted" sticky="stack" collapsible dividing>
                   <ui-example
                     description="A menu item or menu can remove element padding, vertically or horizontally."
                   >
@@ -1297,7 +1297,7 @@
                   </ui-example>
                 </ui-section>
 
-                <ui-section id="examples-variations-items-borderless" label="Borderless" sticky collapsible dividing>
+                <ui-section id="examples-variations-items-borderless" label="Borderless" sticky="stack" collapsible dividing>
                   <ui-example description="A menu item or menu can have no borders.">
                     <ui-menu appearance="borderless" aria-label="Borderless">
                       <ui-item link="#1">1</ui-item>
@@ -1310,7 +1310,7 @@
                   </ui-example>
                 </ui-section>
 
-                <ui-section id="examples-variations-items-at-the-right" label="At the Right" sticky collapsible dividing>
+                <ui-section id="examples-variations-items-at-the-right" label="At the Right" sticky="stack" collapsible dividing>
                   <ui-example
                     description="A menu has no `floated` any more:  a `<ui-stack>` puts it at the left or the right."
                   >
@@ -1323,7 +1323,7 @@
                   </ui-example>
                 </ui-section>
 
-                <ui-section id="examples-variations-items-centered" label="Centered" sticky collapsible dividing>
+                <ui-section id="examples-variations-items-centered" label="Centered" sticky="stack" collapsible dividing>
                   <ui-example>
                     <p slot="description">A menu can be shown centered.</p>
                     <ui-menu centered aria-label="Page tools">
@@ -1359,7 +1359,7 @@
                   </ui-example>
                 </ui-section>
 
-                <ui-section id="examples-variations-items-wrapping" label="Wrapping" sticky collapsible dividing>
+                <ui-section id="examples-variations-items-wrapping" label="Wrapping" sticky="stack" collapsible dividing>
                   <ui-example>
                     <p slot="description">Menu items can automatically wrap on responsive layouts.</p>
                     <ui-message slot="description" state="info" size="small"
@@ -1428,8 +1428,8 @@
               </ui-section>
             </ui-section>
 
-            <ui-section id="examples-fitting-titles" label="Fitting titles" sticky collapsible dividing>
-              <ui-section id="examples-fitting-titles-shrinkable" label="Shrinkable" sticky collapsible dividing>
+            <ui-section id="examples-fitting-titles" label="Fitting titles" sticky="stack" collapsible dividing>
+              <ui-section id="examples-fitting-titles-shrinkable" label="Shrinkable" sticky="stack" collapsible dividing>
                 <ui-example
                   description="`shrinkable` fits the titles to the row:  drag the box's right edge narrower.  Every title whole while they fit;  then the longest cut first, with `…`;  then icons only, each title its tooltip (Judgement calls, with no icon, shows its first letter);  then every item folds into one `…` button, whose menu holds them all, a dot on it for Issues' count."
                 >
@@ -1445,7 +1445,7 @@
                   </div>
                 </ui-example>
               </ui-section>
-              <ui-section id="examples-fitting-titles-segmented" label="Segmented" sticky collapsible dividing>
+              <ui-section id="examples-fitting-titles-segmented" label="Segmented" sticky="stack" collapsible dividing>
                 <ui-example
                   description="A `segmented` one is a single choice:  never cut, never icons only.  Too narrow for every choice whole, it becomes a dropdown:  one button showing the chosen one, its menu the others."
                 >
@@ -1463,7 +1463,7 @@
 
           <ui-tab value="usage" label="Usage">
             <!-- USAGE:  items, sub-menus, the two kinds of menu, events, keyboard, accessibility, frameworks. -->
-            <ui-section id="usage-using-it" label="Using it" sticky collapsible dividing>
+            <ui-section id="usage-using-it" label="Using it" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   A menu's children are the one generic `<ui-item>`: the menu tells each item how to render, so there is no
@@ -1491,7 +1491,7 @@
               </ui-code>
             </ui-section>
 
-            <ui-section id="usage-navigation-or-menubar" label="Navigation or menubar" sticky collapsible dividing>
+            <ui-section id="usage-navigation-or-menubar" label="Navigation or menubar" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   A menu comes in two kinds.
@@ -1503,7 +1503,7 @@
               </ui-markdown>
             </ui-section>
 
-            <ui-section id="usage-fitting-titles" label="Fitting titles" sticky collapsible dividing>
+            <ui-section id="usage-fitting-titles" label="Fitting titles" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   `shrinkable` fits the items' titles to the menu's width, in four stages as it gets narrower:
@@ -1533,7 +1533,7 @@
               </ui-code>
             </ui-section>
 
-            <ui-section id="usage-events" label="Events" sticky collapsible dividing>
+            <ui-section id="usage-events" label="Events" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   `ui-select` fires when a link or button item is activated (click, Enter or Space).
@@ -1555,7 +1555,7 @@
               </ui-code>
             </ui-section>
 
-            <ui-section id="usage-keyboard" label="Keyboard" sticky collapsible dividing>
+            <ui-section id="usage-keyboard" label="Keyboard" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   A navigation menu keeps the browser's own keys: **Tab** moves through its links and buttons, **Enter** follows
@@ -1577,7 +1577,7 @@
               </ui-markdown>
             </ui-section>
 
-            <ui-section id="usage-accessibility" label="Accessibility" sticky collapsible dividing>
+            <ui-section id="usage-accessibility" label="Accessibility" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   - By default the shadow root holds a `<nav>` landmark. Name it with `aria-label` on the `<ui-menu>`: two
@@ -1602,7 +1602,7 @@
               </ui-markdown>
             </ui-section>
 
-            <ui-section id="usage-framework-usage" label="Framework usage" sticky collapsible dividing>
+            <ui-section id="usage-framework-usage" label="Framework usage" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   Define the elements first, then listen for `ui-select` with your framework's custom-event syntax.
@@ -1641,34 +1641,34 @@
 
           <ui-tab value="api" label="API">
             <!-- API:  generated from the vocabularies (`docs/__data/components.json5`);  nothing to write. -->
-            <ui-section id="api-attributes" label="Attributes" sticky collapsible dividing>
+            <ui-section id="api-attributes" label="Attributes" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-menu" only="attributes"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-events" label="Events" sticky collapsible dividing>
+            <ui-section id="api-events" label="Events" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-menu" only="events"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-slots" label="Slots" sticky collapsible dividing>
+            <ui-section id="api-slots" label="Slots" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-menu" only="slots"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-parts" label="Parts" sticky collapsible dividing>
+            <ui-section id="api-parts" label="Parts" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-menu" only="parts"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-states" label="States" sticky collapsible dividing>
+            <ui-section id="api-states" label="States" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-menu" only="states"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-texts" label="Texts" sticky collapsible dividing>
+            <ui-section id="api-texts" label="Texts" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-menu" only="texts"></ui-docs-api>
             </ui-section>
           </ui-tab>
 
           <ui-tab value="theming" label="Theming">
             <!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
-            <ui-section id="theming-tokens" label="Tokens" sticky collapsible dividing>
+            <ui-section id="theming-tokens" label="Tokens" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   Theme with the public `--ui-menu-*` tokens: set one on the element, on any ancestor (a header, `:root`), or on
@@ -1714,7 +1714,7 @@
               </ui-docs-tokens>
             </ui-section>
 
-            <ui-section id="theming-themes" label="Themes" sticky collapsible dividing>
+            <ui-section id="theming-themes" label="Themes" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   The theme menu above picks the theme for every page of the site:  Spell, Glass, Fruity or Merlot,

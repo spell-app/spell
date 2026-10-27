@@ -100,6 +100,8 @@ describe("<ui-section> classes", () => {
     ['padding="lg" attach="top" appearance="bordered"', "ui very padded top attached bordered section"],
     ['align="center"', "ui center aligned section"],
     ['scrolling="very short"', "ui very short scrolling section"],
+    ['sticky="stack"', "ui stack sticky section"],
+    ['appearance="drawer"', "ui drawer section"],
     ['collapsible collapsed label="H" hint="S" level="3" badge="2" icon="bug" offset="4"', "ui section"]
   ])("<ui-section %s>", async (attributes, classes) => {
     const { root } = await section(`<ui-section ${attributes}>Body</ui-section>`)
@@ -1116,6 +1118,88 @@ describe("<ui-section parent>", () => {
     expect(inGroup.matches(":state(in-group)")).toBe(true)
     expect(warn.mock.calls.filter(([message]) => String(message).includes("no-such-section"))).toHaveLength(1)
     expect(page.querySelectorAll(":scope > ui-section")).toHaveLength(2)
+  })
+})
+
+////////////////
+// ## The stack (`sticky="stack"`) and the drawer
+////////////////
+
+describe("<ui-section sticky=stack>", () => {
+  /** Three closed-or-open nested sections in a stacked one, each in a wrapper of its own, as a notebook's cells. */
+  const STACK = `
+    <ui-section id="top" label="Top" sticky="stack">
+      <div slot="actions"><ui-button>Act</ui-button></div>
+      <div><!-- a cell that draws nothing --></div>
+      <div><div><ui-section id="a" label="A" sticky="stack" collapsible open="false">a</ui-section></div></div>
+      <div><ui-section id="b" label="B" sticky="stack" collapsible open="false">b</ui-section></div>
+      <div><ui-section id="c" label="C" sticky="stack" collapsible>c</ui-section></div>
+      <p>Between</p>
+      <ui-section id="d" label="D" sticky="stack" collapsible open="false">d</ui-section>
+    </ui-section>`
+
+  /** Is `element` in each of `states`, and none of the others of the stack's? */
+  function states(element: Element) {
+    return ["stacked", "tucked", "tucks", "after-closed", "joins-above", "joins-below"].filter((state) =>
+      element.matches(`:state(${state})`)
+    )
+  }
+
+  it("finds each nested section's place past wrappers:  tucked first, closed ones joined, an open one after them", async () => {
+    const { host } = await section(STACK)
+    const [a, b, c, d] = ["#a", "#b", "#c", "#d"].map((id) => host.querySelector(id)!)
+    await expect.poll(() => states(host)).toEqual(["stacked", "tucks"])
+    await expect.poll(() => states(a!)).toEqual(["stacked", "tucked", "joins-below"])
+    expect(states(b!)).toEqual(["stacked", "after-closed", "joins-above"])
+    expect(states(c!)).toEqual(["stacked", "after-closed"])
+    // a paragraph stands between C and D
+    expect(states(d!)).toEqual(["stacked"])
+  })
+
+  it("splits the group where one opens, and joins it again as it closes", async () => {
+    const { host } = await section(STACK)
+    const [a, b] = ["#a", "#b"].map((id) => host.querySelector<SectionElement>(id)!)
+    await expect.poll(() => states(a!)).toContain("joins-below")
+    b!.open = true
+    await expect.poll(() => states(a!)).toEqual(["stacked", "tucked"])
+    expect(states(b!)).toEqual(["stacked", "after-closed"])
+    b!.open = false
+    await expect.poll(() => states(a!)).toContain("joins-below")
+  })
+
+  it("draws the group flush, round only at its ends", async () => {
+    const { host } = await section(STACK)
+    const [a, b] = ["#a", "#b"].map((id) => parts(host.querySelector(id)!).title)
+    await expect.poll(() => getComputedStyle(a!).borderBottomLeftRadius).toBe("0px")
+    expect(getComputedStyle(a!).borderTopLeftRadius).toBe("0px") // tucked under Top
+    expect(getComputedStyle(b!).borderTopLeftRadius).toBe("0px")
+    expect(getComputedStyle(b!).borderBottomLeftRadius).not.toBe("0px")
+    expect(Math.round(b!.getBoundingClientRect().top - a!.getBoundingClientRect().bottom)).toBe(0)
+  })
+
+  it("a plain `sticky` section right inside a stack joins it, past plain wrappers;  inside another element, it doesn't", async () => {
+    const { host } = await section(
+      `<ui-section label="Top" sticky="stack">
+        <div><ui-section id="joins" label="J" sticky>j</ui-section></div>
+        <ui-segment><ui-section id="plain" label="P" sticky>p</ui-section></ui-segment>
+      </ui-section>`
+    )
+    await expect.poll(() => states(host)).toContain("stacked")
+    await expect.poll(() => states(host.querySelector("#joins")!)).toContain("stacked")
+    expect(states(host.querySelector("#plain")!)).toEqual([])
+  })
+})
+
+describe("<ui-section appearance=drawer>", () => {
+  it("draws its content as a tinted panel under a raised title, the title's foot round while closed", async () => {
+    const { host, title, content } = await section(
+      `<ui-section label="Settings" appearance="drawer" collapsible>Body</ui-section>`
+    )
+    await expect.poll(() => getComputedStyle(content).backgroundColor).not.toBe("rgba(0, 0, 0, 0)")
+    expect(getComputedStyle(title).boxShadow).not.toBe("none")
+    expect(getComputedStyle(title).borderBottomLeftRadius).toBe("0px")
+    host.open = false
+    await expect.poll(() => getComputedStyle(title).borderBottomLeftRadius).not.toBe("0px")
   })
 })
 

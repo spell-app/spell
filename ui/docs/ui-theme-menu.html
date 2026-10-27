@@ -53,7 +53,7 @@
             <!--
               EXAMPLES:  Fomantic's page, section by section, in its order (Types, Content, States, Variations,
               Groups ...).  Rules, the class-grammar mappings, gaps:  epics/spell-ui-pages/PAGES.md.
-              - A section:  `<ui-section id="examples-types" label="Types" sticky collapsible dividing>` around
+              - A section:  `<ui-section id="examples-types" label="Types" sticky="stack" collapsible dividing>` around
                 its examples;  ids spell out the nesting (`<tab>-<section>-<example>`, lowercase kebab of the headers).
               - An example:  its own nested section (`label` = the example's name) around
                 `<ui-example description="...">` and the live markup;  the markup IS the code shown.  A richer
@@ -64,28 +64,28 @@
               - A gap:  an HTML comment `GAP I<n>:  ...` BEFORE the example's section (a comment inside the example
                 shows in its code).
             -->
-            <ui-section id="examples-types" label="Types" sticky collapsible dividing>
-              <ui-section id="examples-types-palette" label="Palette" sticky collapsible dividing>
+            <ui-section id="examples-types" label="Types" sticky="stack" collapsible dividing>
+              <ui-section id="examples-types-palette" label="Palette" sticky="stack" collapsible dividing>
                 <ui-example
                   description="One round palette button:  its panel picks light, dark or Auto, and one of Spell's themes.  The page remembers both."
                 >
                   <ui-theme-menu></ui-theme-menu>
                 </ui-example>
               </ui-section>
-              <ui-section id="examples-types-theme-dropdown" label="Theme dropdown" sticky collapsible dividing>
+              <ui-section id="examples-types-theme-dropdown" label="Theme dropdown" sticky="stack" collapsible dividing>
                 <ui-example description='A theme dropdown, for a masthead:  `show="theme"`;  `compact` makes it an icon button.'>
                   <ui-theme-menu show="theme"></ui-theme-menu>
                 </ui-example>
               </ui-section>
-              <ui-section id="examples-types-light-dark-only" label="Light / dark only" sticky collapsible dividing>
+              <ui-section id="examples-types-light-dark-only" label="Light / dark only" sticky="stack" collapsible dividing>
                 <ui-example description='A sun or a moon alone:  `show="scheme"`.  A click flips the page between light and dark.'>
                   <ui-theme-menu show="scheme"></ui-theme-menu>
                 </ui-example>
               </ui-section>
             </ui-section>
 
-            <ui-section id="examples-variations" label="Variations" sticky collapsible dividing>
-              <ui-section id="examples-variations-inverted" label="Inverted" sticky collapsible dividing>
+            <ui-section id="examples-variations" label="Variations" sticky="stack" collapsible dividing>
+              <ui-section id="examples-variations-inverted" label="Inverted" sticky="stack" collapsible dividing>
                 <ui-example description="On a dark bar:  `inverted`, here at `size=&quot;small&quot;`.">
                   <ui-segment inverted>
                     <ui-theme-menu inverted size="small"></ui-theme-menu>
@@ -97,7 +97,7 @@
 
           <ui-tab value="usage" label="Usage">
             <!-- USAGE:  how to use it (attributes in practice, events, framework snippets), keyboard, accessibility. -->
-            <ui-section id="usage-using-it" label="Using it" sticky collapsible dividing>
+            <ui-section id="usage-using-it" label="Using it" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   Put one anywhere:  it reads the themes from Spell UI's theme list (`UI.themes.own`), so it works on
@@ -119,7 +119,7 @@
                 </script>
               </ui-code>
             </ui-section>
-            <ui-section id="usage-keyboard" label="Keyboard" sticky collapsible dividing>
+            <ui-section id="usage-keyboard" label="Keyboard" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   - Enter or Space on the palette button opens its panel, the chosen theme focused.
@@ -130,7 +130,7 @@
                 </script>
               </ui-markdown>
             </ui-section>
-            <ui-section id="usage-accessibility" label="Accessibility" sticky collapsible dividing>
+            <ui-section id="usage-accessibility" label="Accessibility" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   - The palette button's name says the theme and scheme chosen ("Theme and light / dark:  Spell,
@@ -145,34 +145,34 @@
 
           <ui-tab value="api" label="API">
             <!-- API:  generated from the vocabularies (`site/_data/components.json5`);  nothing to write. -->
-            <ui-section id="api-attributes" label="Attributes" sticky collapsible dividing>
+            <ui-section id="api-attributes" label="Attributes" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-theme-menu" only="attributes"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-events" label="Events" sticky collapsible dividing>
+            <ui-section id="api-events" label="Events" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-theme-menu" only="events"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-slots" label="Slots" sticky collapsible dividing>
+            <ui-section id="api-slots" label="Slots" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-theme-menu" only="slots"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-parts" label="Parts" sticky collapsible dividing>
+            <ui-section id="api-parts" label="Parts" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-theme-menu" only="parts"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-states" label="States" sticky collapsible dividing>
+            <ui-section id="api-states" label="States" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-theme-menu" only="states"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-texts" label="Texts" sticky collapsible dividing>
+            <ui-section id="api-texts" label="Texts" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-theme-menu" only="texts"></ui-docs-api>
             </ui-section>
           </ui-tab>
 
           <ui-tab value="theming" label="Theming">
             <!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
-            <ui-section id="theming-tokens" label="Tokens" sticky collapsible dividing>
+            <ui-section id="theming-tokens" label="Tokens" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   Set a public `--ui-*` token on the element, any ancestor or `:root`; it inherits into the shadow
@@ -187,7 +187,7 @@
                 <!-- playground:end -->
               </ui-docs-tokens>
             </ui-section>
-            <ui-section id="theming-themes" label="Themes" sticky collapsible dividing>
+            <ui-section id="theming-themes" label="Themes" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   The theme menu above picks the theme for every page of the site:  Spell, Glass, Fruity or Merlot,

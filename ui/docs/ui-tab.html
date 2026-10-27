@@ -62,8 +62,8 @@
                 IS the code shown.  A richer description:  `<p slot="description">` (+ `<ui-message slot="description">`).
               - A gap:  an HTML comment `GAP I<n>:  ...` BEFORE the example (a comment inside it shows in its code).
             -->
-            <ui-section id="examples-types" label="Types" sticky collapsible dividing>
-              <ui-section id="examples-types-tab" label="Tab" sticky collapsible dividing>
+            <ui-section id="examples-types" label="Types" sticky="stack" collapsible dividing>
+              <ui-section id="examples-types-tab" label="Tab" sticky="stack" collapsible dividing>
                 <ui-example>
                   <p slot="description">A basic tab.</p>
                   <ui-message slot="description" state="info" size="small"
@@ -79,7 +79,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-types-pointing" label="Pointing" sticky collapsible dividing>
+              <ui-section id="examples-types-pointing" label="Pointing" sticky="stack" collapsible dividing>
                 <ui-example description="A `pointing secondary` tab menu underlines the selected tab.">
                   <ui-tabs appearance="pointing secondary" aria-label="Pointing demo">
                     <ui-tab label="First">First pane</ui-tab>
@@ -89,7 +89,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-types-basic-menu" label="Basic menu" sticky collapsible dividing>
+              <ui-section id="examples-types-basic-menu" label="Basic menu" sticky="stack" collapsible dividing>
                 <ui-example description="With no look words, the tabs are a plain menu above separate panes.">
                   <ui-tabs aria-label="Basic demo">
                     <ui-tab label="First">First pane</ui-tab>
@@ -98,7 +98,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-types-text" label="Text" sticky collapsible dividing>
+              <ui-section id="examples-types-text" label="Text" sticky="stack" collapsible dividing>
                 <ui-example description="Tabs can be plain text;  `basic` drops the panes' segment box.">
                   <ui-tabs appearance="text basic" aria-label="Text demo">
                     <ui-tab label="First">First pane</ui-tab>
@@ -107,7 +107,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-types-segmented" label="Segmented" sticky collapsible dividing>
+              <ui-section id="examples-types-segmented" label="Segmented" sticky="stack" collapsible dividing>
                 <ui-example>
                   <p slot="description">
                     The tabs can be a segmented control:  one rounded bar, the selected tab filled with colour.
@@ -128,7 +128,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-types-flat-markup" label="Flat markup" sticky collapsible dividing>
+              <ui-section id="examples-types-flat-markup" label="Flat markup" sticky="stack" collapsible dividing>
                 <ui-example>
                   <p slot="description">
                     A pane can be written outside its tabs:  <code>parent</code> names the tabs' id, and the pane
@@ -141,8 +141,8 @@
               </ui-section>
             </ui-section>
 
-            <ui-section id="examples-states" label="States" sticky collapsible dividing>
-              <ui-section id="examples-states-active" label="Active" sticky collapsible dividing>
+            <ui-section id="examples-states" label="States" sticky="stack" collapsible dividing>
+              <ui-section id="examples-states-active" label="Active" sticky="stack" collapsible dividing>
                 <ui-example
                   description="The active tab is the selected one:  its pane shows, and the others stay hidden.  Mark it `selected` (alias `active`)."
                 >
@@ -154,7 +154,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-states-loading" label="Loading" sticky collapsible dividing>
+              <ui-section id="examples-states-loading" label="Loading" sticky="stack" collapsible dividing>
                 <ui-example description="A tab can display a loading indicator.">
                   <ui-tabs appearance="tabular" attach="top" aria-label="Loading demo">
                     <ui-tab label="Tab" loading>
@@ -164,7 +164,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-states-disabled" label="Disabled" sticky collapsible dividing>
+              <ui-section id="examples-states-disabled" label="Disabled" sticky="stack" collapsible dividing>
                 <ui-example description="A `disabled` pane's tab can't be chosen, and the arrow keys skip it.">
                   <ui-tabs appearance="tabular" attach="top" aria-label="Disabled demo">
                     <ui-tab label="First">First pane</ui-tab>
@@ -175,10 +175,10 @@
               </ui-section>
             </ui-section>
 
-            <ui-section id="examples-variations" label="Variations" sticky collapsible dividing>
+            <ui-section id="examples-variations" label="Variations" sticky="stack" collapsible dividing>
               <!-- GAP I51:  no centered tab item (Fomantic's `center item`);  the Two tab sits in line.  `alignment="center"`
                    centres the whole tab list, not one tab between its neighbours. -->
-              <ui-section id="examples-variations-centered-item" label="Centered Item" sticky collapsible dividing>
+              <ui-section id="examples-variations-centered-item" label="Centered Item" sticky="stack" collapsible dividing>
                 <ui-example description="A tab can have center aligned items.">
                   <ui-tabs appearance="tabular" attach="top" aria-label="Centered demo">
                     <ui-tab label="One"><p>First pane:  the One tab's content.</p></ui-tab>
@@ -188,7 +188,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-variations-inverted" label="Inverted" sticky collapsible dividing>
+              <ui-section id="examples-variations-inverted" label="Inverted" sticky="stack" collapsible dividing>
                 <ui-example description="A tab can be shown inverted;  the panes follow.">
                   <ui-segment inverted>
                     <ui-tabs inverted appearance="tabular" attach="top" aria-label="Inverted demo">
@@ -220,7 +220,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-variations-vertical" label="Vertical" sticky collapsible dividing>
+              <ui-section id="examples-variations-vertical" label="Vertical" sticky="stack" collapsible dividing>
                 <ui-example
                   description="Tabs can stack in a column beside the panes;  Arrow Up / Down move between them."
                 >
@@ -232,7 +232,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-variations-fluid" label="Fluid" sticky collapsible dividing>
+              <ui-section id="examples-variations-fluid" label="Fluid" sticky="stack" collapsible dividing>
                 <ui-example description="The tab menu can take the full width.">
                   <ui-tabs fluid appearance="pointing secondary" aria-label="Fluid demo">
                     <ui-tab label="First">First pane</ui-tab>
@@ -241,7 +241,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-variations-alignment" label="Alignment" sticky collapsible dividing>
+              <ui-section id="examples-variations-alignment" label="Alignment" sticky="stack" collapsible dividing>
                 <ui-example>
                   <p slot="description">
                     <code>alignment</code> places the tabs in their row.  A segmented tab list moves as a whole.
@@ -258,7 +258,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-variations-equal" label="Equal" sticky collapsible dividing>
+              <ui-section id="examples-variations-equal" label="Equal" sticky="stack" collapsible dividing>
                 <ui-example>
                   <p slot="description">
                     <code>equal</code> makes every tab the same width, worked out from the tabs themselves:  no count
@@ -285,7 +285,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-variations-compact" label="Compact" sticky collapsible dividing>
+              <ui-section id="examples-variations-compact" label="Compact" sticky="stack" collapsible dividing>
                 <ui-example description="The tab menu can be only as wide as its tabs.">
                   <ui-tabs padding="compact" aria-label="Compact demo">
                     <ui-tab label="Day">Today's numbers</ui-tab>
@@ -310,7 +310,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-variations-icons" label="Icons" sticky collapsible dividing>
+              <ui-section id="examples-variations-icons" label="Icons" sticky="stack" collapsible dividing>
                 <ui-example description="A pane's `icon` shows on its tab, before the label.">
                   <ui-tabs appearance="pointing secondary" aria-label="Icon demo">
                     <ui-tab label="Mail" icon="envelope">Inbox</ui-tab>
@@ -320,8 +320,8 @@
               </ui-section>
             </ui-section>
 
-            <ui-section id="examples-basic-examples" label="Basic Examples" sticky collapsible dividing>
-              <ui-section id="examples-basic-examples-basic-tabs" label="Basic Tabs" sticky collapsible dividing>
+            <ui-section id="examples-basic-examples" label="Basic Examples" sticky="stack" collapsible dividing>
+              <ui-section id="examples-basic-examples-basic-tabs" label="Basic Tabs" sticky="stack" collapsible dividing>
                 <ui-example>
                   <p slot="description">
                     Each <code>&lt;ui-tab&gt;</code> inside a <code>&lt;ui-tabs&gt;</code> is a pane, and its label
@@ -388,7 +388,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-basic-examples-default-paths" label="Default Paths" sticky collapsible dividing>
+              <ui-section id="examples-basic-examples-default-paths" label="Default Paths" sticky="stack" collapsible dividing>
                 <ui-example
                   description="Opening a pane shows its nested tab set's default pane too:  the first `selected` one, else the first enabled one, for as many levels as you nest."
                 >
@@ -419,7 +419,7 @@
               </ui-section>
             </ui-section>
 
-            <ui-section id="examples-remote-examples" label="Remote Examples" sticky collapsible dividing>
+            <ui-section id="examples-remote-examples" label="Remote Examples" sticky="stack" collapsible dividing>
               <ui-section
                 id="examples-remote-examples-retrieving-remote-content"
                 label="Retrieving Remote Content"
@@ -465,7 +465,7 @@
               >
             </ui-section>
 
-            <ui-section id="examples-history-examples" label="History Examples" sticky collapsible dividing>
+            <ui-section id="examples-history-examples" label="History Examples" sticky="stack" collapsible dividing>
               <ui-header level="4" id="using-hash-history">Using Hash History</ui-header>
               <ui-markdown>
                 <script type="text/markdown">
@@ -493,7 +493,7 @@
 
           <ui-tab value="usage" label="Usage">
             <!-- USAGE:  how to use it (attributes in practice, events, framework snippets), keyboard, accessibility. -->
-            <ui-section id="usage-using-it" label="Using it" sticky collapsible dividing>
+            <ui-section id="usage-using-it" label="Using it" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   Two tags:
@@ -522,7 +522,7 @@
               </ui-code>
             </ui-section>
 
-            <ui-section id="usage-events" label="Events" sticky collapsible dividing>
+            <ui-section id="usage-events" label="Events" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   - `ui-changing` on `<ui-tabs>` (`{ value, tab }`, cancelable): the user is about to pick a tab
@@ -550,7 +550,7 @@
               </ui-code>
             </ui-section>
 
-            <ui-section id="usage-history" label="History" sticky collapsible dividing>
+            <ui-section id="usage-history" label="History" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   `history` puts the selection in the URL hash (`#photos`): picking a tab pushes a history entry, Back
@@ -562,7 +562,7 @@
               </ui-markdown>
             </ui-section>
 
-            <ui-section id="usage-panes-without-tabs" label="Panes without tabs" sticky collapsible dividing>
+            <ui-section id="usage-panes-without-tabs" label="Panes without tabs" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   A `<ui-tab>` outside a `<ui-tabs>` is a plain pane, shown only while it's `selected`: switch it
@@ -578,7 +578,7 @@
               </ui-code>
             </ui-section>
 
-            <ui-section id="usage-keyboard" label="Keyboard" sticky collapsible dividing>
+            <ui-section id="usage-keyboard" label="Keyboard" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   The APG tabs pattern: the tab list is one Tab stop (the selected tab), and the shown pane is the
@@ -593,7 +593,7 @@
               </ui-markdown>
             </ui-section>
 
-            <ui-section id="usage-accessibility" label="Accessibility" sticky collapsible dividing>
+            <ui-section id="usage-accessibility" label="Accessibility" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   - The whole pattern lives in one shadow root: a `role="tablist"` (named by the host's `aria-label`)
@@ -607,7 +607,7 @@
               </ui-markdown>
             </ui-section>
 
-            <ui-section id="usage-framework-usage" label="Framework usage" sticky collapsible dividing>
+            <ui-section id="usage-framework-usage" label="Framework usage" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   Bind `value` and listen for `ui-changing`.
@@ -649,34 +649,34 @@
 
           <ui-tab value="api" label="API">
             <!-- API:  generated from the vocabularies (`docs/__data/components.json5`);  nothing to write. -->
-            <ui-section id="api-tags" label="Tags" sticky collapsible dividing>
+            <ui-section id="api-tags" label="Tags" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-tab" only="tags"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-attributes" label="Attributes" sticky collapsible dividing>
+            <ui-section id="api-attributes" label="Attributes" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-tab" only="attributes"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-events" label="Events" sticky collapsible dividing>
+            <ui-section id="api-events" label="Events" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-tab" only="events"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-slots" label="Slots" sticky collapsible dividing>
+            <ui-section id="api-slots" label="Slots" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-tab" only="slots"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-parts" label="Parts" sticky collapsible dividing>
+            <ui-section id="api-parts" label="Parts" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-tab" only="parts"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-states" label="States" sticky collapsible dividing>
+            <ui-section id="api-states" label="States" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-tab" only="states"></ui-docs-api>
             </ui-section>
           </ui-tab>
 
           <ui-tab value="theming" label="Theming">
             <!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
-            <ui-section id="theming-tokens" label="Tokens" sticky collapsible dividing>
+            <ui-section id="theming-tokens" label="Tokens" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   The tab menu adopts the [menu](ui-menu.html)'s stylesheet and the panes the segment's, so they read
@@ -714,7 +714,7 @@
               </ui-docs-tokens>
             </ui-section>
 
-            <ui-section id="theming-themes" label="Themes" sticky collapsible dividing>
+            <ui-section id="theming-themes" label="Themes" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   No theme restyles tabs themselves; the themes that restyle menus and segments reach the tab

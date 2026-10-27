@@ -62,7 +62,7 @@
             sheet (<code>.css</code>) and tests beside it.
           </p>
 
-          <ui-section id="1-example" label="1. Example" sticky collapsible dividing>
+          <ui-section id="1-example" label="1. Example" sticky="stack" collapsible dividing>
             <ui-icon slot="icon" name="eye"></ui-icon>
             <p>Every state a thread is in, from what the comments route answers (the comments are made up):</p>
             <epic-threads>
@@ -85,7 +85,7 @@
             </p>
           </ui-section>
 
-          <ui-section id="2-markup" label="2. Markup" sticky collapsible dividing open="false">
+          <ui-section id="2-markup" label="2. Markup" sticky="stack" collapsible dividing open="false">
             <ui-icon slot="icon" name="code"></ui-icon>
             <p>
               Never written in a page:  the comments' code (<code title="epic/src/tools/_assets/spell-doc-comments.js">PageComments.thread()</code>) makes one per
@@ -102,7 +102,7 @@
             <p>Its id, <code>comment-c3</code>, is what Cmd / Ctrl + K and the toolbar's bullhorn land on.</p>
           </ui-section>
 
-          <ui-section id="3-where-it-goes" label="3. Where it goes" sticky collapsible dividing open="false">
+          <ui-section id="3-where-it-goes" label="3. Where it goes" sticky="stack" collapsible dividing open="false">
             <ui-icon slot="icon" name="map"></ui-icon>
             <ul>
               <li>Its parent:  <a href="epic-threads.html"><code>&lt;epic-threads&gt;</code></a>, the box of threads under one block.</li>
@@ -111,7 +111,7 @@
             </ul>
           </ui-section>
 
-          <ui-section id="4-attributes" label="4. Attributes" sticky collapsible dividing open="false">
+          <ui-section id="4-attributes" label="4. Attributes" sticky="stack" collapsible dividing open="false">
             <ui-icon slot="icon" name="list check"></ui-icon>
             <ui-table celled padding="compact" appearance="striped" unstackable>
               <table>
@@ -129,7 +129,7 @@
                 </tbody>
               </table>
             </ui-table>
-            <ui-section id="events" label="Events" sticky collapsible dividing open="false">
+            <ui-section id="events" label="Events" sticky="stack" collapsible dividing open="false">
             <ui-table celled padding="compact" appearance="striped" unstackable>
               <table>
                 <thead>
@@ -146,7 +146,7 @@
             </ui-section>
           </ui-section>
 
-          <ui-section id="5-how-it-looks" label="5. How it looks" sticky collapsible dividing open="false">
+          <ui-section id="5-how-it-looks" label="5. How it looks" sticky="stack" collapsible dividing open="false">
             <ui-icon slot="icon" name="palette"></ui-icon>
             <ul>
               <li>All ivory, whoever spoke last (Owen, 2026-10-10:  "Make the entire thing ivory");  orange while it's his turn.</li>
@@ -157,7 +157,7 @@
             </ul>
           </ui-section>
 
-          <ui-section id="6-written-by" label="6. Written by" sticky collapsible dividing open="false">
+          <ui-section id="6-written-by" label="6. Written by" sticky="stack" collapsible dividing open="false">
             <ui-icon slot="icon" name="terminal"></ui-icon>
             <ul>
               <li>The docs runtime's comments (<code title="epic/src/tools/_assets/spell-doc-comments.js">spell-doc-comments.js</code>), in the docs bundle and in <code>spell-comments.js</code>, which this page loads.</li>

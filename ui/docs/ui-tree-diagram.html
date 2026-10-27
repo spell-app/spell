@@ -55,8 +55,8 @@
               as a `<script type="application/json">` child, so the code shown IS the data;  the `tree` property is on
               the Usage tab.
             -->
-            <ui-section id="examples-types" label="Types" sticky collapsible dividing>
-              <ui-section id="examples-types-tree-diagram" label="Tree diagram" sticky collapsible dividing>
+            <ui-section id="examples-types" label="Types" sticky="stack" collapsible dividing>
+              <ui-section id="examples-types-tree-diagram" label="Tree diagram" sticky="stack" collapsible dividing>
                 <ui-example
                   description="A tree diagram draws a tree top-down, from plain data:  here spell's parse tree for the first line of FizzBuzz, `if number / 15 is an integer`."
                 >
@@ -98,7 +98,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-types-labels-only" label="Labels only" sticky collapsible dividing>
+              <ui-section id="examples-types-labels-only" label="Labels only" sticky="stack" collapsible dividing>
                 <ui-example description="Only `label` is needed:  each node is a box, joined to its children by lines.">
                   <ui-tree-diagram>
                     <script type="application/json">
@@ -109,8 +109,8 @@
               </ui-section>
             </ui-section>
 
-            <ui-section id="examples-content" label="Content" sticky collapsible dividing>
-              <ui-section id="examples-content-detail" label="Detail" sticky collapsible dividing>
+            <ui-section id="examples-content" label="Content" sticky="stack" collapsible dividing>
+              <ui-section id="examples-content-detail" label="Detail" sticky="stack" collapsible dividing>
                 <ui-example
                   description="A node's `detail` is a second, smaller, muted line under its label, e.g. a datatype.  Every box in a row is as tall as the tallest."
                 >
@@ -129,7 +129,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-content-slot-labels" label="Slot labels" sticky collapsible dividing>
+              <ui-section id="examples-content-slot-labels" label="Slot labels" sticky="stack" collapsible dividing>
                 <ui-example
                   description="A node's `slot` is written on the line from its parent, at its middle:  which part of the parent it fills."
                 >
@@ -148,7 +148,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-content-hover-text" label="Hover text" sticky collapsible dividing>
+              <ui-section id="examples-content-hover-text" label="Hover text" sticky="stack" collapsible dividing>
                 <ui-example
                   description="A node's `title` shows when the pointer rests on its box, e.g. the source it came from."
                 >
@@ -168,8 +168,8 @@
               </ui-section>
             </ui-section>
 
-            <ui-section id="examples-variations" label="Variations" sticky collapsible dividing>
-              <ui-section id="examples-variations-wide-trees" label="Wide trees" sticky collapsible dividing>
+            <ui-section id="examples-variations" label="Variations" sticky="stack" collapsible dividing>
+              <ui-section id="examples-variations-wide-trees" label="Wide trees" sticky="stack" collapsible dividing>
                 <ui-example
                   description="A tree shrinks to fit its column, down to three quarters of its size;  a wider one scrolls sideways (on a phone, this one does)."
                 >
@@ -197,7 +197,7 @@
 
           <ui-tab value="usage" label="Usage">
             <!-- USAGE:  the data contract, the two ways to give it, sizing, framework snippets, accessibility. -->
-            <ui-section id="usage-using-it" label="Using it" sticky collapsible dividing>
+            <ui-section id="usage-using-it" label="Using it" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   A tree diagram draws any tree from plain data: it knows nothing about where the tree came from. Each
@@ -235,7 +235,7 @@
               </ui-code>
             </ui-section>
 
-            <ui-section id="usage-from-script" label="From script" sticky collapsible dividing>
+            <ui-section id="usage-from-script" label="From script" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   Set `tree` on the element. In Solid, pass it as a plain prop, `tree={...}`:  the element takes the
@@ -267,7 +267,7 @@
               </ui-code>
             </ui-section>
 
-            <ui-section id="usage-size" label="Size" sticky collapsible dividing>
+            <ui-section id="usage-size" label="Size" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   A tree is laid out tidy: each depth a row, each parent centred over its children, no two boxes or
@@ -280,7 +280,7 @@
               </ui-markdown>
             </ui-section>
 
-            <ui-section id="usage-keyboard" label="Keyboard" sticky collapsible dividing>
+            <ui-section id="usage-keyboard" label="Keyboard" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   Nothing in a tree diagram takes focus: it's a picture. A tree wide enough to scroll scrolls with the
@@ -289,7 +289,7 @@
               </ui-markdown>
             </ui-section>
 
-            <ui-section id="usage-accessibility" label="Accessibility" sticky collapsible dividing>
+            <ui-section id="usage-accessibility" label="Accessibility" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   - The drawing is one `<svg role="img">`, named by a summary of its root: "Tree: If, with 3 children"
@@ -306,30 +306,30 @@
 
           <ui-tab value="api" label="API">
             <!-- API:  generated from the vocabularies (`docs/__data/components.json5`);  nothing to write. -->
-            <ui-section id="api-attributes" label="Attributes" sticky collapsible dividing>
+            <ui-section id="api-attributes" label="Attributes" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-tree-diagram" only="attributes"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-properties" label="Properties" sticky collapsible dividing>
+            <ui-section id="api-properties" label="Properties" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-tree-diagram" only="properties"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-parts" label="Parts" sticky collapsible dividing>
+            <ui-section id="api-parts" label="Parts" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-tree-diagram" only="parts"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-states" label="States" sticky collapsible dividing>
+            <ui-section id="api-states" label="States" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-tree-diagram" only="states"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-texts" label="Texts" sticky collapsible dividing>
+            <ui-section id="api-texts" label="Texts" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-tree-diagram" only="texts"></ui-docs-api>
             </ui-section>
           </ui-tab>
 
           <ui-tab value="theming" label="Theming">
             <!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
-            <ui-section id="theming-tokens" label="Tokens" sticky collapsible dividing>
+            <ui-section id="theming-tokens" label="Tokens" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   Theme with the public `--ui-tree-diagram-*` tokens: set one on the element, on any ancestor (`:root`
@@ -397,7 +397,7 @@
                 <!-- playground:end -->
               </ui-docs-tokens>
             </ui-section>
-            <ui-section id="theming-themes" label="Themes" sticky collapsible dividing>
+            <ui-section id="theming-themes" label="Themes" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   A tree diagram is ours, not Fomantic's:  the theme menu in the header changes the page around it,

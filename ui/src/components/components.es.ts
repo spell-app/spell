@@ -513,6 +513,8 @@ export const sharedEs = {
     }
   },
   words: {
+    stack: "apilado",
+    drawer: "cajón",
     very: "muy",
     left: "izquierda",
     right: "derecha",

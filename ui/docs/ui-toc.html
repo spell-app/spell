@@ -53,7 +53,7 @@
             <!--
               EXAMPLES:  Fomantic's page, section by section, in its order (Types, Content, States, Variations,
               Groups ...).  Rules, the class-grammar mappings, gaps:  epics/spell-ui-pages/PAGES.md.
-              - A section:  `<ui-section id="examples-types" label="Types" sticky collapsible dividing>` around
+              - A section:  `<ui-section id="examples-types" label="Types" sticky="stack" collapsible dividing>` around
                 its examples;  ids spell out the nesting (`<tab>-<section>-<example>`, lowercase kebab of the headers).
               - An example:  its own nested section (`label` = the example's name) around
                 `<ui-example description="...">` and the live markup;  the markup IS the code shown.  A richer
@@ -64,8 +64,8 @@
               - A gap:  an HTML comment `GAP I<n>:  ...` BEFORE the example's section (a comment inside the example
                 shows in its code).
             -->
-            <ui-section id="examples-types" label="Types" sticky collapsible dividing>
-              <ui-section id="examples-types-table-of-contents" label="Table of contents" sticky collapsible dividing>
+            <ui-section id="examples-types" label="Types" sticky="stack" collapsible dividing>
+              <ui-section id="examples-types-table-of-contents" label="Table of contents" sticky="stack" collapsible dividing>
                 <ui-example description="A table of contents lists the sections it follows (`for`, else the page's `main`) as links:  level 2 headings and top-level `&lt;ui-section&gt;`s, with their examples and level 3 headings under them.  The section in view is lit, and opens.">
                   <ui-stack direction="horizontal" align="start" spacing="lg">
                     <ui-toc for="toc-demo-release" heading="Release notes" style="width: 14em"></ui-toc>
@@ -82,7 +82,7 @@
                   </ui-stack>
                 </ui-example>
               </ui-section>
-              <ui-section id="examples-types-examples" label="Examples" sticky collapsible dividing>
+              <ui-section id="examples-types-examples" label="Examples" sticky="stack" collapsible dividing>
                 <ui-example description="A `&lt;ui-example heading&gt;` is an entry of the section it's in:  a components page's contents list every example.">
                   <ui-stack direction="horizontal" align="start" spacing="lg">
                     <ui-toc for="toc-demo-button" heading="Button" style="width: 14em"></ui-toc>
@@ -103,8 +103,8 @@
                 </ui-example>
               </ui-section>
             </ui-section>
-            <ui-section id="examples-content" label="Content" sticky collapsible dividing>
-              <ui-section id="examples-content-heading" label="Heading" sticky collapsible dividing>
+            <ui-section id="examples-content" label="Content" sticky="stack" collapsible dividing>
+              <ui-section id="examples-content-heading" label="Heading" sticky="stack" collapsible dividing>
                 <ui-example description="`heading`:  a title above the links, e.g. the page's name.  Without it, the toggle sits alone in the header row.">
                   <ui-stack direction="horizontal" align="start" spacing="lg">
                     <ui-toc for="toc-demo-heading" style="width: 14em"></ui-toc>
@@ -119,8 +119,8 @@
                 </ui-example>
               </ui-section>
             </ui-section>
-            <ui-section id="examples-variations" label="Variations" sticky collapsible dividing>
-              <ui-section id="examples-variations-expanded" label="Expanded" sticky collapsible dividing>
+            <ui-section id="examples-variations" label="Variations" sticky="stack" collapsible dividing>
+              <ui-section id="examples-variations-expanded" label="Expanded" sticky="stack" collapsible dividing>
                 <ui-example description="`expanded`:  every section's entries show, not only the one in view's.  The viewer's own folds, and the header's toggle, still win.">
                   <ui-stack direction="horizontal" align="start" spacing="lg">
                     <ui-toc for="toc-demo-expanded" heading="Guide" expanded style="width: 14em"></ui-toc>
@@ -135,7 +135,7 @@
                   </ui-stack>
                 </ui-example>
               </ui-section>
-              <ui-section id="examples-variations-size" label="Size" sticky collapsible dividing>
+              <ui-section id="examples-variations-size" label="Size" sticky="stack" collapsible dividing>
                 <ui-example description="`size`:  `mini` ... `massive`;  `small` by default.">
                   <ui-stack direction="horizontal" align="start" spacing="lg">
                     <ui-toc for="toc-demo-size" heading="Large" size="large" expanded style="width: 14em"></ui-toc>
@@ -152,7 +152,7 @@
 
           <ui-tab value="usage" label="Usage">
             <!-- USAGE:  how to use it (attributes in practice, events, framework snippets), keyboard, accessibility. -->
-            <ui-section id="usage-using-it" label="Using it" sticky collapsible dividing>
+            <ui-section id="usage-using-it" label="Using it" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   `<ui-toc>` is a page's "On this page" list:  put it beside the content, and name that content with `for`.
@@ -186,7 +186,7 @@
                 </script>
               </ui-code>
             </ui-section>
-            <ui-section id="usage-keyboard" label="Keyboard" sticky collapsible dividing>
+            <ui-section id="usage-keyboard" label="Keyboard" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   - Tab moves through the fold buttons and the links, in page order.
@@ -194,7 +194,7 @@
                 </script>
               </ui-markdown>
             </ui-section>
-            <ui-section id="usage-accessibility" label="Accessibility" sticky collapsible dividing>
+            <ui-section id="usage-accessibility" label="Accessibility" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   - The links are one navigation landmark, named "On this page" (its `label` text).
@@ -208,30 +208,34 @@
 
           <ui-tab value="api" label="API">
             <!-- API:  generated from the vocabularies (`site/_data/components.json5`);  nothing to write. -->
-            <ui-section id="api-attributes" label="Attributes" sticky collapsible dividing>
+            <ui-section id="api-attributes" label="Attributes" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-toc" only="attributes"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-events" label="Events" sticky collapsible dividing>
+            <ui-section id="api-events" label="Events" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-toc" only="events"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-parts" label="Parts" sticky collapsible dividing>
+            <ui-section id="api-slots" label="Slots" sticky="stack" collapsible dividing>
+              <ui-docs-api family="ui-toc" only="slots"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-parts" label="Parts" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-toc" only="parts"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-states" label="States" sticky collapsible dividing>
+            <ui-section id="api-states" label="States" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-toc" only="states"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-texts" label="Texts" sticky collapsible dividing>
+            <ui-section id="api-texts" label="Texts" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-toc" only="texts"></ui-docs-api>
             </ui-section>
           </ui-tab>
 
           <ui-tab value="theming" label="Theming">
             <!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
-            <ui-section id="theming-tokens" label="Tokens" sticky collapsible dividing>
+            <ui-section id="theming-tokens" label="Tokens" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   Set a public `--ui-*` token on the element, any ancestor or `:root`; it inherits into the shadow
@@ -260,7 +264,7 @@
                 <!-- playground:end -->
               </ui-docs-tokens>
             </ui-section>
-            <ui-section id="theming-themes" label="Themes" sticky collapsible dividing>
+            <ui-section id="theming-themes" label="Themes" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   The theme menu above picks the theme for every page of the site:  Spell, Glass, Fruity or Merlot,

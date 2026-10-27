@@ -58,7 +58,7 @@
             </script>
           </ui-markdown>
 
-          <ui-section id="general-usage" label="General Usage" sticky collapsible dividing>
+          <ui-section id="general-usage" label="General Usage" sticky="stack" collapsible dividing>
             <ui-section
               id="general-usage-descriptive-attributes"
               label="Descriptive Attributes"
@@ -80,7 +80,7 @@
                 <ui-button size="huge" color="primary">Button</ui-button>
               </ui-example>
             </ui-section>
-            <ui-section id="general-usage-attribute-order" label="Attribute Order" sticky collapsible dividing>
+            <ui-section id="general-usage-attribute-order" label="Attribute Order" sticky="stack" collapsible dividing>
               <ui-example>
                 <p slot="description">
                   Fomantic needs some class names in a strict order (<code>ui left spaced right floated image</code>,
@@ -97,7 +97,7 @@
             </ui-section>
           </ui-section>
 
-          <ui-section id="installation" label="Installation" sticky collapsible dividing>
+          <ui-section id="installation" label="Installation" sticky="stack" collapsible dividing>
             <ui-message state="info" heading="Not published yet">
               <code>spell-ui</code> isn't on npm yet:  the steps below apply once it is. Until then, build it in
               the kit, the checkout every Spell repo is cloned into:
@@ -154,7 +154,7 @@
             >
           </ui-section>
 
-          <ui-section id="the-contract" label="The Contract" sticky collapsible dividing>
+          <ui-section id="the-contract" label="The Contract" sticky="stack" collapsible dividing>
             <ui-markdown>
               <script type="text/markdown">
                 Every component follows the same three rules, which is what makes it work in every framework:
@@ -170,7 +170,7 @@
                   `{ value }`, plus `originalEvent`.
               </script>
             </ui-markdown>
-            <ui-section id="the-contract-plain-html" label="Plain HTML" sticky collapsible dividing>
+            <ui-section id="the-contract-plain-html" label="Plain HTML" sticky="stack" collapsible dividing>
               <ui-example
                 description="No framework:  attributes in markup, the `options` property and a `ui-changed` listener in script.  Pick a fruit."
               >
@@ -197,7 +197,7 @@
             </ui-markdown>
           </ui-section>
 
-          <ui-section id="frameworks" label="Frameworks" sticky collapsible dividing>
+          <ui-section id="frameworks" label="Frameworks" sticky="stack" collapsible dividing>
             <ui-markdown>
               <script type="text/markdown">
                 The contract holds in React 19, Vue 3.5, Svelte 5, Solid, Angular 20 and Preact 10. One line each:
@@ -218,7 +218,7 @@
             </ui-markdown>
           </ui-section>
 
-          <ui-section id="styling" label="Styling" sticky collapsible dividing>
+          <ui-section id="styling" label="Styling" sticky="stack" collapsible dividing>
             <ui-markdown>
               <script type="text/markdown">
                 Components use shadow DOM, so page CSS doesn't reach inside. Instead:
@@ -244,7 +244,7 @@
             </ui-code>
           </ui-section>
 
-          <ui-section id="updating" label="Updating" sticky collapsible dividing>
+          <ui-section id="updating" label="Updating" sticky="stack" collapsible dividing>
             <ui-markdown>
               <script type="text/markdown">
                 Once published, `yarn up spell-ui` (or `npm update spell-ui`) is all there is: no

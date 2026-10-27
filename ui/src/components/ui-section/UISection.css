@@ -732,6 +732,69 @@
     isolation: isolate;
   }
 
+  /*
+   * ## Stack (`sticky="stack"`, the class words `stack sticky`;  or a plain `sticky` that joins one,
+   * `:state(stacked)`):  the titles one stack of rounded bars with a slight shadow, as the
+   * docs pages' sections
+   * - each bar reaches past the content:  a top-level one `--ui-section-stack-reach` (each side:  `-start`, `-end`),
+   *   each level `--ui-section-stack-step` less (never less than 0);  its words stay where they were, its padding
+   *   giving the reach back
+   * - round by `--ui-section-stack-radius` (default:  the theme's medium radius);  how a bar sits among its neighbours
+   *   is in "States" (tucked, stuck, a group of closed ones)
+   * - its fill is the sticky title's (`--ui-section-sticky-background`), or the page's
+   */
+  .ui.stack.sticky.section > .title,
+  :host(:state(stacked)) .ui.sticky.section > .title {
+    --_stack-reach-start: max(
+      0px,
+      calc(
+        var(--ui-section-stack-reach-start, var(--ui-section-stack-reach, 24px)) - var(--ui-section-stack-step, 12px) *
+          var(--_ui-section-depth, 0)
+      )
+    );
+    --_stack-reach-end: max(
+      0px,
+      calc(
+        var(--ui-section-stack-reach-end, var(--ui-section-stack-reach, 24px)) - var(--ui-section-stack-step, 12px) *
+          var(--_ui-section-depth, 0)
+      )
+    );
+    margin-inline: calc(-1 * var(--_stack-reach-start)) calc(-1 * var(--_stack-reach-end));
+    padding-block: 0.4em;
+    padding-inline: var(--_stack-reach-start) var(--_stack-reach-end);
+    border-radius: var(--ui-section-stack-radius, var(--ui-radius-m));
+    box-shadow: 0 1px 0 light-dark(rgb(40 30 90 / 0.08), rgb(0 0 0 / 0.45));
+  }
+
+  /*
+   * ## Drawer (`appearance="drawer"`):  the title a raised bar, the content a tinted panel attached under it, which
+   * rolls open and closed (`:state(animated)`), as an example's code under its demo (`<ui-example>`)
+   */
+  .ui.drawer.section > .title {
+    position: relative;
+    z-index: 1;
+    padding: 0.5em 0.75em;
+    border-radius: var(--_ui-section-drawer-radius);
+    background: var(--ui-section-drawer-title-background, var(--ui-surface));
+    box-shadow:
+      0 1px 0 var(--ui-border-color),
+      0 6px 12px -8px oklch(0 0 0 / 0.25);
+  }
+  /* open:  its content attached under it, square below */
+  .ui.drawer.section:not(:has(> .content[hidden])) > .title {
+    border-end-start-radius: 0;
+    border-end-end-radius: 0;
+  }
+  .ui.drawer.section > .content {
+    margin-inline: var(--ui-section-drawer-inset, 0.5em);
+    padding: 0.75em 1em 0.5em;
+    border-radius: 0 0 var(--_ui-section-drawer-radius) var(--_ui-section-drawer-radius);
+    background: var(--ui-section-drawer-background, color-mix(in oklab, var(--ui-text-color) 3%, transparent));
+  }
+  .ui.drawer.section {
+    --_ui-section-drawer-radius: var(--ui-section-drawer-radius, var(--ui-radius-l));
+  }
+
   /* ## Basic:  no box, rule or tint, whatever else is set (last, so it wins over the looks above). */
   .ui.basic.section {
     --_section-border: none;
@@ -760,6 +823,44 @@
   /* Stuck (the element's `:state(stuck)`):  a shadow under the title, over the content sliding beneath. */
   :host(:state(stuck)) .ui.sticky.section > .title {
     box-shadow: var(--_ui-section-stuck-shadow);
+  }
+
+  /*
+   * A stack's bars among their neighbours (`sticky="stack"`;  the component finds them, past any wrappers)
+   * - stuck, a bar keeps its own slight shadow;  stuck under its parent's, square on top and a heavy round below
+   *   (`--ui-section-stack-stuck-radius`, default the theme's large radius), not its own radius
+   * - `tucked`:  a section's first nested title sits right under its own, square on top;  the parent (`tucks`) keeps
+   *   no room above it
+   * - closed:  no room below;  `after-closed`:  no room above;  closed ones one after another are ONE group, round
+   *   only at its top and bottom (`joins-above`, `joins-below`)
+   */
+  :host(:state(stacked):state(stuck)) .ui.sticky.section > .title {
+    box-shadow: 0 1px 0 light-dark(rgb(40 30 90 / 0.08), rgb(0 0 0 / 0.45));
+  }
+  :host(:state(stacked):state(nested):state(stuck)) .ui.sticky.section > .title {
+    border-radius: 0 0 var(--ui-section-stack-stuck-radius, var(--ui-radius-l))
+      var(--ui-section-stack-stuck-radius, var(--ui-radius-l));
+  }
+  :host(:state(tucked)) .ui.section {
+    margin-block-start: 0;
+  }
+  :host(:state(tucked)) .ui.section > .title,
+  :host(:state(joins-above)) .ui.section > .title {
+    border-start-start-radius: 0;
+    border-start-end-radius: 0;
+  }
+  :host(:state(joins-below)) .ui.section > .title {
+    border-end-start-radius: 0;
+    border-end-end-radius: 0;
+  }
+  :host(:state(tucks)) .ui.section > .content {
+    padding-block-start: 0;
+  }
+  :host(:state(stacked):state(collapsed)) .ui.section {
+    margin-block: 0;
+  }
+  :host(:state(after-closed)) .ui.section {
+    margin-block-start: 0;
   }
 
   /* Disabled:  dimmed and inert. */
