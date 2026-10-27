@@ -1,5 +1,13 @@
 # AGENTS.md
 
+> **Since epic `repo-split` P20, `ui/` is a FOLDER of the kit's ONE repo and ONE package, `spell`**, at
+> `~/www/spell/ui/`, not a repo or package of its own (it was spell-ui, with its history merged in).
+> - Its files are imported as `spell/ui/<path under src/>`;  its `package.json` is a folder manifest (its scripts,
+>   settings and dependencies, no `exports`:  the kit's hold them).
+> - TypeScript reads every folder's source:  no `spell-types --below`.
+> - ONE CI workflow and ONE `yarn.lock`, the kit's;  `git` here is the kit's repo.
+> - Where this file still says "this repo", "child repo" or names `spell-ui/...` imports, this note wins.
+
 This file guides AI coding agents (Claude Code, Codex, and others)
 working with code in this repo, `spell-ui`.
 
