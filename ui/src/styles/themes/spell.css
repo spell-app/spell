@@ -7,7 +7,8 @@
  * - The ONE Spell theme (epic `debut` P17, J88):  the Spell Brand theme (`spell-brand.css`, which imported this
  *   sheet and added to it) folded in.
  *   - A theme remembered as `spell-brand` comes back as `spell` (`Themes.RENAMED`).
- *   - Its facelift is epic `debut` P18.
+ *   - Its facelift, epic `debut` P19:  dark panels a clear step off the page, its text readable on every pressed and
+ *     focused colour (the contrast test, no exceptions), a light primary border that shows on the page.
  * - The default theme of Spell UI's pages and the guides (`ThemePreference`).
  * - Besides the `--ui-*` tokens, the brand's own roles that no `--ui-*` token covers ("Brand roles", below),
  *   as `--spell-*` `light-dark()` pairs:
@@ -198,9 +199,10 @@
     );
 
     --ui-background: light-dark(var(--spell-brand-25), var(--spell-violet-950));
-    --ui-surface: light-dark(oklch(1 0 0), var(--spell-violet-925));
-    --ui-surface-muted: light-dark(var(--spell-brand-50), var(--spell-violet-900));
-    --ui-surface-strong: light-dark(var(--spell-brand-100), var(--spell-violet-850));
+    /* dark:  panels a clear step off the page (1.21:1), as the brand's raised surface;  each tint a step up from them */
+    --ui-surface: light-dark(oklch(1 0 0), var(--spell-violet-900));
+    --ui-surface-muted: light-dark(var(--spell-brand-50), var(--spell-violet-850));
+    --ui-surface-strong: light-dark(var(--spell-brand-100), var(--spell-violet-800));
     /* selection and highlighted rows:  lavender */
     --ui-highlight: light-dark(var(--spell-violet-150), var(--spell-violet-800));
 
@@ -293,6 +295,43 @@
     --ui-warning-on-light: #f69e00; /* amber-500 */
     --ui-warning-on-dark: #ffc075; /* amber-400 */
 
+    /*
+     * Pressed and focused:  a gentler step for the colours that carry INK (light orange, olive and info;  dark
+     * purple), so the ink still reads on them (4.7:1 or more);  `colors.css`' -0.08 / -0.1 took it under 4.5:1
+     */
+    --ui-orange-focus: light-dark(
+      oklch(from var(--ui-orange-on-light) calc(l - 0.06) calc(c * 1.2) h),
+      oklch(from var(--ui-orange-on-dark) calc(l - 0.08) calc(c * 1.2) h)
+    );
+    --ui-orange-down: light-dark(
+      oklch(from var(--ui-orange-on-light) calc(l - 0.07) c h),
+      oklch(from var(--ui-orange-on-dark) calc(l - 0.1) c h)
+    );
+    --ui-olive-focus: light-dark(
+      oklch(from var(--ui-olive-on-light) calc(l - 0.06) calc(c * 1.2) h),
+      oklch(from var(--ui-olive-on-dark) calc(l - 0.08) calc(c * 1.2) h)
+    );
+    --ui-olive-down: light-dark(
+      oklch(from var(--ui-olive-on-light) calc(l - 0.07) c h),
+      oklch(from var(--ui-olive-on-dark) calc(l - 0.1) c h)
+    );
+    --ui-info-focus: light-dark(
+      oklch(from var(--ui-info-on-light) calc(l - 0.06) calc(c * 1.2) h),
+      oklch(from var(--ui-info-on-dark) calc(l - 0.08) calc(c * 1.2) h)
+    );
+    --ui-info-down: light-dark(
+      oklch(from var(--ui-info-on-light) calc(l - 0.07) c h),
+      oklch(from var(--ui-info-on-dark) calc(l - 0.1) c h)
+    );
+    --ui-purple-focus: light-dark(
+      oklch(from var(--ui-purple-on-light) calc(l - 0.08) calc(c * 1.2) h),
+      oklch(from var(--ui-purple-on-dark) calc(l - 0.06) calc(c * 1.2) h)
+    );
+    --ui-purple-down: light-dark(
+      oklch(from var(--ui-purple-on-light) calc(l - 0.1) c h),
+      oklch(from var(--ui-purple-on-dark) calc(l - 0.07) c h)
+    );
+
     /* Hue text:  `colors.css`' recipe again (classic hand-picks yellow / olive / green / teal) */
     --ui-yellow-text: light-dark(
       oklch(from var(--ui-yellow) min(l, 0.5) c h),
@@ -335,7 +374,8 @@
     --ui-primary-active: light-dark(var(--spell-violet-700), var(--spell-violet-200));
     --ui-primary-text: light-dark(var(--spell-violet-600), var(--spell-violet-300));
     --ui-primary-header: light-dark(var(--spell-violet-800), var(--spell-violet-200));
-    --ui-primary-border: var(--spell-violet-400);
+    /* light:  `violet-500`, 3:1 against the page (`violet-400` was 2.8:1) */
+    --ui-primary-border: light-dark(var(--spell-violet-500), var(--spell-violet-400));
     --ui-primary-background: light-dark(var(--spell-violet-100), var(--spell-lilac-soft));
 
     /* Secondary:  the brand's grey-blue */
@@ -343,6 +383,11 @@
     --ui-secondary-inverted: var(--ui-grey-inverted);
     --ui-secondary-on: var(--ui-grey-on);
     --ui-secondary-inverted-on: var(--ui-grey-inverted-on);
+    /* its states darken, as grey's do (the remap, "States", below) */
+    --ui-secondary-hover: var(--ui-grey-hover);
+    --ui-secondary-focus: var(--ui-grey-focus);
+    --ui-secondary-down: var(--ui-grey-down);
+    --ui-secondary-active: var(--ui-grey-active);
 
     /* Messages:  each ladder's palest tint, its 200 hairline, its 700-850 text;  dark:  the colour at 14% */
     --ui-positive-text: light-dark(#006229, #8ef6a5);
@@ -668,6 +713,45 @@
   /* Anchors land below a sticky site header (page only:  `:root` matches nothing in a shadow root) */
   :root :where(h1, h2, h3, h4, h5, h6, section, ui-section) {
     scroll-margin-top: calc(var(--spell-site-header-height, 0px) + 1em);
+  }
+
+  /*******************************
+               States
+  *******************************/
+
+  /*
+   * A coloured element's pressed and focused colours (`--ui-color-focus`, `-down`) are worked out from its colour by
+   * `colors.css`' remap, one recipe for every hue;  these colours take this theme's own (the palette, above), so their
+   * text reads on every state (4.5:1, the contrast test)
+   * - `secondary`:  darker, as grey;  the recipe lightened it, as black, and white on it fell to 3.9:1
+   * - light orange, olive and info, dark purple:  a gentler step, as they carry ink;  the recipe took it to 4.2:1
+   */
+  .ui.secondary,
+  .ui-secondary {
+    --ui-color-hover: var(--ui-secondary-hover);
+    --ui-color-focus: var(--ui-secondary-focus);
+    --ui-color-down: var(--ui-secondary-down);
+    --ui-color-active: var(--ui-secondary-active);
+  }
+  .ui.orange,
+  .ui-orange {
+    --ui-color-focus: var(--ui-orange-focus);
+    --ui-color-down: var(--ui-orange-down);
+  }
+  .ui.olive,
+  .ui-olive {
+    --ui-color-focus: var(--ui-olive-focus);
+    --ui-color-down: var(--ui-olive-down);
+  }
+  .ui.info,
+  .ui-info {
+    --ui-color-focus: var(--ui-info-focus);
+    --ui-color-down: var(--ui-info-down);
+  }
+  .ui.purple,
+  .ui-purple {
+    --ui-color-focus: var(--ui-purple-focus);
+    --ui-color-down: var(--ui-purple-down);
   }
 
   /*******************************
