@@ -259,7 +259,7 @@ export class Shared {
    *   change drops the link at its next `epic shared link` (`--all`:  every checkout)
    * - only a LINK at the checkout's root to the content folder's folder of the same name (`<dir>/<name>`), there
    *   or not (a dangling one too, once the content folder dropped it):  never a real folder or file, never a link
-   *   elsewhere (`spell-epic`)
+   *   elsewhere (the engine's, `epic`)
    * - a checkout whose own manifest still names it (an older branch) keeps it:  `links` is that checkout's
    * - SIDE EFFECT:  removes the links
    */
@@ -279,16 +279,16 @@ export class Shared {
   }
 
   /**
-   * Link the spell-epic checkout into checkout `checkout` at its root, as `spell-epic` (`ENGINE_LINK`):
+   * Link the engine, the epic tooling's folder, into checkout `checkout` at its root, as `epic` (`ENGINE_LINK`):
    * `engineFolder` in the repo's `.epic/config.json5` (epic `epic-eject` I5).  What it did, as `link()` reports it:
    * - `ok`:  already;  `linked`:  made (missing, dangling or pointing elsewhere)
    * - `real`, left alone (`action` `diverged`):  a real folder or file there, never removed
+   *   (the kit's own `epic/`, since repo-split's P20 · One Repo:  the kit's `engineFolder` is `""` anyway)
    * - `undefined`:  nothing to link
    *   - no `engineFolder`, or no such folder
-   *   - a checkout whose git doesn't ignore `spell-epic`:  a branch from before spell-app's switch to spell-epic,
-   *     which runs its own copy of the engine, and would show the link as a new file
-   * - Why a link:  spell-app's alias table (`spell-epic`) and its page server's route modules reach the engine through
-   *   it, from the main checkout and every worktree alike
+   *   - a checkout whose git doesn't ignore `epic`:  it has no use for the link, and would show it as a new file
+   * - Why a link:  a repo that reaches the engine's code or its page server's route modules by a path from its root,
+   *   from the main checkout and every worktree alike (spell-app's did, as `spell-epic`, until repo-split's P20)
    * - SIDE EFFECT:  writes the link (a relative target)
    */
   linkEngine(checkout: string): LinkReport | undefined {
@@ -484,8 +484,11 @@ export type SharedProps = { checkout?: string; config?: SharedConfig }
 /** The flags of `epic shared` that take no value. */
 const SWITCHES = ["json", "import", "all", "quiet", "dryRun"]
 
-/** The spell-epic checkout's link at a checkout's root (`linkEngine()`):  `engineFolder` in `.epic/config.json5`. */
-export const ENGINE_LINK = "spell-epic"
+/**
+ * The engine's link at a checkout's root (`linkEngine()`):  `engineFolder` in `.epic/config.json5`.
+ * - `epic`, the engine's folder's name since repo-split's P20 · One Repo (epic `epic-engine` P49);  `spell-epic` before
+ */
+export const ENGINE_LINK = "epic"
 
 /** Never compared or copied:  OS litter. */
 const LITTER = new Set([".DS_Store"])

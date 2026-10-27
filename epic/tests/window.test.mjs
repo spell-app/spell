@@ -918,7 +918,7 @@ test("handoff:  refused, no record written, when the end-of-turn hook won't run;
     assert.equal(code, 1)
     assert.equal(out, "")
     assert.match(err, /this session can't move to .*'s window:  Claude Code looks for the plugin's marketplace in/)
-    assert.match(err, /fix:  run the plugin install steps again .*claude plugin marketplace add/)
+    assert.match(err, /fix:  run `epic plugin install`/)
     assert.match(err, new RegExp(`to work there now:  \`epic window launch ${name}\``))
     // put right:  the move is promised, and recorded
     pluginListsAt(dirname(import.meta.dirname))
@@ -1067,12 +1067,12 @@ function pluginListsAt(folder) {
   const marketplace = { source: { source: "directory", path: folder } }
   writeFileSync(
     join(claudeHome, "settings.json"),
-    JSON.stringify({ extraKnownMarketplaces: { "spell-epic": marketplace } })
+    JSON.stringify({ extraKnownMarketplaces: { spell: marketplace } })
   )
   mkdirSync(join(claudeHome, "plugins"), { recursive: true })
-  const known = { "spell-epic": { ...marketplace, installLocation: folder } }
+  const known = { spell: { ...marketplace, installLocation: folder } }
   writeFileSync(join(claudeHome, "plugins", "known_marketplaces.json"), JSON.stringify(known))
-  const installed = { version: 2, plugins: { "spell-epic@spell-epic": [{ installPath: folder }] } }
+  const installed = { version: 2, plugins: { "epic@spell": [{ installPath: folder }] } }
   writeFileSync(join(claudeHome, "plugins", "installed_plugins.json"), JSON.stringify(installed))
 }
 

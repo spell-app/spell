@@ -237,33 +237,34 @@ describe("commitShared()", () => {
 })
 
 describe("linkEngine()", () => {
-  // a repo of its own, with spell-epic beside it:  `engineFolder`'s default
+  // a repo of its own, with the engine beside it
   const top = join(TEMP, "engine")
   const repo = join(top, "spell-app")
-  const engine = join(top, "spell-epic")
+  const engine = join(top, "engine")
   mkdirSync(join(engine, "bin"), { recursive: true })
   mkdirSync(repo, { recursive: true })
   git(repo, "init", "-q", "-b", "main")
+  put(".epic/config.json5", '{ "engineFolder": "../engine" }\n', repo)
   const shared = new Shared({ checkout: repo, config: { main: repo, dir: join(top, "dev"), worktrees: [], links: [] } })
 
-  test("a branch that doesn't ignore spell-epic (from before the switch):  nothing linked", () => {
+  test("a checkout that doesn't ignore `epic`:  nothing linked", () => {
     expect(shared.linkEngine(repo)).toBeUndefined()
-    expect(existsSync(join(repo, "spell-epic"))).toBe(false)
+    expect(existsSync(join(repo, "epic"))).toBe(false)
   })
 
   test("ignored:  linked, by a relative path;  again:  ok", () => {
-    put(".gitignore", "/spell-epic\n", repo)
-    expect(shared.linkEngine(repo)).toEqual({ path: "spell-epic", state: "missing", action: "linked" })
-    expect(lstatSync(join(repo, "spell-epic")).isSymbolicLink()).toBe(true)
-    expect(realpathSync(join(repo, "spell-epic"))).toBe(engine)
-    expect(shared.linkEngine(repo)).toEqual({ path: "spell-epic", state: "ok", action: "ok" })
+    put(".gitignore", "/epic\n", repo)
+    expect(shared.linkEngine(repo)).toEqual({ path: "epic", state: "missing", action: "linked" })
+    expect(lstatSync(join(repo, "epic")).isSymbolicLink()).toBe(true)
+    expect(realpathSync(join(repo, "epic"))).toBe(engine)
+    expect(shared.linkEngine(repo)).toEqual({ path: "epic", state: "ok", action: "ok" })
   })
 
   test('a real folder there is never removed;  engineFolder "":  nothing linked', () => {
-    rmSync(join(repo, "spell-epic"))
-    mkdirSync(join(repo, "spell-epic"))
-    expect(shared.linkEngine(repo)).toEqual({ path: "spell-epic", state: "real", action: "diverged" })
-    rmSync(join(repo, "spell-epic"), { recursive: true })
+    rmSync(join(repo, "epic"))
+    mkdirSync(join(repo, "epic"))
+    expect(shared.linkEngine(repo)).toEqual({ path: "epic", state: "real", action: "diverged" })
+    rmSync(join(repo, "epic"), { recursive: true })
     put(".epic/config.json5", '{ "engineFolder": "" }\n', repo)
     expect(shared.linkEngine(repo)).toBeUndefined()
   })

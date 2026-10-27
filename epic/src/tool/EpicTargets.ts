@@ -38,7 +38,7 @@ export class EpicTargets {
   constructor(root: string) {
     this.content = EpicConfig.contentOf(root)
     this.sagas = new Sagas(root)
-    // a set in spell-epic (Epic UI's `epic/src/docs`) is THIS engine's, which serves it, from any checkout
+    // a set in the engine (Epic UI's `epic/src/docs`) is THIS engine's, which serves it, from a checkout without it
     const folderOf = (dir: string) =>
       dir.startsWith(ENGINE_LINK) && !existsSync(join(root, ENGINE_LINK))
         ? join(ServedFolders.ENGINE, dir.slice(ENGINE_LINK.length))
@@ -233,8 +233,11 @@ const TEST_ACTION = /\sclass="[^"]*\bepic-test-action\b/
 /** The page server's show route (`showRoutes.ts`):  `/api/docs/show?path=<page>`. */
 const SHOW_ROUTE = "/api/docs/show?"
 
-/** A checkout's link to spell-epic, where spell-app's served sets name its folders (`epic/src/docs`). */
-const ENGINE_LINK = "spell-epic/"
+/**
+ * The engine's folder, as a served set names it from a checkout's root (`epic/src/docs`):  the kit's own `epic/`, or
+ * a checkout's link to it (`Shared.ENGINE_LINK`;  `spell-epic/` before repo-split's P20 · One Repo).
+ */
+const ENGINE_LINK = "epic/"
 
 /** A worktree's pages, as the main checkout's page server serves them. */
 const WORKTREES = "/worktrees/"

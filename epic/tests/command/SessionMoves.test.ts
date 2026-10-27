@@ -16,12 +16,13 @@ import { SessionMoves } from "spell/epic/command/SessionMoves"
 const top = mkdtempSync(join(tmpdir(), "session-moves-"))
 const home = join(top, "claude")
 const registry = join(top, "registry")
-/** the plugin's folder:  its names, and the end-of-turn hook in it */
-const engine = join(top, "spell-epic")
+/** the plugin's folder, `epic/`:  its name, and the end-of-turn hook in it;  its marketplace at the repo's root */
+const engine = join(top, "epic")
 mkdirSync(join(engine, ".claude-plugin"), { recursive: true })
 mkdirSync(join(engine, "hooks"))
-writeFileSync(join(engine, ".claude-plugin", "plugin.json"), '{ "name": "spell-epic" }')
-writeFileSync(join(engine, ".claude-plugin", "marketplace.json"), '{ "name": "spell-epic" }')
+mkdirSync(join(top, ".claude-plugin"))
+writeFileSync(join(engine, ".claude-plugin", "plugin.json"), '{ "name": "epic" }')
+writeFileSync(join(top, ".claude-plugin", "marketplace.json"), '{ "name": "spell" }')
 writeFileSync(join(engine, "hooks", "handoff.mjs"), "")
 
 const SESSION = "948c5133-c416-417e-b919-de8b08200bed"
@@ -37,13 +38,13 @@ function pluginListsAt(folder: string, { installPath = folder, enabled = true } 
   const marketplace = { source: { source: "directory", path: folder } }
   mkdirSync(join(home, "plugins"), { recursive: true })
   const settings = {
-    enabledPlugins: { "spell-epic@spell-epic": enabled },
-    extraKnownMarketplaces: { "spell-epic": marketplace }
+    enabledPlugins: { "epic@spell": enabled },
+    extraKnownMarketplaces: { spell: marketplace }
   }
   writeFileSync(join(home, "settings.json"), JSON.stringify(settings))
-  const known = { "spell-epic": { ...marketplace, installLocation: folder } }
+  const known = { spell: { ...marketplace, installLocation: folder } }
   writeFileSync(join(home, "plugins", "known_marketplaces.json"), JSON.stringify(known))
-  const installed = { version: 2, plugins: { "spell-epic@spell-epic": [{ installPath }] } }
+  const installed = { version: 2, plugins: { "epic@spell": [{ installPath }] } }
   writeFileSync(join(home, "plugins", "installed_plugins.json"), JSON.stringify(installed))
 }
 
@@ -63,6 +64,22 @@ beforeEach(() => {
 
 afterAll(() => rmSync(top, { recursive: true, force: true }))
 
+describe("pluginNames()", () => {
+  test("epic@spell:  the plugin's name from its manifest, the marketplace's from the repo's root;  else the defaults", () => {
+    expect(moves().pluginNames()).toEqual({ plugin: "epic", marketplace: "spell" })
+    const bare = join(top, "bare", "epic")
+    mkdirSync(bare, { recursive: true })
+    expect(new SessionMoves({ registry, home, engine: bare }).pluginNames()).toEqual({
+      plugin: "epic",
+      marketplace: "spell"
+    })
+  })
+
+  test("the real plugin:  epic@spell", () => {
+    expect(new SessionMoves({ registry, home }).pluginNames()).toEqual({ plugin: "epic", marketplace: "spell" })
+  })
+})
+
 describe("hookProblem():  will the end-of-turn hook run?", () => {
   test("the plugin's lists naming a folder that's there, and the session marked:  no problem", () => {
     pluginListsAt(engine)
@@ -81,10 +98,10 @@ describe("hookProblem():  will the end-of-turn hook run?", () => {
     moves().sawHooks(SESSION)
     const problem = moves().hookProblem(SESSION)!
     expect(problem).toBe(`Claude Code looks for the plugin's marketplace in ${gone}, which is gone (settings.json)`)
-    expect(moves().fixFor(problem)).toMatch(new RegExp(`claude plugin marketplace add ${engine} --scope user`))
+    expect(moves().fixFor(problem)).toMatch(/run `epic plugin install`.*then \/reload-plugins/)
     // only the second list left stale
     pluginListsAt(engine)
-    const known = { "spell-epic": { installLocation: gone } }
+    const known = { spell: { installLocation: gone } }
     writeFileSync(join(home, "plugins", "known_marketplaces.json"), JSON.stringify(known))
     expect(moves().pluginProblem()).toMatch(/which is gone \(known_marketplaces\.json\)/)
   })
@@ -138,7 +155,7 @@ describe("missedMove():  a promised move that didn't happen", () => {
     recordMove()
     const missed = moves().missedMove(SESSION)!
     expect(missed.problem).toMatch(/which is gone/)
-    expect(missed.message).toMatch(/Fix:  run the plugin install steps again/)
+    expect(missed.message).toMatch(/Fix:  run `epic plugin install`/)
   })
 
   test("withMissed():  added after what the prompt hook says;  a blocked prompt left as it is", () => {

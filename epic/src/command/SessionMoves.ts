@@ -38,7 +38,7 @@ export class SessionMoves {
   readonly registry: string
   /** Claude Code's own folder (`~/.claude`):  its settings and plugin lists */
   readonly home: string
-  /** the plugin's folder, spell-epic's:  its `.claude-plugin/` names it */
+  /** the plugin's folder, `epic/`:  its `.claude-plugin/` names it, the repo's root its marketplace */
   readonly engine: string
 
   constructor({ registry = SessionMoves.registry(), home = ClaudeHome.home(), engine = ENGINE }: MovesProps = {}) {
@@ -96,7 +96,7 @@ export class SessionMoves {
    * - its marketplace's folder gone, in either list Claude Code keeps it in:  `~/.claude/settings.json`
    *   (`extraKnownMarketplaces`) and `~/.claude/plugins/known_marketplaces.json` (r20:  both named spell-app's old
    *   `epic/`, and every hook failed, "Plugin directory does not exist")
-   * - the folder its hooks run from (`installed_plugins.json`'s `installPath`, the plugin install steps' step 5 link)
+   * - the folder its hooks run from (`installed_plugins.json`'s `installPath`, the cache link `epic plugin install` makes)
    *   gone, or without the end-of-turn hook
    * - a list missing, or the plugin not in it (a session run with `--plugin-dir`):  no problem said
    */
@@ -123,27 +123,29 @@ export class SessionMoves {
     return null
   }
 
-  /** The plugin's name and its marketplace's, from the engine's `.claude-plugin/`;  `spell-epic` each by default. */
+  /**
+   * The plugin's name and its marketplace's:  `epic` and `spell`, so Claude Code knows it as `epic@spell`.
+   * - the plugin's from its own manifest, `<engine>/.claude-plugin/plugin.json`
+   * - the marketplace's from the ONE marketplace file, at the repo's root:  `<engine>/../.claude-plugin/marketplace.json`
+   *   (epic `epic-engine` P49, Q42;  each was `spell-epic`, in the plugin's own folder, before repo-split's P20 · One Repo)
+   * - a file missing or unreadable:  its default
+   */
   pluginNames(): { plugin: string; marketplace: string } {
-    const folder = join(this.engine, ".claude-plugin")
-    const plugin = readJsonQuietly(join(folder, "plugin.json"))?.name ?? "spell-epic"
-    const marketplace = readJsonQuietly(join(folder, "marketplace.json"))?.name ?? "spell-epic"
+    const plugin = readJsonQuietly(join(this.engine, ".claude-plugin", "plugin.json"))?.name ?? PLUGIN
+    const marketplace =
+      readJsonQuietly(join(dirname(this.engine), ".claude-plugin", "marketplace.json"))?.name ?? MARKETPLACE
     return { plugin, marketplace }
   }
 
   /**
-   * What fixes `problem` (`hookProblem()`'s), in one line:  the plugin install steps (the kit's `README-agents.md`,
-   * "The epic plugin"), or a new session.
+   * What fixes `problem` (`hookProblem()`'s), in one line:  `epic plugin install` (`PluginInstall`), which puts Claude
+   * Code's lists right, or a new session.
    */
   fixFor(problem: string): string {
     if (problem.startsWith("this session's hooks"))
       return "type /reload-plugins, or start a new session;  until then this session can't move"
     if (problem.includes("turned off")) return "turn it back on (`/plugin`), then /reload-plugins"
-    return (
-      `run the plugin install steps again (the kit's README-agents.md, "The epic plugin"):  ` +
-      `\`claude plugin marketplace add ${this.engine} --scope user\`, then the cache link (step 5), ` +
-      `then /reload-plugins`
-    )
+    return "run `epic plugin install` (it puts Claude Code's plugin lists right), then /reload-plugins"
   }
 
   ////////////////
@@ -231,7 +233,7 @@ export type MovesProps = {
   registry?: string
   /** Claude Code's own folder;  default `ClaudeHome.home()` */
   home?: string
-  /** the plugin's folder;  default this file's engine, spell-epic */
+  /** the plugin's folder;  default this file's engine, `epic/` */
   engine?: string
 }
 
@@ -253,8 +255,14 @@ export type HookOutput =
       systemMessage?: string
     }
 
-/** The engine, spell-epic:  the folder this file's `src/command/` is in. */
+/** The engine, `epic/`:  the folder this file's `src/command/` is in. */
 const ENGINE = dirname(dirname(import.meta.dirname))
+
+/** The plugin's name in Claude Code, when its manifest can't be read:  `epic@spell` (epic `epic-engine` P49, Q42). */
+const PLUGIN = "epic"
+
+/** Its marketplace's name, when the root marketplace file can't be read. */
+const MARKETPLACE = "spell"
 
 /** A Claude Code session id:  a uuid. */
 const SESSION_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i

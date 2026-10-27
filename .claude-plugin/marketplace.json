@@ -7,10 +7,7 @@
   "plugins": [
     {
       "name": "epic",
-      "source": {
-        "source": "npm",
-        "package": "spell-epic"
-      },
+      "source": "./epic",
       "description": "Epics for Claude Code:  epic pages, worktrees and windows, the review loop and the epic command"
     }
   ]
