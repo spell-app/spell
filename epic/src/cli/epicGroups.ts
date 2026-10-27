@@ -1177,7 +1177,10 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
   commit: {},
   commits: {
     "--backfill": "every phase and item commit in the page's history",
-    "--merged <shas>": "only those commits, comma-separated"
+    "--merged <shas>": "only those commits, comma-separated",
+    "--repo <repo>": "remap:  the old repo, and any older name of it, comma-separated",
+    "--to <repo>": "remap:  the repo it was merged into (default this checkout's)",
+    "--dry-run": "remap:  only say what it would change"
   },
 
   // an epic page:  items

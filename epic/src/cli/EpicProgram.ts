@@ -290,9 +290,17 @@ export class EpicProgram {
     ).usage('<epic>#P3 | <epic>#J3  <sha> "what it did"')
     this.page(
       epic.command("commits"),
-      "every phase and item commit in the page's history, into their lists (phase ... done and merge do it too)",
+      "every phase and item commit in the page's history, into their lists (phase ... done and merge do it too);  " +
+        "remap:  an old repo's commits, on every page, to their new ids",
       "epic commits seo --backfill"
-    ).usage("<epic> --backfill [--merged <sha,...>]")
+    )
+      .usage("<epic> --backfill [--merged <sha,...>]  |  remap <map> [<map> ...] --repo <old repo> [--dry-run]")
+      .addHelpText(
+        "after",
+        "\n  remap:  every epic page's commits of an old repo, over the whole content folder, pointed at their new" +
+          "\n    ids in the repo it was merged into (repo-split's P20 · One Repo;  epic-engine's P49)" +
+          "\n    epic commits remap tools/one-repo/commit-map-parser.txt --repo spell-parser,spell-lang --dry-run"
+      )
 
     ////////////////
     // ## Epic page:  items
