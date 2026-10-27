@@ -139,6 +139,7 @@ export const APP_TEXTS = {
   homeProjectsLine: "What you've made, and where to start the next one.",
   homeFixturesLine: "The frozen apps the tests run against.",
   homeNoGuides: "Guides are on their way.",
+  homeNotebooksLine: "Spell UI's pages, written in Spell.",
 
   ////////////////
   // ## Project groups:  each group's words, by its `type` (spaces' `PROJECT_GROUPS`)
