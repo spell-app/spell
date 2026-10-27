@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { TokenTree } from "spell-ui/components/ui-theme-editor/TokenTree"
+import { TokenTree } from "spell/ui/components/ui-theme-editor/TokenTree"
 
 /** A tree of `tokens` in group `place`, each token's path its name's parts after `--ui-<place>-`. */
 function treeOf(place: string, tokens: string[]) {

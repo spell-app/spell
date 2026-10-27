@@ -11,7 +11,7 @@
 import { UIDocsThemeBench } from "./UIDocsThemeBench"
 import { BenchPages } from "./BenchPages"
 
-import "spell-ui/components/ui-theme-editor"
+import "spell/ui/components/ui-theme-editor"
 
 UIDocsThemeBench.define()
 

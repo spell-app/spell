@@ -6,7 +6,7 @@
  * - The choices themselves (`ThemeChoices`, `ThemeHues` ...) are `UIT`'s:  an event's `detail` names them.
  */
 
-import type * as UIT from "spell-ui/components/components.types"
+import type * as UIT from "spell/ui/components/components.types"
 import type { themeEditorVocabulary } from "./UIThemeEditor.en"
 
 ////////////////

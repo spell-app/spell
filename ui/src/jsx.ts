@@ -5,7 +5,7 @@
  * - In VS Code:  completion, hover docs and checks.
  * - And each tag's events in plain DOM code.
  * - A program uses it by importing it once, in any of its files (its `.types.ts`, say):
- *   `import type {} from "spell-ui/jsx"`.
+ *   `import type {} from "spell/ui/jsx"`.
  *   - Then every `<ui-*>` tag in that program's JSX is checked.
  *   - Not by `tsconfig`'s `types`:  that finds packages, not a package's files.
  * - EXACT:  an attribute the vocabulary doesn't name is an error.
@@ -31,7 +31,7 @@
 
 import type { JSX } from "@solidjs/web"
 
-import type { E, UIT } from "spell-ui/core"
+import type { E, UIT } from "spell/ui/core"
 
 /**
  * HTML's global attributes, which every `<ui-*>` tag takes:  Solid's own, `class`, `id`, `slot`, `ref`, `onClick` ...
@@ -8419,12 +8419,12 @@ export interface UIDropdownAttributes {
    */
   "prop:additionText"?: string
   /**
-   * Options as a PROPERTY:  `MenuOption[]` (`spell-ui/elements`);  added after slotted `<ui-item>`s.
+   * Options as a PROPERTY:  `MenuOption[]` (`spell/ui/elements`);  added after slotted `<ui-item>`s.
    * - a JS property (rich data):  an object, array or function, given as it is
    */
   options?: unknown
   /**
-   * Options as a PROPERTY:  `MenuOption[]` (`spell-ui/elements`);  added after slotted `<ui-item>`s.
+   * Options as a PROPERTY:  `MenuOption[]` (`spell/ui/elements`);  added after slotted `<ui-item>`s.
    * - a JS property (rich data):  an object, array or function, given as it is
    * @deprecated write `options` -- `prop:` stays only for compiled spell
    */
@@ -27715,12 +27715,12 @@ export interface UISelectAttributes {
    */
   "prop:required"?: boolean | ""
   /**
-   * Options as a PROPERTY:  `MenuOption[]` (`spell-ui/elements`);  added after slotted `<ui-item>`s.
+   * Options as a PROPERTY:  `MenuOption[]` (`spell/ui/elements`);  added after slotted `<ui-item>`s.
    * - a JS property (rich data):  an object, array or function, given as it is
    */
   options?: unknown
   /**
-   * Options as a PROPERTY:  `MenuOption[]` (`spell-ui/elements`);  added after slotted `<ui-item>`s.
+   * Options as a PROPERTY:  `MenuOption[]` (`spell/ui/elements`);  added after slotted `<ui-item>`s.
    * - a JS property (rich data):  an object, array or function, given as it is
    * @deprecated write `options` -- `prop:` stays only for compiled spell
    */

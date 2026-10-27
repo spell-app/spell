@@ -1,8 +1,8 @@
 import { beforeAll, describe, expect, it } from "vite-plus/test"
 
-import type { UIT } from "spell-ui/core"
-import { ThemeDraft } from "spell-ui/components/ui-theme-editor/ThemeDraft"
-import { ThemeTokens } from "spell-ui/components/ui-theme-editor/ThemeTokens"
+import type { UIT } from "spell/ui/core"
+import { ThemeDraft } from "spell/ui/components/ui-theme-editor/ThemeDraft"
+import { ThemeTokens } from "spell/ui/components/ui-theme-editor/ThemeTokens"
 
 /** The editor's texts, as their keys (and params). */
 const text = (key: string, params?: Record<string, string | number>) => `${key}${params ? JSON.stringify(params) : ""}`

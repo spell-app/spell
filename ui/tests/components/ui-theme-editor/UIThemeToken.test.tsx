@@ -2,9 +2,9 @@ import { describe, expect, it } from "vite-plus/test"
 
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import { expectAccessible } from "spell/test-helpers/A11y"
-import type { TokenRow } from "spell-ui/components/ui-theme-editor/UIThemeEditor.types"
+import type { TokenRow } from "spell/ui/components/ui-theme-editor/UIThemeEditor.types"
 
-import "spell-ui/components/ui-theme-editor"
+import "spell/ui/components/ui-theme-editor"
 
 /** A row of `--ui-highlight`:  a mix, set here. */
 const ROW: TokenRow = {

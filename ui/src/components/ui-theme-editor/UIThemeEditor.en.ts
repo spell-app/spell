@@ -1,13 +1,13 @@
 /**
  * The English vocabulary of `<ui-theme-editor>`:  every name the tag uses.
  * - Its tag, attributes, events, parts, states and texts.
- *   The shape is `E.ComponentVocabulary` (`spell-ui/vocabulary`).
+ *   The shape is `E.ComponentVocabulary` (`spell/ui/vocabulary`).
  * - Most of it is TEXTS:  the bar, the Basics, the token tree, the sample app, each translated in
  *   `UIThemeEditor.es.ts`.
  * - Pure data:  `import type` only, so node loads it (`yarn site:data`, `yarn gen:root`).
  */
 
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /****************
  * ### `themeEditorVocabulary`

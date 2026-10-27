@@ -30,7 +30,7 @@ import type {
  * - PURE:  data in, text out, no file system and no JSON5 reader (the caller parses the file), so it runs in node
  *   (`yarn gen:styles`, the committed sheets) and in the browser (the test that keeps them current, the theme
  *   editor rewriting its sheet live, saved themes).
- * - Imports only its own folder's vocabulary and types:  never the element layer, nor the `spell-ui/styles` barrel
+ * - Imports only its own folder's vocabulary and types:  never the element layer, nor the `spell/ui/styles` barrel
  *   with its `?inline` sheets (as `StyleGenerator`).
  ****************/
 export class ThemeFile {

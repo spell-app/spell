@@ -6501,7 +6501,7 @@
             {
               "kind": "field",
               "name": "options",
-              "description": "Options as a PROPERTY:  `MenuOption[]` (`spell-ui/elements`);  added after slotted `<ui-item>`s.  A JS property (rich data), not an attribute.",
+              "description": "Options as a PROPERTY:  `MenuOption[]` (`spell/ui/elements`);  added after slotted `<ui-item>`s.  A JS property (rich data), not an attribute.",
               "type": {
                 "text": "unknown"
               }
@@ -28776,7 +28776,7 @@
             {
               "kind": "field",
               "name": "options",
-              "description": "Options as a PROPERTY:  `MenuOption[]` (`spell-ui/elements`);  added after slotted `<ui-item>`s.  A JS property (rich data), not an attribute.",
+              "description": "Options as a PROPERTY:  `MenuOption[]` (`spell/ui/elements`);  added after slotted `<ui-item>`s.  A JS property (rich data), not an attribute.",
               "type": {
                 "text": "unknown"
               }

@@ -1,12 +1,12 @@
 /**
  * The English vocabulary of `<ui-docs-theme-bench>`:  every name the tag uses.
- * - Its tag, parts and texts.  The shape is `E.ComponentVocabulary` (`spell-ui/vocabulary`).
+ * - Its tag, parts and texts.  The shape is `E.ComponentVocabulary` (`spell/ui/vocabulary`).
  * - A DOC-ONLY element (`src/docs-components/`):  filed under the `documentation` topic,
  *   left out of the component list, and loaded by `<ui-root>` like any family.
  * - Pure data:  `import type` only, so node loads it (`yarn site:data`, `yarn gen:root`).
  */
 
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /****************
  * ### `docsThemeBenchVocabulary`

@@ -1,4 +1,4 @@
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /**
  * `<ui-color-chip>` in Spanish:  `<es-muestra-color>`, with the names only it uses (from `UIColorChip.en.ts`).

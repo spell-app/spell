@@ -3,7 +3,7 @@ import { playwright } from "vite-plus/test/browser-playwright"
 import { resolve } from "node:path"
 
 import { browserMode } from "spell/toolchain/browserMode"
-import { environment } from "spell-ui/tools/environment"
+import { environment } from "spell/ui/tools/environment"
 import { baseConfig } from "./vite.config.ts"
 
 /**

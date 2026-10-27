@@ -1,4 +1,4 @@
-import type { PreviewPage } from "spell-ui/components/ui-theme-editor/UIThemeEditor.types"
+import type { PreviewPage } from "spell/ui/components/ui-theme-editor/UIThemeEditor.types"
 
 /****************
  * ### `BenchPages`

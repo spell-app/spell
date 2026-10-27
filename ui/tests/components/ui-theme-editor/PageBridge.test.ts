@@ -2,7 +2,7 @@ import { describe, expect, it, onTestFinished } from "vite-plus/test"
 
 import { Fixture } from "spell/test-helpers/Fixture"
 
-import { PageBridge } from "spell-ui/components/ui-theme-editor/PageBridge"
+import { PageBridge } from "spell/ui/components/ui-theme-editor/PageBridge"
 
 describe("PageBridge.applyCss()", () => {
   it("lays the theme being made last in <head>, changes it in place, and takes it away", () => {

@@ -1,4 +1,4 @@
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /**
  * `<ui-theme-token>` in Spanish:  `<es-variable-tema>`, with the names and texts only it uses (from

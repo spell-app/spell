@@ -1,5 +1,5 @@
 import { rgbToHex } from "spell/util/color"
-import { TokenColor } from "spell-ui/components/ui-theme-editor/TokenColor"
+import { TokenColor } from "spell/ui/components/ui-theme-editor/TokenColor"
 
 import { FALLBACK_HEX } from "./UIDocsTokens.types"
 

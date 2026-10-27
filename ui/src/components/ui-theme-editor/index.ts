@@ -14,7 +14,7 @@
  *     so a family built of other widgets imports them itself.
  * - Imported by their files, without the editor:  `SavedTheme` (the Spell editor's theme menu, `SavedTheme.restore()`)
  *   and `PageBridge` (the Spell editor app, framed, in development).
- * - Also the library's `spell-ui/ui-theme-editor` entry.
+ * - Also the library's `spell/ui/ui-theme-editor` entry.
  */
 
 import { DOMThemeEditorElement, UIThemeEditor } from "./UIThemeEditor"
@@ -27,23 +27,23 @@ import { ThemeTokens } from "./ThemeTokens"
 import { TokenColor } from "./TokenColor"
 import { TokenTree } from "./TokenTree"
 
-import "spell-ui/components/ui-property-editor"
-import "spell-ui/components/ui-input"
-import "spell-ui/components/ui-select"
-import "spell-ui/components/ui-item"
-import "spell-ui/components/ui-slider"
-import "spell-ui/components/ui-menu"
-import "spell-ui/components/ui-button"
-import "spell-ui/components/ui-card"
-import "spell-ui/components/ui-parts"
-import "spell-ui/components/ui-checkbox"
-import "spell-ui/components/ui-label"
-import "spell-ui/components/ui-message"
-import "spell-ui/components/ui-progress"
-import "spell-ui/components/ui-icon"
-import "spell-ui/components/ui-section"
-import "spell-ui/components/ui-code"
-import "spell-ui/components/ui-theme-menu"
+import "spell/ui/components/ui-property-editor"
+import "spell/ui/components/ui-input"
+import "spell/ui/components/ui-select"
+import "spell/ui/components/ui-item"
+import "spell/ui/components/ui-slider"
+import "spell/ui/components/ui-menu"
+import "spell/ui/components/ui-button"
+import "spell/ui/components/ui-card"
+import "spell/ui/components/ui-parts"
+import "spell/ui/components/ui-checkbox"
+import "spell/ui/components/ui-label"
+import "spell/ui/components/ui-message"
+import "spell/ui/components/ui-progress"
+import "spell/ui/components/ui-icon"
+import "spell/ui/components/ui-section"
+import "spell/ui/components/ui-code"
+import "spell/ui/components/ui-theme-menu"
 
 UIThemeEditor.define()
 UIThemeToken.define()

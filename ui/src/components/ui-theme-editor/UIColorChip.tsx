@@ -1,6 +1,6 @@
 import type { JSX } from "@solidjs/web"
 
-import { E } from "spell-ui/core"
+import { E } from "spell/ui/core"
 import { colorChipVocabulary } from "./UIColorChip.en"
 
 import colorChipCSS from "./UIColorChip.css?inline"

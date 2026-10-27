@@ -1,6 +1,6 @@
 import { isServer, type JSX } from "@solidjs/web"
 
-import { E } from "spell-ui/core"
+import { E } from "spell/ui/core"
 import { BenchPages, EDITOR_REDIRECT, type BenchPageId } from "./BenchPages"
 import { docsThemeBenchVocabulary } from "./UIDocsThemeBench.en"
 import type { DocsThemeBenchVocabulary } from "./UIDocsThemeBench.types"

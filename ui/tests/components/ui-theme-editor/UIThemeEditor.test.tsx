@@ -1,13 +1,13 @@
 import { userEvent } from "vite-plus/test/browser"
 import { afterEach, beforeEach, describe, expect, it, onTestFinished, vi } from "vite-plus/test"
 
-import { UI } from "spell-ui/runtime"
-import { foundationCSS } from "spell-ui/styles"
-import { Sheets } from "spell-ui/test-helpers/Sheets"
+import { UI } from "spell/ui/runtime"
+import { foundationCSS } from "spell/ui/styles"
+import { Sheets } from "spell/ui/test-helpers/Sheets"
 import { expectAccessible } from "spell/test-helpers/A11y"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
-import { SavedTheme, type DOMThemeEditorElement, type UIThemeEditor } from "spell-ui/components/ui-theme-editor"
-import type { PreviewPage } from "spell-ui/components/ui-theme-editor/UIThemeEditor.types"
+import { SavedTheme, type DOMThemeEditorElement, type UIThemeEditor } from "spell/ui/components/ui-theme-editor"
+import type { PreviewPage } from "spell/ui/components/ui-theme-editor/UIThemeEditor.types"
 
 /** What the editor keeps in the browser:  the theme being made, the tree's folds, ⇄. */
 const KEPT_KEYS = [

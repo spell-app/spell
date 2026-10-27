@@ -1,7 +1,7 @@
 import { For, Show } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
-import { E } from "spell-ui/core"
+import { E } from "spell/ui/core"
 import { TokenColor } from "./TokenColor"
 import { themeTokenVocabulary } from "./UIThemeToken.en"
 import type { TokenRow, TokenValue } from "./UIThemeEditor.types"

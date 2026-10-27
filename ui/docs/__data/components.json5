@@ -8073,7 +8073,7 @@
           "name": "options",
           "kind": "json",
           "reflect": false,
-          "description": "Options as a PROPERTY:  `MenuOption[]` (`spell-ui/elements`);  added after slotted `<ui-item>`s."
+          "description": "Options as a PROPERTY:  `MenuOption[]` (`spell/ui/elements`);  added after slotted `<ui-item>`s."
         },
         {
           "name": "visible",
@@ -26899,7 +26899,7 @@
           "name": "options",
           "kind": "json",
           "reflect": false,
-          "description": "Options as a PROPERTY:  `MenuOption[]` (`spell-ui/elements`);  added after slotted `<ui-item>`s."
+          "description": "Options as a PROPERTY:  `MenuOption[]` (`spell/ui/elements`);  added after slotted `<ui-item>`s."
         },
         {
           "name": "loading",

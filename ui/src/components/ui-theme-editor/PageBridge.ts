@@ -1,4 +1,4 @@
-import { E } from "spell-ui/core"
+import { E } from "spell/ui/core"
 import {
   PAGE_MESSAGE,
   type PageMessage,

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { ThemeTokens } from "spell-ui/components/ui-theme-editor/ThemeTokens"
-import { themeTree } from "spell-ui/styles/styles.en"
+import { ThemeTokens } from "spell/ui/components/ui-theme-editor/ThemeTokens"
+import { themeTree } from "spell/ui/styles/styles.en"
 
 describe("ThemeTokens.load()", () => {
   it("reads Spell's theme files;  every group of the theme tree, the theme's own first", async () => {

@@ -385,7 +385,7 @@ read one family, and you can find your way around all of them.
 
 ### Adding a family, step by step
 
-Seven steps, run from `spell-ui/`;  four of them have a test that fails until they're done.
+Seven steps, run from `spell/ui/`;  four of them have a test that fails until they're done.
 
 1. Make the folder, `ui-<name>/` in [the components folder](src/components/), laid out like `ui-button/` (above).
 2. Write one vocabulary per tag, `UI<Name>.en.ts`, with the two fields this page reads:

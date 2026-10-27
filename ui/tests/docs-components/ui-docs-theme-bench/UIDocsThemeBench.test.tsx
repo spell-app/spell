@@ -2,10 +2,10 @@ import { describe, expect, it } from "vite-plus/test"
 
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import type { DOMElement } from "spell/element"
-import type { PreviewPage } from "spell-ui/components/ui-theme-editor/UIThemeEditor.types"
-import { BenchPages } from "spell-ui/docs-components/ui-docs-theme-bench/BenchPages"
+import type { PreviewPage } from "spell/ui/components/ui-theme-editor/UIThemeEditor.types"
+import { BenchPages } from "spell/ui/docs-components/ui-docs-theme-bench/BenchPages"
 
-import "spell-ui/docs-components/ui-docs-theme-bench"
+import "spell/ui/docs-components/ui-docs-theme-bench"
 
 describe("<ui-docs-theme-bench>", () => {
   it("shows the theme editor, handed the four pages, Editor and Epic page first", async () => {

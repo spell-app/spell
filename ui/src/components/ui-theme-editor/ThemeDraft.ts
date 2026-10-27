@@ -1,7 +1,7 @@
-// Import directly:  the `spell-ui/styles` barrel carries every foundation sheet as text, which the editor never needs
-import { ThemeFile } from "spell-ui/styles/ThemeFile"
-import type { ThemeData } from "spell-ui/styles/styles.types"
-import { E, UIT } from "spell-ui/core"
+// Import directly:  the `spell/ui/styles` barrel carries every foundation sheet as text, which the editor never needs
+import { ThemeFile } from "spell/ui/styles/ThemeFile"
+import type { ThemeData } from "spell/ui/styles/styles.types"
+import { E, UIT } from "spell/ui/core"
 import { ThemeTokens } from "./ThemeTokens"
 import {
   GLASS_THEMES,

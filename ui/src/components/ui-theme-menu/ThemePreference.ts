@@ -2,7 +2,7 @@
 import { ColorScheme } from "spell/util/persist/ColorScheme"
 import { PrefStore } from "spell/util/persist/PrefStore"
 import { COLOR_SCHEME_KEY, OLD_COLOR_SCHEME_KEYS } from "spell/util/persist/persist.types"
-import { E, UI, UIT, type Themes } from "spell-ui/core"
+import { E, UI, UIT, type Themes } from "spell/ui/core"
 import {
   DEFAULT_THEME,
   SCHEME_SWITCHING,
@@ -42,7 +42,7 @@ import {
  *     so it usually lands with their first render;  page text may flash the default theme for a frame.
  * - Several menus on one page (the top bar's, a components page's masthead's)
  *   stay in step through `subscribe()`.
- * - Imports the core entry (`UI`, `spell-ui/core`), which the site entry loads anyway;
+ * - Imports the core entry (`UI`, `spell/ui/core`), which the site entry loads anyway;
  *   the runtime chunk (`UI.themes`) loads only to apply a theme.
  * - Static only:  one theme and scheme per page.
  * - Each place keeps its own default theme and theme key (`site()`, epic `debut` J87):

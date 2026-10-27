@@ -11,7 +11,7 @@ import { PATTERN_RULES } from "spell/toolchain/lint/patterns"
  * The `spell-ui/*` lint rules (`spell/toolchain/lint/patterns`, the toolchain's):
  * what each flags, and the ALLOW-LIST of the uses that stay.
  * - Here, in `ui`'s node tooling tests:  the patterns are Spell UI's, and so is the allow-list.
- * - A new `// oxlint-disable-next-line spell-ui/...` comment fails "the allow-list" below until it's added there:
+ * - A new `// oxlint-disable-next-line spell/ui/...` comment fails "the allow-list" below until it's added there:
  *   every exception is seen in review, with its reason.
  */
 
@@ -187,7 +187,7 @@ describe("spell-ui/* disable comments", () => {
     expect(disableComments()).toEqual(sorted(ALLOWED))
   })
 
-  test("each turns off ONE line, and says why:  `// oxlint-disable-next-line spell-ui/<rule> -- <why>`", () => {
+  test("each turns off ONE line, and says why:  `// oxlint-disable-next-line ui/<rule> -- <why>`", () => {
     const loose = componentFiles().flatMap((file) =>
       readFileSync(join(ROOT, file), "utf8")
         .split("\n")
@@ -239,7 +239,7 @@ function sorted(list: readonly Allowed[]): Allowed[] {
 type Allowed = {
   /** from spell-ui's root */
   file: string
-  /** the rule's name, without `spell-ui/` */
+  /** the rule's name, without `ui/` */
   rule: string
   /** the disable comment's reason */
   reason: string

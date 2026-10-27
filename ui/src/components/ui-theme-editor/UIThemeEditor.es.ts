@@ -1,4 +1,4 @@
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /**
  * `<ui-theme-editor>` in Spanish:  `<es-editor-temas>`, with the names and texts only it uses (from `UIThemeEditor.en.ts`).

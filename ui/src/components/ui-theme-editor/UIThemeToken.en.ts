@@ -1,10 +1,10 @@
 /**
  * The English vocabulary of `<ui-theme-token>`:  every name the tag uses.
- * - The shape is `E.ComponentVocabulary` (`spell-ui/vocabulary`).
+ * - The shape is `E.ComponentVocabulary` (`spell/ui/vocabulary`).
  * - Pure data:  `import type` only, so node loads it (`yarn site:data`, `yarn gen:root`).
  */
 
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /****************
  * ### `themeTokenVocabulary`

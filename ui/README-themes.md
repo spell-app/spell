@@ -276,7 +276,7 @@ The runtime fetches the theme's sheet the first time it's asked for,
 and adopts it into the page and every component's shadow root, the ones there now and the ones to come:
 
 ```js
-import { UI } from "spell-ui/core"
+import { UI } from "spell/ui/core"
 
 const { themes } = await UI.load()
 themes.own // Spell's own themes:  ["spell", "glass", "fruity", "merlot"]

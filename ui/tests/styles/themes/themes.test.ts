@@ -1,25 +1,25 @@
 import { describe, expect, it, onTestFinished, vi } from "vite-plus/test"
 
-import { UI } from "spell-ui/runtime"
+import { UI } from "spell/ui/runtime"
 import { A11y } from "spell/test-helpers/A11y"
-import { Painted } from "spell-ui/test-helpers/Painted"
-import { ThemeHarness } from "spell-ui/test-helpers/ThemeHarness"
+import { Painted } from "spell/ui/test-helpers/Painted"
+import { ThemeHarness } from "spell/ui/test-helpers/ThemeHarness"
 
-import "spell-ui/components/ui-button"
-import "spell-ui/components/ui-checkbox"
-import "spell-ui/components/ui-flag"
-import "spell-ui/components/ui-segment"
-import "spell-ui/components/ui-parts"
-import "spell-ui/components/ui-input"
-import "spell-ui/components/ui-menu"
-import "spell-ui/components/ui-message"
-import "spell-ui/components/ui-modal"
-import "spell-ui/components/ui-progress"
+import "spell/ui/components/ui-button"
+import "spell/ui/components/ui-checkbox"
+import "spell/ui/components/ui-flag"
+import "spell/ui/components/ui-segment"
+import "spell/ui/components/ui-parts"
+import "spell/ui/components/ui-input"
+import "spell/ui/components/ui-menu"
+import "spell/ui/components/ui-message"
+import "spell/ui/components/ui-modal"
+import "spell/ui/components/ui-progress"
 
 /*
  * Every theme sheet's cases, one `describe("<name>.css")` each (theme agents APPEND theirs;  don't rewrite).
- * - Helpers:  `ThemeHarness` (`spell-ui/test-helpers/ThemeHarness`).  `UI.themes`' own tests:  `tests/runtime/Themes.test.ts`.
- * - Import the families a case renders at the top (`import "spell-ui/components/ui-<name>"`).
+ * - Helpers:  `ThemeHarness` (`spell/ui/test-helpers/ThemeHarness`).  `UI.themes`' own tests:  `tests/runtime/Themes.test.ts`.
+ * - Import the families a case renders at the top (`import "spell/ui/components/ui-<name>"`).
  * - Fomantic's themes are archived (`src/styles/themes/archive/`, epic `debut` P17):  not tested.
  */
 
@@ -35,7 +35,7 @@ import "spell-ui/components/ui-progress"
 class Own {
   /** Apply theme `name` for this test, the families its cases render loaded. */
   static async use(name: string) {
-    await Promise.all([import("spell-ui/components/ui-card"), import("spell-ui/components/ui-checkbox")])
+    await Promise.all([import("spell/ui/components/ui-card"), import("spell/ui/components/ui-checkbox")])
     await ThemeHarness.use(name)
   }
 
