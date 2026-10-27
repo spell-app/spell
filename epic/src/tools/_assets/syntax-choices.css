@@ -36,7 +36,7 @@
 }
 
 /*
- * The page's round icon buttons beside a box or a name, `<ui-button circular basic size="tiny">` (`spell-syntax.js`
+ * The page's round icon buttons beside a box or a name, `<ui-button appearance="circular basic" size="tiny">` (`spell-syntax.js`
  * `iconButton()`):  the reset ("back to what the code has") and the class name's pencil.  Just the icon, grey, no
  * ring;  the accent on a tint under the pointer.
  */

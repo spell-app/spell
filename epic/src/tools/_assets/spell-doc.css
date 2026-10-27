@@ -234,7 +234,7 @@ body.spell-doc-page :is(.spell-doc-main, .spell-doc-main ui-section) > :is(ui-me
   display: block;
 }
 /*
- * TABLES:  the expand button (`wireTableWidths()`), a `<ui-button basic size="mini">` in the table's actions row, right
+ * TABLES:  the expand button (`wireTableWidths()`), a `<ui-button appearance="basic" size="mini">` in the table's actions row, right
  * of its bullhorn, over the table's top right corner, centred on its header row (`<epic-actions>`, `addBlockAction()`);
  * its icon says which way it goes (`arrows left right`, `... to line` while the table runs wide)
  * - a BARE icon (Owen, 2026-10-19:  "Should be bare icon without the circle border"):  no edge, no fill, hovered or
