@@ -28,7 +28,10 @@ export const docsThemeBenchVocabulary = {
   slots: [],
   parts: [
     { name: "bench", description: "The whole bench:  the bar, the pages and the tuning." },
-    { name: "bar", description: "The top bar:  its title, the theme menu, the layout and the titles' scroll." },
+    {
+      name: "bar",
+      description: "The top bar:  its title, the layout, the titles' scroll, the schemes, and the pages' theme."
+    },
     { name: "pages", description: "The pages' grid." },
     { name: "page", description: "One page:  its title row and its frame." },
     { name: "tuning", description: "The tuning column:  every token, by group, and the changes." },
@@ -56,7 +59,13 @@ export const docsThemeBenchVocabulary = {
     { key: "one", text: "One scheme", description: "Show each page once, in the scheme picked." },
     { key: "light", text: "Light", description: "The light half of a page's pair." },
     { key: "dark", text: "Dark", description: "The dark half of a page's pair." },
-    { key: "reload", text: "Reload", description: "Reload a page, or all of them." },
+    {
+      key: "swap",
+      text: "Swap light and dark",
+      description: "The bar's button:  every pair's light and dark sides change places, the lights side by side."
+    },
+    { key: "theme", text: "Theme", description: "The pages' theme row, and its accessible name." },
+    { key: "reload", text: "Reload", description: "Reload one page's frames (its title row's icon)." },
     { key: "open", text: "Open in a tab", description: "Open a page in a tab of its own." },
     {
       key: "noEditor",

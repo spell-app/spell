@@ -65,6 +65,25 @@
   /* side by side, so no block margin beside each other (a menu takes 1em above and below its siblings) */
   --ui-menu-margin: 0;
 }
+/* the pages' theme:  a row of its own across the bar, every theme one click */
+.themes-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1 0 100%;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+  --ui-menu-margin: 0;
+}
+.themes-row > * {
+  flex: none;
+}
+.themes-label {
+  font-size: 0.85em;
+  font-weight: 600;
+  color: var(--ui-text-muted);
+}
 /* each keeps its width:  the row scrolls, never squeezes a menu under its neighbour */
 .tools > * {
   flex: none;
@@ -145,6 +164,10 @@
 }
 .frames.both {
   grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+/* a row's right-hand pair, or a swapped one:  its dark side first, so a row's two darks (or lights) sit together */
+.frames.dark-first .frame.dark {
+  order: -1;
 }
 /* a frame:  its page, nothing over it (its scheme is clear from the page, and named in its frame's title) */
 .frame {

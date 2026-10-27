@@ -2,6 +2,7 @@ import { describe, expect, it, onTestFinished } from "vite-plus/test"
 
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import type { DOMElement } from "spell/element"
+import { UI } from "spell-ui/core"
 
 import type { UIDocsThemeBench } from "spell-ui/docs-components/ui-docs-theme-bench"
 
@@ -13,13 +14,18 @@ const EDITS_KEY = "spell-ui-site:theme-bench"
 /** The bench's kept folds of its tree. */
 const FOLDS_KEY = "spell-ui-site:theme-bench-folds"
 
+/** The bench's kept swap of every pair's sides. */
+const SWAP_KEY = "spell-ui-site:theme-bench-swapped"
+
 /** Render a bench;  returns its DOM element and component, once its theme files are in and its groups drawn. */
 async function render() {
   localStorage.removeItem(EDITS_KEY)
   localStorage.removeItem(FOLDS_KEY)
+  localStorage.removeItem(SWAP_KEY)
   onTestFinished(() => {
     localStorage.removeItem(EDITS_KEY)
     localStorage.removeItem(FOLDS_KEY)
+    localStorage.removeItem(SWAP_KEY)
   })
   const bench = await ElementFixture.render<DOMElement>(`<ui-docs-theme-bench></ui-docs-theme-bench>`)
   const component = bench.component as unknown as UIDocsThemeBench
@@ -141,5 +147,32 @@ describe("<ui-docs-theme-bench>", () => {
     await ElementFixture.settle()
     const editor = component.groups.find((group) => group.place === "editor")!
     expect(editor.tokens).toEqual(["--spell-brand-25", "--spell-brand-50", "--spell-brand-100"])
+  })
+
+  it("a row's pairs mirror each other, its darks in the middle;  ⇄ swaps them, kept", async () => {
+    const { bench, component } = await render()
+    const root = bench.shadowRoot!
+    // the editor (left) light | dark, the epic page (right) dark | light
+    expect(component.isDarkFirst("editor")).toBe(false)
+    expect(component.isDarkFirst("epic")).toBe(true)
+    expect(root.querySelectorAll(".frames.dark-first")).toHaveLength(2)
+    component.swap()
+    await ElementFixture.settle()
+    expect(component.isDarkFirst("editor")).toBe(true)
+    expect(component.isDarkFirst("epic")).toBe(false)
+    expect(JSON.parse(localStorage.getItem(SWAP_KEY)!)).toBe(true)
+    // a page alone:  light | dark, unless swapped
+    component.layout = "ui"
+    await ElementFixture.settle()
+    expect(component.isDarkFirst("ui")).toBe(true)
+  })
+
+  it("the bar:  every theme of Spell's own one click each, the one shown picked;  no Reload of its own", async () => {
+    const { bench, component } = await render()
+    const row = bench.shadowRoot!.querySelector(".themes-row ui-menu")!
+    const items = [...row.querySelectorAll("ui-item")]
+    expect(items.map((item) => item.getAttribute("value"))).toEqual([...UI.themes.own])
+    expect(row.querySelector("ui-item[selected]")?.getAttribute("value")).toBe(component.theme)
+    expect(bench.shadowRoot!.querySelector(".tools ui-button[icon='redo']")).toBeNull()
   })
 })

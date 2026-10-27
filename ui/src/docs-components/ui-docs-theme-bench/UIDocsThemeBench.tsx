@@ -38,8 +38,9 @@ import benchCSS from "./UIDocsThemeBench.css?inline"
  * and the tokens behind their chrome (page tabs, section titles, surfaces) tuned live, for the theme work.
  *
  * - Its shadow DOM:
- *   - a BAR:  the title, `<ui-theme-menu>` (the theme and light / dark for every page), which pages to show
- *     (all four, or one), where their section titles sit (at rest, or stuck), Reload
+ *   - a BAR:  the title, which pages to show (all four, or one), where their section titles sit (at rest, or
+ *     stuck), light and dark side by side or one scheme, ⇄ (swap each pair's sides);  under them, a row of every
+ *     theme, one click each, and light / dark (`<ui-theme-menu show="scheme">`)
  *   - the PAGES (`BenchPlaces`):  this epic's page, Spell UI's Button page, the Avatar notebook in the editor,
  *     and the editor on Solitaire in its full view (Debug, every side bar, a card picked);
  *     each a real page in a frame, drawn at a desk's width and scaled down to its cell
@@ -267,6 +268,29 @@ export class UIDocsThemeBench extends E.UIComponent<DocsThemeBenchVocabulary> {
   /** Which schemes each page shows:  light and dark side by side (Owen:  "light/dark for the pages"), or one. */
   @E.state accessor schemes: BenchSchemes = "both"
 
+  /**
+   * A row's two pairs mirror each other, so its two darks sit side by side in the middle (Owen:  "light dark dark
+   * light so I can compare the darks against each other");  swapped, its two lights.  Kept in this browser.
+   */
+  @E.state accessor isSwapped: boolean = isServer ? false : (PREFS.get<boolean>(SWAP_PREF) ?? false)
+
+  /** Swap every pair's light and dark sides (the bar's ⇄). */
+  @E.untracked
+  swap(): void {
+    this.isSwapped = !this.isSwapped
+    PREFS.set(SWAP_PREF, this.isSwapped || undefined)
+  }
+
+  /**
+   * Whether page `id`'s pair shows its dark side first:  the right-hand page of each row of the grid, unless swapped;
+   * a page shown alone, only when swapped.
+   * - By the frames' order on screen, never in the DOM:  a frame moved in the DOM loads its page again.
+   */
+  isDarkFirst(id: BenchPlaceId): boolean {
+    const isRight = this.layout === "grid" && BenchPlaceIds.indexOf(id) % 2 === 1
+    return isRight !== this.isSwapped
+  }
+
   /** Each page's frames:  a pair, light and dark;  or its one, in the scheme picked. */
   get slots(): readonly BenchSlot[] {
     return this.schemes === "both" ? PAIR : ONE
@@ -467,11 +491,11 @@ export class UIDocsThemeBench extends E.UIComponent<DocsThemeBenchVocabulary> {
     win.postMessage(message, new URL(url).origin)
   }
 
-  /** Reload page `id`'s frames;  every page's, when none is given. */
+  /** Reload page `id`'s frames (its title row's icon);  the whole bench is the browser's own Reload. */
   @E.untracked
-  reload(id?: BenchPlaceId): void {
+  reload(id: BenchPlaceId): void {
     for (const key of this.frameKeys) {
-      if (id && splitKey(key)[0] !== id) continue
+      if (splitKey(key)[0] !== id) continue
       this.markLoaded(key, false)
       this.frames.get(key)?.contentWindow?.location.reload()
     }
@@ -584,7 +608,7 @@ export class UIDocsThemeBench extends E.UIComponent<DocsThemeBenchVocabulary> {
     )
   }
 
-  /** The bar:  the title, the theme menu, which pages, the titles' place, Reload. */
+  /** The bar:  the title, which pages, the titles' place, the schemes, ⇄;  then the pages' theme row. */
   private bar(): JSX.Element {
     const t = this.text
     return (
@@ -596,7 +620,6 @@ export class UIDocsThemeBench extends E.UIComponent<DocsThemeBenchVocabulary> {
             <p class="lede">{t("lede")}</p>
           </div>
         </div>
-        <ui-theme-menu size="small"></ui-theme-menu>
         <div class="tools">
           <div class="tool">
             <ui-menu
@@ -653,11 +676,50 @@ export class UIDocsThemeBench extends E.UIComponent<DocsThemeBenchVocabulary> {
               </For>
             </ui-menu>
           </div>
-          <ui-button size="small" appearance="basic" icon="redo" onClick={() => this.reload()}>
-            {t("reload")}
-          </ui-button>
+          <ui-button
+            size="small"
+            appearance="basic"
+            icon="exchange alternate"
+            disabled={this.schemes !== "both" ? "" : undefined}
+            aria-pressed={this.isSwapped ? "true" : "false"}
+            aria-label={t("swap")}
+            title={t("swap")}
+            onClick={() => this.swap()}
+          ></ui-button>
         </div>
+        {this.themesRow()}
       </header>
+    )
+  }
+
+  /**
+   * The pages' theme, one click each (Owen:  "Spread themes out in the top bar like \"all four\""):  every theme of
+   * Spell's own (`UI.themes.own`, so a new one shows by itself), then light / dark;  a row of its own, under the
+   * bar's tools, so none scrolls out of sight.
+   * - A pick is saved as the theme menu saves it (`ThemePreference`).
+   */
+  private themesRow(): JSX.Element {
+    const t = this.text
+    const names = () => (this.isReady ? UI.themes.own : [])
+    return (
+      <div class="themes-row">
+        <span class="themes-label">{t("theme")}</span>
+        <ui-menu
+          appearance="segmented link"
+          size="small"
+          aria-label={t("theme")}
+          on-ui-choosing={(event: CustomEvent<{ value: string }>) => void ThemePreference.setTheme(event.detail.value)}
+        >
+          <For each={names()}>
+            {(name) => (
+              <ui-item value={name} selected={this.theme === name ? "" : undefined}>
+                {UIT.ThemeNames.titleOf(name)}
+              </ui-item>
+            )}
+          </For>
+        </ui-menu>
+        <ui-theme-menu show="scheme" size="small"></ui-theme-menu>
+      </div>
     )
   }
 
@@ -687,7 +749,7 @@ export class UIDocsThemeBench extends E.UIComponent<DocsThemeBenchVocabulary> {
             </a>
           </Show>
         </figcaption>
-        <div class={["frames", this.schemes]}>
+        <div class={["frames", this.schemes, { "dark-first": this.schemes === "both" && this.isDarkFirst(id) }]}>
           <For each={this.slots}>{(slot) => this.frame(frameKey(id, slot))}</For>
         </div>
       </figure>
@@ -700,7 +762,7 @@ export class UIDocsThemeBench extends E.UIComponent<DocsThemeBenchVocabulary> {
     const [id, slot] = splitKey(key)
     const url = () => this.urlOf(key)
     return (
-      <div class="frame">
+      <div class={["frame", slot]}>
         <div class={["viewport", { loaded: !!this.loaded[key] }]} ref={(cell) => this.watchCell(key, cell)}>
           <Show when={url()} fallback={<p class="note">{this.editorBase === "" ? t("noEditor") : t("loadingPage")}</p>}>
             <iframe
@@ -1114,6 +1176,7 @@ const DEFAULT_THEME = "spell"
 const PREFS = new PrefStore("spell-ui-site")
 const EDITS_PREF = "theme-bench"
 const FOLDS_PREF = "theme-bench-folds"
+const SWAP_PREF = "theme-bench-swapped"
 
 /** The titles' places, in the menu's order. */
 const TITLE_PLACES: readonly TitlesAt[] = ["rest", "stuck"]
