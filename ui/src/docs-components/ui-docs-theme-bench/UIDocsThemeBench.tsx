@@ -562,21 +562,27 @@ export class UIDocsThemeBench extends E.UIComponent<DocsThemeBenchVocabulary> {
     )
   }
 
-  /** The tuning column:  the filter, every group of tokens, the changes. */
+  /**
+   * The tuning column:  the filter and the themes' names over the columns of every token's swatches, both sticky;
+   * every group of tokens;  the changes.
+   */
   private tuning(): JSX.Element {
     const t = this.text
     return (
-      <aside class="tuning" part={this.partForName("tuning")}>
-        <ui-input
-          class="find"
-          size="small"
-          icon="search"
-          fluid=""
-          placeholder={t("find")}
-          aria-label={t("find")}
-          value={this.filter}
-          on-ui-typed={(event: CustomEvent<{ value: string }>) => (this.filter = event.detail.value)}
-        ></ui-input>
+      <aside class="tuning" part={this.partForName("tuning")} style={`--_themes: ${this.themeNames.length || 1}`}>
+        <div class="tuning-head">
+          <ui-input
+            class="find"
+            size="small"
+            icon="search"
+            fluid=""
+            placeholder={t("find")}
+            aria-label={t("find")}
+            value={this.filter}
+            on-ui-typed={(event: CustomEvent<{ value: string }>) => (this.filter = event.detail.value)}
+          ></ui-input>
+          <Show when={this.tokens}>{this.themeHeads()}</Show>
+        </div>
         <Show
           when={this.tokens}
           fallback={<p class="note">{this.tokensError ? t("failed", { error: this.tokensError }) : t("loading")}</p>}
@@ -585,6 +591,29 @@ export class UIDocsThemeBench extends E.UIComponent<DocsThemeBenchVocabulary> {
         </Show>
         {this.changesSection()}
       </aside>
+    )
+  }
+
+  /** The themes' names, once, over the columns of every token's swatches;  a click wears that theme. */
+  private themeHeads(): JSX.Element {
+    return (
+      <ul class="theme-heads" aria-label={this.text("themesRow")}>
+        <For each={this.themeNames}>
+          {(name) => (
+            <li>
+              <button
+                type="button"
+                class={["theme-head", { current: name === this.theme }]}
+                title={UIT.ThemeNames.titleOf(name)}
+                aria-pressed={name === this.theme}
+                onClick={() => void ThemePreference.setTheme(name)}
+              >
+                {UIT.ThemeNames.titleOf(name)}
+              </button>
+            </li>
+          )}
+        </For>
+      </ul>
     )
   }
 
@@ -700,7 +729,10 @@ export class UIDocsThemeBench extends E.UIComponent<DocsThemeBenchVocabulary> {
     )
   }
 
-  /** Every theme's value for `token`:  a swatch (light and dark halves) or its text;  a click wears that theme. */
+  /**
+   * Every theme's value for `token`, in the themes' columns (named once, `themeHeads()`):
+   * a bare swatch (light and dark halves) or its text;  a click wears that theme.
+   */
   private themesRow(token: string, kind: () => TokenKind): JSX.Element {
     const t = this.text
     return (
@@ -723,18 +755,17 @@ export class UIDocsThemeBench extends E.UIComponent<DocsThemeBenchVocabulary> {
               <li>
                 <button
                   type="button"
-                  class={["chip", { current: name === this.theme, unset: light() === undefined }]}
+                  class={["cell", { current: name === this.theme, unset: light() === undefined }]}
                   title={tip()}
                   aria-label={tip()}
                   onClick={() => void ThemePreference.setTheme(name)}
                 >
-                  <Show when={kind() === "color"} fallback={<span class="chip-text">{light() ?? "–"}</span>}>
+                  <Show when={kind() === "color"} fallback={<span class="cell-text">{light() ?? "–"}</span>}>
                     <span
                       class="swatch"
                       style={`--_light: ${light() ?? "transparent"}; --_dark: ${dark() ?? "transparent"}`}
                     />
                   </Show>
-                  <span class="chip-name">{UIT.ThemeNames.titleOf(name)}</span>
                 </button>
               </li>
             )

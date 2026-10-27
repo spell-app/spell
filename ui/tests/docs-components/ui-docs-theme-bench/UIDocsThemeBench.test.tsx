@@ -26,9 +26,14 @@ describe("<ui-docs-theme-bench>", () => {
     const root = bench.shadowRoot!
     expect(root.querySelectorAll("figure.page")).toHaveLength(4)
     expect(root.querySelectorAll(".token").length).toBeGreaterThan(20)
-    // a theme's own tokens, and every theme's value as a chip, the shown one marked
+    // a theme's own tokens;  the themes named once, the shown one marked, and every token's values under them
     expect(component.groups.map((group) => group.place)).toContain("own")
-    expect(root.querySelector(".chip.current")?.textContent).toContain(component.theme.slice(1))
+    const heads = root.querySelectorAll(".theme-head")
+    expect(heads.length).toBe(component.themeNames.length)
+    expect(root.querySelector(".theme-head.current")?.textContent).toContain(component.theme.slice(1))
+    const cells = root.querySelector(".token .themes")!.querySelectorAll(".cell")
+    expect(cells).toHaveLength(heads.length)
+    expect(cells[component.themeNames.indexOf(component.theme)]!.matches(".current")).toBe(true)
   })
 
   it("a tuning:  the sheet over every page, the theme file's lines, kept;  Reset all takes it back", async () => {
