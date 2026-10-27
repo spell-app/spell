@@ -198,6 +198,35 @@ describe("<ui-docs-toc> following", () => {
     expect(toc.shadowRoot!.querySelector("[part~=section]:state(selected)")?.textContent?.trim()).toBe("States")
   })
 
+  it("`scroller`:  follows a box that scrolls on its own, its reading line from that box's top", async () => {
+    const tall = PAGE.replaceAll("<ui-docs-example", '<ui-docs-example style="display: block; min-height: 400px"')
+      .replace('<ui-docs-toc for="content"', '<ui-docs-toc for="content" scroller="pane"')
+      .replace('<section id="content">', '<div id="pane" style="height: 300px; overflow: auto"><section id="content">')
+      .replace("</section>\n  </div>", "</section></div>\n  </div>")
+    const { toc } = await render(tall)
+    const changes: string[] = []
+    toc.addEventListener("ui-scrolled-to", (event) =>
+      changes.push((event as CustomEvent<{ value: string }>).detail.value)
+    )
+    const pane = document.getElementById("pane")!
+    const window = document.scrollingElement!.scrollTop
+    pane.scrollTop = document.getElementById("disabled")!.offsetTop - pane.offsetTop
+    await vi.waitFor(() => expect(changes.at(-1)).toBe("disabled"))
+    // the pane scrolled, never the window
+    expect(document.scrollingElement!.scrollTop).toBe(window)
+    pane.scrollTop = 0
+    await vi.waitFor(() => expect(changes.at(-1)).toBe("button"))
+  })
+
+  it("a page's own buttons in the header's row, after the toggle (`tools`)", async () => {
+    const { toc } = await render(
+      PAGE.replace('header="Button">', 'header="Button"><ui-button slot="tools" icon="close">Hide</ui-button>')
+    )
+    const slot = toc.shadowRoot!.querySelector<HTMLSlotElement>("[part~=head] slot[name=tools]")!
+    expect(slot.assignedElements().map((element) => element.textContent)).toEqual(["Hide"])
+    expect(slot.previousElementSibling?.matches("[part~=toggle-all]")).toBe(true)
+  })
+
   it("follows a `<ui-tabs>`:  lists the shown pane, rescans when another shows", async () => {
     const { wrapper, toc } = await render(`
       <div>

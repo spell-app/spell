@@ -34,6 +34,13 @@ export const docsTocVocabulary = {
         "Default:  the page's `<main>`, else `<body>`."
     },
     {
+      name: "scroller",
+      kind: "string",
+      description:
+        "Id of the element whose scroll it follows, when the content scrolls inside a box of its own (a pane) rather " +
+        "than the window.  Its reading line is then that box's top.  Default:  the window."
+    },
+    {
       name: "header",
       kind: "string",
       description: "Title above the links, e.g. the page's name (Fomantic's `Button`)."
@@ -59,12 +66,20 @@ export const docsTocVocabulary = {
       description: "The list was built (again):  the ids of every entry, in page order."
     }
   ],
-  slots: [],
+  slots: [
+    {
+      name: "tools",
+      description:
+        "Buttons at the right end of the header's row, after the expand all / collapse all toggle " +
+        "(a page's own, e.g. one hiding the contents).  Shown with `header`."
+    }
+  ],
   parts: [
     { name: "toc", description: 'The whole box (`<div class="ui toc">`).' },
     {
       name: "head",
-      description: "The row above the links:  `header`'s title, and the expand all / collapse all toggle."
+      description:
+        "The row above the links:  `header`'s title, the expand all / collapse all toggle, and the `tools` slot."
     },
     { name: "header", description: "The `<ui-header>` with `header`'s text." },
     {

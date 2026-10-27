@@ -53,6 +53,15 @@
     /* the gap the header kept below itself, before it shared its row */
     margin-block-end: var(--ui-font-size);
   }
+  /* a page's own buttons, after the toggle, at the row's right end */
+  slot[name="tools"] {
+    display: flex;
+    align-items: center;
+    gap: 0.25em;
+  }
+  .head:not(:has(.toggle-all)) slot[name="tools"] {
+    margin-inline-start: auto;
+  }
   [part~="header"] {
     --ui-header-margin-top: 0;
     --ui-header-margin-bottom: 0;
