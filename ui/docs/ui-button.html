@@ -58,18 +58,18 @@
               EXAMPLES:  Fomantic's button page, section by section, in its order (Types, Groups, Content, States,
               Variations, Group Variations), plus our own extras (Icon and text, Link, State texts).
               - A section:  `<ui-header level="2" dividing id="types">Types</ui-header>`, then its examples.
-              - An example:  `<ui-docs-example header="..." description="...">` around the live markup;  the markup
+              - An example:  `<ui-example heading="..." description="...">` around the live markup;  the markup
                 IS the code shown.  `GAP I<n>` comments mark examples a widget can't render yet (plan-doc issues).
             -->
             <ui-section id="examples-types" label="Types" sticky collapsible dividing>
               <ui-section id="examples-types-button" label="Button" sticky collapsible dividing>
-                <ui-docs-example description="A standard button.">
+                <ui-example description="A standard button.">
                   <ui-button>Follow</ui-button>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-types-emphasis" label="Emphasis" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">A button can be formatted to show different levels of emphasis.</p>
                   <ui-message slot="description" state="info" size="small"
                     >Set your brand colours in the <code>--ui-primary</code> and <code>--ui-secondary</code> tokens (see
@@ -77,16 +77,16 @@
                   >
                   <ui-button color="primary">Save</ui-button>
                   <ui-button>Discard</ui-button>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-button color="secondary">Okay</ui-button>
                   <ui-button>Cancel</ui-button>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <!-- GAP I23:  Fomantic's `right arrow` / `left chevron` draw nothing;  use the canonical `arrow right`, `chevron left`. -->
               <ui-section id="examples-types-animated" label="Animated" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     A button can animate to show hidden content. The <code>icon</code> slot (or the
                     <code>icon</code> attribute) is the hidden half.
@@ -99,11 +99,11 @@
                   <ui-button reveal="vertical" icon="shop">Shop</ui-button>
                   <ui-button reveal="fade"><span slot="icon">$12.99 a month</span>Sign-up for a Pro account</ui-button
                   >
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-types-labeled" label="Labeled" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     A button can appear alongside a badge:  <code>badge</code>, or the label slot, joins one.
                     <code>labeled="left"</code> puts it first.
@@ -111,40 +111,40 @@
                   <ui-button icon="heart" badge="2,048">Like</ui-button>
                   <ui-button labeled="left" icon="heart" badge="2,048">Like</ui-button>
                   <ui-button labeled="left" icon="fork" badge="1,048" aria-label="Fork"></ui-button>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-button color="red" icon="heart" badge="1,048">Like</ui-button>
                   <ui-button color="blue" icon="fork" badge="1,048" appearance="basic">Forks</ui-button>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-types-icon" label="Icon" sticky collapsible dividing>
-                <ui-docs-example description="A button can have only an icon.  Give it a name with `aria-label`.">
+                <ui-example description="A button can have only an icon.  Give it a name with `aria-label`.">
                   <ui-button icon="cloud" aria-label="Cloud"></ui-button>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-types-labeled-icon" label="Labeled Icon" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description='A button can use an icon as a label:  `labeled` with an `icon`.  `labeled="right"` puts it at the end.'
                 >
                   <ui-button labeled icon="pause">Pause</ui-button>
                   <ui-button labeled="right" icon="arrow right">Next</ui-button>
                   <ui-button labeled><ui-icon slot="icon" name="spinner" loading></ui-icon>Loading</ui-button>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-types-basic" label="Basic" sticky collapsible dividing>
-                <ui-docs-example description="A basic button is less pronounced.">
+                <ui-example description="A basic button is less pronounced.">
                   <ui-button icon="user" appearance="basic">Add Friend</ui-button>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-button color="primary" appearance="basic">Primary</ui-button>
                   <ui-button color="secondary" appearance="basic">Secondary</ui-button>
                   <ui-button color="positive" appearance="basic">Positive</ui-button>
                   <ui-button color="negative" appearance="basic">Negative</ui-button>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-button color="red" appearance="basic">Red</ui-button>
                   <ui-button color="orange" appearance="basic">Orange</ui-button>
                   <ui-button color="yellow" appearance="basic">Yellow</ui-button>
@@ -158,14 +158,14 @@
                   <ui-button color="brown" appearance="basic">Brown</ui-button>
                   <ui-button color="grey" appearance="basic">Grey</ui-button>
                   <ui-button color="black" appearance="basic">Black</ui-button>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-types-tertiary" label="Tertiary" sticky collapsible dividing>
-                <ui-docs-example description="A borderless, less important button.">
+                <ui-example description="A borderless, less important button.">
                   <ui-button appearance="tertiary">Cancel Action</ui-button>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-button color="primary" appearance="tertiary">Primary</ui-button>
                   <ui-button color="secondary" appearance="tertiary">Secondary</ui-button>
                   <ui-button color="red" appearance="tertiary">Red</ui-button>
@@ -181,11 +181,11 @@
                   <ui-button color="brown" appearance="tertiary">Brown</ui-button>
                   <ui-button color="grey" appearance="tertiary">Grey</ui-button>
                   <ui-button color="black" appearance="tertiary">Black</ui-button>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-types-inverted" label="Inverted" sticky collapsible dividing>
-                <ui-docs-example description="A button can be formatted to appear on dark backgrounds.">
+                <ui-example description="A button can be formatted to appear on dark backgrounds.">
                   <ui-segment inverted>
                     <ui-button inverted>Standard</ui-button>
                     <ui-button inverted color="primary">Primary</ui-button>
@@ -204,9 +204,9 @@
                     <ui-button inverted color="grey">Grey</ui-button>
                     <ui-button inverted color="black">Black</ui-button>
                   </ui-segment>
-                </ui-docs-example>
+                </ui-example>
                 <!-- GAP I21:  `inverted basic` buttons with a colour draw white, not the hue. -->
-                <ui-docs-example>
+                <ui-example>
                   <ui-segment inverted>
                     <ui-button inverted appearance="basic">Basic</ui-button>
                     <ui-button inverted color="primary" appearance="basic">Primary</ui-button>
@@ -225,23 +225,23 @@
                     <ui-button inverted color="grey" appearance="basic">Basic Grey</ui-button>
                     <ui-button inverted color="black" appearance="basic">Basic Black</ui-button>
                   </ui-segment>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
             <ui-section id="examples-groups" label="Groups" sticky collapsible dividing>
               <ui-section id="examples-groups-buttons" label="Buttons" sticky collapsible dividing>
-                <ui-docs-example description="Buttons can exist together as a group:  `<ui-buttons>`.">
+                <ui-example description="Buttons can exist together as a group:  `<ui-buttons>`.">
                   <ui-buttons>
                     <ui-button>One</ui-button>
                     <ui-button>Two</ui-button>
                     <ui-button>Three</ui-button>
                   </ui-buttons>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-groups-icon-buttons" label="Icon Buttons" sticky collapsible dividing>
-                <ui-docs-example description="Button groups can show groups of icons.">
+                <ui-example description="Button groups can show groups of icons.">
                   <ui-buttons icon>
                     <ui-button icon="align left" aria-label="Align left"></ui-button>
                     <ui-button icon="align center" aria-label="Align center"></ui-button>
@@ -253,20 +253,20 @@
                     <ui-button icon="underline" aria-label="Underline"></ui-button>
                     <ui-button icon="text width" aria-label="Text width"></ui-button>
                   </ui-buttons>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
             <ui-section id="examples-content" label="Content" sticky collapsible dividing>
               <ui-section id="examples-content-conditionals" label="Conditionals" sticky collapsible dividing>
-                <ui-docs-example description="Button groups can contain conditionals:  `<ui-or>`.">
+                <ui-example description="Button groups can contain conditionals:  `<ui-or>`.">
                   <ui-buttons>
                     <ui-button>Cancel</ui-button>
                     <ui-or></ui-or>
                     <ui-button color="positive">Save</ui-button>
                   </ui-buttons>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-message slot="description" state="info" size="small"
                     >The <code>or</code> text is translated with the page's language, or set it with <code>label</code>.
                     If the size of the conditional changes, adjust <code>--ui-button-or-size</code>.</ui-message
@@ -276,76 +276,76 @@
                     <ui-or label="ou"></ui-or>
                     <ui-button color="positive">deux</ui-button>
                   </ui-buttons>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-content-icon-and-text" label="Icon and text" sticky collapsible dividing>
-                <ui-docs-example description="The `icon` attribute takes a name;  the `icon` slot takes any markup.">
+                <ui-example description="The `icon` attribute takes a name;  the `icon` slot takes any markup.">
                   <ui-button icon="cloud upload">Upload</ui-button>
                   <ui-button icon="download" color="primary">Download</ui-button>
                   <ui-button label="Next"><ui-icon slot="icon" name="arrow right"></ui-icon></ui-button>
-                </ui-docs-example>
-                <ui-docs-example
+                </ui-example>
+                <ui-example
                   description="`icon-position=&quot;right&quot;` puts the icon after the text (Fomantic's `right` icon), `--ui-button-icon-spacing` from it."
                 >
                   <ui-button icon="arrow right" icon-position="right">Next</ui-button>
                   <ui-button icon="arrow right" icon-position="right" color="primary" appearance="circular">Open app</ui-button>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-content-link" label="Link" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="With `link` the button renders a real link, so it navigates and opens in a new tab."
                 >
                   <ui-button link="#link">A link styled as a button</ui-button>
-                </ui-docs-example>
-                <ui-docs-example
+                </ui-example>
+                <ui-example
                   description="`download` saves the file instead of opening it, as `&lt;a download&gt;`;  a value names the saved file."
                 >
                   <ui-button link="/components/ui/images/wireframe/image.png" download="wireframe.png" icon="download">PNG</ui-button>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
             <ui-section id="examples-states" label="States" sticky collapsible dividing>
               <ui-section id="examples-states-active" label="Active" sticky collapsible dividing>
-                <ui-docs-example description="A button can show it is currently the active user selection.">
+                <ui-example description="A button can show it is currently the active user selection.">
                   <ui-button selected icon="user">Follow</ui-button>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-states-disabled" label="Disabled" sticky collapsible dividing>
-                <ui-docs-example description="A button can show it is currently unable to be interacted with.">
+                <ui-example description="A button can show it is currently unable to be interacted with.">
                   <ui-button disabled icon="user">Followed</ui-button>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <!-- GAP I22:  Fomantic's second and third rows (`double` / `elastic` loading) have no attribute value. -->
               <ui-section id="examples-states-loading" label="Loading" sticky collapsible dividing>
-                <ui-docs-example description="A button can show a loading indicator.">
+                <ui-example description="A button can show a loading indicator.">
                   <ui-button loading>Loading</ui-button>
                   <ui-button loading appearance="basic">Loading</ui-button>
                   <ui-button loading color="primary">Loading</ui-button>
                   <ui-button loading color="secondary">Loading</ui-button>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-states-state-texts" label="State texts" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="A toggle button's label can say its state:  `inactive-text` while off, `active-text` while on.  Click to follow, again to unfollow."
                 >
                   <ui-button toggle inactive-text="Follow" active-text="Following"></ui-button>
                   <ui-button toggle selected inactive-text="Subscribe" active-text="Subscribed" color="primary"></ui-button>
-                </ui-docs-example>
-                <ui-docs-example description="With only `active-text`, the button's own content is the inactive label.">
+                </ui-example>
+                <ui-example description="With only `active-text`, the button's own content is the inactive label.">
                   <ui-button toggle icon="bell" active-text="Watching">Watch</ui-button>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
             <ui-section id="examples-variations" label="Variations" sticky collapsible dividing>
               <ui-section id="examples-variations-size" label="Size" sticky collapsible dividing>
-                <ui-docs-example description="A button can have different sizes.">
+                <ui-example description="A button can have different sizes.">
                   <ui-button size="mini">Mini</ui-button>
                   <ui-button size="tiny">Tiny</ui-button>
                   <ui-button size="small">Small</ui-button>
@@ -354,22 +354,22 @@
                   <ui-button size="big">Big</ui-button>
                   <ui-button size="huge">Huge</ui-button>
                   <ui-button size="massive">Massive</ui-button>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-left-and-right" label="Left and Right" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="A button has no `floated` any more:  a `<ui-stack>` puts one button at the left and one at the right."
                 >
                   <ui-stack direction="horizontal" justify="between">
                     <ui-button>Left</ui-button>
                     <ui-button>Right</ui-button>
                   </ui-stack>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-colored" label="Colored" sticky collapsible dividing>
-                <ui-docs-example description="A button can have different colors.">
+                <ui-example description="A button can have different colors.">
                   <ui-button color="red">Red</ui-button>
                   <ui-button color="orange">Orange</ui-button>
                   <ui-button color="yellow">Yellow</ui-button>
@@ -383,56 +383,56 @@
                   <ui-button color="brown">Brown</ui-button>
                   <ui-button color="grey">Grey</ui-button>
                   <ui-button color="black">Black</ui-button>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-compact" label="Compact" sticky collapsible dividing>
-                <ui-docs-example description="A button can reduce its padding to fit into tighter spaces.">
+                <ui-example description="A button can reduce its padding to fit into tighter spaces.">
                   <ui-button padding="compact">Hold</ui-button>
                   <ui-button icon="pause" aria-label="Pause" padding="compact"></ui-button>
                   <ui-button labeled icon="pause" padding="compact">Pause</ui-button>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-unpadded" label="Unpadded" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="A button can drop its padding altogether, as `compact` taken to none:  the box hugs its text or icon.  A `labeled` icon button keeps room for its icon block."
                 >
                   <ui-button padding="none">Hold</ui-button>
                   <ui-button icon="pause" aria-label="Pause" padding="none"></ui-button>
                   <ui-button labeled icon="pause" padding="none">Pause</ui-button>
                   <ui-button appearance="basic" padding="none">Basic</ui-button>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-toggle" label="Toggle" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="A button can be formatted to toggle on and off:  a click flips `active` and fires `ui-selected` or `ui-deselected`."
                 >
                   <ui-button toggle>Vote</ui-button>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-positive" label="Positive" sticky collapsible dividing>
-                <ui-docs-example description="A button can hint towards a positive consequence.">
+                <ui-example description="A button can hint towards a positive consequence.">
                   <ui-button color="positive">Positive Button</ui-button>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-negative" label="Negative" sticky collapsible dividing>
-                <ui-docs-example description="A button can hint towards a negative consequence.">
+                <ui-example description="A button can hint towards a negative consequence.">
                   <ui-button color="negative">Negative Button</ui-button>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-fluid" label="Fluid" sticky collapsible dividing>
-                <ui-docs-example description="A button can take the width of its container.">
+                <ui-example description="A button can take the width of its container.">
                   <ui-button fluid>Fits container</ui-button>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-wrapped" label="Wrapped" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="A button's text stays on one line, however narrow its container.  `wrapped` lets a long text wrap onto more lines instead."
                 >
                   <div style="max-width: 10em">
@@ -440,11 +440,11 @@
                     <ui-divider spacer></ui-divider>
                     <ui-button wrap>Wraps onto more lines when it's long</ui-button>
                   </div>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-ellipsis" label="Ellipsis" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="`ellipsis` cuts a text that doesn't fit off with `…`, on one line.  It needs a width to cut at:  `fluid`, a width of its own, or a narrow parent, which it never grows past."
                 >
                   <div style="max-width: 14em">
@@ -454,19 +454,19 @@
                     <ui-divider spacer></ui-divider>
                     <ui-button ellipsis style="width: 9em">A width of its own</ui-button>
                   </div>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-circular" label="Circular" sticky collapsible dividing>
-                <ui-docs-example description="A button can be circular.">
+                <ui-example description="A button can be circular.">
                   <ui-button icon="settings" aria-label="Settings" appearance="circular"></ui-button>
-                </ui-docs-example>
-                <ui-docs-example description="Fomantic's circular social buttons, with a brand `icon` and a `color`.">
+                </ui-example>
+                <ui-example description="Fomantic's circular social buttons, with a brand `icon` and a `color`.">
                   <ui-button color="blue" icon="facebook" aria-label="Facebook" appearance="circular"></ui-button>
                   <ui-button color="teal" icon="twitter" aria-label="Twitter" appearance="circular"></ui-button>
                   <ui-button color="blue" icon="linkedin" aria-label="LinkedIn" appearance="circular"></ui-button>
                   <ui-button color="red" icon="google plus" aria-label="Google Plus" appearance="circular"></ui-button>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <!-- GAP I20:  `attached="top|bottom"` buttons stay content-wide. -->
@@ -477,14 +477,14 @@
                 collapsible
                 dividing
               >
-                <ui-docs-example description="A button can be attached to the top or bottom of other content.">
+                <ui-example description="A button can be attached to the top or bottom of other content.">
                   <ui-button attach="top">Top</ui-button>
                   <ui-segment attach="both">
                     <ui-image src="images/wireframe/paragraph.png" alt=""></ui-image>
                   </ui-segment>
                   <ui-button attach="bottom">Bottom</ui-button>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-buttons width="2" attach="top">
                     <ui-button>One</ui-button>
                     <ui-button>Two</ui-button>
@@ -496,7 +496,7 @@
                     <ui-button>One</ui-button>
                     <ui-button>Two</ui-button>
                   </ui-buttons>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section
@@ -506,10 +506,10 @@
                 collapsible
                 dividing
               >
-                <ui-docs-example description="A button can be attached to the left or right of other content.">
+                <ui-example description="A button can be attached to the left or right of other content.">
                   <ui-button attach="left">Left</ui-button>
                   <ui-button attach="right">Right</ui-button>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
@@ -521,14 +521,14 @@
                 collapsible
                 dividing
               >
-                <ui-docs-example description="Groups can be formatted to appear vertically.">
+                <ui-example description="Groups can be formatted to appear vertically.">
                   <ui-buttons direction="vertical">
                     <ui-button>Feed</ui-button>
                     <ui-button>Messages</ui-button>
                     <ui-button>Events</ui-button>
                     <ui-button>Photos</ui-button>
                   </ui-buttons>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section
@@ -538,24 +538,24 @@
                 collapsible
                 dividing
               >
-                <ui-docs-example description="Horizontal groups can automatically be stacked on mobile devices.">
+                <ui-example description="Horizontal groups can automatically be stacked on mobile devices.">
                   <ui-buttons stackable>
                     <ui-button>Feed</ui-button>
                     <ui-button>Messages</ui-button>
                     <ui-button>Events</ui-button>
                     <ui-button>Photos</ui-button>
                   </ui-buttons>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-group-variations-icon-buttons" label="Icon Buttons" sticky collapsible dividing>
-                <ui-docs-example description="Groups can be formatted as icons.">
+                <ui-example description="Groups can be formatted as icons.">
                   <ui-buttons icon>
                     <ui-button icon="play" aria-label="Play"></ui-button>
                     <ui-button icon="pause" aria-label="Pause"></ui-button>
                     <ui-button icon="shuffle" aria-label="Shuffle"></ui-button>
                   </ui-buttons>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section
@@ -565,27 +565,27 @@
                 collapsible
                 dividing
               >
-                <ui-docs-example description="Groups can be formatted as labeled icons.">
+                <ui-example description="Groups can be formatted as labeled icons.">
                   <ui-buttons direction="vertical" labeled icon>
                     <ui-button icon="pause">Pause</ui-button>
                     <ui-button icon="play">Play</ui-button>
                     <ui-button icon="shuffle">Shuffle</ui-button>
                   </ui-buttons>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-group-variations-mixed-group" label="Mixed Group" sticky collapsible dividing>
-                <ui-docs-example description="Groups can be formatted to use multiple button types together.">
+                <ui-example description="Groups can be formatted to use multiple button types together.">
                   <ui-buttons wrapping>
                     <ui-button labeled icon="chevron left">Back</ui-button>
                     <ui-button icon="stop">Stop</ui-button>
                     <ui-button labeled="right" icon="chevron right">Forward</ui-button>
                   </ui-buttons>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-group-variations-equal-width" label="Equal Width" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="Groups can have their widths divided evenly:  `width` is the number of buttons."
                 >
                   <ui-buttons width="5" wrapping>
@@ -601,11 +601,11 @@
                     <ui-button>Specs</ui-button>
                     <ui-button>Support</ui-button>
                   </ui-buttons>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-group-variations-equal" label="Equal" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description='`equal` makes every button as wide as the widest, and the group hugs them.  With `fluid`, each takes an equal share of the row instead.  `width="3"` above is the older, count-based way to write `equal fluid`.'
                 >
                   <ui-buttons equal>
@@ -619,7 +619,7 @@
                     <ui-button>Specifications</ui-button>
                     <ui-button>Support</ui-button>
                   </ui-buttons>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section
@@ -629,13 +629,13 @@
                 collapsible
                 dividing
               >
-                <ui-docs-example description="Groups can have a shared color.">
+                <ui-example description="Groups can have a shared color.">
                   <ui-buttons color="blue">
                     <ui-button>One</ui-button>
                     <ui-button>Two</ui-button>
                     <ui-button>Three</ui-button>
                   </ui-buttons>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section
@@ -645,7 +645,7 @@
                 collapsible
                 dividing
               >
-                <ui-docs-example description="A button group can be less pronounced.">
+                <ui-example description="A button group can be less pronounced.">
                   <ui-buttons appearance="basic">
                     <ui-button>One</ui-button>
                     <ui-button>Two</ui-button>
@@ -657,39 +657,39 @@
                     <ui-button>Two</ui-button>
                     <ui-button>Three</ui-button>
                   </ui-buttons>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-buttons>
                     <ui-button color="red" appearance="basic">One</ui-button>
                     <ui-button color="blue" appearance="basic">Two</ui-button>
                     <ui-button color="green" appearance="basic">Three</ui-button>
                   </ui-buttons>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-group-variations-group-sizes" label="Group Sizes" sticky collapsible dividing>
-                <ui-docs-example description="Groups can have a shared size.">
+                <ui-example description="Groups can have a shared size.">
                   <ui-buttons size="large">
                     <ui-button>One</ui-button>
                     <ui-button>Two</ui-button>
                     <ui-button>Three</ui-button>
                   </ui-buttons>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-buttons size="small" icon appearance="basic">
                     <ui-button icon="file" aria-label="New"></ui-button>
                     <ui-button icon="save" aria-label="Save"></ui-button>
                     <ui-button icon="upload" aria-label="Upload"></ui-button>
                     <ui-button icon="download" aria-label="Download"></ui-button>
                   </ui-buttons>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-buttons size="large">
                     <ui-button>One</ui-button>
                     <ui-or></ui-or>
                     <ui-button>Two</ui-button>
                   </ui-buttons>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section
@@ -699,7 +699,7 @@
                 collapsible
                 dividing
               >
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">Grouped buttons can automatically wrap, sharing the overall available width.</p>
                   <ui-buttons wrapping>
                     <ui-button>One</ui-button>
@@ -723,7 +723,7 @@
                     <ui-button>Nineteen</ui-button>
                     <ui-button>Twenty</ui-button>
                   </ui-buttons>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section
@@ -733,7 +733,7 @@
                 collapsible
                 dividing
               >
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     Buttons inside groups can get a margin so they don't appear attached together, especially with
                     <code>wrapping</code> on responsive layouts.
@@ -764,7 +764,7 @@
                     <ui-button>Nineteen</ui-button>
                     <ui-button>Twenty</ui-button>
                   </ui-buttons>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section
@@ -774,7 +774,7 @@
                 collapsible
                 dividing
               >
-                <ui-docs-example
+                <ui-example
                   description="Circular buttons inside groups get a slight margin so they don't appear attached together."
                 >
                   <ui-buttons wrapping padding="compact" appearance="circular">
@@ -783,7 +783,7 @@
                     <ui-button>Three</ui-button>
                     <ui-button>Four</ui-button>
                   </ui-buttons>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section
@@ -793,7 +793,7 @@
                 collapsible
                 dividing
               >
-                <ui-docs-example description="The same words as on a single button, applied to the whole group.">
+                <ui-example description="The same words as on a single button, applied to the whole group.">
                   <ui-buttons fluid>
                     <ui-button>Fluid</ui-button>
                     <ui-button>Group</ui-button>
@@ -807,7 +807,7 @@
                     <ui-button selected>On</ui-button>
                     <ui-button>Off</ui-button>
                   </ui-buttons>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
@@ -945,7 +945,7 @@
                 collapsible
                 dividing
               >
-                <ui-docs-example
+                <ui-example
                   description="A button opens a popup and a modal with `commandfor` and `command`, no script."
                 >
                   <ui-button commandfor="button-invoker-popup" command="toggle-popover">Toggle popup</ui-button>
@@ -961,7 +961,7 @@
                     content="Opened by a ui-button."
                     closable
                   ></ui-modal>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 

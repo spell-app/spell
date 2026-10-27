@@ -58,13 +58,13 @@
               EXAMPLES:  Fomantic's page, section by section, in its order (Types, Content, States, Variations,
               Groups ...).  Rules, the class-grammar mappings, gaps:  packages/docs/content/epics/spell-ui-pages/PAGES.md.
               - A section:  `<ui-header level="2" dividing id="types">Types</ui-header>`, then its examples.
-              - An example:  `<ui-docs-example header="..." description="...">` around the live markup;  the markup
+              - An example:  `<ui-example heading="..." description="...">` around the live markup;  the markup
                 IS the code shown.  A richer description:  `<p slot="description">` (+ `<ui-message slot="description">`).
               - A gap:  an HTML comment `GAP I<n>:  ...` BEFORE the example (a comment inside it shows in its code).
             -->
             <ui-section id="examples-types" label="Types" sticky collapsible dividing>
               <ui-section id="examples-types-card" label="Card" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">A single card.</p>
                   <ui-message slot="description" state="warning" size="small"
                     >To ensure cards are equal height use the plural, <code>&lt;ui-cards&gt;</code>: a group lays its
@@ -81,10 +81,10 @@
                       <a href="#card-kristy-friends"><ui-icon name="user"></ui-icon> 22 Friends</a>
                     </ui-extra>
                   </ui-card>
-                </ui-docs-example>
+                </ui-example>
 
                 <!-- I125:  Fomantic's `right floated` meta and likes:  a `<ui-stack>` puts them at the right. -->
-                <ui-docs-example>
+                <ui-example>
                   <ui-card>
                     <ui-content>
                       <ui-stack direction="horizontal" justify="between">
@@ -110,11 +110,11 @@
                       ></ui-input>
                     </ui-extra>
                   </ui-card>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-types-cards" label="Cards" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">A group of cards: <code>&lt;ui-cards&gt;</code>.</p>
                   <ui-message slot="description" state="info" size="small"
                     >Cards are designed to be flexible to your content: <code>&lt;ui-content&gt;</code> blocks can
@@ -150,9 +150,9 @@
                       </ui-extra>
                     </ui-card>
                   </ui-cards>
-                </ui-docs-example>
+                </ui-example>
 
-                <ui-docs-example description="A group hands its variations to every card in it:  here `link`.">
+                <ui-example description="A group hands its variations to every card in it:  here `link`.">
                   <ui-cards appearance="link">
                     <ui-card>
                       <img src="images/avatar2/large/matthew.png" alt="Matt Giampietro" />
@@ -182,14 +182,14 @@
                       <ui-extra>Joined in 2014 · <ui-icon name="user"></ui-icon> 151 Friends</ui-extra>
                     </ui-card>
                   </ui-cards>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
             <ui-section id="examples-content" label="Content" sticky collapsible dividing>
               <!-- GAP I128:  the sub header draws as the card header (large), not Fomantic's small sub header. -->
               <ui-section id="examples-content-content-block" label="Content Block" sticky collapsible dividing>
-                <ui-docs-example description="A card can contain blocks of content:  `<ui-content>`.">
+                <ui-example description="A card can contain blocks of content:  `<ui-content>`.">
                   <ui-card>
                     <ui-content>
                       <ui-header>Project Timeline</ui-header>
@@ -224,12 +224,12 @@
                       <ui-button>Join Project</ui-button>
                     </ui-extra>
                   </ui-card>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <!-- GAP I126:  a <ui-reveal> (or a dimmed image) isn't laid out as the card's image;  the plain image shows. -->
               <ui-section id="examples-content-image" label="Image" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     A card can contain an image: a slotted <code>&lt;img&gt;</code> spans the card's width.
                   </p>
@@ -247,7 +247,7 @@
                       <a href="#card-members"><ui-icon name="users"></ui-icon> 2 Members</a>
                     </ui-extra>
                   </ui-card>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-message size="small" class="site-not-ported"
@@ -257,7 +257,7 @@
               >
 
               <ui-section id="examples-content-header" label="Header" sticky collapsible dividing>
-                <ui-docs-example description="A card can contain a header.">
+                <ui-example description="A card can contain a header.">
                   <ui-cards>
                     <ui-card>
                       <ui-content>
@@ -284,11 +284,11 @@
                       </ui-content>
                     </ui-card>
                   </ui-cards>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-content-metadata" label="Metadata" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">A card can contain content metadata.</p>
                   <ui-message slot="description" state="info" size="small"
                     >You can include any amount of metadata, in your own markup: the children of a
@@ -301,12 +301,12 @@
                       <ui-image src="images/wireframe/paragraph.png" alt=""></ui-image>
                     </ui-content>
                   </ui-card>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <!-- GAP I126:  an image link (`<a class="image" href>`) isn't laid out as the card's image;  the image is plain. -->
               <ui-section id="examples-content-link" label="Link" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">A card can contain links as images, headers, or inside content.</p>
                   <ui-message slot="description" state="info" size="small"
                     >To make the entire content of a card a link, see the Link Card variation below.</ui-message
@@ -318,11 +318,11 @@
                       <ui-meta><a href="#card-steve-seen">Last Seen 2 days ago</a></ui-meta>
                     </ui-content>
                   </ui-card>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-content-buttons" label="Buttons" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">A card can contain buttons.</p>
                   <ui-message slot="description" size="small" class="site-not-ported"
                     >Not ported: a button attached to the card's bottom edge (<code>.ui.card &gt; .button</code>). A
@@ -361,11 +361,11 @@
                       </ui-extra>
                     </ui-card>
                   </ui-cards>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-content-approval" label="Approval" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">A card can contain a like or star action.</p>
                   <ui-message slot="description" size="small" class="site-not-ported"
                     >Not ported: the <code>like</code> / <code>star</code> icons that colour on hover -- left out of the
@@ -385,11 +385,11 @@
                       </ui-stack>
                     </ui-extra>
                   </ui-card>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-content-description" label="Description" sticky collapsible dividing>
-                <ui-docs-example description="A card can contain a description with one or more paragraphs.">
+                <ui-example description="A card can contain a description with one or more paragraphs.">
                   <ui-card>
                     <ui-content>
                       <ui-header>Cute Dog</ui-header>
@@ -403,11 +403,11 @@
                       </ui-description>
                     </ui-content>
                   </ui-card>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-content-extra-content" label="Extra Content" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="A card can contain extra content meant to be formatted separately from the main content."
                 >
                   <ui-card>
@@ -424,11 +424,11 @@
                     </ui-content>
                     <ui-extra><ui-icon name="check"></ui-icon> 121 Votes</ui-extra>
                   </ui-card>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-content-shorthand" label="Shorthand" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="The `image`, `header`, `meta`, `description` and `extra` attributes render the same parts without any markup;  `alt` describes the image."
                 >
                   <ui-card
@@ -439,13 +439,13 @@
                     description="Kristy is an art director living in New York."
                     extra="22 Friends"
                   ></ui-card>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
             <ui-section id="examples-states" label="States" sticky collapsible dividing>
               <ui-section id="examples-states-disabled" label="Disabled" sticky collapsible dividing>
-                <ui-docs-example description="A card may show its content is disabled.">
+                <ui-example description="A card may show its content is disabled.">
                   <ui-card disabled>
                     <ui-content>
                       <ui-header link="#card-kristy">Kristy</ui-header>
@@ -456,11 +456,11 @@
                       <a href="#card-kristy-friends"><ui-icon name="user"></ui-icon> 22 Friends</a>
                     </ui-extra>
                   </ui-card>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-states-loading" label="Loading" sticky collapsible dividing>
-                <ui-docs-example description="A card may show its content is being loaded.">
+                <ui-example description="A card may show its content is being loaded.">
                   <ui-card loading>
                     <ui-content>
                       <ui-header link="#card-kristy">Kristy</ui-header>
@@ -471,10 +471,10 @@
                       <a href="#card-kristy-friends"><ui-icon name="user"></ui-icon> 22 Friends</a>
                     </ui-extra>
                   </ui-card>
-                </ui-docs-example>
+                </ui-example>
 
                 <!-- GAP I127:  the loader takes no card colour, and there is no `double` or `usual`;  the brown card shows the plain loader. -->
-                <ui-docs-example>
+                <ui-example>
                   <ui-card color="brown" loading>
                     <ui-content>
                       <ui-header link="#card-kristy">Kristy</ui-header>
@@ -485,13 +485,13 @@
                       <a href="#card-kristy-friends"><ui-icon name="user"></ui-icon> 22 Friends</a>
                     </ui-extra>
                   </ui-card>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
             <ui-section id="examples-variations" label="Variations" sticky collapsible dividing>
               <ui-section id="examples-variations-fluid-card" label="Fluid Card" sticky collapsible dividing>
-                <ui-docs-example description="A fluid card takes up the width of its container.">
+                <ui-example description="A fluid card takes up the width of its container.">
                   <ui-grid columns="3">
                     <ui-column>
                       <ui-card fluid>
@@ -518,18 +518,18 @@
                       </ui-card>
                     </ui-column>
                   </ui-grid>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-centered-card" label="Centered Card" sticky collapsible dividing>
-                <ui-docs-example description="A card can center itself inside its container.">
+                <ui-example description="A card can center itself inside its container.">
                   <ui-card align="center">
                     <img src="images/avatar2/large/elyse.png" alt="Elyse" />
                     <ui-content>
                       <ui-header link="#card-elyse">Elyse</ui-header>
                     </ui-content>
                   </ui-card>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section
@@ -539,7 +539,7 @@
                 collapsible
                 dividing
               >
-                <ui-docs-example description="A card can display horizontally.">
+                <ui-example description="A card can display horizontally.">
                   <ui-card direction="horizontal">
                     <img src="images/avatar2/large/elyse.png" alt="Elyse" />
                     <ui-content>
@@ -550,10 +550,10 @@
                       </ui-description>
                     </ui-content>
                   </ui-card>
-                </ui-docs-example>
+                </ui-example>
 
                 <!-- GAP I129:  the horizontal cards sit one per row, not two side by side (each is 400px wide). -->
-                <ui-docs-example>
+                <ui-example>
                   <ui-cards direction="horizontal">
                     <ui-card>
                       <img src="images/avatar2/large/matthew.png" alt="Matt Giampietro" />
@@ -572,11 +572,11 @@
                       </ui-content>
                     </ui-card>
                   </ui-cards>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-raised-card" label="Raised Card" sticky collapsible dividing>
-                <ui-docs-example description="A card may be formatted to raise above the page.">
+                <ui-example description="A card may be formatted to raise above the page.">
                   <ui-card appearance="raised">
                     <ui-content>
                       <ui-header>Cute Dog</ui-header>
@@ -587,9 +587,9 @@
                     </ui-content>
                     <ui-extra><ui-avatar src="images/avatar/small/matt.jpg" tooltip=""></ui-avatar> Matt</ui-extra>
                   </ui-card>
-                </ui-docs-example>
+                </ui-example>
 
-                <ui-docs-example>
+                <ui-example>
                   <ui-card appearance="raised link">
                     <ui-content>
                       <ui-header>Cute Dog</ui-header>
@@ -600,11 +600,11 @@
                     </ui-content>
                     <ui-extra><ui-avatar src="images/avatar/small/matt.jpg" tooltip=""></ui-avatar> Matt</ui-extra>
                   </ui-card>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-link-card" label="Link Card" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="A card can be formatted so that the entire contents link to another page:  `link`."
                 >
                   <ui-card link="#card-dog">
@@ -617,9 +617,9 @@
                     </ui-content>
                     <ui-extra><ui-avatar src="images/avatar/small/matt.jpg" tooltip=""></ui-avatar> Matt</ui-extra>
                   </ui-card>
-                </ui-docs-example>
+                </ui-example>
 
-                <ui-docs-example description="`link` alone only adds the hover lift:  it's a look, not a link.">
+                <ui-example description="`link` alone only adds the hover lift:  it's a look, not a link.">
                   <ui-card appearance="link">
                     <ui-content>
                       <ui-header>Cute Dog</ui-header>
@@ -630,12 +630,12 @@
                     </ui-content>
                     <ui-extra><ui-avatar src="images/avatar/small/matt.jpg" tooltip=""></ui-avatar> Matt</ui-extra>
                   </ui-card>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <!-- GAP I125:  only <ui-header> / <ui-content> float;  the meta's time and the author sit in line. -->
               <ui-section id="examples-variations-content-at-the-right" label="Content at the Right" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="Content has no `floated` any more:  a `<ui-stack>` puts the meta's time and the author at the right."
                 >
                   <ui-card>
@@ -654,11 +654,11 @@
                       </ui-stack>
                     </ui-extra>
                   </ui-card>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-text-alignment" label="Text Alignment" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="Any element inside a card can have its text alignment specified:  `align`."
                 >
                   <ui-card>
@@ -670,11 +670,11 @@
                     </ui-content>
                     <ui-extra><ui-avatar src="images/avatar/small/jenny.jpg" tooltip=""></ui-avatar> Jenny</ui-extra>
                   </ui-card>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-inverted" label="Inverted" sticky collapsible dividing>
-                <ui-docs-example description="Card's colors can be inverted.">
+                <ui-example description="Card's colors can be inverted.">
                   <ui-segment inverted>
                     <ui-cards inverted>
                       <ui-card>
@@ -706,11 +706,11 @@
                       </ui-card>
                     </ui-cards>
                   </ui-segment>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-colored" label="Colored" sticky collapsible dividing>
-                <ui-docs-example description="A card can specify a color:  a line along its bottom edge.">
+                <ui-example description="A card can specify a color:  a line along its bottom edge.">
                   <ui-cards columns="4">
                     <ui-card color="primary" link="#card-primary"
                       ><img src="images/wireframe/white-image.png" alt="Primary"
@@ -758,11 +758,11 @@
                       ><img src="images/wireframe/white-image.png" alt="Black"
                     /></ui-card>
                   </ui-cards>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-basic" label="Basic" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="A basic card does not have a border, and a coloured one gets a full colour background."
                 >
                   <ui-cards columns="4" appearance="basic">
@@ -812,19 +812,19 @@
                       ><img src="images/wireframe/white-image.png" alt="Black"
                     /></ui-card>
                   </ui-cards>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-dashed" label="Dashed" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="Ours, not Fomantic's:  a dashed card is a flat placeholder, its border dashed in `--ui-card-border-color`."
                 >
                   <ui-card heading="Current, for comparison" description="Where the next one will go." appearance="dashed"></ui-card>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-column-count" label="Column Count" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="A group of cards can set how many cards should exist in a row:  `columns`."
                 >
                   <ui-cards columns="4">
@@ -861,11 +861,11 @@
                       <ui-extra>Rating: <ui-rating color="yellow" value="4" aria-label="Rating"></ui-rating></ui-extra>
                     </ui-card>
                   </ui-cards>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-stackable" label="Stackable" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     A group of cards can automatically stack rows to a single column on mobile devices.
                   </p>
@@ -877,11 +877,11 @@
                     <ui-card><img src="images/avatar/large/stevie.jpg" alt="Stevie" /></ui-card>
                     <ui-card><img src="images/avatar/large/steve.jpg" alt="Steve Jobes" /></ui-card>
                   </ui-cards>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-doubling" label="Doubling" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">A group of cards can double its column width for mobile.</p>
                   <ui-cards columns="6" doubling>
                     <ui-card><img src="images/avatar/large/elliot.jpg" alt="Elliot Fu" /></ui-card>
@@ -891,11 +891,11 @@
                     <ui-card><img src="images/avatar/large/stevie.jpg" alt="Stevie" /></ui-card>
                     <ui-card><img src="images/avatar/large/steve.jpg" alt="Steve Jobes" /></ui-card>
                   </ui-cards>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-size" label="Size" sticky collapsible dividing>
-                <ui-docs-example description="A card's text can vary in size:  `size`.">
+                <ui-example description="A card's text can vary in size:  `size`.">
                   <ui-cards columns="3">
                     <ui-card size="mini">
                       <ui-content>
@@ -958,7 +958,7 @@
                       <ui-extra>Fomantic-UI</ui-extra>
                     </ui-card>
                   </ui-cards>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
           </ui-tab>

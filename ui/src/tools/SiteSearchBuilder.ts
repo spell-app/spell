@@ -2,7 +2,7 @@ import { existsSync, readdirSync, readFileSync } from "node:fs"
 import { join } from "node:path"
 import { parseHTML } from "linkedom"
 
-import { PageOutline } from "spell-ui/docs-components/ui-docs-search/PageOutline"
+import { PageOutline } from "spell-ui/components/ui-toc/PageOutline"
 import type { SiteSearchFile, SiteSearchPage } from "spell-ui/docs-components/docs-components.types"
 
 /****************

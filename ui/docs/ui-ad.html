@@ -58,13 +58,13 @@
               EXAMPLES:  Fomantic's page, section by section, in its order (Types, Content, States, Variations,
               Groups ...).  Rules, the class-grammar mappings, gaps:  packages/docs/content/epics/spell-ui-pages/PAGES.md.
               - A section:  `<ui-header level="2" dividing id="types">Types</ui-header>`, then its examples.
-              - An example:  `<ui-docs-example header="..." description="...">` around the live markup;  the markup
+              - An example:  `<ui-example heading="..." description="...">` around the live markup;  the markup
                 IS the code shown.  A richer description:  `<p slot="description">` (+ `<ui-message slot="description">`).
               - A gap:  an HTML comment `GAP I<n>:  ...` BEFORE the example (a comment inside it shows in its code).
             -->
             <ui-section id="examples-types" label="Types" sticky collapsible dividing>
               <ui-section id="examples-types-ad" label="Ad" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">A standard ad.</p>
                   <ui-message slot="description" size="small"
                     >The following example shows basic
@@ -79,11 +79,11 @@
                       data-ad-slot="XXXXXXXXXXXXXXXX"
                     ></ins>
                   </ui-ad>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-types-common-units" label="Common Units" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     An advertisement can appear in common ad unit sizes: <code>unit</code> takes the unit's words.
                   </p>
@@ -97,12 +97,12 @@
                   <ui-ad unit="leaderboard" test="Leaderboard"></ui-ad>
                   <ui-ad unit="large rectangle" test="Large Rectangle"></ui-ad>
                   <ui-ad unit="half page" test="Half Page"></ui-ad>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <!-- GAP I30:  no `mobile` modifier for other units (Fomantic's `mobile banner`);  only the `mobile leaderboard` / `large mobile banner` units. -->
               <ui-section id="examples-types-mobile" label="Mobile" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">An ad can use common mobile ad sizes.</p>
                   <ui-message slot="description" state="info" size="small"
                     >Mobile ads will automatically only appear on mobile browser viewports, so this example is empty on
@@ -110,78 +110,78 @@
                   >
                   <ui-ad unit="mobile leaderboard" test="Mobile Leaderboard"></ui-ad>
                   <ui-ad unit="large mobile banner" test="Large Mobile Banner"></ui-ad>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-types-rectangle" label="Rectangle" sticky collapsible dividing>
-                <ui-docs-example description="An ad can use a common rectangle ad unit size.">
+                <ui-example description="An ad can use a common rectangle ad unit size.">
                   <ui-ad unit="vertical rectangle" test="Vertical Rectangle"></ui-ad>
                   <ui-ad unit="small rectangle" test="Small Rectangle"></ui-ad>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-types-button" label="Button" sticky collapsible dividing>
-                <ui-docs-example description="An ad can use button ad unit size.">
+                <ui-example description="An ad can use button ad unit size.">
                   <ui-ad unit="button" test="Button"></ui-ad>
                   <ui-ad unit="square button" test="Square Button"></ui-ad>
                   <ui-ad unit="small button" test="Small Button"></ui-ad>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-types-square" label="Square" sticky collapsible dividing>
-                <ui-docs-example description="An ad can use a square ad unit size.">
+                <ui-example description="An ad can use a square ad unit size.">
                   <ui-ad unit="square" test="Square"></ui-ad>
                   <ui-ad unit="small square" test="Small Square"></ui-ad>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-types-skyscraper" label="Skyscraper" sticky collapsible dividing>
-                <ui-docs-example description="An ad can use skyscraper ad unit size.">
+                <ui-example description="An ad can use skyscraper ad unit size.">
                   <ui-ad unit="skyscraper" test="Skyscraper"></ui-ad>
                   <ui-ad unit="wide skyscraper" test="Wide Skyscraper"></ui-ad>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-types-banner" label="Banner" sticky collapsible dividing>
-                <ui-docs-example description="An ad can use banner ad unit size.">
+                <ui-example description="An ad can use banner ad unit size.">
                   <ui-ad unit="banner" test="Banner"></ui-ad>
                   <ui-ad unit="vertical banner" test="Vertical Banner"></ui-ad>
                   <ui-ad unit="top banner" test="Top Banner"></ui-ad>
                   <ui-ad unit="half banner" test="Half Banner"></ui-ad>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <!-- GAP I32:  units wider than the column (leaderboards, top banner, panorama) overflow it on desktop. -->
               <ui-section id="examples-types-leaderboards" label="Leaderboards" sticky collapsible dividing>
-                <ui-docs-example description="An ad can use leaderboard ad unit size.">
+                <ui-example description="An ad can use leaderboard ad unit size.">
                   <ui-ad unit="leaderboard" test="Leaderboard"></ui-ad>
                   <ui-ad unit="large leaderboard" test="Large Leaderboard"></ui-ad>
                   <ui-ad unit="billboard" test="Billboard"></ui-ad>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-types-panorama" label="Panorama" sticky collapsible dividing>
-                <ui-docs-example description="An ad can use panorama ad unit size.">
+                <ui-example description="An ad can use panorama ad unit size.">
                   <ui-ad unit="panorama" test="Panorama"></ui-ad>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-types-netboard" label="Netboard" sticky collapsible dividing>
-                <ui-docs-example description="An ad can use netboard ad unit size.">
+                <ui-example description="An ad can use netboard ad unit size.">
                   <ui-ad unit="netboard" test="Netboard"></ui-ad>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
             <ui-section id="examples-variations" label="Variations" sticky collapsible dividing>
               <ui-section id="examples-variations-centered" label="Centered" sticky collapsible dividing>
-                <ui-docs-example description="An advertisement can appear centered.">
+                <ui-example description="An advertisement can appear centered.">
                   <ui-ad unit="banner" align="center" test></ui-ad>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-test" label="Test" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">An advertisement can be formatted to help verify placement.</p>
                   <ui-message slot="description" state="info" size="small"
                     >Set the text of a test placement with <code>test="..."</code>, Fomantic's <code>data-text</code>.
@@ -190,17 +190,17 @@
                   <ui-ad unit="medium rectangle" test="Ad Unit 1"></ui-ad>
                   <ui-ad unit="medium rectangle" test="Ad Unit 2"></ui-ad>
                   <ui-ad unit="small rectangle" test></ui-ad>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-content" label="Content" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="The ad itself goes inside:  usually an `<iframe>` from the ad network, or an image link with its own `alt`."
                 >
                   <ui-ad unit="small rectangle">
                     <ui-image link="#sponsor" src="images/wireframe/image.png" alt="Our sponsor"></ui-image>
                   </ui-ad>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
           </ui-tab>

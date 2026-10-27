@@ -22,11 +22,11 @@ describe("DesignBrand.examples()", () => {
 <style>.stage { position: relative }</style>
 <ui-tabs><ui-tab value="examples" label="Examples">
 <ui-section id="a" label="Types"><ui-section id="b" label="Phone">
-<ui-docs-example description="x">
+<ui-example description="x">
   <brand-phone></brand-phone>
-</ui-docs-example>
+</ui-example>
 </ui-section></ui-section>
-</ui-tab><ui-tab value="usage" label="Usage"><ui-docs-example><b>not this</b></ui-docs-example></ui-tab></ui-tabs>`
+</ui-tab><ui-tab value="usage" label="Usage"><ui-example><b>not this</b></ui-example></ui-tab></ui-tabs>`
     const brand = new DesignBrand({ folder: join(UI, "../nowhere"), uiFolder: UI, data: BRAND_DATA })
     ;(brand as unknown as { pages: Map<string, string> }).pages.set("brand-phone", page)
     expect(brand.examples("brand-phone")).toEqual([

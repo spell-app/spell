@@ -55,18 +55,18 @@
               Groups ...).  Rules, the class-grammar mappings, gaps:  epics/spell-ui-pages/PAGES.md.
               - A section:  `<ui-section id="examples-types" label="Types" sticky collapsible dividing>` around
                 its examples;  ids spell out the nesting (`<tab>-<section>-<example>`, lowercase kebab of the headers).
-              - An example:  its own nested section (`header` = the example's name) around
-                `<ui-docs-example description="...">` and the live markup;  the markup IS the code shown.  A richer
+              - An example:  its own nested section (`label` = the example's name) around
+                `<ui-example description="...">` and the live markup;  the markup IS the code shown.  A richer
                 description:  `<p slot="description">` (+ `<ui-message slot="description">`).  Fomantic's header-less
-                `.another.example`:  a second `<ui-docs-example>` in the same section.
-              - Or write it flat (`<ui-header level="2">`, `<ui-docs-example header>`) and run `yarn site:sections`:
-                it nests it and writes the ids (and fixes them after a header changes).
+                `.another.example`:  a second `<ui-example>` in the same section.
+              - Or write it flat (`<ui-header level="2">`, `<ui-example heading>`) and run `yarn site:sections`:
+                it nests it and writes the ids (and fixes them after a title changes).
               - A gap:  an HTML comment `GAP I<n>:  ...` BEFORE the example's section (a comment inside the example
                 shows in its code).
             -->
             <ui-section id="examples-types" label="Types" sticky collapsible dividing>
               <ui-section id="examples-types-video" label="Video" sticky collapsible dividing>
-                <ui-docs-example description="A video file in the browser's own player, with captions (`captions`, a WebVTT file) and its shape (`ratio`).">
+                <ui-example description="A video file in the browser's own player, with captions (`captions`, a WebVTT file) and its shape (`ratio`).">
                   <ui-video
                     src="examples/media/sample.webm"
                     captions="examples/media/sample.vtt"
@@ -74,10 +74,10 @@
                     label="A ball rolls across the screen"
                     style="max-width: 32em"
                   ></ui-video>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
               <ui-section id="examples-types-no-controls" label="No controls" sticky collapsible dividing>
-                <ui-docs-example description="`controls=&quot;false&quot;` hides the browser's controls;  `autoplay muted loop` plays it by itself, as a moving picture.">
+                <ui-example description="`controls=&quot;false&quot;` hides the browser's controls;  `autoplay muted loop` plays it by itself, as a moving picture.">
                   <ui-video
                     src="examples/media/sample.webm"
                     controls="false"
@@ -87,7 +87,7 @@
                     label="A ball rolls across the screen, over and over"
                     style="max-width: 20em"
                   ></ui-video>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
           </ui-tab>

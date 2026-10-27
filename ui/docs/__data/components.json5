@@ -8853,6 +8853,287 @@
       "href": "ui-feed.html#ui-event"
     },
     {
+      "tag": "ui-example",
+      "name": "Example",
+      "folder": "ui-example",
+      "topics": [
+        "documentation",
+        "data display"
+      ],
+      "aka": [
+        "example",
+        "demo",
+        "live example",
+        "code sample",
+        "playground",
+        "show code"
+      ],
+      "description": "An example shows its own markup live, under a heading and description, with the same markup as code a button shows and hides.",
+      "noun": "example",
+      "attributes": [
+        {
+          "name": "heading",
+          "kind": "string",
+          "description": "Its title, e.g. `Emphasis`:  Fomantic's `h4` above the example.  Its old name was `header`."
+        },
+        {
+          "name": "description",
+          "kind": "string",
+          "description": "One sentence under the heading;  `` `x` `` becomes code.  Slot `description` for richer text (links, several paragraphs)."
+        },
+        {
+          "name": "level",
+          "kind": "number",
+          "default": 4,
+          "description": "Heading level of the title, `1` ... `6`:  Fomantic's examples are `h4`, under the section's `h2`."
+        },
+        {
+          "name": "code",
+          "kind": "boolean",
+          "description": "The code pane is open;  the code button toggles it, so it's the LIVE state too (reflected, `ui-opened` / `ui-closed`).  Set it in markup to open the code at start."
+        },
+        {
+          "name": "language",
+          "kind": "string",
+          "default": "html",
+          "description": "Language of the code pane (`<ui-code language>`).  The source is the markup, so `html` unless a `code` child says otherwise."
+        },
+        {
+          "name": "bare",
+          "kind": "keyOnly",
+          "description": "No segment frame around the live example and code, even while the code is open."
+        },
+        {
+          "name": "variation",
+          "kind": "keyOnly",
+          "description": "Fomantic's smaller variation style:  a smaller title and less space around it, for a run of small examples under one heading."
+        },
+        {
+          "name": "disabled",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`)."
+        },
+        {
+          "name": "loading",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`)."
+        },
+        {
+          "name": "visible",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible=\"false\"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins."
+        },
+        {
+          "name": "animation",
+          "kind": "enum",
+          "values": [
+            "fade",
+            "fade up",
+            "fade down",
+            "fade left",
+            "fade right",
+            "scale",
+            "zoom",
+            "drop",
+            "browse",
+            "browse right",
+            "fly",
+            "fly up",
+            "fly down",
+            "fly left",
+            "fly right",
+            "slide",
+            "slide up",
+            "slide down",
+            "slide left",
+            "slide right",
+            "swing",
+            "swing up",
+            "swing down",
+            "swing left",
+            "swing right",
+            "horizontal flip",
+            "vertical flip",
+            "flash",
+            "shake",
+            "bounce",
+            "tada",
+            "pulse",
+            "jiggle",
+            "glow",
+            "none"
+          ],
+          "shared": true,
+          "description": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on."
+        },
+        {
+          "name": "link",
+          "kind": "string",
+          "shared": true,
+          "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`."
+        },
+        {
+          "name": "target",
+          "kind": "string",
+          "shared": true,
+          "description": "Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`."
+        },
+        {
+          "name": "font",
+          "kind": "multiple",
+          "values": [
+            "bold",
+            "italic",
+            "underline",
+            "strikethrough",
+            "code",
+            "highlight",
+            "subscript",
+            "superscript"
+          ],
+          "shared": true,
+          "description": "How its letters look, several words at once:  `bold`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript` (`font=\"bold italic\"`).  `<ui-text>` draws each as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it;  every other element shows the look alone."
+        },
+        {
+          "name": "tooltip",
+          "kind": "string",
+          "shared": true,
+          "description": "Its tooltip:  the browser's own, written as the element's `title`."
+        },
+        {
+          "name": "label",
+          "kind": "string",
+          "shared": true,
+          "description": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own."
+        }
+      ],
+      "slots": [
+        {
+          "name": "",
+          "description": "The example itself, shown live;  its markup is the code shown.  A `<template>` child instead:  stamped out live, and its markup shown EXACTLY as written."
+        },
+        {
+          "name": "description",
+          "description": "Rich description, in place of the `description` attribute."
+        },
+        {
+          "name": "source",
+          "description": "What the code pane shows in place of the markup, e.g. an editor of the example's code.  Shown only while the code is open, as the markup is."
+        }
+      ],
+      "events": [
+        {
+          "name": "ui-opened",
+          "detail": "{ open: true, originalEvent?: Event }",
+          "description": "The code button opened the code pane."
+        },
+        {
+          "name": "ui-closed",
+          "detail": "{ open: false, originalEvent?: Event }",
+          "description": "The code button closed the code pane."
+        }
+      ],
+      "parts": [
+        {
+          "name": "example",
+          "description": "The whole block (`<section>`)."
+        },
+        {
+          "name": "header",
+          "description": "The `<ui-header>` title."
+        },
+        {
+          "name": "toggle",
+          "description": "The code button (`<ui-button circular basic icon=\"code\">`)."
+        },
+        {
+          "name": "description",
+          "description": "The description under the title."
+        },
+        {
+          "name": "demo",
+          "description": "The `<ui-segment>` around the live example."
+        },
+        {
+          "name": "code",
+          "description": "The `<ui-segment>` around the code pane."
+        },
+        {
+          "name": "source",
+          "description": "The `<ui-code>` showing the markup."
+        }
+      ],
+      "states": [
+        {
+          "name": "open",
+          "description": "The code pane is open."
+        },
+        {
+          "name": "code-shown",
+          "description": "The code pane is drawn:  open, or still rolling closed."
+        },
+        {
+          "name": "open-at-start",
+          "description": "The code was open from the start:  it showed at once, without rolling open."
+        },
+        {
+          "name": "disabled",
+          "description": "`disabled` is set (or, on a form control, a `<fieldset disabled>` around it)."
+        },
+        {
+          "name": "loading",
+          "description": "`loading` is set."
+        },
+        {
+          "name": "busy",
+          "description": "`loading`, and the element draws the shared loader:  a spinner over it (`elementSetup.loading`)."
+        },
+        {
+          "name": "dimmed",
+          "description": "Disabled or loading the shared way:  everything inside is inert, and dimmed."
+        },
+        {
+          "name": "hidden",
+          "description": "Hidden (`hidden`, or `visible=\"false\"`), once its animation has run."
+        },
+        {
+          "name": "still",
+          "description": "`animation=\"none\"`:  no motion here, nor anywhere inside it (`--ui-motion: none`)."
+        },
+        {
+          "name": "hiding",
+          "description": "Animating out:  `hidden` is already set, and the element stays on screen until it ends."
+        },
+        {
+          "name": "pending",
+          "description": "Defined by its `<ui-root>` before its family loaded:  no component yet, its values kept until it arrives."
+        },
+        {
+          "name": "ready",
+          "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+        }
+      ],
+      "texts": [
+        {
+          "key": "showCode",
+          "text": "Show code",
+          "description": "The code button's label while the code is hidden."
+        },
+        {
+          "key": "hideCode",
+          "text": "Hide code",
+          "description": "The code button's label while the code shows."
+        }
+      ],
+      "mainTag": "ui-example",
+      "main": true,
+      "page": true,
+      "href": "ui-example.html"
+    },
+    {
       "tag": "ui-extra",
       "name": "Extra",
       "folder": "ui-parts",
@@ -33052,6 +33333,299 @@
       "href": "ui-toast.html"
     },
     {
+      "tag": "ui-toc",
+      "name": "Toc",
+      "folder": "ui-toc",
+      "topics": [
+        "navigation",
+        "documentation"
+      ],
+      "aka": [
+        "table of contents",
+        "on this page",
+        "page index",
+        "scrollspy",
+        "toc",
+        "following menu"
+      ],
+      "description": "A table of contents lists the page's sections and examples as links, opens the one in view and follows the scroll.  Each section folds and opens by its chevron, and one button in its header opens or folds them all;  the viewer's folds are kept.",
+      "noun": "toc",
+      "attributes": [
+        {
+          "name": "for",
+          "kind": "string",
+          "property": "htmlFor",
+          "description": "Id of the element whose headings to list.  A `<ui-tabs>`:  its SHOWN pane, followed as the tabs switch.  Default:  the page's `<main>`, else `<body>`."
+        },
+        {
+          "name": "scroller",
+          "kind": "string",
+          "description": "Id of the element whose scroll it follows, when the content scrolls inside a box of its own (a pane) rather than the window.  Its reading line is then that box's top.  Default:  the window."
+        },
+        {
+          "name": "heading",
+          "kind": "string",
+          "description": "Title above the links, e.g. the page's name (Fomantic's `Button`).  Its old name was `header`."
+        },
+        {
+          "name": "size",
+          "kind": "size",
+          "values": [
+            "mini",
+            "tiny",
+            "small",
+            "medium",
+            "large",
+            "big",
+            "huge",
+            "massive"
+          ],
+          "valueSet": "sizes",
+          "default": "small",
+          "description": "Text size, `mini` ... `massive`."
+        },
+        {
+          "name": "expanded",
+          "kind": "keyOnly",
+          "description": "Show every section's entries, not only the current section's (Fomantic opens the one in view).  The viewer's own folds, and the header's toggle, win."
+        },
+        {
+          "name": "disabled",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`)."
+        },
+        {
+          "name": "loading",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`)."
+        },
+        {
+          "name": "visible",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible=\"false\"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins."
+        },
+        {
+          "name": "animation",
+          "kind": "enum",
+          "values": [
+            "fade",
+            "fade up",
+            "fade down",
+            "fade left",
+            "fade right",
+            "scale",
+            "zoom",
+            "drop",
+            "browse",
+            "browse right",
+            "fly",
+            "fly up",
+            "fly down",
+            "fly left",
+            "fly right",
+            "slide",
+            "slide up",
+            "slide down",
+            "slide left",
+            "slide right",
+            "swing",
+            "swing up",
+            "swing down",
+            "swing left",
+            "swing right",
+            "horizontal flip",
+            "vertical flip",
+            "flash",
+            "shake",
+            "bounce",
+            "tada",
+            "pulse",
+            "jiggle",
+            "glow",
+            "none"
+          ],
+          "shared": true,
+          "description": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on."
+        },
+        {
+          "name": "link",
+          "kind": "string",
+          "shared": true,
+          "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`."
+        },
+        {
+          "name": "target",
+          "kind": "string",
+          "shared": true,
+          "description": "Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`."
+        },
+        {
+          "name": "font",
+          "kind": "multiple",
+          "values": [
+            "bold",
+            "italic",
+            "underline",
+            "strikethrough",
+            "code",
+            "highlight",
+            "subscript",
+            "superscript"
+          ],
+          "shared": true,
+          "description": "How its letters look, several words at once:  `bold`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript` (`font=\"bold italic\"`).  `<ui-text>` draws each as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it;  every other element shows the look alone."
+        },
+        {
+          "name": "tooltip",
+          "kind": "string",
+          "shared": true,
+          "description": "Its tooltip:  the browser's own, written as the element's `title`."
+        },
+        {
+          "name": "label",
+          "kind": "string",
+          "shared": true,
+          "description": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own."
+        }
+      ],
+      "slots": [
+        {
+          "name": "tools",
+          "description": "Buttons at the right end of the header's row, after the expand all / collapse all toggle (a page's own, e.g. one hiding the contents).  Shown with `heading`."
+        }
+      ],
+      "events": [
+        {
+          "name": "ui-scrolled-to",
+          "detail": "{ value: string }",
+          "description": "The entry in view changed (scroll, a link, the tabs);  `value` is its target's id."
+        },
+        {
+          "name": "ui-drawn",
+          "detail": "{ ids: string[] }",
+          "description": "The list was built (again):  the ids of every entry, in page order."
+        }
+      ],
+      "parts": [
+        {
+          "name": "toc",
+          "description": "The whole box (`<div class=\"ui toc\">`)."
+        },
+        {
+          "name": "head",
+          "description": "The row above the links:  `heading`'s title, the expand all / collapse all toggle, and the `tools` slot."
+        },
+        {
+          "name": "header",
+          "description": "The `<ui-header>` with `heading`'s text."
+        },
+        {
+          "name": "toggle-all",
+          "description": "The header's ONE button:  opens every section, then folds them all.  Kept for every page in this browser."
+        },
+        {
+          "name": "menu",
+          "description": "The `<ui-menu vertical text>` of sections (a navigation landmark)."
+        },
+        {
+          "name": "section-row",
+          "description": "A section's row:  its fold chevron (when it has entries) and its link."
+        },
+        {
+          "name": "fold",
+          "description": "A section's fold `<button>`:  a chevron, turned down while its entries show.  Kept per page."
+        },
+        {
+          "name": "section",
+          "description": "A section's link `<ui-item>` (a level 2 heading, a top-level `<ui-section>`)."
+        },
+        {
+          "name": "entries",
+          "description": "The `<ui-menu>` of a section's entries (examples, level 3 headings, nested `<ui-section>`s);  nested again under an entry with its own."
+        },
+        {
+          "name": "entry",
+          "description": "One entry's link `<ui-item>`."
+        }
+      ],
+      "states": [
+        {
+          "name": "empty",
+          "description": "Nothing to list (the followed content has no headings)."
+        },
+        {
+          "name": "disabled",
+          "description": "`disabled` is set (or, on a form control, a `<fieldset disabled>` around it)."
+        },
+        {
+          "name": "loading",
+          "description": "`loading` is set."
+        },
+        {
+          "name": "busy",
+          "description": "`loading`, and the element draws the shared loader:  a spinner over it (`elementSetup.loading`)."
+        },
+        {
+          "name": "dimmed",
+          "description": "Disabled or loading the shared way:  everything inside is inert, and dimmed."
+        },
+        {
+          "name": "hidden",
+          "description": "Hidden (`hidden`, or `visible=\"false\"`), once its animation has run."
+        },
+        {
+          "name": "still",
+          "description": "`animation=\"none\"`:  no motion here, nor anywhere inside it (`--ui-motion: none`)."
+        },
+        {
+          "name": "hiding",
+          "description": "Animating out:  `hidden` is already set, and the element stays on screen until it ends."
+        },
+        {
+          "name": "pending",
+          "description": "Defined by its `<ui-root>` before its family loaded:  no component yet, its values kept until it arrives."
+        },
+        {
+          "name": "ready",
+          "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+        }
+      ],
+      "texts": [
+        {
+          "key": "label",
+          "text": "On this page",
+          "description": "Accessible name of the links' landmark."
+        },
+        {
+          "key": "foldSection",
+          "text": "Fold {section}",
+          "description": "A section's fold button, while it's open."
+        },
+        {
+          "key": "openSection",
+          "text": "Open {section}",
+          "description": "A section's fold button, while it's folded."
+        },
+        {
+          "key": "expandAll",
+          "text": "Expand all",
+          "description": "The header's toggle, while a section is folded."
+        },
+        {
+          "key": "collapseAll",
+          "text": "Collapse all",
+          "description": "The header's toggle, while every section is open."
+        }
+      ],
+      "mainTag": "ui-toc",
+      "main": true,
+      "page": true,
+      "href": "ui-toc.html"
+    },
+    {
       "tag": "ui-toolbar",
       "name": "Toolbar",
       "folder": "ui-toolbar",
@@ -35417,286 +35991,6 @@
       "page": false
     },
     {
-      "tag": "ui-docs-example",
-      "name": "Docs example",
-      "folder": "ui-docs-example",
-      "topics": [
-        "documentation",
-        "data display"
-      ],
-      "aka": [
-        "example",
-        "demo",
-        "live example",
-        "code sample",
-        "playground",
-        "show code"
-      ],
-      "description": "An example shows its own markup live, under a header and description, with the same markup as code a button shows and hides.",
-      "noun": "example",
-      "attributes": [
-        {
-          "name": "header",
-          "kind": "string",
-          "description": "Its title, e.g. `Emphasis`:  Fomantic's `h4` above the example."
-        },
-        {
-          "name": "description",
-          "kind": "string",
-          "description": "One sentence under the header;  `` `x` `` becomes code.  Slot `description` for richer text (links, several paragraphs)."
-        },
-        {
-          "name": "level",
-          "kind": "number",
-          "default": 4,
-          "description": "Heading level of the header, `1` ... `6`:  Fomantic's examples are `h4`, under the section's `h2`."
-        },
-        {
-          "name": "code",
-          "kind": "boolean",
-          "description": "The code pane is open;  the code button toggles it, so it's the LIVE state too (reflected, `ui-opened` / `ui-closed`).  Set it in markup to open the code at start."
-        },
-        {
-          "name": "language",
-          "kind": "string",
-          "default": "html",
-          "description": "Language of the code pane (`<ui-code language>`).  The source is the markup, so `html` unless a `code` child says otherwise."
-        },
-        {
-          "name": "bare",
-          "kind": "keyOnly",
-          "description": "No segment frame around the live example and code, even while the code is open."
-        },
-        {
-          "name": "variation",
-          "kind": "keyOnly",
-          "description": "Fomantic's smaller variation style:  a smaller header and less space around it, for a run of small examples under one heading."
-        },
-        {
-          "name": "disabled",
-          "kind": "boolean",
-          "shared": true,
-          "description": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`)."
-        },
-        {
-          "name": "loading",
-          "kind": "boolean",
-          "shared": true,
-          "description": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`)."
-        },
-        {
-          "name": "visible",
-          "kind": "boolean",
-          "shared": true,
-          "description": "Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible=\"false\"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins."
-        },
-        {
-          "name": "animation",
-          "kind": "enum",
-          "values": [
-            "fade",
-            "fade up",
-            "fade down",
-            "fade left",
-            "fade right",
-            "scale",
-            "zoom",
-            "drop",
-            "browse",
-            "browse right",
-            "fly",
-            "fly up",
-            "fly down",
-            "fly left",
-            "fly right",
-            "slide",
-            "slide up",
-            "slide down",
-            "slide left",
-            "slide right",
-            "swing",
-            "swing up",
-            "swing down",
-            "swing left",
-            "swing right",
-            "horizontal flip",
-            "vertical flip",
-            "flash",
-            "shake",
-            "bounce",
-            "tada",
-            "pulse",
-            "jiggle",
-            "glow",
-            "none"
-          ],
-          "shared": true,
-          "description": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on."
-        },
-        {
-          "name": "link",
-          "kind": "string",
-          "shared": true,
-          "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`."
-        },
-        {
-          "name": "target",
-          "kind": "string",
-          "shared": true,
-          "description": "Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`."
-        },
-        {
-          "name": "font",
-          "kind": "multiple",
-          "values": [
-            "bold",
-            "italic",
-            "underline",
-            "strikethrough",
-            "code",
-            "highlight",
-            "subscript",
-            "superscript"
-          ],
-          "shared": true,
-          "description": "How its letters look, several words at once:  `bold`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript` (`font=\"bold italic\"`).  `<ui-text>` draws each as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it;  every other element shows the look alone."
-        },
-        {
-          "name": "tooltip",
-          "kind": "string",
-          "shared": true,
-          "description": "Its tooltip:  the browser's own, written as the element's `title`."
-        },
-        {
-          "name": "label",
-          "kind": "string",
-          "shared": true,
-          "description": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own."
-        }
-      ],
-      "slots": [
-        {
-          "name": "",
-          "description": "The example itself, shown live;  its markup is the code shown.  A `<template>` child instead:  stamped out live, and its markup shown EXACTLY as written."
-        },
-        {
-          "name": "description",
-          "description": "Rich description, in place of the `description` attribute."
-        },
-        {
-          "name": "source",
-          "description": "What the code pane shows in place of the markup, e.g. an editor of the example's code.  Shown only while the code is open, as the markup is."
-        }
-      ],
-      "events": [
-        {
-          "name": "ui-opened",
-          "detail": "{ open: true, originalEvent?: Event }",
-          "description": "The code button opened the code pane."
-        },
-        {
-          "name": "ui-closed",
-          "detail": "{ open: false, originalEvent?: Event }",
-          "description": "The code button closed the code pane."
-        }
-      ],
-      "parts": [
-        {
-          "name": "example",
-          "description": "The whole block (`<section>`)."
-        },
-        {
-          "name": "header",
-          "description": "The `<ui-header>` title."
-        },
-        {
-          "name": "toggle",
-          "description": "The code button (`<ui-button circular basic icon=\"code\">`)."
-        },
-        {
-          "name": "description",
-          "description": "The description under the header."
-        },
-        {
-          "name": "demo",
-          "description": "The `<ui-segment>` around the live example."
-        },
-        {
-          "name": "code",
-          "description": "The `<ui-segment>` around the code pane."
-        },
-        {
-          "name": "source",
-          "description": "The `<ui-code>` showing the markup."
-        }
-      ],
-      "states": [
-        {
-          "name": "open",
-          "description": "The code pane is open."
-        },
-        {
-          "name": "code-shown",
-          "description": "The code pane is drawn:  open, or still rolling closed."
-        },
-        {
-          "name": "open-at-start",
-          "description": "The code was open from the start:  it showed at once, without rolling open."
-        },
-        {
-          "name": "disabled",
-          "description": "`disabled` is set (or, on a form control, a `<fieldset disabled>` around it)."
-        },
-        {
-          "name": "loading",
-          "description": "`loading` is set."
-        },
-        {
-          "name": "busy",
-          "description": "`loading`, and the element draws the shared loader:  a spinner over it (`elementSetup.loading`)."
-        },
-        {
-          "name": "dimmed",
-          "description": "Disabled or loading the shared way:  everything inside is inert, and dimmed."
-        },
-        {
-          "name": "hidden",
-          "description": "Hidden (`hidden`, or `visible=\"false\"`), once its animation has run."
-        },
-        {
-          "name": "still",
-          "description": "`animation=\"none\"`:  no motion here, nor anywhere inside it (`--ui-motion: none`)."
-        },
-        {
-          "name": "hiding",
-          "description": "Animating out:  `hidden` is already set, and the element stays on screen until it ends."
-        },
-        {
-          "name": "pending",
-          "description": "Defined by its `<ui-root>` before its family loaded:  no component yet, its values kept until it arrives."
-        },
-        {
-          "name": "ready",
-          "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
-        }
-      ],
-      "texts": [
-        {
-          "key": "showCode",
-          "text": "Show code",
-          "description": "The code button's label while the code is hidden."
-        },
-        {
-          "key": "hideCode",
-          "text": "Hide code",
-          "description": "The code button's label while the code shows."
-        }
-      ],
-      "mainTag": "ui-docs-example",
-      "main": true,
-      "page": false
-    },
-    {
       "tag": "ui-docs-inspector",
       "name": "Docs inspector",
       "folder": "ui-docs-inspector",
@@ -37113,298 +37407,6 @@
         }
       ],
       "mainTag": "ui-docs-theme-bench",
-      "main": true,
-      "page": false
-    },
-    {
-      "tag": "ui-docs-toc",
-      "name": "Docs toc",
-      "folder": "ui-docs-toc",
-      "topics": [
-        "documentation",
-        "navigation"
-      ],
-      "aka": [
-        "table of contents",
-        "on this page",
-        "page index",
-        "scrollspy",
-        "toc",
-        "following menu"
-      ],
-      "description": "A table of contents lists the page's sections and examples as links, opens the one in view and follows the scroll.  Each section folds and opens by its chevron, and one button in its header opens or folds them all;  the viewer's folds are kept.",
-      "noun": "toc",
-      "attributes": [
-        {
-          "name": "for",
-          "kind": "string",
-          "property": "htmlFor",
-          "description": "Id of the element whose headings to list.  A `<ui-tabs>`:  its SHOWN pane, followed as the tabs switch.  Default:  the page's `<main>`, else `<body>`."
-        },
-        {
-          "name": "scroller",
-          "kind": "string",
-          "description": "Id of the element whose scroll it follows, when the content scrolls inside a box of its own (a pane) rather than the window.  Its reading line is then that box's top.  Default:  the window."
-        },
-        {
-          "name": "header",
-          "kind": "string",
-          "description": "Title above the links, e.g. the page's name (Fomantic's `Button`)."
-        },
-        {
-          "name": "size",
-          "kind": "size",
-          "values": [
-            "mini",
-            "tiny",
-            "small",
-            "medium",
-            "large",
-            "big",
-            "huge",
-            "massive"
-          ],
-          "valueSet": "sizes",
-          "default": "small",
-          "description": "Text size, `mini` ... `massive`."
-        },
-        {
-          "name": "expanded",
-          "kind": "keyOnly",
-          "description": "Show every section's entries, not only the current section's (Fomantic opens the one in view).  The viewer's own folds, and the header's toggle, win."
-        },
-        {
-          "name": "disabled",
-          "kind": "boolean",
-          "shared": true,
-          "description": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`)."
-        },
-        {
-          "name": "loading",
-          "kind": "boolean",
-          "shared": true,
-          "description": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`)."
-        },
-        {
-          "name": "visible",
-          "kind": "boolean",
-          "shared": true,
-          "description": "Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible=\"false\"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins."
-        },
-        {
-          "name": "animation",
-          "kind": "enum",
-          "values": [
-            "fade",
-            "fade up",
-            "fade down",
-            "fade left",
-            "fade right",
-            "scale",
-            "zoom",
-            "drop",
-            "browse",
-            "browse right",
-            "fly",
-            "fly up",
-            "fly down",
-            "fly left",
-            "fly right",
-            "slide",
-            "slide up",
-            "slide down",
-            "slide left",
-            "slide right",
-            "swing",
-            "swing up",
-            "swing down",
-            "swing left",
-            "swing right",
-            "horizontal flip",
-            "vertical flip",
-            "flash",
-            "shake",
-            "bounce",
-            "tada",
-            "pulse",
-            "jiggle",
-            "glow",
-            "none"
-          ],
-          "shared": true,
-          "description": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on."
-        },
-        {
-          "name": "link",
-          "kind": "string",
-          "shared": true,
-          "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`."
-        },
-        {
-          "name": "target",
-          "kind": "string",
-          "shared": true,
-          "description": "Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`."
-        },
-        {
-          "name": "font",
-          "kind": "multiple",
-          "values": [
-            "bold",
-            "italic",
-            "underline",
-            "strikethrough",
-            "code",
-            "highlight",
-            "subscript",
-            "superscript"
-          ],
-          "shared": true,
-          "description": "How its letters look, several words at once:  `bold`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript` (`font=\"bold italic\"`).  `<ui-text>` draws each as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it;  every other element shows the look alone."
-        },
-        {
-          "name": "tooltip",
-          "kind": "string",
-          "shared": true,
-          "description": "Its tooltip:  the browser's own, written as the element's `title`."
-        },
-        {
-          "name": "label",
-          "kind": "string",
-          "shared": true,
-          "description": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own."
-        }
-      ],
-      "slots": [
-        {
-          "name": "tools",
-          "description": "Buttons at the right end of the header's row, after the expand all / collapse all toggle (a page's own, e.g. one hiding the contents).  Shown with `header`."
-        }
-      ],
-      "events": [
-        {
-          "name": "ui-scrolled-to",
-          "detail": "{ value: string }",
-          "description": "The entry in view changed (scroll, a link, the tabs);  `value` is its target's id."
-        },
-        {
-          "name": "ui-drawn",
-          "detail": "{ ids: string[] }",
-          "description": "The list was built (again):  the ids of every entry, in page order."
-        }
-      ],
-      "parts": [
-        {
-          "name": "toc",
-          "description": "The whole box (`<div class=\"ui toc\">`)."
-        },
-        {
-          "name": "head",
-          "description": "The row above the links:  `header`'s title, the expand all / collapse all toggle, and the `tools` slot."
-        },
-        {
-          "name": "header",
-          "description": "The `<ui-header>` with `header`'s text."
-        },
-        {
-          "name": "toggle-all",
-          "description": "The header's ONE button:  opens every section, then folds them all.  Kept for every page in this browser."
-        },
-        {
-          "name": "menu",
-          "description": "The `<ui-menu vertical text>` of sections (a navigation landmark)."
-        },
-        {
-          "name": "section-row",
-          "description": "A section's row:  its fold chevron (when it has entries) and its link."
-        },
-        {
-          "name": "fold",
-          "description": "A section's fold `<button>`:  a chevron, turned down while its entries show.  Kept per page."
-        },
-        {
-          "name": "section",
-          "description": "A section's link `<ui-item>` (a level 2 heading, a top-level `<ui-section>`)."
-        },
-        {
-          "name": "entries",
-          "description": "The `<ui-menu>` of a section's entries (examples, level 3 headings, nested `<ui-section>`s);  nested again under an entry with its own."
-        },
-        {
-          "name": "entry",
-          "description": "One entry's link `<ui-item>`."
-        }
-      ],
-      "states": [
-        {
-          "name": "empty",
-          "description": "Nothing to list (the followed content has no headings)."
-        },
-        {
-          "name": "disabled",
-          "description": "`disabled` is set (or, on a form control, a `<fieldset disabled>` around it)."
-        },
-        {
-          "name": "loading",
-          "description": "`loading` is set."
-        },
-        {
-          "name": "busy",
-          "description": "`loading`, and the element draws the shared loader:  a spinner over it (`elementSetup.loading`)."
-        },
-        {
-          "name": "dimmed",
-          "description": "Disabled or loading the shared way:  everything inside is inert, and dimmed."
-        },
-        {
-          "name": "hidden",
-          "description": "Hidden (`hidden`, or `visible=\"false\"`), once its animation has run."
-        },
-        {
-          "name": "still",
-          "description": "`animation=\"none\"`:  no motion here, nor anywhere inside it (`--ui-motion: none`)."
-        },
-        {
-          "name": "hiding",
-          "description": "Animating out:  `hidden` is already set, and the element stays on screen until it ends."
-        },
-        {
-          "name": "pending",
-          "description": "Defined by its `<ui-root>` before its family loaded:  no component yet, its values kept until it arrives."
-        },
-        {
-          "name": "ready",
-          "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
-        }
-      ],
-      "texts": [
-        {
-          "key": "label",
-          "text": "On this page",
-          "description": "Accessible name of the links' landmark."
-        },
-        {
-          "key": "foldSection",
-          "text": "Fold {section}",
-          "description": "A section's fold button, while it's open."
-        },
-        {
-          "key": "openSection",
-          "text": "Open {section}",
-          "description": "A section's fold button, while it's folded."
-        },
-        {
-          "key": "expandAll",
-          "text": "Expand all",
-          "description": "The header's toggle, while a section is folded."
-        },
-        {
-          "key": "collapseAll",
-          "text": "Collapse all",
-          "description": "The header's toggle, while every section is open."
-        }
-      ],
-      "mainTag": "ui-docs-toc",
       "main": true,
       "page": false
     },
@@ -39248,105 +39250,6 @@
         }
       ]
     },
-    "ui-docs-example": {
-      "folder": "ui-docs-example",
-      "mainTag": "ui-docs-example",
-      "title": "Docs example",
-      "summary": "An example shows its own markup live, under a header and description, with the same markup as code a button shows and hides.",
-      "status": "done",
-      "docs": true,
-      "tags": [
-        "ui-docs-example"
-      ],
-      "tokens": [
-        {
-          "name": "--ui-docs-example-margin",
-          "default": "1.25em 0",
-          "description": "Space above and below the block.",
-          "type": "length"
-        },
-        {
-          "name": "--ui-docs-example-description-width",
-          "default": "50em",
-          "description": "Widest the description runs: Fomantic's 700px.",
-          "type": "length"
-        },
-        {
-          "name": "--ui-docs-example-description-color",
-          "default": "var(--ui-text-color)",
-          "description": "Colour of the description text.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-docs-example-toggle-opacity",
-          "default": "1",
-          "description": "Opacity of the code button at rest: whole, so it stands out on the frame (Fomantic dimmed it to 0.5)",
-          "type": "number"
-        },
-        {
-          "name": "--ui-docs-example-toggle-background",
-          "default": "light-dark(oklch(1 0 0 / 0.95), color-mix(in oklab, var(--ui-surface-strong) 90%, transparent))",
-          "description": "The code button's fill: whiter than the frame, so it stands out on it",
-          "type": "color"
-        },
-        {
-          "name": "--ui-docs-example-toggle-inset",
-          "default": "0.8em",
-          "description": "Space from the frame's top and right edges to the code button, the same both ways: about what centres it beside one line of text.",
-          "type": "length"
-        },
-        {
-          "name": "--ui-docs-example-toggle-corner",
-          "default": "6px",
-          "description": "A framed example's code button: in from its frame's top and right edges, just inside its rim.",
-          "type": "length"
-        },
-        {
-          "name": "--ui-docs-example-gap",
-          "default": "0.5em",
-          "description": "Space between the header, description and example.",
-          "type": "length"
-        },
-        {
-          "name": "--ui-docs-example-frame-background",
-          "default": "color-mix(in oklab, var(--ui-surface) 45%, transparent)",
-          "description": "The frame round an example: a faint see-through card, so it never runs into the prose round it.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-docs-example-frame-border",
-          "default": "var(--ui-border-width, 1px) solid var(--ui-border-color)",
-          "type": "other"
-        },
-        {
-          "name": "--ui-docs-example-frame-radius",
-          "default": "var(--ui-radius-l, 0.75em)",
-          "type": "length"
-        },
-        {
-          "name": "--ui-docs-example-frame-padding",
-          "default": "0.75em 1em",
-          "type": "length"
-        },
-        {
-          "name": "--ui-docs-example-frame-shadow",
-          "default": "var(--ui-shadow-subtle, none)",
-          "type": "other"
-        },
-        {
-          "name": "--ui-docs-example-frame-filter",
-          "default": "none",
-          "description": "What the frame does to what's behind it: a theme's glass (`backdrop-filter`)",
-          "type": "other"
-        },
-        {
-          "name": "--ui-docs-example-demo-background",
-          "default": "color-mix(in oklab, var(--ui-surface) 60%, transparent)",
-          "description": "The live demo while the code shows: a very light tint, so its edge reads (pure white read as a missing border)",
-          "type": "color"
-        }
-      ]
-    },
     "ui-docs-inspector": {
       "folder": "ui-docs-inspector",
       "mainTag": "ui-docs-inspector",
@@ -39679,61 +39582,6 @@
         "ui-docs-theme-bench"
       ],
       "tokens": []
-    },
-    "ui-docs-toc": {
-      "folder": "ui-docs-toc",
-      "mainTag": "ui-docs-toc",
-      "title": "Docs table of contents",
-      "summary": "A table of contents lists the page's sections and examples as links, opens the one in view and follows the scroll.",
-      "status": "done",
-      "docs": true,
-      "tags": [
-        "ui-docs-toc"
-      ],
-      "tokens": [
-        {
-          "name": "--ui-docs-toc-indent",
-          "default": "0.5em",
-          "description": "Indent of a section's entries under its title.",
-          "type": "length"
-        },
-        {
-          "name": "--ui-docs-toc-section-weight",
-          "default": "bold",
-          "description": "Weight of a section's title.",
-          "type": "other"
-        },
-        {
-          "name": "--ui-docs-toc-current-weight",
-          "default": "bold",
-          "description": "Weight of the entry in view (docs.css `.following.menu .menu .active.item`).",
-          "type": "other"
-        },
-        {
-          "name": "--ui-docs-toc-gutter",
-          "default": "1.25em",
-          "description": "Width of the column left of the sections' links, where their fold chevrons sit.",
-          "type": "length"
-        },
-        {
-          "name": "--ui-docs-toc-control-color",
-          "default": "var(--ui-text-muted)",
-          "description": "Colour of the fold chevrons and the expand all / collapse all toggle.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-docs-toc-control-hover-color",
-          "default": "var(--ui-link)",
-          "description": "Colour of the fold chevrons and the toggle under the pointer.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-docs-toc-control-hover-background",
-          "default": "var(--ui-primary-background)",
-          "description": "The toggle's background under the pointer.",
-          "type": "color"
-        }
-      ]
     },
     "ui-docs-tokens": {
       "folder": "ui-docs-tokens",
@@ -40173,6 +40021,105 @@
           "name": "--ui-emoji-size-big",
           "default": "7.5",
           "type": "number"
+        }
+      ]
+    },
+    "ui-example": {
+      "folder": "ui-example",
+      "mainTag": "ui-example",
+      "title": "Example",
+      "summary": "An example shows its own markup live, under a heading and description, with the same markup as code a button shows and hides.",
+      "status": "done",
+      "docs": false,
+      "tags": [
+        "ui-example"
+      ],
+      "tokens": [
+        {
+          "name": "--ui-example-margin",
+          "default": "1.25em 0",
+          "description": "Space above and below the block.",
+          "type": "length"
+        },
+        {
+          "name": "--ui-example-description-width",
+          "default": "50em",
+          "description": "Widest the description runs: Fomantic's 700px.",
+          "type": "length"
+        },
+        {
+          "name": "--ui-example-description-color",
+          "default": "var(--ui-text-color)",
+          "description": "Colour of the description text.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-example-toggle-opacity",
+          "default": "1",
+          "description": "Opacity of the code button at rest: whole, so it stands out on the frame (Fomantic dimmed it to 0.5)",
+          "type": "number"
+        },
+        {
+          "name": "--ui-example-toggle-background",
+          "default": "light-dark(oklch(1 0 0 / 0.95), color-mix(in oklab, var(--ui-surface-strong) 90%, transparent))",
+          "description": "The code button's fill: whiter than the frame, so it stands out on it",
+          "type": "color"
+        },
+        {
+          "name": "--ui-example-toggle-inset",
+          "default": "0.8em",
+          "description": "Space from the frame's top and right edges to the code button, the same both ways: about what centres it beside one line of text.",
+          "type": "length"
+        },
+        {
+          "name": "--ui-example-toggle-corner",
+          "default": "6px",
+          "description": "A framed example's code button: in from its frame's top and right edges, just inside its rim.",
+          "type": "length"
+        },
+        {
+          "name": "--ui-example-gap",
+          "default": "0.5em",
+          "description": "Space between the header, description and example.",
+          "type": "length"
+        },
+        {
+          "name": "--ui-example-frame-background",
+          "default": "color-mix(in oklab, var(--ui-surface) 45%, transparent)",
+          "description": "The frame round an example: a faint see-through card, so it never runs into the prose round it.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-example-frame-border",
+          "default": "var(--ui-border-width, 1px) solid var(--ui-border-color)",
+          "type": "other"
+        },
+        {
+          "name": "--ui-example-frame-radius",
+          "default": "var(--ui-radius-l, 0.75em)",
+          "type": "length"
+        },
+        {
+          "name": "--ui-example-frame-padding",
+          "default": "0.75em 1em",
+          "type": "length"
+        },
+        {
+          "name": "--ui-example-frame-shadow",
+          "default": "var(--ui-shadow-subtle, none)",
+          "type": "other"
+        },
+        {
+          "name": "--ui-example-frame-filter",
+          "default": "none",
+          "description": "What the frame does to what's behind it: a theme's glass (`backdrop-filter`)",
+          "type": "other"
+        },
+        {
+          "name": "--ui-example-demo-background",
+          "default": "color-mix(in oklab, var(--ui-surface) 60%, transparent)",
+          "description": "The live demo while the code shows: a very light tint, so its edge reads (pure white read as a missing border)",
+          "type": "color"
         }
       ]
     },
@@ -46307,6 +46254,61 @@
           "name": "--ui-toast-container-distance",
           "default": "12px",
           "type": "length"
+        }
+      ]
+    },
+    "ui-toc": {
+      "folder": "ui-toc",
+      "mainTag": "ui-toc",
+      "title": "Table of contents",
+      "summary": "A table of contents lists the page's sections and examples as links, opens the one in view and follows the scroll;  each section folds, and one button opens or folds them all.",
+      "status": "done",
+      "docs": false,
+      "tags": [
+        "ui-toc"
+      ],
+      "tokens": [
+        {
+          "name": "--ui-toc-indent",
+          "default": "0.5em",
+          "description": "Indent of a section's entries under its title.",
+          "type": "length"
+        },
+        {
+          "name": "--ui-toc-section-weight",
+          "default": "bold",
+          "description": "Weight of a section's title.",
+          "type": "other"
+        },
+        {
+          "name": "--ui-toc-current-weight",
+          "default": "bold",
+          "description": "Weight of the entry in view (docs.css `.following.menu .menu .active.item`).",
+          "type": "other"
+        },
+        {
+          "name": "--ui-toc-gutter",
+          "default": "1.25em",
+          "description": "Width of the column left of the sections' links, where their fold chevrons sit.",
+          "type": "length"
+        },
+        {
+          "name": "--ui-toc-control-color",
+          "default": "var(--ui-text-muted)",
+          "description": "Colour of the fold chevrons and the expand all / collapse all toggle.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-toc-control-hover-color",
+          "default": "var(--ui-link)",
+          "description": "Colour of the fold chevrons and the toggle under the pointer.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-toc-control-hover-background",
+          "default": "var(--ui-primary-background)",
+          "description": "The toggle's background under the pointer.",
+          "type": "color"
         }
       ]
     },

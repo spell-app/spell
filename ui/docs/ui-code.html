@@ -59,15 +59,15 @@
             -->
             <ui-section id="examples-types" label="Types" sticky collapsible dividing>
               <ui-section id="examples-types-code" label="Code" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="Code colours its own text as `language`:  any highlight.js name or alias (`ts`, `html`, `css`, `json`, `bash` ...)."
                 >
                   <ui-code language="ts">const greeting: string = "hello"</ui-code>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-types-markup" label="Markup" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description='Code with `<` or `&` goes in a `<script type="text/plain">` child:  its text is taken exactly, then dedented.'
                 >
                   <ui-code language="html">
@@ -76,48 +76,48 @@
                       <ui-button>Cancel & close</ui-button>
                     </script>
                   </ui-code>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-types-from-a-file" label="From a file" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="`source` shows a file of this site, fetched when `load` says.  Without `language`, the language is guessed among the common ones;  `detectedLanguage` says which."
                 >
                   <ui-code source="examples/sample.json"></ui-code>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
             </ui-section>
 
             <ui-section id="examples-variations" label="Variations" sticky collapsible dividing>
               <ui-section id="examples-variations-line-numbers" label="Line numbers" sticky collapsible dividing>
-                <ui-docs-example description="`line-numbers` numbers the lines, from `start`.">
+                <ui-example description="`line-numbers` numbers the lines, from `start`.">
                   <ui-code language="json" source="examples/sample.json" line-numbers start="10"></ui-code>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-wrapping" label="Wrapping" sticky collapsible dividing>
-                <ui-docs-example description="`wrap` wraps long lines;  by default they scroll.">
+                <ui-example description="`wrap` wraps long lines;  by default they scroll.">
                   <ui-code language="bash" wrap>
                     <script type="text/plain">
                       echo "a long line that wraps once the box is too narrow to hold it, instead of scrolling sideways"
                     </script>
                   </ui-code>
-                </ui-docs-example>
-                <ui-docs-example description="With `line-numbers`, a wrapped line hangs past its number.">
+                </ui-example>
+                <ui-example description="With `line-numbers`, a wrapped line hangs past its number.">
                   <ui-code language="bash" line-numbers wrap>
                     <script type="text/plain">
                       echo "line one"
                       echo "a long line that wraps once the box is too narrow to hold it, hanging past the line number"
                     </script>
                   </ui-code>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-copy-button" label="Copy button" sticky collapsible dividing>
-                <ui-docs-example description="`copy` adds a button that copies the code.">
+                <ui-example description="`copy` adds a button that copies the code.">
                   <ui-code language="bash" copy>yarn add spell-ui</ui-code>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
           </ui-tab>

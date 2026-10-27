@@ -65,14 +65,14 @@
             -->
             <ui-section id="examples-types" label="Types" sticky collapsible dividing>
               <ui-section id="examples-types-radio" label="Radio" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     A radio is an exclusive option: <code>&lt;ui-radio&gt;</code>s with the same <code>name</code> form a
                     group, and choosing one unchooses the rest.
                   </p>
                   <ui-radio name="radio" selected>Radio choice</ui-radio>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-form>
                     <form>
                       <ui-fields inline role="radiogroup" aria-labelledby="radio-frequency-label">
@@ -84,8 +84,8 @@
                       </ui-fields>
                     </form>
                   </ui-form>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-form>
                     <form>
                       <ui-fields grouped role="radiogroup" aria-labelledby="radio-example2-label">
@@ -97,11 +97,11 @@
                       </ui-fields>
                     </form>
                   </ui-form>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-types-slider" label="Slider" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description='Radios can be sliders, to emphasize the current selection:  `appearance="slider"`.'
                 >
                   <ui-form>
@@ -117,11 +117,11 @@
                       </ui-fields>
                     </form>
                   </ui-form>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-types-toggle" label="Toggle" sticky collapsible dividing>
-                <ui-docs-example description='Radios can be toggles, an on or off look:  `appearance="toggle"`.'>
+                <ui-example description='Radios can be toggles, an on or off look:  `appearance="toggle"`.'>
                   <ui-form>
                     <form>
                       <ui-fields grouped role="radiogroup" aria-labelledby="radio-plan-label">
@@ -132,12 +132,12 @@
                       </ui-fields>
                     </form>
                   </ui-form>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <!-- GAP:  Fomantic styles an invisible checkbox's LABEL as any component (button, message, segment);  ours is a bordered label tinted when chosen. -->
               <ui-section id="examples-types-invisible" label="Invisible" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     An invisible radio has no box: the label itself is the control, bordered while unchosen and tinted when
                     chosen. Its content can be any markup.
@@ -162,31 +162,31 @@
                       </ui-fields>
                     </form>
                   </ui-form>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
             <ui-section id="examples-states" label="States" sticky collapsible dividing>
               <ui-section id="examples-states-checked" label="Checked" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     A radio can be chosen. <code>selected</code> is the canonical name; <code>checked</code> is accepted as an
                     alias, as on a native radio.
                   </p>
                   <ui-radio name="checked-example" checked>Active</ui-radio>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-states-read-only" label="Read-only" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="A radio can be read-only and unable to change states.  It is still submitted."
                 >
                   <ui-radio name="readonly-example" readonly selected>Read Only</ui-radio>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-states-disabled" label="Disabled" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     A radio can show it is currently unable to be interacted with. It is left out of the form.
                   </p>
@@ -196,13 +196,13 @@
                   <ui-segment appearance="basic">
                     <ui-radio name="disabled-toggle" appearance="toggle" disabled>Disabled</ui-radio>
                   </ui-segment>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
             <ui-section id="examples-variations" label="Variations" sticky collapsible dividing>
               <ui-section id="examples-variations-fitted" label="Fitted" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     A fitted radio does not leave padding for a label. Give it an <code>aria-label</code>.
                   </p>
@@ -217,11 +217,11 @@
                       <ui-radio padding="none" appearance="toggle" name="fitted-toggle" aria-label="Fitted toggle"></ui-radio>
                     </ui-segment>
                   </ui-stack>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-inverted" label="Inverted" sticky collapsible dividing>
-                <ui-docs-example description="A radio can be formatted to appear on dark backgrounds.">
+                <ui-example description="A radio can be formatted to appear on dark backgrounds.">
                   <ui-segment padding="compact" inverted>
                     <ui-radio inverted name="inverted" selected>Inverted</ui-radio>
                   </ui-segment>
@@ -231,11 +231,11 @@
                   <ui-segment padding="compact" inverted>
                     <ui-radio inverted appearance="toggle" name="inverted-toggle">Inverted</ui-radio>
                   </ui-segment>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-right-aligned" label="Right aligned" sticky collapsible dividing>
-                <ui-docs-example description="A radio can be aligned to the right of its label:  `right-aligned`.">
+                <ui-example description="A radio can be aligned to the right of its label:  `right-aligned`.">
                   <ui-form>
                     <form>
                       <ui-fields grouped role="radiogroup" aria-label="Right aligned">
@@ -249,21 +249,21 @@
                       </ui-fields>
                     </form>
                   </ui-form>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-colored" label="Colored" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="A radio can have different colors:  `color` tints the chosen bullet, lane or line."
                 >
                   <ui-radio color="purple" name="colored" selected>Purple</ui-radio>
                   <ui-radio color="green" appearance="toggle" name="colored-toggle" selected>Green</ui-radio>
                   <ui-radio color="blue" appearance="slider" name="colored-slider" selected>Blue</ui-radio>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-size" label="Size" sticky collapsible dividing>
-                <ui-docs-example description="A radio can have different sizes.">
+                <ui-example description="A radio can have different sizes.">
                   <ui-radio size="mini" name="size">Mini</ui-radio>
                   <ui-radio size="tiny" name="size">Tiny</ui-radio>
                   <ui-radio size="small" name="size">Small</ui-radio>
@@ -272,7 +272,7 @@
                   <ui-radio size="big" name="size">Big</ui-radio>
                   <ui-radio size="huge" name="size">Huge</ui-radio>
                   <ui-radio size="massive" name="size">Massive</ui-radio>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
           </ui-tab>

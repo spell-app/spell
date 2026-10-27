@@ -16,7 +16,7 @@ import { COMPONENTS, type DesignExample, type DesignSource } from "./tools.types
  *   (`yarn design:build --brand <folder>`;  Spell UI never names the brand's folder itself, epic `repo-split` P5):
  *   - `docs/__data/components.json5` -- its docs set's data, the same shape as ours (its `yarn site:data`)
  *   - `docs/<tag>.html` -- its docs set's pages (served at `/components/brand/`):
- *     the examples are their Examples tab's `<ui-docs-example>`s, titled by the `<ui-section>` around each
+ *     the examples are their Examples tab's `<ui-example>`s, titled by the `<ui-section>` around each
  *   - each page's own `<style>`s:  the classes those examples use (`.brand-docs-row`, `.stage` ...)
  * - The elements themselves reach the bundle from the brand's own build of it (spell-brand's `yarn design:bundle`,
  *   epic `repo-split` P10), which may import Spell UI.
@@ -65,12 +65,12 @@ export class DesignBrand {
     }
   }
 
-  /** Family `folder`'s examples:  its docs page's Examples tab, one per `<ui-docs-example>`, in page order. */
+  /** Family `folder`'s examples:  its docs page's Examples tab, one per `<ui-example>`, in page order. */
   examples(folder: string): DesignExample[] {
     const page = this.page(folder)
     const tab = /<ui-tab\s+value="examples"[\s\S]*?(?=<ui-tab\s|<\/ui-tabs>)/.exec(page)?.[0] ?? ""
     const result: DesignExample[] = []
-    for (const match of tab.matchAll(/<ui-docs-example\b[^>]*>([\s\S]*?)<\/ui-docs-example>/g)) {
+    for (const match of tab.matchAll(/<ui-example\b[^>]*>([\s\S]*?)<\/ui-example>/g)) {
       const before = tab.slice(0, match.index)
       // its title:  `label`
       const headers = [...before.matchAll(/<ui-section\b[^>]*\slabel="([^"]*)"/g)]

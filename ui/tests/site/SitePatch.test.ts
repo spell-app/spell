@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from "vite-plus/test"
 
-import { ExampleSource } from "spell-ui/docs-components/ui-docs-example/ExampleSource"
+import { ExampleSource } from "spell-ui/components/ui-example/ExampleSource"
 import { SitePatch } from "spell-ui/site/_src/SitePatch"
 
 /**
@@ -15,7 +15,7 @@ function pageWith(main: string): string {
 }
 
 const MAIN = `<ui-section id="examples-a" label="A"><p>Hello world</p>
-  <ui-docs-example description="One."><ui-button>Follow</ui-button></ui-docs-example></ui-section>`
+  <ui-example description="One."><ui-button>Follow</ui-button></ui-example></ui-section>`
 
 /** What a change did:  whether it was taken, and whether it asked to reload. */
 type Taken = { taken: boolean; reloaded: boolean }
@@ -61,7 +61,7 @@ describe("SitePatch", () => {
   it("replaces a changed example whole, its new markup kept as its code", async () => {
     const { reloaded, main } = await changed(MAIN, MAIN.replace("Follow", "Unfollow"))
     expect(reloaded).toBe(false)
-    const example = main.querySelector("ui-docs-example")!
+    const example = main.querySelector("ui-example")!
     expect(ExampleSource.of(example)).toContain("Unfollow")
   })
 

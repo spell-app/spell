@@ -55,41 +55,41 @@
               Groups ...).  Rules, the class-grammar mappings, gaps:  epics/spell-ui-pages/PAGES.md.
               - A section:  `<ui-section id="examples-types" label="Types" sticky collapsible dividing>` around
                 its examples;  ids spell out the nesting (`<tab>-<section>-<example>`, lowercase kebab of the headers).
-              - An example:  its own nested section (`header` = the example's name) around
-                `<ui-docs-example description="...">` and the live markup;  the markup IS the code shown.  A richer
+              - An example:  its own nested section (`label` = the example's name) around
+                `<ui-example description="...">` and the live markup;  the markup IS the code shown.  A richer
                 description:  `<p slot="description">` (+ `<ui-message slot="description">`).  Fomantic's header-less
-                `.another.example`:  a second `<ui-docs-example>` in the same section.
-              - Or write it flat (`<ui-header level="2">`, `<ui-docs-example header>`) and run `yarn site:sections`:
-                it nests it and writes the ids (and fixes them after a header changes).
+                `.another.example`:  a second `<ui-example>` in the same section.
+              - Or write it flat (`<ui-header level="2">`, `<ui-example heading>`) and run `yarn site:sections`:
+                it nests it and writes the ids (and fixes them after a title changes).
               - A gap:  an HTML comment `GAP I<n>:  ...` BEFORE the example's section (a comment inside the example
                 shows in its code).
             -->
             <ui-section id="examples-types" label="Types" sticky collapsible dividing>
               <ui-section id="examples-types-terms" label="Terms" sticky collapsible dividing>
-                <ui-docs-example description="Facts lined up:  the labels in one column, the values in the next.  A value can be any element, written inside the term.">
+                <ui-example description="Facts lined up:  the labels in one column, the values in the next.  A value can be any element, written inside the term.">
                   <ui-terms>
                     <ui-term label="Suit" value="hearts"></ui-term>
                     <ui-term label="Rank" value="queen"></ui-term>
                     <ui-term label="Played by"><ui-label color="blue">Jamie</ui-label></ui-term>
                   </ui-terms>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
               <ui-section id="examples-types-horizontal" label="Horizontal" sticky collapsible dividing>
-                <ui-docs-example description="`direction=&quot;horizontal&quot;`:  the terms side by side, wrapping, as a game's scores.">
+                <ui-example description="`direction=&quot;horizontal&quot;`:  the terms side by side, wrapping, as a game's scores.">
                   <ui-terms direction="horizontal">
                     <ui-term label="Score" value="42"></ui-term>
                     <ui-term label="Moves" value="17"></ui-term>
                     <ui-term label="Time" value="3:05"></ui-term>
                   </ui-terms>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
               <ui-section id="examples-types-a-rich-label" label="A rich label" sticky collapsible dividing>
-                <ui-docs-example description="`slot=&quot;label&quot;`:  a label that's more than text.">
+                <ui-example description="`slot=&quot;label&quot;`:  a label that's more than text.">
                   <ui-terms>
                     <ui-term value="Paris"><span slot="label"><ui-icon name="location dot"></ui-icon> City</span></ui-term>
                     <ui-term value="Sunny, 24°"><span slot="label"><ui-icon name="sun"></ui-icon> Weather</span></ui-term>
                   </ui-terms>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
           </ui-tab>

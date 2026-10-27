@@ -106,6 +106,8 @@ export const COMPONENTS = [
   "ui-property-editor",
   "ui-include",
   "ui-code",
+  "ui-example",
+  "ui-toc",
   "ui-markdown",
   "ui-tree-diagram",
   "ui-theme-editor"

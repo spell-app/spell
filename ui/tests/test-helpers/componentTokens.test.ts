@@ -37,6 +37,21 @@ const EXCEPTIONS: Record<string, Record<string, string>> = {
   "ui-search/UISearch.css": {
     "--ui-input-radius": "the search prompt is Fomantic's round input:  it sets the nested input's radius"
   },
+  "ui-example/UIExample.css": {
+    "--ui-header-margin-top": "its heading shares a row with the code button:  the nested header's own margins go",
+    "--ui-header-margin-bottom": "its heading shares a row with the code button:  the nested header's own margins go",
+    "--ui-segment-radius": "a box shown in the frame rounds less than the frame's ring:  its corner, less the padding",
+    "--ui-card-radius": "a box shown in the frame rounds less than the frame's ring:  its corner, less the padding",
+    "--ui-message-radius": "a box shown in the frame rounds less than the frame's ring:  its corner, less the padding",
+    "--ui-code-border": "the code pane's `<ui-code>` sits on the frame's own card:  no border of its own",
+    "--ui-code-background": "the code pane's `<ui-code>` sits on the frame's own card:  no fill of its own",
+    "--ui-code-padding": "the code pane's `<ui-code>`:  room on the right for its copy icon"
+  },
+  "ui-toc/UIToc.css": {
+    "--ui-header-margin-top": "its heading shares the head row with the toggle:  the nested header's own margins go",
+    "--ui-header-margin-bottom": "its heading shares the head row with the toggle:  the nested header's own margins go",
+    "--ui-menu-margin": "its menus of links stack flush, a section's entries under its title"
+  },
   "ui-zoom/UIZoom.css": {
     "--ui-modal-dimmer-background":
       "a zoom's backdrop is dark whatever the page's theme (its own `--ui-zoom-backdrop`):  it sets its modal's dimmer"

@@ -57,7 +57,7 @@
             -->
             <ui-section id="examples-types" label="Types" sticky collapsible dividing>
               <ui-section id="examples-types-tree-diagram" label="Tree diagram" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="A tree diagram draws a tree top-down, from plain data:  here spell's parse tree for the first line of FizzBuzz, `if number / 15 is an integer`."
                 >
                   <ui-tree-diagram>
@@ -95,23 +95,23 @@
                       }
                     </script>
                   </ui-tree-diagram>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-types-labels-only" label="Labels only" sticky collapsible dividing>
-                <ui-docs-example description="Only `label` is needed:  each node is a box, joined to its children by lines.">
+                <ui-example description="Only `label` is needed:  each node is a box, joined to its children by lines.">
                   <ui-tree-diagram>
                     <script type="application/json">
                       { "label": "Add", "children": [{ "label": "Number 1" }, { "label": "Number 2" }] }
                     </script>
                   </ui-tree-diagram>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
             <ui-section id="examples-content" label="Content" sticky collapsible dividing>
               <ui-section id="examples-content-detail" label="Detail" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="A node's `detail` is a second, smaller, muted line under its label, e.g. a datatype.  Every box in a row is as tall as the tallest."
                 >
                   <ui-tree-diagram>
@@ -126,11 +126,11 @@
                       }
                     </script>
                   </ui-tree-diagram>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-content-slot-labels" label="Slot labels" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="A node's `slot` is written on the line from its parent, at its middle:  which part of the parent it fills."
                 >
                   <ui-tree-diagram>
@@ -145,11 +145,11 @@
                       }
                     </script>
                   </ui-tree-diagram>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-content-hover-text" label="Hover text" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="A node's `title` shows when the pointer rests on its box, e.g. the source it came from."
                 >
                   <ui-tree-diagram>
@@ -164,13 +164,13 @@
                       }
                     </script>
                   </ui-tree-diagram>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
             <ui-section id="examples-variations" label="Variations" sticky collapsible dividing>
               <ui-section id="examples-variations-wide-trees" label="Wide trees" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="A tree shrinks to fit its column, down to three quarters of its size;  a wider one scrolls sideways (on a phone, this one does)."
                 >
                   <ui-tree-diagram>
@@ -190,7 +190,7 @@
                       }
                     </script>
                   </ui-tree-diagram>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
           </ui-tab>

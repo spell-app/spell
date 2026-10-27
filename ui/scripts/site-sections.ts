@@ -8,8 +8,8 @@
  *   - a level 2 `<ui-header>` and everything after it (until the next one) becomes
  *     `<ui-section id="<tab>-<slug>" label="<text>" sticky collapsible dividing>`
  *   - a level 3 `<ui-header>` becomes a section nested in the level 2 one, the same way
- *   - a `<ui-docs-example header="X">` becomes a section nested in the innermost one, `id="<parent id>-<slug(X)>"`,
- *     holding the example WITHOUT its `header`
+ *   - a `<ui-example heading="X">` becomes a section nested in the innermost one, `id="<parent id>-<slug(X)>"`,
+ *     holding the example WITHOUT its `heading`
  *     - the header-less examples right after it (Fomantic's `.another.example`) go in with it
  *   - a header holding markup (`<code>` ...) keeps it as the section's `<span slot="label">`
  *   - a section's title is `label`
@@ -55,7 +55,7 @@ import type { SiteDataFile, SiteTag } from "spell-ui/docs-components/docs-compon
 import { ApiModel } from "spell-ui/docs-components/ui-docs-api/ApiModel"
 import { docsApiVocabulary } from "spell-ui/docs-components/ui-docs-api/UIDocsApi.en"
 import type { ApiSectionId } from "spell-ui/docs-components/ui-docs-api/UIDocsApi.types"
-import { TocIndex } from "spell-ui/docs-components/ui-docs-toc/TocIndex"
+import { TocIndex } from "spell-ui/components/ui-toc/TocIndex"
 import { environment } from "spell-ui/tools/environment"
 import { SITE_DATA, SITE_PAGES } from "spell-ui/tools/tools.types"
 
@@ -212,7 +212,7 @@ export class SiteSections {
         stack.push(frame)
       } else {
         // only header-less examples continue an example's section
-        if (stack.at(-1)!.level === SiteSections.EXAMPLE_LEVEL && child.tag !== "ui-docs-example") stack.pop()
+        if (stack.at(-1)!.level === SiteSections.EXAMPLE_LEVEL && child.tag !== "ui-example") stack.pop()
         SiteSections.push(stack.at(-1)!, pending, child)
       }
       pending = []
@@ -307,9 +307,9 @@ export class SiteSections {
     return SiteSections.shift(" ".repeat(this.lineIndent(section.start)) + startTag, extra) + inner + end
   }
 
-  /** A headed example at `column`, without its `header` (the section around it shows it). */
+  /** A headed example at `column`, without its `heading` (the section around it shows it). */
   private renderExample(example: HtmlNode, column: number): string {
-    const attributes = example.attributes.filter((attribute) => attribute.name !== "header").map((a) => a.raw)
+    const attributes = example.attributes.filter((attribute) => attribute.name !== "heading").map((a) => a.raw)
     const extra = column - this.lineIndent(example.start)
     const body = this.html.slice(example.startTagEnd, example.end)
     return this.startTag(column, example.tag!, attributes) + SiteSections.shift(body, extra, true)
@@ -379,16 +379,16 @@ export class SiteSections {
     return level === "2" ? 2 : level === "3" ? 3 : 0
   }
 
-  /** An example with a `header`:  it opens a section. */
+  /** An example with a `heading`:  it opens a section. */
   private static isHeadedExample(node: HtmlNode): boolean {
-    return node.tag === "ui-docs-example" && !!node.attr("header")?.trim()
+    return node.tag === "ui-example" && !!node.attr("heading")?.trim()
   }
 
   /** A header's text (for the slug), its attribute form, and its markup when it holds any. */
   private static headerOf(node: HtmlNode): Header {
-    if (node.tag === "ui-docs-example" || node.tag === "ui-section") {
+    if (node.tag === "ui-example" || node.tag === "ui-section") {
       // a section's title:  `label`;  an example's:  `header`
-      const names = node.tag === "ui-section" ? SiteSections.SECTION_TITLE : ["header"]
+      const names = node.tag === "ui-section" ? SiteSections.SECTION_TITLE : ["heading"]
       const raw = names.map((name) => node.rawAttr(name)).find((value) => value !== undefined)
       if (raw !== undefined) return { text: HtmlParser.decode(raw), attribute: raw }
       const slot = node.children.find((child) => names.includes(child.attr("slot") ?? ""))

@@ -62,7 +62,7 @@
             -->
             <ui-section id="examples-types" label="Types" sticky collapsible dividing>
               <ui-section id="examples-types-root" label="Root" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     Put one around a page or an app:  each <code>ui-*</code> tag inside loads its component the first
                     time it appears, and nothing else is downloaded. Load just the root:
@@ -75,11 +75,11 @@
                       <ui-button color="primary">Save</ui-button>
                     </ui-segment>
                   </ui-root>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-types-theme-and-size" label="Theme and size" sticky collapsible dividing>
-                <ui-docs-example description="`theme` and `size` apply to everything inside.">
+                <ui-example description="`theme` and `size` apply to everything inside.">
                   <ui-root theme="dark" size="small" width="100%" aria-label="Dark report">
                     <ui-segment>
                       <ui-header>Report</ui-header>
@@ -87,11 +87,11 @@
                       <ui-button color="primary">Save</ui-button>
                     </ui-segment>
                   </ui-root>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-types-a-box" label="A box" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="With `width` or `height` (CSS lengths, or `window` for the viewport's), the root is a box that scrolls its own content.  `fixed` pins it to the viewport:  a full-page app shell."
                 >
                   <ui-root height="8em" aria-label="Numbers">
@@ -106,7 +106,7 @@
                       <ui-item>Eight</ui-item>
                     </ui-list>
                   </ui-root>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
@@ -126,7 +126,7 @@
               </ui-markdown>
 
               <ui-section id="examples-while-loading-replay" label="Replay" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="Components on this page are loaded already, so the demo holds the root for 2 seconds:  press a button to see what a slow load shows."
                 >
                   <ui-button icon="redo" data-replay="skeleton">Replay: skeleton</ui-button>
@@ -143,13 +143,13 @@
                       <ui-button>Cancel</ui-button>
                     </ui-root>
                   </ui-segment>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
             <ui-section id="examples-icons-and-emoji" label="Icons and emoji" sticky collapsible dividing>
               <ui-section id="examples-icons-and-emoji-icon-packs" label="Icon packs" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     <code>icons</code> adds packs for everything inside, comma-separated, later wins:  built-in ids
                     (fa7-free, fa7-brands, fomantic) or <code>pack.js</code> URLs. Outside a root, the page's packs apply
@@ -164,11 +164,11 @@
                     Outside:
                     <ui-icon name="spell sparkle" size="big" label="Sparkle"></ui-icon>
                   </p>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-icons-and-emoji-emoji-names" label="Emoji names" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="`emoji=&quot;fomantic&quot;` uses Fomantic's names for everything inside;  outside, the page's set (CLDR by default).  `pencil` is a memo in Fomantic's names, a pencil in CLDR's."
                 >
                   <p>
@@ -179,12 +179,12 @@
                     Outside:
                     <ui-emoji name="pencil" size="small" label="pencil (CLDR)"></ui-emoji>
                   </p>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <!-- GAP I62:  a root's `size` scales only components (its scale token), not plain text or a bare `<ui-icon>` inside. -->
               <ui-section id="examples-icons-and-emoji-nested-roots" label="Nested roots" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="A root inside a root inherits what it doesn't set and adds its own packs.  The outer one is ready only once every inner one is."
                 >
                   <ui-root icons="examples/icon-pack/pack.js" display="immediately">
@@ -193,7 +193,7 @@
                       <ui-button icon="spell sparkle">Inner: large, with the outer root's pack</ui-button>
                     </ui-root>
                   </ui-root>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <script type="module">

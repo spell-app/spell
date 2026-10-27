@@ -40,14 +40,18 @@ describe("ComponentDefinitions", () => {
   })
 
   it("keeps the doc-only `<ui-docs-*>` elements apart:  in `docs`, filed under `documentation`, never in `all`", () => {
-    expect(ComponentDefinitions.docs.map((definition) => definition.tag)).toContain("ui-docs-example")
+    expect(ComponentDefinitions.docs.map((definition) => definition.tag)).toContain("ui-docs-api")
+    expect(ComponentDefinitions.byTag("ui-example")?.folder).toBe("ui-example")
     for (const { tag, topics } of ComponentDefinitions.docs) {
       expect(tag.startsWith("ui-docs-"), tag).toBe(true)
       expect(topics, tag).toContain("documentation")
     }
     expect(ComponentDefinitions.all.filter((definition) => definition.tag.startsWith("ui-docs-"))).toEqual([])
-    expect(ComponentDefinitions.all.filter((definition) => definition.topics.includes("documentation"))).toEqual([])
-    expect(ComponentDefinitions.byTag("ui-docs-example")).toBeUndefined()
+  })
+
+  it("files the components made from docs widgets under `documentation` too (epic `ui-gaps` P14)", () => {
+    const documented = ComponentDefinitions.all.filter((definition) => definition.topics.includes("documentation"))
+    expect(documented.map((definition) => definition.tag).sort()).toEqual(["ui-example", "ui-toc"])
   })
 
   it("puts a folder's main tag first, and names tags readably", () => {

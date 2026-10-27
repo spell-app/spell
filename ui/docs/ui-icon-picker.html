@@ -56,22 +56,22 @@
             -->
             <ui-section id="examples-types" label="Types" sticky collapsible dividing>
               <ui-section id="examples-types-icon-picker" label="Icon picker" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="Click the field:  a search box and a grid of every icon the page knows, in Font Awesome's categories.  Type to filter, by name or by what it shows (`mail` finds `envelope`), then click a glyph, or use the arrows and Enter."
                 >
                   <ui-icon-picker value="star" aria-label="Icon"></ui-icon-picker>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
               <ui-section id="examples-types-none" label="None" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="With no icon chosen, the field says `none`, light and in italics;  `placeholder` says something else.  The grid's first cell, a circle with a slash, clears the choice."
                 >
                   <ui-icon-picker aria-label="Icon"></ui-icon-picker>
                   <ui-icon-picker placeholder="Pick an icon" aria-label="Icon"></ui-icon-picker>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
               <ui-section id="examples-types-in-a-form" label="In a form" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="A form control:  it submits the icon's name under its `name`, and `required` takes the none cell out of the grid."
                 >
                   <ui-form>
@@ -79,42 +79,42 @@
                       <ui-icon-picker name="icon" value="paper plane" required></ui-icon-picker>
                     </ui-field>
                   </ui-form>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
             <ui-section id="examples-states" label="States" sticky collapsible dividing>
               <ui-section id="examples-states-read-only" label="Read-only" sticky collapsible dividing>
-                <ui-docs-example description="Shows its icon, and can be focused, but never opens.">
+                <ui-example description="Shows its icon, and can be focused, but never opens.">
                   <ui-icon-picker readonly value="bell" aria-label="Icon"></ui-icon-picker>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
               <ui-section id="examples-states-disabled" label="Disabled" sticky collapsible dividing>
-                <ui-docs-example description="Can't be used, and is left out of its form.">
+                <ui-example description="Can't be used, and is left out of its form.">
                   <ui-icon-picker disabled value="bell" aria-label="Icon"></ui-icon-picker>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
             <ui-section id="examples-variations" label="Variations" sticky collapsible dividing>
               <ui-section id="examples-variations-size" label="Size" sticky collapsible dividing>
-                <ui-docs-example description="`size` scales the field and its panel, `mini` ... `massive`.">
+                <ui-example description="`size` scales the field and its panel, `mini` ... `massive`.">
                   <ui-icon-picker size="small" value="heart" aria-label="Small"></ui-icon-picker>
                   <ui-icon-picker value="heart" aria-label="Medium"></ui-icon-picker>
                   <ui-icon-picker size="large" value="heart" aria-label="Large"></ui-icon-picker>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
               <ui-section id="examples-variations-fluid" label="Fluid" sticky collapsible dividing>
-                <ui-docs-example description="`fluid` takes its container's width;  the panel is at least as wide.">
+                <ui-example description="`fluid` takes its container's width;  the panel is at least as wide.">
                   <ui-icon-picker fluid value="house" aria-label="Icon"></ui-icon-picker>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
               <ui-section id="examples-variations-dark" label="Dark" sticky collapsible dividing>
-                <ui-docs-example description="In a dark part of a page (`ui-dark`), the field and its panel take the dark colours.">
+                <ui-example description="In a dark part of a page (`ui-dark`), the field and its panel take the dark colours.">
                   <ui-segment inverted class="ui-dark">
                     <ui-icon-picker value="moon" aria-label="Icon"></ui-icon-picker>
                   </ui-segment>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
           </ui-tab>

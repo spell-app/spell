@@ -21,7 +21,7 @@ const DATA = {
     tagOf("Input", "ui-input", ["forms"], { aka: ["text field"] }),
     tagOf("Checkbox", "ui-checkbox", ["forms", "buttons"])
   ],
-  docs: [tagOf("Docs example", "ui-docs-example", ["documentation"])],
+  docs: [tagOf("Docs example", "ui-example", ["documentation"])],
   families: {
     "ui-button": familyOf("ui-button"),
     "ui-calendar": familyOf("ui-calendar", "in-progress"),
@@ -63,7 +63,7 @@ describe("new NavIndex()", () => {
     ])
     expect(index.topics.map((topic) => topic.id)).toEqual(["buttons", "forms", "date & time"])
     expect(index.row("ui-calendar")!.status).toBe("in-progress")
-    expect(index.row("ui-docs-example")).toBeUndefined()
+    expect(index.row("ui-example")).toBeUndefined()
   })
 })
 

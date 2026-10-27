@@ -294,11 +294,6 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
     },
     attributes: ["tag", "family", "only", "level"]
   },
-  "ui-docs-example": {
-    folder: "ui-docs-example",
-    skeleton: { parts: [{ shape: "header" }, { shape: "paragraph", lines: 2 }] },
-    attributes: ["header", "description", "level", "code", "language", "bare", "variation"]
-  },
   "ui-docs-inspector": {
     folder: "ui-docs-inspector",
     skeleton: {
@@ -326,16 +321,6 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
     attributes: ["base", "page", "shortcuts", "placeholder", "size"]
   },
   "ui-docs-theme-bench": { folder: "ui-docs-theme-bench", skeleton: { height: "40em" }, attributes: [] },
-  "ui-docs-toc": {
-    folder: "ui-docs-toc",
-    skeleton: {
-      parts: [
-        { shape: "line", length: "short" },
-        { shape: "paragraph", lines: 6 }
-      ]
-    },
-    attributes: ["for", "scroller", "header", "size", "expanded"]
-  },
   "ui-docs-tokens": {
     folder: "ui-docs-tokens",
     skeleton: {
@@ -414,6 +399,11 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
     attributes: ["size", "name", "label", "appearance", "disabled", "loading"]
   },
   "ui-event": { folder: "ui-feed", attributes: ["color", "icon", "image", "label", "appearance", "disabled"] },
+  "ui-example": {
+    folder: "ui-example",
+    skeleton: { parts: [{ shape: "header" }, { shape: "paragraph", lines: 2 }] },
+    attributes: ["heading", "description", "level", "code", "language", "bare", "variation"]
+  },
   "ui-extra": { folder: "ui-parts", attributes: ["text"] },
   "ui-feed": {
     folder: "ui-feed",
@@ -1456,6 +1446,16 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "compact",
       "actions"
     ]
+  },
+  "ui-toc": {
+    folder: "ui-toc",
+    skeleton: {
+      parts: [
+        { shape: "line", length: "short" },
+        { shape: "paragraph", lines: 6 }
+      ]
+    },
+    attributes: ["for", "scroller", "heading", "size", "expanded"]
   },
   "ui-toolbar": {
     folder: "ui-toolbar",

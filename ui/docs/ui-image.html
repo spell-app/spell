@@ -62,7 +62,7 @@
               <!-- GAP I56:  `size="medium"` is the natural size, not Fomantic's 300px;  the page uses `size="large"` (450px) where Fomantic says medium. -->
               <!-- GAP I87:  Fomantic's 2nd and 3rd blocks wrap an <img> / an <svg> in `ui image`;  <ui-image> has no slot. -->
               <ui-section id="examples-types-image" label="Image" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">An image.</p>
                   <ui-message slot="description" size="small"
                     >Unless a size is specified, images will use the original dimensions of the image up to the size of
@@ -73,21 +73,21 @@
                     as on the native element:  src, alt, width, height and loading.</ui-message
                   >
                   <ui-image size="small" src="images/wireframe/image.png" alt=""></ui-image>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-types-image-link" label="Image Link" sticky collapsible dividing>
-                <ui-docs-example description="An image can be formatted to link to other content:  `link`.">
+                <ui-example description="An image can be formatted to link to other content:  `link`.">
                   <ui-image
                     size="large"
                     link="#image-link"
                     src="images/wireframe/image-text.png"
                     alt="Image link"
                   ></ui-image>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
               <ui-section id="examples-types-figure" label="Figure" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="`caption` puts a caption under the picture:  the image becomes a figure (`<figure>`, `<figcaption>`), the caption no wider than the picture.  The `caption` slot is its rich version."
                 >
                   <ui-image
@@ -96,63 +96,63 @@
                     alt="A wireframe picture"
                     caption="A wireframe stands in for a picture while a page is planned."
                   ></ui-image>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
               <ui-section id="examples-types-zoom" label="Zoom" sticky collapsible dividing>
-                <ui-docs-example description="`zoom`:  a click (or Enter) shows it full size over the page, its alt text under it;  Escape closes it.  The page's one `<a href=&quot;ui-zoom.html&quot;>&lt;ui-zoom&gt;</a>` shows it.">
+                <ui-example description="`zoom`:  a click (or Enter) shows it full size over the page, its alt text under it;  Escape closes it.  The page's one `<a href=&quot;ui-zoom.html&quot;>&lt;ui-zoom&gt;</a>` shows it.">
                   <ui-image zoom size="small" src="images/hello-light.png" alt="Hello, in the light theme"></ui-image>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
             <ui-section id="examples-states" label="States" sticky collapsible dividing>
               <ui-section id="examples-states-hidden" label="Hidden" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="An image can be hidden:  the native `hidden` attribute (the box keeps no space)."
                 >
                   <ui-image hidden src="images/wireframe/image.png" alt=""></ui-image>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-states-disabled" label="Disabled" sticky collapsible dividing>
-                <ui-docs-example description="An image can show that it is disabled and cannot be selected.">
+                <ui-example description="An image can show that it is disabled and cannot be selected.">
                   <ui-image disabled size="large" src="images/wireframe/image.png" alt=""></ui-image>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
             <ui-section id="examples-variations" label="Variations" sticky collapsible dividing>
               <ui-section id="examples-variations-avatar" label="Avatar" sticky collapsible dividing>
-                <ui-docs-example description="An image may be formatted to appear inline with text as an avatar.">
+                <ui-example description="An image may be formatted to appear inline with text as an avatar.">
                   <ui-image avatar src="images/wireframe/square-image.png" alt=""></ui-image>
                   <span>Username</span>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-bordered" label="Bordered" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="An image may include a border to emphasize the edges of white or transparent content."
                 >
                   <ui-image size="large" src="images/wireframe/white-image.png" alt="" appearance="bordered"></ui-image>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-fluid" label="Fluid" sticky collapsible dividing>
-                <ui-docs-example description="An image can take up the width of its container.">
+                <ui-example description="An image can take up the width of its container.">
                   <ui-image fluid src="images/wireframe/image.png" alt=""></ui-image>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-rounded" label="Rounded" sticky collapsible dividing>
-                <ui-docs-example description="An image may appear rounded.">
+                <ui-example description="An image may appear rounded.">
                   <ui-image size="large" src="images/wireframe/square-image.png" alt="" appearance="rounded"></ui-image>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-circular" label="Circular" sticky collapsible dividing>
-                <ui-docs-example description="An image may appear circular.">
+                <ui-example description="An image may appear circular.">
                   <ui-image size="large" src="images/wireframe/square-image.png" alt="" appearance="circular"></ui-image>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section
@@ -162,7 +162,7 @@
                 collapsible
                 dividing
               >
-                <ui-docs-example
+                <ui-example
                   description="An image can specify its vertical alignment:  `vertical-align` is `top`, `middle` or `bottom`."
                 >
                   <ui-image
@@ -188,11 +188,11 @@
                     alt=""
                   ></ui-image>
                   <span>Bottom Aligned</span>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-centered" label="Centered" sticky collapsible dividing>
-                <ui-docs-example description="An image can appear centered in a content block.">
+                <ui-example description="An image can appear centered in a content block.">
                   <ui-segment>
                     <ui-image align="center" size="large" src="images/wireframe/image.png" alt=""></ui-image>
                     <p>
@@ -214,11 +214,11 @@
                       mnesarchum eu per, quas minimum postulant per id.
                     </p>
                   </ui-segment>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-spaced" label="Spaced" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="An image can specify that it needs an additional spacing to separate it from nearby content."
                 >
                   <ui-segment>
@@ -230,8 +230,8 @@
                       definiebas in. Vim dolorum definiebas an. Mei ex natum rebum iisque.
                     </p>
                   </ui-segment>
-                </ui-docs-example>
-                <ui-docs-example description='`spaced="left"` or `spaced="right"` adds the room on one side only.'>
+                </ui-example>
+                <ui-example description='`spaced="left"` or `spaced="right"` adds the room on one side only.'>
                   <p>
                     <ui-image size="mini" spacing="right" src="images/wireframe/image.png" alt=""></ui-image>Audiam
                     quaerendum eu sea, pro omittam definiebas ex. Te est latine definitiones. Quot wisi nulla ex duo.
@@ -241,11 +241,11 @@
                     Eu quo homero blandit intellegebat. Incorrupte consequuntur mei id. Mei ut facer dolores adolescens,
                     no illum aperiri quo, usu odio brute at. Qui te porro electram, ea dico facete utroque quo.<ui-image size="mini" spacing="left" src="images/wireframe/image.png" alt=""></ui-image>
                   </p>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-floated" label="Floated" sticky collapsible dividing>
-                <ui-docs-example description="An image can sit to the left or right of other content.">
+                <ui-example description="An image can sit to the left or right of other content.">
                   <ui-segment>
                     <ui-image size="small" floated="left" src="images/wireframe/text-image.png" alt=""></ui-image>
                     <p>
@@ -267,11 +267,11 @@
                       mnesarchum eu per, quas minimum postulant per id.
                     </p>
                   </ui-segment>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-size" label="Size" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">An image may appear at different sizes.</p>
                   <ui-message slot="description" state="warning" size="small"
                     ><code>medium</code> is the image's natural size here, not Fomantic's 300px (I56): elsewhere on this
@@ -332,13 +332,13 @@
                   <ui-image size="small" src="images/wireframe/image.png" alt=""></ui-image>
                   <ui-divider spacer></ui-divider>
                   <ui-image size="medium" src="images/wireframe/image.png" alt=""></ui-image>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
             <ui-section id="examples-groups" label="Groups" sticky collapsible dividing>
               <ui-section id="examples-groups-size" label="Size" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="A group of images can be formatted to have the same size:  `<ui-images size>`."
                 >
                   <ui-images size="tiny">
@@ -347,19 +347,19 @@
                     <ui-image src="images/wireframe/image.png" alt=""></ui-image>
                     <ui-image src="images/wireframe/image.png" alt=""></ui-image>
                   </ui-images>
-                </ui-docs-example>
-                <ui-docs-example description="Plain `<img>`s in a group take the group's look too.">
+                </ui-example>
+                <ui-example description="Plain `<img>`s in a group take the group's look too.">
                   <ui-images size="small">
                     <img src="images/wireframe/image.png" alt="" />
                     <img src="images/wireframe/image.png" alt="" />
                     <img src="images/wireframe/image.png" alt="" />
                     <img src="images/wireframe/image.png" alt="" />
                   </ui-images>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-groups-group-variations" label="Group variations" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="A group shares its shape, border and alignment with every image in it:  `avatar`, `circular`, `rounded`, `bordered`, `centered` ..."
                 >
                   <ui-images avatar>
@@ -373,7 +373,7 @@
                     <ui-image src="images/wireframe/square-image.png" alt=""></ui-image>
                     <ui-image src="images/wireframe/square-image.png" alt=""></ui-image>
                   </ui-images>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
           </ui-tab>

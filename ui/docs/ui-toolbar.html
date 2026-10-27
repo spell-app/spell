@@ -55,18 +55,18 @@
               Groups ...).  Rules, the class-grammar mappings, gaps:  epics/spell-ui-pages/PAGES.md.
               - A section:  `<ui-section id="examples-types" label="Types" sticky collapsible dividing>` around
                 its examples;  ids spell out the nesting (`<tab>-<section>-<example>`, lowercase kebab of the headers).
-              - An example:  its own nested section (`header` = the example's name) around
-                `<ui-docs-example description="...">` and the live markup;  the markup IS the code shown.  A richer
+              - An example:  its own nested section (`label` = the example's name) around
+                `<ui-example description="...">` and the live markup;  the markup IS the code shown.  A richer
                 description:  `<p slot="description">` (+ `<ui-message slot="description">`).  Fomantic's header-less
-                `.another.example`:  a second `<ui-docs-example>` in the same section.
-              - Or write it flat (`<ui-header level="2">`, `<ui-docs-example header>`) and run `yarn site:sections`:
-                it nests it and writes the ids (and fixes them after a header changes).
+                `.another.example`:  a second `<ui-example>` in the same section.
+              - Or write it flat (`<ui-header level="2">`, `<ui-example heading>`) and run `yarn site:sections`:
+                it nests it and writes the ids (and fixes them after a title changes).
               - A gap:  an HTML comment `GAP I<n>:  ...` BEFORE the example's section (a comment inside the example
                 shows in its code).
             -->
             <ui-section id="examples-types" label="Types" sticky collapsible dividing>
               <ui-section id="examples-types-toolbar" label="Toolbar" sticky collapsible dividing>
-                <ui-docs-example description="A menu whose items don't fit scrolls sideways:  `‹` and `›` show at its ends while there's more that way.">
+                <ui-example description="A menu whose items don't fit scrolls sideways:  `‹` and `›` show at its ends while there's more that way.">
                   <ui-toolbar appearance="secondary" aria-label="Sections" style="max-width: 360px">
                     <ui-item link="#types" selected>Types</ui-item>
                     <ui-item link="#groups">Groups</ui-item>
@@ -75,10 +75,10 @@
                     <ui-item link="#variations">Variations</ui-item>
                     <ui-item link="#group-variations">Group Variations</ui-item>
                   </ui-toolbar>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
               <ui-section id="examples-types-segmented" label="Segmented" sticky collapsible dividing>
-                <ui-docs-example description="The segmented appearance:  a segmented control that scrolls;  its chosen thumb slides as the choice moves.">
+                <ui-example description="The segmented appearance:  a segmented control that scrolls;  its chosen thumb slides as the choice moves.">
                   <ui-toolbar appearance="segmented" aria-label="Views" style="max-width: 320px">
                     <ui-item selected>Examples</ui-item>
                     <ui-item>Usage</ui-item>
@@ -87,19 +87,19 @@
                     <ui-item>Accessibility</ui-item>
                     <ui-item>History</ui-item>
                   </ui-toolbar>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
               <ui-section id="examples-types-everything-fits" label="Everything fits" sticky collapsible dividing>
-                <ui-docs-example description="When every item fits, no buttons show:  it's a plain menu.">
+                <ui-example description="When every item fits, no buttons show:  it's a plain menu.">
                   <ui-toolbar appearance="secondary" aria-label="Short">
                     <ui-item link="#one" selected>One</ui-item>
                     <ui-item link="#two">Two</ui-item>
                     <ui-item link="#three">Three</ui-item>
                   </ui-toolbar>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
               <ui-section id="examples-types-top-bar" label="Top bar" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="A bar's slots:  `icon` and `title` at the start, `center` taking the room left, `right` at the end.  A slot with nothing in it takes no room."
                 >
                   <ui-toolbar appearance="secondary" aria-label="App">
@@ -110,13 +110,13 @@
                     <ui-item link="#themes">Themes</ui-item>
                     <ui-button slot="right" icon="search" aria-label="Search" title="Search" appearance="basic circular"></ui-button>
                   </ui-toolbar>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
             <ui-section id="examples-fitting-titles" label="Fitting titles" sticky collapsible dividing>
               <ui-section id="examples-fitting-titles-shrinkable" label="Shrinkable" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="`shrinkable` fits the titles instead of scrolling:  drag the box's right edge narrower.  Whole, then the longest cut with `…`, then icons only, then one `…` button whose menu holds every item;  no `‹` / `›`.  The bell, an item with no words, stays at every width."
                 >
                   <div style="resize: horizontal; overflow: hidden; box-sizing: border-box; width: 600px; max-width: 100%; min-width: 60px; padding: 4px; border: 1px dashed var(--ui-border-color)">
@@ -128,7 +128,7 @@
                       <ui-item link="#notes" icon="bell" label="Notes"></ui-item>
                     </ui-toolbar>
                   </div>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
           </ui-tab>

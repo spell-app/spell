@@ -2,13 +2,9 @@
 import { PrefStore } from "spell/util/persist/PrefStore"
 import { nextFrame } from "spell-ui/util"
 import { SiteData } from "spell-ui/docs-components/SiteData"
-// Leaves, not the barrel:  the barrel defines `<ui-docs-toc>`, which `<ui-root>` does on first use
-import {
-  HashLanding,
-  type HashLandingRules,
-  type LandingScroll
-} from "spell-ui/docs-components/ui-docs-toc/HashLanding"
-import { TocIndex } from "spell-ui/docs-components/ui-docs-toc/TocIndex"
+// Leaves, not the barrel:  the barrel defines `<ui-toc>`, which `<ui-root>` does on first use
+import { HashLanding, type HashLandingRules, type LandingScroll } from "spell-ui/components/ui-toc/HashLanding"
+import { TocIndex } from "spell-ui/components/ui-toc/TocIndex"
 import { FOLDS_KEY, OLD_FOLDS_KEY } from "./site.types"
 
 /****************
@@ -37,7 +33,7 @@ import { FOLDS_KEY, OLD_FOLDS_KEY } from "./site.types"
  *   - every section around it (and itself) opened without animation
  *   - then scrolled so its title sits just below the stuck ones
  *   - once more as the page settles, unless the viewer scrolled, clicked or typed meanwhile
- *   - The site lands every hash itself:  `<ui-docs-toc>` and `<ui-docs-api>` leave them to it, so a page opened at
+ *   - The site lands every hash itself:  `<ui-toc>` and `<ui-docs-api>` leave them to it, so a page opened at
  *     a `#hash` scrolls once, not once per element.
  *   - Old hashes still land (`resolve()`).
  * - SIDE EFFECTS:
@@ -611,7 +607,7 @@ const TABS_LEAVE = "--site-tabs-leave"
 const TABS_TRACK = "--site-tabs-track"
 
 /** What can't be a page section:  a demo inside an example or a Theming playground, a template. */
-const NOT_PAGE = "ui-docs-example, ui-docs-tokens, template"
+const NOT_PAGE = "ui-example, ui-docs-tokens, template"
 
 /** The section tag. */
 const SECTION_TAG = "ui-section"

@@ -100,11 +100,6 @@
       "summary": "An API reference lists a tag's attributes, properties, events, slots, parts, states and texts as tables, from the site's generated data.",
       "status": "done"
     },
-    "ui-docs-example": {
-      "title": "Docs example",
-      "summary": "An example shows its own markup live, under a header and description, with the same markup as code a button shows and hides.",
-      "status": "done"
-    },
     "ui-docs-inspector": {
       "title": "Docs inspector",
       "summary": "An inspector shows another element's attributes, properties and custom states, live:  click the element, and watch them change.",
@@ -125,11 +120,6 @@
       "summary": "A theme bench shows Spell's real pages side by side, every one in the theme you pick, and tunes the tokens behind their tabs, section titles and surfaces live:  then copy the changes into the theme's file.",
       "status": "done"
     },
-    "ui-docs-toc": {
-      "title": "Docs table of contents",
-      "summary": "A table of contents lists the page's sections and examples as links, opens the one in view and follows the scroll.",
-      "status": "done"
-    },
     "ui-docs-tokens": {
       "title": "Docs tokens",
       "summary": "A token table lists the CSS custom properties of a component family, or of the whole foundation, with their defaults and a live swatch for each colour;  a playground adds inputs that restyle a live preview.",
@@ -148,6 +138,11 @@
     "ui-emoji": {
       "title": "Emoji",
       "summary": "An emoji is a glyph used to represent something else.",
+      "status": "done"
+    },
+    "ui-example": {
+      "title": "Example",
+      "summary": "An example shows its own markup live, under a heading and description, with the same markup as code a button shows and hides.",
       "status": "done"
     },
     "ui-feed": {
@@ -555,6 +550,11 @@
     "ui-toast": {
       "title": "Toast",
       "summary": "A toast allows users to receive a short, non-blocking notification.",
+      "status": "done"
+    },
+    "ui-toc": {
+      "title": "Table of contents",
+      "summary": "A table of contents lists the page's sections and examples as links, opens the one in view and follows the scroll;  each section folds, and one button opens or folds them all.",
       "status": "done"
     },
     "ui-toolbar": {

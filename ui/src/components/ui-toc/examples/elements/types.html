@@ -1,0 +1,18 @@
+<!-- `<ui-toc>`:  the "On this page" menu of a docs page, following the content it names with `for`. -->
+<div class="ui-cluster ui-gap-l" style="align-items: flex-start">
+  <ui-toc for="toc-example-content" heading="Button" style="width: 12em"></ui-toc>
+
+  <section id="toc-example-content" style="flex: 1">
+    <ui-header level="2" dividing>Types</ui-header>
+    <ui-example heading="Button" description="A standard button.">
+      <ui-button>Follow</ui-button>
+    </ui-example>
+    <ui-example heading="Emphasis" description="A button can show different levels of emphasis.">
+      <ui-button color="primary">Save</ui-button>
+    </ui-example>
+    <ui-header level="2" dividing>States</ui-header>
+    <ui-example heading="Disabled" description="A button can't be used.">
+      <ui-button disabled>Followed</ui-button>
+    </ui-example>
+  </section>
+</div>

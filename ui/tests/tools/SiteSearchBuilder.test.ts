@@ -14,7 +14,7 @@ describe("SiteSearchBuilder.page()", () => {
         <ui-tab value="examples" label="Examples">
           <ui-section id="examples-types" label="Types">
             <ui-section id="examples-types-vertical-divider" label="Vertical   Divider">
-              <ui-docs-example><ui-section id="demo" label="Demo"></ui-section></ui-docs-example>
+              <ui-example><ui-section id="demo" label="Demo"></ui-section></ui-example>
             </ui-section>
           </ui-section>
         </ui-tab>

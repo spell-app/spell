@@ -6,7 +6,7 @@ import type { DOMElement } from "spell/element"
 import { SiteData, type SiteDataFile, type SiteTag } from "spell-ui/docs-components"
 
 import type { UIDocsApi } from "spell-ui/docs-components/ui-docs-api/UIDocsApi"
-import { HashLanding } from "spell-ui/docs-components/ui-docs-toc/HashLanding"
+import { HashLanding } from "spell-ui/components/ui-toc/HashLanding"
 
 import "spell-ui/docs-components/ui-docs-api"
 

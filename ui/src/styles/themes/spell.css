@@ -411,6 +411,6 @@
     --ui-markdown-strong-color: var(--spell-text-strong);
     --ui-markdown-code-color: var(--spell-text-strong);
     --ui-markdown-code-background: var(--spell-surface-code);
-    --ui-docs-example-frame-radius: var(--spell-radius-2xl);
+    --ui-example-frame-radius: var(--spell-radius-2xl);
   }
 }

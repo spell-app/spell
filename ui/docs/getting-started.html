@@ -66,22 +66,22 @@
               collapsible
               dividing
             >
-              <ui-docs-example>
+              <ui-example>
                 <p slot="description">
                   Fomantic's base concept is descriptive class names on HTML nodes; Spell UI's is descriptive ATTRIBUTES
                   on <code>ui-*</code> tags. The tag's <code>ui-</code> prefix does the namespacing Fomantic's
                   <code>ui</code> class did.
                 </p>
                 <ui-button color="primary">Button</ui-button>
-              </ui-docs-example>
-              <ui-docs-example
+              </ui-example>
+              <ui-example
                 description="Combine variations to get several effects on the same component:  `size` and `primary`."
               >
                 <ui-button size="huge" color="primary">Button</ui-button>
-              </ui-docs-example>
+              </ui-example>
             </ui-section>
             <ui-section id="general-usage-attribute-order" label="Attribute Order" sticky collapsible dividing>
-              <ui-docs-example>
+              <ui-example>
                 <p slot="description">
                   Fomantic needs some class names in a strict order (<code>ui left spaced right floated image</code>,
                   never <code>ui left right image floated spaced</code>). Attributes have no such rule: each names its
@@ -93,7 +93,7 @@
                 <ui-segment clearing appearance="basic">
                   <ui-image spacing="left" size="tiny" floated="right" src="images/wireframe/square-image.png" alt=""></ui-image>
                 </ui-segment>
-              </ui-docs-example>
+              </ui-example>
             </ui-section>
           </ui-section>
 
@@ -171,7 +171,7 @@
               </script>
             </ui-markdown>
             <ui-section id="the-contract-plain-html" label="Plain HTML" sticky collapsible dividing>
-              <ui-docs-example
+              <ui-example
                 description="No framework:  attributes in markup, the `options` property and a `ui-changed` listener in script.  Pick a fruit."
               >
                 <ui-dropdown id="contract-dropdown" selection placeholder="Fruit" aria-label="Fruit"></ui-dropdown>
@@ -186,7 +186,7 @@
                     document.querySelector("#contract-value").textContent = event.detail.value
                   })
                 </script>
-              </ui-docs-example>
+              </ui-example>
             </ui-section>
             <ui-markdown>
               <script type="text/markdown">

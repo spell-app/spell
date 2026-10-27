@@ -78,6 +78,11 @@ describe("OldNames.rewrite()", () => {
         `width: var(--_ui-theme-menu-size) } querySelector("ui-theme-menu")`
     ],
     [
+      "the docs widgets made elements, their old header the heading",
+      `<ui-docs-toc for="main" header="Button"></ui-docs-toc><ui-docs-example header="Types" code>x</ui-docs-example>`,
+      `<ui-toc for="main" heading="Button"></ui-toc><ui-example heading="Types" code>x</ui-example>`
+    ],
+    [
       "never a renamed tag's old folder",
       `import "spell-ui/docs-components/ui-docs-themes"`,
       `import "spell-ui/docs-components/ui-docs-themes"`
@@ -97,6 +102,16 @@ describe("OldNames.rewrite()", () => {
     const page = `<ui-button primary>x</ui-button> <code>&lt;ui-button primary&gt;</code>`
     expect(names.rewrite(page, { markupOnly: true }).text).toBe(
       `<ui-button color="primary">x</ui-button> <code>&lt;ui-button primary&gt;</code>`
+    )
+  })
+
+  test("`markupOnly` renames a tag only where it's drawn:  never escaped, quoted, in Markdown code or a selector", () => {
+    const page =
+      `<ui-docs-example header="A">x</ui-docs-example> <code>&lt;ui-docs-example&gt;</code> ` +
+      `<epic-item title="<ui-docs-toc>"></epic-item> \`<ui-docs-toc>\` ui-docs-example::part(demo)`
+    expect(names.rewrite(page, { markupOnly: true }).text).toBe(
+      `<ui-example heading="A">x</ui-example> <code>&lt;ui-docs-example&gt;</code> ` +
+        `<epic-item title="<ui-docs-toc>"></epic-item> \`<ui-docs-toc>\` ui-docs-example::part(demo)`
     )
   })
 

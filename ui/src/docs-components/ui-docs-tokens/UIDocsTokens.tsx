@@ -2,14 +2,7 @@ import { For, Show } from "solid-js"
 import { isServer, type JSX } from "@solidjs/web"
 
 import { E, UIT } from "spell-ui/core"
-import {
-  CODE_SPAN,
-  HeadingLevels,
-  type HeadingBounds,
-  type SiteDataFile,
-  type SiteToken,
-  type SiteTokenType
-} from "spell-ui/docs-components/docs-components.types"
+import { type SiteDataFile, type SiteToken, type SiteTokenType } from "spell-ui/docs-components/docs-components.types"
 import { SiteData } from "spell-ui/docs-components/SiteData"
 import { ColorProbe } from "./ColorProbe"
 import { TokenRows } from "./TokenRows"
@@ -126,7 +119,7 @@ export class UIDocsTokens extends E.UIComponent<DocsTokensVocabulary> {
 
   /** Heading level of the group headers, clamped. */
   get headingLevel(): number {
-    return HeadingLevels.levelFor(this.level, LEVELS)
+    return UIT.HeadingLevels.levelFor(this.level, LEVELS)
   }
 
   /** The tables to draw (none for a message, or while loading). */
@@ -377,7 +370,7 @@ export class UIDocsTokens extends E.UIComponent<DocsTokensVocabulary> {
     if (!table.title) return grid
     return (
       <section class={GROUP_CLASS} part={this.partForName("group")}>
-        <ui-header part={this.partForName("header")} level={HeadingLevels.attributeFor(this.headingLevel)}>
+        <ui-header part={this.partForName("header")} level={UIT.HeadingLevels.attributeFor(this.headingLevel)}>
           {table.title}
         </ui-header>
         <Show when={table.description}>
@@ -455,7 +448,7 @@ export class UIDocsTokens extends E.UIComponent<DocsTokensVocabulary> {
 
   /** `text` with each backticked span as `<code>`, as text nodes (never HTML). */
   private inline(text: string): (string | JSX.Element)[] {
-    return text.split(CODE_SPAN).map((piece, index) => (index % 2 ? <code>{piece}</code> : piece))
+    return text.split(UIT.CODE_SPAN).map((piece, index) => (index % 2 ? <code>{piece}</code> : piece))
   }
 
   /**
@@ -525,7 +518,7 @@ const VALUE_CLASS = "value"
 const VISUALLY_HIDDEN_CLASS = "ui-visually-hidden"
 
 /** `level`:  any heading level;  unset, `3`:  group headers sit under the page's `h2` sections. */
-const LEVELS: HeadingBounds = { min: 1, max: 6, fallback: 3 }
+const LEVELS: UIT.HeadingBounds = { min: 1, max: 6, fallback: 3 }
 
 /** `SiteToken.type` of a colour:  a live swatch, and a colour input in the playground. */
 const COLOR_TYPE = "color" satisfies SiteTokenType

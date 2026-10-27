@@ -58,13 +58,13 @@
               EXAMPLES:  Fomantic's page, section by section, in its order (Types, Content, States, Variations,
               Groups ...).  Rules, the class-grammar mappings, gaps:  packages/docs/content/epics/spell-ui-pages/PAGES.md.
               - A section:  `<ui-header level="2" dividing id="types">Types</ui-header>`, then its examples.
-              - An example:  `<ui-docs-example header="..." description="...">` around the live markup;  the markup
+              - An example:  `<ui-example heading="..." description="...">` around the live markup;  the markup
                 IS the code shown.  A richer description:  `<p slot="description">` (+ `<ui-message slot="description">`).
               - A gap:  an HTML comment `GAP I<n>:  ...` BEFORE the example (a comment inside it shows in its code).
             -->
             <ui-section id="examples-types" label="Types" sticky collapsible dividing>
               <ui-section id="examples-types-tab" label="Tab" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">A basic tab.</p>
                   <ui-message slot="description" state="info" size="small"
                     >Two tags:  each <code>&lt;ui-tab&gt;</code> is a pane of content, and
@@ -76,39 +76,39 @@
                       <p>The pane:  whatever you put inside the <code>&lt;ui-tab&gt;</code> shows here.</p>
                     </ui-tab>
                   </ui-tabs>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-types-pointing" label="Pointing" sticky collapsible dividing>
-                <ui-docs-example description="A `pointing secondary` tab menu underlines the selected tab.">
+                <ui-example description="A `pointing secondary` tab menu underlines the selected tab.">
                   <ui-tabs appearance="pointing secondary" aria-label="Pointing demo">
                     <ui-tab label="First">First pane</ui-tab>
                     <ui-tab label="Second">Second pane</ui-tab>
                     <ui-tab label="Third">Third pane</ui-tab>
                   </ui-tabs>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-types-basic-menu" label="Basic menu" sticky collapsible dividing>
-                <ui-docs-example description="With no look words, the tabs are a plain menu above separate panes.">
+                <ui-example description="With no look words, the tabs are a plain menu above separate panes.">
                   <ui-tabs aria-label="Basic demo">
                     <ui-tab label="First">First pane</ui-tab>
                     <ui-tab label="Second">Second pane</ui-tab>
                   </ui-tabs>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-types-text" label="Text" sticky collapsible dividing>
-                <ui-docs-example description="Tabs can be plain text;  `basic` drops the panes' segment box.">
+                <ui-example description="Tabs can be plain text;  `basic` drops the panes' segment box.">
                   <ui-tabs appearance="text basic" aria-label="Text demo">
                     <ui-tab label="First">First pane</ui-tab>
                     <ui-tab label="Second">Second pane</ui-tab>
                   </ui-tabs>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-types-segmented" label="Segmented" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     The tabs can be a segmented control:  one rounded bar, the selected tab filled with colour.
                   </p>
@@ -125,11 +125,11 @@
                     <ui-tab label="Usage">Usage pane</ui-tab>
                     <ui-tab label="API">API pane</ui-tab>
                   </ui-tabs>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-types-flat-markup" label="Flat markup" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     A pane can be written outside its tabs:  <code>parent</code> names the tabs' id, and the pane
                     joins them, in page order, as if it were nested there.
@@ -137,13 +137,13 @@
                   <ui-tabs id="demo-pet-types" appearance="tabular" attach="top" aria-label="Flat markup demo"></ui-tabs>
                   <ui-tab parent="demo-pet-types" label="Cats">Cats pane, written after the tabs.</ui-tab>
                   <ui-tab parent="demo-pet-types" label="Dogs">Dogs pane, written after the tabs.</ui-tab>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
             <ui-section id="examples-states" label="States" sticky collapsible dividing>
               <ui-section id="examples-states-active" label="Active" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="The active tab is the selected one:  its pane shows, and the others stay hidden.  Mark it `selected` (alias `active`)."
                 >
                   <ui-tabs appearance="tabular" attach="top" aria-label="Active demo">
@@ -151,27 +151,27 @@
                     <ui-tab label="Second" selected><p>Second pane:  showing, because its tab is selected.</p></ui-tab>
                     <ui-tab label="Third"><p>Third pane:  hidden, until you pick its tab.</p></ui-tab>
                   </ui-tabs>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-states-loading" label="Loading" sticky collapsible dividing>
-                <ui-docs-example description="A tab can display a loading indicator.">
+                <ui-example description="A tab can display a loading indicator.">
                   <ui-tabs appearance="tabular" attach="top" aria-label="Loading demo">
                     <ui-tab label="Tab" loading>
                       <p>The pane:  hidden under the spinner while it loads.</p>
                     </ui-tab>
                   </ui-tabs>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-states-disabled" label="Disabled" sticky collapsible dividing>
-                <ui-docs-example description="A `disabled` pane's tab can't be chosen, and the arrow keys skip it.">
+                <ui-example description="A `disabled` pane's tab can't be chosen, and the arrow keys skip it.">
                   <ui-tabs appearance="tabular" attach="top" aria-label="Disabled demo">
                     <ui-tab label="First">First pane</ui-tab>
                     <ui-tab label="Second" selected>Second pane</ui-tab>
                     <ui-tab label="Third" disabled>Third pane</ui-tab>
                   </ui-tabs>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
@@ -179,17 +179,17 @@
               <!-- GAP I51:  no centered tab item (Fomantic's `center item`);  the Two tab sits in line.  `alignment="center"`
                    centres the whole tab list, not one tab between its neighbours. -->
               <ui-section id="examples-variations-centered-item" label="Centered Item" sticky collapsible dividing>
-                <ui-docs-example description="A tab can have center aligned items.">
+                <ui-example description="A tab can have center aligned items.">
                   <ui-tabs appearance="tabular" attach="top" aria-label="Centered demo">
                     <ui-tab label="One"><p>First pane:  the One tab's content.</p></ui-tab>
                     <ui-tab label="Two"><p>Second pane:  the Two tab's content.</p></ui-tab>
                     <ui-tab label="Three"><p>Third pane:  the Three tab's content.</p></ui-tab>
                   </ui-tabs>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-inverted" label="Inverted" sticky collapsible dividing>
-                <ui-docs-example description="A tab can be shown inverted;  the panes follow.">
+                <ui-example description="A tab can be shown inverted;  the panes follow.">
                   <ui-segment inverted>
                     <ui-tabs inverted appearance="tabular" attach="top" aria-label="Inverted demo">
                       <ui-tab label="Active Tab"><p>content one</p></ui-tab>
@@ -197,7 +197,7 @@
                       <ui-tab label="Tab 3"><p>content three</p></ui-tab>
                     </ui-tabs>
                   </ui-segment>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section
@@ -207,7 +207,7 @@
                 collapsible
                 dividing
               >
-                <ui-docs-example
+                <ui-example
                   description='You can display the tabbed menu at the bottom of the tab segments:  `attached="bottom"`.'
                 >
                   <ui-segment inverted>
@@ -217,11 +217,11 @@
                       <ui-tab label="Tab 3" selected><p>content three</p></ui-tab>
                     </ui-tabs>
                   </ui-segment>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-vertical" label="Vertical" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="Tabs can stack in a column beside the panes;  Arrow Up / Down move between them."
                 >
                   <ui-tabs direction="vertical" appearance="tabular" aria-label="Vertical demo">
@@ -229,20 +229,20 @@
                     <ui-tab label="Pics">Pictures</ui-tab>
                     <ui-tab label="Companies">Companies</ui-tab>
                   </ui-tabs>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-fluid" label="Fluid" sticky collapsible dividing>
-                <ui-docs-example description="The tab menu can take the full width.">
+                <ui-example description="The tab menu can take the full width.">
                   <ui-tabs fluid appearance="pointing secondary" aria-label="Fluid demo">
                     <ui-tab label="First">First pane</ui-tab>
                     <ui-tab label="Second">Second pane</ui-tab>
                   </ui-tabs>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-alignment" label="Alignment" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     <code>alignment</code> places the tabs in their row.  A segmented tab list moves as a whole.
                   </p>
@@ -255,11 +255,11 @@
                     <ui-tab label="Week">This week's numbers</ui-tab>
                     <ui-tab label="Month">This month's numbers</ui-tab>
                   </ui-tabs>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-equal" label="Equal" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     <code>equal</code> makes every tab the same width, worked out from the tabs themselves:  no count
                     of tabs to keep up to date.
@@ -282,17 +282,17 @@
                     <ui-tab label="Photos and videos">Pictures</ui-tab>
                     <ui-tab label="Friends">Friends</ui-tab>
                   </ui-tabs>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-compact" label="Compact" sticky collapsible dividing>
-                <ui-docs-example description="The tab menu can be only as wide as its tabs.">
+                <ui-example description="The tab menu can be only as wide as its tabs.">
                   <ui-tabs padding="compact" aria-label="Compact demo">
                     <ui-tab label="Day">Today's numbers</ui-tab>
                     <ui-tab label="Week">This week's numbers</ui-tab>
                     <ui-tab label="Month">This month's numbers</ui-tab>
                   </ui-tabs>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section
@@ -302,27 +302,27 @@
                 collapsible
                 dividing
               >
-                <ui-docs-example description="Tabs take a `color` (the selected tab's hue) and a `size`.">
+                <ui-example description="Tabs take a `color` (the selected tab's hue) and a `size`.">
                   <ui-tabs size="small" color="red" appearance="pointing secondary" aria-label="Colored demo">
                     <ui-tab label="First">First pane</ui-tab>
                     <ui-tab label="Second">Second pane</ui-tab>
                   </ui-tabs>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-icons" label="Icons" sticky collapsible dividing>
-                <ui-docs-example description="A pane's `icon` shows on its tab, before the label.">
+                <ui-example description="A pane's `icon` shows on its tab, before the label.">
                   <ui-tabs appearance="pointing secondary" aria-label="Icon demo">
                     <ui-tab label="Mail" icon="envelope">Inbox</ui-tab>
                     <ui-tab label="Settings" icon="gear">Preferences</ui-tab>
                   </ui-tabs>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
             <ui-section id="examples-basic-examples" label="Basic Examples" sticky collapsible dividing>
               <ui-section id="examples-basic-examples-basic-tabs" label="Basic Tabs" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     Each <code>&lt;ui-tab&gt;</code> inside a <code>&lt;ui-tabs&gt;</code> is a pane, and its label
                     becomes a tab. No script, and no <code>data-tab</code> paths to pair up.
@@ -336,7 +336,7 @@
                     <ui-tab label="Second">Second</ui-tab>
                     <ui-tab label="Third">Third</ui-tab>
                   </ui-tabs>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section
@@ -346,7 +346,7 @@
                 collapsible
                 dividing
               >
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     Every <code>&lt;ui-tabs&gt;</code> is its own independent tab group, even nested inside another
                     one's pane.
@@ -385,11 +385,11 @@
                     <ui-tab label="Fifth" selected>5</ui-tab>
                     <ui-tab label="Sixth">6</ui-tab>
                   </ui-tabs>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-basic-examples-default-paths" label="Default Paths" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="Opening a pane shows its nested tab set's default pane too:  the first `selected` one, else the first enabled one, for as many levels as you nest."
                 >
                   <ui-tabs appearance="pointing secondary" aria-label="Default paths demo">
@@ -415,7 +415,7 @@
                       </ui-tabs>
                     </ui-tab>
                   </ui-tabs>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
@@ -427,7 +427,7 @@
                 collapsible
                 dividing
               >
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     A <code>lazy</code> pane stamps its <code>&lt;template&gt;</code> into itself the first time it's
                     shown, so hidden panes cost nothing up front. To fetch content instead, listen for
@@ -457,7 +457,7 @@
                       </template>
                     </ui-tab>
                   </ui-tabs>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
               <ui-message size="small" class="site-not-ported"
                 >Not ported:  running the scripts in a pane's fetched HTML (<code>evaluateScripts</code>) -- panes

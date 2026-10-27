@@ -63,13 +63,13 @@
             <ui-section id="examples-types" label="Types" sticky collapsible dividing>
               <!-- GAP I37:  Fomantic's bare prompt (no icon);  ours always draws the search icon. -->
               <ui-section id="examples-types-standard" label="Standard" sticky collapsible dividing>
-                <ui-docs-example description="A search can display a set of results.">
+                <ui-example description="A search can display a set of results.">
                   <ui-search
                     placeholder="Github Repositories..."
                     source='[{"title":"Fomantic-UI","description":"Fomantic empowers designers and developers by creating a shared vocabulary for UI."},{"title":"Fomantic-UI-Docs","description":"Docs for Fomantic-UI"},{"title":"Fomantic-UI-CSS","description":"CSS only distribution"},{"title":"Fomantic-UI-LESS","description":"LESS only distribution"},{"title":"create-fomantic-icons","description":"Create Fomantic icons from Font Awesome"}]'
                   ></ui-search>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-message slot="description" state="info" size="small"
                     >Every <code>&lt;ui-search&gt;</code> is drawn as Fomantic's <code>ui icon input</code>, so the icon
                     input needs no extra markup. The <code>icon</code> slot swaps the magnifying glass.</ui-message
@@ -78,12 +78,12 @@
                     placeholder="Github Repositories..."
                     source='[{"title":"Fomantic-UI"},{"title":"Fomantic-UI-Docs"},{"title":"Fomantic-UI-CSS"},{"title":"Fomantic-UI-LESS"}]'
                   ></ui-search>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <!-- GAP I38:  no `clearable` remove icon;  Escape clears the text instead. -->
               <ui-section id="examples-types-clearable" label="Clearable" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">A search can show a remove icon to be able to cancel a previous search term.</p>
                   <ui-message slot="description" size="small"
                     >Not yet: there is no remove icon. Escape closes the results, and a second Escape clears the
@@ -96,11 +96,11 @@
                   >
                     <ui-icon slot="icon" name="github"></ui-icon>
                   </ui-search>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-types-category" label="Category" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="A search can display results ordered by categories:  `category`, with each result's `category`."
                 >
                   <ui-search
@@ -108,7 +108,7 @@
                     placeholder="Search people..."
                     source='[{"category":"Designers","title":"Elliot Fu","description":"Film buff"},{"category":"Designers","title":"Helen Troy","description":"Wizard"},{"category":"Developers","title":"Jenny Hess","description":"Student"},{"category":"Developers","title":"Matt Giampietro","description":"Coach"},{"category":"Writers","title":"Stevie Feliciano","description":"Library"},{"category":"Writers","title":"Christian Rocha","description":"Mixologist"}]'
                   ></ui-search>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section
@@ -118,7 +118,7 @@
                 collapsible
                 dividing
               >
-                <ui-docs-example
+                <ui-example
                   description='You can also display horizontal category names on top of each results instead:  `direction="horizontal"`.'
                 >
                   <ui-search
@@ -127,11 +127,11 @@
                     placeholder="Search people..."
                     source='[{"category":"Designers","title":"Elliot Fu","description":"Film buff"},{"category":"Designers","title":"Helen Troy","description":"Wizard"},{"category":"Developers","title":"Jenny Hess","description":"Student"},{"category":"Developers","title":"Matt Giampietro","description":"Coach"},{"category":"Writers","title":"Stevie Feliciano","description":"Library"},{"category":"Writers","title":"Christian Rocha","description":"Mixologist"}]'
                   ></ui-search>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-types-local-search" label="Local Search" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">A search can look for results inside a static local source.</p>
                   <ui-message slot="description" state="info" size="small"
                     >Results that begin with the query come first, then content that matches the query anywhere inside.
@@ -142,7 +142,7 @@
                     placeholder="Search countries..."
                     source='[{"title":"Andorra"},{"title":"United Arab Emirates"},{"title":"Afghanistan"},{"title":"Antigua"},{"title":"Anguilla"},{"title":"Albania"},{"title":"Armenia"},{"title":"Netherlands Antilles"},{"title":"Angola"},{"title":"Argentina"},{"title":"American Samoa"},{"title":"Austria"},{"title":"Australia"},{"title":"Aruba"},{"title":"Aland Islands"},{"title":"Azerbaijan"},{"title":"Bosnia"},{"title":"Barbados"},{"title":"Bangladesh"},{"title":"Belgium"},{"title":"Burkina Faso"},{"title":"Bulgaria"},{"title":"Bahrain"},{"title":"Burundi"}]'
                   ></ui-search>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section
@@ -152,7 +152,7 @@
                 collapsible
                 dividing
               >
-                <ui-docs-example
+                <ui-example
                   description="A search can look for category results inside a static local source:  `category`, with each result's `category`."
                 >
                   <ui-search
@@ -160,7 +160,7 @@
                     placeholder="Search countries..."
                     source='[{"category":"South America","title":"Brazil"},{"category":"South America","title":"Peru"},{"category":"North America","title":"Canada"},{"category":"Asia","title":"South Korea"},{"category":"Asia","title":"Japan"},{"category":"Asia","title":"China"},{"category":"Europe","title":"Denmark"},{"category":"Europe","title":"England"},{"category":"Europe","title":"France"},{"category":"Europe","title":"Germany"},{"category":"Africa","title":"Ethiopia"},{"category":"Africa","title":"Nigeria"},{"category":"Africa","title":"Zimbabwe"}]'
                   ></ui-search>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section
@@ -170,7 +170,7 @@
                 collapsible
                 dividing
               >
-                <ui-docs-example
+                <ui-example
                   description="A search field can allow a user to ignore all diacritics while searching:  `ignore-diacritics`, so `a` matches `á`."
                 >
                   <ui-search
@@ -179,7 +179,7 @@
                     placeholder="Search Diacritics..."
                     source='[{"title":"André"},{"title":"Bokmål"},{"title":"café"},{"title":"cafetería"},{"title":"château"},{"title":"décolleté"},{"title":"Élysée"},{"title":"Fräulein"},{"title":"garçon"},{"title":"háček"},{"title":"inrō"},{"title":"jūjutsu"},{"title":"kroužek"},{"title":"La Niña"},{"title":"Māori"},{"title":"négligée"},{"title":"pączki"},{"title":"Québec"},{"title":"ragoût"},{"title":"Škoda"},{"title":"takahē"},{"title":"über"},{"title":"voilà"},{"title":"whekī"},{"title":"c Zoë"}]'
                   ></ui-search>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section
@@ -189,7 +189,7 @@
                 collapsible
                 dividing
               >
-                <ui-docs-example
+                <ui-example
                   description="A search field can highlight matching strings inside the search results:  `highlight-matches`."
                 >
                   <ui-search
@@ -197,7 +197,7 @@
                     placeholder="Search..."
                     source='[{"title":"Andorra"},{"title":"United Arab Emirates"},{"title":"Afghanistan"},{"title":"Antigua"},{"title":"Anguilla"},{"title":"Albania"},{"title":"Armenia"},{"title":"Netherlands Antilles"},{"title":"Angola"},{"title":"Argentina"},{"title":"American Samoa"},{"title":"Austria"},{"title":"Australia"},{"title":"Aruba"},{"title":"Aland Islands"},{"title":"Azerbaijan"},{"title":"Bosnia"},{"title":"Barbados"},{"title":"Bangladesh"},{"title":"Belgium"},{"title":"Burkina Faso"},{"title":"Bulgaria"},{"title":"Bahrain"},{"title":"Burundi"}]'
                   ></ui-search>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section
@@ -207,7 +207,7 @@
                 collapsible
                 dividing
               >
-                <ui-docs-example
+                <ui-example
                   description="A result can carry a `description`, a `price`, an `image` and a `url`:  choosing a result with a `url` follows it."
                 >
                   <ui-search
@@ -215,32 +215,32 @@
                     placeholder="Search fruit..."
                     source='[{"title":"Apple","description":"Crisp and sweet"},{"title":"Apricot","description":"Soft, from Valencia","price":"$2.00"},{"title":"Grape","url":"#grape"}]'
                   ></ui-search>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
             <ui-section id="examples-states" label="States" sticky collapsible dividing>
               <!-- GAP I39:  Fomantic's second and third rows (`blue loading double`, `slow elastic pink loading`) have no attribute value. -->
               <ui-section id="examples-states-loading" label="Loading" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="A search can show a loading indicator.  It also spins while a remote query runs."
                 >
                   <ui-search loading placeholder="Search..."></ui-search>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
             <ui-section id="examples-variations" label="Variations" sticky collapsible dividing>
               <ui-section id="examples-variations-disabled" label="Disabled" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="A search can show it is currently unable to be interacted with:  it's dimmed and left out of the form."
                 >
                   <ui-search disabled category placeholder="Search animals..."></ui-search>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-scrolling" label="Scrolling" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">A search can have its results scroll.</p>
                   <ui-message slot="description" state="info" size="small"
                     >The scroll height depends on the viewport: 4 results' height, 6 / 8 / 12 from 768px / 992px /
@@ -256,11 +256,11 @@
                     placeholder="Search countries..."
                     source='[{"title":"Andorra"},{"title":"United Arab Emirates"},{"title":"Afghanistan"},{"title":"Antigua"},{"title":"Anguilla"},{"title":"Albania"},{"title":"Armenia"},{"title":"Netherlands Antilles"},{"title":"Angola"},{"title":"Argentina"},{"title":"American Samoa"},{"title":"Austria"},{"title":"Australia"},{"title":"Aruba"},{"title":"Aland Islands"},{"title":"Azerbaijan"},{"title":"Bosnia"},{"title":"Barbados"},{"title":"Bangladesh"},{"title":"Belgium"},{"title":"Burkina Faso"},{"title":"Bulgaria"},{"title":"Bahrain"},{"title":"Burundi"}]'
                   ></ui-search>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-height" label="Height" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     A search can be <code>very-short</code> (0.75x of the default height) so that more results can be
                     glanced. Or it can be short, long (2x) or very-long.
@@ -275,30 +275,30 @@
                     placeholder="Search countries..."
                     source='[{"title":"Andorra"},{"title":"United Arab Emirates"},{"title":"Afghanistan"},{"title":"Antigua"},{"title":"Anguilla"},{"title":"Albania"},{"title":"Armenia"},{"title":"Netherlands Antilles"},{"title":"Angola"},{"title":"Argentina"},{"title":"American Samoa"},{"title":"Austria"},{"title":"Australia"},{"title":"Aruba"},{"title":"Aland Islands"},{"title":"Azerbaijan"},{"title":"Bosnia"},{"title":"Barbados"},{"title":"Bangladesh"},{"title":"Belgium"},{"title":"Burkina Faso"},{"title":"Bulgaria"},{"title":"Bahrain"},{"title":"Burundi"}]'
                   ></ui-search>
-                </ui-docs-example>
-                <ui-docs-example description="Long:  2x of the default height.">
+                </ui-example>
+                <ui-example description="Long:  2x of the default height.">
                   <ui-search
                     length="long"
                     max-results="0"
                     placeholder="Search countries..."
                     source='[{"title":"Andorra"},{"title":"United Arab Emirates"},{"title":"Afghanistan"},{"title":"Antigua"},{"title":"Anguilla"},{"title":"Albania"},{"title":"Armenia"},{"title":"Netherlands Antilles"},{"title":"Angola"},{"title":"Argentina"},{"title":"American Samoa"},{"title":"Austria"},{"title":"Australia"},{"title":"Aruba"},{"title":"Aland Islands"},{"title":"Azerbaijan"},{"title":"Bosnia"},{"title":"Barbados"},{"title":"Bangladesh"},{"title":"Belgium"},{"title":"Burkina Faso"},{"title":"Bulgaria"},{"title":"Bahrain"},{"title":"Burundi"}]'
                   ></ui-search>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-fluid" label="Fluid" sticky collapsible dividing>
-                <ui-docs-example description="A search can have its results take up the width of its container.">
+                <ui-example description="A search can have its results take up the width of its container.">
                   <ui-search
                     fluid
                     category
                     placeholder="Search animals..."
                     source='[{"category":"Mammals","title":"Cat"},{"category":"Mammals","title":"Dog"},{"category":"Birds","title":"Crow"},{"category":"Birds","title":"Owl"}]'
                   ></ui-search>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-aligned" label="Aligned" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description='A search can have its results aligned to its left or right container edge:  `align="right"` extends them to the left.'
                 >
                   <ui-search
@@ -307,12 +307,12 @@
                     placeholder="Search animals..."
                     source='[{"category":"Mammals","title":"Cat","description":"Aligned to the right edge"},{"category":"Mammals","title":"Dog"},{"category":"Birds","title":"Crow"},{"category":"Birds","title":"Owl"}]'
                   ></ui-search>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <!-- GAP I37:  Fomantic's sizes are bare prompts;  ours keep the search icon. -->
               <ui-section id="examples-variations-size" label="Size" sticky collapsible dividing>
-                <ui-docs-example description="A search can vary in size.">
+                <ui-example description="A search can vary in size.">
                   <ui-search size="mini" placeholder="Mini search..."></ui-search>
                   <ui-search size="tiny" placeholder="Tiny search..."></ui-search>
                   <ui-search size="small" placeholder="Small search..."></ui-search>
@@ -320,7 +320,7 @@
                   <ui-search size="big" placeholder="Big search..."></ui-search>
                   <ui-search size="huge" placeholder="Huge search..."></ui-search>
                   <ui-search size="massive" placeholder="Massive search..."></ui-search>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
@@ -333,7 +333,7 @@
                 collapsible
                 dividing
               >
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     Fomantic maps a server's answer to its result fields with <code>fields</code>;  a remote
                     <code>&lt;ui-search url&gt;</code> expects Fomantic's own answer shape instead (<code
@@ -349,7 +349,7 @@
                   >
                     <ui-icon slot="icon" name="github"></ui-icon>
                   </ui-search>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <!-- GAP I40:  no `onResponse` hook to regroup a third-party answer. -->
@@ -360,7 +360,7 @@
                 collapsible
                 dividing
               >
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     Fomantic's <code>apiSettings.onResponse</code> regroups GitHub's answer by language. Ours: a
                     <code>category</code> search over results that carry a <code>category</code>, here a local source.
@@ -381,7 +381,7 @@
                   >
                     <ui-icon slot="icon" name="github"></ui-icon>
                   </ui-search>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
           </ui-tab>

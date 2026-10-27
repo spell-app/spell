@@ -20,7 +20,7 @@ export const SITE_ENTRY = `${ROOT}site/_src/site.ts`
  * - `base: "./"`:  chunk URLs relative to the chunk that imports them, so `_assets/` works under `/components/ui/` at any page
  *   depth.  The default `/` asks the server ROOT for `/<chunk>.js` (`agents/PAPERCUTS.md`, app, 2026-10-02).
  * - Stable names where the tree is stable, so a rebuild's diff is small:  `site.js`, `site.css`,
- *   one `<family>.js` per family barrel (`ui-button.js`, `ui-docs-example.js`), emoji data under `emoji/<set>/`;
+ *   one `<family>.js` per family barrel (`ui-button.js`, `ui-example.js`), emoji data under `emoji/<set>/`;
  *   every other chunk (shared code, the runtime, engines) `<name>-<hash>.js`.
  * - Minified, no sourcemaps:  as a deploy would ship it.  `emptyOutDir: false`:
  *   `scripts/site-bundle.ts` clears the folder itself, keeping the `icon-packs` link.
@@ -78,7 +78,7 @@ function siteChunkName(chunk: { facadeModuleId: string | null; moduleIds: readon
   return "[name]-[hash].js"
 }
 
-/** A family barrel:  `src/components/ui-button/index.ts`, `src/docs-components/ui-docs-example/index.ts`. */
+/** A family barrel:  `src/components/ui-button/index.ts`, `src/components/ui-example/index.ts`. */
 const FAMILY_BARREL = /\/src\/(?:docs-)?components\/(ui-[\w-]+)\/index\.ts$/
 
 /** An emoji name-data module:  its set and chunk letter. */

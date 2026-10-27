@@ -1,5 +1,6 @@
 <!doctype html>
 <!--
+  spell ui rename: leave this file (a frozen copy of a brand page, from before Spell UI's new attribute names)
   A <brand-*> element's page in the brand's docs set (`packages/brand/docs/`, served at `/components/brand/`), in
   Spell UI's component page shape:  masthead, then Examples / Usage / API / Theming tabs.
   - The set's layout (`__parts/layout.html`) loads Spell UI's site bundle and the brand pack;  API and tokens come
@@ -101,7 +102,7 @@
           <ui-tab value="examples" label="Examples">
             <ui-section id="examples-types" label="Types" sticky collapsible dividing>
               <ui-section id="examples-types-phone" label="Phone" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="The Spell App's Build screen preview:  a 300px ivory phone (the raised surface in dark mode), 32px corners, a status bar on top, and the app below it, each child 12px apart.  The app is live:  its checkboxes work."
                 >
                   <brand-phone>
@@ -120,26 +121,26 @@
                       5 days
                     </div>
                   </brand-phone>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
             <ui-section id="examples-content" label="Content" sticky collapsible dividing>
               <ui-section id="examples-content-time" label="Time" sticky collapsible dividing>
-                <ui-docs-example description="`time`:  the status bar's clock, any text;  default `9:41`.">
+                <ui-example description="`time`:  the status bar's clock, any text;  default `9:41`.">
                   <brand-phone time="10:30">
                     <div class="app-card">
                       <h4>Good morning</h4>
                       Three habits to go.
                     </div>
                   </brand-phone>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
             <ui-section id="examples-states" label="States" sticky collapsible dividing>
               <ui-section id="examples-states-dimmed" label="Dimmed" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="`dimmed`:  fades the phone to 45% while its app is being built (the fade animates over 0.4s, unless the reader prefers reduced motion), and marks it busy for screen readers.  Remove it when the app is ready."
                 >
                   <div class="phones">
@@ -156,13 +157,13 @@
                       </div>
                     </brand-phone>
                   </div>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
             <ui-section id="examples-variations" label="Variations" sticky collapsible dividing>
               <ui-section id="examples-variations-width" label="Width" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="`--brand-phone-width`:  the frame's width, border included (default 300px);  never wider than its container.  The app's children stretch to fill it."
                 >
                   <div class="phones">
@@ -179,7 +180,7 @@
                       </div>
                     </brand-phone>
                   </div>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
           </ui-tab>
