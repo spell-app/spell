@@ -157,8 +157,14 @@ Two words for the two objects behind every tag (epic `wwod-spell-ui`, P15):
 - [The `ui-components` family](src/components/ui-components/):  the component packs a `<ui-root>` loads,
   through `<ui-components source>` ("Component packs", below).
 - [The docs components folder](src/docs-components/), `ui-docs-<name>/`:
-  DOC-ONLY element families, the widgets the docs site is built from (`<ui-docs-example>`, `<ui-docs-api>` ...).
+  DOC-ONLY element families, the widgets the docs site is built from (`<ui-docs-api>`, `<ui-docs-nav>` ...).
   - Laid out and written EXACTLY like a component family:  same files, same rules.
+  - A widget other pages need moves into `src/components/` as a component, its old tag renamed by
+    `spell ui rename` (`RENAMED_TAGS` in [OldNames](src/tools/OldNames.ts)):
+    `<ui-theme-menu>` (epic `debut` P17), `<ui-toc>` and `<ui-example>` (epic `ui-gaps` P14).
+    - A docs widget may use a component (`<ui-docs-api>` names itself a shadow host of `<ui-toc>`,
+      `TocIndex.addShadowHost()`), never the other way round.
+    - What both sides share is `UIT`'s:  `HeadingLevels`, `CODE_SPAN`, `TocMarks`.
   - Beside `src/components/`, not in it:
     they're the docs site's widgets, not Spell UI's elements (epic `people-and-orgs` P18).
   - But NOT components:
@@ -741,7 +747,7 @@ SHARED STATES:  states every element takes, though its vocabulary never names th
   - Once the hide is done:  `:state(hidden)`.
   - At once, before it first draws.
   - `hidden="until-found"` stays the browser's.
-  - Renamed, since their old meaning clashed:  `<ui-divider spacer>`, `<ui-reveal unclipped>`.
+  - Renamed, since their old meaning clashed:  `<ui-divider spacer>`, `<ui-reveal clip="none">`.
 - `animation`:  Fomantic's names, or `none`.
   - `animationToRun` is the first that applies:
     - motion off:  its own `none`, `--ui-motion: none` from around it, or reduced motion
@@ -778,7 +784,7 @@ SHARED STATES:  states every element takes, though its vocabulary never names th
     The decorator says the intent (`ThemePreference`'s in-memory theme and scheme, `RootSettings.generation`).
   - A value made once and kept:  `@E.lazy get x()`, or `@E.once` on a method (a loader's promise).
   - Handles to things the class started (a timer, an observer, an abort controller) stay plain fields:
-    nobody should watch them (`UIDocsToc.queuedUpdate`, `ControlLabels.labelObserver`).
+    nobody should watch them (`UIToc.queuedUpdate`, `ControlLabels.labelObserver`).
 - `@E.controlled("open") accessor isOpen = false`:  the DOM element's property when set, else the starting value.
   - A write goes to the DOM element's property.
   - A user change:  `this.requestChange("isOpen", next, () => this.send(...))`.
@@ -1267,6 +1273,13 @@ As WWOD §4, plus these deliberate EXCEPTIONS.
   everything in `src/` is importable while developing (Q47 reverses J38), through `exports`.
   - What other repos' code, tools and tests import:
     - `spell-ui/core`, `spell-ui/components/ui-code`, `spell-ui/property`, `spell-ui/test-helpers/MemberClashes`
+    - `spell-ui/components/ui-toc/TocIndex`, `.../HashLanding`, `.../PageOutline`:  a family's LEAVES, on purpose
+      (epic `ui-gaps` P14).
+      - Plain DOM, no element:  a page's sections, the one in view, landing on a link's target.
+      - The docs site's sections and search, the docs widgets, the site's node scripts and spell-epic's docs runtime
+        read a page with them, without defining `<ui-toc>`;  what they keep page-wide is on `globalThis`.
+    - `spell-ui/components/ui-example/ExampleSource`:  the examples' markup, kept before they upgrade (the site's
+      first import), without defining `<ui-example>`.
     - `spell-ui/components/ui-zoom/ImageZoom`:  a family's LEAF, on purpose (epic `ui-gaps` P14).
       - Plain DOM, no element:  the page's ONE zoom for its screenshots, and which images open in it.
       - The docs runtime imports it alone, so its bundle holds no second `<ui-zoom>`;

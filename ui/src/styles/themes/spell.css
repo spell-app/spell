@@ -607,7 +607,7 @@
      * (Owen's pick, epic `debut` P17, Q1:  "rounding of outer rings needs to be greater than rounding of inner bits";
      * the frame was the theme's 16px round 20px pill ends)
      */
-    --ui-docs-example-frame-radius: var(--spell-radius-2xl);
+    --ui-example-frame-radius: var(--spell-radius-2xl);
   }
 
   /*******************************

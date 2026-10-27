@@ -3,7 +3,7 @@ import { describe, expect, test } from "vite-plus/test"
 import { Fixture } from "spell/test-helpers/Fixture"
 import { DATA, PAGE, SEARCH, siteTag } from "spell-ui/test-helpers/docsSearch.fixtures"
 
-import { PageOutline } from "spell-ui/docs-components/ui-docs-search/PageOutline"
+import { PageOutline } from "spell-ui/components/ui-toc/PageOutline"
 import { SearchIndex } from "spell-ui/docs-components/ui-docs-search/SearchIndex"
 
 /** The index of the test data and search file. */
@@ -61,7 +61,7 @@ describe("SearchIndex.search()", () => {
   })
 
   test("orders groups by their best hit;  the page shown's sections win a tie", () => {
-    const here = PageOutline.read(Fixture.render(PAGE))
+    const here = SearchIndex.here(Fixture.render(PAGE))
     const groups = INDEX.search("vertical divider", here, "components/ui-divider.html")
     expect(groups[0]!.kind).toBe("here")
   })
@@ -130,3 +130,25 @@ describe("PageOutline.trail()", () => {
 function found(query: string, current?: string) {
   return INDEX.search(query, [], current).map((group) => [group.kind, group.hits.map((hit) => hit.entry.title)])
 }
+
+describe("SearchIndex.here()", () => {
+  test("reads sections and headers with ids, their trail through tabs and parents, never a demo's", () => {
+    const page = Fixture.render(`
+      <main>
+        ${PAGE}
+        <ui-header level="2" id="intro">Intro <ui-header>sub</ui-header></ui-header>
+        <h3 id="more">More</h3>
+        <ui-section id="untitled"></ui-section>
+      </main>`)
+    const entries = SearchIndex.here(page)
+    expect(entries.map((entry) => [entry.title, entry.context ?? "", entry.href])).toEqual([
+      ["Types", "Examples", "#examples-types"],
+      ["Divider", "Examples › Types", "#examples-types-divider"],
+      ["Vertical Divider", "Examples › Types", "#examples-types-vertical-divider"],
+      ["Keyboard", "Usage", "#usage-keyboard"],
+      ["Intro", "", "#intro"],
+      ["More", "", "#more"]
+    ])
+    expect(SearchIndex.here(undefined)).toEqual([])
+  })
+})

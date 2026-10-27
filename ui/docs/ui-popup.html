@@ -69,27 +69,27 @@
                 >
 
                 <ui-section id="examples-types-popup-element-popup" label="Popup" sticky collapsible dividing>
-                  <ui-docs-example
+                  <ui-example
                     description="An element can specify popup content to appear.  With no `for`, the popup attaches to the element just before it."
                   >
                     <ui-button icon="plus" aria-label="Add users"></ui-button>
                     <ui-popup label="Add users to your feed"></ui-popup>
-                  </ui-docs-example>
+                  </ui-example>
                 </ui-section>
 
                 <ui-section id="examples-types-popup-element-titled" label="Titled" sticky collapsible dividing>
-                  <ui-docs-example description="An element can specify popup content with a title:  `header`.">
+                  <ui-example description="An element can specify popup content with a title:  `header`.">
                     <ui-image avatar src="images/avatar/small/elliot.jpg" alt="Elliot Fu"></ui-image>
                     <ui-popup heading="Elliot Fu" label="Elliot has been a member since July 2012"></ui-popup>
                     <ui-image avatar src="images/avatar/small/stevie.jpg" alt="Stevie Feliciano"></ui-image>
                     <ui-popup heading="Stevie Feliciano" label="Stevie has been a member since August 2013"></ui-popup>
                     <ui-image avatar src="images/avatar/small/matt.jpg" alt="Matt"></ui-image>
                     <ui-popup heading="Matt" label="Matt has been a member since July 2014"></ui-popup>
-                  </ui-docs-example>
+                  </ui-example>
                 </ui-section>
 
                 <ui-section id="examples-types-popup-element-html" label="HTML" sticky collapsible dividing>
-                  <ui-docs-example
+                  <ui-example
                     description="An element can specify HTML for a popup:  slotted `<ui-header>` / `<ui-content>` and any other markup.  Hover the card."
                   >
                     <ui-card>
@@ -110,7 +110,7 @@
                       <ui-header>User Rating</ui-header>
                       <ui-content><ui-rating color="yellow" max-rating="5" value="5" readonly></ui-rating></ui-content>
                     </ui-popup>
-                  </ui-docs-example>
+                  </ui-example>
                 </ui-section>
 
                 <ui-section
@@ -120,7 +120,7 @@
                   collapsible
                   dividing
                 >
-                  <ui-docs-example>
+                  <ui-example>
                     <p slot="description">An element can display a popup that is already included in the page.</p>
                     <ui-message slot="description" size="small" state="info"
                       >Every <code>&lt;ui-popup&gt;</code> is markup already in the page: there is no
@@ -144,11 +144,11 @@
                     <ui-popup heading="User Rating">
                       <ui-rating color="yellow" value="3" readonly></ui-rating>
                     </ui-popup>
-                  </ui-docs-example>
+                  </ui-example>
                 </ui-section>
 
                 <ui-section id="examples-types-popup-element-on-click" label="On click" sticky collapsible dividing>
-                  <ui-docs-example
+                  <ui-example
                     description='`open-on="click"` makes the popup a small non-modal dialog that toggles on click, for content you interact with;  `flowing` lets it be as wide as its content.'
                   >
                     <ui-button id="popup-types-plan">Choose a plan</ui-button>
@@ -156,7 +156,7 @@
                       <p>Does not include upload or chat.</p>
                       <ui-button size="small" color="primary">Choose</ui-button>
                     </ui-popup>
-                  </ui-docs-example>
+                  </ui-example>
                 </ui-section>
 
                 <ui-section
@@ -166,7 +166,7 @@
                   collapsible
                   dividing
                 >
-                  <ui-docs-example
+                  <ui-example
                     description='Slotted `<ui-header>` and `<ui-content>` style themselves as the popup&apos;s header and content.  This one opens on keyboard focus (`open-on="focus"`).'
                   >
                     <ui-button id="popup-types-parts">Parts</ui-button>
@@ -174,13 +174,13 @@
                       <ui-header>Slotted header</ui-header>
                       <ui-content>Slotted content, styled by the popup.</ui-content>
                     </ui-popup>
-                  </ui-docs-example>
+                  </ui-example>
                 </ui-section>
               </ui-section>
 
               <ui-section id="examples-types-no-javascript" label="No JavaScript" sticky collapsible dividing>
                 <ui-section id="examples-types-no-javascript-tooltip" label="Tooltip" sticky collapsible dividing>
-                  <ui-docs-example>
+                  <ui-example>
                     <p slot="description">
                       An element can specify a simple tooltip that can appear without JavaScript via the
                       <code>data-tooltip</code> attribute. If the tooltip should be shown inverted, also add the
@@ -198,7 +198,7 @@
                       data-tooltip="Add users to your feed"
                       data-inverted
                     ></ui-button>
-                  </ui-docs-example>
+                  </ui-example>
                 </ui-section>
 
                 <ui-section
@@ -208,7 +208,7 @@
                   collapsible
                   dividing
                 >
-                  <ui-docs-example
+                  <ui-example
                     description="A tooltip can be shown at a specific position relative to the element via the `data-position` attribute."
                   >
                     <ui-button data-tooltip="Add users to your feed" data-position="top left">Top Left</ui-button>
@@ -223,8 +223,8 @@
                     <ui-divider></ui-divider>
                     <ui-button data-tooltip="Add users to your feed" data-position="right center">Right Center</ui-button>
                     <ui-button data-tooltip="Add users to your feed" data-position="left center">Left Center</ui-button>
-                  </ui-docs-example>
-                  <ui-docs-example>
+                  </ui-example>
+                  <ui-example>
                     <ui-button data-inverted data-tooltip="Add users to your feed" data-position="top left"
                       >Top Left</ui-button
                     >
@@ -251,15 +251,15 @@
                     <ui-button data-inverted data-tooltip="Add users to your feed" data-position="left center"
                       >Left Center</ui-button
                     >
-                  </ui-docs-example>
-                  <ui-docs-example
+                  </ui-example>
+                  <ui-example
                     description="Ours also sits beside the element, lined up with its top or bottom edge:  `left top`, `left bottom`, `right top`, `right bottom`."
                   >
                     <ui-button data-tooltip="Add users to your feed" data-position="right top">Right Top</ui-button>
                     <ui-button data-tooltip="Add users to your feed" data-position="right bottom">Right Bottom</ui-button>
                     <ui-button data-tooltip="Add users to your feed" data-position="left top">Left Top</ui-button>
                     <ui-button data-tooltip="Add users to your feed" data-position="left bottom">Left Bottom</ui-button>
-                  </ui-docs-example>
+                  </ui-example>
                 </ui-section>
 
                 <ui-section
@@ -269,7 +269,7 @@
                   collapsible
                   dividing
                 >
-                  <ui-docs-example>
+                  <ui-example>
                     <p slot="description">A tooltip can vary in size via the <code>data-variation</code> attribute.</p>
                     <ui-message slot="description" size="small" state="info"
                       >The <code>data-variation</code> attribute takes several words, just like a class would:  sizes,
@@ -294,7 +294,7 @@
                       >Large</ui-button
                     >
                     <ui-button data-inverted data-tooltip="Add users to your feed" data-variation="huge">Huge</ui-button>
-                  </ui-docs-example>
+                  </ui-example>
                 </ui-section>
 
                 <ui-section
@@ -304,7 +304,7 @@
                   collapsible
                   dividing
                 >
-                  <ui-docs-example description="A tooltip can provide more basic formatting:  no pointing arrow.">
+                  <ui-example description="A tooltip can provide more basic formatting:  no pointing arrow.">
                     <ui-button
                       data-tooltip="The default theme's basic tooltip removes the pointing arrow."
                       data-variation="basic"
@@ -320,7 +320,7 @@
                     <ui-button data-inverted data-tooltip="You can combine me" data-variation="tiny basic"
                       >Tiny Basic</ui-button
                     >
-                  </ui-docs-example>
+                  </ui-example>
                 </ui-section>
 
                 <ui-section
@@ -330,7 +330,7 @@
                   collapsible
                   dividing
                 >
-                  <ui-docs-example>
+                  <ui-example>
                     <p slot="description">
                       A tooltip can show multiple lines via line breaks in the attribute and adding
                       <code>multiline</code> to the <code>data-variation</code> attribute.
@@ -348,7 +348,7 @@
                       data-variation="multiline"
                       >Multiline tooltip</ui-button
                     >
-                  </ui-docs-example>
+                  </ui-example>
                 </ui-section>
 
                 <ui-section
@@ -358,7 +358,7 @@
                   collapsible
                   dividing
                 >
-                  <ui-docs-example
+                  <ui-example
                     description="A tooltip can be shown visible all the time by adding `visible` to the `data-variation` attribute."
                   >
                     <ui-button
@@ -367,7 +367,7 @@
                       data-position="right center"
                       >Important Button</ui-button
                     >
-                  </ui-docs-example>
+                  </ui-example>
                 </ui-section>
 
                 <ui-section
@@ -377,7 +377,7 @@
                   collapsible
                   dividing
                 >
-                  <ui-docs-example
+                  <ui-example
                     description="A tooltip can have different colors via the `data-variation` attribute."
                   >
                     <ui-buttons spacing="md" wrapping padding="compact">
@@ -395,14 +395,14 @@
                       <ui-button data-variation="grey" data-tooltip="Grey">Grey</ui-button>
                       <ui-button data-variation="black" data-tooltip="Black">Black</ui-button>
                     </ui-buttons>
-                  </ui-docs-example>
+                  </ui-example>
                 </ui-section>
               </ui-section>
             </ui-section>
 
             <ui-section id="examples-states" label="States" sticky collapsible dividing>
               <ui-section id="examples-states-loading" label="Loading" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="A popup may show its content is being loaded:  a spinner over faded content."
                 >
                   <ui-image avatar size="tiny" src="images/avatar/large/tom.jpg" alt="Matt"></ui-image>
@@ -420,9 +420,9 @@
                     heading="Matt"
                     label="Matt has been a member since July 2014"
                   ></ui-popup>
-                </ui-docs-example>
+                </ui-example>
                 <!-- GAP I41:  no `double` loader or loader speed on a popup;  those two show the plain loader. -->
-                <ui-docs-example description="The loader inherits the color of the popup.">
+                <ui-example description="The loader inherits the color of the popup.">
                   <ui-image avatar size="tiny" src="images/avatar/large/tom.jpg" alt="Matt"></ui-image>
                   <ui-popup
                     position="bottom left"
@@ -455,20 +455,20 @@
                     heading="Matt"
                     label="Matt has been a member since July 2014"
                   ></ui-popup>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
             <ui-section id="examples-variations" label="Variations" sticky collapsible dividing>
               <ui-section id="examples-variations-basic" label="Basic" sticky collapsible dividing>
-                <ui-docs-example description="A popup can provide more basic formatting:  no pointing arrow.">
+                <ui-example description="A popup can provide more basic formatting:  no pointing arrow.">
                   <ui-button icon="plus" aria-label="Add"></ui-button>
                   <ui-popup appearance="basic" label="The default theme's basic popup removes the pointing arrow."></ui-popup>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-width" label="Width" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     A popup can be extra wide to allow for longer content: <code>wide</code>, <code>wide="very"</code>.
                   </p>
@@ -487,11 +487,11 @@
                     wide="very"
                     label="Hello. This is a very wide pop-up which allows for lots of content with additional space. You can fit a lot of words here and the paragraphs will be pretty wide."
                   ></ui-popup>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-fluid" label="Fluid" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">A fluid popup takes up the entire width of its target.</p>
                   <ui-message slot="description" size="small" state="info"
                     >Fomantic's fluid popup spans its offset container; ours spans its target, so make the target as
@@ -506,11 +506,11 @@
                       <ui-column>4</ui-column>
                     </ui-grid>
                   </ui-popup>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-size" label="Size" sticky collapsible dividing>
-                <ui-docs-example description="A popup can vary in size.">
+                <ui-example description="A popup can vary in size.">
                   <ui-icon name="heart" aria-label="Mini" appearance="circular link"></ui-icon>
                   <ui-popup size="mini" label="Hello. This is a mini popup"></ui-popup>
                   <ui-icon name="heart" aria-label="Tiny" appearance="circular link"></ui-icon>
@@ -521,11 +521,11 @@
                   <ui-popup size="large" label="Hello. This is a large popup"></ui-popup>
                   <ui-icon name="heart" aria-label="Huge" appearance="circular link"></ui-icon>
                   <ui-popup size="huge" label="Hello. This is a huge popup"></ui-popup>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-flowing" label="Flowing" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="A popup can have no maximum width and continue to flow to fit its content."
                 >
                   <ui-button>Show flowing popup</ui-button>
@@ -548,11 +548,11 @@
                       </ui-column>
                     </ui-grid>
                   </ui-popup>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-inverted" label="Inverted" sticky collapsible dividing>
-                <ui-docs-example description="A popup can have its colors inverted.">
+                <ui-example description="A popup can have its colors inverted.">
                   <ui-icon name="heart" aria-label="Inverted" appearance="circular link"></ui-icon>
                   <ui-popup inverted label="Hello. This is an inverted popup"></ui-popup>
                   <ui-button
@@ -562,11 +562,11 @@
                     data-position="top left"
                     data-inverted
                   ></ui-button>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-colored" label="Colored" sticky collapsible dividing>
-                <ui-docs-example description="A popup can have different colors.">
+                <ui-example description="A popup can have different colors.">
                   <ui-button>Red</ui-button>
                   <ui-popup color="red" label="Red"></ui-popup>
                   <ui-button>Orange</ui-button>
@@ -593,11 +593,11 @@
                   <ui-popup color="grey" label="Grey"></ui-popup>
                   <ui-button>Black</ui-button>
                   <ui-popup color="black" label="Black"></ui-popup>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-position" label="Position" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description='A popup can be positioned around its target.  These are `open` from the start (`open-on="manual"`);  each flips to the other side when there is no room.'
                 >
                   <ui-segment padding="lg" appearance="basic">
@@ -626,11 +626,11 @@
                       label="Right"
                     ></ui-popup>
                   </ui-segment>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-every-position" label="Every position" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="Fomantic's eight positions, plus four of ours:  `left top`, `left bottom`, `right top` and `right bottom` sit beside the target, lined up with its top or bottom edge.  Word order matters:  `top left` is above.  Hover each button."
                 >
                   <ui-button>Top left</ui-button>
@@ -657,18 +657,18 @@
                   <ui-popup position="right top" label="right top"></ui-popup>
                   <ui-button>Right bottom</ui-button>
                   <ui-popup position="right bottom" label="right bottom"></ui-popup>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-hoverable" label="Hoverable" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description='A hover popup stays open while the pointer is over it (WCAG 1.4.13).  `hoverable="false"` is Fomantic&apos;s default:  it closes as the pointer leaves the target.'
                 >
                   <ui-button>Hoverable (default)</ui-button>
                   <ui-popup hide-delay="200" label="Move the pointer onto me"></ui-popup>
                   <ui-button>Not hoverable</ui-button>
                   <ui-popup hoverable="false" label="I close as you leave the button"></ui-popup>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
           </ui-tab>
@@ -694,13 +694,13 @@
                 </script>
               </ui-markdown>
               <ui-section id="usage-using-it-target-element" label="Target element" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="`for` names the target by id, so the popup can sit anywhere;  this one appears at the label, whichever button you hover."
                 >
                   <ui-label id="popup-usage-target" icon="user">Anna</ui-label>
                   <ui-button>Hover me</ui-button>
                   <ui-popup for="popup-usage-target" label="Anna, project owner"></ui-popup>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
@@ -727,7 +727,7 @@
                 collapsible
                 dividing
               >
-                <ui-docs-example
+                <ui-example
                   description='A popup trigger event can be specified:  `open-on="click"` here, `open-on="focus"` for an input.'
                 >
                   <ui-button id="popup-usage-click">Click me</ui-button>
@@ -739,10 +739,10 @@
                   ></ui-popup>
                   <ui-input id="popup-usage-focus" placeholder="Focus me" icon="search"></ui-input>
                   <ui-popup for="popup-usage-focus" open-on="focus" label="Type to search"></ui-popup>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
               <ui-section id="usage-triggers-wide-popup-menu" label="Wide popup menu" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="Complex content, like a wide menu, is markup already in the page:  a `flowing` hover popup that stays open while the pointer is on it works like a dropdown menu."
                 >
                   <ui-menu>
@@ -778,7 +778,7 @@
                       </ui-column>
                     </ui-grid>
                   </ui-popup>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
@@ -812,7 +812,7 @@
                 collapsible
                 dividing
               >
-                <ui-docs-example description="It appears at the label, not at the buttons.">
+                <ui-example description="It appears at the label, not at the buttons.">
                   <ui-buttons size="small" appearance="basic">
                     <ui-button commandfor="popup-invoker-tip" command="--toggle">Toggle</ui-button>
                     <ui-button commandfor="popup-invoker-tip" command="--close">Close</ui-button>
@@ -824,7 +824,7 @@
                     open-on="manual"
                     label="Anna, project owner"
                   ></ui-popup>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 

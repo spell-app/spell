@@ -97,6 +97,11 @@
       "types": "./dist-types/src/components/ui-embed/index.d.ts",
       "default": "./src/components/ui-embed/index.ts"
     },
+    "./components/ui-example": {
+      "spell-ui-source": "./src/components/ui-example/index.ts",
+      "types": "./dist-types/src/components/ui-example/index.d.ts",
+      "default": "./src/components/ui-example/index.ts"
+    },
     "./components/ui-emoji": {
       "spell-ui-source": "./src/components/ui-emoji/index.ts",
       "types": "./dist-types/src/components/ui-emoji/index.d.ts",
@@ -372,6 +377,11 @@
       "types": "./dist-types/src/components/ui-theme-menu/index.d.ts",
       "default": "./src/components/ui-theme-menu/index.ts"
     },
+    "./components/ui-toc": {
+      "spell-ui-source": "./src/components/ui-toc/index.ts",
+      "types": "./dist-types/src/components/ui-toc/index.d.ts",
+      "default": "./src/components/ui-toc/index.ts"
+    },
     "./components/ui-tree-diagram": {
       "spell-ui-source": "./src/components/ui-tree-diagram/index.ts",
       "types": "./dist-types/src/components/ui-tree-diagram/index.d.ts",
@@ -402,11 +412,6 @@
       "types": "./dist-types/src/docs-components/ui-docs-api/index.d.ts",
       "default": "./src/docs-components/ui-docs-api/index.ts"
     },
-    "./docs-components/ui-docs-example": {
-      "spell-ui-source": "./src/docs-components/ui-docs-example/index.ts",
-      "types": "./dist-types/src/docs-components/ui-docs-example/index.d.ts",
-      "default": "./src/docs-components/ui-docs-example/index.ts"
-    },
     "./docs-components/ui-docs-inspector": {
       "spell-ui-source": "./src/docs-components/ui-docs-inspector/index.ts",
       "types": "./dist-types/src/docs-components/ui-docs-inspector/index.d.ts",
@@ -421,11 +426,6 @@
       "spell-ui-source": "./src/docs-components/ui-docs-search/index.ts",
       "types": "./dist-types/src/docs-components/ui-docs-search/index.d.ts",
       "default": "./src/docs-components/ui-docs-search/index.ts"
-    },
-    "./docs-components/ui-docs-toc": {
-      "spell-ui-source": "./src/docs-components/ui-docs-toc/index.ts",
-      "types": "./dist-types/src/docs-components/ui-docs-toc/index.d.ts",
-      "default": "./src/docs-components/ui-docs-toc/index.ts"
     },
     "./docs-components/ui-docs-tokens": {
       "spell-ui-source": "./src/docs-components/ui-docs-tokens/index.ts",

@@ -1,0 +1,157 @@
+/*
+ * The style sheet of `<ui-toc>`:  Fomantic's docs "On this page" rail menu
+ * (`server/files/stylesheets/docs.css` of Fomantic-UI-Docs, `.following.menu`), built of `<ui-*>` widgets:
+ * this sheet only LAYS THEM OUT (and bolds the entry in view, as docs.css does).
+ * - It styles the component's shadow DOM:
+ *   `<div class="ui [size] toc" part="toc">` holding a `<div class="head" part="head">` row
+ *   (an optional `<ui-header part="header">`, the `<button class="toggle-all">`)
+ *   and `<ui-menu direction="vertical" appearance="text" fluid part="menu">` of section rows:
+ *   `<div class="section-row">`, its `<button class="fold">` chevron in the gutter, its
+ *   `<ui-item class="section" part="section">` link.
+ *   - Under the open section, an `<ui-item class="entries" padding="none-y">`,
+ *     holding `<ui-menu part="entries">` of `<ui-item part="entry">` links.
+ *   - An open entry with entries of its own (nested `<ui-section>`s) is followed by the same pair again,
+ *     one indent further.
+ * - Public tokens (`--ui-toc-*`) are never declared:  each is read through a private alias
+ *   (`notes/theming.md` "Component tokens").
+ */
+
+@layer ui.components.toc.types, ui.components.toc.content, ui.components.toc.variations, ui.components.toc.states;
+
+@layer ui.components.toc.types {
+  :host {
+    display: block;
+  }
+
+  /* Tokens:  Fomantic's docs measures. */
+  .ui.toc {
+    /* Indent of a section's entries under its title. */
+    --_ui-toc-indent: var(--ui-toc-indent, 0.5em);
+    /* Weight of a section's title. */
+    --_ui-toc-section-weight: var(--ui-toc-section-weight, bold);
+    /* Weight of the entry in view (docs.css `.following.menu .menu .active.item`). */
+    --_ui-toc-current-weight: var(--ui-toc-current-weight, bold);
+    /* Width of the column left of the sections' links, where their fold chevrons sit. */
+    --_ui-toc-gutter: var(--ui-toc-gutter, 1.25em);
+    /* Colour of the fold chevrons and the expand all / collapse all toggle. */
+    --_ui-toc-control-color: var(--ui-toc-control-color, var(--ui-text-muted));
+    /* Colour of the fold chevrons and the toggle under the pointer. */
+    --_ui-toc-control-hover-color: var(--ui-toc-control-hover-color, var(--ui-link));
+    /* The toggle's background under the pointer. */
+    --_ui-toc-control-hover-background: var(--ui-toc-control-hover-background, var(--ui-primary-background));
+
+    display: block;
+  }
+}
+
+@layer ui.components.toc.content {
+  /* ## The head:  the title, the toggle at its right */
+  .head {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    /* the gap the header kept below itself, before it shared its row */
+    margin-block-end: var(--ui-font-size);
+  }
+  [part~="header"] {
+    --ui-header-margin-top: 0;
+    --ui-header-margin-bottom: 0;
+  }
+
+  /* ## Buttons:  the fold chevrons and the toggle, muted, the link's colour on hover (the epic pages' look) */
+  .fold,
+  .toggle-all {
+    display: inline-grid;
+    flex: none;
+    place-items: center;
+    box-sizing: border-box;
+    padding: 0;
+    border: none;
+    background: none;
+    color: var(--_ui-toc-control-color);
+    font: inherit;
+    cursor: pointer;
+  }
+  .fold:hover,
+  .toggle-all:hover {
+    color: var(--_ui-toc-control-hover-color);
+  }
+  .fold:focus-visible,
+  .toggle-all:focus-visible {
+    outline: 2px solid var(--ui-focus-color, var(--ui-link));
+    outline-offset: 1px;
+  }
+  .chevron,
+  .chevrons {
+    display: block;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  /* The toggle:  a square, a soft background on hover. */
+  .toggle-all {
+    margin-inline-start: auto;
+    /* centred on the title's capitals, not its line box (which holds the descenders' room below) */
+    translate: 0 -0.125em;
+    width: 1.75em;
+    height: 1.75em;
+    border-radius: 0.4286em;
+  }
+  .toggle-all:hover {
+    background: var(--_ui-toc-control-hover-background);
+  }
+  .chevrons {
+    width: 1em;
+    height: 1em;
+    stroke-width: 1.8;
+  }
+
+  /* ## A section's row:  its link past the gutter, its chevron in it, centred on the link's line */
+  .section-row {
+    position: relative;
+    padding-inline-start: var(--_ui-toc-gutter);
+  }
+  .fold {
+    position: absolute;
+    inset-block: 0;
+    inset-inline-start: 0;
+    width: var(--_ui-toc-gutter);
+    border-radius: 0.25em;
+  }
+  .chevron {
+    width: 0.8571em;
+    height: 0.8571em;
+    stroke-width: 2;
+    /* centred on the heading's capitals, not its line box */
+    translate: 0 -0.1em;
+    transition: rotate var(--ui-duration-fast) var(--ui-ease);
+  }
+  .fold[aria-expanded="true"] .chevron {
+    rotate: 90deg;
+  }
+  [part~="menu"] {
+    --ui-menu-margin: 0;
+  }
+  /* weights go on the item's own box:  its text is drawn in its shadow root */
+  .section::part(item) {
+    font-weight: var(--_ui-toc-section-weight);
+  }
+  /* The entries' holder:  no gap of its own;  its menu indents under the title (a section's, past the gutter). */
+  .entries {
+    padding-inline-start: var(--_ui-toc-indent);
+  }
+  [part~="menu"] > .entries {
+    padding-inline-start: calc(var(--_ui-toc-gutter) + var(--_ui-toc-indent));
+  }
+  [part~="entries"] {
+    --ui-menu-margin: 0;
+  }
+}
+
+@layer ui.components.toc.states {
+  [part~="entry"]:state(selected)::part(item) {
+    font-weight: var(--_ui-toc-current-weight);
+  }
+}

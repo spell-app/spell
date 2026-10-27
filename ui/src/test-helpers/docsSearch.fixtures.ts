@@ -77,7 +77,7 @@ export const PAGE = `
         <ui-section id="examples-types" label="Types">
           <ui-section id="examples-types-divider" label="Divider"></ui-section>
           <ui-section id="examples-types-vertical-divider" label="Vertical Divider">
-            <ui-docs-example><ui-section id="demo" label="Vertical demo"></ui-section></ui-docs-example>
+            <ui-example><ui-section id="demo" label="Vertical demo"></ui-section></ui-example>
           </ui-section>
         </ui-section>
       </ui-tab>

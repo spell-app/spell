@@ -66,7 +66,7 @@
             -->
             <ui-section id="examples-types" label="Types" sticky collapsible dividing>
               <ui-section id="examples-types-placeholder" label="Placeholder" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     A placeholder is used to reserve space for content that soon will appear in a layout.
                   </p>
@@ -89,8 +89,8 @@
                       <ui-placeholder-line></ui-placeholder-line>
                     </ui-placeholder-paragraph>
                   </ui-placeholder>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-grid columns="3" stackable>
                     <ui-column>
                       <ui-segment appearance="raised">
@@ -135,8 +135,8 @@
                       </ui-segment>
                     </ui-column>
                   </ui-grid>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-message slot="description" size="small" class="site-not-ported"
                     >Not ported: Fomantic's &quot;Simulate Loading&quot; button, which swaps the skeleton for a loaded
                     card -- a page script, not part of the placeholder. Replace the placeholder with the real content
@@ -204,13 +204,13 @@
                       </ui-extra>
                     </ui-card>
                   </ui-cards>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
             <ui-section id="examples-content" label="Content" sticky collapsible dividing>
               <ui-section id="examples-content-lines" label="Lines" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">A placeholder can contain lines of text.</p>
                   <ui-message slot="description" state="info" size="small"
                     >By default, repeated lines appear varied in width. It may be useful to give an exact
@@ -223,11 +223,11 @@
                     <ui-placeholder-line></ui-placeholder-line>
                     <ui-placeholder-line></ui-placeholder-line>
                   </ui-placeholder>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-content-headers" label="Headers" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">A placeholder can contain a header.</p>
                   <ui-message slot="description" state="info" size="small"
                     >Header lines are slightly taller than paragraph lines.</ui-message
@@ -238,19 +238,19 @@
                       <ui-placeholder-line></ui-placeholder-line>
                     </ui-placeholder-header>
                   </ui-placeholder>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-placeholder>
                     <ui-placeholder-header>
                       <ui-placeholder-line></ui-placeholder-line>
                       <ui-placeholder-line></ui-placeholder-line>
                     </ui-placeholder-header>
                   </ui-placeholder>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-content-paragraph" label="Paragraph" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">A placeholder can contain a paragraph.</p>
                   <ui-message slot="description" state="info" size="small"
                     >Paragraphs are used to group lines together.</ui-message
@@ -269,17 +269,17 @@
                       <ui-placeholder-line></ui-placeholder-line>
                     </ui-placeholder-paragraph>
                   </ui-placeholder>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <!-- GAP I50:  Fomantic sizes this image placeholder with style="width:150px;height:150px";  no attribute does, so it keeps the default fixed height at the placeholder's width. -->
               <ui-section id="examples-content-image" label="Image" sticky collapsible dividing>
-                <ui-docs-example description="A placeholder can contain an image.">
+                <ui-example description="A placeholder can contain an image.">
                   <ui-placeholder>
                     <ui-placeholder-image></ui-placeholder-image>
                   </ui-placeholder>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-message slot="description" state="info" size="small"
                     >Using <code>square</code> (1:1) or <code>rectangular</code> (4:3) embeds an aspect ratio into the
                     image placeholder, so it keeps its shape in responsive layouts.</ui-message
@@ -307,8 +307,8 @@
                       </ui-content>
                     </ui-card>
                   </ui-cards>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-cards columns="3">
                     <ui-card>
                       <ui-content>
@@ -332,13 +332,13 @@
                       </ui-content>
                     </ui-card>
                   </ui-cards>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
             <ui-section id="examples-variations" label="Variations" sticky collapsible dividing>
               <ui-section id="examples-variations-line-length" label="Line Length" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="A line can specify how long its contents should appear:  `length` is `full`, `very long`, `long`, `medium`, `short` or `very short`."
                 >
                   <ui-placeholder>
@@ -349,8 +349,8 @@
                     <ui-placeholder-line length="short"></ui-placeholder-line>
                     <ui-placeholder-line length="very short"></ui-placeholder-line>
                   </ui-placeholder>
-                </ui-docs-example>
-                <ui-docs-example>
+                </ui-example>
+                <ui-example>
                   <ui-placeholder>
                     <ui-placeholder-header image>
                       <ui-placeholder-line length="medium"></ui-placeholder-line>
@@ -361,11 +361,11 @@
                       <ui-placeholder-line length="medium"></ui-placeholder-line>
                     </ui-placeholder-paragraph>
                   </ui-placeholder>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-fluid" label="Fluid" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="A fluid placeholder takes up the width of its container, instead of stopping at 30em."
                 >
                   <ui-placeholder fluid>
@@ -379,11 +379,11 @@
                       <ui-placeholder-line></ui-placeholder-line>
                     </ui-placeholder-paragraph>
                   </ui-placeholder>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-inverted" label="Inverted" sticky collapsible dividing>
-                <ui-docs-example description="A placeholder can have its colors inverted.">
+                <ui-example description="A placeholder can have its colors inverted.">
                   <ui-segment inverted>
                     <ui-placeholder inverted>
                       <ui-placeholder-header image>
@@ -397,7 +397,7 @@
                       </ui-placeholder-paragraph>
                     </ui-placeholder>
                   </ui-segment>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section
@@ -407,7 +407,7 @@
                 collapsible
                 dividing
               >
-                <ui-docs-example description="Placeholders that follow each other are spaced apart automatically.">
+                <ui-example description="Placeholders that follow each other are spaced apart automatically.">
                   <ui-placeholder>
                     <ui-placeholder-header image>
                       <ui-placeholder-line></ui-placeholder-line>
@@ -426,7 +426,7 @@
                       <ui-placeholder-line></ui-placeholder-line>
                     </ui-placeholder-header>
                   </ui-placeholder>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
           </ui-tab>

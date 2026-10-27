@@ -15,7 +15,7 @@
  * - Sections left out:
  *   - those holding `stub-*` stand-ins (the tests' `StubOwner`, not real elements)
  *   - all past `MAX_SECTIONS` (3) per family, so the page stays scannable (the family's page has the rest)
- * - Each file's `<section><h4>Title</h4>...</section>` becomes a `<ui-docs-example>`:
+ * - Each file's `<section><h4>Title</h4>...</section>` becomes a `<ui-example>`:
  *   - the family's first one headed with its title and summary,
  *     plus a link to its page, and to its sub-tags' own pages
  *   - the rest a header-less continuation, described by their `<h4>`
@@ -93,7 +93,7 @@ class KitchenSinkWriter {
       if (index === 0) {
         const page = `${family.mainTag}.html`
         lines.push(
-          `${indent}<ui-docs-example header="${escapeHTML(family.title)}">`,
+          `${indent}<ui-example heading="${escapeHTML(family.title)}">`,
           `${indent}  <p slot="description">`,
           `${indent}    ${escapeHTML(withoutTicks(family.summary))}`,
           `${indent}    <a href="${page}">${escapeHTML(family.title)} page</a>`,
@@ -101,11 +101,11 @@ class KitchenSinkWriter {
           `${indent}  </p>`
         )
       } else {
-        lines.push(`${indent}<ui-docs-example description="${escapeHTML(section.title)}">`)
+        lines.push(`${indent}<ui-example description="${escapeHTML(section.title)}">`)
       }
       lines.push(
         ...KitchenSinkWriter.indented(KitchenSinkWriter.markup(section), `${indent}  `),
-        `${indent}</ui-docs-example>`
+        `${indent}</ui-example>`
       )
     })
     return lines

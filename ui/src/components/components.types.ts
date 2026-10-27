@@ -1902,3 +1902,61 @@ export class ThemeNames {
     return (themes.constructor as typeof Themes).RENAMED[name] ?? name
   }
 }
+
+////////////////
+// ## Headings and code in a text
+////////////////
+
+/** A family's `level` attribute:  the heading levels it may draw, and the one when unset. */
+export type HeadingBounds = {
+  /** lowest level allowed */
+  readonly min: number
+  /** highest level allowed */
+  readonly max: number
+  /** level when unset or not a number */
+  readonly fallback: number
+}
+
+/** `<ui-header>`'s `level` attribute:  `"1"` ... `"6"`. */
+export type HeadingLevelText = "1" | "2" | "3" | "4" | "5" | "6"
+
+/****************
+ * ### `HeadingLevels`
+ * A `level` attribute as a heading level the element draws:  `<ui-example>`'s, and the docs widgets'
+ * (`<ui-docs-api>`, `<ui-docs-tokens>`).
+ * - Static:  pure.
+ ****************/
+export class HeadingLevels {
+  /** `value` (an attribute) rounded and clamped to `bounds`;  `bounds.fallback` when unset or not a number. */
+  static levelFor(value: unknown, bounds: HeadingBounds): number {
+    const level = Math.round(Number(value ?? bounds.fallback))
+    return Number.isFinite(level) ? Math.min(bounds.max, Math.max(bounds.min, level)) : bounds.fallback
+  }
+
+  /** `level` as `<ui-header>`'s `level` attribute:  `"1"` ... `"6"`, rounded and clamped to a real heading. */
+  static attributeFor(level: number): HeadingLevelText {
+    // clamped to 1 ... 6 just here, which TypeScript can't follow
+    return String(Math.min(6, Math.max(1, Math.round(level)))) as HeadingLevelText
+  }
+}
+
+/**
+ * A backticked span in a description, its content in group 1:
+ * `<ui-example>` and `<ui-docs-tokens>` split text on it and draw each odd piece as `<code>`.
+ * - `<ui-docs-api>` follows CommonMark's longer fences instead (`InlineCode`):  its texts come from vocabularies.
+ */
+export const CODE_SPAN = /`([^`]+)`/g
+
+////////////////
+// ## Table of contents
+////////////////
+
+/**
+ * Marks an element in another element's SHADOW root as an entry of the page's "On this page" list (`<ui-toc>`);
+ * `entry`'s value is the entry's text.
+ * - The list reads light DOM only, except the shadow roots of the tags `TocIndex.addShadowHost()` names
+ *   (`<ui-docs-api>`):  there it lists these, in order, under the `<ui-section>` around the host.
+ * - The element has an id, so the entry links to `#<id>`;  the page lands there (`HashLanding`), as the browser can't.
+ * - `group`:  a GROUP (a tag's header);  the entries after it, to the next group, nest in it.
+ */
+export const TocMarks = { entry: "data-toc", group: "data-toc-group" } as const

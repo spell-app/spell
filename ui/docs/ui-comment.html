@@ -61,7 +61,7 @@
             -->
             <ui-section id="examples-types" label="Types" sticky collapsible dividing>
               <ui-section id="examples-types-comments" label="Comments" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     A basic list of comments: a <code>&lt;ui-comments&gt;</code> inside a comment is its thread of
                     replies, and the <code>reply</code> slot takes a reply form.
@@ -120,13 +120,13 @@
                       </form>
                     </ui-form>
                   </ui-comments>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
             <ui-section id="examples-content" label="Content" sticky collapsible dividing>
               <ui-section id="examples-content-avatar" label="Avatar" sticky collapsible dividing>
-                <ui-docs-example description="A comment can contain an image or avatar:  `<ui-avatar src>`.">
+                <ui-example description="A comment can contain an image or avatar:  `<ui-avatar src>`.">
                   <ui-comments>
                     <ui-comment>
                       <ui-avatar src="images/avatar/small/elliot.jpg"></ui-avatar>
@@ -135,11 +135,11 @@
                       </ui-content>
                     </ui-comment>
                   </ui-comments>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-content-metadata" label="Metadata" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="A comment can contain metadata about the comment, an arbitrary amount of metadata may be defined:  each child of `<ui-meta>` is one piece."
                 >
                   <ui-comments>
@@ -157,11 +157,11 @@
                       </ui-content>
                     </ui-comment>
                   </ui-comments>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-content-actions" label="Actions" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="A comment can contain a list of actions a user may perform related to this comment:  `<button>`s (or links, to go somewhere) in `<ui-actions>`."
                 >
                   <ui-comments>
@@ -181,12 +181,12 @@
                       </ui-content>
                     </ui-comment>
                   </ui-comments>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <!-- GAP I35:  a comment's `reply` slot sits below the whole comment, not beside the avatar. -->
               <ui-section id="examples-content-reply-form" label="Reply Form" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     A comment can contain a form to reply to a comment. This may have arbitrary content.
                   </p>
@@ -212,9 +212,9 @@
                       </ui-form>
                     </ui-comment>
                   </ui-comments>
-                </ui-docs-example>
+                </ui-example>
 
-                <ui-docs-example>
+                <ui-example>
                   <ui-comments>
                     <ui-comment>
                       <ui-avatar src="images/avatar/small/joe.jpg"></ui-avatar>
@@ -249,11 +249,11 @@
                       </form>
                     </ui-form>
                   </ui-comments>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-content-no-avatar" label="No avatar" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="A comment can leave out its avatar;  the content then starts at the edge."
                 >
                   <ui-comments>
@@ -266,13 +266,13 @@
                       </ui-content>
                     </ui-comment>
                   </ui-comments>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
             <ui-section id="examples-states" label="States" sticky collapsible dividing>
               <ui-section id="examples-states-collapsed" label="Collapsed" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="Comments can be collapsed, or hidden from view:  `collapsed` folds away a thread of replies, one comment or a whole list.  Here Christian's thread is folded."
                 >
                   <ui-comments>
@@ -311,11 +311,11 @@
                       </ui-comments>
                     </ui-comment>
                   </ui-comments>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-states-disabled" label="Disabled" sticky collapsible dividing>
-                <ui-docs-example description="A comment can be disabled.">
+                <ui-example description="A comment can be disabled.">
                   <ui-comments>
                     <ui-comment disabled>
                       <ui-avatar src="images/avatar/small/elliot.jpg"></ui-avatar>
@@ -327,13 +327,13 @@
                       </ui-content>
                     </ui-comment>
                   </ui-comments>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
             <ui-section id="examples-variations" label="Variations" sticky collapsible dividing>
               <ui-section id="examples-variations-threaded" label="Threaded" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="A comment list can be threaded to show the relationship between conversations."
                 >
                   <ui-comments threaded>
@@ -385,11 +385,11 @@
                       </form>
                     </ui-form>
                   </ui-comments>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-minimal" label="Minimal" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="Comments can hide extra information unless a user shows intent to interact with a comment:  the actions show while a comment is hovered or holds keyboard focus."
                 >
                   <ui-comments appearance="minimal">
@@ -441,11 +441,11 @@
                       </form>
                     </ui-form>
                   </ui-comments>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-size" label="Size" sticky collapsible dividing>
-                <ui-docs-example description="Comments can have different sizes.">
+                <ui-example description="Comments can have different sizes.">
                   <ui-comments size="small">
                     <ui-header level="3" dividing>Comments</ui-header>
                     <ui-comment>
@@ -495,9 +495,9 @@
                       </form>
                     </ui-form>
                   </ui-comments>
-                </ui-docs-example>
+                </ui-example>
 
-                <ui-docs-example>
+                <ui-example>
                   <ui-comments size="large">
                     <ui-header level="3" dividing>Comments</ui-header>
                     <ui-comment>
@@ -547,11 +547,11 @@
                       </form>
                     </ui-form>
                   </ui-comments>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-inverted" label="Inverted" sticky collapsible dividing>
-                <ui-docs-example description="Comments' colors can be inverted.">
+                <ui-example description="Comments' colors can be inverted.">
                   <ui-segment inverted>
                     <ui-comments inverted threaded>
                       <ui-header level="3" inverted dividing>Comments</ui-header>
@@ -603,7 +603,7 @@
                       </ui-form>
                     </ui-comments>
                   </ui-segment>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
           </ui-tab>
@@ -653,7 +653,7 @@
                 collapsible
                 dividing
               >
-                <ui-docs-example
+                <ui-example
                   description="A button in the comment's actions folds its thread with `collapsed`, and says so with `aria-expanded`."
                 >
                   <ui-comments>
@@ -688,7 +688,7 @@
                       </ui-comments>
                     </ui-comment>
                   </ui-comments>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 

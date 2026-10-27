@@ -829,20 +829,20 @@
    * - Owen, 2026-10-23:  "Uneven amount of space above and below the breadcrumbs here, bottom looks good"
    * - measured:  18.9px over the capitals, 18px under the baseline
    */
-  ui-docs-example:has(> ui-breadcrumbs) {
-    --ui-docs-example-frame-padding: calc(0.75em - 3px) 1em 0.75em;
+  ui-example:has(> ui-breadcrumbs) {
+    --ui-example-frame-padding: calc(0.75em - 3px) 1em 0.75em;
   }
 
   /*
    * an example's buttons that wrap keep apart, row from row:  their rows touched
    * - also inside the example's own segment (Button's Inverted example:  0px between rows, 8px between columns)
    */
-  ui-docs-example > :is(ui-button, ui-buttons, ui-label),
-  ui-docs-example > ui-segment > :is(ui-button, ui-buttons, ui-label) {
+  ui-example > :is(ui-button, ui-buttons, ui-label),
+  ui-example > ui-segment > :is(ui-button, ui-buttons, ui-label) {
     margin-block: 0.25em;
   }
   /* a message given as an example's description runs the frame's width, as every other message does */
-  ui-docs-example:has(> ui-message[slot="description"])::part(description) {
+  ui-example:has(> ui-message[slot="description"])::part(description) {
     max-width: none;
   }
 

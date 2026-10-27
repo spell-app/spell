@@ -1,5 +1,6 @@
 <!doctype html>
 <!--
+  spell ui rename: leave this file (a frozen copy of a brand page, from before Spell UI's new attribute names)
   A <brand-*> element's page in the brand's docs set (`packages/brand/docs/`, served at `/components/brand/`), in
   Spell UI's component page shape:  masthead, then Examples / Usage / API / Theming tabs.
   - The set's layout (`__parts/layout.html`) loads Spell UI's site bundle and the brand pack;  API and tokens come
@@ -61,39 +62,39 @@
           <ui-tab value="examples" label="Examples">
             <ui-section id="examples-types" label="Types" sticky collapsible dividing>
               <ui-section id="examples-types-mark" label="Mark" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description='`variant="mark"` (the default):  the hat alone.  For app icons, favicons and anywhere the name is already on screen.'
                 >
                   <brand-logo></brand-logo>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-types-lockup" label="Lockup" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description='`variant="lockup"`:  the hat and “Spell”, the hat centred on the capitals.  Headers and small spaces.'
                 >
                   <brand-logo variant="lockup"></brand-logo>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-types-tagline" label="Lockup with tagline" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description='`variant="tagline"`:  the primary logo, “All magic, no fuss.” under the word, exactly as wide as it.  Give it room:  it wants about twice the lockup&apos;s height.'
                 >
                   <brand-logo variant="tagline" style="--brand-logo-height: 4em"></brand-logo>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-types-app" label="App lockup" sticky collapsible dividing>
-                <ui-docs-example description='`variant="app"`:  the hat and “Spell App”.'>
+                <ui-example description='`variant="app"`:  the hat and “Spell App”.'>
                   <brand-logo variant="app"></brand-logo>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
             <ui-section id="examples-variations" label="Variations" sticky collapsible dividing>
               <ui-section id="examples-variations-tone-light" label="Tone, on light" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="`tone`:  `ink` (the default:  the theme's strongest text), `aubergine` and `purple`, for light grounds.  `ink` and `purple` follow the scheme (`ui-light` holds this ground light);  `aubergine` never changes."
                 >
                   <ui-segment class="ui-light">
@@ -103,11 +104,11 @@
                       <brand-logo variant="lockup" tone="purple"></brand-logo>
                     </div>
                   </ui-segment>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-tone-dark" label="Tone, on dark" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="`white` and `lilac`, for aubergine and dark grounds (and dark photos).  Both are fixed colours."
                 >
                   <ui-segment inverted>
@@ -116,11 +117,11 @@
                       <brand-logo variant="lockup" tone="lilac"></brand-logo>
                     </div>
                   </ui-segment>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-current" label="Current colour" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description='`tone="current"`:  the logo takes the colour of the text around it, e.g. inside a button, a label or a link.'
                 >
                   <ui-button primary>
@@ -131,30 +132,30 @@
                     <brand-logo tone="current" label="" style="--brand-logo-height: 1.2em"></brand-logo>
                     Made with Spell
                   </ui-label>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-size" label="Size" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="`--brand-logo-height` sets the height;  the width follows the logo's proportions.  The default, `2em`, scales with the font size around it."
                 >
                   <brand-logo variant="lockup" style="--brand-logo-height: 16px"></brand-logo>
                   <brand-logo variant="lockup" style="--brand-logo-height: 24px"></brand-logo>
                   <brand-logo variant="lockup"></brand-logo>
                   <brand-logo variant="lockup" style="--brand-logo-height: 64px"></brand-logo>
-                </ui-docs-example>
-                <ui-docs-example description="In a heading, `1em` sets the mark on the text's height.">
+                </ui-example>
+                <ui-example description="In a heading, `1em` sets the mark on the text's height.">
                   <ui-header level="2">
                     <brand-logo tone="purple" label="" style="--brand-logo-height: 1em"></brand-logo>
                     Cast your first spell
                   </ui-header>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
             <ui-section id="examples-content" label="Content" sticky collapsible dividing>
               <ui-section id="examples-content-decorative" label="Decorative" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description='`label=""`:  hidden from screen readers, when the text beside it already says “Spell”.  Any other `label` renames it.'
                 >
                   <ui-header level="3">
@@ -162,7 +163,7 @@
                     Spell
                   </ui-header>
                   <brand-logo variant="lockup" label="Spell home"></brand-logo>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
           </ui-tab>

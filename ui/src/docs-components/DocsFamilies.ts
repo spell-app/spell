@@ -4,7 +4,7 @@ import { RootLoader } from "spell-ui/components/ui-root/RootLoader"
 
 /****************
  * ### `DocsFamilies`
- * The doc-only families' barrels (`./ui-docs-example/index.ts` => its `import()`), and the one call that lets
+ * The doc-only families' barrels (`./ui-docs-api/index.ts` => its `import()`), and the one call that lets
  * `<ui-root>` / `<ui-include>` load them on first use:  `DocsFamilies.add()`.
  * - Called by the bundles that show docs pages (`site/_src/site.ts`), BEFORE `<ui-root>` is defined.
  * - Why not in `RootLoader`'s own glob:  the library build would make every `<ui-docs-*>` family a dynamic entry

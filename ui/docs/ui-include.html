@@ -59,37 +59,37 @@
             -->
             <ui-section id="examples-types" label="Types" sticky collapsible dividing>
               <ui-section id="examples-types-include" label="Include" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="An include fetches `source` (a page of THIS site) and shows its `<body>`, in its own shadow root:  the page's CSS stays out, inherited fonts, colours and tokens come in.  Its children show until it loads."
                 >
                   <ui-include source="examples/release-notes.html">Loading the release notes...</ui-include>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-types-one-part" label="One part" sticky collapsible dividing>
-                <ui-docs-example description="`select` shows only the first element a CSS selector matches.">
+                <ui-example description="`select` shows only the first element a CSS selector matches.">
                   <ui-include source="examples/release-notes.html" selector="#notes"></ui-include>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
             <ui-section id="examples-states" label="States" sticky collapsible dividing>
               <ui-section id="examples-states-another-site" label="Another site" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="Only this site's pages can be included:  any other URL shows an error, and nothing is fetched."
                 >
                   <ui-include source="https://example.com/"></ui-include>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
             <ui-section id="examples-variations" label="Variations" sticky collapsible dividing>
               <ui-section id="examples-variations-page-styles" label="Page styles" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="`page-styles` puts the included markup in the element's light DOM, where the page's stylesheets style it."
                 >
                   <ui-include source="examples/release-notes.html" selector="#notes" page-styles></ui-include>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section
@@ -99,7 +99,7 @@
                 collapsible
                 dividing
               >
-                <ui-docs-example
+                <ui-example
                   description='`load="visible"` waits until the include scrolls into view;  `idle` until the browser has nothing else to do.  Like Astro&apos;s islands.'
                 >
                   <ui-include source="examples/release-notes.html" selector="#aside" load="visible"
@@ -108,7 +108,7 @@
                   <ui-include source="examples/release-notes.html" selector="#aside" load="idle"
                     >Waiting for the browser to be idle...</ui-include
                   >
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
           </ui-tab>

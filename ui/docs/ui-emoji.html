@@ -68,7 +68,7 @@
               >
               <!-- GAP I48:  Fomantic's Emojis tab (every emoji, searchable) has no widget to render it. -->
               <ui-section id="examples-types-emoji" label="Emoji" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="An emoji is a glyph used to represent something else.  `name` takes its CLDR name, Unicode's own."
                 >
                   <p>
@@ -81,11 +81,11 @@
                     <ui-emoji name="keycap_1"></ui-emoji>
                     <ui-emoji name="woman_technologist"></ui-emoji>
                   </p>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-types-general" label="General" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">You can provide the emoji's name with or without colons.</p>
                   <ui-message slot="description" state="info" size="small"
                     >A name is case-blind, and its words may be joined any way: <code>thumbs_up</code>,
@@ -102,40 +102,40 @@
                     <ui-emoji name=":woman_technologist:"></ui-emoji>
                     <ui-emoji name="womanTechnologist"></ui-emoji>
                   </p>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-types-in-text" label="In text" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="An emoji sits in running text at the size of the text.  `label` names one that means something else in context."
                 >
                   <p>
                     That was <ui-emoji name=":face_with_tears_of_joy:"></ui-emoji> hilarious, thanks
                     <ui-emoji name="thumbs_up" label="Approved"></ui-emoji>
                   </p>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-types-decorative" label="Decorative" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="An empty `label` marks an emoji as decoration, hidden from assistive technology."
                 >
                   <p><ui-emoji name="sparkles" label=""></ui-emoji> New features</p>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
             <ui-section id="examples-states" label="States" sticky collapsible dividing>
               <ui-section id="examples-states-disabled" label="Disabled" sticky collapsible dividing>
-                <ui-docs-example description="An emoji can show that it is disabled.">
+                <ui-example description="An emoji can show that it is disabled.">
                   <ui-segment size="massive" appearance="basic">
                     <ui-emoji name="anguished_face" disabled></ui-emoji>
                   </ui-segment>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-states-loading" label="Loading" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="An emoji can be used as a simple loader.  It stands still when the reader asks for reduced motion."
                 >
                   <ui-segment size="massive" appearance="basic">
@@ -143,13 +143,13 @@
                     <ui-emoji name="smiling_face_with_smiling_eyes" loading></ui-emoji>
                     <ui-emoji name="beaming_face_with_smiling_eyes" loading></ui-emoji>
                   </ui-segment>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
             <ui-section id="examples-variations" label="Variations" sticky collapsible dividing>
               <ui-section id="examples-variations-size" label="Size" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">An emoji can vary in size.</p>
                   <ui-message slot="description" size="small"
                     >Sizes are ratios of the surrounding text: <code>small</code> 1.5em, <code>large</code> 6em,
@@ -165,10 +165,10 @@
                     <br />
                     <ui-emoji name="smiling_face" size="big"></ui-emoji> Big
                   </ui-segment>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
               <ui-section id="examples-variations-autosizing" label="Autosizing" sticky collapsible dividing>
-                <ui-docs-example
+                <ui-example
                   description="If no specific size is given, every emoji is sized by the current element's font size."
                 >
                   <ui-segment appearance="basic">
@@ -181,11 +181,11 @@
                       >Within a text <ui-emoji name="smiling_face"></ui-emoji
                     ></ui-text>
                   </ui-segment>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
 
               <ui-section id="examples-variations-link" label="Link" sticky collapsible dividing>
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">An emoji can be formatted as a link.</p>
                   <ui-message slot="description" size="small"
                     ><code>appearance="link"</code> is only the look, a pointer cursor. Wrap the emoji in a
@@ -197,7 +197,7 @@
                       ><ui-emoji name="slightly_smiling_face" appearance="link"></ui-emoji
                     ></a>
                   </ui-segment>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
 
@@ -209,7 +209,7 @@
                 collapsible
                 dividing
               >
-                <ui-docs-example>
+                <ui-example>
                   <p slot="description">
                     A page written for Fomantic's emoji list can keep its names:  a
                     <code>&lt;ui-root emoji="fomantic"&gt;</code> around them switches every emoji inside to Fomantic's
@@ -231,7 +231,7 @@
                       <ui-emoji name=":cupid:"></ui-emoji>
                     </p>
                   </ui-root>
-                </ui-docs-example>
+                </ui-example>
               </ui-section>
             </ui-section>
           </ui-tab>

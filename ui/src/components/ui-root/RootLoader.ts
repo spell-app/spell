@@ -176,7 +176,7 @@ export class RootLoader {
 
   /**
    * Let roots load more families:  `barrels`, a literal `import.meta.glob()` of family barrels
-   * (`".../ui-docs-example/index.ts" => import()`), each keyed by its folder.
+   * (`".../ui-docs-api/index.ts" => import()`), each keyed by its folder.
    * - Call it BEFORE a root needs one:  a tag whose family failed to load stays failed.
    */
   static add(barrels: Record<string, () => Promise<unknown>>): void {

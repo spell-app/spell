@@ -1004,7 +1004,7 @@
   }
 
   /* ## in-menu:  an item's sub header, `.ui.vertical.menu .item > .header:not(.ui)`
-     (menu header ITEMS are `<ui-item type="header">`). */
+     (menu header ITEMS are `<ui-item kind="header">`). */
   :host(:state(in-menu)) > .header,
   .in-menu.header {
     display: block;

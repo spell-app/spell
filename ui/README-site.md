@@ -2,9 +2,9 @@
 
 ```html
 <ui-section id="examples-types-button" label="Button" sticky collapsible dividing>
-  <ui-docs-example description="A standard button.">
+  <ui-example description="A standard button.">
     <ui-button>Follow</ui-button>
-  </ui-docs-example>
+  </ui-example>
 </ui-section>
 ```
 
@@ -265,9 +265,9 @@ Here is the hook's example, as you'd type it:
 
 ```html
 <ui-header level="2" dividing>Types</ui-header>
-<ui-docs-example header="Button" description="A standard button.">
+<ui-example heading="Button" description="A standard button.">
   <ui-button>Follow</ui-button>
-</ui-docs-example>
+</ui-example>
 ```
 
 Then `yarn site:sections` turns it into the markup at the top of this page.
@@ -281,10 +281,10 @@ and the example a section of its own inside it, `#examples-types-button`, holdin
   and puts its title just below the stuck ones ([SiteSections.ts](site/_src/SiteSections.ts)).
   Old hashes still land (`#types`, `#emphasis`).
   - The landing itself is the docs elements' own,
-    [HashLanding](src/docs-components/ui-docs-toc/HashLanding.ts), by the site's rules:
+    [HashLanding](src/components/ui-toc/HashLanding.ts), by the site's rules:
     the page scrolls once, where the table of contents and the site used to scroll one after the other.
 - Rerun `yarn site:sections` after renaming a header:  it fixes the ids, and running it twice changes nothing.
-- An example is a `<ui-docs-example description>` around live markup.
+- An example is a `<ui-example description>` around live markup.
   It shows that markup, re-indented, so you write it once;  a comment inside it shows too.
 
 The other three panes:

@@ -97,10 +97,10 @@
               </script>
             </ui-markdown>
             <ui-section id="shape-all-at-once" label="All at Once" sticky collapsible dividing>
-              <ui-docs-example description="`size`, two key-only words and the noun:  `ui small basic primary button`.">
+              <ui-example description="`size`, two key-only words and the noun:  `ui small basic primary button`.">
                 <ui-button size="small" color="primary" appearance="basic">Save</ui-button>
-              </ui-docs-example>
-              <ui-docs-example>
+              </ui-example>
+              <ui-example>
                 <p slot="description">
                   Attributes in any order render the same words in the same order: both images are
                   <code>ui tiny left spaced right floated image</code>. Fomantic needs <code>left spaced</code> and
@@ -112,7 +112,7 @@
                 <ui-segment clearing appearance="basic">
                   <ui-image size="tiny" spacing="left" floated="right" src="images/wireframe/square-image.png" alt=""></ui-image>
                 </ui-segment>
-              </ui-docs-example>
+              </ui-example>
             </ui-section>
           </ui-section>
 
@@ -147,44 +147,44 @@
             </ui-markdown>
 
             <ui-section id="attribute-kinds-size" label="Size" sticky collapsible dividing>
-              <ui-docs-example
+              <ui-example
                 description='`size="small"` emits its value;  `size="medium"` is the default and emits nothing.'
               >
                 <ui-button size="small">size="small"</ui-button>
                 <ui-button size="medium">size="medium"</ui-button>
                 <ui-button size="large">size="large"</ui-button>
-              </ui-docs-example>
+              </ui-example>
             </ui-section>
             <ui-section id="attribute-kinds-colour" label="Colour" sticky collapsible dividing>
-              <ui-docs-example description='`color="red"` emits its value:  `ui red button`.'>
+              <ui-example description='`color="red"` emits its value:  `ui red button`.'>
                 <ui-button color="red">color="red"</ui-button>
                 <ui-button color="primary">color="primary"</ui-button>
-              </ui-docs-example>
+              </ui-example>
             </ui-section>
             <ui-section id="attribute-kinds-value-only" label="Value Only" sticky collapsible dividing>
-              <ui-docs-example
+              <ui-example
                 description='Where a colour would go, a value of its own:  `state="warning"` => `ui warning message`.'
               >
                 <ui-message state="warning">state="warning"</ui-message>
-              </ui-docs-example>
+              </ui-example>
             </ui-section>
             <ui-section id="attribute-kinds-key-only" label="Key Only" sticky collapsible dividing>
-              <ui-docs-example
+              <ui-example
                 description="A bare boolean emits its key.  `basic` => `ui basic button`.  `raised` => `ui raised segment`."
               >
                 <ui-button appearance="basic">basic</ui-button>
                 <ui-segment appearance="raised">raised</ui-segment>
-              </ui-docs-example>
+              </ui-example>
             </ui-section>
             <ui-section id="attribute-kinds-value-and-key" label="Value and Key" sticky collapsible dividing>
-              <ui-docs-example
+              <ui-example
                 description='`floated="left"` => `ui left floated image`;  a bare `floated` emits nothing.'
               >
                 <ui-segment clearing appearance="basic">
                   <ui-image floated="left" size="tiny" src="images/wireframe/square-image.png" alt=""></ui-image>
                   <p>An image with <code>floated="left"</code>: the text wraps round it.</p>
                 </ui-segment>
-              </ui-docs-example>
+              </ui-example>
             </ui-section>
             <ui-section
               id="attribute-kinds-key-or-value-and-key"
@@ -193,15 +193,15 @@
               collapsible
               dividing
             >
-              <ui-docs-example
+              <ui-example
                 description='`pointing` => `ui pointing label`.  `pointing="left"` => `ui left pointing label`.'
               >
                 <ui-label pointing>pointing</ui-label>
                 <ui-label pointing="left">pointing="left"</ui-label>
-              </ui-docs-example>
+              </ui-example>
             </ui-section>
             <ui-section id="attribute-kinds-multiple" label="Multiple" sticky collapsible dividing>
-              <ui-docs-example
+              <ui-example
                 description='`only="mobile tablet"` => `mobile only tablet only row`.  Narrow your window to swap the rows.'
               >
                 <ui-grid>
@@ -212,10 +212,10 @@
                     <ui-column><ui-segment>only="mobile tablet": you're on a phone or tablet</ui-segment></ui-column>
                   </ui-row>
                 </ui-grid>
-              </ui-docs-example>
+              </ui-example>
             </ui-section>
             <ui-section id="attribute-kinds-alignment" label="Alignment" sticky collapsible dividing>
-              <ui-docs-example
+              <ui-example
                 description='`text-align="center"` => `center aligned`.  `vertical-align="middle"` => `middle aligned`.'
               >
                 <ui-segment align="center">text-align="center"</ui-segment>
@@ -225,12 +225,12 @@
                   >
                   <ui-column><ui-segment>sits in the middle</ui-segment></ui-column>
                 </ui-grid>
-              </ui-docs-example>
+              </ui-example>
             </ui-section>
             <ui-section id="attribute-kinds-icon" label="Icon" sticky collapsible dividing>
-              <ui-docs-example description='`icon="user"` names a glyph:  no class word, an icon in the shadow root.'>
+              <ui-example description='`icon="user"` names a glyph:  no class word, an icon in the shadow root.'>
                 <ui-button icon="user">icon="user"</ui-button>
-              </ui-docs-example>
+              </ui-example>
             </ui-section>
           </ui-section>
 
@@ -254,7 +254,7 @@
               </script>
             </ui-markdown>
             <ui-section id="widths-widths" label="Widths" sticky collapsible dividing>
-              <ui-docs-example
+              <ui-example
                 description='`width="4"`, `width="1/4"` and `width="25%"` all emit `four wide`;  the rest of each row is `twelve wide`.'
               >
                 <ui-grid celled>
@@ -271,16 +271,16 @@
                     <ui-column width="75%">width="75%"</ui-column>
                   </ui-row>
                 </ui-grid>
-              </ui-docs-example>
+              </ui-example>
             </ui-section>
             <ui-section id="widths-equal-width" label="Equal Width" sticky collapsible dividing>
-              <ui-docs-example description='`columns="equal"` => `equal width`:  the columns share each line.'>
+              <ui-example description='`columns="equal"` => `equal width`:  the columns share each line.'>
                 <ui-grid columns="equal" celled>
                   <ui-column>One</ui-column>
                   <ui-column>Two</ui-column>
                   <ui-column>Three</ui-column>
                 </ui-grid>
-              </ui-docs-example>
+              </ui-example>
             </ui-section>
           </ui-section>
 
@@ -295,14 +295,14 @@
               </script>
             </ui-markdown>
             <ui-section id="booleans-booleans" label="Booleans" sticky collapsible dividing>
-              <ui-docs-example
+              <ui-example
                 description='Unlike a native attribute, `basic="false"` and `basic="no"` mean NOT basic.'
               >
                 <ui-button appearance="basic">basic</ui-button>
                 <ui-button appearance="basic">basic="yes"</ui-button>
                 <ui-button>basic="false"</ui-button>
                 <ui-button>basic="no"</ui-button>
-              </ui-docs-example>
+              </ui-example>
             </ui-section>
             <ui-message size="small"
               >Except <code>disabled</code> on a form control, such as a button, an input or a checkbox: the browser
@@ -320,10 +320,10 @@
               </script>
             </ui-markdown>
             <ui-section id="medium-medium" label="Medium" sticky collapsible dividing>
-              <ui-docs-example description="Both render `ui button`.">
+              <ui-example description="Both render `ui button`.">
                 <ui-button size="medium">size="medium"</ui-button>
                 <ui-button>no size</ui-button>
-              </ui-docs-example>
+              </ui-example>
             </ui-section>
           </ui-section>
 
