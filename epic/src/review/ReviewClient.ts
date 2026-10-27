@@ -756,8 +756,7 @@ export class ReviewClient {
       this.notify(answer.message)
       return answer
     } catch (failure) {
-      const error = (failure as Error).message
-      this.notify(`${error[0]!.toUpperCase()}${error.slice(1)}.`)
+      this.notify(sentence((failure as Error).message))
       return undefined
     }
   }
@@ -919,7 +918,7 @@ export class ReviewClient {
       this.writing--
     }
     this.lastWriteError = error
-    if (!quiet) this.notify(`${error[0]!.toUpperCase()}${error.slice(1)}.`)
+    if (!quiet) this.notify(sentence(error))
     await this.load()
     this.changed()
     return undefined

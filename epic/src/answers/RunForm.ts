@@ -9,9 +9,7 @@ import type {
   RunStatus
 } from "spell/server/runs/runs.types"
 
-import { clockTime } from "spell/util/time"
-import { PlanDates } from "spell-epic/dates"
-import { ServerLink, sentence, type ServerLinkOptions } from "spell-epic/review"
+import { ServerLink, clockOf, sentence, type ServerLinkOptions } from "spell-epic/review"
 
 import { DraftSaver } from "./DraftSaver"
 import { RUN_POLL_MS, RUN_SAVE_MS, RUNS_API, type SendFill } from "./answers.types"
@@ -175,7 +173,7 @@ export class RunForm {
   /** When the last save went through, `14:04`;  `""` before one. */
   get savedAt(): string {
     const state = this.saves.state
-    return state.kind === "saved" ? clockTime(new Date(state.at)) : ""
+    return state.kind === "saved" ? clockOf(state.at) : ""
   }
 
   /** The words beside Send:  how many answered, and where the Send stands. */
@@ -184,7 +182,7 @@ export class RunForm {
     const sent = this.answers.sent
     const counted = `${answered} of ${total} answered`
     if (!sent) return `${counted} · not sent`
-    const when = PlanDates.clock(new Date(sent))
+    const when = clockOf(sent)
     return this.isStale ? `${counted} · changes since Send ${when}` : `${counted} · sent ${when}`
   }
 

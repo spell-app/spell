@@ -381,7 +381,7 @@ describe("<epic-item source>", () => {
     expect(document.getElementById("d9")).not.toBeNull()
   })
 
-  test("a link to an id in `part-ids` unfolds it and loads the part, so the link lands", async () => {
+  test("a link to an id in `part-ids` unfolds it and loads the part, so the page can land the link (it never scrolls itself)", async () => {
     serve(PART, PART_HTML)
     const { host } = await item(
       `<epic-item id="q8" title="Parts" status="decided" source="${PART}" part-ids="d9"></epic-item>`

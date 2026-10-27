@@ -53,11 +53,11 @@ export class EpicChoicesBar extends E.UIComponent<typeof epicChoicesBarVocabular
   /** The feedback brought back from the draft (or the answer):  it goes into the box, once. */
   @E.state accessor restoredFeedback = ""
 
-  /** Copy my answers' last click:  `copied` for a moment, `failed` until the next;  `""` before. */
-  @E.state accessor copyState: "" | "copied" | "failed" = ""
+  /** Copy my answers' copy:  "Copied" for a moment (Spell UI's `ClipboardCopy`). */
+  readonly clipboard = new E.ClipboardCopy()
 
-  /** Copy my answers' "Copied" going back to the button's own words. */
-  private copyTimer?: E.CancelablePromise<unknown>
+  /** Copy my answers' last copy was refused:  its tooltip says so until the next click. */
+  @E.state accessor isCopyRefused = false
 
   /** While connected:  follow the form, save as the page goes away, and bring back what was typed;  the undo. */
   @E.whileConnected
@@ -71,7 +71,6 @@ export class EpicChoicesBar extends E.UIComponent<typeof epicChoicesBarVocabular
     return () => {
       unsubscribe()
       unwatch()
-      this.copyTimer?.cancel()
     }
   }
 
@@ -119,11 +118,11 @@ export class EpicChoicesBar extends E.UIComponent<typeof epicChoicesBarVocabular
             part={this.partForName("copy")}
             size="mini"
             appearance="basic circular"
-            icon={this.copyState === "copied" ? "check" : "copy"}
-            title={this.translationForKey(this.copyState === "failed" ? "copyFailed" : "copyTip")}
+            icon={this.clipboard.isCopied ? "check" : "copy"}
+            title={this.translationForKey(this.isCopyRefused ? "copyFailed" : "copyTip")}
             onClick={this.onCopy}
           >
-            {this.translationForKey(this.copyState === "copied" ? "copied" : "copyAnswers")}
+            {this.translationForKey(this.clipboard.isCopied ? "copied" : "copyAnswers")}
           </ui-button>
           <ui-button
             class={EXPAND}
@@ -203,10 +202,7 @@ export class EpicChoicesBar extends E.UIComponent<typeof epicChoicesBarVocabular
   private readonly onCopy = async () => {
     const form = this.form
     if (!form) return
-    const isCopied = await E.copyText(form.copyText())
-    this.copyTimer?.cancel()
-    this.copyState = isCopied ? "copied" : "failed"
-    if (isCopied) this.copyTimer = E.after(COPIED_SECONDS, () => (this.copyState = ""))
+    this.isCopyRefused = !(await this.clipboard.copy(form.copyText()))
   }
 
   /** Expand all, or Collapse all. */
@@ -229,6 +225,3 @@ const COPY = "copy"
 const EXPAND = "expand"
 const ERROR = "error"
 const SENT = "sent"
-
-/** How long Copy my answers says "Copied", in seconds. */
-const COPIED_SECONDS = 2

@@ -321,6 +321,17 @@ describe("ReviewClient writes", () => {
     expect(client.markOf("q1")).toBeUndefined()
   })
 
+  test("a refusal that ends in a full stop already says ONE (`sentence()`):  a write's, and starting a review", async () => {
+    const { client, server } = await started()
+    const notices: string[] = []
+    client.onNotice((message) => notices.push(message))
+    server.failures.set("mark", { status: 400, error: "no item q1 in that doc." })
+    expect(await client.save("q1", { action: "approve" })).toBe(false)
+    server.failures.set("start", { status: 400, error: "nobody is listening!" })
+    expect(await client.startReview()).toBeUndefined()
+    expect(notices).toEqual(["No item q1 in that doc.", "Nobody is listening!"])
+  })
+
   test("a draft saved drops its backup;  a used note takes the draft and the backup with it", async () => {
     const storage = new MapStorage()
     const { client, server } = await started(new FakeServer(), { storage })

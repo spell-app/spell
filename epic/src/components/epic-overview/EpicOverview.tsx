@@ -6,7 +6,7 @@ import { E } from "spell-ui/core"
 import { SUMMARY_ID } from "spell-epic/review"
 // its view of the review inbox:  the file, not `epic-review`'s barrel (`index.ts` defines that family)
 import { ReviewState } from "spell-epic/components/epic-review/ReviewState"
-import { SHOW_NOTE, type ReviewShows } from "spell-epic/components/epic-review/EpicReview.types"
+import type { ReviewShows } from "spell-epic/components/epic-review/EpicReview.types"
 
 // Import directly:  the fold base, not the `epic-section` barrel (which defines `<epic-section>`)
 import { EpicFold } from "spell-epic/components/epic-section/EpicFold"
@@ -77,15 +77,6 @@ export class EpicOverview extends EpicFold<typeof epicOverviewVocabulary> {
    */
   get reviewed(): boolean {
     return this.reviewState.reviewing() && !!this.domElement.querySelector(SUMMARY_TAG)
-  }
-
-  /** Revisit or Edit, pressed on its own review controls:  unfolded, to show the note box. */
-  @E.on(SHOW_NOTE, { target: "renderRoot" })
-  protected onShowNote(event: Event) {
-    // its own controls' only:  a nested element's come through here too
-    if ((event.target as Node).getRootNode() !== event.currentTarget) return
-    event.stopPropagation()
-    void this.reveal()
   }
 
   /** Its number, by its place among the page's blocks (always the first:  `1`). */

@@ -278,7 +278,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - node only, NOT in the `spell-epic` barrel (`spell-epic/config/EpicConfig`)
       - plain `node` loads it by path too, before a worktree's `yarn install`:
         the hooks ([hooks/](../hooks/)) and the window script ([window.mjs](./window.mjs))
-      - so it reads its JSON5 itself (comments and trailing commas), not through `DataFile`, which needs `json5`
+      - it reads its JSON5 with `json5` (any valid JSON5, as the page server does), from the same install as the
+        kit's `spell/server/checkout` it loads
     - the page server never reads it:  the running epics' route module tells it where the worktrees are
       (`serveWorktrees()`, in the main checkout)
     - worktrees may live beside the repo (epic `epic-eject` P8):

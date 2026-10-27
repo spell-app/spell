@@ -384,6 +384,18 @@ export const SHOW_NOTE = "epic-note-showing"
 export const CHOSEN = "epic-chosen"
 
 /**
+ * Take `event` (`SHOW_NOTE`, `CHOSEN`) when it comes from the listener's OWN review controls:  stopped there, `true`.
+ * - heard on the element's shadow root (`@E.on(..., { target: "renderRoot" })`):
+ *   a nested element's controls send theirs through it too, out of their own shadow roots:  `false`, left to go on
+ * - the one guard of every element with review controls:  an item, a fold (the Overview, a section, a phase)
+ */
+export function stopIfOwn(event: Event): boolean {
+  if ((event.target as Node).getRootNode() !== event.currentTarget) return false
+  event.stopPropagation()
+  return true
+}
+
+/**
  * The event a thread's answer button sends (`buttons="thread"` / `"closed"`):  `{ act }`, which one (`ThreadAct`).
  * - It crosses shadow roots:  the comments' code hears it on the `<epic-thread>` that draws it.
  */

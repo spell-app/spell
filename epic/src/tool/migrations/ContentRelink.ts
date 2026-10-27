@@ -6,6 +6,8 @@ import { SRV } from "spell/server"
 import { DataFile } from "spell-epic/data/DataFile"
 import { CommentList, type Comment } from "spell-epic/tool/CommentList"
 
+import { RootLinks } from "./RootLinks"
+
 /****************
  * ### `ContentRelink`
  * Links on OTHER pages to items a migration renamed (epic `epic-engine` P32;  `item-renames`, P44):  every file in
@@ -20,7 +22,8 @@ import { CommentList, type Comment } from "spell-epic/tool/CommentList"
  * - NOT idempotent:  run it once, with the renames of the pages THIS run migrated (`MigrateCommands`);  a second run
  *   finds nothing to migrate, so nothing to relink
  * - words in prose (`T3 of seo`) are left as written:  the page's log says what each old id became
- * - Node only, plain text:  a file is rewritten only when something in it changed, every other byte kept
+ * - Node only, plain text:  a file is rewritten only when something in it changed, every other byte kept;  under its
+ *   page's lock, as `RootLinks` writes (`RootLinks.lockOf()`)
  * - and every inbox's COMMENTS (`respellComments()`):  their keys respelt `c3` (epic `epic-engine` P44)
  ****************/
 export class ContentRelink {
@@ -34,20 +37,27 @@ export class ContentRelink {
     if (!epics.length) return count
     for (const file of ContentRelink.files(root)) {
       const path = relative(root, file).split(sep).join("/")
-      const before = readFileSync(file, "utf8")
-      let text = before
-      let links = 0
-      for (const [epic, map] of epics) {
-        // the step renumbered the page itself and its parts
-        if (path === `epics/${epic}/${epic}.plan.html` || path.startsWith(`epics/${epic}/parts/`)) continue
-        const result = ContentRelink.rewrite(text, epic, map)
-        text = result.text
-        links += result.links
+      /** The links it renamed, written back unless `dryRun`;  `undefined` when nothing changed. */
+      const relink = (): number | undefined => {
+        const before = readFileSync(file, "utf8")
+        let text = before
+        let links = 0
+        for (const [epic, map] of epics) {
+          // the step renumbered the page itself and its parts
+          if (path === `epics/${epic}/${epic}.plan.html` || path.startsWith(`epics/${epic}/parts/`)) continue
+          const result = ContentRelink.rewrite(text, epic, map)
+          text = result.text
+          links += result.links
+        }
+        if (text === before) return undefined
+        if (!dryRun) writeFileSync(file, text)
+        return links
       }
-      if (text === before) continue
+      // under its page's lock, as its writers take it:  a session writing the page meanwhile loses no write
+      const links = dryRun ? relink() : SRV.FileLock.run(RootLinks.lockOf(file), relink, RootLinks.LOCK)
+      if (links === undefined) continue
       count.files++
       count.links += links
-      if (!dryRun) writeFileSync(file, text)
     }
     return count
   }

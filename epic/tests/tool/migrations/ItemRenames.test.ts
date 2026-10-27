@@ -11,6 +11,7 @@ import { fileURLToPath } from "node:url"
 import { parseHTML } from "linkedom"
 import { afterEach, describe, expect, test, vi } from "vite-plus/test"
 
+import { SRV } from "spell/server"
 import { DataFile } from "spell-epic/data/DataFile"
 import { ContentRelink, ItemRenames, Migrations } from "spell-epic/tool/migrations"
 import { PlanDoc } from "spell-epic/tool/PlanDoc"
@@ -126,6 +127,24 @@ describe("ContentRelink", () => {
     )
     expect(readFileSync(own, "utf8")).toBe(`<a href="seo.plan.html#t8">T8</a>`)
     expect(count).toEqual({ files: 1, links: 5 })
+  })
+
+  test("each file is rewritten under its page's lock, as its writers take it:  a part under its epic page's", () => {
+    root = mkdtempSync(join(tmpdir(), "relink-lock-"))
+    mkdirSync(join(root, "epics", "seo", "parts"), { recursive: true })
+    mkdirSync(join(root, "epics", "other", "parts"), { recursive: true })
+    const page = join(root, "epics", "other", "other.plan.html")
+    const part = join(root, "epics", "other", "parts", "p1.html")
+    writeFileSync(page, "")
+    writeFileSync(part, `<a href="../../seo/seo.plan.html#c8">C8</a>`)
+    const locked = vi.spyOn(SRV.FileLock, "run")
+    try {
+      expect(ContentRelink.run(root, { seo: { c8: "t8" } })).toEqual({ files: 1, links: 1 })
+      expect(locked.mock.calls.map(([file]) => file)).toEqual([page, page])
+    } finally {
+      locked.mockRestore()
+    }
+    expect(readFileSync(part, "utf8")).toBe(`<a href="../../seo/seo.plan.html#t8">T8</a>`)
   })
 
   test("every inbox's comments respelt C, open and closed;  nothing else in the file;  a second run:  none", () => {

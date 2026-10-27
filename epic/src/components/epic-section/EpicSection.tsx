@@ -9,7 +9,7 @@ import { PageStages } from "spell-epic/phases"
 import { NOBODY_LISTENING, SUMMARY_ID, type NewItem, type NewKind } from "spell-epic/review"
 // its view of the review inbox:  the file, not `epic-review`'s barrel (`index.ts` defines that family)
 import { ReviewState } from "spell-epic/components/epic-review/ReviewState"
-import { SHOW_NOTE, type ReviewShows } from "spell-epic/components/epic-review/EpicReview.types"
+import type { ReviewShows } from "spell-epic/components/epic-review/EpicReview.types"
 import { NEW_KIND_LOOKS } from "spell-epic/components/epic-new-item/EpicNewItem.types"
 import { DrawnState, NEEDS_OWEN, STATUS_SLOT } from "spell-epic/components/epic-item/EpicItem.types"
 import {
@@ -663,15 +663,6 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
   /** One of its review controls (`<epic-review>`):  what it `shows`, as its `part`. */
   private reviewControl(shows: ReviewShows, part: "review-buttons" | "note-box" | "said"): JSX.Element {
     return <epic-review of={this.id} shows={shows} buttons="part" part={this.partForName(part)} />
-  }
-
-  /** Revisit or Edit, pressed on its own review controls:  unfolded, to show the note box. */
-  @E.on(SHOW_NOTE, { target: "renderRoot" })
-  protected onShowNote(event: Event) {
-    // its own controls' only:  a nested element's come through here too
-    if ((event.target as Node).getRootNode() !== event.currentTarget) return
-    event.stopPropagation()
-    void this.reveal()
   }
 
   ////////////////

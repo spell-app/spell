@@ -1,6 +1,8 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs"
 import { basename, dirname, isAbsolute, join, resolve, sep } from "node:path"
 
+import JSON5 from "json5"
+
 // The server's checkout finder:  the main checkout from any worktree, with no `git` run.
 // - By the server's package entry (its `exports`, epic `repo-split` P6):
 //   plain `node` loads this file (the hooks, the window script), and finds the server package in `node_modules`
@@ -27,11 +29,13 @@ import { RealPath } from "spell/server/RealPath"
  *   A branch's change to it counts once it's merged and the main checkout has it.
  * - Read fresh by `new EpicConfig()`:  nothing is cached, so a long-running page server picks up an edit at its next
  *   use of a new instance.
- * - The file is JSON5's JSON-compatible part, as every tooling data file is (`DataFile`):
- *   keys and text in double quotes, `//` and `/* *\/` comments, trailing commas.
- *   - Read here by `parse()`, not by `DataFile`, which needs the `json5` package:
- *     the hooks and the window script load this file with plain `node`, before a worktree's `yarn install`.
+ * - The file is JSON5, read by `parse()` with the `json5` package, as the page server reads the same file
+ *   (`SRV.contentFolderOf()`):  anything valid there is valid here, unquoted keys and single quotes too.
+ *   - Written as JSON5's JSON-compatible part, as every tooling data file is (`DataFile`):
+ *     keys and text in double quotes, `//` and `/* *\/` comments, trailing commas.
  *   - So `DataFile.write()` can write it later (`epic init`, epic `epic-eject` P9), keeping Owen's comments.
+ *   - Plain `node` loads this file (the hooks, the window script):  `json5` comes from the same install as the kit's
+ *     `spell/server/checkout` below.
  * - Who reads it:  the CLI (`epic shared`, `status`, `worktree` ...), the epic tool and the epics list,
  *   the hooks (`.claude/hooks/`), the window script (`src/window.mjs`), the running epics' route module.
  *   `epic config [key]` prints a value, for the skills.
@@ -755,18 +759,12 @@ export class EpicConfig {
   }
 
   /**
-   * Config text `text` as data:  JSON5's JSON-compatible part, its comments and trailing commas dropped (never inside
-   * a string), then plain `JSON.parse()`.
+   * Config text `text` as data:  JSON5, as the page server reads it (`json5`).
    * - throws `SyntaxError`, naming `file`
    */
   static parse(text: string, file = EpicConfig.FILE): unknown {
-    const withoutComments = outsideStrings(text, (rest) => {
-      if (rest.startsWith("//")) return rest.indexOf("\n") === -1 ? rest.length : rest.indexOf("\n")
-      if (rest.startsWith("/*")) return rest.indexOf("*/") === -1 ? rest.length : rest.indexOf("*/") + 2
-      return 0
-    })
     try {
-      return JSON.parse(outsideStrings(withoutComments, (rest) => (/^,\s*[}\]]/.test(rest) ? 1 : 0)))
+      return JSON5.parse(text)
     } catch (error) {
       throw new SyntaxError(`EpicConfig:  ${file} won't read:  ${(error as Error).message}`, { cause: error })
     }
@@ -1063,22 +1061,4 @@ function patchesOf(given: Record<string, unknown>, fallback: CheckoutPatch[], fi
     const { id, date, why, copy, run } = patch as CheckoutPatch
     return { id, date, why, ...(copy ? { copy } : {}), ...(run ? { run } : {}) }
   })
-}
-
-/** `text` without what `cut(rest)` says to cut:  how many characters, at each place outside a double-quoted string. */
-function outsideStrings(text: string, cut: (rest: string) => number): string {
-  let out = ""
-  for (let at = 0; at < text.length;) {
-    if (text[at] === '"') {
-      let end = at + 1
-      while (end < text.length && text[end] !== '"') end += text[end] === "\\" ? 2 : 1
-      out += text.slice(at, end + 1)
-      at = end + 1
-      continue
-    }
-    const length = cut(text.slice(at))
-    if (length) at += length
-    else out += text[at++]
-  }
-  return out
 }

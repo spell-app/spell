@@ -34,9 +34,6 @@ export const NEEDS_OWEN: ReadonlySet<string> = new Set(["attention", "replied"] 
  */
 export const CALM_ID = /^[ij]\d+$/
 
-/** Statuses that close an item:  a closed one's Choose pills show only while it's revisited (`<epic-option>`). */
-export const CLOSED_STATUSES = ["decided", "done", "canceled"] as const
-
 /**
  * An item's state when it has no `state` (the tool writes one on every edit), by its status:
  * `STATUS_STATES[status] ?? "open"` (`PlanReader.itemState()`, Owen, 2026-10-08).
