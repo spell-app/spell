@@ -186,6 +186,9 @@ export const englishWords: SP.LanguageWords = {
       icon: "icon",
       "menu-bar": "menu-bar",
       locked: "locked",
+      draggable: "draggable",
+      droppable: "droppable",
+      selectable: "selectable",
       group: "group"
     },
     // code spell's twin of each tag:  the line it reads as (P6) -- see `SP.SpellxTwinWords`
@@ -234,6 +237,7 @@ export const englishWords: SP.LanguageWords = {
       group: "group {name}",
       notebookContent: "to draw its content :",
       notebookLocked: "its lock is locked",
+      viewFlags: { draggable: "it is draggable", droppable: "it is droppable", selectable: "it is selectable" },
       start: "start {words}",
       handlers: { on: "on {phrase} :", when: "when {phrase} :", while: "while {phrase} :" },
       controls: {

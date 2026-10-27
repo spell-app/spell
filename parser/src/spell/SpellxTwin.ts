@@ -157,6 +157,7 @@ export class SpellxTwin {
   /**
    * A template:  `a "card" is a view :`, `solitaire is an app :` ...;  its members are its body.
    * - Its `menu-bar=`, a line ending its body:  `- its menu bar is "GameMenu"` (P10).
+   * - Its bare `draggable`, `droppable`, `selectable`:  `- it is draggable` ... lines too, the outline form's flags.
    */
   private template(): SpellxTwinLine {
     const regrouped = this.block && SpellxTwin.withGroupsOpened(this.block)
@@ -171,7 +172,10 @@ export class SpellxTwin {
         ? this.words.templateAka
         : this.words.template
     const menuBar = this.attribute("menu-bar") ? [[this.bullet(), ...this.expand(this.words.menuBar)]] : []
-    return this.lineAndBlock(this.expand(shape), [], menuBar)
+    const flags = Object.entries(this.words.viewFlags)
+      .filter(([name]) => this.tag.attributes.some((attribute) => attribute.name === name))
+      .map(([, line]) => [this.bullet(), ...this.expand(line)])
+    return this.lineAndBlock(this.expand(shape), [], [...menuBar, ...flags])
   }
 
   /**

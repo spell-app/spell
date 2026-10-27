@@ -182,6 +182,9 @@ export const spanishWords: SP.LanguageWords = {
       "barra-de-menú": "menu-bar",
       "barra-de-menu": "menu-bar",
       bloqueado: "locked",
+      arrastrable: "draggable",
+      soltable: "droppable",
+      seleccionable: "selectable",
       // la página de la que se convirtió un cuaderno (P18):  solo la lee el editor
       grupo: "group"
     },
@@ -232,6 +235,7 @@ export const spanishWords: SP.LanguageWords = {
       group: "grupo {name}",
       notebookContent: "para dibujar su contenido :",
       notebookLocked: "su candado es bloqueado",
+      viewFlags: { draggable: "es arrastrable", droppable: "es soltable", selectable: "es seleccionable" },
       start: "iniciar {words}",
       handlers: { on: "al {phrase} :", when: "cuando {phrase} :", while: "mientras {phrase} :" },
       controls: {
