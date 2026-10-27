@@ -202,14 +202,14 @@ export class NotebookFromPage {
       }
       if (node.nodeType !== ELEMENT) continue
       const element = node as Element
-      const special = EXAMPLES.has(element.localName) || [SECTION, MARKDOWN, CODE].includes(element.localName)
+      const special = [SECTION, EXAMPLE, MARKDOWN, CODE].includes(element.localName)
       if (special || element.localName === "ui-header") flushMarkup()
       if (element.localName === SECTION) {
         this.writeSection(out, element, indent, place, pendingNotes.splice(0))
         continue
       }
       for (const note of pendingNotes.splice(0)) this.writeGapNote(out, note, indent)
-      if (EXAMPLES.has(element.localName)) this.writeExample(out, element, indent, place)
+      if (element.localName === EXAMPLE) this.writeExample(out, element, indent, place)
       else if (element.localName === MARKDOWN) this.writeMarkdown(out, [markdownOf(element)], indent, place)
       else if (element.localName === CODE) this.writeMarkdown(out, [fenceOf(element)], indent, place)
       else if (element.localName === "ui-message" && element.querySelector(MARKDOWN)) {
@@ -634,9 +634,9 @@ const ELEMENT = 1
 const TEXT = 3
 const COMMENT = 8
 
-/** The page's tags this reads:  an example is `<ui-example>` (`<ui-example>` before epic `ui-gaps` P14). */
+/** The page's tags this reads. */
 const SECTION = "ui-section"
-const EXAMPLES = new Set(["ui-example", "ui-example"])
+const EXAMPLE = "ui-example"
 const MARKDOWN = "ui-markdown"
 const CODE = "ui-code"
 
