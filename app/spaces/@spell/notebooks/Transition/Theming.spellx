@@ -32,7 +32,7 @@
 				<button type="button" class="ui button" commandfor="transition-demo-fade-playground" command="--toggle">Fade up</>
 				<button type="button" class="ui button" commandfor="transition-demo-scale-playground" command="--toggle">Scale</>
 				<button type="button" class="ui button" commandfor="transition-demo-flip-playground" command="--toggle">Horizontal flip</>
-				<div class="ui-cluster">
+				<ui-stack class="ui-cluster">
 					<ui-transition id="transition-demo-fade-playground" animation="fade up" inline visible>
 						<ui-segment>Fade up</>
 					</>

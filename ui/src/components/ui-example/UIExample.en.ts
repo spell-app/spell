@@ -34,8 +34,8 @@ export const exampleVocabulary = {
       name: "description",
       kind: "string",
       description:
-        "One sentence under the heading;  `` `x` `` becomes code.  Slot `description` for richer text (links, " +
-        "several paragraphs)."
+        "One sentence under the heading;  `` `x` `` becomes code, `[words](link)` a link.  Slot `description` " +
+        "for richer text (a message, several paragraphs):  drawn after it."
     },
     {
       name: "level",

@@ -19,13 +19,13 @@
 	-->
 	<section label="Types">
 		<section label="Include" sticky="stack" collapsible dividing>
-			<example description="An include fetches `source` (a page of THIS site) and shows its `<body>`, in its own shadow root:  the page's CSS stays out, inherited fonts, colours and tokens come in.  Its children show until it loads.">
+			<example "Include" description="An include fetches `source` (a page of THIS site) and shows its `<body>`, in its own shadow root:  the page's CSS stays out, inherited fonts, colours and tokens come in.  Its children show until it loads.">
 				<include source="/components/ui/examples/release-notes.html">Loading the release notes...</include>
 			</example>
 		</>
 
 		<section label="One part" sticky="stack" collapsible dividing>
-			<example description="`select` shows only the first element a CSS selector matches.">
+			<example "One part" description="`select` shows only the first element a CSS selector matches.">
 				<include source="/components/ui/examples/release-notes.html" selector="#notes"/>
 			</example>
 		</>
@@ -33,7 +33,7 @@
 
 	<section label="States">
 		<section label="Another site" sticky="stack" collapsible dividing>
-			<example description="Only this site's pages can be included:  any other URL shows an error, and nothing is fetched.">
+			<example "Another site" description="Only this site's pages can be included:  any other URL shows an error, and nothing is fetched.">
 				<include source="https://example.com/"/>
 			</example>
 		</>
@@ -41,13 +41,13 @@
 
 	<section label="Variations">
 		<section label="Page styles" sticky="stack" collapsible dividing>
-			<example description="`page-styles` puts the included markup in the element's light DOM, where the page's stylesheets style it.">
+			<example "Page styles" description="`page-styles` puts the included markup in the element's light DOM, where the page's stylesheets style it.">
 				<include source="/components/ui/examples/release-notes.html" selector="#notes" page-styles/>
 			</example>
 		</>
 
 		<section label="Load when visible" sticky collapsible dividing>
-			<example description="`load=\"visible\"` waits until the include scrolls into view;  `idle` until the browser has nothing else to do.  Like Astro's islands.">
+			<example "Load when visible" description="`load=\"visible\"` waits until the include scrolls into view;  `idle` until the browser has nothing else to do.  Like Astro's islands.">
 				<include source="/components/ui/examples/release-notes.html" selector="#aside" load="visible">Waiting to be scrolled into view...</include>
 				<include source="/components/ui/examples/release-notes.html" selector="#aside" load="idle">Waiting for the browser to be idle...</include>
 			</example>

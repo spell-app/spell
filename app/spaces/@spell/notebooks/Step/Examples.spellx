@@ -24,7 +24,7 @@
 	-->
 	<section label="Types">
 		<section label="Step" sticky="stack" collapsible dividing>
-			<example description="A single step.">
+			<example "Step" description="A single step.">
 				<steps>
 					<step>Shipping</step>
 				</steps>
@@ -32,7 +32,7 @@
 		</>
 
 		<section label="Circular Step" sticky="stack" collapsible dividing>
-			<example description="A single circular step.">
+			<example "Circular Step" description="A single circular step.">
 				<steps appearance="circular">
 					<step>
 						<content align="center">
@@ -46,8 +46,8 @@
 
 	<section label="Groups">
 		<section label="Steps" sticky="stack" collapsible dividing>
-			<example description="A set of steps: `<ui-steps>`.">
-				<message slot="description" state="positive" size="small" icon="mobile" heading="Responsive Element"><html>Steps will automatically stack on mobile. To make steps automatically stack for tablet use <code>stackable="tablet"</code>.</html></message>
+			<example "Steps" description="A set of steps: `<ui-steps>`.">
+				<message slot="description" state="positive" size="small" icon="mobile" heading="Responsive Element">Steps will automatically stack on mobile. To make steps automatically stack for tablet use <text code>stackable="tablet"</text>.</message>
 				<steps>
 					<step icon="truck" heading="Shipping" description="Choose your shipping options"/>
 					<step selected icon="payment" heading="Billing" description="Enter billing information"/>
@@ -57,7 +57,7 @@
 		</>
 
 		<section label="Flat markup" sticky="stack" collapsible dividing>
-			<example description="A step can be written outside its steps:  `parent` names the steps' id, and the step joins them, in page order, as if it were nested there.">
+			<example "Flat markup" description="A step can be written outside its steps:  `parent` names the steps' id, and the step joins them, in page order, as if it were nested there.">
 				<steps id="demo-order-steps" ordered/>
 				<step parent="demo-order-steps" completed heading="Shipping"/>
 				<step parent="demo-order-steps" selected heading="Billing"/>
@@ -66,7 +66,7 @@
 		</>
 
 		<section label="Circular Steps" sticky="stack" collapsible dividing>
-			<example description="Circular steps show a series of steps with a connection line between them.">
+			<example "Circular Steps" description="Circular steps show a series of steps with a connection line between them.">
 				<steps appearance="circular" stackable>
 					<step>
 						<content>
@@ -90,7 +90,7 @@
 		</>
 
 		<section label="Ordered" sticky="stack" collapsible dividing>
-			<example description="A step can show an ordered sequence of steps.">
+			<example "Ordered" description="A step can show an ordered sequence of steps.">
 				<steps ordered>
 					<step completed heading="Shipping" description="Choose your shipping options"/>
 					<step completed heading="Billing" description="Enter billing information"/>
@@ -99,7 +99,7 @@
 					<step heading="Delivered" description="Package received"/>
 				</steps>
 			</example>
-			<example>
+			<example "Ordered">
 				<steps appearance="circular" ordered stackable>
 					<step completed heading="Shipping" description="Choose your shipping options"/>
 					<step completed heading="Billing" description="Enter billing information"/>
@@ -111,14 +111,14 @@
 		</>
 
 		<section label="Vertical" sticky="stack" collapsible dividing>
-			<example description="A step can be displayed stacked vertically.">
+			<example "Vertical" description="A step can be displayed stacked vertically.">
 				<steps direction="vertical">
 					<step completed icon="truck" heading="Shipping" description="Choose your shipping options"/>
 					<step completed icon="credit card" heading="Billing" description="Enter billing information"/>
 					<step selected icon="info" heading="Confirm Order" description="Verify order details"/>
 				</steps>
 			</example>
-			<example description="Right vertical steps will show the active arrow to the left:  `vertical=\"right\"`.">
+			<example "Vertical" description="Right vertical steps will show the active arrow to the left:  `vertical=\"right\"`.">
 				<steps direction="vertical-right">
 					<step completed icon="truck" heading="Shipping" description="Choose your shipping options"/>
 					<step completed icon="credit card" heading="Billing" description="Enter billing information"/>
@@ -128,7 +128,7 @@
 		</>
 
 		<section label="Vertical Circular" sticky="stack" collapsible dividing>
-			<example description="Vertical circular steps show a series of steps with the connection line between them vertically next to the title and description of each step, similar to a connected feed.">
+			<example "Vertical Circular" description="Vertical circular steps show a series of steps with the connection line between them vertically next to the title and description of each step, similar to a connected feed.">
 				<steps appearance="circular" direction="vertical">
 					<step completed heading="Shipping" description="Choose your shipping options"/>
 					<step completed heading="Billing" description="Enter billing information"/>
@@ -140,12 +140,12 @@
 
 	<section label="Content">
 		<section label="Description" sticky="stack" collapsible dividing>
-			<example description="A step can contain a description.">
+			<example "Description" description="A step can contain a description.">
 				<steps>
 					<step heading="Shipping" description="Choose your shipping options"/>
 				</steps>
 			</example>
-			<example description="The parts work too:  a `<ui-content>` with a `<ui-title>` and a `<ui-description>`.">
+			<example "Description" description="The parts work too:  a `<ui-content>` with a `<ui-title>` and a `<ui-description>`.">
 				<steps appearance="circular">
 					<step>
 						<content>
@@ -159,7 +159,7 @@
 
 		<!-- GAP I88:  `text-align` / `vertical-align` on a circular step's content change nothing yet. -->
 		<section label="Center Aligned" sticky="stack" collapsible dividing>
-			<example description="Horizontal circular steps can show their title center aligned next to the connection line.  The last step will not show the connection line anymore.">
+			<example "Center Aligned" description="Horizontal circular steps can show their title center aligned next to the connection line.  The last step will not show the connection line anymore.">
 				<steps appearance="circular">
 					<step>
 						<content align="center">
@@ -176,7 +176,7 @@
 		</>
 
 		<section label="Bottom Aligned" sticky="stack" collapsible dividing>
-			<example description="Horizontal circular steps can also show their title and/or description under the connection line.">
+			<example "Bottom Aligned" description="Horizontal circular steps can also show their title and/or description under the connection line.">
 				<steps appearance="circular">
 					<step>
 						<content vertical-align="bottom">
@@ -195,12 +195,12 @@
 		</>
 
 		<section label="Icon" sticky="stack" collapsible dividing>
-			<example description="A step can contain an icon.">
+			<example "Icon" description="A step can contain an icon.">
 				<steps>
 					<step icon="truck" heading="Shipping" description="Choose your shipping options"/>
 				</steps>
 			</example>
-			<example description="Icons in circular steps are part of the title or description.">
+			<example "Icon" description="Icons in circular steps are part of the title or description.">
 				<steps appearance="circular">
 					<step>
 						<content>
@@ -213,25 +213,25 @@
 		</>
 
 		<section label="Link" sticky="stack" collapsible dividing>
-			<example description="A step can link with `link` (a real link), or with `appearance=\"link\"` (a button the page handles).">
+			<example "Link" description="A step can link with `link` (a real link), or with `appearance=\"link\"` (a button the page handles).">
 				<steps>
 					<step link="#link" selected icon="truck" heading="Shipping" description="Choose your shipping options"/>
 					<step link="#link" heading="Billing" description="Enter billing information"/>
 				</steps>
 			</example>
-			<example>
+			<example "Link">
 				<steps>
 					<step appearance="link" icon="truck" heading="Shipping" description="Choose your shipping options"/>
 					<step appearance="link" heading="Billing" description="Enter billing information"/>
 				</steps>
 			</example>
-			<example>
+			<example "Link">
 				<steps appearance="circular">
 					<step link="#link" selected heading="Shipping" description="Choose your shipping options"/>
 					<step link="#link" heading="Billing" description="Enter billing information"/>
 				</steps>
 			</example>
-			<example>
+			<example "Link">
 				<steps appearance="circular">
 					<step appearance="link" heading="Shipping" description="Choose your shipping options"/>
 					<step appearance="link" heading="Billing" description="Enter billing information"/>
@@ -242,12 +242,12 @@
 
 	<section label="States">
 		<section label="Active" sticky="stack" collapsible dividing>
-			<example description="A step can be highlighted as active:  `selected` (or Fomantic's `active`), the current step.">
+			<example "Active" description="A step can be highlighted as active:  `selected` (or Fomantic's `active`), the current step.">
 				<steps>
 					<step selected icon="payment" heading="Billing" description="Enter billing information"/>
 				</steps>
 			</example>
-			<example>
+			<example "Active">
 				<steps appearance="circular">
 					<step selected heading="Billing" description="Enter billing information"/>
 				</steps>
@@ -255,12 +255,12 @@
 		</>
 
 		<section label="Completed" sticky="stack" collapsible dividing>
-			<example description="A step can show that a user has completed it.">
+			<example "Completed" description="A step can show that a user has completed it.">
 				<steps>
 					<step completed icon="payment" heading="Billing" description="Enter billing information"/>
 				</steps>
 			</example>
-			<example>
+			<example "Completed">
 				<steps appearance="circular">
 					<step completed heading="Billing" description="Enter billing information"/>
 				</steps>
@@ -268,12 +268,12 @@
 		</>
 
 		<section label="Disabled" sticky="stack" collapsible dividing>
-			<example description="A step can show that it cannot be selected.">
+			<example "Disabled" description="A step can show that it cannot be selected.">
 				<steps>
 					<step disabled>Billing</step>
 				</steps>
 			</example>
-			<example>
+			<example "Disabled">
 				<steps appearance="circular">
 					<step disabled>
 						<content align="center">
@@ -287,7 +287,7 @@
 
 	<section label="Variations">
 		<section label="Stackable" sticky="stack" collapsible dividing>
-			<example description="A step can stack vertically only on smaller screens:  steps stack below 768px of the group's width by default, `stackable=\"tablet\"` below 992px.">
+			<example "Stackable" description="A step can stack vertically only on smaller screens:  steps stack below 768px of the group's width by default, `stackable=\"tablet\"` below 992px.">
 				<steps stackable="tablet">
 					<step icon="plane" heading="Shipping" description="Choose your shipping options"/>
 					<step selected icon="dollar" heading="Billing" description="Enter billing information"/>
@@ -296,7 +296,7 @@
 			</example>
 
 			<!-- Fomantic's JS snippet that turns circular steps vertical on phones isn't needed:  see the description. -->
-			<example description="Circular steps never stack by width;  set `direction=\"vertical\"` on them yourself for phones.">
+			<example "Stackable" description="Circular steps never stack by width;  set `direction=\"vertical\"` on them yourself for phones.">
 				<steps appearance="circular">
 					<step heading="Shipping" description="Choose your shipping options"/>
 					<step selected heading="Billing" description="Enter billing information"/>
@@ -306,25 +306,23 @@
 		</>
 
 		<section label="Fluid" sticky="stack" collapsible dividing>
-			<example description="A fluid step takes up the width of its container.">
-				<html>
-					<ui-grid columns="2">
-						<ui-column>
-							<ui-steps fluid direction="vertical">
-								<ui-step completed icon="truck" heading="Shipping" description="Choose your shipping options"></ui-step>
-								<ui-step selected icon="dollar" heading="Billing" description="Enter billing information"></ui-step>
-							</ui-steps>
-						</ui-column>
-						<ui-column>
-							<p>The steps take up the entire column width</p>
-						</ui-column>
-					</ui-grid>
-				</html>
+			<example "Fluid" description="A fluid step takes up the width of its container.">
+				<grid columns="2">
+					<column>
+						<steps fluid direction="vertical">
+							<step completed icon="truck" heading="Shipping" description="Choose your shipping options"/>
+							<step selected icon="dollar" heading="Billing" description="Enter billing information"/>
+						</steps>
+					</column>
+					<column>
+						<text paragraph>The steps take up the entire column width</text>
+					</column>
+				</grid>
 			</example>
 		</>
 
 		<section label="Unstackable" sticky="stack" collapsible dividing>
-			<example description="A step can prevent itself from stacking on mobile.">
+			<example "Unstackable" description="A step can prevent itself from stacking on mobile.">
 				<steps unstackable>
 					<step icon="plane" heading="Shipping" description="Choose your shipping options"/>
 					<step selected icon="dollar" heading="Billing" description="Enter billing information"/>
@@ -334,7 +332,7 @@
 		</>
 
 		<section label="Attached" sticky="stack" collapsible dividing>
-			<example description="Steps can be attached to other elements.">
+			<example "Attached" description="Steps can be attached to other elements.">
 				<steps widths="3" attach="top">
 					<step icon="truck" heading="Shipping" description="Choose your shipping options"/>
 					<step selected icon="payment" heading="Billing" description="Enter billing information"/>
@@ -352,14 +350,14 @@
 		</>
 
 		<section label="Evenly Divided" sticky="stack" collapsible dividing>
-			<example description="Steps can be divided evenly inside their parent:  `widths` is the number of steps.">
+			<example "Evenly Divided" description="Steps can be divided evenly inside their parent:  `widths` is the number of steps.">
 				<steps widths="3">
 					<step icon="truck" heading="Shipping" description="Choose your shipping options"/>
 					<step selected icon="payment" heading="Billing" description="Enter billing information"/>
 					<step disabled icon="info" heading="Confirm Order" description="Verify order details"/>
 				</steps>
 			</example>
-			<example>
+			<example "Evenly Divided">
 				<steps widths="2">
 					<step selected icon="payment" heading="Billing" description="Enter billing information"/>
 					<step disabled icon="info" heading="Confirm Order" description="Verify order details"/>
@@ -368,14 +366,14 @@
 		</>
 
 		<section label="Equal" sticky="stack" collapsible dividing>
-			<example description="`equal` makes every step the same width, counted from the steps themselves:  each as wide as the widest;  with `fluid`, an equal share of the row each.  `widths` above is the older, count-based spelling of `equal fluid`.">
+			<example "Equal" description="`equal` makes every step the same width, counted from the steps themselves:  each as wide as the widest;  with `fluid`, an equal share of the row each.  `widths` above is the older, count-based spelling of `equal fluid`.">
 				<steps equal>
 					<step icon="truck" heading="Shipping"/>
 					<step selected icon="payment" heading="Billing" description="Enter billing information"/>
 					<step disabled icon="info" heading="Confirm"/>
 				</steps>
 			</example>
-			<example description="Horizontal circular steps are always evenly divided.">
+			<example "Equal" description="Horizontal circular steps are always evenly divided.">
 				<steps appearance="circular">
 					<step completed>
 						<content align="center">
@@ -397,14 +395,14 @@
 		</>
 
 		<section label="Size" sticky="stack" collapsible dividing>
-			<example description="Steps can have different sizes.">
+			<example "Size" description="Steps can have different sizes.">
 				<steps size="mini">
 					<step icon="truck" heading="Shipping" description="Choose your shipping options"/>
 					<step selected icon="payment" heading="Billing" description="Enter billing information"/>
 					<step disabled icon="info" heading="Confirm Order" description="Verify order details"/>
 				</steps>
 			</example>
-			<example>
+			<example "Size">
 				<steps size="mini" appearance="circular">
 					<step>
 						<content>
@@ -426,14 +424,14 @@
 					</step>
 				</steps>
 			</example>
-			<example>
+			<example "Size">
 				<steps size="tiny">
 					<step icon="truck" heading="Shipping" description="Choose your shipping options"/>
 					<step selected icon="payment" heading="Billing" description="Enter billing information"/>
 					<step disabled icon="info" heading="Confirm Order" description="Verify order details"/>
 				</steps>
 			</example>
-			<example>
+			<example "Size">
 				<steps size="tiny" appearance="circular">
 					<step>
 						<content>
@@ -455,14 +453,14 @@
 					</step>
 				</steps>
 			</example>
-			<example>
+			<example "Size">
 				<steps size="small">
 					<step icon="truck" heading="Shipping" description="Choose your shipping options"/>
 					<step selected icon="payment" heading="Billing" description="Enter billing information"/>
 					<step disabled icon="info" heading="Confirm Order" description="Verify order details"/>
 				</steps>
 			</example>
-			<example>
+			<example "Size">
 				<steps size="small" appearance="circular">
 					<step>
 						<content>
@@ -484,13 +482,13 @@
 					</step>
 				</steps>
 			</example>
-			<example>
+			<example "Size">
 				<steps size="large">
 					<step icon="truck" heading="Shipping"/>
 					<step selected icon="payment" heading="Billing"/>
 				</steps>
 			</example>
-			<example>
+			<example "Size">
 				<steps size="large" appearance="circular">
 					<step>
 						<content align="center">
@@ -504,13 +502,13 @@
 					</step>
 				</steps>
 			</example>
-			<example>
+			<example "Size">
 				<steps size="big">
 					<step icon="truck" heading="Shipping"/>
 					<step selected icon="payment" heading="Billing"/>
 				</steps>
 			</example>
-			<example>
+			<example "Size">
 				<steps size="big" appearance="circular">
 					<step>
 						<content align="center">
@@ -524,13 +522,13 @@
 					</step>
 				</steps>
 			</example>
-			<example>
+			<example "Size">
 				<steps size="huge">
 					<step icon="truck" heading="Shipping"/>
 					<step selected icon="payment" heading="Billing"/>
 				</steps>
 			</example>
-			<example>
+			<example "Size">
 				<steps size="huge" appearance="circular">
 					<step>
 						<content align="center">
@@ -544,13 +542,13 @@
 					</step>
 				</steps>
 			</example>
-			<example>
+			<example "Size">
 				<steps size="massive">
 					<step icon="truck" heading="Shipping"/>
 					<step selected icon="payment" heading="Billing"/>
 				</steps>
 			</example>
-			<example>
+			<example "Size">
 				<steps size="massive" appearance="circular" stackable>
 					<step>
 						<content align="center">
@@ -567,7 +565,7 @@
 		</>
 
 		<section label="Inverted" sticky="stack" collapsible dividing>
-			<example description="A step's color can be inverted.">
+			<example "Inverted" description="A step's color can be inverted.">
 				<segment inverted>
 					<steps inverted>
 						<step icon="truck" heading="Shipping" description="Choose your shipping options"/>
@@ -576,7 +574,7 @@
 					</steps>
 				</segment>
 			</example>
-			<example>
+			<example "Inverted">
 				<segment inverted>
 					<steps inverted appearance="circular" stackable>
 						<step heading="Shipping" description="Choose your shipping options"/>
@@ -585,7 +583,7 @@
 					</steps>
 				</segment>
 			</example>
-			<example>
+			<example "Inverted">
 				<segment inverted>
 					<steps inverted ordered>
 						<step completed heading="Shipping" description="Choose your shipping options"/>
@@ -596,7 +594,7 @@
 					</steps>
 				</segment>
 			</example>
-			<example>
+			<example "Inverted">
 				<segment inverted>
 					<steps inverted ordered appearance="circular" stackable>
 						<step completed heading="Shipping" description="Choose your shipping options"/>
@@ -607,7 +605,7 @@
 					</steps>
 				</segment>
 			</example>
-			<example>
+			<example "Inverted">
 				<segment inverted>
 					<steps inverted direction="vertical">
 						<step completed icon="truck" heading="Shipping" description="Choose your shipping options"/>
@@ -616,7 +614,7 @@
 					</steps>
 				</segment>
 			</example>
-			<example>
+			<example "Inverted">
 				<segment inverted>
 					<steps inverted direction="vertical" appearance="circular">
 						<step completed heading="Shipping" description="Choose your shipping options"/>
@@ -628,7 +626,7 @@
 		</>
 
 		<section label="Color" sticky="stack" collapsible dividing>
-			<example description="Circular steps can be shown in different colors for active and completed steps of the whole step group.">
+			<example "Color" description="Circular steps can be shown in different colors for active and completed steps of the whole step group.">
 				<steps color="primary" size="small" appearance="circular" ordered stackable>
 					<step completed>
 						<content align="center">
@@ -645,7 +643,7 @@
 					<step heading="Default"/>
 				</steps>
 			</example>
-			<example>
+			<example "Color">
 				<steps color="secondary" size="small" appearance="circular" ordered stackable>
 					<step completed>
 						<content align="center">
@@ -662,7 +660,7 @@
 					<step heading="Default"/>
 				</steps>
 			</example>
-			<example>
+			<example "Color">
 				<steps color="red" size="small" appearance="circular" ordered stackable>
 					<step completed>
 						<content align="center">
@@ -679,7 +677,7 @@
 					<step heading="Default"/>
 				</steps>
 			</example>
-			<example>
+			<example "Color">
 				<steps color="orange" size="small" appearance="circular" ordered stackable>
 					<step completed>
 						<content align="center">
@@ -696,7 +694,7 @@
 					<step heading="Default"/>
 				</steps>
 			</example>
-			<example>
+			<example "Color">
 				<steps color="yellow" size="small" appearance="circular" ordered stackable>
 					<step completed>
 						<content align="center">
@@ -713,7 +711,7 @@
 					<step heading="Default"/>
 				</steps>
 			</example>
-			<example>
+			<example "Color">
 				<steps color="olive" size="small" appearance="circular" ordered stackable>
 					<step completed>
 						<content align="center">
@@ -730,7 +728,7 @@
 					<step heading="Default"/>
 				</steps>
 			</example>
-			<example>
+			<example "Color">
 				<steps color="green" size="small" appearance="circular" ordered stackable>
 					<step completed>
 						<content align="center">
@@ -747,7 +745,7 @@
 					<step heading="Default"/>
 				</steps>
 			</example>
-			<example>
+			<example "Color">
 				<steps color="teal" size="small" appearance="circular" ordered stackable>
 					<step completed>
 						<content align="center">
@@ -764,7 +762,7 @@
 					<step heading="Default"/>
 				</steps>
 			</example>
-			<example>
+			<example "Color">
 				<steps color="blue" size="small" appearance="circular" ordered stackable>
 					<step completed>
 						<content align="center">
@@ -781,7 +779,7 @@
 					<step heading="Default"/>
 				</steps>
 			</example>
-			<example>
+			<example "Color">
 				<steps color="violet" size="small" appearance="circular" ordered stackable>
 					<step completed>
 						<content align="center">
@@ -798,7 +796,7 @@
 					<step heading="Default"/>
 				</steps>
 			</example>
-			<example>
+			<example "Color">
 				<steps color="purple" size="small" appearance="circular" ordered stackable>
 					<step completed>
 						<content align="center">
@@ -815,7 +813,7 @@
 					<step heading="Default"/>
 				</steps>
 			</example>
-			<example>
+			<example "Color">
 				<steps color="pink" size="small" appearance="circular" ordered stackable>
 					<step completed>
 						<content align="center">
@@ -832,7 +830,7 @@
 					<step heading="Default"/>
 				</steps>
 			</example>
-			<example>
+			<example "Color">
 				<steps color="brown" size="small" appearance="circular" ordered stackable>
 					<step completed>
 						<content align="center">
@@ -849,7 +847,7 @@
 					<step heading="Default"/>
 				</steps>
 			</example>
-			<example>
+			<example "Color">
 				<steps color="grey" size="small" appearance="circular" ordered stackable>
 					<step completed>
 						<content align="center">
@@ -866,7 +864,7 @@
 					<step heading="Default"/>
 				</steps>
 			</example>
-			<example>
+			<example "Color">
 				<steps color="black" size="small" appearance="circular" ordered stackable>
 					<step completed>
 						<content align="center">
@@ -883,7 +881,7 @@
 					<step heading="Default"/>
 				</steps>
 			</example>
-			<example description="Single steps of a circular steps group can have a separate color.">
+			<example "Color" description="Single steps of a circular steps group can have a separate color.">
 				<steps color="red" appearance="circular" ordered>
 					<step completed/>
 					<step completed color="orange"/>

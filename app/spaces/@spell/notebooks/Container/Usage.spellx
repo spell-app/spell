@@ -34,57 +34,49 @@
 			Containers adjust their maximum width to the screen they appear on. Each width is the largest that fits the
 			breakpoint with its minimum gutters and a 17px scrollbar, e.g. tablet: `768px - (14px * 2) - 17px` = `723px`.
 		</>
-		<html>
-			<ui-table celled definition padding="compact" unstackable>
-				<table>
-					<thead>
-						<tr>
-							<th></>
-							<th>Mobile</>
-							<th>Tablet</>
-							<th>Small Monitor</>
-							<th>Large Monitor</>
-						</>
-					</>
-					<tbody>
-						<tr>
-							<td>Width</>
-							<td>100%</>
-							<td>723px</>
-							<td>933px</>
-							<td>1127px</>
-						</>
-						<tr>
-							<td>Gutter size</>
-							<td>1em</>
-							<td>Fluid</>
-							<td>Fluid</>
-							<td>Fluid</>
-						</>
-						<tr>
-							<td>Token</>
-							<td>
-								<code>--ui-container-mobile-gutter</>
-							</>
-							<td>
-								<code>--ui-container-width-tablet</>
-							</>
-							<td>
-								<code>--ui-container-width-computer</>
-							</>
-							<td>
-								<code>--ui-container-width-large-monitor</>
-							</>
-						</>
-						<tr>
-							<td>Device width</>
-							<td>below 768px</>
-							<td>768px - 991px</>
-							<td>992px - 1200px</>
-							<td>above 1200px</>
-						</>
-					</>
+		<table celled definition padding="compact" unstackable>
+			<row header>
+				<cell/>
+				<cell>Mobile</>
+				<cell>Tablet</>
+				<cell>Small Monitor</>
+				<cell>Large Monitor</>
+			</>
+			<row>
+				<cell>Width</>
+				<cell>100%</>
+				<cell>723px</>
+				<cell>933px</>
+				<cell>1127px</>
+			</>
+			<row>
+				<cell>Gutter size</>
+				<cell>1em</>
+				<cell>Fluid</>
+				<cell>Fluid</>
+				<cell>Fluid</>
+			</>
+			<row>
+				<cell>Token</>
+				<cell>
+					<text code>--ui-container-mobile-gutter</>
 				</>
+				<cell>
+					<text code>--ui-container-width-tablet</>
+				</>
+				<cell>
+					<text code>--ui-container-width-computer</>
+				</>
+				<cell>
+					<text code>--ui-container-width-large-monitor</>
+				</>
+			</>
+			<row>
+				<cell>Device width</>
+				<cell>below 768px</>
+				<cell>768px - 991px</>
+				<cell>992px - 1200px</>
+				<cell>above 1200px</>
 			</>
 		</>
 		<markdown>

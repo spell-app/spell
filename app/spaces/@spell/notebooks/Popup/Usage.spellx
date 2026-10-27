@@ -37,7 +37,7 @@
 		</>
 
 		<section label="Target element" sticky="stack" collapsible dividing>
-			<example description="`for` names the target by id, so the popup can sit anywhere;  this one appears at the label, whichever button you hover.">
+			<example "Target element" description="`for` names the target by id, so the popup can sit anywhere;  this one appears at the label, whichever button you hover.">
 				<label id="popup-usage-target" icon="user">Anna</label>
 				<button>Hover me</button>
 				<popup for="popup-usage-target" label="Anna, project owner"/>
@@ -61,7 +61,7 @@
 		</>
 
 		<section label="Specifying a trigger event" sticky collapsible dividing>
-			<example description="A popup trigger event can be specified:  `open-on=\"click\"` here, `open-on=\"focus\"` for an input.">
+			<example "Specifying a trigger event" description="A popup trigger event can be specified:  `open-on=\"click\"` here, `open-on=\"focus\"` for an input.">
 				<button id="popup-usage-click">Click me</button>
 				<popup for="popup-usage-click" open-on="click" heading="Clicked" label="Click again, or press Escape, to close."/>
 				<input id="popup-usage-focus" placeholder="Focus me" icon="search"/>
@@ -70,7 +70,7 @@
 		</>
 
 		<section label="Wide popup menu" sticky="stack" collapsible dividing>
-			<example description="Complex content, like a wide menu, is markup already in the page:  a `flowing` hover popup that stays open while the pointer is on it works like a dropdown menu.">
+			<example "Wide popup menu" description="Complex content, like a wide menu, is markup already in the page:  a `flowing` hover popup that stays open while the pointer is on it works like a dropdown menu.">
 				<menu>
 					<item id="popup-usage-browse" icon="dropdown" appearance="link">Browse</item>
 				</menu>
@@ -114,7 +114,7 @@
 			the target, lined up with its top or bottom edge). Word order matters: `top left` is above. When there is no
 			room it flips to the other side, inside the viewport.
 		</>
-		<message size="small" class="site-not-ported"><html>Not ported: Fomantic's offset / data-offset, boundary, scrollContext, lastResort and transition settings. CSS anchor positioning places and flips the popup:  set the gap with <code>--ui-popup-distance</>, and the motion with <code>--ui-popup-duration</>.</></>
+		<message size="small" class="site-not-ported">Not ported: Fomantic's offset / data-offset, boundary, scrollContext, lastResort and transition settings. CSS anchor positioning places and flips the popup:  set the gap with <text code>--ui-popup-distance</>, and the motion with <text code>--ui-popup-duration</>.</>
 	</>
 
 	<section label="Invoker commands">
@@ -125,7 +125,7 @@
 		</>
 
 		<section label="Invoker commands" sticky collapsible dividing>
-			<example description="It appears at the label, not at the buttons.">
+			<example "Invoker commands" description="It appears at the label, not at the buttons.">
 				<buttons size="small" appearance="basic">
 					<button commandfor="popup-invoker-tip" command="--toggle">Toggle</button>
 					<button commandfor="popup-invoker-tip" command="--close">Close</button>
@@ -156,7 +156,7 @@
 			popup.visible = true // show it from code:  no event
 			```
 		</>
-		<message size="small" class="site-not-ported"><html>Not ported: Fomantic's behaviors (show, hide, toggle, reposition ...) and callbacks (onShow, onHidden ...):  write <code>visible</> instead. Listen for <code>ui-opening</> / <code>ui-closing</>.</></>
+		<message size="small" class="site-not-ported">Not ported: Fomantic's behaviors (show, hide, toggle, reposition ...) and callbacks (onShow, onHidden ...):  write <text code>visible</> instead. Listen for <text code>ui-opening</> / <text code>ui-closing</>.</>
 	</>
 
 	<section label="CSS-only tooltips">

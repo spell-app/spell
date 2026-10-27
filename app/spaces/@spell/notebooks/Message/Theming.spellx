@@ -44,7 +44,7 @@
 			<ui-docs-tokens family="ui-message" playground>
 				<ui-message>
 					<ui-header>Changes in Service</>
-					<p>We just updated our privacy policy here to better service our customers. We recommend reviewing the changes.</>
+					<ui-text paragraph>We just updated our privacy policy here to better service our customers. We recommend reviewing the changes.</>
 				</>
 			</>
 		</>

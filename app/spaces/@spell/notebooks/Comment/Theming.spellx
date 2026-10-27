@@ -51,11 +51,11 @@
 						<ui-content>
 							<ui-author link="#matt">Matt</>
 							<ui-meta>
-								<span>Today at 5:42PM</>
+								<ui-text>Today at 5:42PM</>
 							</>
 							<ui-description>How artistic!</>
 							<ui-actions>
-								<button type="button">Reply</>
+								<ui-button type="button">Reply</>
 							</>
 						</>
 					</>
@@ -64,11 +64,11 @@
 						<ui-content>
 							<ui-author link="#elliot-fu">Elliot Fu</>
 							<ui-meta>
-								<span>Yesterday at 12:30AM</>
+								<ui-text>Yesterday at 12:30AM</>
 							</>
 							<ui-description>This has been very useful for my research. Thanks as well!</>
 							<ui-actions>
-								<button type="button">Reply</>
+								<ui-button type="button">Reply</>
 							</>
 						</>
 						<ui-comments>
@@ -77,11 +77,11 @@
 								<ui-content>
 									<ui-author link="#jenny-hess">Jenny Hess</>
 									<ui-meta>
-										<span>Just now</>
+										<ui-text>Just now</>
 									</>
 									<ui-description>Elliot you are always so right :)</>
 									<ui-actions>
-										<button type="button">Reply</>
+										<ui-button type="button">Reply</>
 									</>
 								</>
 							</>
@@ -92,21 +92,19 @@
 						<ui-content>
 							<ui-author link="#joe-henderson">Joe Henderson</>
 							<ui-meta>
-								<span>5 days ago</>
+								<ui-text>5 days ago</>
 							</>
 							<ui-description>Dude, this is awesome. Thanks so much</>
 							<ui-actions>
-								<button type="button">Reply</>
+								<ui-button type="button">Reply</>
 							</>
 						</>
 					</>
 					<ui-form slot="reply">
-						<form method="dialog">
-							<ui-field>
-								<ui-textarea aria-label="Reply"></>
-							</>
-							<ui-button type="submit" color="primary">Add Reply</>
+						<ui-field>
+							<ui-textarea aria-label="Reply"></>
 						</>
+						<ui-button type="submit" color="primary">Add Reply</>
 					</>
 				</>
 			</>

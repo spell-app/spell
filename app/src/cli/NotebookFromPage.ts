@@ -12,12 +12,17 @@ import { SP } from "spell/parser/spell"
  *   - `TabBar.spellx`:  the tab bar every notebook draws, `<button-tab-bar showing="usage"/>`, its own tab selected
  *   - `__project.json5`
  * - Each example's markup in spellx's bare names (`<button>` is `<ui-button>`), as Avatar's notebooks are written:
- *   - a run of markup that holds one of the web's own tags (`<span>`, `<div>`), or a tag no pack has
- *     (`<ui-docs-api>`), is an `<html>` block, written as the web writes it
- *   - a bare element whose text holds the web's inline tags (`<code>`, `<a>`) stays bare, only its text an `<html>`
+ *   - the web's own tags as Spell UI's (epic `elemental-spell` P26;  `webTagsAsSpellUI()`):  `<p>` is
+ *     `<text paragraph>`, `<b>` `<text bold>`, `<a>` `<link>`, a table's rows `<row>`s of `<cell>`s, `<div>` a `<stack>`,
+ *     a paragraph's `<br>` a blank line ...
+ *   - what's left, a run of markup that holds one of the web's own tags (a `<pre>`, a data `<script>`), or a tag no
+ *     pack has (`<ui-docs-api>`), is an `<html>` block, written as the web writes it
+ *   - a bare element whose text holds the web's inline tags it couldn't write stays bare, only its text an `<html>`
  *     block:  the smallest one (epic `elemental-spell` P25)
  *   - the section tabs under the tab bar:  `<menu>` and `<item>`
- *   - an example's `<p slot="description">` is its `description=`, its `<code>` backticked;
+ *   - an example is always named:  its heading, else its section's title (Owen, 2026-10-27)
+ *   - its description paragraphs are its `description=`, their `<code>` backticked, their links `[words](link)`;
+ *     a paragraph with more in it is a `<text paragraph slot="description">`;
  *     other description markup (a `<ui-message>`) stays slotted beside it
  *   - relative URLs (`images/...`) as the page server serves them, from the page's folder (`/components/ui/images/...`)
  * - Prose (`<ui-markdown>`) is a `<markdown>` block;  a code block (`<ui-code>`) a fenced one inside a `<markdown>`.
@@ -266,13 +271,18 @@ export class NotebookFromPage {
    */
   private writeExample(out: Writer, example: Element, indent: number, place: Place) {
     const children = childElements(example)
-    // its plain paragraphs (text and `<code>`) are its `description=`;  any other description markup stays, slotted
+    // its plain paragraphs (text, `<code>`, links) are its `description=`;  any other description markup stays, slotted
     const plain = children.filter((child) => child.getAttribute("slot") === "description" && isPlainParagraph(child))
     const description =
-      [example.getAttribute("description"), ...plain.map((child) => backtickedTextOf(child))]
+      [example.getAttribute("description"), ...plain.map((child) => this.descriptionOf(child, place))]
         .filter(Boolean)
         .join("  ") || undefined
-    const header = example.getAttribute("heading") ?? example.getAttribute("header")
+    // always named:  its heading, else its section's title
+    const header =
+      example.getAttribute("heading") ??
+      example.getAttribute("header") ??
+      example.closest(SECTION)?.getAttribute("label") ??
+      undefined
     const heads = [
       "example",
       ...(header ? [`"${escapeAttribute(header)}"`] : []),
@@ -343,7 +353,8 @@ export class NotebookFromPage {
    * A run of markup:  each element in bare names where it can be (`<button>`), else runs of `<html>` blocks, as the
    * web writes them.
    */
-  private writeMarkup(out: Writer, nodes: Element[], indent: number, place: Place) {
+  private writeMarkup(out: Writer, _nodes: Element[], indent: number, place: Place) {
+    const nodes = this.webTagsAsSpellUI(_nodes)
     let html: Node[] = []
     const flushHtml = () => {
       if (!html.length) return
@@ -374,10 +385,11 @@ export class NotebookFromPage {
   /** Can `element` and everything inside it be written in bare names? */
   private isBare(element: Element): boolean {
     if (!this.bareNameOf(element.localName)) return false
-    for (const name of element.getAttributeNames()) if (/[{}[\]]/.test(element.getAttribute(name)!)) return false
+    for (const name of element.getAttributeNames()) if (/[{}]/.test(element.getAttribute(name)!)) return false
     for (const node of element.childNodes) {
       if (node.nodeType === COMMENT) return false
-      if (node.nodeType === TEXT && /[<>{}&]/.test(node.textContent!)) return false
+      // a paragraph's `<br>`:  a blank line in its text (`writeParagraph()`)
+      if (isLineBreak(node) && isParagraph(element)) continue
       if (node.nodeType === ELEMENT && !this.isBare(node as Element)) return false
     }
     return true
@@ -390,7 +402,7 @@ export class NotebookFromPage {
    */
   private hasBareText(element: Element): boolean {
     if (!this.bareNameOf(element.localName)) return false
-    for (const name of element.getAttributeNames()) if (/[{}[\]]/.test(element.getAttribute(name)!)) return false
+    for (const name of element.getAttributeNames()) if (/[{}]/.test(element.getAttribute(name)!)) return false
     const children = [...element.childNodes]
     if (children.some((node) => node.nodeType === COMMENT)) return false
     const hasText = children.some((node) => node.nodeType === TEXT && node.textContent!.trim())
@@ -411,6 +423,10 @@ export class NotebookFromPage {
 
   /** `element` in bare names:  its children a line each, or on its own line when it mixes text and elements. */
   private writeBare(out: Writer, element: Element, indent: number, place: Place) {
+    if (isParagraph(element) && [...element.childNodes].some(isLineBreak)) {
+      this.writeParagraph(out, element, indent, place)
+      return
+    }
     const children = [...element.childNodes].filter((node) => node.nodeType !== COMMENT)
     const isBlock = children.every((node) => node.nodeType !== TEXT || !node.textContent!.trim())
     const kids = children.filter((node) => node.nodeType === ELEMENT) as Element[]
@@ -424,9 +440,35 @@ export class NotebookFromPage {
     }
   }
 
+  /**
+   * A paragraph holding line breaks (`<p>One<br>Two</p>`), in bare names:  its lines one tab in, a blank line where
+   * each `<br>` was, which `<text paragraph>` draws as a line break.
+   */
+  private writeParagraph(out: Writer, paragraph: Element, indent: number, place: Place) {
+    out.line(indent, this.openTag(paragraph))
+    let line: ChildNode[] = []
+    const lines: ChildNode[][] = [line]
+    for (const node of paragraph.childNodes) {
+      if (isLineBreak(node)) lines.push((line = []))
+      else line.push(node)
+    }
+    lines.forEach((nodes, index) => {
+      if (index) out.line(0, "")
+      out.line(indent + 1, this.inlineChildrenOf(nodes, place))
+    })
+    out.line(indent, closerOf(this.bareNameOf(paragraph.localName)!, place))
+  }
+
   /** `element` on one line, in bare names. */
   private inlineOf(element: Element, place: Place): string {
-    const inner = [...element.childNodes]
+    const inner = this.inlineChildrenOf([...element.childNodes], place)
+    if (!inner) return `${this.openTag(element)}`.replace(/>$/, "/>")
+    return `${this.openTag(element)}${inner}${closerOf(this.bareNameOf(element.localName)!, place)}`
+  }
+
+  /** `nodes` on one line, in bare names:  text as written, elements inline. */
+  private inlineChildrenOf(nodes: ChildNode[], place: Place): string {
+    return nodes
       .map((node) => {
         if (node.nodeType === TEXT) return escapeText(node.textContent!.replace(/\s*\n\s*/g, " "))
         if (node.nodeType === ELEMENT) return this.inlineOf(node as Element, place)
@@ -434,8 +476,6 @@ export class NotebookFromPage {
       })
       .join("")
       .trim()
-    if (!inner) return `${this.openTag(element)}`.replace(/>$/, "/>")
-    return `${this.openTag(element)}${inner}${closerOf(this.bareNameOf(element.localName)!, place)}`
   }
 
   /** `element`'s opening tag in bare names, its URLs as the page server serves them. */
@@ -540,12 +580,211 @@ export class NotebookFromPage {
   }
 
   ////////////////
+  // ## The web's tags, as Spell UI's
+  //
+  // Owen, 2026-10-27:  every example in spellx's own tags, an <html> block only where there's no other way.
+  ////////////////
+
+  /**
+   * `nodes`, the web's own tags in them (and inside them) swapped for Spell UI's where it has one:
+   * `<p>` => `<ui-text paragraph>`, `<b>` => `<ui-text bold>`, `<a href>` => `<ui-link link>`, a table's rows =>
+   * `<ui-row>`s of `<ui-cell>`s ... (`WEB_TAGS`, `tableRowsOf()`).
+   * - SIDE EFFECT:  rewrites the page's parsed document in place;  returns `nodes` as they now are.
+   * - A tag is left as it is when it has an attribute its Spell UI tag has no word for (`rowspan`),
+   *   so it's written in an `<html>` block, as before.
+   */
+  private webTagsAsSpellUI(nodes: Element[]): Element[] {
+    return (this.stackLines(nodes) as Element[]).flatMap((node) => {
+      if (node.nodeType !== ELEMENT) return [node]
+      const swapped = this.swapped(node)
+      for (const each of swapped) this.swapInside(each)
+      return swapped
+    })
+  }
+
+  /** The web's tags inside `parent`, as Spell UI's (`webTagsAsSpellUI()`). */
+  private swapInside(parent: Element) {
+    if (KEPT_AS_WRITTEN.has(parent.localName)) return
+    if (!isParagraph(parent)) this.stackLines([...parent.childNodes])
+    for (const child of [...parent.childNodes]) {
+      if (child.nodeType !== ELEMENT) continue
+      for (const each of this.swapped(child as Element)) this.swapInside(each)
+    }
+  }
+
+  /**
+   * `element` as Spell UI's tag, swapped in its place;  `[element]` when it has none, or is one already.
+   * - A table's rows replace the `<table>` they're in;  a `<form>` inside a `<ui-form>` its children;
+   *   a field's `<label>` goes into its `label`.
+   */
+  private swapped(element: Element): Element[] {
+    const { localName: tag } = element
+    if (tag === "table") return this.tableRowsOf(element) ?? [element]
+    if (
+      tag === "form" &&
+      element.parentElement?.localName === "ui-form" &&
+      !hasOwnAttributes(element, FORM_ATTRIBUTES)
+    ) {
+      const children = [...element.childNodes]
+      element.replaceWith(...children)
+      return children.filter((child) => !isBlank(child)) as Element[]
+    }
+    if (tag === "label") return this.fieldLabelOf(element) ? [] : [element]
+    if (tag === "kbd") return [this.keysOf(element) ?? element]
+    const swap = WEB_TAGS[tag]
+    if (!swap || hasOwnAttributes(element, Object.keys(swap.renamed ?? {}))) return [element]
+    const replacement = this.document.createElement(swap.tag)
+    for (const word of swap.bare ?? []) replacement.setAttribute(word, "")
+    for (const name of element.getAttributeNames())
+      replacement.setAttribute(swap.renamed?.[name] ?? name, element.getAttribute(name)!)
+    replacement.append(...element.childNodes)
+    element.replaceWith(replacement)
+    return [replacement]
+  }
+
+  /**
+   * The rows of `table`, a native `<table>` inside a `<ui-table>`, as `<ui-row>`s of `<ui-cell>`s, swapped in its
+   * place;  its `<caption>`, the table's `caption`.
+   * - `undefined`, the table left as it is, for what rows and cells can't say:  a `rowspan`, a row's or cell's class
+   *   words but alignment (`positive`, `collapsing`), the table's own attributes, a rich caption.
+   */
+  private tableRowsOf(table: Element): Element[] | undefined {
+    const owner = table.parentElement
+    if (owner?.localName !== "ui-table" || table.getAttributeNames().length) return undefined
+    const rows: Element[] = []
+    let caption: string | undefined
+    for (const group of childElements(table)) {
+      if (group.localName === "caption") {
+        if (group.children.length || group.getAttributeNames().length) return undefined
+        caption = collapsed(group.textContent ?? "")
+        continue
+      }
+      const rowsOfGroup = TABLE_GROUPS.has(group.localName) ? childElements(group) : [group]
+      if (TABLE_GROUPS.has(group.localName) && group.getAttributeNames().length) return undefined
+      for (const tr of rowsOfGroup) {
+        if (tr.localName !== "tr" || tr.getAttributeNames().length) return undefined
+        const row = this.document.createElement("ui-row")
+        if (group.localName === "thead") row.setAttribute("header", "")
+        if (group.localName === "tfoot") row.setAttribute("footer", "")
+        for (const td of childElements(tr)) {
+          const cell = this.cellOf(td, group.localName === "thead")
+          if (!cell) return undefined
+          row.append(cell)
+        }
+        rows.push(row)
+      }
+    }
+    // every row made:  only now is the page's table taken apart
+    if (caption) owner.setAttribute("caption", caption)
+    for (const row of rows) for (const cell of childElements(row)) cell.append(...(CELL_CONTENTS.get(cell) ?? []))
+    table.replaceWith(...rows)
+    return rows
+  }
+
+  /** `<td>` or `<th>` as a `<ui-cell>` (its contents moved in later), or `undefined` if one can't say it. */
+  private cellOf(td: Element, inHeaderRow: boolean): Element | undefined {
+    if (td.localName !== "td" && td.localName !== "th") return undefined
+    const cell = this.document.createElement("ui-cell")
+    if (td.localName === "th" && !inHeaderRow) cell.setAttribute("header", "")
+    for (const name of td.getAttributeNames()) {
+      const value = td.getAttribute(name)!
+      if (name === "colspan") cell.setAttribute("span", value)
+      else if (name === "class") {
+        const align = value.match(CELL_ALIGNMENT)
+        if (!align) return undefined
+        cell.setAttribute(VERTICAL_ALIGNMENTS.has(align[1]!) ? "vertical-align" : "align", align[1]!)
+      } else if (GLOBAL_ATTRIBUTE.test(name)) cell.setAttribute(name, value)
+      else return undefined
+    }
+    CELL_CONTENTS.set(cell, [...td.childNodes])
+    return cell
+  }
+
+  /**
+   * A `<ui-field>`'s `<label for>` of plain text, as the field's `label`:  the field pairs it with its control.
+   * - SIDE EFFECT:  removes the label, and sets the field's `label`;  `true` if it did.
+   */
+  private fieldLabelOf(label: Element): boolean {
+    const field = label.parentElement
+    const isFirst = field && childElements(field)[0] === label
+    if (field?.localName !== "ui-field" || !isFirst || label.children.length || field.hasAttribute("label"))
+      return false
+    if (label.getAttributeNames().some((name) => name !== "for")) return false
+    field.setAttribute("label", collapsed(label.textContent ?? ""))
+    label.remove()
+    return true
+  }
+
+  /** `<kbd>Ctrl</kbd>` as `<ui-keys shortcut="ctrl">`, swapped in its place;  `undefined` for anything richer. */
+  private keysOf(kbd: Element): Element | undefined {
+    const text = collapsed(kbd.textContent ?? "")
+    if (kbd.children.length || kbd.getAttributeNames().length || !/^[\w+ ]+$/.test(text)) return undefined
+    const keys = this.document.createElement("ui-keys")
+    keys.setAttribute("shortcut", text.toLowerCase().replace(/\s*\+\s*/g, "+"))
+    kbd.replaceWith(keys)
+    return keys
+  }
+
+  /**
+   * `nodes`, lines between `<br>`s (Rating's ratings, one under the other), as a `<ui-stack>` of the lines, swapped
+   * in their place:  a drawing has no `<br>`.  Else `nodes` as they are.
+   * - A line of one element is that element;  of more, or of text, a `<ui-text>` around them, one line of text.
+   * - Not a paragraph's `<br>`:  a blank line in its text (`writeParagraph()`).
+   */
+  private stackLines(nodes: ChildNode[]): ChildNode[] {
+    // an example's description markup (`slot="description"`) stays where it is, outside the lines
+    const isSlotted = (node: ChildNode) => node.nodeType === ELEMENT && (node as Element).hasAttribute("slot")
+    const children = nodes.filter((node) => node.nodeType !== COMMENT && !isBlank(node) && !isSlotted(node))
+    if (!children.some(isLineBreak)) return nodes
+    const lines: ChildNode[][] = [[]]
+    for (const node of children) {
+      if (isLineBreak(node)) lines.push([])
+      else lines.at(-1)!.push(node)
+    }
+    if (lines.some((line) => !line.length)) return nodes
+    const stack = this.document.createElement("ui-stack")
+    stack.setAttribute("spacing", "none")
+    children[0]!.before(stack)
+    for (const line of lines) {
+      if (line.length === 1 && line[0]!.nodeType === ELEMENT) stack.append(line[0]!)
+      else {
+        const text = this.document.createElement("ui-text")
+        text.append(...line)
+        stack.append(text)
+      }
+    }
+    for (const node of children) if (isLineBreak(node)) (node as Element).remove()
+    return [...nodes.filter(isSlotted), stack]
+  }
+
+  ////////////////
+  // ## Descriptions
+  ////////////////
+
+  /**
+   * A description paragraph (`isPlainParagraph()`) as `description=`'s text:  `<code>` backticked, a link
+   * `[words](link)`, its white space collapsed.
+   */
+  private descriptionOf(paragraph: Element, place: Place): string {
+    const text = [...paragraph.childNodes]
+      .map((node) => {
+        if (node.nodeType !== ELEMENT) return node.textContent
+        const element = node as Element
+        if (element.localName === "code") return `\`${element.textContent}\``
+        return `[${collapsed(element.textContent ?? "")}](${element.getAttribute("href") ?? ""})`
+      })
+      .join("")
+    return this.relinked(collapsed(text), place.tab)
+  }
+
+  ////////////////
   // ## Addresses
   ////////////////
 
   /** `value` of attribute `name`, a relative URL made the page server's (`images/x.png` => `/components/ui/images/x.png`). */
   private urlFor(name: string, value: string): string {
-    if (!URL_ATTRIBUTES.has(name) || /^([a-z]+:|\/|#)/i.test(value) || !value) return value
+    // a JSON value (`<ui-search source="[{...}]">`) names no file
+    if (!URL_ATTRIBUTES.has(name) || /^([a-z]+:|\/|#|\[|\{)/i.test(value) || !value) return value
     // `source` names a file only with a folder or an extension:  `<ui-embed source="youtube">` names a site
     if (name === "source" && !/[./]/.test(value)) return value
     return new URL(value, `http://page${this.options.page}`).pathname
@@ -563,6 +802,15 @@ export class NotebookFromPage {
 
   /** `text`'s links:  to the page's sections, into their notebooks;  to the page's neighbours, as served. */
   private relinked(text: string, from: Tab): string {
+    // code, fenced or inline, is left as written:  `this.#title[1](title)` is a call, not a link
+    return text
+      .split(CODE_IN_MARKDOWN)
+      .map((piece, index) => (index % 2 ? piece : this.relinkedProse(piece, from)))
+      .join("")
+  }
+
+  /** `relinked()`, on prose with no code in it. */
+  private relinkedProse(text: string, from: Tab): string {
     return text.replace(/\]\(([^)\s]+)\)/g, (whole, target: string) => {
       if (target.startsWith("#")) {
         const id = target.slice(1)
@@ -676,21 +924,41 @@ function childElements(element: Element): Element[] {
   return [...element.children]
 }
 
-/** Is `element` a `<p>` of text and `<code>` alone? */
+/**
+ * Is `element` a `<p>` of text, `<code>` and links alone, no attribute but its `slot`?
+ * - A description `description=` can say:  backticks and `[words](link)`.
+ */
 function isPlainParagraph(element: Element): boolean {
   return (
     element.localName === "p" &&
-    [...element.children].every((child) => child.localName === "code" && child.children.length === 0)
+    element.getAttributeNames().every((name) => name === "slot") &&
+    [...element.children].every(
+      (child) =>
+        child.children.length === 0 &&
+        (child.localName === "code" ||
+          (child.localName === "a" && child.getAttributeNames().every((name) => name === "href")))
+    )
   )
 }
 
-/** `element`'s text, each `<code>` backticked, its white space collapsed. */
-function backtickedTextOf(element: Element): string {
-  return collapsed(
-    [...element.childNodes]
-      .map((node) => (node.nodeType === ELEMENT ? `\`${node.textContent}\`` : node.textContent))
-      .join("")
-  )
+/** Is `element` a paragraph, `<p>` or `<ui-text paragraph>`:  its `<br>` a blank line in its text? */
+function isParagraph(element: Element): boolean {
+  return element.localName === "p" || (element.localName === "ui-text" && element.hasAttribute("paragraph"))
+}
+
+/** Is `node` a `<br>`? */
+function isLineBreak(node: ChildNode): boolean {
+  return node.nodeType === ELEMENT && (node as Element).localName === "br"
+}
+
+/** Is `node` text of white space alone? */
+function isBlank(node: ChildNode): boolean {
+  return node.nodeType === TEXT && !node.textContent!.trim()
+}
+
+/** Does `element` have an attribute but the web's global ones (`class`, `style`, `aria-*` ...) and `allowed`? */
+function hasOwnAttributes(element: Element, allowed: readonly string[]): boolean {
+  return element.getAttributeNames().some((name) => !GLOBAL_ATTRIBUTE.test(name) && !allowed.includes(name))
 }
 
 /** `<ui-markdown>`'s text:  its `<script type="text/markdown">`'s, or its own, dedented. */
@@ -738,6 +1006,9 @@ function listOf(items: string[], last = "and"): string {
   return items.length < 2 ? (items[0] ?? "") : `${items.slice(0, -1).join(", ")} ${last} ${items.at(-1)}`
 }
 
+/** Code in Markdown, fenced or inline:  its links are left as written (`relinked()`). */
+const CODE_IN_MARKDOWN = /(```[\s\S]*?```|`[^`\n]*`)/
+
 /** How a notebook closes its tags, outside an example:  `</spell-notebook>` and `</example>` are written in full. */
 const CLOSER = "</>"
 
@@ -766,6 +1037,58 @@ const URL_ATTRIBUTES = new Set(["src", "href", "link", "source"])
 
 /** Spell's own words for blocks in a drawing:  a Spell UI tag of the same bare name is written in full. */
 const SPELL_BLOCK_WORDS = new Set(["markdown", "html", "example", "css", "spell", "spellx"])
+
+/**
+ * The web's tags Spell UI has its own for (Owen, 2026-10-27):  its tag, the bare words it adds, and the attributes
+ * it calls by another name;  any other attribute but the web's global ones keeps the web's tag
+ * (`webTagsAsSpellUI()`).
+ */
+const WEB_TAGS: Record<string, { tag: string; bare?: string[]; renamed?: Record<string, string> }> = {
+  p: { tag: "ui-text", bare: ["paragraph"] },
+  span: { tag: "ui-text" },
+  b: { tag: "ui-text", bare: ["bold"] },
+  strong: { tag: "ui-text", bare: ["bold"] },
+  em: { tag: "ui-text", bare: ["italic"] },
+  i: { tag: "ui-text", bare: ["italic"] },
+  ins: { tag: "ui-text", bare: ["underline"] },
+  u: { tag: "ui-text", bare: ["underline"] },
+  s: { tag: "ui-text", bare: ["strikethrough"] },
+  del: { tag: "ui-text", bare: ["strikethrough"] },
+  mark: { tag: "ui-text", bare: ["highlight"] },
+  sub: { tag: "ui-text", bare: ["subscript"] },
+  sup: { tag: "ui-text", bare: ["superscript"] },
+  code: { tag: "ui-text", bare: ["code"] },
+  a: { tag: "ui-link", renamed: { href: "link", target: "target" } },
+  img: { tag: "ui-image", renamed: { src: "src", alt: "alt", width: "width", height: "height", loading: "loading" } },
+  ul: { tag: "ui-list", bare: ["bulleted"] },
+  ol: { tag: "ui-list", bare: ["ordered"] },
+  li: { tag: "ui-item" },
+  section: { tag: "ui-section" },
+  button: { tag: "ui-button", renamed: { type: "type", name: "name", value: "value", disabled: "disabled" } },
+  div: { tag: "ui-stack" },
+  form: { tag: "ui-form" }
+}
+
+/** The web's global attributes, which any tag takes:  a swapped tag keeps them as they are. */
+const GLOBAL_ATTRIBUTE = /^(class|style|id|slot|title|lang|dir|hidden|role|tabindex|aria-.*|data-.*)$/
+
+/** A native `<form>`'s own attributes a `<ui-form>` around it does without:  a docs page's never sends. */
+const FORM_ATTRIBUTES = ["method"]
+
+/** A native table's row groups:  their rows are the table's rows. */
+const TABLE_GROUPS = new Set(["thead", "tbody", "tfoot"])
+
+/** A cell's class words a `<ui-cell>` can say:  its alignment, `right aligned`, `top aligned`. */
+const CELL_ALIGNMENT = /^(left|center|right|justified|top|middle|bottom) aligned$/
+
+/** The alignments that are vertical:  a cell's `vertical-align`. */
+const VERTICAL_ALIGNMENTS = new Set(["top", "middle", "bottom"])
+
+/** Each `<ui-cell>` made, its `<td>`'s contents, moved in once every row of its table could be made. */
+const CELL_CONTENTS = new WeakMap<Element, ChildNode[]>()
+
+/** Tags whose insides are never swapped:  their text is code or data, or the web's own markup inside a template. */
+const KEPT_AS_WRITTEN = new Set(["script", "style", "pre", "template", "svg", "math"])
 
 /** The web's inline tags, which text in a bare element may hold, inside an `<html>` block (`hasBareText()`). */
 const INLINE_TAGS = new Set(["code", "a", "b", "strong", "em", "i", "kbd", "br", "span", "small", "mark", "sup", "sub"])

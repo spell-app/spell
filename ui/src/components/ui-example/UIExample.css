@@ -125,10 +125,7 @@
    */
   .frame {
     /* the code button's corner:  following the frame's corner it sits in, less its inset */
-    --_example-toggle-radius: max(
-      4px,
-      calc(var(--_ui-example-frame-radius) - var(--_ui-example-toggle-corner))
-    );
+    --_example-toggle-radius: max(4px, calc(var(--_ui-example-frame-radius) - var(--_ui-example-toggle-corner)));
     --_example-inner-radius: max(var(--ui-radius-s), calc(var(--_ui-example-frame-radius) - 16px));
     --ui-segment-radius: var(--_example-inner-radius);
     --ui-card-radius: var(--_example-inner-radius);
@@ -215,6 +212,14 @@
   .description code {
     font-family: var(--ui-font-family-mono, monospace);
     font-size: 0.9em;
+  }
+  /* A link in the `description` attribute (`[words](link)`):  the page's link colour. */
+  .description a {
+    color: var(--ui-link);
+  }
+  /* Description markup slotted after the attribute's sentence (a message):  a little room between. */
+  :host([description]) .description ::slotted(*) {
+    margin-block-start: 0.5em;
   }
 
   [part~="demo"],

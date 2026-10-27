@@ -73,32 +73,25 @@
 		</>
 
 		<section label="Validation" sticky="stack" collapsible dividing>
-			<example description="No script:  the controls' own `required` / `type=\"email\"` constraints.  Submit it empty, or tab through the fields (`validate=\"on leave\"`).">
-				<html>
-					<ui-form validate="on leave">
-						<form method="dialog">
-							<ui-fields widths="2">
-								<ui-field required>
-									<label for="form-validate-name">Name</label>
-									<ui-input id="form-validate-name" name="name" placeholder="Name" required></ui-input>
-								</ui-field>
-								<ui-field required>
-									<label for="form-validate-email">E-mail</label>
-									<ui-input id="form-validate-email" name="email" type="email" placeholder="joe@schmoe.com" required></ui-input>
-								</ui-field>
-							</ui-fields>
-							<ui-field required>
-								<label for="form-validate-password">Password</label>
-								<ui-input id="form-validate-password" name="password" type="password" minlength="6" required></ui-input>
-							</ui-field>
-							<ui-field>
-								<ui-checkbox name="terms" required>I agree to the terms</ui-checkbox>
-							</ui-field>
-							<ui-message state="error" heading="Please fix the fields above"></ui-message>
-							<ui-button type="submit" color="primary">Sign up</ui-button>
-						</form>
-					</ui-form>
-				</html>
+			<example "Validation" description="No script:  the controls' own `required` / `type=\"email\"` constraints.  Submit it empty, or tab through the fields (`validate=\"on leave\"`).">
+				<form validate="on leave">
+					<fields widths="2">
+						<field label="Name" required>
+							<input id="form-validate-name" name="name" placeholder="Name" required/>
+						</field>
+						<field label="E-mail" required>
+							<input id="form-validate-email" name="email" type="email" placeholder="joe@schmoe.com" required/>
+						</field>
+					</fields>
+					<field label="Password" required>
+						<input id="form-validate-password" name="password" type="password" minlength="6" required/>
+					</field>
+					<field>
+						<checkbox name="terms" required>I agree to the terms</checkbox>
+					</field>
+					<message state="error" heading="Please fix the fields above"/>
+					<button type="submit" color="primary">Sign up</button>
+				</form>
 			</example>
 		</>
 		<markdown>With rules set from script (the same form):</>
@@ -167,79 +160,69 @@
 		</>
 
 		<section label="Bound form" sticky="stack" collapsible dividing>
-			<example description="No script:  `value` as JSON text.  Type into the fields, or tick the box, and watch the Bound object box below them change.">
+			<example "Bound form" description="No script:  `value` as JSON text.  Type into the fields, or tick the box, and watch the Bound object box below them change.">
 				<html>
 					<ui-form debug value="{\"name\": \"Ada\", \"email\": \"ada@example.com\", \"newsletter\": true}">
-						<form method="dialog">
-							<ui-fields widths="2">
-								<ui-field>
-									<label for="form-bind-name">Name</label>
-									<ui-input id="form-bind-name" name="name"></ui-input>
-								</ui-field>
-								<ui-field>
-									<label for="form-bind-email">E-mail</label>
-									<ui-input id="form-bind-email" name="email" type="email"></ui-input>
-								</ui-field>
-							</ui-fields>
-							<ui-field>
-								<ui-checkbox name="newsletter">Send me the newsletter</ui-checkbox>
+						<ui-fields widths="2">
+							<ui-field label="Name">
+								<ui-input id="form-bind-name" name="name"></ui-input>
 							</ui-field>
-						</form>
+							<ui-field label="E-mail">
+								<ui-input id="form-bind-email" name="email" type="email"></ui-input>
+							</ui-field>
+						</ui-fields>
+						<ui-field>
+							<ui-checkbox name="newsletter">Send me the newsletter</ui-checkbox>
+						</ui-field>
 					</ui-form>
 				</html>
 			</example>
 		</>
 
 		<section label="When a field writes" sticky="stack" collapsible dividing>
-			<example description="Each field says when it takes an edit:  `apply=\"delayed\"` after a pause in typing (300ms;  `delayed 100` for 100ms), `apply=\"on leave\"` once the cursor leaves it.  Type, and watch the Bound object box.">
+			<example "When a field writes" description="Each field says when it takes an edit:  `apply=\"delayed\"` after a pause in typing (300ms;  `delayed 100` for 100ms), `apply=\"on leave\"` once the cursor leaves it.  Type, and watch the Bound object box.">
 				<html>
 					<ui-form debug value="{\"title\": \"Spell\", \"slug\": \"spell\"}">
-						<form method="dialog">
-							<ui-field label="Title" hint="Written after a pause in typing." apply="delayed">
-								<ui-input name="title"></ui-input>
-							</ui-field>
-							<ui-field label="Slug" hint="Written when you leave the field." apply="on leave">
-								<ui-input name="slug"></ui-input>
-							</ui-field>
-						</form>
+						<ui-field label="Title" hint="Written after a pause in typing." apply="delayed">
+							<ui-input name="title"></ui-input>
+						</ui-field>
+						<ui-field label="Slug" hint="Written when you leave the field." apply="on leave">
+							<ui-input name="slug"></ui-input>
+						</ui-field>
 					</ui-form>
 				</html>
 			</example>
 		</>
 
 		<section label="Save and Cancel" sticky="stack" collapsible dividing>
-			<example description="`apply=\"on save\"` holds every edit until `save()`;  `cancel()` drops them.  The form has `:state(changed)` while it holds any, and sends `ui-applying` / `ui-applied`, `ui-cancelling` / `ui-cancelled`.">
+			<example "Save and Cancel" description="`apply=\"on save\"` holds every edit until `save()`;  `cancel()` drops them.  The form has `:state(changed)` while it holds any, and sends `ui-applying` / `ui-applied`, `ui-cancelling` / `ui-cancelled`.">
 				<html>
 					<ui-form debug apply="on save" value="{\"name\": \"Ada\", \"role\": \"Engineer\"}">
-						<form method="dialog">
-							<ui-field label="Name">
-								<ui-input name="name"></ui-input>
-							</ui-field>
-							<ui-field label="Role">
-								<ui-input name="role"></ui-input>
-							</ui-field>
-							<ui-button type="button" onclick="this.closest('ui-form').save()" color="primary">Save</ui-button>
-							<ui-button type="button" onclick="this.closest('ui-form').cancel()">Cancel</ui-button>
-						</form>
+						<ui-field label="Name">
+							<ui-input name="name"></ui-input>
+						</ui-field>
+						<ui-field label="Role">
+							<ui-input name="role"></ui-input>
+						</ui-field>
+						<ui-button type="button" onclick="this.closest('ui-form').save()" color="primary">Save</ui-button>
+						<ui-button type="button" onclick="this.closest('ui-form').cancel()">Cancel</ui-button>
 					</ui-form>
 				</html>
 			</example>
 		</>
 
 		<section label="Many things" sticky="stack" collapsible dividing>
-			<example description="A list as `value` edits every thing in it:  a field shows the value they agree on;  where they don't, it shows blank and `Mixed`.  Typing sets it on all of them.">
+			<example "Many things" description="A list as `value` edits every thing in it:  a field shows the value they agree on;  where they don't, it shows blank and `Mixed`.  Typing sets it on all of them.">
 				<html>
 					<ui-form debug value="\[{\"size\": \"md\", \"font\": \"Inter\"}, {\"size\": \"md\", \"font\": \"Lora\"}, {\"size\": \"md\", \"font\": \"Inter\"}]">
-						<form method="dialog">
-							<ui-fields widths="2">
-								<ui-field label="Size">
-									<ui-input name="size"></ui-input>
-								</ui-field>
-								<ui-field label="Font">
-									<ui-input name="font"></ui-input>
-								</ui-field>
-							</ui-fields>
-						</form>
+						<ui-fields widths="2">
+							<ui-field label="Size">
+								<ui-input name="size"></ui-input>
+							</ui-field>
+							<ui-field label="Font">
+								<ui-input name="font"></ui-input>
+							</ui-field>
+						</ui-fields>
 					</ui-form>
 				</html>
 			</example>
@@ -260,28 +243,8 @@
 				  keeps its focus. To change the list, give the property a new list.
 				- Ids repeat in every row: label a row's controls with `aria-label` (or by wrapping them), not `<label for>`.
 			</>
-			<example description="A to-do list:  a row per task, and a button that adds one.  Rename a task, tick it, or add one, and watch its item change in the Bound object box below.">
-				<html>
-					<ui-form id="form-todos" debug>
-						<form method="dialog">
-							<ui-field>
-								<label for="form-todos-title">List</label>
-								<ui-input id="form-todos-title" name="title"></ui-input>
-							</ui-field>
-							<ui-repeat name="tasks">
-								<ui-fields unstackable>
-									<ui-field width="2">
-										<ui-checkbox name="done" aria-label="Done"></ui-checkbox>
-									</ui-field>
-									<ui-field width="14">
-										<ui-input name="title" aria-label="Task"></ui-input>
-									</ui-field>
-								</ui-fields>
-							</ui-repeat>
-							<ui-button id="form-todos-add" type="button" icon="plus">Add a task</ui-button>
-						</form>
-					</ui-form>
-				</html>
+			<example "Repeat" description="A to-do list:  a row per task, and a button that adds one.  Rename a task, tick it, or add one, and watch its item change in the Bound object box below.">
+				<form-task-list/>
 			</example>
 		</>
 		<markdown>From script, or a framework: any object. A Solid app, with a signal behind each property:</>
@@ -290,7 +253,7 @@
 			class Task {
 			  #title = createSignal("")
 			  get title() { return this.#title[0]() }
-			  set title(title) { this.#title[1](/components/ui/title) }
+			  set title(title) { this.#title[1](title) }
 			}
 
 			const form = document.querySelector("ui-form")
@@ -384,3 +347,37 @@
 		</>
 	</>
 </spell-notebook>
+
+<!-- Usage › Binding › Repeat's to-do list:  a task list bound to its form, its tasks one row each -->
+<spell-thing "task">
+	<property "title">text</>
+	<property "done">yes or no</>
+</spell-thing>
+<spell-view "task list">
+	<property "title">text</>
+	<property "tasks">a new list of tasks</>
+	<action "create it">
+		set its title to "Groceries"
+		add (a new task with title = "Milk", done = yes) to its tasks
+		add (a new task with title = "Eggs") to its tasks
+	</action>
+	<action "make another task">add (a new task) to its tasks</>
+	<draw>
+		<form value={it} debug>
+			<field label="List">
+				<input name="title"/>
+			</field>
+			<repeat name="tasks">
+				<fields unstackable>
+					<field width="2">
+						<checkbox name="done" aria-label="Done"/>
+					</field>
+					<field width="14">
+						<input name="title" aria-label="Task"/>
+					</field>
+				</fields>
+			</repeat>
+			<button type="button" icon="plus" onClick={make another task}>Add a task</button>
+		</form>
+	</draw>
+</spell-view>

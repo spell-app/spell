@@ -39,7 +39,7 @@
 		<html>
 			<ui-docs-tokens family="ui-segment" playground>
 				<ui-segment>
-					<p>Te eum doming eirmod, nominati pertinacia argumentum ad his.</>
+					<ui-text paragraph>Te eum doming eirmod, nominati pertinacia argumentum ad his.</>
 				</>
 			</>
 		</>

@@ -60,18 +60,16 @@
 		</>
 
 		<section label="Closed only by its buttons" sticky collapsible dividing>
-			<example description="`closedby=\"none\"`:  Escape and the dimmer do nothing.  The close button is an invoker, `command=\"--close\"`.">
+			<example "Closed only by its buttons" description="`closedby=\"none\"`:  Escape and the dimmer do nothing.  The close button is an invoker, `command=\"--close\"`.">
 				<button commandfor="modal-usage-none" command="--show">Show</button>
-				<html>
-					<ui-modal id="modal-usage-none" closedby="none" size="small" heading="Unsaved changes">
-						<ui-content>
-							<p>Escape and clicks on the dimmer do nothing here: only the button closes it.</p>
-						</ui-content>
-						<ui-actions>
-							<ui-button commandfor="modal-usage-none" command="--close">Close</ui-button>
-						</ui-actions>
-					</ui-modal>
-				</html>
+				<modal id="modal-usage-none" closedby="none" size="small" heading="Unsaved changes">
+					<content>
+						<text paragraph>Escape and clicks on the dimmer do nothing here: only the button closes it.</text>
+					</content>
+					<actions>
+						<button commandfor="modal-usage-none" command="--close">Close</button>
+					</actions>
+				</modal>
 			</example>
 		</>
 	</>
@@ -106,7 +104,7 @@
 			modal.visible = true // show from code:  no ui-opening
 			```
 		</>
-		<message size="small" class="site-not-ported"><html>Not ported: Fomantic's behaviors (show, hide, refresh, attach events ...), and its <code>allowMultiple: false</>. Instead, write <code>visible</>, use invoker commands, and close the first modal yourself when a second one should replace it.</></>
+		<message size="small" class="site-not-ported">Not ported: Fomantic's behaviors (show, hide, refresh, attach events ...), and its <text code>allowMultiple: false</>. Instead, write <text code>visible</>, use invoker commands, and close the first modal yourself when a second one should replace it.</>
 	</>
 
 	<section label="Dialog helpers">

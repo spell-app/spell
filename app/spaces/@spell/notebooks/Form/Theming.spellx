@@ -39,20 +39,16 @@
 		<html>
 			<ui-docs-tokens family="ui-form" playground>
 				<ui-form>
-					<form>
-						<ui-field>
-							<label for="fm-types-first-playground">First Name</>
-							<ui-input id="fm-types-first-playground" name="first-name" placeholder="First Name"></>
-						</>
-						<ui-field>
-							<label for="fm-types-last-playground">Last Name</>
-							<ui-input id="fm-types-last-playground" name="last-name" placeholder="Last Name"></>
-						</>
-						<ui-field>
-							<ui-checkbox name="terms">I agree to the Terms and Conditions</>
-						</>
-						<ui-button type="submit">Submit</>
+					<ui-field label="First Name">
+						<ui-input id="fm-types-first-playground" name="first-name" placeholder="First Name"></>
 					</>
+					<ui-field label="Last Name">
+						<ui-input id="fm-types-last-playground" name="last-name" placeholder="Last Name"></>
+					</>
+					<ui-field>
+						<ui-checkbox name="terms">I agree to the Terms and Conditions</>
+					</>
+					<ui-button type="submit">Submit</>
 				</>
 			</>
 		</>

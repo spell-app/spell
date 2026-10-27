@@ -19,7 +19,7 @@
 		</>
 		<html>
 			<ui-docs-tokens family="ui-example" playground>
-				<div class="ui-stack">
+				<ui-stack class="ui-stack">
 					<ui-example heading="Button" description="A standard button.">
 						<ui-button>Follow</>
 					</>
@@ -28,7 +28,7 @@
 						<ui-button>Discard</>
 					</>
 					<ui-example heading="Rich description">
-						<p slot="description">A description with a <a href="#rich">link</>, from the <code>description</> slot.</>
+						<ui-text slot="description" paragraph>A description with a <ui-link link="#rich">link</>, from the <ui-text code>description</> slot.</>
 						<ui-button color="secondary">Okay</>
 					</>
 				</>

@@ -40,7 +40,7 @@
 		</>
 
 		<section label="Toggle from a menu" sticky collapsible dividing>
-			<example description="A menu item drives the flyout through a button with `command=\"--toggle\"`.">
+			<example "Toggle from a menu" description="A menu item drives the flyout through a button with `command=\"--toggle\"`.">
 				<menu attach="top">
 					<item>
 						<button commandfor="flyout-usage-menu" command="--toggle" icon="sidebar" appearance="basic">Toggle flyout</button>
@@ -50,24 +50,22 @@
 					<header level="3">Application Content</header>
 					<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
 				</segment>
-				<html>
-					<ui-flyout id="flyout-usage-menu" closable>
-						<ui-header>
-							<ui-icon name="question"></ui-icon>
-							<ui-content>Archive Old Messages</ui-content>
-						</ui-header>
-						<ui-content>
-							<p>Your inbox is getting full, would you like us to enable automatic archiving of old messages?</p>
-						</ui-content>
-						<ui-actions>
-							<ui-button class="cancel" color="red" icon="remove">No</ui-button>
-							<ui-button class="ok" color="green" icon="checkmark">Yes</ui-button>
-						</ui-actions>
-					</ui-flyout>
-				</html>
+				<flyout id="flyout-usage-menu" closable>
+					<header>
+						<icon name="question"/>
+						<content>Archive Old Messages</content>
+					</header>
+					<content>
+						<text paragraph>Your inbox is getting full, would you like us to enable automatic archiving of old messages?</text>
+					</content>
+					<actions>
+						<button class="cancel" color="red" icon="remove">No</button>
+						<button class="ok" color="green" icon="checkmark">Yes</button>
+					</actions>
+				</flyout>
 			</example>
 		</>
-		<message size="small" class="site-not-ported"><html>Not ported: a custom <code>context</> (a flyout inside a segment instead of the page) -- the flyout is a modal <code>&lt;dialog&gt;</> in the top layer, always against the viewport. For a panel inside a region, use <code>&lt;ui-sidebar&gt;</> in a <code>&lt;ui-pushable&gt;</>.</></>
+		<message size="small" class="site-not-ported">Not ported: a custom <text code>context</> (a flyout inside a segment instead of the page) -- the flyout is a modal <text code>&lt;dialog&gt;</> in the top layer, always against the viewport. For a panel inside a region, use <text code>&lt;ui-sidebar&gt;</> in a <text code>&lt;ui-pushable&gt;</>.</>
 	</>
 
 	<section label="Events">
@@ -94,7 +92,7 @@
 			help.visible = true // show from code:  no ui-opening
 			```
 		</>
-		<message size="small" class="site-not-ported"><html>Not ported: Fomantic's behaviors (show, hide, toggle ...), its dimPage, returnScroll and transition settings, and its callbacks. Instead, write <code>visible</>, use invoker commands, and listen for the events.</></>
+		<message size="small" class="site-not-ported">Not ported: Fomantic's behaviors (show, hide, toggle ...), its dimPage, returnScroll and transition settings, and its callbacks. Instead, write <text code>visible</>, use invoker commands, and listen for the events.</>
 	</>
 
 	<section label="Keyboard">

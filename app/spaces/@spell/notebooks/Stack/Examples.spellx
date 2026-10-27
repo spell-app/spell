@@ -27,7 +27,7 @@
 	-->
 	<section label="Types">
 		<section label="Stack" sticky="stack" collapsible dividing>
-			<example description="A column, its children 1em apart.  No look of its own:  the segments are the children.">
+			<example "Stack" description="A column, its children 1em apart.  No look of its own:  the segments are the children.">
 				<stack>
 					<segment>First</segment>
 					<segment>Second</segment>
@@ -37,7 +37,7 @@
 		</>
 
 		<section label="Row" sticky="stack" collapsible dividing>
-			<example description="`direction=\"horizontal\"`:  a row, its children centred on its middle.">
+			<example "Row" description="`direction=\"horizontal\"`:  a row, its children centred on its middle.">
 				<stack direction="horizontal">
 					<icon name="inbox" size="large"/>
 					<text>3 new messages</text>
@@ -47,7 +47,7 @@
 		</>
 
 		<section label="Wrapping row" sticky="stack" collapsible dividing>
-			<example description="`wrap`:  a row that wraps onto the next line, for tags or buttons (Web Awesome's cluster).  Narrow the window to see it wrap.">
+			<example "Wrapping row" description="`wrap`:  a row that wraps onto the next line, for tags or buttons (Web Awesome's cluster).  Narrow the window to see it wrap.">
 				<stack direction="horizontal" wrap spacing="sm">
 					<label>Design</label>
 					<label>Engineering</label>
@@ -62,7 +62,7 @@
 
 	<section label="Variations">
 		<section label="Spacing" sticky="stack" collapsible dividing>
-			<example description="`spacing`:  `none`, `xs`, `sm`, `md` (the default), `lg`, `xl`.">
+			<example "Spacing" description="`spacing`:  `none`, `xs`, `sm`, `md` (the default), `lg`, `xl`.">
 				<stack spacing="lg">
 					<stack direction="horizontal" spacing="none">
 						<button>none</button>
@@ -81,7 +81,7 @@
 		</>
 
 		<section label="One left, one right" sticky="stack" collapsible dividing>
-			<example description="`justify=\"between\"`:  the first child at the start, the last at the end.  What `floated=\"right\"` used to do.">
+			<example "One left, one right" description="`justify=\"between\"`:  the first child at the start, the last at the end.  What `floated=\"right\"` used to do.">
 				<stack direction="horizontal" justify="between">
 					<header level="4">Inbox</header>
 					<button color="primary">New message</button>
@@ -90,7 +90,7 @@
 		</>
 
 		<section label="Centred" sticky="stack" collapsible dividing>
-			<example description="`align=\"center\"`:  a column's children centred across it.">
+			<example "Centred" description="`align=\"center\"`:  a column's children centred across it.">
 				<stack align="center" spacing="sm">
 					<icon name="inbox" size="huge"/>
 					<text>No messages yet</text>

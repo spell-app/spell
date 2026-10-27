@@ -17,40 +17,36 @@
 	-->
 	<section label="Owners">
 		<section label="Card" sticky="stack" collapsible dividing>
-			<example description="A card's description:  muted text under its header and meta.">
-				<html>
-					<ui-card>
-						<ui-content>
-							<ui-header>Elliot</ui-header>
-							<ui-meta>
-								<span>Joined in 2013</span>
-							</ui-meta>
-							<ui-description>Elliot is a sound engineer living in Nashville who enjoys playing guitar.</ui-description>
-						</ui-content>
-					</ui-card>
-				</html>
+			<example "Card" description="A card's description:  muted text under its header and meta.">
+				<card>
+					<content>
+						<header>Elliot</header>
+						<meta>
+							<text>Joined in 2013</text>
+						</meta>
+						<description>Elliot is a sound engineer living in Nashville who enjoys playing guitar.</description>
+					</content>
+				</card>
 			</example>
 		</>
 
 		<section label="Item" sticky="stack" collapsible dividing>
-			<example description="An item's description:  its body text.">
-				<html>
-					<ui-items>
-						<ui-item image="../images/wireframe/image.png">
-							<ui-content>
-								<ui-header>Cute Dog</ui-header>
-								<ui-description>
-									<p>Many people also have their own barometers for what makes a cute dog.</p>
-								</ui-description>
-							</ui-content>
-						</ui-item>
-					</ui-items>
-				</html>
+			<example "Item" description="An item's description:  its body text.">
+				<items>
+					<item image="../images/wireframe/image.png">
+						<content>
+							<header>Cute Dog</header>
+							<description>
+								<text paragraph>Many people also have their own barometers for what makes a cute dog.</text>
+							</description>
+						</content>
+					</item>
+				</items>
 			</example>
 		</>
 
 		<section label="Comment" sticky="stack" collapsible dividing>
-			<example description="A comment's text (Fomantic's comment `text`).">
+			<example "Comment" description="A comment's text (Fomantic's comment `text`).">
 				<comments>
 					<comment>
 						<avatar src="/components/ui/images/avatar/small/elliot.jpg"/>
@@ -64,7 +60,7 @@
 		</>
 
 		<section label="List" sticky="stack" collapsible dividing>
-			<example description="A list item's description:  a second line under its header.">
+			<example "List" description="A list item's description:  a second line under its header.">
 				<list>
 					<item icon="map marker">
 						<content>
@@ -77,7 +73,7 @@
 		</>
 
 		<section label="Step" sticky="stack" collapsible dividing>
-			<example description="A step's description:  a smaller line under its title.">
+			<example "Step" description="A step's description:  a smaller line under its title.">
 				<steps>
 					<step icon="payment">
 						<content>

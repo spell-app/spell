@@ -22,35 +22,31 @@
 	-->
 	<section label="Types">
 		<section label="Root" sticky="stack" collapsible dividing>
-			<example description="Put one around a page or an app:  each `ui-*` tag inside loads its component the first time it appears, and nothing else is downloaded. Load just the root: `import \"spell/ui/ui-root\"`.">
-				<html>
-					<ui-root>
-						<ui-segment>
-							<ui-header>Report</ui-header>
-							<p>Every component in here was loaded by the root, on demand.</p>
-							<ui-button color="primary">Save</ui-button>
-						</ui-segment>
-					</ui-root>
-				</html>
+			<example "Root" description="Put one around a page or an app:  each `ui-*` tag inside loads its component the first time it appears, and nothing else is downloaded. Load just the root: `import \"spell/ui/ui-root\"`.">
+				<root>
+					<segment>
+						<header>Report</header>
+						<text paragraph>Every component in here was loaded by the root, on demand.</text>
+						<button color="primary">Save</button>
+					</segment>
+				</root>
 			</example>
 		</>
 
 		<section label="Theme and size" sticky="stack" collapsible dividing>
-			<example description="`theme` and `size` apply to everything inside.">
-				<html>
-					<ui-root theme="dark" size="small" width="100%" aria-label="Dark report">
-						<ui-segment>
-							<ui-header>Report</ui-header>
-							<p>Dark and small: everything inside follows.</p>
-							<ui-button color="primary">Save</ui-button>
-						</ui-segment>
-					</ui-root>
-				</html>
+			<example "Theme and size" description="`theme` and `size` apply to everything inside.">
+				<root theme="dark" size="small" width="100%" aria-label="Dark report">
+					<segment>
+						<header>Report</header>
+						<text paragraph>Dark and small: everything inside follows.</text>
+						<button color="primary">Save</button>
+					</segment>
+				</root>
 			</example>
 		</>
 
 		<section label="A box" sticky="stack" collapsible dividing>
-			<example description="With `width` or `height` (CSS lengths, or `window` for the viewport's), the root is a box that scrolls its own content.  `fixed` pins it to the viewport:  a full-page app shell.">
+			<example "A box" description="With `width` or `height` (CSS lengths, or `window` for the viewport's), the root is a box that scrolls its own content.  `fixed` pins it to the viewport:  a full-page app shell.">
 				<root height="8em" aria-label="Numbers">
 					<list bulleted>
 						<item>One</item>
@@ -81,7 +77,7 @@
 		</>
 
 		<section label="Replay" sticky="stack" collapsible dividing>
-			<example description="Components on this page are loaded already, so the demo holds the root for 2 seconds:  press a button to see what a slow load shows.">
+			<example "Replay" description="Components on this page are loaded already, so the demo holds the root for 2 seconds:  press a button to see what a slow load shows.">
 				<button icon="redo" data-replay="skeleton">Replay: skeleton</button>
 				<button icon="redo" data-replay="loading">Replay: loading message</button>
 				<segment id="root-replay-stage" appearance="basic">
@@ -102,24 +98,20 @@
 
 	<section label="Icons and emoji">
 		<section label="Icon packs" sticky="stack" collapsible dividing>
-			<example description="`icons` adds packs for everything inside, comma-separated, later wins:  built-in ids (fa7-free, fa7-brands, fomantic) or `pack.js` URLs. Outside a root, the page's packs apply (`UI.icons.use()`):  the sparkle is only in the example's own pack, so inside the root it draws, outside it doesn't.">
-				<html>
-					<p>Inside: <ui-root icons="examples/icon-pack/pack.js" display="immediately"><ui-icon name="spell sparkle" size="big" label="Sparkle"></ui-icon></ui-root> Outside: <ui-icon name="spell sparkle" size="big" label="Sparkle"></ui-icon></p>
-				</html>
+			<example "Icon packs" description="`icons` adds packs for everything inside, comma-separated, later wins:  built-in ids (fa7-free, fa7-brands, fomantic) or `pack.js` URLs. Outside a root, the page's packs apply (`UI.icons.use()`):  the sparkle is only in the example's own pack, so inside the root it draws, outside it doesn't.">
+				<text paragraph>Inside: <root icons="examples/icon-pack/pack.js" display="immediately"><icon name="spell sparkle" size="big" label="Sparkle"/></root> Outside: <icon name="spell sparkle" size="big" label="Sparkle"/></text>
 			</example>
 		</>
 
 		<section label="Emoji names" sticky="stack" collapsible dividing>
-			<example description="`emoji=\"fomantic\"` uses Fomantic's names for everything inside;  outside, the page's set (CLDR by default).  `pencil` is a memo in Fomantic's names, a pencil in CLDR's.">
-				<html>
-					<p>Inside: <ui-root emoji="fomantic" display="immediately"><ui-emoji name="pencil" size="small" label="pencil (Fomantic)"></ui-emoji></ui-root> Outside: <ui-emoji name="pencil" size="small" label="pencil (CLDR)"></ui-emoji></p>
-				</html>
+			<example "Emoji names" description="`emoji=\"fomantic\"` uses Fomantic's names for everything inside;  outside, the page's set (CLDR by default).  `pencil` is a memo in Fomantic's names, a pencil in CLDR's.">
+				<text paragraph>Inside: <root emoji="fomantic" display="immediately"><emoji name="pencil" size="small" label="pencil (Fomantic)"/></root> Outside: <emoji name="pencil" size="small" label="pencil (CLDR)"/></text>
 			</example>
 		</>
 
 		<!-- GAP I62:  a root's `size` scales only components (its scale token), not plain text or a bare `<ui-icon>` inside. -->
 		<section label="Nested roots" sticky="stack" collapsible dividing>
-			<example description="A root inside a root inherits what it doesn't set and adds its own packs.  The outer one is ready only once every inner one is.">
+			<example "Nested roots" description="A root inside a root inherits what it doesn't set and adds its own packs.  The outer one is ready only once every inner one is.">
 				<root icons="examples/icon-pack/pack.js" display="immediately">
 					<button icon="spell sparkle">Outer</button>
 					<root size="large" display="immediately">

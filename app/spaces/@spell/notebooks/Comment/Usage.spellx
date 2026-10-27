@@ -48,7 +48,7 @@
 		</>
 
 		<section label="Show and hide replies" sticky collapsible dividing>
-			<example description="A button in the comment's actions folds its thread with `collapsed`, and says so with `aria-expanded`.">
+			<example "Show and hide replies" description="A button in the comment's actions folds its thread with `collapsed`, and says so with `aria-expanded`.">
 				<html>
 					<ui-comments>
 						<ui-comment>
@@ -56,7 +56,7 @@
 							<ui-content>
 								<ui-author link="#">Elliot Fu</ui-author>
 								<ui-meta>
-									<span>Yesterday at 12:30AM</span>
+									<ui-text>Yesterday at 12:30AM</ui-text>
 								</ui-meta>
 								<ui-description>This has been very useful for my research. Thanks as well!</ui-description>
 								<ui-actions>
@@ -72,7 +72,7 @@
 									<ui-content>
 										<ui-author link="#">Jenny Hess</ui-author>
 										<ui-meta>
-											<span>Just now</span>
+											<ui-text>Just now</ui-text>
 										</ui-meta>
 										<ui-description>Elliot you are always so right :)</ui-description>
 									</ui-content>

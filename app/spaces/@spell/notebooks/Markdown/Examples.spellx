@@ -18,7 +18,7 @@
 	-->
 	<section label="Types">
 		<section label="Markdown" sticky="stack" collapsible dividing>
-			<example description="Markdown renders `source` as GitHub does: tables, task lists, strikethrough, autolinks, and code blocks as `<ui-code>`. `heading-offset` puts its headings under the page's:  here `#` becomes an h4, below this example's h3.">
+			<example "Markdown" description="Markdown renders `source` as GitHub does: tables, task lists, strikethrough, autolinks, and code blocks as `<ui-code>`. `heading-offset` puts its headings under the page's:  here `#` becomes an h4, below this example's h3.">
 				<html>
 					<ui-markdown source="/components/ui/examples/readme.md" heading-offset="3"></ui-markdown>
 				</html>
@@ -26,7 +26,7 @@
 		</>
 
 		<section label="Inline text" sticky="stack" collapsible dividing>
-			<example description="Without `source`, markdown renders its own text:  a `<script type=\"text/markdown\">` child keeps it exact, then dedented.">
+			<example "Inline text" description="Without `source`, markdown renders its own text:  a `<script type=\"text/markdown\">` child keeps it exact, then dedented.">
 				<html>
 					<ui-markdown>
 						<script type="text/markdown">
@@ -43,7 +43,7 @@
 
 	<section label="Variations">
 		<section label="Size" sticky="stack" collapsible dividing>
-			<example description="Markdown can be smaller or larger, as text is.">
+			<example "Size" description="Markdown can be smaller or larger, as text is.">
 				<html>
 					<ui-markdown size="small">Smaller text, the *same* look.</ui-markdown>
 					<ui-markdown size="large">Larger text, the *same* look.</ui-markdown>
@@ -52,7 +52,7 @@
 		</>
 
 		<section label="Line breaks" sticky="stack" collapsible dividing>
-			<example description="`breaks` makes a single newline a line break, as in GitHub comments;  by default it isn't, as in GitHub files.">
+			<example "Line breaks" description="`breaks` makes a single newline a line break, as in GitHub comments;  by default it isn't, as in GitHub files.">
 				<html>
 					<ui-markdown breaks>
 						<script type="text/markdown">
@@ -74,7 +74,7 @@
 		</>
 
 		<section label="Editable" sticky="stack" collapsible dividing>
-			<example description="`editable` adds Write / Preview tabs:  a text box, and its preview, drawn as the rest of the element draws.">
+			<example "Editable" description="`editable` adds Write / Preview tabs:  a text box, and its preview, drawn as the rest of the element draws.">
 				<html>
 					<ui-markdown editable>
 						<script type="text/markdown">
@@ -96,7 +96,7 @@
 		</>
 
 		<section label="Sanitized" sticky="stack" collapsible dividing>
-			<example description="Raw HTML is kept as written, `<ui-*>` elements included.  `sanitized` runs it through DOMPurify, loaded only then:  set it for text you didn't write.">
+			<example "Sanitized" description="Raw HTML is kept as written, `<ui-*>` elements included.  `sanitized` runs it through DOMPurify, loaded only then:  set it for text you didn't write.">
 				<html>
 					<ui-markdown>
 						<script type="text/markdown">Version **2** adds <ui-label size="mini" color="teal">include</ui-label> and <ui-label size="mini">code</ui-label>.</script>

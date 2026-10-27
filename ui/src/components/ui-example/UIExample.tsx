@@ -117,10 +117,23 @@ export class UIExample extends E.UIComponent<typeof exampleVocabulary> {
   // ## The example
   ////////////////
 
-  /** The `description` attribute as text, with each backticked span as `<code>`. */
+  /**
+   * The `description` attribute as text:  each backticked span a `<code>`, each `[words](link)` a link
+   * (epic `elemental-spell` P26:  a page's description paragraph, written as one attribute).
+   */
   private get descriptionWithCode(): (string | JSX.Element)[] {
     const text = this.description ?? ""
-    return text.split(UIT.CODE_SPAN).map((piece, index) => (index % 2 ? <code>{piece}</code> : piece))
+    return text.split(UIT.CODE_SPAN).flatMap((piece, index) => {
+      if (index % 2) return [<code>{piece}</code>]
+      // text, then each link's words, its address and the text after it
+      const parts = piece.split(LINK)
+      const drawn: (string | JSX.Element)[] = []
+      for (let at = 0; at < parts.length; at += 3) {
+        if (parts[at]) drawn.push(parts[at]!)
+        if (at + 2 < parts.length) drawn.push(<a href={parts[at + 2]}>{parts[at + 1]}</a>)
+      }
+      return drawn
+    })
   }
 
   /**
@@ -152,7 +165,9 @@ export class UIExample extends E.UIComponent<typeof exampleVocabulary> {
         </Show>
         <Show when={this.description || this.slots.hasContent(this.slotForName("description"))}>
           <div class={UIT.DESCRIPTION} part={this.partForName("description")}>
-            <slot name={this.slotForName("description")}>{this.descriptionWithCode}</slot>
+            {/* the attribute's sentence, then any richer description markup slotted beside it (a message) */}
+            {this.descriptionWithCode}
+            <slot name={this.slotForName("description")} />
           </div>
         </Show>
         <div class={FRAME_CLASS}>
@@ -221,6 +236,9 @@ const CODE_ICON = "code"
 
 /** `language` when unset (the vocabulary's default):  the source is markup. */
 const DEFAULT_LANGUAGE = "html"
+
+/** A Markdown link in `description`:  `[the words](where)`, its words and its address. */
+const LINK = /\[([^\]]+)\]\(([^)\s]+)\)/
 
 /** Id of the code pane inside the shadow root, for the button's `aria-controls`. */
 const CODE_PANE_ID = "code"

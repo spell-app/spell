@@ -54,26 +54,18 @@
 	</>
 
 	<section label="Keyboard">
-		<html>
-			<ui-table celled padding="compact" unstackable>
-				<table>
-					<thead>
-						<tr>
-							<th>Key</>
-							<th>Action</>
-						</>
-					</>
-					<tbody>
-						<tr>
-							<td>Tab / Shift + Tab</>
-							<td>Move to a band's open / close button, then its actions, then the fields</>
-						</>
-						<tr>
-							<td>Enter / Space</>
-							<td>Close or open the focused band</>
-						</>
-					</>
-				</>
+		<table celled padding="compact" unstackable>
+			<row header>
+				<cell>Key</>
+				<cell>Action</>
+			</>
+			<row>
+				<cell>Tab / Shift + Tab</>
+				<cell>Move to a band's open / close button, then its actions, then the fields</>
+			</>
+			<row>
+				<cell>Enter / Space</>
+				<cell>Close or open the focused band</>
 			</>
 		</>
 	</>

@@ -45,12 +45,10 @@
 		</>
 
 		<section label="Cookie nag" sticky collapsible dividing>
-			<example description="Dismiss it, then reload:  it stays dismissed for this session (`storage=\"session\"`).">
-				<html>
-					<ui-nag key="site-cookie-nag" storage="session">
-						<span class="title">We use cookies to ensure you get the best experience on our website</span>
-					</ui-nag>
-				</html>
+			<example "Cookie nag" description="Dismiss it, then reload:  it stays dismissed for this session (`storage=\"session\"`).">
+				<nag key="site-cookie-nag" storage="session">
+					<text class="title">We use cookies to ensure you get the best experience on our website</text>
+				</nag>
 			</example>
 		</>
 		<markdown>
@@ -61,7 +59,7 @@
 			nag.show() // ... and show it again
 			```
 		</>
-		<message size="small" class="site-not-ported"><html>Not ported: Fomantic's API-backed dismissal, and its expirationKey, detachable and context settings. The nag stays where it is written:  store the dismissal on a server from <code>ui-closed</>.</></>
+		<message size="small" class="site-not-ported">Not ported: Fomantic's API-backed dismissal, and its expirationKey, detachable and context settings. The nag stays where it is written:  store the dismissal on a server from <text code>ui-closed</>.</>
 	</>
 
 	<section label="Events">

@@ -19,37 +19,35 @@
 	-->
 	<section label="Types">
 		<section label="Shape" sticky="stack" collapsible dividing>
-			<example description="A shape is a three dimensional object including any flat content as a side: one `<ui-side>` per face, in order.">
-				<html>
-					<ui-shape id="shape-people">
-						<ui-side>
-							<ui-card image="../images/avatar/large/steve.jpg" alt="">
-								<ui-content>
-									<ui-header>Steve Jobes</ui-header>
-									<ui-meta>
-										<a href="#acquaintances">Acquaintances</a>
-									</ui-meta>
-									<ui-description>Steve Jobes is a fictional character designed to resemble someone familiar to readers.</ui-description>
-								</ui-content>
-								<ui-extra><ui-icon name="user"></ui-icon> 151 Friends · Joined in 2014</ui-extra>
-							</ui-card>
-						</ui-side>
-						<ui-side>
-							<ui-card image="../images/avatar/large/stevie.jpg" alt="">
-								<ui-content>
-									<ui-header link="#stevie">Stevie Feliciano</ui-header>
-									<ui-meta>
-										<span>Joined in 2014</span>
-									</ui-meta>
-									<ui-description>Stevie Feliciano is a library scientist living in New York City. She likes to spend her time reading, running, and writing.</ui-description>
-								</ui-content>
-								<ui-extra>
-									<a href="#stevie-friends"><ui-icon name="user"></ui-icon> 22 Friends</a>
-								</ui-extra>
-							</ui-card>
-						</ui-side>
-					</ui-shape>
-				</html>
+			<example "Shape" description="A shape is a three dimensional object including any flat content as a side: one `<ui-side>` per face, in order.">
+				<shape id="shape-people">
+					<side>
+						<card image="../images/avatar/large/steve.jpg" alt="">
+							<content>
+								<header>Steve Jobes</header>
+								<meta>
+									<link link="#acquaintances">Acquaintances</link>
+								</meta>
+								<description>Steve Jobes is a fictional character designed to resemble someone familiar to readers.</description>
+							</content>
+							<extra><icon name="user"/> 151 Friends · Joined in 2014</extra>
+						</card>
+					</side>
+					<side>
+						<card image="../images/avatar/large/stevie.jpg" alt="">
+							<content>
+								<header link="#stevie">Stevie Feliciano</header>
+								<meta>
+									<text>Joined in 2014</text>
+								</meta>
+								<description>Stevie Feliciano is a library scientist living in New York City. She likes to spend her time reading, running, and writing.</description>
+							</content>
+							<extra>
+								<link link="#stevie-friends"><icon name="user"/> 22 Friends</link>
+							</extra>
+						</card>
+					</side>
+				</shape>
 				<divider/>
 				<buttons icon>
 					<button icon="long arrow alternate left" commandfor="shape-people" command="--flip-left" aria-label="Flip Left" title="Flip Left"/>
@@ -67,7 +65,7 @@
 		</>
 
 		<section label="Cube" sticky="stack" collapsible dividing>
-			<example description="A cube shape is formatted so that each side is the face of a cube:  `cube`.">
+			<example "Cube" description="A cube shape is formatted so that each side is the face of a cube:  `cube`.">
 				<shape id="shape-cube" cube>
 					<side>1</side>
 					<side>2</side>
@@ -93,7 +91,7 @@
 		</>
 
 		<section label="Text" sticky="stack" collapsible dividing>
-			<example description="A text shape is formatted to allow for sides of text to be displayed: `text`.">
+			<example "Text" description="A text shape is formatted to allow for sides of text to be displayed: `text`.">
 				<message slot="description" state="info" size="small" heading="Using Shapes">A shape's sides should have a set width and height, or text may reflow while it turns. Under reduced motion the sides swap at once.</message>
 				<shape id="shape-text" text>
 					<side>
@@ -120,18 +118,16 @@
 					</button>
 				</buttons>
 			</example>
-			<example description="A text shape is inline too:  a word that flips to another.  `active-index` picks the side shown first, from 0.">
+			<example "Text" description="A text shape is inline too:  a word that flips to another.  `active-index` picks the side shown first, from 0.">
 				<button commandfor="shape-inline" command="--flip-down" icon="long arrow alternate down">Flip down</button>
-				<html>
-					<p>Flip to <ui-shape id="shape-inline" text direction="down" active-index="1"><ui-side>Scale</ui-side><ui-side>Fade</ui-side><ui-side>Flip</ui-side></ui-shape> transitions.</p>
-				</html>
+				<text paragraph>Flip to <shape id="shape-inline" text direction="down" active-index="1"><side>Scale</side><side>Fade</side><side>Flip</side></shape> transitions.</text>
 			</example>
 		</>
 	</>
 
 	<section label="Variations">
 		<section label="Direction" sticky="stack" collapsible dividing>
-			<example description="`direction` says which way `--next`, `--previous`, `next()` and `previous()` turn:  `up`, `down`, `left` (the default), `right`, `over` or `back`.">
+			<example "Direction" description="`direction` says which way `--next`, `--previous`, `next()` and `previous()` turn:  `up`, `down`, `left` (the default), `right`, `over` or `back`.">
 				<buttons>
 					<button commandfor="shape-dice" command="--previous" labeled icon="chevron left">Previous</button>
 					<button commandfor="shape-dice" command="--next" labeled="right" icon="chevron right">Next</button>
@@ -147,7 +143,7 @@
 		</>
 
 		<section label="Duration" sticky="stack" collapsible dividing>
-			<example description="`duration` sets the length of a flip:  ms or a CSS time;  Fomantic's 0.6s by default.">
+			<example "Duration" description="`duration` sets the length of a flip:  ms or a CSS time;  Fomantic's 0.6s by default.">
 				<button commandfor="shape-slow" command="--next" icon="long arrow alternate right">Slow flip</button>
 				<divider spacer/>
 				<shape id="shape-slow" cube direction="right" duration="1.5s">
@@ -160,7 +156,7 @@
 
 	<section label="More Examples">
 		<section label="Shape Types" sticky="stack" collapsible dividing>
-			<example description="Shapes do not have to be regular or have their sides match up in length and width to animate correctly.">
+			<example "Shape Types" description="Shapes do not have to be regular or have their sides match up in length and width to animate correctly.">
 				<message slot="description" size="small" class="site-not-ported">Not ported: the demo's Auto / Square / Irregular switch -- it swaps classes from Fomantic's docs stylesheet, not the shape's own.</message>
 				<shape id="shape-leaves">
 					<side>

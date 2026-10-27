@@ -43,22 +43,22 @@
 			<ui-docs-tokens family="ui-grid" playground>
 				<ui-grid>
 					<ui-column width="4">
-						<p>Four wide</>
+						<ui-text paragraph>Four wide</>
 					</>
 					<ui-column width="4">
-						<p>Four wide</>
+						<ui-text paragraph>Four wide</>
 					</>
 					<ui-column width="4">
-						<p>Four wide</>
+						<ui-text paragraph>Four wide</>
 					</>
 					<ui-column width="4">
-						<p>Four wide</>
+						<ui-text paragraph>Four wide</>
 					</>
 					<ui-column width="8">
-						<p>Eight wide</>
+						<ui-text paragraph>Eight wide</>
 					</>
 					<ui-column width="8">
-						<p>Eight wide</>
+						<ui-text paragraph>Eight wide</>
 					</>
 				</>
 			</>

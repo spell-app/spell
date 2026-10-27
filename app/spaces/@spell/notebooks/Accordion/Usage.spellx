@@ -73,7 +73,7 @@
 			`ui-loaded` fires once it's in (`:state(loaded)`); a failure fires the cancelable `ui-error` and shows an error
 			line in the panel (`:state(error)`). `load()` fetches it now, `reload()` again past the cache.
 		</>
-		<example description="Open the question:  its answer comes from `examples/answer.html`.">
+		<example "Content from a file" description="Open the question:  its answer comes from `examples/answer.html`.">
 			<accordion appearance="styled" source="/components/ui/examples/answer.html">
 				<title>What is a dog?</title>
 			</accordion>

@@ -41,7 +41,7 @@
 		<html>
 			<ui-docs-tokens family="ui-nag" playground>
 				<ui-nag>
-					<span class="title">We have updated our privacy policy.</>
+					<ui-text class="title">We have updated our privacy policy.</>
 				</>
 			</>
 		</>

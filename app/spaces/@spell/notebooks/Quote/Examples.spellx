@@ -26,17 +26,15 @@
 	-->
 	<section label="Types">
 		<section label="Quote" sticky="stack" collapsible dividing>
-			<example description="A block quote:  a bar on its leading edge, muted text.  `cite` names where the words come from, for readers' tools.">
+			<example "Quote" description="A block quote:  a bar on its leading edge, muted text.  `cite` names where the words come from, for readers' tools.">
 				<quote cite="https://en.wikipedia.org/wiki/Alan_Kay">The best way to predict the future is to invent it.</quote>
 			</example>
 		</>
 
 		<section label="Inline" sticky="stack" collapsible dividing>
-			<example description="`inline`:  a few words inside a sentence, in the language's own quotation marks.">
-				<html>
-					<p>She looked up and said <ui-quote inline>not today</ui-quote>, then went back to her book.</p>
-					<p lang="fr">Elle a dit <ui-quote inline>pas aujourd'hui</ui-quote>.</p>
-				</html>
+			<example "Inline" description="`inline`:  a few words inside a sentence, in the language's own quotation marks.">
+				<text paragraph>She looked up and said <quote inline>not today</quote>, then went back to her book.</text>
+				<text lang="fr" paragraph>Elle a dit <quote inline>pas aujourd'hui</quote>.</text>
 			</example>
 		</>
 	</>

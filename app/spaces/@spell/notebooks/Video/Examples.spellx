@@ -26,13 +26,13 @@
 	-->
 	<section label="Types">
 		<section label="Video" sticky="stack" collapsible dividing>
-			<example description="A video file in the browser's own player, with captions (`captions`, a WebVTT file) and its shape (`ratio`).">
+			<example "Video" description="A video file in the browser's own player, with captions (`captions`, a WebVTT file) and its shape (`ratio`).">
 				<video src="/components/ui/examples/media/sample.webm" captions="examples/media/sample.vtt" ratio="16/9" label="A ball rolls across the screen" style="max-width: 32em"/>
 			</example>
 		</>
 
 		<section label="No controls" sticky="stack" collapsible dividing>
-			<example description="`controls=\"false\"` hides the browser's controls;  `autoplay muted loop` plays it by itself, as a moving picture.">
+			<example "No controls" description="`controls=\"false\"` hides the browser's controls;  `autoplay muted loop` plays it by itself, as a moving picture.">
 				<video src="/components/ui/examples/media/sample.webm" controls="false" autoplay muted loop label="A ball rolls across the screen, over and over" style="max-width: 20em"/>
 			</example>
 		</>

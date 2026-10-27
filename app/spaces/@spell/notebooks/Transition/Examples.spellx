@@ -26,10 +26,10 @@
 		- A gap:  an HTML comment `GAP I<n>:  ...` BEFORE the example (a comment inside it shows in its code).
 	-->
 	<section label="Transitions">
-		<message size="small" state="info"><html>Each button toggles its leaf with an invoker command, <code>commandfor</> + <code>command="--toggle"</>: no script. A leaf that has gone comes back on the next click.</></>
+		<message size="small" state="info">Each button toggles its leaf with an invoker command, <text code>commandfor</> + <text code>command="--toggle"</>: no script. A leaf that has gone comes back on the next click.</>
 
 		<section label="Scale" sticky="stack" collapsible dividing>
-			<example description="An element can scale into or out of view.">
+			<example "Scale" description="An element can scale into or out of view.">
 				<button size="small" commandfor="tr-scale" command="--toggle">scale</button>
 				<segment appearance="basic">
 					<transition id="tr-scale" animation="scale" inline visible>
@@ -40,7 +40,7 @@
 		</>
 
 		<section label="Zoom" sticky="stack" collapsible dividing>
-			<example description="An element can zoom into view from far away.">
+			<example "Zoom" description="An element can zoom into view from far away.">
 				<button size="small" commandfor="tr-zoom" command="--toggle">zoom</button>
 				<segment appearance="basic">
 					<transition id="tr-zoom" animation="zoom" inline visible>
@@ -51,7 +51,7 @@
 		</>
 
 		<section label="Fade" sticky="stack" collapsible dividing>
-			<example description="An element can fade into or out of view descending and ascending.">
+			<example "Fade" description="An element can fade into or out of view descending and ascending.">
 				<button size="small" commandfor="tr-fade" command="--toggle">fade</button>
 				<button size="small" commandfor="tr-fade-up" command="--toggle">fade up</button>
 				<button size="small" commandfor="tr-fade-down" command="--toggle">fade down</button>
@@ -78,7 +78,7 @@
 		</>
 
 		<section label="Flip" sticky="stack" collapsible dividing>
-			<example description="An element can flip into or out of view vertically or horizontally.">
+			<example "Flip" description="An element can flip into or out of view vertically or horizontally.">
 				<button size="small" commandfor="tr-horizontal-flip" command="--toggle">horizontal flip</button>
 				<button size="small" commandfor="tr-vertical-flip" command="--toggle">vertical flip</button>
 				<segment appearance="basic">
@@ -93,7 +93,7 @@
 		</>
 
 		<section label="Drop" sticky="stack" collapsible dividing>
-			<example description="An element can drop into view from above.">
+			<example "Drop" description="An element can drop into view from above.">
 				<button size="small" commandfor="tr-drop" command="--toggle">drop</button>
 				<segment appearance="basic">
 					<transition id="tr-drop" animation="drop" inline visible>
@@ -104,7 +104,7 @@
 		</>
 
 		<section label="Fly" sticky="stack" collapsible dividing>
-			<example description="An element can fly in from off canvas.">
+			<example "Fly" description="An element can fly in from off canvas.">
 				<button size="small" commandfor="tr-fly-left" command="--toggle">fly left</button>
 				<button size="small" commandfor="tr-fly-right" command="--toggle">fly right</button>
 				<button size="small" commandfor="tr-fly-up" command="--toggle">fly up</button>
@@ -127,7 +127,7 @@
 		</>
 
 		<section label="Swing" sticky="stack" collapsible dividing>
-			<example description="An element can swing into view.">
+			<example "Swing" description="An element can swing into view.">
 				<button size="small" commandfor="tr-swing-left" command="--toggle">swing left</button>
 				<button size="small" commandfor="tr-swing-right" command="--toggle">swing right</button>
 				<button size="small" commandfor="tr-swing-up" command="--toggle">swing up</button>
@@ -150,7 +150,7 @@
 		</>
 
 		<section label="Browse" sticky="stack" collapsible dividing>
-			<example description="An element can appear and disappear as part of a series.">
+			<example "Browse" description="An element can appear and disappear as part of a series.">
 				<button size="small" commandfor="tr-browse" command="--toggle">browse</button>
 				<button size="small" commandfor="tr-browse-right" command="--toggle">browse right</button>
 				<segment appearance="basic">
@@ -165,7 +165,7 @@
 		</>
 
 		<section label="Slide" sticky="stack" collapsible dividing>
-			<example description="An element can appear to slide in from above or below.">
+			<example "Slide" description="An element can appear to slide in from above or below.">
 				<button size="small" commandfor="tr-slide-down" command="--toggle">slide down</button>
 				<button size="small" commandfor="tr-slide-up" command="--toggle">slide up</button>
 				<button size="small" commandfor="tr-slide-left" command="--toggle">slide left</button>
@@ -189,11 +189,11 @@
 	</>
 
 	<section label="Static Animations">
-		<message size="small" state="info"><html>Static (attention) animations run in place, and leave the element as it was. <code>command="--transition"</> runs the element's <code>animation</>, and looping pulsating needs no command at all.</></>
+		<message size="small" state="info">Static (attention) animations run in place, and leave the element as it was. <text code>command="--transition"</> runs the element's <text code>animation</>, and looping pulsating needs no command at all.</>
 
 		<section label="Pulsating" sticky="stack" collapsible dividing>
-			<example description="An element can have pulsating edges. This works best on circular or square elements.">
-				<message slot="description" size="small"><html>Fomantic's ring adopts the colour of the element inside; ours takes the transition's own <code>color</code>, so give both the same one.</html></message>
+			<example "Pulsating" description="An element can have pulsating edges. This works best on circular or square elements.">
+				<message slot="description" size="small">Fomantic's ring adopts the colour of the element inside; ours takes the transition's own <text code>color</text>, so give both the same one.</message>
 				<transition color="green" pulsating looping inline visible>
 					<label color="green">Label</label>
 				</transition>
@@ -210,7 +210,7 @@
 		</>
 
 		<section label="Jiggle" sticky="stack" collapsible dividing>
-			<example description="An element can jiggle to draw attention to its shape.">
+			<example "Jiggle" description="An element can jiggle to draw attention to its shape.">
 				<button size="small" commandfor="tr-jiggle" command="--transition">jiggle</button>
 				<segment appearance="basic">
 					<transition id="tr-jiggle" animation="jiggle" inline visible>
@@ -221,7 +221,7 @@
 		</>
 
 		<section label="Flash" sticky="stack" collapsible dividing>
-			<example description="An element can flash to draw attention to itself.">
+			<example "Flash" description="An element can flash to draw attention to itself.">
 				<button size="small" commandfor="tr-flash" command="--transition">flash</button>
 				<segment appearance="basic">
 					<transition id="tr-flash" animation="flash" inline visible>
@@ -232,7 +232,7 @@
 		</>
 
 		<section label="Shake" sticky="stack" collapsible dividing>
-			<example description="An element can shake to draw attention to its position.">
+			<example "Shake" description="An element can shake to draw attention to its position.">
 				<button size="small" commandfor="tr-shake" command="--transition">shake</button>
 				<segment appearance="basic">
 					<transition id="tr-shake" animation="shake" inline visible>
@@ -243,7 +243,7 @@
 		</>
 
 		<section label="Pulse" sticky="stack" collapsible dividing>
-			<example description="An element can pulse to draw attention to its visibility.">
+			<example "Pulse" description="An element can pulse to draw attention to its visibility.">
 				<button size="small" commandfor="tr-pulse" command="--transition">pulse</button>
 				<segment appearance="basic">
 					<transition id="tr-pulse" animation="pulse" inline visible>
@@ -254,7 +254,7 @@
 		</>
 
 		<section label="Tada" sticky="stack" collapsible dividing>
-			<example description="An element can give user positive feedback for an action.">
+			<example "Tada" description="An element can give user positive feedback for an action.">
 				<button size="small" commandfor="tr-tada" command="--transition">tada</button>
 				<segment appearance="basic">
 					<transition id="tr-tada" animation="tada" inline visible>
@@ -265,7 +265,7 @@
 		</>
 
 		<section label="Bounce" sticky="stack" collapsible dividing>
-			<example description="An element can bounce to politely remind you of itself.">
+			<example "Bounce" description="An element can bounce to politely remind you of itself.">
 				<button size="small" commandfor="tr-bounce" command="--transition">bounce</button>
 				<segment appearance="basic">
 					<transition id="tr-bounce" animation="bounce" inline visible>
@@ -276,7 +276,7 @@
 		</>
 
 		<section label="Glow" sticky="stack" collapsible dividing>
-			<example description="An element can glow to show its position in a page.">
+			<example "Glow" description="An element can glow to show its position in a page.">
 				<button size="small" commandfor="tr-glow" command="--transition">glow</button>
 				<segment appearance="basic">
 					<transition id="tr-glow" animation="glow" inline visible>
@@ -289,7 +289,7 @@
 
 	<section label="Visibility">
 		<section label="Final visibility" sticky collapsible dividing>
-			<example description="Once an element's animation queue finishes, its final visibility is set:  an outward transition leaves it hidden, an inward one visible. Without `visible`, the content starts hidden: out of the page and the accessibility tree.">
+			<example "Final visibility" description="Once an element's animation queue finishes, its final visibility is set:  an outward transition leaves it hidden, an inward one visible. Without `visible`, the content starts hidden: out of the page and the accessibility tree.">
 				<button size="small" commandfor="tr-hidden" command="--show">Show</button>
 				<button size="small" commandfor="tr-hidden" command="--close">Hide</button>
 				<transition id="tr-hidden" animation="drop">
@@ -301,7 +301,7 @@
 
 	<section label="Specifying a direction">
 		<section label="In and out" sticky collapsible dividing>
-			<example description="To force an animation direction, use `--show` (in) or `--close` (out), or `show()` / `hide()` from script. Showing a shown element does nothing.">
+			<example "In and out" description="To force an animation direction, use `--show` (in) or `--close` (out), or `show()` / `hide()` from script. Showing a shown element does nothing.">
 				<button size="small" commandfor="tr-direction" command="--show">fade up in</button>
 				<button size="small" commandfor="tr-direction" command="--close">fade up out</button>
 				<segment appearance="basic">
@@ -315,7 +315,7 @@
 
 	<section label="Automatic Direction">
 		<section label="Toggle" sticky="stack" collapsible dividing>
-			<example description="If an animation direction is not specified it will automatically be determined based on the element's current visibility: `--toggle` (or `toggle()`) runs it out while visible, and in while hidden.">
+			<example "Toggle" description="If an animation direction is not specified it will automatically be determined based on the element's current visibility: `--toggle` (or `toggle()`) runs it out while visible, and in while hidden.">
 				<button size="small" commandfor="tr-automatic" command="--toggle">fade up</button>
 				<segment appearance="basic">
 					<transition id="tr-automatic" animation="fade up" inline visible>
@@ -328,12 +328,12 @@
 
 	<section label="Grouped Transitions">
 		<!-- GAP I70:  no grouped transitions (Fomantic's `interval`, `reverse`);  each element animates on its own. -->
-		<message size="small" class="site-not-ported"><html>Not yet: Animation Intervals, Animation Order and Forcing Order. One <code>&lt;ui-transition&gt;</> animates its own box, so a group that appears one after another (interval, reverse) needs a script calling each element's <code>transition()</> in turn.</></>
+		<message size="small" class="site-not-ported">Not yet: Animation Intervals, Animation Order and Forcing Order. One <text code>&lt;ui-transition&gt;</> animates its own box, so a group that appears one after another (interval, reverse) needs a script calling each element's <text code>transition()</> in turn.</>
 	</>
 
 	<section label="Looping">
 		<section label="Looping" sticky="stack" collapsible dividing>
-			<example description="Animation loops can be controlled by setting `looping`:  it repeats any animation until it's removed.">
+			<example "Looping" description="Animation loops can be controlled by setting `looping`:  it repeats any animation until it's removed.">
 				<transition animation="pulse" looping inline visible>
 					<image size="tiny" src="/components/ui/images/leaves/4.png" alt="Autumn leaf"/>
 				</transition>
@@ -346,7 +346,7 @@
 
 	<section label="Variations">
 		<section label="Inverted" sticky="stack" collapsible dividing>
-			<example description="An inverted ring for dark backgrounds.">
+			<example "Inverted" description="An inverted ring for dark backgrounds.">
 				<segment inverted>
 					<transition pulsating looping inverted inline visible>
 						<button inverted>Pulsating inverted</button>
@@ -356,7 +356,7 @@
 		</>
 
 		<section label="Display Type" sticky="stack" collapsible dividing>
-			<example description="Animations can be used on any display type, not just block level elements:  `inline` keeps a button an inline block while it animates.">
+			<example "Display Type" description="Animations can be used on any display type, not just block level elements:  `inline` keeps a button an inline block while it animates.">
 				<button size="small" commandfor="tr-inline" command="--transition">Jiggle the button</button>
 				<divider/>
 				<transition id="tr-inline" animation="jiggle" inline visible>
@@ -366,7 +366,7 @@
 		</>
 
 		<section label="Disabled" sticky="stack" collapsible dividing>
-			<example description="A disabled transition pauses its running animation.">
+			<example "Disabled" description="A disabled transition pauses its running animation.">
 				<transition pulsating looping disabled inline visible>
 					<button>Paused</button>
 				</transition>

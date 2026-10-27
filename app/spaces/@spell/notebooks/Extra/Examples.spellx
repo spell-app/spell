@@ -17,7 +17,7 @@
 	-->
 	<section label="Owners">
 		<section label="Card" sticky="stack" collapsible dividing>
-			<example description="A card's extra content:  its footer band.">
+			<example "Card" description="A card's extra content:  its footer band.">
 				<card>
 					<content>
 						<header>Elliot</header>
@@ -29,7 +29,7 @@
 		</>
 
 		<section label="Item" sticky="stack" collapsible dividing>
-			<example description="An item's extra content:  a line under its description.">
+			<example "Item" description="An item's extra content:  a line under its description.">
 				<items>
 					<item image="../images/wireframe/image.png">
 						<content>
@@ -43,7 +43,7 @@
 		</>
 
 		<section label="Feed" sticky="stack" collapsible dividing>
-			<example description="A feed event's extra images;  with `text`, extra text.">
+			<example "Feed" description="A feed event's extra images;  with `text`, extra text.">
 				<feed>
 					<event>
 						<content>

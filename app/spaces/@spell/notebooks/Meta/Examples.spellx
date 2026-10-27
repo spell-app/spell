@@ -17,72 +17,64 @@
 	-->
 	<section label="Owners">
 		<section label="Card" sticky="stack" collapsible dividing>
-			<example description="A card's meta:  small and muted, under its header.">
-				<html>
-					<ui-card>
-						<ui-content>
-							<ui-header>Kristy</ui-header>
-							<ui-meta>
-								<span>Joined in 2013</span>
-							</ui-meta>
-							<ui-description>Kristy is an art director living in New York.</ui-description>
-						</ui-content>
-					</ui-card>
-				</html>
+			<example "Card" description="A card's meta:  small and muted, under its header.">
+				<card>
+					<content>
+						<header>Kristy</header>
+						<meta>
+							<text>Joined in 2013</text>
+						</meta>
+						<description>Kristy is an art director living in New York.</description>
+					</content>
+				</card>
 			</example>
 		</>
 
 		<section label="Item" sticky="stack" collapsible dividing>
-			<example description="An item's meta:  each piece spaced apart.">
-				<html>
-					<ui-items>
-						<ui-item image="../images/wireframe/image.png">
-							<ui-content>
-								<ui-header>Cute Dog</ui-header>
-								<ui-meta>
-									<span>Description</span>
-									<span>Stevie</span>
-								</ui-meta>
-							</ui-content>
-						</ui-item>
-					</ui-items>
-				</html>
+			<example "Item" description="An item's meta:  each piece spaced apart.">
+				<items>
+					<item image="../images/wireframe/image.png">
+						<content>
+							<header>Cute Dog</header>
+							<meta>
+								<text>Description</text>
+								<text>Stevie</text>
+							</meta>
+						</content>
+					</item>
+				</items>
 			</example>
 		</>
 
 		<section label="Feed" sticky="stack" collapsible dividing>
-			<example description="A feed event's meta:  a small line under its summary.">
-				<html>
-					<ui-feed>
-						<ui-event>
-							<ui-content>
-								<ui-summary><ui-author link="#elliot">Elliot Fu</ui-author> added you as a friend</ui-summary>
-								<ui-meta>
-									<a href="#like"><ui-icon name="heart"></ui-icon> 4 Likes</a>
-								</ui-meta>
-							</ui-content>
-						</ui-event>
-					</ui-feed>
-				</html>
+			<example "Feed" description="A feed event's meta:  a small line under its summary.">
+				<feed>
+					<event>
+						<content>
+							<summary><author link="#elliot">Elliot Fu</author> added you as a friend</summary>
+							<meta>
+								<link link="#like"><icon name="heart"/> 4 Likes</link>
+							</meta>
+						</content>
+					</event>
+				</feed>
 			</example>
 		</>
 
 		<section label="Comment" sticky="stack" collapsible dividing>
-			<example description="A comment's metadata:  inline after the author.">
-				<html>
-					<ui-comments>
-						<ui-comment>
-							<ui-avatar src="/components/ui/images/avatar/small/matt.jpg"></ui-avatar>
-							<ui-content>
-								<ui-author link="#matt">Matt</ui-author>
-								<ui-meta>
-									<span>Today at 5:42PM</span>
-								</ui-meta>
-								<ui-description>How artistic!</ui-description>
-							</ui-content>
-						</ui-comment>
-					</ui-comments>
-				</html>
+			<example "Comment" description="A comment's metadata:  inline after the author.">
+				<comments>
+					<comment>
+						<avatar src="/components/ui/images/avatar/small/matt.jpg"/>
+						<content>
+							<author link="#matt">Matt</author>
+							<meta>
+								<text>Today at 5:42PM</text>
+							</meta>
+							<description>How artistic!</description>
+						</content>
+					</comment>
+				</comments>
 			</example>
 		</>
 	</>

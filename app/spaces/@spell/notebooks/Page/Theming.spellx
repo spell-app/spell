@@ -19,7 +19,7 @@
 		</>
 		<html>
 			<ui-docs-tokens family="ui-page" playground>
-				<div style="resize: both; overflow: auto; border: 1px dashed currentColor; max-width: 100%">
+				<ui-stack style="resize: both; overflow: auto; border: 1px dashed currentColor; max-width: 100%">
 					<ui-page style="--ui-page-min-height: 0; --ui-page-nav-width: 9em; --ui-page-aside-width: 9em">
 						<ui-header slot="header" level="2">Inbox</>
 						<ui-menu slot="nav" direction="vertical" fluid aria-label="Folders">

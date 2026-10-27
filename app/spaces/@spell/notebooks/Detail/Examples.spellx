@@ -18,7 +18,7 @@
 	-->
 	<section label="Owners">
 		<section label="Label" sticky="stack" collapsible dividing>
-			<example description="A label's detail:  a dimmer second value after its text.">
+			<example "Label" description="A label's detail:  a dimmer second value after its text.">
 				<label icon="mail">Mail<detail>23</detail></label>
 				<label>Dogs<detail>214</detail></label>
 				<label color="blue">Veronika<detail>Friend</detail></label>
@@ -28,7 +28,7 @@
 
 	<section label="Variations">
 		<section label="Link" sticky="stack" collapsible dividing>
-			<example description="With `link`, the detail is a link of its own.">
+			<example "Link" description="With `link`, the detail is a link of its own.">
 				<label color="teal">Tag<detail link="#tags">See all</detail></label>
 			</example>
 		</>

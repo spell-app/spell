@@ -26,7 +26,7 @@
 	-->
 	<section label="Types">
 		<section label="Terms" sticky="stack" collapsible dividing>
-			<example description="Facts lined up:  the labels in one column, the values in the next.  A value can be any element, written inside the term.">
+			<example "Terms" description="Facts lined up:  the labels in one column, the values in the next.  A value can be any element, written inside the term.">
 				<terms>
 					<term label="Suit" value="hearts"/>
 					<term label="Rank" value="queen"/>
@@ -38,7 +38,7 @@
 		</>
 
 		<section label="Horizontal" sticky="stack" collapsible dividing>
-			<example description="`direction=\"horizontal\"`:  the terms side by side, wrapping, as a game's scores.">
+			<example "Horizontal" description="`direction=\"horizontal\"`:  the terms side by side, wrapping, as a game's scores.">
 				<terms direction="horizontal">
 					<term label="Score" value="42"/>
 					<term label="Moves" value="17"/>
@@ -48,17 +48,15 @@
 		</>
 
 		<section label="A rich label" sticky="stack" collapsible dividing>
-			<example description="`slot=\"label\"`:  a label that's more than text.">
-				<html>
-					<ui-terms>
-						<ui-term value="Paris">
-							<span slot="label"><ui-icon name="location dot"></ui-icon> City</span>
-						</ui-term>
-						<ui-term value="Sunny, 24°">
-							<span slot="label"><ui-icon name="sun"></ui-icon> Weather</span>
-						</ui-term>
-					</ui-terms>
-				</html>
+			<example "A rich label" description="`slot=\"label\"`:  a label that's more than text.">
+				<terms>
+					<term value="Paris">
+						<text slot="label"><icon name="location dot"/> City</text>
+					</term>
+					<term value="Sunny, 24°">
+						<text slot="label"><icon name="sun"/> Weather</text>
+					</term>
+				</terms>
 			</example>
 		</>
 	</>

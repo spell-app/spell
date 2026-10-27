@@ -27,7 +27,7 @@
 		<html>
 			<ui-docs-tokens family="ui-visibility" playground>
 				<ui-visibility once="false" offset="0">
-					<p>I fire <code>ui-in-view</> and <code>ui-out-of-view</> each time I come and go.</>
+					<ui-text paragraph>I fire <ui-text code>ui-in-view</> and <ui-text code>ui-out-of-view</> each time I come and go.</>
 				</>
 			</>
 		</>

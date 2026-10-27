@@ -34,41 +34,41 @@
 
 	<section label="Types">
 		<section label="Minimal" sticky="stack" collapsible dividing>
-			<example description="A minimal toast will just display a message.">
-				<button id="toast-minimal">Show</button>
+			<example "Minimal" description="A minimal toast will just display a message.">
+				<button onClick={notify "I am a toast, nice to meet you!"}>Show</button>
 			</example>
-			<example description="A `<ui-toast>` in the page shows where it is, and stays until clicked.">
+			<example "Minimal" description="A `<ui-toast>` in the page shows where it is, and stays until clicked.">
 				<toast message="I am a toast, nice to meet you!"/>
 			</example>
 		</>
 
 		<section label="Titled" sticky="stack" collapsible dividing>
-			<example description="You can add a title to your toast.">
-				<button id="toast-titled">Show</button>
+			<example "Titled" description="You can add a title to your toast.">
+				<button onClick={notify "Hey look, I have a title!" titled "Better?"}>Show</button>
 			</example>
-			<example>
+			<example "Titled">
 				<toast heading="Better?" message="Hey look, I have a title!"/>
 			</example>
 		</>
 
 		<section label="Progress Bar" sticky="stack" collapsible dividing>
-			<example description="You can attach a progress bar to your toast.">
-				<button id="toast-progress">Show</button>
+			<example "Progress Bar" description="You can attach a progress bar to your toast.">
+				<button onClick={notify "See, how long I will last" titled "LOOK" with a progress bar}>Show</button>
 			</example>
 		</>
 
 		<!-- GAP I117:  no colour of the progress bar's own (Fomantic's `classProgress`). -->
-		<message size="small" class="site-not-ported"><html>Not yet: the progress bar's own colour (Fomantic's <code>classProgress: 'red'</>) -- it takes the toast's colour; restyle it with <code>ui-toast::part(bar)</>.</></>
+		<message size="small" class="site-not-ported">Not yet: the progress bar's own colour (Fomantic's <text code>classProgress: 'red'</>) -- it takes the toast's colour; restyle it with <text code>ui-toast::part(bar)</>.</>
 	</>
 
 	<section label="Variations">
 		<section label="Toast Type" sticky="stack" collapsible dividing>
-			<example description="A toast can be used to display different types of information:  `type` (`class` in `UI.toast()`).">
-				<button id="toast-success" color="positive">Success</button>
-				<button id="toast-error" color="negative">Error</button>
-				<button id="toast-warning" color="yellow">Warning</button>
+			<example "Toast Type" description="A toast can be used to display different types of information:  `type` (`class` in `UI.toast()`).">
+				<button color="positive" onClick={notify success "You're using the good framework!"}>Success</button>
+				<button color="negative" onClick={notify error "An error occurred!"}>Error</button>
+				<button color="yellow" onClick={notify warning "Behind you!"}>Warning</button>
 			</example>
-			<example description="A bare `icon` shows the type's own icon;  an `error` toast is announced at once (`role=alert`).">
+			<example "Toast Type" description="A bare `icon` shows the type's own icon;  an `error` toast is announced at once (`role=alert`).">
 				<toast type="info" icon message="An info toast, with its icon."/>
 				<toast type="success" icon message="You're using the good framework!"/>
 				<toast type="warning" icon message="Behind you!"/>
@@ -77,44 +77,56 @@
 		</>
 
 		<section label="Position" sticky="stack" collapsible dividing>
-			<example description="A toast can appear at different positions on the screen.">
-				<button class="toast-position" data-position="top left">Top left</button>
-				<button class="toast-position" data-position="top center">Top center</button>
-				<button class="toast-position" data-position="top right">Top right</button>
-				<button class="toast-position" data-position="centered">Centered</button>
-				<button class="toast-position" data-position="bottom left">Bottom left</button>
-				<button class="toast-position" data-position="bottom center">Bottom center</button>
-				<button class="toast-position" data-position="bottom right">Bottom right</button>
+			<example "Position" description="A toast can appear at different positions on the screen.">
+				<button onClick={notify "Look, I'm here!" at the top left}>Top left</button>
+				<button onClick={notify "Look, I'm here!" at the top center}>Top center</button>
+				<button onClick={notify "Look, I'm here!" at the top right}>Top right</button>
+				<button onClick={notify "Look, I'm here!" in the center}>Centered</button>
+				<button onClick={notify "Look, I'm here!" at the bottom left}>Bottom left</button>
+				<button onClick={notify "Look, I'm here!" at the bottom center}>Bottom center</button>
+				<button onClick={notify "Look, I'm here!" at the bottom right}>Bottom right</button>
 			</example>
 		</>
 		<message size="small" class="site-not-ported">Not ported: Attached Position (the top attached and bottom attached positions, full-width toasts like a phone's notifications) and Center Aligned content (the center aligned class). Both are left out of the toast sheets on purpose.</>
 
 		<section label="Direction" sticky="stack" collapsible dividing>
-			<example description="Toasts can stack horizontally:  `horizontal: true`.">
-				<button id="toast-horizontal">Show</button>
+			<example "Direction" description="Toasts can stack horizontally:  `horizontal: true`.">
+				<button onClick={notify "Next one will open to the right" at the top left side by side}>Show</button>
 			</example>
 		</>
 
 		<section label="Duration" sticky="stack" collapsible dividing>
-			<example description="You can choose how long a toast should be displayed, in milliseconds:  `displayTime`, or `display-time` on the element. `0` keeps it until it's clicked, and `auto` calculates the time from the number of words (120 a minute, at least a second).">
-				<button id="toast-five">5 seconds</button>
-				<button id="toast-forever">Until clicked</button>
-				<button id="toast-auto">Auto</button>
+			<example "Duration" description="You can choose how long a toast should be displayed, in milliseconds:  `displayTime`, or `display-time` on the element. `0` keeps it until it's clicked, and `auto` calculates the time from the number of words (120 a minute, at least a second).">
+				<button onClick={notify "You will see me for 5 seconds." for 5 seconds}>5 seconds</button>
+				<button onClick={notify "I'll stay here until you click on me!" until clicked}>Until clicked</button>
+				<button onClick={notify "The display time of this toast is calculated by its amount of containing words." with a progress bar at the top}>Auto</button>
 			</example>
 		</>
-		<message size="small" class="site-not-ported"><html>Not ported: Use Message Style (<code>className: &#123; toast: 'ui message' &#125;</>) -- a toast is a <code>&lt;ui-toast&gt;</>; slot a message's content into one instead.</></>
+		<message size="small" class="site-not-ported">Not ported: Use Message Style (<text code>className: &#123; toast: 'ui message' &#125;</>) -- a toast is a <text code>&lt;ui-toast&gt;</>; slot a message's content into one instead.</>
 
 		<section label="Increasing Progress Bar" sticky collapsible dividing>
-			<example description="The progress bar can be raised instead of lowered:  `progressUp` (`progress-up`).">
-				<button id="toast-progress-up">Show</button>
+			<example "Increasing Progress Bar" description="The progress bar can be raised instead of lowered:  `progressUp` (`progress-up`).">
+				<button onClick={notify "See, how long I will last" titled "LOOK" with a progress bar filling up at the top}>Show</button>
 			</example>
 		</>
 
 		<section label="Color Variants" sticky="stack" collapsible dividing>
-			<example description="You can use all of the usual color names.">
-				<button id="toast-colors">Show the next colour</button>
+			<example "Color Variants" description="You can use all of the usual color names.">
+				<button color="red" size="mini" onClick={notify "I am a colorful toast" in red with a progress bar}>Red</button>
+				<button color="orange" size="mini" onClick={notify "I am a colorful toast" in orange with a progress bar}>Orange</button>
+				<button color="yellow" size="mini" onClick={notify "I am a colorful toast" in yellow with a progress bar}>Yellow</button>
+				<button color="olive" size="mini" onClick={notify "I am a colorful toast" in olive with a progress bar}>Olive</button>
+				<button color="green" size="mini" onClick={notify "I am a colorful toast" in green with a progress bar}>Green</button>
+				<button color="teal" size="mini" onClick={notify "I am a colorful toast" in teal with a progress bar}>Teal</button>
+				<button color="blue" size="mini" onClick={notify "I am a colorful toast" in blue with a progress bar}>Blue</button>
+				<button color="violet" size="mini" onClick={notify "I am a colorful toast" in violet with a progress bar}>Violet</button>
+				<button color="purple" size="mini" onClick={notify "I am a colorful toast" in purple with a progress bar}>Purple</button>
+				<button color="pink" size="mini" onClick={notify "I am a colorful toast" in pink with a progress bar}>Pink</button>
+				<button color="brown" size="mini" onClick={notify "I am a colorful toast" in brown with a progress bar}>Brown</button>
+				<button color="grey" size="mini" onClick={notify "I am a colorful toast" in grey with a progress bar}>Grey</button>
+				<button color="black" size="mini" onClick={notify "I am a colorful toast" in black with a progress bar}>Black</button>
 			</example>
-			<example>
+			<example "Color Variants">
 				<toast color="red" message="I am a colorful toast"/>
 				<toast color="teal" message="I am a colorful toast"/>
 				<toast color="purple" message="I am a colorful toast"/>
@@ -122,17 +134,29 @@
 		</>
 
 		<section label="Inverted Colors" sticky="stack" collapsible dividing>
-			<example description="Same as above, just add `inverted`:  a plain toast turns dark, a coloured one takes the hue's inverted variant.">
-				<button id="toast-inverted-colors">Show the next colour</button>
+			<example "Inverted Colors" description="Same as above, just add `inverted`:  a plain toast turns dark, a coloured one takes the hue's inverted variant.">
+				<button color="red" size="mini" onClick={notify "I am an inverted colorful toast" in inverted red with a progress bar}>Red</button>
+				<button color="orange" size="mini" onClick={notify "I am an inverted colorful toast" in inverted orange with a progress bar}>Orange</button>
+				<button color="yellow" size="mini" onClick={notify "I am an inverted colorful toast" in inverted yellow with a progress bar}>Yellow</button>
+				<button color="olive" size="mini" onClick={notify "I am an inverted colorful toast" in inverted olive with a progress bar}>Olive</button>
+				<button color="green" size="mini" onClick={notify "I am an inverted colorful toast" in inverted green with a progress bar}>Green</button>
+				<button color="teal" size="mini" onClick={notify "I am an inverted colorful toast" in inverted teal with a progress bar}>Teal</button>
+				<button color="blue" size="mini" onClick={notify "I am an inverted colorful toast" in inverted blue with a progress bar}>Blue</button>
+				<button color="violet" size="mini" onClick={notify "I am an inverted colorful toast" in inverted violet with a progress bar}>Violet</button>
+				<button color="purple" size="mini" onClick={notify "I am an inverted colorful toast" in inverted purple with a progress bar}>Purple</button>
+				<button color="pink" size="mini" onClick={notify "I am an inverted colorful toast" in inverted pink with a progress bar}>Pink</button>
+				<button color="brown" size="mini" onClick={notify "I am an inverted colorful toast" in inverted brown with a progress bar}>Brown</button>
+				<button color="grey" size="mini" onClick={notify "I am an inverted colorful toast" in inverted grey with a progress bar}>Grey</button>
+				<button color="black" size="mini" onClick={notify "I am an inverted colorful toast" in inverted black with a progress bar}>Black</button>
 			</example>
-			<example>
+			<example "Inverted Colors">
 				<toast inverted message="A dark toast."/>
 				<toast inverted color="purple" message="I am an inverted colorful toast"/>
 			</example>
 		</>
 
 		<section label="Not compact" sticky="stack" collapsible dividing>
-			<example description="A toast is 350px wide by default;  `compact=\"false\"` sizes it to its content.">
+			<example "Not compact" description="A toast is 350px wide by default;  `compact=\"false\"` sizes it to its content.">
 				<toast compact="false" message="As wide as my text."/>
 			</example>
 		</>
@@ -140,11 +164,11 @@
 
 	<section label="Actions">
 		<section label="General" sticky="stack" collapsible dividing>
-			<example description="Define click actions on your toast with a text and/or icon, optional class and click handler.">
-				<message slot="description" size="small"><html>The default click handler closes the toast, so leave it out when the button should only close it;  a handler returning <code>false</code> keeps the toast open. In the page, put <code>&lt;ui-button slot="actions"&gt;</code>s in the toast: any activated one closes it unless its click was <code>preventDefault()</code>ed.</html></message>
-				<button id="toast-actions">Show</button>
+			<example "General" description="Define click actions on your toast with a text and/or icon, optional class and click handler.">
+				<message slot="description" size="small">The default click handler closes the toast, so leave it out when the button should only close it;  a handler returning <text code>false</text> keeps the toast open. In the page, put <text code>&lt;ui-button slot="actions"&gt;</text>s in the toast: any activated one closes it unless its click was <text code>preventDefault()</text>ed.</message>
+				<button onClick={notify "Do you really want to star Fomantic-UI?" in black with "Yes"}>Show</button>
 			</example>
-			<example>
+			<example "General">
 				<toast color="black" message="Do you really want to star Fomantic-UI?">
 					<button slot="actions" color="green" icon="check">Yes</button>
 					<button slot="actions" color="red" icon="ban" aria-label="No"/>
@@ -154,7 +178,7 @@
 		</>
 
 		<section label="Basic" sticky="stack" collapsible dividing>
-			<example description="`basic` actions don't lighten the actions' background;  `left` aligns the buttons to the left (`classActions` in `UI.toast()`, `actions` on the element).">
+			<example "Basic" description="`basic` actions don't lighten the actions' background;  `left` aligns the buttons to the left (`classActions` in `UI.toast()`, `actions` on the element).">
 				<toast color="black" actions="basic left" message="Do you really want to star Fomantic-UI?">
 					<button slot="actions" color="yellow">Yes, really</button>
 				</toast>
@@ -163,7 +187,7 @@
 
 		<!-- GAP I118:  no `centered` actions (Fomantic's `classActions: 'centered'`);  shown right-aligned. -->
 		<section label="Centered" sticky="stack" collapsible dividing>
-			<example description="The action buttons can also be shown centered.">
+			<example "Centered" description="The action buttons can also be shown centered.">
 				<toast color="black" message="Do you really want to star Fomantic-UI?">
 					<button slot="actions" color="yellow">Yes, really</button>
 				</toast>
@@ -172,7 +196,7 @@
 
 		<!-- GAP I121:  the attached group sits inset in a light frame, not flush with the toast. -->
 		<section label="Attached" sticky="stack" collapsible dividing>
-			<example description="`attached` turns the actions into a button group joined below the toast;  `attached top` joins it above.">
+			<example "Attached" description="`attached` turns the actions into a button group joined below the toast;  `attached top` joins it above.">
 				<toast color="black" actions="attached top" message="Do you really want to star Fomantic-UI?">
 					<buttons slot="actions" fluid>
 						<button color="green">Yes, really</button>
@@ -189,7 +213,7 @@
 		</>
 
 		<section label="Vertical" sticky="stack" collapsible dividing>
-			<example description="`vertical` displays the actions to the right of the toast.">
+			<example "Vertical" description="`vertical` displays the actions to the right of the toast.">
 				<toast color="black" actions="vertical" message="Do you really want to star Fomantic-UI?">
 					<button slot="actions" color="green">Yes, really</button>
 					<button slot="actions" color="red">Maybe later</button>
@@ -198,7 +222,7 @@
 		</>
 
 		<section label="Vertical attached" sticky collapsible dividing>
-			<example description="Vertical actions can also be a button group:  `vertical attached`, which also supports `left`.">
+			<example "Vertical attached" description="Vertical actions can also be a button group:  `vertical attached`, which also supports `left`.">
 				<toast color="black" actions="left vertical attached" message="Do you really want to star Fomantic-UI?">
 					<buttons slot="actions" direction="vertical">
 						<button color="green">Yes, really</button>
@@ -211,71 +235,82 @@
 
 	<section label="Examples">
 		<section label="Without icon" sticky="stack" collapsible dividing>
-			<example description="A toast shows no icon unless you ask for one (Fomantic's `showIcon: false`):  bare `icon` shows the type's own.">
+			<example "Without icon" description="A toast shows no icon unless you ask for one (Fomantic's `showIcon: false`):  bare `icon` shows the type's own.">
 				<toast type="warning" message="Hey, where is my icon?"/>
 			</example>
 		</>
 
 		<section label="Individual icon" sticky="stack" collapsible dividing>
-			<example description="Use whatever icon you like:  `icon=\"microphone\"`.">
+			<example "Individual icon" description="Use whatever icon you like:  `icon=\"microphone\"`.">
 				<toast type="info" icon="microphone" message="Listen to me"/>
 			</example>
 		</>
-		<message size="small" class="site-not-ported"><html>Not ported: Image toasts (<code>showImage</>, <code>classImage</>), left out of the toast sheet on purpose. Slot an <code>&lt;ui-image avatar&gt;</> into the content instead.</></>
+		<message size="small" class="site-not-ported">Not ported: Image toasts (<text code>showImage</>, <text code>classImage</>), left out of the toast sheet on purpose. Slot an <text code>&lt;ui-image avatar&gt;</> into the content instead.</>
 
 		<section label="Close Icon" sticky="stack" collapsible dividing>
-			<example description="You can force the user to click a close icon instead of clicking anywhere on the toast to close it:  `closable` (`closeIcon`).">
+			<example "Close Icon" description="You can force the user to click a close icon instead of clicking anywhere on the toast to close it:  `closable` (`closeIcon`).">
 				<toast type="info" closable message="Click on the X to close me"/>
 			</example>
 		</>
-		<message size="small" class="site-not-ported"><html>Not ported: the close icon on the left (<code>closeIcon: 'left'</>) -- left out of the toast sheet on purpose.</></>
+		<message size="small" class="site-not-ported">Not ported: the close icon on the left (<text code>closeIcon: 'left'</>) -- left out of the toast sheet on purpose.</>
 
 		<!-- GAP I119:  no transition settings (Fomantic's `transition: { showMethod, hideMethod ... }`);  every toast scales. -->
-		<message size="small" class="site-not-ported"><html>Not yet: Transitions (<code>transition: &#123; showMethod: 'zoom', hideMethod: 'fade' ... &#125;</>) -- every toast scales in and out, timed by <code>--ui-toast-duration</>.</></>
+		<message size="small" class="site-not-ported">Not yet: Transitions (<text code>transition: &#123; showMethod: 'zoom', hideMethod: 'fade' ... &#125;</>) -- every toast scales in and out, timed by <text code>--ui-toast-duration</>.</>
 	</>
 
 	<section label="Create from DOM">
 		<section label="Toast" sticky="stack" collapsible dividing>
-			<example description="A toast can be made from markup:  a `<ui-toast>` in the page, with rich content in its slot.">
-				<toast heading="DOM toast" icon="info"><html>A Toast can be generated out of existing DOM nodes, with <b>any markup</b> inside.</html></toast>
+			<example "Toast" description="A toast can be made from markup:  a `<ui-toast>` in the page, with rich content in its slot.">
+				<toast heading="DOM toast" icon="info">A Toast can be generated out of existing DOM nodes, with <text bold>any markup</text> inside.</toast>
 			</example>
 		</>
 
 		<section label="Approve / Deny Callbacks" sticky collapsible dividing>
-			<example description="Just like a modal, a toast ties approve / deny to any positive / approve, negative / deny or ok / cancel button, with the cancelable `ui-approving` and `ui-denying`. Calling `preventDefault()` on one keeps it open.">
-				<toast id="toast-approve-deny" display-time="0" message="Want to close this DOM toast?">
+			<example "Approve / Deny Callbacks" description="Just like a modal, a toast ties approve / deny to any positive / approve, negative / deny or ok / cancel button, with the cancelable `ui-approving` and `ui-denying`. Calling `preventDefault()` on one keeps it open.">
+				<toast display-time="0" message="Want to close this DOM toast?" on-ui-approving={notify "Approved"}>
 					<button slot="actions" color="positive">Yes</button>
 					<button slot="actions" color="negative">No</button>
 				</toast>
 			</example>
 		</>
-		<message size="small" class="site-not-ported"><html>Not ported: Template, Message and Card toasts (<code>$('.ui.message').toast()</>) -- a toast is a <code>&lt;ui-toast&gt;</>; slot the content you'd have put in a message or card into one.</></>
+		<message size="small" class="site-not-ported">Not ported: Template, Message and Card toasts (<text code>$('.ui.message').toast()</>) -- a toast is a <text code>&lt;ui-toast&gt;</>; slot the content you'd have put in a message or card into one.</>
 	</>
 
 	<section label="Interaction">
 		<section label="Prevent pausing" sticky collapsible dividing>
-			<example description="Hovering over a toast pauses its countdown;  `pauseOnHover: false` (`pause-on-hover=\"false\"`) keeps it running.  Focus inside always pauses it.">
-				<button id="toast-no-pause">Show</button>
+			<example "Prevent pausing" description="Hovering over a toast pauses its countdown;  `pauseOnHover: false` (`pause-on-hover=\"false\"`) keeps it running.  Focus inside always pauses it.">
+				<button onClick={notify "This toast does not pause when you hover on it" with a progress bar at the top without pausing}>Show</button>
 			</example>
 		</>
 
 		<section label="Prevent closing" sticky collapsible dividing>
-			<example description="A click on a toast closes it;  `closeOnClick: false` (`close-on-click=\"false\"`) doesn't.">
+			<example "Prevent closing" description="A click on a toast closes it;  `closeOnClick: false` (`close-on-click=\"false\"`) doesn't.">
 				<toast close-on-click="false" closable message="Clicking me does nothing;  use the X."/>
 			</example>
 		</>
 
 		<section label="Access created toast" sticky collapsible dividing>
-			<example description="Each `UI.toast()` call returns a handle, and `UI.toasts.dismiss(id)` closes it early. The handle's `closed` resolves when the toast is gone, and its `element` is the toast itself.">
-				<button id="toast-handle">Show, then close it after a second</button>
+			<example "Access created toast" description="Each `UI.toast()` call returns a handle, and `UI.toasts.dismiss(id)` closes it early. The handle's `closed` resolves when the toast is gone, and its `element` is the toast itself.">
+				<toast-gone-in-a-second/>
 			</example>
 		</>
 
 		<section label="Close with a command" sticky collapsible dividing>
-			<example description="A button with `command=\"--close\"` dismisses the toast named by `commandfor`, no script.">
+			<example "Close with a command" description="A button with `command=\"--close\"` dismisses the toast named by `commandfor`, no script.">
 				<toast id="toast-invoker" type="success" icon closable message="Saved your changes"/>
 				<button commandfor="toast-invoker" command="--close">Dismiss it</button>
 			</example>
 		</>
 	</>
 </spell-notebook>
+
+<!-- Interaction › Access created toast:  a toast, waited for until it's gone, then another -->
+<spell-view "gone in a second">
+	<action "show the toasts" description="A toast that goes after a second;  once it's gone, a toast saying so">
+		notify "I'll be gone in a second" for 1 second and wait
+		notify "The first toast is gone"
+	</action>
+	<draw>
+		<button onClick={show the toasts}>Show, then close it after a second</button>
+	</draw>
+</spell-view>

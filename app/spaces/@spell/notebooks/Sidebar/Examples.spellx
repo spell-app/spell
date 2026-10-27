@@ -21,8 +21,8 @@
 	-->
 	<section label="Types">
 		<section label="Sidebar" sticky="stack" collapsible dividing>
-			<example description="A sidebar:  `<ui-pushable>`, the context, holds the sidebars and one `<ui-pusher>`, the page beside them.">
-				<message slot="description" state="warning" size="small"><html>Although sidebars can be used with any content, in most cases sidebars hold an inverted vertical <code>&lt;ui-menu&gt;</code>. See the Usage tab for more details.</html></message>
+			<example "Sidebar" description="A sidebar:  `<ui-pushable>`, the context, holds the sidebars and one `<ui-pusher>`, the page beside them.">
+				<message slot="description" state="warning" size="small">Although sidebars can be used with any content, in most cases sidebars hold an inverted vertical <text code>&lt;ui-menu&gt;</text>. See the Usage tab for more details.</message>
 				<pushable>
 					<sidebar id="sidebar-simple" inverted aria-label="Site">
 						<menu direction="vertical" inverted fluid aria-label="Site">
@@ -42,7 +42,7 @@
 		</>
 
 		<section label="Labeled Icon" sticky="stack" collapsible dividing>
-			<example description="A thin sidebar of a `labeled icon` menu:  each item an icon over its label.">
+			<example "Labeled Icon" description="A thin sidebar of a `labeled icon` menu:  each item an icon over its label.">
 				<pushable>
 					<sidebar id="sidebar-labeled" width="thin" inverted aria-label="Sections">
 						<menu direction="vertical" inverted fluid labeled icon aria-label="Sections">
@@ -64,8 +64,8 @@
 
 	<section label="States">
 		<section label="Visible" sticky="stack" collapsible dividing>
-			<example description="A sidebar can be visible on the page: add `visible`.">
-				<message slot="description" state="info" size="small"><html>A modal sidebar that starts <code>visible</code> takes focus as the page loads, so a sidebar shown from the start is usually <code>persistent</code>: part of the page, nothing dimmed or blocked.</html></message>
+			<example "Visible" description="A sidebar can be visible on the page: add `visible`.">
+				<message slot="description" state="info" size="small">A modal sidebar that starts <text code>visible</text> takes focus as the page loads, so a sidebar shown from the start is usually <text code>persistent</text>: part of the page, nothing dimmed or blocked.</message>
 				<pushable>
 					<sidebar width="thin" transition="push" persistent visible aria-label="Sections">
 						<menu direction="vertical" fluid aria-label="Sections">
@@ -84,8 +84,8 @@
 		</>
 
 		<section label="Dimmed" sticky="stack" collapsible dividing>
-			<example description="The pusher is the element pushed away by the sidebar: it holds your site content. A pusher is dimmed while a modal sidebar beside it is visible.">
-				<message slot="description" size="small" class="site-not-ported"><html>Not ported: a <code>dimmed</code> pusher of its own -- the pushable dims (and makes inert) its pusher exactly while a modal sidebar shows, so the two never disagree.</html></message>
+			<example "Dimmed" description="The pusher is the element pushed away by the sidebar: it holds your site content. A pusher is dimmed while a modal sidebar beside it is visible.">
+				<message slot="description" size="small" class="site-not-ported">Not ported: a <text code>dimmed</text> pusher of its own -- the pushable dims (and makes inert) its pusher exactly while a modal sidebar shows, so the two never disagree.</message>
 				<pushable>
 					<sidebar id="sidebar-dimmed" transition="overlay" inverted aria-label="Dimmed">
 						<menu direction="vertical" inverted fluid aria-label="Dimmed">
@@ -106,7 +106,7 @@
 
 	<section label="Variations">
 		<section label="Direction" sticky="stack" collapsible dividing>
-			<example description="A sidebar can appear on different sides of the page:  `position` is `left` (the default), `right`, `top` or `bottom`.  Top and bottom sidebars overlay the page by default.">
+			<example "Direction" description="A sidebar can appear on different sides of the page:  `position` is `left` (the default), `right`, `top` or `bottom`.  Top and bottom sidebars overlay the page by default.">
 				<buttons>
 					<button commandfor="sidebar-position-left" command="--toggle">Left</button>
 					<button commandfor="sidebar-position-right" command="--toggle">Right</button>
@@ -149,8 +149,8 @@
 		</>
 
 		<section label="Width" sticky="stack" collapsible dividing>
-			<example description="A sidebar can specify its width:  `width` is very thin (60px), thin (150px), 260px by default, wide (350px) or very wide (475px). Or it's columns of the viewport:  4, 1/4, 25%.">
-				<message slot="description" size="small"><html>A sidebar adjusts its animations to any width, the words' or your own <code>--ui-sidebar-width</code>.</html></message>
+			<example "Width" description="A sidebar can specify its width:  `width` is very thin (60px), thin (150px), 260px by default, wide (350px) or very wide (475px). Or it's columns of the viewport:  4, 1/4, 25%.">
+				<message slot="description" size="small">A sidebar adjusts its animations to any width, the words' or your own <text code>--ui-sidebar-width</text>.</message>
 				<buttons wrapping>
 					<button commandfor="sidebar-width-very-thin" command="--toggle">Very thin</button>
 					<button commandfor="sidebar-width-thin" command="--toggle">Thin</button>
@@ -201,7 +201,7 @@
 		</>
 
 		<section label="Blurring" sticky="stack" collapsible dividing>
-			<example description="A `blurring` sidebar blurs the dimmed page beside it (Fomantic's `blurring` dimmer).">
+			<example "Blurring" description="A `blurring` sidebar blurs the dimmed page beside it (Fomantic's `blurring` dimmer).">
 				<pushable>
 					<sidebar id="sidebar-blurring" blurring transition="overlay" aria-label="Blurring">
 						<menu direction="vertical" fluid aria-label="Blurring">
@@ -221,8 +221,8 @@
 
 	<section label="More Examples">
 		<section label="Transitions" sticky="stack" collapsible dividing>
-			<example description="Not all sidebar transitions are available for every sidebar direction. Overlay, push and scale down work on every edge;  uncover (the default at the sides), slide along and slide out on the left and right only.">
-				<message slot="description" size="small" class="site-not-ported"><html>Not ported: Fomantic's <code>dimPage</code> setting -- a modal sidebar always dims the page beside it, a <code>persistent</code> one never does.</html></message>
+			<example "Transitions" description="Not all sidebar transitions are available for every sidebar direction. Overlay, push and scale down work on every edge;  uncover (the default at the sides), slide along and slide out on the left and right only.">
+				<message slot="description" size="small" class="site-not-ported">Not ported: Fomantic's <text code>dimPage</text> setting -- a modal sidebar always dims the page beside it, a <text code>persistent</text> one never does.</message>
 				<buttons wrapping>
 					<button commandfor="sidebar-transition-overlay" command="--toggle">Overlay</button>
 					<button commandfor="sidebar-transition-push" command="--toggle">Push</button>
@@ -273,7 +273,7 @@
 		</>
 
 		<section label="Displaying Multiple" sticky collapsible dividing>
-			<example description="Multiple sidebars can be displayed at the same time when they are `persistent`, with a transition like push or overlay. A modal sidebar is a drawer:  one at a time.">
+			<example "Displaying Multiple" description="Multiple sidebars can be displayed at the same time when they are `persistent`, with a transition like push or overlay. A modal sidebar is a drawer:  one at a time.">
 				<buttons>
 					<button commandfor="sidebar-multiple-left" command="--toggle">Left</button>
 					<button commandfor="sidebar-multiple-right" command="--toggle">Right</button>
@@ -300,7 +300,7 @@
 
 		<!-- GAP I73:  a menu item can't toggle the sidebar (no invoker commands on `<ui-item>`);  a button in the menu does. -->
 		<section label="Using a custom context" sticky collapsible dividing>
-			<example description="A sidebar can sit inside any element, not just a page's body: its `<ui-pushable>` is the context.">
+			<example "Using a custom context" description="A sidebar can sit inside any element, not just a page's body: its `<ui-pushable>` is the context.">
 				<message slot="description" state="info" size="small">A sidebar's context can't have any padding: pad its pusher's content instead.</message>
 				<menu attach="top" aria-label="Demo">
 					<item>
@@ -327,7 +327,7 @@
 		</>
 
 		<section label="Triggering show/hide with other content" sticky collapsible dividing>
-			<example description="Any `<ui-button>` (or native `<button>`) toggles a sidebar:  `commandfor` its id, `command=\"--toggle\"`.">
+			<example "Triggering show/hide with other content" description="Any `<ui-button>` (or native `<button>`) toggles a sidebar:  `commandfor` its id, `command=\"--toggle\"`.">
 				<button commandfor="sidebar-trigger" command="--toggle">Trigger Sidebar</button>
 				<pushable>
 					<sidebar id="sidebar-trigger" inverted aria-label="Triggered">
@@ -346,7 +346,7 @@
 		</>
 
 		<section label="Triggering custom behavior with other content" sticky collapsible dividing>
-			<example description="You can also say what the button does:  `--show`, `--close` or `--toggle`.">
+			<example "Triggering custom behavior with other content" description="You can also say what the button does:  `--show`, `--close` or `--toggle`.">
 				<button commandfor="sidebar-open" command="--show">Open Sidebar</button>
 				<pushable>
 					<sidebar id="sidebar-open" inverted aria-label="Opened">
@@ -365,8 +365,8 @@
 		</>
 
 		<section label="Starting Visible" sticky collapsible dividing>
-			<example description="A sidebar can start visible: `visible`.">
-				<message slot="description" state="info" size="small"><html>No pre-script class is needed: the elements lay the sidebar out before and after they load, at any width. Here it's <code>persistent</code> too, so it doesn't take focus as the page loads.</html></message>
+			<example "Starting Visible" description="A sidebar can start visible: `visible`.">
+				<message slot="description" state="info" size="small">No pre-script class is needed: the elements lay the sidebar out before and after they load, at any width. Here it's <text code>persistent</text> too, so it doesn't take focus as the page loads.</message>
 				<pushable>
 					<sidebar width="thin" transition="push" persistent visible inverted aria-label="Application">
 						<menu direction="vertical" inverted fluid labeled icon aria-label="Application">

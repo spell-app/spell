@@ -45,7 +45,7 @@
 		<html>
 			<ui-docs-tokens family="ui-section" playground>
 				<ui-section label="Getting started">
-					<p>A titled block of content. Its title is a real heading: an <code>h2</> at the top level.</>
+					<ui-text paragraph>A titled block of content. Its title is a real heading: an <ui-text code>h2</> at the top level.</>
 				</>
 			</>
 		</>

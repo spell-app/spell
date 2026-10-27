@@ -20,143 +20,74 @@
 	-->
 	<section label="Types">
 		<section label="Rating" sticky="stack" collapsible dividing>
-			<example description="A basic rating.  Fomantic's default is 4 icons;  `max-rating` changes it, here to one.">
+			<example "Rating" description="A basic rating.  Fomantic's default is 4 icons;  `max-rating` changes it, here to one.">
 				<rating max-rating="1" aria-label="Favourite"/>
 			</example>
-			<example description="Four icons, the first three filled by `value`.">
+			<example "Rating" description="Four icons, the first three filled by `value`.">
 				<rating value="3" aria-label="Rating"/>
 			</example>
 		</>
 
 		<section label="Icon" sticky="stack" collapsible dividing>
-			<example description="You can use any available icon as rating indicator:  `icon` takes an icon name.">
-				<rating color="yellow" icon="star" value="2" aria-label="Stars"/>
-				<html>
-					<br />
-				</html>
-				<rating color="red" icon="heart" value="2" aria-label="Hearts"/>
-				<html>
-					<br />
-				</html>
-				<rating color="purple" icon="female" value="2" aria-label="Women"/>
-				<html>
-					<br />
-				</html>
-				<rating color="blue" icon="male" value="2" aria-label="Men"/>
-				<html>
-					<br />
-				</html>
-				<rating color="grey" icon="cloud" value="2" aria-label="Clouds"/>
-				<html>
-					<br />
-				</html>
-				<rating color="pink" icon="cat" value="2" aria-label="Cats"/>
-				<html>
-					<br />
-				</html>
-				<rating color="orange" icon="circle" value="2" aria-label="Circles"/>
+			<example "Icon" description="You can use any available icon as rating indicator:  `icon` takes an icon name.">
+				<stack spacing="none">
+					<rating color="yellow" icon="star" value="2" aria-label="Stars"/>
+					<rating color="red" icon="heart" value="2" aria-label="Hearts"/>
+					<rating color="purple" icon="female" value="2" aria-label="Women"/>
+					<rating color="blue" icon="male" value="2" aria-label="Men"/>
+					<rating color="grey" icon="cloud" value="2" aria-label="Clouds"/>
+					<rating color="pink" icon="cat" value="2" aria-label="Cats"/>
+					<rating color="orange" icon="circle" value="2" aria-label="Circles"/>
+				</stack>
 			</example>
 		</>
 
 		<section label="Color" sticky="stack" collapsible dividing>
-			<example description="You can specify any color of the palette with `color`.">
-				<rating color="red" value="1" max-rating="7" aria-label="Red"/>
-				<html>
-					<br />
-				</html>
-				<rating color="orange" value="2" max-rating="7" aria-label="Orange"/>
-				<html>
-					<br />
-				</html>
-				<rating color="yellow" value="3" max-rating="7" aria-label="Yellow"/>
-				<html>
-					<br />
-				</html>
-				<rating color="olive" value="4" max-rating="7" aria-label="Olive"/>
-				<html>
-					<br />
-				</html>
-				<rating color="green" value="5" max-rating="7" aria-label="Green"/>
-				<html>
-					<br />
-				</html>
-				<rating color="teal" value="6" max-rating="7" aria-label="Teal"/>
-				<html>
-					<br />
-				</html>
-				<rating color="blue" value="6" max-rating="7" aria-label="Blue"/>
-				<html>
-					<br />
-				</html>
-				<rating color="violet" value="5" max-rating="7" aria-label="Violet"/>
-				<html>
-					<br />
-				</html>
-				<rating color="purple" value="4" max-rating="7" aria-label="Purple"/>
-				<html>
-					<br />
-				</html>
-				<rating color="pink" value="3" max-rating="7" aria-label="Pink"/>
-				<html>
-					<br />
-				</html>
-				<rating color="brown" value="2" max-rating="7" aria-label="Brown"/>
-				<html>
-					<br />
-				</html>
-				<rating color="grey" value="1" max-rating="7" aria-label="Grey"/>
-				<html>
-					<br />
-				</html>
-				<rating color="black" value="1" max-rating="7" aria-label="Black"/>
+			<example "Color" description="You can specify any color of the palette with `color`.">
+				<stack spacing="none">
+					<rating color="red" value="1" max-rating="7" aria-label="Red"/>
+					<rating color="orange" value="2" max-rating="7" aria-label="Orange"/>
+					<rating color="yellow" value="3" max-rating="7" aria-label="Yellow"/>
+					<rating color="olive" value="4" max-rating="7" aria-label="Olive"/>
+					<rating color="green" value="5" max-rating="7" aria-label="Green"/>
+					<rating color="teal" value="6" max-rating="7" aria-label="Teal"/>
+					<rating color="blue" value="6" max-rating="7" aria-label="Blue"/>
+					<rating color="violet" value="5" max-rating="7" aria-label="Violet"/>
+					<rating color="purple" value="4" max-rating="7" aria-label="Purple"/>
+					<rating color="pink" value="3" max-rating="7" aria-label="Pink"/>
+					<rating color="brown" value="2" max-rating="7" aria-label="Brown"/>
+					<rating color="grey" value="1" max-rating="7" aria-label="Grey"/>
+					<rating color="black" value="1" max-rating="7" aria-label="Black"/>
+				</stack>
 			</example>
 		</>
 
 		<section label="Partial Ratings" sticky="stack" collapsible dividing>
-			<example description="You can use decimal values for showing partially filled ratings.">
-				<message slot="description" state="info" size="small"><html>A fractional <code>value</code> only draws a partly filled icon: no radio is chosen until the user rates, and the group is described as "Rated 2.5 of 5". Fomantic's jQuery and browser caveats don't apply: every supported browser draws it.</html></message>
-				<rating color="black" value="0.5" max-rating="5" aria-label="Black"/>
-				<html>
-					<br />
-				</html>
-				<rating color="pink" value="1.25" max-rating="5" aria-label="Pink"/>
-				<html>
-					<br />
-				</html>
-				<rating color="red" value="1.775" max-rating="5" aria-label="Red"/>
-				<html>
-					<br />
-				</html>
-				<rating color="yellow" value="2.5" max-rating="5" aria-label="Yellow"/>
-				<html>
-					<br />
-				</html>
-				<rating color="green" value="3.225" max-rating="5" aria-label="Green"/>
-				<html>
-					<br />
-				</html>
-				<rating color="purple" value="3.65" max-rating="5" aria-label="Purple"/>
-				<html>
-					<br />
-				</html>
-				<rating color="blue" value="4.375" max-rating="5" aria-label="Blue"/>
-				<html>
-					<br />
-				</html>
-				<rating color="brown" value="4.75" max-rating="5" aria-label="Brown"/>
+			<example "Partial Ratings" description="You can use decimal values for showing partially filled ratings.">
+				<message slot="description" state="info" size="small">A fractional <text code>value</text> only draws a partly filled icon: no radio is chosen until the user rates, and the group is described as "Rated 2.5 of 5". Fomantic's jQuery and browser caveats don't apply: every supported browser draws it.</message>
+				<stack spacing="none">
+					<rating color="black" value="0.5" max-rating="5" aria-label="Black"/>
+					<rating color="pink" value="1.25" max-rating="5" aria-label="Pink"/>
+					<rating color="red" value="1.775" max-rating="5" aria-label="Red"/>
+					<rating color="yellow" value="2.5" max-rating="5" aria-label="Yellow"/>
+					<rating color="green" value="3.225" max-rating="5" aria-label="Green"/>
+					<rating color="purple" value="3.65" max-rating="5" aria-label="Purple"/>
+					<rating color="blue" value="4.375" max-rating="5" aria-label="Blue"/>
+					<rating color="brown" value="4.75" max-rating="5" aria-label="Brown"/>
+				</stack>
 			</example>
 		</>
 	</>
 
 	<section label="States">
 		<section label="Disabled" sticky="stack" collapsible dividing>
-			<example description="A rating can be non-interactive with `disabled`:  it shows its value, can't be focused and isn't submitted.">
+			<example "Disabled" description="A rating can be non-interactive with `disabled`:  it shows its value, can't be focused and isn't submitted.">
 				<rating color="yellow" disabled value="3" max-rating="5" aria-label="Disabled"/>
 			</example>
 		</>
 
 		<section label="Read-only" sticky="stack" collapsible dividing>
-			<example description="A `readonly` rating shows its value and can't be changed, but is still focusable and submitted.  A `<label for>` names it.">
+			<example "Read-only" description="A `readonly` rating shows its value and can't be changed, but is still focusable and submitted.  A `<label for>` names it.">
 				<html>
 					<label for="rating-readonly">Read-only</label>
 				</html>
@@ -167,39 +98,23 @@
 
 	<section label="Variations">
 		<section label="Size" sticky="stack" collapsible dividing>
-			<example description="A rating can vary in size.">
-				<rating size="mini" color="yellow" value="3" aria-label="Mini"/>
-				<html>
-					<br />
-				</html>
-				<rating size="tiny" color="yellow" value="3" aria-label="Tiny"/>
-				<html>
-					<br />
-				</html>
-				<rating size="small" color="yellow" value="3" aria-label="Small"/>
-				<html>
-					<br />
-				</html>
-				<rating color="yellow" value="3" aria-label="Medium"/>
-				<html>
-					<br />
-				</html>
-				<rating size="large" color="yellow" value="3" aria-label="Large"/>
-				<html>
-					<br />
-				</html>
-				<rating size="huge" color="yellow" value="3" aria-label="Huge"/>
-				<html>
-					<br />
-				</html>
-				<rating size="massive" color="yellow" value="3" aria-label="Massive"/>
+			<example "Size" description="A rating can vary in size.">
+				<stack spacing="none">
+					<rating size="mini" color="yellow" value="3" aria-label="Mini"/>
+					<rating size="tiny" color="yellow" value="3" aria-label="Tiny"/>
+					<rating size="small" color="yellow" value="3" aria-label="Small"/>
+					<rating color="yellow" value="3" aria-label="Medium"/>
+					<rating size="large" color="yellow" value="3" aria-label="Large"/>
+					<rating size="huge" color="yellow" value="3" aria-label="Huge"/>
+					<rating size="massive" color="yellow" value="3" aria-label="Massive"/>
+				</stack>
 			</example>
 		</>
 	</>
 
 	<section label="More Examples">
 		<section label="Setting existing values" sticky collapsible dividing>
-			<example description="`icon` picks the icon, and `value` the starting rating. `max-rating` is the number of icons;  Fomantic's are data-icon, data-rating and data-max-rating, or its icon, initialRating and maxRating settings.">
+			<example "Setting existing values" description="`icon` picks the icon, and `value` the starting rating. `max-rating` is the number of icons;  Fomantic's are data-icon, data-rating and data-max-rating, or its icon, initialRating and maxRating settings.">
 				<list spacing="xl" celled>
 					<item>
 						<image src="/components/ui/images/wireframe/square-image.png" alt="" size="mini"/>
@@ -214,13 +129,13 @@
 		</>
 
 		<section label="Read-Only Ratings" sticky collapsible dividing>
-			<example description="You can disable or enable interactive rating: set or remove `readonly` (or `disabled`), as an attribute or a property. Fomantic's `disable` / `enable` behaviours.">
+			<example "Read-Only Ratings" description="You can disable or enable interactive rating: set or remove `readonly` (or `disabled`), as an attribute or a property. Fomantic's `disable` / `enable` behaviours.">
 				<rating color="red" icon="heart" value="3" max-rating="5" readonly aria-label="Read-only hearts"/>
 			</example>
 		</>
 
 		<section label="Clearing Ratings" sticky collapsible dividing>
-			<example description="With `clearable` you can clear the rating by choosing the current rating again (or with Backspace / Delete).">
+			<example "Clearing Ratings" description="With `clearable` you can clear the rating by choosing the current rating again (or with Backspace / Delete).">
 				<rating color="red" icon="heart" value="3" max-rating="5" clearable aria-label="Clearable hearts"/>
 			</example>
 		</>

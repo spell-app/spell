@@ -25,10 +25,8 @@
 	-->
 	<section label="Introduction">
 		<section label="Grids" sticky="stack" collapsible dividing>
-			<example description="Using a grid makes content appear to flow more naturally on your page.">
-				<html>
-					<p slot="description">A grid is a structure with a <a href="https://99designs.com/designer-blog/2013/03/21/history-of-the-grid-part-1/" target="_blank">long history</a> used to align negative space in designs.</p>
-				</html>
+			<example "Grids" description="Using a grid makes content appear to flow more naturally on your page.">
+				<text slot="description" paragraph>A grid is a structure with a <link target="_blank" link="https://99designs.com/designer-blog/2013/03/21/history-of-the-grid-part-1/">long history</link> used to align negative space in designs.</text>
 				<grid>
 					<column width="4">
 						<segment/>
@@ -47,11 +45,8 @@
 		</>
 
 		<section label="Columns" sticky="stack" collapsible dividing>
-			<example description="Grids divide horizontal space into indivisible units called \"columns\". All columns in a grid must specify their width as proportion of the total available row width.  The example below shows four `width=\"4\"` columns will fit in the first row, `16 / 4 = 4`, and three various sized columns in the second row. `2 + 8 + 6 = 16`">
-				<html>
-					<p slot="description">All grid systems choose an arbitrary column count to allow per row. Spell UI, like Fomantic, uses <b>16 columns</b>.</p>
-					<p slot="description">Gutters and other spacing can be changed with the grid's <a href="/components/ui/theming.html">theming tokens</a> (the Theming tab).</p>
-				</html>
+			<example "Columns" description="Grids divide horizontal space into indivisible units called \"columns\". All columns in a grid must specify their width as proportion of the total available row width.  The example below shows four `width=\"4\"` columns will fit in the first row, `16 / 4 = 4`, and three various sized columns in the second row. `2 + 8 + 6 = 16`  Gutters and other spacing can be changed with the grid's \[theming tokens](/components/ui/theming.html) (the Theming tab).">
+				<text slot="description" paragraph>All grid systems choose an arbitrary column count to allow per row. Spell UI, like Fomantic, uses <text bold>16 columns</text>.</text>
 				<grid>
 					<column width="4">
 						<segment/>
@@ -79,10 +74,8 @@
 		</>
 
 		<section label="Rows" sticky="stack" collapsible dividing>
-			<example description="Rows are groups of columns which are aligned horizontally.  After each group of columns vertical spacing is added to separate each group of columns, creating vertical rhythm.">
-				<html>
-					<p slot="description">Rows can either be <em>explicit</em>, marked with an additional <code>row</code> element, or <em>implicit</em>, automatically occurring when no more space is left in a previous row.</p>
-				</html>
+			<example "Rows" description="Rows are groups of columns which are aligned horizontally.  After each group of columns vertical spacing is added to separate each group of columns, creating vertical rhythm.">
+				<text slot="description" paragraph>Rows can either be <text italic>explicit</text>, marked with an additional <text code>row</text> element, or <text italic>implicit</text>, automatically occurring when no more space is left in a previous row.</text>
 				<grid columns="4">
 					<row>
 						<column>
@@ -112,11 +105,9 @@
 		</>
 
 		<section label="Gutters" sticky="stack" collapsible dividing>
-			<example>
-				<html>
-					<p slot="description">Grid columns are separated by areas of white space referred to as "gutters". Gutters improve legibility by providing, <a href="https://en.wikipedia.org/wiki/Negative_space" target="_blank">negative space</a> between page elements.</p>
-					<p slot="description">Gutters remain a constant size regardless of the width of the grid, or how many columns are in a row. To increase the size of gutters in a particular grid, you can use a <a href="#examples-variations-relaxed"><code>relaxed</code></a> variation.</p>
-				</html>
+			<example "Gutters">
+				<text slot="description" paragraph>Grid columns are separated by areas of white space referred to as "gutters". Gutters improve legibility by providing, <link target="_blank" link="https://en.wikipedia.org/wiki/Negative_space">negative space</link> between page elements.</text>
+				<text slot="description" paragraph>Gutters remain a constant size regardless of the width of the grid, or how many columns are in a row. To increase the size of gutters in a particular grid, you can use a <link link="#examples-variations-relaxed"><text code>relaxed</text></link> variation.</text>
 				<grid>
 					<row columns="3">
 						<column>
@@ -199,12 +190,9 @@
 		</>
 
 		<section label="Negative Margins" sticky collapsible dividing>
-			<example>
-				<html>
-					<p slot="description">Since all grid columns include gutters, grids use <a href="https://csswizardry.com/2011/08/building-better-grid-systems/">negative margins</a> to make sure that the first and last columns sit flush with content outside the grid.</p>
-					<p slot="description">In the following example, you can see even though the top row has padding, the <a href="/components/ui/ui-button.html"><code>attached</code> button</a> still sits flush with the edge of the grid.</p>
-					<p slot="description">In some cases, like when a column or row is <a href="#examples-varying-grids-colored"><code>colored</code></a>, you may want to avoid using negative margins. You can do this by using a <a href="#examples-variations-padded"><code>padded</code></a> variation.</p>
-				</html>
+			<example "Negative Margins" description="Since all grid columns include gutters, grids use \[negative margins](https://csswizardry.com/2011/08/building-better-grid-systems/) to make sure that the first and last columns sit flush with content outside the grid.">
+				<text slot="description" paragraph>In the following example, you can see even though the top row has padding, the <link link="/components/ui/ui-button.html"><text code>attached</text> button</link> still sits flush with the edge of the grid.</text>
+				<text slot="description" paragraph>In some cases, like when a column or row is <link link="#examples-varying-grids-colored"><text code>colored</text></link>, you may want to avoid using negative margins. You can do this by using a <link link="#examples-variations-padded"><text code>padded</text></link> variation.</text>
 				<button attach="top">Button before grid</button>
 				<grid>
 					<column width="16">
@@ -225,12 +213,12 @@
 				<button attach="bottom">Button after grid</button>
 			</example>
 		</>
-		<message size="small" class="site-not-ported"><html>Not ported: Fomantic's deprecated page grids (<code>ui page grid</>) -- put the grid in a <code>&lt;ui-container grid&gt;</> instead (Containers, below).</></>
+		<message size="small" class="site-not-ported">Not ported: Fomantic's deprecated page grids (<text code>ui page grid</>) -- put the grid in a <text code>&lt;ui-container grid&gt;</> instead (Containers, below).</>
 	</>
 
 	<section label="Columns">
 		<section label="Automatic Flow" sticky="stack" collapsible dividing>
-			<example description="Most grids do not need to specify rows. Content will automatically flow to the next row when all the grid columns are taken in the current row.">
+			<example "Automatic Flow" description="Most grids do not need to specify rows. Content will automatically flow to the next row when all the grid columns are taken in the current row.">
 				<grid>
 					<column width="4">
 						<segment/>
@@ -261,7 +249,7 @@
 		</>
 
 		<section label="Column Content" sticky="stack" collapsible dividing>
-			<example description="Since columns use padding to create gutters, content stylings should not be applied directly to columns, but to elements inside of columns.">
+			<example "Column Content" description="Since columns use padding to create gutters, content stylings should not be applied directly to columns, but to elements inside of columns.">
 				<grid columns="3">
 					<column>
 						<segment>
@@ -283,10 +271,8 @@
 		</>
 
 		<section label="Column Widths" sticky="stack" collapsible dividing>
-			<example>
-				<html>
-					<p slot="description">Column widths can be specified using <a href="#examples-variations-column-width"><code>width</code></a>. If a column cannot fit in a row it will automatically flow to the next row</p>
-				</html>
+			<example "Column Widths">
+				<text slot="description" paragraph>Column widths can be specified using <link link="#examples-variations-column-width"><text code>width</text></link>. If a column cannot fit in a row it will automatically flow to the next row</text>
 				<grid>
 					<column width="8">
 						<segment/>
@@ -320,10 +306,8 @@
 		</>
 
 		<section label="Left / Right Attached Column" sticky collapsible dividing>
-			<example>
-				<html>
-					<p slot="description">A column can be attached to the left or right without any padding. This is especially useful when working with a <a href="/components/ui/ui-menu.html"><code>vertical tabular</code> menu</a></p>
-				</html>
+			<example "Left / Right Attached Column">
+				<text slot="description" paragraph>A column can be attached to the left or right without any padding. This is especially useful when working with a <link link="/components/ui/ui-menu.html"><text code>vertical tabular</text> menu</link></text>
 				<grid columns="2">
 					<column attach="left">
 						<segment/>
@@ -338,7 +322,7 @@
 
 	<section label="Rows">
 		<section label="Grouping" sticky="stack" collapsible dividing>
-			<example description="Row wrappers allow you to apply variations to a group of columns.">
+			<example "Grouping" description="Row wrappers allow you to apply variations to a group of columns.">
 				<grid columns="4">
 					<row columns="2">
 						<column>
@@ -362,10 +346,7 @@
 		</>
 
 		<section label="Clearing Content" sticky="stack" collapsible dividing>
-			<example>
-				<html>
-					<p slot="description">Row wrappers will automatically clear previous columns:  the next row starts on a line of its own, even when this one isn't full.  Here empty columns push the second one to the right (<a href="#examples-variations-left-and-right">Left and Right</a>).</p>
-				</html>
+			<example "Clearing Content" description="Row wrappers will automatically clear previous columns:  the next row starts on a line of its own, even when this one isn't full.  Here empty columns push the second one to the right (\[Left and Right](#variations-left-and-right)).">
 				<grid>
 					<row columns="4">
 						<column>
@@ -393,10 +374,8 @@
 		</>
 
 		<section label="Special Grids" sticky="stack" collapsible dividing>
-			<example>
-				<html>
-					<p slot="description">Additionally, some types of grids, like <a href="#examples-types-divided"><code>divided</code></a> or <a href="#examples-types-celled"><code>celled</code></a> require row wrappers to apply formatting correctly.</p>
-				</html>
+			<example "Special Grids">
+				<text slot="description" paragraph>Additionally, some types of grids, like <link link="#examples-types-divided"><text code>divided</text></link> or <link link="#examples-types-celled"><text code>celled</text></link> require row wrappers to apply formatting correctly.</text>
 				<grid celled="internally">
 					<row>
 						<column width="3">
@@ -427,7 +406,7 @@
 
 	<section label="Varying Grids">
 		<section label="Nesting Grids" sticky="stack" collapsible dividing>
-			<example description="Grids can be placed inside of other grids, letting you sub-divide columns.">
+			<example "Nesting Grids" description="Grids can be placed inside of other grids, letting you sub-divide columns.">
 				<grid columns="2">
 					<column>
 						<grid columns="3">
@@ -463,10 +442,8 @@
 		</>
 
 		<section label="Colored" sticky="stack" collapsible dividing id="varying-grids-colored">
-			<example description="To include a color that is not available in the default palette, set `--ui-color` on the row or column in your CSS.">
-				<html>
-					<p slot="description">Grids can use named <a href="#colored-2"><code>color</code></a> to add background colors, but only with <a href="#examples-variations-padded"><code>padded</code></a> that do not include negative margins.</p>
-				</html>
+			<example "Colored" description="To include a color that is not available in the default palette, set `--ui-color` on the row or column in your CSS.">
+				<text slot="description" paragraph>Grids can use named <link link="#colored-2"><text code>color</text></link> to add background colors, but only with <link link="#examples-variations-padded"><text code>padded</text></link> that do not include negative margins.</text>
 				<grid equal-width align="center" padding="md">
 					<row>
 						<column color="olive">Olive</column>
@@ -481,10 +458,8 @@
 		</>
 
 		<section label="Automatic Column Count" sticky collapsible dividing>
-			<example>
-				<html>
-					<p slot="description">The <a href="#examples-variations-equal-width"><code>equal-width</code></a> variation will automatically divide column width evenly. This is useful with dynamic content where you do not know the column count in advance.</p>
-				</html>
+			<example "Automatic Column Count">
+				<text slot="description" paragraph>The <link link="#examples-variations-equal-width"><text code>equal-width</text></link> variation will automatically divide column width evenly. This is useful with dynamic content where you do not know the column count in advance.</text>
 				<grid equal-width>
 					<column>
 						<segment/>
@@ -508,10 +483,8 @@
 		</>
 
 		<section label="Centering Content" sticky collapsible dividing>
-			<example>
-				<html>
-					<p slot="description">If a row does not take up all sixteen grid columns, you can use a <a href="#examples-variations-centered"><code>centered</code></a> variation to center the column contents inside the grid.</p>
-				</html>
+			<example "Centering Content">
+				<text slot="description" paragraph>If a row does not take up all sixteen grid columns, you can use a <link link="#examples-variations-centered"><text code>centered</text></link> variation to center the column contents inside the grid.</text>
 				<grid columns="2" centered>
 					<column>
 						<segment/>
@@ -529,10 +502,8 @@
 		</>
 
 		<section label="Significant Word Order" sticky collapsible dividing>
-			<example description="Grids include many variations for adjusting things like vertical or horizontal alignment, text alignment, or default gutter sizes.">
-				<html>
-					<p slot="description">Some multi-word variations, like <a href="#examples-variations-vertical-alignment"><code>vertical-align="middle"</code></a> or <a href="#examples-variations-text-alignment"><code>align="right"</code></a> are word-order dependent and require you to use adjacent class names.</p>
-				</html>
+			<example "Significant Word Order" description="Grids include many variations for adjusting things like vertical or horizontal alignment, text alignment, or default gutter sizes.">
+				<text slot="description" paragraph>Some multi-word variations, like <link link="#examples-variations-vertical-alignment"><text code>vertical-align="middle"</text></link> or <link link="#examples-variations-text-alignment"><text code>align="right"</text></link> are word-order dependent and require you to use adjacent class names.</text>
 				<grid>
 					<column width="6" align="right">
 						<segment>Right aligned column</segment>
@@ -559,10 +530,7 @@
 
 	<section label="Responsive Grids">
 		<section label="Containers" sticky="stack" collapsible dividing>
-			<example>
-				<html>
-					<p slot="description">A <a href="/components/ui/ui-container.html">container</a> can be used alongside a grid to provide a responsive, fixed width container for wrapping the contents of a page.</p>
-				</html>
+			<example "Containers" description="A \[container](/components/ui/ui-container.html) can be used alongside a grid to provide a responsive, fixed width container for wrapping the contents of a page.">
 				<container grid>
 					<grid>
 						<column width="4">
@@ -595,10 +563,8 @@
 		</>
 
 		<section label="Stackable" sticky="stack" collapsible dividing id="responsive-grids-stackable">
-			<example>
-				<html>
-					<p slot="description">A <a href="#examples-responsive-grids-stackable"><code>stackable</code></a> will automatically stack rows to a single columns on mobile devices</p>
-				</html>
+			<example "Stackable">
+				<text slot="description" paragraph>A <link link="#examples-responsive-grids-stackable"><text code>stackable</text></link> will automatically stack rows to a single columns on mobile devices</text>
 				<grid columns="4" stackable>
 					<column>
 						<segment/>
@@ -617,10 +583,8 @@
 		</>
 
 		<section label="Reverse Order" sticky collapsible dividing>
-			<example>
-				<html>
-					<p slot="description">Grids include special <a href="#examples-responsive-variations-reversed"><code>reversed</code></a> variations that allow you to reverse the order of columns or rows by device</p>
-				</html>
+			<example "Reverse Order">
+				<text slot="description" paragraph>Grids include special <link link="#examples-responsive-variations-reversed"><text code>reversed</text></link> variations that allow you to reverse the order of columns or rows by device</text>
 				<grid equal-width reversed="mobile">
 					<column>First</column>
 					<column>Second</column>
@@ -630,10 +594,8 @@
 		</>
 
 		<section label="Doubling" sticky="stack" collapsible dividing id="responsive-grids-doubling">
-			<example>
-				<html>
-					<p slot="description">A <a href="#examples-responsive-grids-doubling"><code>doubling</code></a> grid will double column widths for each device jump.</p>
-				</html>
+			<example "Doubling">
+				<text slot="description" paragraph>A <link link="#examples-responsive-grids-doubling"><text code>doubling</text></link> grid will double column widths for each device jump.</text>
 				<grid>
 					<row columns="8" doubling>
 						<column>
@@ -700,10 +662,8 @@
 		</>
 
 		<section label="Manual Tweaks" sticky collapsible dividing>
-			<example>
-				<html>
-					<p slot="description">Although design patterns like <a href="#examples-responsive-grids-doubling"><code>doubling</code></a> or <a href="#examples-responsive-grids-stackable"><code>stackable</code></a> are useful at simplifying responsive styling, you can also manually tweak device presentation by specifying <a href="#examples-responsive-variations-responsive-width"><code>width-tablet</code> ...</a> or <a href="#examples-responsive-variations-device-visibility"><code>only</code></a> columns or rows.</p>
-				</html>
+			<example "Manual Tweaks">
+				<text slot="description" paragraph>Although design patterns like <link link="#examples-responsive-grids-doubling"><text code>doubling</text></link> or <link link="#examples-responsive-grids-stackable"><text code>stackable</text></link> are useful at simplifying responsive styling, you can also manually tweak device presentation by specifying <link link="#examples-responsive-variations-responsive-width"><text code>width-tablet</text> ...</link> or <link link="#examples-responsive-variations-device-visibility"><text code>only</text></link> columns or rows.</text>
 				<grid centered>
 					<row only="computer">
 						<column>
@@ -732,7 +692,7 @@
 
 	<section label="Types">
 		<section label="Grid" sticky="stack" collapsible dividing>
-			<example description="A basic grid.">
+			<example "Grid" description="A basic grid.">
 				<grid>
 					<column>
 						<segment/>
@@ -787,7 +747,7 @@
 		</>
 
 		<section label="Divided" sticky="stack" collapsible dividing id="types-divided">
-			<example description="A grid can have dividers between its columns.">
+			<example "Divided" description="A grid can have dividers between its columns.">
 				<grid columns="3" divided>
 					<row>
 						<column>
@@ -816,7 +776,7 @@
 		</>
 
 		<section label="Vertically Divided" sticky collapsible dividing>
-			<example description="A grid can have dividers between rows.">
+			<example "Vertically Divided" description="A grid can have dividers between rows.">
 				<grid divided="vertically">
 					<row columns="2">
 						<column>
@@ -842,7 +802,7 @@
 		</>
 
 		<section label="Celled" sticky="stack" collapsible dividing id="types-celled">
-			<example description="A grid can have rows divided into cells.">
+			<example "Celled" description="A grid can have rows divided into cells.">
 				<grid celled>
 					<row>
 						<column width="3">
@@ -868,7 +828,7 @@
 		</>
 
 		<section label="Internally Celled" sticky="stack" collapsible dividing>
-			<example description="A grid can have rows divisions only between internal rows.">
+			<example "Internally Celled" description="A grid can have rows divisions only between internal rows.">
 				<grid celled="internally">
 					<row>
 						<column width="3">
@@ -899,7 +859,7 @@
 
 	<section label="Content">
 		<section label="Rows" sticky="stack" collapsible dividing>
-			<example description="A row is a horizontal grouping of columns.">
+			<example "Rows" description="A row is a horizontal grouping of columns.">
 				<grid columns="3">
 					<row>
 						<column>
@@ -925,7 +885,7 @@
 		</>
 
 		<section label="Columns" sticky="stack" collapsible dividing>
-			<example description="Columns each contain gutters giving them equal spacing from other columns.">
+			<example "Columns" description="Columns each contain gutters giving them equal spacing from other columns.">
 				<grid>
 					<column width="8">
 						<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
@@ -946,7 +906,7 @@
 
 	<section label="Variations">
 		<section label="Left and Right" sticky="stack" collapsible dividing id="variations-left-and-right">
-			<example description="A column has no `floated` any more:  an empty column between two others pushes them to the left and right edges of the row.">
+			<example "Left and Right" description="A column has no `floated` any more:  an empty column between two others pushes them to the left and right edges of the row.">
 				<grid>
 					<column width="5">
 						<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
@@ -960,7 +920,7 @@
 		</>
 
 		<section label="Column Width" sticky="stack" collapsible dividing id="variations-column-width">
-			<example description="A column can vary in width taking up more than a single grid column.">
+			<example "Column Width" description="A column can vary in width taking up more than a single grid column.">
 				<grid>
 					<column width="4">
 						<image src="/components/ui/images/wireframe/image.png" alt=""/>
@@ -976,7 +936,7 @@
 		</>
 
 		<section label="Column Count" sticky="stack" collapsible dividing>
-			<example description="A grid can have a different number of columns per row.">
+			<example "Column Count" description="A grid can have a different number of columns per row.">
 				<grid>
 					<row columns="3">
 						<column>
@@ -1025,7 +985,7 @@
 		</>
 
 		<section label="Equal Width" sticky="stack" collapsible dividing id="variations-equal-width">
-			<example description="A grid can automatically resize all elements to split the available width evenly.">
+			<example "Equal Width" description="A grid can automatically resize all elements to split the available width evenly.">
 				<grid equal-width>
 					<column>
 						<segment>1</segment>
@@ -1038,7 +998,7 @@
 					</column>
 				</grid>
 			</example>
-			<example>
+			<example "Equal Width">
 				<grid equal-width>
 					<row>
 						<column>
@@ -1079,7 +1039,7 @@
 
 		<!-- GAP I79:  a stretched row doesn't grow the `<ui-segment>`s inside its columns. -->
 		<section label="Stretched" sticky="stack" collapsible dividing>
-			<example description="A row can stretch its contents to take up the entire column height.">
+			<example "Stretched" description="A row can stretch its contents to take up the entire column height.">
 				<grid columns="3" divided>
 					<row stretched>
 						<column>
@@ -1097,7 +1057,7 @@
 					</row>
 				</grid>
 			</example>
-			<example>
+			<example "Stretched">
 				<grid equal-width>
 					<row stretched>
 						<column>
@@ -1134,7 +1094,7 @@
 		</>
 
 		<section label="Padded" sticky="stack" collapsible dividing id="variations-padded">
-			<example description="A grid can preserve its vertical and horizontal gutters on first and last columns  The following grid has vertical and horizontal gutters">
+			<example "Padded" description="A grid can preserve its vertical and horizontal gutters on first and last columns  The following grid has vertical and horizontal gutters">
 				<divider/>
 				<grid columns="2" padding="md">
 					<column>
@@ -1145,7 +1105,7 @@
 					</column>
 				</grid>
 			</example>
-			<example description="The following grid has vertical gutters.">
+			<example "Padded" description="The following grid has vertical gutters.">
 				<divider/>
 				<grid columns="2" padding="md-y">
 					<column>
@@ -1156,7 +1116,7 @@
 					</column>
 				</grid>
 			</example>
-			<example description="The following grid has horizontal gutters.">
+			<example "Padded" description="The following grid has horizontal gutters.">
 				<divider/>
 				<grid columns="2" padding="md-x">
 					<column>
@@ -1170,7 +1130,7 @@
 		</>
 
 		<section label="Compact" sticky="stack" collapsible dividing>
-			<example description="A grid can appear compact with no or very little padding  The following grid is compact.">
+			<example "Compact" description="A grid can appear compact with no or very little padding  The following grid is compact.">
 				<divider/>
 				<grid columns="2" celled="internally" spacing="compact">
 					<row>
@@ -1191,7 +1151,7 @@
 					</row>
 				</grid>
 			</example>
-			<example description="The following grid is very compact.">
+			<example "Compact" description="The following grid is very compact.">
 				<divider/>
 				<grid columns="2" celled="internally" spacing="xs">
 					<row>
@@ -1215,7 +1175,7 @@
 		</>
 
 		<section label="Relaxed" sticky="stack" collapsible dividing id="variations-relaxed">
-			<example description="A grid can increase its gutters to allow for more negative space.">
+			<example "Relaxed" description="A grid can increase its gutters to allow for more negative space.">
 				<grid columns="4" spacing="lg">
 					<column>
 						<image src="/components/ui/images/wireframe/image.png" alt=""/>
@@ -1231,7 +1191,7 @@
 					</column>
 				</grid>
 			</example>
-			<example>
+			<example "Relaxed">
 				<grid columns="4" spacing="xl">
 					<column>
 						<image src="/components/ui/images/wireframe/image.png" alt=""/>
@@ -1250,7 +1210,7 @@
 		</>
 
 		<section label="Colored" sticky="stack" collapsible dividing>
-			<example description="A row or column can be colored.">
+			<example "Colored" description="A row or column can be colored.">
 				<grid columns="5" padding="md">
 					<column color="red">Red</column>
 					<column color="orange">Orange</column>
@@ -1267,7 +1227,7 @@
 					<column color="black">Black</column>
 				</grid>
 			</example>
-			<example>
+			<example "Colored">
 				<grid padding="md">
 					<row color="red">
 						<column>Red</column>
@@ -1313,7 +1273,7 @@
 		</>
 
 		<section label="Centered" sticky="stack" collapsible dividing id="variations-centered">
-			<example description="A grid can have its columns centered.">
+			<example "Centered" description="A grid can have its columns centered.">
 				<grid columns="2" centered>
 					<column>
 						<image src="/components/ui/images/wireframe/image.png" alt=""/>
@@ -1348,7 +1308,7 @@
 		</>
 
 		<section label="Text Alignment" sticky="stack" collapsible dividing id="variations-text-alignment">
-			<example description="A grid, row, or column can specify its text alignment.">
+			<example "Text Alignment" description="A grid, row, or column can specify its text alignment.">
 				<grid columns="3" align="center">
 					<row>
 						<column>
@@ -1371,37 +1331,35 @@
 					</row>
 				</grid>
 			</example>
-			<example>
-				<html>
-					<ui-grid align="center">
-						<ui-row columns="3">
-							<ui-column>
-								<ui-menu direction="vertical" fluid>
-									<ui-item kind="header">Cats</ui-item>
-								</ui-menu>
-							</ui-column>
-							<ui-column align="left">
-								<ui-menu direction="vertical" fluid>
-									<ui-item kind="header">Dogs</ui-item>
-									<ui-item>Poodle</ui-item>
-									<ui-item>Cockerspaniel</ui-item>
-								</ui-menu>
-							</ui-column>
-							<ui-column>
-								<ui-menu direction="vertical" fluid>
-									<ui-item kind="header">Monkeys</ui-item>
-								</ui-menu>
-							</ui-column>
-						</ui-row>
-						<ui-row align="justified">
-							<ui-column>
-								<p>Justified content fits exactly inside the grid column, taking up the entire width from one side to the other. Justified content fits exactly inside the grid column, taking up the entire width from one side to the other. Justified content fits exactly inside the grid column, taking up the entire width from one side to the other. Justified content fits exactly inside the grid column, taking up the entire width from one side to the other. Justified content fits exactly inside the grid column, taking up the entire width from one side to the other.</p>
-							</ui-column>
-						</ui-row>
-					</ui-grid>
-				</html>
+			<example "Text Alignment">
+				<grid align="center">
+					<row columns="3">
+						<column>
+							<menu direction="vertical" fluid>
+								<item kind="header">Cats</item>
+							</menu>
+						</column>
+						<column align="left">
+							<menu direction="vertical" fluid>
+								<item kind="header">Dogs</item>
+								<item>Poodle</item>
+								<item>Cockerspaniel</item>
+							</menu>
+						</column>
+						<column>
+							<menu direction="vertical" fluid>
+								<item kind="header">Monkeys</item>
+							</menu>
+						</column>
+					</row>
+					<row align="justified">
+						<column>
+							<text paragraph>Justified content fits exactly inside the grid column, taking up the entire width from one side to the other. Justified content fits exactly inside the grid column, taking up the entire width from one side to the other. Justified content fits exactly inside the grid column, taking up the entire width from one side to the other. Justified content fits exactly inside the grid column, taking up the entire width from one side to the other. Justified content fits exactly inside the grid column, taking up the entire width from one side to the other.</text>
+						</column>
+					</row>
+				</grid>
 			</example>
-			<example>
+			<example "Text Alignment">
 				<grid columns="3" align="right">
 					<row>
 						<column>
@@ -1427,7 +1385,7 @@
 		</>
 
 		<section label="Vertical Alignment" sticky collapsible dividing id="variations-vertical-alignment">
-			<example description="A grid, row, or column can specify its vertical alignment to have all its columns vertically centered.">
+			<example "Vertical Alignment" description="A grid, row, or column can specify its vertical alignment to have all its columns vertically centered.">
 				<grid columns="4" vertical-align="middle" centered>
 					<row>
 						<column>
@@ -1443,7 +1401,7 @@
 					</row>
 				</grid>
 			</example>
-			<example>
+			<example "Vertical Alignment">
 				<grid columns="4" centered>
 					<row vertical-align="top">
 						<column>
@@ -1488,8 +1446,8 @@
 
 	<section label="Responsive Variations">
 		<section label="Doubling" sticky="stack" collapsible dividing>
-			<example description="A grid can double its column width on tablet and mobile sizes">
-				<message slot="description" state="info" size="small"><html>A grid will round its columns to the closest reasonable value when doubling, for example a <code>columns="5"</code> grid will use <code>2 mobile, 3 tablet, 5 desktop</code>. To force 1 column on mobile you can add <a href="#examples-responsive-grids-stackable"><code>stackable</code></a></html></message>
+			<example "Doubling" description="A grid can double its column width on tablet and mobile sizes">
+				<message slot="description" state="info" size="small">A grid will round its columns to the closest reasonable value when doubling, for example a <text code>columns="5"</text> grid will use <text code>2 mobile, 3 tablet, 5 desktop</text>. To force 1 column on mobile you can add <link link="#examples-responsive-grids-stackable"><text code>stackable</text></link></message>
 				<grid columns="5" doubling>
 					<column>
 						<image src="/components/ui/images/wireframe/image.png" alt=""/>
@@ -1511,7 +1469,7 @@
 		</>
 
 		<section label="Stackable" sticky="stack" collapsible dividing>
-			<example description="A grid can have its columns stack on-top of each other after reaching mobile breakpoints">
+			<example "Stackable" description="A grid can have its columns stack on-top of each other after reaching mobile breakpoints">
 				<message slot="description" state="info" size="small">To see a grid stack, try resizing your browser to a small width</message>
 				<grid columns="2" stackable>
 					<column>
@@ -1531,8 +1489,8 @@
 		</>
 
 		<section label="Reversed" sticky="stack" collapsible dividing id="responsive-variations-reversed">
-			<example description="A grid or row can specify that its columns should reverse order at different device sizes">
-				<message slot="description" state="info" size="small"><html>Reversed grids are compatible with <code>divided</code> grids and other complex grid types.</html></message>
+			<example "Reversed" description="A grid or row can specify that its columns should reverse order at different device sizes">
+				<message slot="description" state="info" size="small">Reversed grids are compatible with <text code>divided</text> grids and other complex grid types.</message>
 				<grid equal-width reversed="computer">
 					<row>
 						<column>Computer A Fourth</column>
@@ -1560,7 +1518,7 @@
 					<column>Mobile First</column>
 				</grid>
 			</example>
-			<example>
+			<example "Reversed">
 				<grid reversed="computer vertically">
 					<row>
 						<column>Computer Row 4</column>
@@ -1576,7 +1534,7 @@
 					</row>
 				</grid>
 			</example>
-			<example>
+			<example "Reversed">
 				<grid reversed="tablet vertically">
 					<row>
 						<column>Tablet Row 4</column>
@@ -1592,7 +1550,7 @@
 					</row>
 				</grid>
 			</example>
-			<example>
+			<example "Reversed">
 				<grid reversed="mobile vertically">
 					<row>
 						<column>Mobile Row 4</column>
@@ -1611,8 +1569,8 @@
 		</>
 
 		<section label="Device Visibility" sticky collapsible dividing id="responsive-variations-device-visibility">
-			<example description="A columns or row can appear only for a specific device, or screen sizes">
-				<message slot="description" state="info" size="small"><html>See the <a href="/components/ui/ui-container.html">container</a> page for the breakpoints.</html></message>
+			<example "Device Visibility" description="A columns or row can appear only for a specific device, or screen sizes">
+				<message slot="description" state="info" size="small">See the <link link="/components/ui/ui-container.html">container</link> page for the breakpoints.</message>
 				<grid>
 					<row columns="2" only="large">
 						<column>
@@ -1682,12 +1640,10 @@
 		</>
 
 		<section label="Responsive Width" sticky collapsible dividing id="responsive-variations-responsive-width">
-			<example description="A column can specify a width for a specific device">
-				<html>
-					<ui-message slot="description" state="info" size="small">
-						<p>It's recommended to use a responsive pattern like <a href="#examples-responsive-grids-doubling"><code>doubling</code></a> or <a href="#examples-responsive-grids-stackable"><code>stackable</code></a> to reduce complexity when designing responsively, however in some circumstances specifying exact widths for screen sizes may be necessary.</p>
-					</ui-message>
-				</html>
+			<example "Responsive Width" description="A column can specify a width for a specific device">
+				<message slot="description" state="info" size="small">
+					<text paragraph>It's recommended to use a responsive pattern like <link link="#examples-responsive-grids-doubling"><text code>doubling</text></link> or <link link="#examples-responsive-grids-stackable"><text code>stackable</text></link> to reduce complexity when designing responsively, however in some circumstances specifying exact widths for screen sizes may be necessary.</text>
+				</message>
 				<grid>
 					<column width-mobile="16" width-tablet="8" width-computer="4">
 						<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
@@ -1706,7 +1662,7 @@
 					</column>
 				</grid>
 			</example>
-			<example>
+			<example "Responsive Width">
 				<grid>
 					<column width-large="2" width-widescreen="1" width="4">
 						<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>

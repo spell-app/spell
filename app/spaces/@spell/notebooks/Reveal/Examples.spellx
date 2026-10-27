@@ -22,42 +22,40 @@
 	-->
 	<section label="Types">
 		<section label="Fade" sticky="stack" collapsible dividing>
-			<example description="An element can disappear to reveal content below.">
+			<example "Fade" description="An element can disappear to reveal content below.">
 				<reveal fade aria-label="Fade demo">
 					<image slot="visible" size="small" src="/components/ui/images/wireframe/square-image.png" alt=""/>
 					<image slot="hidden" size="small" src="/components/ui/images/avatar/large/ade.jpg" alt="Ade"/>
 				</reveal>
 			</example>
-			<example description="The images can be the contents themselves.">
-				<html>
-					<ui-reveal fade aria-label="Fade demo, images as contents">
-						<img slot="visible" src="/components/ui/images/wireframe/square-image.png" alt="" width="150" height="150" />
-						<img slot="hidden" src="/components/ui/images/avatar/large/ade.jpg" alt="Ade" width="150" height="150" />
-					</ui-reveal>
-				</html>
+			<example "Fade" description="The images can be the contents themselves.">
+				<reveal fade aria-label="Fade demo, images as contents">
+					<image height="150" width="150" alt="" src="/components/ui/images/wireframe/square-image.png" slot="visible"/>
+					<image height="150" width="150" alt="Ade" src="/components/ui/images/avatar/large/ade.jpg" slot="hidden"/>
+				</reveal>
 			</example>
 		</>
 
 		<section label="Move" sticky="stack" collapsible dividing>
-			<example description="An element can move in a direction to reveal content:  bare `move` moves left;  `move` also takes `right`, `up` or `down`.">
+			<example "Move" description="An element can move in a direction to reveal content:  bare `move` moves left;  `move` also takes `right`, `up` or `down`.">
 				<reveal move aria-label="Move demo">
 					<image slot="visible" size="small" src="/components/ui/images/wireframe/square-image.png" alt=""/>
 					<image slot="hidden" size="small" src="/components/ui/images/avatar/large/chris.jpg" alt="Chris"/>
 				</reveal>
 			</example>
-			<example>
+			<example "Move">
 				<reveal move="right" aria-label="Move right demo">
 					<image slot="visible" size="small" src="/components/ui/images/wireframe/square-image.png" alt=""/>
 					<image slot="hidden" size="small" src="/components/ui/images/avatar/large/jenny.jpg" alt="Jenny"/>
 				</reveal>
 			</example>
-			<example>
+			<example "Move">
 				<reveal move="up" aria-label="Move up demo">
 					<image slot="visible" size="small" src="/components/ui/images/wireframe/square-image.png" alt=""/>
 					<image slot="hidden" size="small" src="/components/ui/images/avatar/large/justen.jpg" alt="Justen"/>
 				</reveal>
 			</example>
-			<example>
+			<example "Move">
 				<reveal move="down" aria-label="Move down demo">
 					<image slot="visible" size="small" src="/components/ui/images/wireframe/square-image.png" alt=""/>
 					<image slot="hidden" size="small" src="/components/ui/images/avatar/large/nan.jpg" alt="Nan"/>
@@ -66,14 +64,14 @@
 		</>
 
 		<section label="Rotate" sticky="stack" collapsible dividing>
-			<example description="An element can rotate to reveal content below:  bare `rotate` turns right, `rotate=\"left\"` turns left.">
-				<message slot="description" size="small" class="site-not-ported"><html>Not ported: Fomantic's <code>circular reveal image</code> coupling -- the reveal has no image look of its own, so put a <code>&lt;ui-image appearance="circular"&gt;</code> in each content.</html></message>
+			<example "Rotate" description="An element can rotate to reveal content below:  bare `rotate` turns right, `rotate=\"left\"` turns left.">
+				<message slot="description" size="small" class="site-not-ported">Not ported: Fomantic's <text code>circular reveal image</text> coupling -- the reveal has no image look of its own, so put a <text code>&lt;ui-image appearance="circular"&gt;</text> in each content.</message>
 				<reveal rotate aria-label="Rotate demo">
 					<image slot="visible" size="small" src="/components/ui/images/wireframe/square-image.png" alt="" appearance="circular"/>
 					<image slot="hidden" size="small" src="/components/ui/images/avatar/large/stevie.jpg" alt="Stevie" appearance="circular"/>
 				</reveal>
 			</example>
-			<example>
+			<example "Rotate">
 				<reveal rotate="left" aria-label="Rotate left demo">
 					<image slot="visible" size="small" src="/components/ui/images/wireframe/square-image.png" alt="" appearance="circular"/>
 					<image slot="hidden" size="small" src="/components/ui/images/avatar/large/veronika.jpg" alt="Veronika" appearance="circular"/>
@@ -82,7 +80,7 @@
 		</>
 
 		<section label="Slide" sticky="stack" collapsible dividing>
-			<example description="Both contents can slide to swap places:  bare `slide` slides left;  `slide` also takes `right`, `up` or `down`.">
+			<example "Slide" description="Both contents can slide to swap places:  bare `slide` slides left;  `slide` also takes `right`, `up` or `down`.">
 				<reveal slide aria-label="Slide demo">
 					<image slot="visible" size="small" src="/components/ui/images/wireframe/square-image.png" alt=""/>
 					<image slot="hidden" size="small" src="/components/ui/images/avatar/large/elliot.jpg" alt="Elliot"/>
@@ -97,33 +95,29 @@
 
 	<section label="Content">
 		<section label="Visible Content" sticky="stack" collapsible dividing>
-			<example description="A reveal may contain content that is visible before interaction: its `visible` slot.">
+			<example "Visible Content" description="A reveal may contain content that is visible before interaction: its `visible` slot.">
 				<message slot="description" state="info" size="small">Visible and hidden content should be the same aspect ratio.</message>
-				<html>
-					<ui-reveal fade aria-label="Visible content demo">
-						<img slot="visible" src="/components/ui/images/avatar/large/ade.jpg" alt="Ade" width="150" height="150" />
-						<img slot="hidden" src="/components/ui/images/wireframe/square-image.png" alt="" width="150" height="150" />
-					</ui-reveal>
-				</html>
+				<reveal fade aria-label="Visible content demo">
+					<image height="150" width="150" alt="Ade" src="/components/ui/images/avatar/large/ade.jpg" slot="visible"/>
+					<image height="150" width="150" alt="" src="/components/ui/images/wireframe/square-image.png" slot="hidden"/>
+				</reveal>
 			</example>
 		</>
 
 		<section label="Hidden Content" sticky="stack" collapsible dividing>
-			<example description="A reveal may contain content that is hidden before user interaction:  its `hidden` slot.">
-				<html>
-					<ui-reveal fade aria-label="Hidden content demo">
-						<img slot="visible" src="/components/ui/images/wireframe/square-image.png" alt="" width="150" height="150" />
-						<img slot="hidden" src="/components/ui/images/avatar/large/ade.jpg" alt="Ade" width="150" height="150" />
-					</ui-reveal>
-				</html>
+			<example "Hidden Content" description="A reveal may contain content that is hidden before user interaction:  its `hidden` slot.">
+				<reveal fade aria-label="Hidden content demo">
+					<image height="150" width="150" alt="" src="/components/ui/images/wireframe/square-image.png" slot="visible"/>
+					<image height="150" width="150" alt="Ade" src="/components/ui/images/avatar/large/ade.jpg" slot="hidden"/>
+				</reveal>
 			</example>
 		</>
 	</>
 
 	<section label="States">
 		<section label="Active" sticky="stack" collapsible dividing>
-			<example description="An active reveal displays its hidden content.">
-				<message slot="description" state="info" size="small"><html>Setting <code>active</code> shows the hidden content programmatically, without hover or focus.</html></message>
+			<example "Active" description="An active reveal displays its hidden content.">
+				<message slot="description" state="info" size="small">Setting <text code>active</text> shows the hidden content programmatically, without hover or focus.</message>
 				<reveal active move aria-label="Active demo">
 					<image slot="visible" size="small" src="/components/ui/images/wireframe/square-image.png" alt=""/>
 					<image slot="hidden" size="small" src="/components/ui/images/avatar/large/nan.jpg" alt="Nan"/>
@@ -132,7 +126,7 @@
 		</>
 
 		<section label="Disabled" sticky="stack" collapsible dividing>
-			<example description="A disabled reveal will not animate when hovered or focused, and is not a tab stop.">
+			<example "Disabled" description="A disabled reveal will not animate when hovered or focused, and is not a tab stop.">
 				<reveal disabled move>
 					<image slot="visible" size="small" src="/components/ui/images/wireframe/square-image.png" alt=""/>
 					<image slot="hidden" size="small" src="/components/ui/images/avatar/large/chris.jpg" alt="Chris"/>
@@ -141,22 +135,20 @@
 		</>
 
 		<section label="Focusable content" sticky="stack" collapsible dividing>
-			<example description="When the content holds a link, button or field, that control takes the focus and reveals it;  the reveal adds no tab stop of its own.  Tab to it.">
-				<html>
-					<ui-reveal move="up">
-						<ui-image slot="visible" size="small" src="/components/ui/images/wireframe/square-image.png" alt=""></ui-image>
-						<a slot="hidden" href="#focusable-content">
-							<ui-image size="small" src="/components/ui/images/avatar/large/laura.jpg" alt="Laura's profile"></ui-image>
-						</a>
-					</ui-reveal>
-				</html>
+			<example "Focusable content" description="When the content holds a link, button or field, that control takes the focus and reveals it;  the reveal adds no tab stop of its own.  Tab to it.">
+				<reveal move="up">
+					<image slot="visible" size="small" src="/components/ui/images/wireframe/square-image.png" alt=""/>
+					<link link="#focusable-content" slot="hidden">
+						<image size="small" src="/components/ui/images/avatar/large/laura.jpg" alt="Laura's profile"/>
+					</link>
+				</reveal>
 			</example>
 		</>
 	</>
 
 	<section label="Variations">
 		<section label="Instant" sticky="stack" collapsible dividing>
-			<example description="An element can show its content without delay.">
+			<example "Instant" description="An element can show its content without delay.">
 				<reveal instant move aria-label="Instant demo">
 					<image slot="visible" size="small" src="/components/ui/images/wireframe/square-image.png" alt=""/>
 					<image slot="hidden" size="small" src="/components/ui/images/avatar/large/chris.jpg" alt="Chris"/>
@@ -165,7 +157,7 @@
 		</>
 
 		<section label="Unclipped" sticky="stack" collapsible dividing>
-			<example description="A reveal can keep its overflowing content visible instead of clipping it (Fomantic calls it a visible reveal), as the rotating corner here.">
+			<example "Unclipped" description="A reveal can keep its overflowing content visible instead of clipping it (Fomantic calls it a visible reveal), as the rotating corner here.">
 				<reveal clip="none" rotate aria-label="Unclipped demo">
 					<image slot="visible" size="small" src="/components/ui/images/wireframe/square-image.png" alt="" appearance="circular"/>
 					<image slot="hidden" size="small" src="/components/ui/images/avatar/large/tom.jpg" alt="Tom" appearance="circular"/>

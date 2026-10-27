@@ -18,26 +18,26 @@
 	-->
 	<section label="Types">
 		<section label="YouTube" sticky="stack" collapsible dividing>
-			<example description="An embed can be used to display YouTube content. Only a click loads the video, from `youtube-nocookie.com`.">
+			<example "YouTube" description="An embed can be used to display YouTube content. Only a click loads the video, from `youtube-nocookie.com`.">
 				<embed source="youtube" video-id="O6Xo21L0ybE" alt="A Youtube Video about a waving bear" placeholder="../images/image-16by9.png"/>
 			</example>
 		</>
 
 		<section label="Vimeo" sticky="stack" collapsible dividing>
-			<example description="An embed can be used to display Vimeo content:  `source=\"vimeo\"` with the video's id.">
+			<example "Vimeo" description="An embed can be used to display Vimeo content:  `source=\"vimeo\"` with the video's id.">
 				<embed source="vimeo" video-id="125292332" label="A Vimeo video" placeholder="../images/vimeo-example.jpg"/>
 			</example>
 		</>
 
 		<section label="Custom Content" sticky="stack" collapsible dividing>
-			<example description="An embed can display any web content: `url` frames any `http(s)` address.">
+			<example "Custom Content" description="An embed can display any web content: `url` frames any `http(s)` address.">
 				<message slot="description" size="small" state="info">Embeds use an intrinsic aspect ratio to embed content responsively: content keeps its aspect ratio at every browser size.</message>
 				<embed url="https://rasterbuster.lubber.de" label="Rasterbuster" placeholder="../images/image-16by9.png" icon="arrow circle right"/>
 			</example>
 		</>
 
 		<section label="Placeholder content" sticky collapsible dividing>
-			<example description="Children go inside the play button, over the image:  a caption, a duration.">
+			<example "Placeholder content" description="Children go inside the play button, over the image:  a caption, a duration.">
 				<embed source="youtube" video-id="O6Xo21L0ybE" label="A waving bear" placeholder="../images/image-16by9.png">
 					<label color="black" attach="top right">Watch · 2:10</label>
 				</embed>
@@ -47,10 +47,10 @@
 
 	<section label="Variations">
 		<section label="Aspect Ratio" sticky="stack" collapsible dividing>
-			<example description="An embed can specify an alternative aspect ratio out of `square`, `4:3`, `16:9` (the default) or `21:9`.">
+			<example "Aspect Ratio" description="An embed can specify an alternative aspect ratio out of `square`, `4:3`, `16:9` (the default) or `21:9`.">
 				<embed source="youtube" video-id="HTZudKi36bo" aspect-ratio="4:3" label="A 4:3 video" placeholder="../images/4by3.jpg"/>
 			</example>
-			<example>
+			<example "Aspect Ratio">
 				<grid columns="3">
 					<column>
 						<embed source="vimeo" video-id="125292332" aspect-ratio="square" label="Square video"/>

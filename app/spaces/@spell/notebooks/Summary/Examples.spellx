@@ -17,7 +17,7 @@
 	-->
 	<section label="Owners">
 		<section label="Feed" sticky="stack" collapsible dividing>
-			<example description="A feed event's summary:  who did what, with an inline date.">
+			<example "Feed" description="A feed event's summary:  who did what, with an inline date.">
 				<feed>
 					<event image="../images/avatar/small/elliot.jpg">
 						<content>

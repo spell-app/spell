@@ -20,89 +20,93 @@
 	-->
 	<section label="Types">
 		<section label="Checkbox" sticky="stack" collapsible dividing>
-			<example description="A standard checkbox.">
+			<example "Checkbox" description="A standard checkbox.">
 				<checkbox name="example">Make my profile visible</checkbox>
 			</example>
 		</>
 
 		<section label="Radio" sticky="stack" collapsible dividing>
-			<example>
-				<html>
-					<p slot="description">A checkbox can be formatted as a radio element: <code>&lt;ui-radio&gt;</code>, an exclusive option. Groups, sliders, toggles and the rest are on the <a href="/components/ui/ui-radio.html">Radio</a> page.</p>
-				</html>
+			<example "Radio" description="A checkbox can be formatted as a radio element: `<ui-radio>`, an exclusive option. Groups, sliders, toggles and the rest are on the \[Radio](/components/ui/ui-radio.html) page.">
 				<radio name="radio" selected>Radio choice</radio>
 			</example>
 		</>
 
 		<section label="Slider" sticky="stack" collapsible dividing>
-			<example description="A checkbox can be formatted to emphasize the current selection state:  `appearance=\"slider\"`.">
+			<example "Slider" description="A checkbox can be formatted to emphasize the current selection state:  `appearance=\"slider\"`.">
 				<checkbox appearance="slider" name="newsletter">Accept terms and conditions</checkbox>
 			</example>
 		</>
 
 		<section label="Toggle" sticky="stack" collapsible dividing>
-			<example description="A checkbox can be formatted to show an on or off choice:  `appearance=\"toggle\"`.">
+			<example "Toggle" description="A checkbox can be formatted to show an on or off choice:  `appearance=\"toggle\"`.">
 				<checkbox appearance="toggle" name="public">Subscribe to weekly newsletter</checkbox>
 			</example>
 		</>
 
 		<!-- GAP:  Fomantic styles an invisible checkbox's LABEL as any component (button, message, segment);  ours is a bordered label tinted when chosen. -->
 		<section label="Invisible" sticky="stack" collapsible dividing>
-			<example description="An invisible checkbox has no box: the label itself is the control, bordered while unchosen and tinted when chosen. Its content can be any markup.">
-				<message slot="description" size="small" class="site-not-ported"><html>Not ported: styling the label as another component (Fomantic's <code>label class="ui purple button"</code>, or an orange message or teal segment label), and <code>compact invisible</code>. The label is in the shadow root, so it can't take another component's classes.</html></message>
-				<html>
-					<ui-form>
-						<form>
-							<ui-fields grouped>
-								<ui-checkbox invisible name="invisible-one"><b>Option One</b><br />I am a checkbox styled as a bordered label</ui-checkbox>
-								<ui-checkbox invisible name="invisible-two"><b>Option Two</b><br />I am tinted when chosen</ui-checkbox>
-								<ui-checkbox invisible name="invisible-three" selected><b>Option Three</b><br />I am chosen</ui-checkbox>
-							</ui-fields>
-						</form>
-					</ui-form>
-				</html>
+			<example "Invisible" description="An invisible checkbox has no box: the label itself is the control, bordered while unchosen and tinted when chosen. Its content can be any markup.">
+				<message slot="description" size="small" class="site-not-ported">Not ported: styling the label as another component (Fomantic's <text code>label class="ui purple button"</text>, or an orange message or teal segment label), and <text code>compact invisible</text>. The label is in the shadow root, so it can't take another component's classes.</message>
+				<form>
+					<fields grouped>
+						<checkbox invisible name="invisible-one">
+							<stack spacing="none">
+								<text bold>Option One</text>
+								<text>I am a checkbox styled as a bordered label</text>
+							</stack>
+						</checkbox>
+						<checkbox invisible name="invisible-two">
+							<stack spacing="none">
+								<text bold>Option Two</text>
+								<text>I am tinted when chosen</text>
+							</stack>
+						</checkbox>
+						<checkbox invisible name="invisible-three" selected>
+							<stack spacing="none">
+								<text bold>Option Three</text>
+								<text>I am chosen</text>
+							</stack>
+						</checkbox>
+					</fields>
+				</form>
 			</example>
-			<example description="Icons, emojis, flags or images can be the whole label.">
-				<html>
-					<ui-form>
-						<form>
-							<ui-fields inline>
-								<ui-checkbox invisible selected aria-label="Germany">
-									<ui-flag country="de" size="large"></ui-flag>
-								</ui-checkbox>
-								<ui-checkbox invisible selected aria-label="Toilet paper">
-									<ui-icon name="toilet paper" size="huge"></ui-icon>
-								</ui-checkbox>
-								<ui-checkbox invisible aria-label="Wink">
-									<ui-emoji name="winking_face" size="small"></ui-emoji>
-								</ui-checkbox>
-								<ui-checkbox invisible aria-label="Ade">
-									<ui-image size="small" src="/components/ui/images/avatar/large/ade.jpg" alt=""></ui-image>
-								</ui-checkbox>
-							</ui-fields>
-						</form>
-					</ui-form>
-				</html>
+			<example "Invisible" description="Icons, emojis, flags or images can be the whole label.">
+				<form>
+					<fields inline>
+						<checkbox invisible selected aria-label="Germany">
+							<flag country="de" size="large"/>
+						</checkbox>
+						<checkbox invisible selected aria-label="Toilet paper">
+							<icon name="toilet paper" size="huge"/>
+						</checkbox>
+						<checkbox invisible aria-label="Wink">
+							<emoji name="winking_face" size="small"/>
+						</checkbox>
+						<checkbox invisible aria-label="Ade">
+							<image size="small" src="/components/ui/images/avatar/large/ade.jpg" alt=""/>
+						</checkbox>
+					</fields>
+				</form>
 			</example>
 		</>
 	</>
 
 	<section label="States">
 		<section label="Read-only" sticky="stack" collapsible dividing>
-			<example description="A checkbox can be read-only and unable to change states.  It is still submitted.">
+			<example "Read-only" description="A checkbox can be read-only and unable to change states.  It is still submitted.">
 				<checkbox readonly>Read Only</checkbox>
 			</example>
 		</>
 
 		<section label="Checked" sticky="stack" collapsible dividing>
-			<example description="A checkbox can be checked. `selected` is the canonical name; `checked` is accepted as an alias, as on a native checkbox.">
+			<example "Checked" description="A checkbox can be checked. `selected` is the canonical name; `checked` is accepted as an alias, as on a native checkbox.">
 				<checkbox checked>Active</checkbox>
 			</example>
 		</>
 
 		<section label="Indeterminate" sticky="stack" collapsible dividing>
-			<example description="A checkbox can be indeterminate: neither on nor off. A click clears it, as natively.">
-				<message slot="description" state="info" size="small"><html>Unlike Fomantic's, which needs JavaScript, <code>indeterminate</code> is an attribute.</html></message>
+			<example "Indeterminate" description="A checkbox can be indeterminate: neither on nor off. A click clears it, as natively.">
+				<message slot="description" state="info" size="small">Unlike Fomantic's, which needs JavaScript, <text code>indeterminate</text> is an attribute.</message>
 				<segment appearance="basic">
 					<checkbox indeterminate>Indeterminate</checkbox>
 				</segment>
@@ -113,7 +117,7 @@
 		</>
 
 		<section label="Disabled" sticky="stack" collapsible dividing>
-			<example description="A checkbox can show it is currently unable to be interacted with. It is left out of the form.">
+			<example "Disabled" description="A checkbox can show it is currently unable to be interacted with. It is left out of the form.">
 				<segment appearance="basic">
 					<checkbox disabled>Disabled</checkbox>
 				</segment>
@@ -126,7 +130,7 @@
 
 	<section label="Variations">
 		<section label="Fitted" sticky="stack" collapsible dividing>
-			<example description="A fitted checkbox does not leave padding for a label. Give it an `aria-label`.">
+			<example "Fitted" description="A fitted checkbox does not leave padding for a label. Give it an `aria-label`.">
 				<stack direction="horizontal" wrap>
 					<segment padding="compact">
 						<checkbox padding="none" aria-label="Fitted"/>
@@ -142,7 +146,7 @@
 		</>
 
 		<section label="Inverted" sticky="stack" collapsible dividing>
-			<example description="A checkbox can be formatted to appear on dark backgrounds.">
+			<example "Inverted" description="A checkbox can be formatted to appear on dark backgrounds.">
 				<segment padding="compact" inverted>
 					<checkbox inverted>Inverted</checkbox>
 				</segment>
@@ -156,29 +160,25 @@
 		</>
 
 		<section label="Right aligned" sticky="stack" collapsible dividing>
-			<example description="A checkbox can be aligned to the right of the label:  `right-aligned`.">
-				<html>
-					<ui-form>
-						<form>
-							<ui-fields grouped>
-								<ui-field>
-									<ui-checkbox align="right" selected>Checkbox</ui-checkbox>
-								</ui-field>
-								<ui-field>
-									<ui-checkbox align="right" appearance="slider" selected>Slider</ui-checkbox>
-								</ui-field>
-								<ui-field>
-									<ui-checkbox align="right" appearance="toggle" selected>Toggle</ui-checkbox>
-								</ui-field>
-							</ui-fields>
-						</form>
-					</ui-form>
-				</html>
+			<example "Right aligned" description="A checkbox can be aligned to the right of the label:  `right-aligned`.">
+				<form>
+					<fields grouped>
+						<field>
+							<checkbox align="right" selected>Checkbox</checkbox>
+						</field>
+						<field>
+							<checkbox align="right" appearance="slider" selected>Slider</checkbox>
+						</field>
+						<field>
+							<checkbox align="right" appearance="toggle" selected>Toggle</checkbox>
+						</field>
+					</fields>
+				</form>
 			</example>
 		</>
 
 		<section label="Colored" sticky="stack" collapsible dividing>
-			<example description="A checkbox can have different colors:  `color` tints the chosen box, bullet, lane or line.">
+			<example "Colored" description="A checkbox can have different colors:  `color` tints the chosen box, bullet, lane or line.">
 				<checkbox color="red" selected>Red</checkbox>
 				<checkbox color="green" appearance="toggle" selected>Green</checkbox>
 				<checkbox color="blue" appearance="slider" selected>Blue</checkbox>
@@ -186,37 +186,37 @@
 		</>
 
 		<section label="Size" sticky="stack" collapsible dividing>
-			<example description="A checkbox can have different sizes.">
+			<example "Size" description="A checkbox can have different sizes.">
 				<checkbox size="mini">Checkbox</checkbox>
 				<checkbox size="mini" appearance="toggle">Toggle</checkbox>
 				<checkbox size="mini" appearance="slider">Slider</checkbox>
 			</example>
-			<example>
+			<example "Size">
 				<checkbox size="tiny">Checkbox</checkbox>
 				<checkbox size="tiny" appearance="toggle">Toggle</checkbox>
 				<checkbox size="tiny" appearance="slider">Slider</checkbox>
 			</example>
-			<example>
+			<example "Size">
 				<checkbox size="small">Checkbox</checkbox>
 				<checkbox size="small" appearance="toggle">Toggle</checkbox>
 				<checkbox size="small" appearance="slider">Slider</checkbox>
 			</example>
-			<example>
+			<example "Size">
 				<checkbox size="large">Checkbox</checkbox>
 				<checkbox size="large" appearance="toggle">Toggle</checkbox>
 				<checkbox size="large" appearance="slider">Slider</checkbox>
 			</example>
-			<example>
+			<example "Size">
 				<checkbox size="big">Checkbox</checkbox>
 				<checkbox size="big" appearance="toggle">Toggle</checkbox>
 				<checkbox size="big" appearance="slider">Slider</checkbox>
 			</example>
-			<example>
+			<example "Size">
 				<checkbox size="huge">Checkbox</checkbox>
 				<checkbox size="huge" appearance="toggle">Toggle</checkbox>
 				<checkbox size="huge" appearance="slider">Slider</checkbox>
 			</example>
-			<example>
+			<example "Size">
 				<checkbox size="massive">Checkbox</checkbox>
 				<checkbox size="massive" appearance="toggle">Toggle</checkbox>
 				<checkbox size="massive" appearance="slider">Slider</checkbox>
@@ -226,8 +226,8 @@
 
 	<section label="Examples">
 		<section label="Grouped Checkboxes" sticky collapsible dividing>
-			<example description="The `indeterminate` state can be used to represent a value that is neither checked or unchecked. This can be useful with groups where a \"master\" checkbox should display the selections of several other checkboxes.">
-				<message slot="description" state="info" size="small"><html>The wiring (children set the master, the master sets the children) is a few lines on <code>ui-changed</code>: see "Grouped checkboxes" on the Usage tab. Here the states are set in markup.</html></message>
+			<example "Grouped Checkboxes" description="The `indeterminate` state can be used to represent a value that is neither checked or unchecked. This can be useful with groups where a \"master\" checkbox should display the selections of several other checkboxes.">
+				<message slot="description" state="info" size="small">The wiring (children set the master, the master sets the children) is a few lines on <text code>ui-changed</text>: see "Grouped checkboxes" on the Usage tab. Here the states are set in markup.</message>
 				<list celled spacing="lg">
 					<item>
 						<checkbox name="fruits" indeterminate>Fruits</checkbox>
@@ -262,39 +262,31 @@
 		</>
 
 		<section label="One-Way Choices" sticky="stack" collapsible dividing>
-			<example description="A disabled checkbox can't be used at all; a read-only one shows its state but can't change it.">
-				<message slot="description" size="small" class="site-not-ported"><html>Not ported: Fomantic's <code>uncheckable: false</code> setting (check once, never uncheck) -- veto the change in a <code>ui-changed</code> listener instead (Usage tab, "Vetoing a change").</html></message>
-				<html>
-					<ui-form>
-						<form>
-							<ui-field>
-								<ui-checkbox disabled>Disabled</ui-checkbox>
-							</ui-field>
-							<ui-field>
-								<ui-checkbox readonly>Read-only</ui-checkbox>
-							</ui-field>
-						</form>
-					</ui-form>
-				</html>
+			<example "One-Way Choices" description="A disabled checkbox can't be used at all; a read-only one shows its state but can't change it.">
+				<message slot="description" size="small" class="site-not-ported">Not ported: Fomantic's <text code>uncheckable: false</text> setting (check once, never uncheck) -- veto the change in a <text code>ui-changed</text> listener instead (Usage tab, "Vetoing a change").</message>
+				<form>
+					<field>
+						<checkbox disabled>Disabled</checkbox>
+					</field>
+					<field>
+						<checkbox readonly>Read-only</checkbox>
+					</field>
+				</form>
 			</example>
 		</>
 
 		<section label="Two Values" sticky="stack" collapsible dividing>
-			<example description="Ours, not Fomantic's:  `off-value` is what a box submits while unchosen. So the form always hears one of two values, `panel=open` or `panel=closed`.">
-				<html>
-					<ui-form>
-						<form>
-							<ui-field>
-								<ui-checkbox appearance="toggle" name="panel" value="open" off-value="closed">Panel open</ui-checkbox>
-							</ui-field>
-							<ui-field>
-								<ui-checkbox name="reply" value="yes" off-value="no" selected>Reply by email</ui-checkbox>
-							</ui-field>
-						</form>
-					</ui-form>
-				</html>
+			<example "Two Values" description="Ours, not Fomantic's:  `off-value` is what a box submits while unchosen. So the form always hears one of two values, `panel=open` or `panel=closed`.">
+				<form>
+					<field>
+						<checkbox appearance="toggle" name="panel" value="open" off-value="closed">Panel open</checkbox>
+					</field>
+					<field>
+						<checkbox name="reply" value="yes" off-value="no" selected>Reply by email</checkbox>
+					</field>
+				</form>
 			</example>
 		</>
-		<message size="small" class="site-not-ported"><html>Not ported: Using Callbacks, Checking Conditions and Attaching Events to other Elements, which are jQuery behaviours (check, set checked, beforeChecked, attach events). Instead, set the <code>selected</> property and listen for <code>ui-changed</>. Wire other controls with a click listener (Usage tab).</></>
+		<message size="small" class="site-not-ported">Not ported: Using Callbacks, Checking Conditions and Attaching Events to other Elements, which are jQuery behaviours (check, set checked, beforeChecked, attach events). Instead, set the <text code>selected</> property and listen for <text code>ui-changed</>. Wire other controls with a click listener (Usage tab).</>
 	</>
 </spell-notebook>

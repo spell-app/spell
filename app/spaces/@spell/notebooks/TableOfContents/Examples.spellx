@@ -28,31 +28,29 @@
 	-->
 	<section label="Types">
 		<section label="Table of contents" sticky="stack" collapsible dividing>
-			<example description="A table of contents lists the sections it follows (`for`, else the page's `main`) as links:  level 2 headings and top-level `<ui-section>`s, with their examples and level 3 headings under them.  The section in view is lit, and opens.">
-				<html>
-					<ui-stack direction="horizontal" align="start" spacing="lg">
-						<ui-toc for="toc-demo-release" heading="Release notes" style="width: 14em"></ui-toc>
-						<section id="toc-demo-release" style="flex: 1">
-							<ui-header level="2">Components</ui-header>
-							<ui-header level="3">Zoom</ui-header>
-							<p>Anything shown small, then full size.</p>
-							<ui-header level="3">Stack</ui-header>
-							<p>One gap between its children, in a row or a column.</p>
-							<ui-header level="2">Fixes</ui-header>
-							<ui-header level="3">Menus</ui-header>
-							<p>Titles fit the menu's width.</p>
-						</section>
-					</ui-stack>
-				</html>
+			<example "Table of contents" description="A table of contents lists the sections it follows (`for`, else the page's `main`) as links:  level 2 headings and top-level `<ui-section>`s, with their examples and level 3 headings under them.  The section in view is lit, and opens.">
+				<stack direction="horizontal" align="start" spacing="lg">
+					<toc for="toc-demo-release" heading="Release notes" style="width: 14em"/>
+					<section style="flex: 1" id="toc-demo-release">
+						<header level="2">Components</header>
+						<header level="3">Zoom</header>
+						<text paragraph>Anything shown small, then full size.</text>
+						<header level="3">Stack</header>
+						<text paragraph>One gap between its children, in a row or a column.</text>
+						<header level="2">Fixes</header>
+						<header level="3">Menus</header>
+						<text paragraph>Titles fit the menu's width.</text>
+					</section>
+				</stack>
 			</example>
 		</>
 
 		<section label="Examples" sticky="stack" collapsible dividing>
-			<example description="A `<ui-example heading>` is an entry of the section it's in:  a components page's contents list every example.">
+			<example "Examples" description="A `<ui-example heading>` is an entry of the section it's in:  a components page's contents list every example.">
 				<html>
 					<ui-stack direction="horizontal" align="start" spacing="lg">
 						<ui-toc for="toc-demo-button" heading="Button" style="width: 14em"></ui-toc>
-						<section id="toc-demo-button" style="flex: 1">
+						<ui-section style="flex: 1" id="toc-demo-button">
 							<ui-header level="2">Types</ui-header>
 							<ui-example heading="Button" description="A standard button.">
 								<ui-button>Follow</ui-button>
@@ -64,7 +62,7 @@
 							<ui-example heading="Disabled" description="A button can't be used.">
 								<ui-button disabled>Followed</ui-button>
 							</ui-example>
-						</section>
+						</ui-section>
 					</ui-stack>
 				</html>
 			</example>
@@ -73,60 +71,54 @@
 
 	<section label="Content">
 		<section label="Heading" sticky="stack" collapsible dividing>
-			<example description="`heading`:  a title above the links, e.g. the page's name.  Without it, the toggle sits alone in the header row.">
-				<html>
-					<ui-stack direction="horizontal" align="start" spacing="lg">
-						<ui-toc for="toc-demo-heading" style="width: 14em"></ui-toc>
-						<section id="toc-demo-heading" style="flex: 1">
-							<ui-section id="toc-demo-setup" label="Setup">
-								<ui-section id="toc-demo-install" label="Install">
-									<p>One line.</p>
-								</ui-section>
-								<ui-section id="toc-demo-import" label="Import">
-									<p>One more.</p>
-								</ui-section>
-							</ui-section>
-							<ui-section id="toc-demo-use" label="Use">
-								<p>And off you go.</p>
-							</ui-section>
+			<example "Heading" description="`heading`:  a title above the links, e.g. the page's name.  Without it, the toggle sits alone in the header row.">
+				<stack direction="horizontal" align="start" spacing="lg">
+					<toc for="toc-demo-heading" style="width: 14em"/>
+					<section style="flex: 1" id="toc-demo-heading">
+						<section id="toc-demo-setup" label="Setup">
+							<section id="toc-demo-install" label="Install">
+								<text paragraph>One line.</text>
+							</section>
+							<section id="toc-demo-import" label="Import">
+								<text paragraph>One more.</text>
+							</section>
 						</section>
-					</ui-stack>
-				</html>
+						<section id="toc-demo-use" label="Use">
+							<text paragraph>And off you go.</text>
+						</section>
+					</section>
+				</stack>
 			</example>
 		</>
 	</>
 
 	<section label="Variations">
 		<section label="Expanded" sticky="stack" collapsible dividing>
-			<example description="`expanded`:  every section's entries show, not only the one in view's.  The viewer's own folds, and the header's toggle, still win.">
-				<html>
-					<ui-stack direction="horizontal" align="start" spacing="lg">
-						<ui-toc for="toc-demo-expanded" heading="Guide" expanded style="width: 14em"></ui-toc>
-						<section id="toc-demo-expanded" style="flex: 1">
-							<ui-header level="2">Start</ui-header>
-							<ui-header level="3">Install</ui-header>
-							<ui-header level="3">First page</ui-header>
-							<ui-header level="2">Go further</ui-header>
-							<ui-header level="3">Themes</ui-header>
-							<ui-header level="3">Spanish</ui-header>
-						</section>
-					</ui-stack>
-				</html>
+			<example "Expanded" description="`expanded`:  every section's entries show, not only the one in view's.  The viewer's own folds, and the header's toggle, still win.">
+				<stack direction="horizontal" align="start" spacing="lg">
+					<toc for="toc-demo-expanded" heading="Guide" expanded style="width: 14em"/>
+					<section style="flex: 1" id="toc-demo-expanded">
+						<header level="2">Start</header>
+						<header level="3">Install</header>
+						<header level="3">First page</header>
+						<header level="2">Go further</header>
+						<header level="3">Themes</header>
+						<header level="3">Spanish</header>
+					</section>
+				</stack>
 			</example>
 		</>
 
 		<section label="Size" sticky="stack" collapsible dividing>
-			<example description="`size`:  `mini` ... `massive`;  `small` by default.">
-				<html>
-					<ui-stack direction="horizontal" align="start" spacing="lg">
-						<ui-toc for="toc-demo-size" heading="Large" size="large" expanded style="width: 14em"></ui-toc>
-						<section id="toc-demo-size" style="flex: 1">
-							<ui-header level="2">One</ui-header>
-							<ui-header level="3">One and a half</ui-header>
-							<ui-header level="2">Two</ui-header>
-						</section>
-					</ui-stack>
-				</html>
+			<example "Size" description="`size`:  `mini` ... `massive`;  `small` by default.">
+				<stack direction="horizontal" align="start" spacing="lg">
+					<toc for="toc-demo-size" heading="Large" size="large" expanded style="width: 14em"/>
+					<section style="flex: 1" id="toc-demo-size">
+						<header level="2">One</header>
+						<header level="3">One and a half</header>
+						<header level="2">Two</header>
+					</section>
+				</stack>
 			</example>
 		</>
 	</>
