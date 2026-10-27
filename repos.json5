@@ -5,9 +5,14 @@
 // - Each repo here is its own git repo with its own install (spell-brand:  private, never published), at `path` from
 //   the kit's folder:  `~/www/spell-brand`, beside `~/www/spell`.
 // - `url`:  where `yarn clone <name>` clones it from;  over SSH, falling back to HTTPS (GitHub's login, `gh auth`).
-// - Read by `tools/repos.ts` (`yarn clone`, `yarn pull`, `yarn status`, `yarn repos`) and `spell rename imports`;
-//   the page server finds a project beside the kit by the checkout's own `page-server.local.json5`, not by this list.
+// - `peer`:  a repo beside the kit the kit's tools know (epic-engine Q48):  the page server serves its part of the
+//   settings (its `package.json`'s `"pageServer"`), from `path`;  a kit worktree has none beside it, so it uses the
+//   main checkout's (`~/www/spell-brand`).
+// - Read by `tools/repos.ts` (`yarn clone`, `yarn pull`, `yarn status`, `yarn repos`), the page server's settings
+//   (`peerRepos()`) and `spell rename imports`.
 // - This file also marks a folder as a kit (`KIT_MARKER`).
 {
-  "repos": [{ "name": "spell-brand", "url": "git@github.com:spell-app/spell-brand.git", "path": "../spell-brand" }]
+  "repos": [
+    { "name": "spell-brand", "url": "git@github.com:spell-app/spell-brand.git", "path": "../spell-brand", "peer": true }
+  ]
 }

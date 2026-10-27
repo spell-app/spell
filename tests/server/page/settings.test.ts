@@ -1,6 +1,6 @@
 import { mkdirSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
-import { dirname, join } from "node:path"
+import { basename, dirname, join } from "node:path"
 import { afterAll, describe, expect, test } from "vite-plus/test"
 
 import {
@@ -21,14 +21,18 @@ function put(root: string, path: string, json: unknown): void {
 }
 
 /**
- * A kit as `yarn clone` lays one out (epic `repo-split` P16):  its `repos.json5`, its own part (the content repo's
- * tabs), and child repos each declaring their own part, paths from their own folder.
- * - `ui`:  cloned in the kit;  `epic`:  installed as a package only (`node_modules/epic`);  `app`:  listed, not there
+ * A kit (epic `repo-split` P16, P20):  its own part (the content repo's tabs), and its folders (its `workspaces`) each
+ * declaring their own part, paths from their own folder.
+ * - `ui` and `epic`:  there;  `app`:  listed, not there
  */
 function kit(): string {
   const root = realpathSync(mkdtempSync(join(tmpdir(), "page-settings-")))
-  put(root, "repos.json5", "{ repos: [{ name: 'ui' }, { name: 'epic' }, { name: 'app' }] }  // lowest first")
-  put(root, "package.json", { name: "kit", pageServer: { writable: ["epics"], siteTabs: [{ name: "Epics" }] } })
+  put(root, "repos.json5", "{ repos: [] }")
+  put(root, "package.json", {
+    name: "kit",
+    workspaces: ["ui", "epic", "app"],
+    pageServer: { writable: ["epics"], siteTabs: [{ name: "Epics" }] }
+  })
   put(root, "ui/package.json", {
     name: "ui",
     pageServer: {
@@ -36,7 +40,7 @@ function kit(): string {
       componentSets: { ui: { name: "UI", dir: "docs", assets: "site/_assets" } }
     }
   })
-  put(root, "node_modules/epic/package.json", {
+  put(root, "epic/package.json", {
     name: "epic",
     pageServer: {
       routes: ["src/routes.ts"],
@@ -54,12 +58,30 @@ describe("pageServerSettings()", () => {
   const root = kit()
   afterAll(() => rmSync(root, { recursive: true, force: true }))
 
-  test("in a kit:  the kit's part, then each installed child repo's, in repos.json5's order;  a missing one left out", () => {
-    expect(settingsParts(root).map((part) => part.dir)).toEqual([
-      root,
-      join(root, "ui"),
-      join(root, "node_modules/epic")
+  test("in a kit:  the kit's part, then each of its folders', in its `workspaces` order;  a missing one left out", () => {
+    expect(settingsParts(root).map((part) => part.dir)).toEqual([root, join(root, "ui"), join(root, "epic")])
+  })
+
+  test("then each peer repos.json5 names (spell-brand), and each project the checkout's own file names", () => {
+    const withPeers = kit()
+    const peer = `${withPeers}-brand`
+    const tester = `${withPeers}-tester`
+    put(withPeers, "repos.json5", `{ repos: [{ name: "brand", path: "../${basename(peer)}", peer: true }] }`)
+    put(peer, "package.json", { name: "brand", pageServer: { bundles: ["_assets/ui"] } })
+    put(withPeers, "page-server.local.json5", `{ projects: ["../${basename(tester)}", "../gone"] }`)
+    put(tester, "package.json", { name: "tester", pageServer: { watch: ["."] } })
+    expect(settingsParts(withPeers).map((part) => part.dir)).toEqual([
+      withPeers,
+      join(withPeers, "ui"),
+      join(withPeers, "epic"),
+      peer,
+      tester
     ])
+    expect(pageServerSettings(withPeers)).toMatchObject({
+      bundles: ["ui/site/_assets", `../${basename(peer)}/_assets/ui`],
+      watch: ["epic/src/_assets", `../${basename(tester)}`]
+    })
+    for (const dir of [withPeers, peer, tester]) rmSync(dir, { recursive: true, force: true })
   })
 
   test("merges the parts, each repo's paths from its own folder, given from the kit's root", () => {
@@ -69,13 +91,13 @@ describe("pageServerSettings()", () => {
       bundles: ["ui/site/_assets"],
       componentSets: {
         ui: { name: "UI", dir: "ui/docs", assets: "ui/site/_assets" },
-        epics: { name: "Epic UI", dir: "node_modules/epic/src/docs", assets: "node_modules/epic/src/_assets" }
+        epics: { name: "Epic UI", dir: "epic/src/docs", assets: "epic/src/_assets" }
       },
-      routes: ["node_modules/epic/src/routes.ts"],
-      watch: ["node_modules/epic/src/_assets"],
-      engineRoutes: { "/_epic/assets/": "node_modules/epic/src/_assets" },
+      routes: ["epic/src/routes.ts"],
+      watch: ["epic/src/_assets"],
+      engineRoutes: { "/_epic/assets/": "epic/src/_assets" },
       localCopies: { "https://cdn/x.js": "/_epic/assets/x.js" },
-      pageScripts: [{ src: "/x.js", file: "node_modules/epic/dist/x.js" }]
+      pageScripts: [{ src: "/x.js", file: "epic/dist/x.js" }]
     })
     expect(componentSets(pageServerSettings(root)).map((set) => set.prefix)).toEqual([
       "/components/ui",
@@ -83,10 +105,10 @@ describe("pageServerSettings()", () => {
     ])
   })
 
-  test("read for a child repo's folder:  the same merge, its paths from there (another repo's beside it, `../`)", () => {
+  test("read for a folder of the kit:  the same merge, its paths from there (another repo's beside it, `../`)", () => {
     const sets = pageServerSettings(join(root, "ui")).componentSets
     expect(sets?.ui).toEqual({ name: "UI", dir: "docs", assets: "site/_assets" })
-    expect(sets?.epics?.dir).toBe("../node_modules/epic/src/docs")
+    expect(sets?.epics?.dir).toBe("../epic/src/docs")
   })
 
   test("the content repo's part, from its own file in the content folder, after the kit's:  its tabs, writable folders", () => {
@@ -97,7 +119,7 @@ describe("pageServerSettings()", () => {
       withContent,
       join(withContent, "content"),
       join(withContent, "ui"),
-      join(withContent, "node_modules/epic")
+      join(withContent, "epic")
     ])
     expect(pageServerSettings(withContent)).toMatchObject({ writable: ["epics", "guides"], gone: ["/ui"] })
     rmSync(withContent, { recursive: true, force: true })
@@ -148,7 +170,7 @@ describe("componentSetAddressOf() / componentSetFileOf()", () => {
 
   test("a set's page is its address, `/components/<set>/...`, encoded;  any other file `undefined`", () => {
     expect(componentSetAddressOf(root, join(root, "ui/docs/ui-button.html"))).toBe("/components/ui/ui-button.html")
-    expect(componentSetAddressOf(root, join(root, "node_modules/epic/src/docs/a b.html"))).toBe(
+    expect(componentSetAddressOf(root, join(root, "epic/src/docs/a b.html"))).toBe(
       "/components/epics/a%20b.html"
     )
     expect(componentSetAddressOf(root, join(root, "ui/site/x.html"))).toBeUndefined()
@@ -158,7 +180,7 @@ describe("componentSetAddressOf() / componentSetFileOf()", () => {
   test("turned round:  an address is its set's file;  any other path `undefined`", () => {
     expect(componentSetFileOf(root, "/components/ui/ui-button.html")).toBe(join(root, "ui/docs/ui-button.html"))
     expect(componentSetFileOf(root, "/components/epics/a%20b.html")).toBe(
-      join(root, "node_modules/epic/src/docs/a b.html")
+      join(root, "epic/src/docs/a b.html")
     )
     expect(componentSetFileOf(root, "/components/app/x.html")).toBeUndefined()
     expect(componentSetFileOf(root, "/epics/x.html")).toBeUndefined()

@@ -18,7 +18,7 @@ import { gzipSync } from "node:zlib"
 
 import { kb } from "spell/util/number"
 import { SRV } from "spell/server"
-import { pageServerSettings } from "spell/server/page/settings"
+import { pageServerSettings, settingsParts } from "spell/server/page/settings"
 import { packageRootFor } from "spell/toolchain/sourceNames"
 
 /**
@@ -57,7 +57,7 @@ export class Bundle {
 
   /** the folder of its package, `spec.package`, as the checkout finds it;  throws when it isn't installed */
   get packageDir(): string {
-    const found = packageRootFor(this.spec.package, this.root)
+    const found = Bundle.packageDirFor(this.spec.package, this.root)
     if (!found) throw new Error(`Bundle:  ${this.spec.package} isn't installed where ${this.root} finds packages`)
     return found
   }
@@ -106,12 +106,29 @@ export class Bundle {
     return (pageServerSettings(root).bundles ?? []).map((folder) => {
       const wanted = canonical(resolve(root, folder))
       const spec = SRV.BUNDLES.find((each) => {
-        const dir = packageRootFor(each.package, root)
+        const dir = Bundle.packageDirFor(each.package, root)
         return dir !== undefined && canonical(join(dir, each.output)) === wanted
       })
       if (!spec) throw new TypeError(`Bundle.specs():  no bundle builds into '${folder}' (the "pageServer" settings)`)
       return spec
     })
+  }
+
+  /**
+   * Package `name`'s folder, as the checkout at `root` finds it:  installed (`node_modules`), else one of the page
+   * server's settings parts by that name (a project beside the kit with its own install:  spell-brand, epic
+   * `repo-split` P20);  `undefined` when neither has it.
+   */
+  static packageDirFor(name: string, root: string): string | undefined {
+    const installed = packageRootFor(name, root)
+    if (installed) return installed
+    return settingsParts(root).find(({ dir }) => {
+      try {
+        return (JSON.parse(readFileSync(join(dir, "package.json"), "utf8")) as { name?: string }).name === name
+      } catch {
+        return false
+      }
+    })?.dir
   }
 
   /** Is it stale, and why. */
@@ -185,7 +202,7 @@ export class Bundle {
     const roots: string[] = []
     for (const source of this.spec.sources) {
       const named = /^(@[^/]+\/[^/]+|[^@./][^/]*)(?:\/(.*))?$/.exec(source)
-      const folder = named && packageRootFor(named[1]!, this.root)
+      const folder = named && Bundle.packageDirFor(named[1]!, this.root)
       if (named?.[1]!.startsWith("@") && !folder) continue
       const path = folder ? join(folder, named![2] ?? "") : join(installRoot(this.root), source)
       if (statSync(path, { throwIfNoEntry: false })) roots.push(path)
@@ -198,10 +215,10 @@ export class Bundle {
     const found: Array<[string, string]> = []
     for (const source of this.spec.sources) {
       // a package by its npm name:  scoped (`@scope/name/src`), or unscoped when one's installed by that name
-      // (`ui/src`, `spell/src/element`, epic `repo-split` P9 / P11 / P14);  else a path from the install's root
+      // (`spell/ui/src`, `spell/src/element`, epic `repo-split` P9 / P11 / P14 / P20);  else a path from the install's root
       // (`yarn.lock`)
       const named = /^(@[^/]+\/[^/]+|[^@./][^/]*)(?:\/(.*))?$/.exec(source)
-      const folder = named && packageRootFor(named[1]!, this.root)
+      const folder = named && Bundle.packageDirFor(named[1]!, this.root)
       if (named?.[1]!.startsWith("@") && !folder) continue
       const base = folder ?? installRoot(this.root)
       const prefix = folder ? named![1]! : ""
@@ -246,16 +263,16 @@ export class Bundle {
    * unless it's linked there already.
    * - A LINK, never a copy:  committing the packs twice would double them in every clone.
    *   The page server follows it;  a static deploy must copy through it (`cp -RL`).
-   * - Relative, so the repos can move together;  Spell UI found as a package, wherever its repo is.
+   * - Relative, so the repos can move together;  Spell UI found in the ONE package `spell` (its `ui/`), wherever it is.
    * - A link left from another layout (the monorepo's `../../../ui/...`) is pointed again.
    * - throws when Spell UI isn't installed, or the link leads to no folder
    * - SIDE EFFECT:  makes or replaces the link
    */
   static linkIconPacks(folder: string): void {
-    const spellUI = packageRootFor("spell-ui", folder)
-    if (!spellUI) throw new Error(`Bundle.linkIconPacks():  spell-ui isn't installed where ${folder} finds packages`)
+    const spell = packageRootFor("spell", folder)
+    if (!spell) throw new Error(`Bundle.linkIconPacks():  spell isn't installed where ${folder} finds packages`)
     const link = join(folder, ICON_PACKS)
-    const target = relative(canonical(folder), join(spellUI, "src", "icons", ICON_PACKS))
+    const target = relative(canonical(folder), join(canonical(spell), "ui", "src", "icons", ICON_PACKS))
     if (isLink(link) && readlinkSync(link) !== target) rmSync(link)
     if (!existsSync(link) && !isLink(link)) symlinkSync(target, link, "dir")
     if (!statSync(link).isDirectory()) {

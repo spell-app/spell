@@ -200,7 +200,9 @@ export class PageServer {
     router.use(this.waitForWorktreeBundles)
     router.get("/", (_request, reply) => reply.redirect(DOCS_HOME))
     // what moved out of the shared content folder, which still holds it for older checkouts:  no redirect (Q30)
-    for (const path of gone)
+    // - unless the checkout has its own folder there, which wins as every checkout file does:  the kit's `ui/`
+    //   (epic `repo-split` P20) where the content folder still holds Spell UI's old docs, `ui/`
+    for (const path of gone.filter((each) => !existsSync(join(this.root, each))))
       router.use(path, (_request, reply) => reply.status(404).send(`${path}/ moved out of the shared content`))
     // a component set's address without its slash:  with it, so its pages' relative links resolve
     // - the router takes a trailing `/` as optional, so the address WITH it passes on

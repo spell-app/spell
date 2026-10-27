@@ -119,12 +119,14 @@ describe("ReadmeCheck.checkPage():  brand", () => {
   })
 })
 
-describe("ReadmeCheck.checkLink():  links into another repo", () => {
-  /** a page of the kit (`README.md`) in a temporary kit holding one child repo, `spell-ui`, with one page */
+describe("ReadmeCheck.checkLink():  links across the repo's folders, and out of it", () => {
+  /** a page of the kit (`README.md`) in a temporary kit, ONE repo, its folder `ui/` holding one page */
   function kitWithChild(): string {
-    const root = mkdtempSync(join(tmpdir(), "readme-check-"))
-    mkdirSync(join(root, "spell-ui"))
-    writeFileSync(join(root, "spell-ui", "README-themes.md"), "# Themes\n\n## Dark mode\n")
+    const root = join(mkdtempSync(join(tmpdir(), "readme-check-")), "kit")
+    mkdirSync(join(root, "ui"), { recursive: true })
+    writeFileSync(join(root, "package.json"), JSON.stringify({ name: "spell", workspaces: ["ui"] }))
+    writeFileSync(join(root, "ui", "package.json"), JSON.stringify({ name: "spell-ui" }))
+    writeFileSync(join(root, "ui", "README-themes.md"), "# Themes\n\n## Dark mode\n")
     return root
   }
   function findings(root: string, line: string): string[] {
@@ -133,9 +135,11 @@ describe("ReadmeCheck.checkLink():  links into another repo", () => {
       .map(({ rule, message }) => `${rule}  ${message}`)
   }
 
-  test("flags a relative link into another repo, naming the GitHub URL to write", () => {
-    expect(findings(kitWithChild(), "[themes](ui/README-themes.md)")).toEqual([
-      "cross-repo  ui/README-themes.md:  write https://github.com/spell-app/spell/blob/main/ui/README-themes.md"
+  test("a relative link into a folder of the repo is fine;  one out of the repo is flagged", () => {
+    const root = kitWithChild()
+    expect(findings(root, "[themes](ui/README-themes.md#dark-mode)")).toEqual([])
+    expect(findings(root, "[other](../other/README.md)")).toEqual([
+      "cross-repo  ../other/README.md:  leaves the repo;  write its GitHub URL"
     ])
   })
 

@@ -17,6 +17,7 @@ import { createHash } from "node:crypto"
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs"
 import { dirname, join, relative, resolve } from "node:path"
 
+import { kitFolders } from "spell/server/kitFolders"
 import { slug } from "spell/util/string.ts"
 
 /****************
@@ -55,20 +56,24 @@ export class ReadmeCheck {
       "an sh block ending in `#` lines after its command:  its output, which goes in an Output fold after the block, so `yarn readme:test` runs it"
   } as const
 
-  /** the repos whose root pages are checked, from the kit's root (`.` is the kit) */
-  static readonly REPOS = [".", "spell-parser", "spell-ui", "spell-epic", "spell-app"]
+  /**
+   * the folders whose root pages are checked, from the kit's root:  `.` (the kit), then its folders (`workspaces`:
+   * `parser`, `ui`, `epic`, `app`), ONE repo since epic `repo-split` P20
+   */
+  readonly folders: string[]
 
   /** the kit's root:  this file is in its `tools/` */
   readonly root: string
 
   constructor(root = resolve(import.meta.dirname, "..")) {
     this.root = root
+    this.folders = [".", ...kitFolders(root).map((dir) => relative(root, dir))]
   }
 
-  /** Every page:  `README.md` and `README-*.md` at the root of the kit and each cloned child repo, sorted. */
+  /** Every page:  `README.md` and `README-*.md` at the root of the kit and each of its folders, sorted. */
   pages(): string[] {
     const pages: string[] = []
-    for (const repo of ReadmeCheck.REPOS) {
+    for (const repo of this.folders) {
       const folder = join(this.root, repo)
       if (!existsSync(folder)) continue
       for (const name of readdir(folder)) if (PAGE_NAME.test(name)) pages.push(join(folder, name))
@@ -159,26 +164,25 @@ export class ReadmeCheck {
     return findings.sort((a, b) => a.line - b.line)
   }
 
-  /** The repo (an entry of `REPOS`, `.` for the kit) that holds `path`, absolute. */
+  /** The folder (an entry of `folders`, `.` for the kit's own) that holds `path`, absolute. */
   repoOf(path: string): string {
     const first = relative(this.root, path).split(/[\\/]/)[0]
-    return ReadmeCheck.REPOS.includes(first) ? first : "."
+    return this.folders.includes(first) ? first : "."
   }
 
   /** The findings for a link `target` on the page at `path` (its `text`), found at `line`. */
   checkLink(path: string, text: string, target: string, line: number, add: Add, viaGitHub = false): void {
-    // a link into another of our repos is a GitHub URL (each repo stands alone there):  checked against its checkout
+    // a GitHub URL into the repo (`spell-app/spell`, its folders inside it since epic `repo-split` P20):  checked
+    // against the checkout;  another repo's (spell-brand, or one of the four merged in) isn't checked
     const ours = OUR_GITHUB.exec(target)
     if (ours) {
       const [, repo, rest] = ours
-      const folder = repo === "spell" ? "." : repo
-      if (!ReadmeCheck.REPOS.includes(folder)) return
-      if (!existsSync(join(this.root, folder))) return
+      if (repo !== "spell") return
       const [inRepo, anchor] = splitAnchor(rest)
       return this.checkLink(
         path,
         text,
-        relative(dirname(path), join(this.root, folder, inRepo)) + (anchor ? `#${anchor}` : ""),
+        relative(dirname(path), join(this.root, inRepo)) + (anchor ? `#${anchor}` : ""),
         line,
         add,
         true
@@ -191,11 +195,9 @@ export class ReadmeCheck {
       add(line, "content-folder", `${target} points into the content folder`)
       return
     }
-    if (file && !viaGitHub && this.repoOf(resolved) !== this.repoOf(path)) {
-      const repo = this.repoOf(resolved)
-      const name = repo === "." ? "spell" : repo
-      const inRepo = relative(join(this.root, repo), resolved)
-      add(line, "cross-repo", `${target}:  write https://github.com/spell-app/${name}/blob/main/${inRepo}`)
+    // a link out of the repo (a project beside it):  a GitHub URL, as the page is read on GitHub and npm
+    if (file && !viaGitHub && relative(this.root, resolved).startsWith("..")) {
+      add(line, "cross-repo", `${target}:  leaves the repo;  write its GitHub URL`)
       return
     }
     if (!existsSync(resolved)) {

@@ -3,6 +3,7 @@ import { dirname, join, posix, relative, resolve, sep } from "node:path"
 
 import JSON5 from "json5"
 
+import { checkoutOf } from "spell/server/checkout"
 import { contentFolderOf } from "spell/server/contentFolder"
 import { kitFolders } from "spell/server/kitFolders"
 import type { ComponentSet, EngineRoute, PageServerSettings } from "spell/server/page"
@@ -14,8 +15,8 @@ import type { ComponentSet, EngineRoute, PageServerSettings } from "spell/server
  *   the route modules, folders, component sets ... it adds to the page server.
  * - Which parts:  in a kit (`root` at or inside a folder holding `REPOS_FILE`), the kit first, then the content repo's
  *   (`CONTENT_SETTINGS`:  the site's tabs, the writable folders), then each of the kit's folders (its `package.json`'s
- *   `workspaces`, lowest first), then each project beside it its checkout names (`LOCAL_SETTINGS`), in that order
- *   (`settingsParts()`);  outside a kit, `root`'s own.
+ *   `workspaces`, lowest first), then each repo beside it (`REPOS_FILE`'s peers:  spell-brand), then each project
+ *   the checkout names (`LOCAL_SETTINGS`), in that order (`settingsParts()`);  outside a kit, `root`'s own.
  * - Every path in a part is relative to ITS folder;  here they come back relative to `root`
  *   (Spell UI's `"docs"` is `ui/docs` from the kit, `../ui/docs` from the app's folder).
  * - How the parts merge (`mergeSettings()`):  the lists end to end, in that order;  the maps (`componentSets`,
@@ -38,7 +39,8 @@ export type SettingsPart = { readonly dir: string; readonly settings: PageServer
  * The parts of the page server's settings for checkout `root`, in merge order:
  * - in a kit (`kitOf()`):  the kit's own part, then the content repo's (`CONTENT_SETTINGS`, in the content folder
  *   `contentFolderOf()` names), then each of the kit's folders (`kitFolders()`:  `parser/`, `ui/`, `epic/`, `app/`),
- *   then each project beside the kit its checkout names (`localProjects()`:  spell-brand)
+ *   then each repo beside the kit `REPOS_FILE` lists as a peer (`peerRepos()`:  spell-brand), then each project the
+ *   checkout's own `LOCAL_SETTINGS` names (`localProjects()`:  a tester's)
  *   - names no folder or project of its own:  the lists are the kit's data and the checkout's
  *   - a project that isn't there is left out:  the server runs with whatever is there
  * - outside a kit:  `root`'s own part, when it has one
@@ -54,17 +56,48 @@ export function settingsParts(root: string): SettingsPart[] {
   const parts = [
     { dir: kit, settings: repoSettings(kit) },
     { dir: content ?? kit, settings: content ? contentSettings(content) : undefined },
-    ...[...kitFolders(kit), ...localProjects(kit)].map((dir) => ({ dir, settings: repoSettings(dir) }))
+    ...[...new Set([...kitFolders(kit), ...peerRepos(kit), ...localProjects(kit)])].map((dir) => ({
+      dir,
+      settings: repoSettings(dir)
+    }))
   ]
   return parts.flatMap(({ dir, settings }) => (settings ? [{ dir, settings }] : []))
 }
 
 /**
- * The checkout's own file naming the projects BESIDE the kit whose page server parts it serves (epic `repo-split`
- * P20:  spell-brand, a project of its own that uses `spell` as any other would):
- * `{ projects: ["../spell-brand"] }`, each folder from the kit's.
- * - Git-ignored, each checkout's own:  where a project sits is a fact of the machine (`~/www/spell-brand` beside the
- *   main checkout, `~/www/spell-brand.worktrees/<epic>/` for an epic's worktree), not of the branch.
+ * The repos beside the kit that `REPOS_FILE` lists as peers, that are there, absolute (epic `repo-split` P20,
+ * epic-engine Q48):  `{ name: "spell-brand", path: "../spell-brand", peer: true }`, a project of its own that uses
+ * `spell` as any other would.
+ * - `path` is from the kit's folder;  a kit WORKTREE (`~/www/spell.worktrees/<epic>/`) has none beside it, so there
+ *   it's from the MAIN checkout (`~/www/spell`):  every worktree sees main's spell-brand, `~/www/spell-brand`.
+ * - NEVER throws:  an unreadable `REPOS_FILE` lists none
+ */
+export function peerRepos(kit: string): string[] {
+  let repos: unknown
+  try {
+    repos = (JSON5.parse(readFileSync(join(kit, REPOS_FILE), "utf8")) as { repos?: unknown }).repos
+  } catch {
+    return []
+  }
+  if (!Array.isArray(repos)) return []
+  const main = checkoutOf(kit)?.main
+  return repos.flatMap((repo: { path?: unknown; peer?: unknown }) => {
+    if (repo?.peer !== true || typeof repo.path !== "string") return []
+    const path = repo.path
+    const found = [kit, main]
+      .filter((from): from is string => typeof from === "string")
+      .map((from) => resolve(from, path))
+      .find((dir) => existsSync(join(dir, "package.json")))
+    return found ? [found] : []
+  })
+}
+
+/**
+ * The checkout's own file naming more projects whose page server parts it serves, each folder from the kit's:
+ * `{ projects: ["../my-project"] }` (epic `repo-split` P20).
+ * - For a project of someone else's, trying the epic framework on it:  spell-brand, the kit's own peer, is in
+ *   `REPOS_FILE` instead (`peerRepos()`).
+ * - Git-ignored, each checkout's own:  where such a project sits is a fact of the machine, not of the branch.
  */
 export const LOCAL_SETTINGS = "page-server.local.json5"
 

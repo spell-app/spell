@@ -13,10 +13,11 @@ afterAll(() => {
   rmSync(HOME, { recursive: true, force: true })
 })
 
-// what marks a kit (`CLI.findCheckout(CLI.KIT_MARKER)`), and lists its child repos
-write(ROOT, "repos.json5", "{ repos: [{ name: 'spell-parser' }, { name: 'spell-ui' }, { name: 'spell-epic' }] }")
+// what marks a kit (`CLI.findCheckout(CLI.KIT_MARKER)`);  its folders are its `workspaces`
+write(ROOT, "repos.json5", "{ repos: [] }")
 write(ROOT, "package.json", {
   name: "spell",
+  workspaces: ["parser", "ui", "epic"],
   spell: { commands: "./cli/commands.ts" },
   scripts: { "/////// SECTION": "", ts: "tsc", server: "node server.mjs" }
 })
@@ -30,7 +31,7 @@ write(ROOT, "parser/package.json", {
   spell: { commands: "./cli/commands.ts" },
   scripts: { test: "x" }
 })
-write(ROOT, "spell/parser/cli/commands.ts", 'spell\n  .command("compile")\n')
+write(ROOT, "parser/cli/commands.ts", 'spell\n  .command("compile")\n')
 write(ROOT, "ui/package.json", { name: "spell-ui" })
 write(ROOT, "ui/site/package.json", { scripts: { dev: "astro dev" } })
 // the `epic` command's verbs and the plugin's skills:  spell-epic's

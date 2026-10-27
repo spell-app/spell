@@ -5,28 +5,26 @@ import { afterAll, describe, expect, test } from "vite-plus/test"
 
 import { CLI } from "spell/cli"
 
-/** A made-up kit:  three child repos, one installed as a package, one with no `"spell"`, one not there at all. */
+/**
+ * A made-up kit:  its folders (its `workspaces`, epic `repo-split` P20), one with no `"spell"`, one not there at all.
+ */
 const KIT = mkdtempSync(join(tmpdir(), "spell-repos-"))
 afterAll(() => rmSync(KIT, { recursive: true, force: true }))
 
-write(
-  "repos.json5",
-  "{ repos: [{ name: 'spell-parser' }, { name: 'spell-ui' }, { name: 'spell-gone' }, { name: 'spell-app' }] }"
-)
-write("package.json", { name: "spell", version: "1.2.3", spell: { commands: "./cli/commands.ts" } })
+write("repos.json5", "{ repos: [] }")
+write("package.json", {
+  name: "spell",
+  version: "1.2.3",
+  workspaces: ["parser", "ui", "gone", "app"],
+  spell: { commands: "./cli/commands.ts" }
+})
 write("parser/package.json", { name: "spell-parser", spell: { commands: "./cli/commands.ts" } })
 write("ui/package.json", { name: "spell-ui" })
-write("node_modules/spell-app/package.json", {
-  name: "spell-app",
-  spell: { commands: "./cli/commands.ts", hooks: "./cli/hooks.ts" }
-})
-write(
-  "node_modules/spell-app/cli/hooks.ts",
-  'export default { greeting: async () => "hello", other: async () => "other" }\n'
-)
+write("app/package.json", { name: "spell-app", spell: { commands: "./cli/commands.ts", hooks: "./cli/hooks.ts" } })
+write("app/cli/hooks.ts", 'export default { greeting: async () => "hello", other: async () => "other" }\n')
 
 describe("spellRepos()", () => {
-  test("the kit, then each child repo with a `spell` entry, lowest first, in the kit or installed", () => {
+  test("the kit, then each of its folders with a `spell` entry, in its `workspaces` order", () => {
     const repos = CLI.spellRepos(KIT)
     expect(repos.map((repo) => [repo.name, repo.short])).toEqual([
       ["spell", "kit"],
@@ -34,23 +32,21 @@ describe("spellRepos()", () => {
       ["spell-app", "app"]
     ])
     expect(repos[0]).toMatchObject({ version: "1.2.3", commands: join(KIT, "cli/commands.ts") })
-    expect(repos[2]!.hooks).toBe(join(KIT, "node_modules/spell-app/cli/hooks.ts"))
+    expect(repos[2]!.hooks).toBe(join(KIT, "app/cli/hooks.ts"))
   })
 })
 
 describe("spellRepos(), the kit installed from npm", () => {
-  test("each child repo beside it in node_modules", () => {
+  test("the same folders, inside the installed package", () => {
     const project = mkdtempSync(join(tmpdir(), "spell-installed-"))
     const kit = join(project, "node_modules", "spell")
-    mkdirSync(kit, { recursive: true })
-    writeFileSync(join(kit, "repos.json5"), "{ repos: [{ name: 'spell-parser' }, { name: 'spell-brand' }] }")
-    writeFileSync(join(kit, "package.json"), JSON.stringify({ name: "spell", spell: { commands: "./c.js" } }))
-    mkdirSync(join(project, "node_modules", "spell-parser"))
+    mkdirSync(join(kit, "parser"), { recursive: true })
     writeFileSync(
-      join(project, "node_modules", "spell-parser", "package.json"),
-      JSON.stringify({ name: "spell-parser", spell: { commands: "./c.js" } })
+      join(kit, "package.json"),
+      JSON.stringify({ name: "spell", workspaces: ["parser"], spell: { commands: "./c.js" } })
     )
-    expect(CLI.spellRepos(kit).map((repo) => repo.root)).toEqual([kit, join(project, "node_modules", "spell-parser")])
+    writeFileSync(join(kit, "parser", "package.json"), JSON.stringify({ name: "spell-parser", spell: { commands: "./c.js" } }))
+    expect(CLI.spellRepos(kit).map((repo) => repo.root)).toEqual([kit, join(kit, "parser")])
     rmSync(project, { recursive: true, force: true })
   })
 })

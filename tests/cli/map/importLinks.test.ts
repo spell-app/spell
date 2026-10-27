@@ -5,7 +5,7 @@ import { bareName, importsOf, moduleFileFor, type MappedRepo } from "spell/cli/m
 /** The kit and one child repo, as `CodeMap.repos` lists them. */
 const REPOS: MappedRepo[] = [
   { name: "spell", root: "/kit", folder: "", packageName: "spell" },
-  { name: "spell-ui", root: "/kit/spell-ui", folder: "spell-ui", packageName: "spell-ui" }
+  { name: "spell", root: "/kit/ui", folder: "ui", packageName: "spell/ui" }
 ]
 
 /** The files "there", from the checkout's root. */
@@ -62,7 +62,7 @@ describe("moduleFileFor()", () => {
     expect(fileFor("spell/util/node/json5.ts")).toBe("src/util/node/json5.ts")
     expect(fileFor("spell/cli")).toBe("src/cli/index.ts")
     expect(fileFor("spell/ui/components/ui-button/UIButton")).toBe("ui/src/components/ui-button/UIButton.tsx")
-    expect(fileFor("spell-ui")).toBe("ui/src/index.ts")
+    expect(fileFor("spell/ui")).toBe("ui/src/index.ts")
   })
 
   test("NOT a library, a relative import, or a file that isn't there", () => {
@@ -70,6 +70,7 @@ describe("moduleFileFor()", () => {
     expect(fileFor("./Peer")).toBeUndefined()
     expect(fileFor("spell/util/gone")).toBeUndefined()
     expect(fileFor("spell-uix/thing")).toBeUndefined()
+    expect(fileFor("spell-ui/core")).toBeUndefined()
   })
 })
 
