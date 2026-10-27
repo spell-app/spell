@@ -106,9 +106,10 @@ const DATA_PAGES_ONLY = args.includes("--data-pages")
 const DATA_PAGES = ["commands", "core-reference", "spell-syntax"]
 /**
  * What the runtime takes from UI's SOURCE, never `dist/` (`spellUiResolver()`):  the doc-only families' leaves (no lib
- * entry holds them) and the pure types file they read.
+ * entry holds them), the pure types file they read, and the zoom's plain-DOM `ImageZoom` (epic `ui-gaps` P14:  its
+ * family's lib entry would bring the element;  stateless, so the family's own copy beside it is harmless).
  */
-const UI_SOURCE_ONLY = /^spell-ui\/(docs-components\/.+|components\/components\.types)$/
+const UI_SOURCE_ONLY = /^spell-ui\/(docs-components\/.+|components\/components\.types|components\/ui-zoom\/ImageZoom)$/
 /** Page behaviour, the RUNTIME's file;  bundled as an empty module while it doesn't exist yet. */
 const PAGE_RUNTIME = join(ASSETS, "spell-doc-runtime.js")
 

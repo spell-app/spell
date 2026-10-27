@@ -1,5 +1,5 @@
 /* GENERATED -- do not edit:  `spell pack build epics`, from every vocabulary, `<Name>.en.ts` */
-// sources:  b815f8fb7f1831bc
+// sources:  de6380a049b9fcb8
 
 import type { RootCatalogEntry } from "spell-ui"
 
@@ -57,6 +57,5 @@ export const CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
   "epic-threads": {"folder":"epic-thread","attributes":[]},
   "epic-update": {"folder":"epic-update","attributes":["at","summary","phase"]},
   "epic-updated": {"folder":"epic-phase","attributes":["at","phase","of"]},
-  "epic-version": {"folder":"epic-original","attributes":["as-of"]},
-  "epic-zoom": {"folder":"epic-zoom","attributes":["src","alt"]}
+  "epic-version": {"folder":"epic-original","attributes":["as-of"]}
 }

@@ -68,7 +68,8 @@ export const epicTextBoxVocabulary = {
     {
       name: "field",
       description:
-        "The `<textarea>`:  one line to start, growing with its text to a third of the window (`max-height`)."
+        "The `<ui-textarea grow>`:  one line to start, growing with its text to a third of the window " +
+        "(`max-height`);  its own `control` part is the native `<textarea>`."
     },
     {
       name: "kept",

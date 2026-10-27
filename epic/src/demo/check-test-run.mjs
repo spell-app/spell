@@ -498,7 +498,7 @@ function HELPERS() {
     return { fill: button.dataset.fill, color: button.dataset.color, pressed: button.getAttribute("aria-pressed") }
   }
   window.moveButton = (which) => Array.from(runRoot().querySelectorAll(".moves ui-button")).at(which === "next" ? -1 : 0)
-  window.noteField = () => runRoot().querySelector("epic-text-box")?.shadowRoot?.querySelector("textarea") ?? null
+  window.noteField = () => runRoot().querySelector("epic-text-box")?.shadowRoot?.querySelector("ui-textarea")?.shadowRoot?.querySelector("textarea") ?? null
   window.deepActive = () => {
     let active = document.activeElement
     while (active?.shadowRoot?.activeElement) active = active.shadowRoot.activeElement

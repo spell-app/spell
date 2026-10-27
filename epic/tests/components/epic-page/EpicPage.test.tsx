@@ -23,6 +23,8 @@ import "spell-epic/components/epic-commit"
 import "spell-epic/components/epic-item"
 import "spell-epic/components/epic-answer"
 import "spell-epic/components/epic-aside"
+// the boxes are `<ui-textarea grow>`s:  `<ui-root>` loads them on a page
+import "spell-ui/components/ui-input"
 
 /** A page with phases in `statuses`, and `attributes` on the page. */
 function page(attributes: string, statuses: string[], extra = ""): string {
@@ -853,9 +855,13 @@ describe("<epic-page> live badges (epic `epic-engine` P43)", () => {
     await ElementFixture.tick()
     await ElementFixture.tick()
     await vi.waitFor(() => expect(pageChips(host)).toEqual(["open+1", "recent+1"]))
-    expect(markedBadge(host)).toEqual(["3", "3 marked in this pass, waiting for Claude"])
+    expect(markedBadge(host)).toEqual(["3", "3 with Claude:  marked in this pass, or being worked on"])
     expect(chipsOf(questions).map((chip) => `${chip.dataset.state}:${chip.textContent}`)).toEqual(["open:1"])
-    expect(markedBadge(questions)).toEqual(["2", "2 marked in this pass, waiting for Claude"])
+    expect(markedBadge(questions)).toEqual(["2", "2 with Claude:  marked in this pass, or being worked on"])
+    // each marked item's id chip ringed in the badge's blue (Owen:  "the T1 should be blue outline");  an unmarked one not
+    const idChip = (id: string) => host.querySelector(`#${id}`)!.shadowRoot!.querySelector<HTMLElement>('[part~="id"]')!
+    expect(["q1", "q2", "t1"].map((id) => idChip(id).hasAttribute("data-marked"))).toEqual([true, true, true])
+    expect(idChip("t2").hasAttribute("data-marked")).toBe(false)
     // a section whose items are all marked keeps its badge alone
     expect(chipsOf(todos).map((chip) => chip.dataset.state)).toEqual(["recent"])
     expect(markedBadge(todos)?.[0]).toBe("1")
@@ -975,7 +981,7 @@ function noteBox(host: Element, name: string) {
   return {
     row,
     box,
-    note: box.shadowRoot!.querySelector("textarea")!,
+    note: box.shadowRoot!.querySelector("ui-textarea")!.shadowRoot!.querySelector("textarea")!,
     send: row.querySelector<HTMLElement>("ui-button")!
   }
 }
@@ -1063,7 +1069,9 @@ describe("<epic-page> Agents running", () => {
     expect(noteBox(host, "demo-aaa").note).toBe(note)
     expect(note.value).toBe("Half typed")
     expect(agentsRoot(host).activeElement).toBe(box)
-    expect(box.shadowRoot!.activeElement).toBe(note)
+    // focus in the box's `<ui-textarea>`, on its native textarea
+    const field = box.shadowRoot!.activeElement!
+    expect([field.localName, field.shadowRoot!.activeElement]).toEqual(["ui-textarea", note])
     expect(agentsRoot(host).querySelector(".agents-button")!.getAttribute("aria-label")).toBe("3 agents running")
   })
 

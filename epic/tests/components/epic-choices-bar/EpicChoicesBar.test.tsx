@@ -7,6 +7,8 @@ import { ChoicesForm } from "spell-epic/answers"
 
 import "spell-epic/components/epic-choices-bar"
 import "spell-epic/components/epic-choice-rows"
+// the boxes are `<ui-textarea grow>`s:  `<ui-root>` loads them on a page
+import "spell-ui/components/ui-input"
 
 ////////////////
 // ## Fakes
@@ -62,7 +64,7 @@ describe("<epic-choices-bar>", () => {
     const bar = root.querySelector("epic-choices-bar")!
     const row = root.querySelector("epic-choice-row")!
     await vi.waitFor(() => expect((part(bar, "feedback") as HTMLElement & { value: string }).value).toBe("so far"))
-    expect(row.shadowRoot!.querySelector("textarea")!.value).toBe("mine")
+    expect(row.shadowRoot!.querySelector("ui-textarea")!.shadowRoot!.querySelector("textarea")!.value).toBe("mine")
     expect(part(bar, "send")!.title).toBe("Send 1 changed of 1, and the feedback, to Claude")
     expect(getComputedStyle(bar).position).toBe("sticky")
     await expectAccessible(bar)
@@ -77,7 +79,7 @@ describe("<epic-choices-bar>", () => {
     const { form } = adoptForm(route)
     const root = await ElementFixture.render(PAGE)
     const bar = root.querySelector("epic-choices-bar")!
-    const box = root.querySelector("epic-choice-row")!.shadowRoot!.querySelector("textarea")!
+    const box = root.querySelector("epic-choice-row")!.shadowRoot!.querySelector("ui-textarea")!.shadowRoot!.querySelector("textarea")!
     box.value = "mine"
     box.dispatchEvent(new InputEvent("input", { bubbles: true, composed: true }))
     await form.save()

@@ -41,6 +41,21 @@ Each finding, in this order:
 - Last, one line:  "Considered, left out:" each look-alike you weighed and why it isn't one (different jobs, a
   deliberate copy the catalog's "Fine as it is" names, generated code).
 
+## The score
+
+`spell coherence score` counts what the catalog's **Score:** lines find (epic `coherence` P15;  the kit's
+README-cli.md, "Scoring coherence"):  each mechanism's copies left and its users, scored 0-100.
+
+- **A sweep** ends with `spell coherence score --compare last --save`:
+  its report says the score's change since the last snapshot, and names the new copies it lists.
+- **A plan review** counts the copies a plan would add, where its words say how it would do something:
+  "this plan adds 3 copies of Timing (raw `setTimeout()`)".
+  - Where it can't tell, it says nothing:  no guessing a number.
+- **A change in words** is an improvement, never a signed percent (Owen, 2026-10-25):
+  "29% better (fewer copies)", "12% worse (score down)";  a table's column is "Improvement", its cells the bare
+  percent (`17%`, a worse one `−12%`).
+- **Code only:**  the score never counts tests;  tests are a count per repo beside it.
+
 ## Leave alone
 
 - Generated or bundled files:  a header saying so, `__pack/`, `_assets/` bundles, `*.min.js`, `dist/`.

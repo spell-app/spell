@@ -527,6 +527,17 @@
   .chip[data-fill="dashed"] {
     border-style: dashed;
   }
+  /*
+   * marked in this pass, not applied yet (epic `epic-engine` P43):  ONE ring, 2px dotted in the blue badge's blue, in
+   * place of its own, and red letters (Owen, 2026-10-25:  "red text, single blue 2px dotted";  a blue ring round its
+   * own, before)
+   */
+  .chip[data-marked] {
+    border: 2px dotted var(--ui-blue, #2185d0);
+    outline: none;
+    background: transparent;
+    color: var(--ui-red-text, var(--ui-red, #db2828));
+  }
 
   /*
    * still wants a look:  a bolder title;  no longer relevant:  a quieter one

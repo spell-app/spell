@@ -5,8 +5,8 @@ import { E, UI } from "spell-ui/core"
 
 // the fold pieces every `<epic-*>` fold shares:  their files, not `epic-item`'s barrel (which would define it here)
 import { FOLDS, Fold } from "spell-epic/components/epic-item/Fold"
-// plain DOM, the page's ONE zoom:  the docs runtime's too
-import { ImageZoom } from "spell-epic/components/epic-zoom/ImageZoom"
+// Spell UI's page zoom (the docs runtime's too):  its plain-DOM leaf alone, so the pack holds no second `<ui-zoom>`
+import { ImageZoom } from "spell-ui/components/ui-zoom/ImageZoom"
 
 import { epicFieldVocabulary } from "./EpicField.en"
 import { ICON, LABEL, TEXT } from "./EpicPhase.types"
@@ -31,7 +31,7 @@ import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
  *   - a fold:  the chevron (`fold.button()`) and its label as the title row, folded to start with
  *   - open or folded is its `open` attribute (`Fold`'s `kept`):  page state the live patch keeps, never written
  *   - its screenshots are thumbnails, a page sheet's (`EpicField.requests.css`:  they're light DOM, out of reach of
- *     the shadow sheet);  a click shows one full size in the page's `<epic-zoom>` (`ImageZoom`), never its link
+ *     the shadow sheet);  a click shows one full size in the page's `<ui-zoom>` (Spell UI's `ImageZoom`), never its link
  *     (kept for a page without scripts, or opened from disk)
  ****************/
 export class EpicField extends E.UIComponent<typeof epicFieldVocabulary> {

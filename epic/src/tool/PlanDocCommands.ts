@@ -11,6 +11,7 @@ import {
   PlanDocError,
   REVIEW_SECTIONS,
   TITLE_PREFIX,
+  type CommitLogEntry,
   type Phase,
   type PhaseTimer,
   type PlanSummary
@@ -181,9 +182,13 @@ export class PlanDocCommands {
         // `phase seo 3 took`:  its time worked out again, for a phase done before (epic `epic-engine` P41)
         if (status === "took") return this.tookAgain(name, file, phase, Boolean(flags.dryRun))
         const minutes = status === "done" ? this.minutesFor(name, file, phase) : undefined
-        await this.edit(file, (plan) =>
+        // done:  the branch's commits so far, into their phases and items (epic `epic-engine` I135)
+        const history = status === "done" ? this.historyOrNone(file) : undefined
+        const added = await this.edit(file, (plan) => {
           plan.setPhase(plan.phasePlace(phase), status, { done: flags.done as string | undefined, minutes })
-        )
+          return history ? plan.backfillCommits(history.log, history) : []
+        })
+        if (added.length) this.print(`${added.length} commit${added.length === 1 ? "" : "s"} listed on the page`)
         this.files.reindex()
         // a new stage:  bring the doc forward, unless told not to.
         // No reload, nor a second one:  the edit reaches the page by the live client
@@ -286,7 +291,7 @@ export class PlanDocCommands {
         return this.commit(file, rest, flags)
       case "commits":
         if (!flags.backfill) throw new PlanDocError(`commits what?  --backfill  (${USAGE_HINT})`)
-        return this.backfillCommits(file)
+        return this.backfillCommits(file, flags.merged)
       case "close":
       case "reopen":
         return this.edit(file, (plan) => {
@@ -568,27 +573,55 @@ export class PlanDocCommands {
   }
 
   /**
-   * `commits <name> --backfill`:
+   * `commits <name> --backfill [--merged <sha,...>]`:
    * the doc's phase and item commits into its phases' and items' commit lists (`PlanDoc.backfillCommits()`).
    * - prints what it added
-   * - the doc's history:  `PlanDocFiles.docLog()` (git's, or a shared doc's `sharedDocLog()`)
-   * - never a commit ANOTHER epic's page lists:  a bare `P7:  Doc Review` reads the same for every epic with one
+   * - the doc's history:  `unlistedHistory()`
+   * - `--merged`:  only those commits, short shas or full (`epic merge`'s, just fast-forwarded onto `main`;  epic
+   *   `epic-engine` I135)
    */
-  private async backfillCommits(file: string): Promise<void> {
-    const epic = basename(file).replace(/(\.plan)?\.html$/, "")
-    const others = [...new EpicDocs({ files: this.files, name: epic }).otherEpicsCommits()]
-    const log = this.files.docLog(file).filter(({ sha }) => !others.some((listed) => sha.startsWith(listed)))
-    const base = this.files.commitBase(file)
+  private async backfillCommits(file: string, merged?: string | boolean): Promise<void> {
+    const only = typeof merged === "string" ? merged.split(",").filter(Boolean) : undefined
+    const history = this.unlistedHistory(file)
+    const log = only
+      ? history.log.filter(({ sha }) => only.some((given) => sha.startsWith(given) || given.startsWith(sha)))
+      : history.log
     const added = await this.edit(file, (plan) =>
       plan
-        .backfillCommits(log, { base, epic })
+        .backfillCommits(log, history)
         .map((entry) => ({ ...entry, where: entry.phase !== undefined ? plan.phaseLabel(entry.phase) : undefined }))
     )
     for (const entry of added) {
       const where = entry.where ?? entry.item!.toUpperCase()
       this.print(`  ${where.padEnd(4)} ${entry.sha.slice(0, 7)}`)
     }
-    this.print(`${added.length} commit${added.length === 1 ? "" : "s"} added (${log.length} in the doc's history)`)
+    const count = `${added.length} commit${added.length === 1 ? "" : "s"} added`
+    this.print(only ? `${count} (${only.length} merged)` : `${count} (${history.log.length} in the doc's history)`)
+  }
+
+  /**
+   * `unlistedHistory()`, best effort (`phase ... done`):  NEVER throws;  a history that won't read is `undefined`,
+   * and says why.
+   */
+  private historyOrNone(file: string): ReturnType<PlanDocCommands["unlistedHistory"]> | undefined {
+    try {
+      return this.unlistedHistory(file)
+    } catch (error) {
+      this.warn(`epic:  no commits listed:  ${error instanceof Error ? error.message : String(error)}`)
+      return undefined
+    }
+  }
+
+  /**
+   * The doc's history for `backfillCommits()`:  its commits (`PlanDocFiles.docLog()`, git's, or a shared doc's
+   * `sharedDocLog()` over every repo of a kit), its repo's GitHub page and its epic's name.
+   * - never a commit ANOTHER epic's page lists:  a bare `P7:  Doc Review` reads the same for every epic with one
+   */
+  private unlistedHistory(file: string): { log: CommitLogEntry[]; base: string | null; epic: string } {
+    const epic = basename(file).replace(/(\.plan)?\.html$/, "")
+    const others = [...new EpicDocs({ files: this.files, name: epic }).otherEpicsCommits()]
+    const log = this.files.docLog(file).filter(({ sha }) => !others.some((listed) => sha.startsWith(listed)))
+    return { log, base: this.files.commitBase(file), epic }
   }
 
   /**
@@ -1207,8 +1240,10 @@ export const USAGE = `usage:  yarn plan-doc <command> <name> ...    (doc:  epics
                                                    reopen undoes it
   commit <name> <sha> --phase N | --item <id> "sentence"
                                                    list a commit under a phase or an item (replaces its entry)
-  commits <name> --backfill                        list every phase / item commit in the doc's git history
-                                                   (subjects "P3:  Name -- summary", "Fix I3:  ...")
+  commits <name> --backfill [--merged <sha,...>]   list every phase / item commit in the doc's git history
+                                                   (subjects "P3:  Name -- summary", "Fix I3:  ...");
+                                                   --merged:  only those (epic merge's);  phase ... done and
+                                                   epic merge list them by themselves
   log <name> "text"                                timestamped line in the log
   saga page <id> [--force]                         a saga's page, sagas/<id>/<id>.saga.html, from the template:
                                                    its title and purpose from sagas/sagas.json5;  --force remakes

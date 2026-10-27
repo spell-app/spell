@@ -9,7 +9,7 @@ import { fileURLToPath, pathToFileURL } from "node:url"
 
 import { openInChromeTab } from "spell/server/open"
 import { RealPath } from "spell/server/RealPath"
-import { componentSets, pageServerRoot, pageServerSettings, settingsParts } from "spell/server/page/settings"
+import { componentSetAddressOf, componentSetFileOf, pageServerRoot, settingsParts } from "spell/server/page/settings"
 import { Window, envCheckout } from "spell-epic/window.mjs"
 import { EpicConfig } from "spell-epic/config/EpicConfig.ts"
 import { ENGINE_ROUTES, EPIC_UI } from "spell-epic/server/server.types.ts"
@@ -136,9 +136,11 @@ export const OLD_CONTENT = join(PACKAGE, "content")
  * - an old path (`packages/docs/content/solid/solid-2.html`, `content/...`) moved by the reorg
  * - from `cwd`
  * - none:  its page path's file
+ * - a SERVED path, absolute but no file (`/components/ui/x.html`, `/worktrees/<w>/components/ui/x.html`,
+ *   `/epics/...`):  the file it serves (`servedFile()`, epic `epic-engine` I136)
  */
 export function pageFile(page, cwd = process.env.INIT_CWD ?? process.cwd()) {
-  if (isAbsolute(page)) return inContent(page)
+  if (isAbsolute(page)) return inContent(existsSync(page) ? page : (servedFile(page) ?? page))
   const old = page.replace(/^(?:packages\/docs\/)?content\//, "")
   const candidates = [
     pageAt(page),
@@ -224,6 +226,28 @@ export function pageAt(path) {
   if (inSet) return inSet
   const content = resolve(CONTENT, path)
   return existsSync(content) || contentTop(top) ? content : resolve(ROOT, path)
+}
+
+/**
+ * The file a page server's URL path `path` serves, for a page named by its address (`epic pages link
+ * /components/ui/x.html`);  `undefined` when it names no file there.
+ * - `/worktrees/<w>/...`:  in worktree `<w>` (any folder worktrees are in, `EpicConfig.worktreesFolders`):
+ *   a component set's address in that worktree's set (`componentSetFileOf()`), else its file there, else the content
+ *   folder's (shared, the same for every checkout)
+ * - anything else:  its page path's file (`pageAt()`):  `/components/<set>/...`, `/epics/...`, `/templates/...`
+ * - the file must be there
+ */
+export function servedFile(path) {
+  const [, worktree, rest] = /^\/worktrees\/([^/]+)(\/.*)?$/.exec(path) ?? []
+  const there = (file) => (file && existsSync(file) ? file : undefined)
+  if (!worktree) return there(pageAt(decodeURIComponent(path.slice(1))))
+  const inside = decodeURIComponent((rest ?? "/").slice(1))
+  for (const folder of EpicConfig.of(ROOT).worktreesFolders) {
+    const root = join(folder, decodeURIComponent(worktree))
+    if (!existsSync(root)) continue
+    return there(componentSetFileOf(root, rest ?? "/")) ?? there(join(root, inside)) ?? there(join(CONTENT, inside))
+  }
+  return undefined
 }
 
 /**
@@ -555,9 +579,7 @@ export function browserUrlFor(file, { base } = {}) {
 
 /** A component set's page `file` at its address (`/components/epics/x.html`);  `undefined` for any other page. */
 export function componentSetAddress(file) {
-  const path = relative(ROOT, resolve(file)).split(sep).join("/")
-  const set = componentSets(pageServerSettings(ROOT)).find((each) => path.startsWith(`${each.dir}/`))
-  return set && `${set.prefix}${path.slice(set.dir.length).replace(/\/index\.html$/, "/")}`
+  return componentSetAddressOf(ROOT, file)?.replace(/\/index\.html$/, "/")
 }
 
 /**

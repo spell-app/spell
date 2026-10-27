@@ -1911,8 +1911,8 @@ export class PlanDoc extends PlanReader {
    * returns `to`.
    * - only phases still TO DO move, and only among them:  every phase from `from` to `to` must be to do (a done or
    *   active one keeps its number:  its commits and log say it)
-   * - its id stays;  the NUMBERS follow, all at once (`renumberAll()`):  items' `phase`, Updated lines' `of`, the
-   *   `P5` in links' words, and every `P5 · <its name>` in the page's words and attributes (`relabelPhaseNames()`)
+   * - its id stays;  the NUMBERS follow, all at once (`renumberAll()`):  items' `phase`, Updated lines' `of`, every
+   *   bare `P5` in the page's words, and every `P5 · <its name>` (`relabelPhaseNames()`);  the record keeps its own
    * - SIDE EFFECT:  logs it
    * - throws for a place out of range, or a started phase in the way
    */
@@ -1939,8 +1939,8 @@ export class PlanDoc extends PlanReader {
   /**
    * After phases moved:  everything that names one by NUMBER follows, from `before` (`PhaseNumbers.snapshot()`:
    * each phase's id => its number then), ALL AT ONCE, so a number another phase takes is never renamed twice.
-   * - items' and updates' `phase`, Updated lines' `of`, the `P5` in the words of links to a phase (`href="#id"`):
-   *   `PhaseNumbers.follow()`
+   * - items' and updates' `phase`, Updated lines' `of`, every bare `P5`, `P17-P20`, `P20's` in the page's words
+   *   (not another epic's, nor the log's or a quote's):  `PhaseNumbers.follow()`
    * - then the `P5 · <name>` text everywhere (`relabelPhaseNames()`)
    */
   private renumberAll(before: ReadonlyMap<string, string>): void {

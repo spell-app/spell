@@ -20,19 +20,13 @@ import { ThreadFacts } from "spell-epic/comments"
 // ## The toolbar
 ////////////////
 
-/** Below this many px for each title, a titled toolbar shows its buttons' marks only (`fitTitles()`). */
-const MIN_TITLE_PX = 50
-
-/** The widest a titled toolbar's title may be while they shrink (`fitTitles()`), set on the toolbar. */
-const TITLE_MAX = "--spell-toolbar-title-max"
-
 /**
  * A TITLED toolbar's items (a guide's, a details page's, Epic UI's):  one per top-level section, its mark and title.
  * - `groups`:  `{ element, id, label, glyph }` each, the outline's top-level entries
  * - `badgesOf(element)`:  its badges (`[kind, number, words]`, `toolbarItem()`);  none:  `[]`
  * - the mark:  an item's number for an item (`Q3 · When?` shows 3, coloured by the section's `data-state`:  a
  *   details page's questions, `<epic-ask>`);  else its `<ui-icon>`;  else its number (`2.`);  else its access letter,
- *   shown only while the titles are hidden (`spell-toolbar-icons`)
+ *   shown only while the titles are hidden (the menu's `:state(icons-only)`)
  * - the title without its number (`2. Markup` is `Markup`), unless it's an item's
  * - its ACCESS LETTER:  unique on the toolbar (`accessLetters()`), drawn IN its title (bold, the text's colour);
  *   pressing it jumps there as a click does (`wireAccessLetters()`)
@@ -103,11 +97,16 @@ function titleWithKey(title, letter) {
 
 /**
  * THE TOOLBAR, every page's (epic `epic-engine` P3:  Owen, 2026-10-19, "Why are we not using <ui-xxxx> or <epic-xxx>
- * components for these pages?"):  Spell UI's menu, `<ui-menu class="spell-toolbar" appearance="secondary">`,
- * a `<nav>` landmark of `<ui-item>` links (`toolbarItem()`), its look `spell-toolbar.css`'s, through the menu's tokens.
+ * components for these pages?"):  Spell UI's menu, `<ui-menu class="spell-toolbar" appearance="secondary">`, a `<nav>` landmark of
+ * `<ui-item>` links (`toolbarItem()`), its look `spell-toolbar.css`'s, through the menu's tokens.
  * - the current item `selected` (scroll-follow), which the menu draws, and says (`aria-current`)
  * - `titled`:  a guide's (and Epic UI's), each item its mark and its title (`spell-toolbar-titled`);  else an epic
  *   page's, marks only, every item the same width
+ *   - its titles fit the row:  `<ui-toolbar shrinkable>`, Spell UI's own fitting (epic `ui-gaps` P13):  the longest
+ *     end in `...` first;  once one would be cut under 50px, the marks only, each title its tooltip;  narrower still,
+ *     one `...` button whose menu holds every section (Owen, 2026-10-10:  "remove the titles entirely if they each
+ *     only get less than 50px")
+ *   - except a `segmented` one:  it scrolls, every title whole, its `‹` / `›` showing what's past either end
  * - after the items, what a page or the comments add to the row:  the toolbar's bullhorn (`PageComments`), the spell
  *   syntax guide's Expand all and Collapse all;  the items scroll sideways under them (`spell-toolbar.css`)
  * - `segmented`:  the toolbar under a page's tabs (Spell UI's components pages) is a SEGMENTED menu, as the tabs are:
@@ -123,9 +122,8 @@ export function toolbarMenu(items, { titled, segmented = false }) {
     class: ["spell-toolbar", titled && "spell-toolbar-titled", segmented && "spell-toolbar-segmented"]
       .filter(Boolean)
       .join(" "),
-    // `appearance`, never `secondary`:  that old name does nothing since epic `ui-gaps` P13,
-    // and drew a plain bordered menu
     ...(segmented ? { appearance: "segmented" } : { appearance: "secondary" }),
+    shrinkable: titled && !segmented,
     "aria-label": "Sections",
     "data-spell-added": true
   })
@@ -241,8 +239,9 @@ function takesKeys(element) {
 
 /**
  * One toolbar item:  a `<ui-item>` link to section `id` (`data-rail`), its mark (`glyph`, the menu's icon box;  else
- * `mark`, a `slot="icon"` element), its `title` when the toolbar is titled, its `badges` (`[kind, number, words]`:
- * `<ui-label>`s over the mark's top right), `state` (`data-state`, a details page's question's colour).
+ * `mark`, a `slot="icon"` element), its `title` when the toolbar is titled (a plain `<span>` in the item:  a
+ * shrinkable menu's item draws it in its title box, and cuts it there), its `badges` (`[kind, number, words]`:  `<ui-label slot="badge">`s, over
+ * the mark's top right on an epic page), `state` (`data-state`, a details page's question's colour).
  * - its tooltip `tip` on the link inside, where the pointer lands (`titleInside()`):  its mark, title and badges let
  *   the pointer through (`spell-toolbar.css`), so it shows in VS Code too;  the badges say theirs in it, and to a
  *   screen reader
@@ -256,17 +255,23 @@ export function toolbarItem({ id, tip, glyph, mark, title, letter, state, badges
       link: `#${id}`,
       "data-rail": id,
       icon: glyph,
-      // an item with an access letter says it in the toolbar's own tooltip (`wireKeyTips()`), not the browser's
-      title: letter ? undefined : said,
+      // an item with an access letter says it in the toolbar's own tooltip (`wireKeyTips()`), not the browser's:
+      // an empty one, so the menu draws none either, with the icons only
+      title: letter ? "" : said,
       "aria-label": said,
       "aria-keyshortcuts": letter?.toUpperCase(),
       "data-key": letter,
       "data-state": state
     },
     mark,
-    title && el("span", { class: "spell-toolbar-label" }, ...titleWithKey(title, letter)),
+    // one box for the title and its access letter:  loose, the item's flex row would part them ("T ypes")
+    title && el("span", {}, ...titleWithKey(title, letter)),
     ...badges.map(([kind, number]) =>
-      el("ui-label", { class: `spell-toolbar-count ${kind}`, appearance: "circular", size: "mini" }, String(number))
+      el(
+        "ui-label",
+        { class: `spell-toolbar-count ${kind}`, slot: "badge", appearance: "circular", size: "mini" },
+        String(number)
+      )
     )
   )
   titleInside(item, "item")
@@ -284,109 +289,6 @@ export function removeToolbar() {
     old.remove()
   }
   return kept
-}
-
-/**
- * A titled toolbar's titles:  shown, shrinking with `...` (CSS), while none is cut under `MIN_TITLE_PX`;
- * else gone (`spell-toolbar-icons`), the marks only (Owen, 2026-10-10:  "remove the titles entirely if they each only
- * get less than 50px").
- * - the titles' room:  the row's, less every button's mark, badge and padding, and what else the row holds (the
- *   bullhorn, the spell syntax guide's Expand all)
- * - shrinking, the longest titles give way first, down to one width (`--spell-toolbar-title-max`, `titleFit()`):
- *   so no short title is cut to its first letter while a long one stays whole
- * - measured on the items' drawn boxes:  a `<ui-item>` is `display: contents`, its box is in its shadow root
- * - which toolbars:  `fitsTitles()`
- */
-export function fitTitles(toolbar) {
-  const row = toolbarRow(toolbar)
-  const items = [...toolbar.querySelectorAll(":scope > [data-rail]")]
-  toolbar.classList.remove("spell-toolbar-icons")
-  toolbar.style.removeProperty(TITLE_MAX)
-  if (!row || !items.length || !fitsTitles(toolbar)) return
-  const style = getComputedStyle(row)
-  const others = [...toolbar.children]
-    .filter((child) => !child.hasAttribute("data-rail") && !child.hidden)
-    .reduce((sum, child) => sum + boxOf(child).width, 0)
-  const room =
-    row.clientWidth -
-    parseFloat(style.paddingLeft) -
-    parseFloat(style.paddingRight) -
-    (parseFloat(style.columnGap) || 0) * (toolbar.children.length - 1) -
-    others
-  const labels = items.map((item) => item.querySelector(".spell-toolbar-label"))
-  const fixed = items.reduce((sum, item, index) => sum + boxOf(item).width - (labels[index]?.offsetWidth ?? 0), 0)
-  const fit = titleFit(
-    labels.map((label) => label?.scrollWidth ?? 0),
-    room - fixed
-  )
-  if (fit === "icons") toolbar.classList.add("spell-toolbar-icons")
-  else if (fit !== "whole") toolbar.style.setProperty(TITLE_MAX, `${fit}px`)
-}
-
-/**
- * Does `fitTitles()` fit `toolbar`'s titles, or does it keep them whole and scroll?
- * - fits:  a guide's, a details page's, Epic UI's band (Owen, epic `epic-engine` I132:  Epic UI's ran off the page's
- *   right at the side bar's width;  I133:  the guides' too);  scrolling only once even the marks don't fit
- * - keeps them whole, scrolling:  a SEGMENTED one, under a page's tabs (Spell UI's components pages, epic `debut`),
- *   its `‹` / `›` buttons showing what's past either end;  its track is only as wide as its buttons
- */
-function fitsTitles(toolbar) {
-  return !toolbar.classList.contains("spell-toolbar-segmented")
-}
-
-/**
- * How a titled toolbar's titles fit `room`, their natural `widths` (px) given:
- * - `"whole"`:  every one, uncut
- * - a number:  the widest a title may be (`titleCap()`), the longest giving way first
- * - `"icons"`:  none, the marks only, once a title would be cut under `MIN_TITLE_PX`:  a stub like "6 W…" says
- *   nothing, so the titles go to the tooltips instead
- * - e.g. `[30, 80, 120]`:  in 230px `"whole"`, in 200px 90, in 120px `"icons"` (45 each)
- * - pure:  no DOM
- */
-export function titleFit(widths, room) {
-  const cap = titleCap(widths, room)
-  return cap === undefined ? "whole" : cap < MIN_TITLE_PX ? "icons" : cap
-}
-
-/**
- * The widest a title may be so `widths` fit in `room`, the longest giving way first;  `undefined`:  all fit whole.
- * - e.g. `[30, 80, 120]` in 200px:  90 (30 + 80 + 90)
- */
-export function titleCap(widths, room) {
-  const sorted = [...widths].sort((a, b) => a - b)
-  let left = room
-  for (const [index, width] of sorted.entries()) {
-    const share = left / (sorted.length - index)
-    if (width > share) return Math.max(0, Math.floor(share))
-    left -= width
-  }
-  return undefined
-}
-
-/**
- * Fit a titled toolbar's titles (`fitTitles()`) now and whenever they could change:  the window's width, the items
- * drawing, the fonts loading, the row's padding or a button's width changing (its styles arriving late).
- * - the row and the buttons are watched too:  on Epic UI's pages the toolbar's styles land after its first fit, and
- *   the toolbar itself stays the same width, so its titles stayed cut with room to spare at 1200px (epic
- *   `epic-engine` I133)
- *   - no loop:  each fit ends at the same sizes as the one before, so the watcher has nothing new to say
- * - `signal`:  stops watching (Epic UI's pages, whose `main` the site's router swaps for the next page's)
- */
-export function keepFitted(toolbar, { signal } = {}) {
-  const sizes = new ResizeObserver(() => fitTitles(toolbar))
-  sizes.observe(toolbar)
-  signal?.addEventListener("abort", () => sizes.disconnect(), { once: true })
-  const watchDrawn = () => {
-    const row = toolbarRow(toolbar)
-    if (row) sizes.observe(row)
-    for (const item of toolbar.querySelectorAll(":scope > [data-rail]")) {
-      const box = item.shadowRoot?.querySelector('[part~="item"]')
-      if (box) sizes.observe(box)
-    }
-    fitTitles(toolbar)
-  }
-  void customElements.whenDefined("ui-item").then(() => nextFrame(2).then(watchDrawn))
-  void document.fonts?.ready.then(() => fitTitles(toolbar))
 }
 
 /** Mark item `id` of `toolbar` as the section being read (`selected`), and no other;  `""`:  none. */
@@ -561,7 +463,7 @@ function openJumpPrompt(go, canGo, { search, host } = {}) {
  * The jump dialog's list of the threads waiting on Owen (Claude spoke last;  `PageComments.waitingOnOwen`), in page
  * order:  a line each, "C3 · his first words", that `pick(label)` takes;  `undefined` when none wait, or the page takes
  * no comments.
- * - Spell UI's menu (epic `epic-engine` P3):  a `<ui-menu vertical secondary link>`, its title a header item, each line
+ * - Spell UI's menu (epic `epic-engine` P3):  a `<ui-menu direction="vertical" appearance="secondary link">`, its title a header item, each line
  *   a `<ui-item>` button, so it takes the focus, and Enter
  */
 function jumpWaitingList(pick) {

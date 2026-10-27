@@ -536,8 +536,11 @@ than just being able to move on").
        It MUST carry the epic's name:  `commits --backfill` ignores a bare `Fix I3:`, since it can't tell which epic.
    - A multi-repo top:  one commit in EACH repo the phase changed, all with the same subject, each in the repo's
      folder (`epic worktree repos` lists what's uncommitted where);  the lowest repo first (`repos.json5`'s order).
-   - After the phase's commit:  `epic commits <name> --backfill`, which finds them by subject, in the kit and every
-     child repo (a child repo's commit links to that repo on GitHub).
+   - The commits reach the epic page BY THEMSELVES (epic `epic-engine` I135), found by subject, in the kit and every
+     child repo (a child repo's commit links to that repo on GitHub):
+     - `epic phase <name>#P<n> done` lists the branch's so far
+     - `epic merge <name>` lists every commit it just brought onto `main`
+     - by hand, any time:  `epic commits <name> --backfill`;  none is listed twice
      - The epic page is never in that commit:
        it's shared content, committed for you (see "Shared content" at the top).
    - A STANDING epic:  the phase goes onto `main` AT ONCE (Q8 of `epic-workflow`),
@@ -1195,7 +1198,7 @@ Owen starts work in THIS epic, in one block:  a phase, or a handful of its items
     Each talked through:  `review <name>#<id> "<outcome>"`.
   - ONE commit for the block:  `<name> J3 + J4 + T6:  <summary>`.
     - The epic's name first, so `commits --backfill` files it under each item.
-    - Then `epic commits <name> --backfill`.
+    - It reaches the page at the next `epic phase ... done` or `epic merge`;  sooner:  `epic commits <name> --backfill`.
   - Reply as a phase's end does:  what was done per item (in words, ids after), checks with numbers, what's next.
 - Bedtime mode on:  no modals, as `/bedtime` says.
   - It's on when `epic summary <name> --json` has a `bedtime`.

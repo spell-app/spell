@@ -7,6 +7,8 @@ import { AnswerForm } from "spell-epic/answers"
 
 import "spell-epic/components/epic-send"
 import "spell-epic/components/epic-text-box"
+// the boxes are `<ui-textarea grow>`s:  `<ui-root>` loads them on a page
+import "spell-ui/components/ui-input"
 
 ////////////////
 // ## Fakes
@@ -80,7 +82,7 @@ describe("<epic-send>", () => {
       `<div><epic-send></epic-send><epic-text-box type="notes"></epic-text-box></div>`
     )
     const [send, notes] = Array.from(root.children) as [Element, Element]
-    const field = notes.shadowRoot!.querySelector("textarea")!
+    const field = notes.shadowRoot!.querySelector("ui-textarea")!.shadowRoot!.querySelector("textarea")!
     field.value = "hi"
     field.dispatchEvent(new InputEvent("input", { bubbles: true, composed: true }))
     await ElementFixture.settle()
@@ -100,7 +102,7 @@ describe("<epic-send>", () => {
       `<div><epic-send></epic-send><epic-text-box type="notes"></epic-text-box></div>`
     )
     const [send, notes] = Array.from(root.children) as [Element, Element]
-    const field = notes.shadowRoot!.querySelector("textarea")!
+    const field = notes.shadowRoot!.querySelector("ui-textarea")!.shadowRoot!.querySelector("textarea")!
     field.value = "half a thought"
     field.dispatchEvent(new InputEvent("input", { bubbles: true, composed: true }))
     await ElementFixture.settle()
@@ -127,7 +129,7 @@ describe("<epic-send>", () => {
       `<div><epic-send></epic-send><epic-text-box type="notes"></epic-text-box></div>`
     )
     const [send, notes] = Array.from(root.children) as [Element, Element]
-    const field = notes.shadowRoot!.querySelector("textarea")!
+    const field = notes.shadowRoot!.querySelector("ui-textarea")!.shadowRoot!.querySelector("textarea")!
     field.value = "half a thought"
     field.dispatchEvent(new InputEvent("input", { bubbles: true, composed: true }))
     await form.saveDraft()
@@ -161,7 +163,7 @@ describe("<epic-send>", () => {
     )
     const send = root.querySelector("epic-send")!
     const box = root.querySelector("epic-text-box")!
-    const field = box.shadowRoot!.querySelector("textarea")!
+    const field = box.shadowRoot!.querySelector("ui-textarea")!.shadowRoot!.querySelector("textarea")!
     field.value = "Make the top project just spell"
     field.dispatchEvent(new InputEvent("input", { bubbles: true, composed: true }))
     await ElementFixture.settle()
@@ -202,7 +204,7 @@ describe("<epic-send>", () => {
       `<div><epic-send></epic-send><epic-text-box type="notes"></epic-text-box></div>`
     )
     const [send, notes] = Array.from(root.children) as [Element, Element]
-    const field = notes.shadowRoot!.querySelector("textarea")!
+    const field = notes.shadowRoot!.querySelector("ui-textarea")!.shadowRoot!.querySelector("textarea")!
     field.value = "Is this worth it?"
     field.dispatchEvent(new InputEvent("input", { bubbles: true, composed: true }))
     await ElementFixture.settle()

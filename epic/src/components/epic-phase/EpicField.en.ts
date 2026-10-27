@@ -22,7 +22,7 @@ export const epicFieldVocabulary = {
     'prose (anywhere prose goes), a labelled block by `label` instead:  `<epic-field label="Where">` draws `Where:` ' +
     "before its prose, no icon (epic `epic-components` P14).  A labelled field in a phase's Requests field is ONE " +
     "REQUEST (`epic file`):  it folds, its label the title, folded to start with;  its screenshots are thumbnails, " +
-    "a click shows one full size, over the page (`<epic-zoom>`).",
+    "a click shows one full size, over the page (the page's `<ui-zoom>`).",
   attributes: [
     {
       name: "name",

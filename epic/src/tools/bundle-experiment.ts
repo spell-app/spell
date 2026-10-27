@@ -11,7 +11,7 @@
  * - Built as a component pack's script is (`spell-pack build`, the kit's `ComponentPack`):
  *   - Vite, on Spell UI's `baseConfig()`:  decorators BEFORE Solid, Solid's JSX, Lightning CSS
  *   - one minified IIFE, banner first, saying how it was built
- *   - every `PACK_MODULES` specifier (`solid-js`, `@solidjs/web`, `spell/element`, `spell-ui/core`, `spell-ui/forms`)
+ *   - every `PACK_MODULES` specifier (`solid-js`, `@solidjs/web`, `spell/element`, `spell-ui/core`, `spell-ui/forms`, `ImageZoom`)
  *     left external, read from `globalThis.SpellUI.packModules`:  the page's one Solid, spell-element and Spell UI core
  * - Unlike a pack:
  *   - no `<ui-root>` catalog, no `registerPack()`:  the entry defines its tags itself, as the script runs

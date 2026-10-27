@@ -8,6 +8,8 @@ import { AnswerForm, type PageAnswer } from "spell-epic/answers"
 import "spell-epic/components/epic-ask"
 import "spell-epic/components/epic-choices"
 import "spell-epic/components/epic-question"
+// the boxes are `<ui-textarea grow>`s:  `<ui-root>` loads them on a page
+import "spell-ui/components/ui-input"
 
 ////////////////
 // ## Fixtures
@@ -195,7 +197,7 @@ describe("<epic-ask>", () => {
   test("only Other written:  blue;  its text goes with the picks", async () => {
     const section = await ElementFixture.render(question())
     const ask = section.querySelector("epic-ask")!
-    const other = part(ask, "other").shadowRoot!.querySelector("textarea")!
+    const other = part(ask, "other").shadowRoot!.querySelector("ui-textarea")!.shadowRoot!.querySelector("textarea")!
     other.value = "neither"
     other.dispatchEvent(new InputEvent("input", { bubbles: true, composed: true }))
     await ElementFixture.settle()

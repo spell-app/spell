@@ -54,6 +54,7 @@ import * as uiForms from "spell-ui/forms"
 import * as uiRoot from "spell-ui/components/ui-root"
 import * as uiCode from "spell-ui/components/ui-code"
 import * as uiMarkdown from "spell-ui/components/ui-markdown"
+import * as imageZoom from "spell-ui/components/ui-zoom/ImageZoom"
 import { PackHotSwap } from "spell-ui/hot"
 import "spell-ui:lazy"
 import "./spell-ui-sources.js"
@@ -81,6 +82,8 @@ export { registerPack } from "spell-ui"
  *   own `<spell-code>` / `<spell-markdown>` (spell-app's app package, `spell-code.js` / `spell-markdown.js`) EXTEND,
  *   through `spell-ui-shared.js`, so they extend THIS page's `UICode` / `UIMarkdown`:  one Spell UI.  Without them
  *   those scripts stop with an error saying so.  Not packs' externals:  the epics pack imports neither.
+ * - `spell-ui/components/ui-zoom/ImageZoom`:  the page's zoom for its screenshots (epic `ui-gaps` P14), the same one the
+ *   docs runtime wires up, which `<epic-field>`'s request thumbnails open in.
  */
 export const packModules = Object.freeze({
   "solid-js": solid,
@@ -91,7 +94,8 @@ export const packModules = Object.freeze({
   "spell-ui/forms": uiForms,
   "spell-ui/components/ui-root": uiRoot,
   "spell-ui/components/ui-code": uiCode,
-  "spell-ui/components/ui-markdown": uiMarkdown
+  "spell-ui/components/ui-markdown": uiMarkdown,
+  "spell-ui/components/ui-zoom/ImageZoom": imageZoom
 })
 
 /**

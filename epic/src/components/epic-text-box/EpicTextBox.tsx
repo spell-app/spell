@@ -47,8 +47,10 @@ export class DOMTextBoxElement extends E.DOMElement<EpicTextBox> {
 /****************
  * ### `EpicTextBox`
  * The component behind `<epic-text-box>`:  a box Owen types in, on a page he answers on (epic `epic-workflow` P12).
- * - A `<textarea>`, one line to start, growing with its text to a third of the window (Owen, 2026-10-06:  every
- *   "tell me more" field grows);  `max-height` sets another cap.
+ * - A `<ui-textarea grow>` (epic `ui-gaps` P14), one line to start, growing with its text to a third of the window
+ *   (Owen, 2026-10-06:  every "tell me more" field grows);  `max-height` sets another cap.
+ *   - its look is this box's own, through its `control` part (`EpicTextBox.css`)
+ *   - `<ui-root>` loads its family, as every Spell UI tag's
  * - What's typed is part of the page's answer, by `type`:
  *   - `notes`:  the page's notes;  `comment`:  the comment on what `for` names (a section, an option `q1-B`);
  *     `other`:  question `for`'s Other
@@ -56,8 +58,8 @@ export class DOMTextBoxElement extends E.DOMElement<EpicTextBox> {
  *     the answer sent (`gatherInto()`, `showAnswer()`)
  *   - `feedback`:  a choice page's, which its `<epic-choices-bar>` reads itself (`value`);  `note`:  likewise, the
  *     element drawing it reads it (a test run's failure note, `<epic-test-run>`, epic `epic-engine` P4)
- * - Its `input` events are the `<textarea>`'s own:  they bubble out of its shadow root, so the element that draws
- *   it hears them (`onInput`).
+ * - Its `input` events are the native `<textarea>`'s own:  they bubble out of both shadow roots, so the element that
+ *   draws it hears them (`onInput`).
  * - The NOTES box also draws, above its field, what the page KEPT (epic `epic-workflow` P18):  text Owen typed for
  *   a question, option or section an agent's rewrite took off the page (`AnswerForm.kept`), "Kept from before the
  *   page changed", each with its old title and a × to drop it.  It's sent with the rest.
@@ -120,15 +122,16 @@ export class EpicTextBox extends E.UIComponent<typeof epicTextBoxVocabulary> imp
     return (
       <div class={this.rootClass} part={this.partForName("base")}>
         <Show when={this.kept.length}>{this.keptBox()}</Show>
-        <textarea
+        <ui-textarea
+          ref={(element: HTMLElement) => this.holdField(element as DOMFieldElement)}
           class={FIELD}
           part={this.partForName("field")}
-          rows="1"
+          grow=""
+          fluid=""
           placeholder={this.hint}
           aria-label={this.label ?? this.hint}
-          style={this.maxHeight ? { "max-height": this.maxHeight } : undefined}
-          value={this.text}
-          onInput={this.onInput}
+          style={this.maxHeight ? { "--ui-input-textarea-grow-max-height": this.maxHeight } : undefined}
+          on-ui-typed={this.onTyped}
         />
       </div>
     )
@@ -170,9 +173,24 @@ export class EpicTextBox extends E.UIComponent<typeof epicTextBoxVocabulary> imp
     )
   }
 
+  /** Its field, once drawn:  the `<ui-textarea>`. */
+  private field: DOMFieldElement | undefined
+
+  /** Its field, drawn:  kept, and given what's typed so far. */
+  private holdField(element: DOMFieldElement) {
+    this.field = element
+    element.value = this.text
+  }
+
+  /** The text changed from outside (a sent answer, `value`):  the field shows it. */
+  @E.onChange("text")
+  protected onTextChanged(text: string) {
+    if (this.field && this.field.value !== text) this.field.value = text
+  }
+
   /** A keystroke:  the text, and the page's form told (its draft follows). */
-  private readonly onInput = (event: InputEvent) => {
-    this.text = (event.currentTarget as HTMLTextAreaElement).value
+  private readonly onTyped = (event: CustomEvent<{ value: string }>) => {
+    this.text = event.detail.value
     this.form?.edited()
   }
 
@@ -216,7 +234,10 @@ export class EpicTextBox extends E.UIComponent<typeof epicTextBoxVocabulary> imp
 /** The vocabulary's attribute getters, typed (see "Attributes" in `UIComponent`). */
 export interface EpicTextBox extends E.AttributeValues<typeof epicTextBoxVocabulary> {}
 
-/** Class of the `<textarea>`. */
+/** Its field's DOM element:  a `<ui-textarea>`, its live `value` a property. */
+type DOMFieldElement = HTMLElement & { value: string }
+
+/** Class of the `<ui-textarea>`. */
 const FIELD = "field"
 
 /** Classes of a notes box's kept text:  its box, title, why, each text (its title, text, ×). */

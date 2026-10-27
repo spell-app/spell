@@ -6,6 +6,8 @@ import { expectAccessible } from "spell/test-helpers/A11y"
 import { ChoicesForm } from "spell-epic/answers"
 
 import "spell-epic/components/epic-choice-rows"
+// the boxes are `<ui-textarea grow>`s:  `<ui-root>` loads them on a page
+import "spell-ui/components/ui-input"
 
 ////////////////
 // ## Fixtures
@@ -140,7 +142,8 @@ describe("<epic-choice-rows>, <epic-choice-row>", () => {
     part(row, "copy")!.click()
     await ElementFixture.settle()
     await new Promise((done) => requestAnimationFrame(done))
-    const box = part<HTMLTextAreaElement>(row, "box")!
+    // its box, a `<ui-textarea>`:  the cursor is its native textarea's
+    const box = part(row, "box")!.shadowRoot!.querySelector("textarea")!
     expect([box.value, box.selectionStart]).toEqual(["this.open", "this.open".length])
     expect(row.matches(":state(changed)")).toBe(false)
     expect(ChoicesForm.forPage().collect()).toEqual({})

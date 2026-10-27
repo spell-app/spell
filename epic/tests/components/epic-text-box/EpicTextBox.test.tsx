@@ -6,12 +6,14 @@ import { expectAccessible } from "spell/test-helpers/A11y"
 import { AnswerForm } from "spell-epic/answers"
 
 import "spell-epic/components/epic-text-box"
+// the boxes are `<ui-textarea grow>`s:  `<ui-root>` loads them on a page
+import "spell-ui/components/ui-input"
 
 afterEach(() => AnswerForm.adopt(undefined))
 
 /** `box`'s `<textarea>`. */
 function field(box: Element): HTMLTextAreaElement {
-  return box.shadowRoot!.querySelector("textarea")!
+  return box.shadowRoot!.querySelector("ui-textarea")!.shadowRoot!.querySelector("textarea")!
 }
 
 /** Type `text` into `box`, as a keystroke does. */
@@ -46,8 +48,11 @@ describe("<epic-text-box>", () => {
       `<div><epic-text-box></epic-text-box><epic-text-box type="note" max-height="40vh"></epic-text-box></div>`
     )
     const [plain, capped] = Array.from(root.children)
-    expect(field(plain!).style.maxHeight).toBe("")
-    expect(field(capped!).style.maxHeight).toBe("40vh")
+    const cap = (box: Element) => Math.round(field(box).getBoundingClientRect().height)
+    const tall = "line\n".repeat(200)
+    for (const box of [plain!, capped!]) (box as HTMLElement & { value: string }).value = tall
+    await ElementFixture.settle()
+    expect([cap(plain!), cap(capped!)]).toEqual([Math.round(innerHeight * 0.33), Math.round(innerHeight * 0.4)])
   })
 
   test("part of the page's answer by its type:  notes, a comment by `for`, Other by `for`;  blank:  nothing", async () => {
