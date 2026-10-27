@@ -2,6 +2,7 @@ import { For, Show, createEffect, createMemo, createSignal, onCleanup } from "so
 import type { JSX } from "@solidjs/web"
 
 import { E } from "spell/element"
+import { SP } from "spell/parser/spell"
 import { editor } from "spell/app/app/editor"
 import { editorPrefs } from "spell/app/app/editorPrefs"
 import { PropertySchemas } from "spell/ui/property"
@@ -239,9 +240,25 @@ export class Inspector {
   /** A thing's title:  its type, then its name if it has one (`DiscardPile · discards`);  a list's item, its place too. */
   static thingLabel(thing: object, step = ""): string {
     const type = thing.constructor.name
-    const name = (thing as { name?: unknown }).name
-    const titled = typeof name === "string" && name ? `${type} · ${name}` : type
-    return step.startsWith(ITEM_STEP) && !(typeof name === "string" && name) ? `${titled} ${step}` : titled
+    const name = Inspector.nameOf(thing)
+    const titled = name ? `${type} · ${name}` : type
+    return step.startsWith(ITEM_STEP) && !name ? `${titled} ${step}` : titled
+  }
+
+  /**
+   * What `thing` is called, if it has a name:  its `name`, else the one under its language's own word for it
+   * (Spanish's `nombre`, from `SP.LanguageWords.builtInMembers`).
+   * - Why:  a type declares its name in the language it's written in, and it compiles under that word.
+   * - `languages`:  the codes to read the words of;  the running project's, by default.
+   * - `""` if it has none.
+   */
+  static nameOf(thing: object, languages: readonly string[] = editor.project?.wordsLanguages ?? []): string {
+    const words = languages.flatMap((lang) => SP.Language.all.get(lang)?.words.builtInMembers?.name ?? [])
+    for (const key of ["name", ...words]) {
+      const name = (thing as Record<string, unknown>)[key]
+      if (typeof name === "string" && name) return name
+    }
+    return ""
   }
 
   /**
@@ -337,9 +354,7 @@ export class Inspector {
         ownWords(element)
       return which ? `<${element.localName} "${which}" />` : `<${element.localName} />`
     }
-    const type = thing.constructor.name
-    const name = (thing as { name?: unknown }).name
-    return typeof name === "string" && name ? `${type} · ${name}` : type
+    return Inspector.thingLabel(thing)
   }
 
   /** A part's icon:  a stub for now, one for drawn things and one for Spell UI elements. */
