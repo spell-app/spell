@@ -132,6 +132,8 @@ yarn kit:review       # the finishing pass:  ts, lint:fix, format, test
   - `yarn readme:check` (`spell readme check`) checks them
   - `yarn readme:test` (`spell readme test [page...]`) runs every example they print with an Output fold, and
     compares what it prints (epic `readme` P16;  WWOD §6)
+  - `yarn readme:pictures` (`spell readme pictures [page...]`) draws each `html example` block they show, light and
+    dark, into a picture under it;  the check fails a stale one (epic `ui-gaps` P14, from epic `epic-engine` Q28)
   - `yarn mermaid:pretty` styles their Mermaid pictures ([README-toolchain.md](README-toolchain.md))
 - Three ways to make a repo do something:  the `spell` CLI, Claude skills, yarn scripts.
   - Their map, one row per operation:  [the commands page](spell.epics/guides/dev/commands/commands.html).

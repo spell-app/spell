@@ -490,7 +490,7 @@ The kit (`~/www/spell`)
 - `spell` (the `spell` command, without installing it), `cli:install` (puts `spell` on your `PATH`)
 - `server`:  `spell server`, the page server's command line, on the kit's own checkout
 - `favicon [--hat 0.74]`:  Spell's favicon files, from the hat mark
-- `readme:check`, `mermaid:pretty`:  the READMEs' check, and the look of their Mermaid pictures
+- `readme:check`, `readme:pictures`, `mermaid:pretty`:  the READMEs' check, their examples' pictures, and the look of their Mermaid pictures
 
 spell-parser
 - checks:  `ts`, `test`, `lint`, `lint:fix`, `format`, `format:check`, `review`

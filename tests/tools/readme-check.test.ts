@@ -254,6 +254,40 @@ describe("ReadmeCheck.checkPage():  siblings", () => {
   })
 })
 
+describe("ReadmeCheck.examples()", () => {
+  const block = ["```html example", '<ui-button color="primary">Save</ui-button>', "```"]
+  const hash = ReadmeCheck.hashOf('<ui-button color="primary">Save</ui-button>')
+  const picture =
+    '<picture><source media="(prefers-color-scheme: dark)" srcset="images/x.dark.png"><img src="images/x.png" ' +
+    'width="96" height="58" alt="A Save button"></picture>'
+
+  test("reads each `html example` block, its markup's hash, and the picture under it with its stamp", () => {
+    const [example] = ReadmeCheck.examples(
+      ["# Page", "", ...block, "", picture, `<!-- picture of the example above: ${hash} -->`].join("\n")
+    )
+    expect(example).toEqual({
+      start: 3,
+      end: 5,
+      markup: '<ui-button color="primary">Save</ui-button>',
+      hash,
+      picture: { line: 7, lines: 2, dark: "images/x.dark.png", src: "images/x.png", alt: "A Save button", hash }
+    })
+    expect(ReadmeCheck.examples("```html\n<b>x</b>\n```")).toEqual([])
+  })
+
+  test("a hash ignores trailing spaces and blank lines round the markup", () => {
+    expect(ReadmeCheck.hashOf("\n<b>x</b>   \n")).toBe(ReadmeCheck.hashOf("<b>x</b>"))
+    expect(ReadmeCheck.hashOf("<b>y</b>")).not.toBe(ReadmeCheck.hashOf("<b>x</b>"))
+  })
+
+  test("finds an example without its picture, and a picture older than its markup", () => {
+    expect(findingsOf(block, "picture")).toEqual(["1 picture"])
+    expect(
+      findingsOf([...block, "", picture, "<!-- picture of the example above: 000000000000 -->"], "picture")
+    ).toEqual(["5 picture"])
+  })
+})
+
 describe("slugFor()", () => {
   test("makes GitHub's heading slugs", () => {
     expect(slugFor("🌱 Coming:  npm")).toBe("-coming--npm")

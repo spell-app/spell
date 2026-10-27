@@ -97,7 +97,7 @@ From:  original WWOD §8, root `AGENTS.md` "Types / Exports" (files, barrels, na
   - A service with no per-instance state is `static` members on the class that owns its domain, with a docstring
     saying why static (WWOD §12).
   - No owning class:  a small class of its own, all `static`.  `ExampleSource`
-    (`packages/ui/src/docs-components/ui-docs-example/ExampleSource.ts`):  `ExampleSource.snapshot()`,
+    (`packages/ui/src/components/ui-example/ExampleSource.ts`):  `ExampleSource.snapshot()`,
     `ExampleSource.of(host)`.
   - A registry, signal bus or menu module with no per-instance state folds into its owner:  callers read
     better (`UI.icons.register()`, not a separate `iconRegistry.add()`), and the folder's import graph loses edges.
