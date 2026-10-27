@@ -294,6 +294,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - repos share one content folder, so another repo's epic page is found from here too
       - the worktree hook refuses another repo's epic's worktree;  the prompt gate and the session-start guard say
         which window;  `epic worktree path`, `epic window launch|open|close` and `epic list` use that repo's
+      - a renamed repo:  its `renamedRepos` setting (old GitHub address to new) makes a page's old `repo` its own
+        (epic `epic-engine` I150);  offline, and no page is rewritten
       - plain `node` loads it (the hooks)
     - `SessionFolders`:  Claude Code's saved-session folders (`~/.claude/projects/<slug>`)
       - and the link that makes a worktree's main's (`linkSessionFolders`)

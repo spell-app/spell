@@ -87,7 +87,8 @@ export class EpicConfig {
     voices: {},
     pageVoices: { readme: "readme", guide: "readme", code: "code", "epic-page": "code" },
     checkoutPatches: [],
-    promptAck: true
+    promptAck: true,
+    renamedRepos: {}
   }
 
   /**
@@ -384,6 +385,14 @@ export class EpicConfig {
     return this.settings.promptAck
   }
 
+  /**
+   * the repo's OLD GitHub addresses, each to the one it was renamed to (`renamedRepos`, epic `epic-engine` I150):
+   * what `EpicRepo` reads so an epic page recording the old name is still this repo's
+   */
+  get renamedRepos(): Record<string, string> {
+    return this.settings.renamedRepos
+  }
+
   /** the window names:  the default window, and the folder names a window shows */
   get windows(): EpicWindows {
     return this.settings.windows
@@ -653,7 +662,8 @@ export class EpicConfig {
         Object.entries(this.settings.pageVoices).map(([kind, voice]) => [`pageVoices.${kind}`, voice])
       ),
       checkoutPatches: this.checkoutPatches.map((patch) => patch.id).join(","),
-      promptAck: this.promptAck
+      promptAck: this.promptAck,
+      renamedRepos: JSON.stringify(this.renamedRepos)
     }
   }
 
@@ -749,6 +759,7 @@ export class EpicConfig {
       pageVoices: { ...defaults.pageVoices, ...namesTo(given, "pageVoices", {}, file) },
       checkoutPatches: patchesOf(given, defaults.checkoutPatches, file),
       promptAck: valueOf(given, "promptAck", defaults.promptAck, file),
+      renamedRepos: urlsTo(given, "renamedRepos", defaults.renamedRepos, file),
       app: {
         path: valueOf(app, "path", defaults.app.path, file, "app."),
         url: valueOf(app, "url", defaults.app.url, file, "app.", { empty: true }),
@@ -845,6 +856,12 @@ export type RepoCheckout = { repo: string; main: string; worktree: string; top: 
  *   - each repo's own:  a multi-repo top's patches are the top's checkouts', each child repo's its own
  * - `promptAck`:  whether the prompt hook shows a line, "On it:  <what Owen asked, in a sentence>", for a message
  *   sent while the session is busy (`PromptAck`, epic `epic-engine` P18);  on (the default), `false` turns it off
+ * - `renamedRepos`:  the repo's OLD GitHub addresses, each to the address it was renamed to
+ *   (`{ "https://github.com/spell-app/spell-kit": "https://github.com/spell-app/spell" }`, epic `epic-engine` I150);
+ *   `{}` (the default):  none
+ *   - GitHub redirects an old name, but an epic page records the address its repo had when it started:
+ *     `EpicRepo` reads both as one repo, offline, so the page needs no rewrite
+ *   - read from every repo of a multi-repo top, and from the checkout an address is looked for in (`EpicRepo.renamesOf()`)
  */
 export type EpicSettings = {
   contentFolder: string
@@ -866,6 +883,7 @@ export type EpicSettings = {
   pageVoices: Record<string, string>
   checkoutPatches: CheckoutPatch[]
   promptAck: boolean
+  renamedRepos: Record<string, string>
 }
 
 /**
@@ -1061,4 +1079,29 @@ function patchesOf(given: Record<string, unknown>, fallback: CheckoutPatch[], fi
     const { id, date, why, copy, run } = patch as CheckoutPatch
     return { id, date, why, ...(copy ? { copy } : {}), ...(run ? { run } : {}) }
   })
+}
+
+/**
+ * `given[key]`, an object of repo addresses to repo addresses (`{ "https://github.com/o/old": "https://github.com/o/new" }`);
+ * `fallback` when it's left out.
+ * - throws `TypeError` naming the file and the key for anything else, or an empty address on either side
+ */
+function urlsTo(
+  given: Record<string, unknown>,
+  key: string,
+  fallback: Record<string, string>,
+  file: string
+): Record<string, string> {
+  const value = given[key]
+  if (value === undefined) return fallback
+  const ok =
+    typeof value === "object" &&
+    value !== null &&
+    !Array.isArray(value) &&
+    Object.entries(value).every(([from, to]) => from.trim() && typeof to === "string" && to.trim())
+  if (!ok)
+    throw new TypeError(
+      `EpicConfig:  ${file}'s "${key}" must be an object of old repo addresses to new ones, { "https://github.com/o/old": "https://github.com/o/new" }, not ${JSON.stringify(value)}`
+    )
+  return value as Record<string, string>
 }

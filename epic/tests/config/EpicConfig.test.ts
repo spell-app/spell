@@ -62,7 +62,8 @@ describe("EpicConfig", () => {
       "pageVoices.code": "code",
       "pageVoices.epic-page": "code",
       checkoutPatches: "",
-      promptAck: true
+      promptAck: true,
+      renamedRepos: "{}"
     })
     // no app declared
     expect(config.app).toBeUndefined()
@@ -245,6 +246,16 @@ describe("EpicConfig", () => {
       /"windows\.default" must be a string/
     )
     expect(() => EpicConfig.settingsFrom("[]", "x.json5")).toThrow(/must hold an object/)
+  })
+
+  test("renamedRepos (epic-engine I150):  old repo addresses to new;  none by default;  refuses anything else", () => {
+    const renamed = { "https://github.com/o/old": "https://github.com/o/new" }
+    expect(EpicConfig.settingsFrom(JSON.stringify({ renamedRepos: renamed })).renamedRepos).toEqual(renamed)
+    expect(EpicConfig.settingsFrom("").renamedRepos).toEqual({})
+    expect(() => EpicConfig.settingsFrom('{ "renamedRepos": ["x"] }', "x.json5")).toThrow(
+      /x\.json5's "renamedRepos" must be an object of old repo addresses to new ones/
+    )
+    expect(() => EpicConfig.settingsFrom('{ "renamedRepos": { "a": " " } }', "x.json5")).toThrow(TypeError)
   })
 })
 
