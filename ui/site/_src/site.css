@@ -853,6 +853,19 @@
     pointer-events: none;
   }
 
+  /*
+   * ## Fomantic's wireframe pictures (`images/wireframe/`, the examples' stand-in text and images):  light grey
+   * pictures, quiet on a light page but bright bars on a dark one.  In dark they're faint, so the panel's own colour
+   * shows through them, whatever the theme;  the pages' own pictures, not a widget's look.
+   */
+  @container style(--ui-scheme: dark) {
+    /* `<ui-image>`'s box is its `image` part (its host draws none);  a class-grammar example's, the `img` */
+    ui-image[src*="/wireframe/"]::part(image),
+    img[src*="/wireframe/"] {
+      opacity: 0.16;
+    }
+  }
+
   /* ## Footer */
   .site-footer {
     display: block;
