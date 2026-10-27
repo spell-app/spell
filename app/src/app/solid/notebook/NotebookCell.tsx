@@ -1,4 +1,4 @@
-import { For, Loading, Match, Show, Switch, createEffect, onCleanup } from "solid-js"
+import { For, Loading, Match, Show, Switch, createEffect, createSignal, onCleanup } from "solid-js"
 import type { monaco } from "spell/app/app/ui/monaco"
 
 import { appTexts } from "spell/app/app/ui/AppTexts"
@@ -152,7 +152,7 @@ export function ExampleDescription(props: {
  * An example's code, in its code pane (`<spell-example>`'s `source` slot), which its `</>` button rolls open
  * under its result:  the page's code view, and a small switch for it at the pane's top right.
  * - Flipping the switch here flips every example's:  remembered per notebook.
- * - ALWAYS editable, in spellx or html (mapped back to spellx);  spell is read only.
+ * - ALWAYS editable, in spellx or spell (turned back into spellx:  `NotebookController.editExample()`).
  *   Typing draws the example above it again, as it's typed.
  *   - Unlocked:  saved.  Locked:  a try-out, never saved;  a small Reset beside the switch puts its code back as
  *     the file has it (Owen, 2026-10-26:  "Yes as try-out.  If doc is locked, nothing is ever saved").
@@ -163,7 +163,6 @@ export function ExampleCode(props: { controller: NotebookController; key: string
   const { controller } = props
   const cell = () => controller.cellFor(props.key)
   const view = () => controller.codeView()
-  const editable = () => view() !== "spell"
   return (
     <div class="NotebookExampleCode" onClick={(event) => event.stopPropagation()}>
       <div class="NotebookExampleBar">
@@ -186,7 +185,7 @@ export function ExampleCode(props: { controller: NotebookController; key: string
           <CellEditor
             code={controller.exampleCode(shown(), props.index)}
             language={LANGUAGES[view()]}
-            readOnly={!editable()}
+            readOnly={false}
             flush
             onChange={(code) => controller.editExample(props.key, props.index, code)}
           />
@@ -196,7 +195,7 @@ export function ExampleCode(props: { controller: NotebookController; key: string
   )
 }
 
-/** The switch between the code views, spellx / spell / html:  each example's, flipping them all. */
+/** The switch between the code views, spellx / spell:  each example's, flipping them all. */
 export function CodeViewSwitch(props: { controller: NotebookController; size?: "tiny" | "small" }) {
   return (
     <ui-buttons
@@ -227,11 +226,15 @@ export function CodeViewSwitch(props: { controller: NotebookController; size?: "
 
 /****************
  * ### `<CellEditor>`
- * A cell's code in a small Monaco editor, as tall as its lines (at most 30), no line numbers or minimap.
+ * A cell's code in a small Monaco editor, no line numbers or minimap, as tall as its text:  wrapped lines too,
+ *   growing and shrinking as it's typed in, never scrolling inside (Owen, 2026-10-27:  "example code is getting cut
+ *   off, should size based on the content").
  * - `readOnly` follows its prop:  switching to an editable view makes it editable, without a new editor.
  * - Marked `data-spell-editor`:  a change from outside the page never replaces it while it's open (epic-engine P40's
  *   shared rules).
  * - Until Monaco's loaded, its code as plain text.
+ * - Its own edits never come back into it while it's typed in:  the code the page hands back after an edit may differ
+ *   (a blank last line dropped, a view's twin written again), and putting that in would move the cursor.
  ****************/
 export function CellEditor(props: {
   code: string
@@ -242,7 +245,10 @@ export function CellEditor(props: {
   flush?: boolean
 }) {
   let instance: monaco.editor.IStandaloneCodeEditor | undefined
-  const lines = () => Math.min(MOST_LINES, props.code.split("\n").length)
+  // its lines' height until Monaco's in;  then Monaco's own measure of its text, wrapped lines too
+  const [height, setHeight] = createSignal(props.code.split("\n").length * LINE_HEIGHT)
+  // what it shows:  the page's code, but its own text while it's typed in
+  const shownCode = () => (instance?.hasTextFocus() ? instance.getValue() : props.code)
   createEffect(
     () => props.readOnly,
     (readOnly) => {
@@ -250,15 +256,17 @@ export function CellEditor(props: {
     }
   )
   return (
-    <div class="NotebookCode" data-spell-editor="" style={{ height: `${lines() * LINE_HEIGHT + 12}px` }}>
+    <div class="NotebookCode" data-spell-editor="" style={{ height: `${height()}px` }}>
       <Loading fallback={<pre class="NotebookCodeLoading">{props.code}</pre>}>
         <LazyMonaco.MonacoEditor
-          value={props.code}
+          value={shownCode()}
           language={props.language}
           options={{ ...CODE_OPTIONS, ...(props.flush ? FLUSH_OPTIONS : {}), readOnly: props.readOnly }}
           onChange={(code) => props.onChange(code)}
           onMount={(editor) => {
             instance = editor
+            editor.onDidContentSizeChange((event) => setHeight(event.contentHeight))
+            queueMicrotask(() => setHeight(editor.getContentHeight()))
           }}
         />
       </Loading>
@@ -284,16 +292,13 @@ function proseShown(cell: PageCell, heading: boolean | undefined): string | unde
 }
 
 /** The views, in the switch's order. */
-const VIEWS: readonly CodeView[] = ["spellx", "spell", "html"]
+const VIEWS: readonly CodeView[] = ["spellx", "spell"]
 
 /** A slot no example has:  an example's panel with nothing to show goes there, out of sight. */
 const NO_SLOT = "none"
 
 /** Monaco's language for each code view. */
-const LANGUAGES: Record<CodeView, string> = { spellx: "spellx", spell: "spell", html: "html" }
-
-/** Most lines an editor shows before it scrolls. */
-const MOST_LINES = 30
+const LANGUAGES: Record<CodeView, string> = { spellx: "spellx", spell: "spell" }
 
 /** Height of a line in a cell's editor, px. */
 const LINE_HEIGHT = 20
@@ -314,5 +319,6 @@ const CODE_OPTIONS = {
   wordWrap: "on",
   renderLineHighlight: "none",
   overviewRulerLanes: 0,
-  scrollbar: { alwaysConsumeMouseWheel: false }
+  // as tall as its text:  nothing to scroll, and the wheel scrolls the page
+  scrollbar: { vertical: "hidden", handleMouseWheel: false, alwaysConsumeMouseWheel: false }
 } as const

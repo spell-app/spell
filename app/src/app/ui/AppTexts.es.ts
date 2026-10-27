@@ -45,6 +45,7 @@ const APP_TEXTS_ES: AppTextPack = {
   notebookPageContents: "En esta página",
   notebookPagePick: "Ir a otra página del cuaderno",
   notebookPageReset: "Restablecer",
+  notebookPageUnfinished: "Aún sin dibujar:  una etiqueta aquí no está terminada",
   notebookPageResetTip: "Devolver el código de este ejemplo a como lo tiene el archivo",
   notebookPageChangedElsewhere: "Cambiado en otro lugar mientras escribías:  lo tuyo se queda",
   notebookPageTakeTheirs: "Tomar lo suyo",

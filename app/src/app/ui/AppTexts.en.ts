@@ -40,6 +40,7 @@ export const APP_TEXTS = {
   notebookPageContents: "On this page",
   notebookPagePick: "Switch to another notebook page",
   notebookPageReset: "Reset",
+  notebookPageUnfinished: "Not drawn yet:  a tag here isn't finished",
   notebookPageResetTip: "Put this example's code back as the file has it",
   notebookPageChangedElsewhere: "Changed elsewhere while you typed:  yours stays",
   notebookPageTakeTheirs: "Take theirs",

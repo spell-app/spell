@@ -252,7 +252,9 @@
   color: var(--ui-text-muted);
 }
 
+/* its height is its text's (`<CellEditor>`):  its border and padding outside it */
 .NotebookCode {
+  box-sizing: content-box;
   border: 1px solid var(--ui-border-color, rgb(34 36 38 / 0.15));
   border-radius: var(--ui-radius-m, 0.5em);
   overflow: hidden;
@@ -272,7 +274,7 @@
 
 /*
  * an example's code, in its code pane:  its text on the pane's own shade, as the code of a component page's example
- * - its switch (spellx / spell / html) small, over the pane's top right
+ * - its switch (spellx / spell) small, over the pane's top right
  */
 .NotebookExampleCode {
   display: grid;
