@@ -64,7 +64,7 @@ Every body inside a tag (`red if it is a diamond ...`) is plain Spell, word for 
 ## A closed vocabulary, not HTML's open one
 
 In HTML, any tag and any attribute parses;  a browser ignores what it doesn't know.
-Here, a word that isn't Spell's is an error that names the closest one:
+Here, a word that isn't Spell's is an error that names the closest one, or the words that go there:
 
 ```text
 "<propety>" isn't a spellx word:  did you mean "<property>"?

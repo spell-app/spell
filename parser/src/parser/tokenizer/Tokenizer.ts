@@ -595,7 +595,7 @@ export class Tokenizer {
   /**
    * A CHAIN tag's head at `start` of `text`, `<otherwise if its done is yes>`, as a `JSXElementToken` with its `chain`
    * and `phrase` -- `undefined` if no word of `chainTags` starts a tag there.
-   * - Its phrase runs to its `>`:  a `>` inside quotes, parens or braces is the phrase's.
+   * - Its phrase runs to its `>`:  a `>` inside quotes, parens or braces is the phrase's (`findPhraseEnd()`).
    * - Ignores leading whitespace.
    */
   matchJSXChainTag(text: string, start = 0, end?: number): P.JSXElementToken | undefined {
@@ -608,18 +608,7 @@ export class Tokenizer {
     })
     if (!word) return undefined
     const phraseStart = at + 1 + word.length
-    let pos = phraseStart
-    let depth = 0
-    let quote: string | undefined
-    for (; pos < end; pos++) {
-      const char = text[pos]!
-      if (quote) {
-        if (char === quote) quote = undefined
-      } else if (char === '"') quote = char
-      else if (char === "(" || char === "{" || char === "[") depth++
-      else if ((char === ")" || char === "}" || char === "]") && depth > 0) depth--
-      else if (char === ">" && depth === 0) break
-    }
+    const pos = this.findPhraseEnd(text, phraseStart, end, { stop: ">" })
     const raw = text.slice(phraseStart, pos)
     const lead = raw.length - raw.trimStart().length
     const contents = raw.trim()
@@ -1166,6 +1155,35 @@ export class Tokenizer {
   }
 
   /**
+   * Where a PHRASE from `start` ends:  its first `stop` outside strings and brackets, e.g. a tag's `>` or a line's
+   * body `:` -- else `end`.
+   * - A string is skipped as `matchText()` reads one:  this tokenizer's `quoteSymbols` (spell's:  only `"`, as an
+   *   apostrophe is its possessive), escapes too.
+   * - `(`, `{` and `[` nest:  a `stop` inside them is the phrase's, `(more than 2 > 1)`.
+   * - `lineEnds`:  a line break outside them ends it too, as spellx's tags do.
+   * - Brackets that close are the other scan:  `findMatchingDelimiter()`.
+   */
+  findPhraseEnd(text: string, start: number, end: number, { stop, lineEnds = false }: PhraseEndOptions): number {
+    let depth = 0
+    let at = start
+    while (at < end) {
+      const char = text[at]!
+      if ((this.quoteSymbols as readonly string[]).includes(char)) {
+        const string = this.matchText(text, at, end)
+        if (string) {
+          at = string.next
+          continue
+        }
+      }
+      if (char === "(" || char === "{" || char === "[") depth++
+      else if ((char === ")" || char === "}" || char === "]") && depth > 0) depth--
+      else if (depth === 0 && (char === stop || (lineEnds && char === "\n"))) return at
+      at++
+    }
+    return end
+  }
+
+  /**
    * Return the index of the first NON-ESCAPED character in `chars` after `text[start]`.
    * - Returns `undefined` if we didn't find a match.
    */
@@ -1208,6 +1226,14 @@ export type TokenizerProps = {
   emptyEndTagCloses?: boolean
   /** See `Tokenizer.chainTags`. */
   chainTags?: Record<string, P.JSXChainKind>
+}
+
+/** How `Tokenizer.findPhraseEnd()` finds a phrase's end. */
+export type PhraseEndOptions = {
+  /** The character that ends it outside strings and brackets, e.g. `>` or `:`. */
+  stop: string
+  /** Does a line break outside brackets end it too? */
+  lineEnds?: boolean
 }
 
 /** Spaces a tab swallows:  fewer than a tab's width, right before it -- see `indentWidth()`. */

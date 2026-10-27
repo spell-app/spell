@@ -263,6 +263,30 @@ describe("SpellxView.read():  what a tag says", () => {
     ])
   })
 
+  test("a hole holding a quoted `}` reads WHOLE, as the tokenizer reads it:  in markup, on its own line, as a value", () => {
+    const file = read(`<spell-view "card">
+	<draw>
+		<text>{its name + "}"} after</text>
+		{its name + "}"}
+		<text color={its name + "}"}>x</text>
+	</draw>
+</spell-view>
+`)
+    const draw = file.templates[0]!.children[0] as SX.SpellxDeclaration
+    expect(file.diagnostics).toEqual([])
+    expect(draw.children).toMatchObject([
+      {
+        kind: "element",
+        children: [
+          { kind: "hole", code: 'its name + "}"' },
+          { kind: "text", text: " after" }
+        ]
+      },
+      { kind: "hole", code: 'its name + "}"' },
+      { kind: "element", attributes: [{ name: "color", value: 'its name + "}"', quote: "{" }] }
+    ])
+  })
+
   test("prose between members is a cell of its own, headings and all (Q12)", () => {
     const file = read(`<spell-view "card">
 	A card.
@@ -313,6 +337,17 @@ describe("SpellxView.read():  mistakes are diagnostics, and reading goes on", ()
 `)
     expect(messagesOf(file)).toEqual([`2:2-2:20  "<propety>" isn't a spellx word:  did you mean "<property>"?`])
     expect(file.templates[0]!.children.map((node) => node.kind)).toEqual(["declaration", "declaration"])
+  })
+
+  test("an unknown word NOTHING is close to (`suggest()`:  two edits) lists the words that go here:  no wild guess", () => {
+    const file = read(`<spell-view "card">
+	<xyz "suit" />
+	<property "suit" zzz="clubs" />
+</spell-view>
+`)
+    const [word, attribute] = messagesOf(file)
+    expect(word).toMatch(/"<xyz>" isn't a spellx word:  here, use one of <property>, <alias>, .*<on>, <when>, <while>$/)
+    expect(attribute).toMatch(/<property> has no "zzz":  it takes "name", "aka", .*"group"$/)
   })
 
   test("an unknown attribute names the closest;  an event's attributes are its parameters", () => {

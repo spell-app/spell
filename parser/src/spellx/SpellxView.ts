@@ -33,7 +33,7 @@ export class SpellxView {
       tokenizer.unwrapsHtml = false
     }
     const [root] = tokenizer.breakIntoIndentedBlocks(tokenizer.tokenize(text))
-    const view = new SpellxView(text)
+    const view = new SpellxView(text, tokenizer)
     const nodes = view.nodesOf(root?.tokens ?? [], "file")
     const diagnostics: SX.SpellxDiagnostic[] = []
     P.Tokenizer.forEachToken(root ? [root] : [], (token) => {
@@ -43,7 +43,11 @@ export class SpellxView {
     return new SX.SpellxFile({ path: options.path, text, language, nodes, diagnostics })
   }
 
-  private constructor(readonly text: string) {}
+  private constructor(
+    readonly text: string,
+    /** The tokenizer that read it:  its brace scan finds where a hole closes, as it found the hole. */
+    private readonly tokenizer: P.Tokenizer
+  ) {}
 
   ////////////////
   // ## A block's items
@@ -440,11 +444,12 @@ export class SpellxView {
   /**
    * A hole, `{its rank}`:  spell, read where it's drawn.
    * - Text before it that the token took with it, `" "` in `{its rank} {its symbol}`, is a text node first.
+   * - It ends where its token does, just past its `}`:  the tokenizer found that, strings skipped.
    */
   private hole(token: P.JSXExpressionToken): SX.SpellxNode[] {
     const open = this.text.indexOf("{", token.start)
     const start = open < 0 || open >= token.end ? token.start : open
-    return this.holeAt(start, this.closingOf(start, token.end) + 1, token.start)
+    return this.holeAt(start, token.end, token.start)
   }
 
   /** The hole from `start`, its `{`, to `end`, past its `}`;  text from `from` before it first, if any. */
@@ -460,22 +465,16 @@ export class SpellxView {
   }
 
   /**
-   * Where the quote or brace opening at `open` closes, before `limit`:  a brace counts the braces inside it.
+   * Where the quote or brace opening at `open` closes, before `limit`.
+   * - A brace:  the tokenizer's brace scan (`findMatchingDelimiter()`), braces inside it counted and strings skipped,
+   *   so a quoted `}` never closes it, `{its name + "}"}`.
    * - None found:  `limit - 1`.
    */
   private closingOf(open: number, limit: number): number {
     const opener = this.text[open]
-    if (opener !== "{") {
-      const close = this.text.indexOf(opener!, open + 1)
-      return close < 0 || close >= limit ? limit - 1 : close
-    }
-    let depth = 0
-    for (let index = open; index < limit; index++) {
-      const char = this.text[index]
-      if (char === "{") depth++
-      else if (char === "}" && --depth === 0) return index
-    }
-    return limit - 1
+    if (opener === "{") return this.tokenizer.findMatchingDelimiter("{", "}", this.text, open, limit) ?? limit - 1
+    const close = this.text.indexOf(opener!, open + 1)
+    return close < 0 || close >= limit ? limit - 1 : close
   }
 
   ////////////////

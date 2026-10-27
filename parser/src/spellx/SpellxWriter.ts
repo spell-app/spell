@@ -32,7 +32,7 @@ export class SpellxWriter {
   static write({ text, match, scope }: SpellxWriteInput): string {
     const writer = new SpellxWriter(text, scope)
     writer.indexStatements(match)
-    const tokenizer = (scope.parser as SP.SpellParser).tokenizer
+    const { tokenizer } = writer
     const [root] = tokenizer.breakIntoIndentedBlocks(tokenizer.tokenize(text))
     writer.writeBlock(root?.tokens ?? [], 0)
     while (writer.out.at(-1) === "") writer.out.pop()
@@ -59,8 +59,8 @@ export class SpellxWriter {
   private readonly out: string[] = []
   /** The source's lines. */
   private readonly lines: string[]
-  /** Where each source line starts. */
-  private readonly lineStarts: number[] = [0]
+  /** Where each source line starts:  `P.getLineStarts()`. */
+  private readonly lineStarts: number[]
   /** Each line's statement, by where its line token starts. */
   private readonly statements = new Map<number, P.Match>()
   /** The file's language. */
@@ -69,13 +69,16 @@ export class SpellxWriter {
   private readonly words: SP.SpellxWords
   /** Its twin words. */
   private readonly twins: SP.SpellxTwinWords
+  /** Its tokenizer:  spell's, which reads a line's phrase as spell does (`colonAt()`). */
+  private readonly tokenizer: P.Tokenizer
 
   private constructor(
     readonly text: string,
     readonly scope: P.Scope
   ) {
     this.lines = text.split("\n")
-    for (let index = 0; index < text.length; index++) if (text[index] === "\n") this.lineStarts.push(index + 1)
+    this.lineStarts = P.getLineStarts(text)
+    this.tokenizer = (scope.parser as SP.SpellParser).tokenizer
     this.language = SP.Language.of(scope)
     const words = this.language.words.spellx ?? SP.Language.default.words.spellx
     if (!words?.twins) throw new TypeError("SpellxWriter():  this language has no spellx twin words")
@@ -421,7 +424,7 @@ export class SpellxWriter {
    * `- to draw its front:` => `<draw "front">`.
    */
   private action(text: string, body: P.BlockToken | undefined, statement: P.Match, indent: string) {
-    const colon = colonAt(text)
+    const colon = this.colonAt(text)
     if (colon < 0) return undefined
     const lead = normal(text.slice(0, colon))
     const inline = text.slice(colon + 1).trim()
@@ -482,7 +485,7 @@ export class SpellxWriter {
     for (const [kind, shape] of Object.entries(this.twins.handlers)) {
       const lead = shape.split("{phrase}")[0]!
       if (!text.startsWith(lead)) continue
-      const colon = colonAt(text)
+      const colon = this.colonAt(text)
       if (colon < 0) return undefined
       const phrase = text.slice(lead.length, colon).trim()
       const inline = text.slice(colon + 1).trim()
@@ -582,14 +585,16 @@ export class SpellxWriter {
 
   /** The line `offset` is on, from 0. */
   private lineOf(offset: number): number {
-    let low = 0
-    let high = this.lineStarts.length - 1
-    while (low < high) {
-      const middle = (low + high + 1) >> 1
-      if (this.lineStarts[middle]! <= offset) low = middle
-      else high = middle - 1
-    }
-    return low
+    return P.positionForOffset(this.lineStarts, offset).line
+  }
+
+  /**
+   * Where `text`'s body colon is:  the first `:` outside quotes, parentheses and braces (`P.Tokenizer.findPhraseEnd()`);
+   * -1 if none.
+   */
+  private colonAt(text: string): number {
+    const colon = this.tokenizer.findPhraseEnd(text, 0, text.length, { stop: ":" })
+    return text[colon] === ":" ? colon : -1
   }
 
   /** Where the line holding `offset` ends. */
@@ -646,21 +651,6 @@ function fill(template: string, values: Record<string, string>): string {
 /** `text` with spaces evened out and no colon at its end. */
 function normal(text: string): string {
   return text.replace(/\s+/g, " ").replace(/\s*:$/, "").trim()
-}
-
-/** Where `text`'s body colon is:  the first `:` outside quotes, parentheses and braces;  -1 if none. */
-function colonAt(text: string): number {
-  let depth = 0
-  let quote = false
-  for (let index = 0; index < text.length; index++) {
-    const char = text[index]
-    if (char === '"') quote = !quote
-    else if (quote) continue
-    else if (char === "(" || char === "{" || char === "[") depth++
-    else if (char === ")" || char === "}" || char === "]") depth--
-    else if (char === ":" && depth === 0) return index
-  }
-  return -1
 }
 
 /** The key of `table` whose value is `value`:  the word written for it;  `value` itself if none. */

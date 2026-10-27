@@ -1252,3 +1252,29 @@ describe("words in any script", () => {
     expect(word!.next).toBe(decomposed.length)
   })
 })
+
+describe("Tokenizer.findPhraseEnd()", () => {
+  /** Spell's tokenizer:  only `"` quotes, as an apostrophe is its possessive. */
+  const SPELL = new Tokenizer({ quoteSymbols: ['"'] })
+  /** Where `text`'s phrase from 0 ends, at `stop`. */
+  const endOf = (text: string, stop: string, lineEnds = false) =>
+    SPELL.findPhraseEnd(text, 0, text.length, { stop, lineEnds })
+
+  test("stops at the first `stop` outside strings and brackets;  the card's rank is no string", () => {
+    expect(endOf(`its count is (2 > 1) and "a > b" and the card's rank > x`, ">")).toBe(53)
+    expect(endOf(`to turn {it}: over`, ":")).toBe(12)
+  })
+
+  test("a string is read as `matchText()` reads it, escapes too", () => {
+    expect(endOf(`say "a \\" > b" > c`, ">")).toBe(15)
+  })
+
+  test("`lineEnds`:  a line break outside brackets ends it;  inside them it doesn't", () => {
+    expect(endOf("a (b\nc) d\ne > f", ">", true)).toBe(9)
+    expect(endOf("a b\nc > d", ">")).toBe(6)
+  })
+
+  test("none:  the end", () => {
+    expect(endOf("no stop here", ">")).toBe(12)
+  })
+})

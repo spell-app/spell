@@ -1,3 +1,4 @@
+import { suggest } from "spell/util"
 import { P } from "spell-parser/parser"
 import { SP } from "spell-parser/spell"
 
@@ -322,17 +323,32 @@ export class SpellxTokenizer extends P.Tokenizer {
     return []
   }
 
-  /** `word` isn't spellx's:  the error, naming the closest word. */
+  /**
+   * `word` isn't spellx's:  the error, naming the closest word (`suggest()`:  within two edits);
+   * none that close, the words that go here:  a template's at the top, a member's in a template.
+   */
   private unknownWordError(word: TagWord) {
     const { prefix, templates, declarations, notes, handlers } = this.words
-    const known = [
-      ...Object.keys(templates).map((it) => `${prefix}-${it}`),
-      ...Object.keys(declarations),
-      ...Object.keys(notes),
-      ...Object.keys(handlers)
-    ]
-    const suggestion = closestWord(word.word.toLowerCase(), known)
-    return this.message("spellx-unknown-word", { tag: `<${word.word}>`, suggestion: `<${suggestion}>` })
+    const templateWords = Object.keys(templates).map((it) => `${prefix}-${it}`)
+    const memberWords = [...Object.keys(declarations), ...Object.keys(notes), ...Object.keys(handlers)]
+    const tag = `<${word.word}>`
+    const suggestion = suggest(word.word, [...templateWords, ...memberWords])
+    if (suggestion) return this.message("spellx-unknown-word", { tag, suggestion: `<${suggestion}>` })
+    const here = this.frames.length ? memberWords : templateWords
+    return this.message("spellx-unknown-word-here", { tag, words: here.map((it) => `<${it}>`).join(", ") })
+  }
+
+  /**
+   * `<word>` takes no attribute `name`:  the error, naming the closest it does take (`suggest()`:  within two edits),
+   * else them all.
+   */
+  private unknownAttributeError(word: TagWord, name: string) {
+    const known = Object.keys(this.words.attributes)
+    const tag = `<${word.word}>`
+    const suggestion = suggest(name, known)
+    if (suggestion) return this.message("spellx-unknown-attribute", { tag, attribute: name, suggestion })
+    const attributes = known.map((it) => `"${it}"`).join(", ")
+    return this.message("spellx-unknown-attribute-here", { tag, attribute: name, attributes })
   }
 
   /** `<otherwise>` with no open `<if>`:  the error, saying to drop the closer before it if that closed one. */
@@ -384,16 +400,8 @@ export class SpellxTokenizer extends P.Tokenizer {
         head.name = attribute.value
         continue
       }
-      if (checks && !(name.toLowerCase() in this.words.attributes)) {
-        const known = Object.keys(this.words.attributes)
-        head.errors.push(
-          this.message("spellx-unknown-attribute", {
-            tag: `<${word.word}>`,
-            attribute: name,
-            suggestion: closestWord(name.toLowerCase(), known)
-          })
-        )
-      }
+      if (checks && !(name.toLowerCase() in this.words.attributes))
+        head.errors.push(this.unknownAttributeError(word, name))
       const { end: _end, ...rest } = attribute
       head.attributes.push(rest)
     }
@@ -414,7 +422,11 @@ export class SpellxTokenizer extends P.Tokenizer {
     pos = skipSpace(text, pos + 1, end)
     const quote = text[pos]
     if (quote === '"' || quote === "{") {
-      const close = quote === "{" ? matchingBrace(text, pos, end) : closingQuote(text, pos, end)
+      // just past its `}`:  the tokenizer's brace scan skips a `}` in a string, `{its name + "}"}`
+      const close =
+        quote === "{"
+          ? (this.findMatchingDelimiter("{", "}", text, pos, end) ?? end - 1) + 1
+          : closingQuote(text, pos, end)
       attribute.value = this.textAt(text, pos + 1, close - 1, quote === '"')
       attribute.end = close
     } else {
@@ -476,22 +488,10 @@ export class SpellxTokenizer extends P.Tokenizer {
    * The phrase from `start` to its tag's `>`:  a `>` inside a string, parens or braces is the phrase's (Q45),
    * and a `/` just before the `>` ends the tag, not the phrase.
    * - Only `"` starts a string:  an apostrophe is spell's possessive (P3, J25).  A phrase ends with its line.
+   * - The tokenizer's own phrase scan, `findPhraseEnd()`, as an if-chain's in markup.
    */
   private phraseFrom(text: string, start: number) {
-    let pos = start
-    let depth = 0
-    let inString = false
-    while (pos < text.length) {
-      const char = text[pos]!
-      if (char === "\n" && !inString && depth === 0) break
-      if (inString) {
-        if (char === '"') inString = false
-      } else if (char === '"') inString = true
-      else if (char === "(" || char === "{" || char === "[") depth++
-      else if ((char === ")" || char === "}" || char === "]") && depth > 0) depth--
-      else if (char === ">" && depth === 0) break
-      pos++
-    }
+    const pos = this.findPhraseEnd(text, start, text.length, { stop: ">", lineEnds: true })
     const closed = text[pos] === ">"
     const selfClosing = closed && text[pos - 1] === "/"
     const textEnd = selfClosing ? pos - 1 : pos
@@ -826,39 +826,9 @@ function closingQuote(text: string, start: number, end: number) {
   return close < 0 || close >= end ? lineEndOf(text, start, end) : close + 1
 }
 
-/** Just past the `}` matching the `{` at `start`, strings and nested braces skipped. */
-function matchingBrace(text: string, start: number, end: number) {
-  let depth = 0
-  let inString = false
-  for (let pos = start; pos < end; pos++) {
-    const char = text[pos]
-    if (inString) {
-      if (char === '"') inString = false
-    } else if (char === '"') inString = true
-    else if (char === "{") depth++
-    else if (char === "}" && --depth === 0) return pos + 1
-  }
-  return end
-}
-
 /** The first word of `words`, lowercased. */
 function firstWordOf(words: string) {
   return words.toLowerCase().split(/[ \t]+/)[0] ?? ""
-}
-
-/** The word of `words` closest to `word`:  the one sharing the longest start, else the first. */
-function closestWord(word: string, words: string[]): string {
-  let best = words[0] ?? word
-  let bestShared = -1
-  for (const each of words) {
-    let shared = 0
-    while (shared < word.length && word[shared] === each[shared]) shared++
-    if (shared > bestShared) {
-      best = each
-      bestShared = shared
-    }
-  }
-  return best
 }
 
 /** A word of a tag:  letters, digits, `_` and `-`, accents too. */

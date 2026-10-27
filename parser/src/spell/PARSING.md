@@ -1151,8 +1151,9 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
   - So a tag line and its indented body are a line and its block, as an outline item and its body are:
     `breakIntoIndentedBlocks()` needs nothing new.
   - It keeps a stack of open tags, by indent, to check what it can see there:
-    a word spellx doesn't know (naming the closest), a closer for another tag, a tag never closed (one still open at
-    the file's end too), an `<otherwise>` after a `</>` closed its `<if>`, a body line indented less than its tag's.
+    a word spellx doesn't know (naming the closest, or the words that go there), a closer for another tag,
+    a tag never closed (one still open at the file's end too), an `<otherwise>` after a `</>` closed its `<if>`,
+    a body line indented less than its tag's.
     - Each goes on its token (`SP.addSpellxError()`), never thrown;  `BlockLine` reports it on its line.
   - Which tags are its own where:  every one at the top and among a template's members;  in a body, notes and
     controls;  in a drawing, those and a placed part;  in a menu, its actions (`isTagHere()`).
