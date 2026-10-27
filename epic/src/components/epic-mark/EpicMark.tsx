@@ -1,12 +1,12 @@
 import { Show } from "solid-js"
 import { isServer, type JSX } from "@solidjs/web"
 
-import { E } from "spell-ui/core"
+import { E } from "spell/ui/core"
 
-import { EpicAddress, PageTargets, type Landing } from "spell-epic/links"
+import { EpicAddress, PageTargets, type Landing } from "spell/epic/links"
 // Import directly:  the page's signals, not its family's barrel (which would define `<epic-page>` here)
-import { EpicPage } from "spell-epic/components/epic-page/EpicPage"
-import { ItemAge, STATUS_STATES, type ItemState } from "spell-epic/components/epic-item/EpicItem.types"
+import { EpicPage } from "spell/epic/components/epic-page/EpicPage"
+import { ItemAge, STATUS_STATES, type ItemState } from "spell/epic/components/epic-item/EpicItem.types"
 
 import { epicMarkVocabulary } from "./EpicMark.en"
 

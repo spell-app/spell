@@ -4,7 +4,7 @@ import { existsSync } from "node:fs"
 import { join } from "node:path"
 
 import { settingsParts } from "spell/server/page/settings"
-import { firstPackageDir, KIT_PACKAGES, tsxImports } from "spell-epic/tools/packageDir"
+import { firstPackageDir, KIT_PACKAGES, tsxImports } from "spell/epic/tools/packageDir"
 
 import { EpicCheckout } from "./EpicCheckout"
 import { EXIT, type ToolSpec } from "./command.types"
@@ -250,13 +250,13 @@ export type EpicToolOptions = { env?: NodeJS.ProcessEnv; codeRoot?: string; cwd?
  *   - the tool is type-checked here, in spell-epic
  *   - literal specifiers fail the CLI's `tsc` (spell's settings) in two ways (epic `epic-components` I5, 2026-10-07):
  *     - ES2023 (`toSorted()`, `findLast()`) in `Markup`:  the CLI's `lib` is ES2022
- *     - Solid's JSX:  the definitions import the vocabularies, which reach `spell-ui/core` -> `ui`'s `.tsx`
- *   - REFACTOR: once the vocabularies' data lives clear of `spell-ui/core` (and the CLI's `lib` is ES2023),
+ *     - Solid's JSX:  the definitions import the vocabularies, which reach `spell/ui/core` -> `ui`'s `.tsx`
+ *   - REFACTOR: once the vocabularies' data lives clear of `spell/ui/core` (and the CLI's `lib` is ES2023),
  *     import them plainly
  */
-const COMMANDS = "spell-epic/tool/PlanDocCommands"
+const COMMANDS = "spell/epic/tool/PlanDocCommands"
 /** `COMMANDS`' twin:  the docs on disk. */
-const FILES = "spell-epic/tool/PlanDocFiles"
+const FILES = "spell/epic/tool/PlanDocFiles"
 
 /** Signals `runChild()` passes on to its child:  they come to us alone, not from the terminal. */
 const PASSED_SIGNALS: NodeJS.Signals[] = ["SIGTERM", "SIGHUP"]

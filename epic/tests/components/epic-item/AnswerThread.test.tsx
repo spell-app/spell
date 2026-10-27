@@ -2,12 +2,12 @@ import { afterEach, describe, expect, test } from "vite-plus/test"
 
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 
-import { AnswerThread } from "spell-epic/components/epic-item/AnswerThread"
+import { AnswerThread } from "spell/epic/components/epic-item/AnswerThread"
 
-import "spell-epic/components/epic-item"
-import "spell-epic/components/epic-answer"
-import "spell-epic/components/epic-status"
-import "spell-epic/components/epic-choices"
+import "spell/epic/components/epic-item"
+import "spell/epic/components/epic-answer"
+import "spell/epic/components/epic-status"
+import "spell/epic/components/epic-choices"
 
 ////////////////
 // ## Fixtures

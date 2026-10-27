@@ -6,7 +6,7 @@
  * - Loaded INSTEAD of `spell-ui.js`, as `core-reference.js` is:  it fetches, draws, then adds `spell-ui.js` (same
  *   folder), whatever happened (`drawThenBoot()`).
  * - The data:  the JSON `<body data-choices-rows>` names, from the page:
- *   `spell-parser/src/spell/spellSyntax.json`, written by `yarn spell:gen:syntax` in spell-parser
+ *   `parser/src/spell/spellSyntax.json`, written by `yarn spell:gen:syntax` in spell-parser
  *   (spell-parser's `src/spell/node/spellSyntax.ts` has its shape, `SpellSyntaxData`).
  *   - Fetched from the checkout SERVING the page, so each branch shows its own rules.
  *   - From `file://` it says so where the tables go:  the page needs the page server.
@@ -55,8 +55,8 @@
  *   `clockOf()`, the review's one time of day.
  */
 import { slug } from "spell/util/string"
-import { ServerLink, clockOf } from "spell-epic/review"
-import { CHOICES_API, ChoicesForm, DraftSaver } from "spell-epic/answers"
+import { ServerLink, clockOf } from "spell/epic/review"
+import { CHOICES_API, ChoicesForm, DraftSaver } from "spell/epic/answers"
 
 import { dataNotice, drawThenBoot, el, fetchFile, sectionNumber, titleInside, withCode } from "./spell-doc-helpers.js"
 

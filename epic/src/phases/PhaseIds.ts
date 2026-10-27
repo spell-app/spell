@@ -16,7 +16,7 @@ import { slug } from "spell/util/string.ts"
  *     one still on a page (not migrated yet) reads as before:  its own number, the rest counted without it
  * - Before P15 the id WAS the number (`p7`):  such OLD ids still read as phase ids, until the migration
  *   `stable-phase-ids` turns them into stable ones;  an old address (`#p7`) lands on the 7th phase (`landing()`).
- * - STATIC, pure, node-safe:  the elements, the epic tool and its migrations alike import it (`spell-epic/phases`).
+ * - STATIC, pure, node-safe:  the elements, the epic tool and its migrations alike import it (`spell/epic/phases`).
  ****************/
 export class PhaseIds {
   /** What every stable phase id starts with:  it keeps them clear of the section ids (`#log`, `#overview`). */

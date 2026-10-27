@@ -19,7 +19,7 @@
 import { SRV } from "spell/server"
 import type { RouteModule } from "spell/server/page"
 
-import { EpicAddress, TARGET_API } from "spell-epic/links"
+import { EpicAddress, TARGET_API } from "spell/epic/links"
 
 import { EpicTargets } from "./EpicTargets"
 

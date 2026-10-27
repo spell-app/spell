@@ -57,7 +57,7 @@ once an epic page is in the `<epic-*>` markup (epic `epic-components`, P8).
 - Dates:  WRITTEN one way, DRAWN another.
   - Written as below:  `2026-10-08 14:34`, `2026-10-08`, or ISO with an offset.
   - Drawn `10/8/26 14:34` / `10/8/26`, by every element but the log's `<epic-event>`
-    (`PlanDates`, in `spell-epic/dates`).
+    (`PlanDates`, in `spell/epic/dates`).
   - Never write the drawn form.
 - The page's data, on `<epic-page>`:
   - `branch`, `worktree`:  none for a future epic (`new --future`).
@@ -133,7 +133,7 @@ As `plan-doc.md`, "Ids":
   - `close d7` finds the question
 - A PHASE's id is STABLE (epic `epic-workflow` P15, I7 and J49):  made once from its name when it's added, and kept
   for good.  Its number is only its place.
-  - `p-` and the name's slug:  "Epic Migrate" is `p-epic-migrate` (`PhaseIds`, in `spell-epic/phases`).
+  - `p-` and the name's slug:  "Epic Migrate" is `p-epic-migrate` (`PhaseIds`, in `spell/epic/phases`).
     - The slug:  lower case, words joined by `-`, anything else dropped;  an apostrophe joins its word (`owens`).
     - A clash with any id on the page gets `-2`, `-3` ...
   - A rename changes the title, never the id;  an insert changes numbers, never ids.
@@ -231,7 +231,7 @@ As `plan-doc.md`, "Ids":
 - `<epic-page standing>` (epic `epic-workflow`):  a STANDING epic, open for good;  each phase merges into `main` on its
   own, and every phase done is NOT done (STANDING, not DONE).  `update <name> --standing [on|off]` sets it.
 - `<epic-page stage="overview | phases | building">` (epic `epic-engine` P29):  how far planning has got, and so
-  which sections the page shows (`PageStages`, `spell-epic/phases`).
+  which sections the page shows (`PageStages`, `spell/epic/phases`).
   - `overview`:  the Overview, Questions and Todo;  `phases`:  the Phases and Issues too;  `building`:  everything.
   - None (every page made before P29):  `building`, so it looks as it did.  No migration step:  an optional attribute.
   - `create` writes `overview` (Q15:  new and future epics;  the default since P33, `--stage` for another);
@@ -947,7 +947,7 @@ As `plan-doc.md`, "Parts", with the elements as hosts (`EpicParts`, beside this 
     handed over is made the root path of what it reaches from the page.
   - A link to a file in the page's OWN folder stays relative in the skeleton (Owen's Q1), and is that folder's root
     path in a part, as it's split (`PlanParts.toPartFrom()`):  from `parts/` it would climb.
-  - A part written before P46 holds links relative to `parts/` (`../../../spell-ui/x.ts`):  read, they're rebased to
+  - A part written before P46 holds links relative to `parts/` (`../../../ui/x.ts`):  read, they're rebased to
     the page (`PlanParts.toPage()`), and the next write makes them root paths.
   - A link copied out of such a part (one `../` too many for the page) is taken as the part's when only that one is
     there (`PlanDocFiles.rootPartLinks()`, epic `epic-engine` I134).
@@ -973,7 +973,7 @@ Pointing at a saga, an epic, a phase or an item, the same way everywhere (epic `
   - the page server:  a typed `/saga/<saga>[/<epic>]` redirects to the page, the `#id` kept
   - the openers:  `epic pages open SAGA:/...`, `epic pages link SAGA:/...`
   - the check:  below
-- The code:  `spell-epic/links` (`EpicAddress`, `PageTargets`:  pure, browser and node), `EpicTargets` here (what's on
+- The code:  `spell/epic/links` (`EpicAddress`, `PageTargets`:  pure, browser and node), `EpicTargets` here (what's on
   disk).
 - NOT a migration:  a new element, so no older page holds anything to change.
 

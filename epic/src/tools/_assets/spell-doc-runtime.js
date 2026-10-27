@@ -97,17 +97,17 @@ import {
   writeJSON
 } from "./spell-doc-helpers.js"
 import { removeToolbar, shortLabel, titledItems, toolbarItem, toolbarMenu, wireJumpKey } from "./spell-doc-toolbar.js"
-import { readingTime } from "spell-epic/tools/ReadingTime.js"
-import { EpicAddress, PageTargets } from "spell-epic/links"
-import { PageStages } from "spell-epic/phases"
-import { ServerLink } from "spell-epic/review"
+import { readingTime } from "spell/epic/tools/ReadingTime.js"
+import { EpicAddress, PageTargets } from "spell/epic/links"
+import { PageStages } from "spell/epic/phases"
+import { ServerLink } from "spell/epic/review"
 // plain DOM, no Solid:  the element it opens, `<ui-zoom>`, is Spell UI's, which this bundle loads like any other
-import { ImageZoom } from "spell-ui/components/ui-zoom/ImageZoom"
-import { ComponentPacks } from "spell-ui/components/ui-components"
+import { ImageZoom } from "spell/ui/components/ui-zoom/ImageZoom"
+import { ComponentPacks } from "spell/ui/components/ui-components"
 // the doc-only families' plain-DOM leaves, bundled from source (`bundle-spell-ui.js`):  Spell UI's docs land links and
 // follow the scroll the same way (epic `coherence` P11)
-import { HashLanding } from "spell-ui/components/ui-toc/HashLanding"
-import { TocIndex } from "spell-ui/components/ui-toc/TocIndex"
+import { HashLanding } from "spell/ui/components/ui-toc/HashLanding"
+import { TocIndex } from "spell/ui/components/ui-toc/TocIndex"
 
 /** Custom elements this runtime drives:  wait for their definitions before wiring. */
 const TAGS = [
@@ -1651,7 +1651,7 @@ function slug(label) {
 /**
  * Item statuses that DON'T count as open:  finished (`done`), made moot (`canceled`), and a plan's answered
  * questions (`decided`) -- in "Questions" only the questions waiting on the reader are open.
- * - `spell-epic/tool/planDoc.types` `CLOSED` is the same set
+ * - `spell/epic/tool/planDoc.types` `CLOSED` is the same set
  */
 const CLOSED = new Set(["done", "decided", "canceled"])
 

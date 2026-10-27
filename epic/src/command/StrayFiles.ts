@@ -3,7 +3,7 @@ import { homedir } from "node:os"
 import { dirname, join, matchesGlob } from "node:path"
 
 import { Git } from "spell/server/Git"
-import { HOME_ENV, HOME_FOLDER } from "spell-epic/server/server.types"
+import { HOME_ENV, HOME_FOLDER } from "spell/epic/server/server.types"
 
 import { EpicCommandError, type Generator } from "./command.types"
 import { LinesOfCode } from "./LinesOfCode"

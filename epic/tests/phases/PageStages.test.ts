@@ -5,7 +5,7 @@
 import { parseHTML } from "linkedom"
 import { describe, expect, test } from "vite-plus/test"
 
-import { PageStages } from "spell-epic/phases"
+import { PageStages } from "spell/epic/phases"
 
 /** A page in `stage` (none:  no attribute), with the Overview and every section kind. */
 function page(stage?: string): Element {

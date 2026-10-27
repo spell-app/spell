@@ -2,8 +2,8 @@ import { existsSync, readdirSync, readFileSync } from "node:fs"
 import { join, relative } from "node:path"
 
 // By file name, `.ts` and all:  plain `node` loads this file by path (the docs index, `src/tools/index.js`)
-import { EpicConfig } from "spell-epic/config/EpicConfig.ts"
-import { DataFile } from "spell-epic/data/DataFile.ts"
+import { EpicConfig } from "spell/epic/config/EpicConfig.ts"
+import { DataFile } from "spell/epic/data/DataFile.ts"
 import { PlanDocError } from "./planDoc.types.ts"
 
 /** The sagas' shared folder, from the content folder:  `sagas/sagas.json5` and each saga's own folder. */

@@ -1,5 +1,5 @@
 /**
- * `spell-epic/answers`:  the pages Claude makes for Owen to answer ON (epic `epic-workflow` P12), as their elements
+ * `spell/epic/answers`:  the pages Claude makes for Owen to answer ON (epic `epic-workflow` P12), as their elements
  * keep them -- and their types:
  * - a draft that saves itself (`DraftSaver`, epic `coherence` C10):  every form's, the docs pages' too
  * - a details page's answer (`AnswerForm`) and its draft (`AnswerDraft`, P18)

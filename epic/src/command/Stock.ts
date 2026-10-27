@@ -4,7 +4,7 @@ import { basename, join, relative } from "node:path"
 import { localMinutes } from "spell/util/time"
 import { Git } from "spell/server/Git"
 import { RealPath } from "spell/server/RealPath"
-import { EpicConfig } from "spell-epic/config/EpicConfig"
+import { EpicConfig } from "spell/epic/config/EpicConfig"
 
 import {
   EXIT,

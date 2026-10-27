@@ -11,18 +11,18 @@
  * - Built as a component pack's script is (`spell-pack build`, the kit's `ComponentPack`):
  *   - Vite, on Spell UI's `baseConfig()`:  decorators BEFORE Solid, Solid's JSX, Lightning CSS
  *   - one minified IIFE, banner first, saying how it was built
- *   - every `PACK_MODULES` specifier (`solid-js`, `@solidjs/web`, `spell/element`, `spell-ui/core`, `spell-ui/forms`, `ImageZoom`)
+ *   - every `PACK_MODULES` specifier (`solid-js`, `@solidjs/web`, `spell/element`, `spell/ui/core`, `spell/ui/forms`, `ImageZoom`)
  *     left external, read from `globalThis.SpellUI.packModules`:  the page's one Solid, spell-element and Spell UI core
  * - Unlike a pack:
  *   - no `<ui-root>` catalog, no `registerPack()`:  the entry defines its tags itself, as the script runs
- *   - it may import Spell UI's DOC-ONLY families (`spell-ui/docs-components/<family>`, e.g. `<ui-docs-inspector>`),
- *     bundled from this checkout's source;  any other `spell-ui/...` module, or Solid's, fails
+ *   - it may import Spell UI's DOC-ONLY families (`spell/ui/docs-components/<family>`, e.g. `<ui-docs-inspector>`),
+ *     bundled from this checkout's source;  any other `spell/ui/...` module, or Solid's, fails
  * - Why not in `spell-ui.js`:  that bundle is built from `ui`'s `dist/`, which has no docs families;
  *   and only the page that needs these pays for them.
  * - The entry lives in SHARED content, which has no `node_modules`:
- *   `spell-ui/docs-components/...` resolves to Spell UI's `src/` by alias (the `spell-ui` workspace Node's resolver
+ *   `spell/ui/docs-components/...` resolves to Spell UI's `src/` by alias (the `spell-ui` workspace Node's resolver
  *   finds from here), so the script is built from the checkout that runs this.
- * - A shared module is read from `SpellUI.packModules` by its import name as written (`spell-ui/core`):
+ * - A shared module is read from `SpellUI.packModules` by its import name as written (`spell/ui/core`):
  *   the names the docs bundle offers (`spell-ui.entry.js`;  epic `repo-split` P14).
  */
 import { existsSync, readFileSync, writeFileSync } from "node:fs"
@@ -97,7 +97,7 @@ async function bundle(entry: string, out: string) {
           if (SHARED_IMPORT.test(id) && !UI_SOURCE.test(id)) {
             throw new Error(
               `bundle-experiment:  '${id}' can't be shared with the page;  import from solid-js, @solidjs/web, ` +
-                `spell/element, spell-ui/core, spell-ui/forms, or a doc-only family ('spell-ui/docs-components/<family>')`
+                `spell/element, spell/ui/core, spell/ui/forms, or a doc-only family ('spell/ui/docs-components/<family>')`
             )
           }
           return false

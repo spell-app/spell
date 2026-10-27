@@ -1,23 +1,23 @@
 import { Show } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
-import { E } from "spell-ui/core"
+import { E } from "spell/ui/core"
 
-import { SUMMARY_ID } from "spell-epic/review"
+import { SUMMARY_ID } from "spell/epic/review"
 // its view of the review inbox:  the file, not `epic-review`'s barrel (`index.ts` defines that family)
-import { ReviewState } from "spell-epic/components/epic-review/ReviewState"
-import type { ReviewShows } from "spell-epic/components/epic-review/EpicReview.types"
+import { ReviewState } from "spell/epic/components/epic-review/ReviewState"
+import type { ReviewShows } from "spell/epic/components/epic-review/EpicReview.types"
 
 // Import directly:  the fold base, not the `epic-section` barrel (which defines `<epic-section>`)
-import { EpicFold } from "spell-epic/components/epic-section/EpicFold"
-import type { ContentsEntry } from "spell-epic/components/epic-section/EpicSection.types"
+import { EpicFold } from "spell/epic/components/epic-section/EpicFold"
+import type { ContentsEntry } from "spell/epic/components/epic-section/EpicSection.types"
 
 import { epicOverviewVocabulary } from "./EpicOverview.en"
 
-import collapseAllCSS from "spell-epic/components/epic-item/CollapseAll.css?inline"
-import foldCSS from "spell-epic/components/epic-section/EpicFold.css?inline"
+import collapseAllCSS from "spell/epic/components/epic-item/CollapseAll.css?inline"
+import foldCSS from "spell/epic/components/epic-section/EpicFold.css?inline"
 import overviewCSS from "./EpicOverview.css?inline"
-import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
+import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 
 /****************
  * ### `EpicOverview`

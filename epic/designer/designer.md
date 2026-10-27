@@ -48,7 +48,7 @@ Sources, short names used below:
   R7 `-21` to `-26`.
 - **debut late**:  his shorter notes after R7, the same evening (pasted screenshots, no file kept);
   each is a row on the details page `epics/debut/details/fruity-requests.html`.
-- **spell-epic AGENTS**:  `spell-epic/src/AGENTS.md`, where his rulings on the epic and docs pages are quoted.
+- **spell-epic AGENTS**:  `epic/src/AGENTS.md`, where his rulings on the epic and docs pages are quoted.
 - **memory**:  `~/.claude/projects/-Users-owen-www-spell/memory/feedback_*.md`, his standing rules.
 
 ### Spacing & density

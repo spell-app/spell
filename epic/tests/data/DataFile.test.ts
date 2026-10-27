@@ -9,7 +9,7 @@ import { join } from "node:path"
 
 import { afterAll, describe, expect, test } from "vite-plus/test"
 
-import { DataFile } from "spell-epic/data/DataFile"
+import { DataFile } from "spell/epic/data/DataFile"
 
 const root = mkdtempSync(join(tmpdir(), "data-file-"))
 afterAll(() => rmSync(root, { recursive: true, force: true }))

@@ -1,4 +1,4 @@
-import { Markup } from "spell-epic/markup"
+import { Markup } from "spell/epic/markup"
 
 import type { Migration, MigrationContext } from "./migrations.types"
 

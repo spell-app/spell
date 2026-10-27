@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from "vite-plus/test"
 
-import { SendCountdown } from "spell-epic/review/SendCountdown"
-import { COUNTDOWN_KEY, COUNTDOWN_MS } from "spell-epic/review/review.types"
+import { SendCountdown } from "spell/epic/review/SendCountdown"
+import { COUNTDOWN_KEY, COUNTDOWN_MS } from "spell/epic/review/review.types"
 
 ////////////////
 // ## Fakes

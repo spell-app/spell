@@ -1,12 +1,12 @@
 import { For } from "solid-js"
 import { isServer, type JSX } from "@solidjs/web"
 
-import { E } from "spell-ui/core"
+import { E } from "spell/ui/core"
 
 import { epicSortVocabulary } from "./EpicSort.en"
 import { SORT_KEY, save, savedSort, type EpicSortName, type SortDetail } from "./EpicList.types"
 
-import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
+import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 import sortCSS from "./EpicSort.css?inline"
 
 /****************

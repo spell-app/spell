@@ -1,5 +1,5 @@
-import { Definitions, type EpicTag } from "spell-epic/definitions"
-import { Markup } from "spell-epic/markup"
+import { Definitions, type EpicTag } from "spell/epic/definitions"
+import { Markup } from "spell/epic/markup"
 
 import { PlanMarkup } from "./PlanMarkup"
 import { PART_COMMENT, PART_EXT, PART_SOURCE, PARTS_DIR, PlanParts, type PartReader } from "./PlanParts"

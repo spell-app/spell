@@ -23,7 +23,7 @@ A design review of one page (epic `epic-engine` P24, request r19), against the d
 
 ```
 /designer guides/server.html                      a docs page
-/designer spell-ui/docs/ui-button.html "the tabs"  a component set's page, a focus
+/designer ui/docs/ui-button.html "the tabs"  a component set's page, a focus
 /designer http://127.0.0.1:4747/editor/            any URL
 ```
 

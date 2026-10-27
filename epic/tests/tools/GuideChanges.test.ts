@@ -7,12 +7,12 @@ import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { afterAll, describe, expect, test, vi } from "vite-plus/test"
 
-import { ThreadFacts } from "spell-epic/comments"
-import { PhaseIds } from "spell-epic/phases"
-import { GuideInbox } from "spell-epic/tool/GuideInbox"
-import { PlanDocFiles } from "spell-epic/tool/PlanDocFiles"
+import { ThreadFacts } from "spell/epic/comments"
+import { PhaseIds } from "spell/epic/phases"
+import { GuideInbox } from "spell/epic/tool/GuideInbox"
+import { PlanDocFiles } from "spell/epic/tool/PlanDocFiles"
 
-import { GuideChanges } from "spell-epic/tools/GuideChanges"
+import { GuideChanges } from "spell/epic/tools/GuideChanges"
 
 /** A guide, its `<title>` carrying a site suffix, with a page note not yet answered. */
 const GUIDE = `<!doctype html>

@@ -11,7 +11,7 @@ import { afterAll, beforeAll, describe, expect, test, vi } from "vite-plus/test"
 import { PageServer } from "spell/server/page"
 import { ask } from "spell/server/test/serve"
 
-import epicRoutes, { FROM_PAGE, epicName, newEpic, setFavorite } from "spell-epic/tool/epicRoutes"
+import epicRoutes, { FROM_PAGE, epicName, newEpic, setFavorite } from "spell/epic/tool/epicRoutes"
 
 const root = mkdtempSync(join(tmpdir(), "epic-routes-"))
 mkdirSync(join(root, "epics"))

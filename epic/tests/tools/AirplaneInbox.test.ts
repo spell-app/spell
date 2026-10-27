@@ -3,9 +3,9 @@ import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { afterAll, describe, expect, it } from "vite-plus/test"
 
-import { FROM_PAGE } from "spell-epic/tool/epicRoutes"
+import { FROM_PAGE } from "spell/epic/tool/epicRoutes"
 
-import { AirplaneInbox } from "spell-epic/tools/AirplaneInbox.ts"
+import { AirplaneInbox } from "spell/epic/tools/AirplaneInbox.ts"
 
 /** A comment on a block, waiting (`CommentList`'s shape). */
 const COMMENT = {

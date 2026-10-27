@@ -10,7 +10,7 @@ import { orphanServers, serverProcesses } from "spell/server/page/prune"
 import type { OrphanServer, ServerProcess } from "spell/server/page/prune"
 import { RealPath } from "spell/server/RealPath"
 
-import { HOME_ENV, HOME_FOLDER } from "spell-epic/server/server.types.ts"
+import { HOME_ENV, HOME_FOLDER } from "spell/epic/server/server.types.ts"
 
 /****************
  * ### `CheckoutServers`

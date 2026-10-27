@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { parseTarget, phaseOf, phaseRanges, planDocArgs } from "spell-epic/command/epicArgs"
+import { parseTarget, phaseOf, phaseRanges, planDocArgs } from "spell/epic/command/epicArgs"
 
 ////////////////
 // ## Owen's rows

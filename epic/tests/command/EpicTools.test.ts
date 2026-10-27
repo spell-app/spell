@@ -3,7 +3,7 @@ import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { afterAll, describe, expect, test } from "vite-plus/test"
 
-import { EpicTools } from "spell-epic/command/EpicTools"
+import { EpicTools } from "spell/epic/command/EpicTools"
 
 /**
  * Two fake checkouts:

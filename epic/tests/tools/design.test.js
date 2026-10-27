@@ -4,8 +4,8 @@ import { join } from "node:path"
 
 import { describe, expect, it } from "vite-plus/test"
 
-import { changedFiles, hashTree, pullBoard } from "spell-epic/tools/design.js"
-import { ROOT } from "spell-epic/tools/pages.js"
+import { changedFiles, hashTree, pullBoard } from "spell/epic/tools/design.js"
+import { ROOT } from "spell/epic/tools/pages.js"
 
 /** A small artboard, as Claude Design writes one. */
 const BOARD = `<!doctype html>

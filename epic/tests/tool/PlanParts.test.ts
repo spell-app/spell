@@ -8,7 +8,7 @@ import { join } from "node:path"
 
 import { describe, expect, test } from "vite-plus/test"
 
-import { PlanParts } from "spell-epic/tool/PlanParts"
+import { PlanParts } from "spell/epic/tool/PlanParts"
 
 describe("PlanParts", () => {
   test("reader():  `parts/<id>.html`;  `undefined` for none, or an old `.htm` (read no more since P15)", () => {

@@ -4,8 +4,8 @@ import { tmpdir } from "os"
 import { join } from "path"
 import { afterAll, describe, expect, test } from "vite-plus/test"
 
-import { CheckoutPatches } from "spell-epic/command/CheckoutPatches"
-import { EpicConfig } from "spell-epic/config/EpicConfig"
+import { CheckoutPatches } from "spell/epic/command/CheckoutPatches"
+import { EpicConfig } from "spell/epic/config/EpicConfig"
 
 /**
  * Throwaway repos:  a main checkout on `main`, with `.ignore` and a config listing patches, and a worktree `old` on a

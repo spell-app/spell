@@ -3,15 +3,15 @@ import { isServer, type JSX } from "@solidjs/web"
 
 import { E } from "spell/element"
 
-import { PlanDates } from "spell-epic/dates"
-import { EpicAddress, PageTargets } from "spell-epic/links"
+import { PlanDates } from "spell/epic/dates"
+import { EpicAddress, PageTargets } from "spell/epic/links"
 // its view of the review inbox:  the file, not `epic-review`'s barrel (`index.ts` defines that family)
-import { ReviewState } from "spell-epic/components/epic-review/ReviewState"
+import { ReviewState } from "spell/epic/components/epic-review/ReviewState"
 
 import { epicChangeVocabulary } from "./EpicChange.en"
 
 import changeCSS from "./EpicChange.css?inline"
-import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
+import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 
 /****************
  * ### `<epic-change>`

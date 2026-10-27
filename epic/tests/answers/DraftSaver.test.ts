@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from "vite-plus/test"
 
-import { DraftSaver } from "spell-epic/answers/DraftSaver"
-import { ServerLink } from "spell-epic/review/ServerLink"
+import { DraftSaver } from "spell/epic/answers/DraftSaver"
+import { ServerLink } from "spell/epic/review/ServerLink"
 
 ////////////////
 // ## Fakes

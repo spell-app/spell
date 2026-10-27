@@ -4,11 +4,11 @@
  * - Change it, then `spell pack build epics`:  the pack's catalog is read from here.
  */
 
-import type { EpicVocabulary } from "spell-epic/definitions"
+import type { EpicVocabulary } from "spell/epic/definitions"
 
-import { ACTIONS_CHILD, ACTIONS_SLOT_SPEC } from "spell-epic/components/epic-item/Fold.types"
+import { ACTIONS_CHILD, ACTIONS_SLOT_SPEC } from "spell/epic/components/epic-item/Fold.types"
 // the folded panel's parts and states, shared with `<epic-aside>`
-import { PANEL_PARTS, PANEL_STATES } from "spell-epic/components/epic-aside/EpicPanel.types"
+import { PANEL_PARTS, PANEL_STATES } from "spell/epic/components/epic-aside/EpicPanel.types"
 
 /****************
  * ### `<epic-code>`

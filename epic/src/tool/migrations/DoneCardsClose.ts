@@ -1,6 +1,6 @@
-import { Markup } from "spell-epic/markup"
-import { PhaseTakes } from "spell-epic/tool/PhaseTakes"
-import { PlanTime } from "spell-epic/tool/PlanTime"
+import { Markup } from "spell/epic/markup"
+import { PhaseTakes } from "spell/epic/tool/PhaseTakes"
+import { PlanTime } from "spell/epic/tool/PlanTime"
 
 import type { Migration, MigrationContext } from "./migrations.types"
 

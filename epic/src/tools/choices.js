@@ -40,7 +40,7 @@ import { fileURLToPath } from "node:url"
 import { parseHTML } from "linkedom"
 
 import { localDate } from "spell/util/time.ts"
-import { DataFile } from "spell-epic/data/DataFile.ts"
+import { DataFile } from "spell/epic/data/DataFile.ts"
 import { ROWS, TOOL_TEMPLATES, choiceSections, fillHead, fillWords } from "./answerPages.js"
 import {
   SLUG,

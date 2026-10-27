@@ -3,8 +3,8 @@ import { join, relative, sep } from "node:path"
 
 import { escapeRegExp } from "spell/util/string"
 import { SRV } from "spell/server"
-import { DataFile } from "spell-epic/data/DataFile"
-import { CommentList, type Comment } from "spell-epic/tool/CommentList"
+import { DataFile } from "spell/epic/data/DataFile"
+import { CommentList, type Comment } from "spell/epic/tool/CommentList"
 
 import { RootLinks } from "./RootLinks"
 

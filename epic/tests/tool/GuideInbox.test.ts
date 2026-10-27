@@ -8,7 +8,7 @@ import { join } from "node:path"
 
 import { afterAll, expect, test } from "vite-plus/test"
 
-import { GuideInbox } from "spell-epic/tool/GuideInbox"
+import { GuideInbox } from "spell/epic/tool/GuideInbox"
 
 const M1 = "2026-10-13T10:00:00.000Z"
 const M2 = "2026-10-13T10:01:00.000Z"

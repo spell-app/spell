@@ -7,8 +7,8 @@ import type { SRV } from "spell/server"
 import { PageServer } from "spell/server/page"
 import { ask } from "spell/server/test/serve"
 
-import { AirplaneMode } from "spell-epic/tools/AirplaneMode"
-import airplaneRoutes from "spell-epic/tools/airplaneRoutes"
+import { AirplaneMode } from "spell/epic/tools/AirplaneMode"
+import airplaneRoutes from "spell/epic/tools/airplaneRoutes"
 
 describe("AirplaneMode", () => {
   const folder = mkdtempSync(join(tmpdir(), "airplane-"))

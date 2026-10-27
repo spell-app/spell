@@ -11,7 +11,7 @@ import { afterAll, beforeAll, expect, test } from "vite-plus/test"
 import { PageServer } from "spell/server/page"
 import { ask } from "spell/server/test/serve"
 
-import showRoutes, { pageFile, pickWindow, type WindowEntry } from "spell-epic/tools/showRoutes"
+import showRoutes, { pageFile, pickWindow, type WindowEntry } from "spell/epic/tools/showRoutes"
 
 let root: string
 let server: PageServer

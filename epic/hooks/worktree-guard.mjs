@@ -17,7 +17,7 @@ import { readFileSync } from "node:fs"
 try {
   const input = JSON.parse(readFileSync(0, "utf8") || "{}")
   // loaded in here, so a guard that won't load never fails the hook
-  const { WorktreeGuard } = await import("spell-epic/command/WorktreeGuard.ts")
+  const { WorktreeGuard } = await import("spell/epic/command/WorktreeGuard.ts")
   const output = WorktreeGuard.check(input)
   if (output) console.log(JSON.stringify(output))
 } catch (error) {

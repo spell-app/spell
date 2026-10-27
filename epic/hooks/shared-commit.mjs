@@ -24,7 +24,7 @@ try {
   const { session_id: session, cwd } = JSON.parse(readFileSync(0, "utf8") || "{}")
   // the MAIN checkout's config, from the session's folder:  the shared repo is its `contentFolder`.
   // Loaded in here, so a config that won't read never fails the hook
-  const { EpicConfig } = await import("spell-epic/config/EpicConfig.ts")
+  const { EpicConfig } = await import("spell/epic/config/EpicConfig.ts")
   const config = cwd && EpicConfig.of(cwd)
   const dir = config && existsSync(config.file) && config.contentFolder
   if (dir && existsSync(join(dir, ".git"))) {

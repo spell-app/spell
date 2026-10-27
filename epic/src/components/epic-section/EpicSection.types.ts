@@ -193,7 +193,7 @@ export const SECTION_LOOKS = {
 export type SectionLook = (typeof SECTION_LOOKS)[keyof typeof SECTION_LOOKS]
 
 /**
- * A report's kind (an overnight `/bedtime` report, P14):  titled its own, unnumbered.  `spell-epic/definitions`' `REPORT`,
+ * A report's kind (an overnight `/bedtime` report, P14):  titled its own, unnumbered.  `spell/epic/definitions`' `REPORT`,
  * restated:  the components never value-import the definitions.
  */
 export const REPORT = "report"

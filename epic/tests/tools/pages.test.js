@@ -9,10 +9,10 @@ import { fileURLToPath } from "node:url"
 
 import { expect, test } from "vite-plus/test"
 
-import { EPIC_UI } from "spell-epic/server/server.types.ts"
+import { EPIC_UI } from "spell/epic/server/server.types.ts"
 import { fakeMainCheckout } from "spell/server/test/checkouts"
 
-import { CONTENT, EPIC_UI_DOCS, ROOT, pageAndId, pageAt, pagePath, runPagePath } from "spell-epic/tools/pages.js"
+import { CONTENT, EPIC_UI_DOCS, ROOT, pageAndId, pageAt, pagePath, runPagePath } from "spell/epic/tools/pages.js"
 
 /** `src/tools/pages.js`, run in a child for another checkout (`EPIC_CHECKOUT` is read as it loads). */
 const PAGES_JS = resolve(dirname(fileURLToPath(import.meta.url)), "../../src/tools/pages.js")
@@ -54,7 +54,7 @@ test("every component set the checkout's settings name is `components/<set>/...`
     const assets = "packages/ui/site/_assets"
     const componentSets = {
       ui: { name: "Spell UI", dir: "packages/ui/docs", assets },
-      epics: { name: "Epic UI", dir: "spell-epic/src/docs", assets },
+      epics: { name: "Epic UI", dir: "epic/src/docs", assets },
       app: { name: "App UI", dir: "packages/app/docs", assets },
       brand: { name: "Brand", dir: "packages/brand/docs", assets }
     }

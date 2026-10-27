@@ -3,8 +3,8 @@ import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { afterAll, describe, expect, it } from "vite-plus/test"
 
-import { preFlight } from "spell-epic/tools/airplane.ts"
-import { HIGHLIGHT } from "spell-epic/tools/offline.ts"
+import { preFlight } from "spell/epic/tools/airplane.ts"
+import { HIGHLIGHT } from "spell/epic/tools/offline.ts"
 
 describe("epic airplane check:  preFlight()", () => {
   const root = mkdtempSync(join(tmpdir(), "airplane-check-"))

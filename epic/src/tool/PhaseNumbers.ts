@@ -1,6 +1,6 @@
 import { escapeRegExp } from "spell/util/string"
 
-import { PhaseIds } from "spell-epic/phases"
+import { PhaseIds } from "spell/epic/phases"
 
 import { PlanItem } from "./PlanItem"
 

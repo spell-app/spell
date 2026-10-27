@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { accessLetters } from "spell-epic/tools/_assets/spell-doc-toolbar.js"
+import { accessLetters } from "spell/epic/tools/_assets/spell-doc-toolbar.js"
 
 describe("accessLetters()", () => {
   test("each title's first letter, else the next free letter in it", () => {

@@ -4,8 +4,8 @@ import { homedir } from "node:os"
 import { dirname, join } from "node:path"
 
 import { RealPath } from "spell/server/RealPath"
-import { DataFile } from "spell-epic/data/DataFile.ts"
-import { HOME_ENV, HOME_FOLDER } from "spell-epic/server/server.types.ts"
+import { DataFile } from "spell/epic/data/DataFile.ts"
+import { HOME_ENV, HOME_FOLDER } from "spell/epic/server/server.types.ts"
 
 /****************
  * ### `AskListeners`

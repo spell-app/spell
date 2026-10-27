@@ -1,11 +1,11 @@
 import { Show } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
-import { E } from "spell-ui/core"
+import { E } from "spell/ui/core"
 
-import { Fold } from "spell-epic/components/epic-item/Fold"
+import { Fold } from "spell/epic/components/epic-item/Fold"
 // Import directly:  the question's class, not its barrel (which would define `<epic-ask>` here)
-import { EpicAsk } from "spell-epic/components/epic-ask/EpicAsk"
+import { EpicAsk } from "spell/epic/components/epic-ask/EpicAsk"
 
 import { epicChoicesVocabulary } from "./EpicChoices.en"
 import {
@@ -20,7 +20,7 @@ import {
 } from "./EpicChoices.types"
 
 import choicesCSS from "./EpicChoices.css?inline"
-import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
+import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 
 /****************
  * ### `EpicChoices`

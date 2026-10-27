@@ -4,7 +4,7 @@
  */
 import { describe, expect, test } from "vite-plus/test"
 
-import { ThreadFacts, type ThreadComment } from "spell-epic/comments"
+import { ThreadFacts, type ThreadComment } from "spell/epic/comments"
 
 /** A comment, as the comments route answers it. */
 function comment(fields: Partial<ThreadComment> = {}): ThreadComment {

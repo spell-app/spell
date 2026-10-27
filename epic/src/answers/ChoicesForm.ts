@@ -1,6 +1,6 @@
 // Import directly:  the persist barrel would bring the database and server places too
 import { PrefStore } from "spell/util/persist/PrefStore"
-import { ServerLink, clockOf, sentence, type ServerInfo } from "spell-epic/review"
+import { ServerLink, clockOf, sentence, type ServerInfo } from "spell/epic/review"
 
 import type { AnswerFormOptions } from "./AnswerForm"
 import { DraftSaver } from "./DraftSaver"
@@ -47,7 +47,7 @@ import {
  *   - On load they come back in `restoredOrder`, which the table puts its rows in.
  * - Node-safe at import:  no `window` / `document` touched until `forPage()`, `watch()` or `expandAll()`;
  *   `fetch` and the storage come in through `AnswerFormOptions`, so tests stub them.
- * - Position in the import graph:  `spell-epic/review` (the link), `spell-epic/dates`, its peer types.
+ * - Position in the import graph:  `spell/epic/review` (the link), `spell/epic/dates`, its peer types.
  *   NEVER imports Solid or Spell UI.
  ****************/
 export class ChoicesForm {

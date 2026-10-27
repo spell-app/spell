@@ -15,9 +15,9 @@ import { parseHTML } from "linkedom"
 import { afterAll, afterEach, beforeEach, describe, expect, test, vi } from "vite-plus/test"
 
 import { DataFile } from "spell/server/DataFile"
-import { LinesOfCode } from "spell-epic/command/LinesOfCode"
-import { LocPage } from "spell-epic/command/LocPage"
-import { LOC_DEFAULTS, type LocScan } from "spell-epic/command/command.types"
+import { LinesOfCode } from "spell/epic/command/LinesOfCode"
+import { LocPage } from "spell/epic/command/LocPage"
+import { LOC_DEFAULTS, type LocScan } from "spell/epic/command/command.types"
 
 const TEMP = realpathSync(mkdtempSync(join(tmpdir(), "epic-loc-")))
 afterAll(() => rmSync(TEMP, { recursive: true, force: true }))

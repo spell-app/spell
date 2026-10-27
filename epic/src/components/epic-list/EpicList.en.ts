@@ -4,7 +4,7 @@
  * - Change it, then `spell pack build epics`:  the pack's catalog is read from here.
  */
 
-import type { EpicVocabulary } from "spell-epic/definitions"
+import type { EpicVocabulary } from "spell/epic/definitions"
 
 /****************
  * ### `<epic-list>`
@@ -22,7 +22,7 @@ export const epicListVocabulary = {
     "Planning, Urgent, Done -- each under a heading with its count, by title within each or newest first " +
     "(`<epic-sort>`);  above them a chip per saga, in the sagas' order, then No saga, each with its count:  a click " +
     "shows only that saga's epics.  It never moves its cards:  it places and hides them from its shadow root.  " +
-    "Written by `epic pages index` (`spell-epic/list/EpicCards` `epicListHtml()`).",
+    "Written by `epic pages index` (`spell/epic/list/EpicCards` `epicListHtml()`).",
   attributes: [
     {
       name: "sagas",

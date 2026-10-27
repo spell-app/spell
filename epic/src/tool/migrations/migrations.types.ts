@@ -3,7 +3,7 @@
  * - Data only:  nothing here runs.
  */
 import type { SRV } from "spell/server"
-import type { DataFileMove } from "spell-epic/data/DataFile"
+import type { DataFileMove } from "spell/epic/data/DataFile"
 
 /**
  * Every KIND of page a migration step can be for (epic `epic-workflow`, J44), by the names P14 proposes.

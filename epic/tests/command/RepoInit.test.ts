@@ -14,9 +14,9 @@ import { join } from "node:path"
 import { afterAll, describe, expect, test } from "vite-plus/test"
 
 import { Git } from "spell/server/Git"
-import { EpicCheckout } from "spell-epic/command/EpicCheckout"
-import { RepoInit } from "spell-epic/command/RepoInit"
-import { EpicConfig } from "spell-epic/config/EpicConfig"
+import { EpicCheckout } from "spell/epic/command/EpicCheckout"
+import { RepoInit } from "spell/epic/command/RepoInit"
+import { EpicConfig } from "spell/epic/config/EpicConfig"
 
 /** A throwaway repo `try` on branch `trunk`:  a README, nothing set up for epics yet. */
 const TEMP = realpathSync(mkdtempSync(join(tmpdir(), "repo-init-")))

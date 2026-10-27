@@ -4,9 +4,9 @@
 import { parseHTML } from "linkedom"
 import { describe, expect, test } from "vite-plus/test"
 
-import { Markup } from "spell-epic/markup"
+import { Markup } from "spell/epic/markup"
 
-import { EpicParts } from "spell-epic/tool/EpicParts"
+import { EpicParts } from "spell/epic/tool/EpicParts"
 
 /** A small `<epic-*>` doc:  a host of each kind, one with a slotted title, one empty, URLs to rebase. */
 const DOC = `<!doctype html><html><body><main><epic-page epic="x" title="X">

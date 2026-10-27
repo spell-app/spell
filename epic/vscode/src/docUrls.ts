@@ -9,7 +9,7 @@ import { existsSync, readFileSync, readdirSync, statSync } from "node:fs"
 import { homedir } from "node:os"
 import { join } from "node:path"
 
-// By its file, not `spell-epic/...`:  plain `node` runs this file's tests, with no alias table
+// By its file, not `spell/epic/...`:  plain `node` runs this file's tests, with no alias table
 import { RealPath } from "spell/server/RealPath"
 
 /** The extension's id, `<publisher>.<name>`:  its `vscode://` URIs start with it. */

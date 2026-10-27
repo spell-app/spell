@@ -1,13 +1,13 @@
 /**
  * Loose types and constants of the `epic-cards` family:  the page server's answer it draws, and its groups.
- * - Data only:  nothing here runs.  The route that answers (`spell-epic/tool/SagaEpics`) imports these types too.
+ * - Data only:  nothing here runs.  The route that answers (`spell/epic/tool/SagaEpics`) imports these types too.
  */
 
 import type { JSX } from "@solidjs/web"
 
-import type { EpicFacts } from "spell-epic/list/EpicState"
+import type { EpicFacts } from "spell/epic/list/EpicState"
 
-/** Where the cards come from:  `GET /api/epics/saga?saga=<id>` (`spell-epic/tool/epicRoutes.ts`). */
+/** Where the cards come from:  `GET /api/epics/saga?saga=<id>` (`spell/epic/tool/epicRoutes.ts`). */
 export const SAGA_EPICS_API = "/api/epics/saga"
 
 /** One epic serving a saga, as the page server answers it. */
@@ -20,7 +20,7 @@ export type SagaEpic = {
   href: string
   /** its `<epic-summary>`, as text;  `""` with none */
   summary: string
-  /** what its state is read from (`spell-epic/list/EpicState`) */
+  /** what its state is read from (`spell/epic/list/EpicState`) */
   facts: EpicFacts
   /** when it was last worked on, local ISO (`2026-10-09T14:34-04:00`);  none when nothing says */
   worked?: string

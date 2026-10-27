@@ -7,8 +7,8 @@ import { join } from "node:path"
 
 import { describe, expect, test } from "vite-plus/test"
 
-import { engineFileFor } from "spell-epic/server/engineLinks"
-import { engineUrlFor, legacyEnginePath, PACK_URL, repoPrefixFor } from "spell-epic/server/server.types"
+import { engineFileFor } from "spell/epic/server/engineLinks"
+import { engineUrlFor, legacyEnginePath, PACK_URL, repoPrefixFor } from "spell/epic/server/server.types"
 
 describe("engineUrlFor()", () => {
   test("an engine file by a checkout path, from any depth or the root, old folders too:  its route", () => {

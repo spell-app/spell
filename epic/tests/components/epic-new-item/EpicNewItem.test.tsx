@@ -3,10 +3,10 @@ import { afterEach, beforeEach, describe, expect, test, vi } from "vite-plus/tes
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import { expectAccessible } from "spell/test-helpers/A11y"
 
-import { ReviewClient } from "spell-epic/review"
+import { ReviewClient } from "spell/epic/review"
 
-import "spell-ui/components/ui-icon"
-import "spell-epic/components/epic-new-item"
+import "spell/ui/components/ui-icon"
+import "spell/epic/components/epic-new-item"
 
 // the form and its saves, inside a page:  `EpicReview.test.tsx` (a Todos section) and `EpicPage.test.tsx` (the `+`)
 

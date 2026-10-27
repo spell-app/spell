@@ -4,7 +4,7 @@ import { dirname, extname, join, posix } from "node:path"
 import { localDate } from "spell/util/time"
 import { DataFile } from "spell/server/DataFile"
 import { Git } from "spell/server/Git"
-import { EpicConfig } from "spell-epic/config/EpicConfig"
+import { EpicConfig } from "spell/epic/config/EpicConfig"
 
 import {
   EXIT,

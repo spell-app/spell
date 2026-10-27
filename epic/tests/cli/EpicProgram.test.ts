@@ -4,7 +4,7 @@ import { dirname, join, resolve } from "node:path"
 import JSON5 from "json5"
 import { describe, expect, test, vi } from "vite-plus/test"
 
-import { EpicConfig } from "spell-epic/config/EpicConfig"
+import { EpicConfig } from "spell/epic/config/EpicConfig"
 
 /**
  * The real `epic` command, end to end:  `bin/epic` run as a separate process, as a user would.

@@ -3,11 +3,11 @@ import { afterEach, describe, expect, test } from "vite-plus/test"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import { expectAccessible } from "spell/test-helpers/A11y"
 
-import { ChoicesForm } from "spell-epic/answers"
+import { ChoicesForm } from "spell/epic/answers"
 
-import "spell-epic/components/epic-choice-rows"
+import "spell/epic/components/epic-choice-rows"
 // the boxes are `<ui-textarea grow>`s:  `<ui-root>` loads them on a page
-import "spell-ui/components/ui-input"
+import "spell/ui/components/ui-input"
 
 ////////////////
 // ## Fixtures

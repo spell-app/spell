@@ -17,7 +17,7 @@ import { FileLock } from "spell/server/FileLock"
 import { Git } from "spell/server/Git"
 import { RealPath } from "spell/server/RealPath"
 import type { SRV } from "spell/server"
-import { EpicConfig } from "spell-epic/config/EpicConfig"
+import { EpicConfig } from "spell/epic/config/EpicConfig"
 
 import {
   EXIT,

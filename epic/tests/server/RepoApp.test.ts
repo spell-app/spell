@@ -11,9 +11,9 @@ import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
 
 import { ask } from "spell/server/test/serve"
 
-import { EpicServer } from "spell-epic/server/EpicServer"
-import { RepoList } from "spell-epic/server/RepoList"
-import type { AppStatus } from "spell-epic/server/server.types"
+import { EpicServer } from "spell/epic/server/EpicServer"
+import { RepoList } from "spell/epic/server/RepoList"
+import type { AppStatus } from "spell/epic/server/server.types"
 
 /** Write `text` at `path` under `root`, making folders. */
 function put(root: string, path: string, text: string): void {

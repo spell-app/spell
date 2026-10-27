@@ -1,5 +1,5 @@
-import { PlanDates } from "spell-epic/dates"
-import { ServerLink, clockOf, sentence, type ServerLinkOptions, type StorageFinder } from "spell-epic/review"
+import { PlanDates } from "spell/epic/dates"
+import { ServerLink, clockOf, sentence, type ServerLinkOptions, type StorageFinder } from "spell/epic/review"
 
 import { AnswerDraft } from "./AnswerDraft"
 import { DraftSaver } from "./DraftSaver"
@@ -74,7 +74,7 @@ export type AnswerFormOptions = ServerLinkOptions & {
  *   - only on a details page (`DETAILS_PAGE`):  an element's docs page keeps nothing
  * - Node-safe at import:  no `window` / `document` touched until `forPage()` or `watch()`;
  *   `fetch` and the storage come in through `AnswerFormOptions`, so tests stub them.
- * - Position in the import graph:  `spell-epic/review` (the link), `spell-epic/dates`, its peers.
+ * - Position in the import graph:  `spell/epic/review` (the link), `spell/epic/dates`, its peers.
  *   NEVER imports Solid or Spell UI:  the elements bridge its changes (`subscribe()`) into their own state.
  ****************/
 export class AnswerForm {

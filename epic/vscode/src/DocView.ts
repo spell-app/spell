@@ -66,8 +66,8 @@ import { existsSync } from "fs"
 import { join } from "path"
 import * as vscode from "vscode"
 
-import { EpicConfig } from "spell-epic/config/EpicConfig"
-import { RepoList } from "spell-epic/server/RepoList"
+import { EpicConfig } from "spell/epic/config/EpicConfig"
+import { RepoList } from "spell/epic/server/RepoList"
 
 import { escapeAttribute, fileForPath, planDocsOf, samePage, stamped, type ServerInfo } from "./docUrls"
 

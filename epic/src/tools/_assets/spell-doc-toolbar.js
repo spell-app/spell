@@ -14,7 +14,7 @@
 import { nextFrame } from "spell/util/dom"
 import { commentsOnPage, firstWords } from "./spell-doc-comments.js"
 import { FIELDS, el, titleInside } from "./spell-doc-helpers.js"
-import { ThreadFacts } from "spell-epic/comments"
+import { ThreadFacts } from "spell/epic/comments"
 
 ////////////////
 // ## The toolbar

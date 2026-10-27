@@ -1,10 +1,10 @@
 import { Show } from "solid-js"
 import { isServer, type JSX } from "@solidjs/web"
 
-import { E } from "spell-ui/core"
+import { E } from "spell/ui/core"
 
-import { EpicAddress, PageTargets, TARGET_API, type Landing, type TargetAnswer } from "spell-epic/links"
-import { ServerLink } from "spell-epic/review"
+import { EpicAddress, PageTargets, TARGET_API, type Landing, type TargetAnswer } from "spell/epic/links"
+import { ServerLink } from "spell/epic/review"
 
 import { epicLinkVocabulary } from "./EpicLink.en"
 

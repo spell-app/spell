@@ -10,12 +10,12 @@ import { join } from "node:path"
 import { parseHTML } from "linkedom"
 import { afterEach, describe, expect, test } from "vite-plus/test"
 
-import { PAGE_KINDS } from "spell-epic/tool/migrations"
-import { PlanAnchors } from "spell-epic/tool/PlanAnchors"
+import { PAGE_KINDS } from "spell/epic/tool/migrations"
+import { PlanAnchors } from "spell/epic/tool/PlanAnchors"
 
-import { anchorOf, blocksIn, excerptOf, findBlock } from "spell-epic/tools/BlockAnchors.js"
-import { KINDS, migratePages, pageKind, pagesFor, report, STEPS, stepsFor } from "spell-epic/tools/migrate.js"
-import { formattedAlready, tidy } from "spell-epic/tools/pages.js"
+import { anchorOf, blocksIn, excerptOf, findBlock } from "spell/epic/tools/BlockAnchors.js"
+import { KINDS, migratePages, pageKind, pagesFor, report, STEPS, stepsFor } from "spell/epic/tools/migrate.js"
+import { formattedAlready, tidy } from "spell/epic/tools/pages.js"
 
 const dirs: string[] = []
 afterEach(() => {
@@ -305,9 +305,9 @@ describe("root-links", () => {
   test("a guide's relative links as root paths, its site header's root dropped, the rest kept byte for byte;  once", () => {
     const guide =
       '<!doctype html>\n<html><body>\n  <spell-site-header root="../.."></spell-site-header>\n' +
-      '  <main><a  href="../../spell-ui/README.md#x">ui</a> <a href="details/d.html">d</a> <a href="x.html">x</a>\n' +
+      '  <main><a  href="../../ui/README.md#x">ui</a> <a href="details/d.html">d</a> <a href="x.html">x</a>\n' +
       '  <img src="shots/a.png"> <a href="../../../above.html">up</a></main>\n</body></html>\n'
-    const root = checkout({ "guides/x/x.html": guide, "spell-ui/README.md": "", "guides/x/details/d.html": "" })
+    const root = checkout({ "guides/x/x.html": guide, "ui/README.md": "", "guides/x/details/d.html": "" })
     const pages = pagesFor(root).filter(({ file }) => file.endsWith("x/x.html"))
     const { results } = migratePages(pages, { step: "root-links", tidied: false, root })
     expect(results[0]!.ran).toEqual(["root-links"])
@@ -317,7 +317,7 @@ describe("root-links", () => {
     ])
     expect(readFileSync(join(root, "guides/x/x.html"), "utf8")).toBe(
       "<!doctype html>\n<html><body>\n  <spell-site-header></spell-site-header>\n" +
-        '  <main><a  href="/spell-ui/README.md#x">ui</a> <a href="/guides/x/details/d.html">d</a> <a href="x.html">x</a>\n' +
+        '  <main><a  href="/ui/README.md#x">ui</a> <a href="/guides/x/details/d.html">d</a> <a href="x.html">x</a>\n' +
         '  <img src="shots/a.png"> <a href="../../../above.html">up</a></main>\n</body></html>\n'
     )
     expect(migratePages(pages, { step: "root-links", tidied: false, root }).written).toEqual([])

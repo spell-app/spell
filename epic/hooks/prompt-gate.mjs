@@ -31,13 +31,13 @@ try {
   if (input.cwd) process.env.EPIC_CHECKOUT = input.cwd
   const missed = await sessionMoves(input)
   // loaded in here, so a gate that won't load never fails the prompt
-  const { PromptGate } = await import("spell-epic/command/PromptGate.ts")
-  const { Window } = await import("spell-epic/window.mjs")
+  const { PromptGate } = await import("spell/epic/command/PromptGate.ts")
+  const { Window } = await import("spell/epic/window.mjs")
   const output = PromptGate.gate(input, Window.current())
   // a prompt the gate let through, sent while the session is busy:  "On it:  ..." (epic `epic-engine` P18)
-  const { PromptAck } = await import("spell-epic/command/PromptAck.ts")
+  const { PromptAck } = await import("spell/epic/command/PromptAck.ts")
   const ack = new PromptAck().answer(input, { gated: Boolean(output) })
-  const { SessionMoves } = await import("spell-epic/command/SessionMoves.ts")
+  const { SessionMoves } = await import("spell/epic/command/SessionMoves.ts")
   const answer = SessionMoves.withMissed(output ?? ack, missed)
   if (answer) console.log(JSON.stringify(answer))
 } catch (error) {
@@ -47,8 +47,8 @@ try {
 /** The session's mark, then its missed move (`SessionMoves`), or `null`:  never stops the prompt. */
 async function sessionMoves(input) {
   try {
-    const { SessionMoves } = await import("spell-epic/command/SessionMoves.ts")
-    const { PromptAck, BUSY_BEFORE_MS } = await import("spell-epic/command/PromptAck.ts")
+    const { SessionMoves } = await import("spell/epic/command/SessionMoves.ts")
+    const { PromptAck, BUSY_BEFORE_MS } = await import("spell/epic/command/PromptAck.ts")
     const moves = new SessionMoves()
     moves.sawHooks(input.session_id)
     const { status, forMs } = new PromptAck().sessionState(input.session_id)

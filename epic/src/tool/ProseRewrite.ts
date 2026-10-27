@@ -1,5 +1,5 @@
-import { Formats, type EpicData, type EpicTag } from "spell-epic/definitions"
-import { Markup, type MarkupContent } from "spell-epic/markup"
+import { Formats, type EpicData, type EpicTag } from "spell/epic/definitions"
+import { Markup, type MarkupContent } from "spell/epic/markup"
 
 import { Chrome, Drawn, LABELLED_BLOCK, ProseBlocks, ProseCounted, replyTitleParts } from "./planDoc.types"
 

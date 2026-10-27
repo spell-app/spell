@@ -1,22 +1,22 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from "vite-plus/test"
 
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import { expectAccessible } from "spell/test-helpers/A11y"
 
-import { ReviewClient, type Inbox } from "spell-epic/review"
+import { ReviewClient, type Inbox } from "spell/epic/review"
 
-import "spell-ui/components/ui-button"
-import "spell-ui/components/ui-icon"
-import "spell-ui/components/ui-section"
-import "spell-epic/components/epic-item"
-import "spell-epic/components/epic-choices"
-import "spell-epic/components/epic-section"
-import "spell-epic/components/epic-phase"
-import "spell-epic/components/epic-summary"
-import "spell-epic/components/epic-overview"
+import "spell/ui/components/ui-button"
+import "spell/ui/components/ui-icon"
+import "spell/ui/components/ui-section"
+import "spell/epic/components/epic-item"
+import "spell/epic/components/epic-choices"
+import "spell/epic/components/epic-section"
+import "spell/epic/components/epic-phase"
+import "spell/epic/components/epic-summary"
+import "spell/epic/components/epic-overview"
 // the note is a `<ui-textarea grow>`:  `<ui-root>` loads it on a page
-import "spell-ui/components/ui-input"
+import "spell/ui/components/ui-input"
 
 ////////////////
 // ## Fakes

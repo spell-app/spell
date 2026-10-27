@@ -1,5 +1,5 @@
 /**
- * `spell-epic/review`:  the page's server clients -- the review inbox's (`ReviewClient`) and the running agents'
+ * `spell/epic/review`:  the page's server clients -- the review inbox's (`ReviewClient`) and the running agents'
  * (`AgentsClient`), on the link both write through (`ServerLink`) -- their types and helpers;  and the page's
  * countdown to Send (`SendCountdown`, epic `epic-engine` P20).
  * - Node-safe at import:  nothing touches `window` / `document` until a client's `forPage()` or `watch()`;

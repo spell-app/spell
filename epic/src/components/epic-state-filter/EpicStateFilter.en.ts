@@ -4,9 +4,9 @@
  * - Change it, then `spell pack build epics`:  the pack's catalog is read from here.
  */
 
-import type { EpicVocabulary } from "spell-epic/definitions"
+import type { EpicVocabulary } from "spell/epic/definitions"
 
-import { FILTER_TEXTS } from "spell-epic/components/epic-section/EpicSection.types"
+import { FILTER_TEXTS } from "spell/epic/components/epic-section/EpicSection.types"
 
 /****************
  * ### `<epic-state-filter>`

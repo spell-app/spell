@@ -10,12 +10,12 @@ import { afterAll, beforeAll, expect, test, vi } from "vite-plus/test"
 
 import { PageServer } from "spell/server/page"
 import { ask } from "spell/server/test/serve"
-import { CommentList } from "spell-epic/tool/CommentList"
-import { GuideInbox } from "spell-epic/tool/GuideInbox"
-import { ReviewInbox } from "spell-epic/tool/ReviewInbox"
+import { CommentList } from "spell/epic/tool/CommentList"
+import { GuideInbox } from "spell/epic/tool/GuideInbox"
+import { ReviewInbox } from "spell/epic/tool/ReviewInbox"
 
-import { run } from "spell-epic/tools/comments"
-import commentsRoutes from "spell-epic/tools/commentsRoutes"
+import { run } from "spell/epic/tools/comments"
+import commentsRoutes from "spell/epic/tools/commentsRoutes"
 
 let root: string
 let server: PageServer
@@ -56,10 +56,10 @@ const PAGES: Record<string, string> = {
   // a saga page (epic `epic-workflow` P15):  its comments in its own review inbox
   "sagas/epics/epics.saga.html": PAGE,
   // a component set (Epic UI), served at /components/epics/ from its package's docs/
-  "spell-epic/src/docs/epic-item.html": PAGE,
+  "epic/src/docs/epic-item.html": PAGE,
   // Epic UI's page of `<epic-send>`, showing one live:  not a details page, so it takes comments
-  "spell-epic/src/docs/epic-send.html": PAGE.replace("<p>Body.</p>", "<p>Body.</p><epic-send></epic-send>"),
-  "spell-epic/src/docs/__parts/layout.html": PAGE,
+  "epic/src/docs/epic-send.html": PAGE.replace("<p>Body.</p>", "<p>Body.</p><epic-send></epic-send>"),
+  "epic/src/docs/__parts/layout.html": PAGE,
   // spell-app's own sets, App UI and Brand (epic `epic-engine`:  their pages load the comments too)
   "packages/app/docs/Chooser.html": PAGE,
   "packages/app/docs/__parts/layout.html": PAGE,
@@ -82,7 +82,7 @@ const SETTINGS = {
   pageServer: {
     componentSets: {
       ui: { name: "Spell UI", dir: "packages/ui/docs", assets: "packages/ui/site/_assets" },
-      epics: { name: "Epic UI", dir: "spell-epic/src/docs", assets: "packages/ui/site/_assets" },
+      epics: { name: "Epic UI", dir: "epic/src/docs", assets: "packages/ui/site/_assets" },
       app: { name: "App UI", dir: "packages/app/docs", assets: "packages/ui/site/_assets" },
       brand: { name: "Brand", dir: "packages/brand/docs", assets: "packages/ui/site/_assets" }
     }
@@ -247,7 +247,7 @@ test("a page no epic owns:  Send goes to feedback;  nobody listening wakes feedb
   expect(heard.send).toMatchObject({ epic: "feedback", listening: "feedback-1" })
   expect(heard.wake).toBeNull()
   // the tests after it start from no inbox, and no feedback epic
-  rmSync(join(root, "spell-epic/src/docs/epic-item.inbox.json5"))
+  rmSync(join(root, "epic/src/docs/epic-item.inbox.json5"))
   rmSync(join(root, "epics/feedback"), { recursive: true })
 })
 
@@ -411,7 +411,7 @@ test("a component set's page, at its address:  its inbox beside it in the set's 
   const { status, answer } = await post({ page, action: "add", ...ON_TABLE, text: "Show a reply too?" })
   expect(status).toBe(200)
   expect(answer.id).toBe("c1")
-  expect(inboxOf("spell-epic/src/docs/epic-item.html")).toMatchObject({
+  expect(inboxOf("epic/src/docs/epic-item.html")).toMatchObject({
     comments: { c1: { text: "Show a reply too?", status: "new" } }
   })
   const read = JSON.parse((await ask(port, "GET", `/api/docs/comments?page=${page}`)).text)

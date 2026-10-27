@@ -1,5 +1,5 @@
 /**
- * `spell-epic/links`:  pointing at a saga, an epic, a phase or an item, the same way everywhere (epic `epic-workflow`
+ * `spell/epic/links`:  pointing at a saga, an epic, a phase or an item, the same way everywhere (epic `epic-workflow`
  * P15):  short addresses (`SAGA:/drawable-spell/python-target#T1`), `<epic-link>`'s attributes, and what a page holds
  * to land on.
  * - Pure, node-safe at import:  the elements, the docs runtime (`spell-doc-runtime.js`) and the node tools import it.

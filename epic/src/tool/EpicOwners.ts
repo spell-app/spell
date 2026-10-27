@@ -3,8 +3,8 @@ import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path"
 
 import { escapeRegExp } from "spell/util/string"
 import { Git } from "spell/server/Git"
-import { EpicConfig } from "spell-epic/config/EpicConfig"
-import { PageStages } from "spell-epic/phases"
+import { EpicConfig } from "spell/epic/config/EpicConfig"
+import { PageStages } from "spell/epic/phases"
 
 import { PlanDocFiles, type EpicListing } from "./PlanDocFiles"
 import { PARTS_DIR } from "./PlanParts"
@@ -17,10 +17,10 @@ import { PARTS_DIR } from "./PlanParts"
  *   - `branch`:  its branch changes it.
  *     - Its worktree's commits since it left the base branch (`git diff <base>...HEAD`), and what's not committed yet.
  *     - In the checkout and in each child repo inside it (spell-ui, spell-epic ...), named from the checkout's root:
- *       `spell-epic/src/window.mjs`.
+ *       `epic/src/window.mjs`.
  *     - Only an epic in progress whose checkout is a worktree:  the main checkout's own changes are nobody's.
  *   - `plan`:  its epic page names the path:  the skeleton or one of its part files (`parts/*.html`) has the path's
- *     text, as a whole path (`spell-epic/src/x.ts` doesn't name `src/x.ts`;  a link's `../../../src/x.ts` does).
+ *     text, as a whole path (`epic/src/x.ts` doesn't name `src/x.ts`;  a link's `../../../src/x.ts` does).
  * - Each owner with its stage (`OwnerStage`):  `planning` (a page agreeing its Overview or Phases, or a future epic),
  *   else `building`.
  * - NEVER a done epic.
@@ -51,7 +51,7 @@ export class EpicOwners {
 
   /**
    * Which open epics own each of `paths`, in order:  each path with its owners, `[]` when none does.
-   * - a path is the checkout root's:  `src/server/LiveReload.ts`, `spell-epic/src/window.mjs`;
+   * - a path is the checkout root's:  `src/server/LiveReload.ts`, `epic/src/window.mjs`;
    *   an absolute one inside this checkout is made so (`pathOf()`)
    * - owners in `listEpics()`' order:  in progress, then future
    */
@@ -73,7 +73,7 @@ export class EpicOwners {
   }
 
   /**
-   * The files epic `epic`'s branch changes, from its checkout's root:  `src/a.ts`, `spell-ui/src/b.ts`.
+   * The files epic `epic`'s branch changes, from its checkout's root:  `src/a.ts`, `ui/src/b.ts`.
    * - none for a future epic, or one running in the main checkout (`PlanDocFiles.MAIN_CHECKOUT`), or whose worktree
    *   is gone
    * - each repo's (`repoFolders()`):  its commits since the base branch (`<base>...HEAD`:  from where they meet, so
@@ -123,7 +123,7 @@ export class EpicOwners {
 
   /**
    * Does epic-page text `text` name checkout path `path`, as a whole path?
-   * - not inside a longer one:  `spell-epic/src/x.ts` and `src/x.tsx` don't name `src/x.ts`
+   * - not inside a longer one:  `epic/src/x.ts` and `src/x.tsx` don't name `src/x.ts`
    * - a relative link's climb is fine:  `../../../src/x.ts` names it
    * - STATIC:  pure
    */

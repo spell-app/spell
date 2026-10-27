@@ -32,7 +32,7 @@ and nine hooks, scripts Claude Code runs by itself when something happens.
 
 ```sh
 # from the kit's root, ~/www/spell
-echo '{"prompt": "/epic seo add a sitemap", "permission_mode": "plan"}' | node spell-epic/hooks/prompt-gate.mjs
+echo '{"prompt": "/epic seo add a sitemap", "permission_mode": "plan"}' | node epic/hooks/prompt-gate.mjs
 ```
 
 <details>

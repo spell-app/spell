@@ -4,12 +4,12 @@ import { basename, dirname, join, relative, sep } from "node:path"
 
 import { escapeRegExp } from "spell/util/string"
 import { RealPath } from "spell/server/RealPath"
-import { EpicConfig } from "spell-epic/config/EpicConfig"
-import { SessionFolders } from "spell-epic/config/SessionFolders"
-import { DataFile } from "spell-epic/data/DataFile"
+import { EpicConfig } from "spell/epic/config/EpicConfig"
+import { SessionFolders } from "spell/epic/config/SessionFolders"
+import { DataFile } from "spell/epic/data/DataFile"
 import { SRV } from "spell/server"
 
-import { planDocIn } from "spell-epic/tools/pages.js"
+import { planDocIn } from "spell/epic/tools/pages.js"
 import {
   EPIC_CARDS_END,
   EPIC_CARDS_START,

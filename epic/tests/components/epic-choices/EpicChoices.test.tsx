@@ -3,10 +3,10 @@ import { afterEach, describe, expect, test, vi } from "vite-plus/test"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import { expectAccessible } from "spell/test-helpers/A11y"
 
-import { ReviewClient } from "spell-epic/review"
+import { ReviewClient } from "spell/epic/review"
 
 // NOT `epic-item`:  the options read only their item's attributes, so an undefined `<epic-item>` does
-import "spell-epic/components/epic-choices"
+import "spell/epic/components/epic-choices"
 
 ////////////////
 // ## Fakes

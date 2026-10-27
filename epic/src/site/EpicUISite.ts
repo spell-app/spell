@@ -5,8 +5,8 @@ import { fileURLToPath } from "node:url"
 import { parseHTML } from "linkedom"
 
 import { readJSON5File } from "spell/util/node/json5"
-import { SiteDataBuilder } from "spell-ui/tools/SiteDataBuilder"
-import { SiteSearchBuilder } from "spell-ui/tools/SiteSearchBuilder"
+import { SiteDataBuilder } from "spell/ui/tools/SiteDataBuilder"
+import { SiteSearchBuilder } from "spell/ui/tools/SiteSearchBuilder"
 import type {
   SiteAttribute,
   SiteDataFile,
@@ -15,9 +15,9 @@ import type {
   SiteSearchPage,
   SiteSet,
   SiteTag
-} from "spell-ui/docs-components/docs-components.types"
-import { Definitions } from "spell-epic/definitions"
-import type { EpicTag, EpicVocabulary } from "spell-epic/definitions"
+} from "spell/ui/docs-components/docs-components.types"
+import { Definitions } from "spell/epic/definitions"
+import type { EpicTag, EpicVocabulary } from "spell/epic/definitions"
 
 /****************
  * ### `EpicUISite`

@@ -6,7 +6,7 @@ import { checkoutOf } from "spell/server/checkout"
 import { FileLock } from "spell/server/FileLock"
 import { Git } from "spell/server/Git"
 import { RealPath } from "spell/server/RealPath"
-import { EpicConfig, type CheckoutPatch } from "spell-epic/config/EpicConfig.ts"
+import { EpicConfig, type CheckoutPatch } from "spell/epic/config/EpicConfig.ts"
 
 import type { PatchReport } from "./command.types.ts"
 

@@ -5,7 +5,7 @@ import {
   type EpicData,
   type EpicTag,
   type EpicVocabulary
-} from "spell-epic/definitions"
+} from "spell/epic/definitions"
 
 import { TEXT_NODE, type MarkupContent, type MarkupProblem, type ValidateOptions } from "./markup.types"
 import { MarkupCheck } from "./MarkupCheck"
@@ -16,7 +16,7 @@ import { MarkupCheck } from "./MarkupCheck"
  * - Make an element from data (`element()`), read its data back (`read()`), change it (`set()`), put a child where
  *   its parent's content model lists it (`place()`), check a whole doc or a part (`validate()`).
  * - Plain DOM, no globals:  works on linkedom documents (node:  the tool, the converter) and the browser's DOM
- *   alike.  Never defines an element:  `spell-epic/definitions` is data.
+ *   alike.  Never defines an element:  `spell/epic/definitions` is data.
  * - STATIC:  nothing to keep between calls.
  * - Data is keyed by camelCase name (`reviewAs` for `review-as`):  `EpicData<tag>`.
  ****************/

@@ -1,14 +1,14 @@
 /**
- * Types of `spell-epic/definitions`:  the ONE description of every `<epic-*>` element, shared by the browser elements
+ * Types of `spell/epic/definitions`:  the ONE description of every `<epic-*>` element, shared by the browser elements
  * and the node tools (the converter, the epic tool).
  * - An element's description IS its vocabulary, `components/<family>/<Name>.en.ts`:  every set's
  *   `ComponentVocabulary` (`spell/element`), plus what it lacks for a DOCUMENT format -- the children each element
  *   allows (its content model), required attributes and value formats.
  * - Bottom of the folder's import graph:  `import type` only, so it loads anywhere (node, browser, a vocabulary).
- *   `definitions.types` <- `Definitions` <- `spell-epic/markup`.
+ *   `definitions.types` <- `Definitions` <- `spell/epic/markup`.
  */
 
-// NOTE:  spell-element's vocabulary TYPES file, not its barrel or `spell-ui/core`:  those load the element layer (JSX,
+// NOTE:  spell-element's vocabulary TYPES file, not its barrel or `spell/ui/core`:  those load the element layer (JSX,
 // Vite-only imports), which a node tool's type check -- the docs tools, through the epic-page forwarders -- can't compile.
 import type { AttributeSpec, ComponentVocabulary } from "spell/element/vocabulary.types"
 

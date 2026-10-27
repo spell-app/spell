@@ -2,11 +2,11 @@ import { existsSync, readdirSync } from "node:fs"
 import { dirname, join, relative, resolve, sep } from "node:path"
 import { fileURLToPath } from "node:url"
 
-import { EpicConfig } from "spell-epic/config/EpicConfig"
-import { GuideInbox } from "spell-epic/tool/GuideInbox"
-import { SeeAlso } from "spell-epic/tool/SeeAlso"
+import { EpicConfig } from "spell/epic/config/EpicConfig"
+import { GuideInbox } from "spell/epic/tool/GuideInbox"
+import { SeeAlso } from "spell/epic/tool/SeeAlso"
 
-import { EPIC_UI } from "spell-epic/server/server.types"
+import { EPIC_UI } from "spell/epic/server/server.types"
 
 import { ComponentSetFolders } from "./ComponentSetFolders"
 

@@ -4,15 +4,15 @@ import { join } from "node:path"
 import { parseHTML } from "linkedom"
 
 // Import directly:  the `spell/server/site` barrel is browser code (the site header);  this file imports nothing
-import { URGENT_SELECTOR } from "spell-epic/list/EpicState"
-import { PhaseIds } from "spell-epic/phases"
+import { URGENT_SELECTOR } from "spell/epic/list/EpicState"
+import { PhaseIds } from "spell/epic/phases"
 import { localMinutes } from "spell/util/time"
-import { FAVORITES_FILE, eventTimesIn, favoritesIn, lastWorked } from "spell-epic/list/EpicCards"
+import { FAVORITES_FILE, eventTimesIn, favoritesIn, lastWorked } from "spell/epic/list/EpicCards"
 
-import { EpicConfig } from "spell-epic/config/EpicConfig"
-import { DataFile } from "spell-epic/data/DataFile"
+import { EpicConfig } from "spell/epic/config/EpicConfig"
+import { DataFile } from "spell/epic/data/DataFile"
 
-import type { SagaEpic, SagaEpicsAnswer } from "spell-epic/components/epic-cards/EpicCards.types"
+import type { SagaEpic, SagaEpicsAnswer } from "spell/epic/components/epic-cards/EpicCards.types"
 
 import { PlanDocFiles } from "./PlanDocFiles"
 
@@ -21,7 +21,7 @@ import { PlanDocFiles } from "./PlanDocFiles"
  * The epics serving a saga, as a saga page's Epics draws them (`<epic-cards>`, epic `epic-workflow` P15):
  * every epic page whose `<epic-page saga>` names it.
  * - GATHERED when asked, from each epic page's SKELETON (no parts):  its title, summary, phases' statuses, `updated`,
- *   `future`, `standing` and the items that need Owen -- what `spell-epic/list/EpicState` reads an epic's state from
+ *   `future`, `standing` and the items that need Owen -- what `spell/epic/list/EpicState` reads an epic's state from
  *   - and when it was last worked on (its `updated`, its log lines:  the doc's and its `parts/log.html`), and whether
  *     Owen starred it (`FAVORITES_FILE`):  its card is the Epics page's, `<epic-card>` (epic `epic-engine` I39)
  * - nothing kept:  an epic that joins or leaves the saga, or finishes a phase, shows on the next ask

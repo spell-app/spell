@@ -3,9 +3,9 @@ import { describe, expect, test } from "vite-plus/test"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import { expectAccessible } from "spell/test-helpers/A11y"
 
-import "spell-epic/components/epic-mark"
-import "spell-epic/components/epic-page"
-import "spell-epic/components/epic-item"
+import "spell/epic/components/epic-mark"
+import "spell/epic/components/epic-page"
+import "spell/epic/components/epic-item"
 
 /** `<epic-mark>`'s chip in its shadow root. */
 function chipOf(mark: Element): HTMLElement {

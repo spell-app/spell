@@ -292,7 +292,7 @@ Here's the question from the top of this page, as its files hold it:
 
 _Trimmed from the real files:  data in attributes, prose in children, and the body in a part file of its own._
 
-The frame (sections, tables, buttons, icons) is [Spell UI](https://github.com/spell-app/spell-ui/blob/main/README.md)'s `<ui-*>` elements.
+The frame (sections, tables, buttons, icons) is [Spell UI](https://github.com/spell-app/spell/blob/main/ui/README.md)'s `<ui-*>` elements.
 What's particular to epics is Epic UI, spell-epic's own `<epic-*>` set:
 `<epic-page>`, `<epic-item>`, `<epic-question>`, the review buttons, the comment threads.
 And the `epic` command writes its markup from the same element definitions the elements are drawn from,
@@ -406,12 +406,12 @@ yarn vscode:package     # the extension's bundle and spell-epic.vsix:  NOT insta
 <summary>Imports</summary>
 
 - Every file is imported by its package's name and its path under `src/`, with no extension, inside spell-epic too:
-  `spell-epic/tool/PlanDoc`, `spell-ui/core`, `spell/server`.
+  `spell/epic/tool/PlanDoc`, `spell/ui/core`, `spell/server`.
   - A same-folder peer stays `./PlanItem`, and nothing climbs into `src/` with `../`:
     lint fails it, and its message names the package-name import to write.
   - Files outside `src/` (`tests/`, `scripts/`, `hooks/`, `vscode/`) import `src/` the same way.
 - Plain `node` (the hooks, the window script, the docs tools' `.js` scripts) imports a file with its extension:
-  `spell-epic/config/EpicConfig.ts`.
+  `spell/epic/config/EpicConfig.ts`.
 - More:  [the repo's AGENTS.md](AGENTS.md), "Imports";
   the names a page's packs share one Solid and one Spell UI by:  [README-pages.md](README-pages.md#how-a-page-draws-them).
 

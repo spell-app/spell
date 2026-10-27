@@ -4,8 +4,8 @@ import { fileURLToPath } from "node:url"
 
 import { componentSets, pageServerSettings } from "spell/server/page/settings"
 
-import { EpicConfig } from "spell-epic/config/EpicConfig"
-import { EPIC_UI } from "spell-epic/server/server.types"
+import { EpicConfig } from "spell/epic/config/EpicConfig"
+import { EPIC_UI } from "spell/epic/server/server.types"
 
 /****************
  * ### `ServedFolders`
@@ -14,12 +14,12 @@ import { EPIC_UI } from "spell-epic/server/server.types"
  *
  * ```ts
  * ServedFolders.under("/Users/owen/www/spell-app/spell-app")
- * // => { "components/ui": "packages/ui/docs", "components/epics": "spell-epic/src/docs", ...,
- * //      templates: "spell-epic/templates" }
+ * // => { "components/ui": "packages/ui/docs", "components/epics": "epic/src/docs", ...,
+ * //      templates: "epic/templates" }
  * ```
  *
  * - the component sets the checkout's settings name (its root `package.json`'s `"pageServer"` `"componentSets"`,
- *   `componentSets()`):  spell-app's `components/epics` is `spell-epic/src/docs`
+ *   `componentSets()`):  spell-app's `components/epics` is `epic/src/docs`
  * - Epic UI (`EPIC_UI`) when they don't name it:  the engine's `src/docs/`, which the epic server serves for every
  *   repo, found as the templates are
  * - the engine's templates, at `templates/` (epic `epic-eject` T11), through the checkout's `spell-epic` link when it
@@ -48,7 +48,7 @@ export class ServedFolders {
 
   /**
    * The engine's folder `folder` from checkout `root`:  through its `spell-epic` link when it has one to the engine's
-   * repo (spell-app:  `spell-epic/templates`, inside the repo, so its links check as the repo's own);  else as it is
+   * repo (spell-app:  `epic/templates`, inside the repo, so its links check as the repo's own);  else as it is
    * (`templates` in spell-epic itself).
    */
   private static engineDir(root: string, engine: string, folder: string): string {

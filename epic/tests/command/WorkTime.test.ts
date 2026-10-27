@@ -7,7 +7,7 @@ import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { afterAll, describe, expect, test } from "vite-plus/test"
 
-import { WorkTime } from "spell-epic/command/WorkTime"
+import { WorkTime } from "spell/epic/command/WorkTime"
 
 import { transcript, type Line } from "./transcripts"
 

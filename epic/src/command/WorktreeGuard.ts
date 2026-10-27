@@ -4,9 +4,9 @@ import { basename, join } from "node:path"
 
 import { RealPath } from "spell/server/RealPath"
 // By relative path, `.ts` and all:  the `SessionStart` hook loads this file with plain `node` (types stripped)
-import { EpicConfig } from "spell-epic/config/EpicConfig.ts"
-import { EpicRepo } from "spell-epic/config/EpicRepo.ts"
-import { HOME_ENV, HOME_FOLDER } from "spell-epic/server/server.types.ts"
+import { EpicConfig } from "spell/epic/config/EpicConfig.ts"
+import { EpicRepo } from "spell/epic/config/EpicRepo.ts"
+import { HOME_ENV, HOME_FOLDER } from "spell/epic/server/server.types.ts"
 
 /****************
  * ### `WorktreeGuard`

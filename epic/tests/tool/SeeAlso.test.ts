@@ -8,7 +8,7 @@ import { dirname, join } from "node:path"
 
 import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
 
-import { FEEDBACK, OLD_FEEDBACK, SeeAlso, epicNamed } from "spell-epic/tool/SeeAlso"
+import { FEEDBACK, OLD_FEEDBACK, SeeAlso, epicNamed } from "spell/epic/tool/SeeAlso"
 
 const root = mkdtempSync(join(tmpdir(), "see-also-"))
 

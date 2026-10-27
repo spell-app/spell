@@ -17,9 +17,9 @@ import { clockTime, localDate } from "spell/util/time"
 import { SRV } from "spell/server"
 import { Git } from "spell/server/Git"
 import { RealPath } from "spell/server/RealPath"
-import { EpicConfig } from "spell-epic/config/EpicConfig"
-import { SessionFolders } from "spell-epic/config/SessionFolders"
-import { epicStateFor } from "spell-epic/list/EpicState"
+import { EpicConfig } from "spell/epic/config/EpicConfig"
+import { SessionFolders } from "spell/epic/config/SessionFolders"
+import { epicStateFor } from "spell/epic/list/EpicState"
 
 import {
   ENTRYPOINT_PLACES,
@@ -118,7 +118,7 @@ export class Sessions {
         return this.showTranscript(rest[0], flags)
       case "listen": {
         // loaded here:  the epic tool's review inbox, which no other verb needs
-        const { InboxMonitor } = await import("spell-epic/tool/InboxMonitor")
+        const { InboxMonitor } = await import("spell/epic/tool/InboxMonitor")
         const monitor = Number(flags.monitor) || undefined
         const check = new InboxMonitor({ sessions: this }).check({ monitor })
         if (flags.json) out(JSON.stringify(check))
@@ -302,7 +302,7 @@ export class Sessions {
    * The icon work `name`'s state calls for (`TITLE_ICONS`),
    * from its worktree, branch and epic page (`Worktrees.nameStatus()`).
    * - `null` when `name` isn't work this repo knows
-   * - with an epic page, its epic's state (`spell-epic/list/EpicState`;  a session of it running counts as touched):
+   * - with an epic page, its epic's state (`spell/epic/list/EpicState`;  a session of it running counts as touched):
    *   📅 future, 🚧 in progress, 🚨 errors (every phase done, items need Owen), ⏸️ paused (untouched for days)
    * - ✅ finished:  its branch merged into `main`, or every phase of its plan done with nothing left to merge
    * - 🚧 under way:  a worktree, a branch with commits `main` lacks, or a plan done that waits to merge

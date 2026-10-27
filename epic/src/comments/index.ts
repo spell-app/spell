@@ -1,5 +1,5 @@
 /**
- * `spell-epic/comments`:  a comment's THREAD, as every page that draws one works it out (epic `epic-engine` P3):
+ * `spell/epic/comments`:  a comment's THREAD, as every page that draws one works it out (epic `epic-engine` P3):
  * `ThreadFacts`.
  * - Pure, node-safe at import:  the `<epic-thread>` family, the docs runtime's comments (`spell-doc-comments.js`) and
  *   the epic tool's `CommentList` import it.

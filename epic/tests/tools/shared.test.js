@@ -5,8 +5,8 @@ import { join } from "node:path"
 
 import { afterAll, describe, expect, it } from "vite-plus/test"
 
-import { findPages } from "spell-epic/tools/pages.js"
-import { PlanDoc, PlanDocFiles, sharedDocLog } from "spell-epic/tools/plan-doc.js"
+import { findPages } from "spell/epic/tools/pages.js"
+import { PlanDoc, PlanDocFiles, sharedDocLog } from "spell/epic/tools/plan-doc.js"
 
 /**
  * The docs tools with SHARED content (epic `shared-content`):  pages through a link to a folder in the content repo.

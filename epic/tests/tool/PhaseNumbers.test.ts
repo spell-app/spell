@@ -4,8 +4,8 @@
 import { parseHTML } from "linkedom"
 import { describe, expect, test } from "vite-plus/test"
 
-import { PhaseIds } from "spell-epic/phases"
-import { PhaseNumbers } from "spell-epic/tool/PhaseNumbers"
+import { PhaseIds } from "spell/epic/phases"
+import { PhaseNumbers } from "spell/epic/tool/PhaseNumbers"
 
 /** Phases One to Four of epic `demo`, with `todo` (an item's words) and `rest` (more sections) after them. */
 function page(todo: string, rest = ""): Document {

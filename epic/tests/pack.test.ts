@@ -3,7 +3,7 @@ import { join } from "node:path"
 import { fileURLToPath } from "node:url"
 import { expect, test } from "vite-plus/test"
 
-import { packageDir } from "spell-epic/tools/packageDir"
+import { packageDir } from "spell/epic/tools/packageDir"
 
 /**
  * The kit's pack tooling, `spell-pack` (`yarn pack:check`;  Spell UI's `spell-ui-pack` until epic `repo-split` P10),

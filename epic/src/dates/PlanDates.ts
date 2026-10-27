@@ -11,8 +11,8 @@ import { PLAN_DATE, type ReadPlanDate } from "./dates.types.ts"
  *   offset (`2026-10-08T14:34:05-04:00`, `...Z`);  a time without an offset is the writer's local time, as written
  * - formats at draw time:  the docs keep their attributes as they are, no migration
  * - NOT the log's (`<epic-event>` keeps `2026-10-08 14:34`), nor the agents panel's ages (`3m`)
- * - STATIC, pure, node-safe:  no DOM, no clock;  elements and node tools alike import it (`spell-epic/dates`)
- *   - plain `node` too, by path (the Epics page's cards, `spell-epic/list/EpicCards`):  its imports are by file
+ * - STATIC, pure, node-safe:  no DOM, no clock;  elements and node tools alike import it (`spell/epic/dates`)
+ *   - plain `node` too, by path (the Epics page's cards, `spell/epic/list/EpicCards`):  its imports are by file
  *     name (the kit's `spell/util/time.ts` is standalone),
  *     and NEVER an `enum` or a parameter property here, which plain `node` can't strip
  ****************/

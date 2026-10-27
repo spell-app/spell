@@ -1,23 +1,23 @@
 import { Show, type Accessor } from "solid-js"
 import { Dynamic, type JSX } from "@solidjs/web"
 
-import { E } from "spell-ui/core"
+import { E } from "spell/ui/core"
 
-import { NOBODY_LISTENING, ReviewClient, picks } from "spell-epic/review"
+import { NOBODY_LISTENING, ReviewClient, picks } from "spell/epic/review"
 // Import directly:  the question's class, not its barrel (which would define `<epic-ask>` here)
-import { EpicAsk } from "spell-epic/components/epic-ask/EpicAsk"
-import { Fold, type FoldTips } from "spell-epic/components/epic-item/Fold"
-import type { EpicItem } from "spell-epic/components/epic-item/EpicItem"
+import { EpicAsk } from "spell/epic/components/epic-ask/EpicAsk"
+import { Fold, type FoldTips } from "spell/epic/components/epic-item/Fold"
+import type { EpicItem } from "spell/epic/components/epic-item/EpicItem"
 // an answering option's comment box:  its barrel first, so it's defined wherever the option is
-import "spell-epic/components/epic-text-box"
-import { CLOSED_STATUSES } from "spell-epic/components/epic-section/EpicSection.types"
+import "spell/epic/components/epic-text-box"
+import { CLOSED_STATUSES } from "spell/epic/components/epic-section/EpicSection.types"
 
 import { epicOptionVocabulary } from "./EpicOption.en"
 import { EpicChoices } from "./EpicChoices"
 import { ITEM_TAG, ORIGINAL_TAG, TOGGLE, type CardSet } from "./EpicChoices.types"
 
 import choicesCSS from "./EpicChoices.css?inline"
-import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
+import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 
 /****************
  * ### `EpicOption`

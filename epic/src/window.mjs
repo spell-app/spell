@@ -196,10 +196,10 @@ import { escapeRegExp } from "spell/util/string.ts"
 import { checkoutOf } from "spell/server/checkout"
 import { RealPath } from "spell/server/RealPath"
 
-import { EpicConfig } from "spell-epic/config/EpicConfig.ts"
-import { SessionFolders } from "spell-epic/config/SessionFolders.ts"
-import { SessionMoves } from "spell-epic/command/SessionMoves.ts"
-import { WorktreeGuard } from "spell-epic/command/WorktreeGuard.ts"
+import { EpicConfig } from "spell/epic/config/EpicConfig.ts"
+import { SessionFolders } from "spell/epic/config/SessionFolders.ts"
+import { SessionMoves } from "spell/epic/command/SessionMoves.ts"
+import { WorktreeGuard } from "spell/epic/command/WorktreeGuard.ts"
 
 /** The engine, spell-epic:  the folder this script's `scripts/` is in, with the plugin's `hooks/` beside it. */
 const ENGINE = dirname(dirname(fileURLToPath(import.meta.url)))

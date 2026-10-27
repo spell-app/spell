@@ -2,7 +2,7 @@ import { existsSync, mkdirSync, readFileSync } from "node:fs"
 import { dirname, join } from "node:path"
 import { fileURLToPath } from "node:url"
 
-import { SAGA_PREFIX } from "spell-epic/review/review.types"
+import { SAGA_PREFIX } from "spell/epic/review/review.types"
 
 import { PlanDocError } from "./planDoc.types"
 

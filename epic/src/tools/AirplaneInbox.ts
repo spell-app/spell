@@ -1,12 +1,12 @@
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs"
 import { join, relative } from "node:path"
 
-import { EpicConfig } from "spell-epic/config/EpicConfig"
-import { DataFile } from "spell-epic/data/DataFile"
-import { CommentList, type Comment, type IdentifiedComment } from "spell-epic/tool/CommentList"
-import { FROM_PAGE } from "spell-epic/tool/epicRoutes"
-import { GuideInbox } from "spell-epic/tool/GuideInbox"
-import { SeeAlso } from "spell-epic/tool/SeeAlso"
+import { EpicConfig } from "spell/epic/config/EpicConfig"
+import { DataFile } from "spell/epic/data/DataFile"
+import { CommentList, type Comment, type IdentifiedComment } from "spell/epic/tool/CommentList"
+import { FROM_PAGE } from "spell/epic/tool/epicRoutes"
+import { GuideInbox } from "spell/epic/tool/GuideInbox"
+import { SeeAlso } from "spell/epic/tool/SeeAlso"
 
 import { answerFile, readAnswer, listPages } from "./details.js"
 import { GuideChanges } from "./GuideChanges"

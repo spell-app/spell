@@ -70,7 +70,7 @@ jobs:
       # vscode/, the extension:  a yarn project of its own, which `yarn lint` lints (epic `epic-engine` I65)
       - name: the extension's install
         run: yarn install
-        working-directory: "spell-epic/vscode"
+        working-directory: "epic/vscode"
 
       # browser tests run in a real chromium
       - run: yarn playwright install --with-deps chromium

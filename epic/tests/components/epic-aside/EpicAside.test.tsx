@@ -1,10 +1,10 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import type { DOMElement } from "spell-ui/core"
+import type { DOMElement } from "spell/ui/core"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import { expectAccessible } from "spell/test-helpers/A11y"
 
-import "spell-epic/components/epic-aside"
+import "spell/epic/components/epic-aside"
 
 /** `element`'s shadow part `name`. */
 function part(element: Element, name: string): HTMLElement {

@@ -6,13 +6,13 @@ import { fileURLToPath } from "node:url"
 import { parseHTML } from "linkedom"
 
 import { RealPath } from "spell/server/RealPath"
-import { EpicConfig } from "spell-epic/config/EpicConfig"
-import { EpicRepo } from "spell-epic/config/EpicRepo"
-import { DataFile, type DataFileMove } from "spell-epic/data/DataFile"
-import { RepoList } from "spell-epic/server/RepoList"
+import { EpicConfig } from "spell/epic/config/EpicConfig"
+import { EpicRepo } from "spell/epic/config/EpicRepo"
+import { DataFile, type DataFileMove } from "spell/epic/data/DataFile"
+import { RepoList } from "spell/epic/server/RepoList"
 import { SRV } from "spell/server"
 
-import { planDocIn } from "spell-epic/tools/pages.js"
+import { planDocIn } from "spell/epic/tools/pages.js"
 import { PlanDocError, type CommitLogEntry, type PlanDocOptions, type PlanDocParts } from "./planDoc.types"
 
 import { EpicParts } from "./EpicParts"
@@ -442,7 +442,7 @@ export class PlanDocFiles {
   }
 
   /**
-   * Make `plan`'s links that were written as from a PART FILE (`../../../spell-ui/x.ts`) the root paths of what they
+   * Make `plan`'s links that were written as from a PART FILE (`../../../ui/x.ts`) the root paths of what they
    * reach from there (`/spell-ui/x.ts`), so they land as the part held them (epic `epic-engine` I134, P46).
    * - why:  HTML a command is handed (`update --plan`, `details --file`) is read as the PAGE's;
    *   an agent copying from a part file written before P46 hands over the part's, one `../` too many for the page

@@ -3,9 +3,9 @@ import { describe, expect, test, vi } from "vite-plus/test"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import type { RunRow } from "spell/server/runs/runs.types"
 
-import type { EpicRunRow } from "spell-epic/components/epic-run-row"
+import type { EpicRunRow } from "spell/epic/components/epic-run-row"
 
-import "spell-epic/components/epic-run-row"
+import "spell/epic/components/epic-run-row"
 
 /** A row with alternatives. */
 const ROW: RunRow = { id: "task", cells: { english: "Task" }, value: "Tarea", alternatives: ["Faena"] }

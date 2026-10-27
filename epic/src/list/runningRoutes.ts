@@ -27,7 +27,7 @@ import { resolve } from "node:path"
 import type { RouteContext, RouteModule } from "spell/server/page"
 import { RealPath } from "spell/server/RealPath"
 
-import { EpicConfig } from "spell-epic/config/EpicConfig"
+import { EpicConfig } from "spell/epic/config/EpicConfig"
 
 import { RunningEpics } from "./RunningEpics"
 

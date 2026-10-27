@@ -41,7 +41,7 @@ import { RealPath } from "spell/server/RealPath"
  *   `epic config [key]` prints a value, for the skills.
  *   - Packages below epics never read it (the server, spaces):  they find the main checkout through git
  *     (`SRV.checkoutOf()`), or are told by epics' route module (`PageServer.serveWorktrees()`).
- * - Node only (`node:fs`):  NOT in the `spell-epic` barrel, imported by path (`spell-epic/config/EpicConfig`).
+ * - Node only (`node:fs`):  NOT in the `spell-epic` barrel, imported by path (`spell/epic/config/EpicConfig`).
  * - Its position:  imports only node's own modules, the server's `checkout.ts` by its entry and `RealPath` beside it,
  *   so plain `node` loads it (types stripped);  NEVER an alias, an `enum` or a parameter property.
  * - A MULTI-REPO top (epic `epic-engine` P10, repo-split's Q9 A):  one repo holding others, its child repos.
@@ -804,7 +804,7 @@ export type RepoCheckout = { repo: string; main: string; worktree: string; top: 
  *   (off:  the skills run it, after entering).  On, nothing opens the worktree without its packages (I2)
  * - `installTimeout`:  the seconds the hook's install may take (600)
  * - `extraInstalls`:  folders of a new worktree that are yarn projects of their own, NOT workspaces of the one install
- *   (`["spell-epic/vscode", "spell-app/vscode"]`, the extensions;  epic `epic-engine` I65), each a path from the
+ *   (`["epic/vscode", "app/vscode"]`, the extensions;  epic `epic-engine` I65), each a path from the
  *   worktree's root (the top's, in a multi-repo top);  `[]` (the default):  none
  *   - the worktree hook runs `installCommand` in each, after the one at the root, `installTimeout` seconds each
  *   - one that fails, or isn't there, is a warning:
@@ -992,7 +992,7 @@ function foldersOf(given: Record<string, unknown>, key: string, fallback: string
 }
 
 /**
- * `given[key]`, a list of folders, each a relative path (`["vscode", "spell-app/vscode"]`);
+ * `given[key]`, a list of folders, each a relative path (`["vscode", "app/vscode"]`);
  * `fallback` when it's left out.
  * - throws `TypeError` naming the file and the key when it isn't a list of `/`-separated plain names (no absolute path,
  *   no `.`, `..` or empty part)

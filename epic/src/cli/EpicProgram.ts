@@ -2,21 +2,21 @@ import chalk from "chalk"
 import { Command } from "commander"
 
 import { Git } from "spell/server/Git"
-import { EpicCheckout } from "spell-epic/command/EpicCheckout"
-import { EXIT, EpicCommandError } from "spell-epic/command/command.types"
-import { EpicTools, type EpicToolName } from "spell-epic/command/EpicTools"
-import { Hub } from "spell-epic/command/Hub"
-import { LinesOfCode } from "spell-epic/command/LinesOfCode"
-import { Parking } from "spell-epic/command/Parking"
-import { RepoInit } from "spell-epic/command/RepoInit"
-import { Repos } from "spell-epic/command/Repos"
-import { Requests } from "spell-epic/command/Requests"
-import { Sessions } from "spell-epic/command/Sessions"
-import { Shared } from "spell-epic/command/Shared"
-import { Stock } from "spell-epic/command/Stock"
-import { Worktrees } from "spell-epic/command/Worktrees"
-import { EpicConfig } from "spell-epic/config/EpicConfig"
-import { EpicRepo } from "spell-epic/config/EpicRepo"
+import { EpicCheckout } from "spell/epic/command/EpicCheckout"
+import { EXIT, EpicCommandError } from "spell/epic/command/command.types"
+import { EpicTools, type EpicToolName } from "spell/epic/command/EpicTools"
+import { Hub } from "spell/epic/command/Hub"
+import { LinesOfCode } from "spell/epic/command/LinesOfCode"
+import { Parking } from "spell/epic/command/Parking"
+import { RepoInit } from "spell/epic/command/RepoInit"
+import { Repos } from "spell/epic/command/Repos"
+import { Requests } from "spell/epic/command/Requests"
+import { Sessions } from "spell/epic/command/Sessions"
+import { Shared } from "spell/epic/command/Shared"
+import { Stock } from "spell/epic/command/Stock"
+import { Worktrees } from "spell/epic/command/Worktrees"
+import { EpicConfig } from "spell/epic/config/EpicConfig"
+import { EpicRepo } from "spell/epic/config/EpicRepo"
 
 import { GROUP_VERBS, type GroupName } from "./epicGroups"
 
@@ -217,7 +217,7 @@ export class EpicProgram {
       epic.command("owns"),
       "which open epics own each file (a path from the checkout's root):  their branch changes it, or their page " +
         "names it;  each with its stage, planning or building (for /coherence)",
-      "epic owns src/server/LiveReload.ts spell-epic/src/window.mjs"
+      "epic owns src/server/LiveReload.ts epic/src/window.mjs"
     ).usage("<path>... [--json]")
     this.page(
       epic.command("open"),

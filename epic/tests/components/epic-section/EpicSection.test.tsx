@@ -1,14 +1,14 @@
 import { afterEach, describe, expect, test, vi } from "vite-plus/test"
 
-import { E, UI } from "spell-ui/core"
+import { E, UI } from "spell/ui/core"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import { expectAccessible } from "spell/test-helpers/A11y"
 
-import "spell-ui/components/ui-section"
-import "spell-epic/components/epic-section"
-import "spell-epic/components/epic-phase"
-import "spell-epic/components/epic-item"
-import "spell-epic/components/epic-aside"
+import "spell/ui/components/ui-section"
+import "spell/epic/components/epic-section"
+import "spell/epic/components/epic-phase"
+import "spell/epic/components/epic-item"
+import "spell/epic/components/epic-aside"
 
 /** Fixture parts the test server serves:  `fixtures/` beside this file, by its URL path. */
 const FIXTURES = new URL("fixtures", import.meta.url).pathname

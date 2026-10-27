@@ -77,9 +77,9 @@ if (!process.env.CHECK_EPIC_UI_UNDER_TSX) {
 const { BrowserPage } = await import("spell/element-tools/BrowserPage")
 const { DemoServer } = await import("./DemoServer.ts")
 const { bundleRoutes } = await import("./demoPages.mjs")
-const { GuideInbox } = await import("spell-epic/tool/GuideInbox.ts")
-const { RepoList } = await import("spell-epic/server/RepoList.ts")
-const { packageDir } = await import("spell-epic/tools/packageDir.ts")
+const { GuideInbox } = await import("spell/epic/tool/GuideInbox.ts")
+const { RepoList } = await import("spell/epic/server/RepoList.ts")
+const { packageDir } = await import("spell/epic/tools/packageDir.ts")
 const { componentSets, pageServerSettings } = await import("spell/server/page/settings")
 
 const args = process.argv.slice(2)

@@ -17,7 +17,7 @@
  * - A comment on SELECTED TEXT keeps the text (`quote`) and where it starts in its block's text (`offset`,
  *   `offsetIn()`), so it's found again, and highlighted, even where the block says it twice (`quoteIn()`)
  * - Plain DOM, no globals:  the docs runtime runs it on the live page (`_assets/spell-doc-runtime.js`,
- *   "Comments"), the tests on linkedom.  The comments themselves:  `CommentList` (`spell-epic/tool/CommentList`).
+ *   "Comments"), the tests on linkedom.  The comments themselves:  `CommentList` (`spell/epic/tool/CommentList`).
  */
 
 /**

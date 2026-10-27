@@ -1,5 +1,5 @@
 import { clockTime, localDate } from "spell/util/time"
-import type { Comment, CommentPlace, CommentReply, TakenInto, Turn } from "spell-epic/tool/CommentList"
+import type { Comment, CommentPlace, CommentReply, TakenInto, Turn } from "spell/epic/tool/CommentList"
 
 /****************
  * ### `ThreadFacts`

@@ -9,7 +9,7 @@
 ////////////////
 
 /**
- * spell-epic's folder in the home folder, `~/.spell-epic/`:
+ * spell-epic's folder in the home folder, `~/.epic/`:
  * it holds `repos.json5` (`REPOS_FILE`), the server's pid file and its log.
  * - `SPELL_EPIC_HOME` puts it elsewhere:  tests give a temp folder, so no test touches the real one
  */
@@ -64,7 +64,7 @@ export const ENGINE_ROUTES = {
  * EPIC UI, the elements' docs set (epic `epic-workflow` P10):  the engine's `src/docs/`, served at `/components/epics/`
  * by both page servers, not by an engine route:
  * - spell-app's (its root `package.json`'s `"pageServer"` `"componentSets"`, `componentSets()` in `spell/server/page`;
- *   its `dir` `spell-epic/src/docs`)
+ *   its `dir` `epic/src/docs`)
  * - the epic server, the same way (`EpicServer`'s `epicUiMounts()`, epic `epic-eject` I21)
  * - `name`:  what prose calls it
  * - `path`:  its pages' PAGE PATHS start with it, as served (`components/epics/epic-item.html`:  `pages.js`

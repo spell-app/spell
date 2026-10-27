@@ -27,7 +27,7 @@ import { readFileSync } from "node:fs"
 import { resolve } from "node:path"
 
 import { editNotes, notesIn } from "./notesOnDisk"
-import { SeeAlso } from "spell-epic/tool/SeeAlso"
+import { SeeAlso } from "spell/epic/tool/SeeAlso"
 
 import { NotesError } from "./PageNotes.js"
 import { AREAS, CONTENT, ROOT, pageAndId, pageFile, pagePath, parseArgs } from "./pages.js"

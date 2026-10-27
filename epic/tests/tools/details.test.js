@@ -21,7 +21,7 @@ import {
   readDraft,
   sweep,
   waitForAnswer
-} from "spell-epic/tools/details.js"
+} from "spell/epic/tools/details.js"
 
 let docs
 

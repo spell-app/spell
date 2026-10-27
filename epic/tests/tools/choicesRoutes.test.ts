@@ -11,7 +11,7 @@ import { afterAll, beforeAll, expect, test } from "vite-plus/test"
 import { PageServer } from "spell/server/page"
 import { ask } from "spell/server/test/serve"
 
-import choicesRoutes, { type ChoicesAnswer, type ChoicesDraft } from "spell-epic/tools/choicesRoutes"
+import choicesRoutes, { type ChoicesAnswer, type ChoicesDraft } from "spell/epic/tools/choicesRoutes"
 
 let root: string
 let server: PageServer

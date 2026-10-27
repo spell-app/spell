@@ -12,7 +12,7 @@ import { standardDecorators } from "spell/toolchain/decorators"
  *   view of vite's types beside spell-epic's, and comparing the two runs out of stack ("Excessive stack depth
  *   comparing types 'Plugin<any>'").  spell-ui checks that file itself.
  */
-const UI_CONFIG = "spell-ui/vite.config.ts"
+const UI_CONFIG = "spell/ui/vite.config.ts"
 const { baseConfig } = (await import(UI_CONFIG)) as { baseConfig: () => UserConfig }
 
 /**
@@ -30,8 +30,8 @@ const { baseConfig } = (await import(UI_CONFIG)) as { baseConfig: () => UserConf
 /** The tests live in tests/, at the same paths as the code in src/. */
 const TESTS = resolve(import.meta.dirname, "tests")
 
-/** Spell UI's test setup (`spell-ui/test-helpers/setup.ts`), by Node's resolver:  wherever the install put spell-ui. */
-const UI_SETUP = fileURLToPath(import.meta.resolve("spell-ui/test-helpers/setup.ts"))
+/** Spell UI's test setup (`spell/ui/test-helpers/setup.ts`), by Node's resolver:  wherever the install put spell-ui. */
+const UI_SETUP = fileURLToPath(import.meta.resolve("spell/ui/test-helpers/setup.ts"))
 
 export function epicsProjects({
   prefix = "",

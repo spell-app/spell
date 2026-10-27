@@ -64,7 +64,7 @@ import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync
 import { dirname, join, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 
-import { EpicConfig } from "spell-epic/config/EpicConfig.ts"
+import { EpicConfig } from "spell/epic/config/EpicConfig.ts"
 
 const HERE = dirname(fileURLToPath(import.meta.url))
 const ROOT = resolve(HERE, "../..")
@@ -89,9 +89,9 @@ if (!process.env.CHECK_REVIEW_UNDER_TSX) {
 const { BrowserPage } = await import("spell/element-tools/BrowserPage")
 const { DemoServer } = await import("./DemoServer.ts")
 const { logInto } = await import("./demoPages.mjs")
-const { PlanDocCommands } = await import("spell-epic/tool/PlanDocCommands.ts")
-const { PlanDocFiles } = await import("spell-epic/tool/PlanDocFiles.ts")
-const { ReviewInbox } = await import("spell-epic/tool/ReviewInbox.ts")
+const { PlanDocCommands } = await import("spell/epic/tool/PlanDocCommands.ts")
+const { PlanDocFiles } = await import("spell/epic/tool/PlanDocFiles.ts")
+const { ReviewInbox } = await import("spell/epic/tool/ReviewInbox.ts")
 
 ////////////////
 // ## Settings

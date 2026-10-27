@@ -5,10 +5,10 @@ import { fileURLToPath } from "node:url"
 
 import type { SRV } from "spell/server"
 
-import { EpicConfig } from "spell-epic/config/EpicConfig"
-import { EpicServer } from "spell-epic/server/EpicServer"
-import { repoPrefixFor } from "spell-epic/server/server.types"
-import { ReviewStart, type StartResult, type WakeResult } from "spell-epic/tool/ReviewStart"
+import { EpicConfig } from "spell/epic/config/EpicConfig"
+import { EpicServer } from "spell/epic/server/EpicServer"
+import { repoPrefixFor } from "spell/epic/server/server.types"
+import { ReviewStart, type StartResult, type WakeResult } from "spell/epic/tool/ReviewStart"
 
 /****************
  * ### `DemoServer`

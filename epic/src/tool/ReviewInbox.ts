@@ -1,8 +1,8 @@
 import { localTime } from "spell/util/time"
 import { SRV } from "spell/server"
 
-import { DataFile } from "spell-epic/data/DataFile"
-import { PageStages, type PageStage } from "spell-epic/phases"
+import { DataFile } from "spell/epic/data/DataFile"
+import { PageStages, type PageStage } from "spell/epic/phases"
 
 import { CommentList, type Comment, type IdentifiedComment } from "./CommentList"
 

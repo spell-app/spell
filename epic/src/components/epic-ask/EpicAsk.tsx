@@ -1,7 +1,7 @@
 import { Show } from "solid-js"
 import { isServer, type JSX } from "@solidjs/web"
 
-import { E } from "spell-ui/core"
+import { E } from "spell/ui/core"
 
 import {
   AnswerForm,
@@ -10,14 +10,14 @@ import {
   type PageAnswer,
   type PartLabels,
   type SentAnswer
-} from "spell-epic/answers"
+} from "spell/epic/answers"
 // the Other box:  its barrel first, so it's defined wherever `<epic-ask>` is
-import "spell-epic/components/epic-text-box"
+import "spell/epic/components/epic-text-box"
 
 import { epicAskVocabulary } from "./EpicAsk.en"
 
 import askCSS from "./EpicAsk.css?inline"
-import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
+import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 
 /** An option's attributes this reads:  ticked to start with, hidden under Open. */
 const SELECTED = "selected"

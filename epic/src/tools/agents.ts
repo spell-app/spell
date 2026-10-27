@@ -26,9 +26,9 @@
  */
 import { setTimeout as sleep } from "node:timers/promises"
 
-import { WorkTime } from "spell-epic/command/WorkTime"
-import { PlanDocFiles } from "spell-epic/tool/PlanDocFiles"
-import { PlanTime } from "spell-epic/tool/PlanTime"
+import { WorkTime } from "spell/epic/command/WorkTime"
+import { PlanDocFiles } from "spell/epic/tool/PlanDocFiles"
+import { PlanTime } from "spell/epic/tool/PlanTime"
 
 import { AgentList, AgentListError, type RunningAgent, type Untold } from "./AgentList"
 import { ROOT, parseArgs } from "./pages.js"

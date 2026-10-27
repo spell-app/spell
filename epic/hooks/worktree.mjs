@@ -56,7 +56,7 @@
  *      so nothing opens the worktree without its packages (I2).
  *      A failure FAILS the hook, saying how to carry on:  the worktree stays
  *   4. then in each of its `extraInstalls` (epic `epic-engine` I65):  the folders that are yarn projects of their own,
- *      outside the one install (`spell-epic/vscode`, `spell-app/vscode`:  the extensions), so the linting of them
+ *      outside the one install (`epic/vscode`, `app/vscode`:  the extensions), so the linting of them
  *      finds their packages
  *      - `installCommand` again, in that folder, `installTimeout` seconds at most
  *      - a failure, or a folder that isn't there, is a WARNING, saying what to run:  the worktree works without it
@@ -73,7 +73,7 @@
  *     - one that's there already is reused, and a child cloned since is added
  *     - the shared links once (the top's), the session-folder links for the top's worktree and each child's (all to
  *       the main TOP checkout's folder:  every session saved under `~/www/spell`'s), then ONE install, at the top,
- *       and one in each of the top's `extraInstalls` (`spell-epic/vscode` ...)
+ *       and one in each of the top's `extraInstalls` (`epic/vscode` ...)
  *   - `remove`:  the worktree_path may be the top's worktree or any child's in it.  Every repo is checked FIRST
  *     (uncommitted changes, commits its base branch lacks):  any one kept keeps them all.  Then the servers stop
  *     (once, for the whole folder), each child's worktree and branch go, then the top's
@@ -96,11 +96,11 @@ import { existsSync, lstatSync, mkdirSync, readFileSync, readlinkSync, realpathS
 import { basename, dirname, isAbsolute, join, relative, resolve } from "node:path"
 
 import { Git } from "spell/server/Git"
-import { CheckoutPatches } from "spell-epic/command/CheckoutPatches.ts"
-import { CheckoutServers } from "spell-epic/command/CheckoutServers.ts"
-import { EpicRepo } from "spell-epic/config/EpicRepo.ts"
-import { EpicConfig } from "spell-epic/config/EpicConfig.ts"
-import { SessionFolders } from "spell-epic/config/SessionFolders.ts"
+import { CheckoutPatches } from "spell/epic/command/CheckoutPatches.ts"
+import { CheckoutServers } from "spell/epic/command/CheckoutServers.ts"
+import { EpicRepo } from "spell/epic/config/EpicRepo.ts"
+import { EpicConfig } from "spell/epic/config/EpicConfig.ts"
+import { SessionFolders } from "spell/epic/config/SessionFolders.ts"
 
 /** This plugin's `bin/epic`:  `hooks/` is beside `bin/`. */
 const EPIC = join(dirname(import.meta.dirname), "bin", "epic")

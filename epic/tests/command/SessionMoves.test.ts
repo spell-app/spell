@@ -11,7 +11,7 @@ import { join, resolve } from "node:path"
 
 import { afterAll, beforeEach, describe, expect, test } from "vite-plus/test"
 
-import { SessionMoves } from "spell-epic/command/SessionMoves"
+import { SessionMoves } from "spell/epic/command/SessionMoves"
 
 const top = mkdtempSync(join(tmpdir(), "session-moves-"))
 const home = join(top, "claude")

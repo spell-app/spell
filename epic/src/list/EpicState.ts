@@ -9,10 +9,10 @@
  * - `future` -- written down with `/epic future`, not planned yet
  *
  * Who draws it:
- * - the Epics page's cards, `<epic-card>` (`spell-epic/components`, epic `epic-engine` P3), in the browser
+ * - the Epics page's cards, `<epic-card>` (`spell/epic/components`, epic `epic-engine` P3), in the browser
  * - and their groups, which `docs index` counts on the home page
  *   (`src/tools/index.js`, plain `node`:  it imports this FILE by path)
- * - `<epic-page>`'s header mark (`spell-epic/components`), in the browser
+ * - `<epic-page>`'s header mark (`spell/epic/components`), in the browser
  * - the session titles' icons (`epic session icons`, `packages/cli`)
  *
  * Its position:  browser code with NO imports at all, so plain `node` loads it (types stripped),
@@ -68,7 +68,7 @@ export type EpicState = {
 
 /**
  * The Spell UI hues the states are drawn in (`LOOKS`).
- * - Named here, not read from Spell UI (`spell-ui/jsx`):  this file has no imports;
+ * - Named here, not read from Spell UI (`spell/ui/jsx`):  this file has no imports;
  *   a `<ui-icon color>` checks them all the same.
  */
 export type EpicStateColor = "blue" | "red" | "grey" | "green"

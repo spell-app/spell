@@ -28,12 +28,12 @@ import { dirname, join, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 import { afterAll, describe, expect, test } from "vite-plus/test"
 
-import { MainMerge } from "spell-epic/command/MainMerge"
-import { Requests } from "spell-epic/command/Requests"
-import { WorktreeGuard } from "spell-epic/command/WorktreeGuard"
-import { Worktrees } from "spell-epic/command/Worktrees"
-import { EpicConfig } from "spell-epic/config/EpicConfig"
-import { SessionFolders } from "spell-epic/config/SessionFolders"
+import { MainMerge } from "spell/epic/command/MainMerge"
+import { Requests } from "spell/epic/command/Requests"
+import { WorktreeGuard } from "spell/epic/command/WorktreeGuard"
+import { Worktrees } from "spell/epic/command/Worktrees"
+import { EpicConfig } from "spell/epic/config/EpicConfig"
+import { SessionFolders } from "spell/epic/config/SessionFolders"
 
 /** The plugin's worktree hook, and the window script. */
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../..")
@@ -52,7 +52,7 @@ const CHILDREN = ["spell-parser", "spell-ui", "spell-brand", "spell-epic", "spel
 const KIT = ["util", "toolchain", "server", "assembler", "element"]
 
 /** The yarn projects of their own, outside the one install:  the two extensions. */
-const EXTRAS = ["spell-epic/vscode", "spell-app/vscode"]
+const EXTRAS = ["epic/vscode", "app/vscode"]
 
 /** git's identity and no signing, for every commit here and in the code under test (`MainMerge` commits). */
 const GIT_ENV = {

@@ -3,7 +3,7 @@ import { afterEach, describe, expect, test, vi } from "vite-plus/test"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import { expectAccessible } from "spell/test-helpers/A11y"
 
-import "spell-epic/components/epic-state-filter"
+import "spell/epic/components/epic-state-filter"
 
 /** Its chips, as they read:  `state:count`, `+` while pressed. */
 function chips(host: Element): string[] {

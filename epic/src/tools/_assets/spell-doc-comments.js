@@ -13,7 +13,7 @@
  *     - each comment's thread, `<epic-thread>`, in an `<epic-threads>` box under its block
  *     - the comment pane, `<epic-comment-pane>`
  *   - Owen's field, in the pane or a thread:  a native `<textarea>` this code owns, so it lives through every redraw
- *   - what a thread shows, and its ids and words:  `ThreadFacts` (`spell-epic/comments`), which the elements share
+ *   - what a thread shows, and its ids and words:  `ThreadFacts` (`spell/epic/comments`), which the elements share
  * - Its look:  `spell-comments.css`, beside it (the bullhorns, Send, Owen's field, where a thread sits);
  *   the elements' own sheets draw the rest.
  * - What it keeps in the browser (drafts, what's been seen) goes through the kit's `PrefStore`:
@@ -33,11 +33,11 @@ import {
   quoteIn,
   sectionOf,
   sectionTitle
-} from "spell-epic/tools/BlockAnchors.js"
+} from "spell/epic/tools/BlockAnchors.js"
 import { nextFrame } from "spell/util/dom"
-import { ThreadFacts } from "spell-epic/comments"
-import { DraftSaver } from "spell-epic/answers"
-import { ServerLink } from "spell-epic/review"
+import { ThreadFacts } from "spell/epic/comments"
+import { DraftSaver } from "spell/epic/answers"
+import { ServerLink } from "spell/epic/review"
 import {
   addBlockAction,
   BLOCK_ROW,

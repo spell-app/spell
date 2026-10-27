@@ -1,11 +1,11 @@
 import { For, Show } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
-import { E } from "spell-ui/core"
+import { E } from "spell/ui/core"
 
 import type { RunAnswer, RunColumn, RunOutcome, RunRow } from "spell/server/runs/runs.types"
 
-import { clockOf } from "spell-epic/review"
+import { clockOf } from "spell/epic/review"
 
 import { epicRunRowVocabulary } from "./EpicRunRow.en"
 import { RUN_ANSWER, type RunAnswerDetail } from "./EpicRunRow.types"

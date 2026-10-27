@@ -5,7 +5,7 @@ import { join } from "node:path"
 
 import { describe, expect, it } from "vite-plus/test"
 
-import { PACKAGE, docLinksRun } from "spell-epic/tools/pages.js"
+import { PACKAGE, docLinksRun } from "spell/epic/tools/pages.js"
 
 // The rules themselves (what links, which target, what `--check` finds) are tested where they live:
 // `tests/assembler/src/Linker.test.ts`.  These run the command line, under `tsx` as the tools do (`docLinksRun()`).

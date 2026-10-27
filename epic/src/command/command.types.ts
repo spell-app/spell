@@ -1,5 +1,5 @@
 /**
- * Types for the `epic` command's verb groups (`spell-epic/command/`):
+ * Types for the `epic` command's verb groups (`spell/epic/command/`):
  * - spell ui rename: leave this file (its merge report's example quotes an old name on purpose)
  * Claude Code sessions, worktrees, parked work, taking stock, shared content, requests.
  * - Runtime-light:  types, constants, the folder's one error class, and pure helpers over them.
@@ -201,7 +201,7 @@ export const ENTRYPOINT_PLACES: Record<string, string> = {
  * - 🚧 under way:  `/isolate`, `/epic <name>`, `/unpark`, `/epic resume` (the prompt gate, `PromptGate`)
  * - 📅 a future epic written down (`/epic future`)
  * - ✅ merged (`epic session done`)
- * - from its epic's state (`epic session icons`;  `spell-epic/list/EpicState`):
+ * - from its epic's state (`epic session icons`;  `spell/epic/list/EpicState`):
  *   - 🚨 errors (every phase done, items need Owen)
  *   - ⏸️ paused (phases left, untouched for days)
  */
@@ -249,7 +249,7 @@ export type NameStatus = {
 }
 
 /**
- * What an epic page's state is read from (`spell-epic/list/EpicState` `EpicFacts`) -- `Worktrees.planFacts()`.
+ * What an epic page's state is read from (`spell/epic/list/EpicState` `EpicFacts`) -- `Worktrees.planFacts()`.
  * - `phases`:  each phase's status
  * - `updated`, `future`, `standing`:  the page's
  * - `urgent`:  the ids of the items that need Owen

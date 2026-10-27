@@ -26,11 +26,11 @@ import { afterAll, afterEach, beforeEach, describe, expect, test, vi } from "vit
 
 import { SRV } from "spell/server"
 
-import { MigrateCommands } from "spell-epic/tool/MigrateCommands"
-import { PlanDoc } from "spell-epic/tool/PlanDoc"
-import { PlanDocCommands } from "spell-epic/tool/PlanDocCommands"
-import { PlanDocFiles } from "spell-epic/tool/PlanDocFiles"
-import { ReviewInbox } from "spell-epic/tool/ReviewInbox"
+import { MigrateCommands } from "spell/epic/tool/MigrateCommands"
+import { PlanDoc } from "spell/epic/tool/PlanDoc"
+import { PlanDocCommands } from "spell/epic/tool/PlanDocCommands"
+import { PlanDocFiles } from "spell/epic/tool/PlanDocFiles"
+import { ReviewInbox } from "spell/epic/tool/ReviewInbox"
 
 /** The tool's test fixtures:  `epic-plan.html`, a fresh doc in `<epic-*>` markup. */
 const FIXTURES = fileURLToPath(new URL("fixtures", import.meta.url))

@@ -3,7 +3,7 @@ import { relative } from "node:path"
 
 import { parseHTML } from "linkedom"
 
-import { Markup } from "spell-epic/markup"
+import { Markup } from "spell/epic/markup"
 
 import { LOC_TABLE, type LocCounts, type LocScan } from "./command.types"
 import { EpicTools } from "./EpicTools"
@@ -72,7 +72,7 @@ export class LocPage {
     this.update(document, { fresh: created })
     // Imported here:  the docs tools' module reads the checkout (`EPIC_CHECKOUT`) as it loads
     process.env.EPIC_CHECKOUT ??= this.root
-    const pages = await import("spell-epic/tools/pages.js")
+    const pages = await import("spell/epic/tools/pages.js")
     writeFileSync(this.file, pages.serialize(document))
     if (this.shouldTidy && !pages.tidy([this.file])) process.stderr.write(`epic loc:  couldn't tidy ${this.file}\n`)
     return { created }

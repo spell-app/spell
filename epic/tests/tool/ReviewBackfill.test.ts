@@ -4,7 +4,7 @@ import { join } from "node:path"
 
 import { describe, expect, test } from "vite-plus/test"
 
-import { ReviewBackfill } from "spell-epic/tool/ReviewBackfill"
+import { ReviewBackfill } from "spell/epic/tool/ReviewBackfill"
 
 /** The repo's main root, as the fixture's sessions name it. */
 const ROOT = "/Users/someone/repo"

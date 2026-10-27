@@ -1,6 +1,6 @@
 /**
  * Where the docs are, how scripts find, tidy and open pages -- shared by `update.js`, `index.js`, `open.js` and
- * the other docs tools (the `epic` tool, `spell-epic/tool`, has its own).
+ * the other docs tools (the `epic` tool, `spell/epic/tool`, has its own).
  */
 import { spawnSync } from "node:child_process"
 import { existsSync, lstatSync, readdirSync, readFileSync, statSync } from "node:fs"
@@ -10,9 +10,9 @@ import { fileURLToPath, pathToFileURL } from "node:url"
 import { openInChromeTab } from "spell/server/open"
 import { RealPath } from "spell/server/RealPath"
 import { componentSetAddressOf, componentSetFileOf, pageServerRoot, settingsParts } from "spell/server/page/settings"
-import { Window, envCheckout } from "spell-epic/window.mjs"
-import { EpicConfig } from "spell-epic/config/EpicConfig.ts"
-import { ENGINE_ROUTES, EPIC_UI } from "spell-epic/server/server.types.ts"
+import { Window, envCheckout } from "spell/epic/window.mjs"
+import { EpicConfig } from "spell/epic/config/EpicConfig.ts"
+import { ENGINE_ROUTES, EPIC_UI } from "spell/epic/server/server.types.ts"
 
 import { ComponentSetFolders } from "./ComponentSetFolders.ts"
 import { firstPackageDir, KIT_PACKAGES } from "./packageDir.ts"

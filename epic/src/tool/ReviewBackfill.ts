@@ -3,8 +3,8 @@ import { homedir } from "node:os"
 import { basename, join } from "node:path"
 
 import { localDate } from "spell/util/time"
-import { EpicConfig } from "spell-epic/config/EpicConfig"
-import { SessionFolders } from "spell-epic/config/SessionFolders"
+import { EpicConfig } from "spell/epic/config/EpicConfig"
+import { SessionFolders } from "spell/epic/config/SessionFolders"
 
 /****************
  * ### `ReviewBackfill`

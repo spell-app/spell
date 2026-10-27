@@ -5,8 +5,8 @@ import { join } from "node:path"
 import { Git } from "spell/server/Git"
 
 // By package path, `.ts` and all:  the `UserPromptSubmit` hook loads this file with plain `node` (types stripped)
-import { EpicConfig } from "spell-epic/config/EpicConfig.ts"
-import { SessionFolders } from "spell-epic/config/SessionFolders.ts"
+import { EpicConfig } from "spell/epic/config/EpicConfig.ts"
+import { SessionFolders } from "spell/epic/config/SessionFolders.ts"
 
 /****************
  * ### `PromptAck`

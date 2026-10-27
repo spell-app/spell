@@ -11,267 +11,267 @@
   "type": "module",
   "exports": {
     ".": {
-      "spell-epic-source": "./src/index.ts",
+      "spell-source": "./src/index.ts",
       "types": "./dist-types/src/index.d.ts",
       "default": "./src/index.ts"
     },
     "./answers": {
-      "spell-epic-source": "./src/answers/index.ts",
+      "spell-source": "./src/answers/index.ts",
       "types": "./dist-types/src/answers/index.d.ts",
       "default": "./src/answers/index.ts"
     },
     "./comments": {
-      "spell-epic-source": "./src/comments/index.ts",
+      "spell-source": "./src/comments/index.ts",
       "types": "./dist-types/src/comments/index.d.ts",
       "default": "./src/comments/index.ts"
     },
     "./components": {
-      "spell-epic-source": "./src/components/index.ts",
+      "spell-source": "./src/components/index.ts",
       "types": "./dist-types/src/components/index.d.ts",
       "default": "./src/components/index.ts"
     },
     "./components/epic-agents": {
-      "spell-epic-source": "./src/components/epic-agents/index.ts",
+      "spell-source": "./src/components/epic-agents/index.ts",
       "types": "./dist-types/src/components/epic-agents/index.d.ts",
       "default": "./src/components/epic-agents/index.ts"
     },
     "./components/epic-answer": {
-      "spell-epic-source": "./src/components/epic-answer/index.ts",
+      "spell-source": "./src/components/epic-answer/index.ts",
       "types": "./dist-types/src/components/epic-answer/index.d.ts",
       "default": "./src/components/epic-answer/index.ts"
     },
     "./components/epic-aside": {
-      "spell-epic-source": "./src/components/epic-aside/index.ts",
+      "spell-source": "./src/components/epic-aside/index.ts",
       "types": "./dist-types/src/components/epic-aside/index.d.ts",
       "default": "./src/components/epic-aside/index.ts"
     },
     "./components/epic-ask": {
-      "spell-epic-source": "./src/components/epic-ask/index.ts",
+      "spell-source": "./src/components/epic-ask/index.ts",
       "types": "./dist-types/src/components/epic-ask/index.d.ts",
       "default": "./src/components/epic-ask/index.ts"
     },
     "./components/epic-cards": {
-      "spell-epic-source": "./src/components/epic-cards/index.ts",
+      "spell-source": "./src/components/epic-cards/index.ts",
       "types": "./dist-types/src/components/epic-cards/index.d.ts",
       "default": "./src/components/epic-cards/index.ts"
     },
     "./components/epic-choice-rows": {
-      "spell-epic-source": "./src/components/epic-choice-rows/index.ts",
+      "spell-source": "./src/components/epic-choice-rows/index.ts",
       "types": "./dist-types/src/components/epic-choice-rows/index.d.ts",
       "default": "./src/components/epic-choice-rows/index.ts"
     },
     "./components/epic-choices": {
-      "spell-epic-source": "./src/components/epic-choices/index.ts",
+      "spell-source": "./src/components/epic-choices/index.ts",
       "types": "./dist-types/src/components/epic-choices/index.d.ts",
       "default": "./src/components/epic-choices/index.ts"
     },
     "./components/epic-choices-bar": {
-      "spell-epic-source": "./src/components/epic-choices-bar/index.ts",
+      "spell-source": "./src/components/epic-choices-bar/index.ts",
       "types": "./dist-types/src/components/epic-choices-bar/index.d.ts",
       "default": "./src/components/epic-choices-bar/index.ts"
     },
     "./components/epic-code": {
-      "spell-epic-source": "./src/components/epic-code/index.ts",
+      "spell-source": "./src/components/epic-code/index.ts",
       "types": "./dist-types/src/components/epic-code/index.d.ts",
       "default": "./src/components/epic-code/index.ts"
     },
     "./components/epic-comment-pane": {
-      "spell-epic-source": "./src/components/epic-comment-pane/index.ts",
+      "spell-source": "./src/components/epic-comment-pane/index.ts",
       "types": "./dist-types/src/components/epic-comment-pane/index.d.ts",
       "default": "./src/components/epic-comment-pane/index.ts"
     },
     "./components/epic-commit": {
-      "spell-epic-source": "./src/components/epic-commit/index.ts",
+      "spell-source": "./src/components/epic-commit/index.ts",
       "types": "./dist-types/src/components/epic-commit/index.d.ts",
       "default": "./src/components/epic-commit/index.ts"
     },
     "./components/epic-event": {
-      "spell-epic-source": "./src/components/epic-event/index.ts",
+      "spell-source": "./src/components/epic-event/index.ts",
       "types": "./dist-types/src/components/epic-event/index.d.ts",
       "default": "./src/components/epic-event/index.ts"
     },
     "./components/epic-item": {
-      "spell-epic-source": "./src/components/epic-item/index.ts",
+      "spell-source": "./src/components/epic-item/index.ts",
       "types": "./dist-types/src/components/epic-item/index.d.ts",
       "default": "./src/components/epic-item/index.ts"
     },
     "./components/epic-link": {
-      "spell-epic-source": "./src/components/epic-link/index.ts",
+      "spell-source": "./src/components/epic-link/index.ts",
       "types": "./dist-types/src/components/epic-link/index.d.ts",
       "default": "./src/components/epic-link/index.ts"
     },
     "./components/epic-list": {
-      "spell-epic-source": "./src/components/epic-list/index.ts",
+      "spell-source": "./src/components/epic-list/index.ts",
       "types": "./dist-types/src/components/epic-list/index.d.ts",
       "default": "./src/components/epic-list/index.ts"
     },
     "./components/epic-net-effect": {
-      "spell-epic-source": "./src/components/epic-net-effect/index.ts",
+      "spell-source": "./src/components/epic-net-effect/index.ts",
       "types": "./dist-types/src/components/epic-net-effect/index.d.ts",
       "default": "./src/components/epic-net-effect/index.ts"
     },
     "./components/epic-new-item": {
-      "spell-epic-source": "./src/components/epic-new-item/index.ts",
+      "spell-source": "./src/components/epic-new-item/index.ts",
       "types": "./dist-types/src/components/epic-new-item/index.d.ts",
       "default": "./src/components/epic-new-item/index.ts"
     },
     "./components/epic-note": {
-      "spell-epic-source": "./src/components/epic-note/index.ts",
+      "spell-source": "./src/components/epic-note/index.ts",
       "types": "./dist-types/src/components/epic-note/index.d.ts",
       "default": "./src/components/epic-note/index.ts"
     },
     "./components/epic-original": {
-      "spell-epic-source": "./src/components/epic-original/index.ts",
+      "spell-source": "./src/components/epic-original/index.ts",
       "types": "./dist-types/src/components/epic-original/index.d.ts",
       "default": "./src/components/epic-original/index.ts"
     },
     "./components/epic-overview": {
-      "spell-epic-source": "./src/components/epic-overview/index.ts",
+      "spell-source": "./src/components/epic-overview/index.ts",
       "types": "./dist-types/src/components/epic-overview/index.d.ts",
       "default": "./src/components/epic-overview/index.ts"
     },
     "./components/epic-page": {
-      "spell-epic-source": "./src/components/epic-page/index.ts",
+      "spell-source": "./src/components/epic-page/index.ts",
       "types": "./dist-types/src/components/epic-page/index.d.ts",
       "default": "./src/components/epic-page/index.ts"
     },
     "./components/epic-page-note-head": {
-      "spell-epic-source": "./src/components/epic-page-note-head/index.ts",
+      "spell-source": "./src/components/epic-page-note-head/index.ts",
       "types": "./dist-types/src/components/epic-page-note-head/index.d.ts",
       "default": "./src/components/epic-page-note-head/index.ts"
     },
     "./components/epic-phase": {
-      "spell-epic-source": "./src/components/epic-phase/index.ts",
+      "spell-source": "./src/components/epic-phase/index.ts",
       "types": "./dist-types/src/components/epic-phase/index.d.ts",
       "default": "./src/components/epic-phase/index.ts"
     },
     "./components/epic-prompt": {
-      "spell-epic-source": "./src/components/epic-prompt/index.ts",
+      "spell-source": "./src/components/epic-prompt/index.ts",
       "types": "./dist-types/src/components/epic-prompt/index.d.ts",
       "default": "./src/components/epic-prompt/index.ts"
     },
     "./components/epic-question": {
-      "spell-epic-source": "./src/components/epic-question/index.ts",
+      "spell-source": "./src/components/epic-question/index.ts",
       "types": "./dist-types/src/components/epic-question/index.d.ts",
       "default": "./src/components/epic-question/index.ts"
     },
     "./components/epic-review": {
-      "spell-epic-source": "./src/components/epic-review/index.ts",
+      "spell-source": "./src/components/epic-review/index.ts",
       "types": "./dist-types/src/components/epic-review/index.d.ts",
       "default": "./src/components/epic-review/index.ts"
     },
     "./components/epic-section": {
-      "spell-epic-source": "./src/components/epic-section/index.ts",
+      "spell-source": "./src/components/epic-section/index.ts",
       "types": "./dist-types/src/components/epic-section/index.d.ts",
       "default": "./src/components/epic-section/index.ts"
     },
     "./components/epic-send": {
-      "spell-epic-source": "./src/components/epic-send/index.ts",
+      "spell-source": "./src/components/epic-send/index.ts",
       "types": "./dist-types/src/components/epic-send/index.d.ts",
       "default": "./src/components/epic-send/index.ts"
     },
     "./components/epic-state-filter": {
-      "spell-epic-source": "./src/components/epic-state-filter/index.ts",
+      "spell-source": "./src/components/epic-state-filter/index.ts",
       "types": "./dist-types/src/components/epic-state-filter/index.d.ts",
       "default": "./src/components/epic-state-filter/index.ts"
     },
     "./components/epic-status": {
-      "spell-epic-source": "./src/components/epic-status/index.ts",
+      "spell-source": "./src/components/epic-status/index.ts",
       "types": "./dist-types/src/components/epic-status/index.d.ts",
       "default": "./src/components/epic-status/index.ts"
     },
     "./components/epic-summary": {
-      "spell-epic-source": "./src/components/epic-summary/index.ts",
+      "spell-source": "./src/components/epic-summary/index.ts",
       "types": "./dist-types/src/components/epic-summary/index.d.ts",
       "default": "./src/components/epic-summary/index.ts"
     },
     "./components/epic-test-run": {
-      "spell-epic-source": "./src/components/epic-test-run/index.ts",
+      "spell-source": "./src/components/epic-test-run/index.ts",
       "types": "./dist-types/src/components/epic-test-run/index.d.ts",
       "default": "./src/components/epic-test-run/index.ts"
     },
     "./components/epic-text-box": {
-      "spell-epic-source": "./src/components/epic-text-box/index.ts",
+      "spell-source": "./src/components/epic-text-box/index.ts",
       "types": "./dist-types/src/components/epic-text-box/index.d.ts",
       "default": "./src/components/epic-text-box/index.ts"
     },
     "./components/epic-thread": {
-      "spell-epic-source": "./src/components/epic-thread/index.ts",
+      "spell-source": "./src/components/epic-thread/index.ts",
       "types": "./dist-types/src/components/epic-thread/index.d.ts",
       "default": "./src/components/epic-thread/index.ts"
     },
     "./components/epic-update": {
-      "spell-epic-source": "./src/components/epic-update/index.ts",
+      "spell-source": "./src/components/epic-update/index.ts",
       "types": "./dist-types/src/components/epic-update/index.d.ts",
       "default": "./src/components/epic-update/index.ts"
     },
     "./dates": {
-      "spell-epic-source": "./src/dates/index.ts",
+      "spell-source": "./src/dates/index.ts",
       "types": "./dist-types/src/dates/index.d.ts",
       "default": "./src/dates/index.ts"
     },
     "./definitions": {
-      "spell-epic-source": "./src/definitions/index.ts",
+      "spell-source": "./src/definitions/index.ts",
       "types": "./dist-types/src/definitions/index.d.ts",
       "default": "./src/definitions/index.ts"
     },
     "./links": {
-      "spell-epic-source": "./src/links/index.ts",
+      "spell-source": "./src/links/index.ts",
       "types": "./dist-types/src/links/index.d.ts",
       "default": "./src/links/index.ts"
     },
     "./markup": {
-      "spell-epic-source": "./src/markup/index.ts",
+      "spell-source": "./src/markup/index.ts",
       "types": "./dist-types/src/markup/index.d.ts",
       "default": "./src/markup/index.ts"
     },
     "./phases": {
-      "spell-epic-source": "./src/phases/index.ts",
+      "spell-source": "./src/phases/index.ts",
       "types": "./dist-types/src/phases/index.d.ts",
       "default": "./src/phases/index.ts"
     },
     "./review": {
-      "spell-epic-source": "./src/review/index.ts",
+      "spell-source": "./src/review/index.ts",
       "types": "./dist-types/src/review/index.d.ts",
       "default": "./src/review/index.ts"
     },
     "./tool/migrations": {
-      "spell-epic-source": "./src/tool/migrations/index.ts",
+      "spell-source": "./src/tool/migrations/index.ts",
       "types": "./dist-types/src/tool/migrations/index.d.ts",
       "default": "./src/tool/migrations/index.ts"
     },
     "./components/epic-send-buttons": {
-      "spell-epic-source": "./src/components/epic-send-buttons/index.ts",
+      "spell-source": "./src/components/epic-send-buttons/index.ts",
       "types": "./dist-types/src/components/epic-send-buttons/index.d.ts",
       "default": "./src/components/epic-send-buttons/index.ts"
     },
     "./components/epic-run-row": {
-      "spell-epic-source": "./src/components/epic-run-row/index.ts",
+      "spell-source": "./src/components/epic-run-row/index.ts",
       "types": "./dist-types/src/components/epic-run-row/index.d.ts",
       "default": "./src/components/epic-run-row/index.ts"
     },
     "./components/epic-run": {
-      "spell-epic-source": "./src/components/epic-run/index.ts",
+      "spell-source": "./src/components/epic-run/index.ts",
       "types": "./dist-types/src/components/epic-run/index.d.ts",
       "default": "./src/components/epic-run/index.ts"
     },
     "./components/epic-change": {
-      "spell-epic-source": "./src/components/epic-change/index.ts",
+      "spell-source": "./src/components/epic-change/index.ts",
       "types": "./dist-types/src/components/epic-change/index.d.ts",
       "default": "./src/components/epic-change/index.ts"
     },
     "./components/epic-mark": {
-      "spell-epic-source": "./src/components/epic-mark/index.ts",
+      "spell-source": "./src/components/epic-mark/index.ts",
       "types": "./dist-types/src/components/epic-mark/index.d.ts",
       "default": "./src/components/epic-mark/index.ts"
     },
     "./components/epic-actions": {
-      "spell-epic-source": "./src/components/epic-actions/index.ts",
+      "spell-source": "./src/components/epic-actions/index.ts",
       "types": "./dist-types/src/components/epic-actions/index.d.ts",
       "default": "./src/components/epic-actions/index.ts"
     },
     "./*": {
-      "spell-epic-source": [
+      "spell-source": [
         "./src/*.ts",
         "./src/*.tsx",
         "./src/*/index.ts",
@@ -285,7 +285,7 @@
       "default": "./src/*"
     },
     "./*.ts": {
-      "spell-epic-source": "./src/*.ts",
+      "spell-source": "./src/*.ts",
       "types": "./dist-types/src/*.d.ts",
       "default": "./src/*.ts"
     },
@@ -371,7 +371,7 @@
       "epics": {
         "name": "Epic UI",
         "dir": "src/docs",
-        "assets": "../spell-ui/site/_assets"
+        "assets": "../ui/site/_assets"
       }
     },
     "engineRoutes": {

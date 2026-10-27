@@ -2,13 +2,13 @@ import type { JSX } from "@solidjs/web"
 
 import { E } from "spell/element"
 
-import { Fold } from "spell-epic/components/epic-item/Fold"
+import { Fold } from "spell/epic/components/epic-item/Fold"
 
 import { epicMoreVocabulary } from "./EpicMore.en"
 import { BODY } from "./EpicAnswer.types"
 
 import answerCSS from "./EpicAnswer.css?inline"
-import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
+import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 
 /****************
  * ### `EpicMore`

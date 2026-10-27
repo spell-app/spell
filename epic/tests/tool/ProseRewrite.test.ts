@@ -5,7 +5,7 @@
 import { parseHTML } from "linkedom"
 import { describe, expect, test } from "vite-plus/test"
 
-import { ProseRewrite } from "spell-epic/tool/ProseRewrite"
+import { ProseRewrite } from "spell/epic/tool/ProseRewrite"
 
 /** `html` with every old shape rewritten, white space between tags squeezed. */
 function rewritten(html: string): string {

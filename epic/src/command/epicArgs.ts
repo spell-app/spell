@@ -2,7 +2,7 @@ import { EpicCommandError } from "./command.types"
 
 /**
  * How an `epic <verb> ...` command line becomes the `epic` tool's (`<verb> <name> ...`, its own order:  `PlanDocCommands`):
- * a thin translation, so the tool itself (`spell-epic/tool/PlanDocCommands`) keeps its arguments.
+ * a thin translation, so the tool itself (`spell/epic/tool/PlanDocCommands`) keeps its arguments.
  * - Owen's scheme (Command Review Page, 2026-10-12):  `epic <verb> <epic>#<id>` for anything inside an epic page
  *   - `seo`:  the page
  *   - `seo#J3`:  an item (or a comment, `seo#C3`, the old `cm3` read the same;  or an Overview section)
@@ -447,7 +447,7 @@ const PHASE_RANGE = /^[Pp]?(\d+)(?:\s*-\s*[Pp]?(\d+))?$/
  * - `t`:  a todo, work still to do;  `--limit` makes it a limit to know about (the tool's `limit`), as does the word
  *   `limit` (or `caveat`, its word before epic `epic-engine` P44)
  * - `m`:  a manual test (`t` before P44, `v` before P32)
- * - a private copy:  importing `spell-epic/tool/planDoc.types` here would load the tool's types into every call
+ * - a private copy:  importing `spell/epic/tool/planDoc.types` here would load the tool's types into every call
  */
 const KIND_LETTERS: Record<string, string> = {
   q: "question",

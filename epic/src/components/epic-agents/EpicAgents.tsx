@@ -11,13 +11,13 @@ import {
   sentence,
   type InboxDoing,
   type RunningAgent
-} from "spell-epic/review"
-import type { DOMTextBoxElement } from "spell-epic/components/epic-text-box/EpicTextBox"
+} from "spell/epic/review"
+import type { DOMTextBoxElement } from "spell/epic/components/epic-text-box/EpicTextBox"
 
 import { epicAgentsVocabulary } from "./EpicAgents.en"
 
 import agentsCSS from "./EpicAgents.css?inline"
-import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
+import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 
 /****************
  * ### `EpicAgents`

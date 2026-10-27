@@ -3,10 +3,10 @@ import { afterEach, beforeEach, describe, expect, test, vi } from "vite-plus/tes
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import { expectAccessible } from "spell/test-helpers/A11y"
 
-import { SendCountdown } from "spell-epic/review"
-import { COUNTDOWN_MS } from "spell-epic/review/review.types"
+import { SendCountdown } from "spell/epic/review"
+import { COUNTDOWN_MS } from "spell/epic/review/review.types"
 
-import "spell-epic/components/epic-send-buttons"
+import "spell/epic/components/epic-send-buttons"
 
 ////////////////
 // ## Fakes

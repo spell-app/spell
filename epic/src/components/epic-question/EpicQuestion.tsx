@@ -5,7 +5,7 @@ import { E } from "spell/element"
 import { epicQuestionVocabulary } from "./EpicQuestion.en"
 
 import questionCSS from "./EpicQuestion.css?inline"
-import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
+import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 
 /****************
  * ### `EpicQuestion`

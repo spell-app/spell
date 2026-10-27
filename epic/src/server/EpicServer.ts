@@ -17,9 +17,9 @@ import {
 import type { SiteTab } from "spell/server/site/site.types"
 import { resolvedFile } from "spell/toolchain/sourceNames"
 
-import type { ContentRouteContext } from "spell-epic/list/runningRoutes"
+import type { ContentRouteContext } from "spell/epic/list/runningRoutes"
 
-import { packageDir } from "spell-epic/tools/packageDir"
+import { packageDir } from "spell/epic/tools/packageDir"
 
 import { RepoApp } from "./RepoApp"
 import { RepoList } from "./RepoList"
@@ -330,7 +330,7 @@ export class EpicServer {
    * - the engine's templates at each repo's `/r/<repo>/templates/` too, where its pages' `../templates/` leads
    *   (epic `epic-eject` T11)
    * - each repo's main CHECKOUT under its content, where the content has no such file (epic `epic-engine` I25), as
-   *   spell-app's page server lays the two:  a page's links to code (`../../packages/...`, `../../spell-epic/src/...`)
+   *   spell-app's page server lays the two:  a page's links to code (`../../packages/...`, `../../epic/src/...`)
    *   and the data a page draws from the checkout serving it (the spell syntax guide's `spellSyntax.json`, the core
    *   reference page's declarations) resolve here too;  dot files never served
    */
@@ -363,7 +363,7 @@ export class EpicServer {
    * The folders each repo's settings serve at their own addresses, as spell-app's page server serves them
    * (`engineRoutes()`, `"engineRoutes"` in the root `package.json`'s `"pageServer"`;  epic `epic-engine` I58):
    * - e.g. spell-app's `"/element/": "app/dist-element"`, the app's element bundles that App UI's pages load
-   * - the folder is from the repo's main checkout, as the settings give it (`../spell-ui/docs` is beside it)
+   * - the folder is from the repo's main checkout, as the settings give it (`../ui/docs` is beside it)
    * - `/<route>`:  the default repo's;  `/r/<repo>/<route>`:  each repo's
    * - after the engine's own routes (`ENGINE_ROUTES`) and the sets:  at one prefix the first folder holding the path
    *   answers (`SRV.StaticHandler`), so the engine's `/_epic/assets/` is still this engine's, never a repo's copy

@@ -4,7 +4,7 @@
  */
 import { describe, expect, test } from "vite-plus/test"
 
-import { ActiveTime } from "spell-epic/command/ActiveTime"
+import { ActiveTime } from "spell/epic/command/ActiveTime"
 
 import { transcript, type Line } from "./transcripts"
 

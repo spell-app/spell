@@ -4,7 +4,7 @@ import { existsSync, readFileSync, realpathSync } from "node:fs"
 import { basename, dirname, join, matchesGlob, relative, resolve, sep } from "node:path"
 
 import { Git } from "spell/server/Git"
-import { EpicConfig } from "spell-epic/config/EpicConfig"
+import { EpicConfig } from "spell/epic/config/EpicConfig"
 
 import { EXIT, EpicCommandError, type Generator, type MergeMainReport, type SnapshotReview } from "./command.types"
 import { StrayFiles } from "./StrayFiles"

@@ -72,7 +72,7 @@ the bundler, and the kit's own code that goes into the bundle, come from there.
 The extension adds a small install of its own, because it's a yarn project apart, with its own lockfile:
 
 ```sh
-cd ~/www/spell/spell-epic/vscode
+cd ~/www/spell/epic/vscode
 yarn install                               # once:  vsce, and the types for VS Code and node
 yarn package                               # bundles out/extension.js, then writes spell-epic.vsix
 code --install-extension spell-epic.vsix

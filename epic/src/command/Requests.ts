@@ -5,9 +5,9 @@ import { join } from "node:path"
 import { escapeHTML } from "spell/util/string"
 import { localDate, localMinutes } from "spell/util/time"
 import { Git } from "spell/server/Git"
-import { EpicConfig } from "spell-epic/config/EpicConfig"
-import { DataFile } from "spell-epic/data/DataFile"
-import { PhaseIds } from "spell-epic/phases"
+import { EpicConfig } from "spell/epic/config/EpicConfig"
+import { DataFile } from "spell/epic/data/DataFile"
+import { PhaseIds } from "spell/epic/phases"
 
 import {
   EXIT,

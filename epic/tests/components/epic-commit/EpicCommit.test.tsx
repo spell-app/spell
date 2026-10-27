@@ -3,7 +3,7 @@ import { describe, expect, test } from "vite-plus/test"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import { expectAccessible } from "spell/test-helpers/A11y"
 
-import "spell-epic/components/epic-commit"
+import "spell/epic/components/epic-commit"
 
 /** Commits under a box that shows them (`--epic-commits-display`), as the page's git toggle does. */
 function shown(inner: string, repo = ""): string {

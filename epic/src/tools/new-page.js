@@ -21,7 +21,7 @@ import { basename, dirname, join, relative } from "node:path"
 
 import { parseHTML } from "linkedom"
 
-import { DataFile } from "spell-epic/data/DataFile.ts"
+import { DataFile } from "spell/epic/data/DataFile.ts"
 import { CONTENT, GUIDES, PACKAGE, TOOLS, fromTemplate, pagePath, serialize, templateFile, tidy } from "./pages.js"
 
 const { positional, flags } = parseArgs(process.argv.slice(2))
