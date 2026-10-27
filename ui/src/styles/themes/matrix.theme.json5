@@ -5,13 +5,17 @@
 //   What values can't say is in its rules sheets:  `rules/modern.css`, `rules/states.css` (its secondary's states), `rules/matrix.css` (headings, eyebrows, table headers).
 // - Owen, 2026-10-26:  "make a new theme "matrix" based on this", a screenshot of a rack viewer:  a live fabric inventory.
 // - What makes it Matrix:
-//   - dark, its home:  a near-black page with a cold green-grey cast, panels a step lighter with low hairline edges,
-//     no glow:  a flat console
+//   - dark, its home:  a near-black page with a cold green-grey cast and a faint glow from the top, panels only just
+//     off it (#0d1518 on #0a1013), standing off by their hairline edges and a slight lift, not by being brighter
+//   - Owen, on the first version:  "You lost some subtelty in Matrix, e.g. surfgace colors, slight highlight in the
+//     page gradient, fonts, ALL CAPS headers (SJC • SW-B17, table headers)";  so every value is measured off his
+//     screenshot (debut I76)
 //   - ONE mint accent (the eyebrows, the live dots, the counts that are fine), amber for what needs attention,
 //     coral for what's wrong
-//   - big bold headings, tightly tracked;  eyebrows and table headers in the monospace, uppercase and spaced out;
-//     body text a muted grey-green
-//   - light, "daylight":  a cool grey-green page, white panels, the mint deepened so white reads on it
+//   - big heavy headings, tightly tracked (the display cut of the system font);  eyebrows and table headers in the
+//     monospace, uppercase and spaced out;  body text a muted grey-green
+//   - light, "daylight":  the same subtlety:  a cool grey-green page with a white haze at the top, panels a hair
+//     lighter on hairlines, the mint deepened so white reads on it
 //   - the system font and its monospace;  6px chips, 8px controls, 14px cards and panels, 18px modals
 //     (the box round a thing always rounder than it)
 //   - Apple's system colours for the hues (its palette, `apple`)
@@ -21,22 +25,29 @@
   "palette": "apple",
   "rules": ["modern", "states", "matrix"],
   "own": {
-    "matrix-page": { "light": "#e8eeeb", "dark": "#071013" },
-    "matrix-panel": { "light": "#fbfdfc", "dark": "#111f22" },
+    // Measured off Owen's screenshot (the SJC rack viewer), pixel by pixel:  the panels only just off the page,
+    // standing off by their hairline edges and a slight lift, never by being brighter
+    "matrix-page": { "light": "#e9eeec", "dark": "#0a1013" },
+    "matrix-panel": { "light": "#f2f6f4", "dark": "#0d1518" },
     // a raised strip on a panel:  a table's rows, the chosen tab
-    "matrix-raised": { "light": "#f1f6f4", "dark": "#172a2d" },
-    // what sits in a panel:  inputs, a tab bar's track, code
-    "matrix-inset": { "light": "#e2eae7", "dark": "#0a1417" },
-    "matrix-border": { "light": "#cbd8d4", "dark": "#1c2f31" },
-    "matrix-border-strong": { "light": "#afc1bc", "dark": "#2a4043" },
-    "matrix-accent": { "light": "#0b7552", "dark": "#7ce5bd" },
+    "matrix-raised": { "light": "#fafcfb", "dark": "#172124" },
+    // what sits in a panel:  a table's well, a tab bar's track, code
+    "matrix-inset": { "light": "#e6ecea", "dark": "#0b1215" },
+    // an input:  a hair under the panel it's on
+    "matrix-field": { "light": "#f8fbfa", "dark": "#0d1316" },
+    "matrix-border": { "light": "#d3ddd9", "dark": "#1b2528" },
+    "matrix-border-strong": { "light": "#bccac5", "dark": "#283437" },
+    "matrix-accent": { "light": "#0b7552", "dark": "#a3e1c0" },
     "matrix-on-accent": { "light": "#ffffff", "dark": "#03231a" },
-    "matrix-accent-wash": { "light": "#0b75521a", "dark": "#7ce5bd1f" },
-    "matrix-accent-text": { "light": "#0a6648", "dark": "#8ff0ca" },
+    "matrix-accent-wash": { "light": "#0b75521a", "dark": "#a3e1c01f" },
+    "matrix-accent-text": { "light": "#0a6648", "dark": "#a3e1c0" },
     // amber, bright in both schemes, ink on it (as a warning light);  its text a deep amber in light
-    "matrix-amber": { "light": "#e8a334", "dark": "#ffc56d" },
+    "matrix-amber": { "light": "#e8a334", "dark": "#f2c778" },
     "matrix-on-amber": "#2a1a00",
-    "matrix-coral": { "light": "#b5392b", "dark": "#ff8d80" }
+    "matrix-coral": { "light": "#b5392b", "dark": "#e79583" },
+    // the page's highlight:  a soft glow from the top, right of centre, under the header (`rules/matrix.css`);
+    // 5% mint at its brightest in dark (#0a1013 => #111b1c), a white haze in light
+    "matrix-glow": "radial-gradient(27% 300px at 73% 60px, light-dark(#ffffffb3, #a3e1c00d), transparent)"
   },
   "typography": {
     "size": "15px",
@@ -52,11 +63,13 @@
     "l": "14px"
   },
   "text": {
-    "ink": { "light": "#0c1916", "dark": "#e9f0ed" },
+    "ink": { "light": "#0c1916", "dark": "#ebf0ed" },
     "body": { "light": "#1e2e2a", "dark": "#c3d0cc" },
-    "strong": { "light": "#07110e", "dark": "#f4f8f6" },
-    "muted": { "light": "#4c5f5a", "dark": "#90a29e" },
-    "light": { "light": "#5c6e69", "dark": "#7e908c" }
+    "strong": { "light": "#07110e", "dark": "#ebf0ed" },
+    // the console's grey:  its paragraphs and labels
+    "muted": { "light": "#4c5f5a", "dark": "#95a19e" },
+    // its quietest text, a table's header row and a count's note:  #697573 there, lifted to pass 4.5:1 on a raised row
+    "light": { "light": "#56685f", "dark": "#808c8a" }
   },
   "surfaces": {
     "page": "{own.matrix-page}",
@@ -130,8 +143,8 @@
   "shadows": {
     "ink": { "light": "#0c1f1a", "dark": "#000000" },
     "subtle": "0 1px 2px light-dark(#0c1f1a0f, #00000066)",
-    // flat:  a hairline round a panel, and in light a whisper of shadow
-    "raised": "0 0 0 1px {own.matrix-border}, 0 1px 3px light-dark(#0c1f1a0d, #00000000)",
+    // a hairline round a panel, and a slight lift:  a soft shadow just darker than the page (#0a1013 => #090f12)
+    "raised": "0 0 0 1px {own.matrix-border}, 0 6px 24px light-dark(#0c1f1a0f, #00000040)",
     "floating": "0 0 0 1px {borders.strong}, 0 10px 30px light-dark(#0c1f1a24, #000000a6)",
     "floating-hover": "0 0 0 1px {borders.strong}, 0 14px 40px light-dark(#0c1f1a2e, #000000b3)",
     "overlay": "{shadows.floating-hover}"
@@ -143,7 +156,7 @@
     },
     "input": {
       "radius": "{radii.m}",
-      "background": "{own.matrix-inset}",
+      "background": "{own.matrix-field}",
       "border-color": "{own.matrix-border}"
     },
     "dropdown": {
@@ -157,13 +170,13 @@
       "radius": "{radii.m}",
       "active-background": "{own.matrix-accent-wash}",
       "active-color": "{own.matrix-accent-text}",
-      // tab bars:  a sunk track, the chosen tab a raised strip in the ink (not the accent), its corners the track's
-      // less the 3px inset
-      "segmented-background": "{own.matrix-inset}",
+      // tab bars:  a sunk track (#0a1114 under a #0e1619 bar), the chosen tab a raised strip in the ink (#1c272a, not
+      // the accent), its corners the track's less the 3px inset
+      "segmented-background": { "light": "#e3eae7", "dark": "#0a1114" },
       "segmented-radius": "{radii.m}",
       "segmented-padding": "3px",
       "segmented-item-radius": "calc({radii.m} - 3px)",
-      "segmented-active-background": "{own.matrix-raised}",
+      "segmented-active-background": { "light": "#ffffff", "dark": "#1c272a" },
       "segmented-active-color": "{text.strong}",
       // no lines between segments:  one surface, its chosen key the only mark (T7)
       "segmented-divider": "transparent"
@@ -197,12 +210,14 @@
     "header": {
       // headings bold (and tight:  `rules/matrix.css`);  sub-headings muted
       "font-weight": "{typography.weight.bold}",
-      "sub-color": "{text.muted}"
+      "sub-color": "{text.muted}",
+      // an eyebrow (a `sub` header) a little smaller than classic's 6/7:  the console's is about 4/5 of its text
+      "sub-heading-ratio": 0.8
     },
     "table": {
-      // a table's header row:  no fill, muted (in the monospace, uppercase:  `rules/matrix.css`)
+      // a table's header row:  no fill, the quietest text (in the monospace, uppercase:  `rules/matrix.css`)
       "header-background": "transparent",
-      "header-color": "{text.muted}"
+      "header-color": "{text.light}"
     },
     "statistic": {
       // a count's label quiet, as the console's are:  muted, its own case and weight (`rules/matrix.css`)

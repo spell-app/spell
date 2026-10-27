@@ -324,8 +324,8 @@ describe("matrix.css", () => {
     expect(style).toMatchObject({ backgroundColor: "rgb(11, 117, 82)", borderTopLeftRadius: "8px" }) // #0b7552
     expect(style.fontFamily).toMatch(/^system-ui/)
     Own.dark(box)
-    await vi.waitFor(() => expect(getComputedStyle(box).backgroundColor).toBe("rgb(124, 229, 189)")) // #7ce5bd
-    expect(Own.color("--ui-background")).toBe("rgb(7, 16, 19)") // #071013
+    await vi.waitFor(() => expect(getComputedStyle(box).backgroundColor).toBe("rgb(163, 225, 192)")) // #a3e1c0
+    expect(Own.color("--ui-background")).toBe("rgb(10, 16, 19)") // #0a1013
   })
 
   it("the console's labels:  a table's header row in the monospace, uppercase", async () => {
