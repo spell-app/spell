@@ -6,8 +6,8 @@
  * - `spell bundle [names...]` / `spell bundle check`:  the bundles the page server serves, built on demand
  * - `spell commands [list|check]`:  every command against the commands page
  * - `spell wwod [check]`:  WWOD's citations and paths
- * - `spell readme check | test [pages...]`:  every repo's README pages, checked, or their examples run
- *   (epic `readme` P16)
+ * - `spell readme check | test | pictures [pages...]`:  every repo's README pages, checked, their examples run
+ *   (epic `readme` P16), or their `html example` blocks pictured (epic `ui-gaps` P14)
  * - `spell map install | status | build | query | explain | uses`:  a map of every repo's code, and one of the
  *   docs, asked through graphify (epic `coherence` P1)
  * - `spell coherence score [--json] [--save] [--compare <snapshot | last>] [--at <revision>]`:  how coherent the
@@ -122,7 +122,7 @@ export default function kitCommands(spell: Command): void {
 
   const readme = spell
     .command("readme")
-    .description("every repo's README pages:  check their links and words, or run their examples")
+    .description("every repo's README pages:  check their links and words, run their examples, picture their markup")
 
   readme
     .command("check")
@@ -137,6 +137,22 @@ export default function kitCommands(spell: Command): void {
     .option("--list", "only list the examples, without running them")
     .action((pages: string[], options: { list?: boolean }) =>
       CLI.runCommand(() => CLI.runTool(README_TEST, [...pages, ...(options.list ? ["--list"] : [])]))
+    )
+
+  readme
+    .command("pictures")
+    .description("take the pictures of every README's `html example` blocks, headlessly, where missing or stale")
+    .argument("[pages...]", "only these pages, from the kit's root (spell-ui/README.md)")
+    .option("--all", "take every picture again, not only the stale and missing ones")
+    .option("--base <url>", "the page server to draw them with (default:  this checkout's own, else localhost:4747)")
+    .action((pages: string[], options: { all?: boolean; base?: string }) =>
+      CLI.runCommand(() =>
+        CLI.runTool(README_PICTURES, [
+          ...pages,
+          ...(options.all ? ["--all"] : []),
+          ...(options.base ? ["--base", options.base] : [])
+        ])
+      )
     )
 
   ////////////////
@@ -251,6 +267,9 @@ const README_CHECK: CLI.ToolSpec = { tool: "tools/readme-check.ts", cwd: "." }
 
 /** The README examples, run (`spell readme test`;  epic `readme` P16). */
 const README_TEST: CLI.ToolSpec = { tool: "tools/readme-test.ts", cwd: "." }
+
+/** The README examples' pictures (`spell readme pictures`;  epic `ui-gaps` P14). */
+const README_PICTURES: CLI.ToolSpec = { tool: "tools/readme-pictures.ts", cwd: "." }
 
 /** `serverCommand.ts`, loaded when a `spell server` verb runs. */
 function serverCommand() {

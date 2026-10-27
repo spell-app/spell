@@ -13,6 +13,7 @@
  * - What it reports, one line each, `page:line  rule  message`:  `ReadmeCheck.RULES`.
  * - Exit status 1 on any finding, 0 when clean.
  */
+import { createHash } from "node:crypto"
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs"
 import { dirname, join, relative, resolve } from "node:path"
 
@@ -48,6 +49,8 @@ export class ReadmeCheck {
     brand: "the word brand in any form, anywhere (code, links, Mermaid too):  spell-brand is internal, so leave it out",
     capital: "a lowercase `spell` in prose:  write Spell;  lowercase is for code, paths and names like `spell-parser`",
     siblings: "a See also line that opens `Also beside it`:  a See also lists curated links, not every sibling",
+    picture:
+      "an `html example` block without its picture under it, or with one older than its markup:  run `spell readme pictures`",
     output:
       "an sh block ending in `#` lines after its command:  its output, which goes in an Output fold after the block, so `yarn readme:test` runs it"
   } as const
@@ -125,6 +128,18 @@ export class ReadmeCheck {
       this.checkWords(line, lineNumber, folds, add)
       if (/<\/details>/i.test(line)) folds.pop()
     })
+
+    //////
+    // Examples' pictures:  each `html example` block drawn, under it, from its markup as it is now
+    //////
+    for (const example of ReadmeCheck.examples(text)) {
+      const { picture } = example
+      if (!picture) add(example.start, "picture", "this example has no picture:  run `spell readme pictures`")
+      else if (picture.hash !== example.hash)
+        add(picture.line, "picture", "this picture is older than its example:  run `spell readme pictures`")
+      else if (![picture.src, picture.dark].every((src) => existsSync(join(dirname(path), src))))
+        add(picture.line, "picture", `${picture.src} (or its dark one) isn't there:  run \`spell readme pictures\``)
+    }
 
     //////
     // Links, over the prose:  code blanked out, so a link's text may run over two lines
@@ -217,6 +232,67 @@ export class ReadmeCheck {
     )
     return findings.length ? 1 : 0
   }
+
+  ////////////////
+  // ## Examples and their pictures
+  ////////////////
+
+  /**
+   * A page's EXAMPLES:  its `html example` blocks, markup a browser draws, and the picture of each under it.
+   * - GitHub runs no custom elements, so a README shows an example's picture instead (epic `ui-gaps` P14, from
+   *   epic `epic-engine` Q28):  `spell readme pictures` (`tools/readme-pictures.ts`) takes it, headlessly.
+   * - The picture is the block's next line but blank ones:  `<picture>` (its dark source, its light `<img>`), then
+   *   `<!-- picture of the example above: <hash> -->`, the markup's `hash` when it was taken.
+   * - Static:  pure, of the page's text.
+   */
+  static examples(text: string): ReadmeExample[] {
+    const lines = text.split("\n")
+    const examples: ReadmeExample[] = []
+    for (let index = 0; index < lines.length; index++) {
+      const opening = EXAMPLE_FENCE.exec(lines[index]!)
+      if (!opening) continue
+      const marker = opening[1]!
+      let end = index + 1
+      while (
+        end < lines.length &&
+        !(lines[end]!.trim().startsWith(marker) && lines[end]!.trim().replace(/[`~]/g, "") === "")
+      )
+        end++
+      const markup = lines.slice(index + 1, end).join("\n")
+      let next = end + 1
+      while (next < lines.length && !lines[next]!.trim()) next++
+      const tag = PICTURE_LINE.exec(lines[next] ?? "")
+      const stamp = PICTURE_STAMP.exec(lines[next + 1] ?? "")
+      examples.push({
+        start: index + 1,
+        end: end + 1,
+        markup,
+        hash: ReadmeCheck.hashOf(markup),
+        ...(tag && {
+          picture: {
+            line: next + 1,
+            lines: stamp ? 2 : 1,
+            dark: tag[1]!,
+            src: tag[2]!,
+            alt: tag[3]!,
+            hash: stamp?.[1]
+          }
+        })
+      })
+      index = end
+    }
+    return examples
+  }
+
+  /** `markup`'s fingerprint:  its lines, trailing spaces ignored, hashed (SHA-256, the first 12 hex digits). */
+  static hashOf(markup: string): string {
+    const text = markup
+      .split("\n")
+      .map((line) => line.trimEnd())
+      .join("\n")
+      .trim()
+    return createHash("sha256").update(text).digest("hex").slice(0, 12)
+  }
 }
 
 ////////////////
@@ -224,6 +300,33 @@ export class ReadmeCheck {
 ////////////////
 
 /** One thing wrong on a page. */
+/** One example of a page (`ReadmeCheck.examples()`). */
+export type ReadmeExample = {
+  /** line of its opening fence, from 1 */
+  start: number
+  /** line of its closing fence */
+  end: number
+  /** the markup between the fences */
+  markup: string
+  /** the markup's fingerprint now (`hashOf()`) */
+  hash: string
+  /** its picture, when the page has one under it */
+  picture?: {
+    /** its `<picture>` line, from 1 */
+    line: number
+    /** how many lines it takes:  `<picture>`, and its stamp when there is one */
+    lines: number
+    /** the dark picture, from the page's folder */
+    dark: string
+    /** the light one */
+    src: string
+    /** its alt text, kept as the page's author wrote it */
+    alt: string
+    /** the markup's fingerprint when it was taken;  none without its stamp */
+    hash?: string
+  }
+}
+
 export type Finding = {
   /** the page, from the kit's root:  `spell-ui/README.md` */
   page: string
@@ -253,6 +356,16 @@ type Fold = {
 
 /** a page's file name:  `README.md`, `README-cli.md` */
 const PAGE_NAME = /^README(-[\w-]+)?\.md$/
+
+/** An example's opening fence:  ```` ```html example ````. */
+const EXAMPLE_FENCE = /^\s*(`{3,}|~{3,})\s*html\s+example\s*$/
+
+/** An example's picture, on one line:  its dark source, its light `<img>` and that one's alt text. */
+const PICTURE_LINE =
+  /^<picture><source media="\(prefers-color-scheme: dark\)" srcset="([^"]+)"><img src="([^"]+)"[^>]*? alt="([^"]*)"><\/picture>$/
+
+/** The stamp under it:  the markup's fingerprint when the picture was taken. */
+const PICTURE_STAMP = /^<!-- picture of the example above: ([0-9a-f]+) -->$/
 
 /** the content folder's name:  never linked (Q3) */
 const CONTENT_FOLDER = "spell.epics"
