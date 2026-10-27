@@ -1285,58 +1285,103 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
     )
   }
 
-  /** The Basics:  the theme's name and base, then a sub-panel each for Color, Type and Shape, one field a choice. */
+  /**
+   * The Basics, drawn as the token tree is (Owen:  "one editor"):  a head, then folds of the same look:
+   * the theme (its name, what it builds on), Color, Type and Shape, one field a choice.
+   * - Each choice says what the theme's own is while it's untouched:  its colour, font, size, corners.
+   */
   private basics(): JSX.Element {
     const t = this.text
     return (
-      <ui-section
-        class="group basics"
-        part={this.partForName("basics")}
-        label={t("basics")}
-        description={t("basicsTip")}
-        collapsible=""
-        level="2"
-      >
-        <ui-property-editor class="properties">
-          <ui-property name="name" label={t("name")} description={t("nameTip")}>
-            <ui-input
-              value={this.theme.name}
-              placeholder={t("defaultName")}
-              aria-label={t("name")}
-              size="small"
-              fluid=""
-              on-ui-typed={(event: CustomEvent<{ value: string }>) => this.choose({ name: event.detail.value })}
-            ></ui-input>
-          </ui-property>
-          <ui-property name="base" label={t("base")} description={t("baseTip")}>
-            <ui-select
-              value={this.baseTheme}
-              aria-label={t("base")}
-              size="small"
-              fluid=""
-              on-ui-changed={(event: CustomEvent<{ value: string | string[] }>) =>
-                this.choose({ base: String(event.detail.value) })
-              }
-            >
-              <For each={this.bases}>{(base) => <ui-item value={base}>{UIT.ThemeNames.titleOf(base)}</ui-item>}</For>
-            </ui-select>
-          </ui-property>
-          <ui-panel label={t("color")} description={t("colorTip")} collapsible="">
+      <section class="basics" part={this.partForName("basics")} aria-label={t("basics")}>
+        <header class="tokens-bar">
+          <h2 class="tokens-title" title={t("basicsTip")}>
+            {t("basics")}
+          </h2>
+        </header>
+        {this.basicsGroup(
+          "theme",
+          t("theme"),
+          <>
+            <ui-property name="name" label={t("name")} description={t("nameTip")}>
+              <ui-input
+                value={this.theme.name}
+                placeholder={t("defaultName")}
+                aria-label={t("name")}
+                size="small"
+                fluid=""
+                on-ui-typed={(event: CustomEvent<{ value: string }>) => this.choose({ name: event.detail.value })}
+              ></ui-input>
+            </ui-property>
+            <ui-property name="base" label={t("base")} description={t("baseTip")}>
+              <ui-select
+                value={this.baseTheme}
+                aria-label={t("base")}
+                size="small"
+                fluid=""
+                on-ui-changed={(event: CustomEvent<{ value: string | string[] }>) =>
+                  this.choose({ base: String(event.detail.value) })
+                }
+              >
+                <For each={this.bases}>{(base) => <ui-item value={base}>{UIT.ThemeNames.titleOf(base)}</ui-item>}</For>
+              </ui-select>
+            </ui-property>
+          </>
+        )}
+        {this.basicsGroup(
+          "color",
+          t("color"),
+          <>
             {this.hueProperty("primary")}
             {this.hueProperty("secondary")}
             {this.hueProperty("background")}
-          </ui-panel>
-          <ui-panel label={t("type")} description={t("typeTip")} collapsible="">
+          </>
+        )}
+        {this.basicsGroup(
+          "type",
+          t("type"),
+          <>
             {this.fontProperty("headingFont")}
             {this.fontProperty("bodyFont")}
             {this.sizeProperty()}
-          </ui-panel>
-          <ui-panel label={t("shape")} description={t("shapeTip")} collapsible="">
+          </>
+        )}
+        {this.basicsGroup(
+          "shape",
+          t("shape"),
+          <>
             {this.segmentedProperty("corners", UIT.ThemeCorners)}
             {this.segmentedProperty("depth", UIT.ThemeDepths)}
             <Show when={this.hasGlass}>{this.segmentedProperty("glass", UIT.ThemeGlasses)}</Show>
-          </ui-panel>
-        </ui-property-editor>
+          </>
+        )}
+      </section>
+    )
+  }
+
+  /**
+   * One fold of the Basics, `id`:  a group of the token tree's look, its fields in a property editor.
+   * - Open until folded;  its fold kept with the tree's (`basics.<id>`).
+   */
+  private basicsGroup(id: string, label: string, fields: JSX.Element): JSX.Element {
+    const key = `${BASICS_GROUP}${id}`
+    const onFolded = (event: CustomEvent<{ open: boolean; section: Element }>) => {
+      if (event.detail.section !== this.branchSections.get(key) || this.folds[key] === event.detail.open) return
+      this.folds = { ...this.folds, [key]: event.detail.open }
+      PrefStore.setAt(FOLDS_KEY, this.folds)
+    }
+    return (
+      <ui-section
+        ref={(section) => this.branchSections.set(key, section)}
+        class="group"
+        label={label}
+        collapsible=""
+        level="3"
+        open={(this.folds[key] ?? true) ? "" : "false"}
+        on-ui-opened={onFolded}
+        on-ui-closed={onFolded}
+      >
+        <ui-property-editor class="properties">{fields}</ui-property-editor>
       </ui-section>
     )
   }
@@ -1346,34 +1391,122 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
     return GLASS_THEMES.includes(this.baseTheme)
   }
 
-  /** A colour choice:  a row of swatches, the base's own first. */
+  ////////////////
+  // ## The theme's own
+  ////////////////
+
+  /**
+   * The theme's OWN value of `token` in `scheme`, whatever the Basics chose:  its files' (pointers followed), else as
+   * the pages show it under the theme, else as this page does.
+   */
+  private ownValue(token: string, scheme: Scheme, depth = 0): string {
+    const text = this.files?.valueIn(this.baseTheme, token) ?? this.pagesValueOf(token)
+    if (!text) return ""
+    const followed = text.replace(VAR, (whole, name: string) =>
+      depth > MAX_HOPS ? whole : this.ownValue(name, scheme, depth + 1) || whole
+    )
+    return ThemeTokens.forScheme(followed, scheme)
+  }
+
+  /** The theme's own colour of `token`, in each scheme shown:  its hex, as a picker takes it. */
+  private ownColors(token: string): { scheme: Scheme; hex: string }[] {
+    return this.shownSchemes.map((scheme) => {
+      const probe = this.probes[scheme]
+      const value = this.ownValue(token, scheme)
+      return { scheme, hex: (probe && value && TokenColor.split(value, probe)?.hex) || FALLBACK_HEX }
+    })
+  }
+
+  /** The theme's own font of `token`:  its stack, and its name (one of the Basics' fonts, else its first face). */
+  private ownFont(token: string): { stack: string; name: string } {
+    const stack = this.ownValue(token, this.scheme)
+    const font = UIT.ThemeFonts.find((each) => {
+      const own = ThemeDraft.fontStack(each).replace(
+        VAR,
+        (whole, name: string) => this.ownValue(name, "light") || whole
+      )
+      return own.replace(/\s+/g, "") === stack.replace(/\s+/g, "")
+    })
+    const first = stack.split(",")[0]?.trim().replace(/["']/g, "") ?? ""
+    return { stack, name: font ? this.text(font) : SYSTEM_FACES.test(first) ? this.text("system") : first }
+  }
+
+  /** "Theme's own · <value>":  what an untouched choice says. */
+  private ownLabel(value: string): string {
+    return value ? `${this.text("own")} · ${value}` : this.text("own")
+  }
+
+  /** The Shape choice the theme's own is, if it's one of them;  else its own words (`ownShapeText()`). */
+  private ownShape(key: SegmentedKey): UIT.ThemeCorner | UIT.ThemeDepth | UIT.ThemeGlass | undefined {
+    const files = this.files
+    if (!files) return undefined
+    const raw = (token: string) => files.valueIn(this.baseTheme, token)
+    if (key === "corners")
+      return ThemeDraft.cornersOf({ s: raw("--ui-radius-s"), m: raw("--ui-radius-m"), l: raw("--ui-radius-l") })
+    if (key === "depth") return ThemeDraft.depthOf(raw("--ui-shadow-raised"), raw("--ui-shadow-floating"))
+    return ThemeDraft.glassOf(raw("--glass-surface"), raw("--glass-surface-strong"), raw("--glass-blur"))
+  }
+
+  /** The theme's own Shape value in words, when it's none of the choices:  its corner's radius;  else nothing. */
+  private ownShapeText(key: SegmentedKey): string {
+    return key === "corners" ? this.ownValue("--ui-radius", this.scheme) : ""
+  }
+
+  ////////////////
+  // ## The Basics' fields
+  ////////////////
+
+  /** A colour choice:  a row of swatches, the theme's own first, its colour shown and said. */
   private hueProperty(key: HueKey): JSX.Element {
     const t = this.text
     const chosen = () => this.theme[key]
+    const own = () => this.ownColors(ROLE_TOKENS[key])
+    const ownText = () =>
+      own()
+        .map((color) => color.hex)
+        .join(" / ")
     return (
-      <ui-property name={key} label={t(key)} description={t(`${key}Tip`)} output={t(chosen() ?? "own")}>
+      <ui-property
+        name={key}
+        label={t(key)}
+        description={t(`${key}Tip`)}
+        output={chosen() ? t(chosen()!) : this.ownLabel(ownText())}
+      >
         <div class="swatches" role="radiogroup" aria-label={t(key)} onKeyDown={(event) => this.onSwatchKey(event, key)}>
-          {this.swatch(key, undefined)}
+          {this.swatch(key, undefined, own, ownText)}
           <For each={UIT.ThemeHues}>{(hue) => this.swatch(key, hue)}</For>
         </div>
       </ui-property>
     )
   }
 
-  /** One swatch:  `hue`, or the base's own (`undefined`). */
-  private swatch(key: HueKey, hue: UIT.ThemeHue | undefined): JSX.Element {
-    const name = this.text(hue ?? "own")
+  /**
+   * One swatch:  `hue`, or the theme's own (`undefined`), drawn in its colour:  light and dark halves while Both
+   * show;  its hex in its tooltip.
+   */
+  private swatch(
+    key: HueKey,
+    hue: UIT.ThemeHue | undefined,
+    own: () => { scheme: Scheme; hex: string }[] = () => [],
+    ownText: () => string = () => ""
+  ): JSX.Element {
+    const name = () => (hue ? this.text(hue) : this.ownLabel(ownText()))
     const isChosen = () => this.theme[key] === hue
+    const style = () => {
+      if (hue) return `--_swatch: var(--ui-${hue})`
+      const [first, second] = own()
+      return `--_own-light: ${first?.hex ?? FALLBACK_HEX}; --_own-dark: ${(second ?? first)?.hex ?? FALLBACK_HEX}`
+    }
     return (
       <button
         type="button"
         role="radio"
         class={["swatch", hue ?? OWN]}
         value={hue ?? OWN}
-        style={hue ? `--_swatch: var(--ui-${hue})` : undefined}
+        style={style()}
         aria-checked={isChosen() ? "true" : "false"}
-        aria-label={name}
-        title={name}
+        aria-label={name()}
+        title={name()}
         tabindex={isChosen() ? 0 : -1}
         onClick={() => this.choose({ [key]: hue })}
       />
@@ -1395,10 +1528,11 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
     })
   }
 
-  /** A font choice:  a select, each font shown in itself, the base's own first. */
+  /** A font choice:  a select, each font shown in itself, the theme's own first:  "Theme's own · Palatino". */
   private fontProperty(key: FontKey): JSX.Element {
     const t = this.text
     const chosen = () => this.theme[key]
+    const own = () => this.ownFont(FONT_TOKENS[key])
     return (
       <ui-property name={key} label={t(key)} description={t(`${key}Tip`)}>
         <ui-select
@@ -1411,7 +1545,9 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
             this.choose({ [key]: value === OWN ? undefined : (value as UIT.ThemeFont) })
           }}
         >
-          <ui-item value={OWN}>{t("own")}</ui-item>
+          <ui-item value={OWN} style={own().stack ? `font-family: ${own().stack}` : undefined}>
+            {this.ownLabel(own().name)}
+          </ui-item>
           <For each={UIT.ThemeFonts}>
             {(font) => (
               <ui-item value={font} style={`font-family: ${ThemeDraft.fontStack(font)}`}>
@@ -1424,12 +1560,17 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
     )
   }
 
-  /** The text size:  a slider from the base's size, its own Reset. */
+  /** The text size:  a slider from the theme's own size, said as its own while untouched;  its own Reset. */
   private sizeProperty(): JSX.Element {
     const t = this.text
     const size = () => this.theme.textSize ?? this.baseTextSize
     return (
-      <ui-property name="textSize" label={t("textSize")} description={t("textSizeTip")} output={`${size()}px`}>
+      <ui-property
+        name="textSize"
+        label={t("textSize")}
+        description={t("textSizeTip")}
+        output={this.theme.textSize !== undefined ? `${size()}px` : this.ownLabel(`${size()}px`)}
+      >
         <Show when={this.theme.textSize !== undefined}>
           {this.resetButton(() => this.choose({ textSize: undefined }))}
         </Show>
@@ -1451,25 +1592,41 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
     return Number.isFinite(size) ? Math.round(size) : DEFAULT_TEXT_SIZE
   }
 
-  /** A choice of a few words:  a segmented menu, none chosen while the base's own stays. */
+  /**
+   * A choice of a few words:  a segmented menu.  Untouched, the theme's own is picked:  the choice it is, said as its
+   * own;  or, when it's none of them, a first "Theme's own · 14px" segment.
+   */
   private segmentedProperty<K extends SegmentedKey>(key: K, values: readonly NonNullable<UIT.ThemeChoices[K]>[]) {
     const t = this.text
     const chosen = () => this.theme[key]
+    const own = () => this.ownShape(key)
+    const shown = () => (own() ? [...values] : [OWN, ...values])
+    const picked = () => chosen() ?? own() ?? OWN
+    const labelOf = (value: string) =>
+      value === OWN ? this.ownLabel(this.ownShapeText(key)) : t(value as ThemeEditorTextKey)
     return (
-      <ui-property name={key} label={t(key)} description={t(`${key}Tip`)}>
+      <ui-property
+        name={key}
+        label={t(key)}
+        description={t(`${key}Tip`)}
+        output={chosen() ? t(chosen()!) : own() ? this.ownLabel(t(own() as ThemeEditorTextKey)) : undefined}
+      >
         <Show when={chosen() !== undefined}>{this.resetButton(() => this.choose({ [key]: undefined }))}</Show>
         <ui-menu
           appearance="segmented link"
           align="fluid"
-          equal=""
+          equal={own() ? "" : undefined}
           size="small"
           aria-label={t(key)}
-          on-ui-choosing={(event: CustomEvent<{ value: string }>) => this.choose({ [key]: event.detail.value })}
+          on-ui-choosing={(event: CustomEvent<{ value: string }>) => {
+            const value = event.detail.value
+            this.choose({ [key]: value === OWN ? undefined : value })
+          }}
         >
-          <For each={values}>
+          <For each={shown()}>
             {(value) => (
-              <ui-item value={value} selected={chosen() === value ? "" : undefined}>
-                {t(value)}
+              <ui-item value={value} selected={picked() === value ? "" : undefined}>
+                {labelOf(value)}
               </ui-item>
             )}
           </For>
@@ -2015,6 +2172,28 @@ const POINTER_ALONE = /^\{([\w.-]+)\}$/
 
 /** A `var()` alone:  its token. */
 const VAR_ALONE = /^var\((--[\w-]+)\)$/
+
+/** The token each colour choice sets:  what its "Theme's own" swatch shows. */
+const ROLE_TOKENS: Readonly<Record<HueKey, string>> = {
+  primary: "--ui-primary",
+  secondary: "--ui-secondary",
+  background: "--ui-background"
+}
+
+/** The token each font choice sets. */
+const FONT_TOKENS: Readonly<Record<FontKey, string>> = {
+  headingFont: "--ui-font-family-heading",
+  bodyFont: "--ui-font-family"
+}
+
+/** The Basics' folds, in the tree's folds:  `basics.color`. */
+const BASICS_GROUP = "basics."
+
+/** The platform's own face, by any of its names:  the System font. */
+const SYSTEM_FACES = /^(?:system-ui|-apple-system|BlinkMacSystemFont)$/i
+
+/** How deep a theme's own value's pointers are followed. */
+const MAX_HOPS = 8
 
 /** The tree head's rows that open:  the search row, the info pane. */
 type HeadRow = "search" | "info"

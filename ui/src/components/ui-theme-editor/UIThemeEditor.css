@@ -405,6 +405,11 @@
     padding-inline: 8px;
   }
 
+  /* a choice's segments keep to one line:  "Theme's own · 10px" takes the room it needs */
+  .properties ui-item {
+    white-space: nowrap;
+  }
+
   /* ### Swatches:  one row a colour, the chosen one ringed */
 
   /* one row, however narrow the column:  the swatches shrink, up to 22px each */
@@ -430,17 +435,10 @@
   .swatch:hover {
     transform: scale(1.12);
   }
+  /* the theme's own:  its colour, light and dark halves while Both show (Owen:  "Theme's own" says what it is) */
   .swatch.own {
-    background: conic-gradient(
-      var(--ui-red),
-      var(--ui-yellow),
-      var(--ui-green),
-      var(--ui-teal),
-      var(--ui-blue),
-      var(--ui-violet),
-      var(--ui-pink),
-      var(--ui-red)
-    );
+    --_swatch: var(--_own-light);
+    background: linear-gradient(90deg, var(--_own-light) 50%, var(--_own-dark) 50%);
   }
   .swatch[aria-checked="true"] {
     box-shadow:
@@ -457,6 +455,8 @@
    * a branch inside it indented on a guide line, its title a step quieter.  Nesting reads by indent and line, not space.
    */
 
+  /* the Basics and the token tree:  one column of the same folds (Owen:  "one editor") */
+  .basics,
   .tokens {
     display: flex;
     flex-direction: column;

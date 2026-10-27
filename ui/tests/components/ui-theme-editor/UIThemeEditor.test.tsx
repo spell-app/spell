@@ -172,6 +172,17 @@ describe("<ui-theme-editor> Basics", () => {
     expect(token("--ui-radius-s")).not.toBe("9999px")
   })
 
+  it("an untouched choice says what the theme's own is:  its colour, font, size, the Shape it matches", async () => {
+    const host = await editor(`<ui-theme-editor base="fruity"></ui-theme-editor>`)
+    await applied(host)
+    const output = (name: string) => inner(host, `ui-property[name="${name}"]`).getAttribute("output") ?? ""
+    expect(output("primary")).toMatch(/^Theme's own · #[0-9a-f]{6}/)
+    expect(output("textSize")).toMatch(/^Theme's own · \d+px$/)
+    expect(output("corners")).toBe("Theme's own · Round")
+    expect(inner(host, `ui-property[name="corners"] ui-item[value="round"]`).hasAttribute("selected")).toBe(true)
+    expect(inner(host, `ui-property[name="bodyFont"] ui-item[value="own"]`).textContent).toMatch(/^Theme's own · /)
+  })
+
   it("arrow keys in a swatch row move and choose", async () => {
     const host = await editor()
     // from the chosen swatch, the row's tab stop, as a person presses it
@@ -383,7 +394,7 @@ describe("<ui-theme-editor> with pages", () => {
     await ElementFixture.settle()
     expect(inner(host, ".info-pane .marks-legend")).not.toBeNull()
     expect(JSON.parse(localStorage.getItem("spell-ui:theme-editor-head")!)).toEqual({ search: false, info: true })
-    expect(inner(host, ".tokens-title").textContent).toContain("Theme")
+    expect(inner(host, ".tokens .tokens-title").textContent).toContain("Theme")
   })
 
   it("a tree:  the theme's own open, a branch folds and stays folded;  the filter opens every branch it matches", async () => {

@@ -1,7 +1,7 @@
 // Import directly:  the `spell-ui/styles` barrel carries every foundation sheet as text, which the editor never needs
 import { ThemeFile } from "spell-ui/styles/ThemeFile"
 import type { ThemeData } from "spell-ui/styles/styles.types"
-import { E, type UIT } from "spell-ui/core"
+import { E, UIT } from "spell-ui/core"
 import { ThemeTokens } from "./ThemeTokens"
 import {
   GLASS_THEMES,
@@ -283,6 +283,30 @@ export class ThemeDraft {
   // ## Helpers
   ////////////////
 
+  /**
+   * The corners choice a theme's own radii are (`s`, `m`, `l` as its files write them);  `undefined`:  none.
+   * - So the editor marks the theme's own as one of its choices (Owen:  "Theme's own" says what the value is).
+   */
+  static cornersOf(radii: { s?: string; m?: string; l?: string }): UIT.ThemeCorner | undefined {
+    return UIT.ThemeCorners.find((corner) => {
+      const [s, m, l] = RADII[corner]
+      return same(radii.s, s) && same(radii.m, m) && same(radii.l, l)
+    })
+  }
+
+  /** The depth choice a theme's own shadows are (raised, floating);  `undefined`:  none. */
+  static depthOf(raised?: string, floating?: string): UIT.ThemeDepth | undefined {
+    return UIT.ThemeDepths.find((depth) => same(raised, SHADOWS[depth][0]) && same(floating, SHADOWS[depth][1]))
+  }
+
+  /** The glass choice a theme's own glass is (its surface, strong surface, blur);  `undefined`:  none. */
+  static glassOf(surface?: string, strong?: string, blur?: string): UIT.ThemeGlass | undefined {
+    return UIT.ThemeGlasses.find((glass) => {
+      const [a, b, c] = GLASS[glass]
+      return same(surface, a) && same(strong, b) && same(blur, c)
+    })
+  }
+
   /** Font `font`'s stack, for `font-family`:  the editor shows each font in itself. */
   static fontStack(font: UIT.ThemeFont): string {
     return FONT_STACKS[font].replace(POINTER, (_, place: string) => `var(--ui-font-family-${place.split(".").at(-1)})`)
@@ -328,6 +352,11 @@ export type ThemeDraftProps = {
   text: ThemeEditorText
   /** the start of each previewed page's own tokens (`--spell-`) */
   ownPrefixes?: readonly string[]
+}
+
+/** Whether CSS text `a` is `b`, but for spaces and case. */
+function same(a: string | undefined, b: string): boolean {
+  return a !== undefined && a.replace(/\s+/g, "").toLowerCase() === b.replace(/\s+/g, "").toLowerCase()
 }
 
 /** `edit`'s value for `scheme`:  its own, else the other half's. */

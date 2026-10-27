@@ -8,7 +8,7 @@
  * - `PageBridge`:  what it does inside a page it previews in a frame
  * - `SavedTheme`:  the theme kept in the browser
  * - SIDE EFFECT:  importing it defines the tag, and the families its shadow DOM is built of:
- *   the Basics' (panel, property editor, input, select, item, slider, menu, button), the token tree's (section, icon,
+ *   the Basics' (property editor, input, select, item, slider, menu, button), the token tree's (section, icon,
  *   code), the bar's theme menu, and the sample app's (card, parts, checkbox, label, message, progress)
  *   - Why:  a `<ui-root>` only loads what's in the page's light DOM,
  *     so a family built of other widgets imports them itself.
@@ -27,7 +27,6 @@ import { ThemeTokens } from "./ThemeTokens"
 import { TokenColor } from "./TokenColor"
 import { TokenTree } from "./TokenTree"
 
-import "spell-ui/components/ui-panel"
 import "spell-ui/components/ui-property-editor"
 import "spell-ui/components/ui-input"
 import "spell-ui/components/ui-select"
