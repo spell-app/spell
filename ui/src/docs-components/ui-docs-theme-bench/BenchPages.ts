@@ -7,7 +7,7 @@ import type { PreviewPage } from "spell/ui/components/ui-theme-editor/UIThemeEdi
  * - Two by two, in this order (Owen):  the Editor and the Epic page on top, Spell UI and the Notebook under them.
  * - Spell UI's components name no page of Spell's:  this docs widget does, for the pages around it.
  * - Static and pure:  data in, pages out;  the editor app imports it by its file
- *   (`spell-ui/docs-components/ui-docs-theme-bench/BenchPages`).
+ *   (`spell/ui/docs-components/ui-docs-theme-bench/BenchPages`).
  ****************/
 export class BenchPages {
   /**
