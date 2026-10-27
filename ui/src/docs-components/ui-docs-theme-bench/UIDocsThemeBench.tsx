@@ -544,55 +544,61 @@ export class UIDocsThemeBench extends E.UIComponent<DocsThemeBenchVocabulary> {
         </div>
         <ui-theme-menu size="small"></ui-theme-menu>
         <div class="tools">
-          <ui-menu
-            appearance="segmented link"
-            size="small"
-            aria-label={t("layout")}
-            on-ui-choosing={(event: CustomEvent<{ value: string }>) =>
-              (this.layout = event.detail.value as BenchLayout)
-            }
-          >
-            <ui-item value="grid" selected={this.layout === "grid" ? "" : undefined}>
-              {t("grid")}
-            </ui-item>
-            <For each={BenchPlaceIds}>
-              {(id) => (
-                <ui-item value={id} selected={this.layout === id ? "" : undefined}>
-                  {t(id)}
-                </ui-item>
-              )}
-            </For>
-          </ui-menu>
-          <ui-menu
-            appearance="segmented link"
-            size="small"
-            aria-label={t("titles")}
-            on-ui-choosing={(event: CustomEvent<{ value: string }>) => (this.titles = event.detail.value as TitlesAt)}
-          >
-            <For each={TITLE_PLACES}>
-              {(at) => (
-                <ui-item value={at} selected={this.titles === at ? "" : undefined}>
-                  {t(at)}
-                </ui-item>
-              )}
-            </For>
-          </ui-menu>
-          <ui-menu
-            appearance="segmented link"
-            size="small"
-            aria-label={t("schemes")}
-            on-ui-choosing={(event: CustomEvent<{ value: string }>) =>
-              (this.schemes = event.detail.value as BenchSchemes)
-            }
-          >
-            <For each={SCHEME_CHOICES}>
-              {(choice) => (
-                <ui-item value={choice} selected={this.schemes === choice ? "" : undefined}>
-                  {t(choice)}
-                </ui-item>
-              )}
-            </For>
-          </ui-menu>
+          <div class="tool">
+            <ui-menu
+              appearance="segmented link"
+              size="small"
+              aria-label={t("layout")}
+              on-ui-choosing={(event: CustomEvent<{ value: string }>) =>
+                (this.layout = event.detail.value as BenchLayout)
+              }
+            >
+              <ui-item value="grid" selected={this.layout === "grid" ? "" : undefined}>
+                {t("grid")}
+              </ui-item>
+              <For each={BenchPlaceIds}>
+                {(id) => (
+                  <ui-item value={id} selected={this.layout === id ? "" : undefined}>
+                    {t(id)}
+                  </ui-item>
+                )}
+              </For>
+            </ui-menu>
+          </div>
+          <div class="tool">
+            <ui-menu
+              appearance="segmented link"
+              size="small"
+              aria-label={t("titles")}
+              on-ui-choosing={(event: CustomEvent<{ value: string }>) => (this.titles = event.detail.value as TitlesAt)}
+            >
+              <For each={TITLE_PLACES}>
+                {(at) => (
+                  <ui-item value={at} selected={this.titles === at ? "" : undefined}>
+                    {t(at)}
+                  </ui-item>
+                )}
+              </For>
+            </ui-menu>
+          </div>
+          <div class="tool">
+            <ui-menu
+              appearance="segmented link"
+              size="small"
+              aria-label={t("schemes")}
+              on-ui-choosing={(event: CustomEvent<{ value: string }>) =>
+                (this.schemes = event.detail.value as BenchSchemes)
+              }
+            >
+              <For each={SCHEME_CHOICES}>
+                {(choice) => (
+                  <ui-item value={choice} selected={this.schemes === choice ? "" : undefined}>
+                    {t(choice)}
+                  </ui-item>
+                )}
+              </For>
+            </ui-menu>
+          </div>
           <ui-button size="small" appearance="basic" icon="redo" onClick={() => this.reload()}>
             {t("reload")}
           </ui-button>
@@ -927,7 +933,7 @@ export class UIDocsThemeBench extends E.UIComponent<DocsThemeBenchVocabulary> {
             </span>
           )}
         </For>
-        <span class="legend-item" title={t("overridesLegendTip")}>
+        <span class="legend-item overrides" title={t("overridesLegendTip")}>
           <span class="half-dot" />
           {t("overridesLegend")}
         </span>

@@ -97,7 +97,11 @@ export const docsThemeBenchVocabulary = {
       text: "{place} reads it (also set on its own elements)",
       description: "A reader's tip:  the page also sets the token below the page's root, where a tuning doesn't reach."
     },
-    { key: "overridesLegend", text: "also set", description: "The legend's half dot:  what it marks on an icon." },
+    {
+      key: "overridesLegend",
+      text: "the page also sets it on its own elements",
+      description: "The legend's half dot:  what it marks on an icon."
+    },
     {
       key: "overridesLegendTip",
       text: "The page also sets it on its own elements:  a tuning doesn't reach those",

@@ -65,6 +65,10 @@
   /* side by side, so no block margin beside each other (a menu takes 1em above and below its siblings) */
   --ui-menu-margin: 0;
 }
+/* each keeps its width:  the row scrolls, never squeezes a menu under its neighbour */
+.tools > * {
+  flex: none;
+}
 .lede {
   margin: 0;
   font-size: 0.85em;
@@ -144,26 +148,25 @@
 }
 .frame {
   display: grid;
-  grid-template-rows: minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 4px;
   min-height: 0;
-  position: relative;
 }
-/* a pair's half:  its scheme named over its top corner */
+.frames.one .frame {
+  grid-template-rows: minmax(0, 1fr);
+}
+/* a pair's half:  its scheme named over it, never over the page */
 .frame-scheme {
-  position: absolute;
-  inset: 6px 6px auto auto;
-  z-index: 1;
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 2px 8px;
-  border-radius: 999px;
-  background: var(--ui-surface);
-  border: 1px solid var(--ui-border-color);
-  box-shadow: var(--ui-shadow-subtle, none);
+  padding-inline: 6px;
   color: var(--ui-text-muted);
   font-size: 0.75em;
-  pointer-events: none;
+}
+.frame-scheme ui-icon {
+  --ui-icon-width: auto;
+  margin: 0;
 }
 .viewport {
   position: relative;
@@ -426,6 +429,10 @@
   align-items: center;
   gap: 4px;
   white-space: nowrap;
+}
+/* what the half dot means:  a line of its own, under the pages */
+.legend-item.overrides {
+  flex-basis: 100%;
 }
 .legend-item ui-icon {
   --ui-icon-width: auto;
