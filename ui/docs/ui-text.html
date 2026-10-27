@@ -30,12 +30,14 @@
           <ui-menu icon class="site-page-links" aria-label="About this page">
             <ui-item
               link="https://github.com/spell-app/spell-ui/issues/new?title=ui-text%3A%20%20"
+              target="_blank"
               icon="bug"
               aria-label="Report a bug"
               title="Report a bug"
             ></ui-item>
             <ui-item
               link="https://fomantic-ui.com/elements/text.html"
+              target="_blank"
               icon="up right from square"
               aria-label="Fomantic UI's original page"
               title="Fomantic UI's original page"
@@ -45,7 +47,7 @@
             Text
             <ui-header>A text is used to style some inline text with a simple color.</ui-header>
           </ui-header>
-          <ui-docs-themes for="ui-text" show="theme" compact class="site-themes"></ui-docs-themes>
+          <ui-theme-menu show="theme" compact class="site-themes"></ui-theme-menu>
         </ui-container>
       </ui-segment>
 
@@ -333,8 +335,8 @@
             <ui-section id="theming-themes" label="Themes" sticky collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  No Fomantic theme restyles text, so the theme picker above has nothing to switch; the one in the header still
-                  applies a theme to the whole site.
+                  The theme menu in the header (Spell, Glass, Fruity, Merlot) changes text's colours and fonts through
+                  the shared tokens.
                 </script>
               </ui-markdown>
             </ui-section>

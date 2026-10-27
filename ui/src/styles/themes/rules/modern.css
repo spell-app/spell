@@ -1,0 +1,90 @@
+/*
+ * The modern rules:  what a theme of today does that classic doesn't, `@layer ui.theme` (epic `debut` P18).
+ * - A rules sheet several themes name (`"rules": ["modern", ...]`):  Glass (and so Fruity) today;  Spell, and the new
+ *   themes, as they become data.  ONE copy:  Glass and Spell each wrote these out before.
+ * - In `rules/`, so no theme menu lists it (`UI.themes` reads the themes folder's top level only).
+ * - What's here:
+ *   - anchors land below a sticky header
+ *   - tabular numbers in tables and statistics
+ *   - link underlines that skip descenders, softer at rest
+ *   - a hairline outline round pictures
+ *   - buttons press in;  no colour animates while the scheme switches
+ *   - the platform's font smoothing:  a page setting that isn't a token
+ */
+
+@layer ui.theme {
+  :root {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Anchors land below a sticky header (page only:  `:root` matches nothing in a shadow root) */
+  :root :where(h1, h2, h3, h4, h5, h6, section, ui-section) {
+    scroll-margin-top: calc(var(--spell-site-header-height, 0px) + 1em);
+  }
+
+  /*******************************
+       Numbers, links, images
+  *******************************/
+
+  :is(.ui.table, :where(ui-table) > table),
+  .ui.statistic,
+  .ui.statistics {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* underlines never cross descenders;  softer at rest, full on hover, only where the device hovers */
+  :where(a) {
+    text-underline-position: from-font;
+    text-decoration-skip-ink: auto;
+  }
+  @media (hover: hover) {
+    :where(.ui-typography) :where(a) {
+      text-decoration-color: color-mix(in oklab, currentColor 40%, transparent);
+    }
+    :where(.ui-typography) :where(a:hover) {
+      text-decoration-color: currentColor;
+    }
+  }
+
+  /* a white picture doesn't melt into the page:  a 1px 8% outline inside its edge */
+  :where(img) {
+    outline: 1px solid light-dark(rgb(0 0 0 / 0.08), rgb(255 255 255 / 0.08));
+    outline-offset: -1px;
+  }
+
+  /*******************************
+               Motion
+  *******************************/
+
+  /* Buttons press in (0.97, 200ms ease-out);  the property list restates the button's own (`UIButton.css`) */
+  @media (prefers-reduced-motion: no-preference) {
+    .ui.button:not(.loading) {
+      transition-property: opacity, background-color, color, box-shadow, scale;
+      transition-duration:
+        var(--ui-button-duration, var(--ui-duration-fast)), var(--ui-button-duration, var(--ui-duration-fast)),
+        var(--ui-button-duration, var(--ui-duration-fast)), var(--ui-button-duration, var(--ui-duration-fast)), 200ms;
+      transition-timing-function: var(--ui-ease), var(--ui-ease), var(--ui-ease), var(--ui-ease), ease-out;
+    }
+    .ui.button:not(.disabled, :disabled, .loading):active {
+      scale: 0.97;
+    }
+  }
+
+  /*
+   * Switching scheme:  no colour animates across the switch.
+   * - `ThemePreference.applyScheme()` puts `ui-scheme-switching` on `<html>` for one frame.
+   * - The flag inherits into every shadow root, where the style query finds it.
+   * - `!important`:  a transition set by ANY component layer must lose for that frame.
+   */
+  :root.ui-scheme-switching {
+    --spell-scheme-switching: on;
+  }
+  @container style(--spell-scheme-switching: on) {
+    *,
+    ::before,
+    ::after {
+      transition: none !important;
+    }
+  }
+}

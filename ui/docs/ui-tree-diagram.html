@@ -33,6 +33,7 @@
           <ui-menu icon class="site-page-links" aria-label="About this page">
             <ui-item
               link="https://github.com/spell-app/spell-ui/issues/new?title=ui-tree-diagram%3A%20%20"
+              target="_blank"
               icon="bug"
               aria-label="Report a bug"
               title="Report a bug"
@@ -42,7 +43,7 @@
             Tree diagram
             <ui-header>A tree diagram draws a tree top-down:  a box for each node, a line to each of its children.</ui-header>
           </ui-header>
-          <ui-docs-themes for="ui-tree-diagram" show="theme" compact class="site-themes"></ui-docs-themes>
+          <ui-theme-menu show="theme" compact class="site-themes"></ui-theme-menu>
         </ui-container>
       </ui-segment>
 
@@ -399,8 +400,8 @@
             <ui-section id="theming-themes" label="Themes" sticky collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  A tree diagram is ours, not Fomantic's, so no Fomantic theme restyles it: the theme picker in the
-                  header changes only the page around it, and the colours it takes from Spell UI's tokens.
+                  A tree diagram is ours, not Fomantic's:  the theme menu in the header changes the page around it,
+                  and the colours it takes from Spell UI's tokens.
                 </script>
               </ui-markdown>
             </ui-section>

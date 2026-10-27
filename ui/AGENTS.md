@@ -775,7 +775,7 @@ SHARED STATES:  states every element takes, though its vocabulary never names th
   - `{ equals }`, `{ ownedWrite }` when needed.
   - Replaces a `Cell` field and its `.get()` / `.set()`.
   - A value that CHANGES after it's made is `@E.state`, even where nothing reactive reads it yet.
-    The decorator says the intent (`ThemePreference`'s in-memory look, `RootSettings.generation`).
+    The decorator says the intent (`ThemePreference`'s in-memory theme and scheme, `RootSettings.generation`).
   - A value made once and kept:  `@E.lazy get x()`, or `@E.once` on a method (a loader's promise).
   - Handles to things the class started (a timer, an observer, an abort controller) stay plain fields:
     nobody should watch them (`UIDocsToc.queuedUpdate`, `ControlLabels.labelObserver`).
@@ -1267,6 +1267,10 @@ As WWOD §4, plus these deliberate EXCEPTIONS.
   everything in `src/` is importable while developing (Q47 reverses J38), through `exports`.
   - What other repos' code, tools and tests import:
     - `spell-ui/core`, `spell-ui/components/ui-code`, `spell-ui/property`, `spell-ui/test-helpers/MemberClashes`
+    - `spell-ui/components/ui-zoom/ImageZoom`:  a family's LEAF, on purpose (epic `ui-gaps` P14).
+      - Plain DOM, no element:  the page's ONE zoom for its screenshots, and which images open in it.
+      - The docs runtime imports it alone, so its bundle holds no second `<ui-zoom>`;
+        a component pack shares the page's (`PACK_MODULES`), for `<epic-field>`'s request thumbnails.
     - the site and static tools (`spell-ui/tools/SiteDataBuilder` ...)
     - `spell-ui/vite.config.ts` (`baseConfig()`)
     - `spell-ui/test-helpers/setup.ts` (a browser test project's `setupFiles`)

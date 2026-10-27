@@ -110,7 +110,17 @@
    * - over the example, so there's no empty space above the example inside the frame
    *   (Owen, 2026-10-23:  "overlay show code over the example, so no whitespace above the example inside the frame")
    */
+  /*
+   * - a box an example shows inside the frame (an inverted segment, a card, a message) rounds less than the frame:
+   *   its corner the frame's, less the frame's padding, at least the theme's small radius
+   *   (Owen:  "rounding of outer rings needs to be greater than rounding of inner bits");
+   *   it had the frame's own corner, as round as the ring round it
+   */
   .frame {
+    --_docs-example-inner-radius: max(var(--ui-radius-s), calc(var(--_ui-docs-example-frame-radius) - 16px));
+    --ui-segment-radius: var(--_docs-example-inner-radius);
+    --ui-card-radius: var(--_docs-example-inner-radius);
+    --ui-message-radius: var(--_docs-example-inner-radius);
     position: relative;
   }
   .frame > [part~="toggle"] {
@@ -134,6 +144,8 @@
     padding-inline: 0;
     justify-content: center;
     margin: 0;
+    /* a rounded square following the frame's corner it sits in, less its inset:  never rounder than the frame */
+    border-radius: max(4px, calc(var(--_ui-docs-example-frame-radius) - var(--_ui-docs-example-toggle-corner)));
     background: var(--_ui-docs-example-toggle-background);
     box-shadow:
       0 0 0 1px var(--ui-border-color),
@@ -295,46 +307,19 @@
   }
 
   /*
-   * The code's copy button:  an icon, no border (Owen:  "Change "Copy" to copy icon, no border").
-   * - `<ui-code>`'s button keeps its words ("Copy", "Copied") as its accessible name, hidden.
-   * - Its icon is painted through a mask in the text's colour:  two sheets, a check once it has copied.
+   * The code's copy button (`<ui-code>`'s icon):  centred under the code button, the same width (28px) and right edge
+   * - the code's box ends the frame's padding in from the frame's edge;  the button, its inset
+   * - so 1px further out (measured)
    */
   [part~="source"]::part(copy) {
-    /*
-     * centred under the code button:  the same width (28px) and right edge
-     * - the code's box ends the frame's padding in from the frame's edge;  the button, its inset
-     * - so 1px further out (measured;  in px, as the copy button's own font size is 0)
-     */
+    inset-block-start: 0;
     inset-inline-end: -1px;
-    box-sizing: border-box;
     width: 28px;
     height: 28px;
-    padding: 0;
-    border: none;
     border-radius: 6px;
-    background: transparent;
-    font-size: 0;
     color: var(--ui-text-muted);
-  }
-  [part~="source"]::part(copy)::before {
-    content: "";
-    display: block;
-    width: 100%;
-    height: 100%;
-    background: currentColor;
-    mask: var(--_ui-docs-example-copy-icon) center / 15px no-repeat;
-  }
-  [part~="source"]:state(copied)::part(copy)::before {
-    mask-image: var(--_ui-docs-example-copied-icon);
-  }
-  [part~="source"]::part(copy):hover,
-  [part~="source"]::part(copy):focus-visible {
-    background: color-mix(in oklab, var(--ui-text-color) 8%, transparent);
-    color: var(--ui-text-color);
-  }
-  .ui.example {
-    --_ui-docs-example-copy-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linejoin='round'%3E%3Crect x='8' y='8' width='12' height='12' rx='2.5'/%3E%3Cpath d='M16 8V6.5A2.5 2.5 0 0 0 13.5 4h-7A2.5 2.5 0 0 0 4 6.5v7A2.5 2.5 0 0 0 6.5 16H8'/%3E%3C/svg%3E");
-    --_ui-docs-example-copied-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E");
+    /* its icon 15px, whatever the code's size */
+    font-size: 15px;
   }
   /* Phones:  an example wider than the column scrolls inside its frame, never the page. */
   @media (--ui-mobile) {

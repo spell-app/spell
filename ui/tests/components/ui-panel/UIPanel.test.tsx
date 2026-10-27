@@ -184,10 +184,10 @@ describe("<ui-panel> tokens and colour", () => {
     expect(getComputedStyle(root(host)).boxShadow).not.toBe("none")
   })
 
-  it('`color="accent"`, where a theme adds the hue (`spell-brand`), is the ivory look', async () => {
-    // what the brand bundle does (`packages/brand/src/hues.ts`)
+  it('`color="accent"`, where a theme adds the hue (`spell`), is the ivory look', async () => {
+    // what the brand bundle does (spell-brand's `hues.ts`)
     ValueSets.add("hues", "accent")
-    await (await UI.load()).themes.apply("spell-brand")
+    await (await UI.load()).themes.apply("spell")
     try {
       const host = await ElementFixture.render(`<ui-panel label="Theme" color="accent"><p>x</p></ui-panel>`)
       await ElementFixture.settle()

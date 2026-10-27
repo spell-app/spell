@@ -139,6 +139,11 @@
     overflow-y: auto;
     overscroll-behavior: contain;
     scroll-timeline: --ui-docs-nav-list block;
+    /*
+     * a row scrolled to (a link focused, the current page revealed) lands below the group's band stuck at the top,
+     * never half under it:  a band's height, `.band`'s 2.25em of its 0.75em text, and 2px for a count's badge
+     */
+    scroll-padding-block-start: calc(2.25em * 0.75 + 2px);
     padding-block-end: 0.5em;
     scrollbar-width: thin;
     scrollbar-color: transparent transparent;
@@ -185,11 +190,12 @@
   }
   /* the site search takes the band's width (the brand's pill, its shortcut hint),
      the view switch beside it on the same line (Owen, 2026-10-23:  "Search / sort buttons on the same line") */
+  /* the view switch as tall as the search pill:  a theme's shorter buttons drew a smaller group beside it */
   .tools {
     display: flex;
     flex-wrap: nowrap;
     gap: 0.5em;
-    align-items: center;
+    align-items: stretch;
     justify-content: flex-end;
   }
   .tools > [part~="search"] {
@@ -202,6 +208,13 @@
     --ui-button-toggle-background: var(--_ui-docs-nav-current-background);
     --ui-button-toggle-background-hover: var(--_ui-docs-nav-current-background);
     --ui-button-toggle-color: var(--_ui-docs-nav-current-color);
+  }
+  .tools > [part~="views"] > ui-button {
+    align-self: stretch;
+  }
+  .tools > [part~="views"] > ui-button::part(button) {
+    box-sizing: border-box;
+    height: 100%;
   }
 
   /* ## Bands:  a group's is the brand's sub-head band (a tint, a hairline above, bold caps);  a click folds it. */

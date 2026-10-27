@@ -30,12 +30,14 @@
           <ui-menu icon class="site-page-links" aria-label="About this page">
             <ui-item
               link="https://github.com/spell-app/spell-ui/issues/new?title=ui-search%3A%20%20"
+              target="_blank"
               icon="bug"
               aria-label="Report a bug"
               title="Report a bug"
             ></ui-item>
             <ui-item
               link="https://fomantic-ui.com/modules/search.html"
+              target="_blank"
               icon="up right from square"
               aria-label="Fomantic UI's original page"
               title="Fomantic UI's original page"
@@ -45,7 +47,7 @@
             Search
             <ui-header>A search module allows a user to query for results from a selection of data.</ui-header>
           </ui-header>
-          <ui-docs-themes for="ui-search" show="theme" compact class="site-themes"></ui-docs-themes>
+          <ui-theme-menu show="theme" compact class="site-themes"></ui-theme-menu>
         </ui-container>
       </ui-segment>
 
@@ -606,8 +608,8 @@
             <ui-section id="theming-themes" label="Themes" sticky collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  No Fomantic theme restyles the search itself (Fomantic's own search page has no theme list). The site-wide themes
-                  in the header (Material, GitHub, Dark ...) still change the colours, radii and fonts it inherits.
+                  The theme menu in the header (Spell, Glass, Fruity, Merlot) changes the colours, radii and fonts a
+                  search inherits.
                 </script>
               </ui-markdown>
             </ui-section>

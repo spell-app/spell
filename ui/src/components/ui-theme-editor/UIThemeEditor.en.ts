@@ -151,7 +151,7 @@ export const themeEditorVocabulary = {
     { key: "depthTip", text: "How far cards, menus and popups lift off the page.", description: "Its tip." },
     { key: "flat", text: "Flat", description: "A depth choice." },
     { key: "lifted", text: "Lifted", description: "A depth choice." },
-    { key: "glass", text: "Glass", description: "The glass field (themes with glass:  fruity)." },
+    { key: "glass", text: "Glass", description: "The glass field (the glass themes:  glass, fruity)." },
     { key: "glassTip", text: "How much of the page shows through cards, menus and panels.", description: "Its tip." },
     { key: "clear", text: "Clear", description: "A glass choice." },
     { key: "frosted", text: "Frosted", description: "A glass choice." },

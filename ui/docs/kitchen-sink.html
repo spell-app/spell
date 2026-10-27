@@ -2469,6 +2469,60 @@
                 <ui-theme-editor></ui-theme-editor>
               </ui-docs-example>
             </ui-section>
+
+            <ui-section id="spell-ui-s-own-theme-menu" label="Theme Menu" sticky collapsible dividing>
+              <ui-docs-example>
+                <p slot="description">
+                  A theme menu picks the page&#39;s theme from Spell&#39;s own, and its light, dark or system colour scheme, and remembers both for the next page.
+                  <a href="ui-theme-menu.html">Theme Menu page</a>
+                </p>
+                <ui-segment inverted>
+                  <ui-theme-menu inverted size="small"></ui-theme-menu>
+                </ui-segment>
+              </ui-docs-example>
+              <ui-docs-example description="A theme dropdown">
+                <ui-theme-menu show="theme"></ui-theme-menu>
+              </ui-docs-example>
+              <ui-docs-example description="Light / dark only">
+                <ui-theme-menu show="scheme"></ui-theme-menu>
+              </ui-docs-example>
+            </ui-section>
+
+            <ui-section id="spell-ui-s-own-zoom" label="Zoom" sticky collapsible dividing>
+              <ui-docs-example>
+                <p slot="description">
+                  A zoom shows something small in the page, and full size over it on a click.
+                  <a href="ui-zoom.html">Zoom page</a>
+                </p>
+                <ui-zoom max-width="320px">
+                  <ui-segment>
+                    <ui-header level="3">Release notes</ui-header>
+                    <p>Spell UI 2.4 adds a zoom, a stack and a textarea that grows with its text.</p>
+                    <ui-button color="primary">Read more</ui-button>
+                  </ui-segment>
+                </ui-zoom>
+              </ui-docs-example>
+              <ui-docs-example description="Cut off">
+                <ui-zoom max-height="120px" shrink="100%">
+                  <ui-list bulleted>
+                    <ui-item>Zoom</ui-item>
+                    <ui-item>Stack</ui-item>
+                    <ui-item>Growing textarea</ui-item>
+                    <ui-item>Shrinkable menu</ui-item>
+                    <ui-item>Fitting titles</ui-item>
+                    <ui-item>Theme menu</ui-item>
+                  </ui-list>
+                </ui-zoom>
+              </ui-docs-example>
+              <ui-docs-example description="A picture">
+                <ui-zoom shrink="33%">
+                  <img
+                    src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22960%22 height=%22640%22 viewBox=%220 0 30 20%22%3E%3Crect width=%2230%22 height=%2220%22 fill=%22%23cbd5e1%22/%3E%3Cpath d=%22M3 17l7-8 5 6 4-4 8 6z%22 fill=%22%2394a3b8%22/%3E%3Ccircle cx=%2222%22 cy=%226%22 r=%222%22 fill=%22%2394a3b8%22/%3E%3C/svg%3E"
+                    alt="A landscape"
+                  />
+                </ui-zoom>
+              </ui-docs-example>
+            </ui-section>
           </ui-section>
           <!-- kitchen:end -->
         </article>

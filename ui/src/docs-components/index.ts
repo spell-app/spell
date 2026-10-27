@@ -7,8 +7,8 @@
  *   Same files in `ui-docs-<name>/`:  a component class, a vocabulary with `topics` + `aka`, css, tests,
  *   `examples/elements/*.html` (`packages/ui/AGENTS.md` "Solid authoring").
  *   - `<ui-docs-example>` -- a live example plus its source (Fomantic's `.example`)
- *   - `<ui-docs-api>`, `<ui-docs-tokens>`, `<ui-docs-nav>`, `<ui-docs-themes>` --
- *     a tag's API / token tables, the sidebar, the theme picker:
+ *   - `<ui-docs-api>`, `<ui-docs-tokens>`, `<ui-docs-nav>` --
+ *     a tag's API / token tables, the sidebar:
  *     built from the site's generated data, `docs/__data/components.json5`
  *     (`SiteData`;  its shape is `docs-components.types.ts`)
  *   - `<ui-docs-search>` -- the site search (in the nav's header band):
@@ -30,13 +30,12 @@
  *   without it a bundler drops each barrel's `define()` (the family chunk loads, the tag stays undefined, no error).
  * - Imports:  shared code from `spell-ui/core` as any family;
  *   docs-only shared code (`SiteData`) from `spell-ui/docs-components/<file>`.
- * - `ThemePreference`:  the viewer's theme + colour scheme, remembered and re-applied per page
- *   (`<ui-docs-themes>` sets it, the site entry restores it).
- * - NOTE:  this barrel defines NOTHING:  types, `SiteData` and `ThemePreference` only.
+ * - The theme menu is a real component since epic `debut` P17:  `<ui-theme-menu>` (`spell-ui/components/ui-theme-menu`),
+ *   with the remembered theme and scheme, `ThemePreference`.
+ * - NOTE:  this barrel defines NOTHING:  types and `SiteData` only.
  *   Import a family (`spell-ui/docs-components/ui-docs-example`) to define its tags.
  */
 
 export * from "./docs-components.types"
 
 export * from "./SiteData"
-export * from "./ThemePreference"

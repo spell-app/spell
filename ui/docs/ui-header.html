@@ -33,12 +33,14 @@
           <ui-menu icon class="site-page-links" aria-label="About this page">
             <ui-item
               link="https://github.com/spell-app/spell-ui/issues/new?title=ui-header%3A%20%20"
+              target="_blank"
               icon="bug"
               aria-label="Report a bug"
               title="Report a bug"
             ></ui-item>
             <ui-item
               link="https://fomantic-ui.com/elements/header.html"
+              target="_blank"
               icon="up right from square"
               aria-label="Fomantic UI's original page"
               title="Fomantic UI's original page"
@@ -66,7 +68,7 @@
             <a href="ui-title.html">Title</a>,
             <a href="ui-value.html">Value</a>.
           </p>
-          <ui-docs-themes for="ui-header" show="theme" compact class="site-themes"></ui-docs-themes>
+          <ui-theme-menu show="theme" compact class="site-themes"></ui-theme-menu>
         </ui-container>
       </ui-segment>
 
@@ -818,10 +820,8 @@
             <ui-section id="theming-themes" label="Themes" sticky collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  The theme picker above lists the Fomantic themes that restyle these parts; the one in the header applies a theme
-                  to the whole site.
-
-                  Themes that restyle headers and parts: Amazon, Bookish, Chubby, Flat, Fomantic classic, GitHub and Material.
+                  The theme menu above picks the theme for every page of the site:  Spell, Glass, Fruity or Merlot,
+                  each restyling these parts through its tokens.
                 </script>
               </ui-markdown>
             </ui-section>

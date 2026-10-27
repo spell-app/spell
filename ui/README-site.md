@@ -178,7 +178,8 @@ What a page can count on:
 - Links are written as from the page's served address:
   `_assets/` is beside it, `../../` is the page server's root, `../epics/epic-item.html` another set's page.
 - `<ui-root>` loads every family on first use, the doc-only `<ui-docs-*>` elements included:
-  `api`, `example`, `inspector`, `nav`, `search`, `themes`, `toc` and `tokens`, in [their folder](src/docs-components/).
+  `api`, `example`, `inspector`, `nav`, `search`, `toc` and `tokens`, in [their folder](src/docs-components/).
+  - The theme menu was one of them until epic `debut` P17:  `<ui-theme-menu>` is a real element now.
   They read the site's data, [components.json5](docs/__data/components.json5), never the vocabularies.
 - The layout's root is `<ui-root class="site" stack-with="page" ...>`,
   so an example that stacks on a narrow screen stacks by the SCREEN's width, as on fomantic-ui.com,
@@ -242,7 +243,7 @@ yarn site:new getting-started --title "Getting started" --summary "One line."  #
 ```
 
 - A tag (any tag of the family:  `ui-cards` works too) writes its family's page, `docs/<main tag>.html`:
-  a masthead with the family's theme picker, and the four tabs.
+  a masthead with the theme menu, and the four tabs.
 - A sub-tag its family lists under `pages` writes a page of its own, `docs/<tag>.html`:
   ONE tag's API (`<ui-docs-api tag>`, where `#<tag>` lands), and a Theming tab only when a family token names it.
 - Anything else is a guide page, one column, no tabs:  `--title` (default:  the name in Title Case) and `--summary`.
@@ -481,7 +482,6 @@ yarn test:visual [--os local|linux|both] [--browsers all|chrome|webkit|firefox] 
 | [FamilyFiles.ts](src/tools/FamilyFiles.ts) | where a family's own files are, by name:  `ui-button` => `UIButton.css`, `UIButton.types.ts` ...;  for the tools that look one up (`FamilyTokens`, `yarn gen:root`) |
 | [FamilyTokens.ts](src/tools/FamilyTokens.ts) | one family's public CSS tokens, read from its sheets:  its page's token table |
 | [FoundationTokens.ts](src/tools/FoundationTokens.ts) | the foundation tokens (`--ui-font-size`, palette, radii, motion ...), grouped for the theming page, read from the generated sheets |
-| [ThemeFamilies.ts](src/tools/ThemeFamilies.ts) | which families each theme sheet touches, read from its CSS |
 | [SiteCheck.ts](src/tools/SiteCheck.ts) | `yarn site:check`:  the docs pages in headless Chromium, from the kit's page server's `/components/ui/` (started with `spell server start`, run in spell-app's folder);  the checks above, screenshots in `results/site-check/`, a JSON summary on stdout |
 | [pageServer.ts](src/tools/pageServer.ts) | the kit whose page server `site:dev` and `site:check` start, from its root, and the kit's own `spell`:  both found by package, never the `spell` on the `PATH` |
 | [StaticRenderer.ts](src/tools/StaticRenderer.ts) | the server-only Vite server the static render runs on from node:  it compiles the components' JSX for the server, which `tsx` can't;  used by the visual tests' static pages, and by `spell ssr` in its child process (`src/cli/runner/renderStatic.ts`) |

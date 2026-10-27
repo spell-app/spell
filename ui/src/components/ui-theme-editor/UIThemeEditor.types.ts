@@ -32,5 +32,19 @@ export const EDITS_SHEET = "theme-edits"
 /** The theme an editor starts from when the page has none applied (Owen, 2026-10-23:  "fruity by default"). */
 export const DEFAULT_BASE = "fruity"
 
+/**
+ * The GLASS themes:  the bases with glass of their own (`--glass-surface*`, `--glass-blur`), which the Glass choice
+ * changes.
+ * - Glass the base, Fruity on it (`fruity.css` imports `glass.css`;  epic `debut` P17, J88).
+ * - Read by the editor (does it offer the Glass choice?) and `ThemeSheet` (does it write the glass tokens?).
+ */
+export const GLASS_THEMES: readonly string[] = ["glass", "fruity"]
+
+/**
+ * The theme with a wallpaper of its own (`--glass-wallpaper`), which the Background choice tints too:  Fruity.
+ * - Glass's page is one solid colour:  there the choice tints the page alone.
+ */
+export const WALLPAPER_THEME = "fruity"
+
 /** The text sizes an editor offers, in px. */
 export const TEXT_SIZES = { min: 12, max: 20, step: 1 } as const

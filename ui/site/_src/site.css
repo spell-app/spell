@@ -165,7 +165,7 @@
     justify-content: center;
   }
   .site-topbar {
-    /* the palette's box (`<ui-docs-themes size="small">`) */
+    /* the palette's box (`<ui-theme-menu size="small">`) */
     --site-topbar-button: 29.5px;
   }
   .site-topbar-themes::part(palette) {
@@ -358,7 +358,7 @@
    * (Owen, 2026-10-23:  "send|wand|bullhorn in a single group.  then some space, then bug | theme | new window"):
    * - Send, Review Now and the page's bullhorn as one pill
    * - a space
-   * - report a bug, the page's themes as a palette (`<ui-docs-themes compact>`), the original page:
+   * - report a bug, the theme menu as a palette (`<ui-theme-menu compact>`), the original page:
    *   the two links of `.site-page-links` and the palette between them,
    *   each a cell of the grid (the menu and its items box-less)
    * - the row ends where the top bar's palette is centred, so the last icon sits right under it

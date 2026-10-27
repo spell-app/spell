@@ -11,8 +11,8 @@ export const toolbarEs = {
   tag: "ui-toolbar",
   name: "barra-herramientas",
   aka: ["barra de herramientas", "pestañas desplazables", "menú desplazable"],
-  attributes: { pagination: "paginacion", interactive: "interactivo" },
-  slots: { title: "titulo", center: "centro", right: "derecha" },
-  parts: { center: "centro", right: "derecha" },
-  texts: { scrollStart: "Desplazar atrás", scrollEnd: "Desplazar adelante" }
+  attributes: { pagination: "paginacion", interactive: "interactivo", shrinkable: "encogible" },
+  slots: { title: "titulo", center: "centro", right: "derecha", overflow: "desborde" },
+  parts: { center: "centro", right: "derecha", overflow: "desborde", "overflow-menu": "menu-desborde" },
+  texts: { more: "Más", scrollStart: "Desplazar atrás", scrollEnd: "Desplazar adelante" }
 } as const satisfies E.TagDictionary

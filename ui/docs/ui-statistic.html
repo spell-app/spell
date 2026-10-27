@@ -30,12 +30,14 @@
           <ui-menu icon class="site-page-links" aria-label="About this page">
             <ui-item
               link="https://github.com/spell-app/spell-ui/issues/new?title=ui-statistic%3A%20%20"
+              target="_blank"
               icon="bug"
               aria-label="Report a bug"
               title="Report a bug"
             ></ui-item>
             <ui-item
               link="https://fomantic-ui.com/views/statistic.html"
+              target="_blank"
               icon="up right from square"
               aria-label="Fomantic UI's original page"
               title="Fomantic UI's original page"
@@ -45,7 +47,7 @@
             Statistic
             <ui-header>A statistic emphasizes the current value of an attribute.</ui-header>
           </ui-header>
-          <ui-docs-themes for="ui-statistic" show="theme" compact class="site-themes"></ui-docs-themes>
+          <ui-theme-menu show="theme" compact class="site-themes"></ui-theme-menu>
         </ui-container>
       </ui-segment>
 
@@ -455,11 +457,8 @@
             <ui-section id="theming-themes" label="Themes" sticky collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  The theme picker above lists the Fomantic themes that restyle this component; the one in the header applies a
-                  theme to the whole site.
-
-                  No theme restyles statistics on their own -- the same as Fomantic's own statistic page (Default only). Site-wide
-                  themes still reach them through the foundation tokens.
+                  The theme menu above picks the theme for every page of the site:  Spell, Glass, Fruity or Merlot,
+                  each restyling this component through its tokens.
                 </script>
               </ui-markdown>
             </ui-section>

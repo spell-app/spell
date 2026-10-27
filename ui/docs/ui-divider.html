@@ -30,12 +30,14 @@
           <ui-menu icon class="site-page-links" aria-label="About this page">
             <ui-item
               link="https://github.com/spell-app/spell-ui/issues/new?title=ui-divider%3A%20%20"
+              target="_blank"
               icon="bug"
               aria-label="Report a bug"
               title="Report a bug"
             ></ui-item>
             <ui-item
               link="https://fomantic-ui.com/elements/divider.html"
+              target="_blank"
               icon="up right from square"
               aria-label="Fomantic UI's original page"
               title="Fomantic UI's original page"
@@ -45,7 +47,7 @@
             Divider
             <ui-header>A divider visually segments content into groups.</ui-header>
           </ui-header>
-          <ui-docs-themes for="ui-divider" show="theme" compact class="site-themes"></ui-docs-themes>
+          <ui-theme-menu show="theme" compact class="site-themes"></ui-theme-menu>
         </ui-container>
       </ui-segment>
 
@@ -379,8 +381,8 @@
             <ui-section id="theming-themes" label="Themes" sticky collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  No Fomantic theme restyles dividers (Fomantic's own page lists only the default theme); a site theme still
-                  changes their colours through the shared tokens.
+                  Each theme of the set (Spell, Glass, Fruity, Merlot) changes a divider's colours through the shared
+                  tokens.
                 </script>
               </ui-markdown>
             </ui-section>

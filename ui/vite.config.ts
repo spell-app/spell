@@ -61,6 +61,7 @@ export const COMPONENTS = [
   "ui-table",
   "ui-popup",
   "ui-modal",
+  "ui-zoom",
   "ui-transition",
   "ui-dimmer",
   "ui-flyout",

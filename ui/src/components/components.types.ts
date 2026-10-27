@@ -13,7 +13,7 @@
  * - A constant ONE family reads stays in that family's types file;  it moves here once a second family needs it.
  */
 
-import type { E } from "spell-ui/core"
+import type { E, Themes } from "spell-ui/core"
 
 ////////////////
 // ## Button
@@ -157,6 +157,14 @@ export type ItemContext = {
   ownsParts?: boolean
   /** Classes of the `image` shorthand's `<img>`;  default `ui avatar image` (a list's avatar). */
   imageClass?: string
+  /**
+   * Its menu fits its titles to the row (`<ui-menu shrinkable>`):  the item draws its title in a box of its own
+   * (`part="title"`), and its title's first letter as its icon when it has none.
+   * - Only for the menu's own items:  a sub-menu's are never cut.
+   */
+  shrinkable?: boolean
+  /** The menu shows its items' icons only (`:state(icons-only)`):  each title is its box's tooltip too. */
+  iconsOnly?: boolean
 }
 
 /** Roles an owner may give an item's root. */
@@ -1865,4 +1873,32 @@ export type ThemeChoices = {
   depth?: ThemeDepth
   /** a glass theme's see-through:  fruity's only */
   glass?: ThemeGlass
+}
+
+////////////////
+// ## Theme names
+////////////////
+
+/**
+ * A theme's names, ONE way for every place that shows or remembers one (epic `debut` P17, J94):
+ * the theme menu (`<ui-theme-menu>`, `ThemePreference`) and the theme editor (its Start from, `SavedTheme`).
+ * - Static and pure:  it reads only the name, and the theme list (`UI.themes`) it's handed.
+ */
+export class ThemeNames {
+  /** A theme's name for people:  `merlot` => `Merlot`, `my-theme` => `My Theme`. */
+  static titleOf(name: string): string {
+    return name
+      .split("-")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ")
+  }
+
+  /**
+   * A remembered theme `name` as it's called NOW:  its new name when it was renamed (`Themes.RENAMED`,
+   * `studio` => `merlot`), else `name` itself.
+   * - `themes`:  `UI.themes`, once the runtime has loaded;  the list of renames is its class's.
+   */
+  static nameNow(themes: Themes, name: string): string {
+    return (themes.constructor as typeof Themes).RENAMED[name] ?? name
+  }
 }

@@ -10,5 +10,6 @@ export const textareaEs = {
   lang: "es",
   tag: "ui-textarea",
   name: "area-texto",
-  aka: ["área de texto", "texto multilínea", "cuadro de comentario", "entrada"]
+  aka: ["área de texto", "texto multilínea", "cuadro de comentario", "entrada"],
+  attributes: { grow: "crece", "max-rows": "filas-max" }
 } as const satisfies E.TagDictionary

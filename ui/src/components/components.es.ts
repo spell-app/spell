@@ -74,6 +74,7 @@ import { markdownEs } from "spell-ui/components/ui-markdown/UIMarkdown.es"
 import { menuEs } from "spell-ui/components/ui-menu/UIMenu.es"
 import { messageEs } from "spell-ui/components/ui-message/UIMessage.es"
 import { modalEs } from "spell-ui/components/ui-modal/UIModal.es"
+import { zoomEs } from "spell-ui/components/ui-zoom/UIZoom.es"
 import { nagEs } from "spell-ui/components/ui-nag/UINag.es"
 import { panelEs } from "spell-ui/components/ui-panel/UIPanel.es"
 import { actionsEs } from "spell-ui/components/ui-parts/UIActions.es"
@@ -135,6 +136,7 @@ import { cellEs } from "spell-ui/components/ui-table/UICell.es"
 import { textEs } from "spell-ui/components/ui-text/UIText.es"
 import { linkEs } from "spell-ui/components/ui-text/UILink.es"
 import { themeEditorEs } from "spell-ui/components/ui-theme-editor/UIThemeEditor.es"
+import { themeMenuEs } from "spell-ui/components/ui-theme-menu/UIThemeMenu.es"
 import { toastEs } from "spell-ui/components/ui-toast/UIToast.es"
 import { toolbarEs } from "spell-ui/components/ui-toolbar/UIToolbar.es"
 import { transitionEs } from "spell-ui/components/ui-transition/UITransition.es"
@@ -700,6 +702,7 @@ export const es: Dictionary = Vocabulary.dictionaryFrom(sharedEs, [
   menuEs,
   messageEs,
   modalEs,
+  zoomEs,
   nagEs,
   panelEs,
   actionsEs,
@@ -762,6 +765,7 @@ export const es: Dictionary = Vocabulary.dictionaryFrom(sharedEs, [
   textEs,
   linkEs,
   themeEditorEs,
+  themeMenuEs,
   toastEs,
   toolbarEs,
   transitionEs,

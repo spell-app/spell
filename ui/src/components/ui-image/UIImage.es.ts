@@ -11,5 +11,7 @@ export const imageEs = {
   tag: "ui-image",
   name: "imagen",
   aka: ["imagen", "foto", "fotografía", "avatar", "miniatura"],
-  parts: { img: "img" }
+  attributes: { zoom: "ampliable" },
+  parts: { img: "img" },
+  texts: { zoom: "{alt}:  ver a tamaño completo", zoomUntitled: "Ver la imagen a tamaño completo" }
 } as const satisfies E.TagDictionary

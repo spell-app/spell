@@ -30,12 +30,14 @@
           <ui-menu icon class="site-page-links" aria-label="About this page">
             <ui-item
               link="https://github.com/spell-app/spell-ui/issues/new?title=ui-rating%3A%20%20"
+              target="_blank"
               icon="bug"
               aria-label="Report a bug"
               title="Report a bug"
             ></ui-item>
             <ui-item
               link="https://fomantic-ui.com/modules/rating.html"
+              target="_blank"
               icon="up right from square"
               aria-label="Fomantic UI's original page"
               title="Fomantic UI's original page"
@@ -45,7 +47,7 @@
             Rating
             <ui-header>A rating indicates user interest in content.</ui-header>
           </ui-header>
-          <ui-docs-themes for="ui-rating" show="theme" compact class="site-themes"></ui-docs-themes>
+          <ui-theme-menu show="theme" compact class="site-themes"></ui-theme-menu>
         </ui-container>
       </ui-segment>
 
@@ -477,8 +479,8 @@
             <ui-section id="theming-themes" label="Themes" sticky collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  No Fomantic theme restyles the rating itself: Fomantic's own rating page lists only the default theme. The
-                  site-wide themes in the header (Material, GitHub, Dark ...) still change the colours and fonts it inherits.
+                  The theme menu in the header (Spell, Glass, Fruity, Merlot) changes the colours and fonts a rating
+                  inherits.
                 </script>
               </ui-markdown>
             </ui-section>

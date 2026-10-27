@@ -30,12 +30,14 @@
           <ui-menu icon class="site-page-links" aria-label="About this page">
             <ui-item
               link="https://github.com/spell-app/spell-ui/issues/new?title=ui-image%3A%20%20"
+              target="_blank"
               icon="bug"
               aria-label="Report a bug"
               title="Report a bug"
             ></ui-item>
             <ui-item
               link="https://fomantic-ui.com/elements/image.html"
+              target="_blank"
               icon="up right from square"
               aria-label="Fomantic UI's original page"
               title="Fomantic UI's original page"
@@ -45,7 +47,7 @@
             Image
             <ui-header>An image is a graphic representation of something.</ui-header>
           </ui-header>
-          <ui-docs-themes for="ui-image" show="theme" compact class="site-themes"></ui-docs-themes>
+          <ui-theme-menu show="theme" compact class="site-themes"></ui-theme-menu>
         </ui-container>
       </ui-segment>
 
@@ -94,6 +96,11 @@
                     alt="A wireframe picture"
                     caption="A wireframe stands in for a picture while a page is planned."
                   ></ui-image>
+                </ui-docs-example>
+              </ui-section>
+              <ui-section id="examples-types-zoom" label="Zoom" sticky collapsible dividing>
+                <ui-docs-example description="`zoom`:  a click (or Enter) shows it full size over the page, its alt text under it;  Escape closes it.  The page's one `<a href=&quot;ui-zoom.html&quot;>&lt;ui-zoom&gt;</a>` shows it.">
+                  <ui-image zoom size="small" src="images/hello-light.png" alt="Hello, in the light theme"></ui-image>
                 </ui-docs-example>
               </ui-section>
             </ui-section>
@@ -434,6 +441,10 @@
             <ui-section id="api-states" label="States" sticky collapsible dividing>
               <ui-docs-api family="ui-image" only="states"></ui-docs-api>
             </ui-section>
+
+            <ui-section id="api-texts" label="Texts" sticky collapsible dividing>
+              <ui-docs-api family="ui-image" only="texts"></ui-docs-api>
+            </ui-section>
           </ui-tab>
 
           <ui-tab value="theming" label="Theming">
@@ -474,8 +485,8 @@
             <ui-section id="theming-themes" label="Themes" sticky collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  The theme picker above lists the Fomantic themes that restyle this component; the one in the header applies a
-                  theme to the whole site. Themes that restyle images: GitHub.
+                  The theme menu above picks the theme for every page of the site:  Spell, Glass, Fruity or Merlot,
+                  each restyling this component through its tokens.
                 </script>
               </ui-markdown>
             </ui-section>

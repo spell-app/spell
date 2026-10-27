@@ -296,7 +296,7 @@
       "name": "ui-action",
       "description": {
         "kind": "markdown",
-        "value": "A menu item or toolbar button drawn from an action:  its title, icon and shortcut keys.\n\nAlso known as:  action, command, menu item, toolbar button, context menu item, keyboard shortcut.\n\n**Slots:**  default, `icon`"
+        "value": "A menu item or toolbar button drawn from an action:  its title, icon and shortcut keys.\n\nAlso known as:  action, command, menu item, toolbar button, context menu item, keyboard shortcut.\n\n**Slots:**  default, `icon`, `badge`"
       },
       "attributes": [
         {
@@ -14440,6 +14440,13 @@
           ]
         },
         {
+          "name": "zoom",
+          "description": {
+            "kind": "markdown",
+            "value": "A click (or Enter) shows it full size, over the page, in the page's `<ui-zoom>`;  with `link`, a click with a modifier key still follows the link.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
           "name": "link",
           "description": {
             "kind": "markdown",
@@ -15747,7 +15754,7 @@
       "name": "ui-item",
       "description": {
         "kind": "markdown",
-        "value": "An item of a dropdown, list, menu or Items view.\n\nAlso known as:  list item, media object, row.\n\n**Slots:**  default, `icon`"
+        "value": "An item of a dropdown, list, menu or Items view.\n\nAlso known as:  list item, media object, row.\n\n**Slots:**  default, `icon`, `badge`"
       },
       "attributes": [
         {
@@ -18860,7 +18867,7 @@
       "name": "ui-menu",
       "description": {
         "kind": "markdown",
-        "value": "A menu displays grouped navigation actions.\n\nAlso known as:  navbar, nav, tabs bar, toolbar, sidebar menu, pagination.\n\n**Slots:**  default\n\n**Events:**  `ui-choosing`"
+        "value": "A menu displays grouped navigation actions.\n\nAlso known as:  navbar, nav, tabs bar, toolbar, sidebar menu, pagination.\n\n**Slots:**  default, `overflow`\n\n**Events:**  `ui-choosing`"
       },
       "attributes": [
         {
@@ -19226,6 +19233,13 @@
               "name": "16"
             }
           ]
+        },
+        {
+          "name": "shrinkable",
+          "description": {
+            "kind": "markdown",
+            "value": "Fits its items' titles to its width:  every title whole while they fit;  then the longest cut first, each ending in `…`;  once one would be cut under `--ui-menu-title-min`, icons only (`:state(icons-only)`, each title its item's tooltip;  an item with no icon shows its title's first letter);  once a button would be under `--ui-menu-item-min`, every item folds into one `…` button whose menu holds them all (`:state(overflow)`).  A `segmented` one becomes a dropdown instead (`:state(dropdown)`):  one button showing the chosen item.  Items with no words (an icon button) stay as they are.  Off by default.\n\nTakes:  flag (present / absent)"
+          }
         },
         {
           "name": "interactive",
@@ -36598,7 +36612,21 @@
           "name": "rows",
           "description": {
             "kind": "markdown",
-            "value": "Visible lines;  without it the field is Fomantic's form height (12em, 8em ... 24em).\n\nTakes:  number"
+            "value": "Visible lines;  without it the field is Fomantic's form height (12em, 8em ... 24em).  With `grow`:  the lines it starts at, one without it.\n\nTakes:  number"
+          }
+        },
+        {
+          "name": "grow",
+          "description": {
+            "kind": "markdown",
+            "value": "Grows with its text (epic `ui-gaps` P14):  `rows` lines to start (one without it), taller as the text wraps, up to `max-rows`, then it scrolls;  shorter again as text goes.  Opt in:  every \"tell me more\" field should.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "max-rows",
+          "description": {
+            "kind": "markdown",
+            "value": "With `grow`:  the most lines it grows to before it scrolls;  without it, a third of the window (`--ui-input-textarea-grow-max-height`).\n\nTakes:  number"
           }
         },
         {
@@ -36811,6 +36839,276 @@
           "description": {
             "kind": "markdown",
             "value": "The theme to start from (`fruity`, `spell` ...).  None:  the page's own theme, else `fruity`.  Picking another one in the editor applies it to the page.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "disabled",
+          "description": {
+            "kind": "markdown",
+            "value": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "loading",
+          "description": {
+            "kind": "markdown",
+            "value": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "visible",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible=\"false\"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "animation",
+          "description": {
+            "kind": "markdown",
+            "value": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.\n\nTakes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`"
+          },
+          "values": [
+            {
+              "name": "fade"
+            },
+            {
+              "name": "fade up"
+            },
+            {
+              "name": "fade down"
+            },
+            {
+              "name": "fade left"
+            },
+            {
+              "name": "fade right"
+            },
+            {
+              "name": "scale"
+            },
+            {
+              "name": "zoom"
+            },
+            {
+              "name": "drop"
+            },
+            {
+              "name": "browse"
+            },
+            {
+              "name": "browse right"
+            },
+            {
+              "name": "fly"
+            },
+            {
+              "name": "fly up"
+            },
+            {
+              "name": "fly down"
+            },
+            {
+              "name": "fly left"
+            },
+            {
+              "name": "fly right"
+            },
+            {
+              "name": "slide"
+            },
+            {
+              "name": "slide up"
+            },
+            {
+              "name": "slide down"
+            },
+            {
+              "name": "slide left"
+            },
+            {
+              "name": "slide right"
+            },
+            {
+              "name": "swing"
+            },
+            {
+              "name": "swing up"
+            },
+            {
+              "name": "swing down"
+            },
+            {
+              "name": "swing left"
+            },
+            {
+              "name": "swing right"
+            },
+            {
+              "name": "horizontal flip"
+            },
+            {
+              "name": "vertical flip"
+            },
+            {
+              "name": "flash"
+            },
+            {
+              "name": "shake"
+            },
+            {
+              "name": "bounce"
+            },
+            {
+              "name": "tada"
+            },
+            {
+              "name": "pulse"
+            },
+            {
+              "name": "jiggle"
+            },
+            {
+              "name": "glow"
+            },
+            {
+              "name": "none"
+            }
+          ]
+        },
+        {
+          "name": "link",
+          "description": {
+            "kind": "markdown",
+            "value": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "target",
+          "description": {
+            "kind": "markdown",
+            "value": "Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "font",
+          "description": {
+            "kind": "markdown",
+            "value": "How its letters look, several words at once:  `bold`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript` (`font=\"bold italic\"`).  `<ui-text>` draws each as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it;  every other element shows the look alone.\n\nTakes:  space-separated:  `bold` · `italic` · `underline` · `strikethrough` · `code` · `highlight` · `subscript` · `superscript`"
+          },
+          "values": [
+            {
+              "name": "bold"
+            },
+            {
+              "name": "italic"
+            },
+            {
+              "name": "underline"
+            },
+            {
+              "name": "strikethrough"
+            },
+            {
+              "name": "code"
+            },
+            {
+              "name": "highlight"
+            },
+            {
+              "name": "subscript"
+            },
+            {
+              "name": "superscript"
+            }
+          ]
+        },
+        {
+          "name": "tooltip",
+          "description": {
+            "kind": "markdown",
+            "value": "Its tooltip:  the browser's own, written as the element's `title`.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "label",
+          "description": {
+            "kind": "markdown",
+            "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
+          }
+        }
+      ]
+    },
+    {
+      "name": "ui-theme-menu",
+      "description": {
+        "kind": "markdown",
+        "value": "A theme menu switches the page between light and dark, and picks its theme from Spell's own, and remembers both for the next page.\n\nAlso known as:  theme picker, theme switcher, dark mode toggle, colour scheme, appearance, skin.\n\n**Slots:**  `end`\n\n**Events:**  `ui-changed`"
+      },
+      "attributes": [
+        {
+          "name": "show",
+          "description": {
+            "kind": "markdown",
+            "value": "Which controls to show:  `both` (the palette button, whose overlay picks the theme and light / dark), `scheme` (a light / dark button alone) or `theme` (a theme dropdown).\n\nTakes:  `both` · `theme` · `scheme`\nDefault:  `both`"
+          },
+          "values": [
+            {
+              "name": "both"
+            },
+            {
+              "name": "theme"
+            },
+            {
+              "name": "scheme"
+            }
+          ]
+        },
+        {
+          "name": "size",
+          "description": {
+            "kind": "markdown",
+            "value": "Size of the buttons (or the dropdown), `mini` ... `massive`;  `medium` is the default.\n\nTakes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`"
+          },
+          "values": [
+            {
+              "name": "mini"
+            },
+            {
+              "name": "tiny"
+            },
+            {
+              "name": "small"
+            },
+            {
+              "name": "medium"
+            },
+            {
+              "name": "large"
+            },
+            {
+              "name": "big"
+            },
+            {
+              "name": "huge"
+            },
+            {
+              "name": "massive"
+            }
+          ]
+        },
+        {
+          "name": "inverted",
+          "description": {
+            "kind": "markdown",
+            "value": "For dark backgrounds (a dark header or side panel):  light buttons, an inverted dropdown.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "compact",
+          "description": {
+            "kind": "markdown",
+            "value": "With `show=\"theme\"`:  the dropdown is an icon-only palette button, its text (`Spell theme`) its tooltip and name, for a masthead's row of icon buttons.\n\nTakes:  flag (present / absent)"
           }
         },
         {
@@ -37621,7 +37919,7 @@
       "name": "ui-toolbar",
       "description": {
         "kind": "markdown",
-        "value": "A toolbar is a horizontal menu whose items scroll sideways when they don't fit, with a button at each end while there's more to see that way.  It takes every `<ui-menu>` attribute.\n\nAlso known as:  toolbar, tool bar, scrolling tabs, overflow menu, chip bar, scrollable menu.\n\n**Slots:**  default, `icon`, `title`, `center`, `right`\n\n**Events:**  `ui-choosing`"
+        "value": "A toolbar is a horizontal menu whose items scroll sideways when they don't fit, with a button at each end while there's more to see that way;  `shrinkable`, it fits their titles to its width instead.  It takes every `<ui-menu>` attribute.\n\nAlso known as:  toolbar, tool bar, scrolling tabs, overflow menu, chip bar, scrollable menu.\n\n**Slots:**  default, `overflow`, `icon`, `title`, `center`, `right`\n\n**Events:**  `ui-choosing`"
       },
       "attributes": [
         {
@@ -37987,6 +38285,13 @@
               "name": "16"
             }
           ]
+        },
+        {
+          "name": "shrinkable",
+          "description": {
+            "kind": "markdown",
+            "value": "Fits its items' titles to its width:  every title whole while they fit;  then the longest cut first, each ending in `…`;  once one would be cut under `--ui-menu-title-min`, icons only (`:state(icons-only)`, each title its item's tooltip;  an item with no icon shows its title's first letter);  once a button would be under `--ui-menu-item-min`, every item folds into one `…` button whose menu holds them all (`:state(overflow)`).  A `segmented` one becomes a dropdown instead (`:state(dropdown)`):  one button showing the chosen item.  Items with no words (an icon button) stay as they are.  Off by default.\n\nTakes:  flag (present / absent)"
+          }
         },
         {
           "name": "interactive",
@@ -39230,6 +39535,253 @@
           "description": {
             "kind": "markdown",
             "value": "`type=\"image\"`:  that animation's ms.\n\nTakes:  number\nDefault:  `1000`"
+          }
+        },
+        {
+          "name": "disabled",
+          "description": {
+            "kind": "markdown",
+            "value": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "loading",
+          "description": {
+            "kind": "markdown",
+            "value": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "visible",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible=\"false\"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "animation",
+          "description": {
+            "kind": "markdown",
+            "value": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.\n\nTakes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`"
+          },
+          "values": [
+            {
+              "name": "fade"
+            },
+            {
+              "name": "fade up"
+            },
+            {
+              "name": "fade down"
+            },
+            {
+              "name": "fade left"
+            },
+            {
+              "name": "fade right"
+            },
+            {
+              "name": "scale"
+            },
+            {
+              "name": "zoom"
+            },
+            {
+              "name": "drop"
+            },
+            {
+              "name": "browse"
+            },
+            {
+              "name": "browse right"
+            },
+            {
+              "name": "fly"
+            },
+            {
+              "name": "fly up"
+            },
+            {
+              "name": "fly down"
+            },
+            {
+              "name": "fly left"
+            },
+            {
+              "name": "fly right"
+            },
+            {
+              "name": "slide"
+            },
+            {
+              "name": "slide up"
+            },
+            {
+              "name": "slide down"
+            },
+            {
+              "name": "slide left"
+            },
+            {
+              "name": "slide right"
+            },
+            {
+              "name": "swing"
+            },
+            {
+              "name": "swing up"
+            },
+            {
+              "name": "swing down"
+            },
+            {
+              "name": "swing left"
+            },
+            {
+              "name": "swing right"
+            },
+            {
+              "name": "horizontal flip"
+            },
+            {
+              "name": "vertical flip"
+            },
+            {
+              "name": "flash"
+            },
+            {
+              "name": "shake"
+            },
+            {
+              "name": "bounce"
+            },
+            {
+              "name": "tada"
+            },
+            {
+              "name": "pulse"
+            },
+            {
+              "name": "jiggle"
+            },
+            {
+              "name": "glow"
+            },
+            {
+              "name": "none"
+            }
+          ]
+        },
+        {
+          "name": "link",
+          "description": {
+            "kind": "markdown",
+            "value": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "target",
+          "description": {
+            "kind": "markdown",
+            "value": "Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "font",
+          "description": {
+            "kind": "markdown",
+            "value": "How its letters look, several words at once:  `bold`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript` (`font=\"bold italic\"`).  `<ui-text>` draws each as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it;  every other element shows the look alone.\n\nTakes:  space-separated:  `bold` · `italic` · `underline` · `strikethrough` · `code` · `highlight` · `subscript` · `superscript`"
+          },
+          "values": [
+            {
+              "name": "bold"
+            },
+            {
+              "name": "italic"
+            },
+            {
+              "name": "underline"
+            },
+            {
+              "name": "strikethrough"
+            },
+            {
+              "name": "code"
+            },
+            {
+              "name": "highlight"
+            },
+            {
+              "name": "subscript"
+            },
+            {
+              "name": "superscript"
+            }
+          ]
+        },
+        {
+          "name": "tooltip",
+          "description": {
+            "kind": "markdown",
+            "value": "Its tooltip:  the browser's own, written as the element's `title`.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "label",
+          "description": {
+            "kind": "markdown",
+            "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
+          }
+        }
+      ]
+    },
+    {
+      "name": "ui-zoom",
+      "description": {
+        "kind": "markdown",
+        "value": "A zoom shows something full size, over the page.  Round any content it shows it shrunk, within a width and height, and full size on a click;  with `src` it shows that image full size.  Escape, a click outside it or its close button close it.\n\nAlso known as:  lightbox, zoom, full size, image viewer, magnifier, expand, screenshot, thumbnail.\n\n**Slots:**  default"
+      },
+      "attributes": [
+        {
+          "name": "max-width",
+          "description": {
+            "kind": "markdown",
+            "value": "The widest the shrunk view gets, a CSS length (`320px`, `50%`);  none:  its container's width.  Content past it is cut off, until it's shown full size.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "max-height",
+          "description": {
+            "kind": "markdown",
+            "value": "The tallest the shrunk view gets, a CSS length (`200px`, `20em`);  none:  as tall as its content.  Content past it is cut off, until it's shown full size.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "shrink",
+          "description": {
+            "kind": "markdown",
+            "value": "How big its content is in the shrunk view, a percentage of its full size:  `50%` by default;  `100%` keeps it full size, cut off by `max-width` / `max-height`.\n\nTakes:  text\nDefault:  `50%`"
+          }
+        },
+        {
+          "name": "open",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown full size, over the page.  Set to open it from script;  closing it clears it.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "src",
+          "description": {
+            "kind": "markdown",
+            "value": "An image to show full size, in place of its content:  open while it's set, and cleared as it closes.  The page's zoom for its screenshots (`ImageZoom`) is one of these.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "alt",
+          "description": {
+            "kind": "markdown",
+            "value": "With `src`:  the image's alt text, its caption, and the zoomed image's own name.\n\nTakes:  text"
           }
         },
         {

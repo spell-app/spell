@@ -33,6 +33,7 @@
           <ui-menu icon class="site-page-links" aria-label="About this page">
             <ui-item
               link="https://github.com/spell-app/spell-ui/issues/new?title=ui-code%3A%20%20"
+              target="_blank"
               icon="bug"
               aria-label="Report a bug"
               title="Report a bug"
@@ -45,7 +46,7 @@
               this site.</ui-header
             >
           </ui-header>
-          <ui-docs-themes for="ui-code" show="theme" compact class="site-themes"></ui-docs-themes>
+          <ui-theme-menu show="theme" compact class="site-themes"></ui-theme-menu>
         </ui-container>
       </ui-segment>
 
@@ -276,8 +277,8 @@
             <ui-section id="theming-themes" label="Themes" sticky collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  Code is ours, not Fomantic's, so no Fomantic theme restyles it: the theme picker in the header changes only the
-                  page around it. Its colours follow the light or dark scheme.
+                  Code is ours, not Fomantic's:  the theme menu in the header changes the page around it.  Its colours
+                  follow the light or dark scheme.
                 </script>
               </ui-markdown>
             </ui-section>

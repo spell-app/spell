@@ -9,6 +9,7 @@
  *   `medium` stays the no-op default (the natural size), so the component never writes Fomantic's 300px `.medium`.
  *   See `UIImage.css`.
  * - `src`, `alt`, `width`, `height`, `loading` pass straight through to the shadow `<img>`.
+ * - `zoom` opens it full size, in the page's `<ui-zoom>` (epic `ui-gaps` P14).
  * - NOT the generic content part `<ui-image>` of cards / items (`plan.md`):  those land with their owners.
  */
 
@@ -130,6 +131,14 @@ export const imageVocabulary = {
       description: "When to load, as the native `<img loading>`."
     },
     {
+      name: "zoom",
+      group: "behaviour",
+      kind: "boolean",
+      description:
+        "A click (or Enter) shows it full size, over the page, in the page's `<ui-zoom>`;  with `link`, a click with " +
+        "a modifier key still follows the link."
+    },
+    {
       name: "link",
       group: "link",
       kind: "string",
@@ -146,5 +155,8 @@ export const imageVocabulary = {
     { name: "img", description: "With `link`:  the `<img>` inside the link." }
   ],
   states: [{ name: "disabled", description: "Faded:  shown as unavailable." }],
-  texts: []
+  texts: [
+    { key: "zoom", text: "{alt}:  show full size", description: "With `zoom`:  the image's name, as a button." },
+    { key: "zoomUntitled", text: "Show the image full size", description: "With `zoom`, and no `alt`:  its name." }
+  ]
 } as const satisfies E.ComponentVocabulary

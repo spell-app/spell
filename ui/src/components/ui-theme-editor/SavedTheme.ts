@@ -1,6 +1,6 @@
 // Import directly:  in `core`'s util barrel it cost every page 1.9 kB
 import { PrefStore } from "spell/util/persist/PrefStore"
-import { E, UI, type UIT } from "spell-ui/core"
+import { E, UI, UIT } from "spell-ui/core"
 import { EDITS_SHEET } from "./UIThemeEditor.types"
 
 /****************
@@ -54,14 +54,17 @@ export class SavedTheme {
   /**
    * Put the kept theme on the page:  its base theme, then its sheet.  True when one was kept.
    * - SIDE EFFECT:  page-wide (`UI.themes`, `UI.styles`).
-   * - A kept base that's no longer a theme (a renamed sheet) is forgotten, with a warning:  false.
+   * - A kept base under its old name is kept again under its new one (`studio` => `merlot`, `UIT.ThemeNames`).
+   * - A kept base that's no longer a theme is forgotten, with a warning:  false.
    */
   static async restore(): Promise<boolean> {
     const kept = SavedTheme.read()
     if (!kept) return false
     const { themes, styles } = await UI.load()
+    const base = UIT.ThemeNames.nameNow(themes, kept.choices.base)
+    if (base !== kept.choices.base) SavedTheme.save({ ...kept.choices, base }, kept.css)
     try {
-      await themes.apply(kept.choices.base)
+      await themes.apply(base)
     } catch (error) {
       E.Warnings.warn("SavedTheme", `the kept theme's base \`${kept.choices.base}\` is gone;  forgetting it`, error)
       SavedTheme.forget()
@@ -73,12 +76,13 @@ export class SavedTheme {
 
   /**
    * Wear the kept theme's sheet while the page's theme is `theme` and that's its base;  otherwise take it off.
+   * - A base kept under its old name counts as its new one (`studio` as `merlot`).
    * - SIDE EFFECT:  page-wide (`UI.styles`).
    */
   static async follow(theme: string | undefined): Promise<void> {
     const kept = SavedTheme.read()
-    const { styles } = await UI.load()
-    const css = kept && kept.choices.base === theme ? kept.css : ""
+    const { themes, styles } = await UI.load()
+    const css = kept && UIT.ThemeNames.nameNow(themes, kept.choices.base) === theme ? kept.css : ""
     if (css || styles.has(EDITS_SHEET)) styles.register(EDITS_SHEET, css, { page: true })
   }
 

@@ -24,6 +24,7 @@ import type {
   sizes,
   spacing,
   textAlphas,
+  themeTree,
   zIndices
 } from "./styles.en"
 
@@ -214,6 +215,97 @@ export type GeneratedSheetName = "tokens.css" | "colors.css" | "sizes.css"
 
 /** One `property: value` pair `StyleGenerator` writes, e.g. `["--ui-radius", "var(--ui-radius-m)"]`. */
 export type GeneratedDeclaration = [property: string, value: string]
+
+////////////////
+// ## Theme files
+////////////////
+
+/**
+ * A leaf of `themeTree`:  the token a theme value sets, or one token per scheme.
+ * - A pair (`{ light, dark }`) takes a theme value pair as two declarations, not one `light-dark()`:
+ *   `text > ink` is `--ui-ink-on-light` and `--ui-ink-on-dark`.
+ */
+export type ThemeLeaf = string | ThemeTokenPair
+
+/** One token per scheme:  a `themeTree` leaf the scheme picks between by name, not by `light-dark()`. */
+export type ThemeTokenPair = {
+  /** token for the light scheme, e.g. `--ui-red-on-light` */
+  readonly light: string
+  /** token for the dark scheme */
+  readonly dark: string
+}
+
+/** A group of `themeTree`:  leaves and groups, by name. */
+export type ThemeTree = { readonly [name: string]: ThemeLeaf | ThemeTree }
+
+/** A colour's leaves in `themeTree` (a hue, a brand alias, a semantic colour):  `colorTokensFor()`. */
+export type ThemeColorTokens = Record<
+  | "color"
+  | "on"
+  | "text"
+  | "header"
+  | "border"
+  | "background"
+  | "inverted"
+  | "inverted-on"
+  | "hover"
+  | "focus"
+  | "down"
+  | "active",
+  string
+> & { base: ThemeTokenPair }
+
+/**
+ * One value of a theme file:  CSS text, the same in both schemes, or one per scheme.
+ * - A number is CSS text too (`1.45`, `0.625`).
+ * - `"{surfaces.panel}"`, anywhere in the text, points at another leaf:  written as `var(--ui-surface)`.
+ * - A pair on a plain leaf is written as `light-dark(<light>, <dark>)`;  on a pair leaf, as its two tokens.
+ */
+export type ThemeValue = string | number | ThemeValuePair
+
+/** A value per scheme:  `{ "light": "#e8dade", "dark": "#1a0c13" }`. */
+export type ThemeValuePair = {
+  /** in the light scheme */
+  light: string | number
+  /** in the dark scheme */
+  dark: string | number
+}
+
+/** The values a theme file may set under a group of `themeTree`:  the same names, every one optional. */
+export type ThemeValuesOf<Tree> = {
+  -readonly [Name in keyof Tree]?: Tree[Name] extends ThemeLeaf ? ThemeValue : ThemeValuesOf<Tree[Name]>
+}
+
+/**
+ * A theme file, `<name>.theme.json5` (or a palette, `palettes/<name>.palette.json5`), as data:
+ * its values in `themeTree`'s nested groups, and what it builds on.
+ * - Worked out from `themeTree`, so a leaf added there is a name here (and in `theme.schema.json`).
+ * - `ThemeFile` writes its sheet, and checks every name.
+ */
+export type ThemeData = Prettify<
+  ThemeValuesOf<typeof themeTree> & {
+    /** `"./theme.schema.json"`, so VS Code completes and checks the file */
+    $schema?: string
+    /** its name, for a theme a person names (a saved theme);  Spell's own take their file's */
+    title?: string
+    /** the theme it builds on, whose sheet its own imports first (Fruity:  `"glass"`) */
+    extends?: string
+    /** the palette whose hues it borrows (`"apple"`:  `palettes/apple.palette.json5`) */
+    palette?: string
+    /**
+     * what values can't say:  its rules sheets, by name, in `themes/rules/` (`["modern", "glass"]`)
+     * - selectors, the blur behind glass, motion, a page setting that isn't a token
+     */
+    rules?: string[]
+    /**
+     * a family's own tokens, under its name:
+     * `menu > segmented-active-background` is `--ui-menu-segmented-active-background`
+     */
+    components?: Record<string, Record<string, ThemeValue>>
+    /** the theme's private values, by their full name less `--`:  `glass-blur` is `--glass-blur` */
+    own?: Record<string, ThemeValue>
+  }
+>
 
 ////////////////
 // ## Component tokens

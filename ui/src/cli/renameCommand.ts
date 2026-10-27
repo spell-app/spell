@@ -56,7 +56,7 @@ function filesUnder(path: string): string[] {
   if (stat.isFile()) return isReadable(path, stat.size) ? [path] : []
   const files: string[] = []
   for (const entry of readdirSync(path, { withFileTypes: true })) {
-    if (entry.name.startsWith(".") || SKIPPED_FOLDERS.has(entry.name)) continue
+    if (entry.name.startsWith(".") || SKIPPED_FOLDERS.has(entry.name) || BUILD_FOLDER.test(entry.name)) continue
     const child = join(path, entry.name)
     if (entry.isDirectory()) files.push(...filesUnder(child))
     else if (entry.isFile() && isReadable(child, statSync(child).size)) files.push(child)
@@ -93,6 +93,9 @@ const SKIPPED_FOLDERS = new Set([
   "reference"
 ])
 
+/** A build's folder by its name:  `dist-static`, `dist-element` (spell-app's builds), beside a plain `dist`. */
+const BUILD_FOLDER = /^dist-[\w-]+$/
+
 /**
  * Files it leaves:  built ones (generated types, catalogs, packs), and the vocabularies, which list their own old
  * names on purpose (`UIButton.en.ts`, `UIButton.es.ts`).
@@ -102,5 +105,9 @@ const BUILT_FILE = /(?:^|\/)(?:jsx\.ts|[^/]*\.catalog\.ts|[^/]*\.pack\.js|[^/]*\
 /** A file bigger than this is built, not written:  left alone. */
 const MAX_FILE_SIZE = 2_000_000
 
-/** A line this long means a minified file. */
-const MINIFIED_LINE = 5_000
+/**
+ * A line this long means a minified file.
+ * - Was 5,000:  a page's inline SVG path (the Spell hat in every set's `__parts/layout.html`) runs to 10,000,
+ *   which left those layouts out of the theme menu's rename (epic `debut` P17).
+ */
+const MINIFIED_LINE = 20_000

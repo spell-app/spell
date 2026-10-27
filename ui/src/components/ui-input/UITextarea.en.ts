@@ -88,7 +88,27 @@ export const textareaVocabulary = {
       name: "rows",
       group: "content",
       kind: "number",
-      description: "Visible lines;  without it the field is Fomantic's form height (12em, 8em ... 24em)."
+      description:
+        "Visible lines;  without it the field is Fomantic's form height (12em, 8em ... 24em).  With `grow`:  the " +
+        "lines it starts at, one without it."
+    },
+    {
+      name: "grow",
+      group: "layout",
+      kind: "boolean",
+      description:
+        "Grows with its text (epic `ui-gaps` P14):  `rows` lines to start (one without it), taller as the text " +
+        'wraps, up to `max-rows`, then it scrolls;  shorter again as text goes.  Opt in:  every "tell me more" ' +
+        "field should."
+    },
+    {
+      name: "max-rows",
+      group: "layout",
+      kind: "number",
+      min: 1,
+      description:
+        "With `grow`:  the most lines it grows to before it scrolls;  without it, a third of the window " +
+        "(`--ui-input-textarea-grow-max-height`)."
     },
     {
       name: "autocomplete",

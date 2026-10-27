@@ -12762,6 +12762,16 @@ export interface UIImageAttributes {
    */
   "prop:loading"?: "eager" | "lazy"
   /**
+   * A click (or Enter) shows it full size, over the page, in the page's `<ui-zoom>`;  with `link`, a click with a modifier key still follows the link.
+   * - takes:  flag (present / absent)
+   */
+  zoom?: boolean | ""
+  /**
+   * `zoom`, as the DOM element's property.
+   * @deprecated write `zoom` -- `prop:` stays only for compiled spell
+   */
+  "prop:zoom"?: boolean | ""
+  /**
    * Renders a link (`<a>`) around the image.  Its old name was `href`.
    * - takes:  text
    */
@@ -16872,6 +16882,16 @@ export interface UIMenuAttributes {
     | "15"
     | "16"
     | (string & {})
+  /**
+   * Fits its items' titles to its width:  every title whole while they fit;  then the longest cut first, each ending in `…`;  once one would be cut under `--ui-menu-title-min`, icons only (`:state(icons-only)`, each title its item's tooltip;  an item with no icon shows its title's first letter);  once a button would be under `--ui-menu-item-min`, every item folds into one `…` button whose menu holds them all (`:state(overflow)`).  A `segmented` one becomes a dropdown instead (`:state(dropdown)`):  one button showing the chosen item.  Items with no words (an icon button) stay as they are.  Off by default.
+   * - takes:  flag (present / absent)
+   */
+  shrinkable?: boolean | ""
+  /**
+   * `shrinkable`, as the DOM element's property.
+   * @deprecated write `shrinkable` -- `prop:` stays only for compiled spell
+   */
+  "prop:shrinkable"?: boolean | ""
   /**
    * An application menubar (`role=menubar`):  one Tab stop, arrow keys between items, every item a `menuitem`.  Default:  a `<nav>` landmark of links.
    * - takes:  flag (present / absent)
@@ -32309,7 +32329,7 @@ export interface UITextareaAttributes {
    */
   "prop:maxLength"?: number | `${number}`
   /**
-   * Visible lines;  without it the field is Fomantic's form height (12em, 8em ... 24em).
+   * Visible lines;  without it the field is Fomantic's form height (12em, 8em ... 24em).  With `grow`:  the lines it starts at, one without it.
    * - takes:  number
    */
   rows?: number | `${number}`
@@ -32318,6 +32338,26 @@ export interface UITextareaAttributes {
    * @deprecated write `rows` -- `prop:` stays only for compiled spell
    */
   "prop:rows"?: number | `${number}`
+  /**
+   * Grows with its text (epic `ui-gaps` P14):  `rows` lines to start (one without it), taller as the text wraps, up to `max-rows`, then it scrolls;  shorter again as text goes.  Opt in:  every "tell me more" field should.
+   * - takes:  flag (present / absent)
+   */
+  grow?: boolean | ""
+  /**
+   * `grow`, as the DOM element's property.
+   * @deprecated write `grow` -- `prop:` stays only for compiled spell
+   */
+  "prop:grow"?: boolean | ""
+  /**
+   * With `grow`:  the most lines it grows to before it scrolls;  without it, a third of the window (`--ui-input-textarea-grow-max-height`).
+   * - takes:  number
+   */
+  "max-rows"?: number | `${number}`
+  /**
+   * `max-rows`, as the DOM element's property.
+   * @deprecated write `max-rows` -- `prop:` stays only for compiled spell
+   */
+  "prop:maxRows"?: number | `${number}`
   /**
    * Autofill hint, forwarded to the native textarea.
    * - takes:  text
@@ -32731,6 +32771,236 @@ export interface UIThemeEditorJSXAttributes
   extends
     Omit<UIGlobalJSXAttributes<UIHTMLElement<UIThemeEditorEventMap>>, keyof UIThemeEditorAttributes>,
     UIThemeEditorAttributes {}
+
+/** `<ui-theme-menu>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
+export interface UIThemeMenuEventMap {
+  /**
+   * `ui-changed`:  The viewer picked a theme or a scheme here;  `theme` is a `UI.themes` name;  `scheme` is `system` while following the OS, and `shown` the scheme the page shows.  Fired after the choice is stored and while its sheets load.
+   * - `event.detail`:  `{ theme: string, scheme: 'light' | 'dark' | 'system', shown: 'light' | 'dark', originalEvent?: Event }`
+   */
+  "ui-changed": CustomEvent<{
+    theme: string
+    scheme: "light" | "dark" | "system"
+    shown: "light" | "dark"
+    originalEvent?: Event
+  }>
+}
+
+/** `<ui-theme-menu>`'s own attributes, from its vocabulary. */
+export interface UIThemeMenuAttributes {
+  /**
+   * Which controls to show:  `both` (the palette button, whose overlay picks the theme and light / dark), `scheme` (a light / dark button alone) or `theme` (a theme dropdown).
+   * - takes:  `both` · `theme` · `scheme`
+   * - default:  `both`
+   */
+  show?: "both" | "theme" | "scheme"
+  /**
+   * `show`, as the DOM element's property.
+   * @deprecated write `show` -- `prop:` stays only for compiled spell
+   */
+  "prop:show"?: "both" | "theme" | "scheme"
+  /**
+   * Size of the buttons (or the dropdown), `mini` ... `massive`;  `medium` is the default.
+   * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
+   */
+  size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
+  /**
+   * `size`, as the DOM element's property.
+   * @deprecated write `size` -- `prop:` stays only for compiled spell
+   */
+  "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
+  /**
+   * For dark backgrounds (a dark header or side panel):  light buttons, an inverted dropdown.
+   * - takes:  flag (present / absent)
+   */
+  inverted?: boolean | ""
+  /**
+   * `inverted`, as the DOM element's property.
+   * @deprecated write `inverted` -- `prop:` stays only for compiled spell
+   */
+  "prop:inverted"?: boolean | ""
+  /**
+   * With `show="theme"`:  the dropdown is an icon-only palette button, its text (`Spell theme`) its tooltip and name, for a masthead's row of icon buttons.
+   * - takes:  flag (present / absent)
+   */
+  compact?: boolean | ""
+  /**
+   * `compact`, as the DOM element's property.
+   * @deprecated write `compact` -- `prop:` stays only for compiled spell
+   */
+  "prop:compact"?: boolean | ""
+  /**
+   * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
+   * - takes:  flag (present / absent)
+   */
+  disabled?: boolean | ""
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
+  "prop:disabled"?: boolean | ""
+  /**
+   * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
+   * - takes:  flag (present / absent)
+   */
+  loading?: boolean | ""
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
+  "prop:loading"?: boolean | ""
+  /**
+   * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
+   * - takes:  flag (present / absent)
+   */
+  visible?: boolean | ""
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
+  "prop:visible"?: boolean | ""
+  /**
+   * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
+   * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
+   */
+  animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
+  "prop:animation"?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /**
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
+   * - takes:  text
+   */
+  link?: string
+  /**
+   * `link`, as the DOM element's property.
+   * @deprecated write `link` -- `prop:` stays only for compiled spell
+   */
+  "prop:link"?: string
+  /**
+   * Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`.
+   * - takes:  text
+   */
+  target?: string
+  /**
+   * `target`, as the DOM element's property.
+   * @deprecated write `target` -- `prop:` stays only for compiled spell
+   */
+  "prop:target"?: string
+  /**
+   * How its letters look, several words at once:  `bold`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript` (`font="bold italic"`).  `<ui-text>` draws each as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it;  every other element shows the look alone.
+   * - takes:  space-separated:  `bold` · `italic` · `underline` · `strikethrough` · `code` · `highlight` · `subscript` · `superscript`
+   */
+  font?: string
+  /**
+   * `font`, as the DOM element's property.
+   * @deprecated write `font` -- `prop:` stays only for compiled spell
+   */
+  "prop:font"?: string
+  /**
+   * Its tooltip:  the browser's own, written as the element's `title`.
+   * - takes:  text
+   */
+  tooltip?: string
+  /**
+   * `tooltip`, as the DOM element's property.
+   * @deprecated write `tooltip` -- `prop:` stays only for compiled spell
+   */
+  "prop:tooltip"?: string
+  /**
+   * Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.
+   * - takes:  text
+   */
+  label?: string
+  /**
+   * `label`, as the DOM element's property.
+   * @deprecated write `label` -- `prop:` stays only for compiled spell
+   */
+  "prop:label"?: string
+  /**
+   * `ui-changed`:  The viewer picked a theme or a scheme here;  `theme` is a `UI.themes` name;  `scheme` is `system` while following the OS, and `shown` the scheme the page shows.  Fired after the choice is stored and while its sheets load.
+   * - `event.detail`:  `{ theme: string, scheme: 'light' | 'dark' | 'system', shown: 'light' | 'dark', originalEvent?: Event }`
+   */
+  "on-ui-changed"?: (event: UIThemeMenuEventMap["ui-changed"]) => void
+}
+
+/** `<ui-theme-menu>` in JSX:  its own attributes, and HTML's global ones. */
+export interface UIThemeMenuJSXAttributes
+  extends
+    Omit<UIGlobalJSXAttributes<UIHTMLElement<UIThemeMenuEventMap>>, keyof UIThemeMenuAttributes>,
+    UIThemeMenuAttributes {}
 
 /** `<ui-title>`'s own attributes, from its vocabulary. */
 export interface UITitleAttributes {
@@ -33585,6 +33855,16 @@ export interface UIToolbarAttributes {
     | "15"
     | "16"
     | (string & {})
+  /**
+   * Fits its items' titles to its width:  every title whole while they fit;  then the longest cut first, each ending in `…`;  once one would be cut under `--ui-menu-title-min`, icons only (`:state(icons-only)`, each title its item's tooltip;  an item with no icon shows its title's first letter);  once a button would be under `--ui-menu-item-min`, every item folds into one `…` button whose menu holds them all (`:state(overflow)`).  A `segmented` one becomes a dropdown instead (`:state(dropdown)`):  one button showing the chosen item.  Items with no words (an icon button) stay as they are.  Off by default.
+   * - takes:  flag (present / absent)
+   */
+  shrinkable?: boolean | ""
+  /**
+   * `shrinkable`, as the DOM element's property.
+   * @deprecated write `shrinkable` -- `prop:` stays only for compiled spell
+   */
+  "prop:shrinkable"?: boolean | ""
   /**
    * An application menubar (`role=menubar`):  one Tab stop, arrow keys between items, every item a `menuitem`.  Default:  a `<nav>` landmark of links.
    * - takes:  flag (present / absent)
@@ -35034,6 +35314,235 @@ export interface UIVisibilityJSXAttributes
     Omit<UIGlobalJSXAttributes<UIHTMLElement<UIVisibilityEventMap>>, keyof UIVisibilityAttributes>,
     UIVisibilityAttributes {}
 
+/** `<ui-zoom>`'s own attributes, from its vocabulary. */
+export interface UIZoomAttributes {
+  /**
+   * The widest the shrunk view gets, a CSS length (`320px`, `50%`);  none:  its container's width.  Content past it is cut off, until it's shown full size.
+   * - takes:  text
+   */
+  "max-width"?: string
+  /**
+   * `max-width`, as the DOM element's property.
+   * @deprecated write `max-width` -- `prop:` stays only for compiled spell
+   */
+  "prop:maxWidth"?: string
+  /**
+   * The tallest the shrunk view gets, a CSS length (`200px`, `20em`);  none:  as tall as its content.  Content past it is cut off, until it's shown full size.
+   * - takes:  text
+   */
+  "max-height"?: string
+  /**
+   * `max-height`, as the DOM element's property.
+   * @deprecated write `max-height` -- `prop:` stays only for compiled spell
+   */
+  "prop:maxHeight"?: string
+  /**
+   * How big its content is in the shrunk view, a percentage of its full size:  `50%` by default;  `100%` keeps it full size, cut off by `max-width` / `max-height`.
+   * - takes:  text
+   * - default:  `50%`
+   */
+  shrink?: string
+  /**
+   * `shrink`, as the DOM element's property.
+   * @deprecated write `shrink` -- `prop:` stays only for compiled spell
+   */
+  "prop:shrink"?: string
+  /**
+   * Shown full size, over the page.  Set to open it from script;  closing it clears it.
+   * - takes:  flag (present / absent)
+   */
+  open?: boolean | ""
+  /**
+   * `open`, as the DOM element's property.
+   * @deprecated write `open` -- `prop:` stays only for compiled spell
+   */
+  "prop:open"?: boolean | ""
+  /**
+   * An image to show full size, in place of its content:  open while it's set, and cleared as it closes.  The page's zoom for its screenshots (`ImageZoom`) is one of these.
+   * - takes:  text
+   */
+  src?: string
+  /**
+   * `src`, as the DOM element's property.
+   * @deprecated write `src` -- `prop:` stays only for compiled spell
+   */
+  "prop:src"?: string
+  /**
+   * With `src`:  the image's alt text, its caption, and the zoomed image's own name.
+   * - takes:  text
+   */
+  alt?: string
+  /**
+   * `alt`, as the DOM element's property.
+   * @deprecated write `alt` -- `prop:` stays only for compiled spell
+   */
+  "prop:alt"?: string
+  /**
+   * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
+   * - takes:  flag (present / absent)
+   */
+  disabled?: boolean | ""
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
+  "prop:disabled"?: boolean | ""
+  /**
+   * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
+   * - takes:  flag (present / absent)
+   */
+  loading?: boolean | ""
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
+  "prop:loading"?: boolean | ""
+  /**
+   * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
+   * - takes:  flag (present / absent)
+   */
+  visible?: boolean | ""
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
+  "prop:visible"?: boolean | ""
+  /**
+   * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
+   * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
+   */
+  animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
+  "prop:animation"?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /**
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
+   * - takes:  text
+   */
+  link?: string
+  /**
+   * `link`, as the DOM element's property.
+   * @deprecated write `link` -- `prop:` stays only for compiled spell
+   */
+  "prop:link"?: string
+  /**
+   * Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`.
+   * - takes:  text
+   */
+  target?: string
+  /**
+   * `target`, as the DOM element's property.
+   * @deprecated write `target` -- `prop:` stays only for compiled spell
+   */
+  "prop:target"?: string
+  /**
+   * How its letters look, several words at once:  `bold`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript` (`font="bold italic"`).  `<ui-text>` draws each as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it;  every other element shows the look alone.
+   * - takes:  space-separated:  `bold` · `italic` · `underline` · `strikethrough` · `code` · `highlight` · `subscript` · `superscript`
+   */
+  font?: string
+  /**
+   * `font`, as the DOM element's property.
+   * @deprecated write `font` -- `prop:` stays only for compiled spell
+   */
+  "prop:font"?: string
+  /**
+   * Its tooltip:  the browser's own, written as the element's `title`.
+   * - takes:  text
+   */
+  tooltip?: string
+  /**
+   * `tooltip`, as the DOM element's property.
+   * @deprecated write `tooltip` -- `prop:` stays only for compiled spell
+   */
+  "prop:tooltip"?: string
+  /**
+   * Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.
+   * - takes:  text
+   */
+  label?: string
+  /**
+   * `label`, as the DOM element's property.
+   * @deprecated write `label` -- `prop:` stays only for compiled spell
+   */
+  "prop:label"?: string
+}
+
+/** `<ui-zoom>` in JSX:  its own attributes, and HTML's global ones. */
+export interface UIZoomJSXAttributes
+  extends Omit<UIGlobalJSXAttributes<HTMLElement>, keyof UIZoomAttributes>, UIZoomAttributes {}
+
 declare module "@solidjs/web/types/jsx.js" {
   namespace JSX {
     interface IntrinsicElements {
@@ -35051,6 +35560,7 @@ declare module "@solidjs/web/types/jsx.js" {
        * - slots:
        *   - default:  Content:  text, `<ui-icon>`, `<ui-content>` (header, description), a nested list / menu.
        *   - `icon`:  List / menu:  replaces the `icon` shorthand's glyph.
+       *   - `badge`:  Menu:  a count after the title (a `<ui-label>`), which stays when a `shrinkable` menu cuts or hides the title.
        */
       "ui-action": UIActionJSXAttributes
       /**
@@ -35393,6 +35903,7 @@ declare module "@solidjs/web/types/jsx.js" {
        * - slots:
        *   - default:  Content:  text, `<ui-icon>`, `<ui-content>` (header, description), a nested list / menu.
        *   - `icon`:  List / menu:  replaces the `icon` shorthand's glyph.
+       *   - `badge`:  Menu:  a count after the title (a `<ui-label>`), which stays when a `shrinkable` menu cuts or hides the title.
        */
       "ui-item": UIItemJSXAttributes
       /**
@@ -35456,6 +35967,7 @@ declare module "@solidjs/web/types/jsx.js" {
        * - also known as:  navbar, nav, tabs bar, toolbar, sidebar menu, pagination
        * - slots:
        *   - default:  `<ui-item>`s, sub-menus (`<ui-menu position>`), and other content.
+       *   - `overflow`:  `shrinkable`:  what the overflow button shows instead of its `…`, e.g. `<ui-icon name="bars">`.
        * - events:  `ui-choosing`
        */
       "ui-menu": UIMenuJSXAttributes
@@ -35876,6 +36388,14 @@ declare module "@solidjs/web/types/jsx.js" {
        */
       "ui-theme-editor": UIThemeEditorJSXAttributes
       /**
+       * `<ui-theme-menu>`:  A theme menu switches the page between light and dark, and picks its theme from Spell's own, and remembers both for the next page.
+       * - also known as:  theme picker, theme switcher, dark mode toggle, colour scheme, appearance, skin
+       * - slots:
+       *   - `end`:  At the foot of the palette's panel, under the themes and a divider:  a row of the page's own, e.g. the Spell editor's 'Edit theme...'.  Styled as a theme's row.  Not in the theme list's arrow keys.
+       * - events:  `ui-changed`
+       */
+      "ui-theme-menu": UIThemeMenuJSXAttributes
+      /**
        * `<ui-title>`:  A title:  a step's, an accordion panel's, a search result's.
        * - also known as:  accordion title, summary, toggle header
        * - slots:
@@ -35892,10 +36412,11 @@ declare module "@solidjs/web/types/jsx.js" {
        */
       "ui-toast": UIToastJSXAttributes
       /**
-       * `<ui-toolbar>`:  A toolbar is a horizontal menu whose items scroll sideways when they don't fit, with a button at each end while there's more to see that way.  It takes every `<ui-menu>` attribute.
+       * `<ui-toolbar>`:  A toolbar is a horizontal menu whose items scroll sideways when they don't fit, with a button at each end while there's more to see that way;  `shrinkable`, it fits their titles to its width instead.  It takes every `<ui-menu>` attribute.
        * - also known as:  toolbar, tool bar, scrolling tabs, overflow menu, chip bar, scrollable menu
        * - slots:
        *   - default:  `<ui-item>`s, sub-menus (`<ui-menu position>`), and other content.
+       *   - `overflow`:  `shrinkable`:  what the overflow button shows instead of its `…`, e.g. `<ui-icon name="bars">`.
        *   - `icon`:  First, at the start:  an icon or an icon button (a menu button).
        *   - `title`:  After the icon:  the title, never squeezed.
        *   - `center`:  After the title, taking the room left:  e.g. a row of links.
@@ -35937,6 +36458,13 @@ declare module "@solidjs/web/types/jsx.js" {
        * - events:  `ui-in-view`, `ui-out-of-view`, `ui-top-in-view`, `ui-bottom-in-view`, `ui-top-passed`, `ui-bottom-passed`, `ui-passing`, `ui-loaded`
        */
       "ui-visibility": UIVisibilityJSXAttributes
+      /**
+       * `<ui-zoom>`:  A zoom shows something full size, over the page.  Round any content it shows it shrunk, within a width and height, and full size on a click;  with `src` it shows that image full size.  Escape, a click outside it or its close button close it.
+       * - also known as:  lightbox, zoom, full size, image viewer, magnifier, expand, screenshot, thumbnail
+       * - slots:
+       *   - default:  What it zooms:  any content, shown shrunk, then full size on a click.
+       */
+      "ui-zoom": UIZoomJSXAttributes
     }
   }
 }
@@ -36113,6 +36641,7 @@ declare global {
     "ui-text": HTMLElement
     "ui-textarea": UIHTMLElement<UITextareaEventMap>
     "ui-theme-editor": UIHTMLElement<UIThemeEditorEventMap>
+    "ui-theme-menu": UIHTMLElement<UIThemeMenuEventMap>
     "ui-title": HTMLElement
     "ui-toast": UIHTMLElement<UIToastEventMap>
     "ui-toolbar": UIHTMLElement<UIToolbarEventMap>
@@ -36121,6 +36650,7 @@ declare global {
     "ui-value": HTMLElement
     "ui-video": UIHTMLElement<UIVideoEventMap>
     "ui-visibility": UIHTMLElement<UIVisibilityEventMap>
+    "ui-zoom": HTMLElement
   }
   interface HTMLElementEventMap extends UIEventMap {}
   interface DocumentEventMap extends UIEventMap {}

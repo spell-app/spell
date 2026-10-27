@@ -52,6 +52,18 @@ describe("<ui-menu> static render", () => {
     )
     expect(html).not.toContain("<li")
   })
+
+  it("draws a shrinkable menu's titles whole:  each in its title box, no overflow button, nothing cut", () => {
+    const html = StaticRender.fragment(
+      `<ui-menu label="Sections" shrinkable><ui-item link="#q" icon="question">Questions</ui-item>` +
+        `<ui-item link="#j">Judgement calls</ui-item></ui-menu>`
+    )
+    expect(html).toContain(`<span class="title" part="title">Questions</span>`)
+    expect(html).toContain(`<span class="title" part="title">Judgement calls</span>`)
+    expect(html).not.toContain("overflow")
+    expect(html).not.toContain("--_menu-")
+    expect(html).not.toContain("letter")
+  })
 })
 
 /** `html` with each tag's attributes sorted by name:  linkedom adds attributes at the front. */

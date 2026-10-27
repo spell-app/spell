@@ -8,6 +8,7 @@ import { themeEditorVocabulary } from "./UIThemeEditor.en"
 import {
   DEFAULT_BASE,
   EDITS_SHEET,
+  GLASS_THEMES,
   TEXT_SIZES,
   type ThemeEditorTextKey,
   type ThemeEditorVocabulary
@@ -257,7 +258,7 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
                 this.choose({ base: String(event.detail.value) })
               }
             >
-              <For each={this.bases}>{(base) => <ui-item value={base}>{UIThemeEditor.titleOf(base)}</ui-item>}</For>
+              <For each={this.bases}>{(base) => <ui-item value={base}>{UIT.ThemeNames.titleOf(base)}</ui-item>}</For>
             </ui-select>
           </ui-property>
           <ui-panel label={t("color")} description={t("colorTip")} collapsible="">
@@ -307,9 +308,9 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
     return own.includes(this.theme.base) ? own : [...own, this.theme.base]
   }
 
-  /** The base has glass of its own (fruity's), which the Glass choice changes. */
+  /** The base has glass of its own (a glass theme's), which the Glass choice changes. */
   private get hasGlass(): boolean {
-    return GLASS_BASES.includes(this.theme.base)
+    return GLASS_THEMES.includes(this.theme.base)
   }
 
   /** A colour choice:  a row of swatches, the base's own first. */
@@ -575,18 +576,6 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
       </ui-section>
     )
   }
-
-  ////////////////
-  // ## Statics
-  ////////////////
-
-  /** A theme's name for people:  `spell-brand` => `Spell Brand`. */
-  static titleOf(name: string): string {
-    return name
-      .split("-")
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(" ")
-  }
 }
 
 /** The vocabulary getters, typed (`UIComponent`'s doc). */
@@ -609,9 +598,6 @@ type SegmentedKey = "corners" | "depth" | "glass"
 
 /** The value of the base's-own choice, in a swatch row or a font select;  never stored. */
 const OWN = "own"
-
-/** The bases with glass of their own:  `ThemeSheet`'s `--fruity-*`. */
-const GLASS_BASES: readonly string[] = ["fruity"]
 
 /** The text size where the page doesn't say. */
 const DEFAULT_TEXT_SIZE = 16

@@ -27,7 +27,7 @@ import {
  * `yarn design:build` (`spell design build`) writes them to `<out>/project/`, laid out as the format says.
  * - `README.md` -- the brand book:  how to consume the elements (plain markup, one script), the brand's content and
  *   visual rules in `ui` terms, and an index of components by group
- * - `tokens.json` -- the `spell-brand` theme's tokens, light and dark (`DesignTokens`)
+ * - `tokens.json` -- the `spell` theme's tokens, light and dark (`DesignTokens`)
  * - `components/index.d.ts`, `components/<Comp>/README.md` + `preview.html` per family (`DesignComponents`)
  * - `components/Cover/preview.html` -- the cover;  `design-system.json` -- the system's index
  * - NOT `components/bundle.js` / `bundle.css`:  the design bundle's build (P8) writes those into the same folder,
@@ -174,7 +174,7 @@ export class DesignExport {
     const lines = ["---", "", "## Not synced", ""]
     lines.push(
       `- Made by \`yarn design:build\` (spell-ui) from ${tokens.meta.repo}@${this.git.sha}:  the vocabularies ` +
-        "(`docs/__data/components.json5`), the element examples and the `spell-brand` theme's sheets" +
+        "(`docs/__data/components.json5`), the element examples and the `spell` theme's sheets" +
         this.sources
           .map(
             (source) => `;  the ${source.group} cards from ${source.docsPaths.map((path) => `\`${path}\``).join(", ")}`
@@ -224,8 +224,7 @@ export class DesignExport {
           "src/styles/sizes.css",
           "src/styles/colors.css",
           "src/styles/themes/classic.css",
-          "src/styles/themes/spell.css",
-          "src/styles/themes/spell-brand.css"
+          "src/styles/themes/spell.css"
         ],
         docs: [
           `${SITE_DATA}/components.json5`,
@@ -398,7 +397,7 @@ const CONSUMING = [
   "Spell UI is a library of **custom elements**, not React components.  Use them as plain HTML.",
   "",
   "1. **Load ONE classic script, `components/bundle.js`.**  It defines every `<ui-*>` element (the brand's " +
-    "`<brand-*>` too) and applies the Spell brand theme (`spell-brand`) to the page:  nothing to import, no other file.  In a Design, load it once, before the markup:  " +
+    "`<brand-*>` too) and applies the Spell theme (`spell`) to the page:  nothing to import, no other file.  In a Design, load it once, before the markup:  " +
     "`<script src=\"ds/<this system's folder>/components/bundle.js\"></script>`.  This system's own previews already have it.",
   '2. **Write markup:**  `<ui-button icon="check" color="primary">Save</ui-button>`.  Never `x-import`, never ' +
     "`window.SpellUI.Button`, never a React wrapper:  there are none.  (`window.SpellUI` exists for scripting only:  " +
@@ -428,7 +427,7 @@ const CONSUMING = [
 
 /**
  * The README's visual rules:  the brand book's "VISUAL FOUNDATIONS" (`brand/spell-design-system/readme.md`),
- * restated in `ui` terms (tokens and elements, not its React mock-ups' `sp-*` classes), as the `spell-brand` theme
+ * restated in `ui` terms (tokens and elements, not its React mock-ups' `sp-*` classes), as the `spell` theme
  * draws them.
  */
 const VISUAL_FOUNDATIONS = [

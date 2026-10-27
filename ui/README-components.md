@@ -231,7 +231,7 @@ Every family, by group, A-Z inside each.
 
 <!-- components:start -->
 
-72 families, 118 tags;  3 families in progress.
+73 families, 119 tags;  3 families in progress.
 
 ### Elements
 
@@ -346,9 +346,10 @@ Elements with no Fomantic counterpart.
 | <img src="docs/images/components/ui-section.png" alt="Section, its first example" width="200" height="21"> | [Section](docs/ui-section.html) *(In progress)* | `<ui-section>` `<ui-sections>` | A section is a titled block of content that can close and keep its title in view. | section, panel, collapsible, disclosure |
 |  | [Stack](docs/ui-stack.html) | `<ui-stack>` | A stack lays its children out in a column, or a row that wraps, evenly spaced.  It has no look of its own. | stack, cluster, flex box, row |
 |  | [Theme Editor](docs/ui-theme-editor.html) *(In progress)* | `<ui-theme-editor>` | A theme editor makes a theme from an existing one:  pick its colours, fonts and shapes, watch real elements follow in light and dark, then copy the stylesheet or keep it in the browser. | theme editor, theme builder, theme creator, theme generator |
+|  | [Theme Menu](docs/ui-theme-menu.html) | `<ui-theme-menu>` | A theme menu switches the page between light and dark, and picks its theme from Spell's own, and remembers both for the next page. | theme picker, theme switcher, dark mode toggle, colour scheme |
 
 <details>
-<summary>The docs site's own elements:  8 families, never in the library</summary>
+<summary>The docs site's own elements:  7 families, never in the library</summary>
 
 | Family | Tags | What it is | Also called |
 | --- | --- | --- | --- |
@@ -358,7 +359,6 @@ Elements with no Fomantic counterpart.
 | Docs nav | `<ui-docs-nav>` | A docs nav is a panel listing the site's pages and every component, A-Z or by topic, in folding groups, with search and favourites;  the current page is highlighted and scrolled into view. | sidebar, table of contents, toc, site nav |
 | Docs search | `<ui-docs-search>` | A docs search is a field that finds sections of the page shown, components, attributes and every page's sections as you type, and jumps to the one you pick;  `/` or Cmd / Ctrl+K focuses it from anywhere. | site search, docs search, quick find, jump to |
 | Docs table of contents | `<ui-docs-toc>` | A table of contents lists the page's sections and examples as links, opens the one in view and follows the scroll.  Each section folds and opens by its chevron, and one button in its header opens or folds them all;  the viewer's folds are kept. | table of contents, on this page, page index, scrollspy |
-| Docs themes | `<ui-docs-themes>` | Theme controls switch the page between light and dark, and pick its theme, and remember both for the next page. | theme picker, theme switcher, dark mode toggle, colour scheme |
 | Docs tokens | `<ui-docs-tokens>` | A token table lists the CSS custom properties of a component family, or of the whole foundation, with their defaults and a live swatch for each colour;  a playground adds inputs that restyle a live preview. | css variables, custom properties, design tokens, theme tokens |
 
 </details>

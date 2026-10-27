@@ -37,6 +37,10 @@ const EXCEPTIONS: Record<string, Record<string, string>> = {
   "ui-search/UISearch.css": {
     "--ui-input-radius": "the search prompt is Fomantic's round input:  it sets the nested input's radius"
   },
+  "ui-zoom/UIZoom.css": {
+    "--ui-modal-dimmer-background":
+      "a zoom's backdrop is dark whatever the page's theme (its own `--ui-zoom-backdrop`):  it sets its modal's dimmer"
+  },
   "ui-theme-editor/UIThemeEditor.css": {
     "--ui-button-margin-inline": "its rows of buttons (actions, the sample app) space them by their gap",
     "--ui-section-margin": "its preview and stylesheet sections sit in a column spaced by its gap",
@@ -46,6 +50,18 @@ const EXCEPTIONS: Record<string, Record<string, string>> = {
     "--ui-progress-margin": "the same",
     "--ui-message-margin": "the same",
     "--ui-message-icon-size": "the sample's message is one short line:  its icon sized to the text, not to a paragraph"
+  },
+  "ui-theme-menu/UIThemeMenu.css": {
+    "--ui-button-background":
+      "its `compact` theme dropdown is a quiet round icon button:  it themes the dropdown's button box",
+    "--ui-button-background-hover": "the same",
+    "--ui-button-background-down": "the same",
+    "--ui-button-color": "the same",
+    "--ui-button-color-hover": "the same",
+    "--ui-button-padding-block": "the same",
+    "--ui-button-padding-inline": "the same",
+    "--ui-button-radius": "the same",
+    "--ui-button-box-shadow": "the same"
   }
 }
 

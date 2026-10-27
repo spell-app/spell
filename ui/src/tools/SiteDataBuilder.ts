@@ -23,7 +23,6 @@ import { SITE_DATA, SITE_PAGES } from "./tools.types.ts"
 import { FamilyTokens } from "./FamilyTokens.ts"
 import { FoundationTokens } from "./FoundationTokens.ts"
 import { SiteSearchBuilder } from "./SiteSearchBuilder.ts"
-import { ThemeFamilies } from "./ThemeFamilies.ts"
 import { VocabularyFiles } from "spell/element-tools/VocabularyFiles"
 
 /****************
@@ -42,9 +41,6 @@ import { VocabularyFiles } from "spell/element-tools/VocabularyFiles"
  *   - The first seeds came from the old Astro site's MDX pages (frontmatter + token-table props),
  *     deleted with it (epic `spell-ui-pages`, P7).
  * - Also the FOUNDATION tokens, grouped (`foundation`, `src/tools/FoundationTokens.ts`), for the theming page's tables.
- * - And the theme sheets (`themes`, `src/tools/ThemeFamilies.ts`), for `<ui-docs-themes>`:
- *   - each one's title, and the families it touches
- *   - titles are pages.json5's `themes`, seeded once per new sheet
  * - And the search file, `docs/__data/search.json5` (`searchText()`, `src/tools/SiteSearchBuilder.ts`):
  *   every page's sections, read from the pages' markup.
  * - Another component set's data (`set`, `forSet()`):  its own groups as the topics, its own side-column links,
@@ -162,14 +158,6 @@ export class SiteDataBuilder {
     }
 
     const foundation = new FoundationTokens(join(this.root, "src", "styles")).groups()
-    // the theme sheets, titled from pages.json5 (a new sheet seeded there), with the families they touch
-    const themes = new ThemeFamilies({
-      folder: join(this.root, "src", "styles", "themes"),
-      tags: [...components, ...docs],
-      families,
-      foundation: foundation.flatMap((group) => group.tokens.map((token) => token.name))
-    })
-    const seeded: SitePagesFile = { ...pages, themes: themes.seed(pages.themes) }
 
     const data: SiteDataFile = {
       $comment:
@@ -180,10 +168,9 @@ export class SiteDataBuilder {
       components: SiteDataBuilder.finishTags(components, families),
       docs: SiteDataBuilder.finishTags(docs, families),
       families,
-      foundation,
-      themes: themes.read(seeded.themes)
+      foundation
     }
-    return { data: this.options.set ? SiteDataBuilder.forSet(data, this.options.set) : data, pages: seeded }
+    return { data: this.options.set ? SiteDataBuilder.forSet(data, this.options.set) : data, pages }
   }
 
   /**
@@ -375,12 +362,9 @@ export class SiteDataBuilder {
     return {
       $comment:
         "Hand-kept facts per family (title, summary, status, mainTag, `pages`:  sub-tags with a page of their own, " +
-        "token-table overrides) and per theme sheet " +
-        "(`themes`:  title), read by `yarn " +
-        "site:data`.  Shape:  `SitePagesFile` in src/docs-components/docs-components.types.ts.  Edit by hand;  a new " +
+        "token-table overrides) read by `yarn site:data`.  Shape:  `SitePagesFile` in src/docs-components/docs-components.types.ts.  Edit by hand;  a new " +
         "family is added (seeded) by `yarn site:data`.",
-      families: Object.fromEntries(Object.entries(families).sort(([a], [b]) => a.localeCompare(b))),
-      ...(existing?.themes && { themes: existing.themes })
+      families: Object.fromEntries(Object.entries(families).sort(([a], [b]) => a.localeCompare(b)))
     }
   }
 

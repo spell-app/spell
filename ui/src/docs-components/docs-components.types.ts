@@ -15,8 +15,6 @@
 
 import type { JSX } from "@solidjs/web"
 
-// Import directly:  the scheme's key, with no pref store
-import { COLOR_SCHEME_KEY } from "spell/util/persist/persist.types"
 import { clamp } from "spell-ui/util"
 import type { UIHeaderAttributes } from "spell-ui/jsx"
 
@@ -71,11 +69,6 @@ export type SiteDataFile = {
    */
   readonly foundation: readonly SiteFoundationGroup[]
   /**
-   * every theme sheet (`src/styles/themes/*.css`, `classic` and `dark` included), A-Z:
-   * its title and the families it touches (`src/tools/ThemeFamilies.ts`);  `<ui-docs-themes>` titles and filters by it
-   */
-  readonly themes: readonly SiteTheme[]
-  /**
    * another site's own side-column links:
    * a component set served with this site's bundle (Epic UI, `/components/epics/`)
    * - absent:  Spell UI's (`TOP_PAGES`, `FOUNDATION_PAGES` in `<ui-docs-nav>`)
@@ -129,21 +122,6 @@ export type SiteNavPage = {
   readonly label: string
   /** its row's icon (the default `fa7-free` pack), e.g. `house` */
   readonly icon: string
-}
-
-/** One theme sheet:  its title, and which families it restyles. */
-export type SiteTheme = {
-  /** sheet name, as `UI.themes` knows it, e.g. `github` */
-  readonly name: string
-  /** display title, from `pages.json5` `themes`, e.g. `GitHub` */
-  readonly title: string
-  /**
-   * folders of the families whose markup or `--ui-<tag>-*` tokens the sheet touches, A-Z, e.g. `["ui-button"]`
-   * - read from the sheet's class grammar (`.ui.button`), tag selectors (`:where(ui-table)`) and declared tokens
-   */
-  readonly families: readonly string[]
-  /** also re-declares a foundation token (`--ui-font-family`, palette ...) or styles page markup:  site-wide */
-  readonly global: boolean
 }
 
 /** One topic a tag is filed under. */
@@ -353,17 +331,6 @@ export type SiteFoundationGroup = {
 export type SitePagesFile = {
   readonly $comment: string
   readonly families: Readonly<Record<string, SitePageSeed>>
-  /**
-   * theme sheet name => its hand-kept facts;
-   * a new sheet is seeded from its header comment's first words (`GitHub theme:` => `GitHub`)
-   */
-  readonly themes?: Readonly<Record<string, SiteThemeSeed>>
-}
-
-/** One theme sheet's hand-kept facts. */
-export type SiteThemeSeed = {
-  /** display title in the theme picker, e.g. `Bootstrap 3` */
-  readonly title: string
 }
 
 /** One family's hand-kept facts. */
@@ -480,52 +447,6 @@ export const SITE_SEARCH_PATH = "__data/search.json5"
 
 /** `<meta name>` a page may point at its data file with (`SiteData`). */
 export const SITE_DATA_META = "ui-docs-data"
-
-////////////////
-// ## The viewer's look
-////////////////
-
-/**
- * Every docs page colour scheme (`ThemePreference`), in the order the picker shows them:
- * - `light` / `dark`:  `ui-light` / `ui-dark` on `<html>`, and the same `color-scheme` inline
- * - `system`:  neither, so `color-scheme: light dark` follows the OS
- */
-export const DocsSchemes = ["light", "dark", "system"] as const
-/** One of `DocsSchemes`, e.g. `"system"`. */
-export type DocsScheme = (typeof DocsSchemes)[number]
-
-/** The scheme the page SHOWS:  `system` resolved through the OS (`prefers-color-scheme`). */
-export type DocsShownScheme = Exclude<DocsScheme, "system">
-
-/** The viewer's look:  theme and colour scheme (`ThemePreference.look`). */
-export type DocsLook = {
-  /** a `UI.themes` name (`spell`, `github`, `classic`);  `undefined`:  our own look, no theme */
-  readonly theme: string | undefined
-  /** the chosen scheme;  `system` follows the OS */
-  readonly scheme: DocsScheme
-}
-
-/** The theme a viewer who never picked one sees:  the Spell brand (`UI.themes.own`). */
-export const DOCS_DEFAULT_THEME = "spell"
-
-/** What the `theme` key holds for our own look, no theme (the key is absent for `DOCS_DEFAULT_THEME`). */
-export const DOCS_PLAIN_THEME = "default"
-
-/**
- * `<html>` class `ThemePreference.applyScheme()` sets for one frame:
- * a theme turns transitions off under it (`spell.css`), so a scheme switch doesn't animate every colour.
- */
-export const DOCS_SCHEME_SWITCHING = "ui-scheme-switching"
-
-/**
- * `localStorage` keys of the viewer's look (`ThemePreference`).
- * - `scheme`:  the kit's ONE key for every Spell site (`COLOR_SCHEME_KEY`, kept by `ColorScheme`):
- *   `light` / `dark`, absent for `system` (follow the OS).
- *   `<spell-site-header>` on the docs, epic pages and saga pages reads and writes it too.
- * - `theme`:  a `UI.themes` name (`github`, `classic`), `DOCS_PLAIN_THEME` for our own look,
- *   absent for `DOCS_DEFAULT_THEME`.  Spell UI's site only.
- */
-export const DOCS_LOOK_KEYS = { scheme: COLOR_SCHEME_KEY, theme: "spell-ui-site:theme" } as const
 
 ////////////////
 // ## What the docs elements share

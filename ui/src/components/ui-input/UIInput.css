@@ -147,6 +147,7 @@
     --_ui-input-textarea-min-height: var(--ui-input-textarea-min-height, 8em);
     --_ui-input-textarea-max-height: var(--ui-input-textarea-max-height, 24em);
     --_ui-input-textarea-line-height: var(--ui-input-textarea-line-height, 1.2857);
+    --_ui-input-textarea-grow-max-height: var(--ui-input-textarea-grow-max-height, 33vh);
     --_ui-input-inverted-color: var(--ui-input-inverted-color, var(--ui-text-inverted-color));
     --_ui-input-inverted-placeholder-color: var(
       --ui-input-inverted-placeholder-color,
@@ -225,6 +226,25 @@
     block-size: var(--_ui-input-textarea-height);
     min-block-size: var(--_ui-input-textarea-min-height);
     max-block-size: var(--_ui-input-textarea-max-height);
+  }
+  /*
+   * `grow` (epic `ui-gaps` P14):  as tall as its text, from `rows` lines (`--_textarea-rows`) to `max-rows`
+   * (`--_textarea-max`, the component's), else a third of the window;  then it scrolls.
+   * - `field-sizing: content` where the browser has it;  elsewhere the component measures (`fitHeight()`),
+   *   and these bounds cap what it writes.
+   * - A line is the field's own (`1lh`);  the padding and border are added round them (`border-box`).
+   */
+  .ui.input > textarea.grow {
+    --_textarea-chrome: calc(
+      2 * (var(--_ui-input-padding-block) + (var(--_ui-input-line-height) - 1em) / 2) + 2 *
+        var(--_ui-input-border-width)
+    );
+    field-sizing: content;
+    block-size: auto;
+    min-block-size: calc(var(--_textarea-rows, 1) * 1lh + var(--_textarea-chrome));
+    max-block-size: var(--_textarea-max, var(--_ui-input-textarea-grow-max-height));
+    overflow-y: auto;
+    resize: none;
   }
 }
 

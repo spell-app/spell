@@ -33,6 +33,7 @@
           <ui-menu icon class="site-page-links" aria-label="About this page">
             <ui-item
               link="https://github.com/spell-app/spell-ui/issues/new?title=ui-section%3A%20%20"
+              target="_blank"
               icon="bug"
               aria-label="Report a bug"
               title="Report a bug"
@@ -45,7 +46,7 @@
               >A section is a titled block of content that can close and keep its title in view.</ui-header
             >
           </ui-header>
-          <ui-docs-themes for="ui-section" show="theme" compact class="site-themes"></ui-docs-themes>
+          <ui-theme-menu show="theme" compact class="site-themes"></ui-theme-menu>
         </ui-container>
       </ui-segment>
 
@@ -236,7 +237,7 @@
 
               <ui-section id="examples-content-chevron-turn" label="Chevron turn" sticky collapsible dividing>
                 <ui-docs-example
-                  description="The chevron points down while open, and turns toward the title while closed.  Two tokens set the turns, as the code below shows:  `180deg` and `0deg` point it up while open and down while closed, as the Spell Brand theme does.  Right to left, each turn is negated."
+                  description="The chevron points down while open, and turns toward the title while closed.  Two tokens set the turns, as the code below shows:  `180deg` and `0deg` point it up while open and down while closed, as the Spell theme does.  Right to left, each turn is negated."
                 >
                   <div style="--ui-section-fold-icon-rotate: 180deg; --ui-section-fold-icon-folded-rotate: 0deg">
                     <ui-section label="Open" level="4" collapsible fold-icon="end" dividing>
@@ -795,8 +796,8 @@
             <ui-section id="theming-themes" label="Themes" sticky collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  Section is ours, not Fomantic's, so no Fomantic theme restyles it directly: the theme picker in the header changes
-                  the page around it, and the header, segment and accordion looks it borrows follow the colour scheme.
+                  Section is ours, not Fomantic's:  the theme menu in the header changes the page around it, and the
+                  header, segment and accordion looks it borrows follow the colour scheme.
                 </script>
               </ui-markdown>
             </ui-section>

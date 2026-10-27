@@ -33,6 +33,7 @@
           <ui-menu icon class="site-page-links" aria-label="About this page">
             <ui-item
               link="https://github.com/spell-app/spell-ui/issues/new?title=ui-theme-editor%3A%20%20"
+              target="_blank"
               icon="bug"
               aria-label="Report a bug"
               title="Report a bug"
@@ -43,7 +44,7 @@
             <ui-label color="yellow" size="small">In progress</ui-label>
             <ui-header>A theme editor makes a theme from an existing one:  its colours, fonts and shapes, live on real elements, then copied as a stylesheet or kept in the browser.</ui-header>
           </ui-header>
-          <ui-docs-themes for="ui-theme-editor" show="theme" compact class="site-themes"></ui-docs-themes>
+          <ui-theme-menu show="theme" compact class="site-themes"></ui-theme-menu>
         </ui-container>
       </ui-segment>
 
@@ -178,8 +179,8 @@
             <ui-section id="theming-themes" label="Themes" sticky collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  The theme picker above lists the Fomantic themes that restyle this component; the one in the
-                  header applies a theme to the whole site.
+                  The theme menu above picks the theme for every page of the site:  Spell, Glass, Fruity or Merlot,
+                  each restyling this component through its tokens.
                 </script>
               </ui-markdown>
             </ui-section>

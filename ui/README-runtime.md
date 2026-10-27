@@ -78,7 +78,7 @@ Your own code reads them the way the elements do, once the runtime is in:
 import { UI } from "spell-ui/core"
 
 const { themes, i18n } = await UI.load()
-await themes.apply("github") //             Fomantic's GitHub look, on the page and in every shadow root
+await themes.apply("merlot") //             Spell's Merlot theme, on the page and in every shadow root
 i18n.register("es", { close: "Cerrar" }) // every family's "Close", in Spanish
 ```
 

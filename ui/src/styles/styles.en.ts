@@ -19,7 +19,9 @@ import type {
   SchemeColor,
   SchemeRecipe,
   SemanticDefinition,
-  ShadowLayer
+  ShadowLayer,
+  ThemeColorTokens,
+  ThemeTree
 } from "./styles.types"
 
 ////////////////
@@ -456,3 +458,136 @@ export const shadows = {
     [0, 12, 28, -4, 0.22]
   ]
 } as const satisfies Record<string, readonly ShadowLayer[]>
+
+////////////////
+// ## The theme tree
+////////////////
+
+/**
+ * Every value a THEME sets, in nested groups:  the tree a theme file's values follow (`<name>.theme.json5`).
+ * - Each LEAF names the token it sets:  `surfaces > page` is `--ui-background`.
+ *   - A leaf `{ light, dark }` is a pair of tokens, one per scheme (`text > ink`, a hue's `base`):
+ *     a theme's pair of values is written to the two, not as one `light-dark()`.
+ * - Written ONCE, and read by everything that knows a theme's names (epic `debut` P18):
+ *   - `ThemeFile`, which turns a theme file into its sheet, and checks every name against this tree
+ *   - `theme.schema.json` (`yarn gen:styles`), so VS Code completes and checks a theme file
+ *   - `ThemeData`, the type of a theme file, worked out from it
+ *   - the Full Theme Builder's folds (epic `debut` P22)
+ * - Its top groups are the theming page's token tables' groups, by the same names (`FoundationTokens`):
+ *   - a theme sets only some of them, so `scheme`, `stacking` and `breakpoints` are left out
+ *   - except the table's `palette`, here `hues`:  a theme file's `palette` names the palette it borrows (`"apple"`)
+ * - The scales' own names come from the scales above, so a step added there is a leaf here too.
+ * - NOT here:  a family's own tokens (`--ui-menu-*`) and a theme's private ones (`--glass-blur`).
+ *   A theme file holds those in its two open groups, `components` and `own` (`ThemeFile`).
+ */
+export const themeTree = {
+  typography: {
+    size: "--ui-font-size",
+    family: { body: "--ui-font-family", heading: "--ui-font-family-heading", mono: "--ui-font-family-mono" },
+    weight: tokensFor(fontWeights, "--ui-font-weight-"),
+    "line-height": { body: "--ui-line-height", heading: "--ui-line-height-heading", tight: "--ui-line-height-tight" },
+    ratio: { heading: "--ui-heading-ratio", caption: "--ui-caption-ratio" }
+  },
+  sizes: tokensFor(sizes, "--ui-size-"),
+  spacing: tokensFor(spacing, "--ui-space-"),
+  radii: { default: "--ui-radius", ...tokensFor(radii, "--ui-radius-") },
+  text: {
+    ink: { light: "--ui-ink-on-light", dark: "--ui-ink-on-dark" },
+    body: "--ui-text-color",
+    strong: "--ui-text-dark",
+    muted: "--ui-text-muted",
+    light: "--ui-text-light",
+    unselected: "--ui-text-unselected",
+    hovered: "--ui-text-hovered",
+    pressed: "--ui-text-pressed",
+    selected: "--ui-text-selected",
+    disabled: "--ui-text-disabled"
+  },
+  surfaces: {
+    page: "--ui-background",
+    panel: "--ui-surface",
+    inset: "--ui-surface-muted",
+    strong: "--ui-surface-strong",
+    bar: "--ui-bar-background",
+    code: "--ui-code-background",
+    highlight: "--ui-highlight"
+  },
+  borders: {
+    width: "--ui-border-width",
+    color: "--ui-border-color",
+    strong: "--ui-border-color-strong",
+    internal: "--ui-border-color-internal",
+    selected: "--ui-border-color-selected",
+    "selected-strong": "--ui-border-color-selected-strong",
+    disabled: "--ui-border-color-disabled"
+  },
+  brand: {
+    primary: colorTokensFor("primary"),
+    secondary: colorTokensFor("secondary"),
+    accent: colorTokensFor("accent"),
+    link: { color: "--ui-link", hover: "--ui-link-hover" },
+    focus: {
+      width: "--ui-focus-width",
+      offset: "--ui-focus-offset",
+      color: "--ui-focus-color",
+      border: "--ui-focus-border"
+    }
+  },
+  semantic: {
+    positive: colorTokensFor("positive"),
+    negative: colorTokensFor("negative"),
+    info: colorTokensFor("info"),
+    warning: colorTokensFor("warning"),
+    success: colorTokensFor("success"),
+    error: colorTokensFor("error")
+  },
+  hues: {
+    red: colorTokensFor("red"),
+    orange: colorTokensFor("orange"),
+    yellow: colorTokensFor("yellow"),
+    olive: colorTokensFor("olive"),
+    green: colorTokensFor("green"),
+    teal: colorTokensFor("teal"),
+    blue: colorTokensFor("blue"),
+    violet: colorTokensFor("violet"),
+    purple: colorTokensFor("purple"),
+    pink: colorTokensFor("pink"),
+    brown: colorTokensFor("brown"),
+    grey: colorTokensFor("grey"),
+    black: colorTokensFor("black")
+  } satisfies Record<keyof typeof hues, ThemeColorTokens>,
+  shadows: { ink: "--ui-shadow-ink", ...tokensFor(shadows, "--ui-shadow-") },
+  motion: {
+    duration: tokensFor(durations, "--ui-duration-"),
+    ease: { ...tokensFor(easings, "--ui-ease-"), default: "--ui-ease" },
+    "hover-delay": "--ui-hover-delay"
+  }
+} as const satisfies ThemeTree
+
+/** Scale `scale`'s steps, each the token `<prefix><step>`:  `tokensFor(sizes, "--ui-size-")`. */
+function tokensFor<Scale extends object>(scale: Scale, prefix: string): Record<keyof Scale, string> {
+  return Object.fromEntries(Object.keys(scale).map((step) => [step, `${prefix}${step}`])) as Record<keyof Scale, string>
+}
+
+/**
+ * A colour's leaves (a hue, a brand alias, a semantic colour):  the colour itself, its base per scheme, and every
+ * role `colors.css` works out from it, which a theme may set by hand instead.
+ */
+function colorTokensFor(name: string): ThemeColorTokens {
+  const token = (suffix: string) => `--ui-${name}${suffix}`
+  return {
+    color: token(""),
+    base: { light: token("-on-light"), dark: token("-on-dark") },
+    on: token("-on"),
+    text: token("-text"),
+    header: token("-header"),
+    border: token("-border"),
+    background: token("-background"),
+    inverted: token("-inverted"),
+    "inverted-on": token("-inverted-on"),
+    hover: token("-hover"),
+    focus: token("-focus"),
+    down: token("-down"),
+    active: token("-active")
+  }
+}

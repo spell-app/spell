@@ -75,25 +75,6 @@ describe("SiteDataBuilder.build()", () => {
     const radius = data.families["ui-button"]!.tokens.find((token) => token.name === "--ui-button-radius")!
     expect(radius.type).toBe("length")
   }, 60_000)
-
-  it("lists every theme sheet with its title and the families it touches", async () => {
-    const { data } = await new SiteDataBuilder().build()
-    const theme = (name: string) => data.themes.find((entry) => entry.name === name)!
-    expect(data.themes.map((entry) => entry.name)).toContain("classic")
-    expect(theme("bootstrap3")).toEqual({
-      name: "bootstrap3",
-      title: "Bootstrap 3",
-      families: ["ui-button"],
-      global: false
-    })
-    expect(theme("famfamfam")).toBeUndefined()
-    expect(theme("timeline").families).toEqual(["ui-feed"])
-    expect(theme("github")).toMatchObject({
-      families: expect.arrayContaining(["ui-button", "ui-menu", "ui-table"]),
-      global: true
-    })
-    expect(theme("systemfont")).toMatchObject({ families: [], global: true })
-  }, 60_000)
 })
 
 describe("`yarn site:data`'s save (`writeOrCheck()`)", () => {

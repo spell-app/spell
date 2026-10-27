@@ -44,7 +44,6 @@ export const actionVocabulary = {
   ],
   parts: [
     ...itemVocabulary.parts,
-    { name: "title", description: "The action's title, before its keys." },
     { name: "shortcut", description: "The key caps of its shortcut, at the end:  a `<kbd>` each." }
   ],
   texts: [

@@ -325,11 +325,6 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
     skeleton: { width: "16em", height: "2.25em" },
     attributes: ["base", "page", "shortcuts", "placeholder", "size"]
   },
-  "ui-docs-themes": {
-    folder: "ui-docs-themes",
-    skeleton: { display: "inline", width: "5em", height: "2.25em" },
-    attributes: ["for", "show", "size", "inverted", "compact"]
-  },
   "ui-docs-toc": {
     folder: "ui-docs-toc",
     skeleton: {
@@ -583,6 +578,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "width",
       "height",
       "loading",
+      "zoom",
       "link"
     ]
   },
@@ -762,6 +758,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "align",
       "equal",
       "items",
+      "shrinkable",
       "interactive"
     ]
   },
@@ -1426,12 +1423,19 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "minlength",
       "maxlength",
       "rows",
+      "grow",
+      "max-rows",
       "autocomplete",
       "rules"
     ],
     formControl: true
   },
   "ui-theme-editor": { folder: "ui-theme-editor", skeleton: { height: "30em" }, attributes: ["base", "value"] },
+  "ui-theme-menu": {
+    folder: "ui-theme-menu",
+    skeleton: { display: "inline", width: "5em", height: "2.25em" },
+    attributes: ["show", "size", "inverted", "compact"]
+  },
   "ui-title": { folder: "ui-parts", attributes: ["link"] },
   "ui-toast": {
     folder: "ui-toast",
@@ -1476,6 +1480,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "align",
       "equal",
       "items",
+      "shrinkable",
       "interactive"
     ]
   },
@@ -1499,5 +1504,6 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
     folder: "ui-video",
     attributes: ["src", "autoplay", "muted", "loop", "poster", "controls", "captions", "ratio"]
   },
-  "ui-visibility": { folder: "ui-visibility", attributes: ["once", "continuous", "offset", "type", "duration"] }
+  "ui-visibility": { folder: "ui-visibility", attributes: ["once", "continuous", "offset", "type", "duration"] },
+  "ui-zoom": { folder: "ui-zoom", attributes: ["max-width", "max-height", "shrink", "open", "src", "alt"] }
 }

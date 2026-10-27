@@ -389,6 +389,15 @@
     cursor: default;
     opacity: var(--_ui-image-disabled-opacity);
   }
+
+  /* `zoom` (epic `ui-gaps` P14):  a click shows it full size, so the zoom-in cursor;  a focus ring, as a button's */
+  :host([zoom]:not([disabled])) img {
+    cursor: zoom-in;
+  }
+  :host([zoom]) img:focus-visible {
+    outline: 2px solid var(--ui-focus-color, Highlight);
+    outline-offset: 2px;
+  }
 }
 
 /*******************************

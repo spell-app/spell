@@ -59,7 +59,7 @@ describe("<ui-theme-editor> starting", () => {
     // in a test page, the dark sample's label reads its own shadow root's default colours (white on #3faff3),
     // where a served page shows fruity's (checked by eye on screenshots)
     inner(host, ".sample.ui-dark").hidden = true
-    await vi.waitFor(() => expect(token("--fruity-glass")).not.toBe(""))
+    await vi.waitFor(() => expect(token("--glass-surface")).not.toBe(""))
     expect(host.theme).toEqual({ name: "My theme", base: "fruity" })
     expect(UI.themes.current).toBe("fruity")
     expect(host.css).toContain("No changes yet:  this is fruity as it is.")
@@ -160,6 +160,13 @@ describe("<ui-theme-editor> sheet", () => {
     expect(token("--ui-primary")).toBe(token("--ui-green"))
   })
 
+  it("a theme kept on a base under its old name opens on its new one:  Studio as Merlot", async () => {
+    SavedTheme.save({ name: "Kept", base: "studio", primary: "teal" }, "/* kept */")
+    expect(await SavedTheme.restore()).toBe(true)
+    expect(UI.themes.current).toBe("merlot")
+    expect(SavedTheme.choices?.base).toBe("merlot")
+  })
+
   it("Copy CSS copies the stylesheet, and sends `ui-copied`", async () => {
     const writeText = vi.spyOn(navigator.clipboard, "writeText").mockResolvedValue(undefined)
     const host = await editor(`<ui-theme-editor value='{"depth": "flat"}'></ui-theme-editor>`)
@@ -196,9 +203,13 @@ describe("ThemeSheet", () => {
     expect(sheet.css).not.toContain("--ui-primary")
   })
 
-  it("writes fruity's glass only on fruity", () => {
-    const on = (base: string) => new ThemeSheet({ choices: { name: "x", base, glass: "solid" }, text }).css
-    expect(on("fruity")).toContain("--fruity-glass")
-    expect(on("spell")).not.toContain("--fruity-glass")
+  it("writes the glass only on a glass theme (Glass, Fruity), the wallpaper only on Fruity", () => {
+    const on = (base: string) =>
+      new ThemeSheet({ choices: { name: "x", base, glass: "solid", background: "teal" }, text }).css
+    expect(on("glass")).toContain("--glass-surface")
+    expect(on("fruity")).toContain("--glass-surface")
+    expect(on("spell")).not.toContain("--glass-surface")
+    expect(on("fruity")).toContain("--glass-wallpaper")
+    expect(on("glass")).not.toContain("--glass-wallpaper")
   })
 })

@@ -28,8 +28,7 @@ export const DATA: SiteDataFile = {
     "ui-label": family("ui-label", "Label"),
     "ui-modal": family("ui-modal", "Modal")
   },
-  foundation: [],
-  themes: []
+  foundation: []
 }
 
 /** The test search file:  the overview, Theming, Button's page and Divider's. */

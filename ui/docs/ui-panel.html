@@ -33,6 +33,7 @@
           <ui-menu icon class="site-page-links" aria-label="About this page">
             <ui-item
               link="https://github.com/spell-app/spell-ui/issues/new?title=ui-panel%3A%20%20"
+              target="_blank"
               icon="bug"
               aria-label="Report a bug"
               title="Report a bug"
@@ -42,7 +43,7 @@
             Panel
             <ui-header>A panel is an inspector:  a tinted box of fields under a header band, with sub-head bands that open and close.</ui-header>
           </ui-header>
-          <ui-docs-themes for="ui-panel" show="theme" compact class="site-themes"></ui-docs-themes>
+          <ui-theme-menu show="theme" compact class="site-themes"></ui-theme-menu>
         </ui-container>
       </ui-segment>
 
@@ -324,9 +325,8 @@
             <ui-section id="theming-themes" label="Themes" sticky collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  Panel is ours, not Fomantic's, so no Fomantic theme restyles it directly: it follows the theme's
-                  hues, surfaces and colour scheme. `spell-brand` (the brand pages' theme) adds the `accent` hue, the
-                  brand's soft shadow and the aubergine info tip.
+                  Panel is ours, not Fomantic's:  it follows the theme's hues, surfaces and colour scheme.  The Spell
+                  theme (`spell`) adds the `accent` hue, the brand's soft shadow and the aubergine info tip.
                 </script>
               </ui-markdown>
             </ui-section>

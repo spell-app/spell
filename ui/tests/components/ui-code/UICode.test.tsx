@@ -146,17 +146,23 @@ describe("<ui-code> behaviour", () => {
     expect(codeOf(host).querySelector(".hljs-keyword")!.textContent).toBe("HELLO")
   })
 
-  it("copies the code", async () => {
+  it("copies the code, from an icon button named by its words", async () => {
     const writeText = vi.spyOn(navigator.clipboard, "writeText").mockResolvedValue()
     const host = await code(`<ui-code language="text" copy>copy me</ui-code>`)
+    const button = host.shadowRoot!.querySelector<HTMLButtonElement>("[part~=copy]")!
+    expect({ name: button.getAttribute("aria-label"), tip: button.title, text: button.textContent }).toEqual({
+      name: "Copy",
+      tip: "Copy",
+      text: ""
+    })
     const onCopy = vi.fn()
     host.addEventListener("ui-copied", onCopy)
-    host.shadowRoot!.querySelector<HTMLButtonElement>("[part~=copy]")!.click()
+    button.click()
     await vi.waitFor(() => expect(onCopy).toHaveBeenCalled())
     expect(writeText).toHaveBeenCalledWith("copy me")
     await ElementFixture.tick()
     expect(host.matches(":state(copied)")).toBe(true)
-    expect(host.shadowRoot!.querySelector("[part~=copy]")!.textContent).toBe("Copied")
+    expect(button.getAttribute("aria-label")).toBe("Copied")
     writeText.mockRestore()
   })
 

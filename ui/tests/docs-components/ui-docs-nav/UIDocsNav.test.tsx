@@ -76,8 +76,7 @@ const DATA: SiteDataFile = {
     "ui-input": family("ui-input"),
     "ui-checkbox": family("ui-checkbox")
   },
-  foundation: [],
-  themes: []
+  foundation: []
 }
 
 /** A blob URL serving `data` as the site's data file. */
