@@ -6,7 +6,7 @@
  *   - Only their DIRECT children are read:  headers inside an example, a grid or a demo are content, never sections.
  * - Within a root:
  *   - a level 2 `<ui-header>` and everything after it (until the next one) becomes
- *     `<ui-section id="<tab>-<slug>" label="<text>" sticky collapsible dividing>`
+ *     `<ui-section id="<tab>-<slug>" label="<text>" sticky="stack" collapsible dividing>`
  *   - a level 3 `<ui-header>` becomes a section nested in the level 2 one, the same way
  *   - a `<ui-example heading="X">` becomes a section nested in the innermost one, `id="<parent id>-<slug(X)>"`,
  *     holding the example WITHOUT its `heading`
@@ -68,7 +68,7 @@ export class SiteSections {
   static readonly WIDTH = 120
 
   /** Attributes every page section gets after `id` and `label`. */
-  static readonly FLAGS = ["sticky", "collapsible", "dividing"]
+  static readonly FLAGS = ['sticky="stack"', "collapsible", "dividing"]
 
   /** A section's title attribute and slot:  `label`. */
   static readonly SECTION_TITLE = ["label"]

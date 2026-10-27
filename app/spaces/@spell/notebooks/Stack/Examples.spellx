@@ -5,18 +5,16 @@
 	</>
 	<stack-tab-bar showing="examples"/>
 	<section>
-		<html>
-			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-				<ui-item link="#types">Types</>
-				<ui-item link="#variations">Variations</>
-			</>
+		<menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#types">Types</>
+			<item link="#variations">Variations</>
 		</>
 	</>
 
 	<!--
 		EXAMPLES:  Fomantic's page, section by section, in its order (Types, Content, States, Variations,
 		Groups ...).  Rules, the class-grammar mappings, gaps:  epics/spell-ui-pages/PAGES.md.
-		- A section:  `<ui-section id="examples-types" label="Types" sticky collapsible dividing>` around
+		- A section:  `<ui-section id="examples-types" label="Types" sticky="stack" collapsible dividing>` around
 		  its examples;  ids spell out the nesting (`<tab>-<section>-<example>`, lowercase kebab of the headers).
 		- An example:  its own nested section (`label` = the example's name) around
 		  `<ui-example description="...">` and the live markup;  the markup IS the code shown.  A richer
@@ -28,7 +26,7 @@
 		  shows in its code).
 	-->
 	<section label="Types">
-		<section label="Stack" sticky collapsible dividing>
+		<section label="Stack" sticky="stack" collapsible dividing>
 			<example description="A column, its children 1em apart.  No look of its own:  the segments are the children.">
 				<stack>
 					<segment>First</segment>
@@ -38,7 +36,7 @@
 			</example>
 		</>
 
-		<section label="Row" sticky collapsible dividing>
+		<section label="Row" sticky="stack" collapsible dividing>
 			<example description="`direction=\"horizontal\"`:  a row, its children centred on its middle.">
 				<stack direction="horizontal">
 					<icon name="inbox" size="large"/>
@@ -48,7 +46,7 @@
 			</example>
 		</>
 
-		<section label="Wrapping row" sticky collapsible dividing>
+		<section label="Wrapping row" sticky="stack" collapsible dividing>
 			<example description="`wrap`:  a row that wraps onto the next line, for tags or buttons (Web Awesome's cluster).  Narrow the window to see it wrap.">
 				<stack direction="horizontal" wrap spacing="sm">
 					<label>Design</label>
@@ -63,7 +61,7 @@
 	</>
 
 	<section label="Variations">
-		<section label="Spacing" sticky collapsible dividing>
+		<section label="Spacing" sticky="stack" collapsible dividing>
 			<example description="`spacing`:  `none`, `xs`, `sm`, `md` (the default), `lg`, `xl`.">
 				<stack spacing="lg">
 					<stack direction="horizontal" spacing="none">
@@ -82,7 +80,7 @@
 			</example>
 		</>
 
-		<section label="One left, one right" sticky collapsible dividing>
+		<section label="One left, one right" sticky="stack" collapsible dividing>
 			<example description="`justify=\"between\"`:  the first child at the start, the last at the end.  What `floated=\"right\"` used to do.">
 				<stack direction="horizontal" justify="between">
 					<header level="4">Inbox</header>
@@ -91,7 +89,7 @@
 			</example>
 		</>
 
-		<section label="Centred" sticky collapsible dividing>
+		<section label="Centred" sticky="stack" collapsible dividing>
 			<example description="`align=\"center\"`:  a column's children centred across it.">
 				<stack align="center" spacing="sm">
 					<icon name="inbox" size="huge"/>

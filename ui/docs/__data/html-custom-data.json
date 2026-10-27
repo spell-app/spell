@@ -5574,6 +5574,236 @@
       ]
     },
     {
+      "name": "ui-color-chip",
+      "description": {
+        "kind": "markdown",
+        "value": "A colour chip shows one colour, as a small rounded square:  read-only, its value in its tooltip.\n\nAlso known as:  color chip, swatch, colour sample, color preview, color dot."
+      },
+      "attributes": [
+        {
+          "name": "color",
+          "description": {
+            "kind": "markdown",
+            "value": "The colour:  any CSS colour (`#7c55e6`, `oklch(...)`, `var(--ui-primary)`, `light-dark(...)`).\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "scheme",
+          "description": {
+            "kind": "markdown",
+            "value": "The scheme a `light-dark()` colour resolves in:  the page's (`auto`), `light` or `dark`.\n\nTakes:  `auto` · `light` · `dark`\nDefault:  `auto`"
+          },
+          "values": [
+            {
+              "name": "auto"
+            },
+            {
+              "name": "light"
+            },
+            {
+              "name": "dark"
+            }
+          ]
+        },
+        {
+          "name": "label",
+          "description": {
+            "kind": "markdown",
+            "value": "What the colour is, for a screen reader and the tooltip.  None:  the colour itself.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "disabled",
+          "description": {
+            "kind": "markdown",
+            "value": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "loading",
+          "description": {
+            "kind": "markdown",
+            "value": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "visible",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible=\"false\"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "animation",
+          "description": {
+            "kind": "markdown",
+            "value": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.\n\nTakes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`"
+          },
+          "values": [
+            {
+              "name": "fade"
+            },
+            {
+              "name": "fade up"
+            },
+            {
+              "name": "fade down"
+            },
+            {
+              "name": "fade left"
+            },
+            {
+              "name": "fade right"
+            },
+            {
+              "name": "scale"
+            },
+            {
+              "name": "zoom"
+            },
+            {
+              "name": "drop"
+            },
+            {
+              "name": "browse"
+            },
+            {
+              "name": "browse right"
+            },
+            {
+              "name": "fly"
+            },
+            {
+              "name": "fly up"
+            },
+            {
+              "name": "fly down"
+            },
+            {
+              "name": "fly left"
+            },
+            {
+              "name": "fly right"
+            },
+            {
+              "name": "slide"
+            },
+            {
+              "name": "slide up"
+            },
+            {
+              "name": "slide down"
+            },
+            {
+              "name": "slide left"
+            },
+            {
+              "name": "slide right"
+            },
+            {
+              "name": "swing"
+            },
+            {
+              "name": "swing up"
+            },
+            {
+              "name": "swing down"
+            },
+            {
+              "name": "swing left"
+            },
+            {
+              "name": "swing right"
+            },
+            {
+              "name": "horizontal flip"
+            },
+            {
+              "name": "vertical flip"
+            },
+            {
+              "name": "flash"
+            },
+            {
+              "name": "shake"
+            },
+            {
+              "name": "bounce"
+            },
+            {
+              "name": "tada"
+            },
+            {
+              "name": "pulse"
+            },
+            {
+              "name": "jiggle"
+            },
+            {
+              "name": "glow"
+            },
+            {
+              "name": "none"
+            }
+          ]
+        },
+        {
+          "name": "link",
+          "description": {
+            "kind": "markdown",
+            "value": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "target",
+          "description": {
+            "kind": "markdown",
+            "value": "Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "font",
+          "description": {
+            "kind": "markdown",
+            "value": "How its letters look, several words at once:  `bold`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript` (`font=\"bold italic\"`).  `<ui-text>` draws each as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it;  every other element shows the look alone.\n\nTakes:  space-separated:  `bold` · `italic` · `underline` · `strikethrough` · `code` · `highlight` · `subscript` · `superscript`"
+          },
+          "values": [
+            {
+              "name": "bold"
+            },
+            {
+              "name": "italic"
+            },
+            {
+              "name": "underline"
+            },
+            {
+              "name": "strikethrough"
+            },
+            {
+              "name": "code"
+            },
+            {
+              "name": "highlight"
+            },
+            {
+              "name": "subscript"
+            },
+            {
+              "name": "superscript"
+            }
+          ]
+        },
+        {
+          "name": "tooltip",
+          "description": {
+            "kind": "markdown",
+            "value": "Its tooltip:  the browser's own, written as the element's `title`.\n\nTakes:  text"
+          }
+        }
+      ]
+    },
+    {
       "name": "ui-column",
       "description": {
         "kind": "markdown",
@@ -21738,8 +21968,13 @@
           "name": "sticky",
           "description": {
             "kind": "markdown",
-            "value": "The title bar sticks while the section is on screen;  a sticky section inside another sticks just below its title.\n\nTakes:  flag (present / absent)"
-          }
+            "value": "The title bar sticks while the section is on screen;  a sticky section inside another sticks just below its title.  `sticky=\"stack\"`:  the titles read as one stack of rounded bars, as the docs pages' sections do -- each level a step further in (`--ui-section-stack-reach`, `--ui-section-stack-step`), a section's first nested title tucked square under its own, a nested title stuck under its parent's a heavy round (the theme's large radius), and closed sections one after another flush, ONE group, round only at its top and bottom.  A plain `sticky` section right inside a stacked one joins its stack (not through another element, an example's).\n\nTakes:  flag, or `stack`"
+          },
+          "values": [
+            {
+              "name": "stack"
+            }
+          ]
         },
         {
           "name": "offset",
@@ -21859,7 +22094,7 @@
           "name": "appearance",
           "description": {
             "kind": "markdown",
-            "value": "The look, several words at once:  `bordered` (a box around the section, as a segment), `styled` (boxed as a styled accordion:  a tinted title bar over padded content), `raised` (with a box:  lifted with a shadow), `basic` (no box, rule or tint, whatever else is set).  Old names:  `bordered`, `styled`, `raised`, `basic`.\n\nTakes:  space-separated:  `bordered` · `styled` · `raised` · `basic`"
+            "value": "The look, several words at once:  `bordered` (a box around the section, as a segment), `styled` (boxed as a styled accordion:  a tinted title bar over padded content), `raised` (with a box:  lifted with a shadow), `basic` (no box, rule or tint, whatever else is set), `drawer` (the title a raised bar, the content a tinted panel attached under it that rolls open and closed, as an example's code under its demo).  Old names:  `bordered`, `styled`, `raised`, `basic`.\n\nTakes:  space-separated:  `bordered` · `styled` · `raised` · `basic` · `drawer`"
           },
           "values": [
             {
@@ -21873,6 +22108,9 @@
             },
             {
               "name": "basic"
+            },
+            {
+              "name": "drawer"
             }
           ]
         },
@@ -24832,8 +25070,13 @@
           "name": "sticky",
           "description": {
             "kind": "markdown",
-            "value": "The title bar sticks while the section is on screen;  a sticky section inside another sticks just below its title.\n\nTakes:  flag (present / absent)"
-          }
+            "value": "The title bar sticks while the section is on screen;  a sticky section inside another sticks just below its title.  `sticky=\"stack\"`:  the titles read as one stack of rounded bars, as the docs pages' sections do -- each level a step further in (`--ui-section-stack-reach`, `--ui-section-stack-step`), a section's first nested title tucked square under its own, a nested title stuck under its parent's a heavy round (the theme's large radius), and closed sections one after another flush, ONE group, round only at its top and bottom.  A plain `sticky` section right inside a stacked one joins its stack (not through another element, an example's).\n\nTakes:  flag, or `stack`"
+          },
+          "values": [
+            {
+              "name": "stack"
+            }
+          ]
         },
         {
           "name": "offset",
@@ -24920,7 +25163,7 @@
           "name": "appearance",
           "description": {
             "kind": "markdown",
-            "value": "The look, several words at once:  `bordered` (a box around the section, as a segment), `styled` (boxed as a styled accordion:  a tinted title bar over padded content), `raised` (with a box:  lifted with a shadow), `basic` (no box, rule or tint, whatever else is set).  Old names:  `bordered`, `styled`, `raised`, `basic`.\n\nTakes:  space-separated:  `bordered` · `styled` · `raised` · `basic`"
+            "value": "The look, several words at once:  `bordered` (a box around the section, as a segment), `styled` (boxed as a styled accordion:  a tinted title bar over padded content), `raised` (with a box:  lifted with a shadow), `basic` (no box, rule or tint, whatever else is set), `drawer` (the title a raised bar, the content a tinted panel attached under it that rolls open and closed, as an example's code under its demo).  Old names:  `bordered`, `styled`, `raised`, `basic`.\n\nTakes:  space-separated:  `bordered` · `styled` · `raised` · `basic` · `drawer`"
           },
           "values": [
             {
@@ -24934,6 +25177,9 @@
             },
             {
               "name": "basic"
+            },
+            {
+              "name": "drawer"
             }
           ]
         },
@@ -25354,8 +25600,13 @@
           "name": "sticky",
           "description": {
             "kind": "markdown",
-            "value": "The title bar sticks while the section is on screen;  a sticky section inside another sticks just below its title.\n\nTakes:  flag (present / absent)"
-          }
+            "value": "The title bar sticks while the section is on screen;  a sticky section inside another sticks just below its title.  `sticky=\"stack\"`:  the titles read as one stack of rounded bars, as the docs pages' sections do -- each level a step further in (`--ui-section-stack-reach`, `--ui-section-stack-step`), a section's first nested title tucked square under its own, a nested title stuck under its parent's a heavy round (the theme's large radius), and closed sections one after another flush, ONE group, round only at its top and bottom.  A plain `sticky` section right inside a stacked one joins its stack (not through another element, an example's).\n\nTakes:  flag, or `stack`"
+          },
+          "values": [
+            {
+              "name": "stack"
+            }
+          ]
         },
         {
           "name": "offset",
@@ -25475,7 +25726,7 @@
           "name": "appearance",
           "description": {
             "kind": "markdown",
-            "value": "The look, several words at once:  `bordered` (a box around the section, as a segment), `styled` (boxed as a styled accordion:  a tinted title bar over padded content), `raised` (with a box:  lifted with a shadow), `basic` (no box, rule or tint, whatever else is set).  Old names:  `bordered`, `styled`, `raised`, `basic`.\n\nTakes:  space-separated:  `bordered` · `styled` · `raised` · `basic`"
+            "value": "The look, several words at once:  `bordered` (a box around the section, as a segment), `styled` (boxed as a styled accordion:  a tinted title bar over padded content), `raised` (with a box:  lifted with a shadow), `basic` (no box, rule or tint, whatever else is set), `drawer` (the title a raised bar, the content a tinted panel attached under it that rolls open and closed, as an example's code under its demo).  Old names:  `bordered`, `styled`, `raised`, `basic`.\n\nTakes:  space-separated:  `bordered` · `styled` · `raised` · `basic` · `drawer`"
           },
           "values": [
             {
@@ -25489,6 +25740,9 @@
             },
             {
               "name": "basic"
+            },
+            {
+              "name": "drawer"
             }
           ]
         },
@@ -29335,8 +29589,13 @@
           "name": "sticky",
           "description": {
             "kind": "markdown",
-            "value": "The title bar sticks while the section is on screen;  a sticky section inside another sticks just below its title.\n\nTakes:  flag (present / absent)"
-          }
+            "value": "The title bar sticks while the section is on screen;  a sticky section inside another sticks just below its title.  `sticky=\"stack\"`:  the titles read as one stack of rounded bars, as the docs pages' sections do -- each level a step further in (`--ui-section-stack-reach`, `--ui-section-stack-step`), a section's first nested title tucked square under its own, a nested title stuck under its parent's a heavy round (the theme's large radius), and closed sections one after another flush, ONE group, round only at its top and bottom.  A plain `sticky` section right inside a stacked one joins its stack (not through another element, an example's).\n\nTakes:  flag, or `stack`"
+          },
+          "values": [
+            {
+              "name": "stack"
+            }
+          ]
         },
         {
           "name": "offset",
@@ -29456,7 +29715,7 @@
           "name": "appearance",
           "description": {
             "kind": "markdown",
-            "value": "The look, several words at once:  `bordered` (a box around the section, as a segment), `styled` (boxed as a styled accordion:  a tinted title bar over padded content), `raised` (with a box:  lifted with a shadow), `basic` (no box, rule or tint, whatever else is set).  Old names:  `bordered`, `styled`, `raised`, `basic`.\n\nTakes:  space-separated:  `bordered` · `styled` · `raised` · `basic`"
+            "value": "The look, several words at once:  `bordered` (a box around the section, as a segment), `styled` (boxed as a styled accordion:  a tinted title bar over padded content), `raised` (with a box:  lifted with a shadow), `basic` (no box, rule or tint, whatever else is set), `drawer` (the title a raised bar, the content a tinted panel attached under it that rolls open and closed, as an example's code under its demo).  Old names:  `bordered`, `styled`, `raised`, `basic`.\n\nTakes:  space-separated:  `bordered` · `styled` · `raised` · `basic` · `drawer`"
           },
           "values": [
             {
@@ -29470,6 +29729,9 @@
             },
             {
               "name": "basic"
+            },
+            {
+              "name": "drawer"
             }
           ]
         },
@@ -37085,14 +37347,14 @@
       "name": "ui-theme-editor",
       "description": {
         "kind": "markdown",
-        "value": "A theme editor makes a theme from an existing one:  pick its colours, fonts and shapes, watch real elements follow in light and dark, then copy the stylesheet or keep it in the browser.\n\nAlso known as:  theme editor, theme builder, theme creator, theme generator, style editor, design tokens.\n\n**Events:**  `ui-changed`, `ui-copied`, `ui-saved`"
+        "value": "A theme editor makes a theme from an existing one:  pick its colours, fonts and shapes, or set any token by hand, watch real pages follow in light and dark, then copy the theme file or keep it in the browser.\n\nAlso known as:  theme editor, theme builder, theme bench, theme creator, theme generator, style editor, design tokens, token tuner.\n\n**Events:**  `ui-changed`, `ui-copied`, `ui-saved`"
       },
       "attributes": [
         {
           "name": "base",
           "description": {
             "kind": "markdown",
-            "value": "The theme to start from (`fruity`, `spell` ...).  None:  the page's own theme, else `fruity`.  Picking another one in the editor applies it to the page.\n\nTakes:  text"
+            "value": "The theme to start from (`fruity`, `spell` ...).  None:  the page's own theme, else `fruity`.\n\nTakes:  text"
           }
         },
         {
@@ -37365,6 +37627,211 @@
             "value": "With `show=\"theme\"`:  the dropdown is an icon-only palette button, its text (`Spell theme`) its tooltip and name, for a masthead's row of icon buttons.\n\nTakes:  flag (present / absent)"
           }
         },
+        {
+          "name": "disabled",
+          "description": {
+            "kind": "markdown",
+            "value": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "loading",
+          "description": {
+            "kind": "markdown",
+            "value": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "visible",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible=\"false\"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "animation",
+          "description": {
+            "kind": "markdown",
+            "value": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.\n\nTakes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`"
+          },
+          "values": [
+            {
+              "name": "fade"
+            },
+            {
+              "name": "fade up"
+            },
+            {
+              "name": "fade down"
+            },
+            {
+              "name": "fade left"
+            },
+            {
+              "name": "fade right"
+            },
+            {
+              "name": "scale"
+            },
+            {
+              "name": "zoom"
+            },
+            {
+              "name": "drop"
+            },
+            {
+              "name": "browse"
+            },
+            {
+              "name": "browse right"
+            },
+            {
+              "name": "fly"
+            },
+            {
+              "name": "fly up"
+            },
+            {
+              "name": "fly down"
+            },
+            {
+              "name": "fly left"
+            },
+            {
+              "name": "fly right"
+            },
+            {
+              "name": "slide"
+            },
+            {
+              "name": "slide up"
+            },
+            {
+              "name": "slide down"
+            },
+            {
+              "name": "slide left"
+            },
+            {
+              "name": "slide right"
+            },
+            {
+              "name": "swing"
+            },
+            {
+              "name": "swing up"
+            },
+            {
+              "name": "swing down"
+            },
+            {
+              "name": "swing left"
+            },
+            {
+              "name": "swing right"
+            },
+            {
+              "name": "horizontal flip"
+            },
+            {
+              "name": "vertical flip"
+            },
+            {
+              "name": "flash"
+            },
+            {
+              "name": "shake"
+            },
+            {
+              "name": "bounce"
+            },
+            {
+              "name": "tada"
+            },
+            {
+              "name": "pulse"
+            },
+            {
+              "name": "jiggle"
+            },
+            {
+              "name": "glow"
+            },
+            {
+              "name": "none"
+            }
+          ]
+        },
+        {
+          "name": "link",
+          "description": {
+            "kind": "markdown",
+            "value": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "target",
+          "description": {
+            "kind": "markdown",
+            "value": "Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "font",
+          "description": {
+            "kind": "markdown",
+            "value": "How its letters look, several words at once:  `bold`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript` (`font=\"bold italic\"`).  `<ui-text>` draws each as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it;  every other element shows the look alone.\n\nTakes:  space-separated:  `bold` · `italic` · `underline` · `strikethrough` · `code` · `highlight` · `subscript` · `superscript`"
+          },
+          "values": [
+            {
+              "name": "bold"
+            },
+            {
+              "name": "italic"
+            },
+            {
+              "name": "underline"
+            },
+            {
+              "name": "strikethrough"
+            },
+            {
+              "name": "code"
+            },
+            {
+              "name": "highlight"
+            },
+            {
+              "name": "subscript"
+            },
+            {
+              "name": "superscript"
+            }
+          ]
+        },
+        {
+          "name": "tooltip",
+          "description": {
+            "kind": "markdown",
+            "value": "Its tooltip:  the browser's own, written as the element's `title`.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "label",
+          "description": {
+            "kind": "markdown",
+            "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
+          }
+        }
+      ]
+    },
+    {
+      "name": "ui-theme-token",
+      "description": {
+        "kind": "markdown",
+        "value": "A theme token is one token of a theme being made:  where its value comes from, its value as colour chips in light and dark, and, under its name, a drawer to change it.\n\nAlso known as:  theme token, design token, token row, css variable, custom property editor.\n\n**Events:**  `ui-changed`, `ui-command`"
+      },
+      "attributes": [
         {
           "name": "disabled",
           "description": {

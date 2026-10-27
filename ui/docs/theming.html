@@ -56,7 +56,7 @@
             theme gallery (`<ui-theme-menu>` over sample components), the foundation's token tables (`<ui-docs-tokens global>`)
             and the porting recipe from `guides/ui/notes/theming.md`.
           -->
-          <ui-section id="preface" label="Preface" sticky collapsible dividing>
+          <ui-section id="preface" label="Preface" sticky="stack" collapsible dividing>
             <ui-markdown>
               <script type="text/markdown">
                 Spell UI styles everything from CSS custom properties, the **tokens**. They inherit into every component's shadow
@@ -75,7 +75,7 @@
             </ui-markdown>
           </ui-section>
 
-          <ui-section id="theme-gallery" label="Theme gallery" sticky collapsible dividing>
+          <ui-section id="theme-gallery" label="Theme gallery" sticky="stack" collapsible dividing>
             <ui-markdown>
               <script type="text/markdown">
                 Pick a theme and a colour scheme: the whole page follows, these samples included, and the choice is remembered on
@@ -87,7 +87,7 @@
               <ui-theme-menu></ui-theme-menu>
             </ui-segment>
 
-            <ui-section id="theme-gallery-buttons" label="Buttons" sticky collapsible dividing>
+            <ui-section id="theme-gallery-buttons" label="Buttons" sticky="stack" collapsible dividing>
               <ui-example
                 description="Buttons, in the theme picked above."
               >
@@ -119,7 +119,7 @@
               </ui-example>
             </ui-section>
 
-            <ui-section id="theme-gallery-headers" label="Headers" sticky collapsible dividing>
+            <ui-section id="theme-gallery-headers" label="Headers" sticky="stack" collapsible dividing>
               <ui-example description="Headers, in the theme picked above:  each theme sets its own heading font.">
                 <ui-header level="2">
                   Account Settings
@@ -128,7 +128,7 @@
               </ui-example>
             </ui-section>
 
-            <ui-section id="theme-gallery-form-controls" label="Form controls" sticky collapsible dividing>
+            <ui-section id="theme-gallery-form-controls" label="Form controls" sticky="stack" collapsible dividing>
               <ui-example
                 description="Inputs, dropdowns, checkboxes and a form, in the theme picked above."
               >
@@ -165,7 +165,7 @@
               </ui-example>
             </ui-section>
 
-            <ui-section id="theme-gallery-menus" label="Menus" sticky collapsible dividing>
+            <ui-section id="theme-gallery-menus" label="Menus" sticky="stack" collapsible dividing>
               <ui-example description="Menus, in the theme picked above.">
                 <ui-menu aria-label="Gallery menu">
                   <ui-item link="#theme-gallery" selected>Editorials</ui-item>
@@ -206,7 +206,7 @@
               </ui-example>
             </ui-section>
 
-            <ui-section id="theme-gallery-cards-and-comments" label="Cards and comments" sticky collapsible dividing>
+            <ui-section id="theme-gallery-cards-and-comments" label="Cards and comments" sticky="stack" collapsible dividing>
               <ui-example
                 description="Cards and comments, in the theme picked above."
               >
@@ -262,7 +262,7 @@
               </ui-example>
             </ui-section>
 
-            <ui-section id="theme-gallery-tables-and-segments" label="Tables and segments" sticky collapsible dividing>
+            <ui-section id="theme-gallery-tables-and-segments" label="Tables and segments" sticky="stack" collapsible dividing>
               <ui-example
                 description="Tables and segments, in the theme picked above."
               >
@@ -322,7 +322,7 @@
               </ui-example>
             </ui-section>
 
-            <ui-section id="theme-gallery-popup-and-modal" label="Popup and modal" sticky collapsible dividing>
+            <ui-section id="theme-gallery-popup-and-modal" label="Popup and modal" sticky="stack" collapsible dividing>
               <ui-example description="A popup and a modal, in the theme picked above.">
                 <ui-button icon="plus" aria-label="Add users"></ui-button>
                 <ui-popup label="Add users to your feed"></ui-popup>
@@ -339,7 +339,7 @@
               </ui-example>
             </ui-section>
 
-            <ui-section id="theme-gallery-every-theme" label="Every theme" sticky collapsible dividing>
+            <ui-section id="theme-gallery-every-theme" label="Every theme" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   Each theme is one sheet in `src/styles/themes/`, on top of `classic`. **Page-wide** themes change the site's
@@ -402,8 +402,8 @@
             </ui-section>
           </ui-section>
 
-          <ui-section id="using-themes" label="Using themes" sticky collapsible dividing>
-            <ui-section id="using-themes-sitewide-defaults" label="Sitewide defaults" sticky collapsible dividing>
+          <ui-section id="using-themes" label="Using themes" sticky="stack" collapsible dividing>
+            <ui-section id="using-themes-sitewide-defaults" label="Sitewide defaults" sticky="stack" collapsible dividing>
               <ui-example>
                 <p slot="description">
                   Every colour derives from a few base tokens: re-point <code>--ui-primary</code> or a hue's per-scheme
@@ -443,7 +443,7 @@
             </ui-code>
 
             <!-- GAP I57:  no public token for the chosen box's background / border, so Fomantic's branded checkbox can't come from tokens alone. -->
-            <ui-section id="using-themes-component-defaults" label="Component defaults" sticky collapsible dividing>
+            <ui-section id="using-themes-component-defaults" label="Component defaults" sticky="stack" collapsible dividing>
               <ui-example>
                 <p slot="description">
                   Components inherit the global tokens and redefine what's theirs in public
@@ -464,7 +464,7 @@
               </ui-example>
             </ui-section>
 
-            <ui-section id="using-themes-applying-a-theme" label="Applying a theme" sticky collapsible dividing>
+            <ui-section id="using-themes-applying-a-theme" label="Applying a theme" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   A theme is a sheet of token overrides plus class-grammar rules in `@layer ui.theme`. `UI.themes` (the runtime) loads it and
@@ -501,7 +501,7 @@
               >
             </ui-section>
 
-            <ui-section id="using-themes-dark-mode" label="Dark mode" sticky collapsible dividing>
+            <ui-section id="using-themes-dark-mode" label="Dark mode" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   Dark mode follows the OS by default (`color-scheme: light dark` on `:root`, in `ui.tokens`, so a page's own
@@ -513,7 +513,7 @@
                   - `<ui-root theme="dark">` does the same for everything inside a root, on top of any theme.
                 </script>
               </ui-markdown>
-              <ui-section id="using-themes-dark-mode-a-dark-region" label="A dark region" sticky collapsible dividing>
+              <ui-section id="using-themes-dark-mode-a-dark-region" label="A dark region" sticky="stack" collapsible dividing>
                 <ui-example
                   description="`ui-dark` forces the dark scheme on a subtree:  every token below it flips."
                 >
@@ -527,8 +527,8 @@
             </ui-section>
           </ui-section>
 
-          <ui-section id="composing-a-component" label="Composing a component" sticky collapsible dividing>
-            <ui-section id="composing-a-component-the-pieces" label="The pieces" sticky collapsible dividing>
+          <ui-section id="composing-a-component" label="Composing a component" sticky="stack" collapsible dividing>
+            <ui-section id="composing-a-component-the-pieces" label="The pieces" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   Fomantic composes a component from a definition (`.less`) plus a theme's `.variables` and `.overrides`. Ours is a
@@ -624,7 +624,7 @@
               </ui-markdown>
             </ui-section>
 
-            <ui-section id="composing-a-component-layers" label="Layers" sticky collapsible dividing>
+            <ui-section id="composing-a-component-layers" label="Layers" sticky="stack" collapsible dividing>
               <ui-code language="css">
                 <script type="text/plain">
                   @layer ui.reset, ui.tokens, ui.base, ui.components, ui.utilities, ui.theme, ui.app;
@@ -641,7 +641,7 @@
               </ui-markdown>
             </ui-section>
 
-            <ui-section id="composing-a-component-units" label="Units" sticky collapsible dividing>
+            <ui-section id="composing-a-component-units" label="Units" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   - NEVER `rem`: the host page can redefine it. The ONE absolute length is `--ui-font-size` (px, default `16px`);
@@ -668,7 +668,7 @@
               </ui-section>
             </ui-section>
 
-            <ui-section id="composing-a-component-remaps" label="Remaps" sticky collapsible dividing>
+            <ui-section id="composing-a-component-remaps" label="Remaps" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   Component CSS never names a hue. A colour class re-points the GENERIC tokens (`--ui-color`, `--ui-color-text` ...)
@@ -873,7 +873,7 @@
             </ui-section>
           </ui-section>
 
-          <ui-section id="cascading-inheritance" label="Cascading inheritance" sticky collapsible dividing>
+          <ui-section id="cascading-inheritance" label="Cascading inheritance" sticky="stack" collapsible dividing>
             <ui-markdown>
               <script type="text/markdown">
                 Fomantic resolves a variable through three levels: its defaults, a packaged theme, then your site theme. Ours is
@@ -908,7 +908,7 @@
               <ui-docs-tokens global></ui-docs-tokens>
             </ui-section>
 
-            <ui-section id="cascading-inheritance-colour-tokens" label="Colour tokens" sticky collapsible dividing>
+            <ui-section id="cascading-inheritance-colour-tokens" label="Colour tokens" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   For every hue (`red orange yellow olive green teal blue violet purple pink brown grey black`), the aliases
@@ -956,7 +956,7 @@
             </ui-section>
           </ui-section>
 
-          <ui-section id="porting-a-fomantic-theme" label="Porting a Fomantic theme" sticky collapsible dividing>
+          <ui-section id="porting-a-fomantic-theme" label="Porting a Fomantic theme" sticky="stack" collapsible dividing>
             <ui-markdown>
               <script type="text/markdown">
                 Fomantic's themes, ported this way, are archived now (`src/styles/themes/archive/`):  kept to copy from, in no
@@ -1149,7 +1149,7 @@
               </ui-markdown>
             </ui-section>
 
-            <ui-section id="porting-a-fomantic-theme-overrides" label="Overrides" sticky collapsible dividing>
+            <ui-section id="porting-a-fomantic-theme-overrides" label="Overrides" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   - Use the selectors the COMPONENT'S sheet uses for that box (its header's "Shadow markup contract"). An item box
@@ -1186,7 +1186,7 @@
             </ui-section>
           </ui-section>
 
-          <ui-section id="build-notes" label="Build notes" sticky collapsible dividing>
+          <ui-section id="build-notes" label="Build notes" sticky="stack" collapsible dividing>
             <ui-markdown>
               <script type="text/markdown">
                 - `@custom-media` and the `@import`s in the sheets need Lightning CSS (Vite's `css.transformer: "lightningcss"`

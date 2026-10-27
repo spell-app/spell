@@ -5,13 +5,11 @@
 	</>
 	<image-tab-bar showing="examples"/>
 	<section>
-		<html>
-			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-				<ui-item link="#types">Types</>
-				<ui-item link="#states">States</>
-				<ui-item link="#variations">Variations</>
-				<ui-item link="#groups">Groups</>
-			</>
+		<menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#types">Types</>
+			<item link="#states">States</>
+			<item link="#variations">Variations</>
+			<item link="#groups">Groups</>
 		</>
 	</>
 
@@ -22,32 +20,27 @@
 	<section label="Types">
 		<!-- GAP I56:  `size="medium"` is the natural size, not Fomantic's 300px;  the page uses `size="large"` (450px) where Fomantic says medium. -->
 		<!-- GAP I87:  Fomantic's 2nd and 3rd blocks wrap an <img> / an <svg> in `ui image`;  <ui-image> has no slot. -->
-		<section label="Image" sticky collapsible dividing>
-			<example>
-				<html>
-					<p slot="description">An image.</p>
-				</html>
+		<section label="Image" sticky="stack" collapsible dividing>
+			<example description="An image.">
 				<message slot="description" size="small">Unless a size is specified, images will use the original dimensions of the image up to the size of its container.</message>
-				<html>
-					<ui-message slot="description" state="info" size="small"><code>&lt;ui-image&gt;</code> renders a real <code>&lt;img&gt;</code>, so the image attributes work as on the native element:  src, alt, width, height and loading.</ui-message>
-				</html>
+				<message slot="description" state="info" size="small"><html><code>&lt;ui-image&gt;</code> renders a real <code>&lt;img&gt;</code>, so the image attributes work as on the native element:  src, alt, width, height and loading.</html></message>
 				<image size="small" src="/components/ui/images/wireframe/image.png" alt=""/>
 			</example>
 		</>
 
-		<section label="Image Link" sticky collapsible dividing>
+		<section label="Image Link" sticky="stack" collapsible dividing>
 			<example description="An image can be formatted to link to other content:  `link`.">
 				<image size="large" link="#image-link" src="/components/ui/images/wireframe/image-text.png" alt="Image link"/>
 			</example>
 		</>
 
-		<section label="Figure" sticky collapsible dividing>
+		<section label="Figure" sticky="stack" collapsible dividing>
 			<example description="`caption` puts a caption under the picture:  the image becomes a figure (`<figure>`, `<figcaption>`), the caption no wider than the picture.  The `caption` slot is its rich version.">
 				<image size="medium" src="/components/ui/images/wireframe/image.png" alt="A wireframe picture" caption="A wireframe stands in for a picture while a page is planned."/>
 			</example>
 		</>
 
-		<section label="Zoom" sticky collapsible dividing>
+		<section label="Zoom" sticky="stack" collapsible dividing>
 			<example description="`zoom`:  a click (or Enter) shows it full size over the page, its alt text under it;  Escape closes it.  The page's one `<a href=\"ui-zoom.html\"><ui-zoom></a>` shows it.">
 				<image zoom size="small" src="/components/ui/images/hello-light.png" alt="Hello, in the light theme"/>
 			</example>
@@ -55,13 +48,13 @@
 	</>
 
 	<section label="States">
-		<section label="Hidden" sticky collapsible dividing>
+		<section label="Hidden" sticky="stack" collapsible dividing>
 			<example description="An image can be hidden:  the native `hidden` attribute (the box keeps no space).">
 				<image hidden src="/components/ui/images/wireframe/image.png" alt=""/>
 			</example>
 		</>
 
-		<section label="Disabled" sticky collapsible dividing>
+		<section label="Disabled" sticky="stack" collapsible dividing>
 			<example description="An image can show that it is disabled and cannot be selected.">
 				<image disabled size="large" src="/components/ui/images/wireframe/image.png" alt=""/>
 			</example>
@@ -69,7 +62,7 @@
 	</>
 
 	<section label="Variations">
-		<section label="Avatar" sticky collapsible dividing>
+		<section label="Avatar" sticky="stack" collapsible dividing>
 			<example description="An image may be formatted to appear inline with text as an avatar.">
 				<image avatar src="/components/ui/images/wireframe/square-image.png" alt=""/>
 				<html>
@@ -78,25 +71,25 @@
 			</example>
 		</>
 
-		<section label="Bordered" sticky collapsible dividing>
+		<section label="Bordered" sticky="stack" collapsible dividing>
 			<example description="An image may include a border to emphasize the edges of white or transparent content.">
 				<image size="large" src="/components/ui/images/wireframe/white-image.png" alt="" appearance="bordered"/>
 			</example>
 		</>
 
-		<section label="Fluid" sticky collapsible dividing>
+		<section label="Fluid" sticky="stack" collapsible dividing>
 			<example description="An image can take up the width of its container.">
 				<image fluid src="/components/ui/images/wireframe/image.png" alt=""/>
 			</example>
 		</>
 
-		<section label="Rounded" sticky collapsible dividing>
+		<section label="Rounded" sticky="stack" collapsible dividing>
 			<example description="An image may appear rounded.">
 				<image size="large" src="/components/ui/images/wireframe/square-image.png" alt="" appearance="rounded"/>
 			</example>
 		</>
 
-		<section label="Circular" sticky collapsible dividing>
+		<section label="Circular" sticky="stack" collapsible dividing>
 			<example description="An image may appear circular.">
 				<image size="large" src="/components/ui/images/wireframe/square-image.png" alt="" appearance="circular"/>
 			</example>
@@ -121,7 +114,7 @@
 			</example>
 		</>
 
-		<section label="Centered" sticky collapsible dividing>
+		<section label="Centered" sticky="stack" collapsible dividing>
 			<example description="An image can appear centered in a content block.">
 				<html>
 					<ui-segment>
@@ -135,7 +128,7 @@
 			</example>
 		</>
 
-		<section label="Spaced" sticky collapsible dividing>
+		<section label="Spaced" sticky="stack" collapsible dividing>
 			<example description="An image can specify that it needs an additional spacing to separate it from nearby content.">
 				<html>
 					<ui-segment>
@@ -151,7 +144,7 @@
 			</example>
 		</>
 
-		<section label="Floated" sticky collapsible dividing>
+		<section label="Floated" sticky="stack" collapsible dividing>
 			<example description="An image can sit to the left or right of other content.">
 				<html>
 					<ui-segment>
@@ -165,12 +158,11 @@
 			</example>
 		</>
 
-		<section label="Size" sticky collapsible dividing>
-			<example>
+		<section label="Size" sticky="stack" collapsible dividing>
+			<example description="An image may appear at different sizes.">
+				<message slot="description" state="warning" size="small"><html><code>medium</code> is the image's natural size here, not Fomantic's 300px (I56): elsewhere on this page the medium images are <code>size="large"</code> (450px).</html></message>
+				<message slot="description" state="info" size="small"><html>Fomantic's default widths for <code>mini</code> ... <code>massive</code> are arbitrary. Set the ones your project uses in the <code>--ui-image-width-*</code> tokens (Theming tab).</html></message>
 				<html>
-					<p slot="description">An image may appear at different sizes.</p>
-					<ui-message slot="description" state="warning" size="small"><code>medium</code> is the image's natural size here, not Fomantic's 300px (I56): elsewhere on this page the medium images are <code>size="large"</code> (450px).</ui-message>
-					<ui-message slot="description" state="info" size="small">Fomantic's default widths for <code>mini</code> ... <code>massive</code> are arbitrary. Set the ones your project uses in the <code>--ui-image-width-*</code> tokens (Theming tab).</ui-message>
 					<ui-table slot="description" definition padding="compact" unstackable>
 						<table>
 							<thead>
@@ -228,7 +220,7 @@
 	</>
 
 	<section label="Groups">
-		<section label="Size" sticky collapsible dividing>
+		<section label="Size" sticky="stack" collapsible dividing>
 			<example description="A group of images can be formatted to have the same size:  `<ui-images size>`.">
 				<images size="tiny">
 					<image src="/components/ui/images/wireframe/image.png" alt=""/>
@@ -249,7 +241,7 @@
 			</example>
 		</>
 
-		<section label="Group variations" sticky collapsible dividing>
+		<section label="Group variations" sticky="stack" collapsible dividing>
 			<example description="A group shares its shape, border and alignment with every image in it:  `avatar`, `circular`, `rounded`, `bordered`, `centered` ...">
 				<images avatar>
 					<image src="/components/ui/images/wireframe/square-image.png" alt=""/>

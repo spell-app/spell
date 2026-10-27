@@ -1,8 +1,12 @@
 import { isServer, type JSX } from "@solidjs/web"
 
+import { createEffect } from "solid-js"
+
+import { SPACES } from "spell/app/spaces"
 import { editor } from "spell/app/app/editor"
 import { appTexts } from "spell/app/app/ui/AppTexts"
 import { uiReady } from "./loadUI"
+import { tracked } from "./tracked"
 
 import "./EditorTheme.css"
 
@@ -52,12 +56,14 @@ export class EditorTheme {
       EditorTheme.follow(ThemePreference.chosen.theme)
       ThemePreference.subscribe((chosen) => EditorTheme.follow(chosen.theme))
       await ThemePreference.restore()
-      // framed by Spell UI's theme bench, while developing:  take its theme, its tuning and its "full view"
+      // framed by Spell UI's theme editor, while developing:  wear its theme, scheme and sheet, open the full view;
+      // never remembered, so the editor's own choice stays (and a window on this address keeps its scheme)
       if (import.meta.env.DEV && window.parent !== window) {
-        const { BenchBridge } = await import("spell/ui/docs-components/ui-docs-theme-bench/BenchBridge")
-        BenchBridge.listen({
-          theme: (name) => ThemePreference.setTheme(name),
-          scheme: (scheme) => ThemePreference.setScheme(scheme),
+        const { PageBridge } = await import("spell/ui/components/ui-theme-editor/PageBridge")
+        PageBridge.listen({
+          theme: (name) => EditorTheme.wearForPreview(name),
+          scheme: (scheme) =>
+            scheme === "system" ? ThemePreference.applyScheme(scheme) : PageBridge.pinScheme(document, scheme),
           fullMonty: () => EditorTheme.showFullView()
         })
       }
@@ -67,11 +73,22 @@ export class EditorTheme {
   }
 
   /**
-   * The editor's full view, as the theme bench shows it (`<ui-docs-theme-bench>`, epic `debut`):
+   * Wear theme `name`, previewed by Spell UI's theme editor:  marked on `<html>` as a chosen one is, but never
+   * remembered (`ThemePreference.wear()`).
+   * - NEVER throws:  `PageBridge.listen()` catches and logs.
+   */
+  static async wearForPreview(name: string): Promise<void> {
+    const { ThemePreference } = await import("spell/ui/components/ui-theme-menu/ThemePreference")
+    document.documentElement.dataset.spellTheme = name
+    await ThemePreference.wear(name)
+  }
+
+  /**
+   * The editor's full view, as the theme editor previews it (`<ui-theme-editor>`, epic `debut` P24):
    * Debug, the Inspector with every card, and a part picked:  a card, if the app draws one, else its first thing.
    * - What's picked already stays.
    * - Waits up to 3s for the app to draw something to pick;  nothing by then, nothing's picked.
-   * - NEVER throws:  `BenchBridge.listen()` catches and logs.
+   * - NEVER throws:  `PageBridge.listen()` catches and logs.
    */
   static async showFullView(): Promise<void> {
     const [{ EditorMode }, { Inspector, INSPECTOR_PANELS }] = await Promise.all([
@@ -156,13 +173,23 @@ export function ThemeMenu(): JSX.Element {
  * - The hat alone, in the theme's primary colour:  the favicon's hat without its dark square
  *   (`/static/favicon/hat.svg`, drawn as a mask, `EditorTheme.css`).
  * - On a phone, the hat alone (`.AppName` read, not shown:  `chrome.css`).
+ * - A notebook's:  "Spell Notebooks" (Owen, 2026-10-27).
+ * - SIDE EFFECT:  names the browser's tab for the project shown:  `Button • Spell Notebook`, `Solitaire • Spell`.
  ****************/
 export function AppMark(): JSX.Element {
+  const shown = tracked(() => ({
+    title: editor.project?.title,
+    isNotebook: editor.projectRoot?.path === SPACES.SpellProjectRoot.notebooks.path
+  }))
+  createEffect(shown, ({ title, isNotebook }) => {
+    const key = isNotebook ? "notebookTabTitle" : "tabTitle"
+    document.title = title ? appTexts.text(key, { project: title }) : appTexts.text("appName")
+  })
   return (
     <ui-item class="AppMark">
       <a link="" href="/">
         <span class="hat" />
-        <span class="AppName">{appTexts.text("appName")}</span>
+        <span class="AppName">{appTexts.text(shown().isNotebook ? "notebooksAppName" : "appName")}</span>
       </a>
     </ui-item>
   )

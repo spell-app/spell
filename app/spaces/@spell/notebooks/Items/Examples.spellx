@@ -6,13 +6,11 @@
 	</>
 	<items-tab-bar showing="examples"/>
 	<section>
-		<html>
-			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-				<ui-item link="#types">Types</>
-				<ui-item link="#content">Content</>
-				<ui-item link="#states">States</>
-				<ui-item link="#variations">Variations</>
-			</>
+		<menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#types">Types</>
+			<item link="#content">Content</>
+			<item link="#states">States</>
+			<item link="#variations">Variations</>
 		</>
 	</>
 
@@ -22,11 +20,10 @@
 		`.middle aligned content` is `<ui-content vertical-align="middle">`;  `ui wireframe image`s are plain `<ui-image>`s.
 	-->
 	<section label="Types">
-		<section label="Items" sticky collapsible dividing>
-			<example>
+		<section label="Items" sticky="stack" collapsible dividing>
+			<example description="A group of items.">
+				<message slot="description" state="positive" size="small"><html>Item views are designed to be responsive, with images stacking at mobile widths. By default ours stack by the width of the GROUP (<code>stack-with="container"</code>);  this site sets <code>stack-with="page"</code>, so here they stack by the window, as in Fomantic.</html></message>
 				<html>
-					<p slot="description">A group of items.</p>
-					<ui-message slot="description" state="positive" size="small">Item views are designed to be responsive, with images stacking at mobile widths. By default ours stack by the width of the GROUP (<code>stack-with="container"</code>);  this site sets <code>stack-with="page"</code>, so here they stack by the window, as in Fomantic.</ui-message>
 					<ui-items>
 						<ui-item image="../images/wireframe/image.png">
 							<ui-content>
@@ -59,7 +56,7 @@
 	</>
 
 	<section label="Content">
-		<section label="Image" sticky collapsible dividing>
+		<section label="Image" sticky="stack" collapsible dividing>
 			<example description="An item can contain an image:  `image` is the shorthand, at the item's image width.">
 				<items divided>
 					<item image="../images/wireframe/image.png"/>
@@ -69,7 +66,7 @@
 			</example>
 		</>
 
-		<section label="Content" sticky collapsible dividing>
+		<section label="Content" sticky="stack" collapsible dividing>
 			<example description="An item can contain content.">
 				<items divided>
 					<item>
@@ -88,7 +85,7 @@
 			</example>
 		</>
 
-		<section label="Header" sticky collapsible dividing>
+		<section label="Header" sticky="stack" collapsible dividing>
 			<example description="An item can contain a header.">
 				<items>
 					<item>
@@ -113,11 +110,10 @@
 			</example>
 		</>
 
-		<section label="Metadata" sticky collapsible dividing>
-			<example>
+		<section label="Metadata" sticky="stack" collapsible dividing>
+			<example description="An item can contain content metadata.">
+				<message slot="description" state="info" size="small"><html>You can include an arbitrary amount of metadata in <code>&lt;ui-meta&gt;</code>: every child is spaced automatically.</html></message>
 				<html>
-					<p slot="description">An item can contain content metadata.</p>
-					<ui-message slot="description" state="info" size="small">You can include an arbitrary amount of metadata in <code>&lt;ui-meta&gt;</code>: every child is spaced automatically.</ui-message>
 					<ui-items>
 						<ui-item>
 							<ui-image size="small" src="/components/ui/images/wireframe/image.png" alt=""></ui-image>
@@ -163,11 +159,8 @@
 			</example>
 		</>
 
-		<section label="Link" sticky collapsible dividing>
-			<example>
-				<html>
-					<p slot="description">An item can contain links as images, headers, or inside content.</p>
-				</html>
+		<section label="Link" sticky="stack" collapsible dividing>
+			<example description="An item can contain links as images, headers, or inside content.">
 				<message slot="description" state="warning" size="small">To make the entire content of an item a link, see the Link Item variation below.</message>
 				<html>
 					<ui-items>
@@ -203,7 +196,7 @@
 			</example>
 		</>
 
-		<section label="Description" sticky collapsible dividing>
+		<section label="Description" sticky="stack" collapsible dividing>
 			<example description="An item can contain a description with a single or multiple paragraphs.">
 				<html>
 					<ui-items>
@@ -222,7 +215,7 @@
 			</example>
 		</>
 
-		<section label="Extra Content" sticky collapsible dividing>
+		<section label="Extra Content" sticky="stack" collapsible dividing>
 			<example description="An item can contain extra content meant to be formatted separately from the main content.">
 				<items>
 					<item>
@@ -239,12 +232,9 @@
 			</example>
 		</>
 
-		<section label="Rating" sticky collapsible dividing>
-			<example>
-				<html>
-					<p slot="description">An item can contain icons signifying a 'like' or 'favorite' action.</p>
-					<ui-message slot="description" state="info" size="small">Use <code>&lt;ui-rating&gt;</code> to attach events to like and favorite icons.</ui-message>
-				</html>
+		<section label="Rating" sticky="stack" collapsible dividing>
+			<example description="An item can contain icons signifying a 'like' or 'favorite' action.">
+				<message slot="description" state="info" size="small"><html>Use <code>&lt;ui-rating&gt;</code> to attach events to like and favorite icons.</html></message>
 				<items>
 					<item>
 						<image size="tiny" link="#" src="/components/ui/images/avatar/large/jenny.jpg" alt=""/>
@@ -264,7 +254,7 @@
 	</>
 
 	<section label="States">
-		<section label="Disabled" sticky collapsible dividing>
+		<section label="Disabled" sticky="stack" collapsible dividing>
 			<example description="An item can be disabled.">
 				<html>
 					<ui-items>
@@ -284,7 +274,7 @@
 	</>
 
 	<section label="Variations">
-		<section label="Stacking" sticky collapsible dividing>
+		<section label="Stacking" sticky="stack" collapsible dividing>
 			<example description="A group of items can specify how it stacks responsively:  `unstackable` keeps the image beside the content in a narrow group.">
 				<html>
 					<ui-items unstackable>
@@ -317,7 +307,7 @@
 			</example>
 		</>
 
-		<section label="Divided" sticky collapsible dividing>
+		<section label="Divided" sticky="stack" collapsible dividing>
 			<example description="Items can be divided to better distinguish between grouped content.">
 				<html>
 					<ui-items divided>
@@ -374,7 +364,7 @@
 			</example>
 		</>
 
-		<section label="Relaxed" sticky collapsible dividing>
+		<section label="Relaxed" sticky="stack" collapsible dividing>
 			<example description="A group of items can relax its padding to provide more negative space.">
 				<items spacing="lg">
 					<item>
@@ -421,7 +411,7 @@
 			</example>
 		</>
 
-		<section label="Link Item" sticky collapsible dividing>
+		<section label="Link Item" sticky="stack" collapsible dividing>
 			<example description="An item can be formatted so that the entire contents link to another page:  `appearance=\"link\"` on the group is the hover look, `link` on an item the link.">
 				<items appearance="link">
 					<item link="#">
@@ -480,7 +470,7 @@
 			</example>
 		</>
 
-		<section label="Content at the Right" sticky collapsible dividing>
+		<section label="Content at the Right" sticky="stack" collapsible dividing>
 			<example description="Content has no `floated` any more:  a `<ui-stack>` puts it at the left or the right.">
 				<items>
 					<item>
@@ -529,11 +519,10 @@
 			</example>
 		</>
 
-		<section label="Inverted" sticky collapsible dividing>
-			<example>
+		<section label="Inverted" sticky="stack" collapsible dividing>
+			<example description="An item can be inverted to appear on a dark background.">
+				<message slot="description" state="info" size="small"><html>Set a dark background yourself, or wrap the items in an <code>&lt;ui-segment inverted&gt;</code>.</html></message>
 				<html>
-					<p slot="description">An item can be inverted to appear on a dark background.</p>
-					<ui-message slot="description" state="info" size="small">Set a dark background yourself, or wrap the items in an <code>&lt;ui-segment inverted&gt;</code>.</ui-message>
 					<ui-segment inverted>
 						<ui-items inverted>
 							<ui-item>
@@ -568,7 +557,7 @@
 			</example>
 		</>
 
-		<section label="Size" sticky collapsible dividing>
+		<section label="Size" sticky="stack" collapsible dividing>
 			<example description="Items can have different text sizes, `mini` ... `massive`.">
 				<html>
 					<ui-items size="small">

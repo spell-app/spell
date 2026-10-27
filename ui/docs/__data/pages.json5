@@ -539,7 +539,7 @@
     },
     "ui-theme-editor": {
       "title": "Theme Editor",
-      "summary": "A theme editor makes a theme from an existing one:  its colours, fonts and shapes, live on real elements, then copied as a stylesheet or kept in the browser.",
+      "summary": "A theme editor makes a theme from an existing one:  its colours, fonts and shapes, or any token, live on real pages, then copied as a theme file or kept in the browser.",
       "status": "in-progress"
     },
     "ui-theme-menu": {

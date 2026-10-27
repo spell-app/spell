@@ -167,8 +167,9 @@ export class ThemePreference {
   /**
    * Make this page wear theme `name` itself, whatever is chosen, from now on;  `undefined`:  the one chosen again.
    * - Its menu still chooses, and remembers, for what the page shows of OTHER places, never for the page itself.
-   * - e.g. the theme bench (`<ui-docs-theme-bench>`, epic `debut`):  its own bar and columns stay Glass, while its menu
-   *   picks the theme of the pages in its frames (Owen:  "Make the \"chrome\" of the page ... stick to \"glass\"").
+   * - e.g. the theme editor (`<ui-theme-editor>`, epic `debut` P24):  its own bar and column stay Fruity while it
+   *   previews pages in another theme (Owen, Q40:  "Make outer theme \"fruity\"");  framed, the Spell editor wears
+   *   the theme previewed in it, never remembered.
    * - The scheme isn't worn:  the page still shows the one chosen.
    */
   static async wear(name: string | undefined): Promise<void> {

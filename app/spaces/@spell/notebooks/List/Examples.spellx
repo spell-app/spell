@@ -5,14 +5,12 @@
 	</>
 	<list-tab-bar showing="examples"/>
 	<section>
-		<html>
-			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-				<ui-item link="#types">Types</>
-				<ui-item link="#content">Content</>
-				<ui-item link="#states">States</>
-				<ui-item link="#variations">Variations</>
-				<ui-item link="#content-variations">Content Variations</>
-			</>
+		<menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#types">Types</>
+			<item link="#content">Content</>
+			<item link="#states">States</>
+			<item link="#variations">Variations</>
+			<item link="#content-variations">Content Variations</>
 		</>
 	</>
 
@@ -21,7 +19,7 @@
 		Variations), plus our States (Active, Disabled) and Fitted selection.  Items are the generic `<ui-item>`.
 	-->
 	<section label="Types">
-		<section label="List" sticky collapsible dividing>
+		<section label="List" sticky="stack" collapsible dividing>
 			<example description="A list groups related content:  its items are `<ui-item>`s.">
 				<list>
 					<item>Apples</item>
@@ -144,7 +142,7 @@
 			</example>
 		</>
 
-		<section label="Bulleted" sticky collapsible dividing>
+		<section label="Bulleted" sticky="stack" collapsible dividing>
 			<example description="A list can mark items with a bullet.">
 				<list bulleted>
 					<item>Gaining Access</item>
@@ -154,9 +152,7 @@
 				</list>
 			</example>
 		</>
-		<html>
-			<ui-message size="small" class="site-not-ported">Not ported: Fomantic's plain <code>&lt;ul class="ui list"&gt;</> / <code>&lt;ol class="ui list"&gt;</> markup. <code>&lt;ui-list bulleted&gt;</> / <code>&lt;ui-list ordered&gt;</> render a real ul / ol in their shadow root.</>
-		</>
+		<message size="small" class="site-not-ported"><html>Not ported: Fomantic's plain <code>&lt;ul class="ui list"&gt;</> / <code>&lt;ol class="ui list"&gt;</> markup. <code>&lt;ui-list bulleted&gt;</> / <code>&lt;ui-list ordered&gt;</> render a real ul / ol in their shadow root.</></>
 		<example>
 			<list direction="horizontal" bulleted>
 				<item link="#list">About Us</item>
@@ -165,7 +161,7 @@
 			</list>
 		</example>
 
-		<section label="Ordered" sticky collapsible dividing>
+		<section label="Ordered" sticky="stack" collapsible dividing>
 			<example description="A list can be ordered numerically.  Sub lists continue the numbering (`3.1`).">
 				<html>
 					<ui-list ordered>
@@ -201,7 +197,7 @@
 			</example>
 		</>
 
-		<section label="Link" sticky collapsible dividing>
+		<section label="Link" sticky="stack" collapsible dividing>
 			<example description="A list can be specially formatted for navigation links:  the `selected` (or `active`) item is the current page.">
 				<list appearance="link">
 					<item active>Home</item>
@@ -214,7 +210,7 @@
 	</>
 
 	<section label="Content">
-		<section label="Item" sticky collapsible dividing>
+		<section label="Item" sticky="stack" collapsible dividing>
 			<example description="A list item can contain a set of items.">
 				<list>
 					<item>1</item>
@@ -224,7 +220,7 @@
 			</example>
 		</>
 
-		<section label="Icon" sticky collapsible dividing>
+		<section label="Icon" sticky="stack" collapsible dividing>
 			<example description="A list item can contain an icon.">
 				<list>
 					<item link="#list" icon="help">
@@ -244,7 +240,7 @@
 			</example>
 		</>
 
-		<section label="Image" sticky collapsible dividing>
+		<section label="Image" sticky="stack" collapsible dividing>
 			<example description="A list item can contain an image:  `image` takes its URL and shows it as an avatar.">
 				<html>
 					<ui-list>
@@ -283,7 +279,7 @@
 			</example>
 		</>
 
-		<section label="Link" sticky collapsible dividing>
+		<section label="Link" sticky="stack" collapsible dividing>
 			<example description="A list can contain links:  with a `link` an item renders a real link.">
 				<list>
 					<item link="#list">What is a FAQ?</item>
@@ -307,7 +303,7 @@
 			</example>
 		</>
 
-		<section label="Header" sticky collapsible dividing>
+		<section label="Header" sticky="stack" collapsible dividing>
 			<example description="A list item can contain a header.">
 				<list>
 					<item><header>New York City</header> A lovely city</item>
@@ -318,7 +314,7 @@
 			</example>
 		</>
 
-		<section label="Description" sticky collapsible dividing>
+		<section label="Description" sticky="stack" collapsible dividing>
 			<example description="A list item can contain a description.">
 				<list>
 					<item icon="map marker">
@@ -351,7 +347,7 @@
 	</>
 
 	<section label="States">
-		<section label="Active" sticky collapsible dividing>
+		<section label="Active" sticky="stack" collapsible dividing>
 			<example description="A list item can be active:  `selected` is the attribute;  Fomantic's `active` works too.">
 				<list appearance="link">
 					<item link="#list">Home</item>
@@ -361,7 +357,7 @@
 			</example>
 		</>
 
-		<section label="Disabled" sticky collapsible dividing>
+		<section label="Disabled" sticky="stack" collapsible dividing>
 			<example description="A list item can be disabled:  it can't be followed or chosen.">
 				<list direction="horizontal">
 					<item disabled link="#list">Disabled</item>
@@ -373,7 +369,7 @@
 	</>
 
 	<section label="Variations">
-		<section label="Horizontal" sticky collapsible dividing>
+		<section label="Horizontal" sticky="stack" collapsible dividing>
 			<example description="A list can be formatted to have items appear horizontally.">
 				<list direction="horizontal">
 					<item image="../images/avatar/small/tom.jpg">
@@ -409,7 +405,7 @@
 			</example>
 		</>
 
-		<section label="Inverted" sticky collapsible dividing>
+		<section label="Inverted" sticky="stack" collapsible dividing>
 			<example description="A list can be inverted to appear on a dark background.">
 				<segment inverted>
 					<list inverted spacing="lg" divided>
@@ -427,7 +423,7 @@
 			</example>
 		</>
 
-		<section label="Selection" sticky collapsible dividing>
+		<section label="Selection" sticky="stack" collapsible dividing>
 			<example description="A selection list formats list items as possible choices:  each item is a button, and activating one fires `ui-select`.">
 				<list selection vertical-align="middle">
 					<item value="helen" image="../images/avatar/small/helen.jpg">
@@ -456,7 +452,7 @@
 			</example>
 		</>
 
-		<section label="Animated" sticky collapsible dividing>
+		<section label="Animated" sticky="stack" collapsible dividing>
 			<example description="A list can animate to set the current item apart from the list.">
 				<message slot="description" state="info" size="small">Be sure content can fit on one line when using the animated variation, otherwise text content will reflow when hovered.</message>
 				<list hover="indent" vertical-align="middle">
@@ -479,7 +475,7 @@
 			</example>
 		</>
 
-		<section label="Relaxed" sticky collapsible dividing>
+		<section label="Relaxed" sticky="stack" collapsible dividing>
 			<example description="A list can relax its padding to provide more negative space:  `spacing=\"lg\"`, or `spacing=\"xl\"`.">
 				<html>
 					<ui-list spacing="lg">
@@ -568,7 +564,7 @@
 			</example>
 		</>
 
-		<section label="Divided" sticky collapsible dividing>
+		<section label="Divided" sticky="stack" collapsible dividing>
 			<example description="A list can show divisions between content.">
 				<list divided vertical-align="middle">
 					<item image="../images/avatar/small/daniel.jpg">
@@ -590,7 +586,7 @@
 			</example>
 		</>
 
-		<section label="Celled" sticky collapsible dividing>
+		<section label="Celled" sticky="stack" collapsible dividing>
 			<example description="A list can divide its items into cells.">
 				<list celled>
 					<item image="../images/avatar/small/helen.jpg">
@@ -620,7 +616,7 @@
 			</example>
 		</>
 
-		<section label="Size" sticky collapsible dividing>
+		<section label="Size" sticky="stack" collapsible dividing>
 			<example description="A list can vary in size.">
 				<list size="mini" direction="horizontal" divided>
 					<item image="../images/avatar/small/helen.jpg">
@@ -774,7 +770,7 @@
 			</example>
 		</>
 
-		<section label="Left and Right" sticky collapsible dividing>
+		<section label="Left and Right" sticky="stack" collapsible dividing>
 			<example description="A list has no `floated` any more:  a `<ui-stack>` puts a button at the right of an item, or one list at the left and one at the right.">
 				<html>
 					<ui-list divided vertical-align="middle">

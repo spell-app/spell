@@ -35,19 +35,6 @@ const APP_TEXTS_ES: AppTextPack = {
   editMode: "Editar",
   debugMode: "Depurar",
   showLineNumbers: "Mostrar los números de línea",
-  inputViewText: "Mostrar como texto",
-  inputViewNotebook: "Mostrar como un cuaderno de tarjetas",
-  notebookFold: "Cerrar",
-  notebookUnfold: "Abrir",
-  notebookShowForm: "Mostrar el formulario",
-  notebookShowCode: "Mostrar el código",
-  notebookMoveUp: "Subir",
-  notebookMoveDown: "Bajar",
-  notebookName: "Nombre",
-  notebookOneOf: "Uno de",
-  notebookOneOfHint: "a, b o c",
-  notebookAliases: "Frases",
-  notebookAliasHint: "es un (valor)",
   // la página de un cuaderno, `<NotebookPage>` (épica `elemental-spell` P16)
   notebookPageCodeAs: "Ver el código como",
   notebookPageLock: "Bloquearlo:  mientras esté bloqueado no se guarda nada",
@@ -58,6 +45,7 @@ const APP_TEXTS_ES: AppTextPack = {
   notebookPageContents: "En esta página",
   notebookPagePick: "Ir a otra página del cuaderno",
   notebookPageReset: "Restablecer",
+  notebookPageUnfinished: "Aún sin dibujar:  una etiqueta aquí no está terminada",
   notebookPageResetTip: "Devolver el código de este ejemplo a como lo tiene el archivo",
   notebookPageChangedElsewhere: "Cambiado en otro lugar mientras escribías:  lo tuyo se queda",
   notebookPageTakeTheirs: "Tomar lo suyo",
@@ -135,8 +123,11 @@ const APP_TEXTS_ES: AppTextPack = {
   inspectorNoEvents: "Ninguno aún.",
   inspectorEventsTip: "Elige una parte para ver sus eventos.",
   // the theme editor's page (`<ThemeEditorPage>`), and the palette menu's way there
-  themeEditorTitle: "Editor de temas",
   editTheme: "Editar el tema…",
+  "themePage.editor": "Editor",
+  "themePage.epic": "Página de épica",
+  "themePage.ui": "Spell UI",
+  "themePage.notebook": "Cuaderno",
   inspectorEventHeading: "con {event}",
   inspectorEventCode: "Qué pasa con {event}",
   inspectorProperties: "Propiedades",
@@ -199,6 +190,10 @@ const APP_TEXTS_ES: AppTextPack = {
   ////////////////
 
   appName: "Spell",
+  notebooksAppName: "Cuadernos de Encanto",
+  tabTitle: "{project} • Spell",
+  notebookTabTitle: "{project} • Cuaderno de Encanto",
+  homeInSpanish: "En Español",
   homeEyebrow: "Spell, en vista previa",
   homeTitle: "Escribe una app en una frase.",
   homeTagline: "Palabras sencillas.  Una app que funciona.",
@@ -215,6 +210,7 @@ const APP_TEXTS_ES: AppTextPack = {
   homeProjectsLine: "Lo que has hecho, y por dónde empezar lo siguiente.",
   homeFixturesLine: "Las aplicaciones congeladas con las que corren las pruebas.",
   homeNoGuides: "Las guías están en camino.",
+  homeNotebooksLine: "Las páginas de Spell UI, escritas en Encanto.",
 
   ////////////////
   // ## Project groups

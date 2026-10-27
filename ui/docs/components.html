@@ -58,7 +58,7 @@
             </script>
           </ui-markdown>
           <!-- components:start -->
-          <ui-section id="basic" label="Basic" sticky collapsible dividing>
+          <ui-section id="basic" label="Basic" sticky="stack" collapsible dividing>
             <ui-cards>
               <ui-card
                 link="ui-breadcrumbs.html"
@@ -189,7 +189,7 @@
             </ui-cards>
           </ui-section>
 
-          <ui-section id="layout" label="Layout" sticky collapsible dividing>
+          <ui-section id="layout" label="Layout" sticky="stack" collapsible dividing>
             <ui-cards>
               <ui-card
                 link="ui-ad.html"
@@ -353,7 +353,7 @@
             </ui-cards>
           </ui-section>
 
-          <ui-section id="containers" label="Containers" sticky collapsible dividing>
+          <ui-section id="containers" label="Containers" sticky="stack" collapsible dividing>
             <ui-cards>
               <ui-card
                 link="ui-accordion.html"
@@ -462,7 +462,7 @@
             </ui-cards>
           </ui-section>
 
-          <ui-section id="navigation" label="Navigation" sticky collapsible dividing>
+          <ui-section id="navigation" label="Navigation" sticky="stack" collapsible dividing>
             <ui-cards>
               <ui-card
                 link="ui-accordion.html"
@@ -569,7 +569,7 @@
             </ui-cards>
           </ui-section>
 
-          <ui-section id="menus" label="Menus" sticky collapsible dividing>
+          <ui-section id="menus" label="Menus" sticky="stack" collapsible dividing>
             <ui-cards>
               <ui-card
                 link="ui-action.html"
@@ -616,7 +616,7 @@
             </ui-cards>
           </ui-section>
 
-          <ui-section id="forms" label="Forms" sticky collapsible dividing>
+          <ui-section id="forms" label="Forms" sticky="stack" collapsible dividing>
             <ui-cards>
               <ui-card
                 link="ui-button.html"
@@ -739,13 +739,20 @@
                 link="ui-theme-editor.html"
                 heading="Theme editor"
                 meta="&lt;ui-theme-editor&gt;"
-                description="A theme editor makes a theme from an existing one:  pick its colours, fonts and shapes, watch real elements follow in light and dark, then copy the stylesheet or keep it in the browser."
+                description="A theme editor makes a theme from an existing one:  pick its colours, fonts and shapes, or set any token by hand, watch real pages follow in light and dark, then copy the theme file or keep it in the browser."
+                extra="In progress"
+              ></ui-card>
+              <ui-card
+                link="ui-theme-editor.html#ui-theme-token"
+                heading="Theme token"
+                meta="&lt;ui-theme-token&gt;"
+                description="A theme token is one token of a theme being made:  where its value comes from, its value as colour chips in light and dark, and, under its name, a drawer to change it."
                 extra="In progress"
               ></ui-card>
             </ui-cards>
           </ui-section>
 
-          <ui-section id="inputs" label="Inputs" sticky collapsible dividing>
+          <ui-section id="inputs" label="Inputs" sticky="stack" collapsible dividing>
             <ui-cards>
               <ui-card
                 link="ui-calendar.html"
@@ -842,7 +849,7 @@
             </ui-cards>
           </ui-section>
 
-          <ui-section id="controls" label="Controls" sticky collapsible dividing>
+          <ui-section id="controls" label="Controls" sticky="stack" collapsible dividing>
             <ui-cards>
               <ui-card
                 link="ui-action.html"
@@ -926,7 +933,7 @@
                 link="ui-theme-editor.html"
                 heading="Theme editor"
                 meta="&lt;ui-theme-editor&gt;"
-                description="A theme editor makes a theme from an existing one:  pick its colours, fonts and shapes, watch real elements follow in light and dark, then copy the stylesheet or keep it in the browser."
+                description="A theme editor makes a theme from an existing one:  pick its colours, fonts and shapes, or set any token by hand, watch real pages follow in light and dark, then copy the theme file or keep it in the browser."
                 extra="In progress"
               ></ui-card>
               <ui-card
@@ -935,10 +942,17 @@
                 meta="&lt;ui-theme-menu&gt;"
                 description="A theme menu switches the page between light and dark, and picks its theme from Spell&#39;s own, and remembers both for the next page."
               ></ui-card>
+              <ui-card
+                link="ui-theme-editor.html#ui-theme-token"
+                heading="Theme token"
+                meta="&lt;ui-theme-token&gt;"
+                description="A theme token is one token of a theme being made:  where its value comes from, its value as colour chips in light and dark, and, under its name, a drawer to change it."
+                extra="In progress"
+              ></ui-card>
             </ui-cards>
           </ui-section>
 
-          <ui-section id="buttons" label="Buttons" sticky collapsible dividing>
+          <ui-section id="buttons" label="Buttons" sticky="stack" collapsible dividing>
             <ui-cards>
               <ui-card
                 link="ui-action.html"
@@ -973,7 +987,7 @@
             </ui-cards>
           </ui-section>
 
-          <ui-section id="selection" label="Selection" sticky collapsible dividing>
+          <ui-section id="selection" label="Selection" sticky="stack" collapsible dividing>
             <ui-cards>
               <ui-card
                 link="ui-checkbox.html"
@@ -1020,7 +1034,7 @@
             </ui-cards>
           </ui-section>
 
-          <ui-section id="date-time" label="Date &amp; time" sticky collapsible dividing>
+          <ui-section id="date-time" label="Date &amp; time" sticky="stack" collapsible dividing>
             <ui-cards>
               <ui-card
                 link="ui-calendar.html"
@@ -1037,7 +1051,7 @@
             </ui-cards>
           </ui-section>
 
-          <ui-section id="text" label="Text" sticky collapsible dividing>
+          <ui-section id="text" label="Text" sticky="stack" collapsible dividing>
             <ui-cards>
               <ui-card
                 link="ui-code.html"
@@ -1144,13 +1158,20 @@
             </ui-cards>
           </ui-section>
 
-          <ui-section id="typography" label="Typography" sticky collapsible dividing>
+          <ui-section id="typography" label="Typography" sticky="stack" collapsible dividing>
             <ui-cards>
               <ui-card
                 link="ui-code.html"
                 heading="Code"
                 meta="&lt;ui-code&gt;"
                 description="Code shows a block of source code coloured by its language, from the element&#39;s own text or a file on this site."
+              ></ui-card>
+              <ui-card
+                link="ui-theme-editor.html#ui-color-chip"
+                heading="Color chip"
+                meta="&lt;ui-color-chip&gt;"
+                description="A colour chip shows one colour, as a small rounded square:  read-only, its value in its tooltip."
+                extra="In progress"
               ></ui-card>
               <ui-card
                 link="ui-divider.html"
@@ -1198,7 +1219,7 @@
                 link="ui-theme-editor.html"
                 heading="Theme editor"
                 meta="&lt;ui-theme-editor&gt;"
-                description="A theme editor makes a theme from an existing one:  pick its colours, fonts and shapes, watch real elements follow in light and dark, then copy the stylesheet or keep it in the browser."
+                description="A theme editor makes a theme from an existing one:  pick its colours, fonts and shapes, or set any token by hand, watch real pages follow in light and dark, then copy the theme file or keep it in the browser."
                 extra="In progress"
               ></ui-card>
               <ui-card
@@ -1210,7 +1231,7 @@
             </ui-cards>
           </ui-section>
 
-          <ui-section id="media" label="Media" sticky collapsible dividing>
+          <ui-section id="media" label="Media" sticky="stack" collapsible dividing>
             <ui-cards>
               <ui-card
                 link="ui-ad.html"
@@ -1223,6 +1244,13 @@
                 heading="Audio"
                 meta="&lt;ui-audio&gt;"
                 description="An audio plays a sound file:  in the browser&#39;s own player, or unseen, when the page says."
+              ></ui-card>
+              <ui-card
+                link="ui-theme-editor.html#ui-color-chip"
+                heading="Color chip"
+                meta="&lt;ui-color-chip&gt;"
+                description="A colour chip shows one colour, as a small rounded square:  read-only, its value in its tooltip."
+                extra="In progress"
               ></ui-card>
               <ui-card
                 link="ui-embed.html"
@@ -1281,7 +1309,7 @@
             </ui-cards>
           </ui-section>
 
-          <ui-section id="images" label="Images" sticky collapsible dividing>
+          <ui-section id="images" label="Images" sticky="stack" collapsible dividing>
             <ui-cards>
               <ui-card
                 link="ui-avatar.html"
@@ -1340,7 +1368,7 @@
             </ui-cards>
           </ui-section>
 
-          <ui-section id="icons" label="Icons" sticky collapsible dividing>
+          <ui-section id="icons" label="Icons" sticky="stack" collapsible dividing>
             <ui-cards>
               <ui-card
                 link="ui-emoji.html"
@@ -1375,7 +1403,7 @@
             </ui-cards>
           </ui-section>
 
-          <ui-section id="data-display" label="Data display" sticky collapsible dividing>
+          <ui-section id="data-display" label="Data display" sticky="stack" collapsible dividing>
             <ui-cards>
               <ui-card
                 link="ui-accordion.html"
@@ -1482,7 +1510,7 @@
             </ui-cards>
           </ui-section>
 
-          <ui-section id="lists" label="Lists" sticky collapsible dividing>
+          <ui-section id="lists" label="Lists" sticky="stack" collapsible dividing>
             <ui-cards>
               <ui-card
                 link="ui-card.html#ui-cards"
@@ -1535,7 +1563,7 @@
             </ui-cards>
           </ui-section>
 
-          <ui-section id="tables" label="Tables" sticky collapsible dividing>
+          <ui-section id="tables" label="Tables" sticky="stack" collapsible dividing>
             <ui-cards>
               <ui-card
                 link="ui-table.html#ui-cell"
@@ -1552,7 +1580,7 @@
             </ui-cards>
           </ui-section>
 
-          <ui-section id="cards" label="Cards" sticky collapsible dividing>
+          <ui-section id="cards" label="Cards" sticky="stack" collapsible dividing>
             <ui-cards>
               <ui-card
                 link="ui-card.html"
@@ -1581,7 +1609,7 @@
             </ui-cards>
           </ui-section>
 
-          <ui-section id="feedback" label="Feedback" sticky collapsible dividing>
+          <ui-section id="feedback" label="Feedback" sticky="stack" collapsible dividing>
             <ui-cards>
               <ui-card
                 link="ui-dimmer.html"
@@ -1634,7 +1662,7 @@
             </ui-cards>
           </ui-section>
 
-          <ui-section id="messages" label="Messages" sticky collapsible dividing>
+          <ui-section id="messages" label="Messages" sticky="stack" collapsible dividing>
             <ui-cards>
               <ui-card
                 link="ui-message.html"
@@ -1657,7 +1685,7 @@
             </ui-cards>
           </ui-section>
 
-          <ui-section id="notifications" label="Notifications" sticky collapsible dividing>
+          <ui-section id="notifications" label="Notifications" sticky="stack" collapsible dividing>
             <ui-cards>
               <ui-card
                 link="ui-message.html"
@@ -1680,7 +1708,7 @@
             </ui-cards>
           </ui-section>
 
-          <ui-section id="overlays" label="Overlays" sticky collapsible dividing>
+          <ui-section id="overlays" label="Overlays" sticky="stack" collapsible dividing>
             <ui-cards>
               <ui-card
                 link="ui-dimmer.html"
@@ -1733,7 +1761,7 @@
             </ui-cards>
           </ui-section>
 
-          <ui-section id="dialogs" label="Dialogs" sticky collapsible dividing>
+          <ui-section id="dialogs" label="Dialogs" sticky="stack" collapsible dividing>
             <ui-cards>
               <ui-card
                 link="ui-actions.html"
@@ -1756,7 +1784,7 @@
             </ui-cards>
           </ui-section>
 
-          <ui-section id="popups" label="Popups" sticky collapsible dividing>
+          <ui-section id="popups" label="Popups" sticky="stack" collapsible dividing>
             <ui-cards>
               <ui-card
                 link="ui-modal.html"
@@ -1773,7 +1801,7 @@
             </ui-cards>
           </ui-section>
 
-          <ui-section id="loading" label="Loading" sticky collapsible dividing>
+          <ui-section id="loading" label="Loading" sticky="stack" collapsible dividing>
             <ui-cards>
               <ui-card
                 link="ui-components.html"
@@ -1838,7 +1866,7 @@
             </ui-cards>
           </ui-section>
 
-          <ui-section id="progress" label="Progress" sticky collapsible dividing>
+          <ui-section id="progress" label="Progress" sticky="stack" collapsible dividing>
             <ui-cards>
               <ui-card
                 link="ui-loader.html"
@@ -1867,7 +1895,7 @@
             </ui-cards>
           </ui-section>
 
-          <ui-section id="status" label="Status" sticky collapsible dividing>
+          <ui-section id="status" label="Status" sticky="stack" collapsible dividing>
             <ui-cards>
               <ui-card
                 link="ui-label.html"
@@ -1902,7 +1930,7 @@
             </ui-cards>
           </ui-section>
 
-          <ui-section id="animation" label="Animation" sticky collapsible dividing>
+          <ui-section id="animation" label="Animation" sticky="stack" collapsible dividing>
             <ui-cards>
               <ui-card
                 link="ui-reveal.html"
@@ -1937,7 +1965,7 @@
             </ui-cards>
           </ui-section>
 
-          <ui-section id="social" label="Social" sticky collapsible dividing>
+          <ui-section id="social" label="Social" sticky="stack" collapsible dividing>
             <ui-cards>
               <ui-card
                 link="ui-author.html"
@@ -1990,7 +2018,7 @@
             </ui-cards>
           </ui-section>
 
-          <ui-section id="content-parts" label="Content parts" sticky collapsible dividing>
+          <ui-section id="content-parts" label="Content parts" sticky="stack" collapsible dividing>
             <ui-cards>
               <ui-card
                 link="ui-actions.html"
@@ -2127,7 +2155,7 @@
             </ui-cards>
           </ui-section>
 
-          <ui-section id="documentation" label="Documentation" sticky collapsible dividing>
+          <ui-section id="documentation" label="Documentation" sticky="stack" collapsible dividing>
             <ui-cards>
               <ui-card
                 link="ui-example.html"
@@ -2144,7 +2172,7 @@
             </ui-cards>
           </ui-section>
 
-          <ui-section id="elements" label="Elements" sticky collapsible dividing>
+          <ui-section id="elements" label="Elements" sticky="stack" collapsible dividing>
             <ui-cards>
               <ui-card
                 link="ui-audio.html"
@@ -2341,7 +2369,7 @@
             </ui-cards>
           </ui-section>
 
-          <ui-section id="collections" label="Collections" sticky collapsible dividing>
+          <ui-section id="collections" label="Collections" sticky="stack" collapsible dividing>
             <ui-cards>
               <ui-card
                 link="ui-breadcrumbs.html#ui-breadcrumb"
@@ -2443,7 +2471,7 @@
             </ui-cards>
           </ui-section>
 
-          <ui-section id="views" label="Views" sticky collapsible dividing>
+          <ui-section id="views" label="Views" sticky="stack" collapsible dividing>
             <ui-cards>
               <ui-card
                 link="ui-ad.html"
@@ -2520,7 +2548,7 @@
             </ui-cards>
           </ui-section>
 
-          <ui-section id="modules" label="Modules" sticky collapsible dividing>
+          <ui-section id="modules" label="Modules" sticky="stack" collapsible dividing>
             <ui-cards>
               <ui-card
                 link="ui-accordion.html"

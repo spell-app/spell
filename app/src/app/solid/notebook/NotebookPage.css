@@ -2,22 +2,16 @@
  * A notebook's page (`<NotebookPage>`, epic `elemental-spell` P16):  the page and its "On this page" column,
  * drawn as Spell UI's docs site draws a component page.  The page scrolls inside its pane (`.NotebookScroller`).
  * - NO background anywhere under the page:  only the pane's own glass shows (Owen, 2026-10-26:  "I don't want *any*
- *   background under the notebook page").  The section bars, the masthead, the contents and the examples' frames
- *   paint no fill;  a stuck section bar blurs what scrolls under it instead.
+ *   background under the notebook page").  The masthead and the contents paint no fill;
+ *   the section titles and the examples' frames keep the docs site's (below).
  * - No toolbar:  the notebook's tools are in the pane's header (`NotebookHeader.css`).
  */
 
 .NotebookPage {
-  --notebook-gutter: 24px;
+  --notebook-gutter: 40px;
   /* the docs site's text size, the theme's (the editor's own is a little smaller) */
   font-size: var(--ui-font-size);
   line-height: var(--ui-line-height);
-  /*
-   * a section title's bar reaches out past the column, as a component page's does (`docs-sections.css`):
-   * its edge 8px out from the text, half the gutter:  the pane's edge keeps its own room
-   */
-  --ui-docs-section-reach-start: calc(12px + var(--notebook-gutter) / 2);
-  --ui-docs-section-reach-end: calc(12px + var(--notebook-gutter) / 2);
   /* its own width decides its layout, not the window's:  it shares the window with the code */
   container-type: inline-size;
   position: relative;
@@ -144,27 +138,24 @@
 }
 
 /*
- * ## No background:  the docs site's fills cleared, the pane's glass showing through
- * - section bars:  no fill in place;  stuck, the pane's own glass (above), so what scrolls under its words is hidden
- *   and the bar still reads as the pane
- * - examples:  their frame keeps its border, no fill
+ * a section's title bar, a bar of `<ui-section sticky="stack">`'s stack:  reaching out past the column as a component
+ * page's does, a top-level one 28px out (12px in from the pane's edge), a nested one 12px out:  each bar wider than
+ * what it holds (Owen, 2026-10-27:  "outdent button header so it is bigger than the content");  its ends the theme's
+ * pill, as its tab bar's ("pill sides to match the theme")
  */
-.NotebookPage ui-section[sticky]::part(title) {
-  background: none;
-  -webkit-backdrop-filter: none;
-  backdrop-filter: none;
+.NotebookPage ui-section[sticky]:not(spell-example ui-section) {
+  --ui-section-stack-reach-start: calc(var(--notebook-gutter) - 12px);
+  --ui-section-stack-reach-end: calc(var(--notebook-gutter) - 12px);
+  --ui-section-stack-step: 16px;
+  --ui-section-stack-radius: var(--ui-menu-segmented-radius, var(--ui-radius-m));
 }
-.NotebookPage ui-section[sticky]:state(stuck)::part(title) {
-  background-color: var(--notebook-glass-color);
-  background-image: var(--notebook-glass-image);
-  background-attachment: scroll, fixed;
-}
-.NotebookPage :is(spell-example, ui-example) {
-  --ui-example-frame-background: transparent;
-  --ui-example-frame-filter: none;
-  --ui-example-frame-shadow: none;
-  --ui-example-demo-background: transparent;
-}
+
+/*
+ * ## Section titles and examples:  the docs site's own look, left as it is (`docs-sections.css`, `<ui-example>`)
+ * - Owen, 2026-10-27:  the titles and the examples' frames look as they do in Spell UI's docs, not cleared
+ *   ("it really bugs me that the section title and example background look like [this] rather than the way they
+ *   do in the spell/ui docs");  only the page itself stays see-through
+ */
 
 /* the page's title and the line under it, as a component page's masthead (`<ui-header level="1">` and its sub header) */
 .NotebookMasthead {
@@ -198,11 +189,14 @@
   border-bottom: none;
 }
 /*
- * a page section whose first drawing opens with a nested section:  that title right under its own, as the site's
- * (`docs-sections.css` does it for a section that's its parent's first child;  here a cell stands between them)
+ * no room between a closed section and the one right after it, each in a cell of its own:  the stack says which
+ * (`<ui-section sticky="stack">`'s `after-closed`), the cells give up their own room
  */
-.NotebookSection:has(> .NotebookCell .NotebookResult > ui-section[sticky]:first-child)::part(content) {
-  padding-block-start: 0;
+.NotebookCell:has(> * > .NotebookResult > ui-section:state(after-closed):first-child) {
+  margin-block-start: 0;
+}
+.NotebookCell:has(+ .NotebookCell > * > .NotebookResult > ui-section:state(after-closed):first-child) {
+  margin-block-end: 0;
 }
 /* ... nor a title's room:  it has none to show (its padding stood 7.5px over the section tabs) */
 .NotebookResult ui-section:not([label], :has(> [slot="label"]))::part(title) {
@@ -224,12 +218,6 @@
   border-radius: var(--ui-radius-m, 0.5em);
 }
 
-/* the selected cell, the one last clicked (the pane header's ⋯ acts on it):  a faint ring a little out from it */
-.NotebookCell.selected:not(:empty) {
-  outline: 2px solid color-mix(in oklab, var(--ui-primary) 35%, transparent);
-  outline-offset: 4px;
-}
-
 /* a cell with nothing to show (a section's heading cell, its text shown as its example's description):  no room */
 .NotebookCell:empty {
   margin: 0;
@@ -239,8 +227,8 @@
  * ... so the example after it starts right under its section's title, as a component page's first example does
  * - after a section written as tags, two:  its opening tag's and its description's `<text>`
  */
-.NotebookCell:first-child:empty + .NotebookCell,
-.NotebookCell:first-child:empty + .NotebookCell:empty + .NotebookCell {
+.NotebookCell:nth-child(1 of .NotebookCell):empty + .NotebookCell,
+.NotebookCell:nth-child(1 of .NotebookCell):empty + .NotebookCell:empty + .NotebookCell {
   margin-top: 0;
 }
 
@@ -254,7 +242,9 @@
   color: var(--ui-text-muted);
 }
 
+/* its height is its text's (`<CellEditor>`):  its border and padding outside it */
 .NotebookCode {
+  box-sizing: content-box;
   border: 1px solid var(--ui-border-color, rgb(34 36 38 / 0.15));
   border-radius: var(--ui-radius-m, 0.5em);
   overflow: hidden;
@@ -274,7 +264,7 @@
 
 /*
  * an example's code, in its code pane:  its text on the pane's own shade, as the code of a component page's example
- * - its switch (spellx / spell / html) small, over the pane's top right
+ * - its switch (spellx / spell) small, over the pane's top right
  */
 .NotebookExampleCode {
   display: grid;

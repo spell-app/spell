@@ -48,13 +48,14 @@ export class ImportRenamer {
    * Rename the old names in every tracked text file of `repo` (a git checkout), writing each file it changes
    * unless `dryRun`.
    * - `prefix`:  what to print before each file's path (default its path from the kit)
+   * - `only`:  just these files (paths from the repo's root);  default every tracked file
    * - NEVER throws for a file it can't read:  it's skipped.
    */
-  renameRepo(repo: string, dryRun: boolean): RenameReport {
+  renameRepo(repo: string, dryRun: boolean, only?: ReadonlySet<string>): RenameReport {
     const report: RenameReport = { repo, files: [], names: 0 }
     const listed = execFileSync("git", ["ls-files", "-z"], { cwd: repo, encoding: "utf8", maxBuffer: 1 << 28 })
     for (const file of listed.split("\0").filter(Boolean)) {
-      if (SKIPPED.test(file)) continue
+      if (SKIPPED.test(file) || (only && !only.has(file))) continue
       const path = join(repo, file)
       const before = readText(path)
       if (before === undefined) continue
@@ -344,7 +345,14 @@ function escaped(text: string): string {
 function trackedEntries(dir: string): string[] {
   try {
     const listed = execFileSync("git", ["ls-files", "-z"], { cwd: dir, encoding: "utf8", maxBuffer: 1 << 28 })
-    return [...new Set(listed.split("\0").filter(Boolean).map((file) => file.split("/")[0]!))]
+    return [
+      ...new Set(
+        listed
+          .split("\0")
+          .filter(Boolean)
+          .map((file) => file.split("/")[0]!)
+      )
+    ]
   } catch {
     return readdirSync(dir)
   }

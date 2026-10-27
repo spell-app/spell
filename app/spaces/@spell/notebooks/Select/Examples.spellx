@@ -5,14 +5,12 @@
 	</>
 	<select-tab-bar showing="examples"/>
 	<section>
-		<html>
-			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-				<ui-item link="#types">Types</>
-				<ui-item link="#content">Content</>
-				<ui-item link="#states">States</>
-				<ui-item link="#variations">Variations</>
-				<ui-item link="#examples">Examples</>
-			</>
+		<menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#types">Types</>
+			<item link="#content">Content</>
+			<item link="#states">States</>
+			<item link="#variations">Variations</>
+			<item link="#examples">Examples</>
 		</>
 	</>
 
@@ -23,7 +21,7 @@
 		  the browser's own list.  A search, additions, labels or rich content:  `<ui-dropdown>`.
 	-->
 	<section label="Types">
-		<section label="Select" sticky collapsible dividing>
+		<section label="Select" sticky="stack" collapsible dividing>
 			<example description="A select lets the user choose one option, in the closed look of a selection dropdown. Options are `<ui-item>`s, as in a dropdown; `placeholder` stands while nothing is chosen.">
 				<select name="pet" placeholder="Pet">
 					<item value="0">Cat</item>
@@ -48,7 +46,7 @@
 			</example>
 		</>
 
-		<section label="Chosen value" sticky collapsible dividing>
+		<section label="Chosen value" sticky="stack" collapsible dividing>
 			<example description="`value` picks the starting option.">
 				<select aria-label="Fruit" value="banana">
 					<item value="apple">Apple</item>
@@ -70,9 +68,7 @@
 				</select>
 			</example>
 		</>
-		<html>
-			<ui-message size="small" class="site-not-ported">Not ported here, on purpose: Search Selection, Clearable, labels for a multiple, user additions and every menu-only look (inline, button, pointing ...) -- a native <code>&lt;select&gt;</> can't; use <code>&lt;ui-dropdown&gt;</>.</>
-		</>
+		<message size="small" class="site-not-ported"><html>Not ported here, on purpose: Search Selection, Clearable, labels for a multiple, user additions and every menu-only look (inline, button, pointing ...) -- a native <code>&lt;select&gt;</> can't; use <code>&lt;ui-dropdown&gt;</>.</></>
 	</>
 
 	<section label="Content">
@@ -102,7 +98,7 @@
 	</>
 
 	<section label="States">
-		<section label="Error" sticky collapsible dividing>
+		<section label="Error" sticky="stack" collapsible dividing>
 			<example description="An errored select can alert a user to a problem:  `state=\"error\"`.">
 				<select state="error" placeholder="Gender">
 					<item value="male">Male</item>
@@ -122,7 +118,7 @@
 			</example>
 		</>
 
-		<section label="Disabled" sticky collapsible dividing>
+		<section label="Disabled" sticky="stack" collapsible dividing>
 			<example description="A disabled select does not allow user interaction, and isn't submitted.  A disabled item can't be chosen.">
 				<select disabled placeholder="Gender">
 					<item value="male">Male</item>
@@ -139,7 +135,7 @@
 	</>
 
 	<section label="Variations">
-		<section label="Size" sticky collapsible dividing>
+		<section label="Size" sticky="stack" collapsible dividing>
 			<example description="A select can have different sizes.">
 				<select size="mini" name="gender" placeholder="Mini">
 					<item value="1">Male</item>
@@ -178,7 +174,7 @@
 			</example>
 		</>
 
-		<section label="Inverted" sticky collapsible dividing>
+		<section label="Inverted" sticky="stack" collapsible dividing>
 			<example description="A select can be inverted.">
 				<segment inverted>
 					<select inverted name="choices" placeholder="Select choice">
@@ -190,7 +186,7 @@
 			</example>
 		</>
 
-		<section label="Compact" sticky collapsible dividing>
+		<section label="Compact" sticky="stack" collapsible dividing>
 			<example description="A compact select has no minimum width:  it is as wide as its longest option.">
 				<select padding="compact" aria-label="Compact" value="a">
 					<item value="a">Or</item>
@@ -199,7 +195,7 @@
 			</example>
 		</>
 
-		<section label="Fluid" sticky collapsible dividing>
+		<section label="Fluid" sticky="stack" collapsible dividing>
 			<example description="A select can take the full width of its parent.">
 				<select fluid placeholder="Fills its container">
 					<item value="a">A</item>
@@ -210,7 +206,7 @@
 	</>
 
 	<section label="Examples">
-		<section label="Form" sticky collapsible dividing>
+		<section label="Form" sticky="stack" collapsible dividing>
 			<example description="A select is a form control:  in a field, with a label.">
 				<html>
 					<ui-form>

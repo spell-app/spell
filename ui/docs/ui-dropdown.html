@@ -61,9 +61,9 @@
               - Options are slotted `<ui-item>`s;  Fomantic's long country / state lists are shortened.
               - Fomantic's `<select class="ui dropdown">` forms are `<ui-dropdown selection>` (with `multiple` for a multi-select).
             -->
-            <ui-section id="examples-types" label="Types" sticky collapsible dividing>
+            <ui-section id="examples-types" label="Types" sticky="stack" collapsible dividing>
               <!-- GAP I53:  no nested sub-menu (`Publish To Web`);  left out. -->
-              <ui-section id="examples-types-dropdown" label="Dropdown" sticky collapsible dividing>
+              <ui-section id="examples-types-dropdown" label="Dropdown" sticky="stack" collapsible dividing>
                 <ui-example>
                   <p slot="description">
                     A dropdown, its items <code>&lt;ui-item&gt;</code>s. An item's <code>description</code> sits at the
@@ -84,7 +84,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-types-selection" label="Selection" sticky collapsible dividing>
+              <ui-section id="examples-types-selection" label="Selection" sticky="stack" collapsible dividing>
                 <ui-example>
                   <p slot="description">
                     A dropdown can be used to select between choices in a form:  <code>selection</code>, with a name and
@@ -118,7 +118,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-types-search-selection" label="Search Selection" sticky collapsible dividing>
+              <ui-section id="examples-types-search-selection" label="Search Selection" sticky="stack" collapsible dividing>
                 <ui-example
                   description="A selection dropdown can allow a user to search through a large list of choices:  `search`."
                 >
@@ -582,7 +582,7 @@
               </ui-section>
 
               <!-- GAP I11:  no basic button look. -->
-              <ui-section id="examples-types-search-dropdown" label="Search Dropdown" sticky collapsible dividing>
+              <ui-section id="examples-types-search-dropdown" label="Search Dropdown" sticky="stack" collapsible dividing>
                 <ui-example description="A dropdown can be searchable, on a labeled icon button too.">
                   <ui-dropdown floating labeled button search icon="world" placeholder="Select Language">
                     <ui-item>Arabic</ui-item>
@@ -611,7 +611,7 @@
               </ui-section>
 
               <!-- GAP I106:  an input in the menu doesn't filter it (Fomantic's search in-menu);  the header slot just shows it. -->
-              <ui-section id="examples-types-search-in-menu" label="Search In-Menu" sticky collapsible dividing>
+              <ui-section id="examples-types-search-in-menu" label="Search In-Menu" sticky="stack" collapsible dividing>
                 <ui-example>
                   <p slot="description">
                     A dropdown can include content at the top of its menu: the <code>header</code> slot. Fomantic's
@@ -661,7 +661,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-types-inline" label="Inline" sticky collapsible dividing>
+              <ui-section id="examples-types-inline" label="Inline" sticky="stack" collapsible dividing>
                 <ui-example description="A dropdown can be formatted to appear inline in other content.">
                   <p>
                     Show me posts by
@@ -690,7 +690,7 @@
               </ui-section>
 
               <!-- GAP I53:  no dropdown menu item, no nested sub-menus;  the menu examples keep a dropdown inside an item. -->
-              <ui-section id="examples-types-pointing" label="Pointing" sticky collapsible dividing>
+              <ui-section id="examples-types-pointing" label="Pointing" sticky="stack" collapsible dividing>
                 <ui-example>
                   <p slot="description">
                     A dropdown can be formatted so that its menu is pointing: <code>pointing</code>, with a value for
@@ -789,7 +789,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-types-floating" label="Floating" sticky collapsible dividing>
+              <ui-section id="examples-types-floating" label="Floating" sticky="stack" collapsible dividing>
                 <ui-example description="A dropdown menu can appear to be floating below an element.">
                   <ui-buttons color="teal">
                     <ui-button>Save</ui-button>
@@ -802,7 +802,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-types-simple" label="Simple" sticky collapsible dividing>
+              <ui-section id="examples-types-simple" label="Simple" sticky="stack" collapsible dividing>
                 <ui-example
                   description="A simple dropdown can open without JavaScript:  on hover and focus, with no popover."
                 >
@@ -815,9 +815,9 @@
               </ui-section>
             </ui-section>
 
-            <ui-section id="examples-content" label="Content" sticky collapsible dividing>
+            <ui-section id="examples-content" label="Content" sticky="stack" collapsible dividing>
               <!-- GAP I107:  a header item's `icon` draws nothing;  slotted labels are tiny dots touching the text. -->
-              <ui-section id="examples-content-header" label="Header" sticky collapsible dividing>
+              <ui-section id="examples-content-header" label="Header" sticky="stack" collapsible dividing>
                 <ui-example description='A dropdown menu can contain a header:  `type="header"`.'>
                   <ui-dropdown floating labeled button icon="filter" label="Filter">
                     <ui-item kind="header" icon="tags">Filter by tag</ui-item>
@@ -828,7 +828,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-content-divider" label="Divider" sticky collapsible dividing>
+              <ui-section id="examples-content-divider" label="Divider" sticky="stack" collapsible dividing>
                 <ui-example
                   description='A dropdown menu can contain dividers to separate related content:  `type="divider"`.'
                 >
@@ -842,7 +842,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-content-icon" label="Icon" sticky collapsible dividing>
+              <ui-section id="examples-content-icon" label="Icon" sticky="stack" collapsible dividing>
                 <ui-example description="A dropdown menu can contain an icon:  `icon`.">
                   <ui-dropdown floating labeled button icon="filter" label="Filter">
                     <ui-item kind="header" icon="tags">Filter by tag</ui-item>
@@ -854,7 +854,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-content-description" label="Description" sticky collapsible dividing>
+              <ui-section id="examples-content-description" label="Description" sticky="stack" collapsible dividing>
                 <ui-example description="A dropdown menu can contain a description:  `description`.">
                   <ui-dropdown floating labeled button icon="filter" label="Filter Tags">
                     <ui-item kind="header">Filter by tag</ui-item>
@@ -871,7 +871,7 @@
                 (plan issue I107).</ui-message
               >
 
-              <ui-section id="examples-content-label" label="Label" sticky collapsible dividing>
+              <ui-section id="examples-content-label" label="Label" sticky="stack" collapsible dividing>
                 <ui-example
                   description="A dropdown menu can contain a label:  any markup inside an item is projected into its row."
                 >
@@ -888,7 +888,7 @@
               </ui-section>
 
               <!-- GAP I107:  the header slot is unpadded, and an item-less menu adds "No results found." under the message. -->
-              <ui-section id="examples-content-message" label="Message" sticky collapsible dividing>
+              <ui-section id="examples-content-message" label="Message" sticky="stack" collapsible dividing>
                 <ui-example
                   description="A dropdown menu can contain a message:  the `header` slot holds any markup."
                 >
@@ -927,7 +927,7 @@
               </ui-section>
 
               <!-- GAP I107:  no floated content in an item (`right floated icon`). -->
-              <ui-section id="examples-content-content-at-the-end" label="Content at the End" sticky collapsible dividing>
+              <ui-section id="examples-content-content-at-the-end" label="Content at the End" sticky="stack" collapsible dividing>
                 <ui-example>
                   <p slot="description">
                     A dropdown item can have content at the end of its row: its <code>description</code>. An icon can't go
@@ -941,7 +941,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-content-input" label="Input" sticky collapsible dividing>
+              <ui-section id="examples-content-input" label="Input" sticky="stack" collapsible dividing>
                 <ui-example>
                   <p slot="description">
                     A dropdown menu can contain an input, in the <code>header</code> slot. It doesn't filter the items:
@@ -966,7 +966,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-content-image" label="Image" sticky collapsible dividing>
+              <ui-section id="examples-content-image" label="Image" sticky="stack" collapsible dividing>
                 <ui-example description="A dropdown menu can contain an image:  `image`.">
                   <ui-dropdown floating labeled button icon="user plus" label="Add User">
                     <ui-item kind="header">People You Might Know</ui-item>
@@ -995,8 +995,8 @@
               >
             </ui-section>
 
-            <ui-section id="examples-states" label="States" sticky collapsible dividing>
-              <ui-section id="examples-states-loading" label="Loading" sticky collapsible dividing>
+            <ui-section id="examples-states" label="States" sticky="stack" collapsible dividing>
+              <ui-section id="examples-states-loading" label="Loading" sticky="stack" collapsible dividing>
                 <ui-example description="A dropdown can show that it is currently loading data.">
                   <ui-dropdown loading label="Dropdown">
                     <ui-item>Choice 1</ui-item>
@@ -1021,7 +1021,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-states-error" label="Error" sticky collapsible dividing>
+              <ui-section id="examples-states-error" label="Error" sticky="stack" collapsible dividing>
                 <ui-example description='An errored dropdown can alert a user to a problem:  `state="error"`.'>
                   <ui-dropdown floating state="error" label="Dropdown">
                     <ui-item>Choice 1</ui-item>
@@ -1037,7 +1037,7 @@
                   </ui-dropdown>
                 </ui-example>
               </ui-section>
-              <ui-section id="examples-states-form-states" label="Form states" sticky collapsible dividing>
+              <ui-section id="examples-states-form-states" label="Form states" sticky="stack" collapsible dividing>
                 <ui-example
                   description="`state` also takes `info`, `success` and `warning`:  it tints the box, the text and the menu."
                 >
@@ -1050,7 +1050,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-states-active" label="Active" sticky collapsible dividing>
+              <ui-section id="examples-states-active" label="Active" sticky="stack" collapsible dividing>
                 <ui-example>
                   <p slot="description">
                     An active dropdown has its menu open: <code>open</code>. Setting it fires no event.
@@ -1062,7 +1062,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-states-disabled" label="Disabled" sticky collapsible dividing>
+              <ui-section id="examples-states-disabled" label="Disabled" sticky="stack" collapsible dividing>
                 <ui-example
                   description="A disabled dropdown menu or item does not allow user interaction.  A disabled dropdown isn't submitted."
                 >
@@ -1081,7 +1081,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-states-read-only" label="Read-Only" sticky collapsible dividing>
+              <ui-section id="examples-states-read-only" label="Read-Only" sticky="stack" collapsible dividing>
                 <ui-example
                   description="A dropdown can be read-only and does not allow user interaction, but still submits with a form."
                 >
@@ -1094,8 +1094,8 @@
               </ui-section>
             </ui-section>
 
-            <ui-section id="examples-variations" label="Variations" sticky collapsible dividing>
-              <ui-section id="examples-variations-size" label="Size" sticky collapsible dividing>
+            <ui-section id="examples-variations" label="Variations" sticky="stack" collapsible dividing>
+              <ui-section id="examples-variations-size" label="Size" sticky="stack" collapsible dividing>
                 <ui-example description="A dropdown can have different sizes.">
                   <ui-dropdown size="mini" selection name="gender" placeholder="Mini">
                     <ui-item value="1">Male</ui-item>
@@ -1134,7 +1134,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-variations-scrolling" label="Scrolling" sticky collapsible dividing>
+              <ui-section id="examples-variations-scrolling" label="Scrolling" sticky="stack" collapsible dividing>
                 <ui-example>
                   <p slot="description">
                     A dropdown can have its menu scroll: <code>scrolling</code>; add <code>resizable</code> for a native
@@ -1190,7 +1190,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-variations-inverted" label="Inverted" sticky collapsible dividing>
+              <ui-section id="examples-variations-inverted" label="Inverted" sticky="stack" collapsible dividing>
                 <ui-example description="A dropdown can be inverted.">
                   <ui-segment inverted>
                     <ui-dropdown inverted selection name="choices" placeholder="Select choice">
@@ -1207,7 +1207,7 @@
                 inverts the whole dropdown (plan issue I107).</ui-message
               >
 
-              <ui-section id="examples-variations-compact" label="Compact" sticky collapsible dividing>
+              <ui-section id="examples-variations-compact" label="Compact" sticky="stack" collapsible dividing>
                 <ui-example description='A compact dropdown has no minimum width:  `padding="compact"`.'>
                   <ui-dropdown padding="compact" selection label="Compact">
                     <ui-item>A</ui-item>
@@ -1221,7 +1221,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-variations-fluid" label="Fluid" sticky collapsible dividing>
+              <ui-section id="examples-variations-fluid" label="Fluid" sticky="stack" collapsible dividing>
                 <ui-example description="A dropdown can take the full width of its parent:  `fluid`.">
                   <ui-menu direction="vertical">
                     <ui-item link="#link-1">Link 1</ui-item>
@@ -1238,7 +1238,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-variations-height" label="Height" sticky collapsible dividing>
+              <ui-section id="examples-variations-height" label="Height" sticky="stack" collapsible dividing>
                 <ui-example>
                   <p slot="description">
                     A selection dropdown can be <code>long</code> (2x of default height) so that more items can be
@@ -1416,7 +1416,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-variations-menu-direction" label="Menu Direction" sticky collapsible dividing>
+              <ui-section id="examples-variations-menu-direction" label="Menu Direction" sticky="stack" collapsible dividing>
                 <ui-example>
                   <p slot="description">
                     A dropdown menu can specify the direction it should open: <code>direction="left"</code> right-aligns
@@ -1437,7 +1437,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-variations-columnar-menu" label="Columnar Menu" sticky collapsible dividing>
+              <ui-section id="examples-variations-columnar-menu" label="Columnar Menu" sticky="stack" collapsible dividing>
                 <ui-example>
                   <p slot="description">
                     A selection dropdown can allow its menu to be equally divided so that more items can be glanced:
@@ -1624,7 +1624,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-variations-colored" label="Colored" sticky collapsible dividing>
+              <ui-section id="examples-variations-colored" label="Colored" sticky="stack" collapsible dividing>
                 <ui-example
                   description="`color` accents the focus border and the labels of a multiple selection, and fills a button dropdown."
                 >
@@ -1640,8 +1640,8 @@
               </ui-section>
             </ui-section>
 
-            <ui-section id="examples-selection-dropdowns" label="Selection Dropdowns" sticky collapsible dividing>
-              <ui-section id="examples-selection-dropdowns-clearable" label="Clearable" sticky collapsible dividing>
+            <ui-section id="examples-selection-dropdowns" label="Selection Dropdowns" sticky="stack" collapsible dividing>
+              <ui-section id="examples-selection-dropdowns-clearable" label="Clearable" sticky="stack" collapsible dividing>
                 <ui-example description="`clearable` lets users remove their selection from a dropdown.">
                   <ui-dropdown clearable fluid search selection name="country" placeholder="Select Country">
                     <ui-item value="af" flag="af">Afghanistan</ui-item>
@@ -1885,7 +1885,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-selection-dropdowns-upward" label="Upward" sticky collapsible dividing>
+              <ui-section id="examples-selection-dropdowns-upward" label="Upward" sticky="stack" collapsible dividing>
                 <ui-example>
                   <p slot="description">
                     A dropdown menu will automatically change which direction it opens if it can't fit on screen. To
@@ -1913,7 +1913,7 @@
               </ui-section>
             </ui-section>
 
-            <ui-section id="examples-remote-content" label="Remote Content" sticky collapsible dividing>
+            <ui-section id="examples-remote-content" label="Remote Content" sticky="stack" collapsible dividing>
               <ui-message size="small" class="site-not-ported"
                 >Not ported: Fomantic's API settings (<code>apiSettings</code>, <code>filterRemoteData</code>,
                 response mapping). Fetch the data yourself on <code>ui-search</code>, and set the
@@ -1921,7 +1921,7 @@
               >
             </ui-section>
 
-            <ui-section id="examples-menus" label="Menus" sticky collapsible dividing>
+            <ui-section id="examples-menus" label="Menus" sticky="stack" collapsible dividing>
               <ui-message size="small" class="site-not-ported"
                 >Not ported: Changing Transitions (<code>transition</code>) -- the menu fades through CSS; restyle it
                 with <code>::part(menu)</code>.</ui-message
@@ -1981,7 +1981,7 @@
               </ui-section>
             </ui-section>
 
-            <ui-section id="examples-adjusting-actions" label="Adjusting Actions" sticky collapsible dividing>
+            <ui-section id="examples-adjusting-actions" label="Adjusting Actions" sticky="stack" collapsible dividing>
               <ui-message size="small" class="site-not-ported"
                 >Combo Dropdowns and Link Dropdowns (<code>action: "combo" | "nothing" | "hide"</code>: an item that
                 changes a button, or a menu of links) can't be built yet: every dropdown is a select with a value
@@ -1989,9 +1989,9 @@
               >
             </ui-section>
 
-            <ui-section id="examples-coupling" label="Coupling" sticky collapsible dividing>
+            <ui-section id="examples-coupling" label="Coupling" sticky="stack" collapsible dividing>
               <!-- GAP I11:  no basic look, so the button group's dropdowns are filled. -->
-              <ui-section id="examples-coupling-button-group" label="Button Group" sticky collapsible dividing>
+              <ui-section id="examples-coupling-button-group" label="Button Group" sticky="stack" collapsible dividing>
                 <ui-example
                   description="A button group can be formatted to show additional content as a dropdown."
                 >
@@ -2013,7 +2013,7 @@
               </ui-section>
 
               <!-- GAP I53:  no dropdown that IS a menu item;  a dropdown sits inside an item. -->
-              <ui-section id="examples-coupling-menu" label="Menu" sticky collapsible dividing>
+              <ui-section id="examples-coupling-menu" label="Menu" sticky="stack" collapsible dividing>
                 <ui-example>
                   <p slot="description">
                     A menu can contain a dropdown, inside an item. Fomantic's dropdown that IS the item (<code
@@ -2033,7 +2033,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-coupling-form" label="Form" sticky collapsible dividing>
+              <ui-section id="examples-coupling-form" label="Form" sticky="stack" collapsible dividing>
                 <ui-example
                   description="A dropdown can be formatted to allow selection inside a form:  it is a form control."
                 >
@@ -2051,7 +2051,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-coupling-invoker-commands" label="Invoker commands" sticky collapsible dividing>
+              <ui-section id="examples-coupling-invoker-commands" label="Invoker commands" sticky="stack" collapsible dividing>
                 <ui-example
                   description='Buttons drive a dropdown with no script:  `commandfor` + `command="--show"`, `--close` or `--toggle`.'
                 >
@@ -2068,7 +2068,7 @@
 
           <ui-tab value="usage" label="Usage">
             <!-- USAGE:  items vs options, values, forms, events, invokers, keyboard, accessibility, frameworks. -->
-            <ui-section id="usage-using-it" label="Using it" sticky collapsible dividing>
+            <ui-section id="usage-using-it" label="Using it" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   Write `<ui-dropdown>` with `<ui-item>`s inside: the options, headers (`type="header"`) and dividers
@@ -2084,7 +2084,7 @@
               </ui-markdown>
             </ui-section>
 
-            <ui-section id="usage-values" label="Values" sticky collapsible dividing>
+            <ui-section id="usage-values" label="Values" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   `value` is the chosen value: a string, or with `multiple` a `string[]` property (the attribute is a comma / space
@@ -2094,7 +2094,7 @@
               </ui-markdown>
             </ui-section>
 
-            <ui-section id="usage-rich-data" label="Rich data" sticky collapsible dividing>
+            <ui-section id="usage-rich-data" label="Rich data" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   Attributes carry primitives and are reflected; the rich `options` array is a JS property (frameworks find it with
@@ -2118,7 +2118,7 @@
               </ui-code>
             </ui-section>
 
-            <ui-section id="usage-forms" label="Forms" sticky collapsible dividing>
+            <ui-section id="usage-forms" label="Forms" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   A dropdown is a form control: `name` submits the value (`multiple`: one entry per value), `required` validates,
@@ -2127,7 +2127,7 @@
               </ui-markdown>
             </ui-section>
 
-            <ui-section id="usage-events" label="Events" sticky collapsible dividing>
+            <ui-section id="usage-events" label="Events" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   - `ui-changed` (`{ value }`): the user chose, added, removed or cleared a value.
@@ -2148,7 +2148,7 @@
               </ui-code>
             </ui-section>
 
-            <ui-section id="usage-invoker-commands" label="Invoker commands" sticky collapsible dividing>
+            <ui-section id="usage-invoker-commands" label="Invoker commands" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   A button with `commandfor="id"` and `command="--toggle"` (or `--show` / `--close`) opens and closes the menu with
@@ -2158,7 +2158,7 @@
               </ui-markdown>
             </ui-section>
 
-            <ui-section id="usage-keyboard" label="Keyboard" sticky collapsible dividing>
+            <ui-section id="usage-keyboard" label="Keyboard" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   - **Arrow Down** / **Arrow Up**: open the menu, then move the highlight.
@@ -2173,7 +2173,7 @@
               </ui-markdown>
             </ui-section>
 
-            <ui-section id="usage-accessibility" label="Accessibility" sticky collapsible dividing>
+            <ui-section id="usage-accessibility" label="Accessibility" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   The trigger is an ARIA 1.2 combobox with a listbox popup (the WAI-ARIA authoring practices pattern).
@@ -2194,7 +2194,7 @@
               </ui-markdown>
             </ui-section>
 
-            <ui-section id="usage-framework-usage" label="Framework usage" sticky collapsible dividing>
+            <ui-section id="usage-framework-usage" label="Framework usage" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   Set `options` as a property, not an attribute, and listen for `ui-changed`.
@@ -2230,38 +2230,38 @@
 
           <ui-tab value="api" label="API">
             <!-- API:  generated from the vocabularies (`docs/__data/components.json5`);  nothing to write. -->
-            <ui-section id="api-attributes" label="Attributes" sticky collapsible dividing>
+            <ui-section id="api-attributes" label="Attributes" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-dropdown" only="attributes"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-properties" label="Properties" sticky collapsible dividing>
+            <ui-section id="api-properties" label="Properties" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-dropdown" only="properties"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-events" label="Events" sticky collapsible dividing>
+            <ui-section id="api-events" label="Events" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-dropdown" only="events"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-slots" label="Slots" sticky collapsible dividing>
+            <ui-section id="api-slots" label="Slots" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-dropdown" only="slots"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-parts" label="Parts" sticky collapsible dividing>
+            <ui-section id="api-parts" label="Parts" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-dropdown" only="parts"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-states" label="States" sticky collapsible dividing>
+            <ui-section id="api-states" label="States" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-dropdown" only="states"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-texts" label="Texts" sticky collapsible dividing>
+            <ui-section id="api-texts" label="Texts" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-dropdown" only="texts"></ui-docs-api>
             </ui-section>
           </ui-tab>
 
           <ui-tab value="theming" label="Theming">
             <!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
-            <ui-section id="theming-tokens" label="Tokens" sticky collapsible dividing>
+            <ui-section id="theming-tokens" label="Tokens" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   Theme with the public `--ui-dropdown-*` tokens: set one on the element or on any ancestor (`:root` included).
@@ -2304,7 +2304,7 @@
               </ui-docs-tokens>
             </ui-section>
 
-            <ui-section id="theming-themes" label="Themes" sticky collapsible dividing>
+            <ui-section id="theming-themes" label="Themes" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   The theme menu above picks the theme for every page of the site:  Spell, Glass, Fruity or Merlot,

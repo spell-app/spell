@@ -63,6 +63,8 @@ export type ProjectMenuProps = UIMenuJSXAttributes & {
  * - Its trigger shows the project's group icon before its name (a book for a guide ...):  the `trigger` slot.
  *   So does each item.
  * - `showActions`:  the project's actions at its foot (Rename, Duplicate, Delete;  New), in place of a "..." menu.
+ * - A group of many projects (the notebooks, a page per Spell UI component) lists them in columns, so the list isn't
+ *   one long scroll (Owen, 2026-10-27:  "Make the notebooks menu multi-column so it's not so overwhelming").
  * - Sits in a menu:  wrapped in a `<ui-item class="ProjectDropdown">`.  Look:  `ProjectDropdown.css`.
  * - SEE:  its App UI components page, `app/docs/ProjectDropdown.html` (`/components/app/ProjectDropdown.html`).
  ****************/
@@ -75,7 +77,7 @@ export function ProjectDropdown(props: ProjectDropdownProps) {
   return (
     <ui-item class="ProjectDropdown">
       <ui-dropdown
-        class="ProjectDropdown"
+        class={["ProjectDropdown", { many: root().projects.length > MANY_PROJECTS }]}
         loading={!ready()}
         value={selected()}
         ref={on<{ value: string }>("ui-changed", choose)}
@@ -128,6 +130,9 @@ export type ProjectDropdownProps = {
   showActions?: boolean
 }
 
+/** More projects than this in a group:  its menu lists them in columns (`ProjectDropdown.css`). */
+const MANY_PROJECTS = 16
+
 /** The New item's value:  what `choose()` finds it by. */
 const NEW_PROJECT = "new-project"
 
@@ -137,8 +142,11 @@ export type ProjectRootState = {
   loaded: boolean
   /** Did loading it fail?  Then it never loads:  see `trackProjectRoot()`. */
   failed: boolean
-  /** Its projects, in order:  `path`, the name to show, and its description, if its project file has one. */
-  projects: { path: string; name: string; description?: string }[]
+  /**
+   * Its projects, in order:  `path`, the name to show, its description, if its project file has one, and its
+   * language, when it's all written in another than English (`SP.ProjectListEntry`).
+   */
+  projects: { path: string; name: string; description?: string; language?: string }[]
   /** Its icon name. */
   icon?: string
   /** Its words, in the page's language:  its title (`Examples`), what its projects are called (`Example`) ... */
@@ -177,11 +185,15 @@ function readProjectRoot(projectRoot: SPACES.SpellProjectRoot | undefined): Omit
     loaded,
     projects: loaded
       ? // each project's title:  its file's `"title"`, which the list gave, else made from its name (Q45)
-        projectRoot!.projectPaths.map((path) => ({
-          path,
-          name: new SP.SpellProject(path).title,
-          description: projectRoot!.contents?.find((entry) => entry.path === path)?.description
-        }))
+        projectRoot!.projectPaths.map((path) => {
+          const entry = projectRoot!.contents?.find((each) => each.path === path)
+          return {
+            path,
+            name: new SP.SpellProject(path).title,
+            description: entry?.description,
+            language: entry?.language
+          }
+        })
       : [],
     icon: projectRoot?.icon,
     words: appTexts.groupWords(projectRoot)

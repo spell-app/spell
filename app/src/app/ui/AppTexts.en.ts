@@ -30,20 +30,6 @@ export const APP_TEXTS = {
   editMode: "Edit",
   debugMode: "Debug",
   showLineNumbers: "Show line numbers",
-  // the input editor's two views of a .spellx file (epic `elemental-spell` P11)
-  inputViewText: "Show as text",
-  inputViewNotebook: "Show as a notebook of cards",
-  notebookFold: "Close",
-  notebookUnfold: "Open",
-  notebookShowForm: "Show the form",
-  notebookShowCode: "Show the code",
-  notebookMoveUp: "Move up",
-  notebookMoveDown: "Move down",
-  notebookName: "Name",
-  notebookOneOf: "One of",
-  notebookOneOfHint: "a, b or c",
-  notebookAliases: "Aliases",
-  notebookAliasHint: "is a (value)",
   // a notebook's page, `<NotebookPage>` (epic `elemental-spell` P16)
   notebookPageCodeAs: "Show code as",
   notebookPageLock: "Lock it:  nothing is saved while it's locked",
@@ -54,6 +40,7 @@ export const APP_TEXTS = {
   notebookPageContents: "On this page",
   notebookPagePick: "Switch to another notebook page",
   notebookPageReset: "Reset",
+  notebookPageUnfinished: "Not drawn yet:  a tag here isn't finished",
   notebookPageResetTip: "Put this example's code back as the file has it",
   notebookPageChangedElsewhere: "Changed elsewhere while you typed:  yours stays",
   notebookPageTakeTheirs: "Take theirs",
@@ -137,6 +124,10 @@ export const APP_TEXTS = {
   ////////////////
 
   appName: "Spell",
+  notebooksAppName: "Spell Notebooks",
+  tabTitle: "{project} • Spell",
+  notebookTabTitle: "{project} • Spell Notebook",
+  homeInSpanish: "En Español",
   homeEyebrow: "Spell, in preview",
   homeTitle: "Write an app in a sentence.",
   homeTagline: "Plain words in.  A working app out.",
@@ -153,6 +144,7 @@ export const APP_TEXTS = {
   homeProjectsLine: "What you've made, and where to start the next one.",
   homeFixturesLine: "The frozen apps the tests run against.",
   homeNoGuides: "Guides are on their way.",
+  homeNotebooksLine: "Spell UI's pages, written in Spell.",
 
   ////////////////
   // ## Project groups:  each group's words, by its `type` (spaces' `PROJECT_GROUPS`)
@@ -285,8 +277,12 @@ export const APP_TEXTS = {
   inspectorEventsTip: "Pick a part to see its events.",
   // an event's heading over its code (Owen:  "make label `on click`")
   // the theme editor's page (`<ThemeEditorPage>`), and the palette menu's way there
-  themeEditorTitle: "Theme editor",
   editTheme: "Edit theme…",
+  // the pages it previews while it's worked on (`BenchPages`, in development)
+  "themePage.editor": "Editor",
+  "themePage.epic": "Epic page",
+  "themePage.ui": "Spell UI",
+  "themePage.notebook": "Notebook",
   inspectorEventHeading: "on {event}",
   inspectorEventCode: "What happens on {event}",
   inspectorProperties: "Properties",

@@ -5,16 +5,14 @@
 	</>
 	<tab-tab-bar showing="usage"/>
 	<section>
-		<html>
-			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-				<ui-item link="#using-it">Using it</>
-				<ui-item link="#events">Events</>
-				<ui-item link="#history">History</>
-				<ui-item link="#panes-without-tabs">Panes without tabs</>
-				<ui-item link="#keyboard">Keyboard</>
-				<ui-item link="#accessibility">Accessibility</>
-				<ui-item link="#framework-usage">Framework usage</>
-			</>
+		<menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#using-it">Using it</>
+			<item link="#events">Events</>
+			<item link="#history">History</>
+			<item link="#panes-without-tabs">Panes without tabs</>
+			<item link="#keyboard">Keyboard</>
+			<item link="#accessibility">Accessibility</>
+			<item link="#framework-usage">Framework usage</>
 		</>
 	</>
 

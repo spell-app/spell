@@ -5,11 +5,9 @@
 	</>
 	<author-tab-bar showing="examples"/>
 	<section>
-		<html>
-			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-				<ui-item link="#owners">Owners</>
-				<ui-item link="#variations">Variations</>
-			</>
+		<menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#owners">Owners</>
+			<item link="#variations">Variations</>
 		</>
 	</>
 
@@ -19,7 +17,7 @@
 		(`ui-header.html`) shows every part together.
 	-->
 	<section label="Owners">
-		<section label="Comment" sticky collapsible dividing>
+		<section label="Comment" sticky="stack" collapsible dividing>
 			<example description="A comment's author, before its metadata.">
 				<html>
 					<ui-comments>
@@ -38,7 +36,7 @@
 			</example>
 		</>
 
-		<section label="Feed" sticky collapsible dividing>
+		<section label="Feed" sticky="stack" collapsible dividing>
 			<example description="A feed event's user, inline in its summary.">
 				<feed>
 					<event>
@@ -52,7 +50,7 @@
 	</>
 
 	<section label="Variations">
-		<section label="Link" sticky collapsible dividing>
+		<section label="Link" sticky="stack" collapsible dividing>
 			<example description="With `link`, an author is a real link;  without, plain text.">
 				<comments>
 					<comment>

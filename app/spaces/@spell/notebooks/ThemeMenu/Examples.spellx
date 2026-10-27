@@ -5,18 +5,16 @@
 	</>
 	<theme-menu-tab-bar showing="examples"/>
 	<section>
-		<html>
-			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-				<ui-item link="#types">Types</>
-				<ui-item link="#variations">Variations</>
-			</>
+		<menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#types">Types</>
+			<item link="#variations">Variations</>
 		</>
 	</>
 
 	<!--
 		EXAMPLES:  Fomantic's page, section by section, in its order (Types, Content, States, Variations,
 		Groups ...).  Rules, the class-grammar mappings, gaps:  epics/spell-ui-pages/PAGES.md.
-		- A section:  `<ui-section id="examples-types" label="Types" sticky collapsible dividing>` around
+		- A section:  `<ui-section id="examples-types" label="Types" sticky="stack" collapsible dividing>` around
 		  its examples;  ids spell out the nesting (`<tab>-<section>-<example>`, lowercase kebab of the headers).
 		- An example:  its own nested section (`label` = the example's name) around
 		  `<ui-example description="...">` and the live markup;  the markup IS the code shown.  A richer
@@ -28,19 +26,19 @@
 		  shows in its code).
 	-->
 	<section label="Types">
-		<section label="Palette" sticky collapsible dividing>
+		<section label="Palette" sticky="stack" collapsible dividing>
 			<example description="One round palette button:  its panel picks light, dark or Auto, and one of Spell's themes.  The page remembers both.">
 				<theme-menu/>
 			</example>
 		</>
 
-		<section label="Theme dropdown" sticky collapsible dividing>
+		<section label="Theme dropdown" sticky="stack" collapsible dividing>
 			<example description="A theme dropdown, for a masthead:  `show=\"theme\"`;  `compact` makes it an icon button.">
 				<theme-menu show="theme"/>
 			</example>
 		</>
 
-		<section label="Light / dark only" sticky collapsible dividing>
+		<section label="Light / dark only" sticky="stack" collapsible dividing>
 			<example description="A sun or a moon alone:  `show=\"scheme\"`.  A click flips the page between light and dark.">
 				<theme-menu show="scheme"/>
 			</example>
@@ -48,7 +46,7 @@
 	</>
 
 	<section label="Variations">
-		<section label="Inverted" sticky collapsible dividing>
+		<section label="Inverted" sticky="stack" collapsible dividing>
 			<example description="On a dark bar:  `inverted`, here at `size=\"small\"`.">
 				<segment inverted>
 					<theme-menu inverted size="small"/>

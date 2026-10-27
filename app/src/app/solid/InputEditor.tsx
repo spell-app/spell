@@ -1,4 +1,4 @@
-import { For, Loading, Show, createEffect, createMemo, createSignal } from "solid-js"
+import { Loading, Show, createEffect, createMemo, createSignal } from "solid-js"
 
 import { editor } from "spell/app/app/editor"
 import { editorPrefs } from "spell/app/app/editorPrefs"
@@ -8,7 +8,6 @@ import { Actions, ErrorBoundary, MoreMenu, PanelMenu, Submenu, tracked } from "s
 import { isStaticBuild } from "spell/app/app/static/staticBuild"
 import { FileDropdown } from "./FileDropdown"
 import { LazyMonaco } from "./LazyMonaco"
-import { SpellxNotebook } from "./SpellxNotebook"
 
 import "./InputEditor.css"
 
@@ -22,9 +21,7 @@ export function InputRoot(props: InputRootProps) {
       <Show when={props.showToolbar ?? true}>
         <InputToolbar />
       </Show>
-      <Show when={InputView.isNotebook} fallback={<InputEditor showError={editor.showError} />}>
-        <NotebookRoot />
-      </Show>
+      <InputEditor showError={editor.showError} />
     </div>
   )
 }
@@ -49,9 +46,6 @@ export function InputToolbar() {
         <FileDropdown />
       </Submenu>
       <Submenu right spring class="InputTools">
-        <Show when={InputView.canShowNotebook}>
-          <InputViewSwitch />
-        </Show>
         <Actions.saveFile iconOnly />
         <Actions.reloadFile iconOnly />
         <Actions.createFile iconOnly />
@@ -70,88 +64,6 @@ export function InputToolbar() {
         </MoreMenu>
       </Submenu>
     </PanelMenu>
-  )
-}
-
-/****************
- * ### `<InputViewSwitch>`
- * Text | Notebook, for a `.spellx` file (epic `elemental-spell` P11):  how `<InputRoot>` shows it.
- * - Two icons in the pane headers' segmented track (the Inspector's tabs' look, `chrome.css`), each with its `title`:
- *   words would crowd New File and the "..." menu out of a narrow pane.
- ****************/
-function InputViewSwitch() {
-  return (
-    <ui-menu appearance="segmented" class="InputViewSwitch">
-      <For each={INPUT_VIEWS}>
-        {(name) => (
-          <ui-item
-            appearance="link"
-            selected={InputView.isNotebook === (name === "notebook")}
-            title={appTexts.text(INPUT_VIEW_LOOKS[name].text)}
-            aria-label={appTexts.text(INPUT_VIEW_LOOKS[name].text)}
-            onClick={() => InputView.show(name)}
-          >
-            <ui-icon name={INPUT_VIEW_LOOKS[name].icon} />
-          </ui-item>
-        )}
-      </For>
-    </ui-menu>
-  )
-}
-
-/** Each way to show a `.spellx` file:  its switch's icon, and its tooltip. */
-const INPUT_VIEW_LOOKS = {
-  text: { icon: "align left", text: "inputViewText" },
-  notebook: { icon: "th list", text: "inputViewNotebook" }
-} as const
-
-/****************
- * ### `InputView`
- * How `<InputRoot>` shows a `.spellx` file:  as text, or as a notebook (`<SpellxNotebook>`).
- * - Text at first;  the switch picks, and the browser remembers (`spellEditor:inputView`), for every `.spellx` file.
- * - Any other file is always text.
- ****************/
-export class InputView {
-  /** Can the file showing be a notebook (reactive)?  Only a `.spellx` file. */
-  static get canShowNotebook(): boolean {
-    return /\.spellx$/.test(editor.file?.path ?? "")
-  }
-
-  /** Is the file showing as a notebook (reactive)? */
-  static get isNotebook(): boolean {
-    return InputView.canShowNotebook && view() === "notebook"
-  }
-
-  /** Show files as `next`, and remember it. */
-  static show(next: InputViewName): void {
-    setView(next)
-    editorPrefs.set(INPUT_VIEW_PREF, next)
-  }
-}
-
-/** The two ways `<InputRoot>` shows a `.spellx` file. */
-const INPUT_VIEWS = ["text", "notebook"] as const
-/** One of `INPUT_VIEWS`. */
-type InputViewName = (typeof INPUT_VIEWS)[number]
-/** The preference that remembers how `.spellx` files show. */
-const INPUT_VIEW_PREF = "inputView"
-editorPrefs.declare(INPUT_VIEW_PREF, { oneOf: INPUT_VIEWS })
-const [view, setView] = createSignal<InputViewName>((editorPrefs.get(INPUT_VIEW_PREF) as InputViewName) ?? "text")
-
-/****************
- * ### `<NotebookRoot>`
- * `editor.file` as a notebook (`<SpellxNotebook>`):  its edits go in as typed text (`editor.onInputChanged()`).
- ****************/
-function NotebookRoot() {
-  const file = tracked(() => editor.file)
-  return (
-    <div class="InputEditor InputNotebook">
-      <Show when={file()?.path} keyed>
-        {(path) => (
-          <SpellxNotebook text={file()?.contents ?? ""} path={path} onChange={(text) => editor.onInputChanged(text)} />
-        )}
-      </Show>
-    </div>
   )
 }
 

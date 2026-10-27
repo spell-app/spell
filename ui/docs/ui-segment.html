@@ -58,8 +58,8 @@
               EXAMPLES:  Fomantic's segment page, section by section, in its order (Types, Groups, States, Variations).
               - Fomantic's `<img class="ui wireframe image">` => `<ui-image src>`.
             -->
-            <ui-section id="examples-types" label="Types" sticky collapsible dividing>
-              <ui-section id="examples-types-segment" label="Segment" sticky collapsible dividing>
+            <ui-section id="examples-types" label="Types" sticky="stack" collapsible dividing>
+              <ui-section id="examples-types-segment" label="Segment" sticky="stack" collapsible dividing>
                 <ui-example description="A segment of content.">
                   <ui-segment>
                     <ui-image src="images/wireframe/short-paragraph.png" alt=""></ui-image>
@@ -128,7 +128,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-types-raised" label="Raised" sticky collapsible dividing>
+              <ui-section id="examples-types-raised" label="Raised" sticky="stack" collapsible dividing>
                 <ui-example description="A segment may be formatted to raise above the page.">
                   <ui-segment appearance="raised">
                     <p>
@@ -140,7 +140,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-types-stacked" label="Stacked" sticky collapsible dividing>
+              <ui-section id="examples-types-stacked" label="Stacked" sticky="stack" collapsible dividing>
                 <ui-example
                   description='A segment can be formatted to show it contains multiple pages:  `appearance="tall-stacked"` shows two.'
                 >
@@ -163,7 +163,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-types-piled" label="Piled" sticky collapsible dividing>
+              <ui-section id="examples-types-piled" label="Piled" sticky="stack" collapsible dividing>
                 <ui-example>
                   <p slot="description">A segment can be formatted to look like a pile of pages.</p>
                   <ui-message slot="description" state="info" size="small"
@@ -194,7 +194,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-types-vertical-segment" label="Vertical Segment" sticky collapsible dividing>
+              <ui-section id="examples-types-vertical-segment" label="Vertical Segment" sticky="stack" collapsible dividing>
                 <ui-example
                   description="A vertical segment formats content to be aligned as part of a vertical group."
                 >
@@ -211,8 +211,8 @@
               </ui-section>
             </ui-section>
 
-            <ui-section id="examples-groups" label="Groups" sticky collapsible dividing>
-              <ui-section id="examples-groups-segments" label="Segments" sticky collapsible dividing>
+            <ui-section id="examples-groups" label="Groups" sticky="stack" collapsible dividing>
+              <ui-section id="examples-groups-segments" label="Segments" sticky="stack" collapsible dividing>
                 <ui-example
                   description="A group of segments can be formatted to appear together:  `<ui-segments>`."
                 >
@@ -250,7 +250,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-groups-nested-segments" label="Nested Segments" sticky collapsible dividing>
+              <ui-section id="examples-groups-nested-segments" label="Nested Segments" sticky="stack" collapsible dividing>
                 <ui-example description="A group of segments can be nested in another group of segments.">
                   <ui-segments>
                     <ui-segment><p>Top</p></ui-segment>
@@ -343,7 +343,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-groups-raised-segments" label="Raised Segments" sticky collapsible dividing>
+              <ui-section id="examples-groups-raised-segments" label="Raised Segments" sticky="stack" collapsible dividing>
                 <ui-example description="A group of segments can be raised.">
                   <ui-segments appearance="raised">
                     <ui-segment><p>Top</p></ui-segment>
@@ -353,7 +353,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-groups-stacked-segments" label="Stacked Segments" sticky collapsible dividing>
+              <ui-section id="examples-groups-stacked-segments" label="Stacked Segments" sticky="stack" collapsible dividing>
                 <ui-example description="A group of segments can be stacked.">
                   <ui-segments appearance="stacked">
                     <ui-segment><p>Top</p></ui-segment>
@@ -363,7 +363,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-groups-piled-segments" label="Piled Segments" sticky collapsible dividing>
+              <ui-section id="examples-groups-piled-segments" label="Piled Segments" sticky="stack" collapsible dividing>
                 <ui-example description="A group of segments can be piled.">
                   <ui-segments appearance="piled">
                     <ui-segment><p>Top</p></ui-segment>
@@ -374,8 +374,8 @@
               </ui-section>
             </ui-section>
 
-            <ui-section id="examples-states" label="States" sticky collapsible dividing>
-              <ui-section id="examples-states-disabled" label="Disabled" sticky collapsible dividing>
+            <ui-section id="examples-states" label="States" sticky="stack" collapsible dividing>
+              <ui-section id="examples-states-disabled" label="Disabled" sticky="stack" collapsible dividing>
                 <ui-example description="A segment may show its content is disabled.">
                   <ui-segment disabled>
                     <ui-image src="images/wireframe/short-paragraph.png" alt=""></ui-image>
@@ -383,7 +383,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-states-loading" label="Loading" sticky collapsible dividing>
+              <ui-section id="examples-states-loading" label="Loading" sticky="stack" collapsible dividing>
                 <ui-example description="A segment may show its content is being loaded.">
                   <ui-segment loading>
                     <ui-image src="images/wireframe/paragraph.png" alt=""></ui-image>
@@ -403,8 +403,8 @@
               </ui-section>
             </ui-section>
 
-            <ui-section id="examples-variations" label="Variations" sticky collapsible dividing>
-              <ui-section id="examples-variations-inverted" label="Inverted" sticky collapsible dividing>
+            <ui-section id="examples-variations" label="Variations" sticky="stack" collapsible dividing>
+              <ui-section id="examples-variations-inverted" label="Inverted" sticky="stack" collapsible dividing>
                 <ui-example description="A segment can have its colors inverted for contrast.">
                   <ui-segment inverted>
                     <p>I'm here to tell you something, and you will probably read me first.</p>
@@ -412,7 +412,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-variations-attached" label="Attached" sticky collapsible dividing>
+              <ui-section id="examples-variations-attached" label="Attached" sticky="stack" collapsible dividing>
                 <ui-example>
                   <p slot="description">A segment can be attached to other content on a page.</p>
                   <ui-message slot="description" state="info" size="small"
@@ -470,7 +470,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-variations-padded" label="Padded" sticky collapsible dividing>
+              <ui-section id="examples-variations-padded" label="Padded" sticky="stack" collapsible dividing>
                 <ui-example description="A segment can increase its padding.">
                   <ui-segment padding="md">
                     <ui-image src="images/wireframe/short-paragraph.png" alt=""></ui-image>
@@ -483,7 +483,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-variations-fitted" label="Fitted" sticky collapsible dividing>
+              <ui-section id="examples-variations-fitted" label="Fitted" sticky="stack" collapsible dividing>
                 <ui-example description="A segment can remove its padding, vertically or horizontally.">
                   <ui-segment padding="none">
                     <p>Fitted Segment</p>
@@ -497,7 +497,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-variations-compact" label="Compact" sticky collapsible dividing>
+              <ui-section id="examples-variations-compact" label="Compact" sticky="stack" collapsible dividing>
                 <ui-example description="A segment may take up only as much space as is necessary.">
                   <ui-segment padding="compact">
                     <p>Pellentesque habitant morbi</p>
@@ -511,7 +511,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-variations-colored" label="Colored" sticky collapsible dividing>
+              <ui-section id="examples-variations-colored" label="Colored" sticky="stack" collapsible dividing>
                 <ui-example description="A segment can be colored.">
                   <ui-segment color="red">Red</ui-segment>
                   <ui-segment color="orange">Orange</ui-segment>
@@ -544,7 +544,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-variations-emphasis" label="Emphasis" sticky collapsible dividing>
+              <ui-section id="examples-variations-emphasis" label="Emphasis" sticky="stack" collapsible dividing>
                 <ui-example description="A segment can be formatted to appear more or less noticeable.">
                   <ui-segment>
                     <p>I'm here to tell you something, and you will probably read me first.</p>
@@ -581,7 +581,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-variations-circular" label="Circular" sticky collapsible dividing>
+              <ui-section id="examples-variations-circular" label="Circular" sticky="stack" collapsible dividing>
                 <ui-example>
                   <p slot="description">A segment can be circular.</p>
                   <ui-message slot="description" state="info" size="small"
@@ -605,7 +605,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-variations-clearing" label="Clearing" sticky collapsible dividing>
+              <ui-section id="examples-variations-clearing" label="Clearing" sticky="stack" collapsible dividing>
                 <ui-example description="A segment can clear floated content, such as a floated image.">
                   <ui-segment clearing>
                     <ui-image floated="right" size="tiny" src="images/wireframe/square-image.png" alt=""></ui-image>
@@ -613,7 +613,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-variations-left-and-right" label="Left and Right" sticky collapsible dividing>
+              <ui-section id="examples-variations-left-and-right" label="Left and Right" sticky="stack" collapsible dividing>
                 <ui-example
                   description="A segment has no `floated` any more:  a `<ui-stack>` puts one segment at the left and one at the right."
                 >
@@ -628,7 +628,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-variations-text-alignment" label="Text Alignment" sticky collapsible dividing>
+              <ui-section id="examples-variations-text-alignment" label="Text Alignment" sticky="stack" collapsible dividing>
                 <ui-example description="A segment can have its text aligned to a side.">
                   <ui-segment align="right">Right</ui-segment>
                   <ui-segment align="left">Left</ui-segment>
@@ -636,7 +636,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-variations-basic" label="Basic" sticky collapsible dividing>
+              <ui-section id="examples-variations-basic" label="Basic" sticky="stack" collapsible dividing>
                 <ui-example description="A basic segment has no special formatting.">
                   <ui-segment appearance="basic">
                     <p>
@@ -648,7 +648,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-variations-scrolling" label="Scrolling" sticky collapsible dividing>
+              <ui-section id="examples-variations-scrolling" label="Scrolling" sticky="stack" collapsible dividing>
                 <ui-example>
                   <p slot="description">
                     A scrolling segment has a predefined height to allow its content to be scrollable.
@@ -734,7 +734,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-variations-size" label="Size" sticky collapsible dividing>
+              <ui-section id="examples-variations-size" label="Size" sticky="stack" collapsible dividing>
                 <ui-example description="A segment can vary in size.">
                   <ui-segment size="mini">Mini</ui-segment>
                   <ui-segment size="tiny">Tiny</ui-segment>
@@ -750,7 +750,7 @@
 
           <ui-tab value="usage" label="Usage">
             <!-- USAGE:  how to use it (attributes in practice, events, framework snippets), keyboard, accessibility. -->
-            <ui-section id="usage-using-it" label="Using it" sticky collapsible dividing>
+            <ui-section id="usage-using-it" label="Using it" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   Wrap content in `<ui-segment>`, and add attributes for the look: `<ui-segment padding="lg" attach="top" appearance="raised">`
@@ -769,7 +769,7 @@
               </ui-markdown>
             </ui-section>
 
-            <ui-section id="usage-sizing-the-box" label="Sizing the box" sticky collapsible dividing>
+            <ui-section id="usage-sizing-the-box" label="Sizing the box" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   Size and shape a segment with `::part(segment)`, since the host has no box of its own. A `circular` segment is
@@ -791,7 +791,7 @@
               </ui-code>
             </ui-section>
 
-            <ui-section id="usage-keyboard" label="Keyboard" sticky collapsible dividing>
+            <ui-section id="usage-keyboard" label="Keyboard" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   - A segment itself takes no keys; the controls inside work as usual.
@@ -801,7 +801,7 @@
               </ui-markdown>
             </ui-section>
 
-            <ui-section id="usage-accessibility" label="Accessibility" sticky collapsible dividing>
+            <ui-section id="usage-accessibility" label="Accessibility" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   - A segment is a layout box with no role. Use a landmark inside, or `role="region"` with an `aria-label`.
@@ -818,34 +818,34 @@
 
           <ui-tab value="api" label="API">
             <!-- API:  generated from the vocabularies (`docs/__data/components.json5`);  nothing to write. -->
-            <ui-section id="api-tags" label="Tags" sticky collapsible dividing>
+            <ui-section id="api-tags" label="Tags" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-segment" only="tags"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-attributes" label="Attributes" sticky collapsible dividing>
+            <ui-section id="api-attributes" label="Attributes" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-segment" only="attributes"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-slots" label="Slots" sticky collapsible dividing>
+            <ui-section id="api-slots" label="Slots" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-segment" only="slots"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-parts" label="Parts" sticky collapsible dividing>
+            <ui-section id="api-parts" label="Parts" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-segment" only="parts"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-states" label="States" sticky collapsible dividing>
+            <ui-section id="api-states" label="States" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-segment" only="states"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-texts" label="Texts" sticky collapsible dividing>
+            <ui-section id="api-texts" label="Texts" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-segment" only="texts"></ui-docs-api>
             </ui-section>
           </ui-tab>
 
           <ui-tab value="theming" label="Theming">
             <!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
-            <ui-section id="theming-tokens" label="Tokens" sticky collapsible dividing>
+            <ui-section id="theming-tokens" label="Tokens" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   Theme with the public `--ui-segment-*` tokens: set one on the element, on any ancestor (a `<ui-segments>` group,
@@ -878,7 +878,7 @@
               </ui-docs-tokens>
             </ui-section>
 
-            <ui-section id="theming-themes" label="Themes" sticky collapsible dividing>
+            <ui-section id="theming-themes" label="Themes" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   The theme menu above picks the theme for every page of the site:  Spell, Glass, Fruity or Merlot,

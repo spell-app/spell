@@ -5,13 +5,11 @@
 	</>
 	<emoji-tab-bar showing="examples"/>
 	<section>
-		<html>
-			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-				<ui-item link="#types">Types</>
-				<ui-item link="#states">States</>
-				<ui-item link="#variations">Variations</>
-				<ui-item link="#fomantic-s-names">Fomantic's names</>
-			</>
+		<menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#types">Types</>
+			<item link="#states">States</>
+			<item link="#variations">Variations</>
+			<item link="#fomantic-s-names">Fomantic's names</>
 		</>
 	</>
 
@@ -22,12 +20,10 @@
 		differ between systems.
 	-->
 	<section label="Types">
-		<html>
-			<ui-message size="small" class="site-not-ported">Not ported: Fomantic's <code>&lt;em data-emoji&gt;</> images from a CDN (Twemoji, JoyPixels) -- an emoji is the reader's own Unicode glyph, so there is no download and no per-emoji CSS (image sets: I1).</>
-		</>
+		<message size="small" class="site-not-ported"><html>Not ported: Fomantic's <code>&lt;em data-emoji&gt;</> images from a CDN (Twemoji, JoyPixels) -- an emoji is the reader's own Unicode glyph, so there is no download and no per-emoji CSS (image sets: I1).</></>
 
 		<!-- GAP I48:  Fomantic's Emojis tab (every emoji, searchable) has no widget to render it. -->
-		<section label="Emoji" sticky collapsible dividing>
+		<section label="Emoji" sticky="stack" collapsible dividing>
 			<example description="An emoji is a glyph used to represent something else.  `name` takes its CLDR name, Unicode's own.">
 				<html>
 					<p>
@@ -44,11 +40,10 @@
 			</example>
 		</>
 
-		<section label="General" sticky collapsible dividing>
-			<example>
+		<section label="General" sticky="stack" collapsible dividing>
+			<example description="You can provide the emoji's name with or without colons.">
+				<message slot="description" state="info" size="small"><html>A name is case-blind, and its words may be joined any way: <code>thumbs_up</code>, <code>thumbs up</code>, <code>thumbs-up</code>, <code>thumbsUp</code>, <code>thumbsup</code>. No build setting needed (Fomantic 2.10's <code>@variationEmojiNoColons</code>).</html></message>
 				<html>
-					<p slot="description">You can provide the emoji's name with or without colons.</p>
-					<ui-message slot="description" state="info" size="small">A name is case-blind, and its words may be joined any way: <code>thumbs_up</code>, <code>thumbs up</code>, <code>thumbs-up</code>, <code>thumbsUp</code>, <code>thumbsup</code>. No build setting needed (Fomantic 2.10's <code>@variationEmojiNoColons</code>).</ui-message>
 					<p>I <ui-emoji name=":heart_with_arrow:"></ui-emoji> Spell UI</p>
 					<p>I <ui-emoji name="heart_with_arrow"></ui-emoji> Spell UI</p>
 					<p>
@@ -63,7 +58,7 @@
 			</example>
 		</>
 
-		<section label="In text" sticky collapsible dividing>
+		<section label="In text" sticky="stack" collapsible dividing>
 			<example description="An emoji sits in running text at the size of the text.  `label` names one that means something else in context.">
 				<html>
 					<p>That was <ui-emoji name=":face_with_tears_of_joy:"></ui-emoji> hilarious, thanks <ui-emoji name="thumbs_up" label="Approved"></ui-emoji></p>
@@ -71,7 +66,7 @@
 			</example>
 		</>
 
-		<section label="Decorative" sticky collapsible dividing>
+		<section label="Decorative" sticky="stack" collapsible dividing>
 			<example description="An empty `label` marks an emoji as decoration, hidden from assistive technology.">
 				<html>
 					<p><ui-emoji name="sparkles" label=""></ui-emoji> New features</p>
@@ -81,7 +76,7 @@
 	</>
 
 	<section label="States">
-		<section label="Disabled" sticky collapsible dividing>
+		<section label="Disabled" sticky="stack" collapsible dividing>
 			<example description="An emoji can show that it is disabled.">
 				<segment size="massive" appearance="basic">
 					<emoji name="anguished_face" disabled/>
@@ -89,7 +84,7 @@
 			</example>
 		</>
 
-		<section label="Loading" sticky collapsible dividing>
+		<section label="Loading" sticky="stack" collapsible dividing>
 			<example description="An emoji can be used as a simple loader.  It stands still when the reader asks for reduced motion.">
 				<segment size="massive" appearance="basic">
 					<emoji name="baby_angel" loading/>
@@ -101,17 +96,16 @@
 	</>
 
 	<section label="Variations">
-		<section label="Size" sticky collapsible dividing>
-			<example>
+		<section label="Size" sticky="stack" collapsible dividing>
+			<example description="An emoji can vary in size.">
+				<message slot="description" size="small"><html>Sizes are ratios of the surrounding text: <code>small</code> 1.5em, <code>large</code> 6em, <code>big</code> 7.5em. <code>medium</code> is the default, the size of the text -- NOT Fomantic's fixed 3em.</html></message>
 				<html>
-					<p slot="description">An emoji can vary in size.</p>
-					<ui-message slot="description" size="small">Sizes are ratios of the surrounding text: <code>small</code> 1.5em, <code>large</code> 6em, <code>big</code> 7.5em. <code>medium</code> is the default, the size of the text -- NOT Fomantic's fixed 3em.</ui-message>
 					<ui-segment appearance="basic"><ui-emoji name="smiling_face" size="small"></ui-emoji> Small <br /> <ui-emoji name="smiling_face" size="medium"></ui-emoji> Medium <br /> <ui-emoji name="smiling_face" size="large"></ui-emoji> Large <br /> <ui-emoji name="smiling_face" size="big"></ui-emoji> Big</ui-segment>
 				</html>
 			</example>
 		</>
 
-		<section label="Autosizing" sticky collapsible dividing>
+		<section label="Autosizing" sticky="stack" collapsible dividing>
 			<example description="If no specific size is given, every emoji is sized by the current element's font size.">
 				<segment appearance="basic">
 					<header size="small">Within a header <emoji name="smiling_face"/></header>
@@ -124,11 +118,10 @@
 			</example>
 		</>
 
-		<section label="Link" sticky collapsible dividing>
-			<example>
+		<section label="Link" sticky="stack" collapsible dividing>
+			<example description="An emoji can be formatted as a link.">
+				<message slot="description" size="small"><html><code>appearance="link"</code> is only the look, a pointer cursor. Wrap the emoji in a <code>&lt;ui-button&gt;</code> or <code>&lt;a&gt;</code> that does the work, and name that.</html></message>
 				<html>
-					<p slot="description">An emoji can be formatted as a link.</p>
-					<ui-message slot="description" size="small"><code>appearance="link"</code> is only the look, a pointer cursor. Wrap the emoji in a <code>&lt;ui-button&gt;</code> or <code>&lt;a&gt;</code> that does the work, and name that.</ui-message>
 					<ui-segment size="massive" appearance="basic">
 						<a href="#link" aria-label="React with a smile">
 							<ui-emoji name="slightly_smiling_face" appearance="link"></ui-emoji>
@@ -141,10 +134,9 @@
 
 	<section label="Fomantic's names">
 		<section label="Fomantic's names" sticky collapsible dividing>
-			<example>
+			<example description="A page written for Fomantic's emoji list can keep its names:  a `<ui-root emoji=\"fomantic\">` around them switches every emoji inside to Fomantic's set. Its names are Fomantic's:  `thumbsup`, `smile`, `flag_us`, `one` for the keycap;  and so are its meanings:  `dog` is the dog's face there, the whole dog in CLDR.">
+				<message slot="description" size="small"><html>The two sets are never mixed inside a root, so the CLDR names stop working there. A page with no root switches page-wide from JS with <code>EmojiData.use("fomantic")</code>.</html></message>
 				<html>
-					<p slot="description">A page written for Fomantic's emoji list can keep its names:  a <code>&lt;ui-root emoji="fomantic"&gt;</code> around them switches every emoji inside to Fomantic's set. Its names are Fomantic's:  <code>thumbsup</code>, <code>smile</code>, <code>flag_us</code>, <code>one</code> for the keycap;  and so are its meanings:  <code>dog</code> is the dog's face there, the whole dog in CLDR.</p>
-					<ui-message slot="description" size="small">The two sets are never mixed inside a root, so the CLDR names stop working there. A page with no root switches page-wide from JS with <code>EmojiData.use("fomantic")</code>.</ui-message>
 					<ui-root emoji="fomantic" display="immediately">
 						<p>
 							<ui-emoji name="smile"></ui-emoji>

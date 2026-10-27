@@ -54,15 +54,15 @@
               EXAMPLES:  ours, no Fomantic page.
               - Every picker is named (`aria-label`), as a real form's would be.
             -->
-            <ui-section id="examples-types" label="Types" sticky collapsible dividing>
-              <ui-section id="examples-types-icon-picker" label="Icon picker" sticky collapsible dividing>
+            <ui-section id="examples-types" label="Types" sticky="stack" collapsible dividing>
+              <ui-section id="examples-types-icon-picker" label="Icon picker" sticky="stack" collapsible dividing>
                 <ui-example
                   description="Click the field:  a search box and a grid of every icon the page knows, in Font Awesome's categories.  Type to filter, by name or by what it shows (`mail` finds `envelope`), then click a glyph, or use the arrows and Enter."
                 >
                   <ui-icon-picker value="star" aria-label="Icon"></ui-icon-picker>
                 </ui-example>
               </ui-section>
-              <ui-section id="examples-types-none" label="None" sticky collapsible dividing>
+              <ui-section id="examples-types-none" label="None" sticky="stack" collapsible dividing>
                 <ui-example
                   description="With no icon chosen, the field says `none`, light and in italics;  `placeholder` says something else.  The grid's first cell, a circle with a slash, clears the choice."
                 >
@@ -70,7 +70,7 @@
                   <ui-icon-picker placeholder="Pick an icon" aria-label="Icon"></ui-icon-picker>
                 </ui-example>
               </ui-section>
-              <ui-section id="examples-types-in-a-form" label="In a form" sticky collapsible dividing>
+              <ui-section id="examples-types-in-a-form" label="In a form" sticky="stack" collapsible dividing>
                 <ui-example
                   description="A form control:  it submits the icon's name under its `name`, and `required` takes the none cell out of the grid."
                 >
@@ -83,33 +83,33 @@
               </ui-section>
             </ui-section>
 
-            <ui-section id="examples-states" label="States" sticky collapsible dividing>
-              <ui-section id="examples-states-read-only" label="Read-only" sticky collapsible dividing>
+            <ui-section id="examples-states" label="States" sticky="stack" collapsible dividing>
+              <ui-section id="examples-states-read-only" label="Read-only" sticky="stack" collapsible dividing>
                 <ui-example description="Shows its icon, and can be focused, but never opens.">
                   <ui-icon-picker readonly value="bell" aria-label="Icon"></ui-icon-picker>
                 </ui-example>
               </ui-section>
-              <ui-section id="examples-states-disabled" label="Disabled" sticky collapsible dividing>
+              <ui-section id="examples-states-disabled" label="Disabled" sticky="stack" collapsible dividing>
                 <ui-example description="Can't be used, and is left out of its form.">
                   <ui-icon-picker disabled value="bell" aria-label="Icon"></ui-icon-picker>
                 </ui-example>
               </ui-section>
             </ui-section>
 
-            <ui-section id="examples-variations" label="Variations" sticky collapsible dividing>
-              <ui-section id="examples-variations-size" label="Size" sticky collapsible dividing>
+            <ui-section id="examples-variations" label="Variations" sticky="stack" collapsible dividing>
+              <ui-section id="examples-variations-size" label="Size" sticky="stack" collapsible dividing>
                 <ui-example description="`size` scales the field and its panel, `mini` ... `massive`.">
                   <ui-icon-picker size="small" value="heart" aria-label="Small"></ui-icon-picker>
                   <ui-icon-picker value="heart" aria-label="Medium"></ui-icon-picker>
                   <ui-icon-picker size="large" value="heart" aria-label="Large"></ui-icon-picker>
                 </ui-example>
               </ui-section>
-              <ui-section id="examples-variations-fluid" label="Fluid" sticky collapsible dividing>
+              <ui-section id="examples-variations-fluid" label="Fluid" sticky="stack" collapsible dividing>
                 <ui-example description="`fluid` takes its container's width;  the panel is at least as wide.">
                   <ui-icon-picker fluid value="house" aria-label="Icon"></ui-icon-picker>
                 </ui-example>
               </ui-section>
-              <ui-section id="examples-variations-dark" label="Dark" sticky collapsible dividing>
+              <ui-section id="examples-variations-dark" label="Dark" sticky="stack" collapsible dividing>
                 <ui-example description="In a dark part of a page (`ui-dark`), the field and its panel take the dark colours.">
                   <ui-segment inverted class="ui-dark">
                     <ui-icon-picker value="moon" aria-label="Icon"></ui-icon-picker>
@@ -121,7 +121,7 @@
 
           <ui-tab value="usage" label="Usage">
             <!-- USAGE:  how to use it, where its icons come from, keyboard, accessibility. -->
-            <ui-section id="usage-using-it" label="Using it" sticky collapsible dividing>
+            <ui-section id="usage-using-it" label="Using it" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   `value` is an icon's NAME, as `<ui-icon name>` takes it (`star`, `address book`);  `""` is none.
@@ -141,7 +141,7 @@
                 </script>
               </ui-code>
             </ui-section>
-            <ui-section id="usage-its-icons" label="Its icons" sticky collapsible dividing>
+            <ui-section id="usage-its-icons" label="Its icons" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   It offers every icon its page knows:  its nearest `<ui-root icons>`'s packs, else the page's
@@ -161,7 +161,7 @@
                 </script>
               </ui-markdown>
             </ui-section>
-            <ui-section id="usage-keyboard" label="Keyboard" sticky collapsible dividing>
+            <ui-section id="usage-keyboard" label="Keyboard" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   - On the field:  Enter, Space, Down or Up opens it;  a letter opens it searching for that letter.
@@ -171,7 +171,7 @@
                 </script>
               </ui-markdown>
             </ui-section>
-            <ui-section id="usage-accessibility" label="Accessibility" sticky collapsible dividing>
+            <ui-section id="usage-accessibility" label="Accessibility" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   - The field is a button that opens a listbox;  named by the picker's `<label for>` or
@@ -187,30 +187,30 @@
 
           <ui-tab value="api" label="API">
             <!-- API:  generated from the vocabularies (`site/_data/components.json5`);  nothing to write. -->
-            <ui-section id="api-attributes" label="Attributes" sticky collapsible dividing>
+            <ui-section id="api-attributes" label="Attributes" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-icon-picker" only="attributes"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-events" label="Events" sticky collapsible dividing>
+            <ui-section id="api-events" label="Events" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-icon-picker" only="events"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-parts" label="Parts" sticky collapsible dividing>
+            <ui-section id="api-parts" label="Parts" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-icon-picker" only="parts"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-states" label="States" sticky collapsible dividing>
+            <ui-section id="api-states" label="States" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-icon-picker" only="states"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-texts" label="Texts" sticky collapsible dividing>
+            <ui-section id="api-texts" label="Texts" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-icon-picker" only="texts"></ui-docs-api>
             </ui-section>
           </ui-tab>
 
           <ui-tab value="theming" label="Theming">
             <!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
-            <ui-section id="theming-tokens" label="Tokens" sticky collapsible dividing>
+            <ui-section id="theming-tokens" label="Tokens" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   Set a public `--ui-*` token on the element, any ancestor or `:root`; it inherits into the shadow
@@ -224,7 +224,7 @@
                 <!-- playground:end -->
               </ui-docs-tokens>
             </ui-section>
-            <ui-section id="theming-themes" label="Themes" sticky collapsible dividing>
+            <ui-section id="theming-themes" label="Themes" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   The theme menu above picks the theme for every page of the site:  Spell, Glass, Fruity or Merlot,

@@ -5,12 +5,10 @@
 	</>
 	<radio-tab-bar showing="examples"/>
 	<section>
-		<html>
-			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-				<ui-item link="#types">Types</>
-				<ui-item link="#states">States</>
-				<ui-item link="#variations">Variations</>
-			</>
+		<menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#types">Types</>
+			<item link="#states">States</>
+			<item link="#variations">Variations</>
 		</>
 	</>
 
@@ -21,7 +19,7 @@
 		- Radios group by `name` across the whole page when there is no form, so every example's group has its own name.
 	-->
 	<section label="Types">
-		<section label="Radio" sticky collapsible dividing>
+		<section label="Radio" sticky="stack" collapsible dividing>
 			<example description="A radio is an exclusive option: `<ui-radio>`s with the same `name` form a group, and choosing one unchooses the rest.">
 				<radio name="radio" selected>Radio choice</radio>
 			</example>
@@ -73,7 +71,7 @@
 			</example>
 		</>
 
-		<section label="Slider" sticky collapsible dividing>
+		<section label="Slider" sticky="stack" collapsible dividing>
 			<example description="Radios can be sliders, to emphasize the current selection:  `appearance=\"slider\"`.">
 				<html>
 					<ui-form>
@@ -99,7 +97,7 @@
 			</example>
 		</>
 
-		<section label="Toggle" sticky collapsible dividing>
+		<section label="Toggle" sticky="stack" collapsible dividing>
 			<example description="Radios can be toggles, an on or off look:  `appearance=\"toggle\"`.">
 				<html>
 					<ui-form>
@@ -123,11 +121,10 @@
 		</>
 
 		<!-- GAP:  Fomantic styles an invisible checkbox's LABEL as any component (button, message, segment);  ours is a bordered label tinted when chosen. -->
-		<section label="Invisible" sticky collapsible dividing>
-			<example>
+		<section label="Invisible" sticky="stack" collapsible dividing>
+			<example description="An invisible radio has no box: the label itself is the control, bordered while unchosen and tinted when chosen. Its content can be any markup.">
+				<message slot="description" size="small" class="site-not-ported"><html>Not ported: styling the label as another component (Fomantic's <code>label class="ui purple button"</code>, or an orange message or teal segment label). The label is in the shadow root, so it can't take another component's classes.</html></message>
 				<html>
-					<p slot="description">An invisible radio has no box: the label itself is the control, bordered while unchosen and tinted when chosen. Its content can be any markup.</p>
-					<ui-message slot="description" size="small" class="site-not-ported">Not ported: styling the label as another component (Fomantic's <code>label class="ui purple button"</code>, or an orange message or teal segment label). The label is in the shadow root, so it can't take another component's classes.</ui-message>
 					<ui-form>
 						<form>
 							<ui-fields grouped>
@@ -143,19 +140,19 @@
 	</>
 
 	<section label="States">
-		<section label="Checked" sticky collapsible dividing>
+		<section label="Checked" sticky="stack" collapsible dividing>
 			<example description="A radio can be chosen. `selected` is the canonical name; `checked` is accepted as an alias, as on a native radio.">
 				<radio name="checked-example" checked>Active</radio>
 			</example>
 		</>
 
-		<section label="Read-only" sticky collapsible dividing>
+		<section label="Read-only" sticky="stack" collapsible dividing>
 			<example description="A radio can be read-only and unable to change states.  It is still submitted.">
 				<radio name="readonly-example" readonly selected>Read Only</radio>
 			</example>
 		</>
 
-		<section label="Disabled" sticky collapsible dividing>
+		<section label="Disabled" sticky="stack" collapsible dividing>
 			<example description="A radio can show it is currently unable to be interacted with. It is left out of the form.">
 				<segment appearance="basic">
 					<radio name="disabled-example" disabled>Disabled</radio>
@@ -168,7 +165,7 @@
 	</>
 
 	<section label="Variations">
-		<section label="Fitted" sticky collapsible dividing>
+		<section label="Fitted" sticky="stack" collapsible dividing>
 			<example description="A fitted radio does not leave padding for a label. Give it an `aria-label`.">
 				<stack direction="horizontal" wrap>
 					<segment padding="compact">
@@ -184,7 +181,7 @@
 			</example>
 		</>
 
-		<section label="Inverted" sticky collapsible dividing>
+		<section label="Inverted" sticky="stack" collapsible dividing>
 			<example description="A radio can be formatted to appear on dark backgrounds.">
 				<segment padding="compact" inverted>
 					<radio inverted name="inverted" selected>Inverted</radio>
@@ -198,7 +195,7 @@
 			</example>
 		</>
 
-		<section label="Right aligned" sticky collapsible dividing>
+		<section label="Right aligned" sticky="stack" collapsible dividing>
 			<example description="A radio can be aligned to the right of its label:  `right-aligned`.">
 				<html>
 					<ui-form>
@@ -220,7 +217,7 @@
 			</example>
 		</>
 
-		<section label="Colored" sticky collapsible dividing>
+		<section label="Colored" sticky="stack" collapsible dividing>
 			<example description="A radio can have different colors:  `color` tints the chosen bullet, lane or line.">
 				<radio color="purple" name="colored" selected>Purple</radio>
 				<radio color="green" appearance="toggle" name="colored-toggle" selected>Green</radio>
@@ -228,7 +225,7 @@
 			</example>
 		</>
 
-		<section label="Size" sticky collapsible dividing>
+		<section label="Size" sticky="stack" collapsible dividing>
 			<example description="A radio can have different sizes.">
 				<radio size="mini" name="size">Mini</radio>
 				<radio size="tiny" name="size">Tiny</radio>

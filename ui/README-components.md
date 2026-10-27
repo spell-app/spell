@@ -231,7 +231,7 @@ Every family, by group, A-Z inside each.
 
 <!-- components:start -->
 
-76 families, 122 tags;  3 families in progress.
+76 families, 124 tags;  3 families in progress.
 
 ### Elements
 
@@ -347,7 +347,7 @@ Elements with no Fomantic counterpart.
 | <img src="docs/images/components/ui-section.png" alt="Section, its first example" width="200" height="21"> | [Section](docs/ui-section.html) *(In progress)* | `<ui-section>` `<ui-sections>` | A section is a titled block of content that can close and keep its title in view. | section, panel, collapsible, disclosure |
 |  | [Stack](docs/ui-stack.html) | `<ui-stack>` | A stack lays its children out in a column, or a row that wraps, evenly spaced.  It has no look of its own. | stack, cluster, flex box, row |
 |  | [Table of contents](docs/ui-toc.html) | `<ui-toc>` | A table of contents lists the page's sections and examples as links, opens the one in view and follows the scroll.  Each section folds and opens by its chevron, and one button in its header opens or folds them all;  the viewer's folds are kept. | table of contents, on this page, page index, scrollspy |
-|  | [Theme Editor](docs/ui-theme-editor.html) *(In progress)* | `<ui-theme-editor>` | A theme editor makes a theme from an existing one:  pick its colours, fonts and shapes, watch real elements follow in light and dark, then copy the stylesheet or keep it in the browser. | theme editor, theme builder, theme creator, theme generator |
+|  | [Theme Editor](docs/ui-theme-editor.html) *(In progress)* | `<ui-theme-editor>` `<ui-color-chip>` `<ui-theme-token>` | A theme editor makes a theme from an existing one:  pick its colours, fonts and shapes, or set any token by hand, watch real pages follow in light and dark, then copy the theme file or keep it in the browser. | theme editor, theme builder, theme bench, theme creator |
 |  | [Theme Menu](docs/ui-theme-menu.html) | `<ui-theme-menu>` | A theme menu switches the page between light and dark, and picks its theme from Spell's own, and remembers both for the next page. | theme picker, theme switcher, dark mode toggle, colour scheme |
 |  | [Zoom](docs/ui-zoom.html) | `<ui-zoom>` | A zoom shows something full size, over the page.  Round any content it shows it shrunk, within a width and height, and full size on a click;  with `src` it shows that image full size.  Escape, a click outside it or its close button close it. | lightbox, zoom, full size, image viewer |
 
@@ -360,7 +360,7 @@ Elements with no Fomantic counterpart.
 | Docs inspector | `<ui-docs-inspector>` | An inspector shows another element's attributes, properties and custom states, live:  click the element, and watch them change. | inspector, element inspector, devtools, live properties |
 | Docs nav | `<ui-docs-nav>` | A docs nav is a panel listing the site's pages and every component, A-Z or by topic, in folding groups, with search and favourites;  the current page is highlighted and scrolled into view. | sidebar, table of contents, toc, site nav |
 | Docs search | `<ui-docs-search>` | A docs search is a field that finds sections of the page shown, components, attributes and every page's sections as you type, and jumps to the one you pick;  `/` or Cmd / Ctrl+K focuses it from anywhere. | site search, docs search, quick find, jump to |
-| Docs theme bench | `<ui-docs-theme-bench>` | A theme bench shows Spell's real pages side by side, every one in the theme you pick, and tunes the tokens behind their tabs, section titles and surfaces live:  then copy the changes into the theme's file. | theme bench, theme workbench, look tuner, token tuner |
+| Docs theme bench | `<ui-docs-theme-bench>` | A theme bench shows the theme editor full width, previewing Spell's real pages side by side in the theme being made:  the editor, an epic page, Spell UI's docs and a notebook. | theme bench, theme workbench, look tuner, token tuner |
 | Docs tokens | `<ui-docs-tokens>` | A token table lists the CSS custom properties of a component family, or of the whole foundation, with their defaults and a live swatch for each colour;  a playground adds inputs that restyle a live preview. | css variables, custom properties, design tokens, theme tokens |
 
 </details>

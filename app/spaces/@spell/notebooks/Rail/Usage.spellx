@@ -6,14 +6,12 @@
 	</>
 	<rail-tab-bar showing="usage"/>
 	<section>
-		<html>
-			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-				<ui-item link="#when-to-use">When to use</>
-				<ui-item link="#adjusting-sizes">Adjusting sizes</>
-				<ui-item link="#using-it">Using it</>
-				<ui-item link="#keyboard">Keyboard</>
-				<ui-item link="#accessibility">Accessibility</>
-			</>
+		<menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#when-to-use">When to use</>
+			<item link="#adjusting-sizes">Adjusting sizes</>
+			<item link="#using-it">Using it</>
+			<item link="#keyboard">Keyboard</>
+			<item link="#accessibility">Accessibility</>
 		</>
 	</>
 

@@ -6,12 +6,10 @@
 	</>
 	<root-tab-bar showing="examples"/>
 	<section>
-		<html>
-			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-				<ui-item link="#types">Types</>
-				<ui-item link="#while-loading">While loading</>
-				<ui-item link="#icons-and-emoji">Icons and emoji</>
-			</>
+		<menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#types">Types</>
+			<item link="#while-loading">While loading</>
+			<item link="#icons-and-emoji">Icons and emoji</>
 		</>
 	</>
 
@@ -23,7 +21,7 @@
 		- The Replay example needs the small script at the end of this tab:  components on this page are loaded already.
 	-->
 	<section label="Types">
-		<section label="Root" sticky collapsible dividing>
+		<section label="Root" sticky="stack" collapsible dividing>
 			<example description="Put one around a page or an app:  each `ui-*` tag inside loads its component the first time it appears, and nothing else is downloaded. Load just the root: `import \"spell/ui/ui-root\"`.">
 				<html>
 					<ui-root>
@@ -37,7 +35,7 @@
 			</example>
 		</>
 
-		<section label="Theme and size" sticky collapsible dividing>
+		<section label="Theme and size" sticky="stack" collapsible dividing>
 			<example description="`theme` and `size` apply to everything inside.">
 				<html>
 					<ui-root theme="dark" size="small" width="100%" aria-label="Dark report">
@@ -51,7 +49,7 @@
 			</example>
 		</>
 
-		<section label="A box" sticky collapsible dividing>
+		<section label="A box" sticky="stack" collapsible dividing>
 			<example description="With `width` or `height` (CSS lengths, or `window` for the viewport's), the root is a box that scrolls its own content.  `fixed` pins it to the viewport:  a full-page app shell.">
 				<root height="8em" aria-label="Numbers">
 					<list bulleted>
@@ -82,7 +80,7 @@
 			`loading="..."` shows a `<ui-loader>` with that message instead (a bare `loading` says "Loading…").
 		</>
 
-		<section label="Replay" sticky collapsible dividing>
+		<section label="Replay" sticky="stack" collapsible dividing>
 			<example description="Components on this page are loaded already, so the demo holds the root for 2 seconds:  press a button to see what a slow load shows.">
 				<button icon="redo" data-replay="skeleton">Replay: skeleton</button>
 				<button icon="redo" data-replay="loading">Replay: loading message</button>
@@ -103,7 +101,7 @@
 	</>
 
 	<section label="Icons and emoji">
-		<section label="Icon packs" sticky collapsible dividing>
+		<section label="Icon packs" sticky="stack" collapsible dividing>
 			<example description="`icons` adds packs for everything inside, comma-separated, later wins:  built-in ids (fa7-free, fa7-brands, fomantic) or `pack.js` URLs. Outside a root, the page's packs apply (`UI.icons.use()`):  the sparkle is only in the example's own pack, so inside the root it draws, outside it doesn't.">
 				<html>
 					<p>Inside: <ui-root icons="examples/icon-pack/pack.js" display="immediately"><ui-icon name="spell sparkle" size="big" label="Sparkle"></ui-icon></ui-root> Outside: <ui-icon name="spell sparkle" size="big" label="Sparkle"></ui-icon></p>
@@ -111,7 +109,7 @@
 			</example>
 		</>
 
-		<section label="Emoji names" sticky collapsible dividing>
+		<section label="Emoji names" sticky="stack" collapsible dividing>
 			<example description="`emoji=\"fomantic\"` uses Fomantic's names for everything inside;  outside, the page's set (CLDR by default).  `pencil` is a memo in Fomantic's names, a pencil in CLDR's.">
 				<html>
 					<p>Inside: <ui-root emoji="fomantic" display="immediately"><ui-emoji name="pencil" size="small" label="pencil (Fomantic)"></ui-emoji></ui-root> Outside: <ui-emoji name="pencil" size="small" label="pencil (CLDR)"></ui-emoji></p>
@@ -120,7 +118,7 @@
 		</>
 
 		<!-- GAP I62:  a root's `size` scales only components (its scale token), not plain text or a bare `<ui-icon>` inside. -->
-		<section label="Nested roots" sticky collapsible dividing>
+		<section label="Nested roots" sticky="stack" collapsible dividing>
 			<example description="A root inside a root inherits what it doesn't set and adds its own packs.  The outer one is ready only once every inner one is.">
 				<root icons="examples/icon-pack/pack.js" display="immediately">
 					<button icon="spell sparkle">Outer</button>

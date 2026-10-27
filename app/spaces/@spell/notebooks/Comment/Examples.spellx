@@ -5,13 +5,11 @@
 	</>
 	<comment-tab-bar showing="examples"/>
 	<section>
-		<html>
-			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-				<ui-item link="#types">Types</>
-				<ui-item link="#content">Content</>
-				<ui-item link="#states">States</>
-				<ui-item link="#variations">Variations</>
-			</>
+		<menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#types">Types</>
+			<item link="#content">Content</>
+			<item link="#states">States</>
+			<item link="#variations">Variations</>
 		</>
 	</>
 
@@ -21,11 +19,10 @@
 		`.metadata` / `.text` are `<ui-meta>` / `<ui-description>`.  Every reply form posts nowhere (`method="dialog"`).
 	-->
 	<section label="Types">
-		<section label="Comments" sticky collapsible dividing>
-			<example>
+		<section label="Comments" sticky="stack" collapsible dividing>
+			<example description="A basic list of comments: a `<ui-comments>` inside a comment is its thread of replies, and the `reply` slot takes a reply form.">
+				<message slot="description" state="warning" size="small"><html><b>UI Views</b> provide structured layouts, but do not hook up site specific code. You will need to add your own JavaScript behaviors to hide and show the appropriate forms, for example a reply button opening a reply form.</html></message>
 				<html>
-					<p slot="description">A basic list of comments: a <code>&lt;ui-comments&gt;</code> inside a comment is its thread of replies, and the <code>reply</code> slot takes a reply form.</p>
-					<ui-message slot="description" state="warning" size="small"><b>UI Views</b> provide structured layouts, but do not hook up site specific code. You will need to add your own JavaScript behaviors to hide and show the appropriate forms, for example a reply button opening a reply form.</ui-message>
 					<ui-comments>
 						<ui-header level="3" dividing>Comments</ui-header>
 						<ui-comment>
@@ -99,7 +96,7 @@
 	</>
 
 	<section label="Content">
-		<section label="Avatar" sticky collapsible dividing>
+		<section label="Avatar" sticky="stack" collapsible dividing>
 			<example description="A comment can contain an image or avatar:  `<ui-avatar src>`.">
 				<comments>
 					<comment>
@@ -112,7 +109,7 @@
 			</example>
 		</>
 
-		<section label="Metadata" sticky collapsible dividing>
+		<section label="Metadata" sticky="stack" collapsible dividing>
 			<example description="A comment can contain metadata about the comment, an arbitrary amount of metadata may be defined:  each child of `<ui-meta>` is one piece.">
 				<html>
 					<ui-comments>
@@ -132,7 +129,7 @@
 			</example>
 		</>
 
-		<section label="Actions" sticky collapsible dividing>
+		<section label="Actions" sticky="stack" collapsible dividing>
 			<example description="A comment can contain a list of actions a user may perform related to this comment:  `<button>`s (or links, to go somewhere) in `<ui-actions>`.">
 				<html>
 					<ui-comments>
@@ -155,11 +152,10 @@
 		</>
 
 		<!-- GAP I35:  a comment's `reply` slot sits below the whole comment, not beside the avatar. -->
-		<section label="Reply Form" sticky collapsible dividing>
-			<example>
+		<section label="Reply Form" sticky="stack" collapsible dividing>
+			<example description="A comment can contain a form to reply to a comment. This may have arbitrary content.">
+				<message slot="description" state="info" size="small"><html>A form in a <code>&lt;ui-comment&gt;</code>'s <code>reply</code> slot is a nested reply to that comment. One in the <code>&lt;ui-comments&gt;</code> list's reply slot, after every comment, is a normal reply form.</html></message>
 				<html>
-					<p slot="description">A comment can contain a form to reply to a comment. This may have arbitrary content.</p>
-					<ui-message slot="description" state="info" size="small">A form in a <code>&lt;ui-comment&gt;</code>'s <code>reply</code> slot is a nested reply to that comment. One in the <code>&lt;ui-comments&gt;</code> list's reply slot, after every comment, is a normal reply form.</ui-message>
 					<ui-comments>
 						<ui-comment>
 							<ui-avatar src="/components/ui/images/avatar/small/steve.jpg"></ui-avatar>
@@ -230,7 +226,7 @@
 			</example>
 		</>
 
-		<section label="No avatar" sticky collapsible dividing>
+		<section label="No avatar" sticky="stack" collapsible dividing>
 			<example description="A comment can leave out its avatar;  the content then starts at the edge.">
 				<html>
 					<ui-comments>
@@ -253,7 +249,7 @@
 	</>
 
 	<section label="States">
-		<section label="Collapsed" sticky collapsible dividing>
+		<section label="Collapsed" sticky="stack" collapsible dividing>
 			<example description="Comments can be collapsed, or hidden from view:  `collapsed` folds away a thread of replies, one comment or a whole list.  Here Christian's thread is folded.">
 				<html>
 					<ui-comments>
@@ -305,7 +301,7 @@
 			</example>
 		</>
 
-		<section label="Disabled" sticky collapsible dividing>
+		<section label="Disabled" sticky="stack" collapsible dividing>
 			<example description="A comment can be disabled.">
 				<html>
 					<ui-comments>
@@ -329,7 +325,7 @@
 	</>
 
 	<section label="Variations">
-		<section label="Threaded" sticky collapsible dividing>
+		<section label="Threaded" sticky="stack" collapsible dividing>
 			<example description="A comment list can be threaded to show the relationship between conversations.">
 				<html>
 					<ui-comments threaded>
@@ -403,7 +399,7 @@
 			</example>
 		</>
 
-		<section label="Minimal" sticky collapsible dividing>
+		<section label="Minimal" sticky="stack" collapsible dividing>
 			<example description="Comments can hide extra information unless a user shows intent to interact with a comment:  the actions show while a comment is hovered or holds keyboard focus.">
 				<html>
 					<ui-comments appearance="minimal">
@@ -477,7 +473,7 @@
 			</example>
 		</>
 
-		<section label="Size" sticky collapsible dividing>
+		<section label="Size" sticky="stack" collapsible dividing>
 			<example description="Comments can have different sizes.">
 				<html>
 					<ui-comments size="small">
@@ -622,7 +618,7 @@
 			</example>
 		</>
 
-		<section label="Inverted" sticky collapsible dividing>
+		<section label="Inverted" sticky="stack" collapsible dividing>
 			<example description="Comments' colors can be inverted.">
 				<html>
 					<ui-segment inverted>

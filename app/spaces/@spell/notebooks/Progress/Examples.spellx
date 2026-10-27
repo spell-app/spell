@@ -5,13 +5,11 @@
 	</>
 	<progress-tab-bar showing="examples"/>
 	<section>
-		<html>
-			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-				<ui-item link="#types">Types</>
-				<ui-item link="#content">Content</>
-				<ui-item link="#states">States</>
-				<ui-item link="#variations">Variations</>
-			</>
+		<menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#types">Types</>
+			<item link="#content">Content</>
+			<item link="#states">States</>
+			<item link="#variations">Variations</>
 		</>
 	</>
 
@@ -21,13 +19,13 @@
 		`GAP I<n>` comments mark examples a widget can't render yet (plan-doc issues).
 	-->
 	<section label="Types">
-		<section label="Standard" sticky collapsible dividing>
+		<section label="Standard" sticky="stack" collapsible dividing>
 			<example description="A standard progress bar.  `value` is a percentage unless there is a `total`.">
 				<progress value="74" bar-text="percent" label="Uploading Files"/>
 			</example>
 		</>
 
-		<section label="Indicating" sticky collapsible dividing>
+		<section label="Indicating" sticky="stack" collapsible dividing>
 			<example description="An indicating progress bar visually indicates the current level of progress of a task:  its colour runs from red to green.">
 				<html>
 					<ui-progress indicating value="12" label="{percent}% funded"></ui-progress>
@@ -39,13 +37,13 @@
 	</>
 
 	<section label="Content">
-		<section label="Bar" sticky collapsible dividing>
+		<section label="Bar" sticky="stack" collapsible dividing>
 			<example description="A progress element can contain a bar visually indicating progress.">
 				<progress value="30" aria-label="Bar only"/>
 			</example>
 		</>
 
-		<section label="Progress" sticky collapsible dividing>
+		<section label="Progress" sticky="stack" collapsible dividing>
 			<example description="A progress bar can contain a text value indicating current progress:  `bar-text=\"percent\"`.">
 				<progress value="60" bar-text="percent" aria-label="With percent"/>
 			</example>
@@ -58,19 +56,19 @@
 			</example>
 		</>
 
-		<section label="Ratio" sticky collapsible dividing>
+		<section label="Ratio" sticky="stack" collapsible dividing>
 			<example description="With a `total`, `value` counts towards it, and `bar-text=\"ratio\"` shows the count.">
 				<progress value="9" total="20" bar-text="ratio" aria-label="With ratio"/>
 			</example>
 		</>
 
-		<section label="Label" sticky collapsible dividing>
+		<section label="Label" sticky="stack" collapsible dividing>
 			<example description="A progress element can contain a label.  Slotted text is the rich version of `label`, and names the bar.">
 				<progress value="55" bar-text="percent">Uploading Files</progress>
 			</example>
 		</>
 
-		<section label="Multiple Bars" sticky collapsible dividing>
+		<section label="Multiple Bars" sticky="stack" collapsible dividing>
 			<example description="A progress element can have multiple bars:  `value` (or `percent`) takes a comma list, `bar-colors` a hue per bar.">
 				<progress percent="50,0,10,20" bar-colors="blue yellow purple green" aria-label="Disk usage"/>
 			</example>
@@ -85,43 +83,40 @@
 	</>
 
 	<section label="States">
-		<section label="Active" sticky collapsible dividing>
+		<section label="Active" sticky="stack" collapsible dividing>
 			<example description="A progress bar can show activity:  a pulse runs along the bar.">
 				<progress active value="42" bar-text="percent" label="Uploading Files"/>
 			</example>
 		</>
 
-		<section label="Success" sticky collapsible dividing>
+		<section label="Success" sticky="stack" collapsible dividing>
 			<example description="A progress bar can show a success state.  A single bar turns `success` by itself at 100%.">
 				<progress value="100" bar-text="percent" label="Everything worked, your file is all ready."/>
 			</example>
 		</>
 
-		<section label="Warning" sticky collapsible dividing>
+		<section label="Warning" sticky="stack" collapsible dividing>
 			<example description="A progress bar can show a warning state:  `state=\"warning\"`.">
 				<progress state="warning" value="100" bar-text="percent">Your file didn't meet the minimum resolution requirements.</progress>
 			</example>
 		</>
 
-		<section label="Error" sticky collapsible dividing>
+		<section label="Error" sticky="stack" collapsible dividing>
 			<example description="A progress bar can show an error state.">
 				<progress state="error" value="100" bar-text="percent" label="There was an error."/>
 			</example>
 		</>
 
-		<section label="Disabled" sticky collapsible dividing>
+		<section label="Disabled" sticky="stack" collapsible dividing>
 			<example description="A progress bar can be disabled.">
 				<progress disabled value="80" aria-label="Disabled"/>
 			</example>
 		</>
 
 		<!-- GAP I29:  no text inside an indeterminate bar;  each bar's words are its `label` instead. -->
-		<section label="Indeterminate" sticky collapsible dividing>
-			<example>
-				<html>
-					<p slot="description">A progress bar can be shown in different indeterminate states:  bare <code>indeterminate</code> pulses, or it takes filling, sliding or swinging.</p>
-					<ui-message slot="description" state="warning" size="small">The <code>indeterminate</code> progress state is not supposed to be used in combination with multiple progress bars.</ui-message>
-				</html>
+		<section label="Indeterminate" sticky="stack" collapsible dividing>
+			<example description="A progress bar can be shown in different indeterminate states:  bare `indeterminate` pulses, or it takes filling, sliding or swinging.">
+				<message slot="description" state="warning" size="small"><html>The <code>indeterminate</code> progress state is not supposed to be used in combination with multiple progress bars.</html></message>
 				<progress indeterminate color="blue" label="Pulsating (default)"/>
 				<progress indeterminate="filling" color="blue" label="Filling"/>
 				<progress indeterminate="sliding" color="blue" label="Sliding"/>
@@ -135,13 +130,13 @@
 	</>
 
 	<section label="Variations">
-		<section label="Right aligned" sticky collapsible dividing>
+		<section label="Right aligned" sticky="stack" collapsible dividing>
 			<example description="A progress bar can be right aligned growing to the left.">
 				<progress align="right" active value="35" bar-text="percent" aria-label="Right aligned"/>
 			</example>
 		</>
 
-		<section label="Inverted" sticky collapsible dividing>
+		<section label="Inverted" sticky="stack" collapsible dividing>
 			<example description="A progress bar can have its colors inverted.">
 				<segment inverted>
 					<progress inverted value="64" bar-text="percent" label="Uploading Files"/>
@@ -152,14 +147,14 @@
 			</example>
 		</>
 
-		<section label="Basic" sticky collapsible dividing>
+		<section label="Basic" sticky="stack" collapsible dividing>
 			<example description="A basic progress has its remaining background bar removed.">
 				<progress appearance="basic" value="45" bar-text="percent" aria-label="Basic"/>
 			</example>
 		</>
 
 		<!-- GAP I36:  attached bars sit inside the segment's padding, not on its edges. -->
-		<section label="Attached" sticky collapsible dividing>
+		<section label="Attached" sticky="stack" collapsible dividing>
 			<example description="A progress bar can show progress of an element: a thin line on its `top` or `bottom` edge.">
 				<html>
 					<ui-segment>
@@ -188,11 +183,8 @@
 			</example>
 		</>
 
-		<section label="Size" sticky collapsible dividing>
-			<example>
-				<html>
-					<p slot="description">A progress bar can vary in size.</p>
-				</html>
+		<section label="Size" sticky="stack" collapsible dividing>
+			<example description="A progress bar can vary in size.">
 				<message slot="description" state="info" size="small">Some small sizes may not be able to fit an inlined label.</message>
 				<progress size="tiny" value="20" label="Tiny"/>
 				<progress size="small" value="40" label="Small"/>
@@ -202,7 +194,7 @@
 			</example>
 		</>
 
-		<section label="Color" sticky collapsible dividing>
+		<section label="Color" sticky="stack" collapsible dividing>
 			<example description="A progress bar can have different colors.">
 				<progress color="red" value="30" aria-label="Red"/>
 				<progress color="orange" value="35" aria-label="Orange"/>
@@ -220,7 +212,7 @@
 			</example>
 		</>
 
-		<section label="Inverted Color" sticky collapsible dividing>
+		<section label="Inverted Color" sticky="stack" collapsible dividing>
 			<example description="These colors can also be inverted for improved contrast on dark backgrounds.">
 				<segment inverted>
 					<progress inverted color="red" value="30" bar-text="percent" aria-label="Red"/>

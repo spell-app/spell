@@ -5,13 +5,11 @@
 	</>
 	<feed-tab-bar showing="examples"/>
 	<section>
-		<html>
-			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-				<ui-item link="#types">Types</>
-				<ui-item link="#content">Content</>
-				<ui-item link="#states">States</>
-				<ui-item link="#variations">Variations</>
-			</>
+		<menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#types">Types</>
+			<item link="#content">Content</>
+			<item link="#states">States</>
+			<item link="#variations">Variations</>
 		</>
 	</>
 
@@ -22,7 +20,7 @@
 		size="tiny">` in a `<ui-extra>`.
 	-->
 	<section label="Types">
-		<section label="Feed" sticky collapsible dividing>
+		<section label="Feed" sticky="stack" collapsible dividing>
 			<example description="A feed:  a list of `<ui-event>`s.">
 				<html>
 					<ui-feed>
@@ -86,7 +84,7 @@
 	</>
 
 	<section label="Content">
-		<section label="Label" sticky collapsible dividing>
+		<section label="Label" sticky="stack" collapsible dividing>
 			<example description="An event label can contain an image, icon, text or label.  `image` is the shorthand for a picture;  the `label` slot takes anything.">
 				<html>
 					<ui-feed>
@@ -107,11 +105,8 @@
 					</ui-feed>
 				</html>
 			</example>
-			<example>
-				<html>
-					<p slot="description">A <code>&lt;ui-text&gt;</code> in the <code>label</code> slot.</p>
-					<ui-message slot="description" size="small" class="site-not-ported">Not ported: Fomantic's <code>multiline</code> label text (a nudge for a text label that wraps) -- the label box stays one line; keep label texts short.</ui-message>
-				</html>
+			<example description="A `<ui-text>` in the `label` slot.">
+				<message slot="description" size="small" class="site-not-ported"><html>Not ported: Fomantic's <code>multiline</code> label text (a nudge for a text label that wraps) -- the label box stays one line; keep label texts short.</html></message>
 				<feed>
 					<event>
 						<text slot="label" color="purple">NEW</text>
@@ -131,11 +126,8 @@
 					</event>
 				</feed>
 			</example>
-			<example>
-				<html>
-					<p slot="description"><code>label</code> (Fomantic's <code>data-text</code>) makes a round label holding the given text.</p>
-					<ui-message slot="description" state="info" size="small">Add a <code>color</code> too, and <code>basic</code> for a variant without background color.</ui-message>
-				</html>
+			<example description="`label` (Fomantic's `data-text`) makes a round label holding the given text.">
+				<message slot="description" state="info" size="small"><html>Add a <code>color</code> too, and <code>basic</code> for a variant without background color.</html></message>
 				<feed>
 					<event label="Run">
 						<content>Run, Forrest, run!</content>
@@ -150,7 +142,7 @@
 			</example>
 		</>
 
-		<section label="Date" sticky collapsible dividing>
+		<section label="Date" sticky="stack" collapsible dividing>
 			<example description="An event or an event summary can contain a date:  on its own a `<ui-date>` sits above the summary.">
 				<html>
 					<ui-feed>
@@ -178,10 +170,9 @@
 
 		<!-- GAP I42:  `<ui-date>` has no `floated`, so Fomantic's right floated date sits above the summary. -->
 		<section label="Additional information" sticky collapsible dividing>
-			<example>
+			<example description="An event can contain additional information like a set of images or text.">
+				<message slot="description" state="info" size="small"><html>Fomantic's <code>right floated</code> date (to the right of the content block) has no attribute yet: the date sits above the summary.</html></message>
 				<html>
-					<p slot="description">An event can contain additional information like a set of images or text.</p>
-					<ui-message slot="description" state="info" size="small">Fomantic's <code>right floated</code> date (to the right of the content block) has no attribute yet: the date sits above the summary.</ui-message>
 					<ui-feed>
 						<ui-event image="../images/avatar/small/helen.jpg">
 							<ui-content>
@@ -209,7 +200,7 @@
 	</>
 
 	<section label="States">
-		<section label="Disabled" sticky collapsible dividing>
+		<section label="Disabled" sticky="stack" collapsible dividing>
 			<example description="A feed or a single event can be disabled.">
 				<html>
 					<ui-feed>
@@ -266,11 +257,10 @@
 	</>
 
 	<section label="Variations">
-		<section label="Connected" sticky collapsible dividing>
-			<example>
+		<section label="Connected" sticky="stack" collapsible dividing>
+			<example description="Feed events can be connected to visualize a linear timeline.">
+				<message slot="description" state="info" size="small"><html>Add a <code>color</code>, <code>&lt;ui-feed connected color="blue"&gt;</code>, to colour the connection line.</html></message>
 				<html>
-					<p slot="description">Feed events can be connected to visualize a linear timeline.</p>
-					<ui-message slot="description" state="info" size="small">Add a <code>color</code>, <code>&lt;ui-feed connected color="blue"&gt;</code>, to colour the connection line.</ui-message>
 					<ui-feed connected>
 						<ui-event image="../images/avatar/small/elliot.jpg">
 							<ui-content>
@@ -309,12 +299,9 @@
 			</example>
 		</>
 
-		<section label="Ordered" sticky collapsible dividing>
-			<example>
-				<html>
-					<p slot="description">Ordered feeds number their events' labels by themselves. You can again colour the whole feed or each event, and a basic variant is available too.</p>
-					<ui-message slot="description" state="warning" size="small">With <code>connected</code> the connection line takes the feed's color. An event's own <code>color</code> colours both its circle and the line to the next event (Fomantic can colour the label alone).</ui-message>
-				</html>
+		<section label="Ordered" sticky="stack" collapsible dividing>
+			<example description="Ordered feeds number their events' labels by themselves. You can again colour the whole feed or each event, and a basic variant is available too.">
+				<message slot="description" state="warning" size="small"><html>With <code>connected</code> the connection line takes the feed's color. An event's own <code>color</code> colours both its circle and the line to the next event (Fomantic can colour the label alone).</html></message>
 				<feed color="orange" ordered connected>
 					<event color="blue">
 						<content>
@@ -340,7 +327,7 @@
 			</example>
 		</>
 
-		<section label="Divided" sticky collapsible dividing>
+		<section label="Divided" sticky="stack" collapsible dividing>
 			<example description="Feed events can be divided to better distinguish between grouped content.">
 				<html>
 					<ui-feed divided>
@@ -369,7 +356,7 @@
 			</example>
 		</>
 
-		<section label="Size" sticky collapsible dividing>
+		<section label="Size" sticky="stack" collapsible dividing>
 			<example description="A feed can have different sizes.">
 				<html>
 					<ui-feed size="small">
@@ -437,7 +424,7 @@
 			</example>
 		</>
 
-		<section label="Inverted" sticky collapsible dividing>
+		<section label="Inverted" sticky="stack" collapsible dividing>
 			<example description="A feed's color can be inverted.">
 				<html>
 					<ui-segment inverted>

@@ -444,25 +444,14 @@ A compile, in the order Debug's Program Output tab logs it:
 3. `executeCompiledApp()` runs it on the runtime, carrying things over when it's the project it ran last.
 4. The console ends "Example executed without errors.", or with the error.
 
-### A `.spellx` file:  text, or a notebook
+### A `.spellx` file
 
-A `.spellx` file, Spell's tag-shaped form, gets a Text | Notebook switch in the code's toolbar.
-- Text:  the file as written, coloured and checked like a `.spell` file.
-- Notebook:  cells down the page, like Jupyter's.
-  - Its prose is drawn as Markdown.
-  - Each template and member is a card that folds, its code in a small editor, edited in place.
-  - A `<property>` card is a form instead:  its name, its values, its aliases;  "Show the code" shows its text.
-  - Cards move up and down among their template's members;  prose stays where it is.
-- Every edit, in either view, is the file's new text:
-  the running program and the other view follow it, as if you'd typed it.
-- Which cards are open, and where the notebook was scrolled, is kept per file in this browser,
-  so a switch to Text and back, or a reload, finds it as it was.
+A `.spellx` file, Spell's tag-shaped form, opens as text in the code editor:  coloured, with errors and hover, as any Spell file.
 - A template lives in ONE file, `.spell` or `.spellx`, never both:  its other form is a read-only view.
   - Debug's Program panel has it as a tab:  Code Spell on a `.spellx` file, Spellx on a `.spell` file.
   - VS Code's title bar has the same pair:  Show as Code Spell, Show as Spellx.
   - A project may list a `.spellx` file in its `__project.json5` with no `.spell` copy:  it opens, compiles and runs.
-- The notebook is [SpellxNotebook.tsx](src/app/solid/SpellxNotebook.tsx);
-  what the tags mean is [the spellx page](https://github.com/spell-app/spell/blob/main/parser/README-spellx.md).
+- What the tags mean is [the spellx page](https://github.com/spell-app/spell/blob/main/parser/README-spellx.md).
 
 ### The Inspector:  look inside the running app
 

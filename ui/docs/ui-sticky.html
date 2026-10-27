@@ -60,7 +60,7 @@
               - Fomantic puts the stickies in `left` / `right` rails OUTSIDE the segment;  here the site's own nav and "On this
                 page" columns sit there, so the stickies go in `stretched` grid columns beside the content instead.
             -->
-            <ui-section id="examples-introduction" label="Introduction" sticky collapsible dividing>
+            <ui-section id="examples-introduction" label="Introduction" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   Sticky content stays fixed to the browser viewport while another column of content is visible on the page.
@@ -75,7 +75,7 @@
               >
             </ui-section>
 
-            <ui-section id="examples-examples" label="Examples" sticky collapsible dividing>
+            <ui-section id="examples-examples" label="Examples" sticky="stack" collapsible dividing>
               <ui-section
                 id="examples-examples-sticking-to-adjacent-context"
                 label="Sticking to Adjacent Context"
@@ -128,7 +128,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-examples-pushing" label="Pushing" sticky collapsible dividing>
+              <ui-section id="examples-examples-pushing" label="Pushing" sticky="stack" collapsible dividing>
                 <ui-example>
                   <p slot="description">
                     With <code>pushing</code> the viewport &quot;pushes&quot; the sticky content: it sticks to the top
@@ -344,7 +344,7 @@
 
           <ui-tab value="usage" label="Usage">
             <!-- USAGE:  how it sticks, the context, the stuck state and events, accessibility, framework snippets. -->
-            <ui-section id="usage-using-it" label="Using it" sticky collapsible dividing>
+            <ui-section id="usage-using-it" label="Using it" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   A sticky IS CSS `position: sticky` (Fomantic's `native` type): no scroll listener, no script positioning,
@@ -357,7 +357,7 @@
               </ui-markdown>
             </ui-section>
 
-            <ui-section id="usage-context" label="Context" sticky collapsible dividing>
+            <ui-section id="usage-context" label="Context" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   The host has no box of its own (`display: contents`), so the sticky sticks within its PARENT, and the end of that
@@ -377,7 +377,7 @@
               </ui-code>
             </ui-section>
 
-            <ui-section id="usage-stuck-state-and-events" label="Stuck state and events" sticky collapsible dividing>
+            <ui-section id="usage-stuck-state-and-events" label="Stuck state and events" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   What the element adds is reporting. It keeps `:state(stuck)` while stuck and `:state(bound)` while pushed out by
@@ -402,7 +402,7 @@
               </ui-code>
             </ui-section>
 
-            <ui-section id="usage-accessibility" label="Accessibility" sticky collapsible dividing>
+            <ui-section id="usage-accessibility" label="Accessibility" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   - A sticky changes nothing for assistive technology: its content stays where it is in reading and Tab order.
@@ -418,7 +418,7 @@
               </ui-markdown>
             </ui-section>
 
-            <ui-section id="usage-framework-usage" label="Framework usage" sticky collapsible dividing>
+            <ui-section id="usage-framework-usage" label="Framework usage" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   Nothing to bind: put it in the template, and listen for `ui-stuck` / `ui-unstuck` if you need to know.
@@ -453,30 +453,30 @@
 
           <ui-tab value="api" label="API">
             <!-- API:  generated from the vocabularies (`docs/__data/components.json5`);  nothing to write. -->
-            <ui-section id="api-attributes" label="Attributes" sticky collapsible dividing>
+            <ui-section id="api-attributes" label="Attributes" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-sticky" only="attributes"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-events" label="Events" sticky collapsible dividing>
+            <ui-section id="api-events" label="Events" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-sticky" only="events"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-slots" label="Slots" sticky collapsible dividing>
+            <ui-section id="api-slots" label="Slots" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-sticky" only="slots"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-parts" label="Parts" sticky collapsible dividing>
+            <ui-section id="api-parts" label="Parts" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-sticky" only="parts"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-states" label="States" sticky collapsible dividing>
+            <ui-section id="api-states" label="States" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-sticky" only="states"></ui-docs-api>
             </ui-section>
           </ui-tab>
 
           <ui-tab value="theming" label="Theming">
             <!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
-            <ui-section id="theming-tokens" label="Tokens" sticky collapsible dividing>
+            <ui-section id="theming-tokens" label="Tokens" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   Theme with the public `--ui-sticky-*` tokens on the sticky or any ancestor; `::part(sticky)` works too. Style the
@@ -545,7 +545,7 @@
               </ui-docs-tokens>
             </ui-section>
 
-            <ui-section id="theming-themes" label="Themes" sticky collapsible dividing>
+            <ui-section id="theming-themes" label="Themes" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   A sticky has no look of its own, only whatever it holds.

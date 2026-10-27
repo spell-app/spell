@@ -5,17 +5,15 @@
 	</>
 	<button-tab-bar showing="usage"/>
 	<section>
-		<html>
-			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-				<ui-item link="#using-it">Using it</>
-				<ui-item link="#events">Events</>
-				<ui-item link="#state-texts">State texts</>
-				<ui-item link="#invoker-commands">Invoker commands</>
-				<ui-item link="#forms">Forms</>
-				<ui-item link="#keyboard">Keyboard</>
-				<ui-item link="#accessibility">Accessibility</>
-				<ui-item link="#framework-usage">Framework usage</>
-			</>
+		<menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#using-it">Using it</>
+			<item link="#events">Events</>
+			<item link="#state-texts">State texts</>
+			<item link="#invoker-commands">Invoker commands</>
+			<item link="#forms">Forms</>
+			<item link="#keyboard">Keyboard</>
+			<item link="#accessibility">Accessibility</>
+			<item link="#framework-usage">Framework usage</>
 		</>
 	</>
 

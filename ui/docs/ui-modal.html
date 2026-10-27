@@ -66,9 +66,9 @@
               `command="--show"`):  no script.  Never `visible` on load:  it would block the page.
               `GAP I<n>` comments mark examples a widget can't render yet (plan-doc issues).
             -->
-            <ui-section id="examples-types" label="Types" sticky collapsible dividing>
+            <ui-section id="examples-types" label="Types" sticky="stack" collapsible dividing>
               <!-- GAP I56:  `<ui-image size="medium">` is the natural size, not 300px, so the image crowds the description. -->
-              <ui-section id="examples-types-modal" label="Modal" sticky collapsible dividing>
+              <ui-section id="examples-types-modal" label="Modal" sticky="stack" collapsible dividing>
                 <ui-example
                   description="A standard modal:  a header, image content and actions.  The approve / deny buttons close it."
                 >
@@ -95,7 +95,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-types-basic" label="Basic" sticky collapsible dividing>
+              <ui-section id="examples-types-basic" label="Basic" sticky="stack" collapsible dividing>
                 <ui-example
                   description="A modal can reduce its complexity:  no box, light text straight on the dimmer."
                 >
@@ -119,8 +119,8 @@
               </ui-section>
             </ui-section>
 
-            <ui-section id="examples-content" label="Content" sticky collapsible dividing>
-              <ui-section id="examples-content-header" label="Header" sticky collapsible dividing>
+            <ui-section id="examples-content" label="Content" sticky="stack" collapsible dividing>
+              <ui-section id="examples-content-header" label="Header" sticky="stack" collapsible dividing>
                 <ui-example
                   description="A modal can have a header:  a slotted `<ui-header>`, or the `header` shorthand."
                 >
@@ -129,7 +129,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-content-content" label="Content" sticky collapsible dividing>
+              <ui-section id="examples-content-content" label="Content" sticky="stack" collapsible dividing>
                 <ui-example
                   description="A modal can contain content:  a slotted `<ui-content>`, or the `content` shorthand for a block of text."
                 >
@@ -146,7 +146,7 @@
               </ui-section>
 
               <!-- GAP I56:  `<ui-image size="medium">` is the natural size, not 300px, so the image crowds the description. -->
-              <ui-section id="examples-content-image-content" label="Image Content" sticky collapsible dividing>
+              <ui-section id="examples-content-image-content" label="Image Content" sticky="stack" collapsible dividing>
                 <ui-example
                   description="A modal can contain image content:  `<ui-content image>` puts an image beside the description."
                 >
@@ -164,7 +164,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-content-actions" label="Actions" sticky collapsible dividing>
+              <ui-section id="examples-content-actions" label="Actions" sticky="stack" collapsible dividing>
                 <ui-example>
                   <p slot="description">A modal can contain a row of actions: <code>&lt;ui-actions&gt;</code>.</p>
                   <ui-message slot="description" size="small" state="info"
@@ -199,8 +199,8 @@
               </ui-section>
             </ui-section>
 
-            <ui-section id="examples-variations" label="Variations" sticky collapsible dividing>
-              <ui-section id="examples-variations-full-screen" label="Full Screen" sticky collapsible dividing>
+            <ui-section id="examples-variations" label="Variations" sticky="stack" collapsible dividing>
+              <ui-section id="examples-variations-full-screen" label="Full Screen" sticky="stack" collapsible dividing>
                 <ui-example description="A modal can use the entire size of the screen.">
                   <ui-button commandfor="modal-variations-full" command="--show">Show</ui-button>
                   <ui-modal
@@ -238,7 +238,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-variations-size" label="Size" sticky collapsible dividing>
+              <ui-section id="examples-variations-size" label="Size" sticky="stack" collapsible dividing>
                 <ui-example
                   description="A modal can vary in size.  Sizes are widths:  ratios of the default width;  the text does not scale."
                 >
@@ -277,7 +277,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-variations-inverted" label="Inverted" sticky collapsible dividing>
+              <ui-section id="examples-variations-inverted" label="Inverted" sticky="stack" collapsible dividing>
                 <ui-example>
                   <p slot="description">A modal can be shown inverted: the dark scheme.</p>
                   <ui-message slot="description" size="small" class="site-not-ported"
@@ -328,7 +328,7 @@
               </ui-section>
 
               <!-- GAP I99, I110:  no centred actions (`<ui-actions>` has no text-align), and the header ignores its text-align;  only the content centres. -->
-              <ui-section id="examples-variations-center-aligned" label="Center Aligned" sticky collapsible dividing>
+              <ui-section id="examples-variations-center-aligned" label="Center Aligned" sticky="stack" collapsible dividing>
                 <ui-example
                   description='You can center align the header, the content or even actions individually:  `text-align="center"`.'
                 >
@@ -345,7 +345,7 @@
               </ui-section>
 
               <!-- GAP I99:  no left actions;  they stay on the right. -->
-              <ui-section id="examples-variations-left-actions" label="Left Actions" sticky collapsible dividing>
+              <ui-section id="examples-variations-left-actions" label="Left Actions" sticky="stack" collapsible dividing>
                 <ui-example description="You can also place the action buttons to the left.">
                   <ui-button commandfor="modal-variations-left" command="--show">Show</ui-button>
                   <ui-modal id="modal-variations-left" heading="Look at the Actions">
@@ -382,8 +382,8 @@
               </ui-section>
             </ui-section>
 
-            <ui-section id="examples-states" label="States" sticky collapsible dividing>
-              <ui-section id="examples-states-active" label="Active" sticky collapsible dividing>
+            <ui-section id="examples-states" label="States" sticky="stack" collapsible dividing>
+              <ui-section id="examples-states-active" label="Active" sticky="stack" collapsible dividing>
                 <ui-example
                   description="An active modal is visible on the page:  `open` (it emits Fomantic's `active` class).  Writing it shows or hides the modal and fires no `ui-opening` / `ui-closing`."
                 >
@@ -399,7 +399,7 @@
               </ui-section>
             </ui-section>
 
-            <ui-section id="examples-behaviour" label="Behaviour" sticky collapsible dividing>
+            <ui-section id="examples-behaviour" label="Behaviour" sticky="stack" collapsible dividing>
               <ui-section
                 id="examples-behaviour-top-or-bottom-aligned"
                 label="Top or Bottom aligned"
@@ -431,7 +431,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-behaviour-scrolling-modal" label="Scrolling Modal" sticky collapsible dividing>
+              <ui-section id="examples-behaviour-scrolling-modal" label="Scrolling Modal" sticky="stack" collapsible dividing>
                 <ui-example
                   description="When a `scrolling` modal is taller than the browser, it scrolls inside itself, without scrolling the page below."
                 >
@@ -460,7 +460,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-behaviour-multiple-modals" label="Multiple Modals" sticky collapsible dividing>
+              <ui-section id="examples-behaviour-multiple-modals" label="Multiple Modals" sticky="stack" collapsible dividing>
                 <ui-example
                   description="A modal can open a second modal, which opens on top of the first (Fomantic's `allowMultiple: true`);  Escape closes only the topmost."
                 >
@@ -523,7 +523,7 @@
 
           <ui-tab value="usage" label="Usage">
             <!-- USAGE:  opening, dismissal, actions, events, the dialog helpers, keyboard, accessibility, frameworks. -->
-            <ui-section id="usage-using-it" label="Using it" sticky collapsible dividing>
+            <ui-section id="usage-using-it" label="Using it" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   Write a `<ui-modal>` anywhere in the page with its parts inside: `<ui-header>`, `<ui-content>` (`image`,
@@ -538,7 +538,7 @@
               </ui-markdown>
             </ui-section>
 
-            <ui-section id="usage-opening-it" label="Opening it" sticky collapsible dividing>
+            <ui-section id="usage-opening-it" label="Opening it" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   - With no script, from a native `<button commandfor="id" command="--show">` or a `<ui-button>` (an invoker
@@ -554,7 +554,7 @@
               </ui-code>
             </ui-section>
 
-            <ui-section id="usage-dismissal" label="Dismissal" sticky collapsible dividing>
+            <ui-section id="usage-dismissal" label="Dismissal" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   `closedby` says what dismisses it, like `<dialog closedby>`:
@@ -591,7 +591,7 @@
               </ui-section>
             </ui-section>
 
-            <ui-section id="usage-events" label="Events" sticky collapsible dividing>
+            <ui-section id="usage-events" label="Events" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   Buttons anywhere inside act by Fomantic's classes: `approve` / `ok` / `positive` (or `<ui-button color="positive">`)
@@ -630,7 +630,7 @@
               >
             </ui-section>
 
-            <ui-section id="usage-dialog-helpers" label="Dialog helpers" sticky collapsible dividing>
+            <ui-section id="usage-dialog-helpers" label="Dialog helpers" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   For a quick question, `UI.modals.confirm()`, `alert()` and `prompt()` build a small modal for you, open it and
@@ -658,7 +658,7 @@
               </ui-code>
             </ui-section>
 
-            <ui-section id="usage-keyboard" label="Keyboard" sticky collapsible dividing>
+            <ui-section id="usage-keyboard" label="Keyboard" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   - **Tab** / **Shift+Tab** move between the controls inside the modal, never out.
@@ -668,7 +668,7 @@
               </ui-markdown>
             </ui-section>
 
-            <ui-section id="usage-accessibility" label="Accessibility" sticky collapsible dividing>
+            <ui-section id="usage-accessibility" label="Accessibility" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   - A real modal `<dialog>`: focus moves inside and **Tab** stays there, the rest of the page is inert, and focus
@@ -686,7 +686,7 @@
               </ui-markdown>
             </ui-section>
 
-            <ui-section id="usage-framework-usage" label="Framework usage" sticky collapsible dividing>
+            <ui-section id="usage-framework-usage" label="Framework usage" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   Bind `open` to your state and listen for `ui-closing` (and `ui-approving` / `ui-denying`) to follow the user.
@@ -726,34 +726,34 @@
 
           <ui-tab value="api" label="API">
             <!-- API:  generated from the vocabularies (`docs/__data/components.json5`);  nothing to write. -->
-            <ui-section id="api-attributes" label="Attributes" sticky collapsible dividing>
+            <ui-section id="api-attributes" label="Attributes" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-modal" only="attributes"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-events" label="Events" sticky collapsible dividing>
+            <ui-section id="api-events" label="Events" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-modal" only="events"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-slots" label="Slots" sticky collapsible dividing>
+            <ui-section id="api-slots" label="Slots" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-modal" only="slots"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-parts" label="Parts" sticky collapsible dividing>
+            <ui-section id="api-parts" label="Parts" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-modal" only="parts"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-states" label="States" sticky collapsible dividing>
+            <ui-section id="api-states" label="States" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-modal" only="states"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-texts" label="Texts" sticky collapsible dividing>
+            <ui-section id="api-texts" label="Texts" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-modal" only="texts"></ui-docs-api>
             </ui-section>
           </ui-tab>
 
           <ui-tab value="theming" label="Theming">
             <!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
-            <ui-section id="theming-tokens" label="Tokens" sticky collapsible dividing>
+            <ui-section id="theming-tokens" label="Tokens" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   Theme with the public `--ui-modal-*` tokens: set one on the element, on any ancestor (`:root` for every modal),
@@ -812,7 +812,7 @@
               </ui-docs-tokens>
             </ui-section>
 
-            <ui-section id="theming-themes" label="Themes" sticky collapsible dividing>
+            <ui-section id="theming-themes" label="Themes" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   The theme menu above picks the theme for every page of the site:  Spell, Glass, Fruity or Merlot,

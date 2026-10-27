@@ -177,7 +177,7 @@ export function NotebookPage(props: {
                   <ui-section
                     id={slugOf(section().heading!)}
                     label={section().heading}
-                    sticky=""
+                    sticky="stack"
                     level="2"
                     collapsible=""
                     dividing=""

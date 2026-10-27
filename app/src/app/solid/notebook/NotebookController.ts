@@ -257,22 +257,42 @@ export class NotebookController {
   editCell(key: string, code: string) {
     const cell = this.currentCell(key)
     if (!cell || cell.code === code) return
-    this.apply(NotebookPageCells.withCode(this.now.text, cell, code), { undoable: false })
+    const text = NotebookPageCells.withCode(this.now.text, cell, code)
+    if (this.isUnfinished(text, key, (each) => each.code === code)) return
+    this.apply(text, { undoable: false })
   }
 
   /**
-   * Example `index` of cell `key` now has `code`, in the page's code view:  an html edit is mapped back to spellx.
-   * - The spell view is read only:  never called for it.
+   * Example `index` of cell `key` now has `code`, in the page's code view:  a spell view edit is turned back into
+   * spellx, each tag a bare name gives as that name again (`NotebookCode.toSpellx()`).
    * - Its example draws again;  saved only while the notebook's unlocked (`apply()`).
+   * - Unfinished markup (`<` just typed) waits for the next keystroke:  `isUnfinished()`.
    */
   editExample(key: string, index: number, code: string) {
     const example = this.currentCell(key)?.examples?.[index]
     if (!example) return
-    // an `<html>` block's markup is written as it is, in any view
-    const isHtml = this.codeView() === "html" && !example.html
-    const spellx = isHtml ? NotebookCode.toSpellx(code, (tag) => this.wordFor(tag)) : code
+    // an `<html>` block's markup is written as it is, in either view
+    const isSpell = this.codeView() === "spell" && !example.html
+    const spellx = isSpell ? NotebookCode.toSpellx(code, (tag) => this.wordFor(tag)) : code
     if (spellx === example.body.code) return
-    this.apply(NotebookPageCells.withCode(this.now.text, example.body, spellx), { undoable: false })
+    const text = NotebookPageCells.withCode(this.now.text, example.body, spellx)
+    if (this.isUnfinished(text, key, (cell) => cell.examples?.[index]?.body.code === spellx)) return
+    this.apply(text, { undoable: false })
+  }
+
+  /**
+   * Would `text`, cell `key` just typed in, break the page's cells apart?  Then it's unfinished markup:
+   * a tag half typed (`<`, `<but`) swallows the closers after it, and the cells after it would draw again, or vanish.
+   * - `isSame`:  is the new cell in `key`'s place the edit, as typed?
+   * - SIDE EFFECT:  notes the cell's error, until the next edit;  nothing's drawn or saved meanwhile, and its editor
+   *   keeps its text (`<CellEditor>`).
+   */
+  private isUnfinished(text: string, key: string, isSame: (cell: PageCell) => boolean): boolean {
+    const cells = NotebookPageCells.of(text, this.file.path)?.cells ?? []
+    const cell = cells[this.now.keys.indexOf(key)]
+    if (cells.length === this.now.keys.length && cell && isSame(cell)) return false
+    this.noteErrors(key, [appTexts.text("notebookPageUnfinished")])
+    return true
   }
 
   /**
@@ -771,15 +791,13 @@ export class NotebookController {
 
   /**
    * Example `index` of `cell`'s code in `view`:  only what it DRAWS, never its `<example>` tags (P18).
-   * - spellx:  its body as written;  html:  its bare names as their tags;  spell:  its body's code spell twin
-   *   (`SX.CodeSpellWriter.writeMarkup()`).
-   * - A body that's one `<html>` block:  what's inside it, as written, in every view.
+   * - spellx:  its body as written;  spell:  its body's code spell twin (`SX.CodeSpellWriter.writeMarkup()`).
+   * - A body that's one `<html>` block:  what's inside it, as written, in either view.
    */
   exampleCode(cell: PageCell, index: number, view = this.codeView()): string {
     const example = cell.examples?.[index]
     if (!example) return ""
     if (view === "spellx" || example.html) return example.body.code
-    if (view === "html") return NotebookCode.toHtml(example.body.code, (word) => this.tagFor(word))
     return SX.CodeSpellWriter.writeMarkup(example.body.code, {
       path: this.file.path,
       componentTag: (word) => this.tagFor(word)
@@ -789,7 +807,7 @@ export class NotebookController {
   /** `cell`'s whole code in `view`:  a template's outline in code spell, a drawing's tags.  Read only but spellx. */
   cellCode(cell: PageCell, view = this.codeView()): string {
     if (view === "spellx" || cell.kind === "prose") return cell.code
-    if (cell.kind === "template" && view === "spell") {
+    if (cell.kind === "template") {
       const written = SX.CodeSpellWriter.write(cell.code, {
         path: this.file.path,
         componentTag: (word) => this.tagFor(word)
@@ -798,7 +816,7 @@ export class NotebookController {
     }
     // a template's own tags (`<property>`, `<draw>`) stay:  only its drawings' names are tags
     const words = this.spellxWords()
-    return NotebookCode.toHtml(cell.code, (word) => (words.has(word) ? undefined : this.tagFor(word)))
+    return NotebookCode.withTags(cell.code, (word) => (words.has(word) ? undefined : this.tagFor(word)))
   }
 
   /** The words of the notebook's language that are spellx's own tags:  `property`, `draw`, `on` ... */

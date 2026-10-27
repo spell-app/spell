@@ -872,7 +872,7 @@ export class EditorStore extends Observable {
 
   /**
    * The user edited the file's text to `value` somewhere with no Monaco model:
-   *   `<InputEditor>`'s fallback editor, or a `.spellx` file's notebook (`<SpellxNotebook>`).
+   *   `<InputEditor>`'s fallback editor.
    * - The normal editor's edits go through `SpellModels` instead -- see `onFileEdited()`.
    */
   onInputChanged(value: string): void {

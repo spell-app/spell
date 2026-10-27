@@ -54,6 +54,17 @@ import sectionCSS from "./UISection.css?inline"
  *   - A `scrolling` / `height` section's content is its own scroll box:  a fresh stack starts there.
  *   - `StickyWatch` sets `:state(stuck)`, and reserves the title's room for Page Down, as `<ui-sticky>` does.
  *
+ * - *Stack* (`sticky="stack"`, or `sticky` right inside a stacked section, plain wrappers aside):  the titles read as one stack of rounded bars
+ *   (`:state(stacked)`), the look is the sheet's;  what it needs to know of its neighbours, the component works out:
+ *   - `tucked`:  the first thing in its enclosing section (nothing drawn before it, wrappers aside), so its title sits
+ *     right under that section's, square on top;  the enclosing one `tucks`
+ *   - `after-closed`:  right after a closed section, nothing between;  closed too, `joins-above`;  the closed one
+ *     before it, `joins-below`:  closed sections one after another are ONE group, round only at its ends
+ *   - a section knows what's before it;  what's after it (and its first nested one) it hears from them:
+ *     `isFollowedByClosed`, `hasTuckedFirst`, which they set
+ *   - Its neighbours are found in the enclosing section's light DOM, past any wrappers (a notebook's cells):
+ *     `stackPlaces`, recomputed as that DOM changes.  A top-level section's neighbour is its element sibling.
+ *
  * - *Source* (`source`, `select`):  the content comes from a file the first time the section unfolds, by any route:
  *   - a click
  *   - the page setting `open` (a `#id` link)
@@ -281,6 +292,106 @@ export class UISection extends E.UIComponent<SectionVocabulary> {
     return !!this.scrolling || !!this.height
   }
 
+  ////////////////
+  // ## The stack (`sticky="stack"`)
+  ////////////////
+
+  /**
+   * Its title a bar of a stack:  `sticky="stack"`, or a plain `sticky` right inside a stacked section, plain
+   * wrappers aside (a notebook's cells).
+   * - Not through another element (an example, a segment):  a sticky section shown inside one keeps the plain look.
+   */
+  @E.cssState("stacked")
+  get isStacked(): boolean {
+    if (this.sticky === STACK) return true
+    const parent = this.enclosingSection
+    return !!this.sticky && !!parent?.isStacked && isRightInside(this.domElement, parent.domElement)
+  }
+
+  /**
+   * The sections nested in this one, in page order, each with where it stands among them:
+   * first in this one (nothing drawn before it), and the one right before it (nothing drawn between).
+   * - Read from the light DOM, past wrappers;  again whenever it changes.
+   */
+  @E.watches({ childList: true, subtree: true, equals: isSameStack })
+  get stackPlaces(): StackPlace[] {
+    return stackPlacesIn(this.domElement)
+  }
+
+  /** Where it stands among its enclosing section's nested ones;  a top-level one, by its element sibling. */
+  get stackPlace(): StackPlace | undefined {
+    const parent = this.enclosingSection
+    if (parent) return parent.stackPlaces.find((place) => place.element === this.domElement)
+    const sibling = this.domElement.previousElementSibling
+    return {
+      element: this.domElement,
+      isFirst: false,
+      previous: sibling?.localName === this.domElement.localName ? sibling : undefined
+    }
+  }
+
+  /** The stacked section right before it, nothing drawn between. */
+  get previousInStack(): UISection | undefined {
+    const previous = (this.stackPlace?.previous as E.DOMElement | undefined)?.component
+    return previous instanceof UISection && previous.isStacked ? previous : undefined
+  }
+
+  /** Stacked, and the first thing in its enclosing section:  its title tucked under that one's. */
+  @E.cssState("tucked")
+  get isTucked(): boolean {
+    return this.isStacked && !!this.stackPlace?.isFirst
+  }
+
+  /** Stacked, its first nested section tucked under its title:  its content has no room on top. */
+  @E.cssState("tucks")
+  get tucksFirst(): boolean {
+    return this.isStacked && !this.contentScrolls && this.hasTuckedFirst
+  }
+
+  /** Its first nested section is tucked under its title:  that section says so (`onTuckedChanged()`). */
+  @E.state accessor hasTuckedFirst = false
+
+  /** The section right after it is closed:  that section says so (`onNeighbourChanged()`). */
+  @E.state accessor isFollowedByClosed = false
+
+  /** Tell the enclosing section whether this one is tucked under its title (`tucks`). */
+  @E.onChange("isTucked", "enclosingSection", "isConnected")
+  protected onTuckedChanged(isTucked: boolean, parent: UISection | undefined, isConnected: boolean) {
+    if (!isTucked || !parent || !isConnected) return undefined
+    parent.hasTuckedFirst = true
+    return () => {
+      parent.hasTuckedFirst = false
+    }
+  }
+
+  /** Tell the section right before this one whether this one is closed (`joins-below`). */
+  @E.onChange("previousInStack", "isFolded", "isConnected")
+  protected onNeighbourChanged(previous: UISection | undefined, isFolded: boolean, isConnected: boolean) {
+    if (!previous || !isConnected) return undefined
+    previous.isFollowedByClosed = isFolded
+    return () => {
+      previous.isFollowedByClosed = false
+    }
+  }
+
+  /** Stacked, right after a closed section:  no room above it. */
+  @E.cssState("after-closed")
+  get isAfterClosed(): boolean {
+    return this.isStacked && !!this.previousInStack?.isFolded
+  }
+
+  /** Closed, right after a closed one:  in its group, square on top. */
+  @E.cssState("joins-above")
+  get joinsAbove(): boolean {
+    return this.isAfterClosed && this.isFolded
+  }
+
+  /** Closed, right before a closed one:  in its group, square below. */
+  @E.cssState("joins-below")
+  get joinsBelow(): boolean {
+    return this.isStacked && this.isFolded && this.isFollowedByClosed
+  }
+
   /**
    * The title's inline tokens:  stick offset and nesting depth.
    */
@@ -294,7 +405,12 @@ export class UISection extends E.UIComponent<SectionVocabulary> {
    * - Returns its stop.
    */
   @E.onChange("isReady", "isConnected", "sticky", "stickTop")
-  protected onStickingChanged(isReady: boolean, isConnected: boolean, sticky: boolean | undefined, offset: number) {
+  protected onStickingChanged(
+    isReady: boolean,
+    isConnected: boolean,
+    sticky: boolean | typeof STACK | undefined,
+    offset: number
+  ) {
     if (!isReady) return undefined
     const { title, sentinel } = this
     if (!isConnected || !sticky || !title || !sentinel) {
@@ -586,6 +702,92 @@ export class UISection extends E.UIComponent<SectionVocabulary> {
 
 /** The vocabulary getters, typed (`UIComponent`'s doc). */
 export interface UISection extends E.AttributeValues<SectionVocabulary> {}
+
+/** Where a nested section stands among its enclosing section's (`stackPlaces`). */
+type StackPlace = {
+  /** the nested section's DOM element */
+  element: Element
+  /** nothing drawn before it in its enclosing section */
+  isFirst: boolean
+  /** the nested section right before it, nothing drawn between */
+  previous: Element | undefined
+}
+
+/** Do `a` and `b` say the same of the same sections? */
+function isSameStack(a: StackPlace[], b: StackPlace[]): boolean {
+  return (
+    a.length === b.length &&
+    a.every(
+      (place, index) =>
+        place.element === b[index]!.element &&
+        place.isFirst === b[index]!.isFirst &&
+        place.previous === b[index]!.previous
+    )
+  )
+}
+
+/** The sections nested directly in `host` (its own tag, none between), each with where it stands. */
+function stackPlacesIn(host: Element): StackPlace[] {
+  const tag = host.localName
+  const nested = [...host.querySelectorAll(tag)].filter((element) => element.parentElement?.closest(tag) === host)
+  return nested.map((element, index) => {
+    const before = nested[index - 1]
+    return {
+      element,
+      isFirst: isDrawnFirst(element, host),
+      previous: before && isRightAfter(element, before, host) ? before : undefined
+    }
+  })
+}
+
+/** Is `element` inside `outer` with no other element of a set (a tag with a `-`) between them? */
+function isRightInside(element: Element, outer: Element): boolean {
+  for (let node = element.parentElement; node && node !== outer; node = node.parentElement)
+    if (node.localName.includes("-")) return false
+  return true
+}
+
+/** Is nothing drawn before `element` in `host`?  Named slots (a title's actions) and empty wrappers draw nothing. */
+function isDrawnFirst(element: Element, host: Element): boolean {
+  for (let node: Element | null = element; node && node !== host; node = node.parentElement)
+    for (let sibling = node.previousSibling; sibling; sibling = sibling.previousSibling)
+      if (!drawsNothing(sibling)) return false
+  return true
+}
+
+/** Is `element` right after `before` in `host`, nothing drawn between them? */
+function isRightAfter(element: Element, before: Element, host: Element): boolean {
+  for (let node: Element | null = element; node && node !== host; node = node.parentElement)
+    for (let sibling = node.previousSibling; sibling; sibling = sibling.previousSibling) {
+      if (sibling === before || sibling.contains(before)) return isDrawnLast(before, sibling)
+      if (!drawsNothing(sibling)) return false
+    }
+  return false
+}
+
+/** Is nothing drawn after `element` inside `outer` (`element` itself, or an element holding it)? */
+function isDrawnLast(element: Element, outer: Node): boolean {
+  for (let node: Element | null = element; node && node !== outer; node = node.parentElement)
+    for (let sibling = node.nextSibling; sibling; sibling = sibling.nextSibling)
+      if (!drawsNothing(sibling)) return false
+  return true
+}
+
+/** Does `node` draw nothing:  white space, a comment, an element in a named slot, or one with nothing in it? */
+function drawsNothing(node: Node): boolean {
+  if (node.nodeType === COMMENT_NODE) return true
+  if (node.nodeType === TEXT_NODE) return !node.textContent?.trim()
+  const element = node as Element
+  if (element.hasAttribute("slot")) return true
+  return !element.firstElementChild && !element.textContent?.trim()
+}
+
+/** Node types, by number:  a server render has no `Node`. */
+const TEXT_NODE = 3
+const COMMENT_NODE = 8
+
+/** `sticky`'s value that stacks its titles as bars:  `sticky="stack"`. */
+const STACK = "stack"
 
 /** Glyph of the fold button (rotated by CSS while folded). */
 const FOLD_ICON = "chevron down"

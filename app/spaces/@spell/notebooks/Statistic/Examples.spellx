@@ -5,12 +5,10 @@
 	</>
 	<statistic-tab-bar showing="examples"/>
 	<section>
-		<html>
-			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-				<ui-item link="#types">Types</>
-				<ui-item link="#content">Content</>
-				<ui-item link="#variations">Variations</>
-			</>
+		<menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#types">Types</>
+			<item link="#content">Content</>
+			<item link="#variations">Variations</>
 		</>
 	</>
 
@@ -20,7 +18,7 @@
 		(slotted parts keep their order:  a label first is Fomantic's top label);  `four statistics` is `widths="4"`.
 	-->
 	<section label="Types">
-		<section label="Statistic" sticky collapsible dividing>
+		<section label="Statistic" sticky="stack" collapsible dividing>
 			<example description="A statistic can display a value with a label above or below it:  `value` and `label` are the shorthands.">
 				<statistic value="5,550" label="Downloads"/>
 			</example>
@@ -32,7 +30,7 @@
 			</example>
 		</>
 
-		<section label="Statistic Group" sticky collapsible dividing>
+		<section label="Statistic Group" sticky="stack" collapsible dividing>
 			<example description="A group of statistics.">
 				<statistics>
 					<statistic value="22" label="Faves"/>
@@ -44,7 +42,7 @@
 	</>
 
 	<section label="Content">
-		<section label="Value" sticky collapsible dividing>
+		<section label="Value" sticky="stack" collapsible dividing>
 			<example description="A statistic can contain a numeric, icon, image, or text value:  `<ui-value text>` is a word value.">
 				<html>
 					<ui-statistics>
@@ -63,7 +61,7 @@
 			</example>
 		</>
 
-		<section label="Label" sticky collapsible dividing>
+		<section label="Label" sticky="stack" collapsible dividing>
 			<example description="A statistic can contain a label to help provide context for the presented value.">
 				<statistic value="2,204" label="Views"/>
 			</example>
@@ -84,7 +82,7 @@
 			</example>
 		</>
 
-		<section label="Colored" sticky collapsible dividing>
+		<section label="Colored" sticky="stack" collapsible dividing>
 			<example description="A statistic can be formatted to be different colors.">
 				<statistics>
 					<statistic color="red" value="27" label="Red"/>
@@ -103,7 +101,7 @@
 			</example>
 		</>
 
-		<section label="Inverted" sticky collapsible dividing>
+		<section label="Inverted" sticky="stack" collapsible dividing>
 			<example description="A statistic can be formatted to fit on a dark background.">
 				<segment inverted>
 					<statistic inverted value="54" label="Inverted"/>
@@ -123,12 +121,9 @@
 			</example>
 		</>
 
-		<section label="Stackable" sticky collapsible dividing>
-			<example>
-				<html>
-					<p slot="description">A statistic group can automatically stack rows to a single column on mobile devices.</p>
-					<ui-message slot="description" state="info" size="small"><code>stackable</code> answers to the GROUP's width (below 768px), not the window's. This page's example column is narrower than that, so the group shows stacked here even on a wide screen.</ui-message>
-				</html>
+		<section label="Stackable" sticky="stack" collapsible dividing>
+			<example description="A statistic group can automatically stack rows to a single column on mobile devices.">
+				<message slot="description" state="info" size="small"><html><code>stackable</code> answers to the GROUP's width (below 768px), not the window's. This page's example column is narrower than that, so the group shows stacked here even on a wide screen.</html></message>
 				<statistics stackable>
 					<statistic color="red" value="27" label="Red"/>
 					<statistic color="orange" value="8" label="Orange"/>
@@ -146,7 +141,7 @@
 			</example>
 		</>
 
-		<section label="Evenly Divided" sticky collapsible dividing>
+		<section label="Evenly Divided" sticky="stack" collapsible dividing>
 			<example description="A statistic group can have its items divided evenly:  `widths=\"4\"` is Fomantic's `four statistics`.">
 				<html>
 					<ui-statistics widths="4">
@@ -165,7 +160,7 @@
 			</example>
 		</>
 
-		<section label="Equal" sticky collapsible dividing>
+		<section label="Equal" sticky="stack" collapsible dividing>
 			<example description="`equal` divides the row evenly without a count:  one row, an equal share of it per statistic.  `widths=\"4\"` above is the older, count-based spelling (which wraps after four).">
 				<statistics equal>
 					<statistic value="22" label="Saves"/>
@@ -175,13 +170,13 @@
 			</example>
 		</>
 
-		<section label="Fluid" sticky collapsible dividing>
+		<section label="Fluid" sticky="stack" collapsible dividing>
 			<example description="A fluid statistic occupies the whole container width. It's a simpler alternative to a `widths=\"1\"` group.">
 				<statistic fluid value="2,204" label="Views"/>
 			</example>
 		</>
 
-		<section label="Left and Right" sticky collapsible dividing>
+		<section label="Left and Right" sticky="stack" collapsible dividing>
 			<example description="A statistic has no `floated` any more: a `<ui-stack>` puts it at the left or the right of other content. The text stays in a column beside it; it doesn't wrap round it.">
 				<html>
 					<ui-segment>
@@ -204,7 +199,7 @@
 			</example>
 		</>
 
-		<section label="Size" sticky collapsible dividing>
+		<section label="Size" sticky="stack" collapsible dividing>
 			<example description="A statistic can vary in size.">
 				<statistic size="mini" value="2,204" label="Views"/>
 				<statistic size="tiny" value="2,204" label="Views"/>

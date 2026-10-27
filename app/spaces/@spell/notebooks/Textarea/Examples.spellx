@@ -5,12 +5,10 @@
 	</>
 	<textarea-tab-bar showing="examples"/>
 	<section>
-		<html>
-			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-				<ui-item link="#types">Types</>
-				<ui-item link="#states">States</>
-				<ui-item link="#variations">Variations</>
-			</>
+		<menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#types">Types</>
+			<item link="#states">States</>
+			<item link="#variations">Variations</>
 		</>
 	</>
 
@@ -21,13 +19,13 @@
 		`aria-label`;  in a form a `<label for>` does the same job.
 	-->
 	<section label="Types">
-		<section label="Textarea" sticky collapsible dividing>
+		<section label="Textarea" sticky="stack" collapsible dividing>
 			<example description="A textarea allows extended user input:  `rows` sets its height;  without it the field is Fomantic's form height.">
 				<textarea fluid rows="3" placeholder="Tell us more" aria-label="Tell us more"/>
 			</example>
 		</>
 
-		<section label="In a Form" sticky collapsible dividing>
+		<section label="In a Form" sticky="stack" collapsible dividing>
 			<example description="In a `<ui-form>` field, a `<label for>` names it, as Fomantic's form TextArea does.">
 				<html>
 					<ui-form>
@@ -48,19 +46,19 @@
 	</>
 
 	<section label="States">
-		<section label="Disabled" sticky collapsible dividing>
+		<section label="Disabled" sticky="stack" collapsible dividing>
 			<example description="A textarea can be disabled:  dimmed, and left out of the form.">
 				<textarea disabled rows="2" value="Can't touch this" aria-label="Disabled"/>
 			</example>
 		</>
 
-		<section label="Read-only" sticky collapsible dividing>
+		<section label="Read-only" sticky="stack" collapsible dividing>
 			<example description="A read-only textarea shows its value but can't be edited;  it is still submitted.">
 				<textarea readonly rows="2" value="Read, don't write" aria-label="Read-only"/>
 			</example>
 		</>
 
-		<section label="Form States" sticky collapsible dividing>
+		<section label="Form States" sticky="stack" collapsible dividing>
 			<example description="`state` tints the box, text and placeholder:  `error`, `info`, `success`, `warning`.">
 				<textarea state="error" rows="2" placeholder="Error" aria-label="Error"/>
 				<textarea state="info" rows="2" placeholder="Info" aria-label="Info"/>
@@ -72,14 +70,14 @@
 
 	<section label="Variations">
 		<!-- GAP I101:  `<ui-textarea>` has no `icon` or corner label (Fomantic's six textarea inputs);  only the plain one. -->
-		<section label="Height" sticky collapsible dividing>
+		<section label="Height" sticky="stack" collapsible dividing>
 			<example description="`rows` sets the visible lines;  without it a textarea is Fomantic's form height (`--ui-input-textarea-height`, 12em).">
 				<textarea rows="2" placeholder="Two rows" aria-label="Two rows"/>
 				<textarea placeholder="The form height" aria-label="Form height"/>
 			</example>
 		</>
 
-		<section label="Growing" sticky collapsible dividing>
+		<section label="Growing" sticky="stack" collapsible dividing>
 			<example description="`grow`:  one line to start, taller as you type, then it scrolls;  shorter again as text goes.  It stops at `max-rows` lines, else a third of the window.  Every \"tell me more\" field should grow.">
 				<stack>
 					<textarea grow fluid placeholder="Tell me more" aria-label="Tell me more"/>
@@ -88,19 +86,19 @@
 			</example>
 		</>
 
-		<section label="Fluid" sticky collapsible dividing>
+		<section label="Fluid" sticky="stack" collapsible dividing>
 			<example description="A fluid textarea takes the full width of its container.">
 				<textarea fluid rows="2" placeholder="Full width" aria-label="Full width"/>
 			</example>
 		</>
 
-		<section label="Transparent" sticky collapsible dividing>
+		<section label="Transparent" sticky="stack" collapsible dividing>
 			<example description="A transparent textarea has no box:  text only.">
 				<textarea appearance="transparent" rows="2" placeholder="Write here..." aria-label="Transparent"/>
 			</example>
 		</>
 
-		<section label="Inverted" sticky collapsible dividing>
+		<section label="Inverted" sticky="stack" collapsible dividing>
 			<example description="A textarea can be formatted to appear on dark backgrounds.">
 				<segment inverted>
 					<textarea inverted rows="2" placeholder="On a dark background" aria-label="Inverted"/>
@@ -108,7 +106,7 @@
 			</example>
 		</>
 
-		<section label="Size" sticky collapsible dividing>
+		<section label="Size" sticky="stack" collapsible dividing>
 			<example description="A textarea can vary in size.">
 				<textarea size="mini" rows="1" placeholder="Mini" aria-label="Mini"/>
 				<textarea size="small" rows="1" placeholder="Small" aria-label="Small"/>

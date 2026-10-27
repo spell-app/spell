@@ -445,6 +445,12 @@ and a rule changed here reaches every repo's next run.
   - `SplitString<List, Delimiter>`
   - the `global` module, for code written for a bundler that provided it
   - Vite's client types:  `import.meta.env`, `?inline` imports
+- `browserMode()` ([browserMode.ts](src/toolchain/browserMode.ts)):  the `browser` block of every repo's browser test
+  projects, headless Playwright, with animations OFF.
+  - The page asks for reduced motion, so nothing waits on an animation, and a slow CI runner can't stretch one past
+    a test's timeout.
+  - A file of tests of motion itself runs in a project of its own with animations on (`animations: "on"`),
+    since a project's test files share one page, and reduced motion is the page's setting.
 - `packageVersion()` ([packageVersion.ts](src/toolchain/packageVersion.ts)), a Vite plugin, so a build knows its own
   version:  it defines `__PACKAGE_VERSION__` from the nearest `package.json` at or above the folder it's given
   (`packageVersion(import.meta.dirname)`).
@@ -463,6 +469,7 @@ and a rule changed here reaches every repo's next run.
 | [lint.patterns.ts](src/toolchain/lint.patterns.ts) | `spell/toolchain/lint/patterns` | the six `spell-ui/*` component rules |
 | [lint.imports.ts](src/toolchain/lint.imports.ts) | `spell/toolchain/lint/imports` | `spell/no-parent-import`, on every file |
 | [decorators.ts](src/toolchain/decorators.ts) | `spell/toolchain/decorators` | `standardDecorators()`, the decorator pre-pass |
+| [browserMode.ts](src/toolchain/browserMode.ts) | `spell/toolchain/browserMode` | `browserMode()`:  every browser test project's Vitest browser mode, animations off (reduced motion) |
 | [packageVersion.ts](src/toolchain/packageVersion.ts) | `spell/toolchain/packageVersion` | `packageVersion()`:  `__PACKAGE_VERSION__` |
 | [sourceNames.ts](src/toolchain/sourceNames.ts) | `spell/toolchain/sourceNames` | `sourceNames()` for esbuild, and the lookups under it:  `sourceFileFor()`, `packageRootFor()`, `resolvedFile()` |
 | [declarations.ts](src/toolchain/declarations.ts), [bin/spell-types.ts](bin/spell-types.ts) | `spell/toolchain/declarations`;  the bin `spell-types` | the declarations build |

@@ -59,8 +59,8 @@
               Examples tab (More Examples).  A rating is a form control (a group of real radios):  every example is named
               (`aria-label`, or a `<label for>`), as a real form would be.
             -->
-            <ui-section id="examples-types" label="Types" sticky collapsible dividing>
-              <ui-section id="examples-types-rating" label="Rating" sticky collapsible dividing>
+            <ui-section id="examples-types" label="Types" sticky="stack" collapsible dividing>
+              <ui-section id="examples-types-rating" label="Rating" sticky="stack" collapsible dividing>
                 <ui-example
                   description="A basic rating.  Fomantic's default is 4 icons;  `max-rating` changes it, here to one."
                 >
@@ -71,7 +71,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-types-icon" label="Icon" sticky collapsible dividing>
+              <ui-section id="examples-types-icon" label="Icon" sticky="stack" collapsible dividing>
                 <ui-example
                   description="You can use any available icon as rating indicator:  `icon` takes an icon name."
                 >
@@ -91,7 +91,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-types-color" label="Color" sticky collapsible dividing>
+              <ui-section id="examples-types-color" label="Color" sticky="stack" collapsible dividing>
                 <ui-example description="You can specify any color of the palette with `color`.">
                   <ui-rating color="red" value="1" max-rating="7" aria-label="Red"></ui-rating>
                   <br />
@@ -121,7 +121,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-types-partial-ratings" label="Partial Ratings" sticky collapsible dividing>
+              <ui-section id="examples-types-partial-ratings" label="Partial Ratings" sticky="stack" collapsible dividing>
                 <ui-example>
                   <p slot="description">You can use decimal values for showing partially filled ratings.</p>
                   <ui-message slot="description" state="info" size="small"
@@ -148,8 +148,8 @@
               </ui-section>
             </ui-section>
 
-            <ui-section id="examples-states" label="States" sticky collapsible dividing>
-              <ui-section id="examples-states-disabled" label="Disabled" sticky collapsible dividing>
+            <ui-section id="examples-states" label="States" sticky="stack" collapsible dividing>
+              <ui-section id="examples-states-disabled" label="Disabled" sticky="stack" collapsible dividing>
                 <ui-example
                   description="A rating can be non-interactive with `disabled`:  it shows its value, can't be focused and isn't submitted."
                 >
@@ -157,7 +157,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-states-read-only" label="Read-only" sticky collapsible dividing>
+              <ui-section id="examples-states-read-only" label="Read-only" sticky="stack" collapsible dividing>
                 <ui-example
                   description="A `readonly` rating shows its value and can't be changed, but is still focusable and submitted.  A `<label for>` names it."
                 >
@@ -167,8 +167,8 @@
               </ui-section>
             </ui-section>
 
-            <ui-section id="examples-variations" label="Variations" sticky collapsible dividing>
-              <ui-section id="examples-variations-size" label="Size" sticky collapsible dividing>
+            <ui-section id="examples-variations" label="Variations" sticky="stack" collapsible dividing>
+              <ui-section id="examples-variations-size" label="Size" sticky="stack" collapsible dividing>
                 <ui-example description="A rating can vary in size.">
                   <ui-rating size="mini" color="yellow" value="3" aria-label="Mini"></ui-rating>
                   <br />
@@ -187,7 +187,7 @@
               </ui-section>
             </ui-section>
 
-            <ui-section id="examples-more-examples" label="More Examples" sticky collapsible dividing>
+            <ui-section id="examples-more-examples" label="More Examples" sticky="stack" collapsible dividing>
               <ui-section
                 id="examples-more-examples-setting-existing-values"
                 label="Setting existing values"
@@ -275,7 +275,7 @@
 
           <ui-tab value="usage" label="Usage">
             <!-- USAGE:  how to use it (attributes in practice, events, forms), keyboard, accessibility, framework snippets. -->
-            <ui-section id="usage-using-it" label="Using it" sticky collapsible dividing>
+            <ui-section id="usage-using-it" label="Using it" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   Write `<ui-rating>` and give it a name with `aria-label` or a `<label for>`: it's a form control, a group of real
@@ -295,7 +295,7 @@
               </ui-markdown>
             </ui-section>
 
-            <ui-section id="usage-events" label="Events" sticky collapsible dividing>
+            <ui-section id="usage-events" label="Events" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   `ui-changed` fires when the user rates (Fomantic's `onRate`), with `event.detail.value`: `0` when they clear it.
@@ -311,7 +311,7 @@
               </ui-code>
             </ui-section>
 
-            <ui-section id="usage-forms" label="Forms" sticky collapsible dividing>
+            <ui-section id="usage-forms" label="Forms" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   A rating is a form-associated element.
@@ -324,7 +324,7 @@
                   - A fractional `value` (`3.5`) only DRAWS a partial icon: no radio is chosen until the user rates.
                 </script>
               </ui-markdown>
-              <ui-section id="usage-forms-in-a-form" label="In a form" sticky collapsible dividing>
+              <ui-section id="usage-forms-in-a-form" label="In a form" sticky="stack" collapsible dividing>
                 <ui-example
                   description="A required rating, submitted as `food`.  Rate, then reset the form to put back the starting value."
                 >
@@ -346,7 +346,7 @@
               </ui-section>
             </ui-section>
 
-            <ui-section id="usage-keyboard" label="Keyboard" sticky collapsible dividing>
+            <ui-section id="usage-keyboard" label="Keyboard" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   The rating is a radio group, so it's ONE tab stop and the arrows move the choice.
@@ -363,7 +363,7 @@
               </ui-markdown>
             </ui-section>
 
-            <ui-section id="usage-accessibility" label="Accessibility" sticky collapsible dividing>
+            <ui-section id="usage-accessibility" label="Accessibility" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   The rating is a group of real radios: one per icon, each named "3 of 5" (translatable).
@@ -379,7 +379,7 @@
               </ui-markdown>
             </ui-section>
 
-            <ui-section id="usage-framework-usage" label="Framework usage" sticky collapsible dividing>
+            <ui-section id="usage-framework-usage" label="Framework usage" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   `value` is a plain attribute; listen for `ui-changed` with your framework's custom-event syntax.
@@ -415,30 +415,30 @@
 
           <ui-tab value="api" label="API">
             <!-- API:  generated from the vocabularies (`docs/__data/components.json5`);  nothing to write. -->
-            <ui-section id="api-attributes" label="Attributes" sticky collapsible dividing>
+            <ui-section id="api-attributes" label="Attributes" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-rating" only="attributes"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-events" label="Events" sticky collapsible dividing>
+            <ui-section id="api-events" label="Events" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-rating" only="events"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-parts" label="Parts" sticky collapsible dividing>
+            <ui-section id="api-parts" label="Parts" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-rating" only="parts"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-states" label="States" sticky collapsible dividing>
+            <ui-section id="api-states" label="States" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-rating" only="states"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-texts" label="Texts" sticky collapsible dividing>
+            <ui-section id="api-texts" label="Texts" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-rating" only="texts"></ui-docs-api>
             </ui-section>
           </ui-tab>
 
           <ui-tab value="theming" label="Theming">
             <!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
-            <ui-section id="theming-tokens" label="Tokens" sticky collapsible dividing>
+            <ui-section id="theming-tokens" label="Tokens" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   Theme with the public `--ui-rating-*` tokens: set one on the element, on any ancestor (`:root` included), or on
@@ -476,7 +476,7 @@
               </ui-docs-tokens>
             </ui-section>
 
-            <ui-section id="theming-themes" label="Themes" sticky collapsible dividing>
+            <ui-section id="theming-themes" label="Themes" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   The theme menu in the header (Spell, Glass, Fruity, Merlot, Paper, Midnight, Crisp, Pop, Matrix) changes the colours and fonts a rating

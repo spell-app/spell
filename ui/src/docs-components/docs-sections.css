@@ -1,12 +1,15 @@
 /*
- * The look of a docs page's section titles:  its `<ui-section sticky collapsible dividing>`s, nested,
- * as Spell UI's component pages draw them (a rounded bar with a slight shadow, a step further in each level).
+ * The look of a docs page's section titles:  its `<ui-section sticky="stack" collapsible dividing>`s, nested,
+ * as Spell UI's component pages draw them.
+ * - The stack itself (rounded bars a step further in each level, a first nested title tucked under its own, a stuck
+ *   one's heavy round, closed ones one group) is `<ui-section sticky="stack">`'s own (epic `elemental-spell` P25):
+ *   this sheet sets its tokens and the bars' fills.
  * - Shared by Spell UI's docs site (`site/_src/site.css` imports it, for `.site-main`)
  *   and any other page drawn like a component page:  `class="ui-docs-sections"` on what holds its sections
  *   (spell-app's notebook page).
- * - How far a title's bar reaches out past its column, each side:
- *   `--ui-docs-section-reach-start` / `-end`;  unset, the docs site's (its gutter and its side columns' margin).
- *   - the title's text stays where it was:  its padding gives the reach back
+ * - How far a top-level bar reaches out past its column, each side:  `--ui-section-stack-reach-start` / `-end`;
+ *   unset here, the docs site's (its gutter and its side columns' margin, less 12px);  never an example's sections,
+ *   which keep the element's own
  * - Lifted out of `site.css` as it was (epic `elemental-spell` P16):  every quote below is Owen's, about the site.
  * - In `@layer ui.app`, the page's own layer, as `site.css` is.
  */
@@ -17,12 +20,10 @@
   :is(.site-main, .ui-docs-sections) {
     --ui-section-sticky-background: var(--ui-bar-title-background, var(--ui-bar-background, var(--ui-background)));
   }
-  :is(.site-main, .ui-docs-sections) ui-section[sticky] {
-    --_ui-docs-reach-start: var(
-      --ui-docs-section-reach-start,
-      calc(var(--site-gutter, 3em) + var(--_site-band-start, 0px))
-    );
-    --_ui-docs-reach-end: var(--ui-docs-section-reach-end, calc(var(--site-gutter, 3em) + var(--_site-band-end, 0px)));
+  :is(.site-main, .ui-docs-sections) ui-section[sticky]:not(ui-example ui-section) {
+    --ui-section-stack-reach-start: calc(var(--site-gutter, 3em) + var(--_site-band-start, 0px) - 12px);
+    --ui-section-stack-reach-end: calc(var(--site-gutter, 3em) + var(--_site-band-end, 0px) - 12px);
+    --ui-section-stack-step: 16px;
   }
   /*
    * every title's fold chevron in ONE cell, a fixed width, and the same gap after it:
@@ -44,19 +45,6 @@
    *   the switch was between two different properties' values, and never eased
    */
   :is(.site-main, .ui-docs-sections) ui-section[sticky]::part(title) {
-    /*
-     * a rounded bar with a slight shadow, as an epic page's phases, stuck or not (Owen, 2026-10-25:  "rounded w/shadows
-     * like in epic page, add horizontal margins, more for each heading level";  "don't go back to bleed when sticky")
-     * - in from the band's edges by `--_ui-docs-title-inset`, its words where they were:  the padding gives back the
-     *   margin
-     */
-    margin-inline: calc(var(--_ui-docs-title-inset) - var(--_ui-docs-reach-start))
-      calc(var(--_ui-docs-title-inset) - var(--_ui-docs-reach-end));
-    padding-inline: calc(var(--_ui-docs-reach-start) - var(--_ui-docs-title-inset))
-      calc(var(--_ui-docs-reach-end) - var(--_ui-docs-title-inset));
-    border-radius: var(--ui-radius-m, 8px);
-    box-shadow: 0 1px 0 light-dark(rgb(40 30 90 / 0.08), rgb(0 0 0 / 0.45));
-    padding-block: 0.4em;
     /*
      * stuck:  a theme's wallpaper, fixed as the page's is, under its white tint
      * (`--ui-bar-wallpaper`, `--ui-bar-wallpaper-tint`);  else the stuck titles' colour
@@ -88,58 +76,12 @@
     background-image: linear-gradient(var(--_site-title-rest), var(--_site-title-rest)), var(--ui-bar-wallpaper, none);
     backdrop-filter: var(--ui-bar-wallpaper-filter, var(--ui-bar-rest-filter, none));
   }
-  /*
-   * a section's first nested title tucks under its parent's, square at its top;  the parent's stays round
-   * (Owen, 2026-10-25:  "top header should have round bottom");  so does any nested title while stuck under it
-   * ("should NOT be rounded on top when stuck")
-   */
-  :is(.site-main, .ui-docs-sections) ui-section > ui-section[sticky]:not(:not([slot]) ~ *)::part(title),
-  :is(.site-main, .ui-docs-sections) ui-section ui-section[sticky]:state(stuck)::part(title) {
-    border-start-start-radius: 0;
-    border-start-end-radius: 0;
-  }
-  /* each heading level a step further in */
-  :is(.site-main, .ui-docs-sections) ui-section[sticky] {
-    --_ui-docs-title-inset: 12px;
-  }
-  :is(.site-main, .ui-docs-sections) ui-section[sticky] ui-section[sticky] {
-    --_ui-docs-title-inset: 28px;
-  }
-  :is(.site-main, .ui-docs-sections) ui-section[sticky] ui-section[sticky] ui-section[sticky] {
-    --_ui-docs-title-inset: 44px;
-  }
-  /* phones:  the gutter is narrow, so smaller steps */
+  /* phones:  the gutter is narrow, so the bars reach less, and step in less */
   @media (--ui-mobile) {
-    :is(.site-main, .ui-docs-sections) ui-section[sticky] {
-      --_ui-docs-title-inset: 4px;
+    :is(.site-main, .ui-docs-sections) ui-section[sticky]:not(ui-example ui-section) {
+      --ui-section-stack-reach-start: calc(var(--site-gutter, 3em) + var(--_site-band-start, 0px) - 4px);
+      --ui-section-stack-reach-end: calc(var(--site-gutter, 3em) + var(--_site-band-end, 0px) - 4px);
+      --ui-section-stack-step: 4px;
     }
-    :is(.site-main, .ui-docs-sections) ui-section[sticky] ui-section[sticky] {
-      --_ui-docs-title-inset: 8px;
-    }
-    :is(.site-main, .ui-docs-sections) ui-section[sticky] ui-section[sticky] ui-section[sticky] {
-      --_ui-docs-title-inset: 12px;
-    }
-  }
-  /*
-   * a section's first nested title sits right under its own, open:  no gap
-   * (Owen, 2026-10-23:  "No space between header and first section when expanded")
-   * - only when it's the first thing in its section:  after a paragraph, its title keeps the usual gap above
-   *   (`:first-of-type` also took it from a title after a paragraph, a third of the gap under it)
-   */
-  :is(.site-main, .ui-docs-sections) ui-section > ui-section[sticky]:not(:not([slot]) ~ *)::part(section) {
-    margin-block-start: 0;
-  }
-  /* ... nor the parent body's own top padding, when that nested section is the first thing in it */
-  :is(.site-main, .ui-docs-sections) ui-section[sticky]:has(> ui-section[sticky]:not(:not([slot]) ~ *))::part(content) {
-    padding-block-start: 0;
-  }
-  /*
-   * a FOLDED section keeps no space below its title:  the next title sits right under it, as a list of folded rows
-   * (Owen, 2026-10-23:  "No space between types and content when types is collapsed")
-   * - the dividing look's 1.5em margins, its own below and the next one's above, stood between them
-   */
-  :is(.site-main, .ui-docs-sections) ui-section[sticky]:state(collapsed)::part(section),
-  :is(.site-main, .ui-docs-sections) ui-section[sticky]:state(collapsed) + ui-section[sticky]::part(section) {
-    margin-block: 0;
   }
 }

@@ -7,7 +7,7 @@
     <title>Theme Editor | Spell UI</title>
     <meta
       name="description"
-      content="A theme editor makes a theme from an existing one:  its colours, fonts and shapes, live on real elements, then copied as a stylesheet or kept in the browser."
+      content="A theme editor makes a theme from an existing one:  its colours, fonts and shapes, or any token, live on real pages, then copied as a theme file or kept in the browser."
     />
     <!-- Before first paint:  the viewer's colour scheme (`ThemePreference.HEAD_SCRIPT`, as oxfmt lays it out).  The theme itself is restored by site.js. -->
     <script>
@@ -42,7 +42,7 @@
           <ui-header level="1" class="site-title">
             Theme Editor
             <ui-label color="yellow" size="small">In progress</ui-label>
-            <ui-header>A theme editor makes a theme from an existing one:  its colours, fonts and shapes, live on real elements, then copied as a stylesheet or kept in the browser.</ui-header>
+            <ui-header>A theme editor makes a theme from an existing one:  its colours, fonts and shapes, or any token, live on real pages, then copied as a theme file or kept in the browser.</ui-header>
           </ui-header>
           <ui-theme-menu show="theme" compact class="site-themes"></ui-theme-menu>
         </ui-container>
@@ -55,10 +55,10 @@
               EXAMPLES:  ours, no Fomantic page.
               - ONE editor on the page:  it applies the theme it edits to the whole page while it's here.
             -->
-            <ui-section id="examples-types" label="Types" sticky collapsible dividing>
-              <ui-section id="examples-types-theme-editor" label="Theme editor" sticky collapsible dividing>
+            <ui-section id="examples-types" label="Types" sticky="stack" collapsible dividing>
+              <ui-section id="examples-types-theme-editor" label="Theme editor" sticky="stack" collapsible dividing>
                 <ui-example
-                  description="It starts from the page's theme (Fruity where there's none), or the theme you kept with Use this theme.  Pick a colour, a font or a corner:  this whole page follows, and the sample app shows it in light and dark.  Copy CSS copies the stylesheet below it."
+                  description="It starts from the page's theme (Fruity where there's none), or the theme you kept with Use this theme.  Pick a colour, a font or a corner, or set any token:  this whole page follows, and the sample app shows it in light and dark.  Copy changes copies the theme file."
                 >
                   <ui-theme-editor></ui-theme-editor>
                 </ui-example>
@@ -68,24 +68,24 @@
 
           <ui-tab value="usage" label="Usage">
             <!-- USAGE:  how to use it, the kept theme, keyboard, accessibility. -->
-            <ui-section id="usage-using-it" label="Using it" sticky collapsible dividing>
+            <ui-section id="usage-using-it" label="Using it" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   A `<ui-theme-editor>` makes a theme by CHANGING one:  its base, `fruity` unless the page wears another.
 
-                  - The inspector, on the left:  the theme's name and base, then Color, Type and Shape.
-                    Each choice starts as the base's own;  its Reset button (or Start over) puts it back.
-                  - The preview:  a sample app of real elements, once light and once dark.
-                  - The stylesheet:  every choice as tokens on `:root`, in `@layer ui.app`, so it wins over the base theme however each arrives.
-                    Apply the base first, then this sheet:  that's the whole theme.
+                  - The side column:  the Basics (the theme's name and base, then Color, Type and Shape), then every token a theme sets, in its file's groups, light and dark side by side.
+                    Each starts as the base's own;  its Reset button (or Start over) puts it back.  A token set by hand wins over the Basics.
+                  - The preview:  a sample app of real elements, once light and once dark;  or the real pages it's handed (`pages`), each in a frame.
+                  - What it makes is a theme FILE, `extends` its base:  Copy changes copies its JSON5.
+                    Its sheet (`el.css`) is the file's values on `:root`, in `@layer ui.app`:  apply the base first, then the sheet.
                   - While it's on a page, the WHOLE page wears the theme it edits:
                     a token set on one element can't change what the page works out from it at `:root`.
                     Take it off the page and the page's own theme comes back.
                   - `value` starts it from a theme you made before (`{"primary": "pink", "corners": "soft"}`);
                     `base` from another base.
-                  - Events:  `ui-changed` (`{ value, css }`) on every choice, `ui-copied` from Copy CSS,
+                  - Events:  `ui-changed` (`{ value, css }`) on every choice, `ui-copied` (`{ text }`) from Copy changes,
                     `ui-saved` from Use this theme and Stop using.
-                  - Script:  `el.theme` (every choice now), `el.css` (the stylesheet).
+                  - Script:  `el.theme` (every choice now), `el.css` (the sheet), `el.changes` (the theme file).
                 </script>
               </ui-markdown>
               <ui-code language="js">
@@ -96,7 +96,7 @@
                 </script>
               </ui-code>
             </ui-section>
-            <ui-section id="usage-use-this-theme" label="Use this theme" sticky collapsible dividing>
+            <ui-section id="usage-use-this-theme" label="Use this theme" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   Use this theme keeps the theme in this browser, and the Spell editor starts in it.
@@ -114,7 +114,7 @@
                 </script>
               </ui-code>
             </ui-section>
-            <ui-section id="usage-keyboard" label="Keyboard" sticky collapsible dividing>
+            <ui-section id="usage-keyboard" label="Keyboard" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   - Tab moves from field to field.
@@ -123,7 +123,7 @@
                 </script>
               </ui-markdown>
             </ui-section>
-            <ui-section id="usage-accessibility" label="Accessibility" sticky collapsible dividing>
+            <ui-section id="usage-accessibility" label="Accessibility" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   - Each field is labelled, with its tip behind its info icon.
@@ -136,34 +136,38 @@
 
           <ui-tab value="api" label="API">
             <!-- API:  generated from the vocabularies (`site/_data/components.json5`);  nothing to write. -->
-            <ui-section id="api-attributes" label="Attributes" sticky collapsible dividing>
+            <ui-section id="api-tags" label="Tags" sticky="stack" collapsible dividing>
+              <ui-docs-api family="ui-theme-editor" only="tags"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-attributes" label="Attributes" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-theme-editor" only="attributes"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-properties" label="Properties" sticky collapsible dividing>
+            <ui-section id="api-properties" label="Properties" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-theme-editor" only="properties"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-events" label="Events" sticky collapsible dividing>
+            <ui-section id="api-events" label="Events" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-theme-editor" only="events"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-parts" label="Parts" sticky collapsible dividing>
+            <ui-section id="api-parts" label="Parts" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-theme-editor" only="parts"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-states" label="States" sticky collapsible dividing>
+            <ui-section id="api-states" label="States" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-theme-editor" only="states"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-texts" label="Texts" sticky collapsible dividing>
+            <ui-section id="api-texts" label="Texts" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-theme-editor" only="texts"></ui-docs-api>
             </ui-section>
           </ui-tab>
 
           <ui-tab value="theming" label="Theming">
             <!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
-            <ui-section id="theming-tokens" label="Tokens" sticky collapsible dividing>
+            <ui-section id="theming-tokens" label="Tokens" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   Set a public `--ui-*` token on the element, any ancestor or `:root`; it inherits into the shadow
@@ -176,7 +180,7 @@
                 <!-- playground:end -->
               </ui-docs-tokens>
             </ui-section>
-            <ui-section id="theming-themes" label="Themes" sticky collapsible dividing>
+            <ui-section id="theming-themes" label="Themes" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   The theme menu above picks the theme for every page of the site:  Spell, Glass, Fruity or Merlot,

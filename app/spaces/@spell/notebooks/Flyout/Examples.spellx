@@ -5,11 +5,9 @@
 	</>
 	<flyout-tab-bar showing="examples"/>
 	<section>
-		<html>
-			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-				<ui-item link="#types">Types</>
-				<ui-item link="#variations">Variations</>
-			</>
+		<menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#types">Types</>
+			<item link="#variations">Variations</>
 		</>
 	</>
 
@@ -20,12 +18,9 @@
 		`GAP I<n>` comments mark examples a widget can't render yet (plan-doc issues).
 	-->
 	<section label="Types">
-		<section label="Flyout" sticky collapsible dividing>
-			<example>
-				<html>
-					<p slot="description">A flyout: a modal panel that slides in from the left, with a header, content and actions. The approve / deny buttons close it.</p>
-					<ui-message slot="description" size="small" state="warning">On a phone, a side flyout is never wider than the viewport (Fomantic shows it <code>fullscreen</code> there).</ui-message>
-				</html>
+		<section label="Flyout" sticky="stack" collapsible dividing>
+			<example description="A flyout: a modal panel that slides in from the left, with a header, content and actions. The approve / deny buttons close it.">
+				<message slot="description" size="small" state="warning"><html>On a phone, a side flyout is never wider than the viewport (Fomantic shows it <code>fullscreen</code> there).</html></message>
 				<button commandfor="flyout-types-standard" command="--show">Show</button>
 				<html>
 					<ui-flyout id="flyout-types-standard" closable>
@@ -45,7 +40,7 @@
 			</example>
 		</>
 
-		<section label="Shorthands" sticky collapsible dividing>
+		<section label="Shorthands" sticky="stack" collapsible dividing>
 			<example description="`header` and `content` are shorthands for a header and a block of text;  `closable` adds a close icon.">
 				<button commandfor="flyout-types-shorthand" command="--show">Show</button>
 				<flyout id="flyout-types-shorthand" heading="Profile" content="A flyout from its attributes alone." closable/>
@@ -54,7 +49,7 @@
 	</>
 
 	<section label="Variations">
-		<section label="Width" sticky collapsible dividing>
+		<section label="Width" sticky="stack" collapsible dividing>
 			<example description="A flyout can specify its width:  `very thin`, `thin`, the default, `wide` or `very wide`.">
 				<button commandfor="flyout-width-very-thin" command="--show">Very thin</button>
 				<button commandfor="flyout-width-thin" command="--show">Thin</button>
@@ -67,11 +62,8 @@
 				<flyout id="flyout-width-wide" width="wide" heading="Wide" content="A wide flyout." closable/>
 				<flyout id="flyout-width-very-wide" width="very wide" heading="Very wide" content="A very wide flyout." closable/>
 			</example>
-			<example>
-				<html>
-					<p slot="description">Width can also be defined like the grid system: columns of sixteen (<code>width="5"</code>), a fraction (<code>1/4</code>) or a percentage (<code>25%</code>).</p>
-					<ui-message slot="description" size="small" state="warning">A flyout's width applies only to <code>left</code> and <code>right</code> flyouts.</ui-message>
-				</html>
+			<example description="Width can also be defined like the grid system: columns of sixteen (`width=\"5\"`), a fraction (`1/4`) or a percentage (`25%`).">
+				<message slot="description" size="small" state="warning"><html>A flyout's width applies only to <code>left</code> and <code>right</code> flyouts.</html></message>
 				<button commandfor="flyout-width-2" command="--show">Two wide</button>
 				<button commandfor="flyout-width-5" command="--show">Five wide</button>
 				<button commandfor="flyout-width-8" command="--show">Eight wide</button>
@@ -83,11 +75,8 @@
 			</example>
 		</>
 
-		<section label="Position" sticky collapsible dividing>
-			<example>
-				<html>
-					<p slot="description">A flyout can specify its display position:  <code>position</code> is left (the default), right, top or bottom.</p>
-				</html>
+		<section label="Position" sticky="stack" collapsible dividing>
+			<example description="A flyout can specify its display position:  `position` is left (the default), right, top or bottom.">
 				<message slot="description" size="small" state="info">Top and bottom flyouts are full width, and their height is defined by their content.</message>
 				<button commandfor="flyout-position-left" command="--show">Left</button>
 				<button commandfor="flyout-position-right" command="--show">Right</button>
@@ -109,7 +98,7 @@
 			</example>
 		</>
 
-		<section label="Fullscreen" sticky collapsible dividing>
+		<section label="Fullscreen" sticky="stack" collapsible dividing>
 			<example description="A flyout can take all the entire screen if needed.">
 				<button commandfor="flyout-fullscreen" command="--show">Show</button>
 				<flyout id="flyout-fullscreen" fullscreen heading="Full screen" content="The whole viewport wide." closable/>
@@ -117,11 +106,8 @@
 		</>
 
 		<section label="Scrolling Content" sticky collapsible dividing>
-			<example>
-				<html>
-					<p slot="description">A flyout can have a scrolling content.</p>
-					<ui-message slot="description" size="small" state="info">The flyout is a column: header at the top, actions at the bottom, and the content grows between them. The flyout itself scrolls when it's too tall, so <code>&lt;ui-content scrolling&gt;</code> caps nothing here.</ui-message>
-				</html>
+			<example description="A flyout can have a scrolling content.">
+				<message slot="description" size="small" state="info"><html>The flyout is a column: header at the top, actions at the bottom, and the content grows between them. The flyout itself scrolls when it's too tall, so <code>&lt;ui-content scrolling&gt;</code> caps nothing here.</html></message>
 				<button commandfor="flyout-content-scrolling" command="--show">Show terms</button>
 				<html>
 					<ui-flyout id="flyout-content-scrolling" position="right" heading="Terms" closable>
@@ -144,7 +130,7 @@
 		</>
 
 		<!-- GAP I99, I110:  no centred actions (`<ui-actions>` has no text-align), and the header ignores its text-align;  only the content centres. -->
-		<section label="Center Aligned" sticky collapsible dividing>
+		<section label="Center Aligned" sticky="stack" collapsible dividing>
 			<example description="You can center align the header, the content or even actions individually:  `text-align=\"center\"`.">
 				<button commandfor="flyout-center" command="--show">Show</button>
 				<html>
@@ -163,7 +149,7 @@
 		</>
 
 		<!-- GAP I99:  no left actions;  they stay on the right. -->
-		<section label="Left Actions" sticky collapsible dividing>
+		<section label="Left Actions" sticky="stack" collapsible dividing>
 			<example description="You can also place the action buttons to the left.">
 				<button commandfor="flyout-left-actions" command="--show">Show</button>
 				<html>
@@ -200,7 +186,7 @@
 			</example>
 		</>
 
-		<section label="Inverted" sticky collapsible dividing>
+		<section label="Inverted" sticky="stack" collapsible dividing>
 			<example description="A flyout can use the dark scheme:  `inverted` replaces the background, the header colour and the actions background.">
 				<button commandfor="flyout-inverted" command="--show">Show</button>
 				<html>
@@ -213,14 +199,14 @@
 			</example>
 		</>
 
-		<section label="Blurring" sticky collapsible dividing>
+		<section label="Blurring" sticky="stack" collapsible dividing>
 			<example description="`blurring` blurs and greys the page behind the flyout's dimmer.">
 				<button commandfor="flyout-blurring" command="--show">Show</button>
 				<flyout id="flyout-blurring" position="right" blurring heading="Blurring" content="The page behind is blurred." closable/>
 			</example>
 		</>
 
-		<section label="Modeless" sticky collapsible dividing>
+		<section label="Modeless" sticky="stack" collapsible dividing>
 			<example description="`modeless` leaves the page usable while it shows:  no dimmer, and a click on the page lands where it went, closing the flyout as it does (as Escape and its close icon do).  The docs' own side column opens this way on narrow screens.">
 				<button commandfor="flyout-modeless" command="--toggle">Toggle</button>
 				<flyout id="flyout-modeless" position="right" width="thin" modeless heading="Modeless" content="Scroll the page:  this stays open.  A click on the page closes it, and still lands." closable/>

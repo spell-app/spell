@@ -136,6 +136,8 @@ import { cellEs } from "spell/ui/components/ui-table/UICell.es"
 import { textEs } from "spell/ui/components/ui-text/UIText.es"
 import { linkEs } from "spell/ui/components/ui-text/UILink.es"
 import { themeEditorEs } from "spell/ui/components/ui-theme-editor/UIThemeEditor.es"
+import { themeTokenEs } from "spell/ui/components/ui-theme-editor/UIThemeToken.es"
+import { colorChipEs } from "spell/ui/components/ui-theme-editor/UIColorChip.es"
 import { themeMenuEs } from "spell/ui/components/ui-theme-menu/UIThemeMenu.es"
 import { tocEs } from "spell/ui/components/ui-toc/UIToc.es"
 import { exampleEs } from "spell/ui/components/ui-example/UIExample.es"
@@ -511,6 +513,8 @@ export const sharedEs = {
     }
   },
   words: {
+    stack: "apilado",
+    drawer: "cajón",
     very: "muy",
     left: "izquierda",
     right: "derecha",
@@ -767,6 +771,8 @@ export const es: Dictionary = Vocabulary.dictionaryFrom(sharedEs, [
   textEs,
   linkEs,
   themeEditorEs,
+  themeTokenEs,
+  colorChipEs,
   themeMenuEs,
   tocEs,
   exampleEs,

@@ -1792,27 +1792,6 @@
       "href": "InputEditor.html#InputToolbar"
     },
     {
-      "tag": "InputView",
-      "name": "InputView",
-      "folder": "InputEditor",
-      "mainTag": "InputEditor",
-      "main": false,
-      "page": false,
-      "topics": [
-        "editors"
-      ],
-      "aka": [],
-      "description": "How `<InputRoot>` shows a `.spellx` file:  as text, or as a notebook (`<SpellxNotebook>`).",
-      "noun": "InputView",
-      "attributes": [],
-      "slots": [],
-      "events": [],
-      "parts": [],
-      "states": [],
-      "texts": [],
-      "href": "InputEditor.html#InputView"
-    },
-    {
       "tag": "LineNumbers",
       "name": "LineNumbers",
       "folder": "InputEditor",
@@ -1875,10 +1854,6 @@
         {
           "name": "Description",
           "file": "src/app/solid/ScopeDetailsPane.tsx"
-        },
-        {
-          "name": "SpellxNotebook",
-          "file": "src/app/solid/SpellxNotebook.tsx"
         }
       ],
       "href": "Markdown.html"
@@ -1986,10 +1961,6 @@
         }
       ],
       "usedIn": [
-        {
-          "name": "CellCode",
-          "file": "src/app/solid/SpellxNotebook.tsx"
-        },
         {
           "name": "CellEditor",
           "file": "src/app/solid/notebook/NotebookCell.tsx"
@@ -3807,7 +3778,6 @@
         "InputEditor",
         "InputRoot",
         "InputToolbar",
-        "InputView",
         "LineNumbers"
       ],
       "tokens": []
@@ -4517,6 +4487,620 @@
           "name": "--ui-focus-border",
           "default": "light-dark( oklch(from var(--ui-primary) calc(l + 0.18) calc(c * 0.5) h), oklch(from var(--ui-primary) calc(l - 0.1) calc(c * 0.7) h) )",
           "description": "Border of a focused field.",
+          "type": "color"
+        }
+      ]
+    },
+    {
+      "id": "brand",
+      "title": "Brand colours",
+      "description": "Aliases that point at a hue:  re-point `--ui-primary` (and its `-inverted`, `-on`) to re-brand.",
+      "tokens": [
+        {
+          "name": "--ui-primary",
+          "default": "var(--ui-blue)",
+          "description": "The colour, by scheme:  `light-dark()` of its two bases.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-primary-hover",
+          "default": "oklch(from var(--ui-primary) calc(l - 0.05) calc(c * 1.1) h)",
+          "description": "Hover state, derived from the colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-primary-focus",
+          "default": "oklch(from var(--ui-primary) calc(l - 0.08) calc(c * 1.2) h)",
+          "description": "Focus state, derived from the colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-primary-down",
+          "default": "oklch(from var(--ui-primary) calc(l - 0.1) c h)",
+          "description": "Pressed state, derived from the colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-primary-active",
+          "default": "oklch(from var(--ui-primary) calc(l - 0.05) calc(c * 1.15) h)",
+          "description": "Active (selected) state, derived from the colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-primary-text",
+          "default": "light-dark( oklch(from var(--ui-primary) min(l, 0.5) c h), oklch(from var(--ui-primary) max(l, 0.78) c h) )",
+          "description": "Text in this colour:  4.5:1 on `--ui-background`, per scheme.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-primary-header",
+          "default": "light-dark( oklch(from var(--ui-primary) min(l, 0.45) c h), oklch(from var(--ui-primary) max(l, 0.85) c h) )",
+          "description": "Headers in this colour:  a shade darker than `-text`.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-primary-border",
+          "default": "light-dark( oklch(from var(--ui-primary) min(l, 0.6) c h), oklch(from var(--ui-primary) max(l, 0.7) c h) )",
+          "description": "Borders in this colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-primary-background",
+          "default": "light-dark( oklch(from var(--ui-primary) 0.96 calc(c * 0.25) h), oklch(from var(--ui-primary) 0.28 calc(c * 0.35) h) )",
+          "description": "Pale tinted background (`ui-bg-*`, messages).",
+          "type": "color"
+        },
+        {
+          "name": "--ui-primary-inverted",
+          "default": "var(--ui-blue-inverted)",
+          "description": "The colour on dark surfaces, whatever the scheme.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-primary-on",
+          "default": "var(--ui-blue-on)",
+          "description": "Text ON the solid colour:  white or ink, picked by contrast.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-primary-inverted-on",
+          "default": "var(--ui-blue-inverted-on)",
+          "description": "Text on the `-inverted` colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-secondary",
+          "default": "var(--ui-black)",
+          "description": "The colour, by scheme:  `light-dark()` of its two bases.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-secondary-hover",
+          "default": "oklch(from var(--ui-secondary) calc(l + 0.05) c h)",
+          "description": "Hover state, derived from the colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-secondary-focus",
+          "default": "oklch(from var(--ui-secondary) calc(l + 0.08) c h)",
+          "description": "Focus state, derived from the colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-secondary-down",
+          "default": "oklch(from var(--ui-secondary) calc(l + 0.1) c h)",
+          "description": "Pressed state, derived from the colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-secondary-active",
+          "default": "oklch(from var(--ui-secondary) calc(l - 0.05) c h)",
+          "description": "Active (selected) state, derived from the colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-secondary-text",
+          "default": "light-dark( oklch(from var(--ui-secondary) min(l, 0.5) c h), oklch(from var(--ui-secondary) max(l, 0.78) c h) )",
+          "description": "Text in this colour:  4.5:1 on `--ui-background`, per scheme.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-secondary-header",
+          "default": "light-dark( oklch(from var(--ui-secondary) min(l, 0.45) c h), oklch(from var(--ui-secondary) max(l, 0.85) c h) )",
+          "description": "Headers in this colour:  a shade darker than `-text`.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-secondary-border",
+          "default": "light-dark( oklch(from var(--ui-secondary) min(l, 0.6) c h), oklch(from var(--ui-secondary) max(l, 0.7) c h) )",
+          "description": "Borders in this colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-secondary-background",
+          "default": "light-dark( oklch(from var(--ui-secondary) 0.96 calc(c * 0.25) h), oklch(from var(--ui-secondary) 0.28 calc(c * 0.35) h) )",
+          "description": "Pale tinted background (`ui-bg-*`, messages).",
+          "type": "color"
+        },
+        {
+          "name": "--ui-secondary-inverted",
+          "default": "var(--ui-black-inverted)",
+          "description": "The colour on dark surfaces, whatever the scheme.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-secondary-on",
+          "default": "var(--ui-black-on)",
+          "description": "Text ON the solid colour:  white or ink, picked by contrast.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-secondary-inverted-on",
+          "default": "var(--ui-black-inverted-on)",
+          "description": "Text on the `-inverted` colour.",
+          "type": "color"
+        }
+      ]
+    },
+    {
+      "id": "semantic",
+      "title": "Semantic colours",
+      "description": "Emotive colours for messages, labels and form states;  `success` / `error` are aliases of `positive` / `negative`.",
+      "tokens": [
+        {
+          "name": "--ui-positive",
+          "default": "var(--ui-green)",
+          "description": "The colour, by scheme:  `light-dark()` of its two bases.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-positive-inverted",
+          "default": "var(--ui-green-inverted)",
+          "description": "The colour on dark surfaces, whatever the scheme.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-positive-on",
+          "default": "var(--ui-green-on)",
+          "description": "Text ON the solid colour:  white or ink, picked by contrast.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-positive-inverted-on",
+          "default": "var(--ui-green-inverted-on)",
+          "description": "Text on the `-inverted` colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-positive-hover",
+          "default": "oklch(from var(--ui-positive) calc(l - 0.05) calc(c * 1.1) h)",
+          "description": "Hover state, derived from the colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-positive-focus",
+          "default": "oklch(from var(--ui-positive) calc(l - 0.08) calc(c * 1.2) h)",
+          "description": "Focus state, derived from the colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-positive-down",
+          "default": "oklch(from var(--ui-positive) calc(l - 0.1) c h)",
+          "description": "Pressed state, derived from the colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-positive-active",
+          "default": "oklch(from var(--ui-positive) calc(l - 0.05) calc(c * 1.15) h)",
+          "description": "Active (selected) state, derived from the colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-positive-text",
+          "default": "light-dark( oklch(from var(--ui-positive) 0.46 calc(c * 0.6) h), oklch(from var(--ui-positive) 0.85 calc(c * 0.6) h) )",
+          "description": "Text in this colour:  4.5:1 on `--ui-background`, per scheme.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-positive-header",
+          "default": "light-dark( oklch(from var(--ui-positive) 0.4 calc(c * 0.6) h), oklch(from var(--ui-positive) 0.9 calc(c * 0.5) h) )",
+          "description": "Headers in this colour:  a shade darker than `-text`.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-positive-border",
+          "default": "light-dark( oklch(from var(--ui-positive) 0.8 calc(c * 0.3) h), oklch(from var(--ui-positive) 0.45 calc(c * 0.4) h) )",
+          "description": "Borders in this colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-positive-background",
+          "default": "light-dark( oklch(from var(--ui-positive) 0.985 calc(c * 0.08) h), oklch(from var(--ui-positive) 0.25 calc(c * 0.25) h) )",
+          "description": "Pale tinted background (`ui-bg-*`, messages).",
+          "type": "color"
+        },
+        {
+          "name": "--ui-negative",
+          "default": "var(--ui-red)",
+          "description": "The colour, by scheme:  `light-dark()` of its two bases.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-negative-inverted",
+          "default": "var(--ui-red-inverted)",
+          "description": "The colour on dark surfaces, whatever the scheme.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-negative-on",
+          "default": "var(--ui-red-on)",
+          "description": "Text ON the solid colour:  white or ink, picked by contrast.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-negative-inverted-on",
+          "default": "var(--ui-red-inverted-on)",
+          "description": "Text on the `-inverted` colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-negative-hover",
+          "default": "oklch(from var(--ui-negative) calc(l - 0.05) calc(c * 1.1) h)",
+          "description": "Hover state, derived from the colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-negative-focus",
+          "default": "oklch(from var(--ui-negative) calc(l - 0.08) calc(c * 1.2) h)",
+          "description": "Focus state, derived from the colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-negative-down",
+          "default": "oklch(from var(--ui-negative) calc(l - 0.1) c h)",
+          "description": "Pressed state, derived from the colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-negative-active",
+          "default": "oklch(from var(--ui-negative) calc(l - 0.05) calc(c * 1.15) h)",
+          "description": "Active (selected) state, derived from the colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-negative-text",
+          "default": "light-dark( oklch(from var(--ui-negative) 0.46 calc(c * 0.6) h), oklch(from var(--ui-negative) 0.85 calc(c * 0.6) h) )",
+          "description": "Text in this colour:  4.5:1 on `--ui-background`, per scheme.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-negative-header",
+          "default": "light-dark( oklch(from var(--ui-negative) 0.4 calc(c * 0.6) h), oklch(from var(--ui-negative) 0.9 calc(c * 0.5) h) )",
+          "description": "Headers in this colour:  a shade darker than `-text`.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-negative-border",
+          "default": "light-dark( oklch(from var(--ui-negative) 0.8 calc(c * 0.3) h), oklch(from var(--ui-negative) 0.45 calc(c * 0.4) h) )",
+          "description": "Borders in this colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-negative-background",
+          "default": "light-dark( oklch(from var(--ui-negative) 0.985 calc(c * 0.08) h), oklch(from var(--ui-negative) 0.25 calc(c * 0.25) h) )",
+          "description": "Pale tinted background (`ui-bg-*`, messages).",
+          "type": "color"
+        },
+        {
+          "name": "--ui-info-on-light",
+          "default": "oklch(0.74 0.13 218)",
+          "description": "Concrete base in the light scheme (a registered `<color>`):  set it to re-colour the hue.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-info-on-dark",
+          "default": "oklch(0.8 0.12 215)",
+          "description": "Concrete base in the dark scheme (a registered `<color>`).",
+          "type": "color"
+        },
+        {
+          "name": "--ui-info",
+          "default": "light-dark(var(--ui-info-on-light), var(--ui-info-on-dark))",
+          "description": "The colour, by scheme:  `light-dark()` of its two bases.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-info-inverted",
+          "default": "var(--ui-info-on-dark)",
+          "description": "The colour on dark surfaces, whatever the scheme.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-info-on",
+          "default": "var(--ui-ink-on-light)",
+          "description": "Text ON the solid colour:  white or ink, picked by contrast.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-info-inverted-on",
+          "default": "var(--ui-ink-on-light)",
+          "description": "Text on the `-inverted` colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-info-hover",
+          "default": "oklch(from var(--ui-info) calc(l - 0.05) calc(c * 1.1) h)",
+          "description": "Hover state, derived from the colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-info-focus",
+          "default": "oklch(from var(--ui-info) calc(l - 0.08) calc(c * 1.2) h)",
+          "description": "Focus state, derived from the colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-info-down",
+          "default": "oklch(from var(--ui-info) calc(l - 0.1) c h)",
+          "description": "Pressed state, derived from the colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-info-active",
+          "default": "oklch(from var(--ui-info) calc(l - 0.05) calc(c * 1.15) h)",
+          "description": "Active (selected) state, derived from the colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-info-text",
+          "default": "light-dark( oklch(from var(--ui-info) 0.46 calc(c * 0.6) h), oklch(from var(--ui-info) 0.85 calc(c * 0.6) h) )",
+          "description": "Text in this colour:  4.5:1 on `--ui-background`, per scheme.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-info-header",
+          "default": "light-dark( oklch(from var(--ui-info) 0.4 calc(c * 0.6) h), oklch(from var(--ui-info) 0.9 calc(c * 0.5) h) )",
+          "description": "Headers in this colour:  a shade darker than `-text`.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-info-border",
+          "default": "light-dark( oklch(from var(--ui-info) 0.8 calc(c * 0.3) h), oklch(from var(--ui-info) 0.45 calc(c * 0.4) h) )",
+          "description": "Borders in this colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-info-background",
+          "default": "light-dark( oklch(from var(--ui-info) 0.985 calc(c * 0.08) h), oklch(from var(--ui-info) 0.25 calc(c * 0.25) h) )",
+          "description": "Pale tinted background (`ui-bg-*`, messages).",
+          "type": "color"
+        },
+        {
+          "name": "--ui-warning-on-light",
+          "default": "oklch(0.8 0.16 80)",
+          "description": "Concrete base in the light scheme (a registered `<color>`):  set it to re-colour the hue.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-warning-on-dark",
+          "default": "oklch(0.86 0.15 85)",
+          "description": "Concrete base in the dark scheme (a registered `<color>`).",
+          "type": "color"
+        },
+        {
+          "name": "--ui-warning",
+          "default": "light-dark(var(--ui-warning-on-light), var(--ui-warning-on-dark))",
+          "description": "The colour, by scheme:  `light-dark()` of its two bases.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-warning-inverted",
+          "default": "var(--ui-warning-on-dark)",
+          "description": "The colour on dark surfaces, whatever the scheme.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-warning-on",
+          "default": "var(--ui-ink-on-light)",
+          "description": "Text ON the solid colour:  white or ink, picked by contrast.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-warning-inverted-on",
+          "default": "var(--ui-ink-on-light)",
+          "description": "Text on the `-inverted` colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-warning-hover",
+          "default": "oklch(from var(--ui-warning) calc(l - 0.05) calc(c * 1.1) h)",
+          "description": "Hover state, derived from the colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-warning-focus",
+          "default": "oklch(from var(--ui-warning) calc(l - 0.08) calc(c * 1.2) h)",
+          "description": "Focus state, derived from the colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-warning-down",
+          "default": "oklch(from var(--ui-warning) calc(l - 0.1) c h)",
+          "description": "Pressed state, derived from the colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-warning-active",
+          "default": "oklch(from var(--ui-warning) calc(l - 0.05) calc(c * 1.15) h)",
+          "description": "Active (selected) state, derived from the colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-warning-text",
+          "default": "light-dark( oklch(from var(--ui-warning) 0.46 calc(c * 0.6) h), oklch(from var(--ui-warning) 0.85 calc(c * 0.6) h) )",
+          "description": "Text in this colour:  4.5:1 on `--ui-background`, per scheme.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-warning-header",
+          "default": "light-dark( oklch(from var(--ui-warning) 0.4 calc(c * 0.6) h), oklch(from var(--ui-warning) 0.9 calc(c * 0.5) h) )",
+          "description": "Headers in this colour:  a shade darker than `-text`.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-warning-border",
+          "default": "light-dark( oklch(from var(--ui-warning) 0.8 calc(c * 0.3) h), oklch(from var(--ui-warning) 0.45 calc(c * 0.4) h) )",
+          "description": "Borders in this colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-warning-background",
+          "default": "light-dark( oklch(from var(--ui-warning) 0.985 calc(c * 0.08) h), oklch(from var(--ui-warning) 0.25 calc(c * 0.25) h) )",
+          "description": "Pale tinted background (`ui-bg-*`, messages).",
+          "type": "color"
+        },
+        {
+          "name": "--ui-success",
+          "default": "var(--ui-positive)",
+          "description": "The colour, by scheme:  `light-dark()` of its two bases.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-success-inverted",
+          "default": "var(--ui-positive-inverted)",
+          "description": "The colour on dark surfaces, whatever the scheme.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-success-on",
+          "default": "var(--ui-positive-on)",
+          "description": "Text ON the solid colour:  white or ink, picked by contrast.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-success-inverted-on",
+          "default": "var(--ui-positive-inverted-on)",
+          "description": "Text on the `-inverted` colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-success-hover",
+          "default": "var(--ui-positive-hover)",
+          "description": "Hover state, derived from the colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-success-focus",
+          "default": "var(--ui-positive-focus)",
+          "description": "Focus state, derived from the colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-success-down",
+          "default": "var(--ui-positive-down)",
+          "description": "Pressed state, derived from the colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-success-active",
+          "default": "var(--ui-positive-active)",
+          "description": "Active (selected) state, derived from the colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-success-text",
+          "default": "var(--ui-positive-text)",
+          "description": "Text in this colour:  4.5:1 on `--ui-background`, per scheme.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-success-header",
+          "default": "var(--ui-positive-header)",
+          "description": "Headers in this colour:  a shade darker than `-text`.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-success-border",
+          "default": "var(--ui-positive-border)",
+          "description": "Borders in this colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-success-background",
+          "default": "var(--ui-positive-background)",
+          "description": "Pale tinted background (`ui-bg-*`, messages).",
+          "type": "color"
+        },
+        {
+          "name": "--ui-error",
+          "default": "var(--ui-negative)",
+          "description": "The colour, by scheme:  `light-dark()` of its two bases.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-error-inverted",
+          "default": "var(--ui-negative-inverted)",
+          "description": "The colour on dark surfaces, whatever the scheme.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-error-on",
+          "default": "var(--ui-negative-on)",
+          "description": "Text ON the solid colour:  white or ink, picked by contrast.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-error-inverted-on",
+          "default": "var(--ui-negative-inverted-on)",
+          "description": "Text on the `-inverted` colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-error-hover",
+          "default": "var(--ui-negative-hover)",
+          "description": "Hover state, derived from the colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-error-focus",
+          "default": "var(--ui-negative-focus)",
+          "description": "Focus state, derived from the colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-error-down",
+          "default": "var(--ui-negative-down)",
+          "description": "Pressed state, derived from the colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-error-active",
+          "default": "var(--ui-negative-active)",
+          "description": "Active (selected) state, derived from the colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-error-text",
+          "default": "var(--ui-negative-text)",
+          "description": "Text in this colour:  4.5:1 on `--ui-background`, per scheme.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-error-header",
+          "default": "var(--ui-negative-header)",
+          "description": "Headers in this colour:  a shade darker than `-text`.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-error-border",
+          "default": "var(--ui-negative-border)",
+          "description": "Borders in this colour.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-error-background",
+          "default": "var(--ui-negative-background)",
+          "description": "Pale tinted background (`ui-bg-*`, messages).",
           "type": "color"
         }
       ]
@@ -5621,633 +6205,6 @@
       ]
     },
     {
-      "id": "brand",
-      "title": "Brand colours",
-      "description": "Aliases that point at a hue:  re-point `--ui-primary` (and its `-inverted`, `-on`) to re-brand.",
-      "tokens": [
-        {
-          "name": "--ui-primary",
-          "default": "var(--ui-blue)",
-          "description": "The colour, by scheme:  `light-dark()` of its two bases.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-primary-hover",
-          "default": "oklch(from var(--ui-primary) calc(l - 0.05) calc(c * 1.1) h)",
-          "description": "Hover state, derived from the colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-primary-focus",
-          "default": "oklch(from var(--ui-primary) calc(l - 0.08) calc(c * 1.2) h)",
-          "description": "Focus state, derived from the colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-primary-down",
-          "default": "oklch(from var(--ui-primary) calc(l - 0.1) c h)",
-          "description": "Pressed state, derived from the colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-primary-active",
-          "default": "oklch(from var(--ui-primary) calc(l - 0.05) calc(c * 1.15) h)",
-          "description": "Active (selected) state, derived from the colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-primary-text",
-          "default": "light-dark( oklch(from var(--ui-primary) min(l, 0.5) c h), oklch(from var(--ui-primary) max(l, 0.78) c h) )",
-          "description": "Text in this colour:  4.5:1 on `--ui-background`, per scheme.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-primary-header",
-          "default": "light-dark( oklch(from var(--ui-primary) min(l, 0.45) c h), oklch(from var(--ui-primary) max(l, 0.85) c h) )",
-          "description": "Headers in this colour:  a shade darker than `-text`.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-primary-border",
-          "default": "light-dark( oklch(from var(--ui-primary) min(l, 0.6) c h), oklch(from var(--ui-primary) max(l, 0.7) c h) )",
-          "description": "Borders in this colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-primary-background",
-          "default": "light-dark( oklch(from var(--ui-primary) 0.96 calc(c * 0.25) h), oklch(from var(--ui-primary) 0.28 calc(c * 0.35) h) )",
-          "description": "Pale tinted background (`ui-bg-*`, messages).",
-          "type": "color"
-        },
-        {
-          "name": "--ui-primary-inverted",
-          "default": "var(--ui-blue-inverted)",
-          "description": "The colour on dark surfaces, whatever the scheme.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-primary-on",
-          "default": "var(--ui-blue-on)",
-          "description": "Text ON the solid colour:  white or ink, picked by contrast.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-primary-inverted-on",
-          "default": "var(--ui-blue-inverted-on)",
-          "description": "Text on the `-inverted` colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-secondary",
-          "default": "var(--ui-black)",
-          "description": "The colour, by scheme:  `light-dark()` of its two bases.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-secondary-hover",
-          "default": "oklch(from var(--ui-secondary) calc(l + 0.05) c h)",
-          "description": "Hover state, derived from the colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-secondary-focus",
-          "default": "oklch(from var(--ui-secondary) calc(l + 0.08) c h)",
-          "description": "Focus state, derived from the colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-secondary-down",
-          "default": "oklch(from var(--ui-secondary) calc(l + 0.1) c h)",
-          "description": "Pressed state, derived from the colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-secondary-active",
-          "default": "oklch(from var(--ui-secondary) calc(l - 0.05) c h)",
-          "description": "Active (selected) state, derived from the colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-secondary-text",
-          "default": "light-dark( oklch(from var(--ui-secondary) min(l, 0.5) c h), oklch(from var(--ui-secondary) max(l, 0.78) c h) )",
-          "description": "Text in this colour:  4.5:1 on `--ui-background`, per scheme.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-secondary-header",
-          "default": "light-dark( oklch(from var(--ui-secondary) min(l, 0.45) c h), oklch(from var(--ui-secondary) max(l, 0.85) c h) )",
-          "description": "Headers in this colour:  a shade darker than `-text`.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-secondary-border",
-          "default": "light-dark( oklch(from var(--ui-secondary) min(l, 0.6) c h), oklch(from var(--ui-secondary) max(l, 0.7) c h) )",
-          "description": "Borders in this colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-secondary-background",
-          "default": "light-dark( oklch(from var(--ui-secondary) 0.96 calc(c * 0.25) h), oklch(from var(--ui-secondary) 0.28 calc(c * 0.35) h) )",
-          "description": "Pale tinted background (`ui-bg-*`, messages).",
-          "type": "color"
-        },
-        {
-          "name": "--ui-secondary-inverted",
-          "default": "var(--ui-black-inverted)",
-          "description": "The colour on dark surfaces, whatever the scheme.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-secondary-on",
-          "default": "var(--ui-black-on)",
-          "description": "Text ON the solid colour:  white or ink, picked by contrast.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-secondary-inverted-on",
-          "default": "var(--ui-black-inverted-on)",
-          "description": "Text on the `-inverted` colour.",
-          "type": "color"
-        }
-      ]
-    },
-    {
-      "id": "semantic",
-      "title": "Semantic colours",
-      "description": "Emotive colours for messages, labels and form states;  `success` / `error` are aliases of `positive` / `negative`.",
-      "tokens": [
-        {
-          "name": "--ui-positive",
-          "default": "var(--ui-green)",
-          "description": "The colour, by scheme:  `light-dark()` of its two bases.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-positive-inverted",
-          "default": "var(--ui-green-inverted)",
-          "description": "The colour on dark surfaces, whatever the scheme.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-positive-on",
-          "default": "var(--ui-green-on)",
-          "description": "Text ON the solid colour:  white or ink, picked by contrast.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-positive-inverted-on",
-          "default": "var(--ui-green-inverted-on)",
-          "description": "Text on the `-inverted` colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-positive-hover",
-          "default": "oklch(from var(--ui-positive) calc(l - 0.05) calc(c * 1.1) h)",
-          "description": "Hover state, derived from the colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-positive-focus",
-          "default": "oklch(from var(--ui-positive) calc(l - 0.08) calc(c * 1.2) h)",
-          "description": "Focus state, derived from the colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-positive-down",
-          "default": "oklch(from var(--ui-positive) calc(l - 0.1) c h)",
-          "description": "Pressed state, derived from the colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-positive-active",
-          "default": "oklch(from var(--ui-positive) calc(l - 0.05) calc(c * 1.15) h)",
-          "description": "Active (selected) state, derived from the colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-positive-text",
-          "default": "light-dark( oklch(from var(--ui-positive) 0.46 calc(c * 0.6) h), oklch(from var(--ui-positive) 0.85 calc(c * 0.6) h) )",
-          "description": "Text in this colour:  4.5:1 on `--ui-background`, per scheme.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-positive-header",
-          "default": "light-dark( oklch(from var(--ui-positive) 0.4 calc(c * 0.6) h), oklch(from var(--ui-positive) 0.9 calc(c * 0.5) h) )",
-          "description": "Headers in this colour:  a shade darker than `-text`.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-positive-border",
-          "default": "light-dark( oklch(from var(--ui-positive) 0.8 calc(c * 0.3) h), oklch(from var(--ui-positive) 0.45 calc(c * 0.4) h) )",
-          "description": "Borders in this colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-positive-background",
-          "default": "light-dark( oklch(from var(--ui-positive) 0.985 calc(c * 0.08) h), oklch(from var(--ui-positive) 0.25 calc(c * 0.25) h) )",
-          "description": "Pale tinted background (`ui-bg-*`, messages).",
-          "type": "color"
-        },
-        {
-          "name": "--ui-negative",
-          "default": "var(--ui-red)",
-          "description": "The colour, by scheme:  `light-dark()` of its two bases.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-negative-inverted",
-          "default": "var(--ui-red-inverted)",
-          "description": "The colour on dark surfaces, whatever the scheme.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-negative-on",
-          "default": "var(--ui-red-on)",
-          "description": "Text ON the solid colour:  white or ink, picked by contrast.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-negative-inverted-on",
-          "default": "var(--ui-red-inverted-on)",
-          "description": "Text on the `-inverted` colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-negative-hover",
-          "default": "oklch(from var(--ui-negative) calc(l - 0.05) calc(c * 1.1) h)",
-          "description": "Hover state, derived from the colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-negative-focus",
-          "default": "oklch(from var(--ui-negative) calc(l - 0.08) calc(c * 1.2) h)",
-          "description": "Focus state, derived from the colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-negative-down",
-          "default": "oklch(from var(--ui-negative) calc(l - 0.1) c h)",
-          "description": "Pressed state, derived from the colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-negative-active",
-          "default": "oklch(from var(--ui-negative) calc(l - 0.05) calc(c * 1.15) h)",
-          "description": "Active (selected) state, derived from the colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-negative-text",
-          "default": "light-dark( oklch(from var(--ui-negative) 0.46 calc(c * 0.6) h), oklch(from var(--ui-negative) 0.85 calc(c * 0.6) h) )",
-          "description": "Text in this colour:  4.5:1 on `--ui-background`, per scheme.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-negative-header",
-          "default": "light-dark( oklch(from var(--ui-negative) 0.4 calc(c * 0.6) h), oklch(from var(--ui-negative) 0.9 calc(c * 0.5) h) )",
-          "description": "Headers in this colour:  a shade darker than `-text`.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-negative-border",
-          "default": "light-dark( oklch(from var(--ui-negative) 0.8 calc(c * 0.3) h), oklch(from var(--ui-negative) 0.45 calc(c * 0.4) h) )",
-          "description": "Borders in this colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-negative-background",
-          "default": "light-dark( oklch(from var(--ui-negative) 0.985 calc(c * 0.08) h), oklch(from var(--ui-negative) 0.25 calc(c * 0.25) h) )",
-          "description": "Pale tinted background (`ui-bg-*`, messages).",
-          "type": "color"
-        },
-        {
-          "name": "--ui-info-on-light",
-          "default": "oklch(0.74 0.13 218)",
-          "description": "Concrete base in the light scheme (a registered `<color>`):  set it to re-colour the hue.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-info-on-dark",
-          "default": "oklch(0.8 0.12 215)",
-          "description": "Concrete base in the dark scheme (a registered `<color>`).",
-          "type": "color"
-        },
-        {
-          "name": "--ui-info",
-          "default": "light-dark(var(--ui-info-on-light), var(--ui-info-on-dark))",
-          "description": "The colour, by scheme:  `light-dark()` of its two bases.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-info-inverted",
-          "default": "var(--ui-info-on-dark)",
-          "description": "The colour on dark surfaces, whatever the scheme.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-info-on",
-          "default": "var(--ui-ink-on-light)",
-          "description": "Text ON the solid colour:  white or ink, picked by contrast.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-info-inverted-on",
-          "default": "var(--ui-ink-on-light)",
-          "description": "Text on the `-inverted` colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-info-hover",
-          "default": "oklch(from var(--ui-info) calc(l - 0.05) calc(c * 1.1) h)",
-          "description": "Hover state, derived from the colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-info-focus",
-          "default": "oklch(from var(--ui-info) calc(l - 0.08) calc(c * 1.2) h)",
-          "description": "Focus state, derived from the colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-info-down",
-          "default": "oklch(from var(--ui-info) calc(l - 0.1) c h)",
-          "description": "Pressed state, derived from the colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-info-active",
-          "default": "oklch(from var(--ui-info) calc(l - 0.05) calc(c * 1.15) h)",
-          "description": "Active (selected) state, derived from the colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-info-text",
-          "default": "light-dark( oklch(from var(--ui-info) 0.46 calc(c * 0.6) h), oklch(from var(--ui-info) 0.85 calc(c * 0.6) h) )",
-          "description": "Text in this colour:  4.5:1 on `--ui-background`, per scheme.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-info-header",
-          "default": "light-dark( oklch(from var(--ui-info) 0.4 calc(c * 0.6) h), oklch(from var(--ui-info) 0.9 calc(c * 0.5) h) )",
-          "description": "Headers in this colour:  a shade darker than `-text`.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-info-border",
-          "default": "light-dark( oklch(from var(--ui-info) 0.8 calc(c * 0.3) h), oklch(from var(--ui-info) 0.45 calc(c * 0.4) h) )",
-          "description": "Borders in this colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-info-background",
-          "default": "light-dark( oklch(from var(--ui-info) 0.985 calc(c * 0.08) h), oklch(from var(--ui-info) 0.25 calc(c * 0.25) h) )",
-          "description": "Pale tinted background (`ui-bg-*`, messages).",
-          "type": "color"
-        },
-        {
-          "name": "--ui-warning-on-light",
-          "default": "oklch(0.8 0.16 80)",
-          "description": "Concrete base in the light scheme (a registered `<color>`):  set it to re-colour the hue.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-warning-on-dark",
-          "default": "oklch(0.86 0.15 85)",
-          "description": "Concrete base in the dark scheme (a registered `<color>`).",
-          "type": "color"
-        },
-        {
-          "name": "--ui-warning",
-          "default": "light-dark(var(--ui-warning-on-light), var(--ui-warning-on-dark))",
-          "description": "The colour, by scheme:  `light-dark()` of its two bases.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-warning-inverted",
-          "default": "var(--ui-warning-on-dark)",
-          "description": "The colour on dark surfaces, whatever the scheme.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-warning-on",
-          "default": "var(--ui-ink-on-light)",
-          "description": "Text ON the solid colour:  white or ink, picked by contrast.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-warning-inverted-on",
-          "default": "var(--ui-ink-on-light)",
-          "description": "Text on the `-inverted` colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-warning-hover",
-          "default": "oklch(from var(--ui-warning) calc(l - 0.05) calc(c * 1.1) h)",
-          "description": "Hover state, derived from the colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-warning-focus",
-          "default": "oklch(from var(--ui-warning) calc(l - 0.08) calc(c * 1.2) h)",
-          "description": "Focus state, derived from the colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-warning-down",
-          "default": "oklch(from var(--ui-warning) calc(l - 0.1) c h)",
-          "description": "Pressed state, derived from the colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-warning-active",
-          "default": "oklch(from var(--ui-warning) calc(l - 0.05) calc(c * 1.15) h)",
-          "description": "Active (selected) state, derived from the colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-warning-text",
-          "default": "light-dark( oklch(from var(--ui-warning) 0.46 calc(c * 0.6) h), oklch(from var(--ui-warning) 0.85 calc(c * 0.6) h) )",
-          "description": "Text in this colour:  4.5:1 on `--ui-background`, per scheme.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-warning-header",
-          "default": "light-dark( oklch(from var(--ui-warning) 0.4 calc(c * 0.6) h), oklch(from var(--ui-warning) 0.9 calc(c * 0.5) h) )",
-          "description": "Headers in this colour:  a shade darker than `-text`.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-warning-border",
-          "default": "light-dark( oklch(from var(--ui-warning) 0.8 calc(c * 0.3) h), oklch(from var(--ui-warning) 0.45 calc(c * 0.4) h) )",
-          "description": "Borders in this colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-warning-background",
-          "default": "light-dark( oklch(from var(--ui-warning) 0.985 calc(c * 0.08) h), oklch(from var(--ui-warning) 0.25 calc(c * 0.25) h) )",
-          "description": "Pale tinted background (`ui-bg-*`, messages).",
-          "type": "color"
-        },
-        {
-          "name": "--ui-success",
-          "default": "var(--ui-positive)",
-          "description": "The colour, by scheme:  `light-dark()` of its two bases.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-success-inverted",
-          "default": "var(--ui-positive-inverted)",
-          "description": "The colour on dark surfaces, whatever the scheme.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-success-on",
-          "default": "var(--ui-positive-on)",
-          "description": "Text ON the solid colour:  white or ink, picked by contrast.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-success-inverted-on",
-          "default": "var(--ui-positive-inverted-on)",
-          "description": "Text on the `-inverted` colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-success-hover",
-          "default": "var(--ui-positive-hover)",
-          "description": "Hover state, derived from the colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-success-focus",
-          "default": "var(--ui-positive-focus)",
-          "description": "Focus state, derived from the colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-success-down",
-          "default": "var(--ui-positive-down)",
-          "description": "Pressed state, derived from the colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-success-active",
-          "default": "var(--ui-positive-active)",
-          "description": "Active (selected) state, derived from the colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-success-text",
-          "default": "var(--ui-positive-text)",
-          "description": "Text in this colour:  4.5:1 on `--ui-background`, per scheme.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-success-header",
-          "default": "var(--ui-positive-header)",
-          "description": "Headers in this colour:  a shade darker than `-text`.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-success-border",
-          "default": "var(--ui-positive-border)",
-          "description": "Borders in this colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-success-background",
-          "default": "var(--ui-positive-background)",
-          "description": "Pale tinted background (`ui-bg-*`, messages).",
-          "type": "color"
-        },
-        {
-          "name": "--ui-error",
-          "default": "var(--ui-negative)",
-          "description": "The colour, by scheme:  `light-dark()` of its two bases.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-error-inverted",
-          "default": "var(--ui-negative-inverted)",
-          "description": "The colour on dark surfaces, whatever the scheme.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-error-on",
-          "default": "var(--ui-negative-on)",
-          "description": "Text ON the solid colour:  white or ink, picked by contrast.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-error-inverted-on",
-          "default": "var(--ui-negative-inverted-on)",
-          "description": "Text on the `-inverted` colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-error-hover",
-          "default": "var(--ui-negative-hover)",
-          "description": "Hover state, derived from the colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-error-focus",
-          "default": "var(--ui-negative-focus)",
-          "description": "Focus state, derived from the colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-error-down",
-          "default": "var(--ui-negative-down)",
-          "description": "Pressed state, derived from the colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-error-active",
-          "default": "var(--ui-negative-active)",
-          "description": "Active (selected) state, derived from the colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-error-text",
-          "default": "var(--ui-negative-text)",
-          "description": "Text in this colour:  4.5:1 on `--ui-background`, per scheme.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-error-header",
-          "default": "var(--ui-negative-header)",
-          "description": "Headers in this colour:  a shade darker than `-text`.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-error-border",
-          "default": "var(--ui-negative-border)",
-          "description": "Borders in this colour.",
-          "type": "color"
-        },
-        {
-          "name": "--ui-error-background",
-          "default": "var(--ui-negative-background)",
-          "description": "Pale tinted background (`ui-bg-*`, messages).",
-          "type": "color"
-        }
-      ]
-    },
-    {
-      "id": "scheme",
-      "title": "Scheme",
-      "description": "Which colour scheme is in force:  `ui-invert` and style queries read it.",
-      "tokens": [
-        {
-          "name": "--ui-scheme",
-          "default": "light",
-          "description": "`light` or `dark`;  follows the OS unless the page forces one.",
-          "type": "other"
-        }
-      ]
-    },
-    {
       "id": "shadows",
       "title": "Shadows",
       "description": "Box shadows by role, in layers of the shadow ink.",
@@ -6377,6 +6334,19 @@
           "name": "--ui-ease-expo",
           "default": "cubic-bezier(0.19, 1, 0.22, 1)",
           "description": "Easing `expo`.",
+          "type": "other"
+        }
+      ]
+    },
+    {
+      "id": "scheme",
+      "title": "Scheme",
+      "description": "Which colour scheme is in force:  `ui-invert` and style queries read it.",
+      "tokens": [
+        {
+          "name": "--ui-scheme",
+          "default": "light",
+          "description": "`light` or `dark`;  follows the OS unless the page forces one.",
           "type": "other"
         }
       ]

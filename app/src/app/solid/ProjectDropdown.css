@@ -9,6 +9,18 @@ ui-dropdown.ProjectDropdown::part(trigger) {
   font-weight: 700;
 }
 
+/*
+ * a group of many projects (`many`):  its menu in columns, as wide as the window allows, read across, then down;
+ * as tall as the window allows before it scrolls
+ */
+ui-dropdown.ProjectDropdown.many::part(menu) {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(11em, 1fr));
+  align-content: start;
+  width: min(52em, 90vw);
+  max-height: min(36em, 75vh);
+}
+
 /* HACK: a vertical menu's `link` item is a `<button>`, which shrinks to its text even at `display: block`, so its
    divider stops short:  fill the menu's width.  (`SUSPECTED-BUGS.md`, ui, `<ui-menu direction="vertical">` link items) */
 ui-menu.ProjectMenu[vertical] > ui-item::part(item) {

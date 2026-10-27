@@ -5,11 +5,9 @@
 	</>
 	<actions-tab-bar showing="examples"/>
 	<section>
-		<html>
-			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-				<ui-item link="#owners">Owners</>
-				<ui-item link="#standalone">Standalone</>
-			</>
+		<menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#owners">Owners</>
+			<item link="#standalone">Standalone</>
 		</>
 	</>
 
@@ -19,7 +17,7 @@
 		(`ui-header.html`) shows every part together.
 	-->
 	<section label="Owners">
-		<section label="Comment" sticky collapsible dividing>
+		<section label="Comment" sticky="stack" collapsible dividing>
 			<example description="A comment's actions:  a row of small links under its text.">
 				<html>
 					<ui-comments>
@@ -40,7 +38,7 @@
 			</example>
 		</>
 
-		<section label="Modal" sticky collapsible dividing>
+		<section label="Modal" sticky="stack" collapsible dividing>
 			<example description="A modal's actions:  its footer, buttons on the right;  `approve` and `deny` close it.">
 				<button commandfor="actions-modal" command="--show">Show</button>
 				<html>
@@ -60,7 +58,7 @@
 	</>
 
 	<section label="Standalone">
-		<section label="No owner" sticky collapsible dividing>
+		<section label="No owner" sticky="stack" collapsible dividing>
 			<example description="Outside an owner, `<ui-actions>` is an unstyled block.">
 				<actions>
 					<button size="small">OK</button>

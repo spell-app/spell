@@ -59,8 +59,8 @@
               our own extra (No avatar).  Fomantic's `<a class="reply">` actions are real `<button>`s in `<ui-actions>`;  its
               `.metadata` / `.text` are `<ui-meta>` / `<ui-description>`.  Every reply form posts nowhere (`method="dialog"`).
             -->
-            <ui-section id="examples-types" label="Types" sticky collapsible dividing>
-              <ui-section id="examples-types-comments" label="Comments" sticky collapsible dividing>
+            <ui-section id="examples-types" label="Types" sticky="stack" collapsible dividing>
+              <ui-section id="examples-types-comments" label="Comments" sticky="stack" collapsible dividing>
                 <ui-example>
                   <p slot="description">
                     A basic list of comments: a <code>&lt;ui-comments&gt;</code> inside a comment is its thread of
@@ -124,8 +124,8 @@
               </ui-section>
             </ui-section>
 
-            <ui-section id="examples-content" label="Content" sticky collapsible dividing>
-              <ui-section id="examples-content-avatar" label="Avatar" sticky collapsible dividing>
+            <ui-section id="examples-content" label="Content" sticky="stack" collapsible dividing>
+              <ui-section id="examples-content-avatar" label="Avatar" sticky="stack" collapsible dividing>
                 <ui-example description="A comment can contain an image or avatar:  `<ui-avatar src>`.">
                   <ui-comments>
                     <ui-comment>
@@ -138,7 +138,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-content-metadata" label="Metadata" sticky collapsible dividing>
+              <ui-section id="examples-content-metadata" label="Metadata" sticky="stack" collapsible dividing>
                 <ui-example
                   description="A comment can contain metadata about the comment, an arbitrary amount of metadata may be defined:  each child of `<ui-meta>` is one piece."
                 >
@@ -160,7 +160,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-content-actions" label="Actions" sticky collapsible dividing>
+              <ui-section id="examples-content-actions" label="Actions" sticky="stack" collapsible dividing>
                 <ui-example
                   description="A comment can contain a list of actions a user may perform related to this comment:  `<button>`s (or links, to go somewhere) in `<ui-actions>`."
                 >
@@ -185,7 +185,7 @@
               </ui-section>
 
               <!-- GAP I35:  a comment's `reply` slot sits below the whole comment, not beside the avatar. -->
-              <ui-section id="examples-content-reply-form" label="Reply Form" sticky collapsible dividing>
+              <ui-section id="examples-content-reply-form" label="Reply Form" sticky="stack" collapsible dividing>
                 <ui-example>
                   <p slot="description">
                     A comment can contain a form to reply to a comment. This may have arbitrary content.
@@ -252,7 +252,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-content-no-avatar" label="No avatar" sticky collapsible dividing>
+              <ui-section id="examples-content-no-avatar" label="No avatar" sticky="stack" collapsible dividing>
                 <ui-example
                   description="A comment can leave out its avatar;  the content then starts at the edge."
                 >
@@ -270,8 +270,8 @@
               </ui-section>
             </ui-section>
 
-            <ui-section id="examples-states" label="States" sticky collapsible dividing>
-              <ui-section id="examples-states-collapsed" label="Collapsed" sticky collapsible dividing>
+            <ui-section id="examples-states" label="States" sticky="stack" collapsible dividing>
+              <ui-section id="examples-states-collapsed" label="Collapsed" sticky="stack" collapsible dividing>
                 <ui-example
                   description="Comments can be collapsed, or hidden from view:  `collapsed` folds away a thread of replies, one comment or a whole list.  Here Christian's thread is folded."
                 >
@@ -314,7 +314,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-states-disabled" label="Disabled" sticky collapsible dividing>
+              <ui-section id="examples-states-disabled" label="Disabled" sticky="stack" collapsible dividing>
                 <ui-example description="A comment can be disabled.">
                   <ui-comments>
                     <ui-comment disabled>
@@ -331,8 +331,8 @@
               </ui-section>
             </ui-section>
 
-            <ui-section id="examples-variations" label="Variations" sticky collapsible dividing>
-              <ui-section id="examples-variations-threaded" label="Threaded" sticky collapsible dividing>
+            <ui-section id="examples-variations" label="Variations" sticky="stack" collapsible dividing>
+              <ui-section id="examples-variations-threaded" label="Threaded" sticky="stack" collapsible dividing>
                 <ui-example
                   description="A comment list can be threaded to show the relationship between conversations."
                 >
@@ -388,7 +388,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-variations-minimal" label="Minimal" sticky collapsible dividing>
+              <ui-section id="examples-variations-minimal" label="Minimal" sticky="stack" collapsible dividing>
                 <ui-example
                   description="Comments can hide extra information unless a user shows intent to interact with a comment:  the actions show while a comment is hovered or holds keyboard focus."
                 >
@@ -444,7 +444,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-variations-size" label="Size" sticky collapsible dividing>
+              <ui-section id="examples-variations-size" label="Size" sticky="stack" collapsible dividing>
                 <ui-example description="Comments can have different sizes.">
                   <ui-comments size="small">
                     <ui-header level="3" dividing>Comments</ui-header>
@@ -550,7 +550,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-variations-inverted" label="Inverted" sticky collapsible dividing>
+              <ui-section id="examples-variations-inverted" label="Inverted" sticky="stack" collapsible dividing>
                 <ui-example description="Comments' colors can be inverted.">
                   <ui-segment inverted>
                     <ui-comments inverted threaded>
@@ -610,7 +610,7 @@
 
           <ui-tab value="usage" label="Usage">
             <!-- USAGE:  from the old Astro page (Behaviour, Accessibility), tightened. -->
-            <ui-section id="usage-using-it" label="Using it" sticky collapsible dividing>
+            <ui-section id="usage-using-it" label="Using it" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   A comment is made entirely of content parts, which take the comment's look. There are no shorthand attributes.
@@ -629,7 +629,7 @@
               </ui-markdown>
             </ui-section>
 
-            <ui-section id="usage-events" label="Events" sticky collapsible dividing>
+            <ui-section id="usage-events" label="Events" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   Neither element fires events of its own. Wire your own handlers to the action buttons, and set `collapsed` to fold
@@ -692,7 +692,7 @@
               </ui-section>
             </ui-section>
 
-            <ui-section id="usage-keyboard" label="Keyboard" sticky collapsible dividing>
+            <ui-section id="usage-keyboard" label="Keyboard" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   The comment itself takes no keys. Everything focusable inside it is yours: real `<button>`s and links in
@@ -704,7 +704,7 @@
               </ui-markdown>
             </ui-section>
 
-            <ui-section id="usage-accessibility" label="Accessibility" sticky collapsible dividing>
+            <ui-section id="usage-accessibility" label="Accessibility" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   - Each comment is an `<article>`, and a reply's article sits inside the article it answers, which is how HTML
@@ -729,30 +729,30 @@
 
           <ui-tab value="api" label="API">
             <!-- API:  generated from the vocabularies (`docs/__data/components.json5`);  nothing to write. -->
-            <ui-section id="api-tags" label="Tags" sticky collapsible dividing>
+            <ui-section id="api-tags" label="Tags" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-comment" only="tags"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-attributes" label="Attributes" sticky collapsible dividing>
+            <ui-section id="api-attributes" label="Attributes" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-comment" only="attributes"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-slots" label="Slots" sticky collapsible dividing>
+            <ui-section id="api-slots" label="Slots" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-comment" only="slots"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-parts" label="Parts" sticky collapsible dividing>
+            <ui-section id="api-parts" label="Parts" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-comment" only="parts"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-states" label="States" sticky collapsible dividing>
+            <ui-section id="api-states" label="States" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-comment" only="states"></ui-docs-api>
             </ui-section>
           </ui-tab>
 
           <ui-tab value="theming" label="Theming">
             <!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
-            <ui-section id="theming-tokens" label="Tokens" sticky collapsible dividing>
+            <ui-section id="theming-tokens" label="Tokens" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   Theme with the public `--ui-comments-*` and `--ui-comment-*` tokens: set one on the list, on any ancestor (`:root`
@@ -847,7 +847,7 @@
               </ui-docs-tokens>
             </ui-section>
 
-            <ui-section id="theming-themes" label="Themes" sticky collapsible dividing>
+            <ui-section id="theming-themes" label="Themes" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   The theme menu above picks the theme for every page of the site:  Spell, Glass, Fruity or Merlot,

@@ -57,8 +57,8 @@
             <!--
               EXAMPLES:  Fomantic's divider page, in its order (Types, Variations), plus our own extra (Colored).
             -->
-            <ui-section id="examples-types" label="Types" sticky collapsible dividing>
-              <ui-section id="examples-types-divider" label="Divider" sticky collapsible dividing>
+            <ui-section id="examples-types" label="Types" sticky="stack" collapsible dividing>
+              <ui-section id="examples-types-divider" label="Divider" sticky="stack" collapsible dividing>
                 <ui-example>
                   <p slot="description">A standard divider.</p>
                   <ui-message slot="description" state="warning" size="small"
@@ -72,7 +72,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-types-vertical-divider" label="Vertical Divider" sticky collapsible dividing>
+              <ui-section id="examples-types-vertical-divider" label="Vertical Divider" sticky="stack" collapsible dividing>
                 <ui-example>
                   <p slot="description">A divider can segment content vertically.</p>
                   <ui-message slot="description" size="small"
@@ -212,8 +212,8 @@
               </ui-section>
             </ui-section>
 
-            <ui-section id="examples-variations" label="Variations" sticky collapsible dividing>
-              <ui-section id="examples-variations-inverted" label="Inverted" sticky collapsible dividing>
+            <ui-section id="examples-variations" label="Variations" sticky="stack" collapsible dividing>
+              <ui-section id="examples-variations-inverted" label="Inverted" sticky="stack" collapsible dividing>
                 <ui-example description="A divider can have its colors inverted.">
                   <ui-segment inverted>
                     <ui-image src="images/wireframe/short-paragraph.png" alt=""></ui-image>
@@ -224,7 +224,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-variations-fitted" label="Fitted" sticky collapsible dividing>
+              <ui-section id="examples-variations-fitted" label="Fitted" sticky="stack" collapsible dividing>
                 <ui-example description="A divider can be fitted, without any space above or below it.">
                   <ui-segment>
                     Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.
@@ -236,7 +236,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-variations-spacer" label="Spacer" sticky collapsible dividing>
+              <ui-section id="examples-variations-spacer" label="Spacer" sticky="stack" collapsible dividing>
                 <ui-example description="A spacer divider divides content without drawing a line (Fomantic calls it a hidden divider).">
                   <ui-header level="3">Section One</ui-header>
                   <ui-image src="images/wireframe/short-paragraph.png" alt=""></ui-image>
@@ -246,7 +246,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-variations-section" label="Section" sticky collapsible dividing>
+              <ui-section id="examples-variations-section" label="Section" sticky="stack" collapsible dividing>
                 <ui-example description="A divider can provide greater margins to divide sections of content.">
                   <ui-header level="3">Section One</ui-header>
                   <ui-image src="images/wireframe/short-paragraph.png" alt=""></ui-image>
@@ -256,7 +256,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-variations-clearing" label="Clearing" sticky collapsible dividing>
+              <ui-section id="examples-variations-clearing" label="Clearing" sticky="stack" collapsible dividing>
                 <ui-example description="A divider can clear the contents above it.">
                   <ui-segment>
                     <ui-image floated="right" size="mini" src="images/wireframe/square-image.png" alt=""></ui-image>
@@ -266,7 +266,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-variations-size" label="Size" sticky collapsible dividing>
+              <ui-section id="examples-variations-size" label="Size" sticky="stack" collapsible dividing>
                 <ui-example description="A divider text can vary in size.">
                   <ui-divider direction="horizontal" size="mini">Mini</ui-divider>
                   <ui-divider direction="horizontal" size="tiny">Tiny</ui-divider>
@@ -278,7 +278,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-variations-colored" label="Colored" sticky collapsible dividing>
+              <ui-section id="examples-variations-colored" label="Colored" sticky="stack" collapsible dividing>
                 <ui-example description="A divider's rule and text can take a color.">
                   <ui-divider color="red"></ui-divider>
                   <ui-divider direction="horizontal" color="blue">Blue</ui-divider>
@@ -289,7 +289,7 @@
           </ui-tab>
 
           <ui-tab value="usage" label="Usage">
-            <ui-section id="usage-using-it" label="Using it" sticky collapsible dividing>
+            <ui-section id="usage-using-it" label="Using it" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   Put `<ui-divider>` between two blocks of content. With no words it draws a rule; `direction="horizontal"` puts its text
@@ -306,11 +306,11 @@
               </ui-markdown>
             </ui-section>
 
-            <ui-section id="usage-keyboard" label="Keyboard" sticky collapsible dividing>
+            <ui-section id="usage-keyboard" label="Keyboard" sticky="stack" collapsible dividing>
               <ui-markdown>A divider takes no focus and handles no keys.</ui-markdown>
             </ui-section>
 
-            <ui-section id="usage-accessibility" label="Accessibility" sticky collapsible dividing>
+            <ui-section id="usage-accessibility" label="Accessibility" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   - A divider is `role="separator"`, not `<hr>`, because a horizontal or vertical divider carries text an `<hr>`
@@ -326,25 +326,25 @@
           </ui-tab>
 
           <ui-tab value="api" label="API">
-            <ui-section id="api-attributes" label="Attributes" sticky collapsible dividing>
+            <ui-section id="api-attributes" label="Attributes" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-divider" only="attributes"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-slots" label="Slots" sticky collapsible dividing>
+            <ui-section id="api-slots" label="Slots" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-divider" only="slots"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-parts" label="Parts" sticky collapsible dividing>
+            <ui-section id="api-parts" label="Parts" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-divider" only="parts"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-states" label="States" sticky collapsible dividing>
+            <ui-section id="api-states" label="States" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-divider" only="states"></ui-docs-api>
             </ui-section>
           </ui-tab>
 
           <ui-tab value="theming" label="Theming">
-            <ui-section id="theming-tokens" label="Tokens" sticky collapsible dividing>
+            <ui-section id="theming-tokens" label="Tokens" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   Theme with the public `--ui-divider-*` tokens: set one on the element, on any ancestor (a region, `:root`), or
@@ -378,7 +378,7 @@
               </ui-docs-tokens>
             </ui-section>
 
-            <ui-section id="theming-themes" label="Themes" sticky collapsible dividing>
+            <ui-section id="theming-themes" label="Themes" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   Each theme of the set (Spell, Glass, Fruity, Merlot, Paper, Midnight, Crisp, Pop, Matrix) changes a divider's colours through the shared

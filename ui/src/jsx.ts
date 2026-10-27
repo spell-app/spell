@@ -5087,6 +5087,195 @@ export interface UICodeAttributes {
 export interface UICodeJSXAttributes
   extends Omit<UIGlobalJSXAttributes<UIHTMLElement<UICodeEventMap>>, keyof UICodeAttributes>, UICodeAttributes {}
 
+/** `<ui-color-chip>`'s own attributes, from its vocabulary. */
+export interface UIColorChipAttributes {
+  /**
+   * The colour:  any CSS colour (`#7c55e6`, `oklch(...)`, `var(--ui-primary)`, `light-dark(...)`).
+   * - takes:  text
+   */
+  color?: string
+  /**
+   * `color`, as the DOM element's property.
+   * @deprecated write `color` -- `prop:` stays only for compiled spell
+   */
+  "prop:color"?: string
+  /**
+   * The scheme a `light-dark()` colour resolves in:  the page's (`auto`), `light` or `dark`.
+   * - takes:  `auto` · `light` · `dark`
+   * - default:  `auto`
+   */
+  scheme?: "auto" | "light" | "dark"
+  /**
+   * `scheme`, as the DOM element's property.
+   * @deprecated write `scheme` -- `prop:` stays only for compiled spell
+   */
+  "prop:scheme"?: "auto" | "light" | "dark"
+  /**
+   * What the colour is, for a screen reader and the tooltip.  None:  the colour itself.
+   * - takes:  text
+   */
+  label?: string
+  /**
+   * `label`, as the DOM element's property.
+   * @deprecated write `label` -- `prop:` stays only for compiled spell
+   */
+  "prop:label"?: string
+  /**
+   * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
+   * - takes:  flag (present / absent)
+   */
+  disabled?: boolean | ""
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
+  "prop:disabled"?: boolean | ""
+  /**
+   * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
+   * - takes:  flag (present / absent)
+   */
+  loading?: boolean | ""
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
+  "prop:loading"?: boolean | ""
+  /**
+   * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
+   * - takes:  flag (present / absent)
+   */
+  visible?: boolean | ""
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
+  "prop:visible"?: boolean | ""
+  /**
+   * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
+   * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
+   */
+  animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
+  "prop:animation"?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /**
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
+   * - takes:  text
+   */
+  link?: string
+  /**
+   * `link`, as the DOM element's property.
+   * @deprecated write `link` -- `prop:` stays only for compiled spell
+   */
+  "prop:link"?: string
+  /**
+   * Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`.
+   * - takes:  text
+   */
+  target?: string
+  /**
+   * `target`, as the DOM element's property.
+   * @deprecated write `target` -- `prop:` stays only for compiled spell
+   */
+  "prop:target"?: string
+  /**
+   * How its letters look, several words at once:  `bold`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript` (`font="bold italic"`).  `<ui-text>` draws each as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it;  every other element shows the look alone.
+   * - takes:  space-separated:  `bold` · `italic` · `underline` · `strikethrough` · `code` · `highlight` · `subscript` · `superscript`
+   */
+  font?: string
+  /**
+   * `font`, as the DOM element's property.
+   * @deprecated write `font` -- `prop:` stays only for compiled spell
+   */
+  "prop:font"?: string
+  /**
+   * Its tooltip:  the browser's own, written as the element's `title`.
+   * - takes:  text
+   */
+  tooltip?: string
+  /**
+   * `tooltip`, as the DOM element's property.
+   * @deprecated write `tooltip` -- `prop:` stays only for compiled spell
+   */
+  "prop:tooltip"?: string
+}
+
+/** `<ui-color-chip>` in JSX:  its own attributes, and HTML's global ones. */
+export interface UIColorChipJSXAttributes
+  extends Omit<UIGlobalJSXAttributes<HTMLElement>, keyof UIColorChipAttributes>, UIColorChipAttributes {}
+
 /** `<ui-column>`'s own attributes, from its vocabulary. */
 export interface UIColumnAttributes {
   /**
@@ -19258,15 +19447,15 @@ export interface UIPanelAttributes {
    */
   "prop:foldIcon"?: "start" | "end"
   /**
-   * The title bar sticks while the section is on screen;  a sticky section inside another sticks just below its title.
-   * - takes:  flag (present / absent)
+   * The title bar sticks while the section is on screen;  a sticky section inside another sticks just below its title.  `sticky="stack"`:  the titles read as one stack of rounded bars, as the docs pages' sections do -- each level a step further in (`--ui-section-stack-reach`, `--ui-section-stack-step`), a section's first nested title tucked square under its own, a nested title stuck under its parent's a heavy round (the theme's large radius), and closed sections one after another flush, ONE group, round only at its top and bottom.  A plain `sticky` section right inside a stacked one joins its stack (not through another element, an example's).
+   * - takes:  flag, or `stack`
    */
-  sticky?: boolean | ""
+  sticky?: boolean | "" | "stack"
   /**
    * `sticky`, as the DOM element's property.
    * @deprecated write `sticky` -- `prop:` stays only for compiled spell
    */
-  "prop:sticky"?: boolean | ""
+  "prop:sticky"?: boolean | "" | "stack"
   /**
    * With `sticky`:  pixels between the top edge and a TOP-LEVEL section's stuck title (e.g. a page header's height);  nested sections work theirs out.
    * - takes:  number
@@ -19353,8 +19542,8 @@ export interface UIPanelAttributes {
    */
   "prop:block"?: boolean | ""
   /**
-   * The look, several words at once:  `bordered` (a box around the section, as a segment), `styled` (boxed as a styled accordion:  a tinted title bar over padded content), `raised` (with a box:  lifted with a shadow), `basic` (no box, rule or tint, whatever else is set).  Old names:  `bordered`, `styled`, `raised`, `basic`.
-   * - takes:  space-separated:  `bordered` · `styled` · `raised` · `basic`
+   * The look, several words at once:  `bordered` (a box around the section, as a segment), `styled` (boxed as a styled accordion:  a tinted title bar over padded content), `raised` (with a box:  lifted with a shadow), `basic` (no box, rule or tint, whatever else is set), `drawer` (the title a raised bar, the content a tinted panel attached under it that rolls open and closed, as an example's code under its demo).  Old names:  `bordered`, `styled`, `raised`, `basic`.
+   * - takes:  space-separated:  `bordered` · `styled` · `raised` · `basic` · `drawer`
    */
   appearance?: string
   /**
@@ -22142,15 +22331,15 @@ export interface UIPropertyEditorAttributes {
    */
   "prop:foldIcon"?: "start" | "end"
   /**
-   * The title bar sticks while the section is on screen;  a sticky section inside another sticks just below its title.
-   * - takes:  flag (present / absent)
+   * The title bar sticks while the section is on screen;  a sticky section inside another sticks just below its title.  `sticky="stack"`:  the titles read as one stack of rounded bars, as the docs pages' sections do -- each level a step further in (`--ui-section-stack-reach`, `--ui-section-stack-step`), a section's first nested title tucked square under its own, a nested title stuck under its parent's a heavy round (the theme's large radius), and closed sections one after another flush, ONE group, round only at its top and bottom.  A plain `sticky` section right inside a stacked one joins its stack (not through another element, an example's).
+   * - takes:  flag, or `stack`
    */
-  sticky?: boolean | ""
+  sticky?: boolean | "" | "stack"
   /**
    * `sticky`, as the DOM element's property.
    * @deprecated write `sticky` -- `prop:` stays only for compiled spell
    */
-  "prop:sticky"?: boolean | ""
+  "prop:sticky"?: boolean | "" | "stack"
   /**
    * With `sticky`:  pixels between the top edge and a TOP-LEVEL section's stuck title (e.g. a page header's height);  nested sections work theirs out.
    * - takes:  number
@@ -22227,8 +22416,8 @@ export interface UIPropertyEditorAttributes {
    */
   "prop:block"?: boolean | ""
   /**
-   * The look, several words at once:  `bordered` (a box around the section, as a segment), `styled` (boxed as a styled accordion:  a tinted title bar over padded content), `raised` (with a box:  lifted with a shadow), `basic` (no box, rule or tint, whatever else is set).  Old names:  `bordered`, `styled`, `raised`, `basic`.
-   * - takes:  space-separated:  `bordered` · `styled` · `raised` · `basic`
+   * The look, several words at once:  `bordered` (a box around the section, as a segment), `styled` (boxed as a styled accordion:  a tinted title bar over padded content), `raised` (with a box:  lifted with a shadow), `basic` (no box, rule or tint, whatever else is set), `drawer` (the title a raised bar, the content a tinted panel attached under it that rolls open and closed, as an example's code under its demo).  Old names:  `bordered`, `styled`, `raised`, `basic`.
+   * - takes:  space-separated:  `bordered` · `styled` · `raised` · `basic` · `drawer`
    */
   appearance?: string
   /**
@@ -22720,15 +22909,15 @@ export interface UIPropertyGroupAttributes {
    */
   "prop:foldIcon"?: "start" | "end"
   /**
-   * The title bar sticks while the section is on screen;  a sticky section inside another sticks just below its title.
-   * - takes:  flag (present / absent)
+   * The title bar sticks while the section is on screen;  a sticky section inside another sticks just below its title.  `sticky="stack"`:  the titles read as one stack of rounded bars, as the docs pages' sections do -- each level a step further in (`--ui-section-stack-reach`, `--ui-section-stack-step`), a section's first nested title tucked square under its own, a nested title stuck under its parent's a heavy round (the theme's large radius), and closed sections one after another flush, ONE group, round only at its top and bottom.  A plain `sticky` section right inside a stacked one joins its stack (not through another element, an example's).
+   * - takes:  flag, or `stack`
    */
-  sticky?: boolean | ""
+  sticky?: boolean | "" | "stack"
   /**
    * `sticky`, as the DOM element's property.
    * @deprecated write `sticky` -- `prop:` stays only for compiled spell
    */
-  "prop:sticky"?: boolean | ""
+  "prop:sticky"?: boolean | "" | "stack"
   /**
    * With `sticky`:  pixels between the top edge and a TOP-LEVEL section's stuck title (e.g. a page header's height);  nested sections work theirs out.
    * - takes:  number
@@ -22815,8 +23004,8 @@ export interface UIPropertyGroupAttributes {
    */
   "prop:block"?: boolean | ""
   /**
-   * The look, several words at once:  `bordered` (a box around the section, as a segment), `styled` (boxed as a styled accordion:  a tinted title bar over padded content), `raised` (with a box:  lifted with a shadow), `basic` (no box, rule or tint, whatever else is set).  Old names:  `bordered`, `styled`, `raised`, `basic`.
-   * - takes:  space-separated:  `bordered` · `styled` · `raised` · `basic`
+   * The look, several words at once:  `bordered` (a box around the section, as a segment), `styled` (boxed as a styled accordion:  a tinted title bar over padded content), `raised` (with a box:  lifted with a shadow), `basic` (no box, rule or tint, whatever else is set), `drawer` (the title a raised bar, the content a tinted panel attached under it that rolls open and closed, as an example's code under its demo).  Old names:  `bordered`, `styled`, `raised`, `basic`.
+   * - takes:  space-separated:  `bordered` · `styled` · `raised` · `basic` · `drawer`
    */
   appearance?: string
   /**
@@ -26276,15 +26465,15 @@ export interface UISectionAttributes {
    */
   "prop:foldIcon"?: "start" | "end"
   /**
-   * The title bar sticks while the section is on screen;  a sticky section inside another sticks just below its title.
-   * - takes:  flag (present / absent)
+   * The title bar sticks while the section is on screen;  a sticky section inside another sticks just below its title.  `sticky="stack"`:  the titles read as one stack of rounded bars, as the docs pages' sections do -- each level a step further in (`--ui-section-stack-reach`, `--ui-section-stack-step`), a section's first nested title tucked square under its own, a nested title stuck under its parent's a heavy round (the theme's large radius), and closed sections one after another flush, ONE group, round only at its top and bottom.  A plain `sticky` section right inside a stacked one joins its stack (not through another element, an example's).
+   * - takes:  flag, or `stack`
    */
-  sticky?: boolean | ""
+  sticky?: boolean | "" | "stack"
   /**
    * `sticky`, as the DOM element's property.
    * @deprecated write `sticky` -- `prop:` stays only for compiled spell
    */
-  "prop:sticky"?: boolean | ""
+  "prop:sticky"?: boolean | "" | "stack"
   /**
    * With `sticky`:  pixels between the top edge and a TOP-LEVEL section's stuck title (e.g. a page header's height);  nested sections work theirs out.
    * - takes:  number
@@ -26371,8 +26560,8 @@ export interface UISectionAttributes {
    */
   "prop:block"?: boolean | ""
   /**
-   * The look, several words at once:  `bordered` (a box around the section, as a segment), `styled` (boxed as a styled accordion:  a tinted title bar over padded content), `raised` (with a box:  lifted with a shadow), `basic` (no box, rule or tint, whatever else is set).  Old names:  `bordered`, `styled`, `raised`, `basic`.
-   * - takes:  space-separated:  `bordered` · `styled` · `raised` · `basic`
+   * The look, several words at once:  `bordered` (a box around the section, as a segment), `styled` (boxed as a styled accordion:  a tinted title bar over padded content), `raised` (with a box:  lifted with a shadow), `basic` (no box, rule or tint, whatever else is set), `drawer` (the title a raised bar, the content a tinted panel attached under it that rolls open and closed, as an example's code under its demo).  Old names:  `bordered`, `styled`, `raised`, `basic`.
+   * - takes:  space-separated:  `bordered` · `styled` · `raised` · `basic` · `drawer`
    */
   appearance?: string
   /**
@@ -32826,15 +33015,15 @@ export interface UITextareaJSXAttributes
 /** `<ui-theme-editor>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
 export interface UIThemeEditorEventMap {
   /**
-   * `ui-changed`:  A choice changed:  `value` is every choice now, `css` the theme as a stylesheet.
+   * `ui-changed`:  A choice changed:  `value` is every choice now, `css` the theme's sheet, worn over its base.
    * - `event.detail`:  `{ value: ThemeChoices, css: string }`
    */
   "ui-changed": CustomEvent<{ value: UIT.ThemeChoices; css: string }>
   /**
-   * `ui-copied`:  Copy CSS put the stylesheet on the clipboard.
-   * - `event.detail`:  `{ css: string }`
+   * `ui-copied`:  Copy changes put the theme file's JSON5 on the clipboard.
+   * - `event.detail`:  `{ text: string }`
    */
-  "ui-copied": CustomEvent<{ css: string }>
+  "ui-copied": CustomEvent<{ text: string }>
   /**
    * `ui-saved`:  Use this theme kept it in the browser, for the Spell editor and any page that calls `SavedTheme.restore()`;  no `value`:  Stop using forgot it.
    * - `event.detail`:  `{ value?: ThemeChoices, css: string }`
@@ -32845,7 +33034,7 @@ export interface UIThemeEditorEventMap {
 /** `<ui-theme-editor>`'s own attributes, from its vocabulary. */
 export interface UIThemeEditorAttributes {
   /**
-   * The theme to start from (`fruity`, `spell` ...).  None:  the page's own theme, else `fruity`.  Picking another one in the editor applies it to the page.
+   * The theme to start from (`fruity`, `spell` ...).  None:  the page's own theme, else `fruity`.
    * - takes:  text
    */
   base?: string
@@ -32855,16 +33044,27 @@ export interface UIThemeEditorAttributes {
    */
   "prop:base"?: string
   /**
-   * The theme to start with, as `ThemeChoices` (`{"primary": "pink", "corners": "soft"}`).  None:  the theme kept in this browser (`SavedTheme`), else the base theme as it is.
+   * The theme to start with, as `ThemeChoices` (`{"primary": "pink", "corners": "soft"}`).  None:  the theme being made in this browser, else the one kept (`SavedTheme`), else the base theme as it is.
    * - a JS property (rich data):  an object, array or function, given as it is
    */
   value?: unknown
   /**
-   * The theme to start with, as `ThemeChoices` (`{"primary": "pink", "corners": "soft"}`).  None:  the theme kept in this browser (`SavedTheme`), else the base theme as it is.
+   * The theme to start with, as `ThemeChoices` (`{"primary": "pink", "corners": "soft"}`).  None:  the theme being made in this browser, else the one kept (`SavedTheme`), else the base theme as it is.
    * - a JS property (rich data):  an object, array or function, given as it is
    * @deprecated write `value` -- `prop:` stays only for compiled spell
    */
   "prop:value"?: unknown
+  /**
+   * PROPERTY:  the real pages to preview, each in a frame wearing the theme as it changes (`PreviewPage[]`:  `id`, `label`, `url`, `width`, `reach`, `themeKey`, `icon` ...).  None:  a sample app, and the page itself wears the theme.
+   * - a JS property (rich data):  an object, array or function, given as it is
+   */
+  pages?: unknown
+  /**
+   * PROPERTY:  the real pages to preview, each in a frame wearing the theme as it changes (`PreviewPage[]`:  `id`, `label`, `url`, `width`, `reach`, `themeKey`, `icon` ...).  None:  a sample app, and the page itself wears the theme.
+   * - a JS property (rich data):  an object, array or function, given as it is
+   * @deprecated write `pages` -- `prop:` stays only for compiled spell
+   */
+  "prop:pages"?: unknown
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
@@ -33026,13 +33226,13 @@ export interface UIThemeEditorAttributes {
    */
   "prop:label"?: string
   /**
-   * `ui-changed`:  A choice changed:  `value` is every choice now, `css` the theme as a stylesheet.
+   * `ui-changed`:  A choice changed:  `value` is every choice now, `css` the theme's sheet, worn over its base.
    * - `event.detail`:  `{ value: ThemeChoices, css: string }`
    */
   "on-ui-changed"?: (event: UIThemeEditorEventMap["ui-changed"]) => void
   /**
-   * `ui-copied`:  Copy CSS put the stylesheet on the clipboard.
-   * - `event.detail`:  `{ css: string }`
+   * `ui-copied`:  Copy changes put the theme file's JSON5 on the clipboard.
+   * - `event.detail`:  `{ text: string }`
    */
   "on-ui-copied"?: (event: UIThemeEditorEventMap["ui-copied"]) => void
   /**
@@ -33277,6 +33477,215 @@ export interface UIThemeMenuJSXAttributes
   extends
     Omit<UIGlobalJSXAttributes<UIHTMLElement<UIThemeMenuEventMap>>, keyof UIThemeMenuAttributes>,
     UIThemeMenuAttributes {}
+
+/** `<ui-theme-token>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
+export interface UIThemeTokenEventMap {
+  /**
+   * `ui-changed`:  Its drawer set a value:  for `scheme` alone, or (none) for both.
+   * - `event.detail`:  `{ token: string, value: string, scheme?: "light" | "dark" }`
+   */
+  "ui-changed": CustomEvent<{ token: string; value: string; scheme?: "light" | "dark" }>
+  /**
+   * `ui-command`:  Its name opened or closed its drawer (`open`), a button was pressed (`reset`, `set here`, `split`), or a link to another token (`show`, its `place`).
+   * - `event.detail`:  `{ token: string, command: "open" | "reset" | "set here" | "split" | "show", place?: string }`
+   */
+  "ui-command": CustomEvent<{
+    token: string
+    command: "open" | "reset" | "set here" | "split" | "show"
+    place?: string
+  }>
+}
+
+/** `<ui-theme-token>`'s own attributes, from its vocabulary. */
+export interface UIThemeTokenAttributes {
+  /**
+   * PROPERTY:  what to draw, as `TokenRow` (its name, where its value comes from, its value in each scheme, what its drawer offers).  `<ui-theme-editor>` works it out.
+   * - a JS property (rich data):  an object, array or function, given as it is
+   */
+  row?: unknown
+  /**
+   * PROPERTY:  what to draw, as `TokenRow` (its name, where its value comes from, its value in each scheme, what its drawer offers).  `<ui-theme-editor>` works it out.
+   * - a JS property (rich data):  an object, array or function, given as it is
+   * @deprecated write `row` -- `prop:` stays only for compiled spell
+   */
+  "prop:row"?: unknown
+  /**
+   * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
+   * - takes:  flag (present / absent)
+   */
+  disabled?: boolean | ""
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
+  "prop:disabled"?: boolean | ""
+  /**
+   * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
+   * - takes:  flag (present / absent)
+   */
+  loading?: boolean | ""
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
+  "prop:loading"?: boolean | ""
+  /**
+   * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
+   * - takes:  flag (present / absent)
+   */
+  visible?: boolean | ""
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
+  "prop:visible"?: boolean | ""
+  /**
+   * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
+   * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `none`
+   */
+  animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
+  "prop:animation"?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "none"
+  /**
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
+   * - takes:  text
+   */
+  link?: string
+  /**
+   * `link`, as the DOM element's property.
+   * @deprecated write `link` -- `prop:` stays only for compiled spell
+   */
+  "prop:link"?: string
+  /**
+   * Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`.
+   * - takes:  text
+   */
+  target?: string
+  /**
+   * `target`, as the DOM element's property.
+   * @deprecated write `target` -- `prop:` stays only for compiled spell
+   */
+  "prop:target"?: string
+  /**
+   * How its letters look, several words at once:  `bold`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript` (`font="bold italic"`).  `<ui-text>` draws each as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it;  every other element shows the look alone.
+   * - takes:  space-separated:  `bold` · `italic` · `underline` · `strikethrough` · `code` · `highlight` · `subscript` · `superscript`
+   */
+  font?: string
+  /**
+   * `font`, as the DOM element's property.
+   * @deprecated write `font` -- `prop:` stays only for compiled spell
+   */
+  "prop:font"?: string
+  /**
+   * Its tooltip:  the browser's own, written as the element's `title`.
+   * - takes:  text
+   */
+  tooltip?: string
+  /**
+   * `tooltip`, as the DOM element's property.
+   * @deprecated write `tooltip` -- `prop:` stays only for compiled spell
+   */
+  "prop:tooltip"?: string
+  /**
+   * Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.
+   * - takes:  text
+   */
+  label?: string
+  /**
+   * `label`, as the DOM element's property.
+   * @deprecated write `label` -- `prop:` stays only for compiled spell
+   */
+  "prop:label"?: string
+  /**
+   * `ui-changed`:  Its drawer set a value:  for `scheme` alone, or (none) for both.
+   * - `event.detail`:  `{ token: string, value: string, scheme?: "light" | "dark" }`
+   */
+  "on-ui-changed"?: (event: UIThemeTokenEventMap["ui-changed"]) => void
+  /**
+   * `ui-command`:  Its name opened or closed its drawer (`open`), a button was pressed (`reset`, `set here`, `split`), or a link to another token (`show`, its `place`).
+   * - `event.detail`:  `{ token: string, command: "open" | "reset" | "set here" | "split" | "show", place?: string }`
+   */
+  "on-ui-command"?: (event: UIThemeTokenEventMap["ui-command"]) => void
+}
+
+/** `<ui-theme-token>` in JSX:  its own attributes, and HTML's global ones. */
+export interface UIThemeTokenJSXAttributes
+  extends
+    Omit<UIGlobalJSXAttributes<UIHTMLElement<UIThemeTokenEventMap>>, keyof UIThemeTokenAttributes>,
+    UIThemeTokenAttributes {}
 
 /** `<ui-title>`'s own attributes, from its vocabulary. */
 export interface UITitleAttributes {
@@ -36189,6 +36598,11 @@ declare module "@solidjs/web/types/jsx.js" {
        */
       "ui-code": UICodeJSXAttributes
       /**
+       * `<ui-color-chip>`:  A colour chip shows one colour, as a small rounded square:  read-only, its value in its tooltip.
+       * - also known as:  color chip, swatch, colour sample, color preview, color dot
+       */
+      "ui-color-chip": UIColorChipJSXAttributes
+      /**
        * `<ui-column>`:  A column is a vertical cell of a grid, N of 16 wide.
        * - also known as:  grid column, col, cell
        * - slots:
@@ -36912,8 +37326,8 @@ declare module "@solidjs/web/types/jsx.js" {
        */
       "ui-textarea": UITextareaJSXAttributes
       /**
-       * `<ui-theme-editor>`:  A theme editor makes a theme from an existing one:  pick its colours, fonts and shapes, watch real elements follow in light and dark, then copy the stylesheet or keep it in the browser.
-       * - also known as:  theme editor, theme builder, theme creator, theme generator, style editor, design tokens
+       * `<ui-theme-editor>`:  A theme editor makes a theme from an existing one:  pick its colours, fonts and shapes, or set any token by hand, watch real pages follow in light and dark, then copy the theme file or keep it in the browser.
+       * - also known as:  theme editor, theme builder, theme bench, theme creator, theme generator, style editor, design tokens, token tuner
        * - events:  `ui-changed`, `ui-copied`, `ui-saved`
        */
       "ui-theme-editor": UIThemeEditorJSXAttributes
@@ -36925,6 +37339,12 @@ declare module "@solidjs/web/types/jsx.js" {
        * - events:  `ui-changed`
        */
       "ui-theme-menu": UIThemeMenuJSXAttributes
+      /**
+       * `<ui-theme-token>`:  A theme token is one token of a theme being made:  where its value comes from, its value as colour chips in light and dark, and, under its name, a drawer to change it.
+       * - also known as:  theme token, design token, token row, css variable, custom property editor
+       * - events:  `ui-changed`, `ui-command`
+       */
+      "ui-theme-token": UIThemeTokenJSXAttributes
       /**
        * `<ui-title>`:  A title:  a step's, an accordion panel's, a search result's.
        * - also known as:  accordion title, summary, toggle header
@@ -37058,6 +37478,7 @@ export interface UIEventMap {
   "ui-stuck": CustomEvent<unknown>
   "ui-unstuck": CustomEvent<unknown>
   "ui-sorting": CustomEvent<unknown>
+  "ui-command": CustomEvent<unknown>
   "ui-scrolled-to": CustomEvent<unknown>
   "ui-in-view": CustomEvent<unknown>
   "ui-out-of-view": CustomEvent<unknown>
@@ -37087,6 +37508,7 @@ declare global {
     "ui-cell": HTMLElement
     "ui-checkbox": UIHTMLElement<UICheckboxEventMap>
     "ui-code": UIHTMLElement<UICodeEventMap>
+    "ui-color-chip": HTMLElement
     "ui-column": HTMLElement
     "ui-comment": HTMLElement
     "ui-comments": HTMLElement
@@ -37182,6 +37604,7 @@ declare global {
     "ui-textarea": UIHTMLElement<UITextareaEventMap>
     "ui-theme-editor": UIHTMLElement<UIThemeEditorEventMap>
     "ui-theme-menu": UIHTMLElement<UIThemeMenuEventMap>
+    "ui-theme-token": UIHTMLElement<UIThemeTokenEventMap>
     "ui-title": HTMLElement
     "ui-toast": UIHTMLElement<UIToastEventMap>
     "ui-toc": UIHTMLElement<UITocEventMap>

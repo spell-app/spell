@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs"
 import { join } from "node:path"
 
 import { ComponentTokens } from "spell/ui/styles/ComponentTokens"
+import { themeTree } from "spell/ui/styles/styles.en"
 import type { TokenDeclaration } from "spell/ui/styles/styles.types"
 import { FamilyTokens } from "./FamilyTokens.ts"
 import type { SiteFoundationGroup, SiteToken, SiteTokenType } from "spell/ui/docs-components/docs-components.types"
@@ -25,7 +26,11 @@ export class FoundationTokens {
     this.stylesFolder = stylesFolder
   }
 
-  /** Every group with at least one token, in `GROUPS` order. */
+  /**
+   * Every group with at least one token:  those a theme sets in the theme tree's order (`themeTree`, the order the
+   * theme editor's token tree shows them in), then the rest (`scheme`, `stacking` ...) in `GROUPS` order.
+   * - One order for both (epic `debut` J125, P24);  each group's title and rules stay here, saying what each token is.
+   */
   groups(): SiteFoundationGroup[] {
     const found = new Map<string, SiteToken[]>()
     for (const sheet of SHEETS) {
@@ -38,12 +43,16 @@ export class FoundationTokens {
         if (!list.some((row) => row.name === token.name)) list.push(token)
       }
     }
-    return GROUPS.filter((group) => found.has(group.id)).map((group) => ({
-      id: group.id,
-      title: group.title,
-      description: group.description,
-      tokens: found.get(group.id)!
-    }))
+    const rank = (id: string) => (TREE_ORDER.includes(id) ? TREE_ORDER.indexOf(id) : TREE_ORDER.length)
+    const shown = [...GROUPS].sort((a, b) => rank(a.id) - rank(b.id))
+    return shown
+      .filter((group) => found.has(group.id))
+      .map((group) => ({
+        id: group.id,
+        title: group.title,
+        description: group.description,
+        tokens: found.get(group.id)!
+      }))
   }
 
   /**
@@ -133,6 +142,9 @@ const SUFFIX = `(${Object.keys(COLOR_SUFFIXES)
   .sort((a, b) => b.length - a.length)
   .join("|")})?`
 
+/** The theme tree's top groups, in its order, by this table's ids:  its `hues` is the table's `palette`. */
+const TREE_ORDER = Object.keys(themeTree).map((key) => (key === "hues" ? "palette" : key))
+
 /** The catch-all group. */
 const OTHER: GroupDefinition = {
   id: "other",
@@ -141,7 +153,7 @@ const OTHER: GroupDefinition = {
   rules: []
 }
 
-/** Every group, in display order;  the first rule that matches a name wins. */
+/** Every group;  the first rule that matches a name wins, so the order matters here (shown in `groups()`' order). */
 const GROUPS: GroupDefinition[] = [
   {
     id: "typography",

@@ -67,7 +67,7 @@
               ></a
             >.
           </p>
-          <ui-section id="1-example" label="1. Example" sticky collapsible dividing open="false"
+          <ui-section id="1-example" label="1. Example" sticky="stack" collapsible dividing open="false"
             ><ui-icon slot="icon" name="eye"></ui-icon>
             <p>
               Live: the real element, drawn by the epics pack this page loads. Off a details page's own address nothing
@@ -75,7 +75,7 @@
             </p>
             <epic-choices-bar></epic-choices-bar
           ></ui-section>
-          <ui-section id="2-markup" label="2. Markup" sticky collapsible dividing open="false"
+          <ui-section id="2-markup" label="2. Markup" sticky="stack" collapsible dividing open="false"
             ><ui-icon slot="icon" name="code"></ui-icon
             ><ui-accordion class="spell-code" appearance="styled"
               ><ui-title>choice page · its end · 2 lines</ui-title
@@ -89,17 +89,17 @@
               ></ui-accordion
             ></ui-section
           >
-          <ui-section id="3-where-it-goes" label="3. Where it goes" sticky collapsible dividing open="false"
+          <ui-section id="3-where-it-goes" label="3. Where it goes" sticky="stack" collapsible dividing open="false"
             ><ui-icon slot="icon" name="layer group"></ui-icon>
             <ul>
               <li>Once a page, last in its <code>main</code>.</li>
               <li>No children.</li>
             </ul></ui-section
           >
-          <ui-section id="4-attributes" label="4. Attributes" sticky collapsible dividing open="false"
+          <ui-section id="4-attributes" label="4. Attributes" sticky="stack" collapsible dividing open="false"
             ><ui-icon slot="icon" name="table columns"></ui-icon>
             <p>None.</p>
-            <ui-section id="epic-choices-bar-parts" label="Parts" sticky collapsible dividing open="false"
+            <ui-section id="epic-choices-bar-parts" label="Parts" sticky="stack" collapsible dividing open="false"
               ><p>
                 A part is a piece of what the element draws in its shadow root (its own hidden markup), named so a
                 stylesheet can reach it: <code>epic-choices-bar::part(base)</code>.
@@ -149,7 +149,7 @@
                 </table></ui-table
               ></ui-section
             >
-            <ui-section id="epic-choices-bar-states" label="States" sticky collapsible dividing open="false"
+            <ui-section id="epic-choices-bar-states" label="States" sticky="stack" collapsible dividing open="false"
               ><p>
                 A state is a word the element sets on itself while something is true, for styling:
                 <code>epic-choices-bar:state(stale)</code>. Never written in the file.
@@ -172,7 +172,7 @@
               ></ui-section
             >
           </ui-section>
-          <ui-section id="5-how-it-looks" label="5. How it looks" sticky collapsible dividing open="false"
+          <ui-section id="5-how-it-looks" label="5. How it looks" sticky="stack" collapsible dividing open="false"
             ><ui-icon slot="icon" name="palette"></ui-icon>
             <ul>
               <li>
@@ -202,7 +202,7 @@
               </li>
             </ul></ui-section
           >
-          <ui-section id="6-written-by" label="6. Written by" sticky collapsible dividing open="false"
+          <ui-section id="6-written-by" label="6. Written by" sticky="stack" collapsible dividing open="false"
             ><ui-icon slot="icon" name="terminal"></ui-icon>
             <ul>
               <li><code>epic choices create</code>: in the template.</li>

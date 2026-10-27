@@ -5,11 +5,9 @@
 	</>
 	<sticky-tab-bar showing="examples"/>
 	<section>
-		<html>
-			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-				<ui-item link="#introduction">Introduction</>
-				<ui-item link="#examples">Examples</>
-			</>
+		<menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#introduction">Introduction</>
+			<item link="#examples">Examples</>
 		</>
 	</>
 
@@ -32,11 +30,8 @@
 
 	<section label="Examples">
 		<section label="Sticking to Adjacent Context" sticky collapsible dividing>
-			<example>
-				<html>
-					<p slot="description">Sticky content attaches itself to the viewport when it is passed, and stays fixed to the viewport until it collides with the bottom edge of its context. Additional static content can exist above sticky content without affecting its position.</p>
-					<ui-message slot="description" state="info" size="small">The context is the sticky's PARENT, here a stretched <code>&lt;ui-column&gt;</code> (Fomantic uses rails outside the segment, where this site keeps its own columns). Fomantic's <code>context</code> setting (any element) has no CSS equivalent, so put the sticky inside the element it belongs to.</ui-message>
-				</html>
+			<example description="Sticky content attaches itself to the viewport when it is passed, and stays fixed to the viewport until it collides with the bottom edge of its context. Additional static content can exist above sticky content without affecting its position.">
+				<message slot="description" state="info" size="small"><html>The context is the sticky's PARENT, here a stretched <code>&lt;ui-column&gt;</code> (Fomantic uses rails outside the segment, where this site keeps its own columns). Fomantic's <code>context</code> setting (any element) has no CSS equivalent, so put the sticky inside the element it belongs to.</html></message>
 				<segment>
 					<grid>
 						<column width="4" stretched>
@@ -70,7 +65,7 @@
 			</example>
 		</>
 
-		<section label="Pushing" sticky collapsible dividing>
+		<section label="Pushing" sticky="stack" collapsible dividing>
 			<example description="With `pushing` the viewport \"pushes\" the sticky content: it sticks to the top while scrolling down past it, and waits at the bottom edge (`bottom-offset` from it) while it is still below the fold.">
 				<segment>
 					<grid>
@@ -107,10 +102,9 @@
 
 		<!-- GAP I67:  the narrow column stacks the items, so each tiny image grows to the column width (fixed in source;  shows after the next site build). -->
 		<section label="Oversized Content" sticky collapsible dividing>
-			<example>
+			<example description="Sticky content that is larger than the viewport stays where the page puts it: a `position: sticky` box taller than the view scrolls with the page until its end is reached, then sticks.">
+				<message slot="description" size="small" class="site-not-ported"><html>Not ported: Fomantic's scrolling of oversized content against the scroll direction -- the browser's <code>position: sticky</code> does the sticking, with no scroll listener.</html></message>
 				<html>
-					<p slot="description">Sticky content that is larger than the viewport stays where the page puts it: a <code>position: sticky</code> box taller than the view scrolls with the page until its end is reached, then sticks.</p>
-					<ui-message slot="description" size="small" class="site-not-ported">Not ported: Fomantic's scrolling of oversized content against the scroll direction -- the browser's <code>position: sticky</code> does the sticking, with no scroll listener.</ui-message>
 					<ui-segment>
 						<ui-grid>
 							<ui-column width="4" stretched>

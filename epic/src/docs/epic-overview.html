@@ -75,7 +75,7 @@
             >.
           </p>
 
-          <ui-section id="1-example" label="1. Example" sticky collapsible dividing open="false">
+          <ui-section id="1-example" label="1. Example" sticky="stack" collapsible dividing open="false">
             <ui-icon slot="icon" name="eye"></ui-icon>
 
             <epic-overview id="overview" estimate="44h-56h in all, 3h left">
@@ -234,7 +234,7 @@
             </ui-section>
           </ui-section>
 
-          <ui-section id="2-markup" label="2. Markup" sticky collapsible dividing open="false">
+          <ui-section id="2-markup" label="2. Markup" sticky="stack" collapsible dividing open="false">
             <ui-icon slot="icon" name="code"></ui-icon>
             <p>
               From a real epic page (<a
@@ -270,10 +270,10 @@
             </ul>
           </ui-section>
 
-          <ui-section id="3-where-it-goes" label="3. Where it goes" sticky collapsible dividing open="false">
+          <ui-section id="3-where-it-goes" label="3. Where it goes" sticky="stack" collapsible dividing open="false">
             <ui-icon slot="icon" name="compass"></ui-icon>
 
-            <ui-section id="epic-overview-parents" label="Its parents" sticky collapsible dividing open="false">
+            <ui-section id="epic-overview-parents" label="Its parents" sticky="stack" collapsible dividing open="false">
               <ui-table celled padding="compact" appearance="striped" unstackable>
                 <table>
                   <thead>
@@ -300,7 +300,7 @@
               </ui-table>
             </ui-section>
 
-            <ui-section id="epic-overview-children" label="Its children" sticky collapsible dividing open="false">
+            <ui-section id="epic-overview-children" label="Its children" sticky="stack" collapsible dividing open="false">
               <p>
                 The summary, the prompt, then the sub-sections. Older docs held the summary and the prompt in slots
                 (<code>&lt;p slot="summary"&gt;</code>, <code>&lt;blockquote slot="prompt"&gt;</code>); they still draw
@@ -374,7 +374,7 @@
             </ui-section>
           </ui-section>
 
-          <ui-section id="4-attributes" label="4. Attributes" sticky collapsible dividing open="false">
+          <ui-section id="4-attributes" label="4. Attributes" sticky="stack" collapsible dividing open="false">
             <ui-icon slot="icon" name="table columns"></ui-icon>
 
             <ui-table celled padding="compact" appearance="striped" unstackable>
@@ -418,7 +418,7 @@
                 </tbody>
               </table>
             </ui-table>
-            <ui-section id="epic-overview-slots" label="Slots" sticky collapsible dividing open="false">
+            <ui-section id="epic-overview-slots" label="Slots" sticky="stack" collapsible dividing open="false">
               <p>Where its children show: a child goes in a slot by its <code>slot</code> attribute.</p>
               <ui-table celled padding="compact" appearance="striped" unstackable>
                 <table>
@@ -466,7 +466,7 @@
               </ui-table>
             </ui-section>
 
-            <ui-section id="epic-overview-parts" label="Parts" sticky collapsible dividing open="false">
+            <ui-section id="epic-overview-parts" label="Parts" sticky="stack" collapsible dividing open="false">
               <p>Pieces of what it draws, which a page's CSS can style from outside with <code>::part(name)</code>.</p>
               <ui-table celled padding="compact" appearance="striped" unstackable>
                 <table>
@@ -512,7 +512,7 @@
               </ui-table>
             </ui-section>
 
-            <ui-section id="epic-overview-states" label="States" sticky collapsible dividing open="false">
+            <ui-section id="epic-overview-states" label="States" sticky="stack" collapsible dividing open="false">
               <p>Custom states: CSS can match them with <code>epic-overview:state(name)</code>.</p>
               <ui-table celled padding="compact" appearance="striped" unstackable>
                 <table>
@@ -540,7 +540,7 @@
               </ui-table>
             </ui-section>
 
-            <ui-section id="epic-overview-events" label="Events" sticky collapsible dividing open="false">
+            <ui-section id="epic-overview-events" label="Events" sticky="stack" collapsible dividing open="false">
               <ui-table celled padding="compact" appearance="striped" unstackable>
                 <table>
                   <thead>
@@ -580,7 +580,7 @@
             </ui-section>
           </ui-section>
 
-          <ui-section id="5-how-it-looks" label="5. How it looks" sticky collapsible dividing open="false">
+          <ui-section id="5-how-it-looks" label="5. How it looks" sticky="stack" collapsible dividing open="false">
             <ui-icon slot="icon" name="palette"></ui-icon>
             <ul>
               <li>
@@ -613,7 +613,7 @@
             </ul>
           </ui-section>
 
-          <ui-section id="6-written-by" label="6. Written by" sticky collapsible dividing open="false">
+          <ui-section id="6-written-by" label="6. Written by" sticky="stack" collapsible dividing open="false">
             <ui-icon slot="icon" name="terminal"></ui-icon>
             <ul>
               <li>

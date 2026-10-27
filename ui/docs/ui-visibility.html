@@ -65,8 +65,8 @@
                 IS the code shown.  A richer description:  `<p slot="description">` (+ `<ui-message slot="description">`).
               - A gap:  an HTML comment `GAP I<n>:  ...` BEFORE the example (a comment inside it shows in its code).
             -->
-            <ui-section id="examples-usage" label="Usage" sticky collapsible dividing>
-              <ui-section id="examples-usage-how-to-use" label="How To Use" sticky collapsible dividing>
+            <ui-section id="examples-usage" label="Usage" sticky="stack" collapsible dividing>
+              <ui-section id="examples-usage-how-to-use" label="How To Use" sticky="stack" collapsible dividing>
                 <ui-example>
                   <p slot="description">
                     Visibility reports an element's position on screen: wrap the content in
@@ -188,8 +188,8 @@
               </ui-section>
             </ui-section>
 
-            <ui-section id="examples-callbacks" label="Callbacks" sticky collapsible dividing>
-              <ui-section id="examples-callbacks-standard-events" label="Standard Events" sticky collapsible dividing>
+            <ui-section id="examples-callbacks" label="Callbacks" sticky="stack" collapsible dividing>
+              <ui-section id="examples-callbacks-standard-events" label="Standard Events" sticky="stack" collapsible dividing>
                 <ui-example>
                   <p slot="description">
                     Events occur at the first check where their conditions turn true, each Fomantic's callback as a
@@ -265,7 +265,7 @@
                 them.</ui-message
               >
 
-              <ui-section id="examples-callbacks-reverse-events" label="Reverse Events" sticky collapsible dividing>
+              <ui-section id="examples-callbacks-reverse-events" label="Reverse Events" sticky="stack" collapsible dividing>
                 <ui-example>
                   <p slot="description">
                     Reverse events occur under the same conditions, but as the user scrolls back up the page:
@@ -284,7 +284,7 @@
               </ui-section>
             </ui-section>
 
-            <ui-section id="examples-examples" label="Examples" sticky collapsible dividing>
+            <ui-section id="examples-examples" label="Examples" sticky="stack" collapsible dividing>
               <!-- C19:  items stack inside the docs column (under 768px), so these are unstackable (a 125px image). -->
               <ui-section
                 id="examples-examples-lazy-loading-images"
@@ -470,7 +470,7 @@
                 >, on CSS <code>position: sticky</code> with no placeholder element.</ui-message
               >
 
-              <ui-section id="examples-examples-infinite-scroll" label="Infinite Scroll" sticky collapsible dividing>
+              <ui-section id="examples-examples-infinite-scroll" label="Infinite Scroll" sticky="stack" collapsible dividing>
                 <ui-example>
                   <p slot="description">
                     As an alternative to pagination, listen for <code>ui-bottom-in-view</code> with
@@ -580,7 +580,7 @@
 
           <ui-tab value="usage" label="Usage">
             <!-- USAGE:  how to use it (attributes in practice, events, framework snippets), keyboard, accessibility. -->
-            <ui-section id="usage-using-it" label="Using it" sticky collapsible dividing>
+            <ui-section id="usage-using-it" label="Using it" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   Visibility fires events when its content reaches a position on screen. Common uses:
@@ -601,7 +601,7 @@
               </ui-markdown>
             </ui-section>
 
-            <ui-section id="usage-events" label="Events" sticky collapsible dividing>
+            <ui-section id="usage-events" label="Events" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   Each event carries the calculations as `detail` (`topPassed`, `bottomVisible`, `percentagePassed`,
@@ -628,7 +628,7 @@
               </ui-code>
             </ui-section>
 
-            <ui-section id="usage-ui-observevisibility" label="UI.observeVisibility()" sticky collapsible dividing>
+            <ui-section id="usage-ui-observevisibility" label="UI.observeVisibility()" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   `UI.observeVisibility(element, options)` runs the same checks on any element, without wrapping it.
@@ -654,7 +654,7 @@
               </ui-code>
             </ui-section>
 
-            <ui-section id="usage-lazy-images" label="Lazy images" sticky collapsible dividing>
+            <ui-section id="usage-lazy-images" label="Lazy images" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   `type="image"` is Fomantic's lazy image loading: each `<img data-src>` (and `data-srcset`) inside
@@ -665,7 +665,7 @@
               </ui-markdown>
             </ui-section>
 
-            <ui-section id="usage-keyboard" label="Keyboard" sticky collapsible dividing>
+            <ui-section id="usage-keyboard" label="Keyboard" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   None of its own: it's a plain block around its content, which keeps its own keyboard behaviour.
@@ -673,7 +673,7 @@
               </ui-markdown>
             </ui-section>
 
-            <ui-section id="usage-accessibility" label="Accessibility" sticky collapsible dividing>
+            <ui-section id="usage-accessibility" label="Accessibility" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   - Visibility changes nothing for assistive technology: it watches, and its content reads as usual.
@@ -687,7 +687,7 @@
               </ui-markdown>
             </ui-section>
 
-            <ui-section id="usage-framework-usage" label="Framework usage" sticky collapsible dividing>
+            <ui-section id="usage-framework-usage" label="Framework usage" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   Listen for the events you need; in a component, call `UI.observeVisibility()` in a mount hook, and
@@ -722,30 +722,30 @@
 
           <ui-tab value="api" label="API">
             <!-- API:  generated from the vocabularies (`docs/__data/components.json5`);  nothing to write. -->
-            <ui-section id="api-attributes" label="Attributes" sticky collapsible dividing>
+            <ui-section id="api-attributes" label="Attributes" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-visibility" only="attributes"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-events" label="Events" sticky collapsible dividing>
+            <ui-section id="api-events" label="Events" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-visibility" only="events"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-slots" label="Slots" sticky collapsible dividing>
+            <ui-section id="api-slots" label="Slots" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-visibility" only="slots"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-parts" label="Parts" sticky collapsible dividing>
+            <ui-section id="api-parts" label="Parts" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-visibility" only="parts"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-states" label="States" sticky collapsible dividing>
+            <ui-section id="api-states" label="States" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-visibility" only="states"></ui-docs-api>
             </ui-section>
           </ui-tab>
 
           <ui-tab value="theming" label="Theming">
             <!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
-            <ui-section id="theming-tokens" label="Tokens" sticky collapsible dividing>
+            <ui-section id="theming-tokens" label="Tokens" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   A visibility draws nothing: it's a plain block around its content, with no tokens of its own. Style
@@ -768,7 +768,7 @@
               </ui-docs-tokens>
             </ui-section>
 
-            <ui-section id="theming-themes" label="Themes" sticky collapsible dividing>
+            <ui-section id="theming-themes" label="Themes" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   Visibility has no look to restyle.

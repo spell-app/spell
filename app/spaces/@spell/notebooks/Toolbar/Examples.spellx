@@ -5,18 +5,16 @@
 	</>
 	<toolbar-tab-bar showing="examples"/>
 	<section>
-		<html>
-			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-				<ui-item link="#types">Types</>
-				<ui-item link="#fitting-titles">Fitting titles</>
-			</>
+		<menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#types">Types</>
+			<item link="#fitting-titles">Fitting titles</>
 		</>
 	</>
 
 	<!--
 		EXAMPLES:  Fomantic's page, section by section, in its order (Types, Content, States, Variations,
 		Groups ...).  Rules, the class-grammar mappings, gaps:  epics/spell-ui-pages/PAGES.md.
-		- A section:  `<ui-section id="examples-types" label="Types" sticky collapsible dividing>` around
+		- A section:  `<ui-section id="examples-types" label="Types" sticky="stack" collapsible dividing>` around
 		  its examples;  ids spell out the nesting (`<tab>-<section>-<example>`, lowercase kebab of the headers).
 		- An example:  its own nested section (`label` = the example's name) around
 		  `<ui-example description="...">` and the live markup;  the markup IS the code shown.  A richer
@@ -28,7 +26,7 @@
 		  shows in its code).
 	-->
 	<section label="Types">
-		<section label="Toolbar" sticky collapsible dividing>
+		<section label="Toolbar" sticky="stack" collapsible dividing>
 			<example description="A menu whose items don't fit scrolls sideways:  `‹` and `›` show at its ends while there's more that way.">
 				<toolbar appearance="secondary" aria-label="Sections" style="max-width: 360px">
 					<item link="#types" selected>Types</item>
@@ -41,7 +39,7 @@
 			</example>
 		</>
 
-		<section label="Segmented" sticky collapsible dividing>
+		<section label="Segmented" sticky="stack" collapsible dividing>
 			<example description="The segmented appearance:  a segmented control that scrolls;  its chosen thumb slides as the choice moves.">
 				<toolbar appearance="segmented" aria-label="Views" style="max-width: 320px">
 					<item selected>Examples</item>
@@ -54,7 +52,7 @@
 			</example>
 		</>
 
-		<section label="Everything fits" sticky collapsible dividing>
+		<section label="Everything fits" sticky="stack" collapsible dividing>
 			<example description="When every item fits, no buttons show:  it's a plain menu.">
 				<toolbar appearance="secondary" aria-label="Short">
 					<item link="#one" selected>One</item>
@@ -64,7 +62,7 @@
 			</example>
 		</>
 
-		<section label="Top bar" sticky collapsible dividing>
+		<section label="Top bar" sticky="stack" collapsible dividing>
 			<example description="A bar's slots:  `icon` and `title` at the start, `center` taking the room left, `right` at the end.  A slot with nothing in it takes no room.">
 				<html>
 					<ui-toolbar appearance="secondary" aria-label="App">
@@ -81,7 +79,7 @@
 	</>
 
 	<section label="Fitting titles">
-		<section label="Shrinkable" sticky collapsible dividing>
+		<section label="Shrinkable" sticky="stack" collapsible dividing>
 			<example description="`shrinkable` fits the titles instead of scrolling:  drag the box's right edge narrower.  Whole, then the longest cut with `…`, then icons only, then one `…` button whose menu holds every item;  no `‹` / `›`.  The bell, an item with no words, stays at every width.">
 				<html>
 					<div style="resize: horizontal; overflow: hidden; box-sizing: border-box; width: 600px; max-width: 100%; min-width: 60px; padding: 4px; border: 1px dashed var(--ui-border-color)">

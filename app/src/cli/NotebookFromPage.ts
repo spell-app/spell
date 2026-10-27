@@ -12,10 +12,13 @@ import { SP } from "spell/parser/spell"
  *   - `TabBar.spellx`:  the tab bar every notebook draws, `<button-tab-bar showing="usage"/>`, its own tab selected
  *   - `__project.json5`
  * - Each example's markup in spellx's bare names (`<button>` is `<ui-button>`), as Avatar's notebooks are written:
- *   - a run of markup that holds one of the web's own tags (`<span>`, `<code>`, `<div>`), or a tag no pack has
+ *   - a run of markup that holds one of the web's own tags (`<span>`, `<div>`), or a tag no pack has
  *     (`<ui-docs-api>`), is an `<html>` block, written as the web writes it
+ *   - a bare element whose text holds the web's inline tags (`<code>`, `<a>`) stays bare, only its text an `<html>`
+ *     block:  the smallest one (epic `elemental-spell` P25)
+ *   - the section tabs under the tab bar:  `<menu>` and `<item>`
  *   - an example's `<p slot="description">` is its `description=`, its `<code>` backticked;
- *     beside other description markup (a `<ui-message>`) it stays slotted, in the `<html>` block
+ *     other description markup (a `<ui-message>`) stays slotted beside it
  *   - relative URLs (`images/...`) as the page server serves them, from the page's folder (`/components/ui/images/...`)
  * - Prose (`<ui-markdown>`) is a `<markdown>` block;  a code block (`<ui-code>`) a fenced one inside a `<markdown>`.
  * - Links to the page's own sections point into the notebook that holds them:
@@ -170,13 +173,11 @@ export class NotebookFromPage {
     const sections = childElements(tab.element).filter((element) => element.localName === SECTION)
     if (sections.length) {
       out.line(1, "<section>")
-      out.line(2, "<html>")
-      out.line(3, `<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">`)
+      out.line(2, `<menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">`)
       for (const section of sections) {
         const label = section.getAttribute("label") ?? ""
-        out.line(4, `<ui-item link="#${slugOf(label)}">${escapeText(label)}${CLOSER}`)
+        out.line(3, `<item link="#${slugOf(label)}">${escapeText(label)}${CLOSER}`)
       }
-      out.line(3, CLOSER)
       out.line(2, CLOSER)
       out.line(1, CLOSER)
     }
@@ -261,17 +262,16 @@ export class NotebookFromPage {
   /**
    * An example:  `<example description="...">`, its header its quoted name, its markup in bare names.
    * - A `<p slot="description">` of text and `<code>` is its `description=`;
-   *   beside other description markup, every description child stays, slotted, in an `<html>` block.
+   *   other description markup (a `<ui-message>`) stays, slotted, in bare names where it can be.
    */
   private writeExample(out: Writer, example: Element, indent: number, place: Place) {
     const children = childElements(example)
-    const describers = children.filter((child) => child.getAttribute("slot") === "description")
-    let description = example.getAttribute("description") ?? undefined
-    const plainDescription = describers.length > 0 && describers.every((child) => isPlainParagraph(child))
-    if (plainDescription) {
-      const texts = describers.map((child) => backtickedTextOf(child))
-      description = [description, ...texts].filter(Boolean).join("  ")
-    }
+    // its plain paragraphs (text and `<code>`) are its `description=`;  any other description markup stays, slotted
+    const plain = children.filter((child) => child.getAttribute("slot") === "description" && isPlainParagraph(child))
+    const description =
+      [example.getAttribute("description"), ...plain.map((child) => backtickedTextOf(child))]
+        .filter(Boolean)
+        .join("  ") || undefined
     const header = example.getAttribute("heading") ?? example.getAttribute("header")
     const heads = [
       "example",
@@ -288,7 +288,7 @@ export class NotebookFromPage {
       .flatMap((node) => templateContentsOf(node))
       .filter(
         (node) =>
-          !(plainDescription && describers.includes(node as Element)) &&
+          !plain.includes(node as Element) &&
           !(node.nodeType === TEXT && !node.textContent!.trim()) &&
           node.nodeType !== COMMENT
       ) as Element[]
@@ -360,6 +360,12 @@ export class NotebookFromPage {
       } else if (this.isBare(node)) {
         flushHtml()
         this.writeBare(out, node, indent, place)
+      } else if (this.hasBareText(node)) {
+        flushHtml()
+        out.line(
+          indent,
+          `${this.openTag(node)}<html>${this.htmlInnerOf(node, place)}${closerOf("html", place)}${closerOf(this.bareNameOf(node.localName)!, place)}`
+        )
       } else html.push(node)
     }
     flushHtml()
@@ -375,6 +381,32 @@ export class NotebookFromPage {
       if (node.nodeType === ELEMENT && !this.isBare(node as Element)) return false
     }
     return true
+  }
+
+  /**
+   * Is `element` bare itself, holding text with the web's own inline tags (`<code>`, `<a>`, `<b>`) and nothing
+   * else that can't be bare:  `<message size="small"><html>Set <code>--ui-primary</code> ...</html></message>`,
+   * the smallest `<html>` block.
+   */
+  private hasBareText(element: Element): boolean {
+    if (!this.bareNameOf(element.localName)) return false
+    for (const name of element.getAttributeNames()) if (/[{}[\]]/.test(element.getAttribute(name)!)) return false
+    const children = [...element.childNodes]
+    if (children.some((node) => node.nodeType === COMMENT)) return false
+    const hasText = children.some((node) => node.nodeType === TEXT && node.textContent!.trim())
+    const inline = (node: ChildNode) => node.nodeType !== ELEMENT || INLINE_TAGS.has((node as Element).localName)
+    return hasText && children.every(inline)
+  }
+
+  /** `element`'s children as the web writes them, on one line:  an `<html>` block's inside. */
+  private htmlInnerOf(element: Element, place: Place): string {
+    return [...element.childNodes]
+      .map((node) => {
+        if (node.nodeType === TEXT) return escapeText(node.textContent!.replace(/\s*\n\s*/g, " "))
+        return node.nodeType === ELEMENT ? this.htmlOf(node as Element, place) : ""
+      })
+      .join("")
+      .trim()
   }
 
   /** `element` in bare names:  its children a line each, or on its own line when it mixes text and elements. */
@@ -734,6 +766,9 @@ const URL_ATTRIBUTES = new Set(["src", "href", "link", "source"])
 
 /** Spell's own words for blocks in a drawing:  a Spell UI tag of the same bare name is written in full. */
 const SPELL_BLOCK_WORDS = new Set(["markdown", "html", "example", "css", "spell", "spellx"])
+
+/** The web's inline tags, which text in a bare element may hold, inside an `<html>` block (`hasBareText()`). */
+const INLINE_TAGS = new Set(["code", "a", "b", "strong", "em", "i", "kbd", "br", "span", "small", "mark", "sup", "sub"])
 
 /** The web's raw-text tags:  their text as written, never escaped (`writeRawText()`). */
 const RAW_TEXT_TAGS = new Set(["script", "style"])

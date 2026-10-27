@@ -55,8 +55,8 @@
               `src/components/ui-parts/examples/elements/`), then its attributes.  The Content parts page
               (`ui-header.html`) shows every part together.
             -->
-            <ui-section id="examples-owners" label="Owners" sticky collapsible dividing>
-              <ui-section id="examples-owners-comment" label="Comment" sticky collapsible dividing>
+            <ui-section id="examples-owners" label="Owners" sticky="stack" collapsible dividing>
+              <ui-section id="examples-owners-comment" label="Comment" sticky="stack" collapsible dividing>
                 <ui-example description="A comment's author, before its metadata.">
                   <ui-comments>
                     <ui-comment>
@@ -71,7 +71,7 @@
                 </ui-example>
               </ui-section>
 
-              <ui-section id="examples-owners-feed" label="Feed" sticky collapsible dividing>
+              <ui-section id="examples-owners-feed" label="Feed" sticky="stack" collapsible dividing>
                 <ui-example description="A feed event's user, inline in its summary.">
                   <ui-feed>
                     <ui-event>
@@ -84,8 +84,8 @@
               </ui-section>
             </ui-section>
 
-            <ui-section id="examples-variations" label="Variations" sticky collapsible dividing>
-              <ui-section id="examples-variations-link" label="Link" sticky collapsible dividing>
+            <ui-section id="examples-variations" label="Variations" sticky="stack" collapsible dividing>
+              <ui-section id="examples-variations-link" label="Link" sticky="stack" collapsible dividing>
                 <ui-example description="With `link`, an author is a real link;  without, plain text.">
                   <ui-comments>
                     <ui-comment>
@@ -107,7 +107,7 @@
           </ui-tab>
 
           <ui-tab value="usage" label="Usage">
-            <ui-section id="usage-using-it" label="Using it" sticky collapsible dividing>
+            <ui-section id="usage-using-it" label="Using it" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   `<ui-author>` names who wrote a comment or did a feed event (Fomantic's comment `author` and feed `user`).
@@ -118,7 +118,7 @@
               </ui-markdown>
             </ui-section>
 
-            <ui-section id="usage-owners" label="Owners" sticky collapsible dividing>
+            <ui-section id="usage-owners" label="Owners" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   `<ui-author>` finds its nearest owner and sets `:state(in-<owner>)` on itself; `UIParts.css` styles it by that
@@ -132,7 +132,7 @@
               </ui-markdown>
             </ui-section>
 
-            <ui-section id="usage-accessibility" label="Accessibility" sticky collapsible dividing>
+            <ui-section id="usage-accessibility" label="Accessibility" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   - With `link` it renders a real `<a>`: **Tab** reaches it, **Enter** follows it.
@@ -144,19 +144,19 @@
 
           <ui-tab value="api" label="API">
             <!-- API:  generated from the vocabularies (`docs/__data/components.json5`);  nothing to write. -->
-            <ui-section id="api-attributes" label="Attributes" sticky collapsible dividing>
+            <ui-section id="api-attributes" label="Attributes" sticky="stack" collapsible dividing>
               <ui-docs-api tag="ui-author" only="attributes"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-slots" label="Slots" sticky collapsible dividing>
+            <ui-section id="api-slots" label="Slots" sticky="stack" collapsible dividing>
               <ui-docs-api tag="ui-author" only="slots"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-parts" label="Parts" sticky collapsible dividing>
+            <ui-section id="api-parts" label="Parts" sticky="stack" collapsible dividing>
               <ui-docs-api tag="ui-author" only="parts"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-states" label="States" sticky collapsible dividing>
+            <ui-section id="api-states" label="States" sticky="stack" collapsible dividing>
               <ui-docs-api tag="ui-author" only="states"></ui-docs-api>
             </ui-section>
           </ui-tab>

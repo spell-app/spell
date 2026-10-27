@@ -5,18 +5,16 @@
 	</>
 	<action-tab-bar showing="examples"/>
 	<section>
-		<html>
-			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-				<ui-item link="#types">Types</>
-				<ui-item link="#states">States</>
-			</>
+		<menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#types">Types</>
+			<item link="#states">States</>
 		</>
 	</>
 
 	<!--
 		EXAMPLES:  Fomantic's page, section by section, in its order (Types, Content, States, Variations,
 		Groups ...).  Rules, the class-grammar mappings, gaps:  epics/spell-ui-pages/PAGES.md.
-		- A section:  `<ui-section id="examples-types" label="Types" sticky collapsible dividing>` around
+		- A section:  `<ui-section id="examples-types" label="Types" sticky="stack" collapsible dividing>` around
 		  its examples;  ids spell out the nesting (`<tab>-<section>-<example>`, lowercase kebab of the headers).
 		- An example:  its own nested section (`label` = the example's name) around
 		  `<ui-example description="...">` and the live markup;  the markup IS the code shown.  A richer
@@ -28,7 +26,7 @@
 		  shows in its code).
 	-->
 	<section label="Types">
-		<section label="Menu" sticky collapsible dividing>
+		<section label="Menu" sticky="stack" collapsible dividing>
 			<example description="A menu of actions:  each its title, then its shortcut's keys.  `mod` is ⌘ on a Mac, Ctrl elsewhere.">
 				<menu direction="vertical" aria-label="Game">
 					<action icon="play" shortcut="mod+N">New game</action>
@@ -39,7 +37,7 @@
 			</example>
 		</>
 
-		<section label="Toolbar" sticky collapsible dividing>
+		<section label="Toolbar" sticky="stack" collapsible dividing>
 			<example description="The same actions as a toolbar's buttons.">
 				<toolbar aria-label="Game">
 					<action icon="play" shortcut="mod+N">New game</action>
@@ -51,7 +49,7 @@
 	</>
 
 	<section label="States">
-		<section label="Disabled and selected" sticky collapsible dividing>
+		<section label="Disabled and selected" sticky="stack" collapsible dividing>
 			<example description="Greyed while it can't be done (`disabled`, or its action not enabled);  ticked while it's on (`selected`).">
 				<menu direction="vertical" aria-label="View">
 					<action shortcut="mod+1" selected>Show the grid</action>

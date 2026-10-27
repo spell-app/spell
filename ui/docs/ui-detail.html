@@ -55,8 +55,8 @@
               `src/components/ui-parts/examples/elements/`), then its attributes.  The Content parts page
               (`ui-header.html`) shows every part together.
             -->
-            <ui-section id="examples-owners" label="Owners" sticky collapsible dividing>
-              <ui-section id="examples-owners-label" label="Label" sticky collapsible dividing>
+            <ui-section id="examples-owners" label="Owners" sticky="stack" collapsible dividing>
+              <ui-section id="examples-owners-label" label="Label" sticky="stack" collapsible dividing>
                 <ui-example description="A label's detail:  a dimmer second value after its text.">
                   <ui-label icon="mail">Mail<ui-detail>23</ui-detail></ui-label>
                   <ui-label>Dogs<ui-detail>214</ui-detail></ui-label>
@@ -65,8 +65,8 @@
               </ui-section>
             </ui-section>
 
-            <ui-section id="examples-variations" label="Variations" sticky collapsible dividing>
-              <ui-section id="examples-variations-link" label="Link" sticky collapsible dividing>
+            <ui-section id="examples-variations" label="Variations" sticky="stack" collapsible dividing>
+              <ui-section id="examples-variations-link" label="Link" sticky="stack" collapsible dividing>
                 <ui-example description="With `link`, the detail is a link of its own.">
                   <ui-label color="teal">Tag<ui-detail link="#tags">See all</ui-detail></ui-label>
                 </ui-example>
@@ -75,7 +75,7 @@
           </ui-tab>
 
           <ui-tab value="usage" label="Usage">
-            <ui-section id="usage-using-it" label="Using it" sticky collapsible dividing>
+            <ui-section id="usage-using-it" label="Using it" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   `<ui-detail>` is a label's dimmer second value, such as a count: Fomantic's `.detail` inside a `ui label`.
@@ -86,7 +86,7 @@
               </ui-markdown>
             </ui-section>
 
-            <ui-section id="usage-owners" label="Owners" sticky collapsible dividing>
+            <ui-section id="usage-owners" label="Owners" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   `<ui-detail>` finds its nearest owner and sets `:state(in-<owner>)` on itself; `UIParts.css` styles it by that
@@ -99,7 +99,7 @@
               </ui-markdown>
             </ui-section>
 
-            <ui-section id="usage-accessibility" label="Accessibility" sticky collapsible dividing>
+            <ui-section id="usage-accessibility" label="Accessibility" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   - Read together with the label's text ("Dogs 214"): make the pair make sense out loud, or give the label an
@@ -112,19 +112,19 @@
 
           <ui-tab value="api" label="API">
             <!-- API:  generated from the vocabularies (`docs/__data/components.json5`);  nothing to write. -->
-            <ui-section id="api-attributes" label="Attributes" sticky collapsible dividing>
+            <ui-section id="api-attributes" label="Attributes" sticky="stack" collapsible dividing>
               <ui-docs-api tag="ui-detail" only="attributes"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-slots" label="Slots" sticky collapsible dividing>
+            <ui-section id="api-slots" label="Slots" sticky="stack" collapsible dividing>
               <ui-docs-api tag="ui-detail" only="slots"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-parts" label="Parts" sticky collapsible dividing>
+            <ui-section id="api-parts" label="Parts" sticky="stack" collapsible dividing>
               <ui-docs-api tag="ui-detail" only="parts"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-states" label="States" sticky collapsible dividing>
+            <ui-section id="api-states" label="States" sticky="stack" collapsible dividing>
               <ui-docs-api tag="ui-detail" only="states"></ui-docs-api>
             </ui-section>
           </ui-tab>

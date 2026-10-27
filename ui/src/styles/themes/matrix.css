@@ -7,34 +7,36 @@
 
 @layer ui.theme {
   :root {
-    --matrix-page: light-dark(#e8eeeb, #071013);
-    --matrix-panel: light-dark(#fbfdfc, #111f22);
-    --matrix-raised: light-dark(#f1f6f4, #172a2d);
-    --matrix-inset: light-dark(#e2eae7, #0a1417);
-    --matrix-border: light-dark(#cbd8d4, #1c2f31);
-    --matrix-border-strong: light-dark(#afc1bc, #2a4043);
-    --matrix-accent: light-dark(#0b7552, #7ce5bd);
+    --matrix-page: light-dark(#e9eeec, #0a1013);
+    --matrix-panel: light-dark(#f2f6f4, #0d1518);
+    --matrix-raised: light-dark(#fafcfb, #172124);
+    --matrix-inset: light-dark(#e6ecea, #0b1215);
+    --matrix-field: light-dark(#f8fbfa, #0d1316);
+    --matrix-border: light-dark(#d3ddd9, #1b2528);
+    --matrix-border-strong: light-dark(#bccac5, #283437);
+    --matrix-accent: light-dark(#0b7552, #a3e1c0);
     --matrix-on-accent: light-dark(#ffffff, #03231a);
-    --matrix-accent-wash: light-dark(#0b75521a, #7ce5bd1f);
-    --matrix-accent-text: light-dark(#0a6648, #8ff0ca);
-    --matrix-amber: light-dark(#e8a334, #ffc56d);
+    --matrix-accent-wash: light-dark(#0b75521a, #a3e1c01f);
+    --matrix-accent-text: light-dark(#0a6648, #a3e1c0);
+    --matrix-amber: light-dark(#e8a334, #f2c778);
     --matrix-on-amber: #2a1a00;
-    --matrix-coral: light-dark(#b5392b, #ff8d80);
+    --matrix-coral: light-dark(#b5392b, #e79583);
+    --matrix-glow: radial-gradient(27% 300px at 73% 60px, light-dark(#ffffffb3, #a3e1c00d), transparent);
     --ui-font-size: 15px;
     --ui-font-family:
       system-ui, -apple-system, "Segoe UI", "Noto Sans", Cantarell, Ubuntu, "Helvetica Neue", Arial, sans-serif,
       "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji";
-    --ui-font-family-heading: var(--ui-font-family);
+    --ui-font-family-heading: "Inter Matrix", var(--ui-font-family);
     --ui-font-family-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
     --ui-radius-s: 6px;
     --ui-radius-m: 8px;
     --ui-radius-l: 14px;
     --ui-ink-on-light: #0c1916;
-    --ui-ink-on-dark: #e9f0ed;
-    --ui-text-color: light-dark(#1e2e2a, #c3d0cc);
-    --ui-text-dark: light-dark(#07110e, #f4f8f6);
-    --ui-text-muted: light-dark(#4c5f5a, #90a29e);
-    --ui-text-light: light-dark(#5c6e69, #7e908c);
+    --ui-ink-on-dark: #ebf0ed;
+    --ui-text-color: light-dark(#4c5f5a, #95a19e);
+    --ui-text-dark: light-dark(#07110e, #ebf0ed);
+    --ui-text-muted: light-dark(#4c5f5a, #95a19e);
+    --ui-text-light: light-dark(#56685f, #808c8a);
     --ui-background: var(--matrix-page);
     --ui-surface: var(--matrix-panel);
     --ui-surface-muted: var(--matrix-inset);
@@ -84,14 +86,14 @@
     --ui-negative-background: light-dark(#b5392b14, #ff8d801a);
     --ui-shadow-ink: light-dark(#0c1f1a, #000000);
     --ui-shadow-subtle: 0 1px 2px light-dark(#0c1f1a0f, #00000066);
-    --ui-shadow-raised: 0 0 0 1px var(--matrix-border), 0 1px 3px light-dark(#0c1f1a0d, #00000000);
+    --ui-shadow-raised: 0 0 0 1px var(--matrix-border), 0 6px 24px light-dark(#0c1f1a0f, #00000040);
     --ui-shadow-floating: 0 0 0 1px var(--ui-border-color-strong), 0 10px 30px light-dark(#0c1f1a24, #000000a6);
     --ui-shadow-floating-hover: 0 0 0 1px var(--ui-border-color-strong), 0 14px 40px light-dark(#0c1f1a2e, #000000b3);
     --ui-shadow-overlay: var(--ui-shadow-floating-hover);
     --ui-button-radius: var(--ui-radius-m);
     --ui-button-font-weight: 500;
     --ui-input-radius: var(--ui-radius-m);
-    --ui-input-background: var(--matrix-inset);
+    --ui-input-background: var(--matrix-field);
     --ui-input-border-color: var(--matrix-border);
     --ui-dropdown-radius: var(--ui-radius-m);
     --ui-select-background: var(--ui-input-background);
@@ -99,11 +101,11 @@
     --ui-menu-radius: var(--ui-radius-m);
     --ui-menu-active-background: var(--matrix-accent-wash);
     --ui-menu-active-color: var(--matrix-accent-text);
-    --ui-menu-segmented-background: var(--matrix-inset);
+    --ui-menu-segmented-background: light-dark(#e3eae7, #0a1114);
     --ui-menu-segmented-radius: var(--ui-radius-m);
     --ui-menu-segmented-padding: 3px;
     --ui-menu-segmented-item-radius: calc(var(--ui-radius-m) - 3px);
-    --ui-menu-segmented-active-background: var(--matrix-raised);
+    --ui-menu-segmented-active-background: light-dark(#ffffff, #1c272a);
     --ui-menu-segmented-active-color: var(--ui-text-dark);
     --ui-menu-segmented-divider: transparent;
     --ui-card-radius: var(--ui-radius-l);
@@ -118,8 +120,9 @@
     --ui-label-radius: var(--ui-radius-s);
     --ui-header-font-weight: var(--ui-font-weight-bold);
     --ui-header-sub-color: var(--ui-text-muted);
+    --ui-header-sub-heading-ratio: 0.8;
     --ui-table-header-background: transparent;
-    --ui-table-header-color: var(--ui-text-muted);
+    --ui-table-header-color: var(--ui-text-light);
     --ui-statistic-label-color: var(--ui-text-muted);
     --ui-bar-panel-background: var(--matrix-panel);
     --ui-docs-nav-background: var(--matrix-panel);

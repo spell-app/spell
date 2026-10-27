@@ -5,20 +5,18 @@
 	</>
 	<example-tab-bar showing="examples"/>
 	<section>
-		<html>
-			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-				<ui-item link="#types">Types</>
-				<ui-item link="#content">Content</>
-				<ui-item link="#states">States</>
-				<ui-item link="#variations">Variations</>
-			</>
+		<menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#types">Types</>
+			<item link="#content">Content</>
+			<item link="#states">States</>
+			<item link="#variations">Variations</>
 		</>
 	</>
 
 	<!--
 		EXAMPLES:  Fomantic's page, section by section, in its order (Types, Content, States, Variations,
 		Groups ...).  Rules, the class-grammar mappings, gaps:  epics/spell-ui-pages/PAGES.md.
-		- A section:  `<ui-section id="examples-types" label="Types" sticky collapsible dividing>` around
+		- A section:  `<ui-section id="examples-types" label="Types" sticky="stack" collapsible dividing>` around
 		  its examples;  ids spell out the nesting (`<tab>-<section>-<example>`, lowercase kebab of the headers).
 		- An example:  its own nested section (`label` = the example's name) around
 		  `<ui-example description="...">` and the live markup;  the markup IS the code shown.  A richer
@@ -30,7 +28,7 @@
 		  shows in its code).
 	-->
 	<section label="Types">
-		<section label="Example" sticky collapsible dividing>
+		<section label="Example" sticky="stack" collapsible dividing>
 			<example description="An example shows its children live, under its `heading` and `description`;  the `code` button shows the same markup as code, and hides it.">
 				<html>
 					<ui-example heading="Emphasis" description="A button can show different levels of emphasis.">
@@ -43,7 +41,7 @@
 			</example>
 		</>
 
-		<section label="Template" sticky collapsible dividing>
+		<section label="Template" sticky="stack" collapsible dividing>
 			<example description="A `<template>` child:  stamped out live, and its markup shown EXACTLY as written, comments and spacing kept.">
 				<html>
 					<ui-example heading="Labels" description="The code shows the template's markup, as it was typed.">
@@ -58,7 +56,7 @@
 	</>
 
 	<section label="Content">
-		<section label="Description" sticky collapsible dividing>
+		<section label="Description" sticky="stack" collapsible dividing>
 			<example description="`slot=\"description\"`:  a richer description than the attribute's one sentence, with links and several paragraphs.">
 				<html>
 					<ui-example heading="Messages">
@@ -69,7 +67,7 @@
 			</example>
 		</>
 
-		<section label="Source" sticky collapsible dividing>
+		<section label="Source" sticky="stack" collapsible dividing>
 			<example description="`slot=\"source\"`:  what the code pane shows in place of the markup, e.g. an editor of the example's code.">
 				<html>
 					<ui-example heading="Hello" code>
@@ -82,7 +80,7 @@
 	</>
 
 	<section label="States">
-		<section label="Code open" sticky collapsible dividing>
+		<section label="Code open" sticky="stack" collapsible dividing>
 			<example description="`code`:  the code pane is open from the start;  the button closes it, and `code` follows.">
 				<html>
 					<ui-example heading="Toggle" code>
@@ -94,7 +92,7 @@
 	</>
 
 	<section label="Variations">
-		<section label="Bare" sticky collapsible dividing>
+		<section label="Bare" sticky="stack" collapsible dividing>
 			<example description="`bare`:  no frame around the live example and its code, even while the code is open.">
 				<html>
 					<ui-example heading="Bare" bare>
@@ -104,7 +102,7 @@
 			</example>
 		</>
 
-		<section label="Variation" sticky collapsible dividing>
+		<section label="Variation" sticky="stack" collapsible dividing>
 			<example description="`variation`:  a smaller heading and less room around it, for a run of small examples under one heading.">
 				<html>
 					<ui-example heading="Small" variation>
@@ -117,7 +115,7 @@
 			</example>
 		</>
 
-		<section label="Level" sticky collapsible dividing>
+		<section label="Level" sticky="stack" collapsible dividing>
 			<example description="`level`:  the heading's level, `1` ... `6`;  `4` by default, under the page's level 2 sections.">
 				<html>
 					<ui-example heading="A level 3 example" level="3">

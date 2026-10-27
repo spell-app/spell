@@ -5,17 +5,15 @@
 	</>
 	<audio-tab-bar showing="examples"/>
 	<section>
-		<html>
-			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-				<ui-item link="#types">Types</>
-			</>
+		<menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#types">Types</>
 		</>
 	</>
 
 	<!--
 		EXAMPLES:  Fomantic's page, section by section, in its order (Types, Content, States, Variations,
 		Groups ...).  Rules, the class-grammar mappings, gaps:  epics/spell-ui-pages/PAGES.md.
-		- A section:  `<ui-section id="examples-types" label="Types" sticky collapsible dividing>` around
+		- A section:  `<ui-section id="examples-types" label="Types" sticky="stack" collapsible dividing>` around
 		  its examples;  ids spell out the nesting (`<tab>-<section>-<example>`, lowercase kebab of the headers).
 		- An example:  its own nested section (`label` = the example's name) around
 		  `<ui-example description="...">` and the live markup;  the markup IS the code shown.  A richer
@@ -27,13 +25,13 @@
 		  shows in its code).
 	-->
 	<section label="Types">
-		<section label="Audio" sticky collapsible dividing>
+		<section label="Audio" sticky="stack" collapsible dividing>
 			<example description="A sound file in the browser's own player (`controls`).">
 				<audio src="/components/ui/examples/media/chime.wav" controls label="A chime"/>
 			</example>
 		</>
 
-		<section label="A sound the page plays" sticky collapsible dividing>
+		<section label="A sound the page plays" sticky="stack" collapsible dividing>
 			<example description="Without `controls`, nothing shows:  the page plays it, here from a button's click (a game's sounds).">
 				<audio id="chime" src="/components/ui/examples/media/chime.wav"/>
 				<button icon="bell" onclick="document.getElementById('chime').play()">Ring</button>

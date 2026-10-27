@@ -6,11 +6,9 @@
 	</>
 	<code-tab-bar showing="examples"/>
 	<section>
-		<html>
-			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-				<ui-item link="#types">Types</>
-				<ui-item link="#variations">Variations</>
-			</>
+		<menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#types">Types</>
+			<item link="#variations">Variations</>
 		</>
 	</>
 
@@ -19,13 +17,13 @@
 		example.  Files shown:  `site/examples/` (`../examples/sample.json`).
 	-->
 	<section label="Types">
-		<section label="Code" sticky collapsible dividing>
+		<section label="Code" sticky="stack" collapsible dividing>
 			<example description="Code colours its own text as `language`:  any highlight.js name or alias (`ts`, `html`, `css`, `json`, `bash` ...).">
 				<code language="ts">const greeting: string = "hello"</code>
 			</example>
 		</>
 
-		<section label="Markup" sticky collapsible dividing>
+		<section label="Markup" sticky="stack" collapsible dividing>
 			<example description="Code with `<` or `&` goes in a `<script type=\"text/plain\">` child:  its text is taken exactly, then dedented.">
 				<html>
 					<ui-code language="html">
@@ -38,7 +36,7 @@
 			</example>
 		</>
 
-		<section label="From a file" sticky collapsible dividing>
+		<section label="From a file" sticky="stack" collapsible dividing>
 			<example description="`source` shows a file of this site, fetched when `load` says.  Without `language`, the language is guessed among the common ones;  `detectedLanguage` says which.">
 				<code source="/components/ui/examples/sample.json"/>
 			</example>
@@ -46,13 +44,13 @@
 	</>
 
 	<section label="Variations">
-		<section label="Line numbers" sticky collapsible dividing>
+		<section label="Line numbers" sticky="stack" collapsible dividing>
 			<example description="`line-numbers` numbers the lines, from `start`.">
 				<code language="json" source="/components/ui/examples/sample.json" line-numbers start="10"/>
 			</example>
 		</>
 
-		<section label="Wrapping" sticky collapsible dividing>
+		<section label="Wrapping" sticky="stack" collapsible dividing>
 			<example description="`wrap` wraps long lines;  by default they scroll.">
 				<html>
 					<ui-code language="bash" wrap>
@@ -72,7 +70,7 @@
 			</example>
 		</>
 
-		<section label="Copy button" sticky collapsible dividing>
+		<section label="Copy button" sticky="stack" collapsible dividing>
 			<example description="`copy` adds a button that copies the code.">
 				<code language="bash" copy>yarn add spell-ui</code>
 			</example>

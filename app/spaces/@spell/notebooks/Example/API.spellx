@@ -5,15 +5,13 @@
 	</>
 	<example-tab-bar showing="api"/>
 	<section>
-		<html>
-			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-				<ui-item link="#attributes">Attributes</>
-				<ui-item link="#events">Events</>
-				<ui-item link="#slots">Slots</>
-				<ui-item link="#parts">Parts</>
-				<ui-item link="#states">States</>
-				<ui-item link="#texts">Texts</>
-			</>
+		<menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#attributes">Attributes</>
+			<item link="#events">Events</>
+			<item link="#slots">Slots</>
+			<item link="#parts">Parts</>
+			<item link="#states">States</>
+			<item link="#texts">Texts</>
 		</>
 	</>
 

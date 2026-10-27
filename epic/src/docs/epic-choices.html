@@ -76,7 +76,7 @@
             >.
           </p>
 
-          <ui-section id="1-example" label="1. Example" sticky collapsible dividing open="false">
+          <ui-section id="1-example" label="1. Example" sticky="stack" collapsible dividing open="false">
             <ui-icon slot="icon" name="eye"></ui-icon>
             <p>Live: the real element, drawn by the epics pack this page loads.</p>
             <ul>
@@ -137,7 +137,7 @@
             </epic-item>
           </ui-section>
 
-          <ui-section id="2-markup" label="2. Markup" sticky collapsible dividing open="false">
+          <ui-section id="2-markup" label="2. Markup" sticky="stack" collapsible dividing open="false">
             <ui-icon slot="icon" name="code"></ui-icon>
             <p>
               Q13 of the <code>wwod</code> epic, answered (<a
@@ -163,7 +163,7 @@
             </ui-accordion>
           </ui-section>
 
-          <ui-section id="3-where-it-goes" label="3. Where it goes" sticky collapsible dividing open="false">
+          <ui-section id="3-where-it-goes" label="3. Where it goes" sticky="stack" collapsible dividing open="false">
             <ui-icon slot="icon" name="layer group"></ui-icon>
             <p><b>Its parents:</b></p>
             <p>
@@ -222,7 +222,7 @@
             </ui-table>
           </ui-section>
 
-          <ui-section id="4-attributes" label="4. Attributes" sticky collapsible dividing open="false"
+          <ui-section id="4-attributes" label="4. Attributes" sticky="stack" collapsible dividing open="false"
             ><ui-icon slot="icon" name="table columns"></ui-icon>
             <ui-table celled padding="compact" appearance="striped" unstackable
               ><table>
@@ -243,7 +243,7 @@
                   </tr>
                 </tbody></table
             ></ui-table>
-            <ui-section id="epic-choices-slots" label="Slots" sticky collapsible dividing open="false"
+            <ui-section id="epic-choices-slots" label="Slots" sticky="stack" collapsible dividing open="false"
               ><p>
                 A slot is a place in the drawing that a child goes to: a child with <code>slot="name"</code> goes to
                 that name's place, every other child to the default one (shown as <i>default</i>).
@@ -265,7 +265,7 @@
                 </table></ui-table
               ></ui-section
             >
-            <ui-section id="epic-choices-parts" label="Parts" sticky collapsible dividing open="false"
+            <ui-section id="epic-choices-parts" label="Parts" sticky="stack" collapsible dividing open="false"
               ><p>
                 A part is a piece of what the element draws in its shadow root (its own hidden markup), named so a
                 stylesheet can reach it: <code>epic-choices::part(base)</code>.
@@ -302,7 +302,7 @@
                 </table></ui-table
               ></ui-section
             >
-            <ui-section id="epic-choices-states" label="States" sticky collapsible dividing open="false"
+            <ui-section id="epic-choices-states" label="States" sticky="stack" collapsible dividing open="false"
               ><p>
                 A state is a word the element sets on itself while something is true, for styling:
                 <code>epic-choices:state(answered)</code>. Never written in the file.
@@ -338,7 +338,7 @@
               ></ui-section
             >
           </ui-section>
-          <ui-section id="5-how-it-looks" label="5. How it looks" sticky collapsible dividing open="false">
+          <ui-section id="5-how-it-looks" label="5. How it looks" sticky="stack" collapsible dividing open="false">
             <ui-icon slot="icon" name="palette"></ui-icon>
             <p>
               The colours mean the same on every doc page: the whole scheme is on
@@ -381,7 +381,7 @@
             </ul>
           </ui-section>
 
-          <ui-section id="6-written-by" label="6. Written by" sticky collapsible dividing open="false">
+          <ui-section id="6-written-by" label="6. Written by" sticky="stack" collapsible dividing open="false">
             <ui-icon slot="icon" name="terminal"></ui-icon>
             <ul>
               <li>

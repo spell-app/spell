@@ -53,7 +53,7 @@
             <!--
               EXAMPLES:  Fomantic's page, section by section, in its order (Types, Content, States, Variations,
               Groups ...).  Rules, the class-grammar mappings, gaps:  epics/spell-ui-pages/PAGES.md.
-              - A section:  `<ui-section id="examples-types" label="Types" sticky collapsible dividing>` around
+              - A section:  `<ui-section id="examples-types" label="Types" sticky="stack" collapsible dividing>` around
                 its examples;  ids spell out the nesting (`<tab>-<section>-<example>`, lowercase kebab of the headers).
               - An example:  its own nested section (`label` = the example's name) around
                 `<ui-example description="...">` and the live markup;  the markup IS the code shown.  A richer
@@ -64,13 +64,13 @@
               - A gap:  an HTML comment `GAP I<n>:  ...` BEFORE the example's section (a comment inside the example
                 shows in its code).
             -->
-            <ui-section id="examples-types" label="Types" sticky collapsible dividing>
-              <ui-section id="examples-types-keys" label="Keys" sticky collapsible dividing>
+            <ui-section id="examples-types" label="Types" sticky="stack" collapsible dividing>
+              <ui-section id="examples-types-keys" label="Keys" sticky="stack" collapsible dividing>
                 <ui-example description="`shortcut`, the keys joined by `+`.  `mod` is ⌘ on a Mac and Ctrl elsewhere:  this page shows the keys of the keyboard you're reading it on.">
                   <p>Save with <ui-keys shortcut="mod+S"></ui-keys>, undo with <ui-keys shortcut="mod+Z"></ui-keys>.</p>
                 </ui-example>
               </ui-section>
-              <ui-section id="examples-types-on-a-mac-and-elsewhere" label="On a Mac, and elsewhere" sticky collapsible dividing>
+              <ui-section id="examples-types-on-a-mac-and-elsewhere" label="On a Mac, and elsewhere" sticky="stack" collapsible dividing>
                 <ui-example description="`platform=&quot;apple&quot;` or `&quot;other&quot;` draws one keyboard's keys whatever the reader has.">
                   <p>
                     <ui-keys shortcut="shift+mod+P" platform="apple"></ui-keys> on a Mac,
@@ -78,12 +78,12 @@
                   </p>
                 </ui-example>
               </ui-section>
-              <ui-section id="examples-types-two-shortcuts" label="Two shortcuts" sticky collapsible dividing>
+              <ui-section id="examples-types-two-shortcuts" label="Two shortcuts" sticky="stack" collapsible dividing>
                 <ui-example description="Two shortcuts, a space apart, draw both.">
                   <p>Redo with <ui-keys shortcut="shift+mod+Z mod+Y"></ui-keys>.</p>
                 </ui-example>
               </ui-section>
-              <ui-section id="examples-types-named-keys" label="Named keys" sticky collapsible dividing>
+              <ui-section id="examples-types-named-keys" label="Named keys" sticky="stack" collapsible dividing>
                 <ui-example description="Arrows, Enter, Escape, Tab, Backspace, Delete and Space have caps of their own.">
                   <p>
                     <ui-keys shortcut="up"></ui-keys> <ui-keys shortcut="down"></ui-keys> to move,
@@ -96,7 +96,7 @@
 
           <ui-tab value="usage" label="Usage">
             <!-- USAGE:  how to use it (attributes in practice, events, framework snippets), keyboard, accessibility. -->
-            <ui-section id="usage-using-it" label="Using it" sticky collapsible dividing>
+            <ui-section id="usage-using-it" label="Using it" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   `<ui-keys>` draws a keyboard shortcut as key caps, the way the reader's own keyboard writes it.
@@ -111,7 +111,7 @@
                 </script>
               </ui-markdown>
             </ui-section>
-            <ui-section id="usage-accessibility" label="Accessibility" sticky collapsible dividing>
+            <ui-section id="usage-accessibility" label="Accessibility" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   Screen readers hear words, not symbols:  `<ui-keys shortcut="mod+S">` is read as "Command S" on a Mac,
@@ -123,19 +123,19 @@
 
           <ui-tab value="api" label="API">
             <!-- API:  generated from the vocabularies (`site/_data/components.json5`);  nothing to write. -->
-            <ui-section id="api-attributes" label="Attributes" sticky collapsible dividing>
+            <ui-section id="api-attributes" label="Attributes" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-keys" only="attributes"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-parts" label="Parts" sticky collapsible dividing>
+            <ui-section id="api-parts" label="Parts" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-keys" only="parts"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-states" label="States" sticky collapsible dividing>
+            <ui-section id="api-states" label="States" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-keys" only="states"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-texts" label="Texts" sticky collapsible dividing>
+            <ui-section id="api-texts" label="Texts" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-keys" only="texts"></ui-docs-api>
             </ui-section>
           </ui-tab>

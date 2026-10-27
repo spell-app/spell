@@ -52,7 +52,7 @@
             <!--
               EXAMPLES:  Fomantic's page, section by section, in its order (Types, Content, States, Variations,
               Groups ...).  Rules, the class-grammar mappings, gaps:  epics/spell-ui-pages/PAGES.md.
-              - A section:  `<ui-section id="examples-types" label="Types" sticky collapsible dividing>` around
+              - A section:  `<ui-section id="examples-types" label="Types" sticky="stack" collapsible dividing>` around
                 its examples;  ids spell out the nesting (`<tab>-<section>-<example>`, lowercase kebab of the headers).
               - An example:  its own nested section (`label` = the example's name) around
                 `<ui-example description="...">` and the live markup;  the markup IS the code shown.  A richer
@@ -63,8 +63,8 @@
               - A gap:  an HTML comment `GAP I<n>:  ...` BEFORE the example's section (a comment inside the example
                 shows in its code).
             -->
-            <ui-section id="examples-types" label="Types" sticky collapsible dividing>
-              <ui-section id="examples-types-zoom" label="Zoom" sticky collapsible dividing>
+            <ui-section id="examples-types" label="Types" sticky="stack" collapsible dividing>
+              <ui-section id="examples-types-zoom" label="Zoom" sticky="stack" collapsible dividing>
                 <ui-example description="Round any content:  shown at half size, laid out as it is full size.  A click (or Enter) shows it full size, over the page;  Escape, the backdrop or the close button shut it.">
                   <ui-zoom max-width="360px">
                     <ui-segment>
@@ -75,21 +75,21 @@
                   </ui-zoom>
                 </ui-example>
               </ui-section>
-              <ui-section id="examples-types-screenshot" label="Screenshot" sticky collapsible dividing>
+              <ui-section id="examples-types-screenshot" label="Screenshot" sticky="stack" collapsible dividing>
                 <ui-example description="A plain `&lt;img&gt;` inside it:  a screenshot shown at a third of its size, then full size.">
                   <ui-zoom shrink="33%">
                     <img src="images/hello-light.png" alt="Hello, in the light theme" />
                   </ui-zoom>
                 </ui-example>
               </ui-section>
-              <ui-section id="examples-types-image" label="Image" sticky collapsible dividing>
+              <ui-section id="examples-types-image" label="Image" sticky="stack" collapsible dividing>
                 <ui-example description="`&lt;ui-image zoom&gt;`:  the image itself is the button, and opens in the page's zoom, its alt text under it.">
                   <ui-image zoom src="images/hello-light.png" alt="Hello, in the light theme" style="width: 240px"></ui-image>
                 </ui-example>
               </ui-section>
             </ui-section>
-            <ui-section id="examples-variations" label="Variations" sticky collapsible dividing>
-              <ui-section id="examples-variations-shrink" label="Shrink" sticky collapsible dividing>
+            <ui-section id="examples-variations" label="Variations" sticky="stack" collapsible dividing>
+              <ui-section id="examples-variations-shrink" label="Shrink" sticky="stack" collapsible dividing>
                 <ui-example description="`shrink`:  how big the content is in the page, as a percentage of its full size;  `50%` by default.">
                   <ui-stack direction="horizontal" align="start">
                     <ui-zoom shrink="25%">
@@ -101,7 +101,7 @@
                   </ui-stack>
                 </ui-example>
               </ui-section>
-              <ui-section id="examples-variations-cut-off" label="Cut off" sticky collapsible dividing>
+              <ui-section id="examples-variations-cut-off" label="Cut off" sticky="stack" collapsible dividing>
                 <ui-example description="`max-width` and `max-height`:  the most room it takes;  past them the content is cut off until it's shown full size.  `shrink=&quot;100%&quot;` keeps it full size, only cut off.">
                   <ui-zoom max-height="120px" shrink="100%">
                     <ui-list bulleted>
@@ -120,7 +120,7 @@
 
           <ui-tab value="usage" label="Usage">
             <!-- USAGE:  how to use it (attributes in practice, events, framework snippets), keyboard, accessibility. -->
-            <ui-section id="usage-using-it" label="Using it" sticky collapsible dividing>
+            <ui-section id="usage-using-it" label="Using it" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   `<ui-zoom>` shows something small in the page, and full size over it.
@@ -144,7 +144,7 @@
                 </script>
               </ui-code>
             </ui-section>
-            <ui-section id="usage-plain-screenshots" label="Plain screenshots" sticky collapsible dividing>
+            <ui-section id="usage-plain-screenshots" label="Plain screenshots" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   A page can open every plain `<img>` screenshot full size, with none of them rewritten:  `ImageZoom` listens on the
@@ -166,7 +166,7 @@
                 </script>
               </ui-code>
             </ui-section>
-            <ui-section id="usage-keyboard" label="Keyboard" sticky collapsible dividing>
+            <ui-section id="usage-keyboard" label="Keyboard" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   - Tab reaches the zoom's button;  Enter or Space shows it full size.
@@ -175,7 +175,7 @@
                 </script>
               </ui-markdown>
             </ui-section>
-            <ui-section id="usage-accessibility" label="Accessibility" sticky collapsible dividing>
+            <ui-section id="usage-accessibility" label="Accessibility" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   - The content in the page is `inert` while it's shrunk:  a reader meets it once, full size.
@@ -189,30 +189,30 @@
 
           <ui-tab value="api" label="API">
             <!-- API:  generated from the vocabularies (`site/_data/components.json5`);  nothing to write. -->
-            <ui-section id="api-attributes" label="Attributes" sticky collapsible dividing>
+            <ui-section id="api-attributes" label="Attributes" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-zoom" only="attributes"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-slots" label="Slots" sticky collapsible dividing>
+            <ui-section id="api-slots" label="Slots" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-zoom" only="slots"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-parts" label="Parts" sticky collapsible dividing>
+            <ui-section id="api-parts" label="Parts" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-zoom" only="parts"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-states" label="States" sticky collapsible dividing>
+            <ui-section id="api-states" label="States" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-zoom" only="states"></ui-docs-api>
             </ui-section>
 
-            <ui-section id="api-texts" label="Texts" sticky collapsible dividing>
+            <ui-section id="api-texts" label="Texts" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-zoom" only="texts"></ui-docs-api>
             </ui-section>
           </ui-tab>
 
           <ui-tab value="theming" label="Theming">
             <!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
-            <ui-section id="theming-tokens" label="Tokens" sticky collapsible dividing>
+            <ui-section id="theming-tokens" label="Tokens" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   Set a public `--ui-*` token on the element, any ancestor or `:root`; it inherits into the shadow
@@ -231,7 +231,7 @@
                 <!-- playground:end -->
               </ui-docs-tokens>
             </ui-section>
-            <ui-section id="theming-themes" label="Themes" sticky collapsible dividing>
+            <ui-section id="theming-themes" label="Themes" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
                   The theme picker above lists the Fomantic themes that restyle this component; the one in the

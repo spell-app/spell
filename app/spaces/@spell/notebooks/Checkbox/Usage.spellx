@@ -5,18 +5,16 @@
 	</>
 	<checkbox-tab-bar showing="usage"/>
 	<section>
-		<html>
-			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-				<ui-item link="#using-it">Using it</>
-				<ui-item link="#forms">Forms</>
-				<ui-item link="#two-values">Two values</>
-				<ui-item link="#events">Events</>
-				<ui-item link="#vetoing-a-change">Vetoing a change</>
-				<ui-item link="#grouped-checkboxes">Grouped checkboxes</>
-				<ui-item link="#keyboard">Keyboard</>
-				<ui-item link="#accessibility">Accessibility</>
-				<ui-item link="#framework-usage">Framework usage</>
-			</>
+		<menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#using-it">Using it</>
+			<item link="#forms">Forms</>
+			<item link="#two-values">Two values</>
+			<item link="#events">Events</>
+			<item link="#vetoing-a-change">Vetoing a change</>
+			<item link="#grouped-checkboxes">Grouped checkboxes</>
+			<item link="#keyboard">Keyboard</>
+			<item link="#accessibility">Accessibility</>
+			<item link="#framework-usage">Framework usage</>
 		</>
 	</>
 
