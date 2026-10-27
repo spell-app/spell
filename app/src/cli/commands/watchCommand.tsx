@@ -4,10 +4,10 @@ import { render, type Instance } from "ink"
 import { basename, resolve } from "path"
 import { pathToFileURL } from "url"
 
-import { SP } from "spell-parser/spell"
-import { projectFileFor } from "spell-parser/spell/node/projectFile"
-import { LSP } from "spell-app/lsp"
-import { CLI } from "spell-app/cli"
+import { SP } from "spell/parser/spell"
+import { projectFileFor } from "spell/parser/spell/node/projectFile"
+import { LSP } from "spell/app/lsp"
+import { CLI } from "spell/app/cli"
 
 /** Wait this long after a change for more, e.g. an editor saving several files, before rebuilding. */
 const SETTLE_MS = 150

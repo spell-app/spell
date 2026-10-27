@@ -3,8 +3,8 @@ import { tmpdir } from "os"
 import { resolve } from "path"
 import { describe, test, expect } from "vite-plus/test"
 
-import { SP } from "spell-parser/spell"
-import { CLI } from "spell-app/cli"
+import { SP } from "spell/parser/spell"
+import { CLI } from "spell/app/cli"
 import {
   fixturePath,
   fixtureProjectId,
@@ -13,7 +13,7 @@ import {
   EXAMPLE_FIXTURES,
   GUIDE_FIXTURES,
   fixtureFolder
-} from "spell-app/spaces/test"
+} from "spell/app/spaces/test"
 
 /** What `arg` names, reduced to `kind` + id for comparing. */
 async function named(arg: string, cwd?: string) {

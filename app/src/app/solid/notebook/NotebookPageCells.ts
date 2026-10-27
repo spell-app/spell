@@ -1,5 +1,5 @@
-import { SX } from "spell-parser/spellx"
-import { dedented, indentAt, indented, replaceSpan } from "spell-app/app/solid/NotebookCells"
+import { SX } from "spell/parser/spellx"
+import { dedented, indentAt, indented, replaceSpan } from "spell/app/app/solid/NotebookCells"
 
 /**
  * A `.spellx` NOTEBOOK as the cells of its page, and the edits its page makes to its text (epic `elemental-spell` P16).

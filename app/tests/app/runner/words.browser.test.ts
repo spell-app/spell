@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { wordsAt, wordsIn } from "spell-app/app/runner"
+import { wordsAt, wordsIn } from "spell/app/app/runner"
 
 /** A words file, as `SP.SpellWords.script()` writes it. */
 const SOLITAIRE = `/*! SPELL: WORDS Solitaire en */

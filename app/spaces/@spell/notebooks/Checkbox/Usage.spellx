@@ -63,8 +63,8 @@
 		</>
 		<markdown>
 			```js
-			import { E } from "spell-ui/core"
-			import { UICheckbox } from "spell-ui/ui-checkbox"
+			import { E } from "spell/ui/core"
+			import { UICheckbox } from "spell/ui/ui-checkbox"
 
 			class UIDoor extends UICheckbox {
 			  @E.proto static defaultChosenValue = "open"

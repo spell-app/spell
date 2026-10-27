@@ -3,9 +3,9 @@ import { join } from "path"
 
 import { SRV } from "spell/server"
 import { PageServer, pageServerRoot } from "spell/server/page"
-import environment from "spell-app/spaces/server/node/environment"
-import { SP } from "spell-parser/spell"
-import { CLI } from "spell-app/cli"
+import environment from "spell/app/spaces/server/node/environment"
+import { SP } from "spell/parser/spell"
+import { CLI } from "spell/app/cli"
 
 /** The page server's root:  the kit this checkout is in (`pageServerRoot()`, epic `repo-split` P16), else this checkout. */
 const SERVER_ROOT = pageServerRoot(environment.repoDir)

@@ -2,9 +2,9 @@ import { createEffect } from "solid-js"
 import { insert, type JSX } from "@solidjs/web"
 
 import { readsAsImpliedDefault, viewAttributeFor, kebabCase } from "spell/util"
-import { E, UI } from "spell-ui/core"
-import { RootLoader } from "spell-ui/components/ui-root"
-import type { ElementApi, Core } from "spell-parser/core"
+import { E, UI } from "spell/ui/core"
+import { RootLoader } from "spell/ui/components/ui-root"
+import type { ElementApi, Core } from "spell/parser/core"
 import { spellElementVocabulary } from "./SpellElement.en"
 import { Glides } from "./Glides"
 import { Dragging } from "./Dragging"
@@ -122,7 +122,7 @@ const STATES_CSS = `
  *   - See "Reordering", below.
  * - Selecting (P29):  `a task can be selected` -- a click selects a task in its list, shift and command select more
  *   (`onClickToSelect()`);  a selected task drags with the others.
- * - Part of `spell-runtime.js`:  NEVER value-imports `spell-parser/core`.
+ * - Part of `spell-runtime.js`:  NEVER value-imports `spell/parser/core`.
  *   Each runtime copy hands itself over in `installSpellElements()`.
  * - SEE:  its App UI components page, `app/docs/spell-element.html` (`/components/app/spell-element.html`).
  ****************/

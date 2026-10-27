@@ -3,7 +3,7 @@ import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { afterAll, describe, expect, test } from "vite-plus/test"
 
-import { findSpellApp } from "spell-app/vscode/src/spellAppRoot.ts"
+import { findSpellApp } from "spell/app/vscode/src/spellAppRoot.ts"
 
 /**
  * Which spell-app checkout the VS Code extension runs (`findSpellApp()`), on made-up checkouts laid out like Owen's:

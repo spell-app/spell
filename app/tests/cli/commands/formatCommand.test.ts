@@ -1,6 +1,6 @@
 import { describe, test, expect } from "vite-plus/test"
 
-import { applyEdits } from "spell-app/cli/commands/formatCommand"
+import { applyEdits } from "spell/app/cli/commands/formatCommand"
 
 /** An edit replacing `line`'s characters `from` to `to` with `newText`. */
 function edit(line: number, from: number, to: number, newText: string) {

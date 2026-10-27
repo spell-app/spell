@@ -1,20 +1,20 @@
 import type { JSX } from "@solidjs/web"
 
 import { E } from "spell/element"
-import { SP } from "spell-parser/spell"
-import { LSP } from "spell-app/lsp"
-import type * as UIT from "spell-app/app/ui/ui.types"
-import type { monaco } from "spell-app/app/ui/monaco"
-import { appTexts } from "spell-app/app/ui/AppTexts"
-// Import directly, NOT through the `spell-app/app/runner` barrel, which would pull in `runCompiled()`, and so `core`.
-import type { SpellCompiled } from "spell-app/app/runner/runner.types"
-import { adoptShadowStyles } from "spell-app/app/runner/shadowStyles"
-import { wordsOfLanguages } from "spell-app/app/runner/words"
-import { SpellEditorPane, type SpellEditorStatus, type MonacoModule } from "spell-app/app/spellEditor/SpellEditorPane"
+import { SP } from "spell/parser/spell"
+import { LSP } from "spell/app/lsp"
+import type * as UIT from "spell/app/app/ui/ui.types"
+import type { monaco } from "spell/app/app/ui/monaco"
+import { appTexts } from "spell/app/app/ui/AppTexts"
+// Import directly, NOT through the `spell/app/app/runner` barrel, which would pull in `runCompiled()`, and so `core`.
+import type { SpellCompiled } from "spell/app/app/runner/runner.types"
+import { adoptShadowStyles } from "spell/app/app/runner/shadowStyles"
+import { wordsOfLanguages } from "spell/app/app/runner/words"
+import { SpellEditorPane, type SpellEditorStatus, type MonacoModule } from "spell/app/app/spellEditor/SpellEditorPane"
 import { spellEditorVocabulary } from "./SpellEditor.en"
 
 // Every Solid computation follows spell cells (the project's files).
-import "spell-app/app/solid/cellsBridge"
+import "spell/app/app/solid/cellsBridge"
 
 /****************
  * ### `DOMSpellEditorElement`
@@ -479,12 +479,12 @@ const EDITOR_CSS = ["spell-editor.css"]
 /** The element we feed what we compile. */
 const VIEWER_TAG = "spell-viewer"
 
-/** `spell-app/app/solid/monaco`, loaded once:  Monaco is most of our code, so it waits till there's a project to show. */
+/** `spell/app/app/solid/monaco`, loaded once:  Monaco is most of our code, so it waits till there's a project to show. */
 let monacoModule: Promise<MonacoModule> | undefined
 
-/** Load `spell-app/app/solid/monaco` (Monaco, its spell plumbing, and the Solid `MonacoEditor`), once. */
+/** Load `spell/app/app/solid/monaco` (Monaco, its spell plumbing, and the Solid `MonacoEditor`), once. */
 function loadMonaco(): Promise<MonacoModule> {
-  monacoModule ??= import("spell-app/app/solid/monaco")
+  monacoModule ??= import("spell/app/app/solid/monaco")
   return monacoModule
 }
 

@@ -1,8 +1,8 @@
 import { describe, test, expect, beforeAll } from "vite-plus/test"
 
-import { monaco } from "spell-app/app/ui/monaco/monaco"
-import { SpellMonaco } from "spell-app/app/ui/monaco/SpellMonaco"
-import { SpellTokensProvider } from "spell-app/app/ui/monaco/SpellTokensProvider"
+import { monaco } from "spell/app/app/ui/monaco/monaco"
+import { SpellMonaco } from "spell/app/app/ui/monaco/SpellMonaco"
+import { SpellTokensProvider } from "spell/app/app/ui/monaco/SpellTokensProvider"
 
 /**
  * Spell's instant colouring, line by line as Monaco asks for it:  each line starts in the state the last one ended in.

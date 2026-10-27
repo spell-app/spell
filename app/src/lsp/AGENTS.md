@@ -1,7 +1,7 @@
 # AGENTS.md
 
 This file provides guidance to AI coding agents (Claude Code, Codex, and others)
-when working with code in this folder, `src/lsp/` of the `spell-app` package (`spell-app/lsp`).
+when working with code in this folder, `src/lsp/` of the `spell-app` package (`spell/app/lsp`).
 
 **READ the repo root's [AGENTS.md](../../AGENTS.md) and [WWOD](../../agents/wwod/WWOD.md) FIRST:**
 - the root's:  the repo's layout
@@ -11,7 +11,7 @@ when working with code in this folder, `src/lsp/` of the `spell-app` package (`s
 
 ## Overview
 
-- Spell's language server, `spell-app/lsp` (`LSP`):
+- Spell's language server, `spell/app/lsp` (`LSP`):
   - `SpellLanguageService`:  diagnostics, hover, completion, definition, references, rename, outline, folding, formatting,
     accent fixes as you type
   - `LspTexts`:  the labels it shows people, in the language of the file they're about (its name says it) (epic `spanish` P13)
@@ -21,7 +21,7 @@ when working with code in this folder, `src/lsp/` of the `spell-app` package (`s
   - `ScopeExplorer`
   - `ScopesSource` / `ScopePack`:  the scope packs, `<Project>.scopes.js`
   - `SpellDiskWorkspace`:  loads from disk, through spaces' disk reader (`installDiskFetch()`)
-  - See "Language server" in [PARSING.md](../../../spell-parser/src/spell/PARSING.md).
+  - See "Language server" in [PARSING.md](../../../parser/src/spell/PARSING.md).
 - The VS Code extension that runs it is the repo's [vscode/](../../vscode/), its own yarn project.
   - It runs THIS folder's source.
 - The commands:  the repo root's scripts, which run this folder's files with `tsx`.
@@ -33,17 +33,17 @@ when working with code in this folder, `src/lsp/` of the `spell-app` package (`s
   yarn lsp:scopes --compile @spell/examples/Solitaire   # e.g.
   ```
 
-- `spell-app/lsp` MUST stay BROWSER-SAFE (WWOD §8 › "Barrels").
+- `spell/app/lsp` MUST stay BROWSER-SAFE (WWOD §8 › "Barrels").
   - Why:  the app's Monaco editor ([the app's Monaco plumbing](../app/ui/monaco/))
     calls the SAME `LSP.SpellLanguageService`, in-process.
   - The node-only files the barrel leaves out (see the barrel's header):
     - `SpellDiskWorkspace.ts`
     - `server.ts`
     - `stdioGuard.ts`
-- It depends on `spell-parser/spell` (and below).
-  - Its node-only files also import spaces' (`spell-app/spaces/server/node/...`):
+- It depends on `spell/parser/spell` (and below).
+  - Its node-only files also import spaces' (`spell/app/spaces/server/node/...`):
     where projects are on disk, and spaces' disk reader, which registers spell's project groups.
-  - NEVER import `spell-app/app` or `spell-app/cli`.
+  - NEVER import `spell/app/app` or `spell/app/cli`.
 
 ## Imports
 
@@ -62,4 +62,4 @@ As WWOD §12, plus:
 
 As WWOD §8, plus our self-namespace:
 
-- `LSP` ~== `spell-app/lsp`
+- `LSP` ~== `spell/app/lsp`

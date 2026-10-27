@@ -1,7 +1,7 @@
 import { render } from "ink"
 import { createInterface } from "readline"
 
-import { CLI } from "spell-app/cli"
+import { CLI } from "spell/app/cli"
 
 /**
  * `spell repl [project]`:  `spell parse`, a line at a time -- each line's match tree and javascript.

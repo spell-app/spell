@@ -1,6 +1,6 @@
 import type { E } from "spell/element"
 import { Observable, once, state } from "spell/util"
-import type { I18n } from "spell-ui/core"
+import type { I18n } from "spell/ui/core"
 
 import { APP_TEXTS, type AppTextKey, type AppTextPack } from "./AppTexts.en"
 
@@ -24,7 +24,7 @@ const ENGLISH = "en"
  * - Position in the import graph:  NO value import of Solid or `spell-ui`,
  *   so `editor.ts`, the runners and `<spell-viewer>` can all read it.
  *   - Spell UI comes in through dynamic `import()`s.
- *   - Imported by path, `spell-app/app/ui/AppTexts`:  the `UI` barrel is types only.
+ *   - Imported by path, `spell/app/app/ui/AppTexts`:  the `UI` barrel is types only.
  * - ONE instance per page bundle, `appTexts`, below.
  ****************/
 export class AppTexts extends Observable {
@@ -120,7 +120,7 @@ export class AppTexts extends Observable {
     const lang = pageLanguage()
     const code = languageOf(lang)
     const loadPack = Object.hasOwn(LANGUAGES, code) ? LANGUAGES[code] : undefined
-    const [{ UI }, { RootLoader }] = await Promise.all([import("spell-ui/core"), import("spell-ui/components/ui-root")])
+    const [{ UI }, { RootLoader }] = await Promise.all([import("spell/ui/core"), import("spell/ui/components/ui-root")])
     const ui = await UI.load()
     ui.i18n.register(ENGLISH, APP_TEXTS, APP_TEXTS_SCOPE)
     if (loadPack) {
@@ -142,7 +142,7 @@ export const appTexts = new AppTexts()
 ////////////////
 
 /** Where our texts sit in `UI.i18n`:  a scope of their own, as a component's are under its tag. */
-export const APP_TEXTS_SCOPE = "spell-app/app"
+export const APP_TEXTS_SCOPE = "spell/app/app"
 
 /** A project group's `type` when there's none to name, e.g. before the editor shows a project:  `Project`. */
 const DEFAULT_GROUP_TYPE = "project"

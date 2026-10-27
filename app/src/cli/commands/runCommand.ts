@@ -4,12 +4,12 @@ import { tmpdir } from "os"
 import { delimiter, dirname, resolve } from "path"
 import { fileURLToPath, pathToFileURL } from "url"
 
-import environment from "spell-app/spaces/server/node/environment"
-import { P } from "spell-parser/parser"
-import { buildTsx } from "spell-parser/spell/node/buildTsx"
-import { SP } from "spell-parser/spell"
-import { LSP } from "spell-app/lsp"
-import { CLI } from "spell-app/cli"
+import environment from "spell/app/spaces/server/node/environment"
+import { P } from "spell/parser/parser"
+import { buildTsx } from "spell/parser/spell/node/buildTsx"
+import { SP } from "spell/parser/spell"
+import { LSP } from "spell/app/lsp"
+import { CLI } from "spell/app/cli"
 
 /** cli's own folder, `src/cli/` -- NOT `environment.srcDir`, which is spell's. */
 const CLI_SRC_DIR = resolve(fileURLToPath(import.meta.url), "..", "..")
@@ -21,7 +21,7 @@ const TSX = ".tsx"
 const PY = ".py"
 
 /** `spell_core`'s folder, the Python core:  a uv project, spell-parser's `py/core`. */
-const SPELL_CORE_PY_DIR = resolve(environment.packageFolder("spell-parser/py"), "core")
+const SPELL_CORE_PY_DIR = resolve(environment.packageFolder("spell/parser/py"), "core")
 
 /**
  * Run `code`, project `name` compiled to Python, as `python -m spell_core.run` (epic `python-target` P9).

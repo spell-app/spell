@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { languagesOf, mergedWords, wordsAt, wordsOfLanguages } from "spell-app/app/runner"
+import { languagesOf, mergedWords, wordsAt, wordsOfLanguages } from "spell/app/app/runner"
 
 /**
  * A run's words, for its Thing Explorer -- see `words.ts`.

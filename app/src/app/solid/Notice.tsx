@@ -1,7 +1,7 @@
 import { Show, createEffect } from "solid-js"
 
-import { editor } from "spell-app/app/editor"
-import { FLOATING_MESSAGE_STYLE, on, tracked } from "spell-app/app/solid"
+import { editor } from "spell/app/app/editor"
+import { FLOATING_MESSAGE_STYLE, on, tracked } from "spell/app/app/solid"
 
 /****************
  * ### `<Notice>`

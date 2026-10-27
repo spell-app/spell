@@ -1,11 +1,11 @@
 // FIRST:  defines `__PACKAGE_VERSION__`, which vite would, before anything reads it
-import "spell-parser/spell/node/packageVersion.node"
+import "spell/parser/spell/node/packageVersion.node"
 
 import JSON5 from "json5"
 import path from "path"
 
 import { SRV } from "spell/server"
-import environment from "spell-app/spaces/server/node/environment"
+import environment from "spell/app/spaces/server/node/environment"
 import { api, spaceFiles } from "./api"
 import { APP_DIR } from "./EditorServer"
 

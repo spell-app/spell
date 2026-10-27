@@ -1,5 +1,5 @@
 import { ColorScheme } from "spell/util"
-import { monaco } from "spell-app/app/ui/monaco/monaco"
+import { monaco } from "spell/app/app/ui/monaco/monaco"
 import { ShadesOfPurple } from "./ShadesOfPurple"
 
 /****************

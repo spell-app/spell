@@ -1,5 +1,5 @@
-import { E } from "spell-ui/core"
-import { UIExample } from "spell-ui/components/ui-example"
+import { E } from "spell/ui/core"
+import { UIExample } from "spell/ui/components/ui-example"
 import { spellExampleVocabulary } from "./SpellExample.en"
 
 /****************

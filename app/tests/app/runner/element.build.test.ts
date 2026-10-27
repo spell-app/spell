@@ -178,8 +178,8 @@ describe("runner builds", () => {
       "@solidjs/web",
       "@solidjs/h",
       "spell/element",
-      "spell-ui/core",
-      "spell-ui/components/ui-root"
+      "spell/ui/core",
+      "spell/ui/components/ui-root"
     ])
     // a page's modules (the docs bundle's `SpellUI.packModules`), each name a stand-in;
     // `@solidjs/h` as it is, a default export, which `spell-solid-shared.js` renames `h`
@@ -273,8 +273,8 @@ describe("runner builds", () => {
     writeFileSync(copy, text)
     try {
       const families = {
-        "spell-ui/components/ui-code": { UICode: "page's UICode" },
-        "spell-ui/components/ui-markdown": { UIMarkdown: "page's UIMarkdown" }
+        "spell/ui/components/ui-code": { UICode: "page's UICode" },
+        "spell/ui/components/ui-markdown": { UIMarkdown: "page's UIMarkdown" }
       }
       Object.assign(globalThis, { SpellUI: { packModules: { ...core, ...families } } })
       const shared = (await import(`${pathToFileURL(copy).href}?families`)) as Record<string, unknown>

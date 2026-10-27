@@ -1,6 +1,6 @@
 import { SRV } from "spell/server"
-import type { SpaceStorage } from "spell-app/spaces/models/SpaceStorage"
-import { editJSON5, readJSON5 } from "spell-app/spaces/server/node/storage/json5"
+import type { SpaceStorage } from "spell/app/spaces/models/SpaceStorage"
+import { editJSON5, readJSON5 } from "spell/app/spaces/server/node/storage/json5"
 
 /****************
  * ### `SpacePrefs`

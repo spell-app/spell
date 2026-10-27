@@ -1,11 +1,11 @@
-import { SP } from "spell-parser/spell"
-import { SPACES } from "spell-app/spaces"
-import type { V } from "spell-ui/api"
+import { SP } from "spell/parser/spell"
+import { SPACES } from "spell/app/spaces"
+import type { V } from "spell/ui/api"
 // a leaf of Spell UI without its elements:  the `spell-ui` barrel would define every tag
-import { PropertyEditorPages } from "spell-ui/property"
-import { editor, runtimeCore } from "spell-app/app/editor"
-import type { SpellRuntime } from "spell-app/app/runner"
-import { ClassSchemas } from "spell-app/app/ui/ClassSchemas"
+import { PropertyEditorPages } from "spell/ui/property"
+import { editor, runtimeCore } from "spell/app/app/editor"
+import type { SpellRuntime } from "spell/app/app/runner"
+import { ClassSchemas } from "spell/app/app/ui/ClassSchemas"
 
 /****************
  * ### `PropertyEditorFiles`

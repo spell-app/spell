@@ -1,6 +1,6 @@
 import { escapeRegExp, withoutAccents } from "spell/util/string"
-import { P } from "spell-parser/parser"
-import { SP } from "spell-parser/spell"
+import { P } from "spell/parser/parser"
+import { SP } from "spell/parser/spell"
 
 /****************
  * ### `SpellKeywords`

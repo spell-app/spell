@@ -29,4 +29,4 @@ export * from "./runInBrowser"
 export * from "./runTarget"
 export * from "./ui"
 // its folder's barrel by its full name:  `./commands` is `commands.ts` beside this, the repo's command list
-export * from "spell-app/cli/commands/index"
+export * from "spell/app/cli/commands/index"

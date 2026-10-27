@@ -2,10 +2,10 @@ import { readdirSync, readFileSync, writeFileSync } from "fs"
 import { dirname, resolve } from "path"
 
 import { escapeRegExp } from "spell/util/string"
-import { SP } from "spell-parser/spell"
-import { SPACES } from "spell-app/spaces"
-import { PropertyEditorPages, type PageProblem } from "spell-ui/property"
-import { CLI } from "spell-app/cli"
+import { SP } from "spell/parser/spell"
+import { SPACES } from "spell/app/spaces"
+import { PropertyEditorPages, type PageProblem } from "spell/ui/property"
+import { CLI } from "spell/app/cli"
 
 /****************
  * ### `EditorPages`

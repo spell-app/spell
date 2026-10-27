@@ -1,5 +1,5 @@
 /**
- * Barrel for spell-app's `spell` commands' work, one per file -- flattened into `spell-app/cli`.
+ * Barrel for spell-app's `spell` commands' work, one per file -- flattened into `spell/app/cli`.
  * - Each is `(session, args, options) => Promise<exitCode>`:
  *   - the app's own:  `spell app create | serve | preview` (`newCommand`, `serveCommand`, `previewCommand`), `spell projects`
  *   - the language's:  spell-parser's commands (`spell compile` ...), through the `"language"` hook

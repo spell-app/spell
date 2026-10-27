@@ -154,7 +154,7 @@ export class ComponentSource {
     return file && this.sourceFor ? this.sourceFor(file).followType(name, seen) : undefined
   }
 
-  /** The module `name` is imported from, as written (`./modals.types`, `spell-app/app/solid/monaco`);  else `undefined`. */
+  /** The module `name` is imported from, as written (`./modals.types`, `spell/app/app/solid/monaco`);  else `undefined`. */
   private importedFrom(name: string): string | undefined {
     for (const statement of this.source.statements) {
       if (!ts.isImportDeclaration(statement) || !ts.isStringLiteral(statement.moduleSpecifier)) continue

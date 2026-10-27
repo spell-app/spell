@@ -6,7 +6,7 @@
  * - `<spell src URL>`:  spell's source folder to time (a `file:` URL, ending `/`):  ours, or `--against`'s temp
  *   checkout of spell-parser;  its imports are its own package names, found through that checkout's `package.json`.
  *   - So it must be from after epic `repo-split` P14:  `speedtestCommand.ts` checks.
- *   Never `spell-app/cli`.
+ *   Never `spell/app/cli`.
  * - `.mts`, so it loads as an ES module wherever it's copied -- see `PAPERCUTS.md`.
  * - `failed` is a count, not the list.
  */
@@ -17,7 +17,7 @@ for (const method of ["log", "info", "debug", "warn", "group", "groupCollapsed",
 // defines `__PACKAGE_VERSION__` before spell reads it
 const [spellSrc = "", module = ""] = process.argv.slice(2)
 await import(new URL("node/packageVersion.node.ts", spellSrc).href)
-const { SP } = (await import(new URL("index.ts", spellSrc).href)) as typeof import("spell-parser/spell")
+const { SP } = (await import(new URL("index.ts", spellSrc).href)) as typeof import("spell/parser/spell")
 
 const { failed, ...results } = SP.spellParser.speedTest(module)
 process.stdout.write(`${JSON.stringify({ ...results, failed: failed.length })}\n`)

@@ -2,15 +2,15 @@ import { readdirSync, readFileSync } from "fs"
 import { resolve } from "path"
 import { describe, expect, test } from "vite-plus/test"
 
-import { P } from "spell-parser/parser"
-import { SP } from "spell-parser/spell"
-import { parseSpellProject } from "spell-parser/spell/test"
-import { SX } from "spell-parser/spellx"
-import environment from "spell-app/spaces/server/node/environment"
-import { importScopeIn } from "spell-app/spaces/test"
+import { P } from "spell/parser/parser"
+import { SP } from "spell/parser/spell"
+import { parseSpellProject } from "spell/parser/spell/test"
+import { SX } from "spell/parser/spellx"
+import environment from "spell/app/spaces/server/node/environment"
+import { importScopeIn } from "spell/app/spaces/test"
 
 // Spell UI's pack:  a spellx drawing names its components bare (`<button>`)
-import "spell-app/spaces"
+import "spell/app/spaces"
 
 /**
  * Every built-in NOTEBOOK (`@spell/notebooks`, epic `elemental-spell` P16) compiles cleanly, and means the same in

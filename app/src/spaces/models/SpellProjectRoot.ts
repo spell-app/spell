@@ -1,5 +1,5 @@
 import { JSON5File, CONFIRM, LoadableFile, getDier, KnownFormat } from "spell/util"
-import { SP } from "spell-parser/spell"
+import { SP } from "spell/parser/spell"
 
 import { LOCAL_PERSON } from "./projectGroups"
 

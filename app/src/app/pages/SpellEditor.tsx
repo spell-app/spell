@@ -1,7 +1,7 @@
 import type { RouteSectionProps } from "@solidjs/router"
 import { Match, Show, Switch, createSignal, onCleanup } from "solid-js"
 
-import { SP } from "spell-parser/spell"
+import { SP } from "spell/parser/spell"
 import {
   Actions,
   AppMenu,
@@ -26,16 +26,16 @@ import {
   tracked,
   trackProjectRoot,
   type Mode
-} from "spell-app/app/solid"
-import { editor } from "spell-app/app/editor"
-import { editorPrefs } from "spell-app/app/editorPrefs"
-import { appTexts, type AppTextKey } from "spell-app/app/ui/AppTexts"
+} from "spell/app/app/solid"
+import { editor } from "spell/app/app/editor"
+import { editorPrefs } from "spell/app/app/editorPrefs"
+import { appTexts, type AppTextKey } from "spell/app/app/ui/AppTexts"
 // Import directly, NOT through the runner barrel, which brings the runners themselves
-import { RunnerPane, type RunnerTab } from "spell-app/app/runner/RunnerPane"
-import { NotebookController } from "spell-app/app/solid/notebook/NotebookController"
-import { NotebookHeader } from "spell-app/app/solid/notebook/NotebookHeader"
-import { NotebookMenu } from "spell-app/app/solid/notebook/NotebookCellTools"
-import { NotebookPage } from "spell-app/app/solid/notebook/NotebookPage"
+import { RunnerPane, type RunnerTab } from "spell/app/app/runner/RunnerPane"
+import { NotebookController } from "spell/app/app/solid/notebook/NotebookController"
+import { NotebookHeader } from "spell/app/app/solid/notebook/NotebookHeader"
+import { NotebookMenu } from "spell/app/app/solid/notebook/NotebookCellTools"
+import { NotebookPage } from "spell/app/app/solid/notebook/NotebookPage"
 import { editorHotkeys } from "./editorHotkeys"
 import { followRoute } from "./followRoute"
 import type { EditorPage } from "./pages.types"

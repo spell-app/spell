@@ -1,9 +1,9 @@
 import chalk from "chalk"
 
-import { SP } from "spell-parser/spell"
-import { P } from "spell-parser/parser"
-import { LSP } from "spell-app/lsp"
-import { CLI } from "spell-app/cli"
+import { SP } from "spell/parser/spell"
+import { P } from "spell/parser/parser"
+import { LSP } from "spell/app/lsp"
+import { CLI } from "spell/app/cli"
 
 /** Between the sections of the editor's hover -- see `SpellLanguageService.hover()`. */
 const HOVER_RULE = "\n\n---\n\n"

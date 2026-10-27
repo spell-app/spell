@@ -1,9 +1,9 @@
 import { describe, test, expect } from "vite-plus/test"
 
-import { P } from "spell-parser/parser"
-import { SP } from "spell-parser/spell"
-import { compiledSpellProject, parseSpellProject, summarize } from "spell-parser/spell/test"
-import { loadFixtureProject } from "spell-app/spaces/test"
+import { P } from "spell/parser/parser"
+import { SP } from "spell/parser/spell"
+import { compiledSpellProject, parseSpellProject, summarize } from "spell/parser/spell/test"
+import { loadFixtureProject } from "spell/app/spaces/test"
 
 /**
  * A project's declarations:  marked inline while compiling, then split out into its declarations file.

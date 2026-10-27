@@ -3,10 +3,10 @@ import { copyFileSync, cpSync, existsSync, mkdirSync, readFileSync, readdirSync,
 import { dirname, join, resolve } from "path"
 
 import { SRV } from "spell/server"
-import environment from "spell-app/spaces/server/node/environment"
-import * as projectUtils from "spell-app/spaces/server/node/projects/project-utils"
-import { SP } from "spell-parser/spell"
-import { CLI } from "spell-app/cli"
+import environment from "spell/app/spaces/server/node/environment"
+import * as projectUtils from "spell/app/spaces/server/node/projects/project-utils"
+import { SP } from "spell/parser/spell"
+import { CLI } from "spell/app/cli"
 
 /**
  * The editor's STATIC build, the public preview (epic `debut` P9):  the editor as plain files, which any web host
@@ -190,7 +190,7 @@ const APP_FOLDER = resolve(environment.repoDir, "app")
 /** Where the static build goes:  `app/dist-static/` (git-ignored). */
 export const STATIC_FOLDER = join(APP_FOLDER, "dist-static")
 
-/** Vite's mode for the static build:  the app's `STATIC_MODE` (`spell-app/app/static/staticBuild`), copied. */
+/** Vite's mode for the static build:  the app's `STATIC_MODE` (`spell/app/app/static/staticBuild`), copied. */
 const STATIC_MODE = "static"
 
 /** End of the files written for the API's lists and indexes:  the app's `BUILT_DATA_SUFFIX` (`StaticFiles`). */

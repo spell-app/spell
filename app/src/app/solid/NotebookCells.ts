@@ -1,4 +1,4 @@
-import { SX } from "spell-parser/spellx"
+import { SX } from "spell/parser/spellx"
 
 /**
  * A `.spellx` file as NOTEBOOK CELLS, and the edits a notebook makes to its text (epic `elemental-spell` P11).

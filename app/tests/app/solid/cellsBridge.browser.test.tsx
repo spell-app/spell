@@ -12,7 +12,7 @@ import { render } from "@solidjs/web"
 
 import { Observable, cellsContext, derived, flushCells, prop, thing } from "spell/util"
 
-import "spell-app/app/solid/cellsBridge"
+import "spell/app/app/solid/cellsBridge"
 
 /**
  * The cells -> Solid bridge, and the Solid facts spell cells are designed around -- the experiments of

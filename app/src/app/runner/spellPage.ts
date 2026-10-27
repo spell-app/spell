@@ -5,7 +5,7 @@
  * - It IS the page's `@spell/core`:  the program's drawing half, `<Project>.elements.spell.js`, imports from it,
  *   through the page's import map.
  * - It exports what `spell-runtime.js` exports for compiled javascript (`spellPage.test.ts` pins it),
- *   plus the page's side (`page.ts` in `spell-parser/core`):
+ *   plus the page's side (`page.ts` in `spell/parser/core`):
  *   `connectPage()`, `startPage()`, `sendCall()`, `sendTrigger()`.
  * - Its `connectPage()` turns on the program's language first, so a Spanish program's tags draw (`<es-texto>`):
  *   the drawing half says it, `export const lang = "es"`, when it isn't English.
@@ -21,8 +21,8 @@
  * </script>
  * ```
  */
-import "spell-app/app/solid/cellsBridge"
-import "spell-app/app/solid/loadUI"
+import "spell/app/app/solid/cellsBridge"
+import "spell/app/app/solid/loadUI"
 import {
   core,
   Thing,
@@ -48,7 +48,7 @@ import {
   startPage,
   sendCall,
   sendTrigger
-} from "spell-parser/core"
+} from "spell/parser/core"
 import { installSpellElements } from "./SpellElement"
 
 // a view's element, e.g. `<solitaire-card>`:  Spell UI's, which core can't make itself
@@ -61,7 +61,7 @@ installSpellElements(core)
 async function connectPage(options: Parameters<typeof connectCorePage>[0]): Promise<WebSocket> {
   const lang = options.modules.at(-1)?.lang
   if (typeof lang === "string" && lang !== "en") {
-    const { RootLoader } = await import("spell-ui/components/ui-root")
+    const { RootLoader } = await import("spell/ui/components/ui-root")
     // oxlint-disable-next-line react-hooks/rules-of-hooks -- Spell UI's `useLanguage()` is no React hook
     await RootLoader.useLanguage(lang)
   }

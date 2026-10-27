@@ -6,10 +6,10 @@
  * - `ProjectFiles`:  a project's file create, copy, rename and delete (decision Q20).
  * - `TypeSchemas`:  a spell type's properties, from its project's declarations, for a property editor.
  * - `SPACE_NAMES`:  spaces' own `__` names, never a project's file.
- * - `SpaceStorage`:  where spaces' files are kept (a type;  the disk's is `spell-app/spaces/server/node/storage/DiskStorage`).
+ * - `SpaceStorage`:  where spaces' files are kept (a type;  the disk's is `spell/app/spaces/server/node/storage/DiskStorage`).
  * - `PersonView`, `MeAnswer` ...:  what the app and the server say about people (types, epic `people-and-orgs` P9).
  * - NOTE: nothing here may touch `node:*`, `process` or the disk:  the editor imports it.
- *   Node-only code is `spell-app/spaces/server/node/...`.
+ *   Node-only code is `spell/app/spaces/server/node/...`.
  */
 export * from "./projectGroups"
 export * from "./spellUIPack"

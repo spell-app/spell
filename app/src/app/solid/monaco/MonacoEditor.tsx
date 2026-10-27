@@ -1,6 +1,6 @@
 import { createEffect, onSettled, untrack } from "solid-js"
 
-import { monaco, SpellMonaco } from "spell-app/app/ui/monaco"
+import { monaco, SpellMonaco } from "spell/app/app/ui/monaco"
 
 import "./MonacoEditor.css"
 

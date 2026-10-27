@@ -1,7 +1,7 @@
 import chalk from "chalk"
 
-import { SP } from "spell-parser/spell"
-import { CLI } from "spell-app/cli"
+import { SP } from "spell/parser/spell"
+import { CLI } from "spell/app/cli"
 
 /**
  * `spell projects [group]`:  list the project groups -- or, given one, e.g. `@spell/library`, the projects in it.

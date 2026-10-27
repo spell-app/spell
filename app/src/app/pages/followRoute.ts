@@ -1,7 +1,7 @@
 import { createEffect } from "solid-js"
 
-import { SP } from "spell-parser/spell"
-import { editor } from "spell-app/app/editor"
+import { SP } from "spell/parser/spell"
+import { editor } from "spell/app/app/editor"
 import type { EditorPage, SpellRouteParams } from "./pages.types"
 
 /**

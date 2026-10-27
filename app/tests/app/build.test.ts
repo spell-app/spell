@@ -98,7 +98,7 @@ describe("dev server", () => {
       const response = await fetch(new URL(entry!, page))
       expect(response.status).toBe(200)
       expect(response.headers.get("content-type")).toMatch(/javascript/)
-      expect(await response.text()).toContain("spell-app/src/app/editor.ts")
+      expect(await response.text()).toContain("app/src/app/editor.ts")
     } finally {
       await server.close()
       rmSync(cacheDir, { recursive: true, force: true })

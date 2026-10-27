@@ -1,15 +1,15 @@
 import { afterEach, beforeAll, describe, expect, test, vi } from "vite-plus/test"
 import { render } from "@solidjs/web"
 
-import type { SP } from "spell-parser/spell"
+import type { SP } from "spell/parser/spell"
 // Import directly:  the test barrel holds node-only helpers
-import { compiledSpellProject, incrementalSpellProject } from "spell-parser/spell/test/parseSpellProject"
-import { uiReady } from "spell-app/app/solid/loadUI"
-import type { NotebookController } from "spell-app/app/solid/notebook/NotebookController"
-import { NotebookPage } from "spell-app/app/solid/notebook/NotebookPage"
+import { compiledSpellProject, incrementalSpellProject } from "spell/parser/spell/test/parseSpellProject"
+import { uiReady } from "spell/app/app/solid/loadUI"
+import type { NotebookController } from "spell/app/app/solid/notebook/NotebookController"
+import { NotebookPage } from "spell/app/app/solid/notebook/NotebookPage"
 
 // Spell UI's pack:  a spellx drawing names its components bare (`<button>`)
-import "spell-app/spaces"
+import "spell/app/spaces"
 
 /**
  * `<NotebookPage>` in the browser (epic `elemental-spell` P16):  a notebook's page, its cells drawn live by the
@@ -20,7 +20,7 @@ import "spell-app/spaces"
  * - The project:  an incremental parse of the notebook (`incrementalSpellProject()`), standing in for the editor's;
  *   its file, a plain object that counts its saves.
  */
-vi.mock("spell-app/app/editor", () => ({
+vi.mock("spell/app/app/editor", () => ({
   editor: {
     loadRuntime: testRuntime,
     showError: (error: unknown) => console.error(error),
@@ -285,5 +285,5 @@ const RUNTIME_URL = new URL("/src/app/runner/spellRuntime.ts", location.href).hr
 
 /** The runtime, as vite serves it. */
 async function testRuntime() {
-  return (await import(/* @vite-ignore */ RUNTIME_URL)) as typeof import("spell-app/app/runner/spellRuntime")
+  return (await import(/* @vite-ignore */ RUNTIME_URL)) as typeof import("spell/app/app/runner/spellRuntime")
 }

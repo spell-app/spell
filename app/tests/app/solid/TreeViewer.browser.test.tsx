@@ -3,10 +3,10 @@ import { createSignal, flush } from "solid-js"
 import { render } from "@solidjs/web"
 
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
-import type { P } from "spell-parser/parser"
-import { spellParser } from "spell-parser/spell"
-import { uiReady } from "spell-app/app/solid"
-import { TreeViewer } from "spell-app/app/solid/TreeViewer"
+import type { P } from "spell/parser/parser"
+import { spellParser } from "spell/parser/spell"
+import { uiReady } from "spell/app/app/solid"
+import { TreeViewer } from "spell/app/app/solid/TreeViewer"
 
 /**
  * `<TreeViewer>` on a real spell parse, in the browser:  Solid's client build, so `flush()` before asserting.

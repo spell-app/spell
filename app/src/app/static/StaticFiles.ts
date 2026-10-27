@@ -10,7 +10,7 @@ import {
   type $FetchParams,
   type PrefPlace
 } from "spell/util"
-import { SP } from "spell-parser/spell"
+import { SP } from "spell/parser/spell"
 
 import { STATIC_BUILD_CLASS } from "./staticBuild"
 

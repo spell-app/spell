@@ -24,7 +24,7 @@
 	-->
 	<section label="Types">
 		<section label="Root" sticky collapsible dividing>
-			<example description="Put one around a page or an app:  each `ui-*` tag inside loads its component the first time it appears, and nothing else is downloaded. Load just the root: `import \"spell-ui/ui-root\"`.">
+			<example description="Put one around a page or an app:  each `ui-*` tag inside loads its component the first time it appears, and nothing else is downloaded. Load just the root: `import \"spell/ui/ui-root\"`.">
 				<html>
 					<ui-root>
 						<ui-segment>

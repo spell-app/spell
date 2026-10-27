@@ -53,7 +53,7 @@
 		</>
 		<markdown>
 			```js
-			import { SavedTheme } from "spell-ui/components/ui-theme-editor"
+			import { SavedTheme } from "spell/ui/components/ui-theme-editor"
 
 			if (SavedTheme.has) await SavedTheme.restore()
 			```

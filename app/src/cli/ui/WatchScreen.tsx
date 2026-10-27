@@ -1,6 +1,6 @@
 import { Box, Text, useApp, useInput } from "ink"
 
-import { CLI } from "spell-app/cli"
+import { CLI } from "spell/app/cli"
 
 /****************
  * ### `<WatchScreen>`

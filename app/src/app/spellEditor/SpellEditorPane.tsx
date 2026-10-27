@@ -1,8 +1,8 @@
 import { For, Show, createComponent, omit } from "solid-js"
 
-import type { SP } from "spell-parser/spell"
-import type { monaco } from "spell-app/app/ui/monaco"
-import { appTexts } from "spell-app/app/ui/AppTexts"
+import type { SP } from "spell/parser/spell"
+import type { monaco } from "spell/app/app/ui/monaco"
+import { appTexts } from "spell/app/app/ui/AppTexts"
 
 import "./SpellEditorPane.css"
 
@@ -90,12 +90,12 @@ function LazyEditor(props: LazyEditorProps) {
 
 /** Props for `<LazyEditor>`:  the loaded module, and its `MonacoEditor`'s. */
 type LazyEditorProps = Parameters<MonacoModule["MonacoEditor"]>[0] & {
-  /** The loaded `spell-app/app/solid/monaco`. */
+  /** The loaded `spell/app/app/solid/monaco`. */
   module: MonacoModule
 }
 
-/** `spell-app/app/solid/monaco`:  Monaco, spell in it, and the Solid `MonacoEditor` -- loaded lazily, see `SpellEditorElement`. */
-export type MonacoModule = typeof import("spell-app/app/solid/monaco")
+/** `spell/app/app/solid/monaco`:  Monaco, spell in it, and the Solid `MonacoEditor` -- loaded lazily, see `SpellEditorElement`. */
+export type MonacoModule = typeof import("spell/app/app/solid/monaco")
 
 /**
  * What a `<spell-editor>` is doing, for its status line.

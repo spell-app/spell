@@ -30,7 +30,7 @@ const packagesDir = repoDir
  */
 const buildDir = process.env.SPELL_BUILD_DIR ? resolve(process.env.SPELL_BUILD_DIR) : resolve(repoDir, "build")
 /**
- * The folder of an installed package's main entry, through `node_modules`:  `spell-parser/spell` => spell-parser's
+ * The folder of an installed package's main entry, through `node_modules`:  `spell/parser/spell` => spell-parser's
  * `src/spell/`.
  * - By package, never by a path into another repo:  spell-parser sits beside this repo only in the top repo `spell`.
  */
@@ -39,9 +39,9 @@ function entryFolder(name: string): string {
 }
 /**
  * The folder of installed package `name`:  its `package.json`'s (every package of ours exports it);  for a sub-path of
- * a package (`spell-parser/py`), that folder in its `src/`:  a sub-path names a path under `src/`, as every import name
+ * a package (`spell/parser/py`), that folder in its `src/`:  a sub-path names a path under `src/`, as every import name
  * does (epic `repo-split` P14, Q47).
- * - e.g. `spell-parser/py` => spell-parser's `src/py/`, whose `core/` is the Python core;  `spell-parser` => its root
+ * - e.g. `spell/parser/py` => spell-parser's `src/py/`, whose `core/` is the Python core;  `spell-parser` => its root
  * - Unscoped names only, as all of ours are.
  */
 function packageFolder(name: string): string {
@@ -50,9 +50,9 @@ function packageFolder(name: string): string {
   return path.length ? join(root, "src", ...path) : root
 }
 /** `spell`'s `src/` (spell-parser's). */
-const srcDir = entryFolder("spell-parser/spell")
+const srcDir = entryFolder("spell/parser/spell")
 /** `core`'s `src/` (spell-parser's):  the runtime, and its built-in types' scope pack (`core.scopes.js`). */
-const coreDir = entryFolder("spell-parser/core")
+const coreDir = entryFolder("spell/parser/core")
 /** `app`'s `static/`:  fonts and css the app serves. */
 const staticDir = resolve(packagesDir, "app", "static")
 
@@ -110,7 +110,7 @@ const environment = {
   systemFilesRoot: resolve(spaceFolders.builtins, "@spell"),
   /**
    * Frozen projects tests run against, e.g. `spaces/@spell/test/fizzbuzz` -- `@spell/test`.
-   * See `spell-app/spaces/test`.
+   * See `spell/app/spaces/test`.
    */
   testFilesRoot: resolve(spaceFolders.builtins, "@spell", "test"),
   /**

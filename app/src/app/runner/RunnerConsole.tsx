@@ -1,7 +1,7 @@
-import type { SpellConsole } from "spell-parser/core/console"
-// Import directly, NOT through the `spell-app/app/solid` barrel, which pulls in the editor (epic page C9)
-import { tracked } from "spell-app/app/solid/tracked"
-import { ConsoleLines } from "spell-app/app/solid/ConsoleLines"
+import type { SpellConsole } from "spell/parser/core/console"
+// Import directly, NOT through the `spell/app/app/solid` barrel, which pulls in the editor (epic page C9)
+import { tracked } from "spell/app/app/solid/tracked"
+import { ConsoleLines } from "spell/app/app/solid/ConsoleLines"
 
 import "./RunnerConsole.css"
 

@@ -5,8 +5,8 @@
  *   spaces' folders on disk, the editor's language service.
  * - NOT in the barrel:  `hooks.ts` loads it after `consoleGuard.ts`, which must run before spell loads.
  */
-import type { LanguageCommands } from "spell-parser/cli"
-import { CLI } from "spell-app/cli"
+import type { LanguageCommands } from "spell/parser/cli"
+import { CLI } from "spell/app/cli"
 
 /** spell-parser's commands, each on a new `CliSession` with the command's flags. */
 export const languageCommands: LanguageCommands = {

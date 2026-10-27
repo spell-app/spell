@@ -1,9 +1,9 @@
 import { For, Show } from "solid-js"
 import { render } from "@solidjs/web"
 
-import { UI as SpellUI } from "spell-ui"
-import { uiReady } from "spell-app/app/solid/loadUI"
-import type { ChooserModalProps, ChooserOption, ChooserOptionInput } from "spell-app/app/solid/modals"
+import { UI as SpellUI } from "spell/ui"
+import { uiReady } from "spell/app/app/solid/loadUI"
+import type { ChooserModalProps, ChooserOption, ChooserOptionInput } from "spell/app/app/solid/modals"
 
 /****************
  * ### `<Chooser>`

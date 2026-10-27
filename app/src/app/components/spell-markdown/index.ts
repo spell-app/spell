@@ -19,13 +19,13 @@
 
 import { SpellMarkdown } from "./SpellMarkdown"
 
-import "spell-app/app/components/spell-code"
-import "spell-ui/components/ui-checkbox"
-import "spell-ui/components/ui-divider"
-import "spell-ui/components/ui-list"
-import "spell-ui/components/ui-parts"
-import "spell-ui/components/ui-segment"
-import "spell-ui/components/ui-table"
+import "spell/app/app/components/spell-code"
+import "spell/ui/components/ui-checkbox"
+import "spell/ui/components/ui-divider"
+import "spell/ui/components/ui-list"
+import "spell/ui/components/ui-parts"
+import "spell/ui/components/ui-segment"
+import "spell/ui/components/ui-table"
 
 SpellMarkdown.define()
 

@@ -5,12 +5,12 @@ import { resolve } from "path"
 import { pathToFileURL } from "url"
 import { describe, test, expect, beforeAll } from "vite-plus/test"
 
-import environment from "spell-app/spaces/server/node/environment"
-import { P } from "spell-parser/parser"
-import { SP } from "spell-parser/spell"
-import { installDiskFetch, locationForDiskPath } from "spell-app/spaces/server/node/projects/disk-fetch"
-import { describeParseErrors, tsxBinary } from "spell-parser/spell/test"
-import { fixtureFolder } from "spell-app/spaces/test"
+import environment from "spell/app/spaces/server/node/environment"
+import { P } from "spell/parser/parser"
+import { SP } from "spell/parser/spell"
+import { installDiskFetch, locationForDiskPath } from "spell/app/spaces/server/node/projects/disk-fetch"
+import { describeParseErrors, tsxBinary } from "spell/parser/spell/test"
+import { fixtureFolder } from "spell/app/spaces/test"
 
 /**
  * A project importing another, through `project.json` -- as `SpellProject` does it in the app.

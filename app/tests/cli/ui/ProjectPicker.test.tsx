@@ -1,7 +1,7 @@
 import { render } from "ink-testing-library"
 import { describe, test, expect, vi } from "vite-plus/test"
 
-import { CLI } from "spell-app/cli"
+import { CLI } from "spell/app/cli"
 
 const ROOT = {
   kind: "root",

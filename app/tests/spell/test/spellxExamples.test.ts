@@ -3,15 +3,15 @@ import JSON5 from "json5"
 import { resolve } from "path"
 import { describe, expect, test } from "vite-plus/test"
 
-import { SP } from "spell-parser/spell"
-import { parseSpellProject, type SpellSourceFile } from "spell-parser/spell/test"
-import { SX } from "spell-parser/spellx"
-import { projectFileFor } from "spell-parser/spell/node/projectFile"
-import environment from "spell-app/spaces/server/node/environment"
-import { CODE_SPELL_TWINS_DIR } from "spell-app/spaces/test"
+import { SP } from "spell/parser/spell"
+import { parseSpellProject, type SpellSourceFile } from "spell/parser/spell/test"
+import { SX } from "spell/parser/spellx"
+import { projectFileFor } from "spell/parser/spell/node/projectFile"
+import environment from "spell/app/spaces/server/node/environment"
+import { CODE_SPELL_TWINS_DIR } from "spell/app/spaces/test"
 
 // Spell UI's pack:  a spellx drawing names its components bare (`<button>`)
-import "spell-app/spaces"
+import "spell/app/spaces"
 
 /**
  * Every built-in example, written as spellx by `SX.SpellxWriter` (epic `elemental-spell` P12),

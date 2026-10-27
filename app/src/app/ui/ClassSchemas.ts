@@ -1,5 +1,5 @@
 import { schemaOf, type PropInfo } from "spell/util"
-import type { V } from "spell-ui/api"
+import type { V } from "spell/ui/api"
 
 /****************
  * ### `ClassSchemas`

@@ -14,9 +14,9 @@ import { parseArgs } from "node:util"
 
 import { writeOrCheck } from "spell/element-tools/generatedFiles"
 import { Terminal } from "spell/element-tools/Terminal"
-import { SiteDataBuilder } from "spell-ui/tools/SiteDataBuilder"
+import { SiteDataBuilder } from "spell/ui/tools/SiteDataBuilder"
 
-import { AppUIDataBuilder } from "spell-app/app/tools/AppUIDataBuilder"
+import { AppUIDataBuilder } from "spell/app/app/tools/AppUIDataBuilder"
 
 const { values } = parseArgs({ options: { check: { type: "boolean", default: false } } })
 const builder = new AppUIDataBuilder()

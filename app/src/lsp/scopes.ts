@@ -10,18 +10,18 @@
  *   GENERATED from `SP.BUILT_IN_TYPE_TABLE`, whose entries hold its docs:  edit those, then run this.
  * - The language server writes a project's pack itself after each clean compile, as do `spell compile` and
  *   `spell watch` (spell-app's cli) -- all through `SpellDiskWorkspace.writeScopes()`.
- * - NODE ONLY, and NOT in the `spell-app/lsp` barrel:  it runs the moment it's imported.
+ * - NODE ONLY, and NOT in the `spell/app/lsp` barrel:  it runs the moment it's imported.
  */
 // FIRST:  defines `__PACKAGE_VERSION__`, which vite would, before anything reads it
-import "spell-parser/spell/node/packageVersion.node"
+import "spell/parser/spell/node/packageVersion.node"
 
 import { writeFileSync } from "fs"
 import { relative, resolve } from "path"
 
-import environment from "spell-app/spaces/server/node/environment"
-import { SP } from "spell-parser/spell"
-import { LSP } from "spell-app/lsp"
-import { SpellDiskWorkspace } from "spell-app/lsp/SpellDiskWorkspace"
+import environment from "spell/app/spaces/server/node/environment"
+import { SP } from "spell/parser/spell"
+import { LSP } from "spell/app/lsp"
+import { SpellDiskWorkspace } from "spell/app/lsp/SpellDiskWorkspace"
 
 const args = process.argv.slice(2).filter((arg) => arg !== "--compile")
 const compile = args.length < process.argv.length - 2

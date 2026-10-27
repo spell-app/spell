@@ -1,8 +1,8 @@
-import type { MeAnswer, PersonChanges } from "spell-app/spaces/models/people"
-import { LOCAL_PERSON } from "spell-app/spaces/models/projectGroups"
-import environment from "spell-app/spaces/server/node/environment"
-import { respondWithJSON } from "spell-app/spaces/server/node/projects/response-utils"
-import { DiskStorage } from "spell-app/spaces/server/node/storage/DiskStorage"
+import type { MeAnswer, PersonChanges } from "spell/app/spaces/models/people"
+import { LOCAL_PERSON } from "spell/app/spaces/models/projectGroups"
+import environment from "spell/app/spaces/server/node/environment"
+import { respondWithJSON } from "spell/app/spaces/server/node/projects/response-utils"
+import { DiskStorage } from "spell/app/spaces/server/node/storage/DiskStorage"
 import { PeopleStore } from "./PeopleStore"
 
 /**

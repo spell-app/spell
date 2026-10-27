@@ -1,7 +1,7 @@
 # AGENTS.md
 
 This file provides guidance to AI coding agents (Claude Code, Codex, and others)
-when working with code in this folder, `src/app/` of the `spell-app` package (`spell-app/app`),
+when working with code in this folder, `src/app/` of the `spell-app` package (`spell/app/app`),
 and in the app's build folder, `app/` at the repo's root.
 
 **READ the repo root's [AGENTS.md](../../AGENTS.md) and [WWOD](../../agents/wwod/WWOD.md) FIRST:**
@@ -17,7 +17,7 @@ and in the app's build folder, `app/` at the repo's root.
   - Its server is spaces' (below).
 - The app is Solid 2 (READ the root's Solid 2 pointer for Solid work).
   - So is what compiled spell draws, on the page's Spell UI (epic `output-targets` P10-P11):
-    `core`'s [drawing.ts](../../../spell-parser/src/core/drawing.ts).
+    `core`'s [drawing.ts](../../../parser/src/core/drawing.ts).
   - No React:  every `.tsx` is Solid.
   - `build.test.ts` pins that no chunk holds React, `spell-runtime.js` included.
   - Two test projects (the root's `vitest.config.ts`):
@@ -26,7 +26,7 @@ and in the app's build folder, `app/` at the repo's root.
     - `app:node`, for most tests:  there Solid is its SERVER build
       (`renderToString`;  writes NOT staged, see [solid.test.tsx](../../tests/app/solid.test.tsx))
     - `app:browser` (chromium), for `*.browser.test.ts(x)`:  Solid's client build, as in the app
-  - `spell-app/app/solid` is the app's UI, all Solid (P8).
+  - `spell/app/app/solid` is the app's UI, all Solid (P8).
     - the pages' shell (`SpellPage`, `SplitPanel`, `AppRoot`)
     - menus, panes, dialogs, and the plumbing
     - `cellsBridge.ts` makes every Solid computation follow spell cells:
@@ -90,7 +90,7 @@ and in the app's build folder, `app/` at the repo's root.
   - ONE Solid per page, across those bundles.
     - `vite.solid.config.ts` builds FIRST, into each folder:
       - `spell-solid.js`:  Solid itself, plus
-        - Spell UI's element core (`spell-ui/core`, which carries `spell/element`) and its root family
+        - Spell UI's element core (`spell/ui/core`, which carries `spell/element`) and its root family
         - `@solidjs/h`, which compiled spell draws with
         - icon packs beside it
       - `spell-ui.js`:  the `spell-ui` barrel, lazy
@@ -104,7 +104,7 @@ and in the app's build folder, `app/` at the repo's root.
     - `<spell-code>` and `<spell-markdown>` take the Spell UI families they extend through `spell-ui-shared.js`
       (`SHARED_FAMILIES`, `vite.shared.ts`):
       - the page's own, on the same condition:  its `SpellUI.packModules` MUST then name them too
-        (`spell-ui/components/ui-code`, `spell-ui/components/ui-markdown`), or the script stops with an error saying so
+        (`spell/ui/components/ui-code`, `spell/ui/components/ui-markdown`), or the script stops with an error saying so
       - else `spell-ui.js`'s
     - `spell-runtime.js` takes Solid and `h` through it too, since compiled spell draws with Solid.
       It never takes `spell-ui.js`.
@@ -113,13 +113,13 @@ and in the app's build folder, `app/` at the repo's root.
   - `yarn lsp:start` and `yarn lsp:scopes` are [lsp](../lsp/)'s.
 - [The app's Monaco plumbing](ui/monaco/) (no UI).
   - Its language features call the SAME `LSP.SpellLanguageService`, in-process.
-    So `spell-app/lsp` stays browser-safe:  [lsp's AGENTS.md](../lsp/AGENTS.md).
+    So `spell/app/lsp` stays browser-safe:  [lsp's AGENTS.md](../lsp/AGENTS.md).
   - The editors on it are Solid:  `MonacoEditor`, `FileEditor` ([their folder](solid/monaco/)).
     Its barrel re-exports the plumbing.
   - Loaded LAZILY:
-    - in the app, through `spell-app/app/solid`'s `LazyMonaco`
+    - in the app, through `spell/app/app/solid`'s `LazyMonaco`
     - in `<spell-editor>`, through its `loadMonaco()`
-    - NEVER import `spell-app/app/ui/monaco` or `spell-app/app/solid/monaco` statically outside those folders, types aside.
+    - NEVER import `spell/app/app/ui/monaco` or `spell/app/app/solid/monaco` statically outside those folders, types aside.
     - Or Monaco (~4.4 MB) lands in the main bundle again.
 - Routing (P8):  [the routes](pages/routes.tsx), on `@solidjs/router@next` (`createRouter()`, pinned exactly).
   - The router ships its Solid JSX as SOURCE (`.jsx` files, in its dist folder).
@@ -145,8 +145,8 @@ and in the app's build folder, `app/` at the repo's root.
       - built by `yarn build:element`, into `dist-element/`
       - its demo:  `/demo/spell-viewer.html`, on the dev server
   - Solid (P7), on `spell-ui`.
-    - The runners import the Solid panes' FILES, never the `spell-app/app/solid` barrel (it pulls in the editor).
-      - e.g. `spell-app/app/solid/ThingExplorer`, `.../ConsoleLines`, `.../loadUI`
+    - The runners import the Solid panes' FILES, never the `spell/app/app/solid` barrel (it pulls in the editor).
+      - e.g. `spell/app/app/solid/ThingExplorer`, `.../ConsoleLines`, `.../loadUI`
     - `<spell-viewer>` is a root itself, with Fomantic's icons by default.
     - VS Code's webview HTML wraps its `#runner-root` in `<ui-root icons="fomantic">`.
   - The PROGRAM draws with the page's Solid too:  `App.start()` mounts its own root (`core.mountApp()`).
@@ -168,10 +168,10 @@ and in the app's build folder, `app/` at the repo's root.
       - It starts afresh, all the same, when (`runCompiled()`):
         - the edit changed the file that starts its app
         - or one of its things can't come over
-  - So ONLY `spellRuntime.ts` may value-import `spell-parser/core`.
+  - So ONLY `spellRuntime.ts` may value-import `spell/parser/core`.
     - The program finds its elements through `core.domRoot()`, never `document`.
-    - SEE [core's AGENTS.md](../../../spell-parser/src/core/AGENTS.md), "Who may value-import it".
-    - Mind barrels:  `spell-app/app/runner` holds `runCompiled()`, so a bundle's entry imports its runner's file directly.
+    - SEE [core's AGENTS.md](../../../parser/src/core/AGENTS.md), "Who may value-import it".
+    - Mind barrels:  `spell/app/app/runner` holds `runCompiled()`, so a bundle's entry imports its runner's file directly.
   - A drawable thing draws as its own Spell UI element (epic `drawable-thing`).
     - e.g. `a card is a drawable thing` draws as `<solitaire-card>`.
     - The element:  [SpellElement.tsx](runner/SpellElement.tsx).
@@ -214,7 +214,7 @@ and in the app's build folder, `app/` at the repo's root.
 - `components/`:  `<spell-viewer>` and `<spell-editor>` (epic `spell-element`, P4);
   `<spell-code>` and `<spell-markdown>` (epic `repo-split` P2).
   - They're Spell UI components, written as a component pack's families are
-    ([spell-epic's AGENTS.md](../../../spell-epic/src/AGENTS.md)).
+    ([spell-epic's AGENTS.md](../../../epic/src/AGENTS.md)).
   - `components/<tag>/` holds:
     - `<Name>.en.ts`:  the vocabulary
     - `<Name>.tsx`:  two classes
@@ -222,9 +222,9 @@ and in the app's build folder, `app/` at the repo's root.
       - then the component, on `E.UIComponent` (`import { E } from "spell/element"`).
         `<spell-viewer>`'s is on `UIRoot`.
     - Held to Spell UI's patterns by the lint guard, as every set's elements are (`spell-ui/*`:
-      [ui's AGENTS.md](../../../spell-ui/AGENTS.md), "The lint guard";  since epic `people-and-orgs` P17).
+      [ui's AGENTS.md](../../../ui/AGENTS.md), "The lint guard";  since epic `people-and-orgs` P17).
     - `index.ts`:  defines the tag;  also the bundle's entry
-  - `spell-app/app/components/<tag>` imports one.
+  - `spell/app/app/components/<tag>` imports one.
   - `<spell-viewer>` is a ROOT (`SpellViewer extends UIRoot`, J37):  a page needs nothing around it.
     - It loads each Spell UI family the runner draws, the first time one appears (in its shadow root too).
       A drawable thing's element loads its own:  a root never sees into another element's shadow root.
@@ -256,7 +256,7 @@ and in the app's build folder, `app/` at the repo's root.
       - Its family registers `spell` with the page's `UI.code` as it loads ([SpellLanguage](components/spell-code/SpellLanguage.ts)),
         so EVERY `<ui-code language="spell">` on the page is coloured, and every spell block of a markdown.
       - The colours are spell's parser's (`SP.SpellHighlighter`), from source:  a lazy chunk, on first use.
-    - `<spell-markdown>` (`SpellMarkdown extends UIMarkdown`):  drawn by spell's engine (`spell-parser/markdown`), plain and
+    - `<spell-markdown>` (`SpellMarkdown extends UIMarkdown`):  drawn by spell's engine (`spell/parser/markdown`), plain and
       `editable`, in `ui-*` elements ([MDEngine](components/spell-markdown/MDEngine.ts), a lazy chunk).
       - It overrides `UIMarkdown.loadEngine()`;  its barrel imports the families the engine draws with, and
         `<spell-code>` for its spell blocks.
@@ -282,7 +282,7 @@ and in the app's build folder, `app/` at the repo's root.
     - the page server's `componentSets` setting, in the root [package.json](../../package.json)
   - Links are written as from the page's SERVED address (`/components/app/x.html`):
     - `../../` is the checkout's root
-    - `../../spell-ui/ui-button.html` is a Spell UI page
+    - `../../ui/ui-button.html` is a Spell UI page
     - the layout and footer, in `__parts/`, are one level deeper
   - What it documents, and in which group:  [the hand-kept facts](../../app/docs/__data/pages.json5).
   - Each page's props, attributes and "Used in" tables come from the code:  `yarn site:data`.
@@ -326,20 +326,20 @@ and in the app's build folder, `app/` at the repo's root.
     measured between what's drawn.
     A new item takes its place in a group;  never a margin of its own.
 - Prod builds keep class names (`output.keepNames`, here):
-  SEE [parser's AGENTS.md](../../../spell-parser/src/parser/AGENTS.md), `keepNames`.
+  SEE [parser's AGENTS.md](../../../parser/src/parser/AGENTS.md), `keepNames`.
 
 ## Imports
 
-- As WWOD §4, with our own source as `spell-app/app` / `spell-app/app/*`:  a file's path under the repo's `src/`.
-  - e.g. `import { UI } from "spell-app/app/ui"`, `import "spell-app/app/components/spell-code"`
+- As WWOD §4, with our own source as `spell/app/app` / `spell/app/app/*`:  a file's path under the repo's `src/`.
+  - e.g. `import { UI } from "spell/app/app/ui"`, `import "spell/app/app/components/spell-code"`
   - Vite's own entries and `index.html`'s script are paths from `app/`, Vite's root:  `../src/app/index.tsx`.
     - The dev server asks for that one as `/src/app/index.tsx`, as a URL can't go above its root:
       `repoSourceInDev()`, in [vite.config.ts](../../app/vite.config.ts), finds it in the repo's `src/`.
 - Nothing imports THIS folder except `cli`.
   And the `<script>` entries in its own pages:  `index.html` and the demos.
-- It may import spaces' models, `spell-app/spaces` (the same repo, spell-app);
-  NEVER `spell-app/spaces/server/node/...`, which is node only.
-  - Another repo's packages by npm name (`spell-parser/spell`, `spell-ui/core` ...):
+- It may import spaces' models, `spell/app/spaces` (the same repo, spell-app);
+  NEVER `spell/app/spaces/server/node/...`, which is node only.
+  - Another repo's packages by npm name (`spell/parser/spell`, `spell/ui/core` ...):
     the root's [AGENTS.md](../../AGENTS.md), "Import names and global types".
   - The editor ([editor.ts](editor.ts)) does:
     - a group's projects are `SPACES.SpellProjectRoot`
@@ -349,9 +349,9 @@ and in the app's build folder, `app/` at the repo's root.
     - the route:  `/api/people/me`
     - typed by `SPACES.MeAnswer`
   - `<spell-viewer>` loads only the light files, without the parser:
-    - `spell-app/spaces/models/projectGroups`, which registers spell's project groups
-    - `spell-parser/spell/SpellSetup`
-    - `spell-parser/spell/SpellUrls`
+    - `spell/app/spaces/models/projectGroups`, which registers spell's project groups
+    - `spell/parser/spell/SpellSetup`
+    - `spell/parser/spell/SpellUrls`
   - Every project file's URL comes from `SP.SpellUrls`:  `/spaces/<project>/<file>`, compiled files too.
 
 ## Decorators
@@ -366,4 +366,4 @@ As WWOD §12, plus:
 
 As WWOD §8, plus our self-namespace:
 
-- `UI` ~== `spell-app/app/ui`
+- `UI` ~== `spell/app/app/ui`

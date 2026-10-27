@@ -11,10 +11,10 @@ import {
 } from "vscode-languageserver"
 import { CompletionItemInsertTextRule, MarkerSeverity } from "monaco-editor/editor/common/standalone/standaloneEnums"
 
-import { LSP } from "spell-app/lsp"
-import { SpellDiskWorkspace } from "spell-app/lsp/SpellDiskWorkspace"
-import { LspToMonaco } from "spell-app/app/ui/monaco/LspToMonaco"
-import environment from "spell-app/spaces/server/node/environment"
+import { LSP } from "spell/app/lsp"
+import { SpellDiskWorkspace } from "spell/app/lsp/SpellDiskWorkspace"
+import { LspToMonaco } from "spell/app/app/ui/monaco/LspToMonaco"
+import environment from "spell/app/spaces/server/node/environment"
 
 /**
  * LSP => Monaco conversions, alone and on real `SpellLanguageService` answers.

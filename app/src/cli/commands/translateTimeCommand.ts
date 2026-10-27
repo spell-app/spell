@@ -1,7 +1,7 @@
 import { basename } from "path"
 
-import type { TimedProject } from "spell-parser/cli/translateTimes"
-import { CLI } from "spell-app/cli"
+import type { TimedProject } from "spell/parser/cli/translateTimes"
+import { CLI } from "spell/app/cli"
 
 /**
  * `spell translate speedtest [projects...] --to <lang>`:  time `spell translate`, run after run, on scratch copies
@@ -30,8 +30,8 @@ export async function translateTimeCommand(
     const reference = options.reference ?? TRANSLATED_BY_HAND[project.projectId]?.[options.to]
     projects.push({ projectName: project.projectName ?? basename(folder), folder, reference })
   }
-  const { timeTranslations } = await import("spell-parser/cli/translateTimes")
-  const { translationOf } = await import("spell-parser/cli/translateProject")
+  const { timeTranslations } = await import("spell/parser/cli/translateTimes")
+  const { translationOf } = await import("spell/parser/cli/translateProject")
   const report = await timeTranslations(projects, options, async (folder, translateOptions, reference) => {
     // a session of its own each run:  nothing parsed or compiled carried over from the last
     const runSession = new CLI.CliSession(options)

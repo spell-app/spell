@@ -7,7 +7,7 @@
  */
 
 /* Spell UI's breakpoints (`@custom-media`), inlined at build time */
-@import "spell-ui/styles/media.css";
+@import "spell/ui/styles/media.css";
 
 #ProjectChooser {
   --Home-serif: "Spell Serif", Palatino, "Palatino Linotype", "Book Antiqua", P052, serif;

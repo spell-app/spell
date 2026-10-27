@@ -1,6 +1,6 @@
 import { describe, test, expect } from "vite-plus/test"
 
-import { P } from "spell-parser/parser"
+import { P } from "spell/parser/parser"
 import {
   incrementalSpellProject,
   parseSpellProject,
@@ -8,8 +8,8 @@ import {
   summarizeIncremental,
   type SpellProjectSummary,
   type SpellSourceFile
-} from "spell-parser/spell/test"
-import { loadCodeSpellTwin } from "spell-app/spaces/test"
+} from "spell/parser/spell/test"
+import { loadCodeSpellTwin } from "spell/app/spaces/test"
 
 /**
  * `P.IncrementalProject` MUST give exactly what a full parse gives:

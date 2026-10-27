@@ -1,8 +1,8 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { SP } from "spell-parser/spell"
-import { compiledFixture, fixtureLanguages, fixtureProjectNames } from "spell-app/spaces/test"
-import { CLI } from "spell-app/cli"
+import { SP } from "spell/parser/spell"
+import { compiledFixture, fixtureLanguages, fixtureProjectNames } from "spell/app/spaces/test"
+import { CLI } from "spell/app/cli"
 
 /**
  * A test project with files in another language than English runs its own spell tests, and they all pass

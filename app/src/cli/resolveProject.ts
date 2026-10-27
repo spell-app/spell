@@ -18,11 +18,11 @@
 import { existsSync, statSync } from "fs"
 import { basename, dirname, resolve } from "path"
 
-import { SP } from "spell-parser/spell"
-import { hasProjectFile } from "spell-parser/spell/node/projectFile"
-import { locationForDiskPath } from "spell-app/spaces/server/node/projects/disk-fetch"
-import * as projectUtils from "spell-app/spaces/server/node/projects/project-utils"
-import { CLI } from "spell-app/cli"
+import { SP } from "spell/parser/spell"
+import { hasProjectFile } from "spell/parser/spell/node/projectFile"
+import { locationForDiskPath } from "spell/app/spaces/server/node/projects/disk-fetch"
+import * as projectUtils from "spell/app/spaces/server/node/projects/project-utils"
+import { CLI } from "spell/app/cli"
 
 /** Stands for the current folder:  `@here` ~== `.` */
 export const HERE_ARG = "@here"

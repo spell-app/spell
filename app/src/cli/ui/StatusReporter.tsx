@@ -1,7 +1,7 @@
 import chalk from "chalk"
 import { render, type Instance } from "ink"
 
-import { CLI } from "spell-app/cli"
+import { CLI } from "spell/app/cli"
 
 /**
  * Shows progress of a command's work, one `StatusRow` per piece, e.g. per project compiled.

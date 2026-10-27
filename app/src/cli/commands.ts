@@ -78,7 +78,7 @@ export default function appCommands(spell: Command): void {
       "write a component page as notebooks, one per tab, in @spell/notebooks/<Title>/:  its sections, examples in " +
         "spellx's bare names, prose and API tables;  what it can't write as the page has it, on stderr"
     )
-    .argument("<page>", "the page's file, e.g. spell-ui/docs/ui-button.html")
+    .argument("<page>", "the page's file, e.g. ui/docs/ui-button.html")
     .option("--dry-run", "write nothing:  print each file instead")
     .action((page: string, _options, command: Command) =>
       CLI.runCommand(async () => (await loadApp()).appCommands.notebook([page], command.optsWithGlobals()))
@@ -116,5 +116,5 @@ export default function appCommands(spell: Command): void {
 
 /** `spell app vscode [verb]`:  loads no spell (`vscodeCommand.ts`). */
 function vscodeCommand(verb: string | undefined, options: { force?: boolean }): Promise<never> {
-  return CLI.runCommand(async () => (await import("spell-app/cli/commands/vscodeCommand")).vscodeCommand(verb, options))
+  return CLI.runCommand(async () => (await import("spell/app/cli/commands/vscodeCommand")).vscodeCommand(verb, options))
 }

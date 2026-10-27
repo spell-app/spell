@@ -5,14 +5,14 @@ import { resolve } from "path"
 import { pathToFileURL } from "url"
 import { runInNewContext } from "vm"
 
-import environment from "spell-app/spaces/server/node/environment"
-import { SP } from "spell-parser/spell"
-import { LSP } from "spell-app/lsp"
-import { SpellDiskWorkspace } from "spell-app/lsp/SpellDiskWorkspace"
-import { installDiskFetch, locationForDiskPath } from "spell-app/spaces/server/node/projects/disk-fetch"
-import { scopesFromPacks } from "spell-app/lsp/ScopesSource"
-import { compiledSpellProject } from "spell-parser/spell/test"
-import { copyFixtureProject, fixtureFolder, lineOf, loadFixtureProject } from "spell-app/spaces/test"
+import environment from "spell/app/spaces/server/node/environment"
+import { SP } from "spell/parser/spell"
+import { LSP } from "spell/app/lsp"
+import { SpellDiskWorkspace } from "spell/app/lsp/SpellDiskWorkspace"
+import { installDiskFetch, locationForDiskPath } from "spell/app/spaces/server/node/projects/disk-fetch"
+import { scopesFromPacks } from "spell/app/lsp/ScopesSource"
+import { compiledSpellProject } from "spell/parser/spell/test"
+import { copyFixtureProject, fixtureFolder, lineOf, loadFixtureProject } from "spell/app/spaces/test"
 
 /** The Solitaire example's Card.spellx:  the tests name its lines by what they say (`lineOf()`), as it changes. */
 const CARD_TEXT = readFileSync(fixtureFolder("Solitaire", "Card.spellx"), "utf8")

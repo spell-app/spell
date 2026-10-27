@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, test, vi } from "vite-plus/test"
 
-import type { SPACES } from "spell-app/spaces"
+import type { SPACES } from "spell/app/spaces"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
-import { openYouPanel } from "spell-app/app/solid/modals"
+import { openYouPanel } from "spell/app/app/solid/modals"
 
 /**
  * The "You" panel (epic `people-and-orgs` P9), in the browser:

@@ -1,4 +1,4 @@
-import type { EditorStore } from "spell-app/app/editor"
+import type { EditorStore } from "spell/app/app/editor"
 
 // ## Shared types for app pages.
 

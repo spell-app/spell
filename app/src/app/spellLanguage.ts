@@ -12,7 +12,7 @@
  */
 
 if ("SpellUI" in globalThis) {
-  import("spell-app/app/components/spell-code/SpellLanguage")
+  import("spell/app/app/components/spell-code/SpellLanguage")
     .then(({ SpellLanguage }) => SpellLanguage.registerWhenLoaded())
     .catch((error: unknown) => console.error("spell-language.js:  spell's colouring didn't load", error))
 }

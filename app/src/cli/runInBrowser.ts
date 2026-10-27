@@ -16,10 +16,10 @@ import { resolve } from "path"
 import { fileURLToPath } from "url"
 
 import { SRV } from "spell/server"
-import environment from "spell-app/spaces/server/node/environment"
-import { SP } from "spell-parser/spell"
-import { LSP } from "spell-app/lsp"
-import { CLI } from "spell-app/cli"
+import environment from "spell/app/spaces/server/node/environment"
+import { SP } from "spell/parser/spell"
+import { LSP } from "spell/app/lsp"
+import { CLI } from "spell/app/cli"
 
 /** `app` -- the package with the `<spell-viewer>` element. */
 const APP_DIR = resolve(environment.packagesDir, "app")

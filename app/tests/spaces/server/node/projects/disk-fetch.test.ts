@@ -3,20 +3,20 @@ import { existsSync, mkdtempSync, mkdirSync, writeFileSync, readFileSync } from 
 import { tmpdir } from "os"
 import { basename, resolve } from "path"
 
-import environment from "spell-app/spaces/server/node/environment"
-import { P } from "spell-parser/parser"
-import { SP } from "spell-parser/spell"
-import { parseSpellProject, describeParseErrors } from "spell-parser/spell/test"
-import { SPACES } from "spell-app/spaces"
+import environment from "spell/app/spaces/server/node/environment"
+import { P } from "spell/parser/parser"
+import { SP } from "spell/parser/spell"
+import { parseSpellProject, describeParseErrors } from "spell/parser/spell/test"
+import { SPACES } from "spell/app/spaces"
 import {
   loadFixtureProject,
   fixtureFolder,
   fixtureImportScope,
   fixtureProjectId,
   FIXTURES_DIR
-} from "spell-app/spaces/test"
-import { diskFetch, installDiskFetch, locationForDiskPath } from "spell-app/spaces/server/node/projects/disk-fetch"
-import { serverPathForRoot } from "spell-app/spaces/server/node/projects/project-utils"
+} from "spell/app/spaces/test"
+import { diskFetch, installDiskFetch, locationForDiskPath } from "spell/app/spaces/server/node/projects/disk-fetch"
+import { serverPathForRoot } from "spell/app/spaces/server/node/projects/project-utils"
 
 /**
  * `SpellProject` & co. hosted in node, loading from disk instead of over HTTP -- what the language server does:

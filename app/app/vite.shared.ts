@@ -6,7 +6,7 @@ import type { Plugin, PluginOption, UserConfig } from "vite"
 import { standardDecorators } from "spell/toolchain/decorators"
 import { packageVersion } from "spell/toolchain/packageVersion"
 import { CSS_TARGETS, SOLID_DEDUPE } from "spell/element-tools/elementConfig"
-import { emitIconPacks } from "spell-ui/vite.config.ts"
+import { emitIconPacks } from "spell/ui/vite.config.ts"
 
 /**
  * Config every `vite*.config.ts` and `vitest.config.ts` here shares.
@@ -25,7 +25,7 @@ const NOT_SOLID_SOURCE = /\/node_modules\/(?!@solidjs\/router\/)/
  * The top repo `spell`, whose `yarn.lock` is the ONE install for every repo (epic `repo-split` P7):  the nearest folder
  * up holding one.
  * - Vite serves files only inside its workspace (`server.fs.allow`), which is spell-app's own root:  Spell UI's test
- *   setup (`spell-ui/test-helpers/setup.ts`), its source and every other repo's live beside spell-app, under this one.
+ *   setup (`spell/ui/test-helpers/setup.ts`), its source and every other repo's live beside spell-app, under this one.
  */
 export const TOP_REPO = (() => {
   for (let dir = import.meta.dirname; ; dir = path.dirname(dir)) {
@@ -84,7 +84,7 @@ export function appConfig({ iconPacks }: { iconPacks?: boolean } = {}) {
  * every other bundle of ours imports Solid and `spell-ui` from these, beside it,
  * so a page with `<spell-viewer>`s AND a `<spell-editor>` loads ONE copy of each.
  * - `solid`:  `solid-js`, `@solidjs/web` (`@solidjs/signals` under them),
- *   `spell-ui`'s element core, `spell-ui/core`, and its root family, `spell-ui/components/ui-root`, each whole:
+ *   `spell-ui`'s element core, `spell/ui/core`, and its root family, `spell/ui/components/ui-root`, each whole:
  *   `<spell-viewer>` and `<spell-editor>` are Spell UI components (`UIComponent`), defined as their scripts run,
  *   and `<spell-viewer>` is a root (`UIRoot`);
  *   and `@solidjs/h` (as `h`), which compiled spell draws with (`spell-runtime.js`)
@@ -115,8 +115,8 @@ const SHARED_ID = "spell-shared-solid:"
  * - Else `spell-ui.js`'s:  the `spell-ui` barrel exports every one (`vite.solid.config.ts` checks).
  */
 export const SHARED_FAMILIES: Readonly<Record<string, readonly string[]>> = {
-  "spell-ui/components/ui-code": ["UICode", "DOMCodeElement", "CodeHighlighter", "CodeLines"],
-  "spell-ui/components/ui-markdown": ["UIMarkdown", "DOMMarkdownElement", "MarkdownRenderer"]
+  "spell/ui/components/ui-code": ["UICode", "DOMCodeElement", "CodeHighlighter", "CodeLines"],
+  "spell/ui/components/ui-markdown": ["UIMarkdown", "DOMMarkdownElement", "MarkdownRenderer"]
 }
 
 /**
@@ -133,7 +133,7 @@ const DRAWN_FAMILIES = ["ui-checkbox", "ui-divider", "ui-list", "ui-parts", "ui-
  * Specifiers another bundle takes from `SHARED_SOLID`'s files.
  * - Only those our code imports:
  *   `solid-js/internal` (from `@solidjs/web`) and `@solidjs/signals` (from `solid-js`) stay INSIDE `spell-solid.js`.
- * - `spell-ui/core` and `spell-ui/components/ui-root` are in `spell-solid.js`, not `spell-ui.js`:
+ * - `spell/ui/core` and `spell/ui/components/ui-root` are in `spell-solid.js`, not `spell-ui.js`:
  *   `<spell-viewer>` and `<spell-editor>` define themselves on them as their scripts run, before the rest of `ui` loads.
  * - The code and markdown families come through `spell-solid-shared.js`'s partner, `spell-ui-shared.js`
  *   (`SHARED_FAMILIES`, `DRAWN_FAMILIES`).
@@ -145,12 +145,12 @@ const FROM_SHARED_SOLID = new Map<string, string>([
   ["solid-js", SHARED_SOLID.shared],
   ["@solidjs/web", SHARED_SOLID.shared],
   ["@solidjs/h", SHARED_SOLID.shared],
-  // spell-element, which `<spell-viewer>` and `<spell-editor>` are written on:  `spell-ui/core` carries all of it, and
-  // its `E` holds every name spell-element's does, so it comes BEFORE `spell-ui/core` (a page's module,
+  // spell-element, which `<spell-viewer>` and `<spell-editor>` are written on:  `spell/ui/core` carries all of it, and
+  // its `E` holds every name spell-element's does, so it comes BEFORE `spell/ui/core` (a page's module,
   // `spell-solid-shared.js`)
   ["spell/element", SHARED_SOLID.shared],
-  ["spell-ui/core", SHARED_SOLID.shared],
-  ["spell-ui/components/ui-root", SHARED_SOLID.shared],
+  ["spell/ui/core", SHARED_SOLID.shared],
+  ["spell/ui/components/ui-root", SHARED_SOLID.shared],
   ["spell-ui", SHARED_SOLID.ui],
   // the families `<spell-code>` and `<spell-markdown>` extend, and those spell's markdown engine draws with
   ...[...Object.keys(SHARED_FAMILIES), ...DRAWN_FAMILIES].map((id) => [id, SHARED_SOLID.families] as const)
@@ -158,7 +158,7 @@ const FROM_SHARED_SOLID = new Map<string, string>([
 
 /**
  * The specifiers `spell-solid-shared.js` takes from the page when the page has them all:
- * keys of `globalThis.SpellUI.packModules`, the docs bundle's (`spell-epic/src/tools/_assets/spell-ui.entry.js`).
+ * keys of `globalThis.SpellUI.packModules`, the docs bundle's (`epic/src/tools/_assets/spell-ui.entry.js`).
  */
 export const SHARED_SPECIFIERS = [...FROM_SHARED_SOLID]
   .filter(([, file]) => file === SHARED_SOLID.shared)
@@ -187,14 +187,14 @@ const SOLID_FAMILY = /^(solid-js|@solidjs\/[^/]+|spell-ui|spell\/element)(\/|$)/
  * - Such an import resolves to an EXTERNAL id, which `output.paths` writes as `./spell-solid-shared.js` /
  *   `./spell-ui.js`:  relative.
  *   So every chunk that imports one MUST sit at the output folder's top level (ours do:  fixed names, no folders).
- * - Static and dynamic imports alike:  `import("spell-ui")` becomes `import("./spell-ui.js")`, still on demand.
- * - Side-effect imports too:  `import "spell-ui/components/ui-table"` becomes `import "./spell-ui-shared.js"`.
+ * - Static and dynamic imports alike:  `import("spell/ui")` becomes `import("./spell-ui.js")`, still on demand.
+ * - Side-effect imports too:  `import "spell/ui/components/ui-table"` becomes `import "./spell-ui-shared.js"`.
  * - Looked up by the import name itself, the key of the maps above and of a page's `SpellUI.packModules`
  *   (`SHARED_SPECIFIERS`;  epic `repo-split` P14, Q45).
- * - Any other Solid / `ui` specifier (`solid-js/store`, `spell-ui/runtime`) is a build ERROR:
+ * - Any other Solid / `ui` specifier (`solid-js/store`, `spell/ui/runtime`) is a build ERROR:
  *   add it to `FROM_SHARED_SOLID` and to what `vite.solid.config.ts` exports, or the shared files won't have its names.
  * - Type-only imports (`@solidjs/web/types/jsx.js`) are gone before this runs.
- * - `enforce: "pre"`:  before Vite's resolver, which would resolve `spell-ui/core` to its source.
+ * - `enforce: "pre"`:  before Vite's resolver, which would resolve `spell/ui/core` to its source.
  */
 export function sharedSolid(): Plugin {
   return {

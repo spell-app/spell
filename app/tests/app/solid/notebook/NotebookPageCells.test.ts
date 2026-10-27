@@ -1,7 +1,7 @@
 import { readFileSync } from "fs"
 import { describe, expect, test } from "vite-plus/test"
 
-import { NotebookPageCells } from "spell-app/app/solid/notebook/NotebookPageCells"
+import { NotebookPageCells } from "spell/app/app/solid/notebook/NotebookPageCells"
 
 /**
  * The Counter notebook, written in markdown:  its `#` title, its `##` sections and their text.

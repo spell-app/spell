@@ -9,12 +9,12 @@ import {
   core,
   upgradeEntry,
   type ThingsToSearch
-} from "spell-parser/core/model"
-import type { FileProblem, OrgRole, PersonChanges, PersonView } from "spell-app/spaces/models/people"
-import { HOME_ORG } from "spell-app/spaces/models/projectGroups"
-import type { SpaceStorage } from "spell-app/spaces/models/SpaceStorage"
-import { readJSON5, writeJSON5 } from "spell-app/spaces/server/node/storage/json5"
-import * as People from "spell-app/spaces/@spell/library/people/people.lib.ts"
+} from "spell/parser/core/model"
+import type { FileProblem, OrgRole, PersonChanges, PersonView } from "spell/app/spaces/models/people"
+import { HOME_ORG } from "spell/app/spaces/models/projectGroups"
+import type { SpaceStorage } from "spell/app/spaces/models/SpaceStorage"
+import { readJSON5, writeJSON5 } from "spell/app/spaces/server/node/storage/json5"
+import * as People from "spell/app/spaces/@spell/library/people/people.lib.ts"
 
 /** A saved entry, as the people library's things are saved:  `{ "$type": "Person", "id": "owen", ... }`. */
 type Entry = Record<string, unknown>

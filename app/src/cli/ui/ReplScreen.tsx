@@ -3,7 +3,7 @@ import { Box, Text, useApp, useInput, useStdout } from "ink"
 import { useState } from "react"
 import chalk from "chalk"
 
-import { CLI } from "spell-app/cli"
+import { CLI } from "spell/app/cli"
 
 /** Keys, for the footer. */
 const HELP = "Enter parse · ↑↓ earlier lines · Esc quit"

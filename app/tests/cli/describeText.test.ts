@@ -2,8 +2,8 @@ import { basename } from "path"
 import { fileURLToPath } from "url"
 import { beforeAll, describe, test, expect } from "vite-plus/test"
 
-import { LSP } from "spell-app/lsp"
-import { CLI } from "spell-app/cli"
+import { LSP } from "spell/app/lsp"
+import { CLI } from "spell/app/cli"
 
 /**
  * `spell describe`'s text, for the Solitaire example:  its cards, deck and piles, and its game --

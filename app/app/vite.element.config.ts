@@ -3,7 +3,7 @@ import { createRequire } from "node:module"
 import { fileURLToPath, pathToFileURL } from "node:url"
 import { defineConfig, type Plugin } from "vite"
 
-import environment from "spell-app/spaces/server/node/environment"
+import environment from "spell/app/spaces/server/node/environment"
 import { appConfig, sharedSolid } from "./vite.shared.ts"
 
 /**

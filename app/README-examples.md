@@ -237,7 +237,7 @@ spell run @spell/examples/fizzbuzz
 
 </details>
 
-With `--target py`, the same hundred lines come from Python ([the targets](https://github.com/spell-app/spell-parser/blob/main/README-targets.md)).
+With `--target py`, the same hundred lines come from Python ([the targets](https://github.com/spell-app/spell/blob/main/parser/README-targets.md)).
 
 <details>
 <summary>What it compiles to, in JavaScript</summary>
@@ -259,7 +259,7 @@ playFizzbuzz()
 
 - From `spell compile @spell/examples/fizzbuzz --stdout`, its import line left out.
 - The new phrase is a function, `playFizzbuzz()`;  "the number" is the loop's `number`.
-- `core` is [the runtime](https://github.com/spell-app/spell-parser/blob/main/README-core.md) compiled Spell runs on.
+- `core` is [the runtime](https://github.com/spell-app/spell/blob/main/parser/README-core.md) compiled Spell runs on.
 
 </details>
 
@@ -302,7 +302,7 @@ Every framework has its to-do list, and this is Spell's:
 
 It's written in spellx, Spell in tags:  a tag for each template, and inside it a tag for each property, alias and drawing,
 with Markdown around them for a person to read
-([the spellx page](https://github.com/spell-app/spell-parser/blob/main/README-spellx.md)).
+([the spellx page](https://github.com/spell-app/spell/blob/main/parser/README-spellx.md)).
 First, what a task IS:
 
 ```html
@@ -332,7 +332,7 @@ First, what a task IS:
   - `it can be selected`:  a click selects a task, and shift or command (ctrl) selects more.
   - `it can be dragged`:  by its grip, to another place in its list (below).
 
-Then how a task draws, with [Spell UI](https://github.com/spell-app/spell-ui/blob/main/README.md)'s elements:
+Then how a task draws, with [Spell UI](https://github.com/spell-app/spell/blob/main/ui/README.md)'s elements:
 a form of its own, bound to the task.
 
 ```html
@@ -558,7 +558,7 @@ the solitaire itself, how a click or a drag plays a card, and its kinds of pile,
 
 - The same sentences as the Calculator's, each in a tag of its own, without "a solitaire" at the start of every line.
 - It isn't a second language:  the tags are more ways to write the same rules
-  ([the language, sentence by sentence](https://github.com/spell-app/spell-parser/blob/main/README-spell.md)),
+  ([the language, sentence by sentence](https://github.com/spell-app/spell/blob/main/parser/README-spell.md)),
   and a `<spell>` block inside one is plain Spell.
 - `<group>` tags and `##` lines are headings:  for a person to read, which the editor shows in bold.
 - [Card.spellx](spaces/@spell/examples/Solitaire/Card.spellx) says what its suits, ranks and colors are:
@@ -643,7 +643,7 @@ _Solitaire in the editor, dealt:  its Spell on the left, the game on the right._
 ### Solitario:  the same game, in Spanish
 
 Spell reads Spanish too, a file at a time, by its name:  `Solitario.es.spell` is Spanish, a name with no language English
-([Spell in Spanish](https://github.com/spell-app/spell-parser/blob/main/README-spanish.md)).
+([Spell in Spanish](https://github.com/spell-app/spell/blob/main/parser/README-spanish.md)).
 [Solitario](spaces/@spell/examples/Solitario/) is Solitaire written in it, in the outline style, cards and all:
 its own `Carta`, `Mazo` and `Pila`, as Solitaire has its `Card`, `Deck` and `Pile`, so all of it reads in Spanish.
 
@@ -761,7 +761,7 @@ Made Flashcards:  try  spell run <your space>/Flashcards
 FizzBuzz and the to-do list Task List grew from have frozen twins beside them,
 [`@spell/test`](spaces/@spell/test/),
 which the tests in [tests/spell/](tests/spell/) compile and compare line for line
-([how they're checked](https://github.com/spell-app/spell-parser/blob/main/README-spell.md#the-frozen-test-projects)).
+([how they're checked](https://github.com/spell-app/spell/blob/main/parser/README-spell.md#the-frozen-test-projects)).
 Open them like any other project (`/edit/@spell/test/fizzbuzz`), but change the examples here instead:
 even `spell format` leaves the test projects alone.
 
@@ -770,9 +770,9 @@ even `spell format` leaves the test projects alone.
 - [The editor and the runners](README-app.md):  how the editor runs an example as you type,
   and keeps a game going across an edit
 - [Spaces](README-spaces.md):  addresses, your own space, and importing a library into a project
-- [The language, sentence by sentence](https://github.com/spell-app/spell-parser/blob/main/README-spell.md):  every kind of sentence these examples use,
+- [The language, sentence by sentence](https://github.com/spell-app/spell/blob/main/parser/README-spell.md):  every kind of sentence these examples use,
   and how the frozen test projects are checked
 - [spell-app's commands](https://github.com/spell-app/spell/blob/main/README-cli.md#spell-app):  `spell app create`, `spell app serve` and `spell projects`,
   in full
-- [Spell UI's components](https://github.com/spell-app/spell-ui/blob/main/README-components.md):
+- [Spell UI's components](https://github.com/spell-app/spell/blob/main/ui/README-components.md):
   the `<ui-*>` elements Task List and Solitaire draw with

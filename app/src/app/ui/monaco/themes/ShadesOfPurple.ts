@@ -1,4 +1,4 @@
-import type { monaco } from "spell-app/app/ui/monaco/monaco"
+import type { monaco } from "spell/app/app/ui/monaco/monaco"
 
 // Above the class:  its static `dark` and `light` read it while the class is defined
 /** Heading levels with a semantic modifier of their own:  `heading1` ... `heading4` (`TOKEN_LEGEND`). */

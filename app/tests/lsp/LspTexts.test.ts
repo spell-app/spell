@@ -4,10 +4,10 @@ import { tmpdir } from "os"
 import { resolve } from "path"
 import { pathToFileURL } from "url"
 
-import { SP } from "spell-parser/spell"
-import { fixtureFolder } from "spell-app/spaces/test"
-import { LSP } from "spell-app/lsp"
-import { SpellDiskWorkspace } from "spell-app/lsp/SpellDiskWorkspace"
+import { SP } from "spell/parser/spell"
+import { fixtureFolder } from "spell/app/spaces/test"
+import { LSP } from "spell/app/lsp"
+import { SpellDiskWorkspace } from "spell/app/lsp/SpellDiskWorkspace"
 
 /**
  * The language server's labels follow the FILE's language, by its name (epic `spanish` P13, P19):

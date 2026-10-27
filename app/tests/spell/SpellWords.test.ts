@@ -1,7 +1,7 @@
 import { describe, test, expect } from "vite-plus/test"
 
-import { SP } from "spell-parser/spell"
-import { fixtureWords } from "spell-app/spaces/test"
+import { SP } from "spell/parser/spell"
+import { fixtureWords } from "spell/app/spaces/test"
 
 /**
  * A test project's words (`SP.SpellWords`):  spell's wording of each member,

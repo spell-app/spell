@@ -2,19 +2,19 @@ import { copyFileSync, mkdirSync, readdirSync, readFileSync } from "fs"
 import JSON5 from "json5"
 import { basename, resolve } from "path"
 
-import { hasProjectFile, projectFileFor } from "spell-parser/spell/node/projectFile"
-import { P } from "spell-parser/parser"
-import { SP } from "spell-parser/spell"
-import { parseSpellProject, type SpellSourceFile } from "spell-parser/spell/test"
-import environment from "spell-app/spaces/server/node/environment"
+import { hasProjectFile, projectFileFor } from "spell/parser/spell/node/projectFile"
+import { P } from "spell/parser/parser"
+import { SP } from "spell/parser/spell"
+import { parseSpellProject, type SpellSourceFile } from "spell/parser/spell/test"
+import environment from "spell/app/spaces/server/node/environment"
 
 // Spell UI's pack, as every compile has it:  an example written in spellx names its components bare (`<button>`)
-import "spell-app/spaces/models/spellUIPack"
+import "spell/app/spaces/models/spellUIPack"
 
 /*
  * The test projects' helpers:  each one read from disk, parsed and compiled headlessly, as a compile would.
- * - Node only, for tests:  imported as `spell-app/spaces/test`, never from spaces' barrel.
- * - spell-parser's `spell-parser/spell/test` parses and compiles the projects a test writes inline (`parseSpellProject()`);
+ * - Node only, for tests:  imported as `spell/app/spaces/test`, never from spaces' barrel.
+ * - spell-parser's `spell/parser/spell/test` parses and compiles the projects a test writes inline (`parseSpellProject()`);
  *   these are the ones on disk, spell-app's own.
  * - Three kinds, each by its name, e.g. `fizzbuzz`, `Solitaire`, `a-first-spell`:
  *   - the FROZEN test projects, `@spell/test` (`FIXTURES_DIR`):  tests' own, never edited to follow anything

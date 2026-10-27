@@ -5,10 +5,10 @@ import { dirname, join } from "path"
 import { createInterface } from "readline"
 
 import type { SRV } from "spell/server"
-import environment from "spell-app/spaces/server/node/environment"
-import * as projectUtils from "spell-app/spaces/server/node/projects/project-utils"
-import { SP } from "spell-parser/spell"
-import { hasProjectFile } from "spell-parser/spell/node/projectFile"
+import environment from "spell/app/spaces/server/node/environment"
+import * as projectUtils from "spell/app/spaces/server/node/projects/project-utils"
+import { SP } from "spell/parser/spell"
+import { hasProjectFile } from "spell/parser/spell/node/projectFile"
 
 /**
  * Builds spell projects when the API needs what they build:  their compiled output and scope packs are in `build/`

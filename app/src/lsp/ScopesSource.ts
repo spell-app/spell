@@ -8,7 +8,7 @@
  */
 import JSON5 from "json5"
 
-// Import directly, NOT through the `spell-app/lsp` barrel, which would pull in the language service.
+// Import directly, NOT through the `spell/app/lsp` barrel, which would pull in the language service.
 import {
   SCOPE_PACK_GLOBAL,
   scopePath,
@@ -17,12 +17,12 @@ import {
   type ScopeLine,
   type ScopeNode,
   type ScopePack
-} from "spell-app/lsp/lsp.types"
+} from "spell/app/lsp/lsp.types"
 // Import directly:  spell's light URL helper, and spaces' groups, which it splits an address by -- no parser, no barrel
-import { SpellUrls } from "spell-parser/spell/SpellUrls"
+import { SpellUrls } from "spell/parser/spell/SpellUrls"
 // Import directly:  the parser's text positions alone, value-free of the rest of the parser
-import { getLineStarts, offsetForPosition } from "spell-parser/parser/tokenizer/tokenizer.types"
-import "spell-app/spaces/models/projectGroups"
+import { getLineStarts, offsetForPosition } from "spell/parser/parser/tokenizer/tokenizer.types"
+import "spell/app/spaces/models/projectGroups"
 
 /** What a Type Explorer shows:  a tree, and the details of what's in it, by `path`. */
 export type ScopesSource = {
@@ -47,7 +47,7 @@ export type ScopesSourceHooks = {
 
 /**
  * What `ScopesSource` reads of a project's declarations file -- see `SP.SpellDeclarationsData`.
- * - NOT imported from there:  `spell-parser/spell` would pull the whole parser into the bundle.
+ * - NOT imported from there:  `spell/parser/spell` would pull the whole parser into the bundle.
  */
 export type CompiledDeclarations = {
   /** What each declaring statement declared. */
@@ -283,7 +283,7 @@ function declaredPath(path: string): string | undefined {
 
 /**
  * What a `SPELL: DECLARES` marker says, as far as finding its entries goes -- see `SP.SpellDeclaration`.
- * - NOT imported from there:  `spell-parser/spell` would pull the whole parser into the bundle.
+ * - NOT imported from there:  `spell/parser/spell` would pull the whole parser into the bundle.
  */
 export type MarkerDeclaration = {
   type?: string
@@ -346,7 +346,7 @@ const DECLARES = /\/\*! SPELL: DECLARES \{[\s\S]*?\} \*\//g
 
 /**
  * Between each file's code in a project's compiled javascript -- `P.JSWriter.FILE_SEPARATOR`.
- * - NOTE: a copy, NOT imported:  `spell-parser/spell` would pull the whole parser into the bundle.
+ * - NOTE: a copy, NOT imported:  `spell/parser/spell` would pull the whole parser into the bundle.
  */
 const FILE_SEPARATOR = "\n// -----------\n"
 

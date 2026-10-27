@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { absoluteImports } from "spell-app/app/runner"
+import { absoluteImports } from "spell/app/app/runner"
 
 describe("absoluteImports()", () => {
   test("makes relative imports absolute, so a `blob:` copy can load them", () => {

@@ -13,10 +13,10 @@ import chalk from "chalk"
 import JSON5 from "json5"
 
 import { SRV } from "spell/server"
-import * as peopleRoutes from "spell-app/spaces/server/node/people/peopleRoutes"
-import * as prefsRoutes from "spell-app/spaces/server/node/prefs/prefsRoutes"
-import * as projectUtils from "spell-app/spaces/server/node/projects/project-utils"
-import * as responseUtils from "spell-app/spaces/server/node/projects/response-utils"
+import * as peopleRoutes from "spell/app/spaces/server/node/people/peopleRoutes"
+import * as prefsRoutes from "spell/app/spaces/server/node/prefs/prefsRoutes"
+import * as projectUtils from "spell/app/spaces/server/node/projects/project-utils"
+import * as responseUtils from "spell/app/spaces/server/node/projects/response-utils"
 import { ProjectBuild } from "./ProjectBuild"
 
 /** Router mounted at `/api` by `./cli.ts` and `./appRoutes.ts`:  `spell/server`'s Express-shaped `SRV.Router`. */

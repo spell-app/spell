@@ -1,16 +1,16 @@
 /**
- * Barrel for `spell-app/app/ui` (`UI`):  the types the app's UI shares.
+ * Barrel for `spell/app/app/ui` (`UI`):  the types the app's UI shares.
  * - `ui.types.ts`:  editor selections, the explorers' saved state -- types only.
- * - NOT the app's own UI:  that's Solid, on `spell-ui`, in `spell-app/app/solid`.
+ * - NOT the app's own UI:  that's Solid, on `spell-ui`, in `spell/app/app/solid`.
  *   Spell PROGRAMS draw with Spell UI's `<ui-*>` elements
  *   (epic `output-targets` P11 retired the React kit that lived here).
  * - NOTE: deliberately left out:
  *   - `./ClassSchemas`:  a spell class as a property editor's schema,
- *     imported by path (`spell-app/app/ui/ClassSchemas`) where the editor is drawn, so this barrel stays types only
+ *     imported by path (`spell/app/app/ui/ClassSchemas`) where the editor is drawn, so this barrel stays types only
  *   - `./PropertyEditorFiles`:  a project's property editor pages, loaded by `editor.createPropertyEditor()` on use
  *   - `./AppTexts`:  the editor's words in the page's language;  its languages are lazy chunks, `AppTexts.<lang>.ts`
- *     - imported by path (`spell-app/app/ui/AppTexts`) by `editor.ts`, the panes and the web components
- *   - `./monaco`:  Monaco's plumbing (no UI), loaded on first use through `spell-app/app/solid`'s `LazyMonaco`
+ *     - imported by path (`spell/app/app/ui/AppTexts`) by `editor.ts`, the panes and the web components
+ *   - `./monaco`:  Monaco's plumbing (no UI), loaded on first use through `spell/app/app/solid`'s `LazyMonaco`
  *   - `syntax.css`:  the syntax colours, imported by the Solid viewers that use them
  */
 

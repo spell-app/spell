@@ -1,12 +1,12 @@
 import { Match, Show, Switch, createSignal, onCleanup, onSettled } from "solid-js"
 
-import type { LSP } from "spell-app/lsp"
-import type { SP } from "spell-parser/spell"
-import type { FromRunnerMessage, ProjectSettings, RunnerPaneId, ToRunnerMessage } from "spell-app/app/runner"
-import { appTexts, type AppTextKey } from "spell-app/app/ui/AppTexts"
-// Import directly, NOT through the `spell-app/app/solid` barrel, which pulls in the editor
-import { TypeExplorer } from "spell-app/app/solid/TypeExplorer"
-import { ThingExplorer } from "spell-app/app/solid/ThingExplorer"
+import type { LSP } from "spell/app/lsp"
+import type { SP } from "spell/parser/spell"
+import type { FromRunnerMessage, ProjectSettings, RunnerPaneId, ToRunnerMessage } from "spell/app/app/runner"
+import { appTexts, type AppTextKey } from "spell/app/app/ui/AppTexts"
+// Import directly, NOT through the `spell/app/app/solid` barrel, which pulls in the editor
+import { TypeExplorer } from "spell/app/app/solid/TypeExplorer"
+import { ThingExplorer } from "spell/app/app/solid/ThingExplorer"
 import { loadRuntime, type LoadedRuntime } from "./loadRuntime"
 import { RunnerSplit, DEFAULT_SPLIT } from "./RunnerSplit"
 import { RunnerPane, type RunnerTab } from "./RunnerPane"
@@ -14,7 +14,7 @@ import { RunnerConsole } from "./RunnerConsole"
 import { wordsIn, wordsOfLanguages } from "./words"
 import { showTestResults, testReportsOf } from "./testResults"
 
-import "spell-app/app/solid/AppContainer.css"
+import "spell/app/app/solid/AppContainer.css"
 import "./VSCodeRunner.css"
 
 /****************
@@ -40,12 +40,12 @@ import "./VSCodeRunner.css"
  *   - How they went shows in "Output" (`showTestResults()`), and goes to the extension (`testResults`),
  *     which shows each failed check in the editor, on its line.
  * - The program draws with the page's Solid (`App.start()` makes its own root) into `appRoot`, a `<div>` drawn once.
- * - NEVER imports `spell-parser/core`:  it'd be bundled beside this, a second copy -- see `spellRuntime.ts`.
+ * - NEVER imports `spell/parser/core`:  it'd be bundled beside this, a second copy -- see `spellRuntime.ts`.
  * - Says `ready` once listening, so the extension knows to compile.  Messages sent before then are lost.
  * - How it's shown comes from the extension, which remembers it in the project's `settings.json5`:
  *   console, tab, split, the explorers' state.  See `ProjectSettings`.
  * - `post` and `runtimeUrl` are read once.
- * - Its `<ui-*>` tags are the caller's to define (`spell-app/app/solid/loadUI`),
+ * - Its `<ui-*>` tags are the caller's to define (`spell/app/app/solid/loadUI`),
  *   with Fomantic's icon names (`<ui-root icons="fomantic">` in the webview's HTML).
  ****************/
 export function VSCodeRunner(props: VSCodeRunnerProps) {

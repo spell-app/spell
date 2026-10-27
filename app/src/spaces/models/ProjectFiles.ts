@@ -1,5 +1,5 @@
 import { CONFIRM, LoadableFile, getDier, KnownFormat } from "spell/util"
-import { SP } from "spell-parser/spell"
+import { SP } from "spell/parser/spell"
 
 /**
  * A project's FILE edits:  create, copy, rename and delete one of its files, as the editor asks.

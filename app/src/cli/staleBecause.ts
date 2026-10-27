@@ -1,11 +1,11 @@
 import { readdirSync, statSync } from "fs"
 import { basename, join, relative } from "path"
 
-import environment from "spell-app/spaces/server/node/environment"
-import { buildFolderFor } from "spell-app/spaces/server/node/projects/project-utils"
-import { SP } from "spell-parser/spell"
-import { projectFileFor } from "spell-parser/spell/node/projectFile"
-import { LSP } from "spell-app/lsp"
+import environment from "spell/app/spaces/server/node/environment"
+import { buildFolderFor } from "spell/app/spaces/server/node/projects/project-utils"
+import { SP } from "spell/parser/spell"
+import { projectFileFor } from "spell/parser/spell/node/projectFile"
+import { LSP } from "spell/app/lsp"
 
 /**
  * Why `project`'s build is out of date, e.g. `"Card.spell changed since"`;  `undefined` when it's up to date.
@@ -61,15 +61,15 @@ export async function staleBecause(project: SP.SpellProject): Promise<string | u
  * - spell-parser's by its packages' folders (`environment.packageFolder()`), never by a path into that repo
  */
 export const COMPILER_SOURCES = [
-  environment.packageFolder("spell-parser/parser"),
+  environment.packageFolder("spell/parser/parser"),
   environment.srcDir,
   join(environment.repoDir, "src", "lsp"),
-  environment.packageFolder("spell-parser/py"),
-  join(environment.packageFolder("spell-parser/core"), "core.declarations.json5")
+  environment.packageFolder("spell/parser/py"),
+  join(environment.packageFolder("spell/parser/core"), "core.declarations.json5")
 ]
 
 /** Under `COMPILER_SOURCES`, but not the compiler:  Python's core (`spell_core`), its runtime, in py's `core/`. */
-const NOT_COMPILER = new Set([join(environment.packageFolder("spell-parser/py"), "core")])
+const NOT_COMPILER = new Set([join(environment.packageFolder("spell/parser/py"), "core")])
 
 ////////////////
 // ## Helpers

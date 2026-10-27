@@ -1,7 +1,7 @@
 import { spawnSync } from "node:child_process"
 import { join } from "node:path"
 
-// Import directly, not through `spell-app/cli`:  the barrel loads spell, and `spell app vscode` needs none of it
+// Import directly, not through `spell/app/cli`:  the barrel loads spell, and `spell app vscode` needs none of it
 import { CLI } from "spell/cli"
 
 /** The extension, relative to spell-app's root:  its own yarn project, not a workspace. */

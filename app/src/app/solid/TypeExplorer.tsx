@@ -2,11 +2,11 @@ import { For, Show, createEffect, createMemo, createSignal, untrack } from "soli
 import type { JSX } from "@solidjs/web"
 
 import { PrefStore } from "spell/util"
-// Import directly, NOT through the `spell-app/lsp` barrel, which would pull the language service into the bundle.
-import { SCOPE_MEMBER_GROUPS, type ScopeDetails, type ScopeMember, type ScopeNode } from "spell-app/lsp/lsp.types"
-import type { ScopeOrder, TypeExplorerState } from "spell-app/app/ui/ui.types"
-import { appTexts, type AppTextKey } from "spell-app/app/ui/AppTexts"
-import { editorPrefs } from "spell-app/app/editorPrefs"
+// Import directly, NOT through the `spell/app/lsp` barrel, which would pull the language service into the bundle.
+import { SCOPE_MEMBER_GROUPS, type ScopeDetails, type ScopeMember, type ScopeNode } from "spell/app/lsp/lsp.types"
+import type { ScopeOrder, TypeExplorerState } from "spell/app/app/ui/ui.types"
+import { appTexts, type AppTextKey } from "spell/app/app/ui/AppTexts"
+import { editorPrefs } from "spell/app/app/editorPrefs"
 import {
   SCOPE_ICONS,
   ScopeDetailsPane,
@@ -35,7 +35,7 @@ import "./TypeExplorer.css"
  *     So a caller echoing `onStateChange` back into `state` is fine.
  * - A node's details are asked for with `loadDetails()` when first shown, and kept until a new `tree` comes.
  * - `readonly`, e.g. embedded in a page by `<spell-viewer>`:  descriptions can't be edited, whatever `onSaveDescription`.
- * - NOTE: imports its peers directly, NOT the `spell-app/app/solid` barrel:
+ * - NOTE: imports its peers directly, NOT the `spell/app/app/solid` barrel:
  *   a runner's bundle would get the whole editor through it (`Actions.tsx`).
  *   - So its `<ui-*>` tags are the CALLER's to define:  the barrel or `./loadUI`.
  *   - Not imported here:  `spell-ui` can't load under node (`customElements`), and the `node` tests render this.

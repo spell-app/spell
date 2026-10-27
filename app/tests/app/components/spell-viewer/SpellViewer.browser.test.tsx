@@ -2,10 +2,10 @@ import { afterEach, describe, expect, test, vi } from "vite-plus/test"
 import { flush } from "solid-js"
 
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
-import type { SpellCompiled } from "spell-app/app/runner/runner.types"
-import type { DOMSpellViewerElement } from "spell-app/app/components/spell-viewer"
-import type { P } from "spell-parser/parser"
-import type { SP } from "spell-parser/spell"
+import type { SpellCompiled } from "spell/app/app/runner/runner.types"
+import type { DOMSpellViewerElement } from "spell/app/app/components/spell-viewer"
+import type { P } from "spell/parser/parser"
+import type { SP } from "spell/parser/spell"
 
 /**
  * `<spell-viewer>` as a root (`UIRoot`), on a page with nothing else of Spell UI.
@@ -13,12 +13,12 @@ import type { SP } from "spell-parser/spell"
  *   every `<ui-*>` the runner draws is defined by the element itself, the first time it appears.
  * - The runtime and the shadow styles are stubbed, as in `runner.browser.test.tsx`.
  */
-vi.mock("spell-app/app/runner/loadRuntime", async (importOriginal) => {
-  const original = await importOriginal<typeof import("spell-app/app/runner/loadRuntime")>()
+vi.mock("spell/app/app/runner/loadRuntime", async (importOriginal) => {
+  const original = await importOriginal<typeof import("spell/app/app/runner/loadRuntime")>()
   return { ...original, loadRuntime: testRuntime }
 })
-vi.mock("spell-app/app/runner/shadowStyles", async (importOriginal) => {
-  const original = await importOriginal<typeof import("spell-app/app/runner/shadowStyles")>()
+vi.mock("spell/app/app/runner/shadowStyles", async (importOriginal) => {
+  const original = await importOriginal<typeof import("spell/app/app/runner/shadowStyles")>()
   return { ...original, adoptShadowStyles: async () => {} }
 })
 
@@ -226,7 +226,7 @@ describe("<spell-viewer>'s layout:  the spell in its markup (P9, Q11, Q12, Q18)"
   })
 
   test("a <spell> block's handlers:  one line or several, `when` or `on`, an event in several words", async () => {
-    const { LayoutSpell } = await import("spell-app/app/runner/LayoutSpell")
+    const { LayoutSpell } = await import("spell/app/app/runner/LayoutSpell")
     expect(LayoutSpell.handlersIn("when clicked: play a song\non drag: play another song")).toEqual([
       { event: "clicked", body: "play a song" },
       { event: "drag", body: "play another song" }
@@ -243,7 +243,7 @@ describe("<spell-viewer>'s layout:  the spell in its markup (P9, Q11, Q12, Q18)"
   })
 
   test("a <spell> block's handlers are read by spell's own `on` rule:  Spanish's `al` and `cuando` too", async () => {
-    const { LayoutSpell } = await import("spell-app/app/runner/LayoutSpell")
+    const { LayoutSpell } = await import("spell/app/app/runner/LayoutSpell")
     expect(LayoutSpell.handlersIn("al carta elegida: imprimir 1\ncuando clic en carta\n  imprimir 2")).toEqual([
       { event: "carta-elegida", body: "imprimir 1" },
       { event: "clic-en-carta", body: "imprimir 2" }
@@ -345,7 +345,7 @@ describe("<markdown> blocks:  drawn by <ui-markdown>, their holes live (P14, Q22
  * - Spell imported only now:  imported with the file, it loads before `<spell-viewer>`'s own setup has run.
  */
 async function compiledProject(text: string): Promise<{ compiled: string; declarations: SP.SpellDeclarationsData }> {
-  const [{ P }, { SP }] = await Promise.all([import("spell-parser/parser"), import("spell-parser/spell")])
+  const [{ P }, { SP }] = await Promise.all([import("spell/parser/parser"), import("spell/parser/spell")])
   const parentScope = SP.SpellParser.rootScope
   const scope = new P.ProjectScope({
     name: "test-project",
@@ -378,13 +378,13 @@ afterEach(() => {
 /** The runtime, as `loadRuntime()` would hand it over:  `spellRuntime.ts` as vite serves it. */
 async function testRuntime() {
   const url = new URL("/src/app/runner/spellRuntime.ts", location.href).href
-  const runtime = (await import(/* @vite-ignore */ url)) as typeof import("spell-app/app/runner/spellRuntime")
+  const runtime = (await import(/* @vite-ignore */ url)) as typeof import("spell/app/app/runner/spellRuntime")
   return { runtime, coreUrl: url, release: () => {} }
 }
 
 /** Add `<spell-viewer>` markup `html` to the page;  removed after the test. */
 async function mountApp(html: string): Promise<DOMSpellViewerElement> {
-  await import("spell-app/app/components/spell-viewer")
+  await import("spell/app/app/components/spell-viewer")
   const holder = document.createElement("div")
   holder.innerHTML = html
   const app = holder.firstElementChild as DOMSpellViewerElement

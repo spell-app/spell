@@ -1,10 +1,10 @@
 import { afterEach, describe, expect, test, vi } from "vite-plus/test"
 
 import { declareProp, Observable } from "spell/util"
-import { SP } from "spell-parser/spell"
-import { SPACES } from "spell-app/spaces"
-import { editor, type EditorStore } from "spell-app/app/editor"
-import { PropertyEditorFiles, type RunningCore } from "spell-app/app/ui/PropertyEditorFiles"
+import { SP } from "spell/parser/spell"
+import { SPACES } from "spell/app/spaces"
+import { editor, type EditorStore } from "spell/app/app/editor"
+import { PropertyEditorFiles, type RunningCore } from "spell/app/app/ui/PropertyEditorFiles"
 
 /**
  * A project's property editor pages (epic `property-editor` P6):

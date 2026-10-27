@@ -4,7 +4,7 @@ import { createRequire } from "module"
 import { dirname, resolve } from "path"
 import { describe, test, expect } from "vite-plus/test"
 
-import { checkEntry, Loader, Saver } from "spell-parser/core/model"
+import { checkEntry, Loader, Saver } from "spell/parser/core/model"
 
 /**
  * The people library, `@spell/library/people` (epic `people-and-orgs` P7):  people, orgs and what they keep.

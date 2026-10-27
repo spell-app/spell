@@ -1,9 +1,9 @@
 import { For, Match, Show, Switch, createEffect, createMemo, createSignal, untrack } from "solid-js"
 
-import type { ThingAction, ThingLike, ThingRegistry } from "spell-parser/core/things"
-import type { SP } from "spell-parser/spell"
-import type { ThingExplorerState, ThingOrder } from "spell-app/app/ui/ui.types"
-import { appTexts, type AppTextKey } from "spell-app/app/ui/AppTexts"
+import type { ThingAction, ThingLike, ThingRegistry } from "spell/parser/core/things"
+import type { SP } from "spell/parser/spell"
+import type { ThingExplorerState, ThingOrder } from "spell/app/app/ui/ui.types"
+import { appTexts, type AppTextKey } from "spell/app/app/ui/AppTexts"
 import { tracked } from "./tracked"
 import { SCOPE_ICONS, SectionMarker, sectionStartsAt } from "./ScopeDetailsPane"
 import { TreeRow } from "./TypeExplorer"
@@ -34,7 +34,7 @@ import "./ThingExplorer.css"
  *     - Solid re-reads on its own schedule, never mid-write:  a microtask after the change, or `core.flush()`.
  *   - NEVER a Solid store:  a store would wrap the things in proxies, and `===` breaks.
  * - (React's version re-read a whole snapshot in a microtask, `watchLive()`, and redrew it all.)
- * - NOTE: imports its peers directly, NOT the `spell-app/app/solid` barrel:
+ * - NOTE: imports its peers directly, NOT the `spell/app/app/solid` barrel:
  *   a runner's bundle would get the whole editor through it (`Actions.tsx`).
  *   - So its `<ui-*>` tags are the CALLER's to define:  the barrel or `./loadUI`.
  *   - Not imported here:  `spell-ui` can't load under node (`customElements`), and the `node` tests render this.

@@ -51,7 +51,7 @@
 		</>
 		<markdown>
 			```js
-			import { ImageZoom } from "spell-ui/components/ui-zoom/ImageZoom"
+			import { ImageZoom } from "spell/ui/components/ui-zoom/ImageZoom"
 
 			document.addEventListener("click", ImageZoom.onClick)
 			document.addEventListener("pointerover", ImageZoom.onPointerOver, { passive: true })

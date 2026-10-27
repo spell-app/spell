@@ -1,10 +1,10 @@
 import { describe, test, expect } from "vite-plus/test"
 
-import { describeTypecheckError, typecheck } from "spell-parser/spell/node/typecheck"
-import { P } from "spell-parser/parser"
-import { SP } from "spell-parser/spell"
-import { parseSpellProject } from "spell-parser/spell/test"
-import { loadFixtureProject } from "spell-app/spaces/test"
+import { describeTypecheckError, typecheck } from "spell/parser/spell/node/typecheck"
+import { P } from "spell/parser/parser"
+import { SP } from "spell/parser/spell"
+import { parseSpellProject } from "spell/parser/spell/test"
+import { loadFixtureProject } from "spell/app/spaces/test"
 
 /**
  * Each output language names things by its own map (`P.Naming`, epic `drawable-thing` P11):

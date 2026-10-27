@@ -2,7 +2,7 @@ import { existsSync, readdirSync, readFileSync } from "node:fs"
 import path from "node:path"
 
 import { readJSON5File } from "spell/util/node/json5"
-import { SiteDataBuilder } from "spell-ui/tools/SiteDataBuilder"
+import { SiteDataBuilder } from "spell/ui/tools/SiteDataBuilder"
 import {
   APP_COMPONENTS,
   APP_SOURCE,
@@ -252,7 +252,7 @@ export class AppUIDataBuilder {
   }
 
   /**
-   * The app file `specifier`, imported into `from`, stands for:  `./peer`, or `spell-app/...` (`spell-app/app/solid`,
+   * The app file `specifier`, imported into `from`, stands for:  `./peer`, or `spell/app/...` (`spell/app/app/solid`,
    * a file under `src/`);  `undefined` for any other package's, or a file that isn't there.
    * - A folder is its barrel, `index.ts`.
    */
@@ -279,7 +279,7 @@ const VOCABULARY_FOLDERS = [APP_COMPONENTS, APP_SOURCE]
 /** A test file's name. */
 const TEST_FILE = /\.test\.tsx$/
 
-/** spell-app's own import names:  `spell-app/<path under src/>` (epic `repo-split` P14). */
+/** spell-app's own import names:  `app/<path under src/>` (epic `repo-split` P14). */
 const OWN_PACKAGE = "spell-app/"
 
 /** What an import's specifier may leave off. */

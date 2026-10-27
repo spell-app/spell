@@ -3,10 +3,10 @@ import { flush } from "solid-js"
 import { render } from "@solidjs/web"
 
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
-import { buildScopeTree, type ScopeDetails, type ScopeEntry } from "spell-app/lsp/lsp.types"
-import type { TypeExplorerState } from "spell-app/app/ui/ui.types"
-import { uiReady } from "spell-app/app/solid/loadUI"
-import { TypeExplorer, type TypeExplorerProps } from "spell-app/app/solid/TypeExplorer"
+import { buildScopeTree, type ScopeDetails, type ScopeEntry } from "spell/app/lsp/lsp.types"
+import type { TypeExplorerState } from "spell/app/app/ui/ui.types"
+import { uiReady } from "spell/app/app/solid/loadUI"
+import { TypeExplorer, type TypeExplorerProps } from "spell/app/app/solid/TypeExplorer"
 
 /**
  * The Solid `<TypeExplorer>` in the browser:  Solid's client build, so effects run -- details are asked for and

@@ -3,10 +3,10 @@ import { createSignal, flush } from "solid-js"
 import { render } from "@solidjs/web"
 
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
-import type { SP } from "spell-parser/spell"
-import { SPELL_COMPILED_EVENT } from "spell-app/app/runner/runner.types"
-import { SpellEditorPane, type SpellEditorStatus } from "spell-app/app/spellEditor/SpellEditorPane"
-import type { DOMSpellEditorElement } from "spell-app/app/components/spell-editor"
+import type { SP } from "spell/parser/spell"
+import { SPELL_COMPILED_EVENT } from "spell/app/app/runner/runner.types"
+import { SpellEditorPane, type SpellEditorStatus } from "spell/app/app/spellEditor/SpellEditorPane"
+import type { DOMSpellEditorElement } from "spell/app/app/components/spell-editor"
 
 /**
  * `<spell-editor>` on Solid, in the browser:  its pane as the element draws it, and the element's own contract --
@@ -14,8 +14,8 @@ import type { DOMSpellEditorElement } from "spell-app/app/components/spell-edito
  * - No spell server here, so no project ever loads:  the pane is driven directly, with stand-in files.
  * - `adoptShadowStyles()` is stubbed:  the test server doesn't serve the editor's CSS.
  */
-vi.mock("spell-app/app/runner/shadowStyles", async (importOriginal) => {
-  const original = await importOriginal<typeof import("spell-app/app/runner/shadowStyles")>()
+vi.mock("spell/app/app/runner/shadowStyles", async (importOriginal) => {
+  const original = await importOriginal<typeof import("spell/app/app/runner/shadowStyles")>()
   return { ...original, adoptShadowStyles: async () => {} }
 })
 
@@ -110,7 +110,7 @@ describe("<spell-editor>", () => {
   })
 
   test("`COMPILE_DELAY` is on the class", async () => {
-    await import("spell-app/app/components/spell-editor")
+    await import("spell/app/app/components/spell-editor")
     const Class = customElements.get("spell-editor") as unknown as { COMPILE_DELAY: number }
     expect(Class.COMPILE_DELAY).toBe(2000)
   })
@@ -169,7 +169,7 @@ function mountPane({
 
 /** Add `<spell-editor>` markup `html` to the page;  removed after the test. */
 async function mountEditor(html: string): Promise<DOMSpellEditorElement> {
-  await import("spell-app/app/components/spell-editor")
+  await import("spell/app/app/components/spell-editor")
   const holder = document.createElement("div")
   holder.innerHTML = html
   const editor = holder.firstElementChild as DOMSpellEditorElement

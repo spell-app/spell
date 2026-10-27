@@ -1,8 +1,8 @@
 import { describe, test, expect } from "vite-plus/test"
 
-import { P } from "spell-parser/parser"
-import { parseSpellProject } from "spell-parser/spell/test"
-import { loadCodeSpellTwin } from "spell-app/spaces/test"
+import { P } from "spell/parser/parser"
+import { parseSpellProject } from "spell/parser/spell/test"
+import { loadCodeSpellTwin } from "spell/app/spaces/test"
 
 /**
  * LEDGER of what spell's grammar does with a fixed set of phrasings -- one inline snapshot per probe.

@@ -1,6 +1,6 @@
-import type { SP } from "spell-parser/spell"
+import type { SP } from "spell/parser/spell"
 // Import directly:  `<spell-viewer>` loads this file alone, without spell's barrel and its parser
-import { SpellSetup } from "spell-parser/spell/SpellSetup"
+import { SpellSetup } from "spell/parser/spell/SpellSetup"
 
 /**
  * The person whose space this machine's own projects are in:  `owen@spell`.
@@ -32,7 +32,7 @@ export const HOME_ORG = "spell"
  *   - folder:  your projects;  lightbulb:  examples;  open book:  guides;  sticky note:  notebooks;
  *     puzzle piece:  libraries;  flask:  tests
  * - SIDE EFFECT:  loading this file registers them with spell (`SpellSetup.addProjectRoot()`).
- *   - Every program that reads a spell address loads it first:  through `spell-app/spaces`, spaces' disk reader,
+ *   - Every program that reads a spell address loads it first:  through `spell/app/spaces`, spaces' disk reader,
  *     or this file alone.
  */
 export const PROJECT_GROUPS: SP.ProjectRootSpec[] = [

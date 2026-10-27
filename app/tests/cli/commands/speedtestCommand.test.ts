@@ -1,6 +1,6 @@
 import { describe, test, expect } from "vite-plus/test"
 
-import { combined, speedTable } from "spell-app/cli/commands/speedtestCommand"
+import { combined, speedTable } from "spell/app/cli/commands/speedtestCommand"
 
 /** One run's results, as `speedTest.mts` prints them. */
 function run(average: number, min: number, max: number) {

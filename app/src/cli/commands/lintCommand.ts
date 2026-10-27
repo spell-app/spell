@@ -1,8 +1,8 @@
 import { writeFileSync } from "fs"
 
-import { P } from "spell-parser/parser"
-import { SP } from "spell-parser/spell"
-import { CLI } from "spell-app/cli"
+import { P } from "spell/parser/parser"
+import { SP } from "spell/parser/spell"
+import { CLI } from "spell/app/cli"
 
 /**
  * `spell lint [projects...]`:  parse each project or file and list its errors -- writes nothing of its own.

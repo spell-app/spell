@@ -7,8 +7,8 @@
  *   then the projects that one imports.  See `ScopeExplorer.tree()`.
  * - A node or member is named by its `path`, e.g. `project:Solitaire/file:Card.spell/type:Card` -- see `LSP.scopePath()`.
  */
-import { LSP } from "spell-app/lsp"
-import { CLI } from "spell-app/cli"
+import { LSP } from "spell/app/lsp"
+import { CLI } from "spell/app/cli"
 
 /** Node of the project `tree` was built for. */
 export function projectNodeOf(tree: LSP.ScopeNode): LSP.ScopeNode {

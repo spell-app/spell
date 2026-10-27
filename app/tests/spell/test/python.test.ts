@@ -1,8 +1,8 @@
 import { beforeAll, describe, test, expect } from "vite-plus/test"
 
-import { PY } from "spell-parser/py"
-import { describePyrightError, pyright, type PyrightResult } from "spell-parser/spell/node/pyright"
-import { PYTHON_FIXTURES, compiledFixture, fixtureImports, snapshotPath } from "spell-app/spaces/test"
+import { PY } from "spell/parser/py"
+import { describePyrightError, pyright, type PyrightResult } from "spell/parser/spell/node/pyright"
+import { PYTHON_FIXTURES, compiledFixture, fixtureImports, snapshotPath } from "spell/app/spaces/test"
 
 /**
  * The Python fixtures' compiled Python (the `py` target, `PY.PyWriter`), type-checked by pyright:  see `pyright()`.

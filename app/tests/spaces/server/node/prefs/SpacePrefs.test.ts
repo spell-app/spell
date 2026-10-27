@@ -4,8 +4,8 @@ import JSON5 from "json5"
 import { resolve } from "path"
 import { afterAll, describe, expect, test } from "vite-plus/test"
 
-import { SpacePrefs, type PrefPerson } from "spell-app/spaces/server/node/prefs/SpacePrefs"
-import { DiskStorage } from "spell-app/spaces/server/node/storage/DiskStorage"
+import { SpacePrefs, type PrefPerson } from "spell/app/spaces/server/node/prefs/SpacePrefs"
+import { DiskStorage } from "spell/app/spaces/server/node/storage/DiskStorage"
 
 /** Preferences in people's spaces (epic `prefs-and-undo` P2):  on a temporary spell-spaces. */
 const root = mkdtempSync(resolve(tmpdir(), "spell-prefs-"))

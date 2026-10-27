@@ -16,7 +16,7 @@ dependencies = ["spell-core", "quart==0.22.0"]
 
 [tool.uv.sources]
 # spell-parser's Python core (`src/py/core/`), from here
-spell-core = { path = "../../../../../spell-parser/src/py/core", editable = true }
+spell-core = { path = "../../../../../parser/src/py/core", editable = true }
 
 [dependency-groups]
 dev = ["pytest==9.1.1", "pytest-asyncio==1.4.0", "ruff==0.17.0"]

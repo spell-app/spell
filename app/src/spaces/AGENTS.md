@@ -1,7 +1,7 @@
 # AGENTS.md
 
 This file provides guidance to AI coding agents (Claude Code, Codex, and others)
-when working with code in this folder, `src/spaces/` of the `spell-app` package (`spell-app/spaces`),
+when working with code in this folder, `src/spaces/` of the `spell-app` package (`spell/app/spaces`),
 and with the `@spell` space's built-in projects, `spaces/@spell/` at the repo's root.
 
 **READ the repo root's [AGENTS.md](../../AGENTS.md) and [WWOD](../../agents/wwod/WWOD.md) FIRST:**
@@ -23,7 +23,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - `people/`, the people library (P7):  people, orgs and what they keep
       - compiled to `people.lib.ts` (the `ts/lib` target):
         the app, the people store and the spell command import it
-  - [models/](models/index.ts):  `spell-app/spaces` (`SPACES`), safe in a browser:  the editor imports it.
+  - [models/](models/index.ts):  `spell/app/spaces` (`SPACES`), safe in a browser:  the editor imports it.
     - [projectGroups.ts](models/projectGroups.ts):  spell's project groups, `PROJECT_GROUPS`
     - [SpellProjectRoot.ts](models/SpellProjectRoot.ts):  a group's list of projects,
       and its projects' create, copy, rename and delete
@@ -33,7 +33,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       (`<button>` => `<ui-button>`), registered with spell as the barrel loads (`SP.ComponentPacks`, epic
       `elemental-spell` P7);  `<spell-viewer>` doesn't load it:  it never compiles
     - [SpaceStorage.ts](models/SpaceStorage.ts) and [people.ts](models/people.ts):  types only, see "People"
-  - [the node side](server/node/), node only:  imported by path (`spell-app/spaces/server/node/...`), never from the barrel
+  - [the node side](server/node/), node only:  imported by path (`spell/app/spaces/server/node/...`), never from the barrel
     - [environment.ts](server/node/environment.ts):  where everything is on disk (see "Projects" below)
     - [projects/](server/node/projects/):  projects on disk, and the disk reader (see "Projects" below)
     - [storage/](server/node/storage/) and [people/](server/node/people/):  see "People" below
@@ -54,14 +54,14 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - So is every guide, `@spell/guides`, since epic `debut` P10.
       Its snapshots are in `tests/spell/__guides__/<Project>/`.
 - [test/](test/index.ts), node only:
-  the test helpers for the frozen test projects and the tested examples and guides, `spell-app/spaces/test`
+  the test helpers for the frozen test projects and the tested examples and guides, `spell/app/spaces/test`
   - among them:
     - `loadFixtureProject()`
     - `fixturePath()`
     - `fixtureProjectId()`
     - `compiledFixture()` ...
   - Imported by tests only, by name, never from the barrel.
-  - Inline projects are spell-parser's helpers', `spell-parser/spell/test` (`parseSpellProject()`).
+  - Inline projects are spell-parser's helpers', `spell/parser/spell/test` (`parseSpellProject()`).
 - The repo's checks (its root `package.json`'s scripts) cover both:
   - the TypeScript:  tsc, oxlint / oxfmt and vitest
   - then `spell_quart`:  ruff and pytest, through uv
@@ -71,9 +71,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 - Spell's project GROUPS are ours:  `SPACES.PROJECT_GROUPS`, in [projectGroups.ts](models/projectGroups.ts).
   - Loading that file registers them with spell's registry, `SP.SpellSetup`, which starts empty.
   - So every program that reads a spell path loads them first, one of these ways:
-    - through `spell-app/spaces`
+    - through `spell/app/spaces`
     - through our disk reader (below)
-    - or `spell-app/spaces/models/projectGroups` alone:  `<spell-viewer>` does that, to stay light
+    - or `spell/app/spaces/models/projectGroups` alone:  `<spell-viewer>` does that, to stay light
   - Spell NEVER imports us.
 - Each group is named by its ADDRESS, and its folder comes from that (`SP.SpellUrls.folderFor()`):
 
@@ -129,7 +129,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   | another spell-app checkout's `spaces/X` or `tests/X` | THAT checkout's `build/...` | a worktree's example, opened by the main checkout's language server (epic `spanish` P21) |
   | anywhere else | beside the source | |
 
-  - `buildFolderFor()`, in project-utils;  "Projects" in [spell's PARSING.md](../../../spell-parser/src/spell/PARSING.md) has the rest.
+  - `buildFolderFor()`, in project-utils;  "Projects" in [spell's PARSING.md](../../../parser/src/spell/PARSING.md) has the rest.
 - The editor edits projects through our models:
   - a group's projects:  `SPACES.SpellProjectRoot`
   - a project's files:  `new SPACES.ProjectFiles(project)`, to create, duplicate, rename and delete them
@@ -191,7 +191,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - On the kit's server's Express-shaped router and web server (it was Express):  `SRV.Router`, `SRV.WebServer`.
   - Its handlers are our [project-utils.ts](server/node/projects/project-utils.ts)'s.
   - A project or a file is named by its ADDRESS, from ONE function, `SP.SpellUrls` (spell's
-    [SpellUrls.ts](../../../spell-parser/src/spell/SpellUrls.ts)):
+    [SpellUrls.ts](../../../parser/src/spell/SpellUrls.ts)):
     - a file is READ at `/spaces/<project>/<file>`, e.g. `/spaces/@spell/examples/Solitaire/Solitaire.spell`
     - and SAVED by `POST /api/projects/file/<project>/<file>`
     - a project's index:  `/api/projects/index/<project>`
@@ -231,7 +231,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 
 - `spell_quart`:  a Python spell program served as a web app on Quart (epic `python-target` P20).
   - A uv project, [pyproject.toml](server/py/pyproject.toml) with its `uv.lock`:  Python 3.12 or later.
-  - It depends on Quart, and on py's `spell_core`, by a path to it (`../../../../../spell-parser/src/py/core`).
+  - It depends on Quart, and on py's `spell_core`, by a path to it (`../../../../../parser/src/py/core`).
   - It moved here from py's `quart/` in P14 (decision Q21).
 - `SpellSessions`:  a game per visitor (a cookie), the program run once for each, on a core of its own.
   - A page per WebSocket:  the state down when it opens,
@@ -256,13 +256,13 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 
 ## Imports
 
-- As WWOD §4, with our own source folder as `spell-app/spaces` and `spell-app/spaces/*`.
+- As WWOD §4, with our own source folder as `spell/app/spaces` and `spell/app/spaces/*`.
 - What it imports:
-  - `spell-parser/spell`, and spell's node-only files too (`spell-parser/spell/node/...`)
+  - `spell/parser/spell`, and spell's node-only files too (`spell/parser/spell/node/...`)
   - `spell/server`
-  - it may import `spell-parser/core` and `spell/util`
-  - [projectGroups.ts](models/projectGroups.ts) imports spell's light `spell-parser/spell/SpellSetup` alone.
-    So `<spell-viewer>` can load it by path, `spell-app/spaces/models/projectGroups`, without the parser.
+  - it may import `spell/parser/core` and `spell/util`
+  - [projectGroups.ts](models/projectGroups.ts) imports spell's light `spell/parser/spell/SpellSetup` alone.
+    So `<spell-viewer>` can load it by path, `spell/app/spaces/models/projectGroups`, without the parser.
 - NEVER the app, lsp or cli folders:  they import it.
 - `spell` NEVER imports it.
 - NOT in the barrel (WWOD §8 › "Barrels"):  everything under `server/`, and `test/`.
@@ -280,4 +280,4 @@ As WWOD §12, plus:
 
 As WWOD §8, plus our self-namespace:
 
-- `SPACES` ~== `spell-app/spaces`
+- `SPACES` ~== `spell/app/spaces`

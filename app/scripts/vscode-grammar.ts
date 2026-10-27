@@ -13,8 +13,8 @@ import { readFileSync } from "node:fs"
 import path from "node:path"
 
 import { writeOrCheck } from "spell/element-tools/generatedFiles"
-import { SP } from "spell-parser/spell"
-import { LSP } from "spell-app/lsp"
+import { SP } from "spell/parser/spell"
+import { LSP } from "spell/app/lsp"
 
 /** The grammar this keeps current. */
 const GRAMMAR = path.resolve(import.meta.dirname, "../vscode/syntaxes/spell.tmLanguage.json")

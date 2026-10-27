@@ -2,13 +2,13 @@ import { afterEach, beforeEach, describe, expect, test } from "vite-plus/test"
 import { flush } from "solid-js"
 import h from "@solidjs/h"
 
-import { core, App, View } from "spell-parser/core"
-import { installSpellElements } from "spell-app/app/runner/SpellElement"
-import { ActionMenus } from "spell-app/app/runner/ActionMenus"
+import { core, App, View } from "spell/parser/core"
+import { installSpellElements } from "spell/app/app/runner/SpellElement"
+import { ActionMenus } from "spell/app/app/runner/ActionMenus"
 
-import "spell-app/app/solid/cellsBridge"
-import "spell-ui/components/ui-action"
-import "spell-ui/components/ui-toolbar"
+import "spell/app/app/solid/cellsBridge"
+import "spell/ui/components/ui-action"
+import "spell/ui/components/ui-toolbar"
 
 /**
  * A program's actions on the page (epic `elemental-spell` P10):  a small Solitaire, its game menu as the app's menu

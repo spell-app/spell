@@ -1,6 +1,6 @@
-import { E } from "spell-ui/core"
-import { RootLoader } from "spell-ui/components/ui-root"
-import type { Core, MenuItem } from "spell-parser/core"
+import { E } from "spell/ui/core"
+import { RootLoader } from "spell/ui/components/ui-root"
+import type { Core, MenuItem } from "spell/parser/core"
 
 /****************
  * ### `ActionMenus`

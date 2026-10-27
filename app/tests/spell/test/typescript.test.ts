@@ -1,15 +1,15 @@
 import { beforeAll, describe, test, expect } from "vite-plus/test"
 
-import { describeTypecheckError, typecheck, type TypecheckResult } from "spell-parser/spell/node/typecheck"
-import { SP } from "spell-parser/spell"
-import { solidSample } from "spell-parser/spell/test"
+import { describeTypecheckError, typecheck, type TypecheckResult } from "spell/parser/spell/node/typecheck"
+import { SP } from "spell/parser/spell"
+import { solidSample } from "spell/parser/spell/test"
 import {
   compiledFixture,
   fixtureImports,
   fixtureProjectId,
   fixtureProjectNames,
   snapshotPath
-} from "spell-app/spaces/test"
+} from "spell/app/spaces/test"
 
 /**
  * Every fixture project compiled as TypeScript (the `ts/solid` target, `P.TSWriter`), checked by `tsc` against

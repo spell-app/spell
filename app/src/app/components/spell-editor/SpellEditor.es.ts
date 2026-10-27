@@ -4,7 +4,7 @@
  * - Gathered with the editor's Spanish into one chunk, `AppTexts.es.ts`, which only a Spanish page loads.
  */
 
-import type { AppTagTexts } from "spell-app/app/ui/AppTexts"
+import type { AppTagTexts } from "spell/app/app/ui/AppTexts"
 import type { spellEditorVocabulary } from "./SpellEditor.en"
 
 export const spellEditorEs = {

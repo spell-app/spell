@@ -32,11 +32,11 @@ import {
   type WorkspaceSymbol
 } from "vscode-languageserver"
 
-import { P } from "spell-parser/parser"
-import { MD, type InlineNode } from "spell-parser/markdown"
-import { SP } from "spell-parser/spell"
-import { SX } from "spell-parser/spellx"
-import { LSP } from "spell-app/lsp"
+import { P } from "spell/parser/parser"
+import { MD, type InlineNode } from "spell/parser/markdown"
+import { SP } from "spell/parser/spell"
+import { SX } from "spell/parser/spellx"
+import { LSP } from "spell/app/lsp"
 
 /**
  * Answers editor questions about parsed spell files, in Language Server Protocol shapes -- one method per request.

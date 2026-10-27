@@ -56,7 +56,7 @@
 		</>
 		<markdown>
 			```js
-			import "spell-ui/ui-tree-diagram"
+			import "spell/ui/ui-tree-diagram"
 
 			const diagram = document.querySelector("ui-tree-diagram")
 			diagram.tree = {
@@ -70,7 +70,7 @@
 		</>
 		<markdown>
 			```tsx
-			import type { TreeDiagramNode } from "spell-ui"
+			import type { TreeDiagramNode } from "spell/ui"
 
 			function ParseTree(props: { tree: TreeDiagramNode }) {
 			  return <ui-tree-diagram tree={props.tree} />

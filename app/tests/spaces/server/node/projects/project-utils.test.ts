@@ -3,10 +3,10 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, 
 import { tmpdir } from "os"
 import { resolve } from "path"
 
-import environment from "spell-app/spaces/server/node/environment"
-import { SP } from "spell-parser/spell"
-import { locationForDiskPath } from "spell-app/spaces/server/node/projects/disk-fetch"
-import * as projectUtils from "spell-app/spaces/server/node/projects/project-utils"
+import environment from "spell/app/spaces/server/node/environment"
+import { SP } from "spell/parser/spell"
+import { locationForDiskPath } from "spell/app/spaces/server/node/projects/disk-fetch"
+import * as projectUtils from "spell/app/spaces/server/node/projects/project-utils"
 
 /**
  * Where a project's files are on disk (epic `people-and-orgs` P11).

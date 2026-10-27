@@ -1,6 +1,6 @@
 import { observe } from "spell/util"
-import { SP } from "spell-parser/spell"
-import type { LSP } from "spell-app/lsp"
+import { SP } from "spell/parser/spell"
+import type { LSP } from "spell/app/lsp"
 import { monaco } from "./monaco"
 import { AppAddresses } from "./AppAddresses"
 import { LspToMonaco } from "./LspToMonaco"

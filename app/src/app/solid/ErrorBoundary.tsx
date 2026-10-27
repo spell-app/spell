@@ -1,7 +1,7 @@
 import { Errored, runWithOwner, untrack } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
-import { ErrorDisplay } from "spell-app/app/solid"
+import { ErrorDisplay } from "spell/app/app/solid"
 
 /****************
  * ### `<ErrorBoundary>`

@@ -1,8 +1,8 @@
 import { describe, test, expect, vi } from "vite-plus/test"
 
-import { core } from "spell-parser/core"
-import { runSpellFiles } from "spell-parser/spell/test"
-import { loadFixtureProject } from "spell-app/spaces/test"
+import { core } from "spell/parser/core"
+import { runSpellFiles } from "spell/parser/spell/test"
+import { loadFixtureProject } from "spell/app/spaces/test"
 
 /**
  * The OUTLINE style (epic page `outline-spell`) on whole files:  the Solitaire example's cards, deck and piles

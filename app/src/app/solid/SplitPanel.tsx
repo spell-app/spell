@@ -1,7 +1,7 @@
 import { For, Show, children, createEffect, omit, onCleanup } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
-import { editorPrefs } from "spell-app/app/editorPrefs"
+import { editorPrefs } from "spell/app/app/editorPrefs"
 
 import "./spell.css"
 import "./SplitPanel.css"

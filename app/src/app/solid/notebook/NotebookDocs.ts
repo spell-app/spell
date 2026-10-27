@@ -1,4 +1,4 @@
-import { DocsFamilies } from "spell-ui/docs-components/DocsFamilies"
+import { DocsFamilies } from "spell/ui/docs-components/DocsFamilies"
 
 /**
  * Spell UI's docs elements, for a notebook's page (epic `elemental-spell` P18):
@@ -28,9 +28,9 @@ export class NotebookDocs {
     if (!NotebookDocs.loading) DocsFamilies.add()
     NotebookDocs.loading ??= (async () => {
       const [{ SiteData }] = await Promise.all([
-        import("spell-ui/docs-components/SiteData"),
-        import("spell-ui/docs-components/ui-docs-api"),
-        import("spell-ui/components/ui-toc")
+        import("spell/ui/docs-components/SiteData"),
+        import("spell/ui/docs-components/ui-docs-api"),
+        import("spell/ui/components/ui-toc")
       ])
       SiteData.url ??= NotebookDocs.dataUrl
     })().catch((error) => console.error("NotebookDocs.load():  couldn't load Spell UI's docs elements", error))

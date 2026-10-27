@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { linkModule, projectImportsOf, startChanged } from "spell-app/app/runner"
+import { linkModule, projectImportsOf, startChanged } from "spell/app/app/runner"
 
 const COMPILED = `/*! SPELL: PROJECT { spellVersion: "0.8.0" } */
 import { core, Thing, List, App } from "@spell/core"

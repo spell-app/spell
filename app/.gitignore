@@ -57,7 +57,7 @@ PARKED-*.md
 
 # the epic engine:  a link to the spell-epic checkout (`engineFolder` in .epic/config.json5, made by `epic shared link`;
 # epic epic-eject I5);  since epic repo-split P8 spell-epic sits beside this repo in the top repo `spell`, and the page
-# server's settings name it there (`../spell-epic/...`):  a link left behind stays ignored
+# server's settings name it there (`../epic/...`):  a link left behind stays ignored
 /spell-epic
 
 

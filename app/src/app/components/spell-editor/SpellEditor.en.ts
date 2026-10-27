@@ -1,5 +1,5 @@
 /**
- * Every name `<spell-editor>` uses:  tag, attributes, events, texts.  Schema:  `E.ComponentVocabulary` (`spell-ui/core`).
+ * Every name `<spell-editor>` uses:  tag, attributes, events, texts.  Schema:  `E.ComponentVocabulary` (`spell/ui/core`).
  * - Pure data:  `import type` only, so node can read it (the component pack's catalog, `vite.element.config.ts`).
  * - The pane's own words (tabs, status line) are `SpellEditorPane`'s.
  */

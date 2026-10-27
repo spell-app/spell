@@ -2,14 +2,14 @@ import { For, Show, createEffect, createMemo, createSignal, onCleanup } from "so
 import type { JSX } from "@solidjs/web"
 
 import { E } from "spell/element"
-import { editor } from "spell-app/app/editor"
-import { editorPrefs } from "spell-app/app/editorPrefs"
-import { PropertySchemas } from "spell-ui/property"
-import { ValueSets } from "spell-ui/vocabulary"
-import { appTexts, type AppTextKey } from "spell-app/app/ui/AppTexts"
-import { ClassSchemas } from "spell-app/app/ui/ClassSchemas"
+import { editor } from "spell/app/app/editor"
+import { editorPrefs } from "spell/app/app/editorPrefs"
+import { PropertySchemas } from "spell/ui/property"
+import { ValueSets } from "spell/ui/vocabulary"
+import { appTexts, type AppTextKey } from "spell/app/app/ui/AppTexts"
+import { ClassSchemas } from "spell/app/app/ui/ClassSchemas"
 // Import directly, NOT through the runner barrel, which brings the runners themselves
-import { SpellElement } from "spell-app/app/runner/SpellElement"
+import { SpellElement } from "spell/app/app/runner/SpellElement"
 import { InspectorCard, InspectorEvents, InspectorViews, appParts } from "./InspectorParts"
 import { handlersInSource } from "./InspectorSource"
 import { on } from "./on"
@@ -1328,7 +1328,7 @@ async function loadBrandTokens(): Promise<void> {
   if (brandTokens() || loadingBrandTokens) return
   loadingBrandTokens = true
   try {
-    const { UI } = await import("spell-ui")
+    const { UI } = await import("spell/ui")
     await UI.load()
     setBrandTokens(await UI.themes.scopedTokens(BRAND_THEME, ".Inspector"))
   } catch (error) {

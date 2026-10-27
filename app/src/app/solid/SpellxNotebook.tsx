@@ -1,7 +1,7 @@
 import { For, Loading, Show, createMemo, createSignal, onSettled, untrack } from "solid-js"
 
 import { PrefStore } from "spell/util/persist/PrefStore"
-import { appTexts, type AppTextKey } from "spell-app/app/ui/AppTexts"
+import { appTexts, type AppTextKey } from "spell/app/app/ui/AppTexts"
 import { LazyMonaco } from "./LazyMonaco"
 import { Markdown } from "./Markdown"
 import { NotebookCells, type ChunkCell, type NotebookCell, type PropertyForm } from "./NotebookCells"
@@ -316,7 +316,7 @@ const CODE_FONT_SIZE = 13
 
 /**
  * Monaco's language for spell code, `SpellMonaco.LANGUAGE`.
- * - A copy, NOT imported:  `spell-app/app/ui/monaco` loads Monaco, which must stay lazy.
+ * - A copy, NOT imported:  `spell/app/app/ui/monaco` loads Monaco, which must stay lazy.
  */
 const SPELL_LANGUAGE = "spell"
 

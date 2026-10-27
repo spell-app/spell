@@ -18,12 +18,12 @@ import { join, resolve } from "path"
 import { pathToFileURL } from "url"
 
 import { SRV } from "spell/server"
-import environment from "spell-app/spaces/server/node/environment"
-import { buildTsx } from "spell-parser/spell/node/buildTsx"
-import { SP } from "spell-parser/spell"
-import { PY } from "spell-parser/py"
-import { LSP } from "spell-app/lsp"
-import { CLI } from "spell-app/cli"
+import environment from "spell/app/spaces/server/node/environment"
+import { buildTsx } from "spell/parser/spell/node/buildTsx"
+import { SP } from "spell/parser/spell"
+import { PY } from "spell/parser/py"
+import { LSP } from "spell/app/lsp"
+import { CLI } from "spell/app/cli"
 
 /** `--target`'s short names, e.g. `ts`:  each target's full name, `ts/solid`. */
 const SHORT_NAMES: Record<string, string> = { js: "js/solid", ts: "ts/solid", py: "py" }

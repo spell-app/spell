@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { NotebookCells, type ChunkCell } from "spell-app/app/solid/NotebookCells"
+import { NotebookCells, type ChunkCell } from "spell/app/app/solid/NotebookCells"
 
 /** A small `.spellx` file:  prose, two properties, an alias and an action, in one view. */
 const CARD = [

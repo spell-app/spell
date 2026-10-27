@@ -1,6 +1,6 @@
 /**
  * Every name a view's element starts with:  its tag (set per type), attributes, events, texts.
- * Schema:  `E.ComponentVocabulary` (`spell-ui/core`).
+ * Schema:  `E.ComponentVocabulary` (`spell/ui/core`).
  * - Each view template gets its own copy, with its own tag, e.g. `solitaire-card` -- see `SpellElement.defineFor()`.
  * - Pure data:  `import type` only.
  */

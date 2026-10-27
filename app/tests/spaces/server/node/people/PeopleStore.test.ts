@@ -3,8 +3,8 @@ import { tmpdir } from "os"
 import { resolve } from "path"
 import { afterAll, describe, test, expect } from "vite-plus/test"
 
-import { PeopleStore, orgFile, personFile } from "spell-app/spaces/server/node/people/PeopleStore"
-import { DiskStorage } from "spell-app/spaces/server/node/storage/DiskStorage"
+import { PeopleStore, orgFile, personFile } from "spell/app/spaces/server/node/people/PeopleStore"
+import { DiskStorage } from "spell/app/spaces/server/node/storage/DiskStorage"
 
 /** People and orgs on disk (epic `people-and-orgs` P9):  on a temporary spell-spaces. */
 const root = mkdtempSync(resolve(tmpdir(), "spell-people-"))

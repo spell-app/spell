@@ -2,10 +2,10 @@ import { writeFileSync } from "fs"
 import { sep } from "path"
 import type { TextEdit } from "vscode-languageserver"
 
-import environment from "spell-app/spaces/server/node/environment"
-import { P } from "spell-parser/parser"
-import { SP } from "spell-parser/spell"
-import { CLI } from "spell-app/cli"
+import environment from "spell/app/spaces/server/node/environment"
+import { P } from "spell/parser/parser"
+import { SP } from "spell/parser/spell"
+import { CLI } from "spell/app/cli"
 
 /**
  * `spell format [projects...]`:  tidy the whitespace of `.spell` files, as VS Code's "Format Document" does --

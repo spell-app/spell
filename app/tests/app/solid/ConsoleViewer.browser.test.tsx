@@ -3,12 +3,12 @@ import { flush } from "solid-js"
 import { render, type JSX } from "@solidjs/web"
 
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
-import { P } from "spell-parser/parser"
-import { editor, type EditorStore } from "spell-app/app/editor"
-import { uiReady } from "spell-app/app/solid"
-import type { SpellRuntime } from "spell-app/app/runner"
-import { ConsoleInspectorContext, ConsoleLines, type ConsoleInspector } from "spell-app/app/solid/ConsoleLines"
-import { ConsoleRoot, ConsoleViewer, EDITOR_INSPECTOR } from "spell-app/app/solid/ConsoleViewer"
+import { P } from "spell/parser/parser"
+import { editor, type EditorStore } from "spell/app/app/editor"
+import { uiReady } from "spell/app/app/solid"
+import type { SpellRuntime } from "spell/app/app/runner"
+import { ConsoleInspectorContext, ConsoleLines, type ConsoleInspector } from "spell/app/app/solid/ConsoleLines"
+import { ConsoleRoot, ConsoleViewer, EDITOR_INSPECTOR } from "spell/app/app/solid/ConsoleViewer"
 
 /**
  * The console (`ConsoleLines.tsx`, `ConsoleViewer.tsx`) in the browser:  Solid's client build, so `flush()` after

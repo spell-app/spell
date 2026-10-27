@@ -8,71 +8,71 @@
   "type": "module",
   "exports": {
     "./app": {
-      "spell-app-source": "./src/app/index.tsx",
+      "spell-source": "./src/app/index.tsx",
       "default": "./src/app/index.tsx"
     },
     "./app/components/spell-viewer": {
-      "spell-app-source": "./src/app/components/spell-viewer/index.ts",
+      "spell-source": "./src/app/components/spell-viewer/index.ts",
       "default": "./src/app/components/spell-viewer/index.ts"
     },
     "./app/components/spell-code": {
-      "spell-app-source": "./src/app/components/spell-code/index.ts",
+      "spell-source": "./src/app/components/spell-code/index.ts",
       "default": "./src/app/components/spell-code/index.ts"
     },
     "./app/components/spell-editor": {
-      "spell-app-source": "./src/app/components/spell-editor/index.ts",
+      "spell-source": "./src/app/components/spell-editor/index.ts",
       "default": "./src/app/components/spell-editor/index.ts"
     },
     "./app/components/spell-markdown": {
-      "spell-app-source": "./src/app/components/spell-markdown/index.ts",
+      "spell-source": "./src/app/components/spell-markdown/index.ts",
       "default": "./src/app/components/spell-markdown/index.ts"
     },
     "./app/runner": {
-      "spell-app-source": "./src/app/runner/index.ts",
+      "spell-source": "./src/app/runner/index.ts",
       "default": "./src/app/runner/index.ts"
     },
     "./app/solid": {
-      "spell-app-source": "./src/app/solid/index.ts",
+      "spell-source": "./src/app/solid/index.ts",
       "default": "./src/app/solid/index.ts"
     },
     "./app/solid/modals": {
-      "spell-app-source": "./src/app/solid/modals/index.ts",
+      "spell-source": "./src/app/solid/modals/index.ts",
       "default": "./src/app/solid/modals/index.ts"
     },
     "./app/solid/monaco": {
-      "spell-app-source": "./src/app/solid/monaco/index.ts",
+      "spell-source": "./src/app/solid/monaco/index.ts",
       "default": "./src/app/solid/monaco/index.ts"
     },
     "./app/ui": {
-      "spell-app-source": "./src/app/ui/index.ts",
+      "spell-source": "./src/app/ui/index.ts",
       "default": "./src/app/ui/index.ts"
     },
     "./app/ui/monaco": {
-      "spell-app-source": "./src/app/ui/monaco/index.ts",
+      "spell-source": "./src/app/ui/monaco/index.ts",
       "default": "./src/app/ui/monaco/index.ts"
     },
     "./spaces": {
-      "spell-app-source": "./src/spaces/index.ts",
+      "spell-source": "./src/spaces/index.ts",
       "default": "./src/spaces/index.ts"
     },
     "./spaces/test": {
-      "spell-app-source": "./src/spaces/test/index.ts",
+      "spell-source": "./src/spaces/test/index.ts",
       "default": "./src/spaces/test/index.ts"
     },
     "./lsp": {
-      "spell-app-source": "./src/lsp/index.ts",
+      "spell-source": "./src/lsp/index.ts",
       "default": "./src/lsp/index.ts"
     },
     "./cli": {
-      "spell-app-source": "./src/cli/index.ts",
+      "spell-source": "./src/cli/index.ts",
       "default": "./src/cli/index.ts"
     },
     "./cli/ui": {
-      "spell-app-source": "./src/cli/ui/index.ts",
+      "spell-source": "./src/cli/ui/index.ts",
       "default": "./src/cli/ui/index.ts"
     },
     "./*": {
-      "spell-app-source": [
+      "spell-source": [
         "./src/*.ts",
         "./src/*.tsx",
         "./src/*/index.ts",
@@ -82,7 +82,7 @@
       "default": "./src/*"
     },
     "./*.ts": {
-      "spell-app-source": "./src/*.ts",
+      "spell-source": "./src/*.ts",
       "default": "./src/*.ts"
     },
     "./spaces/@spell/library/people/people.lib.ts": "./spaces/@spell/library/people/people.lib.ts",
@@ -201,7 +201,7 @@
       "app": {
         "name": "App UI",
         "dir": "app/docs",
-        "assets": "../spell-ui/site/_assets"
+        "assets": "../ui/site/_assets"
       }
     },
     "engineRoutes": {

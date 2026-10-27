@@ -1,8 +1,8 @@
 import { For, Show } from "solid-js"
 
-import { editor } from "spell-app/app/editor"
-import { Actions, FILE_ICON, on, tracked } from "spell-app/app/solid"
-import { isStaticBuild } from "spell-app/app/static/staticBuild"
+import { editor } from "spell/app/app/editor"
+import { Actions, FILE_ICON, on, tracked } from "spell/app/app/solid"
+import { isStaticBuild } from "spell/app/app/static/staticBuild"
 
 import "./FileDropdown.css"
 

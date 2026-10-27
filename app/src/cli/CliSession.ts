@@ -2,10 +2,10 @@ import { relative } from "path"
 import { fileURLToPath } from "url"
 import { DiagnosticSeverity } from "vscode-languageserver"
 
-import { SP } from "spell-parser/spell"
-import { LSP } from "spell-app/lsp"
-import { SpellDiskWorkspace } from "spell-app/lsp/SpellDiskWorkspace"
-import { CLI } from "spell-app/cli"
+import { SP } from "spell/parser/spell"
+import { LSP } from "spell/app/lsp"
+import { SpellDiskWorkspace } from "spell/app/lsp/SpellDiskWorkspace"
+import { CLI } from "spell/app/cli"
 
 /**
  * One run of a `spell` command:  its flags, and spell loaded from disk -- what every command needs.

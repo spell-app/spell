@@ -3,8 +3,8 @@ import { flush } from "solid-js"
 import { render } from "@solidjs/web"
 
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
-import { UI as SpellUI } from "spell-ui"
-import { editor, type EditorStore } from "spell-app/app/editor"
+import { UI as SpellUI } from "spell/ui"
+import { editor, type EditorStore } from "spell/app/app/editor"
 import {
   Actions,
   ErrorBoundary,
@@ -15,7 +15,7 @@ import {
   addAppIconsPageWide,
   uiReady,
   type ActionProps
-} from "spell-app/app/solid"
+} from "spell/app/app/solid"
 
 /**
  * The shared Solid UI (`chrome.tsx`, `Actions.tsx`, `ErrorBoundary.tsx`, `Notice.tsx`) on real `<ui-*>` elements.

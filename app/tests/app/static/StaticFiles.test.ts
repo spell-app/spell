@@ -1,8 +1,8 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from "vite-plus/test"
 
 import { DatabasePlace, UIError } from "spell/util"
-import "spell-app/spaces"
-import { EDITS_STORE, OLD_STORAGE_PREFIX, StaticFiles } from "spell-app/app/static/StaticFiles"
+import "spell/app/spaces"
+import { EDITS_STORE, OLD_STORAGE_PREFIX, StaticFiles } from "spell/app/app/static/StaticFiles"
 
 /**
  * The editor's static build reads and keeps its files with no server (`StaticFiles`, epic `debut` P9).

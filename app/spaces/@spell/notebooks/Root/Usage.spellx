@@ -32,7 +32,7 @@
 		</>
 		<markdown>
 			```html
-			<!-- once, in your entry:  import "spell-ui/ui-root" -->
+			<!-- once, in your entry:  import "spell/ui/ui-root" -->
 			<ui-root icons="fa7-brands" loading="Loading the dashboard" fixed aria-label="Dashboard">
 			  <ui-menu>...</ui-menu>
 			  <ui-grid>...</ui-grid>
@@ -52,7 +52,7 @@
 			  ready by `timeout` (`timeout`) fires a cancelable `ui-error` (cancel it to skip the console warning) and is
 			  listed in `ui-ready`'s `failed`. The content shows anyway;
 			  a broken form control shows its native fallback, any other broken element just its children.
-			- Without JavaScript (or before the root's script runs, with `spell-ui/styles` loaded), an undefined root
+			- Without JavaScript (or before the root's script runs, with `spell/ui/styles` loaded), an undefined root
 			  hides its content only under `@media (scripting: enabled)`: server-rendered pages still show as sent.
 			- Swap the loading look in code: `UIRoot.Loading` (a `<ui-loader>`) and `UIRoot.Skeleton` (`<ui-placeholder>`s).
 		</>
@@ -73,7 +73,7 @@
 			- A pack that can't load, or doesn't register, still lets the root get ready: `ui-error` and `ui-ready`'s
 			  `failed` list it as `{ tag: "ui-components", reason, source }`, and the console shows an error naming its
 			  `source`.
-			- In an ES module bundle, `import { registerPack } from "spell-ui"` (or `spell-ui/ui-components`).
+			- In an ES module bundle, `import { registerPack } from "spell/ui"` (or `spell/ui/ui-components`).
 		</>
 		<markdown>
 			```html

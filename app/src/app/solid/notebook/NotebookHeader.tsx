@@ -1,9 +1,9 @@
 import { For, Show } from "solid-js"
 
-import { SP } from "spell-parser/spell"
-import { appTexts } from "spell-app/app/ui/AppTexts"
-import { navigate } from "spell-app/app/pages/navigation"
-import { on } from "spell-app/app/solid/on"
+import { SP } from "spell/parser/spell"
+import { appTexts } from "spell/app/app/ui/AppTexts"
+import { navigate } from "spell/app/app/pages/navigation"
+import { on } from "spell/app/app/solid/on"
 import { NotebookController, type SaveStatus } from "./NotebookController"
 
 import "./NotebookHeader.css"

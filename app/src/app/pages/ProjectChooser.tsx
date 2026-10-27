@@ -1,8 +1,8 @@
 import { For, Show } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
-import { SPACES } from "spell-app/spaces"
-import { appTexts } from "spell-app/app/ui/AppTexts"
+import { SPACES } from "spell/app/spaces"
+import { appTexts } from "spell/app/app/ui/AppTexts"
 import {
   Actions,
   AppMenu,
@@ -12,7 +12,7 @@ import {
   openProject,
   trackProjectRoot,
   type ProjectRootState
-} from "spell-app/app/solid"
+} from "spell/app/app/solid"
 
 import "./ProjectChooser.css"
 

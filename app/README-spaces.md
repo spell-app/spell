@@ -17,7 +17,7 @@ Every project and every file in Spell has an address like that one, and it's the
 | the server, reading the file | `GET /spaces/@spell/examples/Solitaire/Solitaire.spellx` |
 
 None of them is a path on disk.
-One function turns an address into a folder, [`SpellUrls.folderFor()`](https://github.com/spell-app/spell-parser/blob/main/src/spell/SpellUrls.ts),
+One function turns an address into a folder, [`SpellUrls.folderFor()`](https://github.com/spell-app/spell/blob/main/parser/src/spell/SpellUrls.ts),
 and everything that reads a project goes through it:  so the editor, the command line and the compiler
 can't disagree about where a project is.
 
@@ -84,7 +84,7 @@ here     = "@here"                       on the command line:  the project in th
 - On the command line, a group or a whole space (`@spell`) stands for its projects:
   `spell` asks which one, or `--all` takes them all ([the command line](https://github.com/spell-app/spell/blob/main/README-cli.md)).
 - The full rules, with every part of an address by name:
-  `SpellLocation`, in spell-parser's [SpellLocation.ts](https://github.com/spell-app/spell-parser/blob/main/src/spell/SpellLocation.ts).
+  `SpellLocation`, in spell-parser's [SpellLocation.ts](https://github.com/spell-app/spell/blob/main/parser/src/spell/SpellLocation.ts).
 
 The groups, and where each one's folder is:
 
@@ -275,7 +275,7 @@ What each printed on a real run is under it.
    - What a compile writes goes in spell-app's `build/` folder, never beside your source:
      the compiled program, `hello.declarations.json5` (what it declares, for projects that import it)
      and `hello.en.js`, its words.
-   - Every target's files, and where each goes:  [spell-parser's README-targets.md](https://github.com/spell-app/spell-parser/blob/main/README-targets.md).
+   - Every target's files, and where each goes:  [spell-parser's README-targets.md](https://github.com/spell-app/spell/blob/main/parser/README-targets.md).
 
 Somewhere else on disk:  `spell app create hello --in <folder>` makes it there, and `spell run <folder>/hello` runs
 it, as `@local/<folder>/hello`.
@@ -314,9 +314,9 @@ Each entry of `imports`:
 
 ## The models:  making projects, not compiling them
 
-[spell-parser](https://github.com/spell-app/spell-parser/blob/main/README.md) compiles projects, but it never lists them:  it starts with no groups at all.
+[spell-parser](https://github.com/spell-app/spell/blob/main/parser/README.md) compiles projects, but it never lists them:  it starts with no groups at all.
 The groups, and every change to what's in them, are spaces' models:
-plain classes in [src/spaces/models/](src/spaces/models/), safe in a browser, imported as `spell-app/spaces`.
+plain classes in [src/spaces/models/](src/spaces/models/), safe in a browser, imported as `spell/app/spaces`.
 
 | Model | What it does |
 | --- | --- |
@@ -329,16 +329,16 @@ plain classes in [src/spaces/models/](src/spaces/models/), safe in a browser, im
 | `PersonView`, `MeAnswer` ... | what the app and the server say about people:  types only |
 
 So a program that reads an address must load the groups first, and there are three ways in:
-- through `spell-app/spaces`, as the editor does
+- through `spell/app/spaces`, as the editor does
 - through spaces' disk reader, `installDiskFetch()`:  the [language server](README-lsp.md) and `spell` do this
-- or `spell-app/spaces/models/projectGroups` alone, as `<spell-viewer>` does to stay clear of the parser
+- or `spell/app/spaces/models/projectGroups` alone, as `<spell-viewer>` does to stay clear of the parser
 
 The line between the two repos is sharp.
 A project's own reading, compiling and saving is its `SpellProject`
-([README-spell.md](https://github.com/spell-app/spell-parser/blob/main/README-spell.md));  making, copying and renaming projects happens here.
+([README-spell.md](https://github.com/spell-app/spell/blob/main/parser/README-spell.md));  making, copying and renaming projects happens here.
 Each model asks the server, and throws with what it was doing ("renaming file") for the editor to show.
 
-- The node side, `spell-app/spaces/server/node/...`, is imported by its path, never from the entry:
+- The node side, `spell/app/spaces/server/node/...`, is imported by its path, never from the entry:
   it's the part that touches the disk.
 - **Not yet:**  a second storage.
   The disk is the only one behind `SpaceStorage`;  the interface is there so another can stand in, and none has.
@@ -489,7 +489,7 @@ That game lives in the server's memory, though:  restart the server, and every g
 - Its tests:  pytest and ruff, through uv, in spell-app's `yarn test` and `yarn lint`;
   [quartApp.test.ts](tests/cli/quartApp.test.ts) plays Solitaire through a compiled app, in headless Chromium.
 - What compiling to Python writes beside your source, the app itself among it:
-  [spell-parser's README-targets.md](https://github.com/spell-app/spell-parser/blob/main/README-targets.md).
+  [spell-parser's README-targets.md](https://github.com/spell-app/spell/blob/main/parser/README-targets.md).
 
 ## People and orgs:  the schema is a Spell file
 
@@ -601,5 +601,5 @@ Where it stands:  the people and organizations are built;  sign-in, permissions 
 - [The example apps](README-examples.md):  what's in `@spell/examples`, and ideas for a project of your own
 - [The command line](https://github.com/spell-app/spell/blob/main/README-cli.md#spell-app):  every option of `spell app create`, `spell app serve` and
   `spell projects`
-- [spell-parser's README-spell.md](https://github.com/spell-app/spell-parser/blob/main/README-spell.md):  `SpellProject`, which reads, compiles and saves
+- [spell-parser's README-spell.md](https://github.com/spell-app/spell/blob/main/parser/README-spell.md):  `SpellProject`, which reads, compiles and saves
   the projects that live here
