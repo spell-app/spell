@@ -28,20 +28,20 @@
     // The accent:  violet light, lilac dark
     "glass-accent-light": "#6a3fd6",
     "glass-accent-dark": "#b79bff",
-    "glass-accent-wash": { "light": "rgb(122 79 224 / 0.12)", "dark": "rgb(183 155 255 / 0.2)" },
+    "glass-accent-wash": { "light": "#7a4fe01f", "dark": "#b79bff33" },
     "glass-accent-text": { "light": "#5a35c4", "dark": "#d3c2ff" },
     // Glass:  the surfaces, their edge and the blur behind them
-    "glass-surface": { "light": "rgb(255 255 255 / 0.45)", "dark": "rgb(38 36 48 / 0.45)" },
-    "glass-surface-strong": { "light": "rgb(255 255 255 / 0.62)", "dark": "rgb(30 28 38 / 0.58)" },
-    "glass-surface-faint": { "light": "rgb(255 255 255 / 0.4)", "dark": "rgb(255 255 255 / 0.05)" },
-    "glass-edge": { "light": "rgb(255 255 255 / 0.75)", "dark": "rgb(255 255 255 / 0.12)" },
-    "glass-hairline": { "light": "rgb(60 60 67 / 0.12)", "dark": "rgb(255 255 255 / 0.08)" },
-    "glass-track": { "light": "rgb(118 118 128 / 0.12)", "dark": "rgb(118 118 128 / 0.24)" },
+    "glass-surface": { "light": "#ffffff73", "dark": "#26243073" },
+    "glass-surface-strong": { "light": "#ffffff9e", "dark": "#1e1c2694" },
+    "glass-surface-faint": { "light": "#ffffff66", "dark": "#ffffff0d" },
+    "glass-edge": { "light": "#ffffffbf", "dark": "#ffffff1f" },
+    "glass-hairline": { "light": "#3c3c431f", "dark": "#ffffff14" },
+    "glass-track": { "light": "#7676801f", "dark": "#7676803d" },
     // the track solid, as a Mac's on a bar:  the grey under tabs and toolbars, and the "or" between two buttons
     "glass-track-solid": { "light": "#e9e9ee", "dark": "#3a3846" },
     "glass-blur": "blur(28px) saturate(1.7)",
     // bars that stick over scrolling content (a page's top bar, sticky titles):  glass too
-    "glass-bar": { "light": "rgb(255 255 255 / 0.95)", "dark": "rgb(30 28 38 / 0.95)" },
+    "glass-bar": { "light": "#fffffff2", "dark": "#1e1c26f2" },
     // The wallpaper behind the page:  none, a solid page.
     // - A theme on this one sets its own (Fruity's colour washes);  the page's colour stays `--ui-background`.
     "glass-wallpaper": "none"
@@ -85,18 +85,18 @@
     "page": { "light": "#f2eefb", "dark": "#15131c" },
     "panel": "{own.glass-surface-strong}",
     "inset": "{own.glass-surface}",
-    "strong": { "light": "rgb(255 255 255 / 0.9)", "dark": "rgb(58 56 70 / 0.8)" },
+    "strong": { "light": "#ffffffe6", "dark": "#3a3846cc" },
     // a bar over scrolling content, for pages that draw one (the docs site's top bar, its sticky titles)
     "bar": "{own.glass-bar}",
-    "code": { "light": "rgb(255 255 255 / 0.5)", "dark": "rgb(0 0 0 / 0.25)" },
+    "code": { "light": "#ffffff80", "dark": "#00000040" },
     "highlight": "{own.glass-accent-wash}"
   },
   "borders": {
     "color": "{own.glass-hairline}",
-    "strong": { "light": "rgb(60 60 67 / 0.22)", "dark": "rgb(255 255 255 / 0.18)" },
+    "strong": { "light": "#3c3c4338", "dark": "#ffffff2e" },
     "internal": "{own.glass-hairline}",
-    "selected": { "light": "rgb(60 60 67 / 0.22)", "dark": "rgb(255 255 255 / 0.18)" },
-    "selected-strong": { "light": "rgb(60 60 67 / 0.3)", "dark": "rgb(255 255 255 / 0.26)" }
+    "selected": { "light": "#3c3c4338", "dark": "#ffffff2e" },
+    "selected-strong": { "light": "#3c3c434d", "dark": "#ffffff42" }
   },
   "brand": {
     "primary": {
@@ -128,11 +128,11 @@
     }
   },
   "shadows": {
-    "ink": { "light": "rgb(40 30 80)", "dark": "rgb(0 0 0)" },
-    "subtle": "0 1px 2px light-dark(rgb(0 0 0 / 0.06), rgb(0 0 0 / 0.3))",
-    "raised": "0 1px 2px light-dark(rgb(40 30 80 / 0.06), rgb(0 0 0 / 0.25)), 0 8px 30px light-dark(rgb(40 30 80 / 0.12), rgb(0 0 0 / 0.35))",
-    "floating": "0 2px 4px light-dark(rgb(40 30 80 / 0.06), rgb(0 0 0 / 0.3)), 0 16px 40px light-dark(rgb(40 30 80 / 0.16), rgb(0 0 0 / 0.45))",
-    "floating-hover": "0 2px 6px light-dark(rgb(40 30 80 / 0.08), rgb(0 0 0 / 0.35)), 0 24px 56px light-dark(rgb(40 30 80 / 0.22), rgb(0 0 0 / 0.55))",
+    "ink": { "light": "#281e50", "dark": "#000000" },
+    "subtle": "0 1px 2px light-dark(#0000000f, #0000004d)",
+    "raised": "0 1px 2px light-dark(#281e500f, #00000040), 0 8px 30px light-dark(#281e501f, #00000059)",
+    "floating": "0 2px 4px light-dark(#281e500f, #0000004d), 0 16px 40px light-dark(#281e5029, #00000073)",
+    "floating-hover": "0 2px 6px light-dark(#281e5014, #00000059), 0 24px 56px light-dark(#281e5038, #0000008c)",
     "overlay": "{shadows.floating-hover}"
   },
   "motion": {
@@ -154,10 +154,10 @@
       "padding-block": "0.4em",
       "padding-inline": "0.9em",
       "font-weight": 500,
-      "background": { "light": "rgb(255 255 255 / 0.85)", "dark": "rgb(255 255 255 / 0.12)" },
-      "background-hover": { "light": "rgb(255 255 255 / 0.98)", "dark": "rgb(255 255 255 / 0.18)" },
-      "background-down": { "light": "rgb(235 235 240 / 0.95)", "dark": "rgb(255 255 255 / 0.24)" },
-      "background-active": { "light": "rgb(235 235 240 / 0.95)", "dark": "rgb(255 255 255 / 0.22)" },
+      "background": { "light": "#ffffffd9", "dark": "#ffffff1f" },
+      "background-hover": { "light": "#fffffffa", "dark": "#ffffff2e" },
+      "background-down": { "light": "#ebebf0f2", "dark": "#ffffff3d" },
+      "background-active": { "light": "#ebebf0f2", "dark": "#ffffff38" },
       "color": "{text.body}",
       "color-hover": "{text.body}"
     },
@@ -179,14 +179,14 @@
     "input": {
       "radius": "{radii.m}",
       // Inputs:  a pale well with a hairline;  the accent ring on focus
-      "background": { "light": "rgb(255 255 255 / 0.7)", "dark": "rgb(255 255 255 / 0.06)" },
+      "background": { "light": "#ffffffb3", "dark": "#ffffff0f" },
       "border-color": "{own.glass-hairline}",
       "border-color-hover": "{borders.strong}",
       "border-color-focus": "{brand.focus.color}"
     },
     "dropdown": {
       "radius": "{radii.m}",
-      "background": { "light": "rgb(255 255 255 / 0.7)", "dark": "rgb(255 255 255 / 0.06)" },
+      "background": { "light": "#ffffffb3", "dark": "#ffffff0f" },
       "border-color": "{own.glass-hairline}",
       "border-color-hover": "{borders.strong}"
     },
@@ -196,7 +196,7 @@
       "text-active-weight": 600,
       "background": "{own.glass-surface}",
       // Menus:  the selected item the accent's wash, its text the accent
-      "hover-background": { "light": "rgb(0 0 0 / 0.05)", "dark": "rgb(255 255 255 / 0.07)" },
+      "hover-background": { "light": "#0000000d", "dark": "#ffffff12" },
       "active-background": "{own.glass-accent-wash}",
       "active-color": "{own.glass-accent-text}",
       // Segmented menus (tab bars):  a grey track, solid as a Mac one (it sits on bars),
@@ -209,9 +209,9 @@
       // fully round pills, the track and every option (Owen, 2026-10-23:  "All should be fully rounded pills")
       "segmented-radius": "{radii.pill}",
       "segmented-item-radius": "{radii.pill}",
-      "segmented-active-background": { "light": "#ffffff", "dark": "rgb(255 255 255 / 0.2)" },
+      "segmented-active-background": { "light": "#ffffff", "dark": "#ffffff33" },
       "segmented-active-color": "{text.body}",
-      "segmented-active-shadow": "0 1px 2px rgb(0 0 0 / 0.15)",
+      "segmented-active-shadow": "0 1px 2px #00000026",
       // the chosen segment under the pointer stays the white key;  an unchosen one a shade darker than the track
       "segmented-active-hover-background": "{components.menu.segmented-active-background}",
       "active-focus-color": "{brand.focus.color}"
@@ -268,10 +268,10 @@
       // a section title:  in place, white glass at 50%;  stuck, 75% (below), the change eased
       // (Owen, 2026-10-23:  "50% opaque white when non-sticky, animated transition ... when sticky");
       // the panel round a page's tabs, 50% too ("make tab surround 50% opaque")
-      "rest-background": { "light": "rgb(255 255 255 / 0.5)", "dark": "rgb(30 28 38 / 0.5)" },
+      "rest-background": { "light": "#ffffff80", "dark": "#1e1c2680" },
       // stuck, 75%, not 90% (Owen, 2026-10-23:  "less opacity when sticky")
-      "title-background": { "light": "rgb(255 255 255 / 0.75)", "dark": "rgb(30 28 38 / 0.75)" },
-      "panel-background": { "light": "rgb(255 255 255 / 0.5)", "dark": "rgb(30 28 38 / 0.5)" },
+      "title-background": { "light": "#ffffffbf", "dark": "#1e1c26bf" },
+      "panel-background": { "light": "#ffffff80", "dark": "#1e1c2680" },
       "rest-filter": "{own.glass-blur}",
       // what a page lays under the bars at its top (the docs site's stuck title line, the strip round its tabs):
       // the wallpaper itself, fixed, so they read as the page
@@ -281,7 +281,7 @@
       // nothing to blur under an opaque wallpaper:  a blur there drew seams where two such bars meet
       "wallpaper-filter": "none",
       // ... and the white over it on a stuck section title:  the 50% it has in place
-      "wallpaper-tint": { "light": "rgb(255 255 255 / 0.5)", "dark": "rgb(30 28 38 / 0.5)" },
+      "wallpaper-tint": { "light": "#ffffff80", "dark": "#1e1c2680" },
       // a titled toolbar (the docs' sections row) as a pill bar, the tab bars' look
       "tracked": 1,
       "track": "{own.glass-track-solid}",
@@ -292,23 +292,23 @@
       "item-padding": "0 1.1em",
       // every corner of a key the track's, less its padding:  nested, never as round as the track
       "item-radius": "calc({components.bar.track-radius} - {components.bar.track-padding})",
-      "hover-background": { "light": "rgb(0 0 0 / 0.05)", "dark": "rgb(255 255 255 / 0.07)" },
-      "active-background": { "light": "#ffffff", "dark": "rgb(255 255 255 / 0.2)" },
-      "active-shadow": "0 1px 2px rgb(0 0 0 / 0.15)",
+      "hover-background": { "light": "#0000000d", "dark": "#ffffff12" },
+      "active-background": { "light": "#ffffff", "dark": "#ffffff33" },
+      "active-shadow": "0 1px 2px #00000026",
       // a border round a page's SECOND row of tabs (the docs' section toolbar):  none yet, one line to give it one
       "subtabs-border": "none",
       // a toolbar's key tip (the docs' "Type T to jump to this section"):  a pill of dark glass, in both schemes
-      "tip-background": "rgb(24 22 36 / 0.62)",
+      "tip-background": "#1816249e",
       "tip-filter": "blur(14px) saturate(160%)"
     },
     "toolbar": {
       // a toolbar's ‹ / › keys:  a faint white disc, so they read as buttons
       // (Owen:  "20% white opacity so it's clear what it is")
-      "button-background": { "light": "rgb(255 255 255 / 0.2)", "dark": "rgb(255 255 255 / 0.12)" }
+      "button-background": { "light": "#ffffff33", "dark": "#ffffff1f" }
     },
     "dimmer": {
       // the scrim:  a light veil that blurs what it covers
-      "background": { "light": "rgb(0 0 0 / 0.18)", "dark": "rgb(0 0 0 / 0.45)" },
+      "background": { "light": "#0000002e", "dark": "#00000073" },
       "blur": "blur(8px) saturate(1.2)"
     },
     "flyout": {
@@ -323,7 +323,7 @@
     },
     "docs-nav": {
       // The docs' side column (`<ui-docs-nav>`):  glass, quiet bands, the current page the accent's wash
-      "background": { "light": "rgb(255 255 255 / 0.78)", "dark": "rgb(30 28 38 / 0.8)" },
+      "background": { "light": "#ffffffc7", "dark": "#1e1c26cc" },
       "header-background": "transparent",
       "band-background": "transparent",
       "band-color": "{text.muted}",
@@ -333,15 +333,15 @@
     },
     "docs-example": {
       // Docs examples (`<ui-docs-example>`):  a glass frame;  the open demo a very light white, not pure white
-      "frame-background": { "light": "rgb(255 255 255 / 0.35)", "dark": "rgb(30 28 38 / 0.35)" },
+      "frame-background": { "light": "#ffffff59", "dark": "#1e1c2659" },
       "frame-border": "1px solid {own.glass-edge}",
       // no blur, only the saturation:
       // - a frame entering at the window's bottom edge blurred in the dark beyond it,
       //   and blinked dark as it scrolled in (Owen, 2026-10-23:  "These blink dark when scrolled at the bottom of the page")
       // - over the smooth wallpaper, the blur showed nothing anyway
       "frame-filter": "saturate(1.7)",
-      "demo-background": { "light": "rgb(255 255 255 / 0.55)", "dark": "rgb(255 255 255 / 0.05)" },
-      "toggle-background": { "light": "rgb(255 255 255 / 0.95)", "dark": "rgb(255 255 255 / 0.18)" }
+      "demo-background": { "light": "#ffffff8c", "dark": "#ffffff0d" },
+      "toggle-background": { "light": "#fffffff2", "dark": "#ffffff2e" }
     },
     "header": {
       // Headers:  San Francisco Display, tight;  ledes muted, never italic

@@ -286,39 +286,39 @@ const RADIUS_TOKENS: readonly (readonly [string, "s" | "m" | "l"])[] = [
 /** Each depth's shadows:  `[raised (cards), floating (menus, popups)]`, both schemes in each. */
 const SHADOWS: Readonly<Record<UIT.ThemeDepth, readonly [string, string]>> = {
   flat: [
-    "0 0 0 1px light-dark(rgb(0 0 0 / 0.06), rgb(255 255 255 / 0.08))",
-    "0 0 0 1px light-dark(rgb(0 0 0 / 0.08), rgb(255 255 255 / 0.1)), " +
-      "0 4px 12px light-dark(rgb(0 0 0 / 0.08), rgb(0 0 0 / 0.35))"
+    "0 0 0 1px light-dark(#0000000f, #ffffff14)",
+    "0 0 0 1px light-dark(#00000014, #ffffff1a), " +
+      "0 4px 12px light-dark(#00000014, #00000059)"
   ],
   soft: [
-    "0 1px 2px light-dark(rgb(40 30 80 / 0.06), rgb(0 0 0 / 0.25)), " +
-      "0 8px 30px light-dark(rgb(40 30 80 / 0.12), rgb(0 0 0 / 0.35))",
-    "0 2px 4px light-dark(rgb(40 30 80 / 0.06), rgb(0 0 0 / 0.3)), " +
-      "0 16px 40px light-dark(rgb(40 30 80 / 0.16), rgb(0 0 0 / 0.45))"
+    "0 1px 2px light-dark(#281e500f, #00000040), " +
+      "0 8px 30px light-dark(#281e501f, #00000059)",
+    "0 2px 4px light-dark(#281e500f, #0000004d), " +
+      "0 16px 40px light-dark(#281e5029, #00000073)"
   ],
   lifted: [
-    "0 2px 4px light-dark(rgb(40 30 80 / 0.08), rgb(0 0 0 / 0.3)), " +
-      "0 14px 40px light-dark(rgb(40 30 80 / 0.2), rgb(0 0 0 / 0.5))",
-    "0 4px 8px light-dark(rgb(40 30 80 / 0.1), rgb(0 0 0 / 0.35)), " +
-      "0 28px 64px light-dark(rgb(40 30 80 / 0.26), rgb(0 0 0 / 0.6))"
+    "0 2px 4px light-dark(#281e5014, #0000004d), " +
+      "0 14px 40px light-dark(#281e5033, #00000080)",
+    "0 4px 8px light-dark(#281e501a, #00000059), " +
+      "0 28px 64px light-dark(#281e5042, #00000099)"
   ]
 }
 
 /** Each glass choice:  `[surface, strong surface, what's behind it]`;  `frosted` is the glass themes' own. */
 const GLASS: Readonly<Record<UIT.ThemeGlass, readonly [string, string, string]>> = {
   clear: [
-    "light-dark(rgb(255 255 255 / 0.25), rgb(38 36 48 / 0.28))",
-    "light-dark(rgb(255 255 255 / 0.4), rgb(30 28 38 / 0.4))",
+    "light-dark(#ffffff40, #26243047)",
+    "light-dark(#ffffff66, #1e1c2666)",
     "blur(18px) saturate(1.8)"
   ],
   frosted: [
-    "light-dark(rgb(255 255 255 / 0.45), rgb(38 36 48 / 0.45))",
-    "light-dark(rgb(255 255 255 / 0.62), rgb(30 28 38 / 0.58))",
+    "light-dark(#ffffff73, #26243073)",
+    "light-dark(#ffffff9e, #1e1c2694)",
     "blur(28px) saturate(1.7)"
   ],
   solid: [
-    "light-dark(rgb(255 255 255 / 0.9), rgb(38 36 48 / 0.92))",
-    "light-dark(rgb(255 255 255 / 0.97), rgb(30 28 38 / 0.97))",
+    "light-dark(#ffffffe6, #262430eb)",
+    "light-dark(#fffffff7, #1e1c26f7)",
     "none"
   ]
 }

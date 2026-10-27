@@ -24,6 +24,9 @@ import type {
  * - Checks every name against `themeTree`, and throws a `TypeError` naming the file, the name and where it belongs:
  *   a name not in the tree, a family token that is a tree leaf, an `own` name that isn't the theme's,
  *   a theme it extends or a palette that doesn't exist.
+ * - Colours are hex, `#rrggbb` or `#rrggbbaa`, never `rgb()`:  a plain `rgb(r g b / a)` is refused, naming the hex
+ *   to write (Owen, epic `debut` P20:  "can you do colors as `#rrggbbaa`").  Relative colours (`oklch(from ...)`),
+ *   `color-mix()` and `var()` are fine.
  * - PURE:  data in, text out, no file system and no JSON5 reader (the caller parses the file), so it runs in node
  *   (`yarn gen:styles`, the committed sheets) and in the browser (the test that keeps them current, the theme
  *   editor rewriting its sheet live, saved themes).
@@ -221,6 +224,8 @@ export class ThemeFile {
     if (typeof value !== "string") {
       this.fail(`\`${path.join(".")}\` is a value:  CSS text, a number, or \`{ "light": ..., "dark": ... }\``)
     }
+    const rgb = PLAIN_RGB.exec(value)
+    if (rgb) this.fail(`\`${path.join(".")}\` writes \`${rgb[0]}\`:  write it as hex, \`${ThemeFile.hexOf(rgb)}\``)
     return value.replace(POINTER, (_, pointer: string) => `var(${this.tokenAt(pointer, path)})`)
   }
 
@@ -241,6 +246,14 @@ export class ThemeFile {
   ////////////////
   // ## Helpers
   ////////////////
+
+  /** The hex of a plain `rgb()` colour `PLAIN_RGB` matched:  `rgb(0 0 0 / 0.3)` => `#0000004d` (its alpha `round(a × 255)`). */
+  static hexOf([, ...channels]: RegExpExecArray): string {
+    const [r, g, b, alpha] = channels
+    const bytes = [r, g, b].map(Number)
+    if (alpha !== undefined) bytes.push(Math.round(Number(alpha) * 255))
+    return `#${bytes.map((byte) => byte.toString(16).padStart(2, "0")).join("")}`
+  }
 
   /** Theme `name`'s data;  throws when there's no such theme file. */
   private themeData(name: string): ThemeData {
@@ -420,6 +433,9 @@ const RULES = "rules"
 
 /** Top-level keys that say what a theme builds on, not values. */
 const META_KEYS = new Set(["$schema", "title", "extends", "palette", "rules"])
+
+/** A plain `rgb()` colour, `rgb(r g b)` or `rgb(r g b / a)`:  refused, as hex is the theme files' one spelling. */
+const PLAIN_RGB = /rgba?\(\s*(\d+)\s+(\d+)\s+(\d+)\s*(?:\/\s*([\d.]+)\s*)?\)/
 
 /** A pointer at another leaf:  `{surfaces.panel}`. */
 const POINTER = /\{([\w.-]+)\}/g

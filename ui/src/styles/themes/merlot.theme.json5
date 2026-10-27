@@ -28,7 +28,7 @@
     "merlot-border": { "light": "#d9c3cb", "dark": "#573244" },
     "merlot-accent": { "light": "#8c1d40", "dark": "#e6c27a" },
     "merlot-on-accent": { "light": "#ffffff", "dark": "#1a0c13" },
-    "merlot-accent-wash": { "light": "rgb(140 29 64 / 0.1)", "dark": "rgb(230 194 122 / 0.15)" }
+    "merlot-accent-wash": { "light": "#8c1d401a", "dark": "#e6c27a26" }
   },
   "typography": {
     "size": "15px",
@@ -137,9 +137,9 @@
   },
   "shadows": {
     // flat:  panels are joined by hairlines;  only what floats casts one
-    "ink": { "light": "rgb(58 24 36)", "dark": "rgb(0 0 0)" },
+    "ink": { "light": "#3a1824", "dark": "#000000" },
     "subtle": "none",
-    "raised": "0 1px 2px light-dark(rgb(58 24 36 / 0.08), rgb(0 0 0 / 0.3))"
+    "raised": "0 1px 2px light-dark(#3a182414, #0000004d)"
   },
   "components": {
     "button": {

@@ -32,10 +32,10 @@
     --spell-brand-600: #767d9a;
     --spell-brand-700: #5d637d;
     --spell-brand-900: #2b2f3f;
-    --spell-hairline-subtle: rgb(200 206 231 / 0.16);
-    --spell-hairline: rgb(200 206 231 / 0.22);
-    --spell-hairline-strong: rgb(200 206 231 / 0.34);
-    --spell-lilac-soft: rgb(184 180 255 / 0.16);
+    --spell-hairline-subtle: #c8cee729;
+    --spell-hairline: #c8cee738;
+    --spell-hairline-strong: #c8cee757;
+    --spell-lilac-soft: #b8b4ff29;
     --spell-accent-25: #fffdf8;
     --spell-accent-50: #fdf9f1;
     --spell-accent-75: #faf5ea;
@@ -47,7 +47,7 @@
     --spell-violet-75: #f1f1ff;
     --spell-brand-500: #8e96b5;
     --spell-brand-800: #454a5f;
-    --spell-surface-tint: light-dark(var(--spell-brand-50), rgb(200 206 231 / 0.07));
+    --spell-surface-tint: light-dark(var(--spell-brand-50), #c8cee712);
     --spell-surface-selected: light-dark(var(--spell-violet-100), var(--spell-lilac-soft));
     --spell-surface-warm: light-dark(var(--spell-accent-75), #2c2152);
     --spell-surface-code: light-dark(var(--spell-brand-75), var(--spell-violet-975));
@@ -63,21 +63,21 @@
     --spell-accent-hover: light-dark(var(--spell-violet-700), var(--spell-violet-200));
     --spell-accent-press: light-dark(var(--spell-violet-800), var(--spell-violet-400));
     --spell-accent-soft: light-dark(var(--spell-violet-100), var(--spell-lilac-soft));
-    --spell-accent-soft-hover: light-dark(var(--spell-violet-150), rgb(184 180 255 / 0.26));
-    --spell-accent-ring: light-dark(rgb(101 80 202 / 0.28), rgb(184 180 255 / 0.4));
+    --spell-accent-soft-hover: light-dark(var(--spell-violet-150), #b8b4ff42);
+    --spell-accent-ring: light-dark(#6550ca47, #b8b4ff66);
     --spell-border-subtle: light-dark(var(--spell-brand-100), var(--spell-hairline-subtle));
     --spell-border-default: light-dark(var(--spell-brand-150), var(--spell-hairline));
     --spell-border-strong: light-dark(var(--spell-brand-300), var(--spell-hairline-strong));
     --spell-border-accent: var(--spell-violet-400);
     --spell-success: light-dark(#00853a, #8ef6a5);
-    --spell-success-soft: light-dark(#e7ffea, rgb(110 231 160 / 0.14));
+    --spell-success-soft: light-dark(#e7ffea, #6ee7a024);
     --spell-warning: light-dark(#a66900, #ffe0bd);
-    --spell-warning-soft: light-dark(#fff8f1, rgb(252 200 90 / 0.14));
+    --spell-warning-soft: light-dark(#fff8f1, #fcc85a24);
     --spell-danger: light-dark(#d90021, #ffada6);
-    --spell-danger-soft: light-dark(#fff0ee, rgb(255 140 150 / 0.14));
+    --spell-danger-soft: light-dark(#fff0ee, #ff8c9624);
     --spell-spark: #ffc075;
     --spell-blob: light-dark(var(--spell-violet-150), var(--spell-lilac-soft));
-    --spell-blob-2: light-dark(var(--spell-brand-100), rgb(200 206 231 / 0.08));
+    --spell-blob-2: light-dark(var(--spell-brand-100), #c8cee714);
     --spell-line-flourish: var(--spell-violet-400);
     --spell-shadow-xs: var(--ui-shadow-subtle);
     --spell-shadow-sm: var(--ui-shadow-raised);
@@ -151,7 +151,7 @@
     --ui-border-color-strong: light-dark(var(--spell-brand-300), var(--spell-hairline-strong));
     --ui-border-color-internal: light-dark(var(--spell-brand-100), var(--spell-hairline-subtle));
     --ui-border-color-selected: light-dark(var(--spell-brand-300), var(--spell-hairline-strong));
-    --ui-border-color-selected-strong: light-dark(var(--spell-brand-400), rgb(200 206 231 / 0.5));
+    --ui-border-color-selected-strong: light-dark(var(--spell-brand-400), #c8cee780);
     --ui-primary: var(--ui-violet);
     --ui-primary-on: var(--ui-violet-on);
     --ui-primary-text: light-dark(var(--spell-violet-600), var(--spell-violet-300));
@@ -178,7 +178,7 @@
     --ui-accent-on: light-dark(oklch(1 0 0), var(--ui-ink-on-light));
     --ui-accent-text: light-dark(var(--spell-accent-800), var(--spell-accent-200));
     --ui-accent-header: light-dark(var(--spell-violet-900), var(--spell-accent-100));
-    --ui-accent-border: light-dark(var(--spell-accent-300), rgb(234 221 196 / 0.3));
+    --ui-accent-border: light-dark(var(--spell-accent-300), #eaddc44d);
     --ui-accent-background: light-dark(var(--spell-accent-100), #2c2152);
     --ui-accent-inverted: var(--ui-accent-on-dark);
     --ui-accent-inverted-on: var(--ui-ink-on-light);
@@ -193,18 +193,18 @@
     --ui-focus-border: var(--spell-violet-400);
     --ui-positive-text: light-dark(#006229, #8ef6a5);
     --ui-positive-header: light-dark(#005020, #b8fec5);
-    --ui-positive-border: light-dark(#b8fec5, rgb(110 231 160 / 0.3));
-    --ui-positive-background: light-dark(#f0fff2, rgb(110 231 160 / 0.12));
+    --ui-positive-border: light-dark(#b8fec5, #6ee7a04d);
+    --ui-positive-background: light-dark(#f0fff2, #6ee7a01f);
     --ui-negative-text: light-dark(#b00018, #ffada6);
     --ui-negative-header: light-dark(#880010, #ffcfca);
-    --ui-negative-border: light-dark(#ffcfca, rgb(255 140 150 / 0.3));
-    --ui-negative-background: light-dark(#fff6f5, rgb(255 140 150 / 0.12));
+    --ui-negative-border: light-dark(#ffcfca, #ff8c964d);
+    --ui-negative-background: light-dark(#fff6f5, #ff8c961f);
     --ui-info-on-light: var(--spell-violet-400);
     --ui-info-on-dark: var(--spell-violet-300);
     --ui-info-text: light-dark(var(--spell-violet-800), var(--spell-violet-200));
     --ui-info-header: light-dark(var(--spell-violet-900), var(--spell-violet-100));
-    --ui-info-border: light-dark(var(--spell-violet-200), rgb(184 180 255 / 0.3));
-    --ui-info-background: light-dark(var(--spell-violet-50), rgb(184 180 255 / 0.12));
+    --ui-info-border: light-dark(var(--spell-violet-200), #b8b4ff4d);
+    --ui-info-background: light-dark(var(--spell-violet-50), #b8b4ff1f);
     --ui-info-focus: light-dark(
       oklch(from var(--ui-info-on-light) calc(l - 0.06) calc(c * 1.2) h),
       oklch(from var(--ui-info-on-dark) calc(l - 0.08) calc(c * 1.2) h)
@@ -217,8 +217,8 @@
     --ui-warning-on-dark: #ffc075;
     --ui-warning-text: light-dark(#794b00, #ffe0bd);
     --ui-warning-header: light-dark(#623c00, #ffeedc);
-    --ui-warning-border: light-dark(#ffe0bd, rgb(252 200 90 / 0.3));
-    --ui-warning-background: light-dark(#fffbf6, rgb(252 200 90 / 0.12));
+    --ui-warning-border: light-dark(#ffe0bd, #fcc85a4d);
+    --ui-warning-background: light-dark(#fffbf6, #fcc85a1f);
     --ui-red-on-light: #d90021;
     --ui-red-on-dark: #ff766e;
     --ui-red-background: light-dark(#ffe8e6, oklch(from var(--ui-red) 0.28 calc(c * 0.35) h));
@@ -293,44 +293,37 @@
     --ui-brown-background: light-dark(#f7efe2, #2c2152);
     --ui-grey-on-light: var(--spell-brand-700);
     --ui-grey-on-dark: var(--spell-brand-400);
-    --ui-grey-background: light-dark(var(--spell-brand-100), rgb(200 206 231 / 0.07));
+    --ui-grey-background: light-dark(var(--spell-brand-100), #c8cee712);
     --ui-black-on-light: var(--spell-violet-900);
     --ui-black-on-dark: var(--spell-violet-850);
-    --ui-black-background: light-dark(var(--spell-brand-100), rgb(200 206 231 / 0.07));
+    --ui-black-background: light-dark(var(--spell-brand-100), #c8cee712);
     --ui-shadow-ink: light-dark(var(--spell-brand-900), var(--spell-violet-975));
-    --ui-shadow-subtle:
-      0 1px 2px light-dark(rgb(43 47 63 / 0.06), rgb(6 3 20 / 0.4)),
-      inset 0 1px 0 light-dark(transparent, rgb(255 255 255 / 0.04));
+    --ui-shadow-subtle: 0 1px 2px light-dark(#2b2f3f0f, #06031466), inset 0 1px 0 light-dark(transparent, #ffffff0a);
     --ui-shadow-raised:
-      0 1px 2px light-dark(rgb(43 47 63 / 0.05), rgb(6 3 20 / 0.4)),
-      0 2px 8px -2px light-dark(rgb(43 47 63 / 0.08), transparent),
-      0 0 0 1px light-dark(transparent, rgb(184 180 255 / 0.05)),
-      0 0 22px -6px light-dark(transparent, rgb(150 138 255 / 0.28)),
-      inset 0 1px 0 light-dark(transparent, rgb(255 255 255 / 0.05));
+      0 1px 2px light-dark(#2b2f3f0d, #06031466), 0 2px 8px -2px light-dark(#2b2f3f14, transparent),
+      0 0 0 1px light-dark(transparent, #b8b4ff0d), 0 0 22px -6px light-dark(transparent, #968aff47),
+      inset 0 1px 0 light-dark(transparent, #ffffff0d);
     --ui-shadow-floating:
-      0 1px 2px light-dark(rgb(43 47 63 / 0.05), transparent),
-      0 10px 28px -10px light-dark(rgb(43 47 63 / 0.18), transparent),
-      0 2px 4px light-dark(transparent, rgb(6 3 20 / 0.45)), 0 0 0 1px light-dark(transparent, rgb(184 180 255 / 0.06)),
-      0 0 32px -6px light-dark(transparent, rgb(150 138 255 / 0.34)),
-      inset 0 1px 0 light-dark(transparent, rgb(255 255 255 / 0.06));
+      0 1px 2px light-dark(#2b2f3f0d, transparent), 0 10px 28px -10px light-dark(#2b2f3f2e, transparent),
+      0 2px 4px light-dark(transparent, #06031473), 0 0 0 1px light-dark(transparent, #b8b4ff0f),
+      0 0 32px -6px light-dark(transparent, #968aff57), inset 0 1px 0 light-dark(transparent, #ffffff0f);
     --ui-shadow-floating-hover:
-      0 2px 4px light-dark(rgb(43 47 63 / 0.06), rgb(6 3 20 / 0.5)),
-      0 24px 56px -16px light-dark(rgb(43 47 63 / 0.26), rgb(6 3 20 / 0.7)),
-      0 0 40px -8px light-dark(transparent, rgb(150 138 255 / 0.3));
+      0 2px 4px light-dark(#2b2f3f0f, #06031480), 0 24px 56px -16px light-dark(#2b2f3f42, #060314b3),
+      0 0 40px -8px light-dark(transparent, #968aff4d);
     --ui-shadow-overlay: var(--ui-shadow-floating-hover);
     --ui-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
     --ui-button-radius: var(--ui-radius-pill);
     --ui-button-font-weight: 500;
-    --ui-button-background: light-dark(var(--spell-brand-100), rgb(200 206 231 / 0.1));
-    --ui-button-background-hover: light-dark(rgb(32 63 175 / 0.1), rgb(200 206 231 / 0.16));
-    --ui-button-background-down: light-dark(rgb(32 63 175 / 0.14), rgb(200 206 231 / 0.22));
-    --ui-button-background-active: light-dark(rgb(32 63 175 / 0.14), rgb(200 206 231 / 0.2));
+    --ui-button-background: light-dark(var(--spell-brand-100), #c8cee71a);
+    --ui-button-background-hover: light-dark(#203faf1a, #c8cee729);
+    --ui-button-background-down: light-dark(#203faf24, #c8cee738);
+    --ui-button-background-active: light-dark(#203faf24, #c8cee733);
     --ui-button-color: var(--ui-text-dark);
     --ui-button-color-hover: var(--ui-text-dark);
     --ui-label-radius: var(--ui-radius-pill);
     --ui-label-font-weight: 500;
     --ui-progress-radius: var(--ui-radius-pill);
-    --ui-progress-background: light-dark(var(--spell-brand-100), rgb(200 206 231 / 0.1));
+    --ui-progress-background: light-dark(var(--spell-brand-100), #c8cee71a);
     --ui-progress-bar-background: var(--ui-primary);
     --ui-progress-text-color: var(--ui-primary-on);
     --ui-checkbox-radius: var(--ui-radius-circle);
@@ -351,13 +344,13 @@
     --ui-modal-radius: 22px;
     --ui-modal-shadow: var(--ui-shadow-floating-hover);
     --ui-popup-radius: var(--ui-radius-s);
-    --ui-dimmer-background: light-dark(rgb(26 15 63 / 0.36), rgb(6 3 20 / 0.6));
+    --ui-dimmer-background: light-dark(#1a0f3f5c, #06031499);
     --ui-bar-color: var(--ui-text-color);
     --ui-nag-background: light-dark(var(--spell-violet-900), var(--spell-violet-850));
-    --ui-menu-hover-background: light-dark(var(--spell-brand-50), rgb(200 206 231 / 0.07));
+    --ui-menu-hover-background: light-dark(var(--spell-brand-50), #c8cee712);
     --ui-menu-active-background: light-dark(var(--spell-violet-100), var(--spell-lilac-soft));
     --ui-menu-active-color: light-dark(var(--spell-violet-700), var(--spell-violet-200));
-    --ui-menu-secondary-hover-background: light-dark(var(--spell-brand-50), rgb(200 206 231 / 0.07));
+    --ui-menu-secondary-hover-background: light-dark(var(--spell-brand-50), #c8cee712);
     --ui-menu-secondary-active-background: light-dark(var(--spell-violet-100), var(--spell-lilac-soft));
     --ui-menu-secondary-active-color: light-dark(var(--spell-violet-700), var(--spell-violet-200));
     --ui-menu-segmented-background: var(--spell-surface-tint);
@@ -390,8 +383,7 @@
     --ui-slider-thumb-background: light-dark(oklch(1 0 0), var(--spell-violet-50));
     --ui-slider-thumb-background-hover: light-dark(var(--spell-violet-25), oklch(1 0 0));
     --ui-slider-thumb-shadow:
-      0 1px 3px light-dark(rgb(43 47 63 / 0.28), rgb(6 3 20 / 0.6)),
-      0 0 0 0.5px light-dark(rgb(43 47 63 / 0.12), transparent);
+      0 1px 3px light-dark(#2b2f3f47, #06031499), 0 0 0 0.5px light-dark(#2b2f3f1f, transparent);
     --ui-slider-tick-color: light-dark(var(--spell-brand-300), var(--spell-hairline-strong));
     --ui-section-tip-background: var(--spell-surface-inverse);
     --ui-section-tip-color: var(--spell-text-inverse);

@@ -164,6 +164,8 @@ the runtime globs the folder, so dropping a `<name>.css` in makes a theme.
 - Spell's own four are written as data:  a theme file each, `<name>.theme.json5`, beside its sheet.
   - Its values sit in nested groups, as the token tables group them:  `surfaces > page`, `typography > family > body`.
     Each is one value, or a light one and a dark one.
+  - A colour is written as hex, `#rrggbb`, or `#rrggbbaa` with its alpha:  `#ffffff59`, not `rgb(255 255 255 / 0.35)`.
+    The writer refuses a plain `rgb()`, and names the hex to write.
   - `yarn gen:styles` writes the sheet from the file, and the sheet is committed:  edit the file, never the sheet.
   - What a value can't say (selectors, the glass blur, motion) stays CSS, in a rules sheet the file names.
   - VS Code completes and checks a theme file's names, from `theme.schema.json` beside it.

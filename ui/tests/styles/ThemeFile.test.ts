@@ -109,6 +109,15 @@ describe("ThemeFile", () => {
   it("names a pointer at nothing", () => {
     expect(() => sheet({ surfaces: { bar: "{surfaces.nothing}" } })).toThrow(/points at `\{surfaces\.nothing\}`/)
   })
+
+  it("refuses a plain rgb() colour, naming the hex to write, inside a longer value too", () => {
+    expect(() => sheet({ surfaces: { panel: "rgb(255 255 255 / 0.35)" } })).toThrow(
+      /`surfaces\.panel` writes `rgb\(255 255 255 \/ 0\.35\)`:  write it as hex, `#ffffff59`/
+    )
+    expect(() => sheet({ shadows: { subtle: "0 1px 2px rgb(0 0 0 / 0.3)" } })).toThrow(/`#0000004d`/)
+    expect(() => sheet({ text: { body: "rgb(18 52 86)" } })).toThrow(/`#123456`/)
+    expect(sheet({ surfaces: { panel: "oklch(from {surfaces.page} calc(l - 0.05) c h)" } })).toContain("oklch(from")
+  })
 })
 
 /** Test theme `data`'s sheet, named `test`. */

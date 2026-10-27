@@ -25,7 +25,7 @@
       // dark:  the wallpaper under a section title, in place or stuck, mostly covered
       // - its wine and plum washes, under Glass's 50%, drew a red / purple seam along every title band
       // - only over the wallpaper:  the editor's top bar keeps Glass's 50% at rest (`--ui-bar-rest-background`)
-      "wallpaper-tint": { "light": "rgb(255 255 255 / 0.5)", "dark": "rgb(30 28 38 / 0.85)" }
+      "wallpaper-tint": { "light": "#ffffff80", "dark": "#1e1c26d9" }
     }
   }
 }

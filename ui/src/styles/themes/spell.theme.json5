@@ -75,10 +75,10 @@
     "spell-brand-700": "#5d637d",
     "spell-brand-900": "#2b2f3f",
     // Dark-mode hairlines and tints:  `brand-300` / lilac at an alpha (`tokens/theme.css`)
-    "spell-hairline-subtle": "rgb(200 206 231 / 0.16)",
-    "spell-hairline": "rgb(200 206 231 / 0.22)",
-    "spell-hairline-strong": "rgb(200 206 231 / 0.34)",
-    "spell-lilac-soft": "rgb(184 180 255 / 0.16)",
+    "spell-hairline-subtle": "#c8cee729",
+    "spell-hairline": "#c8cee738",
+    "spell-hairline-strong": "#c8cee757",
+    "spell-lilac-soft": "#b8b4ff29",
     // Polished Ivory:  the warm accent ladder (`palette.css` `accent-*`)
     "spell-accent-25": "#fffdf8",
     "spell-accent-50": "#fdf9f1",
@@ -92,7 +92,7 @@
     "spell-brand-500": "#8e96b5",
     "spell-brand-800": "#454a5f",
     // Surfaces (`tokens/theme.css`):  tint = lavender wash, warm = ivory, inverse = aubergine panels
-    "spell-surface-tint": { "light": "{own.spell-brand-50}", "dark": "rgb(200 206 231 / 0.07)" },
+    "spell-surface-tint": { "light": "{own.spell-brand-50}", "dark": "#c8cee712" },
     "spell-surface-selected": { "light": "{own.spell-violet-100}", "dark": "{own.spell-lilac-soft}" },
     "spell-surface-warm": { "light": "{own.spell-accent-75}", "dark": "#2c2152" },
     "spell-surface-code": { "light": "{own.spell-brand-75}", "dark": "{own.spell-violet-975}" },
@@ -110,8 +110,8 @@
     "spell-accent-hover": { "light": "{own.spell-violet-700}", "dark": "{own.spell-violet-200}" },
     "spell-accent-press": { "light": "{own.spell-violet-800}", "dark": "{own.spell-violet-400}" },
     "spell-accent-soft": { "light": "{own.spell-violet-100}", "dark": "{own.spell-lilac-soft}" },
-    "spell-accent-soft-hover": { "light": "{own.spell-violet-150}", "dark": "rgb(184 180 255 / 0.26)" },
-    "spell-accent-ring": { "light": "rgb(101 80 202 / 0.28)", "dark": "rgb(184 180 255 / 0.4)" },
+    "spell-accent-soft-hover": { "light": "{own.spell-violet-150}", "dark": "#b8b4ff42" },
+    "spell-accent-ring": { "light": "#6550ca47", "dark": "#b8b4ff66" },
     // Borders
     "spell-border-subtle": { "light": "{own.spell-brand-100}", "dark": "{own.spell-hairline-subtle}" },
     "spell-border-default": { "light": "{own.spell-brand-150}", "dark": "{own.spell-hairline}" },
@@ -119,15 +119,15 @@
     "spell-border-accent": "{own.spell-violet-400}",
     // Status
     "spell-success": { "light": "#00853a", "dark": "#8ef6a5" },
-    "spell-success-soft": { "light": "#e7ffea", "dark": "rgb(110 231 160 / 0.14)" },
+    "spell-success-soft": { "light": "#e7ffea", "dark": "#6ee7a024" },
     "spell-warning": { "light": "#a66900", "dark": "#ffe0bd" },
-    "spell-warning-soft": { "light": "#fff8f1", "dark": "rgb(252 200 90 / 0.14)" },
+    "spell-warning-soft": { "light": "#fff8f1", "dark": "#fcc85a24" },
     "spell-danger": { "light": "#d90021", "dark": "#ffada6" },
-    "spell-danger-soft": { "light": "#fff0ee", "dark": "rgb(255 140 150 / 0.14)" },
+    "spell-danger-soft": { "light": "#fff0ee", "dark": "#ff8c9624" },
     "spell-spark": "#ffc075",
     // Art:  blobs and flourish lines (page art, `<ui-brand-blob>` / `<ui-brand-flourish>`)
     "spell-blob": { "light": "{own.spell-violet-150}", "dark": "{own.spell-lilac-soft}" },
-    "spell-blob-2": { "light": "{own.spell-brand-100}", "dark": "rgb(200 206 231 / 0.08)" },
+    "spell-blob-2": { "light": "{own.spell-brand-100}", "dark": "#c8cee714" },
     "spell-line-flourish": "{own.spell-violet-400}",
     // Shadows `xs` ... `lg`:  the brand's steps, both schemes in one list (as `--ui-shadow-*` below)
     "spell-shadow-xs": "{shadows.subtle}",
@@ -224,7 +224,7 @@
     "strong": { "light": "{own.spell-brand-300}", "dark": "{own.spell-hairline-strong}" },
     "internal": { "light": "{own.spell-brand-100}", "dark": "{own.spell-hairline-subtle}" },
     "selected": { "light": "{own.spell-brand-300}", "dark": "{own.spell-hairline-strong}" },
-    "selected-strong": { "light": "{own.spell-brand-400}", "dark": "rgb(200 206 231 / 0.5)" }
+    "selected-strong": { "light": "{own.spell-brand-400}", "dark": "#c8cee780" }
   },
   "brand": {
     "primary": {
@@ -265,7 +265,7 @@
       // accent-800 / 200
       "text": { "light": "{own.spell-accent-800}", "dark": "{own.spell-accent-200}" },
       "header": { "light": "{own.spell-violet-900}", "dark": "{own.spell-accent-100}" },
-      "border": { "light": "{own.spell-accent-300}", "dark": "rgb(234 221 196 / 0.3)" },
+      "border": { "light": "{own.spell-accent-300}", "dark": "#eaddc44d" },
       // ivory;  dark:  the brand's warm surface
       "background": { "light": "{own.spell-accent-100}", "dark": "#2c2152" },
       "inverted": "var(--ui-accent-on-dark)",
@@ -292,22 +292,22 @@
       // Messages:  each ladder's palest tint, its 200 hairline, its 700-850 text;  dark:  the colour at 14%
       "text": { "light": "#006229", "dark": "#8ef6a5" },
       "header": { "light": "#005020", "dark": "#b8fec5" },
-      "border": { "light": "#b8fec5", "dark": "rgb(110 231 160 / 0.3)" },
-      "background": { "light": "#f0fff2", "dark": "rgb(110 231 160 / 0.12)" }
+      "border": { "light": "#b8fec5", "dark": "#6ee7a04d" },
+      "background": { "light": "#f0fff2", "dark": "#6ee7a01f" }
     },
     "negative": {
       "text": { "light": "#b00018", "dark": "#ffada6" },
       "header": { "light": "#880010", "dark": "#ffcfca" },
-      "border": { "light": "#ffcfca", "dark": "rgb(255 140 150 / 0.3)" },
-      "background": { "light": "#fff6f5", "dark": "rgb(255 140 150 / 0.12)" }
+      "border": { "light": "#ffcfca", "dark": "#ff8c964d" },
+      "background": { "light": "#fff6f5", "dark": "#ff8c961f" }
     },
     "info": {
       "base": { "light": "{own.spell-violet-400}", "dark": "{own.spell-violet-300}" },
       // info:  lavender, the brand's tint for asides
       "text": { "light": "{own.spell-violet-800}", "dark": "{own.spell-violet-200}" },
       "header": { "light": "{own.spell-violet-900}", "dark": "{own.spell-violet-100}" },
-      "border": { "light": "{own.spell-violet-200}", "dark": "rgb(184 180 255 / 0.3)" },
-      "background": { "light": "{own.spell-violet-50}", "dark": "rgb(184 180 255 / 0.12)" },
+      "border": { "light": "{own.spell-violet-200}", "dark": "#b8b4ff4d" },
+      "background": { "light": "{own.spell-violet-50}", "dark": "#b8b4ff1f" },
       "focus": {
         "light": "oklch(from var(--ui-info-on-light) calc(l - 0.06) calc(c * 1.2) h)",
         "dark": "oklch(from var(--ui-info-on-dark) calc(l - 0.08) calc(c * 1.2) h)"
@@ -323,8 +323,8 @@
       "base": { "light": "#f69e00", "dark": "#ffc075" },
       "text": { "light": "#794b00", "dark": "#ffe0bd" },
       "header": { "light": "#623c00", "dark": "#ffeedc" },
-      "border": { "light": "#ffe0bd", "dark": "rgb(252 200 90 / 0.3)" },
-      "background": { "light": "#fffbf6", "dark": "rgb(252 200 90 / 0.12)" }
+      "border": { "light": "#ffe0bd", "dark": "#fcc85a4d" },
+      "background": { "light": "#fffbf6", "dark": "#fcc85a1f" }
     }
   },
   "hues": {
@@ -444,22 +444,22 @@
     "grey": {
       // white fails on `brand-600` (4.1:1)
       "base": { "light": "{own.spell-brand-700}", "dark": "{own.spell-brand-400}" },
-      "background": { "light": "{own.spell-brand-100}", "dark": "rgb(200 206 231 / 0.07)" }
+      "background": { "light": "{own.spell-brand-100}", "dark": "#c8cee712" }
     },
     "black": {
       // aubergine:  the brand's inverse panels
       "base": { "light": "{own.spell-violet-900}", "dark": "{own.spell-violet-850}" },
-      "background": { "light": "{own.spell-brand-100}", "dark": "rgb(200 206 231 / 0.07)" }
+      "background": { "light": "{own.spell-brand-100}", "dark": "#c8cee712" }
     }
   },
   "shadows": {
     // `tokens/theme.css` `--shadow-xs` ... `-lg`:  grey-blue and soft in light;  near-black plus a lilac ring, glow
     // and top highlight in dark.  Both schemes' layers in ONE list, the other scheme's `transparent`.
     "ink": { "light": "{own.spell-brand-900}", "dark": "{own.spell-violet-975}" },
-    "subtle": "0 1px 2px light-dark(rgb(43 47 63 / 0.06), rgb(6 3 20 / 0.4)), inset 0 1px 0 light-dark(transparent, rgb(255 255 255 / 0.04))",
-    "raised": "0 1px 2px light-dark(rgb(43 47 63 / 0.05), rgb(6 3 20 / 0.4)), 0 2px 8px -2px light-dark(rgb(43 47 63 / 0.08), transparent), 0 0 0 1px light-dark(transparent, rgb(184 180 255 / 0.05)), 0 0 22px -6px light-dark(transparent, rgb(150 138 255 / 0.28)), inset 0 1px 0 light-dark(transparent, rgb(255 255 255 / 0.05))",
-    "floating": "0 1px 2px light-dark(rgb(43 47 63 / 0.05), transparent), 0 10px 28px -10px light-dark(rgb(43 47 63 / 0.18), transparent), 0 2px 4px light-dark(transparent, rgb(6 3 20 / 0.45)), 0 0 0 1px light-dark(transparent, rgb(184 180 255 / 0.06)), 0 0 32px -6px light-dark(transparent, rgb(150 138 255 / 0.34)), inset 0 1px 0 light-dark(transparent, rgb(255 255 255 / 0.06))",
-    "floating-hover": "0 2px 4px light-dark(rgb(43 47 63 / 0.06), rgb(6 3 20 / 0.5)), 0 24px 56px -16px light-dark(rgb(43 47 63 / 0.26), rgb(6 3 20 / 0.7)), 0 0 40px -8px light-dark(transparent, rgb(150 138 255 / 0.3))",
+    "subtle": "0 1px 2px light-dark(#2b2f3f0f, #06031466), inset 0 1px 0 light-dark(transparent, #ffffff0a)",
+    "raised": "0 1px 2px light-dark(#2b2f3f0d, #06031466), 0 2px 8px -2px light-dark(#2b2f3f14, transparent), 0 0 0 1px light-dark(transparent, #b8b4ff0d), 0 0 22px -6px light-dark(transparent, #968aff47), inset 0 1px 0 light-dark(transparent, #ffffff0d)",
+    "floating": "0 1px 2px light-dark(#2b2f3f0d, transparent), 0 10px 28px -10px light-dark(#2b2f3f2e, transparent), 0 2px 4px light-dark(transparent, #06031473), 0 0 0 1px light-dark(transparent, #b8b4ff0f), 0 0 32px -6px light-dark(transparent, #968aff57), inset 0 1px 0 light-dark(transparent, #ffffff0f)",
+    "floating-hover": "0 2px 4px light-dark(#2b2f3f0f, #06031480), 0 24px 56px -16px light-dark(#2b2f3f42, #060314b3), 0 0 40px -8px light-dark(transparent, #968aff4d)",
     "overlay": "{shadows.floating-hover}"
   },
   "motion": {
@@ -476,10 +476,10 @@
       // hover, down and on:  a see-through blue ink in light, as dark's lilac, so in a group they show ON its track
       // (a `brand-150` tile on the `brand-100` track was 1.05:1);  on the page alone they still come out
       // `brand-150` / `brand-200`, as before
-      "background": { "light": "{own.spell-brand-100}", "dark": "rgb(200 206 231 / 0.1)" },
-      "background-hover": { "light": "rgb(32 63 175 / 0.1)", "dark": "rgb(200 206 231 / 0.16)" },
-      "background-down": { "light": "rgb(32 63 175 / 0.14)", "dark": "rgb(200 206 231 / 0.22)" },
-      "background-active": { "light": "rgb(32 63 175 / 0.14)", "dark": "rgb(200 206 231 / 0.2)" },
+      "background": { "light": "{own.spell-brand-100}", "dark": "#c8cee71a" },
+      "background-hover": { "light": "#203faf1a", "dark": "#c8cee729" },
+      "background-down": { "light": "#203faf24", "dark": "#c8cee738" },
+      "background-active": { "light": "#203faf24", "dark": "#c8cee733" },
       "color": "{text.strong}",
       "color-hover": "{text.strong}"
     },
@@ -490,7 +490,7 @@
     "progress": {
       "radius": "{radii.pill}",
       // Progress:  a purple bar on a grey-blue track (the brand's build checklist colours)
-      "background": { "light": "{own.spell-brand-100}", "dark": "rgb(200 206 231 / 0.1)" },
+      "background": { "light": "{own.spell-brand-100}", "dark": "#c8cee71a" },
       "bar-background": "{brand.primary.color}",
       "text-color": "{brand.primary.on}"
     },
@@ -530,7 +530,7 @@
     },
     "dimmer": {
       // the scrim:  aubergine at 36% (the brand's 4px blur has no token)
-      "background": { "light": "rgb(26 15 63 / 0.36)", "dark": "rgb(6 3 20 / 0.6)" }
+      "background": { "light": "#1a0f3f5c", "dark": "#06031499" }
     },
     "bar": {
       "color": "{text.body}"
@@ -541,12 +541,12 @@
     },
     "menu": {
       // Menus:  the brand's selected nav item, a lavender fill with purple text;  a faint tint on hover
-      "hover-background": { "light": "{own.spell-brand-50}", "dark": "rgb(200 206 231 / 0.07)" },
+      "hover-background": { "light": "{own.spell-brand-50}", "dark": "#c8cee712" },
       "active-background": { "light": "{own.spell-violet-100}", "dark": "{own.spell-lilac-soft}" },
       "active-color": { "light": "{own.spell-violet-700}", "dark": "{own.spell-violet-200}" },
       // a `secondary` menu (the brand's side nav):  `spell`'s menu hover and active colours, which its own tokens
       // never take from the generic `:root` ones
-      "secondary-hover-background": { "light": "{own.spell-brand-50}", "dark": "rgb(200 206 231 / 0.07)" },
+      "secondary-hover-background": { "light": "{own.spell-brand-50}", "dark": "#c8cee712" },
       "secondary-active-background": { "light": "{own.spell-violet-100}", "dark": "{own.spell-lilac-soft}" },
       "secondary-active-color": { "light": "{own.spell-violet-700}", "dark": "{own.spell-violet-200}" },
       // Segmented controls (`appearance="segmented"`, menus and tab sets):  the brand's `.sp-seg`, a pill track in
@@ -589,7 +589,7 @@
       "fill-color-focus": "{brand.primary.hover}",
       "thumb-background": { "light": "oklch(1 0 0)", "dark": "{own.spell-violet-50}" },
       "thumb-background-hover": { "light": "{own.spell-violet-25}", "dark": "oklch(1 0 0)" },
-      "thumb-shadow": "0 1px 3px light-dark(rgb(43 47 63 / 0.28), rgb(6 3 20 / 0.6)), 0 0 0 0.5px light-dark(rgb(43 47 63 / 0.12), transparent)",
+      "thumb-shadow": "0 1px 3px light-dark(#2b2f3f47, #06031499), 0 0 0 0.5px light-dark(#2b2f3f1f, transparent)",
       "tick-color": { "light": "{own.spell-brand-300}", "dark": "{own.spell-hairline-strong}" }
     },
     "section": {
