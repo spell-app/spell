@@ -33,6 +33,8 @@
  * - `window.UI`:  the runtime (`UI.load()` works at once;  the rest after it), for poking in DevTools.
  * - `window.SiteData`:  the site's data reader, for a page's own script:
  *   the icon browser reads `__data/icons.json5` with `SiteData.json()` (JSON5, so a comment written into it reads too).
+ * - `window.IconName`:  icon names and Spell UI's ONE icon search (`IconName.search()`), for the icon browser's page
+ *   script, so it finds what `spell icon` and `<ui-icon-picker>` find.
  */
 import "./snapshot"
 import "./SitePacks"
@@ -63,7 +65,7 @@ const SITE_ROOT = new URL("../", ASSETS)
 E.BuiltInPacks.base = ASSETS
 SiteData.url ??= `${ASSETS}../__data/components.json5`
 DocsFamilies.add()
-Object.assign(globalThis, { UI, SiteData })
+Object.assign(globalThis, { UI, SiteData, IconName: E.IconName })
 
 // the viewer's theme + scheme (`<ui-theme-menu>`):  started NOW, beside the layout's fetch;  `<ui-root>` waits for it
 const theme = ThemePreference.restore().catch((error: unknown) =>

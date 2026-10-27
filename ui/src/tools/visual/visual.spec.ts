@@ -6,6 +6,8 @@ import { mkdirSync, writeFileSync } from "node:fs"
 import { BrowserPage } from "spell/element-tools/BrowserPage"
 import type { VisualState } from "spell-ui/test-helpers/test.types"
 import { environment } from "spell-ui/tools/environment"
+// A leaf, not the barrel:  Playwright loads this spec without Vite, which the barrel needs
+import { StaticFamilies } from "spell-ui/static/StaticFamilies.ssr.ts"
 import type {
   ParityKind,
   ParityResult,
@@ -16,7 +18,6 @@ import type {
   VisualScheme
 } from "./visual.types.ts"
 import { ParityReport } from "./ParityReport.ts"
-import { StaticFamilies } from "./StaticFamilies.ts"
 import { VisualExamples } from "./VisualExamples.ts"
 import { VisualSettings } from "./VisualSettings.ts"
 

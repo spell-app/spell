@@ -497,7 +497,7 @@ In a family's folder, `ui-<name>/`, every file is named for its component:
     after reviewing every diff in the HTML report.
     NEVER update to silence a diff you haven't looked at.
   - `--static`:  compares the STATIC server render (`spell-ui/static`) with the elements instead.
-    - The families:  [the static families](src/tools/visual/StaticFamilies.ts).
+    - The families:  [the static families](src/static/StaticFamilies.ssr.ts).
     - Report only:  `static-parity.md`, in the visual tests' results.
     - `--os local` by default.
 - `yarn dev`:  [the demo](src/tools/demo/), every example as class grammar beside elements.

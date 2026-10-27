@@ -5,26 +5,16 @@
  *   plugin must compile the components' JSX for the server (`generate: "ssr"`) and `@solidjs/web` resolve to its
  *   server build (the `node` condition), as in vitest's `ssr` project.  `verify()` fails a page that shows
  *   otherwise.
- * - Which families:  `StaticFamilies`.  Every listed class is defined once, for every page.
+ * - Which families:  `StaticFamilies`.  Every listed class is defined once, for every page (`StaticCatalog.define()`).
  */
 
-import type { UIComponentClass } from "spell/element"
-import { ServerRuntime, StaticRender, StaticStylesheet } from "spell-ui/static"
-
-import { StaticFamilies } from "./StaticFamilies.ts"
+import { ServerRuntime, StaticCatalog, StaticFamilies, StaticRender, StaticStylesheet } from "spell-ui/static"
 
 /** Element examples, by path;  lazy, a page renders one. */
 const ELEMENTS = import.meta.glob<string>("/src/components/*/examples/elements/*.html", {
   query: "?raw",
   import: "default"
 })
-
-/** Component class files (`UIButton.tsx`), by path;  lazy, only `StaticFamilies`' are loaded. */
-const CLASSES = import.meta.glob<Record<string, unknown>>([
-  "/src/components/*/UI*.{ts,tsx}",
-  // a family's other files are named for its component too (`UIButton.types.ts`, `UIButton.test.tsx`)
-  "!/components/*/UI*.*.{ts,tsx}"
-])
 
 /****************
  * ### `StaticFixture`
@@ -45,7 +35,7 @@ export class StaticFixture {
     const [family = "", name] = id.split("/")
     if (!StaticFamilies.covers(family))
       throw new Error(
-        `StaticFixture.example():  "${family}" isn't compared statically;  add it to tools/visual/StaticFamilies.ts`
+        `StaticFixture.example():  "${family}" isn't compared statically;  add it to static/StaticFamilies.ssr.ts`
       )
     const load = ELEMENTS[`/src/components/${family}/examples/elements/${name}.html`]
     if (!load) throw new Error(`StaticFixture.example():  no element example "${id}"`)
@@ -72,24 +62,10 @@ export class StaticFixture {
     return (StaticFixture.defined ??= StaticFixture.load())
   }
 
-  /**
-   * Import every `StaticFamilies` class from its own file and `StaticRender.define()` them all;  load the default
-   * icon pack first, as the element pages' runtime does (`ServerRuntime.icons()`).
-   */
+  /** Load the default icon pack, as the element pages' runtime does (`ServerRuntime.icons()`), then define the families. */
   private static async load(): Promise<void> {
     await ServerRuntime.icons()
-    const classes: UIComponentClass[] = []
-    for (const [family, names] of Object.entries(StaticFamilies.CLASSES)) {
-      for (const name of names) {
-        const path = StaticFamilies.classPath(family, name)
-        const load = CLASSES[`${path}.tsx`] ?? CLASSES[`${path}.ts`]
-        const Class = (await load?.())?.[name]
-        if (typeof Class !== "function")
-          throw new Error(`StaticFixture.load():  no class ${name} in ${path}.ts(x);  fix StaticFamilies.CLASSES`)
-        classes.push(Class as UIComponentClass)
-      }
-    }
-    StaticRender.define(...classes)
+    await StaticCatalog.define()
   }
 
   /**

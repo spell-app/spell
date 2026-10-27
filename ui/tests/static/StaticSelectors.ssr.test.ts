@@ -86,3 +86,14 @@ describe("StaticSelectors.rewrite() list items", () => {
     ])
   })
 })
+
+describe("StaticSelectors.rewrite() quoted brackets", () => {
+  it("reads a `)` or `]` inside quotes as text, not as a bracket", () => {
+    expect(StaticSelectors.rewrite('.a[title="x) y"] .b').selectors).toEqual([
+      '.a[title="x) y"] .b:where(:scope, :not([data-ui-slotted]))'
+    ])
+    expect(StaticSelectors.rewrite(':host > .c[title="]"]::after').selectors).toEqual([
+      ':scope:where([data-ui]):is(.c[title="]"])::after'
+    ])
+  })
+})

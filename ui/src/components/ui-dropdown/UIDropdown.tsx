@@ -629,16 +629,9 @@ export class UIDropdown extends F.FormComponent<typeof dropdownVocabulary> {
   private markedText(option: E.MenuOption): JSX.Element {
     const query = this.effectiveQuery
     if (!query) return option.text
-    const ranges = this.visibleOptions.highlights(option, query)
-    const parts: JSX.Element[] = []
-    let at = 0
-    for (const [start, end] of ranges) {
-      if (start > at) parts.push(option.text.slice(at, start))
-      parts.push(<mark>{option.text.slice(start, end)}</mark>)
-      at = end
-    }
-    if (at < option.text.length) parts.push(option.text.slice(at))
-    return parts
+    return E.markedPieces(option.text, this.visibleOptions.highlights(option, query)).map((piece) =>
+      piece.isMarked ? <mark>{piece.text}</mark> : piece.text
+    )
   }
 
   /** The "Add …" row of `allow-additions`. */

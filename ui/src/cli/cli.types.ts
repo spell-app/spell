@@ -18,7 +18,7 @@ import type {
  * `spell icon` flags.
  * - `pack`:  only this pack, e.g. `fa7-brands`
  * - `json`:  print the icons found as JSON
- * - `open`:  show them in a browser, as pictures
+ * - `open`:  show them as pictures, in the docs' icon browser
  */
 /** `spell ui rename`'s options. */
 export type RenameOptions = CLI.GlobalOptions & {

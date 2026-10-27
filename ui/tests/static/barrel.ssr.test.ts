@@ -33,6 +33,7 @@ const VALUES = [
   "StaticPageStyles",
   "StaticStylesheet",
   "StaticRender",
+  "StaticFamilies",
   "StaticCatalog",
   // self-namespace
   "SSR"
@@ -51,6 +52,7 @@ const ENTRIES = [
   "spell-ui/static/StaticPageStyles.ssr",
   "spell-ui/static/StaticStylesheet.ssr",
   "spell-ui/static/StaticRender.ssr",
+  "spell-ui/static/StaticFamilies.ssr",
   "spell-ui/static/StaticCatalog.ssr"
 ]
 

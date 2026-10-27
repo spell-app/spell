@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { type MenuOption, MenuOptions } from "spell-ui/elements"
+import { type MenuOption, MenuOptions, markedPieces } from "spell-ui/elements"
 
 /** Small option list with accents, a disabled option and value / text differences. */
 const OPTIONS: MenuOption[] = [
@@ -259,3 +259,21 @@ function manyOptions(count: number): MenuOption[] {
     text: `${words[index % words.length]} ${words[(index * 7) % words.length]} ${index}`
   }))
 }
+
+describe("markedPieces()", () => {
+  it("cuts a text at its ranges, in order, the ranges marked", () => {
+    expect(
+      markedPieces("Crème brûlée", [
+        [0, 2],
+        [6, 8]
+      ])
+    ).toEqual([
+      { text: "Cr", isMarked: true },
+      { text: "ème ", isMarked: false },
+      { text: "br", isMarked: true },
+      { text: "ûlée", isMarked: false }
+    ])
+    expect(markedPieces("bell", [])).toEqual([{ text: "bell", isMarked: false }])
+    expect(markedPieces("bell", [[0, 4]])).toEqual([{ text: "bell", isMarked: true }])
+  })
+})

@@ -20,8 +20,7 @@ import {
   type SearchEntry,
   type SearchGroup,
   type SearchHit,
-  type SearchKind,
-  type TitleSegment
+  type SearchKind
 } from "./UIDocsSearch.types"
 
 import searchCSS from "./UIDocsSearch.css?inline"
@@ -586,7 +585,7 @@ export class UIDocsSearch extends E.UIComponent<DocsSearchVocabulary> {
         <span class={UIT.TEXT}>
           <span class={UIT.TITLE}>
             <span class={NAME}>
-              <For each={UIDocsSearch.segments(entry.title, hit.marks)}>
+              <For each={E.markedPieces(entry.title, hit.marks)}>
                 {(piece) => (piece.isMarked ? <mark>{piece.text}</mark> : piece.text)}
               </For>
             </span>
@@ -698,19 +697,6 @@ export class UIDocsSearch extends E.UIComponent<DocsSearchVocabulary> {
     let active = document.activeElement
     while (active?.shadowRoot?.activeElement) active = active.shadowRoot.activeElement
     return active instanceof HTMLElement && active !== document.body ? active : undefined
-  }
-
-  /** `title` cut at `marks`:  the pieces to show, the marked ones flagged. */
-  static segments(title: string, marks: readonly (readonly [number, number])[]): TitleSegment[] {
-    const pieces: TitleSegment[] = []
-    let at = 0
-    for (const [start, end] of marks) {
-      if (start > at) pieces.push({ text: title.slice(at, start), isMarked: false })
-      pieces.push({ text: title.slice(start, end), isMarked: true })
-      at = end
-    }
-    if (at < title.length) pieces.push({ text: title.slice(at), isMarked: false })
-    return pieces
   }
 }
 

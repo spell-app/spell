@@ -8,11 +8,12 @@
  *   names.
  * - Its graph, bottom up:  `static.types.ssr` <- `ServerIds`, `ServerDOMElement`, `StaticSelectors` <- `ServerRuntime`,
  *   `StaticFlattener`, `StaticInteractions`, `StaticPageStyles` <- `StaticStylesheet`, `StaticRender`;
- *   `StaticCatalog` (every family's classes) beside them.
+ *   `StaticFamilies` (the table of server-ready families, pure data) and `StaticCatalog` (their classes, defined)
+ *   beside them.
  * - Its files import each other through `SSR` (`import { SSR } from "spell-ui/static"`), resolved at call time;  what
  *   one needs while it EVALUATES (the marks its module constants read) it imports from the defining file
  *   (`barrel.ssr.test.ts` checks every route in).
- * - NOTE: `StaticCatalog` loads every family's classes, so importing this barrel does too.
+ * - NOTE: loading the barrel loads no family:  `StaticCatalog.define()` imports their classes when it's called.
  */
 
 export * from "./static.types.ssr"
@@ -26,6 +27,7 @@ export * from "./StaticInteractions.ssr"
 export * from "./StaticPageStyles.ssr"
 export * from "./StaticStylesheet.ssr"
 export * from "./StaticRender.ssr"
+export * from "./StaticFamilies.ssr"
 export * from "./StaticCatalog.ssr"
 
 export * as SSR from "."

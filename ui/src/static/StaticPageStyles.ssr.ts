@@ -36,7 +36,7 @@ export class StaticPageStyles {
 
   /** One page selector => its static equivalents. */
   static selector(selector: string, tags: ReadonlyMap<string, string>): string[] {
-    let text = selector.replace(STATE, (_match, name: string) => `[${SSR.STATE_ATTRIBUTE}~="${name.trim()}"]`)
+    let text = SSR.StaticSelectors.stateAttributes(selector)
     text = text.replace(TAG, (match, before: string, tag: string) => {
       const kind = tags.get(tag)
       return kind ? `${before}[${SSR.ROOT_ATTRIBUTE}="${kind}"]` : match
@@ -50,9 +50,6 @@ export class StaticPageStyles {
     return [`${host}${attribute}${after}`, `${host} ${attribute}${after}`]
   }
 }
-
-/** `:state(name)`. */
-const STATE = /:state\(([^()]*)\)/g
 
 /** A `ui-*` type selector:  at the start, after a combinator, `(` or `,`. */
 const TAG = /(^|[\s>+~(,])(ui-[a-z][\w-]*)(?![\w-])/g

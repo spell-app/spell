@@ -1,4 +1,5 @@
 import { SSR } from "spell-ui/static"
+import { CssText } from "spell-ui/styles/CssText"
 // Import directly to avoid circular import:  the constants below the class read them
 import { ROOT, SLOTTED } from "./static.types.ssr"
 
@@ -21,6 +22,7 @@ import { ROOT, SLOTTED } from "./static.types.ssr"
  * - Anything else (class grammar) is kept as written.
  * - Node only (`spell-ui/static`):  strings in, strings out, no DOM, no postcss;  NEVER imported by a component or
  *   `spell-ui`.
+ * - Reads a selector's brackets through `CssText`:  a quoted `)` or `]` (`[title="a)"]`) never ends one.
  ****************/
 export class StaticSelectors {
   /**
@@ -40,7 +42,7 @@ export class StaticSelectors {
       const target = StaticSelectors.slottedTarget(inner.trim(), tags)
       return before.trim() === "" ? `:scope > ${target}` : target
     })
-    text = StaticSelectors.replaceFunction(text, ":state", (inner) => `[${SSR.STATE_ATTRIBUTE}~="${inner.trim()}"]`)
+    text = StaticSelectors.stateAttributes(text)
     // the slot element:  its resets reached the assigned nodes by inheritance;  a rule ON it is boxless,
     // like a DOM element's
     const slotSubject = SLOT_SUBJECT.test(text)
@@ -56,6 +58,14 @@ export class StaticSelectors {
     if (listItems) result.selectors = result.selectors.flatMap((each) => StaticSelectors.throughListItems(each))
     result.selectors = result.selectors.map((each) => StaticSelectors.anchor(each, { slotted }))
     return result
+  }
+
+  /**
+   * `selector` with each `:state(x)` as `[data-state~="x"]`, the flattener's attribute for DOM element states.
+   * - The ONE rewrite of states:  a page's own CSS takes it too (`StaticPageStyles`).
+   */
+  static stateAttributes(selector: string): string {
+    return StaticSelectors.replaceFunction(selector, ":state", (inner) => `[${SSR.STATE_ATTRIBUTE}~="${inner.trim()}"]`)
   }
 
   /**
@@ -98,15 +108,7 @@ export class StaticSelectors {
 
   /** Where `selector`'s subject (last compound) starts:  after its last top-level combinator. */
   private static subjectStart(selector: string): number {
-    let depth = 0
-    let subject = 0
-    for (let index = 0; index < selector.length; index++) {
-      const char = selector[index]!
-      if (char === "(" || char === "[") depth++
-      else if (char === ")" || char === "]") depth--
-      else if (depth === 0 && COMBINATOR_START.test(char)) subject = index + 1
-    }
-    return subject
+    return CssText.topLevel(selector, (char) => COMBINATOR_START.test(char), { last: true }) + 1
   }
 
   /**
@@ -153,12 +155,8 @@ export class StaticSelectors {
         while (end < compound.length && /[\w-]/.test(compound[end]!)) end++
         if (compound[end] === "(") end = StaticSelectors.closingParen(compound, end) + 1
       } else {
-        while (end < compound.length && compound[end] !== ":") {
-          if (compound[end] === "(" || compound[end] === "[") {
-            end =
-              compound[end] === "(" ? StaticSelectors.closingParen(compound, end) + 1 : compound.indexOf("]", end) + 1
-          } else end++
-        }
+        const colon = CssText.topLevel(compound, (char) => char === ":", { from: end })
+        end = colon < 0 ? compound.length : colon
       }
       const segment = compound.slice(index, end)
       if (pseudo && StaticSelectors.isPosition(segment)) moved += segment
@@ -179,18 +177,12 @@ export class StaticSelectors {
   private static throughListItems(selector: string): string[] {
     let variants = [""]
     let start = 0
-    let depth = 0
-    let count = 0
-    for (let index = 0; index < selector.length; index++) {
-      const char = selector[index]!
-      if (char === "(" || char === "[") depth++
-      else if (char === ")" || char === "]") depth--
-      else if (char === ">" && depth === 0 && count < MAX_LIST_ITEM_STEPS) {
-        const before = selector.slice(start, index)
-        variants = variants.flatMap((each) => [`${each}${before}>`, `${each}${before}> ${SSR.LIST_ITEM} >`])
-        start = index + 1
-        count++
-      }
+    for (let count = 0; count < MAX_LIST_ITEM_STEPS; count++) {
+      const index = CssText.topLevel(selector, (char) => char === ">", { from: start })
+      if (index < 0) break
+      const before = selector.slice(start, index)
+      variants = variants.flatMap((each) => [`${each}${before}>`, `${each}${before}> ${SSR.LIST_ITEM} >`])
+      start = index + 1
     }
     return variants.map((each) => StaticSelectors.wrapperPosition(each + selector.slice(start)))
   }
@@ -233,15 +225,8 @@ export class StaticSelectors {
 
   /** First compound selector of `text` (up to a top-level combinator) and what follows it. */
   private static firstCompound(text: string): { compound: string; tail: string } {
-    let depth = 0
-    for (let index = 0; index < text.length; index++) {
-      const char = text[index]!
-      if (char === "(" || char === "[") depth++
-      else if (char === ")" || char === "]") depth--
-      else if (depth === 0 && COMBINATOR_START.test(char))
-        return { compound: text.slice(0, index), tail: text.slice(index) }
-    }
-    return { compound: text, tail: "" }
+    const index = CssText.topLevel(text, (char) => COMBINATOR_START.test(char))
+    return index < 0 ? { compound: text, tail: "" } : { compound: text.slice(0, index), tail: text.slice(index) }
   }
 
   /**
@@ -250,32 +235,16 @@ export class StaticSelectors {
    *   the minified `?inline` sheets use.
    */
   private static pseudoElementIndex(text: string): number {
-    let depth = 0
-    for (let index = 0; index < text.length; index++) {
-      const char = text[index]!
-      if (char === "(" || char === "[") depth++
-      else if (char === ")" || char === "]") depth--
-      else if (depth === 0 && char === ":" && PSEUDO_ELEMENT.test(text.slice(index))) return index
-    }
-    return -1
+    return CssText.topLevel(text, (char, index) => char === ":" && PSEUDO_ELEMENT.test(text.slice(index)))
   }
 
   /**
-   * Index of the `)` matching the `(` at `open`;  quoted strings (`[x="("]`) are skipped.
+   * Index of the `)` matching the `(` at `open` (`CssText.closing()`:  quoted strings, `[x="("]`, are skipped).
    * - throws a `SyntaxError` if there is none:  the selector (from a sheet) doesn't parse
    */
   private static closingParen(text: string, open: number): number {
-    let depth = 0
-    for (let index = open; index < text.length; index++) {
-      const char = text[index]!
-      if (char === '"' || char === "'") {
-        index = text.indexOf(char, index + 1)
-        if (index < 0) break
-        continue
-      }
-      if (char === "(") depth++
-      else if (text[index] === ")" && --depth === 0) return index
-    }
+    const close = CssText.closing(text, open)
+    if (close >= 0) return close
     throw new SyntaxError(
       `StaticSelectors.rewrite():  unbalanced parentheses in \`${text}\`;  balance them in the sheet it came from`
     )

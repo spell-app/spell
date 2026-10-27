@@ -5,7 +5,8 @@
  *   - the parts with no Solid:  class building, validation, menu options, shorthand, native fallbacks
  *   - the elements that show a text file, the dropdown's entries, the sticky watch
  * - Runtime-light:  types, plus a few constants
- *   (`WHITESPACE`, `StickyWatchEdges` and `StickyWatch`'s thresholds, the source URL attributes, `SourceEvent`).
+ *   (`WHITESPACE`, `StickyWatchEdges` and `StickyWatch`'s thresholds, the source URL attributes, `SourceEvent`)
+ *   and one pure helper (`markedPieces()`).
  * - The BOTTOM of the folder's import graph:  `import type` only (the core's types as `E`, erased),
  *   so it NEVER loads a class module of its folder, the DOM or Solid.
  *   - `core.ts` re-exports it,
@@ -321,6 +322,32 @@ export type MenuNavigateOptions = {
 
 /** Half-open `[start, end)` range of `option.text` that matched, for `<mark>`-style highlighting. */
 export type HighlightRange = readonly [start: number, end: number]
+
+/**
+ * `text` cut at `ranges` (sorted, never overlapping) into pieces, in order:  the ranges' pieces marked.
+ * - The ONE cutter for a list that marks its matches:  each draws a marked piece as its `<mark>`
+ *   (the dropdown, the search, the docs' search).
+ * - e.g. `markedPieces("bell slash", [[0, 4]])` => `[{ text: "bell", isMarked: true }, { text: " slash", isMarked: false }]`
+ */
+export function markedPieces(text: string, ranges: readonly HighlightRange[]): MarkedPiece[] {
+  const pieces: MarkedPiece[] = []
+  let at = 0
+  for (const [start, end] of ranges) {
+    if (start > at) pieces.push({ text: text.slice(at, start), isMarked: false })
+    pieces.push({ text: text.slice(start, end), isMarked: true })
+    at = end
+  }
+  if (at < text.length) pieces.push({ text: text.slice(at), isMarked: false })
+  return pieces
+}
+
+/** A piece of a text cut at its matches (`markedPieces()`). */
+export type MarkedPiece = {
+  /** its text */
+  readonly text: string
+  /** a match:  drawn as `<mark>` */
+  readonly isMarked: boolean
+}
 
 /** The option fields a query is matched against (`MenuFilterOptions.search`;  `"both"` ~== all of them). */
 export const MenuSearchFields = ["text", "value"] as const

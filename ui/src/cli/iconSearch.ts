@@ -3,6 +3,7 @@
  * - Read from each built-in pack's `pack.js` (`spell-ui/icons`, `BuiltInPacks`), named as the runtime names them:
  *   `IconName.claim()`.  An icon no name reaches is left out.
  * - Search keywords from ui's `data/search.json` (its `terms`), keyed by Font Awesome file name, e.g. `bell` -> `alarm`.
+ * - Found by `IconName.search()`, the one search `<ui-icon-picker>` and the docs' icon browser use too.
  */
 import { readFileSync } from "node:fs"
 import { dirname, resolve } from "node:path"
@@ -46,13 +47,12 @@ export async function loadIcons(packs: readonly string[] = BuiltInIconPacks): Pr
     for (const key of Object.keys(index.icons)) {
       const claimed = names.get(key)
       if (!claimed) continue
-      const own = IconName.fromKey(key)
-      const name = claimed.includes(own) ? own : claimed[0]!
+      const name = IconName.labelOf(key, claimed)
       icons.push({
         name,
         pack,
         aliases: claimed.filter((it) => it !== name),
-        keywords: [...(keywordsByFile[key.slice(key.lastIndexOf("/") + 1)] ?? [])],
+        keywords: [...(keywordsByFile[IconName.fileOf(key)] ?? [])],
         svg: resolve(folder, `${key}.svg`)
       })
     }
@@ -61,20 +61,15 @@ export async function loadIcons(packs: readonly string[] = BuiltInIconPacks): Pr
 }
 
 /**
- * The icons `query` finds:  every word of it in a name or alias, or starting a keyword's word -- so `bell` finds
- * `dumbbell`, but not `brain` by its keyword `cerebellum`.  Ignoring case, `-` ~== space.
- * - An exact name first, then names starting with the query, then the rest, each by name.
- * - Empty `query`:  all of them.
+ * The icons `query` finds, best first:  Spell UI's ONE icon search (`IconName.search()`), as `<ui-icon-picker>` and the
+ * docs' icon browser search.
+ * - Within a rank, by name.
+ * - Empty `query`:  all of them, as loaded.
  */
 export function searchIcons(icons: IconInfo[], query: string): IconInfo[] {
-  const wanted = IconName.normalize(query)
-  if (!wanted) return icons
-  const words = wanted.split(" ")
-  const found = icons.filter((icon) => {
-    const names = [icon.name, ...icon.aliases].join("|")
-    const keywordWords = icon.keywords.flatMap((it) => IconName.normalize(it).split(" "))
-    return words.every((word) => names.includes(word) || keywordWords.some((it) => it.startsWith(word)))
-  })
-  const rank = (icon: IconInfo) => (icon.name === wanted ? 0 : icon.name.startsWith(wanted) ? 1 : 2)
-  return found.sort((a, b) => rank(a) - rank(b) || a.name.localeCompare(b.name))
+  if (!IconName.normalize(query)) return icons
+  const byName = [...icons].sort((a, b) => a.name.localeCompare(b.name))
+  return [
+    ...IconName.search(byName, query, { names: (icon) => [icon.name, ...icon.aliases], terms: (icon) => icon.keywords })
+  ]
 }

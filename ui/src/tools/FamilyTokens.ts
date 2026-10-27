@@ -2,6 +2,7 @@ import { readdirSync, readFileSync } from "node:fs"
 import { basename, join } from "node:path"
 
 import { ComponentTokens } from "spell-ui/styles/ComponentTokens"
+import { CssText } from "spell-ui/styles/CssText"
 import type { SiteToken, SiteTokenSeed, SiteTokenType } from "spell-ui/docs-components/docs-components.types"
 
 import { FamilyFiles } from "./FamilyFiles.ts"
@@ -108,12 +109,9 @@ export class FamilyTokens {
     const found: Row[] = []
     for (const match of stripped.matchAll(new RegExp(`var\\(\\s*(--${prefix}-[a-z0-9-]+)\\s*,`, "g"))) {
       const start = match.index + match[0].length
-      let depth = 0
-      let end = start
-      for (; end < stripped.length; end++) {
-        if (stripped[end] === "(") depth++
-        else if (stripped[end] === ")" && depth-- === 0) break
-      }
+      // the `var(`'s own `)`:  its fallback runs to it
+      const close = CssText.closing(stripped, match.index + "var".length)
+      const end = close < 0 ? stripped.length : close
       found.push({
         name: match[1]!,
         default: stripped.slice(start, end).replace(/\s+/g, " ").trim(),

@@ -30,7 +30,7 @@ const USAGE = `Usage:  yarn test:visual [options]
   --grep <targets>           only these families / examples, comma separated:  ui-button,ui-modal/types
                              (the ui- may be left out)
   --parity                   also compare class grammar vs elements;  report in results/visual/parity.md
-  --static                   ONLY compare the static server render vs elements (tools/visual/StaticFamilies.ts);
+  --static                   ONLY compare the static server render vs elements (static/StaticFamilies.ssr.ts);
                              report in results/visual/static-parity.md
   --workers <n|n%>           Playwright workers (default 50%)
   --help                     this text

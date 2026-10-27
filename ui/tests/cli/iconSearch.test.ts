@@ -30,12 +30,16 @@ describe("searchIcons()", () => {
     expect(names).toContain("dumbbell")
   })
 
-  test("a keyword finds an icon only at the start of one of its words", () => {
+  test("a search term finds an icon wherever it holds the query, after every name:  as the picker and the page", () => {
     expect(searchIcons(icons, "buzzer").map((icon) => icon.name)).toContain("bell")
-    expect(searchIcons(icons, "bell").map((icon) => icon.name)).not.toContain("brain")
+    // `brain`'s term `cerebellum` (epic `coherence` P25:  the command missed it, the picker found it)
+    const names = searchIcons(icons, "bell").map((icon) => icon.name)
+    expect(names).toContain("brain")
+    expect(names.indexOf("brain")).toBeGreaterThan(names.indexOf("dumbbell"))
   })
 
-  test("every word must match;  `-` ~== space", () => {
+  test("the whole query, as an icon name:  `-` ~== space", () => {
+    expect(searchIcons(icons, "arrow-up")[0]!.name).toBe("arrow up")
     const names = searchIcons(icons, "address-book outline").map((icon) => icon.name)
     expect(new Set(names)).toEqual(new Set(["address book outline"]))
   })

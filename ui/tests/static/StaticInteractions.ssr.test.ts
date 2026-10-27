@@ -15,7 +15,7 @@ describe("StaticInteractions.wire() with JavaScript off", { timeout: 30_000 }, (
   let page: Page
 
   beforeAll(async () => {
-    StaticRender.define(...StaticCatalog.classes)
+    await StaticCatalog.define()
     const body = `
       <ui-button id="open" commandfor="m1" command="--show">Open</ui-button>
       <ui-modal id="m1" closable heading="Hello">

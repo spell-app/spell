@@ -139,8 +139,12 @@
                *   tooltip.  An icon whose name another entry took is labelled by its first alias.
                * - Sorted by Font Awesome file name, so an outline tile follows its solid icon;  Fomantic:  one tile per Fomantic
                *   name, alphabetically.
-               * - Search also matches Font Awesome's search terms (`__data/icons.json5`, fetched on the first search), keyed by FA
+               * - Search is Spell UI's ONE icon search, `IconName.search()` (the site's global `IconName`), as `spell icon` and
+               *   `<ui-icon-picker>` search:  the query read as an icon name (`arrow-up` ~== `arrow up`), best match first.
+               *   It also matches Font Awesome's search terms (`__data/icons.json5`, fetched on the first search), keyed by FA
                *   file name, so an outline or Fomantic tile matches its solid icon's terms.
+               * - The address may name a query and a pack (`icons.html?q=bell&pack=fa7-brands`):  `spell icon --open` opens
+               *   it so.
                * - Renders the first 300 matches, then "Show more" in steps of 300:  cheap enough without a virtual list.
                * - A render "generation" drops stale async results when the pack or query changes mid-load.
                ****************/
@@ -163,7 +167,7 @@
 
                 /** current pack id */
                 pack = "fa7-free"
-                /** current query, lowercased */
+                /** current query, as typed */
                 query = ""
                 /** loaded packs by id */
                 loaded = new Map()
@@ -190,12 +194,16 @@
                   for (const button of this.packButtons) {
                     button.addEventListener("click", () => void this.setPack(button.dataset.pack))
                   }
-                  document.getElementById("icon-search").addEventListener("ui-input", (event) => {
+                  const search = document.getElementById("icon-search")
+                  search.addEventListener("ui-input", (event) => {
                     this.query = String(event.detail.value ?? "")
-                      .trim()
-                      .toLowerCase()
                     void this.filter()
                   })
+                  // the address's query and pack (`spell icon --open`)
+                  const asked = new URLSearchParams(location.search)
+                  this.query = asked.get("q") ?? ""
+                  if (this.query) search.value = this.query
+                  if (IconBrowser.USAGE[asked.get("pack")]) this.pack = asked.get("pack")
                   this.more.addEventListener("click", () => void this.renderMore())
                   this.grid.addEventListener("click", (event) => {
                     const item = event.target.closest?.("ui-item[data-name]")
@@ -234,16 +242,13 @@
                 async filter() {
                   const generation = ++this.generation
                   const query = this.query
-                  if (query && !this.terms) this.terms = await IconBrowser.loadTerms()
+                  if (IconName.normalize(query) && !this.terms) this.terms = await IconBrowser.loadTerms()
                   if (generation !== this.generation) return
                   const terms = this.terms ?? {}
-                  this.matches = query
-                    ? this.icons.filter(
-                        (icon) =>
-                          icon.names.some((name) => name.includes(query)) ||
-                          (terms[icon.file] ?? []).some((term) => term.toLowerCase().includes(query))
-                      )
-                    : this.icons
+                  this.matches = IconName.search(this.icons, query, {
+                    names: (icon) => icon.names,
+                    terms: (icon) => terms[icon.file] ?? []
+                  })
                   this.grid.replaceChildren()
                   this.shown = 0
                   this.renderMore()
@@ -303,29 +308,18 @@
                 static tiles(pack) {
                   const tiles = []
                   for (const icon of pack.icons()) {
-                    const file = IconBrowser.normalize(icon.key.slice(icon.key.lastIndexOf("/") + 1))
-                    const slug = file.replaceAll(" ", "-")
+                    const file = IconName.fileOf(icon.key)
                     if (pack.id === IconBrowser.FOMANTIC) {
-                      const alias = pack.index.icons[icon.key].alias
-                      const aliases = (Array.isArray(alias) ? alias : alias ? [alias] : []).map(IconBrowser.normalize)
+                      const aliases = IconName.aliases(pack.index.icons[icon.key].alias)
                       for (const name of icon.names)
-                        if (aliases.includes(name)) tiles.push({ names: [name], file: slug, sort: name })
+                        if (aliases.includes(name)) tiles.push({ names: [name], file, sort: name })
                     } else if (icon.names.length) {
-                      const names = icon.names.includes(file)
-                        ? [file, ...icon.names.filter((name) => name !== file)]
-                        : icon.names
-                      tiles.push({ names, file: slug, sort: file })
+                      const label = IconName.labelOf(icon.key, icon.names)
+                      const names = [label, ...icon.names.filter((name) => name !== label)]
+                      tiles.push({ names, file, sort: IconName.fromKey(icon.key) })
                     }
                   }
                   return tiles.sort((a, b) => (a.sort < b.sort ? -1 : a.sort > b.sort ? 1 : 0))
-                }
-
-                /** A name as `IconName.normalize()` spells it:  lowercase, dashes / underscores => spaces. */
-                static normalize(name) {
-                  return name
-                    .toLowerCase()
-                    .replace(/[\s_-]+/g, " ")
-                    .trim()
                 }
               }
 

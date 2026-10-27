@@ -129,7 +129,7 @@ const KINDS: Record<ParityKind, ParityReportKind> = {
     intro: [
       "Each element example (`examples/elements/<name>.html`) rendered statically -- `StaticRender` + `StaticStylesheet`,",
       "no scripts, no `ui-*` element defined (`/static/<family>/<name>.html`) -- against the live elements, light and dark.",
-      "Only the families in `src/tools/visual/StaticFamilies.ts`.  Informational."
+      "Only the families in `src/static/StaticFamilies.ssr.ts`.  Informational."
     ]
   }
 }

@@ -558,9 +558,9 @@ It's the `SSR` namespace, `spell-ui/static`, in [`src/static/`](src/static/):  n
 ```ts
 import { SSR } from "spell-ui/static"
 
-SSR.StaticRender.define(...SSR.StaticCatalog.classes) // the 55 families it can render, once per process
-await SSR.StaticRender.prepare(html) //                  what the render reads:  icon packs, each family's own data
-const page = SSR.StaticRender.page(html) //              a whole document;  fragment(html) for body content
+await SSR.StaticCatalog.define() //        the 55 families it can render, once per process
+await SSR.StaticRender.prepare(html) //    what the render reads:  icon packs, each family's own data
+const page = SSR.StaticRender.page(html) // a whole document;  fragment(html) for body content
 ```
 
 - It parses the page with linkedom, builds every component in document order (owners first), then renders each with

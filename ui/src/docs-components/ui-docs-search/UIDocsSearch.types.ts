@@ -95,14 +95,6 @@ export type SearchHit = {
   readonly marks: readonly (readonly [number, number])[]
 }
 
-/** A piece of a result's title (`UIDocsSearch.segments()`):  marked where the query matched. */
-export type TitleSegment = {
-  /** its text */
-  readonly text: string
-  /** a match:  drawn as `<mark>` */
-  readonly isMarked: boolean
-}
-
 /** One group of hits, best first. */
 export type SearchGroup = {
   /** the kind its hits share */

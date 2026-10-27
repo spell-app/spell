@@ -38,15 +38,12 @@ export class StaticDocument {
   static readonly ELEMENT_SCRIPT =
     /(?<![\w-])spell-ui(?![\w.-])|\$\/ui\b|\/ui\/(?:src|dist)\/|\/components\/ui-[\w-]+\/|\bspell-ui(?:[\w.-]*)\.js\b/
 
-  /** `StaticCatalog`'s classes are defined:  static, as defining is once per process. */
-  private static isDefined = false
-
   /**
    * Render `html`, a whole document.
    * - SIDE EFFECT:  outside `shared`, clears `StaticRender.sheetUsage` first, so the stylesheet covers only this page.
    */
   static async render(html: string, options: StaticDocumentOptions = {}): Promise<StaticDocumentResult> {
-    StaticDocument.define()
+    await SSR.StaticCatalog.define()
     if (options.shared && !options.href) {
       throw new TypeError("StaticDocument.render():  a `shared` stylesheet has no `href`;  pass the sheet's URL")
     }
@@ -54,7 +51,7 @@ export class StaticDocument {
     await SSR.StaticRender.prepare(html)
     const rendered = SSR.StaticRender.page(html)
     const tags = [...SSR.StaticRender.lastTags]
-    const css = options.shared ? undefined : StaticDocument.stylesheet(tags, { minify: options.minify })
+    const css = options.shared ? undefined : await StaticDocument.stylesheet(tags, { minify: options.minify })
 
     const { document } = parseHTML(rendered)
     const inlined = options.input ? StaticDocument.inlineLinkedSheets(document, options.input, options.output) : []
@@ -89,11 +86,11 @@ export class StaticDocument {
    * - `coverage`:  what an earlier run's sheet covered (its tags, what they adopted):  merged in, so the sheet keeps
    *   styling pages this run didn't render.  The result's `coverage` is the union.
    */
-  static stylesheet(
+  static async stylesheet(
     tags: Iterable<string>,
     { minify = true, coverage }: StaticStylesheetOptions = {}
-  ): StaticStylesheetResult {
-    StaticDocument.define()
+  ): Promise<StaticStylesheetResult> {
+    await SSR.StaticCatalog.define()
     const usage = SSR.StaticRender.sheetUsage
     for (const [name, nouns] of Object.entries(coverage?.users ?? {})) {
       let set = usage.users.get(name)
@@ -142,13 +139,6 @@ export class StaticDocument {
   ////////////////
   // ## Helpers
   ////////////////
-
-  /** Define `StaticCatalog`'s classes, once. */
-  private static define() {
-    if (StaticDocument.isDefined) return
-    SSR.StaticRender.define(...SSR.StaticCatalog.classes)
-    StaticDocument.isDefined = true
-  }
 
   /**
    * The page's LOCAL linked stylesheets that say something about elements (`::part()`, `:state()`, `ui-*` tags),

@@ -42,7 +42,7 @@ import { readJSON5File } from "spell/util/node/json5"
 import { escapeHTML, indented } from "spell/util/string"
 
 import type { SiteDataFile, SiteFamily, SiteTag } from "spell-ui/docs-components/docs-components.types"
-// A leaf, not `spell-ui/static`:  its barrel loads every family's classes, which only Vite can
+// A leaf, not `spell-ui/static`:  its barrel loads the element core, which only Vite can
 import { ID_REFERENCE_ATTRIBUTES } from "spell-ui/static/static.types.ssr"
 import { Terminal } from "spell/element-tools/Terminal"
 import { spliceGenerated, writeOrCheck, type GeneratedOutput } from "spell/element-tools/generatedFiles"

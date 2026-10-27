@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs"
 import { join } from "node:path"
 
+import { CssText } from "spell-ui/styles/CssText"
 import { DesignColor, type Oklch } from "./DesignColor.ts"
 import { FoundationTokens } from "./FoundationTokens.ts"
 import type { SiteFoundationGroup } from "spell-ui/docs-components/docs-components.types"
@@ -154,7 +155,7 @@ export class DesignTokens {
     }
     const lightDark = /^light-dark\(([\s\S]*)\)$/i.exec(value)
     if (lightDark) {
-      const [light, dark] = DesignColor.splitTop(lightDark[1]!, ",")
+      const [light, dark] = CssText.splitTop(lightDark[1]!, ",")
       return this.resolve((theme === "light" ? light : dark) ?? "", theme, seen)
     }
     return DesignColor.parse(value, (inner) => this.resolve(inner, theme, seen))
@@ -341,8 +342,8 @@ export class DesignTokens {
     const raw = this.literal(name, theme)
     if (raw === undefined) return undefined
     if (raw === "none") return raw
-    const layers = DesignColor.splitTop(raw, ",").map((layer) => {
-      const parts = DesignColor.splitTop(layer).map((part) => {
+    const layers = CssText.splitTop(raw, ",").map((layer) => {
+      const parts = CssText.splitTop(layer).map((part) => {
         if (/^(inset|0|-?[\d.]+(px|em))$/.test(part)) return part
         const color = this.resolve(part, theme)
         return color ? DesignColor.toHex(color) : undefined
@@ -436,7 +437,7 @@ export class DesignTokens {
   static pickTheme(text: string, theme: Theme): string {
     const match = /^light-dark\(([\s\S]*)\)$/i.exec(text.trim())
     if (!match) return text.trim()
-    const [light, dark] = DesignColor.splitTop(match[1]!, ",")
+    const [light, dark] = CssText.splitTop(match[1]!, ",")
     return DesignTokens.pickTheme((theme === "light" ? light : dark) ?? "", theme)
   }
 
@@ -444,15 +445,11 @@ export class DesignTokens {
   static pickAll(text: string, theme: Theme): string {
     let result = text
     for (let start = result.search(/light-dark\(/i); start >= 0; start = result.search(/light-dark\(/i)) {
-      const open = start + "light-dark(".length
-      let depth = 1
-      let end = open
-      for (; end < result.length && depth > 0; end++) {
-        if (result[end] === "(") depth++
-        else if (result[end] === ")") depth--
-      }
-      const [light, dark] = DesignColor.splitTop(result.slice(open, end - 1), ",")
-      result = result.slice(0, start) + ((theme === "light" ? light : dark) ?? "") + result.slice(end)
+      const open = start + "light-dark".length
+      const close = CssText.closing(result, open)
+      const end = close < 0 ? result.length : close
+      const [light, dark] = CssText.splitTop(result.slice(open + 1, end), ",")
+      result = result.slice(0, start) + ((theme === "light" ? light : dark) ?? "") + result.slice(end + 1)
     }
     return result
   }

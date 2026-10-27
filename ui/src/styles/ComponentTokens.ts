@@ -1,3 +1,4 @@
+import { CssText } from "./CssText"
 import type { TokenDeclaration } from "./styles.types"
 
 /****************
@@ -8,7 +9,7 @@ import type { TokenDeclaration } from "./styles.types"
  * - the private aliases that replace them, `--_ui-x: var(--ui-x, <default>)`
  * - the codemod that converts a family
  *
- * - Pure text in, text out:  no DOM, no Vite, and nothing of `ui`'s but `styles.types` (types only).
+ * - Pure text in, text out:  no DOM, no Vite, and nothing of `ui`'s but `styles.types` (types only) and `CssText`.
  *   So these share it:
  *   - the browser test (`tests/test-helpers/componentTokens.test.ts`)
  *   - the codemod (`yarn tokens:alias`, `scripts/tokens-alias.ts`)
@@ -140,7 +141,7 @@ export class ComponentTokens {
     for (const declaration of ComponentTokens.declarations(css, prefix)) {
       const match = alias.exec(declaration.value)
       if (!match || declaration.name !== ComponentTokens.privateNameFor(match[1]!) || found.has(match[1]!)) continue
-      if (!ComponentTokens.balanced(match[2]!)) continue
+      if (!CssText.isBalanced(match[2]!)) continue
       found.set(match[1]!, {
         name: match[1]!,
         default: match[2]!.replace(/\s+/g, " ").trim(),
@@ -251,16 +252,6 @@ export class ComponentTokens {
   private static skipSpace(text: string, index: number): number {
     while (index < text.length && /\s/.test(text[index]!)) index++
     return index
-  }
-
-  /** Whether `text`'s parentheses balance (a `var(--ui-x, a), b` pair would not).  Static:  plain text. */
-  private static balanced(text: string): boolean {
-    let depth = 0
-    for (const char of text) {
-      if (char === "(") depth++
-      else if (char === ")" && --depth < 0) return false
-    }
-    return depth === 0
   }
 }
 

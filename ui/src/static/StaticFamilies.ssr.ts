@@ -1,13 +1,13 @@
 /****************
  * ### `StaticFamilies`
- * Families `yarn test:visual --static` compares, and the component classes `StaticRender.define()`s for them.
+ * The ONE table of the families the static render supports, and their component classes:  what `spell ssr` renders,
+ * and what `yarn test:visual --static` compares.
  * - Grows as families become server-ready (epic `seo`, P3:  `epics/seo/seo.plan.html`):  add the family folder and
  *   the classes that render cleanly in node;  nothing else changes.
- * - PURE DATA, no imports:  the CLI and the Playwright spec (no Vite) read it for WHICH examples to compare,
- *   `StaticFixture` (loaded through Vite's SSR) for WHAT to define.
+ * - PURE DATA, no imports:  the visual tests' Playwright spec (no Vite) reads it for WHICH examples to compare;
+ *   `StaticCatalog.define()` (under Vite) for WHAT to define.
  * - Classes by NAME:  one class per file, so `UIButton` lives in `src/components/ui-button/UIButton.ts(x)`.
- *   Imported from their files, never the family's `index.ts`, which calls `customElements.define()`.
- * - STATIC:  a table and two lookups.
+ * - STATIC:  a table and a lookup.
  ****************/
 export class StaticFamilies {
   /**
@@ -96,13 +96,8 @@ export class StaticFamilies {
     "ui-shape": ["UIShape", "UISide"]
   }
 
-  /** `family` (`ui-button`) is compared statically. */
+  /** `family` (`ui-button`) renders statically. */
   static covers(family: string): boolean {
     return Object.hasOwn(StaticFamilies.CLASSES, family)
-  }
-
-  /** Source path of `name` in `family`, as Vite globs it, without the extension:  `/src/components/ui-button/UIButton`. */
-  static classPath(family: string, name: string): string {
-    return `/src/components/${family}/${name}`
   }
 }

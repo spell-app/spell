@@ -27,7 +27,7 @@ const uiCommands: CLI.CommandList = (spell) => {
     .argument("[query...]", "words to look for, e.g. bell -- none:  every icon")
     .option("--pack <id>", "only this pack:  fa7-free, fa7-brands or fomantic")
     .option("--json", "print the icons found as JSON")
-    .option("--open", "show them as pictures in a browser, until Ctrl-C")
+    .option("--open", "show them as pictures:  the docs' icon browser, on the page server")
     .action((query: string[], options: IconsOptions) =>
       CLI.runCommand(async () => (await import("spell-ui/cli/iconCommand")).iconCommand(query, options))
     )

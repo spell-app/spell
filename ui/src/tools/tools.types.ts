@@ -532,7 +532,7 @@ export type StaticDocumentModule = {
     /** `StaticDocument.render()` */
     render(html: string, options?: StaticDocumentOptions): Promise<StaticDocumentResult>
     /** `StaticDocument.stylesheet()` */
-    stylesheet(tags: Iterable<string>, options?: StaticStylesheetOptions): StaticStylesheetResult
+    stylesheet(tags: Iterable<string>, options?: StaticStylesheetOptions): Promise<StaticStylesheetResult>
   }
 }
 

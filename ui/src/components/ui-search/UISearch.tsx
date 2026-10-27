@@ -582,15 +582,7 @@ export class UISearch extends F.FormComponent<Vocabulary> {
     const ranges = this.highlighter.highlights({ value: "", text }, query, {
       ignoreDiacritics: this.ignoreDiacritics
     })
-    const parts: JSX.Element[] = []
-    let at = 0
-    for (const [start, end] of ranges) {
-      if (start > at) parts.push(text.slice(at, start))
-      parts.push(<mark>{text.slice(start, end)}</mark>)
-      at = end
-    }
-    if (at < text.length) parts.push(text.slice(at))
-    return parts
+    return E.markedPieces(text, ranges).map((piece) => (piece.isMarked ? <mark>{piece.text}</mark> : piece.text))
   }
 
   /** What the live region says:  the result count, or the message. */

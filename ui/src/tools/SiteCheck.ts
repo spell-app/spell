@@ -9,7 +9,7 @@ import type { Browser, Page } from "playwright"
 import { BrowserPage, type BrowserPageProps } from "spell/element-tools/BrowserPage"
 import { FOLDS_KEY } from "spell-ui/site/_src/site.types"
 import { TocIndex } from "spell-ui/components/ui-toc/TocIndex"
-import { KIT_ROOT, ensurePageServer } from "./pageServer.ts"
+import { KIT_ROOT, SITE_ADDRESS, ensurePageServer } from "./pageServer.ts"
 import { SITE_PAGES, SPELL_UI_ROOT, SiteCheckError, sitePages } from "./tools.types.ts"
 import { environment } from "./environment.ts"
 import { Terminal } from "spell/element-tools/Terminal"
@@ -650,9 +650,6 @@ function parseCommandLine(argv: string[]) {
 
 /** The site's pages, `docs/` (`SITE_PAGES`):  what the page server serves at `SITE_ADDRESS`. */
 const SITE = join(SPELL_UI_ROOT, SITE_PAGES)
-
-/** Where the page server serves Spell UI's docs (the page server's `componentSets` setting). */
-const SITE_ADDRESS = "/components/ui"
 
 /** Default screenshot folder;  `results` is git-ignored. */
 const DEFAULT_OUT = join(SPELL_UI_ROOT, "results", "site-check")

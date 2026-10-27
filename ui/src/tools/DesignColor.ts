@@ -1,5 +1,6 @@
 import { hexToRgb, oklchToRgb, rgbToHex, rgbToOklch } from "spell/util/color"
 import { clamp } from "spell/util/number"
+import { CssText } from "spell-ui/styles/CssText"
 
 /****************
  * ### `DesignColor`
@@ -79,7 +80,7 @@ export class DesignColor {
 
   /** `oklch()`'s plain arguments:  `0.57 0.21 27`, `0.259 0.005 248 / 0.15`. */
   private static fromOklchArgs(body: string): Oklch | undefined {
-    const parts = DesignColor.splitTop(body)
+    const parts = CssText.splitTop(body)
     const slash = parts.indexOf("/")
     const channels = slash < 0 ? parts : parts.slice(0, slash)
     if (channels.length !== 3) return undefined
@@ -96,7 +97,7 @@ export class DesignColor {
    * `l`, `c`, `h`, `alpha` (`calc(l - 0.05)`, `min(l, 0.5)`, `0.28`).
    */
   private static relative(body: string, resolve: (text: string) => Oklch | undefined): Oklch | undefined {
-    const parts = DesignColor.splitTop(body.replace(/^\s*from\s+/, ""))
+    const parts = CssText.splitTop(body.replace(/^\s*from\s+/, ""))
     const base = resolve(parts[0] ?? "")
     if (!base) return undefined
     const slash = parts.indexOf("/")
@@ -116,7 +117,7 @@ export class DesignColor {
    * the alpha down, as CSS does);  premultiplied, in `oklab`, `oklch` (shorter hue) or `srgb`.
    */
   private static mix(body: string, resolve: (text: string) => Oklch | undefined): Oklch | undefined {
-    const [space, first, second] = DesignColor.splitTop(body, ",")
+    const [space, first, second] = CssText.splitTop(body, ",")
     const method = /^in\s+(oklab|oklch|srgb)$/i.exec(space ?? "")?.[1]?.toLowerCase()
     if (!method || !first || !second) return undefined
     const a = DesignColor.mixArgument(first, resolve)
@@ -159,7 +160,7 @@ export class DesignColor {
 
   /** One `color-mix()` colour argument, `<colour> [<percentage>]`. */
   private static mixArgument(text: string, resolve: (text: string) => Oklch | undefined) {
-    const parts = DesignColor.splitTop(text)
+    const parts = CssText.splitTop(text)
     const percentText = parts.find((part) => /^[\d.]+%$/.test(part))
     const colorText = parts.filter((part) => part !== percentText).join(" ")
     const color = resolve(colorText)
@@ -205,30 +206,6 @@ export class DesignColor {
   ////////////////
   // ## Text helpers
   ////////////////
-
-  /**
-   * `text` split at top-level whitespace (or `separator`), parentheses kept whole;  a top-level `/` is its own part.
-   * - e.g. `from var(--x) calc(l - 0.05) c h / 0.5` => `["var(--x)", "calc(l - 0.05)", "c", "h", "/", "0.5"]`
-   */
-  static splitTop(text: string, separator: " " | "," = " "): string[] {
-    const parts: string[] = []
-    let depth = 0
-    let current = ""
-    for (const char of text) {
-      if (char === "(") depth++
-      else if (char === ")") depth--
-      const splits = depth === 0 && (separator === "," ? char === "," : /\s/.test(char) || char === "/")
-      if (!splits) {
-        current += char
-        continue
-      }
-      if (current.trim()) parts.push(current.trim())
-      current = ""
-      if (separator === " " && char === "/") parts.push("/")
-    }
-    if (current.trim()) parts.push(current.trim())
-    return parts
-  }
 
   /** A number or percentage (`percentOf` is 100%'s value), else `undefined`. */
   private static number(text: string, percentOf: number): number | undefined {

@@ -16,7 +16,8 @@ import { E } from "spell-ui/core"
  *   - A glyph in several categories is in EACH, as on Font Awesome's own site:
  *     someone looking through Weather expects every weather glyph there, not only those no earlier category took.
  *   - A pack of other glyphs (not Font Awesome's files) is all "Other".
- * - A search matches, best first:
+ * - A search matches, best first, by Spell UI's ONE icon search (`IconName.search()`, as `spell icon` and the docs' icon
+ *   browser):
  *   - a name that IS the query, then names starting with it, then names holding it
  *   - then Font Awesome's search terms for the glyph's file (`envelope` for `mail`)
  * - The categories and the terms are ONE file, `spell-ui/icons/data/search.json` (`IconSearchFile`):
@@ -51,19 +52,11 @@ export class IconCatalog {
     for (const [name, icon] of iconForName) {
       const choice = choiceForUrl.get(icon.url)
       if (choice) choice.names.push(name)
-      else choiceForUrl.set(icon.url, { name, names: [name], file: IconCatalog.fileOf(icon.key) })
+      else choiceForUrl.set(icon.url, { name, names: [name], file: E.IconName.fileOf(icon.key) })
     }
     const choices = [...choiceForUrl.values()]
-    for (const choice of choices) {
-      const own = choice.file.replaceAll("-", " ")
-      if (choice.names.includes(own)) choice.name = own
-    }
+    for (const choice of choices) choice.name = E.IconName.labelOf(choice.file, choice.names)
     return choices.sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0))
-  }
-
-  /** An index key's file name, Font Awesome's spelling, the search terms' key:  `solid/address-book` => `address-book`. */
-  private static fileOf(key: string): string {
-    return key.slice(key.lastIndexOf("/") + 1)
   }
 
   /** The lists made so far, per set of packs, with the packs they were made from. */
@@ -142,28 +135,10 @@ export class IconCatalog {
    * - `terms`:  Font Awesome's search terms, once loaded;  without them, names alone match.
    */
   static matches(choices: readonly IconChoice[], query: string, terms: IconSearchTerms = {}): readonly IconChoice[] {
-    const wanted = E.IconName.normalize(query)
-    if (!wanted) return choices
-    const ranked: { choice: IconChoice; rank: number }[] = []
-    for (const choice of choices) {
-      const rank = IconCatalog.rankOf(choice, wanted, terms)
-      if (rank < NO_MATCH) ranked.push({ choice, rank })
-    }
-    // `sort()` is stable:  A-Z within a rank
-    return ranked.sort((a, b) => a.rank - b.rank).map((entry) => entry.choice)
-  }
-
-  /** How well `choice` matches `wanted`:  0 best ... `NO_MATCH` none. */
-  private static rankOf(choice: IconChoice, wanted: string, terms: IconSearchTerms): number {
-    let rank = NO_MATCH
-    for (const name of choice.names) {
-      if (name === wanted) return 0
-      if (name.startsWith(wanted)) rank = Math.min(rank, 1)
-      else if (name.includes(wanted)) rank = Math.min(rank, 2)
-    }
-    if (rank < NO_MATCH) return rank
-    const ownTerms = terms[choice.file] ?? []
-    return ownTerms.some((term) => term.toLowerCase().includes(wanted)) ? 3 : NO_MATCH
+    return E.IconName.search(choices, query, {
+      names: (choice) => choice.names,
+      terms: (choice) => terms[choice.file] ?? []
+    })
   }
 }
 
@@ -213,6 +188,3 @@ const NO_WORDS: IconSearchWords = { terms: {}, categories: [] }
 
 /** The id of the group of choices in no category. */
 const OTHER_GROUP = "other"
-
-/** `rankOf()`'s "doesn't match". */
-const NO_MATCH = 4
