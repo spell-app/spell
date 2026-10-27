@@ -1,0 +1,61 @@
+<spell-notebook "dimmer theming">
+	<header level="1">
+		Dimmer
+		<header>A dimmer hides distractions to focus attention on particular content.</>
+	</>
+	<dimmer-tab-bar showing="theming"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#tokens">Tokens</>
+				<ui-item link="#themes">Themes</>
+			</>
+		</>
+	</>
+
+	<!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
+	<section label="Tokens">
+		<markdown>
+			Theme with the public `--ui-dimmer-*` tokens: set one on the element, on any ancestor (`:root` for every dimmer),
+			or on the box through `::part(dimmer)`. `--ui-dimmer-background`, `-inverted-background`, `-blurred-background`,
+			`-blur` and `-duration` are read where they paint. Style the centred box with `::part(content)`.
+		</>
+		<markdown>
+			```css
+			:root {
+			  --ui-dimmer-background: oklch(0.2 0.05 260 / 0.8);
+			  --ui-dimmer-blur: blur(8px);
+			}
+			ui-dimmer::part(content) {
+			  max-width: 30em;
+			}
+			```
+		</>
+		<message state="info" size="small">
+			<markdown>
+				The dimmer tokens are SHARED: `--ui-dimmer-background` also colours `<ui-modal>`'s backdrop, and
+				`<ui-flyout blurring>` and `<ui-sidebar blurring>` read the blur tokens, so one rule on `:root` themes every
+				dimmer on the page. The shades (`medium`, `light`, `very light`) set their own background. Never set the
+				`--_ui-dimmer-*` names: they're the sheet's private plumbing.
+			</>
+		</>
+		<markdown>Edit a value below to try it.</>
+		<html>
+			<ui-docs-tokens family="ui-dimmer" playground>
+				<button type="button" class="ui button" commandfor="dimmer-types-plain-playground" command="--toggle">Toggle</>
+				<ui-segment>
+					<p>A segment holding some text that the dimmer covers.</>
+					<p>Another paragraph, so the segment has some height.</>
+					<ui-dimmer id="dimmer-types-plain-playground" visible></>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="Themes">
+		<markdown>
+			The theme menu above picks the theme for every page of the site:  Spell, Glass, Fruity or Merlot,
+			each restyling this component through its tokens.
+		</>
+	</>
+</spell-notebook>

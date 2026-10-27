@@ -1,0 +1,94 @@
+<spell-notebook "feed usage">
+	<header level="1">
+		Feed
+		<header>A feed presents user activity chronologically.</>
+	</>
+	<feed-tab-bar showing="usage"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#using-it">Using it</>
+				<ui-item link="#events">Events</>
+				<ui-item link="#keyboard">Keyboard</>
+				<ui-item link="#accessibility">Accessibility</>
+			</>
+		</>
+	</>
+
+	<!-- USAGE:  from the old Astro page (Behaviour, Accessibility), tightened. -->
+	<section label="Using it">
+		<markdown>
+			A feed is a list of events, newest or oldest first as you order them. Each `<ui-event>` is a label beside a block
+			of content.
+
+			- The label is optional: a round picture (`image`), an `icon`, a short text in a circle (`label`, Fomantic's
+			  `data-text`), or anything you put in the `label` slot (a `<ui-text>`, a `<ui-label>`, your own `<img>`).
+			- In an `ordered` feed every event gets a label for its number; a `label` text still wins.
+			- The feed styles the content parts inside its events, so you write plain parts and they take the feed's look:
+			  - `<ui-content>` holds the event
+			  - `<ui-summary>` says what happened
+			  - `<ui-author>` names who (Fomantic's `.user`)
+			  - `<ui-date>` says when: inline inside the summary, a line of its own outside it
+			  - `<ui-extra>` adds more: `text` for a block of text, or a `<ui-images size="tiny">` for pictures
+			  - `<ui-meta>` holds small actions such as a like count
+			- `connected`, `ordered`, `divided`, `appearance="basic"` and `color` are set on the feed and reach every event; `color` and
+			  `appearance="basic"` also work on a single event.
+		</>
+		<markdown>
+			```html
+			<ui-feed connected>
+			  <ui-event image="/avatars/elliot.jpg">
+			    <ui-content>
+			      <ui-summary>
+			        <ui-author link="/people/elliot">Elliot Fu</ui-author> added you as a friend
+			        <ui-date datetime="2026-10-03T09:00">1 Hour Ago</ui-date>
+			      </ui-summary>
+			      <ui-meta><a href="/likes/1"><ui-icon name="like"></ui-icon> 4 Likes</a></ui-meta>
+			    </ui-content>
+			  </ui-event>
+			</ui-feed>
+			```
+		</>
+	</>
+
+	<section label="Events">
+		<markdown>
+			Neither element fires events of its own. Links and buttons inside the content are yours: listen for their
+			native `click`. A feed that grows appends `<ui-event>`s; the numbers of an `ordered` feed and the line of a
+			`connected` one follow by themselves (CSS counters and inherited tokens).
+		</>
+		<markdown>
+			```js
+			const feed = document.querySelector("ui-feed")
+			const event = document.createElement("ui-event")
+			event.setAttribute("icon", "pencil")
+			event.innerHTML = `<ui-content><ui-summary>You posted on the page <ui-date>Just now</ui-date></ui-summary></ui-content>`
+			feed.prepend(event)
+			```
+		</>
+	</>
+
+	<section label="Keyboard">
+		<markdown>
+			The feed itself takes no keys and is never a tab stop. **Tab** reaches the links and buttons inside its events in
+			reading order; **Enter** / **Space** come from the browser.
+		</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			- The shadow root holds a real `<ul>` (`<ol>` when `ordered`, since the numbers mean something) with an explicit
+			  `role="list"`, because Safari drops list semantics from unstyled lists. Each `<ui-event>` in a feed is a
+			  `listitem`.
+			- The `image` and `icon` labels are decorative (`alt=""`, hidden glyph): the summary must say who and what. Give
+			  a picture in the `label` slot its own `alt` (`""` when it is decoration).
+			- A `label` text and the numbers of an `ordered` feed are drawn by CSS, so don't rely on them to carry meaning a
+			  screen reader must hear.
+			- `disabled` fades the event, blocks the mouse and sets `aria-disabled`. Links inside stay in the tab order; add
+			  `inert` to the event when they must not be reached at all.
+			- If the feed or an event fails to render, it shows its children through a bare `<slot>`, so the feed
+			  still reads in order; the list, the event boxes and their styling go, and so does an event's label
+			  (shorthand or slotted).
+		</>
+	</>
+</spell-notebook>

@@ -1,0 +1,56 @@
+<spell-notebook "page api">
+	<header level="1">
+		Page
+		<header>A page frames a whole window:  a header, navigation, the main content, a side column and a footer.</>
+	</>
+	<page-tab-bar showing="api"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#attributes">Attributes</>
+				<ui-item link="#events">Events</>
+				<ui-item link="#slots">Slots</>
+				<ui-item link="#parts">Parts</>
+				<ui-item link="#states">States</>
+				<ui-item link="#texts">Texts</>
+			</>
+		</>
+	</>
+
+	<!-- API:  generated from the vocabularies (`site/_data/components.json5`);  nothing to write. -->
+	<section label="Attributes">
+		<html>
+			<ui-docs-api family="ui-page" only="attributes"></>
+		</>
+	</>
+
+	<section label="Events">
+		<html>
+			<ui-docs-api family="ui-page" only="events"></>
+		</>
+	</>
+
+	<section label="Slots">
+		<html>
+			<ui-docs-api family="ui-page" only="slots"></>
+		</>
+	</>
+
+	<section label="Parts">
+		<html>
+			<ui-docs-api family="ui-page" only="parts"></>
+		</>
+	</>
+
+	<section label="States">
+		<html>
+			<ui-docs-api family="ui-page" only="states"></>
+		</>
+	</>
+
+	<section label="Texts">
+		<html>
+			<ui-docs-api family="ui-page" only="texts"></>
+		</>
+	</>
+</spell-notebook>

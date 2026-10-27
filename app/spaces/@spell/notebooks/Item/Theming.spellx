@@ -1,0 +1,46 @@
+<spell-notebook "item theming">
+	<header level="1">
+		Item
+		<header>One item for dropdowns, lists and menus, rendered by whatever holds it.</>
+	</>
+	<item-tab-bar showing="theming"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#tokens">Tokens</>
+				<ui-item link="#themes">Themes</>
+			</>
+		</>
+	</>
+
+	<!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
+	<section label="Tokens">
+		<markdown>
+			An item has no tokens of its own: its look comes from its owner, so theme it through the list, menu, dropdown or
+			Items-view tokens (their Theming tabs). `UIItem.css` declares only a private flag (`--_ui-item-media`); never set
+			it.
+
+			Style the pieces of a list or menu item with `::part()`: `item` (the box), `icon` and `image`.
+		</>
+		<markdown>
+			```css
+			ui-menu ui-item::part(item) {
+			  font-weight: bold;
+			}
+			ui-list ui-item::part(image) {
+			  border-radius: 0.25em;
+			}
+			```
+		</>
+		<html>
+			<ui-docs-tokens family="ui-item" playground></>
+		</>
+	</>
+
+	<section label="Themes">
+		<markdown>
+			No theme restyles items directly: a theme that restyles lists, menus or dropdowns restyles their items. The theme
+			picker in the header applies a theme to the whole site.
+		</>
+	</>
+</spell-notebook>

@@ -1,0 +1,233 @@
+<spell-notebook "select examples">
+	<header level="1">
+		Select
+		<header>A select lets a user choose a value from a list, with the platform's own picker.</>
+	</>
+	<select-tab-bar showing="examples"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#types">Types</>
+				<ui-item link="#content">Content</>
+				<ui-item link="#states">States</>
+				<ui-item link="#variations">Variations</>
+				<ui-item link="#examples">Examples</>
+			</>
+		</>
+	</>
+
+	<!--
+		EXAMPLES:  ours (no Fomantic page of its own):  the selection variants of Fomantic's dropdown page that a native
+		`<select>` can draw, in that page's order (Types, Content, States, Variations), with the old page's facts.
+		- In browsers with the customizable select (Chrome 135+) the open picker is styled too, with icons;  elsewhere it's
+		  the browser's own list.  A search, additions, labels or rich content:  `<ui-dropdown>`.
+	-->
+	<section label="Types">
+		<section label="Select" sticky collapsible dividing>
+			<example description="A select lets the user choose one option, in the closed look of a selection dropdown. Options are `<ui-item>`s, as in a dropdown; `placeholder` stands while nothing is chosen.">
+				<select name="pet" placeholder="Pet">
+					<item value="0">Cat</item>
+					<item value="1">Dog</item>
+					<item value="2">Bird</item>
+					<item value="3">Rabbit</item>
+					<item value="4">Squirrel</item>
+					<item value="5">Horse</item>
+					<item value="6">Turtle</item>
+					<item value="7">Parrot</item>
+				</select>
+			</example>
+			<example description="Options can lead with an image (customizable select only).">
+				<select fluid name="user" placeholder="Select Friend">
+					<item value="jenny" image="../images/avatar/small/jenny.jpg">Jenny Hess</item>
+					<item value="elliot" image="../images/avatar/small/elliot.jpg">Elliot Fu</item>
+					<item value="stevie" image="../images/avatar/small/stevie.jpg">Stevie Feliciano</item>
+					<item value="christian" image="../images/avatar/small/christian.jpg">Christian</item>
+					<item value="matt" image="../images/avatar/small/matt.jpg">Matt</item>
+					<item value="justen" image="../images/avatar/small/justen.jpg">Justen Kitsune</item>
+				</select>
+			</example>
+		</>
+
+		<section label="Chosen value" sticky collapsible dividing>
+			<example description="`value` picks the starting option.">
+				<select aria-label="Fruit" value="banana">
+					<item value="apple">Apple</item>
+					<item value="banana">Banana</item>
+					<item value="cherry">Cherry</item>
+				</select>
+			</example>
+		</>
+
+		<section label="Multiple Selection" sticky collapsible dividing>
+			<example description="A select can allow several choices: `multiple`, a native list box in every browser. `value` is a comma list.">
+				<select multiple name="skills" aria-label="Skills" value="angular,css">
+					<item value="angular">Angular</item>
+					<item value="css">CSS</item>
+					<item value="design">Graphic Design</item>
+					<item value="ember">Ember</item>
+					<item value="html">HTML</item>
+					<item value="javascript">Javascript</item>
+				</select>
+			</example>
+		</>
+		<html>
+			<ui-message size="small" class="site-not-ported">Not ported here, on purpose: Search Selection, Clearable, labels for a multiple, user additions and every menu-only look (inline, button, pointing ...) -- a native <code>&lt;select&gt;</> can't; use <code>&lt;ui-dropdown&gt;</>.</>
+		</>
+	</>
+
+	<section label="Content">
+		<section label="Groups and dividers" sticky collapsible dividing>
+			<example description="A `header` item starts a group of options (an `<optgroup>`);  a `divider` item draws a rule.">
+				<select placeholder="Choose food">
+					<item kind="header">Fruit</item>
+					<item value="apple">Apple</item>
+					<item value="pear">Pear</item>
+					<item kind="header">Vegetables</item>
+					<item value="leek">Leek</item>
+					<item kind="divider"/>
+					<item value="none">Nothing</item>
+				</select>
+			</example>
+		</>
+
+		<section label="Flags, icons and descriptions" sticky collapsible dividing>
+			<example description="Options can carry a flag, an icon and a description. Browsers without the customizable select show the flag and description as text, and drop the icon.">
+				<select placeholder="Select Country">
+					<item value="fr" flag="fr" description="EU">France</item>
+					<item value="gh" flag="gh" description="AU">Ghana</item>
+					<item value="jp" icon="sun">Japan</item>
+				</select>
+			</example>
+		</>
+	</>
+
+	<section label="States">
+		<section label="Error" sticky collapsible dividing>
+			<example description="An errored select can alert a user to a problem:  `state=\"error\"`.">
+				<select state="error" placeholder="Gender">
+					<item value="male">Male</item>
+					<item value="female">Female</item>
+				</select>
+			</example>
+			<example description="The other form states tint the box too:  `info`, `success`, `warning`.">
+				<select state="info" aria-label="Info" value="a">
+					<item value="a">Info</item>
+				</select>
+				<select state="success" aria-label="Success" value="a">
+					<item value="a">Success</item>
+				</select>
+				<select state="warning" aria-label="Warning" value="a">
+					<item value="a">Warning</item>
+				</select>
+			</example>
+		</>
+
+		<section label="Disabled" sticky collapsible dividing>
+			<example description="A disabled select does not allow user interaction, and isn't submitted.  A disabled item can't be chosen.">
+				<select disabled placeholder="Gender">
+					<item value="male">Male</item>
+				</select>
+			</example>
+			<example>
+				<select required placeholder="Size" name="size">
+					<item value="s">Small</item>
+					<item value="m" disabled>Medium (sold out)</item>
+					<item value="l">Large</item>
+				</select>
+			</example>
+		</>
+	</>
+
+	<section label="Variations">
+		<section label="Size" sticky collapsible dividing>
+			<example description="A select can have different sizes.">
+				<select size="mini" name="gender" placeholder="Mini">
+					<item value="1">Male</item>
+					<item value="0">Female</item>
+				</select>
+				<select size="tiny" name="gender" placeholder="Tiny">
+					<item value="1">Male</item>
+					<item value="0">Female</item>
+				</select>
+				<select size="small" name="gender" placeholder="Small">
+					<item value="1">Male</item>
+					<item value="0">Female</item>
+				</select>
+				<select size="medium" name="gender" placeholder="Medium">
+					<item value="1">Male</item>
+					<item value="0">Female</item>
+				</select>
+				<select size="large" name="gender" placeholder="Large">
+					<item value="1">Male</item>
+					<item value="0">Female</item>
+				</select>
+			</example>
+			<example>
+				<select size="big" name="gender" placeholder="Big">
+					<item value="1">Male</item>
+					<item value="0">Female</item>
+				</select>
+				<select size="huge" name="gender" placeholder="Huge">
+					<item value="1">Male</item>
+					<item value="0">Female</item>
+				</select>
+				<select size="massive" name="gender" placeholder="Massive">
+					<item value="1">Male</item>
+					<item value="0">Female</item>
+				</select>
+			</example>
+		</>
+
+		<section label="Inverted" sticky collapsible dividing>
+			<example description="A select can be inverted.">
+				<segment inverted>
+					<select inverted name="choices" placeholder="Select choice">
+						<item>Choice 1</item>
+						<item>Choice 2</item>
+						<item>Choice 3</item>
+					</select>
+				</segment>
+			</example>
+		</>
+
+		<section label="Compact" sticky collapsible dividing>
+			<example description="A compact select has no minimum width:  it is as wide as its longest option.">
+				<select padding="compact" aria-label="Compact" value="a">
+					<item value="a">Or</item>
+					<item value="b">And</item>
+				</select>
+			</example>
+		</>
+
+		<section label="Fluid" sticky collapsible dividing>
+			<example description="A select can take the full width of its parent.">
+				<select fluid placeholder="Fills its container">
+					<item value="a">A</item>
+					<item value="b">B</item>
+				</select>
+			</example>
+		</>
+	</>
+
+	<section label="Examples">
+		<section label="Form" sticky collapsible dividing>
+			<example description="A select is a form control:  in a field, with a label.">
+				<html>
+					<ui-form>
+						<form>
+							<ui-field required>
+								<label for="select-form-gender">Gender</label>
+								<ui-select id="select-form-gender" required name="gender" placeholder="Gender">
+									<ui-item value="male">Male</ui-item>
+									<ui-item value="female">Female</ui-item>
+								</ui-select>
+							</ui-field>
+							<ui-button type="submit">Submit</ui-button>
+							<ui-button type="reset" appearance="basic">Reset</ui-button>
+						</form>
+					</ui-form>
+				</html>
+			</example>
+		</>
+	</>
+</spell-notebook>

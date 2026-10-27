@@ -1,0 +1,62 @@
+<spell-notebook "dropdown theming">
+	<header level="1">
+		Dropdown
+		<header>A dropdown allows a user to select a value from a series of options.</>
+	</>
+	<dropdown-tab-bar showing="theming"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#tokens">Tokens</>
+				<ui-item link="#themes">Themes</>
+			</>
+		</>
+	</>
+
+	<!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
+	<section label="Tokens">
+		<markdown>
+			Theme with the public `--ui-dropdown-*` tokens: set one on the element or on any ancestor (`:root` included).
+			They inherit into the shadow root, where the sheet reads each through a private alias, so nothing inside blocks
+			them. Style the pieces with `::part()`: `trigger`, `text`, `icon`, `menu`, `item`, `label`, `search` and
+			`clear`.
+		</>
+		<markdown>
+			```css
+			ui-dropdown::part(menu) {
+			  max-height: 20em;
+			}
+			ui-dropdown {
+			  --ui-dropdown-arrow-size: 0.8em;
+			}
+			```
+		</>
+		<message state="info" size="small">
+			<markdown>
+				Variations build on the tokens: `floating` and `pointing` swap in their own `--ui-dropdown-floating-*` /
+				`--ui-dropdown-pointing-*` values. A `button` dropdown reads the button tokens. Never set the
+				`--_ui-dropdown-*` names: they're the sheet's private plumbing.
+			</>
+		</>
+		<markdown>Edit a value below to try it.</>
+		<html>
+			<ui-docs-tokens family="ui-dropdown" playground>
+				<ui-dropdown label="File">
+					<ui-item>New</>
+					<ui-item description="ctrl + o">Open...</>
+					<ui-item description="ctrl + s">Save as...</>
+					<ui-item kind="divider"></>
+					<ui-item>Edit</>
+					<ui-item>Share</>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="Themes">
+		<markdown>
+			The theme menu above picks the theme for every page of the site:  Spell, Glass, Fruity or Merlot,
+			each restyling this component through its tokens.
+		</>
+	</>
+</spell-notebook>

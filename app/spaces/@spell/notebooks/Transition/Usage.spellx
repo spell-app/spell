@@ -1,0 +1,144 @@
+<spell-notebook "transition usage">
+	<header level="1">
+		Transition
+		<header>A transition is an animation used to show or hide content, or to draw attention to it.</>
+	</>
+	<transition-tab-bar showing="usage"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#using-it">Using it</>
+				<ui-item link="#methods-and-commands">Methods and commands</>
+				<ui-item link="#queuing-animations">Queuing animations</>
+				<ui-item link="#events">Events</>
+				<ui-item link="#animating-any-element">Animating any element</>
+				<ui-item link="#keyboard">Keyboard</>
+				<ui-item link="#accessibility">Accessibility</>
+				<ui-item link="#framework-usage">Framework usage</>
+			</>
+		</>
+	</>
+
+	<!-- USAGE:  how to use it (attributes in practice, events, framework snippets), keyboard, accessibility. -->
+	<section label="Using it">
+		<markdown>
+			Wrap the content to animate in `<ui-transition>`. `visible` drives it: absent means hidden, and each
+			change animates `animation` in or out. The first paint never animates.
+
+			- `animation` takes Fomantic's names, spaces and all (`fade up`, `horizontal flip`, `browse right`);
+			  an attention one (`shake`, `pulse`...) runs in place and leaves visibility alone.
+			- `duration` takes milliseconds (`300`) or a CSS time (`0.3s`); default the animation's own.
+			- `inline` makes the box an inline block, for inline content (an image, a button).
+			- Transitions are three kinds, as in Fomantic: inward (shows), outward (hides) and static
+			  (attention: visibility unchanged).
+		</>
+	</>
+
+	<section label="Methods and commands">
+		<markdown>
+			There is no attribute for "shake now", so the host has methods, each resolving once its animation
+			has run: `show()`, `hide()`, `toggle()` and `transition(name?)` (Fomantic's
+			`$(el).transition(name)`; `animate` is the Web Animations API's). `show()` / `hide()` /
+			`toggle()` write `visible`, so it reflects. Invoker commands do the same with no script, from a
+			`<ui-button>` or a native `<button>`: `--show`, `--close`, `--toggle` and `--transition`.
+		</>
+		<markdown>
+			```html
+			<ui-button commandfor="notice" command="--toggle">Toggle</ui-button>
+			<ui-transition id="notice" animation="fade up" visible>
+			  <ui-message>Saved.</ui-message>
+			</ui-transition>
+			```
+		</>
+	</>
+
+	<section label="Queuing animations">
+		<markdown>
+			Animations queue, as Fomantic's did: each waits for the one before, and a queued one with no
+			direction works it out from the visibility it will have by then. The same animation twice in a
+			row is dropped (`allow-repeats` keeps it). With `interrupt`, a new animation stops the running one
+			instead (Fomantic's `queue: false`).
+
+			Fomantic's `stop`, `stop all` and `clear queue` behaviours are not ported: `interrupt` covers
+			replacing the running animation.
+		</>
+	</>
+
+	<section label="Events">
+		<markdown>
+			- `ui-opened` (`{ visible: true, animation }`): shown, its animation finished (Fomantic's
+			  `onVisible`).
+			- `ui-closed` (`{ visible: false, animation }`): hidden, its animation finished (`onHidden`).
+			- `ui-animated` (`{ visible, animation }`): any animation finished, attention ones included
+			  (`onComplete`).
+		</>
+		<markdown>
+			```js
+			const notice = document.querySelector("#notice")
+			await notice.hide() // resolves once animated out
+			await notice.transition("shake") // attention:  in place
+			notice.addEventListener("ui-opened", (event) => console.log(event.detail.animation))
+			```
+		</>
+	</>
+
+	<section label="Animating any element">
+		<markdown>
+			Other components (dropdowns, modals, popups ...) animate with the same catalogue through the
+			runtime's `UI.transitions`, which also plays it on any element without wrapping it. The animations
+			themselves are the foundation's `animations.css`.
+		</>
+	</>
+
+	<section label="Keyboard">
+		<markdown>
+			None of its own: the box takes no focus. Drive transitions from real buttons (`commandfor`), so
+			keyboard and screen reader users can reach them.
+		</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			- Hidden content is out of the page and the accessibility tree, as `hidden` would make it: nothing
+			  inside can take focus or be read.
+			- Showing or hiding content doesn't announce anything by itself; if the change matters, say so in
+			  a live region or move focus to it.
+			- Under `prefers-reduced-motion` the element jumps straight to its end state, with the same events.
+			- If the element fails to render, it shows its children through a bare `<slot>` and no longer follows
+			  `visible`: no showing or hiding, no animation, and no `ui-opened` / `ui-closed` or `ui-animated`.
+		</>
+	</>
+
+	<section label="Framework usage">
+		<markdown>Bind `visible`, and call the methods through a ref for attention animations.</>
+		<header level="4" id="framework-react">React 19</>
+		<markdown>
+			```jsx
+			<ui-transition animation="fade up" visible={shown} ref={box} onui-hide={() => setGone(true)}>
+			  ...
+			</ui-transition>
+			// later:  box.current.transition("shake")
+			```
+		</>
+		<header level="4" id="framework-vue">Vue 3.5</>
+		<markdown>
+			```html
+			<!-- compilerOptions.isCustomElement = (tag) => tag.startsWith("ui-") -->
+			<ui-transition ref="box" animation="fade up" :visible="shown" @ui-closed="gone = true">...</ui-transition>
+			```
+		</>
+		<header level="4" id="framework-solid">Solid 2</>
+		<markdown>
+			```jsx
+			// events and rich data are plain props:  `on-<event>={...}`, `options={...}`
+			<ui-transition
+			  animation="fade up"
+			  visible={shown()}
+			  on-ui-closed={() => setGone(true)}
+			>
+			  ...
+			</ui-transition>
+			```
+		</>
+	</>
+</spell-notebook>

@@ -1,0 +1,144 @@
+<spell-notebook "visibility usage">
+	<header level="1">
+		Visibility
+		<header>Visibility provides a set of callbacks for when content appears in the viewport.</>
+	</>
+	<visibility-tab-bar showing="usage"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#using-it">Using it</>
+				<ui-item link="#events">Events</>
+				<ui-item link="#ui-observevisibility">UI.observeVisibility()</>
+				<ui-item link="#lazy-images">Lazy images</>
+				<ui-item link="#keyboard">Keyboard</>
+				<ui-item link="#accessibility">Accessibility</>
+				<ui-item link="#framework-usage">Framework usage</>
+			</>
+		</>
+	</>
+
+	<!-- USAGE:  how to use it (attributes in practice, events, framework snippets), keyboard, accessibility. -->
+	<section label="Using it">
+		<markdown>
+			Visibility fires events when its content reaches a position on screen. Common uses:
+
+			- **Lazy loading images**: start loading an image just before the user sees it (`type="image"`).
+			- **Reactive content**: change an element as the user scrolls past it.
+			- **Event tracking**: log engagement, e.g. when a post is scrolled past (`ui-bottom-passed`).
+			- **Infinite scroll**: load more content when the bottom of a list comes on screen
+			  (`ui-bottom-in-view`).
+			- Sticky headers are `<ui-sticky>`'s job, on CSS `position: sticky`.
+
+			Wrap the content in `<ui-visibility>` and listen. It runs Fomantic's callbacks on an
+			`IntersectionObserver`: no scroll listener, nothing measured while the page scrolls. The checks
+			happen at crossings (the element entering or leaving, an edge crossing the screen's top or bottom),
+			so `continuous` means "at each crossing", not "at every scrolled pixel". `offset` moves the
+			screen's top down, under a fixed menu.
+		</>
+	</>
+
+	<section label="Events">
+		<markdown>
+			Each event carries the calculations as `detail` (`topPassed`, `bottomVisible`, `percentagePassed`,
+			`pixelsPassed`, `direction` ...), and the element keeps `:state(visible)` while any of it is on
+			screen. By default each event fires at most once (`once`, Fomantic's default); `once="false"` fires
+			it each time its condition turns true.
+
+			- `ui-in-view` (`onOnScreen`): some of it came on screen.
+			- `ui-out-of-view` (`onOffScreen`): none of it is on screen.
+			- `ui-top-in-view` (`onTopVisible`): its top came on screen.
+			- `ui-bottom-in-view` (`onBottomVisible`): its bottom came on screen.
+			- `ui-top-passed` (`onTopPassed`): its top passed the screen's top.
+			- `ui-bottom-passed` (`onBottomPassed`): its bottom passed the screen's top.
+			- `ui-passing` (`onPassing`): it spans the screen's top.
+			- `ui-loaded` (`{ image }`): with `type="image"`, an image got its source (and finished its fade).
+		</>
+		<markdown>
+			```js
+			const watched = document.querySelector("#watched")
+			watched.addEventListener("ui-in-view", (event) => console.log("on screen", event.detail.percentagePassed))
+			watched.addEventListener("ui-bottom-passed", () => analytics.track("read to the end"))
+			```
+		</>
+	</>
+
+	<section label="UI.observeVisibility()">
+		<markdown>
+			`UI.observeVisibility(element, options)` runs the same checks on any element, without wrapping it.
+			It takes Fomantic's names, including the `...Reverse` callbacks (the condition turned false again)
+			and `onUpdate` (every check), plus `once`, `continuous`, `offset` and `context` (a scroll container
+			to measure against instead of the viewport). It returns the function that stops watching.
+		</>
+		<markdown>
+			```js
+			import { UI } from "spell-ui/core"
+
+			await UI.load()
+			const stop = UI.observeVisibility(box, {
+			  once: false,
+			  context: scroller,
+			  onTopPassed: (calculations) => console.log("top passed", calculations.direction),
+			  onBottomVisible: () => loadMore(),
+			  onOffScreen: () => pause()
+			})
+			// later:  stop()
+			```
+		</>
+	</>
+
+	<section label="Lazy images">
+		<markdown>
+			`type="image"` is Fomantic's lazy image loading: each `<img data-src>` (and `data-srcset`) inside
+			gets its source once it's on screen, preloaded, then fades in; `ui-loaded` fires per image. For
+			images alone, the browser's own `loading="lazy"` needs no script at all; `type="image"` adds the
+			fade and the event.
+		</>
+	</>
+
+	<section label="Keyboard">
+		<markdown>None of its own: it's a plain block around its content, which keeps its own keyboard behaviour.</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			- Visibility changes nothing for assistive technology: it watches, and its content reads as usual.
+			- Don't hide content until it's scrolled to: keyboard and screen reader users move through a page
+			  without scrolling it the way a mouse does. Load more, or animate, but keep the content reachable.
+			- Lazy images keep their `alt` and their `width` / `height`, so the layout doesn't jump when they
+			  load.
+			- If the element fails to render, it shows its children through a bare `<slot>`, but nothing watches
+			  them: an `<img data-src>` never gets its source, so it stays empty, and the events go.
+		</>
+	</>
+
+	<section label="Framework usage">
+		<markdown>
+			Listen for the events you need; in a component, call `UI.observeVisibility()` in a mount hook, and
+			call what it returns on unmount.
+		</>
+		<header level="4" id="framework-react">React 19</>
+		<markdown>
+			```jsx
+			<ui-visibility once="false" onui-bottom-visible={loadMore}>...</ui-visibility>
+			useEffect(() => UI.observeVisibility(ref.current, { onTopPassed: showBackToTop, once: false }), [])
+			```
+		</>
+		<header level="4" id="framework-vue">Vue 3.5</>
+		<markdown>
+			```html
+			<!-- compilerOptions.isCustomElement = (tag) => tag.startsWith("ui-") -->
+			<ui-visibility once="false" @ui-bottom-in-view="loadMore">...</ui-visibility>
+			```
+		</>
+		<header level="4" id="framework-solid">Solid 2</>
+		<markdown>
+			```jsx
+			// events and rich data are plain props:  `on-<event>={...}`, `options={...}`
+			<ui-visibility once="false" on-ui-bottom-in-view={loadMore}>
+			  ...
+			</ui-visibility>
+			```
+		</>
+	</>
+</spell-notebook>

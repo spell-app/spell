@@ -1,0 +1,65 @@
+<spell-notebook "value examples">
+	<header level="1">
+		Value
+		<header>A value is what a statistic shows:  a number, a word, an icon or an image.</>
+	</>
+	<value-tab-bar showing="examples"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#owners">Owners</>
+				<ui-item link="#variations">Variations</>
+			</>
+		</>
+	</>
+
+	<!--
+		EXAMPLES:  `<ui-value>` in each owner that gives it a look (from the owners' own pages and
+		`src/components/ui-parts/examples/elements/`), then its attributes.  The Content parts page
+		(`ui-header.html`) shows every part together.
+	-->
+	<section label="Owners">
+		<section label="Statistic" sticky collapsible dividing>
+			<example description="A statistic's value, above its label.">
+				<statistics>
+					<statistic>
+						<value>40,509</value>
+						<label>Views</label>
+					</statistic>
+					<statistic direction="horizontal">
+						<value>2,204</value>
+						<label>Downloads</label>
+					</statistic>
+				</statistics>
+			</example>
+		</>
+	</>
+
+	<section label="Variations">
+		<section label="Text Value" sticky collapsible dividing>
+			<example description="`text` makes a word value, smaller and bold.">
+				<html>
+					<ui-statistic>
+						<ui-value text>Three<br />Thousand</ui-value>
+						<ui-label>Signups</ui-label>
+					</ui-statistic>
+				</html>
+			</example>
+		</>
+
+		<section label="Icon and Image" sticky collapsible dividing>
+			<example description="A value can hold an icon or an image beside the number.">
+				<statistics>
+					<statistic>
+						<value><icon name="plane"/> 5</value>
+						<label>Flights</label>
+					</statistic>
+					<statistic>
+						<value><image inline src="/components/ui/images/avatar/small/joe.jpg" alt="" appearance="circular"/> 42</value>
+						<label>Team Members</label>
+					</statistic>
+				</statistics>
+			</example>
+		</>
+	</>
+</spell-notebook>

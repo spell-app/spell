@@ -1,6 +1,6 @@
 {
   "title": "Avatar",
-  "description": "Spell UI's Avatar page as notebooks:  its Examples, Usage and API tabs, each a notebook of its own, linked by the page's tab bar (epic `elemental-spell` P18)",
+  "description": "Spell UI's Avatar page as notebooks:  its Examples, Usage and API tabs, each a notebook of its own, linked by the page's tab bar (written by `spell app notebook convert`)",
   "imports": [
     {
       "path": "/Examples.spellx",

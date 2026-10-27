@@ -1,0 +1,26 @@
+{
+  "title": "Table of contents",
+  "description": "Spell UI's Table of contents page as notebooks:  its Examples, Usage, API and Theming tabs, each a notebook of its own, linked by the page's tab bar (written by `spell app notebook convert`)",
+  "imports": [
+    {
+      "path": "/Examples.spellx",
+      "active": true
+    },
+    {
+      "path": "/Usage.spellx",
+      "active": true
+    },
+    {
+      "path": "/API.spellx",
+      "active": true
+    },
+    {
+      "path": "/Theming.spellx",
+      "active": true
+    },
+    {
+      "path": "/TabBar.spellx",
+      "active": true
+    }
+  ]
+}

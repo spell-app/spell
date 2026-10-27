@@ -1,0 +1,930 @@
+<spell-notebook "card examples">
+	<header level="1">
+		Card
+		<header>A card displays site content in a manner similar to a playing card.</>
+	</>
+	<card-tab-bar showing="examples"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#types">Types</>
+				<ui-item link="#content">Content</>
+				<ui-item link="#states">States</>
+				<ui-item link="#variations">Variations</>
+			</>
+		</>
+	</>
+
+	<!--
+		EXAMPLES:  Fomantic's page, section by section, in its order (Types, Content, States, Variations,
+		Groups ...).  Rules, the class-grammar mappings, gaps:  packages/docs/content/epics/spell-ui-pages/PAGES.md.
+		- A section:  `<ui-header level="2" dividing id="types">Types</ui-header>`, then its examples.
+		- An example:  `<ui-example heading="..." description="...">` around the live markup;  the markup
+		  IS the code shown.  A richer description:  `<p slot="description">` (+ `<ui-message slot="description">`).
+		- A gap:  an HTML comment `GAP I<n>:  ...` BEFORE the example (a comment inside it shows in its code).
+	-->
+	<section label="Types">
+		<section label="Card" sticky collapsible dividing>
+			<example>
+				<html>
+					<p slot="description">A single card.</p>
+					<ui-message slot="description" state="warning" size="small">To ensure cards are equal height use the plural, <code>&lt;ui-cards&gt;</code>: a group lays its cards out with flex, so cards in the same row match heights.</ui-message>
+					<ui-card>
+						<img src="/components/ui/images/avatar2/large/kristy.png" alt="Kristy" />
+						<ui-content>
+							<ui-header link="#card-kristy">Kristy</ui-header>
+							<ui-meta>Joined in 2013</ui-meta>
+							<ui-description>Kristy is an art director living in New York.</ui-description>
+						</ui-content>
+						<ui-extra>
+							<a href="#card-kristy-friends"><ui-icon name="user"></ui-icon> 22 Friends</a>
+						</ui-extra>
+					</ui-card>
+				</html>
+			</example>
+
+			<!-- I125:  Fomantic's `right floated` meta and likes:  a `<ui-stack>` puts them at the right. -->
+			<example>
+				<html>
+					<ui-card>
+						<ui-content>
+							<ui-stack direction="horizontal" justify="between">
+								<span><ui-image avatar src="/components/ui/images/avatar/large/elliot.jpg" alt=""></ui-image> Elliot</span>
+								<ui-meta>14h</ui-meta>
+							</ui-stack>
+						</ui-content>
+						<img src="/components/ui/images/wireframe/image.png" alt="" />
+						<ui-content>
+							<ui-stack direction="horizontal" justify="between">
+								<span><ui-icon name="comment"></ui-icon> 3 comments</span>
+								<span><ui-icon name="heart"></ui-icon> 17 likes</span>
+							</ui-stack>
+						</ui-content>
+						<ui-extra>
+							<ui-input size="large" appearance="transparent" icon="heart" icon-position="left" placeholder="Add Comment..." aria-label="Add a comment"></ui-input>
+						</ui-extra>
+					</ui-card>
+				</html>
+			</example>
+		</>
+
+		<section label="Cards" sticky collapsible dividing>
+			<example>
+				<html>
+					<p slot="description">A group of cards: <code>&lt;ui-cards&gt;</code>.</p>
+					<ui-message slot="description" state="info" size="small">Cards are designed to be flexible to your content: <code>&lt;ui-content&gt;</code> blocks can include any custom elements related to your content.</ui-message>
+					<ui-cards>
+						<ui-card>
+							<ui-content>
+								<ui-image floated="right" size="mini" src="/components/ui/images/avatar/large/elliot.jpg" alt=""></ui-image>
+								<ui-header>Elliot Fu</ui-header>
+								<ui-meta>Friends of Veronika</ui-meta>
+								<ui-description>Elliot requested permission to view your contact details</ui-description>
+							</ui-content>
+							<ui-extra>
+								<ui-buttons width="2">
+									<ui-button color="green" appearance="basic">Approve</ui-button>
+									<ui-button color="red" appearance="basic">Decline</ui-button>
+								</ui-buttons>
+							</ui-extra>
+						</ui-card>
+						<ui-card>
+							<ui-content>
+								<ui-image floated="right" size="mini" src="/components/ui/images/avatar/large/jenny.jpg" alt=""></ui-image>
+								<ui-header>Jenny Hess</ui-header>
+								<ui-meta>New Member</ui-meta>
+								<ui-description>Jenny wants to add you to the group <b>best friends</b></ui-description>
+							</ui-content>
+							<ui-extra>
+								<ui-buttons width="2">
+									<ui-button color="green" appearance="basic">Approve</ui-button>
+									<ui-button color="red" appearance="basic">Decline</ui-button>
+								</ui-buttons>
+							</ui-extra>
+						</ui-card>
+					</ui-cards>
+				</html>
+			</example>
+			<example description="A group hands its variations to every card in it:  here `link`.">
+				<html>
+					<ui-cards appearance="link">
+						<ui-card>
+							<img src="/components/ui/images/avatar2/large/matthew.png" alt="Matt Giampietro" />
+							<ui-content>
+								<ui-header>Matt Giampietro</ui-header>
+								<ui-meta>Friends</ui-meta>
+								<ui-description>Matthew is an interior designer living in New York.</ui-description>
+							</ui-content>
+							<ui-extra>Joined in 2013 · <ui-icon name="user"></ui-icon> 75 Friends</ui-extra>
+						</ui-card>
+						<ui-card>
+							<img src="/components/ui/images/avatar2/large/molly.png" alt="Molly" />
+							<ui-content>
+								<ui-header>Molly</ui-header>
+								<ui-meta>Coworker</ui-meta>
+								<ui-description>Molly is a personal assistant living in Paris.</ui-description>
+							</ui-content>
+							<ui-extra>Joined in 2011 · <ui-icon name="user"></ui-icon> 35 Friends</ui-extra>
+						</ui-card>
+						<ui-card>
+							<img src="/components/ui/images/avatar2/large/elyse.png" alt="Elyse" />
+							<ui-content>
+								<ui-header>Elyse</ui-header>
+								<ui-meta>Coworker</ui-meta>
+								<ui-description>Elyse is a copywriter working in New York.</ui-description>
+							</ui-content>
+							<ui-extra>Joined in 2014 · <ui-icon name="user"></ui-icon> 151 Friends</ui-extra>
+						</ui-card>
+					</ui-cards>
+				</html>
+			</example>
+		</>
+	</>
+
+	<section label="Content">
+		<!-- GAP I128:  the sub header draws as the card header (large), not Fomantic's small sub header. -->
+		<section label="Content Block" sticky collapsible dividing>
+			<example description="A card can contain blocks of content:  `<ui-content>`.">
+				<html>
+					<ui-card>
+						<ui-content>
+							<ui-header>Project Timeline</ui-header>
+						</ui-content>
+						<ui-content>
+							<ui-header sub>Activity</ui-header>
+							<ui-feed size="small">
+								<ui-event>
+									<ui-content>
+										<ui-summary><a href="#card-elliot">Elliot Fu</a> added <a href="#card-jenny">Jenny Hess</a> to the project</ui-summary>
+									</ui-content>
+								</ui-event>
+								<ui-event>
+									<ui-content>
+										<ui-summary><a href="#card-stevie">Stevie Feliciano</a> was added as an <a href="#card-admin">Administrator</a></ui-summary>
+									</ui-content>
+								</ui-event>
+								<ui-event>
+									<ui-content>
+										<ui-summary><a href="#card-helen">Helen Troy</a> added two pictures</ui-summary>
+									</ui-content>
+								</ui-event>
+							</ui-feed>
+						</ui-content>
+						<ui-extra>
+							<ui-button>Join Project</ui-button>
+						</ui-extra>
+					</ui-card>
+				</html>
+			</example>
+		</>
+
+		<!-- GAP I126:  a <ui-reveal> (or a dimmed image) isn't laid out as the card's image;  the plain image shows. -->
+		<section label="Image" sticky collapsible dividing>
+			<example>
+				<html>
+					<p slot="description">A card can contain an image: a slotted <code>&lt;img&gt;</code> spans the card's width.</p>
+				</html>
+				<message slot="description" state="info" size="small">Fomantic's cards use a reveal or a dimmer to show more on hover; ours can't yet (see the notes below), so this card shows the plain image.</message>
+				<html>
+					<ui-card>
+						<img src="/components/ui/images/avatar/large/jenny.jpg" alt="Jenny Hess" />
+						<ui-content>
+							<ui-header link="#card-team">Team Fu &amp; Hess</ui-header>
+							<ui-meta>Created in Sep 2014</ui-meta>
+						</ui-content>
+						<ui-extra>
+							<a href="#card-members"><ui-icon name="users"></ui-icon> 2 Members</a>
+						</ui-extra>
+					</ui-card>
+				</html>
+			</example>
+		</>
+		<html>
+			<ui-message size="small" class="site-not-ported">Not ported: a dimmer over a card's image (Fomantic's <code>blurring dimmable image</> special cards) -- left out of the card sheet on purpose (dimmer looks inside cards), and <code>&lt;ui-image&gt;</> holds no dimmer (I55).</>
+		</>
+
+		<section label="Header" sticky collapsible dividing>
+			<example description="A card can contain a header.">
+				<cards>
+					<card>
+						<content>
+							<header>Elliot Fu</header>
+							<meta>Friend</meta>
+							<description>Elliot Fu is a film-maker from New York.</description>
+						</content>
+					</card>
+					<card>
+						<content>
+							<header>Veronika Ossi</header>
+							<meta>Friend</meta>
+							<description>Veronika Ossi is a set designer living in New York who enjoys kittens, music, and partying.</description>
+						</content>
+					</card>
+					<card>
+						<content>
+							<header>Jenny Hess</header>
+							<meta>Friend</meta>
+							<description>Jenny is a student studying Media Management at the New School</description>
+						</content>
+					</card>
+				</cards>
+			</example>
+		</>
+
+		<section label="Metadata" sticky collapsible dividing>
+			<example>
+				<html>
+					<p slot="description">A card can contain content metadata.</p>
+					<ui-message slot="description" state="info" size="small">You can include any amount of metadata, in your own markup: the children of a <code>&lt;ui-meta&gt;</code> are spaced for you.</ui-message>
+					<ui-card>
+						<ui-content>
+							<ui-header>Cute Dog</ui-header>
+							<ui-meta>
+								<span>2 days ago</span>
+								<a href="#card-animals">Animals</a>
+							</ui-meta>
+							<ui-image src="/components/ui/images/wireframe/paragraph.png" alt=""></ui-image>
+						</ui-content>
+					</ui-card>
+				</html>
+			</example>
+		</>
+
+		<!-- GAP I126:  an image link (`<a class="image" href>`) isn't laid out as the card's image;  the image is plain. -->
+		<section label="Link" sticky collapsible dividing>
+			<example>
+				<html>
+					<p slot="description">A card can contain links as images, headers, or inside content.</p>
+				</html>
+				<message slot="description" state="info" size="small">To make the entire content of a card a link, see the Link Card variation below.</message>
+				<html>
+					<ui-card>
+						<img src="/components/ui/images/avatar/large/steve.jpg" alt="Steve Jobes" />
+						<ui-content>
+							<ui-header link="#card-steve">Steve Jobes</ui-header>
+							<ui-meta>
+								<a href="#card-steve-seen">Last Seen 2 days ago</a>
+							</ui-meta>
+						</ui-content>
+					</ui-card>
+				</html>
+			</example>
+		</>
+
+		<section label="Buttons" sticky collapsible dividing>
+			<example>
+				<html>
+					<p slot="description">A card can contain buttons.</p>
+					<ui-message slot="description" size="small" class="site-not-ported">Not ported: a button attached to the card's bottom edge (<code>.ui.card &gt; .button</code>). A <code>&lt;ui-button&gt;</code> element has no box for the card to widen:  put a fluid button in a <code>&lt;ui-extra&gt;</code>.</ui-message>
+				</html>
+				<cards>
+					<card>
+						<content>
+							<header>Elliot Fu</header>
+							<description>Elliot Fu is a film-maker from New York.</description>
+						</content>
+						<extra>
+							<button fluid icon="plus">Add Friend</button>
+						</extra>
+					</card>
+					<card>
+						<content>
+							<header>Veronika Ossi</header>
+							<description>Veronika Ossi is a set designer living in New York who enjoys kittens, music, and partying.</description>
+						</content>
+						<extra>
+							<button fluid icon="plus">Add Friend</button>
+						</extra>
+					</card>
+					<card>
+						<content>
+							<header>Jenny Hess</header>
+							<description>Jenny is a student studying Media Management at the New School</description>
+						</content>
+						<extra>
+							<button fluid icon="plus">Add Friend</button>
+						</extra>
+					</card>
+				</cards>
+			</example>
+		</>
+
+		<section label="Approval" sticky collapsible dividing>
+			<example>
+				<html>
+					<p slot="description">A card can contain a like or star action.</p>
+					<ui-message slot="description" size="small" class="site-not-ported">Not ported: the <code>like</code> / <code>star</code> icons that colour on hover -- left out of the card sheet on purpose; use real buttons, which take focus and say what they do.</ui-message>
+				</html>
+				<card>
+					<content>
+						<header>Cute Dog</header>
+						<description>
+							<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
+						</description>
+					</content>
+					<extra>
+						<stack direction="horizontal" justify="between">
+							<button size="mini" icon="heart" appearance="basic">Like</button>
+							<button size="mini" icon="star" appearance="basic">Favorite</button>
+						</stack>
+					</extra>
+				</card>
+			</example>
+		</>
+
+		<section label="Description" sticky collapsible dividing>
+			<example description="A card can contain a description with one or more paragraphs.">
+				<html>
+					<ui-card>
+						<ui-content>
+							<ui-header>Cute Dog</ui-header>
+							<ui-meta>2 days ago</ui-meta>
+							<ui-description>
+								<p>Cute dogs come in a variety of shapes and sizes. Some cute dogs are cute for their adorable faces, others for their tiny stature, and even others for their massive size.</p>
+								<p>Many people also have their own barometers for what makes a cute dog.</p>
+							</ui-description>
+						</ui-content>
+					</ui-card>
+				</html>
+			</example>
+		</>
+
+		<section label="Extra Content" sticky collapsible dividing>
+			<example description="A card can contain extra content meant to be formatted separately from the main content.">
+				<html>
+					<ui-card>
+						<ui-content>
+							<ui-header>Cute Dog</ui-header>
+							<ui-meta>2 days ago</ui-meta>
+							<ui-description>
+								<p>Cute dogs come in a variety of shapes and sizes. Some cute dogs are cute for their adorable faces, others for their tiny stature, and even others for their massive size.</p>
+								<p>Many people also have their own barometers for what makes a cute dog.</p>
+							</ui-description>
+						</ui-content>
+						<ui-extra><ui-icon name="check"></ui-icon> 121 Votes</ui-extra>
+					</ui-card>
+				</html>
+			</example>
+		</>
+
+		<section label="Shorthand" sticky collapsible dividing>
+			<example description="The `image`, `header`, `meta`, `description` and `extra` attributes render the same parts without any markup;  `alt` describes the image.">
+				<card image="../images/avatar2/large/kristy.png" alt="Kristy" heading="Kristy" meta="Joined in 2013" description="Kristy is an art director living in New York." extra="22 Friends"/>
+			</example>
+		</>
+	</>
+
+	<section label="States">
+		<section label="Disabled" sticky collapsible dividing>
+			<example description="A card may show its content is disabled.">
+				<html>
+					<ui-card disabled>
+						<ui-content>
+							<ui-header link="#card-kristy">Kristy</ui-header>
+							<ui-meta>Joined in 2013</ui-meta>
+							<ui-description>Kristy is an art director living in New York.</ui-description>
+						</ui-content>
+						<ui-extra>
+							<a href="#card-kristy-friends"><ui-icon name="user"></ui-icon> 22 Friends</a>
+						</ui-extra>
+					</ui-card>
+				</html>
+			</example>
+		</>
+
+		<section label="Loading" sticky collapsible dividing>
+			<example description="A card may show its content is being loaded.">
+				<html>
+					<ui-card loading>
+						<ui-content>
+							<ui-header link="#card-kristy">Kristy</ui-header>
+							<ui-meta>Joined in 2013</ui-meta>
+							<ui-description>Kristy is an art director living in New York.</ui-description>
+						</ui-content>
+						<ui-extra>
+							<a href="#card-kristy-friends"><ui-icon name="user"></ui-icon> 22 Friends</a>
+						</ui-extra>
+					</ui-card>
+				</html>
+			</example>
+
+			<!-- GAP I127:  the loader takes no card colour, and there is no `double` or `usual`;  the brown card shows the plain loader. -->
+			<example>
+				<html>
+					<ui-card color="brown" loading>
+						<ui-content>
+							<ui-header link="#card-kristy">Kristy</ui-header>
+							<ui-meta>Joined in 2013</ui-meta>
+							<ui-description>Kristy is an art director living in New York.</ui-description>
+						</ui-content>
+						<ui-extra>
+							<a href="#card-kristy-friends"><ui-icon name="user"></ui-icon> 22 Friends</a>
+						</ui-extra>
+					</ui-card>
+				</html>
+			</example>
+		</>
+	</>
+
+	<section label="Variations">
+		<section label="Fluid Card" sticky collapsible dividing>
+			<example description="A fluid card takes up the width of its container.">
+				<html>
+					<ui-grid columns="3">
+						<ui-column>
+							<ui-card fluid>
+								<img src="/components/ui/images/avatar/large/daniel.jpg" alt="Daniel Louise" />
+								<ui-content>
+									<ui-header link="#card-daniel">Daniel Louise</ui-header>
+								</ui-content>
+							</ui-card>
+						</ui-column>
+						<ui-column>
+							<ui-card fluid>
+								<img src="/components/ui/images/avatar/large/helen.jpg" alt="Helen Troy" />
+								<ui-content>
+									<ui-header link="#card-helen">Helen Troy</ui-header>
+								</ui-content>
+							</ui-card>
+						</ui-column>
+						<ui-column>
+							<ui-card fluid>
+								<img src="/components/ui/images/avatar/large/elliot.jpg" alt="Elliot Fu" />
+								<ui-content>
+									<ui-header link="#card-elliot">Elliot Fu</ui-header>
+								</ui-content>
+							</ui-card>
+						</ui-column>
+					</ui-grid>
+				</html>
+			</example>
+		</>
+
+		<section label="Centered Card" sticky collapsible dividing>
+			<example description="A card can center itself inside its container.">
+				<html>
+					<ui-card align="center">
+						<img src="/components/ui/images/avatar2/large/elyse.png" alt="Elyse" />
+						<ui-content>
+							<ui-header link="#card-elyse">Elyse</ui-header>
+						</ui-content>
+					</ui-card>
+				</html>
+			</example>
+		</>
+
+		<section label="Horizontal Cards" sticky collapsible dividing>
+			<example description="A card can display horizontally.">
+				<html>
+					<ui-card direction="horizontal">
+						<img src="/components/ui/images/avatar2/large/elyse.png" alt="Elyse" />
+						<ui-content>
+							<ui-header>Cute Dog</ui-header>
+							<ui-meta>Animals</ui-meta>
+							<ui-description>
+								<ui-image src="/components/ui/images/wireframe/paragraph.png" alt=""></ui-image>
+							</ui-description>
+						</ui-content>
+					</ui-card>
+				</html>
+			</example>
+
+			<!-- GAP I129:  the horizontal cards sit one per row, not two side by side (each is 400px wide). -->
+			<example>
+				<html>
+					<ui-cards direction="horizontal">
+						<ui-card>
+							<img src="/components/ui/images/avatar2/large/matthew.png" alt="Matt Giampietro" />
+							<ui-content>
+								<ui-header>Matt Giampietro</ui-header>
+								<ui-meta>
+									<a href="#card-friends">Friends</a>
+								</ui-meta>
+								<ui-description>Matthew is an interior designer living in New York.</ui-description>
+							</ui-content>
+						</ui-card>
+						<ui-card>
+							<img src="/components/ui/images/avatar2/large/molly.png" alt="Molly" />
+							<ui-content>
+								<ui-header>Molly</ui-header>
+								<ui-meta>Coworker</ui-meta>
+								<ui-description>Molly is a personal assistant living in Paris.</ui-description>
+							</ui-content>
+						</ui-card>
+					</ui-cards>
+				</html>
+			</example>
+		</>
+
+		<section label="Raised Card" sticky collapsible dividing>
+			<example description="A card may be formatted to raise above the page.">
+				<card appearance="raised">
+					<content>
+						<header>Cute Dog</header>
+						<meta>Animals</meta>
+						<description>
+							<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
+						</description>
+					</content>
+					<extra><avatar src="/components/ui/images/avatar/small/matt.jpg" tooltip/> Matt</extra>
+				</card>
+			</example>
+			<example>
+				<card appearance="raised link">
+					<content>
+						<header>Cute Dog</header>
+						<meta>Animals</meta>
+						<description>
+							<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
+						</description>
+					</content>
+					<extra><avatar src="/components/ui/images/avatar/small/matt.jpg" tooltip/> Matt</extra>
+				</card>
+			</example>
+		</>
+
+		<section label="Link Card" sticky collapsible dividing>
+			<example description="A card can be formatted so that the entire contents link to another page:  `link`.">
+				<card link="#card-dog">
+					<content>
+						<header>Cute Dog</header>
+						<meta>Animals</meta>
+						<description>
+							<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
+						</description>
+					</content>
+					<extra><avatar src="/components/ui/images/avatar/small/matt.jpg" tooltip/> Matt</extra>
+				</card>
+			</example>
+			<example description="`link` alone only adds the hover lift:  it's a look, not a link.">
+				<card appearance="link">
+					<content>
+						<header>Cute Dog</header>
+						<meta>Animals</meta>
+						<description>
+							<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
+						</description>
+					</content>
+					<extra><avatar src="/components/ui/images/avatar/small/matt.jpg" tooltip/> Matt</extra>
+				</card>
+			</example>
+		</>
+
+		<!-- GAP I125:  only <ui-header> / <ui-content> float;  the meta's time and the author sit in line. -->
+		<section label="Content at the Right" sticky collapsible dividing>
+			<example description="Content has no `floated` any more:  a `<ui-stack>` puts the meta's time and the author at the right.">
+				<html>
+					<ui-card>
+						<ui-content>
+							<ui-header>Cute Dog</ui-header>
+							<ui-meta>
+								<ui-stack direction="horizontal" justify="between">
+									<span>Animals</span>
+									<span>2 days ago</span>
+								</ui-stack>
+							</ui-meta>
+							<ui-description>
+								<ui-image src="/components/ui/images/wireframe/paragraph.png" alt=""></ui-image>
+							</ui-description>
+						</ui-content>
+						<ui-extra>
+							<ui-stack direction="horizontal" justify="end">
+								<span><ui-image avatar src="/components/ui/images/avatar/small/matt.jpg" alt=""></ui-image> Matt</span>
+							</ui-stack>
+						</ui-extra>
+					</ui-card>
+				</html>
+			</example>
+		</>
+
+		<section label="Text Alignment" sticky collapsible dividing>
+			<example description="Any element inside a card can have its text alignment specified:  `align`.">
+				<html>
+					<ui-card>
+						<ui-content align="center">
+							<ui-header>Jenny Hess</ui-header>
+							<ui-description>
+								<p>Jenny is a student studying Media Management at the New School</p>
+							</ui-description>
+						</ui-content>
+						<ui-extra><ui-avatar src="/components/ui/images/avatar/small/jenny.jpg" tooltip></ui-avatar> Jenny</ui-extra>
+					</ui-card>
+				</html>
+			</example>
+		</>
+
+		<section label="Inverted" sticky collapsible dividing>
+			<example description="Card's colors can be inverted.">
+				<html>
+					<ui-segment inverted>
+						<ui-cards inverted>
+							<ui-card>
+								<img src="/components/ui/images/avatar2/large/matthew.png" alt="Matt Giampietro" />
+								<ui-content>
+									<ui-header link="#card-matthew">Matt Giampietro</ui-header>
+									<ui-meta>Friends</ui-meta>
+									<ui-description>Matthew is an interior designer living in New York.</ui-description>
+								</ui-content>
+								<ui-extra>Joined in 2013 · <ui-icon name="user"></ui-icon> 75 Friends</ui-extra>
+							</ui-card>
+							<ui-card>
+								<img src="/components/ui/images/avatar2/large/molly.png" alt="Molly" />
+								<ui-content>
+									<ui-header link="#card-molly">Molly</ui-header>
+									<ui-meta>Coworker</ui-meta>
+									<ui-description>Molly is a personal assistant living in Paris.</ui-description>
+								</ui-content>
+								<ui-extra>Joined in 2011 · <ui-icon name="user"></ui-icon> 35 Friends</ui-extra>
+							</ui-card>
+							<ui-card>
+								<img src="/components/ui/images/avatar2/large/elyse.png" alt="Elyse" />
+								<ui-content>
+									<ui-header link="#card-elyse">Elyse</ui-header>
+									<ui-meta>Coworker</ui-meta>
+									<ui-description>Elyse is a copywriter working in New York.</ui-description>
+								</ui-content>
+								<ui-extra>Joined in 2014 · <ui-icon name="user"></ui-icon> 151 Friends</ui-extra>
+							</ui-card>
+						</ui-cards>
+					</ui-segment>
+				</html>
+			</example>
+		</>
+
+		<section label="Colored" sticky collapsible dividing>
+			<example description="A card can specify a color:  a line along its bottom edge.">
+				<html>
+					<ui-cards columns="4">
+						<ui-card color="primary" link="#card-primary">
+							<img src="/components/ui/images/wireframe/white-image.png" alt="Primary" />
+						</ui-card>
+						<ui-card color="secondary" link="#card-secondary">
+							<img src="/components/ui/images/wireframe/white-image.png" alt="Secondary" />
+						</ui-card>
+						<ui-card color="red" link="#card-red">
+							<img src="/components/ui/images/wireframe/white-image.png" alt="Red" />
+						</ui-card>
+						<ui-card color="orange" link="#card-orange">
+							<img src="/components/ui/images/wireframe/white-image.png" alt="Orange" />
+						</ui-card>
+						<ui-card color="yellow" link="#card-yellow">
+							<img src="/components/ui/images/wireframe/white-image.png" alt="Yellow" />
+						</ui-card>
+						<ui-card color="olive" link="#card-olive">
+							<img src="/components/ui/images/wireframe/white-image.png" alt="Olive" />
+						</ui-card>
+						<ui-card color="green" link="#card-green">
+							<img src="/components/ui/images/wireframe/white-image.png" alt="Green" />
+						</ui-card>
+						<ui-card color="teal" link="#card-teal">
+							<img src="/components/ui/images/wireframe/white-image.png" alt="Teal" />
+						</ui-card>
+						<ui-card color="blue" link="#card-blue">
+							<img src="/components/ui/images/wireframe/white-image.png" alt="Blue" />
+						</ui-card>
+						<ui-card color="violet" link="#card-violet">
+							<img src="/components/ui/images/wireframe/white-image.png" alt="Violet" />
+						</ui-card>
+						<ui-card color="purple" link="#card-purple">
+							<img src="/components/ui/images/wireframe/white-image.png" alt="Purple" />
+						</ui-card>
+						<ui-card color="pink" link="#card-pink">
+							<img src="/components/ui/images/wireframe/white-image.png" alt="Pink" />
+						</ui-card>
+						<ui-card color="brown" link="#card-brown">
+							<img src="/components/ui/images/wireframe/white-image.png" alt="Brown" />
+						</ui-card>
+						<ui-card color="grey" link="#card-grey">
+							<img src="/components/ui/images/wireframe/white-image.png" alt="Grey" />
+						</ui-card>
+						<ui-card color="black" link="#card-black">
+							<img src="/components/ui/images/wireframe/white-image.png" alt="Black" />
+						</ui-card>
+					</ui-cards>
+				</html>
+			</example>
+		</>
+
+		<section label="Basic" sticky collapsible dividing>
+			<example description="A basic card does not have a border, and a coloured one gets a full colour background.">
+				<html>
+					<ui-cards columns="4" appearance="basic">
+						<ui-card color="primary" link="#card-primary">
+							<img src="/components/ui/images/wireframe/white-image.png" alt="Primary" />
+						</ui-card>
+						<ui-card color="secondary" link="#card-secondary">
+							<img src="/components/ui/images/wireframe/white-image.png" alt="Secondary" />
+						</ui-card>
+						<ui-card color="red" link="#card-red">
+							<img src="/components/ui/images/wireframe/white-image.png" alt="Red" />
+						</ui-card>
+						<ui-card color="orange" link="#card-orange">
+							<img src="/components/ui/images/wireframe/white-image.png" alt="Orange" />
+						</ui-card>
+						<ui-card color="yellow" link="#card-yellow">
+							<img src="/components/ui/images/wireframe/white-image.png" alt="Yellow" />
+						</ui-card>
+						<ui-card color="olive" link="#card-olive">
+							<img src="/components/ui/images/wireframe/white-image.png" alt="Olive" />
+						</ui-card>
+						<ui-card color="green" link="#card-green">
+							<img src="/components/ui/images/wireframe/white-image.png" alt="Green" />
+						</ui-card>
+						<ui-card color="teal" link="#card-teal">
+							<img src="/components/ui/images/wireframe/white-image.png" alt="Teal" />
+						</ui-card>
+						<ui-card color="blue" link="#card-blue">
+							<img src="/components/ui/images/wireframe/white-image.png" alt="Blue" />
+						</ui-card>
+						<ui-card color="violet" link="#card-violet">
+							<img src="/components/ui/images/wireframe/white-image.png" alt="Violet" />
+						</ui-card>
+						<ui-card color="purple" link="#card-purple">
+							<img src="/components/ui/images/wireframe/white-image.png" alt="Purple" />
+						</ui-card>
+						<ui-card color="pink" link="#card-pink">
+							<img src="/components/ui/images/wireframe/white-image.png" alt="Pink" />
+						</ui-card>
+						<ui-card color="brown" link="#card-brown">
+							<img src="/components/ui/images/wireframe/white-image.png" alt="Brown" />
+						</ui-card>
+						<ui-card color="grey" link="#card-grey">
+							<img src="/components/ui/images/wireframe/white-image.png" alt="Grey" />
+						</ui-card>
+						<ui-card color="black" link="#card-black">
+							<img src="/components/ui/images/wireframe/white-image.png" alt="Black" />
+						</ui-card>
+					</ui-cards>
+				</html>
+			</example>
+		</>
+
+		<section label="Dashed" sticky collapsible dividing>
+			<example description="Ours, not Fomantic's:  a dashed card is a flat placeholder, its border dashed in `--ui-card-border-color`.">
+				<card heading="Current, for comparison" description="Where the next one will go." appearance="dashed"/>
+			</example>
+		</>
+
+		<section label="Column Count" sticky collapsible dividing>
+			<example description="A group of cards can set how many cards should exist in a row:  `columns`.">
+				<html>
+					<ui-cards columns="4">
+						<ui-card>
+							<img src="/components/ui/images/wireframe/image.png" alt="" />
+							<ui-extra>Rating: <ui-rating color="yellow" value="4" aria-label="Rating"></ui-rating></ui-extra>
+						</ui-card>
+						<ui-card>
+							<img src="/components/ui/images/wireframe/image.png" alt="" />
+							<ui-extra>Rating: <ui-rating color="yellow" value="2" aria-label="Rating"></ui-rating></ui-extra>
+						</ui-card>
+						<ui-card>
+							<img src="/components/ui/images/wireframe/image.png" alt="" />
+							<ui-extra>Rating: <ui-rating color="yellow" value="3" aria-label="Rating"></ui-rating></ui-extra>
+						</ui-card>
+						<ui-card>
+							<img src="/components/ui/images/wireframe/image.png" alt="" />
+							<ui-extra>Rating: <ui-rating color="yellow" value="4" aria-label="Rating"></ui-rating></ui-extra>
+						</ui-card>
+						<ui-card>
+							<img src="/components/ui/images/wireframe/image.png" alt="" />
+							<ui-extra>Rating: <ui-rating color="yellow" value="3" aria-label="Rating"></ui-rating></ui-extra>
+						</ui-card>
+						<ui-card>
+							<img src="/components/ui/images/wireframe/image.png" alt="" />
+							<ui-extra>Rating: <ui-rating color="yellow" value="3" aria-label="Rating"></ui-rating></ui-extra>
+						</ui-card>
+						<ui-card>
+							<img src="/components/ui/images/wireframe/image.png" alt="" />
+							<ui-extra>Rating: <ui-rating color="yellow" value="4" aria-label="Rating"></ui-rating></ui-extra>
+						</ui-card>
+						<ui-card>
+							<img src="/components/ui/images/wireframe/image.png" alt="" />
+							<ui-extra>Rating: <ui-rating color="yellow" value="4" aria-label="Rating"></ui-rating></ui-extra>
+						</ui-card>
+					</ui-cards>
+				</html>
+			</example>
+		</>
+
+		<section label="Stackable" sticky collapsible dividing>
+			<example description="A group of cards can automatically stack rows to a single column on mobile devices.">
+				<html>
+					<ui-cards columns="3" stackable>
+						<ui-card>
+							<img src="/components/ui/images/avatar/large/elliot.jpg" alt="Elliot Fu" />
+						</ui-card>
+						<ui-card>
+							<img src="/components/ui/images/avatar/large/helen.jpg" alt="Helen Troy" />
+						</ui-card>
+						<ui-card>
+							<img src="/components/ui/images/avatar/large/jenny.jpg" alt="Jenny Hess" />
+						</ui-card>
+						<ui-card>
+							<img src="/components/ui/images/avatar/large/veronika.jpg" alt="Veronika Ossi" />
+						</ui-card>
+						<ui-card>
+							<img src="/components/ui/images/avatar/large/stevie.jpg" alt="Stevie" />
+						</ui-card>
+						<ui-card>
+							<img src="/components/ui/images/avatar/large/steve.jpg" alt="Steve Jobes" />
+						</ui-card>
+					</ui-cards>
+				</html>
+			</example>
+		</>
+
+		<section label="Doubling" sticky collapsible dividing>
+			<example description="A group of cards can double its column width for mobile.">
+				<html>
+					<ui-cards columns="6" doubling>
+						<ui-card>
+							<img src="/components/ui/images/avatar/large/elliot.jpg" alt="Elliot Fu" />
+						</ui-card>
+						<ui-card>
+							<img src="/components/ui/images/avatar/large/helen.jpg" alt="Helen Troy" />
+						</ui-card>
+						<ui-card>
+							<img src="/components/ui/images/avatar/large/jenny.jpg" alt="Jenny Hess" />
+						</ui-card>
+						<ui-card>
+							<img src="/components/ui/images/avatar/large/veronika.jpg" alt="Veronika Ossi" />
+						</ui-card>
+						<ui-card>
+							<img src="/components/ui/images/avatar/large/stevie.jpg" alt="Stevie" />
+						</ui-card>
+						<ui-card>
+							<img src="/components/ui/images/avatar/large/steve.jpg" alt="Steve Jobes" />
+						</ui-card>
+					</ui-cards>
+				</html>
+			</example>
+		</>
+
+		<section label="Size" sticky collapsible dividing>
+			<example description="A card's text can vary in size:  `size`.">
+				<cards columns="3">
+					<card size="mini">
+						<content>
+							<header>Mini Card</header>
+							<meta>Variant</meta>
+							<description>This is a mini card</description>
+						</content>
+						<extra>Fomantic-UI</extra>
+					</card>
+					<card size="tiny">
+						<content>
+							<header>Tiny Card</header>
+							<meta>Variant</meta>
+							<description>This is a tiny card</description>
+						</content>
+						<extra>Fomantic-UI</extra>
+					</card>
+					<card size="small">
+						<content>
+							<header>Small Card</header>
+							<meta>Variant</meta>
+							<description>This is a small card</description>
+						</content>
+						<extra>Fomantic-UI</extra>
+					</card>
+				</cards>
+				<cards columns="2">
+					<card size="large">
+						<content>
+							<header>Large Card</header>
+							<meta>Variant</meta>
+							<description>This is a large card</description>
+						</content>
+						<extra>Fomantic-UI</extra>
+					</card>
+					<card size="big">
+						<content>
+							<header>Big Card</header>
+							<meta>Variant</meta>
+							<description>This is a big card</description>
+						</content>
+						<extra>Fomantic-UI</extra>
+					</card>
+				</cards>
+				<cards columns="2">
+					<card size="huge">
+						<content>
+							<header>Huge Card</header>
+							<meta>Variant</meta>
+							<description>This is a huge card</description>
+						</content>
+						<extra>Fomantic-UI</extra>
+					</card>
+					<card size="massive">
+						<content>
+							<header>Massive Card</header>
+							<meta>Variant</meta>
+							<description>This is a massive card</description>
+						</content>
+						<extra>Fomantic-UI</extra>
+					</card>
+				</cards>
+			</example>
+		</>
+	</>
+</spell-notebook>

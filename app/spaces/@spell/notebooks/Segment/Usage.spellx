@@ -1,0 +1,75 @@
+<spell-notebook "segment usage">
+	<header level="1">
+		Segment
+		<header>A segment is used to create a grouping of related content.</>
+	</>
+	<segment-tab-bar showing="usage"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#using-it">Using it</>
+				<ui-item link="#sizing-the-box">Sizing the box</>
+				<ui-item link="#keyboard">Keyboard</>
+				<ui-item link="#accessibility">Accessibility</>
+			</>
+		</>
+	</>
+
+	<!-- USAGE:  how to use it (attributes in practice, events, framework snippets), keyboard, accessibility. -->
+	<section label="Using it">
+		<markdown>
+			Wrap content in `<ui-segment>`, and add attributes for the look: `<ui-segment padding="lg" attach="top" appearance="raised">`
+			renders `ui raised very padded top attached segment`.
+
+			- Group segments in `<ui-segments>`: the group draws one box with dividers, and its words (`direction`,
+			  `appearance`, `padding`, `size` ...) apply to the whole group. Groups nest.
+			- The host is `display: contents` and the box lives on the `segment` part, so margins collapse, floats float and
+			  attached headers / labels line up exactly as with Fomantic's markup.
+			- A coloured or large segment recolours / resizes only its own box: the slot resets the colour and size tokens
+			  for nested content, as in Fomantic.
+			- `inverted` switches everything inside to the dark scheme (headers, labels, dividers, parts follow with no
+			  inverted attribute of their own).
+			- Segments have no events.
+		</>
+	</>
+
+	<section label="Sizing the box">
+		<markdown>
+			Size and shape a segment with `::part(segment)`, since the host has no box of its own. A `circular` segment is
+			round only when its box is square:
+		</>
+		<markdown>
+			```html
+			<ui-segment id="buy-now" appearance="circular">
+			  <ui-header level="2">Buy Now<ui-header>$10.99</ui-header></ui-header>
+			</ui-segment>
+			<style>
+			  #buy-now::part(segment) {
+			    width: 175px;
+			    height: 175px;
+			  }
+			</style>
+			```
+		</>
+	</>
+
+	<section label="Keyboard">
+		<markdown>
+			- A segment itself takes no keys; the controls inside work as usual.
+			- A `scrolling` segment is a tab stop, so its overflow scrolls with the arrow keys, **Page Up** / **Page Down**
+			  and **Home** / **End** without a mouse.
+		</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			- A segment is a layout box with no role. Use a landmark inside, or `role="region"` with an `aria-label`.
+			- `loading` sets `aria-busy` and shows a visually hidden `role="status"` "Loading…" message (translatable).
+			- `disabled` sets `aria-disabled` and, as in Fomantic, only dims and blocks pointer events: disable the controls
+			  inside too.
+			- A `scrolling` segment is a keyboard stop, so its overflow can be scrolled without a mouse.
+			- If the element fails to render, it shows its children through a bare `<slot>`: the content stays,
+			  the segment's box, colours and `inverted` look go.
+		</>
+	</>
+</spell-notebook>

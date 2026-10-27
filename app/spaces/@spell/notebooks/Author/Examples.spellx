@@ -1,0 +1,74 @@
+<spell-notebook "author examples">
+	<header level="1">
+		Author
+		<header>An author names who wrote a comment or did a feed event.</>
+	</>
+	<author-tab-bar showing="examples"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#owners">Owners</>
+				<ui-item link="#variations">Variations</>
+			</>
+		</>
+	</>
+
+	<!--
+		EXAMPLES:  `<ui-author>` in each owner that gives it a look (from the owners' own pages and
+		`src/components/ui-parts/examples/elements/`), then its attributes.  The Content parts page
+		(`ui-header.html`) shows every part together.
+	-->
+	<section label="Owners">
+		<section label="Comment" sticky collapsible dividing>
+			<example description="A comment's author, before its metadata.">
+				<html>
+					<ui-comments>
+						<ui-comment>
+							<ui-avatar src="/components/ui/images/avatar/small/matt.jpg"></ui-avatar>
+							<ui-content>
+								<ui-author link="#matt">Matt</ui-author>
+								<ui-meta>
+									<span>Today at 5:42PM</span>
+								</ui-meta>
+								<ui-description>How artistic!</ui-description>
+							</ui-content>
+						</ui-comment>
+					</ui-comments>
+				</html>
+			</example>
+		</>
+
+		<section label="Feed" sticky collapsible dividing>
+			<example description="A feed event's user, inline in its summary.">
+				<feed>
+					<event>
+						<content>
+							<summary><author link="#elliot">Elliot Fu</author> added you as a friend</summary>
+						</content>
+					</event>
+				</feed>
+			</example>
+		</>
+	</>
+
+	<section label="Variations">
+		<section label="Link" sticky collapsible dividing>
+			<example description="With `link`, an author is a real link;  without, plain text.">
+				<comments>
+					<comment>
+						<content>
+							<author link="#stevie">Stevie Feliciano</author>
+							<description>A linked author.</description>
+						</content>
+					</comment>
+					<comment>
+						<content>
+							<author>Anonymous</author>
+							<description>A plain author.</description>
+						</content>
+					</comment>
+				</comments>
+			</example>
+		</>
+	</>
+</spell-notebook>

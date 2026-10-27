@@ -1,0 +1,124 @@
+<spell-notebook "select usage">
+	<header level="1">
+		Select
+		<header>A select lets a user choose a value from a list, with the platform's own picker.</>
+	</>
+	<select-tab-bar showing="usage"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#using-it">Using it</>
+				<ui-item link="#forms">Forms</>
+				<ui-item link="#events">Events</>
+				<ui-item link="#select-or-dropdown">Select or dropdown?</>
+				<ui-item link="#keyboard">Keyboard</>
+				<ui-item link="#accessibility">Accessibility</>
+				<ui-item link="#framework-usage">Framework usage</>
+			</>
+		</>
+	</>
+
+	<!-- USAGE:  native select, options, forms, events, select vs dropdown, accessibility, frameworks. -->
+	<section label="Using it">
+		<markdown>
+			The element is a real `<select>` in Fomantic's look, so the keyboard, type-ahead, the phone's picker wheel or
+			sheet, and screen-reader support are all the browser's.
+
+			- Options come from slotted `<ui-item>`s (`value`, `icon`, `image`, `flag`, `description`, `disabled`; `header`
+			  and `divider` items), then the `options` property (the same shape as a dropdown's).
+			- `placeholder` is the text of an empty first option, shown while nothing is chosen.
+			- In browsers with the customizable select (`appearance: base-select`, Chrome 135+) the open picker is styled
+			  and shows icons and images (`:state(customizable)`); elsewhere it's the browser's own list.
+		</>
+	</>
+
+	<section label="Forms">
+		<markdown>
+			It is a form control: `name` and `value` submit with the form (`multiple` sends one entry per value), `required`
+			validates, `disabled` leaves it out, and a form reset puts back the starting `value`.
+		</>
+	</>
+
+	<section label="Events">
+		<markdown>
+			`ui-changed` fires when the user picks, with `{ value }` (a `string[]` with `multiple`). Setting `value` from code
+			fires nothing.
+		</>
+		<markdown>
+			```js
+			const select = document.querySelector("ui-select")
+			select.options = [{ value: "xl", text: "Extra large" }]
+			select.addEventListener("ui-changed", (event) => console.log(event.detail.value))
+			```
+		</>
+	</>
+
+	<section label="Select or dropdown?">
+		<markdown>
+			Use `<ui-select>` when:
+
+			- a form field picks from a fixed list
+			- the platform picker matters: phones' wheels and sheets, native type-ahead,
+			  a plain `<select>` standing in if the element fails to render
+			- icons and flags in options are nice to have, not essential
+
+			Use `<ui-dropdown>` when:
+
+			- the user types to filter (`search`), adds values or clears them
+			- chosen values show as labels (`multiple`), or the menu holds rich content
+			- it isn't a form field: an action menu, `inline`, `button`, `pointing`
+		</>
+	</>
+
+	<section label="Keyboard">
+		<markdown>
+			The browser's own select keyboard: **Space** / **Enter** / **Alt+Arrow Down** open the picker, the arrows move,
+			typing jumps to a matching option, **Escape** closes. A `multiple` list box takes **Shift** / **Ctrl** (**Cmd**)
+
+			- click or arrows to extend the choice.
+		</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			- The shadow root holds one native `<select>`: its role, keyboard and announcements are the browser's.
+			- Name it with `aria-label` on the host, or a `<label for>` pointing at the host. The `placeholder` alone is not
+			  a name.
+			- While nothing is chosen, an empty first option shows the placeholder, so the browser never quietly picks the
+			  first real option; `required` makes that empty option unselectable.
+			- `state="error"` is only a look; `aria-invalid` follows the select's own validation (`required`).
+			- If the element can't render, its native fallback is the same `<select>` with the same options and value, so it
+			  still works and submits; option icons and images are dropped, and a `<label for>` on the host no longer names
+			  it (use `aria-label`).
+		</>
+	</>
+
+	<section label="Framework usage">
+		<markdown>Set `options` as a property, not an attribute, and listen for `ui-changed`.</>
+		<header level="4" id="framework-react">React 19</>
+		<markdown>
+			```jsx
+			<ui-select name="size" options={sizes} value={size} onui-changed={(e) => setSize(e.detail.value)} />
+			```
+		</>
+		<header level="4" id="framework-vue">Vue 3.5</>
+		<markdown>
+			```html
+			<!-- compilerOptions.isCustomElement = (tag) => tag.startsWith("ui-") -->
+			<ui-select name="size" :options="sizes" :value="size" @ui-changed="(e) => (size = e.detail.value)" />
+			```
+		</>
+		<header level="4" id="framework-solid">Solid 2</>
+		<markdown>
+			```jsx
+			// events and rich data are plain props:  `on-<event>={...}`, `options={...}`
+			<ui-select
+			  name="size"
+			  options={sizes}
+			  value={size()}
+			  on-ui-changed={(e) => setSize(e.detail.value)}
+			/>
+			```
+		</>
+	</>
+</spell-notebook>

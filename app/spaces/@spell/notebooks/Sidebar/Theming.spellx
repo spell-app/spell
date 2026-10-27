@@ -1,0 +1,71 @@
+<spell-notebook "sidebar theming">
+	<header level="1">
+		Sidebar
+		<header>A sidebar hides additional content beside a page.</>
+	</>
+	<sidebar-tab-bar showing="theming"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#tokens">Tokens</>
+				<ui-item link="#themes">Themes</>
+			</>
+		</>
+	</>
+
+	<!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
+	<section label="Tokens">
+		<markdown>
+			Theme with the public `--ui-sidebar-*` tokens: set one on the element, on any ancestor (`:root` for every
+			sidebar), or on the box through `::part(sidebar)`.
+
+			- The width words replace `--ui-sidebar-width`; `inverted` replaces `--ui-sidebar-background`.
+			- `--ui-sidebar-duration`, `--ui-sidebar-dimmer-background` and `--ui-pusher-background` are read where they
+			  paint (the sidebar, the pusher and its dimmer): set them on the pushable or any ancestor to reach them all, or
+			  on the sidebar or the pusher alone.
+			- `blurring` reads the shared dimmer tokens.
+			- Style the boxes with `::part(pushable)` and `::part(pusher)`.
+		</>
+		<markdown>
+			```css
+			ui-sidebar {
+			  --ui-sidebar-width: 300px;
+			  --ui-sidebar-background: oklch(0.3 0.05 260);
+			}
+			ui-pusher::part(pusher) {
+			  background: var(--ui-surface);
+			}
+			```
+		</>
+		<message state="info" size="small">
+			<markdown>
+				Never set the `--_ui-*` names (`--_ui-pusher-blurring` ...): they're the private switches the pushable sets on
+				its pusher.
+			</>
+		</>
+		<markdown>Edit a value below to try it.</>
+		<html>
+			<ui-docs-tokens family="ui-sidebar" playground>
+				<ui-pushable style="height: 14em">
+					<ui-sidebar id="sidebar-demo-left-playground" inverted aria-label="Site">
+						<ui-menu direction="vertical" inverted fluid aria-label="Site">
+							<ui-item link="#home">Home</>
+							<ui-item link="#games">Games</>
+							<ui-item link="#channels">Channels</>
+						</>
+					</>
+					<ui-pusher>
+						<ui-segment appearance="basic">
+							<button type="button" class="ui button" commandfor="sidebar-demo-left-playground" command="--toggle">Menu</>
+							<p>The default left sidebar uncovers itself from under this content, which dims.</>
+						</>
+					</>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="Themes">
+		<markdown>The theme menu in the header (Spell, Glass, Fruity, Merlot, Paper, Midnight, Crisp, Pop, Matrix) restyles the menu inside a sidebar.</>
+	</>
+</spell-notebook>

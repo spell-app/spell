@@ -1,0 +1,61 @@
+<spell-notebook "reveal theming">
+	<header level="1">
+		Reveal
+		<header>A reveal displays additional content in place of previous content when activated.</>
+	</>
+	<reveal-tab-bar showing="theming"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#tokens">Tokens</>
+				<ui-item link="#themes">Themes</>
+			</>
+		</>
+	</>
+
+	<!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
+	<section label="Tokens">
+		<markdown>
+			Theme with the public `--ui-reveal-*` tokens: set one on the element, on any ancestor (a gallery, `:root`), or on
+			the reveal's box through `::part(reveal)`. They inherit into the shadow root, where the sheet reads each through a
+			private alias, so nothing inside blocks them.
+
+			- The two contents are `::part(visible)` and `::part(hidden)`; they read the reveal's tokens, so set tokens on the
+			  reveal (or above it), not on them.
+			- `--ui-reveal-transition` is the whole `transition` shorthand, built from the delay, duration and easing tokens:
+			  set it only to replace all three.
+			- Never set the `--_ui-reveal-*` names: they're the sheet's private plumbing.
+		</>
+		<markdown>
+			```css
+			/* every reveal on the page */
+			:root {
+			  --ui-reveal-duration: 0.8s;
+			}
+			/* one gallery */
+			.team {
+			  --ui-reveal-delay: 0s;
+			}
+			ui-reveal::part(hidden) {
+			  border-radius: var(--ui-radius);
+			}
+			```
+		</>
+		<markdown>Edit a value below to try it.</>
+		<html>
+			<ui-docs-tokens family="ui-reveal" playground>
+				<ui-reveal fade>
+					<img slot="visible" src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22150%22 height=%22150%22 viewBox=%220 0 10 10%22%3E%3Crect width=%2210%22 height=%2210%22 fill=%22%2394a3b8%22/%3E%3Ccircle cx=%225%22 cy=%224%22 r=%222%22 fill=%22%23e2e8f0%22/%3E%3C/svg%3E" alt="Avatar" width="150" height="150" />
+					<img slot="hidden" src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22150%22 height=%22150%22 viewBox=%220 0 10 10%22%3E%3Crect width=%2210%22 height=%2210%22 fill=%22%230f766e%22/%3E%3Ccircle cx=%225%22 cy=%224%22 r=%222%22 fill=%22%23ccfbf1%22/%3E%3C/svg%3E" alt="Profile" width="150" height="150" />
+				</>
+			</>
+		</>
+	</>
+
+	<section label="Themes">
+		<markdown>
+			A reveal has no look of its own:  the theme menu in the header still applies a theme to the whole
+			site.
+		</>
+	</>
+</spell-notebook>

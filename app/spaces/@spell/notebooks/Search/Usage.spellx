@@ -1,0 +1,147 @@
+<spell-notebook "search usage">
+	<header level="1">
+		Search
+		<header>A search module allows a user to query for results from a selection of data.</>
+	</>
+	<search-tab-bar showing="usage"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#using-it">Using it</>
+				<ui-item link="#events">Events</>
+				<ui-item link="#forms">Forms</>
+				<ui-item link="#security">Security</>
+				<ui-item link="#keyboard">Keyboard</>
+				<ui-item link="#accessibility">Accessibility</>
+				<ui-item link="#framework-usage">Framework usage</>
+			</>
+		</>
+	</>
+
+	<!-- USAGE:  how to use it (results, events, forms), keyboard, accessibility, framework snippets. -->
+	<section label="Using it">
+		<markdown>
+			Write `<ui-search>` and give it results. Name it with `aria-label` or a `<label for>`: the placeholder alone is
+			not a name. Results come from one of two places:
+
+			- the `source` PROPERTY, searched in the page. Plain HTML may write it as a JSON attribute (single-quoted), as
+			  the examples do.
+			  - `search-fields` picks the fields searched (`title description` by default).
+			  - `full-text-search` says how loosely they match: a word START always matches; then `exact` anywhere (the
+			    default), `fuzzy` in order, `prefix` nothing more, `some` any word, `all` every word.
+			  - `ignore-diacritics` lets `a` match `á`; `max-results` caps the list (`0`: no limit).
+			- or a server: `url` is a template with `{query}` (`/api/search?q={query}`). Typing waits `search-delay` ms, a
+			  newer query cancels an older one, and answers are cached per query. The answer is Fomantic's shape:
+			  `{ results: [...] }`, or `{ results: { key: { name, results: [...] } } }` for a `category` search.
+
+			A result is Fomantic's `{ title, description, image, price, category, url }`. `min-characters` (default 1) is how
+			much to type before a search runs.
+		</>
+		<markdown>
+			```js
+			const search = document.querySelector("ui-search")
+			search.source = [
+			  { title: "France", description: "EU", url: "/countries/fr" },
+			  { title: "Ghana", description: "AU", url: "/countries/gh" }
+			]
+			```
+		</>
+	</>
+
+	<section label="Events">
+		<markdown>
+			- `ui-search` -- `{ query }`: the user typed a query at least `min-characters` long; it's about to run.
+			- `ui-replied` -- `{ query, results }`: a remote query answered.
+			- `ui-select` -- `{ result }`, cancelable: a result is about to be chosen (Fomantic's `onSelect`).
+			  `preventDefault()` keeps the text, the results and the page.
+			- `ui-changed` -- `{ value }`: the text was committed: a result chosen, the input cleared with Escape, or left
+			  after an edit.
+			- `ui-opening` / `ui-closing` -- `{ open }`, cancelable: the results are about to show / hide.
+
+			Choosing a result fires `ui-select` first; then its title goes into the input (`ui-changed`), the results close,
+			and a result with a `url` is followed.
+		</>
+		<markdown>
+			```js
+			search.addEventListener("ui-select", (event) => {
+			  event.preventDefault() // stay on the page
+			  console.log(event.detail.result.title)
+			})
+			```
+		</>
+	</>
+
+	<section label="Forms">
+		<markdown>
+			A search is a form-associated element, like Fomantic's real `<input class="prompt">`.
+
+			- With a `name`, it submits the input's text; `value` is that text (the query, or a chosen result's title).
+			- `required` means the input can't be empty.
+			- `disabled` dims it and leaves it out of the form.
+			- Enter with no result highlighted submits the form.
+		</>
+	</>
+
+	<section label="Security">
+		<markdown>
+			Fomantic's Security tab warns that results from a foreign API may carry HTML. Ours render every field as TEXT
+			(`highlight-matches` wraps the query in a real `<mark>`, never a string of HTML), so a hostile title or
+			description can't inject markup. A result's `url` is still followed when chosen: check it if the API isn't yours.
+		</>
+	</>
+
+	<section label="Keyboard">
+		<markdown>
+			Focus stays in the text field; the arrows move a highlight through the results.
+
+			| Key                   | Action                                                                |
+			| --------------------- | --------------------------------------------------------------------- |
+			| Arrow Down / Arrow Up | Move the highlight through the results (stops at the ends)            |
+			| Enter                 | Choose the highlighted result; with none highlighted, submit the form |
+			| Escape                | Close the results; when they're already closed, clear the text        |
+			| Tab                   | Leave the search                                                      |
+		</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			The text field is an ARIA 1.2 combobox with a list of results (the WAI-ARIA authoring practices pattern).
+
+			- `role="combobox"` with `aria-autocomplete="list"`, `aria-expanded`, `aria-controls` and
+			  `aria-activedescendant` pointing at the highlighted result; focus stays in the text field.
+			- The results are a `listbox` of `option`s; a `category` search groups them in named `group`s.
+			- A hidden status message announces how many results there are, or the no-results / error message.
+			- Name the search with `aria-label` on the host or a `<label for>`; the placeholder alone is not a name.
+			- If the element can't render, its native fallback is a text input with the browser's suggestions (a
+			  `<datalist>`) from `source`: titles only, no remote results, no events.
+		</>
+	</>
+
+	<section label="Framework usage">
+		<markdown>Set `source` as a property, not an attribute, and listen for `ui-select` or `ui-changed`.</>
+		<header level="4" id="framework-react">React 19</>
+		<markdown>
+			```jsx
+			<ui-search name="country" source={countries} onui-select={(event) => setCountry(event.detail.result)} />
+			```
+		</>
+		<header level="4" id="framework-vue">Vue 3.5</>
+		<markdown>
+			```html
+			<!-- compilerOptions.isCustomElement = (tag) => tag.startsWith("ui-") -->
+			<ui-search name="country" :source="countries" @ui-select="(event) => (country = event.detail.result)" />
+			```
+		</>
+		<header level="4" id="framework-solid">Solid 2</>
+		<markdown>
+			```jsx
+			// events and rich data are plain props:  `on-<event>={...}`, `options={...}`
+			<ui-search
+			  name="country"
+			  source={countries}
+			  on-ui-choosing={(event) => setCountry(event.detail.result)}
+			/>
+			```
+		</>
+	</>
+</spell-notebook>

@@ -1,0 +1,302 @@
+<spell-notebook "icon examples">
+	<header level="1">
+		Icon
+		<header>An icon is a glyph used to represent something else.</>
+	</>
+	<icon-tab-bar showing="examples"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#types">Types</>
+				<ui-item link="#states">States</>
+				<ui-item link="#variations">Variations</>
+				<ui-item link="#groups">Groups</>
+			</>
+		</>
+	</>
+
+	<!--
+		EXAMPLES:  Fomantic's icon page (its Definition tab:  States, Variations, Groups), after our own Types (solid,
+		outline, brands, in text).  Fomantic's Icons tab (every icon by category) is the site's Icons page.  The page's
+		root loads the `fomantic` and `fa7-brands` packs, so Fomantic's names (`help`, `dont`, `add`, `home`)
+		work here as written.
+	-->
+	<section label="Types">
+		<html>
+			<ui-message size="small">The icon set -- every icon with its name, by category, searchable -- is on the <a href="/components/ui/icons.html">Icons</> page. Icons are Font Awesome 7 Free SVG files, one per icon, loaded on first use.</>
+		</>
+
+		<section label="Icon" sticky collapsible dividing>
+			<example description="An icon is a glyph used to represent something else.  `name` is its name in words;  solid is the default set.">
+				<icon name="house"/>
+				<icon name="users"/>
+				<icon name="cloud"/>
+				<icon name="puzzle piece"/>
+				<icon name="heart"/>
+			</example>
+		</>
+
+		<section label="Outline" sticky collapsible dividing>
+			<example description="An `outline` word (or the `outline` attribute) names the regular icon.">
+				<icon name="heart outline"/>
+				<icon name="bell outline"/>
+				<icon name="envelope" appearance="outline"/>
+				<icon name="circle outline"/>
+			</example>
+		</>
+
+		<section label="Brands" sticky collapsible dividing>
+			<example description="Brand logos come in the `fa7-brands` pack, which a `<ui-root icons>` adds (this page has it).">
+				<icon name="github"/>
+				<icon name="discord"/>
+				<icon name="medium"/>
+				<icon name="mastodon"/>
+			</example>
+		</>
+
+		<section label="Card suits" sticky collapsible dividing>
+			<example description="The card suits answer to their plural names too:  `hearts`, `diamonds`.  `diamonds` is the suit even where Fomantic's names make `diamond` a gem, as on this page.  Font Awesome Free has no club or spade, so `clubs` and `spades` draw nothing.">
+				<icon name="hearts" color="red"/>
+				<icon name="diamonds" color="red"/>
+				<icon name="diamond"/>
+			</example>
+		</>
+
+		<section label="Inline with text" sticky collapsible dividing>
+			<example description="An icon sits on the text baseline, one line tall.">
+				<html>
+					<p><ui-icon name="circle info"></ui-icon>Icons sit on the text baseline, one line tall.</p>
+				</html>
+			</example>
+		</>
+	</>
+
+	<section label="States">
+		<section label="Disabled" sticky collapsible dividing>
+			<example description="An icon can show that it is disabled.">
+				<icon name="users" disabled/>
+			</example>
+		</>
+
+		<!-- GAP I23:  Fomantic's `notched circle` draws nothing;  the pack's name is `circle notched`. -->
+		<section label="Loading" sticky collapsible dividing>
+			<example description="An icon can be used as a simple loader.">
+				<icon name="spinner" loading/>
+				<icon name="circle notched" loading/>
+				<icon name="asterisk" loading/>
+			</example>
+		</>
+	</>
+
+	<section label="Variations">
+		<section label="Fitted" sticky collapsible dividing>
+			<example description="An icon can be fitted, without any space to the left or right of it.">
+				Tight spacing
+				<icon name="help" padding="none"/>
+				Tight spacing
+			</example>
+		</>
+
+		<section label="Size" sticky collapsible dividing>
+			<example description="An icon can vary in size.">
+				<icon name="home" size="mini"/>
+				<icon name="home" size="tiny"/>
+				<icon name="home" size="small"/>
+				<html>
+					<br />
+				</html>
+				<icon name="home"/>
+				<html>
+					<br />
+				</html>
+				<icon name="home" size="large"/>
+				<html>
+					<br />
+				</html>
+				<icon name="home" size="big"/>
+				<html>
+					<br />
+				</html>
+				<icon name="home" size="huge"/>
+				<html>
+					<br />
+				</html>
+				<icon name="home" size="massive"/>
+			</example>
+		</>
+
+		<section label="Link" sticky collapsible dividing>
+			<example>
+				<html>
+					<p slot="description">An icon can be formatted as a link.</p>
+					<ui-message slot="description" size="small"><code>appearance="link"</code> is only the look (dimmed until hovered, a pointer cursor). For interaction, wrap the icon in a real <code>&lt;a&gt;</code> or <code>&lt;button&gt;</code>.</ui-message>
+				</html>
+				<icon name="close" appearance="link"/>
+				<icon name="help" appearance="link"/>
+			</example>
+		</>
+
+		<section label="Flipped" sticky collapsible dividing>
+			<example description="An icon can be flipped.">
+				<icon name="cloud" flipped="horizontally"/>
+				<icon name="cloud" flipped="vertically"/>
+			</example>
+		</>
+
+		<section label="Rotated" sticky collapsible dividing>
+			<example description="An icon can be rotated:  `clockwise`, `counterclockwise`, or `halfway` (180°).">
+				<icon name="cloud" rotated="clockwise"/>
+				<icon name="cloud" rotated="counterclockwise"/>
+				<icon name="cloud" rotated="halfway"/>
+			</example>
+		</>
+
+		<section label="Circular" sticky collapsible dividing>
+			<example description="An icon can be formatted to appear circular.">
+				<icon name="users" appearance="circular"/>
+				<icon name="users" color="teal" appearance="circular"/>
+				<icon name="users" inverted appearance="circular"/>
+				<icon name="users" color="teal" inverted appearance="circular"/>
+			</example>
+		</>
+
+		<section label="Circular Colored" sticky collapsible dividing>
+			<example>
+				<html>
+					<p slot="description">The circular color can appear in the same color as the icon itself.</p>
+					<ui-message slot="description" size="small" class="site-not-ported">Not ported: the <code>colored</code> word -- a coloured circular or bordered icon's ring always follows its colour.</ui-message>
+				</html>
+				<icon name="users" color="red" appearance="circular"/>
+				<icon name="users" color="green" appearance="circular"/>
+				<icon name="users" color="blue" appearance="circular"/>
+			</example>
+		</>
+
+		<section label="Bordered" sticky collapsible dividing>
+			<example>
+				<html>
+					<p slot="description">An icon can be formatted to appear bordered.</p>
+					<ui-message slot="description" state="info" size="small">In Fomantic <code>0.x.x</code> bordered was formerly known as <code>squared</code>.</ui-message>
+				</html>
+				<icon name="users" appearance="bordered"/>
+				<icon name="users" color="teal" appearance="bordered"/>
+				<icon name="users" color="black" inverted appearance="bordered"/>
+				<icon name="users" color="teal" inverted appearance="bordered"/>
+			</example>
+		</>
+
+		<section label="Bordered Colored" sticky collapsible dividing>
+			<example description="The bordered color appears in the same color as the icon itself.">
+				<icon name="users" color="red" appearance="bordered"/>
+				<icon name="users" color="green" appearance="bordered"/>
+				<icon name="users" color="blue" appearance="bordered"/>
+			</example>
+		</>
+
+		<section label="Colored" sticky collapsible dividing>
+			<example description="An icon can be formatted with different colors.">
+				<icon name="users" color="primary"/>
+				<icon name="users" color="secondary"/>
+				<icon name="users" color="red"/>
+				<icon name="users" color="orange"/>
+				<icon name="users" color="yellow"/>
+				<icon name="users" color="olive"/>
+				<icon name="users" color="green"/>
+				<icon name="users" color="teal"/>
+				<icon name="users" color="blue"/>
+				<icon name="users" color="violet"/>
+				<icon name="users" color="purple"/>
+				<icon name="users" color="pink"/>
+				<icon name="users" color="brown"/>
+				<icon name="users" color="grey"/>
+				<icon name="users" color="black"/>
+			</example>
+		</>
+
+		<section label="Inverted" sticky collapsible dividing>
+			<example description="An icon can have its colors inverted for contrast.">
+				<segment inverted>
+					<icon name="users" inverted/>
+					<icon name="users" color="primary" inverted/>
+					<icon name="users" color="secondary" inverted/>
+					<icon name="users" color="red" inverted/>
+					<icon name="users" color="orange" inverted/>
+					<icon name="users" color="yellow" inverted/>
+					<icon name="users" color="olive" inverted/>
+					<icon name="users" color="green" inverted/>
+					<icon name="users" color="teal" inverted/>
+					<icon name="users" color="blue" inverted/>
+					<icon name="users" color="violet" inverted/>
+					<icon name="users" color="purple" inverted/>
+					<icon name="users" color="pink" inverted/>
+					<icon name="users" color="brown" inverted/>
+					<icon name="users" color="grey" inverted/>
+				</segment>
+			</example>
+		</>
+	</>
+
+	<section label="Groups">
+		<section label="Icons" sticky collapsible dividing>
+			<example description="Several icons can be used together as a group:  `<ui-icons>`, the first icon the base, the rest stacked on it.">
+				<icons size="huge">
+					<icon name="circle outline" size="big"/>
+					<icon name="user"/>
+				</icons>
+			</example>
+			<example>
+				<icons size="huge">
+					<icon name="dont" size="big" color="red"/>
+					<icon name="user" color="black"/>
+				</icons>
+			</example>
+		</>
+
+		<section label="Corner Icon" sticky collapsible dividing>
+			<example description="A group of icons can display a smaller corner icon.">
+				<icons size="huge">
+					<icon name="puzzle"/>
+					<icon name="add" corner/>
+				</icons>
+			</example>
+			<example description="`corner` takes `top left`, `top right`, `bottom left` or `bottom right` (bare `corner`).">
+				<icons size="huge">
+					<icon name="puzzle"/>
+					<icon name="add" corner="top left"/>
+				</icons>
+				<icons size="huge">
+					<icon name="puzzle"/>
+					<icon name="add" corner="top right"/>
+				</icons>
+				<icons size="huge">
+					<icon name="puzzle"/>
+					<icon name="add" corner="bottom left"/>
+				</icons>
+				<icons size="huge">
+					<icon name="puzzle"/>
+					<icon name="add" corner="bottom right"/>
+				</icons>
+			</example>
+			<example>
+				<header level="2"><icons size="large"><icon name="twitter"/> <icon name="add" inverted corner/></icons> Add on Twitter</header>
+			</example>
+		</>
+
+		<section label="Bordered and circular groups" sticky collapsible dividing>
+			<example description="The ring surrounds the whole group.">
+				<icons size="big" appearance="bordered">
+					<icon name="user"/>
+					<icon name="cog" corner/>
+				</icons>
+				<icons size="big" appearance="circular">
+					<icon name="user"/>
+					<icon name="cog" corner="top right"/>
+				</icons>
+				<icons size="big" inverted appearance="circular">
+					<icon name="user"/>
+					<icon name="cog" inverted corner/>
+				</icons>
+			</example>
+		</>
+	</>
+</spell-notebook>

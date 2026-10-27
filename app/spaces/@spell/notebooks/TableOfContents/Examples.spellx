@@ -1,0 +1,135 @@
+<spell-notebook "table-of-contents examples">
+	<header level="1">
+		Table of contents
+		<header>A table of contents lists the page's sections and examples as links, opens the one in view and follows the scroll;  each section folds, and one button opens or folds them all.</>
+	</>
+	<table-of-contents-tab-bar showing="examples"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#types">Types</>
+				<ui-item link="#content">Content</>
+				<ui-item link="#variations">Variations</>
+			</>
+		</>
+	</>
+
+	<!--
+		EXAMPLES:  Fomantic's page, section by section, in its order (Types, Content, States, Variations,
+		Groups ...).  Rules, the class-grammar mappings, gaps:  epics/spell-ui-pages/PAGES.md.
+		- A section:  `<ui-section id="examples-types" label="Types" sticky collapsible dividing>` around
+		  its examples;  ids spell out the nesting (`<tab>-<section>-<example>`, lowercase kebab of the headers).
+		- An example:  its own nested section (`label` = the example's name) around
+		  `<ui-example description="...">` and the live markup;  the markup IS the code shown.  A richer
+		  description:  `<p slot="description">` (+ `<ui-message slot="description">`).  Fomantic's header-less
+		  `.another.example`:  a second `<ui-example>` in the same section.
+		- Or write it flat (`<ui-header level="2">`, `<ui-example heading>`) and run `yarn site:sections`:
+		  it nests it and writes the ids (and fixes them after a title changes).
+		- A gap:  an HTML comment `GAP I<n>:  ...` BEFORE the example's section (a comment inside the example
+		  shows in its code).
+	-->
+	<section label="Types">
+		<section label="Table of contents" sticky collapsible dividing>
+			<example description="A table of contents lists the sections it follows (`for`, else the page's `main`) as links:  level 2 headings and top-level `<ui-section>`s, with their examples and level 3 headings under them.  The section in view is lit, and opens.">
+				<html>
+					<ui-stack direction="horizontal" align="start" spacing="lg">
+						<ui-toc for="toc-demo-release" heading="Release notes" style="width: 14em"></ui-toc>
+						<section id="toc-demo-release" style="flex: 1">
+							<ui-header level="2">Components</ui-header>
+							<ui-header level="3">Zoom</ui-header>
+							<p>Anything shown small, then full size.</p>
+							<ui-header level="3">Stack</ui-header>
+							<p>One gap between its children, in a row or a column.</p>
+							<ui-header level="2">Fixes</ui-header>
+							<ui-header level="3">Menus</ui-header>
+							<p>Titles fit the menu's width.</p>
+						</section>
+					</ui-stack>
+				</html>
+			</example>
+		</>
+
+		<section label="Examples" sticky collapsible dividing>
+			<example description="A `<ui-example heading>` is an entry of the section it's in:  a components page's contents list every example.">
+				<html>
+					<ui-stack direction="horizontal" align="start" spacing="lg">
+						<ui-toc for="toc-demo-button" heading="Button" style="width: 14em"></ui-toc>
+						<section id="toc-demo-button" style="flex: 1">
+							<ui-header level="2">Types</ui-header>
+							<ui-example heading="Button" description="A standard button.">
+								<ui-button>Follow</ui-button>
+							</ui-example>
+							<ui-example heading="Emphasis" description="A button can show different levels of emphasis.">
+								<ui-button color="primary">Save</ui-button>
+							</ui-example>
+							<ui-header level="2">States</ui-header>
+							<ui-example heading="Disabled" description="A button can't be used.">
+								<ui-button disabled>Followed</ui-button>
+							</ui-example>
+						</section>
+					</ui-stack>
+				</html>
+			</example>
+		</>
+	</>
+
+	<section label="Content">
+		<section label="Heading" sticky collapsible dividing>
+			<example description="`heading`:  a title above the links, e.g. the page's name.  Without it, the toggle sits alone in the header row.">
+				<html>
+					<ui-stack direction="horizontal" align="start" spacing="lg">
+						<ui-toc for="toc-demo-heading" style="width: 14em"></ui-toc>
+						<section id="toc-demo-heading" style="flex: 1">
+							<ui-section id="toc-demo-setup" label="Setup">
+								<ui-section id="toc-demo-install" label="Install">
+									<p>One line.</p>
+								</ui-section>
+								<ui-section id="toc-demo-import" label="Import">
+									<p>One more.</p>
+								</ui-section>
+							</ui-section>
+							<ui-section id="toc-demo-use" label="Use">
+								<p>And off you go.</p>
+							</ui-section>
+						</section>
+					</ui-stack>
+				</html>
+			</example>
+		</>
+	</>
+
+	<section label="Variations">
+		<section label="Expanded" sticky collapsible dividing>
+			<example description="`expanded`:  every section's entries show, not only the one in view's.  The viewer's own folds, and the header's toggle, still win.">
+				<html>
+					<ui-stack direction="horizontal" align="start" spacing="lg">
+						<ui-toc for="toc-demo-expanded" heading="Guide" expanded style="width: 14em"></ui-toc>
+						<section id="toc-demo-expanded" style="flex: 1">
+							<ui-header level="2">Start</ui-header>
+							<ui-header level="3">Install</ui-header>
+							<ui-header level="3">First page</ui-header>
+							<ui-header level="2">Go further</ui-header>
+							<ui-header level="3">Themes</ui-header>
+							<ui-header level="3">Spanish</ui-header>
+						</section>
+					</ui-stack>
+				</html>
+			</example>
+		</>
+
+		<section label="Size" sticky collapsible dividing>
+			<example description="`size`:  `mini` ... `massive`;  `small` by default.">
+				<html>
+					<ui-stack direction="horizontal" align="start" spacing="lg">
+						<ui-toc for="toc-demo-size" heading="Large" size="large" expanded style="width: 14em"></ui-toc>
+						<section id="toc-demo-size" style="flex: 1">
+							<ui-header level="2">One</ui-header>
+							<ui-header level="3">One and a half</ui-header>
+							<ui-header level="2">Two</ui-header>
+						</section>
+					</ui-stack>
+				</html>
+			</example>
+		</>
+	</>
+</spell-notebook>

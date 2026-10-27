@@ -1,0 +1,58 @@
+<spell-notebook "label theming">
+	<header level="1">
+		Label
+		<header>A label displays content classification.</>
+	</>
+	<label-tab-bar showing="theming"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#tokens">Tokens</>
+				<ui-item link="#themes">Themes</>
+			</>
+		</>
+	</>
+
+	<!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
+	<section label="Tokens">
+		<markdown>
+			Theme with the public `--ui-label-*` tokens: set one on the element, on any ancestor (a `<ui-labels>` group,
+			`:root`), or on the label's box through `::part(label)`. They inherit into the shadow root, where the sheet reads
+			each through a private alias, so nothing inside blocks them.
+		</>
+		<markdown>
+			```css
+			/* square tags in one group */
+			ui-labels.tags {
+			  --ui-label-radius: 0;
+			}
+			/* an owner of yours, with a 2px border */
+			.photo-frame {
+			  position: relative;
+			  --ui-label-owner-edge: 2px;
+			}
+			```
+		</>
+		<message state="info" size="small">
+			<markdown>
+				Positioned labels (`corner`, `ribbon`, `attached`, `floating`) read `--ui-label-owner-edge` and
+				`--ui-label-owner-radius` from their owner, so set those on the element that holds them (`<ui-segment>`,
+				`<ui-input>` ... set them for you). Never set the `--_ui-label-*` names: they're the sheet's private plumbing.
+			</>
+		</>
+		<markdown>Edit a value below to try it.</>
+		<html>
+			<ui-docs-tokens family="ui-label" playground>
+				<ui-label icon="envelope">23</>
+				<p><kbd><ui-label>Ctrl</></> + <kbd><ui-label>Alt</></> + <kbd><ui-label>Del</></> <kbd><ui-label appearance="basic">W</></><kbd><ui-label appearance="basic">A</></><kbd><ui-label appearance="basic">S</></></>
+			</>
+		</>
+	</>
+
+	<section label="Themes">
+		<markdown>
+			The theme menu above picks the theme for every page of the site:  Spell, Glass, Fruity or Merlot,
+			each restyling this component through its tokens.
+		</>
+	</>
+</spell-notebook>

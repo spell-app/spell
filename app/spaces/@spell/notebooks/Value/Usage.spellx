@@ -1,0 +1,45 @@
+<spell-notebook "value usage">
+	<header level="1">
+		Value
+		<header>A value is what a statistic shows:  a number, a word, an icon or an image.</>
+	</>
+	<value-tab-bar showing="usage"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#using-it">Using it</>
+				<ui-item link="#owners">Owners</>
+				<ui-item link="#accessibility">Accessibility</>
+			</>
+		</>
+	</>
+
+	<section label="Using it">
+		<markdown>
+			`<ui-value>` is what a statistic shows: a number, a word, an icon or an image, with a `<ui-label>` naming it. In a
+			search result it is the price.
+
+			- `text` makes a word value: smaller and bold, so "Three Thousand" fits.
+			- Put a `<ui-icon>` or `<ui-image>` inside it beside the number.
+		</>
+	</>
+
+	<section label="Owners">
+		<markdown>
+			`<ui-value>` finds its nearest owner and sets `:state(in-<owner>)` on itself; `UIParts.css` styles it by that
+			state. Its owners, and what each makes of it:
+
+			- [Statistic](/components/ui/ui-statistic.html) (`:state(in-statistic)`): large and light, above the label;  the statistic's `size` scales it
+			- [Search](/components/ui/ui-search.html) (`:state(in-search)`): a search result's price, on the right
+
+			Anywhere else it is an unstyled block. More on how parts find their owners: [Content parts](/components/ui/ui-header.html).
+		</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			- The value and its label are read in order ("40,509 Views"); keep them next to each other in the markup.
+			- An icon inside a value is decorative: the number and the label carry the meaning.
+		</>
+	</>
+</spell-notebook>

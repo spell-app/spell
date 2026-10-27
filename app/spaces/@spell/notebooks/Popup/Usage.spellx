@@ -1,0 +1,244 @@
+<spell-notebook "popup usage">
+	<header level="1">
+		Popup
+		<header>A popup displays additional information on top of a page.</>
+	</>
+	<popup-tab-bar showing="usage"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#using-it">Using it</>
+				<ui-item link="#triggers">Triggers</>
+				<ui-item link="#positioning">Positioning</>
+				<ui-item link="#invoker-commands">Invoker commands</>
+				<ui-item link="#events">Events</>
+				<ui-item link="#css-only-tooltips">CSS-only tooltips</>
+				<ui-item link="#keyboard">Keyboard</>
+				<ui-item link="#accessibility">Accessibility</>
+				<ui-item link="#framework-usage">Framework usage</>
+			</>
+		</>
+	</>
+
+	<!-- USAGE:  targets, triggers, invoker commands, events, the CSS-only tooltip, keyboard, accessibility, frameworks. -->
+	<section label="Using it">
+		<markdown>
+			Write a `<ui-popup>` next to what it explains. There is no `.popup()` call to make: the popup finds its
+			TARGET by itself, in this order:
+
+			1. the `target` property (any element),
+			2. else `for` (the id of an element in the same document or shadow root),
+			3. else the element just before it (Fomantic's `inline: true`, always on).
+
+			It then sits in the top layer, positioned by CSS anchor positioning: no script measures anything, and when
+			there is no room it flips to the other side (top to bottom, left to right) by itself.
+
+			Content comes from the `heading` / `label` shorthands (Fomantic's `data-title` / `data-content`), slotted
+			markup (Fomantic's `data-html` and pre-existing popups), or `<ui-header>` / `<ui-content>` parts. A pre-existing
+			popup anywhere in the page is just a `<ui-popup for="...">` placed there.
+		</>
+
+		<section label="Target element" sticky collapsible dividing>
+			<example description="`for` names the target by id, so the popup can sit anywhere;  this one appears at the label, whichever button you hover.">
+				<label id="popup-usage-target" icon="user">Anna</label>
+				<button>Hover me</button>
+				<popup for="popup-usage-target" label="Anna, project owner"/>
+			</example>
+		</>
+	</>
+
+	<section label="Triggers">
+		<markdown>
+			`open-on` picks what opens it:
+
+			- `hover` (the default): pointer hover and keyboard focus, after `show-delay` (50ms); it hides `hide-delay`
+			  (70ms) after the pointer leaves. The popup stays open while the pointer is over it, so its text can be read
+			  and selected (WCAG 1.4.13). `hoverable="false"` is Fomantic's default instead: it hides as the pointer
+			  leaves the target, even onto the popup.
+			- `focus`: keyboard or pointer focus on the target only.
+			- `click`: a click toggles it; it behaves as a small non-modal dialog, for content you interact with.
+			- `manual`: only your code, through `visible` (or `hidden`).
+
+			Escape and a click elsewhere close it.
+		</>
+
+		<section label="Specifying a trigger event" sticky collapsible dividing>
+			<example description="A popup trigger event can be specified:  `open-on=\"click\"` here, `open-on=\"focus\"` for an input.">
+				<button id="popup-usage-click">Click me</button>
+				<popup for="popup-usage-click" open-on="click" heading="Clicked" label="Click again, or press Escape, to close."/>
+				<input id="popup-usage-focus" placeholder="Focus me" icon="search"/>
+				<popup for="popup-usage-focus" open-on="focus" label="Type to search"/>
+			</example>
+		</>
+
+		<section label="Wide popup menu" sticky collapsible dividing>
+			<example description="Complex content, like a wide menu, is markup already in the page:  a `flowing` hover popup that stays open while the pointer is on it works like a dropdown menu.">
+				<menu>
+					<item id="popup-usage-browse" icon="dropdown" appearance="link">Browse</item>
+				</menu>
+				<popup for="popup-usage-browse" flowing position="bottom left" hide-delay="300">
+					<grid columns="3" divided spacing="lg">
+						<column>
+							<header level="4">Fabrics</header>
+							<list appearance="link">
+								<item link="#cashmere">Cashmere</item>
+								<item link="#linen">Linen</item>
+								<item link="#cotton">Cotton</item>
+								<item link="#viscose">Viscose</item>
+							</list>
+						</column>
+						<column>
+							<header level="4">Size</header>
+							<list appearance="link">
+								<item link="#small">Small</item>
+								<item link="#medium">Medium</item>
+								<item link="#large">Large</item>
+								<item link="#plus-sizes">Plus Sizes</item>
+							</list>
+						</column>
+						<column>
+							<header level="4">Colors</header>
+							<list appearance="link">
+								<item link="#neutrals">Neutrals</item>
+								<item link="#brights">Brights</item>
+								<item link="#pastels">Pastels</item>
+							</list>
+						</column>
+					</grid>
+				</popup>
+			</example>
+		</>
+	</>
+
+	<section label="Positioning">
+		<markdown>
+			`position` places it: `top left` (the default) ... `right center`, plus `left top` ... `right bottom` (beside
+			the target, lined up with its top or bottom edge). Word order matters: `top left` is above. When there is no
+			room it flips to the other side, inside the viewport.
+		</>
+		<html>
+			<ui-message size="small" class="site-not-ported">Not ported: Fomantic's offset / data-offset, boundary, scrollContext, lastResort and transition settings. CSS anchor positioning places and flips the popup:  set the gap with <code>--ui-popup-distance</>, and the motion with <code>--ui-popup-duration</>.</>
+		</>
+	</>
+
+	<section label="Invoker commands">
+		<markdown>
+			A button can drive a popup with no script, through an invoker command: `commandfor` names the popup, `command`
+			is `--show`, `--close` or `--toggle` (or the native `show-popover` / `hide-popover` / `toggle-popover`). The
+			popup always opens at ITS target, whichever button sent the command (a `manual` popup suits this).
+		</>
+
+		<section label="Invoker commands" sticky collapsible dividing>
+			<example description="It appears at the label, not at the buttons.">
+				<buttons size="small" appearance="basic">
+					<button commandfor="popup-invoker-tip" command="--toggle">Toggle</button>
+					<button commandfor="popup-invoker-tip" command="--close">Close</button>
+				</buttons>
+				<label id="popup-invoker-target">Anna</label>
+				<popup id="popup-invoker-tip" for="popup-invoker-target" open-on="manual" label="Anna, project owner"/>
+			</example>
+		</>
+	</>
+
+	<section label="Events">
+		<markdown>
+			`visible` is the controlled state, as on every element (`hidden` is its other name): writing either shows
+			or hides the popup and fires nothing. A popup starts hidden. The user's own changes (the trigger, an
+			invoker command) dispatch the cancelable events first.
+
+			- `ui-opening` -- about to show; `detail` is `{ visible: true, originalEvent? }`. `preventDefault()` keeps it hidden.
+			- `ui-closing` -- about to hide; `detail` is `{ visible: false, originalEvent? }`. `preventDefault()` keeps it shown,
+			  except when the browser already dismissed a `hint` popover (Escape, a click elsewhere).
+		</>
+		<markdown>
+			```js
+			const popup = document.querySelector("ui-popup")
+			popup.target = document.querySelector("#avatar") // wins over `for`
+			popup.addEventListener("ui-closing", (event) => {
+			  if (form.dirty) event.preventDefault() // keep it shown
+			})
+			popup.visible = true // show it from code:  no event
+			```
+		</>
+		<html>
+			<ui-message size="small" class="site-not-ported">Not ported: Fomantic's behaviors (show, hide, toggle, reposition ...) and callbacks (onShow, onHidden ...):  write <code>visible</> instead. Listen for <code>ui-opening</> / <code>ui-closing</>.</>
+		</>
+	</>
+
+	<section label="CSS-only tooltips">
+		<markdown>
+			The CSS-only tooltip is a plain attribute on any element: `data-tooltip` (the text), `data-position` (the same
+			twelve positions, default `top center`), `data-inverted` and `data-variation` (sizes, hues, `basic`, `fixed`,
+			`wide fixed`, `very wide fixed`, `multiline`, `visible`). It lives in the page stylesheet, so it works with no
+			script and costs nothing.
+
+			But it cannot flip, cannot hold markup, and its text is a CSS pseudo-element, which screen readers do not
+			reliably announce: use it for hints only, and a `<ui-popup>` for anything that matters. On an element that
+			already draws `::before` / `::after` (an `<i>` icon in Fomantic), put it on a wrapper instead.
+		</>
+		<markdown>
+			```html
+			<button data-tooltip="Add users" data-position="bottom left" data-inverted data-variation="small">+</button>
+			```
+		</>
+	</>
+
+	<section label="Keyboard">
+		<markdown>
+			- **Tab** onto the target shows a `hover` or `focus` popup; leaving the target hides it.
+			- **Enter** / **Space** toggles a `click` popup (the target's own activation).
+			- **Escape** closes the popup.
+		</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			- The ARIA pattern follows `open-on`:
+			  - `hover`, `focus` and `manual` popups are tooltips: the popup has `role="tooltip"` and the target is
+			    `aria-describedby` it, so its text is read as the target's description. Keep that text short, and put
+			    nothing interactive in it.
+			  - `click` popups are non-modal dialogs: `role="dialog"`, named by `header` or the popup's `aria-label`; the
+			    target gets `aria-haspopup="dialog"`, `aria-expanded` and `aria-controls`.
+			- The ARIA goes on the element that actually takes focus: for a `<ui-button>`, its inner `<button>`.
+			- Hover popups also open on keyboard focus, stay open while hovered, and close with Escape: hoverable,
+			  persistent and dismissible, as WCAG 1.4.13 asks.
+			- A target with only an icon still needs its own name (`aria-label`): a tooltip describes, it does not name.
+			- The CSS-only `data-tooltip` text is a pseudo-element and is not reliably announced; never rely on it alone.
+			- If the element fails to render, the popup never shows: no positioning, triggers, events or Escape,
+			  and no native `title` stands in for a tooltip-like popup.
+		</>
+	</>
+
+	<section label="Framework usage">
+		<markdown>Set `target` as a property when the target is not a sibling or an id, and listen for `ui-opening` / `ui-closing`.</>
+		<header level="4" id="framework-react">React 19</>
+		<markdown>
+			```jsx
+			<ui-popup target={anchorEl} open-on="click" heading="Share" onui-close={() => setOpen(false)}>
+			  ...
+			</ui-popup>
+			```
+		</>
+		<header level="4" id="framework-vue">Vue 3.5</>
+		<markdown>
+			```html
+			<!-- compilerOptions.isCustomElement = (tag) => tag.startsWith("ui-") -->
+			<ui-popup :target="anchorEl" open-on="click" heading="Share" @ui-closing="open = false">...</ui-popup>
+			```
+		</>
+		<header level="4" id="framework-solid">Solid 2</>
+		<markdown>
+			```jsx
+			// events and rich data are plain props:  `on-<event>={...}`, `options={...}`
+			<ui-popup
+			  target={anchorEl}
+			  open-on="click"
+			  heading="Share"
+			  on-ui-closing={() => setOpen(false)}
+			>
+			  ...
+			</ui-popup>
+			```
+		</>
+	</>
+</spell-notebook>

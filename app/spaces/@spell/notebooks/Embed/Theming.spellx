@@ -1,0 +1,58 @@
+<spell-notebook "embed theming">
+	<header level="1">
+		Embed
+		<header>An embed displays content from other websites, like YouTube videos, loaded only when asked
+              for.</>
+	</>
+	<embed-tab-bar showing="theming"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#tokens">Tokens</>
+				<ui-item link="#themes">Themes</>
+			</>
+		</>
+	</>
+
+	<!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
+	<section label="Tokens">
+		<markdown>
+			Theme with the public `--ui-embed-*` tokens on the embed or any ancestor; `::part(embed)` works too. They
+			inherit into the shadow root, where the sheet reads each through a private alias, so nothing inside blocks
+			them. Style the pieces with `::part()`: `play` (the button), `placeholder` (the image), `icon` and `frame`.
+		</>
+		<markdown>
+			```css
+			/* every embed on the page */
+			ui-embed {
+			  --ui-embed-icon-size: 4em;
+			  --ui-embed-icon-color: var(--ui-red);
+			}
+			/* the box */
+			ui-embed::part(embed) {
+			  border-radius: 0.5em;
+			  overflow: hidden;
+			}
+			```
+		</>
+		<message state="info" size="small">
+			<markdown>
+				An `aspect-ratio` attribute (`4:3`, `21:9`, `square`) replaces `--ui-embed-ratio`, whatever you set. Never
+				set the `--_ui-embed-*` names: they're the sheet's private plumbing.
+			</>
+		</>
+		<markdown>Edit a value below to try it.</>
+		<html>
+			<ui-docs-tokens family="ui-embed" playground>
+				<ui-embed source="youtube" video-id="O6Xo21L0ybE" placeholder="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 9'%3E%3Crect width='16' height='9' fill='%23456'/%3E%3Ccircle cx='12' cy='3' r='1.5' fill='%23fc6'/%3E%3Cpath d='M0 9 5 4l3 3 2-2 6 4z' fill='%23234'/%3E%3C/svg%3E" label="Fomantic UI intro"></>
+			</>
+		</>
+	</>
+
+	<section label="Themes">
+		<markdown>
+			The theme menu above picks the theme for every page of the site:  Spell, Glass, Fruity or Merlot,
+			each restyling this component through its tokens.
+		</>
+	</>
+</spell-notebook>

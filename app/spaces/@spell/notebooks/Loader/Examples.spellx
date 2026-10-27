@@ -1,0 +1,244 @@
+<spell-notebook "loader examples">
+	<header level="1">
+		Loader
+		<header>A loader alerts a user to wait for an activity to complete.</>
+	</>
+	<loader-tab-bar showing="examples"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#types">Types</>
+				<ui-item link="#states">States</>
+				<ui-item link="#variations">Variations</>
+			</>
+		</>
+	</>
+
+	<!-- EXAMPLES:  Fomantic's loader page, section by section, in its order (Types, States, Variations). -->
+	<section label="Types">
+		<!-- GAP I43:  an active <ui-dimmer> neither shows nor inverts its <ui-loader>:  every loader in a dimmer says `visible` (and `inverted` in a dark one). -->
+		<section label="Loader" sticky collapsible dividing>
+			<example>
+				<html>
+					<p slot="description">A loader.</p>
+					<ui-message slot="description" state="info" size="small">Loaders are hidden unless <code>visible</code>, even inside a <code>&lt;ui-dimmer&gt;</code>.</ui-message>
+				</html>
+				<segment>
+					<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+					<dimmer visible>
+						<loader visible inverted/>
+					</dimmer>
+				</segment>
+			</example>
+		</>
+
+		<section label="Text Loader" sticky collapsible dividing>
+			<example description="A loader can contain text:  add `text` and put the words inside.">
+				<segment>
+					<dimmer visible>
+						<loader visible inverted text>Loading</loader>
+					</dimmer>
+					<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+				</segment>
+			</example>
+			<example>
+				<segment>
+					<dimmer visible inverted>
+						<loader visible text>Loading</loader>
+					</dimmer>
+					<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+				</segment>
+			</example>
+		</>
+	</>
+
+	<section label="States">
+		<section label="Indeterminate" sticky collapsible dividing>
+			<example description="A loader can show it's unsure of how long a task will take.">
+				<segment>
+					<dimmer visible>
+						<loader visible inverted indeterminate text>Preparing Files</loader>
+					</dimmer>
+					<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+				</segment>
+			</example>
+		</>
+
+		<section label="Active" sticky collapsible dividing>
+			<example>
+				<html>
+					<p slot="description">A loader can be active (<code>visible</code>).</p>
+					<ui-message slot="description" state="info" size="small">An active loader may not be easy to see without a <code>&lt;ui-dimmer&gt;</code>.</ui-message>
+				</html>
+				<segment>
+					<loader visible/>
+					<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+				</segment>
+			</example>
+		</>
+
+		<section label="Disabled" sticky collapsible dividing>
+			<example description="A loader can be disabled or hidden, even while `visible`.">
+				<segment>
+					<loader visible disabled/>
+					<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+				</segment>
+			</example>
+		</>
+	</>
+
+	<section label="Variations">
+		<section label="Inline" sticky collapsible dividing>
+			<example description="Loaders can appear inline with content.">
+				<loader visible inline/>
+			</example>
+		</>
+
+		<section label="Inline Center" sticky collapsible dividing>
+			<example description="Loaders can appear inline centered with content.">
+				<loader visible align="center" inline/>
+			</example>
+		</>
+
+		<section label="Speed" sticky collapsible dividing>
+			<example description="Loaders can appear slow, normal or fast:  `speed=\"slow\"`, `speed=\"fast\"`.">
+				<loader visible inline speed="slow"/>
+				<loader visible inline/>
+				<loader visible inline speed="fast"/>
+			</example>
+		</>
+
+		<section label="Colors" sticky collapsible dividing>
+			<example description="Loaders can be different colors.">
+				<loader visible inline color="primary"/>
+				<loader visible inline color="secondary"/>
+				<loader visible inline color="red"/>
+				<loader visible inline color="orange"/>
+				<loader visible inline color="yellow"/>
+				<loader visible inline color="olive"/>
+				<loader visible inline color="green"/>
+				<loader visible inline color="teal"/>
+				<loader visible inline color="blue"/>
+				<loader visible inline color="violet"/>
+				<loader visible inline color="purple"/>
+				<loader visible inline color="pink"/>
+				<loader visible inline color="brown"/>
+				<loader visible inline color="grey"/>
+				<loader visible inline color="black"/>
+			</example>
+		</>
+
+		<section label="Size" sticky collapsible dividing>
+			<example description="Loaders can have different sizes.">
+				<segment>
+					<dimmer visible>
+						<loader visible inverted size="mini" text>Loading</loader>
+					</dimmer>
+					<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+				</segment>
+				<segment>
+					<dimmer visible>
+						<loader visible inverted size="tiny" text>Loading</loader>
+					</dimmer>
+					<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+				</segment>
+				<segment>
+					<dimmer visible>
+						<loader visible inverted size="small" text>Loading</loader>
+					</dimmer>
+					<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+				</segment>
+				<segment>
+					<dimmer visible>
+						<loader visible inverted size="medium" text>Loading</loader>
+					</dimmer>
+					<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+					<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+				</segment>
+				<segment>
+					<dimmer visible>
+						<loader visible inverted size="large" text>Loading</loader>
+					</dimmer>
+					<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+					<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+					<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+				</segment>
+				<segment>
+					<dimmer visible>
+						<loader visible inverted size="big" text>Loading</loader>
+					</dimmer>
+					<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+					<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+					<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+				</segment>
+				<segment>
+					<dimmer visible>
+						<loader visible inverted size="huge" text>Loading</loader>
+					</dimmer>
+					<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+					<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+					<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+				</segment>
+				<segment>
+					<dimmer visible>
+						<loader visible inverted size="massive" text>Loading</loader>
+					</dimmer>
+					<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+					<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+					<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+				</segment>
+			</example>
+		</>
+
+		<section label="Inverted" sticky collapsible dividing>
+			<example description="Loaders can have their colors inverted.">
+				<segment inverted padding="lg">
+					<loader visible inverted/>
+				</segment>
+			</example>
+			<example>
+				<html>
+					<ui-message slot="description" state="info" size="small">Inside an <code>inverted</code> (light) dimmer a loader keeps its normal colours: no <code>inverted</code> on the loader.</ui-message>
+				</html>
+				<segment>
+					<dimmer visible inverted>
+						<loader visible size="mini" text>Loading</loader>
+					</dimmer>
+					<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+				</segment>
+				<segment>
+					<dimmer visible inverted>
+						<loader visible size="small" text>Loading</loader>
+					</dimmer>
+					<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+				</segment>
+				<segment>
+					<dimmer visible inverted>
+						<loader visible size="medium" text>Loading</loader>
+					</dimmer>
+					<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+					<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+				</segment>
+				<segment>
+					<dimmer visible inverted>
+						<loader visible size="large" text>Loading</loader>
+					</dimmer>
+					<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+					<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+					<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+				</segment>
+			</example>
+		</>
+
+		<section label="Styles" sticky collapsible dividing>
+			<example description="Loaders can also appear in `double` or `elastic` animation style.  Can be combined with any color or speed.">
+				<segment padding="lg">
+					<loader visible double color="green" speed="slow"/>
+				</segment>
+				<segment padding="lg">
+					<loader visible elastic color="blue"/>
+				</segment>
+			</example>
+		</>
+	</>
+</spell-notebook>

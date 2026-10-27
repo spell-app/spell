@@ -1,0 +1,185 @@
+<spell-notebook "breadcrumb examples">
+	<header level="1">
+		Breadcrumb
+		<header>A breadcrumb is used to show hierarchy between content.</>
+	</>
+	<breadcrumb-tab-bar showing="examples"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#types">Types</>
+				<ui-item link="#content">Content</>
+				<ui-item link="#states">States</>
+				<ui-item link="#variations">Variations</>
+			</>
+		</>
+	</>
+
+	<!--
+		EXAMPLES:  Fomantic's breadcrumb page, section by section, in its order (Types, Content, States, Variations).
+		Each breadcrumb is a `<nav>` landmark, so every example names its own with `aria-label`:  two landmarks with one
+		name on a page are ambiguous.  `GAP I<n>` comments mark examples a widget can't render yet (plan-doc issues).
+	-->
+	<section label="Types">
+		<section label="Breadcrumb" sticky collapsible dividing>
+			<example description="A standard breadcrumb. Each `<ui-breadcrumb>` draws its own divider, so there is nothing to write between them.">
+				<breadcrumbs aria-label="Standard breadcrumb">
+					<breadcrumb link="#home">Home</breadcrumb>
+					<breadcrumb link="#store">Store</breadcrumb>
+					<breadcrumb selected>T-Shirt</breadcrumb>
+				</breadcrumbs>
+			</example>
+			<example>
+				<breadcrumbs aria-label="Breadcrumb with icon dividers" divider-icon="angle right">
+					<breadcrumb link="#home">Home</breadcrumb>
+					<breadcrumb link="#store">Store</breadcrumb>
+					<breadcrumb selected>T-Shirt</breadcrumb>
+				</breadcrumbs>
+			</example>
+		</>
+	</>
+
+	<section label="Content">
+		<section label="Divider" sticky collapsible dividing>
+			<example description="A breadcrumb can contain a divider to show the relationship between sections, this can be formatted as an icon or text:  `divider` sets the text (`/` when unset), `divider-icon` an icon.">
+				<breadcrumbs aria-label="Text divider" divider="/">
+					<breadcrumb link="#home">Home</breadcrumb>
+					<breadcrumb link="#registration">Registration</breadcrumb>
+					<breadcrumb selected>Personal Information</breadcrumb>
+				</breadcrumbs>
+			</example>
+
+			<!-- GAP I28:  Fomantic mixes a `right chevron` and a `right arrow` divider in one breadcrumb;  ours has one divider per breadcrumb. -->
+			<example>
+				<breadcrumbs aria-label="Chevron dividers" divider-icon="chevron right">
+					<breadcrumb link="#home">Home</breadcrumb>
+					<breadcrumb link="#registration">Registration</breadcrumb>
+					<breadcrumb selected>Personal Information</breadcrumb>
+				</breadcrumbs>
+			</example>
+			<example>
+				<breadcrumbs aria-label="Arrow dividers" divider-icon="arrow right">
+					<breadcrumb link="#home">Home</breadcrumb>
+					<breadcrumb link="#registration">Registration</breadcrumb>
+					<breadcrumb selected>Personal Information</breadcrumb>
+				</breadcrumbs>
+			</example>
+			<example description="Any text works as a divider, e.g. a guillemet or a pipe.">
+				<breadcrumbs aria-label="Guillemet divider" divider="›">
+					<breadcrumb link="#home">Home</breadcrumb>
+					<breadcrumb link="#store">Store</breadcrumb>
+					<breadcrumb selected>T-Shirt</breadcrumb>
+				</breadcrumbs>
+			</example>
+			<example>
+				<breadcrumbs aria-label="Pipe divider" divider="|">
+					<breadcrumb link="#home">Home</breadcrumb>
+					<breadcrumb selected>Search</breadcrumb>
+				</breadcrumbs>
+			</example>
+		</>
+
+		<section label="Section" sticky collapsible dividing>
+			<example description="A breadcrumb can contain sections that can either be formatted as a link (`link`) or text.">
+				<breadcrumbs aria-label="Text sections">
+					<breadcrumb>Home</breadcrumb>
+					<breadcrumb selected>Search</breadcrumb>
+				</breadcrumbs>
+			</example>
+		</>
+
+		<section label="Link" sticky collapsible dividing>
+			<example description="A section may be linkable or contain a link.">
+				<html>
+					<ui-breadcrumbs aria-label="Section holding a link">
+						<ui-breadcrumb link="#home">Home</ui-breadcrumb>
+						<ui-breadcrumb selected>Search for: <a href="#paper-towels">paper towels</a></ui-breadcrumb>
+					</ui-breadcrumbs>
+				</html>
+			</example>
+		</>
+	</>
+
+	<section label="States">
+		<section label="Active" sticky collapsible dividing>
+			<example description="A section can be active:  the current page, bold, never a link, with `aria-current=\"page\"`.">
+				<breadcrumbs aria-label="Active section">
+					<breadcrumb link="#products">Products</breadcrumb>
+					<breadcrumb selected>Paper Towels</breadcrumb>
+				</breadcrumbs>
+			</example>
+		</>
+	</>
+
+	<section label="Variations">
+		<section label="Inverted" sticky collapsible dividing>
+			<example description="A breadcrumb can be inverted.">
+				<segment inverted>
+					<breadcrumbs inverted aria-label="Inverted links" divider-icon="chevron right">
+						<breadcrumb link="#home">Home</breadcrumb>
+						<breadcrumb link="#registration">Registration</breadcrumb>
+						<breadcrumb selected>Personal Information</breadcrumb>
+					</breadcrumbs>
+					<divider spacer/>
+					<breadcrumbs inverted aria-label="Inverted text" divider-icon="chevron right">
+						<breadcrumb>Home</breadcrumb>
+						<breadcrumb>Registration</breadcrumb>
+						<breadcrumb selected>Personal Information</breadcrumb>
+					</breadcrumbs>
+				</segment>
+			</example>
+		</>
+
+		<section label="Size" sticky collapsible dividing>
+			<example description="A breadcrumb can vary in size.">
+				<breadcrumbs size="mini" aria-label="Mini" divider-icon="chevron right">
+					<breadcrumb link="#home">Home</breadcrumb>
+					<breadcrumb link="#registration">Registration</breadcrumb>
+					<breadcrumb selected>Personal Information</breadcrumb>
+				</breadcrumbs>
+			</example>
+			<example>
+				<breadcrumbs size="tiny" aria-label="Tiny" divider-icon="chevron right">
+					<breadcrumb link="#home">Home</breadcrumb>
+					<breadcrumb link="#registration">Registration</breadcrumb>
+					<breadcrumb selected>Personal Information</breadcrumb>
+				</breadcrumbs>
+			</example>
+			<example>
+				<breadcrumbs size="small" aria-label="Small" divider-icon="chevron right">
+					<breadcrumb link="#home">Home</breadcrumb>
+					<breadcrumb link="#registration">Registration</breadcrumb>
+					<breadcrumb selected>Personal Information</breadcrumb>
+				</breadcrumbs>
+			</example>
+			<example>
+				<breadcrumbs size="large" aria-label="Large" divider-icon="chevron right">
+					<breadcrumb link="#home">Home</breadcrumb>
+					<breadcrumb link="#registration">Registration</breadcrumb>
+					<breadcrumb selected>Personal Information</breadcrumb>
+				</breadcrumbs>
+			</example>
+			<example>
+				<breadcrumbs size="big" aria-label="Big" divider-icon="chevron right">
+					<breadcrumb link="#home">Home</breadcrumb>
+					<breadcrumb link="#registration">Registration</breadcrumb>
+					<breadcrumb selected>Personal Information</breadcrumb>
+				</breadcrumbs>
+			</example>
+			<example>
+				<breadcrumbs size="huge" aria-label="Huge" divider-icon="chevron right">
+					<breadcrumb link="#home">Home</breadcrumb>
+					<breadcrumb link="#registration">Registration</breadcrumb>
+					<breadcrumb selected>Personal Information</breadcrumb>
+				</breadcrumbs>
+			</example>
+			<example>
+				<breadcrumbs size="massive" aria-label="Massive" divider-icon="chevron right">
+					<breadcrumb link="#home">Home</breadcrumb>
+					<breadcrumb link="#registration">Registration</breadcrumb>
+					<breadcrumb selected>Personal Information</breadcrumb>
+				</breadcrumbs>
+			</example>
+		</>
+	</>
+</spell-notebook>

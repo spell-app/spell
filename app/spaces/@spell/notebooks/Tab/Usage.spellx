@@ -1,0 +1,158 @@
+<spell-notebook "tab usage">
+	<header level="1">
+		Tab
+		<header>A tab is a hidden section of content activated by a menu.</>
+	</>
+	<tab-tab-bar showing="usage"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#using-it">Using it</>
+				<ui-item link="#events">Events</>
+				<ui-item link="#history">History</>
+				<ui-item link="#panes-without-tabs">Panes without tabs</>
+				<ui-item link="#keyboard">Keyboard</>
+				<ui-item link="#accessibility">Accessibility</>
+				<ui-item link="#framework-usage">Framework usage</>
+			</>
+		</>
+	</>
+
+	<!-- USAGE:  how to use it (attributes in practice, events, framework snippets), keyboard, accessibility. -->
+	<section label="Using it">
+		<markdown>
+			Two tags:
+
+			- `<ui-tab>` is a PANE:  the content that shows when its tab is picked.
+			- `<ui-tabs>` holds the panes, and draws the tabs you click as a menu,
+			  from each pane's `label` and `icon`.
+
+			One element per tab keeps a label with its content, with nothing to pair up.
+
+			- The tab menu is styled by the menu's own sheet, so its look words are the menu's: `appearance`
+			  (`tabular`, `pointing`, `secondary`, `text`), `direction`, `fluid`, `padding`, `inverted`, `size`, `color`.
+			- The panes are segments: `attach` joins them to the menu, `appearance="basic"` drops their box.
+			- `value` is the selected pane: its `value`, else its index. With no `value`, the first `selected`
+			  pane shows, else the first enabled one.
+			- Name the tab list with `aria-label` on `<ui-tabs>`.
+		</>
+		<markdown>
+			```html
+			<ui-tabs appearance="tabular" attach="top" aria-label="Profile">
+			  <ui-tab label="Bio" value="bio">...</ui-tab>
+			  <ui-tab label="Photos" value="photos" icon="image" lazy><template>...</template></ui-tab>
+			</ui-tabs>
+			```
+		</>
+	</>
+
+	<section label="Events">
+		<markdown>
+			- `ui-changing` on `<ui-tabs>` (`{ value, tab }`, cancelable): the user is about to pick a tab
+			  (click, key, or the URL hash with `history`); `preventDefault()` keeps the current one.
+			- `ui-opened` on `<ui-tab>` (`{ value, first }`): the pane was shown; `first` is true the first
+			  time, the moment to fill a pane yourself.
+			- Writing `value` from code switches panes and fires no `ui-changing`.
+		</>
+		<markdown>
+			```js
+			const tabs = document.querySelector("ui-tabs")
+			tabs.addEventListener("ui-changing", (event) => {
+			  if (form.dirty && !confirm("Leave unsaved changes?")) event.preventDefault()
+			})
+			tabs.value = "photos" // switch from code:  no event
+			document.querySelector("ui-tab[value=stats]").addEventListener("ui-opened", async (event) => {
+			  if (!event.detail.first) return
+			  const pane = event.target
+			  pane.toggleAttribute("loading", true)
+			  pane.innerHTML = await (await fetch("/stats.html")).text()
+			  pane.toggleAttribute("loading", false)
+			})
+			```
+		</>
+	</>
+
+	<section label="History">
+		<markdown>
+			`history` puts the selection in the URL hash (`#photos`): picking a tab pushes a history entry, Back
+			and Forward switch panes, a link to `#photos` selects that pane, and a page opened on `#photos`
+			starts there. Where the browser has View Transitions, the pane swap runs in one (not under reduced
+			motion). Give the panes a `value`, so the hash reads as a word. One `history` tab set per page:
+			two would fight for the hash.
+		</>
+	</>
+
+	<section label="Panes without tabs">
+		<markdown>
+			A `<ui-tab>` outside a `<ui-tabs>` is a plain pane, shown only while it's `selected`: switch it
+			from your own buttons.
+		</>
+		<markdown>
+			```js
+			document.querySelector("#show-inbox").addEventListener("click", () => {
+			  for (const pane of document.querySelectorAll("ui-tab.mail")) pane.toggleAttribute("selected", pane.id === "inbox")
+			})
+			```
+		</>
+	</>
+
+	<section label="Keyboard">
+		<markdown>
+			The APG tabs pattern: the tab list is one Tab stop (the selected tab), and the shown pane is the
+			next.
+
+			- **Arrow Left** / **Arrow Right**: previous / next tab (**Arrow Up** / **Down** when `direction="vertical"`),
+			  wrapping, skipping disabled tabs.
+			- **Home** / **End**: first / last tab.
+			- **Enter** / **Space**: select the focused tab, with `activation="manual"` (where the arrows only
+			  move focus). Use it when showing a pane is slow.
+		</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			- The whole pattern lives in one shadow root: a `role="tablist"` (named by the host's `aria-label`)
+			  of `<button role="tab">`s with `aria-selected` and `aria-controls`; each `<ui-tab>` host is the
+			  `role="tabpanel"`, named by its `label`.
+			- Disabled tabs stay in the list (announced as unavailable), but the arrow keys skip them.
+			- If the element fails to render, it shows its children through a bare `<slot>`, so the content stays;
+			  the tab list, selecting a pane, the arrow keys, `ui-changing`, `history`, `lazy` templates
+			  and tab icons go.
+		</>
+	</>
+
+	<section label="Framework usage">
+		<markdown>Bind `value` and listen for `ui-changing`.</>
+		<header level="4" id="framework-react">React 19</>
+		<markdown>
+			```jsx
+			<ui-tabs appearance="tabular" attach="top" value={tab} onui-changed={(e) => setTab(e.detail.value)}>
+			  <ui-tab label="Bio" value="bio">...</ui-tab>
+			</ui-tabs>
+			```
+		</>
+		<header level="4" id="framework-vue">Vue 3.5</>
+		<markdown>
+			```html
+			<!-- compilerOptions.isCustomElement = (tag) => tag.startsWith("ui-") -->
+			<ui-tabs appearance="tabular" attach="top" :value="tab" @ui-changing="(e) => (tab = e.detail.value)">
+			  <ui-tab label="Bio" value="bio">...</ui-tab>
+			</ui-tabs>
+			```
+		</>
+		<header level="4" id="framework-solid">Solid 2</>
+		<markdown>
+			```jsx
+			// events and rich data are plain props:  `on-<event>={...}`, `options={...}`
+			<ui-tabs
+			  appearance="tabular"
+			  attach="top"
+			  value={tab()}
+			  on-ui-changing={(e) => setTab(e.detail.value)}
+			>
+			  <ui-tab label="Bio" value="bio">...</ui-tab>
+			</ui-tabs>
+			```
+		</>
+	</>
+</spell-notebook>

@@ -1,0 +1,156 @@
+<spell-notebook "panel examples">
+	<header level="1">
+		Panel
+		<header>A panel is an inspector:  a tinted box of fields under a header band, with sub-head bands that open and close.</>
+	</>
+	<panel-tab-bar showing="examples"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#types">Types</>
+				<ui-item link="#content">Content</>
+				<ui-item link="#variations">Variations</>
+			</>
+		</>
+	</>
+
+	<!--
+		EXAMPLES:  ours, no Fomantic page (moved from the brand's `<ui-brand-panel>` page, epic `design-system`).
+		- Fields are plain Spell UI controls with an `aria-label`.
+		- `color="accent"` isn't shown:  the hue exists only where the `spell-brand` theme AND the brand bundle add it.
+	-->
+	<section label="Types">
+		<section label="Panel" sticky collapsible dividing>
+			<example description="A panel is a tinted box under a header band:  `label` is the band's title.  Its content is a column of fields, 8px apart.">
+				<panel label="Theme" style="max-width: 320px">
+					<input placeholder="Name, e.g. sunrise" aria-label="Name"/>
+					<slider min="13" max="19" value="16" aria-label="Text size"/>
+				</panel>
+			</example>
+		</>
+
+		<section label="Sub-panels" sticky collapsible dividing>
+			<example description="A panel inside a panel is a SUB-HEAD BAND:  small capitals, a hairline above, reaching the box's edges.  Group a panel's fields under them.">
+				<panel label="Color Set" style="max-width: 320px">
+					<input placeholder="Name, e.g. brand" aria-label="Set name"/>
+					<panel label="Tweak">
+						<slider min="0" max="200" step="20" value="100" aria-label="Vibrancy"/>
+						<slider min="-40" max="40" step="8" value="0" aria-label="Hue drift toward dark"/>
+					</panel>
+				</panel>
+			</example>
+		</>
+
+		<section label="Collapsible" sticky collapsible dividing>
+			<example description="`collapsible` bands close and open when clicked;  `open=\"false\"` starts one closed.  A closed LAST band closes the box, no gap under it.">
+				<html>
+					<ui-panel label="Color Set" collapsible style="max-width: 320px">
+						<ui-panel label="Tweak" collapsible>
+							<ui-slider min="0" max="200" step="20" value="100" aria-label="Vibrancy"></ui-slider>
+						</ui-panel>
+						<ui-panel label="Presets" collapsible open="false">
+							<p>Six preset chips.</p>
+						</ui-panel>
+					</ui-panel>
+				</html>
+			</example>
+		</>
+	</>
+
+	<section label="Content">
+		<section label="Actions" sticky collapsible dividing>
+			<example description="`slot=\"actions\"` puts small buttons at the end of a band, before the chevron:  a reset, a copy.">
+				<html>
+					<ui-panel label="CSS" collapsible style="max-width: 320px">
+						<ui-button slot="actions" size="mini" icon="copy" appearance="circular basic">Copy</ui-button>
+						<ui-code language="css">
+							<script type="text/plain">:root { --brand-500: #8e96b5; }</script>
+						</ui-code>
+					</ui-panel>
+				</html>
+			</example>
+		</>
+
+		<section label="Subhead" sticky collapsible dividing>
+			<example description="`hint` is a line of small, muted text under the band.">
+				<panel label="Theme" hint="Saved to themes/sunrise.css" style="max-width: 320px">
+					<slider min="0" max="3" value="2" aria-label="Corners"/>
+				</panel>
+			</example>
+		</>
+
+		<section label="Info tip" sticky collapsible dividing>
+			<example description="`description` (or `slot=\"description\"`, for bold words and paragraphs):  a tip about the band, shown under it while the pointer is on its title or its open / close button has focus.">
+				<html>
+					<ui-panel label="Theme" collapsible style="max-width: 320px">
+						<span slot="description">A <b>theme</b> is the look of an app made with Spell: its colours, fonts and shapes.</span>
+						<ui-panel label="Shape" collapsible description="Corners and shadows, for every card and button.">
+							<ui-slider min="0" max="3" value="2" aria-label="Corners"></ui-slider>
+						</ui-panel>
+					</ui-panel>
+				</html>
+			</example>
+		</>
+
+		<section label="Fold icon" sticky collapsible dividing>
+			<example description="`fold-icon`:  where a band's chevron sits.  `end` (the panel's default) at the far end of the band, after any actions;  `start` before the title, as a plain `<ui-section>`'s.">
+				<html>
+					<div class="ui-cluster" style="align-items: start">
+						<ui-panel label="Preview" collapsible style="width: 240px">
+							<ui-button slot="actions" size="mini" icon="moon outline" appearance="circular basic">Dark</ui-button>
+							<p>fold-icon="end"</p>
+						</ui-panel>
+						<ui-panel label="Preview" collapsible fold-icon="start" style="width: 240px">
+							<ui-button slot="actions" size="mini" icon="moon outline" appearance="circular basic">Dark</ui-button>
+							<p>fold-icon="start"</p>
+						</ui-panel>
+					</div>
+				</html>
+			</example>
+		</>
+	</>
+
+	<section label="Variations">
+		<section label="Colors" sticky collapsible dividing>
+			<example description="`color` paints the whole panel from a hue:  the header band, a lighter box, the border, the sub-head bands.  No `color` is `primary`;  sub-panels follow their panel's hue.  A hue a theme adds works too (the brand pages' `accent`).">
+				<html>
+					<div class="ui-cluster" style="align-items: start">
+						<ui-panel label="Default" style="width: 200px">
+							<ui-panel label="Tweak">
+								<p>No <code>color</code>: primary.</p>
+							</ui-panel>
+						</ui-panel>
+						<ui-panel label="Violet" color="violet" style="width: 200px">
+							<ui-panel label="Tweak">
+								<p>Any hue.</p>
+							</ui-panel>
+						</ui-panel>
+						<ui-panel label="Grey" color="grey" style="width: 200px">
+							<ui-panel label="Tweak">
+								<p>Quiet.</p>
+							</ui-panel>
+						</ui-panel>
+						<ui-panel label="Teal" color="teal" style="width: 200px">
+							<ui-panel label="Tweak">
+								<p>Sub-panels follow.</p>
+							</ui-panel>
+						</ui-panel>
+					</div>
+				</html>
+			</example>
+		</>
+
+		<section label="Tokens" sticky collapsible dividing>
+			<example description="Every colour, the radius, the padding and the spacing are tokens (`--ui-panel-*`):  set them on the panel or any ancestor.  The Theming tab lists them.">
+				<panel label="Settings" style="
+                      max-width: 320px;
+                      --ui-panel-background: var(--ui-surface);
+                      --ui-panel-header-background: var(--ui-surface-strong);
+                      --ui-panel-radius: 22px;
+                    ">
+					<checkbox appearance="toggle" selected>Notifications</checkbox>
+				</panel>
+			</example>
+		</>
+	</>
+</spell-notebook>

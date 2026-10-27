@@ -1,0 +1,87 @@
+<spell-notebook "rail usage">
+	<header level="1">
+		Rail
+		<header>A rail is used to show accompanying content outside the boundaries of the main view of a
+              site.</>
+	</>
+	<rail-tab-bar showing="usage"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#when-to-use">When to use</>
+				<ui-item link="#adjusting-sizes">Adjusting sizes</>
+				<ui-item link="#using-it">Using it</>
+				<ui-item link="#keyboard">Keyboard</>
+				<ui-item link="#accessibility">Accessibility</>
+			</>
+		</>
+	</>
+
+	<!-- USAGE:  when to use a rail, how it's positioned, accessibility. -->
+	<section label="When to use">
+		<markdown>
+			Rails display optional accompanying content outside of the main viewport of your site. Sites often use rails with
+			[sticky](/components/ui/ui-sticky.html) content to fix extra, often optional, content to the viewport as you scroll through the
+			page.
+
+			- The default rail is `300px` wide: just large enough to fit many common ad unit sizes, and just wide enough for a
+			  sub-navigation menu or a prominent call-to-action.
+			- This site's own "On this page" column is a `<ui-rail>` holding a `<ui-sticky>`.
+		</>
+	</>
+
+	<section label="Adjusting sizes">
+		<markdown>
+			Railed content will most likely need breakpoints of your own, specific to your site's content, so it never runs
+			past the edge of the browser.
+
+			- Rails usually sit beside long, single-column containers with long-form content: blog posts, articles, user
+			  profiles. Keep the main text column around `600-800px` wide, depending on the font size, for a readable line
+			  length.
+			- So most tablets fit one rail; laptops two small rails; larger monitors two full-sized rails.
+			- Narrow every rail with `--ui-rail-width` (Theming tab), and hide rails (or move their content into the page)
+			  below the width where they fit.
+		</>
+	</>
+
+	<section label="Using it">
+		<markdown>
+			Put a `<ui-rail>` inside the box it rails, and pick a side with `position="left"` or `position="right"`.
+
+			- A rail is positioned against the nearest positioned box around it: a `<ui-segment>`, or any element of yours
+			  with `position: relative`.
+			- It takes no room in the layout, so leave space beside the container for an outside rail, or use `internal`.
+			- It is as tall as its container, so a `<ui-sticky>` inside it can stick all the way down.
+			- Put anything in it: a segment, a sticky menu, an ad. It has no events.
+		</>
+		<markdown>
+			```html
+			<ui-container text class="article">
+			  <ui-rail position="right">
+			    <ui-sticky offset="64">
+			      <ui-menu direction="vertical">...</ui-menu>
+			    </ui-sticky>
+			  </ui-rail>
+			  <p>The article ...</p>
+			</ui-container>
+			```
+		</>
+	</>
+
+	<section label="Keyboard">
+		<markdown>A rail has no keys of its own: **Tab** reaches what's inside it in source order, wherever it is drawn.</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			- A rail is a plain block with no role: its content carries the meaning. If the rail is a region of its own (a
+			  table of contents, related links), put a named landmark inside it, e.g. `<nav aria-label="On this page">`.
+			- A rail comes before or after the main content in the source, wherever you wrote it; it is only moved visually.
+			  Write it where it makes sense to read it.
+			- An outside rail can end up off screen on a narrow viewport. Hide it, or move its content into the page, on
+			  small screens.
+			- If the element fails to render, it shows its children through a bare `<slot>`, but no longer as a
+			  rail: its place beside the content goes.
+		</>
+	</>
+</spell-notebook>

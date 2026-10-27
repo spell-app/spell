@@ -1,0 +1,160 @@
+<spell-notebook "tree-diagram examples">
+	<header level="1">
+		Tree diagram
+		<header>A tree diagram draws a tree top-down:  a box for each node, a line to each of its children.</>
+	</>
+	<tree-diagram-tab-bar showing="examples"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#types">Types</>
+				<ui-item link="#content">Content</>
+				<ui-item link="#variations">Variations</>
+			</>
+		</>
+	</>
+
+	<!--
+		EXAMPLES:  ours only, no Fomantic page (2026-10-05, epic `output-targets` P4).  Every example gives its tree
+		as a `<script type="application/json">` child, so the code shown IS the data;  the `tree` property is on
+		the Usage tab.
+	-->
+	<section label="Types">
+		<section label="Tree diagram" sticky collapsible dividing>
+			<example description="A tree diagram draws a tree top-down, from plain data:  here spell's parse tree for the first line of FizzBuzz, `if number / 15 is an integer`.">
+				<html>
+					<ui-tree-diagram>
+						<script type="application/json">
+							{
+							  "label": "If",
+							  "title": "if number / 15 is an integer",
+							  "children": [
+							    {
+							      "label": "IsA · integer",
+							      "detail": "boolean",
+							      "slot": "condition",
+							      "children": [
+							        {
+							          "label": "Divide",
+							          "detail": "number",
+							          "slot": "value",
+							          "children": [
+							            { "label": "Variable number", "detail": "number" },
+							            { "label": "Number 15", "detail": "number" }
+							          ]
+							        }
+							      ]
+							    },
+							    {
+							      "label": "Print",
+							      "slot": "body",
+							      "children": [
+							        { "label": "Variable number", "detail": "number" },
+							        { "label": "Text \"fizzbuzz\"", "detail": "text" }
+							      ]
+							    },
+							    { "label": "If …", "slot": "otherwise" }
+							  ]
+							}
+						</script>
+					</ui-tree-diagram>
+				</html>
+			</example>
+		</>
+
+		<section label="Labels only" sticky collapsible dividing>
+			<example description="Only `label` is needed:  each node is a box, joined to its children by lines.">
+				<html>
+					<ui-tree-diagram>
+						<script type="application/json">{ "label": "Add", "children": [{ "label": "Number 1" }, { "label": "Number 2" }] }</script>
+					</ui-tree-diagram>
+				</html>
+			</example>
+		</>
+	</>
+
+	<section label="Content">
+		<section label="Detail" sticky collapsible dividing>
+			<example description="A node's `detail` is a second, smaller, muted line under its label, e.g. a datatype.  Every box in a row is as tall as the tallest.">
+				<html>
+					<ui-tree-diagram>
+						<script type="application/json">
+							{
+							  "label": "Divide",
+							  "detail": "number",
+							  "children": [
+							    { "label": "Variable number", "detail": "number" },
+							    { "label": "Number 15" }
+							  ]
+							}
+						</script>
+					</ui-tree-diagram>
+				</html>
+			</example>
+		</>
+
+		<section label="Slot labels" sticky collapsible dividing>
+			<example description="A node's `slot` is written on the line from its parent, at its middle:  which part of the parent it fills.">
+				<html>
+					<ui-tree-diagram>
+						<script type="application/json">
+							{
+							  "label": "Repeat",
+							  "children": [
+							    { "label": "Range 1 to 100", "slot": "over" },
+							    { "label": "Variable number", "slot": "each" },
+							    { "label": "Block", "slot": "body" }
+							  ]
+							}
+						</script>
+					</ui-tree-diagram>
+				</html>
+			</example>
+		</>
+
+		<section label="Hover text" sticky collapsible dividing>
+			<example description="A node's `title` shows when the pointer rests on its box, e.g. the source it came from.">
+				<html>
+					<ui-tree-diagram>
+						<script type="application/json">
+							{
+							  "label": "Print",
+							  "title": "print number, \"fizz\"",
+							  "children": [
+							    { "label": "Variable number", "title": "number" },
+							    { "label": "Text \"fizz\"", "title": "\"fizz\"" }
+							  ]
+							}
+						</script>
+					</ui-tree-diagram>
+				</html>
+			</example>
+		</>
+	</>
+
+	<section label="Variations">
+		<section label="Wide trees" sticky collapsible dividing>
+			<example description="A tree shrinks to fit its column, down to three quarters of its size;  a wider one scrolls sideways (on a phone, this one does).">
+				<html>
+					<ui-tree-diagram>
+						<script type="application/json">
+							{
+							  "label": "List",
+							  "detail": "list of number",
+							  "children": [
+							    { "label": "Number 1" },
+							    { "label": "Number 2" },
+							    { "label": "Number 3" },
+							    { "label": "Number 5" },
+							    { "label": "Number 8" },
+							    { "label": "Number 13" },
+							    { "label": "Number 21" }
+							  ]
+							}
+						</script>
+					</ui-tree-diagram>
+				</html>
+			</example>
+		</>
+	</>
+</spell-notebook>

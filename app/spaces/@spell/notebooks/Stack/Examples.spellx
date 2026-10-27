@@ -1,0 +1,104 @@
+<spell-notebook "stack examples">
+	<header level="1">
+		Stack
+		<header>A stack lays its children out in a column, or a row that wraps, evenly spaced.</>
+	</>
+	<stack-tab-bar showing="examples"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#types">Types</>
+				<ui-item link="#variations">Variations</>
+			</>
+		</>
+	</>
+
+	<!--
+		EXAMPLES:  Fomantic's page, section by section, in its order (Types, Content, States, Variations,
+		Groups ...).  Rules, the class-grammar mappings, gaps:  epics/spell-ui-pages/PAGES.md.
+		- A section:  `<ui-section id="examples-types" label="Types" sticky collapsible dividing>` around
+		  its examples;  ids spell out the nesting (`<tab>-<section>-<example>`, lowercase kebab of the headers).
+		- An example:  its own nested section (`label` = the example's name) around
+		  `<ui-example description="...">` and the live markup;  the markup IS the code shown.  A richer
+		  description:  `<p slot="description">` (+ `<ui-message slot="description">`).  Fomantic's header-less
+		  `.another.example`:  a second `<ui-example>` in the same section.
+		- Or write it flat (`<ui-header level="2">`, `<ui-example heading>`) and run `yarn site:sections`:
+		  it nests it and writes the ids (and fixes them after a title changes).
+		- A gap:  an HTML comment `GAP I<n>:  ...` BEFORE the example's section (a comment inside the example
+		  shows in its code).
+	-->
+	<section label="Types">
+		<section label="Stack" sticky collapsible dividing>
+			<example description="A column, its children 1em apart.  No look of its own:  the segments are the children.">
+				<stack>
+					<segment>First</segment>
+					<segment>Second</segment>
+					<segment>Third</segment>
+				</stack>
+			</example>
+		</>
+
+		<section label="Row" sticky collapsible dividing>
+			<example description="`direction=\"horizontal\"`:  a row, its children centred on its middle.">
+				<stack direction="horizontal">
+					<icon name="inbox" size="large"/>
+					<text>3 new messages</text>
+					<button size="small">Open</button>
+				</stack>
+			</example>
+		</>
+
+		<section label="Wrapping row" sticky collapsible dividing>
+			<example description="`wrap`:  a row that wraps onto the next line, for tags or buttons (Web Awesome's cluster).  Narrow the window to see it wrap.">
+				<stack direction="horizontal" wrap spacing="sm">
+					<label>Design</label>
+					<label>Engineering</label>
+					<label>Research</label>
+					<label>Writing</label>
+					<label>Support</label>
+					<label>Sales</label>
+				</stack>
+			</example>
+		</>
+	</>
+
+	<section label="Variations">
+		<section label="Spacing" sticky collapsible dividing>
+			<example description="`spacing`:  `none`, `xs`, `sm`, `md` (the default), `lg`, `xl`.">
+				<stack spacing="lg">
+					<stack direction="horizontal" spacing="none">
+						<button>none</button>
+						<button>none</button>
+					</stack>
+					<stack direction="horizontal" spacing="sm">
+						<button>sm</button>
+						<button>sm</button>
+					</stack>
+					<stack direction="horizontal" spacing="xl">
+						<button>xl</button>
+						<button>xl</button>
+					</stack>
+				</stack>
+			</example>
+		</>
+
+		<section label="One left, one right" sticky collapsible dividing>
+			<example description="`justify=\"between\"`:  the first child at the start, the last at the end.  What `floated=\"right\"` used to do.">
+				<stack direction="horizontal" justify="between">
+					<header level="4">Inbox</header>
+					<button color="primary">New message</button>
+				</stack>
+			</example>
+		</>
+
+		<section label="Centred" sticky collapsible dividing>
+			<example description="`align=\"center\"`:  a column's children centred across it.">
+				<stack align="center" spacing="sm">
+					<icon name="inbox" size="huge"/>
+					<text>No messages yet</text>
+					<button size="small">Write one</button>
+				</stack>
+			</example>
+		</>
+	</>
+</spell-notebook>

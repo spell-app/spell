@@ -1,0 +1,89 @@
+<spell-notebook "step usage">
+	<header level="1">
+		Step
+		<header>A step shows the completion status of an activity in a series of activities.</>
+	</>
+	<step-tab-bar showing="usage"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#using-it">Using it</>
+				<ui-item link="#links-and-events">Links and events</>
+				<ui-item link="#keyboard">Keyboard</>
+				<ui-item link="#accessibility">Accessibility</>
+			</>
+		</>
+	</>
+
+	<!-- USAGE:  how to use it (attributes in practice, events, framework snippets), keyboard, accessibility. -->
+	<section label="Using it">
+		<markdown>
+			`<ui-steps>` is an ordered list and each `<ui-step>` one item of it.
+
+			- Mark the current step `selected` (Fomantic's `active` also works), finished ones `completed` and unavailable
+			  ones `disabled`. The steps never change these themselves: the page moves `selected` along as the user
+			  progresses.
+			- The title is `header`, not `title` (every HTML element already uses `title` for its tooltip); `description` is
+			  the line under it. For richer content, slot a `<ui-content>` with `<ui-title>` / `<ui-description>`.
+			- `icon` names the icon before the content; a `completed` step (and an `ordered` step's number) shows a check.
+			- Steps stack one per row below 768px of the GROUP's own width (992px with `stackable="tablet"`), not the
+			  window's, so a step group in a narrow panel stacks even on a wide screen; `unstackable` keeps the row. Circular
+			  steps never stack.
+			- `stack-with="page"` (on the steps, or on a `<ui-root>` for a whole page, as this site does) measures the
+			  SCREEN instead, as Fomantic.
+			- Circular steps (`appearance="circular"`) take a `color` on the group (the current and completed rings) or on one step.
+		</>
+		<markdown>
+			```html
+			<ui-steps ordered>
+			  <ui-step completed heading="Shipping" description="Choose your shipping options"></ui-step>
+			  <ui-step selected heading="Billing" description="Enter billing information"></ui-step>
+			  <ui-step disabled heading="Confirm Order"></ui-step>
+			</ui-steps>
+			```
+		</>
+	</>
+
+	<section label="Links and events">
+		<markdown>
+			A step with a `link` is a link; an `appearance="link"` step is a button whose `click` the page handles. A `disabled` link or
+			button step is never followed. Steps have no custom events: listen for `click` on the group.
+		</>
+		<markdown>
+			```js
+			const steps = document.querySelector("ui-steps")
+			steps.addEventListener("click", (event) => {
+			  const step = event.target.closest("ui-step[link]")
+			  if (!step) return
+			  steps.querySelector("ui-step[selected]")?.removeAttribute("selected")
+			  step.setAttribute("selected", "")
+			})
+			```
+		</>
+	</>
+
+	<section label="Keyboard">
+		<markdown>
+			- A step with a `link` is a real `<a>` and an `appearance="link"` step a real `<button>`: **Tab** reaches them, **Enter** follows
+			  them (**Space** too, for a button).
+			- Plain steps are text, not tab stops.
+			- A `disabled` link or button step is skipped.
+		</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			- The group is an ordered list (`<ol>` with an explicit `role="list"`) and each step a list item, so a screen
+			  reader announces "list, 3 items" and each step's position.
+			- The `selected` step carries `aria-current="step"`.
+			- A `completed` step adds a visually hidden "Completed" (translatable): the check alone says nothing to a screen
+			  reader.
+			- A `disabled` step is `aria-disabled` (a disabled `link` step is a disabled `<button>`), and its dimmed text is
+			  that of an inactive control.
+			- Icons are decorative; the step's title carries its meaning.
+			- If a step or the steps group fails to render, it shows its children through a bare `<slot>`, so the
+			  text stays; the list, a step's box and link, `aria-current`, the "Completed" text, the `icon` glyph
+			  (a slotted icon too) and the check go.
+		</>
+	</>
+</spell-notebook>

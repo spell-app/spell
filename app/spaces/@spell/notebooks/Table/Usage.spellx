@@ -1,0 +1,242 @@
+<spell-notebook "table usage">
+	<header level="1">
+		Table
+		<header>A table displays a collection of data grouped into rows.</>
+	</>
+	<table-tab-bar showing="usage"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#rows-and-cells">Rows and cells</>
+				<ui-item link="#using-it">Using it</>
+				<ui-item link="#stacking">Stacking</>
+				<ui-item link="#sorting">Sorting</>
+				<ui-item link="#events">Events</>
+				<ui-item link="#data-mode">Data mode</>
+				<ui-item link="#keyboard">Keyboard</>
+				<ui-item link="#accessibility">Accessibility</>
+				<ui-item link="#framework-usage">Framework usage</>
+			</>
+		</>
+	</>
+
+	<!-- USAGE:  rows and cells, the native table, stacking, sorting, data mode, keyboard, accessibility, frameworks. -->
+	<section label="Rows and cells">
+		<markdown>
+			A table can be built from tags alone:  `<ui-row>`s of `<ui-cell>`s, with no native `<table>`.
+			That's how a drawing writes one, since a drawing holds no native HTML.
+
+			- `header` on a row makes it the header row:  its cells name the columns.
+			- `header` on a cell in a body row makes it that row's name (the first cell, say).
+			- `footer` on a row makes it a footer row:  totals, notes.
+			- `span="2"` makes a cell cover two columns.  Cells never span rows.
+			- `caption` names the table, above its rows.
+			- Every class word works as on a native table:  `celled`, `appearance="striped"`, `padding="compact"`,
+			  `selectable`, `inverted`, a colour.
+			- Sorting works the same:  click a header cell;  with `client-sort` the rows themselves move.
+			- Screen readers hear a real table:  rows, column headers, row headers and cells.
+
+			`<ui-row>` is also the grid's row:  inside a `<ui-grid>` it lays out columns, as before.
+		</>
+	</>
+
+	<section label="Using it">
+		<markdown>
+			`<ui-table>` holds ONE native `<table>`, and the table stays in the page (the light DOM): its semantics,
+			find-in-page, copy and your own CSS all work as on any table. The element only adds the look, sorting and a
+			scroller.
+
+			- It copies its class words onto the table (`<ui-table celled appearance="striped">` gives
+			  `<table class="ui celled striped table">`), adding and removing only its own words, so your classes
+			  stay. A server can write that class string itself, and the table paints before any script runs.
+			- Rows and cells keep Fomantic's classes on the native `tr`, `td` and `th`: `positive`, `left red marked`,
+			  `collapsing`, `four wide`, `right aligned`. No script, no extra elements.
+			- `columns="4"` is Fomantic's equal-width column count; the data mode's column list is the separate `columnDefs`
+			  property.
+		</>
+	</>
+
+	<section label="Stacking">
+		<markdown>
+			`stackable` answers to the VIEWPORT, as in Fomantic: below 768px every table stacks unless it is `unstackable`;
+			`stackable="tablet"` also stacks below 992px.
+
+			A table in a narrow sidebar of a wide screen can follow its OWN width instead with `stack-by="container"`, or a
+			whole region with the token `--ui-table-stack-by: container` (on an ancestor or the page); the attribute wins
+			over the token.
+
+			`stack-by="none"` never stacks: `unstackable`, said the way the token can say it for a whole page.
+			`ui-table { --ui-table-stack-by: none }` keeps every table on the page a table, however narrow; a table that
+			should still stack opts back in with its own `stack-by="container"` or `stack-by="viewport"`.
+		</>
+	</>
+
+	<section label="Sorting">
+		<markdown>
+			With `sortable`, every header in the `thead` sorts, unless it has `data-sortable="false"` (or Fomantic's
+			`class="disabled"`).
+
+			- A click, or Enter / Space on a focused header, first dispatches the cancelable `ui-sorting`
+			  (`{ column, key, direction }`, where `key` is the header's `data-key`).
+			- Then `sort-column`, `sort-direction` and the header's `aria-sort` update. The same header again flips the
+			  direction; a new one starts `ascending`.
+			- The element does not move your rows unless you ask: `client-sort` reorders a simple table's `tbody` rows by the
+			  sorted column's text (numbers in number order); otherwise sort the rows yourself.
+		</>
+
+		<section label="Client sort" sticky collapsible dividing>
+			<example description="`client-sort` reorders the rows by cell text on each `ui-sorting`.  Click a header.">
+				<html>
+					<ui-table sortable client-sort celled>
+						<table>
+							<thead>
+								<tr>
+									<th data-key="name">
+										<button type="button">Name</button>
+									</th>
+									<th data-key="calories" class="right aligned">
+										<button type="button">Calories</button>
+									</th>
+									<th data-sortable="false">Notes</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td>Bread</td>
+									<td class="right aligned">150</td>
+									<td>Wholemeal</td>
+								</tr>
+								<tr>
+									<td>Apples</td>
+									<td class="right aligned">95</td>
+									<td>None</td>
+								</tr>
+								<tr>
+									<td>Cheese</td>
+									<td class="right aligned">1200</td>
+									<td>Per kilo</td>
+								</tr>
+								<tr>
+									<td>Oranges</td>
+									<td class="right aligned">62</td>
+									<td>None</td>
+								</tr>
+							</tbody>
+						</table>
+					</ui-table>
+				</html>
+			</example>
+		</>
+	</>
+
+	<section label="Events">
+		<markdown>
+			`ui-sorting` is the only event: `detail` is `{ column, key, direction, originalEvent }`. `preventDefault()` keeps
+			the current sort (and skips data mode / `client-sort` reordering).
+		</>
+		<markdown>
+			```js
+			// the app sorts its own rows;  `event.preventDefault()` would keep the current sort instead
+			const table = document.querySelector("ui-table")
+			table.addEventListener("ui-sorting", async (event) => {
+			  const { key, direction } = event.detail
+			  renderRows(await fetchRows({ sort: key, direction }))
+			})
+			```
+		</>
+	</>
+
+	<section label="Data mode">
+		<markdown>
+			With NO slotted `<table>`, set the `rows` property (and optionally `columnDefs`: `key`, `header`, `textAlign`,
+			`sortable`, `width`) and the element renders the table itself, into the light DOM as plain text.
+
+			- `th scope="col"` headers, with sort buttons when `sortable`, and the rows in the current sort order.
+			- Without `columnDefs`, the columns are the first row's keys.
+			- A slotted table always wins and is never overwritten.
+			- Every row renders (there is no virtual scrolling yet), and first paint never needs the property: a server can
+			  write the same `<table>` markup itself.
+		</>
+		<markdown>
+			```html
+			<ui-table celled appearance="striped" sortable aria-label="Planets"></ui-table>
+			```
+		</>
+		<markdown>
+			```js
+			const table = document.querySelector("ui-table")
+			table.columnDefs = [
+			  { key: "name", header: "Planet" },
+			  { key: "moons", header: "Moons", textAlign: "right" },
+			  { key: "day", header: "Day (hours)", textAlign: "right" }
+			]
+			table.rows = [
+			  { name: "Mercury", moons: 0, day: 4222.6 },
+			  { name: "Venus", moons: 0, day: 2802 },
+			  { name: "Earth", moons: 1, day: 24 },
+			  { name: "Mars", moons: 2, day: 24.7 },
+			  { name: "Jupiter", moons: 95, day: 9.9 }
+			]
+			table.addEventListener("ui-sorting", (event) => console.log(event.detail))
+			```
+		</>
+	</>
+
+	<section label="Keyboard">
+		<markdown>
+			- **Tab** moves to each sort button (or focusable header), and to a scrolling region.
+			- **Enter** / **Space** sorts by the focused header; again flips the direction.
+			- **Arrow keys**, **Page Up** / **Page Down** scroll a focused scrolling region.
+		</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			- The table is a real `<table>` in the document, so screen readers read its rows, columns and headers natively.
+			  Mark headers with `th` and `scope` (`col`, `row`, `colgroup`), and name the table with a `<caption>`.
+			- Row and cell states (`positive`, `error`, `warning`, colours, `marked`) are visual only: say the same thing in
+			  the cell's text too.
+			- Sortable headers: put a `<button>` in each, as the WAI-ARIA sortable table pattern does. A header without one
+			  is made focusable and answers Enter and Space. The sorted header gets `aria-sort`.
+			- `scrolling` and `overflowing` make the scroller a focusable `role="region"`, so keyboard users can scroll it.
+			  It is named by the host's `aria-label`, else the table's `<caption>`, else the translated `label` ("Table").
+			- If the element fails to render, it shows a slotted `<table>` through a bare `<slot>`, so the data
+			  stays, but without the table look or the scroller. It drops sorting (`ui-sorting`, `aria-sort`,
+			  focusable headers, `client-sort`), data mode (nothing shows without a slotted `<table>`)
+			  and the translated `label`.
+		</>
+	</>
+
+	<section label="Framework usage">
+		<markdown>
+			Render the `<table>` inside `<ui-table>` as usual. For data mode, set `rows` / `columnDefs` as properties, not
+			attributes, and listen for `ui-sorting`.
+		</>
+		<header level="4" id="framework-react">React 19</>
+		<markdown>
+			```jsx
+			<ui-table celled sortable rows={rows} columnDefs={columns} onui-sort={(event) => setSort(event.detail)} />
+			```
+		</>
+		<header level="4" id="framework-vue">Vue 3.5</>
+		<markdown>
+			```html
+			<!-- compilerOptions.isCustomElement = (tag) => tag.startsWith("ui-") -->
+			<ui-table celled sortable :rows="rows" :columnDefs="columns" @ui-sorting="(event) => (sort = event.detail)" />
+			```
+		</>
+		<header level="4" id="framework-solid">Solid 2</>
+		<markdown>
+			```jsx
+			// events and rich data are plain props:  `on-<event>={...}`, `options={...}`
+			<ui-table
+			  celled
+			  sortable
+			  rows={rows()}
+			  columnDefs={columns}
+			  on-ui-sorting={(event) => setSort(event.detail)}
+			/>
+			```
+		</>
+	</>
+</spell-notebook>

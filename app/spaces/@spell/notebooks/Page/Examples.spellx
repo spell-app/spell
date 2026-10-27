@@ -1,0 +1,69 @@
+<spell-notebook "page examples">
+	<header level="1">
+		Page
+		<header>A page frames a whole window:  a header, navigation, the main content, a side column and a footer.</>
+	</>
+	<page-tab-bar showing="examples"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#types">Types</>
+			</>
+		</>
+	</>
+
+	<!--
+		EXAMPLES:  Fomantic's page, section by section, in its order (Types, Content, States, Variations,
+		Groups ...).  Rules, the class-grammar mappings, gaps:  epics/spell-ui-pages/PAGES.md.
+		- A section:  `<ui-section id="examples-types" label="Types" sticky collapsible dividing>` around
+		  its examples;  ids spell out the nesting (`<tab>-<section>-<example>`, lowercase kebab of the headers).
+		- An example:  its own nested section (`label` = the example's name) around
+		  `<ui-example description="...">` and the live markup;  the markup IS the code shown.  A richer
+		  description:  `<p slot="description">` (+ `<ui-message slot="description">`).  Fomantic's header-less
+		  `.another.example`:  a second `<ui-example>` in the same section.
+		- Or write it flat (`<ui-header level="2">`, `<ui-example heading>`) and run `yarn site:sections`:
+		  it nests it and writes the ids (and fixes them after a title changes).
+		- A gap:  an HTML comment `GAP I<n>:  ...` BEFORE the example's section (a comment inside the example
+		  shows in its code).
+	-->
+	<section label="Types">
+		<section label="Page" sticky collapsible dividing>
+			<example description="A whole page:  the header across the top, the folders and a tip either side of the messages, the footer at the bottom.  Drag the box's corner narrower:  on a phone's width the regions stack.  Here it's shrunk into a box (`--ui-page-min-height: 0`);  on its own it fills the window.">
+				<html>
+					<div style="resize: both; overflow: auto; border: 1px dashed currentColor; max-width: 100%">
+						<ui-page style="--ui-page-min-height: 0; --ui-page-nav-width: 9em; --ui-page-aside-width: 9em">
+							<ui-header slot="header" level="2">Inbox</ui-header>
+							<ui-menu slot="nav" direction="vertical" fluid aria-label="Folders">
+								<ui-item selected>Inbox</ui-item>
+								<ui-item>Sent</ui-item>
+								<ui-item>Drafts</ui-item>
+							</ui-menu>
+							<ui-text paragraph>Three new messages since this morning.</ui-text>
+							<ui-segment slot="aside">Tip:  press <ui-keys shortcut="mod+K"></ui-keys> to search.</ui-segment>
+							<ui-text slot="footer" color="grey">© 2026 Inbox</ui-text>
+						</ui-page>
+					</div>
+				</html>
+			</example>
+		</>
+
+		<section label="On a phone" sticky collapsible dividing>
+			<example description="At a phone's width every region stacks, in reading order:  header, nav, content, aside, footer.">
+				<html>
+					<div style="width: 22em; max-width: 100%; border: 1px dashed currentColor">
+						<ui-page style="--ui-page-min-height: 0">
+							<ui-header slot="header" level="3">Inbox</ui-header>
+							<ui-menu slot="nav" fluid aria-label="Folders">
+								<ui-item selected>Inbox</ui-item>
+								<ui-item>Sent</ui-item>
+							</ui-menu>
+							<ui-text paragraph>Three new messages since this morning.</ui-text>
+							<ui-segment slot="aside">A tip, under the messages.</ui-segment>
+							<ui-text slot="footer" color="grey">© 2026 Inbox</ui-text>
+						</ui-page>
+					</div>
+				</html>
+			</example>
+		</>
+	</>
+</spell-notebook>

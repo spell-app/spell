@@ -1,0 +1,48 @@
+<spell-notebook "flag usage">
+	<header level="1">
+		Flag
+		<header>A flag is used to represent a political state.</>
+	</>
+	<flag-tab-bar showing="usage"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#using-it">Using it</>
+				<ui-item link="#keyboard">Keyboard</>
+				<ui-item link="#accessibility">Accessibility</>
+			</>
+		</>
+	</>
+
+	<section label="Using it">
+		<markdown>
+			Write `<ui-flag country="fr">`. `country` takes:
+
+			- any two-letter country code (ISO 3166-1 alpha-2), in any case: `fr`, `US`
+			- or the English names and aliases from Fomantic's flag list (the table on the Examples tab): `france`,
+			  `united states`, `america`, `uk`, `czech republic` ... Underscores count as spaces, so `United_States` works too
+			- or one of the non-country flags: `rainbow` (`pride`, `lgbt`), `transgender`, `pirate`, `england`, `scotland`,
+			  `wales`
+
+			The flag is the Unicode flag emoji, drawn by the platform's emoji font: no images to download and no CSS per
+			country. An unknown `country` renders an empty box of the same size, so the line doesn't jump. Flags have no
+			events.
+		</>
+	</>
+
+	<section label="Keyboard">
+		<markdown>A flag takes no focus and handles no keys.</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			- A flag is an image named after its country (`role="img"`, `aria-label="France"`). The name comes from the
+			  browser's own list of region names in the page's language, so it is translated for free.
+			- The non-country flags have their own names ("Rainbow flag", "Pirate flag", "England" ...), which a translation
+			  can change.
+			- A flag with an unknown `country` has no role and no name, so screen readers skip it.
+			- If the flag fails to render, the emoji and its name go: only children written inside the element
+			  still show, through a bare `<slot>`.
+		</>
+	</>
+</spell-notebook>

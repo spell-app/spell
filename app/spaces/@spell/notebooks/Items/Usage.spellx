@@ -1,0 +1,79 @@
+<spell-notebook "items usage">
+	<header level="1">
+		Items
+		<header>A group of items presents a set of site content for display, each an image beside its
+              text.</>
+	</>
+	<items-tab-bar showing="usage"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#using-it">Using it</>
+				<ui-item link="#events">Events</>
+				<ui-item link="#keyboard">Keyboard</>
+				<ui-item link="#accessibility">Accessibility</>
+			</>
+		</>
+	</>
+
+	<!-- USAGE:  from the old Astro page (Behaviour, Accessibility), tightened. -->
+	<section label="Using it">
+		<markdown>
+			An item here is the same `<ui-item>` that dropdowns, lists and menus use: there is no separate "items item".
+			Inside `<ui-items>` it becomes a block with its image on one side and a `<ui-content>` on the other, and it styles
+			the content parts inside it (`<ui-header>`, `<ui-meta>`, `<ui-description>`, `<ui-extra>`) as Fomantic's item
+			header, meta and so on. The same parts inside a list item still look like list parts.
+
+			- The image: the `image` shorthand, a slotted `<img>` (both at the item's image width), or a `<ui-image size>`
+			  (its own size).
+			- `link` makes the whole item one link; `appearance="link"` on the group is only the hover look.
+			- `<ui-content vertical-align="middle|bottom">` aligns the content against the image;  a
+			  `<ui-stack direction="horizontal" justify="end">` in a part (`<ui-extra>`) puts its buttons at the right.
+			- Items stack, image above content, below 768px:  of the GROUP's width by default, of the window's with
+			  `stack-with="page"` (here, or on a `<ui-root>`);  `unstackable` keeps them side by side. A stacked
+			  image takes its natural width, up to 250px tall.
+		</>
+		<markdown>
+			```html
+			<ui-items divided>
+			  <ui-item image="/covers/totoro.jpg">
+			    <ui-content>
+			      <ui-header link="/films/totoro">My Neighbor Totoro</ui-header>
+			      <ui-meta><span>IFC Cinema</span></ui-meta>
+			      <ui-description><p>Two sisters move to the country ...</p></ui-description>
+			      <ui-extra><ui-label>Limited</ui-label></ui-extra>
+			    </ui-content>
+			  </ui-item>
+			</ui-items>
+			```
+		</>
+	</>
+
+	<section label="Events">
+		<markdown>
+			A group has no events of its own. A link item is a normal link (`click`, then navigation); buttons and links
+			inside an item's content fire their native events.
+		</>
+	</>
+
+	<section label="Keyboard">
+		<markdown>
+			The group is never a tab stop. **Tab** reaches each link item (one stop per item) or the links and buttons inside
+			an item's content, in reading order; **Enter** follows a link.
+		</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			- The group is a `role="list"` and each item a `listitem`, so a screen reader hears how many there are.
+			- A link item is one `<a>` whose name is all of its text. Keep other links and buttons out of it, and don't give a
+			  linked header its own `link` inside one.
+			- Give a `<ui-header>` a `level` when an item's title should be a heading in the page outline.
+			- A slotted image needs its own `alt`; the `image` shorthand is decorative (`alt=""`), so put what matters in
+			  the text.
+			- `disabled` fades the item and sets `aria-disabled`.
+			- If the element fails to render, it shows its items through a bare `<slot>`, so they still read in
+			  order; the list around them, its spacing and the stacking in a narrow group go.
+		</>
+	</>
+</spell-notebook>

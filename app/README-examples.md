@@ -54,6 +54,8 @@ They're two groups in Spell's own space:
 `@spell/examples`, and `@spell/library`, whose library is for other projects to import.
 Every example but Counter has a guide that takes it apart:  [guides](#guides--programs-that-read-as-prose), below.
 Counter has a notebook instead, `@spell/notebooks/Counter`, which imports its counter and tries it out.
+Every Spell UI component page is a notebook project too, `@spell/notebooks/Button` and the rest:
+a notebook per tab, linked by the page's tab bar, written from the page by `spell app notebook convert`.
 
 ### Opening one
 

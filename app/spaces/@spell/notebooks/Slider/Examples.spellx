@@ -1,0 +1,258 @@
+<spell-notebook "slider examples">
+	<header level="1">
+		Slider
+		<header>A slider allows users to select values within a range.</>
+	</>
+	<slider-tab-bar showing="examples"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#types">Types</>
+				<ui-item link="#states">States</>
+				<ui-item link="#variations">Variations</>
+				<ui-item link="#more-examples">More Examples</>
+			</>
+		</>
+	</>
+
+	<!--
+		EXAMPLES:  Fomantic's slider page, its Definition tab section by section (Types, Variations), then its Examples tab
+		(More Examples).  A slider is a form control:  every example is named (`aria-label`, or a `<label for>`).
+		Fomantic's settings are attributes here (`min`, `max`, `step`, `value` for `start`, `end`);  its letter and
+		interpreted labels are one list, `step-labels`.
+	-->
+	<section label="Types">
+		<section label="Slider" sticky collapsible dividing>
+			<example description="A standard slider:  `min` 0, `max` 20 and `step` 1 by default, as Fomantic's.">
+				<slider aria-label="Slider"/>
+			</example>
+		</>
+
+		<section label="Labeled slider" sticky collapsible dividing>
+			<example description="A slider that shows its labels:  `labeled`.">
+				<slider labeled aria-label="Labeled"/>
+			</example>
+		</>
+
+		<section label="Labeled ticked slider" sticky collapsible dividing>
+			<example description="A slider that shows its labels and ticks:  `labeled ticked`.">
+				<slider labeled ticked aria-label="Labeled ticked"/>
+			</example>
+		</>
+
+		<section label="Ticked slider" sticky collapsible dividing>
+			<example description="Ours, not Fomantic's:  `ticked` alone draws plain ticks under the track, no numbers;  `tick-step` spaces them (here every 20 on a 0 ... 200 slider stepping by 1).">
+				<slider ticked max="200" value="120" tick-step="20" aria-label="Chroma"/>
+			</example>
+		</>
+
+		<section label="Bottom aligned labeled" sticky collapsible dividing>
+			<example description="A slider can display the labels below the track:  `aligned=\"bottom\"`.">
+				<slider labeled align="bottom" aria-label="Bottom aligned"/>
+			</example>
+		</>
+
+		<!-- GAP I84:  no restricted labels (0, 10, 15, 35, 80, 90, 100);  the labels auto-adjust. -->
+		<section label="Restricted Labels" sticky collapsible dividing>
+			<example description="You can restrict the display of labels to only the ones you want.  Not yet:  ours always pick evenly spaced labels.">
+				<slider labeled ticked max="100" step="0" aria-label="Restricted labels"/>
+			</example>
+		</>
+
+		<section label="Letters" sticky collapsible dividing>
+			<example description="Instead of numeric values, you can show letters:  one `step-labels` entry per step, from `min`.  The thumb speaks them too.">
+				<html>
+					<ui-slider labeled max="15" step-labels="\[\"A\",\"B\",\"C\",\"D\",\"E\",\"F\",\"G\",\"H\",\"I\",\"J\",\"K\",\"L\",\"M\",\"N\",\"O\",\"P\"]" aria-label="Letters"></ui-slider>
+				</html>
+			</example>
+			<example description="You may provide a different alphabetical set of letters.">
+				<html>
+					<ui-slider labeled max="15" step-labels="\[\"α\",\"β\",\"γ\",\"δ\",\"ε\",\"ζ\",\"η\",\"θ\",\"ι\",\"κ\",\"λ\",\"μ\",\"ν\",\"ξ\",\"ο\",\"π\"]" aria-label="Greek letters"></ui-slider>
+				</html>
+			</example>
+			<example description="Letters can repeat once the end of the letter set is reached, like the columns of a spreadsheet:  write them out.">
+				<html>
+					<ui-slider labeled max="15" step-labels="\[\"A\",\"B\",\"C\",\"AA\",\"AB\",\"AC\",\"BA\",\"BB\",\"BC\",\"CA\",\"CB\",\"CC\",\"AAA\",\"AAB\",\"AAC\",\"ABA\"]" aria-label="Repeating letters"></ui-slider>
+				</html>
+			</example>
+		</>
+
+		<section label="Letter Words" sticky collapsible dividing>
+			<example description="By providing words to `step-labels` you can predefine text for each label value.">
+				<html>
+					<ui-slider labeled max="3" step-labels="\[\"Beginner\",\"Advanced\",\"Pro\",\"Genius\"]" aria-label="Level"></ui-slider>
+				</html>
+			</example>
+		</>
+
+		<section label="Custom interpreted labels" sticky collapsible dividing>
+			<example description="Fomantic's `interpretLabel` function returns a custom label per value;  ours is the same list, computed once (here hex values).">
+				<html>
+					<ui-slider labeled ticked step-labels="\[\"00\",\"01\",\"02\",\"03\",\"04\",\"05\",\"06\",\"07\",\"08\",\"09\",\"0A\",\"0B\",\"0C\",\"0D\",\"0E\",\"0F\",\"10\",\"11\",\"12\",\"13\",\"14\"]" aria-label="Hex"></ui-slider>
+				</html>
+			</example>
+		</>
+
+		<section label="Range slider" sticky collapsible dividing>
+			<example description="A range slider allows you to select a range between two values:  `range`, with `value` and `end`.">
+				<slider range labeled ticked min="5" max="100" value="10" end="90" step="5" aria-label="Range"/>
+			</example>
+
+			<!-- GAP I85:  no minimum / maximum distance between the thumbs (Fomantic's minRange 10, maxRange 40). -->
+			<example description="A range slider can be limited in how far apart the two thumbs can be.  Not yet:  ours only stop at each other.">
+				<slider range labeled ticked min="5" max="100" value="10" end="50" step="0" aria-label="Limited range"/>
+			</example>
+		</>
+	</>
+
+	<section label="States">
+		<section label="Disabled" sticky collapsible dividing>
+			<example description="A slider can appear disabled:  dimmed, not focusable, left out of the form.">
+				<slider disabled aria-label="Disabled"/>
+			</example>
+		</>
+
+		<section label="Read-only" sticky collapsible dividing>
+			<example description="A `readonly` slider shows its value and can't be changed, but is still focusable and submitted.">
+				<slider readonly value="12" aria-label="Read-only"/>
+			</example>
+		</>
+	</>
+
+	<section label="Variations">
+		<section label="Inverted" sticky collapsible dividing>
+			<example description="A slider can be inverted, for dark backgrounds.">
+				<segment inverted>
+					<slider inverted aria-label="Inverted"/>
+				</segment>
+			</example>
+		</>
+
+		<section label="Reversed" sticky collapsible dividing>
+			<example description="A slider can be reversed:  it runs from the right.">
+				<slider direction="reversed" aria-label="Reversed"/>
+			</example>
+		</>
+
+		<!-- GAP I86:  no thumb tooltips (showThumbTooltip / tooltipConfig). -->
+		<section label="Thumb Tooltips" sticky collapsible dividing>
+			<example description="The slider thumbs can show a tooltip on hover containing the current value.  Not yet.">
+				<slider aria-label="Tooltips"/>
+			</example>
+			<example description="The tooltips can stay visible all the time, in any popup variation.  Not yet.">
+				<slider range aria-label="Range tooltips"/>
+			</example>
+		</>
+
+		<!-- GAP I83:  a vertical slider fills its host's height:  only an inline style sets it (as in Fomantic's own markup). -->
+		<section label="Vertical" sticky collapsible dividing>
+			<example description="A slider can be vertical, filling the host's height;  min at the top.">
+				<slider direction="vertical" style="height: 200px" aria-label="Vertical"/>
+			</example>
+		</>
+
+		<!-- GAP I83:  the host's height is an inline style. -->
+		<section label="Vertical right aligned" sticky collapsible dividing>
+			<example description="A vertical slider can have its ticks and labels right aligned:  `align=\"right\"`.">
+				<slider direction="vertical" labeled ticked align="right" style="height: 200px" aria-label="Right aligned"/>
+			</example>
+		</>
+
+		<section label="Colored" sticky collapsible dividing>
+			<example description="A slider can be different colors.">
+				<slider color="red" value="4" aria-label="Red"/>
+				<slider color="orange" value="5" aria-label="Orange"/>
+				<slider color="yellow" value="6" aria-label="Yellow"/>
+				<slider color="olive" value="7" aria-label="Olive"/>
+				<slider color="green" value="8" aria-label="Green"/>
+				<slider color="teal" value="9" aria-label="Teal"/>
+				<slider color="blue" value="10" aria-label="Blue"/>
+				<slider color="violet" value="11" aria-label="Violet"/>
+				<slider color="purple" value="12" aria-label="Purple"/>
+				<slider color="pink" value="13" aria-label="Pink"/>
+				<slider color="brown" value="14" aria-label="Brown"/>
+				<slider color="grey" value="15" aria-label="Grey"/>
+				<slider color="black" value="16" aria-label="Black"/>
+			</example>
+		</>
+
+		<section label="Inverted Colored" sticky collapsible dividing>
+			<example description="A slider can be different colors while inverted.">
+				<segment inverted>
+					<slider inverted color="red" value="4" aria-label="Red"/>
+					<slider inverted color="orange" value="5" aria-label="Orange"/>
+					<slider inverted color="yellow" value="6" aria-label="Yellow"/>
+					<slider inverted color="olive" value="7" aria-label="Olive"/>
+					<slider inverted color="green" value="8" aria-label="Green"/>
+					<slider inverted color="teal" value="9" aria-label="Teal"/>
+					<slider inverted color="blue" value="10" aria-label="Blue"/>
+					<slider inverted color="violet" value="11" aria-label="Violet"/>
+					<slider inverted color="purple" value="12" aria-label="Purple"/>
+					<slider inverted color="pink" value="13" aria-label="Pink"/>
+					<slider inverted color="brown" value="14" aria-label="Brown"/>
+					<slider inverted color="grey" value="15" aria-label="Grey"/>
+					<slider inverted color="black" value="16" aria-label="Black"/>
+				</segment>
+			</example>
+		</>
+
+		<section label="Basic" sticky collapsible dividing>
+			<example description="A `basic` slider's thumbs take the fill colour instead of white.">
+				<slider appearance="basic" color="blue" value="10" aria-label="Basic"/>
+			</example>
+		</>
+
+		<section label="Hover" sticky collapsible dividing>
+			<example description="With `hover`, the thumbs show only while the slider is hovered or focused.">
+				<slider hover value="10" aria-label="Hover"/>
+			</example>
+		</>
+
+		<section label="Size" sticky collapsible dividing>
+			<example description="A slider can have different sizes.">
+				<slider color="red" size="small" value="4" aria-label="Small"/>
+				<slider color="orange" value="8" aria-label="Medium"/>
+				<slider color="yellow" size="large" value="12" aria-label="Large"/>
+				<slider color="olive" size="big" value="16" aria-label="Big"/>
+			</example>
+		</>
+	</>
+
+	<section label="More Examples">
+		<section label="Step" sticky collapsible dividing>
+			<example description="A slider can have a custom step...">
+				<slider labeled max="10" value="4" step="2" aria-label="Even steps"/>
+			</example>
+			<example description="...or no step at all:  `step=\"0\"` allows any value.">
+				<slider max="10" value="3.82" step="0" aria-label="Any value"/>
+			</example>
+		</>
+
+		<section label="Smooth slide" sticky collapsible dividing>
+			<example description="A slider can have a smooth slide:  the thumb glides under the pointer, the value still snaps.">
+				<slider smooth labeled ticked max="10" value="4" step="2" aria-label="Smooth"/>
+			</example>
+		</>
+
+		<!-- GAP I84:  no highlighted range labels (Fomantic's highlightRange). -->
+		<section label="Highlight Range" sticky collapsible dividing>
+			<example description="A slider can highlight the selected range values only.  Not yet:  the track fill shows the range, the labels don't.">
+				<slider color="green" range labeled ticked max="50" value="5" end="25" aria-label="Highlighted range"/>
+			</example>
+		</>
+
+		<!-- GAP I84:  no `ui label` look for the tick labels. -->
+		<section label="UI Labels" sticky collapsible dividing>
+			<example description="A slider can use `<ui-label>`s for its tick values.  Not yet:  the labels are plain text.">
+				<slider color="green" range labeled ticked max="50" aria-label="Labels"/>
+			</example>
+		</>
+
+		<!-- GAP I84:  labels always auto-adjust;  no `fixed` or off. -->
+		<section label="Autoadjust Labels" sticky collapsible dividing>
+			<example description="On different window sizes, a large scale slider can't show every value: it shows evenly spaced labels, the rest as half ticks. Fomantic's `autoAdjustLabels: false` and `fixed` (with labelDistance) aren't settable yet.">
+				<slider color="green" range labeled ticked max="97" aria-label="Auto-adjusted"/>
+			</example>
+		</>
+	</>
+</spell-notebook>

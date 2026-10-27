@@ -24,6 +24,9 @@ import { SP } from "spell-parser/spell"
  * - The page's comments between its sections, prose and examples (each tab's notes on how the page is written, the
  *   `GAP` notes) are spellx comments, `<!-- ... -->`, where they were:  never drawn (Owen, 2026-10-26).
  *   Those inside an example's markup (the playground's markers) are left out.
+ * - Every tag closes with `</>` (Owen, 2026-10-27), except:
+ *   - `</spell-notebook>` and `</example>`, written in full
+ *   - the markup inside an example, its code, written as people write it (`</button>`, `</ui-segment>`)
  * - What it couldn't write as the page has it is in `warnings`, for a person to tidy by hand.
  * - Pure:  given the page's text, it returns the files' text, and writes nothing.
  *   Its bare names come from Spell UI's pack (`SP.ComponentPacks`), registered by `spell-app/spaces`.
@@ -82,9 +85,14 @@ export class NotebookFromPage {
     return slugOf(this.title)
   }
 
+  /** The project's folder:  its title, each word capitalised, `Button`, `TableOfContents`. */
+  get folder(): string {
+    return fileNameOf(this.title)
+  }
+
   /** The project's address, `@spell/notebooks/Button`. */
   private get project(): string {
-    return `${this.options.into}/${this.title.replace(/\s+/g, "")}`
+    return `${this.options.into}/${this.folder}`
   }
 
   /** The tab bar's tag, `<button-tab-bar>`. */
@@ -125,7 +133,7 @@ export class NotebookFromPage {
     const values = this.tabs.map((tab) => tab.value)
     const items = this.tabs.map(
       (tab) =>
-        `\t\t\t\t<ui-item link="${this.addressOf(tab)}" selected={its showing is ${tab.value}}>${tab.label}</ui-item>`
+        `\t\t\t\t<ui-item link="${this.addressOf(tab)}" selected={its showing is ${tab.value}}>${tab.label}${CLOSER}`
     )
     return [
       "# The tab bar",
@@ -139,12 +147,12 @@ export class NotebookFromPage {
       "",
       `\t<draw description="The tab strip a component page's tabs draw:  a segmented bar the width of the page, its tabs one size, on the docs site's panel (its box exported as docs-tabs)">`,
       "\t\t<html>",
-      `\t\t\t<ui-menu class="${this.title.replace(/\s+/g, "")}Tabs" appearance="segmented" align="fluid" equal aria-label="${this.title}" exportparts="menu: docs-tabs">`,
+      `\t\t\t<ui-menu class="${this.folder}Tabs" appearance="segmented" align="fluid" equal aria-label="${this.title}" exportparts="menu: docs-tabs">`,
       ...items,
-      "\t\t\t</ui-menu>",
-      "\t\t</html>",
-      "\t</draw>",
-      "</spell-view>",
+      `\t\t\t${CLOSER}`,
+      `\t\t${CLOSER}`,
+      `\t${CLOSER}`,
+      CLOSER,
       ""
     ].join("\n")
   }
@@ -152,11 +160,11 @@ export class NotebookFromPage {
   /** Tab `tab`'s notebook. */
   private notebookFor(tab: Tab): string {
     const out = new Writer()
-    out.line(0, `<spell-notebook "${this.prefix} ${tab.value}" original="${this.options.page}">`)
+    out.line(0, `<spell-notebook "${this.prefix} ${tab.value}">`)
     out.line(1, `<header level="1">`)
     out.line(2, escapeText(this.title))
-    if (this.subtitle) out.line(2, `<header>${escapeText(this.subtitle)}</header>`)
-    out.line(1, "</header>")
+    if (this.subtitle) out.line(2, `<header>${escapeText(this.subtitle)}${CLOSER}`)
+    out.line(1, CLOSER)
     out.line(1, `<${this.tabBarTag} showing="${tab.value}"/>`)
 
     const sections = childElements(tab.element).filter((element) => element.localName === SECTION)
@@ -166,14 +174,14 @@ export class NotebookFromPage {
       out.line(3, `<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">`)
       for (const section of sections) {
         const label = section.getAttribute("label") ?? ""
-        out.line(4, `<ui-item link="#${slugOf(label)}">${escapeText(label)}</ui-item>`)
+        out.line(4, `<ui-item link="#${slugOf(label)}">${escapeText(label)}${CLOSER}`)
       }
-      out.line(3, "</ui-menu>")
-      out.line(2, "</html>")
-      out.line(1, "</section>")
+      out.line(3, CLOSER)
+      out.line(2, CLOSER)
+      out.line(1, CLOSER)
     }
 
-    this.writeChildren(out, tab.element, 1, { tab, depth: 0 })
+    this.writeChildren(out, tab.element, 1, { tab, depth: 0, inExample: false })
     out.line(0, "</spell-notebook>")
     return out.text
   }
@@ -247,7 +255,7 @@ export class NotebookFromPage {
     out.blankLine()
     out.line(indent, head)
     this.writeChildren(out, section, indent + 1, { ...place, depth: place.depth + 1 })
-    out.line(indent, "</section>")
+    out.line(indent, CLOSER)
   }
 
   /**
@@ -275,13 +283,16 @@ export class NotebookFromPage {
       ...(description ? [`description="${escapeAttribute(description)}"`] : [])
     ]
     out.line(indent, `<${heads.join(" ")}>`)
-    const body = [...example.childNodes].filter(
-      (node) =>
-        !(plainDescription && describers.includes(node as Element)) &&
-        !(node.nodeType === TEXT && !node.textContent!.trim()) &&
-        node.nodeType !== COMMENT
-    ) as Element[]
-    this.writeMarkup(out, body, indent + 1, place)
+    // a `<template>` is the page's way to run an example's script with it:  its contents are the example
+    const body = [...example.childNodes]
+      .flatMap((node) => templateContentsOf(node))
+      .filter(
+        (node) =>
+          !(plainDescription && describers.includes(node as Element)) &&
+          !(node.nodeType === TEXT && !node.textContent!.trim()) &&
+          node.nodeType !== COMMENT
+      ) as Element[]
+    this.writeMarkup(out, body, indent + 1, { ...place, inExample: true })
     out.line(indent, "</example>")
   }
 
@@ -290,7 +301,7 @@ export class NotebookFromPage {
     const attributes = message.getAttributeNames().map((name) => attributeText(name, message.getAttribute(name)!))
     out.line(indent, `<message${attributes.length ? " " + attributes.join(" ") : ""}>`)
     this.writeChildren(out, message, indent + 1, place)
-    out.line(indent, "</message>")
+    out.line(indent, CLOSER)
   }
 
   /** Prose:  a `<markdown>` block, its text as written, its links to the page's sections pointed into the notebooks. */
@@ -298,12 +309,12 @@ export class NotebookFromPage {
     const text = this.relinked(texts.join("\n\n"), place.tab)
     const lines = text.split("\n")
     if (lines.length === 1 && !/[<{}]/.test(text)) {
-      out.line(indent, `<markdown>${text}</markdown>`)
+      out.line(indent, `<markdown>${text}${CLOSER}`)
       return
     }
     out.line(indent, "<markdown>")
     for (const line of lines) out.line(line ? indent + 1 : 0, line)
-    out.line(indent, "</markdown>")
+    out.line(indent, CLOSER)
   }
 
   /**
@@ -337,15 +348,16 @@ export class NotebookFromPage {
     const flushHtml = () => {
       if (!html.length) return
       out.line(indent, "<html>")
-      for (const node of html) this.writeHtml(out, node, indent + 1)
-      out.line(indent, "</html>")
+      for (const node of html) this.writeHtml(out, node, indent + 1, place)
+      out.line(indent, closerOf("html", place))
       html = []
     }
     for (const node of nodes) {
+      if (this.isPageScript(node, place)) continue
       if (node.nodeType === TEXT) {
         flushHtml()
         out.line(indent, escapeText(collapsed(node.textContent!)))
-      } else if (node.localName === "ui-header" || this.isBare(node)) {
+      } else if (this.isBare(node)) {
         flushHtml()
         this.writeBare(out, node, indent, place)
       } else html.push(node)
@@ -372,26 +384,26 @@ export class NotebookFromPage {
     const kids = children.filter((node) => node.nodeType === ELEMENT) as Element[]
     if (!children.some((node) => node.nodeType === ELEMENT || node.textContent!.trim()))
       out.line(indent, `${this.openTag(element)}/>`.replace(/>\/>$/, "/>"))
-    else if (!isBlock) out.line(indent, this.inlineOf(element))
+    else if (!isBlock) out.line(indent, this.inlineOf(element, place))
     else {
       out.line(indent, this.openTag(element))
       this.writeMarkup(out, kids, indent + 1, place)
-      out.line(indent, `</${this.bareNameOf(element.localName)}>`)
+      out.line(indent, closerOf(this.bareNameOf(element.localName)!, place))
     }
   }
 
   /** `element` on one line, in bare names. */
-  private inlineOf(element: Element): string {
+  private inlineOf(element: Element, place: Place): string {
     const inner = [...element.childNodes]
       .map((node) => {
         if (node.nodeType === TEXT) return escapeText(node.textContent!.replace(/\s*\n\s*/g, " "))
-        if (node.nodeType === ELEMENT) return this.inlineOf(node as Element)
+        if (node.nodeType === ELEMENT) return this.inlineOf(node as Element, place)
         return ""
       })
       .join("")
       .trim()
     if (!inner) return `${this.openTag(element)}`.replace(/>$/, "/>")
-    return `${this.openTag(element)}${inner}</${this.bareNameOf(element.localName)}>`
+    return `${this.openTag(element)}${inner}${closerOf(this.bareNameOf(element.localName)!, place)}`
   }
 
   /** `element`'s opening tag in bare names, its URLs as the page server serves them. */
@@ -404,12 +416,13 @@ export class NotebookFromPage {
 
   /**
    * The bare name of Spell UI's `tag`, `ui-button` => `button`, when the pack finds it so;  else `undefined`.
+   * - Never one of spell's own block words (`<markdown>`, `<example>`, `<html>`):  `<ui-markdown>` stays so.
    * - Never a docs element's (`<ui-docs-api>`):  the notebook's page loads them for its `<html>` blocks
    *   (`NotebookDocs`), so a bare `<docs-api>` would draw nothing.
    */
   private bareNameOf(tag: string): string | undefined {
     const bare = tag.replace(/^ui-/, "")
-    if (bare === tag || bare.startsWith("docs-")) return undefined
+    if (bare === tag || bare.startsWith("docs-") || SPELL_BLOCK_WORDS.has(bare)) return undefined
     return (this.options.tagFor ?? defaultTagFor)(bare) === tag ? bare : undefined
   }
 
@@ -417,37 +430,73 @@ export class NotebookFromPage {
    * `node` as the web writes it, at `indent`:  an element holding only elements a line each, nested;
    * one holding text on a single line, as JSX joins text across a line break with no space.
    */
-  private writeHtml(out: Writer, node: Node, indent: number) {
+  private writeHtml(out: Writer, node: Node, indent: number, place: Place) {
     if (node.nodeType === TEXT) {
       const text = collapsed(node.textContent!)
       if (text) out.line(indent, escapeText(text))
       return
     }
     const element = node as Element
+    if (RAW_TEXT_TAGS.has(element.localName)) {
+      this.writeRawText(out, element, indent, place)
+      return
+    }
     const children = [...element.childNodes].filter((child) => child.nodeType !== COMMENT)
     const hasText = children.some((child) => child.nodeType === TEXT && child.textContent!.trim())
     if (VOID_TAGS.has(element.localName) || hasText || !children.some((child) => child.nodeType === ELEMENT)) {
-      out.line(indent, this.htmlOf(element))
+      out.line(indent, this.htmlOf(element, place))
       return
     }
     out.line(indent, `${this.htmlOpenTag(element)}>`)
-    for (const child of children) if (child.nodeType === ELEMENT) this.writeHtml(out, child, indent + 1)
-    out.line(indent, `</${element.localName}>`)
+    for (const child of children)
+      if (child.nodeType === ELEMENT && !this.isPageScript(child, place)) this.writeHtml(out, child, indent + 1, place)
+    out.line(indent, closerOf(element.localName, place))
+  }
+
+  /**
+   * A `<script>` or `<style>`, its text as written:  spellx reads it so, as the web does.
+   * - One line:  `<style>:root { ... }</style>`;  several:  its lines, dedented, one tab in.
+   */
+  private writeRawText(out: Writer, element: Element, indent: number, place: Place) {
+    const open = `${this.htmlOpenTag(element)}>`
+    const text = dedented(element.textContent ?? "")
+    const closer = closerOf(element.localName, place)
+    if (!text.includes("\n")) {
+      out.line(indent, `${open}${text}${closer}`)
+      return
+    }
+    out.line(indent, open)
+    for (const line of text.split("\n")) out.line(line ? indent + 1 : 0, line)
+    out.line(indent, closer)
+  }
+
+  /**
+   * Is `node` a page's own script, which drives its examples (`<script type="module">`), not data a component reads?
+   * - Left out, and noted in `warnings`:  it finds the page's elements by their ids as the page loads, so in a
+   *   notebook, drawn later and again on each edit, it finds nothing and throws.
+   */
+  private isPageScript(node: Node, place: Place): boolean {
+    const element = node as Element
+    if (node.nodeType !== ELEMENT || element.localName !== "script") return false
+    if (DATA_SCRIPT.test(element.getAttribute("type") ?? "")) return false
+    const what = element.getAttribute("src") ?? collapsed(element.textContent ?? "").slice(0, 60)
+    this.warn(`${place.tab.label}:  the page's script that drives its examples is left out (${what} ...)`)
+    return true
   }
 
   /** `element`'s markup on one line:  void tags closed (`<img ... />`), comments left out, URLs served. */
-  private htmlOf(element: Element): string {
+  private htmlOf(element: Element, place: Place): string {
     const open = this.htmlOpenTag(element)
     if (VOID_TAGS.has(element.localName)) return `${open} />`
     const inner = [...element.childNodes]
       .map((node) => {
         if (node.nodeType === TEXT) return escapeText(node.textContent!.replace(/\s*\n\s*/g, " "))
-        if (node.nodeType === ELEMENT) return this.htmlOf(node as Element)
+        if (node.nodeType === ELEMENT && !this.isPageScript(node, place)) return this.htmlOf(node as Element, place)
         return ""
       })
       .join("")
       .trim()
-    return `${open}>${inner}</${element.localName}>`
+    return `${open}>${inner}${closerOf(element.localName, place)}`
   }
 
   /** `element`'s opening tag as the web writes it, without its `>`. */
@@ -465,6 +514,8 @@ export class NotebookFromPage {
   /** `value` of attribute `name`, a relative URL made the page server's (`images/x.png` => `/components/ui/images/x.png`). */
   private urlFor(name: string, value: string): string {
     if (!URL_ATTRIBUTES.has(name) || /^([a-z]+:|\/|#)/i.test(value) || !value) return value
+    // `source` names a file only with a folder or an extension:  `<ui-embed source="youtube">` names a site
+    if (name === "source" && !/[./]/.test(value)) return value
     return new URL(value, `http://page${this.options.page}`).pathname
   }
 
@@ -514,8 +565,16 @@ export type NotebookFromPageOptions = {
 /** A tab of the page, and its notebook's file. */
 type Tab = { element: Element; value: string; label: string; file: string }
 
-/** Where the writing is:  which tab, how many sections deep. */
-type Place = { tab: Tab; depth: number }
+/** Where the writing is:  which tab, how many sections deep, and whether inside an example (its code). */
+type Place = { tab: Tab; depth: number; inExample: boolean }
+
+/**
+ * The closer for `tag` where `place` is:  `</>` outside an example, `</tag>` in full inside one, its code as people
+ * write it (Owen, 2026-10-27).
+ */
+function closerOf(tag: string, place: Place): string {
+  return place.inExample ? `</${tag}>` : CLOSER
+}
 
 /** Lines of tab-indented text. */
 class Writer {
@@ -543,25 +602,41 @@ function defaultTagFor(bare: string): string | undefined {
   return SP.ComponentPacks.tagFor(bare, "en")
 }
 
-/** `name="value"` in spellx markup:  a boolean bare, a `"` escaped. */
+/** `name="value"` in spellx markup:  a boolean bare, its value escaped (`escapeAttribute()`). */
 function attributeText(name: string, value: string): string {
   if (value === "" && !STRING_ATTRIBUTES.test(name)) return name
   return `${name}="${escapeAttribute(value)}"`
 }
 
-/** A `"` escaped for a quoted value. */
+/** A quoted value's `"` and `\` escaped, and its `[` a real bracket (`\[`), not a fill-in. */
 function escapeAttribute(value: string): string {
-  return value.replace(/\\/g, "\\\\").replace(/"/g, '\\"')
+  return value.replace(/\\/g, "\\\\").replace(/"/g, '\\"').replace(/\[/g, "\\[")
 }
 
-/** Markup text as written:  `<`, `>`, `&` as entities. */
+/**
+ * Markup text as written:  `<`, `>`, `&`, `{` and `}` as entities, `[` a real bracket (`\[`), not a fill-in.
+ * - spellx reads them back as the characters, as JSX does.
+ */
 function escapeText(text: string): string {
-  return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/\{/g, "&#123;")
+    .replace(/\}/g, "&#125;")
+    .replace(/\[/g, "\\[")
 }
 
 /** `text`'s line breaks, and the indents around them, as one space, trimmed:  its own double spaces kept. */
 function collapsed(text: string): string {
   return text.replace(/\s*\n\s*/g, " ").trim()
+}
+
+/** `node`'s own contents when it's a `<template>` (`<ui-example>`'s, around markup and its script), else `node`. */
+function templateContentsOf(node: ChildNode): ChildNode[] {
+  if (node.nodeType !== ELEMENT || (node as Element).localName !== "template") return [node]
+  const content = (node as HTMLTemplateElement).content
+  return [...(content?.childNodes.length ? content.childNodes : node.childNodes)]
 }
 
 /** `element`'s element children. */
@@ -617,7 +692,7 @@ function slugOf(text: string): string {
     .replace(/^-|-$/g, "")
 }
 
-/** A tab's label as a file name:  `API` => `API`, `Theming` => `Theming`, `Framework usage` => `FrameworkUsage`. */
+/** A tab's label or a page's title as a file name:  `API` => `API`, `Theming` => `Theming`, `Framework usage` => `FrameworkUsage`. */
 function fileNameOf(label: string): string {
   return label
     .split(/[^\p{L}\p{N}]+/u)
@@ -630,6 +705,9 @@ function fileNameOf(label: string): string {
 function listOf(items: string[], last = "and"): string {
   return items.length < 2 ? (items[0] ?? "") : `${items.slice(0, -1).join(", ")} ${last} ${items.at(-1)}`
 }
+
+/** How a notebook closes its tags, outside an example:  `</spell-notebook>` and `</example>` are written in full. */
+const CLOSER = "</>"
 
 /** How a comment ends, in HTML and in spellx. */
 const HTML_COMMENT_END = "-->"
@@ -651,8 +729,17 @@ const TOP_SECTION_ATTRIBUTES = new Set(["id", "label", "sticky", "collapsible", 
 /** Attributes a page writes `=""` on for an empty text, never as a boolean. */
 const STRING_ATTRIBUTES = /^(alt|value|label|aria-.*|title|placeholder)$/
 
-/** Attributes holding a URL. */
-const URL_ATTRIBUTES = new Set(["src", "href", "link"])
+/** Attributes holding a URL:  `source` is Spell UI's, a markdown or code file's (`<ui-markdown source>`), when it has a `.` or `/`. */
+const URL_ATTRIBUTES = new Set(["src", "href", "link", "source"])
+
+/** Spell's own words for blocks in a drawing:  a Spell UI tag of the same bare name is written in full. */
+const SPELL_BLOCK_WORDS = new Set(["markdown", "html", "example", "css", "spell", "spellx"])
+
+/** The web's raw-text tags:  their text as written, never escaped (`writeRawText()`). */
+const RAW_TEXT_TAGS = new Set(["script", "style"])
+
+/** A script's `type` that holds data a component reads (`<ui-code>`'s text, a tree's JSON), not code that runs. */
+const DATA_SCRIPT = /^(text\/(?!javascript)|application\/(?!javascript))/
 
 /** The web's void tags, closed as `<img ... />` in an `<html>` block. */
 const VOID_TAGS = new Set([

@@ -1,0 +1,55 @@
+<spell-notebook "toast theming">
+	<header level="1">
+		Toast
+		<header>A toast allows users to receive a short, non-blocking notification.</>
+	</>
+	<toast-tab-bar showing="theming"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#tokens">Tokens</>
+				<ui-item link="#themes">Themes</>
+			</>
+		</>
+	</>
+
+	<!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
+	<section label="Tokens">
+		<markdown>
+			Theme with the public `--ui-toast-*` tokens: set one on the element, on any ancestor (`:root` for
+			every toast), or on the box through `::part(box)`. They inherit into the shadow root, where the
+			sheet reads each through a private alias. Never set the `--_ui-toast-*` names: they're the sheet's
+			private plumbing.
+
+			- `--ui-toast-width` applies on screens wider than a phone; phones (up to 420px) use
+			  `--ui-toast-mobile-width`.
+			- `--ui-toast-container-distance` goes on `:root`: the containers are page-level. For
+			  `UI.toast()`'s toasts, set the rest on `:root` too.
+			- Style the pieces with `::part()`: `box` (around the toast, its bar and attached actions),
+			  `toast`, `icon`, `content`, `header`, `message`, `close`, `actions`, `progress` and `bar`.
+		</>
+		<markdown>
+			```css
+			:root {
+			  --ui-toast-radius: 0.75em;
+			}
+			ui-toast::part(bar) {
+			  background: var(--ui-primary);
+			}
+			```
+		</>
+		<markdown>Edit a value below to try it.</>
+		<html>
+			<ui-docs-tokens family="ui-toast" playground>
+				<ui-toast message="I am a toast, nice to meet you!"></>
+			</>
+		</>
+	</>
+
+	<section label="Themes">
+		<markdown>
+			Each theme of the set (Spell, Glass, Fruity, Merlot, Paper, Midnight, Crisp, Pop, Matrix) changes the page, and the colours a toast takes
+			from it.
+		</>
+	</>
+</spell-notebook>

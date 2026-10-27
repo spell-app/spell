@@ -1,0 +1,79 @@
+<spell-notebook "items theming">
+	<header level="1">
+		Items
+		<header>A group of items presents a set of site content for display, each an image beside its
+              text.</>
+	</>
+	<items-tab-bar showing="theming"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#tokens">Tokens</>
+				<ui-item link="#themes">Themes</>
+			</>
+		</>
+	</>
+
+	<!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
+	<section label="Tokens">
+		<markdown>
+			Theme with the public `--ui-items-*` tokens: set one on the element, on any ancestor (a region, `:root`), or on
+			the group's box through `::part(items)`. The items inside read them from the group, so set them there or above,
+			not on one item.
+		</>
+		<markdown>
+			```css
+			ui-items {
+			  --ui-items-image-width: 8em;
+			  --ui-items-divided-border: 2px solid var(--ui-border-color);
+			}
+			```
+		</>
+		<message state="info" size="small">
+			<markdown>
+				`divided`, `spacing`, `appearance` and `unstackable` switch private tokens the items read; use the attributes, and
+				never set the `--_ui-*` / `--_items-*` names: they're the sheet's private plumbing.
+			</>
+		</>
+		<markdown>Edit a value below to try it.</>
+		<html>
+			<ui-docs-tokens family="ui-items" playground>
+				<ui-items>
+					<ui-item>
+						<img src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22480%22 height=%22320%22 viewBox=%220 0 30 20%22%3E%3Crect width=%2230%22 height=%2220%22 fill=%22%23cbd5e1%22/%3E%3Cpath d=%22M3 17l7-8 5 6 4-4 8 6z%22 fill=%22%2394a3b8%22/%3E%3Ccircle cx=%2222%22 cy=%226%22 r=%222%22 fill=%22%2394a3b8%22/%3E%3C/svg%3E" alt="" />
+						<ui-content>
+							<ui-header link="#cute-dog">Cute Dog</>
+							<ui-meta>
+								<span>Description</>
+							</>
+							<ui-description>
+								<p>Many people also have their own barometers for what makes a cute dog.</>
+							</>
+							<ui-extra>Additional details</>
+						</>
+					</>
+					<ui-item>
+						<img src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22480%22 height=%22320%22 viewBox=%220 0 30 20%22%3E%3Crect width=%2230%22 height=%2220%22 fill=%22%23cbd5e1%22/%3E%3Cpath d=%22M3 17l7-8 5 6 4-4 8 6z%22 fill=%22%2394a3b8%22/%3E%3Ccircle cx=%2222%22 cy=%226%22 r=%222%22 fill=%22%2394a3b8%22/%3E%3C/svg%3E" alt="" />
+						<ui-content>
+							<ui-header link="#arrowhead-valley-camp">Arrowhead Valley Camp</>
+							<ui-meta>
+								<span>$1200 1 month</>
+							</>
+							<ui-description>
+								<p>Ours is a life of constant reruns.</>
+							</>
+							<ui-extra>Limited availability</>
+						</>
+					</>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="Themes">
+		<markdown>
+			The theme menu above picks the theme for every page of the site:  Spell, Glass, Fruity or Merlot,
+			each restyling this component through its tokens.
+		</>
+	</>
+</spell-notebook>

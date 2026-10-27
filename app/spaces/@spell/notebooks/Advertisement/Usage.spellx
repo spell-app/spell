@@ -1,0 +1,69 @@
+<spell-notebook "advertisement usage">
+	<header level="1">
+		Advertisement
+		<header>An ad displays third-party promotional content.</>
+	</>
+	<advertisement-tab-bar showing="usage"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#using-it">Using it</>
+				<ui-item link="#unit-sizes">Unit sizes</>
+				<ui-item link="#keyboard">Keyboard</>
+				<ui-item link="#accessibility">Accessibility</>
+			</>
+		</>
+	</>
+
+	<!-- USAGE:  how to use it (attributes in practice, events, framework snippets), keyboard, accessibility. -->
+	<section label="Using it">
+		<markdown>
+			`<ui-ad>` is only the slot: it sizes a box to an IAB unit and lays out whatever you put in it.
+			Loading the ad itself is up to your ad network's script.
+
+			- `unit` takes the unit's words (`medium rectangle`, `leaderboard`, `large mobile banner` ...),
+			  not `size`, which is `mini` ... `massive` on every component.
+			- `test` shows a grey placeholder until the real ad arrives: bare, it says "Ad" (translated);
+			  with a value, it says that.
+			- `align="center"` centres the box in its container.
+			- Mobile units (`mobile leaderboard`, `large mobile banner`) show only on phone-sized viewports:
+			  they're served for the device, not for the container's width.
+			- It has no events.
+		</>
+		<markdown>
+			```html
+			<ui-ad unit="medium rectangle" test="Your ad here">
+			  <iframe src="https://ads.example.com/unit/123" title="Advertisement" width="300" height="250"></iframe>
+			</ui-ad>
+			```
+		</>
+	</>
+
+	<section label="Unit sizes">
+		<markdown>
+			Unit sizes are the IAB's, in `px`, on purpose: an ad unit is a pixel contract with the ad server,
+			not a typographic size, so they aren't tokens. Units wider than the column (`leaderboard` 728 px,
+			`billboard` 970 px) overflow it; give them a wide enough region.
+		</>
+	</>
+
+	<section label="Keyboard">
+		<markdown>
+			None of its own: the box takes no focus (`delegatesFocus` is off). Links and frames inside the
+			ad take focus as usual.
+		</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			- An ad is a plain block with no role, so several ads on a page don't create duplicate landmarks.
+			  Where you want one, wrap the ad column in a named `<aside aria-label="Sponsored">`.
+			- The `test` text is drawn by CSS and isn't reliably read aloud; it's a layout placeholder, not
+			  content.
+			- The ad's own content needs its own text alternative: an `alt` on an image link, a `title` on an
+			  `<iframe>`.
+			- If the element fails to render, it shows its children through a bare `<slot>`: the ad's own image,
+			  link or frame still shows, but the unit loses its fixed size, and a bare `test` shows nothing.
+		</>
+	</>
+</spell-notebook>

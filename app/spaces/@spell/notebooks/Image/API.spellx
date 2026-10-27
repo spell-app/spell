@@ -1,0 +1,55 @@
+<spell-notebook "image api">
+	<header level="1">
+		Image
+		<header>An image is a graphic representation of something.</>
+	</>
+	<image-tab-bar showing="api"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#tags">Tags</>
+				<ui-item link="#attributes">Attributes</>
+				<ui-item link="#slots">Slots</>
+				<ui-item link="#parts">Parts</>
+				<ui-item link="#states">States</>
+				<ui-item link="#texts">Texts</>
+			</>
+		</>
+	</>
+
+	<section label="Tags">
+		<html>
+			<ui-docs-api family="ui-image" only="tags"></>
+		</>
+	</>
+
+	<section label="Attributes">
+		<html>
+			<ui-docs-api family="ui-image" only="attributes"></>
+		</>
+	</>
+
+	<section label="Slots">
+		<html>
+			<ui-docs-api family="ui-image" only="slots"></>
+		</>
+	</>
+
+	<section label="Parts">
+		<html>
+			<ui-docs-api family="ui-image" only="parts"></>
+		</>
+	</>
+
+	<section label="States">
+		<html>
+			<ui-docs-api family="ui-image" only="states"></>
+		</>
+	</>
+
+	<section label="Texts">
+		<html>
+			<ui-docs-api family="ui-image" only="texts"></>
+		</>
+	</>
+</spell-notebook>

@@ -1,0 +1,63 @@
+<spell-notebook "emoji theming">
+	<header level="1">
+		Emoji
+		<header>An emoji is a glyph used to represent something else.</>
+	</>
+	<emoji-tab-bar showing="theming"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#tokens">Tokens</>
+				<ui-item link="#themes">Themes</>
+			</>
+		</>
+	</>
+
+	<section label="Tokens">
+		<markdown>
+			Theme with the public `--ui-emoji-*` tokens: set one on the element, on any ancestor (a region, `:root`), or on
+			the emoji's box through `::part(emoji)`. They inherit into the shadow root, where the sheet reads each through a
+			private alias, so nothing inside blocks them.
+
+			- `--ui-emoji-font-family` picks the emoji font.
+			- `--ui-emoji-size-small` / `-large` / `-big` are the size ratios.
+			- Class-grammar `medium` is Fomantic's 3em emoji (fixed, not a token): the element treats `medium` as the default
+			  size.
+			- Never set the `--_ui-*` names: they're the sheet's private plumbing.
+		</>
+		<markdown>
+			```css
+			/* every emoji on the page */
+			:root {
+			  --ui-emoji-font-family: "Noto Color Emoji", sans-serif;
+			}
+			/* one region */
+			.reactions {
+			  --ui-emoji-size-large: 4;
+			}
+			```
+		</>
+		<markdown>Edit a value below to try it.</>
+		<html>
+			<ui-docs-tokens family="ui-emoji" playground>
+				<p>
+					<ui-emoji name="grinning_face_with_smiling_eyes"></>
+					<ui-emoji name="face_with_tears_of_joy"></>
+					<ui-emoji name="thumbs_up"></>
+					<ui-emoji name="red_heart"></>
+					<ui-emoji name="sun"></>
+					<ui-emoji name="flag_united_states"></>
+					<ui-emoji name="keycap_1"></>
+					<ui-emoji name="woman_technologist"></>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="Themes">
+		<markdown>
+			No theme restyles emoji. Fomantic's `joypixels` theme swaps its image set, which we don't have (image emoji
+			sets: I1); to change the look, point `--ui-emoji-font-family` at another emoji font.
+		</>
+	</>
+</spell-notebook>

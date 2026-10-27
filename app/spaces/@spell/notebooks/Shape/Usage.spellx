@@ -1,0 +1,120 @@
+<spell-notebook "shape usage">
+	<header level="1">
+		Shape
+		<header>A shape is a three dimensional object displayed on a two dimensional plane.</>
+	</>
+	<shape-tab-bar showing="usage"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#using-it">Using it</>
+				<ui-item link="#invoker-commands">Invoker commands</>
+				<ui-item link="#methods-and-events">Methods and events</>
+				<ui-item link="#accessibility">Accessibility</>
+				<ui-item link="#framework-usage">Framework usage</>
+			</>
+		</>
+	</>
+
+	<!-- USAGE:  how to use it (sides, flips, commands, methods, events), accessibility, framework snippets. -->
+	<section label="Using it">
+		<markdown>
+			A shape's children are its sides: one `<ui-side>` per face, in order, as Fomantic's markup has a `.side` per
+			face inside `.sides`. Only one shows at a time.
+
+			- `active-index` (from 0) is the side shown. Changing it turns the shape the `direction` way to that side.
+			- `direction` is `up`, `down`, `left` (the default), `right`, `over` or `back`. The attribute is `direction`, not
+			  `flip`: `flip()` is a method.
+			- `cube` gives square grey faces; `text` sides of text.
+			- `duration` is the length of a turn: ms (`600`) or a CSS time (`0.6s`).
+		</>
+	</>
+
+	<section label="Invoker commands">
+		<markdown>
+			Turn a shape from a button with no script: `commandfor` is the shape's id, `command` what to do. Works on a
+			native `<button>` and a `<ui-button>` alike.
+
+			- `--next` / `--previous`: the next / previous side (both wrap round), the `direction` attribute's way.
+			- `--flip-up`, `--flip-down`, `--flip-left`, `--flip-right`, `--flip-over`, `--flip-back`: the next side, THAT
+			  way (Fomantic's `flip up` ... behaviours).
+		</>
+		<markdown>
+			```html
+			<ui-button commandfor="dice" command="--flip-up" icon="long arrow alternate up" aria-label="Flip up"></ui-button>
+			<ui-shape id="dice" cube>
+			  <ui-side>1</ui-side>
+			  <ui-side>2</ui-side>
+			</ui-shape>
+			```
+		</>
+	</>
+
+	<section label="Methods and events">
+		<markdown>
+			The host has Fomantic's behaviours as methods, each resolving once the turn has finished (`true`), or `false`
+			when there was nothing to do:
+
+			- `flip(direction?, index?)` -- turn `direction` (default: the attribute's) to side `index` (default: the next).
+			- `next()` / `previous()` -- the next / previous side, wrapping round.
+
+			Each writes `activeIndex`, so it reflects. Flips queue, as Fomantic's did. `ui-animated` fires once another side
+			is shown (Fomantic's `onChange`), with `{ activeIndex, side, flip }`.
+		</>
+		<markdown>
+			```js
+			const dice = document.querySelector("#dice")
+			await dice.next() // the next side, the `direction` way
+			await dice.flip("back", 0) // back to the first side
+			dice.addEventListener("ui-animated", (event) => console.log(event.detail.activeIndex))
+			```
+		</>
+		<markdown>
+			The turn is Fomantic's own geometry, as a CSS transition; under reduced motion the sides swap at once, and
+			`ui-animated` fires all the same.
+		</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			- Only the side shown is in the accessibility tree; the others are hidden.
+			- The box that turns is a polite live region, so the new side is read out after a flip.
+			- A shape has no keyboard of its own: turn it from real buttons (`commandfor`), so everyone can. Name icon-only
+			  buttons with `aria-label`.
+			- If the element fails to render, it shows its sides through a bare `<slot>`, with no flips, invoker
+			  commands or `ui-animated`.
+		</>
+	</>
+
+	<section label="Framework usage">
+		<markdown>Bind `active-index` and listen for `ui-animated`, or call the methods through a ref.</>
+		<header level="4" id="framework-react">React 19</>
+		<markdown>
+			```jsx
+			<ui-shape cube active-index={side} onui-animated={(event) => setSide(event.detail.activeIndex)}>
+			  ...
+			</ui-shape>
+			```
+		</>
+		<header level="4" id="framework-vue">Vue 3.5</>
+		<markdown>
+			```html
+			<!-- compilerOptions.isCustomElement = (tag) => tag.startsWith("ui-") -->
+			<ui-shape cube :active-index="side" @ui-animated="(event) => (side = event.detail.activeIndex)">...</ui-shape>
+			```
+		</>
+		<header level="4" id="framework-solid">Solid 2</>
+		<markdown>
+			```jsx
+			// events and rich data are plain props:  `on-<event>={...}`, `options={...}`
+			<ui-shape
+			  cube
+			  active-index={side()}
+			  on-ui-animated={(event) => setSide(event.detail.activeIndex)}
+			>
+			  ...
+			</ui-shape>
+			```
+		</>
+	</>
+</spell-notebook>

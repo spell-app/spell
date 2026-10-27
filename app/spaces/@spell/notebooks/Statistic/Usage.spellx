@@ -1,0 +1,77 @@
+<spell-notebook "statistic usage">
+	<header level="1">
+		Statistic
+		<header>A statistic emphasizes the current value of an attribute.</>
+	</>
+	<statistic-tab-bar showing="usage"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#using-it">Using it</>
+				<ui-item link="#events">Events</>
+				<ui-item link="#keyboard">Keyboard</>
+				<ui-item link="#accessibility">Accessibility</>
+			</>
+		</>
+	</>
+
+	<!-- USAGE:  from the old Astro page (Behaviour, Accessibility), tightened. -->
+	<section label="Using it">
+		<markdown>
+			A statistic is a value over a label. Write it with the `value` and `label` shorthands, or slot the generic
+			`<ui-value>` and `<ui-label>` content parts: inside a statistic they take its look (size, colour, horizontal,
+			inverted), so there is no separate statistic-label tag.
+
+			- Slotted parts keep their order: a `<ui-label>` before the `<ui-value>` is Fomantic's top label.
+			- The `value` shorthand always comes before the slotted parts and the `label` shorthand after, so either shorthand
+			  pairs with a slotted part.
+			- A word value is `<ui-value text>` (or `text` with the `value` shorthand): smaller, bold, at least two lines tall.
+			- A `<ui-statistics>` group shares its `size`, `color`, `direction` and `inverted` with every statistic in it; a
+			  statistic's own attribute still wins.
+			- `widths="N"` divides each row of a group evenly (Fomantic's `four statistics`).
+			- `stackable` answers to the group's own width, not the window's, so a group in a narrow sidebar stacks even on a
+			  wide screen.
+		</>
+		<markdown>
+			```html
+			<ui-statistics widths="3" size="small">
+			  <ui-statistic value="22" label="Faves"></ui-statistic>
+			  <ui-statistic color="green" label="Flights">
+			    <ui-value><ui-icon name="plane"></ui-icon> 5</ui-value>
+			  </ui-statistic>
+			  <ui-statistic label="Signups"><ui-value text>Three<br />Thousand</ui-value></ui-statistic>
+			</ui-statistics>
+			```
+		</>
+	</>
+
+	<section label="Events">
+		<markdown>
+			Statistics have no events. To update one, set its `value` (or the text of its `<ui-value>`).
+		</>
+		<markdown>
+			```js
+			const downloads = document.querySelector("ui-statistic#downloads")
+			downloads.setAttribute("value", count.toLocaleString())
+			```
+		</>
+	</>
+
+	<section label="Keyboard">
+		<markdown>A statistic is text: it is never a tab stop and takes no keys.</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			- A statistic is plain text with no role: it reads as its value, then its label. Name a group of statistics where
+			  it matters, with a heading before it or an `aria-label` on a region around it.
+			- Write numbers the way they should be read: a screen reader says "5,550", not the size or colour around it.
+			- An icon inside a value is decorative unless given a `label`; an image needs its own `alt` (empty when the label
+			  already says it all).
+			- `color` is never the only signal: say what a red or green value means in the label.
+			- If the element fails to render, it shows its slotted `<ui-value>` and `<ui-label>` parts through a
+			  bare `<slot>`; the `value` and `label` shorthands, the statistic's look and the spacing between
+			  neighbouring statistics go.
+		</>
+	</>
+</spell-notebook>

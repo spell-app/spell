@@ -1,0 +1,58 @@
+<spell-notebook "statistic theming">
+	<header level="1">
+		Statistic
+		<header>A statistic emphasizes the current value of an attribute.</>
+	</>
+	<statistic-tab-bar showing="theming"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#tokens">Tokens</>
+				<ui-item link="#themes">Themes</>
+			</>
+		</>
+	</>
+
+	<!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
+	<section label="Tokens">
+		<markdown>
+			Theme with the public `--ui-statistic-*` tokens: set one on the element, on any ancestor (a `<ui-statistics>`
+			group, `:root`), or on the box through `::part(statistic)` (the group's box is `::part(group)`). They inherit into
+			the shadow root, where the sheet reads each through a private alias, so nothing inside blocks them.
+
+			- `--ui-statistic-value-size` and `--ui-statistic-text-value-size` replace the size ladder's value sizes;
+			  `direction="horizontal"` swaps in its own ladder.
+			- The `value` and `label` parts style the shorthands.
+		</>
+		<markdown>
+			```css
+			ui-statistics {
+			  --ui-statistic-horizontal-spacing: 2.5em;
+			  --ui-statistic-row-spacing: 2em;
+			}
+			ui-statistic::part(label) {
+			  text-transform: none;
+			}
+			```
+		</>
+		<message state="info" size="small">
+			<markdown>
+				`color` remaps `--ui-color` for the value; `size` picks a step of the value-size ladder. Never set the
+				`--_ui-*` / `--_statistic-*` names: they're the sheet's private plumbing.
+			</>
+		</>
+		<markdown>Edit a value below to try it.</>
+		<html>
+			<ui-docs-tokens family="ui-statistic" playground>
+				<ui-statistic value="5,550" label="Downloads"></>
+			</>
+		</>
+	</>
+
+	<section label="Themes">
+		<markdown>
+			The theme menu above picks the theme for every page of the site:  Spell, Glass, Fruity or Merlot,
+			each restyling this component through its tokens.
+		</>
+	</>
+</spell-notebook>

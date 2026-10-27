@@ -1,0 +1,143 @@
+<spell-notebook "accordion usage">
+	<header level="1">
+		Accordion
+		<header>An accordion allows users to toggle the display of sections of content.</>
+	</>
+	<accordion-tab-bar showing="usage"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#using-it">Using it</>
+				<ui-item link="#open-panels">Open panels</>
+				<ui-item link="#events">Events</>
+				<ui-item link="#content-from-a-file">Content from a file</>
+				<ui-item link="#without-javascript">Without JavaScript</>
+				<ui-item link="#keyboard">Keyboard</>
+				<ui-item link="#accessibility">Accessibility</>
+				<ui-item link="#framework-usage">Framework usage</>
+			</>
+		</>
+	</>
+
+	<!-- USAGE:  how to use it (panels, `open`, events), keyboard, accessibility, frameworks. -->
+	<section label="Using it">
+		<markdown>
+			Children come in PAIRS, like Fomantic's `.title` + `.content`: each `<ui-title>` starts a panel and the element
+			right after it is the panel's content. There is no panel element to write.
+
+			- In its shadow root the accordion wraps each pair in a native `<details>`, with the title in its `<summary>`, so
+			  the browser does the disclosure: the title is a real button, and find-in-page opens the panel that holds a match.
+			- An `exclusive` accordion (the default) is one `<details name>` group, so opening a panel closes the others;
+			  `exclusive="no"` lets any number stay open.
+			- `collapsible="no"` keeps one panel open: activating the open title does nothing.
+			- `appearance` (`styled`, `basic`), `fluid`, `inverted`, `padding` and `tree` are the look; a nested `<ui-accordion>` takes its
+			  parent's.
+		</>
+	</>
+
+	<section label="Open panels">
+		<markdown>
+			`open` lists the open panels by index, from 0 and space-separated (`open="0 2"`); while `exclusive`, only the
+			first index counts. Writing `open` opens and closes panels and fires nothing.
+
+			Panels open and close with a height transition where the browser can animate to `auto` (`interpolate-size`);
+			with reduced motion they snap.
+		</>
+	</>
+
+	<section label="Events">
+		<markdown>
+			When the user activates a title, the cancelable `ui-opening` / `ui-closing` go first, with
+			`{ index, open, title, content, originalEvent }`; switching panels in an exclusive accordion announces the close
+			too. `preventDefault()` keeps things as they were.
+		</>
+		<markdown>
+			```js
+			const faq = document.querySelector("ui-accordion")
+			faq.addEventListener("ui-opening", (event) => {
+			  if (event.detail.index === 2 && !signedIn) event.preventDefault() // stays closed
+			})
+			faq.open = "0 1" // open panels from code:  no event
+			```
+		</>
+	</>
+
+	<section label="Content from a file">
+		<markdown>
+			`source` names an HTML file whose `<body>` becomes the FIRST panel's content, fetched the first time that panel
+			opens (at once when it starts open). It's meant for an accordion of one title, like an item in a long list
+			whose details load only when read. The body goes into the panel's content child, a `<ui-content>` the
+			accordion adds after the title when there's none; that child's children are a placeholder it replaces.
+			`select` takes only the first match of a CSS selector. Fetched as [`<ui-section source>`](/components/ui/ui-section.html)
+			fetches: same origin, cached, scripts inert, relative URLs rewritten.
+
+			The panel stays closed while the body is on its way (at most 300 ms), so it opens onto the real content.
+			`ui-loaded` fires once it's in (`:state(loaded)`); a failure fires the cancelable `ui-error` and shows an error
+			line in the panel (`:state(error)`). `load()` fetches it now, `reload()` again past the cache.
+		</>
+		<example description="Open the question:  its answer comes from `examples/answer.html`.">
+			<accordion appearance="styled" source="/components/ui/examples/answer.html">
+				<title>What is a dog?</title>
+			</accordion>
+		</example>
+	</>
+
+	<section label="Without JavaScript">
+		<markdown>
+			Fomantic 2.9 styles `details.ui.accordion` as a pure-CSS accordion, and ours draws the same
+			`<details>` panels. If the element fails to render, though, none of it shows, titles and answers
+			included: it hands each title and answer to its place in a panel itself, and a broken accordion hands
+			over none of them.
+		</>
+	</>
+
+	<section label="Keyboard">
+		<markdown>
+			- **Tab** / **Shift+Tab** moves to the next / previous title (and into an open panel).
+			- **Enter** / **Space** opens or closes the focused panel.
+			- **Arrow Down** / **Arrow Up** moves to the next / previous title of the same accordion.
+			- **Home** / **End** moves to the first / last title.
+		</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			- Each title is a native `<summary>`: a focusable button that exposes whether its panel is expanded, with no
+			  ARIA to keep in sync.
+			- Arrow keys move between the titles of one accordion, as the APG accordion pattern suggests.
+			- Find-in-page (Ctrl / Cmd + F) opens a closed panel that holds a match. That opening can't be vetoed:
+			  `ui-opening` still fires, but `preventDefault()` does nothing.
+			- Titles are buttons, not headings: they don't appear in the page's outline.
+		</>
+	</>
+
+	<section label="Framework usage">
+		<markdown>Bind `open` (a string of indexes) and listen for `ui-opening` / `ui-closing` to follow the user.</>
+		<header level="4" id="framework-react">React 19</>
+		<markdown>
+			```jsx
+			<ui-accordion appearance="styled" open={String(index)} onui-open={(e) => setIndex(e.detail.index)}>...</ui-accordion>
+			```
+		</>
+		<header level="4" id="framework-vue">Vue 3.5</>
+		<markdown>
+			```html
+			<!-- compilerOptions.isCustomElement = (tag) => tag.startsWith("ui-") -->
+			<ui-accordion appearance="styled" :open="String(index)" @ui-opening="(e) => (index = e.detail.index)">...</ui-accordion>
+			```
+		</>
+		<header level="4" id="framework-solid">Solid 2</>
+		<markdown>
+			```jsx
+			// events and rich data are plain props:  `on-<event>={...}`, `options={...}`
+			<ui-accordion
+			  appearance="styled"
+			  open={String(index())}
+			  on-ui-opening={(e) => setIndex(e.detail.index)}
+			>
+			  ...
+			</ui-accordion>
+			```
+		</>
+	</>
+</spell-notebook>

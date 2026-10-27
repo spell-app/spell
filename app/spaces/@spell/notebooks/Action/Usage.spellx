@@ -1,0 +1,50 @@
+<spell-notebook "action usage">
+	<header level="1">
+		Action
+		<header>An action is a menu item or toolbar button drawn from something a program can do:  its title, icon and shortcut keys, greyed while it can't be done.</>
+	</>
+	<action-tab-bar showing="usage"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#using-it">Using it</>
+				<ui-item link="#keyboard">Keyboard</>
+				<ui-item link="#accessibility">Accessibility</>
+			</>
+		</>
+	</>
+
+	<!-- USAGE:  how to use it (attributes in practice, events, framework snippets), keyboard, accessibility. -->
+	<section label="Using it">
+		<markdown>
+			Put `<ui-action>`s where you'd put `<ui-item>`s:  in a `<ui-menu>`, a `<ui-toolbar>` or a list.  Each draws as one of its items.
+
+			- Written by hand:  its title as its text, its keys in `shortcut`, `icon`, `disabled` and `selected`.
+			- Drawn from an action:  set its `action` property, and it reads the title, icon, shortcut and state from there, live.  A click runs it, unless it's disabled.
+			- Any object of the action's shape will do;  Spell's runner hands it each item of a template's menu.
+		</>
+		<markdown>
+			```js
+			const undo = document.createElement("ui-action")
+			undo.action = {
+			  get title() { return history.undoTitle },  // "Undo Turn Card"
+			  shortcut: "mod+Z",
+			  get isEnabled() { return history.canUndo },
+			  isSelected: false,
+			  run: () => history.undo()
+			}
+			document.querySelector("ui-menu").append(undo)
+			```
+		</>
+	</>
+
+	<section label="Keyboard">
+		<markdown>As its menu's or toolbar's items:  Tab, or the arrow keys in an `interactive` menu, reach it;  Enter or Space runs it.  Its `shortcut` is only drawn:  the page binds the keys (Spell's runner does, for a program's actions).</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			A `<button>` (a link with `link`), named by its title;  `aria-disabled` while it can't be done, the owner's role in a menubar (`menuitem`).  The key caps are part of its name as a screen reader reads it, after the title.
+		</>
+	</>
+</spell-notebook>

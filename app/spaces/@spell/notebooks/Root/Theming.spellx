@@ -1,0 +1,57 @@
+<spell-notebook "root theming">
+	<header level="1">
+		Root
+		<header>A root loads the components inside it on demand, sets their theme, size, icons and emoji, and shows
+              them once they're ready.</>
+	</>
+	<root-tab-bar showing="theming"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#tokens">Tokens</>
+				<ui-item link="#themes">Themes</>
+			</>
+		</>
+	</>
+
+	<!-- THEMING:  no tokens of its own;  what it sets for what's inside. -->
+	<section label="Tokens">
+		<markdown>
+			A root has no look of its own, so no `--ui-root-*` tokens. It themes what's INSIDE it:
+
+			- `theme="light"` / `"dark"` sets the colour scheme of everything inside (`:state(light)` / `:state(dark)`).
+			- `size` scales the components inside, `mini` ... `massive` (not plain text, nor a bare `<ui-icon>`, which follows its text).
+			- Any `--ui-*` token set on the root inherits into every element inside, as on any ancestor.
+			- Style the loading look with `::part(loading)` (the loader) and `::part(skeleton)` (the placeholders' box), and
+			  a box's scroller with `::part(scroller)`.
+		</>
+		<markdown>
+			```css
+			ui-root.dashboard {
+			  --ui-primary: var(--ui-teal);
+			}
+			ui-root.dashboard::part(skeleton) {
+			  padding: 1em;
+			}
+			```
+		</>
+		<html>
+			<ui-docs-tokens family="ui-root" playground>
+				<ui-root>
+					<ui-segment>
+						<ui-header>Report</>
+						<p>Every component inside was loaded by the root, on demand.</>
+						<ui-button color="primary">Save</>
+					</>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="Themes">
+		<markdown>
+			Root is ours, not Fomantic's, and draws nothing itself, so no theme restyles it. The site-wide theme (the picker in
+			the header) applies to everything inside a root.
+		</>
+	</>
+</spell-notebook>

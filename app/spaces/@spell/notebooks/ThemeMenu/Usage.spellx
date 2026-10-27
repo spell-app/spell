@@ -1,0 +1,58 @@
+<spell-notebook "theme-menu usage">
+	<header level="1">
+		Theme Menu
+		<header>A theme menu picks the page's theme from Spell's own, and its light, dark or system colour scheme, and remembers both for the next page.</>
+	</>
+	<theme-menu-tab-bar showing="usage"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#using-it">Using it</>
+				<ui-item link="#keyboard">Keyboard</>
+				<ui-item link="#accessibility">Accessibility</>
+			</>
+		</>
+	</>
+
+	<!-- USAGE:  how to use it (attributes in practice, events, framework snippets), keyboard, accessibility. -->
+	<section label="Using it">
+		<markdown>
+			Put one anywhere:  it reads the themes from Spell UI's theme list (`UI.themes.own`), so it works on
+			any page, not only these.
+
+			- It lists Spell's own themes:  Spell, Glass, Fruity, Merlot, Paper, Midnight, Crisp, Pop and Matrix, each with a line saying what it is.
+			- A pick applies the theme to the page and every element on it, and remembers it for the next page
+			  (`ThemePreference`).  Light / dark is ONE choice for every Spell site.
+			- A page that restores the remembered theme before any menu shows calls
+			  `ThemePreference.restore()`;  a place with its own default theme and remembered pick calls
+			  `ThemePreference.site({ defaultTheme, themeKey })` first, as the Spell editor does.
+			- Its `end` slot adds rows of the page's own under the themes:  the editor's "Edit theme...".
+		</>
+		<markdown>
+			```js
+			document.querySelector("ui-theme-menu").addEventListener("ui-changed", (event) => console.log(event.detail))
+			// { theme: "merlot", scheme: "system", shown: "dark" }
+			```
+		</>
+	</>
+
+	<section label="Keyboard">
+		<markdown>
+			- Enter or Space on the palette button opens its panel, the chosen theme focused.
+			- In the theme list:  the arrows, Home and End move;  Enter or Space picks, and the panel stays open
+			  to compare.
+			- Shift+Tab reaches Light | Dark | Auto:  the arrows move and choose, as in any radio group.
+			- Escape closes the panel, and focus goes back to the palette button.
+		</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			- The palette button's name says the theme and scheme chosen ("Theme and light / dark:  Spell,
+			  Auto");  it's its tooltip too.
+			- The theme list is a `menu` of `menuitemradio`s, the chosen one checked;  Light | Dark | Auto a
+			  `radiogroup`.
+			- Nothing for an author to add.
+		</>
+	</>
+</spell-notebook>

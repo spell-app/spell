@@ -1,0 +1,58 @@
+<spell-notebook "input theming">
+	<header level="1">
+		Input
+		<header>An input is a field used to elicit a response from a user.</>
+	</>
+	<input-tab-bar showing="theming"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#tokens">Tokens</>
+				<ui-item link="#themes">Themes</>
+			</>
+		</>
+	</>
+
+	<!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
+	<section label="Tokens">
+		<markdown>
+			Theme with the public `--ui-input-*` tokens: set one on the element, on any ancestor (a form, `:root`), or on the
+			root box through `::part(input)`. They inherit into the shadow root, where the sheet reads each through a private
+			alias, so nothing inside blocks them.
+
+			- `<ui-textarea>` reads the same set.
+			- Style the native control itself with `::part(control)`.
+		</>
+		<markdown>
+			```css
+			ui-input,
+			ui-textarea {
+			  --ui-input-radius: 0;
+			  --ui-input-border-color-focus: var(--ui-primary);
+			}
+			ui-input::part(control) {
+			  font-variant-numeric: tabular-nums;
+			}
+			```
+		</>
+		<message state="info" size="small">
+			<markdown>
+				A `state` swaps in its own border and background colours over yours. Never set the `--_ui-input-*` names:
+				they're the sheet's private plumbing.
+			</>
+		</>
+		<markdown>Edit a value below to try it.</>
+		<html>
+			<ui-docs-tokens family="ui-input" playground>
+				<ui-input placeholder="Search..." aria-label="Search"></>
+			</>
+		</>
+	</>
+
+	<section label="Themes">
+		<markdown>
+			The theme menu above picks the theme for every page of the site:  Spell, Glass, Fruity or Merlot,
+			each restyling this component through its tokens.
+		</>
+	</>
+</spell-notebook>

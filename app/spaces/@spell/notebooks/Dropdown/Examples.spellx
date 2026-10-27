@@ -1,0 +1,1731 @@
+<spell-notebook "dropdown examples">
+	<header level="1">
+		Dropdown
+		<header>A dropdown allows a user to select a value from a series of options.</>
+	</>
+	<dropdown-tab-bar showing="examples"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#types">Types</>
+				<ui-item link="#content">Content</>
+				<ui-item link="#states">States</>
+				<ui-item link="#variations">Variations</>
+				<ui-item link="#selection-dropdowns">Selection Dropdowns</>
+				<ui-item link="#remote-content">Remote Content</>
+				<ui-item link="#menus">Menus</>
+				<ui-item link="#adjusting-actions">Adjusting Actions</>
+				<ui-item link="#coupling">Coupling</>
+			</>
+		</>
+	</>
+
+	<!--
+		EXAMPLES:  Fomantic's dropdown page, section by section, in its order (Types, Content, States, Variations, then
+		its Examples tab:  Selection Dropdowns, Remote Content, Menus, Adjusting Actions, Coupling), plus our extras
+		(Form states, Colored, Invoker commands).
+		- Options are slotted `<ui-item>`s;  Fomantic's long country / state lists are shortened.
+		- Fomantic's `<select class="ui dropdown">` forms are `<ui-dropdown selection>` (with `multiple` for a multi-select).
+	-->
+	<section label="Types">
+		<!-- GAP I53:  no nested sub-menu (`Publish To Web`);  left out. -->
+		<section label="Dropdown" sticky collapsible dividing>
+			<example description="A dropdown, its items `<ui-item>`s. An item's `description` sits at the end of its row, and its `icon` before the text.">
+				<dropdown label="File">
+					<item>New</item>
+					<item description="ctrl + o">Open...</item>
+					<item description="ctrl + s">Save as...</item>
+					<item description="ctrl + r">Rename</item>
+					<item>Make a copy</item>
+					<item icon="folder">Move to folder</item>
+					<item icon="trash">Move to trash</item>
+					<item kind="divider"/>
+					<item>Download As...</item>
+					<item>E-mail Collaborators</item>
+				</dropdown>
+			</example>
+		</>
+
+		<section label="Selection" sticky collapsible dividing>
+			<example>
+				<html>
+					<p slot="description">A dropdown can be used to select between choices in a form:  <code>selection</code>, with a name and a placeholder.</p>
+					<ui-message slot="description" size="small" class="site-not-ported">Not ported: initializing on a native <code>&lt;select&gt;</code> (write the items instead:  the native fallback IS a select), and <code>scrollhint</code> (a touch-only scroll animation).</ui-message>
+				</html>
+				<dropdown selection name="pet" placeholder="Pet">
+					<item value="0">Cat</item>
+					<item value="1">Dog</item>
+					<item value="2">Bird</item>
+					<item value="3">Rabbit</item>
+					<item value="4">Squirrel</item>
+					<item value="5">Horse</item>
+					<item value="6">Turtle</item>
+					<item value="7">Parrot</item>
+				</dropdown>
+			</example>
+			<example description="Items can lead with an image:  `image`.">
+				<dropdown fluid selection name="user" placeholder="Select Friend">
+					<item value="jenny" image="../images/avatar/small/jenny.jpg">Jenny Hess</item>
+					<item value="elliot" image="../images/avatar/small/elliot.jpg">Elliot Fu</item>
+					<item value="stevie" image="../images/avatar/small/stevie.jpg">Stevie Feliciano</item>
+					<item value="christian" image="../images/avatar/small/christian.jpg">Christian</item>
+					<item value="matt" image="../images/avatar/small/matt.jpg">Matt</item>
+					<item value="justen" image="../images/avatar/small/justen.jpg">Justen Kitsune</item>
+				</dropdown>
+			</example>
+		</>
+
+		<section label="Search Selection" sticky collapsible dividing>
+			<example description="A selection dropdown can allow a user to search through a large list of choices:  `search`.">
+				<dropdown fluid search selection name="country" placeholder="Select Country">
+					<item value="af" flag="af">Afghanistan</item>
+					<item value="ax" flag="ax">Aland Islands</item>
+					<item value="al" flag="al">Albania</item>
+					<item value="dz" flag="dz">Algeria</item>
+					<item value="as" flag="as">American Samoa</item>
+					<item value="ad" flag="ad">Andorra</item>
+					<item value="ao" flag="ao">Angola</item>
+					<item value="ai" flag="ai">Anguilla</item>
+					<item value="ag" flag="ag">Antigua</item>
+					<item value="ar" flag="ar">Argentina</item>
+					<item value="am" flag="am">Armenia</item>
+					<item value="aw" flag="aw">Aruba</item>
+					<item value="au" flag="au">Australia</item>
+					<item value="at" flag="at">Austria</item>
+					<item value="az" flag="az">Azerbaijan</item>
+					<item value="bs" flag="bs">Bahamas</item>
+					<item value="bh" flag="bh">Bahrain</item>
+					<item value="bd" flag="bd">Bangladesh</item>
+					<item value="bb" flag="bb">Barbados</item>
+					<item value="by" flag="by">Belarus</item>
+				</dropdown>
+			</example>
+			<example>
+				<dropdown search selection placeholder="State">
+					<item value="AL">Alabama</item>
+					<item value="AK">Alaska</item>
+					<item value="AZ">Arizona</item>
+					<item value="AR">Arkansas</item>
+					<item value="CA">California</item>
+					<item value="CO">Colorado</item>
+					<item value="CT">Connecticut</item>
+					<item value="DE">Delaware</item>
+					<item value="DC">District Of Columbia</item>
+					<item value="FL">Florida</item>
+					<item value="GA">Georgia</item>
+					<item value="HI">Hawaii</item>
+					<item value="ID">Idaho</item>
+					<item value="IL">Illinois</item>
+					<item value="IN">Indiana</item>
+					<item value="IA">Iowa</item>
+					<item value="KS">Kansas</item>
+					<item value="KY">Kentucky</item>
+					<item value="LA">Louisiana</item>
+					<item value="ME">Maine</item>
+					<item value="MD">Maryland</item>
+					<item value="MA">Massachusetts</item>
+					<item value="MI">Michigan</item>
+					<item value="MN">Minnesota</item>
+					<item value="MS">Mississippi</item>
+					<item value="MO">Missouri</item>
+					<item value="MT">Montana</item>
+					<item value="NE">Nebraska</item>
+					<item value="NV">Nevada</item>
+					<item value="NH">New Hampshire</item>
+					<item value="NJ">New Jersey</item>
+					<item value="NM">New Mexico</item>
+					<item value="NY">New York</item>
+					<item value="NC">North Carolina</item>
+					<item value="ND">North Dakota</item>
+					<item value="OH">Ohio</item>
+					<item value="OK">Oklahoma</item>
+					<item value="OR">Oregon</item>
+					<item value="PA">Pennsylvania</item>
+					<item value="RI">Rhode Island</item>
+					<item value="SC">South Carolina</item>
+					<item value="SD">South Dakota</item>
+					<item value="TN">Tennessee</item>
+					<item value="TX">Texas</item>
+					<item value="UT">Utah</item>
+					<item value="VT">Vermont</item>
+					<item value="VA">Virginia</item>
+					<item value="WA">Washington</item>
+					<item value="WV">West Virginia</item>
+					<item value="WI">Wisconsin</item>
+					<item value="WY">Wyoming</item>
+				</dropdown>
+			</example>
+		</>
+
+		<!-- GAP I106:  no unfilterable items. -->
+		<section label="Unfilterable items in Search Selection" sticky collapsible dividing>
+			<example description="Fomantic can keep some items listed whatever the search (`unfilterable` items). Ours filters every item; the example shows the list without the extra rule.">
+				<dropdown search selection name="states" placeholder="States">
+					<item value="AL">Alabama (unfilterable)</item>
+					<item value="AK">Alaska</item>
+					<item value="AZ">Arizona (unfilterable)</item>
+					<item value="AR">Arkansas (unfilterable)</item>
+					<item value="CA">California</item>
+					<item value="OH">Ohio</item>
+					<item value="OK">Oklahoma</item>
+				</dropdown>
+			</example>
+		</>
+
+		<!-- GAP I106:  no ignore-diacritics setting on the element (MenuOptions has one). -->
+		<section label="Search ignoring Diacritics" sticky collapsible dividing>
+			<example description="Fomantic can ignore diacritics while searching (`ignoreDiacritics`). Ours matches them as typed:  type `cafe`, and only `cafetería` matches, not café.">
+				<dropdown search selection name="diacritics" placeholder="Search diacritics by only typing usual vowels">
+					<item>André</item>
+					<item>Bokmål</item>
+					<item>café</item>
+					<item>cafetería</item>
+					<item>château</item>
+					<item>décolleté</item>
+					<item>Élysée</item>
+					<item>Fräulein</item>
+					<item>garçon</item>
+					<item>háček</item>
+					<item>Québec</item>
+					<item>Škoda</item>
+					<item>über</item>
+					<item>voilà</item>
+					<item>Zoë</item>
+				</dropdown>
+			</example>
+		</>
+
+		<section label="Highlight search matches" sticky collapsible dividing>
+			<example description="The matching strings inside the search results are highlighted: always on, no setting.">
+				<dropdown fluid multiple search selection placeholder="State">
+					<item value="AL">Alabama</item>
+					<item value="AK">Alaska</item>
+					<item value="AZ">Arizona</item>
+					<item value="AR">Arkansas</item>
+					<item value="CA">California</item>
+					<item value="CO">Colorado</item>
+					<item value="CT">Connecticut</item>
+					<item value="DE">Delaware</item>
+					<item value="DC">District Of Columbia</item>
+					<item value="FL">Florida</item>
+					<item value="GA">Georgia</item>
+					<item value="HI">Hawaii</item>
+					<item value="ID">Idaho</item>
+					<item value="IL">Illinois</item>
+					<item value="IN">Indiana</item>
+					<item value="IA">Iowa</item>
+					<item value="KS">Kansas</item>
+					<item value="KY">Kentucky</item>
+					<item value="LA">Louisiana</item>
+					<item value="ME">Maine</item>
+					<item value="MD">Maryland</item>
+					<item value="MA">Massachusetts</item>
+					<item value="MI">Michigan</item>
+					<item value="MN">Minnesota</item>
+					<item value="MS">Mississippi</item>
+					<item value="MO">Missouri</item>
+					<item value="MT">Montana</item>
+					<item value="NE">Nebraska</item>
+					<item value="NV">Nevada</item>
+					<item value="NH">New Hampshire</item>
+					<item value="NJ">New Jersey</item>
+					<item value="NM">New Mexico</item>
+					<item value="NY">New York</item>
+					<item value="NC">North Carolina</item>
+					<item value="ND">North Dakota</item>
+					<item value="OH">Ohio</item>
+					<item value="OK">Oklahoma</item>
+					<item value="OR">Oregon</item>
+					<item value="PA">Pennsylvania</item>
+					<item value="RI">Rhode Island</item>
+					<item value="SC">South Carolina</item>
+					<item value="SD">South Dakota</item>
+					<item value="TN">Tennessee</item>
+					<item value="TX">Texas</item>
+					<item value="UT">Utah</item>
+					<item value="VT">Vermont</item>
+					<item value="VA">Virginia</item>
+					<item value="WA">Washington</item>
+					<item value="WV">West Virginia</item>
+					<item value="WI">Wisconsin</item>
+					<item value="WY">Wyoming</item>
+				</dropdown>
+			</example>
+		</>
+
+		<section label="Clearable Selection" sticky collapsible dividing>
+			<example description="A clearable selection dropdown can allow a user to cancel a previous selection:  `clearable`.">
+				<dropdown clearable selection name="language" value="English" placeholder="Select Language">
+					<item>Arabic</item>
+					<item>Chinese</item>
+					<item>Danish</item>
+					<item>Dutch</item>
+					<item>English</item>
+					<item>French</item>
+					<item>German</item>
+					<item>Greek</item>
+					<item>Hungarian</item>
+					<item>Italian</item>
+					<item>Japanese</item>
+					<item>Korean</item>
+					<item>Lithuanian</item>
+					<item>Persian</item>
+					<item>Polish</item>
+					<item>Portuguese</item>
+					<item>Russian</item>
+					<item>Spanish</item>
+					<item>Swedish</item>
+					<item>Turkish</item>
+					<item>Vietnamese</item>
+				</dropdown>
+			</example>
+			<example>
+				<dropdown clearable multiple selection name="languages" value="Dutch,English,French" placeholder="Select Languages">
+					<item>Arabic</item>
+					<item>Chinese</item>
+					<item>Danish</item>
+					<item>Dutch</item>
+					<item>English</item>
+					<item>French</item>
+					<item>German</item>
+					<item>Greek</item>
+					<item>Hungarian</item>
+					<item>Italian</item>
+					<item>Japanese</item>
+					<item>Korean</item>
+					<item>Lithuanian</item>
+					<item>Persian</item>
+					<item>Polish</item>
+					<item>Portuguese</item>
+					<item>Russian</item>
+					<item>Spanish</item>
+					<item>Swedish</item>
+					<item>Turkish</item>
+					<item>Vietnamese</item>
+				</dropdown>
+			</example>
+		</>
+
+		<section label="Multiple Selection" sticky collapsible dividing>
+			<example description="A selection dropdown can allow multiple selections:  `multiple`.  `value` is a comma-separated list.">
+				<dropdown fluid multiple selection name="skills" placeholder="Skills">
+					<item value="angular">Angular</item>
+					<item value="css">CSS</item>
+					<item value="design">Graphic Design</item>
+					<item value="ember">Ember</item>
+					<item value="html">HTML</item>
+					<item value="ia">Information Architecture</item>
+					<item value="javascript">Javascript</item>
+					<item value="mech">Mechanical Engineering</item>
+					<item value="meteor">Meteor</item>
+					<item value="node">NodeJS</item>
+					<item value="plumbing">Plumbing</item>
+					<item value="python">Python</item>
+					<item value="rails">Rails</item>
+					<item value="react">React</item>
+					<item value="repair">Kitchen Repair</item>
+					<item value="ruby">Ruby</item>
+					<item value="ui">UI Design</item>
+					<item value="ux">User Experience</item>
+				</dropdown>
+			</example>
+		</>
+
+		<section label="Multiple Search Selection" sticky collapsible dividing>
+			<example description="A selection dropdown can allow multiple search selections.">
+				<dropdown fluid multiple search selection placeholder="State">
+					<item value="AL">Alabama</item>
+					<item value="AK">Alaska</item>
+					<item value="AZ">Arizona</item>
+					<item value="AR">Arkansas</item>
+					<item value="CA">California</item>
+					<item value="CO">Colorado</item>
+					<item value="CT">Connecticut</item>
+					<item value="DE">Delaware</item>
+					<item value="DC">District Of Columbia</item>
+					<item value="FL">Florida</item>
+					<item value="GA">Georgia</item>
+					<item value="HI">Hawaii</item>
+					<item value="ID">Idaho</item>
+					<item value="IL">Illinois</item>
+					<item value="IN">Indiana</item>
+					<item value="IA">Iowa</item>
+					<item value="KS">Kansas</item>
+					<item value="KY">Kentucky</item>
+					<item value="LA">Louisiana</item>
+					<item value="ME">Maine</item>
+					<item value="MD">Maryland</item>
+					<item value="MA">Massachusetts</item>
+					<item value="MI">Michigan</item>
+					<item value="MN">Minnesota</item>
+					<item value="MS">Mississippi</item>
+					<item value="MO">Missouri</item>
+					<item value="MT">Montana</item>
+					<item value="NE">Nebraska</item>
+					<item value="NV">Nevada</item>
+					<item value="NH">New Hampshire</item>
+					<item value="NJ">New Jersey</item>
+					<item value="NM">New Mexico</item>
+					<item value="NY">New York</item>
+					<item value="NC">North Carolina</item>
+					<item value="ND">North Dakota</item>
+					<item value="OH">Ohio</item>
+					<item value="OK">Oklahoma</item>
+					<item value="OR">Oregon</item>
+					<item value="PA">Pennsylvania</item>
+					<item value="RI">Rhode Island</item>
+					<item value="SC">South Carolina</item>
+					<item value="SD">South Dakota</item>
+					<item value="TN">Tennessee</item>
+					<item value="TX">Texas</item>
+					<item value="UT">Utah</item>
+					<item value="VT">Vermont</item>
+					<item value="VA">Virginia</item>
+					<item value="WA">Washington</item>
+					<item value="WV">West Virginia</item>
+					<item value="WI">Wisconsin</item>
+					<item value="WY">Wyoming</item>
+				</dropdown>
+			</example>
+
+			<!-- GAP I106:  no keep-search-term (the query clears on each choice). -->
+			<example description="Fomantic can keep the search term after a choice (`keepSearchTerm`) so the menu stays filtered; ours clears it.">
+				<dropdown fluid multiple search selection placeholder="State">
+					<item value="AL">Alabama</item>
+					<item value="AK">Alaska</item>
+					<item value="AZ">Arizona</item>
+					<item value="AR">Arkansas</item>
+					<item value="CA">California</item>
+					<item value="CO">Colorado</item>
+					<item value="CT">Connecticut</item>
+					<item value="DE">Delaware</item>
+					<item value="DC">District Of Columbia</item>
+					<item value="FL">Florida</item>
+					<item value="GA">Georgia</item>
+					<item value="HI">Hawaii</item>
+					<item value="ID">Idaho</item>
+					<item value="IL">Illinois</item>
+					<item value="IN">Indiana</item>
+					<item value="IA">Iowa</item>
+					<item value="KS">Kansas</item>
+					<item value="KY">Kentucky</item>
+					<item value="LA">Louisiana</item>
+					<item value="ME">Maine</item>
+					<item value="MD">Maryland</item>
+					<item value="MA">Massachusetts</item>
+					<item value="MI">Michigan</item>
+					<item value="MN">Minnesota</item>
+					<item value="MS">Mississippi</item>
+					<item value="MO">Missouri</item>
+					<item value="MT">Montana</item>
+					<item value="NE">Nebraska</item>
+					<item value="NV">Nevada</item>
+					<item value="NH">New Hampshire</item>
+					<item value="NJ">New Jersey</item>
+					<item value="NM">New Mexico</item>
+					<item value="NY">New York</item>
+					<item value="NC">North Carolina</item>
+					<item value="ND">North Dakota</item>
+					<item value="OH">Ohio</item>
+					<item value="OK">Oklahoma</item>
+					<item value="OR">Oregon</item>
+					<item value="PA">Pennsylvania</item>
+					<item value="RI">Rhode Island</item>
+					<item value="SC">South Carolina</item>
+					<item value="SD">South Dakota</item>
+					<item value="TN">Tennessee</item>
+					<item value="TX">Texas</item>
+					<item value="UT">Utah</item>
+					<item value="VT">Vermont</item>
+					<item value="VA">Virginia</item>
+					<item value="WA">Washington</item>
+					<item value="WV">West Virginia</item>
+					<item value="WI">Wisconsin</item>
+					<item value="WY">Wyoming</item>
+				</dropdown>
+			</example>
+			<example description="Items can hold content a native `<option>` can't, such as flags.">
+				<dropdown fluid multiple search selection name="country" placeholder="Select Country">
+					<item value="af" flag="af">Afghanistan</item>
+					<item value="ax" flag="ax">Aland Islands</item>
+					<item value="al" flag="al">Albania</item>
+					<item value="dz" flag="dz">Algeria</item>
+					<item value="as" flag="as">American Samoa</item>
+					<item value="ad" flag="ad">Andorra</item>
+					<item value="ao" flag="ao">Angola</item>
+					<item value="ai" flag="ai">Anguilla</item>
+					<item value="ag" flag="ag">Antigua</item>
+					<item value="ar" flag="ar">Argentina</item>
+					<item value="am" flag="am">Armenia</item>
+					<item value="aw" flag="aw">Aruba</item>
+					<item value="au" flag="au">Australia</item>
+					<item value="at" flag="at">Austria</item>
+					<item value="az" flag="az">Azerbaijan</item>
+					<item value="bs" flag="bs">Bahamas</item>
+					<item value="bh" flag="bh">Bahrain</item>
+					<item value="bd" flag="bd">Bangladesh</item>
+					<item value="bb" flag="bb">Barbados</item>
+					<item value="by" flag="by">Belarus</item>
+				</dropdown>
+			</example>
+		</>
+
+		<!-- GAP I11:  no basic button look. -->
+		<section label="Search Dropdown" sticky collapsible dividing>
+			<example description="A dropdown can be searchable, on a labeled icon button too.">
+				<dropdown floating labeled button search icon="world" placeholder="Select Language">
+					<item>Arabic</item>
+					<item>Chinese</item>
+					<item>Danish</item>
+					<item>Dutch</item>
+					<item>English</item>
+					<item>French</item>
+					<item>German</item>
+					<item>Greek</item>
+					<item>Hungarian</item>
+					<item>Italian</item>
+					<item>Japanese</item>
+					<item>Korean</item>
+					<item>Lithuanian</item>
+					<item>Persian</item>
+					<item>Polish</item>
+					<item>Portuguese</item>
+					<item>Russian</item>
+					<item>Spanish</item>
+					<item>Swedish</item>
+					<item>Turkish</item>
+					<item>Vietnamese</item>
+				</dropdown>
+			</example>
+		</>
+
+		<!-- GAP I106:  an input in the menu doesn't filter it (Fomantic's search in-menu);  the header slot just shows it. -->
+		<section label="Search In-Menu" sticky collapsible dividing>
+			<example description="A dropdown can include content at the top of its menu: the `header` slot. Fomantic's in-menu search input also filters the items; ours is only shown, so use `search` to filter.">
+				<dropdown floating labeled button scrolling icon="filter" label="Filter Posts">
+					<input slot="header" icon="search" placeholder="Search tags..." aria-label="Search tags"/>
+					<item kind="divider"/>
+					<item kind="header" icon="tags">Tag Label</item>
+					<item value="important"><label color="red" empty appearance="circular"/>Important</item>
+					<item value="announcement"><label color="blue" empty appearance="circular"/>Announcement</item>
+					<item value="cannotfix"><label color="black" empty appearance="circular"/>Cannot Fix</item>
+					<item value="news"><label color="purple" empty appearance="circular"/>News</item>
+					<item value="enhancement"><label color="orange" empty appearance="circular"/>Enhancement</item>
+					<item value="declined"><label empty appearance="circular"/>Change Declined</item>
+					<item value="off-topic"><label color="yellow" empty appearance="circular"/>Off Topic</item>
+					<item value="interesting"><label color="pink" empty appearance="circular"/>Interesting</item>
+					<item value="discussion"><label color="green" empty appearance="circular"/>Discussion</item>
+				</dropdown>
+			</example>
+			<example>
+				<dropdown multiple scrolling name="filters" placeholder="Filter Posts">
+					<item value="important"><label color="red" empty appearance="circular"/>Important</item>
+					<item value="announcement"><label color="blue" empty appearance="circular"/>Announcement</item>
+					<item value="cannotfix"><label color="black" empty appearance="circular"/>Cannot Fix</item>
+					<item value="news"><label color="purple" empty appearance="circular"/>News</item>
+					<item value="enhancement"><label color="orange" empty appearance="circular"/>Enhancement</item>
+					<item value="declined"><label empty appearance="circular"/>Change Declined</item>
+					<item value="off-topic"><label color="yellow" empty appearance="circular"/>Off Topic</item>
+					<item value="interesting"><label color="pink" empty appearance="circular"/>Interesting</item>
+					<item value="discussion"><label color="green" empty appearance="circular"/>Discussion</item>
+				</dropdown>
+			</example>
+		</>
+
+		<section label="Inline" sticky collapsible dividing>
+			<example description="A dropdown can be formatted to appear inline in other content.">
+				<html>
+					<p>Show me posts by <ui-dropdown inline value="jenny"><ui-item value="jenny" image="../images/avatar/small/jenny.jpg">Jenny Hess</ui-item> <ui-item value="elliot" image="../images/avatar/small/elliot.jpg">Elliot Fu</ui-item> <ui-item value="stevie" image="../images/avatar/small/stevie.jpg">Stevie Feliciano</ui-item> <ui-item value="christian" image="../images/avatar/small/christian.jpg">Christian</ui-item> <ui-item value="matt" image="../images/avatar/small/matt.jpg">Matt</ui-item> <ui-item value="justen" image="../images/avatar/small/justen.jpg">Justen Kitsune</ui-item></ui-dropdown></p>
+				</html>
+			</example>
+			<example>
+				<header level="4"><icon name="trophy"/> Trending repos <dropdown inline value="today"><item kind="header">Adjust time span</item> <item value="today" label="today">Today</item> <item value="this week" label="this week">This Week</item> <item value="this month" label="this month">This Month</item></dropdown></header>
+			</example>
+		</>
+
+		<!-- GAP I53:  no dropdown menu item, no nested sub-menus;  the menu examples keep a dropdown inside an item. -->
+		<section label="Pointing" sticky collapsible dividing>
+			<example description="A dropdown can be formatted so that its menu is pointing: `pointing`, with a value for where the menu's arrow sits.">
+				<dropdown pointing label="Shopping">
+					<item kind="header">Categories</item>
+					<item>Clothing</item>
+					<item>Home Goods</item>
+					<item>Bedroom</item>
+					<item kind="divider"/>
+					<item kind="header">Order</item>
+					<item>Status</item>
+					<item>Cancellations</item>
+				</dropdown>
+			</example>
+			<example>
+				<dropdown pointing="left" label="Messages">
+					<item>Inbox</item>
+					<item>Starred</item>
+					<item>Sent Mail</item>
+					<item>Drafts (143)</item>
+					<item kind="divider"/>
+					<item>Spam (1009)</item>
+					<item>Trash</item>
+				</dropdown>
+			</example>
+			<example>
+				<dropdown button pointing="top left" aria-label="Settings">
+					<icon slot="trigger" name="wrench"/>
+					<item kind="header">Display Density</item>
+					<item>Comfortable</item>
+					<item>Cozy</item>
+					<item>Compact</item>
+					<item kind="divider"/>
+					<item>Settings</item>
+					<item>Upload Settings</item>
+					<item>Manage Apps</item>
+					<item>Keyboard Shortcuts</item>
+					<item>Help</item>
+				</dropdown>
+			</example>
+			<example>
+				<dropdown button pointing="bottom left" aria-label="File">
+					<icon slot="trigger" name="wrench"/>
+					<item>New</item>
+					<item>Open...</item>
+					<item>Save...</item>
+					<item>Edit Permissions</item>
+					<item kind="divider"/>
+					<item kind="header">Export</item>
+					<item>Share...</item>
+					<item>Save As...</item>
+				</dropdown>
+				<dropdown button pointing="bottom right" aria-label="File">
+					<icon slot="trigger" name="wrench"/>
+					<item>New</item>
+					<item>Open...</item>
+					<item>Save As...</item>
+				</dropdown>
+			</example>
+			<example>
+				<dropdown labeled button pointing="top left" icon="filter" label="Filter Posts">
+					<item kind="header" icon="tags">Filter by tag</item>
+					<item value="important"><label color="red" empty appearance="circular"/>Important</item>
+					<item value="announcement"><label color="blue" empty appearance="circular"/>Announcement</item>
+					<item value="discussion"><label color="black" empty appearance="circular"/>Discussion</item>
+					<item kind="divider"/>
+					<item kind="header">Filter by date</item>
+					<item><icon name="circle" color="olive"/>This Week</item>
+					<item><icon name="circle" color="violet"/>This Month</item>
+					<item><icon name="circle" color="orange"/>This Year</item>
+				</dropdown>
+			</example>
+			<example>
+				<dropdown button pointing="right" aria-label="Settings">
+					<icon slot="trigger" name="cog"/>
+					<item kind="header">Filter by tag</item>
+					<item value="important"><label color="red" empty appearance="circular"/>Important</item>
+					<item value="announcement"><label color="blue" empty appearance="circular"/>Announcement</item>
+					<item value="discussion"><label color="black" empty appearance="circular"/>Discussion</item>
+				</dropdown>
+				<dropdown button pointing="left" aria-label="Settings">
+					<icon slot="trigger" name="cog"/>
+					<item kind="header">Tag Label</item>
+					<item value="important"><label color="red" empty appearance="circular"/>Important</item>
+					<item value="announcement"><label color="blue" empty appearance="circular"/>Announcement</item>
+					<item value="discussion"><label color="black" empty appearance="circular"/>Discussion</item>
+				</dropdown>
+			</example>
+		</>
+
+		<section label="Floating" sticky collapsible dividing>
+			<example description="A dropdown menu can appear to be floating below an element.">
+				<buttons color="teal">
+					<button>Save</button>
+					<dropdown floating button color="teal" aria-label="More actions">
+						<item icon="edit">Edit Post</item>
+						<item icon="delete">Remove Post</item>
+						<item icon="eye slash">Hide Post</item>
+					</dropdown>
+				</buttons>
+			</example>
+		</>
+
+		<section label="Simple" sticky collapsible dividing>
+			<example description="A simple dropdown can open without JavaScript:  on hover and focus, with no popover.">
+				<dropdown appearance="simple" label="Dropdown">
+					<item>Choice 1</item>
+					<item>Choice 2</item>
+					<item>Choice 3</item>
+				</dropdown>
+			</example>
+		</>
+	</>
+
+	<section label="Content">
+		<!-- GAP I107:  a header item's `icon` draws nothing;  slotted labels are tiny dots touching the text. -->
+		<section label="Header" sticky collapsible dividing>
+			<example description="A dropdown menu can contain a header:  `type=\"header\"`.">
+				<dropdown floating labeled button icon="filter" label="Filter">
+					<item kind="header" icon="tags">Filter by tag</item>
+					<item>Important</item>
+					<item>Announcement</item>
+					<item>Discussion</item>
+				</dropdown>
+			</example>
+		</>
+
+		<section label="Divider" sticky collapsible dividing>
+			<example description="A dropdown menu can contain dividers to separate related content:  `type=\"divider\"`.">
+				<dropdown floating labeled button icon="filter" label="Filter">
+					<item kind="header" icon="tags">Filter by tag</item>
+					<item kind="divider"/>
+					<item>Important</item>
+					<item>Announcement</item>
+					<item>Discussion</item>
+				</dropdown>
+			</example>
+		</>
+
+		<section label="Icon" sticky collapsible dividing>
+			<example description="A dropdown menu can contain an icon:  `icon`.">
+				<dropdown floating labeled button icon="filter" label="Filter">
+					<item kind="header" icon="tags">Filter by tag</item>
+					<item kind="divider"/>
+					<item icon="exclamation">Important</item>
+					<item icon="comment">Announcement</item>
+					<item icon="comments">Discussion</item>
+				</dropdown>
+			</example>
+		</>
+
+		<section label="Description" sticky collapsible dividing>
+			<example description="A dropdown menu can contain a description:  `description`.">
+				<dropdown floating labeled button icon="filter" label="Filter Tags">
+					<item kind="header">Filter by tag</item>
+					<item kind="divider"/>
+					<item description="2 new">Important</item>
+					<item description="10 new">Hopper</item>
+					<item description="5 new">Discussion</item>
+				</dropdown>
+			</example>
+		</>
+
+		<!-- GAP I107:  no vertical item (the description under the text). -->
+		<html>
+			<ui-message size="small" class="site-not-ported">Fomantic's <code>vertical item</> (the description underneath the entry) has no attribute yet (plan issue I107).</>
+		</>
+
+		<section label="Label" sticky collapsible dividing>
+			<example description="A dropdown menu can contain a label:  any markup inside an item is projected into its row.">
+				<dropdown floating labeled button icon="filter" label="Filter">
+					<item kind="header">Search Issues</item>
+					<item kind="header" icon="tags">Filter by tag</item>
+					<item value="important"><label color="red" empty appearance="circular"/>Important</item>
+					<item value="announcement"><label color="blue" empty appearance="circular"/>Announcement</item>
+					<item value="discussion"><label color="black" empty appearance="circular"/>Discussion</item>
+				</dropdown>
+			</example>
+		</>
+
+		<!-- GAP I107:  the header slot is unpadded, and an item-less menu adds "No results found." under the message. -->
+		<section label="Message" sticky collapsible dividing>
+			<example description="A dropdown menu can contain a message:  the `header` slot holds any markup.">
+				<dropdown floating labeled button icon="filter" label="Login">
+					<message slot="header" state="error" heading="Error">You must log-in to see all categories</message>
+				</dropdown>
+			</example>
+			<example description="A search that matches nothing shows the translated `noResults` text, or `no-results-text`.">
+				<dropdown search selection no-results-text="No country by that name." placeholder="Select Country">
+					<item value="af" flag="af">Afghanistan</item>
+					<item value="ax" flag="ax">Aland Islands</item>
+					<item value="al" flag="al">Albania</item>
+					<item value="dz" flag="dz">Algeria</item>
+					<item value="as" flag="as">American Samoa</item>
+					<item value="ad" flag="ad">Andorra</item>
+					<item value="ao" flag="ao">Angola</item>
+					<item value="ai" flag="ai">Anguilla</item>
+					<item value="ag" flag="ag">Antigua</item>
+					<item value="ar" flag="ar">Argentina</item>
+					<item value="am" flag="am">Armenia</item>
+					<item value="aw" flag="aw">Aruba</item>
+					<item value="au" flag="au">Australia</item>
+					<item value="at" flag="at">Austria</item>
+					<item value="az" flag="az">Azerbaijan</item>
+					<item value="bs" flag="bs">Bahamas</item>
+					<item value="bh" flag="bh">Bahrain</item>
+					<item value="bd" flag="bd">Bangladesh</item>
+					<item value="bb" flag="bb">Barbados</item>
+					<item value="by" flag="by">Belarus</item>
+				</dropdown>
+			</example>
+		</>
+
+		<!-- GAP I107:  no floated content in an item (`right floated icon`). -->
+		<section label="Content at the End" sticky collapsible dividing>
+			<example description="A dropdown item can have content at the end of its row: its `description`. An icon can't go at the end yet.">
+				<dropdown fluid selection placeholder="Select Type">
+					<item description="!">Important</item>
+					<item icon="comment">Announcement</item>
+					<item icon="comments">Discussion</item>
+				</dropdown>
+			</example>
+		</>
+
+		<section label="Input" sticky collapsible dividing>
+			<example description="A dropdown menu can contain an input, in the `header` slot. It doesn't filter the items: use `search` for that.">
+				<dropdown floating labeled button icon="filter" label="Filter">
+					<input slot="header" icon="search" icon-position="left" placeholder="Search..." aria-label="Search"/>
+					<item kind="header" icon="tags">Filter by tag</item>
+					<item kind="divider"/>
+					<item value="important"><label color="red" empty appearance="circular"/>Important</item>
+					<item value="announcement"><label color="blue" empty appearance="circular"/>Announcement</item>
+					<item value="discussion"><label color="black" empty appearance="circular"/>Discussion</item>
+				</dropdown>
+			</example>
+		</>
+
+		<section label="Image" sticky collapsible dividing>
+			<example description="A dropdown menu can contain an image:  `image`.">
+				<dropdown floating labeled button icon="user plus" label="Add User">
+					<item kind="header">People You Might Know</item>
+					<item image="../images/avatar/small/jenny.jpg">Jenny Hess</item>
+					<item image="../images/avatar/small/elliot.jpg">Elliot Fu</item>
+					<item image="../images/avatar/small/stevie.jpg">Stevie Feliciano</item>
+					<item kind="header">Your Friends' Friends</item>
+					<item image="../images/avatar/small/christian.jpg">Christian</item>
+					<item image="../images/avatar/small/matt.jpg">Matt</item>
+					<item image="../images/avatar/small/justen.jpg">Justen Kitsune</item>
+				</dropdown>
+			</example>
+			<example description="Or a flag:  `flag`.">
+				<dropdown selection value="fr" placeholder="Country">
+					<item value="fr" flag="fr">France</item>
+					<item value="de" flag="de">Germany</item>
+					<item value="jp" flag="jp">Japan</item>
+				</dropdown>
+			</example>
+		</>
+
+		<!-- GAP I53:  no actionable items (an item that runs a callback instead of being chosen). -->
+		<html>
+			<ui-message size="small" class="site-not-ported">Actionable (an item that runs a callback instead of being chosen) can't be built yet: every item is an option (plan issue I53). Listen for <code>ui-changed</> and set the value back.</>
+		</>
+	</>
+
+	<section label="States">
+		<section label="Loading" sticky collapsible dividing>
+			<example description="A dropdown can show that it is currently loading data.">
+				<dropdown loading label="Dropdown">
+					<item>Choice 1</item>
+					<item>Choice 2</item>
+					<item>Choice 3</item>
+				</dropdown>
+			</example>
+
+			<!-- GAP I108:  no slow / double / elastic loader;  the colour tints the box, not the loader. -->
+			<example>
+				<dropdown loading color="red" fluid multiple search selection value="kp" placeholder="Search...">
+					<item>Choice 1</item>
+					<item>Choice 2</item>
+					<item>Choice 3</item>
+				</dropdown>
+			</example>
+			<example>
+				<dropdown loading color="teal" selection label="Dropdown">
+					<item>Choice 1</item>
+					<item>Choice 2</item>
+					<item>Choice 3</item>
+				</dropdown>
+			</example>
+		</>
+
+		<section label="Error" sticky collapsible dividing>
+			<example description="An errored dropdown can alert a user to a problem:  `state=\"error\"`.">
+				<dropdown floating state="error" label="Dropdown">
+					<item>Choice 1</item>
+					<item>Choice 2</item>
+					<item>Choice 3</item>
+				</dropdown>
+			</example>
+			<example>
+				<dropdown selection state="error" label="Dropdown">
+					<item>Choice 1</item>
+					<item>Choice 2</item>
+					<item>Choice 3</item>
+				</dropdown>
+			</example>
+		</>
+
+		<section label="Form states" sticky collapsible dividing>
+			<example description="`state` also takes `info`, `success` and `warning`:  it tints the box, the text and the menu.">
+				<dropdown state="info" selection label="Info">
+					<item>One</item>
+				</dropdown>
+				<dropdown state="success" selection label="Success">
+					<item>One</item>
+				</dropdown>
+				<dropdown state="warning" multiple selection placeholder="Warning" value="warning">
+					<item value="warning">Warning</item>
+					<item>One</item>
+				</dropdown>
+			</example>
+		</>
+
+		<section label="Active" sticky collapsible dividing>
+			<example description="An active dropdown has its menu open: `open`. Setting it fires no event.">
+				<dropdown open label="Dropdown">
+					<item>Choice 1</item>
+					<item>Choice 2</item>
+				</dropdown>
+			</example>
+		</>
+
+		<section label="Disabled" sticky collapsible dividing>
+			<example description="A disabled dropdown menu or item does not allow user interaction.  A disabled dropdown isn't submitted.">
+				<dropdown disabled label="Dropdown">
+					<item>Choice 1</item>
+					<item>Choice 2</item>
+					<item>Choice 3</item>
+				</dropdown>
+			</example>
+			<example>
+				<dropdown label="Disabled Item">
+					<item>Choice 1</item>
+					<item disabled>Disabled</item>
+					<item>Choice 3</item>
+				</dropdown>
+			</example>
+		</>
+
+		<section label="Read-Only" sticky collapsible dividing>
+			<example description="A dropdown can be read-only and does not allow user interaction, but still submits with a form.">
+				<dropdown readonly label="Dropdown">
+					<item>Choice 1</item>
+					<item>Choice 2</item>
+					<item>Choice 3</item>
+				</dropdown>
+			</example>
+		</>
+	</>
+
+	<section label="Variations">
+		<section label="Size" sticky collapsible dividing>
+			<example description="A dropdown can have different sizes.">
+				<dropdown size="mini" selection name="gender" placeholder="Mini">
+					<item value="1">Male</item>
+					<item value="0">Female</item>
+				</dropdown>
+				<dropdown size="tiny" selection name="gender" placeholder="Tiny">
+					<item value="1">Male</item>
+					<item value="0">Female</item>
+				</dropdown>
+				<dropdown size="small" selection name="gender" placeholder="Small">
+					<item value="1">Male</item>
+					<item value="0">Female</item>
+				</dropdown>
+				<dropdown size="medium" selection name="gender" placeholder="Medium">
+					<item value="1">Male</item>
+					<item value="0">Female</item>
+				</dropdown>
+				<dropdown size="large" selection name="gender" placeholder="Large">
+					<item value="1">Male</item>
+					<item value="0">Female</item>
+				</dropdown>
+			</example>
+			<example>
+				<dropdown size="big" selection name="gender" placeholder="Big">
+					<item value="1">Male</item>
+					<item value="0">Female</item>
+				</dropdown>
+				<dropdown size="huge" selection name="gender" placeholder="Huge">
+					<item value="1">Male</item>
+					<item value="0">Female</item>
+				</dropdown>
+				<dropdown size="massive" selection name="gender" placeholder="Massive">
+					<item value="1">Male</item>
+					<item value="0">Female</item>
+				</dropdown>
+			</example>
+		</>
+
+		<section label="Scrolling" sticky collapsible dividing>
+			<example description="A dropdown can have its menu scroll: `scrolling`; add `resizable` for a native resize handle at the bottom of the menu.">
+				<dropdown scrolling name="choice" placeholder="Select choice">
+					<item>Choice 1</item>
+					<item>Choice 2</item>
+					<item>Choice 3</item>
+					<item>Choice 4</item>
+					<item>Choice 5</item>
+					<item>Choice 6</item>
+					<item>Choice 7</item>
+					<item>Choice 8</item>
+					<item>Choice 9</item>
+					<item>Choice 10</item>
+					<item>Choice 11</item>
+					<item>Choice 12</item>
+					<item>Choice 13</item>
+					<item>Choice 14</item>
+					<item>Choice 15</item>
+				</dropdown>
+				<dropdown scrolling resizable name="choice" placeholder="Resizable">
+					<item>Choice 1</item>
+					<item>Choice 2</item>
+					<item>Choice 3</item>
+					<item>Choice 4</item>
+					<item>Choice 5</item>
+					<item>Choice 6</item>
+					<item>Choice 7</item>
+					<item>Choice 8</item>
+					<item>Choice 9</item>
+					<item>Choice 10</item>
+				</dropdown>
+			</example>
+			<example>
+				<dropdown scrolling label="Filter Posts">
+					<item kind="header" icon="tags">Tag Label</item>
+					<item value="important"><label color="red" empty appearance="circular"/>Important</item>
+					<item value="announcement"><label color="blue" empty appearance="circular"/>Announcement</item>
+					<item value="cannotfix"><label color="black" empty appearance="circular"/>Cannot Fix</item>
+					<item value="news"><label color="purple" empty appearance="circular"/>News</item>
+					<item value="enhancement"><label color="orange" empty appearance="circular"/>Enhancement</item>
+					<item value="declined"><label empty appearance="circular"/>Change Declined</item>
+					<item value="off-topic"><label color="yellow" empty appearance="circular"/>Off Topic</item>
+					<item value="interesting"><label color="pink" empty appearance="circular"/>Interesting</item>
+					<item value="discussion"><label color="green" empty appearance="circular"/>Discussion</item>
+				</dropdown>
+			</example>
+		</>
+
+		<section label="Inverted" sticky collapsible dividing>
+			<example description="A dropdown can be inverted.">
+				<segment inverted>
+					<dropdown inverted selection name="choices" placeholder="Select choice">
+						<item>Choice 1</item>
+						<item>Choice 2</item>
+						<item>Choice 3</item>
+					</dropdown>
+				</segment>
+			</example>
+		</>
+
+		<!-- GAP I107:  no inverted menu on a plain dropdown. -->
+		<html>
+			<ui-message size="small" class="site-not-ported">Fomantic can invert only the menu of a non-inverted dropdown (<code>inverted menu</>); ours inverts the whole dropdown (plan issue I107).</>
+		</>
+
+		<section label="Compact" sticky collapsible dividing>
+			<example description="A compact dropdown has no minimum width:  `padding=\"compact\"`.">
+				<dropdown padding="compact" selection label="Compact">
+					<item>A</item>
+					<item>B</item>
+					<item>C</item>
+				</dropdown>
+				<dropdown padding="compact" selection label="Compact">
+					<item>A very long item that takes up a lot of space</item>
+					<item>B</item>
+				</dropdown>
+			</example>
+		</>
+
+		<section label="Fluid" sticky collapsible dividing>
+			<example description="A dropdown can take the full width of its parent:  `fluid`.">
+				<menu direction="vertical">
+					<item link="#link-1">Link 1</item>
+					<item link="#link-2">Link 2</item>
+					<item kind="header">All Sections</item>
+					<item>
+						<dropdown fluid selection label="More">
+							<item>Choice 1</item>
+							<item>Choice 2</item>
+							<item>Choice 3</item>
+						</dropdown>
+					</item>
+				</menu>
+			</example>
+		</>
+
+		<section label="Height" sticky collapsible dividing>
+			<example description="A selection dropdown can be `long` (2x of default height) so that more items can be glanced.">
+				<dropdown length="long" multiple search selection placeholder="State">
+					<item value="AL">Alabama</item>
+					<item value="AK">Alaska</item>
+					<item value="AZ">Arizona</item>
+					<item value="AR">Arkansas</item>
+					<item value="CA">California</item>
+					<item value="CO">Colorado</item>
+					<item value="CT">Connecticut</item>
+					<item value="DE">Delaware</item>
+					<item value="DC">District Of Columbia</item>
+					<item value="FL">Florida</item>
+					<item value="GA">Georgia</item>
+					<item value="HI">Hawaii</item>
+					<item value="ID">Idaho</item>
+					<item value="IL">Illinois</item>
+					<item value="IN">Indiana</item>
+					<item value="IA">Iowa</item>
+					<item value="KS">Kansas</item>
+					<item value="KY">Kentucky</item>
+					<item value="LA">Louisiana</item>
+					<item value="ME">Maine</item>
+					<item value="MD">Maryland</item>
+					<item value="MA">Massachusetts</item>
+					<item value="MI">Michigan</item>
+					<item value="MN">Minnesota</item>
+					<item value="MS">Mississippi</item>
+					<item value="MO">Missouri</item>
+					<item value="MT">Montana</item>
+					<item value="NE">Nebraska</item>
+					<item value="NV">Nevada</item>
+					<item value="NH">New Hampshire</item>
+					<item value="NJ">New Jersey</item>
+					<item value="NM">New Mexico</item>
+					<item value="NY">New York</item>
+					<item value="NC">North Carolina</item>
+					<item value="ND">North Dakota</item>
+					<item value="OH">Ohio</item>
+					<item value="OK">Oklahoma</item>
+					<item value="OR">Oregon</item>
+					<item value="PA">Pennsylvania</item>
+					<item value="RI">Rhode Island</item>
+					<item value="SC">South Carolina</item>
+					<item value="SD">South Dakota</item>
+					<item value="TN">Tennessee</item>
+					<item value="TX">Texas</item>
+					<item value="UT">Utah</item>
+					<item value="VT">Vermont</item>
+					<item value="VA">Virginia</item>
+					<item value="WA">Washington</item>
+					<item value="WV">West Virginia</item>
+					<item value="WI">Wisconsin</item>
+					<item value="WY">Wyoming</item>
+				</dropdown>
+			</example>
+			<example description="Very long:  3x of default height (`length=\"very-long\"`).  `short` and `very-short` go the other way.">
+				<dropdown length="very-long" multiple search selection placeholder="State">
+					<item value="AL">Alabama</item>
+					<item value="AK">Alaska</item>
+					<item value="AZ">Arizona</item>
+					<item value="AR">Arkansas</item>
+					<item value="CA">California</item>
+					<item value="CO">Colorado</item>
+					<item value="CT">Connecticut</item>
+					<item value="DE">Delaware</item>
+					<item value="DC">District Of Columbia</item>
+					<item value="FL">Florida</item>
+					<item value="GA">Georgia</item>
+					<item value="HI">Hawaii</item>
+					<item value="ID">Idaho</item>
+					<item value="IL">Illinois</item>
+					<item value="IN">Indiana</item>
+					<item value="IA">Iowa</item>
+					<item value="KS">Kansas</item>
+					<item value="KY">Kentucky</item>
+					<item value="LA">Louisiana</item>
+					<item value="ME">Maine</item>
+					<item value="MD">Maryland</item>
+					<item value="MA">Massachusetts</item>
+					<item value="MI">Michigan</item>
+					<item value="MN">Minnesota</item>
+					<item value="MS">Mississippi</item>
+					<item value="MO">Missouri</item>
+					<item value="MT">Montana</item>
+					<item value="NE">Nebraska</item>
+					<item value="NV">Nevada</item>
+					<item value="NH">New Hampshire</item>
+					<item value="NJ">New Jersey</item>
+					<item value="NM">New Mexico</item>
+					<item value="NY">New York</item>
+					<item value="NC">North Carolina</item>
+					<item value="ND">North Dakota</item>
+					<item value="OH">Ohio</item>
+					<item value="OK">Oklahoma</item>
+					<item value="OR">Oregon</item>
+					<item value="PA">Pennsylvania</item>
+					<item value="RI">Rhode Island</item>
+					<item value="SC">South Carolina</item>
+					<item value="SD">South Dakota</item>
+					<item value="TN">Tennessee</item>
+					<item value="TX">Texas</item>
+					<item value="UT">Utah</item>
+					<item value="VT">Vermont</item>
+					<item value="VA">Virginia</item>
+					<item value="WA">Washington</item>
+					<item value="WV">West Virginia</item>
+					<item value="WI">Wisconsin</item>
+					<item value="WY">Wyoming</item>
+				</dropdown>
+			</example>
+			<example description="Unlimited: no scrollbar and no height limitation (`unlimited`), especially with `pointing`, to keep the arrow displayed.">
+				<dropdown limit="none" pointing multiple search selection placeholder="State">
+					<item value="AL">Alabama</item>
+					<item value="AK">Alaska</item>
+					<item value="AZ">Arizona</item>
+					<item value="AR">Arkansas</item>
+					<item value="CA">California</item>
+					<item value="CO">Colorado</item>
+					<item value="CT">Connecticut</item>
+					<item value="DE">Delaware</item>
+					<item value="DC">District Of Columbia</item>
+					<item value="FL">Florida</item>
+					<item value="GA">Georgia</item>
+					<item value="HI">Hawaii</item>
+					<item value="ID">Idaho</item>
+					<item value="IL">Illinois</item>
+					<item value="IN">Indiana</item>
+					<item value="IA">Iowa</item>
+					<item value="KS">Kansas</item>
+					<item value="KY">Kentucky</item>
+					<item value="LA">Louisiana</item>
+					<item value="ME">Maine</item>
+					<item value="MD">Maryland</item>
+					<item value="MA">Massachusetts</item>
+					<item value="MI">Michigan</item>
+					<item value="MN">Minnesota</item>
+					<item value="MS">Mississippi</item>
+					<item value="MO">Missouri</item>
+					<item value="MT">Montana</item>
+					<item value="NE">Nebraska</item>
+					<item value="NV">Nevada</item>
+					<item value="NH">New Hampshire</item>
+					<item value="NJ">New Jersey</item>
+					<item value="NM">New Mexico</item>
+					<item value="NY">New York</item>
+					<item value="NC">North Carolina</item>
+					<item value="ND">North Dakota</item>
+					<item value="OH">Ohio</item>
+					<item value="OK">Oklahoma</item>
+					<item value="OR">Oregon</item>
+					<item value="PA">Pennsylvania</item>
+					<item value="RI">Rhode Island</item>
+					<item value="SC">South Carolina</item>
+					<item value="SD">South Dakota</item>
+					<item value="TN">Tennessee</item>
+					<item value="TX">Texas</item>
+					<item value="UT">Utah</item>
+					<item value="VT">Vermont</item>
+					<item value="VA">Virginia</item>
+					<item value="WA">Washington</item>
+					<item value="WV">West Virginia</item>
+					<item value="WI">Wisconsin</item>
+					<item value="WY">Wyoming</item>
+				</dropdown>
+			</example>
+		</>
+
+		<section label="Menu Direction" sticky collapsible dividing>
+			<example description="A dropdown menu can specify the direction it should open: `direction=\"left\"` right-aligns it, so it extends toward the start; `upward` opens it above.">
+				<dropdown floating labeled button icon="caret down" direction="left" label="Menu">
+					<item>Left</item>
+					<item>Still Left</item>
+				</dropdown>
+				<dropdown floating labeled button icon="caret down" label="Menu">
+					<item>Right</item>
+					<item>Still Right</item>
+				</dropdown>
+				<dropdown direction="up" selection label="Upward">
+					<item>One</item>
+					<item>Two</item>
+				</dropdown>
+			</example>
+		</>
+
+		<section label="Columnar Menu" sticky collapsible dividing>
+			<example description="A selection dropdown can allow its menu to be equally divided so that more items can be glanced: `columnar=\"2\"` ... `\"5\"`.">
+				<dropdown columnar="2" multiple selection placeholder="Two columns">
+					<item value="1">one</item>
+					<item value="2">two</item>
+					<item value="3">three</item>
+					<item value="4">four</item>
+					<item value="5">five</item>
+					<item value="6">six</item>
+					<item value="7">seven</item>
+					<item value="8">eight</item>
+					<item value="9">nine</item>
+					<item value="10">ten</item>
+					<item value="0">zero</item>
+				</dropdown>
+			</example>
+			<example description="Three columns.">
+				<dropdown columnar="3" fluid multiple search selection placeholder="State">
+					<item value="AL">Alabama</item>
+					<item value="AK">Alaska</item>
+					<item value="AZ">Arizona</item>
+					<item value="AR">Arkansas</item>
+					<item value="CA">California</item>
+					<item value="CO">Colorado</item>
+					<item value="CT">Connecticut</item>
+					<item value="DE">Delaware</item>
+					<item value="DC">District Of Columbia</item>
+					<item value="FL">Florida</item>
+					<item value="GA">Georgia</item>
+					<item value="HI">Hawaii</item>
+					<item value="ID">Idaho</item>
+					<item value="IL">Illinois</item>
+					<item value="IN">Indiana</item>
+					<item value="IA">Iowa</item>
+					<item value="KS">Kansas</item>
+					<item value="KY">Kentucky</item>
+					<item value="LA">Louisiana</item>
+					<item value="ME">Maine</item>
+					<item value="MD">Maryland</item>
+					<item value="MA">Massachusetts</item>
+					<item value="MI">Michigan</item>
+					<item value="MN">Minnesota</item>
+					<item value="MS">Mississippi</item>
+					<item value="MO">Missouri</item>
+					<item value="MT">Montana</item>
+					<item value="NE">Nebraska</item>
+					<item value="NV">Nevada</item>
+					<item value="NH">New Hampshire</item>
+					<item value="NJ">New Jersey</item>
+					<item value="NM">New Mexico</item>
+					<item value="NY">New York</item>
+					<item value="NC">North Carolina</item>
+					<item value="ND">North Dakota</item>
+					<item value="OH">Ohio</item>
+					<item value="OK">Oklahoma</item>
+					<item value="OR">Oregon</item>
+					<item value="PA">Pennsylvania</item>
+					<item value="RI">Rhode Island</item>
+					<item value="SC">South Carolina</item>
+					<item value="SD">South Dakota</item>
+					<item value="TN">Tennessee</item>
+					<item value="TX">Texas</item>
+					<item value="UT">Utah</item>
+					<item value="VT">Vermont</item>
+					<item value="VA">Virginia</item>
+					<item value="WA">Washington</item>
+					<item value="WV">West Virginia</item>
+					<item value="WI">Wisconsin</item>
+					<item value="WY">Wyoming</item>
+				</dropdown>
+			</example>
+			<example description="Four columns.">
+				<dropdown columnar="4" fluid multiple search selection placeholder="State">
+					<item value="AL">Alabama</item>
+					<item value="AK">Alaska</item>
+					<item value="AZ">Arizona</item>
+					<item value="AR">Arkansas</item>
+					<item value="CA">California</item>
+					<item value="CO">Colorado</item>
+					<item value="CT">Connecticut</item>
+					<item value="DE">Delaware</item>
+					<item value="DC">District Of Columbia</item>
+					<item value="FL">Florida</item>
+					<item value="GA">Georgia</item>
+					<item value="HI">Hawaii</item>
+					<item value="ID">Idaho</item>
+					<item value="IL">Illinois</item>
+					<item value="IN">Indiana</item>
+					<item value="IA">Iowa</item>
+					<item value="KS">Kansas</item>
+					<item value="KY">Kentucky</item>
+					<item value="LA">Louisiana</item>
+					<item value="ME">Maine</item>
+					<item value="MD">Maryland</item>
+					<item value="MA">Massachusetts</item>
+					<item value="MI">Michigan</item>
+					<item value="MN">Minnesota</item>
+					<item value="MS">Mississippi</item>
+					<item value="MO">Missouri</item>
+					<item value="MT">Montana</item>
+					<item value="NE">Nebraska</item>
+					<item value="NV">Nevada</item>
+					<item value="NH">New Hampshire</item>
+					<item value="NJ">New Jersey</item>
+					<item value="NM">New Mexico</item>
+					<item value="NY">New York</item>
+					<item value="NC">North Carolina</item>
+					<item value="ND">North Dakota</item>
+					<item value="OH">Ohio</item>
+					<item value="OK">Oklahoma</item>
+					<item value="OR">Oregon</item>
+					<item value="PA">Pennsylvania</item>
+					<item value="RI">Rhode Island</item>
+					<item value="SC">South Carolina</item>
+					<item value="SD">South Dakota</item>
+					<item value="TN">Tennessee</item>
+					<item value="TX">Texas</item>
+					<item value="UT">Utah</item>
+					<item value="VT">Vermont</item>
+					<item value="VA">Virginia</item>
+					<item value="WA">Washington</item>
+					<item value="WV">West Virginia</item>
+					<item value="WI">Wisconsin</item>
+					<item value="WY">Wyoming</item>
+				</dropdown>
+			</example>
+			<example description="Five columns.">
+				<dropdown columnar="5" fluid multiple search selection placeholder="State">
+					<item value="AL">Alabama</item>
+					<item value="AK">Alaska</item>
+					<item value="AZ">Arizona</item>
+					<item value="AR">Arkansas</item>
+					<item value="CA">California</item>
+					<item value="CO">Colorado</item>
+					<item value="CT">Connecticut</item>
+					<item value="DE">Delaware</item>
+					<item value="DC">District Of Columbia</item>
+					<item value="FL">Florida</item>
+					<item value="GA">Georgia</item>
+					<item value="HI">Hawaii</item>
+					<item value="ID">Idaho</item>
+					<item value="IL">Illinois</item>
+					<item value="IN">Indiana</item>
+					<item value="IA">Iowa</item>
+					<item value="KS">Kansas</item>
+					<item value="KY">Kentucky</item>
+					<item value="LA">Louisiana</item>
+					<item value="ME">Maine</item>
+					<item value="MD">Maryland</item>
+					<item value="MA">Massachusetts</item>
+					<item value="MI">Michigan</item>
+					<item value="MN">Minnesota</item>
+					<item value="MS">Mississippi</item>
+					<item value="MO">Missouri</item>
+					<item value="MT">Montana</item>
+					<item value="NE">Nebraska</item>
+					<item value="NV">Nevada</item>
+					<item value="NH">New Hampshire</item>
+					<item value="NJ">New Jersey</item>
+					<item value="NM">New Mexico</item>
+					<item value="NY">New York</item>
+					<item value="NC">North Carolina</item>
+					<item value="ND">North Dakota</item>
+					<item value="OH">Ohio</item>
+					<item value="OK">Oklahoma</item>
+					<item value="OR">Oregon</item>
+					<item value="PA">Pennsylvania</item>
+					<item value="RI">Rhode Island</item>
+					<item value="SC">South Carolina</item>
+					<item value="SD">South Dakota</item>
+					<item value="TN">Tennessee</item>
+					<item value="TX">Texas</item>
+					<item value="UT">Utah</item>
+					<item value="VT">Vermont</item>
+					<item value="VA">Virginia</item>
+					<item value="WA">Washington</item>
+					<item value="WV">West Virginia</item>
+					<item value="WI">Wisconsin</item>
+					<item value="WY">Wyoming</item>
+				</dropdown>
+			</example>
+		</>
+
+		<section label="Colored" sticky collapsible dividing>
+			<example description="`color` accents the focus border and the labels of a multiple selection, and fills a button dropdown.">
+				<dropdown color="red" multiple selection placeholder="Colors" value="red">
+					<item value="red">Red</item>
+					<item value="blue">Blue</item>
+				</dropdown>
+				<dropdown color="primary" button label="Actions">
+					<item>Edit</item>
+					<item>Delete</item>
+				</dropdown>
+			</example>
+		</>
+	</>
+
+	<section label="Selection Dropdowns">
+		<section label="Clearable" sticky collapsible dividing>
+			<example description="`clearable` lets users remove their selection from a dropdown.">
+				<dropdown clearable fluid search selection name="country" placeholder="Select Country">
+					<item value="af" flag="af">Afghanistan</item>
+					<item value="ax" flag="ax">Aland Islands</item>
+					<item value="al" flag="al">Albania</item>
+					<item value="dz" flag="dz">Algeria</item>
+					<item value="as" flag="as">American Samoa</item>
+					<item value="ad" flag="ad">Andorra</item>
+					<item value="ao" flag="ao">Angola</item>
+					<item value="ai" flag="ai">Anguilla</item>
+					<item value="ag" flag="ag">Antigua</item>
+					<item value="ar" flag="ar">Argentina</item>
+					<item value="am" flag="am">Armenia</item>
+					<item value="aw" flag="aw">Aruba</item>
+					<item value="au" flag="au">Australia</item>
+					<item value="at" flag="at">Austria</item>
+					<item value="az" flag="az">Azerbaijan</item>
+					<item value="bs" flag="bs">Bahamas</item>
+					<item value="bh" flag="bh">Bahrain</item>
+					<item value="bd" flag="bd">Bangladesh</item>
+					<item value="bb" flag="bb">Barbados</item>
+					<item value="by" flag="by">Belarus</item>
+				</dropdown>
+				<divider/>
+				<segment appearance="secondary">Show me <dropdown clearable inline scrolling name="skill" value="css" placeholder="any"><item value="angular">Angular</item> <item value="css">CSS</item> <item value="design">Graphic Design</item> <item value="ember">Ember</item> <item value="html">HTML</item> <item value="ia">Information Architecture</item> <item value="javascript">Javascript</item> <item value="mech">Mechanical Engineering</item> <item value="meteor">Meteor</item> <item value="node">NodeJS</item> <item value="plumbing">Plumbing</item> <item value="python">Python</item> <item value="rails">Rails</item> <item value="react">React</item> <item value="repair">Kitchen Repair</item> <item value="ruby">Ruby</item> <item value="ui">UI Design</item> <item value="ux">User Experience</item></dropdown> classes currently available.</segment>
+			</example>
+		</>
+
+		<!-- GAP I106:  no `useLabels: false` (a count instead of labels). -->
+		<section label="Maximum Selections" sticky collapsible dividing>
+			<example description="`max-selections` forces a maximum number of selections. Form validation can also set a minimum and a maximum for multi-selects inside forms.">
+				<header level="5">Selection</header>
+				<dropdown max-selections="3" fluid multiple selection name="skills" placeholder="Skills">
+					<item value="angular">Angular</item>
+					<item value="css">CSS</item>
+					<item value="design">Graphic Design</item>
+					<item value="ember">Ember</item>
+					<item value="html">HTML</item>
+					<item value="ia">Information Architecture</item>
+					<item value="javascript">Javascript</item>
+					<item value="mech">Mechanical Engineering</item>
+					<item value="meteor">Meteor</item>
+					<item value="node">NodeJS</item>
+					<item value="plumbing">Plumbing</item>
+					<item value="python">Python</item>
+					<item value="rails">Rails</item>
+					<item value="react">React</item>
+					<item value="repair">Kitchen Repair</item>
+					<item value="ruby">Ruby</item>
+					<item value="ui">UI Design</item>
+					<item value="ux">User Experience</item>
+				</dropdown>
+				<header level="5">Search Selection</header>
+				<dropdown max-selections="3" fluid multiple search selection name="country" placeholder="Select Country">
+					<item value="af" flag="af">Afghanistan</item>
+					<item value="ax" flag="ax">Aland Islands</item>
+					<item value="al" flag="al">Albania</item>
+					<item value="dz" flag="dz">Algeria</item>
+					<item value="as" flag="as">American Samoa</item>
+					<item value="ad" flag="ad">Andorra</item>
+					<item value="ao" flag="ao">Angola</item>
+					<item value="ai" flag="ai">Anguilla</item>
+					<item value="ag" flag="ag">Antigua</item>
+					<item value="ar" flag="ar">Argentina</item>
+					<item value="am" flag="am">Armenia</item>
+					<item value="aw" flag="aw">Aruba</item>
+					<item value="au" flag="au">Australia</item>
+					<item value="at" flag="at">Austria</item>
+					<item value="az" flag="az">Azerbaijan</item>
+					<item value="bs" flag="bs">Bahamas</item>
+					<item value="bh" flag="bh">Bahrain</item>
+					<item value="bd" flag="bd">Bangladesh</item>
+					<item value="bb" flag="bb">Barbados</item>
+					<item value="by" flag="by">Belarus</item>
+				</dropdown>
+			</example>
+		</>
+
+		<section label="Tagging and User Additions" sticky collapsible dividing>
+			<example description="`allow-additions` gives users the ability to add their own options. This can work with either single or multiple search selection dropdowns; `addition-text` words the add item.">
+				<header level="5">Single</header>
+				<dropdown allow-additions fluid search selection name="skills" placeholder="Skills">
+					<item value="angular">Angular</item>
+					<item value="css">CSS</item>
+					<item value="design">Graphic Design</item>
+					<item value="ember">Ember</item>
+					<item value="html">HTML</item>
+					<item value="ia">Information Architecture</item>
+					<item value="javascript">Javascript</item>
+					<item value="mech">Mechanical Engineering</item>
+					<item value="meteor">Meteor</item>
+					<item value="node">NodeJS</item>
+					<item value="plumbing">Plumbing</item>
+					<item value="python">Python</item>
+					<item value="rails">Rails</item>
+					<item value="react">React</item>
+					<item value="repair">Kitchen Repair</item>
+					<item value="ruby">Ruby</item>
+					<item value="ui">UI Design</item>
+					<item value="ux">User Experience</item>
+				</dropdown>
+				<header level="5">Multiple</header>
+				<dropdown allow-additions fluid multiple search selection name="tags" placeholder="Skills">
+					<item value="angular">Angular</item>
+					<item value="css">CSS</item>
+					<item value="design">Graphic Design</item>
+					<item value="ember">Ember</item>
+					<item value="html">HTML</item>
+					<item value="ia">Information Architecture</item>
+					<item value="javascript">Javascript</item>
+					<item value="mech">Mechanical Engineering</item>
+					<item value="meteor">Meteor</item>
+					<item value="node">NodeJS</item>
+					<item value="plumbing">Plumbing</item>
+					<item value="python">Python</item>
+					<item value="rails">Rails</item>
+					<item value="react">React</item>
+					<item value="repair">Kitchen Repair</item>
+					<item value="ruby">Ruby</item>
+					<item value="ui">UI Design</item>
+					<item value="ux">User Experience</item>
+				</dropdown>
+			</example>
+		</>
+		<html>
+			<ui-message size="small" class="site-not-ported">Not ported: Stuck User Additions (<code>hideAdditions: false</> + <code>stuck</>) -- our add item is the first row of the filtered menu, so it is always in view.</>
+			<ui-message size="small" class="site-not-ported">Text Labels (<code>useLabels: false</>: a "3 selected" count instead of labels) can't be set yet (plan issue I106).</>
+		</>
+
+		<section label="Clearing Dropdown" sticky collapsible dividing>
+			<example description="You can reset a dropdown to its placeholder: set its `value` to `\"\"` (see Usage, \"Values\"). Here a `clearable` dropdown's own clear button does it.">
+				<dropdown clearable multiple selection name="gender" value="0,1" placeholder="Default">
+					<item value="1">Male</item>
+					<item value="0">Female</item>
+				</dropdown>
+				<dropdown clearable selection name="gender" placeholder="Select a value">
+					<item value="1">Male</item>
+					<item value="0">Female</item>
+				</dropdown>
+			</example>
+		</>
+
+		<section label="Restoring Defaults" sticky collapsible dividing>
+			<example description="A form reset restores a dropdown to its `value` attribute (Fomantic's `restore defaults`). Change them, then reset.">
+				<html>
+					<ui-form>
+						<form>
+							<ui-field>
+								<ui-dropdown multiple selection name="defaults" value="default,default2" placeholder="Default">
+									<ui-item value="default">Default</ui-item>
+									<ui-item value="default2">Another Default</ui-item>
+									<ui-item value="1">Male</ui-item>
+									<ui-item value="0">Female</ui-item>
+								</ui-dropdown>
+							</ui-field>
+							<ui-field>
+								<ui-dropdown selection name="default" value="default" placeholder="Select a value">
+									<ui-item value="default">Default Value</ui-item>
+									<ui-item value="1">Male</ui-item>
+									<ui-item value="0">Female</ui-item>
+								</ui-dropdown>
+							</ui-field>
+							<ui-button type="reset" color="primary">Restore All Dropdowns</ui-button>
+						</form>
+					</ui-form>
+				</html>
+			</example>
+		</>
+
+		<section label="Upward" sticky collapsible dividing>
+			<example description="A dropdown menu will automatically change which direction it opens if it can't fit on screen. To open in a specific direction, use `upward`.">
+				<segment attach="top">
+					<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
+				</segment>
+				<menu attach="bottom">
+					<item>
+						<dropdown direction="up" aria-label="Settings">
+							<icon slot="trigger" name="cog"/>
+							<item>New</item>
+							<item>Open...</item>
+							<item>Save...</item>
+							<item>Edit Permissions</item>
+							<item kind="divider"/>
+							<item kind="header">Export</item>
+							<item>Share...</item>
+							<item>Save As...</item>
+						</dropdown>
+					</item>
+				</menu>
+			</example>
+		</>
+	</>
+
+	<section label="Remote Content">
+		<html>
+			<ui-message size="small" class="site-not-ported">Not ported: Fomantic's API settings (<code>apiSettings</>, <code>filterRemoteData</>, response mapping). Fetch the data yourself on <code>ui-search</>, and set the <code>options</> property (Usage tab, "Rich data").</>
+		</>
+	</>
+
+	<section label="Menus">
+		<html>
+			<ui-message size="small" class="site-not-ported">Not ported: Changing Transitions (<code>transition</>) -- the menu fades through CSS; restyle it with <code>::part(menu)</>.</>
+			<ui-message size="small" class="site-not-ported">Multiple Levels and Category Selection (sub-menus inside the menu, <code>allowCategorySelection</>) can't be built: the menu is one listbox deep (plan issue I53).</>
+		</>
+
+		<section label="Preserving User Selections" sticky collapsible dividing>
+			<example description="A dropdown shows the item whose value is its `value` on page load. `text` shows a text before the items (or `options`) arrive.">
+				<dropdown selection value="trash" placeholder="Folder">
+					<item value="inbox">Inbox</item>
+					<item value="drafts">Drafts</item>
+					<item value="trash">Trash</item>
+				</dropdown>
+			</example>
+		</>
+
+		<section label="Dropdown Dividers / Headers" sticky collapsible dividing>
+			<example description="A dropdown menu can contain dividers and headers to separate related content. While searching, they hide and only the matching items show (Fomantic's `hideDividers`).">
+				<dropdown labeled button search pointing="top left" icon="filter" placeholder="Filter Posts">
+					<item kind="header" icon="tags">Filter by tag</item>
+					<item value="important"><label color="red" empty appearance="circular"/>Important</item>
+					<item value="announcement"><label color="blue" empty appearance="circular"/>Announcement</item>
+					<item value="discussion"><label color="black" empty appearance="circular"/>Discussion</item>
+					<item kind="divider"/>
+					<item kind="header" icon="calendar">Filter by date</item>
+					<item value="week">This Week</item>
+					<item value="month">This Month</item>
+					<item value="year">This Year</item>
+				</dropdown>
+			</example>
+		</>
+	</>
+
+	<section label="Adjusting Actions">
+		<html>
+			<ui-message size="small" class="site-not-ported">Combo Dropdowns and Link Dropdowns (<code>action: "combo" | "nothing" | "hide"</>: an item that changes a button, or a menu of links) can't be built yet: every dropdown is a select with a value (plan issue I53).</>
+		</>
+	</>
+
+	<section label="Coupling">
+		<!-- GAP I11:  no basic look, so the button group's dropdowns are filled. -->
+		<section label="Button Group" sticky collapsible dividing>
+			<example description="A button group can be formatted to show additional content as a dropdown.">
+				<buttons>
+					<dropdown button pointing="top left" label="Visit">
+						<item>Home</item>
+						<item>Blog</item>
+					</dropdown>
+					<dropdown button pointing="top left" label="Edit">
+						<item>Edit Post</item>
+						<item>Remove Post</item>
+					</dropdown>
+					<dropdown button pointing="top right" label="Share">
+						<item>Facebook</item>
+						<item>Twitter</item>
+					</dropdown>
+				</buttons>
+			</example>
+		</>
+
+		<!-- GAP I53:  no dropdown that IS a menu item;  a dropdown sits inside an item. -->
+		<section label="Menu" sticky collapsible dividing>
+			<example description="A menu can contain a dropdown, inside an item. Fomantic's dropdown that IS the item (`ui dropdown item`) isn't there yet.">
+				<menu>
+					<item link="#home">Home</item>
+					<item>
+						<dropdown label="Categories">
+							<item>Electronics</item>
+							<item>Automotive</item>
+							<item>Home</item>
+						</dropdown>
+					</item>
+				</menu>
+			</example>
+		</>
+
+		<section label="Form" sticky collapsible dividing>
+			<example description="A dropdown can be formatted to allow selection inside a form:  it is a form control.">
+				<html>
+					<ui-form>
+						<form>
+							<ui-field>
+								<label for="dropdown-form-gender">Gender</label>
+								<ui-dropdown id="dropdown-form-gender" selection name="gender" placeholder="Gender">
+									<ui-item value="male">Male</ui-item>
+									<ui-item value="female">Female</ui-item>
+								</ui-dropdown>
+							</ui-field>
+						</form>
+					</ui-form>
+				</html>
+			</example>
+		</>
+
+		<section label="Invoker commands" sticky collapsible dividing>
+			<example description="Buttons drive a dropdown with no script:  `commandfor` + `command=\"--show\"`, `--close` or `--toggle`.">
+				<button commandfor="dropdown-invoker" command="--show">Open the menu</button>
+				<button commandfor="dropdown-invoker" command="--close">Close it</button>
+				<dropdown id="dropdown-invoker" selection placeholder="Pick one">
+					<item value="a">Alpha</item>
+					<item value="b">Beta</item>
+				</dropdown>
+			</example>
+		</>
+	</>
+</spell-notebook>

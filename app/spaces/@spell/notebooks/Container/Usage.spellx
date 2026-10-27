@@ -1,0 +1,115 @@
+<spell-notebook "container usage">
+	<header level="1">
+		Container
+		<header>A container limits content to a maximum width.</>
+	</>
+	<container-tab-bar showing="usage"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#using-it">Using it</>
+				<ui-item link="#container-sizes">Container sizes</>
+				<ui-item link="#keyboard">Keyboard</>
+				<ui-item link="#accessibility">Accessibility</>
+			</>
+		</>
+	</>
+
+	<section label="Using it">
+		<markdown>
+			Wrap page content in `<ui-container>` to hold it to a reasonable maximum width, centred, with gutters on small
+			screens. Combine it with a grid or a menu to line their contents up with the page.
+
+			- `text` narrows it to a reading column with slightly larger type; `wide` makes it a fifth wider; `fluid` drops the
+			  maximum width (useful only for `align` on unstyled content).
+			- `grid` is for a container that holds a `<ui-grid>`: it adds the grid's gutters so the columns line up with other
+			  containers; add `spacing="lg"` (or `xl`) to match a grid with wider gutters.
+			- `scrolling` caps the height (per breakpoint) and scrolls; `short`, `very short`, `long`, `very long` scale the cap,
+			  and `resizable` lets the reader drag it.
+			- The host is a block; the look lives on the `container` part inside, around one slot.
+			- No events: a container is pure layout.
+		</>
+	</>
+
+	<section label="Container sizes">
+		<markdown>
+			Containers adjust their maximum width to the screen they appear on. Each width is the largest that fits the
+			breakpoint with its minimum gutters and a 17px scrollbar, e.g. tablet: `768px - (14px * 2) - 17px` = `723px`.
+		</>
+		<html>
+			<ui-table celled definition padding="compact" unstackable>
+				<table>
+					<thead>
+						<tr>
+							<th></>
+							<th>Mobile</>
+							<th>Tablet</>
+							<th>Small Monitor</>
+							<th>Large Monitor</>
+						</>
+					</>
+					<tbody>
+						<tr>
+							<td>Width</>
+							<td>100%</>
+							<td>723px</>
+							<td>933px</>
+							<td>1127px</>
+						</>
+						<tr>
+							<td>Gutter size</>
+							<td>1em</>
+							<td>Fluid</>
+							<td>Fluid</>
+							<td>Fluid</>
+						</>
+						<tr>
+							<td>Token</>
+							<td>
+								<code>--ui-container-mobile-gutter</>
+							</>
+							<td>
+								<code>--ui-container-width-tablet</>
+							</>
+							<td>
+								<code>--ui-container-width-computer</>
+							</>
+							<td>
+								<code>--ui-container-width-large-monitor</>
+							</>
+						</>
+						<tr>
+							<td>Device width</>
+							<td>below 768px</>
+							<td>768px - 991px</>
+							<td>992px - 1200px</>
+							<td>above 1200px</>
+						</>
+					</>
+				</>
+			</>
+		</>
+		<markdown>
+			`wide` multiplies each width by `--ui-container-wide-ratio` (`1.2`). Change a width with its token (Theming tab),
+			not by recomputing breakpoints: the sheet's media queries are fixed.
+		</>
+	</>
+
+	<section label="Keyboard">
+		<markdown>
+			A plain container takes no focus. A `scrolling` container is a tab stop (`tabindex="0"`), so its overflow can
+			be scrolled with the arrow keys, **Page Up** / **Page Down**, **Home** / **End**.
+		</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			- A container is a layout box with no role of its own. Use a landmark inside it (`<main>`, `<nav>`,
+			  `<article>`), or put `role` / `aria-label` on the host when the region needs a name.
+			- A `scrolling` container is a keyboard stop so its overflow can be scrolled without a mouse; give it an
+			  `aria-label` when it needs a name.
+			- If the element fails to render, it shows its children through a bare `<slot>`: the content stays,
+			  but without the container's width and spacing.
+		</>
+	</>
+</spell-notebook>

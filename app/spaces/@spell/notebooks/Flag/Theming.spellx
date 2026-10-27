@@ -1,0 +1,88 @@
+<spell-notebook "flag theming">
+	<header level="1">
+		Flag
+		<header>A flag is used to represent a political state.</>
+	</>
+	<flag-tab-bar showing="theming"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#tokens">Tokens</>
+				<ui-item link="#a-flag-font">A flag font</>
+				<ui-item link="#themes">Themes</>
+			</>
+		</>
+	</>
+
+	<section label="Tokens">
+		<markdown>
+			Theme with the public `--ui-flag-*` tokens: set one on the element, on any ancestor (a region, `:root`), or on
+			the flag's box through `::part(flag)`. They inherit into the shadow root, where the sheet reads each through a
+			private alias, so nothing inside blocks them.
+
+			- `--ui-flag-size-small` ... `-massive` are the size ratios; `--ui-flag-distance` the space after a flag.
+			- `--ui-flag-font-family` is the font flags draw with; it defaults to the colour emoji fonts,
+			  `--ui-font-family-emoji`. Windows' Chrome / Edge need a flag font: "A flag font", below.
+			- Never set the `--_ui-*` names: they're the sheet's private plumbing.
+		</>
+		<markdown>Edit a value below to try it.</>
+		<html>
+			<ui-docs-tokens family="ui-flag" playground>
+				<p>
+					<ui-flag country="fr"></>
+					<ui-flag country="us"></>
+					<ui-flag country="gb"></>
+					<ui-flag country="de"></>
+					<ui-flag country="jp"></>
+					<ui-flag country="br"></>
+					<ui-flag country="in"></>
+					<ui-flag country="za"></>
+					<ui-flag country="eu"></>
+					<ui-flag country="un"></>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="A flag font">
+		<markdown>
+			Flags are emoji, drawn by the reader's emoji font. Mac, iPhone, Android, ChromeOS, Linux (Noto Color Emoji)
+			and Firefox everywhere draw them. **Windows' Chrome and Edge don't:** Microsoft's emoji font, Segoe UI Emoji,
+			has no country flags (Windows 10 or 11), so 🇫🇷 shows as the letters "FR", and England / Scotland / Wales
+			as a plain black flag. Rainbow, transgender and pirate flags work everywhere.
+
+			A page that wants flags there loads a flag font itself; `spell-ui` ships no font bytes:
+
+			- Which font: "Twemoji Country Flags", through the `country-flag-emoji-polyfill` package (about 77 KB of
+			  woff2, per its package; not measured here). Country flags only.
+			- How: call `polyfillCountryFlagEmojis()` once. It checks whether the browser can draw flags, and only if it
+			  can't (Windows Chromium) adds an `@font-face` for the font, fetched from a CDN by default. Elsewhere it
+			  does nothing, and nothing is downloaded.
+			- Then name the font first in `--ui-flag-font-family`, once for the page, in front of the emoji fonts.
+			  `<ui-flag>` reads it, and so do the flags in `<ui-dropdown>` and `<ui-select>` rows.
+			- Without it, nothing breaks: Windows readers see the two letters.
+		</>
+		<markdown>
+			```js
+			// the page's own module script, once
+			import { polyfillCountryFlagEmojis } from "country-flag-emoji-polyfill"
+			polyfillCountryFlagEmojis()
+			```
+		</>
+		<markdown>
+			```css
+			/* the page's stylesheet:  the flag font first, then the emoji fonts it falls back to */
+			:root {
+			  --ui-flag-font-family: "Twemoji Country Flags", var(--ui-font-family-emoji), var(--ui-font-family);
+			}
+			```
+		</>
+	</>
+
+	<section label="Themes">
+		<markdown>
+			Flags are emoji only, by design, so a theme leaves them as they are;  the theme menu in the header
+			still applies a theme to the whole site.  Fomantic's `famfamfam` sprite theme isn't ported.
+		</>
+	</>
+</spell-notebook>

@@ -1,0 +1,49 @@
+<spell-notebook "actions usage">
+	<header level="1">
+		Actions
+		<header>Actions hold what a user can do next:  a comment's reply links, a modal's or toast's buttons.</>
+	</>
+	<actions-tab-bar showing="usage"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#using-it">Using it</>
+				<ui-item link="#owners">Owners</>
+				<ui-item link="#accessibility">Accessibility</>
+			</>
+		</>
+	</>
+
+	<section label="Using it">
+		<markdown>
+			`<ui-actions>` holds what a user can do next with its owner's content: a comment's reply links, a modal's or
+			flyout's buttons. Put links or `<ui-button>`s inside it; it lays them out the way its owner expects (a comment's
+			links in a row, a modal's buttons on the right, on a footer band).
+
+			- No attributes: the owner decides the look.
+			- A button's `class="approve"` / `class="deny"` in a modal's actions closes the modal (see the modal page).
+		</>
+	</>
+
+	<section label="Owners">
+		<markdown>
+			`<ui-actions>` finds its nearest owner and sets `:state(in-<owner>)` on itself; `UIParts.css` styles it by that
+			state. Its owners, and what each makes of it:
+
+			- [Comment](/components/ui/ui-comment.html) (`:state(in-comment)`): a row of small, quiet links under the text; `minimal` comments show them on hover or focus
+			- [Modal](/components/ui/ui-modal.html) (`:state(in-modal)`): the footer band, buttons on the right
+			- [Flyout](/components/ui/ui-flyout.html) (`:state(in-flyout)`): the footer band, buttons on the right
+			- [Toast](/components/ui/ui-toast.html) (`:state(in-toast)`): buttons under the message
+
+			Anywhere else it is an unstyled block. More on how parts find their owners: [Content parts](/components/ui/ui-header.html).
+		</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			- A neutral block with no role: the links and buttons inside it carry the meaning, so give icon-only buttons an
+			  `aria-label`.
+			- A comment's `minimal` actions show on hover AND on keyboard focus, so they stay reachable with **Tab**.
+		</>
+	</>
+</spell-notebook>

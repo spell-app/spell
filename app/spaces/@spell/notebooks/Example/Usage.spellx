@@ -1,0 +1,60 @@
+<spell-notebook "example usage">
+	<header level="1">
+		Example
+		<header>An example shows its own markup live, under a heading and description, with the same markup as code a button shows and hides.</>
+	</>
+	<example-tab-bar showing="usage"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#using-it">Using it</>
+				<ui-item link="#keyboard">Keyboard</>
+				<ui-item link="#accessibility">Accessibility</>
+			</>
+		</>
+	</>
+
+	<!-- USAGE:  how to use it (attributes in practice, events, framework snippets), keyboard, accessibility. -->
+	<section label="Using it">
+		<markdown>
+			`<ui-example>` shows a piece of markup working, with the same markup as code.
+
+			- Its children are the example, live;  their markup, as the page wrote it, is the code shown.
+			- `heading` and `description` sit above it, on the page;  a backticked word in `description` is code.
+			- The code button shows and hides the code, and `code` follows (`ui-opened` / `ui-closed`);
+			  write `code` to open it from the start.
+			- A `<template>` child is stamped out live, and its markup shown exactly as typed.
+			- Any page may have one:  Spell UI's pages, the guides, an epic page.
+			  A `<ui-toc>` lists each example with a `heading`.
+			- On GitHub a README shows no live element:  there an example is its picture (`spell readme pictures`).
+		</>
+		<markdown>
+			```html
+			<ui-example heading="Emphasis" description="A button can show different levels of emphasis.">
+			  <ui-button color="primary">Save</ui-button>
+			</ui-example>
+			```
+		</>
+		<markdown>
+			```js
+			document.querySelector("ui-example").addEventListener("ui-opened", () => console.log("code shown"))
+			```
+		</>
+	</>
+
+	<section label="Keyboard">
+		<markdown>
+			- Tab reaches the code button, then the example's own controls.
+			- Enter or Space on the code button shows or hides the code.
+		</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			- The code button is named by what a click does ("Show code", "Hide code"),
+			  with `aria-expanded` and `aria-controls` naming the code pane.
+			- The heading is a real heading, at `level`:  the page's outline reads it.
+			- The example's own elements keep their roles:  nothing is wrapped in a landmark.
+		</>
+	</>
+</spell-notebook>

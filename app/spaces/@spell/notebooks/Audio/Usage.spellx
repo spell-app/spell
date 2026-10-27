@@ -1,0 +1,38 @@
+<spell-notebook "audio usage">
+	<header level="1">
+		Audio
+		<header>An audio plays a sound file:  in the browser's own player, or unseen, when the page says.</>
+	</>
+	<audio-tab-bar showing="usage"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#using-it">Using it</>
+				<ui-item link="#accessibility">Accessibility</>
+			</>
+		</>
+	</>
+
+	<!-- USAGE:  how to use it (attributes in practice, events, framework snippets), keyboard, accessibility. -->
+	<section label="Using it">
+		<markdown>
+			`<ui-audio>` plays a sound file:  in the browser's own player with `controls`, or unseen.
+
+			- `src` is the file, relative to the page.
+			- With `controls`, the browser's player shows.  Without, nothing does:  the page plays it with `play()`.
+			- `autoplay` starts it at once, but a browser only allows that when it's `muted`, or after the reader has clicked
+			  on the page.
+			- `muted` and `loop` are the player's own.
+
+			From script:  `audio.play()`, `audio.pause()`, `audio.currentTime`, `audio.paused`, and the events `ui-play`,
+			`ui-pause` and `ui-ended`.
+		</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			- Name a player with `label`.
+			- Don't let a sound play by itself:  people using screen readers hear it over their reader.
+		</>
+	</>
+</spell-notebook>

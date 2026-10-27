@@ -1,0 +1,66 @@
+<spell-notebook "table-of-contents usage">
+	<header level="1">
+		Table of contents
+		<header>A table of contents lists the page's sections and examples as links, opens the one in view and follows the scroll;  each section folds, and one button opens or folds them all.</>
+	</>
+	<table-of-contents-tab-bar showing="usage"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#using-it">Using it</>
+				<ui-item link="#keyboard">Keyboard</>
+				<ui-item link="#accessibility">Accessibility</>
+			</>
+		</>
+	</>
+
+	<!-- USAGE:  how to use it (attributes in practice, events, framework snippets), keyboard, accessibility. -->
+	<section label="Using it">
+		<markdown>
+			`<ui-toc>` is a page's "On this page" list:  put it beside the content, and name that content with `for`.
+
+			- `for`:  the id of what it lists;  without it, the page's `<main>`, else `<body>`.
+			  A `<ui-tabs>` lists its SHOWN pane, and follows the tabs as they switch.
+			- What it lists:  level 2 headings and top-level `<ui-section>`s are sections;
+			  the examples with a `heading`, level 3 headings and nested `<ui-section>`s are entries under them.
+			- A heading without an `id` gets one (a slug of its text), so every link works.
+			- Its links are plain `#id` links:  the browser scrolls, below the page's stuck titles.
+			  It lands on the page's hash too, opening the tab and the folds that hide it.
+			- It follows the scroll:  the entry in view is lit, its section opens, and it sends `ui-scrolled-to`.
+			- Each section folds by its chevron;  the header's one button opens or folds them all.
+			  The viewer's folds are kept in this browser:  a section's for its page, the button's for every page.
+		</>
+		<markdown>
+			```html
+			<ui-stack direction="horizontal" align="start">
+			  <ui-toc for="guide" heading="Guide"></ui-toc>
+			  <article id="guide">
+			    <h2>Install</h2> ...
+			    <h2>Use</h2> ...
+			  </article>
+			</ui-stack>
+			```
+		</>
+		<markdown>
+			```js
+			document.querySelector("ui-toc").addEventListener("ui-scrolled-to", (event) => console.log(event.detail.value))
+			```
+		</>
+	</>
+
+	<section label="Keyboard">
+		<markdown>
+			- Tab moves through the fold buttons and the links, in page order.
+			- Enter or Space on a fold button folds or opens its section;  Enter on a link jumps there.
+		</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			- The links are one navigation landmark, named "On this page" (its `label` text).
+			- Each fold button is named by its section's words, with `aria-expanded` as the fold stands.
+			- The toggle's name says what a click does:  "Expand all" or "Collapse all".
+			- The entry in view is `selected`:  shown, and announced, as the current one.
+		</>
+	</>
+</spell-notebook>

@@ -1,0 +1,41 @@
+<spell-notebook "zoom theming">
+	<header level="1">
+		Zoom
+		<header>A zoom shows something small in the page, and full size over it on a click.</>
+	</>
+	<zoom-tab-bar showing="theming"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#tokens">Tokens</>
+				<ui-item link="#themes">Themes</>
+			</>
+		</>
+	</>
+
+	<!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
+	<section label="Tokens">
+		<markdown>
+			Set a public `--ui-*` token on the element, any ancestor or `:root`; it inherits into the shadow
+			root. Edit a value below to try it.
+		</>
+		<html>
+			<ui-docs-tokens family="ui-zoom" playground>
+				<ui-zoom max-width="320px">
+					<ui-segment>
+						<ui-header level="3">Release notes</>
+						<p>Spell UI 2.4 adds a zoom, a stack and a textarea that grows with its text.</>
+						<ui-button color="primary">Read more</>
+					</>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="Themes">
+		<markdown>
+			The theme picker above lists the Fomantic themes that restyle this component; the one in the
+			header applies a theme to the whole site.
+		</>
+	</>
+</spell-notebook>

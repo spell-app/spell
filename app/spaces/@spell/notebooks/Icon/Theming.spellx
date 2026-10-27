@@ -1,0 +1,55 @@
+<spell-notebook "icon theming">
+	<header level="1">
+		Icon
+		<header>An icon is a glyph used to represent something else.</>
+	</>
+	<icon-tab-bar showing="theming"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#tokens">Tokens</>
+				<ui-item link="#themes">Themes</>
+			</>
+		</>
+	</>
+
+	<section label="Tokens">
+		<markdown>
+			Theme with the public `--ui-icon-*` tokens: set one on the element, on any ancestor (a `<ui-icons>` group,
+			`:root`), or on the box through `::part(icon)`. They inherit into the shadow root, where the sheet reads each
+			through a private alias, so nothing inside blocks them.
+
+			- Size tokens (`--ui-icon-size-huge` ...) rescale a whole step; `circular` and `bordered` replace the width and
+			  height (`--ui-icon-circular-size`, `--ui-icon-bordered-size`).
+			- The glyph takes `currentColor`, so `color` on the icon or its parent works too.
+			- Never set the `--_ui-*` names: they're the sheet's private plumbing.
+		</>
+		<markdown>
+			```css
+			:root {
+			  --ui-icon-distance: 0.5em;
+			}
+			.toolbar {
+			  --ui-icon-size-large: 1.25;
+			}
+			```
+		</>
+		<markdown>Edit a value below to try it.</>
+		<html>
+			<ui-docs-tokens family="ui-icon" playground>
+				<ui-icon name="house"></>
+				<ui-icon name="users"></>
+				<ui-icon name="cloud"></>
+				<ui-icon name="puzzle-piece"></>
+				<ui-icon name="heart"></>
+			</>
+		</>
+	</>
+
+	<section label="Themes">
+		<markdown>
+			A theme changes an icon's colour, not its glyph.  To change the glyphs themselves, add another icon
+			pack (Usage tab).
+		</>
+	</>
+</spell-notebook>

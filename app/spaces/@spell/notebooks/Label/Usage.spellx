@@ -1,0 +1,105 @@
+<spell-notebook "label usage">
+	<header level="1">
+		Label
+		<header>A label displays content classification.</>
+	</>
+	<label-tab-bar showing="usage"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#using-it">Using it</>
+				<ui-item link="#positioned-labels">Positioned labels</>
+				<ui-item link="#events">Events</>
+				<ui-item link="#keyboard">Keyboard</>
+				<ui-item link="#accessibility">Accessibility</>
+				<ui-item link="#framework-usage">Framework usage</>
+			</>
+		</>
+	</>
+
+	<!-- USAGE:  how to use it, events, positioned labels, keyboard, accessibility, frameworks. -->
+	<section label="Using it">
+		<markdown>
+			Write `<ui-label>` with text inside, and add attributes for the look: `<ui-label color="red" tag appearance="basic">`.
+
+			- `link` renders a link; without one the label is a plain `<span>`-like box.
+			- `icon` puts an icon before the text (alone, it centres the icon); the `icon` slot takes any markup.
+			- `detail` adds a dimmer second value (a count); a `<ui-detail>` child does the same, and with `link` it links.
+			- `image` with a URL makes an image label around its own photo; bare `image` styles a slotted `<img>`.
+			- `<ui-labels>` shares `size`, `color`, `basic`, `tag`, `circular` ... with every label inside it.
+			- Colour follows Fomantic: a plain label stays grey inside a coloured owner (a red segment); only its own
+			  `color`, or its `<ui-labels color>` group's, paints it.
+		</>
+	</>
+
+	<section label="Positioned labels">
+		<markdown>
+			`corner`, `ribbon`, `attached` and `floating` labels place themselves against their OWNER: the nearest positioned
+			box around them (`position: relative`).
+
+			- `<ui-segment>`, `<ui-card>`, `<ui-input>` and menu items are owners already, and tell the label their border
+			  width and radius.
+			- Anything else: give it `position: relative`, and set `--ui-label-owner-edge` / `--ui-label-owner-radius` on it
+			  to match its border.
+		</>
+	</>
+
+	<section label="Events">
+		<markdown>
+			A plain click is the native `click`. `ui-removing` is the only custom event: a `removable` label fires it when its
+			delete button is activated. It is cancelable, and the label does NOT remove itself: remove it in the listener.
+		</>
+		<markdown>
+			```js
+			document.addEventListener("ui-removing", (event) => {
+			  if (event.target.matches("ui-label")) event.target.remove()
+			})
+			```
+		</>
+	</>
+
+	<section label="Keyboard">
+		<markdown>
+			- A label with `href` is a real link: **Tab** reaches it, **Enter** follows it.
+			- Without `href` a label is inert text, never a tab stop.
+			- A `removable` label's delete button is its own tab stop; **Enter** or **Space** fires `ui-removing`.
+		</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			- An icon-only label (`icon` with no text) needs an `aria-label`.
+			- `removable` adds a delete button with its own accessible name ("Remove", translatable).
+			- A `prompt` label under a field should carry `role="alert"` and be tied to the field with `aria-describedby`, as
+			  the Prompt example does; it is only a look, so it does not link itself to the input.
+			- Colour is never the only signal: a label's text carries its meaning.
+			- If the label fails to render, it shows its children through a bare `<slot>`, so text and links stay;
+			  its box and colours, the `removable` delete button (and `ui-removing`), the `icon` glyph, a slotted
+			  icon and the `image` shorthand go.
+		</>
+	</>
+
+	<section label="Framework usage">
+		<markdown>Events are `ui-*`, so use your framework's custom-event syntax.</>
+		<header level="4" id="framework-react">React 19</>
+		<markdown>
+			```jsx
+			<ui-label removable onui-remove={() => removeTag(tag)}>{tag}</ui-label>
+			```
+		</>
+		<header level="4" id="framework-vue">Vue 3.5</>
+		<markdown>
+			```html
+			<ui-label removable @ui-removing="removeTag(tag)">{{ tag }}</ui-label>
+			```
+		</>
+		<header level="4" id="framework-solid">Solid 2</>
+		<markdown>
+			```jsx
+			<ui-label removable on-ui-removing={() => removeTag(tag)}>
+			  {tag}
+			</ui-label>
+			```
+		</>
+	</>
+</spell-notebook>

@@ -1,0 +1,152 @@
+<spell-notebook "calendar usage">
+	<header level="1">
+		Calendar
+		<header>A calendar lets a user pick a date, a time, or both.</>
+	</>
+	<calendar-tab-bar showing="usage"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#using-it">Using it</>
+				<ui-item link="#values">Values</>
+				<ui-item link="#forms">Forms</>
+				<ui-item link="#events">Events</>
+				<ui-item link="#disabled-days">Disabled days</>
+				<ui-item link="#keyboard">Keyboard</>
+				<ui-item link="#accessibility">Accessibility</>
+				<ui-item link="#framework-usage">Framework usage</>
+			</>
+		</>
+	</>
+
+	<!-- USAGE:  views, values, typing, forms, events, disabled days, keyboard, accessibility, frameworks. -->
+	<section label="Using it">
+		<markdown>
+			A calendar is a field whose icon is a real button opening the picker, a popover dialog anchored to the field by
+			CSS (no script measures anything). With `inline` the picker sits in the page instead. No JavaScript to call:
+			Fomantic's settings are attributes (`type`, `min`, `max`, `first-day-of-week`, `select-adjacent-days`,
+			`start-calendar` / `end-calendar` ...).
+
+			The picker has Fomantic's views: years (a decade), months, days (always six weeks), hours and minutes (5-minute
+			steps), as far as `type` goes. Choosing a coarser cell opens the next view; the finest sets the value. The
+			title button goes back up. `disable-minute`, `disable-month` and `disable-year` skip a view.
+		</>
+	</>
+
+	<section label="Values">
+		<markdown>
+			Values are ISO strings, the shapes of the native date inputs:
+
+			- `2026-09-30` (`date`)
+			- `14:30` (`time`)
+			- `2026-09-30T14:30` (`datetime`, the default)
+			- `2026-09` (`month`)
+			- `2026` (`year`)
+
+			`min`, `max` and `initial-date` (where the picker starts while there's no value) take the same shapes. The
+			`value` attribute is the starting (and reset) value; the `value` property is the live one.
+
+			Typing works too. The field reads ISO, the locale's own numeric order (`9/30/2026`, `30.9.2026`), month names or
+			their first three letters, and times with or without the locale's `am` / `pm`. Text it can't read, or a value
+			out of range, reverts when the field is left or Enter is pressed.
+
+			Dates are computed with `Temporal`: the browser's own where it has one, else a polyfill loaded on demand, only by
+			pages that show a calendar.
+		</>
+	</>
+
+	<section label="Forms">
+		<markdown>
+			A calendar is a form control: `name` submits the ISO value, `required` validates, a form reset restores the
+			`value` attribute, `disabled` leaves it out and `readonly` keeps it in but unchangeable.
+		</>
+	</>
+
+	<section label="Events">
+		<markdown>
+			`ui-changing` (`{ value }`) fires when the user chooses, types or clears a value; `ui-opening` / `ui-closing` around
+			the popup. All three are cancelable.
+		</>
+		<markdown>
+			```js
+			const due = document.querySelector("ui-calendar[name=due]")
+			due.addEventListener("ui-changing", (event) => {
+			  if (event.detail.value < today) event.preventDefault() // keep the old value
+			})
+			```
+		</>
+	</>
+
+	<section label="Disabled days">
+		<markdown>
+			Days that can't be chosen are the `disabledDates` (ISO dates) and `disabledDaysOfWeek` (0 = Sunday) PROPERTIES;
+			in plain HTML their attributes take JSON. Other months' days can't be chosen either, unless
+			`select-adjacent-days`.
+		</>
+		<markdown>
+			```js
+			due.disabledDates = ["2026-12-25", "2026-12-26"]
+			due.disabledDaysOfWeek = [0, 6] // no weekends
+			```
+		</>
+	</>
+
+	<section label="Keyboard">
+		<markdown>
+			- **Arrow Down** (in the field or on the button): open the picker, focus in the grid.
+			- **Arrow keys**: move by a day (a cell); **Up** / **Down** by a week (a row).
+			- **Home** / **End**: first / last day of the week (cell of the page in other views).
+			- **Page Up** / **Page Down**: previous / next month (a year, or a decade, in the coarser views).
+			- **Shift + Page Up** / **Page Down**: previous / next year, in the day view.
+			- **Enter** / **Space**: choose the focused cell.
+			- **Escape**: close the picker; focus goes back to the field.
+			- A click in the field opens the picker and leaves focus there for typing; focus leaving the element closes it.
+		</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			The picker follows the WAI-ARIA APG date picker dialog. The grid is a `role="grid"` named by its title (a time
+			grid by "Hours" / "Minutes"); each cell carries the whole date as its name, with `aria-selected`,
+			`aria-disabled` and `aria-current="date"` on today. Weekday heads spell out the day (`<th abbr>`).
+
+			- Name the field with a `<label for>`, `aria-label`, or at least a `placeholder`; an inline calendar needs
+			  `aria-label`.
+			- Disabled days stay focusable (APG), so the keyboard never skips a week; they just can't be chosen.
+			- All the texts (Today, Previous month ...) are translatable.
+			- If the element can't render, its native fallback is the browser's own `<input type="date">` (or `time`,
+			  `datetime-local`, `month`, a number for a `year`) holding the same ISO value, so it still works and submits.
+			  Fomantic's picker, ranges, disabled days and the locale's formats are lost.
+		</>
+	</>
+
+	<section label="Framework usage">
+		<markdown>Bind `value` (an ISO string) and listen for `ui-changing`; set `disabledDates` as a property.</>
+		<header level="4" id="framework-react">React 19</>
+		<markdown>
+			```jsx
+			<ui-calendar type="date" name="due" value={due} disabledDates={holidays} onui-changed={(e) => setDue(e.detail.value)} />
+			```
+		</>
+		<header level="4" id="framework-vue">Vue 3.5</>
+		<markdown>
+			```html
+			<!-- compilerOptions.isCustomElement = (tag) => tag.startsWith("ui-") -->
+			<ui-calendar type="date" name="due" :value="due" :disabledDates="holidays" @ui-changing="(e) => (due = e.detail.value)" />
+			```
+		</>
+		<header level="4" id="framework-solid">Solid 2</>
+		<markdown>
+			```jsx
+			// events and rich data are plain props:  `on-<event>={...}`, `options={...}`
+			<ui-calendar
+			  type="date"
+			  name="due"
+			  value={due()}
+			  disabledDates={holidays}
+			  on-ui-changing={(e) => setDue(e.detail.value)}
+			/>
+			```
+		</>
+	</>
+</spell-notebook>

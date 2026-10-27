@@ -1,0 +1,56 @@
+<spell-notebook "select api">
+	<header level="1">
+		Select
+		<header>A select lets a user choose a value from a list, with the platform's own picker.</>
+	</>
+	<select-tab-bar showing="api"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#attributes">Attributes</>
+				<ui-item link="#properties">Properties</>
+				<ui-item link="#events">Events</>
+				<ui-item link="#slots">Slots</>
+				<ui-item link="#parts">Parts</>
+				<ui-item link="#states">States</>
+			</>
+		</>
+	</>
+
+	<!-- API:  generated from the vocabularies (`docs/__data/components.json5`);  nothing to write. -->
+	<section label="Attributes">
+		<html>
+			<ui-docs-api family="ui-select" only="attributes"></>
+		</>
+	</>
+
+	<section label="Properties">
+		<html>
+			<ui-docs-api family="ui-select" only="properties"></>
+		</>
+	</>
+
+	<section label="Events">
+		<html>
+			<ui-docs-api family="ui-select" only="events"></>
+		</>
+	</>
+
+	<section label="Slots">
+		<html>
+			<ui-docs-api family="ui-select" only="slots"></>
+		</>
+	</>
+
+	<section label="Parts">
+		<html>
+			<ui-docs-api family="ui-select" only="parts"></>
+		</>
+	</>
+
+	<section label="States">
+		<html>
+			<ui-docs-api family="ui-select" only="states"></>
+		</>
+	</>
+</spell-notebook>

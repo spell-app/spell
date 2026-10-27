@@ -1,0 +1,40 @@
+<spell-notebook "summary usage">
+	<header level="1">
+		Summary
+		<header>A summary is a feed event's main line:  who did what, and when.</>
+	</>
+	<summary-tab-bar showing="usage"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#using-it">Using it</>
+				<ui-item link="#owners">Owners</>
+				<ui-item link="#accessibility">Accessibility</>
+			</>
+		</>
+	</>
+
+	<section label="Using it">
+		<markdown>
+			`<ui-summary>` is a feed event's main line: who did what, with an inline `<ui-author>` and `<ui-date>`.
+
+			- No attributes: it takes the feed's bold-ish line style.
+			- Put a `<ui-date>` inside it to show the date inline at its end, or before it to show it above.
+		</>
+	</>
+
+	<section label="Owners">
+		<markdown>
+			`<ui-summary>` finds its nearest owner and sets `:state(in-<owner>)` on itself; `UIParts.css` styles it by that
+			state. Its owners, and what each makes of it:
+
+			- [Feed](/components/ui/ui-feed.html) (`:state(in-feed)`): the event's main line, the author bold and the date inline
+
+			Anywhere else it is an unstyled block. More on how parts find their owners: [Content parts](/components/ui/ui-header.html).
+		</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>- A neutral block with no role; the event around it is a list item of the feed's list.</>
+	</>
+</spell-notebook>

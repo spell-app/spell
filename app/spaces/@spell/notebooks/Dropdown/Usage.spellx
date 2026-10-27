@@ -1,0 +1,162 @@
+<spell-notebook "dropdown usage">
+	<header level="1">
+		Dropdown
+		<header>A dropdown allows a user to select a value from a series of options.</>
+	</>
+	<dropdown-tab-bar showing="usage"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#using-it">Using it</>
+				<ui-item link="#values">Values</>
+				<ui-item link="#rich-data">Rich data</>
+				<ui-item link="#forms">Forms</>
+				<ui-item link="#events">Events</>
+				<ui-item link="#invoker-commands">Invoker commands</>
+				<ui-item link="#keyboard">Keyboard</>
+				<ui-item link="#accessibility">Accessibility</>
+				<ui-item link="#framework-usage">Framework usage</>
+			</>
+		</>
+	</>
+
+	<!-- USAGE:  items vs options, values, forms, events, invokers, keyboard, accessibility, frameworks. -->
+	<section label="Using it">
+		<markdown>
+			Write `<ui-dropdown>` with `<ui-item>`s inside: the options, headers (`type="header"`) and dividers
+			(`type="divider"`), in order. No JavaScript to call: Fomantic's settings are attributes.
+
+			- The look: `selection` (a form select), `search`, `multiple`, `inline`, `button` (+ `labeled` with an `icon`),
+			  `floating`, `pointing`, `appearance="simple"`, `padding="compact"`, `fluid`, `scrolling`, the `length`s ...
+			- An item's `value` defaults to its text; `label` overrides what the dropdown shows once it's chosen;
+			  `description`, `icon`, `image` and `flag` decorate the row, and any markup inside is projected into it.
+			- Slots: `trigger` (your own trigger content), `header` (content at the top of the menu), `icon` (replaces the
+			  caret, or a `labeled` icon).
+		</>
+	</>
+
+	<section label="Values">
+		<markdown>
+			`value` is the chosen value: a string, or with `multiple` a `string[]` property (the attribute is a comma / space
+			list). Set it to choose from code (no event); set it to `""` (or `[]`) to clear, which shows the placeholder
+			again -- Fomantic's `clear` behaviour. A form reset restores the `value` attribute (`restore defaults`).
+		</>
+	</>
+
+	<section label="Rich data">
+		<markdown>
+			Attributes carry primitives and are reflected; the rich `options` array is a JS property (frameworks find it with
+			`"options" in element`), and first paint never needs it -- slotted `<ui-item>`s or the `value` / `label`
+			attributes carry what server rendering must show. Options set through the property are added after the slotted
+			items. For remote data, fetch on `ui-search` and set `options`.
+		</>
+		<markdown>
+			```js
+			// <ui-dropdown selection clearable placeholder="Pick a framework"></ui-dropdown>
+			const dropdown = document.querySelector("ui-dropdown")
+			dropdown.options = [
+			  { value: "react", text: "React" },
+			  { value: "vue", text: "Vue" },
+			  { value: "solid", text: "Solid", description: "2.0" },
+			  { value: "svelte", text: "Svelte", disabled: true }
+			]
+			dropdown.addEventListener("ui-changed", (event) => console.log(event.detail.value))
+			```
+		</>
+	</>
+
+	<section label="Forms">
+		<markdown>
+			A dropdown is a form control: `name` submits the value (`multiple`: one entry per value), `required` validates,
+			`disabled` leaves it out and `readonly` keeps it in but unchangeable. `max-selections` caps a `multiple`.
+		</>
+	</>
+
+	<section label="Events">
+		<markdown>
+			- `ui-changed` (`{ value }`): the user chose, added, removed or cleared a value.
+			- `ui-opening` / `ui-closing` (`{ open }`): the menu is about to open / close; cancelable.
+			- `ui-search` (`{ query }`): a `search` dropdown's query changed.
+			- `ui-added` / `ui-removed` (`{ value }`): a `multiple` dropdown gained or lost a value (`ui-added` also for an
+			  `allow-additions` addition).
+		</>
+		<markdown>
+			```js
+			const tags = document.querySelector("ui-dropdown[name=tags]")
+			tags.addEventListener("ui-added", (event) => console.log("added", event.detail.value))
+			tags.addEventListener("ui-search", async (event) => {
+			  tags.options = await fetch(`/tags?q=${encodeURIComponent(event.detail.query)}`).then((r) => r.json())
+			})
+			```
+		</>
+	</>
+
+	<section label="Invoker commands">
+		<markdown>
+			A button with `commandfor="id"` and `command="--toggle"` (or `--show` / `--close`) opens and closes the menu with
+			no script, as a user action (the cancelable `ui-opening` / `ui-closing` first), and focuses the dropdown so the arrow
+			keys work. A disabled or read-only dropdown ignores commands. Live: "Invoker commands" on the Examples tab.
+		</>
+	</>
+
+	<section label="Keyboard">
+		<markdown>
+			- **Arrow Down** / **Arrow Up**: open the menu, then move the highlight.
+			- **Home** / **End**: highlight the first / last enabled option (open).
+			- **Page Down** / **Page Up**: move the highlight several rows (open).
+			- **Enter**: choose the highlighted option (or the addition); opens a `search` dropdown.
+			- **Space**: choose the highlighted option (not in `search`, where it types a space).
+			- **Escape**: close the menu. **Tab**: close it and move on.
+			- **Backspace** (`multiple` + `search`, empty query): remove the last label.
+			- Any character (no `search`): type-ahead -- open and highlight the next matching option.
+		</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			The trigger is an ARIA 1.2 combobox with a listbox popup (the WAI-ARIA authoring practices pattern).
+
+			- `role="combobox"` with `aria-expanded`, `aria-controls`, `aria-haspopup="listbox"` and `aria-activedescendant`
+			  pointing at the highlighted row. Focus stays on the trigger while you move through the list.
+			- The menu is `role="listbox"` (`aria-multiselectable` for `multiple`); rows are `role="option"` with
+			  `aria-selected` and `aria-disabled`. Headers and dividers are presentational.
+			- `aria-label` on the host names the combobox, otherwise the placeholder does. `loading`, `readonly`, `required`
+			  and validation set `aria-busy`, `aria-readonly`, `aria-required` and `aria-invalid`.
+			- The clear button and each `multiple` label's delete button get translated names (`Clear`, `Remove {value}`).
+			- Escape and outside clicks close the menu; leaving the dropdown with Tab closes it too.
+			- If the element fails to render, its native fallback is a real `<select>`
+			  (`multiple` when `multiple`), built from the same `<ui-item>`s or `options`.
+			  It keeps the value, the form submission, `ui-changed`, and the browser's own keyboard pattern;
+			  it drops search, additions, clearable, option icons and images, and the open / close events.
+		</>
+	</>
+
+	<section label="Framework usage">
+		<markdown>Set `options` as a property, not an attribute, and listen for `ui-changed`.</>
+		<header level="4" id="framework-react">React 19</>
+		<markdown>
+			```jsx
+			<ui-dropdown selection options={options} value="x" onui-changed={(e) => setValue(e.detail.value)} />
+			```
+		</>
+		<header level="4" id="framework-vue">Vue 3.5</>
+		<markdown>
+			```html
+			<!-- compilerOptions.isCustomElement = (tag) => tag.startsWith("ui-") -->
+			<ui-dropdown selection :options="options" value="x" @ui-changed="(e) => (value = e.detail.value)" />
+			```
+		</>
+		<header level="4" id="framework-solid">Solid 2</>
+		<markdown>
+			```jsx
+			// events and rich data are plain props:  `on-<event>={...}`, `options={...}`
+			<ui-dropdown
+			  selection
+			  options={options}
+			  value="x"
+			  on-ui-changed={(e) => setValue(e.detail.value)}
+			/>
+			```
+		</>
+	</>
+</spell-notebook>

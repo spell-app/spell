@@ -1,0 +1,47 @@
+<spell-notebook "divider usage">
+	<header level="1">
+		Divider
+		<header>A divider visually segments content into groups.</>
+	</>
+	<divider-tab-bar showing="usage"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#using-it">Using it</>
+				<ui-item link="#keyboard">Keyboard</>
+				<ui-item link="#accessibility">Accessibility</>
+			</>
+		</>
+	</>
+
+	<section label="Using it">
+		<markdown>
+			Put `<ui-divider>` between two blocks of content. With no words it draws a rule; `direction="horizontal"` puts its text
+			(and an `icon`) between two rules, `direction="vertical"` stands it upright between two columns.
+
+			- `spacer` keeps the spacing without the line: Fomantic's `hidden` divider (its class word is still
+			  `hidden`). It was renamed because `hidden` hides every element, as the platform's does.
+			- `section` adds more space; `padding="none"` removes it; `clearing` clears floats above it.
+			- `align="left|right"` on a horizontal divider drops the rule on that side.
+			- A vertical divider centres itself in its nearest positioned owner: a `<ui-segment>`, a `<ui-grid>`. In a
+			  `stackable` grid it turns horizontal when the grid stacks.
+			- No events: a divider is static.
+		</>
+	</>
+
+	<section label="Keyboard">
+		<markdown>A divider takes no focus and handles no keys.</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			- A divider is `role="separator"`, not `<hr>`, because a horizontal or vertical divider carries text an `<hr>`
+			  can't hold.
+			- A vertical divider adds `aria-orientation="vertical"`.
+			- A `spacer` divider is `role="none"`: it is spacing only and is not announced.
+			- The `icon` is decorative.
+			- If the element fails to render, it shows its text through a bare `<slot>`: the text stays, the
+			  divider line and the `icon` shorthand go.
+		</>
+	</>
+</spell-notebook>

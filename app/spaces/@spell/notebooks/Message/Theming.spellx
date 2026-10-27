@@ -1,0 +1,61 @@
+<spell-notebook "message theming">
+	<header level="1">
+		Message
+		<header>A message displays information that explains nearby content.</>
+	</>
+	<message-tab-bar showing="theming"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#tokens">Tokens</>
+				<ui-item link="#themes">Themes</>
+			</>
+		</>
+	</>
+
+	<!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
+	<section label="Tokens">
+		<markdown>
+			Theme with the public `--ui-message-*` tokens: set one on the element, on any ancestor (`:root` for every
+			message), or on the box through `::part(message)`. They inherit into the shadow root, where the sheet reads each
+			through a private alias, so nothing inside blocks them. A slotted header reads `--ui-message-header-font-size`
+			from the message. Style the other pieces with `::part()`: `icon`, `content`, `header` and `close`.
+		</>
+		<markdown>
+			```css
+			:root {
+			  --ui-message-radius: 0;
+			}
+			ui-message.notice {
+			  --ui-message-padding: 1.5em 2em;
+			}
+			ui-message::part(close) {
+			  opacity: 1;
+			}
+			```
+		</>
+		<message state="info" size="small">
+			<markdown>
+				`state` and `color` are colour remaps: they re-point `--ui-color` and its tints, so a theme recolours every
+				positive or red message by setting `--ui-positive` / `--ui-red`. Never set the `--_ui-*` names: they're the
+				sheet's private plumbing.
+			</>
+		</>
+		<markdown>Edit a value below to try it.</>
+		<html>
+			<ui-docs-tokens family="ui-message" playground>
+				<ui-message>
+					<ui-header>Changes in Service</>
+					<p>We just updated our privacy policy here to better service our customers. We recommend reviewing the changes.</>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="Themes">
+		<markdown>
+			The theme menu above picks the theme for every page of the site:  Spell, Glass, Fruity or Merlot,
+			each restyling this component through its tokens.
+		</>
+	</>
+</spell-notebook>

@@ -1,0 +1,102 @@
+<spell-notebook "list usage">
+	<header level="1">
+		List
+		<header>A list is used to group related content.</>
+	</>
+	<list-tab-bar showing="usage"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#using-it">Using it</>
+				<ui-item link="#events">Events</>
+				<ui-item link="#keyboard">Keyboard</>
+				<ui-item link="#accessibility">Accessibility</>
+				<ui-item link="#framework-usage">Framework usage</>
+			</>
+		</>
+	</>
+
+	<!-- USAGE:  items, links / buttons, ui-select, keyboard, accessibility, frameworks. -->
+	<section label="Using it">
+		<markdown>
+			A list's children are the one generic `<ui-item>`: the list tells each item how to render, so there is no
+			`ui-list-item`.
+
+			- An item with a `link` is a real link; in a `selection` list every item is a `<button>`; otherwise an item is a
+			  plain block that can hold anything.
+			- `icon` and `image` are shorthands for the item's icon and avatar; a `<ui-content>` holds a `<ui-header>` and a
+			  `<ui-description>`.
+			- A `<ui-list>` inside an item is its sub list, with the outer list's look (and numbering, when `ordered`).
+			- `selected` (or Fomantic's `active`) marks the current item.
+		</>
+	</>
+
+	<section label="Events">
+		<markdown>
+			`ui-select` fires when a link or button item of the list is activated (click, **Enter** or **Space**).
+
+			- `detail.value` is the item's `value`, else its text; `detail.item` is the `<ui-item>`.
+			- The list never moves `selected` itself, so the page decides what is chosen.
+		</>
+		<markdown>
+			```js
+			const list = document.querySelector("ui-list[selection]")
+			list.addEventListener("ui-select", (event) => {
+			  for (const item of list.querySelectorAll(":scope > ui-item")) {
+			    item.toggleAttribute("selected", item === event.detail.item)
+			  }
+			})
+			```
+		</>
+	</>
+
+	<section label="Keyboard">
+		<markdown>
+			Every link or button item is its own tab stop; a list has no arrow-key navigation.
+
+			- **Tab** moves to the next link or button item.
+			- **Enter** follows a link item, or activates a button item (`ui-select`).
+			- **Space** activates a button item (`ui-select`).
+		</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			- The shadow root holds a real `<ul>` (`<ol>` when `ordered`) with an explicit `role="list"`, since Safari drops
+			  list semantics from unstyled lists. Each `<ui-item>` is a `listitem`.
+			- Items with a `link` are real links; the `selected` one gets `aria-current="page"`. In a `selection` list the items
+			  are `<button>`s and the selected one gets `aria-current="true"`.
+			- `disabled` removes a link's `href` (and sets `aria-disabled`), or disables a button.
+			- An item holding only an icon or image needs a name: put `aria-label` on the `<ui-item>`. The `image` shorthand
+			  is decorative (`alt=""`).
+			- If the element fails to render, it shows its items through a bare `<slot>`, so their text and links
+			  stay; the `<ul>` / `<ol>` around them, the numbering, the list layout and `ui-select` go.
+		</>
+	</>
+
+	<section label="Framework usage">
+		<markdown>Define the elements first, then listen for `ui-select` with your framework's custom-event syntax.</>
+		<header level="4" id="framework-react">React 19</>
+		<markdown>
+			```jsx
+			<ui-list selection onui-select={(event) => setChoice(event.detail.value)}>...</ui-list>
+			```
+		</>
+		<header level="4" id="framework-vue">Vue 3.5</>
+		<markdown>
+			```html
+			<!-- compilerOptions.isCustomElement = (tag) => tag.startsWith("ui-") -->
+			<ui-list selection @ui-select="(event) => (choice = event.detail.value)">...</ui-list>
+			```
+		</>
+		<header level="4" id="framework-solid">Solid 2</>
+		<markdown>
+			```jsx
+			// events and rich data are plain props:  `on-<event>={...}`, `options={...}`
+			<ui-list selection on-ui-chosen={(event) => setChoice(event.detail.value)}>
+			  ...
+			</ui-list>
+			```
+		</>
+	</>
+</spell-notebook>

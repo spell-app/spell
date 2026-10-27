@@ -1,0 +1,90 @@
+<spell-notebook "table theming">
+	<header level="1">
+		Table
+		<header>A table displays a collection of data grouped into rows.</>
+	</>
+	<table-tab-bar showing="theming"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#tokens">Tokens</>
+				<ui-item link="#themes">Themes</>
+			</>
+		</>
+	</>
+
+	<!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
+	<section label="Tokens">
+		<markdown>
+			Theme with the public `--ui-table-*` tokens: set one on the element, on any ancestor (`:root` included), on the
+			table itself (it's in your page) or through `::part(scroller)`. The sheet reads each through a private alias, so
+			nothing blocks them. The shadow root's only piece is the `scroller` part.
+		</>
+		<markdown>
+			```css
+			ui-table {
+			  --ui-table-header-background: var(--ui-surface);
+			  --ui-table-striped-background: oklch(from var(--ui-primary) l c h / 0.06);
+			}
+			ui-table::part(scroller) {
+			  scrollbar-gutter: stable;
+			}
+			```
+		</>
+		<message state="info" size="small">
+			<markdown>
+				`inverted` swaps in its own `--ui-table-inverted-*` colours, and `padding` (`compact`, `md` ...) replaces the cell padding
+				with their own steps (`--ui-table-padded`, `--ui-table-compact-padding-*`). `--ui-table-stack-by: container`
+				makes every table in a region stack by its own width;  `--ui-table-stack-by: none`, never. Never set the `--_ui-*` names: they're the sheet's private
+				plumbing.
+			</>
+		</>
+		<markdown>Edit a value below to try it.</>
+		<html>
+			<ui-docs-tokens family="ui-table" playground>
+				<ui-table celled>
+					<table>
+						<thead>
+							<tr>
+								<th>Name</>
+								<th>Status</>
+								<th>Notes</>
+							</>
+						</>
+						<tbody>
+							<tr>
+								<td>John</>
+								<td>Approved</>
+								<td>None</>
+							</>
+							<tr>
+								<td>Jamie</>
+								<td>Approved</>
+								<td>Requires call</>
+							</>
+							<tr>
+								<td>Jill</>
+								<td>Denied</>
+								<td>None</>
+							</>
+						</>
+						<tfoot>
+							<tr>
+								<th>3 People</>
+								<th>2 Approved</>
+								<td></>
+							</>
+						</>
+					</>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="Themes">
+		<markdown>
+			The theme menu above picks the theme for every page of the site:  Spell, Glass, Fruity or Merlot,
+			each restyling this component through its tokens.
+		</>
+	</>
+</spell-notebook>

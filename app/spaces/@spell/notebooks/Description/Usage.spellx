@@ -1,0 +1,50 @@
+<spell-notebook "description usage">
+	<header level="1">
+		Description
+		<header>A description is the text of a card, item, modal, list item, step or comment.</>
+	</>
+	<description-tab-bar showing="usage"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#using-it">Using it</>
+				<ui-item link="#owners">Owners</>
+				<ui-item link="#accessibility">Accessibility</>
+			</>
+		</>
+	</>
+
+	<section label="Using it">
+		<markdown>
+			`<ui-description>` describes its owner's content: a card's or an item's text, a comment's text (Fomantic's comment
+			`text`), a list item's or a step's second line, a modal's text beside an image.
+
+			- No attributes: the owner decides the look (a card's muted text, a comment's body, a step's smaller line).
+			- Put paragraphs, links or other parts inside it.
+		</>
+	</>
+
+	<section label="Owners">
+		<markdown>
+			`<ui-description>` finds its nearest owner and sets `:state(in-<owner>)` on itself; `UIParts.css` styles it by that
+			state. Its owners, and what each makes of it:
+
+			- [Card](/components/ui/ui-card.html) (`:state(in-card)`): muted body text under the header and meta
+			- [Item](/components/ui/ui-items.html) (`:state(in-item)`): body text, with space above
+			- [Comment](/components/ui/ui-comment.html) (`:state(in-comment)`): the comment's text
+			- [Modal](/components/ui/ui-modal.html) (`:state(in-modal)`): the text beside an `image` content's image
+			- [Flyout](/components/ui/ui-flyout.html) (`:state(in-flyout)`): body text
+			- [List](/components/ui/ui-list.html) (`:state(in-list)`): a second, muted line under the item's header
+			- [Step](/components/ui/ui-step.html) (`:state(in-step)`): a smaller line under the step's title
+			- [Search](/components/ui/ui-search.html) (`:state(in-search)`): a search result's second line
+
+			Anywhere else it is an unstyled block. More on how parts find their owners: [Content parts](/components/ui/ui-header.html).
+		</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			- A neutral block with no role. Use real elements inside it (`<p>`, `<a>`, lists) for structure.
+		</>
+	</>
+</spell-notebook>

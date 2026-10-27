@@ -1,0 +1,71 @@
+<spell-notebook "actions examples">
+	<header level="1">
+		Actions
+		<header>Actions hold what a user can do next:  a comment's reply links, a modal's or toast's buttons.</>
+	</>
+	<actions-tab-bar showing="examples"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#owners">Owners</>
+				<ui-item link="#standalone">Standalone</>
+			</>
+		</>
+	</>
+
+	<!--
+		EXAMPLES:  `<ui-actions>` in each owner that gives it a look (from the owners' own pages and
+		`src/components/ui-parts/examples/elements/`), then its attributes.  The Content parts page
+		(`ui-header.html`) shows every part together.
+	-->
+	<section label="Owners">
+		<section label="Comment" sticky collapsible dividing>
+			<example description="A comment's actions:  a row of small links under its text.">
+				<html>
+					<ui-comments>
+						<ui-comment>
+							<ui-avatar src="/components/ui/images/avatar/small/joe.jpg"></ui-avatar>
+							<ui-content>
+								<ui-author link="#joe">Joe Henderson</ui-author>
+								<ui-description>Dude, this is awesome. Thanks so much</ui-description>
+								<ui-actions>
+									<a href="#reply">Reply</a>
+									<a href="#save">Save</a>
+									<a href="#hide">Hide</a>
+								</ui-actions>
+							</ui-content>
+						</ui-comment>
+					</ui-comments>
+				</html>
+			</example>
+		</>
+
+		<section label="Modal" sticky collapsible dividing>
+			<example description="A modal's actions:  its footer, buttons on the right;  `approve` and `deny` close it.">
+				<button commandfor="actions-modal" command="--show">Show</button>
+				<html>
+					<ui-modal id="actions-modal" size="small" closable>
+						<ui-header>Delete Your Account</ui-header>
+						<ui-content>
+							<p>Are you sure you want to delete your account?</p>
+						</ui-content>
+						<ui-actions>
+							<ui-button class="deny" color="negative">No</ui-button>
+							<ui-button class="approve" color="positive">Yes</ui-button>
+						</ui-actions>
+					</ui-modal>
+				</html>
+			</example>
+		</>
+	</>
+
+	<section label="Standalone">
+		<section label="No owner" sticky collapsible dividing>
+			<example description="Outside an owner, `<ui-actions>` is an unstyled block.">
+				<actions>
+					<button size="small">OK</button>
+				</actions>
+			</example>
+		</>
+	</>
+</spell-notebook>

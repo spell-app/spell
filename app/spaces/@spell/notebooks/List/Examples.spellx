@@ -1,0 +1,836 @@
+<spell-notebook "list examples">
+	<header level="1">
+		List
+		<header>A list is used to group related content.</>
+	</>
+	<list-tab-bar showing="examples"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#types">Types</>
+				<ui-item link="#content">Content</>
+				<ui-item link="#states">States</>
+				<ui-item link="#variations">Variations</>
+				<ui-item link="#content-variations">Content Variations</>
+			</>
+		</>
+	</>
+
+	<!--
+		EXAMPLES:  Fomantic's list page, section by section, in its order (Types, Content, Variations, Content
+		Variations), plus our States (Active, Disabled) and Fitted selection.  Items are the generic `<ui-item>`.
+	-->
+	<section label="Types">
+		<section label="List" sticky collapsible dividing>
+			<example description="A list groups related content:  its items are `<ui-item>`s.">
+				<list>
+					<item>Apples</item>
+					<item>Pears</item>
+					<item>Oranges</item>
+				</list>
+			</example>
+			<example>
+				<html>
+					<ui-list>
+						<ui-item icon="users">
+							<ui-content>Fomantic UI</ui-content>
+						</ui-item>
+						<ui-item icon="location dot">
+							<ui-content>Worldwide</ui-content>
+						</ui-item>
+						<ui-item icon="mail">
+							<ui-content>
+								<a href="mailto:contact@fomantic-ui.com">contact@fomantic-ui.com</a>
+							</ui-content>
+						</ui-item>
+						<ui-item icon="linkify">
+							<ui-content>
+								<a href="https://fomantic-ui.com">fomantic-ui.com</a>
+							</ui-content>
+						</ui-item>
+					</ui-list>
+				</html>
+			</example>
+
+			<!-- GAP I89:  linked headers (`<ui-header link>`) in list items draw underlined, as on the rest of this page. -->
+			<example>
+				<list spacing="lg" divided vertical-align="middle">
+					<item>
+						<icon slot="icon" name="github" size="large"/>
+						<content>
+							<header link="#list">fomantic/Fomantic-UI</header>
+							<description>Updated 10 mins ago</description>
+						</content>
+					</item>
+					<item>
+						<icon slot="icon" name="github" size="large"/>
+						<content>
+							<header link="#list">fomantic/Fomantic-UI-Docs</header>
+							<description>Updated 22 mins ago</description>
+						</content>
+					</item>
+					<item>
+						<icon slot="icon" name="github" size="large"/>
+						<content>
+							<header link="#list">fomantic/Fomantic-UI-LESS</header>
+							<description>Updated 34 mins ago</description>
+						</content>
+					</item>
+				</list>
+			</example>
+			<example>
+				<list>
+					<item icon="folder">
+						<content>
+							<header>src</header>
+							<description>Source files for project</description>
+							<list>
+								<item icon="folder">
+									<content>
+										<header>site</header>
+										<description>Your site's theme</description>
+									</content>
+								</item>
+								<item icon="folder">
+									<content>
+										<header>themes</header>
+										<description>Packaged theme files</description>
+										<list>
+											<item icon="folder">
+												<content>
+													<header>default</header>
+													<description>Default packaged theme</description>
+												</content>
+											</item>
+											<item icon="folder">
+												<content>
+													<header>my_theme</header>
+													<description>Packaged themes are also available in this folder</description>
+												</content>
+											</item>
+										</list>
+									</content>
+								</item>
+								<item icon="file">
+									<content>
+										<header>theme.config</header>
+										<description>Config file for setting packaged themes</description>
+									</content>
+								</item>
+							</list>
+						</content>
+					</item>
+					<item icon="folder">
+						<content>
+							<header>dist</header>
+							<description>Compiled CSS and JS files</description>
+							<list>
+								<item icon="folder">
+									<content>
+										<header>components</header>
+										<description>Individual component CSS and JS</description>
+									</content>
+								</item>
+							</list>
+						</content>
+					</item>
+					<item icon="file">
+						<content>
+							<header>semantic.json</header>
+							<description>Contains build settings for gulp</description>
+						</content>
+					</item>
+				</list>
+			</example>
+		</>
+
+		<section label="Bulleted" sticky collapsible dividing>
+			<example description="A list can mark items with a bullet.">
+				<list bulleted>
+					<item>Gaining Access</item>
+					<item>Inviting Friends</item>
+					<item>Benefits <list><item link="#list">Link to somewhere</item> <item>Rebates</item> <item>Discounts</item></list></item>
+					<item>Warranty</item>
+				</list>
+			</example>
+		</>
+		<html>
+			<ui-message size="small" class="site-not-ported">Not ported: Fomantic's plain <code>&lt;ul class="ui list"&gt;</> / <code>&lt;ol class="ui list"&gt;</> markup. <code>&lt;ui-list bulleted&gt;</> / <code>&lt;ui-list ordered&gt;</> render a real ul / ol in their shadow root.</>
+		</>
+		<example>
+			<list direction="horizontal" bulleted>
+				<item link="#list">About Us</item>
+				<item link="#list">Sitemap</item>
+				<item link="#list">Contact</item>
+			</list>
+		</example>
+
+		<section label="Ordered" sticky collapsible dividing>
+			<example description="A list can be ordered numerically.  Sub lists continue the numbering (`3.1`).">
+				<html>
+					<ui-list ordered>
+						<ui-item link="#list">Getting Started</ui-item>
+						<ui-item link="#list">Introduction</ui-item>
+						<ui-item>
+							<a href="#list">Languages</a>
+							<ui-list>
+								<ui-item link="#list">HTML</ui-item>
+								<ui-item link="#list">Javascript</ui-item>
+								<ui-item link="#list">CSS</ui-item>
+							</ui-list>
+						</ui-item>
+						<ui-item link="#list">Review</ui-item>
+					</ui-list>
+				</html>
+			</example>
+			<example description="`suffixed`:  a dot follows each number (`1.`).">
+				<list ordered suffixed>
+					<item>Signing Up</item>
+					<item>User Benefits</item>
+					<item>User Types <list><item>Admin</item> <item>Power User</item> <item>Regular User</item></list></item>
+					<item>Deleting Your Account</item>
+				</list>
+			</example>
+			<example description="An item's `value` replaces its number.">
+				<list ordered>
+					<item value="*">Signing Up</item>
+					<item value="*">User Benefits</item>
+					<item value="*">User Types <list><item value="-">Admin</item> <item value="-">Power User</item> <item value="-">Regular User</item></list></item>
+					<item value="*">Deleting Your Account</item>
+				</list>
+			</example>
+		</>
+
+		<section label="Link" sticky collapsible dividing>
+			<example description="A list can be specially formatted for navigation links:  the `selected` (or `active`) item is the current page.">
+				<list appearance="link">
+					<item active>Home</item>
+					<item link="#list">About</item>
+					<item link="#list">Jobs</item>
+					<item link="#list">Team</item>
+				</list>
+			</example>
+		</>
+	</>
+
+	<section label="Content">
+		<section label="Item" sticky collapsible dividing>
+			<example description="A list item can contain a set of items.">
+				<list>
+					<item>1</item>
+					<item>2</item>
+					<item>3</item>
+				</list>
+			</example>
+		</>
+
+		<section label="Icon" sticky collapsible dividing>
+			<example description="A list item can contain an icon.">
+				<list>
+					<item link="#list" icon="help">
+						<content>
+							<header>Floated Icon</header>
+							<description>This text will always have a left margin to make sure it sits alongside your icon</description>
+						</content>
+					</item>
+					<item link="#list" icon="caret right">
+						<content>
+							<header>Icon Alignment</header>
+							<description>Floated icons are by default top aligned. To have an icon top aligned try this example.</description>
+						</content>
+					</item>
+					<item icon="help">Inline Text</item>
+				</list>
+			</example>
+		</>
+
+		<section label="Image" sticky collapsible dividing>
+			<example description="A list item can contain an image:  `image` takes its URL and shows it as an avatar.">
+				<html>
+					<ui-list>
+						<ui-item image="../images/avatar2/small/rachel.png">
+							<ui-content>
+								<ui-header link="#list">Rachel</ui-header>
+								<ui-description>Last seen watching <a href="#list"><b>Arrested Development</b></a> just now.</ui-description>
+							</ui-content>
+						</ui-item>
+						<ui-item image="../images/avatar2/small/lindsay.png">
+							<ui-content>
+								<ui-header link="#list">Lindsay</ui-header>
+								<ui-description>Last seen watching <a href="#list"><b>Bob's Burgers</b></a> 10 hours ago.</ui-description>
+							</ui-content>
+						</ui-item>
+						<ui-item image="../images/avatar2/small/matthew.png">
+							<ui-content>
+								<ui-header link="#list">Matthew</ui-header>
+								<ui-description>Last seen watching <a href="#list"><b>The Godfather Part 2</b></a> yesterday.</ui-description>
+							</ui-content>
+						</ui-item>
+						<ui-item image="../images/avatar/small/jenny.jpg">
+							<ui-content>
+								<ui-header link="#list">Jenny Hess</ui-header>
+								<ui-description>Last seen watching <a href="#list"><b>Twin Peaks</b></a> 3 days ago.</ui-description>
+							</ui-content>
+						</ui-item>
+						<ui-item image="../images/avatar/small/veronika.jpg">
+							<ui-content>
+								<ui-header link="#list">Veronika Ossi</ui-header>
+								<ui-description>Has not watched anything recently</ui-description>
+							</ui-content>
+						</ui-item>
+					</ui-list>
+				</html>
+			</example>
+		</>
+
+		<section label="Link" sticky collapsible dividing>
+			<example description="A list can contain links:  with a `link` an item renders a real link.">
+				<list>
+					<item link="#list">What is a FAQ?</item>
+					<item link="#list">Who is our user?</item>
+					<item link="#list">Where is our office located?</item>
+				</list>
+			</example>
+			<example>
+				<html>
+					<ui-list>
+						<ui-item>
+							<ui-header link="#list">Header</ui-header>
+							<ui-description>Click a link in our <a href="#list">description</a>.</ui-description>
+						</ui-item>
+						<ui-item>
+							<ui-header link="#list">Learn More</ui-header>
+							<ui-description>Learn more about this site on <a href="#list">our FAQ page</a>.</ui-description>
+						</ui-item>
+					</ui-list>
+				</html>
+			</example>
+		</>
+
+		<section label="Header" sticky collapsible dividing>
+			<example description="A list item can contain a header.">
+				<list>
+					<item><header>New York City</header> A lovely city</item>
+					<item><header>Chicago</header> Also quite a lovely city</item>
+					<item><header>Los Angeles</header> Sometimes can be a lovely city</item>
+					<item><header>San Francisco</header> What a lovely city</item>
+				</list>
+			</example>
+		</>
+
+		<section label="Description" sticky collapsible dividing>
+			<example description="A list item can contain a description.">
+				<list>
+					<item icon="map marker">
+						<content>
+							<header link="#list">Krolewskie Jadlo</header>
+							<description>An excellent polish restaurant, quick delivery and hearty, filling meals.</description>
+						</content>
+					</item>
+					<item icon="map marker">
+						<content>
+							<header link="#list">Xian Famous Foods</header>
+							<description>A taste of Shaanxi's delicious culinary traditions, with delights like spicy cold noodles and lamb burgers.</description>
+						</content>
+					</item>
+					<item icon="map marker">
+						<content>
+							<header link="#list">Sapporo Haru</header>
+							<description>Greenpoint's best choice for quick and delicious sushi.</description>
+						</content>
+					</item>
+					<item icon="map marker">
+						<content>
+							<header link="#list">Enid's</header>
+							<description>At night a bar, during the day a delicious brunch spot.</description>
+						</content>
+					</item>
+				</list>
+			</example>
+		</>
+	</>
+
+	<section label="States">
+		<section label="Active" sticky collapsible dividing>
+			<example description="A list item can be active:  `selected` is the attribute;  Fomantic's `active` works too.">
+				<list appearance="link">
+					<item link="#list">Home</item>
+					<item selected link="#list">About</item>
+					<item link="#list">Jobs</item>
+				</list>
+			</example>
+		</>
+
+		<section label="Disabled" sticky collapsible dividing>
+			<example description="A list item can be disabled:  it can't be followed or chosen.">
+				<list direction="horizontal">
+					<item disabled link="#list">Disabled</item>
+					<item link="#list">Terms</item>
+					<item link="#list">Privacy</item>
+				</list>
+			</example>
+		</>
+	</>
+
+	<section label="Variations">
+		<section label="Horizontal" sticky collapsible dividing>
+			<example description="A list can be formatted to have items appear horizontally.">
+				<list direction="horizontal">
+					<item image="../images/avatar/small/tom.jpg">
+						<content><header>Tom</header> Top Contributor</content>
+					</item>
+					<item image="../images/avatar/small/christian.jpg">
+						<content><header>Christian Rocha</header> Admin</content>
+					</item>
+					<item image="../images/avatar/small/matt.jpg">
+						<content><header>Matt</header> Top Rated User</content>
+					</item>
+				</list>
+			</example>
+			<example>
+				<list ordered direction="horizontal">
+					<item image="../images/avatar/small/tom.jpg">
+						<content><header>Steve Jobes</header> 50 Points</content>
+					</item>
+					<item image="../images/avatar/small/stevie.jpg">
+						<content><header>Stevie Feliciano</header> 44 Points</content>
+					</item>
+					<item image="../images/avatar/small/jenny.jpg">
+						<content><header>Jenny Hess</header> 11 Points</content>
+					</item>
+				</list>
+			</example>
+			<example>
+				<list direction="horizontal" bulleted appearance="link">
+					<item link="#list">Terms and Conditions</item>
+					<item link="#list">Privacy Policy</item>
+					<item link="#list">Contact Us</item>
+				</list>
+			</example>
+		</>
+
+		<section label="Inverted" sticky collapsible dividing>
+			<example description="A list can be inverted to appear on a dark background.">
+				<segment inverted>
+					<list inverted spacing="lg" divided>
+						<item>
+							<content><header>Snickerdoodle</header> An excellent companion</content>
+						</item>
+						<item>
+							<content><header>Poodle</header> A poodle, its pretty basic</content>
+						</item>
+						<item>
+							<content><header>Paulo</header> He's also a dog</content>
+						</item>
+					</list>
+				</segment>
+			</example>
+		</>
+
+		<section label="Selection" sticky collapsible dividing>
+			<example description="A selection list formats list items as possible choices:  each item is a button, and activating one fires `ui-select`.">
+				<list selection vertical-align="middle">
+					<item value="helen" image="../images/avatar/small/helen.jpg">
+						<content>
+							<header>Helen</header>
+						</content>
+					</item>
+					<item value="christian" image="../images/avatar/small/christian.jpg">
+						<content>
+							<header>Christian</header>
+						</content>
+					</item>
+					<item value="daniel" image="../images/avatar/small/daniel.jpg">
+						<content>
+							<header>Daniel</header>
+						</content>
+					</item>
+				</list>
+			</example>
+			<example description="`padding=\"none\"` drops the items' side padding, so the hover background reaches past the list's edges.">
+				<list padding="none" selection>
+					<item>Inbox</item>
+					<item>Starred</item>
+					<item>Sent</item>
+				</list>
+			</example>
+		</>
+
+		<section label="Animated" sticky collapsible dividing>
+			<example description="A list can animate to set the current item apart from the list.">
+				<message slot="description" state="info" size="small">Be sure content can fit on one line when using the animated variation, otherwise text content will reflow when hovered.</message>
+				<list hover="indent" vertical-align="middle">
+					<item image="../images/avatar/small/helen.jpg">
+						<content>
+							<header>Helen</header>
+						</content>
+					</item>
+					<item image="../images/avatar/small/christian.jpg">
+						<content>
+							<header>Christian</header>
+						</content>
+					</item>
+					<item image="../images/avatar/small/daniel.jpg">
+						<content>
+							<header>Daniel</header>
+						</content>
+					</item>
+				</list>
+			</example>
+		</>
+
+		<section label="Relaxed" sticky collapsible dividing>
+			<example description="A list can relax its padding to provide more negative space:  `spacing=\"lg\"`, or `spacing=\"xl\"`.">
+				<html>
+					<ui-list spacing="lg">
+						<ui-item image="../images/avatar/small/daniel.jpg">
+							<ui-content>
+								<ui-header link="#list">Daniel Louise</ui-header>
+								<ui-description>Last seen watching <a href="#list"><b>Arrested Development</b></a> just now.</ui-description>
+							</ui-content>
+						</ui-item>
+						<ui-item image="../images/avatar/small/stevie.jpg">
+							<ui-content>
+								<ui-header link="#list">Stevie Feliciano</ui-header>
+								<ui-description>Last seen watching <a href="#list"><b>Bob's Burgers</b></a> 10 hours ago.</ui-description>
+							</ui-content>
+						</ui-item>
+						<ui-item image="../images/avatar/small/elliot.jpg">
+							<ui-content>
+								<ui-header link="#list">Elliot Fu</ui-header>
+								<ui-description>Last seen watching <a href="#list"><b>The Godfather Part 2</b></a> yesterday.</ui-description>
+							</ui-content>
+						</ui-item>
+					</ui-list>
+				</html>
+			</example>
+			<example>
+				<list spacing="lg" direction="horizontal">
+					<item image="../images/avatar/small/daniel.jpg">
+						<content>
+							<header link="#list">Daniel Louise</header>
+						</content>
+					</item>
+					<item image="../images/avatar/small/stevie.jpg">
+						<content>
+							<header link="#list">Stevie Feliciano</header>
+						</content>
+					</item>
+					<item image="../images/avatar/small/elliot.jpg">
+						<content>
+							<header link="#list">Elliot Fu</header>
+						</content>
+					</item>
+				</list>
+			</example>
+			<example>
+				<html>
+					<ui-list spacing="xl">
+						<ui-item image="../images/avatar/small/daniel.jpg">
+							<ui-content>
+								<ui-header link="#list">Daniel Louise</ui-header>
+								<ui-description>Last seen watching <a href="#list"><b>Arrested Development</b></a> just now.</ui-description>
+							</ui-content>
+						</ui-item>
+						<ui-item image="../images/avatar/small/stevie.jpg">
+							<ui-content>
+								<ui-header link="#list">Stevie Feliciano</ui-header>
+								<ui-description>Last seen watching <a href="#list"><b>Bob's Burgers</b></a> 10 hours ago.</ui-description>
+							</ui-content>
+						</ui-item>
+						<ui-item image="../images/avatar/small/elliot.jpg">
+							<ui-content>
+								<ui-header link="#list">Elliot Fu</ui-header>
+								<ui-description>Last seen watching <a href="#list"><b>The Godfather Part 2</b></a> yesterday.</ui-description>
+							</ui-content>
+						</ui-item>
+					</ui-list>
+				</html>
+			</example>
+			<example>
+				<list spacing="xl" direction="horizontal">
+					<item image="../images/avatar/small/daniel.jpg">
+						<content>
+							<header link="#list">Daniel Louise</header>
+						</content>
+					</item>
+					<item image="../images/avatar/small/stevie.jpg">
+						<content>
+							<header link="#list">Stevie Feliciano</header>
+						</content>
+					</item>
+					<item image="../images/avatar/small/elliot.jpg">
+						<content>
+							<header link="#list">Elliot Fu</header>
+						</content>
+					</item>
+				</list>
+			</example>
+		</>
+
+		<section label="Divided" sticky collapsible dividing>
+			<example description="A list can show divisions between content.">
+				<list divided vertical-align="middle">
+					<item image="../images/avatar/small/daniel.jpg">
+						<content>
+							<header link="#list">Daniel Louise</header>
+						</content>
+					</item>
+					<item image="../images/avatar/small/stevie.jpg">
+						<content>
+							<header link="#list">Stevie Feliciano</header>
+						</content>
+					</item>
+					<item image="../images/avatar/small/elliot.jpg">
+						<content>
+							<header link="#list">Elliot Fu</header>
+						</content>
+					</item>
+				</list>
+			</example>
+		</>
+
+		<section label="Celled" sticky collapsible dividing>
+			<example description="A list can divide its items into cells.">
+				<list celled>
+					<item image="../images/avatar/small/helen.jpg">
+						<content><header>Snickerdoodle</header> An excellent companion</content>
+					</item>
+					<item image="../images/avatar/small/daniel.jpg">
+						<content><header>Poodle</header> A poodle, its pretty basic</content>
+					</item>
+					<item image="../images/avatar/small/daniel.jpg">
+						<content><header>Paulo</header> He's also a dog</content>
+					</item>
+				</list>
+			</example>
+			<example>
+				<list celled ordered>
+					<item>Cats</item>
+					<item>Horses</item>
+					<item>Dogs <list><item>Labradoodles</item> <item>Shiba Inu</item> <item>Mastiff</item></list></item>
+				</list>
+			</example>
+			<example>
+				<list celled direction="horizontal">
+					<item>About Us</item>
+					<item>Contact</item>
+					<item>Support</item>
+				</list>
+			</example>
+		</>
+
+		<section label="Size" sticky collapsible dividing>
+			<example description="A list can vary in size.">
+				<list size="mini" direction="horizontal" divided>
+					<item image="../images/avatar/small/helen.jpg">
+						<content>
+							<header>Helen</header>
+						</content>
+					</item>
+					<item image="../images/avatar/small/christian.jpg">
+						<content>
+							<header>Christian</header>
+						</content>
+					</item>
+					<item image="../images/avatar/small/daniel.jpg">
+						<content>
+							<header>Daniel</header>
+						</content>
+					</item>
+				</list>
+			</example>
+			<example>
+				<list size="tiny" direction="horizontal">
+					<item image="../images/avatar/small/helen.jpg">
+						<content>
+							<header>Helen</header>
+						</content>
+					</item>
+					<item image="../images/avatar/small/christian.jpg">
+						<content>
+							<header>Christian</header>
+						</content>
+					</item>
+					<item image="../images/avatar/small/daniel.jpg">
+						<content>
+							<header>Daniel</header>
+						</content>
+					</item>
+				</list>
+			</example>
+			<example>
+				<list size="small" direction="horizontal">
+					<item image="../images/avatar/small/helen.jpg">
+						<content>
+							<header>Helen</header>
+						</content>
+					</item>
+					<item image="../images/avatar/small/christian.jpg">
+						<content>
+							<header>Christian</header>
+						</content>
+					</item>
+					<item image="../images/avatar/small/daniel.jpg">
+						<content>
+							<header>Daniel</header>
+						</content>
+					</item>
+				</list>
+			</example>
+			<example>
+				<list size="large" direction="horizontal" divided>
+					<item image="../images/avatar/small/helen.jpg">
+						<content>
+							<header>Helen</header>
+						</content>
+					</item>
+					<item image="../images/avatar/small/christian.jpg">
+						<content>
+							<header>Christian</header>
+						</content>
+					</item>
+					<item image="../images/avatar/small/daniel.jpg">
+						<content>
+							<header>Daniel</header>
+						</content>
+					</item>
+				</list>
+			</example>
+			<example>
+				<list size="big" direction="horizontal" divided>
+					<item image="../images/avatar/small/helen.jpg">
+						<content>
+							<header>Helen</header>
+						</content>
+					</item>
+					<item image="../images/avatar/small/christian.jpg">
+						<content>
+							<header>Christian</header>
+						</content>
+					</item>
+					<item image="../images/avatar/small/daniel.jpg">
+						<content>
+							<header>Daniel</header>
+						</content>
+					</item>
+				</list>
+			</example>
+			<example>
+				<list size="huge" direction="horizontal" divided>
+					<item image="../images/avatar/small/helen.jpg">
+						<content>
+							<header>Helen</header>
+						</content>
+					</item>
+					<item image="../images/avatar/small/christian.jpg">
+						<content>
+							<header>Christian</header>
+						</content>
+					</item>
+					<item image="../images/avatar/small/daniel.jpg">
+						<content>
+							<header>Daniel</header>
+						</content>
+					</item>
+				</list>
+			</example>
+			<example>
+				<list size="massive" direction="horizontal" divided>
+					<item image="../images/avatar/small/helen.jpg">
+						<content>
+							<header>Helen</header>
+						</content>
+					</item>
+					<item image="../images/avatar/small/christian.jpg">
+						<content>
+							<header>Christian</header>
+						</content>
+					</item>
+					<item image="../images/avatar/small/daniel.jpg">
+						<content>
+							<header>Daniel</header>
+						</content>
+					</item>
+				</list>
+			</example>
+		</>
+	</>
+
+	<section label="Content Variations">
+		<section label="Vertically Aligned" sticky collapsible dividing>
+			<example description="An element inside a list can be vertically aligned:  `vertical-align` on a `<ui-content>` (or on the whole list).">
+				<list direction="horizontal">
+					<item image="../images/avatar/small/helen.jpg">
+						<content vertical-align="top">Top Aligned</content>
+					</item>
+					<item image="../images/avatar/small/christian.jpg">
+						<content vertical-align="middle">Middle</content>
+					</item>
+					<item image="../images/avatar/small/daniel.jpg">
+						<content vertical-align="bottom">Bottom</content>
+					</item>
+				</list>
+			</example>
+		</>
+
+		<section label="Left and Right" sticky collapsible dividing>
+			<example description="A list has no `floated` any more:  a `<ui-stack>` puts a button at the right of an item, or one list at the left and one at the right.">
+				<html>
+					<ui-list divided vertical-align="middle">
+						<ui-item>
+							<ui-stack direction="horizontal" justify="between">
+								<ui-stack direction="horizontal" spacing="sm">
+									<ui-image avatar src="/components/ui/images/avatar2/small/lena.png" alt=""></ui-image>
+									<span>Lena</span>
+								</ui-stack>
+								<ui-button>Add</ui-button>
+							</ui-stack>
+						</ui-item>
+						<ui-item>
+							<ui-stack direction="horizontal" justify="between">
+								<ui-stack direction="horizontal" spacing="sm">
+									<ui-image avatar src="/components/ui/images/avatar2/small/lindsay.png" alt=""></ui-image>
+									<span>Lindsay</span>
+								</ui-stack>
+								<ui-button>Add</ui-button>
+							</ui-stack>
+						</ui-item>
+						<ui-item>
+							<ui-stack direction="horizontal" justify="between">
+								<ui-stack direction="horizontal" spacing="sm">
+									<ui-image avatar src="/components/ui/images/avatar2/small/mark.png" alt=""></ui-image>
+									<span>Mark</span>
+								</ui-stack>
+								<ui-button>Add</ui-button>
+							</ui-stack>
+						</ui-item>
+						<ui-item>
+							<ui-stack direction="horizontal" justify="between">
+								<ui-stack direction="horizontal" spacing="sm">
+									<ui-image avatar src="/components/ui/images/avatar2/small/molly.png" alt=""></ui-image>
+									<span>Molly</span>
+								</ui-stack>
+								<ui-button>Add</ui-button>
+							</ui-stack>
+						</ui-item>
+					</ui-list>
+				</html>
+			</example>
+			<example>
+				<stack direction="horizontal" justify="between" wrap>
+					<list direction="horizontal">
+						<item link="#list">About Us</item>
+						<item link="#list">Jobs</item>
+					</list>
+					<list direction="horizontal">
+						<item disabled>© GitHub, Inc.</item>
+						<item link="#list">Terms</item>
+						<item link="#list">Privacy</item>
+						<item link="#list">Contact</item>
+					</list>
+				</stack>
+			</example>
+		</>
+	</>
+</spell-notebook>

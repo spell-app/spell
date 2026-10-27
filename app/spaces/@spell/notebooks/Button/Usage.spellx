@@ -1,23 +1,23 @@
-<spell-notebook "button usage" original="/components/ui/ui-button.html">
+<spell-notebook "button usage">
 	<header level="1">
 		Button
-		<header>A button indicates a possible user action.</header>
-	</header>
+		<header>A button indicates a possible user action.</>
+	</>
 	<button-tab-bar showing="usage"/>
 	<section>
 		<html>
 			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-				<ui-item link="#using-it">Using it</ui-item>
-				<ui-item link="#events">Events</ui-item>
-				<ui-item link="#state-texts">State texts</ui-item>
-				<ui-item link="#invoker-commands">Invoker commands</ui-item>
-				<ui-item link="#forms">Forms</ui-item>
-				<ui-item link="#keyboard">Keyboard</ui-item>
-				<ui-item link="#accessibility">Accessibility</ui-item>
-				<ui-item link="#framework-usage">Framework usage</ui-item>
-			</ui-menu>
-		</html>
-	</section>
+				<ui-item link="#using-it">Using it</>
+				<ui-item link="#events">Events</>
+				<ui-item link="#state-texts">State texts</>
+				<ui-item link="#invoker-commands">Invoker commands</>
+				<ui-item link="#forms">Forms</>
+				<ui-item link="#keyboard">Keyboard</>
+				<ui-item link="#accessibility">Accessibility</>
+				<ui-item link="#framework-usage">Framework usage</>
+			</>
+		</>
+	</>
 
 	<!-- USAGE:  how to use it (attributes in practice, events, framework snippets), keyboard, accessibility. -->
 	<section label="Using it">
@@ -37,23 +37,23 @@
 			- `link` draws an `<a>` in place of the button, so it navigates like a link.
 			- Wrap buttons in `<ui-buttons>` to join them.
 			  The group's words (`size`, `color` ...) reach every button in it.
-		</markdown>
-	</section>
+		</>
+	</>
 
 	<section label="Events">
 		<markdown>
 			A plain click is the native `click`.
 			A toggle button also sends `ui-selected` as it turns on, and `ui-deselected` as it turns off.
 			Both carry the new state in `event.detail.active`.
-		</markdown>
+		</>
 		<markdown>
 			```js
 			const toggle = document.querySelector("ui-button[toggle]")
 			toggle.addEventListener("ui-selected", () => console.log("on"))
 			toggle.addEventListener("ui-deselected", () => console.log("off"))
 			```
-		</markdown>
-	</section>
+		</>
+	</>
 
 	<section label="State texts">
 		<markdown>
@@ -68,15 +68,15 @@
 			The label SAYS the state, so a toggle button with a state text leaves `aria-pressed` off.
 			A toggle button whose name changes would announce the state twice (WAI-ARIA APG).
 			Listen for `ui-selected` and `ui-deselected` as usual.
-		</markdown>
+		</>
 		<markdown>
 			```js
 			const follow = document.querySelector("ui-button[active-text]")
 			follow.addEventListener("ui-selected", () => startFollowing())
 			follow.addEventListener("ui-deselected", () => stopFollowing())
 			```
-		</markdown>
-	</section>
+		</>
+	</>
 
 	<section label="Invoker commands">
 		<markdown>
@@ -106,7 +106,7 @@
 			so the element hands it the target itself (`commandForElement`).
 			In a browser without invoker commands (`UI.browser.supports.invokers`),
 			a click runs the built-in commands itself.
-		</markdown>
+		</>
 
 		<section label="Popup and modal" sticky collapsible dividing>
 			<example description="A button opens a popup and a modal with `commandfor` and `command`, no script.">
@@ -115,8 +115,8 @@
 				<button commandfor="button-invoker-modal" command="--show" color="primary">Open modal</button>
 				<modal id="button-invoker-modal" heading="Invoked" content="Opened by a ui-button." closable/>
 			</example>
-		</section>
-	</section>
+		</>
+	</>
 
 	<section label="Forms">
 		<markdown>
@@ -131,7 +131,7 @@
 			  So Enter in a `<ui-input>` submits through the form's submit button.
 			- A disabled `<fieldset>` disables the buttons inside it.
 			- To submit, the buttons need a real `<form>` in the light DOM:  inside a `<ui-form>` too.
-		</markdown>
+		</>
 		<markdown>
 			```html
 			<ui-form>
@@ -142,8 +142,8 @@
 			  </form>
 			</ui-form>
 			```
-		</markdown>
-	</section>
+		</>
+	</>
 
 	<section label="Keyboard">
 		<markdown>
@@ -155,8 +155,8 @@
 			- **Enter** or **Space** clicks a button; **Enter** follows a `link`.
 			- A toggle button flips `selected` on **Enter** or **Space**, as a click does.
 			- A `disabled` button is skipped by **Tab**.
-		</markdown>
-	</section>
+		</>
+	</>
 
 	<section label="Accessibility">
 		<markdown>
@@ -171,28 +171,28 @@
 			- `<ui-buttons>` has the group role:  give it an `aria-label` when the group needs a name.
 			- If the element fails to render, its native fallback keeps a plain `<button>` styled by the same
 			  class words, so the button still renders, focuses and submits its form.
-		</markdown>
-	</section>
+		</>
+	</>
 
 	<section label="Framework usage">
 		<markdown>
 			Define the elements first (load the bundle, or `<ui-root>`), then use the tag like any other. Events
 			are `ui-*`, so use your framework's custom-event syntax.
-		</markdown>
-		<header level="4" id="framework-react">React 19</header>
+		</>
+		<header level="4" id="framework-react">React 19</>
 		<markdown>
 			```jsx
 			<ui-button toggle onui-selected={() => setOn(true)} onui-deselected={() => setOn(false)} color="primary">Vote</ui-button>
 			```
-		</markdown>
-		<header level="4" id="framework-vue">Vue 3.5</header>
+		</>
+		<header level="4" id="framework-vue">Vue 3.5</>
 		<markdown>
 			```html
 			<!-- compilerOptions.isCustomElement = (tag) => tag.startsWith("ui-") -->
 			<ui-button toggle @ui-selected="on = true" @ui-deselected="on = false" color="primary">Vote</ui-button>
 			```
-		</markdown>
-		<header level="4" id="framework-solid">Solid 2</header>
+		</>
+		<header level="4" id="framework-solid">Solid 2</>
 		<markdown>
 			```jsx
 			// events and rich data are plain props:  `on-<event>={...}`, `options={...}`
@@ -200,6 +200,6 @@
 			  Vote
 			</ui-button>
 			```
-		</markdown>
-	</section>
+		</>
+	</>
 </spell-notebook>

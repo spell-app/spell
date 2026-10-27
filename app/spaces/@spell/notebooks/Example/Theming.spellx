@@ -1,0 +1,47 @@
+<spell-notebook "example theming">
+	<header level="1">
+		Example
+		<header>An example shows its own markup live, under a heading and description, with the same markup as code a button shows and hides.</>
+	</>
+	<example-tab-bar showing="theming"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#tokens">Tokens</>
+				<ui-item link="#themes">Themes</>
+			</>
+		</>
+	</>
+
+	<!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
+	<section label="Tokens">
+		<markdown>
+			Set a public `--ui-*` token on the element, any ancestor or `:root`; it inherits into the shadow
+			root. Edit a value below to try it.
+		</>
+		<html>
+			<ui-docs-tokens family="ui-example" playground>
+				<div class="ui-stack">
+					<ui-example heading="Button" description="A standard button.">
+						<ui-button>Follow</>
+					</>
+					<ui-example heading="Emphasis" description="A button can be formatted to show different levels of emphasis." code>
+						<ui-button color="primary">Save</>
+						<ui-button>Discard</>
+					</>
+					<ui-example heading="Rich description">
+						<p slot="description">A description with a <a href="#rich">link</>, from the <code>description</> slot.</>
+						<ui-button color="secondary">Okay</>
+					</>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="Themes">
+		<markdown>
+			The theme menu above picks the theme for every page of the site:  Spell, Glass, Fruity or Merlot,
+			each restyling this component through its tokens.
+		</>
+	</>
+</spell-notebook>

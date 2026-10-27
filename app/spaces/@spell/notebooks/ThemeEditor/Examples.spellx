@@ -1,0 +1,26 @@
+<spell-notebook "theme-editor examples">
+	<header level="1">
+		Theme Editor
+		<header>A theme editor makes a theme from an existing one:  its colours, fonts and shapes, live on real elements, then copied as a stylesheet or kept in the browser.</>
+	</>
+	<theme-editor-tab-bar showing="examples"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#types">Types</>
+			</>
+		</>
+	</>
+
+	<!--
+		EXAMPLES:  ours, no Fomantic page.
+		- ONE editor on the page:  it applies the theme it edits to the whole page while it's here.
+	-->
+	<section label="Types">
+		<section label="Theme editor" sticky collapsible dividing>
+			<example description="It starts from the page's theme (Fruity where there's none), or the theme you kept with Use this theme.  Pick a colour, a font or a corner:  this whole page follows, and the sample app shows it in light and dark.  Copy CSS copies the stylesheet below it.">
+				<theme-editor/>
+			</example>
+		</>
+	</>
+</spell-notebook>

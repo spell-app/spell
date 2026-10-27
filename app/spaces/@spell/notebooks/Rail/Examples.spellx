@@ -1,0 +1,201 @@
+<spell-notebook "rail examples">
+	<header level="1">
+		Rail
+		<header>A rail is used to show accompanying content outside the boundaries of the main view of a
+              site.</>
+	</>
+	<rail-tab-bar showing="examples"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#types">Types</>
+				<ui-item link="#variations">Variations</>
+			</>
+		</>
+	</>
+
+	<!--
+		EXAMPLES:  Fomantic's rail page, section by section, in its order (Types, Variations).
+		- A rail is 300px wide and sits OUTSIDE its container:  two of them don't fit beside the docs column, so each
+		  outside rail gets its own example, its segment in a half-width `<ui-column>` that leaves the rail its room
+		  (GAP below).
+	-->
+	<message state="warning" size="small">The following examples use no breakpoints, so a rail may run outside your browser's viewport on smaller screens.</>
+
+	<section label="Types">
+		<!-- GAP I33:  a rail is a fixed 300px with no attribute to narrow it, so Fomantic's two-rail examples don't fit the docs column:  one rail per example. -->
+		<section label="Rail" sticky collapsible dividing>
+			<example description="A rail can be presented on the left or right side of a container.">
+				<grid>
+					<column width="8"/>
+					<column width="8">
+						<segment>
+							<rail position="left">
+								<segment>Left Rail Content</segment>
+							</rail>
+							<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
+						</segment>
+					</column>
+				</grid>
+			</example>
+			<example>
+				<grid>
+					<column width="8">
+						<segment>
+							<rail position="right">
+								<segment>Right Rail Content</segment>
+							</rail>
+							<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
+						</segment>
+					</column>
+				</grid>
+			</example>
+		</>
+
+		<section label="Internal" sticky collapsible dividing>
+			<example description="A rail can attach itself to the inside of a container.">
+				<segment padding="lg">
+					<rail position="left" internal>
+						<segment>Left Rail Content</segment>
+					</rail>
+					<rail position="right" internal>
+						<segment>Right Rail Content</segment>
+					</rail>
+				</segment>
+			</example>
+		</>
+
+		<section label="Dividing" sticky collapsible dividing>
+			<example description="A rail can create a division between itself and a container.">
+				<grid>
+					<column width="8"/>
+					<column width="8">
+						<segment>
+							<rail position="left" dividing>
+								<segment>Left Rail Content</segment>
+							</rail>
+							<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
+						</segment>
+					</column>
+				</grid>
+			</example>
+			<example>
+				<grid>
+					<column width="8">
+						<segment>
+							<rail position="right" dividing>
+								<segment>Right Rail Content</segment>
+							</rail>
+							<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
+						</segment>
+					</column>
+				</grid>
+			</example>
+		</>
+	</>
+
+	<section label="Variations">
+		<section label="Attached" sticky collapsible dividing>
+			<example description="A rail can appear attached to the main viewport.">
+				<grid>
+					<column width="8"/>
+					<column width="8">
+						<segment>
+							<rail position="left" attach="both">
+								<segment>Left Rail Content</segment>
+							</rail>
+							<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
+						</segment>
+					</column>
+				</grid>
+			</example>
+			<example>
+				<grid>
+					<column width="8">
+						<segment>
+							<rail position="right" attach="both">
+								<segment>Right Rail Content</segment>
+							</rail>
+							<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
+						</segment>
+					</column>
+				</grid>
+			</example>
+			<example>
+				<segment padding="lg">
+					<rail position="left" internal attach="both">
+						<segment>Left Rail Content</segment>
+					</rail>
+					<rail position="right" internal attach="both">
+						<segment>Right Rail Content</segment>
+					</rail>
+				</segment>
+			</example>
+		</>
+
+		<section label="Close" sticky collapsible dividing>
+			<example description="A rail can appear closer to the main viewport:  `close`, or `close=\"very\"`.">
+				<grid>
+					<column width="8"/>
+					<column width="8">
+						<segment>
+							<rail position="left" close>
+								<segment>Left Rail Content</segment>
+							</rail>
+							<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
+						</segment>
+					</column>
+				</grid>
+			</example>
+			<example>
+				<grid>
+					<column width="8">
+						<segment>
+							<rail position="right" close="very">
+								<segment>Right Rail Content</segment>
+							</rail>
+							<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
+						</segment>
+					</column>
+				</grid>
+			</example>
+		</>
+
+		<section label="Size" sticky collapsible dividing>
+			<example description="A rail can have different sizes:  `size` scales its text.">
+				<grid>
+					<column width="8">
+						<segment>
+							<rail position="right" size="mini">Mini</rail>
+							<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+						</segment>
+						<segment>
+							<rail position="right" size="tiny">Tiny</rail>
+							<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+						</segment>
+						<segment>
+							<rail position="right" size="small">Small</rail>
+							<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+						</segment>
+						<segment>
+							<rail position="right" size="large">Large</rail>
+							<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+						</segment>
+						<segment>
+							<rail position="right" size="big">Big</rail>
+							<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+						</segment>
+						<segment>
+							<rail position="right" size="huge">Huge</rail>
+							<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+						</segment>
+						<segment>
+							<rail position="right" size="massive">Massive</rail>
+							<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+						</segment>
+					</column>
+				</grid>
+			</example>
+		</>
+	</>
+</spell-notebook>

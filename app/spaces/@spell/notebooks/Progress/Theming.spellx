@@ -1,0 +1,61 @@
+<spell-notebook "progress theming">
+	<header level="1">
+		Progress
+		<header>A progress bar shows the progression of a task.</>
+	</>
+	<progress-tab-bar showing="theming"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#tokens">Tokens</>
+				<ui-item link="#themes">Themes</>
+			</>
+		</>
+	</>
+
+	<!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
+	<section label="Tokens">
+		<markdown>
+			Theme with the public `--ui-progress-*` tokens: set one on the element, on any ancestor (`:root` for every
+			progress bar), or on the track through `::part(progress)`. They inherit into the shadow root, where the sheet
+			reads each through a private alias, so nothing inside blocks them. Style each bar with `::part(bar)` and its
+			text with `::part(bar-text)`.
+		</>
+		<markdown>
+			```css
+			/* every progress bar on the page */
+			:root {
+			  --ui-progress-radius: 999px;
+			}
+			/* one kind */
+			ui-progress.slim {
+			  --ui-progress-bar-height: 0.75em;
+			}
+			/* each bar */
+			ui-progress.striped::part(bar) {
+			  background-image: repeating-linear-gradient(45deg, transparent 0 0.5em, rgb(255 255 255 / 0.2) 0.5em 1em);
+			}
+			```
+		</>
+		<message state="info" size="small">
+			<markdown>
+				A `size` replaces the bar height, `inverted` the label colour, and `indicating` / `state` repaint the bar
+				whatever `color` says. Never set the `--_ui-progress-*` / `--_progress-*` names: they're the sheet's private
+				plumbing.
+			</>
+		</>
+		<markdown>Edit a value below to try it.</>
+		<html>
+			<ui-docs-tokens family="ui-progress" playground>
+				<ui-progress value="74" bar-text="percent" aria-label="Standard"></>
+			</>
+		</>
+	</>
+
+	<section label="Themes">
+		<markdown>
+			The theme menu above picks the theme for every page of the site:  Spell, Glass, Fruity or Merlot,
+			each restyling this component through its tokens.
+		</>
+	</>
+</spell-notebook>

@@ -1,0 +1,198 @@
+<spell-notebook "modal usage">
+	<header level="1">
+		Modal
+		<header>A modal displays content that temporarily blocks interactions with the main view of a
+              site.</>
+	</>
+	<modal-tab-bar showing="usage"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#using-it">Using it</>
+				<ui-item link="#opening-it">Opening it</>
+				<ui-item link="#dismissal">Dismissal</>
+				<ui-item link="#events">Events</>
+				<ui-item link="#dialog-helpers">Dialog helpers</>
+				<ui-item link="#keyboard">Keyboard</>
+				<ui-item link="#accessibility">Accessibility</>
+				<ui-item link="#framework-usage">Framework usage</>
+			</>
+		</>
+	</>
+
+	<!-- USAGE:  opening, dismissal, actions, events, the dialog helpers, keyboard, accessibility, frameworks. -->
+	<section label="Using it">
+		<markdown>
+			Write a `<ui-modal>` anywhere in the page with its parts inside: `<ui-header>`, `<ui-content>` (`image`,
+			`scrolling`) and `<ui-actions>` with buttons, or the `header` / `content` shorthands. There is no `.modal()`
+			call to make.
+
+			The modal is a real `<dialog>` in the element's shadow root, opened with `showModal()`: the browser moves
+			focus into it, keeps **Tab** inside, makes the rest of the page inert and puts it in the top layer. Its
+			`::backdrop` is the dimmer. The element adds page scroll lock, closes only the topmost overlay on **Escape**,
+			and returns focus to whatever opened it.
+		</>
+	</>
+
+	<section label="Opening it">
+		<markdown>
+			- With no script, from a native `<button commandfor="id" command="--show">` or a `<ui-button>` (an invoker
+			  command; Fomantic's `attach events`). `--close` closes it and `--toggle` flips it.
+			- From code, set `open`: writing it is your own decision and fires no `ui-opening` / `ui-closing`.
+		</>
+		<markdown>
+			```html
+			<ui-button commandfor="welcome" command="--show">Show</ui-button>
+			<ui-modal id="welcome" heading="Welcome" content="Opened by the button, no script." closable></ui-modal>
+			```
+		</>
+	</>
+
+	<section label="Dismissal">
+		<markdown>
+			`closedby` says what dismisses it, like `<dialog closedby>`:
+
+			- `any` (the default): **Escape** or a click on the dimmer
+			- `closerequest`: **Escape** only
+			- `none`: only its own buttons (Fomantic's `closable: false`)
+
+			`closable` adds the close ICON inside the box (Fomantic's `closeIcon`), and `closable="false"` also brings
+			back Fomantic's `closable: false` -- no icon, and Escape and the dimmer do nothing -- unless `closedby` is set,
+			which wins for dismissal.
+		</>
+
+		<section label="Closed only by its buttons" sticky collapsible dividing>
+			<example description="`closedby=\"none\"`:  Escape and the dimmer do nothing.  The close button is an invoker, `command=\"--close\"`.">
+				<button commandfor="modal-usage-none" command="--show">Show</button>
+				<html>
+					<ui-modal id="modal-usage-none" closedby="none" size="small" heading="Unsaved changes">
+						<ui-content>
+							<p>Escape and clicks on the dimmer do nothing here: only the button closes it.</p>
+						</ui-content>
+						<ui-actions>
+							<ui-button commandfor="modal-usage-none" command="--close">Close</ui-button>
+						</ui-actions>
+					</ui-modal>
+				</html>
+			</example>
+		</>
+	</>
+
+	<section label="Events">
+		<markdown>
+			Buttons anywhere inside act by Fomantic's classes: `approve` / `ok` / `positive` (or `<ui-button color="positive">`)
+			approve, `deny` / `cancel` / `negative` (or `<ui-button color="negative">`) deny.
+
+			`visible` is the controlled state, as on every element (`hidden` is its other name): writing either shows
+			or hides the modal and fires nothing. A modal starts hidden. The events, in order:
+
+			- `ui-opening` (cancelable) -- a user asked to open it, through an invoker command; `detail` is
+			  `{ visible: true, originalEvent? }`.
+			- `ui-approving` / `ui-denying` (cancelable) -- an approve / deny button was activated; `detail` is
+			  `{ action, originalEvent? }`. `preventDefault()` keeps the modal shown, like Fomantic's `onApprove`
+			  returning `false`.
+			- `ui-closing` (cancelable) -- about to close; `detail` is `{ visible: false, reason, originalEvent? }`, and
+			  `reason` is `escape`, `outside` (the dimmer), `close` (the close icon or `--close`), `approve`, `deny` or
+			  `close-all`.
+			- `ui-opened` / `ui-closed` -- shown or hidden, once the transition has finished (Fomantic's `onVisible` /
+			  `onHidden`).
+		</>
+		<markdown>
+			```js
+			const modal = document.querySelector("#modal-types-standard")
+			modal.addEventListener("ui-approving", (event) => {
+			  if (!form.checkValidity()) event.preventDefault() // stay shown
+			})
+			modal.addEventListener("ui-closing", (event) => console.log(event.detail.reason))
+			modal.addEventListener("ui-closed", () => console.log("gone"))
+			modal.visible = true // show from code:  no ui-opening
+			```
+		</>
+		<html>
+			<ui-message size="small" class="site-not-ported">Not ported: Fomantic's behaviors (show, hide, refresh, attach events ...), and its <code>allowMultiple: false</>. Instead, write <code>visible</>, use invoker commands, and close the first modal yourself when a second one should replace it.</>
+		</>
+	</>
+
+	<section label="Dialog helpers">
+		<markdown>
+			For a quick question, `UI.modals.confirm()`, `alert()` and `prompt()` build a small modal for you, open it and
+			resolve once it has hidden:
+
+			- `confirm()` resolves with `true` / `false`
+			- `alert()` with nothing
+			- `prompt()` with the text, or `undefined` on Cancel
+
+			Each takes `{ title, message, okText, cancelText }` (and `value` for `prompt()`); the buttons default to the
+			translated `ok` / `cancel` texts. **Escape** answers "cancel"; a click on the dimmer does nothing, so a stray
+			click can't answer.
+		</>
+		<markdown>
+			```js
+			import { UI } from "spell-ui/core"
+			import "spell-ui/ui-modal" // registers the helpers
+
+			await UI.load()
+			const ok = await UI.modals.confirm({ title: "Delete draft?", message: "The draft will be gone for good." })
+			await UI.modals.alert({ title: "Saved", message: "Your changes are safe." })
+			const name = await UI.modals.prompt({ title: "Rename", message: "New name", value: "Untitled" })
+			```
+		</>
+	</>
+
+	<section label="Keyboard">
+		<markdown>
+			- **Tab** / **Shift+Tab** move between the controls inside the modal, never out.
+			- **Enter** / **Space** activate the focused button (approve, deny, close).
+			- **Escape** closes it (`closedby` `any` or `closerequest`); with several open, only the topmost.
+		</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			- A real modal `<dialog>`: focus moves inside and **Tab** stays there, the rest of the page is inert, and focus
+			  returns to the opener when it closes.
+			- Named by the host's `aria-label`, else the `header` shorthand, else a slotted `<ui-header>`.
+			- The close icon is a real button named "Close" (translated), placed last, so the first focus lands in the
+			  content (a confirm's Cancel), not on it. Put `autofocus` on the control that should take focus first.
+			- **Escape** closes it unless `closedby="none"`; with `closedby="none"`, make sure a button inside closes it.
+			- Open it from a real button (`commandfor`), so keyboard and screen reader users can reach it the same way.
+			- If the element fails to render, there's no dialog: it shows its children through a bare `<slot>`, in
+			  the page where they're written rather than over it, so nothing traps focus, dims the page or closes
+			  on Escape. `open`, invoker commands, `ui-approving` / `ui-denying`, the `ui-opening` / `ui-closing` vetoes,
+			  `ui-opened`, `closedby`, scroll lock and the close button go.
+		</>
+	</>
+
+	<section label="Framework usage">
+		<markdown>Bind `open` to your state and listen for `ui-closing` (and `ui-approving` / `ui-denying`) to follow the user.</>
+		<header level="4" id="framework-react">React 19</>
+		<markdown>
+			```jsx
+			<ui-modal visible={open} heading="Delete?" onui-close={() => setOpen(false)} onui-approve={remove}>
+			  ...
+			</ui-modal>
+			```
+		</>
+		<header level="4" id="framework-vue">Vue 3.5</>
+		<markdown>
+			```html
+			<!-- compilerOptions.isCustomElement = (tag) => tag.startsWith("ui-") -->
+			<ui-modal :visible="open" heading="Delete?" @ui-closing="open = false" @ui-approving="remove">...</ui-modal>
+			```
+		</>
+		<header level="4" id="framework-solid">Solid 2</>
+		<markdown>
+			```jsx
+			// events and rich data are plain props:  `on-<event>={...}`, `options={...}`
+			<ui-modal
+			  visible={open()}
+			  heading="Delete?"
+			  on-ui-closing={() => setOpen(false)}
+			  on-ui-approving={remove}
+			>
+			  ...
+			</ui-modal>
+			```
+		</>
+	</>
+</spell-notebook>

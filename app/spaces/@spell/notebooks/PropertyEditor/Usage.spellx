@@ -1,0 +1,68 @@
+<spell-notebook "property-editor usage">
+	<header level="1">
+		Property Editor
+		<header>A property editor draws a form from a schema:  one field per property, in groups that open and close, for one thing or many.</>
+	</>
+	<property-editor-tab-bar showing="usage"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#using-it">Using it</>
+				<ui-item link="#controls-choices-and-rules">Controls, choices and rules</>
+				<ui-item link="#accessibility">Accessibility</>
+			</>
+		</>
+	</>
+
+	<!-- USAGE:  how to use it, the registry, accessibility. -->
+	<section label="Using it">
+		<markdown>
+			A `<ui-property-editor>` is a [`<ui-form>`](/components/ui/ui-form.html) drawn from a SCHEMA:
+			what the thing's properties are, each with its type, label, tip, choices, limits and rules.
+
+			- `schema`, one of:
+			  - a schema's name, one the page added (`UI.propertyControls.addSchema()`)
+			  - a tag, `ui-button`:  its vocabulary
+			  - as a property:  a schema, or a component's vocabulary
+			- `value`:  the thing it edits, or a list of things.
+			- Empty, it draws every property, in the schema's order.
+			  Lay it out yourself with `<ui-property-group>`s (a [`<ui-section>`](/components/ui/ui-section.html) each)
+			  and `<ui-property name>`s (a [`<ui-field>`](/components/ui/ui-form.html) each).
+			- It PASSES THROUGH the attributes of what it's built on:
+			  - the editor:  the form's (`apply`, `validate`, `rules`, `debug` ...),
+			    and a section's around its properties (`label`, `collapsible`, `sticky` ...)
+			  - a group:  a section's
+			  - a property:  a field's (`hint`, `apply`, `rules` ...)
+			- `readonly` on the editor or a group reaches every property in it.
+			- `ui-changed` comes from the editor (`{ name, value, things }`), and from the property written.
+		</>
+	</>
+
+	<section label="Controls, choices and rules">
+		<markdown>
+			`UI.propertyControls` is the page's registry of what properties are drawn and read with:
+
+			- a control kind for `as`, and the types it's the default for
+			- a choice source for `options` (or a schema's `choicesFrom`), maybe async
+			- an "on change" rule for a schema's `onChange`, run after its property is written
+			- a schema, by name
+		</>
+		<markdown>
+			```js
+			UI.propertyControls.add("date", { tag: "ui-calendar", types: ["date"] })
+			UI.propertyControls.addChoices("fonts", async () => (await fetch("/fonts.json")).json())
+			UI.propertyControls.addRule("darkSetsContrast", ({ things, value }) => {
+			  for (const theme of things) theme.contrast = value ? "high" : "normal"
+			})
+			UI.propertyControls.addSchema("Theme", themeSchema)
+			```
+		</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			- Each property names its control after its label, and its errors are an alert.
+			- Each group is a real heading, with an open / close button when it can close.
+		</>
+	</>
+</spell-notebook>

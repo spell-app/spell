@@ -1,0 +1,300 @@
+<spell-notebook "toast examples">
+	<header level="1">
+		Toast
+		<header>A toast allows users to receive a short, non-blocking notification.</>
+	</>
+	<toast-tab-bar showing="examples"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#types">Types</>
+				<ui-item link="#variations">Variations</>
+				<ui-item link="#actions">Actions</>
+				<ui-item link="#examples">Examples</>
+				<ui-item link="#create-from-dom">Create from DOM</>
+				<ui-item link="#interaction">Interaction</>
+			</>
+		</>
+	</>
+
+	<!--
+		EXAMPLES:  Fomantic's page, section by section, in its order (Types, Content, States, Variations,
+		Groups ...).  Rules, the class-grammar mappings, gaps:  packages/docs/content/epics/spell-ui-pages/PAGES.md.
+		- A section:  `<ui-header level="2" dividing id="types">Types</ui-header>`, then its examples.
+		- An example:  `<ui-example heading="..." description="...">` around the live markup;  the markup
+		  IS the code shown.  A richer description:  `<p slot="description">` (+ `<ui-message slot="description">`).
+		- A gap:  an HTML comment `GAP I<n>:  ...` BEFORE the example (a comment inside it shows in its code).
+	-->
+	<message size="small" state="info">
+		<markdown>
+			Two ways to show a toast: `UI.toast({...})` stacks one in a corner of the screen and closes it after
+			its display time (Fomantic's `$.toast()`, same settings), and a `<ui-toast>` written in the page
+			shows where it is. Each example's **Show** button runs the `UI.toast()` call in its code; the
+			header-less examples after it are the same toast as an element.
+		</>
+	</>
+
+	<section label="Types">
+		<section label="Minimal" sticky collapsible dividing>
+			<example description="A minimal toast will just display a message.">
+				<button id="toast-minimal">Show</button>
+			</example>
+			<example description="A `<ui-toast>` in the page shows where it is, and stays until clicked.">
+				<toast message="I am a toast, nice to meet you!"/>
+			</example>
+		</>
+
+		<section label="Titled" sticky collapsible dividing>
+			<example description="You can add a title to your toast.">
+				<button id="toast-titled">Show</button>
+			</example>
+			<example>
+				<toast heading="Better?" message="Hey look, I have a title!"/>
+			</example>
+		</>
+
+		<section label="Progress Bar" sticky collapsible dividing>
+			<example description="You can attach a progress bar to your toast.">
+				<button id="toast-progress">Show</button>
+			</example>
+		</>
+
+		<!-- GAP I117:  no colour of the progress bar's own (Fomantic's `classProgress`). -->
+		<html>
+			<ui-message size="small" class="site-not-ported">Not yet: the progress bar's own colour (Fomantic's <code>classProgress: 'red'</>) -- it takes the toast's colour; restyle it with <code>ui-toast::part(bar)</>.</>
+		</>
+	</>
+
+	<section label="Variations">
+		<section label="Toast Type" sticky collapsible dividing>
+			<example description="A toast can be used to display different types of information:  `type` (`class` in `UI.toast()`).">
+				<button id="toast-success" color="positive">Success</button>
+				<button id="toast-error" color="negative">Error</button>
+				<button id="toast-warning" color="yellow">Warning</button>
+			</example>
+			<example description="A bare `icon` shows the type's own icon;  an `error` toast is announced at once (`role=alert`).">
+				<toast type="info" icon message="An info toast, with its icon."/>
+				<toast type="success" icon message="You're using the good framework!"/>
+				<toast type="warning" icon message="Behind you!"/>
+				<toast type="error" icon message="An error occurred!"/>
+			</example>
+		</>
+
+		<section label="Position" sticky collapsible dividing>
+			<example description="A toast can appear at different positions on the screen.">
+				<button class="toast-position" data-position="top left">Top left</button>
+				<button class="toast-position" data-position="top center">Top center</button>
+				<button class="toast-position" data-position="top right">Top right</button>
+				<button class="toast-position" data-position="centered">Centered</button>
+				<button class="toast-position" data-position="bottom left">Bottom left</button>
+				<button class="toast-position" data-position="bottom center">Bottom center</button>
+				<button class="toast-position" data-position="bottom right">Bottom right</button>
+			</example>
+		</>
+		<message size="small" class="site-not-ported">Not ported: Attached Position (the top attached and bottom attached positions, full-width toasts like a phone's notifications) and Center Aligned content (the center aligned class). Both are left out of the toast sheets on purpose.</>
+
+		<section label="Direction" sticky collapsible dividing>
+			<example description="Toasts can stack horizontally:  `horizontal: true`.">
+				<button id="toast-horizontal">Show</button>
+			</example>
+		</>
+
+		<section label="Duration" sticky collapsible dividing>
+			<example description="You can choose how long a toast should be displayed, in milliseconds:  `displayTime`, or `display-time` on the element. `0` keeps it until it's clicked, and `auto` calculates the time from the number of words (120 a minute, at least a second).">
+				<button id="toast-five">5 seconds</button>
+				<button id="toast-forever">Until clicked</button>
+				<button id="toast-auto">Auto</button>
+			</example>
+		</>
+		<html>
+			<ui-message size="small" class="site-not-ported">Not ported: Use Message Style (<code>className: &#123; toast: 'ui message' &#125;</>) -- a toast is a <code>&lt;ui-toast&gt;</>; slot a message's content into one instead.</>
+		</>
+
+		<section label="Increasing Progress Bar" sticky collapsible dividing>
+			<example description="The progress bar can be raised instead of lowered:  `progressUp` (`progress-up`).">
+				<button id="toast-progress-up">Show</button>
+			</example>
+		</>
+
+		<section label="Color Variants" sticky collapsible dividing>
+			<example description="You can use all of the usual color names.">
+				<button id="toast-colors">Show the next colour</button>
+			</example>
+			<example>
+				<toast color="red" message="I am a colorful toast"/>
+				<toast color="teal" message="I am a colorful toast"/>
+				<toast color="purple" message="I am a colorful toast"/>
+			</example>
+		</>
+
+		<section label="Inverted Colors" sticky collapsible dividing>
+			<example description="Same as above, just add `inverted`:  a plain toast turns dark, a coloured one takes the hue's inverted variant.">
+				<button id="toast-inverted-colors">Show the next colour</button>
+			</example>
+			<example>
+				<toast inverted message="A dark toast."/>
+				<toast inverted color="purple" message="I am an inverted colorful toast"/>
+			</example>
+		</>
+
+		<section label="Not compact" sticky collapsible dividing>
+			<example description="A toast is 350px wide by default;  `compact=\"false\"` sizes it to its content.">
+				<toast compact="false" message="As wide as my text."/>
+			</example>
+		</>
+	</>
+
+	<section label="Actions">
+		<section label="General" sticky collapsible dividing>
+			<example>
+				<html>
+					<p slot="description">Define click actions on your toast with a text and/or icon, optional class and click handler.</p>
+					<ui-message slot="description" size="small">The default click handler closes the toast, so leave it out when the button should only close it;  a handler returning <code>false</code> keeps the toast open. In the page, put <code>&lt;ui-button slot="actions"&gt;</code>s in the toast: any activated one closes it unless its click was <code>preventDefault()</code>ed.</ui-message>
+				</html>
+				<button id="toast-actions">Show</button>
+			</example>
+			<example>
+				<toast color="black" message="Do you really want to star Fomantic-UI?">
+					<button slot="actions" color="green" icon="check">Yes</button>
+					<button slot="actions" color="red" icon="ban" aria-label="No"/>
+					<button slot="actions" color="blue">?</button>
+				</toast>
+			</example>
+		</>
+
+		<section label="Basic" sticky collapsible dividing>
+			<example description="`basic` actions don't lighten the actions' background;  `left` aligns the buttons to the left (`classActions` in `UI.toast()`, `actions` on the element).">
+				<toast color="black" actions="basic left" message="Do you really want to star Fomantic-UI?">
+					<button slot="actions" color="yellow">Yes, really</button>
+				</toast>
+			</example>
+		</>
+
+		<!-- GAP I118:  no `centered` actions (Fomantic's `classActions: 'centered'`);  shown right-aligned. -->
+		<section label="Centered" sticky collapsible dividing>
+			<example description="The action buttons can also be shown centered.">
+				<toast color="black" message="Do you really want to star Fomantic-UI?">
+					<button slot="actions" color="yellow">Yes, really</button>
+				</toast>
+			</example>
+		</>
+
+		<!-- GAP I121:  the attached group sits inset in a light frame, not flush with the toast. -->
+		<section label="Attached" sticky collapsible dividing>
+			<example description="`attached` turns the actions into a button group joined below the toast;  `attached top` joins it above.">
+				<toast color="black" actions="attached top" message="Do you really want to star Fomantic-UI?">
+					<buttons slot="actions" fluid>
+						<button color="green">Yes, really</button>
+						<button color="red">Maybe later</button>
+					</buttons>
+				</toast>
+				<toast color="black" actions="attached" message="Do you really want to star Fomantic-UI?">
+					<buttons slot="actions" fluid>
+						<button color="green">Yes, really</button>
+						<button color="red">Maybe later</button>
+					</buttons>
+				</toast>
+			</example>
+		</>
+
+		<section label="Vertical" sticky collapsible dividing>
+			<example description="`vertical` displays the actions to the right of the toast.">
+				<toast color="black" actions="vertical" message="Do you really want to star Fomantic-UI?">
+					<button slot="actions" color="green">Yes, really</button>
+					<button slot="actions" color="red">Maybe later</button>
+				</toast>
+			</example>
+		</>
+
+		<section label="Vertical attached" sticky collapsible dividing>
+			<example description="Vertical actions can also be a button group:  `vertical attached`, which also supports `left`.">
+				<toast color="black" actions="left vertical attached" message="Do you really want to star Fomantic-UI?">
+					<buttons slot="actions" direction="vertical">
+						<button color="green">Yes, really</button>
+						<button color="red">Maybe later</button>
+					</buttons>
+				</toast>
+			</example>
+		</>
+	</>
+
+	<section label="Examples">
+		<section label="Without icon" sticky collapsible dividing>
+			<example description="A toast shows no icon unless you ask for one (Fomantic's `showIcon: false`):  bare `icon` shows the type's own.">
+				<toast type="warning" message="Hey, where is my icon?"/>
+			</example>
+		</>
+
+		<section label="Individual icon" sticky collapsible dividing>
+			<example description="Use whatever icon you like:  `icon=\"microphone\"`.">
+				<toast type="info" icon="microphone" message="Listen to me"/>
+			</example>
+		</>
+		<html>
+			<ui-message size="small" class="site-not-ported">Not ported: Image toasts (<code>showImage</>, <code>classImage</>), left out of the toast sheet on purpose. Slot an <code>&lt;ui-image avatar&gt;</> into the content instead.</>
+		</>
+
+		<section label="Close Icon" sticky collapsible dividing>
+			<example description="You can force the user to click a close icon instead of clicking anywhere on the toast to close it:  `closable` (`closeIcon`).">
+				<toast type="info" closable message="Click on the X to close me"/>
+			</example>
+		</>
+		<html>
+			<ui-message size="small" class="site-not-ported">Not ported: the close icon on the left (<code>closeIcon: 'left'</>) -- left out of the toast sheet on purpose.</>
+		</>
+
+		<!-- GAP I119:  no transition settings (Fomantic's `transition: { showMethod, hideMethod ... }`);  every toast scales. -->
+		<html>
+			<ui-message size="small" class="site-not-ported">Not yet: Transitions (<code>transition: &#123; showMethod: 'zoom', hideMethod: 'fade' ... &#125;</>) -- every toast scales in and out, timed by <code>--ui-toast-duration</>.</>
+		</>
+	</>
+
+	<section label="Create from DOM">
+		<section label="Toast" sticky collapsible dividing>
+			<example description="A toast can be made from markup:  a `<ui-toast>` in the page, with rich content in its slot.">
+				<html>
+					<ui-toast heading="DOM toast" icon="info">A Toast can be generated out of existing DOM nodes, with <b>any markup</b> inside.</ui-toast>
+				</html>
+			</example>
+		</>
+
+		<section label="Approve / Deny Callbacks" sticky collapsible dividing>
+			<example description="Just like a modal, a toast ties approve / deny to any positive / approve, negative / deny or ok / cancel button, with the cancelable `ui-approving` and `ui-denying`. Calling `preventDefault()` on one keeps it open.">
+				<toast id="toast-approve-deny" display-time="0" message="Want to close this DOM toast?">
+					<button slot="actions" color="positive">Yes</button>
+					<button slot="actions" color="negative">No</button>
+				</toast>
+			</example>
+		</>
+		<html>
+			<ui-message size="small" class="site-not-ported">Not ported: Template, Message and Card toasts (<code>$('.ui.message').toast()</>) -- a toast is a <code>&lt;ui-toast&gt;</>; slot the content you'd have put in a message or card into one.</>
+		</>
+	</>
+
+	<section label="Interaction">
+		<section label="Prevent pausing" sticky collapsible dividing>
+			<example description="Hovering over a toast pauses its countdown;  `pauseOnHover: false` (`pause-on-hover=\"false\"`) keeps it running.  Focus inside always pauses it.">
+				<button id="toast-no-pause">Show</button>
+			</example>
+		</>
+
+		<section label="Prevent closing" sticky collapsible dividing>
+			<example description="A click on a toast closes it;  `closeOnClick: false` (`close-on-click=\"false\"`) doesn't.">
+				<toast close-on-click="false" closable message="Clicking me does nothing;  use the X."/>
+			</example>
+		</>
+
+		<section label="Access created toast" sticky collapsible dividing>
+			<example description="Each `UI.toast()` call returns a handle, and `UI.toasts.dismiss(id)` closes it early. The handle's `closed` resolves when the toast is gone, and its `element` is the toast itself.">
+				<button id="toast-handle">Show, then close it after a second</button>
+			</example>
+		</>
+
+		<section label="Close with a command" sticky collapsible dividing>
+			<example description="A button with `command=\"--close\"` dismisses the toast named by `commandfor`, no script.">
+				<toast id="toast-invoker" type="success" icon closable message="Saved your changes"/>
+				<button commandfor="toast-invoker" command="--close">Dismiss it</button>
+			</example>
+		</>
+	</>
+</spell-notebook>

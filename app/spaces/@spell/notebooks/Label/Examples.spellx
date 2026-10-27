@@ -1,0 +1,687 @@
+<spell-notebook "label examples">
+	<header level="1">
+		Label
+		<header>A label displays content classification.</>
+	</>
+	<label-tab-bar showing="examples"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#types">Types</>
+				<ui-item link="#content">Content</>
+				<ui-item link="#states">States</>
+				<ui-item link="#variations">Variations</>
+				<ui-item link="#groups">Groups</>
+			</>
+		</>
+	</>
+
+	<!--
+		EXAMPLES:  Fomantic's label page, section by section, in its order (Types, Content, States, Variations, Groups),
+		plus our Active state and Prompt content.  `<ui-labels>` (the group) lives on this page too.
+	-->
+	<section label="Types">
+		<section label="Label" sticky collapsible dividing>
+			<example description="A label.">
+				<label icon="mail">23</label>
+			</example>
+
+			<!-- GAP I111:  the page's `kbd` style draws a second box around each label. -->
+			<example description="Highlight keyboard shortcuts:  a label inside a `<kbd>`.">
+				<html>
+					<kbd>
+						<ui-label>CTRL</ui-label>
+					</kbd>
+				</html>
+				+
+				<html>
+					<kbd>
+						<ui-label>Alt</ui-label>
+					</kbd>
+				</html>
+				+
+				<html>
+					<kbd>
+						<ui-label>Del</ui-label>
+					</kbd>
+					<kbd>
+						<ui-label inverted icon="windows" aria-label="Windows"></ui-label>
+					</kbd>
+				</html>
+				+
+				<html>
+					<kbd>
+						<ui-label inverted>L</ui-label>
+					</kbd>
+					<kbd>
+						<ui-label appearance="basic">W</ui-label>
+					</kbd>
+					<kbd>
+						<ui-label appearance="basic">A</ui-label>
+					</kbd>
+					<kbd>
+						<ui-label appearance="basic">S</ui-label>
+					</kbd>
+					<kbd>
+						<ui-label appearance="basic">D</ui-label>
+					</kbd>
+				</html>
+			</example>
+		</>
+
+		<section label="Image" sticky collapsible dividing>
+			<example description="A label can be formatted to emphasize an image:  `image` is the photo's URL.">
+				<label link="#label" image="../images/avatar/small/joe.jpg">Joe</label>
+				<label link="#label" image="../images/avatar/small/elliot.jpg">Elliot</label>
+				<label link="#label" image="../images/avatar/small/stevie.jpg">Stevie</label>
+			</example>
+			<example description="With a `detail`.">
+				<label link="#label" color="blue" image="../images/avatar/small/veronika.jpg" detail="Friend">Veronika</label>
+				<label link="#label" color="teal" image="../images/avatar/small/jenny.jpg" detail="Student">Veronika</label>
+				<label link="#label" color="yellow" image="../images/avatar/small/christian.jpg" detail="Co-worker">Helen</label>
+			</example>
+			<example description="`removable` adds a delete button, which fires `ui-removing`.">
+				<label image="../images/avatar/small/ade.jpg" removable>Adrienne</label>
+				<label image="../images/avatar/small/zoe.jpg" removable>Zoe</label>
+				<label image="../images/avatar/small/nan.jpg" removable>Nan</label>
+			</example>
+		</>
+
+		<section label="Pointing" sticky collapsible dividing>
+			<example description="A label can point to content next to it:  `pointing` (above), `below`, `left` or `right`.">
+				<html>
+					<ui-form>
+						<form>
+							<ui-field>
+								<ui-input placeholder="First name"></ui-input>
+								<ui-label pointing>Please enter a value</ui-label>
+							</ui-field>
+							<ui-divider></ui-divider>
+							<ui-field>
+								<ui-label pointing="below">Please enter a value</ui-label>
+								<ui-input placeholder="Last name"></ui-input>
+							</ui-field>
+							<ui-divider></ui-divider>
+							<ui-field inline>
+								<ui-input placeholder="Username"></ui-input>
+								<ui-label pointing="left">That name is taken!</ui-label>
+							</ui-field>
+							<ui-divider></ui-divider>
+							<ui-field inline>
+								<ui-label pointing="right">Your password must be 6 characters or more</ui-label>
+								<ui-input type="password" aria-label="Password"></ui-input>
+							</ui-field>
+						</form>
+					</ui-form>
+				</html>
+			</example>
+			<example>
+				<html>
+					<ui-form>
+						<form>
+							<ui-field>
+								<ui-input placeholder="First name"></ui-input>
+								<ui-label pointing color="red" appearance="basic">Please enter a value</ui-label>
+							</ui-field>
+							<ui-divider></ui-divider>
+							<ui-field>
+								<ui-label pointing="below" color="red" appearance="basic">Please enter a value</ui-label>
+								<ui-input placeholder="Last name"></ui-input>
+							</ui-field>
+							<ui-divider></ui-divider>
+							<ui-field inline>
+								<ui-input placeholder="Username"></ui-input>
+								<ui-label pointing="left" color="red" appearance="basic">That name is taken!</ui-label>
+							</ui-field>
+							<ui-divider></ui-divider>
+							<ui-field inline>
+								<ui-label pointing="right" color="red" appearance="basic">Your password must be 6 characters or more</ui-label>
+								<ui-input type="password" aria-label="Password"></ui-input>
+							</ui-field>
+						</form>
+					</ui-form>
+				</html>
+			</example>
+		</>
+
+		<section label="Corner" sticky collapsible dividing>
+			<example>
+				<html>
+					<p slot="description">A label can position itself in the corner of an element.</p>
+					<ui-message slot="description" state="warning" size="small">A corner label sits in the corner of its owner, the nearest positioned box around it: a <code>&lt;ui-segment&gt;</code> is one, and clips the label to its rounded corner.</ui-message>
+				</html>
+				<grid columns="2">
+					<column>
+						<segment>
+							<label link="#label" corner="left" icon="heart" aria-label="Like"/>
+							<image fluid src="/components/ui/images/wireframe/image.png" alt=""/>
+						</segment>
+					</column>
+					<column>
+						<segment>
+							<label link="#label" color="red" corner="right" icon="save" aria-label="Save"/>
+							<image fluid src="/components/ui/images/wireframe/image.png" alt=""/>
+						</segment>
+					</column>
+				</grid>
+			</example>
+		</>
+
+		<section label="Tag" sticky collapsible dividing>
+			<example description="A label can appear as a tag.">
+				<label link="#label" tag>New</label>
+				<label link="#label" color="red" tag>Upcoming</label>
+				<label link="#label" color="teal" tag>Featured</label>
+			</example>
+		</>
+
+		<section label="Ribbon" sticky collapsible dividing>
+			<example description="A label can appear as a ribbon attaching itself to an element:  `ribbon`, or `ribbon=\"right\"`.">
+				<html>
+					<ui-grid columns="2">
+						<ui-column>
+							<ui-segment appearance="raised"><ui-label link="#label" color="red" ribbon>Overview</ui-label> <span>Account Details</span> <ui-image src="/components/ui/images/wireframe/paragraph.png" alt=""></ui-image> <ui-label link="#label" color="blue" ribbon>Community</ui-label> User Reviews <ui-image src="/components/ui/images/wireframe/paragraph.png" alt=""></ui-image></ui-segment>
+						</ui-column>
+						<ui-column>
+							<ui-segment>
+								<ui-label link="#label" color="orange" ribbon="right">Specs</ui-label>
+								<ui-image src="/components/ui/images/wireframe/paragraph.png" alt=""></ui-image>
+								<ui-label link="#label" color="teal" ribbon="right">Reviews</ui-label>
+								<ui-image src="/components/ui/images/wireframe/paragraph.png" alt=""></ui-image>
+							</ui-segment>
+						</ui-column>
+					</ui-grid>
+				</html>
+			</example>
+			<example>
+				<grid columns="2">
+					<column>
+						<segment>
+							<label color="black" ribbon icon="hotel">Hotel</label>
+							<image fluid src="/components/ui/images/wireframe/image.png" alt=""/>
+						</segment>
+					</column>
+					<column>
+						<segment>
+							<label color="blue" ribbon="right" icon="utensils">Food</label>
+							<image fluid src="/components/ui/images/wireframe/image.png" alt=""/>
+						</segment>
+					</column>
+				</grid>
+			</example>
+			<example>
+				<grid columns="2">
+					<column>
+						<segment>
+							<label color="black" ribbon icon="hotel" aria-label="Hotel"/>
+							<image fluid src="/components/ui/images/wireframe/image.png" alt=""/>
+						</segment>
+					</column>
+					<column>
+						<segment>
+							<label color="blue" ribbon="right" icon="utensils" aria-label="Food"/>
+							<image fluid src="/components/ui/images/wireframe/image.png" alt=""/>
+						</segment>
+					</column>
+				</grid>
+			</example>
+		</>
+
+		<!-- GAP I75:  no `bottom` / `center` ribbon, so Fomantic's Bottom and Center Ribbon example (2.9.3) is left out. -->
+		<!-- GAP I77:  attached labels overlay the paragraph:  the segment doesn't pad the content after them. -->
+		<section label="Attached" sticky collapsible dividing>
+			<example>
+				<html>
+					<p slot="description">A label can attach to a content segment.</p>
+				</html>
+				<message slot="description" state="warning" size="small">Attached labels try to pad the other content in the owner to make room, but may not get it right in every case; then correct the padding of the other content yourself.</message>
+				<grid columns="3">
+					<column>
+						<segment>
+							<label attach="top">HTML</label>
+							<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
+						</segment>
+					</column>
+					<column>
+						<segment>
+							<label attach="bottom">CSS</label>
+							<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
+						</segment>
+					</column>
+					<column>
+						<segment>
+							<label attach="top right">Code</label>
+							<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
+						</segment>
+					</column>
+					<column>
+						<segment>
+							<label attach="top left">View</label>
+							<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
+						</segment>
+					</column>
+					<column>
+						<segment>
+							<label attach="bottom left">User View</label>
+							<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
+						</segment>
+					</column>
+					<column>
+						<segment>
+							<label attach="bottom right">Admin View</label>
+							<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
+						</segment>
+					</column>
+				</grid>
+			</example>
+		</>
+
+		<section label="Horizontal" sticky collapsible dividing>
+			<example description="A horizontal label is formatted to label content along-side it horizontally.">
+				<list divided selection>
+					<item link="#label"><label color="red" direction="horizontal">Fruit</label>Kumquats</item>
+					<item link="#label"><label color="purple" direction="horizontal">Candy</label>Ice Cream</item>
+					<item link="#label"><label color="red" direction="horizontal">Fruit</label>Orange</item>
+					<item link="#label"><label direction="horizontal">Dog</label>Poodle</item>
+				</list>
+			</example>
+		</>
+
+		<section label="Floating" sticky collapsible dividing>
+			<example>
+				<html>
+					<p slot="description">A label can float above or below another element.</p>
+				</html>
+				<message slot="description" state="warning" size="small">A floating label sits on the corner of its owner, the nearest positioned box around it: a menu item is one.</message>
+				<menu padding="compact">
+					<item link="#label" icon="mail">Messages<label color="red" floating>22</label></item>
+					<item link="#label" icon="users">Friends<label color="blue" floating>22</label></item>
+				</menu>
+				<divider spacer/>
+				<menu padding="compact">
+					<item link="#label" icon="mail">Messages<label color="red" floating>22 Mails</label></item>
+					<item link="#label" icon="users">Friends<label color="blue" floating>22 Friends</label></item>
+				</menu>
+				<divider spacer/>
+				<menu padding="compact">
+					<item link="#label" icon="mail">Messages<label color="red" floating="bottom">22</label></item>
+					<item link="#label" icon="users">Friends<label color="blue" floating="bottom">22</label></item>
+				</menu>
+				<divider spacer/>
+				<menu padding="compact">
+					<item link="#label" icon="mail">Messages<label color="red" floating="bottom">22 Mails</label></item>
+					<item link="#label" icon="users">Friends<label color="blue" floating="bottom">22 Friends</label></item>
+				</menu>
+			</example>
+		</>
+
+		<section label="Floating left" sticky collapsible dividing>
+			<example description="Floating labels can be positioned to the left also.">
+				<menu padding="compact">
+					<item link="#label" icon="mail">Messages<label color="red" floating="left">22</label></item>
+					<item link="#label" icon="users">Friends<label color="blue" floating="left">22</label></item>
+				</menu>
+				<divider spacer/>
+				<menu padding="compact">
+					<item link="#label" icon="mail">Messages<label color="red" floating="left">22 Mails</label></item>
+					<item link="#label" icon="users">Friends<label color="blue" floating="left">22 Friends</label></item>
+				</menu>
+			</example>
+		</>
+
+		<!-- GAP I76:  no `left aligned` / `right aligned` floating label;  shown with plain `floating`. -->
+		<section label="Floating aligned" sticky collapsible dividing>
+			<example description="Floating labels containing large text can be aligned to the left or right.">
+				<menu padding="compact">
+					<item link="#label" icon="mail">Messages from Fomantic-UI-Users<label color="red" floating>22 Mails unread</label></item>
+					<item link="#label" icon="users">Friends of the Fomantic-UI Community<label color="blue" floating>22 Friends online</label></item>
+				</menu>
+			</example>
+		</>
+
+		<section label="Inverted" sticky collapsible dividing>
+			<example description="All variants of label can be inverted.">
+				<segment inverted>
+					<label color="primary" inverted>Primary</label>
+					<label color="secondary" inverted>Secondary</label>
+					<label color="red" inverted>Red</label>
+					<label color="orange" inverted>Orange</label>
+					<label color="yellow" inverted>Yellow</label>
+					<label color="olive" inverted>Olive</label>
+					<label color="green" inverted>Green</label>
+					<label color="teal" inverted>Teal</label>
+					<label color="blue" inverted>Blue</label>
+					<label color="violet" inverted>Violet</label>
+					<label color="purple" inverted>Purple</label>
+					<label color="pink" inverted>Pink</label>
+					<label color="brown" inverted>Brown</label>
+					<label color="grey" inverted>Grey</label>
+					<label color="black" inverted>Black</label>
+					<divider spacer/>
+					<label color="primary" inverted appearance="basic">Primary</label>
+					<label color="secondary" inverted appearance="basic">Secondary</label>
+					<label color="red" inverted appearance="basic">Red</label>
+					<label color="orange" inverted appearance="basic">Orange</label>
+					<label color="yellow" inverted appearance="basic">Yellow</label>
+					<label color="olive" inverted appearance="basic">Olive</label>
+					<label color="green" inverted appearance="basic">Green</label>
+					<label color="teal" inverted appearance="basic">Teal</label>
+					<label color="blue" inverted appearance="basic">Blue</label>
+					<label color="violet" inverted appearance="basic">Violet</label>
+					<label color="purple" inverted appearance="basic">Purple</label>
+					<label color="pink" inverted appearance="basic">Pink</label>
+					<label color="brown" inverted appearance="basic">Brown</label>
+					<label color="grey" inverted appearance="basic">Grey</label>
+					<label color="black" inverted appearance="basic">Black</label>
+					<divider spacer/>
+					<label inverted tag>Tag</label>
+					<label color="primary" inverted tag>Primary</label>
+					<label color="secondary" inverted tag>Secondary</label>
+					<label color="red" inverted tag>Red</label>
+					<label color="orange" inverted tag>Orange</label>
+					<label color="yellow" inverted tag>Yellow</label>
+					<label color="olive" inverted tag>Olive</label>
+					<label color="green" inverted tag>Green</label>
+					<label color="teal" inverted tag>Teal</label>
+					<label color="blue" inverted tag>Blue</label>
+					<label color="violet" inverted tag>Violet</label>
+					<label color="purple" inverted tag>Purple</label>
+					<label color="pink" inverted tag>Pink</label>
+					<label color="brown" inverted tag>Brown</label>
+					<label color="grey" inverted tag>Grey</label>
+					<label color="black" inverted tag>Black</label>
+				</segment>
+			</example>
+		</>
+	</>
+
+	<section label="Content">
+		<section label="Detail" sticky collapsible dividing>
+			<example description="A label can contain a detail:  the `detail` shorthand, or a `<ui-detail>` child.">
+				<label detail="214">Dogs</label>
+			</example>
+		</>
+
+		<section label="Icon" sticky collapsible dividing>
+			<example description="A label can include an icon.">
+				<label icon="mail">Mail</label>
+				<label icon="checkmark">Test Passed</label>
+				<label icon="dog">Dog</label>
+				<label icon="cat">Cat</label>
+			</example>
+
+			<!-- GAP I74:  no icon after the text (Fomantic's `right icon` label, also its right-icon ribbons). -->
+			<example description="Labels can contain individual icons without text.  Give each an `aria-label`.">
+				<label icon="mail" aria-label="Mail"/>
+				<label icon="dog" aria-label="Dog"/>
+				<label icon="cat" aria-label="Cat"/>
+			</example>
+			<example description="A close icon before the text is just an `icon`;  after the text it's `removable`, a real delete button.">
+				<label icon="close">Close</label>
+				<label icon="delete">Delete</label>
+				<label removable>Close</label>
+				<label removable>Delete</label>
+			</example>
+		</>
+
+		<section label="Image" sticky collapsible dividing>
+			<example description="A label can include an image.">
+				<label link="#label"><image avatar spacing="right" src="/components/ui/images/avatar/small/elliot.jpg" alt=""/>Elliot</label>
+				<label link="#label"><image avatar src="/components/ui/images/avatar/small/stevie.jpg" alt=""/>Stevie</label>
+			</example>
+		</>
+
+		<section label="Link" sticky collapsible dividing>
+			<example description="A label can be a link (`link`) or contain an item that links.">
+				<label link="#label" icon="mail">23</label>
+			</example>
+
+			<!-- GAP I78:  the linked detail draws the browser's link blue, not the label's colour. -->
+			<example>
+				<label icon="mail">23<detail link="#label">View Mail</detail></label>
+			</example>
+		</>
+
+		<section label="Prompt" sticky collapsible dividing>
+			<example description="A prompt label points at an invalid field.  Give it `role=\"alert\"` and tie it to the field with `aria-describedby`.">
+				<field>
+					<input type="email" placeholder="E-mail" aria-describedby="label-prompt-email"/>
+					<label id="label-prompt-email" role="alert" pointing prompt appearance="basic">Please enter a valid e-mail</label>
+				</field>
+			</example>
+		</>
+	</>
+
+	<section label="States">
+		<section label="Active" sticky collapsible dividing>
+			<example description="A label can show it is the current selection.">
+				<label link="#label" selected>Active</label>
+				<label link="#label">Inactive</label>
+			</example>
+		</>
+
+		<section label="Disabled" sticky collapsible dividing>
+			<example description="A label can show it is currently unable to be interacted with.">
+				<label link="#label" disabled>Disabled Label</label>
+			</example>
+		</>
+	</>
+
+	<section label="Variations">
+		<section label="Fluid" sticky collapsible dividing>
+			<example description="A label can take the width of its container.">
+				<label fluid>Fits container</label>
+			</example>
+		</>
+
+		<section label="Centered" sticky collapsible dividing>
+			<example description="Text can be shown centered.">
+				<label fluid align="center">Fits container</label>
+			</example>
+		</>
+
+		<section label="Circular" sticky collapsible dividing>
+			<example description="A label can be circular.">
+				<label color="red" link="#label" appearance="circular">2</label>
+				<label color="orange" link="#label" appearance="circular">2</label>
+				<label color="yellow" link="#label" appearance="circular">2</label>
+				<label color="olive" link="#label" appearance="circular">2</label>
+				<label color="green" link="#label" appearance="circular">2</label>
+				<label color="teal" link="#label" appearance="circular">2</label>
+				<label color="blue" link="#label" appearance="circular">2</label>
+				<label color="violet" link="#label" appearance="circular">2</label>
+				<label color="purple" link="#label" appearance="circular">2</label>
+				<label color="pink" link="#label" appearance="circular">2</label>
+				<label color="brown" link="#label" appearance="circular">2</label>
+				<label color="grey" link="#label" appearance="circular">2</label>
+				<label color="black" link="#label" appearance="circular">2</label>
+			</example>
+			<example description="With `empty`, an empty dot.">
+				<label color="red" link="#label" empty appearance="circular"/>
+				<label color="orange" link="#label" empty appearance="circular"/>
+				<label color="yellow" link="#label" empty appearance="circular"/>
+				<label color="olive" link="#label" empty appearance="circular"/>
+				<label color="green" link="#label" empty appearance="circular"/>
+				<label color="teal" link="#label" empty appearance="circular"/>
+				<label color="blue" link="#label" empty appearance="circular"/>
+				<label color="violet" link="#label" empty appearance="circular"/>
+				<label color="purple" link="#label" empty appearance="circular"/>
+				<label color="pink" link="#label" empty appearance="circular"/>
+				<label color="brown" link="#label" empty appearance="circular"/>
+				<label color="grey" link="#label" empty appearance="circular"/>
+				<label color="black" link="#label" empty appearance="circular"/>
+			</example>
+		</>
+
+		<section label="Basic" sticky collapsible dividing>
+			<example description="A label can reduce its complexity.">
+				<label link="#label" appearance="basic">Basic</label>
+				<label link="#label" pointing appearance="basic">Pointing</label>
+				<label link="#label" image="../images/avatar/small/elliot.jpg" appearance="basic">Elliot</label>
+				<label link="#label" color="red" pointing appearance="basic">Red Pointing</label>
+				<label link="#label" color="blue" appearance="basic">Blue</label>
+			</example>
+		</>
+
+		<section label="Tinted" sticky collapsible dividing>
+			<example description="Ours, not Fomantic's:  a tinted label is soft, the colour's tint as the fill and its text colour as the text (a pill or badge).">
+				<label color="primary" appearance="tinted">Live</label>
+				<label color="green" appearance="tinted">Done</label>
+				<label color="orange" appearance="tinted circular">3</label>
+				<label appearance="tinted">Plain</label>
+			</example>
+		</>
+
+		<section label="Colored" sticky collapsible dividing>
+			<example description="A label can have different colors.">
+				<label color="primary" link="#label">Primary</label>
+				<label color="secondary" link="#label">Secondary</label>
+				<label color="red" link="#label">Red</label>
+				<label color="orange" link="#label">Orange</label>
+				<label color="yellow" link="#label">Yellow</label>
+				<label color="olive" link="#label">Olive</label>
+				<label color="green" link="#label">Green</label>
+				<label color="teal" link="#label">Teal</label>
+				<label color="blue" link="#label">Blue</label>
+				<label color="violet" link="#label">Violet</label>
+				<label color="purple" link="#label">Purple</label>
+				<label color="pink" link="#label">Pink</label>
+				<label color="brown" link="#label">Brown</label>
+				<label color="grey" link="#label">Grey</label>
+				<label color="black" link="#label">Black</label>
+			</example>
+		</>
+
+		<section label="Basic Tag Labels" sticky collapsible dividing>
+			<example description="Tag labels can be basic too.">
+				<label link="#label" tag appearance="basic">Standard Tag</label>
+				<label color="primary" link="#label" tag appearance="basic">Primary</label>
+				<label color="secondary" link="#label" tag appearance="basic">Secondary</label>
+				<label color="red" link="#label" tag appearance="basic">Red</label>
+				<label color="orange" link="#label" tag appearance="basic">Orange</label>
+				<label color="yellow" link="#label" tag appearance="basic">Yellow</label>
+				<label color="olive" link="#label" tag appearance="basic">Olive</label>
+				<label color="green" link="#label" tag appearance="basic">Green</label>
+				<label color="teal" link="#label" tag appearance="basic">Teal</label>
+				<label color="blue" link="#label" tag appearance="basic">Blue</label>
+				<label color="violet" link="#label" tag appearance="basic">Violet</label>
+				<label color="purple" link="#label" tag appearance="basic">Purple</label>
+				<label color="pink" link="#label" tag appearance="basic">Pink</label>
+				<label color="brown" link="#label" tag appearance="basic">Brown</label>
+				<label color="grey" link="#label" tag appearance="basic">Grey</label>
+				<label color="black" link="#label" tag appearance="basic">Black</label>
+			</example>
+		</>
+
+		<section label="Size" sticky collapsible dividing>
+			<example description="A label can be small or large.">
+				<label size="mini">Mini</label>
+				<label size="tiny">Tiny</label>
+				<label size="small">Small</label>
+				<label size="medium">Medium</label>
+				<label size="large">Large</label>
+				<label size="big">Big</label>
+				<label size="huge">Huge</label>
+				<label size="massive">Massive</label>
+			</example>
+		</>
+	</>
+
+	<section label="Groups">
+		<section label="Labels" sticky collapsible dividing>
+			<example description="Label groups also have a vertical margin to make sure labels don't appear attached together when wrapped:  `<ui-labels>`.">
+				<labels>
+					<label>One</label>
+					<label>Two</label>
+					<label>Three</label>
+					<label>Four</label>
+					<label>Five</label>
+					<label>Six</label>
+					<label>Seven</label>
+					<label>Eight</label>
+					<label>Nine</label>
+					<label>Ten</label>
+					<label>Eleven</label>
+					<label>Twelve</label>
+					<label>Thirteen</label>
+					<label>Fourteen</label>
+					<label>Fifteen</label>
+					<label>Sixteen</label>
+					<label>Seventeen</label>
+					<label>Eighteen</label>
+					<label>Nineteen</label>
+					<label>Twenty</label>
+					<label>Twentyone</label>
+					<label>Twentytwo</label>
+					<label>Twentythree</label>
+					<label>Twentyfour</label>
+					<label>Twentyfive</label>
+					<label>Twentysix</label>
+					<label>Twentyseven</label>
+					<label>Twentyeight</label>
+					<label>Twentynine</label>
+					<label>Thirty</label>
+				</labels>
+			</example>
+		</>
+
+		<section label="Group Size" sticky collapsible dividing>
+			<example description="Labels can share sizes together.">
+				<labels size="huge">
+					<label>Fun</label>
+					<label>Happy</label>
+					<label>Smart</label>
+					<label>Witty</label>
+				</labels>
+			</example>
+		</>
+
+		<section label="Colored Group" sticky collapsible dividing>
+			<example description="Labels can share colors together.">
+				<labels color="blue">
+					<label link="#label" removable>Fun</label>
+					<label link="#label" detail="22">Happy</label>
+					<label link="#label">Smart</label>
+					<label link="#label">Insane</label>
+					<label link="#label">Exciting</label>
+				</labels>
+			</example>
+		</>
+
+		<section label="Basic Group" sticky collapsible dividing>
+			<example description="Labels can share their style together.">
+				<labels appearance="basic">
+					<label link="#label" removable>Fun</label>
+					<label link="#label" detail="22">Happy</label>
+					<label link="#label">Smart</label>
+					<label link="#label">Insane</label>
+					<label link="#label">Exciting</label>
+				</labels>
+			</example>
+		</>
+
+		<section label="Tag Group" sticky collapsible dividing>
+			<example description="Labels can share tag formatting.">
+				<labels tag>
+					<label link="#label">$10.00</label>
+					<label link="#label">$19.99</label>
+					<label link="#label">$24.99</label>
+					<label link="#label">$30.99</label>
+					<label link="#label">$10.25</label>
+				</labels>
+			</example>
+		</>
+
+		<section label="Circular Group" sticky collapsible dividing>
+			<example description="Labels can share shapes.">
+				<labels appearance="circular">
+					<label link="#label">11</label>
+					<label link="#label">22</label>
+					<label link="#label">33</label>
+					<label link="#label">44</label>
+					<label link="#label">141</label>
+				</labels>
+			</example>
+		</>
+	</>
+</spell-notebook>

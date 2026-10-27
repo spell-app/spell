@@ -1,0 +1,69 @@
+<spell-notebook "form theming">
+	<header level="1">
+		Form
+		<header>A form displays a set of related user input fields in a structured way.</>
+	</>
+	<form-tab-bar showing="theming"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#tokens">Tokens</>
+				<ui-item link="#themes">Themes</>
+			</>
+		</>
+	</>
+
+	<!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
+	<section label="Tokens">
+		<markdown>
+			Theme with the public `--ui-form-*` tokens: set one on the element, on any ancestor (`:root` included), or on the
+			form's box through `::part(form)`. They inherit into the shadow root, where the sheet reads each through a
+			private alias, so nothing inside blocks them; the form hands them to its fields and rows, so set them on the form
+			(a field outside a form reads them from its own ancestors).
+		</>
+		<markdown>
+			```css
+			ui-form {
+			  --ui-form-gutter: 2em;
+			  --ui-form-label-font-weight: normal;
+			  --ui-form-required-color: var(--ui-primary);
+			}
+			```
+		</>
+		<message state="info" size="small">
+			<markdown>
+				`inverted` swaps in `--ui-form-inverted-label-color`, and `loading` draws its spinner from the
+				`--ui-form-loader-*` tokens. The `--_ui-fields-*` tokens are private (a row hands them to its fields): use
+				`width` and `widths` instead. Never set the `--_ui-*` names: they're the sheet's private plumbing.
+			</>
+		</>
+		<markdown>Edit a value below to try it.</>
+		<html>
+			<ui-docs-tokens family="ui-form" playground>
+				<ui-form>
+					<form>
+						<ui-field>
+							<label for="fm-types-first-playground">First Name</>
+							<ui-input id="fm-types-first-playground" name="first-name" placeholder="First Name"></>
+						</>
+						<ui-field>
+							<label for="fm-types-last-playground">Last Name</>
+							<ui-input id="fm-types-last-playground" name="last-name" placeholder="Last Name"></>
+						</>
+						<ui-field>
+							<ui-checkbox name="terms">I agree to the Terms and Conditions</>
+						</>
+						<ui-button type="submit">Submit</>
+					</>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="Themes">
+		<markdown>
+			The theme menu above picks the theme for every page of the site:  Spell, Glass, Fruity or Merlot,
+			each restyling this component through its tokens.
+		</>
+	</>
+</spell-notebook>
