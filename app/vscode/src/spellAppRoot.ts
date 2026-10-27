@@ -2,11 +2,13 @@
  * Which spell-app checkout the extension runs:  its language server (`src/lsp/`) and its runner bundle (`app/`).
  * - Decided when the server starts, from the window, NOT from where the extension was built:
  *   one installed copy works for the kit's main checkout, every epic's worktree, and a checkout you've moved.
- * - Plain node (`fs`, `path`), NO `vscode`:  `extension.ts` hands it the setting and the window's folders,
- *   so a script can check it without VS Code.
+ * - Plain node, NO `vscode`:  node's `fs` and `path`, and the kit's `checkoutOf()`, which uses node's modules only.
+ *   `extension.ts` hands it the setting and the window's folders, so a script can check it without VS Code.
  */
-import { existsSync, readFileSync, statSync } from "fs"
+import { existsSync, readFileSync } from "fs"
 import { dirname, join, resolve } from "path"
+
+import { checkoutOf } from "spell/server/checkout"
 
 /** spell-app's package name:  its `package.json` says so, wherever the checkout lives. */
 const SPELL_APP = "spell-app"
@@ -36,7 +38,8 @@ export function findSpellApp({ configured, workspaceFolders, builtIn }: SpellApp
       const root = findIn(folder)
       return root ? [{ root, folder }] : []
     })
-    const worktree = found.find(({ root }) => isWorktree(root))
+    // a worktree, as git lays one out:  its `.git` a file leading to a main checkout (`checkoutOf()`)
+    const worktree = found.find(({ root }) => checkoutOf(root)?.worktree)
     if (worktree) return { root: worktree.root, reason: `window folder ${worktree.folder}, a worktree` }
     if (found[0]) return { root: found[0].root, reason: `window folder ${found[0].folder}` }
   }
@@ -66,11 +69,6 @@ export function spellAppAt(folder: string): string | undefined {
     if (packageNameOf(candidate) === SPELL_APP) return candidate
   }
   return undefined
-}
-
-/** Whether checkout `root` is a git worktree:  its `.git` is a FILE pointing at the main checkout's, not a folder. */
-function isWorktree(root: string): boolean {
-  return statSync(join(root, ".git"), { throwIfNoEntry: false })?.isFile() ?? false
 }
 
 /** The `name` in `folder`'s `package.json`;  `undefined` if it has none, or it can't be read. */

@@ -138,7 +138,11 @@ export class ElementsHelp implements vscode.CompletionItemProvider {
     return help
   }
 
-  /** `work()`'s result, or `undefined` when it throws:  logged, never shown. */
+  /**
+   * `work()`'s result, or `undefined` when it throws:  logged with its stack, never shown.
+   * - NOT the kit's `safelyCall()` (epic `coherence` P24):  it takes the kit's `Logger`, a class this output isn't,
+   *   and this output prints an error handed to it as its message alone, without the stack that says where it threw
+   */
   private safely<T>(work: () => T): T | undefined {
     try {
       return work()
