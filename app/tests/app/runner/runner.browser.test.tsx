@@ -132,6 +132,45 @@ if (!core.isCarryingOver) table.start()
 `
 
 /**
+ * A view with a SLOT, as spell compiles it (epic `elemental-spell` P27):  `- it has slots "lid"`, `- to draw its lid:`,
+ * and its drawing placing it, `draw its lid`, as the web's `<slot name="lid">` around the lid's own drawing.
+ * - A fancy box draws its lid again;  the table draws one of each, and a box written by hand whose lid it fills,
+ *   `<test-project-box><i slot="lid">filled lid</i></test-project-box>`.
+ */
+const BOXES = `
+import { core, App, View, h } from "@spell/core"
+export class Box extends View {
+  static elementTag = core.defineElement(this, "test-project")
+  static slots = ["lid"]
+  draw() {
+    return h("div", { class: "box" }, h("slot", { name: "lid" }, () => this.drawLid()))
+  }
+  drawLid() {
+    return h("b", { part: "lid" }, "plain lid")
+  }
+}
+export class FancyBox extends Box {
+  static elementTag = core.defineElement(this, "test-project")
+  drawLid() {
+    return h("b", { part: "lid" }, "fancy lid")
+  }
+}
+export class Table extends App {
+  draw() {
+    return h("div", { class: "table" },
+      () => core.drawThing(box),
+      () => core.drawThing(fancy),
+      h("test-project-box", h("i", { slot: "lid" }, "filled lid"))
+    )
+  }
+}
+export const table = new Table()
+export const box = new Box()
+export const fancy = new FancyBox()
+if (!core.isCarryingOver) table.start()
+`
+
+/**
  * A card game, as compiled spell draws it:
  * - a card's `draw()` chooses its face by an `if` (read OUTSIDE its live values)
  * - its rank is a live value
@@ -520,6 +559,26 @@ describe("compiled spell draws with Solid", () => {
     expect(header.getAttribute("slot")).toBe("header")
     expect(header.assignedSlot?.name).toBe("header")
     expect(header.assignedSlot?.parentElement?.className).toBe("header")
+  })
+
+  test("a view's slot:  its own drawing until the page fills it, slot=, for that one element (epic `elemental-spell` P27)", async () => {
+    const host = await mount(source(BOXES, "Table"))
+    const boxes = () => [...host.querySelectorAll<HTMLElement>("test-project-box, test-project-fancy-box")]
+    await waitFor(() => boxes().length === 3 && boxes().every((box) => box.shadowRoot?.querySelector(".box")))
+    await ElementFixture.settle(host)
+    expect(host.querySelector(".spell-draw-error")).toBeNull()
+    const [plain, fancy, byHand] = boxes()
+    const lidOf = (box: HTMLElement) => box.shadowRoot!.querySelector<HTMLSlotElement>("slot[name=lid]")!
+    // unfilled:  the slot shows its own drawing, which still styles as ::part(lid)
+    expect(lidOf(plain!).assignedNodes()).toEqual([])
+    expect(lidOf(plain!).querySelector("[part=lid]")!.textContent).toBe("plain lid")
+    // a box built on it draws the slot again:  its own drawing, in the same slot
+    expect(fancy!.localName).toBe("test-project-fancy-box")
+    expect(lidOf(fancy!).querySelector("[part=lid]")!.textContent).toBe("fancy lid")
+    // filled from outside:  what the page put in it takes its place, for that box alone
+    const filling = byHand!.querySelector("i")!
+    expect(filling.assignedSlot).toBe(lidOf(byHand!))
+    expect(lidOf(byHand!).assignedElements()).toEqual([filling])
   })
 
   test("an element class the program hands over, from `@spell/elements`:  the page defines its tag on it (P10)", async () => {

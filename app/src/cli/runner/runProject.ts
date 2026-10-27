@@ -228,7 +228,8 @@ async function fakeElements() {
 
 /**
  * SIDE EFFECT:  each element's shadow root put in its place under `root`, as the page shows it:
- * its `<slot>`s holding the element's children, a named one those with that `slot`.
+ * its `<slot>`s holding the element's children, a named one those with that `slot`;
+ *   a slot nothing fills, its own content (a view's slot, `<slot name="front">`, drawing its front).
  * - So the printed page shows what a person sees:  `<solitaire-tableau>` holding its drawing, its cards in it.
  * - Shadow roots inside shadow roots too.
  */
@@ -243,7 +244,8 @@ function withShadowsInPlace(root: ParentNode) {
       const slotted = children.filter((child) =>
         child instanceof Element ? child.getAttribute("slot") === name : name === null
       )
-      slot.replaceWith(...slotted)
+      // nothing put in it:  its own content shows, as a browser shows it, e.g. a view's slot drawing itself
+      slot.replaceWith(...(slotted.length ? slotted : [...slot.childNodes]))
     }
     host.replaceChildren(...shadow.childNodes)
   }

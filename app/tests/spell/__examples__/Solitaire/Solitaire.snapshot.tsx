@@ -79,8 +79,8 @@ export class Card extends TwoSidedView {
   /** Both its sides, one over the other:  styles.css shows the one it's turned to, and flips it over as it turns */
   @drawn draw() {
     return [
-      this.drawFront(),
-      this.drawBack()
+      <slot name="front">{this.drawFront()}</slot>,
+      <slot name="back">{this.drawBack()}</slot>
     ]
   }
 

@@ -82,7 +82,10 @@ class Card(TwoSidedView):
 
     def draw(self) -> list:
         """Both its sides, one over the other:  styles.css shows the one it's turned to, and flips it over as it turns"""
-        return [self.draw_front(), self.draw_back()]
+        return [
+            h("slot", {"name": "front"}, self.draw_front()),
+            h("slot", {"name": "back"}, self.draw_back()),
+        ]
 
     @property
     def picture(self) -> str | None:
