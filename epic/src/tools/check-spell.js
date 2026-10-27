@@ -532,7 +532,7 @@ function scrollToMiddleSection(nav) {
  *   - h2:  one its short section's end pushed out (`:state(bound)`) counts:  it stuck, then left with its section
  *     - only with its bottom AT its section's bottom, where the section's end pushes it:  `<ui-sticky>` says
  *       `bound` of a title that never stuck too, scrolled away at its section's top (epic `epic-engine` I35)
- * - active:  the rail's `selected` entry
+ * - active:  the name of the toolbar's current entry, the one `markCurrent()` marks `selected`
  */
 function stuckAndActive({ id, nav }) {
   const element = id && document.getElementById(id)
@@ -575,11 +575,9 @@ function stuckAndActive({ id, nav }) {
     stuck: section ? stuckState && atTop && ownTitle : bound || (atTop && ownTitle),
     top: rect && Math.round(rect.top),
     covering: covering && `${covering.localName}#${covering.id}`,
-    active: (
-      active?.querySelector(".spell-rail-label")?.textContent ??
-      active?.getAttribute("title") ??
-      active?.textContent
-    )?.trim()
+    // its name, `aria-label`, always set (`toolbarItem()`):  NOT `title`, empty on an item with an access letter
+    // (its tooltip is the toolbar's own, `wireKeyTips()`), which read as "none marked" (epic `epic-engine` r36)
+    active: active && (active.getAttribute("aria-label")?.trim() || active.textContent.trim() || active.dataset.rail)
   }
 }
 
