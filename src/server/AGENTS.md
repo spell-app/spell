@@ -129,6 +129,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - [Test helpers](test/checkouts.ts) that fake one:  `fakeMainCheckout()`, `fakeWorktree()`.
   - [proxy.ts](proxy.ts) -- `proxyTo()` / `proxyUpgrade()`:  HTTP and websockets to another local server
   - `WebServer` -- all of the above on node's HTTP server
+  - [serveRoutes.ts](serveRoutes.ts) -- `serveRoutes()`, `folderRoute()`:  a small loopback server for a command's
+    page (spell-app's `spell run`), each path answered with text, a file, or 404 (epic `coherence` P25)
   - [untilInterrupted.ts](untilInterrupted.ts) -- run until `Ctrl-C`
   - `CommandRun`, in [runs/](runs/CommandRun.ts) -- a command asking Owen on a page (epic `epic-engine` P23):
     its rows in the content folder's `pages/runs/<id>/`, waiting for his Send, his answers read back
