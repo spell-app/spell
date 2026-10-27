@@ -52,7 +52,8 @@
  *     `null` while a session listens
  *   - once per epic per 10 minutes, or until a session listens (the inbox's `woken`)
  * - `POST /api/epics/review/start` `{ page }` -- "start a review" (epic `airplane` P12):
- *   types `/epic review <epic>` into the ONE running Claude session titled for the epic;
+ *   asks the ONE running Claude session titled for the epic through its inbox poller (epic `epic-engine` I144), else
+ *   types `/epic review <epic>` into its tab;
  *   none or several:  sends nothing, says which it found (`ReviewStart`);  answers its `StartResult`, not the inbox
  * - writes:  under the inbox's lock, atomic (`ReviewInbox.updateAsync()`);
  *   each needs the page server's token (`x-server-token`) and its own origin (`SRV.Guard`)
@@ -158,7 +159,7 @@ const reviewRoutes: RouteModule = {
     api.post("/start", async (request, reply) => {
       const body = request.body as { page?: unknown }
       const file = planDoc(web.files, body.page)
-      reply.json(await new ReviewStart(root).start(epicOf(file)))
+      reply.json(await new ReviewStart(root).start(epicOf(file), file))
     })
     router.use(API, api)
   }

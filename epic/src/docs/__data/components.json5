@@ -4273,7 +4273,7 @@
         },
         {
           "name": "status",
-          "description": "Its status icon, in its status's colour."
+          "description": "Its status icon, in its status's colour;  while Claude is at work on it (`:state(working)`), a blue turning spinner instead."
         },
         {
           "name": "changed",
@@ -4316,6 +4316,10 @@
         {
           "name": "movable",
           "description": "Still to do, on a page being reviewed:  dragged by its title row to another place (epic `epic-engine` P34)."
+        },
+        {
+          "name": "working",
+          "description": "Claude is at work on it, and it isn't done:  the review inbox's `working`, keyed by its id (writing its plan, or building it;  epic `epic-engine` I147).  Its status icon is a blue turning spinner."
         }
       ],
       "texts": [
@@ -4353,6 +4357,16 @@
           "key": "statusDone",
           "text": "Done",
           "description": "The status icon's name:  `done`."
+        },
+        {
+          "key": "workingPlan",
+          "text": "Claude is writing this phase's plan",
+          "description": "Its spinner while Claude is at work on it and its plan isn't accepted yet:  its tooltip and name."
+        },
+        {
+          "key": "workingOn",
+          "text": "Claude is working on it",
+          "description": "Its spinner while Claude is at work on it, its plan accepted or the phase under way."
         },
         {
           "key": "tookTip",
@@ -5107,6 +5121,11 @@
           "name": "epic-filter-changed",
           "detail": "{ states: string[] | undefined }",
           "description": "Its state filter changed:  its chips, `show all`, or the page's toolbar (`showStates()`).  `states` the ones showing;  none:  every state."
+        },
+        {
+          "name": "epic-count-changed",
+          "detail": "{}",
+          "description": "Its live count changed with no change to its markup (epic `epic-engine` I147):  an item or phase being worked on, an urgency not applied yet.  The docs runtime draws the toolbar's badges again."
         },
         {
           "name": "epic-test-opening",

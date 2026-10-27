@@ -78,7 +78,7 @@ export class InboxCommands {
         if (flags.all) ReviewInbox.update(path, (box) => box.markSent())
         return this.apply(name, file, args)
       case "working": {
-        const id = ReviewInbox.toItemId(this.owner.need(args[0], "an item id"))
+        const id = this.workingKey(file, this.owner.need(args[0], "an item id"))
         const on = this.owner.need(args[1], "on | off")
         if (!["on", "off"].includes(on)) throw new PlanDocError(`working ${id} on | off, not '${on}'`)
         this.setWorking(file, id, on === "on")
@@ -129,6 +129,18 @@ export class InboxCommands {
     this.owner.print(
       `doing:  ${text}${items.length ? ` (${items.map((item) => item.id.toUpperCase()).join(", ")})` : ""}`
     )
+  }
+
+  /**
+   * The inbox's key for what `inbox working` was given:  a comment's or an item's id, or a PHASE as people name one
+   * (`P20`, its id `p-one-repo`, its name;  epic `epic-engine` I147) as its stable id, which `<epic-phase>` reads.
+   * - throws for a phase the doc hasn't (`PlanDoc.phasePlace()`)
+   */
+  private workingKey(file: string, given: string): string {
+    const key = ReviewInbox.toItemId(given)
+    if (!PHASE_REF.test(key)) return key
+    const plan = this.owner.read(file)
+    return plan.phase(plan.phasePlace(key)).id
   }
 
   setWorking(file: string, id: string, on: boolean): void {
@@ -651,6 +663,19 @@ export class GuideSends {
   }
 
   /**
+   * The sends not taken yet on the epic's pages, as one string, `<page>@<sent>` each;  `""` for none.
+   * - names the batch the session's poller announces (`InboxMonitor`'s `batch`):  a newer Send is a new batch
+   */
+  get newSends(): string {
+    return this.owned()
+      .flatMap((page) => {
+        const inbox = this.peek(this.inboxOf(page))
+        return inbox?.hasNewSend ? [`${page}@${inbox.sent}`] : []
+      })
+      .join(" ")
+  }
+
+  /**
    * The inbox files of the epic's pages, existing or not yet:  what the session's monitor watches for a Send
    * (`InboxMonitor.check()`).
    */
@@ -764,6 +789,9 @@ function calmWords(calm: boolean): string {
 }
 
 /** What an agent works on for a mark:  a revisit's answer, else details. */
+/** What names a phase, not an item or a comment:  `p20`, a stable id `p-one-repo`. */
+const PHASE_REF = /^p(\d+|-[a-z0-9-]+)$/
+
 function workOf(mark: { action: string } | undefined): "revisit" | "details" {
   return mark?.action === "revisit" ? "revisit" : "details"
 }

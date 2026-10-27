@@ -16,6 +16,8 @@ import {
   type Running
 } from "spell-epic/review"
 
+import { NO_LIVE_REVIEW, type LiveReview } from "spell-epic/components/epic-item/EpicItem.types"
+
 import { PAGE_TAG, REVIEWING, type ReviewFill } from "./EpicReview.types"
 
 /****************
@@ -92,6 +94,23 @@ export class ReviewState {
 
   /** Has Claude taken its request (an agent at work on it), rather than it waiting to be taken? */
   readonly workedOn = (): boolean => this.read((client, id) => client.isWorkedOn(id)) ?? false
+
+  /**
+   * What the inbox says of item `itemId` (its own id when none) for its drawn state (`DrawnState.of()`):
+   * worked on, Owen's urgency, his check pressed.
+   * - the page's inbox, so any element reads it for any item:  a section counts its items by it, as their chips draw
+   */
+  readonly liveOf = (itemId?: string): LiveReview =>
+    this.readPage((client) => {
+      const id = (itemId ?? this.id()).toLowerCase()
+      if (!id) return NO_LIVE_REVIEW
+      const urgency = client.inbox.urgency[id]
+      return {
+        workedOn: client.isWorkedOn(id),
+        urgency: urgency && { calm: urgency.calm },
+        approved: client.markOf(id)?.action === "approve"
+      }
+    }) ?? NO_LIVE_REVIEW
 
   /**
    * The comments waiting for Claude in its text (`ReviewClient.commentsIn()`, epic `epic-engine` I140), while nothing

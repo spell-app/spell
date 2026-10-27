@@ -131,7 +131,7 @@
     white-space: nowrap;
   }
   /*
-   * the pen and the trash:  `<ui-button circular basic size="mini">`s with no ring, a tint under the pointer (Owen,
+   * the pen and the trash:  `<ui-button appearance="circular basic" size="mini">`s with no ring, a tint under the pointer (Owen,
    * 2026-10-10:  "no round border like everything else"), through the component's own tokens
    */
   .tool {

@@ -11,7 +11,7 @@ import { NOBODY_LISTENING, SUMMARY_ID, type NewItem, type NewKind } from "spell-
 import { ReviewState } from "spell-epic/components/epic-review/ReviewState"
 import type { ReviewShows } from "spell-epic/components/epic-review/EpicReview.types"
 import { NEW_KIND_LOOKS } from "spell-epic/components/epic-new-item/EpicNewItem.types"
-import { ItemAge, NEEDS_OWEN, STATUS_SLOT, STATUS_STATES } from "spell-epic/components/epic-item/EpicItem.types"
+import { DrawnState, NEEDS_OWEN, STATUS_SLOT } from "spell-epic/components/epic-item/EpicItem.types"
 import {
   SHOW_ALL,
   STATE_PICK,
@@ -26,6 +26,7 @@ import { StateFilter } from "./StateFilter"
 import {
   CLOSED_STATUSES,
   COUNT_ATTRIBUTES,
+  COUNT_CHANGED,
   COUNTED,
   EMPTY,
   FILTER,
@@ -72,11 +73,21 @@ export class DOMEpicSectionElement extends DOMEpicFoldElement {
   }
 
   /**
-   * How many of its items Owen marked in this pass (epic `epic-engine` P43):  the page's toolbar adds them up.
+   * How many of its items Owen marked in this pass (epic `epic-engine` P43), and the Phases section's phases with
+   * Claude (I147):  the page's toolbar adds them up.
    * - read TRACKED:  the toolbar follows each mark (and reads `stateFilter` again with it)
    */
   get markedCount(): number {
-    return this.section?.marked().size ?? 0
+    const section = this.section
+    return section ? section.marked().size + section.phasesWithClaude() : 0
+  }
+
+  /**
+   * Its state chips' counts as one string (`progress:1 attention:3`), read TRACKED:  the page's toolbar follows it,
+   * so an item being worked on moves from red to blue there as on its own chips (Owen, 2026-10-26).
+   */
+  get chipCounts(): string {
+    return [...(this.section?.stateCounts() ?? [])].map(([state, count]) => `${state}:${count}`).join(" ")
   }
 
   /** Show its items in `states` only (none:  every state), as if picked on its own chips;  remembered. */
@@ -225,14 +236,14 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
   }
 
   /** Its count:  `{ open, total }`;  `undefined` for a kind that isn't counted, or with nothing to count. */
-  readonly count = createMemo((): SectionCount | undefined => EpicSection.countOf(this.counted))
+  readonly count = createMemo((): SectionCount | undefined => this.countOf(this.counted))
 
   /** Each item's state, in page order (items only:  phases aren't filtered). */
   readonly itemStates = createMemo((): { item: Element; state: ItemStateName }[] =>
     this.holdsItems()
       ? this.counted
           .filter((child) => child.localName === "epic-item")
-          .map((item) => ({ item, state: EpicSection.stateOf(item) }))
+          .map((item) => ({ item, state: this.drawnStateOf(item) }))
       : []
   )
 
@@ -246,6 +257,22 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
   readonly marked = createMemo((): ReadonlySet<Element> => {
     const marked = this.itemStates().filter((it) => it.item.id && this.reviewState.isMarked(it.item.id))
     return marked.length ? new Set(marked.map((it) => it.item)) : NOTHING_MARKED
+  })
+
+  /**
+   * The Phases section's phases WITH CLAUDE (epic `epic-engine` I147):  not done, and marked in this pass or being
+   * worked on (the inbox's `working`:  its plan being written, or it being built);  0 for any other kind.
+   * - its blue badge, as an item section's marked and worked-on items are (`<epic-state-filter marked>`)
+   */
+  readonly phasesWithClaude = createMemo((): number => {
+    if (this.kind !== "phases") return 0
+    return this.counted.filter(
+      (phase) =>
+        phase.localName === "epic-phase" &&
+        phase.getAttribute("status") !== "done" &&
+        !!phase.id &&
+        (this.reviewState.isMarked(phase.id) || this.reviewState.liveOf(phase.id).workedOn)
+    ).length
   })
 
   /** Its items not marked in this pass:  what the state chips count and filter. */
@@ -314,11 +341,12 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
    * - an Overview sub-section, for its marks
    * - the Todos and Questions sections, for their new items
    * - every item section, for its items marked in this pass (epic `epic-engine` P43)
+   * - the Phases section, for its phases marked or being worked on (epic `epic-engine` I147)
    */
   @E.whileConnected
   protected followReviews() {
-    // an item section for its marked items too (P43)
-    const follows = this.kind === "overview-part" || this.holdsItems()
+    // an item section for its marked items too (P43);  the Phases section for its phases with Claude (I147)
+    const follows = this.kind === "overview-part" || this.kind === "phases" || this.holdsItems()
     return follows ? this.reviewState.connect() : undefined
   }
 
@@ -355,6 +383,29 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
     return undefined
   }
 
+  /** Its count's parts the toolbar's badges show, as one string:  what `announceCount()` follows. */
+  get badgeCount(): string {
+    const count = this.count()
+    return count ? `${count.attention} ${count.replied ?? 0} ${count.running ?? 0}` : ""
+  }
+
+  /** The badge count it last announced;  `undefined` before its first. */
+  private announced: string | undefined
+
+  /**
+   * Its badge count changed after its first:  say so (`COUNT_CHANGED`), so the docs runtime draws the toolbar's
+   * badges again from the live state, as its own chips draw (Owen, 2026-10-26:  "badges don't match up").
+   * - a change of its markup re-counts the page by itself (the live update);  this is for the review inbox's
+   * - SIDE EFFECT:  dispatches on its DOM element
+   */
+  @E.onChange("badgeCount")
+  protected announceCount(badgeCount: string) {
+    const before = this.announced
+    this.announced = badgeCount
+    if (isServer || before === undefined || before === badgeCount) return
+    this.domElement.dispatchEvent(new CustomEvent(COUNT_CHANGED, { bubbles: true, composed: true }))
+  }
+
   /**
    * Mark each item its filter hides `data-epic-filtered`, which the page sheet hides and its runs step over (P45);
    * the marks come off again when it shows them, or when the section goes.
@@ -385,7 +436,12 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
       },
       tools:
         kind === "phases"
-          ? () => this.toggles()
+          ? () => (
+              <>
+                {this.toggles()}
+                {this.filter()}
+              </>
+            )
           : kind === "overview-part"
             ? () => this.reviewButtons()
             : this.holdsItems()
@@ -440,7 +496,7 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
     return {
       label: `${number}. ${this.translationForKey(look.title)}`,
       icon: look.icon,
-      count: EpicSection.countOf(children)
+      count: this.countOf(children)
     }
   }
 
@@ -539,7 +595,7 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
           <epic-state-filter
             counts={[...this.stateCounts()].map(([state, count]) => `${state}:${count}`).join(" ")}
             shown={this.chosen ? [...this.showing()].join(" ") : undefined}
-            marked={this.marked().size || undefined}
+            marked={this.marked().size + this.phasesWithClaude() || undefined}
           />
         </span>
       </Show>
@@ -788,7 +844,7 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
 
   /** It draws a state filter:  chips, or items marked in this pass (their badge). */
   private hasFilter(): boolean {
-    return this.present().length > 0 || this.marked().size > 0
+    return this.present().length > 0 || this.marked().size > 0 || this.phasesWithClaude() > 0
   }
 
   /** A kind that holds items (Questions ... Manual tests). */
@@ -816,15 +872,35 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
   /**
    * The count of `children` (items, or phases);  none without any.
    * - `open`:  any status but `CLOSED_STATUSES`'
-   * - `attention`:  the items that need Owen (`NEEDS_OWEN`:  red, or orange, his turn to pick)
+   * - `attention`:  those that need Owen (`NEEDS_OWEN`:  red, or orange, his turn to pick), an item by its state AS
+   *   DRAWN (`drawnStateOf()`), as its section's chips count it (Owen, 2026-10-26:  "badges don't match up"):
+   *   - one being worked on is blue, not red
+   *   - one Owen marked in this pass is with Claude (the blue badge), in neither
+   * - `replied`:  of those, the ones waiting on his pick (orange)
+   * - `running`:  the phases at work now:  under way (`status="active"`), or being worked on (I147)
    */
-  private static countOf(children: readonly Element[]): SectionCount | undefined {
+  private countOf(children: readonly Element[]): SectionCount | undefined {
     if (!children.length) return undefined
     const open = children.filter(
       (child) => !(CLOSED_STATUSES as readonly string[]).includes(child.getAttribute("status") ?? "")
     ).length
-    const attention = children.filter((child) => NEEDS_OWEN.has(child.getAttribute("state") ?? "")).length
-    return { open, total: children.length, attention }
+    // an item Owen marked in this pass is with Claude (the blue badge), as its section's chips leave it out (P43)
+    const states = children.map((child) =>
+      child.localName !== "epic-item"
+        ? (child.getAttribute("state") ?? "")
+        : child.id && this.reviewState.isMarked(child.id)
+          ? "marked"
+          : this.drawnStateOf(child)
+    )
+    const attention = states.filter((state) => NEEDS_OWEN.has(state)).length
+    const replied = states.filter((state) => state === "replied").length
+    const running = children.filter(
+      (child) =>
+        child.localName === "epic-phase" &&
+        (child.getAttribute("status") === "active" ||
+          (child.getAttribute("status") !== "done" && !!child.id && this.reviewState.liveOf(child.id).workedOn))
+    ).length
+    return { open, total: children.length, attention, replied, running }
   }
 
   /**
@@ -840,16 +916,11 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
   }
 
   /**
-   * An item's state, as its id chip reads it (`<epic-item>`'s `itemState`):
-   * `state` when it's one of ours, else by its status
-   * (`STATUS_STATES`:  decided or done `recent`, canceled `old`, else `open`).
+   * An item's state AS DRAWN, as its id chip shows it:  `DrawnState.of()`, its attributes and the live inbox
+   * (worked on:  blue;  Owen's urgency not applied yet), the ONE rule every count uses.
    */
-  private static stateOf(item: Element): ItemStateName {
-    const state = item.getAttribute("state")
-    const known = FILTER_STATES.find((it) => it.state === state)?.state
-    // a decided or done item a day old, or approved since it changed, draws grey (`ItemAge`):  its count and chip with it
-    const written = known ?? STATUS_STATES[item.getAttribute("status") ?? ""] ?? "open"
-    return ItemAge.shown(written, item.getAttribute("changed"), item.getAttribute("reviewed")) as ItemStateName
+  private drawnStateOf(item: Element): ItemStateName {
+    return DrawnState.of(DrawnState.fieldsOf(item), this.reviewState.liveOf(item.id))
   }
 
   /** The Phases toggles as last left on this page;  none without storage. */

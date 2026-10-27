@@ -1,6 +1,7 @@
+// spell ui rename: leave this file (its docstrings quote the renames merge-main makes, old names on purpose)
 import { spawnSync } from "node:child_process"
-import { existsSync, readFileSync } from "node:fs"
-import { basename, dirname, join, matchesGlob, relative } from "node:path"
+import { existsSync, readFileSync, realpathSync } from "node:fs"
+import { basename, dirname, join, matchesGlob, relative, resolve, sep } from "node:path"
 
 import { Git } from "spell/server/Git"
 import { EpicConfig } from "spell-epic/config/EpicConfig"
@@ -28,6 +29,15 @@ const SNAPSHOT_UPDATE = (tests: string[]) => ["yarn", "vp", "test", "run", ...te
 /** The lockfiles, at a checkout's root, whose change means the merged packages need installing. */
 const LOCKFILES = ["yarn.lock", "package-lock.json", "pnpm-lock.yaml", "bun.lock"]
 
+/** The kit's own program, from its root:  where the rename step runs (`renameOldNames()`). */
+const KIT_PROGRAM = "bin/spell.mjs"
+
+/** The rename step's command, from the kit's root, the files appended:  `spell ui rename --write`. */
+const RENAME = ["node", KIT_PROGRAM, "ui", "rename", "--write"]
+
+/** The rename step's own commit, in each repo it changed. */
+const RENAME_MESSAGE = "merge-main:  old Spell UI names renamed (spell ui rename)"
+
 /****************
  * ### `MainMerge`
  * `epic worktree merge-main`:  merge `main` into this checkout's branch,
@@ -50,7 +60,9 @@ const LOCKFILES = ["yarn.lock", "package-lock.json", "pnpm-lock.yaml", "bun.lock
  * - Any OTHER file in conflict stops it mid-merge:
  *   Claude resolves those, `git add`s them, and runs it again with `--continue`.
  * - A merge (or fast-forward) that changed a lockfile runs the checkout's install command after it (`reinstall()`).
- * - Node built-ins and git only:  no spell.
+ * - Then, in a Spell kit, Spell UI's old names the branch still writes are renamed, and committed on their own
+ *   (`renameOldNames()`, epic `epic-engine` I143):  `runAll()` runs it once every repo is merged.
+ * - Node built-ins and git only:  no spell imported.  The rename step RUNS the kit's `spell`, never loads it.
  ****************/
 export class MainMerge {
   /** the checkout whose branch `main` merges into:  STATIC for the object's life */
@@ -65,17 +77,35 @@ export class MainMerge {
   /** the command that installs the packages, as words;  `[]`:  none */
   readonly install: string[]
 
+  /** the rename step's command, as words, the files appended;  `[]`:  no step */
+  readonly rename: string[]
+
+  /** where the rename step runs:  the kit's root, holding `bin/spell.mjs`;  `undefined`:  no kit, no step */
+  readonly kitRoot: string | undefined
+
   /**
    * - `root`:  the checkout (a worktree, usually)
    * - `generators`:  default the checkout's own list (`generatorsOf()`)
    * - `snapshotUpdate`:  default `yarn vp test run <tests> --update`
    * - `install`:  default the checkout's `installCommand` (`.epic/config.json5`;  `yarn install`)
+   * - `rename`:  default `node bin/spell.mjs ui rename --write`
+   * - `kitRoot`:  default the nearest folder at or above `root` with `bin/spell.mjs` (`kitRootOf()`):
+   *   the merged checkout's own kit, so a worktree's child repo uses its worktree's kit, never main's
    */
-  constructor({ root, generators, snapshotUpdate = SNAPSHOT_UPDATE, install }: MainMergeProps) {
+  constructor({
+    root,
+    generators,
+    snapshotUpdate = SNAPSHOT_UPDATE,
+    install,
+    rename = RENAME,
+    kitRoot
+  }: MainMergeProps) {
     this.root = root
     this.generators = generators ?? MainMerge.generatorsOf(root)
     this.snapshotUpdate = snapshotUpdate
     this.install = install ?? EpicConfig.of(root).installCommand.split(/\s+/).filter(Boolean)
+    this.rename = rename
+    this.kitRoot = kitRoot ?? MainMerge.kitRootOf(root)
   }
 
   /**
@@ -247,21 +277,103 @@ export class MainMerge {
   ): MergeMainReport[] {
     const top = EpicConfig.of(root).top
     const epic = top?.worktreeNameOf(root)
-    if (!top || !epic) return [make(root).run(mode)]
+    if (!top || !epic) {
+      const merge = make(root)
+      const report = merge.run(mode)
+      return [report.result === "merged" ? { ...report, ...merge.renameOldNames() } : report]
+    }
     const checkouts = top.repoCheckouts(epic).filter(({ worktree }) => existsSync(join(worktree, ".git")))
-    const reports: MergeMainReport[] = []
+    const merged: { merge: MainMerge; report: MergeMainReport }[] = []
     for (const { repo, worktree } of [...checkouts.slice(1), ...checkouts.slice(0, 1)]) {
       if (mode === "continue" && !Git.run(["rev-parse", "-q", "--verify", "MERGE_HEAD"], worktree).ok) continue
+      const merge = make(worktree)
       try {
-        reports.push({ ...make(worktree).run(mode), repo })
+        merged.push({ merge, report: { ...merge.run(mode), repo } })
       } catch (error) {
         const branch = Git.out(["branch", "--show-current"], worktree) ?? ""
-        reports.push({ ...emptyReport(branch), repo, error: (error as Error).message })
+        merged.push({ merge, report: { ...emptyReport(branch), repo, error: (error as Error).message } })
       }
     }
-    if (mode === "continue" && !reports.length)
+    if (mode === "continue" && !merged.length)
       throw new EpicCommandError("merge-main --continue:  no merge in progress")
-    return reports
+    // Renamed once EVERY repo is merged:  the kit's `spell` and Spell UI's old names are the merged ones then
+    return merged.map(({ merge, report }) =>
+      report.result === "merged" && !report.error ? { ...report, ...merge.renameOldNames() } : report
+    )
+  }
+
+  /**
+   * Rewrite the old Spell UI names the branch still writes (`<ui-docs-toc>` => `<ui-toc>`), after a merge:
+   * `spell ui rename --write` over its files, from the kit's root, committed on their own (epic `epic-engine` I143).
+   * - Why (Owen's pick on epic `epic-engine` Q27):  a branch cut before a rename keeps writing the old tag, which then
+   *   draws an empty box where an example was
+   * - its files:  the branch's diff against the base branch, ON THE MERGED TREE (`renameFiles()`):
+   *   the files the branch added or changed, which `main`'s own rename sweep never saw;
+   *   NOT the merge's diff (`main`'s changes), which `main` already swept
+   * - committed as ONE commit of its own (`RENAME_MESSAGE`):  a tool's rewrite, reviewable apart from the merge;
+   *   only the files it rewrote, so nothing generated goes in
+   * - call after `run()` returned `merged`:  HEAD is the merge commit
+   * - `{}` when there's no kit (`kitRoot`), nothing to read, or nothing renamed
+   * - NEVER throws:  the merge is committed;  a kit with no `ui rename` (older), or a failure, is one line
+   *   (`renameSkipped`)
+   */
+  renameOldNames(): Pick<MergeMainReport, "renamed" | "renameSkipped"> {
+    const { root, rename, kitRoot } = this
+    if (!rename.length || !kitRoot) return {}
+    const command = rename.slice(0, 4).join(" ")
+    try {
+      const files = this.renameFiles()
+      if (!files.length) return {}
+      const run = spawnSync(rename[0]!, [...rename.slice(1), ...files.map((file) => join(root, file))], {
+        cwd: kitRoot,
+        encoding: "utf8",
+        maxBuffer: 64 * 1024 * 1024
+      })
+      if (run.status !== 0) {
+        const why = lastLine(`${run.stderr ?? ""}\n${run.stdout ?? ""}`) || run.error?.message || `exit ${run.status}`
+        return { renameSkipped: `\`${command}\` failed, nothing renamed:  ${why}` }
+      }
+      // What it left for a person (a value it can't see):  passed on
+      if (run.stderr) process.stderr.write(run.stderr)
+      const listed = new Set(files)
+      const renamed = renamedFiles(run.stdout)
+        .map((each) => ({ ...each, path: relative(root, resolve(kitRoot, each.file)) }))
+        .filter(({ path }) => listed.has(path))
+      if (!renamed.length) return {}
+      const paths = renamed.map(({ path }) => path)
+      const commit = Git.run(["commit", "-q", "-m", RENAME_MESSAGE, "--", ...paths], root)
+      if (!commit.ok) return { renameSkipped: `renamed, NOT committed (\`git commit\`:  ${lastLine(commit.err)})` }
+      return { renamed: renamed.map(({ file, renames }) => ({ file, renames })) }
+    } catch (error) {
+      return { renameSkipped: `\`${command}\` failed, nothing renamed:  ${(error as Error).message}` }
+    }
+  }
+
+  /**
+   * The files the rename step reads:  what the merged branch differs from the base branch in (`HEAD^2..HEAD`).
+   * - left out:  deleted files, generated ones (the generators' outputs, snapshots), and anything reached through a
+   *   link out of the checkout:  the shared content folder is NEVER touched
+   */
+  private renameFiles(): string[] {
+    const { root, generators } = this
+    const realRoot = realpathSync(root)
+    const generated = generators.flatMap((generator) => generator.outputs)
+    return Git.lines(["diff", "--name-only", "--diff-filter=d", "HEAD^2", "HEAD"], root).filter((file) => {
+      if (isSnapshot(file) || matchesAny(file, generated)) return false
+      const path = join(root, file)
+      return existsSync(path) && realpathSync(path).startsWith(realRoot + sep)
+    })
+  }
+
+  /**
+   * The kit's root for checkout `root`:  the nearest folder at or above it holding `bin/spell.mjs`;
+   * `undefined` outside a Spell kit (a repo using the epic tooling alone), so no rename step
+   */
+  static kitRootOf(root: string): string | undefined {
+    for (let folder = resolve(root); ; folder = dirname(folder)) {
+      if (existsSync(join(folder, KIT_PROGRAM))) return folder
+      if (dirname(folder) === folder) return undefined
+    }
   }
 
   /** where a checkout lists its generated files:  `<root>/.epic/generators.json5` (epic `epic-eject` T4) */
@@ -364,6 +476,36 @@ export type MainMergeProps = {
   generators?: Generator[]
   snapshotUpdate?: (tests: string[]) => string[]
   install?: string[]
+  rename?: string[]
+  kitRoot?: string
+}
+
+/**
+ * `spell ui rename`'s report, its lines `<file>:  <rename>;  <rename> (x4)`, as each file and its renames,
+ * every one with its count:  `<ui-docs-example> => <ui-example> (4)`.
+ * - the total line (`rewrote 5 old names in 2 files`) has no `:  `, so it's left out
+ */
+function renamedFiles(out: string): { file: string; renames: string[] }[] {
+  return out.split("\n").flatMap((line) => {
+    const match = /^(.+?):  (.+)$/.exec(line.trimEnd())
+    if (!match) return []
+    const renames = match[2]!.split(";  ").map((rename) => {
+      const counted = /^(.*) \(x(\d+)\)$/.exec(rename)
+      return counted ? `${counted[1]} (${counted[2]})` : `${rename} (1)`
+    })
+    return [{ file: match[1]!, renames }]
+  })
+}
+
+/** The last line of `text` with something on it. */
+function lastLine(text: string): string {
+  return (
+    text
+      .split("\n")
+      .map((line) => line.trim())
+      .filter(Boolean)
+      .at(-1) ?? ""
+  )
 }
 
 /**

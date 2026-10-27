@@ -1,5 +1,15 @@
 import { execFileSync } from "child_process"
-import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, realpathSync, rmSync, writeFileSync } from "fs"
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  realpathSync,
+  rmSync,
+  symlinkSync,
+  writeFileSync
+} from "fs"
 import { tmpdir } from "os"
 import { dirname, join } from "path"
 import { afterAll, describe, expect, test } from "vite-plus/test"
@@ -165,6 +175,90 @@ describe("MainMerge.run()", () => {
     change(repo, "main", { "yarn.lock": "v4\n" })
     const failing = new MainMerge({ root: repo, ...OPTIONS, install: ["node", "-e", "process.exit(1)"] }).run()
     expect(failing.installed).toMatchObject({ ok: false })
+  })
+})
+
+/**
+ * A stand-in for `spell ui rename --write`:  `<old-tag` => `<new-tag` in each file it's given,
+ * printing each file it changed as the real one does (`<file>:  <rename> (x2)`), from the folder it runs in
+ */
+const RENAME = `
+const fs = require("fs"), path = require("path")
+let files = 0
+for (const file of process.argv.slice(1)) {
+  const text = fs.readFileSync(file, "utf8")
+  const count = text.split("<old-tag").length - 1
+  if (!count) continue
+  files++
+  fs.writeFileSync(file, text.replaceAll("<old-tag", "<new-tag"))
+  console.log(path.relative(process.cwd(), file) + ":  <old-tag> => <new-tag>" + (count > 1 ? " (x" + count + ")" : ""))
+}
+console.log("rewrote old names in " + files + " files")
+`
+
+describe("the rename step (`renameOldNames()`)", () => {
+  /** A merge of `main` into a branch that wrote the old tag in its own files, run as `epic worktree merge-main` is. */
+  const mergeWith = (repo: string, rename: string[]) =>
+    MainMerge.runAll(repo, "start", (root) => new MainMerge({ root, ...OPTIONS, rename, kitRoot: root }))[0]!
+
+  test("the branch's own files with an old name are rewritten and committed on their own;  main's and generated ones aren't", () => {
+    const repo = makeRepo("rename")
+    const outside = join(TEMP, "rename-content")
+    put(outside, { "page.html": "<old-tag>\n" })
+    change(repo, "main", { "src/a.txt": "A2\n", "docs/main.html": "<old-tag> left by main\n" })
+    change(repo, "wip", {
+      "docs/page.html": "<old-tag></old-tag>\n<old-tag x>\n",
+      "src/b.txt": "<old-tag>\n",
+      "docs/clean.html": "nothing old\n"
+    })
+    // a link into the shared content folder, as an older checkout had one
+    symlinkSync(outside, join(repo, "epics"))
+    git(repo, "add", "epics")
+    git(repo, "commit", "-q", "-m", "a link")
+
+    const report = mergeWith(repo, ["node", "-e", RENAME])
+    expect(report.result).toBe("merged")
+    expect(report.renameSkipped).toBeUndefined()
+    expect(report.renamed).toEqual([
+      { file: "docs/page.html", renames: ["<old-tag> => <new-tag> (2)"] },
+      { file: "src/b.txt", renames: ["<old-tag> => <new-tag> (1)"] }
+    ])
+    expect(read(repo, "docs/page.html")).toBe("<new-tag></old-tag>\n<new-tag x>\n")
+    // main's own file, the generated output and the content folder:  untouched
+    expect(read(repo, "docs/main.html")).toBe("<old-tag> left by main\n")
+    expect(read(repo, "gen/out.txt")).toBe("A2\n<old-tag>\n")
+    expect(read(outside, "page.html")).toBe("<old-tag>\n")
+    expect(git(repo, "log", "-2", "--format=%s")).toBe(
+      "merge-main:  old Spell UI names renamed (spell ui rename)\nMerge main into wip"
+    )
+    expect(git(repo, "show", "--name-only", "--format=", "HEAD")).toBe("docs/page.html\nsrc/b.txt")
+    expect(git(repo, "status", "--porcelain")).toBe("")
+  })
+
+  test("a kit with no `ui rename`, or one that fails, is one line;  the merge stands", () => {
+    const repo = makeRepo("rename-missing")
+    change(repo, "main", { "src/a.txt": "A2\n" })
+    change(repo, "wip", { "docs/page.html": "<old-tag>\n" })
+    const report = mergeWith(repo, ["node", "-e", "console.error(\"error: unknown command 'ui'\");  process.exit(1)"])
+    expect(report.result).toBe("merged")
+    expect(report.renamed).toBeUndefined()
+    expect(report.renameSkipped).toMatch(/failed, nothing renamed:  error: unknown command 'ui'$/)
+    expect(read(repo, "docs/page.html")).toBe("<old-tag>\n")
+    expect(git(repo, "log", "-1", "--format=%s")).toBe("Merge main into wip")
+  })
+
+  test("outside a Spell kit, no step;  a fast-forward has nothing of the branch's to read", () => {
+    const repo = makeRepo("rename-none")
+    expect(MainMerge.kitRootOf(repo)).toBeUndefined()
+    change(repo, "main", { "docs/page.html": "<old-tag>\n" })
+    const report = mergeWith(repo, ["node", "-e", RENAME])
+    expect(report).toMatchObject({ result: "fast-forward" })
+    expect(report.renamed).toBeUndefined()
+    expect(read(repo, "docs/page.html")).toBe("<old-tag>\n")
+    const kit = join(TEMP, "rename-kit")
+    put(kit, { "bin/spell.mjs": "" })
+    mkdirSync(join(kit, "spell-ui"))
+    expect(MainMerge.kitRootOf(join(kit, "spell-ui"))).toBe(kit)
   })
 })
 

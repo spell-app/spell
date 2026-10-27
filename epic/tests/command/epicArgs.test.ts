@@ -62,6 +62,10 @@ const OWENS_ROWS: [string[], string[][]][] = [
   [["unqueue", "seo#J3"], [["unqueue", "seo", "J3"]]],
   // the inbox's own verb first (Owen's names, repo-split P13)
   [["inbox", "working", "seo#J3", "on"], [["inbox", "seo", "working", "J3", "on"]]],
+  // epic `epic-engine` I147:  a phase being worked on, by number;  Claude writing its plan
+  [["inbox", "working", "seo#P20", "on"], [["inbox", "seo", "working", "P20", "on"]]],
+  [["phase", "seo#P20", "planning"], [["phase", "seo", "20", "planning"]]],
+  [["phase", "seo#P20", "planning", "off"], [["phase", "seo", "20", "planning", "off"]]],
   [["inbox", "done", "seo#J3"], [["inbox", "seo", "done", "J3"]]],
   [["inbox", "clear", "seo#J3"], [["inbox", "seo", "clear", "J3"]]],
   [["inbox", "watch", "seo", "--session", "abc"], [["inbox", "seo", "watch", "--session", "abc"]]],

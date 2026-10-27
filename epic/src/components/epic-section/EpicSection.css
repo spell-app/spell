@@ -40,8 +40,19 @@
     padding-inline: min(var(--epic-inset, 16px), var(--epic-card-inset, 16px)) var(--_epic-fold-end);
   }
   :host(:state(open):not([kind="overview-part"])) ui-section:not(:state(stuck))::part(title) {
-    border-start-start-radius: var(--epic-section-radius, 14px);
-    border-start-end-radius: var(--epic-section-radius, 14px);
+    border-start-start-radius: var(--epic-section-top-radius, var(--epic-section-radius, 14px));
+    border-start-end-radius: var(--epic-section-top-radius, var(--epic-section-radius, 14px));
+  }
+  /*
+   * folded:  rounded too, but a RUN with the sections it touches (Owen, 2026-10-26:  "top of group 7 shouldn't be
+   * square, bottom of 7 & top of 8 should be square"):  square where two touch, round at the run's free ends;  the page
+   * sheet (`EpicSection.runs.css`) zeroes the touching corners through `--epic-section-top-radius` / `-bottom-radius`
+   */
+  :host(:not(:state(open)):not([kind="overview-part"])) ui-section:not(:state(stuck))::part(title) {
+    border-start-start-radius: var(--epic-section-top-radius, var(--epic-section-radius, 14px));
+    border-start-end-radius: var(--epic-section-top-radius, var(--epic-section-radius, 14px));
+    border-end-start-radius: var(--epic-section-bottom-radius, var(--epic-section-radius, 14px));
+    border-end-end-radius: var(--epic-section-bottom-radius, var(--epic-section-radius, 14px));
   }
   :host {
     --_epic-fold-band: var(--epic-band-section, transparent);

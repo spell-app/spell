@@ -237,8 +237,11 @@ export const CLOSED_STATUSES = ["done", "decided", "canceled"] as const
 /** The children a section counts:  its items, or its phases (`<epic-phase status>`). */
 export const COUNTED = ":scope > epic-item, :scope > epic-phase"
 
-/** The attributes of a counted child that change its count or its state:  a change re-counts. */
-export const COUNT_ATTRIBUTES = ["status", "state"]
+/**
+ * The attributes of a counted child that change its count or its state:  a change re-counts.
+ * - an item's drawn state reads them all (`DrawnState.fieldsOf()`, `STATE_ATTRIBUTES`)
+ */
+export const COUNT_ATTRIBUTES = ["status", "state", "changed", "reviewed", "queued", "working"]
 
 /*
  * Its runs (the item lines and phase title rows drawn as rounded cards) are the page sheet's since epic `epic-engine`
@@ -330,7 +333,21 @@ export type SectionCount = {
    * what the rail counts (decision Q20:  red, only what needs him;  no pill for none)
    */
   attention: number
+  /** of those, the ones waiting on Owen's pick (`replied`, orange):  the toolbar's orange badge */
+  replied?: number
+  /**
+   * the phases at work now:  under way (`status="active"`), or being worked on (the inbox's `working`, epic
+   * `epic-engine` I147):  the toolbar's blue badge on the Phases button (P43)
+   */
+  running?: number
 }
+
+/**
+ * Fired by a counted section when its live count changes without its markup changing (an item being worked on, a
+ * phase's plan being written:  the review inbox), so the docs runtime counts the toolbar's badges again.
+ * - bubbles out of its shadow root;  no detail
+ */
+export const COUNT_CHANGED = "epic-count-changed"
 
 /** Classes of the filter's box and its chips (`<epic-state-filter>`'s, and the box its owners put it in). */
 export const FILTER = "filter"

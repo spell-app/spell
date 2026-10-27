@@ -21,7 +21,6 @@ import { epicItemVocabulary } from "./EpicItem.en"
 import { CONTROLS, Fold } from "./Fold"
 import {
   BED_ICON,
-  CALM_ID,
   CANCELED,
   CELL,
   CHIP,
@@ -36,7 +35,6 @@ import {
   FOLD,
   GIT,
   HAS_DETAILS,
-  ITEM_STATES,
   LABEL,
   LINE,
   MORE_TAG,
@@ -49,8 +47,7 @@ import {
   REVIEW,
   STATE_TIP_KEYS,
   STATUS_SLOT,
-  STATUS_STATES,
-  ItemAge,
+  DrawnState,
   THREAD_ATTRIBUTES,
   TITLE,
   TOGGLE,
@@ -59,6 +56,7 @@ import {
   UNFOLDED,
   type ChipMark,
   type EpicItemVocabulary,
+  type StateFields,
   type ItemState,
   type ReviewLabel,
   isTodo
@@ -220,29 +218,21 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
    * - yes for an open judgement call or issue, not reviewed, nothing queued or under way:
    *   the items red for want of a review (`PlanReader.itemState()`)
    */
-  readonly canCalm = createMemo(() => {
-    const { id, status, reviewed, queued, working } = this
-    return CALM_ID.test(id ?? "") && status === "open" && !reviewed && !queued && !working
-  })
+  readonly canCalm = createMemo(() => DrawnState.canCalm(this.stateFields()))
 
   /**
-   * Where it stands:  `state` as the script wrote it,
-   * else by its status (`STATUS_STATES`:  decided or done `recent`, canceled `old`, else `open`).
-   * - Claude's agent at work on it (the review inbox's `working`, the page's live view of it):
-   *   `progress` (blue), at once, before the script rewrites `state`
-   * - Owen's urgency, not applied yet (its id chip clicked):
-   *   `open` (yellow) when not urgent, `attention` (red) when urgent, at once
+   * Where it stands, as drawn:  `DrawnState.of()`, the ONE rule its section's and the page's counts use too.
+   * - Claude's agent at work on it (the review inbox's `working`):  `progress` (blue), at once
+   * - Owen's urgency, not applied yet:  `open` or `attention`, at once
+   * - else `state` as the tool wrote it, or by its status, greyed with age
    */
-  readonly itemState = createMemo((): ItemState => {
-    if (this.reviewState.workedOn()) return "progress"
-    const urgency = this.reviewState.urgency()
-    if (urgency && this.canCalm()) return urgency.calm ? "open" : "attention"
-    const state = this.state
-    const written = state && (ITEM_STATES as readonly string[]).includes(state) ? (state as ItemState) : undefined
-    const shown = ItemAge.shown(written ?? STATUS_STATES[this.status ?? ""] ?? "open", this.changed, this.reviewed)
-    // his check pressed, not applied yet:  grey at once too
-    return shown === "recent" && this.reviewState.mark()?.action === "approve" ? "old" : shown
-  })
+  readonly itemState = createMemo((): ItemState => DrawnState.of(this.stateFields(), this.reviewState.liveOf()))
+
+  /** Its attributes its drawn state reads (`DrawnState.of()`), tracked. */
+  private stateFields(): StateFields {
+    const { id, state, status, changed, reviewed, queued, working } = this
+    return { id, state, status, changed, reviewed, queued, working }
+  }
 
   /**
    * Where Owen's answer on it stands, as its id chip wears it (Owen, 2026-10-10:  "leaning into outlines"):

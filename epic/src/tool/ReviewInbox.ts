@@ -96,6 +96,10 @@ import { CommentList, type Comment, type IdentifiedComment } from "./CommentList
  *       (`claimWake()`), from the epic page or any page that wakes the same epic
  *     - `state` `waking` while the wake is under way, claimed under the lock:  two Sends at once wake once
  *     - gone once a session listens (`setListening()`), or `WAKE_COOLDOWN_MS` after `at` (`liveWoken()`)
+ *   - `reviewAsked`:  ISO time Owen asked for a review from the page ("start review") while the session's inbox
+ *     POLLER runs (epic `epic-engine` I144), else `null`:  the poller's next look says so (`📬`), which wakes the
+ *     session, instead of typing into it (`askReview()`)
+ *     - gone once a session waits on the inbox itself (`setListening()` with no poller), `epic inbox watch`
  * - Node only (`node:fs`, `spell/server`'s lock):  NOT in the `spell-epic` barrel, imported by path.
  *   Imports no other file of the tool but `CommentList` (its comments).
  * - From the docs tools' `inbox.js` (epic `epic-components`, P7), which now forwards here.
@@ -127,6 +131,8 @@ export class ReviewInbox {
   woken: InboxWoken | null = null
   /** what the listening session is doing now (P35:  the page's toolbar line), else `null` */
   doing: InboxDoing | null = null
+  /** when Owen asked for a review from the page, for the session's poller to pass on (I144), else `null` */
+  reviewAsked: string | null = null
 
   /**
    * An inbox:  empty, or the fields of `record` (a file's JSON) over an empty one's.
@@ -244,6 +250,7 @@ export class ReviewInbox {
       !Object.keys(this.canceled).length &&
       !Object.keys(this.comments).length &&
       !this.listening &&
+      !this.reviewAsked &&
       !this.liveWoken()
     )
   }
@@ -586,7 +593,19 @@ export class ReviewInbox {
     if (session === null) this.doing = null
     // a session took over:  the wake did its job, and the next Send with nobody listening may wake again
     if (session !== null) this.woken = null
+    // the session itself waits on the inbox (not its poller):  the review it was asked for has started
+    if (session !== null && !pid) this.reviewAsked = null
     return this.listening
+  }
+
+  /**
+   * Owen asked for a review from the page ("start review") while the session's poller runs (epic `epic-engine` I144):
+   * its next look prints the `📬` line asking for `/epic review`, which wakes the session.
+   * - stays until the session waits on the inbox itself (`setListening()`)
+   */
+  askReview(at = isoTime()): string {
+    this.reviewAsked = at
+    return at
   }
 
   /**
@@ -998,6 +1017,7 @@ export type InboxRecord = {
   comments: Record<string, Comment>
   woken: InboxWoken | null
   doing: InboxDoing | null
+  reviewAsked: string | null
 }
 
 /** What the listening session is doing now (`ReviewInbox.doing`, epic `epic-engine` P35). */
@@ -1115,8 +1135,10 @@ export type InboxWoken = { at: string; state: "waking" | WokenState; did: string
  * - `typed`:  `/epic review <epic>` typed into the epic's running session
  * - `opened`:  a new session opened in an open window (the epic's worktree's, or a main one), the command typed in
  * - `launched`:  the epic's worktree window opened (`epic window launch`), a new session in it, the command typed in
+ * - `told`:  the session's inbox poller runs (epic `epic-engine` I144):  it hears the Send and wakes the session,
+ *   nothing typed
  */
-export type WokenState = "typed" | "opened" | "launched"
+export type WokenState = "typed" | "opened" | "launched" | "told"
 
 /** `ReviewInbox.claimWake()`'s answer:  wake now (`due`, the claim's `at`), or why not. */
 export type WakeClaim =

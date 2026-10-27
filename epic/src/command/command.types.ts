@@ -1,5 +1,6 @@
 /**
  * Types for the `epic` command's verb groups (`spell-epic/command/`):
+ * - spell ui rename: leave this file (its merge report's example quotes an old name on purpose)
  * Claude Code sessions, worktrees, parked work, taking stock, shared content, requests.
  * - Runtime-light:  types, constants, the folder's one error class, and pure helpers over them.
  * - Its position:  the BOTTOM of the folder's imports, and loaded by plain `node` too (types stripped):
@@ -537,6 +538,14 @@ export type MergeMainReport = {
   /** generated files left uncommitted, moved aside before the merge (`StrayFiles`);  `ditchedTo`:  where */
   ditched?: string[]
   ditchedTo?: string
+  /**
+   * Spell UI's old names the branch brought in, rewritten after the merge by `spell ui rename --write`
+   * (`MainMerge.renameOldNames()`, epic `epic-engine` I143), committed on their own:
+   * each file, from the kit's root, with its renames (`<ui-docs-toc> => <ui-toc> (2)`);  left out when none
+   */
+  renamed?: { file: string; renames: string[] }[]
+  /** why that step didn't run, in one line:  a kit with no `spell ui rename`, a failure;  never fails the merge */
+  renameSkipped?: string
 }
 
 /**

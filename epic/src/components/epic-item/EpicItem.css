@@ -77,7 +77,7 @@
      * - 1px more below than above:  the shadow over its top reads as a border
      * - no right padding:  the review buttons sit as far from its right as from its top, 2px (Owen, 2026-10-25)
      */
-    padding: 5px 0 6px 6px;
+    padding: 5px 0 8px 6px;
     border-start-start-radius: var(--_epic-item-top-radius);
     border-start-end-radius: var(--_epic-item-top-radius);
     border-end-start-radius: var(--_epic-item-bottom-radius);
@@ -137,8 +137,6 @@
     /* its top rounded, free inside the drawer (I105);  its bottom the drawer's */
     --epic-note-radius-top: 10px;
     --epic-note-radius-bottom: var(--_epic-item-bottom-radius);
-    /* its paper ring only above, 1px in at the sides:  the drawer's side rules show down to its rounded corners */
-    box-shadow: 0 -4px 0 -1px var(--ui-background, Canvas);
     /* one line of shadow, its own (EpicReview.css) */
   }
   /* scrolled right under the stuck section titles:  square on top, flush against them (`watchScroll()`) */
@@ -253,6 +251,9 @@
     margin-inline-start: auto;
     /* 1px of the line's fill right of the review buttons' ring (Owen, 2026-10-25:  "1px white gap, not 3ish px like now") */
     margin-inline-end: -1.34px;
+    /* 2px lower than the line's first line puts it (Owen, 2026-10-26:  "move bullhorn/button group down 2px");  drawn, not laid
+       out;  the line's bottom padding 2px more to keep room under it */
+    translate: 0 2px;
   }
   ::slotted([slot="actions"]) {
     flex: none;
@@ -441,16 +442,13 @@
   /*
    * The note box, last in the details (Owen, 2026-10-07):
    * sticks to the window's bottom while the item is open and taller than the window;
-   * a ring of paper hides the text scrolling past its rounded corners
+   * no ring of paper round it:  it showed as a white band above the box on a tinted page (Owen, 2026-10-26:  "Lose the
+   * white border above comment field")
    */
   .details > [part~="note-box"] {
     position: sticky;
     z-index: 1;
     bottom: 4px;
-  }
-  /* the ring on the box itself (`<epic-review>`'s), so it follows its rounded corners */
-  .details > [part~="note-box"]::part(base) {
-    box-shadow: 0 0 0 4px var(--ui-background, Canvas);
   }
   .note {
     margin: 0 0 4px;
@@ -530,14 +528,14 @@
   }
   /*
    * marked in this pass, not applied yet (epic `epic-engine` P43):  ONE ring, 2px dotted in the blue badge's blue, in
-   * place of its own, and red letters (Owen, 2026-10-25:  "red text, single blue 2px dotted";  a blue ring round its
-   * own, before)
+   * place of its own, and blue letters:  all blue, "handed to Claude" (Owen, 2026-10-26;  red letters before, which read
+   * as "needs you")
    */
   .chip[data-marked] {
     border: 2px dotted var(--ui-blue, #2185d0);
     outline: none;
     background: transparent;
-    color: var(--ui-red-text, var(--ui-red, #db2828));
+    color: var(--ui-blue-text, var(--ui-blue, #2185d0));
   }
 
   /*

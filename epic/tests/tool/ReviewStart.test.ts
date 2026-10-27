@@ -12,6 +12,7 @@ import { dirname, join } from "node:path"
 import { afterAll, beforeAll, beforeEach, expect, test } from "vite-plus/test"
 
 import { EpicConfig } from "spell-epic/config/EpicConfig"
+import { ReviewInbox } from "spell-epic/tool/ReviewInbox"
 import { ReviewStart } from "spell-epic/tool/ReviewStart"
 import { fakeMainCheckout, fakeWorktree } from "spell/server/test/checkouts"
 
@@ -23,6 +24,10 @@ let bridgePort: number
 const asked: [string, unknown][] = []
 /** the fake bridge's answer:  ok, or refused */
 let refuse = false
+/** what else the fake bridge answers (`typed`, epic `epic-engine` I144) */
+let bridgeSays: object = {}
+/** the inbox poller each session's process has, by its pid (`ReviewStart`'s `pollerOf`) */
+const pollers = new Map<number, number>()
 /** what `launch` was asked:  `[args, cwd]` */
 const launched: [string[], string][] = []
 
@@ -43,7 +48,7 @@ beforeAll(async () => {
       asked.push([request.url!.slice(1), JSON.parse(text)])
       response.setHeader("content-type", "application/json")
       response.statusCode = refuse ? 409 : 200
-      response.end(JSON.stringify(refuse ? { ok: false, error: "no thanks" } : { ok: true }))
+      response.end(JSON.stringify(refuse ? { ok: false, error: "no thanks" } : { ok: true, ...bridgeSays }))
     })
   })
   await new Promise<void>((done) => bridge.listen(0, "127.0.0.1", done))
@@ -63,13 +68,19 @@ beforeEach(() => {
   asked.splice(0)
   launched.splice(0)
   refuse = false
+  bridgeSays = {}
+  pollers.clear()
   rmSync(join(home, "windows", `${process.pid}.json`), { force: true })
   rmSync(join(root, ".claude"), { recursive: true, force: true })
 })
 
 /** a `ReviewStart` on the scratch checkout `at` (default:  its root), `launch` recorded, never run */
 function starter(at = root) {
-  return new ReviewStart(at, { launch: (args, cwd) => void launched.push([args, cwd]), airplane: () => false })
+  return new ReviewStart(at, {
+    launch: (args, cwd) => void launched.push([args, cwd]),
+    airplane: () => false,
+    pollerOf: (pid) => pollers.get(pid)
+  })
 }
 
 /** this process's window, showing `folders` */
@@ -167,7 +178,7 @@ test("a session resumed in a new process, mid-turn:  found by its transcript's t
       did: "typed /epic review big into 🚧 big",
       message: "Typed /epic review big into 🚧 big:  press Enter there.  It reads it once its turn ends."
     })
-    expect(asked).toEqual([["open-session", { sessionId: id, prompt: "/epic review big" }]])
+    expect(asked).toEqual([["open-session", { sessionId: id, prompt: "/epic review big", title: "🚧 big" }]])
     // a name the session was given (`/rename`, the prompt gate) is its title as it is
     asked.splice(0)
     writeFileSync(
@@ -205,9 +216,99 @@ test("feedback, woken from a page no epic owns:  a new session in a main window;
   try {
     const wake = await starter().wake("feedback")
     expect(wake).toMatchObject({ state: "typed", did: "typed /epic review feedback into 🚧 feedback" })
-    expect(asked).toEqual([["open-session", { sessionId: id, prompt: "/epic review feedback" }]])
+    expect(asked).toEqual([["open-session", { sessionId: id, prompt: "/epic review feedback", title: "🚧 feedback" }]])
   } finally {
     rmSync(join(home, "sessions", `${process.pid}.json`), { force: true })
     rmSync(join(root, "epics"), { recursive: true, force: true })
   }
+})
+
+////////////////
+// ## A session whose tab is open, or whose poller runs (epic `epic-engine` I144)
+////////////////
+
+// r39:  repo-split's session was open in its window;  "start review" typed into it through VS Code, which refused
+// ("Session is already open.  Your prompt was not applied"), and the page said it was typed
+
+/** A session titled for epic `big`, idle, in its worktree's window, for `run`;  its record removed after. */
+async function withBigSession(run: (id: string, planDoc: string) => Promise<void>) {
+  const id = "0f0f0f0f-9999-aaaa-bbbb-cccccccccccc"
+  const folder = worktree("big")
+  window([folder])
+  const planDoc = join(root, "epics", "big", "big.plan.html")
+  mkdirSync(dirname(planDoc), { recursive: true })
+  writeFileSync(
+    join(home, "sessions", `${process.pid}.json`),
+    JSON.stringify({ pid: process.pid, sessionId: id, cwd: folder, status: "idle", name: "🚧 big", nameSource: "hook" })
+  )
+  try {
+    await run(id, planDoc)
+  } finally {
+    rmSync(join(home, "sessions", `${process.pid}.json`), { force: true })
+    rmSync(join(root, "epics"), { recursive: true, force: true })
+  }
+}
+
+test("start:  the session's inbox poller runs:  asked through the inbox, nothing typed", async () => {
+  await withBigSession(async (_id, planDoc) => {
+    pollers.set(process.pid, 4242)
+    const start = await starter().start("big", planDoc)
+    expect(start).toMatchObject({ state: "asked", command: "/epic review big", sessions: ["🚧 big"] })
+    expect(start.message).toBe(
+      "Asked 🚧 big to start the review:  its inbox poller wakes it in a few seconds, nothing typed."
+    )
+    expect(asked).toEqual([])
+    expect(ReviewInbox.read(ReviewInbox.pathFor(planDoc)).reviewAsked).toBeTruthy()
+  })
+})
+
+test("start:  its tab open already (the bridge types nothing):  says so plainly, never that it typed", async () => {
+  await withBigSession(async (id, planDoc) => {
+    bridgeSays = { typed: false }
+    const start = await starter().start("big", planDoc)
+    expect(start.state).toBe("tab-open")
+    expect(start.message).toBe(
+      "🚧 big's tab is open, and VS Code types only into a session it opens:  nothing typed.  " +
+        "Paste /epic review big there:  it's copied."
+    )
+    expect(start.message).not.toMatch(/Typed/)
+    expect(asked).toEqual([["open-session", { sessionId: id, prompt: "/epic review big", title: "🚧 big" }]])
+  })
+})
+
+test("start:  typed (the bridge says so):  press Enter there;  an older bridge that can't tell says what to do if not", async () => {
+  await withBigSession(async (_id, planDoc) => {
+    bridgeSays = { typed: true }
+    expect(await starter().start("big", planDoc)).toMatchObject({
+      state: "sent",
+      message: "Typed /epic review big into 🚧 big:  press Enter there."
+    })
+    bridgeSays = {}
+    const older = await starter().start("big", planDoc)
+    expect(older.state).toBe("sent")
+    expect(older.message).toMatch(/^Asked VS Code to type \/epic review big into 🚧 big/)
+    expect(older.message).toMatch(/If VS Code says the session is already open, nothing was typed/)
+  })
+})
+
+test("wake:  the session's inbox poller runs:  told, nothing typed, kept for the cooldown", async () => {
+  await withBigSession(async () => {
+    pollers.set(process.pid, 4242)
+    const wake = await starter().wake("big")
+    expect(wake).toMatchObject({
+      state: "told",
+      did: "told 🚧 big through its inbox poller",
+      message: "Told 🚧 big through its inbox poller:  it wakes in a few seconds, nothing typed."
+    })
+    expect(asked).toEqual([])
+  })
+})
+
+test("wake:  its tab open already:  `tab-open`, nothing typed, nothing kept", async () => {
+  await withBigSession(async () => {
+    bridgeSays = { typed: false }
+    const wake = await starter().wake("big")
+    expect(wake).toMatchObject({ state: "tab-open", did: "" })
+    expect(wake.message).toMatch(/^🚧 big's tab is open/)
+  })
 })
