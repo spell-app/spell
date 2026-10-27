@@ -149,6 +149,14 @@
 .spell-comment-mark ui-button,
 ui-button.spell-comment-float {
   --ui-button-basic-border-width: 0px;
+  /* a disc of the page's paper behind it, no ring, so it reads over the text it sits on (Owen, 2026-10-26, r41:  "bullhorn icon
+     should be in white circle so it's visible above text") */
+  --ui-button-basic-background: var(--epic-card, var(--ui-surface, Canvas));
+}
+.spell-comment-mark ui-button::part(button),
+ui-button.spell-comment-float::part(button) {
+  border-radius: 50%;
+  background: var(--epic-card, var(--ui-surface, Canvas));
 }
 :is(.spell-doc-main, .site-main)
   :is(

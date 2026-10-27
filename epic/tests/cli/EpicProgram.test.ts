@@ -77,6 +77,14 @@ describe.skipIf(!SPELL_APP || !existsSync(resolve(EpicConfig.contentOf(SPELL_APP
       expect(group.stdout).toMatch(/^ {2}working +Claude is thinking/m)
     })
 
+    // epic `epic-engine` I147:  a phase's plan being written shows on its page
+    test("phase --help:  planning, beside its statuses", () => {
+      const { status, stdout } = epic(["phase", "--help"])
+      expect(status).toBe(0)
+      expect(stdout).toContain("<epic>#P3 planning [off]")
+      expect(stdout).toMatch(/planning:\s+Claude is writing\s+its plan/)
+    })
+
     test("an unknown verb, or a group's:  exit 1, listing the verbs", () => {
       const verb = epic(["bogus"])
       expect(verb.status).toBe(1)

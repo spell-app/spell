@@ -46,6 +46,8 @@ This file guides AI coding agents (Claude Code, Codex, and others) working in sp
 - Hooks:  [hooks.json](hooks/hooks.json) and the scripts beside it.
   - Every hook exits 0 whatever happens.
   - Except the worktree hook:  its failure is Claude Code's answer.
+  - And the inbox poller, the `asyncRewake` `Stop` hook (`monitors/listen.mjs --hook`, epic `epic-engine` I144):
+    it runs in the background and exits 2 with its `📬` line, which is how it wakes the session.
 - Removing a worktree stops its page and vite servers FIRST (`CheckoutServers`, epic `epic-engine` I53):
   - `epic worktree remove <name>`, never a bare `git worktree remove`, in the skills and anything new
   - the worktree hook and `epic worktree move` do it themselves;  the session-start hook stops the rest, hourly

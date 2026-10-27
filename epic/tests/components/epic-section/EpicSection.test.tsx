@@ -261,7 +261,7 @@ describe("<epic-section> counts and state filter", () => {
     expect(entry()).toEqual({
       label: "1. Questions",
       icon: "file circle question",
-      count: { open: 1, total: 3, attention: 1 }
+      count: { open: 1, total: 3, attention: 1, replied: 0, running: 0 }
     })
     // right after a change, before any memo or observer has caught up:  what the live update reads
     host.querySelector("#q1")!.setAttribute("status", "decided")

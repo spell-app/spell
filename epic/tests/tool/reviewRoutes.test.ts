@@ -73,6 +73,8 @@ beforeAll(async () => {
   // spell-epic's own registry too, empty:  else a real window of Owen's (its extension's bridge) is found and typed into
   process.env.SPELL_EPIC_WINDOWS_DIR = join(home, "epic-windows")
   process.env.SPELL_AIRPLANE_FILE = join(home, "airplane.json")
+  // the sessions' inbox pollers' files, empty:  never the real ones (epic `epic-engine` I144)
+  process.env.SPELL_EPIC_LISTENERS_DIR = join(home, "listeners")
   root = mkdtempSync(join(tmpdir(), "review-routes-"))
   mkdirSync(join(root, ".git"))
   for (const page of Object.values(PAGES)) {
@@ -93,6 +95,7 @@ afterAll(async () => {
   delete process.env.SPELL_WINDOWS_DIR
   delete process.env.SPELL_EPIC_WINDOWS_DIR
   delete process.env.SPELL_AIRPLANE_FILE
+  delete process.env.SPELL_EPIC_LISTENERS_DIR
   rmSync(home, { recursive: true, force: true })
 })
 
@@ -411,8 +414,26 @@ describe("start, and waking the epic", () => {
     expect(got.status).toBe(200)
     expect(got.body).toMatchObject({ state: "sent", command: "/epic review big", sessions: ["🚧 big"] })
     expect(asked).toEqual([
-      ["open-session", { sessionId: "00000000-0000-0000-0000-000000000000", prompt: "/epic review big" }]
+      [
+        "open-session",
+        { sessionId: "00000000-0000-0000-0000-000000000000", prompt: "/epic review big", title: "🚧 big" }
+      ]
     ])
+  })
+
+  // epic `epic-engine` I144, request r39
+  test("one session titled for the epic, its inbox poller running:  asked through the inbox, nothing typed", async () => {
+    sessions(["🚧 big", process.pid])
+    mkdirSync(join(home, "listeners"), { recursive: true })
+    writeFileSync(join(home, "listeners", `${process.pid}.pid`), `${process.ppid}\n`)
+    try {
+      const got = await post("start", { page: PLAN_URL })
+      expect(got.body).toMatchObject({ state: "asked", command: "/epic review big", sessions: ["🚧 big"] })
+      expect(asked).toEqual([])
+      expect(written(PAGES.plan).reviewAsked).toBeTruthy()
+    } finally {
+      rmSync(join(home, "listeners"), { recursive: true, force: true })
+    }
   })
 
   test("none:  nothing sent, and says so", async () => {
@@ -467,7 +488,10 @@ describe("start, and waking the epic", () => {
       message: "Typed /epic review big into 🚧 big:  press Enter there."
     })
     expect(asked).toEqual([
-      ["open-session", { sessionId: "00000000-0000-0000-0000-000000000000", prompt: "/epic review big" }]
+      [
+        "open-session",
+        { sessionId: "00000000-0000-0000-0000-000000000000", prompt: "/epic review big", title: "🚧 big" }
+      ]
     ])
     // the page's pill says it, from the inbox, until a session listens
     expect(first.body.woken).toMatchObject({ state: "typed", did: "typed /epic review big into 🚧 big" })

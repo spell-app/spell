@@ -72,8 +72,9 @@ import { Worktrees } from "./Worktrees"
  *   - `window [pid]`:  the VS Code window id a process runs in (default this session's)
  *   - `transcript <id prefix>`:  another session's prompts, last reply and waiting question
  *   - `listen [--json] [--monitor <pid>]`:  ONE look at THIS session's epic page for it (`InboxMonitor`):  takes the
- *     listener's place, says what's waiting;  the plugin's monitor (`InboxPoller`) runs it as files change, `--json`,
- *     its own pid as `--monitor`, which holds the place while it runs
+ *     listener's place, says what's waiting;  the session's inbox poller (`InboxPoller`:  the plugin's `Stop` hook in
+ *     every session, its monitor in a terminal one) runs it as files change, `--json`, its own pid as `--monitor`,
+ *     which holds the place while it runs
  *   - `--json` (`list`, `find`, `transcript`):  the data instead of lines
  * - Node built-ins only, plus the repo's config:  no spell.
  * - Was `session.py` and `transcript.py`.

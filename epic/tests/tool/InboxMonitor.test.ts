@@ -95,10 +95,52 @@ test("check:  this session's own /epic review wait (no process) keeps the inbox;
   expect(ReviewInbox.read(inboxFile).listening?.pid).toBeUndefined()
 })
 
-test("check:  another live monitor of this session holds it (an old one, after a reload);  this one stands back", () => {
+// epic `epic-engine` I144:  every turn's end starts a new poller (the `Stop` hook);  the last turn's may still run
+test("check:  an older poller of this session holds it (the last turn's hook);  this newer one takes over", () => {
   ReviewInbox.update(inboxFile, (box) => box.setListening("s1", undefined, process.ppid))
+  expect(monitor().check(MONITOR)).toMatchObject({ watch: [inboxFile], waiting: false })
+  expect(ReviewInbox.read(inboxFile).listening).toMatchObject({ session: "s1", pid: process.pid })
+})
+
+test("check:  another session's live poller holds it;  this one stands back", () => {
+  ReviewInbox.update(inboxFile, (box) => box.setListening("other", undefined, process.ppid))
   expect(monitor().check(MONITOR)).toMatchObject({ watch: [], recheckMs: 5 * 60_000 })
   expect(ReviewInbox.read(inboxFile).listening?.pid).toBe(process.ppid)
+})
+
+// epic `epic-engine` I144:  "start review" while the session's poller runs asks through the inbox, not by typing
+test("check:  a review asked for from the page is waiting, its own line;  gone once the session's own wait listens", () => {
+  const each = monitor()
+  each.check(MONITOR)
+  ReviewInbox.update(inboxFile, (box) => box.askReview())
+  expect(each.check(MONITOR)).toMatchObject({ waiting: true, notice: InboxMonitor.askNotice("x") })
+  expect(InboxMonitor.askNotice("x")).toContain("/epic review x")
+  // the session's `/epic review` (`epic inbox watch`):  no poller's pid
+  ReviewInbox.update(inboxFile, (box) => box.setListening("s1"))
+  expect(ReviewInbox.read(inboxFile).reviewAsked).toBeNull()
+})
+
+test("check:  a review asked AND work sent:  the work's line, which takes the session to its review anyway", () => {
+  const each = monitor()
+  each.check(MONITOR)
+  ReviewInbox.update(inboxFile, (box) => {
+    box.askReview()
+    box.markSent()
+  })
+  expect(each.check(MONITOR)).toMatchObject({ waiting: true, notice: InboxMonitor.notice("x") })
+})
+
+test("check:  batch names what's waiting:  the same work, the same batch;  a newer Send, a new one", () => {
+  const each = monitor()
+  each.check(MONITOR)
+  ReviewInbox.update(inboxFile, (box) => box.markSent("2026-10-26T20:00:00.000-04:00"))
+  const first = each.check(MONITOR).batch
+  expect(first).toBeTruthy()
+  expect(each.check(MONITOR).batch).toBe(first)
+  ReviewInbox.update(inboxFile, (box) => box.markSent("2026-10-26T20:05:00.000-04:00"))
+  expect(each.check(MONITOR).batch).not.toBe(first)
+  ReviewInbox.update(inboxFile, (box) => box.takeWork())
+  expect(each.check(MONITOR).batch).toBeUndefined()
 })
 
 test("check:  no epic, nothing done, its record watched;  the session's process gone, it ended", () => {

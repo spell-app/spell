@@ -313,6 +313,10 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - `Requests`:  `send`, `requests`, `file`, `home`, `merge`
       - `Worktrees` (`worktree`), with `MainMerge`
         (`worktree merge-main`:  installs the packages when it changed a lockfile)
+        - then renames Spell UI's old names the branch still writes (`renameOldNames()`, epic `epic-engine` I143):
+          the kit's `spell ui rename --write` over what the merged branch differs from `main` in, once every repo is
+          merged, committed on its own;  generated files and links out of the checkout (the content folder) left out;
+          no kit above the checkout, no step;  a failure is one line (`renameSkipped`), never the merge's
       - `StrayFiles`:  what's uncommitted in a main checkout `epic merge` fast-forwards,
         and moving it aside into the epic home's `ditched/` (epic `epic-engine` I77)
         - a snapshot or generated output by itself, a few others with `--ditch`
@@ -438,15 +442,25 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - `ReviewInbox`:  the inbox file
       - `ReviewStart`:  the pill's start, and WAKING the epic when Send finds nobody listening
         (epic `epic-workflow` P16:  its session typed into, or a new session in its window)
-    - `InboxMonitor`:  `epic session listen`, ONE look for the plugin's MONITOR, one beside every session
-      ([monitors.json](../monitors/monitors.json);  epic `epic-engine` P18):
-      an epic's session listens to its page whenever it's open
+    - `InboxMonitor`:  `epic session listen`, ONE look for the session's inbox POLLER, one beside every session
+      (epic `epic-engine` P18):  an epic's session listens to its page whenever it's open
       - the epic:  the session's title, else its worktree;  none, it does nothing
       - holds the inbox for the session (`setListening()`, with the monitor's pid:  live while it runs, no heartbeat)
         unless another listener holds it
-      - says what's waiting, the `📬` line to print, which files to watch, and when to look again
-    - `InboxPoller`:  the monitor itself (epic `epic-engine` P19)
-      - [InboxPoller.mjs](tool/InboxPoller.mjs), run by the plugin's monitor, [listen.mjs](../monitors/listen.mjs)
+      - says what's waiting, the `📬` line to print, its `batch`, which files to watch, and when to look again
+      - "start review" asked for (`reviewAsked`):  waiting too, its line asking for `/epic review` (I144)
+    - `InboxPoller`:  the poller itself (epic `epic-engine` P19), run by [listen.mjs](../monitors/listen.mjs)
+      - [InboxPoller.mjs](tool/InboxPoller.mjs)
+      - started by the plugin's `Stop` hook at each turn's end, in every session (`--hook`, `asyncRewake`):  it prints
+        the line to stderr and exits 2, which wakes the session;  the next turn's end starts it again (I144)
+        - why:  Claude Code starts a plugin's MONITORS ([monitors.json](../monitors/monitors.json)) only in an
+          interactive terminal session;  VS Code's panel runs `claude` as a stream, where none ever ran (checked
+          2026-10-26, Claude Code 2.1.310, with a probe plugin:  no monitor;  its `asyncRewake` `Stop` hook woke it)
+        - in a terminal session the monitor runs it too
+      - ONE per session, the newest:  `~/.spell-epic/listeners/<session pid>.pid` names it (and the batch it last
+        announced, so the next turn's hook never announces it again);  an older one sees it gone and ends
+      - the page server reads that file (`listenerOf()`):  a session with a poller is asked through its inbox, never
+        typed into (`ReviewStart`)
       - plain JavaScript, node's own modules only:  bare node, about 45MB a session
         - the look, under `tsx`, about 150MB, runs for a moment as its own process
         - NEVER import TypeScript into it:  node's TypeScript support alone adds about 28MB
@@ -1010,9 +1024,22 @@ In `tools/`:
           right of the bullhorn rather than in its own line");  pressed (`active`) while wide, the row moving with
           the table's right edge
         - a `<ui-button appearance="circular basic" size="mini">`, its icon arrows left right / to line, its tooltip on itself
-      - a TWO-COLUMN table (every row two cells:  `VERB | DOES`):  its first column never wraps, the second takes the
-        rest (Owen, 2026-10-19:  "Two column table -- left column shouldn't wrap");  too wide then (phone width), it
-        scrolls sideways inside its own box, never the page.  `spell-doc.css`, "A TWO-COLUMN table".
+      - a TWO-COLUMN table (every row two cells:  `VERB | DOES`):  its first column doesn't wrap, the second takes the
+        rest (Owen, 2026-10-19:  "Two column table -- left column shouldn't wrap")
+        - UNTIL the first would take more than 40% of the table AND leave the second less than a readable measure
+          (its words whole, or 24em):  then the first wraps, to the wider of 40% and what leaves the second that
+          measure, the second never under 12em (epic `epic-engine` I145;  Owen, 2026-10-26:  "table layout sucks",
+          the second column a word a line at the side bar's width)
+          - only when that takes 2em or more off the first:  never a word wrapped for a few px
+          - measured by the runtime (`wireTwoColumnTables()`:  `data-spell-wrap-first`, `--spell-first-column`),
+            again as its box changes size:  CSS can't say "no wider than its words, nor than 40%" for a cell
+          - measured, at 646 / 520 / 390px:  repo-split P20's trade-off table went from 167 / 41 / 34px for its
+            second column to 332 / 257 / 198px;  the server guide's "Shape" from 115px and scrolling to 368 / 292 /
+            214px, nothing scrolling;  a short first column ("spell-app") stays whole at every width
+        - its cells, header cells too, break only between words, even inside an epic phase's body (which breaks
+          anywhere):  the letter-spaced capitals never split mid-word
+        - too wide even then (phone width), it scrolls sideways inside its own box, never the page.
+          `spell-doc.css`, "A TWO-COLUMN table".
       - remembered per table, in this browser (`spell-table-wide:<path>`):
         by the table's id, else the nearest id above it and which table it is under that (`p14#table-1`)
       - the runtime's `wireTableWidths()` measures how far in a table starts,
@@ -1129,9 +1156,13 @@ In `tools/`:
     - One button per top-level block:  its icon ONLY, the title its tooltip (Owen, 2026-10-10:  "lose the titles").
       - the current one a deeper ivory
       - every button the same width, badges or not
-    - Badges count the block's items waiting on Owen:
+    - Badges count the block's items waiting on Owen, by each item's state AS DRAWN (`DrawnState`, `EpicItem.types.ts`:
+      the one rule its id chip, its section's chips and blue badge and the toolbar share;  an item being worked on is
+      blue, never red;  Owen, 2026-10-26:  "badges don't match up")
       - red:  urgent (`state="attention"`)
       - orange:  Claude replied with options for him to pick (`state="replied"`)
+      - blue, on the Phases button:  phases under way, or being worked on
+      - a block's count changing with the inbox alone fires `epic-count-changed`;  the runtime counts them again
       - both kinds, both badges;  none, none
       - over the icon's top right, a third of a badge on the icon
     - At the row's right, `<epic-page>`'s own tools (see "Overview"):
@@ -1550,11 +1581,16 @@ Each kind of page has ONE name, written everywhere a person reads it.
     - Waiting until answered (`epic inbox done <name>#C3`).
   - `listening.seen`:  the session's heartbeat (`LISTEN_HEARTBEAT_MS`, 30s, from `wait`).
     - Older than `LISTEN_STALE_MS` (90s), the session is gone:  `liveListener()` returns `null`.
-  - `listening.pid`:  the session's MONITOR's process, when the monitor holds it (`InboxMonitor`, epic `epic-engine`
-    P19):  live exactly while that process runs, with no heartbeat.
+  - `listening.pid`:  the session's inbox POLLER's process, when the poller holds it (`InboxMonitor`, epic
+    `epic-engine` P19):  live exactly while that process runs, with no heartbeat.
+    - a newer poller of the same session (the next turn's `Stop` hook) takes the place over (I144)
+  - `reviewAsked`:  "start review" pressed while the session's poller runs (epic `epic-engine` I144):  the poller's
+    next look prints a `📬` line asking for `/epic review`, which wakes the session;  nothing typed.
+    Gone once the session's own `epic inbox watch` listens.
   - `woken`:  the page server's last WAKE of the epic (epic `epic-workflow` P16), `{ at, state, did, message }`.
     - Send with nobody listening wakes it, inside the request:
-      `/epic review <epic>` typed into its session, or a new session in its window (`ReviewStart`).
+      its session's poller told (`told`:  it hears the Send itself), `/epic review <epic>` typed into its session, or
+      a new session in its window (`ReviewStart`).
     - Claimed under the inbox's lock (`claimWake()`):  two Sends at once wake once.
     - It stands 10 minutes (`WAKE_COOLDOWN_MS`), or until a session listens (`setListening()` clears it).
     - No wake with several sessions titled for the epic, in airplane mode, or for a Send with nothing new.
@@ -1572,7 +1608,9 @@ Each kind of page has ONE name, written everywhere a person reads it.
     - `POST send { page, now? }`:  `now: true` is the countdown's send (Review Now's, before epic `epic-engine` P20;  no page draws the wand since 2026-10-25),
       every revisit waiting asked now too (`reviewNow()`)
     - `send` and `now` answer `wake` too:  what waking the epic did (`WakeResult`), `null` while a session listens
-    - `POST start { page }`:  the pill's click, `/epic review <epic>` typed into the epic's session (`StartResult`)
+    - `POST start { page }`:  the pill's click (`StartResult`):  the epic's session asked through its inbox poller
+      (`asked`), else `/epic review <epic>` typed into its tab (`sent`);  its tab open already, VS Code would refuse
+      ("Session is already open"), so the bridge types nothing and the answer says so (`tab-open`;  I144)
     - `POST new { page, id?, entry | null }`:  a new item from the page;  no `id`:  the next free key
     - `POST shot { page, id, png }`:  a test run's screenshot (a PNG data URL, at most 8 MB, else 413), written
       beside the page in `tests/` (`TestShots`), never over a file;  answers `{ shot }`, its path, which the
@@ -1605,7 +1643,13 @@ Each kind of page has ONE name, written everywhere a person reads it.
   - `apply [ids]`:  the sent approve / pick / Make Todo marks and test answers, into the doc (`PlanDoc.applyMark()`),
     then cleared;  each failed test's new issue listed, for the session to tell Owen with its link
     - A revisit with a pick is left, "to talk over".
-  - `<name>#<id> working on|off`
+  - `<name>#<id> working on|off`:  an item, a comment, or a PHASE by number or id (`P20`, `p-one-repo`;  epic
+    `epic-engine` I147), kept under its stable id
+    - a phase worked on (not done):  its status icon a blue turning spinner, the header's, its tooltip "Claude is
+      writing this phase's plan" (to do, plan not accepted) or "Claude is working on it";  counted in the Phases
+      section's blue badge and the toolbar's
+    - Claude writing a phase's plan:  `epic phase <name>#P20 planning [off]`;  `update #P20 --goal ...` on a phase
+      whose plan isn't accepted sets it by itself, and `--plan` (now waiting for Owen) ends it
   - `<name>#<id> done`:  keeps a mark Owen changed meanwhile
   - `<name>#<id> clear`
   - These and `apply` stamp the heartbeat too.

@@ -104,6 +104,13 @@ export const epicSectionVocabulary = {
         "showing;  none:  every state."
     },
     {
+      name: "epic-count-changed",
+      detail: "{}",
+      description:
+        "Its live count changed with no change to its markup (epic `epic-engine` I147):  an item or phase being worked " +
+        "on, an urgency not applied yet.  The docs runtime draws the toolbar's badges again."
+    },
+    {
       name: "epic-test-opening",
       detail: "{}",
       description:

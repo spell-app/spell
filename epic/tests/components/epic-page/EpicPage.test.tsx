@@ -884,6 +884,88 @@ describe("<epic-page> live badges (epic `epic-engine` P43)", () => {
     expect([markedBadge(host), markedBadge(questions), markedBadge(todos)]).toEqual([null, null, null])
   })
 
+  // Owen, 2026-10-26:  "badges don't match up" -- I144 and I145 drew blue (worked on), yet counted red
+  test("an item being worked on counts blue, never red:  its section's chips and badge, the toolbar's, and the count the rail reads", async () => {
+    const routes = new FakeRoutes()
+    const client = await adoptClient(routes)
+    const host = await render(filterPage(["attention", "attention", "open"], ["open"]))
+    const questions = host.querySelector("#decisions")!
+    const rail = () => (questions as unknown as { contentsEntry: { count: { attention: number } } }).contentsEntry.count
+    await vi.waitFor(() => expect(pageChips(host)).toEqual(["attention+2", "open+2"]))
+    expect(rail().attention).toBe(2)
+    const counted = vi.fn()
+    host.addEventListener("epic-count-changed", counted)
+    // Claude takes q1 (`epic inbox working demo#Q1 on`):  its chip draws blue at once, and every count follows it
+    routes.inbox.working = { q1: { action: "details", since: new Date().toISOString() } }
+    await client.refresh()
+    await ElementFixture.tick()
+    await ElementFixture.tick()
+    await vi.waitFor(() => expect(pageChips(host)).toEqual(["attention+1", "open+2"]))
+    expect(chipsOf(questions).map((chip) => `${chip.dataset.state}:${chip.textContent}`)).toEqual([
+      "attention:1",
+      "open:1"
+    ])
+    expect(markedBadge(questions)?.[0]).toBe("1")
+    expect(markedBadge(host)?.[0]).toBe("1")
+    // the docs runtime's toolbar reads this, and hears it changed
+    expect(rail().attention).toBe(1)
+    expect(counted).toHaveBeenCalled()
+    // marked by Owen in this pass:  with Claude too, out of the red the rail reads, as out of the chips
+    routes.inbox.working = {}
+    routes.inbox.marks = { q2: { action: "approve", at: new Date().toISOString() } }
+    await client.refresh()
+    await ElementFixture.tick()
+    await ElementFixture.tick()
+    await vi.waitFor(() => expect(rail().attention).toBe(1))
+    expect(markedBadge(questions)?.[0]).toBe("1")
+    // done:  red again
+    routes.inbox.marks = {}
+    await client.refresh()
+    await ElementFixture.tick()
+    await ElementFixture.tick()
+    await vi.waitFor(() => expect(pageChips(host)).toEqual(["attention+2", "open+2"]))
+    expect(rail().attention).toBe(2)
+  })
+
+  // Owen, 2026-10-26:  "repo-split is actively planning this (writing the plan) but there is no indication in the phase
+  // header" (epic `epic-engine` I147)
+  test("a phase being worked on:  a blue spinner for its status icon, saying what Claude does;  counted with Claude and running", async () => {
+    const routes = new FakeRoutes()
+    const client = await adoptClient(routes)
+    const host = await render(page("", ["done", "todo", "todo"]))
+    const phases = host.querySelector("#phases")!
+    const p2 = host.querySelector("#p2")!
+    const status = () => p2.shadowRoot!.querySelector<HTMLElement>('[part~="status"]')!
+    const rail = () => (phases as unknown as { contentsEntry: { count: { running: number } } }).contentsEntry.count
+    expect(status().querySelector(".spinner")).toBeNull()
+    expect(rail().running).toBe(0)
+    routes.inbox.working = {
+      p2: { action: "details", since: new Date().toISOString() },
+      // a done phase's leftover entry draws nothing
+      p1: { action: "details", since: new Date().toISOString() }
+    }
+    await client.refresh()
+    await ElementFixture.tick()
+    await ElementFixture.tick()
+    await vi.waitFor(() => expect(status().querySelector(".spinner")).not.toBeNull())
+    expect(status().title).toBe("Claude is writing this phase's plan")
+    expect(p2.matches(":state(working)")).toBe(true)
+    expect(host.querySelector("#p1")!.shadowRoot!.querySelector(".spinner")).toBeNull()
+    expect(markedBadge(phases)).toEqual(["1", "1 with Claude:  marked in this pass, or being worked on"])
+    expect(rail().running).toBe(1)
+    await vi.waitFor(() => expect(markedBadge(host)?.[0]).toBe("1"))
+    // its plan accepted:  Claude is working on it, no longer writing the plan
+    p2.setAttribute("plan", "accepted")
+    await ElementFixture.tick()
+    expect(status().title).toBe("Claude is working on it")
+    routes.inbox.working = {}
+    await client.refresh()
+    await ElementFixture.tick()
+    await ElementFixture.tick()
+    await vi.waitFor(() => expect(status().querySelector(".spinner")).toBeNull())
+    expect(markedBadge(phases)).toBeNull()
+  })
+
   test("outside a review (no inbox):  no badge, every count as before", async () => {
     await adoptClient(new FakeRoutes(), { served: false })
     const host = await render(filterPage(["attention", "open"], ["open"]))

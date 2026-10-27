@@ -181,6 +181,8 @@ export class PlanDocCommands {
         const status = need(rest[1], "a status")
         // `phase seo 3 took`:  its time worked out again, for a phase done before (epic `epic-engine` P41)
         if (status === "took") return this.tookAgain(name, file, phase, Boolean(flags.dryRun))
+        // `phase seo#P20 planning [off]`:  Claude is writing its plan, on the page (epic `epic-engine` I147)
+        if (status === "planning") return this.planning(file, phase, rest[2] !== "off")
         const minutes = status === "done" ? this.minutesFor(name, file, phase) : undefined
         // done:  the branch's commits so far, into their phases and items (epic `epic-engine` I135)
         const history = status === "done" ? this.historyOrNone(file) : undefined
@@ -189,6 +191,8 @@ export class PlanDocCommands {
           return history ? plan.backfillCommits(history.log, history) : []
         })
         if (added.length) this.print(`${added.length} commit${added.length === 1 ? "" : "s"} listed on the page`)
+        // done:  nobody works on it any more (I147)
+        if (status === "done") this.inbox.setWorking(file, this.phaseIdOf(file, phase), false)
         this.files.reindex()
         // a new stage:  bring the doc forward, unless told not to.
         // No reload, nor a second one:  the edit reaches the page by the live client
@@ -206,14 +210,18 @@ export class PlanDocCommands {
           plan.movePhase(from, to)
           this.print(`${was} -> ${plan.phaseLabel(to)}`)
         })
-      case "phase-body":
-        return this.edit(file, (plan) => {
+      case "phase-body": {
+        const planning = await this.edit(file, (plan) => {
           const n = plan.phasePlace(need(rest[0], "a phase"))
           const set = plan.setPhaseFields(n, flags)
           if (!set.length)
             throw new PlanDocError(`phase-body what?  --symptom / --changes / --goal / --files / --verify`)
           plan.log(`${plan.phaseLabel(n)} ${set.join(", ")} set`)
+          return PlanDocCommands.planningAfter(plan.phase(n), flags)
         })
+        if (planning) this.inbox.setWorking(file, planning.id, planning.on)
+        return undefined
+      }
       case "updated":
         return this.edit(file, (plan) =>
           plan.addPhaseUpdate(
@@ -392,6 +400,38 @@ export class PlanDocCommands {
       this.warn(`epic:  no time for ${phase}:  ${error instanceof Error ? error.message : String(error)}`)
       return undefined
     }
+  }
+
+  /**
+   * `phase <name> P20 planning [off]`:  Claude is writing phase P20's plan (epic `epic-engine` I147), so its page shows
+   * it:  the review inbox's `working` on its stable id, which `<epic-phase>` draws as a blue spinner;  `off` ends it.
+   * - `update <name>#P20 --plan` turns it off by itself, the plan written and waiting for Owen (`planningAfter()`)
+   */
+  private planning(file: string, phase: string, on: boolean): void {
+    const id = this.phaseIdOf(file, phase)
+    this.inbox.setWorking(file, id, on)
+    const plan = this.read(file)
+    this.print(`${plan.phaseLabel(plan.phasePlace(id))} planning:  ${on ? "on" : "off"}`)
+  }
+
+  /** The stable id (`p-one-repo`) of the phase `phase` names in the doc at `file`, as people name one (`P20`). */
+  private phaseIdOf(file: string, phase: string): string {
+    const plan = this.read(file)
+    return plan.phase(plan.phasePlace(phase)).id
+  }
+
+  /**
+   * Whether a `phase-body` edit of `phase` (`epic update <name>#P20 --goal ...`) leaves Claude writing its plan
+   * (epic `epic-engine` I147):  the page's spinner on it, or off;  `undefined`:  leave it as it is.
+   * - its plan written (`--plan`:  now waiting for Owen's Accept, or accepted, the doc pass):  off
+   * - else still to do, and its plan not accepted yet:  on, until `--plan` comes (or `phase ... planning off`)
+   * - read after the edit:  `plan` is what the edit just set
+   */
+  static planningAfter(phase: Element, flags: Flags): { id: string; on: boolean } | undefined {
+    if (typeof flags.plan === "string" && flags.plan.trim()) return { id: phase.id, on: false }
+    const todo = (phase.getAttribute("status") ?? "todo") === "todo"
+    if (todo && phase.getAttribute("plan") !== "accepted") return { id: phase.id, on: true }
+    return undefined
   }
 
   /**
@@ -1207,6 +1247,8 @@ export const USAGE = `usage:  yarn plan-doc <command> <name> ...    (doc:  epics
                                                    transcripts:  epic epic-engine P41);
                                                    brings the doc forward in VS Code (it updates itself)
   phase <name> <N> took [--dry-run]                a done phase's time, worked out again from the transcripts
+  phase <name> <N> planning [off]                  Claude is writing its plan:  a blue spinner on its page (off
+                                                   by itself once --plan is written;  phase-body sets it too)
   move <name> <N> <place>                          a to-do phase to place <place>, among the to-do phases;
                                                    numbers, links and "P5 · Name" text follow (epic-engine P34);
                                                    numbers stay whole:  a phase moved is numbered by its place
@@ -1308,7 +1350,7 @@ export const USAGE = `usage:  yarn plan-doc <command> <name> ...    (doc:  epics
                                                    urgency (an id chip clicked:  calm or not), to the doc, clear
                                                    them;  prints each, and what it left (revisits, a pick with a
                                                    revisit:  to talk over);  --all:  sent or not (/airplane land)
-  inbox working <name> <id> on|off                 the page's spinner on an item;  a comment (C3):  its
+  inbox working <name> <id> on|off                 the page's spinner on an item or a phase (P20, its id);  a comment (C3):  its
                                                    thread's "Claude: thinking…" (done C3 turns it off)
   inbox done <name> <id>...                        an agent finished an item:  its mark and spinner go (a mark
                                                    Owen changed meanwhile stays)

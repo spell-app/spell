@@ -144,7 +144,12 @@ export const epicPhaseVocabulary = {
   ],
   parts: [
     ...FOLD_PARTS,
-    { name: "status", description: "Its status icon, in its status's colour." },
+    {
+      name: "status",
+      description:
+        "Its status icon, in its status's colour;  while Claude is at work on it (`:state(working)`), a blue turning " +
+        "spinner instead."
+    },
     {
       name: "changed",
       description: "In its title, while it isn't done:  its plan changed, an orange pen and how many times (`changes`)."
@@ -169,6 +174,12 @@ export const epicPhaseVocabulary = {
       name: "movable",
       description:
         "Still to do, on a page being reviewed:  dragged by its title row to another place (epic `epic-engine` P34)."
+    },
+    {
+      name: "working",
+      description:
+        "Claude is at work on it, and it isn't done:  the review inbox's `working`, keyed by its id (writing its plan, " +
+        "or building it;  epic `epic-engine` I147).  Its status icon is a blue turning spinner."
     }
   ],
   texts: [
@@ -177,6 +188,16 @@ export const epicPhaseVocabulary = {
     { key: "statusTodo", text: "To do", description: "The status icon's name:  `todo`." },
     { key: "statusActive", text: "Under way", description: "The status icon's name:  `active`." },
     { key: "statusDone", text: "Done", description: "The status icon's name:  `done`." },
+    {
+      key: "workingPlan",
+      text: "Claude is writing this phase's plan",
+      description: "Its spinner while Claude is at work on it and its plan isn't accepted yet:  its tooltip and name."
+    },
+    {
+      key: "workingOn",
+      text: "Claude is working on it",
+      description: "Its spinner while Claude is at work on it, its plan accepted or the phase under way."
+    },
     {
       key: "tookTip",
       text: "~{estimate}",
