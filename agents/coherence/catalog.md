@@ -480,7 +480,11 @@ What a component, or a page built on Spell UI, reaches for first.
 - **Score:**  `hasReaderMoved|decodeURIComponent\((\w+\.)*location\.hash`
   · home `spell-ui/src/docs-components/ui-docs-toc/TocIndex.ts`, `spell-ui/src/docs-components/ui-docs-toc/HashLanding.ts`
 - **Copies:**  `--` since P11 (Spell UI's toc, site sections and API tables;  the docs pages' runtime)
+  - Fine:  `spell-epic/src/components/epic-section/EpicFold.tsx`, `spell-epic/src/components/epic-item/EpicItem.tsx`:
+    since P18 they only open for a link (a page whose lander doesn't know epic folds), never scroll
   - Left:  the comments' toolbar (`spell-comments.entry.js` `currentSection()`):  it bundles no Spell UI
+  - Left:  the runtime's `EPIC_LAND_GAP` still calls itself `EpicFold`'s `LAND_GAP`, gone (sweep 2, epic-pages #3):
+    the runtime waited for ui-gaps' merge, then for repo-split P20
   - Left:  the site sections' sticking, in the site (the finding's "later":  into Spell UI's own code)
 
 ### Copying, with VS Code's side bar
@@ -491,7 +495,7 @@ What a component, or a page built on Spell UI, reaches for first.
 - **Flag:**  `navigator\.clipboard\.writeText`
 - **Score:**  `navigator\.clipboard\.writeText` · home `src/util/dom.ts`, `spell-ui/src/elements/ClipboardCopy.ts`
 - **Copies:**  `--` since epic `coherence` P10 (Spell UI's code block and theme editor, the brand's colour picker and
-  swatch, the epic pages' `Clipboard`)
+  swatch, the epic pages' `Clipboard`);  Copy my answers (`<epic-choices-bar>`) on `ClipboardCopy` since P18
   - Left:  the parked goals page (`goals-live.js`), read only
 
 ### A toast
@@ -574,6 +578,8 @@ Generic files:  Spell UI imports them one by one, so they reach any page.
 - **It is:**  `clamp()`, `kb()` (one unit:  KB of 1024):  `src/util/number.ts`
 - **Flag:**  `Math\.min\(.*Math\.max\(|/ 1024`
 - **Score:**  `Math\.min\(.*Math\.max\(|Math\.max\(.*Math\.min\(|/ 1024\b` · home `src/util/number.ts`
+- **Copies:**  the docs pages' toolbar, runtime and comments entry, a clamp each (sweep 2, epic-pages #13):
+  left for after repo-split P20;  the comment pane's two on `clamp()` since P18
 
 ### Local dates and times
 
