@@ -207,14 +207,14 @@ describe("fruity.css", () => {
 })
 
 describe("merlot.css", () => {
-  it("a maroon primary in light, a warm amber in dark;  8px buttons, the system font;  a deep wine page", async () => {
+  it("a maroon primary in light, a warm gold in dark;  8px buttons, the system font;  a deep wine page", async () => {
     await Own.use("merlot")
     const box = await Own.primaryButton()
     const style = getComputedStyle(box)
     expect(style).toMatchObject({ backgroundColor: "rgb(140, 29, 64)", borderTopLeftRadius: "8px" }) // #8c1d40
     expect(style.fontFamily).toMatch(/^system-ui/)
     Own.dark(box)
-    await vi.waitFor(() => expect(getComputedStyle(box).backgroundColor).toBe("rgb(244, 166, 95)")) // #f4a65f
+    await vi.waitFor(() => expect(getComputedStyle(box).backgroundColor).toBe("rgb(230, 194, 122)")) // #e6c27a
     expect(Own.color("--ui-background")).toBe("rgb(26, 12, 19)") // #1a0c13
   })
 

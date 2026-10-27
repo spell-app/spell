@@ -157,7 +157,7 @@ the runtime globs the folder, so dropping a `<name>.css` in makes a theme.
     - The glass is CSS alone (`backdrop-filter`);  without it the surfaces are still translucent, and still read.
   - `fruity`:  `glass` over a soft pastel wallpaper, three colour washes:  its sheet imports `glass.css`.
   - `merlot`:  a code studio in wine reds:  flat panels on hairlines a step off the page, no glass,
-    an amber primary on deep wine in dark, a maroon one on rose-grey in light.
+    a warm gold primary on deep wine in dark, a maroon one on rose-grey in light.
     It's tokens only so far:  every family keeps `classic`'s shapes.
   - A theme remembered under an old name comes back under its new one (`Themes.RENAMED`):
     `studio` as `merlot`, `spell-brand` as `spell`.
@@ -178,7 +178,7 @@ the last column is what a theme restyles on purpose.
 | `spell` | Spell's own:  Palatino-family serif headings with italic ledes, a system sans body, Spell Purple, pill buttons, 16px cards, soft layered shadows, an aubergine dark mode.  Page-wide;  the docs site's default. | everything, through the global tokens |
 | `glass` | macOS today:  the system font, 15px, 8px buttons and 14px cards, a violet accent, Apple's system colours;  translucent glass surfaces on a solid page.  Page-wide. | everything, through the global tokens;  card, segment, section, menu, popup, dropdown, modal and toast get the blur |
 | `fruity` | `glass` over a soft pastel wallpaper:  three blurred colour washes behind the page.  Page-wide. | as `glass` |
-| `merlot` | A code studio in wine reds:  the system font, flat panels joined by hairlines a step off the page, no glass;  an amber primary on deep wine in dark, a maroon one on pale rose-grey in light.  Page-wide;  tokens only so far. | everything, through the global tokens |
+| `merlot` | A code studio in wine reds:  the system font, flat panels joined by hairlines a step off the page, no glass;  a warm gold primary on deep wine in dark, a maroon one on pale rose-grey in light.  Page-wide;  tokens only so far. | everything, through the global tokens |
 | `classic` | Fomantic's original look, and the base of every theme above:  Lato, 14px, Fomantic's palette and size ratios, 4px radii.  Page-wide. | everything, through the global tokens |
 
 </details>
