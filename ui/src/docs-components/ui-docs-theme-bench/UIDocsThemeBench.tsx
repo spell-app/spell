@@ -478,7 +478,7 @@ export class UIDocsThemeBench extends E.UIComponent<DocsThemeBenchVocabulary> {
         <ui-theme-menu size="small"></ui-theme-menu>
         <div class="tools">
           <ui-menu
-            appearance="segmented"
+            appearance="segmented link"
             size="small"
             aria-label={t("layout")}
             on-ui-choosing={(event: CustomEvent<{ value: string }>) =>
@@ -497,7 +497,7 @@ export class UIDocsThemeBench extends E.UIComponent<DocsThemeBenchVocabulary> {
             </For>
           </ui-menu>
           <ui-menu
-            appearance="segmented"
+            appearance="segmented link"
             size="small"
             aria-label={t("titles")}
             on-ui-choosing={(event: CustomEvent<{ value: string }>) => (this.titles = event.detail.value as TitlesAt)}
