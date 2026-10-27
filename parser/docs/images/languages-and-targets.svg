@@ -37,10 +37,10 @@
   <path class="edge" d="M240,198 C266,198 280,221 317,226" marker-end="url(#arrow)"/>
   <path class="later" d="M240,256 C266,256 280,251 317,246" marker-end="url(#arrow-later)"/>
   <path class="later" d="M240,314 C268,314 284,280 320,266" marker-end="url(#arrow-later)"/>
-  <path class="edge" d="M478,214 C520,180 520,140 556,140" marker-end="url(#arrow)"/>
+  <path class="edge" d="M466,195 C492,179 514,140 556,140" marker-end="url(#arrow)"/>
   <path class="edge" d="M480,228 C520,214 524,200 556,200" marker-end="url(#arrow)"/>
   <path class="edge" d="M480,244 C520,256 524,260 556,260" marker-end="url(#arrow)"/>
-  <path class="later" d="M478,258 C520,292 520,320 556,320" marker-end="url(#arrow-later)"/>
+  <path class="later" d="M466,277 C492,293 514,320 556,320" marker-end="url(#arrow-later)"/>
 
   <!-- in -->
   <rect class="box" x="50" y="116" width="190" height="48" rx="12"/>
