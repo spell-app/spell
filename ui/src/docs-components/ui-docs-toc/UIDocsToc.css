@@ -53,13 +53,14 @@
     /* the gap the header kept below itself, before it shared its row */
     margin-block-end: var(--ui-font-size);
   }
-  /* a page's own buttons, after the toggle, at the row's right end */
+  /*
+   * a page's own buttons, after the toggle, at the row's right end:  the row's own items (no box of the slot's), so
+   * an empty slot leaves the toggle where it was
+   */
   slot[name="tools"] {
-    display: flex;
-    align-items: center;
-    gap: 0.25em;
+    display: contents;
   }
-  .head:not(:has(.toggle-all)) slot[name="tools"] {
+  .head:not(:has(.toggle-all)) ::slotted([slot="tools"]:first-child) {
     margin-inline-start: auto;
   }
   [part~="header"] {
