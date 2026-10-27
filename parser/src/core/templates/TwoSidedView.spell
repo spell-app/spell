@@ -1,0 +1,23 @@
+## A two sided view:  a view with a front and a back, showing one at a time
+// Built into spell (epic `elemental-spell` Q71):  compiled once, into the core's `TwoSidedView`.
+// A view made from it says what each side looks like, with `to draw its front:` and `to draw its back:`.
+a "two sided view" is a view where:
+	- it has parts "front" and "back"
+	// which way it faces:  a new one starts face down
+	- its "direction" is down or up
+	- it "is face (direction)"
+	- to turn it face up:
+		set its direction to up
+	- to turn it face down:
+		set its direction to down
+	- to turn it over:
+		if it is face down
+			turn it face up
+		otherwise
+			turn it face down
+	// its front when it's face up, its back when it's face down
+	- to draw it:
+		if it is face down
+			draw its back
+		otherwise
+			draw its front

@@ -1,0 +1,62 @@
+/**
+ * Master import file for the classes `core` exposes to compiled spell code.
+ * - Re-exported from `spell-parser/core`'s own barrel (`export * from "./classes"`) so `Thing`, `List`, `App`, `View`,
+ *   `Page`, `TwoSidedView`, `Notebook` and `ViewableList` are available alongside the rest of `core`.
+ *
+ * NOTE: imports reach into `spell-parser/core/core` and `spell-parser/core/Core` directly rather than
+ * the `spell-parser/core` barrel -- this file helps BUILD that barrel, so going through it would
+ * re-enter it circularly.
+ */
+import { core } from "spell-parser/core/core"
+import { defineCoreModule, SPELL_BASE_TYPES } from "spell-parser/core/core.types"
+
+import { Thing } from "./Thing"
+import { App } from "./App"
+import { List } from "./List"
+import { View } from "./View"
+import { Page } from "./Page"
+import { TwoSidedView } from "./TwoSidedView"
+import { Notebook } from "./Notebook"
+import { ViewableList } from "./ViewableList"
+
+/** Base-type registry, and where an app mounts.  Drawing is `../drawing.ts`. */
+export const classesMethods = defineCoreModule({
+  /** Base types known to the `spell` language/parser -- see `SPELL_BASE_TYPES`. */
+  BASE_TYPES: [...SPELL_BASE_TYPES] as string[],
+
+  /**
+   * Is the app's page laid out in markup, around the program?  Then `App.start()` draws nothing:
+   * the markup is the app's drawing, and its tags find their things (epic `drawable-thing` P9).
+   * - Set by the runner for each run, e.g. a `<spell-viewer>` with markup inside it.
+   */
+  appLayout: false,
+
+  /** DOM `id` of the element an `App` mounts into when the host set no `appRoot`. */
+  REACT_APP_ROOT_ID: "spell-app-root",
+
+  /**
+   * Element `App.start()` mounts into, if the host says -- e.g. `<spell-viewer>`'s, inside its shadow root.
+   * - Unset:  `#spell-app-root` in `document`, see `appElement()`.
+   * - Also decides where `installStyles()` puts a project's styles -- see `domRoot()`.
+   */
+  appRoot: undefined as HTMLElement | undefined,
+
+  /** Element the app mounts into:  `appRoot`, else `#spell-app-root` in `document` -- `null` if neither. */
+  appElement(): HTMLElement | null {
+    return core.appRoot ?? document.getElementById(core.REACT_APP_ROOT_ID)
+  },
+
+  /**
+   * Document or shadow root the app lives in:  `appRoot`'s shadow root, if it's in one, else `document`.
+   * - Look elements up and add styles HERE, NOT on `document` -- which can't see into a shadow root.
+   */
+  domRoot(): Document | ShadowRoot {
+    const root = core.appRoot?.getRootNode()
+    return typeof ShadowRoot !== "undefined" && root instanceof ShadowRoot ? root : document
+  }
+})
+Object.assign(core, classesMethods)
+
+// Compiled spell imports these -- `import { core, Thing, List, App, ... } from "@spell/core"`.  No globals.
+export { Thing, List, App, View, Page, TwoSidedView, Notebook, ViewableList }
+export type { ListCallback } from "./List"

@@ -1,0 +1,73 @@
+/**
+ * Master import file for spell language.
+ * - All other files MUST only import from here (or a direct peer file):
+ *   reaching into a leaf file from outside `spell-parser/spell` risks circular import problems.
+ * - NOTE: this barrel is also pulled into the server:
+ *   spaces' `project-utils.ts` does `import { SP } from "spell-parser/spell"`,
+ *   and calls `SP.SpellLocation...` / `SP.spellParser.compile()` directly.
+ * - NOTE: its project groups are spaces' (`spell-app/spaces`):  load them before reading a path -- see `SpellSetup`.
+ *   - So nothing reachable from here can rely on browser-only globals at module-evaluation time.
+ *   - Methods that only run client-side are fine:  the server just never calls them.
+ * - NOTE: nothing here imports `core`'s code -- only its types file.
+ *   - Programs run on a runner's own copy of it, see `spellRuntime.ts`,
+ *     so a second copy here would be one no program runs on.
+ */
+
+/**
+ * All SpellParser code as `SP` barrel.
+ * - Prefer importing as `import { SP } from "spell-parser/spell"` when possible.
+ */
+export * as SP from "./"
+
+export * from "./spell.types"
+
+export * from "./SpellLocation"
+export * from "./SpellProject"
+export * from "./SpellFile"
+export * from "./SpellJSFile"
+export * from "./SpellCSSFile"
+export * from "./SpellSetup"
+export * from "./SpellUrls"
+export * from "./SpellParser"
+export * from "./SpellxTokens"
+export * from "./SpellxTokenizer"
+export * from "./SpellxTwin"
+export * from "./ComponentPacks"
+export * from "./builtinTypes"
+export * from "./builtInTemplates"
+
+/**
+ * `spellParser`: shared `SpellParser` instance with spell's "core" rules already applied.
+ * - Start here if you need the language's default parser.
+ * - Also re-exports:
+ *   - `ParseError`:  the fallback "couldn't parse this" rule
+ *   - `parseExpression()`:  parse a bare expression string
+ */
+export {
+  spellParser,
+  ParseError,
+  type DocComment,
+  commitStatement,
+  SpellStatement,
+  Block,
+  BlockLine,
+  parseExpression,
+  Negatable,
+  SPELL_TAG_NAMES,
+  isBareComponentName,
+  type JSXMatchData,
+  MarkdownDescription,
+  MarkdownBlock
+} from "./rules"
+
+export * from "./SpellDeclarations"
+export * from "./SpellWords"
+export * from "./SpellWarnings"
+export * from "./hoistClassMembers"
+export * from "./targets"
+export * from "./highlight"
+export * from "./languages/Language"
+
+// The language packs:  English first, the default
+export { english } from "./languages/en"
+export { spanish } from "./languages/es"

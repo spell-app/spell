@@ -1,0 +1,18 @@
+node_modules
+.yarn/install-state.gz
+.DS_Store
+.vitest/
+*.log
+# `/park`'s note on where parked work stopped:  never committed
+PARKED-*.md
+*.code-workspace
+__pycache__/
+.venv/
+# `agents/`:  a link to the kit's agents/ (WWOD and the three logs), made by the kit's every `yarn install` (epic repo-split P9, P12)
+/agents
+
+# the declarations each package builds for the repos above this one (`spell-types`, epic repo-split I12):  never committed
+dist-types/
+
+# `spell map`'s map of this repo (graphify's, epic coherence P1):  rebuilt on demand, never committed
+graphify-out/

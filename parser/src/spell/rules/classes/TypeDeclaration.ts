@@ -1,0 +1,201 @@
+import { kebabCase, proto } from "spell/util"
+import { P } from "spell-parser/parser"
+import { SP } from "spell-parser/spell"
+import { Synonyms } from "spell-parser/spell/rules/expressions"
+import { Priority } from "spell-parser/spell/rules/rules.types"
+// Import directly to avoid circular import
+import { SpellStatement } from "spell-parser/spell/rules/Statement"
+import { SpellType } from "spell-parser/spell/rules/types/SpellType"
+
+/**
+ * A statement declaring a type -- which may take an OUTLINE body:
+ * `a card is a thing where:`, then indented lines all about cards, e.g. `- it has a deck` (epic page `outline-spell`).
+ * - The body's scope is a `P.SubjectScope` about the type:  `it` / `its` there mean it,
+ *   `subject_it` / `subject_its` -- except inside a method or getter, where `it` is the instance.
+ * - `flatBody`:  the body compiles beside the class, as if its lines were written out at the top level,
+ *   so its members are hoisted into the class as usual.
+ * - `where:`, `with:` and a bare `:` all open the body (epic page Q7):  `{with_nested_statements}?`.
+ *   - So does `where` alone, or nothing at all:  the indented block under the heading is its body
+ *     (epic page `outline-spell`, P10) -- see `takesNestedBody()`.
+ * - Its name may be several words, and it may have a short name too (epic `drawable-thing`, P1):
+ *   `a bank account aka account is a thing` -- `{type:type_words} (aka {aka:singular_type})?`.
+ *   - Either name finds the type afterwards, e.g. `the accounts`, `a new bank account`.
+ *   - A name some other type already goes by is refused -- see `refuseTakenNames()`.
+ *   - So is a type declared a second time (issue I13):  `a game:` adds to it -- see `reopen_type`.
+ * - A VIEW type (`a card is a view`, or a sub-type of one) defines its element as its class is declared:
+ *   a static field, `static elementTag = core.defineElement(this, "Solitaire")` -- see `elementMember()`.
+ */
+export class TypeDeclaration<
+  Groups extends string,
+  MatchData extends P.AnyMatchData = P.AnyMatchData
+> extends SpellStatement<Groups, MatchData> {
+  @proto static priority = Priority.declaration
+  @proto static alias = "statement"
+  @proto static flatBody = true
+
+  /**
+   * The indented block under us is our body, whether or not the line ends `where:`, `with:` or `:`
+   * (epic page `outline-spell`, P10):  `a stock-pile is a pile`, then `- can give up a card if: ...` under it.
+   * - Only a syntax which takes a body at all, `{with_nested_statements}?`.
+   */
+  takesNestedBody(_match: P.Match): boolean {
+    return !!this.bodySpec
+  }
+
+  /** Our body is all about the type we declare -- see class docs. */
+  getNestedScopeForMatch(match: P.MatchFor<this>): P.SubjectScope {
+    const { groups, scope } = TypeDeclaration.named(match)
+    return new P.SubjectScope({ parentScope: scope, subject: `${groups.type.value}`, declaredBy: match as P.Match })
+  }
+
+  /**
+   * `match`, or a parse error if one of its names is already some other type's:
+   * - its name is another type's short name, e.g. `an account is a thing` after `a bank account aka account ...`
+   * - its short name names another type, e.g. `a bank account aka card ...` when there's a card
+   * - it's declared already, by another line of the project (issue I13):  JavaScript won't load two classes of
+   *   one name, so the error says to add to it, `a game:` -- see `reopen_type`
+   * - Call it WHILE PARSING:  it looks up scope.
+   */
+  refuseTakenNames(match: P.Match): P.Match {
+    const { groups, scope } = TypeDeclaration.named(match)
+    const language = SP.Language.of(scope)
+    const name = P.classCase(`${groups.type.value}`)
+    const named = scope.types?.get(name)
+    if (named && SpellType.isShortName(named, name)) {
+      const message = language.parserMessage("already-a-short-name", {
+        name: `${groups.type.raw}`,
+        type: wordsOf(named.name)
+      })
+      return SpellStatement.refuse(match, message)
+    }
+    const { aka } = groups
+    const akaNamed = aka && scope.types?.get(`${aka.value}`)
+    if (akaNamed && akaNamed.name !== name) {
+      const message = language.parserMessage("aka-names-a-type", { aka: `${aka.raw}`, type: wordsOf(akaNamed.name) })
+      return SpellStatement.refuse(match, message)
+    }
+    if (named && TypeDeclaration.isDeclaredElsewhere(named, match)) {
+      // as the line says it, e.g. `an account`
+      const words = `${match.tokens[0]!.value} ${`${groups.type.raw}`.replace(/^["']|["']$/g, "")}`.toLowerCase()
+      const where = TypeDeclaration.whereDeclared(named.declaredBy!, match)
+      return SpellStatement.refuse(match, language.parserMessage("type-declared-twice", { words, where }))
+    }
+    return match
+  }
+
+  /**
+   * SIDE EFFECT:  declares `match`'s type in its scope, with its short name if it has one
+   * -- unless it's already defined (no redefinition / merge).
+   * - A type only STUBBED by an earlier mention, or left by an earlier parse of this statement, is claimed instead --
+   *   see `P.TypeScope.claim()`.
+   * - So is the kind of a property's values of the same name, e.g. `card suit` (`P.ValueKind.property`):
+   *   a type someone declares is what the name means.
+   * - An IMPORTED one is declared again anyway, so `SP.SpellDeclarations.checkImportClashes()` can report it.
+   * - Its `gender`, from the article it's declared with, e.g. `feminine` for `una carta es una cosa`
+   *   (epic `spanish` P8):  see `genderOf()`.
+   */
+  declareType(match: P.Match, superType: string, { itemType }: { itemType?: P.Datatype } = {}): void {
+    const { groups, scope } = TypeDeclaration.named(match)
+    const name = `${groups.type.value}`
+    const options = { itemType, aka: groups.aka && `${groups.aka.value}`, gender: TypeDeclaration.genderOf(match) }
+    // TODO: complain if existing type is set up differently!
+    const existing = scope.types?.get(name)
+    if (existing && !(existing.parentScope instanceof P.ImportScope)) {
+      // a stub, or left by an earlier parse of this statement -- see `P.TypeScope.sameStatement()`
+      const isPropertyKind = !!existing.valueKind?.property
+      if (existing.stub || isPropertyKind || P.TypeScope.sameStatement(existing.declaredBy, match)) {
+        existing.claim(match, superType, options)
+      }
+      return
+    }
+    scope.types?.add({ name, superType, declaredBy: match, ...options })
+  }
+
+  /**
+   * The gender of the type `match` declares, read off its article, e.g. `feminine` for `una carta es una cosa`:
+   * see `SP.Language.genderOf()`.
+   * - `undefined` in English, whose articles have none, and for a declaration with no article first,
+   *   e.g. `solitario es una aplicación`.
+   */
+  static genderOf(match: P.Match): string | undefined {
+    const article = Synonyms.matchAt(match.scope, "indefinite_article", match.tokens)
+    return article && SP.Language.of(match.scope).genderOf(Synonyms.formOf(article))
+  }
+
+  /**
+   * Name of the project `scope` is in, which a view type's element is named after, e.g. `Solitaire` --
+   * `""` outside a project.  Call it WHILE PARSING:  it looks up scope.
+   */
+  static projectNameOf(scope: P.Scope): string {
+    for (let at: P.Scope | undefined = scope; at; at = at.parentScope) {
+      if (at instanceof P.ProjectScope) return at.name ?? ""
+    }
+    return ""
+  }
+
+  /**
+   * The member that defines a view type's element as its class is declared, in project `project` --
+   * `undefined` for a type that isn't a view (no `project`).
+   * - `static elementTag = core.defineElement(this, "Solitaire")`:  a static field runs as the class is made,
+   *   so before the program draws anything.  See `core.defineElement()`, in core's `elements.ts`.
+   * - `name`:  the tag's own word when it isn't the class's, e.g. an app's,
+   *   `core.defineElement(this, "Solitaire", "App")` for `<solitaire-app>`.
+   */
+  elementMember(
+    match: P.Match,
+    type: P.ASTTypeExpression,
+    project: string | undefined,
+    name?: string
+  ): P.ASTClassMember | undefined {
+    if (project === undefined) return undefined
+    const args = name === undefined ? [project] : [project, name]
+    return new P.ASTStaticDefinition(match, {
+      type,
+      name: "elementTag",
+      value: new P.ASTStringLiteral(
+        match,
+        `core.defineElement(this, ${args.map((arg) => JSON.stringify(arg)).join(", ")})`
+      )
+    })
+  }
+
+  /** `match`, with the groups every type declaration has:  TS can't see every subclass has them. */
+  /**
+   * Did ANOTHER line of the project declare `type`?
+   * - Not a stub (a mention, or the pre-pass's), an imported type, a built-in, or this line's own earlier parse.
+   * - Nor the kind of a property's values, e.g. `card suit`:  a type declared with its name takes it over.
+   */
+  private static isDeclaredElsewhere(type: P.TypeScope, match: P.Match): boolean {
+    if (type.stub || !type.declaredBy || type.parentScope instanceof P.ImportScope) return false
+    if (type.valueKind?.property) return false
+    return !P.TypeScope.sameStatement(type.declaredBy, match)
+  }
+
+  /** Where `declaredBy` is, as seen from `match`:  `on line 3`, or `on line 3 of /Card.spell` in another file. */
+  private static whereDeclared(declaredBy: P.Match, match: P.Match): string {
+    const language = SP.Language.of(match.scope)
+    const line = declaredBy.line! + 1
+    const file = TypeDeclaration.fileOf(declaredBy.scope)
+    if (file && file !== TypeDeclaration.fileOf(match.scope)) {
+      return language.parserMessage("on-line-of-file", { line, file: file.path })
+    }
+    return language.parserMessage("on-line", { line })
+  }
+
+  /** The file `scope` is in, if any. */
+  private static fileOf(scope: P.Scope | undefined): P.FileScope | undefined {
+    for (let current = scope; current; current = current.parentScope) {
+      if (current instanceof P.FileScope) return current
+    }
+    return undefined
+  }
+
+  private static named(match: object) {
+    return match as unknown as P.Match<{ type: P.Match; aka?: P.Match }>
+  }
+}
+
+/** A type's name in words, e.g. `bank account` for `BankAccount`. */
+function wordsOf(typeName: string): string {
+  return kebabCase(typeName).replace(/-/g, " ").trim()
+}

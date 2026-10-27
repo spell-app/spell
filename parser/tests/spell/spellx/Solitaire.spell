@@ -1,0 +1,38 @@
+a "card" is a thing
+a "column" is a list of cards
+
+solitaire is an app where:
+	// Klondike solitaire:  deal seven columns, then build four foundations, ace to king, one suit each.
+
+	// The seven piles cards are played on
+	- its "columns" is a new list of columns
+	// How many moves so far
+	- its "moves" is 0
+	- to start a new game:
+		- shortcut meta+N
+		set its moves to 0
+	- to undo the last move:
+		- shortcut meta+Z
+		- enabled when its moves > 0
+		set its moves to its moves - 1
+	- its "GameMenu" is a menu of "start a new game", "-", "undo the last move" and "redo"
+	- on mouse down:
+		// A press a card passed on.
+		print "pressed"
+	- to draw it:
+		<ui-toolbar menu="GameMenu" />
+		<ui-text context-menu="GameMenu">{its moves} moves</ui-text>
+		for each column in its columns
+			<ui-segment>{draw the column}</ui-segment>
+	- its menu bar is "GameMenu"
+
+a "score page" is a page where:
+	// A page that lists games, best first.
+	- its "scores" is a new list of numbers
+
+leaderboard is a score page where:
+	// The ten best games, fastest first.
+	- to draw it:
+		<ui-header>High scores</ui-header>
+		for each score in its scores
+			<ui-text>{the score}</ui-text>

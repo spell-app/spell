@@ -1,0 +1,327 @@
+/**
+ * Drawing with Solid:  what compiled spell's `draw` statements call -- `drawThing()`, `drawItems()`, `@drawn` --
+ * and mounting an app (`mountApp()`).
+ * - Compiled JSX is Solid's own `h()`, exported here as core's `h`, as a person writing Solid without JSX would:
+ *   `h("span", { class: "suit" }, () => this.shortSuit)`.
+ *   - Every value that can change is written as a function.
+ *     Solid calls it, and again when what it read changes, updating only that node:  nothing redraws a whole board.
+ *   - Since epic `output-targets` P20.
+ *     Before it, compiled spell called `core.element()`:  gone since P22, with every example recompiled.
+ * - Each drawn thing sits in its own error boundary (`drawInBoundary()`, on Solid's `<Errored>`):
+ *   when its `draw()` throws, it shows a small stand-in, and the rest keeps drawing.
+ *   ONE boundary, for both targets:
+ *   - compiled JavaScript draws a thing with `core.drawThing(card)`, which puts its `draw()` in the boundary
+ *   - compiled TypeScript (and hand-written code) writes `@drawn draw() { ... }`, which puts it there itself:
+ *     it draws a child with `core.drawThing(card)` too, which calls a `@drawn` `draw()` straight
+ *     (a bare `{card.draw()}` would skip a view's element -- epic `spanish` J100)
+ *   - `h()` returns a THUNK, a function that makes the element:  the boundary makes it, once (`madeOnce()`)
+ * - Solid comes from the PAGE, never a copy of its own:
+ *   `spell-runtime.js` imports `solid-js`, `@solidjs/web` and `@solidjs/h` from the page's one shared Solid,
+ *   `spell-solid.js`.
+ *   - Spell state reaches Solid through the host's `bridgeSolid()` (`spell/util/reactive`).
+ * - Part of `core`:  imported by `spell-parser/core`'s barrel for its side effect.
+ */
+
+import h from "@solidjs/h"
+import { createComponent, render, type JSX } from "@solidjs/web"
+import { Errored, For, createMemo, runWithOwner } from "solid-js"
+
+import { core } from "./core"
+import { defineCoreModule } from "./core.types"
+import { ViewableList } from "./classes/ViewableList"
+import { listenForUndoKeys } from "./ui"
+
+/**
+ * Solid's own `h()`, what compiled JavaScript draws with:  `import { h } from "@spell/core"`.
+ * - The SAME copy core draws with, so the boundary knows its thunks (`isElementThunk()`).
+ * - Epic `output-targets` P20, Q57.
+ */
+export { h }
+
+/** What a drawing is:  a Solid node, or anything Solid can put on the page (text, a list of them, nothing). */
+export type Drawing = JSX.Element
+
+/** Anything that can draw itself, e.g. a `Thing` or a `List`. */
+export type CanDraw = {
+  /** Returns its drawing -- compiled from `to draw (a card)`. */
+  draw(): Drawing
+}
+
+/** `core`'s drawing methods, on Solid. */
+export const drawingMethods = defineCoreModule({
+  ////////////////
+  // ## Drawing things
+  ////////////////
+
+  /**
+   * `drawable` drawn -- `null` if it can't draw (no `draw()`).
+   * - Compiles from `draw the card` -- see `rules/draw/DrawThing.ts`.
+   *   Takes ANYTHING, as it checks:
+   *   compiled spell draws what TypeScript can't type, e.g. the last card of a pile.
+   * - A VIEW (`a card is a view`) is its element, e.g. `<solitaire-card>`, the card set as its
+   *   `thing`:  it draws itself in there, with `drawOwn()`.  When the page can define it -- see `elementFor()`.
+   *   - A viewable LIST's items are its element's children, e.g. `<game-pile>` holding `<game-card>`s,
+   *     shown in its drawing's `<slot>` (spell's `<children/>`).
+   *   - An APP's whole drawing is its element's children, e.g. `<solitaire-app>` holding its board:
+   *     its class `drawsInItsChildren`, so the project's styles still reach it (epic `elemental-spell` Q62).
+   * - Anything else:  its own drawing, here -- see `drawOwn()`.
+   */
+  drawThing(drawable?: unknown): Drawing | null {
+    const thing = drawable as Partial<CanDraw> | undefined
+    if (typeof thing?.draw !== "function") return null
+    const tag = core.elementFor(thing)
+    if (tag) {
+      // a viewable list's items, or an app's whole drawing, are its element's children:  shown in its `<slot>`
+      const children = drawsInItsChildren(thing)
+        ? [() => core.drawOwn(thing)]
+        : thing instanceof ViewableList
+          ? [() => core.drawItems(thing)]
+          : []
+      // made NOW:  the thing is a plain value, set once
+      return (h(tag, { "prop:thing": thing }, ...children) as unknown as () => Drawing)()
+    }
+    return core.drawOwn(thing)
+  },
+
+  /**
+   * `drawable`'s OWN drawing, in its own error boundary, never its element -- `null` if it can't draw (no `draw()`).
+   * - What `drawThing()` draws for a thing with no element, and what a view's element draws inside.
+   * - Its `draw()` re-runs when something it read OUTSIDE its live values changes,
+   *   e.g. the `is face down` an `if` chose by:  the card's node is drawn again, nothing else.
+   *   Its live values update on their own.
+   * - The error boundary is `drawInBoundary()`'s.
+   *   A thing whose `draw()` is `@drawn` brings its own:  it's called straight.
+   */
+  drawOwn(drawable?: unknown): Drawing | null {
+    const thing = drawable as Partial<CanDraw> | undefined
+    if (typeof thing?.draw !== "function") return null
+    // a second boundary around `@drawn`'s own would catch nothing more
+    if (isDrawn(thing.draw)) return thing.draw()
+    return drawInBoundary(thing, () => (thing as CanDraw).draw())
+  },
+
+  /**
+   * Each item of `list`, drawn in its own error boundary -- `null` if `list` has no items to draw.
+   * - Compiles from `draw each card in the deck` / `draw cards of the deck` -- see `rules/draw/DrawItems.ts`.
+   *   And what a viewable list's element holds as its children -- see `drawThing()`.
+   * - A list with its own `to draw each item` (`drawEachItem()`) draws each item with it, in a boundary of the list's:
+   *   the wrapper each item is drawn in (epic `spanish` P20).
+   *   - A viewable list's default draws the item itself, in the item's own boundary:  no second one around it.
+   * - Any other list's item draws as itself (`drawThing()`).
+   * - Kept by IDENTITY (`<For>`):  an item added, removed or moved changes only its own node.
+   */
+  drawItems(list: unknown): Drawing | null {
+    // NOT `list.items` here:  read in the caller's drawing, every change to the list would draw it all again
+    if (!list || typeof list !== "object" || !("items" in list)) return null
+    const { drawEachItem } = list as Partial<DrawsEachItem>
+    const drawItem =
+      typeof drawEachItem !== "function"
+        ? (item: unknown) => core.drawThing(item)
+        : drawEachItem === DEFAULT_DRAW_EACH_ITEM
+          ? (item: unknown) => drawEachItem.call(list, item)
+          : (item: unknown) => drawInBoundary(list, () => drawEachItem.call(list, item))
+    return createComponent(For as unknown as ForByIdentity, {
+      get each() {
+        return (list as { items: unknown[] }).items
+      },
+      children: drawItem
+    })
+  },
+
+  ////////////////
+  // ## Mounting
+  ////////////////
+
+  /**
+   * Mount `view`'s drawing into `core.appElement()`, as the program's page:  what `App.start()` and `Page.start()` do
+   * (`start the game`, `start the counter notebook`).
+   * - Creates a `core.REACT_APP_ROOT_ID` container `div` if there's none.
+   * - On a page that defines elements, that's the view's element, `<solitaire-app>`, its drawing inside it.
+   * - Starting again replaces what's drawn there.
+   * - SIDE EFFECT: appends a `div` to `document.body` the first time it's called, if the host set no `appRoot`.
+   * - With `core.appLayout` (a `<spell-viewer>` with markup inside it):  draws nothing, saying so on the console.
+   */
+  startDrawing(view: CanDraw): void {
+    if (core.appLayout) {
+      core.console.log(`${view.constructor.name}:  its page's markup draws it, not its \`to draw\``)
+      return
+    }
+    let element = core.appElement()
+    if (!element) {
+      element = document.createElement("div")
+      element.id = core.REACT_APP_ROOT_ID
+      document.body.appendChild(element)
+    }
+    core.mountApp(view, element)
+  },
+
+  /**
+   * Mount `app`'s drawing into `element` -- replacing what was there -- and return how to take it down again.
+   * - What `App.start()` does, into `core.appElement()`.
+   * - SIDE EFFECT:  `element.spellRoot` is the mounted app:
+   *   so a runner can `unmount()` it before running a program again (`runCompiled()`).
+   * - SIDE EFFECT:  ⌘Z and ⇧⌘Z undo and redo while it has the focus, until it's unmounted (`listenForUndoKeys()`).
+   */
+  mountApp(app: CanDraw, element: HTMLElement): MountedApp {
+    ;(element as AppElement).spellRoot?.unmount()
+    // a root of its own:  `start the game` may run inside the host's drawing (a runner's effect),
+    // whose owner would otherwise own the app's drawing -- and hold or re-run it with the host's
+    const dispose = runWithOwner(null, () => render(() => core.drawThing(app), element))
+    const stopUndoKeys = listenForUndoKeys(element)
+    const mounted: MountedApp = {
+      app,
+      unmount() {
+        dispose()
+        stopUndoKeys()
+        if ((element as AppElement).spellRoot === mounted) delete (element as AppElement).spellRoot
+      }
+    }
+    ;(element as AppElement).spellRoot = mounted
+    return mounted
+  }
+})
+Object.assign(core, drawingMethods)
+
+////////////////
+// ## `@drawn`
+////////////////
+
+/**
+ * `@drawn draw() { ... }`:  the drawing in its own error boundary, the same boundary `core.drawThing()` gives.
+ * - So its drawing neither re-runs when the card's reads change, nor dies with the card's errors:
+ *   the card's drawing re-runs by itself, inside its boundary.
+ * - What compiled TypeScript (`ts/solid`) and hand-written classes write.
+ *   - Both targets draw a thing with `core.drawThing(card)`:
+ *     javascript's `draw()`, with no decorators, gets the same boundary there.
+ *   - ONE boundary, `drawInBoundary()`, for both targets.
+ * - SIDE EFFECT:  marks the method it returns (`isDrawn()`), so `drawThing()` calls it straight:
+ *   no second boundary around it.
+ * - A standard (TC39) method decorator, `@spell/core`'s like `@prop`.
+ *   NOTE: lowered by esbuild (`vite.decorators.ts`), so it MUST start its line.
+ */
+export function drawn<This extends object, Draw extends (this: This) => Drawing>(
+  draw: Draw,
+  _context: ClassMethodDecoratorContext<This, Draw>
+): Draw {
+  const drawInItsBoundary = function (this: This): Drawing {
+    return drawInBoundary(this, () => draw.call(this))
+  }
+  Object.defineProperty(drawInItsBoundary, DRAWN, { value: true })
+  return drawInItsBoundary as Draw
+}
+
+/**
+ * `draw()`'s drawing, for `thing`, in its own error boundary:
+ * `drawThing()`'s and `@drawn`'s, the ONE boundary both targets draw in.
+ * - Through `createComponent()`, as Solid's JSX does:  untracked, so what `draw()` reads is its own, not the caller's.
+ * - `draw()` runs in a memo, inside the boundary:
+ *   again only for what IT read, never because the boundary re-reads its children
+ *   (it does, whenever anything under it changes:  a list grows, a card flips).
+ * - When `draw()` (or a live value in it) throws:
+ *   - one line on the program's console
+ *   - a cancelable `ui-error` from the app's element (`{ error, thing }`)
+ *   - a small stand-in, unless that event was cancelled:  made once, even as the drawing around it changes
+ *     (`<Errored>` builds its fallback once since Solid rc.15;  `drawing.test.ts` pins it)
+ *   - The rest of the drawing keeps working;  the boundary heals when the thing draws again.
+ */
+function drawInBoundary(thing: object, draw: () => Drawing): Drawing {
+  return createComponent(Errored, {
+    fallback: (error: () => unknown) => drawingFailed(thing, error()),
+    get children() {
+      return createMemo(() => madeOnce(draw())) as unknown as Drawing
+    }
+  })
+}
+
+/**
+ * Does `thing`'s element show its drawing as its children, rather than in its shadow root?
+ * - An app's does:  its class says `drawsInItsChildren` (`App`).
+ */
+function drawsInItsChildren(thing: object): boolean {
+  return (thing.constructor as { drawsInItsChildren?: boolean }).drawsInItsChildren === true
+}
+
+/** Is `draw` a method `@drawn` made, which draws in its own boundary? */
+function isDrawn(draw: Function): boolean {
+  return (draw as { [DRAWN]?: boolean })[DRAWN] === true
+}
+
+/** A mounted app, as `mountApp()` returns it and leaves on its element (`spellRoot`). */
+export type MountedApp = {
+  /** The app drawn, e.g. the game:  a recompile that keeps the program's things starts it again (`carryOver()`). */
+  app: CanDraw
+  /** Take the app's drawing down, emptying its element. */
+  unmount(): void
+}
+
+/** The element an app is mounted into. */
+export type AppElement = HTMLElement & { spellRoot?: MountedApp }
+
+/** A list with its own way to draw each item:  a viewable list's `drawEachItem()`, spell's `to draw each item`. */
+type DrawsEachItem = {
+  /** `item` drawn as one of the list's -- see `ViewableList.drawEachItem()`. */
+  drawEachItem(item: unknown): Drawing
+}
+
+/** A viewable list's own `drawEachItem()`:  `drawItems()` adds no boundary around it. */
+const DEFAULT_DRAW_EACH_ITEM = ViewableList.prototype.drawEachItem
+
+/** `<For>` keyed by identity (its first overload):  `createComponent()` would pick its last. */
+type ForByIdentity = (props: { readonly each: unknown[]; children: (item: unknown) => Drawing }) => Drawing
+
+/** The DOM event a drawing that failed sends -- the same name as Spell UI's. */
+const ERROR_EVENT = "ui-error"
+
+/** Marks a method `@drawn` made -- see `isDrawn()`. */
+const DRAWN = Symbol("drawn")
+
+/**
+ * `drawing` MADE, if it's `h()`'s thunk (a function that makes the element) -- else `drawing` as it is.
+ * - Compiled JavaScript's `draw()` returns `h("div", ...)`, a thunk.  Made here, inside the boundary's memo:
+ *   - ONCE:  left a thunk, Solid would make the element again each time the boundary re-reads its children, which it
+ *     does whenever anything under it changes (a card added to a pile)
+ *   - inside the boundary:  a tag or child that throws while it's made shows the stand-in
+ *   - elements INSIDE it need nothing:  `h()` makes them as it makes their parent
+ * - A fragment, `<>...</>`, is a list of them (`[h("a"), h("b")]`):  each made once, the same way.
+ * - ONLY `h()`'s thunks:  any other function is a live value, which Solid calls itself, again when it changes.
+ *   `h()` marks its thunks with a symbol it keeps to itself, so it's read off a thunk of our own, `H_THUNK`.
+ */
+function madeOnce(drawing: Drawing): Drawing {
+  if (Array.isArray(drawing)) return drawing.map(madeOnce)
+  return isElementThunk(drawing) ? madeOnce(drawing()) : drawing
+}
+
+/** Is `value` a thunk core's `h()` made -- see `madeOnce()`? */
+export function isElementThunk(value: unknown): value is () => Drawing {
+  return typeof value === "function" && !!H_THUNK && (value as unknown as Record<symbol, unknown>)[H_THUNK] === true
+}
+
+/**
+ * The symbol `h()` marks its thunks with (`$ELEMENT`, "hyper-element" in `@solidjs/h`).
+ * - Not exported, so read off a thunk it made.
+ *   `h("i")` only wraps its arguments:  nothing is made, and nothing touches the page.
+ * - `undefined` if an `@solidjs/h` to come stops marking them:  `drawing.test.ts` pins it.
+ */
+const H_THUNK: symbol | undefined = Object.getOwnPropertySymbols(h("i"))[0]
+
+/**
+ * What a drawing that failed shows:  a stand-in naming the thing, after telling the program and the page.
+ * - SIDE EFFECTS:  one line on the program's console;  a cancelable `ui-error` from the app's element.
+ * - `null`, drawing nothing, when the page cancelled that event.
+ */
+function drawingFailed(thing: object, error: unknown): Drawing | null {
+  const type = (thing as { type?: string }).type ?? thing.constructor?.name ?? "thing"
+  core.console.error(`${type}:  draw() failed`, error)
+  const event = new CustomEvent(ERROR_EVENT, {
+    bubbles: true,
+    composed: true,
+    cancelable: true,
+    detail: { error, thing }
+  })
+  const target = core.appElement()
+  if (target && !target.dispatchEvent(event)) return null
+  const message = error instanceof Error ? error.message : String(error)
+  // made NOW, as `madeOnce()` makes a drawing:  the boundary shows the stand-in once, as it is
+  const standIn = core.message("cant-draw", { type })
+  return madeOnce(h("span.spell-draw-error", { title: message, role: "alert" }, standIn) as unknown as Drawing)
+}

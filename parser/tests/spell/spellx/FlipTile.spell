@@ -1,0 +1,26 @@
+// A tile that shows one side at a time.
+
+a "flip tile" is a view where:
+	- its "side" is one of up, down
+		- it "is showing (side)"
+	// Sent each time it turns over
+	- it sends "flipped" with count as a number
+	// Turns it over.
+	- to flip it:
+		- shortcut meta+F
+		- enabled when it is showing up
+		- undone as "Flip Tile"
+		if it is showing up
+			set its side to down
+		otherwise
+			set its side to up
+	- to draw its face:
+		<ui-text>face</ui-text>
+	- to draw its back:
+		<ui-text>back</ui-text>
+	- to draw it:
+		if it is showing up
+			draw its face
+		otherwise
+			draw its back
+	- on mouse down: flip it

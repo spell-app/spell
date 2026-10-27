@@ -1,0 +1,21 @@
+// This repo's GENERATED files, and the command that rebuilds each from the merged source (epic `epic-eject` T4;
+// spell-parser's own since epic `repo-split` P8 cut it from spell-app).
+// - Read by `epic worktree merge-main` (`MainMerge.generatorsOf()`), from the checkout being merged:
+//   a branch that adds a generated file adds its line here, and its merge already knows it.
+// - IN ORDER:  a later one may read an earlier one's output.
+// - Each line's keys:
+//   - `outputs`:  globs, from the repo's root
+//   - `cwd`:  where `run` runs, from the repo's root
+// - Snapshots aren't here:  the merge makes one update per package, after these.
+// - The same paths are `merge=binary` in `.gitattributes`:  keep the two in step.
+// - No `yarn.lock`:  the top repo `spell` holds the one install for every repo.
+{
+  "generators": [
+    {
+      "name": "spell syntax table",
+      "outputs": ["src/spell/spellSyntax.json"],
+      "cwd": ".",
+      "run": ["yarn", "spell:gen:syntax"]
+    }
+  ]
+}

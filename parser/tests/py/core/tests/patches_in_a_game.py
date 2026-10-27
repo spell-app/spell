@@ -1,0 +1,64 @@
+"""Plays a compiled game seeded, checking after every click that its patches give the same state as writing it whole.
+
+`python tests/py/core/tests/patches_in_a_game.py Solitaire.spell.py --seed 1 --clicks 300` (from the repo root)
+
+- Run by the core contract (cli's `contract.test.ts`), in a process of its own:
+  the game's classes (`Card`, `Pile` ...) are known by name, and would stand in for the test files' own.
+- Each click is a call of the card's own click handler, `on_click`, as the page sends one (epic `elemental-spell` J69):
+  every other one on the top card of the game's `stock`, if it has one, turning a card over;
+  the rest on a card of its `deck`, picked by the seeded random.
+  - Each kept at the program's top level, or by its app:  `solitaire`'s `stock` (see `kept()`).
+- Played by the page's own messages (`spell_core.playing`):
+  after each, the patches so far must add up to the game's whole state.
+- Prints how many clicks changed something;  exits 1 at the first that doesn't match.
+"""
+
+import argparse
+import sys
+from typing import Any
+
+from spell_core import core
+from spell_core.playing import PatchMismatchError, play_page
+
+
+def main() -> None:
+    """Play the game `sys.argv` names:  see the module's docs."""
+    parser = argparse.ArgumentParser()
+    parser.add_argument("program")
+    parser.add_argument("--seed", type=int, default=1)
+    parser.add_argument("--clicks", type=int, default=300)
+    args = parser.parse_args()
+    game = play_page(args.program, seed=args.seed)
+    cards = [card["$id"] for card in kept(game, "deck")["$items"]]
+    changed = 0
+    for click in range(args.clicks):
+        stock = kept(game, "stock", None)
+        stock = stock and stock["$items"]
+        card = stock[-1] if click % 2 == 0 and stock else {"$id": core.random_item_of(cards)}
+        try:
+            changed += bool(game.call("on_click", {"type": "click"}, on=card))
+        except PatchMismatchError:
+            print(f"click {click + 1}:  the patched state differs from the whole state", file=sys.stderr)
+            sys.exit(1)
+    print(f"{changed} of {args.clicks} clicks changed something;  every patch matched")
+
+
+def kept(game: Any, name: str, *default: Any) -> Any:
+    """The thing the game keeps as `name`:  at its top level, `stock`, or as its app's property, `solitaire`'s `stock`.
+
+    - `default`, if given, when there's none;  else raises `KeyError`.
+    """
+    if name in game.state:
+        return game.named(name)
+    for value in game.state.values():
+        thing = game.thing(value["$id"]) if isinstance(value, dict) and "$id" in value else None
+        member = thing and thing.get(name)
+        if isinstance(member, dict) and "$id" in member:
+            return game.thing(member["$id"])
+    if default:
+        return default[0]
+    raise KeyError(name)
+
+
+if __name__ == "__main__":
+    main()
