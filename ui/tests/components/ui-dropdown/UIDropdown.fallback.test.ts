@@ -65,7 +65,7 @@ describe("DropdownFallback", () => {
 
   it("reads its items as the component does:  an item's old names, `text` and `type`, read nothing (ui-gaps Q28)", () => {
     const { select } = dropdown(`<x-fb-dropdown aria-label="x">
-      <ui-item kind="header" label="Old" value="a" selected>Apple</ui-item>
+      <ui-item type="header" text="Old" value="a" selected>Apple</ui-item>
     </x-fb-dropdown>`)
     expect([...select().options].map((option) => [option.value, option.textContent, option.selected])).toEqual([
       ["a", "Apple", true]
