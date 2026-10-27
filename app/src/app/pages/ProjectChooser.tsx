@@ -1,6 +1,7 @@
-import { For, Show } from "solid-js"
+import { For, Show, onSettled } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
+import { SP } from "spell/parser/spell"
 import { SPACES } from "spell/app/spaces"
 import { appTexts } from "spell/app/app/ui/AppTexts"
 import {
@@ -35,6 +36,10 @@ export function ProjectChooser() {
   const showFixtures = !!import.meta.env?.DEV || !fixtures.devOnly
   const exampleList = trackProjectRoot(() => examples)
   const guideList = trackProjectRoot(() => guides)
+  // the browser's tab:  plain "Spell" here, a project's name on the editor's pages (`<AppMark>`)
+  onSettled(() => {
+    document.title = appTexts.text("appName")
+  })
 
   return (
     <SpellPage id="ProjectChooser" fillWindow dark scrolling>
@@ -125,6 +130,8 @@ function Hero(props: { examples: ProjectRootState; guides: ProjectRootState }) {
  * - A card:  a coloured tile with the project's initial, its title, and the first phrase of its description.
  * - Clicking one opens it in the editor (`useRunner`:  in the runner).
  * - Nothing in it:  one quiet card saying so (`empty`, else "No examples yet!").
+ * - Projects written in another language (Solitario, ListaDeTareas) come last, under a quiet line naming it,
+ *   "En Español" (Owen, 2026-10-27):  each project's language is its files' (`SP.ProjectListEntry`).
  ****************/
 function ProjectCards(props: ProjectCardsProps) {
   const root = trackProjectRoot(() => props.projectRoot)
@@ -146,34 +153,61 @@ function ProjectCards(props: ProjectCardsProps) {
           }
         >
           <For
-            each={root().projects}
+            each={root().projects.filter((project) => !project.language)}
             fallback={<div class="card empty">{props.empty ?? appTexts.text("nothingInGroup", root().words)}</div>}
           >
-            {(project) => (
-              <a
-                class="card"
-                href={project.path}
-                onClick={(event) => {
-                  event.preventDefault()
-                  openProject(project.path, props.useRunner)
-                }}
-              >
-                <span class="tile" style={{ "--ProjectCards-hue": hueFor(project.path) }} aria-hidden="true">
-                  {project.name.charAt(0)}
-                </span>
-                <span class="text">
-                  <span class="title">{project.name}</span>
-                  <Show when={firstPhrase(project.description)}>
-                    <span class="description">{firstPhrase(project.description)}</span>
-                  </Show>
-                </span>
-              </a>
+            {(project) => <ProjectCard project={project} useRunner={props.useRunner} />}
+          </For>
+          {/* those written in another language:  after the rest, under a quiet line naming it */}
+          <For each={languagesIn(root().projects)}>
+            {(language) => (
+              <>
+                <h3 class="language">{languageTitle(language)}</h3>
+                <For each={root().projects.filter((project) => project.language === language)}>
+                  {(project) => <ProjectCard project={project} useRunner={props.useRunner} />}
+                </For>
+              </>
             )}
           </For>
         </Show>
       </div>
     </section>
   )
+}
+
+/** One project's card:  its tile, its title, the first phrase of its description;  a click opens it. */
+function ProjectCard(props: { project: ProjectRootState["projects"][number]; useRunner?: boolean }) {
+  const project = () => props.project
+  return (
+    <a
+      class="card"
+      href={project().path}
+      onClick={(event) => {
+        event.preventDefault()
+        openProject(project().path, props.useRunner)
+      }}
+    >
+      <span class="tile" style={{ "--ProjectCards-hue": hueFor(project().path) }} aria-hidden="true">
+        {project().name.charAt(0)}
+      </span>
+      <span class="text">
+        <span class="title">{project().name}</span>
+        <Show when={firstPhrase(project().description)}>
+          <span class="description">{firstPhrase(project().description)}</span>
+        </Show>
+      </span>
+    </a>
+  )
+}
+
+/** The languages other than English that `projects` are written in, in the order they come. */
+function languagesIn(projects: ProjectRootState["projects"]): string[] {
+  return [...new Set(projects.flatMap((project) => (project.language ? [project.language] : [])))]
+}
+
+/** The line over a language's projects:  "En Español", in that language;  else its name in English. */
+function languageTitle(language: string): string {
+  return language === "es" ? appTexts.text("homeInSpanish") : SP.Language.for(language).name
 }
 
 /** Props for `<ProjectCards>`. */

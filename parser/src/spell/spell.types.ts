@@ -263,8 +263,10 @@ export type ProjectList = ProjectListEntry[]
  * One project of a group's list:  `{ path: "@spell/examples/TaskList", title: "Task List", description: "..." }`.
  * - `title` only when its project file has one (decision Q45):  else `SpellProject.title` makes it from the name.
  * - `description` only when its project file has one:  what it shows, for the editor's landing page cards.
+ * - `language` only when its files are all written in another language than English, by their names:
+ *   `es` for Solitario (`Carta.es.spell` ...), so the landing page lists it under "En Español".
  */
-export type ProjectListEntry = { path: string; title?: string; description?: string }
+export type ProjectListEntry = { path: string; title?: string; description?: string; language?: string }
 
 /** List of project addresses, e.g. `owen@spell/errors`:  a `ProjectList`'s paths. */
 export type ProjectPathList = string[]

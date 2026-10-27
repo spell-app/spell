@@ -1,8 +1,12 @@
 import { isServer, type JSX } from "@solidjs/web"
 
+import { createEffect } from "solid-js"
+
+import { SPACES } from "spell/app/spaces"
 import { editor } from "spell/app/app/editor"
 import { appTexts } from "spell/app/app/ui/AppTexts"
 import { uiReady } from "./loadUI"
+import { tracked } from "./tracked"
 
 import "./EditorTheme.css"
 
@@ -169,13 +173,23 @@ export function ThemeMenu(): JSX.Element {
  * - The hat alone, in the theme's primary colour:  the favicon's hat without its dark square
  *   (`/static/favicon/hat.svg`, drawn as a mask, `EditorTheme.css`).
  * - On a phone, the hat alone (`.AppName` read, not shown:  `chrome.css`).
+ * - A notebook's:  "Spell Notebooks" (Owen, 2026-10-27).
+ * - SIDE EFFECT:  names the browser's tab for the project shown:  `Button • Spell Notebook`, `Solitaire • Spell`.
  ****************/
 export function AppMark(): JSX.Element {
+  const shown = tracked(() => ({
+    title: editor.project?.title,
+    isNotebook: editor.projectRoot?.path === SPACES.SpellProjectRoot.notebooks.path
+  }))
+  createEffect(shown, ({ title, isNotebook }) => {
+    const key = isNotebook ? "notebookTabTitle" : "tabTitle"
+    document.title = title ? appTexts.text(key, { project: title }) : appTexts.text("appName")
+  })
   return (
     <ui-item class="AppMark">
       <a link="" href="/">
         <span class="hat" />
-        <span class="AppName">{appTexts.text("appName")}</span>
+        <span class="AppName">{appTexts.text(shown().isNotebook ? "notebooksAppName" : "appName")}</span>
       </a>
     </ui-item>
   )

@@ -124,6 +124,10 @@ export const APP_TEXTS = {
   ////////////////
 
   appName: "Spell",
+  notebooksAppName: "Spell Notebooks",
+  tabTitle: "{project} • Spell",
+  notebookTabTitle: "{project} • Spell Notebook",
+  homeInSpanish: "En Español",
   homeEyebrow: "Spell, in preview",
   homeTitle: "Write an app in a sentence.",
   homeTagline: "Plain words in.  A working app out.",

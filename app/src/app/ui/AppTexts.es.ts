@@ -190,6 +190,10 @@ const APP_TEXTS_ES: AppTextPack = {
   ////////////////
 
   appName: "Spell",
+  notebooksAppName: "Cuadernos de Encanto",
+  tabTitle: "{project} • Spell",
+  notebookTabTitle: "{project} • Cuaderno de Encanto",
+  homeInSpanish: "En Español",
   homeEyebrow: "Spell, en vista previa",
   homeTitle: "Escribe una app en una frase.",
   homeTagline: "Palabras sencillas.  Una app que funciona.",

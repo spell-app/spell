@@ -257,14 +257,30 @@ export const getProjectList = async (domainId: string): Promise<SP.ProjectList> 
   return Promise.all(
     projectNames.map(async (projectName) => {
       const path = `${domain.projectRoot}/${projectName}`
-      const { title, description } = await loadProjectFile(path).catch(() => ({
+      const { title, description, imports } = await loadProjectFile(path).catch(() => ({
         title: undefined,
-        description: undefined
+        description: undefined,
+        imports: []
       }))
-      return { path, ...(title && { title }), ...(description && { description }) }
+      const language = languageOf(imports.map((each) => each.path))
+      return { path, ...(title && { title }), ...(description && { description }), ...(language && { language }) }
     })
   )
 }
+
+/**
+ * The language a project's spell files are all written in, by their names (`Carta.es.spell` => `es`):
+ * `undefined` for English, or a mix.  Its other files (`styles.css`) say nothing.
+ */
+function languageOf(files: string[]): string | undefined {
+  const spellFiles = files.filter((file) => SPELL_FILE.test(file))
+  const languages = new Set(spellFiles.map((file) => SP.Language.langOfFile(file) ?? "en"))
+  const [language] = languages
+  return languages.size === 1 && language !== "en" ? language : undefined
+}
+
+/** A spell file's name:  `.spell` or `.spellx`. */
+const SPELL_FILE = /\.spellx?$/
 
 /**
  * `GET /api/projects/list/<group>` -- list projects in a group, e.g. `/api/projects/list/@spell/examples`.
