@@ -572,6 +572,11 @@ export type SpellxTwinWords = {
   notebookContent: string
   /** A notebook's `locked`:  a line in its body, `its lock is locked`. */
   notebookLocked: string
+  /**
+   * A template's bare `draggable`, `droppable`, `selectable`:  a line in its body, by the attribute's English name,
+   * the same line `- it is draggable` writes (`DragAndDrop`), so the class gets the same `canBeDragged` flag.
+   */
+  viewFlags: Record<string, string>
   /** What starts a notebook, after it:  `start {words}`, as an app's file says `start the game`. */
   start: string
   /** A handler, by its kind:  `{ on: "on {phrase} :" }`. */
