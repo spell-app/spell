@@ -1,0 +1,267 @@
+// Pop:  playful and colourful, as a Spell UI theme.
+// - One of Spell's own themes, the set `UI.themes.own` lists;  applied ON TOP of `classic.css`,
+//   so every classic token it replaces is restated here.
+// - Its sheet, `pop.css`, is GENERATED from this file:  `yarn gen:styles` (`ThemeFile`;  epic `debut` P18).
+//   What values can't say is in its rules sheets:  `rules/modern.css`, `rules/states.css` (its secondary's states), `rules/pop.css` (the buttons' sticker look).
+// - One of the four new themes (epic `debut` P20;  Owen:  "I like "Paper", "Midnight", "Crisp" and "Pop"").
+// - What makes it Pop:
+//   - a STICKER look:  thick ink outlines and a hard offset shadow, no blur, on cards, panels and buttons
+//   - light:  a warm off-white page, a hot pink primary, bright flat colours
+//   - dark:  a deep plum page, the same colours lighter, ink text on them
+//   - the rounded system font (Spell UI's rounded stack, `--ui-font-family-rounded`)
+//   - 12px controls, 16px cards and panels, 22px modals (the box round a thing always rounder than it)
+//   - Apple's system colours for the hues (its palette, `apple`):  bright, and AA in both schemes
+// - NO font files ship:  every face is the platform's own.
+{
+  "$schema": "./theme.schema.json",
+  "palette": "apple",
+  "rules": ["modern", "states", "pop"],
+  "own": {
+    "pop-page": { "light": "#fff5ea", "dark": "#1d0f27" },
+    "pop-panel": { "light": "#ffffff", "dark": "#2c1739" },
+    "pop-inset": { "light": "#fdebd8", "dark": "#24122f" },
+    // the ink of the outlines and the sticker shadow:  near-black plum, in both schemes
+    "pop-ink": { "light": "#1f1025", "dark": "#07020b" },
+    "pop-accent": { "light": "#c8125d", "dark": "#ff7ab8" },
+    "pop-on-accent": { "light": "#ffffff", "dark": "#2a0619" },
+    "pop-accent-wash": { "light": "#c8125d1a", "dark": "#ff7ab829" },
+    "pop-accent-text": { "light": "#b0104f", "dark": "#ff9cca" },
+    // the sticker:  a 2px outline, then a hard shadow down and to the right
+    "pop-outline": "0 0 0 2px {own.pop-ink}",
+    "pop-sticker": "0 0 0 2px {own.pop-ink}, 4px 4px 0 0 {own.pop-ink}",
+    "pop-sticker-lifted": "0 0 0 2px {own.pop-ink}, 6px 6px 0 0 {own.pop-ink}"
+  },
+  "typography": {
+    "size": "15px",
+    "family": {
+      "body": "{typography.family.rounded}",
+      "heading": "{typography.family.rounded}",
+      "mono": "ui-monospace, \"SF Mono\", Menlo, Consolas, monospace"
+    }
+  },
+  "radii": {
+    "s": "8px",
+    "m": "12px",
+    "l": "16px"
+  },
+  "text": {
+    "ink": { "light": "#1f1025", "dark": "#fbefff" },
+    "body": { "light": "#24122b", "dark": "#f5e6fb" },
+    "strong": { "light": "#16091b", "dark": "#ffffff" },
+    "muted": { "light": "#5e4a66", "dark": "#cdb5d8" },
+    "light": { "light": "#6b5673", "dark": "#bba2c7" }
+  },
+  "surfaces": {
+    "page": "{own.pop-page}",
+    "panel": "{own.pop-panel}",
+    "inset": "{own.pop-inset}",
+    "strong": "{own.pop-panel}",
+    "bar": "{surfaces.page}",
+    "code": "{own.pop-inset}",
+    "highlight": "{own.pop-accent-wash}"
+  },
+  "borders": {
+    "width": "2px",
+    "color": "{own.pop-ink}",
+    "strong": "{own.pop-ink}",
+    "internal": { "light": "#e5cfc0", "dark": "#4a2c5c" }
+  },
+  "brand": {
+    "primary": {
+      // Primary:  hot pink, white on it in light, plum ink on it in dark
+      "color": "{own.pop-accent}",
+      "on": "{own.pop-on-accent}",
+      "text": "{own.pop-accent-text}",
+      "background": "{own.pop-accent-wash}",
+      "inverted": "{own.pop-accent}",
+      "inverted-on": "{own.pop-on-accent}"
+    },
+    "secondary": {
+      // Secondary:  a bright blue, the pink's partner
+      "color": "{hues.blue.color}",
+      "on": "{hues.blue.on}",
+      "inverted": "{hues.blue.inverted}",
+      "inverted-on": "{hues.blue.inverted-on}",
+      // its states move away from the text on it, as the Apple palette moves blue's (`rules/apple.css`):
+      // darker in light, lighter in dark, where ink is on it (`rules/states.css`)
+      "hover": {
+        "light": "oklch(from {hues.blue.color} calc(l - 0.05) calc(c * 1.1) h)",
+        "dark": "oklch(from {hues.blue.color} calc(l + 0.05) calc(c * 1.1) h)"
+      },
+      "focus": {
+        "light": "oklch(from {hues.blue.color} calc(l - 0.08) calc(c * 1.2) h)",
+        "dark": "oklch(from {hues.blue.color} calc(l + 0.08) calc(c * 1.2) h)"
+      },
+      "down": {
+        "light": "oklch(from {hues.blue.color} calc(l - 0.1) c h)",
+        "dark": "oklch(from {hues.blue.color} calc(l + 0.1) c h)"
+      },
+      "active": {
+        "light": "oklch(from {hues.blue.color} calc(l - 0.05) calc(c * 1.15) h)",
+        "dark": "oklch(from {hues.blue.color} calc(l + 0.05) calc(c * 1.15) h)"
+      }
+    },
+    "link": {
+      "color": { "light": "#b0104f", "dark": "#ff9cca" },
+      "hover": { "light": "#7f0b39", "dark": "#ffc4df" }
+    },
+    "focus": {
+      "width": "3px",
+      "color": "{own.pop-accent}"
+    }
+  },
+  "hues": {
+    // Hue text on the warm page:  a shade darker than `colors.css`' recipe, as on Paper's cream and Merlot's rose
+    "yellow": {
+      "text": {
+        "light": "oklch(from {hues.yellow.color} min(l, 0.46) c h)",
+        "dark": "oklch(from {hues.yellow.color} max(l, 0.78) c h)"
+      },
+      "border": {
+        "light": "oklch(from {hues.yellow.color} min(l, 0.56) c h)",
+        "dark": "oklch(from {hues.yellow.color} max(l, 0.7) c h)"
+      }
+    },
+    "olive": {
+      "text": {
+        "light": "oklch(from {hues.olive.color} min(l, 0.46) c h)",
+        "dark": "oklch(from {hues.olive.color} max(l, 0.78) c h)"
+      }
+    },
+    "green": {
+      "text": {
+        "light": "oklch(from {hues.green.color} min(l, 0.46) c h)",
+        "dark": "oklch(from {hues.green.color} max(l, 0.78) c h)"
+      }
+    },
+    "teal": {
+      "text": {
+        "light": "oklch(from {hues.teal.color} min(l, 0.46) c h)",
+        "dark": "oklch(from {hues.teal.color} max(l, 0.78) c h)"
+      }
+    },
+    "brown": {
+      "text": {
+        "light": "oklch(from {hues.brown.color} min(l, 0.46) c h)",
+        "dark": "oklch(from {hues.brown.color} max(l, 0.78) c h)"
+      }
+    },
+    "grey": {
+      "text": {
+        "light": "oklch(from {hues.grey.color} min(l, 0.46) c h)",
+        "dark": "oklch(from {hues.grey.color} max(l, 0.78) c h)"
+      }
+    }
+  },
+  "shadows": {
+    // hard, never blurred:  the sticker's offset
+    "ink": "{own.pop-ink}",
+    // small things (a chip, a label) stay flat:  the sticker is for cards, panels and buttons
+    "subtle": "none",
+    "raised": "{own.pop-sticker}",
+    "floating": "0 0 0 2px {own.pop-ink}, 6px 6px 0 0 {own.pop-ink}",
+    "floating-hover": "0 0 0 2px {own.pop-ink}, 8px 8px 0 0 {own.pop-ink}",
+    "overlay": "{shadows.floating-hover}"
+  },
+  "motion": {
+    "ease": {
+      // a little bounce
+      "out": "cubic-bezier(0.34, 1.4, 0.64, 1)"
+    }
+  },
+  "components": {
+    "button": {
+      "radius": "{radii.m}",
+      "font-weight": 700
+    },
+    "input": {
+      "radius": "{radii.m}",
+      "background": "{own.pop-panel}",
+      "border-color": "{own.pop-ink}",
+      "border-color-hover": "{own.pop-ink}",
+      "border-color-focus": "{own.pop-accent}"
+    },
+    "dropdown": {
+      "radius": "{radii.m}",
+      "border-color": "{own.pop-ink}"
+    },
+    "select": {
+      "background": "{components.input.background}",
+      "border-color": "{components.input.border-color}"
+    },
+    "menu": {
+      "radius": "{radii.m}",
+      "text-active-weight": 700,
+      "active-background": "{own.pop-accent-wash}",
+      "active-color": "{own.pop-accent-text}",
+      // tab bars:  an outlined track, the chosen tab a pink sticker inside it, its corners the track's less the inset
+      "segmented-background": "{own.pop-panel}",
+      "segmented-border": "2px solid {own.pop-ink}",
+      "segmented-radius": "{radii.l}",
+      "segmented-padding": "3px",
+      "segmented-item-radius": "calc({radii.l} - 5px)",
+      "segmented-active-background": "{own.pop-accent}",
+      "segmented-active-color": "{own.pop-on-accent}",
+      "segmented-active-shadow": "none",
+      // no lines between segments:  one surface, its chosen key the only mark (T7)
+      "segmented-divider": "transparent"
+    },
+    "card": {
+      "radius": "{radii.l}",
+      "border-color": "{own.pop-ink}",
+      "hover-border-color": "{own.pop-ink}",
+      "shadow": "{own.pop-sticker}",
+      "hover-shadow": "{own.pop-sticker-lifted}",
+      "raised-shadow": "{own.pop-sticker}",
+      "raised-hover-shadow": "{own.pop-sticker-lifted}"
+    },
+    "segment": {
+      "radius": "{radii.l}",
+      "border-color": "{own.pop-ink}",
+      "shadow": "{own.pop-outline}",
+      "raised-shadow": "{own.pop-sticker}"
+    },
+    "section": {
+      "radius": "{radii.l}"
+    },
+    "panel": {
+      "radius": "{radii.l}",
+      "shadow": "{own.pop-sticker}"
+    },
+    "message": {
+      "radius": "{radii.l}"
+    },
+    "popup": {
+      "radius": "{radii.m}",
+      "border-color": "{own.pop-ink}",
+      "shadow": "{own.pop-sticker}"
+    },
+    "toast": {
+      "radius": "{radii.l}",
+      "shadow": "{own.pop-sticker}"
+    },
+    "modal": {
+      "radius": "22px",
+      "shadow": "{shadows.floating-hover}"
+    },
+    "bar": {
+      "panel-background": "{own.pop-panel}"
+    },
+    "docs-nav": {
+      // the docs' side column (`<ui-docs-nav>`) in the theme's own colours, not the classic ivory and brown
+      "background": "{own.pop-panel}",
+      "header-background": "{own.pop-inset}",
+      "band-background": "{own.pop-inset}",
+      "band-color": "{text.muted}",
+      "border-color": "{borders.color}",
+      "current-background": "{own.pop-accent-wash}",
+      "current-color": "{own.pop-accent-text}"
+    },
+    "toolbar": {
+      "button-radius": "{radii.s}"
+    },
+    "header": {
+      "font-weight": "{typography.weight.bold}"
+    }
+  }
+}

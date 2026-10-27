@@ -1,0 +1,19 @@
+<!-- `<ui-page>`:  a page frame, shrunk into a box (`--ui-page-min-height: 0`) so it fits beside the others. -->
+<div class="ui-stack">
+  <section>
+    <h4>Page</h4>
+    <div style="resize: both; overflow: auto; border: 1px dashed currentColor; max-width: 100%">
+      <ui-page style="--ui-page-min-height: 0; --ui-page-nav-width: 9em; --ui-page-aside-width: 9em">
+        <ui-header slot="header" level="2">Inbox</ui-header>
+        <ui-menu slot="nav" direction="vertical" fluid aria-label="Folders">
+          <ui-item selected>Inbox</ui-item>
+          <ui-item>Sent</ui-item>
+          <ui-item>Drafts</ui-item>
+        </ui-menu>
+        <ui-text paragraph>Three new messages since this morning.</ui-text>
+        <ui-segment slot="aside">Tip: press <ui-keys shortcut="mod+K"></ui-keys> to search.</ui-segment>
+        <ui-text slot="footer" color="grey">© 2026 Inbox</ui-text>
+      </ui-page>
+    </div>
+  </section>
+</div>

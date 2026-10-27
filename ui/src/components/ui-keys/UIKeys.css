@@ -1,0 +1,44 @@
+/*
+ * The style sheet of `<ui-keys>`:  key caps, the docs search's look, as an element of its own.
+ * - Shadow markup:  `<kbd class="ui keys" part="keys">` of `<span class="chord">`s of `<kbd class="key" part="key">`,
+ *   the caps 1px apart, so a chord reads as ONE shortcut, not two presses (Owen, 2026-10-23).
+ * - The DOM element is `display: contents`:  the keys flow with the text round them.
+ * - Public tokens (`--ui-keys-*`) are NEVER declared here:  each is read through its private alias.
+ *   The docs search draws its shortcut with this element, so they're its look too.
+ */
+
+@layer ui.components.keys.types {
+  :host {
+    display: contents;
+  }
+  .ui.keys {
+    --_ui-keys-border-color: var(--ui-keys-border-color, var(--ui-border-color));
+    --_ui-keys-background: var(--ui-keys-background, var(--ui-surface));
+    --_ui-keys-color: var(--ui-keys-color, var(--ui-text-muted));
+    --_ui-keys-radius: var(--ui-keys-radius, 0.375em);
+    --_ui-keys-font-size: var(--ui-keys-font-size, 0.875em);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5em;
+    font: inherit;
+    vertical-align: baseline;
+  }
+  .chord {
+    display: inline-flex;
+    gap: 1px;
+  }
+  .key {
+    box-sizing: border-box;
+    display: inline-grid;
+    place-items: center;
+    min-width: 1.5em;
+    height: 1.5em;
+    padding-inline: 0.3em;
+    border: 1px solid var(--_ui-keys-border-color);
+    border-block-end-width: 2px;
+    border-radius: var(--_ui-keys-radius);
+    background: var(--_ui-keys-background);
+    color: var(--_ui-keys-color);
+    font: 500 var(--_ui-keys-font-size) / 1 var(--ui-font-family-mono);
+  }
+}

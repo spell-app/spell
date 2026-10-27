@@ -1,0 +1,125 @@
+<!-- `src/components/ui-menu/examples/variations.html` as element markup. -->
+<div class="ui-stack">
+  <section>
+    <h4>Stackable</h4>
+    <ui-menu stackable aria-label="Stackable demo">
+      <ui-item link="#features">Features</ui-item>
+      <ui-item link="#testimonials">Testimonials</ui-item>
+      <ui-item link="#signin">Sign-in</ui-item>
+    </ui-menu>
+  </section>
+
+  <section>
+    <h4>Inverted</h4>
+    <ui-menu inverted aria-label="Inverted demo">
+      <ui-item link="#home" selected>Home</ui-item>
+      <ui-item link="#messages">Messages</ui-item>
+      <ui-item link="#friends">Friends</ui-item>
+    </ui-menu>
+    <ui-segment inverted>
+      <ui-menu inverted appearance="secondary pointing" aria-label="Inverted secondary pointing demo">
+        <ui-item link="#home" selected>Home</ui-item>
+        <ui-item link="#messages">Messages</ui-item>
+      </ui-menu>
+    </ui-segment>
+  </section>
+
+  <section>
+    <h4>Colored</h4>
+    <ui-menu aria-label="Colored items demo">
+      <ui-item link="#red" color="red" selected>Red</ui-item>
+      <ui-item link="#orange" color="orange">Orange</ui-item>
+    </ui-menu>
+    <ui-menu color="blue" items="3" aria-label="Colored menu demo">
+      <ui-item link="#a" selected>Blue</ui-item>
+      <ui-item link="#b">Two</ui-item>
+      <ui-item link="#c">Three</ui-item>
+    </ui-menu>
+    <ui-menu inverted color="green" aria-label="Inverted colored demo">
+      <ui-item link="#a" selected>Home</ui-item>
+      <ui-item link="#b">Messages</ui-item>
+    </ui-menu>
+  </section>
+
+  <section>
+    <h4>Icons</h4>
+    <ui-menu padding="compact" icon aria-label="Icons demo">
+      <ui-item link="#gamepad" icon="gamepad" aria-label="Games"></ui-item>
+      <ui-item link="#video" icon="video" aria-label="Video"></ui-item>
+    </ui-menu>
+    <ui-menu padding="compact" labeled aria-label="Labeled icons demo">
+      <ui-item link="#games" icon="gamepad">Games</ui-item>
+      <ui-item link="#channels" icon="video">Channels</ui-item>
+    </ui-menu>
+  </section>
+
+  <section>
+    <h4>Fluid, compact, evenly divided</h4>
+    <ui-menu direction="vertical" fluid aria-label="Fluid demo">
+      <ui-item link="#run">Run</ui-item>
+      <ui-item link="#walk">Walk</ui-item>
+    </ui-menu>
+    <ui-menu padding="compact" aria-label="Compact demo">
+      <ui-item link="#messages">Messages</ui-item>
+      <ui-item link="#friends">Friends</ui-item>
+    </ui-menu>
+    <ui-menu items="equal" aria-label="Equal width demo">
+      <ui-item link="#buy">Buy</ui-item>
+      <ui-item link="#sell">Sell</ui-item>
+      <ui-item link="#rent">Rent</ui-item>
+    </ui-menu>
+  </section>
+
+  <section>
+    <h4>Attached</h4>
+    <ui-menu attach="top" aria-label="Attached top demo">
+      <ui-item link="#a">Top</ui-item>
+    </ui-menu>
+    <ui-segment attach="both"><p>Content</p></ui-segment>
+    <ui-menu attach="bottom" aria-label="Attached bottom demo">
+      <ui-item link="#b">Bottom</ui-item>
+    </ui-menu>
+  </section>
+
+  <section>
+    <h4>Size, fitted, borderless</h4>
+    <ui-menu size="mini" aria-label="Mini demo">
+      <ui-item link="#home" selected>Home</ui-item>
+      <ui-item link="#messages">Messages</ui-item>
+    </ui-menu>
+    <ui-menu size="huge" aria-label="Huge demo">
+      <ui-item link="#home" selected>Home</ui-item>
+      <ui-item link="#messages">Messages</ui-item>
+    </ui-menu>
+    <ui-menu aria-label="Fitted items demo">
+      <ui-item link="#nopad" padding="none">No padding</ui-item>
+      <ui-item link="#nohpad" padding="none-x">No horizontal padding</ui-item>
+    </ui-menu>
+    <ui-menu appearance="borderless" aria-label="Borderless demo">
+      <ui-item link="#1">1</ui-item>
+      <ui-item link="#2">2</ui-item>
+    </ui-menu>
+  </section>
+
+  <section>
+    <h4>At the right, centered, wrapping</h4>
+    <ui-stack direction="horizontal" justify="end">
+      <ui-menu padding="compact" aria-label="At the right demo">
+        <ui-item link="#1">1</ui-item>
+        <ui-item link="#2">2</ui-item>
+      </ui-menu>
+    </ui-stack>
+    <ui-menu centered padding="compact" aria-label="Centered demo">
+      <ui-item link="#a">A</ui-item>
+      <ui-item link="#b">B</ui-item>
+    </ui-menu>
+    <div style="max-width: 16em">
+      <ui-menu wrapping aria-label="Wrapping demo">
+        <ui-item link="#one">One</ui-item>
+        <ui-item link="#two">Two</ui-item>
+        <ui-item link="#three">Three</ui-item>
+        <ui-item link="#four">Four</ui-item>
+      </ui-menu>
+    </div>
+  </section>
+</div>

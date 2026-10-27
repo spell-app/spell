@@ -1,0 +1,156 @@
+/*
+ * The style sheet of `<ui-text>`:  a port of Fomantic's `text.less` + `text.variables`.
+ * - It styles the component's shadow DOM, in Fomantic's class names on a semantic element:
+ *   `<span class="ui [size] [color] [state] [keyOnly ...] text" part="text"><slot></slot></span>`
+ *   - `state` (`error`, `info`, `success`, `warning`) writes its word alone, like a colour:
+ *     `colors.css` remaps `.ui.error` … onto the same generic tokens, so ONE rule set colours hues and states alike
+ * - It keys on `span.ui.text` (and `a.ui.text`, a link), as Fomantic keys on `span.ui.text`:  `ui text container`,
+ *   `ui text menu` and `ui text loader` are other components' boxes.
+ * - The DOM element is `display: contents` (`:host`):  the inner span IS the inline box,
+ *   flowing with the text around it.
+ *
+ * - Colours read the generic remap:  `--ui-color-text` (the hue's contrast-tuned text role, per scheme),
+ *   and `--ui-color-inverted` for `inverted` (the hue on dark surfaces, whatever the scheme).
+ *   Uncoloured text inherits its colour.
+ * - Sizes are relative to the SURROUNDING text (em), with Fomantic's own ladder (`huge` === 4em):
+ *   the box points `--ui-size-*` at `--ui-text-size-*`, so the generic `.ui.huge { --ui-scale }` remap
+ *   picks the text ratio.
+ *   - The element resets `--ui-scale` and the `--ui-color*` a coloured parent would hand down,
+ *     so text in a large red button is neither scaled twice nor painted red on red.
+ *
+ * - The public tokens (`--ui-text-line-height`, `--ui-text-size-*`, `--ui-text-disabled-opacity`,
+ *   `--ui-text-link-color`, `--ui-text-link-hover-color`, `--ui-text-code-background`,
+ *   `--ui-text-highlight-background`)
+ *   are NEVER declared here.
+ *   - The token block gives each a private alias, and every rule reads the alias:
+ *     `--_ui-text-line-height: var(--ui-text-line-height, 1)`.
+ *   - So a value set on `:root`, an ancestor, the element, `::part(text)` or in the app's style sheet
+ *     reaches the box (`notes/theming.md`, "Component tokens").
+ *   - The component's tokens share the `--ui-text-` prefix with the GLOBAL neutral text colours
+ *     (`--ui-text-color`, `--ui-text-muted`, `--ui-text-disabled`, `--ui-text-inverted-*` …).
+ *     This sheet NEVER aliases (or declares) one of those;  its own names don't collide.
+ *
+ * - `:state(disabled)`, set by the component, is for the PAGE's styles only;  this sheet keys on classes.
+ *
+ * - Left out, on purpose:
+ *   - Fomantic's raw hue for coloured text:  the `-text` role reads on its background (yellow text included)
+ *   - an `inverted` look for uncoloured text:  Fomantic has none either;  it inherits
+ */
+
+@layer ui.components.text.types, ui.components.text.content, ui.components.text.variations, ui.components.text.states;
+
+/*******************************
+             Text
+*******************************/
+
+@layer ui.components.text.types {
+  /* The DOM element:  no box of its own;  the inner span is the inline box. */
+  :host {
+    display: contents;
+    /* Don't inherit a parent component's scale or colour:  text follows the surrounding TEXT. */
+    --ui-scale: initial;
+    --ui-color: initial;
+    --ui-color-text: initial;
+    --ui-color-inverted: initial;
+  }
+
+  /* Tokens:  one per `text.variables` entry that still matters, each the private alias of its public token. */
+  :is(span, a, p).ui.text {
+    --_ui-text-line-height: var(--ui-text-line-height, 1);
+    --_ui-text-disabled-opacity: var(--ui-text-disabled-opacity, var(--ui-disabled-opacity));
+    /* A link (`link`), and code and highlight inside text (`font`;  epic `ui-gaps` P3). */
+    --_ui-text-link-color: var(--ui-text-link-color, var(--ui-link));
+    --_ui-text-link-hover-color: var(--ui-text-link-hover-color, var(--ui-link-hover));
+    --_ui-text-code-background: var(--ui-text-code-background, var(--ui-surface-strong));
+    --_ui-text-highlight-background: var(
+      --ui-text-highlight-background,
+      light-dark(oklch(from var(--ui-yellow) 0.92 calc(c * 0.55) h), oklch(from var(--ui-yellow) 0.38 calc(c * 0.6) h))
+    );
+    /* Fomantic's text ladder, relative to the surrounding text. */
+    --_ui-text-size-mini: var(--ui-text-size-mini, 0.4);
+    --_ui-text-size-tiny: var(--ui-text-size-tiny, 0.5);
+    --_ui-text-size-small: var(--ui-text-size-small, 0.75);
+    --_ui-text-size-large: var(--ui-text-size-large, 1.5);
+    --_ui-text-size-big: var(--ui-text-size-big, 2);
+    --_ui-text-size-huge: var(--ui-text-size-huge, 4);
+    --_ui-text-size-massive: var(--ui-text-size-massive, 8);
+    /* The generic size remap (`sizes.css`) resolves `--ui-size-<size>` HERE, so it picks the text ladder. */
+    --ui-size-mini: var(--_ui-text-size-mini);
+    --ui-size-tiny: var(--_ui-text-size-tiny);
+    --ui-size-small: var(--_ui-text-size-small);
+    --ui-size-large: var(--_ui-text-size-large);
+    --ui-size-big: var(--_ui-text-size-big);
+    --ui-size-huge: var(--_ui-text-size-huge);
+    --ui-size-massive: var(--_ui-text-size-massive);
+  }
+
+  /* Text:  inline, coloured by its hue or state, sized against the text around it. */
+  :is(span, a, p).ui.text {
+    color: var(--ui-color-text, inherit);
+    font-size: calc(1em * var(--ui-scale, 1));
+    line-height: var(--_ui-text-line-height);
+  }
+
+  /* A paragraph (`paragraph`):  a block, the body's line height, a line's space under it (none after the last). */
+  p.ui.text {
+    margin-block: 0 1em;
+    line-height: var(--ui-line-height);
+  }
+  :host(:last-child) > p.ui.text {
+    margin-block-end: 0;
+  }
+
+  /* A link in running text (`link`), or in a paragraph:  the page's link colour, unless it has a hue;  underlined. */
+  a.ui.text,
+  p.ui.text > a {
+    color: var(--ui-color-text, var(--_ui-text-link-color));
+    text-decoration-line: underline;
+    text-decoration-thickness: 0.06em;
+    text-underline-offset: 0.15em;
+  }
+  a.ui.text:hover,
+  p.ui.text > a:hover {
+    color: var(--ui-color-text, var(--_ui-text-link-hover-color));
+  }
+  /* The text's line is only as tall as its letters:  a ring a little away from them, lightly rounded. */
+  a.ui.text:focus-visible,
+  p.ui.text > a:focus-visible {
+    outline-offset: 1px;
+    border-radius: 2px;
+  }
+
+  /* Code and a highlight inside the text (`font="code"`, `font="highlight"`). */
+  .ui.text code {
+    padding: 0.125em 0.375em;
+    font-family: var(--ui-font-family-mono);
+    font-size: 0.875em;
+    background-color: var(--_ui-text-code-background);
+    border-radius: var(--ui-radius-s);
+  }
+  .ui.text mark {
+    color: inherit;
+    background-color: var(--_ui-text-highlight-background);
+  }
+}
+
+/*******************************
+           Variations
+*******************************/
+
+@layer ui.components.text.variations {
+  /* Inverted:  the hue as it reads on a dark surface. */
+  :is(span, p).ui.inverted.text {
+    color: var(--ui-color-inverted, inherit);
+  }
+}
+
+/*******************************
+             States
+*******************************/
+
+@layer ui.components.text.states {
+  /* Disabled:  faded. */
+  :is(span, p).ui.disabled.text {
+    opacity: var(--_ui-text-disabled-opacity);
+  }
+}

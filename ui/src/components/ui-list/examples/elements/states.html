@@ -1,0 +1,25 @@
+<!-- `src/components/ui-list/examples/states.html` as element markup. -->
+<div class="ui-stack">
+  <section>
+    <h4>Disabled</h4>
+    <ui-list direction="horizontal">
+      <ui-item disabled link="#disabled">Disabled</ui-item>
+      <ui-item link="#terms">Terms</ui-item>
+      <ui-item link="#privacy">Privacy</ui-item>
+    </ui-list>
+  </section>
+
+  <section>
+    <h4>Active</h4>
+    <ui-list appearance="link">
+      <ui-item link="#home">Home</ui-item>
+      <ui-item selected link="#about">About</ui-item>
+      <ui-item link="#jobs">Jobs</ui-item>
+    </ui-list>
+    <ui-list selection>
+      <ui-item value="inbox">Inbox</ui-item>
+      <ui-item selected value="starred">Starred</ui-item>
+      <ui-item value="sent">Sent</ui-item>
+    </ui-list>
+  </section>
+</div>

@@ -1,0 +1,462 @@
+{
+  "$comment": "A FIXTURE for Spell UI's design tools' tests:  two families of spell-brand's docs set data (its docs/__data/components.json5, 2026-10-20), cut down.  Spell UI may not read the brand's repo, which is above it (epic repo-split P8).",
+  "version": 1,
+  "topics": [
+    {
+      "id": "colour",
+      "title": "Colour"
+    },
+    {
+      "id": "casting",
+      "title": "Casting"
+    },
+    {
+      "id": "app",
+      "title": "The app's pieces"
+    },
+    {
+      "id": "art",
+      "title": "Page art"
+    }
+  ],
+  "components": [
+    {
+      "tag": "brand-logo",
+      "name": "Brand logo",
+      "folder": "brand-logo",
+      "topics": [
+        "art"
+      ],
+      "aka": [
+        "logo",
+        "lockup",
+        "wordmark",
+        "brand mark",
+        "hat mark"
+      ],
+      "description": "The Spell logo:  the hat mark, or the mark with the wordmark (and tagline), outlined, in one colour.",
+      "noun": "logo",
+      "attributes": [
+        {
+          "name": "variant",
+          "kind": "enum",
+          "values": [
+            "mark",
+            "lockup",
+            "tagline",
+            "app"
+          ],
+          "default": "mark",
+          "description": "Which:  `mark` (the hat), `lockup` (hat + Spell), `tagline` (+ All magic, no fuss.), `app` (hat + Spell App)."
+        },
+        {
+          "name": "tone",
+          "kind": "enum",
+          "values": [
+            "ink",
+            "purple",
+            "lilac",
+            "aubergine",
+            "white",
+            "current"
+          ],
+          "default": "ink",
+          "description": "Colour:  `ink` (the theme's strongest text), `purple`, `lilac`, `aubergine`, `white`, `current` (`currentColor`)."
+        },
+        {
+          "name": "label",
+          "kind": "string",
+          "description": "Accessible name;  default `Spell` (`Spell App`).  `\"\"`:  decorative, hidden from screen readers."
+        },
+        {
+          "name": "disabled",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`)."
+        },
+        {
+          "name": "loading",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`)."
+        },
+        {
+          "name": "visible",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible=\"false\"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins."
+        },
+        {
+          "name": "animation",
+          "kind": "enum",
+          "values": [
+            "fade",
+            "fade up",
+            "fade down",
+            "fade left",
+            "fade right",
+            "scale",
+            "zoom",
+            "drop",
+            "browse",
+            "browse right",
+            "fly",
+            "fly up",
+            "fly down",
+            "fly left",
+            "fly right",
+            "slide",
+            "slide up",
+            "slide down",
+            "slide left",
+            "slide right",
+            "swing",
+            "swing up",
+            "swing down",
+            "swing left",
+            "swing right",
+            "horizontal flip",
+            "vertical flip",
+            "flash",
+            "shake",
+            "bounce",
+            "tada",
+            "pulse",
+            "jiggle",
+            "glow",
+            "none"
+          ],
+          "shared": true,
+          "description": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on."
+        }
+      ],
+      "slots": [],
+      "events": [],
+      "parts": [
+        {
+          "name": "logo",
+          "description": "The `<svg>`."
+        }
+      ],
+      "states": [
+        {
+          "name": "disabled",
+          "description": "`disabled` is set (or, on a form control, a `<fieldset disabled>` around it)."
+        },
+        {
+          "name": "loading",
+          "description": "`loading` is set."
+        },
+        {
+          "name": "busy",
+          "description": "`loading`, and the element draws the shared loader:  a spinner over it (`elementSetup.loading`)."
+        },
+        {
+          "name": "dimmed",
+          "description": "Disabled or loading the shared way:  everything inside is inert, and dimmed."
+        },
+        {
+          "name": "hidden",
+          "description": "Hidden (`hidden`, or `visible=\"false\"`), once its animation has run."
+        },
+        {
+          "name": "still",
+          "description": "`animation=\"none\"`:  no motion here, nor anywhere inside it (`--ui-motion: none`)."
+        },
+        {
+          "name": "hiding",
+          "description": "Animating out:  `hidden` is already set, and the element stays on screen until it ends."
+        }
+      ],
+      "texts": [
+        {
+          "key": "spell",
+          "text": "Spell",
+          "description": "Default name of the mark and the lockups."
+        },
+        {
+          "key": "spellApp",
+          "text": "Spell App",
+          "description": "Default name of the `app` lockup."
+        }
+      ],
+      "mainTag": "brand-logo",
+      "main": true,
+      "page": true,
+      "href": "brand-logo.html"
+    },
+    {
+      "tag": "brand-phone",
+      "name": "Brand phone",
+      "folder": "brand-phone",
+      "topics": [
+        "app"
+      ],
+      "aka": [
+        "phone frame",
+        "device frame",
+        "phone mockup",
+        "device mockup",
+        "app preview",
+        "mobile preview"
+      ],
+      "description": "A brand phone frames live app content as a phone:  a status bar on top, the app below.",
+      "noun": "phone",
+      "attributes": [
+        {
+          "name": "time",
+          "kind": "string",
+          "default": "9:41",
+          "description": "The status bar's clock:  any text, default `9:41`."
+        },
+        {
+          "name": "dimmed",
+          "kind": "keyOnly",
+          "description": "Fades the phone (to 45%) while its app is being built, and marks it busy (`aria-busy`)."
+        },
+        {
+          "name": "label",
+          "kind": "string",
+          "description": "Accessible name of the region around the app;  default `App preview`.  `\"\"`:  no region, just a frame."
+        },
+        {
+          "name": "disabled",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`)."
+        },
+        {
+          "name": "loading",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`)."
+        },
+        {
+          "name": "visible",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible=\"false\"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins."
+        },
+        {
+          "name": "animation",
+          "kind": "enum",
+          "values": [
+            "fade",
+            "fade up",
+            "fade down",
+            "fade left",
+            "fade right",
+            "scale",
+            "zoom",
+            "drop",
+            "browse",
+            "browse right",
+            "fly",
+            "fly up",
+            "fly down",
+            "fly left",
+            "fly right",
+            "slide",
+            "slide up",
+            "slide down",
+            "slide left",
+            "slide right",
+            "swing",
+            "swing up",
+            "swing down",
+            "swing left",
+            "swing right",
+            "horizontal flip",
+            "vertical flip",
+            "flash",
+            "shake",
+            "bounce",
+            "tada",
+            "pulse",
+            "jiggle",
+            "glow",
+            "none"
+          ],
+          "shared": true,
+          "description": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on."
+        }
+      ],
+      "slots": [
+        {
+          "name": "",
+          "description": "The app:  its title, cards, controls.  Each child is spaced 12px apart."
+        }
+      ],
+      "events": [],
+      "parts": [
+        {
+          "name": "phone",
+          "description": "The frame:  a `<section>`, the region named `label`."
+        },
+        {
+          "name": "status",
+          "description": "The status bar (hidden from screen readers)."
+        },
+        {
+          "name": "time",
+          "description": "The status bar's clock."
+        },
+        {
+          "name": "icons",
+          "description": "The status bar's signal, wifi and battery icons."
+        }
+      ],
+      "states": [
+        {
+          "name": "disabled",
+          "description": "`disabled` is set (or, on a form control, a `<fieldset disabled>` around it)."
+        },
+        {
+          "name": "loading",
+          "description": "`loading` is set."
+        },
+        {
+          "name": "busy",
+          "description": "`loading`, and the element draws the shared loader:  a spinner over it (`elementSetup.loading`)."
+        },
+        {
+          "name": "dimmed",
+          "description": "Disabled or loading the shared way:  everything inside is inert, and dimmed."
+        },
+        {
+          "name": "hidden",
+          "description": "Hidden (`hidden`, or `visible=\"false\"`), once its animation has run."
+        },
+        {
+          "name": "still",
+          "description": "`animation=\"none\"`:  no motion here, nor anywhere inside it (`--ui-motion: none`)."
+        },
+        {
+          "name": "hiding",
+          "description": "Animating out:  `hidden` is already set, and the element stays on screen until it ends."
+        }
+      ],
+      "texts": [
+        {
+          "key": "appPreview",
+          "text": "App preview",
+          "description": "Default name of the region around the app."
+        }
+      ],
+      "mainTag": "brand-phone",
+      "main": true,
+      "page": true,
+      "href": "brand-phone.html"
+    }
+  ],
+  "docs": [],
+  "families": {
+    "brand-logo": {
+      "folder": "brand-logo",
+      "mainTag": "brand-logo",
+      "title": "Brand logo",
+      "summary": "The Spell logo:  the hat mark, or the mark with the wordmark (and tagline), outlined, in one colour.",
+      "status": "done",
+      "docs": false,
+      "tags": [
+        "brand-logo"
+      ],
+      "tokens": [
+        {
+          "name": "--brand-logo-height",
+          "default": "2em",
+          "type": "length"
+        },
+        {
+          "name": "--brand-logo-color",
+          "default": "var(--spell-text-strong, var(--ui-text-dark))",
+          "type": "color"
+        }
+      ]
+    },
+    "brand-phone": {
+      "folder": "brand-phone",
+      "mainTag": "brand-phone",
+      "title": "Brand phone",
+      "summary": "A brand phone frames live app content as a phone:  a status bar on top, the app below.",
+      "status": "done",
+      "docs": false,
+      "tags": [
+        "brand-phone"
+      ],
+      "tokens": [
+        {
+          "name": "--brand-phone-width",
+          "default": "300px",
+          "type": "length"
+        },
+        {
+          "name": "--brand-phone-background",
+          "default": "light-dark(var(--spell-surface-warm, var(--ui-surface-muted)), var(--ui-surface-muted))",
+          "type": "color"
+        },
+        {
+          "name": "--brand-phone-border-color",
+          "default": "var(--spell-border-subtle, var(--ui-border-color))",
+          "type": "color"
+        },
+        {
+          "name": "--brand-phone-radius",
+          "default": "32px",
+          "type": "length"
+        },
+        {
+          "name": "--brand-phone-shadow",
+          "default": "var(--spell-shadow-md, var(--ui-shadow-floating))",
+          "type": "other"
+        },
+        {
+          "name": "--brand-phone-padding",
+          "default": "14px 14px 18px",
+          "type": "length"
+        },
+        {
+          "name": "--brand-phone-gap",
+          "default": "12px",
+          "type": "length"
+        },
+        {
+          "name": "--brand-phone-dimmed-opacity",
+          "default": "0.45",
+          "type": "number"
+        }
+      ]
+    }
+  },
+  "foundation": [],
+  "themes": [],
+  "nav": {
+    "start": [
+      {
+        "id": "index",
+        "file": "index.html",
+        "label": "The Brand Elements",
+        "icon": "wand magic sparkles"
+      }
+    ],
+    "foundation": [
+      {
+        "id": "brand",
+        "file": "../../brand/index.html",
+        "label": "The Brand tab",
+        "icon": "palette"
+      },
+      {
+        "id": "design-system",
+        "file": "../../guides/design-system/design-system.html",
+        "label": "The Design System",
+        "icon": "book open"
+      }
+    ],
+    "titles": {
+      "start": "Start",
+      "components": "Elements",
+      "foundation": "Brand"
+    }
+  }
+}

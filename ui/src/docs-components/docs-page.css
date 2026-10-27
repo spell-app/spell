@@ -1,0 +1,107 @@
+/*
+ * The look of a docs page's head:  its title's subtitle, and its tabs panel (Examples | Usage | API) with the row of
+ * section tabs under it, as Spell UI's component pages draw them.
+ * - Shared by Spell UI's docs site (`site/_src/site.css` imports it:  its tabs read the measures below)
+ *   and any other page drawn like a component page:  `class="ui-docs-sections"` on what holds it, as for
+ *   `docs-sections.css` (spell-app's notebook page).
+ * - The MEASURES are the site's, one home:  `--ui-docs-tabs-*` and `--ui-docs-subtitle-scale`.
+ * - The site's tabs are a `<ui-tabs>` whose panel sticks, with spell-epic's section toolbar under it (`site.css`,
+ *   spell-epic's `spell-toolbar.css`, "Under a page's tabs").  Another page's tabs here are plain and don't stick:
+ *   - the tabs:  a segmented `<ui-menu>` whose box is exported as `docs-tabs`
+ *     (`exportparts="menu: docs-tabs"`, so it's reached from outside the element that draws it)
+ *   - the section tabs under them:  a segmented `<ui-menu class="ui-docs-section-tabs">`
+ * - In `@layer ui.app`, the page's own layer, as `site.css` is.
+ */
+
+@import "../styles/media.css";
+
+@layer ui.app {
+  :is(.site-main, .ui-docs-sections) {
+    /* the panel's glass round each row's track */
+    --ui-docs-tabs-band: 10px;
+    /* the space above the panel and below it */
+    --ui-docs-tabs-gap: 10px;
+    /* the panel, in from the column's edges (its band reaching out past this;  Owen, 2026-10-23:  "Add 40px margin") */
+    --ui-docs-tabs-inset: 40px;
+    /* the tabs' row a little larger than the section tabs' row under it */
+    --ui-docs-tabs-scale: 1.0667;
+    /* the panel's glass:  a theme's own (`--ui-bar-panel-background`), else its bars' */
+    --ui-docs-tabs-glass: var(--ui-bar-panel-background, var(--ui-bar-background, var(--ui-background)));
+    /* the subtitle under the page's title, against the page's text size */
+    --ui-docs-subtitle-scale: 1.34;
+  }
+  /* phones:  a thinner band, its glass starting at the gutter (Owen, 2026-10-25:  "Thinner border around the tabs") */
+  @media (--ui-mobile) {
+    :is(.site-main, .ui-docs-sections) {
+      --ui-docs-tabs-band: 6px;
+      --ui-docs-tabs-inset: var(--ui-docs-tabs-band);
+    }
+  }
+
+  /* ## The subtitle:  the title's own sub header, in the page's heading font, muted, as the site's `.site-subtitle` */
+  .ui-docs-sections ui-header[level="1"] {
+    --ui-header-sub-font-size: calc(var(--ui-font-size) * var(--ui-docs-subtitle-scale));
+    --ui-header-sub-color: var(--ui-text-muted);
+  }
+
+  /*
+   * ## The tabs:  their track is the panel itself, a band of its glass round it;
+   * an unselected tab shows the panel, the selected one its thumb (Owen, 2026-10-25:  "non-selected tab to show bg color")
+   */
+  .ui-docs-sections *::part(docs-tabs) {
+    --ui-menu-segmented-background: var(--ui-docs-tabs-glass);
+    margin: calc(var(--ui-docs-tabs-gap) + var(--ui-docs-tabs-band)) var(--ui-docs-tabs-inset);
+    font-size: calc(var(--ui-font-size) * var(--ui-docs-tabs-scale));
+    box-shadow: 0 0 0 var(--ui-docs-tabs-band) var(--ui-docs-tabs-glass);
+  }
+
+  /*
+   * ## The section tabs under them:  the panel's lower half, ONE panel with the tabs' (a T)
+   * - only as wide as its buttons, centred, its bottom corners round;  two concave curves where it meets the top band
+   * - it starts where the tabs' band ends:  glass laid twice would show a darker seam
+   */
+  .ui-docs-sections ui-menu.ui-docs-section-tabs::part(menu) {
+    --ui-menu-segmented-background: transparent;
+    position: relative;
+    box-sizing: border-box;
+    width: fit-content;
+    max-width: calc(100% - 2 * var(--ui-docs-tabs-inset));
+    /*
+     * under the tabs' band, no gap;  below, the panel's gap and a section title's own top margin (1.5em), which this
+     * margin collapses with:  the site's toolbar keeps both
+     */
+    margin: calc(-1 * var(--ui-docs-tabs-gap)) auto calc(var(--ui-docs-tabs-gap) + 1.5em);
+    /* the band round the track, and the segmented track's own 2px inside it */
+    padding: 2px calc(var(--ui-docs-tabs-band) + 2px) calc(var(--ui-docs-tabs-band) + 2px);
+    /* a size smaller than the tabs' row above it, as the site's section toolbar is */
+    font-size: calc(var(--ui-font-size) * 0.9333);
+    border-radius: 0 0 calc(12px + var(--ui-docs-tabs-band)) calc(12px + var(--ui-docs-tabs-band));
+    background: var(--ui-docs-tabs-glass);
+    box-shadow: none;
+  }
+  .ui-docs-sections ui-menu.ui-docs-section-tabs::part(menu)::before,
+  .ui-docs-sections ui-menu.ui-docs-section-tabs::part(menu)::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    width: var(--ui-docs-tabs-band);
+    height: var(--ui-docs-tabs-band);
+    pointer-events: none;
+  }
+  .ui-docs-sections ui-menu.ui-docs-section-tabs::part(menu)::before {
+    right: 100%;
+    background: radial-gradient(
+      circle at 0 100%,
+      transparent calc(var(--ui-docs-tabs-band) - 0.5px),
+      var(--ui-docs-tabs-glass) var(--ui-docs-tabs-band)
+    );
+  }
+  .ui-docs-sections ui-menu.ui-docs-section-tabs::part(menu)::after {
+    left: 100%;
+    background: radial-gradient(
+      circle at 100% 100%,
+      transparent calc(var(--ui-docs-tabs-band) - 0.5px),
+      var(--ui-docs-tabs-glass) var(--ui-docs-tabs-band)
+    );
+  }
+}

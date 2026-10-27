@@ -1,0 +1,105 @@
+// Apple's system colours, as a palette a theme borrows (`"palette": "apple"`).
+// - Not a theme:  `UI.themes` reads only the themes folder's top level, so this folder lists in no menu.
+// - Its sheet, `apple.css`, is GENERATED from this file:  `yarn gen:styles` (`ThemeFile`;  epic `debut` P18).
+//   How a solid colour moves when hovered or pressed is CSS:  its rules sheet, `rules/apple.css`.
+// - Its themes:  Glass (and so Fruity), Merlot (epic `debut` P17).
+// - Every hue's base, its text on it (`on`), its text colour (`text`), its colour on dark surfaces (`inverted`):
+//   all checked at WCAG AA in both schemes (`colors.contrast.test.ts`, J76).
+//   - light uses their higher-contrast shades, so white reads on them;  dark, their dark-mode shades, which take ink
+//   - `on` restated for each:  `colors.css` picked it for classic's bases, not these
+// - A theme on it picks its own primary and secondary, and its own surfaces.
+{
+  "$schema": "../theme.schema.json",
+  "rules": ["apple"],
+  "semantic": {
+    "info": {
+      "base": { "light": "#0066d6", "dark": "#64d2ff" },
+      "on": { "light": "oklch(1 0 0)", "dark": "var(--ui-ink-on-light)" }
+    },
+    "warning": {
+      "base": { "light": "#c93400", "dark": "#ff9f0a" },
+      "on": { "light": "oklch(1 0 0)", "dark": "var(--ui-ink-on-light)" }
+    }
+  },
+  "hues": {
+    "red": {
+      "base": { "light": "#d70015", "dark": "#ff453a" },
+      "on": { "light": "oklch(1 0 0)", "dark": "var(--ui-ink-on-light)" }
+    },
+    "orange": {
+      "base": { "light": "#c93400", "dark": "#ff9f0a" },
+      "on": { "light": "oklch(1 0 0)", "dark": "var(--ui-ink-on-light)" }
+    },
+    "yellow": {
+      // ink on it, both schemes
+      "base": { "light": "#ffcc00", "dark": "#ffd60a" },
+      "on": "var(--ui-ink-on-light)",
+      // Hue text:  `colors.css`' recipe again (classic hand-picks yellow / olive / green / teal)
+      "text": {
+        "light": "oklch(from {hues.yellow.color} min(l, 0.5) c h)",
+        "dark": "oklch(from {hues.yellow.color} max(l, 0.78) c h)"
+      }
+    },
+    "olive": {
+      "base": { "light": "#5a7d00", "dark": "#a8e05f" },
+      "on": { "light": "oklch(1 0 0)", "dark": "var(--ui-ink-on-light)" },
+      "text": {
+        "light": "oklch(from {hues.olive.color} min(l, 0.5) c h)",
+        "dark": "oklch(from {hues.olive.color} max(l, 0.78) c h)"
+      }
+    },
+    "green": {
+      // a shade under Apple's #248a3d, which takes white at 4.40:1;  this one 4.81:1 (epic `debut` P17, J76)
+      "base": { "light": "#1f8338", "dark": "#30d158" },
+      "on": { "light": "oklch(1 0 0)", "dark": "var(--ui-ink-on-light)" },
+      "text": {
+        "light": "oklch(from {hues.green.color} min(l, 0.5) c h)",
+        "dark": "oklch(from {hues.green.color} max(l, 0.78) c h)"
+      }
+    },
+    "teal": {
+      "base": { "light": "#0071a4", "dark": "#40c8e0" },
+      "on": { "light": "oklch(1 0 0)", "dark": "var(--ui-ink-on-light)" },
+      "text": {
+        "light": "oklch(from {hues.teal.color} min(l, 0.5) c h)",
+        "dark": "oklch(from {hues.teal.color} max(l, 0.78) c h)"
+      }
+    },
+    "blue": {
+      "base": { "light": "#0066d6", "dark": "#0a84ff" },
+      "on": { "light": "oklch(1 0 0)", "dark": "var(--ui-ink-on-light)" }
+    },
+    "violet": {
+      // dark:  a saturated violet with white on it, as macOS keeps its accent;  the lilac is for text and focus
+      "base": { "light": "#6a3fd6", "dark": "#7c55e6" },
+      "on": "oklch(1 0 0)",
+      // The violet and the grey on dark surfaces (`-inverted`):  read as TEXT on the dark page too, so the lilac accent
+      // and Apple's secondary label grey, with ink on them (their dark bases, `#7c55e6` / `#636366`, read 3.77:1 /
+      // 3.07:1 on the page;  epic `debut` P17, J76)
+      "inverted": "#b79bff",
+      "inverted-on": "var(--ui-ink-on-light)"
+    },
+    "purple": {
+      "base": { "light": "#8944ab", "dark": "#bf5af2" },
+      "on": { "light": "oklch(1 0 0)", "dark": "var(--ui-ink-on-light)" }
+    },
+    "pink": {
+      "base": { "light": "#d30f45", "dark": "#ff375f" },
+      "on": { "light": "oklch(1 0 0)", "dark": "var(--ui-ink-on-light)" }
+    },
+    "brown": {
+      "base": { "light": "#7f6545", "dark": "#ac8e68" },
+      "on": { "light": "oklch(1 0 0)", "dark": "var(--ui-ink-on-light)" }
+    },
+    "grey": {
+      "base": { "light": "#6e6e73", "dark": "#636366" },
+      "on": "oklch(1 0 0)",
+      "inverted": "#a1a1a6",
+      "inverted-on": "var(--ui-ink-on-light)"
+    },
+    "black": {
+      "base": { "light": "#1d1d1f", "dark": "#3a3a3c" },
+      "on": "oklch(1 0 0)"
+    }
+  }
+}

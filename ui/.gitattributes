@@ -1,0 +1,38 @@
+# Generated files:  each is a function of BOTH branches' source, so a line merge of two versions is never right.
+# - `linguist-generated`:  collapsed in GitHub's PR diffs ("Load diff")
+# - `merge=binary`:  changed on both sides => git keeps ours, marks it conflicted, and never interleaves the two;
+#   `epic worktree merge-main` then regenerates it from the merged source (its table:
+#   `.epic/generators.json5`, read by spell-epic's `MainMerge`)
+# - `-diff`:  minified;  `git diff` says "Binary files differ" instead of printing megabytes of one line
+# NOT `merge=ours`:  it silently drops the other side's changes, flips meaning in a rebase, and GitHub ignores it.
+
+# Vitest snapshots:  regenerated with `vp test run --update`, then checked against both sides
+**/__snapshots__/*.snap                                        linguist-generated merge=binary
+
+# Spell UI site data (`yarn site:data`;  `.json5` since epic `epic-workflow` P20);  `pages.json5` is hand-kept.
+# Its bundle, `site/_assets/`, isn't committed:  the page server builds it (`.gitignore`)
+docs/__data/components.json5                                  linguist-generated merge=binary
+docs/__data/icons.json5                                       linguist-generated merge=binary -diff
+docs/__data/search.json5                                      linguist-generated merge=binary
+docs/__data/custom-elements.json                              linguist-generated merge=binary
+docs/__data/html-custom-data.json                             linguist-generated merge=binary
+docs/__data/css-custom-data.json                              linguist-generated merge=binary
+
+# Theme sheets and their schema, written from the theme files (`yarn gen:styles`, `ThemeFile`;  epic `debut` P18)
+src/styles/themes/spell.css                                   linguist-generated merge=binary
+src/styles/themes/glass.css                                   linguist-generated merge=binary
+src/styles/themes/fruity.css                                  linguist-generated merge=binary
+src/styles/themes/merlot.css                                  linguist-generated merge=binary
+src/styles/themes/paper.css                                   linguist-generated merge=binary
+src/styles/themes/midnight.css                                linguist-generated merge=binary
+src/styles/themes/crisp.css                                   linguist-generated merge=binary
+src/styles/themes/pop.css                                     linguist-generated merge=binary
+src/styles/themes/matrix.css                                  linguist-generated merge=binary
+src/styles/themes/palettes/apple.css                          linguist-generated merge=binary
+src/styles/themes/theme.schema.json                           linguist-generated merge=binary
+
+# emoji data, from a reference clone (`yarn gen:emoji`):  collapsed only, never regenerated on a merge
+src/components/ui-emoji/data/**                               linguist-generated -diff
+
+# Visual regression baselines (`yarn test:visual`):  images, never diffed or merged as text
+src/test-helpers/visual/baselines/**/*.png binary

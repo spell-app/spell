@@ -1,0 +1,79 @@
+<!-- `src/components/ui-menu/examples/appearance.html` as element markup. -->
+<div class="ui-stack">
+  <section>
+    <h4>Appearance</h4>
+    <ui-menu appearance="tabular" aria-label="Tabular appearance demo">
+      <ui-item link="#bio" selected>Bio</ui-item>
+      <ui-item link="#photos">Photos</ui-item>
+    </ui-menu>
+    <ui-menu appearance="pointing" aria-label="Pointing appearance demo">
+      <ui-item link="#home" selected>Home</ui-item>
+      <ui-item link="#messages">Messages</ui-item>
+    </ui-menu>
+    <ui-menu appearance="secondary" aria-label="Secondary appearance demo">
+      <ui-item link="#home" selected>Home</ui-item>
+      <ui-item link="#messages">Messages</ui-item>
+    </ui-menu>
+    <ui-menu appearance="text" aria-label="Text appearance demo">
+      <ui-item link="#closest" selected>Closest</ui-item>
+      <ui-item link="#popular">Most popular</ui-item>
+    </ui-menu>
+  </section>
+
+  <section>
+    <h4>Segmented</h4>
+    <ui-menu appearance="segmented" aria-label="Segmented demo">
+      <ui-item link="#light" selected>Light</ui-item>
+      <ui-item link="#dark">Dark</ui-item>
+      <ui-item link="#system">System</ui-item>
+    </ui-menu>
+    <ui-menu appearance="segmented" color="teal" aria-label="Segmented teal demo">
+      <ui-item link="#day">Day</ui-item>
+      <ui-item link="#week" selected>Week</ui-item>
+      <ui-item link="#month">Month</ui-item>
+    </ui-menu>
+    <ui-segment inverted>
+      <ui-menu appearance="segmented" inverted aria-label="Segmented inverted demo">
+        <ui-item link="#list" selected>List</ui-item>
+        <ui-item link="#grid">Grid</ui-item>
+      </ui-menu>
+    </ui-segment>
+  </section>
+
+  <section>
+    <h4>Alignment</h4>
+    <ui-menu align="center" aria-label="Centered demo">
+      <ui-item link="#one" selected>One</ui-item>
+      <ui-item link="#two">Two</ui-item>
+      <ui-item link="#three">Three</ui-item>
+    </ui-menu>
+    <ui-menu appearance="segmented" align="right" aria-label="Segmented right demo">
+      <ui-item link="#one" selected>One</ui-item>
+      <ui-item link="#two">Two</ui-item>
+    </ui-menu>
+    <ui-menu appearance="segmented" align="fluid" aria-label="Segmented fluid demo">
+      <ui-item link="#one" selected>One</ui-item>
+      <ui-item link="#two">Two, longer</ui-item>
+      <ui-item link="#three">Three</ui-item>
+    </ui-menu>
+  </section>
+
+  <section>
+    <h4>Equal</h4>
+    <ui-menu equal aria-label="Equal demo">
+      <ui-item link="#a" selected>A</ui-item>
+      <ui-item link="#b">Somewhat longer</ui-item>
+      <ui-item link="#c">C</ui-item>
+    </ui-menu>
+    <ui-menu appearance="segmented" equal align="center" aria-label="Equal segmented centered demo">
+      <ui-item link="#a">A</ui-item>
+      <ui-item link="#b" selected>Somewhat longer</ui-item>
+      <ui-item link="#c">C</ui-item>
+    </ui-menu>
+    <ui-menu equal align="fluid" aria-label="Equal fluid demo">
+      <ui-item link="#a" selected>A</ui-item>
+      <ui-item link="#b">Somewhat longer</ui-item>
+      <ui-item link="#c">C</ui-item>
+    </ui-menu>
+  </section>
+</div>

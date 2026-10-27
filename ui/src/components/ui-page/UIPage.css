@@ -1,0 +1,100 @@
+/*
+ * The style sheet of `<ui-page>`:  the page frame, on top of `<ui-root>`'s sheet.
+ * - Shadow markup:  `<div class="ui page" part="page">` around
+ *   `<a class="skip" part="skip">`, then `<header>`, `<nav>`, `<main>`, `<aside>`, `<footer>`, each round its slot;
+ *   a region with nothing slotted into it isn't drawn.
+ * - A CSS grid:  the header and footer across, the nav, main content and aside in a row between;
+ *   at a phone's width (the page's own, a container query), every region stacked in reading order.
+ * - The whole window:  at least the viewport's height (`--ui-page-min-height`), the page's background and text
+ *   colour.
+ *   With no `theme`, it follows the system's light or dark setting.
+ * - Public tokens (`--ui-page-*`) are NEVER declared here:  each is read through its private alias.
+ * - The body's margin is cleared by the page sheet the component registers (`UIPage.page.css`).
+ */
+
+@layer ui.components.page.types {
+  :host {
+    display: block;
+    /* its own width decides the phone layout:  a page in a narrow box stacks too */
+    container-type: inline-size;
+    min-block-size: var(--ui-page-min-height, 100dvh);
+    background: var(--ui-background);
+    color: var(--ui-text-color);
+  }
+  /* no `theme`:  the system's light or dark */
+  :host(:not(:state(light), :state(dark))) {
+    color-scheme: light dark;
+  }
+  .ui.page {
+    --_ui-page-gap: var(--ui-page-gap, var(--ui-space-l));
+    --_ui-page-padding: var(--ui-page-padding, var(--ui-space-l));
+    --_ui-page-nav-width: var(--ui-page-nav-width, 16em);
+    --_ui-page-aside-width: var(--ui-page-aside-width, 16em);
+    --_ui-page-max-width: var(--ui-page-max-width, none);
+    position: relative;
+    box-sizing: border-box;
+    display: grid;
+    grid-template:
+      "header header header" auto
+      "nav main aside" 1fr
+      "footer footer footer" auto
+      / auto minmax(0, 1fr) auto;
+    gap: var(--_ui-page-gap);
+    min-block-size: var(--ui-page-min-height, 100dvh);
+    max-inline-size: var(--_ui-page-max-width);
+    margin-inline: auto;
+    padding: var(--_ui-page-padding);
+  }
+  .ui.page > header {
+    grid-area: header;
+  }
+  .ui.page > nav {
+    grid-area: nav;
+    inline-size: var(--_ui-page-nav-width);
+  }
+  .ui.page > main {
+    grid-area: main;
+    min-inline-size: 0;
+  }
+  .ui.page > main:focus {
+    outline: none;
+  }
+  .ui.page > aside {
+    grid-area: aside;
+    inline-size: var(--_ui-page-aside-width);
+  }
+  .ui.page > footer {
+    grid-area: footer;
+  }
+
+  /* Skip to content:  hidden until the keyboard reaches it, then over the page's top-left corner. */
+  .skip:not(:focus-visible) {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .skip {
+    position: absolute;
+    inset-block-start: var(--ui-space-xs);
+    inset-inline-start: var(--ui-space-xs);
+    z-index: var(--ui-z-sticky, 10);
+    padding: var(--ui-space-xs) var(--ui-space-s);
+    border-radius: var(--ui-radius);
+    background: var(--ui-surface);
+    color: var(--ui-link);
+    box-shadow: var(--ui-shadow-floating);
+  }
+
+  /* A phone's width (the page's own):  every region stacked, in reading order. */
+  @container (width < 768px) {
+    .ui.page {
+      grid-template: "header" auto "nav" auto "main" 1fr "aside" auto "footer" auto / minmax(0, 1fr);
+    }
+    .ui.page > :is(nav, aside) {
+      inline-size: auto;
+    }
+  }
+}

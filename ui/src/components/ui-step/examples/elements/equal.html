@@ -1,0 +1,20 @@
+<!-- `src/components/ui-step/examples/equal.html` as element markup. -->
+<div class="ui-stack">
+  <section>
+    <h4>Equal</h4>
+    <ui-steps equal>
+      <ui-step icon="truck" heading="Shipping"></ui-step>
+      <ui-step selected icon="credit-card" heading="Billing" description="Enter billing information"></ui-step>
+      <ui-step disabled icon="circle-info" heading="Confirm"></ui-step>
+    </ui-steps>
+  </section>
+
+  <section>
+    <h4>Equal and fluid</h4>
+    <ui-steps equal fluid ordered>
+      <ui-step completed heading="Shipping"></ui-step>
+      <ui-step selected heading="Billing" description="Enter billing information"></ui-step>
+      <ui-step heading="Confirm"></ui-step>
+    </ui-steps>
+  </section>
+</div>

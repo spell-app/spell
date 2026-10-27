@@ -1,0 +1,129 @@
+/**
+ * Constants and types of the checkbox family:  the vocabulary pieces `<ui-checkbox>` and `<ui-radio>` share,
+ * and the shapes their components and native fallback share.
+ * - Pure data:  `import type` only (its vocabularies too:  they import this file's values),
+ *   so node can load it (`yarn site:data`).
+ * - A word only ONE class uses sits below that class instead.
+ */
+
+import * as UIT from "spell-ui/components/components.types"
+import type { checkboxVocabulary } from "./UICheckbox.en"
+import type { radioVocabulary } from "./UIRadio.en"
+
+////////////////
+// ## Vocabulary pieces
+////////////////
+
+/** Attributes both elements start with:  `appearance` comes after them, so its word follows the colour. */
+export const LEADING_ATTRIBUTES = [
+  { name: "size", kind: "size", description: "Size, `mini` ... `massive`;  `medium` is the default." },
+  {
+    name: "color",
+    kind: "color",
+    description: "Hue of the chosen state:  the filled box, the radio bullet, the toggle lane, the slider line."
+  }
+] as const
+
+/** Attributes both elements share, after their own `appearance`. */
+export const SHARED_ATTRIBUTES = [
+  {
+    name: "padding",
+    kind: "valueOnly",
+    values: ["none"],
+    classes: { none: "fitted" },
+    replaces: [{ from: "fitted", value: "none" }],
+    description: "`none`:  no room for a label, just the box.  Old name:  `fitted`."
+  },
+  {
+    name: "invisible",
+    kind: "keyOnly",
+    description: "No box:  the LABEL is the control, bordered while unchosen and tinted when chosen."
+  },
+  {
+    name: "align",
+    kind: "valueOnly",
+    values: ["right"],
+    classes: { right: "right aligned" },
+    replaces: [{ from: "right-aligned", value: "right" }],
+    description: "`right`:  the box after the label, at the end of the line.  Old name:  `right-aligned`."
+  },
+  { name: "disabled", kind: "keyOnly", description: "Can't be used;  dimmed, left out of the form." },
+  { ...UIT.FormControlAttributes.readonly, description: "Shows its state but can't be changed;  still submitted." },
+  { name: "inverted", kind: "keyOnly", description: "For dark backgrounds." },
+  {
+    name: "selected",
+    kind: "boolean",
+    description: "Chosen.  Controlled:  set it to choose;  a click dispatches `ui-changed` first.  Alias:  `checked`."
+  },
+  {
+    name: "value",
+    kind: "string",
+    description:
+      "Value submitted while chosen;  default `on`, as a native checkbox (or its class's `defaultChosenValue`)."
+  },
+  UIT.FormControlAttributes.name,
+  {
+    ...UIT.FormControlAttributes.required,
+    description: "Form validation:  must be chosen (a radio:  one of its group)."
+  },
+  { name: "label", kind: "string", description: "Label text;  slotted content is the rich version." }
+] as const
+
+/** Events both elements share. */
+export const SHARED_EVENTS = [
+  {
+    name: "ui-changed",
+    detail: "{ selected: boolean, value: string, originalEvent?: Event }",
+    description:
+      "Someone chose or unchose it (a radio:  only the newly chosen one fires);  `value`:  what it stands for after the change, a checkbox's `off-value` once unchosen."
+  }
+] as const
+
+/** Parts both elements share. */
+export const SHARED_PARTS = [
+  { name: "checkbox", description: "The root box." },
+  { name: "control", description: "The native `<input>` (invisible, over the box)." },
+  { name: "label", description: "The `<label>` drawing the box, the mark and the text." }
+] as const
+
+/** One of `SHARED_PARTS`' names, e.g. `"label"`. */
+export type CheckPartName = (typeof SHARED_PARTS)[number]["name"]
+
+////////////////
+// ## Element shapes
+////////////////
+
+/** Either element's vocabulary. */
+export type CheckVocabulary = typeof checkboxVocabulary | typeof radioVocabulary
+
+/** Converted attributes both elements have (`checkbox` and `radio`):  their vocabulary getters on `CheckControl`. */
+export type CommonAttributes = {
+  /** chosen now */
+  selected: boolean
+  /** submitted while chosen;  none ~== `on` */
+  value: string | undefined
+  /** form field name */
+  name: string | undefined
+  /** label text (the `label` shorthand) */
+  label: string | undefined
+  /** must be chosen to submit */
+  required: boolean
+  /** can't be used */
+  disabled: boolean
+  /** shows its state, can't be changed */
+  readonly: boolean
+}
+
+/** What a radio group needs from each member (`UIRadio`);  structural, so this file never imports the component. */
+export type RadioMember = {
+  /** The member's DOM element, for document order and focus. */
+  readonly domElement: HTMLElement
+  /** Chosen now?  Tracked.  A write chooses / unchooses it without an event. */
+  isSelected: boolean
+  /** Can't be used now?  Tracked. */
+  readonly isDisabled: boolean
+  /** Makes the group required?  Tracked. */
+  readonly required: boolean
+  /** Its value;  tracked. */
+  readonly chosenValue: string
+}

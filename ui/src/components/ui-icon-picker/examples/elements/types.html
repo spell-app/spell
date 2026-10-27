@@ -1,0 +1,24 @@
+<!--
+  `<ui-icon-picker>`'s types, as element markup (no class-grammar twin:  it has no Fomantic original).
+  - Each picker is named (`aria-label`), as a real form's would be.
+-->
+<div class="ui-stack">
+  <section>
+    <h4>Icon picker</h4>
+    <ui-icon-picker value="star" aria-label="Icon"></ui-icon-picker>
+  </section>
+  <section>
+    <h4>None chosen</h4>
+    <ui-icon-picker aria-label="Icon"></ui-icon-picker>
+  </section>
+  <section>
+    <h4>Sizes</h4>
+    <ui-icon-picker size="small" value="heart" aria-label="Small icon"></ui-icon-picker>
+    <ui-icon-picker size="large" value="heart" aria-label="Large icon"></ui-icon-picker>
+  </section>
+  <section>
+    <h4>Read-only and disabled</h4>
+    <ui-icon-picker readonly value="bell" aria-label="Read-only icon"></ui-icon-picker>
+    <ui-icon-picker disabled value="bell" aria-label="Disabled icon"></ui-icon-picker>
+  </section>
+</div>

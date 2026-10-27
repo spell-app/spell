@@ -1,0 +1,131 @@
+/**
+ * The English vocabulary of `<ui-theme-menu>`:  every name the tag uses.
+ * - Its tag, attributes, events, slots, parts, states and texts.
+ *   The shape is `E.ComponentVocabulary` (`spell-ui/vocabulary`).
+ * - Class words:  `inverted` (`ui inverted themes`), for dark backgrounds.
+ * - Pure data:  `import type` only, so node loads it (`yarn site:data`, `yarn gen:root`).
+ */
+
+import type { E } from "spell-ui/core"
+
+/****************
+ * ### `themeMenuVocabulary`
+ * The names of `<ui-theme-menu>`, a page's theme and light / dark, remembered per viewer:
+ * - a palette button opening a small overlay with Light | Dark | Auto and Spell's themes
+ * - or a theme dropdown, for a page's masthead
+ * - or a sun / moon button alone
+ ****************/
+export const themeMenuVocabulary = {
+  tag: "ui-theme-menu",
+  topics: ["controls", "selection", "menus"],
+  aka: ["theme picker", "theme switcher", "dark mode toggle", "colour scheme", "appearance", "skin"],
+  skeleton: "inline 5 x 2.25",
+  noun: "themes",
+  description:
+    "A theme menu switches the page between light and dark, and picks its theme from Spell's own, and remembers " +
+    "both for the next page.",
+  attributes: [
+    {
+      name: "show",
+      kind: "enum",
+      values: ["both", "theme", "scheme"],
+      default: "both",
+      description:
+        "Which controls to show:  `both` (the palette button, whose overlay picks the theme and light / dark), " +
+        "`scheme` (a light / dark button alone) or `theme` (a theme dropdown)."
+    },
+    {
+      name: "size",
+      kind: "size",
+      description: "Size of the buttons (or the dropdown), `mini` ... `massive`;  `medium` is the default."
+    },
+    {
+      name: "inverted",
+      kind: "keyOnly",
+      description: "For dark backgrounds (a dark header or side panel):  light buttons, an inverted dropdown."
+    },
+    {
+      name: "compact",
+      kind: "keyOnly",
+      description:
+        'With `show="theme"`:  the dropdown is an icon-only palette button, its text (`Spell theme`) its tooltip ' +
+        "and name, for a masthead's row of icon buttons."
+    }
+  ],
+  events: [
+    {
+      name: "ui-changed",
+      detail: "{ theme: string, scheme: 'light' | 'dark' | 'system', shown: 'light' | 'dark', originalEvent?: Event }",
+      description:
+        "The viewer picked a theme or a scheme here;  `theme` is a `UI.themes` name;  " +
+        "`scheme` is `system` while following the OS, and `shown` the scheme the page shows.  Fired after the " +
+        "choice is stored and while its sheets load."
+    }
+  ],
+  slots: [
+    {
+      name: "end",
+      description:
+        "At the foot of the palette's panel, under the themes and a divider:  a row of the page's own, " +
+        "e.g. the Spell editor's 'Edit theme...'.  Styled as a theme's row.  Not in the theme list's arrow keys."
+    }
+  ],
+  parts: [
+    { name: "controls", description: "The wrapper around the controls." },
+    {
+      name: "scheme",
+      description: 'The light / dark `<button>` (`show="scheme"`):  a sun or a moon, the scheme the page shows.'
+    },
+    { name: "palette", description: "The `<button>` opening the overlay." },
+    { name: "overlay", description: 'The overlay, a `<ui-popup open-on="click">`;  its box is `::part(popup)`.' },
+    { name: "menu", description: "The overlay's theme list (`role=menu`)." },
+    { name: "option", description: "One theme in the list (`role=menuitemradio`)." },
+    { name: "schemes", description: "The overlay's Light | Dark | Auto control (`role=radiogroup`)." },
+    { name: "scheme-option", description: "One choice in it (`role=radio`):  an icon and its name." },
+    { name: "tip", description: 'A button\'s tooltip, a `<ui-popup inverted size="mini">`.' },
+    { name: "theme", description: 'The theme `<ui-dropdown>` (`show="theme"`).' }
+  ],
+  states: [
+    { name: "dark", description: "The page shows the dark scheme (chosen, or the OS's while following it)." },
+    { name: "following", description: "The scheme follows the OS (nothing chosen, or Auto)." },
+    { name: "open", description: "The overlay is open." }
+  ],
+  texts: [
+    { key: "themeLabel", text: "{title} theme", description: "The dropdown's text:  the chosen theme." },
+    {
+      key: "themeName",
+      text: "Theme",
+      description: "Accessible name of the theme dropdown, and the overlay's header."
+    },
+    { key: "spellDescription", text: "The Spell brand", description: "Under `Spell` in the list." },
+    {
+      key: "glassDescription",
+      text: "Translucent glass on a solid page",
+      description: "Under `Glass` in the list."
+    },
+    { key: "fruityDescription", text: "Glass on a pastel wallpaper", description: "Under `Fruity` in the list." },
+    { key: "merlotDescription", text: "A wine-dark studio", description: "Under `Merlot` in the list." },
+    { key: "paperDescription", text: "Warm and bookish, for reading", description: "Under `Paper` in the list." },
+    { key: "midnightDescription", text: "Dark first, calm and glowing", description: "Under `Midnight` in the list." },
+    {
+      key: "crispDescription",
+      text: "High contrast, for anyone who needs it",
+      description: "Under `Crisp` in the list."
+    },
+    { key: "popDescription", text: "Playful and colourful", description: "Under `Pop` in the list." },
+    { key: "matrixDescription", text: "A dark ops console", description: "Under `Matrix` in the list." },
+    { key: "toDark", text: "Switch to dark", description: "The light / dark button's name, while the page is light." },
+    { key: "toLight", text: "Switch to light", description: "The light / dark button's name, while the page is dark." },
+    {
+      key: "palette",
+      text: "Theme and light / dark:  {title}, {scheme}",
+      description:
+        "The palette button's name and tooltip:  the chosen theme and scheme (`light`, `dark` or `auto`'s text)."
+    },
+    { key: "overlayName", text: "Theme and colour scheme", description: "Accessible name of the overlay." },
+    { key: "schemeName", text: "Light or dark", description: "Accessible name of the overlay's scheme control." },
+    { key: "light", text: "Light", description: "The scheme control's light choice." },
+    { key: "dark", text: "Dark", description: "The scheme control's dark choice." },
+    { key: "auto", text: "Auto", description: "The scheme control's choice that follows the device's scheme." }
+  ]
+} as const satisfies E.ComponentVocabulary

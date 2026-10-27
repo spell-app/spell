@@ -1,0 +1,15 @@
+node_modules
+.yarn/install-state.gz
+.DS_Store
+*.log
+
+# Vitest browser mode's failure screenshots and attachments
+.vitest/
+
+dist/
+
+# `agents/`:  a link to the kit's agents/ (WWOD and the three logs), made by the kit's every `yarn install`
+/agents
+
+# the declarations this repo builds for the repos above it (`spell-types`):  never committed
+dist-types/

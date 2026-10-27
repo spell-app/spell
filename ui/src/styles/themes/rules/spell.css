@@ -1,0 +1,165 @@
+/*
+ * Spell's rules:  what its values can't say (epic `debut` P18).
+ * - A rules sheet of the Spell theme (`spell.theme.json5`, `"rules": ["modern", "spell"]`);  its sheet, `spell.css`,
+ *   imports this one:  `yarn gen:styles` writes it.
+ * - In `rules/`, so no theme menu lists it (`UI.themes` reads the themes folder's top level only).
+ * - What's here:
+ *   - `"Spell Serif"`:  the INSTALLED Palatino family only, no font files;  the `@font-face` rules sit OUTSIDE the layer
+ *     (they can't be layered) and work from the PAGE copy:  shadow roots use the page's fonts
+ *   - headings:  serif, bold `h1` / `h2`, regular `h3` and content headers, sans semibold `h4`-`h6`;
+ *     a header's sub header the brand's italic serif LEDE;  a `sub` header its mono EYEBROW
+ *   - the pressed and focused colours its own palette asks for (P19)
+ *   - the `accent` hue's remap:  `.ui.accent` / `.ui-accent` onto the generic `--ui-color*`, so `color="accent"` tints
+ *     any element that takes a `color` while this theme is on
+ *     - the NAME is added to the `hues` value set by the brand bundle (spell-brand's `hues.ts`):  a theme can't;
+ *       elsewhere the attribute is refused, under another theme accepted but untinted
+ *     - `<ui-panel color="accent">`:  the Color Set Chooser's ivory panel
+ */
+
+@font-face {
+  font-family: "Spell Serif";
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  src:
+    local("Palatino"), local("Palatino-Roman"), local("Palatino Linotype"), local("PalatinoLinotype-Roman"),
+    local("Book Antiqua"), local("P052 Roman"), local("P052-Roman"), local("TeX Gyre Pagella");
+}
+@font-face {
+  font-family: "Spell Serif";
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+  src:
+    local("Palatino Bold"), local("Palatino-Bold"), local("Palatino Linotype Bold"), local("PalatinoLinotype-Bold"),
+    local("Book Antiqua Bold"), local("P052 Bold"), local("P052-Bold"), local("TeX Gyre Pagella Bold");
+}
+@font-face {
+  font-family: "Spell Serif";
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+  src:
+    local("Palatino Italic"), local("Palatino-Italic"), local("Palatino Linotype Italic"),
+    local("PalatinoLinotype-Italic"), local("Book Antiqua Italic"), local("P052 Italic"), local("P052-Italic"),
+    local("TeX Gyre Pagella Italic");
+}
+@font-face {
+  font-family: "Spell Serif";
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+  src:
+    local("Palatino Bold Italic"), local("Palatino-BoldItalic"), local("Palatino Linotype Bold Italic"),
+    local("PalatinoLinotype-BoldItalic"), local("Book Antiqua Bold Italic"), local("P052 Bold Italic"),
+    local("P052-BoldItalic"), local("TeX Gyre Pagella Bold Italic");
+}
+
+@layer ui.theme {
+  /*******************************
+        Headings, ledes, eyebrows
+  *******************************/
+
+  .ui.header,
+  :where(h1, h2, h3, h4, h5, h6) {
+    text-wrap-style: balance;
+  }
+  :is(h1, h2).ui.header,
+  .ui.header:is(.huge, .massive) {
+    font-weight: var(--ui-font-weight-bold);
+    letter-spacing: -0.012em;
+  }
+  :is(h4, h5, h6).ui.header {
+    font-family: var(--ui-font-family);
+    font-weight: var(--ui-font-weight-semibold);
+  }
+  /* a header's sub header:  the italic serif lede */
+  :host(:state(in-header)) > .header,
+  .in-header.header {
+    font-style: italic;
+    text-wrap-style: pretty;
+  }
+  /* a `sub` header:  the mono eyebrow */
+  .ui.sub.header {
+    color: var(--ui-color-header, var(--ui-primary-text));
+    font-family: var(--ui-font-family-mono);
+    font-weight: 500;
+    letter-spacing: 0.14em;
+  }
+
+  /* a statistic's label:  the eyebrow too (Fomantic set it in the header face, bold) */
+  :host(:state(in-statistic)) > .label,
+  .in-statistic.label {
+    color: var(--ui-statistic-label-color, var(--ui-text-muted));
+    font-family: var(--ui-font-family-mono);
+    font-size: 0.75em;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+  }
+
+  /* Page typography (`ui-typography`):  the same ranks */
+  :where(.ui-typography) :where(h1, h2) {
+    color: var(--ui-text-dark);
+    letter-spacing: -0.012em;
+  }
+  :where(.ui-typography) :where(h3) {
+    color: var(--ui-text-dark);
+    font-weight: var(--ui-font-weight-normal);
+  }
+  :where(.ui-typography) :where(h4, h5, h6) {
+    font-family: var(--ui-font-family);
+    font-weight: var(--ui-font-weight-semibold);
+  }
+
+  /*******************************
+               States
+  *******************************/
+
+  /*
+   * A coloured element's pressed and focused colours (`--ui-color-focus`, `-down`) are worked out from its colour by
+   * `colors.css`' remap, one recipe for every hue;  these colours take this theme's own (the palette, above), so their
+   * text reads on every state (4.5:1, the contrast test)
+   * - `secondary`:  its own states, every theme's that sets them (`rules/states.css`)
+   * - light orange, olive and info, dark purple:  a gentler step, as they carry ink;  the recipe took it to 4.2:1
+   */
+  .ui.orange,
+  .ui-orange {
+    --ui-color-focus: var(--ui-orange-focus);
+    --ui-color-down: var(--ui-orange-down);
+  }
+  .ui.olive,
+  .ui-olive {
+    --ui-color-focus: var(--ui-olive-focus);
+    --ui-color-down: var(--ui-olive-down);
+  }
+  .ui.info,
+  .ui-info {
+    --ui-color-focus: var(--ui-info-focus);
+    --ui-color-down: var(--ui-info-down);
+  }
+  .ui.purple,
+  .ui-purple {
+    --ui-color-focus: var(--ui-purple-focus);
+    --ui-color-down: var(--ui-purple-down);
+  }
+
+  /*******************************
+             The accent hue
+  *******************************/
+
+  .ui.accent,
+  .ui-accent {
+    --ui-color: var(--ui-accent);
+    --ui-color-hover: var(--ui-accent-hover);
+    --ui-color-focus: var(--ui-accent-focus);
+    --ui-color-down: var(--ui-accent-down);
+    --ui-color-active: var(--ui-accent-active);
+    --ui-color-text: var(--ui-accent-text);
+    --ui-color-header: var(--ui-accent-header);
+    --ui-color-border: var(--ui-accent-border);
+    --ui-color-background: var(--ui-accent-background);
+    --ui-color-inverted: var(--ui-accent-inverted);
+    --ui-color-on: var(--ui-accent-on);
+    --ui-color-inverted-on: var(--ui-accent-inverted-on);
+  }
+}

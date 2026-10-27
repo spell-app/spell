@@ -1,0 +1,31 @@
+node_modules
+dist
+build
+.cache
+coverage
+test-results
+reference/
+.DS_Store
+*.log
+.yarn/install-state.gz
+.vitest/
+# package tooling output (`yarn vendor`, `yarn measure` ..., `src/tools/`)
+vendor
+/results/
+src/tools/frameworks/solid/dist
+# `/park`'s note on where parked work stopped:  never committed
+PARKED-*.md
+*.code-workspace
+# the docs site's bundle, built by the page server when it starts, if stale (`spell bundle --stale`):
+# never committed, its chunk names carry content hashes
+/site/_assets/
+# the docs pages' waiting comments (`<page>.inbox.json5` beside a page, and its lock):  per machine
+/docs/**/*.inbox.json*
+# `agents/`:  a link to the kit's agents/ (WWOD and the three logs), made by the kit's every `yarn install` (epic repo-split P9, P12)
+/agents
+
+# the declarations each package builds for the repos above this one (`spell-types`, epic repo-split I12):  never committed
+dist-types/
+
+# `spell map`'s map of this repo (graphify's, epic coherence P1):  rebuilt on demand, never committed
+graphify-out/

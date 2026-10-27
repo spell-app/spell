@@ -1,0 +1,18 @@
+import { defineConfig } from "vite-plus"
+
+import { fmtConfig, packageLint } from "spell/toolchain/lint"
+
+/**
+ * `spell-__pack__`'s Vite+ config:  only the `lint` / `fmt` blocks (`vp lint`, `vp fmt`),
+ * from the toolchain's settings (`spell/toolchain/lint`).
+ * - The pack's BUILD is the kit's, the same for every pack:  `spell-pack build` (`yarn pack:build`,
+ *   `spell/element-tools/ComponentPack`), on the kit's `elementBaseConfig()`.
+ * - Tests:  `vitest.config.ts` beside this.
+ * - `src/components/__pack/` is generated:  not ours to lint.
+ * - No aliases:  every file is imported by its package name (`spell-__pack__/components`, `spell-ui/core`),
+ *   which Vite finds through each package's `exports`.
+ */
+export default defineConfig({
+  fmt: fmtConfig,
+  lint: packageLint({ ignorePatterns: ["src/components/__pack", "dist", ".vitest"] })
+})

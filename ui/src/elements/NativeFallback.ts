@@ -1,0 +1,348 @@
+// Import directly to avoid circular import
+import { lazy, proto } from "spell-ui/util"
+import { E } from "spell-ui/core"
+
+// spell ui rename: leave this file (its docs are about the old names it still reads)
+/****************
+ * ### `NativeFallback`
+ * The base class of the form controls' fallbacks:
+ * plain native DOM a DOM element shows when its component's render throws, so its form keeps working
+ * (`notes/fallback.md`:  only form controls have one).
+ * - No Solid, so the fallback works whatever broke the Solid render:
+ *   - of the core (`E`), it uses only the foundation and `E.ClassBuilder`, NEVER Solid or the runtime (`UI`)
+ *   - it builds with `createElement` + `setAttribute` (NEVER `innerHTML` with user text)
+ * - Same class grammar, `part`s and `<slot>` as the real element,
+ *   so the component's adopted sheet still styles it and light-DOM children still show.
+ * - Subclasses set `@proto static vocabulary` (or `vocabularies`, one class for several tags) and implement `build()`;
+ *   callers only use `render()`.
+ * - A form control's subclass also implements `sync()`, handing `syncForm()` its value and the native control
+ *   whose validity counts:  `render()` runs it once the nodes are attached, the subclass on each change.
+ * - Reads the DOM ELEMENT'S ATTRIBUTES (reflected primitives), never its properties,
+ *   except where a subclass says so (`dropdown`:  `value`, `options`).
+ * - NOTE:  attribute names are canonical English;  a translated DOM element must map its attributes back first.
+ ****************/
+export abstract class NativeFallback<V extends E.ComponentVocabulary = E.ComponentVocabulary> {
+  /**
+   * Names the fallback reads and renders, read from the prototype (`@proto`).
+   * - STATIC:  one per family, shared by every instance, so no per-instance copy.
+   * - A subclass overrides it with its own `@proto static vocabulary` line, which needs no docstring.
+   * - The base's is an empty placeholder.
+   */
+  @proto static vocabulary: E.ComponentVocabulary = {
+    tag: "",
+    noun: "",
+    attributes: [],
+    events: [],
+    slots: [],
+    parts: [],
+    states: [],
+    texts: []
+  }
+
+  /**
+   * One class for several tags (`<ui-card>` + `<ui-cards>`):  every tag's vocabulary, the FIRST the default.
+   * - The constructor puts the right one into `vocabulary`:
+   *   the one whose `tag` is the DOM element's, else the first (a translated tag).
+   * - STATIC for the same reason as `vocabulary`;  empty (the default) keeps `vocabulary` as it is.
+   */
+  @proto static vocabularies: readonly E.ComponentVocabulary[] = []
+
+  /**
+   * What the fallback loses against the real component, see `NativeFallbackHandle`.
+   * - STATIC:  a fact about the family, written once beside its `build()`, the same for every instance.
+   */
+  @proto static degraded: readonly string[] = []
+
+  /** Names this fallback reads and renders:  the class's `vocabulary`, or the DOM element tag's from `vocabularies`. */
+  declare vocabulary: V
+
+  /** Every tag's vocabulary, for a class serving several tags, see the static. */
+  declare vocabularies: readonly V[]
+
+  /** What this fallback loses against the real component, see `NativeFallbackHandle`. */
+  declare degraded: readonly string[]
+
+  /** Element that failed. */
+  readonly domElement: HTMLElement
+
+  /** Where the fallback builds. */
+  readonly root: E.NativeFallbackRoot
+
+  /** Why the real render failed. */
+  readonly error: unknown
+
+  /** DOM element internals, when the element has them. */
+  readonly internals: ElementInternals | undefined
+
+  /** `internals` only when the DOM element is form-associated, so form calls never throw. */
+  protected readonly formInternals: ElementInternals | undefined
+
+  /** Undo functions for `listen()`. */
+  private readonly disposers: (() => void)[] = []
+
+  constructor({ domElement, root, error, internals }: NativeFallbackProps) {
+    this.domElement = domElement
+    this.root = root
+    this.error = error
+    this.internals = internals
+    this.formInternals = (domElement.constructor as { formAssociated?: boolean }).formAssociated ? internals : undefined
+    // Shadows the prototype's `vocabulary` with the DOM element tag's
+    const { vocabularies } = this
+    if (vocabularies.length) {
+      this.vocabulary = vocabularies.find(({ tag }) => tag === domElement.localName) ?? vocabularies[0]
+    }
+  }
+
+  ////////////////
+  // ## Entry point
+  ////////////////
+
+  /**
+   * Build the fallback for `domElement` into `root`, replacing its children.
+   * - Call as `ButtonFallback.render({ domElement: this, root: this.shadowRoot, error, internals: this.internals })`.
+   * - SIDE EFFECT:  adds custom state `errored` to `internals`, when given.
+   * - The component's own adopted stylesheets stay;  only children are replaced.
+   * - STATIC on purpose:  callers never hold the instance, only the handle it returns.
+   */
+  static render<T extends NativeFallback>(
+    this: new (props: NativeFallbackProps) => T,
+    props: NativeFallbackProps
+  ): E.NativeFallbackHandle {
+    const fallback = new this(props)
+    props.root.replaceChildren(...fallback.build())
+    fallback.sync()
+    props.internals?.states.add(E.ERRORED_STATE)
+    return { dispose: () => fallback.dispose(), degraded: fallback.degraded }
+  }
+
+  /**
+   * Nodes to put in `root`:  the subclass's whole fallback, built from the DOM element's attributes.
+   * - Called once, by `render()`, before the nodes are attached:
+   *   the form value and validity, which need them in the document, wait for `sync()`.
+   * - An override that only builds needs no docstring.
+   */
+  protected abstract build(): Node[]
+
+  /**
+   * Remove every listener `listen()` added;  the DOM stays, so a later re-render can replace it.
+   * - Called through the handle `render()` returns, when the DOM element is released.
+   * - An override (an observer to disconnect) calls `super.dispose()`.
+   */
+  dispose() {
+    for (const undo of this.disposers.splice(0)) undo()
+  }
+
+  ////////////////
+  // ## Reading the DOM element
+  ////////////////
+
+  /** DOM element attribute `name`, or `undefined` when absent (`getAttribute()`'s `null` stops here). */
+  protected attr(name: E.AttributeNameOf<V>): string | undefined {
+    return this.domElement.getAttribute(name) ?? undefined
+  }
+
+  /** DOM element attribute `name` as a boolean, `disabled="no"` ~== false. */
+  protected flag(name: E.AttributeNameOf<V>): boolean {
+    return E.Converters.boolean(this.domElement.getAttribute(name), name)
+  }
+
+  /**
+   * Fomantic class string the real element would render, e.g. `ui small primary button`.
+   * - Every class-emitting vocabulary attribute is read from the DOM element:  its converted value;
+   *   else the attribute's text.
+   * - An absent one takes its vocabulary `default`, as the element's props do (`<ui-sidebar>` => `ui left sidebar`).
+   */
+  protected classes(extra?: string): string {
+    const input: Record<string, unknown> = {}
+    // the DOM element's own values, converted:  a translated tag's names included
+    const { valueNamed } = this.domElement as Partial<Pick<E.DOMElement, "valueNamed">>
+    for (const spec of this.vocabulary.attributes) {
+      if (valueNamed) {
+        input[spec.name] = valueNamed.call(this.domElement, spec.name)
+        continue
+      }
+      const value = this.domElement.getAttribute(spec.name) ?? NativeFallback.defaultText(spec.default)
+      if (value === undefined) continue
+      if (spec.kind === "keyOnly") input[spec.name] = E.Converters.boolean(value, spec.name)
+      else if (spec.kind === "keyOrValueAndKey") input[spec.name] = E.Converters.keyOrValue(value, undefined)
+      else input[spec.name] = value
+    }
+    return this.builder.build(input, { extra })
+  }
+
+  /** Builds `classes()`;  made on first use, over the DOM element tag's `vocabulary`. */
+  @lazy private get builder(): E.ClassBuilder {
+    return new E.ClassBuilder(this.vocabulary)
+  }
+
+  /** The DOM element's form (`internals.form`, else an ancestor `<form>`), or `undefined`. */
+  protected form(): HTMLFormElement | undefined {
+    return this.formInternals?.form ?? this.domElement.closest("form") ?? undefined
+  }
+
+  ////////////////
+  // ## The form
+  ////////////////
+
+  /**
+   * Report the form value and validity:  a form control's subclass calls `syncForm()` with its own.
+   * - Runs once the built nodes are attached (`render()`), as validity anchors on them;
+   *   then the subclass calls it on each change.
+   * - Default:  nothing (the button's fallback sets its value as it's clicked).
+   */
+  protected sync() {}
+
+  /**
+   * Give the DOM element's form `value`, and the validity of the native `control` holding it.
+   * - `value`:  text, several texts (one `FormData` entry each, under `name`), or `undefined` for nothing.
+   *   Without a `name`, nothing, as a native control.
+   * - `control`:  its validity is the DOM element's, anchored on it;  left out:  validity is left alone.
+   * - `valueMissing`:  the fallback's own "value missing", in place of the control's whole validity.
+   * - Does nothing on a DOM element that isn't form-associated.
+   */
+  protected syncForm({ value, control, valueMissing }: FallbackFormSync) {
+    const internals = this.formInternals
+    if (!internals) return
+    const name = this.domElement.getAttribute("name")
+    // `null`:  `setFormValue()`'s "submit nothing"
+    if (!name || value === undefined) internals.setFormValue(null)
+    else if (typeof value === "string") internals.setFormValue(value)
+    else {
+      const data = new FormData()
+      for (const each of value) data.append(name, each)
+      internals.setFormValue(data)
+    }
+    if (!control) return
+    if (valueMissing !== undefined) {
+      internals.setValidity(valueMissing ? { valueMissing } : {}, control.validationMessage, control)
+    } else if (control.validity.valid) internals.setValidity({})
+    else internals.setValidity(control.validity, control.validationMessage, control)
+  }
+
+  ////////////////
+  // ## Building
+  ////////////////
+
+  /** Element `tag` with `attributes` and `children` (strings become text nodes). */
+  protected create<K extends keyof HTMLElementTagNameMap>(
+    tag: K,
+    attributes: E.NativeFallbackAttributes = {},
+    ...children: (Node | string)[]
+  ): HTMLElementTagNameMap[K] {
+    const element = this.domElement.ownerDocument.createElement(tag)
+    for (const [name, value] of Object.entries(attributes)) {
+      if (value != null && value !== false) element.setAttribute(name, value === true ? "" : value)
+    }
+    element.append(...children)
+    return element
+  }
+
+  /** A `<slot>` for light-DOM content, with `fallback` text shown while nothing is slotted. */
+  protected slot(fallback?: string): HTMLSlotElement {
+    return this.create("slot", {}, ...(fallback ? [fallback] : []))
+  }
+
+  /**
+   * Give `target` its `part` and the DOM element's accessibility attributes.
+   * - `name` is one of the vocabulary's parts, typed.
+   *   A vocabulary TypeScript can't see (a class serving several tags) gets a dev warning instead.
+   * - `extra` parts are added unchecked.
+   * - Copies every `aria-*` from the DOM element.
+   *   NOTE:  idref ones (`aria-labelledby`) can't cross the shadow boundary, so they dangle.
+   * - A boolean `loading` becomes `aria-busy`;
+   *   a vocabulary where it isn't boolean (`<ui-image loading="lazy">`, the native `<img loading>`) is left alone.
+   */
+  protected decorate<T extends Element>(target: T, name: PartNameOf<V>, ...extra: string[]): T {
+    if (!this.vocabulary.parts.some((part) => part.name === name)) {
+      E.Warnings.devWarn(`<${this.vocabulary.tag}> fallback`, `"${name}" is not a part in its vocabulary`)
+    }
+    target.setAttribute("part", [name, ...extra].join(" "))
+    for (const { name: attribute, value } of this.domElement.attributes) {
+      if (attribute.startsWith("aria-")) target.setAttribute(attribute, value)
+    }
+    const loading = this.vocabulary.attributes.find((attribute) => attribute.name === LOADING)
+    if (loading?.kind === "keyOnly" && E.Converters.boolean(this.domElement.getAttribute(LOADING), LOADING)) {
+      target.setAttribute("aria-busy", "true")
+    }
+    return target
+  }
+
+  /**
+   * Name `control` by the DOM element's `placeholder`, when nothing names it yet:  no `aria-label` of its own,
+   * nor one `decorate()` copied from the DOM element.
+   */
+  protected nameFromPlaceholder(control: Element) {
+    const placeholder = this.domElement.getAttribute(PLACEHOLDER)
+    if (!control.hasAttribute("aria-label") && placeholder) control.setAttribute("aria-label", placeholder)
+  }
+
+  /**
+   * Send the vocabulary's event `name` from the DOM element, with `detail`:  as the component's own `send()` does.
+   * - It bubbles, and crosses shadow roots.
+   * - It's cancelable when the vocabulary says so;  then it returns false if a listener cancelled it.
+   * - On a translated tag, it goes out under that tag's name for it:
+   *   `<es-selector>`'s `ui-changed` is `es-cambiado`.
+   * - A host that isn't one of our DOM elements (a test's stub) sends the English name.
+   */
+  protected send(name: E.EventName<V>, detail: object): boolean {
+    const spec = this.vocabulary.events.find((event) => event.name === name)
+    const definition = (this.domElement.constructor as Partial<E.DOMElementClass>).tagSetup?.elementDefinition
+    const event = new CustomEvent(definition?.event(name) ?? name, {
+      bubbles: true,
+      composed: true,
+      cancelable: !!spec?.cancelable,
+      detail
+    })
+    return this.domElement.dispatchEvent(event)
+  }
+
+  /** `addEventListener`, undone by `dispose()`. */
+  protected listen<T extends Event = Event>(target: EventTarget, type: string, handler: (event: T) => void) {
+    target.addEventListener(type, handler as EventListener)
+    this.disposers.push(() => target.removeEventListener(type, handler as EventListener))
+  }
+
+  ////////////////
+  // ## Helpers
+  ////////////////
+
+  /**
+   * A vocabulary `default` as attribute text:  `true` => bare (`""`), `false` / absent => `undefined`.
+   * - STATIC:  pure, needs no instance.
+   */
+  private static defaultText(value: string | number | boolean | null | undefined): string | undefined {
+    if (value == null || value === false) return undefined
+    return value === true ? "" : String(value)
+  }
+}
+
+/** What a fallback is built from:  `new NativeFallback(props)`, `NativeFallback.render(props)`. */
+export type NativeFallbackProps = {
+  /** Element that failed. */
+  domElement: HTMLElement
+  /** Where the fallback builds:  the DOM element's shadow root, or the DOM element itself. */
+  root: E.NativeFallbackRoot
+  /** Why the real render failed. */
+  error?: unknown
+  /** DOM element internals, when the element has them:  `errored` state, roles, form calls. */
+  internals?: ElementInternals
+}
+
+/** Part names of vocabulary `V`, so `decorate()` can't misspell one. */
+export type PartNameOf<V extends { parts: readonly { name: string }[] }> = V["parts"][number]["name"]
+
+/** What a form control's fallback hands `syncForm()`:  its value, and the native control whose validity counts. */
+export type FallbackFormSync = {
+  /** what the form submits:  text, several texts (one entry each, under `name`), or `undefined` for nothing */
+  value: string | readonly string[] | undefined
+  /** the native control whose validity the DOM element reports, anchored on it;  left out:  none reported */
+  control?: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+  /** the fallback's own "value missing", where it works that out:  the control's other checks don't count */
+  valueMissing?: boolean
+}
+
+/** The busy-flag attribute name. */
+const LOADING = "loading"
+
+/** The attribute that names a control with no other name (`nameFromPlaceholder()`). */
+const PLACEHOLDER = "placeholder"

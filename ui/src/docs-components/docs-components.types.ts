@@ -1,0 +1,464 @@
+/**
+ * Shared types of the doc-only elements (`src/docs-components/`):
+ * the shape of the site's generated data file, `docs/__data/components.json5`,
+ * which `<ui-docs-api>`, `<ui-docs-tokens>`, `<ui-docs-nav>` ... read through `SiteData`.
+ * - Why a data file, not the vocabularies:  `ComponentDefinitions` imports every vocabulary (~325 KB of source);
+ *   a docs element importing it would drag all of that into the site bundle
+ *   (and into docs' `spell-ui.js`, whose `<ui-root>` glob reaches these families too).
+ * - The file is written by `yarn site:data` (`scripts/site-data.ts`, built by `src/tools/SiteDataBuilder.ts`)
+ *   and committed;  its test (`tests/tools/SiteDataBuilder.test.ts`) fails while it's stale.
+ * - Also the JSX types of the `<ui-docs-*>` tags the docs elements render in their shadow roots (`DocsJSXTags`),
+ *   and the exact ones of every component tag they render (`spell-ui/jsx`).
+ * - Runtime-light:
+ *   types and constants only, plus the docs families' small pure helper `VocabularyTexts`.
+ *   - What they share with the components (`HeadingLevels`, `CODE_SPAN`, `TocMarks`) is `UIT`'s, since epic `ui-gaps`
+ *     P14 made the table of contents and the example components.
+ */
+
+import type { JSX } from "@solidjs/web"
+
+import type { OutlineSection } from "spell-ui/components/ui-toc"
+
+////////////////
+// ## `<ui-*>` in JSX
+////////////////
+
+/**
+ * The docs tags (`<ui-docs-*>`) a docs element may render in its JSX, each as loose attributes.
+ * - Every COMPONENT tag (`<ui-button>` ...) has exact types, generated:  `spell-ui/jsx`, imported here.
+ *   The docs tags aren't in that set, so they're named here.
+ * - Named tags, NOT `` [tag: `ui-${string}`] ``:  that would loosen every component tag too.
+ * - A docs element that renders another docs tag adds it here.
+ * - Loose on purpose:  any attribute, any value (an object or function becomes the property, `RichAttributes`);
+ *   a misspelt attribute isn't caught.
+ */
+declare module "@solidjs/web/types/jsx.js" {
+  namespace JSX {
+    interface IntrinsicElements extends DocsJSXTags {}
+  }
+}
+
+/** Attributes of a `<ui-docs-*>` tag in a docs element's JSX:  HTML attributes, plus any attribute, any value. */
+export type DocsJSXAttributes = JSX.HTMLAttributes<HTMLElement> & { [attribute: string]: unknown }
+
+/** Every `<ui-docs-*>` tag the docs elements render in JSX. */
+export type DocsJSXTags = {
+  "ui-docs-search": DocsJSXAttributes
+}
+
+////////////////
+// ## The data file
+////////////////
+
+/** `docs/__data/components.json5`:  everything the docs pages know about the tags, generated. */
+export type SiteDataFile = {
+  /** what wrote it, and how to regenerate it */
+  readonly $comment: string
+  /** format version:  bumped when a field changes meaning */
+  readonly version: typeof SITE_DATA_VERSION
+  /** every topic, in `ValueSets.topics` order (curated:  newcomer topics first, Fomantic's groups last) */
+  readonly topics: readonly SiteTopic[]
+  /** every COMPONENT tag, A-Z by name:  what the nav and the component index list */
+  readonly components: readonly SiteTag[]
+  /** the doc-only `<ui-docs-*>` tags, A-Z:  kept apart so the nav can leave them out */
+  readonly docs: readonly SiteTag[]
+  /** folder => its family (page title, summary, status, tags, CSS tokens), components and docs families both */
+  readonly families: Readonly<Record<string, SiteFamily>>
+  /**
+   * the FOUNDATION tokens (`--ui-font-size`, palette, radii, motion ...), grouped,
+   * from the generated sheets (`src/tools/FoundationTokens.ts`):  `<ui-docs-tokens global>`
+   */
+  readonly foundation: readonly SiteFoundationGroup[]
+  /**
+   * another site's own side-column links:
+   * a component set served with this site's bundle (Epic UI, `/components/epics/`)
+   * - absent:  Spell UI's (`TOP_PAGES`, `FOUNDATION_PAGES` in `<ui-docs-nav>`)
+   */
+  readonly nav?: SiteNav
+}
+
+/**
+ * A site's own links in `<ui-docs-nav>`, around its component list:  the start pages above, the "Foundation" ones
+ * below, and the bands' titles.
+ * - For a site other than Spell UI's that loads this site's bundle (the page server's `componentSets` setting).
+ */
+export type SiteNav = {
+  /** the links above the components (Spell UI:  Overview, Getting started ...) */
+  readonly start: readonly SiteNavPage[]
+  /** the links below them (Spell UI:  Theming, Utilities ...);  may be empty */
+  readonly foundation: readonly SiteNavPage[]
+  /** the bands' titles, where they aren't the vocabulary's ("Get started", "Components", "Foundation") */
+  readonly titles?: { readonly start?: string; readonly components?: string; readonly foundation?: string }
+}
+
+/**
+ * A component set's own facts, hand-kept in its `pages.json5`:  its side column's groups and links
+ * (Spell UI's `SiteDataBuilder` `set`, `SiteDataBuilder.forSet()`).
+ * - Epic UI's, the brand's, App UI's
+ */
+export type SiteSet = {
+  /** the side column's groups, in order:  the data's topics */
+  readonly groups: readonly SiteSetGroup[]
+  /** the side column's own links and band titles */
+  readonly nav: SiteNav
+}
+
+/** One group of a set's side column:  a topic, in the site data's words. */
+export type SiteSetGroup = {
+  /** id, as a tag's `topics` names it, e.g. `menus and dialogs` */
+  readonly id: string
+  /** what the side column shows, e.g. `Menus and dialogs` */
+  readonly title: string
+  /** the tags filed under it;  none:  the tags whose own `topics` name it */
+  readonly tags?: readonly string[]
+}
+
+/** One of a site's own links in `<ui-docs-nav>`. */
+export type SiteNavPage = {
+  /** what `current` names it by:  its file name without `.html`, e.g. `index` */
+  readonly id: string
+  /** its file, relative to the site root;  may climb out of it, e.g. `../guides/x/x.html` */
+  readonly file: string
+  /** its row's text, e.g. `Overview` */
+  readonly label: string
+  /** its row's icon (the default `fa7-free` pack), e.g. `house` */
+  readonly icon: string
+}
+
+/** One topic a tag is filed under. */
+export type SiteTopic = {
+  /** id, as in a vocabulary's `topics`, e.g. `date & time` */
+  readonly id: string
+  /** display title, e.g. `Date & time` */
+  readonly title: string
+}
+
+/** One tag:  its names, where it's documented, and its whole vocabulary. */
+export type SiteTag = {
+  /** e.g. `ui-or` */
+  readonly tag: string
+  /** display name from the tag, e.g. `Or`, `Breadcrumb section` */
+  readonly name: string
+  /** its family's folder, e.g. `ui-button` */
+  readonly folder: string
+  /** its family's main tag (`ui-<folder>`'s own tag), e.g. `ui-button` */
+  readonly mainTag: string
+  /** `true` for the family's main tag, whose page IS the family page */
+  readonly main: boolean
+  /**
+   * `true` when `href` is a page of its own:
+   * the family's main tag, or a sub-tag split onto its own page (`SiteFamily.pages`, e.g. `ui-radio`);
+   * `false` for a sub-tag documented on its family's page (`ui-or`) and a doc-only tag
+   */
+  readonly page: boolean
+  /**
+   * docs page, relative to the site root:  `components/<tag>.html` for a tag with its own page (`page`),
+   * else `components/<main tag>.html#<tag>` (`ui-button.html#ui-or`, its family page's API header);
+   * `undefined` for a doc-only tag (no page of its own)
+   */
+  readonly href?: string
+  /** topic ids */
+  readonly topics: readonly string[]
+  /** other names people search for */
+  readonly aka: readonly string[]
+  /** the vocabulary's one-line summary */
+  readonly description?: string
+  /** class-grammar noun, e.g. `button` */
+  readonly noun: string
+  readonly attributes: readonly SiteAttribute[]
+  readonly slots: readonly SiteNamed[]
+  readonly events: readonly SiteEvent[]
+  readonly parts: readonly SiteNamed[]
+  readonly states: readonly SiteNamed[]
+  readonly texts: readonly SiteText[]
+  /**
+   * a FUNCTION component's props, in the order its props type declares them:
+   * the spell app's Solid components (`packages/app`'s App UI set, `yarn site:data` there);
+   * absent for a custom element, whose API is its attributes
+   */
+  readonly props?: readonly SiteProp[]
+  /** where it's drawn:  each component that draws it, and that component's file, A-Z;  absent for none found */
+  readonly usedIn?: readonly SiteUse[]
+}
+
+/** One prop of a function component, as its props type declares it. */
+export type SiteProp = {
+  /** e.g. `autoHide`;  `...ChooserModalProps` for a props type it takes whole, from another file */
+  readonly name: string
+  /** its type, as written, e.g. `boolean`, `(element: HTMLDivElement) => void` */
+  readonly type: string
+  /** `true`:  the caller must pass it (no `?`) */
+  readonly required?: boolean
+  /** its docstring */
+  readonly description: string
+}
+
+/** One place a component is drawn:  the component (or page) that draws it, and its file. */
+export type SiteUse = {
+  /** e.g. `RunnerPane`, `<spell-viewer>` */
+  readonly name: string
+  /** from the repo root, e.g. `packages/app/src/runner/RunnerPane.tsx` */
+  readonly file: string
+}
+
+/** One attribute of a component, as the site shows it. */
+export type SiteAttribute = {
+  /** canonical attribute name, e.g. `text-align` */
+  readonly name: string
+  /** `AttributeKind`:  how it becomes a class or a property (`keyOnly`, `size`, `string` ...) */
+  readonly kind: string
+  /** allowed values, resolved (a shared set's values, or the inline list);  absent:  free text / boolean */
+  readonly values?: readonly string[]
+  /** the shared value set they come from, e.g. `hues`;  absent for an inline list */
+  readonly valueSet?: string
+  /** value when absent */
+  readonly default?: string | number | boolean | null
+  /** other attribute names accepted for it, e.g. `checked` for `selected` */
+  readonly aliases?: readonly string[]
+  /** JS property name, when it isn't `camelCase(name)` */
+  readonly property?: string
+  /** `false`:  not reflected to the attribute (rich data) */
+  readonly reflect?: boolean
+  /** `true`:  one of the attributes every element takes (`SharedVocabulary`:  `disabled`, `loading`, `visible`) */
+  readonly shared?: boolean
+  readonly description: string
+}
+
+/** A slot, part or state:  a name and what it is;  the default slot's name is `""`. */
+export type SiteNamed = {
+  readonly name: string
+  readonly description: string
+}
+
+/** A `ui-*` event a tag dispatches. */
+export type SiteEvent = {
+  /** e.g. `ui-changed` */
+  readonly name: string
+  /** `event.detail`'s shape, as text, e.g. `{ value: string }` */
+  readonly detail: string
+  /** `preventDefault()` vetoes it */
+  readonly cancelable?: boolean
+  /** what it means, in the docs */
+  readonly description: string
+}
+
+/** A user-visible text string, looked up through `UI.i18n`. */
+export type SiteText = {
+  /** lookup key, e.g. `noResults` */
+  readonly key: string
+  /** English text */
+  readonly text: string
+  readonly description?: string
+}
+
+/** One family:  a folder of tags and its docs page. */
+export type SiteFamily = {
+  /** e.g. `ui-button` */
+  readonly folder: string
+  /** its main tag, e.g. `ui-button` */
+  readonly mainTag: string
+  /** page title, e.g. `Button` */
+  readonly title: string
+  /** one-line tagline under the title, Fomantic style */
+  readonly summary: string
+  /** how far along the port is;  anything but `done` gets a badge */
+  readonly status: SiteStatus
+  /** `true` for a doc-only family (`src/docs-components/`) */
+  readonly docs: boolean
+  /** its tags, the main tag first, then A-Z */
+  readonly tags: readonly string[]
+  /**
+   * sub-tags with a docs page of their own (`components/<tag>.html`), tag => its page's facts, A-Z;
+   * absent when every tag is documented on the family page
+   * - e.g. `ui-checkbox`'s `ui-radio`;  the family page still documents every tag's API (`#ui-radio` lands there)
+   */
+  readonly pages?: Readonly<Record<string, SiteTagPage>>
+  /** its public CSS tokens (`--ui-<tag>-*`), main sheet's first */
+  readonly tokens: readonly SiteToken[]
+}
+
+/** A sub-tag's own docs page:  what its masthead, nav row and card say (`pages.json5`'s `pages`). */
+export type SiteTagPage = {
+  /** page title, e.g. `Radio` */
+  readonly title: string
+  /** one-line tagline under the title */
+  readonly summary: string
+  /** how far along the page is;  anything but `done` gets a badge */
+  readonly status: SiteStatus
+}
+
+/** How far along a family's port is. */
+export type SiteStatus = "planned" | "in-progress" | "done"
+
+/** One public CSS custom property of a family. */
+export type SiteToken = {
+  /** e.g. `--ui-button-radius` */
+  readonly name: string
+  /** default, with private aliases read by their public names, e.g. `var(--ui-radius)` */
+  readonly default: string
+  /** the sheet's comment above it */
+  readonly description?: string
+  /** guessed from the name and default:  `color` gets a live swatch */
+  readonly type: SiteTokenType
+}
+
+/** What a token's value is, for the token table. */
+export type SiteTokenType = "color" | "length" | "time" | "number" | "other"
+
+/** One group of foundation tokens:  a table of its own on the theming page. */
+export type SiteFoundationGroup = {
+  /** e.g. `palette`, `typography`;  `<ui-docs-tokens global groups="...">` picks by it */
+  readonly id: string
+  /** display title, e.g. `Palette` */
+  readonly title: string
+  /** one or two sentences above its table;  `` `x` `` is code */
+  readonly description: string
+  /** its tokens, in sheet order */
+  readonly tokens: readonly SiteToken[]
+}
+
+////////////////
+// ## The pages seed
+////////////////
+
+/**
+ * `docs/__data/pages.json5`:  the hand-kept per-family facts the vocabularies don't hold --
+ * title, summary, status, the sub-tags with a page of their own, and how to read its tokens.
+ * - `yarn site:data` reads it and writes `components.json5`.
+ * - Seeded ONCE per new family from its vocabulary (`SiteDataBuilder`);  from then on THIS file is the source.
+ * - Edit it by hand.
+ * - The first seeds came from the old Astro site's MDX pages, deleted in epic `spell-ui-pages` P7.
+ */
+export type SitePagesFile = {
+  readonly $comment: string
+  readonly families: Readonly<Record<string, SitePageSeed>>
+}
+
+/** One family's hand-kept facts. */
+export type SitePageSeed = {
+  readonly title: string
+  readonly summary: string
+  readonly status: SiteStatus
+  /** its main tag, when no tag is named like the folder (`ui-parts` => `ui-header`) */
+  readonly mainTag?: string
+  /**
+   * sub-tags documented on a page of their OWN (`components/<tag>.html`), tag => its title, summary, status;
+   * every other tag stays on the family page (epic `ui-docs-rework`, P7)
+   * - hand-added, never seeded;  `yarn site:data` gives these tags `href:  components/<tag>.html`,
+   *   and `yarn site:new <tag>` writes their page
+   */
+  readonly pages?: Readonly<Record<string, SiteTagPage>>
+  /** how to read its tokens;  absent:  every `--<folder>-*` token its sheets alias or read */
+  readonly tokens?: SiteTokenSeed
+}
+
+/** Overrides for a family's token table. */
+export type SiteTokenSeed = {
+  /** name prefixes to keep, default `["--<folder>-"]`, e.g. `["--ui-card-", "--ui-cards-"]` */
+  readonly prefixes?: readonly string[]
+  /** readable default text by token name, in place of the sheet's plumbing */
+  readonly defaults?: Readonly<Record<string, string>>
+  /** a hand-written table, in place of reading the sheets (a family whose tokens are private plumbing) */
+  readonly list?: readonly { name: string; default: string; description?: string }[]
+}
+
+////////////////
+// ## The icons file
+////////////////
+
+/**
+ * `docs/__data/icons.json5`:  what the icon browser (`docs/icons.html`) needs beyond the packs' own indexes.
+ * - It loads those indexes through `UI.icons`, like any page.
+ * - GENERATED by `yarn site:data` from `src/icons/data/search.json`'s terms.
+ * - Fetched only on the first search:  ~100 KB.
+ */
+export type SiteIconsFile = {
+  readonly $comment: string
+  /**
+   * Font Awesome's search terms by its file name (`address-book` => `["contact", "directory" ...]`);
+   * an outline or Fomantic name matches through its solid icon's file name
+   */
+  readonly terms: Readonly<Record<string, readonly string[]>>
+}
+
+////////////////
+// ## The search file
+////////////////
+
+/**
+ * `docs/__data/search.json5`, beside the other data:
+ * every page of the site and its sections, for `<ui-docs-search>`'s jumps to OTHER pages.
+ * - The page shown is read live from its DOM.
+ * - GENERATED by `yarn site:data` (`src/tools/SiteSearchBuilder.ts`) from the page files' markup.
+ * - Fetched on the first search, beside `components.json5`.
+ */
+export type SiteSearchFile = {
+  readonly $comment: string
+  /** every page, the hand-written ones first, then the components pages A-Z */
+  readonly pages: readonly SiteSearchPage[]
+}
+
+/** One page of the site and its sections. */
+export type SiteSearchPage = {
+  /** relative to the site root, e.g. `components/ui-divider.html` */
+  readonly path: string
+  /** title, from its `main`'s `data-toc-header` (else its `<title>`), e.g. `Divider` */
+  readonly title: string
+  /** its `<meta name="description">` */
+  readonly summary?: string
+  /**
+   * a components page:  the tag it documents, its file name,
+   * e.g. `ui-divider` (a family's main tag) or `ui-radio` (a sub-tag with its own page);
+   * the search lists the page itself as that component, not as a page
+   */
+  readonly tag?: string
+  /** its `#site-tabs` panes:  value => label, e.g. `examples` => `Examples` */
+  readonly tabs?: Readonly<Record<string, string>>
+  /** its sections (and headers with ids), in document order */
+  readonly sections: readonly OutlineSection[]
+}
+
+////////////////
+// ## Constants
+////////////////
+
+/** `SiteDataFile.version`. */
+export const SITE_DATA_VERSION = 1
+
+/** Tag prefix of every doc-only element. */
+export const DOCS_TAG_PREFIX = "ui-docs-"
+
+/** Where the data file sits, relative to the site root (a set's `docs/`:  Spell UI's `docs/`). */
+export const SITE_DATA_PATH = "__data/components.json5"
+
+/** Where the search file sits, relative to the site root:  beside the data file. */
+export const SITE_SEARCH_PATH = "__data/search.json5"
+
+/** `<meta name>` a page may point at its data file with (`SiteData`). */
+export const SITE_DATA_META = "ui-docs-data"
+
+////////////////
+// ## What the docs elements share
+////////////////
+
+/** What `VocabularyTexts` reads of a vocabulary:  its texts. */
+export type TextsVocabulary = {
+  readonly texts: readonly { readonly key: string; readonly text: string }[]
+}
+
+/****************
+ * ### `VocabularyTexts`
+ * A vocabulary's ENGLISH text, `{name}` placeholders filled:
+ * what the docs families' native fallbacks show, as they never reach `UI.i18n` (the runtime may be what failed).
+ * - Static:  pure, and shared by every docs fallback.
+ ****************/
+export class VocabularyTexts {
+  /** `vocabulary`'s text for `key` (`key` itself if it has none), each `{name}` filled from `params`. */
+  static english(vocabulary: TextsVocabulary, key: string, params: Record<string, string | number> = {}): string {
+    const text = vocabulary.texts.find((entry) => entry.key === key)?.text ?? key
+    return text.replace(PLACEHOLDER, (match, name: string) => String(params[name] ?? match))
+  }
+}
+
+/** A `{name}` placeholder in a text, the name in group 1. */
+const PLACEHOLDER = /\{(\w+)\}/g
