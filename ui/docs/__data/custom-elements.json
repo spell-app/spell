@@ -593,6 +593,10 @@
             {
               "name": "icon",
               "description": "List / menu:  replaces the `icon` shorthand's glyph."
+            },
+            {
+              "name": "badge",
+              "description": "Menu:  a count after the title (a `<ui-label>`), which stays when a `shrinkable` menu cuts or hides the title."
             }
           ],
           "cssParts": [
@@ -610,7 +614,11 @@
             },
             {
               "name": "title",
-              "description": "The action's title, before its keys."
+              "description": "A `shrinkable` menu's item (and every `<ui-action>`):  the box around its title, cut with `…` to fit the row."
+            },
+            {
+              "name": "badge",
+              "description": "Menu:  the box around the `badge` slot."
             },
             {
               "name": "shortcut",
@@ -11581,6 +11589,14 @@
               "fieldName": "loading"
             },
             {
+              "name": "zoom",
+              "description": "A click (or Enter) shows it full size, over the page, in the page's `<ui-zoom>`;  with `link`, a click with a modifier key still follows the link.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "zoom"
+            },
+            {
               "name": "link",
               "description": "Renders a link (`<a>`) around the image.  Its old name was `href`.",
               "type": {
@@ -12832,6 +12848,10 @@
               "default": "1.2857"
             },
             {
+              "name": "--ui-input-textarea-grow-max-height",
+              "default": "33vh"
+            },
+            {
               "name": "--ui-input-inverted-color",
               "default": "var(--ui-text-inverted-color)"
             },
@@ -12955,11 +12975,27 @@
             },
             {
               "name": "rows",
-              "description": "Visible lines;  without it the field is Fomantic's form height (12em, 8em ... 24em).",
+              "description": "Visible lines;  without it the field is Fomantic's form height (12em, 8em ... 24em).  With `grow`:  the lines it starts at, one without it.",
               "type": {
                 "text": "number"
               },
               "fieldName": "rows"
+            },
+            {
+              "name": "grow",
+              "description": "Grows with its text (epic `ui-gaps` P14):  `rows` lines to start (one without it), taller as the text wraps, up to `max-rows`, then it scrolls;  shorter again as text goes.  Opt in:  every \"tell me more\" field should.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "grow"
+            },
+            {
+              "name": "max-rows",
+              "description": "With `grow`:  the most lines it grows to before it scrolls;  without it, a third of the window (`--ui-input-textarea-grow-max-height`).",
+              "type": {
+                "text": "number"
+              },
+              "fieldName": "maxRows"
             },
             {
               "name": "autocomplete",
@@ -13339,6 +13375,10 @@
             {
               "name": "icon",
               "description": "List / menu:  replaces the `icon` shorthand's glyph."
+            },
+            {
+              "name": "badge",
+              "description": "Menu:  a count after the title (a `<ui-label>`), which stays when a `shrinkable` menu cuts or hides the title."
             }
           ],
           "cssParts": [
@@ -13353,6 +13393,14 @@
             {
               "name": "image",
               "description": "List / menu:  the `<img>` of the `image` shorthand."
+            },
+            {
+              "name": "title",
+              "description": "A `shrinkable` menu's item (and every `<ui-action>`):  the box around its title, cut with `…` to fit the row."
+            },
+            {
+              "name": "badge",
+              "description": "Menu:  the box around the `badge` slot."
             }
           ],
           "cssStates": [
@@ -16160,6 +16208,14 @@
               "fieldName": "items"
             },
             {
+              "name": "shrinkable",
+              "description": "Fits its items' titles to its width:  every title whole while they fit;  then the longest cut first, each ending in `…`;  once one would be cut under `--ui-menu-title-min`, icons only (`:state(icons-only)`, each title its item's tooltip;  an item with no icon shows its title's first letter);  once a button would be under `--ui-menu-item-min`, every item folds into one `…` button whose menu holds them all (`:state(overflow)`).  A `segmented` one becomes a dropdown instead (`:state(dropdown)`):  one button showing the chosen item.  Items with no words (an icon button) stay as they are.  Off by default.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "shrinkable"
+            },
+            {
               "name": "interactive",
               "description": "An application menubar (`role=menubar`):  one Tab stop, arrow keys between items, every item a `menuitem`.  Default:  a `<nav>` landmark of links.",
               "type": {
@@ -16254,12 +16310,24 @@
             {
               "name": "",
               "description": "`<ui-item>`s, sub-menus (`<ui-menu position>`), and other content."
+            },
+            {
+              "name": "overflow",
+              "description": "`shrinkable`:  what the overflow button shows instead of its `…`, e.g. `<ui-icon name=\"bars\">`."
             }
           ],
           "cssParts": [
             {
               "name": "menu",
               "description": "The menu box:  `<nav>`, `<div role=menubar>`, or a sub-menu's `<div>`."
+            },
+            {
+              "name": "overflow",
+              "description": "`shrinkable`:  the overflow button, shown once the items fold into it (a `segmented` one's dropdown)."
+            },
+            {
+              "name": "overflow-menu",
+              "description": "`shrinkable`:  the overflow button's menu, every item in a row."
             }
           ],
           "cssStates": [
@@ -16270,6 +16338,18 @@
             {
               "name": "vertical",
               "description": "Items stacked (`direction=\"vertical\"`)."
+            },
+            {
+              "name": "icons-only",
+              "description": "`shrinkable`:  the titles are gone, the icons only."
+            },
+            {
+              "name": "overflow",
+              "description": "`shrinkable`:  every item folded into the overflow button."
+            },
+            {
+              "name": "dropdown",
+              "description": "`shrinkable` and `segmented`:  one button showing the chosen item, a dropdown."
             },
             {
               "name": "disabled",
@@ -16540,6 +16620,14 @@
             {
               "name": "--ui-menu-icon-float",
               "default": "none"
+            },
+            {
+              "name": "--ui-menu-title-min",
+              "default": "50px"
+            },
+            {
+              "name": "--ui-menu-item-min",
+              "default": "34px"
             },
             {
               "name": "--ui-menu-vertical-item-display",
@@ -34815,8 +34903,8 @@
           "name": "UIToolbar",
           "tagName": "ui-toolbar",
           "customElement": true,
-          "summary": "A toolbar is a horizontal menu whose items scroll sideways when they don't fit, with a button at each end while there's more to see that way.  It takes every `<ui-menu>` attribute.",
-          "description": "A toolbar is a horizontal menu whose items scroll sideways when they don't fit, with a button at each end while there's more to see that way.  It takes every `<ui-menu>` attribute.\n\nAlso known as:  toolbar, tool bar, scrolling tabs, overflow menu, chip bar, scrollable menu.",
+          "summary": "A toolbar is a horizontal menu whose items scroll sideways when they don't fit, with a button at each end while there's more to see that way;  `shrinkable`, it fits their titles to its width instead.  It takes every `<ui-menu>` attribute.",
+          "description": "A toolbar is a horizontal menu whose items scroll sideways when they don't fit, with a button at each end while there's more to see that way;  `shrinkable`, it fits their titles to its width instead.  It takes every `<ui-menu>` attribute.\n\nAlso known as:  toolbar, tool bar, scrolling tabs, overflow menu, chip bar, scrollable menu.",
           "attributes": [
             {
               "name": "size",
@@ -34979,6 +35067,14 @@
               "fieldName": "items"
             },
             {
+              "name": "shrinkable",
+              "description": "Fits its items' titles to its width:  every title whole while they fit;  then the longest cut first, each ending in `…`;  once one would be cut under `--ui-menu-title-min`, icons only (`:state(icons-only)`, each title its item's tooltip;  an item with no icon shows its title's first letter);  once a button would be under `--ui-menu-item-min`, every item folds into one `…` button whose menu holds them all (`:state(overflow)`).  A `segmented` one becomes a dropdown instead (`:state(dropdown)`):  one button showing the chosen item.  Items with no words (an icon button) stay as they are.  Off by default.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "shrinkable"
+            },
+            {
               "name": "interactive",
               "description": "An application menubar (`role=menubar`):  one Tab stop, arrow keys between items, every item a `menuitem`.  Default:  a `<nav>` landmark of links.",
               "type": {
@@ -35075,6 +35171,10 @@
               "description": "`<ui-item>`s, sub-menus (`<ui-menu position>`), and other content."
             },
             {
+              "name": "overflow",
+              "description": "`shrinkable`:  what the overflow button shows instead of its `…`, e.g. `<ui-icon name=\"bars\">`."
+            },
+            {
               "name": "icon",
               "description": "First, at the start:  an icon or an icon button (a menu button)."
             },
@@ -35095,6 +35195,14 @@
             {
               "name": "menu",
               "description": "The menu box:  `<nav>`, `<div role=menubar>`, or a sub-menu's `<div>`."
+            },
+            {
+              "name": "overflow",
+              "description": "`shrinkable`:  the overflow button, shown once the items fold into it (a `segmented` one's dropdown)."
+            },
+            {
+              "name": "overflow-menu",
+              "description": "`shrinkable`:  the overflow button's menu, every item in a row."
             },
             {
               "name": "icon",
@@ -35135,8 +35243,20 @@
               "description": "Items stacked (`direction=\"vertical\"`)."
             },
             {
+              "name": "icons-only",
+              "description": "`shrinkable`:  the titles are gone, the icons only."
+            },
+            {
+              "name": "overflow",
+              "description": "`shrinkable`:  every item folded into the overflow button."
+            },
+            {
+              "name": "dropdown",
+              "description": "`shrinkable` and `segmented`:  one button showing the chosen item, a dropdown."
+            },
+            {
               "name": "overflowing",
-              "description": "Its items don't all fit:  they scroll sideways."
+              "description": "Its items don't all fit:  they scroll sideways (never once `shrinkable`)."
             },
             {
               "name": "disabled",
@@ -36425,6 +36545,264 @@
           "declaration": {
             "name": "UIVisibility",
             "module": "src/components/ui-visibility/index.ts"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "src/components/ui-zoom/index.ts",
+      "declarations": [
+        {
+          "kind": "class",
+          "name": "UIZoom",
+          "tagName": "ui-zoom",
+          "customElement": true,
+          "summary": "A zoom shows something full size, over the page.  Round any content it shows it shrunk, within a width and height, and full size on a click;  with `src` it shows that image full size.  Escape, a click outside it or its close button close it.",
+          "description": "A zoom shows something full size, over the page.  Round any content it shows it shrunk, within a width and height, and full size on a click;  with `src` it shows that image full size.  Escape, a click outside it or its close button close it.\n\nAlso known as:  lightbox, zoom, full size, image viewer, magnifier, expand, screenshot, thumbnail.",
+          "attributes": [
+            {
+              "name": "max-width",
+              "description": "The widest the shrunk view gets, a CSS length (`320px`, `50%`);  none:  its container's width.  Content past it is cut off, until it's shown full size.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "maxWidth"
+            },
+            {
+              "name": "max-height",
+              "description": "The tallest the shrunk view gets, a CSS length (`200px`, `20em`);  none:  as tall as its content.  Content past it is cut off, until it's shown full size.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "maxHeight"
+            },
+            {
+              "name": "shrink",
+              "description": "How big its content is in the shrunk view, a percentage of its full size:  `50%` by default;  `100%` keeps it full size, cut off by `max-width` / `max-height`.",
+              "type": {
+                "text": "string"
+              },
+              "default": "\"50%\"",
+              "fieldName": "shrink"
+            },
+            {
+              "name": "open",
+              "description": "Shown full size, over the page.  Set to open it from script;  closing it clears it.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "open"
+            },
+            {
+              "name": "src",
+              "description": "An image to show full size, in place of its content:  open while it's set, and cleared as it closes.  The page's zoom for its screenshots (`ImageZoom`) is one of these.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "src"
+            },
+            {
+              "name": "alt",
+              "description": "With `src`:  the image's alt text, its caption, and the zoomed image's own name.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "alt"
+            },
+            {
+              "name": "disabled",
+              "description": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "disabled"
+            },
+            {
+              "name": "loading",
+              "description": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "loading"
+            },
+            {
+              "name": "visible",
+              "description": "Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible=\"false\"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "visible"
+            },
+            {
+              "name": "animation",
+              "description": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.",
+              "type": {
+                "text": "\"fade\" | \"fade up\" | \"fade down\" | \"fade left\" | \"fade right\" | \"scale\" | \"zoom\" | \"drop\" | \"browse\" | \"browse right\" | \"fly\" | \"fly up\" | \"fly down\" | \"fly left\" | \"fly right\" | \"slide\" | \"slide up\" | \"slide down\" | \"slide left\" | \"slide right\" | \"swing\" | \"swing up\" | \"swing down\" | \"swing left\" | \"swing right\" | \"horizontal flip\" | \"vertical flip\" | \"flash\" | \"shake\" | \"bounce\" | \"tada\" | \"pulse\" | \"jiggle\" | \"glow\" | \"none\""
+              },
+              "fieldName": "animation"
+            },
+            {
+              "name": "link",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "link"
+            },
+            {
+              "name": "target",
+              "description": "Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "target"
+            },
+            {
+              "name": "font",
+              "description": "How its letters look, several words at once:  `bold`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript` (`font=\"bold italic\"`).  `<ui-text>` draws each as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it;  every other element shows the look alone.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "font"
+            },
+            {
+              "name": "tooltip",
+              "description": "Its tooltip:  the browser's own, written as the element's `title`.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "tooltip"
+            },
+            {
+              "name": "label",
+              "description": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "label"
+            }
+          ],
+          "members": [],
+          "events": [],
+          "slots": [
+            {
+              "name": "",
+              "description": "What it zooms:  any content, shown shrunk, then full size on a click."
+            }
+          ],
+          "cssParts": [
+            {
+              "name": "view",
+              "description": "The shrunk view of its content, in the page."
+            },
+            {
+              "name": "button",
+              "description": "The button over the shrunk view that shows it full size."
+            },
+            {
+              "name": "base",
+              "description": "The `<ui-modal>`, over the whole window."
+            },
+            {
+              "name": "content",
+              "description": "Its content, full size, in the modal."
+            },
+            {
+              "name": "image",
+              "description": "With `src`:  the image, as large as fits."
+            },
+            {
+              "name": "caption",
+              "description": "With `src`:  its alt text, under it."
+            }
+          ],
+          "cssStates": [
+            {
+              "name": "open",
+              "description": "Shown full size, over the page."
+            },
+            {
+              "name": "disabled",
+              "description": "`disabled` is set (or, on a form control, a `<fieldset disabled>` around it)."
+            },
+            {
+              "name": "loading",
+              "description": "`loading` is set."
+            },
+            {
+              "name": "busy",
+              "description": "`loading`, and the element draws the shared loader:  a spinner over it (`elementSetup.loading`)."
+            },
+            {
+              "name": "dimmed",
+              "description": "Disabled or loading the shared way:  everything inside is inert, and dimmed."
+            },
+            {
+              "name": "hidden",
+              "description": "Hidden (`hidden`, or `visible=\"false\"`), once its animation has run."
+            },
+            {
+              "name": "still",
+              "description": "`animation=\"none\"`:  no motion here, nor anywhere inside it (`--ui-motion: none`)."
+            },
+            {
+              "name": "hiding",
+              "description": "Animating out:  `hidden` is already set, and the element stays on screen until it ends."
+            },
+            {
+              "name": "pending",
+              "description": "Defined by its `<ui-root>` before its family loaded:  no component yet, its values kept until it arrives."
+            },
+            {
+              "name": "ready",
+              "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            }
+          ],
+          "cssProperties": [
+            {
+              "name": "--ui-zoom-margin",
+              "default": "24px"
+            },
+            {
+              "name": "--ui-zoom-caption",
+              "default": "2.5em"
+            },
+            {
+              "name": "--ui-zoom-radius",
+              "default": "var(--ui-radius, 4px)"
+            },
+            {
+              "name": "--ui-zoom-backdrop",
+              "default": "oklch(0 0 0 / 0.9)",
+              "description": "dark whatever the page's theme: a screenshot is judged on black, not on the page's dimmer"
+            },
+            {
+              "name": "--ui-zoom-padding",
+              "default": "16px"
+            },
+            {
+              "name": "--ui-zoom-background",
+              "default": "var(--ui-surface, Canvas)"
+            }
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "UIZoom",
+          "declaration": {
+            "name": "UIZoom",
+            "module": "src/components/ui-zoom/index.ts"
+          }
+        },
+        {
+          "kind": "custom-element-definition",
+          "name": "ui-zoom",
+          "declaration": {
+            "name": "UIZoom",
+            "module": "src/components/ui-zoom/index.ts"
           }
         }
       ]

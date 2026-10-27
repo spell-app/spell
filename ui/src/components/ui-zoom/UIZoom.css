@@ -1,0 +1,129 @@
+/*
+ * `<ui-zoom>` (`UIZoom.tsx`):  something shown shrunk in the page, and full size over the whole window.
+ * - The shadow markup:
+ *
+ *     <div class="view" part="view">                       (round content;  none with `src`)
+ *       <div class="shrunk" inert><slot></slot></div>      (while it's shut)
+ *       <button class="show" part="button">                (over the whole view)
+ *     </div>
+ *     <ui-modal class="ui zoom [image]" part="base" appearance="basic" closable>
+ *       <figure class="figure">                            (with `src`)
+ *         <img class="image" part="image"><figcaption class="caption" part="caption">
+ *       </figure>
+ *       <div class="content" part="content"><slot></slot></div>     (round content, while it's open)
+ *     </ui-modal>
+ *
+ * - The view:  its content laid out at full size, then drawn smaller (CSS `zoom`, the shrink),
+ *   within `max-width` / `max-height` (cut off past them).  A zoom-in cursor, and a focus ring on its button.
+ * - The modal is `basic`:  no box of its own, on a dark backdrop whatever the page's theme.
+ *   - an image straight on the backdrop:  as large as fits the window, less a margin and the caption's line;
+ *     never cropped, never enlarged past its natural size (`max-*` only, `object-fit: contain`)
+ *   - content on the page's ground, at the width it had in the page, scrolling when it's taller than the window
+ * - The close button:  the window's top right corner, out of the way.
+ * - Public tokens (`--ui-zoom-*`) are never declared here:  read through private aliases.
+ */
+
+@layer ui.components.zoom.types;
+
+@layer ui.components.zoom.types {
+  :host {
+    --_ui-zoom-margin: var(--ui-zoom-margin, 24px);
+    --_ui-zoom-caption: var(--ui-zoom-caption, 2.5em);
+    --_ui-zoom-radius: var(--ui-zoom-radius, var(--ui-radius, 4px));
+    /* as wide as what it shows, so a click beside it is the page's */
+    display: block;
+    inline-size: fit-content;
+    max-inline-size: 100%;
+  }
+  /* the page's zoom for its screenshots holds nothing in the page */
+  :host([src]) {
+    display: contents;
+  }
+
+  /* the shrunk view */
+  .view {
+    position: relative;
+    box-sizing: border-box;
+    inline-size: fit-content;
+    max-inline-size: 100%;
+    overflow: hidden;
+    border-radius: var(--_ui-zoom-radius);
+  }
+  .shrunk {
+    /* the slotted content can't be reached in here:  the button over it shows it full size */
+    pointer-events: none;
+  }
+  .show {
+    position: absolute;
+    inset: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: inherit;
+    background: transparent;
+    cursor: zoom-in;
+  }
+  .show:focus-visible {
+    outline: 2px solid var(--ui-focus-color, Highlight);
+    outline-offset: -2px;
+  }
+
+  ui-modal {
+    /* dark whatever the page's theme:  a screenshot is judged on black, not on the page's dimmer */
+    --ui-modal-dimmer-background: var(--ui-zoom-backdrop, oklch(0 0 0 / 0.9));
+  }
+  ui-modal::part(modal) {
+    width: auto;
+    max-width: none;
+    max-height: none;
+    margin: auto;
+    padding: 0;
+    overflow: visible;
+    background: transparent;
+    box-shadow: none;
+  }
+  ui-modal::part(close) {
+    position: fixed;
+    top: 12px;
+    right: 12px;
+    color: #fff;
+  }
+
+  /* an image, full size */
+  .figure {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    cursor: zoom-out;
+  }
+  .image {
+    display: block;
+    max-width: calc(100vw - 2 * var(--_ui-zoom-margin));
+    max-height: calc(100vh - 2 * var(--_ui-zoom-margin) - var(--_ui-zoom-caption));
+    object-fit: contain;
+    border-radius: var(--_ui-zoom-radius);
+  }
+  .caption {
+    max-width: calc(100vw - 2 * var(--_ui-zoom-margin));
+    color: #fff;
+    text-align: center;
+    line-height: 1.4;
+  }
+
+  /* content, full size */
+  .content {
+    box-sizing: border-box;
+    /* its content's width in the page (the component's), so the modal is no wider than it */
+    inline-size: fit-content;
+    max-width: calc(100vw - 2 * var(--_ui-zoom-margin));
+    margin-inline: auto;
+    max-height: calc(100vh - 2 * var(--_ui-zoom-margin));
+    overflow: auto;
+    padding: var(--ui-zoom-padding, 16px);
+    border-radius: var(--_ui-zoom-radius);
+    background: var(--ui-zoom-background, var(--ui-surface, Canvas));
+    color: var(--ui-text-color, CanvasText);
+  }
+}

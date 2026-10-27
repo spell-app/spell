@@ -36,6 +36,8 @@ import toolbarCSS from "./UIToolbar.css?inline"
  *   - Neither shows when everything fits;  the one at an end the row has reached is hidden.
  *   - Out of the Tab order:  the items themselves are what a keyboard reaches, and focusing one scrolls it in.
  * - It follows the box's size and its items' (`ResizeObserver`), and the scroll.
+ * - `shrinkable` (the menu's):  it never scrolls with `‹` / `›`;  its titles fit the row instead, down to the menu's
+ *   overflow button (epic `epic-engine` Q38).  Only a row too narrow for even that button scrolls, with no keys.
  * - A BAR's slots around the items, for a site's top bar:
  *   `icon`, `title`, `center` (the room left), `right` (at the end).
  *   - A slot with nothing in it draws no box;  with no items, the menu's box takes no room.
@@ -65,7 +67,7 @@ export class UIToolbar extends UIMenu {
   }
 
   /** SIDE EFFECT:  follows the box's scroll and the sizes of it and its items, once drawn;  the cleanup stops. */
-  @E.onChange("isReady")
+  @E.onChange("isReady", "shrinkable")
   protected onReadyToScroll(isReady: boolean) {
     const box = this.box
     if (!isReady || !box) return
@@ -90,9 +92,11 @@ export class UIToolbar extends UIMenu {
   private measure() {
     const box = this.box
     if (!box) return
+    // a shrinkable one fits its titles instead:  no keys, no fades
+    const canScroll = !this.shrinkable
     // a pixel of slack:  fractional widths leave the end a hair short
-    this.canScrollStart = box.scrollLeft > 1
-    this.canScrollEnd = box.scrollLeft + box.clientWidth < box.scrollWidth - 1
+    this.canScrollStart = canScroll && box.scrollLeft > 1
+    this.canScrollEnd = canScroll && box.scrollLeft + box.clientWidth < box.scrollWidth - 1
   }
 
   /** Scroll by most of the box's width:  `-1` back, `1` on;  smoothly, unless the person asked for less motion. */

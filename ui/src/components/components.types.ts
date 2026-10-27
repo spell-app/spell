@@ -157,6 +157,14 @@ export type ItemContext = {
   ownsParts?: boolean
   /** Classes of the `image` shorthand's `<img>`;  default `ui avatar image` (a list's avatar). */
   imageClass?: string
+  /**
+   * Its menu fits its titles to the row (`<ui-menu shrinkable>`):  the item draws its title in a box of its own
+   * (`part="title"`), and its title's first letter as its icon when it has none.
+   * - Only for the menu's own items:  a sub-menu's are never cut.
+   */
+  shrinkable?: boolean
+  /** The menu shows its items' icons only (`:state(icons-only)`):  each title is its box's tooltip too. */
+  iconsOnly?: boolean
 }
 
 /** Roles an owner may give an item's root. */

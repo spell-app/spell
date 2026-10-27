@@ -1427,6 +1427,38 @@
                 </ui-section>
               </ui-section>
             </ui-section>
+
+            <ui-section id="examples-fitting-titles" label="Fitting titles" sticky collapsible dividing>
+              <ui-section id="examples-fitting-titles-shrinkable" label="Shrinkable" sticky collapsible dividing>
+                <ui-docs-example
+                  description="`shrinkable` fits the titles to the row:  drag the box's right edge narrower.  Every title whole while they fit;  then the longest cut first, with `…`;  then icons only, each title its tooltip (Judgement calls, with no icon, shows its first letter);  then every item folds into one `…` button, whose menu holds them all, a dot on it for Issues' count."
+                >
+                  <div style="resize: horizontal; overflow: hidden; box-sizing: border-box; width: 560px; max-width: 100%; min-width: 60px; padding: 4px; border: 1px dashed var(--ui-border-color)">
+                    <ui-menu shrinkable label="Sections">
+                      <ui-item link="#questions" icon="question" selected>Questions</ui-item>
+                      <ui-item link="#issues" icon="exclamation"
+                        >Issues<ui-label slot="badge" appearance="circular" size="mini" color="red">2</ui-label></ui-item
+                      >
+                      <ui-item link="#judgements">Judgement calls</ui-item>
+                      <ui-item link="#todos" icon="check">Todos</ui-item>
+                    </ui-menu>
+                  </div>
+                </ui-docs-example>
+              </ui-section>
+              <ui-section id="examples-fitting-titles-segmented" label="Segmented" sticky collapsible dividing>
+                <ui-docs-example
+                  description="A `segmented` one is a single choice:  never cut, never icons only.  Too narrow for every choice whole, it becomes a dropdown:  one button showing the chosen one, its menu the others."
+                >
+                  <div style="resize: horizontal; overflow: hidden; box-sizing: border-box; width: 420px; max-width: 100%; min-width: 60px; padding: 4px; border: 1px dashed var(--ui-border-color)">
+                    <ui-menu shrinkable appearance="segmented link" label="Views">
+                      <ui-item icon="list">List view</ui-item>
+                      <ui-item icon="th" selected>Grid view</ui-item>
+                      <ui-item icon="calendar">Calendar view</ui-item>
+                    </ui-menu>
+                  </div>
+                </ui-docs-example>
+              </ui-section>
+            </ui-section>
           </ui-tab>
 
           <ui-tab value="usage" label="Usage">
@@ -1471,6 +1503,36 @@
               </ui-markdown>
             </ui-section>
 
+            <ui-section id="usage-fitting-titles" label="Fitting titles" sticky collapsible dividing>
+              <ui-markdown>
+                <script type="text/markdown">
+                  `shrinkable` fits the items' titles to the menu's width, in four stages as it gets narrower:
+
+                  1. every title whole, while they fit
+                  2. the longest cut first, each ending in `…`, down to one width
+                  3. once a title would be cut under `--ui-menu-title-min` (50px):  icons only, `:state(icons-only)`;
+                     each title is its item's tooltip, and an item with no icon shows its title's first letter
+                  4. once a button would be under `--ui-menu-item-min` (34px):  every item folds into one `…` button,
+                     `:state(overflow)`, whose menu holds them all;  a dot on it while an item inside has a count
+
+                  - Counts go in an item's `badge` slot, so they stay while its title is cut or gone.
+                  - An item with no words (an icon button) stays in the row at every stage.
+                  - `slot="overflow"` changes the `…`:  `<ui-icon slot="overflow" name="bars">`.
+                  - Picking a row of the `…` menu clicks the real item:  `selected` and your listeners work as ever.
+                  - A `segmented` one becomes a dropdown instead (`:state(dropdown)`):  its button shows the chosen item.
+                  - Style the stages from outside:  `ui-menu:state(icons-only) ui-item::part(item) { width: 34px }`.
+                </script>
+              </ui-markdown>
+              <ui-code language="html">
+                <script type="text/plain">
+                  <ui-menu shrinkable label="Sections" style="--ui-menu-title-min: 60px; --ui-menu-item-min: 40px">
+                    <ui-item link="#questions" icon="question">Questions</ui-item>
+                    <ui-item link="#issues" icon="exclamation">Issues <ui-label slot="badge">2</ui-label></ui-item>
+                  </ui-menu>
+                </script>
+              </ui-code>
+            </ui-section>
+
             <ui-section id="usage-events" label="Events" sticky collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
@@ -1504,6 +1566,13 @@
                   - **Arrow Down** / **Arrow Up**: next / previous item in a `direction="vertical"` menubar.
                   - **Home** / **End**: first / last item.
                   - **Enter** / **Space**: activate the item (`ui-select`).
+
+                  A `shrinkable` menu's `…` button (and a segmented one's dropdown):
+
+                  - **Enter**, **Space** or **Arrow Down** opens its menu, on the selected item (else the first).
+                  - **Arrow Down** / **Arrow Up**:  next / previous row, wrapping;  **Home** / **End**:  first / last.
+                  - **Enter** / **Space** on a row picks it:  the real item is clicked, and focus goes back to the button.
+                  - **Escape** closes it, focus back on the button;  **Tab** closes it and moves on.
                 </script>
               </ui-markdown>
             </ui-section>
@@ -1519,7 +1588,11 @@
                     way. Each item's box is a `menuitem` and the item element itself has `role="none"`. The arrow keys skip
                     disabled items.
                   - `type="header"` items are plain text, not links or menu items.
-                  - An icon-only item needs a name: put `aria-label` on the `<ui-item>`.
+                  - An icon-only item needs a name: put `label` (or `aria-label`) on the `<ui-item>`.
+                  - `shrinkable`:  a cut or hidden title is clipped, never removed, so it still names its item;  with icons
+                    only it is the item's tooltip too.  The `…` button is named "More", `aria-haspopup="menu"` and
+                    `aria-expanded`;  its menu is a `role="menu"`, a `menuitem` per row, the selected one a `menuitemradio`,
+                    `aria-checked`.
                   - `disabled` removes a link's `href` (and sets `aria-disabled`), disables a button, and marks a menu item
                     `aria-disabled`.
                   - If the element fails to render, it shows its items through a bare `<slot>`, so their text and links
@@ -1586,6 +1659,10 @@
 
             <ui-section id="api-states" label="States" sticky collapsible dividing>
               <ui-docs-api family="ui-menu" only="states"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-texts" label="Texts" sticky collapsible dividing>
+              <ui-docs-api family="ui-menu" only="texts"></ui-docs-api>
             </ui-section>
           </ui-tab>
 

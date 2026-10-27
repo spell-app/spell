@@ -130,6 +130,15 @@
                 </ui-docs-example>
               </ui-section>
 
+              <ui-section id="examples-variations-growing" label="Growing" sticky collapsible dividing>
+                <ui-docs-example description="`grow`:  one line to start, taller as you type, then it scrolls;  shorter again as text goes.  It stops at `max-rows` lines, else a third of the window.  Every &quot;tell me more&quot; field should grow.">
+                  <ui-stack>
+                    <ui-textarea grow fluid placeholder="Tell me more" aria-label="Tell me more"></ui-textarea>
+                    <ui-textarea grow fluid rows="2" max-rows="5" placeholder="Two lines to start, five at most" aria-label="Two to five lines"></ui-textarea>
+                  </ui-stack>
+                </ui-docs-example>
+              </ui-section>
+
               <ui-section id="examples-variations-fluid" label="Fluid" sticky collapsible dividing>
                 <ui-docs-example description="A fluid textarea takes the full width of its container.">
                   <ui-textarea fluid rows="2" placeholder="Full width" aria-label="Full width"></ui-textarea>

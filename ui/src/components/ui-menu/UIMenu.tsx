@@ -1,9 +1,10 @@
-import { Match, Switch, untrack } from "solid-js"
-import type { JSX } from "@solidjs/web"
+import { For, Match, Show, Switch, untrack } from "solid-js"
+import { isServer, type JSX } from "@solidjs/web"
 
 import { E, UI, UIT } from "spell-ui/core"
 import { menuVocabulary } from "./UIMenu.en"
 import { SegmentedThumb } from "./SegmentedThumb"
+import { TitleFit, type FitAnswer, type FitRow } from "./TitleFit"
 
 import menuCSS from "./UIMenu.css?inline"
 
@@ -16,7 +17,23 @@ function isSameContext(a: UIT.ItemContext, b: UIT.ItemContext): boolean {
     a.domElementRole === b.domElementRole &&
     a.role === b.role &&
     a.interactive === b.interactive &&
-    a.current === b.current
+    a.current === b.current &&
+    a.shrinkable === b.shrinkable &&
+    a.iconsOnly === b.iconsOnly
+  )
+}
+
+/**
+ * Same overflow rows, row by row and field by field:  the overflow menu doesn't redraw for an equal list.
+ * - Above the class:  `@state({ equals })` reads it while the class is defined.
+ */
+function isSameFolded(a: readonly FoldedItem[], b: readonly FoldedItem[]): boolean {
+  return (
+    a.length === b.length &&
+    a.every((row, index) => {
+      const other = b[index]!
+      return (Object.keys(row) as (keyof FoldedItem)[]).every((key) => row[key] === other[key])
+    })
   )
 }
 
@@ -54,6 +71,13 @@ function isSameContext(a: UIT.ItemContext, b: UIT.ItemContext): boolean {
  *
  * - A top-level `segmented` menu draws ONE sliding thumb under its items (`SegmentedThumb`),
  *   moved to each new choice as Apple's segmented control slides.
+ *
+ * - `shrinkable`:  it fits its items' titles to its row (`TitleFit`, epic `ui-gaps` P13):
+ *   whole, then cut with `…`, then icons only, then every item folded into ONE overflow button,
+ *   `<button part="overflow">` first in its box, whose menu (`<div role="menu" popover part="overflow-menu">`)
+ *   holds a row per item;  picking a row clicks the real item, so `selected` and the page's listeners work as ever.
+ *   - A `segmented` one has two stages:  whole, else a dropdown, its button showing the chosen item.
+ *   - Its items draw their titles in a box of their own while it is (`ItemContext.shrinkable`).
  ****************/
 export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.ItemOwner {
   @E.proto static vocabulary = menuVocabulary
@@ -138,8 +162,16 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
       domElementRole: isInteractive ? "none" : undefined,
       role: isInteractive ? "menuitem" : undefined,
       interactive: isInteractive || this.hasLook(LINK_LOOK) || this.pagination,
-      current: "page"
+      current: "page",
+      shrinkable: this.isShrinking,
+      iconsOnly: this.isIconsOnly
     }
+  }
+
+  /** What a sub-menu's items render as:  the menu's context, but never fitted (only the row's own items are). */
+  @E.derived({ equals: isSameContext })
+  get nestedItemContext(): UIT.ItemContext {
+    return { ...this.ownItemContext, shrinkable: false, iconsOnly: false }
   }
 
   /**
@@ -154,7 +186,7 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
     const top = untrack(() => this.topMenu)
     top.itemsThatAsked.add(item)
     top.queueRefresh()
-    return top.ownItemContext
+    return item.parentElement === top.domElement ? top.ownItemContext : top.nestedItemContext
   }
 
   /**
@@ -215,10 +247,21 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
     }
   }
 
-  /** An item's `selected` (or `active`) changed, or items came and went:  the thumb moves to the chosen one. */
-  @E.watches({ attributes: true, subtree: true, childList: true, attributeFilter: [UIT.SELECTED, UIT.ACTIVE] })
+  /**
+   * An item's `selected` (or `active`) changed, items came and went, showed or hid, or their words changed:
+   * the thumb moves to the chosen one, and a `shrinkable` menu fits again.
+   */
+  @E.watches({
+    attributes: true,
+    subtree: true,
+    childList: true,
+    characterData: true,
+    attributeFilter: [UIT.SELECTED, UIT.ACTIVE, "hidden"]
+  })
   protected onChoiceChanged() {
     this.thumb?.update()
+    this.titleFit?.update()
+    this.readFolded()
   }
 
   /** The chosen item's box (in its own shadow root), among the items this menu owns. */
@@ -229,6 +272,385 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
       return element.shadowRoot?.querySelector<HTMLElement>(ITEM_BOX) ?? undefined
     }
     return undefined
+  }
+
+  ////////////////
+  // ## Fitting titles (`shrinkable`)
+  ////////////////
+
+  /** It fits its titles to its row:  `shrinkable`, a top-level menu whose items run sideways. */
+  get isShrinking(): boolean {
+    return this.shrinkable && !this.parentMenu && !this.isVertical
+  }
+
+  /** The stage `TitleFit` found:  `whole`, the widest a title may be (cut), `icons` or `overflow`. */
+  @E.state accessor fitAnswer: FitAnswer = WHOLE
+
+  /** The titles are gone, the icons only:  `:state(icons-only)`. */
+  @E.cssState("icons-only")
+  get isIconsOnly(): boolean {
+    return this.isShrinking && this.fitAnswer === ICONS
+  }
+
+  /** Every item folded into the overflow button:  `:state(overflow)`. */
+  @E.cssState("overflow")
+  get isFolded(): boolean {
+    return this.isShrinking && this.fitAnswer === OVERFLOW && !this.isSegmented
+  }
+
+  /** A `segmented` one shows as a dropdown, its overflow button showing the chosen item:  `:state(dropdown)`. */
+  @E.cssState("dropdown")
+  get isDropdown(): boolean {
+    return this.isShrinking && this.fitAnswer === OVERFLOW && this.isSegmented
+  }
+
+  /** Shrinking, and drawn:  `TitleFit` runs. */
+  get canFit(): boolean {
+    return this.isShrinking && this.isReady
+  }
+
+  /** The fitting, while it runs. */
+  private titleFit: TitleFit | undefined
+
+  /** SIDE EFFECT:  fits the titles while `canFit`, on the box drawn now;  its cleanup shows them whole again. */
+  @E.onChange("canFit", "interactive", "appearance")
+  protected onFitChanged(canFit: boolean) {
+    const box = this.box
+    if (!canFit || !box) return
+    const fit = new TitleFit({
+      box,
+      domElement: this.domElement,
+      children: () => this.fitChildren(),
+      isSegmented: () => this.isSegmented,
+      onAnswer: (answer) => this.onFitAnswer(answer)
+    })
+    this.titleFit = fit
+    const stop = fit.start()
+    return () => {
+      stop()
+      this.titleFit = undefined
+      this.fitAnswer = WHOLE
+    }
+  }
+
+  /** A new stage:  the thumb follows its choice's box, the overflow menu closes once it's gone. */
+  private onFitAnswer(answer: FitAnswer) {
+    this.fitAnswer = answer
+    this.thumb?.update()
+    this.readFolded()
+    if (answer !== OVERFLOW) this.overflowMenu.close()
+  }
+
+  /**
+   * What `TitleFit` fits:  the box's own items with words (each its box and title box), and everything else in
+   * the row (another button, a sub-menu, an item with only an icon).
+   */
+  @E.untracked
+  private fitChildren(): { rows: FitRow[]; others: Element[] } {
+    const rows: FitRow[] = []
+    const others: Element[] = []
+    for (const element of this.rowElements()) {
+      const item = this.fittedItem(element)
+      if (item) rows.push({ box: item.focusTarget!, title: item.titleBox! })
+      else others.push(element)
+    }
+    return { rows, others }
+  }
+
+  /** The elements in the box's default slot:  its row. */
+  @E.untracked
+  private rowElements(): Element[] {
+    return this.box?.querySelector<HTMLSlotElement>(DEFAULT_SLOT)?.assignedElements() ?? []
+  }
+
+  /** `element`'s component, when it's an item this menu fits:  its own, drawn with a title box, not hidden. */
+  private fittedItem(element: Element): ItemComponent | undefined {
+    if (!this.itemsThatAsked.has(element) || (element as HTMLElement).hidden) return undefined
+    const item = (element as E.DOMElement).component as ItemComponent | undefined
+    return item?.kind === UIT.ITEM && item.focusTarget && item.titleBox ? item : undefined
+  }
+
+  ////////////////
+  // ## The overflow button and its menu
+  ////////////////
+
+  /** The items the overflow menu holds, a row each, read from the page's items (`readFolded()`). */
+  @E.state({ equals: isSameFolded }) accessor folded: readonly FoldedItem[] = []
+
+  /** The chosen item, among them:  what a segmented one's dropdown shows. */
+  get chosen(): FoldedItem | undefined {
+    return this.folded.find((row) => row.isSelected)
+  }
+
+  /** Some item inside has a count:  a dot on the overflow button (epic `epic-engine` Q37). */
+  get hasFoldedBadge(): boolean {
+    return this.folded.some((row) => row.hasBadge)
+  }
+
+  /** Read the overflow menu's rows from the fitted items, now. */
+  @E.untracked
+  private readFolded() {
+    if (!this.isShrinking) {
+      this.folded = []
+      return
+    }
+    const rows: FoldedItem[] = []
+    for (const element of this.rowElements()) {
+      const item = this.fittedItem(element)
+      if (!item) continue
+      const text = item.titleText ?? ""
+      rows.push({
+        element,
+        text,
+        icon: item.icon || undefined,
+        letter: item.firstLetter,
+        isSelected: !!item.isSelected,
+        isDisabled: !!item.isDisabled,
+        hasBadge: !!item.hasBadge
+      })
+    }
+    this.folded = rows
+  }
+
+  /** The overflow menu's open state:  its own, no events. */
+  readonly overflowMenu = new E.Disclosure()
+
+  /** The overflow menu is open. */
+  get isOverflowOpen(): boolean {
+    return this.overflowMenu.isOpen
+  }
+
+  /** The overflow button, while drawn. */
+  private overflowButton: HTMLButtonElement | undefined
+
+  /** The overflow menu's box, while drawn. */
+  private overflowPanel: HTMLElement | undefined
+
+  /** The overflow menu's `UI.overlays` entry while open:  Escape or a click outside closes it. */
+  private readonly overflowOverlay: E.OverlayEntry = {
+    element: this.domElement,
+    kind: "popover",
+    restoreFocus: false,
+    onDismiss: (reason) => this.closeOverflow(reason === "escape")
+  }
+
+  /** Its ids:  the anchor its menu hangs from, and the menu's `id` (the button's `aria-controls`). */
+  @E.lazy
+  get overflowIds(): { anchor: string; menu: string } {
+    return { anchor: `--${UI.ids.next(this.vocabulary.tag)}`, menu: UI.ids.next(this.vocabulary.tag) }
+  }
+
+  /** The overflow button's name and tooltip, and its menu's:  "More". */
+  get moreText(): string {
+    return this.translationForKey("more")
+  }
+
+  /** The `…` on the overflow button. */
+  readonly moreGlyph = new E.IconGlyph({ owner: this, name: () => (this.isShrinking ? MORE_ICON : undefined) })
+
+  /** A segmented one's dropdown:  its caret, and the chosen item's icon. */
+  readonly caretGlyph = new E.IconGlyph({
+    owner: this,
+    name: () => (this.isShrinking && this.isSegmented ? CARET_ICON : undefined)
+  })
+  readonly chosenGlyph = new E.IconGlyph({
+    owner: this,
+    name: () => (this.isShrinking && this.isSegmented ? this.chosen?.icon : undefined)
+  })
+
+  /**
+   * SIDE EFFECT:  the overflow menu shows in the top layer while open, with its `UI.overlays` entry,
+   * its chosen row (else its first) focused;  the cleanup hides it.
+   */
+  @E.onChange("isOverflowOpen", "isConnected")
+  protected onOverflowOpenChanged(isOpen: boolean, isConnected: boolean) {
+    const panel = this.overflowPanel
+    if (!isOpen || !isConnected || !panel) return
+    if (!panel.matches(POPOVER_OPEN)) panel.showPopover()
+    UI.overlays.open(this.overflowOverlay)
+    E.afterSolidUpdate(() =>
+      this.focusRow(
+        Math.max(
+          0,
+          this.folded.findIndex((row) => row.isSelected)
+        )
+      )
+    )
+    return () => {
+      if (panel.matches(POPOVER_OPEN)) panel.hidePopover()
+      UI.overlays.close(this.overflowOverlay)
+    }
+  }
+
+  /** Open the overflow menu, its rows read fresh. */
+  @E.untracked
+  openOverflow() {
+    this.readFolded()
+    this.overflowMenu.open()
+  }
+
+  /** Close the overflow menu;  `refocus`:  focus goes back to its button (Escape, Tab, a pick). */
+  @E.untracked
+  closeOverflow(refocus = false) {
+    this.overflowMenu.close()
+    if (refocus) this.overflowButton?.focus()
+  }
+
+  /** Its rows' boxes, in order. */
+  private get rowBoxes(): HTMLElement[] {
+    return [...(this.overflowPanel?.querySelectorAll<HTMLElement>(`:scope > .${ROW}`) ?? [])]
+  }
+
+  /** Focus row `index`, wrapping round. */
+  private focusRow(index: number) {
+    const rows = this.rowBoxes
+    if (!rows.length) return
+    rows[(index + rows.length) % rows.length]!.focus()
+  }
+
+  /** The overflow button's keys:  ↓ opens it, as Enter and Space do (a click). */
+  @E.untracked
+  private readonly onOverflowButtonKey = (event: KeyboardEvent) => {
+    if (event.key !== UIT.Key.arrowDown) return
+    event.preventDefault()
+    this.openOverflow()
+  }
+
+  /** The overflow menu's keys:  ↑ ↓ Home End move;  Escape closes it, focus back on its button;  Tab closes it. */
+  @E.untracked
+  private readonly onOverflowMenuKey = (event: KeyboardEvent) => {
+    const rows = this.rowBoxes
+    const at = rows.indexOf(event.composedPath()[0] as HTMLElement)
+    const move = (index: number) => {
+      event.preventDefault()
+      this.focusRow(index)
+    }
+    if (event.key === UIT.Key.arrowDown) move(at + 1)
+    else if (event.key === UIT.Key.arrowUp) move(at - 1)
+    else if (event.key === UIT.Key.home) move(0)
+    else if (event.key === UIT.Key.end) move(rows.length - 1)
+    else if (event.key === UIT.Key.escape) {
+      event.preventDefault()
+      this.closeOverflow(true)
+    } else if (event.key === UIT.Key.tab) this.closeOverflow(true)
+  }
+
+  /** A row was picked:  the menu closes, focus goes back to its button, and the real item is clicked. */
+  @E.untracked
+  private pickFolded(row: FoldedItem) {
+    if (row.isDisabled) return
+    this.closeOverflow(true)
+    const item = (row.element as E.DOMElement).component as ItemComponent | undefined
+    item?.focusTarget?.click()
+  }
+
+  /** The overflow button, first in the box:  it shows only once the items fold into it (`UIMenu.css`). */
+  private overflowButtonBox(): JSX.Element {
+    return (
+      <Show when={this.isShrinking && !isServer}>
+        <button
+          ref={(element: HTMLButtonElement) => (this.overflowButton = element)}
+          type="button"
+          class={OVERFLOW_ITEM_CLASS}
+          part={this.partForName("overflow")}
+          style={{ "anchor-name": this.overflowIds.anchor }}
+          role={this.interactive ? "menuitem" : undefined}
+          aria-haspopup="menu"
+          aria-expanded={this.overflowMenu.ariaExpanded}
+          aria-controls={this.overflowIds.menu}
+          aria-label={this.isSegmented ? undefined : this.moreText}
+          title={this.isSegmented ? this.chosen?.text : this.moreText}
+          onClick={() => (this.isOverflowOpen ? this.closeOverflow() : this.openOverflow())}
+          onKeyDown={this.onOverflowButtonKey}
+        >
+          <Show when={this.isSegmented} fallback={this.moreFace()}>
+            {this.dropdownFace()}
+          </Show>
+        </button>
+      </Show>
+    )
+  }
+
+  /** The overflow button's `…` (or the `overflow` slot's own), and a dot while an item inside has a count. */
+  private moreFace(): JSX.Element {
+    return (
+      <>
+        <span class={UIT.ICON}>
+          <slot name={this.slotForName("overflow")}>{this.moreGlyph.svg}</slot>
+        </span>
+        <Show when={this.hasFoldedBadge}>
+          <span class={DOT} aria-hidden="true" />
+        </Show>
+      </>
+    )
+  }
+
+  /** A segmented one's dropdown:  the chosen item's icon and title, and a caret. */
+  private dropdownFace(): JSX.Element {
+    return (
+      <>
+        <Show when={this.chosenGlyph.svg}>
+          <span class={UIT.ICON}>{this.chosenGlyph.svg}</span>
+        </Show>
+        <span class={TITLE}>{this.chosen?.text}</span>
+        <span class={CARET}>{this.caretGlyph.svg}</span>
+      </>
+    )
+  }
+
+  /** The overflow menu:  a popover in the top layer, hanging from its button, a row per folded item. */
+  private overflowMenuBox(): JSX.Element {
+    return (
+      <Show when={this.isShrinking && !isServer}>
+        <div
+          ref={(element: HTMLElement) => (this.overflowPanel = element)}
+          id={this.overflowIds.menu}
+          class={OVERFLOW_MENU_CLASS}
+          part={this.partForName("overflow-menu")}
+          role="menu"
+          popover="manual"
+          style={{ "position-anchor": this.overflowIds.anchor }}
+          aria-label={this.moreText}
+          onKeyDown={this.onOverflowMenuKey}
+        >
+          <For each={this.folded}>{(row) => this.foldedRow(row)}</For>
+        </div>
+      </Show>
+    )
+  }
+
+  /**
+   * One row of the overflow menu:  the item's icon (its `icon`, a copy of what's in its `icon` slot, else its first
+   * letter), its title and a copy of its counts;  the chosen one a `menuitemradio`, ticked.
+   */
+  private foldedRow(row: FoldedItem): JSX.Element {
+    const item = (row.element as E.DOMElement).component as ItemComponent | undefined
+    const copies = (name: "icon" | "badge") =>
+      (item?.slotted?.(name) ?? []).map((element) => {
+        const copy = element.cloneNode(true) as Element
+        copy.removeAttribute("slot")
+        return copy
+      })
+    const icons = copies("icon")
+    const badges = copies("badge")
+    const glyph = row.icon ? new E.IconGlyph({ owner: this, name: () => row.icon }) : undefined
+    return (
+      <button
+        type="button"
+        class={[ROW, { [SELECTED_CLASS]: row.isSelected, [DISABLED_CLASS]: row.isDisabled }]}
+        role={row.isSelected ? "menuitemradio" : "menuitem"}
+        aria-checked={row.isSelected ? "true" : undefined}
+        aria-disabled={row.isDisabled ? "true" : undefined}
+        tabindex="-1"
+        onClick={() => this.pickFolded(row)}
+      >
+        <span class={UIT.ICON} aria-hidden="true">
+          {glyph ? glyph.svg : icons.length ? icons : <span class={LETTER}>{row.letter}</span>}
+        </span>
+        <span class={TITLE}>{row.text}</span>
+        {badges.length ? <span class={BADGE}>{badges}</span> : undefined}
+      </button>
+    )
   }
 
   ////////////////
@@ -291,12 +713,16 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
     for (const box of this.menuItems()) box.removeAttribute("tabindex")
   }
 
-  /** Re-apply the roving `tabindex`es once, after the item set may have changed (restarting before any focus). */
+  /**
+   * Re-apply the roving `tabindex`es once, after the item set may have changed (restarting before any focus);
+   * a `shrinkable` menu fits again.
+   */
   private queueRefresh() {
     if (this.refreshIsQueued) return
     this.refreshIsQueued = true
     E.afterSolidUpdate(() => {
       this.refreshIsQueued = false
+      this.titleFit?.update()
       if (!this.rovingTabindex) return
       if (this.domElement.matches(":focus-within")) this.rovingTabindex.refresh()
       else this.startRoving(this.orientation)
@@ -323,8 +749,27 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
   // ## Rendering
   ////////////////
 
-  /** The root for this shape:  sub-menu, menubar or landmark;  the DOM element's `aria-label` names the last two. */
+  /**
+   * The root for this shape:  sub-menu, menubar or landmark;  the DOM element's `aria-label` names the last two.
+   * - `shrinkable`:  the overflow button first in the box, and its menu after it (outside a menubar, whose children
+   *   must all be its items).
+   */
   render(): JSX.Element {
+    return (
+      <>
+        {this.menuBox()}
+        {this.overflowMenuBox()}
+      </>
+    )
+  }
+
+  /** The name of its landmark or menubar:  its `aria-label`, else its `label`. */
+  private get landmarkLabel(): string | undefined {
+    return this.attributes["aria-label"] ?? this.sharedLabel ?? undefined
+  }
+
+  /** The menu's box, for its shape. */
+  private menuBox(): JSX.Element {
     return (
       <Switch>
         <Match when={this.parentMenu}>
@@ -342,8 +787,9 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
             part={this.partForName("menu")}
             role="menubar"
             aria-orientation={this.isVertical ? "vertical" : undefined}
-            aria-label={this.attributes["aria-label"] ?? undefined}
+            aria-label={this.landmarkLabel}
           >
+            {this.overflowButtonBox()}
             <slot />
           </div>
         </Match>
@@ -352,8 +798,9 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
             ref={(element: HTMLElement) => (this.box = element)}
             class={this.rootClass}
             part={this.partForName("menu")}
-            aria-label={this.attributes["aria-label"] ?? undefined}
+            aria-label={this.landmarkLabel}
           >
+            {this.overflowButtonBox()}
             <slot />
           </nav>
         </Match>
@@ -403,6 +850,33 @@ const LINK_LOOK = "link"
 /** The `direction` of a menu whose items run top to bottom. */
 const VERTICAL = "vertical"
 
+/** `TitleFit`'s stages the menu tells apart. */
+const WHOLE = "whole"
+const ICONS = "icons"
+const OVERFLOW = "overflow"
+
+/** The box's default slot:  its row. */
+const DEFAULT_SLOT = ":scope > slot:not([name])"
+
+/** Icons of the overflow button:  `…`, and a segmented one's dropdown caret. */
+const MORE_ICON = "ellipsis horizontal"
+const CARET_ICON = "caret down"
+
+/** Class words of the overflow button (drawn as an item), its menu and their pieces (`UIMenu.css`, "Shrinkable"). */
+const OVERFLOW_ITEM_CLASS = `${UIT.ITEM} overflow`
+const OVERFLOW_MENU_CLASS = "overflow-menu"
+const ROW = "row"
+const TITLE = "title"
+const BADGE = "badge"
+const LETTER = "letter"
+const CARET = "caret"
+const DOT = "dot"
+const SELECTED_CLASS = "selected"
+const DISABLED_CLASS = "disabled"
+
+/** Selector of a popover in the top layer. */
+const POPOVER_OPEN = ":popover-open"
+
 ////////////////
 // ## Item types
 ////////////////
@@ -415,6 +889,40 @@ type ItemComponent = {
   readonly value?: string
   /** the item's box that takes focus (its link or button), once rendered */
   focusTarget?: HTMLElement
+  /** its title box, in a `shrinkable` menu */
+  readonly titleBox?: HTMLElement
+  /** its title, as a person reads it */
+  readonly titleText?: string
+  /** its `icon` attribute */
+  readonly icon?: string
+  /** selected (or `active`) */
+  readonly isSelected?: boolean
+  /** disabled */
+  readonly isDisabled?: boolean
+  /** something in its `badge` slot */
+  readonly hasBadge?: boolean
+  /** its title's first letter:  what stands for it with no icon */
+  readonly firstLetter?: string
+  /** its light-DOM children in slot `name` */
+  slotted?(name: "icon" | "badge"): Element[]
+}
+
+/** One row of a `shrinkable` menu's overflow menu:  a fitted item, as read when it was (`readFolded()`). */
+type FoldedItem = {
+  /** the item's DOM element:  what a pick clicks */
+  readonly element: Element
+  /** its title */
+  readonly text: string
+  /** its `icon` attribute */
+  readonly icon: string | undefined
+  /** its title's first letter:  its icon when it has none */
+  readonly letter: string | undefined
+  /** selected:  ticked */
+  readonly isSelected: boolean
+  /** disabled:  can't be picked */
+  readonly isDisabled: boolean
+  /** has a count */
+  readonly hasBadge: boolean
 }
 
 /** What the menu writes on an item's DOM element it chooses (`UIItem`'s reflected `selected`). */

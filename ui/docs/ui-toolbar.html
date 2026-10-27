@@ -113,6 +113,24 @@
                 </ui-docs-example>
               </ui-section>
             </ui-section>
+
+            <ui-section id="examples-fitting-titles" label="Fitting titles" sticky collapsible dividing>
+              <ui-section id="examples-fitting-titles-shrinkable" label="Shrinkable" sticky collapsible dividing>
+                <ui-docs-example
+                  description="`shrinkable` fits the titles instead of scrolling:  drag the box's right edge narrower.  Whole, then the longest cut with `…`, then icons only, then one `…` button whose menu holds every item;  no `‹` / `›`.  The bell, an item with no words, stays at every width."
+                >
+                  <div style="resize: horizontal; overflow: hidden; box-sizing: border-box; width: 600px; max-width: 100%; min-width: 60px; padding: 4px; border: 1px dashed var(--ui-border-color)">
+                    <ui-toolbar shrinkable appearance="secondary" label="Sections">
+                      <ui-item link="#types" icon="shapes" selected>Types</ui-item>
+                      <ui-item link="#content" icon="font">Content</ui-item>
+                      <ui-item link="#variations" icon="sliders">Variations</ui-item>
+                      <ui-item link="#group-variations">Group variations</ui-item>
+                      <ui-item link="#notes" icon="bell" label="Notes"></ui-item>
+                    </ui-toolbar>
+                  </div>
+                </ui-docs-example>
+              </ui-section>
+            </ui-section>
           </ui-tab>
 
           <ui-tab value="usage" label="Usage">
@@ -125,6 +143,8 @@
                   - Give it a width, or let its column do it.
                   - When its items don't fit, they scroll sideways, and a `‹` / `›` button shows at each end while there's more to see that way.
                   - `ui-select` tells you which item was chosen.
+                  - `shrinkable` fits its titles instead of scrolling, as `<ui-menu shrinkable>` does:  cut, then icons only,
+                    then one `…` button whose menu holds every item.  It never shows `‹` / `›`.  Off by default.
                 </script>
               </ui-markdown>
               <ui-code language="js">
@@ -136,14 +156,14 @@
             <ui-section id="usage-keyboard" label="Keyboard" sticky collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  As `<ui-menu>`'s:  Tab reaches each link item (an `interactive` toolbar is one Tab stop, the arrow keys between items).  Focusing an item scrolls it into view;  the `‹` / `›` buttons are for the pointer, out of the Tab order.
+                  As `<ui-menu>`'s:  Tab reaches each link item (an `interactive` toolbar is one Tab stop, the arrow keys between items).  Focusing an item scrolls it into view;  the `‹` / `›` buttons are for the pointer, out of the Tab order.  A `shrinkable` toolbar's `…` button takes the menu's keys (`<ui-menu>`, Keyboard).
                 </script>
               </ui-markdown>
             </ui-section>
             <ui-section id="usage-accessibility" label="Accessibility" sticky collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  A `<nav>` landmark, as `<ui-menu>`:  give it an `aria-label`.  The scroll buttons are named (Scroll back, Scroll on) but left out of the Tab order, since every item is reachable by keyboard.
+                  A `<nav>` landmark, as `<ui-menu>`:  give it an `aria-label`.  The scroll buttons are named (Scroll back, Scroll on) but left out of the Tab order, since every item is reachable by keyboard.  A `shrinkable` toolbar's cut and hidden titles still name their items, and its `…` button is named "More" (`<ui-menu>`, Accessibility).
                 </script>
               </ui-markdown>
             </ui-section>

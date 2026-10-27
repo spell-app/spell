@@ -74,6 +74,7 @@ import { markdownEs } from "spell-ui/components/ui-markdown/UIMarkdown.es"
 import { menuEs } from "spell-ui/components/ui-menu/UIMenu.es"
 import { messageEs } from "spell-ui/components/ui-message/UIMessage.es"
 import { modalEs } from "spell-ui/components/ui-modal/UIModal.es"
+import { zoomEs } from "spell-ui/components/ui-zoom/UIZoom.es"
 import { nagEs } from "spell-ui/components/ui-nag/UINag.es"
 import { panelEs } from "spell-ui/components/ui-panel/UIPanel.es"
 import { actionsEs } from "spell-ui/components/ui-parts/UIActions.es"
@@ -701,6 +702,7 @@ export const es: Dictionary = Vocabulary.dictionaryFrom(sharedEs, [
   menuEs,
   messageEs,
   modalEs,
+  zoomEs,
   nagEs,
   panelEs,
   actionsEs,

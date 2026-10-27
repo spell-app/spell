@@ -18,7 +18,7 @@ import actionCSS from "./UIAction.css?inline"
  *
  *     <button class="[disabled] [active] item" part="item">      (a menu's or toolbar's item box, `UIItem`'s)
  *       <span class="icon" part="icon">  <svg>  </span>                (with an icon)
- *       <span class="title" part="title">  <slot>title</slot>  </span>
+ *       <span class="title" part="title">  <slot>title</slot>  </span>     (`UIItem`'s title box, always drawn)
  *       <span class="shortcut" part="shortcut">  <kbd>⌘</kbd><kbd>T</kbd>  </span>   (with a shortcut)
  *     </button>
  *
@@ -103,14 +103,22 @@ export class UIAction extends UIItem {
   // ## Rendering
   ////////////////
 
-  /** Its title (the slot, else the action's), then its shortcut's key caps. */
+  /** Always its title box, in any owner:  its slot, else its action's title. */
+  get hasTitleBox(): boolean {
+    return this.kind === UIT.ITEM
+  }
+
+  /** Its title box's fallback:  its action's title. */
+  protected get titleFallback(): string {
+    return this.title
+  }
+
+  /** The item's title box and badge (`UIItem.boxContent()`), then its shortcut's key caps. */
   protected boxContent(): JSX.Element {
     const caps = () => (this.shortcut ? this.keyCapsFor(this.shortcut) : [])
     return (
       <>
-        <span class={TITLE} part={this.actionPart(TITLE)}>
-          <slot>{this.title}</slot>
-        </span>
+        {super.boxContent()}
         <Show when={caps().length}>
           <span class={SHORTCUT} part={this.actionPart(SHORTCUT)}>
             <For each={caps()}>{(cap) => <kbd>{cap}</kbd>}</For>
@@ -147,7 +155,7 @@ export class UIAction extends UIItem {
   }
 
   /** A part of the action's own (its vocabulary adds them to the item's, which TypeScript knows). */
-  private actionPart(name: typeof TITLE | typeof SHORTCUT): string {
+  private actionPart(name: typeof SHORTCUT): string {
     return this.partForName(name as never)
   }
 }
@@ -176,9 +184,6 @@ export type ActionToDraw = {
 ////////////////
 // ## Constants
 ////////////////
-
-/** Class word and part of the title's box. */
-const TITLE = "title"
 
 /** Class word and part of the key caps' box. */
 const SHORTCUT = "shortcut"

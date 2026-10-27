@@ -25,7 +25,8 @@ export const toolbarVocabulary = {
   skeleton: "inline 24 x 2.5",
   description:
     "A toolbar is a horizontal menu whose items scroll sideways when they don't fit, with a button at each end " +
-    "while there's more to see that way.  It takes every `<ui-menu>` attribute.",
+    "while there's more to see that way;  `shrinkable`, it fits their titles to its width instead.  It takes every " +
+    "`<ui-menu>` attribute.",
   slots: [
     ...menuVocabulary.slots,
     { name: "icon", description: "First, at the start:  an icon or an icon button (a menu button)." },
@@ -45,9 +46,10 @@ export const toolbarVocabulary = {
   ],
   states: [
     ...menuVocabulary.states,
-    { name: "overflowing", description: "Its items don't all fit:  they scroll sideways." }
+    { name: "overflowing", description: "Its items don't all fit:  they scroll sideways (never once `shrinkable`)." }
   ],
   texts: [
+    ...menuVocabulary.texts,
     { key: "scrollStart", text: "Scroll back", description: "Accessible name and tooltip of the `‹` button." },
     { key: "scrollEnd", text: "Scroll on", description: "Accessible name and tooltip of the `›` button." }
   ]

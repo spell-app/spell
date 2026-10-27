@@ -1,0 +1,62 @@
+<!--
+  `<ui-menu shrinkable>`:  the same items at four widths, each a stage of fitting their titles to the row.
+  - Element markup only:  the stages are the element's own (`TitleFit`), no class-grammar twin.
+-->
+<ui-stack spacing="lg">
+  <section>
+    <h4>Every title whole</h4>
+    <ui-menu shrinkable label="Whole demo" style="width: 520px">
+      <ui-item link="#questions" icon="question" selected>Questions</ui-item>
+      <ui-item link="#issues" icon="exclamation"
+        >Issues<ui-label slot="badge" appearance="circular" size="mini" color="red">2</ui-label></ui-item
+      >
+      <ui-item link="#judgements">Judgement calls</ui-item>
+      <ui-item link="#todos" icon="check">Todos</ui-item>
+    </ui-menu>
+  </section>
+
+  <section>
+    <h4>The longest cut first</h4>
+    <ui-menu shrinkable label="Cut demo" style="width: 400px">
+      <ui-item link="#questions" icon="question" selected>Questions</ui-item>
+      <ui-item link="#issues" icon="exclamation"
+        >Issues<ui-label slot="badge" appearance="circular" size="mini" color="red">2</ui-label></ui-item
+      >
+      <ui-item link="#judgements">Judgement calls</ui-item>
+      <ui-item link="#todos" icon="check">Todos</ui-item>
+    </ui-menu>
+  </section>
+
+  <section>
+    <h4>Icons only</h4>
+    <ui-menu shrinkable label="Icons demo" style="width: 260px">
+      <ui-item link="#questions" icon="question" selected>Questions</ui-item>
+      <ui-item link="#issues" icon="exclamation"
+        >Issues<ui-label slot="badge" appearance="circular" size="mini" color="red">2</ui-label></ui-item
+      >
+      <ui-item link="#judgements">Judgement calls</ui-item>
+      <ui-item link="#todos" icon="check">Todos</ui-item>
+    </ui-menu>
+  </section>
+
+  <section>
+    <h4>Folded into its overflow button</h4>
+    <ui-menu shrinkable label="Overflow demo" style="width: 140px">
+      <ui-item link="#questions" icon="question" selected>Questions</ui-item>
+      <ui-item link="#issues" icon="exclamation"
+        >Issues<ui-label slot="badge" appearance="circular" size="mini" color="red">2</ui-label></ui-item
+      >
+      <ui-item link="#judgements">Judgement calls</ui-item>
+      <ui-item link="#todos" icon="check">Todos</ui-item>
+    </ui-menu>
+  </section>
+
+  <section>
+    <h4>Segmented: a dropdown once it doesn't fit</h4>
+    <ui-menu shrinkable appearance="segmented link" label="Segmented demo" style="width: 200px">
+      <ui-item icon="list">List view</ui-item>
+      <ui-item icon="th" selected>Grid view</ui-item>
+      <ui-item icon="calendar">Calendar view</ui-item>
+    </ui-menu>
+  </section>
+</ui-stack>

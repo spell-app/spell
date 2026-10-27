@@ -1267,6 +1267,10 @@ As WWOD §4, plus these deliberate EXCEPTIONS.
   everything in `src/` is importable while developing (Q47 reverses J38), through `exports`.
   - What other repos' code, tools and tests import:
     - `spell-ui/core`, `spell-ui/components/ui-code`, `spell-ui/property`, `spell-ui/test-helpers/MemberClashes`
+    - `spell-ui/components/ui-zoom/ImageZoom`:  a family's LEAF, on purpose (epic `ui-gaps` P14).
+      - Plain DOM, no element:  the page's ONE zoom for its screenshots, and which images open in it.
+      - The docs runtime imports it alone, so its bundle holds no second `<ui-zoom>`;
+        a component pack shares the page's (`PACK_MODULES`), for `<epic-field>`'s request thumbnails.
     - the site and static tools (`spell-ui/tools/SiteDataBuilder` ...)
     - `spell-ui/vite.config.ts` (`baseConfig()`)
     - `spell-ui/test-helpers/setup.ts` (a browser test project's `setupFiles`)
