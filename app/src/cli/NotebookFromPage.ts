@@ -634,9 +634,9 @@ const ELEMENT = 1
 const TEXT = 3
 const COMMENT = 8
 
-/** The page's tags this reads:  an example is `<ui-example>` (`<ui-docs-example>` before epic `ui-gaps` P14). */
+/** The page's tags this reads:  an example is `<ui-example>` (`<ui-example>` before epic `ui-gaps` P14). */
 const SECTION = "ui-section"
-const EXAMPLES = new Set(["ui-example", "ui-docs-example"])
+const EXAMPLES = new Set(["ui-example", "ui-example"])
 const MARKDOWN = "ui-markdown"
 const CODE = "ui-code"
 
