@@ -1163,7 +1163,7 @@
           "name": "message"
         },
         {
-          "name": "closeText"
+          "name": "options"
         }
       ],
       "section": "Talking to the person",

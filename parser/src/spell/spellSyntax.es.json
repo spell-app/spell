@@ -1368,6 +1368,10 @@
             "list_end",
             "before_or_after",
             "print_kind",
+            "notify_kind",
+            "toast_color",
+            "toast_position",
+            "toast_progress",
             "take_or_give_up",
             "drag_or_drop",
             "drag_moment",
@@ -1405,6 +1409,18 @@
             },
             {
               "syntax": "((info:información|informacion)|(warning:aviso|advertencia)|(error:error)|(group:grupo)|(collapsed_group:grupo plegado|grupo cerrado))"
+            },
+            {
+              "syntax": "((info:información|informacion)|(success:éxito|exito)|(warning:aviso|advertencia)|(error:error))"
+            },
+            {
+              "syntax": "((red:rojo|roja)|(orange:naranja)|(yellow:amarillo|amarilla)|(olive:verde oliva|oliva)|(teal:verde azulado|turquesa)|(green:verde)|(blue:azul)|(violet:violeta)|(purple:morado|morada|púrpura|purpura)|(pink:rosa)|(brown:marrón|marron)|(grey:gris)|(black:negro|negra))"
+            },
+            {
+              "syntax": "((top_left:arriba a la izquierda)|(top_center:arriba al centro|arriba)|(top_right:arriba a la derecha)|(centered:en el centro|en medio)|(bottom_left:abajo a la izquierda)|(bottom_center:abajo al centro|abajo)|(bottom_right:abajo a la derecha))"
+            },
+            {
+              "syntax": "((top_up:con una barra de progreso que se llena arriba)|(bottom_up:con una barra de progreso que se llena|con una barra de progreso que se llena abajo)|(top:con una barra de progreso arriba)|(bottom:con una barra de progreso|con una barra de progreso abajo))"
             },
             {
               "syntax": "((take:agregar|añadir|anadir|tomar)|(give_up:soltar|quitar|eliminar|ceder))"
@@ -3610,11 +3626,11 @@
           "ruleNames": ["notify"],
           "internal": false,
           "file": "src/spell/rules/UI/Notify.ts",
-          "line": 12,
-          "purpose": "Notify user about `message` in a non-modal (popup?) interface.",
+          "line": 24,
+          "purpose": "Tells the person something for a moment, in a toast, e.g. `notify \"Saved!\"`.",
           "syntaxes": [
             {
-              "syntax": "notificar {message:expression} (con {okButton:text})?",
+              "syntax": "notificar {kind:notify_kind}? {message:expression} (titulado {title:expression})? (en {color:toast_color} (inverted:invertido|invertida)?)? {position:toast_position}? ((durante {time:expression} {units:pause_units})|(untilClicked:hasta un clic|hasta que se haga clic))? {progress:toast_progress}? (sideBySide:uno al lado del otro|en fila)? (keepRunning:sin pausa|sin pausar)? (con {okButton:text})? (waits:y esperar)?",
               "example": "notificar \"Yo!\"",
               "outputs": {
                 "js": {
