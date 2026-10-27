@@ -452,7 +452,10 @@ describe("ScopeExplorer scope packs", () => {
   test("`core`'s `src/core.scopes.js` is what `yarn scopes --builtins` generates from the table -- run it", () => {
     const path = resolve(environment.coreDir, "core.scopes.js")
     const shipped = runPackScript(readFileSync(path, "utf8"), "core.scopes.js")
-    expect(shipped).toEqual(builtIns)
+    // The pack names each file by its `file://` URI, which holds the checkout's own path:  compare without it
+    const withoutCheckout = (pack: LSP.ScopePack) =>
+      JSON.parse(JSON.stringify(pack).replace(/file:\/\/[^"]*?(?=\/parser\/src\/core\/)/g, "file://"))
+    expect(withoutCheckout(shipped)).toEqual(withoutCheckout(builtIns))
   })
 })
 
