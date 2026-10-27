@@ -47,6 +47,35 @@ export class BenchBridge {
   }
 
   ////////////////
+  // ## The scheme
+  ////////////////
+
+  /**
+   * Show `doc` in `scheme`, and keep it so:  its `ui-light` / `ui-dark` class and `color-scheme` on `<html>`,
+   * as a theme menu sets them (`ThemePreference.applyScheme()`), but never remembered.
+   * - Why kept:  a light and a dark frame of the same page share the browser's storage, and each page follows a
+   *   scheme stored by another (a `storage` event), so it'd take its neighbour's;  after each one, it's put back.
+   * - SIDE EFFECT:  listens to `doc`'s window's `storage` events, once per window.
+   */
+  static pinScheme(doc: Document, scheme: "light" | "dark"): void {
+    const win = doc.defaultView
+    if (!win) return
+    const isNew = !PINNED.has(win)
+    PINNED.set(win, scheme)
+    BenchBridge.showScheme(doc, scheme)
+    // after the page's own `storage` listener, which applied the stored scheme
+    if (isNew) win.addEventListener("storage", () => E.soon(() => BenchBridge.showScheme(doc, PINNED.get(win)!)))
+  }
+
+  /** Show `scheme` on `doc`'s `<html>`:  its class, the other one off, and the same `color-scheme`. */
+  private static showScheme(doc: Document, scheme: "light" | "dark"): void {
+    const root = doc.documentElement
+    root.classList.remove(scheme === "dark" ? "ui-light" : "ui-dark")
+    root.classList.add(`ui-${scheme}`)
+    root.style.colorScheme = scheme
+  }
+
+  ////////////////
   // ## The section titles
   ////////////////
 
@@ -250,6 +279,9 @@ export type BridgeHandlers = {
   /** Open the app's full view (the editor:  Debug, every side bar, a part picked). */
   fullMonty?(): unknown
 }
+
+/** The scheme each framed window is pinned to (`pinScheme()`). */
+const PINNED = new WeakMap<Window, "light" | "dark">()
 
 /** Id of the `<style>` the tuning goes in. */
 const STYLE_ID = "ui-theme-bench"

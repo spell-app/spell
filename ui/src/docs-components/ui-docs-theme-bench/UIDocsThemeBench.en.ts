@@ -51,6 +51,11 @@ export const docsThemeBenchVocabulary = {
     { key: "titles", text: "Section titles", description: "Accessible name of the titles' scroll menu." },
     { key: "rest", text: "At rest", description: "Scroll each page to its top, its titles at rest." },
     { key: "stuck", text: "Stuck", description: "Scroll each page so its section titles stick." },
+    { key: "schemes", text: "Schemes", description: "Accessible name of the schemes' menu." },
+    { key: "both", text: "Light & dark", description: "Show each page in light and dark, side by side." },
+    { key: "one", text: "One scheme", description: "Show each page once, in the scheme picked." },
+    { key: "light", text: "Light", description: "The light half of a page's pair." },
+    { key: "dark", text: "Dark", description: "The dark half of a page's pair." },
     { key: "reload", text: "Reload", description: "Reload a page, or all of them." },
     { key: "open", text: "Open in a tab", description: "Open a page in a tab of its own." },
     {

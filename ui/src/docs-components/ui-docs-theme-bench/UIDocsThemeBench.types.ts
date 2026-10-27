@@ -85,6 +85,19 @@ export const BenchPlaces: Readonly<Record<BenchPlaceId, BenchPlace>> = {
   }
 }
 
+/**
+ * Which schemes each page shows:  `both`, light and dark side by side as a pair of frames;  `one`, the scheme picked.
+ */
+export type BenchSchemes = "both" | "one"
+
+/**
+ * One frame of a page:  its light or dark half of a pair, or (`shown`) its one frame, in the scheme picked.
+ */
+export type BenchSlot = "light" | "dark" | "shown"
+
+/** A frame's key:  its page and its slot (`editor:dark`). */
+export type BenchFrameKey = `${BenchPlaceId}:${BenchSlot}`
+
 /** The page server's address that redirects to the editor app, wherever it runs (spell-app's `appRoutes`). */
 export const EDITOR_REDIRECT = "/editor"
 

@@ -16,9 +16,12 @@ import {
   BenchPlaces,
   EDITOR_REDIRECT,
   type BenchEditSet,
+  type BenchFrameKey,
   type BenchMessage,
   type BenchPlaceId,
   type BenchReply,
+  type BenchSchemes,
+  type BenchSlot,
   type DocsThemeBenchVocabulary,
   type PageLook,
   type ThemeBenchTextKey,
@@ -36,9 +39,12 @@ import benchCSS from "./UIDocsThemeBench.css?inline"
  * - Its shadow DOM:
  *   - a BAR:  the title, `<ui-theme-menu>` (the theme and light / dark for every page), which pages to show
  *     (all four, or one), where their section titles sit (at rest, or stuck), Reload
- *   - the PAGES:  four frames, each a real page drawn at a desk's width and scaled down to its cell
- *     (`BenchPlaces`):  this epic's page, Spell UI's Button page, the Avatar notebook in the editor,
- *     and the editor on Solitaire in its full view (Debug, every side bar, a card picked)
+ *   - the PAGES (`BenchPlaces`):  this epic's page, Spell UI's Button page, the Avatar notebook in the editor,
+ *     and the editor on Solitaire in its full view (Debug, every side bar, a card picked);
+ *     each a real page in a frame, drawn at a desk's width and scaled down to its cell
+ *     - in light and dark side by side, a pair of frames (`schemes`, "both");  or once, in the scheme picked
+ *     - a pair's dark editor frame is the editor at this machine's other name (`127.0.0.1`):  another origin,
+ *       so the two keep their own schemes
  *   - the TUNING:  every token, in the theme tree's groups (`BenchTokens`), each with a control (a colour's picker and
  *     opacity, a length's slider, its text), every theme's value for it, and which pages' sheets read it;
  *     then the CHANGES, as the lines to put in the theme's file (`BenchEdits`)
@@ -154,10 +160,10 @@ export class UIDocsThemeBench extends E.UIComponent<DocsThemeBenchVocabulary> {
     return BenchEdits.count(this.edits, this.theme) > 0
   }
 
-  /** A new sheet:  every page wears it. */
+  /** A new sheet:  every frame wears it. */
   @E.onChange("css", { defer: true })
   protected onCssChanged() {
-    for (const id of BenchPlaceIds) void this.dress(id, { css: true })
+    for (const key of this.frameKeys) void this.dress(key, { css: true })
   }
 
   /** Set `token` to `value`:  for the scheme shown when its value differs by scheme, else for both. */
@@ -204,22 +210,43 @@ export class UIDocsThemeBench extends E.UIComponent<DocsThemeBenchVocabulary> {
   /** Where the pages' section titles sit. */
   @E.state accessor titles: TitlesAt = "rest"
 
+  /** Which schemes each page shows:  light and dark side by side (Owen:  "light/dark for the pages"), or one. */
+  @E.state accessor schemes: BenchSchemes = "both"
+
+  /** Each page's frames:  a pair, light and dark;  or its one, in the scheme picked. */
+  get slots(): readonly BenchSlot[] {
+    return this.schemes === "both" ? PAIR : ONE
+  }
+
+  /** Every frame shown, by key:  each page's slots. */
+  get frameKeys(): BenchFrameKey[] {
+    return BenchPlaceIds.flatMap((id) => this.slots.map((slot) => frameKey(id, slot)))
+  }
+
+  /** The scheme frame `slot` shows:  its own half of a pair, else the scheme picked. */
+  private schemeOf(slot: BenchSlot): "light" | "dark" {
+    return slot === "shown" ? this.scheme : slot
+  }
+
   /** The editor app's address;  `undefined` while it's found, `""` when it isn't running. */
   @E.state accessor editorBase: string | undefined = undefined
 
-  /** What each page's sheets read, set and hold, as it last said. */
+  /**
+   * What each page's sheets read, set and hold, as it last said:  from its frame in the scheme picked
+   * (`isReadFrom()`), so the values read are that scheme's.
+   */
   @E.state accessor looks: Readonly<Partial<Record<BenchPlaceId, PageLook>>> = {}
 
-  /** Which pages are dressed and drawn:  until then, a loading line covers each frame. */
-  @E.state accessor loaded: Readonly<Partial<Record<BenchPlaceId, boolean>>> = {}
+  /** Which frames are dressed and drawn:  until then, a loading line covers each one. */
+  @E.state accessor loaded: Readonly<Partial<Record<BenchFrameKey, boolean>>> = {}
 
-  /** Mark page `id` loaded, or not. */
-  private markLoaded(id: BenchPlaceId, isLoaded: boolean): void {
-    if (!!this.loaded[id] !== isLoaded) this.loaded = { ...this.loaded, [id]: isLoaded }
+  /** Mark frame `key` loaded, or not. */
+  private markLoaded(key: BenchFrameKey, isLoaded: boolean): void {
+    if (!!this.loaded[key] !== isLoaded) this.loaded = { ...this.loaded, [key]: isLoaded }
   }
 
-  /** Each page's cell, as big as it's drawn. */
-  @E.state accessor cells: Readonly<Partial<Record<BenchPlaceId, CellSize>>> = {}
+  /** Each frame's cell, as big as it's drawn. */
+  @E.state accessor cells: Readonly<Partial<Record<BenchFrameKey, CellSize>>> = {}
 
   /** The tokens each page's sheets read, and those they set below `:root`, as sets. */
   @E.derived
@@ -232,14 +259,14 @@ export class UIDocsThemeBench extends E.UIComponent<DocsThemeBenchVocabulary> {
     )
   }
 
-  /** New titles' place:  every page scrolls there. */
+  /** New titles' place:  every frame scrolls there. */
   @E.onChange("titles", { defer: true })
   protected onTitlesChanged() {
-    for (const id of BenchPlaceIds) void this.dress(id, { titles: true })
+    for (const key of this.frameKeys) void this.dress(key, { titles: true })
   }
 
-  /** Each page's frame, by id. */
-  private readonly frames = new Map<BenchPlaceId, HTMLIFrameElement>()
+  /** Each frame, by key. */
+  private readonly frames = new Map<BenchFrameKey, HTMLIFrameElement>()
 
   /** Asks sent, so each reply finds its page. */
   private asked = 0
@@ -283,53 +310,76 @@ export class UIDocsThemeBench extends E.UIComponent<DocsThemeBenchVocabulary> {
     return isServer ? "" : location.pathname.replace(BENCH_PAGE_PATH, "")
   }
 
-  /** Page `id`'s address;  `undefined` for the editor's while it isn't found, or running. */
-  private urlOf(id: BenchPlaceId): string | undefined {
+  /**
+   * Frame `key`'s address;  `undefined` for the editor's while it isn't found, or running.
+   * - A pair's dark editor frame is the editor at this machine's OTHER name (`127.0.0.1` for `localhost`):
+   *   another origin, so it keeps its own scheme where the light one keeps its own (the editor remembers its scheme in
+   *   the browser, and its code follows that).
+   */
+  private urlOf(key: BenchFrameKey): string | undefined {
+    const [id, slot] = splitKey(key)
     const place = BenchPlaces[id]
     if (place.reach === "page server") return this.siteRoot + place.path
-    return this.editorBase ? this.editorBase + place.path : undefined
+    if (!this.editorBase) return undefined
+    const base = slot === "dark" ? otherLoopback(this.editorBase) : this.editorBase
+    return base + place.path
   }
 
   /**
-   * A page loaded (again):  a page server's, dress it all;  the editor's says hello once its app is up.
+   * A frame loaded (again):  a page server's, dress it all;  the editor's says hello once its app is up.
    * - Shown after `LOADED_ANYWAY_SECONDS` whatever happens, so a page that never answers still shows.
    */
   @E.untracked
-  private onPageLoaded(id: BenchPlaceId): void {
-    if (BenchPlaces[id].reach === "page server") void this.dress(id, ALL_PARTS).then(() => this.markLoaded(id, true))
-    void E.after(LOADED_ANYWAY_SECONDS, () => this.markLoaded(id, true))
+  private onPageLoaded(key: BenchFrameKey): void {
+    const [id] = splitKey(key)
+    if (BenchPlaces[id].reach === "page server") void this.dress(key, ALL_PARTS).then(() => this.markLoaded(key, true))
+    void E.after(LOADED_ANYWAY_SECONDS, () => this.markLoaded(key, true))
   }
 
-  /** A page's message:  it's listening (dress it all), or it answered an ask. */
+  /** A frame's message:  it's listening (dress it all), or it answered an ask. */
   @E.untracked
   private onPageMessage(event: MessageEvent): void {
     const reply = event.data as BenchReply | undefined
     if (reply?.type !== BENCH_MESSAGE) return
-    const id = BenchPlaceIds.find((each) => this.frames.get(each)?.contentWindow === event.source)
-    if (!id) return
-    if (reply.hello) void this.dress(id, ALL_PARTS)
-    if (reply.look) this.took(id, reply.look)
+    const key = this.frameKeys.find((each) => this.frames.get(each)?.contentWindow === event.source)
+    if (!key) return
+    if (reply.hello) void this.dress(key, ALL_PARTS)
+    if (reply.look) this.took(key, reply.look)
   }
 
-  /** Page `id` said what its sheets say:  keep it;  the editor's own tokens new to the bench, ask again for them. */
-  private took(id: BenchPlaceId, look: PageLook): void {
-    const known = new Set(this.tokenList)
-    this.looks = { ...this.looks, [id]: look }
-    if (BenchPlaces[id].reach === "editor") this.markLoaded(id, true)
-    const isNew = look.declares.some((token) => token.startsWith(EDITOR_PREFIX) && !known.has(token))
-    if (isNew && BenchPlaces[id].reach === "editor") void this.dress(id, { look: true })
+  /** Whether page `id`'s look is read from frame `key`:  its frame in the scheme picked. */
+  private isReadFrom(key: BenchFrameKey): boolean {
+    return this.schemeOf(splitKey(key)[1]) === this.scheme
   }
 
   /**
-   * Make page `id` wear what `parts` says:  the theme, the scheme, the tuning, its titles' place;
+   * Frame `key` said what its page's sheets say:  keep it, when it's the frame its page is read from;
+   * the editor's own tokens new to the bench, ask again for them.
+   */
+  private took(key: BenchFrameKey, look: PageLook): void {
+    const [id] = splitKey(key)
+    const isEditor = BenchPlaces[id].reach === "editor"
+    if (isEditor) this.markLoaded(key, true)
+    if (!this.isReadFrom(key)) return
+    const known = new Set(this.tokenList)
+    this.looks = { ...this.looks, [id]: look }
+    const isNew = look.declares.some((token) => token.startsWith(EDITOR_PREFIX) && !known.has(token))
+    if (isNew && isEditor) void this.dress(key, { look: true })
+  }
+
+  /**
+   * Make frame `key` wear what `parts` says:  the theme, its scheme, the tuning, its titles' place;
    * then ask what its sheets say (`look`).
+   * - A page server's frame keeps its scheme pinned (`BenchBridge.pinScheme()`):  a pair's two halves share the
+   *   browser's storage, where each page follows the scheme the other stores.
    * - NEVER throws:  a page that can't be reached (not loaded, gone) warns.
    */
-  private async dress(id: BenchPlaceId, parts: DressParts): Promise<void> {
+  private async dress(key: BenchFrameKey, parts: DressParts): Promise<void> {
+    const [id, slot] = splitKey(key)
     const place = BenchPlaces[id]
-    const frame = this.frames.get(id)
+    const frame = this.frames.get(key)
     if (!frame?.contentWindow) return
-    if (place.reach === "editor") return this.post(id, frame.contentWindow, parts)
+    if (place.reach === "editor") return this.post(key, frame.contentWindow, parts)
     const win = frame.contentWindow as FrameWindow
     const doc = frame.contentDocument
     if (!doc?.documentElement) return
@@ -339,34 +389,37 @@ export class UIDocsThemeBench extends E.UIComponent<DocsThemeBenchVocabulary> {
         const runtime = await UIDocsThemeBench.runtimeOf(win)
         await runtime?.themes.apply(this.theme)
       }
-      if (parts.scheme) ThemePreference.applyScheme(this.scheme, doc.documentElement)
+      if (parts.scheme) BenchBridge.pinScheme(doc, this.schemeOf(slot))
       if (parts.css) BenchBridge.applyCss(doc, this.css)
       if (parts.titles) await E.after(LAYOUT_SECONDS, () => BenchBridge.scrollTitles(doc, this.titles))
-      if (parts.look) this.took(id, BenchBridge.look(doc, this.tokenList))
+      if (parts.look) this.took(key, BenchBridge.look(doc, this.tokenList))
     } catch (error) {
-      E.Warnings.warn("<ui-docs-theme-bench>", `can't dress the ${id} page`, error)
+      E.Warnings.warn("<ui-docs-theme-bench>", `can't dress the ${key} page`, error)
     }
   }
 
   /** `dress()` for the editor app:  a message to its frame, `win`;  `look` asks, and its reply comes as a message. */
-  private post(id: BenchPlaceId, win: Window, parts: DressParts): void {
-    if (!this.editorBase) return
+  private post(key: BenchFrameKey, win: Window, parts: DressParts): void {
+    const url = this.urlOf(key)
+    if (!url) return
+    const [id, slot] = splitKey(key)
     const message: BenchMessage = { type: BENCH_MESSAGE }
     if (parts.theme) message.theme = this.theme
-    if (parts.scheme) message.scheme = this.scheme
+    if (parts.scheme) message.scheme = this.schemeOf(slot)
     if (parts.css) message.css = this.css
     if (parts.titles) message.titles = this.titles
     if (parts.fullMonty && id === "editor") message.fullMonty = true
     if (parts.look) message.ask = { id: ++this.asked, tokens: this.tokenList }
-    win.postMessage(message, new URL(this.editorBase).origin)
+    win.postMessage(message, new URL(url).origin)
   }
 
-  /** Reload page `id`;  every page, when none is given. */
+  /** Reload page `id`'s frames;  every page's, when none is given. */
   @E.untracked
   reload(id?: BenchPlaceId): void {
-    for (const each of id ? [id] : BenchPlaceIds) {
-      this.markLoaded(each, false)
-      this.frames.get(each)?.contentWindow?.location.reload()
+    for (const key of this.frameKeys) {
+      if (id && splitKey(key)[0] !== id) continue
+      this.markLoaded(key, false)
+      this.frames.get(key)?.contentWindow?.location.reload()
     }
   }
 
@@ -384,10 +437,10 @@ export class UIDocsThemeBench extends E.UIComponent<DocsThemeBenchVocabulary> {
     return undefined
   }
 
-  /** Watch the cell of page `id`, `cell`, for its size:  its frame is scaled to it. */
-  private watchCell(id: BenchPlaceId, cell: HTMLElement): void {
+  /** Watch frame `key`'s cell, `cell`, for its size:  its frame is scaled to it. */
+  private watchCell(key: BenchFrameKey, cell: HTMLElement): void {
     if (isServer) return
-    cell.dataset.place = id
+    cell.dataset.frame = key
     this.resizer.observe(cell)
   }
 
@@ -397,17 +450,17 @@ export class UIDocsThemeBench extends E.UIComponent<DocsThemeBenchVocabulary> {
     return new ResizeObserver((entries) => {
       const cells = { ...this.cells }
       for (const entry of entries) {
-        const id = (entry.target as HTMLElement).dataset.place as BenchPlaceId
-        cells[id] = { width: entry.contentRect.width, height: entry.contentRect.height }
+        const key = (entry.target as HTMLElement).dataset.frame as BenchFrameKey
+        cells[key] = { width: entry.contentRect.width, height: entry.contentRect.height }
       }
       this.cells = cells
     })
   }
 
-  /** Page `id`'s frame's size:  its desk width, as tall as its cell, scaled to fit the cell's width. */
-  private frameStyle(id: BenchPlaceId): string {
-    const { width } = BenchPlaces[id]
-    const cell = this.cells[id]
+  /** Frame `key`'s size:  its page's desk width, as tall as its cell, scaled to fit the cell's width. */
+  private frameStyle(key: BenchFrameKey): string {
+    const { width } = BenchPlaces[splitKey(key)[0]]
+    const cell = this.cells[key]
     if (!cell?.width) return `width: ${width}px; height: 100%`
     const scale = cell.width / width
     return `width: ${width}px; height: ${Math.round(cell.height / scale)}px; transform: scale(${scale})`
@@ -514,6 +567,22 @@ export class UIDocsThemeBench extends E.UIComponent<DocsThemeBenchVocabulary> {
               )}
             </For>
           </ui-menu>
+          <ui-menu
+            appearance="segmented link"
+            size="small"
+            aria-label={t("schemes")}
+            on-ui-choosing={(event: CustomEvent<{ value: string }>) =>
+              (this.schemes = event.detail.value as BenchSchemes)
+            }
+          >
+            <For each={SCHEME_CHOICES}>
+              {(choice) => (
+                <ui-item value={choice} selected={this.schemes === choice ? "" : undefined}>
+                  {t(choice)}
+                </ui-item>
+              )}
+            </For>
+          </ui-menu>
           <ui-button size="small" appearance="basic" icon="redo" onClick={() => this.reload()}>
             {t("reload")}
           </ui-button>
@@ -522,10 +591,10 @@ export class UIDocsThemeBench extends E.UIComponent<DocsThemeBenchVocabulary> {
     )
   }
 
-  /** Page `id`:  its title row, and its frame, scaled into its cell. */
+  /** Page `id`:  its title row, then its frames (a light and dark pair, or one), each scaled into its cell. */
   private page(id: BenchPlaceId): JSX.Element {
     const t = this.text
-    const url = () => this.urlOf(id)
+    const url = () => this.urlOf(frameKey(id, this.slots[0]!))
     return (
       <figure class="page" part={this.partForName("page")} hidden={this.layout !== "grid" && this.layout !== id}>
         <figcaption class="page-head">
@@ -548,21 +617,41 @@ export class UIDocsThemeBench extends E.UIComponent<DocsThemeBenchVocabulary> {
             </a>
           </Show>
         </figcaption>
-        <div class={["viewport", { loaded: !!this.loaded[id] }]} ref={(cell) => this.watchCell(id, cell)}>
+        <div class={["frames", this.schemes]}>
+          <For each={this.slots}>{(slot) => this.frame(frameKey(id, slot))}</For>
+        </div>
+      </figure>
+    )
+  }
+
+  /** Frame `key`:  a pair's half named for its scheme, over its cell, the page scaled into it. */
+  private frame(key: BenchFrameKey): JSX.Element {
+    const t = this.text
+    const [id, slot] = splitKey(key)
+    const url = () => this.urlOf(key)
+    return (
+      <div class="frame">
+        <Show when={slot !== "shown"}>
+          <span class="frame-scheme">
+            <ui-icon name={slot === "dark" ? "moon" : "sun"} aria-hidden="true"></ui-icon>
+            {t(slot as "light" | "dark")}
+          </span>
+        </Show>
+        <div class={["viewport", { loaded: !!this.loaded[key] }]} ref={(cell) => this.watchCell(key, cell)}>
           <Show when={url()} fallback={<p class="note">{this.editorBase === "" ? t("noEditor") : t("loadingPage")}</p>}>
             <iframe
               src={url()}
-              title={t(id)}
-              style={this.frameStyle(id)}
-              ref={(frame) => this.frames.set(id, frame)}
-              onLoad={() => this.onPageLoaded(id)}
+              title={slot === "shown" ? t(id) : `${t(id)}, ${t(slot as "light" | "dark")}`}
+              style={this.frameStyle(key)}
+              ref={(frame) => this.frames.set(key, frame)}
+              onLoad={() => this.onPageLoaded(key)}
             ></iframe>
-            <Show when={!this.loaded[id]}>
+            <Show when={!this.loaded[key]}>
               <p class="note loading">{t("loadingPage")}</p>
             </Show>
           </Show>
         </div>
-      </figure>
+      </div>
     )
   }
 
@@ -879,6 +968,37 @@ const EDITS_PREF = "theme-bench"
 
 /** The titles' places, in the menu's order. */
 const TITLE_PLACES: readonly TitlesAt[] = ["rest", "stuck"]
+
+/** The schemes' choices, in the menu's order. */
+const SCHEME_CHOICES: readonly BenchSchemes[] = ["both", "one"]
+
+/** A page's frames:  a pair, or its one in the scheme picked. */
+const PAIR: readonly BenchSlot[] = ["light", "dark"]
+const ONE: readonly BenchSlot[] = ["shown"]
+
+/** Frame key of page `id`'s `slot`. */
+function frameKey(id: BenchPlaceId, slot: BenchSlot): BenchFrameKey {
+  return `${id}:${slot}`
+}
+
+/** A frame key's page and slot. */
+function splitKey(key: BenchFrameKey): [BenchPlaceId, BenchSlot] {
+  return key.split(":") as [BenchPlaceId, BenchSlot]
+}
+
+/**
+ * `address` at this machine's other name:  `localhost` <=> `127.0.0.1`;  the same server, another origin,
+ * so its own browser storage.
+ */
+function otherLoopback(address: string): string {
+  const url = new URL(address)
+  url.hostname = url.hostname === LOCALHOST ? LOOPBACK_IP : LOCALHOST
+  return url.origin + url.pathname.replace(/\/$/, "")
+}
+
+/** This machine's two names. */
+const LOCALHOST = "localhost"
+const LOOPBACK_IP = "127.0.0.1"
 
 /** Where a token's value now is read first:  the editor's own tokens, then the rest. */
 const EDITOR_FIRST: readonly BenchPlaceId[] = ["editor", "notebook"]

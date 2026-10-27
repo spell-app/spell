@@ -36,6 +36,18 @@ describe("<ui-docs-theme-bench>", () => {
     expect(cells[component.themeNames.indexOf(component.theme)]!.matches(".current")).toBe(true)
   })
 
+  it("each page in light and dark, side by side;  One scheme shows each once", async () => {
+    const { bench, component } = await render()
+    const root = bench.shadowRoot!
+    expect(component.schemes).toBe("both")
+    expect(component.frameKeys).toContain("ui:dark")
+    for (const page of root.querySelectorAll("figure.page")) expect(page.querySelectorAll(".frame")).toHaveLength(2)
+    component.schemes = "one"
+    await ElementFixture.settle()
+    expect(component.frameKeys).toEqual(["epic:shown", "ui:shown", "notebook:shown", "editor:shown"])
+    for (const page of root.querySelectorAll("figure.page")) expect(page.querySelectorAll(".frame")).toHaveLength(1)
+  })
+
   it("a tuning:  the sheet over every page, the theme file's lines, kept;  Reset all takes it back", async () => {
     const { bench, component } = await render()
     component.tune("--ui-radius-l", "20px")

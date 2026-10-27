@@ -19,6 +19,28 @@ describe("BenchBridge.applyCss()", () => {
   })
 })
 
+describe("BenchBridge.pinScheme()", () => {
+  it("shows its scheme on <html>, and puts it back after the page follows another frame's stored one", async () => {
+    const frame = document.createElement("iframe")
+    document.body.append(frame)
+    onTestFinished(() => frame.remove())
+    const doc = frame.contentDocument!
+    const root = doc.documentElement
+    BenchBridge.pinScheme(doc, "dark")
+    expect(root.classList.contains("ui-dark")).toBe(true)
+    expect(root.style.colorScheme).toBe("dark")
+    // the page follows a scheme another frame stored:  light, then the storage event
+    root.classList.replace("ui-dark", "ui-light")
+    frame.contentWindow!.dispatchEvent(new StorageEvent("storage", { key: "spell-site:scheme" }))
+    await expect.poll(() => root.classList.contains("ui-dark")).toBe(true)
+    expect(root.classList.contains("ui-light")).toBe(false)
+    // pinned again, to light:  the same listener puts light back
+    BenchBridge.pinScheme(doc, "light")
+    expect(root.className).toContain("ui-light")
+    expect(root.classList.contains("ui-dark")).toBe(false)
+  })
+})
+
 describe("BenchBridge.look()", () => {
   it("what the sheets read and set, and set on an element below :root", () => {
     const box = Fixture.render(`

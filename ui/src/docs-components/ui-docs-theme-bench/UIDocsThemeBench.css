@@ -132,6 +132,39 @@
   display: inline-flex;
   color: var(--ui-text-muted);
 }
+/* a page's frames:  its light and dark halves side by side, or its one */
+.frames {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 6px;
+  min-height: 0;
+}
+.frames.both {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.frame {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr);
+  min-height: 0;
+  position: relative;
+}
+/* a pair's half:  its scheme named over its top corner */
+.frame-scheme {
+  position: absolute;
+  inset: 6px 6px auto auto;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--ui-surface);
+  border: 1px solid var(--ui-border-color);
+  box-shadow: var(--ui-shadow-subtle, none);
+  color: var(--ui-text-muted);
+  font-size: 0.75em;
+  pointer-events: none;
+}
 .viewport {
   position: relative;
   overflow: hidden;
