@@ -321,6 +321,13 @@ export type JSXAttributeTokenProps = Prettify<P.TokenProps<JSXAttributeValue>> &
 export class JSXTextToken extends JSXToken<string> {}
 
 /**
+ * A raw-text element's contents, read as written:  `<style>`, `<script>`, `<css>`, `<markdown>` (`Tokenizer.rawTextTags`).
+ * - Text like any other (`instanceof JSXTextToken`), but its `{`, `[` and line breaks are its own:
+ *   a rule drawing it takes it whole, as the web does a `<script>`'s.
+ */
+export class JSXRawTextToken extends JSXTextToken {}
+
+/**
  * A comment inside markup, never drawn (epic `elemental-spell`, Owen 2026-10-26):  see `Tokenizer.markupComments`.
  * - `<!-- GAP I23:  ... -->`, over as many lines as it takes;  or a line of its own starting `//`.
  * - `value`:  its text, without `<!--` / `-->` or `//`, trimmed.

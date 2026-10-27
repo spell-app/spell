@@ -5902,7 +5902,7 @@
           "ruleNames": ["jsxText"],
           "internal": false,
           "file": "src/spell/rules/JSX/SpellJSXText.ts",
-          "line": 10,
+          "line": 15,
           "purpose": "Match literal text between JSX tags (`jsxChild`).",
           "syntaxes": [],
           "aliases": ["jsxChild"]

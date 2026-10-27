@@ -1250,7 +1250,7 @@ describe("comments in markup (`markupComments`;  epic `elemental-spell`, Owen 20
 
   test("a raw-text tag's `<!--` and `//` are its own text", () => {
     expect(childrenOf(commenting, "<markdown>\n<!-- x -->\n// y\n</markdown>")).toEqual([
-      ["JSXTextToken", "\n<!-- x -->\n// y\n"],
+      ["JSXRawTextToken", "\n<!-- x -->\n// y\n"],
       ["JSXEndTagToken", undefined]
     ])
   })
@@ -1266,13 +1266,42 @@ describe("raw-text JSX tags (`rawTextTags`)", () => {
   test("a raw-text tag's contents are ONE text token, `{` and `<` included", () => {
     const [element] = raw.tokenize("<css>\n  .red { color: red } a < b\n</css>") as [JSXElementToken]
     expect(element.tagName).toBe("css")
-    expect(element.children?.map((child) => child.constructor.name)).toEqual(["JSXTextToken", "JSXEndTagToken"])
+    expect(element.children?.map((child) => child.constructor.name)).toEqual(["JSXRawTextToken", "JSXEndTagToken"])
     expect(element.children?.[0]!.value).toBe("\n  .red { color: red } a < b\n")
   })
 
   test("any other tag's contents are JSX, as before", () => {
     const [element] = raw.tokenize("<div>{x}</div>") as [JSXElementToken]
     expect(element.children?.[0]).toBeInstanceOf(JSXExpressionToken)
+  })
+
+  // epic `elemental-spell` P24:  a notebook's `<markdown>` closes with `</>`, as its other tags do
+  describe("`</>` where `emptyEndTagCloses` says so", () => {
+    const spellx = new Tokenizer({ rawTextTags: ["markdown"], emptyEndTagCloses: true })
+    const textOf = (source: string) => {
+      const [element] = spellx.tokenize(source) as [JSXElementToken]
+      return [element.children?.[0]!.value, element.children?.at(-1)!.raw]
+    }
+
+    test("ends it at a line's end, on one line or its own", () => {
+      expect(textOf("<markdown>Hi **there**</>")).toEqual(["Hi **there**", "</>"])
+      expect(textOf("<markdown>\n\tHi\n</>\n")).toEqual(["\n\tHi\n", "</>"])
+    })
+
+    test("a `</>` inside its text is text", () => {
+      expect(textOf("<markdown>\n\t`</>` closes it\n</>")).toEqual(["\n\t`</>` closes it\n", "</>"])
+    })
+
+    test("`</markdown>` still ends it", () => {
+      expect(textOf("<markdown>\n\tHi\n</markdown>")).toEqual(["\n\tHi\n", "</markdown>"])
+    })
+
+    test("off by default:  `</>` is text", () => {
+      const [element] = new Tokenizer({ rawTextTags: ["markdown"] }).tokenize("<markdown>Hi</>\n</markdown>") as [
+        JSXElementToken
+      ]
+      expect(element.children?.[0]!.value).toBe("Hi</>\n")
+    })
   })
 })
 

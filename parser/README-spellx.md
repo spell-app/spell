@@ -98,7 +98,7 @@ reversible:`, and reads to the same tree as the English card.
 | A block of prose | `<description>` `<comment>` | `<descripción>` `<comentario>` |
 | A handler, its head a phrase | `<on ...>` `<when ...>` `<while ...>` | `<al ...>` `<cuando ...>` `<mientras ...>` |
 | A control in a drawing | `<if ...>` `<otherwise if ...>` `<otherwise>` `<for each ...>`;  `else` for `otherwise` | `<si ...>` `<si no si ...>` `<si no>` `<para cada ...>`;  `sino`, `de lo contrario` too |
-| An attribute | `name` `aka` `template` `one-of` `alias` `description` `shortcut` `enabled-when` `selected-when` `undone-as` `icon` `menu-bar` `group` `locked` `original` | `nombre` `alias` (a template's short name) `plantilla` `uno-de` `frase` `descripción` `atajo` `activa-cuando` `seleccionada-cuando` `se-deshace-como` `icono` `barra-de-menú` `grupo` `bloqueado` `original` |
+| An attribute | `name` `aka` `template` `one-of` `alias` `description` `shortcut` `enabled-when` `selected-when` `undone-as` `icon` `menu-bar` `group` `locked` | `nombre` `alias` (a template's short name) `plantilla` `uno-de` `frase` `descripción` `atajo` `activa-cuando` `seleccionada-cuando` `se-deshace-como` `icono` `barra-de-menú` `grupo` `bloqueado` |
 
 - Spanish words read with their accents and without:  `<encanto-pagina>` is `<encanto-página>`.
 - An event's attributes are its parameters (`<event "flipped" side="direction" />`), so they're never checked.
@@ -123,6 +123,8 @@ reversible:`, and reads to the same tree as the English card.
   tags of their own between its elements.
 - **Closers:**  `</>` closes the innermost open tag;  `</property>` does too, and checks it's a property;
   `/>` ends a tag with nothing inside.
+  - A `<markdown>` block's text is read as written, so there `</>` closes it only at a line's end:
+    `<markdown>Hi</>`, or `</>` on a line of its own.  A `</>` inside its text (`` `</>` closes it ``) is text.
   `<otherwise>` goes on with the open `<if>`, and ONE `</>` closes the whole chain.
 - **Mistakes are errors on their own lines**, from the tokenizer (a word spellx doesn't know, a closer for another
   tag, a tag never closed) or from the rules (a body's Spell they can't read).
@@ -335,8 +337,6 @@ its body a drawing of markdown, markup and examples, with templates of its own.
 - It reads as `counter notebook is a notebook:`, its body `- to draw its content:`, each run of prose a `<markdown>`
   block, a new one at each `##`;  its own templates read just before it, and `start counter notebook` after it.
 - `locked` (Spanish `bloqueado`):  only whoever can write its file saves an edit;  anyone else's is a try-out.
-- `original="/components/ui/ui-avatar.html"`:  the page it was converted from, while pages become notebooks.
-  The editor shows that page's example under each of its own;  it compiles to nothing.
 - A notebook is only ever a `.spellx` file.  The editor shows its page, editable in place, at
   `/run/@spell/notebooks/Counter`:  each edit saves just its own cell, and draws just that cell again.
 - `SP.SpellProject.compileChunk({ into, path, text, span, kind })` compiles one cell on its own:  a drawing's

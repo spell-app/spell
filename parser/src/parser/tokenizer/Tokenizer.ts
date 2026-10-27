@@ -709,18 +709,24 @@ export class Tokenizer {
   /**
    * Children of raw-text tag `<endTagName>` at `start` of `text`:  ONE `JSXTextToken` of everything up to
    * `</endTagName>`, then that end tag -- see `rawTextTags`.
+   * - Where `emptyEndTagCloses` says so, `</>` ends it too, but only at a line's end (`<markdown>Hi</>`, or `</>` on a
+   *   line of its own):  a `</>` inside its text (`` `</>` closes it ``) is text.
    * - No end tag:  the text runs to `end`, and there's no end tag token.
    */
   matchRawJSXChildren(endTagName: string, text: string, start: number, end?: number) {
     if (typeof end !== "number" || end > text.length) end = text.length
     if (start >= end) return undefined
-    const endTag = `</${endTagName}>`
-    const found = text.indexOf(endTag, start)
+    const named = `</${endTagName}>`
+    const namedAt = text.indexOf(named, start)
+    const emptyAt = this.emptyEndTagCloses ? Tokenizer.lineEndingEmptyEndTag(text, start, end) : -1
+    const isEmpty = emptyAt !== -1 && (namedAt === -1 || emptyAt < namedAt)
+    const endTag = isEmpty ? "</>" : named
+    const found = isEmpty ? emptyAt : namedAt
     const textEnd = found === -1 || found + endTag.length > end ? end : found
     const children: P.Token[] = []
     if (textEnd > start) {
       const value = text.slice(start, textEnd)
-      children.push(new P.JSXTextToken({ value, raw: value, start }))
+      children.push(new P.JSXRawTextToken({ value, raw: value, start }))
     }
     if (textEnd < end) {
       children.push(new P.JSXEndTagToken({ raw: endTag, tagName: endTagName, start: textEnd }))
@@ -728,6 +734,14 @@ export class Tokenizer {
       this.logger.warn(`matchRawJSXChildren(${text.slice(start, start + 20)}): no ${endTag}`)
     }
     return children
+  }
+
+  /** Where the first `</>` ending a line (spaces after it allowed) is, from `start` of `text` up to `end`;  else `-1`. */
+  private static lineEndingEmptyEndTag(text: string, start: number, end: number): number {
+    const pattern = /<\/>[ \t]*(?=\r?\n|$)/g
+    pattern.lastIndex = start
+    const found = pattern.exec(text.slice(0, end))
+    return found ? found.index : -1
   }
 
   /**

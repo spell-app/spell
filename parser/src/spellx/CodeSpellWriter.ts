@@ -192,7 +192,9 @@ export class CodeSpellWriter {
       const isComponent = BARE_NAME.test(tagName) && !this.blocks.has(tagName)
       const tag = isComponent ? this.componentTag(tagName, token.start) : undefined
       const name = tag ?? tagName
-      if (tag) edits.push({ start: token.start + 1, end: token.start + 1 + tagName.length, text: tag })
+      // its name just after its `<`:  a token's start can take in the white space before it (`a <text>`)
+      const nameAt = this.text.indexOf("<", token.start) + 1
+      if (tag) edits.push({ start: nameAt, end: nameAt + tagName.length, text: tag })
       const closer = token.isUnaryTag ? undefined : token.raw?.match(/<\/[^>]*>$/)?.[0]
       if (closer && closer !== `</${name}>`) {
         edits.push({ start: token.end - closer.length, end: token.end, text: `</${name}>` })

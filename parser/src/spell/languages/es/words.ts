@@ -181,7 +181,6 @@ export const spanishWords: SP.LanguageWords = {
       "barra-de-menu": "menu-bar",
       bloqueado: "locked",
       // la página de la que se convirtió un cuaderno (P18):  solo la lee el editor
-      original: "original",
       grupo: "group"
     },
     // el gemelo de cada etiqueta en el código de spell:  la línea que se lee (P6) -- ver `SP.SpellxTwinWords`
