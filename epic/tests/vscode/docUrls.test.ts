@@ -89,6 +89,9 @@ test("fileForPath():  the epic server's engine and repos;  a checkout's root and
   equal(fileForPath(hub, "/_epic/assets/spell-doc.css"), "/e/src/tools/_assets/spell-doc.css")
   equal(fileForPath(hub, "/_epic/pack/epics.pack.js"), "/e/src/components/__pack/epics.pack.js")
   equal(fileForPath(hub, "/_epic/nope/x"), undefined)
+  // the templates are the engine's too (epic `epic-eject` T11), under each repo's prefix as at the root
+  equal(fileForPath(hub, "/templates/durable.html"), "/e/templates/durable.html")
+  equal(fileForPath(hub, "/r/other/templates/durable.html"), "/e/templates/durable.html")
   const checkout = { root: "/repo", worktrees: "/repo/.claude/worktrees" }
   equal(fileForPath(checkout, "/packages/x.ts"), "/repo/packages/x.ts")
   equal(fileForPath(checkout, "/worktrees/seo/epics/x.html"), "/repo/.claude/worktrees/seo/epics/x.html")

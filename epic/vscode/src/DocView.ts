@@ -66,10 +66,16 @@ import { existsSync } from "fs"
 import { join } from "path"
 import * as vscode from "vscode"
 
+// Import directly:  the `spell/util` barrel would bring lodash and the rest of spell's utilities into this bundle
+import { escapeHTML } from "spell/util/string"
+import { waitUntil } from "spell/util/timing"
+// Import directly:  through the `SRV` barrel, the Linker's HTML parser (~700 KB) lands in this bundle (I58)
+import { serverAt } from "spell/server/PidFile"
+
 import { EpicConfig } from "spell-epic/config/EpicConfig"
 import { RepoList } from "spell-epic/server/RepoList"
 
-import { escapeAttribute, fileForPath, planDocsOf, samePage, stamped, type ServerInfo } from "./docUrls"
+import { fileForPath, planDocsOf, samePage, stamped } from "./docUrls"
 
 /** The page's iframe's sandbox:  Simple Browser's.  Scripts need the webview's `enableScripts` too. */
 const SANDBOX = "allow-scripts allow-forms allow-same-origin allow-downloads"
@@ -124,11 +130,8 @@ const COMMANDS = ["back", "forward", "reload", "restartServer", "openExternal"] 
  */
 const MENU = ["cut", "copy", "paste", "selectAll", "back", "forward", "reload", "openExternal", "inspect"] as const
 
-/** How many times `remembered()` asks a page server that doesn't answer, `REMEMBER_WAIT_MS` apart:  ~10s in all. */
-const REMEMBER_TRIES = 10
-
-/** How long `remembered()` waits between asks, in ms. */
-const REMEMBER_WAIT_MS = 1000
+/** How long `remembered()` waits for a page server that doesn't answer, looking once a second:  in seconds. */
+const REMEMBER_WAIT = { timeout: 10, every: 1 }
 
 /****************
  * ### `DocView`
@@ -419,15 +422,16 @@ export class DocView implements vscode.WebviewViewProvider {
     const here = this.here
     if (!here) return
     const page = new URL(here)
-    const info = await serverInfo(page.origin)
-    const root = info?.epicServer ? ENGINE_ROOT : info?.root
+    const info = await serverAt(page.origin)
+    const isEpicServer = info !== undefined && "epicServer" in info
+    const root = isEpicServer ? ENGINE_ROOT : info?.root
     if (!root) {
       void vscode.window.showWarningMessage(
         `Epic Docs:  ${page.origin} isn't a page server, so there's nothing to restart.`
       )
       return
     }
-    const command = info?.epicServer
+    const command = isEpicServer
       ? `${ENGINE_EPIC} hub stop; ${ENGINE_EPIC} hub ensure`
       : existsSync(join(root, OLD_EPIC))
         ? `(node ${OLD_EPIC} server stop || ${OLD_SPELL} dev server stop); ` +
@@ -487,11 +491,8 @@ export class DocView implements vscode.WebviewViewProvider {
     // a page server restarting (`spell server start` after a merge) is back in a few seconds:
     // wait for it rather than forget the page
     // (Owen, 2026-10-10:  "reloading either of those tabs forgets what page was shown")
-    for (let tries = 0; tries < REMEMBER_TRIES; tries++) {
-      if (await serverRoot(new URL(url).origin)) return url
-      await new Promise((done) => setTimeout(done, REMEMBER_WAIT_MS))
-    }
-    return undefined
+    const origin = new URL(url).origin
+    return (await waitUntil(() => serverAt(origin), REMEMBER_WAIT)) ? url : undefined
   }
 
   /**
@@ -526,7 +527,7 @@ export class DocView implements vscode.WebviewViewProvider {
     const nonce = randomBytes(16).toString("base64")
     const csp = `default-src 'none'; style-src 'unsafe-inline'; script-src 'nonce-${nonce}'; frame-src http://127.0.0.1:* http://localhost:*`
     const body = url
-      ? `<iframe src="${escapeAttribute(url)}" sandbox="${SANDBOX}" allow="${ALLOW}"></iframe>`
+      ? `<iframe src="${escapeHTML(url)}" sandbox="${SANDBOX}" allow="${ALLOW}"></iframe>`
       : `<p>${VIEWS[this.name].empty}</p>`
     return `<!doctype html>
 <html>
@@ -624,7 +625,7 @@ export class DocView implements vscode.WebviewViewProvider {
     if (!url) return
     const target = new URL(url)
     if (kind !== "file") return void vscode.env.openExternal(vscode.Uri.parse(url))
-    const info = await serverInfo(target.origin)
+    const info = await serverAt(target.origin)
     const path = info && fileForPath(info, target.pathname)
     if (!path) return void vscode.env.openExternal(vscode.Uri.parse(url))
     const file = vscode.Uri.file(path)
@@ -649,22 +650,6 @@ export type DocViewName = "docs" | "review"
 export function docsIndex(): string | undefined {
   const root = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath
   return root && join(EpicConfig.contentOf(root), "pages", "index.html")
-}
-
-/** The folder the page server at `origin` serves (its `/api/server`'s `root`);  `undefined`:  not a page server. */
-async function serverRoot(origin: string): Promise<string | undefined> {
-  return (await serverInfo(origin))?.root
-}
-
-/**
- * What the page server at `origin` says of itself (`/api/server`):
- * the epic server's engine and repos, or a checkout's root and the folder its `/worktrees/<w>/` serves.
- * - `undefined`:  not a page server
- */
-async function serverInfo(origin: string): Promise<ServerInfo | undefined> {
-  return fetch(`${origin}/api/server`, { signal: AbortSignal.timeout(2000) })
-    .then((answer) => (answer.ok ? (answer.json() as Promise<ServerInfo>) : undefined))
-    .catch(() => undefined)
 }
 
 /**

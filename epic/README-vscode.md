@@ -364,7 +364,7 @@ How Send picks the session it wakes:  [README-pages.md](README-pages.md), "How S
 - Plain HTTP on `127.0.0.1`, on a free port, one server per window.
 - `POST /<operation>`, a JSON object as the body (64 KB at most), and `Authorization: Bearer <token>`,
   checked in constant time.
-- It answers `{ ok: true, ... }`, or `{ ok: false, error }` with a 4xx or 5xx status:
+- It answers `{ ok: true, ... }`, or `{ error }` with a 4xx or 5xx status:
   401 for a bad token, 404 for an unknown operation or a missing file, 409 for `add-folder` in a window with no
   window file, 413 for a body too big.
 - A window whose bridge fails to start still works;  its sessions just can't reach it.

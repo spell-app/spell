@@ -2,15 +2,19 @@
  * The extension's pure parts:
  * page URLs, the epic pages listed for "Open Epic...", where a served URL's file is, a Claude tab's label, a window's
  * folder.
- * - no `vscode` here, and node built-ins only (`RealPath` too, by its file), so its tests run under plain `node`
- *   (`tests/vscode/docUrls.test.ts`)
+ * - no `vscode` here, and node built-ins only (`RealPath` and spell-epic's server constants too, each by its file),
+ *   so its tests run under plain `node` (`tests/vscode/docUrls.test.ts`)
  */
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs"
 import { homedir } from "node:os"
 import { join } from "node:path"
 
-// By its file, not `spell-epic/...`:  plain `node` runs this file's tests, with no alias table
+import type { SRV } from "spell/server"
+// By its file, not the barrel:  plain `node` runs this file's tests
 import { RealPath } from "spell/server/RealPath"
+
+// With its `.ts`:  plain `node` adds no extension to a name
+import { ENGINE_PREFIX, ENGINE_ROUTES, type EpicServerInfo } from "spell-epic/server/server.types.ts"
 
 /** The extension's id, `<publisher>.<name>`:  its `vscode://` URIs start with it. */
 export const EXTENSION_ID = "spell-app.spell-epic"
@@ -66,11 +70,6 @@ export function isLoopback(url: string): boolean {
   }
 }
 
-/** `text` safe inside a double-quoted html attribute. */
-export function escapeAttribute(text: string): string {
-  return text.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;")
-}
-
 ////////////////
 // ## Epic pages
 ////////////////
@@ -114,40 +113,32 @@ export function planDocsOf(repos: { name: string; content: string }[]): PlanDocE
 ////////////////
 
 /**
- * What a page server says of itself at `/api/server`:  a checkout's page server (`root`, `worktrees`), or spell-epic's
- * epic server (`epicServer`, `engine`, `repos`).
- */
-export type ServerInfo = {
-  root?: string
-  worktrees?: string
-  /** every folder its `/worktrees/<w>/` serves, `worktrees` first (epic `epic-eject` J28) */
-  worktreesFolders?: string[]
-  epicServer?: boolean
-  engine?: string
-  repos?: { name: string; content: string; prefix: string; isDefault: boolean }[]
-}
-
-/**
  * The file a page server serves at URL path `path` (decoded segments joined), for a link the page couldn't follow:
  * `undefined` when the server doesn't say.
- * - the epic server:
- *   - `/_epic/assets/...` and `/_epic/pack/...` in its engine
+ * - what the server says of itself at `/api/server`:  a checkout's page server, the kit's `ServerInfo` (`root`,
+ *   `worktrees`);  or spell-epic's epic server, its `EpicServerInfo` (`epicServer`, `engine`, `repos`)
+ * - the epic server, as it lays out what it serves (`EpicServer`):
+ *   - the engine's routes (`ENGINE_ROUTES`:  `/_epic/assets/...`, `/_epic/pack/...`, `/templates/...`) in its engine;
+ *     the templates under each repo's prefix too, `/r/<repo>/templates/...`
  *   - `/r/<repo>/...` in that repo's content
  *   - anything else in the default repo's content
  * - a checkout's page server:  under its root;  `/worktrees/<w>/...` in the first folder it serves worktrees from
  *   that holds `<w>`, else the first
  */
-export function fileForPath(info: ServerInfo, path: string): string | undefined {
-  const parts = path.split("/").filter(Boolean).map(decodeURIComponent)
-  if (info.epicServer) {
-    if (parts[0] === "_epic" && info.engine) {
-      const folder = ENGINE_FOLDERS[parts[1] as keyof typeof ENGINE_FOLDERS]
-      return folder && join(info.engine, folder, ...parts.slice(2))
-    }
-    const named = parts[0] === "r" ? info.repos?.find((repo) => repo.name === parts[1]) : undefined
-    if (named) return join(named.content, ...parts.slice(2))
-    const home = info.repos?.find((repo) => repo.isDefault)
-    return home && join(home.content, ...parts)
+export function fileForPath(info: SRV.ServerInfo | EpicServerInfo, path: string): string | undefined {
+  const parts = segmentsOf(path)
+  if ("epicServer" in info) {
+    const named = parts[0] === "r" ? info.repos.find((repo) => repo.name === parts[1]) : undefined
+    const rest = named ? parts.slice(2) : parts
+    // the engine's own files:  its routes, and under a repo's prefix its templates
+    const route = Object.values(ENGINE_ROUTES).find(
+      (each) => (!named || each === ENGINE_ROUTES.templates) && isUnder(rest, each.prefix)
+    )
+    if (route) return join(info.engine, route.dir, ...rest.slice(segmentsOf(route.prefix).length))
+    // an `/_epic/` path no route serves
+    if (!named && isUnder(rest, ENGINE_PREFIX)) return undefined
+    const repo = named ?? info.repos.find((each) => each.isDefault)
+    return repo && join(repo.content, ...rest)
   }
   if (!info.root) return undefined
   const folders = info.worktreesFolders ?? (info.worktrees ? [info.worktrees] : [])
@@ -158,8 +149,15 @@ export function fileForPath(info: ServerInfo, path: string): string | undefined 
   return join(info.root, ...parts)
 }
 
-/** The engine's routes, `/_epic/<route>/...`, by route:  their folders in spell-epic's checkout. */
-const ENGINE_FOLDERS = { assets: "src/tools/_assets", pack: "src/components/__pack" } as const
+/** URL path `path`'s segments, decoded:  `/epics/a%20b/x.html` => `["epics", "a b", "x.html"]`. */
+function segmentsOf(path: string): string[] {
+  return path.split("/").filter(Boolean).map(decodeURIComponent)
+}
+
+/** Whether URL path segments `parts` are under URL prefix `prefix`:  `["_epic", "assets", "x.js"]` under `/_epic/`. */
+function isUnder(parts: string[], prefix: string): boolean {
+  return segmentsOf(prefix).every((segment, at) => parts[at] === segment)
+}
 
 ////////////////
 // ## Claude tabs

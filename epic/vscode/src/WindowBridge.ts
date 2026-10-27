@@ -20,9 +20,9 @@
  *     spell-epic's window script reads this folder first, then that one
  *   - rewritten when the window's folders change;  deleted on dispose
  *   - files of dead pids (a crashed window) are deleted when any window starts
- * - Server:  http on `127.0.0.1`, a free port.
- *   - `POST /<op>`, JSON body, `Authorization: Bearer <token>`
- *   - answers `{ ok: true, ... }`, or `{ ok: false, error }` with a 4xx / 5xx status
+ * - Server:  http on `127.0.0.1`, a free port, on the kit's server pieces (`Router`, `toListener()`, `readBody()`)
+ *   - `POST /<op>`, a JSON object as the body, `Authorization: Bearer <token>`
+ *   - answers `{ ok: true, ... }`;  a failure, its status and `{ error }`, as every kit server does (`HttpError`)
  * - Ops:
  *   - `add-folder { path, name? }`:  add `path` as the window's last folder;  already there:  ok, no-op
  *   - `remove-folder { path }`:  remove it;  never folder 0 (the repo root);  not there:  ok, no-op
@@ -57,10 +57,18 @@
  */
 import { randomBytes, timingSafeEqual } from "crypto"
 import { chmodSync, existsSync, mkdirSync, readdirSync, renameSync, statSync, unlinkSync, writeFileSync } from "fs"
-import { createServer, type IncomingMessage, type Server, type ServerResponse } from "http"
+import { createServer, type Server } from "http"
 import type { AddressInfo } from "net"
 import { join, resolve } from "path"
 import * as vscode from "vscode"
+
+import type { SRV } from "spell/server"
+// Import directly:  through the `SRV` barrel, the Linker's HTML parser (~700 KB) lands in this bundle (I58)
+import { readBody } from "spell/server/bodies"
+import { toListener } from "spell/server/listener"
+import { isProcessAlive } from "spell/server/PidFile"
+import { Router } from "spell/server/Router"
+import { HttpError } from "spell/server/server.types"
 
 import { DocPreview } from "./DocPreview"
 import { DocView } from "./DocView"
@@ -108,7 +116,9 @@ export class WindowBridge {
     } catch (error) {
       console.error("spell-epic window bridge:  sweeping stale registry files failed", error)
     }
-    const server = createServer((request, response) => void WindowBridge.handle(request, response))
+    // the token first, then the op;  anything else is answered 404
+    const router = new Router().use(WindowBridge.authorize).post("/:op", WindowBridge.answer)
+    const server = createServer(toListener(router.handle))
     WindowBridge.server = server
     server.on("error", (error) => console.error("spell-epic window bridge:", error))
     server.listen(0, "127.0.0.1", () => {
@@ -164,7 +174,7 @@ export class WindowBridge {
     if (!existsSync(dir)) return
     for (const name of readdirSync(dir)) {
       const match = name.match(/^(\d+)\.json(\.tmp)?$/)
-      if (!match || isAlive(Number(match[1]))) continue
+      if (!match || isProcessAlive(Number(match[1]))) continue
       const path = join(dir, name)
       if (statSync(path).isFile()) unlinkSync(path)
     }
@@ -174,19 +184,16 @@ export class WindowBridge {
   // ## Requests
   ////////////////
 
-  /** Answer one request:  check it, run its op, reply JSON. */
-  static async handle(request: IncomingMessage, response: ServerResponse): Promise<void> {
-    try {
-      if (request.method !== "POST") throw new BridgeError(405, "POST only")
-      if (!WindowBridge.authorized(request.headers.authorization)) throw new BridgeError(401, "bad or missing token")
-      const op = (request.url ?? "/").replace(/^\//, "").replace(/\?.*$/, "")
-      const body = await readBody(request)
-      const result = await WindowBridge.run(op, body)
-      reply(response, 200, { ok: true, ...result })
-    } catch (error) {
-      if (error instanceof BridgeError) return reply(response, error.status, { ok: false, error: error.message })
-      reply(response, 500, { ok: false, error: String((error as Error)?.message ?? error) })
-    }
+  /** Every request, first:  a 401 unless it carries our token (`authorized()`). */
+  static authorize(request: SRV.Request, _reply: SRV.Reply, next: SRV.Next): void {
+    if (!WindowBridge.authorized(request.get("authorization"))) throw new HttpError(401, "bad or missing token")
+    next()
+  }
+
+  /** `POST /<op>`:  run the op with the request's body (`jsonBody()`), and answer `{ ok: true, ... }`. */
+  static async answer(request: SRV.Request, reply: SRV.Reply): Promise<void> {
+    const result = await WindowBridge.run(request.params.op!, await jsonBody(request))
+    reply.json({ ok: true, ...result })
   }
 
   /** Whether `header` is `Bearer <our token>` (compared in constant time). */
@@ -205,16 +212,16 @@ export class WindowBridge {
         return WindowBridge.removeFolder(path(body, "path"))
       case "show-doc": {
         const file = path(body, "file")
-        if (!existsSync(file) || !statSync(file).isFile()) throw new BridgeError(404, `no file '${file}'`)
+        if (!existsSync(file) || !statSync(file).isFile()) throw new HttpError(404, `no file '${file}'`)
         const view = body.view ?? "docs"
-        if (view !== "docs" && view !== "review") throw new BridgeError(400, `bad view ${JSON.stringify(view)}`)
+        if (view !== "docs" && view !== "review") throw new HttpError(400, `bad view ${JSON.stringify(view)}`)
         const hash = typeof body.hash === "string" ? body.hash : undefined
         await DocPreview.show(file, hash, view, typeof body.query === "string" ? body.query : undefined)
         return { file, view }
       }
       case "reload-view": {
         const view = body.view ?? "docs"
-        if (view !== "docs" && view !== "review") throw new BridgeError(400, `bad view ${JSON.stringify(view)}`)
+        if (view !== "docs" && view !== "review") throw new HttpError(400, `bad view ${JSON.stringify(view)}`)
         return { view, url: DocView.of(view).rebuild() ?? null }
       }
       case "close-window":
@@ -225,7 +232,7 @@ export class WindowBridge {
         // no `sessionId`:  a NEW session (`epic window launch`)
         const sessionId = body.sessionId
         if (sessionId !== undefined && (typeof sessionId !== "string" || !SESSION_ID.test(sessionId))) {
-          throw new BridgeError(400, `bad session id ${JSON.stringify(sessionId)}`)
+          throw new HttpError(400, `bad session id ${JSON.stringify(sessionId)}`)
         }
         // 2nd argument:  the extension's `initialPrompt` (2.1.287), typed in, not sent
         const prompt = typeof body.prompt === "string" && body.prompt ? body.prompt : undefined
@@ -242,7 +249,7 @@ export class WindowBridge {
         return WindowBridge.closeSessionTab(titles.filter((title): title is string => typeof title === "string"))
       }
       default:
-        throw new BridgeError(404, `unknown op '${op}'`)
+        throw new HttpError(404, `unknown op '${op}'`)
     }
   }
 
@@ -254,17 +261,17 @@ export class WindowBridge {
   static addFolder(folder: string, name?: string): Record<string, unknown> {
     if (WindowBridge.indexOf(folder) >= 0) return { added: false, path: folder }
     if (vscode.workspace.workspaceFile?.scheme !== "file") {
-      throw new BridgeError(
+      throw new HttpError(
         409,
         "this window isn't a saved workspace:  adding a folder would restart its extensions (and the Claude panel)." +
           "  Open it from its window file, <pkg>.code-workspace in `epic config windowsFolder`."
       )
     }
-    if (!existsSync(folder) || !statSync(folder).isDirectory()) throw new BridgeError(404, `no folder '${folder}'`)
+    if (!existsSync(folder) || !statSync(folder).isDirectory()) throw new HttpError(404, `no folder '${folder}'`)
     const count = vscode.workspace.workspaceFolders?.length ?? 0
     const uri = vscode.Uri.file(folder)
     if (!vscode.workspace.updateWorkspaceFolders(count, 0, name ? { uri, name } : { uri })) {
-      throw new BridgeError(500, `VS Code refused to add '${folder}'`)
+      throw new HttpError(500, `VS Code refused to add '${folder}'`)
     }
     return { added: true, path: folder }
   }
@@ -277,9 +284,9 @@ export class WindowBridge {
   static removeFolder(folder: string): Record<string, unknown> {
     const index = WindowBridge.indexOf(folder)
     if (index < 0) return { removed: false, path: folder }
-    if (index === 0) throw new BridgeError(400, `'${folder}' is the window's first folder:  never removed`)
+    if (index === 0) throw new HttpError(400, `'${folder}' is the window's first folder:  never removed`)
     if (!vscode.workspace.updateWorkspaceFolders(index, 1)) {
-      throw new BridgeError(500, `VS Code refused to remove '${folder}'`)
+      throw new HttpError(500, `VS Code refused to remove '${folder}'`)
     }
     return { removed: true, path: folder }
   }
@@ -300,7 +307,7 @@ export class WindowBridge {
    */
   static async closeSessionTab(titles: string[]): Promise<Record<string, unknown>> {
     titles = titles.map((title) => title.trim()).filter(Boolean)
-    if (!titles.length) throw new BridgeError(400, "no title")
+    if (!titles.length) throw new HttpError(400, "no title")
     const claudeTabs = WindowBridge.claudeTabs()
     const matches: Record<string, number> = {}
     for (const title of titles) {
@@ -336,63 +343,25 @@ export type WindowEntry = {
   folders: string[]
 }
 
-/** An op's failure, with its http status. */
-class BridgeError extends Error {
-  /** http status to reply with. */
-  declare status: number
-
-  constructor(status: number, message: string) {
-    super(message)
-    this.status = status
-  }
-}
-
-/** Whether a process `pid` exists:  signal 0 checks without signalling;  EPERM means it exists, someone else's. */
-function isAlive(pid: number): boolean {
-  try {
-    process.kill(pid, 0)
-    return true
-  } catch (error) {
-    return (error as NodeJS.ErrnoException).code === "EPERM"
-  }
-}
-
 /** The body's `key`, a non-empty string, as an absolute path;  else a 400. */
 function path(body: Record<string, unknown>, key: string): string {
   const value = body[key]
-  if (typeof value !== "string" || !value) throw new BridgeError(400, `missing '${key}'`)
+  if (typeof value !== "string" || !value) throw new HttpError(400, `missing '${key}'`)
   return resolve(value)
 }
 
-/** The request's JSON body (`{}` when empty);  a 400 when it isn't a JSON object, a 413 when too big. */
-function readBody(request: IncomingMessage): Promise<Record<string, unknown>> {
-  return new Promise((done, fail) => {
-    const chunks: Buffer[] = []
-    let size = 0
-    request.on("data", (chunk: Buffer) => {
-      size += chunk.length
-      if (size > MAX_BODY) {
-        fail(new BridgeError(413, "body too big"))
-        request.destroy()
-      } else chunks.push(chunk)
-    })
-    request.on("error", fail)
-    request.on("end", () => {
-      const text = Buffer.concat(chunks).toString("utf8").trim()
-      if (!text) return done({})
-      try {
-        const body = JSON.parse(text)
-        if (body && typeof body === "object" && !Array.isArray(body)) return done(body)
-      } catch {
-        // fall through
-      }
-      fail(new BridgeError(400, "body isn't a JSON object"))
-    })
-  })
-}
-
-/** Send `body` as JSON with `status`. */
-function reply(response: ServerResponse, status: number, body: Record<string, unknown>): void {
-  response.writeHead(status, { "Content-Type": "application/json; charset=utf-8" })
-  response.end(JSON.stringify(body))
+/**
+ * The request's body, a JSON object (`{}` when empty);  a 400 when it's anything else, a 413 over `MAX_BODY` (the
+ * kit's `readBody()`).
+ */
+async function jsonBody(request: SRV.Request): Promise<Record<string, unknown>> {
+  const text = (await readBody(request.raw, MAX_BODY)).toString("utf8").trim()
+  if (!text) return {}
+  try {
+    const body: unknown = JSON.parse(text)
+    if (body && typeof body === "object" && !Array.isArray(body)) return body as Record<string, unknown>
+  } catch {
+    // not JSON:  the 400 below
+  }
+  throw new HttpError(400, "body isn't a JSON object")
 }
