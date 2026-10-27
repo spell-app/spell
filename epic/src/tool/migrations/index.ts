@@ -2,6 +2,7 @@
  * The epic page migrations (`spell-epic/tool/migrations`):  the registry, its steps and their types.
  */
 export { ChangesAfterGoal } from "./ChangesAfterGoal"
+export { DoneCardsClose } from "./DoneCardsClose"
 export { ContentRelink, type RelinkCount } from "./ContentRelink"
 export { ItemRenames } from "./ItemRenames"
 export { LinksAgree } from "./LinksAgree"

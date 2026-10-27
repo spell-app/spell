@@ -753,8 +753,8 @@ epic inbox apply <name> [ids]              approve / pick / Make Todo marks into
 epic inbox working <name>#<id> on|off      the page's spinner on an item, or a phase (P20)
 epic inbox status <name> "<text>" [--items q3,c2] | --clear   the toolbar's line:  what you're doing, what you answer
 epic update <name>#<id> underway "<reading>"   Claude's blue status card on an item, spinner on
-epic update <name>#<id> done ["<summary>"]     WORK done:  that card green (Done), the summary under it;  spinner off
-epic update <name>#<id> noted "<what>"         only RECORDED Owen's choice:  an outlined Noted card (what;  what's next)
+epic update <name>#<id> done ["<summary>"]     the item FINISHED:  that card green (Done);  an open issue / todo closes
+epic update <name>#<id> noted "<what>"         a STEP done (choice recorded, answer written):  an outlined Noted card
 epic details <name>#<id> --file f --more | --append   a More Details card (Add Details) / a reply appended
 epic summarize <name>#<id> --file f        condense an item:  f replaces what it shows, the rest folded away (13.)
 epic inbox done <name>#<id>  /  clear      an item's request finished  /  marks dropped after a talk
@@ -804,14 +804,21 @@ epic inbox <name> [--json]                 what's waiting, sent or not
 Read what it printed.
 Then, in this order.
 
-Every card you finish says what REALLY happened
-(Owen, 2026-10-10:  "Claude Done entries are confusing ... you haven't apparently done anything"):
-- `status ... done` ONLY for work done:  an answer or reply written, details added, code changed, a phase built.
-- `status ... noted "<what was recorded;  what happens next>"`, when all you did was RECORD his choice
-  ("B it is";  a todo made;  "do it next phase").
-  - E.g. `"Chose B · Bananas:  recorded as the answer;  waiting for the next phase, P9 · Build"`.
+Every card you finish says what REALLY happened, one of three
+(Owen, 2026-10-10:  "Claude Done entries are confusing ... you haven't apparently done anything";
+2026-10-26, epic `epic-engine` I148:  a fixed issue with two Done cards stayed red):
+- `status ... underway "<reading>"`:  you're on it.
+- `status ... noted "<what;  what happens next>"`:  a STEP done, the item NOT finished.
+  - his choice recorded ("B it is";  a todo made;  "do it next phase"):
+    `"Chose B · Bananas:  recorded as the answer;  waiting for the next phase, P9 · Build"`
+  - an answer or reply written, details added, the item condensed:  `"Answered his note:  options A and B"`
+  - called off:  `"Called off on the page:  nothing written."`
   - An underway card turns noted.
-- Called off:  `done "Called off on the page:  nothing written."` stays (it says what happened).
+- `status ... done ["<summary>"]` ONLY when the item's work is FINISHED:  an issue fixed, a todo built.
+  - An open issue or todo CLOSES with it (status done, green, its phase stamped, logged), as `epic close` does.
+  - A question, judgement call or manual test keeps its status:  a question is decided (`decide`, `choose`), the
+    other two are Owen's to close.
+  - Meant "this step done"?  That's `noted`.
 
 The item's id chip follows too (PLAN-DOC.md "Colours"):
 - dashed:  not sent
@@ -829,7 +836,7 @@ want you to just do it").
 
 1b. CANCELED:  Owen said "nevermind" on a running request for now (epic `windows-and-review` P2).
    - Stop that item's background agent (`TaskStop`).
-   - Then `epic update <name>#<id> done "Called off on the page:  nothing written."`.
+   - Then `epic update <name>#<id> noted "Called off on the page:  nothing written."`.
    - And `epic inbox done <name>#<id>`.
    - An agent that finishes anyway is refused (`epic details` errors:  "Owen called this request off"):
      nothing lands.
@@ -859,8 +866,10 @@ want you to just do it").
      - `epic details <name>#<id> --append --file <html>`.
      - With a pick ("picks B · ..., asks:  ..."):  answer about THAT option.
        Never decide the question:  he confirms with a plain pick.
-   - Last:  `epic update <name>#<id> done ["<summary>"]`:  the card turns green.
-     - A summary only when there's something worth saying:  a surprise, a choice made, something left undone.
+   - Last:  `epic update <name>#<id> noted "<what was written>"`:  the card turns Noted, a step done.
+     - `done ["<summary>"]` instead only when the request FINISHED the item ("do it" on a todo, and it's built):
+       the card turns green and the issue or todo closes.
+     - Say what was written;  a surprise, a choice made, something left undone when there is one.
      - Then `epic inbox done <name>#<id>`.
    - Up to 5 agents at once (root rules);  more:  the rest after.
 3. SENT marks:  `epic inbox apply <name>`.
@@ -890,8 +899,8 @@ want you to just do it").
      - `status ... underway "<reading>"` as you take it up.
      - Answer his note INTO the item, as a reply:  `details --append`, with the reply markup of "revisit now" above.
        His note quoted, the answer with evidence, option cards when he must choose, so he picks ON THE PAGE.
-     - Then `status ... done ["<summary>"]`, since you wrote an answer.
-       Only noting what he said, no answer needed:  `status ... noted "<what>"`.
+     - Then `status ... noted "<what was answered>"`:  an answer is a step, not the item finished.
+       `done` only when it finished the item (an issue fixed, a todo built).
      - Then `inbox clear <name>#<id>`, and `review <name>#<id> "<outcome>"`.
      - His answer in words names an option ("require the parens", "B"):  `choose <name>#<id> <letter> "<outcome>"`
        as soon as he says it (section 5, step 2), not a `review`.
@@ -907,7 +916,7 @@ want you to just do it").
      - `status ... underway`, then answer the note about B.
      - Once he agrees (in words, a reply or the chat), record it yourself, on any item:
        `epic choose <name>#<id> B "Owen, <date>:  '<his words>'"`.
-     - Then `status ... done`.
+     - Then `status ... noted "Chose B · ...:  recorded after the talk"`.
      - `inbox clear` / `done` KEEP his pick as that set's `chosen` (with a Noted card), unless you decided otherwise.
        Once he picked, the card says Chosen.
    - The page counts this session as gone once its heartbeat is 90s old.
@@ -1282,7 +1291,7 @@ because its text and replies have grown too long to read (Owen, epic `repo-split
    - Its text, every reply, More Details and Choices nobody picked move into its Original Discussion, folded:
      nothing is lost.
    - His picks, the answer, status cards, commits and his marks stay.
-4. With a mark on it:  `epic update <name>#<id> done "Condensed:  <what's in it now>"`, then
+4. With a mark on it:  `epic update <name>#<id> noted "Condensed:  <what's in it now>"`, then
    `epic inbox done <name>#<id>`.
 5. Reply with its link pair (`epic pages link <doc> --hash <id> --review`).
 
