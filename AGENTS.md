@@ -67,7 +67,7 @@ and suggest where it belongs before building it (below, "Commands").
     `"pageServer"`, `"spellPack"`, `"spellTypes"`, `"spellPublish"`), and its dependencies at the kit's versions,
     plus `spell` itself (`workspace:*`, for the bins).
   - No `exports`:  the kit's hold every folder's names.
-    (epic's keeps its own only as a temporary `spell-epic/...` alias, until epic `epic-engine` P49.)
+    (epic's kept a temporary `spell-epic/...` alias until epic `epic-engine` P49.)
 - `yarn install` runs HERE, at the root, never in a folder:  ONE `yarn.lock`.
   - One copy of each package version (`nmHoistingLimits: none`), above all Solid:  pinned by `resolutions`.
   - Tool versions are bumped here (below, "Toolchain:  Vite+").
@@ -267,8 +267,7 @@ Lowest first, each using only the ones above it in this table (the lint's `spell
   `spell/app/spaces/...`.
   - Inside a folder too:  no `$/`, no `#`, no `../`.
   - Spell UI's short names:  `spell/ui/ui-button`;  the `spell-ui` bundle's (`spell-ui/ui-button`) are for outside.
-  - The epic folder's old name, `spell-epic/...`, still resolves (its folder manifest's `exports`) until epic
-    `epic-engine` P49:  the plugin's hooks.
+  - The epic folder's old name, `spell-epic/...`, is gone since epic `epic-engine` P49:  write `spell/epic/...`.
 - The kit's `package.json` `exports`:  one wildcard entry per folder (`./ui/*` => `./ui/src/*`), in three conditions:
   - `spell-source`:  TypeScript reads the SOURCE (every program's `customConditions`)
   - `types`:  built declarations (`dist-types/`, `spell-types`), for the app's node program and for spell-brand
