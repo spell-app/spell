@@ -10409,7 +10409,7 @@
       "name": "::part(head)",
       "description": {
         "kind": "markdown",
-        "value": "Part of:\n\n- `<ui-toc>`:  The row above the links:  `heading`'s title, and the expand all / collapse all toggle."
+        "value": "Part of:\n\n- `<ui-toc>`:  The row above the links:  `heading`'s title, the expand all / collapse all toggle, and the `tools` slot."
       }
     },
     {

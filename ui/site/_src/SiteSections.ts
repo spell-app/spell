@@ -5,7 +5,7 @@ import { SiteData } from "spell-ui/docs-components/SiteData"
 // Leaves, not the barrel:  the barrel defines `<ui-toc>`, which `<ui-root>` does on first use
 import { HashLanding, type HashLandingRules, type LandingScroll } from "spell-ui/components/ui-toc/HashLanding"
 import { TocIndex } from "spell-ui/components/ui-toc/TocIndex"
-import { FOLDS_KEY } from "./site.types"
+import { FOLDS_KEY, OLD_FOLDS_KEY } from "./site.types"
 
 /****************
  * ### `SiteSections`
@@ -24,7 +24,9 @@ import { FOLDS_KEY } from "./site.types"
  * - Closed sections:  remembered per page, in `localStorage` through `PrefStore`
  *   (`FOLDS_KEY` + the path:  `{ [section id]: closed }`).
  *   - The viewer's (`ui-opening` / `ui-closing` that can be cancelled) are saved, and restored on every visit.
- *   - Everything else starts OPEN.
+ *   - Everything else starts as its markup says:  open, or closed by `open="false"` (Epic UI's pages start folded).
+ *   - The same key and shape as the docs runtime's (`spell-folds:<path>`), so every page remembers its folds alike;
+ *     what the site kept under its old key (`spell-ui-site:folds:<path>`) moves over on first read.
  *   - An opening made by a landing, or by find-in-page, is never saved.
  * - Landing (`land()`), through Spell UI's `HashLanding`, by the site's rules (`landingRules()`):
  *   - the target's pane selected (the first word of a section id IS its tab:  `#usage-keyboard`)
@@ -245,9 +247,9 @@ export class SiteSections {
     for (const section of SiteSections.pageSections(main)) {
       if (!section.hasAttribute("collapsible") || !(section.id in saved)) continue
       const isCollapsed = !!saved[section.id]
-      if (section.hasAttribute(COLLAPSED) === isCollapsed) continue
+      if (SiteSections.isClosed(section) === isCollapsed) continue
       if (isInstant && !hasChanged) SiteSections.instantly(main)
-      section.toggleAttribute(COLLAPSED, isCollapsed)
+      SiteSections.setClosed(section, isCollapsed)
       hasChanged = true
     }
   }
@@ -274,10 +276,10 @@ export class SiteSections {
       let section: Element | undefined = target.closest(SECTION_TAG) ?? undefined;
       section && main.contains(section);
     ) {
-      if (section.hasAttribute(COLLAPSED)) {
+      if (SiteSections.isClosed(section)) {
         if (!hasOpened) SiteSections.instantly(main)
         // controlled:  writing it announces nothing, so it isn't saved
-        section.removeAttribute(COLLAPSED)
+        SiteSections.setClosed(section, false)
         hasOpened = true
       }
       section = SiteSections.sectionAround(section)
@@ -512,8 +514,23 @@ export class SiteSections {
     void nextFrame(OPEN_FRAMES + 1).then(() => main.style.removeProperty(SECTION_DURATION))
   }
 
-  /** This page's saved closed sections, `{}` when none. */
+  /**
+   * Closed, as its `open` says:  `open="false"` (absent is open).
+   * - The attribute, not the property:  on the first load the sections aren't defined yet.
+   */
+  private static isClosed(section: Element): boolean {
+    return section.getAttribute(OPEN) === "false"
+  }
+
+  /** Close or open `section` without an event:  `open` is controlled, so writing it announces nothing. */
+  private static setClosed(section: Element, isClosed: boolean): void {
+    if (isClosed) section.setAttribute(OPEN, "false")
+    else section.removeAttribute(OPEN)
+  }
+
+  /** This page's saved closed sections, `{}` when none;  the old key's moved over first. */
   private static readClosed(): Record<string, boolean> {
+    PrefStore.moveOldKey(OLD_FOLDS_KEY + location.pathname, FOLDS_KEY + location.pathname)
     const saved = PrefStore.getAt(FOLDS_KEY + location.pathname)
     return saved && typeof saved === "object" ? (saved as Record<string, boolean>) : {}
   }
@@ -595,8 +612,8 @@ const NOT_PAGE = "ui-example, ui-docs-tokens, template"
 /** The section tag. */
 const SECTION_TAG = "ui-section"
 
-/** A section's closed attribute (controlled:  writing it announces nothing). */
-const COLLAPSED = "collapsed"
+/** A section's open attribute, `"false"` when closed (controlled:  writing it announces nothing). */
+const OPEN = "open"
 
 /** The sticky offset attribute of a section or `<ui-sticky>`, px. */
 const OFFSET = "offset"

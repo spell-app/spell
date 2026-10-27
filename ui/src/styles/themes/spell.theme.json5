@@ -1,0 +1,635 @@
+// Spell:  the Spell brand (`brand/spell-design-system/`) as a Spell UI theme.
+// - One of Spell's own themes, the set `UI.themes.own` lists;  applied ON TOP of `classic.css`,
+//   so every classic token a brand value replaces is restated here:
+//   type, the size ladder, radii, ink, borders, shadows, the whole palette, the message colours, links, focus, highlight.
+// - Its sheet, `spell.css`, is GENERATED from this file:  `yarn gen:styles` (`ThemeFile`;  epic `debut` P18).
+//   What values can't say is in its rules sheets:  `rules/modern.css`, `rules/spell.css` (its fonts, headings, states,
+//   the `accent` hue's remap).
+// - The ONE Spell theme (epic `debut` P17, J88):  the Spell Brand theme (`spell-brand.css`) folded in.
+//   - A theme remembered as `spell-brand` comes back as `spell` (`Themes.RENAMED`).
+//   - Its facelift, epic `debut` P19:  dark panels a clear step off the page, its text readable on every pressed and
+//     focused colour (the contrast test, no exceptions), a light primary border that shows on the page.
+// - The default theme of Spell UI's pages and the guides (`ThemePreference`).
+// - Besides the `--ui-*` tokens, the brand's own roles that no `--ui-*` token covers, its `own` values
+//   (`spell-*`, as `light-dark()` pairs):
+//   - surfaces:  `spell-surface-tint` (lavender wash:  asides, sidebars), `-warm` (ivory:  anything "alive"),
+//     `-selected`, `-code`, `-inverse` (aubergine panels)
+//   - text:  `spell-text-strong` ... `-inverse`;  accent:  `spell-accent`, `-hover`, `-press`, `-soft`, `-ring`
+//   - borders, status (`spell-success` / `-soft` ...), art (`spell-blob`, `-blob-2`, `spell-line-flourish`)
+//   - shadows `spell-shadow-xs` ... `-lg`, and the type roles (`spell-type-eyebrow`, `-lede`, `-spell` ...)
+//   - the Polished Ivory ladder (`spell-accent-25` ... `-800`)
+//   - spell-brand's `<brand-*>` elements and the `.spell.html` pages read these;  plain `<ui-*>` elements never do.
+// - And the brand's own components (`components`):
+//   checkbox, slider, tooltips, fold chevron, menus, segmented controls, Markdown;  and the `accent` hue (`brand.accent`).
+// - Source of each value:  the brand's `tokens/palette.css` (17-step OKLCH ladders, as hex), `tokens/theme.css`
+//   (what each step MEANS, light and dark), `tokens/typography.css`, `tokens/spacing.css`, `components.css`.
+//   - primary:  Spell Purple, `violet-600` light / lilac `violet-300` dark, aubergine text on lilac
+//   - secondary and grey:  the "brand" ladder (House of Owen grey-blue);  neutrals, borders and text too
+//   - accent:  Polished Ivory, as the `brown` hue (the brand's Theme Creator mapping), and its own `accent` hue
+//   - dark:  AUBERGINE, never black:  `violet-950` canvas, `violet-900` cards, lilac glows on raised surfaces
+//   - every other hue:  the brand ladder of the same name, `600` light (`700` where white needs it for 4.5:1),
+//     `400` dark;  `on` re-checked (ink where white fails 4.5:1)
+// - Primitives:  the palette steps used more than once, as `own` values (`spell-<ladder>-<step>`).
+//   Components only ever read the semantic `--ui-*` tokens.
+// - Fonts:  `'Spell Serif'` is the INSTALLED Palatino family only (its rules sheet);  NO font files ship
+//   (Owen, 2026-10-04:  the brand's P052 `.otf` fallback was ~540 KB, and AGPL).
+//   Body:  the system sans;  code:  the system mono.
+// - Shape:  pill buttons, labels and progress bars, 12px inputs and menus, 16px cards / segments / messages /
+//   toasts, 22px modals, 8px popups;  round checkboxes (the brand's to-do circle).
+//   Soft layered, violet-tinted shadows (`tokens/theme.css` `--shadow-xs` ... `-lg`), each ONE list whose layers are
+//   `light-dark()` colours, so the dark glows switch with the scheme like every other token.
+// - NOT taken from the brand (no `ui` token, or a component change):  the modal scrim's 4px blur;  the
+//   switch knob's spring;  coloured backgrounds' lavender blobs and flourish lines (page art, not a theme);  a
+//   white-with-hairline DEFAULT button (ours stays a quiet tinted fill:  a button has no border token)
+{
+  "$schema": "./theme.schema.json",
+  "rules": ["modern", "spell"],
+  "own": {
+    // Violet:  Spell Purple (600), lilac (300), lavender (150), aubergine (900 / 950)
+    "spell-violet-25": "#fcfcff",
+    "spell-violet-50": "#f7f7ff",
+    "spell-violet-100": "#eaeaff",
+    "spell-violet-150": "#e0dfff",
+    "spell-violet-200": "#d4d3ff",
+    "spell-violet-300": "#b8b4ff",
+    "spell-violet-400": "#968aff",
+    "spell-violet-500": "#7b68e9",
+    "spell-violet-600": "#6550ca",
+    "spell-violet-700": "#503ca8",
+    "spell-violet-800": "#3e2d86",
+    "spell-violet-850": "#342572",
+    "spell-violet-900": "#2a1d60",
+    "spell-violet-925": "#221750",
+    "spell-violet-950": "#1a1040",
+    "spell-violet-975": "#0f092b",
+    // Brand:  House of Owen grey-blue, the neutrals
+    "spell-brand-25": "#fcfdff",
+    "spell-brand-50": "#f7f9ff",
+    "spell-brand-75": "#f3f5fd",
+    "spell-brand-100": "#eef0fa",
+    "spell-brand-150": "#e6eaf7",
+    "spell-brand-200": "#dde2f4",
+    "spell-brand-300": "#c8cee7",
+    "spell-brand-400": "#a9b1cf",
+    "spell-brand-600": "#767d9a",
+    "spell-brand-700": "#5d637d",
+    "spell-brand-900": "#2b2f3f",
+    // Dark-mode hairlines and tints:  `brand-300` / lilac at an alpha (`tokens/theme.css`)
+    "spell-hairline-subtle": "#c8cee729",
+    "spell-hairline": "#c8cee738",
+    "spell-hairline-strong": "#c8cee757",
+    "spell-lilac-soft": "#b8b4ff29",
+    // Polished Ivory:  the warm accent ladder (`palette.css` `accent-*`)
+    "spell-accent-25": "#fffdf8",
+    "spell-accent-50": "#fdf9f1",
+    "spell-accent-75": "#faf5ea",
+    "spell-accent-100": "#f7efe2",
+    "spell-accent-150": "#f1e7d4",
+    "spell-accent-200": "#eaddc4",
+    "spell-accent-300": "#d7c5a2",
+    "spell-accent-800": "#534323",
+    "spell-violet-75": "#f1f1ff",
+    "spell-brand-500": "#8e96b5",
+    "spell-brand-800": "#454a5f",
+    // Surfaces (`tokens/theme.css`):  tint = lavender wash, warm = ivory, inverse = aubergine panels
+    "spell-surface-tint": { "light": "{own.spell-brand-50}", "dark": "#c8cee712" },
+    "spell-surface-selected": { "light": "{own.spell-violet-100}", "dark": "{own.spell-lilac-soft}" },
+    "spell-surface-warm": { "light": "{own.spell-accent-75}", "dark": "#2c2152" },
+    "spell-surface-code": { "light": "{own.spell-brand-75}", "dark": "{own.spell-violet-975}" },
+    "spell-surface-inverse": { "light": "{own.spell-violet-900}", "dark": "{own.spell-violet-50}" },
+    // Text
+    "spell-text-strong": { "light": "{own.spell-violet-900}", "dark": "{own.spell-violet-25}" },
+    "spell-text-body": { "light": "{own.spell-brand-900}", "dark": "{own.spell-brand-100}" },
+    "spell-text-muted": { "light": "{own.spell-brand-700}", "dark": "{own.spell-brand-300}" },
+    "spell-text-subtle": { "light": "{own.spell-brand-500}", "dark": "{own.spell-brand-400}" },
+    "spell-text-accent": { "light": "{own.spell-violet-600}", "dark": "{own.spell-violet-300}" },
+    "spell-text-on-accent": { "light": "#fff", "dark": "{own.spell-violet-950}" },
+    "spell-text-inverse": { "light": "#fff", "dark": "{own.spell-violet-900}" },
+    // Accent:  Spell Purple light, lilac dark
+    "spell-accent": { "light": "{own.spell-violet-600}", "dark": "{own.spell-violet-300}" },
+    "spell-accent-hover": { "light": "{own.spell-violet-700}", "dark": "{own.spell-violet-200}" },
+    "spell-accent-press": { "light": "{own.spell-violet-800}", "dark": "{own.spell-violet-400}" },
+    "spell-accent-soft": { "light": "{own.spell-violet-100}", "dark": "{own.spell-lilac-soft}" },
+    "spell-accent-soft-hover": { "light": "{own.spell-violet-150}", "dark": "#b8b4ff42" },
+    "spell-accent-ring": { "light": "#6550ca47", "dark": "#b8b4ff66" },
+    // Borders
+    "spell-border-subtle": { "light": "{own.spell-brand-100}", "dark": "{own.spell-hairline-subtle}" },
+    "spell-border-default": { "light": "{own.spell-brand-150}", "dark": "{own.spell-hairline}" },
+    "spell-border-strong": { "light": "{own.spell-brand-300}", "dark": "{own.spell-hairline-strong}" },
+    "spell-border-accent": "{own.spell-violet-400}",
+    // Status
+    "spell-success": { "light": "#00853a", "dark": "#8ef6a5" },
+    "spell-success-soft": { "light": "#e7ffea", "dark": "#6ee7a024" },
+    "spell-warning": { "light": "#a66900", "dark": "#ffe0bd" },
+    "spell-warning-soft": { "light": "#fff8f1", "dark": "#fcc85a24" },
+    "spell-danger": { "light": "#d90021", "dark": "#ffada6" },
+    "spell-danger-soft": { "light": "#fff0ee", "dark": "#ff8c9624" },
+    "spell-spark": "#ffc075",
+    // Art:  blobs and flourish lines (page art, `<ui-brand-blob>` / `<ui-brand-flourish>`)
+    "spell-blob": { "light": "{own.spell-violet-150}", "dark": "{own.spell-lilac-soft}" },
+    "spell-blob-2": { "light": "{own.spell-brand-100}", "dark": "#c8cee714" },
+    "spell-line-flourish": "{own.spell-violet-400}",
+    // Shadows `xs` ... `lg`:  the brand's steps, both schemes in one list (as `--ui-shadow-*` below)
+    "spell-shadow-xs": "{shadows.subtle}",
+    "spell-shadow-sm": "{shadows.raised}",
+    "spell-shadow-md": "{shadows.floating}",
+    "spell-shadow-lg": "{shadows.floating-hover}",
+    "spell-shadow-focus": "0 0 0 3px {own.spell-accent-ring}",
+    // Type roles (`typography.css`):  serif headlines and spells, sans UI, mono eyebrows and code
+    "spell-font-serif": "{typography.family.heading}",
+    "spell-font-sans": "{typography.family.body}",
+    "spell-font-mono": "{typography.family.mono}",
+    "spell-tracking-display": "-0.022em",
+    "spell-tracking-heading": "-0.012em",
+    "spell-tracking-eyebrow": "0.14em",
+    "spell-type-display": "700 64px/1.08 {own.spell-font-serif}",
+    "spell-type-h1": "700 48px/1.08 {own.spell-font-serif}",
+    "spell-type-h2": "700 30px/1.25 {own.spell-font-serif}",
+    "spell-type-h3": "400 24px/1.25 {own.spell-font-serif}",
+    "spell-type-h4": "600 17px/1.25 {own.spell-font-sans}",
+    "spell-type-lede": "italic 400 20px/1.25 {own.spell-font-serif}",
+    "spell-type-body": "400 15px/1.5 {own.spell-font-sans}",
+    "spell-type-ui": "500 13px/1.3 {own.spell-font-sans}",
+    "spell-type-spell": "400 17px/1.5 {own.spell-font-serif}",
+    "spell-type-code": "400 13px/1.6 {own.spell-font-mono}",
+    "spell-type-eyebrow": "500 12px/1 {own.spell-font-mono}",
+    // Shape and motion (`spacing.css`)
+    "spell-radius-xl": "22px",
+    "spell-radius-2xl": "28px",
+    "spell-control-h-sm": "30px",
+    "spell-control-h-md": "36px",
+    "spell-control-h-lg": "44px",
+    "spell-ease-out": "cubic-bezier(0.22, 1, 0.36, 1)",
+    "spell-ease-spring": "cubic-bezier(0.34, 1.4, 0.64, 1)",
+    "spell-dur-fast": "120ms",
+    "spell-dur-base": "200ms",
+    "spell-dur-slow": "360ms"
+  },
+  "typography": {
+    "size": "16px",
+    "family": {
+      "body": "system-ui, -apple-system, \"Segoe UI\", \"Noto Sans\", Cantarell, Ubuntu, \"Helvetica Neue\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+      "heading": "\"Spell Serif\", Palatino, \"Palatino Linotype\", \"Book Antiqua\", P052, \"TeX Gyre Pagella\", \"URW Palladio L\", serif",
+      "mono": "ui-monospace, \"SF Mono\", Menlo, Consolas, \"Cascadia Mono\", \"DejaVu Sans Mono\", \"Liberation Mono\", monospace"
+    },
+    "line-height": {
+      "body": 1.5,
+      "heading": 1.25
+    }
+  },
+  "sizes": {
+    // Sizes:  our own ladder again (classic's is Fomantic's px ladder at 14px)
+    "mini": 0.625,
+    "tiny": 0.75,
+    "small": 0.875,
+    "large": 1.125,
+    "big": 1.25,
+    "huge": 1.5,
+    "massive": 2
+  },
+  "radii": {
+    "s": "8px",
+    "m": "12px",
+    "l": "16px"
+  },
+  "text": {
+    // Ink:  aubergine-black on light, violet-white on dark;  the text roles below are the brand's own steps
+    "ink": { "light": "{own.spell-violet-950}", "dark": "{own.spell-violet-25}" },
+    "body": { "light": "{own.spell-brand-900}", "dark": "{own.spell-brand-100}" },
+    "strong": { "light": "{own.spell-violet-900}", "dark": "{own.spell-violet-25}" },
+    "muted": { "light": "{own.spell-brand-700}", "dark": "{own.spell-brand-300}" },
+    // between `brand-600` (3.99:1, too faint for text) and `brand-700`:  4.5:1 on the canvas
+    "light": {
+      "light": "color-mix(in oklab, {own.spell-brand-600} 60%, {own.spell-brand-700})",
+      "dark": "{own.spell-brand-400}"
+    }
+  },
+  "surfaces": {
+    "page": { "light": "{own.spell-brand-25}", "dark": "{own.spell-violet-950}" },
+    // dark:  panels a clear step off the page (1.21:1), as the brand's raised surface;  each tint a step up from them
+    "panel": { "light": "oklch(1 0 0)", "dark": "{own.spell-violet-900}" },
+    "inset": { "light": "{own.spell-brand-50}", "dark": "{own.spell-violet-850}" },
+    "strong": { "light": "{own.spell-brand-100}", "dark": "{own.spell-violet-800}" },
+    // a bar over scrolling content (a page's top bar, its sticky strips, an epic page's toolbar):  Spell's own page,
+    // its cool grey-blue, and its ink;  without them a page fell back to an ivory band (`--ui-brown-background`)
+    "bar": "{surfaces.page}",
+    // Code wells:  the brand's `--surface-code` (also the docs pages' inline code and `pre`)
+    "code": { "light": "{own.spell-brand-75}", "dark": "{own.spell-violet-975}" },
+    // selection and highlighted rows:  lavender
+    "highlight": { "light": "{own.spell-violet-150}", "dark": "{own.spell-violet-800}" }
+  },
+  "borders": {
+    // Borders:  hairlines, a step stronger on hover, violet on focus
+    "color": { "light": "{own.spell-brand-150}", "dark": "{own.spell-hairline}" },
+    "strong": { "light": "{own.spell-brand-300}", "dark": "{own.spell-hairline-strong}" },
+    "internal": { "light": "{own.spell-brand-100}", "dark": "{own.spell-hairline-subtle}" },
+    "selected": { "light": "{own.spell-brand-300}", "dark": "{own.spell-hairline-strong}" },
+    "selected-strong": { "light": "{own.spell-brand-400}", "dark": "#c8cee780" }
+  },
+  "brand": {
+    "primary": {
+      // Primary:  Spell Purple;  hover / press step the ladder (lighter in dark), as the brand's buttons do
+      "color": "{hues.violet.color}",
+      "on": "{hues.violet.on}",
+      "text": { "light": "{own.spell-violet-600}", "dark": "{own.spell-violet-300}" },
+      "header": { "light": "{own.spell-violet-800}", "dark": "{own.spell-violet-200}" },
+      // light:  `violet-500`, 3:1 against the page (`violet-400` was 2.8:1)
+      "border": { "light": "{own.spell-violet-500}", "dark": "{own.spell-violet-400}" },
+      "background": { "light": "{own.spell-violet-100}", "dark": "{own.spell-lilac-soft}" },
+      "inverted": "{hues.violet.inverted}",
+      "inverted-on": "{hues.violet.inverted-on}",
+      "hover": { "light": "{own.spell-violet-700}", "dark": "{own.spell-violet-200}" },
+      "focus": { "light": "{own.spell-violet-700}", "dark": "{own.spell-violet-200}" },
+      "down": { "light": "{own.spell-violet-800}", "dark": "{own.spell-violet-400}" },
+      "active": { "light": "{own.spell-violet-700}", "dark": "{own.spell-violet-200}" }
+    },
+    "secondary": {
+      // Secondary:  the brand's grey-blue
+      "color": "{hues.grey.color}",
+      "on": "{hues.grey.on}",
+      "inverted": "{hues.grey.inverted}",
+      "inverted-on": "{hues.grey.inverted-on}",
+      // its states darken, as grey's do (the remap, "States", below)
+      "hover": "{hues.grey.hover}",
+      "focus": "{hues.grey.focus}",
+      "down": "{hues.grey.down}",
+      "active": "{hues.grey.active}"
+    },
+    "accent": {
+      "color": { "light": "var(--ui-accent-on-light)", "dark": "var(--ui-accent-on-dark)" },
+      // The `accent` hue, Polished Ivory (the brand's warm accent, `palette.css` `accent-*`), beside Fomantic's:  tokens as every hue's
+      // accent-600
+      // accent-400
+      "base": { "light": "#867044", "dark": "#baa479" },
+      "on": { "light": "oklch(1 0 0)", "dark": "var(--ui-ink-on-light)" },
+      // accent-800 / 200
+      "text": { "light": "{own.spell-accent-800}", "dark": "{own.spell-accent-200}" },
+      "header": { "light": "{own.spell-violet-900}", "dark": "{own.spell-accent-100}" },
+      "border": { "light": "{own.spell-accent-300}", "dark": "#eaddc44d" },
+      // ivory;  dark:  the brand's warm surface
+      "background": { "light": "{own.spell-accent-100}", "dark": "#2c2152" },
+      "inverted": "var(--ui-accent-on-dark)",
+      "inverted-on": "var(--ui-ink-on-light)",
+      "hover": "oklch(from {brand.accent.color} calc(l - 0.05) calc(c * 1.1) h)",
+      "focus": "oklch(from {brand.accent.color} calc(l - 0.08) calc(c * 1.2) h)",
+      "down": "oklch(from {brand.accent.color} calc(l - 0.1) c h)",
+      "active": "oklch(from {brand.accent.color} calc(l - 0.05) calc(c * 1.15) h)"
+    },
+    "link": {
+      // Page accents
+      "color": { "light": "{own.spell-violet-600}", "dark": "{own.spell-violet-300}" },
+      "hover": { "light": "{own.spell-violet-700}", "dark": "{own.spell-violet-200}" }
+    },
+    "focus": {
+      // focus:  a 3px violet ring off the box;  `violet-500` (4.3:1) where the brand's 28% halo would be 1.5:1
+      "width": "3px",
+      "color": { "light": "{own.spell-violet-500}", "dark": "{own.spell-violet-300}" },
+      "border": "{own.spell-violet-400}"
+    }
+  },
+  "semantic": {
+    "positive": {
+      // Messages:  each ladder's palest tint, its 200 hairline, its 700-850 text;  dark:  the colour at 14%
+      "text": { "light": "#006229", "dark": "#8ef6a5" },
+      "header": { "light": "#005020", "dark": "#b8fec5" },
+      "border": { "light": "#b8fec5", "dark": "#6ee7a04d" },
+      "background": { "light": "#f0fff2", "dark": "#6ee7a01f" }
+    },
+    "negative": {
+      "text": { "light": "#b00018", "dark": "#ffada6" },
+      "header": { "light": "#880010", "dark": "#ffcfca" },
+      "border": { "light": "#ffcfca", "dark": "#ff8c964d" },
+      "background": { "light": "#fff6f5", "dark": "#ff8c961f" }
+    },
+    "info": {
+      "base": { "light": "{own.spell-violet-400}", "dark": "{own.spell-violet-300}" },
+      // info:  lavender, the brand's tint for asides
+      "text": { "light": "{own.spell-violet-800}", "dark": "{own.spell-violet-200}" },
+      "header": { "light": "{own.spell-violet-900}", "dark": "{own.spell-violet-100}" },
+      "border": { "light": "{own.spell-violet-200}", "dark": "#b8b4ff4d" },
+      "background": { "light": "{own.spell-violet-50}", "dark": "#b8b4ff1f" },
+      "focus": {
+        "light": "oklch(from var(--ui-info-on-light) calc(l - 0.06) calc(c * 1.2) h)",
+        "dark": "oklch(from var(--ui-info-on-dark) calc(l - 0.08) calc(c * 1.2) h)"
+      },
+      "down": {
+        "light": "oklch(from var(--ui-info-on-light) calc(l - 0.07) c h)",
+        "dark": "oklch(from var(--ui-info-on-dark) calc(l - 0.1) c h)"
+      }
+    },
+    "warning": {
+      // amber-500
+      // amber-400
+      "base": { "light": "#f69e00", "dark": "#ffc075" },
+      "text": { "light": "#794b00", "dark": "#ffe0bd" },
+      "header": { "light": "#623c00", "dark": "#ffeedc" },
+      "border": { "light": "#ffe0bd", "dark": "#fcc85a4d" },
+      "background": { "light": "#fffbf6", "dark": "#fcc85a1f" }
+    }
+  },
+  "hues": {
+    "red": {
+      // `onLight` / `onDark` bases, from the brand ladders;  `-on` where it differs from `colors.css`' pick
+      // red-600
+      // red-400
+      "base": { "light": "#d90021", "dark": "#ff766e" },
+      // Hue tints:  the ladders' `100` steps light;  dark keeps `colors.css`' recipe
+      "background": { "light": "#ffe8e6", "dark": "oklch(from {hues.red.color} 0.28 calc(c * 0.35) h)" }
+    },
+    "orange": {
+      // orange-500:  white fails at 600 too, ink reads
+      // orange-400
+      "base": { "light": "#fc7100", "dark": "#ff9f6d" },
+      "background": { "light": "#ffefe7", "dark": "oklch(from {hues.orange.color} 0.28 calc(c * 0.35) h)" },
+      // Pressed and focused:  a gentler step for the colours that carry INK (light orange, olive and info;  dark
+      // purple), so the ink still reads on them (4.7:1 or more);  `colors.css`' -0.08 / -0.1 took it under 4.5:1
+      "focus": {
+        "light": "oklch(from var(--ui-orange-on-light) calc(l - 0.06) calc(c * 1.2) h)",
+        "dark": "oklch(from var(--ui-orange-on-dark) calc(l - 0.08) calc(c * 1.2) h)"
+      },
+      "down": {
+        "light": "oklch(from var(--ui-orange-on-light) calc(l - 0.07) c h)",
+        "dark": "oklch(from var(--ui-orange-on-dark) calc(l - 0.1) c h)"
+      }
+    },
+    "yellow": {
+      // yellow-500
+      // yellow-400
+      "base": { "light": "#eab300", "dark": "#ffce59" },
+      // Hue text:  `colors.css`' recipe again (classic hand-picks yellow / olive / green / teal)
+      "text": {
+        "light": "oklch(from {hues.yellow.color} min(l, 0.5) c h)",
+        "dark": "oklch(from {hues.yellow.color} max(l, 0.78) c h)"
+      },
+      "background": { "light": "#fff8e8", "dark": "oklch(from {hues.yellow.color} 0.28 calc(c * 0.35) h)" }
+    },
+    "olive": {
+      // lime-600
+      // lime-400
+      "base": { "light": "#6dad00", "dark": "#9fe54d" },
+      "text": {
+        "light": "oklch(from {hues.olive.color} min(l, 0.5) c h)",
+        "dark": "oklch(from {hues.olive.color} max(l, 0.78) c h)"
+      },
+      "background": { "light": "#eaffd8", "dark": "oklch(from {hues.olive.color} 0.28 calc(c * 0.35) h)" },
+      "focus": {
+        "light": "oklch(from var(--ui-olive-on-light) calc(l - 0.06) calc(c * 1.2) h)",
+        "dark": "oklch(from var(--ui-olive-on-dark) calc(l - 0.08) calc(c * 1.2) h)"
+      },
+      "down": {
+        "light": "oklch(from var(--ui-olive-on-light) calc(l - 0.07) c h)",
+        "dark": "oklch(from var(--ui-olive-on-dark) calc(l - 0.1) c h)"
+      }
+    },
+    "green": {
+      // green-700:  the brand's success
+      // green-400
+      "base": { "light": "#00853a", "dark": "#51e07b" },
+      "text": {
+        "light": "oklch(from {hues.green.color} min(l, 0.5) c h)",
+        "dark": "oklch(from {hues.green.color} max(l, 0.78) c h)"
+      },
+      "background": { "light": "#daffe0", "dark": "oklch(from {hues.green.color} 0.28 calc(c * 0.35) h)" }
+    },
+    "teal": {
+      // teal-700:  white reads (5.1:1)
+      // teal-400
+      "base": { "light": "#007c6f", "dark": "#50d3c0" },
+      "on": { "light": "oklch(1 0 0)", "dark": "var(--ui-ink-on-light)" },
+      "text": {
+        "light": "oklch(from {hues.teal.color} min(l, 0.5) c h)",
+        "dark": "oklch(from {hues.teal.color} max(l, 0.78) c h)"
+      },
+      "background": { "light": "#d9fbf4", "dark": "oklch(from {hues.teal.color} 0.28 calc(c * 0.35) h)" }
+    },
+    "blue": {
+      // blue-600
+      // blue-400
+      "base": { "light": "#1a67e0", "dark": "#69a1ff" },
+      "background": { "light": "#e4eeff", "dark": "oklch(from {hues.blue.color} 0.28 calc(c * 0.35) h)" }
+    },
+    "violet": {
+      "base": { "light": "{own.spell-violet-600}", "dark": "{own.spell-violet-300}" },
+      "background": { "light": "{own.spell-violet-100}", "dark": "{own.spell-lilac-soft}" }
+    },
+    "purple": {
+      // purple-600
+      // purple-400
+      "base": { "light": "#9233e0", "dark": "#bd82ff" },
+      "background": { "light": "#f2e9ff", "dark": "oklch(from {hues.purple.color} 0.28 calc(c * 0.35) h)" },
+      "focus": {
+        "light": "oklch(from var(--ui-purple-on-light) calc(l - 0.08) calc(c * 1.2) h)",
+        "dark": "oklch(from var(--ui-purple-on-dark) calc(l - 0.06) calc(c * 1.2) h)"
+      },
+      "down": {
+        "light": "oklch(from var(--ui-purple-on-light) calc(l - 0.1) c h)",
+        "dark": "oklch(from var(--ui-purple-on-dark) calc(l - 0.07) c h)"
+      }
+    },
+    "pink": {
+      // pink-600
+      // pink-400
+      "base": { "light": "#d60981", "dark": "#ff76b3" },
+      "background": { "light": "#ffe9f0", "dark": "oklch(from {hues.pink.color} 0.28 calc(c * 0.35) h)" }
+    },
+    "brown": {
+      // accent-600:  Polished Ivory's ladder
+      // accent-400
+      "base": { "light": "#867044", "dark": "#baa479" },
+      // accent-800 / accent-200
+      "text": { "light": "#534323", "dark": "#eaddc4" },
+      // ivory;  dark:  the brand's warm surface
+      "background": { "light": "#f7efe2", "dark": "#2c2152" }
+    },
+    "grey": {
+      // white fails on `brand-600` (4.1:1)
+      "base": { "light": "{own.spell-brand-700}", "dark": "{own.spell-brand-400}" },
+      "background": { "light": "{own.spell-brand-100}", "dark": "#c8cee712" }
+    },
+    "black": {
+      // aubergine:  the brand's inverse panels
+      "base": { "light": "{own.spell-violet-900}", "dark": "{own.spell-violet-850}" },
+      "background": { "light": "{own.spell-brand-100}", "dark": "#c8cee712" }
+    }
+  },
+  "shadows": {
+    // `tokens/theme.css` `--shadow-xs` ... `-lg`:  grey-blue and soft in light;  near-black plus a lilac ring, glow
+    // and top highlight in dark.  Both schemes' layers in ONE list, the other scheme's `transparent`.
+    "ink": { "light": "{own.spell-brand-900}", "dark": "{own.spell-violet-975}" },
+    "subtle": "0 1px 2px light-dark(#2b2f3f0f, #06031466), inset 0 1px 0 light-dark(transparent, #ffffff0a)",
+    "raised": "0 1px 2px light-dark(#2b2f3f0d, #06031466), 0 2px 8px -2px light-dark(#2b2f3f14, transparent), 0 0 0 1px light-dark(transparent, #b8b4ff0d), 0 0 22px -6px light-dark(transparent, #968aff47), inset 0 1px 0 light-dark(transparent, #ffffff0d)",
+    "floating": "0 1px 2px light-dark(#2b2f3f0d, transparent), 0 10px 28px -10px light-dark(#2b2f3f2e, transparent), 0 2px 4px light-dark(transparent, #06031473), 0 0 0 1px light-dark(transparent, #b8b4ff0f), 0 0 32px -6px light-dark(transparent, #968aff57), inset 0 1px 0 light-dark(transparent, #ffffff0f)",
+    "floating-hover": "0 2px 4px light-dark(#2b2f3f0f, #06031480), 0 24px 56px -16px light-dark(#2b2f3f42, #060314b3), 0 0 40px -8px light-dark(transparent, #968aff4d)",
+    "overlay": "{shadows.floating-hover}"
+  },
+  "motion": {
+    "ease": {
+      // Motion:  the brand's ease-out
+      "out": "cubic-bezier(0.22, 1, 0.36, 1)"
+    }
+  },
+  "components": {
+    "button": {
+      "radius": "{radii.pill}",
+      // Buttons:  the brand's UI weight (500);  the default button a quiet grey-blue fill, aubergine text
+      "font-weight": 500,
+      // hover, down and on:  a see-through blue ink in light, as dark's lilac, so in a group they show ON its track
+      // (a `brand-150` tile on the `brand-100` track was 1.05:1);  on the page alone they still come out
+      // `brand-150` / `brand-200`, as before
+      "background": { "light": "{own.spell-brand-100}", "dark": "#c8cee71a" },
+      "background-hover": { "light": "#203faf1a", "dark": "#c8cee729" },
+      "background-down": { "light": "#203faf24", "dark": "#c8cee738" },
+      "background-active": { "light": "#203faf24", "dark": "#c8cee733" },
+      "color": "{text.strong}",
+      "color-hover": "{text.strong}"
+    },
+    "label": {
+      "radius": "{radii.pill}",
+      "font-weight": 500
+    },
+    "progress": {
+      "radius": "{radii.pill}",
+      // Progress:  a purple bar on a grey-blue track (the brand's build checklist colours)
+      "background": { "light": "{own.spell-brand-100}", "dark": "#c8cee71a" },
+      "bar-background": "{brand.primary.color}",
+      "text-color": "{brand.primary.on}"
+    },
+    "checkbox": {
+      "radius": "{radii.circle}",
+      // the brand's done to-do, a FILLED purple circle with a white check (issue I1)
+      "checked-background": "{brand.primary.color}",
+      "checked-border-color": "{brand.primary.color}",
+      "checked-mark-color": "{brand.primary.on}"
+    },
+    "card": {
+      "radius": "{radii.l}",
+      // Surfaces wear a hairline AND a soft shadow (brand cards)
+      "border-color": { "light": "{own.spell-brand-100}", "dark": "{own.spell-hairline-subtle}" },
+      "hover-border-color": "{borders.color}",
+      "shadow": "{shadows.raised}",
+      "hover-shadow": "{shadows.floating}"
+    },
+    "segment": {
+      "radius": "{radii.l}",
+      "border-color": { "light": "{own.spell-brand-100}", "dark": "{own.spell-hairline-subtle}" },
+      "shadow": "{shadows.raised}",
+      "raised-shadow": "{shadows.floating}"
+    },
+    "message": {
+      "radius": "{radii.l}"
+    },
+    "toast": {
+      "radius": "{radii.l}"
+    },
+    "modal": {
+      "radius": "22px",
+      "shadow": "{shadows.floating-hover}"
+    },
+    "popup": {
+      "radius": "{radii.s}"
+    },
+    "dimmer": {
+      // the scrim:  aubergine at 36% (the brand's 4px blur has no token)
+      "background": { "light": "#1a0f3f5c", "dark": "#06031499" }
+    },
+    "bar": {
+      "color": "{text.body}"
+    },
+    "nag": {
+      // Nags:  the brand's inverse panel, aubergine
+      "background": { "light": "{own.spell-violet-900}", "dark": "{own.spell-violet-850}" }
+    },
+    "menu": {
+      // Menus:  the brand's selected nav item, a lavender fill with purple text;  a faint tint on hover
+      "hover-background": { "light": "{own.spell-brand-50}", "dark": "#c8cee712" },
+      "active-background": { "light": "{own.spell-violet-100}", "dark": "{own.spell-lilac-soft}" },
+      "active-color": { "light": "{own.spell-violet-700}", "dark": "{own.spell-violet-200}" },
+      // a `secondary` menu (the brand's side nav):  `spell`'s menu hover and active colours, which its own tokens
+      // never take from the generic `:root` ones
+      "secondary-hover-background": { "light": "{own.spell-brand-50}", "dark": "#c8cee712" },
+      "secondary-active-background": { "light": "{own.spell-violet-100}", "dark": "{own.spell-lilac-soft}" },
+      "secondary-active-color": { "light": "{own.spell-violet-700}", "dark": "{own.spell-violet-200}" },
+      // Segmented controls (`appearance="segmented"`, menus and tab sets):  the brand's `.sp-seg`, a pill track in
+      // the lavender tint with an inset hairline, 3px around and 2px between the options;  the chosen one a raised
+      // card-coloured thumb, strong text, `--shadow-sm`;  the others muted.  28px options at 13px:  `0.58em` padding.
+      "segmented-background": "{own.spell-surface-tint}",
+      "segmented-border": "1px solid {own.spell-border-subtle}",
+      "segmented-radius": "{radii.pill}",
+      "segmented-padding": "2px",
+      "segmented-gap": "2px",
+      "segmented-divider": "transparent",
+      "segmented-item-padding": "0.58em 1.08em",
+      "segmented-item-color": "{own.spell-text-muted}",
+      "segmented-item-radius": "{radii.pill}",
+      // dark:  the lilac tint, a step lighter than the track (the aubergine card barely showed on the page)
+      "segmented-active-background": { "light": "{surfaces.panel}", "dark": "{own.spell-lilac-soft}" },
+      "segmented-active-hover-background": "{components.menu.segmented-active-background}",
+      "segmented-active-color": "{own.spell-text-strong}",
+      "segmented-active-shadow": "{own.spell-shadow-sm}"
+    },
+    "header": {
+      // Headers:  regular serif by default (h1 / h2 bold, below);  the brand's display sizes;  aubergine ledes
+      "font-weight": "{typography.weight.normal}",
+      "h1": 2.5,
+      "h2": 1.875,
+      "h3": 1.375,
+      "h4": 1.0625,
+      "sub-color": { "light": "{own.spell-violet-800}", "dark": "{own.spell-violet-200}" }
+    },
+    "slider": {
+      // the brand's range (Color Set Chooser):  a thin pill track in Spell Purple, an 18px thumb set off
+      // by a soft shadow, never a white ring;  compact, so a field's label row sits right above it (issue I2)
+      "height": "1.125em",
+      "padding-block": "0.375em",
+      "padding-inline": "0.5625em",
+      "track-height": "0.25em",
+      "track-radius": "{radii.pill}",
+      "track-color": { "light": "{own.spell-brand-150}", "dark": "{own.spell-hairline}" },
+      "fill-color": "{brand.primary.color}",
+      "fill-color-focus": "{brand.primary.hover}",
+      "thumb-background": { "light": "oklch(1 0 0)", "dark": "{own.spell-violet-50}" },
+      "thumb-background-hover": { "light": "{own.spell-violet-25}", "dark": "oklch(1 0 0)" },
+      "thumb-shadow": "0 1px 3px light-dark(#2b2f3f47, #06031499), 0 0 0 0.5px light-dark(#2b2f3f1f, transparent)",
+      "tick-color": { "light": "{own.spell-brand-300}", "dark": "{own.spell-hairline-strong}" }
+    },
+    "section": {
+      // `<ui-section info>` (and so `<ui-panel>`'s bands) and `<ui-field description>`:  the brand's tooltip, an
+      // aubergine bubble
+      "tip-background": "{own.spell-surface-inverse}",
+      "tip-color": "{own.spell-text-inverse}",
+      // the brand's fold chevron (Theme Creator, Color Set Chooser):  UP while open, DOWN while folded
+      "fold-icon-rotate": "180deg",
+      "fold-icon-folded-rotate": "0deg"
+    },
+    "field-tip": {
+      "background": "{own.spell-surface-inverse}",
+      "color": "{own.spell-text-inverse}"
+    },
+    "markdown": {
+      // Markdown:  the Design Guide's prose (`Design Guide.dc.html`):  bold serif headings in the strong ink, no rule
+      // under them (`##` 28px, `###` 19px of its 15px text), a hairline `hr`, bold text and inline code in the strong ink
+      "heading-color": "{own.spell-text-strong}",
+      "heading-font-family": "{typography.family.heading}",
+      "heading-weight": "{typography.weight.bold}",
+      "heading-line-height": 1.2,
+      "heading-margin": "1.1em 0.43em",
+      "heading-rule": "none",
+      "heading-rule-gap": 0,
+      // below the site header, which `scroll-padding-top` already clears
+      "heading-scroll-margin": "24px",
+      "h2-size": "calc(28em / 15)",
+      "h3-size": "calc(19em / 15)",
+      "hr-height": "1px",
+      "rule-color": "{own.spell-border-subtle}",
+      "strong-color": "{own.spell-text-strong}",
+      "code-color": "{own.spell-text-strong}",
+      "code-background": "{own.spell-surface-code}"
+    },
+    "example": {
+      // a docs page's example frame:  the brand's largest corner, 28px, rounder than the pill buttons inside it
+      // (Owen's pick, epic `debut` P17, Q1:  "rounding of outer rings needs to be greater than rounding of inner bits";
+      // the frame was the theme's 16px round 20px pill ends)
+      "frame-radius": "{own.spell-radius-2xl}"
+    }
+  }
+}

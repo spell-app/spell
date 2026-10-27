@@ -1454,7 +1454,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
         { shape: "paragraph", lines: 6 }
       ]
     },
-    attributes: ["for", "heading", "size", "expanded"]
+    attributes: ["for", "scroller", "heading", "size", "expanded"]
   },
   "ui-toolbar": {
     folder: "ui-toolbar",

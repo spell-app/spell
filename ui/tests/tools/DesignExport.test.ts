@@ -108,7 +108,7 @@ describe("DesignExport.build() tokens.json", () => {
     expect(Object.fromEntries(colors)).toMatchObject({
       "violet-500": "#7b68e9",
       primary: "{violet}",
-      surface: { light: "oklch(1 0 0)", dark: "{violet-925}" }
+      surface: { light: "oklch(1 0 0)", dark: "{violet-900}" }
     })
     // computed:  color-mix() in light, an alias in dark
     expect(themed(colors.get("text-light")!, "light")).toMatch(/^#[0-9a-f]{6}$/)

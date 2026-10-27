@@ -38173,7 +38173,7 @@
       "name": "ui-toc",
       "description": {
         "kind": "markdown",
-        "value": "A table of contents lists the page's sections and examples as links, opens the one in view and follows the scroll.  Each section folds and opens by its chevron, and one button in its header opens or folds them all;  the viewer's folds are kept.\n\nAlso known as:  table of contents, on this page, page index, scrollspy, toc, following menu.\n\n**Events:**  `ui-scrolled-to`, `ui-drawn`"
+        "value": "A table of contents lists the page's sections and examples as links, opens the one in view and follows the scroll.  Each section folds and opens by its chevron, and one button in its header opens or folds them all;  the viewer's folds are kept.\n\nAlso known as:  table of contents, on this page, page index, scrollspy, toc, following menu.\n\n**Slots:**  `tools`\n\n**Events:**  `ui-scrolled-to`, `ui-drawn`"
       },
       "attributes": [
         {
@@ -38181,6 +38181,13 @@
           "description": {
             "kind": "markdown",
             "value": "Id of the element whose headings to list.  A `<ui-tabs>`:  its SHOWN pane, followed as the tabs switch.  Default:  the page's `<main>`, else `<body>`.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "scroller",
+          "description": {
+            "kind": "markdown",
+            "value": "Id of the element whose scroll it follows, when the content scrolls inside a box of its own (a pane) rather than the window.  Its reading line is then that box's top.  Default:  the window.\n\nTakes:  text"
           }
         },
         {

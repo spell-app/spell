@@ -27,7 +27,7 @@ import tocCSS from "./UIToc.css?inline"
  *
  * - Its shadow DOM:
  *   `<div class="ui [size] toc" part="toc">` holding a `<div part="head">` row (an optional `<ui-header part="header">`,
- *   the expand all / collapse all `<button part="toggle-all">`)
+ *   the expand all / collapse all `<button part="toggle-all">`, then the `tools` slot:  a page's own buttons)
  *   and ONE `<ui-menu direction="vertical" appearance="text" fluid part="menu">` (the landmark) of section links.
  *   - Each section is a `<div part="section-row">`:  its fold `<button part="fold">` (when it has entries), its link.
  *   - Under an open section, an item holds a `<ui-menu part="entries">` of its entries' links.
@@ -46,6 +46,8 @@ import tocCSS from "./UIToc.css?inline"
  *     so every attribute, event ... is listed under its section
  * - It follows the scroll:  the entry whose top passed the reading line (`TocIndex.current()`) is `selected`,
  *   and its section opens;  `ui-scrolled-to { value }` when that changes.
+ *   - The window's scroll, or, with `scroller`, the scroll of the box that id names:  content scrolling in a pane
+ *     of its own (spell-app's notebook page), its reading line from that box's top.
  * - Links are plain `#id` links:  the browser scrolls (below the document's `scroll-padding-top`).
  *   - As the page opens and on `hashchange`, it lands on the hash through `HashLanding`:  a target in a HIDDEN pane
  *     of the tabs shows that pane first (`<ui-tabs history>` ignores hashes that aren't pane values), its folds open,
@@ -59,7 +61,8 @@ import tocCSS from "./UIToc.css?inline"
  * - SIDE EFFECTS:
  *   - gives each listed heading / example without an `id` one (a slug of its text), so its link works
  *   - the viewer's folds, in `localStorage` (`TocPreferences`)
- *   - while connected:  `window` `scroll` / `resize` / `hashchange` listeners, and the two observers.
+ *   - while connected:  `window` `scroll` / `resize` / `hashchange` listeners (`scroll` on `scroller` too, once it
+ *     exists), and the two observers.
  ****************/
 export class UIToc extends E.UIComponent<TocVocabulary> {
   @E.proto static vocabulary = tocVocabulary
@@ -175,6 +178,7 @@ export class UIToc extends E.UIComponent<TocVocabulary> {
               <ui-header part={this.partForName("header")}>{this.heading}</ui-header>
             </Show>
             <Show when={this.hasFolds}>{this.toggleAllButton()}</Show>
+            <slot name="tools" />
           </div>
         </Show>
         <ui-menu
@@ -335,7 +339,12 @@ export class UIToc extends E.UIComponent<TocVocabulary> {
     const onHash = () => this.reveal()
     this.loadFolds()
     let followed: FollowedContent | undefined
-    const start = () => (followed = this.observe({ observer, resized, onShow, onDrawn }))
+    let scrolling: Element | undefined
+    const start = () => {
+      followed = this.observe({ observer, resized, onShow, onDrawn })
+      scrolling = this.scrollerElement()
+      scrolling?.addEventListener("scroll", onScroll, { passive: true })
+    }
     view.addEventListener("scroll", onScroll, { passive: true })
     view.addEventListener("resize", onScroll, { passive: true })
     view.addEventListener("hashchange", onHash)
@@ -347,6 +356,7 @@ export class UIToc extends E.UIComponent<TocVocabulary> {
       resized.disconnect()
       followed?.tabs?.removeEventListener(UI_SHOW, onShow)
       followed?.root.removeEventListener(UI_DRAWN, onDrawn)
+      scrolling?.removeEventListener("scroll", onScroll)
       document.removeEventListener("DOMContentLoaded", start)
       view.removeEventListener("scroll", onScroll)
       view.removeEventListener("resize", onScroll)
@@ -407,7 +417,7 @@ export class UIToc extends E.UIComponent<TocVocabulary> {
   /** Mark the entry in view;  `ui-scrolled-to` when it moved. */
   @E.untracked
   private followScroll(sections = this.sections): void {
-    const id = TocIndex.current(sections, this.domElement.ownerDocument)
+    const id = TocIndex.current(sections, this.domElement.ownerDocument, this.scrollerElement())
     if (id === this.idInView) return
     this.idInView = id
     if (id) this.send("ui-scrolled-to", { value: id })
@@ -427,6 +437,11 @@ export class UIToc extends E.UIComponent<TocVocabulary> {
   /** What `for` names (else the page's `main`), and its tabs;  `undefined` while it doesn't exist. */
   private followedContent(): FollowedContent | undefined {
     return TocIndex.followed(this.domElement.ownerDocument, this.for || undefined)
+  }
+
+  /** The box `scroller` names, whose scroll it follows;  `undefined` for the window (or while it doesn't exist). */
+  private scrollerElement(): Element | undefined {
+    return (this.scroller && this.domElement.ownerDocument.getElementById(this.scroller)) || undefined
   }
 
   /** Ids a new heading id must not take:  the followed tabs' pane values (the URL hash names those too). */

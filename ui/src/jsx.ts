@@ -33868,6 +33868,16 @@ export interface UITocAttributes {
    */
   "prop:htmlFor"?: string
   /**
+   * Id of the element whose scroll it follows, when the content scrolls inside a box of its own (a pane) rather than the window.  Its reading line is then that box's top.  Default:  the window.
+   * - takes:  text
+   */
+  scroller?: string
+  /**
+   * `scroller`, as the DOM element's property.
+   * @deprecated write `scroller` -- `prop:` stays only for compiled spell
+   */
+  "prop:scroller"?: string
+  /**
    * Title above the links, e.g. the page's name (Fomantic's `Button`).  Its old name was `header`.
    * - takes:  text
    */
@@ -36923,6 +36933,8 @@ declare module "@solidjs/web/types/jsx.js" {
       /**
        * `<ui-toc>`:  A table of contents lists the page's sections and examples as links, opens the one in view and follows the scroll.  Each section folds and opens by its chevron, and one button in its header opens or folds them all;  the viewer's folds are kept.
        * - also known as:  table of contents, on this page, page index, scrollspy, toc, following menu
+       * - slots:
+       *   - `tools`:  Buttons at the right end of the header's row, after the expand all / collapse all toggle (a page's own, e.g. one hiding the contents).  Shown with `heading`.
        * - events:  `ui-scrolled-to`, `ui-drawn`
        */
       "ui-toc": UITocJSXAttributes
