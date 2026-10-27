@@ -263,8 +263,10 @@ const ICONS = {
  * which the epic pages' stores import since epic `prefs-and-undo`, and its files import each other by):  found as
  * their source files.  esbuild adds no extension to a package's `exports`, so `spell/util/class` failed.
  * - NOT Spell UI's (`spell/ui/...`, a folder of the one package since epic `repo-split` P20):  its built `dist/`.
+ * - No lookahead:  esbuild runs the filter as a Go regular expression, which has none,
+ *   so "anything but `ui`" is spelled out (`u` alone, `u` then not `i`, `ui` then not `/`).
  */
-const SPELL_EPIC = /^spell(?:-epic)?(?:\/(?!ui(?:\/|$)).*)?$/
+const SPELL_EPIC = /^spell(?:-epic)?(?:\/(?:[^u].*|u|u[^i].*|ui[^/].*))?$/
 
 /** Bare specifiers that MUST resolve from UI's root:  Solid, all subpaths. */
 const SOLID = /^(solid-js|@solidjs\/[\w-]+)(\/.*)?$/
