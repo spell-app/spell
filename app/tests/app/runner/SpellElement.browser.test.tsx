@@ -1,4 +1,4 @@
-import { describe, expect, test, vi } from "vite-plus/test"
+import { describe, expect, onTestFinished, test, vi } from "vite-plus/test"
 import { flush } from "solid-js"
 import h from "@solidjs/h"
 
@@ -733,6 +733,7 @@ describe("SpellElement", () => {
     }
 
     test("a reordered list:  the dragged item dims, a line shows where it goes, and the drop puts it there (outline-spell P30)", async () => {
+      motionOn()
       const { element, chits, labelsNow, done } = await drawColumn("a", "b", "c")
       try {
         const [a, , c] = chits()
@@ -867,6 +868,7 @@ describe("SpellElement", () => {
     })
 
     test("a chip moved to another pot glides there from where it was (outline-spell P27)", async () => {
+      motionOn()
       const [from, to] = [new Pot(), new Pot()]
       const chip = new Chip("a")
       core.append(from, new Chip("stays"), chip)
@@ -1568,3 +1570,19 @@ describe("SpellElement", () => {
     })
   })
 })
+
+/**
+ * Motion ON for this test:  `prefers-reduced-motion: reduce` reads false, in this file's frame only.
+ * - Every browser test's page asks for reduced motion (the kit's `browserMode()`;  epic `debut` I77),
+ *   and nothing glides then (`Glides`).
+ * - Not the page's own setting:  the files beside this one share the page.
+ */
+function motionOn(): void {
+  const matchMedia = window.matchMedia.bind(window)
+  const spy = vi
+    .spyOn(window, "matchMedia")
+    .mockImplementation((query) =>
+      /prefers-reduced-motion:\s*reduce/.test(query) ? { ...matchMedia(query), matches: false } : matchMedia(query)
+    )
+  onTestFinished(() => spy.mockRestore())
+}

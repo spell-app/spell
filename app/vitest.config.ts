@@ -1,6 +1,7 @@
 import { configDefaults, defineConfig, type TestProjectConfiguration } from "vite-plus"
 import { playwright } from "vite-plus/test/browser-playwright"
 
+import { browserMode } from "spell/toolchain/browserMode"
 import { standardDecorators } from "spell/toolchain/decorators"
 import { packageVersion } from "spell/toolchain/packageVersion"
 import { appConfig } from "./app/vite.shared.ts"
@@ -77,12 +78,8 @@ function appProjects(): TestProjectConfiguration[] {
         include: BROWSER_TESTS,
         // Spell UI's core first, as a page has it:  its settings for `spell/element`
         setupFiles: ["spell-ui/test-helpers/setup.ts"],
-        browser: {
-          enabled: true,
-          provider: playwright(),
-          headless: true,
-          instances: [{ browser: "chromium" }]
-        }
+        // chromium, animations off (the kit's `browserMode()`, every repo's)
+        browser: browserMode(playwright)
       }
     }
   ]
