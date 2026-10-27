@@ -9,9 +9,9 @@
  *   so the noun's gender never has to agree with a word around it.
  */
 
-import type { AppLanguagePack, AppTextPack } from "spell-app/app/ui/AppTexts"
-import { spellViewerEs } from "spell-app/app/components/spell-viewer/SpellViewer.es"
-import { spellEditorEs } from "spell-app/app/components/spell-editor/SpellEditor.es"
+import type { AppLanguagePack, AppTextPack } from "spell/app/app/ui/AppTexts"
+import { spellViewerEs } from "spell/app/app/components/spell-viewer/SpellViewer.es"
+import { spellEditorEs } from "spell/app/app/components/spell-editor/SpellEditor.es"
 
 /** The editor's own texts, in Spanish. */
 const APP_TEXTS_ES: AppTextPack = {

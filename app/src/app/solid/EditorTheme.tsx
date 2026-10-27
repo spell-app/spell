@@ -1,7 +1,7 @@
 import { isServer, type JSX } from "@solidjs/web"
 
-import { editor } from "spell-app/app/editor"
-import { appTexts } from "spell-app/app/ui/AppTexts"
+import { editor } from "spell/app/app/editor"
+import { appTexts } from "spell/app/app/ui/AppTexts"
 import { uiReady } from "./loadUI"
 
 import "./EditorTheme.css"
@@ -24,7 +24,7 @@ import "./EditorTheme.css"
  * - A theme made with Spell UI's theme editor and kept there (Use this theme) is worn over its base,
  *   while that base is the theme chosen (`SavedTheme.follow()`, epic `debut` P6).
  * - The code's colours aren't a page theme:  Monaco's Purple follows the page's light / dark by itself
- *   (`spell-app/app/ui/monaco/themes`).
+ *   (`spell/app/app/ui/monaco/themes`).
  * - Loads lazily, as `loadUI()` does:  Spell UI's half is its own chunk, off the app's first paint.
  * - The editor app's only:  NEVER from `<spell-viewer>` / `<spell-editor>`, which live on other people's pages.
  ****************/
@@ -47,7 +47,7 @@ export class EditorTheme {
     if (isServer) return
     try {
       await uiReady
-      const { ThemePreference } = await import("spell-ui/components/ui-theme-menu/ThemePreference")
+      const { ThemePreference } = await import("spell/ui/components/ui-theme-menu/ThemePreference")
       ThemePreference.site({ defaultTheme: EditorTheme.DEFAULT_THEME, themeKey: EditorTheme.THEME_KEY })
       EditorTheme.follow(ThemePreference.chosen.theme)
       ThemePreference.subscribe((chosen) => EditorTheme.follow(chosen.theme))
@@ -55,7 +55,7 @@ export class EditorTheme {
       // framed by Spell UI's theme editor, while developing:  wear its theme, scheme and sheet, open the full view;
       // never remembered, so the editor's own choice stays (and a window on this address keeps its scheme)
       if (import.meta.env.DEV && window.parent !== window) {
-        const { PageBridge } = await import("spell-ui/components/ui-theme-editor/PageBridge")
+        const { PageBridge } = await import("spell/ui/components/ui-theme-editor/PageBridge")
         PageBridge.listen({
           theme: (name) => EditorTheme.wearForPreview(name),
           scheme: (scheme) =>
@@ -74,7 +74,7 @@ export class EditorTheme {
    * - NEVER throws:  `PageBridge.listen()` catches and logs.
    */
   static async wearForPreview(name: string): Promise<void> {
-    const { ThemePreference } = await import("spell-ui/components/ui-theme-menu/ThemePreference")
+    const { ThemePreference } = await import("spell/ui/components/ui-theme-menu/ThemePreference")
     document.documentElement.dataset.spellTheme = name
     await ThemePreference.wear(name)
   }
@@ -117,8 +117,8 @@ export class EditorTheme {
   static async wearKept(): Promise<void> {
     try {
       const [{ ThemePreference }, { SavedTheme }] = await Promise.all([
-        import("spell-ui/components/ui-theme-menu/ThemePreference"),
-        import("spell-ui/components/ui-theme-editor/SavedTheme")
+        import("spell/ui/components/ui-theme-menu/ThemePreference"),
+        import("spell/ui/components/ui-theme-editor/SavedTheme")
       ])
       const base = SavedTheme.choices?.base
       // a new base:  choosing it puts the kept sheet on too (`follow()`);  the same one:  the sheet changed
@@ -134,7 +134,7 @@ export class EditorTheme {
     if (theme) document.documentElement.dataset.spellTheme = theme
     else delete document.documentElement.dataset.spellTheme
     // the theme made in Spell UI's theme editor and kept there (Use this theme), worn while its base is chosen
-    void import("spell-ui/components/ui-theme-editor/SavedTheme")
+    void import("spell/ui/components/ui-theme-editor/SavedTheme")
       .then(({ SavedTheme }) => SavedTheme.follow(theme))
       .catch((error: unknown) => console.error("EditorTheme:  couldn't wear the theme kept in the browser", error))
   }

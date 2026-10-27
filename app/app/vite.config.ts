@@ -3,7 +3,7 @@ import path from "node:path"
 import { defineConfig, type Plugin } from "vite-plus"
 
 import { fmtConfig, packageLint } from "spell/toolchain/lint"
-import environment from "spell-app/spaces/server/node/environment"
+import environment from "spell/app/spaces/server/node/environment"
 import { TOP_REPO, appConfig } from "./vite.shared.ts"
 
 /** Name of the runtime's entry in a build:  `dist/spell-runtime.js` -- see `editor.loadRuntime()`. */
@@ -16,7 +16,7 @@ const APP_CONFIG = appConfig({ iconPacks: true })
  * The editor app:  `yarn start:dev` / `yarn build` => `dist/`.
  * - Plugins, dedupe and CSS:  `appConfig()`;  in dev, `repoSourceInDev()` too.
  * - `iconPacks`:  `spell-ui`'s built-in icon packs go beside the chunk holding `BuiltInPacks` (`assets/`), where
- *   it looks;  the app's Solid UI draws Fomantic names from them (`spell-app/app/solid`'s `loadUI.ts`).
+ *   it looks;  the app's Solid UI draws Fomantic names from them (`spell/app/app/solid`'s `loadUI.ts`).
  * - ONE page, so it bundles its own Solid and `ui`:  `spell-solid.js` is the elements' and the runner's.
  */
 export default defineConfig({

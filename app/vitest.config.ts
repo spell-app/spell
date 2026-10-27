@@ -77,7 +77,7 @@ function appProjects(): TestProjectConfiguration[] {
         dir: APP_TESTS,
         include: BROWSER_TESTS,
         // Spell UI's core first, as a page has it:  its settings for `spell/element`
-        setupFiles: ["spell-ui/test-helpers/setup.ts"],
+        setupFiles: ["spell/ui/test-helpers/setup.ts"],
         // chromium, animations off (the kit's `browserMode()`, every repo's)
         browser: browserMode(playwright)
       }
@@ -94,7 +94,7 @@ function browserConfig() {
   return {
     ...appConfig(),
     optimizeDeps: {
-      // crawl the tests' imports up front:  `spell-app/app/editor` pulls in more (`marked`, lodash ...)
+      // crawl the tests' imports up front:  `spell/app/app/editor` pulls in more (`marked`, lodash ...)
       // - `spellRuntime.ts` too:  tests import it by URL (`editor.loadRuntime()`), which the crawl can't follow, so
       //   ITS deps (`lodash/cloneDeep` ...) were found mid-run on a fresh cache (C6)
       entries: [...BROWSER_TESTS.map((glob) => `${APP_TESTS}/${glob}`), "src/app/runner/spellRuntime.ts"],

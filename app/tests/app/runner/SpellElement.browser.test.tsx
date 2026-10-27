@@ -3,14 +3,14 @@ import { flush } from "solid-js"
 import h from "@solidjs/h"
 
 import { peekProp } from "spell/util"
-import { core, App, View, ViewableList, Thing } from "spell-parser/core"
-import { P } from "spell-parser/parser"
-import { E } from "spell-ui/core"
-import { RootLoader } from "spell-ui/components/ui-root"
+import { core, App, View, ViewableList, Thing } from "spell/parser/core"
+import { P } from "spell/parser/parser"
+import { E } from "spell/ui/core"
+import { RootLoader } from "spell/ui/components/ui-root"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
-import { installSpellElements, SpellElement } from "spell-app/app/runner/SpellElement"
+import { installSpellElements, SpellElement } from "spell/app/app/runner/SpellElement"
 
-import "spell-app/app/solid/cellsBridge"
+import "spell/app/app/solid/cellsBridge"
 
 /**
  * A view's own element (epic `drawable-thing`, P3).
