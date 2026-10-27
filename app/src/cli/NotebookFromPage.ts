@@ -202,14 +202,14 @@ export class NotebookFromPage {
       }
       if (node.nodeType !== ELEMENT) continue
       const element = node as Element
-      const special = [SECTION, EXAMPLE, MARKDOWN, CODE].includes(element.localName)
+      const special = EXAMPLES.has(element.localName) || [SECTION, MARKDOWN, CODE].includes(element.localName)
       if (special || element.localName === "ui-header") flushMarkup()
       if (element.localName === SECTION) {
         this.writeSection(out, element, indent, place, pendingNotes.splice(0))
         continue
       }
       for (const note of pendingNotes.splice(0)) this.writeGapNote(out, note, indent)
-      if (element.localName === EXAMPLE) this.writeExample(out, element, indent, place)
+      if (EXAMPLES.has(element.localName)) this.writeExample(out, element, indent, place)
       else if (element.localName === MARKDOWN) this.writeMarkdown(out, [markdownOf(element)], indent, place)
       else if (element.localName === CODE) this.writeMarkdown(out, [fenceOf(element)], indent, place)
       else if (element.localName === "ui-message" && element.querySelector(MARKDOWN)) {
@@ -268,13 +268,13 @@ export class NotebookFromPage {
       const texts = describers.map((child) => backtickedTextOf(child))
       description = [description, ...texts].filter(Boolean).join("  ")
     }
-    const header = example.getAttribute("header")
+    const header = example.getAttribute("heading") ?? example.getAttribute("header")
     const heads = [
       "example",
       ...(header ? [`"${escapeAttribute(header)}"`] : []),
       ...example
         .getAttributeNames()
-        .filter((name) => !["description", "header"].includes(name))
+        .filter((name) => !["description", "heading", "header"].includes(name))
         .map((name) => attributeText(name, example.getAttribute(name)!)),
       ...(description ? [`description="${escapeAttribute(description)}"`] : [])
     ]
@@ -634,9 +634,9 @@ const ELEMENT = 1
 const TEXT = 3
 const COMMENT = 8
 
-/** The page's tags this reads. */
+/** The page's tags this reads:  an example is `<ui-example>` (`<ui-docs-example>` before epic `ui-gaps` P14). */
 const SECTION = "ui-section"
-const EXAMPLE = "ui-docs-example"
+const EXAMPLES = new Set(["ui-example", "ui-docs-example"])
 const MARKDOWN = "ui-markdown"
 const CODE = "ui-code"
 

@@ -1,7 +1,7 @@
 /*
  * A cell's tools (`<CellTools>`) and the notebook's ⋯ menu (`<NotebookMenu>`), NotebookCellTools.tsx.
  * - Each tool in the look of its example's `</>`:  its size, corner and fill, handed down by the example's `tools`
- *   row (`--ui-docs-example-tool-*`);  on a section's title bar, the same values as their fallbacks.
+ *   row (`--ui-example-tool-*`);  on a section's title bar, the same values as their fallbacks.
  * - Hosts are `display: contents`:  rules reach the boxes through `::part()`.
  */
 
@@ -13,15 +13,15 @@
   & > ui-button::part(button),
   & > ui-dropdown > ui-button[slot="trigger"]::part(button) {
     box-sizing: border-box;
-    width: var(--ui-docs-example-tool-size, 28px);
+    width: var(--ui-example-tool-size, 28px);
     min-width: 0;
-    min-height: var(--ui-docs-example-tool-size, 28px);
+    min-height: var(--ui-example-tool-size, 28px);
     padding: 0;
     margin: 0;
     justify-content: center;
     border: 0;
-    border-radius: var(--ui-docs-example-tool-radius, 6px);
-    background: var(--ui-docs-example-tool-background, var(--ui-surface));
+    border-radius: var(--ui-example-tool-radius, 6px);
+    background: var(--ui-example-tool-background, var(--ui-surface));
     box-shadow:
       0 0 0 1px var(--ui-border-color),
       var(--ui-shadow-subtle, 0 0 #0000);
