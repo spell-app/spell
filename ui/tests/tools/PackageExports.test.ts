@@ -19,15 +19,18 @@ const ROOT = fileURLToPath(new URL("../../", import.meta.url))
 /** Folders whose `index.ts` no other code imports as a folder:  page scripts and test data. */
 const NOT_BARRELS = /\/(templates|fixtures|examples|demo)\//
 
+/** The ONE package's `package.json`, the kit's, which holds this folder's `exports` (epic `repo-split` P20). */
+const KIT = join(ROOT, "..")
+
 describe("package.json exports", () => {
-  test("every folder barrel has its own key, pointing at its index.ts", () => {
-    const exports = JSON.parse(readFileSync(join(ROOT, "package.json"), "utf8")).exports as Record<string, unknown>
+  test("every folder barrel has its own key in the kit's, `./ui/...`, pointing at its index.ts", () => {
+    const exports = JSON.parse(readFileSync(join(KIT, "package.json"), "utf8")).exports as Record<string, unknown>
     const barrels = (readdirSync(join(ROOT, "src"), { recursive: true }) as string[])
       .map((path) => relative(ROOT, join(ROOT, "src", path)))
       .filter((path) => path.endsWith("/index.ts") && path !== "src/index.ts" && !NOT_BARRELS.test(`/${path}`))
     const missing = barrels.filter((barrel) => {
-      const key = `./${barrel.slice("src/".length, -"/index.ts".length)}`
-      return (exports[key] as { default?: string } | undefined)?.default !== `./${barrel}`
+      const key = `./ui/${barrel.slice("src/".length, -"/index.ts".length)}`
+      return (exports[key] as { default?: string } | undefined)?.default !== `./ui/${barrel}`
     })
     expect(missing).toEqual([])
   })

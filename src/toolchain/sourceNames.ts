@@ -8,8 +8,8 @@ import type { Plugin } from "esbuild"
 /****************
  * ### `sourceNames()`
  * An esbuild plugin finding our packages' names as their SOURCE files, the way Vite and `tsx` do:
- * `spell/server` => the kit's `src/server/index.ts`, `spell-epic/config/RealPath` => spell-epic's
- * `src/config/RealPath.ts`.
+ * `spell/server` => the kit's `src/server/index.ts`, `spell/epic/config/RealPath` => its epic folder's
+ * `epic/src/config/RealPath.ts` (a folder of the package, its `workspaces`:  epic `repo-split` P20).
  *
  * ```ts
  * import { sourceNames } from "spell/toolchain/sourceNames"
@@ -48,8 +48,12 @@ export function sourceFileFor(specifier: string, from: string = import.meta.file
   const [, pkg = specifier, path] = PACKAGE_NAME.exec(specifier) ?? []
   const root = packageRootFor(pkg, from)
   if (!root) return undefined
-  const src = join(root, "src")
-  const candidates = path ? [`${path}.ts`, `${path}.tsx`, `${path}/index.ts`, `${path}/index.tsx`, path] : ["index.ts"]
+  // a folder of the package (its `workspaces`, epic `repo-split` P20):  `spell/ui/core` is `ui/src/core.ts`
+  const [first = "", ...more] = (path ?? "").split("/")
+  const inFolder = first && foldersOf(root).includes(first)
+  const src = inFolder ? join(root, first, "src") : join(root, "src")
+  const rest = inFolder ? more.join("/") : path
+  const candidates = rest ? [`${rest}.ts`, `${rest}.tsx`, `${rest}/index.ts`, `${rest}/index.tsx`, rest] : ["index.ts"]
   for (const candidate of candidates) {
     const file = join(src, candidate)
     if (existsSync(file) && statSync(file).isFile()) return realpathSync(file)
@@ -89,6 +93,16 @@ export function resolvedFile(specifier: string, from: string = import.meta.filen
     return realpathSync(createRequire(pathToFileURL(base)).resolve(specifier))
   } catch {
     return undefined
+  }
+}
+
+/** The folders package `root` lists as its `workspaces` (the kit's:  `parser`, `ui` ...);  none when it lists none. */
+function foldersOf(root: string): string[] {
+  try {
+    const { workspaces } = JSON.parse(readFileSync(join(root, "package.json"), "utf8")) as { workspaces?: unknown }
+    return Array.isArray(workspaces) ? workspaces.filter((each): each is string => typeof each === "string") : []
+  } catch {
+    return []
   }
 }
 

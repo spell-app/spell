@@ -113,7 +113,7 @@ const DATA_PAGES = ["commands", "core-reference", "spell-syntax"]
  *   shadow hosts) is on `globalThis`, so the family's own copy shares it
  */
 const UI_SOURCE_ONLY =
-  /^spell-ui\/(docs-components\/.+|components\/components\.types|components\/ui-zoom\/ImageZoom|components\/ui-toc\/(TocIndex|HashLanding|PageOutline))$/
+  /^spell\/ui\/(docs-components\/.+|components\/components\.types|components\/ui-zoom\/ImageZoom|components\/ui-toc\/(TocIndex|HashLanding|PageOutline))$/
 /** Page behaviour, the RUNTIME's file;  bundled as an empty module while it doesn't exist yet. */
 const PAGE_RUNTIME = join(ASSETS, "spell-doc-runtime.js")
 
@@ -262,8 +262,9 @@ const ICONS = {
  * spell-epic's own names (`spell/epic/links`), which the docs runtime imports, and the kit's (`spell/util/persist`,
  * which the epic pages' stores import since epic `prefs-and-undo`, and its files import each other by):  found as
  * their source files.  esbuild adds no extension to a package's `exports`, so `spell/util/class` failed.
+ * - NOT Spell UI's (`spell/ui/...`, a folder of the one package since epic `repo-split` P20):  its built `dist/`.
  */
-const SPELL_EPIC = /^spell(?:-epic)?(?:\/.*)?$/
+const SPELL_EPIC = /^spell(?:-epic)?(?:\/(?!ui(?:\/|$)).*)?$/
 
 /** Bare specifiers that MUST resolve from UI's root:  Solid, all subpaths. */
 const SOLID = /^(solid-js|@solidjs\/[\w-]+)(\/.*)?$/
@@ -457,12 +458,12 @@ function spellUiResolver() {
         return { contents: "", loader: "js" }
       })
       pluginBuild.onResolve({ filter: UI_SOURCE_ONLY }, ({ path }) => ({
-        path: join(UI_DIR, "src", `${path.slice("spell-ui/".length)}.ts`)
+        path: join(UI_DIR, "src", `${path.slice("spell/ui/".length)}.ts`)
       }))
       // every file of UI's `dist/` HAS side effects (each family defines its tags as it's imported):  its
       // `package.json`'s `sideEffects` names only its `src/` files, so esbuild dropped the families `dist/` files import
       // by relative path, and their tags stayed pending (epic `epic-engine` P29)
-      pluginBuild.onResolve({ filter: /^spell-ui(\/.*)?$/ }, ({ path }) => ({
+      pluginBuild.onResolve({ filter: /^spell\/ui(\/.*)?$/ }, ({ path }) => ({
         path: uiDistPath(path),
         sideEffects: true
       }))
@@ -489,12 +490,12 @@ function spellUiResolver() {
 }
 
 /**
- * File in UI's `dist/` for a `spell-ui[/...]` specifier:  a family's folder (`components/ui-code`) is its own file
+ * File in UI's `dist/` for a `spell/ui[/...]` specifier:  a family's folder (`components/ui-code`) is its own file
  * (`dist/ui-code.js`), as UI's published `exports` have it.
  */
 function uiDistPath(specifier) {
   const sub = specifier
-    .slice("spell-ui".length)
+    .slice("spell/ui".length)
     .replace(/^\//, "")
     .replace(/^components\/(ui-[a-z-]+)$/, "$1")
     // `spell/ui/util` is all in `core` (`src/core.ts` re-exports it), and has no file of its own

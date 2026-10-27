@@ -576,7 +576,12 @@ export class Linker {
         .filter(isDir),
       ...[join(this.root, "src"), join(this.root, "tests")].filter(isDir),
       ...AREAS.map((area) => this.real(join(this.root, area))),
-      ...[...new Set([join(this.root, "spell-epic", "src"), join(this.top, "spell-epic", "src")])].filter(isDir),
+      // the engine's code:  the kit's `epic/` folder (epic `repo-split` P20), else an older checkout's `spell-epic`
+      ...[
+        ...new Set(
+          ["epic", "spell-epic"].flatMap((engine) => [join(this.root, engine, "src"), join(this.top, engine, "src")])
+        )
+      ].filter(isDir),
       join(this.ui, "notes")
     ]
   }

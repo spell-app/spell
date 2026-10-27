@@ -67,6 +67,14 @@
   // The VS Code window files, each machine's own:  the content repo's `windows/`, git-ignored there.
   "windowsFolder": "spell.epics/windows",
 
+  // The app's editor, served by the page server at its own address (spell-app's own settings until epic `repo-split`
+  // P20 made it a folder):  where it is, the file its server writes its address to, and how to start it.
+  "app": {
+    "path": "/editor/",
+    "urlFile": ".spell-server.editor.json",
+    "start": "node bin/spell.mjs server start"
+  },
+
   // The VOICES pages are written in (epic `readme` P13;  `epic voice`):  a name each, its file from here.
   // - `code`:  docstrings, comments, AGENTS.md files, epic pages:  WWOD's writing rules, §6 and its spoke.
   // - `readme` (READMEs, guides) is spell-epic's own, `voices/readme.md`, plus WWOD §6's Spell additions.

@@ -87,7 +87,8 @@ export class ComponentPack {
    */
   static read(_folder: string): ComponentPack {
     const folder = resolve(_folder)
-    const { spellPack, name: packageName } = ComponentPack.packageJson(folder)
+    const { spellPack, name: ownName } = ComponentPack.packageJson(folder)
+    const packageName = ComponentPack.importNameOf(folder) ?? ownName
     if (typeof spellPack?.prefix !== "string") {
       throw new ComponentPackError(
         `ComponentPack.read():  ${join(folder, "package.json")} has no "spellPack": { "prefix" }, so it isn't a ` +
@@ -496,6 +497,16 @@ ${families.join(",\n")}
     }
   }
 
+  /**
+   * The name a kit FOLDER's files are imported by, `<kit>/<folder>` (`spell/epic`:  epic `repo-split` P20), when
+   * `folder` is one of the kit's `workspaces`;  else `undefined`, and the folder's own package name holds.
+   */
+  private static importNameOf(folder: string): string | undefined {
+    const kit = ComponentPack.packageJson(dirname(folder)) as PackPackageJson & { workspaces?: unknown }
+    const workspaces = Array.isArray(kit.workspaces) ? kit.workspaces : []
+    return typeof kit.name === "string" && workspaces.includes(basename(folder)) ? `${kit.name}/${basename(folder)}` : undefined
+  }
+
   /** The hash a generated file records, if any. */
   private static recordedHash(text: string): string | undefined {
     return HASH_RECORD.exec(text)?.[1]
@@ -552,7 +563,8 @@ const USAGE = "usage:  spell-pack build | check [<folder>]   (the pack's package
  * Imports the page must share, never bundled:  spell-element (`spell/element`), Spell UI, Solid, our other repos'
  * packages (`spell-parser`, `spell-app` ..., epic `repo-split` P11).
  */
-const SHARED_IMPORT = /^solid-js(\/|$)|^@solidjs\/|^spell-(ui|lang|app|brand|epic)(\/|$)|^spell\/element(\/|$)/
+const SHARED_IMPORT =
+  /^solid-js(\/|$)|^@solidjs\/|^spell-(ui|lang|app|brand|epic)(\/|$)|^spell\/(element|ui|parser|epic|app)(\/|$)/
 
 /** Version of what `build()` writes:  bump it when the generated files change shape, so every pack goes stale. */
 const PACK_FORMAT = "spell-pack 3"

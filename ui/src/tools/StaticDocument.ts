@@ -36,7 +36,7 @@ export class StaticDocument {
    * - NOT import maps:  other modules may still need them, and they load nothing themselves.
    */
   static readonly ELEMENT_SCRIPT =
-    /(?<![\w-])spell-ui(?![\w.-])|\$\/ui\b|\/ui\/(?:src|dist)\/|\/components\/ui-[\w-]+\/|\bspell-ui(?:[\w.-]*)\.js\b/
+    /(?<![\w-])spell[-/]ui(?![\w.-])|\$\/ui\b|\/ui\/(?:src|dist)\/|\/components\/ui-[\w-]+\/|\bspell-ui(?:[\w.-]*)\.js\b/
 
   /**
    * Render `html`, a whole document.

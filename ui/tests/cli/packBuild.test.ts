@@ -74,7 +74,7 @@ describe("buildPack() / checkPack()", () => {
     )
     expect(script.split("\n")[1]).toMatch(/^\(function\(/)
     expect(script).toMatch(
-      /\}\)\(globalThis\.SpellUI\.packModules\[`@solidjs\/web`\],globalThis\.SpellUI\.packModules\[`spell-ui\/core`\]\);\s*$/
+      /\}\)\(globalThis\.SpellUI\.packModules\[`@solidjs\/web`\],globalThis\.SpellUI\.packModules\[`spell\/ui\/core`\]\);\s*$/
     )
     expect(script).not.toMatch(/\bimport\s*[{(*]|\bexport\s*\{/)
     expect(script).toContain("registerPack({name:`demo`,prefix:`demo-`")

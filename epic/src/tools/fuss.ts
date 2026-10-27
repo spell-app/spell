@@ -133,7 +133,8 @@ export class Fuss {
    * - `static`, so a reader finds the table on the class it configures.
    */
   static JARGON: Record<string, string[]> = {
-    "spell-ui": ["the fork", "fork's"]
+    // Spell UI's folder, `ui/` (`spell-ui/` until epic `repo-split` P20 made it a folder of the kit's)
+    ui: ["the fork", "fork's"]
   }
 }
 

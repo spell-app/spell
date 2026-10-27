@@ -107,13 +107,13 @@ describe("dev server", () => {
 })
 
 /** Solid's packages and `spell-ui`, as they appear in a sourcemap's `sources`. */
-const SOLID_OR_UI = /\/node_modules\/(solid-js|@solidjs\/(web|signals))\/|\/spell-ui\/src\//
+const SOLID_OR_UI = /\/node_modules\/(solid-js|@solidjs\/(web|signals))\/|\/ui\/src\//
 
 /** React and what renders with it, as they appear in a sourcemap's `sources`. */
 const REACT = /\/node_modules\/(react|react-dom|scheduler|semantic-ui-react)\//
 
 /** `ui`'s `BuiltInPacks`, which looks for the packs beside its own chunk. */
-const BUILT_IN_PACKS = /\/spell-ui\/src\/icons\/BuiltInPacks\.ts$/
+const BUILT_IN_PACKS = /\/ui\/src\/icons\/BuiltInPacks\.ts$/
 
 /** Source modules javascript file `file` was built from, from its sourcemap;  none for a chunk without one (a facade). */
 function sources(file: string): string[] {

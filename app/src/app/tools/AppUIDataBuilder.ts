@@ -279,8 +279,8 @@ const VOCABULARY_FOLDERS = [APP_COMPONENTS, APP_SOURCE]
 /** A test file's name. */
 const TEST_FILE = /\.test\.tsx$/
 
-/** spell-app's own import names:  `app/<path under src/>` (epic `repo-split` P14). */
-const OWN_PACKAGE = "spell-app/"
+/** The app folder's own import names:  `spell/app/<path under src/>` (epic `repo-split` P14, P20). */
+const OWN_PACKAGE = "spell/app/"
 
 /** What an import's specifier may leave off. */
 const SOURCE_EXTENSIONS = [".ts", ".tsx", "/index.ts"]

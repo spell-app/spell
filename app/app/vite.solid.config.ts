@@ -18,8 +18,8 @@ const UI_CORE = sourceOf("spell/ui/core.ts")
  */
 const UI_ROOT = sourceOf("spell/ui/components/ui-root")
 
-/** `spell-ui`'s barrel, `spell-ui`:  in `SHARED_SOLID.ui`. */
-const UI_BARREL = sourceOf("spell-ui")
+/** Spell UI's barrel, `spell/ui`:  in `SHARED_SOLID.ui`. */
+const UI_BARREL = sourceOf("spell/ui")
 
 /** An emoji data module of `ui`'s:  its set and chunk letter (as `ui`'s own `emojiChunkNames()`). */
 const EMOJI_DATA = /\/components\/ui-emoji\/data\/([\w-]+)\/(\w+)\.json$/

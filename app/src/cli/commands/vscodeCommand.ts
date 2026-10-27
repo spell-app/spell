@@ -23,7 +23,7 @@ export async function vscodeCommand(
   { force = false }: { force?: boolean } = {}
 ): Promise<number> {
   const steps = vscodeSteps(verb)
-  const root = CLI.findCheckout(join(VSCODE, "package.json"), process.cwd(), join(CLI.KIT_ROOT, "spell-app"))
+  const root = CLI.findCheckout(join(VSCODE, "package.json"), process.cwd(), join(CLI.KIT_ROOT, "app"))
   if (!force) {
     const base = baseBranchOf(root)
     const branch = git(["rev-parse", "--abbrev-ref", "HEAD"], root)

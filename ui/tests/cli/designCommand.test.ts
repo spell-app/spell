@@ -1,5 +1,6 @@
-import { existsSync } from "node:fs"
-import { join } from "node:path"
+import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs"
+import { tmpdir } from "node:os"
+import { basename, join } from "node:path"
 import { describe, expect, test } from "vite-plus/test"
 
 import { CLI } from "spell/cli"
@@ -13,10 +14,6 @@ describe("DESIGN_TOOLS", () => {
       "/kit/ui/scripts/design-build.ts"
     ])
   })
-  test("the bundle and its check:  spell-brand's, under tsx", () => {
-    expect(CLI.toolArgs(DESIGN_TOOLS.bundle, "/kit").at(-1)).toBe("/kit/spell-brand/scripts/design-bundle.ts")
-    expect(CLI.toolArgs(DESIGN_TOOLS.check, "/kit").at(-1)).toBe("/kit/spell-brand/scripts/design-check.ts")
-  })
   test("the sync verbs:  spell-epic's design tool, plain node", () => {
     expect(CLI.toolArgs(DESIGN_TOOLS.sync, "/kit")).toEqual(["/kit/epic/src/tools/design.js"])
   })
@@ -29,8 +26,15 @@ describe("DESIGN_TOOLS", () => {
 })
 
 describe("designBuildArgs()", () => {
-  test("the kit's spell-brand, before the caller's own arguments", () => {
-    expect(designBuildArgs("/no-such-kit").slice(0, 2)).toEqual(["--brand", "/no-such-kit/spell-brand"])
+  test("spell-brand, the kit's peer, before the caller's own arguments;  none beside the kit:  no --brand", () => {
+    const kit = mkdtempSync(join(tmpdir(), "design-kit-"))
+    const brand = `${kit}-brand`
+    mkdirSync(brand)
+    writeFileSync(join(brand, "package.json"), JSON.stringify({ name: "spell-brand" }))
+    writeFileSync(join(kit, "repos.json5"), `{ repos: [{ name: "spell-brand", path: "../${basename(brand)}", peer: true }] }`)
+    expect(designBuildArgs(kit).slice(0, 2)).toEqual(["--brand", brand])
+    expect(designBuildArgs("/no-such-kit")).not.toContain("--brand")
+    for (const dir of [kit, brand]) rmSync(dir, { recursive: true, force: true })
   })
 })
 

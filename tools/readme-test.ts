@@ -190,7 +190,7 @@ export class ReadmeTest {
       chmodSync(file, 0o755)
     }
     shim("spell", `node ${JSON.stringify(join(this.root, "bin", "spell.mjs"))}`)
-    shim("epic", JSON.stringify(join(this.root, "spell-epic", "bin", "epic")))
+    shim("epic", JSON.stringify(join(this.root, "epic", "bin", "epic")))
     this.shimFolder = folder
     return folder
   }

@@ -283,7 +283,7 @@ describe("runner builds", () => {
       // its own core, but not the families:  an error naming them, never a second Spell UI
       Object.assign(globalThis, { SpellUI: { packModules: core } })
       await expect(import(`${pathToFileURL(copy).href}?core-only`)).rejects.toThrow(
-        /shares no spell-ui\/components\/ui-code/
+        /shares no spell\/ui\/components\/ui-code/
       )
     } finally {
       Reflect.deleteProperty(globalThis, "SpellUI")
@@ -314,7 +314,7 @@ describe("runner builds", () => {
 /** Modules of each package a test asks about, as they appear in a sourcemap's `sources`. */
 const PACKAGES = {
   solid: /\/node_modules\/(solid-js|@solidjs\/(web|signals))\//,
-  ui: /\/spell-ui\/src\//,
+  ui: /\/ui\/src\//,
   monaco: /\/node_modules\/monaco-editor\//
 }
 
@@ -322,10 +322,10 @@ const PACKAGES = {
 const UI_COMPONENT = /\/src\/element\/UIComponent\.tsx$/
 
 /** `ui`'s root component, which `<spell-viewer>` extends. */
-const UI_ROOT = /\/spell-ui\/src\/components\/ui-root\/UIRoot\.tsx$/
+const UI_ROOT = /\/ui\/src\/components\/ui-root\/UIRoot\.tsx$/
 
 /** Spell's highlighter, which colours spell for `<spell-code>`. */
-const SPELL_HIGHLIGHTER = /\/spell-parser\/src\/spell\/highlight\/SpellHighlighter\.ts$/
+const SPELL_HIGHLIGHTER = /\/parser\/src\/spell\/highlight\/SpellHighlighter\.ts$/
 
 /** `<spell-editor>`'s component. */
 const SPELL_EDITOR = /\/components\/spell-editor\/SpellEditor\.tsx$/
@@ -337,7 +337,7 @@ const SHARED_NAMES = /^export const \{ (.+) \} = from$/m
 const SHARED_SPECIFIERS = /^const specifiers = (.+)$/m
 
 /** `ui`'s `BuiltInPacks`, which looks for the packs beside its own chunk. */
-const BUILT_IN_PACKS = /\/spell-ui\/src\/icons\/BuiltInPacks\.ts$/
+const BUILT_IN_PACKS = /\/ui\/src\/icons\/BuiltInPacks\.ts$/
 
 /**
  * Does chunk `file` export `name` just as it imports it from `spell-solid-shared.js`:  the page's copy, passed on?

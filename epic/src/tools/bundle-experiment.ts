@@ -41,7 +41,7 @@ const DOCS = resolve(dirname(fileURLToPath(import.meta.url)), "..")
 const UI_DIR = packageDir("spell-ui") ?? join(DOCS, "spell-ui (not installed)")
 
 /** Imports bundled from `ui`'s source:  the doc-only families and what they import of `ui` beyond the core. */
-const UI_SOURCE = /^spell-ui\/(docs-components|components\/components\.types)(\/|$)/
+const UI_SOURCE = /^spell\/ui\/(docs-components|components\/components\.types)(\/|$)/
 
 /** Imports the page must share, never bundled:  Spell UI, Solid, our other repos' packages (as `packBuild.ts`). */
 const SHARED_IMPORT = /^solid-js(\/|$)|^@solidjs\/|^spell-(ui|lang|app|brand|epic)(\/|$)|^spell\/element(\/|$)/
@@ -76,7 +76,7 @@ async function bundle(entry: string, out: string) {
       ...base.resolve,
       alias: [
         {
-          find: /^spell-ui\/(?=docs-components|components\/components\.types)/,
+          find: /^spell\/ui\/(?=docs-components|components\/components\.types)/,
           replacement: `${join(UI_DIR, "src")}/`
         }
       ]

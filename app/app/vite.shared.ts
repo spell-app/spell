@@ -151,7 +151,7 @@ const FROM_SHARED_SOLID = new Map<string, string>([
   ["spell/element", SHARED_SOLID.shared],
   ["spell/ui/core", SHARED_SOLID.shared],
   ["spell/ui/components/ui-root", SHARED_SOLID.shared],
-  ["spell-ui", SHARED_SOLID.ui],
+  ["spell/ui", SHARED_SOLID.ui],
   // the families `<spell-code>` and `<spell-markdown>` extend, and those spell's markdown engine draws with
   ...[...Object.keys(SHARED_FAMILIES), ...DRAWN_FAMILIES].map((id) => [id, SHARED_SOLID.families] as const)
 ])
@@ -225,7 +225,7 @@ export function sharedSolid(): Plugin {
 ////////////////
 
 /** `ui`'s `BuiltInPacks`, which looks for the packs beside ITS chunk (`import.meta.url`). */
-const BUILT_IN_PACKS = /\/spell-ui\/src\/icons\/BuiltInPacks\.ts$/
+const BUILT_IN_PACKS = /\/ui\/src\/icons\/BuiltInPacks\.ts$/
 
 /**
  * `spell-ui`'s built-in icon packs, emitted to `icon-packs/` beside whichever chunk holds `BuiltInPacks` --

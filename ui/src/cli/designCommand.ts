@@ -1,7 +1,8 @@
-import { existsSync } from "node:fs"
+import { existsSync, readFileSync } from "node:fs"
 import { join } from "node:path"
 
 import { contentFolderOf } from "spell/server/contentFolder"
+import { peerRepos } from "spell/server/page/settings"
 import { CLI } from "spell/cli"
 
 /**
@@ -12,6 +13,8 @@ import { CLI } from "spell/cli"
  *   Spell UI never finds by itself
  * - `bundle [--out <dir>] [--skip-ui-build]`:  spell-brand's `yarn design:bundle`, the system's `bundle.js`
  * - `check [bundle] [outDir]`:  spell-brand's `yarn design:check`, the bundle proved inlined and on a Design board
+ *   - both run in spell-brand's own folder, with its own install:  a project beside the kit (epic `repo-split` P20),
+ *     found as the kit's peer (`brandFolder()`)
  * - `pull <board.dc.html> <page.html>`, `changed`, `pushed`, `state`:  spell-epic's `src/tools/design.js`, the local
  *   half of `/design` (`epic` has no verb for them yet)
  * - Runs in the current folder:  a relative path is relative to it (`bundle` / `check` are told it, `INIT_CWD`, as
@@ -23,7 +26,11 @@ import { CLI } from "spell/cli"
 export function designCommand(verb: string, args: string[]): Promise<number> {
   if (verb === "build")
     return CLI.runTool(DESIGN_TOOLS.build, [...designBuildArgs(CLI.findCheckout(DESIGN_TOOLS.build.tool)), ...args])
-  if (verb === "bundle" || verb === "check") return CLI.runTool(DESIGN_TOOLS[verb], args, { INIT_CWD: process.cwd() })
+  if (verb === "bundle" || verb === "check") {
+    const brand = brandFolder(CLI.findCheckout(CLI.KIT_MARKER))
+    if (!brand) throw new CLI.CliError(`spell design ${verb} runs spell-brand's script:  no spell-brand beside the kit`)
+    return CLI.runChild("yarn", [`design:${verb}`, ...args], { cwd: brand, env: { ...process.env, INIT_CWD: process.cwd() } })
+  }
   if (!SYNC_VERBS.includes(verb)) throw new CLI.CliError(`unknown verb '${verb}':  ${DESIGN_VERBS.join(", ")}`)
   return CLI.runTool(DESIGN_TOOLS.sync, [verb, ...args])
 }
@@ -31,13 +38,11 @@ export function designCommand(verb: string, args: string[]): Promise<number> {
 /**
  * The tools `spell design` runs, from the kit's root (`CLI.runTool()` finds the nearest kit that has each):
  * - `build`:  Spell UI's `design:build`, under `tsx`, in the caller's folder (so `--out` is relative to it)
- * - `bundle` / `check`:  spell-brand's `design:bundle` / `design:check` (epic `repo-split` P10, Q32), under `tsx`
  * - `sync`:  spell-epic's `src/tools/design.js`, its verb first (`pull`, `changed` ...)
+ * - Not `bundle` / `check`:  spell-brand's own scripts, run in its own folder (`designCommand()`)
  */
 export const DESIGN_TOOLS = {
   build: { tool: "ui/scripts/design-build.ts", tsx: "ui/tsconfig.node.json" },
-  bundle: { tool: "spell-brand/scripts/design-bundle.ts", tsx: "spell-brand/tsconfig.json" },
-  check: { tool: "spell-brand/scripts/design-check.ts", tsx: "spell-brand/tsconfig.json" },
   sync: { tool: "epic/src/tools/design.js" }
 } satisfies Record<string, CLI.ToolSpec>
 
@@ -56,7 +61,22 @@ const SYNC_VERBS = ["pull", "changed", "pushed", "state"]
  */
 export function designBuildArgs(root: string): string[] {
   const book = join(contentFolderOf(root) ?? root, BRAND_BOOK)
-  return ["--brand", join(root, "spell-brand"), ...(existsSync(book) ? ["--brand-book", book] : [])]
+  const brand = brandFolder(root)
+  return [...(brand ? ["--brand", brand] : []), ...(existsSync(book) ? ["--brand-book", book] : [])]
+}
+
+/**
+ * spell-brand's folder, beside kit `root`:  the kit's peer by that package name (`repos.json5`, `peerRepos()`;  main's
+ * `~/www/spell-brand` from a kit worktree);  `undefined` when it isn't there.
+ */
+export function brandFolder(root: string): string | undefined {
+  return peerRepos(root).find((dir) => {
+    try {
+      return (JSON.parse(readFileSync(join(dir, "package.json"), "utf8")) as { name?: string }).name === "spell-brand"
+    } catch {
+      return false
+    }
+  })
 }
 
 /** The brand book (Claude Design's export), in the shared content folder (epic `claude-design`, P11). */

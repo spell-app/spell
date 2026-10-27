@@ -1,4 +1,4 @@
-import { realpathSync } from "node:fs"
+import { existsSync, realpathSync } from "node:fs"
 import { join, relative, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 
@@ -52,7 +52,9 @@ export class ServedFolders {
    * (`templates` in spell-epic itself).
    */
   private static engineDir(root: string, engine: string, folder: string): string {
-    const link = join(root, "spell-epic")
+    // `epic`:  the kit's own folder (epic `repo-split` P20);  `spell-epic`:  a link in an older checkout
+    const link =
+      ["epic", "spell-epic"].map((name) => join(root, name)).find((each) => existsSync(each)) ?? join(root, "epic")
     try {
       // any checkout of it:  `node bin/epic` run from a worktree of spell-epic, its link the main checkout
       if (EpicConfig.mainOf(realpathSync(link)) === EpicConfig.mainOf(realpathSync(engine)))
