@@ -2,8 +2,8 @@ import { For, Show } from "solid-js"
 import { isServer, type JSX } from "@solidjs/web"
 
 import { E, UIT } from "spell-ui/core"
-import { type SiteDataFile, type SiteToken, type SiteTokenType } from "spell-ui/docs-components/docs-components.types"
-import { SiteData } from "spell-ui/docs-components/SiteData"
+import { type SiteToken, type SiteTokenType } from "spell-ui/docs-components/docs-components.types"
+import { SiteDataLoad } from "spell-ui/docs-components/SiteDataLoad"
 import { ColorProbe } from "./ColorProbe"
 import { TokenRows } from "./TokenRows"
 import { FALLBACK_HEX, type DocsTokensVocabulary, type TokenTable, type TokenView } from "./UIDocsTokens.types"
@@ -54,26 +54,8 @@ export class UIDocsTokens extends E.UIComponent<DocsTokensVocabulary> {
   // ## Data
   ////////////////
 
-  /** The site's data, once fetched. */
-  @E.state accessor siteData: SiteDataFile | undefined = undefined
-
-  /** Why the data couldn't be fetched, if it couldn't. */
-  @E.state accessor loadError: Error | undefined = undefined
-
-  /** The fetch, started on first connect;  settles once `siteData` or `loadError` is set. */
-  readonly fetched: Promise<void> = isServer ? Promise.resolve() : this.fetch()
-
-  /** Fetch the site's data (once per page, `SiteData`). */
-  private fetch(): Promise<void> {
-    return SiteData.load().then(
-      (data) => {
-        this.siteData = data
-      },
-      (error: unknown) => {
-        this.loadError = error instanceof Error ? error : new Error(String(error))
-      }
-    )
-  }
+  /** The site's data:  `value` once it's in, `error` if it didn't come, `loaded` once either is set. */
+  readonly data = new SiteDataLoad()
 
   /** Still fetching (in a browser). */
   @E.cssState("loading")
@@ -98,10 +80,10 @@ export class UIDocsTokens extends E.UIComponent<DocsTokensVocabulary> {
   /** What to draw:  the tables, or a message;  `undefined` until the data is in. */
   @E.derived
   get tokenView(): TokenView | undefined {
-    const loadError = this.loadError
+    const loadError = this.data.error
     if (loadError)
       return { kind: "message", text: this.translationForKey("loadError", { error: loadError.message }), isError: true }
-    const data = this.siteData
+    const data = this.data.value
     if (!data) return undefined
     return TokenRows.viewFor(
       data,

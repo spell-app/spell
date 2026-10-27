@@ -2,8 +2,8 @@
  * `yarn site:kitchen [--check]`:  write the kitchen sink's examples, from every component family's MAIN example file;
  * and each component page's Theming playground, from its family's main example (`PlaygroundWriter`).
  * - The page:  `docs/kitchen-sink.html`, one of the site's pages (`SITE_PAGES`).
- * - A family's main file:  `src/components/ui-<family>/examples/elements/types.html`, else its first `.html`.
- *   - `MAIN_FILES` names it where `types.html` isn't the main one (`ui-parts`:  `header.html`).
+ * - A family's main file:  `src/components/ui-<family>/examples/elements/types.html`, else its first `.html`
+ *   (`FamilyExamples.files()`, which the design export reads them by too;  `ui-parts`' is `header.html`).
  * - Why generated:  the old Astro page read the same files at build time;  a static page would drift from them.
  *   - The markup is the files' own (the families' tests render them),
  *     so it keeps their native bits (`<p>`, a `style=` box around a loader, `<div class="ui-stack">` around radios).
@@ -15,7 +15,7 @@
  * - Sections left out:
  *   - those holding `stub-*` stand-ins (the tests' `StubOwner`, not real elements)
  *   - all past `MAX_SECTIONS` (3) per family, so the page stays scannable (the family's page has the rest)
- * - Each file's `<section><h4>Title</h4>...</section>` becomes a `<ui-example>`:
+ * - Each file's `<section><h4>Title</h4>...</section>` becomes a `<ui-example>` (`FamilyExamples.sections()`):
  *   - the family's first one headed with its title and summary,
  *     plus a link to its page, and to its sub-tags' own pages
  *   - the rest a header-less continuation, described by their `<h4>`
@@ -34,23 +34,23 @@
  * - Rerun after changing an example (`yarn site:build` runs it).
  * - `--check`:  write nothing;  exit 1 if the kitchen sink or a playground is stale.
  */
-import { existsSync, readdirSync, readFileSync } from "node:fs"
+import { readFileSync } from "node:fs"
 import path from "node:path"
 import { parseArgs } from "node:util"
 
 import { readJSON5File } from "spell/util/node/json5"
-import { escapeHTML } from "spell/util/string"
+import { escapeHTML, indented } from "spell/util/string"
 
 import type { SiteDataFile, SiteFamily, SiteTag } from "spell-ui/docs-components/docs-components.types"
+// A leaf, not `spell-ui/static`:  its barrel loads every family's classes, which only Vite can
+import { ID_REFERENCE_ATTRIBUTES } from "spell-ui/static/static.types.ssr"
 import { Terminal } from "spell/element-tools/Terminal"
 import { spliceGenerated, writeOrCheck, type GeneratedOutput } from "spell/element-tools/generatedFiles"
-import { SITE_DATA, SITE_PAGES } from "spell-ui/tools/tools.types"
+import { FamilyExamples, type ExampleSection } from "spell-ui/tools/FamilyExamples"
+import { COMPONENTS, SITE_DATA, SITE_PAGES, SPELL_UI_ROOT, sitePages } from "spell-ui/tools/tools.types"
 
 import { withoutTicks } from "spell-ui/tools/generatedFiles"
 import { SiteSections } from "./site-sections.ts"
-
-/** `packages/ui/`. */
-const UI = path.resolve(import.meta.dirname, "..")
 
 /****************
  * ### `KitchenSinkWriter`
@@ -59,10 +59,10 @@ const UI = path.resolve(import.meta.dirname, "..")
  ****************/
 class KitchenSinkWriter {
   /** The page. */
-  readonly file = path.join(UI, SITE_PAGES, "kitchen-sink.html")
+  readonly file = path.join(SPELL_UI_ROOT, SITE_PAGES, "kitchen-sink.html")
 
   /** The site's data:  titles, summaries, topics. */
-  readonly data: SiteDataFile = readJSON5File<SiteDataFile>(path.join(UI, SITE_DATA, "components.json5"))
+  readonly data: SiteDataFile = readJSON5File<SiteDataFile>(path.join(SPELL_UI_ROOT, SITE_DATA, "components.json5"))
 
   /** `page` with its generated block replaced by a fresh one. */
   render(page: string): string {
@@ -103,33 +103,30 @@ class KitchenSinkWriter {
       } else {
         lines.push(`${indent}<ui-example description="${escapeHTML(section.title)}">`)
       }
-      lines.push(
-        ...KitchenSinkWriter.indented(KitchenSinkWriter.markup(section), `${indent}  `),
-        `${indent}</ui-example>`
-      )
+      lines.push(indented(KitchenSinkWriter.markup(section), `${indent}  `), `${indent}</ui-example>`)
     })
     return lines
   }
 
   /**
    * `family`'s MAIN EXAMPLE, the one its kitchen sink entry opens with:
-   * its main file's first section (`exampleFile()`, `sections()`), as page markup (`markup()`).
+   * its main file's first section (`mainSections()`), as page markup (`markup()`).
    * - `undefined` for a family without one:  no element example, or only `stub-*` stand-ins.
    * - Also what its page's empty Theming playground shows (`PlaygroundWriter`).
    */
-  mainExample(family: SiteFamily): string[] | undefined {
+  mainExample(family: SiteFamily): string | undefined {
     const [first] = this.mainSections(family)
     return first && KitchenSinkWriter.markup(first)
   }
 
   /**
-   * `family`'s example sections, in its main file's order, without those holding `stub-*` stand-ins
-   * (the tests' `StubOwner`, not real elements);  none without a main file.
+   * `family`'s example sections, in its main file's order (`FamilyExamples`), without those holding `stub-*`
+   * stand-ins (the tests' `StubOwner`, not real elements);  none without a main file.
    */
-  private mainSections(family: SiteFamily): Section[] {
+  private mainSections(family: SiteFamily): ExampleSection[] {
     const file = this.exampleFile(family)
     if (!file) return []
-    return KitchenSinkWriter.sections(readFileSync(file, "utf8")).filter(
+    return FamilyExamples.sections(readFileSync(file, "utf8")).filter(
       (section) => !section.body.some((line) => line.includes("<stub-"))
     )
   }
@@ -138,16 +135,10 @@ class KitchenSinkWriter {
    * `section`'s body as the site's pages write it, at column 0:
    * its own class (`ui-dark ui-p-m`) a `<div>` around it, its example sources the site's copies (`siteSources()`).
    */
-  private static markup(section: Section): string[] {
-    const body = section.className
-      ? [`<div class="${section.className}">`, ...section.body.map((line) => `  ${line}`), "</div>"]
-      : section.body
-    return body.map((line) => KitchenSinkWriter.siteSources(line))
-  }
-
-  /** `lines` at `indent`, blank lines left empty. */
-  static indented(lines: string[], indent: string): string[] {
-    return lines.map((line) => (line ? `${indent}${line}` : ""))
+  private static markup(section: ExampleSection): string {
+    const body = section.body.join("\n")
+    const markup = section.className ? `<div class="${section.className}">\n${indented(body, 2)}\n</div>` : body
+    return KitchenSinkWriter.siteSources(markup)
   }
 
   /**
@@ -161,59 +152,17 @@ class KitchenSinkWriter {
     )
   }
 
-  /** `family`'s main example file:  `types.html`, else its first `.html`;  `undefined` without one. */
+  /** `family`'s main example file (`FamilyExamples.files()`'s first);  `undefined` without one. */
   private exampleFile(family: SiteFamily): string | undefined {
-    const folder = path.join(UI, "src/components", family.folder, "examples/elements")
-    if (!existsSync(folder)) return undefined
-    const files = readdirSync(folder)
-      .filter((name) => name.endsWith(".html"))
-      .sort()
-    const main = MAIN_FILES[family.folder]
-    const name = main && files.includes(main) ? main : files.includes("types.html") ? "types.html" : files[0]
-    return name ? path.join(folder, name) : undefined
+    return FamilyExamples.files(path.join(SPELL_UI_ROOT, COMPONENTS), family.folder)[0]
   }
 
-  /**
-   * An example file's sections:  each `<section>` at the wrapper's top level, its `<h4>` title and its body (dedented).
-   * - A file without sections is one untitled section, the whole file minus its comments.
-   */
-  private static sections(html: string): Section[] {
-    const lines = html.replace(/<!--[\s\S]*?-->\n?/g, "").split("\n")
-    const sections: Section[] = []
-    let current: Section | undefined
-    for (const line of lines) {
-      const open = /^ {2}<section(?: class="([^"]*)")?>$/.exec(line)
-      if (open) {
-        current = { title: "", className: open[1], body: [] }
-        continue
-      }
-      if (!current) continue
-      if (line === "  </section>") {
-        sections.push({ ...current, body: KitchenSinkWriter.trim(current.body) })
-        current = undefined
-        continue
-      }
-      const title = /^ {4}<h4>(.*)<\/h4>$/.exec(line)
-      if (title && !current.title) current.title = title[1]!
-      else current.body.push(line.slice(4))
-    }
-    if (sections.length) return sections
-    return [{ title: "", body: KitchenSinkWriter.trim(lines) }]
-  }
-
-  /** `line` with its dev-server example sources pointed at the site's copies (`examples/<file>`). */
-  private static siteSources(line: string): string {
-    return line.replace(
+  /** `markup` with its dev-server example sources pointed at the site's copies (`examples/<file>`). */
+  private static siteSources(markup: string): string {
+    return markup.replace(
       /source="\/src\/components\/[^/"]+\/examples\/sources\/([^"]+)"/g,
       (_match, file: string) => `source="examples/${SITE_SOURCES[file] ?? file}"`
     )
-  }
-
-  /** `lines` without leading and trailing blank lines. */
-  private static trim(lines: string[]): string[] {
-    const first = lines.findIndex((line) => line.trim())
-    const last = lines.findLastIndex((line) => line.trim())
-    return first < 0 ? [] : lines.slice(first, last + 1).map((line) => line.trimEnd())
   }
 
   /** Which group `tag` files under:  its Fomantic topic, else ours (`undefined`). */
@@ -252,7 +201,7 @@ class PlaygroundWriter {
       return [
         `${indent}${open}`,
         `${indent}  ${PLAYGROUND_START}`,
-        ...KitchenSinkWriter.indented(PlaygroundWriter.ownIds(example), `${indent}  `),
+        indented(PlaygroundWriter.ownIds(example), `${indent}  `),
         `${indent}  ${PLAYGROUND_END}`,
         `${indent}</ui-docs-tokens>`
       ].join("\n")
@@ -260,30 +209,18 @@ class PlaygroundWriter {
   }
 
   /**
-   * `lines` with each id they define suffixed (`-playground`), and every attribute naming one of them
+   * `markup` with each id it defines suffixed (`-playground`), and every attribute naming one of them
    * (`for`, `commandfor`, `aria-labelledby` ...;  `ID_REFERENCES`) following it.
    */
-  static ownIds(lines: string[]): string[] {
-    const ids = new Set(lines.flatMap((line) => [...line.matchAll(/ id="([^"]+)"/g)].map((match) => match[1]!)))
-    if (!ids.size) return lines
+  static ownIds(markup: string): string {
+    const ids = new Set([...markup.matchAll(/ id="([^"]+)"/g)].map((match) => match[1]!))
+    if (!ids.size) return markup
     const own = (id: string) => (ids.has(id) ? `${id}${PLAYGROUND_ID_SUFFIX}` : id)
-    return lines.map((line) =>
-      line.replace(
-        ID_REFERENCES,
-        (_whole, name: string, value: string) => ` ${name}="${value.split(" ").map(own).join(" ")}"`
-      )
+    return markup.replace(
+      ID_REFERENCES,
+      (_whole, name: string, value: string) => ` ${name}="${value.split(" ").map(own).join(" ")}"`
     )
   }
-}
-
-/** One example section of a file. */
-type Section = {
-  /** its `<h4>` text, `""` for a file without sections */
-  title: string
-  /** the `<section>`'s own class, e.g. `ui-dark ui-p-m` */
-  className?: string
-  /** its markup, dedented to column 0 */
-  body: string[]
 }
 
 ////////////////
@@ -311,9 +248,11 @@ const PLAYGROUND_START = "<!-- playground:start  (yarn site:kitchen:  the family
 /** Added to each id a playground's example defines:  apart from the same example's ids in the Examples tab. */
 const PLAYGROUND_ID_SUFFIX = "-playground"
 
-/** An attribute holding an id, or a list of them:  its name and its value. */
-const ID_REFERENCES =
-  / (id|for|commandfor|popovertarget|aria-labelledby|aria-describedby|aria-controls|aria-owns|list|form)="([^"]*)"/g
+/**
+ * An attribute holding an id, or a list of them:  its name and its value.
+ * - `id` itself, and every attribute that names one (`ID_REFERENCE_ATTRIBUTES`, the static render's list too)
+ */
+const ID_REFERENCES = new RegExp(` (id|${ID_REFERENCE_ATTRIBUTES.join("|")})="([^"]*)"`, "g")
 
 /** A playground's end marker. */
 const PLAYGROUND_END = "<!-- playground:end -->"
@@ -328,9 +267,6 @@ const PLAYGROUND =
 /** Sections shown per family:  enough to judge a theme, short enough to scroll through every family. */
 const MAX_SECTIONS = 3
 
-/** A family's main example file where it isn't `types.html` (or the first file):  folder => file name. */
-const MAIN_FILES: Readonly<Record<string, string>> = { "ui-parts": "header.html" }
-
 /**
  * The site's copies of the example source files (`docs/examples/`), by the source's file name, where the name differs.
  * - A `source="/src/components/.../examples/sources/<file>"` (a dev-server path) points at the copy.
@@ -343,14 +279,9 @@ const writer = new KitchenSinkWriter()
 const kitchenPage = SiteSections.convert(writer.render(readFileSync(writer.file, "utf8")))
 // every other page's Theming playground:  its family's main example
 const playgrounds = new PlaygroundWriter(writer)
-const pagesFolder = path.join(UI, SITE_PAGES)
-const pages = readdirSync(pagesFolder)
-  .filter((name) => name.endsWith(".html") && path.join(pagesFolder, name) !== writer.file)
-  .sort()
-  .map((name): GeneratedOutput => {
-    const file = path.join(pagesFolder, name)
-    return [file, playgrounds.render(readFileSync(file, "utf8"))]
-  })
+const pages = sitePages()
+  .filter((file) => file !== writer.file)
+  .map((file): GeneratedOutput => [file, playgrounds.render(readFileSync(file, "utf8"))])
 const stale = writeOrCheck([[writer.file, kitchenPage], ...pages], { command: "site:kitchen", isCheck: values.check })
 for (const folder of new Set(playgrounds.missing))
   Terminal.err(`playground:  ${folder} has no main example;  left empty`)

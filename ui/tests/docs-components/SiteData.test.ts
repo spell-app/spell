@@ -1,6 +1,8 @@
 import { afterEach, describe, expect, test } from "vite-plus/test"
 
+import { E } from "spell-ui/core"
 import { SiteData } from "spell-ui/docs-components/SiteData"
+import { SiteDataLoad } from "spell-ui/docs-components/SiteDataLoad"
 import type { SiteDataFile } from "spell-ui/docs-components/docs-components.types"
 
 /** `<x-button>` and its sub-tag `<x-or>`, a docs tag, and the `x-button` family. */
@@ -12,6 +14,9 @@ const DATA = {
   docs: [{ tag: "x-docs", folder: "x-docs" }],
   families: { "x-button": { folder: "x-button", mainTag: "x-button", tags: ["x-button", "x-or"] } }
 } as unknown as SiteDataFile
+
+/** A data file the test server doesn't have:  it answers 404. */
+const MISSING = "/missing/__data/components.json5"
 
 afterEach(() => (SiteData.url = undefined))
 
@@ -49,5 +54,39 @@ describe("SiteData.json()", () => {
 
   test("rejects a file that won't read even as JSON5", async () => {
     await expect(SiteData.json(new Response("{ nope"))).rejects.toThrow(SyntaxError)
+  })
+})
+
+describe("SiteData.load()", () => {
+  test("rejects with a `load` `SourceError` naming the method, the URL, its answer and the fix", async () => {
+    SiteData.url = MISSING
+    const failure = await SiteData.load().catch((error: unknown) => error)
+    expect(failure).toBeInstanceOf(E.SourceError)
+    expect(failure).toMatchObject({ cause: { kind: "load", status: 404 } })
+    expect((failure as Error).message).toMatch(
+      /^SiteData\.load\(\):  .*\/missing\/__data\/components\.json5 answered 404/
+    )
+    expect((failure as Error).message).toContain("run `yarn site:data`")
+  })
+})
+
+describe("SiteDataLoad", () => {
+  test("holds the data once it's in;  loading until then", async () => {
+    SiteData.url = `data:application/json,${encodeURIComponent(JSON.stringify(DATA))}`
+    const load = new SiteDataLoad()
+    expect(load.isLoading).toBe(true)
+    await load.loaded
+    expect(load.value).toEqual(DATA)
+    expect(load.error).toBeUndefined()
+    expect(load.isLoading).toBe(false)
+  })
+
+  test("holds why the data didn't come, and is no longer loading", async () => {
+    SiteData.url = MISSING
+    const load = new SiteDataLoad()
+    await load.loaded
+    expect(load.value).toBeUndefined()
+    expect(load.error).toBeInstanceOf(E.SourceError)
+    expect(load.isLoading).toBe(false)
   })
 })

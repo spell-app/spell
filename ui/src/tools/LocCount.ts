@@ -1,7 +1,9 @@
 /// <reference types="node" />
 
 import { globSync, readFileSync } from "node:fs"
-import { relative } from "node:path"
+import { extname, relative } from "node:path"
+
+import { codeLines } from "spell/element-tools/codeLines"
 
 import type { LocFile, LocResults } from "./tools.types.ts"
 
@@ -9,8 +11,8 @@ import type { LocFile, LocResults } from "./tools.types.ts"
  * ### `LocCount`
  * Lines of code per file, for `yarn report`'s `loc` tables (`loc-results.json`).
  * - `lines` -- every line, the trailing newline not counted as an extra one
- * - `code` -- lines that are neither blank nor comment-only:  `//` lines, `/* ... *\/` blocks (docstrings
- *   included) and HTML `<!-- -->` blocks don't count;  a line with code AND a comment does
+ * - `code` -- lines that are neither blank nor comment-only, by the kit's `codeLines()`:  `//` lines, `/* ... *\/`
+ *   blocks (docstrings included) and HTML `<!-- -->` blocks don't count;  a line with code AND a comment does
  * - groups are glob lists relative to the root;  `!glob` excludes;  a file counts in its FIRST group
  * - Count after `oxfmt` (`yarn review` formats), so line breaks are comparable between runs.
  ****************/
@@ -61,40 +63,12 @@ export class LocCount {
       .sort()
   }
 
-  /** `lines` / `code` of one file's text;  `path` picks the comment syntax (HTML or C-like). */
+  /**
+   * `lines` / `code` of one file's text;  `path`'s extension picks the comments (the kit's `codeLines()`, the one rule
+   * every line counter shares).
+   */
   static countText(text: string, path = ""): { lines: number; code: number } {
-    const rows = text.replace(/\n$/, "").split("\n")
-    const html = path.endsWith(".html")
-    let inBlock = false
-    let code = 0
-    for (const row of rows) {
-      let rest = row.trim()
-      let hasCode = false
-      while (rest) {
-        if (inBlock) {
-          const end = rest.indexOf(html ? "-->" : "*/")
-          if (end < 0) {
-            rest = ""
-            break
-          }
-          rest = rest.slice(end + (html ? 3 : 2)).trim()
-          inBlock = false
-          continue
-        }
-        const open = html ? rest.indexOf("<!--") : rest.indexOf("/*")
-        const line = html ? -1 : rest.indexOf("//")
-        if (line === 0) break
-        if (open === 0) {
-          inBlock = true
-          rest = rest.slice(html ? 4 : 2)
-          continue
-        }
-        hasCode = true
-        break
-      }
-      if (hasCode) code++
-    }
-    return { lines: rows.length, code }
+    return { lines: text.replace(/\n$/, "").split("\n").length, code: codeLines(text, extname(path)).length }
   }
 }
 

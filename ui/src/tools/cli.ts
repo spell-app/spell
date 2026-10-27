@@ -12,8 +12,9 @@
  *   - the extra pages
  * - `declarations` -- `DeclarationCheck`:  `dist/**.d.ts` resolve for a consumer (no alias, nothing outside `dist/`)
  * - `serve` -- the same pages and import map for a person:  prints the URLs, runs until killed
- * - `loc` / `report` -- `LocCount` writes `loc-results.json`;
- *   `ReportTables` then rewrites the report's generated tables (the content repo's `guides/ui/notes/report.md`)
+ * - `loc` / `report [--check]` -- `LocCount` writes `loc-results.json`;
+ *   `ReportTables` then rewrites the report's generated tables (the content repo's `guides/ui/notes/report.md`);
+ *   `--check`:  writes no report, and fails while a table is stale
  * - `icons:pack <folder> --id <id> [--label <text>] [--license <text>] [--sanitize]
  *   [--skip-unsafe | --allow-unsafe] [--force]` -- `IconPackBuilder`:
  *   verify a folder of SVGs and write its `pack.js` (keeps hand edits of an existing one)
@@ -92,7 +93,10 @@ switch (command) {
     // the report is in the content repo's guides, with the rest of the old `notes/` (epic `repo-split` P9, Q34):
     // the kit's content folder, Spell UI being a child repo of the kit
     const content = contentFolderOf(resolve(PACKAGE.root, "..")) ?? resolve(PACKAGE.root, "../spell.epics")
-    new ReportTables({ root: PACKAGE.root, file: join(content, "guides/ui/notes/report.md") }).write()
+    const { values } = parseArgs({ args, options: { check: { type: "boolean", default: false } } })
+    new ReportTables({ root: PACKAGE.root, file: join(content, "guides/ui/notes/report.md") }).write({
+      isCheck: values.check
+    })
     break
   }
   case "icons:pack":

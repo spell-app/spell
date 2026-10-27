@@ -5,6 +5,7 @@ import { E, UIT } from "spell-ui/core"
 import type { UILabelAttributes } from "spell-ui/jsx"
 import type { SiteDataFile, SiteTag } from "spell-ui/docs-components/docs-components.types"
 import { SiteData } from "spell-ui/docs-components/SiteData"
+import { SiteDataLoad } from "spell-ui/docs-components/SiteDataLoad"
 // Leaves, not the barrel, which would define `<ui-toc>`:  the landing, and the slugs the page's section ids use
 import { HashLanding } from "spell-ui/components/ui-toc/HashLanding"
 import { TocIndex } from "spell-ui/components/ui-toc/TocIndex"
@@ -72,27 +73,13 @@ export class UIDocsApi extends E.UIComponent<DocsApiVocabulary> {
   // ## The data
   ////////////////
 
-  /** The site's data, once fetched. */
-  @E.state accessor siteData: SiteDataFile | undefined = undefined
-
-  /** Why the data couldn't be fetched, if it couldn't. */
-  @E.state accessor loadError: Error | undefined = undefined
-
-  /** The fetch, started on first connect;  settles once `siteData` or `loadError` is set. */
-  readonly fetched: Promise<void> = isServer ? Promise.resolve() : this.fetch()
+  /** The site's data:  `value` once it's in, `error` if it didn't come, `loaded` once either is set. */
+  readonly data = new SiteDataLoad()
 
   /** Waiting for the data (never in a server render:  nothing loads). */
   @E.cssState("loading")
   get isLoading(): boolean {
-    return !isServer && !this.siteData && !this.loadError
-  }
-
-  /** Fetch the site's data into `siteData`, or the reason it failed into `loadError`. */
-  private fetch(): Promise<void> {
-    return SiteData.load().then(
-      (data) => void (this.siteData = data),
-      (error: unknown) => void (this.loadError = error instanceof Error ? error : new Error(String(error)))
-    )
+    return this.data.isLoading
   }
 
   ////////////////
@@ -102,13 +89,13 @@ export class UIDocsApi extends E.UIComponent<DocsApiVocabulary> {
   /** What to draw:  one entry per tag, with its tables;  `undefined` until the data is in. */
   @E.derived
   get items(): ApiItem[] | undefined {
-    const data = this.siteData
+    const data = this.data.value
     return data && UIDocsApi.itemsFor(data, { tag: this.tag, family: this.family })
   }
 
   /** The message to show instead of tables, if any:  a failed fetch, no `tag` / `family`, an unknown tag. */
   get message(): ApiMessage | undefined {
-    const failure = this.loadError
+    const failure = this.data.error
     if (failure) return { state: NEGATIVE, key: "loadError", params: { error: failure.message } }
     const items = this.items
     if (!items || items.length) return undefined
@@ -415,7 +402,7 @@ export class UIDocsApi extends E.UIComponent<DocsApiVocabulary> {
    * - Lands on the header's `<section>` when the `<ui-header>` draws no box of its own (`display: contents`).
    */
   private async reveal(hash: string): Promise<void> {
-    const id = UIDocsApi.idForHash(hash)
+    const id = TocIndex.decode(hash.replace(/^#/, ""))
     const root = this.domElement.renderRoot
     const header = id ? (root as ShadowRoot).getElementById?.(id) : undefined
     if (!header) return
@@ -429,18 +416,6 @@ export class UIDocsApi extends E.UIComponent<DocsApiVocabulary> {
     await Promise.all(elements.map((element) => (element as Element & { ready: Promise<void> }).ready))
     const box = header.getClientRects().length ? header : header.parentElement
     if (box) void landing.land(box)
-  }
-
-  /**
-   * The id a `location.hash` names, decoded;  `""` for none or a malformed one.
-   * - Static:  pure.
-   */
-  private static idForHash(hash: string): string {
-    try {
-      return decodeURIComponent(hash.replace(/^#/, ""))
-    } catch {
-      return ""
-    }
   }
 
   /**

@@ -1,27 +1,31 @@
 /**
- * `yarn gen:styles`:  regenerate every generated sheet in `src/styles/`.
+ * `yarn gen:styles [--check]`:  regenerate every generated sheet in `src/styles/`.
  * - `tokens.css`, `colors.css`, `sizes.css`, from `styles.en.ts` (`StyleGenerator`).
  * - Each theme's sheet, from its theme file (`ThemeFile`;  epic `debut` P18):
  *   `themes/<name>.theme.json5` => `themes/<name>.css`, `themes/palettes/<name>.palette.json5` => `palettes/<name>.css`;
  *   and `themes/theme.schema.json`, from the theme tree.
  * - The generated sheets are COMMITTED, so consumers need no build step;  rerun after any vocabulary or theme change.
+ * - `--check`:  write nothing;  exit 1 if a sheet is stale.
  * - NOTE: imports the generators' leaf files, not the `spell-ui/styles` barrel -- the barrel pulls in `?raw` / `?inline`
  *   CSS imports that only Vite understands.
  */
-import { readdirSync, writeFileSync } from "node:fs"
+import { readdirSync } from "node:fs"
 import { fileURLToPath } from "node:url"
+import { parseArgs } from "node:util"
 
 import { readJSON5File } from "spell/util/node/json5"
 import { StyleGenerator } from "spell-ui/styles/StyleGenerator"
 import { ThemeFile } from "spell-ui/styles/ThemeFile"
 import type { ThemeData } from "spell-ui/styles/styles.types"
 import { Terminal } from "spell/element-tools/Terminal"
+import { type GeneratedOutput, writeOrCheck } from "spell/element-tools/generatedFiles"
 
-import { formatFiles } from "spell-ui/tools/generatedFiles"
+import { formatted } from "spell-ui/tools/generatedFiles"
 
 /****************
  * ### `GenStylesCommand`
- * Writes the generated sheets, formats them (so `yarn format` is a no-op on them), and says so.
+ * Writes the generated sheets, formatted as `yarn format` would (so it's a no-op on them), only those that changed,
+ * and says so.
  ****************/
 class GenStylesCommand {
   /** `src/styles/`, where the sheets live. */
@@ -31,25 +35,25 @@ class GenStylesCommand {
   readonly themesDirectory = `${this.directory}themes/`
 
   /**
-   * Write every sheet, format them, report.
-   * - SIDE EFFECT:  overwrites the generated files.
+   * Write every sheet that changed (`isCheck`:  write none, fail on a stale one), report.
+   * - SIDE EFFECT:  overwrites the generated files, or sets `process.exitCode`.
    * - throws a `TypeError` on a mistake in a theme file, naming it
    */
-  run() {
-    const paths: string[] = []
-    const write = (path: string, text: string) => {
-      writeFileSync(path, text)
-      paths.push(path)
-    }
-    for (const [name, css] of Object.entries(new StyleGenerator().sheets())) write(`${this.directory}${name}`, css)
+  async run({ isCheck }: { isCheck: boolean }) {
+    const outputs: GeneratedOutput[] = Object.entries(new StyleGenerator().sheets()).map(([name, css]) => [
+      `${this.directory}${name}`,
+      css
+    ])
     const sheets = ThemeFile.sheets({
       themes: this.themeFiles("", "theme"),
       palettes: this.themeFiles("palettes/", "palette")
     })
-    for (const [path, css] of Object.entries(sheets)) write(`${this.themesDirectory}${path}`, css)
-    write(`${this.themesDirectory}theme.schema.json`, `${JSON.stringify(ThemeFile.schema(), undefined, 2)}\n`)
-    formatFiles(paths)
-    for (const path of paths) Terminal.out(`wrote ${path}`)
+    for (const [path, css] of Object.entries(sheets)) outputs.push([`${this.themesDirectory}${path}`, css])
+    outputs.push([`${this.themesDirectory}theme.schema.json`, `${JSON.stringify(ThemeFile.schema(), undefined, 2)}\n`])
+    const stale = writeOrCheck(await formatted(outputs), { command: "gen:styles", isCheck })
+    if (isCheck) return
+    for (const path of stale) Terminal.out(`wrote ${path}`)
+    Terminal.out(`${outputs.length - stale.length} of ${outputs.length} generated sheets unchanged`)
   }
 
   /** Every `<name>.<kind>.json5` in the themes folder's `folder`, parsed, by name. */
@@ -65,4 +69,5 @@ class GenStylesCommand {
   }
 }
 
-new GenStylesCommand().run()
+const { values } = parseArgs({ options: { check: { type: "boolean", default: false } } })
+await new GenStylesCommand().run({ isCheck: values.check })

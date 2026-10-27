@@ -1,10 +1,9 @@
-import { execFileSync } from "node:child_process"
 import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs"
 import { dirname, join, relative } from "node:path"
-import { fileURLToPath } from "node:url"
 
 import { readJSON5File } from "spell/util/node/json5"
 import { localDate } from "spell/util/time"
+import { Git } from "spell/server/Git"
 
 import { DesignBrand } from "./DesignBrand.ts"
 import { DesignComponents } from "./DesignComponents.ts"
@@ -13,6 +12,7 @@ import type { SiteDataFile } from "spell-ui/docs-components/docs-components.type
 import {
   COMPONENTS,
   SITE_DATA,
+  SPELL_UI_ROOT,
   type DesignExportResult,
   type DesignFamily,
   type DesignFile,
@@ -58,7 +58,7 @@ export class DesignExport {
   readonly allData: SiteDataFile
 
   constructor(options: DesignExportOptions = {}) {
-    this.uiFolder = options.uiFolder ?? UI_FOLDER
+    this.uiFolder = options.uiFolder ?? SPELL_UI_ROOT
     this.data = options.data ?? readJSON5File<SiteDataFile>(join(this.uiFolder, SITE_DATA, "components.json5"))
     this.git = options.git ?? DesignExport.readGit(this.uiFolder)
     this.now = options.now ?? new Date()
@@ -317,21 +317,16 @@ export class DesignExport {
     return this.allData.components.find((tag) => tag.tag === family.mainTag)?.folder ?? family.mainTag
   }
 
-  /** Branch, short sha and author of the checkout `folder` is in;  `unknown` for any git can't answer. */
+  /**
+   * Branch, short sha and author of the checkout `folder` is in, by the kit's `Git`;  `unknown` for any git can't
+   * answer.
+   * - NEVER throws
+   */
   static readGit(folder: string): DesignGit {
     return {
-      branch: git("rev-parse", "--abbrev-ref", "HEAD"),
-      sha: git("rev-parse", "--short", "HEAD"),
-      user: git("config", "user.name")
-    }
-
-    /** `git <args>`'s output in `folder`, trimmed;  `unknown` when git can't answer.  NEVER throws. */
-    function git(...args: string[]): string {
-      try {
-        return execFileSync("git", args, { cwd: folder, encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim()
-      } catch {
-        return "unknown"
-      }
+      branch: Git.out(["rev-parse", "--abbrev-ref", "HEAD"], folder) ?? UNKNOWN,
+      sha: Git.out(["rev-parse", "--short", "HEAD"], folder) ?? UNKNOWN,
+      user: Git.out(["config", "user.name"], folder) ?? UNKNOWN
     }
   }
 
@@ -378,8 +373,8 @@ export type DesignGit = {
   user: string
 }
 
-/** Spell UI's folder (`spell-ui`), absolute. */
-const UI_FOLDER = fileURLToPath(new URL("../../", import.meta.url))
+/** What a commit fact is when git can't say. */
+const UNKNOWN = "unknown"
 
 /** The design system's title on claude.ai (Owen, 2026-10-05). */
 const SYSTEM_TITLE = "Spell"

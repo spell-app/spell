@@ -15,3 +15,22 @@ describe("FoundationTokens.groups()", () => {
     expect(all.every((token) => token.description)).toBe(true)
   })
 })
+
+describe("FoundationTokens.rootDeclarations()", () => {
+  test("reads only top-level :root declarations, inside @layer;  every prefix asked for, in sheet order", () => {
+    const css =
+      "@layer a { :root { --ui-x: 1px; --spell-y: light-dark(#fff, #000); --ui-z: 2 } } " +
+      "@media (x) { :root { --ui-w: 2 } } .a { --ui-v: 3 }"
+    const read = (prefixes?: string[]) =>
+      FoundationTokens.rootDeclarations(css, prefixes).map(({ name, value }) => ({ name, value }))
+    expect(read(["ui", "spell"])).toEqual([
+      { name: "--ui-x", value: "1px" },
+      { name: "--spell-y", value: "light-dark(#fff, #000)" },
+      { name: "--ui-z", value: "2" }
+    ])
+    expect(read()).toEqual([
+      { name: "--ui-x", value: "1px" },
+      { name: "--ui-z", value: "2" }
+    ])
+  })
+})

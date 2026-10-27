@@ -23,13 +23,10 @@ import type { SiteDataFile, SiteTag } from "spell-ui/docs-components/docs-compon
 import { NavIndex } from "spell-ui/docs-components/ui-docs-nav/NavIndex"
 import { Terminal } from "spell/element-tools/Terminal"
 import { spliceGenerated, writeOrCheck } from "spell/element-tools/generatedFiles"
-import { SITE_DATA, SITE_PAGES } from "spell-ui/tools/tools.types"
+import { SITE_DATA, SITE_PAGES, SPELL_UI_ROOT } from "spell-ui/tools/tools.types"
 
 import { STATUS_TEXT, withoutTicks } from "spell-ui/tools/generatedFiles"
 import { SiteSections } from "./site-sections.ts"
-
-/** `packages/ui/`. */
-const UI = path.resolve(import.meta.dirname, "..")
 
 /****************
  * ### `ComponentIndexWriter`
@@ -38,10 +35,10 @@ const UI = path.resolve(import.meta.dirname, "..")
  ****************/
 class ComponentIndexWriter {
   /** The page. */
-  readonly file = path.join(UI, SITE_PAGES, "components.html")
+  readonly file = path.join(SPELL_UI_ROOT, SITE_PAGES, "components.html")
 
   /** The site's data. */
-  readonly data: SiteDataFile = readJSON5File<SiteDataFile>(path.join(UI, SITE_DATA, "components.json5"))
+  readonly data: SiteDataFile = readJSON5File<SiteDataFile>(path.join(SPELL_UI_ROOT, SITE_DATA, "components.json5"))
 
   /** `page` with its generated block replaced by a fresh one. */
   render(page: string): string {

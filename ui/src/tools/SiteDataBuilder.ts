@@ -1,6 +1,5 @@
 import { existsSync, readFileSync } from "node:fs"
 import { join } from "node:path"
-import { fileURLToPath } from "node:url"
 
 import { readJSON5File } from "spell/util/node/json5"
 
@@ -19,7 +18,7 @@ import {
   type SiteTagPage
 } from "spell-ui/docs-components/docs-components.types"
 import type { AttributeSpec, ComponentVocabulary, ValueSetName } from "spell/element/vocabulary.types"
-import { SITE_DATA, SITE_PAGES } from "./tools.types.ts"
+import { SITE_DATA, SITE_PAGES, SPELL_UI_ROOT } from "./tools.types.ts"
 import { FamilyTokens } from "./FamilyTokens.ts"
 import { FoundationTokens } from "./FoundationTokens.ts"
 import { SiteSearchBuilder } from "./SiteSearchBuilder.ts"
@@ -55,7 +54,7 @@ export class SiteDataBuilder {
   /** Other folders to read instead of the site's own (`SiteDataBuilderProps`):  another package's elements. */
   readonly options: Omit<SiteDataBuilderProps, "root">
 
-  constructor({ root = UI_ROOT, ...options }: SiteDataBuilderProps = {}) {
+  constructor({ root = SPELL_UI_ROOT, ...options }: SiteDataBuilderProps = {}) {
     this.root = root
     this.options = options
   }
@@ -417,6 +416,3 @@ type PagesForParams = {
   /** its pages.json5 entry */
   seed: SitePageSeed
 }
-
-/** `packages/ui/`. */
-const UI_ROOT = fileURLToPath(new URL("../../", import.meta.url))

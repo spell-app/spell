@@ -33,6 +33,7 @@ import type { Browser, Page } from "playwright"
 
 import { BrowserPage } from "spell/element-tools/BrowserPage"
 import { DevServer } from "spell/element-tools/DevServer"
+import { SPELL_UI_ROOT } from "./tools.types.ts"
 
 void describe("hot module replacement (Vite dev, tools/demo/hmr.html)", () => {
   // set in `before()`:  the suite's body runs while this module loads, before the classes below exist
@@ -462,8 +463,8 @@ class SourceFiles {
   }
 }
 
-/** The package root, with a trailing slash. */
-const ROOT = fileURLToPath(new URL("../../", import.meta.url))
+/** The package root, with a trailing slash (`SPELL_UI_ROOT`). */
+const ROOT = `${SPELL_UI_ROOT}/`
 
 /** Source files the scenarios edit. */
 const FILES = {

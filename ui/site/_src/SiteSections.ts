@@ -1,6 +1,6 @@
 // Import directly:  in `core`'s util barrel it cost every page 1.9 kB
 import { PrefStore } from "spell/util/persist/PrefStore"
-import { nextFrame } from "spell-ui/util"
+import { beforeNextPaint, nextFrame } from "spell-ui/util"
 import { SiteData } from "spell-ui/docs-components/SiteData"
 // Leaves, not the barrel:  the barrel defines `<ui-toc>`, which `<ui-root>` does on first use
 import { HashLanding, type HashLandingRules, type LandingScroll } from "spell-ui/components/ui-toc/HashLanding"
@@ -91,7 +91,7 @@ export class SiteSections {
   private markTabsStuck(): void {
     if (this.isMarkingStuck) return
     this.isMarkingStuck = true
-    requestAnimationFrame(() => {
+    beforeNextPaint(() => {
       this.isMarkingStuck = false
       const main = this.main
       if (!main?.isConnected) return

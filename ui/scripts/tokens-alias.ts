@@ -8,28 +8,26 @@
  * - NOTE: imports the leaf file, not the `spell-ui/styles` barrel (whose `?inline` imports only Vite understands).
  */
 import { readdirSync, readFileSync, writeFileSync } from "node:fs"
-import { fileURLToPath } from "node:url"
+import { join } from "node:path"
 import { parseArgs } from "node:util"
 
 import { ComponentTokens } from "spell-ui/styles/ComponentTokens"
 import { Terminal } from "spell/element-tools/Terminal"
-import { SITE_PAGES } from "spell-ui/tools/tools.types"
+import type { GeneratedOutput } from "spell/element-tools/generatedFiles"
+import { SITE_PAGES, SPELL_UI_ROOT } from "spell-ui/tools/tools.types"
 
-import { formatFiles } from "spell-ui/tools/generatedFiles"
+import { formatted } from "spell-ui/tools/generatedFiles"
 
 /****************
  * ### `AliasTokensCommand`
  * Converts one family's sheets to private token aliases, and lists what's left for a person to fix.
  ****************/
 class AliasTokensCommand {
-  /** `packages/ui/`. */
-  readonly root = fileURLToPath(new URL("../", import.meta.url))
-
   /**
    * Convert, report.
-   * - SIDE EFFECT:  with `write`, overwrites the family's sheets (then formats them).
+   * - SIDE EFFECT:  with `write`, overwrites the family's sheets that changed, formatted as `yarn format` would.
    */
-  run({ family, write }: AliasTokensOptions) {
+  async run({ family, write }: AliasTokensOptions) {
     const tokens = new ComponentTokens({
       vocabularies: this.read(this.files("src/components", ENGLISH_VOCABULARY)),
       foundation: Object.values(this.read(this.files("src/styles", /\.css$/)))
@@ -45,28 +43,26 @@ class AliasTokensCommand {
     )
     Terminal.out(`${family}:  ${declared.size} public tokens declared`)
 
-    const written: string[] = []
+    const converted: GeneratedOutput[] = []
     for (const [path, css] of Object.entries(sheets)) {
-      const { css: converted, notes } = tokens.convert(family, css, declared)
-      Terminal.out(`\n${path}${converted === css ? "  (unchanged)" : ""}`)
+      const { css: sheet, notes } = tokens.convert(family, css, declared)
+      Terminal.out(`\n${path}${sheet === css ? "  (unchanged)" : ""}`)
       for (const note of notes) Terminal.out(`  - ${note}`)
-      if (write && converted !== css) {
-        writeFileSync(`${this.root}${path}`, converted)
-        written.push(`${this.root}${path}`)
-      }
+      if (sheet !== css) converted.push([join(SPELL_UI_ROOT, path), sheet])
     }
     // formatted so `yarn format` is a no-op afterwards
-    if (written.length > 0) formatFiles(written)
+    if (write) for (const [file, sheet] of await formatted(converted)) writeFileSync(file, sheet)
 
     Terminal.out("\nOther files naming a converted token (reads of the PUBLIC name, not through the alias):")
     const own = new Set(Object.keys(sheets))
     const pattern = new RegExp(`(?<!var\\(--_ui-[a-z0-9-]+, var\\()(${[...declared].join("|")})(?![a-z0-9-])`, "g")
     // the site's pages too (`SITE_PAGES`)
-    for (const directory of ["src", "tests", "site", SITE_PAGES, "notes"]) {
+    // not the notes:  they're the content repo's since epic `repo-split` P9 (`guides/ui/notes/`), and reading the
+    // folder they left threw
+    for (const directory of ["src", "tests", "site", SITE_PAGES]) {
       for (const path of this.files(directory, /\.(css|ts|tsx|html|md)$/)) {
-        if (own.has(path) || path.endsWith("notes/report.md") || GENERATED_SITE.test(path) || declared.size === 0)
-          continue
-        const lines = readFileSync(`${this.root}${path}`, "utf8").split("\n")
+        if (own.has(path) || GENERATED_SITE.test(path) || declared.size === 0) continue
+        const lines = readFileSync(join(SPELL_UI_ROOT, path), "utf8").split("\n")
         lines.forEach((line, index) => {
           if (line.match(pattern)) Terminal.out(`  ${path}:${index + 1}:  ${line.trim().slice(0, 140)}`)
         })
@@ -76,7 +72,7 @@ class AliasTokensCommand {
 
   /** Repo-relative paths under `directory` (recursive) whose name matches `pattern`. */
   private files(directory: string, pattern: RegExp): string[] {
-    return (readdirSync(`${this.root}${directory}`, { recursive: true }) as string[])
+    return (readdirSync(join(SPELL_UI_ROOT, directory), { recursive: true }) as string[])
       .filter((file) => pattern.test(file) && !file.includes("node_modules"))
       .map((file) => `${directory}/${file}`)
       .sort()
@@ -84,7 +80,7 @@ class AliasTokensCommand {
 
   /** path => text of each repo-relative path. */
   private read(paths: string[]): Record<string, string> {
-    return Object.fromEntries(paths.map((path) => [path, readFileSync(`${this.root}${path}`, "utf8")]))
+    return Object.fromEntries(paths.map((path) => [path, readFileSync(join(SPELL_UI_ROOT, path), "utf8")]))
   }
 }
 
@@ -114,4 +110,4 @@ if (!family) {
   Terminal.err(USAGE)
   process.exit(2)
 }
-new AliasTokensCommand().run({ family, write: values.write })
+await new AliasTokensCommand().run({ family, write: values.write })

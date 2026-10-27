@@ -36,13 +36,10 @@ import { readJSON5File } from "spell/util/node/json5"
 import { escapeHTML } from "spell/util/string"
 
 import { Terminal } from "spell/element-tools/Terminal"
-import { SITE_DATA, SITE_PAGES } from "spell-ui/tools/tools.types"
+import { SITE_DATA, SITE_PAGES, SPELL_UI_ROOT } from "spell-ui/tools/tools.types"
 
 import { STATUS_TEXT } from "spell-ui/tools/generatedFiles"
 import { SiteSections } from "./site-sections.ts"
-
-/** Spell UI's repo root. */
-const UI = path.resolve(import.meta.dirname, "..")
 
 /**
  * The template, in spell-epic's `templates/` (epic `epic-eject` T11:  every template is the engine's), found by
@@ -58,7 +55,7 @@ const TEMPLATE = path.join(
 const TEMPLATE_SITE = /\.\.\/(?:components\/)?ui\//g
 
 /** Fomantic's docs pages, by group folder. */
-const FOMANTIC_DOCS = path.join(UI, "reference/Fomantic-UI-Docs/server/documents")
+const FOMANTIC_DOCS = path.join(SPELL_UI_ROOT, "reference/Fomantic-UI-Docs/server/documents")
 
 /** Families whose Fomantic page has another name (epic page 1.3, the page map). */
 const FOMANTIC_PAGES: Record<string, string> = {
@@ -117,11 +114,11 @@ type PageFacts = {
  ****************/
 class SitePageWriter {
   /** the site's pages, `docs/` */
-  readonly site = path.join(UI, SITE_PAGES)
+  readonly site = path.join(SPELL_UI_ROOT, SITE_PAGES)
 
   /** Every family of `components.json5`, by folder. */
   private readonly families: Record<string, Family> = readJSON5File<{ families: Record<string, Family> }>(
-    path.join(UI, SITE_DATA, "components.json5")
+    path.join(SPELL_UI_ROOT, SITE_DATA, "components.json5")
   ).families
 
   /** The facts for `name` (a tag, a family folder or a page name), with `--title` / `--summary` applied. */

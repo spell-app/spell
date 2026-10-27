@@ -91,7 +91,7 @@ export class StaticInteractions {
       element.id = fresh
       seen.add(fresh)
       const scope = element.closest(SSR.ROOT) ?? document.body
-      for (const attribute of REFERENCES) {
+      for (const attribute of SSR.ID_REFERENCE_ATTRIBUTES) {
         for (const reference of scope.querySelectorAll(`[${attribute}]`)) {
           const tokens = (reference.getAttribute(attribute) ?? "").split(/\s+/)
           if (tokens.includes(id)) {
@@ -126,21 +126,3 @@ const POPOVER_COMMANDS: Readonly<Record<string, string>> = {
 
 /** Buttons that close their dialog. */
 const CLOSERS = '[part~="close"], [approve], [deny]'
-
-/** Attributes that refer to ids (space-separated lists). */
-const REFERENCES = [
-  "aria-controls",
-  "aria-labelledby",
-  "aria-describedby",
-  "aria-owns",
-  "aria-details",
-  "aria-errormessage",
-  "aria-activedescendant",
-  "for",
-  "form",
-  "headers",
-  "list",
-  "commandfor",
-  "popovertarget",
-  "anchor"
-]

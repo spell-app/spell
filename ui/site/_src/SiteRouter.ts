@@ -3,6 +3,7 @@ import { E, UI } from "spell-ui/core"
 import { RootLoader } from "spell-ui/components/ui-root/RootLoader"
 import { ExampleSource } from "spell-ui/components/ui-example/ExampleSource"
 import { NavIndex } from "spell-ui/docs-components/ui-docs-nav/NavIndex"
+import { serverConfig } from "spell/server/site"
 import type { SitePatch } from "./SitePatch"
 import { SiteSections } from "./SiteSections"
 import { SiteShell } from "./SiteShell"
@@ -48,10 +49,10 @@ export class SiteRouter {
   private readonly firstPage = location.pathname
 
   /** The first page's file, as the page server named it (`SPELL_SERVER.file`). */
-  private readonly firstFile = SiteRouter.server()?.file
+  private readonly firstFile = serverConfig()?.file
 
   /** The first page's file on disk, as the page server named it (`SPELL_SERVER.source`):  `serverSource()`'s anchor. */
-  private readonly firstSource = SiteRouter.server()?.source
+  private readonly firstSource = serverConfig()?.source
 
   constructor({ siteRoot, content, patch }: SiteRouterProps) {
     this.siteRoot = siteRoot
@@ -254,7 +255,7 @@ export class SiteRouter {
     if (title) document.title = title
     const current = NavIndex.page()
     for (const nav of document.querySelectorAll("ui-docs-nav")) nav.setAttribute("current", current)
-    const server = SiteRouter.server()
+    const server = serverConfig()
     const file = this.serverFile(url)
     if (server && file) server.file = file
     // and the file on disk, which the header's "open in VS Code" opens:  none known, the header falls back
@@ -337,11 +338,6 @@ export class SiteRouter {
   private tail(path: string): string {
     const rest = path.slice(this.siteRoot.pathname.length)
     return rest === "" || rest.endsWith("/") ? `${rest}index.html` : rest
-  }
-
-  /** What the page server injected (`window.SPELL_SERVER`);  live reload reads its `file`. */
-  private static server(): { file?: string; source?: string } | undefined {
-    return (globalThis as { SPELL_SERVER?: { file?: string; source?: string } }).SPELL_SERVER
   }
 
   /** Load the family defining `tag`, if any. */

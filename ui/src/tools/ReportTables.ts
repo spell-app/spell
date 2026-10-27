@@ -1,9 +1,10 @@
 /// <reference types="node" />
 
-import { existsSync, readFileSync, writeFileSync } from "node:fs"
+import { existsSync, readFileSync } from "node:fs"
 import { join, resolve } from "node:path"
 
 import { kb } from "spell/util/number"
+import { spliceGenerated, writeOrCheck } from "spell/element-tools/generatedFiles"
 import type { PerfRecord, PerfResult, PerfStep } from "spell-ui/test-helpers/PerfRun"
 import {
   REPORT_DIGITS,
@@ -22,12 +23,13 @@ import { Terminal } from "spell/element-tools/Terminal"
  * ### `ReportTables`
  * Rewrites the GENERATED tables of `notes/report.md` from the result files, with fixed headers, units and rounding.
  * - A table lives between `<!-- generated:<name> -->` and `<!-- /generated:<name> -->`;
- *   ONLY that content is replaced, prose around it is left alone.  Names are the keys of `TABLES` (`TableName`).
+ *   ONLY that content is replaced, prose around it is left alone (the kit's `spliceGenerated()`, a table at a time;  a
+ *   table without its markers is skipped).  Names are the keys of `TABLES` (`TableName`).
  * - Inputs, all in `results/`:
  *   `measure-results.json` (`BundleMeasure`), `perf-results.json` (`PerfRun`, written by the dropdown perf test),
  *   `smoke-results.json` (`SmokeRunner`), `loc-results.json` (`LocCount`).
  *   A missing file renders a one-line "not measured" note instead of the table.
- * - Idempotent:  running it twice changes nothing.
+ * - Idempotent:  running it twice changes nothing;  an unchanged report isn't written (`writeOrCheck()`).
  ****************/
 export class ReportTables {
   /** repo root, absolute */
@@ -43,20 +45,27 @@ export class ReportTables {
     this.results = results
   }
 
-  /** Rewrite every marked table;  returns the names it found. */
-  write(): string[] {
+  /**
+   * Rewrite every marked table;  returns the names it found.
+   * - `isCheck`:  write nothing;  fail (exit code 1) if a table is stale, naming `yarn report`
+   * - SIDE EFFECT:  writes the report when a table changed, or sets `process.exitCode`
+   */
+  write({ isCheck = false }: { isCheck?: boolean } = {}): string[] {
     const path = resolve(this.root, this.file)
     let text = readFileSync(path, "utf8")
     const found: string[] = []
     for (const name of Object.keys(TABLES) as TableName[]) {
-      const pattern = new RegExp(`(<!-- generated:${name} -->\\n)[\\s\\S]*?(<!-- /generated:${name} -->)`, "g")
-      if (!pattern.test(text)) continue
+      const start = `<!-- generated:${name} -->`
+      if (!text.includes(start)) continue
       found.push(name)
-      const body = this.render(name)
-      text = text.replace(pattern, (_match, open: string, close: string) => `${open}${body}\n${close}`)
+      const end = `<!-- /generated:${name} -->`
+      text = spliceGenerated(text, { file: this.file, start, end, block: () => `${this.render(name)}\n` })
     }
-    writeFileSync(path, text)
-    Terminal.out(`${this.file}:  regenerated ${found.join(", ") || "nothing (no markers)"}`)
+    const [stale] = writeOrCheck([[path, text]], { command: "report", isCheck })
+    if (!isCheck) {
+      const tables = found.length ? `regenerated ${found.join(", ")}` : "nothing (no markers)"
+      Terminal.out(`${this.file}:  ${stale ? tables : "unchanged"}`)
+    }
     return found
   }
 

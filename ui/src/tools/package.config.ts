@@ -1,13 +1,11 @@
 /// <reference types="node" />
 
-import { fileURLToPath } from "node:url"
-
-import type { Bucket, ImportMap, PackageConfig } from "./tools.types.ts"
+import { SPELL_UI_ROOT, type Bucket, type ImportMap, type PackageConfig } from "./tools.types.ts"
 import { COMPONENTS, ENTRIES, SHARED_ENTRIES, SOLID_EXTERNAL } from "spell-ui/vite.config.ts"
 import { VocabularyFiles } from "spell/element-tools/VocabularyFiles"
 
-/** Repo root, absolute, with a trailing slash. */
-const ROOT = fileURLToPath(new URL("../../", import.meta.url))
+/** Repo root, absolute, with a trailing slash (`SPELL_UI_ROOT`):  Vite's module ids start with it. */
+const ROOT = `${SPELL_UI_ROOT}/`
 
 /**
  * Lib entries measured for their effect on the others' chunks, not as tiers (`PackageConfig.extra`).

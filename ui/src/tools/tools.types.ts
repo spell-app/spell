@@ -4,11 +4,17 @@
  * (`IconPackError` ...).
  * - The component packs' shapes (their reports, `ComponentPackError`) are the kit's, beside its pack tooling:
  *   `spell/element-tools/tools.types` (epic `repo-split` P10).
- * - At the BOTTOM of the tools' import graph:  `import type` only, so every tool (and Spell UI's `spell` commands, `src/cli/`,
- *   through `spell-ui/tools/tools.types`) imports it without loading another.
+ * - At the BOTTOM of the tools' import graph:  `import type` only, and node's own modules (`SPELL_UI_ROOT`,
+ *   `sitePages()`),
+ *   so every tool (and Spell UI's `spell` commands, `src/cli/`, through `spell-ui/tools/tools.types`) imports it without
+ *   loading another.
  * - Every `results/*-results.json` has one of these shapes;  `ReportTables` reads them.
  * - The perf shapes (`PerfRecord` ...) live beside the benchmark, in `src/test-helpers/PerfRun.ts` (it runs in the browser).
  */
+
+import { existsSync, readdirSync } from "node:fs"
+import { join, resolve } from "node:path"
+import { fileURLToPath } from "node:url"
 
 import type { SiteDataFile } from "spell-ui/docs-components/docs-components.types"
 import type { PerfResult } from "spell-ui/test-helpers/PerfRun"
@@ -301,6 +307,13 @@ export type ImportMap = {
 ////////////////
 
 /**
+ * Spell UI's folder, the repo's root, absolute:  what `SITE_PAGES`, `SITE_DATA` and the rest are from.
+ * - ONE place works it out, for every tool and script (epic `coherence` P23);  `PACKAGE.root` holds it too, but
+ *   loads the Vite config.
+ */
+export const SPELL_UI_ROOT = resolve(fileURLToPath(import.meta.url), "../../..")
+
+/**
  * Spell UI's docs site's PAGES, from the repo's root:  its `docs/` folder, a component set laid out as every set is
  * (epic `people-and-orgs` P18;  until then shared content, the checkout's `ui/`, from claude-design P6).
  * - What's in it:
@@ -313,6 +326,20 @@ export type ImportMap = {
  *   so a page's `_assets/site.js` resolves (the page server's `componentSets` setting).
  */
 export const SITE_PAGES = "docs"
+
+/**
+ * Every page of a component set's site:  the `.html` files right in `folder`, A-Z, absolute;  none when it's missing.
+ * - `folder`:  Spell UI's pages (`SITE_PAGES`) by default;  another set's for its data (`SiteDataBuilder`'s `set`).
+ * - Not a `_`-prefixed file:  a partial or a smoke page, never one of the site's pages.
+ * - What `site:sections`, `site:kitchen`, `site:check --all` and the site search's index read (epic `coherence` P23).
+ */
+export function sitePages(folder = join(SPELL_UI_ROOT, SITE_PAGES)): string[] {
+  if (!existsSync(folder)) return []
+  return readdirSync(folder)
+    .filter((name) => name.endsWith(".html") && !name.startsWith("_"))
+    .sort()
+    .map((name) => join(folder, name))
+}
 
 /**
  * Spell UI's docs site's DATA, from the repo's root:  `docs/__data/`.

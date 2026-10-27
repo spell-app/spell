@@ -1,9 +1,7 @@
 /// <reference types="node" />
 
-import { execFileSync } from "node:child_process"
-import { existsSync, mkdirSync, readdirSync, realpathSync, statSync } from "node:fs"
+import { existsSync, mkdirSync, realpathSync, statSync } from "node:fs"
 import { basename, isAbsolute, join, relative, resolve, sep } from "node:path"
-import { fileURLToPath } from "node:url"
 import { parseArgs } from "node:util"
 
 import type { Browser, Page } from "playwright"
@@ -11,8 +9,8 @@ import type { Browser, Page } from "playwright"
 import { BrowserPage, type BrowserPageProps } from "spell/element-tools/BrowserPage"
 import { FOLDS_KEY } from "spell-ui/site/_src/site.types"
 import { TocIndex } from "spell-ui/components/ui-toc/TocIndex"
-import { KIT_ROOT, SPELL_CLI } from "./pageServer.ts"
-import { SITE_PAGES, SiteCheckError } from "./tools.types.ts"
+import { KIT_ROOT, ensurePageServer } from "./pageServer.ts"
+import { SITE_PAGES, SPELL_UI_ROOT, SiteCheckError, sitePages } from "./tools.types.ts"
 import { environment } from "./environment.ts"
 import { Terminal } from "spell/element-tools/Terminal"
 
@@ -86,7 +84,7 @@ export class SiteCheck {
     const { values, positionals } = parsed
     if (values.help) return exit(USAGE, 0)
     try {
-      const names = values.all ? SiteCheck.allPages() : positionals.map((name) => SiteCheck.resolvePage(name, cwd))
+      const names = values.all ? sitePages() : positionals.map((name) => SiteCheck.resolvePage(name, cwd))
       if (!names.length) return exit(USAGE, 2)
       const check = new SiteCheck({
         files: [...new Set(names)],
@@ -132,15 +130,6 @@ export class SiteCheck {
     return join(SITE, inside)
   }
 
-  /** Every page:  `docs/*.html`, minus `_`-prefixed ones (smoke pages, partials). */
-  static allPages(): string[] {
-    if (!existsSync(SITE)) return []
-    return readdirSync(SITE)
-      .filter((file) => file.endsWith(".html") && !file.startsWith("_"))
-      .sort()
-      .map((file) => join(SITE, file))
-  }
-
   /**
    * A page's screenshot prefix:  its file name (`ui-button`, `grammar`), or its path for a folder's `index.html`
    * (`components/index.html` => `components-index`), which would else overwrite the home page's shots.
@@ -174,24 +163,16 @@ export class SiteCheck {
   }
 
   /**
-   * The page server's origin, once it serves the site bundle.
-   * - `spell server start` prints `{ base, port, ... }` as JSON, maybe after other lines:
-   *   parsed from the first `{`
+   * The page server's origin, once it serves the site bundle (`ensurePageServer()`, as `site:dev` starts it).
    * - throws `SiteCheckError` when there's no server, or it doesn't serve `/components/ui/_assets/site.js`
    */
   async ensureServer(): Promise<string> {
     let base: string
     try {
-      const text = execFileSync(process.execPath, [SPELL, "server", "start"], {
-        cwd: REPO,
-        encoding: "utf8",
-        stdio: ["ignore", "pipe", "pipe"],
-        timeout: SERVER_START_MS
-      })
-      base = (JSON.parse(text.slice(text.indexOf("{"))) as { base: string }).base.replace(/\/$/, "")
+      base = ensurePageServer()
     } catch (error) {
       throw new SiteCheckError(
-        `SiteCheck.ensureServer():  can't start or find the page server (\`spell server start\` in ${REPO}):  ` +
+        `SiteCheck.ensureServer():  can't start or find the page server (\`spell server start\` in ${KIT_ROOT}):  ` +
           `${error};  start it by hand and read its output`
       )
     }
@@ -542,7 +523,7 @@ export class SiteCheck {
 
 /** Constructor props of `SiteCheck`. */
 export type SiteCheckProps = {
-  /** page files to check, absolute (`SiteCheck.resolvePage()`, `allPages()`) */
+  /** page files to check, absolute (`SiteCheck.resolvePage()`, `sitePages()`) */
   files: string[]
   /** screenshot folder, absolute;  default `results/site-check/` */
   out?: string
@@ -667,21 +648,14 @@ function parseCommandLine(argv: string[]) {
 // ## Constants
 ////////////////
 
-/** Spell UI's folder. */
-const PACKAGE = fileURLToPath(new URL("../..", import.meta.url))
-
 /** The site's pages, `docs/` (`SITE_PAGES`):  what the page server serves at `SITE_ADDRESS`. */
-const SITE = join(PACKAGE, SITE_PAGES)
+const SITE = join(SPELL_UI_ROOT, SITE_PAGES)
 
 /** Where the page server serves Spell UI's docs (the page server's `componentSets` setting). */
 const SITE_ADDRESS = "/components/ui"
 
-/** Where `spell server start` runs (the kit's root), and the kit's `spell` that runs it (`pageServer.ts`). */
-const REPO = KIT_ROOT
-const SPELL = SPELL_CLI
-
 /** Default screenshot folder;  `results` is git-ignored. */
-const DEFAULT_OUT = join(PACKAGE, "results", "site-check")
+const DEFAULT_OUT = join(SPELL_UI_ROOT, "results", "site-check")
 
 /** Printed on bad arguments and `--help`. */
 const USAGE = `usage:  yarn site:check <page...> | --all  [--out <dir>]
@@ -762,9 +736,6 @@ const CLICK_MS = 3000
 
 /** One screenshot (a full page can be tall). */
 const SCREENSHOT_MS = 30000
-
-/** `spell server start`, which may start the server. */
-const SERVER_START_MS = 60000
 
 /** Fetching the site bundle from the server, to see it's served. */
 const PROBE_MS = 10000

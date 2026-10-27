@@ -21,11 +21,11 @@
 
 import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs"
 import path from "node:path"
-import { fileURLToPath } from "node:url"
 
 import { NodePackage } from "spell/element-tools/NodePackage"
 import { Terminal } from "spell/element-tools/Terminal"
 import { emojiChunkFor } from "spell-ui/components/ui-emoji/UIEmoji.types"
+import { SPELL_UI_ROOT } from "spell-ui/tools/tools.types"
 
 /****************
  * ### `EmojiGenerator`
@@ -159,14 +159,11 @@ class EmojiGenerator {
 // ## Constants
 ////////////////
 
-/** `packages/ui/`. */
-const PACKAGE_ROOT = fileURLToPath(new URL("../", import.meta.url))
-
 /** Fomantic's emoji variables (read only). */
-const SOURCE = path.join(PACKAGE_ROOT, "reference/Fomantic-UI/src/themes/default/elements/emoji.variables")
+const SOURCE = path.join(SPELL_UI_ROOT, "reference/Fomantic-UI/src/themes/default/elements/emoji.variables")
 
 /** Output directory;  emptied first, so a dropped emoji or set doesn't linger. */
-const OUTPUT = path.join(PACKAGE_ROOT, "src/components/ui-emoji/data")
+const OUTPUT = path.join(SPELL_UI_ROOT, "src/components/ui-emoji/data")
 
 /** Variation selector 16:  "show as an emoji". */
 const VS16 = 0xfe0f

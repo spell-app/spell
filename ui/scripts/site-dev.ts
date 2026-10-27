@@ -23,19 +23,17 @@ import { execFileSync } from "node:child_process"
 import path from "node:path"
 import { build, type Rolldown } from "vite"
 
-import { KIT_ROOT, SPELL_CLI } from "spell-ui/tools/pageServer"
+import { ensurePageServer } from "spell-ui/tools/pageServer"
+import { SPELL_UI_ROOT } from "spell-ui/tools/tools.types"
 import { Terminal } from "spell/element-tools/Terminal"
 
-/** Spell UI's folder. */
-const UI = path.resolve(import.meta.dirname, "..")
-
-execFileSync("yarn", ["site:bundle"], { cwd: UI, stdio: "inherit" })
+execFileSync("yarn", ["site:bundle"], { cwd: SPELL_UI_ROOT, stdio: "inherit" })
 const base = ensurePageServer()
 Terminal.out(
   `\nSpell UI site:  ${base}/components/ui/  (live reload);  watching the bundle's sources, Ctrl-C to stop\n`
 )
 const watcher = (await build({
-  configFile: path.join(UI, "vite.site.config.ts"),
+  configFile: path.join(SPELL_UI_ROOT, "vite.site.config.ts"),
   build: { watch: {} }
 })) as Rolldown.RolldownWatcher
 watcher.on("event", report)
@@ -44,19 +42,4 @@ watcher.on("event", report)
 function report(event: Rolldown.RolldownWatcherEvent): void {
   if (event.code === "BUNDLE_END") Terminal.out(`${new Date().toLocaleTimeString()}  rebuilt in ${event.duration}ms`)
   if (event.code === "ERROR") Terminal.err(`${new Date().toLocaleTimeString()}  build failed:  ${event.error.message}`)
-}
-
-/**
- * The kit's page server origin, e.g. `http://127.0.0.1:54769` (`KIT_ROOT`'s:  it serves this site).
- * - SIDE EFFECT:  `spell server start` starts it in the background if it isn't running
- * - it prints `{ base, port, ... }` as JSON, maybe after other lines:  parsed from the first `{`
- */
-function ensurePageServer(): string {
-  const text = execFileSync(process.execPath, [SPELL_CLI, "server", "start"], {
-    cwd: KIT_ROOT,
-    encoding: "utf8",
-    stdio: ["ignore", "pipe", "inherit"],
-    timeout: 60000
-  })
-  return (JSON.parse(text.slice(text.indexOf("{"))) as { base: string }).base.replace(/\/$/, "")
 }

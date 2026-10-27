@@ -1,8 +1,7 @@
 /// <reference types="node" />
 
-import { fileURLToPath } from "node:url"
-
 import { NodePackage } from "spell/element-tools/NodePackage"
+import { SPELL_UI_ROOT } from "spell-ui/tools/tools.types"
 import type { VisualBrowser, VisualOs } from "./visual.types.ts"
 
 /**
@@ -14,8 +13,8 @@ import type { VisualBrowser, VisualOs } from "./visual.types.ts"
  * - See `notes/visual-testing.md`.
  */
 export class VisualSettings {
-  /** repo root, with a trailing slash */
-  static readonly ROOT = fileURLToPath(new URL("../../../", import.meta.url))
+  /** repo root, with a trailing slash (`SPELL_UI_ROOT`) */
+  static readonly ROOT = `${SPELL_UI_ROOT}/`
   /** baselines, in git:  `<os>/<browser>/ui-<family>/<file>.png` */
   static readonly BASELINES = `${VisualSettings.ROOT}src/test-helpers/visual/baselines`
   /** diffs, HTML reports, the parity report (git-ignored) */

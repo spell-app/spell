@@ -1,7 +1,8 @@
 import { UI } from "spell-ui/core"
 // A leaf, not the barrel:  the barrel defines `<ui-example>`, which `<ui-root>` does on first use
 import { ExampleSource } from "spell-ui/components/ui-example/ExampleSource"
-import { PagePatch } from "spell/server/site"
+import type { PageChange } from "spell/server/liveClient"
+import { PagePatch, serverConfig } from "spell/server/site"
 import { SiteSections } from "./SiteSections"
 import { SiteShell } from "./SiteShell"
 import { PAGE_MAIN } from "./site.types"
@@ -47,7 +48,7 @@ export class SitePatch {
 
   constructor({ main }: SitePatchProps) {
     this.main = main
-    const server = SitePatch.server()
+    const server = serverConfig()
     this.base = server?.readPage
       ? server.readPage().then(
           ({ html, etag }) => (etag && etag === server.etag ? html : null),
@@ -59,7 +60,8 @@ export class SitePatch {
   /** Take the page's own changes from the live client.  SIDE EFFECT:  a window listener, for good. */
   start(): void {
     addEventListener("spell-server:reloading", (event) => {
-      const { html, reload, own } = ((event as CustomEvent).detail ?? {}) as PageChange
+      // the detail as sent, checked:  a page may hear the event from somewhere else
+      const { html, reload, own } = ((event as CustomEvent).detail ?? {}) as Partial<PageChange>
       if (typeof html !== "string" || typeof reload !== "function") return
       event.preventDefault()
       this.queue = this.queue.then(() => this.update(html, reload, own)).catch(() => reload())
@@ -95,11 +97,6 @@ export class SitePatch {
     if (!patched) return reload()
     SiteSections.instance.show(main!, { isFirst: false })
   }
-
-  /** What the page server injected (`window.SPELL_SERVER`):  `readPage()` and the page's `ETag`. */
-  private static server(): { readPage?: () => Promise<{ html: string; etag?: string }>; etag?: string } | undefined {
-    return (globalThis as { SPELL_SERVER?: ReturnType<typeof SitePatch.server> }).SPELL_SERVER
-  }
 }
 
 /** What a `SitePatch` needs:  the page's `main` as shown. */
@@ -107,9 +104,6 @@ export type SitePatchProps = {
   /** the page's `main`, in the layout */
   main: () => HTMLElement | undefined
 }
-
-/** `detail` of `spell-server:reloading` (the kit's `PageChange`, spelled out:  `liveClient.ts` is the server's). */
-type PageChange = { html?: string; own?: boolean; reload?: () => void }
 
 /** The example tag:  a copy that IS an example is kept by itself (`ExampleSource.keep()` looks inside). */
 const EXAMPLE_TAG = "ui-example"

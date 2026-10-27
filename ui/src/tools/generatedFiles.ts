@@ -1,31 +1,32 @@
 /**
  * What Spell UI's generators share beside the kit's `writeOrCheck()` and `spliceGenerated()`
  * (`spell/element-tools/generatedFiles`, every repo's, since epic `coherence` P11):
- * format what they wrote as `yarn format` would, and a page's status words.
+ * what they write formatted as `yarn format` would, and a page's status words.
  * - Escaping the text they write into markup:  the kit's `escapeHTML()` (`spell/util/string`).
  * - Used by `site:index`, `site:kitchen`, `site:new`, `readme:components`, `gen:root`, `gen:styles`, `tokens:alias`.
  * - Node only:  imported by `scripts/`, never by `src/`.
  */
-import { execFileSync } from "node:child_process"
-import { fileURLToPath } from "node:url"
+import type { GeneratedOutput } from "spell/element-tools/generatedFiles"
+import { SRV } from "spell/server"
 
 ////////////////
 // ## Files
 ////////////////
 
 /**
- * Format `files` as `yarn format` does (`vp fmt`, with the repo's `vite.lint.ts` settings), so it changes nothing in
- * them afterwards.
- * - NOT the bare `oxfmt` binary:  it doesn't read `vite.lint.ts`, so it writes oxfmt's defaults (semicolons,
- *   trailing commas).
- * - SIDE EFFECT:  rewrites `files`
+ * `outputs`, each formatted as `yarn format` formats its file, in memory (`SRV.formatHTML()`:  the file's extension
+ * picks the parser, `.ts`, `.css` or `.json` as well as `.html`).
+ * - So `writeOrCheck()` compares formatted text:  a file that didn't change is left alone, and `--check` works.
+ * - Instead of `yarn vp fmt` run on the files afterwards, about half a second each time (epic `coherence` P23).
+ * - NOT for Markdown:  `yarn format` leaves every `*.md` file as it is (the toolchain's format settings), so a
+ *   README is written as generated.
+ * - throws on a parse error, naming the file
  */
-export function formatFiles(files: string[]): void {
-  execFileSync("yarn", ["vp", "fmt", ...files], { cwd: PACKAGE_ROOT, stdio: "ignore" })
+export async function formatted(outputs: readonly GeneratedOutput[]): Promise<GeneratedOutput[]> {
+  return Promise.all(
+    outputs.map(async ([file, text]): Promise<GeneratedOutput> => [file, await SRV.formatHTML(file, text)])
+  )
 }
-
-/** Spell UI's root:  where `vp fmt` runs. */
-const PACKAGE_ROOT = fileURLToPath(new URL("../../", import.meta.url))
 
 ////////////////
 // ## Markup

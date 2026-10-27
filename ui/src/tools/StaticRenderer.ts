@@ -1,7 +1,8 @@
 /// <reference types="node" />
 
-import { fileURLToPath } from "node:url"
 import { createServer, type InlineConfig, type ViteDevServer } from "vite"
+
+import { SPELL_UI_ROOT } from "./tools.types.ts"
 
 /****************
  * ### `StaticRenderer`
@@ -19,8 +20,8 @@ import { createServer, type InlineConfig, type ViteDevServer } from "vite"
  * - See `agents/PAPERCUTS.md` (`## ui`, "`server.ssrLoadModule()` of `spell-ui/server`", the folder's name then).
  ****************/
 export class StaticRenderer {
-  /** `packages/ui/`, with a trailing `/`:  the server's root by default. */
-  static readonly ROOT = fileURLToPath(new URL("../../", import.meta.url))
+  /** Spell UI's folder (`SPELL_UI_ROOT`):  the server's root by default. */
+  static readonly ROOT = SPELL_UI_ROOT
 
   /** Vite path of `StaticDocument`, the whole-page render module. */
   static readonly DOCUMENT = "/src/tools/StaticDocument.ts"

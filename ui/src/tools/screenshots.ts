@@ -8,13 +8,14 @@
  */
 
 import { mkdirSync } from "node:fs"
-import { fileURLToPath } from "node:url"
+import { join } from "node:path"
 import { parseArgs } from "node:util"
 import type { Page } from "playwright"
 
 import { BrowserPage } from "spell/element-tools/BrowserPage"
 import { DevServer } from "spell/element-tools/DevServer"
 import { Terminal } from "spell/element-tools/Terminal"
+import { SPELL_UI_ROOT } from "./tools.types.ts"
 
 /****************
  * ### `DemoScreenshots`
@@ -85,11 +86,8 @@ class DemoScreenshots {
   }
 }
 
-/** The package root, with a trailing slash. */
-const ROOT = fileURLToPath(new URL("../../", import.meta.url))
-
 /** Where the PNGs go (git-ignored). */
-const OUT = `${ROOT}.cache/screenshots`
+const OUT = join(SPELL_UI_ROOT, ".cache/screenshots")
 
 /** Families shot when none are named:  the first ones ported, a quick cross-section. */
 const DEFAULT_FAMILIES = "button,dropdown,icon,label,divider,segment,container,parts"
@@ -108,7 +106,7 @@ const MAX_PROBLEMS = 30
 
 const { positionals } = parseArgs({ allowPositionals: true, options: {} })
 const families = (positionals[0] ?? DEFAULT_FAMILIES).split(",").map((family) => family.trim().replace(/^ui-/, ""))
-const server = await DevServer.start({ root: ROOT, port: PORT, logLevel: "error" })
+const server = await DevServer.start({ root: SPELL_UI_ROOT, port: PORT, logLevel: "error" })
 try {
   await BrowserPage.with(async (browser) => {
     const page = await BrowserPage.newPage(browser, { viewport: { width: 1400, height: 900 } })

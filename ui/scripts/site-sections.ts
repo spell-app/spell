@@ -42,7 +42,7 @@
  * - `--check`:  write nothing;  exit 1 if a page would change.
  * - No pages named:  every page of the site.
  */
-import { readdirSync, readFileSync } from "node:fs"
+import { readFileSync } from "node:fs"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
 import { parseArgs } from "node:util"
@@ -57,13 +57,7 @@ import { docsApiVocabulary } from "spell-ui/docs-components/ui-docs-api/UIDocsAp
 import type { ApiSectionId } from "spell-ui/docs-components/ui-docs-api/UIDocsApi.types"
 import { TocIndex } from "spell-ui/components/ui-toc/TocIndex"
 import { environment } from "spell-ui/tools/environment"
-import { SITE_DATA, SITE_PAGES } from "spell-ui/tools/tools.types"
-
-/** `packages/ui/`. */
-const UI = path.resolve(import.meta.dirname, "..")
-
-/** The site's pages:  `docs/` (`SITE_PAGES`). */
-const SITE = path.join(UI, SITE_PAGES)
+import { SITE_DATA, SPELL_UI_ROOT, sitePages } from "spell-ui/tools/tools.types"
 
 /****************
  * ### `SiteSections`
@@ -538,7 +532,7 @@ class ApiSections {
 
   /** The site's data, read once. */
   private static get data(): SiteDataFile {
-    return (ApiSections.loaded ??= readJSON5File<SiteDataFile>(path.join(UI, SITE_DATA, "components.json5")))
+    return (ApiSections.loaded ??= readJSON5File<SiteDataFile>(path.join(SPELL_UI_ROOT, SITE_DATA, "components.json5")))
   }
   private static loaded?: SiteDataFile
 }
@@ -800,13 +794,6 @@ class HtmlParser {
 ////////////////
 // ## Command line
 ////////////////
-
-/** Every page of the site:  `docs/*.html`, in one folder. */
-function sitePages(): string[] {
-  return readdirSync(SITE)
-    .filter((name) => name.endsWith(".html"))
-    .map((name) => path.join(SITE, name))
-}
 
 /**
  * Run as a script (not imported by `site:index` / `site:kitchen` / `site:new`).

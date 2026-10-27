@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs"
 import { join } from "node:path"
 
 import { DesignColor, type Oklch } from "./DesignColor.ts"
+import { FoundationTokens } from "./FoundationTokens.ts"
 import type { SiteFoundationGroup } from "spell-ui/docs-components/docs-components.types"
 import type { DesignSkip, DesignTokenRow, DesignTokensFile, DesignTypeStyle, ThemedValue } from "./tools.types.ts"
 
@@ -40,7 +41,8 @@ export class DesignTokens {
     this.stylesFolder = stylesFolder
     this.foundation = foundation
     for (const sheet of SHEETS) {
-      for (const { name, value } of DesignTokens.rootDeclarations(readFileSync(join(stylesFolder, sheet), "utf8")))
+      const css = readFileSync(join(stylesFolder, sheet), "utf8")
+      for (const { name, value } of FoundationTokens.rootDeclarations(css, PREFIXES))
         this.values.set(name, value.replace(/\s+/g, " ").trim())
     }
     for (const name of this.values.keys()) {
@@ -467,45 +469,6 @@ export class DesignTokens {
     while (families.join(", ").length > 200 && families.length > 1) families.pop()
     return families.join(", ")
   }
-
-  /**
-   * Every custom property declared on `:root` in `css`, outside any `@media` / `@container` / `@supports`, in order.
-   * - `:root` may sit inside `@layer` blocks (our sheets' `@layer ui.tokens { :root { ... } }`).
-   */
-  static rootDeclarations(css: string): { name: string; value: string }[] {
-    const text = css.replace(/\/\*[\s\S]*?\*\//g, " ")
-    const result: { name: string; value: string }[] = []
-    const stack: string[] = []
-    let segment = 0
-    for (let index = 0; index < text.length; index++) {
-      const char = text[index]
-      if (char === "{") {
-        stack.push(text.slice(segment, index).trim())
-        segment = index + 1
-      } else if (char === "}") {
-        stack.pop()
-        segment = index + 1
-      } else if (char === ";") {
-        segment = index + 1
-      } else if (char === "-" && text[index + 1] === "-" && !text.slice(segment, index).trim()) {
-        const head = /^(--[\w-]+)\s*:/.exec(text.slice(index))
-        if (!head) continue
-        let depth = 0
-        let end = index + head[0].length
-        for (; end < text.length; end++) {
-          const next = text[end]
-          if (next === "(") depth++
-          else if (next === ")") depth--
-          else if (depth === 0 && (next === ";" || next === "}")) break
-        }
-        const atRoot = stack.at(-1) === ":root" && stack.slice(0, -1).every((prelude) => prelude.startsWith("@layer"))
-        if (atRoot) result.push({ name: head[1]!, value: text.slice(index + head[0].length, end).trim() })
-        index = end - 1
-        segment = end
-      }
-    }
-    return result
-  }
 }
 
 /** Constructor props of `DesignTokens`. */
@@ -526,3 +489,6 @@ const THEMES = ["light", "dark"] as const
  * The sheets `UI.themes.apply("spell")` stacks, in cascade order (later wins), relative to `src/styles/`.
  */
 const SHEETS = ["tokens.css", "sizes.css", "colors.css", "themes/classic.css", "themes/spell.css"] as const
+
+/** The tokens' first words:  Spell UI's own (`--ui-*`) and the Spell theme's brand roles (`--spell-*`). */
+const PREFIXES = ["ui", "spell"] as const

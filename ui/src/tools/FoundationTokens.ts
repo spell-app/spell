@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs"
 import { join } from "node:path"
 
 import { ComponentTokens } from "spell-ui/styles/ComponentTokens"
+import type { TokenDeclaration } from "spell-ui/styles/styles.types"
 import { FamilyTokens } from "./FamilyTokens.ts"
 import type { SiteFoundationGroup, SiteToken, SiteTokenType } from "spell-ui/docs-components/docs-components.types"
 
@@ -29,8 +30,7 @@ export class FoundationTokens {
     const found = new Map<string, SiteToken[]>()
     for (const sheet of SHEETS) {
       const css = readFileSync(join(this.stylesFolder, sheet), "utf8")
-      for (const declaration of ComponentTokens.declarations(css)) {
-        if (declaration.nested || !ROOT.test(declaration.selector)) continue
+      for (const declaration of FoundationTokens.rootDeclarations(css)) {
         if (!declaration.name.startsWith("--ui-") || declaration.name.startsWith("--ui-sheet-")) continue
         const { group, token } = FoundationTokens.classify(declaration.name, declaration.value.replace(/\s+/g, " "))
         if (!found.has(group)) found.set(group, [])
@@ -44,6 +44,25 @@ export class FoundationTokens {
       description: group.description,
       tokens: found.get(group.id)!
     }))
+  }
+
+  /**
+   * Every token `css` declares on `:root` itself, outside any `@media` / `@container` / `@supports`, in sheet order:
+   * `ComponentTokens.declarations()`, the one reader of a sheet's tokens, a call per prefix.
+   * - `prefixes`:  the tokens' first words, e.g. `["ui", "spell"]` for the theme's brand roles too;
+   *   default `ComponentTokens.declarations()`'s, `ui`
+   * - `:root` may sit inside `@layer` blocks (the generated sheets' `@layer ui.tokens { :root { ... } }`).
+   * - Also what the design export's `tokens.json` reads (`DesignTokens`), so the theming page's tables and the design
+   *   system read a sheet one way (epic `coherence` P23).
+   * - Static:  one sheet's text is all it reads.
+   */
+  static rootDeclarations(css: string, prefixes?: readonly string[]): TokenDeclaration[] {
+    const declarations = prefixes
+      ? prefixes.flatMap((prefix) => ComponentTokens.declarations(css, prefix))
+      : ComponentTokens.declarations(css)
+    return declarations
+      .filter((declaration) => !declaration.nested && ROOT.test(declaration.selector))
+      .sort((a, b) => a.at - b.at)
   }
 
   /** The group and row of one `:root` token. */

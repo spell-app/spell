@@ -1,12 +1,13 @@
-import { existsSync, readdirSync, readFileSync } from "node:fs"
-import { join } from "node:path"
+import { readdirSync, readFileSync } from "node:fs"
+import { basename, join } from "node:path"
 
 import { clamp } from "spell/util/number"
 import { dedent, escapeHTML, indented } from "spell/util/string"
 
 import { ElementManifests } from "./ElementManifests.ts"
+import { FamilyExamples } from "./FamilyExamples.ts"
 import type { SiteAttribute, SiteDataFile, SiteFamily, SiteTag } from "spell-ui/docs-components/docs-components.types"
-import type { DesignExample, DesignFamily, DesignSource } from "./tools.types.ts"
+import { COMPONENTS, type DesignExample, type DesignFamily, type DesignSource } from "./tools.types.ts"
 
 /****************
  * ### `DesignComponents`
@@ -360,28 +361,25 @@ export class DesignComponents {
     return []
   }
 
-  /** Every element example section of family `folder`:  `types.html` first, then the other files A-Z. */
+  /**
+   * Every element example section of family `folder`, its main file first, then the other files A-Z:
+   * as the kitchen sink reads them (`FamilyExamples`), each section's `<h4>` its title (else the file's name).
+   */
   examples(folder: string): DesignExample[] {
     const cached = this.sections.get(folder)
     if (cached) return cached
-    const dir = join(this.uiFolder, "src/components", folder, "examples/elements")
-    const files = existsSync(dir) ? readdirSync(dir).filter((file) => file.endsWith(".html")) : []
-    files.sort((a, b) => Number(b === "types.html") - Number(a === "types.html") || a.localeCompare(b))
     const result: DesignExample[] = []
-    for (const file of files) {
-      const source = `components/${folder}/examples/elements/${file}`
-      const html = readFileSync(join(dir, file), "utf8").replace(/^\s*<!--[\s\S]*?-->\s*/, "")
-      const sections = [...html.matchAll(/<section\b[^>]*>([\s\S]*?)<\/section>/g)].map((match) => match[1]!)
-      const bodies = sections.length ? sections : [html]
-      for (const body of bodies) {
-        if (/\ssource="/.test(body)) continue
-        const title =
-          /<h\d[^>]*>([\s\S]*?)<\/h\d>/
-            .exec(body)?.[1]
-            ?.replace(/<[^>]+>/g, "")
-            .trim() || DesignComponents.titleFor(file)
-        const markup = dedent(body.replace(/^\s*<h\d[^>]*>[\s\S]*?<\/h\d>/, ""))
-        if (markup.trim()) result.push({ title, markup, source })
+    for (const file of FamilyExamples.files(join(this.uiFolder, COMPONENTS), folder)) {
+      const name = basename(file)
+      const source = `components/${folder}/examples/elements/${name}`
+      for (const section of FamilyExamples.sections(readFileSync(file, "utf8"))) {
+        const markup = section.body.join("\n")
+        if (!markup.trim() || /\ssource="/.test(markup)) continue
+        result.push({
+          title: section.title.replace(/<[^>]+>/g, "").trim() || DesignComponents.titleFor(name),
+          markup,
+          source
+        })
       }
     }
     this.sections.set(folder, result)
@@ -390,8 +388,8 @@ export class DesignComponents {
 
   /** Every family folder with element examples. */
   private allFolders(): string[] {
-    const root = join(this.uiFolder, "src/components")
-    return readdirSync(root).filter((folder) => existsSync(join(root, folder, "examples/elements")))
+    const root = join(this.uiFolder, COMPONENTS)
+    return readdirSync(root).filter((folder) => FamilyExamples.files(root, folder).length)
   }
 
   ////////////////

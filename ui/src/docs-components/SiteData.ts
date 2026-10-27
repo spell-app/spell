@@ -20,7 +20,7 @@ import {
  *   An element shows its error;  it never guesses.
  * - Plain fetch, no Solid:  elements wrap `load()` in their own async memo.
  * - The site's other files go through `request()` too (`SearchData`, the layout's `SiteShell`):  one way to fail.
- * - Imports `spell-ui/core` for `E.SourceError`, `@E.once` and `@E.resets` only:
+ * - Imports `spell-ui/core` for `E.fetchOk()`, `E.SourceError`, `@E.once` and `@E.resets` only:
  *   every bundle that loads this already has the core.
  * - Static only:  the data is one per page.
  ****************/
@@ -58,25 +58,24 @@ export class SiteData {
   }
 
   /**
-   * GET `url` for `method`;  resolves with the response, which answered 2xx.
+   * GET `url` for `method`;  resolves with the response, which answered 2xx (Spell UI's `E.fetchOk()`).
    * - Throws a `load` `E.SourceError` when it doesn't answer (the network error as `cause.error`)
    *   or answers anything else (`cause.status`).
    *   The message names `method`, the URL, and `fix`.
    * - Not `UI.sources`:  that refuses `data:` URLs (tests point `url` at one), caches the text,
    *   and needs the runtime chunk, which the layout's fetch (`SiteShell`) mustn't wait for.
    */
-  static async request(url: string, { method, fix }: SiteRequest): Promise<Response> {
-    let response: Response
-    try {
-      response = await fetch(url)
-    } catch (error) {
+  static request(url: string, { method, fix }: SiteRequest): Promise<Response> {
+    return E.fetchOk(url, ({ response, error }) => {
+      if (response) {
+        return new E.SourceError(`${method}:  ${url} answered ${E.answerOf(response)};  ${fix}`, {
+          cause: { kind: "load", status: response.status }
+        })
+      }
       const said = error instanceof Error ? error.message : String(error)
-      throw new E.SourceError(`${method}:  ${url} didn't answer (${said});  ${fix}`, { cause: { kind: "load", error } })
-    }
-    if (response.ok) return response
-    const answer = `${response.status} ${response.statusText}`.trim()
-    throw new E.SourceError(`${method}:  ${url} answered ${answer};  ${fix}`, {
-      cause: { kind: "load", status: response.status }
+      return new E.SourceError(`${method}:  ${url} didn't answer (${said});  ${fix}`, {
+        cause: { kind: "load", error }
+      })
     })
   }
 

@@ -2,17 +2,6 @@ import { describe, expect, test } from "vite-plus/test"
 
 import { DesignTokens } from "spell-ui/tools/DesignTokens"
 
-describe("DesignTokens.rootDeclarations()", () => {
-  test("reads only top-level :root declarations, inside @layer", () => {
-    const css =
-      "@layer a { :root { --x: 1px; --y: light-dark(#fff, #000) } } @media (x) { :root { --z: 2 } } .a { --w: 3 }"
-    expect(DesignTokens.rootDeclarations(css)).toEqual([
-      { name: "--x", value: "1px" },
-      { name: "--y", value: "light-dark(#fff, #000)" }
-    ])
-  })
-})
-
 describe("DesignTokens.pickTheme()", () => {
   test("picks a theme's branch of light-dark()", () => {
     expect(DesignTokens.pickTheme("light-dark(var(--a), var(--b))", "dark")).toBe("var(--b)")

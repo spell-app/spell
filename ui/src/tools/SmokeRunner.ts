@@ -2,13 +2,14 @@
 
 import { mkdirSync, writeFileSync } from "node:fs"
 import { isAbsolute, join, relative } from "node:path"
-import { chromium, type Browser } from "playwright"
+import type { Browser } from "playwright"
 
 import { localDate } from "spell/util/time"
 
 import type { ImportMap, PageResult, SmokePage, SmokePageKind, SmokeResults } from "./tools.types.ts"
 import { HostApp } from "./HostApp.ts"
 import { StaticServer } from "./StaticServer.ts"
+import { BrowserPage } from "spell/element-tools/BrowserPage"
 import { Terminal } from "spell/element-tools/Terminal"
 
 /****************
@@ -43,7 +44,7 @@ export class SmokeRunner {
   async run(): Promise<SmokeResults> {
     const server = await this.server()
     const origin = await server.listen(this.options.port ?? 0)
-    const browser = await chromium.launch()
+    const browser = await BrowserPage.launch()
     const version = browser.version()
     const pages: SmokePage[] = []
     try {
@@ -96,15 +97,21 @@ export class SmokeRunner {
     return paths
   }
 
-  /** Load one page and collect its `window.smokeResult`, console errors and warnings. */
+  /**
+   * Load one page and collect its `window.smokeResult`, console errors and warnings.
+   * - Its problems through the kit's `BrowserPage`:  an uncaught error is `uncaught: <it>`, an error or warning in the
+   *   console is its text.
+   */
   private async visit({ browser, origin, path, kind }: VisitParams): Promise<SmokePage> {
-    const page = await browser.newPage()
     const errors: string[] = []
     const warnings: string[] = []
-    page.on("pageerror", (error) => errors.push(`uncaught: ${error.message}`))
-    page.on("console", (message) => {
-      if (message.type() === "error") errors.push(message.text())
-      if (message.type() === "warning") warnings.push(message.text())
+    const page = await BrowserPage.newPage(browser, {
+      consoleTypes: ["error", "warning"],
+      onProblem: (text, problem) => {
+        if (problem === "page error") errors.push(`uncaught: ${text}`)
+        else if (problem === "console warning") warnings.push(text)
+        else errors.push(text)
+      }
     })
     await page.route("**/*", (route) => {
       const host = new URL(route.request().url()).hostname

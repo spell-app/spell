@@ -1,10 +1,12 @@
 /**
- * `yarn gen:root`:  write `src/components/ui-root/UIRoot.catalog.ts`, every component tag => what `<ui-root>` needs
- * BEFORE that tag's family loads:  its folder (which family to import) and its skeleton
+ * `yarn gen:root [--check]`:  write `src/components/ui-root/UIRoot.catalog.ts`, every component tag => what
+ * `<ui-root>` needs BEFORE that tag's family loads:  its folder (which family to import) and its skeleton
  * (`ComponentVocabulary.skeleton`, skeleton text parsed by `SkeletonText` into a `SkeletonSpec`;  a vocabulary
  * without one writes no `skeleton` key).
  * - Run after adding or moving a tag, or changing a skeleton.  `tests/components/ui-root/UIRoot.catalog.test.ts` and
  *   `tests/test-helpers/vocabularies.test.ts` fail while the file is stale.
+ * - Formatted as `yarn format` would, in memory, and written only when it changed (`formatted()`, `writeOrCheck()`).
+ * - `--check`:  write nothing;  exit 1 if the catalog is stale.
  * - Why generated, not `ComponentDefinitions`:  that roll-up imports every vocabulary (~325 kB of source);  a lib
  *   entry importing it would split each vocabulary into a chunk shared with its family.  The catalog is a few kB.
  * - Reads the vocabularies with the kit's `RootCatalog` (`spell/element-tools/RootCatalog`;  the pack build,
@@ -17,15 +19,16 @@
  * - The catalog and the types file it imports are named through `FamilyFiles`
  *   (`UIRoot.catalog.ts`, `UIRoot.types.ts`).
  */
-import { writeFileSync } from "node:fs"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
+import { parseArgs } from "node:util"
 
 import { FamilyFiles } from "spell-ui/tools/FamilyFiles"
 import { RootCatalog } from "spell/element-tools/RootCatalog"
 import { Terminal } from "spell/element-tools/Terminal"
+import { writeOrCheck } from "spell/element-tools/generatedFiles"
 
-import { formatFiles } from "spell-ui/tools/generatedFiles"
+import { formatted } from "spell-ui/tools/generatedFiles"
 
 /** `src/components/`. */
 const COMPONENTS = fileURLToPath(new URL("../src/components/", import.meta.url))
@@ -42,10 +45,9 @@ const OUTPUT = FamilyFiles.path(ROOT_FAMILY, ".catalog.ts")
 /** The module the generated file imports its types from:  the family's types file, without `.ts`. */
 const TYPES_MODULE = `./${path.basename(FamilyFiles.path(ROOT_FAMILY, ".types.ts"), ".ts")}`
 
+const { values } = parseArgs({ options: { check: { type: "boolean", default: false } } })
 const lines = RootCatalog.lines(await RootCatalog.read([COMPONENTS, DOCS_COMPONENTS]))
-writeFileSync(
-  OUTPUT,
-  `/* GENERATED -- do not edit, run \`yarn gen:root\` (source:  every \`UI<Name>.en.ts\`) */
+const catalog = `/* GENERATED -- do not edit, run \`yarn gen:root\` (source:  every \`UI<Name>.en.ts\`) */
 
 import type { RootCatalogEntry } from "${TYPES_MODULE}"
 
@@ -54,6 +56,9 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
 ${lines.join(",\n")}
 }
 `
-)
-formatFiles([OUTPUT])
-Terminal.out(`wrote ${path.relative(process.cwd(), OUTPUT)}:  ${lines.length} tags`)
+const [stale] = writeOrCheck(await formatted([[OUTPUT, catalog]]), { command: "gen:root", isCheck: values.check })
+if (!values.check) {
+  Terminal.out(
+    `${stale ? `wrote ${stale}` : `${path.relative(process.cwd(), OUTPUT)} unchanged`}:  ${lines.length} tags`
+  )
+}

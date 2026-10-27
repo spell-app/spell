@@ -132,7 +132,7 @@ async function render(html: string, url = DATA_URL) {
 
 /** Wait for `host`'s data and every widget in its shadow root. */
 async function drawn(host: DOMElement) {
-  await (host.component as UIDocsApi).fetched
+  await (host.component as UIDocsApi).data.loaded
   await ElementFixture.tick()
   await ElementFixture.settle(host)
   const hosts = [...host.shadowRoot!.querySelectorAll("*")].filter((element) => "ready" in element) as DOMElement[]

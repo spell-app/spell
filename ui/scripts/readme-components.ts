@@ -15,11 +15,11 @@
  *   - No families named:  the ones that have a thumbnail already.
  *   - Needs the page server running;  it doesn't start one.
  * - Writes ONLY between the page's `<!-- components:start -->` and `<!-- components:end -->` markers:  the rest of
- *   the page is hand-kept.  The block goes through `vp fmt` (as `yarn format` would), so formatting changes nothing.
+ *   the page is hand-kept.  The block is written as generated:  `yarn format` leaves Markdown alone (the toolchain's
+ *   format settings skip `*.md`).
  * - Rerun after `yarn site:data`.
  * - `--check`:  write nothing;  exit 1 if the page is stale.
  */
-import { execFileSync } from "node:child_process"
 import { existsSync, mkdirSync, readFileSync } from "node:fs"
 import path from "node:path"
 import { parseArgs } from "node:util"
@@ -31,12 +31,9 @@ import { Terminal } from "spell/element-tools/Terminal"
 import { spliceGenerated, writeOrCheck } from "spell/element-tools/generatedFiles"
 
 import type { SiteDataFile, SiteFamily } from "spell-ui/docs-components/docs-components.types"
-import { SITE_DATA, SITE_PAGES } from "spell-ui/tools/tools.types"
+import { SITE_DATA, SITE_PAGES, SPELL_UI_ROOT } from "spell-ui/tools/tools.types"
 
 import { STATUS_TEXT } from "spell-ui/tools/generatedFiles"
-
-/** The repo's root:  `spell-ui/`. */
-const UI = path.resolve(import.meta.dirname, "..")
 
 /****************
  * ### `ComponentCatalogWriter`
@@ -45,22 +42,17 @@ const UI = path.resolve(import.meta.dirname, "..")
  ****************/
 class ComponentCatalogWriter {
   /** The page. */
-  readonly file = path.join(UI, "README-components.md")
+  readonly file = path.join(SPELL_UI_ROOT, "README-components.md")
 
   /** The site's data. */
-  readonly data: SiteDataFile = readJSON5File<SiteDataFile>(path.join(UI, SITE_DATA, "components.json5"))
+  readonly data: SiteDataFile = readJSON5File<SiteDataFile>(path.join(SPELL_UI_ROOT, SITE_DATA, "components.json5"))
 
   /** Every tag, library and doc-only, by name. */
   private readonly tags = new Map([...this.data.components, ...this.data.docs].map((tag) => [tag.tag, tag]))
 
-  /** `page` with its generated block replaced by a fresh one, formatted as `yarn format` would. */
+  /** `page` with its generated block replaced by a fresh one. */
   render(page: string): string {
-    const spliced = spliceGenerated(page, { file: this.file, start: START, end: END, block: () => this.block() })
-    return execFileSync("yarn", ["vp", "fmt", `--stdin-filepath=${path.basename(this.file)}`], {
-      cwd: UI,
-      input: spliced,
-      encoding: "utf8"
-    })
+    return spliceGenerated(page, { file: this.file, start: START, end: END, block: () => this.block() })
   }
 
   /** The generated lines:  a count, then per group a header and a table. */
@@ -135,7 +127,7 @@ class ComponentCatalogWriter {
 
   /** `family`'s thumbnail as an `<img>`, scaled to fit `THUMBNAIL_BOX`;  `""` without one. */
   private static thumbnail(family: SiteFamily): string {
-    const file = path.join(UI, THUMBNAILS, `${family.folder}.png`)
+    const file = path.join(SPELL_UI_ROOT, THUMBNAILS, `${family.folder}.png`)
     if (!existsSync(file)) return ""
     const { width, height } = ComponentCatalogWriter.pngSize(file)
     const scale = Math.min(1, THUMBNAIL_BOX.width / width, THUMBNAIL_BOX.height / height)
@@ -169,7 +161,7 @@ class ComponentThumbnails {
 
   /** Shoot each of `families` (folders, `ui-button`);  prints one line each, and never throws for one family. */
   async shoot(families: readonly SiteFamily[]): Promise<void> {
-    mkdirSync(path.join(UI, THUMBNAILS), { recursive: true })
+    mkdirSync(path.join(SPELL_UI_ROOT, THUMBNAILS), { recursive: true })
     await BrowserPage.with(async (browser) => {
       const page = await BrowserPage.newPage(browser, { viewport: VIEWPORT, context: { deviceScaleFactor: 1 } })
       for (const family of families) {
@@ -195,7 +187,7 @@ class ComponentThumbnails {
     const clip = await example.evaluate(contentBox, { maxWidth: MAX_SHOT.width, maxHeight: MAX_SHOT.height })
     if (!clip) throw new Error("its first example draws nothing")
     const trimmed = await ComponentThumbnails.trimmed(page, clip)
-    await page.screenshot({ path: path.join(UI, THUMBNAILS, `${family.folder}.png`), clip: trimmed })
+    await page.screenshot({ path: path.join(SPELL_UI_ROOT, THUMBNAILS, `${family.folder}.png`), clip: trimmed })
   }
 
   /** `clip` without the plain background around what's drawn, plus `PADDING`. */
@@ -341,7 +333,9 @@ const writer = new ComponentCatalogWriter()
 if (values.shoot) {
   const named = positionals.map((name) => (name.startsWith("ui-") ? name : `ui-${name}`))
   const families = Object.values(writer.data.families).filter((family) =>
-    named.length ? named.includes(family.folder) : existsSync(path.join(UI, THUMBNAILS, `${family.folder}.png`))
+    named.length
+      ? named.includes(family.folder)
+      : existsSync(path.join(SPELL_UI_ROOT, THUMBNAILS, `${family.folder}.png`))
   )
   await new ComponentThumbnails(values.shoot).shoot(families)
 }

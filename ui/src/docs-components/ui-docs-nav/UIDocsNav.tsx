@@ -3,6 +3,7 @@ import { isServer, type JSX } from "@solidjs/web"
 
 import { E, UIT } from "spell-ui/core"
 import { SiteData } from "spell-ui/docs-components/SiteData"
+import { SiteDataLoad } from "spell-ui/docs-components/SiteDataLoad"
 import type { DOMDocsSearchElement } from "spell-ui/docs-components/ui-docs-search/UIDocsSearch"
 import { docsNavVocabulary } from "./UIDocsNav.en"
 import { NavIndex } from "./NavIndex"
@@ -126,22 +127,26 @@ export class UIDocsNav extends E.UIComponent<DocsNavVocabulary> {
   constructor(...args: ConstructorParameters<typeof E.UIComponent>) {
     super(...args)
     this.listed = new Promise((resolve) => (this.resolveListed = resolve))
-    if (isServer) return
-    void SiteData.load().then(
-      (data) => (this.navIndex = new NavIndex(data)),
-      (error: unknown) => (this.loadError = error instanceof Error ? error.message : String(error))
-    )
   }
 
   ////////////////
   // ## The list
   ////////////////
 
-  /** The list, once the data has loaded. */
-  @E.state accessor navIndex: NavIndex | undefined = undefined
+  /** The site's data, loading as the nav is made:  `value` once it's in, `error` if it didn't come. */
+  readonly data = new SiteDataLoad()
 
-  /** Why the data didn't load, if it didn't. */
-  @E.state accessor loadError: string | undefined = undefined
+  /** The list, once the data has loaded:  built once from it. */
+  @E.derived
+  get navIndex(): NavIndex | undefined {
+    const data = this.data.value
+    return data && new NavIndex(data)
+  }
+
+  /** Why the data didn't load, if it didn't:  its message. */
+  get loadError(): string | undefined {
+    return this.data.error?.message
+  }
 
   /** The data has loaded, or failed to:  the list (or its error) renders.  `:state(listed)`. */
   @E.cssState("listed")

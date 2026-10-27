@@ -1,9 +1,10 @@
-import { existsSync, readdirSync, readFileSync } from "node:fs"
-import { join } from "node:path"
+import { readFileSync } from "node:fs"
+import { basename, join } from "node:path"
 import { parseHTML } from "linkedom"
 
 import { PageOutline } from "spell-ui/components/ui-toc/PageOutline"
 import type { SiteSearchFile, SiteSearchPage } from "spell-ui/docs-components/docs-components.types"
+import { sitePages } from "./tools.types.ts"
 
 /****************
  * ### `SiteSearchBuilder`
@@ -72,7 +73,7 @@ export class SiteSearchBuilder {
    * (`components.html`), then each components page A-Z.
    */
   pageFiles(): string[] {
-    const files = this.html("")
+    const files = sitePages(this.site).map((file) => basename(file))
     const isComponent = (file: string) => file.startsWith(this.prefix)
     const top = files
       .filter((file) => !isComponent(file) && file !== COMPONENT_INDEX)
@@ -103,15 +104,6 @@ export class SiteSearchBuilder {
     const header = main.getAttribute("data-toc-header")?.trim()
     if (header) return header
     return (document.querySelector("title")?.textContent ?? "").trim().replace(SiteSearchBuilder.TITLE_SUFFIX, "")
-  }
-
-  /** The `.html` files of `folder` (relative to the site), A-Z;  none if it doesn't exist. */
-  private html(folder: string): string[] {
-    const path = join(this.site, folder)
-    if (!existsSync(path)) return []
-    return readdirSync(path)
-      .filter((file) => file.endsWith(".html"))
-      .sort()
   }
 }
 

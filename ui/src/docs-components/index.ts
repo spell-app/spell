@@ -28,7 +28,7 @@
  * - `package.json` `sideEffects` lists every `./src/docs-components/<family>/index.ts`:
  *   without it a bundler drops each barrel's `define()` (the family chunk loads, the tag stays undefined, no error).
  * - Imports:  shared code from `spell-ui/core` as any family;
- *   docs-only shared code (`SiteData`) from `spell-ui/docs-components/<file>`.
+ *   docs-only shared code (`SiteData`, `SiteDataLoad`) from `spell-ui/docs-components/<file>`.
  * - Real components now, once docs widgets:
  *   - the theme menu, since epic `debut` P17:  `<ui-theme-menu>` (`spell-ui/components/ui-theme-menu`),
  *     with the remembered theme and scheme, `ThemePreference`
@@ -36,10 +36,11 @@
  *     (`spell-ui/components/ui-toc`, `spell-ui/components/ui-example`);  a docs widget may use them, never the
  *     other way round
  *   - what they share with the docs widgets is `UIT`'s:  `HeadingLevels`, `CODE_SPAN`, `TocMarks`
- * - NOTE:  this barrel defines NOTHING:  types and `SiteData` only.
+ * - NOTE:  this barrel defines NOTHING:  types, `SiteData` and `SiteDataLoad` only.
  *   Import a family (`spell-ui/docs-components/ui-docs-api`) to define its tags.
  */
 
 export * from "./docs-components.types"
 
 export * from "./SiteData"
+export * from "./SiteDataLoad"

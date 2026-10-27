@@ -23,14 +23,13 @@ import { execFileSync } from "node:child_process"
 import { copyFileSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import path from "node:path"
-import { fileURLToPath } from "node:url"
 
 import { IconName } from "spell-ui/icons/IconName"
 import { environment } from "spell-ui/tools/environment"
 import { IconPackBuilder } from "spell-ui/tools/IconPackBuilder"
 import { Terminal } from "spell/element-tools/Terminal"
 import type { IconSearchFile, IconSearchFileCategory } from "spell-ui/icons"
-import type { IconPackReport } from "spell-ui/tools/tools.types"
+import { SPELL_UI_ROOT, type IconPackReport } from "spell-ui/tools/tools.types"
 import { ICON_EXTRAS } from "./iconExtras.ts"
 
 /****************
@@ -42,15 +41,13 @@ import { ICON_EXTRAS } from "./iconExtras.ts"
  *   constants.
  ****************/
 class IconGenerator {
-  /** `packages/ui/`. */
-  private readonly packageRoot = fileURLToPath(new URL("..", import.meta.url))
   /** Where the packs go. */
-  private readonly packsDir = path.join(this.packageRoot, "src/icons/icon-packs")
+  private readonly packsDir = path.join(SPELL_UI_ROOT, "src/icons/icon-packs")
   /** Where the docs-site search data goes. */
-  private readonly dataDir = path.join(this.packageRoot, "src/icons/data")
+  private readonly dataDir = path.join(SPELL_UI_ROOT, "src/icons/data")
   /** Fomantic's icon LESS (read only). */
   private readonly fomanticVariablesPath = path.join(
-    this.packageRoot,
+    SPELL_UI_ROOT,
     "reference/Fomantic-UI/src/themes/default/elements/icon.variables"
   )
   /** extracted FA package (`<dir>/package/...`), cached OUTSIDE the repo;  override with `SPELL_UI_FA_PACKAGE_DIR` */
