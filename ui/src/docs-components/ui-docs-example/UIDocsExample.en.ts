@@ -91,12 +91,19 @@ export const docsExampleVocabulary = {
       description:
         "What the code pane shows in place of the markup, e.g. an editor of the example's code.  Shown only while " +
         "the code is open, as the markup is."
+    },
+    {
+      name: "tools",
+      description:
+        "Buttons of the page's own, in a row just left of the code button and in its look, e.g. a notebook's Add, " +
+        "Move and Delete.  The page decides when they show."
     }
   ],
   parts: [
     { name: "example", description: "The whole block (`<section>`)." },
     { name: "header", description: "The `<ui-header>` title." },
     { name: "toggle", description: 'The code button (`<ui-button circular basic icon="code">`).' },
+    { name: "tools", description: "The row round the `tools` slot, just left of the code button." },
     { name: "description", description: "The description under the header." },
     { name: "demo", description: "The `<ui-segment>` around the live example." },
     { name: "code", description: "The `<ui-segment>` around the code pane." },
