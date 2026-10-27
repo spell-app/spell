@@ -1,0 +1,202 @@
+<spell-notebook "item examples">
+	<header level="1">
+		Item
+		<header>One item for dropdowns, lists and menus, rendered by whatever holds it.</>
+	</>
+	<item-tab-bar showing="examples"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#types">Types</>
+				<ui-item link="#content">Content</>
+				<ui-item link="#states">States</>
+				<ui-item link="#variations">Variations</>
+			</>
+		</>
+	</>
+
+	<!--
+		EXAMPLES:  ours only (Fomantic shares one `.item` between dropdowns, lists, menus and the Items view, and documents
+		it on those pages):  the old page's content, restyled.  Every example is an item inside its owner, which loads its
+		own family;  the owners' pages show them in full.
+	-->
+	<section label="Types">
+		<section label="In a dropdown" sticky collapsible dividing>
+			<example description="Inside a dropdown an item is data:  the dropdown reads its `value`, text, `icon`, `flag`, `description` and `selected`, and draws the option rows itself.">
+				<dropdown selection placeholder="Fruit">
+					<item value="apple">Apple</item>
+					<item value="pear" selected>Pear</item>
+					<item value="plum" description="in season">Plum</item>
+				</dropdown>
+			</example>
+		</>
+
+		<section label="In a list" sticky collapsible dividing>
+			<example description="Inside a list an item is a list row.">
+				<list divided>
+					<item icon="users">Friends</item>
+					<item icon="map marker">Worldwide</item>
+					<item icon="mail">Messages</item>
+				</list>
+			</example>
+		</>
+
+		<section label="In a menu" sticky collapsible dividing>
+			<example description="Inside a menu an item is a menu item.">
+				<menu appearance="pointing" aria-label="Item in a menu demo">
+					<item link="#inbox" selected>Inbox</item>
+					<item link="#starred">Starred</item>
+					<item link="#sent">Sent</item>
+				</menu>
+			</example>
+		</>
+
+		<section label="In an Items view" sticky collapsible dividing>
+			<example description="Inside `<ui-items>` an item is a media object:  its `image` beside a `<ui-content>` of header, meta, description and extra.">
+				<html>
+					<ui-items>
+						<ui-item image="../images/wireframe/image.png">
+							<ui-content>
+								<ui-header>Cute Dog</ui-header>
+								<ui-meta>
+									<span>Description</span>
+								</ui-meta>
+								<ui-description>
+									<ui-image src="/components/ui/images/wireframe/short-paragraph.png" alt=""></ui-image>
+								</ui-description>
+								<ui-extra>Additional Details</ui-extra>
+							</ui-content>
+						</ui-item>
+					</ui-items>
+				</html>
+			</example>
+		</>
+	</>
+
+	<section label="Content">
+		<section label="Link, button or block" sticky collapsible dividing>
+			<example description="In a list or menu, `link` renders a link;  `appearance=\"link\"` (or a `selection` list, or an `appearance=\"link\"`, `pagination` or `interactive` menu) renders a button;  anything else is a plain block.">
+				<list>
+					<item link="#link-button-or-block" icon="linkify">A link</item>
+					<item appearance="link" icon="hand pointer">A button</item>
+					<item icon="square outline">A plain block</item>
+				</list>
+			</example>
+		</>
+
+		<section label="Icon and image" sticky collapsible dividing>
+			<example description="`icon` takes an icon name, the `icon` slot any glyph, and `image` a URL shown as an avatar.">
+				<list>
+					<item icon="star">Icon attribute</item>
+					<item><icon slot="icon" name="heart" color="red"/>Icon slot</item>
+					<item image="../images/avatar/small/helen.jpg">Image attribute</item>
+				</list>
+			</example>
+		</>
+
+		<section label="Content parts" sticky collapsible dividing>
+			<example description="An item can hold a `<ui-content>` with a `<ui-header>` and `<ui-description>`:  they take the list's look.">
+				<list spacing="lg">
+					<item icon="github">
+						<content>
+							<header link="#content-parts">fomantic/Fomantic-UI</header>
+							<description>Updated 10 mins ago</description>
+						</content>
+					</item>
+					<item icon="github">
+						<content>
+							<header link="#content-parts">fomantic/Fomantic-UI-Docs</header>
+							<description>Updated 22 mins ago</description>
+						</content>
+					</item>
+				</list>
+			</example>
+		</>
+
+		<section label="Header and divider" sticky collapsible dividing>
+			<example description="`kind` picks the row kind:  an `item`, a group `header` (dropdown, menu) or a `divider` line (dropdown).  Open the dropdown to see its header and divider.">
+				<menu appearance="text" aria-label="Header item demo">
+					<item kind="header">Sort By</item>
+					<item link="#header-and-divider" selected>Closest</item>
+					<item link="#header-and-divider">Most Popular</item>
+				</menu>
+				<dropdown label="File">
+					<item kind="header">Recent</item>
+					<item>report.pdf</item>
+					<item kind="divider"/>
+					<item description="ctrl + o">Open...</item>
+				</dropdown>
+			</example>
+		</>
+
+		<section label="Nested list or menu" sticky collapsible dividing>
+			<example description="A `<ui-list>` or `<ui-menu>` inside an item is its sub list or sub menu.">
+				<list bulleted>
+					<item>Benefits <list><item>Rebates</item> <item>Discounts</item></list></item>
+				</list>
+				<menu direction="vertical" aria-label="Nested menu demo">
+					<item>Home <menu><item link="#nested-list-or-menu" selected>Search</item> <item link="#nested-list-or-menu">Add</item></menu></item>
+				</menu>
+			</example>
+		</>
+	</>
+
+	<section label="States">
+		<section label="Selected" sticky collapsible dividing>
+			<example description="`selected` marks the chosen item:  the dropdown's value, or the list's or menu's current item.  Fomantic's word, `active`, works too in lists and menus.">
+				<menu appearance="secondary" aria-label="Selected demo">
+					<item link="#selected" selected>selected</item>
+					<item link="#selected">Other</item>
+				</menu>
+				<menu appearance="secondary" aria-label="Active alias demo">
+					<item link="#selected" active>active</item>
+					<item link="#selected">Other</item>
+				</menu>
+			</example>
+		</>
+
+		<section label="Disabled" sticky collapsible dividing>
+			<example description="A disabled item can't be chosen or followed.">
+				<list appearance="link">
+					<item link="#disabled">Enabled</item>
+					<item link="#disabled" disabled>Disabled</item>
+				</list>
+				<menu padding="compact" aria-label="Disabled item demo">
+					<item link="#disabled">Enabled</item>
+					<item link="#disabled" disabled>Disabled</item>
+				</menu>
+			</example>
+		</>
+	</>
+
+	<section label="Variations">
+		<section label="Colored" sticky collapsible dividing>
+			<example description="In a menu, an item's `color` tints it while selected.">
+				<menu appearance="pointing" aria-label="Colored item demo">
+					<item link="#colored" color="red" selected>Red</item>
+					<item link="#colored" color="blue">Blue</item>
+					<item link="#colored" color="green">Green</item>
+				</menu>
+			</example>
+		</>
+
+		<section label="Position" sticky collapsible dividing>
+			<example description="In a menu, `position=\"right\"` pushes an item (and those after it) to the far end.">
+				<menu aria-label="Positioned item demo">
+					<item link="#position">Home</item>
+					<item link="#position" position="right">Logout</item>
+				</menu>
+			</example>
+		</>
+
+		<section label="Fitted" sticky collapsible dividing>
+			<example description="In a menu, `padding=\"none\"` takes away an item’s padding;  `none-x` or `none-y` keeps the other axis.">
+				<menu aria-label="Fitted item demo">
+					<item link="#fitted" padding="none">No padding</item>
+					<item link="#fitted" padding="none-x">No horizontal padding</item>
+					<item link="#fitted" padding="none-y">No vertical padding</item>
+				</menu>
+			</example>
+		</>
+	</>
+</spell-notebook>

@@ -1,0 +1,69 @@
+<spell-notebook "accordion theming">
+	<header level="1">
+		Accordion
+		<header>An accordion allows users to toggle the display of sections of content.</>
+	</>
+	<accordion-tab-bar showing="theming"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#tokens">Tokens</>
+				<ui-item link="#themes">Themes</>
+			</>
+		</>
+	</>
+
+	<!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
+	<section label="Tokens">
+		<markdown>
+			Theme with the public `--ui-accordion-*` tokens: set one on the element, on any ancestor (`:root` for every
+			accordion), or on the box through `::part(accordion)`. They inherit into the shadow root, where the sheet reads
+			each through a private alias. Style the pieces with `::part()`: `panel` (each `<details>`), `title`, `icon` (the
+			arrow) and `content`.
+		</>
+		<markdown>
+			```css
+			ui-accordion {
+			  --ui-accordion-title-padding: 0.75em 0;
+			  --ui-accordion-duration: 0.2s;
+			}
+			ui-accordion::part(title) {
+			  text-transform: uppercase;
+			}
+			```
+		</>
+		<message state="info" size="small">
+			<markdown>
+				the `styled` and `basic` looks and `padding` replace the paddings and colours whatever you set. Open and hovered title
+				colours follow `--ui-accordion-title-color` unless set. A nested accordion takes the outermost one's look, so
+				theme the outer one. Never set the `--_ui-accordion-*` names: they're the sheet's private plumbing.
+			</>
+		</>
+		<markdown>Edit a value below to try it.</>
+		<html>
+			<ui-docs-tokens family="ui-accordion" playground>
+				<ui-accordion open="0">
+					<ui-title>What is a dog?</>
+					<ui-content>
+						<p>A dog is a type of domesticated animal. Known for its loyalty and faithfulness, it can be found as a welcome guest in many households across the world.</>
+					</>
+					<ui-title>What kinds of dogs are there?</>
+					<ui-content>
+						<p>There are many breeds of dogs. Each breed varies in size and temperament. Owners often select a breed of dog that they find to be compatible with their own lifestyle and desires from a companion.</>
+					</>
+					<ui-title>How do you acquire a dog?</>
+					<ui-content>
+						<p>Three common ways for a prospective owner to acquire a dog is from pet shops, private owners, or shelters.</>
+					</>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="Themes">
+		<markdown>
+			The theme menu above picks the theme for every page of the site:  Spell, Glass, Fruity or Merlot,
+			each restyling this component through its tokens.
+		</>
+	</>
+</spell-notebook>

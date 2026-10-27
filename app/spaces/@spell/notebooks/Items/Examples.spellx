@@ -1,0 +1,593 @@
+<spell-notebook "items examples">
+	<header level="1">
+		Items
+		<header>A group of items presents a set of site content for display, each an image beside its
+              text.</>
+	</>
+	<items-tab-bar showing="examples"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#types">Types</>
+				<ui-item link="#content">Content</>
+				<ui-item link="#states">States</>
+				<ui-item link="#variations">Variations</>
+			</>
+		</>
+	</>
+
+	<!--
+		EXAMPLES:  Fomantic's item page, section by section, in its order (Types, Content, States, Variations).
+		Fomantic's `.item` is the generic `<ui-item>`;  its `.image` + `<img>` the `image` shorthand (or a `<ui-image size>`);
+		`.middle aligned content` is `<ui-content vertical-align="middle">`;  `ui wireframe image`s are plain `<ui-image>`s.
+	-->
+	<section label="Types">
+		<section label="Items" sticky collapsible dividing>
+			<example>
+				<html>
+					<p slot="description">A group of items.</p>
+					<ui-message slot="description" state="positive" size="small">Item views are designed to be responsive, with images stacking at mobile widths. By default ours stack by the width of the GROUP (<code>stack-with="container"</code>);  this site sets <code>stack-with="page"</code>, so here they stack by the window, as in Fomantic.</ui-message>
+					<ui-items>
+						<ui-item image="../images/wireframe/image.png">
+							<ui-content>
+								<ui-header link="#">Header</ui-header>
+								<ui-meta>
+									<span>Description</span>
+								</ui-meta>
+								<ui-description>
+									<ui-image src="/components/ui/images/wireframe/short-paragraph.png" alt=""></ui-image>
+								</ui-description>
+								<ui-extra>Additional Details</ui-extra>
+							</ui-content>
+						</ui-item>
+						<ui-item image="../images/wireframe/image.png">
+							<ui-content>
+								<ui-header link="#">Header</ui-header>
+								<ui-meta>
+									<span>Description</span>
+								</ui-meta>
+								<ui-description>
+									<ui-image src="/components/ui/images/wireframe/short-paragraph.png" alt=""></ui-image>
+								</ui-description>
+								<ui-extra>Additional Details</ui-extra>
+							</ui-content>
+						</ui-item>
+					</ui-items>
+				</html>
+			</example>
+		</>
+	</>
+
+	<section label="Content">
+		<section label="Image" sticky collapsible dividing>
+			<example description="An item can contain an image:  `image` is the shorthand, at the item's image width.">
+				<items divided>
+					<item image="../images/wireframe/image.png"/>
+					<item image="../images/wireframe/image.png"/>
+					<item image="../images/wireframe/image.png"/>
+				</items>
+			</example>
+		</>
+
+		<section label="Content" sticky collapsible dividing>
+			<example description="An item can contain content.">
+				<items divided>
+					<item>
+						<image size="tiny" src="/components/ui/images/wireframe/image.png" alt=""/>
+						<content vertical-align="middle">Content A</content>
+					</item>
+					<item>
+						<image size="tiny" src="/components/ui/images/wireframe/image.png" alt=""/>
+						<content vertical-align="middle">Content B</content>
+					</item>
+					<item>
+						<image size="tiny" src="/components/ui/images/wireframe/image.png" alt=""/>
+						<content vertical-align="middle">Content C</content>
+					</item>
+				</items>
+			</example>
+		</>
+
+		<section label="Header" sticky collapsible dividing>
+			<example description="An item can contain a header.">
+				<items>
+					<item>
+						<image size="tiny" src="/components/ui/images/wireframe/image.png" alt=""/>
+						<content vertical-align="middle">
+							<header link="#">12 Years a Slave</header>
+						</content>
+					</item>
+					<item>
+						<image size="tiny" src="/components/ui/images/wireframe/image.png" alt=""/>
+						<content vertical-align="middle">
+							<header link="#">My Neighbor Totoro</header>
+						</content>
+					</item>
+					<item>
+						<image size="tiny" src="/components/ui/images/wireframe/image.png" alt=""/>
+						<content vertical-align="middle">
+							<header link="#">Watchmen</header>
+						</content>
+					</item>
+				</items>
+			</example>
+		</>
+
+		<section label="Metadata" sticky collapsible dividing>
+			<example>
+				<html>
+					<p slot="description">An item can contain content metadata.</p>
+					<ui-message slot="description" state="info" size="small">You can include an arbitrary amount of metadata in <code>&lt;ui-meta&gt;</code>: every child is spaced automatically.</ui-message>
+					<ui-items>
+						<ui-item>
+							<ui-image size="small" src="/components/ui/images/wireframe/image.png" alt=""></ui-image>
+							<ui-content>
+								<ui-header>Arrowhead Valley Camp</ui-header>
+								<ui-meta>
+									<span>$1200</span>
+									<span>1 Month</span>
+								</ui-meta>
+								<ui-description>
+									<ui-image src="/components/ui/images/wireframe/short-paragraph.png" alt=""></ui-image>
+								</ui-description>
+							</ui-content>
+						</ui-item>
+						<ui-item>
+							<ui-image size="small" src="/components/ui/images/wireframe/image.png" alt=""></ui-image>
+							<ui-content>
+								<ui-header>Buck's Homebrew Stayaway</ui-header>
+								<ui-meta>
+									<span>$1000</span>
+									<span>2 Weeks</span>
+								</ui-meta>
+								<ui-description>
+									<ui-image src="/components/ui/images/wireframe/short-paragraph.png" alt=""></ui-image>
+								</ui-description>
+							</ui-content>
+						</ui-item>
+						<ui-item>
+							<ui-image size="small" src="/components/ui/images/wireframe/image.png" alt=""></ui-image>
+							<ui-content>
+								<ui-header>Astrology Camp</ui-header>
+								<ui-meta>
+									<span>$1600</span>
+									<span>6 Weeks</span>
+								</ui-meta>
+								<ui-description>
+									<ui-image src="/components/ui/images/wireframe/short-paragraph.png" alt=""></ui-image>
+								</ui-description>
+							</ui-content>
+						</ui-item>
+					</ui-items>
+				</html>
+			</example>
+		</>
+
+		<section label="Link" sticky collapsible dividing>
+			<example>
+				<html>
+					<p slot="description">An item can contain links as images, headers, or inside content.</p>
+				</html>
+				<message slot="description" state="warning" size="small">To make the entire content of an item a link, see the Link Item variation below.</message>
+				<html>
+					<ui-items>
+						<ui-item>
+							<ui-image size="tiny" link="#" src="/components/ui/images/avatar/large/stevie.jpg" alt=""></ui-image>
+							<ui-content>
+								<ui-header link="#">Stevie Feliciano</ui-header>
+								<ui-description>
+									<p>Stevie Feliciano is a <a href="#">library scientist</a> living in New York City. She likes to spend her time reading, running, and writing.</p>
+								</ui-description>
+							</ui-content>
+						</ui-item>
+						<ui-item>
+							<ui-image size="tiny" link="#" src="/components/ui/images/avatar/large/veronika.jpg" alt=""></ui-image>
+							<ui-content>
+								<ui-header link="#">Veronika Ossi</ui-header>
+								<ui-description>
+									<p>Veronika Ossi is a set designer living in New York who <a href="#">enjoys</a> kittens, music, and partying.</p>
+								</ui-description>
+							</ui-content>
+						</ui-item>
+						<ui-item>
+							<ui-image size="tiny" link="#" src="/components/ui/images/avatar/large/jenny.jpg" alt=""></ui-image>
+							<ui-content>
+								<ui-header link="#">Jenny Hess</ui-header>
+								<ui-description>
+									<p>Jenny is a student studying Media Management at <a href="#">the New School</a>.</p>
+								</ui-description>
+							</ui-content>
+						</ui-item>
+					</ui-items>
+				</html>
+			</example>
+		</>
+
+		<section label="Description" sticky collapsible dividing>
+			<example description="An item can contain a description with a single or multiple paragraphs.">
+				<html>
+					<ui-items>
+						<ui-item>
+							<ui-image size="small" link="#" src="/components/ui/images/wireframe/image.png" alt=""></ui-image>
+							<ui-content>
+								<ui-header link="#">Cute Dog</ui-header>
+								<ui-description>
+									<p>Cute dogs come in a variety of shapes and sizes. Some cute dogs are cute for their adorable faces, others for their tiny stature, and even others for their massive size.</p>
+									<p>Many people also have their own barometers for what makes a cute dog.</p>
+								</ui-description>
+							</ui-content>
+						</ui-item>
+					</ui-items>
+				</html>
+			</example>
+		</>
+
+		<section label="Extra Content" sticky collapsible dividing>
+			<example description="An item can contain extra content meant to be formatted separately from the main content.">
+				<items>
+					<item>
+						<content>
+							<header link="#">Cute Dog</header>
+							<description>
+								<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+								<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+							</description>
+							<extra><icon name="check" color="green"/> 121 Votes</extra>
+						</content>
+					</item>
+				</items>
+			</example>
+		</>
+
+		<section label="Rating" sticky collapsible dividing>
+			<example>
+				<html>
+					<p slot="description">An item can contain icons signifying a 'like' or 'favorite' action.</p>
+					<ui-message slot="description" state="info" size="small">Use <code>&lt;ui-rating&gt;</code> to attach events to like and favorite icons.</ui-message>
+				</html>
+				<items>
+					<item>
+						<image size="tiny" link="#" src="/components/ui/images/avatar/large/jenny.jpg" alt=""/>
+						<content vertical-align="middle">
+							<header><icon name="like"/> Veronika Ossi</header>
+						</content>
+					</item>
+					<item>
+						<image size="tiny" link="#" src="/components/ui/images/avatar/large/justen.jpg" alt=""/>
+						<content vertical-align="middle">
+							<header><icon name="favorite"/> Justen Kitsune</header>
+						</content>
+					</item>
+				</items>
+			</example>
+		</>
+	</>
+
+	<section label="States">
+		<section label="Disabled" sticky collapsible dividing>
+			<example description="An item can be disabled.">
+				<html>
+					<ui-items>
+						<ui-item disabled>
+							<ui-image size="tiny" link="#" src="/components/ui/images/avatar/large/veronika.jpg" alt=""></ui-image>
+							<ui-content>
+								<ui-header link="#">Veronika Ossi</ui-header>
+								<ui-description>
+									<p>Veronika Ossi is a set designer living in New York who <a href="#">enjoys</a> kittens, music, and partying.</p>
+								</ui-description>
+							</ui-content>
+						</ui-item>
+					</ui-items>
+				</html>
+			</example>
+		</>
+	</>
+
+	<section label="Variations">
+		<section label="Stacking" sticky collapsible dividing>
+			<example description="A group of items can specify how it stacks responsively:  `unstackable` keeps the image beside the content in a narrow group.">
+				<html>
+					<ui-items unstackable>
+						<ui-item image="../images/wireframe/image.png">
+							<ui-content>
+								<ui-header link="#">Header</ui-header>
+								<ui-meta>
+									<span>Description</span>
+								</ui-meta>
+								<ui-description>
+									<ui-image src="/components/ui/images/wireframe/short-paragraph.png" alt=""></ui-image>
+								</ui-description>
+								<ui-extra>Additional Details</ui-extra>
+							</ui-content>
+						</ui-item>
+						<ui-item image="../images/wireframe/image.png">
+							<ui-content>
+								<ui-header link="#">Header</ui-header>
+								<ui-meta>
+									<span>Description</span>
+								</ui-meta>
+								<ui-description>
+									<ui-image src="/components/ui/images/wireframe/short-paragraph.png" alt=""></ui-image>
+								</ui-description>
+								<ui-extra>Additional Details</ui-extra>
+							</ui-content>
+						</ui-item>
+					</ui-items>
+				</html>
+			</example>
+		</>
+
+		<section label="Divided" sticky collapsible dividing>
+			<example description="Items can be divided to better distinguish between grouped content.">
+				<html>
+					<ui-items divided>
+						<ui-item image="../images/wireframe/image.png">
+							<ui-content>
+								<ui-header link="#">12 Years a Slave</ui-header>
+								<ui-meta>
+									<span>Union Square 14</span>
+								</ui-meta>
+								<ui-description>
+									<ui-image src="/components/ui/images/wireframe/short-paragraph.png" alt=""></ui-image>
+								</ui-description>
+								<ui-extra>
+									<ui-label>IMAX</ui-label>
+									<ui-label icon="globe">Additional Languages</ui-label>
+								</ui-extra>
+							</ui-content>
+						</ui-item>
+						<ui-item image="../images/wireframe/image.png">
+							<ui-content>
+								<ui-header link="#">My Neighbor Totoro</ui-header>
+								<ui-meta>
+									<span>IFC Cinema</span>
+								</ui-meta>
+								<ui-description>
+									<ui-image src="/components/ui/images/wireframe/short-paragraph.png" alt=""></ui-image>
+								</ui-description>
+								<ui-extra>
+									<ui-stack direction="horizontal" justify="between">
+										<ui-label>Limited</ui-label>
+										<ui-button color="primary">Buy tickets <ui-icon name="chevron right"></ui-icon></ui-button>
+									</ui-stack>
+								</ui-extra>
+							</ui-content>
+						</ui-item>
+						<ui-item image="../images/wireframe/image.png">
+							<ui-content>
+								<ui-header link="#">Watchmen</ui-header>
+								<ui-meta>
+									<span>IFC</span>
+								</ui-meta>
+								<ui-description>
+									<ui-image src="/components/ui/images/wireframe/short-paragraph.png" alt=""></ui-image>
+								</ui-description>
+								<ui-extra>
+									<ui-stack direction="horizontal" justify="end">
+										<ui-button color="primary">Buy tickets <ui-icon name="chevron right"></ui-icon></ui-button>
+									</ui-stack>
+								</ui-extra>
+							</ui-content>
+						</ui-item>
+					</ui-items>
+				</html>
+			</example>
+		</>
+
+		<section label="Relaxed" sticky collapsible dividing>
+			<example description="A group of items can relax its padding to provide more negative space.">
+				<items spacing="lg">
+					<item>
+						<image size="tiny" src="/components/ui/images/wireframe/image.png" alt=""/>
+						<content vertical-align="middle">
+							<header link="#">12 Years a Slave</header>
+						</content>
+					</item>
+					<item>
+						<image size="tiny" src="/components/ui/images/wireframe/image.png" alt=""/>
+						<content vertical-align="middle">
+							<header link="#">My Neighbor Totoro</header>
+						</content>
+					</item>
+					<item>
+						<image size="tiny" src="/components/ui/images/wireframe/image.png" alt=""/>
+						<content vertical-align="middle">
+							<header link="#">Watchmen</header>
+						</content>
+					</item>
+				</items>
+			</example>
+			<example description="Even more with `relaxed=\"very\"`.">
+				<items spacing="xl">
+					<item>
+						<image size="tiny" src="/components/ui/images/wireframe/image.png" alt=""/>
+						<content vertical-align="middle">
+							<header link="#">12 Years a Slave</header>
+						</content>
+					</item>
+					<item>
+						<image size="tiny" src="/components/ui/images/wireframe/image.png" alt=""/>
+						<content vertical-align="middle">
+							<header link="#">My Neighbor Totoro</header>
+						</content>
+					</item>
+					<item>
+						<image size="tiny" src="/components/ui/images/wireframe/image.png" alt=""/>
+						<content vertical-align="middle">
+							<header link="#">Watchmen</header>
+						</content>
+					</item>
+				</items>
+			</example>
+		</>
+
+		<section label="Link Item" sticky collapsible dividing>
+			<example description="An item can be formatted so that the entire contents link to another page:  `appearance=\"link\"` on the group is the hover look, `link` on an item the link.">
+				<items appearance="link">
+					<item link="#">
+						<image size="tiny" src="/components/ui/images/avatar/large/stevie.jpg" alt=""/>
+						<content>
+							<header>Stevie Feliciano</header>
+							<description>
+								<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+							</description>
+						</content>
+					</item>
+					<item link="#">
+						<image size="tiny" src="/components/ui/images/avatar/large/veronika.jpg" alt=""/>
+						<content>
+							<header>Veronika Ossi</header>
+							<description>
+								<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+							</description>
+						</content>
+					</item>
+					<item link="#">
+						<image size="tiny" src="/components/ui/images/avatar/large/jenny.jpg" alt=""/>
+						<content>
+							<header>Jenny Hess</header>
+							<description>
+								<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+							</description>
+						</content>
+					</item>
+				</items>
+			</example>
+		</>
+
+		<section label="Vertical Alignment" sticky collapsible dividing>
+			<example description="Content can specify its vertical alignment:  `vertical-align` on the `<ui-content>`.">
+				<items unstackable>
+					<item>
+						<image size="small" src="/components/ui/images/wireframe/image.png" alt=""/>
+						<content>
+							<header>Top Aligned</header>
+						</content>
+					</item>
+					<item>
+						<image size="small" src="/components/ui/images/wireframe/image.png" alt=""/>
+						<content vertical-align="middle">
+							<header>Middle Aligned</header>
+						</content>
+					</item>
+					<item>
+						<image size="small" src="/components/ui/images/wireframe/image.png" alt=""/>
+						<content vertical-align="bottom">
+							<header>Bottom Aligned</header>
+						</content>
+					</item>
+				</items>
+			</example>
+		</>
+
+		<section label="Content at the Right" sticky collapsible dividing>
+			<example description="Content has no `floated` any more:  a `<ui-stack>` puts it at the left or the right.">
+				<items>
+					<item>
+						<image size="small" src="/components/ui/images/wireframe/image.png" alt=""/>
+						<content vertical-align="middle">
+							<header>Content A</header>
+							<description>
+								<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+							</description>
+							<extra>
+								<stack direction="horizontal" justify="end">
+									<button>Action</button>
+								</stack>
+							</extra>
+						</content>
+					</item>
+					<item>
+						<image size="small" src="/components/ui/images/wireframe/image.png" alt=""/>
+						<content vertical-align="middle">
+							<header>Content B</header>
+							<description>
+								<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+							</description>
+							<extra>
+								<stack direction="horizontal" justify="end">
+									<button>Action</button>
+								</stack>
+							</extra>
+						</content>
+					</item>
+					<item>
+						<image size="small" src="/components/ui/images/wireframe/image.png" alt=""/>
+						<content vertical-align="middle">
+							<header>Content C</header>
+							<description>
+								<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+							</description>
+							<extra>
+								<stack direction="horizontal" justify="end">
+									<button>Action</button>
+								</stack>
+							</extra>
+						</content>
+					</item>
+				</items>
+			</example>
+		</>
+
+		<section label="Inverted" sticky collapsible dividing>
+			<example>
+				<html>
+					<p slot="description">An item can be inverted to appear on a dark background.</p>
+					<ui-message slot="description" state="info" size="small">Set a dark background yourself, or wrap the items in an <code>&lt;ui-segment inverted&gt;</code>.</ui-message>
+					<ui-segment inverted>
+						<ui-items inverted>
+							<ui-item>
+								<ui-image size="small" src="/components/ui/images/wireframe/image.png" alt=""></ui-image>
+								<ui-content>
+									<ui-header>Arrowhead Valley Camp</ui-header>
+									<ui-meta>
+										<span>$1200</span>
+										<span>1 Month</span>
+									</ui-meta>
+									<ui-description>
+										<ui-image src="/components/ui/images/wireframe/short-paragraph.png" alt=""></ui-image>
+									</ui-description>
+								</ui-content>
+							</ui-item>
+							<ui-item>
+								<ui-image size="small" src="/components/ui/images/wireframe/image.png" alt=""></ui-image>
+								<ui-content>
+									<ui-header>Buck's Homebrew Stayaway</ui-header>
+									<ui-meta>
+										<span>$1000</span>
+										<span>2 Weeks</span>
+									</ui-meta>
+									<ui-description>
+										<ui-image src="/components/ui/images/wireframe/short-paragraph.png" alt=""></ui-image>
+									</ui-description>
+								</ui-content>
+							</ui-item>
+						</ui-items>
+					</ui-segment>
+				</html>
+			</example>
+		</>
+
+		<section label="Size" sticky collapsible dividing>
+			<example description="Items can have different text sizes, `mini` ... `massive`.">
+				<html>
+					<ui-items size="small">
+						<ui-item>
+							<ui-image size="small" src="/components/ui/images/wireframe/image.png" alt=""></ui-image>
+							<ui-content>
+								<ui-header>Arrowhead Valley Camp</ui-header>
+								<ui-meta>
+									<span>$1200</span>
+									<span>1 Month</span>
+								</ui-meta>
+								<ui-description>
+									<ui-image src="/components/ui/images/wireframe/short-paragraph.png" alt=""></ui-image>
+								</ui-description>
+							</ui-content>
+						</ui-item>
+					</ui-items>
+				</html>
+			</example>
+		</>
+	</>
+</spell-notebook>

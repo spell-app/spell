@@ -1,0 +1,141 @@
+<spell-notebook "radio usage">
+	<header level="1">
+		Radio
+		<header>A radio button lets a user choose exactly one value of a group.</>
+	</>
+	<radio-tab-bar showing="usage"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#using-it">Using it</>
+				<ui-item link="#radio-groups">Radio groups</>
+				<ui-item link="#forms">Forms</>
+				<ui-item link="#events">Events</>
+				<ui-item link="#keyboard">Keyboard</>
+				<ui-item link="#accessibility">Accessibility</>
+				<ui-item link="#framework-usage">Framework usage</>
+			</>
+		</>
+	</>
+
+	<!-- USAGE:  groups, forms, `selected` / `checked`, events, keyboard, accessibility, frameworks. -->
+	<section label="Using it">
+		<markdown>
+			Write one `<ui-radio>` per option, its label inside, and give the options of one question the same `name`. No
+			JavaScript to call: radios work as soon as the elements are defined, like Fomantic's radio checkbox without its
+			module. `<ui-radio>` shares its family, sheet and tokens with [`<ui-checkbox>`](/components/ui/ui-checkbox.html).
+
+			- `appearance="toggle"` / `appearance="slider"` changes the look; the default is the round radio.
+			- `selected` is the chosen state, as an attribute and a property. `checked` is an alias: the `checked`
+			  attribute in markup chooses the radio, and `el.checked` reads and writes `el.selected`.
+			- The label is the slotted content, or `label` for plain text; a `padding="none"` radio has none.
+			- Wrap a group in `<ui-fields grouped>` (one per line) or `<ui-fields inline>` (one row) inside a `<ui-form>`.
+		</>
+	</>
+
+	<section label="Radio groups">
+		<markdown>
+			Radios group by `name` within their form, or the whole page when there is none, even though each `<ui-radio>`
+			keeps its input in its own shadow root. Choosing one unchooses the others without firing events on them. A group
+			can mix looks (a radio, a slider and a toggle with one `name` are still one group).
+		</>
+	</>
+
+	<section label="Forms">
+		<markdown>
+			Radios are real form controls.
+
+			- A group submits `name=value` of its chosen radio (`value` defaults to `on`, as natively); with none chosen,
+			  nothing.
+			- `form.reset()` restores the starting choice, and a disabled `<fieldset>` disables them.
+			- `required` on any member makes the whole group required.
+			- `disabled` leaves a radio out of the form; `readonly` keeps it in but cancels clicks.
+		</>
+	</>
+
+	<section label="Events">
+		<markdown>
+			`ui-changed` fires on the newly chosen radio only, when the user chooses it, with `{ selected, value,
+			originalEvent }`. It fires BEFORE the change, so a handler that sets `selected` back vetoes it (see the
+			checkbox page's [Vetoing a change](/components/ui/ui-checkbox.html)). Setting `selected` from code
+			fires nothing -- Fomantic's `set checked`.
+		</>
+		<markdown>
+			```js
+			const form = document.querySelector("form")
+			form.addEventListener("ui-changed", (event) => {
+			  if (event.target.localName === "ui-radio") console.log(event.target.name, event.detail.value)
+			})
+			document.querySelector("ui-radio[value=day]").checked = true // same as .selected = true;  no event
+			```
+		</>
+	</>
+
+	<section label="Keyboard">
+		<markdown>
+			- **Space** chooses the focused radio.
+			- **Arrow Down** / **Arrow Right**: choose the next enabled radio of the group and focus it (wraps).
+			- **Arrow Up** / **Arrow Left**: choose the previous enabled radio of the group (wraps).
+			- **Tab** moves into or out of a group, through its one tab stop.
+		</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			- The shadow root holds a real `<input type="radio">` tied to a `<label>`, so clicking the label, Space, and the
+			  checked state come from the browser. `delegatesFocus` keeps the host out of the tab order and draws the focus
+			  ring on the box.
+			- Toggles and sliders keep the radio role (one of a group), not `switch`.
+			- The accessible name is the label text. A `padding="none"` radio (or an `invisible` one holding only an image) has none,
+			  so give it an `aria-label` or a `<label for>` pointing at the host.
+			- Wrap a group in `role="radiogroup"` with a name (`aria-label` or `aria-labelledby`), as the examples do.
+			- Only the chosen radio of a group (else the first enabled one) is a tab stop, as with native radios.
+			- A required group the user left empty gets `aria-invalid="true"` once they have interacted.
+			- If the element fails to render, its native fallback keeps the same markup with a plain native radio:
+			  it still submits, validates `required` and fires `ui-changed`. It drops grouping across elements
+			  (each fallback radio stands alone, with no arrow keys), vetoing `ui-changed`, the invalid state and
+			  reset to the starting state.
+		</>
+	</>
+
+	<section label="Framework usage">
+		<markdown>Bind `selected` as a property on each radio, and listen for `ui-changed` on the group.</>
+		<header level="4" id="framework-react">React 19</>
+		<markdown>
+			```jsx
+			{sizes.map((size) => (
+			  <ui-radio key={size} name="size" value={size} selected={chosen === size} onui-changed={() => setChosen(size)}>
+			    {size}
+			  </ui-radio>
+			))}
+			```
+		</>
+		<header level="4" id="framework-vue">Vue 3.5</>
+		<markdown>
+			```html
+			<!-- compilerOptions.isCustomElement = (tag) => tag.startsWith("ui-") -->
+			<ui-radio v-for="size in sizes" name="size" :value="size" :selected="chosen === size" @ui-changed="chosen = size">
+			  {{ size }}
+			</ui-radio>
+			```
+		</>
+		<header level="4" id="framework-solid">Solid 2</>
+		<markdown>
+			```jsx
+			// events and rich data are plain props:  `on-<event>={...}`, `options={...}`
+			<For each={sizes}>
+			  {(size) => (
+			    <ui-radio
+			      name="size"
+			      value={size()}
+			      selected={chosen() === size()}
+			      on-ui-changed={() => setChosen(size())}
+			    >
+			      {size()}
+			    </ui-radio>
+			  )}
+			</For>
+			```
+		</>
+	</>
+</spell-notebook>

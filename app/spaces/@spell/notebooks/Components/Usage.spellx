@@ -1,0 +1,34 @@
+<spell-notebook "components usage">
+	<header level="1">
+		Components
+		<header>Components name a pack of another package's elements, which the root around them loads on demand, once per page.</>
+	</>
+	<components-tab-bar showing="usage"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#using-it">Using it</>
+				<ui-item link="#keyboard">Keyboard</>
+				<ui-item link="#accessibility">Accessibility</>
+			</>
+		</>
+	</>
+
+	<!-- USAGE:  how to use it (attributes in practice, events, framework snippets), keyboard, accessibility. -->
+	<section label="Using it">
+		<markdown>Short how-to: what to write, which attributes matter, the events to listen for.</>
+		<markdown>
+			```js
+			document.querySelector("ui-components").addEventListener("ui-changed", (event) => console.log(event.detail))
+			```
+		</>
+	</>
+
+	<section label="Keyboard">
+		<markdown>Which keys do what.</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>What the shadow markup exposes, and what an author must add (`aria-label` ...).</>
+	</>
+</spell-notebook>

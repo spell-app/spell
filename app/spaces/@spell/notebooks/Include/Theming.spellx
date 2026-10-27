@@ -1,0 +1,51 @@
+<spell-notebook "include theming">
+	<header level="1">
+		Include
+		<header>An include shows part of another page from this site in this one, loaded at once, when idle or when
+              scrolled into view.</>
+	</>
+	<include-tab-bar showing="theming"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#tokens">Tokens</>
+				<ui-item link="#themes">Themes</>
+			</>
+		</>
+	</>
+
+	<!-- THEMING:  no tokens of its own;  what reaches the included markup instead. -->
+	<section label="Tokens">
+		<markdown>
+			An include has no look of its own, so no `--ui-include-*` tokens. What styles the included markup:
+
+			- In a shadow root (the default): only inherited values reach it -- fonts, colours and every `--ui-*` token set
+			  on the include or above it. Style the box with `::part(content)`.
+			- With `page-styles`: the page's own stylesheets, as for any other light-DOM markup.
+			- The loader and the error message are `::part(loader)` and `::part(error)`.
+		</>
+		<markdown>
+			```css
+			ui-include.notes {
+			  --ui-font-size: 14px;
+			  color: var(--ui-grey);
+			}
+			ui-include.notes::part(content) {
+			  padding: 1em;
+			}
+			```
+		</>
+		<html>
+			<ui-docs-tokens family="ui-include" playground>
+				<ui-include source="/components/ui/examples/release-notes.html">Loading the release notes...</>
+			</>
+		</>
+	</>
+
+	<section label="Themes">
+		<markdown>
+			Include is ours, not Fomantic's, and draws nothing itself, so no theme restyles it. The `ui-*` elements in the
+			included markup follow the site's theme like any others.
+		</>
+	</>
+</spell-notebook>

@@ -1,0 +1,121 @@
+<spell-notebook "textarea examples">
+	<header level="1">
+		Textarea
+		<header>A textarea is a multi-line field used to elicit a longer response.</>
+	</>
+	<textarea-tab-bar showing="examples"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#types">Types</>
+				<ui-item link="#states">States</>
+				<ui-item link="#variations">Variations</>
+			</>
+		</>
+	</>
+
+	<!--
+		EXAMPLES:  `<ui-textarea>`, moved here from the input page when it got its own page (epic ui-docs-rework
+		P7);  it shares the input family's sheet, sizes, states and tokens.  Fomantic has no textarea page:  its
+		form page's TextArea field, plus the input variations a textarea takes.  Every field is named with
+		`aria-label`;  in a form a `<label for>` does the same job.
+	-->
+	<section label="Types">
+		<section label="Textarea" sticky collapsible dividing>
+			<example description="A textarea allows extended user input:  `rows` sets its height;  without it the field is Fomantic's form height.">
+				<textarea fluid rows="3" placeholder="Tell us more" aria-label="Tell us more"/>
+			</example>
+		</>
+
+		<section label="In a Form" sticky collapsible dividing>
+			<example description="In a `<ui-form>` field, a `<label for>` names it, as Fomantic's form TextArea does.">
+				<html>
+					<ui-form>
+						<form>
+							<ui-field>
+								<label for="textarea-text">Text</label>
+								<ui-textarea id="textarea-text"></ui-textarea>
+							</ui-field>
+							<ui-field>
+								<label for="textarea-short">Short Text</label>
+								<ui-textarea id="textarea-short" rows="2"></ui-textarea>
+							</ui-field>
+						</form>
+					</ui-form>
+				</html>
+			</example>
+		</>
+	</>
+
+	<section label="States">
+		<section label="Disabled" sticky collapsible dividing>
+			<example description="A textarea can be disabled:  dimmed, and left out of the form.">
+				<textarea disabled rows="2" value="Can't touch this" aria-label="Disabled"/>
+			</example>
+		</>
+
+		<section label="Read-only" sticky collapsible dividing>
+			<example description="A read-only textarea shows its value but can't be edited;  it is still submitted.">
+				<textarea readonly rows="2" value="Read, don't write" aria-label="Read-only"/>
+			</example>
+		</>
+
+		<section label="Form States" sticky collapsible dividing>
+			<example description="`state` tints the box, text and placeholder:  `error`, `info`, `success`, `warning`.">
+				<textarea state="error" rows="2" placeholder="Error" aria-label="Error"/>
+				<textarea state="info" rows="2" placeholder="Info" aria-label="Info"/>
+				<textarea state="success" rows="2" placeholder="Success" aria-label="Success"/>
+				<textarea state="warning" rows="2" placeholder="Warning" aria-label="Warning"/>
+			</example>
+		</>
+	</>
+
+	<section label="Variations">
+		<!-- GAP I101:  `<ui-textarea>` has no `icon` or corner label (Fomantic's six textarea inputs);  only the plain one. -->
+		<section label="Height" sticky collapsible dividing>
+			<example description="`rows` sets the visible lines;  without it a textarea is Fomantic's form height (`--ui-input-textarea-height`, 12em).">
+				<textarea rows="2" placeholder="Two rows" aria-label="Two rows"/>
+				<textarea placeholder="The form height" aria-label="Form height"/>
+			</example>
+		</>
+
+		<section label="Growing" sticky collapsible dividing>
+			<example description="`grow`:  one line to start, taller as you type, then it scrolls;  shorter again as text goes.  It stops at `max-rows` lines, else a third of the window.  Every \"tell me more\" field should grow.">
+				<stack>
+					<textarea grow fluid placeholder="Tell me more" aria-label="Tell me more"/>
+					<textarea grow fluid rows="2" max-rows="5" placeholder="Two lines to start, five at most" aria-label="Two to five lines"/>
+				</stack>
+			</example>
+		</>
+
+		<section label="Fluid" sticky collapsible dividing>
+			<example description="A fluid textarea takes the full width of its container.">
+				<textarea fluid rows="2" placeholder="Full width" aria-label="Full width"/>
+			</example>
+		</>
+
+		<section label="Transparent" sticky collapsible dividing>
+			<example description="A transparent textarea has no box:  text only.">
+				<textarea appearance="transparent" rows="2" placeholder="Write here..." aria-label="Transparent"/>
+			</example>
+		</>
+
+		<section label="Inverted" sticky collapsible dividing>
+			<example description="A textarea can be formatted to appear on dark backgrounds.">
+				<segment inverted>
+					<textarea inverted rows="2" placeholder="On a dark background" aria-label="Inverted"/>
+				</segment>
+			</example>
+		</>
+
+		<section label="Size" sticky collapsible dividing>
+			<example description="A textarea can vary in size.">
+				<textarea size="mini" rows="1" placeholder="Mini" aria-label="Mini"/>
+				<textarea size="small" rows="1" placeholder="Small" aria-label="Small"/>
+				<textarea rows="1" placeholder="Medium" aria-label="Medium"/>
+				<textarea size="large" rows="1" placeholder="Large" aria-label="Large"/>
+				<textarea size="huge" rows="1" placeholder="Huge" aria-label="Huge"/>
+			</example>
+		</>
+	</>
+</spell-notebook>

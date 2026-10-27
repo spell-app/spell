@@ -1,0 +1,54 @@
+<spell-notebook "calendar theming">
+	<header level="1">
+		Calendar
+		<header>A calendar lets a user pick a date, a time, or both.</>
+	</>
+	<calendar-tab-bar showing="theming"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#tokens">Tokens</>
+				<ui-item link="#themes">Themes</>
+			</>
+		</>
+	</>
+
+	<!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
+	<section label="Tokens">
+		<markdown>
+			Theme with the public `--ui-calendar-*` tokens: set one on the element, on any ancestor (`:root` for every
+			calendar), or on the box through `::part(calendar)` or `::part(popup)`. Style the pieces with `::part()`:
+			`input` and `control` (the field), `trigger` (the icon button), `popup`, `header` with `previous`, `title` and
+			`next`, `grid`, `cell` and `today`.
+		</>
+		<markdown>
+			```css
+			ui-calendar {
+			  --ui-calendar-cell-padding: 0.75em;
+			}
+			ui-calendar::part(cell) {
+			  border-radius: 50%;
+			}
+			```
+		</>
+		<message state="info" size="small">
+			<markdown>
+				`color` remaps the shared `--ui-color`, so a theme's hues work here too. Never set the `--_ui-calendar-*`
+				names: they're the sheet's private plumbing.
+			</>
+		</>
+		<markdown>Edit a value below to try it.</>
+		<html>
+			<ui-docs-tokens family="ui-calendar" playground>
+				<ui-calendar value="2026-09-30T14:30" locale="en-US" placeholder="Date and time" today></>
+			</>
+		</>
+	</>
+
+	<section label="Themes">
+		<markdown>
+			The theme menu above picks the theme for every page of the site:  Spell, Glass, Fruity or Merlot,
+			each restyling this component through its tokens.
+		</>
+	</>
+</spell-notebook>

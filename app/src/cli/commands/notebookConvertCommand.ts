@@ -26,7 +26,7 @@ export async function notebookConvertCommand(
   const path = resolve(file)
   const page = `/components/ui/${path.split("/").at(-1)}`
   const converter = new CLI.NotebookFromPage(readFileSync(path, "utf8"), { page, into: NOTEBOOKS })
-  const folder = resolve(environment.systemFilesRoot, "notebooks", converter.title.replace(/\s+/g, ""))
+  const folder = resolve(environment.systemFilesRoot, "notebooks", converter.folder)
   for (const [name, text] of converter.files) {
     if (options.dryRun) session.out(`// ${name}\n${text}`)
     else {

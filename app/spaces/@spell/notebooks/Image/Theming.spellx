@@ -1,0 +1,51 @@
+<spell-notebook "image theming">
+	<header level="1">
+		Image
+		<header>An image is a graphic representation of something.</>
+	</>
+	<image-tab-bar showing="theming"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#tokens">Tokens</>
+				<ui-item link="#themes">Themes</>
+			</>
+		</>
+	</>
+
+	<section label="Tokens">
+		<markdown>
+			Theme with the public `--ui-image-*` tokens: set one on the element, on any ancestor (a `<ui-images>` group, a
+			region, `:root`), or on the inner box through `::part(image)` (`::part(group)` for `<ui-images>`). They inherit
+			into the shadow root, where the sheet reads each through a private alias, so nothing inside blocks them.
+
+			- The size widths are `--ui-image-width-mini` ... `-massive`.
+			- Never set the `--_ui-*` / `--_ui-images-*` names: they're the sheets' private plumbing.
+		</>
+		<markdown>
+			```css
+			/* every image on the page */
+			:root {
+			  --ui-image-rounded-radius: 1em;
+			}
+			/* one gallery */
+			.gallery {
+			  --ui-image-border: 2px solid var(--ui-border-color-strong);
+			}
+			```
+		</>
+		<markdown>Edit a value below to try it.</>
+		<html>
+			<ui-docs-tokens family="ui-image" playground>
+				<ui-image src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22480%22 height=%22320%22 viewBox=%220 0 30 20%22%3E%3Crect width=%2230%22 height=%2220%22 fill=%22%23cbd5e1%22/%3E%3Cpath d=%22M3 17l7-8 5 6 4-4 8 6z%22 fill=%22%2394a3b8%22/%3E%3Ccircle cx=%2222%22 cy=%226%22 r=%222%22 fill=%22%2394a3b8%22/%3E%3C/svg%3E" alt=""></>
+			</>
+		</>
+	</>
+
+	<section label="Themes">
+		<markdown>
+			The theme menu above picks the theme for every page of the site:  Spell, Glass, Fruity or Merlot,
+			each restyling this component through its tokens.
+		</>
+	</>
+</spell-notebook>

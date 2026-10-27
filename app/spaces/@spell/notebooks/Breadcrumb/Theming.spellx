@@ -1,0 +1,59 @@
+<spell-notebook "breadcrumb theming">
+	<header level="1">
+		Breadcrumb
+		<header>A breadcrumb is used to show hierarchy between content.</>
+	</>
+	<breadcrumb-tab-bar showing="theming"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#tokens">Tokens</>
+				<ui-item link="#themes">Themes</>
+			</>
+		</>
+	</>
+
+	<!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
+	<section label="Tokens">
+		<markdown>
+			Theme with the public `--ui-breadcrumb-*` tokens: set one on the element, on any ancestor (a header, `:root`), or
+			on the breadcrumb's box through `::part(breadcrumb)`. The sections inherit them from the breadcrumb, so set them
+			there or above, not on a section.
+
+			The text divider is the `--ui-breadcrumb-divider` token (a CSS string), so a whole site can change it once
+			instead of setting `divider` on every breadcrumb; a `divider` attribute still wins.
+		</>
+		<markdown>
+			```css
+			header ui-breadcrumbs {
+			  --ui-breadcrumb-divider: "»";
+			  --ui-breadcrumb-divider-color: var(--ui-primary);
+			  --ui-breadcrumb-active-font-weight: normal;
+			}
+			```
+		</>
+		<message state="info" size="small">
+			<markdown>
+				`size` scales every token measured in `em`; `inverted` switches the breadcrumb to the dark scheme, so its colour
+				tokens resolve to their dark values. Never set the `--_ui-*` names: they're the sheet's private plumbing.
+			</>
+		</>
+		<markdown>Edit a value below to try it.</>
+		<html>
+			<ui-docs-tokens family="ui-breadcrumbs" playground>
+				<ui-breadcrumbs aria-label="Breadcrumb demo">
+					<ui-breadcrumb link="#home">Home</>
+					<ui-breadcrumb link="#store">Store</>
+					<ui-breadcrumb selected>T-Shirt</>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="Themes">
+		<markdown>
+			The theme menu above picks the theme for every page of the site:  Spell, Glass, Fruity or Merlot,
+			each restyling this component through its tokens.
+		</>
+	</>
+</spell-notebook>

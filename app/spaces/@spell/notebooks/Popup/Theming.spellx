@@ -1,0 +1,64 @@
+<spell-notebook "popup theming">
+	<header level="1">
+		Popup
+		<header>A popup displays additional information on top of a page.</>
+	</>
+	<popup-tab-bar showing="theming"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#tokens">Tokens</>
+				<ui-item link="#themes">Themes</>
+			</>
+		</>
+	</>
+
+	<!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
+	<section label="Tokens">
+		<markdown>
+			Theme with the public `--ui-popup-*` tokens: set one on the element, on any ancestor (`:root` for every popup),
+			or on the box through `::part(popup)`. They inherit into the shadow root, where the sheet reads each through a
+			private alias, so nothing inside blocks them. `wide` and `very wide` swap the max width for
+			`--ui-popup-wide-width` / `--ui-popup-very-wide-width`; a slotted header reads `--ui-popup-header-font-size`
+			from the popup. The CSS-only tooltip reads `--ui-tooltip-*` tokens on the element that carries it.
+		</>
+		<markdown>
+			```css
+			/* every popup on the page */
+			:root {
+			  --ui-popup-radius: 0.5em;
+			}
+			/* one kind */
+			ui-popup.help {
+			  --ui-popup-max-width: 320px;
+			  --ui-popup-distance: 0.75em;
+			}
+			/* the CSS-only tooltips */
+			[data-tooltip] {
+			  --ui-tooltip-distance: 0.75em;
+			}
+			```
+		</>
+		<message state="info" size="small">
+			<markdown>
+				The host resets the colour remap and `--ui-scale`, so a popup opened from inside a red message or a large
+				button is neither red nor large: give the popup its own `color` / `size`. Never set the `--_ui-popup-*` names:
+				they're the sheet's private plumbing.
+			</>
+		</>
+		<markdown>Edit a value below to try it.</>
+		<html>
+			<ui-docs-tokens family="ui-popup" playground>
+				<ui-button icon="plus" aria-label="Add users"></>
+				<ui-popup label="Add users to your feed"></>
+			</>
+		</>
+	</>
+
+	<section label="Themes">
+		<markdown>
+			The theme menu above picks the theme for every page of the site:  Spell, Glass, Fruity or Merlot,
+			each restyling this component through its tokens.
+		</>
+	</>
+</spell-notebook>

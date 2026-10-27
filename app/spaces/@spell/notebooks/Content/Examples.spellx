@@ -1,0 +1,165 @@
+<spell-notebook "content examples">
+	<header level="1">
+		Content
+		<header>Content is the main block of a card, item, feed event, comment, modal, message, list item or step.</>
+	</>
+	<content-tab-bar showing="examples"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#owners">Owners</>
+				<ui-item link="#variations">Variations</>
+			</>
+		</>
+	</>
+
+	<!--
+		EXAMPLES:  `<ui-content>` in each owner that gives it a look (from the owners' own pages and
+		`src/components/ui-parts/examples/elements/`), then its attributes.  The Content parts page
+		(`ui-header.html`) shows every part together.
+	-->
+	<section label="Owners">
+		<section label="Card" sticky collapsible dividing>
+			<example description="A card's content blocks, divided from each other.">
+				<card>
+					<content>
+						<header>Elliot Fu</header>
+						<meta>Friend</meta>
+						<description>Elliot is a film-maker from New York.</description>
+					</content>
+					<content>
+						<description>A second content block, divided from the first.</description>
+					</content>
+				</card>
+			</example>
+		</>
+
+		<section label="Item" sticky collapsible dividing>
+			<example description="An item's content is the column beside its image.">
+				<html>
+					<ui-items>
+						<ui-item image="../images/wireframe/image.png">
+							<ui-content>
+								<ui-header link="#item">Arrowhead Valley Camp</ui-header>
+								<ui-meta>
+									<span>Summer camp</span>
+								</ui-meta>
+								<ui-description>A week of hiking, canoeing and campfires.</ui-description>
+							</ui-content>
+						</ui-item>
+					</ui-items>
+				</html>
+			</example>
+		</>
+
+		<section label="Message" sticky collapsible dividing>
+			<example description="A message's content is the text beside its icon.">
+				<html>
+					<ui-message icon="inbox">
+						<ui-content>
+							<ui-header>Have you heard about our mailing list?</ui-header>
+							<p>Get the best news in your e-mail every day.</p>
+						</ui-content>
+					</ui-message>
+				</html>
+			</example>
+		</>
+
+		<section label="List" sticky collapsible dividing>
+			<example description="A list item's content sits beside its icon.">
+				<list spacing="lg">
+					<item icon="github">
+						<content>
+							<header link="#list">fomantic/Fomantic-UI</header>
+							<description>Updated 10 mins ago</description>
+						</content>
+					</item>
+				</list>
+			</example>
+		</>
+
+		<section label="Step" sticky collapsible dividing>
+			<example description="A step's content sits beside its icon.">
+				<steps>
+					<step icon="truck">
+						<content>
+							<title>Shipping</title>
+							<description>Choose your shipping options</description>
+						</content>
+					</step>
+				</steps>
+			</example>
+		</>
+
+		<section label="Accordion" sticky collapsible dividing>
+			<example description="An accordion's panels:  each `<ui-content>` shows while the title before it is open.">
+				<html>
+					<ui-accordion appearance="styled" open="0">
+						<ui-title>What is a dog?</ui-title>
+						<ui-content>
+							<p>A dog is a type of domesticated animal.</p>
+						</ui-content>
+						<ui-title>What kinds of dogs are there?</ui-title>
+						<ui-content>
+							<p>There are many breeds of dogs.</p>
+						</ui-content>
+					</ui-accordion>
+				</html>
+			</example>
+		</>
+
+		<section label="Modal" sticky collapsible dividing>
+			<example description="A modal's body:  `image` puts an image beside the description.">
+				<button commandfor="content-modal" command="--show">Show</button>
+				<html>
+					<ui-modal id="content-modal" closable>
+						<ui-header>Profile Picture</ui-header>
+						<ui-content image>
+							<ui-image size="medium" src="/components/ui/images/avatar/large/chris.jpg" alt=""></ui-image>
+							<ui-description>
+								<ui-header>We've auto-chosen a profile image for you.</ui-header>
+								<p>Is it okay to use this photo?</p>
+							</ui-description>
+						</ui-content>
+						<ui-actions>
+							<ui-button class="approve" color="primary">Use it</ui-button>
+						</ui-actions>
+					</ui-modal>
+				</html>
+			</example>
+		</>
+	</>
+
+	<section label="Variations">
+		<section label="Text Alignment" sticky collapsible dividing>
+			<example description="In a card, `align` aligns one content block:  Fomantic's `center aligned content`.">
+				<card>
+					<content align="center">
+						<header>Centered</header>
+						<description>A center aligned content block.</description>
+					</content>
+					<content align="right">
+						<description>A right aligned one.</description>
+					</content>
+				</card>
+			</example>
+		</>
+
+		<section label="Vertical Alignment" sticky collapsible dividing>
+			<example description="In an item, `vertical-align` lines the content up against the image beside it.">
+				<items>
+					<item image="../images/wireframe/image.png">
+						<content vertical-align="middle">
+							<header>Middle aligned</header>
+						</content>
+					</item>
+					<item image="../images/wireframe/image.png">
+						<content vertical-align="bottom">
+							<header>Bottom aligned</header>
+						</content>
+					</item>
+				</items>
+			</example>
+		</>
+	</>
+</spell-notebook>

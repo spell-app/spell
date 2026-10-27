@@ -1,0 +1,73 @@
+<spell-notebook "embed examples">
+	<header level="1">
+		Embed
+		<header>An embed displays content from other websites, like YouTube videos, loaded only when asked
+              for.</>
+	</>
+	<embed-tab-bar showing="examples"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#types">Types</>
+				<ui-item link="#variations">Variations</>
+			</>
+		</>
+	</>
+
+	<!--
+		EXAMPLES:  Fomantic's embed page, section by section, in its order (Types, Variations), plus our extra (Placeholder
+		content).  Nothing third-party loads on this page until a reader clicks a play button.
+	-->
+	<section label="Types">
+		<section label="YouTube" sticky collapsible dividing>
+			<example description="An embed can be used to display YouTube content. Only a click loads the video, from `youtube-nocookie.com`.">
+				<embed source="youtube" video-id="O6Xo21L0ybE" alt="A Youtube Video about a waving bear" placeholder="../images/image-16by9.png"/>
+			</example>
+		</>
+
+		<section label="Vimeo" sticky collapsible dividing>
+			<example description="An embed can be used to display Vimeo content:  `source=\"vimeo\"` with the video's id.">
+				<embed source="vimeo" video-id="125292332" label="A Vimeo video" placeholder="../images/vimeo-example.jpg"/>
+			</example>
+		</>
+
+		<section label="Custom Content" sticky collapsible dividing>
+			<example>
+				<html>
+					<p slot="description">An embed can display any web content: <code>url</code> frames any <code>http(s)</code> address.</p>
+				</html>
+				<message slot="description" size="small" state="info">Embeds use an intrinsic aspect ratio to embed content responsively: content keeps its aspect ratio at every browser size.</message>
+				<embed url="https://rasterbuster.lubber.de" label="Rasterbuster" placeholder="../images/image-16by9.png" icon="arrow circle right"/>
+			</example>
+		</>
+
+		<section label="Placeholder content" sticky collapsible dividing>
+			<example description="Children go inside the play button, over the image:  a caption, a duration.">
+				<embed source="youtube" video-id="O6Xo21L0ybE" label="A waving bear" placeholder="../images/image-16by9.png">
+					<label color="black" attach="top right">Watch · 2:10</label>
+				</embed>
+			</example>
+		</>
+	</>
+
+	<section label="Variations">
+		<section label="Aspect Ratio" sticky collapsible dividing>
+			<example description="An embed can specify an alternative aspect ratio out of `square`, `4:3`, `16:9` (the default) or `21:9`.">
+				<embed source="youtube" video-id="HTZudKi36bo" aspect-ratio="4:3" label="A 4:3 video" placeholder="../images/4by3.jpg"/>
+			</example>
+			<example>
+				<grid columns="3">
+					<column>
+						<embed source="vimeo" video-id="125292332" aspect-ratio="square" label="Square video"/>
+					</column>
+					<column>
+						<embed source="vimeo" video-id="125292332" aspect-ratio="16:9" label="16:9 video"/>
+					</column>
+					<column>
+						<embed source="vimeo" video-id="125292332" aspect-ratio="21:9" label="21:9 video"/>
+					</column>
+				</grid>
+			</example>
+		</>
+	</>
+</spell-notebook>

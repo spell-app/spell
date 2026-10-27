@@ -1,0 +1,388 @@
+<spell-notebook "accordion examples">
+	<header level="1">
+		Accordion
+		<header>An accordion allows users to toggle the display of sections of content.</>
+	</>
+	<accordion-tab-bar showing="examples"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#types">Types</>
+				<ui-item link="#states">States</>
+				<ui-item link="#variations">Variations</>
+				<ui-item link="#examples">Examples</>
+			</>
+		</>
+	</>
+
+	<!--
+		EXAMPLES:  Fomantic's accordion page, section by section, in its order (Types, Variations, Examples), plus our
+		own extras (States:  open, not exclusive, not collapsible;  any content element).
+		- Panels are pairs:  a `<ui-title>` and the element after it;  `open` lists the open panels by index.
+	-->
+	<section label="Types">
+		<section label="Accordion" sticky collapsible dividing>
+			<example description="A standard accordion:  each `<ui-title>` starts a panel, and the element after it is that panel's content. `open` lists the panels open at the start.">
+				<html>
+					<ui-accordion open="0">
+						<ui-title>What is a dog?</ui-title>
+						<ui-content>
+							<p>A dog is a type of domesticated animal. Known for its loyalty and faithfulness, it can be found as a welcome guest in many households across the world.</p>
+						</ui-content>
+						<ui-title>What kinds of dogs are there?</ui-title>
+						<ui-content>
+							<p>There are many breeds of dogs. Each breed varies in size and temperament. Owners often select a breed of dog that they find to be compatible with their own lifestyle and desires from a companion.</p>
+						</ui-content>
+						<ui-title>How do you acquire a dog?</ui-title>
+						<ui-content>
+							<p>Three common ways for a prospective owner to acquire a dog is from pet shops, private owners, or shelters.</p>
+							<p>A pet shop may be the most convenient way to buy a dog. Buying a dog from a private owner allows you to assess the pedigree and upbringing of your dog before choosing to take it home. Lastly, finding your dog from a shelter, helps give a good home to a dog who may not find one so readily.</p>
+						</ui-content>
+					</ui-accordion>
+				</html>
+			</example>
+		</>
+
+		<section label="Styled" sticky collapsible dividing>
+			<example description="A styled accordion adds basic formatting.">
+				<html>
+					<ui-accordion appearance="styled" open="0">
+						<ui-title>What is a dog?</ui-title>
+						<ui-content>
+							<p>A dog is a type of domesticated animal. Known for its loyalty and faithfulness, it can be found as a welcome guest in many households across the world.</p>
+						</ui-content>
+						<ui-title>What kinds of dogs are there?</ui-title>
+						<ui-content>
+							<p>There are many breeds of dogs. Each breed varies in size and temperament. Owners often select a breed of dog that they find to be compatible with their own lifestyle and desires from a companion.</p>
+						</ui-content>
+						<ui-title>How do you acquire a dog?</ui-title>
+						<ui-content>
+							<p>Three common ways for a prospective owner to acquire a dog is from pet shops, private owners, or shelters.</p>
+							<p>A pet shop may be the most convenient way to buy a dog. Buying a dog from a private owner allows you to assess the pedigree and upbringing of your dog before choosing to take it home. Lastly, finding your dog from a shelter, helps give a good home to a dog who may not find one so readily.</p>
+						</ui-content>
+					</ui-accordion>
+				</html>
+			</example>
+		</>
+
+		<section label="Basic Styled" sticky collapsible dividing>
+			<example description="A basic styled accordion limits the formatting to the header only.">
+				<html>
+					<ui-accordion appearance="basic styled" open="0">
+						<ui-title>What is a dog?</ui-title>
+						<ui-content>
+							<p>A dog is a type of domesticated animal. Known for its loyalty and faithfulness, it can be found as a welcome guest in many households across the world.</p>
+						</ui-content>
+						<ui-title>What kinds of dogs are there?</ui-title>
+						<ui-content>
+							<p>There are many breeds of dogs. Each breed varies in size and temperament. Owners often select a breed of dog that they find to be compatible with their own lifestyle and desires from a companion.</p>
+						</ui-content>
+						<ui-title>How do you acquire a dog?</ui-title>
+						<ui-content>
+							<p>Three common ways for a prospective owner to acquire a dog is from pet shops, private owners, or shelters.</p>
+							<p>A pet shop may be the most convenient way to buy a dog. Buying a dog from a private owner allows you to assess the pedigree and upbringing of your dog before choosing to take it home. Lastly, finding your dog from a shelter, helps give a good home to a dog who may not find one so readily.</p>
+						</ui-content>
+					</ui-accordion>
+				</html>
+			</example>
+		</>
+
+		<section label="Tree" sticky collapsible dividing>
+			<example>
+				<html>
+					<p slot="description">A tree accordion using <a href="#examples-examples-nested-accordions">nested accordions</a>: each panel's content is indented under its title, like a file tree.</p>
+				</html>
+				<accordion tree open="0">
+					<title>Level 1</title>
+					<content>
+						<accordion open="0">
+							<title>Level 1A</title>
+							<content>
+								<accordion>
+									<title>Level 1A-A</title>
+									<content>Level 1A-A Contents</content>
+									<title>Level 1A-B</title>
+									<content>Level 1A-B Contents</content>
+								</accordion>
+							</content>
+							<title>Level 1B</title>
+							<content>Level 1B Contents</content>
+							<title>Level 1C</title>
+							<content>Level 1C Contents</content>
+						</accordion>
+					</content>
+					<title>Level 2</title>
+					<content>
+						<accordion open="0">
+							<title>Level 2A</title>
+							<content>
+								<accordion>
+									<title>Level 2A-A</title>
+									<content>Level 2A-A Contents</content>
+									<title>Level 2A-B</title>
+									<content>Level 2A-B Contents</content>
+								</accordion>
+							</content>
+							<title>Level 2B</title>
+							<content>Level 2B Contents</content>
+							<title>Level 2C</title>
+							<content>Level 2C Contents</content>
+						</accordion>
+					</content>
+				</accordion>
+			</example>
+		</>
+	</>
+
+	<section label="States">
+		<section label="Open" sticky collapsible dividing>
+			<example description="An open panel shows its content;  its title is the active one.  `open` counts from 0.">
+				<html>
+					<ui-accordion appearance="styled" open="1">
+						<ui-title>Closed panel</ui-title>
+						<ui-content>
+							<p>Hidden until opened.</p>
+						</ui-content>
+						<ui-title>Open panel</ui-title>
+						<ui-content>
+							<p>Shown: its title is the active one.</p>
+						</ui-content>
+					</ui-accordion>
+				</html>
+			</example>
+		</>
+
+		<section label="Not exclusive" sticky collapsible dividing>
+			<example description="By default opening one panel closes the others.  `exclusive=\"no\"` lets any number stay open, so `open` can list several:  `open=\"0 1\"`.">
+				<html>
+					<ui-accordion appearance="styled" exclusive="no" open="0 1">
+						<ui-title>First</ui-title>
+						<ui-content>
+							<p>Both panels can be open.</p>
+						</ui-content>
+						<ui-title>Second</ui-title>
+						<ui-content>
+							<p>Still open.</p>
+						</ui-content>
+					</ui-accordion>
+				</html>
+			</example>
+		</>
+
+		<section label="Not collapsible" sticky collapsible dividing>
+			<example description="`collapsible=\"no\"` keeps one panel open:  activating the open title does nothing.">
+				<html>
+					<ui-accordion appearance="styled" collapsible="no" open="0">
+						<ui-title>Always one open</ui-title>
+						<ui-content>
+							<p>Open another panel to close this one.</p>
+						</ui-content>
+						<ui-title>Another panel</ui-title>
+						<ui-content>
+							<p>Now this one stays open.</p>
+						</ui-content>
+					</ui-accordion>
+				</html>
+			</example>
+		</>
+	</>
+
+	<section label="Variations">
+		<section label="Fluid" sticky collapsible dividing>
+			<example description="An accordion can take up the width of its container.">
+				<html>
+					<ui-accordion appearance="styled" fluid open="0">
+						<ui-title>What is a dog?</ui-title>
+						<ui-content>
+							<p>A dog is a type of domesticated animal. Known for its loyalty and faithfulness, it can be found as a welcome guest in many households across the world.</p>
+						</ui-content>
+						<ui-title>What kinds of dogs are there?</ui-title>
+						<ui-content>
+							<p>There are many breeds of dogs. Each breed varies in size and temperament. Owners often select a breed of dog that they find to be compatible with their own lifestyle and desires from a companion.</p>
+						</ui-content>
+						<ui-title>How do you acquire a dog?</ui-title>
+						<ui-content>
+							<p>Three common ways for a prospective owner to acquire a dog is from pet shops, private owners, or shelters.</p>
+							<p>A pet shop may be the most convenient way to buy a dog. Buying a dog from a private owner allows you to assess the pedigree and upbringing of your dog before choosing to take it home. Lastly, finding your dog from a shelter, helps give a good home to a dog who may not find one so readily.</p>
+						</ui-content>
+					</ui-accordion>
+				</html>
+			</example>
+		</>
+
+		<section label="Inverted" sticky collapsible dividing>
+			<example description="An accordion can be formatted to appear on dark backgrounds.">
+				<html>
+					<ui-segment inverted>
+						<ui-accordion inverted open="0">
+							<ui-title>What is a dog?</ui-title>
+							<ui-content>
+								<p>A dog is a type of domesticated animal. Known for its loyalty and faithfulness, it can be found as a welcome guest in many households across the world.</p>
+							</ui-content>
+							<ui-title>What kinds of dogs are there?</ui-title>
+							<ui-content>
+								<p>There are many breeds of dogs. Each breed varies in size and temperament. Owners often select a breed of dog that they find to be compatible with their own lifestyle and desires from a companion.</p>
+							</ui-content>
+							<ui-title>How do you acquire a dog?</ui-title>
+							<ui-content>
+								<p>Three common ways for a prospective owner to acquire a dog is from pet shops, private owners, or shelters.</p>
+								<p>A pet shop may be the most convenient way to buy a dog. Buying a dog from a private owner allows you to assess the pedigree and upbringing of your dog before choosing to take it home. Lastly, finding your dog from a shelter, helps give a good home to a dog who may not find one so readily.</p>
+							</ui-content>
+						</ui-accordion>
+					</ui-segment>
+				</html>
+			</example>
+			<example description="A styled accordion can be inverted too.">
+				<html>
+					<ui-accordion inverted appearance="styled" open="0">
+						<ui-title>What is a dog?</ui-title>
+						<ui-content>
+							<p>A dog is a type of domesticated animal. Known for its loyalty and faithfulness, it can be found as a welcome guest in many households across the world.</p>
+						</ui-content>
+						<ui-title>What kinds of dogs are there?</ui-title>
+						<ui-content>
+							<p>There are many breeds of dogs. Each breed varies in size and temperament. Owners often select a breed of dog that they find to be compatible with their own lifestyle and desires from a companion.</p>
+						</ui-content>
+						<ui-title>How do you acquire a dog?</ui-title>
+						<ui-content>
+							<p>Three common ways for a prospective owner to acquire a dog is from pet shops, private owners, or shelters.</p>
+							<p>A pet shop may be the most convenient way to buy a dog. Buying a dog from a private owner allows you to assess the pedigree and upbringing of your dog before choosing to take it home. Lastly, finding your dog from a shelter, helps give a good home to a dog who may not find one so readily.</p>
+						</ui-content>
+					</ui-accordion>
+				</html>
+			</example>
+		</>
+
+		<section label="Compact" sticky collapsible dividing>
+			<example description="An accordion can reduce its padding to appear compact.">
+				<html>
+					<ui-segment>
+						<ui-accordion padding="compact" open="0">
+							<ui-title>What is a dog?</ui-title>
+							<ui-content>
+								<p>A dog is a type of domesticated animal. Known for its loyalty and faithfulness, it can be found as a welcome guest in many households across the world.</p>
+							</ui-content>
+							<ui-title>What kinds of dogs are there?</ui-title>
+							<ui-content>
+								<p>There are many breeds of dogs. Each breed varies in size and temperament. Owners often select a breed of dog that they find to be compatible with their own lifestyle and desires from a companion.</p>
+							</ui-content>
+							<ui-title>How do you acquire a dog?</ui-title>
+							<ui-content>
+								<p>Three common ways for a prospective owner to acquire a dog is from pet shops, private owners, or shelters.</p>
+								<p>A pet shop may be the most convenient way to buy a dog. Buying a dog from a private owner allows you to assess the pedigree and upbringing of your dog before choosing to take it home. Lastly, finding your dog from a shelter, helps give a good home to a dog who may not find one so readily.</p>
+							</ui-content>
+						</ui-accordion>
+					</ui-segment>
+				</html>
+			</example>
+			<example description="The following accordion appears very compact:  `padding=\"xs\"`.">
+				<html>
+					<ui-segment>
+						<ui-accordion padding="xs" open="0">
+							<ui-title>What is a dog?</ui-title>
+							<ui-content>
+								<p>A dog is a type of domesticated animal. Known for its loyalty and faithfulness, it can be found as a welcome guest in many households across the world.</p>
+							</ui-content>
+							<ui-title>What kinds of dogs are there?</ui-title>
+							<ui-content>
+								<p>There are many breeds of dogs. Each breed varies in size and temperament. Owners often select a breed of dog that they find to be compatible with their own lifestyle and desires from a companion.</p>
+							</ui-content>
+							<ui-title>How do you acquire a dog?</ui-title>
+							<ui-content>
+								<p>Three common ways for a prospective owner to acquire a dog is from pet shops, private owners, or shelters.</p>
+								<p>A pet shop may be the most convenient way to buy a dog. Buying a dog from a private owner allows you to assess the pedigree and upbringing of your dog before choosing to take it home. Lastly, finding your dog from a shelter, helps give a good home to a dog who may not find one so readily.</p>
+							</ui-content>
+						</ui-accordion>
+					</ui-segment>
+				</html>
+			</example>
+		</>
+	</>
+
+	<section label="Examples">
+		<section label="Nested Accordions" sticky collapsible dividing id="examples-nested-accordions">
+			<example description="An accordion can have multiple levels of nested content: a nested `<ui-accordion>` inside a panel's content. It takes its parent's look; its own `open` is its own.">
+				<html>
+					<ui-accordion appearance="styled" open="0">
+						<ui-title>Level 1</ui-title>
+						<ui-content>Welcome to level 1 <ui-accordion open="0"><ui-title>Level 1A</ui-title> <ui-content><p>Level 1A Contents</p> <ui-accordion><ui-title>Level 1A-A</ui-title> <ui-content>Level 1A-A Contents</ui-content> <ui-title>Level 1A-B</ui-title> <ui-content>Level 1A-B Contents</ui-content></ui-accordion></ui-content> <ui-title>Level 1B</ui-title> <ui-content>Level 1B Contents</ui-content> <ui-title>Level 1C</ui-title> <ui-content>Level 1C Contents</ui-content></ui-accordion></ui-content>
+						<ui-title>Level 2</ui-title>
+						<ui-content>
+							<p>Welcome to level 2</p>
+							<ui-accordion open="0">
+								<ui-title>Level 2A</ui-title>
+								<ui-content>
+									<p>Level 2A Contents</p>
+									<ui-accordion>
+										<ui-title>Level 2A-A</ui-title>
+										<ui-content>Level 2A-A Contents</ui-content>
+										<ui-title>Level 2A-B</ui-title>
+										<ui-content>Level 2A-B Contents</ui-content>
+									</ui-accordion>
+								</ui-content>
+								<ui-title>Level 2B</ui-title>
+								<ui-content>Level 2B Contents</ui-content>
+								<ui-title>Level 2C</ui-title>
+								<ui-content>Level 2C Contents</ui-content>
+							</ui-accordion>
+						</ui-content>
+					</ui-accordion>
+				</html>
+			</example>
+		</>
+		<html>
+			<ui-message size="small" class="site-not-ported">Not ported: Changing Trigger (<code>selector.trigger</> / <code>selector.ignore</>). The whole title is the native <code>&lt;summary&gt;</> button, and a click on a link or button inside a title is already left alone.</>
+		</>
+
+		<section label="Form Fields" sticky collapsible dividing>
+			<example description="An accordion can be used anywhere where content can be shown or hidden.  For example, to show optional form fields.">
+				<html>
+					<ui-segment>
+						<ui-form>
+							<form>
+								<ui-fields widths="2">
+									<ui-field>
+										<label for="accordion-form-first">First Name</label>
+										<ui-input id="accordion-form-first" placeholder="First Name"></ui-input>
+									</ui-field>
+									<ui-field>
+										<label for="accordion-form-last">Last Name</label>
+										<ui-input id="accordion-form-last" placeholder="Last Name"></ui-input>
+									</ui-field>
+								</ui-fields>
+								<ui-accordion>
+									<ui-title>Optional Details</ui-title>
+									<ui-field>
+										<label for="accordion-form-maiden">Maiden Name</label>
+										<ui-input id="accordion-form-maiden" placeholder="Maiden Name"></ui-input>
+									</ui-field>
+								</ui-accordion>
+								<ui-button type="submit" color="secondary">Sign Up</ui-button>
+							</form>
+						</ui-form>
+					</ui-segment>
+				</html>
+			</example>
+		</>
+
+		<section label="Any content element" sticky collapsible dividing>
+			<example description="The content of a panel is simply the element after its title: a `<ui-content>` is usual, but any element works.">
+				<accordion appearance="styled" open="0">
+					<title>A list</title>
+					<list bulleted>
+						<item>Apples</item>
+						<item>Pears</item>
+					</list>
+					<title>A form field</title>
+					<input placeholder="Name" aria-label="Name"/>
+				</accordion>
+			</example>
+		</>
+
+		<!-- GAP I15:  no accordion menu (`ui vertical accordion menu`, a menu item holding a title + drawer);  left out. -->
+		<html>
+			<ui-message size="small" class="site-not-ported">Accordion Menu (content drawers inside a vertical menu) can't be built yet: a <code>&lt;ui-item&gt;</> can't hold a collapsible group (plan issue I15). Use an accordion beside the menu, or <code>&lt;ui-menu&gt;</>'s sub-menus.</>
+			<ui-message size="small" class="site-not-ported">Not ported: Right Icon (<code>right dropdown icon</>) -- the arrow always sits before the title text, turned by the reading direction.</>
+		</>
+	</>
+</spell-notebook>

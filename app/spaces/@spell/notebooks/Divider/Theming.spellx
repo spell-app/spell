@@ -1,0 +1,54 @@
+<spell-notebook "divider theming">
+	<header level="1">
+		Divider
+		<header>A divider visually segments content into groups.</>
+	</>
+	<divider-tab-bar showing="theming"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#tokens">Tokens</>
+				<ui-item link="#themes">Themes</>
+			</>
+		</>
+	</>
+
+	<section label="Tokens">
+		<markdown>
+			Theme with the public `--ui-divider-*` tokens: set one on the element, on any ancestor (a region, `:root`), or
+			on the inner box through `::part(divider)`. They inherit into the shadow root, where the sheet reads each
+			through a private alias, so nothing inside blocks them.
+
+			- A `section` divider swaps in `--ui-divider-section-margin`, whatever the base margin.
+			- The text look is `--ui-divider-font-weight`, `-text-transform`, `-letter-spacing`, `-text-color`.
+			- Never set the `--_ui-*` names: they're the sheet's private plumbing.
+		</>
+		<markdown>
+			```css
+			/* every divider on the page */
+			:root {
+			  --ui-divider-line-color: var(--ui-border-color-strong);
+			}
+			/* one region */
+			.sidebar {
+			  --ui-divider-margin: 0.5em;
+			}
+			```
+		</>
+		<markdown>Edit a value below to try it.</>
+		<html>
+			<ui-docs-tokens family="ui-divider" playground>
+				<p>Doggie treats are good for all times of the year. Proven to be eaten by 99.9% of all dogs worldwide.</>
+				<ui-divider></>
+				<p>Doggie treats are good for all times of the year. Proven to be eaten by 99.9% of all dogs worldwide.</>
+			</>
+		</>
+	</>
+
+	<section label="Themes">
+		<markdown>
+			Each theme of the set (Spell, Glass, Fruity, Merlot, Paper, Midnight, Crisp, Pop, Matrix) changes a divider's colours through the shared
+			tokens.
+		</>
+	</>
+</spell-notebook>

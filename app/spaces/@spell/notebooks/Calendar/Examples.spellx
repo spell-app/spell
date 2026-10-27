@@ -1,0 +1,286 @@
+<spell-notebook "calendar examples">
+	<header level="1">
+		Calendar
+		<header>A calendar lets a user pick a date, a time, or both.</>
+	</>
+	<calendar-tab-bar showing="examples"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#types">Types</>
+				<ui-item link="#variations">Variations</>
+				<ui-item link="#states">States</>
+				<ui-item link="#examples">Examples</>
+				<ui-item link="#coupling">Coupling</>
+				<ui-item link="#disabling-specific-days">Disabling specific Days</>
+				<ui-item link="#highlighting-specific-days">Highlighting specific Days</>
+			</>
+		</>
+	</>
+
+	<!--
+		EXAMPLES:  Fomantic's calendar page, section by section, in its order (Types, Variations, States, then its Examples
+		tab:  Examples, Coupling, Disabling specific Days, Highlighting specific Days), plus our own extras (Read-only,
+		Required, Colored, Compact, Fluid, Position, Today).
+		- Every example pins `locale="en-US"` (except the locale ones), so names and formats don't follow the reader's
+		  browser.  Fomantic's jQuery settings are attributes here.
+	-->
+	<section label="Types">
+		<section label="Calendar" sticky collapsible dividing>
+			<example description="A standard calendar: a date and a time, Fomantic's default `type`. The field takes typed text too; the icon button opens the picker.">
+				<calendar fluid locale="en-US" placeholder="Date/Time"/>
+			</example>
+		</>
+
+		<section label="Range" sticky collapsible dividing>
+			<example description="A range calendar allows you to select a start date and a stop date: `end-calendar` names the end's calendar, `start-calendar` the start's. Each limits the other, and the days between them are highlighted.">
+				<html>
+					<ui-form>
+						<form>
+							<ui-fields widths="2">
+								<ui-field>
+									<label for="calendar-range-start">Start date</label>
+									<ui-calendar id="calendar-range-start" end-calendar="calendar-range-end" type="date" locale="en-US" placeholder="Start"></ui-calendar>
+								</ui-field>
+								<ui-field>
+									<label for="calendar-range-end">End date</label>
+									<ui-calendar id="calendar-range-end" start-calendar="calendar-range-start" type="date" locale="en-US" placeholder="End"></ui-calendar>
+								</ui-field>
+							</ui-fields>
+						</form>
+					</ui-form>
+				</html>
+			</example>
+		</>
+
+		<section label="Inline calendar" sticky collapsible dividing>
+			<example description="An inline calendar isn't shown in a popup: no field, no popup, still a form control. Name it with `aria-label`.">
+				<calendar inline locale="en-US" aria-label="Inline calendar"/>
+			</example>
+			<example description="Any type can be inline.">
+				<calendar inline type="date" value="2026-09-30" locale="en-US" aria-label="Inline date"/>
+			</example>
+			<example>
+				<calendar inline type="month" value="2026-09" locale="en-US" aria-label="Inline month"/>
+			</example>
+			<example>
+				<calendar inline type="time" value="14:30" locale="en-US" aria-label="Inline time"/>
+			</example>
+		</>
+	</>
+
+	<section label="Variations">
+		<section label="Size" sticky collapsible dividing>
+			<example description="A calendar can have different sizes.">
+				<calendar size="tiny" fluid locale="en-US" placeholder="Date/Time"/>
+				<divider spacer/>
+				<calendar size="medium" fluid locale="en-US" placeholder="Date/Time"/>
+				<divider spacer/>
+				<calendar size="big" fluid locale="en-US" placeholder="Date/Time"/>
+			</example>
+			<example description="The size reaches the picker too.">
+				<calendar inline size="small" type="month" value="2026-09" locale="en-US" aria-label="Small"/>
+			</example>
+			<example>
+				<calendar inline size="large" type="month" value="2026-09" locale="en-US" aria-label="Large"/>
+			</example>
+		</>
+
+		<section label="Inverted" sticky collapsible dividing>
+			<example description="A calendar can have its colors inverted.">
+				<segment inverted>
+					<calendar inverted fluid locale="en-US" placeholder="Date/Time"/>
+				</segment>
+			</example>
+			<example>
+				<segment inverted>
+					<calendar inline inverted type="date" value="2026-09-30" locale="en-US" aria-label="Inverted"/>
+				</segment>
+			</example>
+		</>
+
+		<!-- GAP I63:  no multi-month view (`multiMonth`, `monthOffset`);  example left out. -->
+		<html>
+			<ui-message size="small" class="site-not-ported">Multimonth (several day grids side by side, <code>multiMonth</> / <code>monthOffset</>) can't be drawn yet: a calendar shows one grid (plan issue I63).</>
+		</>
+
+		<section label="Colored" sticky collapsible dividing>
+			<example description="`color` tints the chosen cell, the range and the focus ring.">
+				<calendar inline color="red" type="month" value="2026-09" locale="en-US" aria-label="Red"/>
+			</example>
+			<example>
+				<calendar inline color="teal" type="date" value="2026-09-12" locale="en-US" aria-label="Teal"/>
+			</example>
+		</>
+
+		<section label="Compact" sticky collapsible dividing>
+			<example description="A compact calendar has tighter cells.">
+				<calendar inline padding="compact" type="month" value="2026-09" locale="en-US" aria-label="Compact"/>
+			</example>
+		</>
+
+		<section label="Position" sticky collapsible dividing>
+			<example description="`position` says where the popup opens against the field; it flips when there's no room.">
+				<calendar position="top left" type="date" locale="en-US" placeholder="Opens above"/>
+				<calendar position="bottom right" type="date" locale="en-US" placeholder="Opens bottom right"/>
+			</example>
+		</>
+	</>
+
+	<section label="States">
+		<section label="Disabled" sticky collapsible dividing>
+			<example description="A disabled calendar does not allow user interaction, and isn't submitted.">
+				<calendar disabled locale="en-US" placeholder="Date/Time"/>
+			</example>
+		</>
+
+		<section label="Read-only" sticky collapsible dividing>
+			<example description="A read-only calendar shows its value and can't be changed, but is still submitted.">
+				<calendar readonly type="date" value="2026-09-30" locale="en-US" placeholder="Read-only date"/>
+			</example>
+		</>
+
+		<section label="Required" sticky collapsible dividing>
+			<example description="A required calendar must have a value for its form to submit.">
+				<html>
+					<ui-form>
+						<form>
+							<ui-field required>
+								<label for="calendar-required">Due date</label>
+								<ui-calendar id="calendar-required" required name="due" type="date" locale="en-US"></ui-calendar>
+							</ui-field>
+							<ui-button type="submit">Submit</ui-button>
+						</form>
+					</ui-form>
+				</html>
+			</example>
+		</>
+	</>
+
+	<section label="Examples">
+		<section label="Date calendar" sticky collapsible dividing>
+			<example description="A date calendar disables the time selection:  `type=\"date\"`.">
+				<calendar type="date" locale="en-US" placeholder="Date"/>
+			</example>
+		</>
+
+		<section label="Time calendar" sticky collapsible dividing>
+			<example description="A time calendar disables the date selection:  `type=\"time\"`.">
+				<calendar type="time" locale="en-US" placeholder="Time"/>
+			</example>
+			<example description="The type and the date are HTML attributes:  `value` is an ISO string in the shape of the type, e.g. `2019-12-24`.">
+				<calendar type="date" value="2019-12-24" locale="en-US" placeholder="Date"/>
+			</example>
+		</>
+
+		<!-- GAP I64:  no start view (`startMode: "year"`);  a plain date calendar stands in. -->
+		<section label="Year first calendar" sticky collapsible dividing>
+			<example description="A year first calendar allows you to select a date by starting to select a year. Ours opens on the days; its title button goes up to months and years.">
+				<calendar type="date" locale="en-US" placeholder="Date"/>
+			</example>
+		</>
+
+		<!-- GAP I65:  no custom text format;  the 24-hour clock comes from the locale. -->
+		<section label="24 hour format" sticky collapsible dividing>
+			<example description="You can get rid of the AM/PM notation with a locale that uses a 24-hour clock (`en-GB`, `de-DE` ...).">
+				<calendar type="time" locale="en-GB" placeholder="Time"/>
+			</example>
+		</>
+
+		<section label="Month and year calendar" sticky collapsible dividing>
+			<example description="A month and year calendar disables the date and time selection:  `type=\"month\"`.">
+				<calendar type="month" locale="en-US" placeholder="Date"/>
+			</example>
+		</>
+
+		<section label="Year calendar" sticky collapsible dividing>
+			<example description="A year calendar allows you to select a year only:  `type=\"year\"`.">
+				<calendar type="year" locale="en-US" placeholder="Date"/>
+			</example>
+		</>
+
+		<section label="Min/max date" sticky collapsible dividing>
+			<example description="You can set a minimum and a maximum selection date: `min` and `max`, ISO like the value. Days outside stay focusable, but can't be picked.">
+				<calendar inline type="date" value="2026-09-18" min="2026-09-07" max="2026-09-25" locale="en-US" aria-label="Bounded date"/>
+			</example>
+			<example description="With a time:  `min` and `max` take a date and time.">
+				<calendar fluid min="2018-10-05T08:00" max="2018-10-19T18:00" initial-date="2018-10-05" locale="en-US" placeholder="Date"/>
+			</example>
+		</>
+
+		<section label="Day first calendar" sticky collapsible dividing>
+			<example description="Day first display (parsing too) follows the locale:  `en-GB` reads and writes `30/09/2026`.">
+				<calendar type="date" value="2026-09-30" locale="en-GB" placeholder="Date"/>
+			</example>
+		</>
+
+		<!-- GAP I65:  no custom format tokens or formatter function, and no shortyear century setting. -->
+		<html>
+			<ui-message size="small" class="site-not-ported">Custom format (token strings such as <code>YYYY-MM-DD</>, or a function) and Century Calculation for shortyears can't be set yet: the field uses the locale's own format (plan issue I65).</>
+		</>
+
+		<section label="Select adjacent days" sticky collapsible dividing>
+			<example description="Days of the previous and next month in the day grid can be chosen too, instead of being disabled:  `select-adjacent-days`.">
+				<calendar inline select-adjacent-days type="date" value="2026-09-30" locale="en-US" aria-label="Adjacent days"/>
+			</example>
+		</>
+
+		<section label="Language" sticky collapsible dividing>
+			<example description="It's possible to change the calendar language to fit with your needs: `locale` sets month and day names, formats, the clock and the first day of the week (unless `first-day-of-week` says, 0 = Sunday). The Today / Now and button names follow the page's translations.">
+				<calendar inline type="date" value="2026-09-30" locale="fr" aria-label="Calendrier"/>
+			</example>
+			<example>
+				<calendar type="date" value="2026-09-30" locale="de-DE" placeholder="German"/>
+				<calendar first-day-of-week="1" type="date" locale="en-US" placeholder="Monday first"/>
+			</example>
+		</>
+
+		<section label="Today button" sticky collapsible dividing>
+			<example description="`today` adds a Today (or Now, with a time) button under the grid.">
+				<calendar inline today type="date" value="2026-09-30" locale="en-US" aria-label="With today"/>
+			</example>
+		</>
+
+		<section label="Fluid" sticky collapsible dividing>
+			<example description="The field can take the full width of its container.">
+				<calendar fluid type="date" value="2026-09-30" locale="en-US" placeholder="Fluid date"/>
+			</example>
+		</>
+	</>
+
+	<section label="Coupling">
+		<!-- GAP I66:  a calendar can't be coupled to a button;  example left out. -->
+		<html>
+			<ui-message size="small" class="site-not-ported">Button (a calendar opened from a <code>ui button</>, with no text field) can't be built yet: a calendar always draws its own field (plan issue I66). An inline calendar inside a <code>&lt;ui-popup&gt;</> is the nearest thing.</>
+			<ui-message size="small" class="site-not-ported">Not ported: Context (<code>context</> / <code>popupContext</>) -- the picker is a popover in the top layer, so an overflowing container never clips it.</>
+		</>
+	</>
+
+	<section label="Disabling specific Days">
+		<section label="Days of Week" sticky collapsible dividing>
+			<example description="Disable each Monday, Wednesday and Friday from selection: `disabled-days-of-week`, a JSON array (0 = Sunday), or the `disabledDaysOfWeek` property.">
+				<html>
+					<ui-calendar inline type="date" value="2026-09-29" disabled-days-of-week="\[1, 3, 5]" locale="en-US" aria-label="Not Monday, Wednesday or Friday"></ui-calendar>
+				</html>
+			</example>
+		</>
+
+		<!-- GAP I68:  no reason popup on a disabled date. -->
+		<section label="Single Dates" sticky collapsible dividing>
+			<example description="Disabling specific single dates: `disabled-dates`, a JSON array of ISO dates, or the `disabledDates` property. Fomantic's optional reason popup on hover isn't there yet.">
+				<html>
+					<ui-calendar inline type="date" value="2026-12-21" disabled-dates="\[\"2026-12-24\", \"2026-12-25\", \"2026-12-26\"]" locale="en-US" aria-label="Not over Christmas"></ui-calendar>
+				</html>
+			</example>
+		</>
+
+		<!-- GAP I68:  no disabled hours, whole months, whole years, enable-only list or event dates;  examples left out. -->
+		<message size="small" class="site-not-ported">Hours, Whole Months, Whole Years and Enable only specific Dates can't be set yet: only dates and weekdays can be disabled (plan issue I68).</>
+	</>
+
+	<section label="Highlighting specific Days">
+		<html>
+			<ui-message size="small" class="site-not-ported">Event Dates (days marked with their own style and a tooltip, <code>eventDates</>) can't be set yet (plan issue I68).</>
+		</>
+	</>
+</spell-notebook>

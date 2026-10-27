@@ -1,0 +1,56 @@
+<spell-notebook "list theming">
+	<header level="1">
+		List
+		<header>A list is used to group related content.</>
+	</>
+	<list-tab-bar showing="theming"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#tokens">Tokens</>
+				<ui-item link="#themes">Themes</>
+			</>
+		</>
+	</>
+
+	<!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
+	<section label="Tokens">
+		<markdown>
+			Theme with the public `--ui-list-*` tokens: set one on the element, on any ancestor (a region, `:root`), or on the
+			list's box through `::part(list)`.
+
+			- The items (and a nested list's items, through the `--ui-list-child-*` tokens) read them from the list, so set
+			  them there or above, not on an item.
+			- A variation (`spacing`, `celled` ...) swaps its own values in over yours.
+			- Style an item's box with `ui-item::part(item)`.
+		</>
+		<markdown>
+			```css
+			ui-list {
+			  --ui-list-item-border-color: var(--ui-primary);
+			  --ui-list-item-padding-block: 0.5em;
+			}
+			```
+		</>
+		<message state="info" size="small">
+			<markdown>Never set the `--_ui-list-*` names: they're the sheet's private plumbing.</>
+		</>
+		<markdown>Edit a value below to try it.</>
+		<html>
+			<ui-docs-tokens family="ui-list" playground>
+				<ui-list>
+					<ui-item>Apples</>
+					<ui-item>Pears</>
+					<ui-item>Oranges</>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="Themes">
+		<markdown>
+			Each theme of the set (Spell, Glass, Fruity, Merlot, Paper, Midnight, Crisp, Pop, Matrix) changes a list's colours and type through the
+			shared tokens.
+		</>
+	</>
+</spell-notebook>

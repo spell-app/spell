@@ -1,0 +1,87 @@
+<spell-notebook "content-parts usage">
+	<header level="1">
+		Content parts
+		<header>Headers, content, descriptions, metas and the other generic parts that cards, items, modals and
+              messages share.</>
+	</>
+	<content-parts-tab-bar showing="usage"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#using-it">Using it</>
+				<ui-item link="#owners">Owners</>
+				<ui-item link="#keyboard">Keyboard</>
+				<ui-item link="#accessibility">Accessibility</>
+			</>
+		</>
+	</>
+
+	<!-- USAGE:  how to use it (attributes in practice, events, framework snippets), keyboard, accessibility. -->
+	<section label="Using it">
+		<markdown>
+			One family, thirteen tags: `<ui-header>`, `<ui-content>`, `<ui-description>`, `<ui-meta>`, `<ui-extra>`,
+			`<ui-actions>`, `<ui-title>`, `<ui-summary>`, `<ui-date>`, `<ui-author>`, `<ui-avatar>`, `<ui-detail>` and
+			`<ui-value>`. This page is the header's and the family's overview; every other part has a page of its own
+			(its owners, examples and API): [`<ui-meta>`](/components/ui/ui-meta.html), [`<ui-content>`](/components/ui/ui-content.html) ...
+
+			- Only a STANDALONE `<ui-header>` is a component in its own right (Fomantic's `ui header`), with its own
+			  attributes: `level`, `size`, `sub`, `icon`, `dividing`, `block`, `attached`, `color`, `inverted` ...
+			- `level` renders a real `<h1>` ... `<h6>` (a page header, sized by level); without it the header is a `<div>`
+			  sized by `size`, relative to the text around it (a content header).
+			- Inside a header, a nested `<ui-header sub>` is its sub header and a `<ui-content>` its text column (beside an
+			  icon or image).
+			- The other parts take few or no attributes: they are styled by their OWNER.
+		</>
+		<markdown>
+			```html
+			<ui-header level="2" icon>
+			  <ui-icon name="settings"></ui-icon>
+			  <ui-content>
+			    Account Settings
+			    <ui-header sub>Manage your account settings and set e-mail preferences.</ui-header>
+			  </ui-content>
+			</ui-header>
+			```
+		</>
+	</>
+
+	<section label="Owners">
+		<markdown>
+			A generic part styles itself by its OWNER, not by a per-owner tag: there is no `ui-card-header`. The part finds
+			its nearest owner and sets `:state(in-card)`, `:state(in-modal)` ... on itself, and `UIParts.css` keys on that
+			state, so the same markup reads differently in each owner.
+
+			- The owners: card, item (in `<ui-items>`), feed, comment, statistic, step, message, modal, flyout, popup,
+			  accordion, tabs, list, menu, label and header, with more as families land. Each owner lists what it owns
+			  (`ownsParts`) in its own vocabulary; each part's `in-*` states (API tab) list the owners it knows.
+			- Outside any owner, `<ui-content>`, `<ui-description>` and the rest are unstyled blocks.
+			- Owners hand their parts private layout switches (`--_ui-card-layout: horizontal`), so a part never needs to
+			  know its owner's markup.
+			- Parts have no events.
+		</>
+	</>
+
+	<section label="Keyboard">
+		<markdown>
+			Parts take no keys of their own. A header, title, author or detail with `link` renders a real `<a>`: **Tab**
+			reaches it and **Enter** follows it.
+		</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			- A `<ui-header>` with `level` renders a real `<h1>` ... `<h6>`, so it belongs in the document outline. Without
+			  `level` it is a `<div>` that only looks like a heading: pick a level whenever it labels a section.
+			- A slotted `<ui-icon>` is decorative unless given a `label`; an image inside a header needs its own `alt`.
+			- `sub` and `disabled` are visual: `disabled` does not remove the header from the outline.
+			- A linked header with a `level` is `<a role="heading" aria-level>`, so it is both a link and a heading.
+			- `<ui-date datetime>` renders a `<time datetime>`, so machines read the date too.
+			- `<ui-avatar>`'s `alt` defaults to `""` (decorative): the person's name is nearby.
+			- The other parts are neutral blocks with no role; their meaning comes from the owner and from the semantic
+			  elements you put inside them.
+			- If the header fails to render, it shows its text through a bare `<slot>`; the heading element
+			  (`<h1>` ... `<h6>` for a leveled header) goes, and with it the header's place in the page outline,
+			  its styling and its icon.
+		</>
+	</>
+</spell-notebook>

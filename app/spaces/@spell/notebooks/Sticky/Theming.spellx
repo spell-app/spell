@@ -1,0 +1,65 @@
+<spell-notebook "sticky theming">
+	<header level="1">
+		Sticky
+		<header>Sticky content stays fixed to the viewport while its container is on screen.</>
+	</>
+	<sticky-tab-bar showing="theming"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#tokens">Tokens</>
+				<ui-item link="#themes">Themes</>
+			</>
+		</>
+	</>
+
+	<!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
+	<section label="Tokens">
+		<markdown>
+			Theme with the public `--ui-sticky-*` tokens on the sticky or any ancestor; `::part(sticky)` works too. Style the
+			box through `::part(sticky)`, and a stuck one through `:state(stuck)`.
+		</>
+		<markdown>
+			```css
+			ui-sticky {
+			  --ui-sticky-z-index: 50;
+			}
+			ui-sticky:state(stuck)::part(sticky) {
+			  background: var(--ui-surface);
+			}
+			```
+		</>
+		<message state="info" size="small">
+			<markdown>
+				The offsets come from the `offset` / `bottom-offset` attributes; `--ui-sticky-offset` /
+				`--ui-sticky-bottom-offset` are for class-grammar markup only. Never set the `--_ui-sticky-*` names: the element
+				writes them inline from its attributes.
+			</>
+		</>
+		<markdown>Edit a value below to try it.</>
+		<html>
+			<ui-docs-tokens family="ui-sticky" playground>
+				<div style="height: 14em; overflow: auto; border: 1px solid var(--ui-border-color)" tabindex="0" role="region" aria-label="Sticky rail example">
+					<div style="display: flex; gap: 1em; padding: 0 1em">
+						<div style="flex: 1">
+							<p>Fomantic's sticky kept content in view with scroll listeners and fixed positioning. Here the browser does it: the box is <code>position: sticky</>, and the element only reports when it is stuck.</>
+							<p>Fomantic's sticky kept content in view with scroll listeners and fixed positioning. Here the browser does it: the box is <code>position: sticky</>, and the element only reports when it is stuck.</>
+							<p>Fomantic's sticky kept content in view with scroll listeners and fixed positioning. Here the browser does it: the box is <code>position: sticky</>, and the element only reports when it is stuck.</>
+							<p>Fomantic's sticky kept content in view with scroll listeners and fixed positioning. Here the browser does it: the box is <code>position: sticky</>, and the element only reports when it is stuck.</>
+							<p>Fomantic's sticky kept content in view with scroll listeners and fixed positioning. Here the browser does it: the box is <code>position: sticky</>, and the element only reports when it is stuck.</>
+						</>
+						<div style="width: 8em">
+							<ui-sticky offset="8">
+								<p style="margin: 0; padding: 0.5em; background: var(--ui-surface-strong)">I stick 8px from the top</>
+							</>
+						</>
+					</>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="Themes">
+		<markdown>A sticky has no look of its own, only whatever it holds.</>
+	</>
+</spell-notebook>

@@ -1,0 +1,64 @@
+<spell-notebook "markdown theming">
+	<header level="1">
+		Markdown
+		<header>Markdown renders GitHub-flavoured markdown -- tables, task lists, code blocks -- from the element's
+              own text or a file on this site.</>
+	</>
+	<markdown-tab-bar showing="theming"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#tokens">Tokens</>
+				<ui-item link="#themes">Themes</>
+			</>
+		</>
+	</>
+
+	<!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
+	<section label="Tokens">
+		<markdown>
+			Theme with the public `--ui-markdown-*` tokens: set one on the element, on any ancestor (`:root` for all
+			markdown), or on the rendered `<article>` through `::part(body)`. They inherit into the shadow root, where the
+			sheet reads each through a private alias. Never set the `--_ui-markdown-*` names: they're the sheet's private
+			plumbing.
+
+			Code blocks are `<ui-code>` elements, so the `--ui-code-*` tokens colour them (see Code's Theming tab).
+		</>
+		<markdown>
+			```css
+			/* every block of markdown on the page */
+			:root {
+			  --ui-markdown-link-color: var(--ui-teal);
+			  --ui-markdown-line-height: 1.6;
+			}
+			/* a quieter README */
+			ui-markdown.readme {
+			  --ui-markdown-heading-color: var(--ui-grey);
+			}
+			/* serif headings, no rule under them, a hairline `hr` */
+			ui-markdown.guide {
+			  --ui-markdown-heading-font-family: var(--ui-font-family-heading);
+			  --ui-markdown-heading-weight: 700;
+			  --ui-markdown-heading-rule: none;
+			  --ui-markdown-heading-rule-gap: 0;
+			  --ui-markdown-hr-height: 1px;
+			}
+			```
+		</>
+		<markdown>Edit a value below to try it.</>
+		<html>
+			<ui-docs-tokens family="ui-markdown" playground>
+				<ui-markdown source="/components/ui/examples/readme.md" heading-offset="4"></>
+			</>
+		</>
+	</>
+
+	<section label="Themes">
+		<markdown>
+			Markdown is ours, not Fomantic's:  the theme menu in the header changes the page around it.  Its
+			colours follow the light or dark scheme.  The Spell theme (`spell`) gives it the brand's Design
+			Guide look:  bold serif headings without a rule, a hairline `hr`, bold text and inline code in the
+			strong ink.
+		</>
+	</>
+</spell-notebook>

@@ -1,0 +1,53 @@
+<spell-notebook "container theming">
+	<header level="1">
+		Container
+		<header>A container limits content to a maximum width.</>
+	</>
+	<container-tab-bar showing="theming"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#tokens">Tokens</>
+				<ui-item link="#themes">Themes</>
+			</>
+		</>
+	</>
+
+	<section label="Tokens">
+		<markdown>
+			Theme with the public `--ui-container-*` tokens: set one on the element, on any ancestor (a region, `:root`), or
+			on the inner box through `::part(container)`. They inherit into the shadow root, where the sheet reads each
+			through a private alias, so nothing inside blocks them.
+
+			- The fixed widths are one token per breakpoint: `--ui-container-width-tablet`, `-computer`, `-large-monitor`.
+			- The `scrolling` heights too: `--ui-container-scrolling-height` (phones, 15em), then
+			  `--ui-container-scrolling-height-tablet` (18em), `-computer` (24em), `-widescreen` (30em).
+			- Never set the `--_ui-*` names: they're the sheet's private plumbing.
+		</>
+		<markdown>
+			```css
+			/* every container on the page */
+			:root {
+			  --ui-container-width-large-monitor: 1200px;
+			}
+			/* one article */
+			article {
+			  --ui-container-text-width: 640px;
+			}
+			```
+		</>
+		<markdown>Edit a value below to try it.</>
+		<html>
+			<ui-docs-tokens family="ui-container" playground>
+				<ui-container>
+					<p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa strong. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.</>
+					<p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa strong. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.</>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="Themes">
+		<markdown>A container has no look of its own:  the theme in the header changes the type inside it.</>
+	</>
+</spell-notebook>

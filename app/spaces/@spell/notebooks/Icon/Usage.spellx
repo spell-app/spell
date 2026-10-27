@@ -1,0 +1,72 @@
+<spell-notebook "icon usage">
+	<header level="1">
+		Icon
+		<header>An icon is a glyph used to represent something else.</>
+	</>
+	<icon-tab-bar showing="usage"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#using-it">Using it</>
+				<ui-item link="#icon-packs">Icon packs</>
+				<ui-item link="#keyboard">Keyboard</>
+				<ui-item link="#accessibility">Accessibility</>
+			</>
+		</>
+	</>
+
+	<section label="Using it">
+		<markdown>
+			`name` is the only thing an icon needs: one name per icon, words separated by spaces (Font Awesome's dashed
+			`circle-check` works too). A trailing `outline` names the regular icon; `lucide:bell` asks one pack.
+
+			- Icons also work as the `icon` attribute of other components (`<ui-button icon="download">`), where they share
+			  this name resolution.
+			- Words go in the icon's own order: `arrow right`, not Fomantic's `right arrow` (a name that isn't in any pack
+			  draws nothing).
+			- `<ui-icons>` groups icons: the first is the base glyph, the rest stack on it; `corner` puts a small badge on
+			  a corner.
+			- Icons have no events.
+		</>
+	</>
+
+	<section label="Icon packs">
+		<markdown>
+			A pack is a folder of SVG files plus a `pack.js` index; the page's packs are shared by every component. Font
+			Awesome 7 Free (solid + regular) is the default. Add more for a subtree with `<ui-root icons>`, a
+			comma-separated list of built-in ids or `pack.js` URLs (the last pack wins a name; a nested root adds to its
+			outer root's packs).
+		</>
+		<markdown>
+			```html
+			<ui-root icons="fa7-brands">...</ui-root>                      <!-- every brand logo -->
+			<ui-root icons="fomantic">...</ui-root>                        <!-- Fomantic's names -->
+			<ui-root icons="fa7-free, /icons/lucide/pack.js">...</ui-root> <!-- your own pack, after the default -->
+			<ui-root icons="fomantic" assets="/assets/ui/">...</ui-root>   <!-- built-ins load from /assets/ui/icon-packs/ -->
+			```
+		</>
+		<markdown>
+			A page without a root adds them from JS: `UI.icons.use("fa7-brands")`, with `{ prefix, base, only }` options.
+			Turn any folder of SVGs into a pack with `yarn icons:pack <folder> --id <id>`.
+		</>
+	</>
+
+	<section label="Keyboard">
+		<markdown>
+			An icon takes no focus and handles no keys, `link` or not: the `<a>` or `<button>` around it does.
+		</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			- An icon is decorative by default: `aria-hidden="true"` on the host, so screen readers skip it.
+			- Give a meaningful icon a `label`: the host becomes `role="img"` with that `aria-label`. Same for a
+			  `<ui-icons>` group.
+			- An icon that is the only content of a control (`<ui-button icon="cloud">`) needs the name on the control, not
+			  the icon.
+			- `link` is only the look: wrap the icon in a real `<a>` or `<button>` for interaction.
+			- If the icon fails to render, it shows only children written inside it, through a bare `<slot>`: the
+			  glyph, its box (size, colour, ring), the `role` and the `label` go.
+		</>
+	</>
+</spell-notebook>

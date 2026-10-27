@@ -1,0 +1,49 @@
+<spell-notebook "radio api">
+	<header level="1">
+		Radio
+		<header>A radio button lets a user choose exactly one value of a group.</>
+	</>
+	<radio-tab-bar showing="api"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#attributes">Attributes</>
+				<ui-item link="#events">Events</>
+				<ui-item link="#slots">Slots</>
+				<ui-item link="#parts">Parts</>
+				<ui-item link="#states">States</>
+			</>
+		</>
+	</>
+
+	<!-- API:  `<ui-radio>`'s tables (`docs/__data/components.json5`);  the whole family's are on the checkbox page. -->
+	<section label="Attributes">
+		<html>
+			<ui-docs-api tag="ui-radio" only="attributes"></>
+		</>
+	</>
+
+	<section label="Events">
+		<html>
+			<ui-docs-api tag="ui-radio" only="events"></>
+		</>
+	</>
+
+	<section label="Slots">
+		<html>
+			<ui-docs-api tag="ui-radio" only="slots"></>
+		</>
+	</>
+
+	<section label="Parts">
+		<html>
+			<ui-docs-api tag="ui-radio" only="parts"></>
+		</>
+	</>
+
+	<section label="States">
+		<html>
+			<ui-docs-api tag="ui-radio" only="states"></>
+		</>
+	</>
+</spell-notebook>

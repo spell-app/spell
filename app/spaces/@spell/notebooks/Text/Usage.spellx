@@ -1,0 +1,54 @@
+<spell-notebook "text usage">
+	<header level="1">
+		Text
+		<header>A text is used to style some inline text with a simple color.</>
+	</>
+	<text-tab-bar showing="usage"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#using-it">Using it</>
+				<ui-item link="#keyboard">Keyboard</>
+				<ui-item link="#accessibility">Accessibility</>
+			</>
+		</>
+	</>
+
+	<!-- USAGE:  how to use it (attributes in practice, events, framework snippets), keyboard, accessibility. -->
+	<section label="Using it">
+		<markdown>
+			`<ui-text>` is an inline span that flows with the text around it: wrap the words, then add `color`, `state`,
+			`size`, `inverted` or `disabled`.
+
+			- `color` takes a palette hue (`red` ... `black`) or `primary` / `secondary`; text without one inherits its colour.
+			- `state` (`info`, `success`, `warning`, `error`) is the colour of a status message.
+			- `size` is relative to the surrounding text: `mini` is 0.4em, `medium` 1em, `massive` 8em.
+			- It ignores the colour and size of a component it sits in: red text inside a large blue button is red, at the
+			  button's text size, never scaled twice.
+			- `paragraph` makes it a paragraph (`<p>`) instead:  a block, with the body's line height.
+			- `link` makes it a link;  `<ui-link>` is the same as a tag of its own.  `disabled` drops the link.
+			- Text has no events.
+		</>
+		<markdown>
+			```html
+			<p>Your plan renews on <ui-text color="blue">1 March</ui-text>; payment <ui-text state="error">failed</ui-text>.</p>
+			```
+		</>
+	</>
+
+	<section label="Keyboard">
+		<markdown>Nothing to do: a text is not focusable and takes no keys.</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			- Colour is never the only signal: `state="error"` is only a colour, so the words must say it is an error too.
+			  Use `role="alert"` or a live region when it has to be announced.
+			- Coloured text uses each hue's text shade, tuned to reach 4.5:1 contrast on the page background in both light
+			  and dark schemes. `inverted` switches to the shade meant for dark surfaces.
+			- `disabled` only fades the text; it does not hide it from screen readers.
+			- If the element fails to render, it shows its text through a bare `<slot>`,
+			  without the class words' look.
+		</>
+	</>
+</spell-notebook>

@@ -1,0 +1,46 @@
+<spell-notebook "title usage">
+	<header level="1">
+		Title
+		<header>A title heads a step, an accordion panel or a search result.</>
+	</>
+	<title-tab-bar showing="usage"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#using-it">Using it</>
+				<ui-item link="#owners">Owners</>
+				<ui-item link="#accessibility">Accessibility</>
+			</>
+		</>
+	</>
+
+	<section label="Using it">
+		<markdown>
+			`<ui-title>` heads a step, an accordion panel or a search result.
+
+			- In an accordion each title toggles the `<ui-content>` after it: the accordion makes it a button.
+			- `link` renders it as a real link (`<a>`).
+		</>
+	</>
+
+	<section label="Owners">
+		<markdown>
+			`<ui-title>` finds its nearest owner and sets `:state(in-<owner>)` on itself; `UIParts.css` styles it by that
+			state. Its owners, and what each makes of it:
+
+			- [Step](/components/ui/ui-step.html) (`:state(in-step)`): bold, the step's main line
+			- [Accordion](/components/ui/ui-accordion.html) (`:state(in-accordion)`): the toggle of the panel after it, with a turning chevron
+			- [Search](/components/ui/ui-search.html) (`:state(in-search)`): a search result's main line
+
+			Anywhere else it is an unstyled block. More on how parts find their owners: [Content parts](/components/ui/ui-header.html).
+		</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			- In an accordion the title is a real button with `aria-expanded`, controlling its panel: **Enter** or **Space**
+			  toggles it.
+			- With `link` it is a real `<a>`: **Tab** reaches it, **Enter** follows it.
+		</>
+	</>
+</spell-notebook>

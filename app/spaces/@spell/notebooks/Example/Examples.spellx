@@ -1,0 +1,130 @@
+<spell-notebook "example examples">
+	<header level="1">
+		Example
+		<header>An example shows its own markup live, under a heading and description, with the same markup as code a button shows and hides.</>
+	</>
+	<example-tab-bar showing="examples"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#types">Types</>
+				<ui-item link="#content">Content</>
+				<ui-item link="#states">States</>
+				<ui-item link="#variations">Variations</>
+			</>
+		</>
+	</>
+
+	<!--
+		EXAMPLES:  Fomantic's page, section by section, in its order (Types, Content, States, Variations,
+		Groups ...).  Rules, the class-grammar mappings, gaps:  epics/spell-ui-pages/PAGES.md.
+		- A section:  `<ui-section id="examples-types" label="Types" sticky collapsible dividing>` around
+		  its examples;  ids spell out the nesting (`<tab>-<section>-<example>`, lowercase kebab of the headers).
+		- An example:  its own nested section (`label` = the example's name) around
+		  `<ui-example description="...">` and the live markup;  the markup IS the code shown.  A richer
+		  description:  `<p slot="description">` (+ `<ui-message slot="description">`).  Fomantic's header-less
+		  `.another.example`:  a second `<ui-example>` in the same section.
+		- Or write it flat (`<ui-header level="2">`, `<ui-example heading>`) and run `yarn site:sections`:
+		  it nests it and writes the ids (and fixes them after a title changes).
+		- A gap:  an HTML comment `GAP I<n>:  ...` BEFORE the example's section (a comment inside the example
+		  shows in its code).
+	-->
+	<section label="Types">
+		<section label="Example" sticky collapsible dividing>
+			<example description="An example shows its children live, under its `heading` and `description`;  the `code` button shows the same markup as code, and hides it.">
+				<html>
+					<ui-example heading="Emphasis" description="A button can show different levels of emphasis.">
+						<ui-buttons>
+							<ui-button color="primary">Save</ui-button>
+							<ui-button>Discard</ui-button>
+						</ui-buttons>
+					</ui-example>
+				</html>
+			</example>
+		</>
+
+		<section label="Template" sticky collapsible dividing>
+			<example description="A `<template>` child:  stamped out live, and its markup shown EXACTLY as written, comments and spacing kept.">
+				<html>
+					<ui-example heading="Labels" description="The code shows the template's markup, as it was typed.">
+						<template>
+							<ui-label color="teal">New</ui-label>
+							<ui-label>Draft</ui-label>
+						</template>
+					</ui-example>
+				</html>
+			</example>
+		</>
+	</>
+
+	<section label="Content">
+		<section label="Description" sticky collapsible dividing>
+			<example description="`slot=\"description\"`:  a richer description than the attribute's one sentence, with links and several paragraphs.">
+				<html>
+					<ui-example heading="Messages">
+						<p slot="description">A message can hold a <a href="/components/ui/ui-message.html">heading</a> and any content.</p>
+						<ui-message state="info" heading="Saved">Your changes are in.</ui-message>
+					</ui-example>
+				</html>
+			</example>
+		</>
+
+		<section label="Source" sticky collapsible dividing>
+			<example description="`slot=\"source\"`:  what the code pane shows in place of the markup, e.g. an editor of the example's code.">
+				<html>
+					<ui-example heading="Hello" code>
+						<ui-header level="4">Hello, world</ui-header>
+						<ui-code slot="source" language="js" content="console.log(\"Hello, world\")"></ui-code>
+					</ui-example>
+				</html>
+			</example>
+		</>
+	</>
+
+	<section label="States">
+		<section label="Code open" sticky collapsible dividing>
+			<example description="`code`:  the code pane is open from the start;  the button closes it, and `code` follows.">
+				<html>
+					<ui-example heading="Toggle" code>
+						<ui-checkbox appearance="toggle">Remember me</ui-checkbox>
+					</ui-example>
+				</html>
+			</example>
+		</>
+	</>
+
+	<section label="Variations">
+		<section label="Bare" sticky collapsible dividing>
+			<example description="`bare`:  no frame around the live example and its code, even while the code is open.">
+				<html>
+					<ui-example heading="Bare" bare>
+						<ui-button icon="heart" aria-label="Like"></ui-button>
+					</ui-example>
+				</html>
+			</example>
+		</>
+
+		<section label="Variation" sticky collapsible dividing>
+			<example description="`variation`:  a smaller heading and less room around it, for a run of small examples under one heading.">
+				<html>
+					<ui-example heading="Small" variation>
+						<ui-button size="small">Small</ui-button>
+					</ui-example>
+					<ui-example heading="Large" variation>
+						<ui-button size="large">Large</ui-button>
+					</ui-example>
+				</html>
+			</example>
+		</>
+
+		<section label="Level" sticky collapsible dividing>
+			<example description="`level`:  the heading's level, `1` ... `6`;  `4` by default, under the page's level 2 sections.">
+				<html>
+					<ui-example heading="A level 3 example" level="3">
+						<ui-label>Three</ui-label>
+					</ui-example>
+				</html>
+			</example>
+		</>
+	</>
+</spell-notebook>

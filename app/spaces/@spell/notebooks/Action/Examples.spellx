@@ -1,0 +1,64 @@
+<spell-notebook "action examples">
+	<header level="1">
+		Action
+		<header>An action is a menu item or toolbar button drawn from something a program can do:  its title, icon and shortcut keys, greyed while it can't be done.</>
+	</>
+	<action-tab-bar showing="examples"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#types">Types</>
+				<ui-item link="#states">States</>
+			</>
+		</>
+	</>
+
+	<!--
+		EXAMPLES:  Fomantic's page, section by section, in its order (Types, Content, States, Variations,
+		Groups ...).  Rules, the class-grammar mappings, gaps:  epics/spell-ui-pages/PAGES.md.
+		- A section:  `<ui-section id="examples-types" label="Types" sticky collapsible dividing>` around
+		  its examples;  ids spell out the nesting (`<tab>-<section>-<example>`, lowercase kebab of the headers).
+		- An example:  its own nested section (`label` = the example's name) around
+		  `<ui-example description="...">` and the live markup;  the markup IS the code shown.  A richer
+		  description:  `<p slot="description">` (+ `<ui-message slot="description">`).  Fomantic's header-less
+		  `.another.example`:  a second `<ui-example>` in the same section.
+		- Or write it flat (`<ui-header level="2">`, `<ui-example heading>`) and run `yarn site:sections`:
+		  it nests it and writes the ids (and fixes them after a title changes).
+		- A gap:  an HTML comment `GAP I<n>:  ...` BEFORE the example's section (a comment inside the example
+		  shows in its code).
+	-->
+	<section label="Types">
+		<section label="Menu" sticky collapsible dividing>
+			<example description="A menu of actions:  each its title, then its shortcut's keys.  `mod` is ⌘ on a Mac, Ctrl elsewhere.">
+				<menu direction="vertical" aria-label="Game">
+					<action icon="play" shortcut="mod+N">New game</action>
+					<action kind="divider"/>
+					<action icon="undo" shortcut="mod+Z">Undo Turn Card</action>
+					<action icon="redo" shortcut="mod+shift+Z" disabled>Redo</action>
+				</menu>
+			</example>
+		</>
+
+		<section label="Toolbar" sticky collapsible dividing>
+			<example description="The same actions as a toolbar's buttons.">
+				<toolbar aria-label="Game">
+					<action icon="play" shortcut="mod+N">New game</action>
+					<action icon="undo" shortcut="mod+Z">Undo</action>
+					<action icon="redo" shortcut="mod+shift+Z" disabled>Redo</action>
+				</toolbar>
+			</example>
+		</>
+	</>
+
+	<section label="States">
+		<section label="Disabled and selected" sticky collapsible dividing>
+			<example description="Greyed while it can't be done (`disabled`, or its action not enabled);  ticked while it's on (`selected`).">
+				<menu direction="vertical" aria-label="View">
+					<action shortcut="mod+1" selected>Show the grid</action>
+					<action shortcut="mod+2">Show the rulers</action>
+					<action shortcut="mod+3" disabled>Show the guides</action>
+				</menu>
+			</example>
+		</>
+	</>
+</spell-notebook>

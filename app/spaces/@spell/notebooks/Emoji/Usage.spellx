@@ -1,0 +1,77 @@
+<spell-notebook "emoji usage">
+	<header level="1">
+		Emoji
+		<header>An emoji is a glyph used to represent something else.</>
+	</>
+	<emoji-tab-bar showing="usage"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#using-it">Using it</>
+				<ui-item link="#name-sets-and-loading">Name sets and loading</>
+				<ui-item link="#keyboard">Keyboard</>
+				<ui-item link="#accessibility">Accessibility</>
+			</>
+		</>
+	</>
+
+	<section label="Using it">
+		<markdown>
+			An emoji is the real Unicode character drawn by the reader's own emoji font, never an image: there is no image
+			download and no per-emoji CSS, and it looks like the other emoji on their system.
+
+			- `name` takes an emoji's CLDR shortcode, Unicode's own name for it (`thumbs_up`, `grinning_face_with_smiling_eyes`,
+			  `flag_united_states`, `rocket`).
+			- A name is case-blind, may keep its `:colons:`, and its words may be joined any way: `thumbs_up`, `thumbs up`,
+			  `thumbs-up`, `thumbsUp` (handy from JS), `thumbsup`. An unknown name draws nothing.
+			- These are the page's default NAME SET, `cldr`; Fomantic's names are another, and a page uses one set at a time.
+			- No events: `link` is only a look.
+		</>
+	</>
+
+	<section label="Name sets and loading">
+		<markdown>
+			The names load in small pieces, one per first letter, the first time a name starting with that letter is used;
+			later emoji from the same piece draw at once. `EmojiData`, exported with the element, picks the name set,
+			preloads a name or adds your own.
+
+			- `<ui-root emoji="fomantic">` switches its subtree to Fomantic's names (the shortcodes Discord and JoyPixels
+			  use); emoji inside redraw when the root's `emoji` changes.
+			- A switch from JS affects LATER lookups only: an emoji already drawn keeps its glyph, so switch before the first
+			  emoji draws.
+		</>
+		<markdown>
+			```js
+			import { EmojiData } from "spell/ui/ui-emoji"
+
+			EmojiData.use("fomantic") // later lookups use Fomantic's names;  "cldr" is the default
+			EmojiData.register("approve", "👍") // <ui-emoji name="approve"> now draws 👍, in either set
+			await EmojiData.get("tada") // loads the "t" names;  resolves to "🎉"
+			```
+		</>
+	</>
+
+	<section label="Keyboard">
+		<markdown>
+			An emoji takes no focus and handles no keys, `link` or not: the `<button>` or `<a>` around it does.
+		</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			- By default the emoji is plain text, so assistive technology reads the character's own Unicode name in the
+			  reader's language ("grinning face with smiling eyes").
+			- `label="..."` makes it a `role="img"` named by the label: use it when the emoji stands for something else, as
+			  "Approved" does in the example.
+			- An empty `label` marks it decorative (`aria-hidden`), for an emoji that only repeats nearby text. In a
+			  framework, write `label=""`: some (MDX, JSX) turn a bare attribute into `label="true"`, which would become its
+			  name.
+			- An unknown name renders an empty box with no role, so nothing is announced.
+			- `link` is only a look: the emoji takes no focus and does nothing on click. Put it inside a `<button>` or `<a>`
+			  and give that control a name.
+			- `loading` spins the glyph, and stands still under reduced motion; `disabled` only dims it.
+			- If the emoji fails to render, the character and its name go: only children written inside the
+			  element still show, through a bare `<slot>`.
+		</>
+	</>
+</spell-notebook>

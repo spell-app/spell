@@ -1,0 +1,49 @@
+<spell-notebook "table-of-contents api">
+	<header level="1">
+		Table of contents
+		<header>A table of contents lists the page's sections and examples as links, opens the one in view and follows the scroll;  each section folds, and one button opens or folds them all.</>
+	</>
+	<table-of-contents-tab-bar showing="api"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#attributes">Attributes</>
+				<ui-item link="#events">Events</>
+				<ui-item link="#parts">Parts</>
+				<ui-item link="#states">States</>
+				<ui-item link="#texts">Texts</>
+			</>
+		</>
+	</>
+
+	<!-- API:  generated from the vocabularies (`site/_data/components.json5`);  nothing to write. -->
+	<section label="Attributes">
+		<html>
+			<ui-docs-api family="ui-toc" only="attributes"></>
+		</>
+	</>
+
+	<section label="Events">
+		<html>
+			<ui-docs-api family="ui-toc" only="events"></>
+		</>
+	</>
+
+	<section label="Parts">
+		<html>
+			<ui-docs-api family="ui-toc" only="parts"></>
+		</>
+	</>
+
+	<section label="States">
+		<html>
+			<ui-docs-api family="ui-toc" only="states"></>
+		</>
+	</>
+
+	<section label="Texts">
+		<html>
+			<ui-docs-api family="ui-toc" only="texts"></>
+		</>
+	</>
+</spell-notebook>

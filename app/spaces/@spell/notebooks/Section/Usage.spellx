@@ -1,0 +1,261 @@
+<spell-notebook "section usage">
+	<header level="1">
+		Section
+		<header>A section is a titled block of content that can close and keep its title in view.</>
+	</>
+	<section-tab-bar showing="usage"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#using-it">Using it</>
+				<ui-item link="#heading-levels">Heading levels</>
+				<ui-item link="#opening-and-closing">Opening and closing</>
+				<ui-item link="#content-from-a-file">Content from a file</>
+				<ui-item link="#sticky-titles">Sticky titles</>
+				<ui-item link="#slots">Slots</>
+				<ui-item link="#events">Events</>
+				<ui-item link="#keyboard">Keyboard</>
+				<ui-item link="#accessibility">Accessibility</>
+				<ui-item link="#framework-usage">Framework usage</>
+			</>
+		</>
+	</>
+
+	<!-- USAGE:  the old Astro page's Behaviour, Accessibility and Framework usage, restyled. -->
+	<section label="Using it">
+		<markdown>
+			Reach for a section when content needs a TITLE that means something to the page outline, and maybe closing or a
+			title that stays in view. Its neighbours:
+
+			| You want                                                     | Use                            |
+			| ------------------------------------------------------------ | ------------------------------ |
+			| a box or group of content, no title                          | [segment](/components/ui/ui-segment.html)     |
+			| a heading on its own, styled                                 | [header](/components/ui/ui-header.html)       |
+			| several panels where opening one may close the others        | [accordion](/components/ui/ui-accordion.html) |
+			| a titled block that can close, stick, or both, in the outline | `<ui-section>`                 |
+			| a run of titled blocks that all close, packed tight           | `<ui-sections collapsing>`     |
+			| content that sticks, without a title of its own              | [sticky](/components/ui/ui-sticky.html)       |
+
+			An accordion's titles are buttons, not headings, and its panels are one group; each section closes on its own and
+			its title IS a heading. A section borrows Fomantic's looks for its box: `dividing` and `block` from the header,
+			the `bordered` and `raised` looks, `attach` and `padding` from the segment, the `styled` look from the accordion.
+		</>
+	</>
+
+	<section label="Heading levels">
+		<markdown>
+			The title renders as `<h1>` ... `<h6>`.
+
+			- Without `level`, a section takes its enclosing section's level + 1, and a top-level one is an `h2`,
+			  under the page's `h1`. So nesting sections builds a correct outline by itself.
+			- Set `level` where the section sits under a heading that isn't a section (as the examples on this page
+			  do), or to restart the count.
+			- Levels stop at `h6`.
+		</>
+	</>
+
+	<section label="Opening and closing">
+		<markdown>
+			`collapsible` makes the title close and open the content.
+
+			- `open` is CONTROLLED, as the accordion's is:  writing it closes or opens, and fires nothing.
+			- When the USER activates the title, the cancelable `ui-opening` / `ui-closing` go first,
+			  with `{ open, section, originalEvent }`. `preventDefault()` keeps things as they were.
+			- It opens and closes with a height transition where the browser can animate to `auto` (`interpolate-size`);
+			  with reduced motion it snaps.
+
+			A closed section's content is `hidden="until-found"`:  it stays in the page.
+
+			- So find-in-page (Ctrl / Cmd + F) finds text inside it, and opens the section to show the match.
+			- That opening fires `ui-opening` with `cancelable: false`:
+			  the browser has already revealed the match, so it can't be vetoed.
+		</>
+		<markdown>
+			```js
+			const section = document.querySelector("ui-section[collapsible]")
+			section.addEventListener("ui-closing", (event) => {
+			  if (hasUnsavedChanges) event.preventDefault() // stays open
+			})
+			section.open = true // open from code:  no event
+			```
+		</>
+	</>
+
+	<section label="Content from a file">
+		<markdown>
+			`source` names an HTML file whose `<body>` becomes the content.
+			So a long page can ship as titles alone, and load each body when it's read.
+
+			- It's fetched the FIRST time the section opens:
+			  by a click, by the page setting `open` (a `#id` link), or at once when it starts open.
+			- The body goes in the section's LIGHT DOM, so the page's CSS styles it.
+			  Whatever was there (except slotted title pieces) is a placeholder it replaces.
+			- `select` takes only the first match of a CSS selector.
+			- Same origin only, fetched and cached as [`<ui-include>`](/components/ui/ui-include.html) fetches:
+			  scripts in the file don't run, and relative URLs are rewritten.
+
+			While it loads, and after:
+
+			- The content stays closed while the body is on its way, so the section opens once, onto the real content.
+			- A slow file (over 300 ms) shows the placeholder under the `loading` look instead.
+			- `ui-loaded` fires once the body is in (`:state(loaded)`).
+			- A failure fires the cancelable `ui-error`, and shows an error line (`:state(error)`).
+			  Opening again tries again.
+			- `load()` fetches it now, closed or not;  `reload()` fetches it again past the cache, and replaces it.
+		</>
+		<example description="Open Chapter 2:  its content comes from `examples/chapter.html`.">
+			<html>
+				<ui-section label="Chapter 1" level="4" collapsible>
+					<p>Written in the page.</p>
+				</ui-section>
+				<ui-section label="Chapter 2" level="4" source="/components/ui/examples/chapter.html" collapsible open="false">
+					<p>Loading chapter 2…</p>
+				</ui-section>
+			</html>
+		</example>
+		<markdown>
+			```js
+			const section = document.querySelector("ui-section[source]")
+			section.addEventListener("ui-loaded", (event) => console.log("loaded", event.detail.source))
+			await section.load() // fetch and insert now, still closed
+			await section.reload() // the file changed:  fetch it again and replace the content
+			```
+		</>
+	</>
+
+	<section label="Sticky titles">
+		<markdown>
+			With `sticky`, the title bar sticks to the top of the scroll container while any of its section is on screen;
+			the end of the section pushes it out.
+
+			- A sticky section INSIDE another sticks just below its parent's title, so nested titles stack like breadcrumbs.
+			- `offset` (pixels) moves a TOP-LEVEL section's stuck title down, e.g. below a fixed page header.
+			  Nested sections work theirs out.
+			- Only the title bar sticks:  the hint scrolls away.
+			- `:state(stuck)` is set while it is stuck.
+
+			Stuck titles cover what scrolls under them, so a stuck title reserves its room on the scroll container
+			(`scroll-padding-top`), as [`<ui-sticky>`](/components/ui/ui-sticky.html) does.
+			So Page Down, Space, focus and `scrollIntoView()` keep content out from under the stack,
+			instead of hiding the next line behind it.
+		</>
+		<markdown>
+			```css
+			ui-section:state(stuck)::part(title) {
+			  box-shadow: 0 2px 4px oklch(0 0 0 / 0.15);
+			}
+			```
+		</>
+	</>
+
+	<section label="Slots">
+		<markdown>
+			The default slot is the content:  anything, nested sections included.
+
+			- `label`, `hint`, `description`, `icon` and `badge` each have an attribute for plain text,
+			  and a slot for rich markup;  the slot wins.
+			- `actions` has no attribute:  its controls sit at the right of the title bar, OUTSIDE the open / close button.
+			  So clicking one never closes the section, and they stay visible while it's closed.
+		</>
+	</>
+
+	<section label="Events">
+		<markdown>
+			- `ui-opening` (cancelable) -- the user is opening the section: `{ open: true, section, originalEvent }`. Not
+			  cancelable when find-in-page opens it.
+			- `ui-closing` (cancelable) -- the user is closing the section: `{ open: false, section, originalEvent }`.
+			- Writing `open` fires neither.
+			- `ui-opened` / `ui-closed` -- it has opened or closed, by any route: the user, `open`, find-in-page.
+			- `ui-loading` / `ui-loaded` -- a `source` body is on its way, then in place.
+
+			The old names are gone:  `ui-opening` / `ui-closing` / `ui-loaded` are `ui-opening` / `ui-closing` /
+			`ui-loaded`, and the attributes and slots `header`, `subhead` and `info` are `label`, `hint` and
+			`description`.
+		</>
+	</>
+
+	<section label="Keyboard">
+		<html>
+			<ui-table celled padding="compact" unstackable>
+				<table>
+					<thead>
+						<tr>
+							<th>Key</>
+							<th>Action</>
+						</>
+					</>
+					<tbody>
+						<tr>
+							<td>Tab / Shift + Tab</>
+							<td>Move to the open / close button, then the actions, then the content</>
+						</>
+						<tr>
+							<td>Enter / Space</>
+							<td>Close or open the focused section</>
+						</>
+					</>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			- The title is a real heading, so sections appear in the page outline and screen readers can jump between them.
+			- With `collapsible`, the heading CONTAINS the open / close button (`<hN><button aria-expanded>`), as the APG accordion
+			  pattern does: the heading stays in the outline, and the button says whether the content is shown. The chevron
+			  is decoration; the button's tooltip says "Close this section" or "Open this section" (translatable).
+			- The actions are outside the button, so each one is its own tab stop with its own name.
+			- Find-in-page reaches closed content and opens it.
+			- `loading` sets `aria-busy` and announces "Loading…"; `disabled` makes the section inert.
+			- Color is never the only signal: say in the title what a colored section means.
+		</>
+	</>
+
+	<section label="Framework usage">
+		<markdown>Bind `open` and listen for `ui-opened` / `ui-closed` to follow it, by any route.</>
+		<header level="4" id="framework-react">React 19</>
+		<markdown>
+			```jsx
+			<ui-section
+			  label="Details"
+			  collapsible
+			  open={isOpen}
+			  onui-opened={() => setOpen(true)}
+			  onui-closed={() => setOpen(false)}
+			>
+			  ...
+			</ui-section>
+			```
+		</>
+		<header level="4" id="framework-vue">Vue 3.5</>
+		<markdown>
+			```html
+			<!-- compilerOptions.isCustomElement = (tag) => tag.startsWith("ui-") -->
+			<ui-section
+			  label="Details"
+			  collapsible
+			  :open="isOpen"
+			  @ui-opened="isOpen = true"
+			  @ui-closed="isOpen = false"
+			>
+			  ...
+			</ui-section>
+			```
+		</>
+		<header level="4" id="framework-solid">Solid 2</>
+		<markdown>
+			```jsx
+			// events and rich data are plain props:  `on-<event>={...}`, `options={...}`
+			<ui-section
+			  label="Details"
+			  collapsible
+			  open={isOpen()}
+			  on-ui-closed={() => setOpen(false)}
+			>
+			  ...
+			</ui-section>
+			```
+		</>
+	</>
+</spell-notebook>

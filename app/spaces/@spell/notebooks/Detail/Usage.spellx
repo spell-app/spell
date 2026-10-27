@@ -1,0 +1,44 @@
+<spell-notebook "detail usage">
+	<header level="1">
+		Detail
+		<header>A detail is a label's dimmer second value, such as a count.</>
+	</>
+	<detail-tab-bar showing="usage"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#using-it">Using it</>
+				<ui-item link="#owners">Owners</>
+				<ui-item link="#accessibility">Accessibility</>
+			</>
+		</>
+	</>
+
+	<section label="Using it">
+		<markdown>
+			`<ui-detail>` is a label's dimmer second value, such as a count: Fomantic's `.detail` inside a `ui label`.
+
+			- Slot it into a `<ui-label>`, after the label's text.
+			- `link` renders it as a link of its own (`<a class="detail">`), apart from the label.
+		</>
+	</>
+
+	<section label="Owners">
+		<markdown>
+			`<ui-detail>` finds its nearest owner and sets `:state(in-<owner>)` on itself; `UIParts.css` styles it by that
+			state. Its owners, and what each makes of it:
+
+			- [Label](/components/ui/ui-label.html) (`:state(in-label)`): dimmer and bold, after the label's text
+
+			Anywhere else it is an unstyled block. More on how parts find their owners: [Content parts](/components/ui/ui-header.html).
+		</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			- Read together with the label's text ("Dogs 214"): make the pair make sense out loud, or give the label an
+			  `aria-label`.
+			- With `link` it is a real `<a>`: **Tab** reaches it, **Enter** follows it.
+		</>
+	</>
+</spell-notebook>

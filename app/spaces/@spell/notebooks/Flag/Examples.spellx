@@ -1,0 +1,2219 @@
+<spell-notebook "flag examples">
+	<header level="1">
+		Flag
+		<header>A flag is used to represent a political state.</>
+	</>
+	<flag-tab-bar showing="examples"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#definition">Definition</>
+				<ui-item link="#types">Types</>
+				<ui-item link="#variations">Variations</>
+			</>
+		</>
+	</>
+
+	<!--
+		EXAMPLES:  Fomantic's flag page, in its order (Definition, Types:  the flag list, Size, Autosizing), plus our own
+		extras (Names, Other flags).  The glyph is the reader's platform flag EMOJI, so the look depends on the OS:
+		Windows' Chrome / Edge show two letters unless the page loads a flag font (Theming tab, "A flag font").  The flag list is generated from
+		`FLAG_ALIASES` (`UIFlag.types.ts`) / `UIT.SpecialFlags` with English region names.
+	-->
+	<section label="Definition">
+		<section label="Flag" sticky collapsible dividing>
+			<example description="A flag can use the two digit country code, the full name, or a common alias.">
+				<flag country="ae"/>
+				<flag country="france"/>
+				<flag country="myanmar"/>
+			</example>
+		</>
+
+		<section label="Names" sticky collapsible dividing>
+			<example description="Case, underscores and extra spaces don't matter:  `America`, `United_Kingdom`, `uk` all work.">
+				<flag country="fr"/>
+				<flag country="US"/>
+				<flag country="united states"/>
+				<flag country="America"/>
+				<flag country="United_Kingdom"/>
+				<flag country="uk"/>
+				<flag country="south africa"/>
+			</example>
+		</>
+
+		<section label="Other flags" sticky collapsible dividing>
+			<example description="Flags that aren't a country:  `rainbow` (`pride`, `lgbt`), `transgender`, `pirate`, and the `england`, `scotland` and `wales` subdivision flags.">
+				<flag country="pride"/>
+				<flag country="transgender"/>
+				<flag country="pirate"/>
+				<flag country="england"/>
+				<flag country="scotland"/>
+				<flag country="wales"/>
+			</example>
+		</>
+	</>
+
+	<section label="Types">
+		<message state="info" size="small">Flags are the Unicode flag emoji, as in Fomantic 2.9's default theme: no images, by design. Windows' Chrome and Edge have no flag emoji and show the two letters instead; a page that wants flags there loads a flag font (Theming tab, "A flag font").</>
+		<html>
+			<ui-message size="small" class="site-not-ported">Not ported: Fomantic's <code>famfamfam</> sprite theme -- flags are emoji only.</>
+			<ui-message size="small" class="site-not-ported">Not ported: Fomantic's <code>@flags</> variable to trim the generated CSS -- there is no per-flag CSS to trim.</>
+		</>
+
+		<section label="Flag list" sticky collapsible dividing>
+			<html>
+				<ui-table selectable sortable client-sort padding="compact" celled appearance="striped" definition>
+					<table>
+						<thead>
+							<tr>
+								<th data-sortable="false">Flag</>
+								<th>Name</>
+								<th>ISO 3166-2 Code</>
+								<th>Additional Aliases</>
+							</>
+						</>
+						<tbody>
+							<tr>
+								<td>
+									<ui-flag country="af"></>
+								</>
+								<td>Afghanistan</>
+								<td>af</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="ax"></>
+								</>
+								<td>Åland Islands</>
+								<td>ax</>
+								<td>aland islands</>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="al"></>
+								</>
+								<td>Albania</>
+								<td>al</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="dz"></>
+								</>
+								<td>Algeria</>
+								<td>dz</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="as"></>
+								</>
+								<td>American Samoa</>
+								<td>as</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="ad"></>
+								</>
+								<td>Andorra</>
+								<td>ad</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="ao"></>
+								</>
+								<td>Angola</>
+								<td>ao</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="ai"></>
+								</>
+								<td>Anguilla</>
+								<td>ai</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="aq"></>
+								</>
+								<td>Antarctica</>
+								<td>aq</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="ag"></>
+								</>
+								<td>Antigua &amp; Barbuda</>
+								<td>ag</>
+								<td>antigua and barbuda, antigua</>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="ar"></>
+								</>
+								<td>Argentina</>
+								<td>ar</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="am"></>
+								</>
+								<td>Armenia</>
+								<td>am</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="aw"></>
+								</>
+								<td>Aruba</>
+								<td>aw</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="ac"></>
+								</>
+								<td>Ascension Island</>
+								<td>ac</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="au"></>
+								</>
+								<td>Australia</>
+								<td>au</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="at"></>
+								</>
+								<td>Austria</>
+								<td>at</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="az"></>
+								</>
+								<td>Azerbaijan</>
+								<td>az</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="bs"></>
+								</>
+								<td>Bahamas</>
+								<td>bs</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="bh"></>
+								</>
+								<td>Bahrain</>
+								<td>bh</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="bd"></>
+								</>
+								<td>Bangladesh</>
+								<td>bd</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="bb"></>
+								</>
+								<td>Barbados</>
+								<td>bb</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="by"></>
+								</>
+								<td>Belarus</>
+								<td>by</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="be"></>
+								</>
+								<td>Belgium</>
+								<td>be</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="bz"></>
+								</>
+								<td>Belize</>
+								<td>bz</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="bj"></>
+								</>
+								<td>Benin</>
+								<td>bj</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="bm"></>
+								</>
+								<td>Bermuda</>
+								<td>bm</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="bt"></>
+								</>
+								<td>Bhutan</>
+								<td>bt</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="bo"></>
+								</>
+								<td>Bolivia</>
+								<td>bo</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="ba"></>
+								</>
+								<td>Bosnia &amp; Herzegovina</>
+								<td>ba</>
+								<td>bosnia and herzegovina</>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="bw"></>
+								</>
+								<td>Botswana</>
+								<td>bw</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="bv"></>
+								</>
+								<td>Bouvet Island</>
+								<td>bv</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="br"></>
+								</>
+								<td>Brazil</>
+								<td>br</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="io"></>
+								</>
+								<td>British Indian Ocean Territory</>
+								<td>io</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="vg"></>
+								</>
+								<td>British Virgin Islands</>
+								<td>vg</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="bn"></>
+								</>
+								<td>Brunei</>
+								<td>bn</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="bg"></>
+								</>
+								<td>Bulgaria</>
+								<td>bg</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="bf"></>
+								</>
+								<td>Burkina Faso</>
+								<td>bf</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="bi"></>
+								</>
+								<td>Burundi</>
+								<td>bi</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="kh"></>
+								</>
+								<td>Cambodia</>
+								<td>kh</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="cm"></>
+								</>
+								<td>Cameroon</>
+								<td>cm</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="ca"></>
+								</>
+								<td>Canada</>
+								<td>ca</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="ic"></>
+								</>
+								<td>Canary Islands</>
+								<td>ic</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="cv"></>
+								</>
+								<td>Cape Verde</>
+								<td>cv</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="bq"></>
+								</>
+								<td>Caribbean Netherlands</>
+								<td>bq</>
+								<td>an, netherlands antilles</>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="ky"></>
+								</>
+								<td>Cayman Islands</>
+								<td>ky</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="cf"></>
+								</>
+								<td>Central African Republic</>
+								<td>cf</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="ea"></>
+								</>
+								<td>Ceuta &amp; Melilla</>
+								<td>ea</>
+								<td>ceuta and melilla</>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="td"></>
+								</>
+								<td>Chad</>
+								<td>td</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="cl"></>
+								</>
+								<td>Chile</>
+								<td>cl</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="cn"></>
+								</>
+								<td>China</>
+								<td>cn</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="cx"></>
+								</>
+								<td>Christmas Island</>
+								<td>cx</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="cp"></>
+								</>
+								<td>Clipperton Island</>
+								<td>cp</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="cc"></>
+								</>
+								<td>Cocos (Keeling) Islands</>
+								<td>cc</>
+								<td>cocos islands</>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="co"></>
+								</>
+								<td>Colombia</>
+								<td>co</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="km"></>
+								</>
+								<td>Comoros</>
+								<td>km</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="cg"></>
+								</>
+								<td>Congo - Brazzaville</>
+								<td>cg</>
+								<td>congo brazzaville</>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="cd"></>
+								</>
+								<td>Congo - Kinshasa</>
+								<td>cd</>
+								<td>congo kinshasa, congo</>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="ck"></>
+								</>
+								<td>Cook Islands</>
+								<td>ck</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="cr"></>
+								</>
+								<td>Costa Rica</>
+								<td>cr</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="ci"></>
+								</>
+								<td>Côte d’Ivoire</>
+								<td>ci</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="hr"></>
+								</>
+								<td>Croatia</>
+								<td>hr</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="cu"></>
+								</>
+								<td>Cuba</>
+								<td>cu</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="cw"></>
+								</>
+								<td>Curaçao</>
+								<td>cw</>
+								<td>curacao</>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="cy"></>
+								</>
+								<td>Cyprus</>
+								<td>cy</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="cz"></>
+								</>
+								<td>Czechia</>
+								<td>cz</>
+								<td>czech republic</>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="dk"></>
+								</>
+								<td>Denmark</>
+								<td>dk</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="dg"></>
+								</>
+								<td>Diego Garcia</>
+								<td>dg</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="dj"></>
+								</>
+								<td>Djibouti</>
+								<td>dj</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="dm"></>
+								</>
+								<td>Dominica</>
+								<td>dm</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="do"></>
+								</>
+								<td>Dominican Republic</>
+								<td>do</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="ec"></>
+								</>
+								<td>Ecuador</>
+								<td>ec</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="eg"></>
+								</>
+								<td>Egypt</>
+								<td>eg</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="sv"></>
+								</>
+								<td>El Salvador</>
+								<td>sv</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="gb-eng"></>
+								</>
+								<td>England</>
+								<td>gb-eng</>
+								<td>gb eng</>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="gq"></>
+								</>
+								<td>Equatorial Guinea</>
+								<td>gq</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="er"></>
+								</>
+								<td>Eritrea</>
+								<td>er</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="ee"></>
+								</>
+								<td>Estonia</>
+								<td>ee</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="sz"></>
+								</>
+								<td>Eswatini</>
+								<td>sz</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="et"></>
+								</>
+								<td>Ethiopia</>
+								<td>et</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="eu"></>
+								</>
+								<td>European Union</>
+								<td>eu</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="fk"></>
+								</>
+								<td>Falkland Islands</>
+								<td>fk</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="fo"></>
+								</>
+								<td>Faroe Islands</>
+								<td>fo</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="fj"></>
+								</>
+								<td>Fiji</>
+								<td>fj</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="fi"></>
+								</>
+								<td>Finland</>
+								<td>fi</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="fr"></>
+								</>
+								<td>France</>
+								<td>fr</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="gf"></>
+								</>
+								<td>French Guiana</>
+								<td>gf</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="pf"></>
+								</>
+								<td>French Polynesia</>
+								<td>pf</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="tf"></>
+								</>
+								<td>French Southern Territories</>
+								<td>tf</>
+								<td>french territories</>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="ga"></>
+								</>
+								<td>Gabon</>
+								<td>ga</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="gm"></>
+								</>
+								<td>Gambia</>
+								<td>gm</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="ge"></>
+								</>
+								<td>Georgia</>
+								<td>ge</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="de"></>
+								</>
+								<td>Germany</>
+								<td>de</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="gh"></>
+								</>
+								<td>Ghana</>
+								<td>gh</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="gi"></>
+								</>
+								<td>Gibraltar</>
+								<td>gi</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="gr"></>
+								</>
+								<td>Greece</>
+								<td>gr</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="gl"></>
+								</>
+								<td>Greenland</>
+								<td>gl</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="gd"></>
+								</>
+								<td>Grenada</>
+								<td>gd</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="gp"></>
+								</>
+								<td>Guadeloupe</>
+								<td>gp</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="gu"></>
+								</>
+								<td>Guam</>
+								<td>gu</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="gt"></>
+								</>
+								<td>Guatemala</>
+								<td>gt</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="gg"></>
+								</>
+								<td>Guernsey</>
+								<td>gg</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="gn"></>
+								</>
+								<td>Guinea</>
+								<td>gn</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="gw"></>
+								</>
+								<td>Guinea-Bissau</>
+								<td>gw</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="gy"></>
+								</>
+								<td>Guyana</>
+								<td>gy</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="ht"></>
+								</>
+								<td>Haiti</>
+								<td>ht</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="hm"></>
+								</>
+								<td>Heard &amp; McDonald Islands</>
+								<td>hm</>
+								<td>heard and mcdonald islands</>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="hn"></>
+								</>
+								<td>Honduras</>
+								<td>hn</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="hk"></>
+								</>
+								<td>Hong Kong SAR China</>
+								<td>hk</>
+								<td>hong kong</>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="hu"></>
+								</>
+								<td>Hungary</>
+								<td>hu</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="is"></>
+								</>
+								<td>Iceland</>
+								<td>is</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="in"></>
+								</>
+								<td>India</>
+								<td>in</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="id"></>
+								</>
+								<td>Indonesia</>
+								<td>id</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="ir"></>
+								</>
+								<td>Iran</>
+								<td>ir</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="iq"></>
+								</>
+								<td>Iraq</>
+								<td>iq</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="ie"></>
+								</>
+								<td>Ireland</>
+								<td>ie</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="im"></>
+								</>
+								<td>Isle of Man</>
+								<td>im</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="il"></>
+								</>
+								<td>Israel</>
+								<td>il</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="it"></>
+								</>
+								<td>Italy</>
+								<td>it</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="jm"></>
+								</>
+								<td>Jamaica</>
+								<td>jm</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="jp"></>
+								</>
+								<td>Japan</>
+								<td>jp</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="je"></>
+								</>
+								<td>Jersey</>
+								<td>je</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="jo"></>
+								</>
+								<td>Jordan</>
+								<td>jo</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="kz"></>
+								</>
+								<td>Kazakhstan</>
+								<td>kz</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="ke"></>
+								</>
+								<td>Kenya</>
+								<td>ke</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="ki"></>
+								</>
+								<td>Kiribati</>
+								<td>ki</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="xk"></>
+								</>
+								<td>Kosovo</>
+								<td>xk</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="kw"></>
+								</>
+								<td>Kuwait</>
+								<td>kw</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="kg"></>
+								</>
+								<td>Kyrgyzstan</>
+								<td>kg</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="la"></>
+								</>
+								<td>Laos</>
+								<td>la</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="lv"></>
+								</>
+								<td>Latvia</>
+								<td>lv</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="lb"></>
+								</>
+								<td>Lebanon</>
+								<td>lb</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="ls"></>
+								</>
+								<td>Lesotho</>
+								<td>ls</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="lr"></>
+								</>
+								<td>Liberia</>
+								<td>lr</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="ly"></>
+								</>
+								<td>Libya</>
+								<td>ly</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="li"></>
+								</>
+								<td>Liechtenstein</>
+								<td>li</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="lt"></>
+								</>
+								<td>Lithuania</>
+								<td>lt</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="lu"></>
+								</>
+								<td>Luxembourg</>
+								<td>lu</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="mo"></>
+								</>
+								<td>Macao SAR China</>
+								<td>mo</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="mg"></>
+								</>
+								<td>Madagascar</>
+								<td>mg</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="mw"></>
+								</>
+								<td>Malawi</>
+								<td>mw</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="my"></>
+								</>
+								<td>Malaysia</>
+								<td>my</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="mv"></>
+								</>
+								<td>Maldives</>
+								<td>mv</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="ml"></>
+								</>
+								<td>Mali</>
+								<td>ml</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="mt"></>
+								</>
+								<td>Malta</>
+								<td>mt</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="mh"></>
+								</>
+								<td>Marshall Islands</>
+								<td>mh</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="mq"></>
+								</>
+								<td>Martinique</>
+								<td>mq</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="mr"></>
+								</>
+								<td>Mauritania</>
+								<td>mr</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="mu"></>
+								</>
+								<td>Mauritius</>
+								<td>mu</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="yt"></>
+								</>
+								<td>Mayotte</>
+								<td>yt</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="mx"></>
+								</>
+								<td>Mexico</>
+								<td>mx</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="fm"></>
+								</>
+								<td>Micronesia</>
+								<td>fm</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="md"></>
+								</>
+								<td>Moldova</>
+								<td>md</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="mc"></>
+								</>
+								<td>Monaco</>
+								<td>mc</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="mn"></>
+								</>
+								<td>Mongolia</>
+								<td>mn</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="me"></>
+								</>
+								<td>Montenegro</>
+								<td>me</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="ms"></>
+								</>
+								<td>Montserrat</>
+								<td>ms</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="ma"></>
+								</>
+								<td>Morocco</>
+								<td>ma</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="mz"></>
+								</>
+								<td>Mozambique</>
+								<td>mz</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="mm"></>
+								</>
+								<td>Myanmar (Burma)</>
+								<td>mm</>
+								<td>myanmar, burma</>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="na"></>
+								</>
+								<td>Namibia</>
+								<td>na</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="nr"></>
+								</>
+								<td>Nauru</>
+								<td>nr</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="np"></>
+								</>
+								<td>Nepal</>
+								<td>np</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="nl"></>
+								</>
+								<td>Netherlands</>
+								<td>nl</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="nc"></>
+								</>
+								<td>New Caledonia</>
+								<td>nc</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="nz"></>
+								</>
+								<td>New Zealand</>
+								<td>nz</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="ni"></>
+								</>
+								<td>Nicaragua</>
+								<td>ni</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="ne"></>
+								</>
+								<td>Niger</>
+								<td>ne</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="ng"></>
+								</>
+								<td>Nigeria</>
+								<td>ng</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="nu"></>
+								</>
+								<td>Niue</>
+								<td>nu</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="nf"></>
+								</>
+								<td>Norfolk Island</>
+								<td>nf</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="kp"></>
+								</>
+								<td>North Korea</>
+								<td>kp</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="mk"></>
+								</>
+								<td>North Macedonia</>
+								<td>mk</>
+								<td>republic of north macedonia, macedonia</>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="mp"></>
+								</>
+								<td>Northern Mariana Islands</>
+								<td>mp</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="no"></>
+								</>
+								<td>Norway</>
+								<td>no</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="om"></>
+								</>
+								<td>Oman</>
+								<td>om</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="pk"></>
+								</>
+								<td>Pakistan</>
+								<td>pk</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="pw"></>
+								</>
+								<td>Palau</>
+								<td>pw</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="ps"></>
+								</>
+								<td>Palestinian Territories</>
+								<td>ps</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="pa"></>
+								</>
+								<td>Panama</>
+								<td>pa</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="pg"></>
+								</>
+								<td>Papua New Guinea</>
+								<td>pg</>
+								<td>new guinea</>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="py"></>
+								</>
+								<td>Paraguay</>
+								<td>py</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="pe"></>
+								</>
+								<td>Peru</>
+								<td>pe</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="ph"></>
+								</>
+								<td>Philippines</>
+								<td>ph</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="pirate"></>
+								</>
+								<td>Pirate</>
+								<td>pirate</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="pn"></>
+								</>
+								<td>Pitcairn Islands</>
+								<td>pn</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="pl"></>
+								</>
+								<td>Poland</>
+								<td>pl</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="pt"></>
+								</>
+								<td>Portugal</>
+								<td>pt</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="pr"></>
+								</>
+								<td>Puerto Rico</>
+								<td>pr</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="qa"></>
+								</>
+								<td>Qatar</>
+								<td>qa</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="rainbow"></>
+								</>
+								<td>Rainbow</>
+								<td>rainbow</>
+								<td>pride, lgbt</>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="re"></>
+								</>
+								<td>Réunion</>
+								<td>re</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="ro"></>
+								</>
+								<td>Romania</>
+								<td>ro</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="ru"></>
+								</>
+								<td>Russia</>
+								<td>ru</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="rw"></>
+								</>
+								<td>Rwanda</>
+								<td>rw</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="ws"></>
+								</>
+								<td>Samoa</>
+								<td>ws</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="sm"></>
+								</>
+								<td>San Marino</>
+								<td>sm</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="st"></>
+								</>
+								<td>São Tomé &amp; Príncipe</>
+								<td>st</>
+								<td>sao tome and principe, samo tome</>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="sa"></>
+								</>
+								<td>Saudi Arabia</>
+								<td>sa</>
+								<td>saudiarabia, saudi</>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="gb-sct"></>
+								</>
+								<td>Scotland</>
+								<td>gb-sct</>
+								<td>gb sct</>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="sn"></>
+								</>
+								<td>Senegal</>
+								<td>sn</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="rs"></>
+								</>
+								<td>Serbia</>
+								<td>rs</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="sc"></>
+								</>
+								<td>Seychelles</>
+								<td>sc</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="sl"></>
+								</>
+								<td>Sierra Leone</>
+								<td>sl</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="sg"></>
+								</>
+								<td>Singapore</>
+								<td>sg</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="sx"></>
+								</>
+								<td>Sint Maarten</>
+								<td>sx</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="sk"></>
+								</>
+								<td>Slovakia</>
+								<td>sk</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="si"></>
+								</>
+								<td>Slovenia</>
+								<td>si</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="sb"></>
+								</>
+								<td>Solomon Islands</>
+								<td>sb</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="so"></>
+								</>
+								<td>Somalia</>
+								<td>so</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="za"></>
+								</>
+								<td>South Africa</>
+								<td>za</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="gs"></>
+								</>
+								<td>South Georgia &amp; South Sandwich Islands</>
+								<td>gs</>
+								<td>south georgia and south sandwich islands, sandwich islands</>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="kr"></>
+								</>
+								<td>South Korea</>
+								<td>kr</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="ss"></>
+								</>
+								<td>South Sudan</>
+								<td>ss</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="es"></>
+								</>
+								<td>Spain</>
+								<td>es</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="lk"></>
+								</>
+								<td>Sri Lanka</>
+								<td>lk</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="bl"></>
+								</>
+								<td>St. Barthélemy</>
+								<td>bl</>
+								<td>st barthelemy, saint barth</>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="sh"></>
+								</>
+								<td>St. Helena</>
+								<td>sh</>
+								<td>st helena, saint helena</>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="kn"></>
+								</>
+								<td>St. Kitts &amp; Nevis</>
+								<td>kn</>
+								<td>st kitts and nevis, saint kitts and navis</>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="lc"></>
+								</>
+								<td>St. Lucia</>
+								<td>lc</>
+								<td>st lucia, saint lucia</>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="mf"></>
+								</>
+								<td>St. Martin</>
+								<td>mf</>
+								<td>st martin</>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="pm"></>
+								</>
+								<td>St. Pierre &amp; Miquelon</>
+								<td>pm</>
+								<td>st pierre and miquelon, saint pierre</>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="vc"></>
+								</>
+								<td>St. Vincent &amp; Grenadines</>
+								<td>vc</>
+								<td>st vincent and grenadines</>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="sd"></>
+								</>
+								<td>Sudan</>
+								<td>sd</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="sr"></>
+								</>
+								<td>Suriname</>
+								<td>sr</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="sj"></>
+								</>
+								<td>Svalbard &amp; Jan Mayen</>
+								<td>sj</>
+								<td>svalbard and jan mayen, svalbard, jan mayen</>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="se"></>
+								</>
+								<td>Sweden</>
+								<td>se</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="ch"></>
+								</>
+								<td>Switzerland</>
+								<td>ch</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="sy"></>
+								</>
+								<td>Syria</>
+								<td>sy</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="tw"></>
+								</>
+								<td>Taiwan</>
+								<td>tw</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="tj"></>
+								</>
+								<td>Tajikistan</>
+								<td>tj</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="tz"></>
+								</>
+								<td>Tanzania</>
+								<td>tz</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="th"></>
+								</>
+								<td>Thailand</>
+								<td>th</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="tl"></>
+								</>
+								<td>Timor-Leste</>
+								<td>tl</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="tg"></>
+								</>
+								<td>Togo</>
+								<td>tg</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="tk"></>
+								</>
+								<td>Tokelau</>
+								<td>tk</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="to"></>
+								</>
+								<td>Tonga</>
+								<td>to</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="transgender"></>
+								</>
+								<td>Transgender</>
+								<td>transgender</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="tt"></>
+								</>
+								<td>Trinidad &amp; Tobago</>
+								<td>tt</>
+								<td>trinidad and tobago</>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="ta"></>
+								</>
+								<td>Tristan da Cunha</>
+								<td>ta</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="tn"></>
+								</>
+								<td>Tunisia</>
+								<td>tn</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="tr"></>
+								</>
+								<td>Türkiye</>
+								<td>tr</>
+								<td>turkey</>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="tm"></>
+								</>
+								<td>Turkmenistan</>
+								<td>tm</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="tc"></>
+								</>
+								<td>Turks &amp; Caicos Islands</>
+								<td>tc</>
+								<td>turks and caicos islands</>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="tv"></>
+								</>
+								<td>Tuvalu</>
+								<td>tv</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="um"></>
+								</>
+								<td>U.S. Outlying Islands</>
+								<td>um</>
+								<td>us outlying islands, minor islands</>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="vi"></>
+								</>
+								<td>U.S. Virgin Islands</>
+								<td>vi</>
+								<td>us virgin islands</>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="ug"></>
+								</>
+								<td>Uganda</>
+								<td>ug</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="ua"></>
+								</>
+								<td>Ukraine</>
+								<td>ua</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="ae"></>
+								</>
+								<td>United Arab Emirates</>
+								<td>ae</>
+								<td>uae</>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="gb"></>
+								</>
+								<td>United Kingdom</>
+								<td>gb</>
+								<td>uk</>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="un"></>
+								</>
+								<td>United Nations</>
+								<td>un</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="us"></>
+								</>
+								<td>United States</>
+								<td>us</>
+								<td>america</>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="uy"></>
+								</>
+								<td>Uruguay</>
+								<td>uy</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="uz"></>
+								</>
+								<td>Uzbekistan</>
+								<td>uz</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="vu"></>
+								</>
+								<td>Vanuatu</>
+								<td>vu</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="va"></>
+								</>
+								<td>Vatican City</>
+								<td>va</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="ve"></>
+								</>
+								<td>Venezuela</>
+								<td>ve</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="vn"></>
+								</>
+								<td>Vietnam</>
+								<td>vn</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="gb-wls"></>
+								</>
+								<td>Wales</>
+								<td>gb-wls</>
+								<td>gb wls</>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="wf"></>
+								</>
+								<td>Wallis &amp; Futuna</>
+								<td>wf</>
+								<td>wallis and futuna</>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="eh"></>
+								</>
+								<td>Western Sahara</>
+								<td>eh</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="ye"></>
+								</>
+								<td>Yemen</>
+								<td>ye</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="zm"></>
+								</>
+								<td>Zambia</>
+								<td>zm</>
+								<td></>
+							</>
+							<tr>
+								<td>
+									<ui-flag country="zw"></>
+								</>
+								<td>Zimbabwe</>
+								<td>zw</>
+								<td></>
+							</>
+						</>
+					</>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="Variations">
+		<section label="Size" sticky collapsible dividing>
+			<example>
+				<html>
+					<p slot="description">A flag can vary in size.</p>
+					<ui-message slot="description" size="small">Sizes are ratios of the surrounding text, <code>small</code> (1.5em) ... <code>massive</code> (12em). <code>medium</code> is the default, the size of the text -- NOT Fomantic's fixed 3em.</ui-message>
+					<ui-segment appearance="basic"><ui-flag country="de" size="small"></ui-flag> Small <br /> <ui-flag country="fr" size="medium"></ui-flag> Medium <br /> <ui-flag country="li" size="large"></ui-flag> Large <br /> <ui-flag country="jp" size="big"></ui-flag> Big <br /> <ui-flag country="gb" size="huge"></ui-flag> Huge <br /> <ui-flag country="un" size="massive"></ui-flag> Massive</ui-segment>
+				</html>
+			</example>
+		</>
+
+		<section label="Autosizing" sticky collapsible dividing>
+			<example description="If no specific size is given, every flag is sized by the current element's font size.">
+				<segment appearance="basic">
+					<header size="small">Within a header <flag country="us"/></header>
+					<button size="large">Within a button <flag country="eu"/></button>
+					<divider spacer/>
+					<label size="massive">Within a label <flag country="pirate"/></label>
+					<divider spacer/>
+					<text size="small" color="orange">Within a text <flag country="rainbow"/></text>
+				</segment>
+			</example>
+		</>
+	</>
+</spell-notebook>

@@ -1,0 +1,113 @@
+<spell-notebook "sticky usage">
+	<header level="1">
+		Sticky
+		<header>Sticky content stays fixed to the viewport while its container is on screen.</>
+	</>
+	<sticky-tab-bar showing="usage"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#using-it">Using it</>
+				<ui-item link="#context">Context</>
+				<ui-item link="#stuck-state-and-events">Stuck state and events</>
+				<ui-item link="#accessibility">Accessibility</>
+				<ui-item link="#framework-usage">Framework usage</>
+			</>
+		</>
+	</>
+
+	<!-- USAGE:  how it sticks, the context, the stuck state and events, accessibility, framework snippets. -->
+	<section label="Using it">
+		<markdown>
+			A sticky IS CSS `position: sticky` (Fomantic's `native` type): no scroll listener, no script positioning,
+			nothing to measure or refresh.
+
+			- `offset` and `bottom-offset` (px) become its `top` and `bottom`: leave room for a fixed header with `offset`.
+			- `pushing` also sticks it to the bottom edge: content below the fold waits there until the page reaches it.
+			- It sticks to its nearest scroll container, else the viewport (Fomantic's `scrollContext`).
+		</>
+	</>
+
+	<section label="Context">
+		<markdown>
+			The host has no box of its own (`display: contents`), so the sticky sticks within its PARENT, and the end of that
+			parent pushes it out. Fomantic's `context` setting (any element) has no CSS equivalent: put the sticky inside the
+			element it belongs to, such as a rail.
+		</>
+		<markdown>
+			```html
+			<ui-segment>
+			  <ui-rail position="right">
+			    <ui-sticky offset="60">Table of contents</ui-sticky>
+			  </ui-rail>
+			  ...the article...
+			</ui-segment>
+			```
+		</>
+	</>
+
+	<section label="Stuck state and events">
+		<markdown>
+			What the element adds is reporting. It keeps `:state(stuck)` while stuck and `:state(bound)` while pushed out by
+			the end of its parent, and fires `ui-stuck` / `ui-unstuck` (Fomantic's `onStick` / `onUnstick`, with `{ edge }`,
+			`top` or `bottom`) as that changes. It watches with an `IntersectionObserver` on two 1px markers, against the
+			nearest scroll container (else the viewport).
+		</>
+		<markdown>
+			```css
+			ui-sticky:state(stuck)::part(sticky) {
+			  box-shadow: 0 2px 4px oklch(0 0 0 / 0.15);
+			}
+			```
+		</>
+		<markdown>
+			```js
+			document
+			  .querySelector("ui-sticky")
+			  .addEventListener("ui-stuck", (event) => console.log("stuck to the", event.detail.edge))
+			```
+		</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			- A sticky changes nothing for assistive technology: its content stays where it is in reading and Tab order.
+			- Stuck content covers what scrolls under it, so while stuck the element RESERVES its room: it sets its scroll
+			  container's `scroll-padding-top` (`-bottom` at the bottom edge) to the lowest stuck edge. Focus moves,
+			  `scrollIntoView()` and Page Down / Space (Chromium, Firefox; Safari pages the full viewport) then keep content
+			  out from under it.
+			- A sticky column (taller than half the view, or narrower than half its width) reserves nothing. Keep stuck
+			  content small all the same.
+			- If the element fails to render, it shows its children through a bare `<slot>`, in place: the
+			  sticking, `:state(stuck)` and the events go.
+		</>
+	</>
+
+	<section label="Framework usage">
+		<markdown>Nothing to bind: put it in the template, and listen for `ui-stuck` / `ui-unstuck` if you need to know.</>
+		<header level="4" id="framework-react">React 19</>
+		<markdown>
+			```jsx
+			<ui-sticky offset={60} onui-stick={() => setStuck(true)} onui-unstick={() => setStuck(false)}>
+			  ...
+			</ui-sticky>
+			```
+		</>
+		<header level="4" id="framework-vue">Vue 3.5</>
+		<markdown>
+			```html
+			<!-- compilerOptions.isCustomElement = (tag) => tag.startsWith("ui-") -->
+			<ui-sticky offset="60" @ui-stuck="stuck = true" @ui-unstuck="stuck = false">...</ui-sticky>
+			```
+		</>
+		<header level="4" id="framework-solid">Solid 2</>
+		<markdown>
+			```jsx
+			// events and rich data are plain props:  `on-<event>={...}`, `options={...}`
+			<ui-sticky offset="60" on-ui-stuck={() => setStuck(true)}>
+			  ...
+			</ui-sticky>
+			```
+		</>
+	</>
+</spell-notebook>

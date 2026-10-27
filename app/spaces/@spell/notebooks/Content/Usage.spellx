@@ -1,0 +1,61 @@
+<spell-notebook "content usage">
+	<header level="1">
+		Content
+		<header>Content is the main block of a card, item, feed event, comment, modal, message, list item or step.</>
+	</>
+	<content-tab-bar showing="usage"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#using-it">Using it</>
+				<ui-item link="#owners">Owners</>
+				<ui-item link="#accessibility">Accessibility</>
+			</>
+		</>
+	</>
+
+	<section label="Using it">
+		<markdown>
+			`<ui-content>` is the main content block of its owner: a card's, an item's, a feed event's, a comment's, a modal's,
+			a message's, a list item's, a step's, an accordion panel's.
+
+			- Inside it go the other parts: `<ui-header>`, `<ui-meta>`, `<ui-description>`, `<ui-extra>` ...
+			- `align` aligns one block (a card's `center aligned content`); `vertical-align` lines it up against the image
+			  or icon beside it in an item or a list.  To put content at the left or right, a `<ui-stack>` inside it
+			  places it.
+			- In a modal, `image` puts an image beside the description and `scrolling` caps the height and scrolls.
+			- In a `<ui-header>` it is the text column beside an icon or image.
+		</>
+	</>
+
+	<section label="Owners">
+		<markdown>
+			`<ui-content>` finds its nearest owner and sets `:state(in-<owner>)` on itself; `UIParts.css` styles it by that
+			state. Its owners, and what each makes of it:
+
+			- [Card](/components/ui/ui-card.html) (`:state(in-card)`): a padded block;  several are divided by a line
+			- [Item](/components/ui/ui-items.html) (`:state(in-item)`): the column beside the item's image
+			- [Feed](/components/ui/ui-feed.html) (`:state(in-feed)`): the event's text, beside its label
+			- [Comment](/components/ui/ui-comment.html) (`:state(in-comment)`): the text beside the avatar
+			- [Modal](/components/ui/ui-modal.html) (`:state(in-modal)`): the padded body;  `image`, `scrolling`
+			- [Flyout](/components/ui/ui-flyout.html) (`:state(in-flyout)`): the padded body
+			- [Message](/components/ui/ui-message.html) (`:state(in-message)`): the text beside the message's icon
+			- [List](/components/ui/ui-list.html) (`:state(in-list)`): the text beside a list item's icon or image
+			- [Step](/components/ui/ui-step.html) (`:state(in-step)`): the text beside a step's icon
+			- [Accordion](/components/ui/ui-accordion.html) (`:state(in-accordion)`): a panel, shown while its title is open
+			- [Popup](/components/ui/ui-popup.html) (`:state(in-popup)`): the popup's body, under its header
+			- [Toast](/components/ui/ui-toast.html) (`:state(in-toast)`): the toast's text
+			- [Search](/components/ui/ui-search.html) (`:state(in-search)`): a search result's text
+			- [Header](/components/ui/ui-header.html) (`:state(in-header)`): the text column beside a header's icon or image
+
+			Anywhere else it is an unstyled block. More on how parts find their owners: [Content parts](/components/ui/ui-header.html).
+		</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			- A neutral block with no role: the meaning comes from its owner and from the elements you put inside it.
+			- An accordion panel is hidden from assistive technology while its title is closed, and announced when it opens.
+		</>
+	</>
+</spell-notebook>

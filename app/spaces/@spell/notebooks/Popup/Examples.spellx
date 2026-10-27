@@ -1,0 +1,428 @@
+<spell-notebook "popup examples">
+	<header level="1">
+		Popup
+		<header>A popup displays additional information on top of a page.</>
+	</>
+	<popup-tab-bar showing="examples"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#types">Types</>
+				<ui-item link="#states">States</>
+				<ui-item link="#variations">Variations</>
+			</>
+		</>
+	</>
+
+	<!--
+		EXAMPLES:  Fomantic's popup page, section by section, in its order (Types:  JavaScript, then No JavaScript;  States;
+		Variations), plus our extras (Content parts, On click, Position, Every position, Hoverable).  Hover (or focus) a
+		target to see its popup;  a popup with no `for` attaches to the element just before it.
+		`GAP I<n>` comments mark examples a widget can't render yet (plan-doc issues).
+	-->
+	<section label="Types">
+		<section label="Popup element" sticky collapsible dividing>
+			<html>
+				<ui-message size="small" state="info">Popup comes as an element, <code>&lt;ui-popup&gt;</>, with the full feature set (any markup, triggers, events, flipping), and as a CSS-only <code>data-tooltip</> attribute, which needs no script and suits pages with many short hints.</>
+			</>
+
+			<section label="Popup" sticky collapsible dividing>
+				<example description="An element can specify popup content to appear.  With no `for`, the popup attaches to the element just before it.">
+					<button icon="plus" aria-label="Add users"/>
+					<popup label="Add users to your feed"/>
+				</example>
+			</>
+
+			<section label="Titled" sticky collapsible dividing>
+				<example description="An element can specify popup content with a title:  `header`.">
+					<image avatar src="/components/ui/images/avatar/small/elliot.jpg" alt="Elliot Fu"/>
+					<popup heading="Elliot Fu" label="Elliot has been a member since July 2012"/>
+					<image avatar src="/components/ui/images/avatar/small/stevie.jpg" alt="Stevie Feliciano"/>
+					<popup heading="Stevie Feliciano" label="Stevie has been a member since August 2013"/>
+					<image avatar src="/components/ui/images/avatar/small/matt.jpg" alt="Matt"/>
+					<popup heading="Matt" label="Matt has been a member since July 2014"/>
+				</example>
+			</>
+
+			<section label="HTML" sticky collapsible dividing>
+				<example description="An element can specify HTML for a popup:  slotted `<ui-header>` / `<ui-content>` and any other markup.  Hover the card.">
+					<html>
+						<ui-card>
+							<img src="/components/ui/images/movies/totoro-horizontal.jpg" alt="" />
+							<ui-content>
+								<ui-header>My Neighbor Totoro</ui-header>
+								<ui-description>Two sisters move to the country with their father in order to be closer to their hospitalized mother, and discover the surrounding trees are inhabited by magical spirits.</ui-description>
+							</ui-content>
+							<ui-buttons width="2" attach="bottom">
+								<ui-button icon="plus">Queue</ui-button>
+								<ui-button icon="play" color="primary">Watch</ui-button>
+							</ui-buttons>
+						</ui-card>
+					</html>
+					<popup>
+						<header>User Rating</header>
+						<content>
+							<rating color="yellow" max-rating="5" value="5" readonly/>
+						</content>
+					</popup>
+				</example>
+			</>
+
+			<section label="Pre-Existing" sticky collapsible dividing>
+				<example>
+					<html>
+						<p slot="description">An element can display a popup that is already included in the page.</p>
+						<ui-message slot="description" size="small" state="info">Every <code>&lt;ui-popup&gt;</code> is markup already in the page: there is no <code>data-html</code> string to build one from.</ui-message>
+						<ui-card>
+							<img src="/components/ui/images/movies/watchmen-horizontal.jpg" alt="" />
+							<ui-content>
+								<ui-header>Watchmen</ui-header>
+								<ui-description>In a gritty and alternate 1985 the glory days of costumed vigilantes have been brought to a close by a government crackdown, but after one of the masked veterans is brutally murdered an investigation into the killer is initiated.</ui-description>
+							</ui-content>
+							<ui-buttons width="2" attach="bottom">
+								<ui-button icon="plus">Queue</ui-button>
+								<ui-button icon="play" color="primary">Watch</ui-button>
+							</ui-buttons>
+						</ui-card>
+					</html>
+					<popup heading="User Rating">
+						<rating color="yellow" value="3" readonly/>
+					</popup>
+				</example>
+			</>
+
+			<section label="On click" sticky collapsible dividing>
+				<example description="`open-on=\"click\"` makes the popup a small non-modal dialog that toggles on click, for content you interact with;  `flowing` lets it be as wide as its content.">
+					<button id="popup-types-plan">Choose a plan</button>
+					<html>
+						<ui-popup for="popup-types-plan" open-on="click" position="bottom left" flowing heading="Basic plan">
+							<p>Does not include upload or chat.</p>
+							<ui-button size="small" color="primary">Choose</ui-button>
+						</ui-popup>
+					</html>
+				</example>
+			</>
+
+			<section label="Content parts" sticky collapsible dividing>
+				<example description="Slotted `<ui-header>` and `<ui-content>` style themselves as the popup's header and content.  This one opens on keyboard focus (`open-on=\"focus\"`).">
+					<button id="popup-types-parts">Parts</button>
+					<popup for="popup-types-parts" open-on="focus">
+						<header>Slotted header</header>
+						<content>Slotted content, styled by the popup.</content>
+					</popup>
+				</example>
+			</>
+		</>
+
+		<section label="No JavaScript" sticky collapsible dividing>
+			<section label="Tooltip" sticky collapsible dividing>
+				<example>
+					<html>
+						<p slot="description">An element can specify a simple tooltip that can appear without JavaScript via the <code>data-tooltip</code> attribute. If the tooltip should be shown inverted, also add the <code>data-inverted</code> attribute.</p>
+						<ui-message slot="description" size="small" state="warning">Tooltips use an element's <code>::before</code> and <code>::after</code> pseudo-elements, and screen readers don't reliably announce them. Use them for hints only, and a <code>&lt;ui-popup&gt;</code> for anything that matters.</ui-message>
+					</html>
+					<button icon="plus" aria-label="Add users" data-tooltip="Add users to your feed"/>
+					<button icon="plus" aria-label="Add users" data-tooltip="Add users to your feed" data-inverted/>
+				</example>
+			</>
+
+			<section label="Tooltip Position" sticky collapsible dividing>
+				<example description="A tooltip can be shown at a specific position relative to the element via the `data-position` attribute.">
+					<button data-tooltip="Add users to your feed" data-position="top left">Top Left</button>
+					<button data-tooltip="Add users to your feed" data-position="top center">Top Center</button>
+					<button data-tooltip="Add users to your feed" data-position="top right">Top Right</button>
+					<divider/>
+					<button data-tooltip="Add users to your feed" data-position="bottom left">Bottom Left</button>
+					<button data-tooltip="Add users to your feed" data-position="bottom center">Bottom Center</button>
+					<button data-tooltip="Add users to your feed" data-position="bottom right">Bottom Right</button>
+					<divider/>
+					<button data-tooltip="Add users to your feed" data-position="right center">Right Center</button>
+					<button data-tooltip="Add users to your feed" data-position="left center">Left Center</button>
+				</example>
+				<example>
+					<button data-inverted data-tooltip="Add users to your feed" data-position="top left">Top Left</button>
+					<button data-inverted data-tooltip="Add users to your feed" data-position="top center">Top Center</button>
+					<button data-inverted data-tooltip="Add users to your feed" data-position="top right">Top Right</button>
+					<divider/>
+					<button data-inverted data-tooltip="Add users to your feed" data-position="bottom left">Bottom Left</button>
+					<button data-inverted data-tooltip="Add users to your feed" data-position="bottom center">Bottom Center</button>
+					<button data-inverted data-tooltip="Add users to your feed" data-position="bottom right">Bottom Right</button>
+					<divider/>
+					<button data-inverted data-tooltip="Add users to your feed" data-position="right center">Right Center</button>
+					<button data-inverted data-tooltip="Add users to your feed" data-position="left center">Left Center</button>
+				</example>
+				<example description="Ours also sits beside the element, lined up with its top or bottom edge:  `left top`, `left bottom`, `right top`, `right bottom`.">
+					<button data-tooltip="Add users to your feed" data-position="right top">Right Top</button>
+					<button data-tooltip="Add users to your feed" data-position="right bottom">Right Bottom</button>
+					<button data-tooltip="Add users to your feed" data-position="left top">Left Top</button>
+					<button data-tooltip="Add users to your feed" data-position="left bottom">Left Bottom</button>
+				</example>
+			</>
+
+			<section label="Tooltip Size" sticky collapsible dividing>
+				<example>
+					<html>
+						<p slot="description">A tooltip can vary in size via the <code>data-variation</code> attribute.</p>
+						<ui-message slot="description" size="small" state="info">The <code>data-variation</code> attribute takes several words, just like a class would:  sizes, basic, fixed, multiline, visible and colours.</ui-message>
+					</html>
+					<button data-tooltip="Add users to your feed" data-variation="mini">Mini</button>
+					<button data-tooltip="Add users to your feed" data-variation="tiny">Tiny</button>
+					<button data-tooltip="Add users to your feed" data-variation="small">Small</button>
+					<button data-tooltip="Add users to your feed" data-variation="medium">Medium</button>
+					<button data-tooltip="Add users to your feed" data-variation="large">Large</button>
+					<button data-tooltip="Add users to your feed" data-variation="huge">Huge</button>
+					<divider/>
+					<button data-inverted data-tooltip="Add users to your feed" data-variation="mini">Mini</button>
+					<button data-inverted data-tooltip="Add users to your feed" data-variation="tiny">Tiny</button>
+					<button data-inverted data-tooltip="Add users to your feed" data-variation="small">Small</button>
+					<button data-inverted data-tooltip="Add users to your feed" data-variation="medium">Medium</button>
+					<button data-inverted data-tooltip="Add users to your feed" data-variation="large">Large</button>
+					<button data-inverted data-tooltip="Add users to your feed" data-variation="huge">Huge</button>
+				</example>
+			</>
+
+			<section label="Basic Tooltip" sticky collapsible dividing>
+				<example description="A tooltip can provide more basic formatting:  no pointing arrow.">
+					<button data-tooltip="The default theme's basic tooltip removes the pointing arrow." data-variation="basic">Basic</button>
+					<button data-tooltip="You can combine me" data-variation="tiny basic">Tiny Basic</button>
+					<button data-inverted data-tooltip="The default theme's basic tooltip removes the pointing arrow." data-variation="basic">Basic</button>
+					<button data-inverted data-tooltip="You can combine me" data-variation="tiny basic">Tiny Basic</button>
+				</example>
+			</>
+
+			<section label="Multiline Tooltip" sticky collapsible dividing>
+				<example>
+					<html>
+						<p slot="description">A tooltip can show multiple lines via line breaks in the attribute and adding <code>multiline</code> to the <code>data-variation</code> attribute.</p>
+						<ui-message slot="description" size="small" state="warning">Line breaks in the attribute become tooltip line breaks; a non-breaking space must be the U+A0 character itself, not <code>&amp;nbsp;</code>.</ui-message>
+					</html>
+					<button data-tooltip="Look, I have multiple lines!
+                  -one
+                  -two
+                  -three" data-position="bottom center" data-variation="multiline">Multiline tooltip</button>
+				</example>
+			</>
+
+			<section label="Visible Tooltip" sticky collapsible dividing>
+				<example description="A tooltip can be shown visible all the time by adding `visible` to the `data-variation` attribute.">
+					<button data-tooltip="I am visible all the time" data-variation="visible" data-position="right center">Important Button</button>
+				</example>
+			</>
+
+			<section label="Colored Tooltip" sticky collapsible dividing>
+				<example description="A tooltip can have different colors via the `data-variation` attribute.">
+					<buttons spacing="md" wrapping padding="compact">
+						<button data-variation="red" data-tooltip="Red">Red</button>
+						<button data-variation="orange" data-tooltip="Orange">Orange</button>
+						<button data-variation="yellow" data-tooltip="Yellow">Yellow</button>
+						<button data-variation="olive" data-tooltip="Olive">Olive</button>
+						<button data-variation="green" data-tooltip="Green">Green</button>
+						<button data-variation="teal" data-tooltip="Teal">Teal</button>
+						<button data-variation="blue" data-tooltip="Blue">Blue</button>
+						<button data-variation="violet" data-tooltip="Violet">Violet</button>
+						<button data-variation="purple" data-tooltip="Purple">Purple</button>
+						<button data-variation="pink" data-tooltip="Pink">Pink</button>
+						<button data-variation="brown" data-tooltip="Brown">Brown</button>
+						<button data-variation="grey" data-tooltip="Grey">Grey</button>
+						<button data-variation="black" data-tooltip="Black">Black</button>
+					</buttons>
+				</example>
+			</>
+		</>
+	</>
+
+	<section label="States">
+		<section label="Loading" sticky collapsible dividing>
+			<example description="A popup may show its content is being loaded:  a spinner over faded content.">
+				<image avatar size="tiny" src="/components/ui/images/avatar/large/tom.jpg" alt="Matt"/>
+				<popup position="bottom left" loading heading="Matt" label="Matt has been a member since July 2014"/>
+				<image avatar size="tiny" src="/components/ui/images/avatar/large/tom.jpg" alt="Matt"/>
+				<popup position="bottom left" inverted loading heading="Matt" label="Matt has been a member since July 2014"/>
+			</example>
+
+			<!-- GAP I41:  no `double` loader or loader speed on a popup;  those two show the plain loader. -->
+			<example description="The loader inherits the color of the popup.">
+				<image avatar size="tiny" src="/components/ui/images/avatar/large/tom.jpg" alt="Matt"/>
+				<popup position="bottom left" color="purple" loading heading="Matt" label="Matt has been a member since July 2014"/>
+				<image avatar size="tiny" src="/components/ui/images/avatar/large/tom.jpg" alt="Matt"/>
+				<popup position="bottom left" color="orange" loading heading="Matt" label="Matt has been a member since July 2014"/>
+				<image avatar size="tiny" src="/components/ui/images/avatar/large/tom.jpg" alt="Matt"/>
+				<popup position="bottom left" color="blue" loading heading="Matt" label="Matt has been a member since July 2014"/>
+				<image avatar size="tiny" src="/components/ui/images/avatar/large/tom.jpg" alt="Matt"/>
+				<popup position="bottom left" color="green" loading heading="Matt" label="Matt has been a member since July 2014"/>
+			</example>
+		</>
+	</>
+
+	<section label="Variations">
+		<section label="Basic" sticky collapsible dividing>
+			<example description="A popup can provide more basic formatting:  no pointing arrow.">
+				<button icon="plus" aria-label="Add"/>
+				<popup appearance="basic" label="The default theme's basic popup removes the pointing arrow."/>
+			</example>
+		</>
+
+		<section label="Width" sticky collapsible dividing>
+			<example>
+				<html>
+					<p slot="description">A popup can be extra wide to allow for longer content: <code>wide</code>, <code>wide="very"</code>.</p>
+					<ui-message slot="description" size="small" state="info">A popup's width is capped by its maximum width, so short content stays narrow even when it is <code>wide</code>. Add <code>fixed</code> to make it always that wide;  the CSS-only tooltip takes these in its <code>data-variation</code>:  fixed, wide fixed and very wide fixed.</ui-message>
+				</html>
+				<icon name="heart" aria-label="Wide" appearance="circular link"/>
+				<popup wide label="Hello. This is a wide pop-up which allows for lots of content with additional space. You can fit a lot of words here and the paragraphs will be pretty wide."/>
+				<icon name="heart" aria-label="Very wide" appearance="circular link"/>
+				<popup wide="very" label="Hello. This is a very wide pop-up which allows for lots of content with additional space. You can fit a lot of words here and the paragraphs will be pretty wide."/>
+			</example>
+		</>
+
+		<section label="Fluid" sticky collapsible dividing>
+			<example>
+				<html>
+					<p slot="description">A fluid popup takes up the entire width of its target.</p>
+					<ui-message slot="description" size="small" state="info">Fomantic's fluid popup spans its offset container; ours spans its target, so make the target as wide as the popup should be (here a <code>fluid</code> button).</ui-message>
+				</html>
+				<button fluid>Show fluid popup</button>
+				<popup fluid position="bottom left">
+					<grid columns="4" divided align="center">
+						<column>1</column>
+						<column>2</column>
+						<column>3</column>
+						<column>4</column>
+					</grid>
+				</popup>
+			</example>
+		</>
+
+		<section label="Size" sticky collapsible dividing>
+			<example description="A popup can vary in size.">
+				<icon name="heart" aria-label="Mini" appearance="circular link"/>
+				<popup size="mini" label="Hello. This is a mini popup"/>
+				<icon name="heart" aria-label="Tiny" appearance="circular link"/>
+				<popup size="tiny" label="Hello. This is a tiny popup"/>
+				<icon name="heart" aria-label="Small" appearance="circular link"/>
+				<popup size="small" label="Hello. This is a small popup"/>
+				<icon name="heart" aria-label="Large" appearance="circular link"/>
+				<popup size="large" label="Hello. This is a large popup"/>
+				<icon name="heart" aria-label="Huge" appearance="circular link"/>
+				<popup size="huge" label="Hello. This is a huge popup"/>
+			</example>
+		</>
+
+		<section label="Flowing" sticky collapsible dividing>
+			<example description="A popup can have no maximum width and continue to flow to fit its content.">
+				<button>Show flowing popup</button>
+				<html>
+					<ui-popup flowing>
+						<ui-grid columns="3" divided align="center">
+							<ui-column>
+								<ui-header level="4">Basic Plan</ui-header>
+								<p><b>2</b> projects, $10 a month</p>
+								<ui-button>Choose</ui-button>
+							</ui-column>
+							<ui-column>
+								<ui-header level="4">Business Plan</ui-header>
+								<p><b>5</b> projects, $20 a month</p>
+								<ui-button>Choose</ui-button>
+							</ui-column>
+							<ui-column>
+								<ui-header level="4">Premium Plan</ui-header>
+								<p><b>8</b> projects, $25 a month</p>
+								<ui-button>Choose</ui-button>
+							</ui-column>
+						</ui-grid>
+					</ui-popup>
+				</html>
+			</example>
+		</>
+
+		<section label="Inverted" sticky collapsible dividing>
+			<example description="A popup can have its colors inverted.">
+				<icon name="heart" aria-label="Inverted" appearance="circular link"/>
+				<popup inverted label="Hello. This is an inverted popup"/>
+				<button icon="plus" aria-label="Add" data-tooltip="Hello. This is an inverted popup" data-position="top left" data-inverted/>
+			</example>
+		</>
+
+		<section label="Colored" sticky collapsible dividing>
+			<example description="A popup can have different colors.">
+				<button>Red</button>
+				<popup color="red" label="Red"/>
+				<button>Orange</button>
+				<popup color="orange" label="Orange"/>
+				<button>Yellow</button>
+				<popup color="yellow" label="Yellow"/>
+				<button>Olive</button>
+				<popup color="olive" label="Olive"/>
+				<button>Green</button>
+				<popup color="green" label="Green"/>
+				<button>Teal</button>
+				<popup color="teal" label="Teal"/>
+				<button>Blue</button>
+				<popup color="blue" label="Blue"/>
+				<button>Violet</button>
+				<popup color="violet" label="Violet"/>
+				<button>Purple</button>
+				<popup color="purple" label="Purple"/>
+				<button>Pink</button>
+				<popup color="pink" label="Pink"/>
+				<button>Brown</button>
+				<popup color="brown" label="Brown"/>
+				<button>Grey</button>
+				<popup color="grey" label="Grey"/>
+				<button>Black</button>
+				<popup color="black" label="Black"/>
+			</example>
+		</>
+
+		<section label="Position" sticky collapsible dividing>
+			<example description="A popup can be positioned around its target.  These are `open` from the start (`open-on=\"manual\"`);  each flips to the other side when there is no room.">
+				<segment padding="lg" appearance="basic">
+					<button id="popup-variations-top">Top right</button>
+					<popup for="popup-variations-top" open-on="manual" visible position="top right" label="Top right"/>
+					<button id="popup-variations-bottom">Bottom center</button>
+					<popup for="popup-variations-bottom" open-on="manual" visible position="bottom center" label="Bottom center"/>
+					<button id="popup-variations-right">Right center</button>
+					<popup for="popup-variations-right" open-on="manual" visible position="right center" label="Right"/>
+				</segment>
+			</example>
+		</>
+
+		<section label="Every position" sticky collapsible dividing>
+			<example description="Fomantic's eight positions, plus four of ours:  `left top`, `left bottom`, `right top` and `right bottom` sit beside the target, lined up with its top or bottom edge.  Word order matters:  `top left` is above.  Hover each button.">
+				<button>Top left</button>
+				<popup position="top left" label="top left"/>
+				<button>Top center</button>
+				<popup position="top center" label="top center"/>
+				<button>Top right</button>
+				<popup position="top right" label="top right"/>
+				<button>Bottom left</button>
+				<popup position="bottom left" label="bottom left"/>
+				<button>Bottom center</button>
+				<popup position="bottom center" label="bottom center"/>
+				<button>Bottom right</button>
+				<popup position="bottom right" label="bottom right"/>
+				<button>Left center</button>
+				<popup position="left center" label="left center"/>
+				<button>Right center</button>
+				<popup position="right center" label="right center"/>
+				<button>Left top</button>
+				<popup position="left top" label="left top"/>
+				<button>Left bottom</button>
+				<popup position="left bottom" label="left bottom"/>
+				<button>Right top</button>
+				<popup position="right top" label="right top"/>
+				<button>Right bottom</button>
+				<popup position="right bottom" label="right bottom"/>
+			</example>
+		</>
+
+		<section label="Hoverable" sticky collapsible dividing>
+			<example description="A hover popup stays open while the pointer is over it (WCAG 1.4.13).  `hoverable=\"false\"` is Fomantic's default:  it closes as the pointer leaves the target.">
+				<button>Hoverable (default)</button>
+				<popup hide-delay="200" label="Move the pointer onto me"/>
+				<button>Not hoverable</button>
+				<popup hoverable="false" label="I close as you leave the button"/>
+			</example>
+		</>
+	</>
+</spell-notebook>

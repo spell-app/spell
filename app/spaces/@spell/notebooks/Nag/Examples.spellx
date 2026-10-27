@@ -1,0 +1,173 @@
+<spell-notebook "nag examples">
+	<header level="1">
+		Nag
+		<header>A nag is a persistent message that stays until dismissed, and can remember the dismissal.</>
+	</>
+	<nag-tab-bar showing="examples"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#types">Types</>
+				<ui-item link="#groups">Groups</>
+				<ui-item link="#variations">Variations</>
+			</>
+		</>
+	</>
+
+	<!--
+		EXAMPLES:  Fomantic's nag page, section by section, in its order (Types, Groups, Variations).  Nags here sit in the
+		flow of the page;  the fixed ones start `hidden` and open from a button, so they never cover the docs.  Most are
+		`closable="false"`, so a stray click doesn't take the example away.
+	-->
+	<section label="Types">
+		<html>
+			<ui-message size="small" state="info">A nag shows as soon as it is on the page, unless its dismissal is remembered (see the Usage tab) or it starts <code>hidden</>; Fomantic's starts hidden until script calls it.</>
+		</>
+
+		<section label="Nag" sticky collapsible dividing>
+			<example description="A simple nag appears in the DOM where it is declared.  Closing it hides it for this visit.">
+				<nag>Look, I am a nag!</nag>
+			</example>
+		</>
+
+		<section label="Title" sticky collapsible dividing>
+			<example description="A nag can have a title:  a `<span class=\"title\">` inside is set off in the title colour.">
+				<html>
+					<ui-nag closable="false"><span class="title">Welcome to the nag module</span> Look, I am a nag!</ui-nag>
+				</html>
+			</example>
+		</>
+
+		<section label="Fixed Nag" sticky collapsible dividing>
+			<example description="A fixed nag appears at the top of the screen:  this one starts `hidden`, and a button shows it (`command=\"--show\"`). `persist` ignores the stored dismissal, for the demo.">
+				<button commandfor="nag-fixed" command="--show" icon="eye">Show fixed nag</button>
+				<nag id="nag-fixed" fixed hidden persistent>Look, I am a fixed nag!</nag>
+			</example>
+			<example description="A fixed nag can appear at the bottom of the screen:  `fixed bottom`.">
+				<button commandfor="nag-bottom-fixed" command="--show" icon="eye">Show bottom fixed nag</button>
+				<nag id="nag-bottom-fixed" fixed bottom hidden persistent>Look, I am a bottom fixed nag!</nag>
+			</example>
+		</>
+
+		<section label="Overlay Nag" sticky collapsible dividing>
+			<example description="An overlay nag is absolute positioned and appears at the top of the parent element, over its content.">
+				<html>
+					<ui-segment>
+						<ui-nag overlay closable="false"><span class="title">Welcome to the nag module</span> Look, I am a top overlay nag!</ui-nag>
+						<ui-image src="/components/ui/images/wireframe/paragraph.png" alt=""></ui-image>
+					</ui-segment>
+				</html>
+			</example>
+			<example description="An overlay nag can appear at the bottom of the parent element:  `overlay bottom`.">
+				<html>
+					<ui-segment>
+						<ui-nag overlay bottom closable="false"><span class="title">Welcome to the nag module</span> Look, I am a bottom overlay nag!</ui-nag>
+						<ui-image src="/components/ui/images/wireframe/paragraph.png" alt=""></ui-image>
+					</ui-segment>
+				</html>
+			</example>
+		</>
+	</>
+
+	<section label="Groups">
+		<section label="Nags" sticky collapsible dividing>
+			<example>
+				<html>
+					<p slot="description">A group of nags can be formatted to appear together.</p>
+					<ui-message slot="description" size="small" class="site-not-ported">Not ported: the <code>.ui.nags</code> group (several nags joined in one bar) -- here they simply stack, each with its own close icon.</ui-message>
+					<ui-nag>
+						<span class="title">First nag</span>
+					</ui-nag>
+					<ui-nag>
+						<span class="title">Second nag</span>
+					</ui-nag>
+					<ui-nag>
+						<span class="title">Third nag</span>
+					</ui-nag>
+				</html>
+			</example>
+		</>
+	</>
+
+	<section label="Variations">
+		<section label="Colored" sticky collapsible dividing>
+			<example description="A nag can be formatted to be different colors.">
+				<html>
+					<ui-nag color="red" closable="false">
+						<span class="title">Red</span>
+					</ui-nag>
+					<ui-nag color="orange" closable="false">
+						<span class="title">Orange</span>
+					</ui-nag>
+					<ui-nag color="yellow" closable="false">
+						<span class="title">Yellow</span>
+					</ui-nag>
+					<ui-nag color="olive" closable="false">
+						<span class="title">Olive</span>
+					</ui-nag>
+					<ui-nag color="green" closable="false">
+						<span class="title">Green</span>
+					</ui-nag>
+					<ui-nag color="teal" closable="false">
+						<span class="title">Teal</span>
+					</ui-nag>
+					<ui-nag color="blue" closable="false">
+						<span class="title">Blue</span>
+					</ui-nag>
+					<ui-nag color="violet" closable="false">
+						<span class="title">Violet</span>
+					</ui-nag>
+					<ui-nag color="purple" closable="false">
+						<span class="title">Purple</span>
+					</ui-nag>
+					<ui-nag color="pink" closable="false">
+						<span class="title">Pink</span>
+					</ui-nag>
+					<ui-nag color="brown" closable="false">
+						<span class="title">Brown</span>
+					</ui-nag>
+					<ui-nag color="black" closable="false">
+						<span class="title">Black</span>
+					</ui-nag>
+				</html>
+			</example>
+		</>
+
+		<section label="Inverted" sticky collapsible dividing>
+			<example description="A nag can be formatted to appear inverted:  a nag is dark by default, `inverted` makes it light;  a coloured one takes its tint.">
+				<html>
+					<ui-nag inverted closable="false"><span class="title">Inverted</span> This nag has inverted colors</ui-nag>
+					<ui-nag inverted color="red" closable="false"><span class="title">Inverted red</span> A tinted nag</ui-nag>
+				</html>
+			</example>
+		</>
+
+		<section label="Size" sticky collapsible dividing>
+			<example description="A nag can have different sizes.">
+				<html>
+					<ui-nag size="mini" closable="false">
+						<span class="title">Mini nag</span>
+					</ui-nag>
+					<ui-nag size="tiny" closable="false">
+						<span class="title">Tiny nag</span>
+					</ui-nag>
+					<ui-nag size="small" closable="false">
+						<span class="title">Small nag</span>
+					</ui-nag>
+					<ui-nag size="large" closable="false">
+						<span class="title">Large nag</span>
+					</ui-nag>
+					<ui-nag size="big" closable="false">
+						<span class="title">Big nag</span>
+					</ui-nag>
+					<ui-nag size="huge" closable="false">
+						<span class="title">Huge nag</span>
+					</ui-nag>
+					<ui-nag size="massive" closable="false">
+						<span class="title">Massive nag</span>
+					</ui-nag>
+				</html>
+			</example>
+		</>
+	</>
+</spell-notebook>

@@ -1,0 +1,77 @@
+<spell-notebook "item usage">
+	<header level="1">
+		Item
+		<header>One item for dropdowns, lists and menus, rendered by whatever holds it.</>
+	</>
+	<item-tab-bar showing="usage"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#using-it">Using it</>
+				<ui-item link="#events">Events</>
+				<ui-item link="#keyboard">Keyboard</>
+				<ui-item link="#accessibility">Accessibility</>
+			</>
+		</>
+	</>
+
+	<!-- USAGE:  how to use it (attributes in practice, events, framework snippets), keyboard, accessibility. -->
+	<section label="Using it">
+		<markdown>
+			Fomantic shares one `.item` between dropdowns, lists and menus, and so does this library: there is one
+			`<ui-item>`, never a `ui-list-item` or `ui-menu-item`. The item looks at what holds it and renders to match:
+
+			- In a dropdown it is data. It renders only its content, and the dropdown draws the option rows (rich markup
+			  inside an item is shown in its row).
+			- In a list it is a list row; in a menu it is a menu item. The box is a link with a `link`, a button with `appearance="link"` or
+			  when the owner makes its items interactive, otherwise a plain block that can hold text, inputs, buttons or a
+			  dropdown.
+			- In an Items view (`<ui-items>`) it is a media object and OWNS the content parts inside it (header, meta,
+			  description, extra); in a list or menu those parts see through it to the list or menu.
+			- Anywhere else it renders just its content.
+
+			`selected` is the canonical attribute for the chosen item; `active`, Fomantic's word, is accepted as an alias in
+			lists and menus. Attributes marked "Dropdown", "List" or "Menu" on the API tab are read only by that owner.
+		</>
+	</>
+
+	<section label="Events">
+		<markdown>
+			An item fires no events of its own: its list or menu fires `ui-select` when a link or button item is activated
+			(`detail.item` is the `<ui-item>`), and a dropdown fires `ui-changed`.
+		</>
+		<markdown>
+			```js
+			document.querySelector("ui-menu").addEventListener("ui-select", (event) => {
+			  console.log(event.detail.item.textContent)
+			})
+			```
+		</>
+	</>
+
+	<section label="Keyboard">
+		<markdown>
+			- A link or button item is a real `<a href>` or `<button>`: **Tab** reaches it, **Enter** follows or clicks it
+			  (**Space** too, for a button).
+			- In an `interactive` menu the menu moves focus between its items with the arrow keys (see the menu's page).
+			- In a dropdown the dropdown handles the keys: its items are never focused themselves.
+			- A `disabled` item is skipped.
+		</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			- In a list the item is a `listitem`; in an `interactive` menu its box is a `menuitem` and the item itself has
+			  `role="none"`; in a navigation menu it adds no role, so its link or button speaks for itself.
+			- A link or button box is a real `<a href>` or `<button>`, so focus, Enter, Space and the accessible name come
+			  from the browser. An icon-only item needs a name: put `aria-label` on the `<ui-item>` and it moves to the box.
+			- A selected item is `aria-current="page"` when it is a link, `aria-current="true"` otherwise.
+			- `disabled` removes a link's `href` (and sets `aria-disabled`), or disables a button.
+			- The `image` shorthand is decorative (`alt=""`); a `divider` is a `role="separator"`.
+			- In a dropdown the dropdown owns the semantics: items become `option`s of its listbox (see the dropdown's page).
+			- If the item fails to render, it shows its children through a bare `<slot>`, so its text and any
+			  links written inside it stay; its box, its own link (`link`), the `icon` and `image` shorthands, a
+			  slotted icon, button items, `menuitem` roles and `aria-current` go.
+		</>
+	</>
+</spell-notebook>

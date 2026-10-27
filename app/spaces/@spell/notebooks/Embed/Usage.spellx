@@ -1,0 +1,134 @@
+<spell-notebook "embed usage">
+	<header level="1">
+		Embed
+		<header>An embed displays content from other websites, like YouTube videos, loaded only when asked
+              for.</>
+	</>
+	<embed-tab-bar showing="usage"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#using-it">Using it</>
+				<ui-item link="#privacy">Privacy</>
+				<ui-item link="#events">Events</>
+				<ui-item link="#behaviors">Behaviors</>
+				<ui-item link="#keyboard">Keyboard</>
+				<ui-item link="#accessibility">Accessibility</>
+				<ui-item link="#framework-usage">Framework usage</>
+			</>
+		</>
+	</>
+
+	<!-- USAGE:  sources, privacy, events, script API, keyboard, accessibility, frameworks. -->
+	<section label="Using it">
+		<markdown>
+			Write `<ui-embed>` with what to show; there is no `.embed()` call to make. The content comes from:
+
+			- `source` (`youtube` or `vimeo`) plus `video-id` (Fomantic's `data-id`: `id` is the element's own) -- your
+			  backend stores the meaningful id, the element builds the URL
+			- or any `http(s)` `url` (other protocols are refused); a YouTube / Vimeo URL gets their player parameters
+
+			`placeholder` is the image shown before the frame loads, `icon` the icon over it (`icon="false"` for none),
+			`label` names it (default `alt`, else "video" / "embedded content"). `autoplay` is on by default, since the
+			click already asked for the video; `branded-ui` keeps the player's branding, and the `parameters` property adds
+			URL parameters (`{ start: 30 }`).
+		</>
+	</>
+
+	<section label="Privacy">
+		<markdown>
+			Until it's activated, an embed makes no request to the other site, not even a preconnect. Fomantic loaded the
+			frame at once; here the placeholder is a real `<button>`, and only a click (or **Enter** / **Space**) loads the
+			`<iframe>`. YouTube videos play from `youtube-nocookie.com`.
+		</>
+		<html>
+			<ui-message size="small" class="site-not-ported">Not ported: custom sources (<code>$.fn.embed.settings.sources</>), and Fomantic's per-source hd and color settings. Give any other player its <code>url</>, and its options through <code>parameters</>.</>
+		</>
+	</>
+
+	<section label="Events">
+		<markdown>
+			- `ui-loading` -- about to load the frame from `url` (a click, **Enter** / **Space**, `host.activate()`);
+			  `detail` is `{ url, originalEvent? }`. `preventDefault()` keeps the placeholder: the place to ask for
+			  consent.
+			- `ui-reset` -- back to the placeholder (`host.reset()`, Fomantic's `reset`); the frame is gone.
+
+			Writing `active` loads the frame without an event.
+		</>
+		<markdown>
+			```js
+			const tour = document.querySelector("ui-embed")
+			tour.parameters = { start: 30 }
+			tour.addEventListener("ui-loading", (event) => {
+			  if (!consent.video) {
+			    event.preventDefault() // keep the placeholder
+			    askForConsent()
+			  }
+			})
+			tour.reset() // back to the placeholder
+			```
+		</>
+	</>
+
+	<section label="Behaviors">
+		<markdown>
+			Fomantic's behaviors are methods and properties on the host:
+
+			- `change(source, id, url)` -- set `source` / `video-id` / `url`
+			- `reset` -- `host.reset()`
+			- `show` -- `host.activate()` (fires `ui-loading`), or `host.active = true` (no event)
+			- `get url`, `get id`, `get placeholder` ... -- read the attributes
+			- `has placeholder` -- `host.placeholder`
+		</>
+	</>
+
+	<section label="Keyboard">
+		<markdown>
+			- **Tab** reaches the play button.
+			- **Enter** / **Space** loads the frame and moves focus into it.
+		</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			- The placeholder is a real `<button>` named "Play" plus the `label` ("Play Fomantic UI intro"; translated).
+			  Give every embed a `label`: it also becomes the frame's `title`, which is how screen readers name an
+			  `<iframe>`.
+			- Once activated, focus moves into the frame, so keyboard users land on the player they asked for.
+			- The video's own controls and captions are the other site's.
+			- If the element fails to render, the video is gone: no play button, no frame,
+			  and no `ui-loading`, `reset()` or focus move.
+			  Only children written inside the element still show, through a bare `<slot>`.
+		</>
+	</>
+
+	<section label="Framework usage">
+		<markdown>Set `parameters` as a property, and listen for `ui-loading` to gate loading.</>
+		<header level="4" id="framework-react">React 19</>
+		<markdown>
+			```jsx
+			<ui-embed source="youtube" video-id={id} label={title} parameters={{ start: 30 }} onui-activate={track} />
+			```
+		</>
+		<header level="4" id="framework-vue">Vue 3.5</>
+		<markdown>
+			```html
+			<!-- compilerOptions.isCustomElement = (tag) => tag.startsWith("ui-") -->
+			<ui-embed source="youtube" :video-id="id" :label="title" :parameters="{ start: 30 }" @ui-loading="track" />
+			```
+		</>
+		<header level="4" id="framework-solid">Solid 2</>
+		<markdown>
+			```jsx
+			// events and rich data are plain props:  `on-<event>={...}`, `options={...}`
+			<ui-embed
+			  source="youtube"
+			  video-id={id}
+			  label={title}
+			  parameters={{ start: 30 }}
+			  on-ui-loading={track}
+			/>
+			```
+		</>
+	</>
+</spell-notebook>

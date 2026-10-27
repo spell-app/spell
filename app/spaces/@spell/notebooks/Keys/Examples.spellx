@@ -1,0 +1,62 @@
+<spell-notebook "keys examples">
+	<header level="1">
+		Keys
+		<header>Keys show a keyboard shortcut as key caps, the way the reader's own keyboard writes it.</>
+	</>
+	<keys-tab-bar showing="examples"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#types">Types</>
+			</>
+		</>
+	</>
+
+	<!--
+		EXAMPLES:  Fomantic's page, section by section, in its order (Types, Content, States, Variations,
+		Groups ...).  Rules, the class-grammar mappings, gaps:  epics/spell-ui-pages/PAGES.md.
+		- A section:  `<ui-section id="examples-types" label="Types" sticky collapsible dividing>` around
+		  its examples;  ids spell out the nesting (`<tab>-<section>-<example>`, lowercase kebab of the headers).
+		- An example:  its own nested section (`label` = the example's name) around
+		  `<ui-example description="...">` and the live markup;  the markup IS the code shown.  A richer
+		  description:  `<p slot="description">` (+ `<ui-message slot="description">`).  Fomantic's header-less
+		  `.another.example`:  a second `<ui-example>` in the same section.
+		- Or write it flat (`<ui-header level="2">`, `<ui-example heading>`) and run `yarn site:sections`:
+		  it nests it and writes the ids (and fixes them after a title changes).
+		- A gap:  an HTML comment `GAP I<n>:  ...` BEFORE the example's section (a comment inside the example
+		  shows in its code).
+	-->
+	<section label="Types">
+		<section label="Keys" sticky collapsible dividing>
+			<example description="`shortcut`, the keys joined by `+`.  `mod` is ⌘ on a Mac and Ctrl elsewhere:  this page shows the keys of the keyboard you're reading it on.">
+				<html>
+					<p>Save with <ui-keys shortcut="mod+S"></ui-keys>, undo with <ui-keys shortcut="mod+Z"></ui-keys>.</p>
+				</html>
+			</example>
+		</>
+
+		<section label="On a Mac, and elsewhere" sticky collapsible dividing>
+			<example description="`platform=\"apple\"` or `\"other\"` draws one keyboard's keys whatever the reader has.">
+				<html>
+					<p><ui-keys shortcut="shift+mod+P" platform="apple"></ui-keys> on a Mac, <ui-keys shortcut="shift+mod+P" platform="other"></ui-keys> elsewhere.</p>
+				</html>
+			</example>
+		</>
+
+		<section label="Two shortcuts" sticky collapsible dividing>
+			<example description="Two shortcuts, a space apart, draw both.">
+				<html>
+					<p>Redo with <ui-keys shortcut="shift+mod+Z mod+Y"></ui-keys>.</p>
+				</html>
+			</example>
+		</>
+
+		<section label="Named keys" sticky collapsible dividing>
+			<example description="Arrows, Enter, Escape, Tab, Backspace, Delete and Space have caps of their own.">
+				<html>
+					<p><ui-keys shortcut="up"></ui-keys> <ui-keys shortcut="down"></ui-keys> to move, <ui-keys shortcut="enter"></ui-keys> to open, <ui-keys shortcut="escape"></ui-keys> to close.</p>
+				</html>
+			</example>
+		</>
+	</>
+</spell-notebook>

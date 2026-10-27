@@ -1,0 +1,45 @@
+<spell-notebook "date usage">
+	<header level="1">
+		Date
+		<header>A date says when something happened, inline and small inside a feed event.</>
+	</>
+	<date-tab-bar showing="usage"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#using-it">Using it</>
+				<ui-item link="#owners">Owners</>
+				<ui-item link="#accessibility">Accessibility</>
+			</>
+		</>
+	</>
+
+	<section label="Using it">
+		<markdown>
+			`<ui-date>` says when something happened: a feed event's date, inline and small inside its summary or above it.
+
+			- `datetime` makes it a real `<time datetime>`, so machines read the date too: an ISO date
+			  (`2026-10-04`), a time, or a duration (`P3D`).
+			- The text is what readers see: "3 days ago", "Today".
+		</>
+	</>
+
+	<section label="Owners">
+		<markdown>
+			`<ui-date>` finds its nearest owner and sets `:state(in-<owner>)` on itself; `UIParts.css` styles it by that
+			state. Its owners, and what each makes of it:
+
+			- [Feed](/components/ui/ui-feed.html) (`:state(in-feed)`): small and muted:  above the summary, or inline at its end
+
+			Anywhere else it is an unstyled block. More on how parts find their owners: [Content parts](/components/ui/ui-header.html).
+		</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			- With `datetime` it renders a `<time datetime>`: the visible text ("3 days ago") is read aloud, the exact date is
+			  there for machines.
+			- No role or tab stop of its own.
+		</>
+	</>
+</spell-notebook>

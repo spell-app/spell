@@ -1,0 +1,119 @@
+<spell-notebook "comment usage">
+	<header level="1">
+		Comment
+		<header>A comment displays user feedback to site content.</>
+	</>
+	<comment-tab-bar showing="usage"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#using-it">Using it</>
+				<ui-item link="#events">Events</>
+				<ui-item link="#keyboard">Keyboard</>
+				<ui-item link="#accessibility">Accessibility</>
+			</>
+		</>
+	</>
+
+	<!-- USAGE:  from the old Astro page (Behaviour, Accessibility), tightened. -->
+	<section label="Using it">
+		<markdown>
+			A comment is made entirely of content parts, which take the comment's look. There are no shorthand attributes.
+
+			- `<ui-avatar src>` is the picture.
+			- A `<ui-content>` beside it holds `<ui-author>` (who), `<ui-meta>` (when: Fomantic's `.metadata`),
+			  `<ui-description>` (the text: Fomantic's `.text`) and `<ui-actions>`.
+			- A `<ui-comments>` placed inside a comment is that comment's thread of replies, indented below it. Threads nest
+			  as deep as the conversation goes.
+			- The `reply` slot takes a reply form (`<ui-form>`): on the list, below every comment; on one comment, to answer
+			  it.
+			- A thread has no variations of its own: `threaded`, `appearance="minimal"`, `inverted` and `size` are set once on the outer
+			  list and reach every thread.
+			- `collapsed` and `disabled` work anywhere: on the list, a thread or one comment.
+		</>
+	</>
+
+	<section label="Events">
+		<markdown>
+			Neither element fires events of its own. Wire your own handlers to the action buttons, and set `collapsed` to fold
+			a thread away.
+		</>
+		<markdown>
+			```js
+			const thread = document.querySelector("ui-comment ui-comments")
+			const toggle = document.querySelector("#show-replies") // a <button aria-expanded="true">
+			toggle.addEventListener("click", () => {
+			  thread.toggleAttribute("collapsed")
+			  toggle.setAttribute("aria-expanded", String(!thread.hasAttribute("collapsed")))
+			})
+			```
+		</>
+
+		<section label="Show and hide replies" sticky collapsible dividing>
+			<example description="A button in the comment's actions folds its thread with `collapsed`, and says so with `aria-expanded`.">
+				<html>
+					<ui-comments>
+						<ui-comment>
+							<ui-avatar src="/components/ui/images/avatar/small/elliot.jpg"></ui-avatar>
+							<ui-content>
+								<ui-author link="#">Elliot Fu</ui-author>
+								<ui-meta>
+									<span>Yesterday at 12:30AM</span>
+								</ui-meta>
+								<ui-description>This has been very useful for my research. Thanks as well!</ui-description>
+								<ui-actions>
+									<button type="button" aria-expanded="true" onclick="
+                              const thread = this.closest('ui-comment').querySelector('ui-comments')
+                              this.setAttribute('aria-expanded', String(!thread.toggleAttribute('collapsed')))
+                            ">Replies</button>
+								</ui-actions>
+							</ui-content>
+							<ui-comments>
+								<ui-comment>
+									<ui-avatar src="/components/ui/images/avatar/small/jenny.jpg"></ui-avatar>
+									<ui-content>
+										<ui-author link="#">Jenny Hess</ui-author>
+										<ui-meta>
+											<span>Just now</span>
+										</ui-meta>
+										<ui-description>Elliot you are always so right :)</ui-description>
+									</ui-content>
+								</ui-comment>
+							</ui-comments>
+						</ui-comment>
+					</ui-comments>
+				</html>
+			</example>
+		</>
+	</>
+
+	<section label="Keyboard">
+		<markdown>
+			The comment itself takes no keys. Everything focusable inside it is yours: real `<button>`s and links in
+			`<ui-actions>`, the author link, the reply form's fields. **Tab** reaches them in reading order, and **Enter** /
+			**Space** come from the browser.
+
+			- the `minimal` look shows a comment's actions while it holds keyboard focus, so a focused action is never invisible.
+		</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			- Each comment is an `<article>`, and a reply's article sits inside the article it answers, which is how HTML
+			  describes a thread of user comments. The list itself has no role: give it a heading, as the
+			  `<ui-header level="3">` in the first example does.
+			- Put real `<button>`s in `<ui-actions>` for actions and links for navigation, so focus, **Enter** and **Space**
+			  come from the browser.
+			- `<ui-avatar>` is decorative by default (`alt=""`), since the author's name sits beside it; set `alt` when the
+			  picture says something the name doesn't.
+			- `collapsed` hides a comment or thread from everyone, screen readers included. A button that toggles it should
+			  carry `aria-expanded`.
+			- `disabled` fades the comment, blocks the mouse and sets `aria-disabled`. Its buttons and links stay in the tab
+			  order; add `inert` when they must not be reached at all.
+			- Label the reply field, as the examples do with `aria-label`.
+			- If a list or comment fails to render, it shows its children through a bare `<slot>`, so the
+			  conversation still reads in order; its boxes and comment styling go,
+			  and so does anything in its `reply` slot.
+		</>
+	</>
+</spell-notebook>

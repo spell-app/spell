@@ -1,0 +1,62 @@
+<spell-notebook "section theming">
+	<header level="1">
+		Section
+		<header>A section is a titled block of content that can close and keep its title in view.</>
+	</>
+	<section-tab-bar showing="theming"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#tokens">Tokens</>
+				<ui-item link="#themes">Themes</>
+			</>
+		</>
+	</>
+
+	<!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
+	<section label="Tokens">
+		<markdown>
+			Theme with the public `--ui-section-*` tokens:
+			set one on the element, on any ancestor (`:root` for every section), or on the box through `::part(section)`.
+
+			- the `basic` look replaces the box, rule and tint, whatever you set.
+			- Never set the `--_ui-section-*` names:  they're the sheet's private plumbing.
+
+			Style the pieces with `::part()`:
+
+			- `title`:  the bar that sticks;  in it, `heading`, and with `collapsible`, `toggle` and `fold-icon`
+			- `icon`, `header` (the title's text), `badge`, `actions`
+			- `tip`:  the `description`, under the title bar
+			- `subhead`:  the hint
+			- `content`
+		</>
+		<markdown>
+			```css
+			ui-section {
+			  --ui-section-scrolling-height: 20em;
+			  /* chevron up while open, down while closed */
+			  --ui-section-fold-icon-rotate: 180deg;
+			  --ui-section-fold-icon-folded-rotate: 0deg;
+			}
+			ui-section::part(heading) {
+			  letter-spacing: 0.02em;
+			}
+			```
+		</>
+		<markdown>Edit a value below to try it.</>
+		<html>
+			<ui-docs-tokens family="ui-section" playground>
+				<ui-section label="Getting started">
+					<p>A titled block of content. Its title is a real heading: an <code>h2</> at the top level.</>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="Themes">
+		<markdown>
+			Section is ours, not Fomantic's:  the theme menu in the header changes the page around it, and the
+			header, segment and accordion looks it borrows follow the colour scheme.
+		</>
+	</>
+</spell-notebook>

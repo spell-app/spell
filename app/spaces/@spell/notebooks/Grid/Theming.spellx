@@ -1,0 +1,76 @@
+<spell-notebook "grid theming">
+	<header level="1">
+		Grid
+		<header>A grid is used to harmonize negative space in a layout.</>
+	</>
+	<grid-tab-bar showing="theming"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#tokens">Tokens</>
+				<ui-item link="#themes">Themes</>
+			</>
+		</>
+	</>
+
+	<!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
+	<section label="Tokens">
+		<markdown>
+			Theme with the public `--ui-grid-*` tokens: set one on the grid element, on any ancestor (a region, `:root`), or
+			on the grid's box through `::part(grid)` (or on `.ui.grid` in your app stylesheet); its rows and columns follow.
+			They inherit into the shadow roots, where the sheet reads each through a private alias, so nothing inside blocks
+			them.
+		</>
+		<markdown>
+			```css
+			/* every grid on the page */
+			:root {
+			  --ui-grid-divider-color: var(--ui-border-color-strong);
+			}
+			/* one grid */
+			ui-grid.roomy {
+			  --ui-grid-gutter: 3em;
+			}
+			```
+		</>
+		<message state="info" size="small">
+			<markdown>
+				`spacing="lg"` and `spacing="compact"` swap in their own gutter tokens (`--ui-grid-relaxed-gutter`, `--ui-grid-compact-gutter`
+				...), whatever the base gutter; `celled` reads the `--ui-grid-celled-*` ones. Never set the `--_ui-*` /
+				`--_grid-*` names: they're the sheet's private plumbing.
+			</>
+		</>
+		<markdown>Edit a value below to try it.</>
+		<html>
+			<ui-docs-tokens family="ui-grid" playground>
+				<ui-grid>
+					<ui-column width="4">
+						<p>Four wide</>
+					</>
+					<ui-column width="4">
+						<p>Four wide</>
+					</>
+					<ui-column width="4">
+						<p>Four wide</>
+					</>
+					<ui-column width="4">
+						<p>Four wide</>
+					</>
+					<ui-column width="8">
+						<p>Eight wide</>
+					</>
+					<ui-column width="8">
+						<p>Eight wide</>
+					</>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="Themes">
+		<markdown>
+			The theme menu above picks the theme for every page of the site:  Spell, Glass, Fruity or Merlot,
+			each restyling this component through its tokens.
+		</>
+	</>
+</spell-notebook>

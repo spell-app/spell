@@ -1,0 +1,412 @@
+<spell-notebook "sidebar examples">
+	<header level="1">
+		Sidebar
+		<header>A sidebar hides additional content beside a page.</>
+	</>
+	<sidebar-tab-bar showing="examples"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#types">Types</>
+				<ui-item link="#states">States</>
+				<ui-item link="#variations">Variations</>
+				<ui-item link="#more-examples">More Examples</>
+			</>
+		</>
+	</>
+
+	<!--
+		EXAMPLES:  Fomantic's sidebar page, its Definition tab section by section (Types, States, Variations), then its
+		Examples tab (More Examples).  Fomantic's demos slide sidebars over the whole docs page;  here each one lives in its
+		own `<ui-pushable>` (Fomantic's custom context), and buttons toggle them through invoker commands (`commandfor` +
+		`command="--toggle"`):  no script.  Escape or a click on the dimmed page beside a modal sidebar closes it.
+	-->
+	<section label="Types">
+		<section label="Sidebar" sticky collapsible dividing>
+			<example>
+				<html>
+					<p slot="description">A sidebar:  <code>&lt;ui-pushable&gt;</code>, the context, holds the sidebars and one <code>&lt;ui-pusher&gt;</code>, the page beside them.</p>
+					<ui-message slot="description" state="warning" size="small">Although sidebars can be used with any content, in most cases sidebars hold an inverted vertical <code>&lt;ui-menu&gt;</code>. See the Usage tab for more details.</ui-message>
+				</html>
+				<pushable>
+					<sidebar id="sidebar-simple" inverted aria-label="Site">
+						<menu direction="vertical" inverted fluid aria-label="Site">
+							<item link="#one">1</item>
+							<item link="#two">2</item>
+							<item link="#three">3</item>
+						</menu>
+					</sidebar>
+					<pusher>
+						<segment appearance="basic">
+							<button commandfor="sidebar-simple" command="--toggle" icon="sidebar">Toggle</button>
+							<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
+						</segment>
+					</pusher>
+				</pushable>
+			</example>
+		</>
+
+		<section label="Labeled Icon" sticky collapsible dividing>
+			<example description="A thin sidebar of a `labeled icon` menu:  each item an icon over its label.">
+				<pushable>
+					<sidebar id="sidebar-labeled" width="thin" inverted aria-label="Sections">
+						<menu direction="vertical" inverted fluid labeled icon aria-label="Sections">
+							<item link="#home" icon="home">Home</item>
+							<item link="#topics" icon="block layout">Topics</item>
+							<item link="#friends" icon="smile">Friends</item>
+						</menu>
+					</sidebar>
+					<pusher>
+						<segment appearance="basic">
+							<button commandfor="sidebar-labeled" command="--toggle" icon="sidebar">Toggle</button>
+							<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
+						</segment>
+					</pusher>
+				</pushable>
+			</example>
+		</>
+	</>
+
+	<section label="States">
+		<section label="Visible" sticky collapsible dividing>
+			<example>
+				<html>
+					<p slot="description">A sidebar can be visible on the page: add <code>visible</code>.</p>
+					<ui-message slot="description" state="info" size="small">A modal sidebar that starts <code>visible</code> takes focus as the page loads, so a sidebar shown from the start is usually <code>persistent</code>: part of the page, nothing dimmed or blocked.</ui-message>
+				</html>
+				<pushable>
+					<sidebar width="thin" transition="push" persistent visible aria-label="Sections">
+						<menu direction="vertical" fluid aria-label="Sections">
+							<item link="#alpha">Alpha</item>
+							<item link="#beta">Beta</item>
+							<item link="#gamma">Gamma</item>
+						</menu>
+					</sidebar>
+					<pusher>
+						<segment appearance="basic">
+							<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
+						</segment>
+					</pusher>
+				</pushable>
+			</example>
+		</>
+
+		<section label="Dimmed" sticky collapsible dividing>
+			<example>
+				<html>
+					<p slot="description">The pusher is the element pushed away by the sidebar: it holds your site content. A pusher is dimmed while a modal sidebar beside it is visible.</p>
+					<ui-message slot="description" size="small" class="site-not-ported">Not ported: a <code>dimmed</code> pusher of its own -- the pushable dims (and makes inert) its pusher exactly while a modal sidebar shows, so the two never disagree.</ui-message>
+				</html>
+				<pushable>
+					<sidebar id="sidebar-dimmed" transition="overlay" inverted aria-label="Dimmed">
+						<menu direction="vertical" inverted fluid aria-label="Dimmed">
+							<item link="#one">1</item>
+							<item link="#two">2</item>
+						</menu>
+					</sidebar>
+					<pusher>
+						<segment appearance="basic">
+							<button commandfor="sidebar-dimmed" command="--show" icon="sidebar">Show</button>
+							<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
+						</segment>
+					</pusher>
+				</pushable>
+			</example>
+		</>
+	</>
+
+	<section label="Variations">
+		<section label="Direction" sticky collapsible dividing>
+			<example description="A sidebar can appear on different sides of the page:  `position` is `left` (the default), `right`, `top` or `bottom`.  Top and bottom sidebars overlay the page by default.">
+				<buttons>
+					<button commandfor="sidebar-position-left" command="--toggle">Left</button>
+					<button commandfor="sidebar-position-right" command="--toggle">Right</button>
+					<button commandfor="sidebar-position-top" command="--toggle">Top</button>
+					<button commandfor="sidebar-position-bottom" command="--toggle">Bottom</button>
+				</buttons>
+				<pushable>
+					<sidebar id="sidebar-position-left" inverted aria-label="Left">
+						<menu direction="vertical" inverted fluid aria-label="Left">
+							<item link="#one">One</item>
+							<item link="#two">Two</item>
+						</menu>
+					</sidebar>
+					<sidebar id="sidebar-position-right" position="right" inverted aria-label="Right">
+						<menu direction="vertical" inverted fluid aria-label="Right">
+							<item link="#one">One</item>
+							<item link="#two">Two</item>
+						</menu>
+					</sidebar>
+					<sidebar id="sidebar-position-top" position="top" inverted aria-label="Top">
+						<menu inverted fluid aria-label="Top">
+							<item link="#one">One</item>
+							<item link="#two">Two</item>
+						</menu>
+					</sidebar>
+					<sidebar id="sidebar-position-bottom" position="bottom" inverted aria-label="Bottom">
+						<menu inverted fluid aria-label="Bottom">
+							<item link="#one">One</item>
+							<item link="#two">Two</item>
+						</menu>
+					</sidebar>
+					<pusher>
+						<segment appearance="basic">
+							<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
+							<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
+						</segment>
+					</pusher>
+				</pushable>
+			</example>
+		</>
+
+		<section label="Width" sticky collapsible dividing>
+			<example>
+				<html>
+					<p slot="description">A sidebar can specify its width:  <code>width</code> is very thin (60px), thin (150px), 260px by default, wide (350px) or very wide (475px). Or it's columns of the viewport:  4, 1/4, 25%.</p>
+					<ui-message slot="description" size="small">A sidebar adjusts its animations to any width, the words' or your own <code>--ui-sidebar-width</code>.</ui-message>
+				</html>
+				<buttons wrapping>
+					<button commandfor="sidebar-width-very-thin" command="--toggle">Very thin</button>
+					<button commandfor="sidebar-width-thin" command="--toggle">Thin</button>
+					<button commandfor="sidebar-width-default" command="--toggle">Default</button>
+					<button commandfor="sidebar-width-wide" command="--toggle">Wide</button>
+					<button commandfor="sidebar-width-very-wide" command="--toggle">Very wide</button>
+					<button commandfor="sidebar-width-quarter" command="--toggle">A quarter</button>
+				</buttons>
+				<pushable>
+					<sidebar id="sidebar-width-very-thin" width="very thin" transition="overlay" inverted aria-label="Very thin">
+						<menu direction="vertical" inverted fluid icon aria-label="Very thin">
+							<item link="#home" icon="home" aria-label="Home"/>
+							<item link="#topics" icon="block layout" aria-label="Topics"/>
+						</menu>
+					</sidebar>
+					<sidebar id="sidebar-width-thin" width="thin" transition="overlay" inverted aria-label="Thin">
+						<menu direction="vertical" inverted fluid aria-label="Thin">
+							<item link="#thin">Thin</item>
+						</menu>
+					</sidebar>
+					<sidebar id="sidebar-width-default" transition="overlay" inverted aria-label="Default">
+						<menu direction="vertical" inverted fluid aria-label="Default">
+							<item link="#default">Default</item>
+						</menu>
+					</sidebar>
+					<sidebar id="sidebar-width-wide" width="wide" transition="overlay" inverted aria-label="Wide">
+						<menu direction="vertical" inverted fluid aria-label="Wide">
+							<item link="#wide">Wide</item>
+						</menu>
+					</sidebar>
+					<sidebar id="sidebar-width-very-wide" width="very wide" transition="overlay" inverted aria-label="Very wide">
+						<menu direction="vertical" inverted fluid aria-label="Very wide">
+							<item link="#very-wide">Very wide</item>
+						</menu>
+					</sidebar>
+					<sidebar id="sidebar-width-quarter" width="1/4" transition="overlay" inverted aria-label="A quarter">
+						<menu direction="vertical" inverted fluid aria-label="A quarter">
+							<item link="#quarter">A quarter</item>
+						</menu>
+					</sidebar>
+					<pusher>
+						<segment appearance="basic">
+							<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
+						</segment>
+					</pusher>
+				</pushable>
+			</example>
+		</>
+
+		<section label="Blurring" sticky collapsible dividing>
+			<example description="A `blurring` sidebar blurs the dimmed page beside it (Fomantic's `blurring` dimmer).">
+				<pushable>
+					<sidebar id="sidebar-blurring" blurring transition="overlay" aria-label="Blurring">
+						<menu direction="vertical" fluid aria-label="Blurring">
+							<item link="#one">One</item>
+						</menu>
+					</sidebar>
+					<pusher>
+						<segment appearance="basic">
+							<button commandfor="sidebar-blurring" command="--toggle" icon="sidebar">Toggle</button>
+							<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
+						</segment>
+					</pusher>
+				</pushable>
+			</example>
+		</>
+	</>
+
+	<section label="More Examples">
+		<section label="Transitions" sticky collapsible dividing>
+			<example>
+				<html>
+					<p slot="description">Not all sidebar transitions are available for every sidebar direction. Overlay, push and scale down work on every edge;  uncover (the default at the sides), slide along and slide out on the left and right only.</p>
+					<ui-message slot="description" size="small" class="site-not-ported">Not ported: Fomantic's <code>dimPage</code> setting -- a modal sidebar always dims the page beside it, a <code>persistent</code> one never does.</ui-message>
+				</html>
+				<buttons wrapping>
+					<button commandfor="sidebar-transition-overlay" command="--toggle">Overlay</button>
+					<button commandfor="sidebar-transition-push" command="--toggle">Push</button>
+					<button commandfor="sidebar-transition-scale" command="--toggle">Scale Down</button>
+					<button commandfor="sidebar-transition-uncover" command="--toggle">Uncover</button>
+					<button commandfor="sidebar-transition-along" command="--toggle">Slide Along</button>
+					<button commandfor="sidebar-transition-out" command="--toggle">Slide Out</button>
+				</buttons>
+				<pushable>
+					<sidebar id="sidebar-transition-overlay" transition="overlay" inverted aria-label="Overlay">
+						<menu direction="vertical" inverted fluid aria-label="Overlay">
+							<item link="#overlay">Overlay</item>
+						</menu>
+					</sidebar>
+					<sidebar id="sidebar-transition-push" transition="push" inverted aria-label="Push">
+						<menu direction="vertical" inverted fluid aria-label="Push">
+							<item link="#push">Push</item>
+						</menu>
+					</sidebar>
+					<sidebar id="sidebar-transition-scale" transition="scale down" inverted aria-label="Scale down">
+						<menu direction="vertical" inverted fluid aria-label="Scale down">
+							<item link="#scale">Scale Down</item>
+						</menu>
+					</sidebar>
+					<sidebar id="sidebar-transition-uncover" transition="uncover" inverted aria-label="Uncover">
+						<menu direction="vertical" inverted fluid aria-label="Uncover">
+							<item link="#uncover">Uncover</item>
+						</menu>
+					</sidebar>
+					<sidebar id="sidebar-transition-along" transition="slide along" inverted aria-label="Slide along">
+						<menu direction="vertical" inverted fluid aria-label="Slide along">
+							<item link="#along">Slide Along</item>
+						</menu>
+					</sidebar>
+					<sidebar id="sidebar-transition-out" transition="slide out" inverted aria-label="Slide out">
+						<menu direction="vertical" inverted fluid aria-label="Slide out">
+							<item link="#out">Slide Out</item>
+						</menu>
+					</sidebar>
+					<pusher>
+						<segment appearance="basic">
+							<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
+							<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
+						</segment>
+					</pusher>
+				</pushable>
+			</example>
+		</>
+
+		<section label="Displaying Multiple" sticky collapsible dividing>
+			<example description="Multiple sidebars can be displayed at the same time when they are `persistent`, with a transition like push or overlay. A modal sidebar is a drawer:  one at a time.">
+				<buttons>
+					<button commandfor="sidebar-multiple-left" command="--toggle">Left</button>
+					<button commandfor="sidebar-multiple-right" command="--toggle">Right</button>
+				</buttons>
+				<pushable>
+					<sidebar id="sidebar-multiple-left" width="thin" transition="overlay" persistent inverted aria-label="Left">
+						<menu direction="vertical" inverted fluid aria-label="Left">
+							<item link="#left">Left</item>
+						</menu>
+					</sidebar>
+					<sidebar id="sidebar-multiple-right" position="right" width="thin" transition="overlay" persistent inverted aria-label="Right">
+						<menu direction="vertical" inverted fluid aria-label="Right">
+							<item link="#right">Right</item>
+						</menu>
+					</sidebar>
+					<pusher>
+						<segment appearance="basic">
+							<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
+						</segment>
+					</pusher>
+				</pushable>
+			</example>
+		</>
+
+		<!-- GAP I73:  a menu item can't toggle the sidebar (no invoker commands on `<ui-item>`);  a button in the menu does. -->
+		<section label="Using a custom context" sticky collapsible dividing>
+			<example>
+				<html>
+					<p slot="description">A sidebar can sit inside any element, not just a page's body: its <code>&lt;ui-pushable&gt;</code> is the context.</p>
+				</html>
+				<message slot="description" state="info" size="small">A sidebar's context can't have any padding: pad its pusher's content instead.</message>
+				<menu attach="top" aria-label="Demo">
+					<item>
+						<button commandfor="sidebar-context" command="--toggle" icon="sidebar" appearance="basic" padding="compact">Menu</button>
+					</item>
+				</menu>
+				<pushable>
+					<sidebar id="sidebar-context" width="thin" inverted aria-label="Application">
+						<menu direction="vertical" inverted fluid labeled icon aria-label="Application">
+							<item link="#home" icon="home">Home</item>
+							<item link="#topics" icon="block layout">Topics</item>
+							<item link="#friends" icon="smile">Friends</item>
+							<item link="#history" icon="calendar">History</item>
+						</menu>
+					</sidebar>
+					<pusher>
+						<segment appearance="basic">
+							<header level="3">Application Content</header>
+							<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
+						</segment>
+					</pusher>
+				</pushable>
+			</example>
+		</>
+
+		<section label="Triggering show/hide with other content" sticky collapsible dividing>
+			<example description="Any `<ui-button>` (or native `<button>`) toggles a sidebar:  `commandfor` its id, `command=\"--toggle\"`.">
+				<button commandfor="sidebar-trigger" command="--toggle">Trigger Sidebar</button>
+				<pushable>
+					<sidebar id="sidebar-trigger" inverted aria-label="Triggered">
+						<menu direction="vertical" inverted fluid aria-label="Triggered">
+							<item link="#one">1</item>
+							<item link="#two">2</item>
+						</menu>
+					</sidebar>
+					<pusher>
+						<segment appearance="basic">
+							<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
+						</segment>
+					</pusher>
+				</pushable>
+			</example>
+		</>
+
+		<section label="Triggering custom behavior with other content" sticky collapsible dividing>
+			<example description="You can also say what the button does:  `--show`, `--close` or `--toggle`.">
+				<button commandfor="sidebar-open" command="--show">Open Sidebar</button>
+				<pushable>
+					<sidebar id="sidebar-open" inverted aria-label="Opened">
+						<menu direction="vertical" inverted fluid aria-label="Opened">
+							<item link="#one">1</item>
+							<item link="#two">2</item>
+						</menu>
+					</sidebar>
+					<pusher>
+						<segment appearance="basic">
+							<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
+						</segment>
+					</pusher>
+				</pushable>
+			</example>
+		</>
+
+		<section label="Starting Visible" sticky collapsible dividing>
+			<example>
+				<html>
+					<p slot="description">A sidebar can start visible: <code>visible</code>.</p>
+					<ui-message slot="description" state="info" size="small">No pre-script class is needed: the elements lay the sidebar out before and after they load, at any width. Here it's <code>persistent</code> too, so it doesn't take focus as the page loads.</ui-message>
+				</html>
+				<pushable>
+					<sidebar width="thin" transition="push" persistent visible inverted aria-label="Application">
+						<menu direction="vertical" inverted fluid labeled icon aria-label="Application">
+							<item link="#home" icon="home">Home</item>
+							<item link="#topics" icon="block layout">Topics</item>
+							<item link="#friends" icon="smile">Friends</item>
+							<item link="#history" icon="calendar">History</item>
+						</menu>
+					</sidebar>
+					<pusher>
+						<segment appearance="basic">
+							<header level="3">Application Content</header>
+							<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
+						</segment>
+					</pusher>
+				</pushable>
+			</example>
+		</>
+	</>
+</spell-notebook>

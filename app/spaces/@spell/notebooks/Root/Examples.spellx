@@ -1,0 +1,134 @@
+<spell-notebook "root examples">
+	<header level="1">
+		Root
+		<header>A root loads the components inside it on demand, sets their theme, size, icons and emoji, and shows
+              them once they're ready.</>
+	</>
+	<root-tab-bar showing="examples"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#types">Types</>
+				<ui-item link="#while-loading">While loading</>
+				<ui-item link="#icons-and-emoji">Icons and emoji</>
+			</>
+		</>
+	</>
+
+	<!--
+		EXAMPLES:  ours only, no Fomantic page.  The old Astro page's examples, restyled.  This page itself runs inside a
+		`<ui-root display="immediately">`, which loads every example's components;  the roots below are NESTED in it.
+		- Icon packs:  the page's root already has every built-in pack, so the icon examples use a pack of their own,
+		  `site/examples/icon-pack/` (one icon, `spell sparkle`).
+		- The Replay example needs the small script at the end of this tab:  components on this page are loaded already.
+	-->
+	<section label="Types">
+		<section label="Root" sticky collapsible dividing>
+			<example description="Put one around a page or an app:  each `ui-*` tag inside loads its component the first time it appears, and nothing else is downloaded. Load just the root: `import \"spell/ui/ui-root\"`.">
+				<html>
+					<ui-root>
+						<ui-segment>
+							<ui-header>Report</ui-header>
+							<p>Every component in here was loaded by the root, on demand.</p>
+							<ui-button color="primary">Save</ui-button>
+						</ui-segment>
+					</ui-root>
+				</html>
+			</example>
+		</>
+
+		<section label="Theme and size" sticky collapsible dividing>
+			<example description="`theme` and `size` apply to everything inside.">
+				<html>
+					<ui-root theme="dark" size="small" width="100%" aria-label="Dark report">
+						<ui-segment>
+							<ui-header>Report</ui-header>
+							<p>Dark and small: everything inside follows.</p>
+							<ui-button color="primary">Save</ui-button>
+						</ui-segment>
+					</ui-root>
+				</html>
+			</example>
+		</>
+
+		<section label="A box" sticky collapsible dividing>
+			<example description="With `width` or `height` (CSS lengths, or `window` for the viewport's), the root is a box that scrolls its own content.  `fixed` pins it to the viewport:  a full-page app shell.">
+				<root height="8em" aria-label="Numbers">
+					<list bulleted>
+						<item>One</item>
+						<item>Two</item>
+						<item>Three</item>
+						<item>Four</item>
+						<item>Five</item>
+						<item>Six</item>
+						<item>Seven</item>
+						<item>Eight</item>
+					</list>
+				</root>
+			</example>
+		</>
+	</>
+
+	<section label="While loading">
+		<markdown>
+			`display` says what shows until every component inside is ready (or `timeout`, 5s by default, has passed):
+
+			- `skeleton` (the default): a `<ui-placeholder>` for each component that describes one, drawn in the root's own
+			  shadow DOM, so your page's DOM is never touched. Placeholders stack in page order; inline ones (buttons,
+			  labels, inputs) sit side by side.
+			- `when-ready`: nothing, with the space kept.
+			- `immediately`: everything as it arrives.
+
+			`loading="..."` shows a `<ui-loader>` with that message instead (a bare `loading` says "Loading…").
+		</>
+
+		<section label="Replay" sticky collapsible dividing>
+			<example description="Components on this page are loaded already, so the demo holds the root for 2 seconds:  press a button to see what a slow load shows.">
+				<button icon="redo" data-replay="skeleton">Replay: skeleton</button>
+				<button icon="redo" data-replay="loading">Replay: loading message</button>
+				<segment id="root-replay-stage" appearance="basic">
+					<root display="skeleton">
+						<card>
+							<content>
+								<header>Report</header>
+								<description>Every component inside was ready before this showed.</description>
+							</content>
+						</card>
+						<button color="primary">Save</button>
+						<button>Cancel</button>
+					</root>
+				</segment>
+			</example>
+		</>
+	</>
+
+	<section label="Icons and emoji">
+		<section label="Icon packs" sticky collapsible dividing>
+			<example description="`icons` adds packs for everything inside, comma-separated, later wins:  built-in ids (fa7-free, fa7-brands, fomantic) or `pack.js` URLs. Outside a root, the page's packs apply (`UI.icons.use()`):  the sparkle is only in the example's own pack, so inside the root it draws, outside it doesn't.">
+				<html>
+					<p>Inside: <ui-root icons="examples/icon-pack/pack.js" display="immediately"><ui-icon name="spell sparkle" size="big" label="Sparkle"></ui-icon></ui-root> Outside: <ui-icon name="spell sparkle" size="big" label="Sparkle"></ui-icon></p>
+				</html>
+			</example>
+		</>
+
+		<section label="Emoji names" sticky collapsible dividing>
+			<example description="`emoji=\"fomantic\"` uses Fomantic's names for everything inside;  outside, the page's set (CLDR by default).  `pencil` is a memo in Fomantic's names, a pencil in CLDR's.">
+				<html>
+					<p>Inside: <ui-root emoji="fomantic" display="immediately"><ui-emoji name="pencil" size="small" label="pencil (Fomantic)"></ui-emoji></ui-root> Outside: <ui-emoji name="pencil" size="small" label="pencil (CLDR)"></ui-emoji></p>
+				</html>
+			</example>
+		</>
+
+		<!-- GAP I62:  a root's `size` scales only components (its scale token), not plain text or a bare `<ui-icon>` inside. -->
+		<section label="Nested roots" sticky collapsible dividing>
+			<example description="A root inside a root inherits what it doesn't set and adds its own packs.  The outer one is ready only once every inner one is.">
+				<root icons="examples/icon-pack/pack.js" display="immediately">
+					<button icon="spell sparkle">Outer</button>
+					<root size="large" display="immediately">
+						<button icon="spell sparkle">Inner: large, with the outer root's pack</button>
+					</root>
+				</root>
+			</example>
+		</>
+	</>
+</spell-notebook>

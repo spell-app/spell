@@ -1,0 +1,284 @@
+<spell-notebook "input examples">
+	<header level="1">
+		Input
+		<header>An input is a field used to elicit a response from a user.</>
+	</>
+	<input-tab-bar showing="examples"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#types">Types</>
+				<ui-item link="#states">States</>
+				<ui-item link="#variations">Variations</>
+			</>
+		</>
+	</>
+
+	<!--
+		EXAMPLES:  Fomantic's input page, section by section, in its order (Types, States, Variations), plus our native
+		types and the other form states;  `<ui-textarea>` (same family) has its own page, `ui-textarea.html`.
+		Every field is named with `aria-label`;  in a form a `<label for>` does the same job.
+	-->
+	<section label="Types">
+		<section label="Input" sticky collapsible dividing>
+			<example description="A standard input.">
+				<input placeholder="Search..." aria-label="Search"/>
+			</example>
+		</>
+
+		<section label="Native types" sticky collapsible dividing>
+			<example description="`type` passes through to the native input:  password, e-mail, number, date and the rest.">
+				<input type="password" placeholder="Password" aria-label="Password"/>
+				<input type="email" placeholder="E-mail" aria-label="E-mail"/>
+				<input type="number" placeholder="Quantity" aria-label="Quantity"/>
+				<input type="date" aria-label="Date"/>
+			</example>
+			<example description="Numbers sit right-aligned against their unit, in tabular figures:  `type=\"number\"`, or a text field with `inputmode=\"decimal\"` / `\"numeric\"`.  `--ui-input-numeric-align: start` sets them back.">
+				<input type="number" value="250" labeled="right" label="°" aria-label="Hue"/>
+				<input inputmode="decimal" value="55.5" labeled="right" label="%" aria-label="Lightness"/>
+			</example>
+		</>
+
+		<section label="File Input" sticky collapsible dividing>
+			<example>
+				<html>
+					<p slot="description">A file input: <code>type="file"</code>.</p>
+					<ui-message slot="description" size="small">For a trigger button with your own text or an icon, use a <a href="#examples-variations-file-action">File Action</a> input.</ui-message>
+				</html>
+				<input type="file" aria-label="Upload"/>
+			</example>
+		</>
+
+		<!-- GAP I95:  no invisible file input that a separate `<label for>` (a button, a placeholder segment) triggers;  left out. -->
+		<section label="Textarea" sticky collapsible dividing>
+			<example>
+				<html>
+					<p slot="description">A <code>&lt;ui-textarea&gt;</code> allows extended user input. Its states, variations and the rest are on the <a href="/components/ui/ui-textarea.html">Textarea</a> page.</p>
+				</html>
+				<textarea fluid rows="3" placeholder="Tell us more" aria-label="Tell us more"/>
+			</example>
+		</>
+	</>
+
+	<section label="States">
+		<html>
+			<ui-message size="small" class="site-not-ported">Not ported: Fomantic's <code>focus</> class, which draws the focused look on an unfocused input -- the look follows real focus (<code>:focus-visible</>), so click or tab into any field.</>
+		</>
+
+		<section label="Loading" sticky collapsible dividing>
+			<example>
+				<html>
+					<p slot="description">An icon input field can show that it is currently loading data.</p>
+				</html>
+				<message slot="description" size="small">Loading inputs automatically turn their icon into a spinner while loading.</message>
+				<input loading icon="search" icon-position="left" placeholder="Search..." aria-label="Search"/>
+			</example>
+			<example>
+				<input loading icon="search" placeholder="Search..." aria-label="Search"/>
+			</example>
+		</>
+
+		<!-- GAP I96:  Fomantic's `purple double loading` and `red fast elastic loading` inputs have no attributes;  left out. -->
+		<section label="Disabled" sticky collapsible dividing>
+			<example description="An input field can show that it is disabled.">
+				<input disabled placeholder="Search..." aria-label="Search"/>
+			</example>
+			<example>
+				<input disabled icon="search" placeholder="Search..." aria-label="Search"/>
+			</example>
+		</>
+
+		<section label="Error" sticky collapsible dividing>
+			<example description="An input field can show the data contains errors:  `state=\"error\"`.">
+				<input state="error" placeholder="Search..." aria-label="Search"/>
+			</example>
+			<example description="Input types with built-in validation (date, email, url ...) and `required` fields get the error look by themselves when invalid. They show it once the user has interacted with them, as `:user-invalid` does, so an untouched empty field never shows it.">
+				<input type="date" aria-label="Date"/>
+				<input type="email" placeholder="E-Mail Address" required aria-label="E-Mail Address"/>
+			</example>
+		</>
+
+		<section label="Info, success, warning" sticky collapsible dividing>
+			<example description="`state` also takes `info`, `success` and `warning`;  a state tints a joined label too.">
+				<input state="info" placeholder="Info" aria-label="Info"/>
+				<input state="success" placeholder="Success" aria-label="Success"/>
+				<input state="warning" placeholder="Warning" aria-label="Warning"/>
+				<input state="error" label="https://" placeholder="mysite.com" aria-label="Site"/>
+			</example>
+		</>
+	</>
+
+	<section label="Variations">
+		<section label="Icon" sticky collapsible dividing>
+			<example>
+				<html>
+					<p slot="description">An input can be formatted with an icon: <code>icon</code>, at the end by default.</p>
+					<ui-message slot="description" size="small">Input icons don't receive pointer events unless they're <code>link</code> icons (the <code>icon</code> slot).</ui-message>
+				</html>
+				<input icon="search" placeholder="Search..." aria-label="Search"/>
+			</example>
+			<example description="`icon-position=\"left\"` puts it at the start.">
+				<input icon="users" icon-position="left" placeholder="Search users..." aria-label="Search users"/>
+			</example>
+			<example>
+				<input placeholder="Search..." aria-label="Search">
+					<icon slot="icon" name="search" appearance="circular link"/>
+				</input>
+			</example>
+			<example>
+				<input placeholder="Search..." aria-label="Search">
+					<icon slot="icon" name="search" inverted appearance="circular link"/>
+				</input>
+			</example>
+		</>
+
+		<section label="Labeled" sticky collapsible dividing>
+			<example description="An input can be formatted with a label:  `label` is its text, and `labeled` says where it sits.">
+				<input label="https://" placeholder="mysite.com" aria-label="Site"/>
+			</example>
+			<example description="The `label` slot takes any markup, e.g. a `<ui-dropdown>`.">
+				<input labeled="right" placeholder="Find domain" aria-label="Domain">
+					<dropdown slot="label" value=".com" aria-label="Top-level domain">
+						<item value=".com">.com</item>
+						<item value=".net">.net</item>
+						<item value=".org">.org</item>
+					</dropdown>
+				</input>
+			</example>
+
+			<!-- GAP I102:  a slotted `<ui-label>` (basic, tag) sits inside the grey joined label box, a label in a label. -->
+			<example>
+				<input labeled="right" placeholder="Enter weight.." aria-label="Weight">
+					<label slot="label" appearance="basic">kg</label>
+				</input>
+			</example>
+
+			<!-- GAP I97:  one label per input, so Fomantic's `$` ... `.00` input shows only the `$`. -->
+			<example>
+				<input label="$" placeholder="Amount" aria-label="Amount"/>
+			</example>
+			<example>
+				<input labeled="right" icon="tags" icon-position="left" placeholder="Enter tags" aria-label="Tags">
+					<label slot="label" tag link="#input">Add Tag</label>
+				</input>
+			</example>
+			<example description="A `corner` label's `label` is an icon name:  `labeled=\"left corner\"` or `labeled=\"corner\"`.">
+				<input labeled="left corner" label="asterisk" placeholder="Search..." aria-label="Search, required"/>
+			</example>
+			<example>
+				<input labeled="corner" label="asterisk" placeholder="Search..." aria-label="Search, required"/>
+			</example>
+		</>
+
+		<!-- GAP I98:  a label joins only a text field, not a `<ui-dropdown selection>` (Fomantic's `I am a [Developer]` / `[1-5] Persons`);  left out. -->
+		<section label="Action" sticky collapsible dividing>
+			<example description="An input can be formatted to alert the user to an action they may perform:  buttons go in the `action` slot.">
+				<input placeholder="Search..." aria-label="Search">
+					<button slot="action">Search</button>
+				</input>
+			</example>
+			<example description="`action=\"left\"` puts them first.">
+				<input action="left" value="$52.03" aria-label="Amount">
+					<button slot="action" color="green" labeled icon="cart">Checkout</button>
+				</input>
+			</example>
+
+			<!-- GAP I11:  a `basic` dropdown button draws no basic look. -->
+			<example>
+				<input icon="search" icon-position="left" placeholder="Search" aria-label="Search">
+					<dropdown slot="action" button basic floating label="This Page">
+						<item>This Organization</item>
+						<item>Entire Site</item>
+					</dropdown>
+				</input>
+			</example>
+			<example>
+				<input placeholder="Search..." aria-label="Search">
+					<dropdown slot="action" selection padding="compact" value="articles" aria-label="Search in">
+						<item value="all">All</item>
+						<item value="articles">Articles</item>
+						<item value="products">Products</item>
+					</dropdown>
+					<button slot="action">Search</button>
+				</input>
+			</example>
+			<example>
+				<input value="https://ww.short.url/c0opq" aria-label="Short link">
+					<button slot="action" color="teal" labeled="right" icon="copy">Copy</button>
+				</input>
+			</example>
+			<example>
+				<input placeholder="Search..." aria-label="Search">
+					<button slot="action" icon="search" aria-label="Search"/>
+				</input>
+			</example>
+		</>
+
+		<!-- GAP I100:  a `file` input's trigger is the native choose-file button:  no custom content (Fomantic's File Action label button). -->
+		<section label="File Action" sticky collapsible dividing id="variations-file-action">
+			<example description="A file input's choose-file button takes a `color`.">
+				<input type="file" color="blue" aria-label="Choose wisely"/>
+			</example>
+		</>
+
+		<section label="Transparent" sticky collapsible dividing>
+			<example description="A transparent input has no background.">
+				<input appearance="transparent" placeholder="Search..." aria-label="Search"/>
+			</example>
+			<example>
+				<input appearance="transparent" icon="search" placeholder="Search..." aria-label="Search"/>
+			</example>
+			<example>
+				<input appearance="transparent" icon="search" icon-position="left" placeholder="Search..." aria-label="Search"/>
+			</example>
+		</>
+
+		<!-- GAP I103:  an inverted input takes the dark surface with no border, so the field itself doesn't show. -->
+		<section label="Inverted" sticky collapsible dividing>
+			<example description="An input can be formatted to appear on dark backgrounds.">
+				<segment inverted>
+					<input inverted placeholder="Search..." aria-label="Search"/>
+					<divider inverted/>
+					<input inverted icon="search" icon-position="left" placeholder="Search..." aria-label="Search"/>
+					<divider inverted/>
+					<input inverted appearance="transparent" icon="search" placeholder="Search..." aria-label="Search"/>
+				</segment>
+			</example>
+		</>
+
+		<section label="Fluid" sticky collapsible dividing>
+			<example description="An input can take the size of its container.">
+				<input fluid icon="search" placeholder="Search a very wide input..." aria-label="Search"/>
+				<divider spacer/>
+				<input fluid placeholder="Search..." aria-label="Search">
+					<button slot="action">Search</button>
+				</input>
+			</example>
+		</>
+
+		<section label="Size" sticky collapsible dividing>
+			<example>
+				<html>
+					<p slot="description">An input can vary in size.</p>
+				</html>
+				<message slot="description" state="info" size="small">Inputs size themselves unless you give them a width.</message>
+				<input size="mini" icon="search" placeholder="Search mini..." aria-label="Search"/>
+			</example>
+			<example>
+				<input size="small" icon="search" placeholder="Search small..." aria-label="Search"/>
+			</example>
+			<example>
+				<input size="large" icon="search" placeholder="Search large..." aria-label="Search"/>
+			</example>
+			<example>
+				<input size="big" icon="search" placeholder="Search big..." aria-label="Search"/>
+			</example>
+			<example>
+				<input size="huge" icon="search" placeholder="Search huge..." aria-label="Search"/>
+			</example>
+			<example>
+				<input size="massive" icon="search" placeholder="Search massive..." aria-label="Search"/>
+			</example>
+		</>
+	</>
+</spell-notebook>

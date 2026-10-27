@@ -1,0 +1,67 @@
+<spell-notebook "terms examples">
+	<header level="1">
+		Terms
+		<header>Terms list facts as a label and a value each, lined up.</>
+	</>
+	<terms-tab-bar showing="examples"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#types">Types</>
+			</>
+		</>
+	</>
+
+	<!--
+		EXAMPLES:  Fomantic's page, section by section, in its order (Types, Content, States, Variations,
+		Groups ...).  Rules, the class-grammar mappings, gaps:  epics/spell-ui-pages/PAGES.md.
+		- A section:  `<ui-section id="examples-types" label="Types" sticky collapsible dividing>` around
+		  its examples;  ids spell out the nesting (`<tab>-<section>-<example>`, lowercase kebab of the headers).
+		- An example:  its own nested section (`label` = the example's name) around
+		  `<ui-example description="...">` and the live markup;  the markup IS the code shown.  A richer
+		  description:  `<p slot="description">` (+ `<ui-message slot="description">`).  Fomantic's header-less
+		  `.another.example`:  a second `<ui-example>` in the same section.
+		- Or write it flat (`<ui-header level="2">`, `<ui-example heading>`) and run `yarn site:sections`:
+		  it nests it and writes the ids (and fixes them after a title changes).
+		- A gap:  an HTML comment `GAP I<n>:  ...` BEFORE the example's section (a comment inside the example
+		  shows in its code).
+	-->
+	<section label="Types">
+		<section label="Terms" sticky collapsible dividing>
+			<example description="Facts lined up:  the labels in one column, the values in the next.  A value can be any element, written inside the term.">
+				<terms>
+					<term label="Suit" value="hearts"/>
+					<term label="Rank" value="queen"/>
+					<term label="Played by">
+						<label color="blue">Jamie</label>
+					</term>
+				</terms>
+			</example>
+		</>
+
+		<section label="Horizontal" sticky collapsible dividing>
+			<example description="`direction=\"horizontal\"`:  the terms side by side, wrapping, as a game's scores.">
+				<terms direction="horizontal">
+					<term label="Score" value="42"/>
+					<term label="Moves" value="17"/>
+					<term label="Time" value="3:05"/>
+				</terms>
+			</example>
+		</>
+
+		<section label="A rich label" sticky collapsible dividing>
+			<example description="`slot=\"label\"`:  a label that's more than text.">
+				<html>
+					<ui-terms>
+						<ui-term value="Paris">
+							<span slot="label"><ui-icon name="location dot"></ui-icon> City</span>
+						</ui-term>
+						<ui-term value="Sunny, 24°">
+							<span slot="label"><ui-icon name="sun"></ui-icon> Weather</span>
+						</ui-term>
+					</ui-terms>
+				</html>
+			</example>
+		</>
+	</>
+</spell-notebook>

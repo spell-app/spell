@@ -1,0 +1,58 @@
+<spell-notebook "select theming">
+	<header level="1">
+		Select
+		<header>A select lets a user choose a value from a list, with the platform's own picker.</>
+	</>
+	<select-tab-bar showing="theming"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#tokens">Tokens</>
+				<ui-item link="#themes">Themes</>
+			</>
+		</>
+	</>
+
+	<!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
+	<section label="Tokens">
+		<markdown>
+			Theme with the public `--ui-select-*` tokens: set one on the element, on any ancestor (a form, `:root`), or on
+			the select's box through `::part(select)`. They inherit into the shadow root, where the sheet reads each through
+			a private alias, so nothing inside blocks them. Style the rest with `::part()`: `button`, `option`,
+			`placeholder` and `group`.
+		</>
+		<markdown>
+			```css
+			ui-select {
+			  --ui-select-radius: 0;
+			}
+			ui-select::part(option) {
+			  padding-block: 0.75em;
+			}
+			```
+		</>
+		<message state="info" size="small">
+			<markdown>
+				The open picker is styled only where the browser has the customizable select; elsewhere `option` and `group`
+				reach as far as the platform's list lets them. Never set the `--_ui-select-*` names: they're the sheet's
+				private plumbing.
+			</>
+		</>
+		<markdown>Edit a value below to try it.</>
+		<html>
+			<ui-docs-tokens family="ui-select" playground>
+				<ui-select placeholder="Gender" name="gender">
+					<ui-item value="male">Male</>
+					<ui-item value="female">Female</>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="Themes">
+		<markdown>
+			The theme menu above picks the theme for every page of the site:  Spell, Glass, Fruity or Merlot,
+			each restyling this component through its tokens.
+		</>
+	</>
+</spell-notebook>

@@ -1,0 +1,28 @@
+<spell-notebook "components api">
+	<header level="1">
+		Components
+		<header>Components name a pack of another package's elements, which the root around them loads on demand, once per page.</>
+	</>
+	<components-tab-bar showing="api"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#attributes">Attributes</>
+				<ui-item link="#states">States</>
+			</>
+		</>
+	</>
+
+	<!-- API:  generated from the vocabularies (`docs/__data/components.json5`);  nothing to write. -->
+	<section label="Attributes">
+		<html>
+			<ui-docs-api family="ui-components" only="attributes"></>
+		</>
+	</>
+
+	<section label="States">
+		<html>
+			<ui-docs-api family="ui-components" only="states"></>
+		</>
+	</>
+</spell-notebook>

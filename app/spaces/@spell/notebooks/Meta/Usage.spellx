@@ -1,0 +1,47 @@
+<spell-notebook "meta usage">
+	<header level="1">
+		Meta
+		<header>A meta holds metadata about the content, such as a date or a category.</>
+	</>
+	<meta-tab-bar showing="usage"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#using-it">Using it</>
+				<ui-item link="#owners">Owners</>
+				<ui-item link="#accessibility">Accessibility</>
+			</>
+		</>
+	</>
+
+	<section label="Using it">
+		<markdown>
+			`<ui-meta>` holds metadata about its owner's content, such as a date or a category: a card's or an item's meta line,
+			a feed event's likes, a comment's `metadata`.
+
+			- No attributes: the owner decides the look (small and muted almost everywhere).
+			- Put each piece in its own `<span>` or `<a>`: an item spaces them apart, a comment separates them.
+		</>
+	</>
+
+	<section label="Owners">
+		<markdown>
+			`<ui-meta>` finds its nearest owner and sets `:state(in-<owner>)` on itself; `UIParts.css` styles it by that
+			state. Its owners, and what each makes of it:
+
+			- [Card](/components/ui/ui-card.html) (`:state(in-card)`): small, muted, under the header
+			- [Item](/components/ui/ui-items.html) (`:state(in-item)`): small, muted, each piece spaced apart
+			- [Feed](/components/ui/ui-feed.html) (`:state(in-feed)`): a small line under the summary (likes, replies)
+			- [Comment](/components/ui/ui-comment.html) (`:state(in-comment)`): inline after the author, small and muted
+
+			Anywhere else it is an unstyled block. More on how parts find their owners: [Content parts](/components/ui/ui-header.html).
+		</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			- A neutral block with no role. Its muted colour is a look only: dates belong in `<time>` (or a `<ui-date
+			  datetime>` in a feed) for machines.
+		</>
+	</>
+</spell-notebook>

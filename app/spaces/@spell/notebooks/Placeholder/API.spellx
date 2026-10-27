@@ -1,0 +1,49 @@
+<spell-notebook "placeholder api">
+	<header level="1">
+		Placeholder
+		<header>A placeholder is used to reserve space for content that soon will appear in a layout.</>
+	</>
+	<placeholder-tab-bar showing="api"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#tags">Tags</>
+				<ui-item link="#attributes">Attributes</>
+				<ui-item link="#slots">Slots</>
+				<ui-item link="#parts">Parts</>
+				<ui-item link="#states">States</>
+			</>
+		</>
+	</>
+
+	<!-- API:  generated from the vocabularies (`docs/__data/components.json5`);  nothing to write. -->
+	<section label="Tags">
+		<html>
+			<ui-docs-api family="ui-placeholder" only="tags"></>
+		</>
+	</>
+
+	<section label="Attributes">
+		<html>
+			<ui-docs-api family="ui-placeholder" only="attributes"></>
+		</>
+	</>
+
+	<section label="Slots">
+		<html>
+			<ui-docs-api family="ui-placeholder" only="slots"></>
+		</>
+	</>
+
+	<section label="Parts">
+		<html>
+			<ui-docs-api family="ui-placeholder" only="parts"></>
+		</>
+	</>
+
+	<section label="States">
+		<html>
+			<ui-docs-api family="ui-placeholder" only="states"></>
+		</>
+	</>
+</spell-notebook>

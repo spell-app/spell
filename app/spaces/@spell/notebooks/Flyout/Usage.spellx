@@ -1,0 +1,161 @@
+<spell-notebook "flyout usage">
+	<header level="1">
+		Flyout
+		<header>A flyout is a modal that slides in from a side of the page.</>
+	</>
+	<flyout-tab-bar showing="usage"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#using-it">Using it</>
+				<ui-item link="#opening-it">Opening it</>
+				<ui-item link="#events">Events</>
+				<ui-item link="#keyboard">Keyboard</>
+				<ui-item link="#accessibility">Accessibility</>
+				<ui-item link="#framework-usage">Framework usage</>
+			</>
+		</>
+	</>
+
+	<!-- USAGE:  what a flyout is, opening, dismissal, events, keyboard, accessibility, frameworks. -->
+	<section label="Using it">
+		<markdown>
+			A flyout is `<ui-modal>`'s element in a flyout's clothes: the same `<dialog>` opened with `showModal()`, so
+			focus moves inside, the rest of the page is inert and scroll-locked, **Escape** closes only the topmost overlay,
+			and focus returns to whatever opened it. Its dimmer is lighter than a modal's. Loading the flyout family
+			defines `<ui-modal>` too.
+
+			Write a `<ui-flyout>` anywhere in the page with its parts inside -- `<ui-header>`, `<ui-content>`,
+			`<ui-actions>` with buttons -- or the `header` / `content` shorthands. There is no `.flyout()` call to make.
+		</>
+	</>
+
+	<section label="Opening it">
+		<markdown>
+			- With no script, from a native `<button commandfor="id" command="--show">` or a `<ui-button>` (an invoker
+			  command; Fomantic's `attach events`). `--close` closes it and `--toggle` flips it (Fomantic's `toggle`).
+			- From code, write `open` (which fires no `ui-opening` / `ui-closing`).
+
+			`closedby` says what dismisses it: `any` (the default: **Escape** or a click on the dimmer), `closerequest`
+			(**Escape** only) or `none` (only its own buttons). `closable` adds the close icon; `closable="false"` is also
+			Fomantic's `closable: false`, unless `closedby` is set.
+		</>
+
+		<section label="Toggle from a menu" sticky collapsible dividing>
+			<example description="A menu item drives the flyout through a button with `command=\"--toggle\"`.">
+				<menu attach="top">
+					<item>
+						<button commandfor="flyout-usage-menu" command="--toggle" icon="sidebar" appearance="basic">Toggle flyout</button>
+					</item>
+				</menu>
+				<segment attach="bottom">
+					<header level="3">Application Content</header>
+					<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+				</segment>
+				<html>
+					<ui-flyout id="flyout-usage-menu" closable>
+						<ui-header>
+							<ui-icon name="question"></ui-icon>
+							<ui-content>Archive Old Messages</ui-content>
+						</ui-header>
+						<ui-content>
+							<p>Your inbox is getting full, would you like us to enable automatic archiving of old messages?</p>
+						</ui-content>
+						<ui-actions>
+							<ui-button class="cancel" color="red" icon="remove">No</ui-button>
+							<ui-button class="ok" color="green" icon="checkmark">Yes</ui-button>
+						</ui-actions>
+					</ui-flyout>
+				</html>
+			</example>
+		</>
+		<html>
+			<ui-message size="small" class="site-not-ported">Not ported: a custom <code>context</> (a flyout inside a segment instead of the page) -- the flyout is a modal <code>&lt;dialog&gt;</> in the top layer, always against the viewport. For a panel inside a region, use <code>&lt;ui-sidebar&gt;</> in a <code>&lt;ui-pushable&gt;</>.</>
+		</>
+	</>
+
+	<section label="Events">
+		<markdown>
+			Buttons inside act by Fomantic's classes: `approve` / `ok` / `positive` approve, `deny` / `cancel` / `negative`
+			deny, each first dispatching the cancelable `ui-approving` / `ui-denying` (`{ action, originalEvent? }`).
+
+			`visible` is the controlled state, as on every element (`hidden` is its other name): writing either shows
+			or hides the flyout and fires nothing. A flyout starts hidden.
+
+			- `ui-opening` (cancelable) -- a user asked to open it, through an invoker command; `detail` is
+			  `{ visible: true, originalEvent? }`.
+			- `ui-closing` (cancelable) -- about to close; `detail` is `{ visible: false, reason, originalEvent? }`, and
+			  `reason` is `escape`, `outside`, `close`, `approve`, `deny` or `close-all`.
+			- `ui-opened` / `ui-closed` -- shown or hidden, once the slide has finished (Fomantic's `onVisible` / `onHidden`).
+		</>
+		<markdown>
+			```js
+			const help = document.querySelector("#help")
+			help.addEventListener("ui-approving", (event) => {
+			  if (!form.checkValidity()) event.preventDefault() // stay shown
+			})
+			help.addEventListener("ui-closing", (event) => console.log(event.detail.reason))
+			help.visible = true // show from code:  no ui-opening
+			```
+		</>
+		<html>
+			<ui-message size="small" class="site-not-ported">Not ported: Fomantic's behaviors (show, hide, toggle ...), its dimPage, returnScroll and transition settings, and its callbacks. Instead, write <code>visible</>, use invoker commands, and listen for the events.</>
+		</>
+	</>
+
+	<section label="Keyboard">
+		<markdown>
+			- **Tab** / **Shift+Tab** move between the controls inside the flyout, never out.
+			- **Enter** / **Space** activate the focused button (approve, deny, close).
+			- **Escape** closes it (`closedby` `any` or `closerequest`).
+		</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			- A real modal `<dialog>`: focus moves inside and **Tab** stays there, the rest of the page is inert, and focus
+			  returns to the opener when it closes.
+			- Named by the host's `aria-label`, else the `header` shorthand, else a slotted `<ui-header>`. A flyout with
+			  neither (a cookie bar) needs `aria-label`.
+			- The close icon is a real button named "Close" (translated), placed last so the first focus lands in the
+			  content. Put `autofocus` on the control that should take focus first.
+			- **Escape** closes it unless `closedby="none"`; with `none`, make sure a button inside closes it.
+			- If the element fails to render, there's no dialog: it shows its children through a bare `<slot>`, in
+			  the page where they're written rather than over it, so nothing traps focus, dims the page or closes
+			  on Escape. `open`, invoker commands, the `ui-opening` / `ui-closing` vetoes and the slide go.
+		</>
+	</>
+
+	<section label="Framework usage">
+		<markdown>Bind `open` to your state and listen for `ui-closing` (and `ui-approving` / `ui-denying`) to follow the user.</>
+		<header level="4" id="framework-react">React 19</>
+		<markdown>
+			```jsx
+			<ui-flyout visible={open} position="right" heading="Help" onui-close={() => setOpen(false)}>
+			  ...
+			</ui-flyout>
+			```
+		</>
+		<header level="4" id="framework-vue">Vue 3.5</>
+		<markdown>
+			```html
+			<!-- compilerOptions.isCustomElement = (tag) => tag.startsWith("ui-") -->
+			<ui-flyout :visible="open" position="right" heading="Help" @ui-closing="open = false">...</ui-flyout>
+			```
+		</>
+		<header level="4" id="framework-solid">Solid 2</>
+		<markdown>
+			```jsx
+			// events and rich data are plain props:  `on-<event>={...}`, `options={...}`
+			<ui-flyout
+			  visible={open()}
+			  position="right"
+			  heading="Help"
+			  on-ui-closing={() => setOpen(false)}
+			>
+			  ...
+			</ui-flyout>
+			```
+		</>
+	</>
+</spell-notebook>

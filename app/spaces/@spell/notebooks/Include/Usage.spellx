@@ -1,0 +1,102 @@
+<spell-notebook "include usage">
+	<header level="1">
+		Include
+		<header>An include shows part of another page from this site in this one, loaded at once, when idle or when
+              scrolled into view.</>
+	</>
+	<include-tab-bar showing="usage"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#using-it">Using it</>
+				<ui-item link="#the-included-markup">The included markup</>
+				<ui-item link="#editing-and-saving">Editing and saving</>
+				<ui-item link="#events">Events</>
+				<ui-item link="#keyboard">Keyboard</>
+				<ui-item link="#accessibility">Accessibility</>
+			</>
+		</>
+	</>
+
+	<!-- USAGE:  from the old Astro page's Behaviour, plus the vocabulary's events and the element's a11y. -->
+	<section label="Using it">
+		<markdown>
+			Point `source` at a page of this site (relative to the current page, same origin only). The include shows that
+			page's `<body>`, or the first element `select` matches; its `<head>` (title, styles, scripts) is left out.
+
+			- Its children are a placeholder (e.g. a server-rendered copy), shown until the include loads, then replaced.
+			- `load` says when to fetch: `eager` (at once, the default), `visible` (once scrolled into view) or `idle` (when
+			  the browser has nothing else to do). Like Astro's `client:visible` / `client:idle`.
+			- By default the markup goes in a shadow root: the page's CSS stays out, inherited values (fonts, colours,
+			  `--ui-*` tokens) come in. `page-styles` puts it in the light DOM, where the page's stylesheets (and an outer
+			  `<ui-root>`) see it. This site's header and footer are `page-styles` includes.
+		</>
+		<markdown>
+			```html
+			<ui-include source="__parts/footer.html" page-styles load="visible">
+			  <footer>Spell UI</footer>
+			</ui-include>
+			```
+		</>
+	</>
+
+	<section label="The included markup">
+		<markdown>
+			- Scripts in the included markup never run (it is parsed, not executed).
+			- `ui-*` tags in it load their families on demand, as `<ui-root>` loads them: a shadow root is out of a root's
+			  sight, so the include does it itself.
+			- Relative `href` / `src` / `action` / `poster` / `source` are rewritten against the included page's URL, so its
+			  links, images and nested includes still point where they did. The originals are kept for saving.
+			- An include inside an include of the same page, or nested too deep, shows an error instead of looping.
+		</>
+	</>
+
+	<section label="Editing and saving">
+		<markdown>
+			For editors: `contentRoot` is where the markup lives. Edit it in place, then call `save()`.
+
+			- `content` is the FILE: the source as fetched while the markup is untouched; once edited, the live markup spliced
+			  back into the file's `<body>` (byte-exact outside it). With `select`, the matched element alone, saved by its
+			  `id`.
+			- Saving goes through `UI.sources.saver`, which the page registers (`ui` ships none). The cancelable `ui-saving`
+			  goes first, so an editor can save elsewhere; then `ui-saved` with the file's new `etag`, or `ui-error`.
+			- `<ui-code>` and `<ui-markdown>` save the same way: all three show a text file.
+		</>
+	</>
+
+	<section label="Events">
+		<markdown>
+			- `ui-loaded` -- the page arrived: `{ source, content }`.
+			- `ui-changed` -- `content` was set: `{ content }`; the include is `:state(dirty)` until saved.
+			- `ui-saving` (cancelable) -- `save()` is about to save: `{ source, content, etag }`.
+			- `ui-saved` -- saved: `{ source, etag }`.
+			- `ui-error` (cancelable) -- loading, showing or saving failed: `{ kind, source, error }`, `kind` one of `load`,
+			  `cross-origin`, `file-protocol`, `save`, `conflict`, `no-saver`, `render`. Cancel a load error to skip the
+			  message.
+		</>
+		<markdown>
+			```js
+			const notes = document.querySelector("ui-include")
+			notes.addEventListener("ui-saving", (event) => {
+			  event.preventDefault() // save it ourselves
+			  fetch("/api/pages", { method: "PUT", body: event.detail.content })
+			})
+			await notes.save()
+			```
+		</>
+	</>
+
+	<section label="Keyboard">
+		<markdown>Nothing of its own: whatever the included markup holds is in the page's tab order, in place.</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			- The included markup is read in place, as part of the page: its headings and landmarks join the page's outline,
+			  so include parts whose structure fits where they land.
+			- While it loads, a `<ui-loader>` (`role="status"`) says so.
+			- A failed load shows a `<ui-message>` saying why; a page opened from disk (`file://`) says to open it from a
+			  web server.
+		</>
+	</>
+</spell-notebook>

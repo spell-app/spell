@@ -1,0 +1,50 @@
+<spell-notebook "code api">
+	<header level="1">
+		Code
+		<header>Code shows a block of source code coloured by its language, from the element's own text or a file on
+              this site.</>
+	</>
+	<code-tab-bar showing="api"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#attributes">Attributes</>
+				<ui-item link="#events">Events</>
+				<ui-item link="#parts">Parts</>
+				<ui-item link="#states">States</>
+				<ui-item link="#texts">Texts</>
+			</>
+		</>
+	</>
+
+	<!-- API:  generated from the vocabularies (`docs/__data/components.json5`);  nothing to write. -->
+	<section label="Attributes">
+		<html>
+			<ui-docs-api family="ui-code" only="attributes"></>
+		</>
+	</>
+
+	<section label="Events">
+		<html>
+			<ui-docs-api family="ui-code" only="events"></>
+		</>
+	</>
+
+	<section label="Parts">
+		<html>
+			<ui-docs-api family="ui-code" only="parts"></>
+		</>
+	</>
+
+	<section label="States">
+		<html>
+			<ui-docs-api family="ui-code" only="states"></>
+		</>
+	</>
+
+	<section label="Texts">
+		<html>
+			<ui-docs-api family="ui-code" only="texts"></>
+		</>
+	</>
+</spell-notebook>

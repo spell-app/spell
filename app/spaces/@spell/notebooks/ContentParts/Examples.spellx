@@ -1,0 +1,558 @@
+<spell-notebook "content-parts examples">
+	<header level="1">
+		Content parts
+		<header>Headers, content, descriptions, metas and the other generic parts that cards, items, modals and
+              messages share.</>
+	</>
+	<content-parts-tab-bar showing="examples"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#types">Types</>
+				<ui-item link="#content">Content</>
+				<ui-item link="#states">States</>
+				<ui-item link="#variations">Variations</>
+				<ui-item link="#parts">Parts</>
+			</>
+		</>
+	</>
+
+	<!--
+		EXAMPLES:  Fomantic's header page, section by section, in its order (Types, Content, States, Variations), plus our
+		extras (Fitted, Link), then the generic content parts (Parts), from the part sections of Fomantic's card, item,
+		comment, feed and statistic pages.
+		- A nested `<ui-header sub>` is Fomantic's `.sub.header` inside a header;  a standalone `sub` is `ui sub header`.
+		- Fomantic's `img.ui.wireframe.image` => `<ui-image src>`.
+		- Fomantic's `images/icons/school.png` / `plugin.png` aren't in `site/images/`:  `book.png` / `lab.png` instead.
+	-->
+	<section label="Types">
+		<section label="Page Headers" sticky collapsible dividing>
+			<example>
+				<html>
+					<p slot="description">Headers may be oriented to give the hierarchy of a section in the context of the page: <code>level</code> renders an h1 ... h6.</p>
+					<ui-message slot="description" state="info" size="small">Page headings are sized from <code>--ui-font-size</code> by level and are not affected by surrounding content size.</ui-message>
+				</html>
+				<header level="1">First header</header>
+				<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+				<header level="2">Second header</header>
+				<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+				<header level="3">Third header</header>
+				<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+				<header level="4">Fourth header</header>
+				<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+				<header level="5">Fifth header</header>
+				<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+			</example>
+		</>
+
+		<section label="Content Headers" sticky collapsible dividing>
+			<example>
+				<html>
+					<p slot="description">Headers may be oriented to give the importance of a section in the context of the content that surrounds it: <code>size</code>.</p>
+					<ui-message slot="description" state="info" size="small">Content headings are sized with <code>em</code> and are based on the font-size of their container.</ui-message>
+				</html>
+				<segment appearance="vertical">
+					<header size="huge">Huge Header</header>
+					<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+					<header size="large">Large Header</header>
+					<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+					<header size="medium">Medium Header</header>
+					<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+					<header size="small">Small Header</header>
+					<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+					<header size="tiny">Tiny Header</header>
+					<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+				</segment>
+			</example>
+			<example description="A page header takes a `size` too, which wins over its level.">
+				<header level="2" size="massive">A sized page header</header>
+				<header level="2" size="mini">A mini page header</header>
+			</example>
+		</>
+
+		<section label="Icon Headers" sticky collapsible dividing>
+			<example description="A header can be formatted to emphasize an icon.">
+				<header level="2" icon>
+					<icon name="settings"/>
+					<content>Account Settings <header sub>Manage your account settings and set e-mail preferences.</header></content>
+				</header>
+			</example>
+			<example>
+				<header level="2" align="center" icon><icon name="users" appearance="circular"/> Friends</header>
+				<image align="center" src="/components/ui/images/wireframe/centered-paragraph.png" alt=""/>
+			</example>
+		</>
+
+		<section label="Sub Headers" sticky collapsible dividing>
+			<example description="Headers may be formatted to label smaller or de-emphasized content:  `sub`.">
+				<header level="2" sub>Price</header>
+				<html>
+					<span>$10.99</span>
+				</html>
+			</example>
+			<example>
+				<list direction="horizontal">
+					<item image="../images/avatar2/small/molly.png">
+						<content><header sub>Molly</header> Coordinator</content>
+					</item>
+					<item image="../images/avatar2/small/elyse.png">
+						<content><header sub>Elyse</header> Developer</content>
+					</item>
+					<item image="../images/avatar2/small/eve.png">
+						<content><header sub>Eve</header> Project Manager</content>
+					</item>
+				</list>
+			</example>
+		</>
+	</>
+
+	<section label="Content">
+		<section label="Image" sticky collapsible dividing>
+			<example description="A header may contain an image.">
+				<html>
+					<ui-header level="2">
+						<img src="/components/ui/images/icons/book.png" alt="" />
+						<ui-content>Learn More</ui-content>
+					</ui-header>
+				</html>
+				<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+			</example>
+
+			<!-- GAP I115:  a slotted `<ui-image appearance="circular">` isn't sized by the header:  a plain (square) `<img>` instead. -->
+			<example>
+				<html>
+					<ui-header level="2"><img src="/components/ui/images/avatar2/large/patrick.png" alt="" /> Patrick</ui-header>
+				</html>
+				<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+			</example>
+			<example>
+				<html>
+					<ui-header level="2">
+						<img src="/components/ui/images/icons/lab.png" alt="" />
+						<ui-content>Plug-ins <ui-header sub>Check out our plug-in marketplace</ui-header></ui-content>
+					</ui-header>
+				</html>
+				<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+			</example>
+		</>
+
+		<section label="Icon" sticky collapsible dividing>
+			<example description="A header may contain an icon, with the text in a `<ui-content>`.">
+				<header level="2">
+					<icon name="plug"/>
+					<content>Uptime Guarantee</content>
+				</header>
+				<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+			</example>
+			<example>
+				<header level="2">
+					<icon name="settings"/>
+					<content>Account Settings <header sub>Manage your preferences</header></content>
+				</header>
+				<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+			</example>
+		</>
+
+		<section label="Subheader" sticky collapsible dividing>
+			<example description="Headers may contain subheaders:  a nested `<ui-header sub>`.">
+				<header level="2">Account Settings <header sub>Manage your account settings and set e-mail preferences.</header></header>
+				<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+			</example>
+			<example>
+				<header level="1">H1 <header sub>Sub Header</header></header>
+				<header level="2">H2 <header sub>Sub Header</header></header>
+				<header level="3">H3 <header sub>Sub Header</header></header>
+				<header level="4">H4 <header sub>Sub Header</header></header>
+				<header level="5">H5 <header sub>Sub Header</header></header>
+			</example>
+		</>
+	</>
+
+	<section label="States">
+		<section label="Disabled" sticky collapsible dividing>
+			<example description="A header can show that it is inactive.">
+				<header disabled>Disabled Header</header>
+				<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+			</example>
+		</>
+	</>
+
+	<section label="Variations">
+		<section label="Dividing" sticky collapsible dividing>
+			<example description="A header can be formatted to divide itself from the content below it.">
+				<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+				<header level="3" dividing>Dividing Header</header>
+				<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+			</example>
+		</>
+
+		<section label="Block" sticky collapsible dividing>
+			<example description="A header can be formatted to appear inside a content block.">
+				<header level="3" block>Block Header</header>
+				<image src="/components/ui/images/wireframe/media-paragraph.png" alt=""/>
+			</example>
+		</>
+
+		<section label="Attached" sticky collapsible dividing>
+			<example description="A header can be attached to other content, like a segment.">
+				<header level="3" attach="top">Top Attached</header>
+				<segment attach="both">
+					<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
+				</segment>
+				<header level="3" attach="both">Attached</header>
+				<segment attach="both">
+					<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
+				</segment>
+				<header level="3" attach="bottom">Bottom Attached</header>
+			</example>
+		</>
+
+		<section label="Seamless attached" sticky collapsible dividing>
+			<example description="A top header can be seamless attached without related attached border.">
+				<header level="3" seamless attach="top">Seamless Top Attached</header>
+				<segment attach="both">
+					<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
+				</segment>
+				<segment attach="both">
+					<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
+				</segment>
+			</example>
+			<example>
+				<message slot="description" state="warning" size="small">This variant is not available for the bottom header, which doesn't have the attached border. To get a seamless bottom header, make the previous attached element seamless.</message>
+				<segment attach="both">
+					<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
+				</segment>
+				<segment seamless attach="both">
+					<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
+				</segment>
+				<header level="3" attach="bottom">Seamless Bottom Attached</header>
+			</example>
+		</>
+
+		<section label="Left and Right" sticky collapsible dividing>
+			<example description="A header has no `floated` any more:  a `<ui-stack>` puts one header at the left and one at the right.">
+				<segment>
+					<stack direction="horizontal" justify="between">
+						<header level="3">Go Back</header>
+						<header level="3">Go Forward</header>
+					</stack>
+				</segment>
+			</example>
+		</>
+
+		<section label="Text Alignment" sticky collapsible dividing>
+			<example description="A header can have its text aligned to a side.">
+				<segment>
+					<header level="3" align="right">Right</header>
+					<header level="3" align="left">Left</header>
+					<header level="3" align="justified">This should take up the full width even if only one line</header>
+					<header level="3" align="center">Center</header>
+				</segment>
+			</example>
+		</>
+
+		<section label="Colored" sticky collapsible dividing>
+			<example description="A header can be formatted with different colors.">
+				<header level="4" color="primary">Primary</header>
+				<header level="4" color="secondary">Secondary</header>
+				<header level="4" color="red">Red</header>
+				<header level="4" color="orange">Orange</header>
+				<header level="4" color="yellow">Yellow</header>
+				<header level="4" color="olive">Olive</header>
+				<header level="4" color="green">Green</header>
+				<header level="4" color="teal">Teal</header>
+				<header level="4" color="blue">Blue</header>
+				<header level="4" color="purple">Purple</header>
+				<header level="4" color="violet">Violet</header>
+				<header level="4" color="pink">Pink</header>
+				<header level="4" color="brown">Brown</header>
+				<header level="4" color="grey">Grey</header>
+			</example>
+		</>
+
+		<section label="Inverted" sticky collapsible dividing>
+			<example>
+				<html>
+					<p slot="description">A header can have its colors inverted for contrast.</p>
+				</html>
+				<message slot="description" state="info" size="small">Inverted headers use light versions of the site's colours, adapted to have more contrast on a dark background.</message>
+				<segment inverted>
+					<header level="4" color="red" inverted>Red</header>
+					<header level="4" color="orange" inverted>Orange</header>
+					<header level="4" color="yellow" inverted>Yellow</header>
+					<header level="4" color="olive" inverted>Olive</header>
+					<header level="4" color="green" inverted>Green</header>
+					<header level="4" color="teal" inverted>Teal</header>
+					<header level="4" color="blue" inverted>Blue</header>
+					<header level="4" color="purple" inverted>Purple</header>
+					<header level="4" color="violet" inverted>Violet</header>
+					<header level="4" color="pink" inverted>Pink</header>
+					<header level="4" color="brown" inverted>Brown</header>
+					<header level="4" color="grey" inverted>Grey</header>
+				</segment>
+			</example>
+		</>
+
+		<section label="Fitted" sticky collapsible dividing>
+			<example description="A header can drop its padding.">
+				<header level="3" padding="none" block>Fitted block header</header>
+				<header level="3" block>Block header</header>
+			</example>
+		</>
+
+		<section label="Link" sticky collapsible dividing>
+			<example description="With `link` a header renders a link styled as a header.">
+				<header link="#link">Link header</header>
+			</example>
+		</>
+	</>
+
+	<section label="Parts">
+		<html>
+			<ui-message size="small" state="info">The other content parts style themselves by their OWNER: the same <code>&lt;ui-meta&gt;</> reads differently in a card, an item, a feed and a comment;  outside any owner, they are unstyled blocks. Each part has its own page too (linked above), and the owners' pages (card, items, comment, feed, statistic, step, label) show every owner in full.</>
+		</>
+
+		<section label="Content" sticky collapsible dividing>
+			<example description="`<ui-content>` is the main content block of a card, item, event, comment, modal, message, list item or step.">
+				<card>
+					<content>
+						<header>Elliot Fu</header>
+						<meta>Friend</meta>
+						<description>Elliot is a film-maker from New York.</description>
+					</content>
+					<content>
+						<description>A second content block, divided from the first.</description>
+					</content>
+				</card>
+			</example>
+			<example description="In a card, `text-align` aligns one content block:  Fomantic's `center aligned content`.">
+				<card>
+					<content align="center">
+						<header>Centered</header>
+						<description>A center aligned content block.</description>
+					</content>
+				</card>
+			</example>
+		</>
+
+		<section label="Header" sticky collapsible dividing>
+			<example description="Inside an owner, `<ui-header>` is the owner's header:  here a card's, an item's and a list item's.">
+				<card>
+					<content>
+						<header>Matthew</header>
+					</content>
+				</card>
+				<html>
+					<ui-items>
+						<ui-item>
+							<ui-content>
+								<ui-header link="#header">Arrowhead Valley Camp</ui-header>
+								<ui-meta>
+									<span>Summer camp</span>
+								</ui-meta>
+							</ui-content>
+						</ui-item>
+					</ui-items>
+				</html>
+				<list>
+					<item icon="user">
+						<content>
+							<header>Rachel</header>
+						</content>
+					</item>
+				</list>
+			</example>
+		</>
+
+		<section label="Meta" sticky collapsible dividing>
+			<example description="`<ui-meta>` holds metadata about the content, e.g. a date or a category:  the same markup in a card, an item, a feed event and a comment.">
+				<html>
+					<ui-card>
+						<ui-content>
+							<ui-header>Kristy</ui-header>
+							<ui-meta>
+								<span>Joined in 2013</span>
+							</ui-meta>
+						</ui-content>
+					</ui-card>
+					<ui-items>
+						<ui-item>
+							<ui-content>
+								<ui-header>Cute Dog</ui-header>
+								<ui-meta>
+									<span>Description</span>
+									<span>Stevie</span>
+								</ui-meta>
+							</ui-content>
+						</ui-item>
+					</ui-items>
+					<ui-feed>
+						<ui-event>
+							<ui-content>
+								<ui-summary>Elliot Fu added you as a friend</ui-summary>
+								<ui-meta>
+									<a href="#like">4 Likes</a>
+								</ui-meta>
+							</ui-content>
+						</ui-event>
+					</ui-feed>
+					<ui-comments>
+						<ui-comment>
+							<ui-content>
+								<ui-author link="#matt">Matt</ui-author>
+								<ui-meta>
+									<span>Today at 5:42PM</span>
+								</ui-meta>
+							</ui-content>
+						</ui-comment>
+					</ui-comments>
+				</html>
+			</example>
+		</>
+
+		<section label="Description" sticky collapsible dividing>
+			<example description="`<ui-description>` describes the content:  a card's or item's text, a comment's text (Fomantic's comment `text`), a step's line.">
+				<card>
+					<content>
+						<header>Elliot</header>
+						<description>Elliot is a sound engineer living in Nashville who enjoys playing guitar.</description>
+					</content>
+				</card>
+				<comments>
+					<comment>
+						<content>
+							<author link="#elliot">Elliot Fu</author>
+							<description>This has been very useful for my research. Thanks as well!</description>
+						</content>
+					</comment>
+				</comments>
+			</example>
+		</>
+
+		<section label="Extra" sticky collapsible dividing>
+			<example description="`<ui-extra>` is extra content, set apart from the main content:  a card's footer, an item's extra line, a feed event's extra text.">
+				<html>
+					<ui-card>
+						<ui-content>
+							<ui-header>Elliot</ui-header>
+						</ui-content>
+						<ui-extra>
+							<a href="#friends">16 Friends</a>
+						</ui-extra>
+					</ui-card>
+				</html>
+				<feed>
+					<event>
+						<content>
+							<summary>Helen Troy added 2 photos</summary>
+							<extra text>Ours is a life of constant reruns. We're always circling back to where we'd we started.</extra>
+						</content>
+					</event>
+				</feed>
+			</example>
+		</>
+
+		<section label="Actions" sticky collapsible dividing>
+			<example description="`<ui-actions>` holds the actions a user can take:  a comment's reply links, a modal's or toast's buttons.">
+				<html>
+					<ui-comments>
+						<ui-comment>
+							<ui-content>
+								<ui-author link="#joe">Joe Henderson</ui-author>
+								<ui-description>Dude, this is awesome. Thanks so much</ui-description>
+								<ui-actions>
+									<a href="#reply">Reply</a>
+									<a href="#save">Save</a>
+									<a href="#hide">Hide</a>
+								</ui-actions>
+							</ui-content>
+						</ui-comment>
+					</ui-comments>
+				</html>
+			</example>
+		</>
+
+		<section label="Avatar and Author" sticky collapsible dividing>
+			<example description="`<ui-avatar>` is a small picture of a person, `<ui-author>` who wrote a comment or did a feed event (Fomantic's feed `user`).">
+				<html>
+					<ui-comments>
+						<ui-comment>
+							<ui-avatar src="/components/ui/images/avatar/small/matt.jpg"></ui-avatar>
+							<ui-content>
+								<ui-author link="#matt">Matt</ui-author>
+								<ui-meta>
+									<span>Today at 5:42PM</span>
+								</ui-meta>
+								<ui-description>How artistic!</ui-description>
+							</ui-content>
+						</ui-comment>
+					</ui-comments>
+				</html>
+				<feed>
+					<event>
+						<content>
+							<summary><author link="#elliot">Elliot Fu</author> added you as a friend</summary>
+						</content>
+					</event>
+				</feed>
+			</example>
+		</>
+
+		<section label="Summary and Date" sticky collapsible dividing>
+			<example description="`<ui-summary>` is a feed event's summary line;  `<ui-date>` says when, inline and small inside it (`datetime` makes it a real `<time>`).">
+				<feed>
+					<event>
+						<content>
+							<date datetime="P3D">3 days ago</date>
+							<summary>You added Jenny Hess to your coworker group.</summary>
+						</content>
+					</event>
+					<event>
+						<content>
+							<summary><author link="#jenny">Jenny Hess</author> added you as a friend <date datetime="PT4H">4 hours ago</date></summary>
+						</content>
+					</event>
+				</feed>
+			</example>
+		</>
+
+		<section label="Title" sticky collapsible dividing>
+			<example description="`<ui-title>` is a step's, an accordion panel's or a search result's title.">
+				<steps>
+					<step icon="truck">
+						<content>
+							<title>Shipping</title>
+							<description>Choose your shipping options</description>
+						</content>
+					</step>
+				</steps>
+			</example>
+		</>
+
+		<section label="Value" sticky collapsible dividing>
+			<example description="`<ui-value>` is a statistic's value (a number, a word, an icon or image), with `<ui-label>` naming it.">
+				<statistics>
+					<statistic>
+						<value>40,509</value>
+						<label>Views</label>
+					</statistic>
+					<statistic>
+						<value><icon name="plane"/> 5</value>
+						<label>Flights</label>
+					</statistic>
+					<statistic>
+						<value text>Three Thousand</value>
+						<label>Signups</label>
+					</statistic>
+				</statistics>
+			</example>
+		</>
+
+		<section label="Detail" sticky collapsible dividing>
+			<example description="`<ui-detail>` is a label's dimmer second value, e.g. a count.">
+				<label>Dogs<detail>214</detail></label>
+				<label color="blue">Veronika<detail>Friend</detail></label>
+			</example>
+		</>
+	</>
+</spell-notebook>

@@ -1,0 +1,54 @@
+<spell-notebook "date examples">
+	<header level="1">
+		Date
+		<header>A date says when something happened, inline and small inside a feed event.</>
+	</>
+	<date-tab-bar showing="examples"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#owners">Owners</>
+				<ui-item link="#content">Content</>
+			</>
+		</>
+	</>
+
+	<!--
+		EXAMPLES:  `<ui-date>` in each owner that gives it a look (from the owners' own pages and
+		`src/components/ui-parts/examples/elements/`), then its attributes.  The Content parts page
+		(`ui-header.html`) shows every part together.
+	-->
+	<section label="Owners">
+		<section label="Feed" sticky collapsible dividing>
+			<example description="A date above an event's summary, and one inline at its end.">
+				<feed>
+					<event>
+						<content>
+							<date datetime="P3D">3 days ago</date>
+							<summary>You added Jenny Hess to your coworker group.</summary>
+						</content>
+					</event>
+					<event>
+						<content>
+							<summary><author link="#jenny">Jenny Hess</author> added you as a friend <date datetime="PT4H">4 hours ago</date></summary>
+						</content>
+					</event>
+				</feed>
+			</example>
+		</>
+	</>
+
+	<section label="Content">
+		<section label="Machine-readable date" sticky collapsible dividing>
+			<example description="`datetime` renders a `<time datetime>`;  the text stays what readers see.">
+				<feed>
+					<event>
+						<content>
+							<summary>Release 2.0 shipped <date datetime="2026-10-04">Today</date></summary>
+						</content>
+					</event>
+				</feed>
+			</example>
+		</>
+	</>
+</spell-notebook>

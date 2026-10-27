@@ -1,0 +1,75 @@
+<spell-notebook "reveal usage">
+	<header level="1">
+		Reveal
+		<header>A reveal displays additional content in place of previous content when activated.</>
+	</>
+	<reveal-tab-bar showing="usage"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#using-it">Using it</>
+				<ui-item link="#events">Events</>
+				<ui-item link="#keyboard">Keyboard</>
+				<ui-item link="#accessibility">Accessibility</>
+			</>
+		</>
+	</>
+
+	<!-- USAGE:  how to use it (attributes in practice, events, framework snippets), keyboard, accessibility. -->
+	<section label="Using it">
+		<markdown>
+			A reveal shows its `visible` slot and hides its `hidden` slot underneath. On hover, while it holds keyboard focus,
+			or while `active` is set, the visible content moves, fades, rotates or slides away to show the hidden one.
+
+			- The box is as big as the hidden content, with the visible content laid over it: give both the same size.
+			- Anything you put in the reveal without a slot joins the visible content.
+			- Pick one type: `fade`, `move`, `rotate` or `slide`, each with its direction (`move="up"`, `rotate="left"`).
+			- `size` (`mini` ... `massive`) sets the text size of both contents; widgets inside keep their own `size`.
+			- `instant` drops the short delay before the swap; `disabled` stops it.
+			- Under the user's reduced-motion setting the swap is instant (no movement, no delay), with the same end state.
+		</>
+		<markdown>
+			```html
+			<ui-reveal move="up" aria-label="Team member">
+			  <ui-image slot="visible" size="small" src="placeholder.png" alt=""></ui-image>
+			  <ui-image slot="hidden" size="small" src="ade.jpg" alt="Ade"></ui-image>
+			</ui-reveal>
+			```
+		</>
+	</>
+
+	<section label="Events">
+		<markdown>Reveals have no events of their own. Set `active` from your own code to reveal one without hover.</>
+		<markdown>
+			```js
+			const reveal = document.querySelector("ui-reveal")
+			document.querySelector("#show-profile").addEventListener("click", () => reveal.toggleAttribute("active"))
+			```
+		</>
+	</>
+
+	<section label="Keyboard">
+		<markdown>
+			- **Tab** focuses the reveal, which reveals it (`:focus-within`); **Tab** away hides it again.
+			- When the content holds a link, button or field, **Tab** lands on that control instead, and its focus reveals
+			  the reveal: no second stop.
+			- A `disabled` reveal is skipped.
+		</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			- "Hidden" is visual only: both contents stay in the accessibility tree, so a screen reader reads the visible
+			  content, then the hidden one, at any time. Give each image its own `alt` (empty for a decorative placeholder).
+			- When the content has no control of its own, the reveal is a tab stop: a `role="group"` named by the
+			  `aria-label` you put on the host, with a focus ring.
+			- When the content holds a link, button or field, that control's own focus reveals it and the reveal adds no
+			  extra tab stop. A `<ui-button>` inside is not detected yet (its control renders later), so the reveal keeps its
+			  stop then.
+			- A `disabled` reveal is not a tab stop and never reveals.
+			- Under reduced motion the swap is instant, with no movement.
+			- If the element fails to render, nothing of it shows: its two contents go in its `visible` and
+			  `hidden` slots, and a broken element has only a bare `<slot>`, which takes neither.
+		</>
+	</>
+</spell-notebook>

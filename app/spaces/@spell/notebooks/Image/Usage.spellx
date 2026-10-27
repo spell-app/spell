@@ -1,0 +1,51 @@
+<spell-notebook "image usage">
+	<header level="1">
+		Image
+		<header>An image is a graphic representation of something.</>
+	</>
+	<image-tab-bar showing="usage"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#using-it">Using it</>
+				<ui-item link="#keyboard">Keyboard</>
+				<ui-item link="#accessibility">Accessibility</>
+			</>
+		</>
+	</>
+
+	<section label="Using it">
+		<markdown>
+			`<ui-image>` renders a real `<img>`, so `src`, `alt`, `width`, `height` and `loading` work as they do on the native
+			element.
+
+			- `width` and `height` are the image's own pixel size, which reserves space before it loads; `size` sets how wide
+			  it is drawn. (`width` is NOT the column `width` grammar here.)
+			- An image is a block on its own line; `avatar`, `inline`, `spaced` and `vertical-align` make it sit in a line of
+			  text instead.
+			- `link` wraps it in a real link.
+			- `<ui-images>` shares its size, shape, border and alignment with every image inside it, plain `<img>`s included.
+			- Images have no events.
+		</>
+	</>
+
+	<section label="Keyboard">
+		<markdown>
+			A plain image takes no focus. A linked image (`link`) is a real link: **Tab** reaches it, **Enter** follows it;
+			a `disabled` one is skipped.
+		</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			- Give every image an `alt`. `alt=""` marks it decorative, so screen readers skip it; a missing `alt` stays
+			  missing, and accessibility checkers will flag it.
+			- A linked image (`link`) is a real link, named by its `alt`: describe where it goes.
+			- `disabled` removes the link's `href` and sets `aria-disabled`, so it is no longer focusable.
+			- `<ui-images>` is a plain box with no role; wrap it in a list or give it a label if the group means something.
+			- If the element fails to render, the `<img>`, its `alt` and any link around it go: only children
+			  written inside the element still show, through a bare `<slot>`. A broken group still shows its
+			  images, without the group layout.
+		</>
+	</>
+</spell-notebook>

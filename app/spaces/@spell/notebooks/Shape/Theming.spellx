@@ -1,0 +1,64 @@
+<spell-notebook "shape theming">
+	<header level="1">
+		Shape
+		<header>A shape is a three dimensional object displayed on a two dimensional plane.</>
+	</>
+	<shape-tab-bar showing="theming"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#tokens">Tokens</>
+				<ui-item link="#themes">Themes</>
+			</>
+		</>
+	</>
+
+	<!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
+	<section label="Tokens">
+		<markdown>
+			Theme with the public `--ui-shape-*` tokens on the shape or any ancestor; `::part(shape)` works too. Style the
+			pieces with `::part()`: `shape` (the stage, with the 3D perspective) and `sides` (the box that turns) on the
+			shape, `side` (the face) on each `<ui-side>`.
+		</>
+		<markdown>
+			```css
+			ui-shape[cube] {
+			  --ui-shape-cube-size: 10em;
+			}
+			ui-side::part(side) {
+			  border-radius: 0.5em;
+			}
+			```
+		</>
+		<message state="info" size="small">
+			<markdown>
+				`duration` on a shape beats `--ui-shape-duration`. Never set the `--_ui-*` names (`--_ui-shape-type` is how
+				the sides learn their shape's type): they're the sheet's private plumbing.
+			</>
+		</>
+		<markdown>Edit a value below to try it.</>
+		<html>
+			<ui-docs-tokens family="ui-shape" playground>
+				<button type="button" class="ui button" commandfor="shape-demo-plain-playground" command="--next">Flip left</>
+				<ui-shape id="shape-demo-plain-playground">
+					<ui-side>
+						<p>This side starts visible.</>
+					</>
+					<ui-side>
+						<p>This is yet another side.</>
+					</>
+					<ui-side>
+						<p>This is the last side.</>
+					</>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="Themes">
+		<markdown>
+			The theme menu in the header (Spell, Glass, Fruity, Merlot, Paper, Midnight, Crisp, Pop, Matrix) restyles the cards, headers and images
+			on a shape's sides.
+		</>
+	</>
+</spell-notebook>

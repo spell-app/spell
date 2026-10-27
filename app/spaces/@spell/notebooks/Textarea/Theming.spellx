@@ -1,0 +1,49 @@
+<spell-notebook "textarea theming">
+	<header level="1">
+		Textarea
+		<header>A textarea is a multi-line field used to elicit a longer response.</>
+	</>
+	<textarea-tab-bar showing="theming"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#tokens">Tokens</>
+				<ui-item link="#themes">Themes</>
+			</>
+		</>
+	</>
+
+	<!-- THEMING:  the input family's tokens a textarea reads, live. -->
+	<section label="Tokens">
+		<markdown>
+			A textarea reads the input family's `--ui-input-*` tokens: the shared box, border, colour and placeholder
+			tokens, plus its own `--ui-input-textarea-*` (height, its limits, line height). Set one on the element, on any
+			ancestor (a form, `:root`), or on the root box through `::part(input)`; style the native `<textarea>` itself
+			with `::part(control)`. The [input page](/components/ui/ui-input.html) lists every token of the family.
+		</>
+		<markdown>
+			```css
+			ui-textarea {
+			  --ui-input-textarea-height: 6em;
+			  --ui-input-radius: 0;
+			}
+			ui-textarea::part(control) {
+			  resize: none;
+			}
+			```
+		</>
+		<markdown>Edit a value below to try it.</>
+		<html>
+			<ui-docs-tokens family="ui-input" tokens="--ui-input-textarea* --ui-input-padding* --ui-input-background* --ui-input-color* --ui-input-border* --ui-input-radius --ui-input-placeholder*" playground>
+				<ui-textarea fluid placeholder="Type here" aria-label="Preview"></>
+			</>
+		</>
+	</>
+
+	<section label="Themes">
+		<markdown>
+			The theme menu above picks the theme for every page of the site:  Spell, Glass, Fruity or Merlot,
+			each restyling textareas (the input family's) through its tokens.
+		</>
+	</>
+</spell-notebook>

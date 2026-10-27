@@ -1,0 +1,58 @@
+<spell-notebook "step theming">
+	<header level="1">
+		Step
+		<header>A step shows the completion status of an activity in a series of activities.</>
+	</>
+	<step-tab-bar showing="theming"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#tokens">Tokens</>
+				<ui-item link="#themes">Themes</>
+			</>
+		</>
+	</>
+
+	<!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
+	<section label="Tokens">
+		<markdown>
+			Theme with the public `--ui-step-*` and `--ui-steps-*` tokens: set one on the element, on any ancestor (a region,
+			`:root`), or on the group's box through `::part(steps)`. Every step in the group reads them from the group, so set
+			them there or above, not on one step.
+
+			- The content's look tokens (`--ui-step-content-padding`, `--ui-step-description-distance` ...) also work on one
+			  step.
+			- Style one step's box with `ui-step::part(step)`, and its `icon`, `content`, `title` and `description` parts
+			  likewise.
+			- Never set the `--_ui-step*` names: they're the sheet's private plumbing (the group resolves its variations into
+			  them).
+		</>
+		<markdown>
+			```css
+			ui-steps {
+			  --ui-step-completed-color: var(--ui-primary);
+			  --ui-step-active-background: var(--ui-surface-muted);
+			  --ui-step-padding: 1em 1.5em;
+			}
+			ui-step::part(title) {
+			  font-weight: normal;
+			}
+			```
+		</>
+		<markdown>Edit a value below to try it.</>
+		<html>
+			<ui-docs-tokens family="ui-step" playground>
+				<ui-steps>
+					<ui-step icon="truck" heading="Shipping" description="Choose your shipping options"></>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="Themes">
+		<markdown>
+			The theme menu above picks the theme for every page of the site:  Spell, Glass, Fruity or Merlot,
+			each restyling this component through its tokens.
+		</>
+	</>
+</spell-notebook>

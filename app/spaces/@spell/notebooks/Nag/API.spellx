@@ -1,0 +1,56 @@
+<spell-notebook "nag api">
+	<header level="1">
+		Nag
+		<header>A nag is a persistent message that stays until dismissed, and can remember the dismissal.</>
+	</>
+	<nag-tab-bar showing="api"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#attributes">Attributes</>
+				<ui-item link="#events">Events</>
+				<ui-item link="#slots">Slots</>
+				<ui-item link="#parts">Parts</>
+				<ui-item link="#states">States</>
+				<ui-item link="#texts">Texts</>
+			</>
+		</>
+	</>
+
+	<!-- API:  generated from the vocabularies (`docs/__data/components.json5`);  nothing to write. -->
+	<section label="Attributes">
+		<html>
+			<ui-docs-api family="ui-nag" only="attributes"></>
+		</>
+	</>
+
+	<section label="Events">
+		<html>
+			<ui-docs-api family="ui-nag" only="events"></>
+		</>
+	</>
+
+	<section label="Slots">
+		<html>
+			<ui-docs-api family="ui-nag" only="slots"></>
+		</>
+	</>
+
+	<section label="Parts">
+		<html>
+			<ui-docs-api family="ui-nag" only="parts"></>
+		</>
+	</>
+
+	<section label="States">
+		<html>
+			<ui-docs-api family="ui-nag" only="states"></>
+		</>
+	</>
+
+	<section label="Texts">
+		<html>
+			<ui-docs-api family="ui-nag" only="texts"></>
+		</>
+	</>
+</spell-notebook>

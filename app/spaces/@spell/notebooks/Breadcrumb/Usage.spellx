@@ -1,0 +1,66 @@
+<spell-notebook "breadcrumb usage">
+	<header level="1">
+		Breadcrumb
+		<header>A breadcrumb is used to show hierarchy between content.</>
+	</>
+	<breadcrumb-tab-bar showing="usage"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#using-it">Using it</>
+				<ui-item link="#events">Events</>
+				<ui-item link="#keyboard">Keyboard</>
+				<ui-item link="#accessibility">Accessibility</>
+			</>
+		</>
+	</>
+
+	<!-- USAGE:  how to use it (sections, dividers), keyboard, accessibility. -->
+	<section label="Using it">
+		<markdown>
+			`<ui-breadcrumbs>` is a `<nav>` around an ordered list; each `<ui-breadcrumb>` is one item of it.
+
+			- A section with `link` is a link (`target` works too); one without is plain text.
+			- An `active` section is the current page: bold, never a link, even with `link`.
+			- Each section draws its own divider before it (hidden on the first), so there is nothing to put between them.
+			- `divider` sets the text divider (`/` when unset); `divider-icon` draws an icon instead, in the text colour.
+			- `size` and `inverted` are the only look words.
+		</>
+		<markdown>
+			```html
+			<ui-breadcrumbs aria-label="Location" divider-icon="chevron right">
+			  <ui-breadcrumb link="/">Home</ui-breadcrumb>
+			  <ui-breadcrumb link="/store">Store</ui-breadcrumb>
+			  <ui-breadcrumb selected>T-Shirt</ui-breadcrumb>
+			</ui-breadcrumbs>
+			```
+		</>
+	</>
+
+	<section label="Events">
+		<markdown>
+			Breadcrumbs have no events of their own: a linked section is a real `<a>`, so it fires the native `click` and
+			navigates.
+		</>
+	</>
+
+	<section label="Keyboard">
+		<markdown>
+			- **Tab** / **Shift+Tab** moves between the linked sections; text and `active` sections are not tab stops.
+			- **Enter** follows the focused link.
+		</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			- The WAI-ARIA breadcrumb pattern: a `<nav>` landmark around an `<ol>`, whose items are the sections.
+			- The landmark is named "Breadcrumb" (translatable); an `aria-label` on the host replaces it. Give each breadcrumb
+			  on a page its own name.
+			- The `active` section carries `aria-current="page"`. Linked sections are real `<a>`s: focusable, with Enter to
+			  follow.
+			- Dividers are drawn by CSS and hidden from assistive technology, so the list reads as its section names only.
+			- If the element fails to render, it shows its sections through a bare `<slot>`, so their text and
+			  links stay; the dividers between them, the `<nav>` around them and its "Breadcrumb" name go.
+		</>
+	</>
+</spell-notebook>

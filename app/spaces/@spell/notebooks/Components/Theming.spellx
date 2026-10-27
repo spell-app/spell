@@ -1,0 +1,33 @@
+<spell-notebook "components theming">
+	<header level="1">
+		Components
+		<header>Components name a pack of another package's elements, which the root around them loads on demand, once per page.</>
+	</>
+	<components-tab-bar showing="theming"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#tokens">Tokens</>
+				<ui-item link="#themes">Themes</>
+			</>
+		</>
+	</>
+
+	<!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
+	<section label="Tokens">
+		<markdown>
+			Set a public `--ui-*` token on the element, any ancestor or `:root`; it inherits into the shadow
+			root. Edit a value below to try it.
+		</>
+		<html>
+			<ui-docs-tokens family="ui-components" playground></>
+		</>
+	</>
+
+	<section label="Themes">
+		<markdown>
+			The theme menu above picks the theme for every page of the site:  Spell, Glass, Fruity or Merlot,
+			each restyling this component through its tokens.
+		</>
+	</>
+</spell-notebook>

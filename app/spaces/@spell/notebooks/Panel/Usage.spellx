@@ -1,0 +1,93 @@
+<spell-notebook "panel usage">
+	<header level="1">
+		Panel
+		<header>A panel is an inspector:  a tinted box of fields under a header band, with sub-head bands that open and close.</>
+	</>
+	<panel-tab-bar showing="usage"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#using-it">Using it</>
+				<ui-item link="#loading-a-band-from-a-file">Loading a band from a file</>
+				<ui-item link="#keyboard">Keyboard</>
+				<ui-item link="#accessibility">Accessibility</>
+			</>
+		</>
+	</>
+
+	<!-- USAGE:  how to use it (attributes in practice, events, framework snippets), keyboard, accessibility. -->
+	<section label="Using it">
+		<markdown>
+			A `<ui-panel>` is a [`<ui-section>`](/components/ui/ui-section.html) in an inspector's look, so it takes EVERY section
+			attribute, slot, part and event: `label`, `hint`, `icon`, `badge`, `description`, `level`, `collapsible`,
+			`open`, `fold-icon`, `sticky`, the `label`, `hint`, `icon`, `badge`, `actions` and `description`
+			slots, `ui-opening` / `ui-closing` and `ui-opened` / `ui-closed`. Its vocabulary is built on the section's, so an attribute the section
+			gains, the panel gains too.
+
+			- Put fields straight inside: inputs, sliders, checkboxes, `<ui-field>`s. They stack 8px apart.
+			- Nest a panel to start a sub-head band; its fields follow it.
+			- `open` is controlled: set it to close or open; cancel `ui-opening` / `ui-closing` to keep the
+			  user's click from changing it.
+			- It needs no theme: under any theme it's a `primary`-tinted box. The brand pages' `spell-brand`
+			  theme adds the `accent` hue (Polished Ivory) and the brand's shadow.
+		</>
+		<markdown>
+			```js
+			document.querySelector("ui-panel").addEventListener("ui-closing", (event) => {
+			  if (unsavedChanges) event.preventDefault() // keep it open
+			})
+			```
+		</>
+	</>
+
+	<section label="Loading a band from a file">
+		<markdown>
+			`source` comes with `<ui-section source>` (being built in epic `claude-design`): a collapsed band
+			loads its body from a file the first time it's opened. The panel takes it with no change of its
+			own, as it takes every section attribute; until then the attribute does nothing.
+		</>
+		<markdown>
+			```html
+			<ui-panel label="Theme" collapsible>
+			  <ui-panel label="Advanced" collapsible open="false" source="advanced.html"></ui-panel>
+			</ui-panel>
+			```
+		</>
+	</>
+
+	<section label="Keyboard">
+		<html>
+			<ui-table celled padding="compact" unstackable>
+				<table>
+					<thead>
+						<tr>
+							<th>Key</>
+							<th>Action</>
+						</>
+					</>
+					<tbody>
+						<tr>
+							<td>Tab / Shift + Tab</>
+							<td>Move to a band's open / close button, then its actions, then the fields</>
+						</>
+						<tr>
+							<td>Enter / Space</>
+							<td>Close or open the focused band</>
+						</>
+					</>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			- Each band is a real heading (`h2`, nested ones one level deeper), so panels appear in the page
+			  outline.
+			- A collapsible band's heading CONTAINS its open / close button, which says whether the content is shown
+			  (`aria-expanded`) and which content it controls. The chevron is decoration.
+			- Find-in-page reaches closed content and opens it.
+			- Name every field: a panel's band doesn't label the controls under it.
+		</>
+	</>
+</spell-notebook>

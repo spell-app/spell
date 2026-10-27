@@ -1,0 +1,62 @@
+<spell-notebook "content-parts theming">
+	<header level="1">
+		Content parts
+		<header>Headers, content, descriptions, metas and the other generic parts that cards, items, modals and
+              messages share.</>
+	</>
+	<content-parts-tab-bar showing="theming"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#tokens">Tokens</>
+				<ui-item link="#themes">Themes</>
+			</>
+		</>
+	</>
+
+	<!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
+	<section label="Tokens">
+		<markdown>
+			A standalone header's tokens are public (`--ui-header-*`): set one on the element, on any ancestor or `:root`, or
+			through `::part(header)`. They inherit into the shadow root, where the sheet reads each through a private alias.
+
+			- The page header ladder (`--ui-header-h1` ... `-h6`) is a ratio of `--ui-font-size`; the content header ladder
+			  (`--ui-header-size-mini` ... `-massive`) is in `em` of the surrounding text.
+			- Inside an owner, a part's look comes from the OWNER's tokens (`--ui-card-header-color`,
+			  `--ui-modal-header-size` ...): set them on the owner or above it, and every part inside follows. See each
+			  owner's Theming tab.
+			- Never set the private switches owners hand their parts (`--_ui-card-layout` ...), or any `--_*` name.
+		</>
+		<markdown>
+			```css
+			/* quieter page headers everywhere */
+			:root {
+			  --ui-header-font-weight: 600;
+			  --ui-header-h1: 1.75;
+			}
+			/* one card's header */
+			ui-card.note {
+			  --ui-card-header-color: var(--ui-primary);
+			}
+			```
+		</>
+		<markdown>Edit a value below to try it.</>
+		<html>
+			<ui-docs-tokens family="ui-parts" playground>
+				<ui-header level="1">First header</>
+				<ui-header level="2">Second header</>
+				<ui-header level="3">Third header</>
+				<ui-header level="4">Fourth header</>
+				<ui-header level="5">Fifth header</>
+				<ui-header level="6">Sixth header</>
+			</>
+		</>
+	</>
+
+	<section label="Themes">
+		<markdown>
+			The theme menu above picks the theme for every page of the site:  Spell, Glass, Fruity or Merlot,
+			each restyling these parts through its tokens.
+		</>
+	</>
+</spell-notebook>

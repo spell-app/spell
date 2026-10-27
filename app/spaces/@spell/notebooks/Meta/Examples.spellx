@@ -1,0 +1,91 @@
+<spell-notebook "meta examples">
+	<header level="1">
+		Meta
+		<header>A meta holds metadata about the content, such as a date or a category.</>
+	</>
+	<meta-tab-bar showing="examples"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#owners">Owners</>
+			</>
+		</>
+	</>
+
+	<!--
+		EXAMPLES:  `<ui-meta>` in each owner that gives it a look (from the owners' own pages and
+		`src/components/ui-parts/examples/elements/`), then its attributes.  The Content parts page
+		(`ui-header.html`) shows every part together.
+	-->
+	<section label="Owners">
+		<section label="Card" sticky collapsible dividing>
+			<example description="A card's meta:  small and muted, under its header.">
+				<html>
+					<ui-card>
+						<ui-content>
+							<ui-header>Kristy</ui-header>
+							<ui-meta>
+								<span>Joined in 2013</span>
+							</ui-meta>
+							<ui-description>Kristy is an art director living in New York.</ui-description>
+						</ui-content>
+					</ui-card>
+				</html>
+			</example>
+		</>
+
+		<section label="Item" sticky collapsible dividing>
+			<example description="An item's meta:  each piece spaced apart.">
+				<html>
+					<ui-items>
+						<ui-item image="../images/wireframe/image.png">
+							<ui-content>
+								<ui-header>Cute Dog</ui-header>
+								<ui-meta>
+									<span>Description</span>
+									<span>Stevie</span>
+								</ui-meta>
+							</ui-content>
+						</ui-item>
+					</ui-items>
+				</html>
+			</example>
+		</>
+
+		<section label="Feed" sticky collapsible dividing>
+			<example description="A feed event's meta:  a small line under its summary.">
+				<html>
+					<ui-feed>
+						<ui-event>
+							<ui-content>
+								<ui-summary><ui-author link="#elliot">Elliot Fu</ui-author> added you as a friend</ui-summary>
+								<ui-meta>
+									<a href="#like"><ui-icon name="heart"></ui-icon> 4 Likes</a>
+								</ui-meta>
+							</ui-content>
+						</ui-event>
+					</ui-feed>
+				</html>
+			</example>
+		</>
+
+		<section label="Comment" sticky collapsible dividing>
+			<example description="A comment's metadata:  inline after the author.">
+				<html>
+					<ui-comments>
+						<ui-comment>
+							<ui-avatar src="/components/ui/images/avatar/small/matt.jpg"></ui-avatar>
+							<ui-content>
+								<ui-author link="#matt">Matt</ui-author>
+								<ui-meta>
+									<span>Today at 5:42PM</span>
+								</ui-meta>
+								<ui-description>How artistic!</ui-description>
+							</ui-content>
+						</ui-comment>
+					</ui-comments>
+				</html>
+			</example>
+		</>
+	</>
+</spell-notebook>

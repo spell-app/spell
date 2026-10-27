@@ -1,0 +1,124 @@
+<spell-notebook "comment theming">
+	<header level="1">
+		Comment
+		<header>A comment displays user feedback to site content.</>
+	</>
+	<comment-tab-bar showing="theming"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#tokens">Tokens</>
+				<ui-item link="#themes">Themes</>
+			</>
+		</>
+	</>
+
+	<!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
+	<section label="Tokens">
+		<markdown>
+			Theme with the public `--ui-comments-*` and `--ui-comment-*` tokens: set one on the list, on any ancestor (`:root`
+			for every list), or on its box through `::part(comments)`. Its comments and threads inherit them.
+
+			The parts inside a comment also read a few tokens that are unset by default, so they are not in the table:
+
+			- `--ui-comment-avatar-width` (`2.5em`)
+			- `--ui-comment-content-margin` (`3.5em`, the space beside the avatar)
+			- `--ui-comment-author-color`, `--ui-comment-meta-color`, `--ui-comment-text-color` and
+			  `--ui-comment-action-color`
+		</>
+		<markdown>
+			```css
+			ui-comments {
+			  --ui-comments-max-width: 50em;
+			  --ui-comment-distance: 1em;
+			  --ui-comment-avatar-width: 3em;
+			  --ui-comment-content-margin: 4em;
+			}
+			```
+		</>
+		<message state="info" size="small">
+			<markdown>
+				the `minimal` look, `threaded` and `inverted` are switches the top list sets for its threads and parts; use the
+				attributes. Never set the `--_ui-*` / `--_comments-*` names (`--_ui-comments-minimal` ...): they're the sheet's
+				private plumbing.
+			</>
+		</>
+		<markdown>Edit a value below to try it.</>
+		<html>
+			<ui-docs-tokens family="ui-comment" playground>
+				<ui-comments>
+					<ui-header level="3" dividing>Comments</>
+					<ui-comment>
+						<ui-avatar src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22 viewBox=%220 0 10 10%22%3E%3Crect width=%2210%22 height=%2210%22 fill=%22%2394a3b8%22/%3E%3Ccircle cx=%225%22 cy=%224%22 r=%222%22 fill=%22%23e2e8f0%22/%3E%3C/svg%3E"></>
+						<ui-content>
+							<ui-author link="#matt">Matt</>
+							<ui-meta>
+								<span>Today at 5:42PM</>
+							</>
+							<ui-description>How artistic!</>
+							<ui-actions>
+								<button type="button">Reply</>
+							</>
+						</>
+					</>
+					<ui-comment>
+						<ui-avatar src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22 viewBox=%220 0 10 10%22%3E%3Crect width=%2210%22 height=%2210%22 fill=%22%2394a3b8%22/%3E%3Ccircle cx=%225%22 cy=%224%22 r=%222%22 fill=%22%23e2e8f0%22/%3E%3C/svg%3E"></>
+						<ui-content>
+							<ui-author link="#elliot-fu">Elliot Fu</>
+							<ui-meta>
+								<span>Yesterday at 12:30AM</>
+							</>
+							<ui-description>This has been very useful for my research. Thanks as well!</>
+							<ui-actions>
+								<button type="button">Reply</>
+							</>
+						</>
+						<ui-comments>
+							<ui-comment>
+								<ui-avatar src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22 viewBox=%220 0 10 10%22%3E%3Crect width=%2210%22 height=%2210%22 fill=%22%2394a3b8%22/%3E%3Ccircle cx=%225%22 cy=%224%22 r=%222%22 fill=%22%23e2e8f0%22/%3E%3C/svg%3E"></>
+								<ui-content>
+									<ui-author link="#jenny-hess">Jenny Hess</>
+									<ui-meta>
+										<span>Just now</>
+									</>
+									<ui-description>Elliot you are always so right :)</>
+									<ui-actions>
+										<button type="button">Reply</>
+									</>
+								</>
+							</>
+						</>
+					</>
+					<ui-comment>
+						<ui-avatar src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22 viewBox=%220 0 10 10%22%3E%3Crect width=%2210%22 height=%2210%22 fill=%22%2394a3b8%22/%3E%3Ccircle cx=%225%22 cy=%224%22 r=%222%22 fill=%22%23e2e8f0%22/%3E%3C/svg%3E"></>
+						<ui-content>
+							<ui-author link="#joe-henderson">Joe Henderson</>
+							<ui-meta>
+								<span>5 days ago</>
+							</>
+							<ui-description>Dude, this is awesome. Thanks so much</>
+							<ui-actions>
+								<button type="button">Reply</>
+							</>
+						</>
+					</>
+					<ui-form slot="reply">
+						<form method="dialog">
+							<ui-field>
+								<ui-textarea aria-label="Reply"></>
+							</>
+							<ui-button type="submit" color="primary">Add Reply</>
+						</>
+					</>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="Themes">
+		<markdown>
+			The theme menu above picks the theme for every page of the site:  Spell, Glass, Fruity or Merlot,
+			each restyling this component through its tokens.
+		</>
+	</>
+</spell-notebook>

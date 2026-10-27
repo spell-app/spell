@@ -13,7 +13,6 @@ import { appTexts, type AppTextKey } from "spell/app/app/ui/AppTexts"
 import type { SpellRuntime } from "spell/app/app/runner"
 import { NotebookCode, CODE_VIEWS, type CodeView } from "./NotebookCode"
 import { NotebookKeys } from "./NotebookKeys"
-import { NotebookOriginal } from "./NotebookOriginal"
 import { NotebookPageCells, type NotebookPageModel, type PageCell } from "./NotebookPageCells"
 import { CellRunner, ChunkTreeAdapter } from "./NotebookPatch"
 
@@ -601,17 +600,6 @@ export class NotebookController {
    */
   panelMaker: ((key: string, index: number) => HTMLElement[]) | undefined
 
-  /**
-   * Each example's "Original" fold, under it:  the page the notebook was converted from (`original=`).
-   * - TODO:  TEMPORARY, gone after P19's Button page with `NotebookOriginal`.
-   */
-  private readonly originals = new NotebookOriginal(() => this.originalPage())
-
-  /** The page the notebook was converted from, its `original="..."`, if it names one. */
-  private originalPage(): string | undefined {
-    return this.now.model?.notebook.attributes.find((attribute) => attribute.name === "original")?.value
-  }
-
   /** Cell `key` is drawn in `host`, a place on the page:  draw it there. */
   attach(key: string, host: HTMLElement) {
     this.drawn.set(key, { host })
@@ -765,7 +753,6 @@ export class NotebookController {
       const was = panels[index][0]?.parentElement
       if (was?.hasAttribute("code")) example.setAttribute("code", "")
       example.append(...panels[index])
-      this.originals.place(key, index, example)
     })
     this.panels.set(key, panels)
   }

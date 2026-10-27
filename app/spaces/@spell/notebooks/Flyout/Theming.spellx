@@ -1,0 +1,70 @@
+<spell-notebook "flyout theming">
+	<header level="1">
+		Flyout
+		<header>A flyout is a modal that slides in from a side of the page.</>
+	</>
+	<flyout-tab-bar showing="theming"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#tokens">Tokens</>
+				<ui-item link="#themes">Themes</>
+			</>
+		</>
+	</>
+
+	<!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
+	<section label="Tokens">
+		<markdown>
+			Theme with the public `--ui-flyout-*` tokens: set one on the element, on any ancestor (`:root` for every
+			flyout), or on the box through `::part(flyout)`. They inherit into the shadow root, where the sheet reads each
+			through a private alias, so nothing inside blocks them.
+
+			- The `width` words and columns replace `--ui-flyout-width`; `inverted` replaces the background, the header
+			  colour and the actions background.
+			- Slotted parts read `--ui-flyout-header-color` and `--ui-flyout-actions-background` from the flyout, so set
+			  those on the flyout or above it, not on the part.
+			- `--ui-flyout-dimmer-background` colours the backdrop; `blurring` reads the shared dimmer tokens.
+			- The shorthands are parts: `header`, `content`, and `close` for the close icon.
+		</>
+		<markdown>
+			```css
+			/* every flyout on the page */
+			ui-flyout {
+			  --ui-flyout-width: 480px;
+			  --ui-flyout-dimmer-background: oklch(0 0 0 / 0.25);
+			}
+			/* the close icon */
+			ui-flyout::part(close) {
+			  opacity: 1;
+			}
+			```
+		</>
+		<message state="info" size="small">
+			<markdown>Never set the `--_ui-flyout-*` names: they're the sheet's private plumbing.</>
+		</>
+		<markdown>Edit a value below to try it.</>
+		<html>
+			<ui-docs-tokens family="ui-flyout" playground>
+				<button type="button" class="ui button" commandfor="flyout-types-standard-playground" command="--show">Show</>
+				<ui-flyout id="flyout-types-standard-playground" closable>
+					<ui-header>Archive old messages</>
+					<ui-content>
+						<p>Your inbox is getting full. Would you like us to enable automatic archiving of old messages?</>
+					</>
+					<ui-actions>
+						<ui-button class="cancel" color="red">No</>
+						<ui-button class="ok" color="green">Yes</>
+					</>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="Themes">
+		<markdown>
+			The theme menu above picks the theme for every page of the site:  Spell, Glass, Fruity or Merlot,
+			each restyling this component through its tokens.
+		</>
+	</>
+</spell-notebook>
