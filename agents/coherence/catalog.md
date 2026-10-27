@@ -43,6 +43,16 @@ What `/coherence sweep` reads, an agent each.
 | `epic-pages` | `spell-epic/src/components/`, `spell-epic/src/tools/_assets/` (hand-written only), `spell-epic/src/answers/`, `spell-epic/src/review/` |
 | `epic-tools-kit` | `spell-epic/src/` (the rest), `spell-epic/hooks/`, the kit's `src/`, `tools/`, `scripts/` |
 | `parser-app` | `spell-parser/src/`, `spell-app/src/`, `spell-brand/src/`, `spell-brand/scripts/` |
+| `ui-shared` | `spell-ui/src/`'s other folders:  `cli/`, `icons/`, `property/`, `util/`, `vocabulary/`, its top-level files |
+| `vscode` | the two VS Code extensions:  `spell-app/vscode/`, `spell-epic/vscode/` |
+
+The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
+"did your coherence sweep include our CLI command surface?  What about agent files?").
+
+| Area | What |
+| --- | --- |
+| `commands` | every `spell` command, `epic` verb and yarn script, and the skills that run them:  one job one way, one verb and one flag per idea ([the commands guide](../../spell.epics/guides/dev/commands/commands.md)) |
+| `agent-files` | every `AGENTS.md` and `CLAUDE.md`, WWOD and its spokes, the skills, the agent definitions and their procedures, the epic templates:  a rule in ONE place, steps referenced not copied, one word per idea |
 
 ## Reading text
 
