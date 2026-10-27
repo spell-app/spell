@@ -1,9 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" width="800" height="400" role="img" aria-labelledby="title desc">
   <title id="title">Languages in, targets out</title>
-  <desc id="desc">Human languages read into one Spell tree, and each target writes out of it.  In:  English and Spanish, today, each file by its name, Card.spell or Carta.es.spell;  your favorite language coming.  Out:  JavaScript on Solid, TypeScript on Solid or as a library, and Python today, your favorite language coming.</desc>
+  <desc id="desc">Human languages read into one Spell tree, and each target writes out of it.  In:  English and Spanish, today, each file by its name, Card.spell or Carta.es.spell;  French coming, and your language, if you help translate it.  Out:  JavaScript on Solid, TypeScript on Solid or as a library, and Python today;  C++, Java, Swift and more coming.</desc>
   <defs>
     <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
       <path d="M0,0 L10,5 L0,10 z" fill="#6550CA"/>
+    </marker>
+    <marker id="arrow-later" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#7BA05B"/>
     </marker>
   </defs>
   <style>
@@ -31,24 +34,28 @@
   <text class="head" x="655" y="104">PROGRAMMING LANGUAGE</text>
 
   <!-- edges -->
-  <path class="edge" d="M240,144 C290,144 300,214 324,222" marker-end="url(#arrow)"/>
-  <path class="edge" d="M240,212 C290,212 300,234 324,238" marker-end="url(#arrow)"/>
-  <path class="later" d="M240,280 C290,280 300,262 326,254" marker-end="url(#arrow)"/>
+  <path class="edge" d="M240,140 C290,140 300,200 320,206" marker-end="url(#arrow)"/>
+  <path class="edge" d="M240,198 C285,198 300,224 317,226" marker-end="url(#arrow)"/>
+  <path class="later" d="M240,256 C285,256 300,248 317,246" marker-end="url(#arrow-later)"/>
+  <path class="later" d="M240,314 C290,314 300,272 320,266" marker-end="url(#arrow-later)"/>
   <path class="edge" d="M478,214 C520,180 520,140 556,140" marker-end="url(#arrow)"/>
   <path class="edge" d="M480,228 C520,214 524,200 556,200" marker-end="url(#arrow)"/>
   <path class="edge" d="M480,244 C520,256 524,260 556,260" marker-end="url(#arrow)"/>
-  <path class="later" d="M478,258 C520,292 520,320 556,320" marker-end="url(#arrow)"/>
+  <path class="later" d="M478,258 C520,292 520,320 556,320" marker-end="url(#arrow-later)"/>
 
   <!-- in -->
-  <rect class="box" x="50" y="116" width="190" height="56" rx="12"/>
-  <text class="name" x="145" y="141">English</text>
-  <text class="what" x="145" y="160">Card.spell</text>
-  <rect class="box" x="50" y="184" width="190" height="56" rx="12"/>
-  <text class="name" x="145" y="209">Spanish</text>
-  <text class="what" x="145" y="228">Carta.es.spell</text>
-  <rect class="coming" x="50" y="256" width="190" height="48" rx="12"/>
-  <text class="soon" x="145" y="277">Your favorite language</text>
-  <text class="soonwhat" x="145" y="294">coming</text>
+  <rect class="box" x="50" y="116" width="190" height="48" rx="12"/>
+  <text class="name" x="145" y="137">English</text>
+  <text class="what" x="145" y="154">Card.spell</text>
+  <rect class="box" x="50" y="174" width="190" height="48" rx="12"/>
+  <text class="name" x="145" y="195">Spanish</text>
+  <text class="what" x="145" y="212">Carta.es.spell</text>
+  <rect class="coming" x="50" y="232" width="190" height="48" rx="12"/>
+  <text class="soon" x="145" y="253">French</text>
+  <text class="soonwhat" x="145" y="270">coming</text>
+  <rect class="coming" x="50" y="290" width="190" height="48" rx="12"/>
+  <text class="soon" x="145" y="311">Your language</text>
+  <text class="soonwhat" x="145" y="328">help us translate it</text>
 
   <!-- the tree -->
   <circle cx="400" cy="236" r="78" fill="#6550CA" stroke="#4A3AA0" stroke-width="2.5"/>
@@ -66,7 +73,7 @@
   <text class="name" x="660" y="257">Python</text>
   <text class="what" x="660" y="274">a .py program</text>
   <rect class="coming" x="560" y="296" width="200" height="48" rx="12"/>
-  <text class="soon" x="660" y="317">Your favorite language</text>
+  <text class="soon" x="660" y="317">C++, Java, Swift...</text>
   <text class="soonwhat" x="660" y="334">coming</text>
 
   <text class="sub" x="400" y="370" style="text-anchor:middle">N languages plus M targets, never N × M</text>
