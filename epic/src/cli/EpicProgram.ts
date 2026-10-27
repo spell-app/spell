@@ -10,6 +10,7 @@ import { EpicTools, type EpicToolName } from "spell/epic/command/EpicTools"
 import { Hub } from "spell/epic/command/Hub"
 import { LinesOfCode } from "spell/epic/command/LinesOfCode"
 import { Parking } from "spell/epic/command/Parking"
+import { PluginInstall } from "spell/epic/command/PluginInstall"
 import { RepoInit } from "spell/epic/command/RepoInit"
 import { Repos } from "spell/epic/command/Repos"
 import { Requests } from "spell/epic/command/Requests"
@@ -43,6 +44,7 @@ import { GROUP_VERBS, VERB_FLAGS, type GroupName, type VerbFlags } from "./epicG
  *   - `pages`:  the docs pages' tools (spell-app's `spell dev docs` until epic `repo-split` P13;  epic `epic-eject` P9), passed through
  *   - `loc`:  lines of code per repo and folder, and the LOC guide rewritten (`LinesOfCode`, epic `epic-engine` I122)
  *   - `init`:  a repo set up for epics (`RepoInit`, epic `epic-eject` P9)
+ *   - `plugin install`:  the epic plugin installed in Claude Code, `epic@spell` (`PluginInstall`, epic `epic-engine` P49)
  *   - `config`:  the repo's `.epic/config.json5`, a value or all of them (`config()`)
  * - Help and mistakes:
  *   - each group's verbs are listed (`epicGroups.ts`) for their help, `epic ask create --help`,
@@ -553,7 +555,7 @@ export class EpicProgram {
   // ## The repo's settings
   ////////////////
 
-  /** `config`. */
+  /** `config`, `voice`, `init`, `plugin`. */
   private addSettingsVerbs(): void {
     const epic = this.epic
     epic.commandsGroup("The repo's settings:")
@@ -577,6 +579,12 @@ export class EpicProgram {
       )
       .usage("[--dry-run] [--json]")
       .addHelpText("after", INIT_HELP)
+
+    this.group(
+      epic.command("plugin"),
+      "the epic plugin in Claude Code, epic@spell from the kit's epic/:  install (moves an old spell-epic@spell-epic)",
+      (args) => new PluginInstall().run(args)
+    )
   }
 
   ////////////////

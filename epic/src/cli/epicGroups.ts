@@ -935,6 +935,22 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
       flags: {}
     }
   ],
+  plugin: [
+    {
+      name: "install",
+      usage: "[--kit <folder>] [--dry-run] [--json]",
+      description:
+        "install the epic plugin in Claude Code as epic@spell, run in place from the kit's epic/:  the old " +
+        "spell-epic@spell-epic taken out, the marketplace spell added, the cache, skill and epic links made;  " +
+        "safe to run again",
+      example: "epic plugin install --dry-run",
+      flags: {
+        "--kit <folder>": "the kit's checkout to install from (default this code's main checkout, ~/www/spell)",
+        "--dry-run": "only say what it would change",
+        "--json": "print the report as JSON"
+      }
+    }
+  ],
   pages: [
     {
       name: "index",
@@ -1031,6 +1047,23 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
         "--fix": "point the pages at the local copy first",
         "--json": "print what's left as JSON"
       }
+    },
+    {
+      name: "shots",
+      usage:
+        "<page | URL> [--out <dir>] [--base <url>] [--full] [--scroll <px | selector>] [--hover <selector>] [--click <selector>]",
+      description:
+        "the designer review's screenshots:  a page at desk, mid and phone width, light and dark, and the states " +
+        "asked for;  a JSON summary last (/designer)",
+      example: "epic pages shots guides/changelog.html --full --out /tmp/designer",
+      flags: {
+        "--out <dir>": "where the shots go (default a temp folder)",
+        "--base <url>": "the page server to load a page from",
+        "--full": "the whole page at desk and phone width, in slices",
+        "--scroll <where>": "desk and phone, scrolled that far down or to that selector;  again for more",
+        "--hover <selector>": "desk, the pointer over it;  again for more",
+        "--click <selector>": "desk, after clicking it;  again for more"
+      }
     }
   ]
 }
@@ -1040,7 +1073,7 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
  * - a docs tool or script passed through:
  *   `ask`, `choices`, `comments`, `notes`, `agents`, `airplane`, `window`, `server`
  * - a class of this folder:  `worktree` (`Worktrees`), `session` (`Sessions`), `park` (`Parking`), `shared` (`Shared`),
- *   `hub` (`Hub`), `repo` (`Repos`)
+ *   `hub` (`Hub`), `repo` (`Repos`), `plugin` (`PluginInstall`)
  * - the docs pages' tools:  `pages` (`EpicTools.runPages()`)
  */
 export type GroupName =
@@ -1058,6 +1091,7 @@ export type GroupName =
   | "server"
   | "hub"
   | "repo"
+  | "plugin"
   | "pages"
 
 /** One verb of a group, for its help:  `epic <group> <name> <usage>`, what it does, a whole command line. */

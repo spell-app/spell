@@ -302,7 +302,7 @@ As the kit's ([AGENTS.md](../AGENTS.md), "Commands"), plus:
 - LIVE since the switch (epic `epic-eject` I5, 2026-10-18):  this repo carries no copy of the engine.
   - Gone from here:  the epics package and its tests, the window script, the hooks and the epic skills.
   - Make epic changes IN spell-epic, with its own checks (`yarn ts`, `yarn test`, `yarn lint`), and commit there.
-  - Claude Code runs its hooks and skills as the installed plugin (`spell-epic@spell-epic`), and puts its `bin/epic`
+  - Claude Code runs its hooks and skills as the installed plugin (`epic@spell`;  `spell-epic@spell-epic` before epic `epic-engine`'s P49), and puts its `bin/epic`
     on every session's `PATH`;  [the repo's Claude settings](.claude/settings.json) hold no hooks.
 - How this repo reaches it:
   - it doesn't, for the page server:  spell-epic declares its own part of the kit's page server's settings

@@ -316,51 +316,55 @@ _Two subjects from the kit's history:  a phase's, and an item fix's, which names
 
 ## The epic plugin
 
-[spell-epic](https://github.com/spell-app/spell/blob/main/epic/README.md) is a Claude Code plugin:
+[The epic plugin](https://github.com/spell-app/spell/blob/main/epic/README.md), `epic@spell`, is a Claude Code plugin:
 the epic pages and their review loop, worktrees and VS Code windows, parking and waking sessions,
 and the `epic` command that drives them.
 ONE copy on the machine serves every repo and every window.
 
 - It adds 19 skills and 8 hooks, and puts `epic` on every session's `PATH`.
-- An edit to it is live at once for `epic` and the hooks (once step 5 below links them);  a skill's new text after
-  `/reload-plugins`;  its inbox monitor in sessions started after.
+- An edit to it is live at once for `epic` and the hooks (once `epic plugin install` links them);
+  a skill's new text after `/reload-plugins`;  its inbox monitor in sessions started after.
 - A repo opts in with `.epic/config.json5`:  where its content folder, worktrees and windows are.
   The kit's [.epic/config.json5](.epic/config.json5) turns on MULTI-REPO mode, so an epic's worktree holds every repo.
 - Every `epic` verb:  [README-cli.md](README-cli.md).
 
-Installing it, once per machine, after [setup](README.md#setup-from-zero):
+Installing it, once per machine, after [setup](README.md#setup-from-zero), from the kit's checkout:
 
 ```sh
-claude plugin marketplace add ~/www/spell/spell-epic --scope user
-claude plugin install spell-epic@spell-epic --scope user
-for skill in ~/www/spell/epic/skills/*/; do ln -sfn "${skill%/}" ~/.claude/skills/"$(basename "$skill")"; done
-ln -s ~/www/spell/epic/bin/epic ~/.local/bin/epic
-cache=~/.claude/plugins/cache/spell-epic/spell-epic/0.1.0 && rm -rf "$cache" && ln -s ~/www/spell/spell-epic "$cache"
+node epic/bin/epic plugin install    # then /reload-plugins in each running session
 ```
 
-1. Adds spell-epic's folder as a marketplace of one, for the whole machine.
-   - Claude Code keeps that folder's path in two files:  `~/.claude/settings.json` (`extraKnownMarketplaces`) and
-     `~/.claude/plugins/known_marketplaces.json`.  When spell-epic moves, point both at the new folder:
-     `claude plugin list` then says "Read from" it.
+It installs the plugin as `epic@spell`, run in place from the kit's `epic/` folder, never a copy
+(epic `epic-engine`'s P49, after repo-split's P20 · One Repo).
+Run again, it changes nothing and says so;  `--dry-run` says what it would change.
+In order, each step skipped when it's done already:
+
+1. Takes the old plugin, `spell-epic@spell-epic`, and its marketplace out of Claude Code's lists.
+2. Adds the marketplace `spell` from the kit's main checkout, `~/www/spell`, a folder rather than GitHub.
+   - Claude Code keeps it in two files:  `~/.claude/settings.json` (`extraKnownMarketplaces`) and
+     `~/.claude/plugins/known_marketplaces.json`.  `claude plugin list` then says "Read from" it.
    - Left at an old folder, every hook fails ("Plugin directory does not exist"):  nothing moves a session, shared
      content isn't committed, the prompt hook titles nothing.  From repo-split's move until 2026-10-24 both named
      `~/www/spell-app/spell-epic/` (epic `epic-engine` I84).
-2. Installs the plugin from it.
-   Claude Code COPIES the folder at install, and runs the plugin's hooks and monitor from the copy:  step 5.
-3. Links each skill into your own skills folder, so you type a bare `/epic`:
-   a plugin's skills are otherwise named `/spell-epic:epic`.
-   - It replaces a link already there:  run it again after spell-epic moves, or gains a skill.
-     A link left pointing at an old place makes `/epic` find nothing:  from repo-split's move until 2026-10-24 every
-     link named `~/www/spell-app/spell-epic/`, gone, so `/epic done` reached no skill (epic `epic-engine` I82).
-4. Puts `epic` on your terminal's `PATH`, outside Claude Code.
-5. Swaps that copy for a link to spell-epic's folder, so the hooks and the inbox monitor run `main`'s code, as the
-   skills and `epic` do.
-   - Without it, the copy stays as it was the day it was installed.  From 2026-10-18 to 2026-10-23 every session ran
+3. Installs `epic@spell` at the plugin's version (`installed_plugins.json`).
+4. Makes the copy Claude Code runs the hooks and inbox monitor from a LINK to the kit's `epic/`:
+   `~/.claude/plugins/cache/spell/epic/<version>`.
+   - Without it the copy stays as it was the day it was installed.  From 2026-10-18 to 2026-10-23 every session ran
      that day's hooks, and no session ran the inbox monitor, which came after (epic `epic-engine` I79).
-   - The folder's name is the plugin's version (`plugin.json`).  Reinstalling or updating the plugin puts a copy back:
-     run step 5 again.
+   - Updating the plugin in Claude Code puts a copy back, and so does a new version:  run it again.
+5. Links each skill into `~/.claude/skills/`, so you type a bare `/epic`:  a plugin's skills are otherwise named
+   `/epic:epic`.
+   - It moves a link left at an older folder:  from repo-split's move until 2026-10-24 every link named
+     `~/www/spell-app/spell-epic/`, gone, so `/epic done` reached no skill (epic `epic-engine` I82).
+6. Puts `epic` on your terminal's `PATH`, outside Claude Code:  `~/.local/bin/epic`.
+7. Fixes a `Read` permission still naming `spell-epic/templates/epics/`.
 
-- To try it in ONE session first, with nothing installed:  `claude --plugin-dir ~/www/spell/spell-epic`.
+- Outside Spell, with no checkout:  `/plugin marketplace add spell-app/spell`, then `/plugin install epic@spell`.
+  - The repo's ONE marketplace file, [.claude-plugin/marketplace.json](.claude-plugin/marketplace.json), names the
+    `epic/` folder as the plugin's source until it's published;  `spell publish` then turns it to the npm package
+    `spell-epic`.
+  - Run `epic plugin install` again after that:  it links the cache back to the checkout, at the new version.
+- To try it in ONE session first, with nothing installed:  `claude --plugin-dir ~/www/spell/epic`.
 - For the Review tab and window moves, install its VS Code extension too:
   [README-vscode.md](README-vscode.md#spell-epic--the-pages-beside-your-code).
 - Using it in a repo that isn't Spell:  [spell-epic's README-adopting.md](https://github.com/spell-app/spell/blob/main/epic/README-adopting.md).

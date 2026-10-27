@@ -169,8 +169,11 @@ Every worktree is another checkout, with an install of its own:  that's the pric
 
 You need, once:
 - a Spell checkout ([setup from zero](https://github.com/spell-app/spell/blob/main/README.md#setup-from-zero), on the kit's front page)
-- the plugin, and `epic` on your terminal's `PATH`:  four commands, in
-  [the kit's README-agents.md](https://github.com/spell-app/spell/blob/main/README-agents.md#the-epic-plugin)
+- the plugin, and `epic` on your terminal's `PATH`:  one command from the kit's checkout,
+  `node epic/bin/epic plugin install`
+  ([the kit's README-agents.md](https://github.com/spell-app/spell/blob/main/README-agents.md#the-epic-plugin) says
+  what it does)
+  - outside Spell:  `/plugin marketplace add spell-app/spell`, then `/plugin install epic@spell`
 - Spell Epic, the VS Code extension, for the Review tab ([README-vscode.md](README-vscode.md))
 - a content folder for the pages:  a new machine has none, and `epic init` at the kit's root makes an empty one,
   keeping the kit's settings as they are
@@ -363,7 +366,7 @@ on top of WWOD, [the house style](https://github.com/spell-app/spell/blob/main/R
 
 | Folder | What's in it |
 | --- | --- |
-| [.claude-plugin/](.claude-plugin/) | the plugin's manifest, and a marketplace of one (this folder);  Claude Code installs a copy of it, which the kit's install steps link back to this folder |
+| [.claude-plugin/](.claude-plugin/) | the plugin's manifest, `epic`;  its marketplace, `spell`, is the repo's root `.claude-plugin/marketplace.json`.  Claude Code installs a copy of this folder, which `epic plugin install` links back to it |
 | [skills/](skills/) | the nineteen skills, a `SKILL.md` each |
 | [coherence/](coherence/) | the coherence review's rules ([procedures](coherence/procedures.md)) and the `coherence` agent that reads them:  ONE way of doing each thing;  each repo's own catalog and word list are its `agents/coherence/` |
 | [designer/](designer/) | the design review's rules:  [the owner's taste](designer/designer.md), his own asks quoted;  [craft](designer/craft.md), interfaces.dev's and jakub.kr's rules;  [procedures](designer/procedures.md);  and the `designer` agent that reads them |
@@ -391,7 +394,7 @@ Its git history starts on 2026-10-17, when it was lifted out of spell-app:
 the first commit names the spell-app commit the files came from, so anything older is there.
 
 ```sh
-# from spell-epic's folder, ~/www/spell/spell-epic
+# from the plugin's folder, ~/www/spell/epic
 yarn ts                 # src/ and tests/, after the declarations of the repos below
 yarn test               # node and browser (chromium) projects, then the window script's and the extension's tests
 yarn lint

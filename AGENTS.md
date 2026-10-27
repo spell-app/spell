@@ -151,8 +151,10 @@ yarn kit:review       # the finishing pass:  ts, lint:fix, format, test
   - `spell-ui`:  Spell UI's Vite library build, the element code inside (Q63)
   - `spell-epic`:  the epic plugin, its parts at its root, depending on `spell` (Q64)
   - spell-parser and spell-app are held names, not published again (Q65).
-  - [marketplace.json](.claude-plugin/marketplace.json), at the root:  marketplace `spell`, plugin `epic` from
-    `spell-epic` (`/plugin install epic@spell`);  Owen's own machine keeps loading the plugin in place.
+  - [marketplace.json](.claude-plugin/marketplace.json), at the root, the ONE marketplace file:  marketplace `spell`,
+    plugin `epic` (`/plugin install epic@spell`), its source `./epic` until `spell publish` turns it to `spell-epic`.
+    Owen's machine loads the plugin in place, from the kit's `epic/`:  `epic plugin install` sets it up
+    (epic `epic-engine`'s P49).
 - The READMEs (the root's and every big folder's `README.md` and `README-*.md`):
   - `yarn readme:check` (`spell readme check`) checks them
   - `yarn readme:test` (`spell readme test [page...]`) runs every example they print with an Output fold, and
