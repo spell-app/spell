@@ -223,7 +223,7 @@ describe("<ui-toc> following", () => {
 
   it("a page's own buttons in the header's row, after the toggle (`tools`)", async () => {
     const { toc } = await render(
-      PAGE.replace('header="Button">', 'header="Button"><ui-button slot="tools" icon="close">Hide</ui-button>')
+      PAGE.replace('heading="Button">', 'heading="Button"><ui-button slot="tools" icon="close">Hide</ui-button>')
     )
     const slot = toc.shadowRoot!.querySelector<HTMLSlotElement>("[part~=head] slot[name=tools]")!
     expect(slot.assignedElements().map((element) => element.textContent)).toEqual(["Hide"])
