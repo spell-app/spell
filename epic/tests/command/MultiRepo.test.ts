@@ -26,7 +26,7 @@ import {
 import { tmpdir } from "node:os"
 import { dirname, join, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
-import { afterAll, describe, expect, test } from "vite-plus/test"
+import { afterAll, describe, expect, test, vi } from "vite-plus/test"
 
 import { MainMerge } from "spell/epic/command/MainMerge"
 import { Requests } from "spell/epic/command/Requests"
@@ -158,6 +158,9 @@ describe("EpicConfig in a multi-repo top", () => {
     expect(app.values()).toMatchObject({ repos: "", top: TOP })
   })
 })
+
+// each test drives git and the hook in real child processes:  well over vitest's 5s default on a busy CI runner
+vi.setConfig({ testTimeout: 30_000 })
 
 describe("the worktree hook, multi-repo", () => {
   test("create:  the top's worktree, every child's inside it, all on the epic's branch;  ONE install, at the top", () => {
