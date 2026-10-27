@@ -16,7 +16,9 @@ import themeTokenCSS from "./UIThemeToken.css?inline"
  * - The row (Owen's asks):
  *   - its mark, ● set here or ○ from what the theme builds on (the row dimmed), then its name;
  *     which pages read it;  Set here, Split, Reset
- *   - its value in each scheme shown, light then dark, 20px apart (no sun or moon:  the order says which):
+ *   - its value in each scheme shown, light then dark, 20px apart (no sun or moon:  the order says which);
+ *     one, when they're the same
+ *   - its buttons (Set here, Split, Reset), then which pages read it, at its right
  *     - a colour:  its chip;  a mix:  `chip = base chip + mixed-in chip 20%`, the amount as text
  *     - anything else:  its text
  *   - a pointer:  ↳ the token it points at, a link
@@ -25,7 +27,7 @@ import themeTokenCSS from "./UIThemeToken.css?inline"
  *   - a mix:  its base and what's mixed in, each one of the theme's colours, and the amount on a slider, the main
  *     control
  *   - a pointer:  which token it points at, or Set here
- *   - a plain colour:  a picker, its hex and opacity, per scheme;  anything else, its text (a length, a slider too)
+ *   - a plain colour:  per scheme, a picker, its hex (8ch) and its opacity on a slider, the % after it;  anything else, its text (a length, a slider too)
  * - Data in (`row`, a `TokenRow`), events out:  `ui-changed` for a value, `ui-command` for a button, the name or a
  *   link.  The editor decides what each means for the theme.
  * - `:state(here)` while the theme sets it, `:state(open)` while its drawer is open.
@@ -53,6 +55,22 @@ export class UIThemeToken extends E.UIComponent<typeof themeTokenVocabulary> {
   @E.cssState("open")
   get isOpen(): boolean {
     return !!this.data?.isOpen
+  }
+
+  /**
+   * The schemes its values show in:  the row's, but ONE when light and dark are the same (Owen:  "if light and dark
+   * are the same, only show one value").
+   */
+  get shownSchemes(): readonly Scheme[] {
+    const row = this.data
+    if (!row) return []
+    if (row.schemes.length < 2 || !sameValue(row.values.light, row.values.dark)) return row.schemes
+    return row.schemes.slice(0, 1)
+  }
+
+  /** Light and dark show apart:  each value under its sun or moon in the drawer. */
+  get isApart(): boolean {
+    return this.shownSchemes.length > 1 || this.data?.schemes.length === 1
   }
 
   ////////////////
@@ -88,7 +106,7 @@ export class UIThemeToken extends E.UIComponent<typeof themeTokenVocabulary> {
         <div class={["ui theme-token", { here: this.isHere, open: this.isOpen }]} part={this.partForName("row")}>
           {this.head()}
           <div class="values">
-            <For each={this.data!.schemes}>{(scheme) => this.value(scheme)}</For>
+            <For each={this.shownSchemes}>{(scheme) => this.value(scheme)}</For>
           </div>
           <Show when={this.data!.pointer && !this.isOpen}>
             <div class="pointer">
@@ -123,15 +141,6 @@ export class UIThemeToken extends E.UIComponent<typeof themeTokenVocabulary> {
         >
           {row().label}
         </button>
-        <span class="readers" role="list" aria-label={t("readBy")}>
-          <For each={row().readers}>
-            {(reader) => (
-              <span class={["reader", { overrides: reader.overrides }]} role="listitem" title={reader.tip}>
-                <ui-icon name={reader.icon} aria-hidden="true"></ui-icon>
-              </span>
-            )}
-          </For>
-        </span>
         <Show when={!row().isHere}>
           <ui-button
             class="tool"
@@ -165,6 +174,15 @@ export class UIThemeToken extends E.UIComponent<typeof themeTokenVocabulary> {
             onClick={() => this.command("reset")}
           ></ui-button>
         </Show>
+        <span class="readers" role="list" aria-label={t("readBy")}>
+          <For each={row().readers}>
+            {(reader) => (
+              <span class={["reader", { overrides: reader.overrides }]} role="listitem" title={reader.tip}>
+                <ui-icon name={reader.icon} aria-hidden="true"></ui-icon>
+              </span>
+            )}
+          </For>
+        </span>
       </div>
     )
   }
@@ -228,7 +246,7 @@ export class UIThemeToken extends E.UIComponent<typeof themeTokenVocabulary> {
           fallback={
             <Show
               when={row().pointer}
-              fallback={<For each={row().schemes}>{(scheme) => this.valueEditor(scheme)}</For>}
+              fallback={<For each={this.shownSchemes}>{(scheme) => this.valueEditor(scheme)}</For>}
             >
               {this.pointerEditor()}
             </Show>
@@ -308,7 +326,10 @@ export class UIThemeToken extends E.UIComponent<typeof themeTokenVocabulary> {
     const forScheme = () => (this.data!.isSplit ? scheme : undefined)
     const name = () => `${this.data!.token}, ${this.text(scheme)}`
     return (
-      <div class={["value-editor", value().kind]} title={this.text(scheme)}>
+      <div class={["value-editor", value().kind, { apart: this.isApart }]} title={this.text(scheme)}>
+        <Show when={this.isApart}>
+          <ui-icon class="scheme" name={scheme === "dark" ? "moon" : "sun"} aria-label={this.text(scheme)}></ui-icon>
+        </Show>
         <Show
           when={value().kind === "color"}
           fallback={
@@ -356,26 +377,29 @@ export class UIThemeToken extends E.UIComponent<typeof themeTokenVocabulary> {
               this.change(TokenColor.join(event.detail.value.trim(), value().opacity ?? FULL), forScheme())
             }
           ></ui-input>
-          <ui-input
+          <ui-slider
             class="opacity"
-            type="number"
-            size="small"
-            min="0"
-            max={String(FULL)}
-            step="1"
-            value={String(value().opacity ?? FULL)}
+            min={0}
+            max={FULL}
+            step={1}
+            value={value().opacity ?? FULL}
             aria-label={`${name()}:  ${this.text("alpha")}`}
-            on-ui-changed={(event: CustomEvent<{ value: string }>) =>
-              this.change(TokenColor.join(value().hex ?? FALLBACK_HEX, Number(event.detail.value) || 0), forScheme())
+            on-ui-moved={(event: CustomEvent<{ value: number }>) =>
+              this.change(TokenColor.join(value().hex ?? FALLBACK_HEX, event.detail.value), forScheme())
             }
-          ></ui-input>
-          <span class="unit" aria-hidden="true">
-            %
-          </span>
+          ></ui-slider>
+          <span class="percent">{value().opacity ?? FULL}%</span>
         </Show>
       </div>
     )
   }
+}
+
+/** Whether two values of a token show the same:  text, colour and mix. */
+function sameValue(a: TokenValue, b: TokenValue): boolean {
+  return (
+    a.text === b.text && a.hex === b.hex && a.opacity === b.opacity && JSON.stringify(a.mix) === JSON.stringify(b.mix)
+  )
 }
 
 /** The vocabulary getters, typed (`UIComponent`'s doc). */

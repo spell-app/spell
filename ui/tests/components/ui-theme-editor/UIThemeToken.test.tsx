@@ -77,6 +77,35 @@ describe("<ui-theme-token>", () => {
     })
   })
 
+  it("a plain colour's drawer:  its hex, its opacity on a slider, the % after it;  the slider tunes live", async () => {
+    const plain: TokenRow = {
+      ...ROW,
+      isOpen: true,
+      isSplit: true,
+      values: { light: { text: "#7b52de1f", kind: "color", hex: "#7b52de", opacity: 12 }, dark: ROW.values.dark }
+    }
+    const { root, events } = await render(plain)
+    const light = root.querySelector(".value-editor.color")!
+    expect(light.querySelector(".percent")?.textContent).toBe("12%")
+    light
+      .querySelector("ui-slider.opacity")!
+      .dispatchEvent(new CustomEvent("ui-moved", { detail: { value: 50 }, bubbles: true, composed: true }))
+    expect(events.at(-1)?.detail).toEqual({ token: "--ui-highlight", value: "#7b52de80", scheme: "light" })
+  })
+
+  it("one value when light and dark are the same;  its buttons before who reads it", async () => {
+    const same = { text: "blur(28px)", kind: "text" as const }
+    const { root } = await render({
+      ...ROW,
+      values: { light: same, dark: same },
+      readers: [{ id: "page", icon: "file", tip: "A page reads it", overrides: false }],
+      resetLabel: "Reset"
+    })
+    expect(root.querySelectorAll(".value")).toHaveLength(1)
+    const head = [...root.querySelector(".head")!.children].map((child) => child.className)
+    expect(head.indexOf("readers")).toBeGreaterThan(head.findIndex((name) => String(name).includes("tool")))
+  })
+
   it("○ from what the theme builds on:  Set here, as a command", async () => {
     const { element, root, events } = await render({ ...ROW, isHere: false, markTip: "From Glass" })
     expect(root.querySelector(".mark")?.textContent).toBe("○")

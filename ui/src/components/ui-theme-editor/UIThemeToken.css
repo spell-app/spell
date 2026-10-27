@@ -208,8 +208,25 @@
     align-items: center;
     gap: 6px;
   }
+  /* a colour:  its swatch, its hex just wide enough for #rrggbb, its opacity on a slider, the % at the end */
   .value-editor.color {
-    grid-template-columns: 32px minmax(0, 1fr) 3.4em auto;
+    grid-template-columns: 32px calc(8ch + 1.6em) minmax(0, 1fr) 3.2em;
+    gap: 8px;
+  }
+  /* light and dark apart:  each row under its sun or moon (Owen:  "Put the sun/moon icons back in the details") */
+  .value-editor.apart {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+  .value-editor.color.apart {
+    grid-template-columns: auto 32px calc(8ch + 1.6em) minmax(0, 1fr) 3.2em;
+  }
+  .value-editor.length.apart {
+    grid-template-columns: auto 7em minmax(0, 1fr);
+  }
+  .scheme {
+    --ui-icon-width: 1em;
+    margin: 0;
+    color: var(--ui-text-muted);
   }
   .value-editor.length {
     grid-template-columns: 7em minmax(0, 1fr);
@@ -219,15 +236,18 @@
     block-size: 28px;
   }
   .hex::part(control) {
+    padding-inline: 0.5em;
     font-family: var(--ui-font-family-mono, monospace);
   }
-  .opacity::part(control),
   .value-editor.length ui-input::part(control) {
     text-align: end;
     font-variant-numeric: tabular-nums;
   }
-  .unit {
-    font-size: 0.8em;
+  .percent {
+    font-size: 0.85em;
+    text-align: end;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
     color: var(--ui-text-muted);
   }
 }
