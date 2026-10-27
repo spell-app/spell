@@ -52,7 +52,7 @@ const CHILDREN = ["spell-parser", "spell-ui", "spell-brand", "spell-epic", "spel
 const KIT = ["util", "toolchain", "server", "assembler", "element"]
 
 /** The yarn projects of their own, outside the one install:  the two extensions. */
-const EXTRAS = ["spell-epic/vscode", "spell-app/vscode"]
+const EXTRAS = ["epic/vscode", "app/vscode"]
 
 /** git's identity and no signing, for every commit here and in the code under test (`MainMerge` commits). */
 const GIT_ENV = {
