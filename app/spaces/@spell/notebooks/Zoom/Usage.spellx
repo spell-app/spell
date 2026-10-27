@@ -1,0 +1,79 @@
+<spell-notebook "zoom usage">
+	<header level="1">
+		Zoom
+		<header>A zoom shows something small in the page, and full size over it on a click.</>
+	</>
+	<zoom-tab-bar showing="usage"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#using-it">Using it</>
+				<ui-item link="#plain-screenshots">Plain screenshots</>
+				<ui-item link="#keyboard">Keyboard</>
+				<ui-item link="#accessibility">Accessibility</>
+			</>
+		</>
+	</>
+
+	<!-- USAGE:  how to use it (attributes in practice, events, framework snippets), keyboard, accessibility. -->
+	<section label="Using it">
+		<markdown>
+			`<ui-zoom>` shows something small in the page, and full size over it.
+
+			- Round any content:  the content is laid out at its full size, then drawn at `shrink` of it (`50%` by default).
+			- `max-width` and `max-height` are the most room it takes in the page, as CSS lengths;  past them it's cut off.
+			- A click on it, or Enter, shows the content full size in a modal, at the width it had in the page.
+			  The page keeps its room meanwhile, so nothing below it moves.
+			- `open` says it's showing;  set it to open it from script.
+			- With `src` it shows that image full size instead, its `alt` the caption:  open while `src` is set.
+
+			`<ui-image zoom>` opens its image the same way, with no wrapper.
+		</>
+		<markdown>
+			```html
+			<ui-zoom max-width="320px" max-height="200px" shrink="40%">
+			  <ui-table>...</ui-table>
+			</ui-zoom>
+			<ui-image zoom src="shots/toolbar.png" alt="The toolbar"></ui-image>
+			```
+		</>
+	</>
+
+	<section label="Plain screenshots">
+		<markdown>
+			A page can open every plain `<img>` screenshot full size, with none of them rewritten:  `ImageZoom` listens on the
+			whole page, and makes the page's one `<ui-zoom>` the first time.
+			The epic pages, guides and details pages do it.
+
+			- It opens an image shown at least 64px, and smaller than its own size, in a `<figure>`, or in a link to an image.
+			- Never an icon, an image inside another link or a button, inside a `<ui-zoom>`, or anything marked `data-no-zoom`.
+			- The pointer over one marks it `data-ui-zoom`:  give it the zoom-in cursor.
+		</>
+		<markdown>
+			```js
+			import { ImageZoom } from "spell/ui/components/ui-zoom/ImageZoom"
+
+			document.addEventListener("click", ImageZoom.onClick)
+			document.addEventListener("pointerover", ImageZoom.onPointerOver, { passive: true })
+			// and in the page's CSS:  img[data-ui-zoom] { cursor: zoom-in }
+			```
+		</>
+	</>
+
+	<section label="Keyboard">
+		<markdown>
+			- Tab reaches the zoom's button;  Enter or Space shows it full size.
+			- Escape shuts it, and focus goes back where it was.
+			- `<ui-image zoom>` is a button too, unless it's a `link`.
+		</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			- The content in the page is `inert` while it's shrunk:  a reader meets it once, full size.
+			  One button over it, named "Show full size", opens it.
+			- Full size, it's in a modal dialog, which keeps focus inside until it's shut.
+			- The zoomed image's own name is its alt text, then ", full size";  without one, "Image, full size".
+		</>
+	</>
+</spell-notebook>

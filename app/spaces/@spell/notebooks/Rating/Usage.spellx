@@ -1,0 +1,137 @@
+<spell-notebook "rating usage">
+	<header level="1">
+		Rating
+		<header>A rating indicates user interest in content.</>
+	</>
+	<rating-tab-bar showing="usage"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#using-it">Using it</>
+				<ui-item link="#events">Events</>
+				<ui-item link="#forms">Forms</>
+				<ui-item link="#keyboard">Keyboard</>
+				<ui-item link="#accessibility">Accessibility</>
+				<ui-item link="#framework-usage">Framework usage</>
+			</>
+		</>
+	</>
+
+	<!-- USAGE:  how to use it (attributes in practice, events, forms), keyboard, accessibility, framework snippets. -->
+	<section label="Using it">
+		<markdown>
+			Write `<ui-rating>` and give it a name with `aria-label` or a `<label for>`: it's a form control, a group of real
+			radios, one per icon. No script needed: Fomantic's `data-icon`, `data-rating` and `data-max-rating` metadata and
+			its `icon`, `initialRating` and `maxRating` settings are plain attributes.
+
+			- `icon` is an icon NAME (`star`, the default, `heart`, any `<ui-icon>` name), not a class.
+			- `max-rating` is how many icons (Fomantic's default: 4).
+			- `value` is the rating, `0` (none) ... `max-rating`. The attribute is the starting (and reset) value; the
+			  `value` property is the live one.
+			- `clearable` lets the user take the rating back by choosing the current one again; a one-icon rating is always
+			  clearable (Fomantic's `clearable: auto`).
+			- `readonly` and `disabled` are Fomantic's `interactive: false` and its `disable` / `enable` behaviours.
+			- Fomantic's `set rating` / `get rating` / `clear rating` behaviours are the `value` property: set it, read it,
+			  set it to `0`.
+		</>
+	</>
+
+	<section label="Events">
+		<markdown>
+			`ui-changed` fires when the user rates (Fomantic's `onRate`), with `event.detail.value`: `0` when they clear it.
+			Setting `value` back inside the handler vetoes the change. Setting `value` from script fires nothing (Fomantic's
+			`fireOnInit: false`).
+		</>
+		<markdown>
+			```js
+			const rating = document.querySelector("ui-rating")
+			rating.addEventListener("ui-changed", (event) => console.log(event.detail.value))
+			```
+		</>
+	</>
+
+	<section label="Forms">
+		<markdown>
+			A rating is a form-associated element.
+
+			- With a `name`, it submits its `value` with the form while it's above `0`.
+			- `required` makes a rating necessary; the element is `:state(invalid)` once the user has interacted and it's
+			  still empty.
+			- A form reset puts back the starting `value` (the attribute).
+			- `disabled` leaves it out of the form; `readonly` still submits.
+			- A fractional `value` (`3.5`) only DRAWS a partial icon: no radio is chosen until the user rates.
+		</>
+
+		<section label="In a form" sticky collapsible dividing>
+			<example description="A required rating, submitted as `food`.  Rate, then reset the form to put back the starting value.">
+				<html>
+					<ui-form>
+						<form>
+							<label for="rating-food">Food</label>
+							<ui-rating id="rating-food" name="food" color="yellow" value="2" max-rating="5" required></ui-rating>
+							<ui-button type="reset" icon="undo" appearance="basic">Reset</ui-button>
+						</form>
+					</ui-form>
+				</html>
+			</example>
+		</>
+	</>
+
+	<section label="Keyboard">
+		<markdown>
+			The rating is a radio group, so it's ONE tab stop and the arrows move the choice.
+
+			| Key                      | Action                                    |
+			| ------------------------ | ----------------------------------------- |
+			| Tab                      | Move into the rating (one stop), then out |
+			| Arrow Right / Arrow Down | Choose one more (wraps to the first)      |
+			| Arrow Left / Arrow Up    | Choose one less (wraps to the last)       |
+			| Home / End               | Choose the lowest / highest rating        |
+			| Space                    | Choose the focused icon                   |
+			| Backspace / Delete       | Clear a `clearable` rating                |
+		</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			The rating is a group of real radios: one per icon, each named "3 of 5" (translatable).
+
+			- The group is a `radiogroup` named by the host's `aria-label` or a `<label for>`. A fractional rating adds a
+			  description, "Rated 3.5 of 5".
+			- `readonly` stays focusable and announced but can't change; `disabled` leaves the tab order.
+			- Colour is never the only signal: filled and empty icons differ in shape, and the radios carry the count.
+			- If the element can't render, its native fallback is the same group of real radios, numbered instead of icons,
+			  so the rating still works and submits; colours, sizes, the hover preview, partial icons, `clearable` and
+			  Home / End are dropped.
+		</>
+	</>
+
+	<section label="Framework usage">
+		<markdown>`value` is a plain attribute; listen for `ui-changed` with your framework's custom-event syntax.</>
+		<header level="4" id="framework-react">React 19</>
+		<markdown>
+			```jsx
+			<ui-rating name="food" max-rating={5} value={stars} onui-changed={(event) => setStars(event.detail.value)} />
+			```
+		</>
+		<header level="4" id="framework-vue">Vue 3.5</>
+		<markdown>
+			```html
+			<!-- compilerOptions.isCustomElement = (tag) => tag.startsWith("ui-") -->
+			<ui-rating name="food" max-rating="5" :value="stars" @ui-changed="(event) => (stars = event.detail.value)" />
+			```
+		</>
+		<header level="4" id="framework-solid">Solid 2</>
+		<markdown>
+			```jsx
+			// events and rich data are plain props:  `on-<event>={...}`, `options={...}`
+			<ui-rating
+			  name="food"
+			  max-rating="5"
+			  value={stars()}
+			  on-ui-changed={(event) => setStars(event.detail.value)}
+			/>
+			```
+		</>
+	</>
+</spell-notebook>

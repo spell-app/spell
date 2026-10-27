@@ -29,6 +29,7 @@ for (const file of [
   "spell-ui/tools/SiteCheck.ts",
   "spell-parser/package.json",
   "spell-parser/src/spell/spellSyntax.json",
+  "epic/src/tool/Merged.ts",
   "spell-server/package.json",
   "spell-server/src/server/page/PageServer.ts",
   "tsconfig.base.json",
@@ -236,6 +237,12 @@ describe("Linker.rootLinks()", () => {
         '<a href="/spell-lang/nowhere.ts">n</a>'
     )
     expect(changes.map((change) => change.kind)).toEqual(["mended", "mended", "broken"])
+  })
+
+  test("`mend`:  a child repo's old root path goes to its folder of the kit's ONE repo (epic `repo-split` P20)", () => {
+    expect(rooted('<a href="../../spell-epic/src/tool/Merged.ts">m</a>', { mend: true }).text).toBe(
+      '<a href="/epic/src/tool/Merged.ts">m</a>'
+    )
   })
 
   test("is idempotent:  a second run changes nothing", () => {

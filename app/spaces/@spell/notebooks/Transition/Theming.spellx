@@ -1,0 +1,55 @@
+<spell-notebook "transition theming">
+	<header level="1">
+		Transition
+		<header>A transition is an animation used to show or hide content, or to draw attention to it.</>
+	</>
+	<transition-tab-bar showing="theming"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#tokens">Tokens</>
+				<ui-item link="#themes">Themes</>
+			</>
+		</>
+	</>
+
+	<!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
+	<section label="Tokens">
+		<markdown>
+			A transition draws nothing of its own: the animations are the foundation's `animations.css`
+			catalogue, shared by every component. The `pulsating` ring reads `--ui-transition-inverted-pulse` when `inverted`
+			(set it on the element, an ancestor or `:root`), and `color` tints it. Style the animated
+			box through `::part(transition)`. Never set the `--_*` names: they're the sheet's private plumbing.
+		</>
+		<markdown>
+			```css
+			ui-transition::part(transition) {
+			  border-radius: 0.5em;
+			}
+			```
+		</>
+		<markdown>Edit a value below to try it.</>
+		<html>
+			<ui-docs-tokens family="ui-transition" playground>
+				<button type="button" class="ui button" commandfor="transition-demo-fade-playground" command="--toggle">Fade up</>
+				<button type="button" class="ui button" commandfor="transition-demo-scale-playground" command="--toggle">Scale</>
+				<button type="button" class="ui button" commandfor="transition-demo-flip-playground" command="--toggle">Horizontal flip</>
+				<div class="ui-cluster">
+					<ui-transition id="transition-demo-fade-playground" animation="fade up" inline visible>
+						<ui-segment>Fade up</>
+					</>
+					<ui-transition id="transition-demo-scale-playground" animation="scale" inline visible>
+						<ui-segment>Scale</>
+					</>
+					<ui-transition id="transition-demo-flip-playground" animation="horizontal flip" duration="500" inline visible>
+						<ui-segment>Horizontal flip</>
+					</>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="Themes">
+		<markdown>A theme leaves the animations as they are, and changes the page around them.</>
+	</>
+</spell-notebook>

@@ -1,0 +1,137 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`SpellxView.read():  the examples > Card.spellx reads with NO diagnostics, to its outline 1`] = `
+"template view <spell-view> "playing card" 1:1-68:14 aka="card" template="two sided view"
+  prose 2:2-5:19 "A playing card has a suit and a rank.…"
+  declaration property <property> "suit" /> 7:2-10:4 one-of="clubs, diamonds, hearts, spades" description="Which of the four suits it belongs to" alias="is a (suit)"
+  declaration property <property> "color" 11:2-17:13 one-of="red, black" alias="is (color)" alias="is a (color) card"
+    code 2 lines 15:3-16:18 "red if it is a diamond or it is a heart"
+  declaration property <property> "symbol" 18:2-23:13 description="Its suit's sign, for drawing"
+    code 4 lines 19:3-22:23 "\\"♣\\" if it is a club"
+  prose 25:2-25:9 "## Rank"
+  declaration property <property> "rank" /> 27:2-30:4 one-of="ace, 2 ... 10, jack, queen, king" description="Ace is low:  ace = 1 ... king = 13" alias="is a (rank)"
+  declaration alias <alias> "is the (rank) of (suit)" /> 31:2-31:37
+  declaration alias <alias> "is a face card" 32:2-32:63
+    code 1 line 32:26-32:60 "if its rank is jack, queen or king"
+  declaration alias <alias> "is a number card" 33:2-33:55
+    code 1 line 33:28-33:52 "if it is not a face card"
+  prose 35:2-35:15 "## Playing it"
+  declaration action <action> "show it" 37:2-44:11
+    note description <description> 38:3-41:17 "Turns it face up, if it isn't already.…"
+    code 2 lines 42:3-43:16 "if it is face down"
+  handler on <on> "mouse down" 46:2-52:5
+    note comment <comment> 47:3-47:95 "Face down:  turn it over.  Face up:  pass the pr…"
+    code 4 lines 48:3-51:14 "if it is face down"
+  prose 54:2-54:15 "## Drawing it"
+  declaration draw <draw> "front" 56:2-59:9
+    note comment <comment> 57:3-57:92 "One line of text, the size of the text around it…"
+    element <text> 58:3-58:69 part="face" color={its color}
+      hole {its rank} 58:39-58:49
+      text 58:49-58:50 " "
+      hole {its symbol} 58:50-58:62
+  declaration draw <draw> "back" 60:2-62:9
+    element <image> /> 61:3-61:69 part="back" src="card-back.svg" alt="the back of a card"
+  declaration test <test> "card setup" 64:2-67:5
+    code 2 lines 65:3-66:53 "get a new card whose rank is queen, suit is spad…""
+`;
+
+exports[`SpellxView.read():  the examples > Carta.es.spellx reads with NO diagnostics, to its outline 1`] = `
+"template view <encanto-vista> "carta de la baraja" 1:1-68:17 alias(aka)="carta" plantilla(template)="vista reversible"
+  prose 2:2-5:17 "Una carta tiene un palo y un rango.…"
+  declaration property <propiedad> "palo" /> 7:2-10:4 uno-de(one-of)="tréboles, diamantes, corazones, espadas" descripción(description)="A cuál de los cuatro palos pertenece" frase(alias)="es un (palo)"
+  declaration property <propiedad> "color" 11:2-17:14 uno-de(one-of)="rojo, negro" frase(alias)="es (color)" frase(alias)="es una carta (color)"
+    code 2 lines 15:3-16:24 "rojo si es un diamante o es un corazón"
+  declaration property <propiedad> "símbolo" 18:2-23:14 descripción(description)="El signo de su palo, para dibujarla"
+    code 4 lines 19:3-22:23 "\\"♣\\" si es un trébol"
+  prose 25:2-25:10 "## Rango"
+  declaration property <propiedad> "rango" /> 27:2-30:4 uno-de(one-of)="as, 2 ... 10, jota, dama, rey" descripción(description)="El as es bajo:  as = 1 ... rey = 13" frase(alias)="es un (rango)"
+  declaration alias <frase> "es el (rango) de (palo)" /> 31:2-31:37
+  declaration alias <frase> "es una figura" 32:2-32:59
+    code 1 line 32:25-32:56 "si su rango es jota, dama o rey"
+  declaration alias <frase> "es una carta numérica" 33:2-33:55
+    code 1 line 33:33-33:52 "si no es una figura"
+  prose 35:2-35:12 "## Jugarla"
+  declaration action <acción> "mostrarla" 37:2-44:11
+    note description <descripción> 38:3-41:17 "La pone boca arriba, si no lo está ya.…"
+    code 2 lines 42:3-43:13 "si está boca abajo"
+  handler on <al> "presionar el ratón" 46:2-52:5
+    note comment <comentario> 47:3-47:99 "Boca abajo:  voltearla.  Boca arriba:  pasar el …"
+    code 4 lines 48:3-51:16 "si está boca abajo"
+  prose 54:2-54:14 "## Dibujarla"
+  declaration draw <dibujar> "frente" 56:2-59:12
+    note comment <comentario> 57:3-57:107 "Una línea de texto, del tamaño del texto de alre…"
+    element <texto> 58:3-58:70 part="cara" color={su color}
+      hole {su rango} 58:39-58:49
+      text 58:49-58:50 " "
+      hole {su símbolo} 58:50-58:62
+  declaration draw <dibujar> "dorso" 60:2-62:12
+    element <imagen> /> 61:3-61:70 part="dorso" src="dorso.svg" alt="el dorso de una carta"
+  declaration test <probar> "preparación de la carta" 64:2-67:5
+    code 2 lines 65:3-66:51 "obtener una nueva carta cuyo rango es dama, palo…""
+`;
+
+exports[`SpellxView.read():  the examples > Deck.spellx reads with NO diagnostics, to its outline 1`] = `
+"template thing <spell-thing> "deck" 1:1-3:15 template="list of cards"
+  declaration action <action> "shuffle it" 2:2-2:57
+    code 1 line 2:23-2:54 "put its cards in a random order""
+`;
+
+exports[`SpellxView.read():  the examples > Solitaire.spellx reads with NO diagnostics, to its outline 1`] = `
+"template app <spell-app> "solitaire" 1:1-35:13 menu-bar="GameMenu"
+  prose 2:2-2:99 "Klondike solitaire:  deal seven columns, then bu…"
+  declaration property <property> "deck" 4:2-4:32
+    code 1 line 4:19-4:29 "a new deck"
+  declaration property <property> "columns" 5:2-5:88 description="The seven piles cards are played on"
+    code 1 line 5:72-5:85 "7 new columns"
+  declaration property <property> "moves" 6:2-6:87 description="Every move so far, newest last"
+    code 1 line 6:65-6:84 "a new list of moves"
+  declaration action <action> "start a new game" 8:2-11:11 shortcut="meta+N"
+    code 2 lines 9:3-10:33 "shuffle its deck"
+  declaration action <action> "undo the last move" 12:2-14:11 shortcut="meta+Z" enabled-when="it has moves"
+    code 1 line 13:3-13:34 "take back the last of its moves"
+  declaration menu <menu> "GameMenu" 16:2-19:9
+    declaration action <action> "start a new game" /> 17:3-17:32
+    declaration action <action> "undo the last move" /> 18:3-18:34
+  handler on <on> "mouse down" 21:2-25:5
+    note comment <comment> 22:3-22:100 "A press a card passed on:  the original target i…"
+    code 2 lines 23:3-24:52 "if the original target is a card"
+  declaration draw <draw> 27:2-34:9
+    element <toolbar> /> 28:3-28:30 menu="GameMenu"
+    note comment <comment> 29:3-29:97 "A card made by its own tag:  the game's logo, wi…"
+    element <solitaire-card> /> 30:3-30:97 rank="ace" suit="spades" direction="up" part="logo" context-menu="GameMenu"
+    loop for each <for each> "column in its columns" 31:3-33:6
+      hole {column} 32:4-32:12
+template page template <spell-page-template> "score page" 37:1-40:23
+  prose 38:2-38:38 "A page that lists games, best first."
+  declaration property <property> "scores" 39:2-39:44
+    code 1 line 39:21-39:41 "a new list of scores"
+template page <spell-page> "high scores" 42:1-50:14 template="score page"
+  prose 43:2-43:36 "The ten best games, fastest first."
+  declaration draw <draw> 44:2-49:9
+    element <header> 45:3-45:31
+      text 45:11-45:22 "High scores"
+    loop for each <for each> "score in the first 10 of its scores" 46:3-48:6
+      element <text> 47:4-47:35
+        hole {the score's time} 47:10-47:28"
+`;
+
+exports[`SpellxView.read():  the examples > TwoSidedView.spellx reads with NO diagnostics, to its outline 1`] = `
+"template view <spell-view> "two sided view" 1:1-37:14
+  prose 2:2-3:90 "A view with a front and a back:  it shows one si…"
+  declaration property <property> "direction" /> 5:2-8:4 one-of="up, down" description="Which way it faces" alias="is face (direction)"
+  declaration event <event> "flipped" /> 10:2-12:4 side="direction" description="Sent each time it turns over;  side is the way i…"
+  declaration action <action> "turn it face up" 14:2-16:11
+    code 1 line 15:3-15:26 "set its direction to up"
+  declaration action <action> "turn it face down" 17:2-19:11
+    code 1 line 18:3-18:28 "set its direction to down"
+  declaration action <action> "turn it over" 20:2-27:11
+    note description <description> 21:3-21:66 "Flips it:  face up becomes face down, and back."
+    code 5 lines 22:3-26:41 "if it is face up"
+  declaration draw <draw> 29:2-36:9
+    note description <description> 30:3-30:77 "The front when it's face up, the back when it's …"
+    choice 2 branches 31:3-35:6
+      branch if <if> "it is face up" 31:3-33:3
+        place <draw> "front" 32:4-32:20
+      branch otherwise <otherwise> 33:3-35:3
+        place <draw> "back" 34:4-34:19"
+`;

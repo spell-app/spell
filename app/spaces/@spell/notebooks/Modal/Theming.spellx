@@ -1,0 +1,79 @@
+<spell-notebook "modal theming">
+	<header level="1">
+		Modal
+		<header>A modal displays content that temporarily blocks interactions with the main view of a
+              site.</>
+	</>
+	<modal-tab-bar showing="theming"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#tokens">Tokens</>
+				<ui-item link="#themes">Themes</>
+			</>
+		</>
+	</>
+
+	<!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
+	<section label="Tokens">
+		<markdown>
+			Theme with the public `--ui-modal-*` tokens: set one on the element, on any ancestor (`:root` for every modal),
+			or on the box through `::part(modal)`. They inherit into the shadow root, where the sheet reads each through a
+			private alias, so nothing inside blocks them.
+
+			- `--ui-modal-dimmer-background` colours the backdrop (by default the shared `--ui-dimmer-background`, which also
+			  themes `<ui-dimmer>`); `--ui-modal-dimmer-filter` filters it (`blur(5px) grayscale(0.7)` for Fomantic's blurring
+			  dimmer).
+			- A `--ui-modal-width` holds on every screen; `fullscreen` replaces it.
+			- The header, content and actions parts read `--ui-modal-header-*`, `--ui-modal-content-background` and
+			  `--ui-modal-actions-background` from the modal, so set those on the modal or above it; the `basic` look replaces them.
+		</>
+		<markdown>
+			```css
+			/* every modal on the page */
+			:root {
+			  --ui-modal-radius: 0.75em;
+			}
+			/* one kind:  a narrower box on a darker, blurred dimmer */
+			ui-modal.confirm {
+			  --ui-modal-width: 480px;
+			  --ui-modal-dimmer-background: oklch(0 0 0 / 0.6);
+			  --ui-modal-dimmer-filter: blur(5px) grayscale(0.7);
+			}
+			```
+		</>
+		<message state="info" size="small">
+			<markdown>
+				Sizes are widths, ratios of the default width (`--ui-modal-width`: 95%, tablets 88%, then 850px / 900px /
+				950px by screen); the text does not scale. Never set the `--_ui-modal-*` names: they're the sheet's private
+				plumbing.
+			</>
+		</>
+		<markdown>Edit a value below to try it.</>
+		<html>
+			<ui-docs-tokens family="ui-modal" playground>
+				<button type="button" class="ui button" commandfor="modal-types-standard-playground" command="--show">Show</>
+				<ui-modal id="modal-types-standard-playground" closable>
+					<ui-header>Profile Picture</>
+					<ui-content>
+						<ui-description>
+							<p>We've found the following gravatar image associated with your e-mail address.</>
+							<p>Is it okay to use this photo?</>
+						</>
+					</>
+					<ui-actions>
+						<ui-button class="deny" color="black">Nope</>
+						<ui-button class="approve" color="positive">Yep, that's me</>
+					</>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="Themes">
+		<markdown>
+			The theme menu above picks the theme for every page of the site:  Spell, Glass, Fruity or Merlot,
+			each restyling this component through its tokens.
+		</>
+	</>
+</spell-notebook>

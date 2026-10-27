@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>spell-ui: in Spanish</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 16px;
+        font-family: system-ui, sans-serif;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>&lt;es-boton&gt; / &lt;es-desplegable&gt;</h1>
+    <p>
+      <es-boton primario>Guardar</es-boton>
+      <es-boton color="rojo" tamano="grande">Borrar</es-boton>
+      <es-boton alternable color="verde">Votar</es-boton>
+    </p>
+    <p>
+      <es-desplegable seleccion busqueda marcador="Género" name="genero">
+        <es-elemento value="f">Femenino</es-elemento>
+        <es-elemento value="m">Masculino</es-elemento>
+        <es-elemento value="x">Otro</es-elemento>
+      </es-desplegable>
+    </p>
+    <pre id="log"></pre>
+    <script type="module" src="./translate.ts"></script>
+  </body>
+</html>

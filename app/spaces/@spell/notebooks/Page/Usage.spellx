@@ -1,0 +1,43 @@
+<spell-notebook "page usage">
+	<header level="1">
+		Page
+		<header>A page frames a whole window:  a header, navigation, the main content, a side column and a footer.</>
+	</>
+	<page-tab-bar showing="usage"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#using-it">Using it</>
+				<ui-item link="#accessibility">Accessibility</>
+			</>
+		</>
+	</>
+
+	<!-- USAGE:  how to use it (attributes in practice, events, framework snippets), keyboard, accessibility. -->
+	<section label="Using it">
+		<markdown>
+			`<ui-page>` frames a whole window.  Put it straight inside `<body>`, once.
+
+			- Its regions are slots:  `header`, `nav`, `aside` and `footer`;  everything else is the main content.
+			- Each region is the landmark screen readers jump between:  `<header>`, `<nav>`, `<main>`, `<aside>`, `<footer>`.
+			- A region with nothing in it isn't drawn.
+			- On a phone's width the regions stack, in reading order:  header, nav, content, aside, footer.
+			- It paints the window's background, takes the body's margin away, and follows the system's light or dark setting
+			  unless `theme` says which.
+			- It's a root, as `<ui-root>` is:  it loads the components inside it, and its `theme`, `size` and `display` work
+			  the same way.
+			- A second `<ui-page>` on a page still draws, and says in the console that one frames a window.
+
+			Its tokens size the regions:  `--ui-page-nav-width`, `--ui-page-aside-width`, `--ui-page-gap`, `--ui-page-padding`,
+			`--ui-page-max-width` (to centre a narrow page), `--ui-page-min-height` (the window's height by default).
+		</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			- "Skip to content" is the page's first tab stop, shown only when the keyboard reaches it.  It moves focus to the
+			  main content, past the header and the navigation.
+			- Name a `nav` when a page has more than one menu:  `<ui-menu slot="nav" aria-label="Folders">`.
+		</>
+	</>
+</spell-notebook>

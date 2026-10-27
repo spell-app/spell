@@ -1,0 +1,47 @@
+<spell-notebook "page theming">
+	<header level="1">
+		Page
+		<header>A page frames a whole window:  a header, navigation, the main content, a side column and a footer.</>
+	</>
+	<page-tab-bar showing="theming"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#tokens">Tokens</>
+				<ui-item link="#themes">Themes</>
+			</>
+		</>
+	</>
+
+	<!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
+	<section label="Tokens">
+		<markdown>
+			Set a public `--ui-*` token on the element, any ancestor or `:root`; it inherits into the shadow
+			root. Edit a value below to try it.
+		</>
+		<html>
+			<ui-docs-tokens family="ui-page" playground>
+				<div style="resize: both; overflow: auto; border: 1px dashed currentColor; max-width: 100%">
+					<ui-page style="--ui-page-min-height: 0; --ui-page-nav-width: 9em; --ui-page-aside-width: 9em">
+						<ui-header slot="header" level="2">Inbox</>
+						<ui-menu slot="nav" direction="vertical" fluid aria-label="Folders">
+							<ui-item selected>Inbox</>
+							<ui-item>Sent</>
+							<ui-item>Drafts</>
+						</>
+						<ui-text paragraph>Three new messages since this morning.</>
+						<ui-segment slot="aside">Tip: press <ui-keys shortcut="mod+K"></> to search.</>
+						<ui-text slot="footer" color="grey">© 2026 Inbox</>
+					</>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="Themes">
+		<markdown>
+			The theme menu above picks the theme for every page of the site:  Spell, Glass, Fruity or Merlot,
+			each restyling this component through its tokens.
+		</>
+	</>
+</spell-notebook>

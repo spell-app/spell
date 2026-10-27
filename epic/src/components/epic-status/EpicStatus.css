@@ -1,0 +1,105 @@
+/*
+ * `<epic-status>` (EpicStatus.tsx):  Claude's status card, on top of the answer family's card sheet
+ * (`EpicAnswer.css`, adopted first):  its box, its dated band (`.header.dated`:  who left, the date right), its body.
+ * Only the fills are here, in the colours of decision Q20 (Owen, 2026-10-08):
+ * - underway:  blue, Claude is working on it
+ * - done:  green, work was done;  both with a border solid enough to tell them from the reply cards around them
+ * - noted:  Owen's choice recorded, nothing built:  no fill, a green outline (Owen, 2026-10-10)
+ * - the summary under the reading, across a rule
+ * - Public tokens (`--epic-status-*`) are never declared here:  read through private aliases.
+ */
+
+@layer ui.components.epic-status.variations;
+
+@layer ui.components.epic-status.variations {
+  /* a white card, its state's colour in its rule and words only (Owen, 2026-10-25:  calmer cards) */
+  .status {
+    --_epic-card-rule: color-mix(in oklab, var(--_epic-card-accent) 35%, transparent);
+  }
+  .status.underway {
+    --_epic-card-accent: var(--ui-blue-text, var(--ui-blue, #1a67e0));
+  }
+  .status.done {
+    --_epic-card-fill: color-mix(in oklab, var(--ui-green, #21ba45) 5%, light-dark(#fff, Canvas));
+    --_epic-card-accent: var(--ui-green-text, var(--ui-green, #00853a));
+  }
+  /* noted:  Owen's choice recorded, nothing built yet:  OUTLINED green on the page's surface, the fill rule's
+     "recorded" (a sent mark is outlined too);  the green fill stays Done's alone */
+  .status.noted {
+    --_epic-card-fill: var(--ui-surface, Canvas);
+    --_epic-card-accent: var(--ui-green-text, var(--ui-green, #00853a));
+    --_epic-card-band: var(--_epic-card-fill);
+  }
+  .summary {
+    border-top: 1px solid var(--_epic-card-rule);
+  }
+}
+
+/*
+ * IN AN ITEM:  a LINE, not a card (epic `epic-engine` P27, Owen's layout A):
+ * `✓ Noted 10/24/26 15:21 → Done 15:25 · what Claude did`, in its state's colours, a tint of them, one row that wraps.
+ * - a run's earlier cards hide (`merged`);  a drive-by's line goes first in the item's details (`order`)
+ * - in the thread:  on its brown ground, last, the block's bottom corners on its host
+ */
+@layer ui.components.epic-status.line;
+
+@layer ui.components.epic-status.line {
+  :host(:state(merged)) {
+    display: none;
+  }
+  :host(:state(drive-by)) {
+    order: -1;
+    margin-top: 0;
+    margin-bottom: var(--epic-part-gap, 8px);
+  }
+  :host(:state(in-thread)) {
+    --_epic-thread-fill: var(--epic-thread-fill, color-mix(in oklab, var(--ui-text-color, #1d1d22) 4%, transparent));
+    margin-top: 0;
+    padding: 4px 6px;
+    background: var(--_epic-thread-fill);
+  }
+  :host(:state(thread-end)) {
+    padding-bottom: 6px;
+    border-end-start-radius: 12px;
+    border-end-end-radius: 12px;
+  }
+  .status.line {
+    --_epic-card-rule: color-mix(in oklab, var(--_epic-card-accent) 35%, transparent);
+    padding: 4px 10px;
+    /* rounded, not a pill:  a line that wraps stays a tidy box */
+    border-radius: 12px;
+    background: light-dark(#fff, color-mix(in oklab, CanvasText 6%, Canvas));
+    font-size: 0.9em;
+    line-height: 1.45;
+    overflow-wrap: anywhere;
+  }
+  /* noted:  recorded, nothing built:  outlined, on the page's ground (the fill rule) */
+  .status.line.noted {
+    background: light-dark(#fff, color-mix(in oklab, CanvasText 6%, Canvas));
+  }
+  .mark,
+  .steps,
+  .earlier {
+    /* the accent, deepened toward the ink:  readable on the tint in both schemes */
+    color: color-mix(in oklab, var(--_epic-card-accent) 70%, var(--_epic-card-ink));
+    font-weight: 600;
+  }
+  .mark {
+    margin-inline-end: 4px;
+  }
+  .steps .date {
+    font-weight: 400;
+    font-variant-numeric: tabular-nums;
+  }
+  .earlier {
+    font-weight: 400;
+    font-style: italic;
+  }
+  .reading.empty {
+    display: none;
+  }
+  .text ::slotted(*) {
+    display: inline;
+    margin: 0;
+  }
+}

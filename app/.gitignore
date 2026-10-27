@@ -1,0 +1,78 @@
+node_modules
+.yarn/install-state.gz
+.DS_Store
+.claude/worktrees/
+# the projects the `spell` prompt picked last (`recentProjects.ts`):  each checkout's own;  `.recent-targets.json`
+# was its name until epic output-targets T6, renamed on first read
+/.recent-projects.json
+/.recent-targets.json
+# the VS Code window files' old folder:  they live in the content folder's windows/ since epic epic-eject P13
+# (`windowsFolder`, .epic/config.json5);  the main checkout's leftovers stay out of git until they're deleted
+/workspaces/
+__pycache__/
+
+# the page server's pid file and log (`spell server`)
+.spell-server.json
+.spell-server.log
+.spell-server.*.log
+.spell-server.*.json
+
+
+
+# what spell compiles for each project in this repo (`spaces/@spell/...`), at its path there (epic people-and-orgs P11):
+# never committed, rebuilt by `spell compile`.  Which files:  "Projects" in spell-parser's spell/PARSING.md
+/build/
+# how VS Code's runner shows each project (its console, its tab), beside the project's file:  each machine's own,
+# "Safe to delete" (the extension's `RunnerPanel`);  ignored in the old `packages/spell/` and `packages/app/` too
+/spaces/**/settings.json5
+
+# `/park`'s note on where parked work stopped:  never committed
+PARKED-*.md
+# a checkout's running agents when it has no epic (`epic agents`;  an epic's:  `epics/<epic>/agents.json5`);
+# `.json` was its name before epic `epic-workflow` P21
+/.spell-agents.json
+/.spell-agents.json5
+.vitest/
+
+# the component sets' waiting comments (`<page>.inbox.json5` beside a page, and its lock;  the comment route, epic
+# epic-workflow P10 / P11):  per machine, never the record, as the shared pages' are
+/app/docs/**/*.inbox.json*
+
+# `/details` scratch pages and review inboxes (`pages/details/`, `epics/*/*.inbox.json5`):  ignored by the shared
+# content repo's own `.gitignore` (`../spell.epics`);  here the whole folders are ignored (below)
+
+# `agents/`:  a link to the kit's agents/ (WWOD and the three logs), made by the kit's every `yarn install` (epic repo-split P9, P12, I64)
+/agents
+
+# the shared content folders a checkout linked in at its root until epic epic-eject P12:  the page server and the tools
+# find them in the content folder itself now (`contentFolder` in .epic/config.json5), and `epic shared link` removes the
+# links;  ignored still, for a link left behind
+/epics
+/guides
+/pages
+/brand
+/ui
+/goals
+/sagas
+
+# the epic engine:  a link to the spell-epic checkout (`engineFolder` in .epic/config.json5, made by `epic shared link`;
+# epic epic-eject I5);  since epic repo-split P8 spell-epic sits beside this repo in the top repo `spell`, and the page
+# server's settings name it there (`../epic/...`):  a link left behind stays ignored
+/spell-epic
+
+
+# the generated declarations every package builds for the repos above it (`spell-types`, epic repo-split I12)
+dist-types/
+
+# preview copies of the shared epic pages in <epic-*> markup (`epic convert --all --out preview-epics`,
+# epic epic-components):  at the root so a copy's `../../packages/...` and `../../guides/...` links resolve
+/preview-epics/
+# the MAIN checkout's marker:  worktree windows hide its folder's files (spell-epic's window script, `filesExclude()`)
+/.spell-main
+*.code-workspace
+
+# graphify's knowledge graph:  rebuilt on demand, never committed
+graphify-out/
+
+# `spell map`'s map of this repo (graphify's, epic coherence P1):  rebuilt on demand, never committed
+graphify-out/

@@ -1,0 +1,494 @@
+/**
+ * Every name `<epic-page>` uses.  Schema:  `EpicVocabulary` (Spell UI's `ComponentVocabulary` plus its children).
+ * - Pure data:  `import type`, plus the stages (`PageStages`, node-safe);  its toolbar's chips are
+ *   `<epic-state-filter>`'s, with their texts.
+ * - Change it, then `spell pack build epics`:  the pack's catalog is read from here.
+ */
+
+import type { EpicVocabulary } from "spell/epic/definitions"
+import { PageStages } from "spell/epic/phases"
+
+/****************
+ * ### `<epic-page>`
+ * An epic page:  one epic's page.  Or, `kind="saga"`, a SAGA page (epic `epic-workflow` P15):  one saga's page,
+ * built of the same elements.
+ ****************/
+export const epicPageVocabulary = {
+  tag: "epic-page",
+  topics: ["documentation", "layout", "containers"],
+  aka: ["epic page", "plan doc", "epic", "plan", "project plan"],
+  skeleton: "header, 4 line paragraph",
+  noun: "page",
+  ui: false,
+  description:
+    "An epic page:  one epic's page -- its crumbs, header and meta lines, the Overview, then its sections in a fixed " +
+    "order.  Runs edge to edge:  it breaks out of the docs' `<main>` padding (`--spell-doc-pad-inline`).  With " +
+    '`kind="saga"`, a saga page:  the saga\'s crumbs and header, its Overview, Epics, Questions, Todos and Log.',
+  attributes: [
+    {
+      name: "epic",
+      kind: "string",
+      format: "epic name",
+      description:
+        "The epic's name:  its folder in `epics/`, and its branch's (`epic-components`).  On every epic page;  " +
+        'absent on a saga page (`kind="saga"`), which `saga` names instead.'
+    },
+    {
+      name: "kind",
+      // a string, not an enum:  `<epic-section kind>`'s enum and this one would type `EpicData` of any tag as never
+      kind: "string",
+      description:
+        "What kind of page:  absent, an epic page;  `saga`, a SAGA page (epic `epic-workflow` P15), " +
+        "`sagas/<id>/<id>.saga.html`:  `saga` names it, its crumbs say `Docs / Sagas`, its review command is " +
+        "`/epic review SAGA:/<id>`, and it has no phases, branch, worktree or step label."
+    },
+    {
+      name: "title",
+      property: "epicTitle",
+      kind: "string",
+      required: true,
+      description:
+        "The epic's title (`Windows and Review`):  the page's `<title>` and the Epics list's;  not drawn on the page, " +
+        "whose h1 is the epic's name."
+    },
+    { name: "branch", kind: "string", description: "Its git branch;  absent for a future epic." },
+    {
+      name: "worktree",
+      kind: "string",
+      description: "Its worktree's folder, absolute;  absent for a future epic, or once the worktree is gone."
+    },
+    { name: "started", kind: "string", format: "date", description: "The day the epic page was made." },
+    { name: "updated", kind: "string", format: "date", description: "The day a command last changed it." },
+    {
+      name: "future",
+      kind: "boolean",
+      description:
+        "A FUTURE epic (`/epic future`):  an idea written down, not planned yet;  its open questions are on " +
+        "`details/analysis.html`."
+    },
+    {
+      name: "standing",
+      kind: "boolean",
+      description:
+        "A STANDING epic (epic `epic-workflow`):  open for good, a home that requests from other sessions keep " +
+        "adding phases to;  each phase merges into `main` on its own, and every phase done is NOT done."
+    },
+    {
+      name: "stage",
+      kind: "enum",
+      values: PageStages.ALL,
+      description:
+        "How far planning has got (epic `epic-engine` P29), and so which sections show:  `overview` (the Overview, " +
+        "Questions and Todo only), `phases` (the Phases and Issues too), `building` (everything).  The header's Send group is " +
+        "the stage's button meanwhile:  Accept Overview, then Accept Phases;  and an open phase's review pills are " +
+        "Looks good and Defer while the phases are agreed.  Absent:  `building`, so every page made before stages " +
+        "looks as it did.  Set by `epic create` (`overview`), the button's mark, and `epic stage`."
+    },
+    {
+      name: "saga",
+      kind: "string",
+      format: "saga id",
+      description:
+        "The saga this epic serves, by id (`drawable-spell`;  epic `epic-workflow` P15):  one of `sagas/sagas.json5`'s, " +
+        "set by `epic saga set`.  Drawn in the meta lines, a link to its saga page;  absent:  no saga."
+    },
+    {
+      name: "bedtime",
+      kind: "string",
+      description: "A `/bedtime` run is on, and what it runs (`P3-P6`):  items it changes are `recent`."
+    },
+    {
+      name: "recent-since",
+      kind: "string",
+      format: "time",
+      description:
+        "Items decided, reviewed or closed since then are `recent` (green):  the commit time of `HEAD~2` in the " +
+        "doc's checkout.  Absent without git history."
+    },
+    {
+      name: "repo",
+      kind: "string",
+      description:
+        "The repo's web address (`https://github.com/spell-app/spell-app`):  `<epic-commit>` links are made from " +
+        "it.  Absent:  commits show without links."
+    },
+    {
+      name: "reviewing",
+      kind: "boolean",
+      description:
+        "PAGE state, never in a doc:  the page is being reviewed -- served by the page server with a token, its " +
+        "review inbox answering -- so items and Overview parts show their review controls, and the header Send." +
+        "  Set by them (P9, `ReviewState`);  the old runtime's `body.plan-reviewing`."
+    }
+  ],
+  events: [],
+  slots: [
+    { name: "", description: "The Overview, then the sections." },
+    {
+      name: "durable",
+      description:
+        'A link to the guide, once Doc Review wrote one:  `<a slot="durable" href="/guides/x.html">X</a>`.'
+    },
+    {
+      name: "toolbar",
+      description:
+        "The sticky bar's last row:  the section toolbar the docs runtime adds to an epic page " +
+        '(`<ui-menu slot="toolbar" class="spell-toolbar">`, `spell-doc-runtime.js` `buildToolbar()`);  never in a doc.'
+    }
+  ],
+  parts: [
+    { name: "base", description: "The page." },
+    {
+      name: "crumbs",
+      description:
+        "In the h1, before the epic's name:  `Docs / Epics /`, the docs' eyebrow.  None narrow, nor while the doc " +
+        "still holds its old `ui-breadcrumbs.spell-crumbs` before the page."
+    },
+    {
+      name: "header",
+      description:
+        "The sticky page header:  the h1, then at its right Send (while reviewed), the bedtime label, " +
+        "the step label (the state in it) and the git toggle."
+    },
+    {
+      name: "heading",
+      description:
+        "The h1:  the crumbs, then the epic's name in their type, twice their size and bold;  a click on the name copies `/epic resume <name>`."
+    },
+    {
+      name: "bar",
+      description:
+        "The toolbar's sticky bar, right below the header once the title has scrolled away:  the new item form " +
+        "(while open), then the toolbar."
+    },
+    {
+      name: "toolbar",
+      description:
+        "The sticky bar's last row:  the docs runtime's section buttons (`slot=\"toolbar\"`), then at the right the page's " +
+        "state filter, collapse-all and (reviewed) the new todo or question button."
+    },
+    {
+      name: "filter",
+      description:
+        "The toolbar's state filter:  a chip per state the page's items are in, with how many;  filters every section."
+    },
+    {
+      name: "pill",
+      description:
+        "Under the review line, while marks, comments or requests for now wait and nobody can take them:  no Claude " +
+        "session reviewing (orange), or airplane mode;  once a Send woke the epic, what the wake did " +
+        "(`Typed /epic review <name> into 🚧 <name>:  press Enter there`).  A click copies the review line's command."
+    },
+    {
+      name: "send",
+      description:
+        "In the header while the page is reviewed, Send (`<epic-send-buttons>`, epic `epic-engine` " +
+        "P20):  the paper plane sends every unsent mark and comment to Claude (grey with nothing to send, blue with " +
+        "some unsent, outlined blue once sent);  no wand or countdown since 2026-10-25.  While " +
+        "the page is in a stage, the plane is the stage button:  Accept Overview, then Accept Phases.  While building, " +
+        "with Claude's build plans waiting for Owen's Accept on their phases, the pill is ringed, its border 2px #666 (`asks`), " +
+        "dotted once each has his mark;  its tooltip names them."
+    },
+    { name: "git", description: "The git toggle:  shows or hides every commit (only when the doc has some)." },
+    {
+      name: "status",
+      description:
+        "The header's right side:  the changes to accept, Send (while reviewed), the bedtime label, " +
+        "the step label, the git toggle."
+    },
+    {
+      name: "step-pill",
+      description: "One pill (epic `epic-engine` I108):  the step label, then the agents running (`agents-pill`)."
+    },
+    {
+      name: "agents-pill",
+      description: "The agents running, in the header's pill after the step label (`<epic-agents draws=agents>`)."
+    },
+    {
+      name: "state",
+      description:
+        "The step label while the epic has a state, its icon and colour the state's (`spell/epic/list/EpicState`):  " +
+        "in progress (blue half circle), errors (red:  every phase done, items need you), paused (grey:  phases " +
+        "left, untouched for days);  why on hover.  None for a future epic or a done one:  FUTURE or DONE says so."
+    },
+    {
+      name: "review-line",
+      description:
+        "Under the header:  `To review this doc, type /epic review <name>` (airplane mode:  `/airplane land`), " +
+        "copied on click."
+    },
+    { name: "meta", description: "The meta lines:  branch, worktree, dates, saga, guide." },
+    { name: "notice", description: "A future epic's notice:  not planned yet." },
+    {
+      name: "hung",
+      description:
+        "A doc still planning (no phases, not future):  the folded `Plan hung?` aside, with the prompt to copy."
+    },
+    {
+      name: "toggle-all",
+      description:
+        "The toolbar's ONE double chevron:  down, it opens every section, phase and item;  up once it has, it folds them."
+    },
+    {
+      name: "see-also",
+      description:
+        "Above the blocks:  the pages the epic made for itself (its `details/` folder), each a link;  none, no box."
+    },
+    {
+      name: "agents",
+      description:
+        "What Claude is doing and the running agents (an `<epic-agents>`, epic `epic-engine` P35), in its toolbar."
+    },
+    {
+      name: "test-run",
+      description:
+        "In test mode (epic `epic-engine` P4), the TEST RUN over its blocks (an `<epic-test-run>`):  from the Manual tests " +
+        "section's Start testing, or the address's `?test=1` (`?test=1&all=1`:  one epic of a run across every epic, " +
+        "`epic test --all`).  Its blocks, toolbar, review line and meta lines hide meanwhile."
+    }
+  ],
+  states: [
+    { name: "future", description: "A future epic." },
+    { name: "commits", description: "Every commit shows (the git toggle is on)." },
+    {
+      name: "testing",
+      description:
+        "Test mode (epic `epic-engine` P4):  a test run shows over its blocks, until Esc or Done testing.  Page state, " +
+        "never in a doc."
+    }
+  ],
+  texts: [
+    {
+      key: "hungTip",
+      text: "Fold or unfold:  how to restart a hung session",
+      description: "Plan hung?:  its tooltip."
+    },
+
+    { key: "copyHeading", text: "Copy {command}", description: "The h1's name:  its tooltip." },
+    {
+      key: "copiedText",
+      text: "Copied {text}",
+      description:
+        "The toast once something is copied (the h1's name, a meta line's code):  what went onto the clipboard."
+    },
+    { key: "crumbs", text: "Breadcrumb", description: "The crumbs, spoken." },
+    { key: "seeAlso", text: "See Also", description: "The See Also box's title." },
+    { key: "seeAlsoDurable", text: "guide", description: "A See Also page's kind:  the epic's guide." },
+    { key: "seeAlsoGuide", text: "guide", description: "A See Also page's kind:  a guide the epic page links to." },
+    { key: "seeAlsoDetails", text: "details", description: "A See Also page's kind:  a details page." },
+    { key: "seeAlsoChoices", text: "choice", description: "A See Also page's kind:  a choice page." },
+    { key: "crumbDocs", text: "Docs", description: "The crumbs' first:  the docs' home page." },
+    { key: "crumbEpics", text: "Epics", description: "The crumbs' second:  the Epics list page." },
+    { key: "crumbSagas", text: "Sagas", description: "A saga page's crumbs' second:  the Sagas list page." },
+    {
+      key: "sagaPage",
+      text: "Saga page:",
+      description: "A saga page's meta line, before its short address (`SAGA:/drawable-spell`, copied on click)."
+    },
+    { key: "planDoc", text: "Epic page for", description: "Meta line:  `Epic page for /epic x, branch x`." },
+    { key: "branch", text: "branch", description: "Meta line:  before the branch's name." },
+    { key: "futureEpic", text: "Future epic:", description: "Meta line of a future epic." },
+    { key: "noBranch", text: "no branch yet", description: "Meta line of a future epic." },
+    { key: "worktree", text: "Worktree:", description: "Meta line:  before the worktree's folder." },
+    { key: "noWorktree", text: "none yet", description: "Meta line:  no worktree." },
+    { key: "started", text: "Started", description: "Meta line:  `Started 10/6/26, updated 10/7/26`." },
+    { key: "updated", text: "updated", description: "Meta line:  before the last change's day." },
+    { key: "durable", text: "Guide:", description: "Meta line:  before the guide's link." },
+    { key: "saga", text: "Saga:", description: "Meta line:  before the link to the saga the epic serves." },
+    {
+      key: "sagaTip",
+      text: "The saga this epic serves:  {purpose}",
+      description: "The saga link's tooltip, once the page server has said what the saga is for."
+    },
+    { key: "done", text: "DONE", description: "Step label:  every phase is done." },
+    { key: "future", text: "FUTURE", description: "Step label:  a future epic." },
+    {
+      key: "standing",
+      text: "STANDING",
+      description: "Step label:  a standing epic with every phase done:  open for requests."
+    },
+    { key: "next", text: "Next:  ", description: "Step label's tooltip, before the next phase." },
+    { key: "bedtime", text: "Bedtime {phases}", description: "The bedtime label:  a `/bedtime` run is on." },
+    {
+      key: "bedtimeTip",
+      text: "A /bedtime run is on ({phases}):  what it changes shows green until you review it.",
+      description: "The bedtime label's tooltip."
+    },
+    { key: "showCommits", text: "Show the commits", description: "The git toggle, off." },
+    { key: "hideCommits", text: "Hide the commits", description: "The git toggle, on." },
+    { key: "futureHeader", text: "Future epic:  not planned yet", description: "A future epic's notice." },
+    {
+      key: "futureBody",
+      text:
+        "No worktree, no phases yet.  Its high-level open questions are on its review page, answered in the side " +
+        "bar's Review tab;  the answers land here as decided questions.",
+      description: "A future epic's notice."
+    },
+    { key: "analysisPage", text: "Open its review page", description: "The notice's link." },
+    { key: "futurePlan", text: "plans it.", description: "The notice's last line, after `/epic <name>`." },
+    {
+      key: "send",
+      text: "Send {what} to Claude",
+      description: "Send, marks or comments unsent;  `what` counts them (`marksOne` ..., `2 marks, 1 comment`)."
+    },
+    { key: "sent", text: "Sent:  waiting for Claude", description: "Send, every mark and comment sent." },
+    {
+      key: "acceptOverview",
+      text: "Accept Overview",
+      description: "The stage button while the Overview is agreed (`stage=overview`, epic `epic-engine` P29)."
+    },
+    {
+      key: "acceptPhases",
+      text: "Accept Phases",
+      description: "The stage button while the phases are agreed (`stage=phases`)."
+    },
+    {
+      key: "acceptOverviewTip",
+      text: "The Overview is agreed:  Claude writes the phases next",
+      description: "The stage button's tooltip, Overview stage:  what a press does."
+    },
+    {
+      key: "acceptPhasesTip",
+      text: "The phases and their build plans are agreed:  Claude starts building",
+      description: "The stage button's tooltip, Phases stage:  what a press does."
+    },
+    {
+      key: "acceptedOverview",
+      text: "Overview accepted:  waiting for Claude to write the phases",
+      description: "The stage button's tooltip once pressed, Overview stage."
+    },
+    {
+      key: "acceptedPhases",
+      text: "Phases accepted:  waiting for Claude to start building",
+      description: "The stage button's tooltip once pressed, Phases stage."
+    },
+    {
+      key: "stageOverview",
+      text: "OVERVIEW",
+      description: "The step label while the Overview is agreed (`stage=overview`), in place of a phase."
+    },
+    {
+      key: "stagePhases",
+      text: "PHASES",
+      description: "The step label while the phases are agreed (`stage=phases`), in place of a phase."
+    },
+    {
+      key: "stageOverviewTip",
+      text: "Agreeing the Overview:  only it, the questions and todos show until Accept Overview",
+      description: "The step label's tooltip, Overview stage."
+    },
+    {
+      key: "stagePhasesTip",
+      text: "Agreeing the phases and their build plans:  Defer any, then Accept Phases, one press for both",
+      description: "The step label's tooltip, Phases stage."
+    },
+    { key: "openQuestionsOne", text: "1 question open", description: "The stage button's tooltip:  what's open." },
+    {
+      key: "openQuestionsMany",
+      text: "{count} questions open",
+      description: "The stage button's tooltip:  what's open;  a reminder, never a lock."
+    },
+    { key: "nothingOpen", text: "no questions open", description: "The stage button's tooltip:  nothing open." },
+    {
+      key: "plansWaitOne",
+      text: "1 build plan waits for your Accept:  {phases}",
+      description:
+        "While building, Send's tooltip begins so while a phase's build plan waits (the pill ringed 3px);  `{phases}`:  `P43`."
+    },
+    {
+      key: "plansWaitMany",
+      text: "{count} build plans wait for your Accept:  {phases}",
+      description: "The same, for several:  `{phases}` like `P43, P44`."
+    },
+    {
+      key: "acceptSends",
+      text: "sends {count} unsent with it",
+      description: "The stage button's tooltip:  marks and comments a press sends along."
+    },
+    {
+      key: "sendIdle",
+      text: "Nothing to send:  mark an item (its buttons) or leave a comment (its bullhorn)",
+      description: "Send, no marks or comments."
+    },
+    { key: "marksOne", text: "1 mark", description: "Send's count:  one mark." },
+    { key: "marksMany", text: "{count} marks", description: "Send's count:  marks." },
+    { key: "commentsOne", text: "1 comment", description: "Send's count:  one comment." },
+    { key: "commentsMany", text: "{count} comments", description: "Send's count:  comments." },
+    { key: "reviewLine", text: "To review this doc, type", description: "The review line, before the command." },
+    {
+      key: "nobodyPill",
+      text: "No Claude session is reviewing:  start one with",
+      description: "The pill while nobody listens, before the command it copies."
+    },
+    {
+      key: "airplanePill",
+      text: "Airplane mode:  this waits for",
+      description: "The pill in airplane mode, before `/airplane land`."
+    },
+    {
+      key: "expandAll",
+      text: "Open every section, phase and item",
+      description: "The toolbar's expand-all button:  its name and tooltip."
+    },
+    {
+      key: "collapseAll",
+      text: "Fold everything on the page",
+      description: "The toolbar's collapse-all button:  its name and tooltip."
+    },
+    {
+      key: "reviewLineAirplane",
+      text: "Airplane mode:  what you mark here waits for",
+      description: "The review line in airplane mode (no Claude), before `/airplane land`."
+    },
+    { key: "copyCommand", text: "Copy the command", description: "The review line's tooltip." },
+    {
+      key: "startReview",
+      text: "Start the review in this epic's Claude session (and copy the command)",
+      description: "The nobody-listening pill's tooltip:  a click types the command into the epic's session."
+    },
+    { key: "copied", text: "copied", description: "The review line, just copied." },
+    { key: "hung", text: "Plan hung?", description: "The planning aside's title." },
+    { key: "hungBefore", text: "Close its Claude tab, then run", description: "The aside, before `/epic <name>`." },
+    { key: "hungAfter", text: "and pick \u201cReuse\u201d.", description: "The aside, after `/epic <name>`." }
+  ],
+  children: [
+    { tag: "flow", slot: "durable", max: 1, description: "The guide's link." },
+    { tag: "epic-overview", min: 1, max: 1, description: "1. Overview." },
+    {
+      tag: "epic-section",
+      where: { attribute: "kind", values: ["report"] },
+      description: "Reports a run wrote (an overnight `/bedtime` report), after the Overview:  unnumbered."
+    },
+    {
+      tag: "epic-section",
+      where: { attribute: "kind", values: ["epics"] },
+      when: { attribute: "kind", values: ["saga"] },
+      max: 1,
+      description: "A saga page's Epics, after its Overview:  the cards of the epics serving it."
+    },
+    { tag: "epic-section", where: { attribute: "kind", values: ["phases"] }, max: 1, description: "2. Phases." },
+    {
+      tag: "epic-section",
+      where: { attribute: "kind", values: ["questions"] },
+      max: 1,
+      description: "3. Questions."
+    },
+    {
+      tag: "epic-section",
+      where: { attribute: "kind", values: ["judgements"] },
+      max: 1,
+      description: "4. Judgement calls."
+    },
+    {
+      tag: "epic-section",
+      where: { attribute: "kind", values: ["todos"] },
+      max: 1,
+      description:
+        "5. Todo:  work still to do, and limits to know about (`limit`;  Caveats, epic `epic-engine` P32 to P44)."
+    },
+    { tag: "epic-section", where: { attribute: "kind", values: ["issues"] }, max: 1, description: "6. Issues." },
+    { tag: "epic-section", where: { attribute: "kind", values: ["tests"] }, max: 1, description: "7. Manual tests." },
+    { tag: "epic-section", where: { attribute: "kind", values: ["log"] }, max: 1, description: "8. Log." }
+  ],
+  childOrder: "listed"
+} as const satisfies EpicVocabulary

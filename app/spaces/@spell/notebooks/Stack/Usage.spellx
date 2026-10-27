@@ -1,0 +1,39 @@
+<spell-notebook "stack usage">
+	<header level="1">
+		Stack
+		<header>A stack lays its children out in a column, or a row that wraps, evenly spaced.</>
+	</>
+	<stack-tab-bar showing="usage"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#using-it">Using it</>
+				<ui-item link="#accessibility">Accessibility</>
+			</>
+		</>
+	</>
+
+	<!-- USAGE:  how to use it (attributes in practice, events, framework snippets), keyboard, accessibility. -->
+	<section label="Using it">
+		<markdown>
+			`<ui-stack>` lays out whatever is inside it, and draws nothing itself:  no padding, border or colour.
+
+			- A column by default;  `direction="horizontal"` makes a row, and `wrap` lets the row wrap.
+			- `spacing` is the gap between children, from `none` to `xl`.
+			- `align` lines children up ACROSS it:  a column's edges or centres, a row's tops, middles or baselines.
+			- `justify` places them ALONG it:  at the `start`, `center` or `end`, or spread out (`between`, `around`).
+			- `fluid` makes it as wide as its container.
+			- Its children's own block margins are dropped:  the stack's spacing is the space.
+
+			In plain HTML, the `ui-stack` and `ui-cluster` classes do the same on a `<div>`.
+			The tag is for where there's no `<div>` to put them on:  a drawing.
+		</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			A stack has no role:  screen readers read its children in order, as if it weren't there.
+			`justify` and `align` only move things on screen, so keep the order the reading order.
+		</>
+	</>
+</spell-notebook>

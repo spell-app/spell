@@ -12,9 +12,9 @@ const CATALOG = `# The catalog
 - **It is:**  \`LiveReload\`
 - **Flag:**  \`\\bwatch\\(\`
 - **Score:**  \`import \\{[^}]*\\bwatch\\b\` · home \`src/server/LiveReload.ts\`
-  · not \`spell-app/src/old/\`
+  · not \`app/src/old/\`
 - **Copies:**  four
-  - Fine:  \`spell-epic/src/tool/InboxPoller.mjs\` keeps its own
+  - Fine:  \`epic/src/tool/InboxPoller.mjs\` keeps its own
 
 ### Logging
 
@@ -23,11 +23,11 @@ const CATALOG = `# The catalog
 
 ### Fetching in Spell UI
 
-- **Score:**  \`response\\.ok\` · in \`spell-ui/src\` · home \`spell-ui/src/runtime/runtime.types.ts\`, \`spell-ui/src/Api.ts\`
+- **Score:**  \`response\\.ok\` · in \`ui/src\` · home \`ui/src/runtime/runtime.types.ts\`, \`ui/src/Api.ts\`
 
 ## Fine as it is
 
-- \`spell-parser/src/markdown/blocks/BlockScanner.ts\`:  a state machine, not a grammar.
+- \`parser/src/markdown/blocks/BlockScanner.ts\`:  a state machine, not a grammar.
 - Spell UI's marked and the parser's markdown:  two engines on purpose.
 `
 
@@ -48,21 +48,21 @@ describe("the catalog's **Score:** lines", () => {
 
   test("its own not, its entry's Fine lines and the catalog's Fine as it is are all left out", () => {
     expect(mechanisms[0]!.not).toEqual([
-      "spell-app/src/old/",
-      "spell-epic/src/tool/InboxPoller.mjs",
-      "spell-parser/src/markdown/blocks/BlockScanner.ts"
+      "app/src/old/",
+      "epic/src/tool/InboxPoller.mjs",
+      "parser/src/markdown/blocks/BlockScanner.ts"
     ])
   })
 
   test("in and several homes", () => {
     expect(mechanisms[1]).toMatchObject({
-      within: ["spell-ui/src"],
-      homes: ["spell-ui/src/runtime/runtime.types.ts", "spell-ui/src/Api.ts"]
+      within: ["ui/src"],
+      homes: ["ui/src/runtime/runtime.types.ts", "ui/src/Api.ts"]
     })
   })
 
   test("Fine as it is:  only its paths, not its prose", () => {
-    expect(finePaths(CATALOG)).toEqual(["spell-parser/src/markdown/blocks/BlockScanner.ts"])
+    expect(finePaths(CATALOG)).toEqual(["parser/src/markdown/blocks/BlockScanner.ts"])
   })
 
   test("the word list reads the same way", () => {

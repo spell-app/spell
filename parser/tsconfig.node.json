@@ -1,0 +1,27 @@
+{
+  // spell-parser's TypeScript settings for its node-only code (see `tsconfig.json` for the rest):
+  // - the cli's commands (`src/cli/`)
+  // - spell's node tools (`src/spell/node/`) and test helpers (`src/spell/test/`), the parser's (`src/parser/test/`)
+  // - core's declarations writer
+  // - the scripts and configs at the root
+  // What they import from the browser-safe folders is checked again here, with node's types.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "types": ["node", "vite/client", "spell/toolchain/types"]
+  },
+  "include": [
+    "src/cli",
+    "src/parser/test",
+    "src/core/coreDeclarations.ts",
+    "src/core/writeCoreDeclarations.ts",
+    "src/spell/node",
+    "src/spell/test",
+    "scripts",
+    "vite.config.ts",
+    "vitest.config.ts"
+  ],
+  // hand-written `ts/solid` output:  checked by `typecheck()`, with `@spell/core` and Solid's JSX (`typescript.test.ts`)
+  "exclude": ["src/spell/test/*.sample.tsx"]
+}

@@ -1,0 +1,88 @@
+<!doctype html>
+<!--
+  Trying out `<spell-editor>` with `<spell-viewer>` --
+  served by the dev server at `/demo/spell-editor.html`, after `yarn build:element`.
+  - Each editor compiles as it opens, 2 seconds after typing stops, and on Cmd+Enter.
+  - It hands what it compiled to the apps it's linked to, from either side:
+    the editor's `app="<selector>"`, or an app's `editor="<selector>"`.
+  - NOTE: edits SAVE to the example projects on disk, as the web app's editor does.
+  - Three editors of three projects on one page, each with its own files.
+  - Loaded as a Spell UI component pack (`vite.element.config.ts`, `componentPack()`):
+    - `spell-ui.js` gives the page `<ui-root>`
+    - its `<ui-components>` loads `spell.pack.js`
+    - which defines `<spell-editor>` and `<spell-viewer>`
+  - The `<ui-root>` is needed here, unlike on the `<spell-viewer>` demo:
+    the editors sit BESIDE the apps, outside any `<spell-viewer>` (a root, which loads the spell tags inside it).
+    Each `<spell-viewer>` is a root nested in it.
+-->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>spell-editor demo</title>
+    <script type="module" src="/element/spell-ui.js"></script>
+    <style>
+      body {
+        margin: 0;
+        padding: 16px;
+        font-family: Georgia, serif;
+        background: #f4f1ea;
+      }
+      h2 {
+        margin: 32px 0 8px;
+      }
+      p {
+        margin: 0 0 8px;
+      }
+      spell-viewer {
+        border: 1px solid #ccc;
+      }
+      .side-by-side {
+        display: flex;
+        gap: 16px;
+        align-items: flex-start;
+
+        & > * {
+          flex: 1 1 0;
+          min-width: 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <ui-root>
+      <ui-components source="/element/spell.pack.js"></ui-components>
+      <h1>spell-editor</h1>
+      <p><strong>Edits save</strong> to the example projects on disk.</p>
+
+      <h2>Linked from the editor's side: <code>app="#calculator"</code></h2>
+      <div class="side-by-side">
+        <spell-editor project="@spell/examples/calculator" app="#calculator" height="420px"></spell-editor>
+        <spell-viewer id="calculator" project="@spell/examples/calculator" toolbar></spell-viewer>
+      </div>
+
+      <h2>Linked from the apps' side: two apps with <code>editor="#tasks"</code></h2>
+      <p>Neither app names a project: each waits for the editor's first compile.</p>
+      <spell-editor id="tasks" project="@spell/examples/TaskList" height="360px"></spell-editor>
+      <div class="side-by-side">
+        <spell-viewer editor="#tasks" toolbar></spell-viewer>
+        <spell-viewer editor="#tasks" toolbar></spell-viewer>
+      </div>
+
+      <h2>A project of several files, with the Type Explorer following edits</h2>
+      <spell-editor
+        project="@spell/examples/Solitaire"
+        file="Solitaire.spell"
+        app="#solitaire"
+        height="420px"
+      ></spell-editor>
+      <spell-viewer
+        id="solitaire"
+        project="@spell/examples/Solitaire"
+        toolbar
+        debug="explorer"
+        height="640px"
+      ></spell-viewer>
+    </ui-root>
+  </body>
+</html>

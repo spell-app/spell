@@ -205,7 +205,7 @@ Where a test runs is decided by its folder and its name, so a new file needs no 
 - Shared helpers:
   - the kit's, for every set of elements:  `spell/test-helpers/ElementFixture`, `Fixture`, `A11y`, `Viewport` ...
     ([README-element.md](README-element.md))
-  - Spell UI's setup, `spell-ui/test-helpers/setup.ts`, which spell-app's and spell-epic's browser tests run first
+  - Spell UI's setup, `spell/ui/test-helpers/setup.ts`, which spell-app's and spell-epic's browser tests run first
 
 Tests reach DOWN only, as code does:
 - A higher repo's tests may use a lower repo's helpers and test data:
@@ -227,14 +227,14 @@ import { SRV } from "spell/server"
 // one file, src/util/string.ts:  the same name from inside the kit, where this line comes from
 import { camelCase, kebabCase } from "spell/util/string"
 // a query stays
-import partsCSS from "spell-ui/components/ui-parts/UIParts.css?inline"
+import partsCSS from "spell/ui/components/ui-parts/UIParts.css?inline"
 ```
 
 _Real lines, from [the router's test](tests/server/Router.test.ts),
 [the kit's tag names for views](src/util/spell/view.ts)
-and [Spell UI's label](https://github.com/spell-app/spell-ui/blob/main/src/components/ui-label/UILabel.tsx)._
+and [Spell UI's label](https://github.com/spell-app/spell/blob/main/ui/src/components/ui-label/UILabel.tsx)._
 
-- The other repos' files go the same way:  `spell-ui/components/ui-button`, `spell-parser/spell`.
+- The other repos' files go the same way:  `spell/ui/components/ui-button`, `spell/parser/spell`.
 - No path aliases and no `../`;  a same-folder peer stays `./Peer`.
   Lint holds it:  `spell/no-parent-import` fails a `../` that climbs into a package's `src/`,
   and its message names the import to write ([README-toolchain.md](README-toolchain.md#the-houses-own-lint-rules)).
@@ -283,7 +283,7 @@ _The worktree is a copy of the whole checkout, on one branch name in every repo.
 
 **Making one:**  `/epic <name>`, or `/isolate <name>` for a smaller job, in Claude Code.
 - spell-epic's worktree hook branches every repo from your local `main`, unpushed work included.
-- It runs the one install, then the two VS Code extensions' own (`spell-epic/vscode`, `spell-app/vscode`).
+- It runs the one install, then the two VS Code extensions' own (`epic/vscode`, `app/vscode`).
 - The edge:  it's Claude Code's worktree hook that does this, so making one needs Claude Code.
   Without it, do by hand what it does:  the same branch name in each repo you change (below, "The manual way").
 
@@ -318,8 +318,8 @@ While you're in it:
   Control.
   Never `code --add`, never `code -r`:  [README-vscode.md](README-vscode.md), "Windows and worktrees", says why.
 - `epic` is spell-epic's command, on every Claude Code session's `PATH` while the plugin is on:
-  every verb in [spell-epic's README-cli.md](https://github.com/spell-app/spell-epic/blob/main/README-cli.md);
-  epic pages, the review loop and the skills in [spell-epic's README](https://github.com/spell-app/spell-epic/blob/main/README.md).
+  every verb in [spell-epic's README-cli.md](https://github.com/spell-app/spell/blob/main/epic/README-cli.md);
+  epic pages, the review loop and the skills in [spell-epic's README](https://github.com/spell-app/spell/blob/main/epic/README.md).
 
 <details>
 <summary>The manual way, for a change in one repo</summary>
@@ -415,7 +415,7 @@ The edges:
 3. `yarn install`, with `YARN_ENABLE_IMMUTABLE_INSTALLS=false`:
    the lockfile lists child repos that aren't cloned there.
 4. In a child repo, around the clones above:  uv, for spell-parser's and spell-app's Python;
-   and spell-epic's extension install (`spell-epic/vscode`, a yarn project of its own, which its `lint` reads).
+   and spell-epic's extension install (`epic/vscode`, a yarn project of its own, which its `lint` reads).
 5. `yarn playwright install --with-deps chromium`, for the browser tests.
 6. In a child repo, a git name and email:  some tests make throwaway git repos and commit to them.
 7. The checks.
@@ -435,24 +435,24 @@ Find the row for what you want to change, then read the page beside it before yo
 
 | To change ... | Look in |
 | --- | --- |
-| how a Spell sentence parses or compiles | spell-parser's [rules](https://github.com/spell-app/spell-parser/tree/main/src/spell/rules) and its [parser](https://github.com/spell-app/spell-parser/tree/main/src/parser) (the engine, Rulex):  [README-spell.md](https://github.com/spell-app/spell-parser/blob/main/README-spell.md), [README-parser.md](https://github.com/spell-app/spell-parser/blob/main/README-parser.md) |
-| a word in Spanish, or a third human language | spell-parser's [language packs](https://github.com/spell-app/spell-parser/tree/main/src/spell/languages) and each rule module's `<module>.es.ts`;  `spell translate check`:  [README-spanish.md](https://github.com/spell-app/spell-parser/blob/main/README-spanish.md) |
-| what compiled code runs on | spell-parser's [core](https://github.com/spell-app/spell-parser/tree/main/src/core) (JavaScript) and [py](https://github.com/spell-app/spell-parser/tree/main/src/py) (Python):  [README-core.md](https://github.com/spell-app/spell-parser/blob/main/README-core.md) |
-| the output for one language | the writers, and the list of targets in spell-parser's [`targets.ts`](https://github.com/spell-app/spell-parser/blob/main/src/spell/targets.ts):  [README-targets.md](https://github.com/spell-app/spell-parser/blob/main/README-targets.md) |
-| errors, hover and completion | the language service ([`SpellLanguageService.ts`](https://github.com/spell-app/spell-app/blob/main/src/lsp/SpellLanguageService.ts)):  [README-lsp.md](https://github.com/spell-app/spell-app/blob/main/README-lsp.md) |
-| the editor's screens and behaviour | spell-app's [`src/app/`](https://github.com/spell-app/spell-app/tree/main/src/app):  [`solid/`](https://github.com/spell-app/spell-app/tree/main/src/app/solid), [`pages/`](https://github.com/spell-app/spell-app/tree/main/src/app/pages), [`editor.ts`](https://github.com/spell-app/spell-app/blob/main/src/app/editor.ts);  [README-app.md](https://github.com/spell-app/spell-app/blob/main/README-app.md) |
-| how programs run in a page | spell-app's [runner](https://github.com/spell-app/spell-app/tree/main/src/app/runner) |
-| `<spell-viewer>`, `<spell-editor>`, `<spell-code>`, `<spell-markdown>` | spell-app's [`src/app/components/`](https://github.com/spell-app/spell-app/tree/main/src/app/components);  build with `yarn build:element`;  demos in `app/demo/` |
-| VS Code language features, Run Project | spell-app's [`vscode/src/`](https://github.com/spell-app/spell-app/tree/main/vscode/src):  [README-vscode.md](README-vscode.md) |
-| projects on disk, addresses, the editor's API | spell-app's [spaces](https://github.com/spell-app/spell-app/tree/main/src/spaces/server/node):  [README-spaces.md](https://github.com/spell-app/spell-app/blob/main/README-spaces.md) |
-| the example projects | spell-app's [`spaces/@spell/examples/`](https://github.com/spell-app/spell-app/tree/main/spaces/@spell/examples) and `library/`:  [README-examples.md](https://github.com/spell-app/spell-app/blob/main/README-examples.md) |
-| Python web apps | spell-app's [`spell_quart`](https://github.com/spell-app/spell-app/tree/main/src/spaces/server/py) |
+| how a Spell sentence parses or compiles | spell-parser's [rules](https://github.com/spell-app/spell/tree/main/parser/src/spell/rules) and its [parser](https://github.com/spell-app/spell/tree/main/parser/src/parser) (the engine, Rulex):  [README-spell.md](https://github.com/spell-app/spell/blob/main/parser/README-spell.md), [README-parser.md](https://github.com/spell-app/spell/blob/main/parser/README-parser.md) |
+| a word in Spanish, or a third human language | spell-parser's [language packs](https://github.com/spell-app/spell/tree/main/parser/src/spell/languages) and each rule module's `<module>.es.ts`;  `spell translate check`:  [README-spanish.md](https://github.com/spell-app/spell/blob/main/parser/README-spanish.md) |
+| what compiled code runs on | spell-parser's [core](https://github.com/spell-app/spell/tree/main/parser/src/core) (JavaScript) and [py](https://github.com/spell-app/spell/tree/main/parser/src/py) (Python):  [README-core.md](https://github.com/spell-app/spell/blob/main/parser/README-core.md) |
+| the output for one language | the writers, and the list of targets in spell-parser's [`targets.ts`](https://github.com/spell-app/spell/blob/main/parser/src/spell/targets.ts):  [README-targets.md](https://github.com/spell-app/spell/blob/main/parser/README-targets.md) |
+| errors, hover and completion | the language service ([`SpellLanguageService.ts`](https://github.com/spell-app/spell/blob/main/app/src/lsp/SpellLanguageService.ts)):  [README-lsp.md](https://github.com/spell-app/spell/blob/main/app/README-lsp.md) |
+| the editor's screens and behaviour | spell-app's [`src/app/`](https://github.com/spell-app/spell/tree/main/app/src/app):  [`solid/`](https://github.com/spell-app/spell/tree/main/app/src/app/solid), [`pages/`](https://github.com/spell-app/spell/tree/main/app/src/app/pages), [`editor.ts`](https://github.com/spell-app/spell/blob/main/app/src/app/editor.ts);  [README-app.md](https://github.com/spell-app/spell/blob/main/app/README-app.md) |
+| how programs run in a page | spell-app's [runner](https://github.com/spell-app/spell/tree/main/app/src/app/runner) |
+| `<spell-viewer>`, `<spell-editor>`, `<spell-code>`, `<spell-markdown>` | spell-app's [`src/app/components/`](https://github.com/spell-app/spell/tree/main/app/src/app/components);  build with `yarn build:element`;  demos in `app/demo/` |
+| VS Code language features, Run Project | spell-app's [`vscode/src/`](https://github.com/spell-app/spell/tree/main/app/vscode/src):  [README-vscode.md](README-vscode.md) |
+| projects on disk, addresses, the editor's API | spell-app's [spaces](https://github.com/spell-app/spell/tree/main/app/src/spaces/server/node):  [README-spaces.md](https://github.com/spell-app/spell/blob/main/app/README-spaces.md) |
+| the example projects | spell-app's [`spaces/@spell/examples/`](https://github.com/spell-app/spell/tree/main/app/spaces/@spell/examples) and `library/`:  [README-examples.md](https://github.com/spell-app/spell/blob/main/app/README-examples.md) |
+| Python web apps | spell-app's [`spell_quart`](https://github.com/spell-app/spell/tree/main/app/src/spaces/server/py) |
 | a `spell` command | its repo's `src/cli/` folder:  [README-cli.md](README-cli.md) |
-| the page server | the kit's [server](src/server/page/) ([README-server.md](README-server.md));  what a repo adds to it, in that repo's own `package.json` (`"pageServer"`):  spell-app's, [its README-page-server.md](https://github.com/spell-app/spell-app/blob/main/README-page-server.md);  the header's tabs and the writable folders, in the content repo's `page-server.json5` |
-| a Spell UI element | [spell-ui](https://github.com/spell-app/spell-ui/blob/main/README.md) |
+| the page server | the kit's [server](src/server/page/) ([README-server.md](README-server.md));  what a repo adds to it, in that repo's own `package.json` (`"pageServer"`):  spell-app's, [its README-page-server.md](https://github.com/spell-app/spell/blob/main/app/README-page-server.md);  the header's tabs and the writable folders, in the content repo's `page-server.json5` |
+| a Spell UI element | [spell-ui](https://github.com/spell-app/spell/blob/main/ui/README.md) |
 | the element framework under every set | the kit's [element](src/element/):  [README-element.md](README-element.md) |
-| epic pages, review, windows, hooks, skills | [spell-epic](https://github.com/spell-app/spell-epic/blob/main/README.md), with its own checks;  `/reload-plugins` for a skill's new text |
-| the Review tab and Epic Docs | spell-epic's [`vscode/`](https://github.com/spell-app/spell-epic/tree/main/vscode) |
+| epic pages, review, windows, hooks, skills | [spell-epic](https://github.com/spell-app/spell/blob/main/epic/README.md), with its own checks;  `/reload-plugins` for a skill's new text |
+| the Review tab and Epic Docs | spell-epic's [`vscode/`](https://github.com/spell-app/spell/tree/main/epic/vscode) |
 | the house style | the kit's [`agents/wwod/`](agents/wwod/), then `spell wwod check` |
 
 ## When something's wrong, read the papercuts first
@@ -542,7 +542,7 @@ spell-app
 ## See also
 
 - [README-toolchain.md](README-toolchain.md):  what the checks run on, and how a type check reads another repo
-- [spell-epic's README](https://github.com/spell-app/spell-epic/blob/main/README.md):  epic pages, the review loop, and the skills behind `/epic` and
+- [spell-epic's README](https://github.com/spell-app/spell/blob/main/epic/README.md):  epic pages, the review loop, and the skills behind `/epic` and
   `/isolate`
 - [README-vscode.md](README-vscode.md):  the extensions, and how windows and worktrees are laid out
 - [README-agents.md](README-agents.md):  how a coding agent finds the rules, and the three logs

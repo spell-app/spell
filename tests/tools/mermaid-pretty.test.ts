@@ -55,7 +55,7 @@ describe("kindFor()", () => {
     expect(kindFor("lang", "spell-parser: the language")).toBe("repo")
     expect(kindFor("x", "the kit")).toBe("repo")
     expect(kindFor("x", "the kit's folders")).toBeUndefined()
-    expect(kindFor("x", "spell-parser/core")).toBeUndefined()
+    expect(kindFor("x", "spell/parser/core")).toBeUndefined()
     expect(kindFor("x", "🌱 sharing")).toBe("coming")
     expect(kindFor("x", "2 · tokens")).toBe("step")
     expect(kindFor("x", "docs/:  the pages")).toBe("folder")

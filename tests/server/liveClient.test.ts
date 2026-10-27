@@ -89,10 +89,10 @@ describe("liveAction():  what a changed file means to a page", () => {
 
   // epic `epic-engine` P40:  a component set's page is reported where it's served, not as its file in the checkout
   test("the file at its own address:  the page too, a folder's as its `index.html`", () => {
-    const setPage = { file: "/spell-ui/docs/ui-button.html", scripts: [], address: "/components/ui/ui-button.html" }
+    const setPage = { file: "/ui/docs/ui-button.html", scripts: [], address: "/components/ui/ui-button.html" }
     expect(SRV.liveAction("/components/ui/ui-button.html", setPage)).toBe("page")
     expect(SRV.liveAction("/components/ui/ui-icon.html", setPage)).toBe("file")
-    const home = { file: "/spell-ui/docs/index.html", scripts: [], address: "/components/ui/" }
+    const home = { file: "/ui/docs/index.html", scripts: [], address: "/components/ui/" }
     expect(SRV.liveAction("/components/ui/index.html", home)).toBe("page")
   })
 
@@ -154,7 +154,7 @@ describe("servedPath()", () => {
 describe("worktreeHref()", () => {
   test("a worktree's page:  a root path under its address;  the server's own routes and other URLs as they are", () => {
     const page = "/worktrees/seo/epics/seo/seo.plan.html"
-    expect(SRV.worktreeHref("/spell-ui/src/x.ts#L3", page)).toBe("/worktrees/seo/spell-ui/src/x.ts#L3")
+    expect(SRV.worktreeHref("/ui/src/x.ts#L3", page)).toBe("/worktrees/seo/ui/src/x.ts#L3")
     expect(SRV.worktreeHref("/guides/server.html", page)).toBe("/worktrees/seo/guides/server.html")
     for (const href of [
       "/api/server",
@@ -169,7 +169,7 @@ describe("worktreeHref()", () => {
   })
 
   test("main's own page:  every link as it is", () => {
-    expect(SRV.worktreeHref("/spell-ui/src/x.ts", "/epics/seo/seo.plan.html")).toBe("/spell-ui/src/x.ts")
+    expect(SRV.worktreeHref("/ui/src/x.ts", "/epics/seo/seo.plan.html")).toBe("/ui/src/x.ts")
   })
 })
 

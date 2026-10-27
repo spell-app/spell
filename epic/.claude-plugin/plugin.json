@@ -1,0 +1,12 @@
+{
+  "name": "spell-epic",
+  "displayName": "Spell Epic",
+  "version": "0.8.0",
+  "description": "Epics for Claude Code:  epic pages, worktrees and windows, the review loop and the epic command, for any repo with an .epic/config.json5",
+  "author": {
+    "name": "Owen Williams"
+  },
+  "license": "MIT",
+  "keywords": ["epics", "planning", "worktrees", "review"],
+  "agents": ["./designer/designer-agent.md", "./coherence/coherence-agent.md"]
+}

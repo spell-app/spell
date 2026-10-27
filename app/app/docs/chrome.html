@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>Chrome</title>
+    <meta
+      name="description"
+      content='The menus and toolbars around the panes:  bars, sections, springs, "..." menus.'
+    />
+    <!-- Before first paint:  the viewer's colour scheme (Spell UI's `ThemePreference.HEAD_SCRIPT`).  The theme itself is restored by site.js. -->
+    <script>
+      try {
+        var l = localStorage,
+          d = document.documentElement,
+          s = l.getItem("spell-site:scheme") || l.getItem("spell-site:theme") || l.getItem("spell-ui-site:scheme")
+        if (s === "light" || s === "dark") {
+          d.classList.add("ui-" + s)
+          d.style.colorScheme = s
+        }
+      } catch (e) {}
+    </script>
+    <link rel="stylesheet" href="_assets/site.css" />
+    <script type="module" src="_assets/site.js"></script>
+    <!-- the comments (bullhorns, threads, Send):  the docs runtime's, alone, beside the site's Spell UI -->
+    <script defer src="/_epic/assets/spell-comments.js"></script>
+  </head>
+  <body class="ui-typography">
+    <main id="main" class="site-main" data-toc-header="Chrome">
+      <ui-segment appearance="vertical" class="site-masthead">
+        <ui-container>
+          <ui-menu icon class="site-page-links" aria-label="About this page">
+            <ui-item
+              link="../../src/app/solid/chrome.tsx"
+              icon="code"
+              aria-label="Its code, chrome.tsx"
+              title="Its code, chrome.tsx"
+            ></ui-item>
+          </ui-menu>
+          <ui-header level="1" class="site-title">
+            Chrome
+            <ui-header>The menus and toolbars around the panes: bars, sections, springs, "..." menus.</ui-header>
+          </ui-header>
+        </ui-container>
+      </ui-segment>
+
+      <ui-container class="site-body">
+        <article class="site-article">
+          <p class="lede">
+            The pieces every toolbar in the editor is built from: the bar across the top of each page, the header on top
+            of each pane, the left, middle and right sections inside them, and the "..." menus. The theme picked dresses
+            them all, as it does the rest of the editor.
+          </p>
+          <ui-list class="spell-meta">
+            <ui-item icon="user">Written for: anyone adding to, or changing, the spell app's toolbars</ui-item>
+            <ui-item icon="image">A picture, not live: the editor page's top bar, an AppMenu</ui-item>
+          </ui-list>
+
+          <ui-section id="1-what-it-looks-like" label="1. What it looks like" sticky collapsible dividing open="false">
+            <ui-icon slot="icon" name="image"></ui-icon>
+            <p>
+              The editor page's AppMenu, in three sections: Spell's hat and the project (its actions at the foot of its
+              menu) on the left; Run | Edit | Debug in the middle; on the right, the theme menu, Home and your avatar,
+              their glyphs 12px apart, the icons dark grey.
+            </p>
+            <ui-image
+              src="_images/chrome.png"
+              alt="The editor's top bar, in Fruity: Spell's hat and name and the Solitaire project on the left; Run, Edit and Debug in the middle; the theme menu, Home and an avatar on the right"
+              appearance="bordered rounded"
+            ></ui-image>
+            <p class="meta">
+              A picture, taken by <code>yarn site:pictures</code> in
+              <a href="../../" target="src-spell-app"><code>spell-app</code></a
+              >.
+            </p>
+            <p>
+              Each pane's own toolbar is a PanelMenu, the pane's header: the input editor's, on
+              <a href="Actions.html" target="src-packages-app-docs-actions-html">Actions</a>; the App pane's, on
+              <a href="AppRoot.html" target="src-packages-app-docs-approot-html">AppRoot</a>.
+            </p>
+          </ui-section>
+
+          <ui-section id="2-using-it" label="2. Using it" sticky collapsible dividing open="false">
+            <ui-icon slot="icon" name="code"></ui-icon>
+            <p>The editor page's top bar, above: an AppMenu of three Submenus:</p>
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>SpellEditor.tsx · the editor page's top bar · 14 lines</ui-title>
+              <ui-content>
+                <ui-code language="typescript"
+                  ><script type="text/plain">
+                    <AppMenu>
+                      <Submenu left spring mark>
+                        <ProjectDropdown useRunner={props.mode === "run"} showActions />
+                        <Actions.resetApp />
+                      </Submenu>
+                      <Submenu center spring>
+                        <ModeButtons current={props.mode} />
+                      </Submenu>
+                      <Submenu right spring>
+                        <ThemeMenu />
+                        <Actions.showProjectChooser iconOnly />
+                        <Actions.you />
+                      </Submenu>
+                    </AppMenu>
+                  </script></ui-code
+                >
+              </ui-content>
+            </ui-accordion>
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>TreeViewer.tsx · a pane's toolbar · 5 lines</ui-title>
+              <ui-content>
+                <ui-code language="typescript"
+                  ><script type="text/plain">
+                    <PanelMenu>
+                      <Submenu left spring>
+                        <MenuHeader>Spell Tree</MenuHeader>
+                      </Submenu>
+                    </PanelMenu>
+                  </script></ui-code
+                >
+              </ui-content>
+            </ui-accordion>
+            <ul>
+              <li>
+                The bars: <code>&lt;AppMenu&gt;</code>, across the top of a page; <code>&lt;PanelMenu&gt;</code>, on top
+                of a pane: plain menus, which the theme shapes (<code title="app/src/app/solid/EditorTheme.css"
+                  >EditorTheme.css</code
+                >). Each is a <code>&lt;ui-menu&gt;</code> holding <code>&lt;ui-item&gt;</code>s.
+              </li>
+              <li>
+                <code>&lt;Submenu&gt;</code>: a left, middle or right section, each at least a third of the bar, so the
+                three line up. With <code>spring</code>, a <code>&lt;Spring&gt;</code> pushes it away from its
+                neighbours.
+              </li>
+              <li><code>&lt;Spring&gt;</code>: an invisible item that takes up the room left over.</li>
+              <li><code>&lt;MenuHeader&gt;</code>: a pane's name on its bar, "App" or "Spell Tree".</li>
+              <li>
+                <code>&lt;MoreMenu&gt;</code>: a "..." dropdown of
+                <a href="Actions.html" target="src-packages-app-docs-actions-html">Actions</a>. Choosing one clicks it,
+                so an action works the same in a menu or on a bar.
+                <ul>
+                  <li>Same-titled items need their own <code>value</code>s.</li>
+                  <li><code>stub</code>: a dimmed "..." that does nothing yet.</li>
+                </ul>
+              </li>
+              <li>
+                The project's actions are at the foot of its dropdown (<code>showActions</code>): Rename, Duplicate,
+                Delete, then New. The code's toolbar has a MoreMenu of its own: the file's actions, then "Show line
+                numbers".
+              </li>
+              <li>
+                Each piece's host takes no room of its own (<code>display: contents</code>): style the boxes inside
+                through their parts, never the host.
+              </li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="3-props" label="3. Props, and where it's drawn" sticky collapsible dividing open="false">
+            <ui-icon slot="icon" name="list check"></ui-icon>
+            <ui-docs-api family="chrome"></ui-docs-api>
+            <p class="meta">
+              From its code, by <code>yarn site:data</code> in
+              <a href="../../" target="src-spell-app"><code>spell-app</code></a
+              >.
+            </p>
+          </ui-section>
+
+          <ui-section id="4-its-code" label="4. Its code" sticky collapsible dividing open="false">
+            <ui-icon slot="icon" name="folder open"></ui-icon>
+            <ul>
+              <li>
+                <a href="../../src/app/solid/chrome.tsx" target="src-packages-app-src-solid-chrome-tsx"
+                  ><code title="src/app/solid/chrome.tsx">chrome.tsx</code></a
+                >: every piece above, and the icons the app's menus use
+              </li>
+              <li>
+                <a href="../../src/app/solid/chrome.css" target="src-packages-app-src-solid-chrome-css"
+                  ><code title="src/app/solid/chrome.css">chrome.css</code></a
+                >: their look
+              </li>
+              <li>
+                <a
+                  href="../../tests/app/solid/sharedUI.browser.test.tsx"
+                  target="src-tests-app-src-solid-sharedui-browser-test-tsx"
+                  ><code title="tests/app/solid/sharedUI.browser.test.tsx">sharedUI.browser.test.tsx</code></a
+                >: their tests, with the Actions'
+              </li>
+              <li>
+                In the app's Solid components, <code>app/app/solid</code>:
+                <a href="../../src/app/solid/" target="src-packages-app-src-solid"
+                  ><code title="src/app/solid/">src/solid/</code></a
+                >
+              </li>
+            </ul>
+          </ui-section>
+
+          <footer class="site-page-footer">
+            <ui-divider></ui-divider>
+            <p class="meta">Last checked 2026-10-12 against branch <code>epic-workflow</code>.</p>
+          </footer>
+        </article>
+      </ui-container>
+    </main>
+  </body>
+</html>

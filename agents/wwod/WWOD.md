@@ -77,7 +77,7 @@ Read the spoke(s) for what you're touching BEFORE writing code or text:
 ## 2. General style
 
 - **DRY:  extract logic duplicated more than ~3 lines** into a shared utility:
-  - Before writing one, check `spell/util`, the package's own util folder (`spell-ui/util` ...) and lodash
+  - Before writing one, check `spell/util`, the package's own util folder (`spell/ui/util` ...) and lodash
     (re-exported by `spell/util`), e.g. lodash for dotted paths, `string.ts` for case conversion.
   - Before writing a MECHANISM (a parser, a watcher, a fold, a poller, a command line), check the catalog of the ones
     Spell has, `agents/coherence/catalog.md`, and ask the code map what already does it:  `spell map uses <name>`.
@@ -195,46 +195,46 @@ Read the spoke(s) for what you're touching BEFORE writing code or text:
 
 ## 4. Imports
 
-Examples use spell-parser's `parser` and its namespace (`spell-parser/parser`, `P`);  each package's `AGENTS.md` names its
+Examples use spell-parser's `parser` and its namespace (`spell/parser/parser`, `P`);  each package's `AGENTS.md` names its
 own.
 
 - **ONE name per file:  the package's name plus its path under `src/`** (epic `repo-split` P14, Q47):
   - Every repo keeps its code under ONE `src/`, and every file has ONE name, the same in every repo:
-    `spell/util/string` is `src/util/string.ts` of `spell`;  `spell-parser/parser` is the barrel
-    `src/parser/index.ts`;  `spell-ui/components/ui-button/UIButton`.
+    `spell/util/string` is `src/util/string.ts` of `spell`;  `spell/parser/parser` is the barrel
+    `src/parser/index.ts`;  `spell/ui/components/ui-button/UIButton`.
   - Inside its own repo too:  NO `$/` alias, NO `#` subpath import, NO `../`.
-  - No extension, as a bundler resolves it;  a query stays (`spell-ui/components/ui-parts/UIParts.css?inline`).
+  - No extension, as a bundler resolves it;  a query stays (`spell/ui/components/ui-parts/UIParts.css?inline`).
   - The names come from the package's `exports`:  one wildcard entry (the kit's `AGENTS.md`, "Imports across repos").
     - Plain `node`, which adds no extension, writes `.ts` (`spell/util/node/json5.ts`), or uses an entry of its
       own the package lists.
-  - Spell UI's published short names (`spell-ui/ui-code`) are for outside the repos only.
-  - A string that only NAMES a module (a `packModules` key) is that same name:  `spell-ui/core` (P14, Q45).
+  - Spell UI's published short names (`spell/ui/ui-code`) are for outside the repos only.
+  - A string that only NAMES a module (a `packModules` key) is that same name:  `spell/ui/core` (P14, Q45).
   - Lint fails a `../` import into any package's `src/` (`spell/no-parent-import`, the toolchain's
     `lint.imports.ts`);  its message names the import to write.
 - **The barrel, from another sub-system:**
-  - From ANOTHER sub-system (a folder of `src/` with its own namespace), import its BARREL only (`spell-parser/parser`,
-    never `spell-parser/parser/rules/Rule`), except the leaves its `AGENTS.md` lists for that (opt-in side-effect
+  - From ANOTHER sub-system (a folder of `src/` with its own namespace), import its BARREL only (`spell/parser/parser`,
+    never `spell/parser/parser/rules/Rule`), except the leaves its `AGENTS.md` lists for that (opt-in side-effect
     imports, test helpers, node-only files ...).
     - Everything in `src/` HAS a name, but that's not a license:  a leaf named from outside is a public shape.
   - Other exceptions are in the package's own "Imports".
   - EXCEPTION:  when subclassing, import the extended class directly from its file, to avoid circular imports --
     SEE:  WWOD §4 › "Circular imports".
   - Something outside `src/` that code must import (a `vite.config.ts`):  an explicit entry in its package's
-    `exports` (`spell-ui/vite.config.ts`), never a path.
+    `exports` (`spell/ui/vite.config.ts`), never a path.
 - **Same-folder peers only:**
   - OK to import from direct peers:  `import { Rule } from "./Rule"`, but not subdirectories -- use
-    `spell-parser/parser/...` instead.
+    `spell/parser/parser/...` instead.
   - Need to reach a parent folder?  That's a package-name import.
 - **ONE namespace per sub-system:**
   - Prefer ONE namespace import per sub-system and qualify at use site:
-    `import { P } from "spell-parser/parser"` => `P.Match`, `new P.Symbol(...)`, `P.ASTExpression`.
+    `import { P } from "spell/parser/parser"` => `P.Match`, `new P.Symbol(...)`, `P.ASTExpression`.
     - Applies INSIDE the sub-system as well.
     - Self-import uses full path too, even from same folder as the barrel:
-      `import { P } from "spell-parser/parser"`, NEVER `import { P } from "."`.
+      `import { P } from "spell/parser/parser"`, NEVER `import { P } from "."`.
       Only the barrel itself says `"."`:  `export * as P from "."`.
     - NEVER reach into another sub-system's leaf file for something its barrel exports.
     - OK to refer to file's own class unqualified.
-    - Tests may mix:  `import { P, Match, Parser } from "spell-parser/parser"`.
+    - Tests may mix:  `import { P, Match, Parser } from "spell/parser/parser"`.
   - Why:  one name per type everywhere (`P.AnyMatch`), and `import type { P }` erases completely from output,
     so a `.types.ts` file stays value-free.
   - NOT:  a second namespace per feature folder -- SEE:  WWOD §8 › "ONE self-namespace per package".
@@ -253,7 +253,7 @@ own.
 
       ```ts
       // spell-parser's src/parser/scope/TypeScope.ts
-      import { P } from "spell-parser/parser"
+      import { P } from "spell/parser/parser"
       // Import directly to avoid circular import
       import { BlockScope } from "./BlockScope"
 
@@ -271,15 +271,15 @@ own.
   - node_modules
   - (blank line)
   - `spell/util` and other general utilities, general-to-specific
-  - other sub-system barrels, this repo's and other repos' (`spell-ui/...`, `spell-parser/...`), lowest first
+  - other sub-system barrels, this repo's and other repos' (`spell/ui/...`, `spell/parser/...`), lowest first
   - own barrel
   - direct peer files, base classes first
   - (blank line)
-  - side-effect imports (`import "spell-parser/parser/rulex"`)
+  - side-effect imports (`import "spell/parser/parser/rulex"`)
   - css files (`./foo.css` if in same folder, else `<package>/path/to/foo.css`)
   - Frameworks (`solid-js` ...) are node_modules:  no group of their own.
 - **One import statement per module:**
-  - Inline type imports:  `import { P, type AnyMatch } from "spell-parser/parser"`.
+  - Inline type imports:  `import { P, type AnyMatch } from "spell/parser/parser"`.
 
 ## 5. Errors
 
@@ -421,7 +421,7 @@ Their long before / afters are in `agents/wwod/writing.md`.
     ```text
     BEFORE
     Built: buildTsx(), packages/spell/src/node/buildTsx.ts:40.  Checked: tsc with jsx preserve,
-    jsxImportSource solid-js, types ["spell-app/app/jsx"], paths from tsconfig.base.json, experimentalDecorators off.
+    jsxImportSource solid-js, types ["app/app/jsx"], paths from tsconfig.base.json, experimentalDecorators off.
 
     AFTER
     Built: buildTsx()      <- its path is the tooltip
@@ -515,7 +515,7 @@ Their long before / afters are in `agents/wwod/writing.md`.
   - The description:  one line of what it is, then bullets of its responsibilities.
 - **A module or class docstring states its POSITION IN THE IMPORT GRAPH**, and what it must never import or know
   about:
-  - spell-app's `src/app/runner/main.tsx`:  "NEVER imports `spell-parser/core`:  it'd be bundled here, a second copy".
+  - spell-app's `src/app/runner/main.tsx`:  "NEVER imports `spell/parser/core`:  it'd be bundled here, a second copy".
   - spell-app's `src/app/solid/modals/dialogs.ts`:  "`editor` reaches these through a DYNAMIC `import()`, so
     `editor.ts` stays free of Solid and `spell-ui`".
   - What it deliberately does NOT know about, and why that matters -- often what makes it testable, e.g.
@@ -565,10 +565,10 @@ Their long before / afters are in `agents/wwod/writing.md`.
     `readme` Q5).
 - **User-facing strings stay inline**, where they're used -- EXCEPT in code that speaks more than one language:
   - Spell UI:  its vocabularies (`UIButton.en.ts`) and dictionaries (`UIButton.es.ts`)
-  - the editor app (`spell-app/app`):  every text it shows people is a key in `AppTexts.en.ts`,
+  - the editor app (`spell/app/app`):  every text it shows people is a key in `AppTexts.en.ts`,
     read with `appTexts.text(key, params)`;  each other language is a LAZY `AppTexts.<lang>.ts` beside it,
     with every key (its type says so)
-  - the language server (`spell-app/lsp`):  its labels are keys in `LspTexts.en.ts`,
+  - the language server (`spell/app/lsp`):  its labels are keys in `LspTexts.en.ts`,
     read in the language of the FILE they're about (`LSP.LspTexts.of(scope)`)
   - A sentence that names something takes it as a param (`{type}`, `{theType}`), never glued from pieces:
     each language words it its own way.

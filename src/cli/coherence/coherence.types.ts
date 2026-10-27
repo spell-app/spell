@@ -12,7 +12,7 @@
  * One search the score runs:  a catalog entry's **Score:** line, or a word list entry's.
  * - `name`:  the entry's title:  `Watching files`, `open / close`
  * - `pattern`:  what a copy looks like, as git's Perl regex (`git grep -P`), one line at a time
- * - `within`:  only these paths, from the checkout's root (`spell-ui/src`);  none:  every repo's code
+ * - `within`:  only these paths, from the checkout's root (`ui/src`);  none:  every repo's code
  * - `homes`:  the mechanism's own files (`src/server/Git.ts`):  never a copy;  what its users use
  * - `not`:  paths left out:  the line's own, its entry's "Fine:" lines', the catalog's "Fine as it is"
  */

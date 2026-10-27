@@ -1,0 +1,426 @@
+/*
+ * `<epic-test-run>` (EpicTestRun.tsx):  a test run -- its head, the progress bar, then ONE card:  a test's, or the
+ * summary.
+ * - Side bar first:  390px wide is the run's home (the Review tab), 1200px the browser's;  the card is one column,
+ *   in the page's column (`--epic-inset`), its answers two by two until the card is wide enough for four.
+ * - The four answers' colours (plan-doc.md, "Colours"):  Passed green (done), Failed red (needs your words), Skip grey
+ *   (no longer relevant), Not now yellow (still open, its words DARK).
+ * - THE FILL (Q20), as the review buttons':  a grey outline at rest (the icon in its colour, to find it), dashed in
+ *   its colour once chosen, outlined in it once sent.
+ * - The fields' copies keep the page's look for prose:  paragraphs, lists, code, links.
+ * - Units:  px and em, never rem (WWOD §18).
+ * - A MODAL's shape (Owen, 2026-10-22:  "the test pages feel like a modal, with the buttons on the bottom whether the
+ *   page needs to scroll or not";  then "the buttons should not be part of the test card but rather pinned to the
+ *   window with no margin around ... the Testing 2 of 6 and done testing + bar underneath should be full width and
+ *   sticky"):
+ *   - the run fills the window below the page's sticky header
+ *   - its head (Testing, where, Done testing, the progress bar):  a full-width band, sticky under the page's header
+ *   - Back and Next:  a full-width band of their own, pinned to the window's bottom, nothing under it
+ *   - the card between them, scrolling under both
+ *   - both bands out to the run's edges (`--epic-inset` back out), their contents in the column
+ */
+
+@layer ui.components.epic-test-run;
+
+@layer ui.components.epic-test-run {
+  :host {
+    --_run-ink: var(--epic-ink, var(--ui-text-color, CanvasText));
+    --_run-muted: var(--epic-muted, var(--ui-text-muted, GrayText));
+    --_run-rule: var(--epic-rule, var(--ui-border-color, GrayText));
+    --_run-card: var(--epic-bg, var(--ui-background, Canvas));
+    --_run-band: var(--epic-band-section, transparent);
+    --_run-code: var(--epic-code-bg, var(--ui-code-background, transparent));
+    --_run-mono: var(--epic-mono, var(--ui-font-family-mono, ui-monospace, monospace));
+    --_run-green: var(--ui-green, #00853a);
+    --_run-red: var(--epic-state-attention, var(--ui-red, #db2828));
+    --_run-grey: var(--ui-grey, light-dark(#767676, #a0a0a0));
+    --_run-yellow: var(--ui-yellow, #fbbd08);
+    --_run-yellow-ink: var(--ui-yellow-on, #3d2b00);
+    --_run-blue: var(--ui-blue, #1a67e0);
+    --_run-ivory: var(--ui-brown-background, light-dark(#f7efe2, #2e261c));
+    --_run-ivory-ink: var(--ui-brown-text, light-dark(#534323, #eaddc4));
+    display: block;
+    box-sizing: border-box;
+    /* the page's column, as its blocks sit:  `--epic-inset` in from the bands' edges */
+    padding: 0 var(--epic-inset, 16px);
+    color: var(--_run-ink);
+    font-size: 16px;
+    line-height: 1.5;
+  }
+
+  /* the window below the page's sticky header (the site's header, then the epic's:  `--epic-head-h`, measured) */
+  [part~="base"] {
+    display: flex;
+    flex-direction: column;
+    min-height: calc(100dvh - var(--spell-site-header-height, 0px) - var(--epic-head-h, 0px));
+  }
+
+  /* ## The head's band:  sticky under the page's header, full width */
+  .top {
+    position: sticky;
+    top: calc(var(--spell-site-header-height, 0px) + var(--epic-head-h, 0px));
+    z-index: 2;
+    margin-inline: calc(-1 * var(--epic-inset, 16px));
+    padding: 0 var(--epic-inset, 16px) 10px;
+    border-block-end: 1px solid color-mix(in oklab, var(--_run-rule) 60%, transparent);
+    background: var(--epic-bg, var(--ui-background, Canvas));
+  }
+
+  /* ## The head:  "Testing", "4 of 9", Done testing;  the bar under it */
+  .head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 12px;
+    padding-block: 12px 6px;
+  }
+  .head .title {
+    font: 700 13px/1.2 var(--_run-mono);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--_run-muted);
+  }
+  .head .where {
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+  .head .leave {
+    margin-inline-start: auto;
+  }
+  .bar {
+    display: block;
+  }
+  .bar::part(progress) {
+    margin: 0;
+  }
+
+  /* ## The card */
+  .card {
+    container: test-card / inline-size;
+    display: block;
+    box-sizing: border-box;
+    min-width: 0;
+    margin: 14px 0;
+    padding: 14px 16px 12px;
+    border: 1px solid var(--_run-rule);
+    border-radius: 12px;
+    background: var(--_run-card);
+  }
+  .card.empty {
+    color: var(--_run-muted);
+  }
+  .card-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 6px 10px;
+    margin-block-end: 10px;
+  }
+  .card-head .id {
+    flex: none;
+    font-family: var(--_run-mono);
+  }
+  .test-title {
+    flex: 1 1 14em;
+    min-width: 0;
+    margin: 0;
+    font-size: 1.25em;
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+  }
+  .card-head .before {
+    flex: none;
+  }
+
+  /* ## The fields:  Step, Should, Example, If not */
+  .field {
+    margin-block: 0 12px;
+    padding-block-start: 10px;
+    border-block-start: 1px solid color-mix(in oklab, var(--_run-rule) 60%, transparent);
+  }
+  .field h3 {
+    margin: 0 0 4px;
+    font: 700 12px/1.2 var(--_run-mono);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--_run-muted);
+  }
+  .field.step .prose {
+    font-size: 1.05em;
+  }
+  .prose {
+    overflow-wrap: anywhere;
+  }
+  .prose > :first-child,
+  .prose > :first-child > :first-child {
+    margin-block-start: 0;
+  }
+  .prose > :last-child {
+    margin-block-end: 0;
+  }
+  .prose :is(p, ul, ol) {
+    margin-block: 0 6px;
+  }
+  .prose :is(ul, ol) {
+    padding-inline-start: 1.4em;
+  }
+  .prose code {
+    padding: 0 3px;
+    border-radius: 4px;
+    background: var(--_run-code);
+    font: 0.9em var(--_run-mono);
+  }
+  .prose a {
+    color: var(--_run-blue);
+  }
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-block-start: 8px;
+  }
+
+  /* screenshots:  a button each, the image filling it;  click to zoom */
+  .shot {
+    display: inline-block;
+    max-width: 100%;
+    margin: 2px 6px 6px 0;
+    --ui-button-padding: 0;
+  }
+  .shot::part(button) {
+    padding: 3px;
+    border-radius: 8px;
+    max-width: 100%;
+    cursor: zoom-in;
+  }
+  .shot img {
+    display: block;
+    max-width: 100%;
+    max-height: 220px;
+    border-radius: 6px;
+  }
+  .zoom::part(modal) {
+    max-width: calc(100vw - 32px);
+  }
+  .zoomed {
+    display: block;
+    max-width: 100%;
+    max-height: 85vh;
+    margin: 0 auto;
+    border-radius: 6px;
+  }
+
+  /* ## The answers */
+  .answers {
+    margin-block: 4px 10px;
+  }
+  .not-served {
+    margin: 0 0 6px;
+    color: var(--_run-muted);
+    font-size: 14px;
+  }
+  /* one group:  two by two in the side bar, four in a row where the card is wide (`.card` is the container) */
+  .answer-group {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+  }
+  @container test-card (min-width: 520px) {
+    .answer-group {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+  .answer {
+    min-width: 0;
+    --_act: var(--_run-grey);
+    --_act-ink: var(--_act);
+  }
+  .answer::part(button) {
+    width: 100%;
+    min-height: 44px;
+    justify-content: center;
+    white-space: nowrap;
+    font-size: 15px;
+    font-weight: 600;
+  }
+  .answer::part(icon) {
+    color: var(--_act);
+  }
+  .answer[data-color="green"] {
+    --_act: var(--_run-green);
+  }
+  .answer[data-color="red"] {
+    --_act: var(--_run-red);
+  }
+  .answer[data-color="grey"] {
+    --_act: var(--_run-grey);
+  }
+  .answer[data-color="yellow"] {
+    --_act: var(--_run-yellow);
+    /* yellow takes DARK words:  a yellow ring with its words in the yellow's own ink */
+    --_act-ink: light-dark(var(--_run-yellow-ink), var(--_run-yellow));
+  }
+  .answer[data-fill="dashed"]::part(button) {
+    outline: 2px dashed var(--_act);
+    outline-offset: -3px;
+    color: var(--_act-ink);
+  }
+  .answer[data-fill="outline"]::part(button) {
+    box-shadow: inset 0 0 0 2px var(--_act);
+    color: var(--_act-ink);
+  }
+
+  /* ## The comment, on every card:  Owen's words, on his ivory, the same on all four sides (its box has no margin) */
+  .comment {
+    margin-block: 0 10px;
+    padding: 8px;
+    border: 1px solid color-mix(in oklab, var(--_run-ivory-ink) 30%, transparent);
+    border-radius: 12px;
+    background: var(--_run-ivory);
+  }
+
+  /* ## A failure:  the screenshot's area */
+  .failure {
+    display: grid;
+    gap: 8px;
+    margin-block: 0 12px;
+    padding: 8px;
+    border: 1px solid color-mix(in oklab, var(--_run-ivory-ink) 30%, transparent);
+    border-radius: 12px;
+    background: var(--_run-ivory);
+  }
+  .drop {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    min-height: 56px;
+    padding: 8px;
+    border: 1.5px dashed color-mix(in oklab, var(--_run-ivory-ink) 45%, transparent);
+    border-radius: 8px;
+    color: var(--_run-ivory-ink);
+    font-size: 14px;
+  }
+  .drop:focus-visible {
+    outline: 2px solid var(--ui-focus-color, Highlight);
+    outline-offset: 1px;
+  }
+  .drop.saving {
+    opacity: 0.8;
+  }
+  .drop .shot {
+    margin: 0;
+  }
+  .drop .shot img {
+    max-height: 120px;
+  }
+  .drop .remove {
+    align-self: flex-start;
+    margin-inline-start: auto;
+  }
+
+  /*
+   * ## Back and Next:  a band of their own at the window's bottom
+   * - pushed to the run's foot (it fills the window) and pinned there while the card runs on:  so Next is always in
+   *   the same place, a long test or not
+   * - full width, no margin round it;  the page's ground and a soft shadow above, so what scrolls under it stays
+   *   readable
+   */
+  .moves {
+    position: sticky;
+    inset-block-end: 0;
+    z-index: 2;
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    margin: auto calc(-1 * var(--epic-inset, 16px)) 0;
+    padding: 10px var(--epic-inset, 16px);
+    border-block-start: 1px solid color-mix(in oklab, var(--_run-rule) 60%, transparent);
+    background: var(--epic-bg, var(--ui-background, Canvas));
+    box-shadow: 0 -8px 12px -10px rgb(0 0 0 / 0.3);
+  }
+
+  /* ## The summary */
+  .counts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 18px;
+    margin: 0 0 10px;
+    padding: 0;
+    list-style: none;
+    font-weight: 600;
+  }
+  .counts li {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .counts li[data-zero] {
+    color: var(--_run-muted);
+    font-weight: 400;
+  }
+  .counts li[data-color="green"] ui-icon {
+    color: var(--_run-green);
+  }
+  .counts li[data-color="red"] ui-icon {
+    color: var(--_run-red);
+  }
+  .counts li[data-color="grey"] ui-icon {
+    color: var(--_run-grey);
+  }
+  .counts li[data-color="yellow"] ui-icon {
+    color: light-dark(var(--_run-yellow-ink), var(--_run-yellow));
+  }
+  .commented-title {
+    margin: 0 0 4px;
+    font: 700 12px/1.2 var(--_run-mono);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--_run-muted);
+  }
+  .commented {
+    display: grid;
+    gap: 4px;
+    margin: 0 0 12px;
+    padding: 0;
+    list-style: none;
+  }
+  .commented li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 2px 8px;
+    padding: 4px 8px;
+    border-radius: 8px;
+    background: var(--_run-ivory);
+    color: var(--_run-ivory-ink);
+  }
+  .commented .result {
+    flex: none;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .commented .said {
+    flex: 1 1 12em;
+    min-width: 0;
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+  }
+  .what {
+    margin: 0 0 12px;
+    color: var(--_run-muted);
+    font-size: 14px;
+  }
+  .ends {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-block-end: 12px;
+  }
+  .send[data-fill="dashed"]::part(button) {
+    outline: 2px dashed var(--_run-blue);
+    outline-offset: -3px;
+    box-shadow: none;
+  }
+}

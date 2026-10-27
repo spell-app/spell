@@ -1,0 +1,188 @@
+<spell-notebook "checkbox usage">
+	<header level="1">
+		Checkbox
+		<header>A checkbox allows a user to select a value from a small set of options, often binary.</>
+	</>
+	<checkbox-tab-bar showing="usage"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#using-it">Using it</>
+				<ui-item link="#forms">Forms</>
+				<ui-item link="#two-values">Two values</>
+				<ui-item link="#events">Events</>
+				<ui-item link="#vetoing-a-change">Vetoing a change</>
+				<ui-item link="#grouped-checkboxes">Grouped checkboxes</>
+				<ui-item link="#keyboard">Keyboard</>
+				<ui-item link="#accessibility">Accessibility</>
+				<ui-item link="#framework-usage">Framework usage</>
+			</>
+		</>
+	</>
+
+	<!-- USAGE:  forms, `selected` / `checked`, events, keyboard, accessibility, frameworks;  radios:  ui-radio.html. -->
+	<section label="Using it">
+		<markdown>
+			Write `<ui-checkbox>` with its label inside. No JavaScript to call: it works as soon as the element is defined,
+			like Fomantic's checkbox without its module. For an exclusive option, `<ui-radio>` (same family, sheet and tokens)
+			has its own page: [Radio](/components/ui/ui-radio.html).
+
+			- `appearance="toggle"` / `appearance="slider"` changes the look.
+			- `selected` is the chosen state, as an attribute and a property. `checked` is an alias: the `checked`
+			  attribute in markup selects the box, and `el.checked` reads and writes `el.selected`.
+			- `indeterminate` is an attribute (Fomantic needs JavaScript for it); a click clears it, as natively.
+			- The label is the slotted content, or `label` for plain text; a `padding="none"` box has none.
+		</>
+	</>
+
+	<section label="Forms">
+		<markdown>
+			A checkbox is a real form control.
+
+			- While chosen, it submits `name=value` with its form (`value` defaults to `on`, as natively); unchosen, it
+			  submits nothing, unless it has an `off-value` ("Two values", below).
+			- `form.reset()` restores the starting state, and a disabled `<fieldset>` disables it.
+			- `required` asks for it to be chosen.
+			- `disabled` leaves it out of the form; `readonly` keeps it in but cancels clicks.
+		</>
+	</>
+
+	<section label="Two values">
+		<markdown>
+			A native checkbox submits nothing while unchosen, so the server never hears "closed". `off-value` fixes
+			that: `<ui-checkbox name="panel" value="open" off-value="closed">` submits `panel=open` while chosen and
+			`panel=closed` while not -- no hidden input needed, the element submits it itself.
+
+			- `form.values` (`<ui-form>`) reads the off-value instead of `false`; several boxes of one name list what
+			  each submits.
+			- `required` still means "must be chosen": an off-value never satisfies it.
+			- Radios have no `off-value`: their group submits the chosen one.
+			- Needs JavaScript: a static server render (no script) submits nothing while unchosen, as a native box.
+			- A subclass sets both values for every element it defines, with `@E.proto static` class defaults; the
+			  attributes still win on any one element.
+		</>
+		<markdown>
+			```js
+			import { E } from "spell/ui/core"
+			import { UICheckbox } from "spell/ui/ui-checkbox"
+
+			class UIDoor extends UICheckbox {
+			  @E.proto static defaultChosenValue = "open"
+			  @E.proto static defaultUnchosenValue = "closed"
+			}
+			UIDoor.define("ui-door") // <ui-door name="panel">Open</ui-door> submits panel=open / panel=closed
+			```
+		</>
+	</>
+
+	<section label="Events">
+		<markdown>
+			`ui-changed` fires when the user chooses or unchooses, with `{ selected, value, originalEvent }`. `value` is
+			what the box stands for after the change: its `value`, or once unchosen its `off-value` when it has one.
+			Setting `selected` from code fires nothing -- Fomantic's `set checked`.
+		</>
+		<markdown>
+			```js
+			const news = document.querySelector("ui-checkbox[name=news]")
+			news.addEventListener("ui-changed", (event) => console.log(event.detail.selected, event.detail.value))
+			document.querySelector("ui-checkbox[name=terms]").checked = true // same as .selected = true;  no event
+			```
+		</>
+	</>
+
+	<section label="Vetoing a change">
+		<markdown>
+			`ui-changed` fires BEFORE the state changes; a handler that sets `selected` back vetoes the change. That covers
+			Fomantic's `beforeChecked` / `beforeUnchecked` and its `uncheckable: false` (check once, never uncheck).
+		</>
+		<markdown>
+			```js
+			const terms = document.querySelector("ui-checkbox[name=terms]")
+			terms.addEventListener("ui-changed", (event) => {
+			  if (!event.detail.selected && !confirm("Really opt out?")) terms.selected = true
+			})
+			```
+		</>
+	</>
+
+	<section label="Grouped checkboxes">
+		<markdown>
+			Fomantic's master / child example, on `ui-changed`: the master sets every child, and each child sets the master
+			to chosen, unchosen or `indeterminate`.
+		</>
+		<markdown>
+			```js
+			for (const item of document.querySelectorAll("ui-list[celled] > ui-item")) {
+			  const master = item.querySelector(":scope > ui-checkbox")
+			  const children = [...item.querySelectorAll("ui-list ui-checkbox")]
+			  master.addEventListener("ui-changed", (event) => {
+			    for (const child of children) child.selected = event.detail.selected
+			  })
+			  item.addEventListener("ui-changed", (event) => {
+			    if (event.target === master) return
+			    queueMicrotask(() => {
+			      const chosen = children.filter((child) => child.selected).length
+			      master.selected = chosen === children.length
+			      master.indeterminate = chosen > 0 && chosen < children.length
+			    })
+			  })
+			}
+			```
+		</>
+	</>
+
+	<section label="Keyboard">
+		<markdown>
+			- **Space** toggles the checkbox.
+			- **Tab** moves to the next checkbox: each is a tab stop of its own.
+			- Radios' arrow keys: the [Radio](/components/ui/ui-radio.html) page.
+		</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			- The shadow root holds a real `<input type="checkbox">` tied to a `<label>`, so clicking the label,
+			  Space, and the checked state come from the browser. `delegatesFocus` keeps the host out of the tab order and
+			  draws the focus ring on the box.
+			- Toggles and sliders are `role="switch"` (on / off); an `indeterminate` checkbox reports `aria-checked="mixed"`;
+			  `readonly` sets `aria-readonly` and cancels clicks.
+			- The accessible name is the label text. A `padding="none"` box (or an `invisible` one holding only an image) has none,
+			  so give it an `aria-label` or a `<label for>` pointing at the host.
+			- A box that fails `required` after the user has interacted gets `aria-invalid="true"`.
+			- If the element fails to render, its native fallback keeps the same markup with a plain native input:
+			  it still submits, validates `required` and fires `ui-changed`. It drops vetoing `ui-changed`,
+			  the invalid state, reset to the starting state,
+			  and naming a `padding="none"` box through `<label for>` (only `aria-label` works).
+		</>
+	</>
+
+	<section label="Framework usage">
+		<markdown>Bind `selected` as a property to control the box, and listen for `ui-changed`.</>
+		<header level="4" id="framework-react">React 19</>
+		<markdown>
+			```jsx
+			<ui-checkbox name="news" selected={on} onui-changed={(e) => setOn(e.detail.selected)}>Newsletter</ui-checkbox>
+			```
+		</>
+		<header level="4" id="framework-vue">Vue 3.5</>
+		<markdown>
+			```html
+			<!-- compilerOptions.isCustomElement = (tag) => tag.startsWith("ui-") -->
+			<ui-checkbox name="news" :selected="on" @ui-changed="(e) => (on = e.detail.selected)">Newsletter</ui-checkbox>
+			```
+		</>
+		<header level="4" id="framework-solid">Solid 2</>
+		<markdown>
+			```jsx
+			// events and rich data are plain props:  `on-<event>={...}`, `options={...}`
+			<ui-checkbox
+			  name="news"
+			  selected={on()}
+			  on-ui-changed={(e) => setOn(e.detail.selected)}
+			>
+			  Newsletter
+			</ui-checkbox>
+			```
+		</>
+	</>
+</spell-notebook>

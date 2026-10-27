@@ -3,6 +3,7 @@ import {
   Errored,
   Show,
   createEffect,
+  createMemo,
   createRenderEffect,
   getOwner,
   runWithOwner,
@@ -149,7 +150,7 @@ export abstract class UIComponent<V extends E.ComponentVocabulary = E.ComponentV
 
   /**
    * Built once per element, the first time the element is connected (`UIComponent.mount()`).
-   * - Two arguments in a row, not one object:  the server render (`spell-ui/static`) builds components the same way.
+   * - Two arguments in a row, not one object:  the server render (`spell/ui/static`) builds components the same way.
    * - It runs while Solid is drawing:  don't change state here (see the class docs).
    */
   constructor(domElement: DOMElement, definition: E.ElementDefinition) {
@@ -193,11 +194,13 @@ export abstract class UIComponent<V extends E.ComponentVocabulary = E.ComponentV
    * Set the element up and return its content, which `mount()` puts into the shadow root.
    * - Called once, by `mount()`, right after the constructor.
    * - SIDE EFFECTS:
-   *   - adopts the class's style sheets into the shadow root (if the runtime has loaded)
+   *   - adopts the class's style sheets into the shadow root (if the runtime has loaded),
+   *     and the element's own `:host` rule (`hostLayout`)
    *   - keeps the element's `:state()`s in step with its `@cssState` members, `elementSetup.cssStates`
    *     and `cssStates()`;  for a state two classes of the chain name, the subclass's member wins
    *   - starts the `@onChange` and `@whileConnected` methods, the `@aria` members' effect,
    *     and the `@watches` methods' watch
+   *   - follows `parent`, where the vocabulary declares it (`ParentLink`)
    *   - re-adopts the style sheets when `styleSheetNames` changes
    * - Not in the constructor, because a subclass's fields don't exist yet while the base constructor runs.
    * - Hook:  an override starts its own effects, then returns `super.onMount()`.
@@ -217,6 +220,8 @@ export abstract class UIComponent<V extends E.ComponentVocabulary = E.ComponentV
       }
     )
     E.Reactive.startEffects(this)
+    this.followParent()
+    this.followHostLayout()
     // the names joined into one string, so the effect can tell "same names" from "new names"
     const separator = " "
     createEffect(
@@ -357,6 +362,29 @@ export abstract class UIComponent<V extends E.ComponentVocabulary = E.ComponentV
   }
 
   /**
+   * Where the element's own `<a>` goes:  its `link` (the family's own attribute, or the shared one),
+   * unless the element is disabled (`isMarkedDisabled`).
+   * - For a family that draws its own link (`elementSetup.link` is `"its own"`, or a `link` of its own):
+   *   its `<a>`'s `href`, `linkTarget` its `target`.
+   * - `undefined` without a `link`, with an empty one (a card's bare `link` is a look), or while disabled:
+   *   the family draws no `href`, and a disabled link says `aria-disabled` itself.
+   */
+  get linkTo(): string | undefined {
+    const link = E.Reactive.attributeValue(this, LINK)
+    return typeof link === "string" && link !== "" && !this.isMarkedDisabled ? link : undefined
+  }
+
+  /**
+   * Where `linkTo` opens (`_blank`, a window's name):  its `target`, the family's own or the shared one.
+   * - `undefined` while it links nowhere.
+   */
+  get linkTarget(): string | undefined {
+    if (!this.linkTo) return undefined
+    const target = E.Reactive.attributeValue(this, TARGET)
+    return typeof target === "string" && target !== "" ? target : undefined
+  }
+
+  /**
    * The words of the shared `font` (`bold italic`), as `:state(font-<word>)`s:  every word its spec lists, on or off.
    * - Empty where the family declares its own `font`.
    */
@@ -402,9 +430,7 @@ export abstract class UIComponent<V extends E.ComponentVocabulary = E.ComponentV
   protected onSharedLinkClick(event: MouseEvent) {
     const link = this.sharedLink
     if (!link || this.elementSetup.link !== "click" || this.isDisabled || event.defaultPrevented) return
-    const path = event.composedPath()
-    const inside = path.slice(0, Math.max(0, path.indexOf(this.domElement)))
-    if (inside.some((node) => (node as Element).matches?.(OWN_CONTROLS))) return
+    if (E.OwnControls.isClicked(event, { upTo: this.domElement })) return
     this.followLink(link, this.sharedTarget)
   }
 
@@ -423,6 +449,81 @@ export abstract class UIComponent<V extends E.ComponentVocabulary = E.ComponentV
     if (!this.elementDefinition.takesShared(name)) return undefined
     const value = E.Reactive.attributeValue(this, name)
     return typeof value === "string" && value !== "" ? value : undefined
+  }
+
+  ////////////////
+  // ## Parent
+  //
+  // `parent`, where the vocabulary declares it:  an element written anywhere on the page joins the container with
+  // that id, as if nested there (`ParentLink`).  Spell UI's `<ui-tab>`, `<ui-step>` and `<ui-section>` take it.
+  ////////////////
+
+  /**
+   * While connected with a `parent`, join that container;  its cleanup stops waiting for it.
+   * - Only for a tag whose vocabulary declares `parent`:  no effect for any other.
+   * - Never on a server, where nothing connects.
+   */
+  private followParent() {
+    const { domElement, elementDefinition } = this
+    if (isServer || !elementDefinition.takesAttribute(PARENT)) return
+    const parentLink = new E.ParentLink({ domElement, attribute: elementDefinition.localAttribute(PARENT) })
+    const joining = createMemo(() =>
+      this.isConnected ? (E.Reactive.attributeValue(this, PARENT) as string | undefined) : undefined
+    )
+    createEffect(joining, (id) => {
+      return parentLink.follow(id)
+    })
+  }
+
+  ////////////////
+  // ## Its own `:host` rule
+  ////////////////
+
+  /**
+   * Hook:  the declarations of the element's own `:host` rule, worked out from its attributes
+   * (`gap: var(--ui-space-m);  flex-direction: row`);  default none.
+   * - Written into ONE sheet adopted into its shadow root, never into its `style` attribute:  that's the page's.
+   * - Tracked:  written again whenever what it reads changes.
+   * - So a layout tag says only its declarations:  Spell UI's `<ui-stack>`, `<ui-cell>`, `<ui-terms>`, `<ui-root>`.
+   * - Not on a server:  no style sheets there.
+   */
+  protected get hostLayout(): string | undefined {
+    return undefined
+  }
+
+  /**
+   * Keep the sheet of `hostLayout` current, for a class that works one out (it overrides the hook).
+   * - The sheet is made on the first declarations, and emptied when there are none.
+   * - Spell UI's `UI.styles` keeps it when it adopts the class's own sheets again (a sheet it didn't make).
+   */
+  private followHostLayout() {
+    if (isServer || !UIComponent.overrides(this, "hostLayout")) return
+    const root = this.domElement.renderRoot
+    let sheet: CSSStyleSheet | undefined
+    const declarations = createMemo(() => this.hostLayout ?? "")
+    createEffect(declarations, (text) => {
+      if (!text && !sheet) return
+      if (!sheet) {
+        sheet = new CSSStyleSheet()
+        root.adoptedStyleSheets = [...root.adoptedStyleSheets, sheet]
+      }
+      sheet.replaceSync(text ? `:host { ${text} }` : "")
+    })
+  }
+
+  /**
+   * Does `component`'s class (below `UIComponent`) define `member` itself, overriding the base's hook?
+   * - Static:  a question about the class chain, asked once per element as it mounts.
+   */
+  private static overrides(component: UIComponent, member: string): boolean {
+    for (
+      let at = Object.getPrototypeOf(component);
+      at && at !== UIComponent.prototype;
+      at = Object.getPrototypeOf(at)
+    ) {
+      if (Object.hasOwn(at, member)) return true
+    }
+    return false
   }
 
   ////////////////
@@ -1274,8 +1375,8 @@ const FONT = "font"
 const TOOLTIP = "tooltip"
 const LABEL = "label"
 
-/** What a click on is that control's, not the element's `link` (`onSharedLinkClick()`). */
-const OWN_CONTROLS = "a[href], button, input, select, textarea, label, [role=button], [role=link]"
+/** The attribute naming the container an element joins ("Parent"). */
+const PARENT = "parent"
 
 /** `UIComponent.internalState`:  what only the base class uses inside. */
 type InternalState = {

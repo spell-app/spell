@@ -1,3 +1,4 @@
+import { scrollByRow, scrollEnds } from "spell/util/dom"
 import { ColorScheme, PrefStore, type ColorSchemeName } from "spell/util/persist"
 import { escapeHTML } from "spell/util/string"
 import type { ServerConfig, ServerInfo } from "spell/server"
@@ -167,7 +168,7 @@ export class SiteHeader extends HTMLElement {
    * Absolute path of the page's source file, for VS Code;  `undefined` when unknown (a proxied page).
    * - served:  the file the server served (`SPELL_SERVER.source`), wherever it lives
    *   - e.g. a guide, from the content folder:  `.../spell-app.epics/guides/x.html`
-   *   - epic `epic-engine` I42:  `root` + `file` gave `.../spell-app/guides/x.html`, which doesn't exist
+   *   - epic `epic-engine` I42:  `root` + `file` gave `.../app/guides/x.html`, which doesn't exist
    *     since the guides moved to the content folder (epic `epic-eject` P12;  `file` is the page's path in it)
    * - a server from before `source`:  `root` + `file`, right for the checkout's own pages
    */
@@ -242,6 +243,7 @@ export class SiteHeader extends HTMLElement {
 
   /**
    * The tabs' `‹` / `›`:  each scrolls the row by most of its width;  shown while there's more that way.
+   * - Spell UI's `<ui-toolbar>`'s keys, the kit's `scrollByRow()` and `scrollEnds()`:  at once under reduced motion
    * - SIDE EFFECT:  the lit tab scrolled into the row, once drawn
    * - never `docked`:  its tabs wrap, or the page's own bar scrolls them
    */
@@ -250,8 +252,7 @@ export class SiteHeader extends HTMLElement {
     if (!nav || this.docked) return
     nav.onscroll = () => this.showScrollKeys()
     for (const key of this.shadowRoot!.querySelectorAll<HTMLButtonElement>("[data-scroll]"))
-      key.onclick = () =>
-        nav.scrollBy({ left: Number(key.dataset.scroll) * nav.clientWidth * SCROLL_SHARE, behavior: "smooth" })
+      key.onclick = () => scrollByRow(nav, Number(key.dataset.scroll) as -1 | 1)
     this.tabsResize.disconnect()
     this.tabsResize.observe(nav)
     nav.querySelector<HTMLElement>(`[aria-current="page"]`)?.scrollIntoView({ block: "nearest", inline: "nearest" })
@@ -263,8 +264,8 @@ export class SiteHeader extends HTMLElement {
     const nav = this.shadowRoot?.querySelector<HTMLElement>("nav")
     const tabs = nav?.parentElement
     if (!nav || !tabs) return
-    const more = [nav.scrollLeft > 1 && "start", nav.scrollLeft + nav.clientWidth < nav.scrollWidth - 1 && "end"]
-    tabs.dataset.more = more.filter(Boolean).join(" ")
+    const { start, end } = scrollEnds(nav)
+    tabs.dataset.more = [start && "start", end && "end"].filter(Boolean).join(" ")
   }
 
   /**
@@ -323,9 +324,6 @@ const THEME_SLOT = "theme"
 
 /** This tab's preferences:  edit mode, `spell-site:edit`. */
 const tabPrefs = new PrefStore(SITE_PREFS, { place: "session" })
-
-/** How much of the tabs' row one `‹` / `›` click scrolls:  most of it, so the tab cut at its end shows whole. */
-const SCROLL_SHARE = 0.8
 
 /** The `‹` / `›` buttons' tooltips. */
 const SCROLL_BACK = "Scroll the tabs back"

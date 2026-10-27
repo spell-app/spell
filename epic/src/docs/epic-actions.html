@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>epic-actions</title>
+    <meta
+      name="description"
+      content="The &lt;epic-actions&gt; element: a block&#39;s actions row on an epic page, its buttons over the block&#39;s top right corner."
+    />
+    <!-- Before first paint:  the viewer's colour scheme (Spell UI's `ThemePreference.HEAD_SCRIPT`).  The theme itself is restored by site.js. -->
+    <script>
+      try {
+        var l = localStorage,
+          d = document.documentElement,
+          s = l.getItem("spell-site:scheme") || l.getItem("spell-site:theme") || l.getItem("spell-ui-site:scheme")
+        if (s === "light" || s === "dark") {
+          d.classList.add("ui-" + s)
+          d.style.colorScheme = s
+        }
+      } catch (e) {}
+    </script>
+    <link rel="stylesheet" href="_assets/site.css" />
+    <script type="module" src="_assets/site.js"></script>
+    <!-- the comments (bullhorns, threads, Send):  the docs runtime's, alone, beside the site's Spell UI -->
+    <script defer src="/_epic/assets/spell-comments.js"></script>
+  </head>
+  <body class="ui-typography">
+    <main id="main" class="site-main" data-toc-header="&lt;epic-actions&gt;">
+      <ui-segment appearance="vertical" class="site-masthead">
+        <ui-container>
+          <ui-header level="1" class="site-title">
+            &lt;epic-actions&gt;
+            <ui-header>The &lt;epic-actions&gt; element: a block&#39;s actions row on an epic page, its buttons over the block&#39;s top right corner.</ui-header>
+          </ui-header>
+        </ui-container>
+      </ui-segment>
+
+      <ui-container class="site-body">
+        <article class="site-article">
+          <p class="lede">
+            <code>&lt;epic-actions&gt;</code> is a block's actions row on an epic page: the one row of a paragraph's, a
+            list's or a table's own controls, a line of no height just before the block, its buttons over the block's top
+            right corner. The comments' bullhorn comes first, then a table's expand button.
+          </p>
+          <p class="meta">
+            For anyone adding a control to a block, or changing where the bullhorns sit.<br />
+            Status: <ui-label size="mini" color="green">built</ui-label> (epic <code>epic-engine</code> P45), its own
+            <a href="/epic/src/components/epic-actions/" target="src-spell-epic-src-components-epic-actions"><code title="epic/src/components/epic-actions/">epic-actions</code></a> family.<br />
+            Its vocabulary: <a href="/epic/src/components/epic-actions/EpicActions.en.ts" target="src-spell-epic-src-components-epic-actions-epicactions-en-ts"><code title="epic/src/components/epic-actions/EpicActions.en.ts">EpicActions.en.ts</code></a><br />
+            Its component: <a href="/epic/src/components/epic-actions/EpicActions.tsx" target="src-spell-epic-src-components-epic-actions-epicactions-tsx"><code title="epic/src/components/epic-actions/EpicActions.tsx">EpicActions.tsx</code></a>.
+          </p>
+
+          <ui-section id="1-example" label="1. Example" sticky collapsible dividing open="false">
+            <ui-icon slot="icon" name="eye"></ui-icon>
+            <p>A row with two buttons, before a paragraph, as the docs runtime makes it.</p>
+            <div style="position: relative; padding: 8px; border: 1px dashed var(--ui-border-color)">
+              <epic-actions style="--spell-block-gap: 0px">
+                <ui-button appearance="basic circular" size="mini" icon="bullhorn" aria-label="Comment"></ui-button>
+                <ui-button appearance="basic" size="mini" icon="arrows left right" aria-label="Expand"></ui-button>
+              </epic-actions>
+              <p style="margin: 0">A paragraph of an epic page: its controls sit over its top right corner, on the page's ground, and never push its text aside.</p>
+            </div>
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>The example above · 5 lines</ui-title>
+              <ui-content>
+                <ui-code language="html"
+                  ><script type="text/plain">
+                    <epic-actions data-spell-added>
+                      <ui-button appearance="basic circular" size="mini" icon="bullhorn" aria-label="Comment"></ui-button>
+                      <ui-button appearance="basic" size="mini" icon="arrows left right" aria-label="Expand"></ui-button>
+                    </epic-actions>
+                    <p>A paragraph of an epic page ...</p>
+                  </script></ui-code
+                >
+              </ui-content>
+            </ui-accordion>
+          </ui-section>
+
+          <ui-section id="2-markup" label="2. Markup" sticky collapsible dividing open="false">
+            <ui-icon slot="icon" name="code"></ui-icon>
+            <ul>
+              <li>
+                Nobody writes it in a page: the docs runtime makes it the first time a block gets a control
+                (<a href="/epic/src/tools/_assets/spell-doc-helpers.js" target="src-spell-epic-src-tools-assets-spell-doc-helpers-js"><code title="epic/src/tools/_assets/spell-doc-helpers.js">addBlockAction()</code></a>),
+                and takes it away with its last.
+              </li>
+              <li>
+                On every page: every page that draws one loads the epics pack (the docs runtime, the component sets'
+                layouts).
+              </li>
+              <li>
+                <code>data-spell-added</code>: a live update steps around it.
+              </li>
+              <li>
+                Where the block's top edge lies is the runtime's to measure (the block's own top margin may lie between
+                them): it hands it in as <code>--spell-block-gap</code>, and for a table <code>--spell-block-head</code>
+                and <code>head-row</code>.
+              </li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="3-attributes" label="3. Attributes" sticky collapsible dividing open="false">
+            <ui-icon slot="icon" name="table columns"></ui-icon>
+            <ui-table celled padding="compact" appearance="striped" unstackable>
+              <table>
+                <thead>
+                  <tr><th>Name</th><th>What it is</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td><code>head-row</code></td><td>Its block is a table: the buttons centred on its header row.</td></tr>
+                  <tr><td><code>::part(base)</code></td><td>The controls' box, out of the flow, over the block's corner.</td></tr>
+                </tbody>
+              </table>
+            </ui-table>
+          </ui-section>
+
+          <ui-section id="4-how-it-looks" label="4. How it looks" sticky collapsible dividing open="false">
+            <ui-icon slot="icon" name="palette"></ui-icon>
+            <ul>
+              <li>2px inside the block's top and right edges (<code>--epic-actions-inset</code>), 2px between the buttons (<code>--epic-actions-gap</code>).</li>
+              <li>Each button round, on the page's ground (<code>--epic-actions-background</code>).</li>
+            </ul>
+          </ui-section>
+
+          <footer class="site-page-footer">
+            <ui-divider></ui-divider>
+            <p class="meta">Last checked 2026-10-25 against branch <code>epic-engine</code> (P45).</p>
+          </footer>
+        </article>
+      </ui-container>
+    </main>
+  </body>
+</html>

@@ -25,14 +25,14 @@ import { ask } from "spell/server/test/serve"
 const SERVED = {
   componentSets: {
     ui: { name: "Spell UI", dir: "packages/ui/docs", assets: "packages/ui/site/_assets" },
-    epics: { name: "Epic UI", dir: "spell-epic/src/docs", assets: "packages/ui/site/_assets" },
+    epics: { name: "Epic UI", dir: "epic/src/docs", assets: "packages/ui/site/_assets" },
     app: { name: "App UI", dir: "packages/app/docs", assets: "packages/ui/site/_assets" },
     brand: { name: "Brand", dir: "packages/brand/docs", assets: "packages/ui/site/_assets" }
   },
   engineRoutes: {
-    "/_epic/assets/": "spell-epic/src/tools/_assets",
-    "/_epic/pack/": "spell-epic/src/components/__pack",
-    "/templates/": "spell-epic/templates"
+    "/_epic/assets/": "epic/src/tools/_assets",
+    "/_epic/pack/": "epic/src/components/__pack",
+    "/templates/": "epic/templates"
   }
 }
 
@@ -119,7 +119,7 @@ describe("liveClientScript()", () => {
 describe("PageServer", () => {
   const root = mkdtempSync(join(tmpdir(), "srv-page-"))
   const page = join(root, "docs", "page.html")
-  // the epic engine:  spell-epic beside the checkout, linked in at its root as `spell-epic` (epic `epic-eject` I5)
+  // the epic engine:  spell-epic beside the checkout, linked in at its root as `epic` (epic `epic-eject` I5)
   const engine = `${root}-engine`
   let server: PageServer
   let port: number
@@ -127,7 +127,7 @@ describe("PageServer", () => {
   beforeAll(async () => {
     mkdirSync(join(root, "docs"))
     mkdirSync(join(engine, "src", "docs"), { recursive: true })
-    symlinkSync(engine, join(root, "spell-epic"))
+    symlinkSync(engine, join(root, "epic"))
     // Spell UI's set:  its pages (`packages/ui/docs/`) and its site bundle (`packages/ui/site/_assets/`)
     mkdirSync(join(root, "packages", "ui", "docs", "__data"), { recursive: true })
     mkdirSync(join(root, "packages", "ui", "site", "_assets"), { recursive: true })
@@ -259,7 +259,7 @@ describe("PageServer", () => {
     expect(bare.status).toBe(302)
     expect(bare.headers.location).toBe("/components/epics/")
     // its long address is a plain folder:  no redirect (Q30)
-    expect((await ask(port, "GET", "/spell-epic/src/docs/index.html")).status).toBe(200)
+    expect((await ask(port, "GET", "/epic/src/docs/index.html")).status).toBe(200)
     expect(componentSetPath("/components/app/spell-viewer.html", server.componentSets)).toBe(
       "/packages/app/docs/spell-viewer.html"
     )
@@ -273,7 +273,7 @@ describe("PageServer", () => {
       "/worktrees/w/packages/ui/site/_assets/site.js"
     )
     expect(componentSetPath("/worktrees/w/components/epics/x.html", server.componentSets)).toBe(
-      "/worktrees/w/spell-epic/src/docs/x.html"
+      "/worktrees/w/epic/src/docs/x.html"
     )
     expect(componentSetPath("/components/epics", server.componentSets)).toBeUndefined()
     expect(componentSetPath("/components/nope/x.html", server.componentSets)).toBeUndefined()
@@ -284,9 +284,9 @@ describe("PageServer", () => {
     server.serveWorktrees(join(root, ".claude", "worktrees"))
     expect(server.info.worktrees).toBe(join(root, ".claude", "worktrees"))
     const worktree = join(root, ".claude", "worktrees", "w")
-    mkdirSync(join(worktree, "spell-epic", "src", "docs"), { recursive: true })
+    mkdirSync(join(worktree, "epic", "src", "docs"), { recursive: true })
     mkdirSync(join(worktree, "packages", "ui", "site", "_assets"), { recursive: true })
-    writeFileSync(join(worktree, "spell-epic", "src", "docs", "index.html"), "<!doctype html><head></head><p>W</p>\n")
+    writeFileSync(join(worktree, "epic", "src", "docs", "index.html"), "<!doctype html><head></head><p>W</p>\n")
     writeFileSync(join(worktree, "packages", "ui", "site", "_assets", "site.js"), "// w\n")
     expect((await ask(port, "GET", "/worktrees/w/components/epics/")).text).toContain("<p>W</p>")
     expect((await ask(port, "GET", "/worktrees/w/components/epics/_assets/site.js")).text).toBe("// w\n")
@@ -531,7 +531,7 @@ describe("PageServer", () => {
       "/_beside/ui/docs",
       ""
     ])
-    expect(() => folderUrl("../../x")).toThrow(/above the checkout's parent/)
+    expect(folderUrl("../../x/y")).toBe("/_beside/_up/x/y")
   })
 
   it("serves no component sets and no engine routes when its root's settings name none", () => {
@@ -559,7 +559,7 @@ describe("PageServer", () => {
     expect((await ask(port, "GET", "/_epic/pack/epics.pack.js")).text).toBe("// pack\n")
     expect((await ask(port, "GET", "/_epic/assets/missing.js")).status).toBe(404)
     expect(engineRoutePath("/_epic/assets/emoji/cldr/a.js", server.engineRoutes)).toBe(
-      "/spell-epic/src/tools/_assets/emoji/cldr/a.js"
+      "/epic/src/tools/_assets/emoji/cldr/a.js"
     )
     expect(engineRoutePath("/epics/x.html", server.engineRoutes)).toBeUndefined()
   })
@@ -571,10 +571,10 @@ describe("PageServer", () => {
     expect((await ask(port, "GET", "/templates/durable.html")).text).toContain("<title>Guide Template</title>")
     expect((await ask(port, "GET", "/templates/missing.html")).status).toBe(404)
     expect(engineRoutePath("/templates/goals/index.html", server.engineRoutes)).toBe(
-      "/spell-epic/templates/goals/index.html"
+      "/epic/templates/goals/index.html"
     )
     expect(engineRoutePath("/worktrees/seo/templates/durable.html", server.engineRoutes)).toBe(
-      "/spell-epic/templates/durable.html"
+      "/epic/templates/durable.html"
     )
     expect(engineRoutePath("/worktrees/seo/guides/x.html", server.engineRoutes)).toBeUndefined()
   })
@@ -762,7 +762,7 @@ describe("PageServer's localCopies, gone and siteTabs", () => {
     const settings = {
       componentSets: { ui: { name: "Spell UI", dir: "ui/docs", assets: "ui/site/_assets" } },
       localCopies: { [cdn]: "/_epic/assets/highlight.min.js" },
-      gone: ["/ui"],
+      gone: ["/ui", "/old"],
       siteTabs: tabs
     }
     writeFileSync(join(root, "package.json"), JSON.stringify({ pageServer: settings }))
@@ -772,13 +772,18 @@ describe("PageServer's localCopies, gone and siteTabs", () => {
     writeFileSync(join(root, "docs/offline.html"), `<!doctype html><head></head><script src="${cdn}"></script>\n`)
     writeFileSync(join(root, "ui/button.html"), "<!doctype html><p>old</p>\n")
     writeFileSync(join(root, "brand/index.html"), "<!doctype html><p>Brand</p>\n")
+    // the content folder still holds `old/`, which moved out of it
+    mkdirSync(join(`${root}-content`, "old"), { recursive: true })
+    writeFileSync(join(`${root}-content`, "old/button.html"), "<!doctype html><p>old</p>\n")
     server = await new PageServer({ root }).start({ port: 0, routes: false, pidFile: false })
+    server.routeContext().serveContent!(`${root}-content`)
     port = server.info.port
   })
 
   afterAll(async () => {
     await server.stop()
     rmSync(root, { recursive: true, force: true })
+    rmSync(`${root}-content`, { recursive: true, force: true })
   })
 
   it("serves each page its CDN files' local copies, so pages load offline (withLocalCopies())", async () => {
@@ -787,9 +792,13 @@ describe("PageServer's localCopies, gone and siteTabs", () => {
     expect(answer.text).not.toContain("cdnjs")
   })
 
-  it('answers "not found" at what\'s gone, though the folder is there:  no redirect (Q30)', async () => {
-    for (const old of ["/ui/button.html", "/ui/", "/ui"]) expect((await ask(port, "GET", old)).status, old).toBe(404)
+  it('answers "not found" at what\'s gone, though the content folder holds it:  no redirect (Q30)', async () => {
+    for (const old of ["/old/button.html", "/old/", "/old"]) expect((await ask(port, "GET", old)).status, old).toBe(404)
     expect((await ask(port, "GET", "/brand/index.html")).status).toBe(200)
+  })
+
+  it("but the checkout's own folder by that name wins, as its files always do:  the kit's ui/ (epic `repo-split` P20)", async () => {
+    expect((await ask(port, "GET", "/ui/button.html")).status).toBe(200)
   })
 
   it("leaves out a tab whose home is a component set it doesn't serve:  no App/UI without spell-app", () => {

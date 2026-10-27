@@ -1,0 +1,50 @@
+<spell-notebook "table-of-contents theming">
+	<header level="1">
+		Table of contents
+		<header>A table of contents lists the page's sections and examples as links, opens the one in view and follows the scroll;  each section folds, and one button opens or folds them all.</>
+	</>
+	<table-of-contents-tab-bar showing="theming"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#tokens">Tokens</>
+				<ui-item link="#themes">Themes</>
+			</>
+		</>
+	</>
+
+	<!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
+	<section label="Tokens">
+		<markdown>
+			Set a public `--ui-*` token on the element, any ancestor or `:root`; it inherits into the shadow
+			root. Edit a value below to try it.
+		</>
+		<html>
+			<ui-docs-tokens family="ui-toc" playground>
+				<div class="ui-cluster ui-gap-l" style="align-items: flex-start">
+					<ui-toc for="toc-example-content-playground" heading="Button" style="width: 12em"></>
+					<section id="toc-example-content-playground" style="flex: 1">
+						<ui-header level="2" dividing>Types</>
+						<ui-example heading="Button" description="A standard button.">
+							<ui-button>Follow</>
+						</>
+						<ui-example heading="Emphasis" description="A button can show different levels of emphasis.">
+							<ui-button color="primary">Save</>
+						</>
+						<ui-header level="2" dividing>States</>
+						<ui-example heading="Disabled" description="A button can't be used.">
+							<ui-button disabled>Followed</>
+						</>
+					</>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="Themes">
+		<markdown>
+			The theme menu above picks the theme for every page of the site:  Spell, Glass, Fruity or Merlot,
+			each restyling this component through its tokens.
+		</>
+	</>
+</spell-notebook>

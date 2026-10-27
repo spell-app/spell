@@ -1,0 +1,93 @@
+<spell-notebook "code usage">
+	<header level="1">
+		Code
+		<header>Code shows a block of source code coloured by its language, from the element's own text or a file on
+              this site.</>
+	</>
+	<code-tab-bar showing="usage"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#using-it">Using it</>
+				<ui-item link="#languages">Languages</>
+				<ui-item link="#events">Events</>
+				<ui-item link="#keyboard">Keyboard</>
+				<ui-item link="#accessibility">Accessibility</>
+			</>
+		</>
+	</>
+
+	<!-- USAGE:  from the old Astro page's Behaviour, plus the vocabulary's events and the shadow markup's a11y. -->
+	<section label="Using it">
+		<markdown>
+			Write the code inside `<ui-code>` and say its `language`. The text comes from, first match wins:
+
+			- `source`: a file of this site (same origin only), fetched when `load` says (`eager`, `visible` or `idle`).
+			- A `<script type="text/plain">` child: its text exactly, so `<` and `&` need no escaping.
+			- The element's own text, dedented, so it can be indented with the markup around it.
+
+			The `content` property replaces either until `source` changes. Leave `language` out to have it guessed among the
+			common languages (`detectedLanguage` says which), or say `text` for no colours at all.
+		</>
+	</>
+
+	<section label="Languages">
+		<markdown>
+			highlight.js loads lazily, with the first code shown; until it arrives, the code shows plain.
+
+			`UI.code.register(name, language)` adds a language: a highlight.js grammar, a highlighter of your own returning
+			`{ start, end, kind }` spans, or a `load()` that fetches either on first use. Elements already showing that
+			language colour again. An unknown language shows plain text and fires a `ui-error` (`kind: "render"`), with no
+			message: the code is still there.
+
+			Spell itself is such a language, from outside Spell UI: the app's `<spell-code>` registers it, so on a page
+			that loads it, `language="spell"` is coloured here too.
+		</>
+		<markdown>
+			```js
+			UI.code.register("ini", {
+			  load: async () => ({ grammar: (await import("highlight.js/lib/languages/ini")).default })
+			})
+			```
+		</>
+	</>
+
+	<section label="Events">
+		<markdown>
+			- `ui-coloured` -- coloured: `{ language, detected }`, `language` `undefined` for plain text, `detected` when it
+			  was guessed.
+			- `ui-copied` -- the copy button copied `{ content }`.
+			- `ui-loaded` -- the text arrived, from `source` or the element's own content: `{ source, content }`.
+			- `ui-error` (cancelable) -- loading or colouring failed: `{ kind, source, error }`. Cancel it to skip the error
+			  message.
+			- `ui-changed`, `ui-saving`, `ui-saved` -- editing and saving, shared with `<ui-markdown>` and `<ui-include>` (see
+			  Include's Usage tab).
+		</>
+		<markdown>
+			```js
+			const code = document.querySelector("ui-code")
+			code.addEventListener("ui-coloured", (event) => console.log(event.detail.language, event.detail.detected))
+			code.addEventListener("ui-copied", (event) => console.log("copied", event.detail.content.length, "characters"))
+			```
+		</>
+	</>
+
+	<section label="Keyboard">
+		<markdown>
+			- With `copy`, **Tab** reaches the copy button first; **Enter** or **Space** copies.
+			- **Tab** then reaches the code itself (the `<pre>` is a tab stop), so the arrow keys can scroll a long line
+			  sideways.
+		</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			- The code is a real `<pre><code>`, named by its language as written ("ts code", else "Code"), so a screen reader
+			  says what it is before reading it.
+			- The copy button says "Copy", then "Copied" for a moment (both translatable).
+			- Colours are never the only signal: the code reads the same without them.
+			- While `source` loads, a `<ui-loader>` (`role="status"`) says so; a failed load shows a `<ui-message>` saying
+			  why.
+		</>
+	</>
+</spell-notebook>

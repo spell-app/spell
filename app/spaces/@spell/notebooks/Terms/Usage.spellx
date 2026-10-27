@@ -1,0 +1,33 @@
+<spell-notebook "terms usage">
+	<header level="1">
+		Terms
+		<header>Terms list facts as a label and a value each, lined up.</>
+	</>
+	<terms-tab-bar showing="usage"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#using-it">Using it</>
+				<ui-item link="#accessibility">Accessibility</>
+			</>
+		</>
+	</>
+
+	<!-- USAGE:  how to use it (attributes in practice, events, framework snippets), keyboard, accessibility. -->
+	<section label="Using it">
+		<markdown>
+			`<ui-terms>` lists facts, a label and a value each:  HTML's `<dl>`, `<dt>` and `<dd>`.
+
+			- `<ui-term label="Suit" value="hearts">`:  the label and value as attributes.
+			- Or written inside:  the value as the term's content, the label in `slot="label"`, for anything more than text.
+			- The labels line up in one column and the values in the next.
+			- `direction="horizontal"` puts the terms side by side, wrapping.
+			- `spacing` (`sm`, `md`, `lg`) is the space between terms.
+			- A `<ui-term>` on its own draws its label and value on one line.
+		</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>Screen readers hear each label as a term and its value as the term's definition (`role="term"`, `role="definition"`).</>
+	</>
+</spell-notebook>

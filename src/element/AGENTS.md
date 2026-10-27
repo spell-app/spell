@@ -9,7 +9,7 @@ the kit's layout, and the house style every repo shares.
 Only what's local is below;  a section named like a WWOD rule extends it.
 
 **This is Solid work:  READ [the Solid 2 rules](../../spell.epics/guides/solid/solid-2.md) IN FULL FIRST,**
-then [ui's AGENTS.md](../../spell-ui/AGENTS.md), "Solid authoring":  how an element is written on this folder's code.
+then [ui's AGENTS.md](../../ui/AGENTS.md), "Solid authoring":  how an element is written on this folder's code.
 
 ## This folder:  the kit's `src/element/`
 
@@ -31,7 +31,7 @@ then [ui's AGENTS.md](../../spell-ui/AGENTS.md), "Solid authoring":  how an elem
 
 - What makes a custom element on Solid, for EVERY component set:
   Spell UI's, the epics', the app's, the brand's, and a space's own (epic `people-and-orgs`, P17).
-  - Until then it was the element half of Spell UI's element core, in [its elements folder](../../spell-ui/src/elements/).
+  - Until then it was the element half of Spell UI's element core, in [its elements folder](../../ui/src/elements/).
   - Owen, round 7 of the spaces page:  "Move the code in spell/ui that creates custom components into $/spell-solid."
   - Named `spell-solid` (`$/spell-solid`) until epic `repo-split` P3 renamed it, package and alias, as Owen asked.
     - Its class `SpellSolid` (the settings, below) and the app's `spell-solid.js` chunks keep the old word:
@@ -51,6 +51,10 @@ then [ui's AGENTS.md](../../spell-ui/AGENTS.md), "Solid authoring":  how an elem
   - [Disclosure](Disclosure.ts):  one open / closed state for anything that shows and hides a box (a fold, a section,
     a popover, an overlay):  a guarded request with `ui-opening` / `ui-closing`, then `ui-opened` / `ui-closed`,
     `aria-expanded`, find-in-page opening it (epic `coherence` P8)
+  - [OwnControls](OwnControls.ts):  did a click land on a control inside an element (a button, a link, a field),
+    not on the element itself?  A linked element's click, Spell UI's folding titles and toasts (epic `coherence` P21)
+  - [ParentLink](ParentLink.ts):  the `parent` attribute, an element joining the container with that id;
+    `UIComponent` follows it for every tag whose vocabulary declares one (Spell UI's until epic `coherence` P21)
   - [PartContext](PartContext.ts) and [OwnerContext](OwnerContext.ts):
     the generic content parts, and the element they belong to
   - [ShadowEvents](ShadowEvents.ts):  Solid's events kept from leaking out of shadow roots
@@ -141,7 +145,7 @@ then [ui's AGENTS.md](../../spell-ui/AGENTS.md), "Solid authoring":  how an elem
     `test-helpers/` (`MemberClashes`, `ThemeHarness`, `Sheets` ...).
     - What needs Spell UI's real runtime is tested in Spell UI's tests:
       `<ui-root>`'s `appContext`, Spell UI's settings and translations, its core carrying every name,
-      no vocabulary attribute named like a base's member (`spell-ui/test-helpers/MemberClashes`, run by each set over
+      no vocabulary attribute named like a base's member (`spell/ui/test-helpers/MemberClashes`, run by each set over
       its own).
   - [The barrel test](../../tests/element/barrel.test.ts) pins what "Imports" says:
     - every export live
@@ -162,11 +166,11 @@ As WWOD §4, plus:
   - Except what a file reads while it EVALUATES (a base class, a decorator, a static initializer):
     that comes from its own file, under `// Import directly to avoid circular import`.
 - Who imports it:
-  - Spell UI:  its `spell-ui/core` entry re-exports ALL of it, so Spell UI's `E` holds every name this `E` does.
-    Spell UI's own component files keep importing `spell-ui/core`.
+  - Spell UI:  its `spell/ui/core` entry re-exports ALL of it, so Spell UI's `E` holds every name this `E` does.
+    Spell UI's own component files keep importing `spell/ui/core`.
   - Every pack's element files, `import { E } from "spell/element"` (another repo's, so by its npm name):
     - `epics`, `brand`, and `app`'s `components/`
-    - A file that also uses Spell UI's own pieces takes `E` from `spell-ui/core` instead:
+    - A file that also uses Spell UI's own pieces takes `E` from `spell/ui/core` instead:
       the same names, and Spell UI's on top.
       Those pieces:  `E.IconGlyph`, `E.LoadableBody`, `E.NativeFallback`, `E.Converters` ...
 - Leaves other code imports on their own (everything in `src/` has a name;  these are the ones meant for it):
@@ -175,7 +179,7 @@ As WWOD §4, plus:
     - for node code that mustn't load the element layer (the vocabularies, the epics' definitions)
   - `spell/element/SkeletonText`:  node code that parses skeletons
   - `spell/element/HotDefinitions`:  the HMR plugin, [HotElements](../element-tools/HotElements.ts), injects it by its file path;
-    Spell UI's `PackHotSwap` (its `spell-ui/hot` entry) imports it
+    Spell UI's `PackHotSwap` (its `spell/ui/hot` entry) imports it
 - The element tools and the `spell-pack` bin are node only:
   they may import node built-ins, Vite and `tsx` too, and never run in a page.
 
@@ -192,7 +196,7 @@ As WWOD §4, plus:
     - `styles`, `focus`
     - `motion`:  the default animation, reduced motion, running one
     - `warn()`
-  - Spell UI's:  [SpellUISettings](../../spell-ui/src/elements/SpellUISettings.ts), installed as `spell-ui/core` loads.
+  - Spell UI's:  [SpellUISettings](../../ui/src/elements/SpellUISettings.ts), installed as `spell/ui/core` loads.
     - Spell UI's barrel and the root's install them too:  a bundler may drop `core`'s side-effect import.
     - Every page with elements has Spell UI's runtime.
   - A tag defined before any are installed waits for them:
@@ -235,12 +239,12 @@ the family ATTACHES it when it arrives.
     - Spell UI's built `core.js`
     - the docs bundle, the site bundles
     - the app's `spell-solid.js`
-  - A component pack leaves `spell/element` external, as it leaves Solid and `spell-ui/core`.
+  - A component pack leaves `spell/element` external, as it leaves Solid and `spell/ui/core`.
     - The list:  `PACK_MODULES`, in [the pack modules](../element-tools/packModules.ts).
     - It reads it from the page:
       `SpellUI.packModules["spell/element"]` is Spell UI's core module, which carries all of it.
   - The app's element bundles likewise take it from `spell-solid-shared.js`
-    ([the app's shared build](../../spell-app/app/vite.shared.ts)).
+    ([the app's shared build](../../app/app/vite.shared.ts)).
 
 ## Commands
 

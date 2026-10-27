@@ -1,0 +1,388 @@
+<spell-notebook "form usage">
+	<header level="1">
+		Form
+		<header>A form displays a set of related user input fields in a structured way.</>
+	</>
+	<form-tab-bar showing="usage"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#using-it">Using it</>
+				<ui-item link="#submission">Submission</>
+				<ui-item link="#validation">Validation</>
+				<ui-item link="#binding">Binding</>
+				<ui-item link="#events">Events</>
+				<ui-item link="#keyboard">Keyboard</>
+				<ui-item link="#accessibility">Accessibility</>
+				<ui-item link="#framework-usage">Framework usage</>
+			</>
+		</>
+	</>
+
+	<!-- USAGE:  the native form, submission, validation, events, keyboard, accessibility, frameworks. -->
+	<section label="Using it">
+		<markdown>
+			A form control only belongs to a `<form>` in its own part of the page, so a custom element can't be the form
+			itself. `<ui-form>` is the form's LOOK and its VALIDATION around a native `<form>` you write: one inside it
+			(preferred), or the one around it. It never creates or moves one, so frameworks keep owning that markup.
+
+			- `<ui-field>` is one label + control; `<ui-fields>` a row of them (`widths="2"`, `widths="equal"`, `inline`,
+			  `grouped`); `width` on a field takes columns of 16.
+			- Label every control with `<label for>` pointing at the `ui-*` control's `id`.
+			- `state` on the form shows the `<ui-message>`s of that state inside it; on a field it tints the field.
+		</>
+		<markdown>
+			```html
+			<ui-form>
+			  <form action="/subscribe">
+			    <ui-field required>
+			      <label for="email">E-mail</label>
+			      <ui-input id="email" name="email" type="email" required></ui-input>
+			    </ui-field>
+			    <ui-message state="error" heading="Please check the form"></ui-message>
+			    <ui-button type="submit" color="primary">Subscribe</ui-button>
+			  </form>
+			</ui-form>
+			```
+		</>
+	</>
+
+	<section label="Submission">
+		<markdown>
+			Submission stays native.
+
+			- `<ui-input>`, `<ui-textarea>`, `<ui-checkbox>`, `<ui-radio>`, `<ui-dropdown>`, `<ui-select>` and
+			  `<ui-calendar>` submit their `name` / `value` in the form's `FormData` like native inputs.
+			- `<ui-button type="submit">` and Enter in a `<ui-input>` submit; `form.reset()` puts every control back to its
+			  starting value; `<fieldset disabled>` disables what is inside it.
+		</>
+	</>
+
+	<section label="Validation">
+		<markdown>
+			Validation runs on submit:  the `rules` property (Fomantic's `fields` shape, keyed by `name` or `id`),
+			plus each control's own constraints (`required`, `type="email"` ...).
+
+			- An invalid submit is stopped before the page's own submit handlers run:
+			  - the failing fields show a prompt inside their `<ui-field>`
+			  - the form goes into the `error` state, showing its error `<ui-message>`s
+			  - `ui-save-failed` fires, and the first invalid field is focused
+			- A valid submit fires `ui-saving`, which is cancelable:
+			  `preventDefault()` stops the native submission, e.g. to send it with `fetch()` instead.
+			- `validate="on leave"` or `validate="immediately"` also validates each field as the person leaves or
+			  changes it. A field showing an error always validates again as it changes.
+			- Each `<ui-field rules>` adds its own rules to the form&apos;s.
+		</>
+
+		<section label="Validation" sticky collapsible dividing>
+			<example description="No script:  the controls' own `required` / `type=\"email\"` constraints.  Submit it empty, or tab through the fields (`validate=\"on leave\"`).">
+				<html>
+					<ui-form validate="on leave">
+						<form method="dialog">
+							<ui-fields widths="2">
+								<ui-field required>
+									<label for="form-validate-name">Name</label>
+									<ui-input id="form-validate-name" name="name" placeholder="Name" required></ui-input>
+								</ui-field>
+								<ui-field required>
+									<label for="form-validate-email">E-mail</label>
+									<ui-input id="form-validate-email" name="email" type="email" placeholder="joe@schmoe.com" required></ui-input>
+								</ui-field>
+							</ui-fields>
+							<ui-field required>
+								<label for="form-validate-password">Password</label>
+								<ui-input id="form-validate-password" name="password" type="password" minlength="6" required></ui-input>
+							</ui-field>
+							<ui-field>
+								<ui-checkbox name="terms" required>I agree to the terms</ui-checkbox>
+							</ui-field>
+							<ui-message state="error" heading="Please fix the fields above"></ui-message>
+							<ui-button type="submit" color="primary">Sign up</ui-button>
+						</form>
+					</ui-form>
+				</html>
+			</example>
+		</>
+		<markdown>With rules set from script (the same form):</>
+		<markdown>
+			```js
+			const form = document.querySelector("ui-form")
+			form.rules = {
+			  name: "notEmpty",
+			  email: ["notEmpty", "email"],
+			  password: ["notEmpty", "minLength[6]"],
+			  terms: "checked"
+			}
+			form.addEventListener("ui-saving", (event) => {
+			  event.preventDefault() // no native submission
+			  console.log(event.detail.values)
+			})
+			form.addEventListener("ui-save-failed", (event) => console.log(event.detail.errors))
+			```
+		</>
+		<markdown>
+			A field's rules are a rule name, a list of them, or an object with the list plus options. Rule names are
+			Fomantic's: `notEmpty`, `checked`, `email`, `url`, `integer`, `decimal`, `number`, `regExp[...]`, `is[...]`,
+			`not[...]`, `contains[...]`, `minLength[n]`, `exactLength[n]`, `maxLength[n]`, `size[a..b]`, `match[field]`,
+			`different[field]`, `creditCard`, `minCount[n]`, `exactCount[n]`, `maxCount[n]`, `range[a..b]`, `minValue[n]`
+			and `maxValue[n]`. A rule object's `prompt` replaces the default message, with the same placeholders (`{name}`,
+			`{value}`, `{ruleValue}`).
+		</>
+		<markdown>
+			```js
+			form.rules = {
+			  email: ["notEmpty", "email"],
+			  confirm: ["match[password]"],
+			  nickname: { rules: ["minLength[3]"], optional: true }, // skipped while blank
+			  company: { rules: ["notEmpty"], depends: "is-business" }, // skipped while that field is blank
+			  password: { rules: [{ type: "minLength[8]", prompt: "Use at least 8 characters" }] }
+			}
+
+			form.validate() // validate every field and show prompts;  true when valid
+			form.isValid() // the same verdict, showing nothing
+			form.values // { email: "...", confirm: "...", ... } by name
+			form.reset() // the native reset, and prompts cleared
+			form.clear() // every control emptied, and prompts cleared
+			```
+		</>
+		<markdown>
+			`error-focus="no"` keeps focus where it is after a failed submit, and `prevent-leaving` asks before the user
+			leaves the page with changed values. Without a native form, `<ui-form>` still validates (`validate()`,
+			`validate="on leave"`), but nothing submits.
+		</>
+	</>
+
+	<section label="Binding">
+		<markdown>
+			Give a form an object as its `value` property, and it is BOUND to it: each control with a `name` shows that
+			property of the object, and writes it back as people type and click.
+
+			- Live both ways, for anything Solid can follow: a class with reactive properties, Solid signals behind getters
+			  and setters, Spell's own objects. A plain object works too, but only the form sees its changes.
+			- A checkbox or toggle shows and writes a boolean (`selected`); radios of one name, the chosen one's value;
+			  anything else, its `value`. A `type="number"` input writes a number (`null` while blank).
+			- Validation, `values`, submission and `reset()` work as before; after a reset or `clear()`, the object takes
+			  the controls' values.
+			- `debug` shows the bound object as JSON in a box below the form, captioned "Bound object", live (its own
+			  `toJSON()` counts); on an unbound form, its `values`. Both examples below have it on: type, tick, and watch it.
+			- Without `value`, nothing is bound.
+		</>
+
+		<section label="Bound form" sticky collapsible dividing>
+			<example description="No script:  `value` as JSON text.  Type into the fields, or tick the box, and watch the Bound object box below them change.">
+				<html>
+					<ui-form debug value="{\"name\": \"Ada\", \"email\": \"ada@example.com\", \"newsletter\": true}">
+						<form method="dialog">
+							<ui-fields widths="2">
+								<ui-field>
+									<label for="form-bind-name">Name</label>
+									<ui-input id="form-bind-name" name="name"></ui-input>
+								</ui-field>
+								<ui-field>
+									<label for="form-bind-email">E-mail</label>
+									<ui-input id="form-bind-email" name="email" type="email"></ui-input>
+								</ui-field>
+							</ui-fields>
+							<ui-field>
+								<ui-checkbox name="newsletter">Send me the newsletter</ui-checkbox>
+							</ui-field>
+						</form>
+					</ui-form>
+				</html>
+			</example>
+		</>
+
+		<section label="When a field writes" sticky collapsible dividing>
+			<example description="Each field says when it takes an edit:  `apply=\"delayed\"` after a pause in typing (300ms;  `delayed 100` for 100ms), `apply=\"on leave\"` once the cursor leaves it.  Type, and watch the Bound object box.">
+				<html>
+					<ui-form debug value="{\"title\": \"Spell\", \"slug\": \"spell\"}">
+						<form method="dialog">
+							<ui-field label="Title" hint="Written after a pause in typing." apply="delayed">
+								<ui-input name="title"></ui-input>
+							</ui-field>
+							<ui-field label="Slug" hint="Written when you leave the field." apply="on leave">
+								<ui-input name="slug"></ui-input>
+							</ui-field>
+						</form>
+					</ui-form>
+				</html>
+			</example>
+		</>
+
+		<section label="Save and Cancel" sticky collapsible dividing>
+			<example description="`apply=\"on save\"` holds every edit until `save()`;  `cancel()` drops them.  The form has `:state(changed)` while it holds any, and sends `ui-applying` / `ui-applied`, `ui-cancelling` / `ui-cancelled`.">
+				<html>
+					<ui-form debug apply="on save" value="{\"name\": \"Ada\", \"role\": \"Engineer\"}">
+						<form method="dialog">
+							<ui-field label="Name">
+								<ui-input name="name"></ui-input>
+							</ui-field>
+							<ui-field label="Role">
+								<ui-input name="role"></ui-input>
+							</ui-field>
+							<ui-button type="button" onclick="this.closest('ui-form').save()" color="primary">Save</ui-button>
+							<ui-button type="button" onclick="this.closest('ui-form').cancel()">Cancel</ui-button>
+						</form>
+					</ui-form>
+				</html>
+			</example>
+		</>
+
+		<section label="Many things" sticky collapsible dividing>
+			<example description="A list as `value` edits every thing in it:  a field shows the value they agree on;  where they don't, it shows blank and `Mixed`.  Typing sets it on all of them.">
+				<html>
+					<ui-form debug value="\[{\"size\": \"md\", \"font\": \"Inter\"}, {\"size\": \"md\", \"font\": \"Lora\"}, {\"size\": \"md\", \"font\": \"Inter\"}]">
+						<form method="dialog">
+							<ui-fields widths="2">
+								<ui-field label="Size">
+									<ui-input name="size"></ui-input>
+								</ui-field>
+								<ui-field label="Font">
+									<ui-input name="font"></ui-input>
+								</ui-field>
+							</ui-fields>
+						</form>
+					</ui-form>
+				</html>
+			</example>
+		</>
+
+		<section label="Repeat" sticky collapsible dividing>
+			<markdown>
+				`<ui-repeat name="tasks">` shows its children once per item of the list in the property `tasks`, and binds
+				each row's controls to its own item.
+
+				- The list is any iterable (an array, a `Set`, Spell's `List` ...), read from the form's `value`, or from the
+				  item of the `<ui-repeat>` row around it: repeats nest.
+				- Or give it the list itself, as its `items` property: it wins over `name`. In spell,
+				  `<ui-repeat items={the shownTasks of the app}>`.
+				- Its children are the template: plain markup, or a `<template>`. Each row is a copy in the page (no wrapper
+				  element), so the form validates and submits its controls.
+				- Rows are kept by item: adding, removing or moving an item adds, removes or moves only its row, and a row
+				  keeps its focus. To change the list, give the property a new list.
+				- Ids repeat in every row: label a row's controls with `aria-label` (or by wrapping them), not `<label for>`.
+			</>
+			<example description="A to-do list:  a row per task, and a button that adds one.  Rename a task, tick it, or add one, and watch its item change in the Bound object box below.">
+				<html>
+					<ui-form id="form-todos" debug>
+						<form method="dialog">
+							<ui-field>
+								<label for="form-todos-title">List</label>
+								<ui-input id="form-todos-title" name="title"></ui-input>
+							</ui-field>
+							<ui-repeat name="tasks">
+								<ui-fields unstackable>
+									<ui-field width="2">
+										<ui-checkbox name="done" aria-label="Done"></ui-checkbox>
+									</ui-field>
+									<ui-field width="14">
+										<ui-input name="title" aria-label="Task"></ui-input>
+									</ui-field>
+								</ui-fields>
+							</ui-repeat>
+							<ui-button id="form-todos-add" type="button" icon="plus">Add a task</ui-button>
+						</form>
+					</ui-form>
+				</html>
+			</example>
+		</>
+		<markdown>From script, or a framework: any object. A Solid app, with a signal behind each property:</>
+		<markdown>
+			```js
+			class Task {
+			  #title = createSignal("")
+			  get title() { return this.#title[0]() }
+			  set title(title) { this.#title[1](/components/ui/title) }
+			}
+
+			const form = document.querySelector("ui-form")
+			form.value = todoList // its fields show it, and edit it
+			form.value = undefined // unbound:  the controls keep what they show
+			```
+		</>
+	</>
+
+	<section label="Events">
+		<markdown>
+			- `ui-valid` / `ui-invalid`: a field passed / failed validation (`{ field, value, values }`, plus `errors` when
+			  it failed).
+			- `ui-saving`: a submit passed validation (`{ values }`); cancelable, to stop the native submission.
+			- `ui-save-failed`: a submit failed validation (`{ values, errors }`, errors by field); the native submission is
+			  stopped.
+		</>
+	</>
+
+	<section label="Keyboard">
+		<markdown>
+			The controls keep their own keys. **Enter** in a `<ui-input>` submits the form, like a native input; after a
+			failed submit, focus moves to the first invalid field (unless `error-focus="no"`).
+		</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			- The form is your native `<form>`, so submission, `FormData`, reset and the browser's form handling are
+			  unchanged. `<ui-form>` turns off the browser's own validation bubbles while it is connected (and restores them
+			  after), so its prompts are the only ones shown.
+			- Label every control: a `<label for>` pointing at the `ui-*` control's `id` names it, as the examples do. In an
+			  inline row, give the controls without a visible label an `aria-label`.
+			- Group radios and checkboxes in `<ui-fields grouped>` (or `inline`) with `role="radiogroup"` / `role="group"`
+			  and `aria-labelledby` pointing at the group's label.
+			- `required` on a `<ui-field>` only draws the asterisk. Put `required` on the control, or a `notEmpty` rule, so
+			  it is enforced.
+			- A prompt is a `role="alert"` label inside the field, so it is announced when it appears; failing controls get
+			  `aria-invalid="true"` until they pass.
+			- `loading` sets `aria-busy`; `loading` and `disabled` make the form `inert`, and a `disabled` field is `inert`
+			  too, so their controls can't be reached.
+			- If the element fails to render, it shows its children through a bare `<slot>`: your own `<form>` and
+			  its fields stay, so it still submits, with the browser's own constraint validation taking over. It
+			  drops the form's own styling, `rules`, prompts, the events, `values` and the methods,
+			  `prevent-leaving`, and the error state after a failed submit.
+		</>
+	</>
+
+	<section label="Framework usage">
+		<markdown>
+			Keep the native `<form>` in your template, set `rules` as a property, and handle `ui-saving` (cancel it to
+			submit with `fetch()`).
+		</>
+		<header level="4" id="framework-react">React 19</>
+		<markdown>
+			```jsx
+			<ui-form
+			  rules={rules}
+			  onui-success={(event) => {
+			    event.preventDefault()
+			    save(event.detail.values)
+			  }}
+			>
+			  <form>...</form>
+			</ui-form>
+			```
+		</>
+		<header level="4" id="framework-vue">Vue 3.5</>
+		<markdown>
+			```html
+			<!-- compilerOptions.isCustomElement = (tag) => tag.startsWith("ui-") -->
+			<ui-form :rules="rules" @ui-saving.prevent="(event) => save(event.detail.values)">
+			  <form>...</form>
+			</ui-form>
+			```
+		</>
+		<header level="4" id="framework-solid">Solid 2</>
+		<markdown>
+			```jsx
+			// events and rich data are plain props:  `on-<event>={...}`, `options={...}`
+			<ui-form
+			  rules={rules}
+			  on-ui-saving={(event) => {
+			    event.preventDefault()
+			    save(event.detail.values)
+			  }}
+			>
+			  <form>...</form>
+			</ui-form>
+			```
+		</>
+	</>
+</spell-notebook>

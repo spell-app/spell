@@ -1,0 +1,55 @@
+// Una carta tiene un palo y un rango.
+// Boca arriba los muestra;  boca abajo, el dorso que comparten todas las cartas.
+
+una carta de la baraja alias carta es una vista reversible donde:
+
+	## Palo y color
+
+	// A cuál de los cuatro palos pertenece
+	- su "palo" es uno de tréboles, diamantes, corazones, espadas
+		- "es un (palo)"
+	- su "color" es uno de rojo, negro:
+		rojo si es un diamante o es un corazón
+		negro de lo contrario
+		- "es (color)"
+		- "es una carta (color)"
+	// El signo de su palo, para dibujarla
+	- su "símbolo" es:
+		"♣" si es un trébol
+		"♦" si es un diamante
+		"♥" si es un corazón
+		"♠" si es una espada
+
+	## Rango
+
+	// El as es bajo:  as = 1 ... rey = 13
+	- su "rango" es uno de as, 2 ... 10, jota, dama, rey
+		- "es un (rango)"
+	- "es el (rango) de (palo)"
+	- "es una figura" si su rango es jota, dama o rey
+	- "es una carta numérica" si no es una figura
+
+	## Jugarla
+
+	// La pone boca arriba, si no lo está ya.
+	// Una pila muestra su carta de arriba cada vez que una carta la deja.
+	- para mostrarla:
+		si está boca abajo
+			voltear eso
+
+	- al clic:
+		// Boca abajo:  voltearla.
+		si está boca abajo
+			voltear eso
+
+	## Dibujarla
+
+	- para dibujar su frente:
+		// Una línea de texto, del tamaño del texto de alrededor:  su pila la escala para que quepa.
+		<es-texto part="cara" color={su color}>{su rango} {su símbolo}</es-texto>
+	- para dibujar su dorso:
+		<es-imagen part="dorso" src="dorso.svg" alt="el dorso de una carta" />
+
+	- para probar preparación de la carta:
+		obtener una nueva carta cuyo rango es dama, palo es espadas y dirección es abajo
+		eco "probando la " + su rango + " de " + su palo

@@ -1,8 +1,8 @@
-# The kit's checks on a push to `main`, a pull request, or by hand (Actions tab => "checks" => "Run workflow"):
-# `yarn kit:ts`, `kit:lint` and `kit:test`, over its one `src/` (util, toolchain, server, element, its tools and test
-# helpers, cli) and its tests (epic `repo-split` P12, P14).
-# - The kit alone:  no child repo is cloned.
-#   Each child repo's own workflow checks it on the kit (its `.github/workflows/checks.yml`).
+# The repo's checks on a push to `main`, a pull request, or by hand (Actions tab => "checks" => "Run workflow"):
+# `yarn ts`, `yarn lint` and `yarn test`, over the kit and each of its folders, lowest first (`tools/repos.ts run`).
+# - ONE repo since epic `repo-split` P20:  the kit's own `src/`, and its folders `parser/`, `ui/`, `epic/` and `app/`,
+#   once spell-parser, spell-ui, spell-epic and spell-app, each with a workflow of its own.
+# - spell-brand, a project beside the kit, has its own workflow, which checks it on this repo.
 name: checks
 
 on:
@@ -15,15 +15,11 @@ concurrency:
   group: checks-${{ github.ref }}
   cancel-in-progress: true
 
-env:
-  # the lockfile lists every child repo, and none is cloned here:  yarn must be free to drop them
-  YARN_ENABLE_IMMUTABLE_INSTALLS: "false"
-
 jobs:
   checks:
     runs-on: ubuntu-latest
-    # a hung test fails the run in 30 minutes, not GitHub's 6 hours (epic `repo-split` I73)
-    timeout-minutes: 30
+    # a hung test fails the run in an hour (four folders' tests), not GitHub's 6 hours (epic `repo-split` I73)
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
       - run: corepack enable
@@ -31,11 +27,23 @@ jobs:
         with:
           node-version: 24
           cache: yarn
+      # parser's and app's Python (their `yarn test`'s pytest and `yarn lint`'s ruff run through uv);  uv fetches the
+      # Python each project pins
+      - uses: astral-sh/setup-uv@v6
+
       - run: yarn install
+      # the two VS Code extensions:  yarn projects of their own, which epic's and app's `yarn lint` lint
+      # (epic `epic-engine` I65)
+      - run: yarn install
+        working-directory: epic/vscode
+      - run: yarn install
+        working-directory: app/vscode
 
-      # util's and element's browser tests run in a real chromium
+      # browser tests run in a real chromium
       - run: yarn playwright install --with-deps chromium
+      # tests that commit make throwaway git repos
+      - run: git config --global user.name CI && git config --global user.email ci@spell.invalid
 
-      - run: yarn kit:ts
-      - run: yarn kit:lint
-      - run: yarn kit:test
+      - run: yarn ts
+      - run: yarn lint
+      - run: yarn test

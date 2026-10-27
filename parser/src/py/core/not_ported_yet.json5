@@ -1,0 +1,111 @@
+{
+  "about": "What spell_core doesn't have yet of the core's method list (src/core/core.declarations.json5), by the JavaScript name, grouped by why.  Read by tests/py/core/tests/test_core_declarations.py, and by the core reference page (guides/targets/core-reference.html).  Take a name out as it's ported.",
+  "groups": [
+    {
+      "why": "Actions run by a person's keys, clicks and menus (epic elemental-spell P10):  a page's, not yet Python's",
+      "names": [
+        "runAction",
+        "isActionEnabled",
+        "isActionSelected",
+        "actionTitle",
+        "onActionRun",
+        "runShortcut",
+        "menuOf",
+        "menuBarOf"
+      ]
+    },
+    {
+      "why": "Pauses and events (P11):  Python's runtime hasn't needed these",
+      "names": [
+        "forEachSequential",
+        "DEBUG_RUNTIME",
+        "DEBUG_PROCESSES",
+        "clearRuntime"
+      ]
+    },
+    {
+      "why": "A browser's only:  a view's own element (<solitaire-card>), a page's markup, its shadow root",
+      "names": [
+        "elementDefiner",
+        "beforeMove",
+        "defineElement",
+        "elementFor",
+        "elementApiOf",
+        "thingFor",
+        "appLayout",
+        "domRoot",
+        "useElement",
+        "elementClassOf",
+        "css"
+      ]
+    },
+    {
+      "why": "Events sent to things (epic elemental-spell P9):  `send` up a thing's chain, and the mouse and keys (`input`);  a Python program's page sends them to its things",
+      "names": ["send", "input"]
+    },
+    {
+      "why": "A page's drag handlers (epic outline-spell P28):  the page calls them;  a Python program's page sends them to its things, as `start_while()` and `end_while()`",
+      "names": [
+        "remote",
+        "runHandler",
+        "moveBefore",
+        "startWhile",
+        "endWhile"
+      ]
+    },
+    {
+      "why": "A recompile keeping the last run's things (epic drawable-thing P16, P17):  the page's runners only;  a Python program never keeps them",
+      "names": [
+        "isCarryingOver",
+        "carryOver",
+        "carryProblems"
+      ]
+    },
+    {
+      "why": "An element's id on the page (epic drawable-thing P18):  the page's own javascript gives it, never the program",
+      "names": [
+        "elementIdFor"
+      ]
+    },
+    {
+      "why": "What the lookups search (epic people-and-orgs P9):  Python's take what they search on each call, thing_for_reference(reference, things, kept)",
+      "names": [
+        "searchThings"
+      ]
+    },
+    {
+      "why": "Running a project's tests from a runner (epic spanish, Card Checks and Test Results):  spell test and the VS Code runner's Run Tests, on the JavaScript core;  Python's tests run under pytest",
+      "names": [
+        "testResults",
+        "runTests"
+      ]
+    },
+    {
+      "why": "Remembered props (epic prefs-and-undo P8):  kept in the person's preferences, in a browser or on the page server;  a Python program keeps none yet",
+      "names": [
+        "remember"
+      ]
+    },
+    {
+      "why": "Not decided yet:  a word of Python's own, a browser's only, or ported when a program needs it",
+      "names": [
+        "doNothing",
+        "flush",
+        "TYPE_NAME_CONVERSIONS",
+        "IS_OF_TYPE_SPECIALS",
+        "get",
+        "set",
+        "absoluteValue",
+        "repeat",
+        "doubleQuote",
+        "getPath",
+        "setPath",
+        "splitPath",
+        "notify",
+        "alert",
+        "confirm",
+        "prompt"
+      ]
+    }
+  ]
+}

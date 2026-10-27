@@ -1,0 +1,160 @@
+/*
+ * The style sheet of `<ui-docs-tokens>`:  token tables (and the playground), built of `<ui-*>` widgets
+ * (`<ui-table>`, `<ui-label>`, `<ui-input>`, `<ui-segment>`, `<ui-button>`, `<ui-header>`, `<ui-message>`).
+ * This sheet only LAYS THEM OUT, plus the look of inline `<code>` (no widget draws one, as in `<ui-docs-api>`).
+ * - It styles the component's shadow DOM:  `<section class="ui [global] [playground] tokens" part="tokens">`,
+ *   holding in order:
+ *   - with `playground`:  `<ui-segment class="playground" part="playground">` around `<div class="bar">`,
+ *     holding `<div class="preview" part="preview">` (the default slot) and the `<ui-button part="reset">`
+ *   - the filter:  `<ui-input class="search" part="search">`
+ *   - a `<ui-message part="message">`, if any
+ *   - the tables:  `<ui-table part="table">` around a native `<table>`;
+ *     with `global`, each inside `<section class="group" part="group">`,
+ *     under its `<ui-header part="header">` and `<p class="description" part="description">`
+ * - A row:
+ *   - `th[scope=row] > code.name`, and the description under it in `small.ui-caption` when the table has no
+ *     description column (under a quarter of its rows have one)
+ *   - `td > span.default`:  the `<ui-label part="swatch">` and the default's `<code>`
+ *   - the description, in a column of its own
+ *   - with `playground`, `td > ui-input.value[part="input"]`
+ * - Public tokens (`--ui-docs-tokens-*`) are never declared:  each is read through a private alias
+ *   (`notes/theming.md` "Component tokens").
+ *   The swatch's size and ring go through `<ui-label>`'s own public tokens (`--ui-label-empty-size`)
+ *   and its `::part(label)`, as a page would.
+ */
+
+@layer ui.components.docs-tokens.types, ui.components.docs-tokens.content, ui.components.docs-tokens.variations, ui.components.docs-tokens.states;
+
+@layer ui.components.docs-tokens.types {
+  :host {
+    display: block;
+    /*
+     * Its tables NEVER stack, whatever the page says (`--ui-stack-with`):  too wide for their column,
+     * they scroll sideways in `<ui-table>`'s own scroller.  The table's own region token, as a page would set it.
+     */
+    --ui-table-stack-by: none;
+  }
+
+  .ui.tokens {
+    /* Space between the playground, the filter, the message and the tables. */
+    --_ui-docs-tokens-gap: var(--ui-docs-tokens-gap, 1em);
+    /* Space between one group of `global` and the next. */
+    --_ui-docs-tokens-group-gap: var(--ui-docs-tokens-group-gap, 2em);
+    /* Diameter of a colour swatch. */
+    --_ui-docs-tokens-swatch-size: var(--ui-docs-tokens-swatch-size, 1.15em);
+    /* Ring around a swatch, so a white or transparent colour still shows. */
+    --_ui-docs-tokens-swatch-ring: var(--ui-docs-tokens-swatch-ring, var(--ui-border-color-strong));
+    /* Background of inline code. */
+    --_ui-docs-tokens-code-background: var(--ui-docs-tokens-code-background, var(--ui-surface-strong));
+    /* Widest the filter input grows. */
+    --_ui-docs-tokens-search-width: var(--ui-docs-tokens-search-width, 20em);
+    /* Share of the table the token names take, at most:  a long name breaks after a dash instead. */
+    --_ui-docs-tokens-name-width: var(--ui-docs-tokens-name-width, 40%);
+    /* Narrowest the names get (a phone):  two or three lines a name, not one word a line. */
+    --_ui-docs-tokens-name-min-width: var(--ui-docs-tokens-name-min-width, 9em);
+    display: flex;
+    flex-direction: column;
+    gap: var(--_ui-docs-tokens-gap);
+  }
+}
+
+@layer ui.components.docs-tokens.content {
+  /* Playground:  the preview fills the bar, the reset button sits at its end (wrapping below on a narrow column). */
+  .playground {
+    --ui-segment-margin: 0;
+  }
+  .bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75em;
+  }
+  .preview {
+    display: flex;
+    flex: 1 1 12em;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5em;
+    min-width: 0;
+  }
+  [part~="reset"] {
+    flex: none;
+    margin-inline-start: auto;
+  }
+
+  .search {
+    display: block;
+    max-width: var(--_ui-docs-tokens-search-width);
+  }
+
+  .group > [part~="header"] {
+    --ui-header-margin-top: 0;
+    --ui-header-margin-bottom: 0.5em;
+  }
+  .group + .group {
+    margin-block-start: calc(var(--_ui-docs-tokens-group-gap) - var(--_ui-docs-tokens-gap));
+  }
+  .group > .description {
+    margin-block: 0 0.75em;
+    line-height: var(--ui-line-height);
+  }
+
+  /* Default cell:  the swatch beside the value;  long values wrap between words (`light-dark(oklch(...), ...)`). */
+  .default {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5em;
+    max-width: 100%;
+  }
+  /* No fade:  a swatch follows a colour picker as it's dragged. */
+  [part~="swatch"] {
+    --ui-label-empty-size: var(--_ui-docs-tokens-swatch-size);
+    --ui-label-duration: 0s;
+  }
+  [part~="swatch"]::part(label) {
+    flex: none;
+    margin: 0;
+    box-shadow: inset 0 0 0 1px var(--_ui-docs-tokens-swatch-ring);
+  }
+
+  code {
+    font-family: var(--ui-font-family-mono, monospace);
+    font-size: 0.9em;
+    padding: 0.1em 0.3em;
+    border-radius: var(--ui-radius-s);
+    background: var(--_ui-docs-tokens-code-background);
+    /*
+     * between words, a word longer than its cell anywhere;  NOT `anywhere`, which let a phone's table squeeze the
+     * Default column to two letters a line:  the table never stacks, it scrolls sideways (epic `debut` J64)
+     */
+    overflow-wrap: break-word;
+  }
+  /*
+   * Names:  their column takes at most `--ui-docs-tokens-name-width` of the table, so the values show on a phone;
+   * a longer name breaks after one of its dashes (`--ui-button-` / `padding-block`), never inside a word.
+   * - On a desktop every name fits on one line.
+   */
+  th[scope="row"] {
+    width: var(--_ui-docs-tokens-name-width);
+    min-width: var(--_ui-docs-tokens-name-min-width);
+  }
+  /* a row's cells line up on their first line, the name's, the default's and the input's text alike */
+  tbody > tr > :is(th, td) {
+    vertical-align: baseline;
+  }
+  code.name {
+    background: none;
+    padding: 0;
+    overflow-wrap: normal;
+  }
+  th small {
+    display: block;
+    margin-block-start: 0.25em;
+    font-weight: var(--ui-font-weight-normal);
+  }
+
+  .value {
+    display: block;
+    min-width: 8em;
+  }
+}

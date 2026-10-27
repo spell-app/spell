@@ -51,7 +51,7 @@ export class RootCatalog {
 
 /**
  * What `<ui-root>` knows of a tag before its family loads:  `RootCatalogEntry`'s shape (Spell UI's `UIRoot.types.ts`).
- * - Its own, not imported:  the kit imports nothing of Spell UI, and `UIRoot.types.ts` imports `spell-ui/core` (types),
+ * - Its own, not imported:  the kit imports nothing of Spell UI, and `UIRoot.types.ts` imports `spell/ui/core` (types),
  *   which would drag the element files (JSX) into every caller's type check.
  */
 export type RootCatalogEntry = {

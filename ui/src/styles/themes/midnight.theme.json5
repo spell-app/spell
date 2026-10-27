@@ -1,0 +1,174 @@
+// Midnight:  dark first, calm and glowing, as a Spell UI theme.
+// - One of Spell's own themes, the set `UI.themes.own` lists;  applied ON TOP of `classic.css`,
+//   so every classic token it replaces is restated here.
+// - Its sheet, `midnight.css`, is GENERATED from this file:  `yarn gen:styles` (`ThemeFile`;  epic `debut` P18).
+//   What values can't say is in its rules sheets:  `rules/modern.css`, `rules/states.css` (its secondary's states), `rules/midnight.css` (the page's colour).
+// - One of the four new themes (epic `debut` P20;  Owen:  "I like "Paper", "Midnight", "Crisp" and "Pop"").
+// - What makes it Midnight:
+//   - dark, its home:  a blue-black page, panels a clear step lighter, a glowing teal primary with deep ink on it,
+//     panels' edges softly lit (a faint teal hairline, a glow under them)
+//   - light, "dawn":  a pale blue-grey page, white panels, a deep teal primary with white on it
+//   - the system font;  10px controls, 14px cards and panels, 18px modals (the box round a thing always rounder)
+//   - Apple's system colours for the hues (its palette, `apple`, Glass's and Merlot's too)
+// - NO font files ship:  every face is the platform's own.
+{
+  "$schema": "./theme.schema.json",
+  "palette": "apple",
+  "rules": ["modern", "states", "midnight"],
+  "own": {
+    "midnight-page": { "light": "#e6ecf1", "dark": "#0a0f15" },
+    "midnight-panel": { "light": "#fbfcfd", "dark": "#1a2431" },
+    "midnight-inset": { "light": "#eef2f5", "dark": "#121a24" },
+    "midnight-border": { "light": "#ccd6df", "dark": "#78dce621" },
+    "midnight-accent": { "light": "#0b6870", "dark": "#43d9cf" },
+    "midnight-on-accent": { "light": "#ffffff", "dark": "#04201f" },
+    "midnight-accent-wash": { "light": "#0b68701a", "dark": "#43d9cf24" },
+    "midnight-accent-text": { "light": "#0a5e66", "dark": "#7ce8e0" },
+    // the glow:  a soft teal light round what floats, in dark;  a plain shadow in light
+    "midnight-glow": { "light": "#14283c1a", "dark": "#43d9cf14" }
+  },
+  "typography": {
+    "size": "15px",
+    "family": {
+      "body": "system-ui, -apple-system, \"Segoe UI\", \"Noto Sans\", Cantarell, Ubuntu, \"Helvetica Neue\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Noto Color Emoji\"",
+      "heading": "{typography.family.body}",
+      "mono": "ui-monospace, \"SF Mono\", \"JetBrains Mono\", Menlo, Consolas, monospace"
+    }
+  },
+  "radii": {
+    "s": "8px",
+    "m": "10px",
+    "l": "14px"
+  },
+  "text": {
+    "ink": { "light": "#0f1a24", "dark": "#e6eef6" },
+    "body": { "light": "#1a2733", "dark": "#dbe5ef" },
+    "strong": { "light": "#0a121a", "dark": "#ffffff" },
+    "muted": { "light": "#4d5d6c", "dark": "#97a8b8" },
+    "light": { "light": "#5b6b7a", "dark": "#8596a7" }
+  },
+  "surfaces": {
+    "page": "{own.midnight-page}",
+    "panel": "{own.midnight-panel}",
+    "inset": "{own.midnight-inset}",
+    "strong": "{own.midnight-panel}",
+    "bar": "{surfaces.page}",
+    "code": "{own.midnight-inset}",
+    "highlight": "{own.midnight-accent-wash}"
+  },
+  "borders": {
+    "color": "{own.midnight-border}",
+    "strong": { "light": "#b2c0cc", "dark": "#78dce63d" },
+    "internal": "{own.midnight-border}"
+  },
+  "brand": {
+    "primary": {
+      // Primary:  deep teal in light (white on it), glowing teal in dark (deep ink on it)
+      "color": "{own.midnight-accent}",
+      "on": "{own.midnight-on-accent}",
+      "text": "{own.midnight-accent-text}",
+      "background": "{own.midnight-accent-wash}",
+      "inverted": "{own.midnight-accent}",
+      "inverted-on": "{own.midnight-on-accent}"
+    },
+    "secondary": {
+      "color": "{hues.grey.color}",
+      "on": "{hues.grey.on}",
+      "inverted": "{hues.grey.inverted}",
+      "inverted-on": "{hues.grey.inverted-on}",
+      // its states grey's own, which the Apple palette moves away from the text on it (`rules/states.css`)
+      "hover": "{hues.grey.hover}",
+      "focus": "{hues.grey.focus}",
+      "down": "{hues.grey.down}",
+      "active": "{hues.grey.active}"
+    },
+    "link": {
+      "color": { "light": "#0b6b8a", "dark": "#7cc7ff" },
+      "hover": { "light": "#074e66", "dark": "#a9dbff" }
+    },
+    "focus": {
+      "width": "3px",
+      "color": "{own.midnight-accent}"
+    }
+  },
+  "shadows": {
+    "ink": { "light": "#14283c", "dark": "#000000" },
+    "subtle": "0 1px 2px light-dark(#14283c0f, #00000066)",
+    // softly lit edges:  a teal hairline round a panel, a glow under it
+    "raised": "0 0 0 1px {own.midnight-border}, 0 2px 12px {own.midnight-glow}",
+    "floating": "0 0 0 1px {borders.strong}, 0 8px 28px light-dark(#14283c29, #0000008c), 0 0 24px {own.midnight-glow}",
+    "floating-hover": "0 0 0 1px {borders.strong}, 0 14px 40px light-dark(#14283c33, #00000099), 0 0 32px {own.midnight-glow}",
+    "overlay": "{shadows.floating-hover}"
+  },
+  "components": {
+    "button": {
+      "radius": "{radii.m}",
+      "font-weight": 500
+    },
+    "input": {
+      "radius": "{radii.m}",
+      "background": "{own.midnight-inset}",
+      "border-color": "{own.midnight-border}"
+    },
+    "dropdown": {
+      "radius": "{radii.m}"
+    },
+    "select": {
+      "background": "{components.input.background}",
+      "border-color": "{components.input.border-color}"
+    },
+    "menu": {
+      "radius": "{radii.m}",
+      "active-background": "{own.midnight-accent-wash}",
+      "active-color": "{own.midnight-accent-text}",
+      // tab bars:  an inset track, the chosen tab lit in the accent, its corners the track's less the 2px inset
+      "segmented-background": "{own.midnight-inset}",
+      "segmented-radius": "{radii.l}",
+      "segmented-padding": "2px",
+      "segmented-item-radius": "calc({radii.l} - 2px)",
+      "segmented-active-background": "{own.midnight-accent}",
+      "segmented-active-color": "{own.midnight-on-accent}",
+      // no lines between segments:  one surface, its chosen key the only mark (T7)
+      "segmented-divider": "transparent"
+    },
+    "card": {
+      "radius": "{radii.l}",
+      "shadow": "{shadows.raised}"
+    },
+    "segment": {
+      "radius": "{radii.l}"
+    },
+    "section": {
+      "radius": "{radii.l}"
+    },
+    "panel": {
+      "radius": "{radii.l}",
+      "shadow": "{shadows.raised}"
+    },
+    "message": {
+      "radius": "{radii.m}"
+    },
+    "popup": {
+      "radius": "{radii.m}"
+    },
+    "modal": {
+      "radius": "18px"
+    },
+    "bar": {
+      "panel-background": "{own.midnight-panel}"
+    },
+    "docs-nav": {
+      // the docs' side column (`<ui-docs-nav>`) in the theme's own colours, not the classic ivory and brown
+      "background": "{own.midnight-panel}",
+      "header-background": "{own.midnight-inset}",
+      "band-background": "{own.midnight-inset}",
+      "band-color": "{text.muted}",
+      "border-color": "{borders.color}",
+      "current-background": "{own.midnight-accent-wash}",
+      "current-color": "{own.midnight-accent-text}"
+    },
+    "toolbar": {
+      "button-radius": "{radii.s}"
+    }
+  }
+}

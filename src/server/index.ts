@@ -44,6 +44,7 @@ export * from "./Guard"
 export * from "./PidFile"
 export * from "./mainServer"
 export * from "./WebServer"
+export * from "./serveRoutes"
 
 export * from "./contentFolder"
 export * from "./DataFile"

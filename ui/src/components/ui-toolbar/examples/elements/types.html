@@ -1,0 +1,38 @@
+<!--
+  `<ui-toolbar>`'s types, as element markup (no class-grammar twin:  the scroll buttons are the element's own).
+  - Each sits in a narrow box, so its items overflow and its `‹` / `›` buttons show.
+-->
+<div class="ui-stack">
+  <section>
+    <h4>Toolbar</h4>
+    <ui-toolbar appearance="secondary" aria-label="Sections demo" style="max-width: 360px">
+      <ui-item link="#types" selected>Types</ui-item>
+      <ui-item link="#groups">Groups</ui-item>
+      <ui-item link="#content">Content</ui-item>
+      <ui-item link="#states">States</ui-item>
+      <ui-item link="#variations">Variations</ui-item>
+      <ui-item link="#group-variations">Group Variations</ui-item>
+    </ui-toolbar>
+  </section>
+
+  <section>
+    <h4>Segmented</h4>
+    <ui-toolbar appearance="segmented" aria-label="Segmented demo" style="max-width: 320px">
+      <ui-item selected>Examples</ui-item>
+      <ui-item>Usage</ui-item>
+      <ui-item>API</ui-item>
+      <ui-item>Theming</ui-item>
+      <ui-item>Accessibility</ui-item>
+      <ui-item>History</ui-item>
+    </ui-toolbar>
+  </section>
+
+  <section>
+    <h4>Everything fits</h4>
+    <ui-toolbar appearance="secondary" aria-label="Short demo">
+      <ui-item link="#one" selected>One</ui-item>
+      <ui-item link="#two">Two</ui-item>
+      <ui-item link="#three">Three</ui-item>
+    </ui-toolbar>
+  </section>
+</div>

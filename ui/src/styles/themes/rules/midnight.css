@@ -1,0 +1,13 @@
+/*
+ * Midnight's rules:  what its values can't say, `@layer ui.theme` (epic `debut` P20).
+ * - A rules sheet of the Midnight theme (`midnight.theme.json5`, `"rules": ["modern", "midnight"]`);  its sheet,
+ *   `midnight.css`, imports this one:  `yarn gen:styles` writes it.
+ * - In `rules/`, so no theme menu lists it (`UI.themes` reads the themes folder's top level only).
+ */
+
+@layer ui.theme {
+  /* the page's own colour;  page only:  `:root` matches nothing inside a shadow root */
+  :root {
+    background-color: var(--ui-background);
+  }
+}

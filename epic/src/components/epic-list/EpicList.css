@@ -1,0 +1,79 @@
+/*
+ * `<epic-list>` (`EpicList.tsx`):  the Epics page's list, the look `spell-doc.css` gave its groups and chips before
+ * epic `epic-engine` P3.
+ * - the SAGA CHIPS:  a pill per saga, pressed (the toolbar's deeper ivory) while its epics show, outlined while hidden
+ * - ONE grid of the groups' headings and the slotted cards, as many columns of 330px cards as fit
+ *   (`--epic-list-card-min`:  a saga page's take 260px);  each heading
+ *   across the whole row;  its `::slotted()` rules (drawn in a `<style>`) place and hide the cards
+ * - each heading:  a small eyebrow, its icon, title and count;  18px above every one but the first
+ * - the page's tokens (`--spell-*`, `spell-doc.css`), each with a fallback for a list drawn outside a docs page
+ * - Units:  px and em, never rem (WWOD §18).
+ */
+
+@layer ui.components.epic-list.types, ui.components.epic-list.content;
+
+@layer ui.components.epic-list.types {
+  :host {
+    display: block;
+    margin: 0 0 16px;
+  }
+}
+
+@layer ui.components.epic-list.content {
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 0 0 14px;
+  }
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 2px 10px;
+    border: 1px solid var(--spell-rail-edge, ButtonBorder);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--spell-muted, var(--ui-text-muted, GrayText));
+    font: 500 12.8px var(--spell-sans, system-ui, sans-serif);
+    cursor: pointer;
+
+    &:hover {
+      background: var(--spell-rail-hover, ButtonFace);
+    }
+    &[aria-pressed="true"] {
+      background: var(--spell-rail-selected, ButtonFace);
+      color: var(--spell-rail-ink, ButtonText);
+    }
+    &:focus-visible {
+      outline: 2px solid var(--ui-focus-color, var(--spell-doc-accent, Highlight));
+      outline-offset: 1px;
+    }
+  }
+  .count {
+    font-variant-numeric: tabular-nums;
+  }
+  .chip .count {
+    font-weight: 700;
+  }
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(var(--epic-list-card-min, 330px), 100%), 1fr));
+    gap: 12px;
+  }
+  .group-title {
+    display: flex;
+    grid-column: 1 / -1;
+    align-items: center;
+    gap: 6px;
+    /* with the grid's 12px gap:  18px above it, 16px from its cards, as before */
+    margin: 6px 0 4px;
+    color: var(--spell-muted, var(--ui-text-muted, GrayText));
+    font: var(--spell-eyebrow-font, 500 11px/1.2 ui-monospace, monospace);
+    letter-spacing: var(--spell-eyebrow-tracking, 0.14em);
+    text-transform: uppercase;
+  }
+  .group-title.first {
+    margin-top: 0;
+  }
+}

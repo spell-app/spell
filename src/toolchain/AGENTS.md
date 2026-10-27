@@ -20,7 +20,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - Was spell-app's root `vite.lint.ts`.
   - `spell/toolchain/lint/patterns` ([lint.patterns.ts](lint.patterns.ts)):
     the `spell-ui/*` rules, Spell UI's patterns in every set's component files
-    ("The lint guard" in [ui's AGENTS.md](../../spell-ui/AGENTS.md)).
+    ("The lint guard" in [ui's AGENTS.md](../../ui/AGENTS.md)).
   - `spell/toolchain/lint/imports` ([lint.imports.ts](lint.imports.ts)):  the `spell/*` rule, on everywhere:
     - `no-parent-import`:  no `../` import into a package's `src/`, any repo's.
       Its message names the import to write:

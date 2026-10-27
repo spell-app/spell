@@ -1,0 +1,168 @@
+/*
+ * `<epic-section>`'s PAGE sheet (`EpicSection.tsx` registers it once, `page: true`):  the RUNS of a list, and the
+ * items its state filter hides (epic `epic-engine` P45).
+ * - A list's lines are drawn as rounded cards, one per RUN of lines between unfolded items' details
+ *   (Owen, 2026-10-24:  "tops and bottoms should always be rounded"):
+ *   - a run starts at the first line showing, and right after an unfolded one (its details end the card above)
+ *   - a run ends at the last line showing, and at an unfolded one (its details follow its line)
+ *   - an unfolded line right after another is a run of its own:  rounded top and bottom
+ *   - a run's top drops the line's rule above it:  a straight line over rounded corners reads as a mistake
+ * - The Phases section's phases the same (I96):  their title rows, the open ones' bodies between them;
+ *   a run's last drops its rule below.  And the Overview's parts (`<epic-section kind="overview-part">`), the same.
+ * - By POSITION, with sibling selectors (Owen, 2026-10-25:  "This making the open things round can be done with
+ *   generic CSS, using sibling selectors ... rather than with explicit ids");  before P45 the section wrote a
+ *   `::slotted(#q1, ...)` rule per item.
+ * - Only the lines SHOWING count:  one its own `hidden` hides, or the filter (`data-epic-filtered`, which the
+ *   section writes on the items it hides, and the live patch keeps), is stepped over.
+ *   - NOTE: CSS can't step over any number of them:  up to 8 hidden lines between an unfolded line and the next one
+ *     showing (2 phases or Overview parts);  past that, the next line's top stays square.
+ * - The item sections are `ITEM_KINDS` (`EpicSection.types.ts`), written out here.
+ * - The items round their lines by their own tokens (`--epic-item-top-radius` ...);  the size is the section's
+ *   (`--_epic-run-radius`, inherited from its shadow root).
+ * - Light DOM:  the section's shadow sheet couldn't see an item's siblings (`::slotted()` takes one element).
+ */
+
+@layer ui.components.epic-section.page;
+
+@layer ui.components.epic-section.page {
+  /* ## the items the state filter hides */
+  epic-section:is([kind="questions"], [kind="judgements"], [kind="todos"], [kind="issues"], [kind="tests"])
+    > epic-item[data-epic-filtered] {
+    display: none;
+  }
+
+  /* ## an item list's runs:  each one's top */
+  epic-section:is([kind="questions"], [kind="judgements"], [kind="todos"], [kind="issues"], [kind="tests"])
+    > epic-item:not([hidden], [data-epic-filtered]):nth-child(1 of epic-item:not([hidden], [data-epic-filtered])),
+  epic-section:is([kind="questions"], [kind="judgements"], [kind="todos"], [kind="issues"], [kind="tests"])
+    > epic-item:not([hidden], [data-epic-filtered])[open]
+    + epic-item:not([hidden], [data-epic-filtered]),
+  epic-section:is([kind="questions"], [kind="judgements"], [kind="todos"], [kind="issues"], [kind="tests"])
+    > epic-item:not([hidden], [data-epic-filtered])[open]
+    + :is([hidden], [data-epic-filtered], :not(epic-item))
+    + epic-item:not([hidden], [data-epic-filtered]),
+  epic-section:is([kind="questions"], [kind="judgements"], [kind="todos"], [kind="issues"], [kind="tests"])
+    > epic-item:not([hidden], [data-epic-filtered])[open]
+    + :is([hidden], [data-epic-filtered], :not(epic-item))
+    + :is([hidden], [data-epic-filtered], :not(epic-item))
+    + epic-item:not([hidden], [data-epic-filtered]),
+  epic-section:is([kind="questions"], [kind="judgements"], [kind="todos"], [kind="issues"], [kind="tests"])
+    > epic-item:not([hidden], [data-epic-filtered])[open]
+    + :is([hidden], [data-epic-filtered], :not(epic-item))
+    + :is([hidden], [data-epic-filtered], :not(epic-item))
+    + :is([hidden], [data-epic-filtered], :not(epic-item))
+    + epic-item:not([hidden], [data-epic-filtered]),
+  epic-section:is([kind="questions"], [kind="judgements"], [kind="todos"], [kind="issues"], [kind="tests"])
+    > epic-item:not([hidden], [data-epic-filtered])[open]
+    + :is([hidden], [data-epic-filtered], :not(epic-item))
+    + :is([hidden], [data-epic-filtered], :not(epic-item))
+    + :is([hidden], [data-epic-filtered], :not(epic-item))
+    + :is([hidden], [data-epic-filtered], :not(epic-item))
+    + epic-item:not([hidden], [data-epic-filtered]),
+  epic-section:is([kind="questions"], [kind="judgements"], [kind="todos"], [kind="issues"], [kind="tests"])
+    > epic-item:not([hidden], [data-epic-filtered])[open]
+    + :is([hidden], [data-epic-filtered], :not(epic-item))
+    + :is([hidden], [data-epic-filtered], :not(epic-item))
+    + :is([hidden], [data-epic-filtered], :not(epic-item))
+    + :is([hidden], [data-epic-filtered], :not(epic-item))
+    + :is([hidden], [data-epic-filtered], :not(epic-item))
+    + epic-item:not([hidden], [data-epic-filtered]),
+  epic-section:is([kind="questions"], [kind="judgements"], [kind="todos"], [kind="issues"], [kind="tests"])
+    > epic-item:not([hidden], [data-epic-filtered])[open]
+    + :is([hidden], [data-epic-filtered], :not(epic-item))
+    + :is([hidden], [data-epic-filtered], :not(epic-item))
+    + :is([hidden], [data-epic-filtered], :not(epic-item))
+    + :is([hidden], [data-epic-filtered], :not(epic-item))
+    + :is([hidden], [data-epic-filtered], :not(epic-item))
+    + :is([hidden], [data-epic-filtered], :not(epic-item))
+    + epic-item:not([hidden], [data-epic-filtered]),
+  epic-section:is([kind="questions"], [kind="judgements"], [kind="todos"], [kind="issues"], [kind="tests"])
+    > epic-item:not([hidden], [data-epic-filtered])[open]
+    + :is([hidden], [data-epic-filtered], :not(epic-item))
+    + :is([hidden], [data-epic-filtered], :not(epic-item))
+    + :is([hidden], [data-epic-filtered], :not(epic-item))
+    + :is([hidden], [data-epic-filtered], :not(epic-item))
+    + :is([hidden], [data-epic-filtered], :not(epic-item))
+    + :is([hidden], [data-epic-filtered], :not(epic-item))
+    + :is([hidden], [data-epic-filtered], :not(epic-item))
+    + epic-item:not([hidden], [data-epic-filtered]),
+  epic-section:is([kind="questions"], [kind="judgements"], [kind="todos"], [kind="issues"], [kind="tests"])
+    > epic-item:not([hidden], [data-epic-filtered])[open]
+    + :is([hidden], [data-epic-filtered], :not(epic-item))
+    + :is([hidden], [data-epic-filtered], :not(epic-item))
+    + :is([hidden], [data-epic-filtered], :not(epic-item))
+    + :is([hidden], [data-epic-filtered], :not(epic-item))
+    + :is([hidden], [data-epic-filtered], :not(epic-item))
+    + :is([hidden], [data-epic-filtered], :not(epic-item))
+    + :is([hidden], [data-epic-filtered], :not(epic-item))
+    + :is([hidden], [data-epic-filtered], :not(epic-item))
+    + epic-item:not([hidden], [data-epic-filtered]) {
+    --epic-item-top-radius: var(--_epic-run-radius);
+    border-top: none;
+  }
+  /* each one's bottom:  an unfolded line, or the last one showing */
+  epic-section:is([kind="questions"], [kind="judgements"], [kind="todos"], [kind="issues"], [kind="tests"])
+    > epic-item:not([hidden], [data-epic-filtered])[open],
+  epic-section:is([kind="questions"], [kind="judgements"], [kind="todos"], [kind="issues"], [kind="tests"])
+    > epic-item:not([hidden], [data-epic-filtered]):nth-last-child(1 of epic-item:not([hidden], [data-epic-filtered])) {
+    --epic-item-bottom-radius: var(--_epic-run-radius);
+  }
+
+  /* ## the Phases section's runs:  a phase rounds its title row by its own tokens */
+  epic-section[kind="phases"] > epic-phase:not([hidden]):nth-child(1 of epic-phase:not([hidden])),
+  epic-section[kind="phases"] > epic-phase:not([hidden])[open] + epic-phase:not([hidden]),
+  epic-section[kind="phases"]
+    > epic-phase:not([hidden])[open]
+    + :is([hidden], :not(epic-phase))
+    + epic-phase:not([hidden]),
+  epic-section[kind="phases"]
+    > epic-phase:not([hidden])[open]
+    + :is([hidden], :not(epic-phase))
+    + :is([hidden], :not(epic-phase))
+    + epic-phase:not([hidden]) {
+    --epic-phase-top-radius: var(--_epic-run-radius);
+  }
+  epic-section[kind="phases"] > epic-phase:not([hidden])[open],
+  epic-section[kind="phases"] > epic-phase:not([hidden]):nth-last-child(1 of epic-phase:not([hidden])) {
+    --epic-phase-bottom-radius: var(--_epic-run-radius);
+    border-bottom: none;
+  }
+
+  /* ## the Overview's parts, as the phases (Owen, 2026-10-25:  "1.3 top and 1.4 bottom should be rounded") */
+  epic-overview
+    > epic-section[kind="overview-part"]:not([hidden]):nth-child(1 of epic-section[kind="overview-part"]:not([hidden])),
+  epic-overview
+    > epic-section[kind="overview-part"]:not([hidden])[open]
+    + epic-section[kind="overview-part"]:not([hidden]),
+  epic-overview
+    > epic-section[kind="overview-part"]:not([hidden])[open]
+    + :is([hidden], :not(epic-section[kind="overview-part"]))
+    + epic-section[kind="overview-part"]:not([hidden]),
+  epic-overview
+    > epic-section[kind="overview-part"]:not([hidden])[open]
+    + :is([hidden], :not(epic-section[kind="overview-part"]))
+    + :is([hidden], :not(epic-section[kind="overview-part"]))
+    + epic-section[kind="overview-part"]:not([hidden]) {
+    --epic-part-top-radius: var(--_epic-run-radius, 8px);
+  }
+  epic-overview > epic-section[kind="overview-part"]:not([hidden])[open],
+  epic-overview
+    > epic-section[kind="overview-part"]:not([hidden]):nth-last-child(
+      1 of epic-section[kind="overview-part"]:not([hidden])
+    ) {
+    --epic-part-bottom-radius: var(--_epic-run-radius, 8px);
+    border-bottom: none;
+  }
+
+  /*
+   * top-level sections in a RUN (Owen, 2026-10-26:  "top of group 7 shouldn't be square, bottom of 7 & top of 8 should
+   * be square"):  a FOLDED section touches the one after it, so its bottom and that one's top are square;  the run's
+   * free ends stay round (`EpicSection.css` reads the two)
+   */
+  epic-section:not([kind="overview-part"], [hidden], [open]):has(+ epic-section:not([kind="overview-part"], [hidden])) {
+    --epic-section-bottom-radius: 0px;
+  }
+  epic-section:not([kind="overview-part"], [hidden], [open]) + epic-section:not([kind="overview-part"], [hidden]) {
+    --epic-section-top-radius: 0px;
+  }
+}

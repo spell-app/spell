@@ -1,0 +1,111 @@
+<spell-notebook "tree-diagram usage">
+	<header level="1">
+		Tree diagram
+		<header>A tree diagram draws a tree top-down:  a box for each node, a line to each of its children.</>
+	</>
+	<tree-diagram-tab-bar showing="usage"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#using-it">Using it</>
+				<ui-item link="#from-script">From script</>
+				<ui-item link="#size">Size</>
+				<ui-item link="#keyboard">Keyboard</>
+				<ui-item link="#accessibility">Accessibility</>
+			</>
+		</>
+	</>
+
+	<!-- USAGE:  the data contract, the two ways to give it, sizing, framework snippets, accessibility. -->
+	<section label="Using it">
+		<markdown>
+			A tree diagram draws any tree from plain data: it knows nothing about where the tree came from. Each
+			node is a `TreeDiagramNode` (exported by `spell-ui`):
+
+			| Field | What it is |
+			|---|---|
+			| `label` | The box's text, e.g. `If`, `Variable number`, `Number 15`. Required. |
+			| `detail` | A second, smaller, muted line under the label, e.g. a datatype `number`. |
+			| `slot` | Text on the line from its parent, e.g. `condition`, `body`, `otherwise`. |
+			| `title` | Hover text on its box, e.g. the source it came from. |
+			| `children` | Its children, left to right. |
+
+			Give the tree one of two ways:
+
+			- The `tree` property, from script or a framework. It redraws whenever `tree` is set again: set a NEW
+			  tree, since a tree changed in place isn't seen.
+			- A `<script type="application/json">` child holding the tree as JSON, for a static page with no script
+			  of its own (it works from `file://` too). The diagram follows the child if the page changes it.
+
+			The property wins when both are there; setting it back to `undefined` shows the child's tree again. With
+			no tree, or JSON that doesn't parse, it draws nothing and takes no room; bad JSON also logs one console
+			warning. Data is checked, not trusted: a node without a `label` gets an empty box, and anything that
+			isn't a node is left out.
+		</>
+		<markdown>
+			```html
+			{ "label": "Add", "children": [{ "label": "Number 1" }, { "label": "Number 2" }] }
+			```
+		</>
+	</>
+
+	<section label="From script">
+		<markdown>
+			Set `tree` on the element. In Solid, pass it as a plain prop, `tree={...}`:  the element takes the
+			object whole, as its property.
+		</>
+		<markdown>
+			```js
+			import "spell/ui/ui-tree-diagram"
+
+			const diagram = document.querySelector("ui-tree-diagram")
+			diagram.tree = {
+			  label: "If",
+			  children: [
+			    { label: "IsA · integer", slot: "condition", detail: "boolean" },
+			    { label: "Print", slot: "body" }
+			  ]
+			}
+			```
+		</>
+		<markdown>
+			```tsx
+			import type { TreeDiagramNode } from "spell/ui"
+
+			function ParseTree(props: { tree: TreeDiagramNode }) {
+			  return <ui-tree-diagram tree={props.tree} />
+			}
+			```
+		</>
+	</>
+
+	<section label="Size">
+		<markdown>
+			A tree is laid out tidy: each depth a row, each parent centred over its children, no two boxes or
+			slot labels overlapping. Boxes are sized to their text, in a monospace font.
+
+			It draws at its natural size, `--ui-tree-diagram-font-size` (13px in 16px text) for labels, and never
+			larger. In a narrower column it shrinks to fit, down to `--ui-tree-diagram-min-scale` (three quarters);
+			a tree wider than that scrolls sideways inside the element instead of shrinking past readable.
+		</>
+	</>
+
+	<section label="Keyboard">
+		<markdown>
+			Nothing in a tree diagram takes focus: it's a picture. A tree wide enough to scroll scrolls with the
+			scrollbar or a trackpad; browsers that make scrolling boxes focusable also let the arrow keys scroll it.
+		</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			- The drawing is one `<svg role="img">`, named by a summary of its root: "Tree: If, with 3 children"
+			  (translatable).
+			- A node's `title` is its box's `<title>`: hover text for a pointer.
+			- The summary doesn't read out the whole tree. Where its shape matters to a reader, say it in the
+			  text around the diagram too.
+			- If drawing fails, the element shows the tree as nested lists instead, which a screen reader reads in
+			  full.
+		</>
+	</>
+</spell-notebook>

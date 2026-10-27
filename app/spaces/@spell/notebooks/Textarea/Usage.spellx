@@ -1,0 +1,114 @@
+<spell-notebook "textarea usage">
+	<header level="1">
+		Textarea
+		<header>A textarea is a multi-line field used to elicit a longer response.</>
+	</>
+	<textarea-tab-bar showing="usage"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#using-it">Using it</>
+				<ui-item link="#forms-and-validation">Forms and validation</>
+				<ui-item link="#events">Events</>
+				<ui-item link="#keyboard">Keyboard</>
+				<ui-item link="#accessibility">Accessibility</>
+				<ui-item link="#framework-usage">Framework usage</>
+			</>
+		</>
+	</>
+
+	<!-- USAGE:  forms, validation, events, keyboard, accessibility, frameworks. -->
+	<section label="Using it">
+		<markdown>
+			`<ui-textarea>` is a multi-line field. It shares its family, sheet, sizes, states and tokens with
+			[`<ui-input>`](/components/ui/ui-input.html), so most attributes are the same: `size`, `state`, `fluid`, `appearance`,
+			`inverted`, `placeholder`.
+
+			- `rows` sets the visible lines; without it the field is Fomantic's form height (12em, between 8em and 24em).
+			- No `icon`, `label` or `action`: those are `<ui-input>`'s.
+		</>
+	</>
+
+	<section label="Forms and validation">
+		<markdown>
+			A textarea is a real form control: inside a `<form>` its `name` / `value` is submitted with it.
+
+			- The `value` ATTRIBUTE is the starting value and the `value` PROPERTY the live one; `form.reset()` goes back to
+			  the attribute, and a disabled `<fieldset>` disables it.
+			- `readonly` keeps the value in the submission, `disabled` leaves it out.
+			- `required`, `minlength` and `maxlength` validate natively; the `rules` property adds Fomantic's rules on top
+			  (`["notEmpty", "minLength[20]"]`).
+			- The field only shows as invalid once the user has interacted with it, as `:user-invalid` does.
+			- **Enter** types a new line; it never submits the form.
+		</>
+	</>
+
+	<section label="Events">
+		<markdown>
+			- `ui-input` fires on every keystroke, with `event.detail.value`.
+			- `ui-changed` fires when the user commits: when the field loses focus after an edit.
+			- Setting `value` from a `ui-input` handler wins over what was typed, so a handler can reformat or reject input.
+		</>
+		<markdown>
+			```js
+			const bio = document.querySelector("ui-textarea[name=bio]")
+			bio.rules = ["notEmpty", "maxLength[280]"]
+			bio.addEventListener("ui-input", (event) => console.log(280 - event.detail.value.length, "left"))
+			bio.addEventListener("ui-changed", (event) => console.log(event.detail.value, bio.validity.valid))
+			```
+		</>
+	</>
+
+	<section label="Keyboard">
+		<markdown>
+			The shadow root holds a real `<textarea>`, so the browser does the keyboard work.
+
+			- **Tab** / **Shift+Tab** moves focus to and from the field; the host delegates focus, so it is never a tab stop
+			  of its own, and clicking the host focuses the control.
+			- **Enter** types a new line.
+		</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			- Typing, selection, autofill and the on-screen keyboard come from the browser's own control.
+			- Name the field with a `<label for>` pointing at the host's `id` (as in a form) or an `aria-label` on the host;
+			  either becomes the control's accessible name. A `placeholder` is not a label.
+			- A field that fails validation after the user has touched it gets `aria-invalid="true"`; a `<ui-form>` marks
+			  failing fields the same way.
+			- If the element fails to render, its native fallback keeps the same box with a plain native
+			  `<textarea>`: it still submits, validates its native constraints and fires `ui-input` / `ui-changed`.
+			  It drops `rules`, the invalid state, reset to the starting value, and naming through `<label for>`
+			  (only `aria-label` or `placeholder` name the control).
+		</>
+	</>
+
+	<section label="Framework usage">
+		<markdown>Bind `value` as a property to control the field, set `rules` as a property, and listen for `ui-input`.</>
+		<header level="4" id="framework-react">React 19</>
+		<markdown>
+			```jsx
+			<ui-textarea name="bio" rows="4" value={bio} onui-input={(e) => setBio(e.detail.value)} />
+			```
+		</>
+		<header level="4" id="framework-vue">Vue 3.5</>
+		<markdown>
+			```html
+			<!-- compilerOptions.isCustomElement = (tag) => tag.startsWith("ui-") -->
+			<ui-textarea name="bio" rows="4" :value="bio" @ui-input="(e) => (bio = e.detail.value)" />
+			```
+		</>
+		<header level="4" id="framework-solid">Solid 2</>
+		<markdown>
+			```jsx
+			// events and rich data are plain props:  `on-<event>={...}`, `options={...}`
+			<ui-textarea
+			  name="bio"
+			  rows="4"
+			  value={bio()}
+			  on-ui-typed={(e) => setBio(e.detail.value)}
+			/>
+			```
+		</>
+	</>
+</spell-notebook>

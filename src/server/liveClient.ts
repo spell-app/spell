@@ -1031,7 +1031,7 @@ export type KeyPlace = { apple: boolean; field?: "text" | "rich" }
  * - `"page"`:  the page's own file (`file`), or the file at its own address (`address`, a folder's as its
  *   `index.html`)
  *   - why the address:  a component set's page is reported where it's served (`/components/ui/ui-button.html`),
- *     while its `file` is its path in the checkout (`/spell-ui/docs/ui-button.html`;  epic `epic-engine` P40)
+ *     while its `file` is its path in the checkout (`/ui/docs/ui-button.html`;  epic `epic-engine` P40)
  * - `"style"`:  a stylesheet:  swapped in place, if the page uses it
  * - `"script"`:  a script the page loaded (`scripts`), or one in the same folder as one it loaded
  *   (a rebuilt bundle's lazy chunks get new names):  HOT RELOAD

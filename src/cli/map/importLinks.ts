@@ -3,7 +3,7 @@ import type { ImportStatement, MappedRepo } from "./map.types"
 /**
  * Reading imports, and finding the file a package-name import means:  what graphify can't do for our repos.
  * - graphify links `./Peer` imports itself, but every other import of ours is by package name
- *   (`spell/util/node/json5`, `spell-ui/components/ui-button/UIButton`), which it leaves unresolved.
+ *   (`spell/util/node/json5`, `spell/ui/components/ui-button/UIButton`), which it leaves unresolved.
  * - Plain text, no TypeScript:  fast over 3,000 files, and wrong only on an import inside a string or comment.
  */
 
@@ -26,7 +26,7 @@ export function importsOf(text: string): ImportStatement[] {
 
 /**
  * The file a package-name import means, relative to the checkout's root:  `spell/util/node/json5` =>
- * `src/util/node/json5.ts`;  `spell-ui/components/ui-button` => `spell-ui/src/components/ui-button/index.tsx`.
+ * `src/util/node/json5.ts`;  `spell/ui/components/ui-button` => `ui/src/components/ui-button/index.tsx`.
  * - `exists`:  whether a file is there, relative to the checkout's root
  * - the shapes tried are the package's `exports` (the kit's `AGENTS.md`, "Imports across repos"):  `.ts`, `.tsx`,
  *   a folder's `index.ts` / `index.tsx`, or the name as written
@@ -37,7 +37,10 @@ export function moduleFileFor(
   repos: MappedRepo[],
   exists: (path: string) => boolean
 ): string | undefined {
-  const repo = repos.find((each) => from === each.packageName || from.startsWith(`${each.packageName}/`))
+  // the longest name first:  `spell/ui/x` is the ui folder's, not the kit's `src/ui/x`
+  const repo = [...repos]
+    .sort((a, b) => b.packageName.length - a.packageName.length)
+    .find((each) => from === each.packageName || from.startsWith(`${each.packageName}/`))
   if (!repo) return undefined
   const rest = from.slice(repo.packageName.length + 1).replace(/\.tsx?$/, "")
   const base = [repo.folder, "src", rest].filter(Boolean).join("/")

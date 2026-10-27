@@ -1,0 +1,21 @@
+✅ test counting from zero
+  ▶️ Executing   `the rack is a new rack`
+  ✅ As expected `the letter of tile 0 of the rack` is `"A"`
+  ✅ As expected `the letter of tile 1 of the rack` is `"B"`
+  ✅ As expected `the letter of tile -1 of the rack` is `"E"`
+  ✅ As expected `the letter of the first tile of the rack` is `"A"`
+  ✅ As expected `the letter of the second tile of the rack` is `"B"`
+  ✅ As expected `the letter of the last tile of the rack` is `"E"`
+  ▶️ Executing   `set the start to the first tile of the rack`
+  ✅ As expected `the position of the start in the rack` is `0`
+  ▶️ Executing   `set the front to tiles 0 to 2 of the rack`
+  ✅ As expected `the number of tiles in the front` is `3`
+  ✅ As expected `the letter of the last tile of the front` is `"C"`
+  ▶️ Executing   `set the back to last two tiles of the rack`
+  ✅ As expected `the number of tiles in the back` is `2`
+  ✅ As expected `the letter of the first tile of the back` is `"D"`
+  ▶️ Executing   `set the positions to a new list of numbers`
+  ▶️ Executing   `for each tile, position in the front`
+  positions: 0, 1, 2
+  ▶️ Executing   `remove tile 0 of the rack`
+  ✅ As expected `the letter of the first tile of the rack` is `"B"`

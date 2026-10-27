@@ -1,0 +1,58 @@
+<spell-notebook "loader theming">
+	<header level="1">
+		Loader
+		<header>A loader alerts a user to wait for an activity to complete.</>
+	</>
+	<loader-tab-bar showing="theming"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#tokens">Tokens</>
+				<ui-item link="#themes">Themes</>
+			</>
+		</>
+	</>
+
+	<!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
+	<section label="Tokens">
+		<markdown>
+			Theme with the public `--ui-loader-*` tokens: set one on the element, on any ancestor (a region, `:root`), or on
+			the inner box through `::part(loader)`. They inherit into the shadow root, where the sheet reads each through a
+			private alias, so nothing inside blocks them.
+		</>
+		<markdown>
+			```css
+			/* every loader on the page */
+			:root {
+			  --ui-loader-speed: 0.8s;
+			}
+			/* one kind, on its box */
+			ui-loader.thick::part(loader) {
+			  --ui-loader-line-width: 0.3em;
+			}
+			```
+		</>
+		<message state="info" size="small">
+			<markdown>
+				`--ui-loader-slow` and `--ui-loader-fast` are ratios of `--ui-loader-speed`, so one change paces every style,
+				`indeterminate` included. Never set the `--_ui-loader-*` / `--_loader-*` names: they're the sheet's private
+				plumbing.
+			</>
+		</>
+		<markdown>Edit a value below to try it.</>
+		<html>
+			<ui-docs-tokens family="ui-loader" playground>
+				<div style="position: relative; height: 8em; border: 1px solid var(--ui-border-color); border-radius: var(--ui-radius)">
+					<ui-loader visible></>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="Themes">
+		<markdown>
+			The theme menu above picks the theme for every page of the site:  Spell, Glass, Fruity or Merlot,
+			each restyling this component through its tokens.
+		</>
+	</>
+</spell-notebook>

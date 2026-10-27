@@ -129,6 +129,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - [Test helpers](test/checkouts.ts) that fake one:  `fakeMainCheckout()`, `fakeWorktree()`.
   - [proxy.ts](proxy.ts) -- `proxyTo()` / `proxyUpgrade()`:  HTTP and websockets to another local server
   - `WebServer` -- all of the above on node's HTTP server
+  - [serveRoutes.ts](serveRoutes.ts) -- `serveRoutes()`, `folderRoute()`:  a small loopback server for a command's
+    page (spell-app's `spell run`), each path answered with text, a file, or 404 (epic `coherence` P25)
   - [untilInterrupted.ts](untilInterrupted.ts) -- run until `Ctrl-C`
   - `CommandRun`, in [runs/](runs/CommandRun.ts) -- a command asking Owen on a page (epic `epic-engine` P23):
     its rows in the content folder's `pages/runs/<id>/`, waiting for his Send, his answers read back
@@ -181,7 +183,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         (cloned in the kit, else in its `node_modules`), lowest first.
         - names no child repo:  the list is the kit's data, so the server runs with any set of repos installed
         - every path in a part is from ITS repo's folder;
-          merged, from `root` (`spell-ui/docs` from the kit, `../spell-ui/docs` read for spell-app's folder)
+          merged, from `root` (`ui/docs` from the kit, `../ui/docs` read for spell-app's folder)
         - lists end to end;  maps (`componentSets`, `engineRoutes`, `localCopies`) entry by entry, a later repo winning
         - outside a kit:  `root`'s own `package.json` alone (the tests' scratch checkouts)
       - `componentSets()` and `engineRoutes()` read their two lists out of them;  `repoSettings()` reads one part.
@@ -208,7 +210,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - It mounts every worktree's files at `/worktrees/<w>/`, once a route module says where they are:
       `serveWorktrees(dir)` (epic `epic-eject` P4).
       - The running epics' route module does, in the main checkout:
-        [runningRoutes.ts](../../spell-epic/src/list/runningRoutes.ts) (spell-epic's), which also answers
+        [runningRoutes.ts](../../epic/src/list/runningRoutes.ts) (spell-epic's), which also answers
         `/api/epics/running`.
       - Why:  the worktrees' folder is in the repo's epic settings (`.epic/config.json5`, read by epics' `EpicConfig`),
         and this package imports no other.
@@ -228,7 +230,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - A kit without spell-epic answers "not found" there, and loads no epic route module.
       - Live reload reports a change in one at its route.
     - Route modules add to every page's `window.SPELL_SERVER`:  `addPageConfig()`.
-      - e.g. epics' airplane mode ([airplaneRoutes.ts](../../spell-epic/src/tools/airplaneRoutes.ts)),
+      - e.g. epics' airplane mode ([airplaneRoutes.ts](../../epic/src/tools/airplaneRoutes.ts)),
         whose switch, `AirplaneMode`, moved to epics in `epic-eject` P4.
     - Tests set a route module up by hand with `server.routeContext()`.
     - Every call is under `/api/`, one prefix per package that answers it.
@@ -282,7 +284,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         at the first request at its sets' addresses, then watched;  while it builds, those requests wait, pages too
     - Spell projects' compiled output (`build/`, never committed) is built the same way,
       but by the app's route module, not here.
-      - [ProjectBuild](../../spell-app/src/spaces/server/node/routes/ProjectBuild.ts), in spaces' routes,
+      - [ProjectBuild](../../app/src/spaces/server/node/routes/ProjectBuild.ts), in spaces' routes,
         runs `spell compile --stale --all @spell/examples @spell/library` as the page server starts.
       - The page server knows nothing of spell projects.
   - `spell/server/site/...` -- browser code:
@@ -314,7 +316,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         ```
 
       - `WebServer` imports the leaf, never the browser-only barrel.
-    - An epic's state and the Epics page's cards left for `spell-epic/list/` (epic `people-and-orgs` P16).
+    - An epic's state and the Epics page's cards left for `spell/epic/list/` (epic `people-and-orgs` P16).
       - `EpicState`, `EpicCards`
   - `spell/server/test/...` -- test helpers (`serveHandler`, `ask`)
 - Commands:
@@ -403,8 +405,8 @@ The steps between a page's content and its file on disk, for every tool that wri
       - in the shared content folder (`contentFolderOf()`), laid under the checkout:
         its folders the checkout has none of are found there (`Linker`'s `content`)
     - the epic engine's code, docs tools included:  spell-epic's `src/`, through the checkout's `spell-epic` link
-- The docs tools are JavaScript:  [doc-links.js](../../spell-epic/src/tools/doc-links.js) imports the kit's server.
-  - So it runs under `tsx`:  `docLinksRun()`, in the docs tools' [pages.js](../../spell-epic/src/tools/pages.js).
+- The docs tools are JavaScript:  [doc-links.js](../../epic/src/tools/doc-links.js) imports the kit's server.
+  - So it runs under `tsx`:  `docLinksRun()`, in the docs tools' [pages.js](../../epic/src/tools/pages.js).
 
 ## Express, on purpose
 

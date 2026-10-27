@@ -1,0 +1,65 @@
+<spell-notebook "menu theming">
+	<header level="1">
+		Menu
+		<header>A menu displays grouped navigation actions.</>
+	</>
+	<menu-tab-bar showing="theming"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#tokens">Tokens</>
+				<ui-item link="#themes">Themes</>
+			</>
+		</>
+	</>
+
+	<!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
+	<section label="Tokens">
+		<markdown>
+			Theme with the public `--ui-menu-*` tokens: set one on the element, on any ancestor (a header, `:root`), or on
+			the menu's box through `::part(menu)`. The items read them from the menu, so set them there or above, not on an
+			item. Style an item's box with `ui-item::part(item)`.
+		</>
+		<markdown>
+			```css
+			ui-menu {
+			  --ui-menu-radius: 0;
+			  --ui-menu-item-padding: 0.75em 1.5em;
+			}
+			/* one menu's current item */
+			ui-menu.site-nav {
+			  --ui-menu-active-background: var(--ui-primary);
+			  --ui-menu-active-color: white;
+			}
+			```
+		</>
+		<message state="info" size="small">
+			<markdown>
+				A variation swaps its own values in over the generic tokens, so a theme's `:root` look for the plain menu
+				never leaks into a secondary or text one. What `direction="vertical"` and the `secondary`, `text` and `segmented` looks swap has a
+				token of its own, `--ui-menu-<variation>-*`: `--ui-menu-secondary-item-padding`,
+				`--ui-menu-vertical-icon-float`, `--ui-menu-text-item-color`, `--ui-menu-segmented-active-shadow` ... (all
+				in the table below). `--ui-menu-active-first-radius` / `--ui-menu-active-last-radius` default to the
+				menu's own corners on that side, by layout. Never set the `--_ui-*` names: they're the sheet's private
+				plumbing.
+			</>
+		</>
+		<markdown>Edit a value below to try it.</>
+		<html>
+			<ui-docs-tokens family="ui-menu" playground>
+				<ui-menu items="3" aria-label="Menu demo">
+					<ui-item link="#editorials" selected>Editorials</>
+					<ui-item link="#reviews">Reviews</>
+					<ui-item link="#events">Upcoming Events</>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="Themes">
+		<markdown>
+			The theme menu above picks the theme for every page of the site:  Spell, Glass, Fruity or Merlot,
+			each restyling this component through its tokens.
+		</>
+	</>
+</spell-notebook>

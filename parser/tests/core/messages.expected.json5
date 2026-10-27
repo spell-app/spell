@@ -1,0 +1,17 @@
+{
+  "about": "The core messages in English, by key:  the JavaScript core's CORE_MESSAGES (core.types.ts) and spell_core's MESSAGES (messages.py) must both be these.  Read by tests/core/messages.test.ts and tests/py/core/tests/test_messages.py.",
+  "messages": {
+    "expect-passed": "As expected {what} is {expected}",
+    "expect-failed": "Unexpected: {what} should be {expected} but is actually {actual}",
+    "expect-truthy": "truthy",
+    "test-step": "▶️ Executing   {step}",
+    "test-threw": "Error in test {test}:",
+    "cant-draw": "⚠ {type} can't draw",
+    "confirm-default": "{question} (yes)",
+    "drop-event": "{thing}-drop",
+    "undo": "Undo",
+    "undo-step": "Undo {step}",
+    "redo": "Redo",
+    "redo-step": "Redo {step}"
+  }
+}

@@ -14,7 +14,7 @@ import { CATALOG_FILE, WORDS_FILE, type ScoreSearch, type ScoreSearches } from "
  *
  *   - the search first:  git's Perl regex (`git grep -P`), matched one line at a time
  *   - `in`:  only those paths;  `home`:  the mechanism's own files;  `not`:  paths left out
- *   - every path from the kit's root (`src/server/Git.ts`, `spell-ui/src/runtime/`), a file or a folder
+ *   - every path from the kit's root (`src/server/Git.ts`, `ui/src/runtime/`), a file or a folder
  *   - words after a part's paths are for people:  `not \`x.ts\` (it loads before the kit)`
  * - A line may wrap:  the lines under it, indented, that aren't a bullet of their own, are its.
  * - Also left out of every search:  each path an entry's "Fine:" lines name, and the paths under "Fine as it is".
@@ -129,7 +129,7 @@ function codeSpans(text: string): string[] {
   return [...text.matchAll(/`([^`]+)`/g)].map((match) => match[1]!)
 }
 
-/** The code spans of `text` that are paths from the kit's root:  `spell-epic/src/tool/InboxPoller.mjs`, `src/x/`. */
+/** The code spans of `text` that are paths from the kit's root:  `epic/src/tool/InboxPoller.mjs`, `src/x/`. */
 function pathsIn(text: string): string[] {
   return codeSpans(text).filter((span) => /^[\w.@-]+(\/[\w.@-]+)+\/?$/.test(span) && !span.includes(".."))
 }

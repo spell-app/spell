@@ -1,0 +1,47 @@
+# `spell-__pack__` -- a component pack of `<__prefix__*>` elements
+
+Custom elements a page loads ON DEMAND:  `<ui-root>` reads the pack's script (`src/components/__pack/__pack__.pack.js`, a classic
+script, so it works from `file://` too) when the page names it, shows each tag's skeleton until it's defined, then
+defines them all.  Written exactly like Spell UI's own element families, on its `spell/ui/core`.
+
+```html
+<ui-root>
+  <ui-components source="../../spell-__pack__/src/components/__pack/__pack__.pack.js"></ui-components>
+  <__prefix__...> ... </__prefix__...>
+</ui-root>
+```
+
+The page must load Spell UI's docs bundle (`/_epic/assets/spell-ui.js`, spell-epic's) first:  the pack registers
+there (`SpellUI.registerPack()`) and takes Solid and Spell UI's shared code from it (`SpellUI.packModules`).
+
+## The DRY rule (one of each)
+
+If you find yourself writing a second copy of any of these, stop and reuse.
+
+- the pack's build, catalog and staleness check:  the kit's, `spell-pack` (`spell/element-tools/ComponentPack`)
+- reading a vocabulary's tag and skeleton:  the kit's `RootCatalog` (`spell/element-tools/RootCatalog`)
+- the element authoring API:  `spell/ui/core`
+
+## Files
+
+| Path | What |
+| --- | --- |
+| `src/components/<tag>/` | one element family:  component, vocabulary, sheet, barrel |
+| `src/components/index.ts` | `spell-__pack__/components`:  every family barrel (defines every tag:  SIDE EFFECT) |
+| `src/index.ts` | `spell-__pack__`:  code the elements share |
+| `tests/components/<tag>/` | each family's test, at the same path as its code |
+| `tests/pack.test.ts` | runs `yarn pack:check`:  `src/components/__pack/` is current |
+| `src/components/__pack/` | GENERATED, committed:  `__pack__.catalog.ts`, `__pack__.entry.ts`, `__pack__.pack.js` |
+| `vite.config.ts` | lint and format only:  the build is the kit's pack tooling (`spell-pack`) |
+| `vitest.config.ts` | `node` (`tests/*.test.ts`) and `browser` (`tests/components/`) projects |
+
+## Adding a new element
+
+1. `spell pack add __pack__ __prefix__<name>`:  writes `src/components/__prefix__<name>/` and its test, adds it to
+   `src/components/index.ts` and `package.json`'s `exports`, and rebuilds `src/components/__pack/`
+2. Fill in its vocabulary (description, `topics`, `aka`, attributes, parts, skeleton), its class and sheet
+3. `yarn pack:build`, then `yarn review`;  commit `src/components/__pack/` with the change
+
+## Deferred
+
+- Docs pages for the elements (Spell UI's site data reads only Spell UI's own families)

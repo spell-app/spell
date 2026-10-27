@@ -1,0 +1,23 @@
+{
+  // Spell UI's BROWSER code, ONE TypeScript program (epic `repo-split` P14, Q47):
+  // everything in `src/` but the node tools and the `spell` commands, and the docs site bundle's entry (`site/_src`).
+  // - It extends the settings every repo shares, the kit's toolchain's (`spell/toolchain/tsconfig.base.json`).
+  // - NO `paths`:  every file is imported by its package name and its path under `src/`
+  //   (`spell/ui/components/ui-button/UIButton`), Spell UI's own files too.
+  //   `customConditions` makes TypeScript read Spell UI's SOURCE for its own name (`exports`, `spell-source`),
+  //   where another repo reads its built declarations (`types`).
+  // - The node code (`src/tools`, `src/cli`, `scripts/`, the Vite configs) is `tsconfig.node.json`'s.
+  // - The declarations build (`spell-types`, the `package.json`'s `"spellTypes"`) builds both into `dist-types/`.
+  "extends": "spell/toolchain/tsconfig.base.json",
+  "compilerOptions": {
+    "customConditions": ["spell-source"],
+    "target": "ES2022",
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "jsx": "preserve",
+    "jsxImportSource": "@solidjs/web",
+    "types": ["vite/client"]
+  },
+  "include": ["src", "site/_src"],
+  // `site/`:  only `site/_src` (the site bundle's entry);  the rest is pages, data and the built bundle
+  "exclude": ["node_modules", "src/tools", "src/cli"]
+}

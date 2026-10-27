@@ -1,0 +1,95 @@
+/*
+ * `<epic-send>` (`EpicSend.tsx`):  a details page's Send, at the right of its sticky header.
+ * - Where the answer stands, the draft's save (muted), then Send and its countdown (`<epic-send-buttons>`, which draws
+ *   the fill rule itself), then who hears it (a green dot while a session waits).
+ * - Under them, on its own line:  a draft's save that failed (red, bold:  epic `epic-engine` P15),
+ *   a send's error, else what a send nobody waited for did (orange:  a warning).
+ * - Public tokens (`--epic-send-*`) are never declared here:  read through private aliases.
+ */
+
+@layer ui.components.epic-send.types;
+
+@layer ui.components.epic-send.types {
+  :host {
+    display: block;
+    flex: 0 1 auto;
+    min-width: 0;
+    margin-inline-start: auto;
+  }
+  :host([hidden]) {
+    display: none;
+  }
+  .row {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+  /* too narrow (the side bar):  the draft's save gives way first, then who hears it;  where it stands, never */
+  .state {
+    flex: none;
+    overflow: hidden;
+    color: var(--ui-text-muted, GrayText);
+    font: 600 0.8rem var(--ui-font-family, inherit);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .state[data-color="green"] {
+    color: var(--ui-green-text, #1a7f37);
+  }
+  .state[data-color="blue"] {
+    color: var(--ui-blue-text, #1a69a4);
+  }
+  .draft {
+    overflow: hidden;
+    flex: 0 3 auto;
+    min-width: 0;
+    color: var(--ui-text-muted, GrayText);
+    font: 0.75rem var(--ui-font-family, inherit);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .send {
+    flex: none;
+  }
+  .who {
+    overflow: hidden;
+    flex: 0 1 auto;
+    min-width: 0;
+    color: var(--ui-text-muted, GrayText);
+    font: 0.75rem var(--ui-font-family, inherit);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  /* a session waits:  a green dot before the words, as the comments' Send draws it */
+  .who[data-listening]::before {
+    content: "";
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    margin-inline-end: 5px;
+    border-radius: 50%;
+    background: var(--ui-green, #21ba45);
+    vertical-align: 1px;
+  }
+  .notice {
+    max-width: 32em;
+    margin: 4px 0 0;
+    color: var(--ui-orange-text, var(--ui-orange, #f2711c));
+    font-size: 0.8rem;
+    line-height: 1.35;
+    text-align: end;
+  }
+  .error {
+    max-width: 32em;
+    margin: 4px 0 0;
+    color: var(--ui-error-text, var(--ui-red, #db2828));
+    font-size: 0.8rem;
+    line-height: 1.35;
+    text-align: end;
+  }
+  /* a save that failed says so loudly (epic `epic-engine` P15) */
+  .draft-failed {
+    font-weight: 600;
+  }
+}

@@ -1,0 +1,133 @@
+<spell-notebook "slider usage">
+	<header level="1">
+		Slider
+		<header>A slider allows users to select values within a range.</>
+	</>
+	<slider-tab-bar showing="usage"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#using-it">Using it</>
+				<ui-item link="#events">Events</>
+				<ui-item link="#forms">Forms</>
+				<ui-item link="#keyboard">Keyboard</>
+				<ui-item link="#accessibility">Accessibility</>
+				<ui-item link="#framework-usage">Framework usage</>
+			</>
+		</>
+	</>
+
+	<!-- USAGE:  how to use it (values, labels, events, forms), keyboard, accessibility, framework snippets. -->
+	<section label="Using it">
+		<markdown>
+			Write `<ui-slider>` and name it with `aria-label` or a `<label for>`. Fomantic's settings are attributes:
+
+			- `min` / `max` / `step` default to Fomantic's 0, 20 and 1; `step="0"` allows any value.
+			- `value` is Fomantic's `start`; a `range` adds `end`. The attributes are the starting (and reset) values; the
+			  `value` / `end` properties are the live ones.
+			- `labeled` shows a label per step (thinned out on a short track), `ticked` adds ticks, `align` moves them
+			  (`bottom`; `right` on a `direction="vertical"` slider).
+			- `step-labels` replaces the numbers: one label per step, from `min` (Fomantic's `labelType: 'letter'`,
+			  `letters` and `interpretLabel`, written out). It's also what the thumb speaks.
+			- `smooth` lets the thumb glide under the pointer while the value still snaps.
+		</>
+	</>
+
+	<section label="Events">
+		<markdown>
+			`ui-input` fires on every move (Fomantic's `onMove`) and `ui-changed` when a key press or a drag ends (its
+			`onChange`), both with `{ value, end }`. Setting `value` inside a `ui-input` handler wins, so you can clamp or
+			reject a move. `step-labels` is also a property:
+		</>
+		<markdown>
+			```js
+			const size = document.querySelector("#size") // <ui-slider id="size" labeled max="4" aria-label="Size">
+			size.stepLabels = ["XS", "S", "M", "L", "XL"]
+			size.addEventListener("ui-changed", (event) => console.log(event.detail.value))
+			```
+		</>
+	</>
+
+	<section label="Forms">
+		<markdown>
+			A slider is a form-associated element.
+
+			- With a `name`, it submits `value`; a `range` submits two entries under that name (start, then end):
+			  `formData.getAll(name)`.
+			- A form reset puts back the starting `value` / `end` (the attributes).
+			- `disabled` leaves it out of the form; `readonly` still submits.
+		</>
+
+		<section label="In a form" sticky collapsible dividing>
+			<example description="A price range, submitted as two `price` entries.  Move it, then reset the form.">
+				<html>
+					<ui-form>
+						<form>
+							<label for="slider-price">Price</label>
+							<ui-slider id="slider-price" name="price" range labeled max="100" step="10" value="20" end="60"></ui-slider>
+							<ui-button type="reset" icon="undo" appearance="basic">Reset</ui-button>
+						</form>
+					</ui-form>
+				</html>
+			</example>
+		</>
+	</>
+
+	<section label="Keyboard">
+		<markdown>
+			| Key                 | Action                                               |
+			| ------------------- | ---------------------------------------------------- |
+			| Arrow keys          | Move the thumb one step the way the arrow points     |
+			| Page Up / Page Down | Move two steps                                       |
+			| Home / End          | Move to the thumb's lowest / highest position        |
+			| Tab                 | Move to the next thumb (a `range` has two), then out |
+
+			On a `direction="vertical"` slider the minimum is at the top, so Arrow Down increases; on a `reversed` one Arrow Left does.
+		</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			Each thumb is an ARIA `slider` (the APG pattern) with `aria-valuemin`, `aria-valuemax` and `aria-valuenow`, and
+			`aria-orientation` when `direction="vertical"`.
+
+			- A single slider's thumb is named by the host's `aria-label` or a `<label for>`. A `range` is a group named
+			  that way, with two thumbs, "Minimum" and "Maximum" (translatable); each stops at the other.
+			- Step labels are hidden from assistive tech: the thumb's value is what's announced.
+			- `readonly` stays focusable and announced but can't change; `disabled` leaves the tab order.
+			- If the element can't render, its native fallback is the browser's range input (two for a `range`), so the
+			  value can still be set and submitted; Fomantic's track and thumbs, labels, `vertical` / `reversed` and
+			  `step-labels` are dropped.
+		</>
+	</>
+
+	<section label="Framework usage">
+		<markdown>`value` / `end` are plain attributes and `stepLabels` a property; listen for `ui-input` or `ui-changed`.</>
+		<header level="4" id="framework-react">React 19</>
+		<markdown>
+			```jsx
+			<ui-slider name="volume" max={10} value={volume} onui-input={(event) => setVolume(event.detail.value)} />
+			```
+		</>
+		<header level="4" id="framework-vue">Vue 3.5</>
+		<markdown>
+			```html
+			<!-- compilerOptions.isCustomElement = (tag) => tag.startsWith("ui-") -->
+			<ui-slider name="volume" max="10" :value="volume" :stepLabels="labels" @ui-input="(event) => (volume = event.detail.value)" />
+			```
+		</>
+		<header level="4" id="framework-solid">Solid 2</>
+		<markdown>
+			```jsx
+			// events and rich data are plain props:  `on-<event>={...}`, `options={...}`
+			<ui-slider
+			  name="volume"
+			  max="10"
+			  value={volume()}
+			  stepLabels={labels}
+			  on-ui-moved={(event) => setVolume(event.detail.value)}
+			/>
+			```
+		</>
+	</>
+</spell-notebook>

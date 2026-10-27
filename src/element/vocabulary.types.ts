@@ -9,10 +9,10 @@
  * - Canonical names are English and never change;  CSS, `ClassBuilder` output and `:state()`s always use them.
  *   - A `Dictionary` only renames what AUTHORS type:  tags, attribute names, attribute values, events, slots, parts.
  * - The types live here, in spell-element, since every set's elements are declared by one.
- *   - The code that reads them is Spell UI's, `spell-ui/vocabulary`:
+ *   - The code that reads them is Spell UI's, `spell/ui/vocabulary`:
  *     the registry, value sets, converters, class words.
  *   - spell-element reaches it through its settings (`SpellSolidSettings.words`).
- *   - The shared value sets and topics are Spell UI's too (`spell-ui/vocabulary`'s `ValueSets`):
+ *   - The shared value sets and topics are Spell UI's too (`spell/ui/vocabulary`'s `ValueSets`):
  *     it names them, and their values, by augmenting `ValueSetValues`, `KindValueSets` and `TopicNames`.
  * - Types only, importing nothing:  it erases completely.
  *   - Node reads it with every vocabulary (`yarn site:data`, `yarn gen:root`):  it MUST NOT reach the element layer.
@@ -371,7 +371,7 @@ export type ComponentVocabulary = {
    *   or a tag with nothing to show (`ui-popup`).
    * - Text, not a `SkeletonSpec`:  one form for Spell UI's vocabularies and a component pack's.
    *   - `yarn gen:root` (and `spell pack build`) parse it into a catalog.
-   *   - Spell UI's vocabularies test (`spell-ui/tests/test-helpers/vocabularies.test.ts`) parses every one.
+   *   - Spell UI's vocabularies test (`ui/tests/test-helpers/vocabularies.test.ts`) parses every one.
    * - NEVER translated:  drawing data, like `states`.
    */
   skeleton?: string
@@ -411,7 +411,7 @@ export type SkeletonPart =
 /**
  * The topics a component may be filed under:  a set's runtime adds them by augmenting this interface,
  * so a vocabulary's `topics` are checked against them.
- * - Spell UI's are `ValueSets.topics` (`spell-ui/vocabulary`):
+ * - Spell UI's are `ValueSets.topics` (`spell/ui/vocabulary`):
  *   `declare module "spell/element/vocabulary.types" { interface TopicNames extends Record<..., true> {} }`
  */
 export interface TopicNames {}
@@ -484,7 +484,7 @@ export type NameMap = Readonly<Record<string, string>>
  * - NOT here:  states (a CSS contract), CSS classes.
  * - Its `texts` ride along for the runtime's texts (Spell UI's `UI.i18n`):  the names never read them.
  * - Spell UI's own Spanish:  each tag's `UI<Name>.es.ts` (a `TagDictionary`),
- *   gathered into one by `spell-ui/components/components.es`.
+ *   gathered into one by `spell/ui/components/components.es`.
  * - See Spell UI's `notes/translation.md`.
  */
 export type Dictionary = {

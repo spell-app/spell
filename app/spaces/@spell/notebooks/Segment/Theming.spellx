@@ -1,0 +1,56 @@
+<spell-notebook "segment theming">
+	<header level="1">
+		Segment
+		<header>A segment is used to create a grouping of related content.</>
+	</>
+	<segment-tab-bar showing="theming"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#tokens">Tokens</>
+				<ui-item link="#themes">Themes</>
+			</>
+		</>
+	</>
+
+	<!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
+	<section label="Tokens">
+		<markdown>
+			Theme with the public `--ui-segment-*` tokens: set one on the element, on any ancestor (a `<ui-segments>` group,
+			`:root`), or on the box through `::part(segment)`. They inherit into the shadow root, where the sheet reads each
+			through a private alias, so nothing inside blocks them. Set on a `<ui-segments>`, they reach its segments.
+
+			- Variations build on them: `padding="md"` swaps in `--ui-segment-padded`, `padding="lg"` `--ui-segment-very-padded`.
+			- `--ui-segment-scrolling-height` replaces the viewport-based height of `scrolling` segments at every width.
+			- The group's own `--_ui-segments-*` tokens, and every `--_segment-*` / `--_ui-segment-*` name, are private
+			  plumbing: never set them.
+		</>
+		<markdown>
+			```css
+			/* square segments in one group */
+			ui-segments.cards {
+			  --ui-segment-radius: 0;
+			}
+			/* taller scrolling segments everywhere */
+			:root {
+			  --ui-segment-scrolling-height: 20em;
+			}
+			```
+		</>
+		<markdown>Edit a value below to try it.</>
+		<html>
+			<ui-docs-tokens family="ui-segment" playground>
+				<ui-segment>
+					<p>Te eum doming eirmod, nominati pertinacia argumentum ad his.</>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="Themes">
+		<markdown>
+			The theme menu above picks the theme for every page of the site:  Spell, Glass, Fruity or Merlot,
+			each restyling this component through its tokens.
+		</>
+	</>
+</spell-notebook>

@@ -1,0 +1,129 @@
+/**
+ * The English vocabulary of `<ui-message>`:  every name the tag uses.
+ * - Its tag, attributes (each with its kind and allowed values), events, slots, parts, states and texts.
+ *   The shape is `E.ComponentVocabulary` (`spell/ui/vocabulary`).
+ * - The attributes become Fomantic's class words, in Fomantic's order (`ClassBuilder`):
+ *   `<ui-message state="negative" attach="bottom" size="small">` => `ui small negative bottom attached message`.
+ *   The component adds `icon` when it shows an icon.
+ * - `color` and `state` are both remaps (`colors.css`);  `state` is `kind: "valueOnly"` because it emits its value
+ *   alone (`ui negative message`), as dropdown's `state` does.
+ * - A message OWNS the `header` and `content` parts:  slotted `<ui-header>` / `<ui-content>` get
+ *   `:state(in-message)` and style themselves from `UIParts.css`, reading `--_ui-message-layout` (`UIMessage.css`).
+ */
+
+import type { E } from "spell/ui/core"
+
+/****************
+ * ### `messageVocabulary`
+ * The names of `<ui-message>`:  `<div class="ui … message" part="message">`,
+ * with an optional icon, a content block and a close button.
+ ****************/
+export const messageVocabulary = {
+  tag: "ui-message",
+  topics: ["messages", "feedback", "notifications", "status", "collections"],
+  aka: ["alert", "callout", "notice", "banner", "info box", "error message"],
+  skeleton: "header, long line",
+  noun: "message",
+  description: "A message displays information that explains nearby content.",
+  attributes: [
+    {
+      name: "size",
+      group: "appearance",
+      kind: "size",
+      description: "Text size, `mini` ... `massive`;  `medium` is the default."
+    },
+    { name: "color", group: "appearance", kind: "color", description: "Hue:  a tinted surface, border and text." },
+    {
+      name: "state",
+      group: "form",
+      kind: "valueOnly",
+      values: ["positive", "negative", "error", "info", "success", "warning"],
+      description: "Consequence, tinting it like a colour."
+    },
+    { name: "floating", group: "appearance", kind: "keyOnly", description: "Lifted off the page with a shadow." },
+    {
+      name: "padding",
+      group: "layout",
+      kind: "valueOnly",
+      values: ["compact"],
+      replaces: [{ from: "compact", value: "compact" }],
+      description: "`compact`:  only as wide as its content.  Old name:  `compact`."
+    },
+    {
+      name: "centered",
+      group: "layout",
+      kind: "keyOnly",
+      description: "Centres its text (and its icon with the content)."
+    },
+    {
+      name: "inverted",
+      group: "appearance",
+      kind: "keyOnly",
+      description: "The dark scheme;  a coloured one keeps its hue in the text."
+    },
+    {
+      name: "attach",
+      group: "layout",
+      kind: "valueOnly",
+      values: ["both", "top", "bottom"],
+      classes: { both: "attached", top: "top attached", bottom: "bottom attached" },
+      replaces: [{ from: "attached", value: "both" }],
+      description:
+        "Joined edge to edge with the segment or form below (`both`, `top`);  `bottom` joins the one above.  Old " +
+        "name:  `attached` (bare is `both`)."
+    },
+    {
+      name: "align",
+      group: "layout",
+      kind: "textAlign",
+      values: ["center", "right"],
+      replaces: ["text-align"],
+      description: "Aligns its text `center` or `right`.  Old name:  `text-align`."
+    },
+    {
+      name: "icon",
+      group: "content",
+      kind: "icon",
+      description: "Icon name, shown large beside the content;  the root gets the `icon` class."
+    },
+    {
+      name: "heading",
+      replaces: ["header"],
+      group: "name",
+      kind: "string",
+      description:
+        "Shorthand for a header above the content;  a slotted `<ui-header>` is the rich version.  Its old name was `header`."
+    },
+    {
+      name: "dismissible",
+      group: "behaviour",
+      kind: "boolean",
+      description: "Shows a close button;  clicking it dispatches `ui-closing`, then hides the message (`ui-closed`)."
+    }
+  ],
+  events: [
+    {
+      name: "ui-closing",
+      detail: "{ originalEvent?: Event }",
+      cancelable: true,
+      description:
+        "The close button of a `dismissible` message was activated.  Unless cancelled the element sets `hidden` " +
+        "on itself (it never removes itself)."
+    },
+    { name: "ui-closed", detail: "{}", description: "Closed by its close button:  the element is `hidden` now." }
+  ],
+  slots: [
+    { name: "", description: "Content:  text, `<p>`s, a `<ul>` list, `<ui-header>` / `<ui-content>` parts." },
+    { name: "icon", description: "Icon, instead of the `icon` attribute;  shown large beside the content." }
+  ],
+  parts: [
+    { name: "message", description: "The message box." },
+    { name: "icon", description: "The icon box." },
+    { name: "content", description: "The content block around the header and the default slot." },
+    { name: "header", description: "The `header` shorthand." },
+    { name: "close", description: "The close button of a `dismissible` message." }
+  ],
+  states: [{ name: "inverted", description: "In the dark scheme." }],
+  texts: [{ key: "dismiss", text: "Dismiss", description: "Accessible name of the close button." }],
+  ownsParts: ["header", "content"]
+} as const satisfies E.ComponentVocabulary

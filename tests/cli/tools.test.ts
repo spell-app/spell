@@ -7,8 +7,8 @@ import { CLI } from "spell/cli"
 
 describe("toolArgs()", () => {
   test("plain node:  just the script, in the tool's checkout", () => {
-    expect(CLI.toolArgs({ tool: "spell-epic/src/tools/design.js" }, "/kit")).toEqual([
-      "/kit/spell-epic/src/tools/design.js"
+    expect(CLI.toolArgs({ tool: "epic/src/tools/design.js" }, "/kit")).toEqual([
+      "/kit/epic/src/tools/design.js"
     ])
   })
   test("tsx:  the kit's loader first, then the run-time alias hook", () => {
@@ -21,18 +21,18 @@ describe("toolArgs()", () => {
 })
 
 describe("epicBin()", () => {
-  // a kit with spell-epic in it, and a folder inside it
+  // a kit with its engine folder, epic/, in it, and a folder inside it
   const temp = realpathSync(mkdtempSync(join(tmpdir(), "epic-bin-")))
   afterAll(() => rmSync(temp, { recursive: true, force: true }))
-  mkdirSync(join(temp, "kit", "spell-epic", "bin"), { recursive: true })
+  mkdirSync(join(temp, "kit", "epic", "bin"), { recursive: true })
   mkdirSync(join(temp, "kit", "spell-app", "x"), { recursive: true })
-  writeFileSync(join(temp, "kit", "spell-epic", "bin", "epic"), "")
+  writeFileSync(join(temp, "kit", "epic", "bin", "epic"), "")
 
-  test("the nearest checkout's spell-epic:  its bin/epic", () => {
-    expect(CLI.epicBin(join(temp, "kit", "spell-app", "x"))).toBe(join(temp, "kit", "spell-epic", "bin", "epic"))
+  test("the nearest checkout's engine:  its epic/bin/epic", () => {
+    expect(CLI.epicBin(join(temp, "kit", "spell-app", "x"))).toBe(join(temp, "kit", "epic", "bin", "epic"))
   })
   test("none there:  the kit spell runs from's, else plain epic, from the PATH", () => {
-    expect(CLI.epicBin(temp)).toMatch(/(^epic|\/spell-epic\/bin\/epic)$/)
+    expect(CLI.epicBin(temp)).toMatch(/(^epic|\/epic\/bin\/epic)$/)
   })
 })
 

@@ -1,0 +1,57 @@
+<spell-notebook "rating theming">
+	<header level="1">
+		Rating
+		<header>A rating indicates user interest in content.</>
+	</>
+	<rating-tab-bar showing="theming"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#tokens">Tokens</>
+				<ui-item link="#themes">Themes</>
+			</>
+		</>
+	</>
+
+	<!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
+	<section label="Tokens">
+		<markdown>
+			Theme with the public `--ui-rating-*` tokens: set one on the element, on any ancestor (`:root` included), or on
+			the group's box through `::part(rating)`. They inherit into the shadow root, where the sheet reads each through a
+			private alias, so nothing inside blocks them. Style one icon with `::part(icon)`.
+		</>
+		<markdown>
+			```css
+			/* every rating on the page */
+			:root {
+			  --ui-rating-icon-width: 1.5em;
+			}
+			/* one kind:  quieter empty icons */
+			ui-rating.reviews {
+			  --ui-rating-inactive-color: var(--ui-border-color);
+			}
+			```
+		</>
+		<message state="info" size="small">
+			<markdown>
+				`color` sets the filled icons' hue through the shared colour remap (`--ui-color`), so a coloured rating ignores
+				`--ui-rating-active-color` (filled) and `--ui-rating-selected-color` (the hover preview); `size` scales the
+				whole rating. Never set the `--_ui-*` names: they're the
+				sheet's private plumbing.
+			</>
+		</>
+		<markdown>Edit a value below to try it.</>
+		<html>
+			<ui-docs-tokens family="ui-rating" playground>
+				<ui-rating value="3" aria-label="Rating"></>
+			</>
+		</>
+	</>
+
+	<section label="Themes">
+		<markdown>
+			The theme menu in the header (Spell, Glass, Fruity, Merlot, Paper, Midnight, Crisp, Pop, Matrix) changes the colours and fonts a rating
+			inherits.
+		</>
+	</>
+</spell-notebook>

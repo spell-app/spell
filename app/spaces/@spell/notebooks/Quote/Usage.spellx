@@ -1,0 +1,35 @@
+<spell-notebook "quote usage">
+	<header level="1">
+		Quote
+		<header>A quote holds someone else's words:  a block of its own, or a few words inside a sentence.</>
+	</>
+	<quote-tab-bar showing="usage"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#using-it">Using it</>
+				<ui-item link="#accessibility">Accessibility</>
+			</>
+		</>
+	</>
+
+	<!-- USAGE:  how to use it (attributes in practice, events, framework snippets), keyboard, accessibility. -->
+	<section label="Using it">
+		<markdown>
+			`<ui-quote>` holds someone else's words.
+
+			- By default it's a block quote:  its own block, a bar on its leading edge, the text muted.
+			- `inline` puts it inside a sentence instead, with quotation marks round it.
+			  The marks are the browser's for the text's language:  “…” in English, « … » in French.
+			- `cite` is the address the words come from.  It isn't shown:  it's for readers' tools.
+			- The look is the Markdown pages' block quote.  Its tokens, `--ui-quote-color` and `--ui-quote-border`,
+			  fall back to the Markdown ones, so a theme that sets those sets both.
+		</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			A block quote is a real `<blockquote>`, and an inline one a real `<q>`:  screen readers announce them as quotations.
+		</>
+	</>
+</spell-notebook>

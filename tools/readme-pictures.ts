@@ -19,7 +19,7 @@
  *
  * ```sh
  * yarn readme:pictures                    # every page's stale or missing pictures
- * yarn readme:pictures spell-ui/README.md # only those pages (paths from the kit's root)
+ * yarn readme:pictures ui/README.md # only those pages (paths from the kit's root)
  * yarn readme:pictures --all              # every picture, taken again
  * yarn readme:pictures --base http://localhost:4747   # another page server than this checkout's own
  * ```

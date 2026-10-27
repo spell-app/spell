@@ -1,0 +1,78 @@
+<spell-notebook "theme-editor usage">
+	<header level="1">
+		Theme Editor
+		<header>A theme editor makes a theme from an existing one:  its colours, fonts and shapes, live on real elements, then copied as a stylesheet or kept in the browser.</>
+	</>
+	<theme-editor-tab-bar showing="usage"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#using-it">Using it</>
+				<ui-item link="#use-this-theme">Use this theme</>
+				<ui-item link="#keyboard">Keyboard</>
+				<ui-item link="#accessibility">Accessibility</>
+			</>
+		</>
+	</>
+
+	<!-- USAGE:  how to use it, the kept theme, keyboard, accessibility. -->
+	<section label="Using it">
+		<markdown>
+			A `<ui-theme-editor>` makes a theme by CHANGING one:  its base, `fruity` unless the page wears another.
+
+			- The inspector, on the left:  the theme's name and base, then Color, Type and Shape.
+			  Each choice starts as the base's own;  its Reset button (or Start over) puts it back.
+			- The preview:  a sample app of real elements, once light and once dark.
+			- The stylesheet:  every choice as tokens on `:root`, in `@layer ui.app`, so it wins over the base theme however each arrives.
+			  Apply the base first, then this sheet:  that's the whole theme.
+			- While it's on a page, the WHOLE page wears the theme it edits:
+			  a token set on one element can't change what the page works out from it at `:root`.
+			  Take it off the page and the page's own theme comes back.
+			- `value` starts it from a theme you made before (`{"primary": "pink", "corners": "soft"}`);
+			  `base` from another base.
+			- Events:  `ui-changed` (`{ value, css }`) on every choice, `ui-copied` from Copy CSS,
+			  `ui-saved` from Use this theme and Stop using.
+			- Script:  `el.theme` (every choice now), `el.css` (the stylesheet).
+		</>
+		<markdown>
+			```js
+			document.querySelector("ui-theme-editor").addEventListener("ui-changed", (event) => {
+			  console.log(event.detail.value.primary, event.detail.css)
+			})
+			```
+		</>
+	</>
+
+	<section label="Use this theme">
+		<markdown>
+			Use this theme keeps the theme in this browser, and the Spell editor starts in it.
+			Any page can wear it too:  `SavedTheme.restore()` applies its base, then its sheet.
+
+			- `SavedTheme.has`, `.choices`, `.css`:  what's kept;  `SavedTheme.forget()` drops it.
+			- Kept in `localStorage` (`spell-ui:theme`):  a private window keeps nothing.
+		</>
+		<markdown>
+			```js
+			import { SavedTheme } from "spell/ui/components/ui-theme-editor"
+
+			if (SavedTheme.has) await SavedTheme.restore()
+			```
+		</>
+	</>
+
+	<section label="Keyboard">
+		<markdown>
+			- Tab moves from field to field.
+			- In a row of colours, one Tab stop:  the arrow keys move AND choose, as in any radio group.
+			- The selects, the slider and the segmented choices take their own keys.
+		</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			- Each field is labelled, with its tip behind its info icon.
+			- A row of colours is a `radiogroup`, each swatch a `radio` named for its colour.
+			- The sample app is real elements, so what it shows of contrast is what an app will have.
+		</>
+	</>
+</spell-notebook>

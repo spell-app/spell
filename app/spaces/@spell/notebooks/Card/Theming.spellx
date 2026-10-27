@@ -1,0 +1,72 @@
+<spell-notebook "card theming">
+	<header level="1">
+		Card
+		<header>A card displays site content in a manner similar to a playing card.</>
+	</>
+	<card-tab-bar showing="theming"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#tokens">Tokens</>
+				<ui-item link="#themes">Themes</>
+			</>
+		</>
+	</>
+
+	<!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
+	<section label="Tokens">
+		<markdown>
+			Theme a card with the public `--ui-card-*` tokens: set one on the element, on any ancestor (a
+			`<ui-cards>` group, a region, `:root`), or on the card's box through `::part(card)`. A group's
+			spacing tokens, `--ui-cards-*`, go on the group or above it. The shorthand blocks are parts too:
+			`image`, `content`, `header`, `meta`, `description` and `extra`.
+
+			The look of the parts inside (`--ui-card-header-color`, `--ui-card-content-padding`,
+			`--ui-card-meta-color` ...) is themed the same way, on the card or above it (see the
+			[content parts](/components/ui/ui-header.html) page). Never set the `--_ui-*`, `--_card-*` or `--_cards-*` names:
+			they're the sheet's private plumbing.
+
+			A card's border, coloured edge and drop shadow are ONE `box-shadow`, so each shadow token takes
+			`none` on its own: `--ui-card-shadow: none` drops the drop shadow and keeps the border (set it on the
+			card or above it, not through `::part(card)`). A link card's hover border is
+			`--ui-card-hover-border-color`.
+		</>
+		<markdown>
+			```css
+			ui-card {
+			  --ui-card-radius: 0;
+			  --ui-card-width: 20em;
+			  --ui-card-header-color: var(--ui-violet-text);
+			}
+			ui-cards {
+			  --ui-cards-spacing: 2em;
+			}
+			```
+		</>
+		<markdown>Edit a value below to try it.</>
+		<html>
+			<ui-docs-tokens family="ui-card" playground>
+				<ui-card>
+					<img src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22480%22 height=%22320%22 viewBox=%220 0 30 20%22%3E%3Crect width=%2230%22 height=%2220%22 fill=%22%23cbd5e1%22/%3E%3Cpath d=%22M3 17l7-8 5 6 4-4 8 6z%22 fill=%22%2394a3b8%22/%3E%3Ccircle cx=%2222%22 cy=%226%22 r=%222%22 fill=%22%2394a3b8%22/%3E%3C/svg%3E" alt="Kristy" />
+					<ui-content>
+						<ui-header link="#kristy">Kristy</>
+						<ui-meta>
+							<span>Joined in 2013</>
+						</>
+						<ui-description>Kristy is an art director living in New York.</>
+					</>
+					<ui-extra>
+						<a href="#kristy-friends"><ui-icon name="user"></> 22 Friends</>
+					</>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="Themes">
+		<markdown>
+			The theme menu above picks the theme for every page of the site:  Spell, Glass, Fruity or Merlot,
+			each restyling this component through its tokens.
+		</>
+	</>
+</spell-notebook>

@@ -1,7 +1,11 @@
-# The kit `spell` (checked out at `~/www/spell`) tracks its own code (src/, tests/, bin/, scripts/), the house style
-# (agents/), and the glue (package.json, yarn.lock, .yarnrc.yml, repos.json5, tools/):
-# every child repo is its own git repo, cloned inside it by `yarn clone`, and ignored here.
+# The kit `spell` (checked out at `~/www/spell`) is ONE repo since epic repo-split P20:  its own code (src/, tests/,
+# bin/, scripts/), its folders (parser/, ui/, epic/, app/), the house style (agents/) and the glue (package.json,
+# yarn.lock, .yarnrc.yml, repos.json5, tools/).
+# - The child repos that were cloned inside it until then (spell-parser/, spell-ui/ ...) may still be on disk in an
+#   older checkout:  ignored here.  The repos beside the kit (spell-brand) are outside it, at ../spell-brand.
 /spell-*/
+# the page server's projects beside the kit, each checkout's own (page/settings.ts LOCAL_SETTINGS)
+/page-server.local.json5
 # the two data folders (epic repo-split J5):  the content repo (its own git repo, local only) and your projects (a plain
 # folder)
 /spell.epics

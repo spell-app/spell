@@ -1,0 +1,36 @@
+// Una ficha que muestra un lado a la vez.
+
+una "ficha giratoria" es una vista donde:
+	- su "lado" es uno de arriba, abajo
+		- "está (lado)"
+	// Se envía cada vez que se voltea
+	- envía "volteada" con cuenta como un número
+	// La da vuelta.
+	- para girarla:
+		- atajo meta+G
+		- activa cuando está arriba
+		- se deshace como "Girar ficha"
+		si está arriba
+			poner su lado a abajo
+		de lo contrario
+			poner su lado a arriba
+	- para dibujar su cara:
+		<es-texto>cara</es-texto>
+	- para dibujar su dorso:
+		<es-texto>dorso</es-texto>
+	- para dibujar eso:
+		si está arriba
+			dibujar su cara
+		de lo contrario
+			dibujar su dorso
+	- al clic: girar eso
+
+marcador es una aplicación donde:
+	- su "mejor" es uno de bajo, alto
+	- su "puntos" es una nueva lista de números
+	- para dibujar eso:
+		<es-encabezado>Puntos</es-encabezado>
+		para cada punto en sus puntos
+			<es-texto>{el punto}</es-texto>
+	- para probar empezar de nuevo:
+		eco "otra vez"

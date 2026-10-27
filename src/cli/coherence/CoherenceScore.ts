@@ -1,4 +1,5 @@
 import { existsSync, readFileSync } from "node:fs"
+import { join } from "node:path"
 
 import { escapeRegExp } from "spell/util/string"
 import { localTime } from "spell/util/time"
@@ -138,22 +139,39 @@ export class CoherenceScore {
    * - else each is at its newest commit by the time of the kit's `at` commit, or by `at` as a time
    */
   private reposAt(at: string | undefined): RepoCode[] {
-    const repos = new CodeMap(this.checkout).repos
-    if (!at) return repos.map((repo) => codeOf(repo))
+    const repos = codeUnitsOf(this.checkout)
+    const inside = repos.slice(1).map((repo) => repo.folder)
+    if (!at) return repos.map((repo) => codeOf(repo, undefined, repo.folder ? [] : inside))
     const kit = repos[0]!
     const kitCommit = commitOf(kit.root, at)
     const seconds = kitCommit ? Git.out(["log", "-1", "--format=%ct", kitCommit], kit.root) : timeOf(at)
     if (!seconds) throw new CLI.CliError(`--at ${at}:  neither a commit of the kit nor a time (2026-10-25 14:00)`)
     return repos.flatMap((repo) => {
       const own = commitOf(repo.root, at) ?? lastCommitBy(repo.root, seconds)
-      return own ? [codeOf(repo, own)] : []
+      return own ? [codeOf(repo, own, repo.folder ? [] : inside)] : []
     })
   }
 }
 
-/** A repo's code, at `commit` (none:  the working tree). */
-function codeOf(repo: MappedRepo, commit?: string): RepoCode {
-  return new RepoCode(repo.name, repo.root, repo.folder, commit)
+/**
+ * What the score reads as one repo's code each:  the kit's `src/`, then each of its folders' (`ui/src/` ...), by the
+ * folder's package name (`spell-ui`), ONE git repo since epic `repo-split` P20.
+ */
+function codeUnitsOf(checkout: string): MappedRepo[] {
+  const [kit, ...folders] = new CodeMap(checkout).importRoots.reverse()
+  if (!kit) return []
+  return [
+    kit,
+    ...folders.map((folder) => {
+      const { name } = JSON.parse(readFileSync(join(folder.root, "package.json"), "utf8")) as { name?: string }
+      return { ...folder, name: name ?? folder.folder }
+    })
+  ]
+}
+
+/** A repo's code, at `commit` (none:  the working tree), leaving out the folders `inside` it that are code of their own. */
+function codeOf(repo: MappedRepo, commit?: string, inside: string[] = []): RepoCode {
+  return new RepoCode(repo.name, repo.root, repo.folder, commit, inside)
 }
 
 /** The commit `revision` names in the repo at `root`;  `undefined` when it names none there. */
@@ -199,9 +217,9 @@ export function usersInMap(map: MapGraph, homes: string[]): string[] {
   return [...users]
 }
 
-/** Whether `file`, from the checkout's root, is code the score reads:  under a repo's `src/`, not a test. */
+/** Whether `file`, from the checkout's root, is code the score reads:  under the kit's or a folder's `src/`, not a test. */
 function isScoredInCheckout(file: string): boolean {
-  const inRepo = file.replace(/^spell-[\w-]+\//, "")
+  const inRepo = file.startsWith("src/") ? file : file.replace(/^[\w.-]+\//, "")
   return RepoCode.isScored(inRepo, new Set())
 }
 
@@ -237,7 +255,7 @@ function percent(part: number, whole: number): number {
 
 /**
  * Whether `file` is `path`, or in folder `path`.
- * - `path` may be a glob:  `*` within a name, `**` across folders (`spell-ui/src/**.fallback.ts`)
+ * - `path` may be a glob:  `*` within a name, `**` across folders (`ui/src/**.fallback.ts`)
  */
 export function isUnder(file: string, path: string): boolean {
   if (path.includes("*")) return globPattern(path).test(file)

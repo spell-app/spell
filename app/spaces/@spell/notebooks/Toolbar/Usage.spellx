@@ -1,0 +1,46 @@
+<spell-notebook "toolbar usage">
+	<header level="1">
+		Toolbar
+		<header>A toolbar is a horizontal menu whose items scroll sideways when they don't fit, with a button at each end while there's more to see that way.</>
+	</>
+	<toolbar-tab-bar showing="usage"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#using-it">Using it</>
+				<ui-item link="#keyboard">Keyboard</>
+				<ui-item link="#accessibility">Accessibility</>
+			</>
+		</>
+	</>
+
+	<!-- USAGE:  how to use it (attributes in practice, events, framework snippets), keyboard, accessibility. -->
+	<section label="Using it">
+		<markdown>
+			Write a `<ui-toolbar>` as you'd write a `<ui-menu>`:  the same attributes and `<ui-item>`s.
+
+			- Give it a width, or let its column do it.
+			- When its items don't fit, they scroll sideways, and a `‹` / `›` button shows at each end while there's more to see that way.
+			- `ui-select` tells you which item was chosen.
+			- `shrinkable` fits its titles instead of scrolling, as `<ui-menu shrinkable>` does:  cut, then icons only,
+			  then one `…` button whose menu holds every item.  It never shows `‹` / `›`.  Off by default.
+		</>
+		<markdown>
+			```js
+			document.querySelector("ui-toolbar").addEventListener("ui-select", (event) => console.log(event.detail.value))
+			```
+		</>
+	</>
+
+	<section label="Keyboard">
+		<markdown>
+			As `<ui-menu>`'s:  Tab reaches each link item (an `interactive` toolbar is one Tab stop, the arrow keys between items).  Focusing an item scrolls it into view;  the `‹` / `›` buttons are for the pointer, out of the Tab order.  A `shrinkable` toolbar's `…` button takes the menu's keys (`<ui-menu>`, Keyboard).
+		</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			A `<nav>` landmark, as `<ui-menu>`:  give it an `aria-label`.  The scroll buttons are named (Scroll back, Scroll on) but left out of the Tab order, since every item is reachable by keyboard.  A `shrinkable` toolbar's cut and hidden titles still name their items, and its `…` button is named "More" (`<ui-menu>`, Accessibility).
+		</>
+	</>
+</spell-notebook>

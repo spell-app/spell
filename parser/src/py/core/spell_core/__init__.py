@@ -1,0 +1,50 @@
+"""spell_core:  what Python compiled from spell imports, to do what Python has no word of its own for.
+
+- The Python twin of the JavaScript core, `spell/parser/core`, in spell-parser's `src/py/core/`:
+  `spell/parser/py`'s Python.
+- Compiled code imports the one `core`, and the classes it extends:
+  `from spell_core import core, Thing, List, App, prop, h`.
+- And, for spell code counting from 1, what turns its positions into indexes as it runs (`positions.py`):
+  `from spell_core import position`.
+- Standard library only:  nothing to install besides it.
+"""
+
+from spell_core.apps import App, Page, View, ViewableList
+from spell_core.console import SpellConsole
+from spell_core.core import Core, core
+from spell_core.drawing import h
+from spell_core.lists import List
+from spell_core.notebook import Notebook
+from spell_core.positions import end_position, position, spell_position, with_spell_positions
+from spell_core.saving import Loader, Saved, SavedRef, Saver, parse_ref, ref_text
+from spell_core.state import StateMirror, StateWriter
+from spell_core.things import Thing, prop
+from spell_core.two_sided_view import TwoSidedView
+
+__all__ = [
+    "App",
+    "Core",
+    "List",
+    "Loader",
+    "Notebook",
+    "Page",
+    "Saved",
+    "SavedRef",
+    "Saver",
+    "SpellConsole",
+    "StateMirror",
+    "StateWriter",
+    "Thing",
+    "TwoSidedView",
+    "View",
+    "ViewableList",
+    "core",
+    "end_position",
+    "h",
+    "parse_ref",
+    "position",
+    "prop",
+    "ref_text",
+    "spell_position",
+    "with_spell_positions",
+]

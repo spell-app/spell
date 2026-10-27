@@ -1,0 +1,29 @@
+/*
+ * `<epic-cards>` (`EpicCards.tsx`):  a saga page's Epics, the Epics page's own list and cards (`<epic-list>`,
+ * `<epic-card>`, which style themselves), or a note saying why there are none.
+ * - the pack's tokens (`--epic-*`, from `<epic-page>`), each with a fallback for a list drawn outside a page
+ * - Units:  px and em, never rem (WWOD §18).
+ */
+
+@layer ui.components.epic-cards.types, ui.components.epic-cards.content;
+
+@layer ui.components.epic-cards.types {
+  :host {
+    display: block;
+    margin: 0 0 12px;
+    color: var(--epic-ink, var(--ui-text-color));
+    font: 400 15px/1.5 var(--epic-sans, var(--ui-font-family));
+    /* three cards to a row in an epic page's column, as before they were the Epics page's */
+    --epic-list-card-min: 260px;
+  }
+  :host([hidden]) {
+    display: none;
+  }
+}
+
+@layer ui.components.epic-cards.content {
+  .note {
+    margin: 4px 0;
+    color: var(--epic-muted, var(--ui-text-muted));
+  }
+}

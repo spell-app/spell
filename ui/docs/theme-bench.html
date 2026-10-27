@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>Theme bench | Spell UI</title>
+    <meta
+      name="description"
+      content="Spell's real pages side by side in one theme:  tune the tokens behind their tabs, section titles and surfaces, live."
+    />
+    <!--
+      The theme bench (`<ui-docs-theme-bench>`, epic `debut`):  a working page for the theme work, not a page of the docs.
+      - It shows four REAL pages in frames:  this epic's page, Spell UI's Button page, the Avatar notebook in the editor,
+        the editor on Solitaire;  so it needs the page server (and the editor app, which starts with it).
+      - Full width, so it mounts no layout:  a page with no bare `main` shows alone (`SiteShell`).
+    -->
+    <!-- Before first paint:  the viewer's colour scheme (`ThemePreference.HEAD_SCRIPT`, as oxfmt lays it out).  The theme itself is restored by site.js. -->
+    <script>
+      try {
+        var l = localStorage,
+          d = document.documentElement,
+          s = l.getItem("spell-site:scheme") || l.getItem("spell-site:theme") || l.getItem("spell-ui-site:scheme")
+        if (s === "light" || s === "dark") {
+          d.classList.add("ui-" + s)
+          d.style.colorScheme = s
+        }
+      } catch (e) {}
+    </script>
+    <link rel="stylesheet" href="_assets/site.css" />
+    <script type="module" src="_assets/site.js"></script>
+  </head>
+  <body class="ui-typography">
+    <ui-root class="site" icons="fa7-brands, fomantic" display="when-ready">
+      <ui-docs-theme-bench></ui-docs-theme-bench>
+    </ui-root>
+  </body>
+</html>

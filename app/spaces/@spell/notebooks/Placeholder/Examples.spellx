@@ -1,0 +1,366 @@
+<spell-notebook "placeholder examples">
+	<header level="1">
+		Placeholder
+		<header>A placeholder is used to reserve space for content that soon will appear in a layout.</>
+	</>
+	<placeholder-tab-bar showing="examples"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#types">Types</>
+				<ui-item link="#content">Content</>
+				<ui-item link="#variations">Variations</>
+			</>
+		</>
+	</>
+
+	<!--
+		EXAMPLES:  Fomantic's placeholder page, section by section, in its order (Types, Content, Variations), plus our
+		Consecutive placeholders.  Five tags, one family:  `<ui-placeholder>` and its shapes `<ui-placeholder-header>`,
+		`-paragraph`, `-line`, `-image`.
+	-->
+	<section label="Types">
+		<section label="Placeholder" sticky collapsible dividing>
+			<example>
+				<html>
+					<p slot="description">A placeholder is used to reserve space for content that soon will appear in a layout.</p>
+					<ui-message slot="description" state="info" size="small">Placeholders can include <code>&lt;ui-placeholder-paragraph&gt;</code>, <code>&lt;ui-placeholder-header&gt;</code> (<code>image</code> for an image header) and <code>&lt;ui-placeholder-image&gt;</code> to let you format the placeholder to emulate the content being loaded.</ui-message>
+				</html>
+				<placeholder>
+					<placeholder-header image>
+						<placeholder-line/>
+						<placeholder-line/>
+					</placeholder-header>
+					<placeholder-paragraph>
+						<placeholder-line/>
+						<placeholder-line/>
+						<placeholder-line/>
+						<placeholder-line/>
+						<placeholder-line/>
+					</placeholder-paragraph>
+				</placeholder>
+			</example>
+			<example>
+				<grid columns="3" stackable>
+					<column>
+						<segment appearance="raised">
+							<placeholder>
+								<placeholder-header image>
+									<placeholder-line/>
+									<placeholder-line/>
+								</placeholder-header>
+								<placeholder-paragraph>
+									<placeholder-line length="medium"/>
+									<placeholder-line length="short"/>
+								</placeholder-paragraph>
+							</placeholder>
+						</segment>
+					</column>
+					<column>
+						<segment appearance="raised">
+							<placeholder>
+								<placeholder-header image>
+									<placeholder-line/>
+									<placeholder-line/>
+								</placeholder-header>
+								<placeholder-paragraph>
+									<placeholder-line length="medium"/>
+									<placeholder-line length="short"/>
+								</placeholder-paragraph>
+							</placeholder>
+						</segment>
+					</column>
+					<column>
+						<segment appearance="raised">
+							<placeholder>
+								<placeholder-header image>
+									<placeholder-line/>
+									<placeholder-line/>
+								</placeholder-header>
+								<placeholder-paragraph>
+									<placeholder-line length="medium"/>
+									<placeholder-line length="short"/>
+								</placeholder-paragraph>
+							</placeholder>
+						</segment>
+					</column>
+				</grid>
+			</example>
+			<example>
+				<message slot="description" size="small" class="site-not-ported">Not ported: Fomantic's "Simulate Loading" button, which swaps the skeleton for a loaded card -- a page script, not part of the placeholder. Replace the placeholder with the real content when it arrives.</message>
+				<cards columns="3" doubling stackable>
+					<card>
+						<placeholder>
+							<placeholder-image square/>
+						</placeholder>
+						<content>
+							<placeholder>
+								<placeholder-header>
+									<placeholder-line length="very short"/>
+									<placeholder-line length="medium"/>
+								</placeholder-header>
+								<placeholder-paragraph>
+									<placeholder-line length="short"/>
+								</placeholder-paragraph>
+							</placeholder>
+						</content>
+						<extra>
+							<button disabled color="primary">Add</button>
+							<button disabled>Delete</button>
+						</extra>
+					</card>
+					<card>
+						<placeholder>
+							<placeholder-image square/>
+						</placeholder>
+						<content>
+							<placeholder>
+								<placeholder-header>
+									<placeholder-line length="very short"/>
+									<placeholder-line length="medium"/>
+								</placeholder-header>
+								<placeholder-paragraph>
+									<placeholder-line length="short"/>
+								</placeholder-paragraph>
+							</placeholder>
+						</content>
+						<extra>
+							<button disabled color="primary">Add</button>
+							<button disabled>Delete</button>
+						</extra>
+					</card>
+					<card>
+						<placeholder>
+							<placeholder-image square/>
+						</placeholder>
+						<content>
+							<placeholder>
+								<placeholder-header>
+									<placeholder-line length="very short"/>
+									<placeholder-line length="medium"/>
+								</placeholder-header>
+								<placeholder-paragraph>
+									<placeholder-line length="short"/>
+								</placeholder-paragraph>
+							</placeholder>
+						</content>
+						<extra>
+							<button disabled color="primary">Add</button>
+							<button disabled>Delete</button>
+						</extra>
+					</card>
+				</cards>
+			</example>
+		</>
+	</>
+
+	<section label="Content">
+		<section label="Lines" sticky collapsible dividing>
+			<example>
+				<html>
+					<p slot="description">A placeholder can contain lines of text.</p>
+					<ui-message slot="description" state="info" size="small">By default, repeated lines appear varied in width. It may be useful to give an exact <code>length</code> to make them match up with the content more closely.</ui-message>
+				</html>
+				<placeholder>
+					<placeholder-line/>
+					<placeholder-line/>
+					<placeholder-line/>
+					<placeholder-line/>
+					<placeholder-line/>
+				</placeholder>
+			</example>
+		</>
+
+		<section label="Headers" sticky collapsible dividing>
+			<example>
+				<html>
+					<p slot="description">A placeholder can contain a header.</p>
+				</html>
+				<message slot="description" state="info" size="small">Header lines are slightly taller than paragraph lines.</message>
+				<placeholder>
+					<placeholder-header image>
+						<placeholder-line/>
+						<placeholder-line/>
+					</placeholder-header>
+				</placeholder>
+			</example>
+			<example>
+				<placeholder>
+					<placeholder-header>
+						<placeholder-line/>
+						<placeholder-line/>
+					</placeholder-header>
+				</placeholder>
+			</example>
+		</>
+
+		<section label="Paragraph" sticky collapsible dividing>
+			<example>
+				<html>
+					<p slot="description">A placeholder can contain a paragraph.</p>
+				</html>
+				<message slot="description" state="info" size="small">Paragraphs are used to group lines together.</message>
+				<placeholder>
+					<placeholder-paragraph>
+						<placeholder-line/>
+						<placeholder-line/>
+						<placeholder-line/>
+						<placeholder-line/>
+						<placeholder-line/>
+					</placeholder-paragraph>
+					<placeholder-paragraph>
+						<placeholder-line/>
+						<placeholder-line/>
+						<placeholder-line/>
+					</placeholder-paragraph>
+				</placeholder>
+			</example>
+		</>
+
+		<!-- GAP I50:  Fomantic sizes this image placeholder with style="width:150px;height:150px";  no attribute does, so it keeps the default fixed height at the placeholder's width. -->
+		<section label="Image" sticky collapsible dividing>
+			<example description="A placeholder can contain an image.">
+				<placeholder>
+					<placeholder-image/>
+				</placeholder>
+			</example>
+			<example>
+				<html>
+					<ui-message slot="description" state="info" size="small">Using <code>square</code> (1:1) or <code>rectangular</code> (4:3) embeds an aspect ratio into the image placeholder, so it keeps its shape in responsive layouts.</ui-message>
+				</html>
+				<cards columns="3">
+					<card>
+						<content>
+							<placeholder>
+								<placeholder-image square/>
+							</placeholder>
+						</content>
+					</card>
+					<card>
+						<content>
+							<placeholder>
+								<placeholder-image square/>
+							</placeholder>
+						</content>
+					</card>
+					<card>
+						<content>
+							<placeholder>
+								<placeholder-image square/>
+							</placeholder>
+						</content>
+					</card>
+				</cards>
+			</example>
+			<example>
+				<cards columns="3">
+					<card>
+						<content>
+							<placeholder>
+								<placeholder-image rectangular/>
+							</placeholder>
+						</content>
+					</card>
+					<card>
+						<content>
+							<placeholder>
+								<placeholder-image rectangular/>
+							</placeholder>
+						</content>
+					</card>
+					<card>
+						<content>
+							<placeholder>
+								<placeholder-image rectangular/>
+							</placeholder>
+						</content>
+					</card>
+				</cards>
+			</example>
+		</>
+	</>
+
+	<section label="Variations">
+		<section label="Line Length" sticky collapsible dividing>
+			<example description="A line can specify how long its contents should appear:  `length` is `full`, `very long`, `long`, `medium`, `short` or `very short`.">
+				<placeholder>
+					<placeholder-line length="full"/>
+					<placeholder-line length="very long"/>
+					<placeholder-line length="long"/>
+					<placeholder-line length="medium"/>
+					<placeholder-line length="short"/>
+					<placeholder-line length="very short"/>
+				</placeholder>
+			</example>
+			<example>
+				<placeholder>
+					<placeholder-header image>
+						<placeholder-line length="medium"/>
+						<placeholder-line length="full"/>
+					</placeholder-header>
+					<placeholder-paragraph>
+						<placeholder-line length="full"/>
+						<placeholder-line length="medium"/>
+					</placeholder-paragraph>
+				</placeholder>
+			</example>
+		</>
+
+		<section label="Fluid" sticky collapsible dividing>
+			<example description="A fluid placeholder takes up the width of its container, instead of stopping at 30em.">
+				<placeholder fluid>
+					<placeholder-header image>
+						<placeholder-line/>
+						<placeholder-line/>
+					</placeholder-header>
+					<placeholder-paragraph>
+						<placeholder-line/>
+						<placeholder-line/>
+						<placeholder-line/>
+					</placeholder-paragraph>
+				</placeholder>
+			</example>
+		</>
+
+		<section label="Inverted" sticky collapsible dividing>
+			<example description="A placeholder can have its colors inverted.">
+				<segment inverted>
+					<placeholder inverted>
+						<placeholder-header image>
+							<placeholder-line/>
+							<placeholder-line/>
+						</placeholder-header>
+						<placeholder-paragraph>
+							<placeholder-line/>
+							<placeholder-line/>
+							<placeholder-line/>
+						</placeholder-paragraph>
+					</placeholder>
+				</segment>
+			</example>
+		</>
+
+		<section label="Consecutive placeholders" sticky collapsible dividing>
+			<example description="Placeholders that follow each other are spaced apart automatically.">
+				<placeholder>
+					<placeholder-header image>
+						<placeholder-line/>
+						<placeholder-line/>
+					</placeholder-header>
+				</placeholder>
+				<placeholder>
+					<placeholder-header image>
+						<placeholder-line/>
+						<placeholder-line/>
+					</placeholder-header>
+				</placeholder>
+				<placeholder>
+					<placeholder-header image>
+						<placeholder-line/>
+						<placeholder-line/>
+					</placeholder-header>
+				</placeholder>
+			</example>
+		</>
+	</>
+</spell-notebook>

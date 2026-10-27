@@ -27,7 +27,7 @@ The coherence agent reads it too, and flags a second word for the same idea (epi
   - `toggle()` stays as a METHOD that opens or closes, as `<details>` has a `toggle` event:  never an event name of
     ours.
 - **Score:**  `"ui-(folded|unfolded|fold|unfold|expand(ed|ing)?|collapse[ds]?|collapsing|show(n|ing)?|hid(e|den|ing)|dismiss(ed|ing)?)"|\bcollapsed=|\[collapsed\]|"collapsed"`
-  · not `spell-ui/src/jsx.ts`
+  · not `ui/src/jsx.ts`
 - **Decided:**  epic `elemental-spell`, 2026-10-24, its event-name rounds:  Q65 (A:  an `open` attribute opens and
   closes) and Q68 (A:  overlays open and close too;  Owen:  "Use for tabs, transitions, edit panel as well").
   - Owen, round 2:  "folding is a programmer concept, showing and hiding are people concepts ... better to reuse
@@ -49,7 +49,7 @@ The coherence agent reads it too, and flags a second word for the same idea (epi
 
 - **Say:**  viewer, for the person reading a page (a docs page, an epic page, a components page).
 - **Not:**  reader, person.
-- **Score:**  `\b(reader|person)\b` · in `spell-ui/src/docs-components/`
+- **Score:**  `\b(reader|person)\b` · in `ui/src/docs-components/`
 - **Decided:**  Owen, 2026-10-25, epic `coherence` Q9.
   - Sweep 1 found Spell UI's docs code saying "viewer" 51 times, "reader" 18, "person" 10;
     P14 made them "viewer" (Spell UI's docs components).

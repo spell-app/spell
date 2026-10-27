@@ -1,0 +1,5 @@
+{
+  // spell-__pack__'s tests:  its own settings (the repo's tsconfig.json), over this folder
+  "extends": "../tsconfig.json",
+  "include": ["."]
+}

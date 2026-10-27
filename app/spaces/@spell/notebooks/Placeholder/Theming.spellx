@@ -1,0 +1,68 @@
+<spell-notebook "placeholder theming">
+	<header level="1">
+		Placeholder
+		<header>A placeholder is used to reserve space for content that soon will appear in a layout.</>
+	</>
+	<placeholder-tab-bar showing="theming"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#tokens">Tokens</>
+				<ui-item link="#themes">Themes</>
+			</>
+		</>
+	</>
+
+	<!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
+	<section label="Tokens">
+		<markdown>
+			Theme with the public `--ui-placeholder-*` tokens: set one on the element, on any ancestor (a region, `:root`), or
+			on the inner box through `::part(placeholder)`; every shape inside follows. They inherit into the shadow roots,
+			where the sheet reads each through a private alias, so nothing inside blocks them.
+
+			- A single shape takes them too, on its own element or `::part()`.
+			- The colours are tints of the ink colour, so they suit any surface in either scheme.
+		</>
+		<markdown>
+			```css
+			/* every placeholder on the page */
+			:root {
+			  --ui-placeholder-duration: 3s;
+			}
+			/* one region */
+			.sidebar {
+			  --ui-placeholder-max-width: 40em;
+			  --ui-placeholder-radius: 0;
+			}
+			```
+		</>
+		<message state="info" size="small">
+			<markdown>
+				`fluid` lifts the `--ui-placeholder-max-width` cap whatever you set. Never set the `--_ui-placeholder-*` names:
+				they're the sheet's private plumbing.
+			</>
+		</>
+		<markdown>Edit a value below to try it.</>
+		<html>
+			<ui-docs-tokens family="ui-placeholder" playground>
+				<ui-placeholder>
+					<ui-placeholder-header image>
+						<ui-placeholder-line></>
+						<ui-placeholder-line></>
+					</>
+					<ui-placeholder-paragraph>
+						<ui-placeholder-line length="medium"></>
+						<ui-placeholder-line length="short"></>
+					</>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="Themes">
+		<markdown>
+			Each theme of the set (Spell, Glass, Fruity, Merlot, Paper, Midnight, Crisp, Pop, Matrix) changes a placeholder's colours through the
+			shared tokens.
+		</>
+	</>
+</spell-notebook>

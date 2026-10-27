@@ -1,0 +1,228 @@
+// Matrix:  a dark ops console, as a Spell UI theme.
+// - One of Spell's own themes, the set `UI.themes.own` lists;  applied ON TOP of `classic.css`,
+//   so every classic token it replaces is restated here.
+// - Its sheet, `matrix.css`, is GENERATED from this file:  `yarn gen:styles` (`ThemeFile`;  epic `debut` P18).
+//   What values can't say is in its rules sheets:  `rules/modern.css`, `rules/states.css` (its secondary's states), `rules/matrix.css` (headings, eyebrows, table headers).
+// - Owen, 2026-10-26:  "make a new theme "matrix" based on this", a screenshot of a rack viewer:  a live fabric inventory.
+// - What makes it Matrix:
+//   - dark, its home:  a near-black page with a cold green-grey cast, panels a step lighter with low hairline edges,
+//     no glow:  a flat console
+//   - ONE mint accent (the eyebrows, the live dots, the counts that are fine), amber for what needs attention,
+//     coral for what's wrong
+//   - big bold headings, tightly tracked;  eyebrows and table headers in the monospace, uppercase and spaced out;
+//     body text a muted grey-green
+//   - light, "daylight":  a cool grey-green page, white panels, the mint deepened so white reads on it
+//   - the system font and its monospace;  6px chips, 8px controls, 14px cards and panels, 18px modals
+//     (the box round a thing always rounder than it)
+//   - Apple's system colours for the hues (its palette, `apple`)
+// - NO font files ship:  every face is the platform's own.
+{
+  "$schema": "./theme.schema.json",
+  "palette": "apple",
+  "rules": ["modern", "states", "matrix"],
+  "own": {
+    "matrix-page": { "light": "#e8eeeb", "dark": "#071013" },
+    "matrix-panel": { "light": "#fbfdfc", "dark": "#111f22" },
+    // a raised strip on a panel:  a table's rows, the chosen tab
+    "matrix-raised": { "light": "#f1f6f4", "dark": "#172a2d" },
+    // what sits in a panel:  inputs, a tab bar's track, code
+    "matrix-inset": { "light": "#e2eae7", "dark": "#0a1417" },
+    "matrix-border": { "light": "#cbd8d4", "dark": "#1c2f31" },
+    "matrix-border-strong": { "light": "#afc1bc", "dark": "#2a4043" },
+    "matrix-accent": { "light": "#0b7552", "dark": "#7ce5bd" },
+    "matrix-on-accent": { "light": "#ffffff", "dark": "#03231a" },
+    "matrix-accent-wash": { "light": "#0b75521a", "dark": "#7ce5bd1f" },
+    "matrix-accent-text": { "light": "#0a6648", "dark": "#8ff0ca" },
+    // amber, bright in both schemes, ink on it (as a warning light);  its text a deep amber in light
+    "matrix-amber": { "light": "#e8a334", "dark": "#ffc56d" },
+    "matrix-on-amber": "#2a1a00",
+    "matrix-coral": { "light": "#b5392b", "dark": "#ff8d80" }
+  },
+  "typography": {
+    "size": "15px",
+    "family": {
+      "body": "system-ui, -apple-system, \"Segoe UI\", \"Noto Sans\", Cantarell, Ubuntu, \"Helvetica Neue\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Noto Color Emoji\"",
+      "heading": "{typography.family.body}",
+      "mono": "ui-monospace, \"SF Mono\", \"JetBrains Mono\", Menlo, Consolas, monospace"
+    }
+  },
+  "radii": {
+    "s": "6px",
+    "m": "8px",
+    "l": "14px"
+  },
+  "text": {
+    "ink": { "light": "#0c1916", "dark": "#e9f0ed" },
+    "body": { "light": "#1e2e2a", "dark": "#c3d0cc" },
+    "strong": { "light": "#07110e", "dark": "#f4f8f6" },
+    "muted": { "light": "#4c5f5a", "dark": "#90a29e" },
+    "light": { "light": "#5c6e69", "dark": "#7e908c" }
+  },
+  "surfaces": {
+    "page": "{own.matrix-page}",
+    "panel": "{own.matrix-panel}",
+    "inset": "{own.matrix-inset}",
+    "strong": "{own.matrix-raised}",
+    "bar": "{surfaces.page}",
+    "code": "{own.matrix-inset}",
+    "highlight": "{own.matrix-accent-wash}"
+  },
+  "borders": {
+    "color": "{own.matrix-border}",
+    "strong": "{own.matrix-border-strong}",
+    "internal": "{own.matrix-border}"
+  },
+  "brand": {
+    "primary": {
+      // Primary:  deep mint in light (white on it), mint in dark (deep ink on it)
+      "color": "{own.matrix-accent}",
+      "on": "{own.matrix-on-accent}",
+      "text": "{own.matrix-accent-text}",
+      "background": "{own.matrix-accent-wash}",
+      "inverted": "{own.matrix-accent}",
+      "inverted-on": "{own.matrix-on-accent}"
+    },
+    "secondary": {
+      "color": "{hues.grey.color}",
+      "on": "{hues.grey.on}",
+      "inverted": "{hues.grey.inverted}",
+      "inverted-on": "{hues.grey.inverted-on}",
+      // its states grey's own, which the Apple palette moves away from the text on it (`rules/states.css`)
+      "hover": "{hues.grey.hover}",
+      "focus": "{hues.grey.focus}",
+      "down": "{hues.grey.down}",
+      "active": "{hues.grey.active}"
+    },
+    "link": {
+      "color": "{own.matrix-accent-text}",
+      "hover": { "light": "#064a34", "dark": "#b8f7dd" }
+    },
+    "focus": {
+      "width": "2px",
+      "color": "{own.matrix-accent}"
+    }
+  },
+  "semantic": {
+    // the console's three states:  mint is fine, amber needs attention, coral is wrong
+    "positive": {
+      "base": "{own.matrix-accent}",
+      "text": "{own.matrix-accent-text}",
+      "border": { "light": "#0b75524d", "dark": "#7ce5bd4d" },
+      "background": "{own.matrix-accent-wash}"
+    },
+    "warning": {
+      "base": "{own.matrix-amber}",
+      "on": "{own.matrix-on-amber}",
+      "inverted-on": "{own.matrix-on-amber}",
+      "text": { "light": "#7a4d00", "dark": "#ffd596" },
+      "header": { "light": "#5e3b00", "dark": "#ffe4bd" },
+      "border": { "light": "#e8a3344d", "dark": "#ffc56d4d" },
+      "background": { "light": "#e8a3341a", "dark": "#ffc56d1a" }
+    },
+    "negative": {
+      "base": "{own.matrix-coral}",
+      "text": { "light": "#9a2c20", "dark": "#ffb0a6" },
+      "header": { "light": "#7a2018", "dark": "#ffd0ca" },
+      "border": { "light": "#b5392b4d", "dark": "#ff8d804d" },
+      "background": { "light": "#b5392b14", "dark": "#ff8d801a" }
+    }
+  },
+  "shadows": {
+    "ink": { "light": "#0c1f1a", "dark": "#000000" },
+    "subtle": "0 1px 2px light-dark(#0c1f1a0f, #00000066)",
+    // flat:  a hairline round a panel, and in light a whisper of shadow
+    "raised": "0 0 0 1px {own.matrix-border}, 0 1px 3px light-dark(#0c1f1a0d, #00000000)",
+    "floating": "0 0 0 1px {borders.strong}, 0 10px 30px light-dark(#0c1f1a24, #000000a6)",
+    "floating-hover": "0 0 0 1px {borders.strong}, 0 14px 40px light-dark(#0c1f1a2e, #000000b3)",
+    "overlay": "{shadows.floating-hover}"
+  },
+  "components": {
+    "button": {
+      "radius": "{radii.m}",
+      "font-weight": 500
+    },
+    "input": {
+      "radius": "{radii.m}",
+      "background": "{own.matrix-inset}",
+      "border-color": "{own.matrix-border}"
+    },
+    "dropdown": {
+      "radius": "{radii.m}"
+    },
+    "select": {
+      "background": "{components.input.background}",
+      "border-color": "{components.input.border-color}"
+    },
+    "menu": {
+      "radius": "{radii.m}",
+      "active-background": "{own.matrix-accent-wash}",
+      "active-color": "{own.matrix-accent-text}",
+      // tab bars:  a sunk track, the chosen tab a raised strip in the ink (not the accent), its corners the track's
+      // less the 3px inset
+      "segmented-background": "{own.matrix-inset}",
+      "segmented-radius": "{radii.m}",
+      "segmented-padding": "3px",
+      "segmented-item-radius": "calc({radii.m} - 3px)",
+      "segmented-active-background": "{own.matrix-raised}",
+      "segmented-active-color": "{text.strong}",
+      // no lines between segments:  one surface, its chosen key the only mark (T7)
+      "segmented-divider": "transparent"
+    },
+    "card": {
+      "radius": "{radii.l}",
+      "shadow": "{shadows.raised}"
+    },
+    "segment": {
+      "radius": "{radii.l}"
+    },
+    "section": {
+      "radius": "{radii.l}"
+    },
+    "panel": {
+      "radius": "{radii.l}",
+      "shadow": "{shadows.raised}"
+    },
+    "message": {
+      "radius": "{radii.m}"
+    },
+    "popup": {
+      "radius": "{radii.m}"
+    },
+    "modal": {
+      "radius": "18px"
+    },
+    "label": {
+      "radius": "{radii.s}"
+    },
+    "header": {
+      // headings bold (and tight:  `rules/matrix.css`);  sub-headings muted
+      "font-weight": "{typography.weight.bold}",
+      "sub-color": "{text.muted}"
+    },
+    "table": {
+      // a table's header row:  no fill, muted (in the monospace, uppercase:  `rules/matrix.css`)
+      "header-background": "transparent",
+      "header-color": "{text.muted}"
+    },
+    "statistic": {
+      // a count's label quiet, as the console's are:  muted, its own case and weight (`rules/matrix.css`)
+      "label-color": "{text.muted}"
+    },
+    "bar": {
+      "panel-background": "{own.matrix-panel}"
+    },
+    "docs-nav": {
+      // the docs' side column (`<ui-docs-nav>`) in the theme's own colours, not the classic ivory and brown
+      "background": "{own.matrix-panel}",
+      "header-background": "{own.matrix-inset}",
+      "band-background": "{own.matrix-inset}",
+      "band-color": "{text.muted}",
+      "border-color": "{borders.color}",
+      "current-background": "{own.matrix-accent-wash}",
+      "current-color": "{own.matrix-accent-text}"
+    },
+    "toolbar": {
+      "button-radius": "{radii.s}"
+    }
+  }
+}

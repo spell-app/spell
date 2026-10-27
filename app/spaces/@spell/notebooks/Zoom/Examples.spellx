@@ -1,0 +1,99 @@
+<spell-notebook "zoom examples">
+	<header level="1">
+		Zoom
+		<header>A zoom shows something small in the page, and full size over it on a click.</>
+	</>
+	<zoom-tab-bar showing="examples"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#types">Types</>
+				<ui-item link="#variations">Variations</>
+			</>
+		</>
+	</>
+
+	<!--
+		EXAMPLES:  Fomantic's page, section by section, in its order (Types, Content, States, Variations,
+		Groups ...).  Rules, the class-grammar mappings, gaps:  epics/spell-ui-pages/PAGES.md.
+		- A section:  `<ui-section id="examples-types" label="Types" sticky collapsible dividing>` around
+		  its examples;  ids spell out the nesting (`<tab>-<section>-<example>`, lowercase kebab of the headers).
+		- An example:  its own nested section (`label` = the example's name) around
+		  `<ui-example description="...">` and the live markup;  the markup IS the code shown.  A richer
+		  description:  `<p slot="description">` (+ `<ui-message slot="description">`).  Fomantic's header-less
+		  `.another.example`:  a second `<ui-example>` in the same section.
+		- Or write it flat (`<ui-header level="2">`, `<ui-example heading>`) and run `yarn site:sections`:
+		  it nests it and writes the ids (and fixes them after a title changes).
+		- A gap:  an HTML comment `GAP I<n>:  ...` BEFORE the example's section (a comment inside the example
+		  shows in its code).
+	-->
+	<section label="Types">
+		<section label="Zoom" sticky collapsible dividing>
+			<example description="Round any content:  shown at half size, laid out as it is full size.  A click (or Enter) shows it full size, over the page;  Escape, the backdrop or the close button shut it.">
+				<html>
+					<ui-zoom max-width="360px">
+						<ui-segment>
+							<ui-header level="3">Release notes</ui-header>
+							<p>Spell UI adds a zoom, a stack, and a textarea that grows with its text.</p>
+							<ui-button color="primary">Read more</ui-button>
+						</ui-segment>
+					</ui-zoom>
+				</html>
+			</example>
+		</>
+
+		<section label="Screenshot" sticky collapsible dividing>
+			<example description="A plain `<img>` inside it:  a screenshot shown at a third of its size, then full size.">
+				<html>
+					<ui-zoom shrink="33%">
+						<img src="/components/ui/images/hello-light.png" alt="Hello, in the light theme" />
+					</ui-zoom>
+				</html>
+			</example>
+		</>
+
+		<section label="Image" sticky collapsible dividing>
+			<example description="`<ui-image zoom>`:  the image itself is the button, and opens in the page's zoom, its alt text under it.">
+				<image zoom src="/components/ui/images/hello-light.png" alt="Hello, in the light theme" style="width: 240px"/>
+			</example>
+		</>
+	</>
+
+	<section label="Variations">
+		<section label="Shrink" sticky collapsible dividing>
+			<example description="`shrink`:  how big the content is in the page, as a percentage of its full size;  `50%` by default.">
+				<html>
+					<ui-stack direction="horizontal" align="start">
+						<ui-zoom shrink="25%">
+							<ui-segment style="width: 400px">
+								<ui-header level="3">25%</ui-header>
+								<p>A quarter of its size.</p>
+							</ui-segment>
+						</ui-zoom>
+						<ui-zoom shrink="50%">
+							<ui-segment style="width: 400px">
+								<ui-header level="3">50%</ui-header>
+								<p>Half its size.</p>
+							</ui-segment>
+						</ui-zoom>
+					</ui-stack>
+				</html>
+			</example>
+		</>
+
+		<section label="Cut off" sticky collapsible dividing>
+			<example description="`max-width` and `max-height`:  the most room it takes;  past them the content is cut off until it's shown full size.  `shrink=\"100%\"` keeps it full size, only cut off.">
+				<zoom max-height="120px" shrink="100%">
+					<list bulleted>
+						<item>Zoom</item>
+						<item>Stack</item>
+						<item>Growing textarea</item>
+						<item>Shrinkable menu</item>
+						<item>Fitting titles</item>
+						<item>Theme menu</item>
+					</list>
+				</zoom>
+			</example>
+		</>
+	</>
+</spell-notebook>

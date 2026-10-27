@@ -1,0 +1,58 @@
+<spell-notebook "nag theming">
+	<header level="1">
+		Nag
+		<header>A nag is a persistent message that stays until dismissed, and can remember the dismissal.</>
+	</>
+	<nag-tab-bar showing="theming"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#tokens">Tokens</>
+				<ui-item link="#themes">Themes</>
+			</>
+		</>
+	</>
+
+	<!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
+	<section label="Tokens">
+		<markdown>
+			Theme with the public `--ui-nag-*` tokens: set one on the element, on any ancestor (`:root` for every nag), or
+			on the bar through `::part(nag)`. They inherit into the shadow root, where the sheet reads each through a
+			private alias, so nothing inside blocks them. `inverted` reads the `--ui-nag-inverted-*` tokens instead. Style
+			the close icon with `::part(close)`.
+		</>
+		<markdown>
+			```css
+			/* every nag on the page */
+			ui-nag {
+			  --ui-nag-padding: 1em 2em;
+			}
+			/* the close icon */
+			ui-nag::part(close) {
+			  opacity: 1;
+			}
+			```
+		</>
+		<message state="info" size="small">
+			<markdown>
+				Fomantic's grey bar with dark text and a white title (3.2:1 contrast) is a dark grey bar with light text here.
+				Never set the `--_ui-nag-*` names: they're the sheet's private plumbing.
+			</>
+		</>
+		<markdown>Edit a value below to try it.</>
+		<html>
+			<ui-docs-tokens family="ui-nag" playground>
+				<ui-nag>
+					<span class="title">We have updated our privacy policy.</>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="Themes">
+		<markdown>
+			The theme menu above picks the theme for every page of the site:  Spell, Glass, Fruity or Merlot,
+			each restyling this component through its tokens.
+		</>
+	</>
+</spell-notebook>

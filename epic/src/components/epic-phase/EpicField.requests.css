@@ -1,0 +1,23 @@
+/*
+ * `<epic-field>`'s PAGE sheet (`EpicField.tsx` registers it once, `page: true`):  a request's screenshots, small.
+ * - They're the request's light DOM (`<p><a><img></a></p>`, as `epic file` writes it):
+ *   out of reach of the field's shadow sheet, so they're drawn from the page.
+ * - Thumbnails:  200px wide or 140px tall at most, a thin border;  a click shows one full size (the page's `<ui-zoom>`).
+ * - `!important`:  the markup's own `style="max-width: 100%"` is inline, which beats any rule but an important one.
+ */
+
+@layer ui.components.epic-field.page;
+
+@layer ui.components.epic-field.page {
+  epic-field[name="requests"] > epic-field[label]:not([name]) img {
+    box-sizing: border-box;
+    width: auto !important;
+    height: auto !important;
+    max-width: min(200px, 100%) !important;
+    max-height: 140px !important;
+    border: 1px solid var(--epic-rule, var(--ui-border-color, rgba(34, 36, 38, 0.15)));
+    border-radius: 4px;
+    vertical-align: top;
+    cursor: zoom-in;
+  }
+}

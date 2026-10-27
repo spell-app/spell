@@ -1,0 +1,42 @@
+<spell-notebook "toolbar theming">
+	<header level="1">
+		Toolbar
+		<header>A toolbar is a horizontal menu whose items scroll sideways when they don't fit, with a button at each end while there's more to see that way.</>
+	</>
+	<toolbar-tab-bar showing="theming"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#tokens">Tokens</>
+				<ui-item link="#themes">Themes</>
+			</>
+		</>
+	</>
+
+	<!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
+	<section label="Tokens">
+		<markdown>
+			Set a public `--ui-*` token on the element, any ancestor or `:root`; it inherits into the shadow
+			root. Edit a value below to try it.
+		</>
+		<html>
+			<ui-docs-tokens family="ui-toolbar" playground>
+				<ui-toolbar appearance="secondary" aria-label="Sections demo" style="max-width: 360px">
+					<ui-item link="#types" selected>Types</>
+					<ui-item link="#groups">Groups</>
+					<ui-item link="#content">Content</>
+					<ui-item link="#states">States</>
+					<ui-item link="#variations">Variations</>
+					<ui-item link="#group-variations">Group Variations</>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="Themes">
+		<markdown>
+			The theme menu above picks the theme for every page of the site:  Spell, Glass, Fruity or Merlot,
+			each restyling this component through its tokens.
+		</>
+	</>
+</spell-notebook>

@@ -1,0 +1,42 @@
+<spell-notebook "panel theming">
+	<header level="1">
+		Panel
+		<header>A panel is an inspector:  a tinted box of fields under a header band, with sub-head bands that open and close.</>
+	</>
+	<panel-tab-bar showing="theming"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#tokens">Tokens</>
+				<ui-item link="#themes">Themes</>
+			</>
+		</>
+	</>
+
+	<!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
+	<section label="Tokens">
+		<markdown>
+			Set a `--ui-panel-*` token on the panel, any ancestor or `:root`; it inherits into the shadow root.
+			The colour defaults come from the panel's hue (`color`, else `primary`). The section's own tokens
+			(`--ui-section-tip-*`, the chevron's turn) apply too. Never set the `--_ui-panel-*` names: they're
+			the sheet's private plumbing. Edit a value below to try it.
+		</>
+		<html>
+			<ui-docs-tokens family="ui-panel" playground>
+				<ui-panel label="Color Set" collapsible style="max-width: 320px">
+					<ui-input placeholder="Name, e.g. brand" aria-label="Set name"></>
+					<ui-panel label="Tweak" collapsible>
+						<ui-slider min="0" max="200" step="20" value="100" aria-label="Vibrancy"></>
+					</>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="Themes">
+		<markdown>
+			Panel is ours, not Fomantic's:  it follows the theme's hues, surfaces and colour scheme.  The Spell
+			theme (`spell`) adds the `accent` hue, the brand's soft shadow and the aubergine info tip.
+		</>
+	</>
+</spell-notebook>

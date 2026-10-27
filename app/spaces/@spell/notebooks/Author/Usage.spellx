@@ -1,0 +1,44 @@
+<spell-notebook "author usage">
+	<header level="1">
+		Author
+		<header>An author names who wrote a comment or did a feed event.</>
+	</>
+	<author-tab-bar showing="usage"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#using-it">Using it</>
+				<ui-item link="#owners">Owners</>
+				<ui-item link="#accessibility">Accessibility</>
+			</>
+		</>
+	</>
+
+	<section label="Using it">
+		<markdown>
+			`<ui-author>` names who wrote a comment or did a feed event (Fomantic's comment `author` and feed `user`).
+
+			- `link` renders a real link (`<a>`), e.g. to a profile; `target` goes with it.
+			- In a feed it sits inline in the `<ui-summary>`; in a comment it opens the content, before the `<ui-meta>`.
+		</>
+	</>
+
+	<section label="Owners">
+		<markdown>
+			`<ui-author>` finds its nearest owner and sets `:state(in-<owner>)` on itself; `UIParts.css` styles it by that
+			state. Its owners, and what each makes of it:
+
+			- [Comment](/components/ui/ui-comment.html) (`:state(in-comment)`): bold, at the start of the comment's content
+			- [Feed](/components/ui/ui-feed.html) (`:state(in-feed)`): bold, inline in the event's summary
+
+			Anywhere else it is an unstyled block. More on how parts find their owners: [Content parts](/components/ui/ui-header.html).
+		</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			- With `link` it renders a real `<a>`: **Tab** reaches it, **Enter** follows it.
+			- Without `link` it is plain inline text with no role.
+		</>
+	</>
+</spell-notebook>

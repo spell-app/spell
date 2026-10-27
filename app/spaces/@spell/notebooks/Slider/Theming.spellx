@@ -1,0 +1,52 @@
+<spell-notebook "slider theming">
+	<header level="1">
+		Slider
+		<header>A slider allows users to select values within a range.</>
+	</>
+	<slider-tab-bar showing="theming"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#tokens">Tokens</>
+				<ui-item link="#themes">Themes</>
+			</>
+		</>
+	</>
+
+	<!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
+	<section label="Tokens">
+		<markdown>
+			Theme with the public `--ui-slider-*` tokens: set one on the element, on any ancestor (`:root` included), or on
+			the slider's box through `::part(slider)`. They inherit into the shadow root, where the sheet reads each through
+			a private alias, so nothing inside blocks them. Style the pieces with `::part()`: `track`, `track-fill`,
+			`thumb`, `labels` and `label`.
+		</>
+		<markdown>
+			```css
+			ui-slider {
+			  --ui-slider-track-height: 0.25em;
+			}
+			ui-slider::part(thumb) {
+			  box-shadow: none;
+			}
+			```
+		</>
+		<message state="info" size="small">
+			<markdown>
+				`inverted` swaps in its own `--ui-slider-inverted-*` colours; `color` replaces `--ui-slider-fill-color`; a size
+				scales the whole slider (every length is `em`). Never set the `--_ui-*` / `--_slider-*` names: they're the sheet's private
+				plumbing (the element writes the thumb and label positions there).
+			</>
+		</>
+		<markdown>Edit a value below to try it.</>
+		<html>
+			<ui-docs-tokens family="ui-slider" playground>
+				<ui-slider value="5" aria-label="Volume"></>
+			</>
+		</>
+	</>
+
+	<section label="Themes">
+		<markdown>The theme menu in the header (Spell, Glass, Fruity, Merlot, Paper, Midnight, Crisp, Pop, Matrix) changes the colours a slider inherits.</>
+	</>
+</spell-notebook>

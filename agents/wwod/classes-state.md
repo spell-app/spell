@@ -3,7 +3,7 @@
 Classes, decorators, spell-cell state, `Loadable`, value objects and records.
 - Read with the hub, [WWOD.md](WWOD.md).
 - From:  original WWOD §12-16, root `AGENTS.md` "Decorators",
-  [Spell UI's AGENTS.md](../../spell-ui/AGENTS.md) "UI rules" (its classes rule, widened).
+  [Spell UI's AGENTS.md](../../ui/AGENTS.md) "UI rules" (its classes rule, widened).
 
 Solid mechanics of spell cells (bridge, flush, `tracked()`):
 [the Solid 2 rules](../../spell.epics/guides/solid/solid-2.md), "Spell's decisions".
@@ -45,10 +45,10 @@ This spoke is house style on top.
 - **Transitions MUTATE, and return a result structure or `this`;  derived reads are getters:**
   - A transition writes props through their setters (`@prop accessor`, or `setProp()`);
     a read is a getter, reactive because it reads a prop.
-    - e.g. `EditorStore` ([editor.ts](../../spell-app/src/app/editor.ts)):
+    - e.g. `EditorStore` ([editor.ts](../../app/src/app/editor.ts)):
       `showNotice()` / `hideNotice()` set `editor.notice`;  `get appType()` reads
   - Nothing else to return:  `return this`, typed `: this`, so calls chain and a subclass chains as itself.
-    - e.g. `UI.icons.reset()` ([IconPacks.ts](../../spell-ui/src/runtime/IconPacks.ts)),
+    - e.g. `UI.icons.reset()` ([IconPacks.ts](../../ui/src/runtime/IconPacks.ts)),
       `Loadable.stopInflightLoadOrSave()`
   - NOT:  free functions that each take the record and return `{ ...record, changed }`.
     Immutable-record-plus-spread forces every caller to re-assign the result,
@@ -77,14 +77,14 @@ This spoke is house style on top.
 - **`static` class constants, declared after the main methods:**
   - In a class, all helpers and constants go AFTER the main methods.
     - e.g. `EmojiData`'s registries, `private static readonly sets` and `loads`
-      ([EmojiData.ts](../../spell-ui/src/components/ui-emoji/EmojiData.ts))
+      ([EmojiData.ts](../../ui/src/components/ui-emoji/EmojiData.ts))
   - Module level:  WWOD §8 › "Class first, its types and helpers below".
     - `ui` keeps a constant ONE class uses as a module `const` below the class instead
       (a static's name survives minification):
-      [Spell UI's AGENTS.md](../../spell-ui/AGENTS.md), "Classes" (epic `wwod-spell-ui`, Q18).
+      [Spell UI's AGENTS.md](../../ui/AGENTS.md), "Classes" (epic `wwod-spell-ui`, Q18).
   - Tuning tables are `as const` objects,
     e.g. `UI.themes`' `slots = { base: BASE, theme: "theme" } as const`
-    ([Themes.ts](../../spell-ui/src/runtime/Themes.ts)).
+    ([Themes.ts](../../ui/src/runtime/Themes.ts)).
   - Developer / debug switches are the exception and stay at the top ("ALL-CAPS switches" below).
   - If a value property can be overridden per instance or per subclass,
     use `@proto` to define it on the prototype ("`@proto static` defaults" below).
@@ -134,7 +134,7 @@ This spoke is house style on top.
     - `@once` for a method run once (a loader's promise)
     - `forget(object, "x")` resets either, e.g. in a `static reset()`
     - Replaces a backing field plus `return (this.field ??= make())`
-      ([SiteData.ts](../../spell-ui/src/docs-components/SiteData.ts)).
+      ([SiteData.ts](../../ui/src/docs-components/SiteData.ts)).
   - A lazy value that is STATE (must be reactive, survive re-derivation) is `getState(name, init)` instead -- §13.
 - **Literal getters say `as const`:**
   a getter returning a fixed literal (a type name, an icon) narrows its type, so subclasses' literals stay distinct.
@@ -156,17 +156,17 @@ This spoke is house style on top.
     ```
 
   - Today the editor keys by path instead, through overloaded get / set functions
-    ([editor.ts](../../spell-app/src/app/editor.ts)):
+    ([editor.ts](../../app/src/app/editor.ts)):
     `lastSelectionForFile(path)` reads, `lastSelectionForFile(path, selection)` writes.
   - In Spell UI, which imports `PrefStore` by file (`spell/util/persist/PrefStore`), never through its util barrel:
     one key table, and static read / write pairs over `PrefStore.getAt()` / `setAt()`.
-    - e.g. `NavPreferences` ([NavPreferences.ts](../../spell-ui/src/docs-components/ui-docs-nav/NavPreferences.ts))
+    - e.g. `NavPreferences` ([NavPreferences.ts](../../ui/src/docs-components/ui-docs-nav/NavPreferences.ts))
     - No access needs wrapping:  `PrefStore` never throws when storage fails.
 - **Subclass for behaviour, spread for plain config:**
   - Behaviour that varies is a subclass overriding methods, its class-level defaults `@proto static`
     ("`@proto static` defaults" below), e.g. `TextFile` / `JSONFile` extend `LoadableFile`.
   - A plain config / spec record (data, no methods) spreads over its defaults:
-    `{ ...defaults, ...user, ...overrides }` ([Shorthand.ts](../../spell-ui/src/elements/Shorthand.ts)).
+    `{ ...defaults, ...user, ...overrides }` ([Shorthand.ts](../../ui/src/elements/Shorthand.ts)).
   - NOT:  config-by-spread over subclassing for pluggable BEHAVIOUR (`{ ...BaseSpec, parse, stringify }`) --
     a function in a spread record has no `super`, no `instanceof`, no docstring home.
 - **Interning:**  SEE:  WWOD §15 › "Immutable and interned, so `===` is equality".
@@ -190,7 +190,7 @@ This spoke is house style on top.
   - Use STANDARD (TC39 2023-11) decorators,
     NEVER `experimentalDecorators` or legacy 3-arg decorators that mutate the property descriptor.
   - General-purpose ones live in [util's decorators.ts](../../src/util/decorators.ts) (`@proto`, `@lazy`, `@once`):
-    import them from `spell/util`;  `ui` has `spell-ui/util`, which re-exports the generic ones.
+    import them from `spell/util`;  `ui` has `spell/ui/util`, which re-exports the generic ones.
   - The reactive ones (`@prop`, `@state`, `@derived`) live in
     [the reactive engine's decorators.ts](../../src/util/reactive/decorators.ts).
   - Spell's own `@thing` lives in [spellDecorators.ts](../../src/util/spell/spellDecorators.ts),
@@ -244,7 +244,7 @@ This spoke is house style on top.
       so it MUST read only record members;  else a plain getter.
   - A plain getter for a cheap derived value, as "Derived reads are plain getters" says.
   - Where they live:  `spell/element`'s [Reactive.ts](../../src/element/Reactive.ts).
-  - The details:  [Spell UI's AGENTS.md](../../spell-ui/AGENTS.md), "Solid authoring".
+  - The details:  [Spell UI's AGENTS.md](../../ui/AGENTS.md), "Solid authoring".
   - Hand-written spell `Observable`s keep `@prop` / `@derived` from `spellDecorators.ts`:
     the same idea on spell cells.
 - **A decorator starts its line:**
@@ -274,7 +274,7 @@ This spoke is house style on top.
   - Readers (Solid computations through the host's bridge, React through `view()`, `observe()`)
     re-run when a value they read REALLY changes.
     Reads are synchronous:  a read right after a write sees it.
-  - e.g. `EditorStore` ([editor.ts](../../spell-app/src/app/editor.ts)):
+  - e.g. `EditorStore` ([editor.ts](../../app/src/app/editor.ts)):
     `editor.x = y` anywhere, and Solid code reading `editor.x` re-runs.
   - SEE:  [the Solid 2 rules](../../spell.epics/guides/solid/solid-2.md), "Spell's decisions" › "Spell cells".
 - **Props are public, state is transient:**

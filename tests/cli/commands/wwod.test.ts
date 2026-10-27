@@ -64,10 +64,10 @@ describe("checkAgentRules()", () => {
     put("src/server/LiveReload.ts", "export class LiveReload {}\n")
     put(
       "agents/coherence/catalog.md",
-      "`src/server/LiveReload.ts`, `spell-epic/src/gone.mjs` and `spell-parser/parser`, the barrel.\n"
+      "`src/server/LiveReload.ts`, `epic/src/gone.mjs` and `spell/parser/parser`, the barrel.\n"
     )
     expect(checkAgentRules(CHECKOUT).problems.filter((each) => each.file.startsWith("agents/coherence"))).toEqual([
-      { file: "agents/coherence/catalog.md", line: 1, cite: "`spell-epic/src/gone.mjs`", problem: "no such path" }
+      { file: "agents/coherence/catalog.md", line: 1, cite: "`epic/src/gone.mjs`", problem: "no such path" }
     ])
   })
 

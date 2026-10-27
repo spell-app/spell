@@ -1,0 +1,149 @@
+<spell-notebook "nag usage">
+	<header level="1">
+		Nag
+		<header>A nag is a persistent message that stays until dismissed, and can remember the dismissal.</>
+	</>
+	<nag-tab-bar showing="usage"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#using-it">Using it</>
+				<ui-item link="#remembering-the-dismissal">Remembering the dismissal</>
+				<ui-item link="#events">Events</>
+				<ui-item link="#behaviors">Behaviors</>
+				<ui-item link="#keyboard">Keyboard</>
+				<ui-item link="#accessibility">Accessibility</>
+				<ui-item link="#framework-usage">Framework usage</>
+			</>
+		</>
+	</>
+
+	<!-- USAGE:  showing, remembering, events, script API, accessibility, frameworks. -->
+	<section label="Using it">
+		<markdown>
+			Nags present a one-time message that persists until the user acknowledges it: the site's use of cookies, an
+			important change to the site. Write `<ui-nag>` with the text inside; there is no `.nag()` call to make.
+
+			- It shows as soon as it is on the page, with a close icon (`closable`, on by default).
+			- A `<span class="title">` inside is set off in the title colour.
+			- Plain, it pushes the content down; `overlay` puts it over the top of its container, `fixed` pins it to the
+			  top of the viewport, and `bottom` moves either to the bottom edge.
+			- `display-time` hides it after that many milliseconds, without storing anything.
+			- Start it `hidden` to show it later: `host.show()`, or a button with `commandfor` and `command="--show"`
+			  (`--close` and `--toggle` work too).
+		</>
+	</>
+
+	<section label="Remembering the dismissal">
+		<markdown>
+			Remembering is opt-in. With a `key`, closing the nag stores `value` (default `dismiss`) under that key in
+			`storage`, so this browser doesn't get the nag again:
+
+			- `storage`: `local` (`localStorage`), `session` (`sessionStorage`) or `cookie` (Fomantic's default, with
+			  `path`, `domain`, `secure` and `samesite`)
+			- `expires`: days the dismissal lasts (30 by default; `0` never expires)
+			- a nag whose dismissal is stored is hidden before it paints, unless it's `persistent`
+			- blocked storage (a private window, a strict browser) just doesn't remember: the nag still shows and closes
+		</>
+
+		<section label="Cookie nag" sticky collapsible dividing>
+			<example description="Dismiss it, then reload:  it stays dismissed for this session (`storage=\"session\"`).">
+				<html>
+					<ui-nag key="site-cookie-nag" storage="session">
+						<span class="title">We use cookies to ensure you get the best experience on our website</span>
+					</ui-nag>
+				</html>
+			</example>
+		</>
+		<markdown>
+			```js
+			const nag = document.querySelector("ui-nag[key=site-cookie-nag]")
+			nag.dismissed // true once dismissed, now or on an earlier visit
+			nag.clear() // forget the dismissal ...
+			nag.show() // ... and show it again
+			```
+		</>
+		<html>
+			<ui-message size="small" class="site-not-ported">Not ported: Fomantic's API-backed dismissal, and its expirationKey, detachable and context settings. The nag stays where it is written:  store the dismissal on a server from <code>ui-closed</>.</>
+		</>
+	</>
+
+	<section label="Events">
+		<markdown>
+			- `ui-opening` -- shown, its entry animation finished (Fomantic's `onVisible`); `detail` is `{}`.
+			- `ui-closing` -- about to close, cancelable; `detail.reason` is `close` (the icon), `timeout` (`display-time`)
+			  or `dismiss` (`host.close()`, an invoker command). `preventDefault()` keeps it and stores nothing
+			  (Fomantic's `onHide` returning `false`).
+			- `ui-closed` -- closed, its exit animation finished (Fomantic's `onHidden`); the host is `hidden` now.
+		</>
+		<markdown>
+			```js
+			const nag = document.querySelector("ui-nag[key=cookies]")
+			nag.addEventListener("ui-closing", (event) => {
+			  if (!consentSaved) event.preventDefault() // keep it up, store nothing
+			})
+			nag.addEventListener("ui-closed", (event) => console.log(event.detail.reason))
+			if (nag.dismissed) loadAnalytics()
+			```
+		</>
+	</>
+
+	<section label="Behaviors">
+		<markdown>
+			Fomantic's behaviors are methods on the host:
+
+			- `show` -- `nag.show()`: shows it again, unless a dismissal is stored (and it isn't `persistent`); true when it
+			  shows
+			- `hide` / `dismiss` -- `nag.close()`: closes it, storing the dismissal when it has a `key`
+			- `clear` -- `nag.clear()`: forgets a stored dismissal
+			- `nag.dismissed` -- true once dismissed, now or before
+		</>
+	</>
+
+	<section label="Keyboard">
+		<markdown>
+			- **Tab** reaches the close icon, a real `<button>`.
+			- **Enter** / **Space** on it closes the nag.
+		</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			- A nag has no role of its own: it's content, read in page order. If it must be announced when it appears,
+			  give it `role="status"` (or a `role="region"` with an `aria-label`, for a banner) yourself.
+			- The close icon is a real button named "Close" (translated). With `closable="false"`, make sure something
+			  else closes it.
+			- A `fixed` nag covers the page's edge: leave room for it (padding on the body), so it never hides content.
+			- If the element fails to render, it shows its text through a bare `<slot>`, with no close button:
+			  hiding, `ui-closed`, remembering, `display-time` and the vetoes go.
+		</>
+	</>
+
+	<section label="Framework usage">
+		<markdown>A nag manages itself: put it in the template with a `key`, and listen for `ui-closed` if you track it.</>
+		<header level="4" id="framework-react">React 19</>
+		<markdown>
+			```jsx
+			<ui-nag key="cookies" storage="local" onui-hide={() => setConsent(true)}>
+			  We use cookies.
+			</ui-nag>
+			```
+		</>
+		<header level="4" id="framework-vue">Vue 3.5</>
+		<markdown>
+			```html
+			<!-- compilerOptions.isCustomElement = (tag) => tag.startsWith("ui-") -->
+			<ui-nag key="cookies" storage="local" @ui-closed="consent = true">We use cookies.</ui-nag>
+			```
+		</>
+		<header level="4" id="framework-solid">Solid 2</>
+		<markdown>
+			```jsx
+			// events and rich data are plain props:  `on-<event>={...}`, `options={...}`
+			<ui-nag key="cookies" storage="local" on-ui-closed={() => setConsent(true)}>
+			  We use cookies.
+			</ui-nag>
+			```
+		</>
+	</>
+</spell-notebook>

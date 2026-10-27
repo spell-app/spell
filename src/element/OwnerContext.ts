@@ -10,7 +10,7 @@ import { E } from "spell/element"
  *     `.ui.card > .content > .header`, with `depth` saying how many custom elements sit between
  *   - an optional `barrier` stops the climb, e.g. at a component that doesn't own this part
  * - Climbs the FLAT tree, so slotting and shadow roots don't hide the owner:  `assignedSlot`, then
- *   `parentElement`, then the shadow root's `host`:  `spell-ui/util`'s `flatParentFor()`, the climb
+ *   `parentElement`, then the shadow root's `host`:  `spell/ui/util`'s `flatParentFor()`, the climb
  *   `closestAcrossShadow()` uses too (which can't be reused:  it matches a selector, and doesn't count or stop).
  * - Call on `connectedCallback` and `slotchange`:  moving or re-slotting a part changes its owner.
  * - Library-neutral:  plain DOM, no Solid, no registry -- `PartContext` keeps the page-wide one and climbs through

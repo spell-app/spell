@@ -1,0 +1,855 @@
+import { existsSync, readFileSync } from "node:fs"
+import { relative, resolve } from "node:path"
+import { setTimeout as sleep } from "node:timers/promises"
+
+import { EpicCommandError, duration, stringFlag } from "spell/epic/command/command.types"
+import { PageInboxes } from "spell/epic/tools/PageInboxes"
+
+import { PlanDocError, type ItemDescription, type KeptNote, type MarkResult, type OptionCard } from "./planDoc.types"
+
+import { CommentList, CommentsError, type IdentifiedComment } from "./CommentList"
+import { GuideInbox, type GuideSend } from "./GuideInbox"
+import type { PlanDoc } from "./PlanDoc"
+import type { PlanReader } from "./PlanReader"
+import type { Flags, PlanDocCommands } from "./PlanDocCommands"
+import { PlanItem } from "./PlanItem"
+import {
+  ACTIONS,
+  InboxError,
+  LISTEN_HEARTBEAT_MS,
+  LISTEN_STALE_MS,
+  ReviewInbox,
+  type DoingItem,
+  type ListedMark,
+  type ListedUrgency,
+  type TakenWork
+} from "./ReviewInbox"
+import { FEEDBACK, SeeAlso, epicNamed } from "./SeeAlso"
+
+/****************
+ * ### `InboxCommands`
+ * `epic inbox [<what>] <name>[#<id>] ...` (`inbox <name> [<what> ...]`, the tool's order):  the review inbox of an
+ * epic's doc (`ReviewInbox`),
+ * from Claude's side;  `<what>` none prints it.
+ * - every inbox write goes through `ReviewInbox.update()` (the inbox's lock);
+ *   doc edits through `PlanDocCommands.edit()` (the doc's)
+ * - the session's commands (`wait`, `apply`, `working`, `done`, `clear`) stamp its heartbeat (`touchListening()`):
+ *   a session busy between `wait`s still counts as listening
+ * - the loop, step by step:  `templates/epics/plan-doc.md`, "Review inbox"
+ * - Prints through its owner (`PlanDocCommands`), whose files and edits it uses:  NOT a command line of its own.
+ * - From the docs tools' `plan-doc.js` `inbox()`, `printInbox()`, `waitForWork()`, `printWork()`,
+ *   `applyInbox()` (epic `epic-components`, P7).
+ ****************/
+export class InboxCommands {
+  /** the command line this belongs to:  its files, edits and output */
+  readonly owner: PlanDocCommands
+
+  constructor(owner: PlanDocCommands) {
+    this.owner = owner
+  }
+
+  /**
+   * `inbox <name> [<what> ...]`:  the review inbox of epic `name`'s doc at `file`;
+   * resolves to the exit code (`undefined` for 0).
+   * - throws a `PlanDocError` for an unknown `what`, or a missing argument
+   * - `name` may be an old name:  read as today's (`epicNamed()`:  `guide-changes` is `feedback`), as `findDoc()`
+   *   found `file`
+   */
+  async run(asked: string, file: string, [what, ...args]: string[], flags: Flags): Promise<number | void> {
+    const name = epicNamed(asked)
+    const path = ReviewInbox.pathFor(file)
+    switch (what) {
+      case undefined:
+        return this.print(name, this.owner.read(file), file, Boolean(flags.json))
+      case "watch": {
+        const session = stringFlag(flags.session) ?? process.env.CLAUDE_CODE_SESSION_ID
+        if (!session) throw new PlanDocError("watch as which session?  --session <id> (no $CLAUDE_CODE_SESSION_ID)")
+        ReviewInbox.update(path, (box) => box.setListening(session))
+        return this.owner.print(`listening:  session ${session}`)
+      }
+      case "ignore":
+        ReviewInbox.update(path, (box) => box.setListening(null))
+        return this.owner.print("listening:  nobody")
+      case "status":
+        return this.status(file, args, flags)
+      case "wait":
+        return this.waitForWork(name, file, flags)
+      case "apply":
+        // `--all`:  sent or not, as if Owen had pressed Send first (`/airplane land`:  nobody to send to, on a plane)
+        if (flags.all) ReviewInbox.update(path, (box) => box.markSent())
+        return this.apply(name, file, args)
+      case "working": {
+        const id = this.workingKey(file, this.owner.need(args[0], "an item id"))
+        const on = this.owner.need(args[1], "on | off")
+        if (!["on", "off"].includes(on)) throw new PlanDocError(`working ${id} on | off, not '${on}'`)
+        this.setWorking(file, id, on === "on")
+        return this.owner.print(`${shown(id)} working:  ${on}`)
+      }
+      case "done":
+      case "clear":
+        return this.finish(file, what, args, flags)
+      default:
+        throw new PlanDocError(
+          `inbox what?  watch | ignore | wait | apply | status | working | done | clear (not '${what}')`
+        )
+    }
+  }
+
+  /**
+   * The page's spinner on item `id` of the doc at `file`, on or off (`inbox working`;  `status` too):
+   * the inbox's `working` entry, and the session's heartbeat.
+   * - a comment's id (`C3`;  `c3`, `cm3` too):  its thread's "Claude: thinking…" stub instead
+   *   (`CommentList.setWorking()`);  `done` turns it off too.  Throws when there's no such comment.
+   * - SIDE EFFECT:  writes the inbox, under its lock
+   */
+  /**
+   * `inbox status <name> "<text>" [--items q6,c3]`:  what the session is doing now, the page's toolbar line (epic
+   * `epic-engine` P35);  `--clear`:  nothing.
+   * - `--items`:  what it's answering, each with its title from the doc (an item, a phase, a change mark) or the inbox
+   *   (a comment's first words);  an id that's neither is refused
+   */
+  private status(file: string, args: string[], flags: Flags): void {
+    const path = ReviewInbox.pathFor(file)
+    if (flags.clear) {
+      ReviewInbox.update(path, (box) => box.setDoing(null))
+      return this.owner.print("doing:  nothing")
+    }
+    const text = this.owner.need(args[0], 'what it\'s doing ("Responding", "Building P35")')
+    const ids =
+      stringFlag(flags.items)
+        ?.split(/[\s,]+/)
+        .filter(Boolean) ?? []
+    const plan = ids.length ? this.owner.read(file) : undefined
+    const comments = ReviewInbox.read(path).comments
+    const items = ids.map((given): DoingItem => {
+      const id = ReviewInbox.toItemId(given)
+      const comment = CommentList.isCommentId(id) ? comments[id] : undefined
+      if (comment) return { id, title: firstWords(comment.text) }
+      const facts = plan!.describeItem(id)
+      if (!facts) throw new PlanDocError(`status --items:  no item ${given.toUpperCase()}`)
+      return { id, title: facts.title }
+    })
+    ReviewInbox.update(path, (box) => box.setDoing({ text, items }))
+    this.owner.print(
+      `doing:  ${text}${items.length ? ` (${items.map((item) => item.id.toUpperCase()).join(", ")})` : ""}`
+    )
+  }
+
+  /**
+   * The inbox's key for what `inbox working` was given:  a comment's or an item's id, or a PHASE as people name one
+   * (`P20`, its id `p-one-repo`, its name;  epic `epic-engine` I147) as its stable id, which `<epic-phase>` reads.
+   * - throws for a phase the doc hasn't (`PlanDoc.phasePlace()`)
+   */
+  private workingKey(file: string, given: string): string {
+    const key = ReviewInbox.toItemId(given)
+    if (!PHASE_REF.test(key)) return key
+    const plan = this.owner.read(file)
+    return plan.phase(plan.phasePlace(key)).id
+  }
+
+  setWorking(file: string, id: string, on: boolean): void {
+    const key = ReviewInbox.toItemId(id)
+    ReviewInbox.update(ReviewInbox.pathFor(file), (box) => {
+      if (CommentList.isCommentId(key)) box.commentList.setWorking(key, on)
+      else box.setWorking(key, on ? workOf(box.marks[key]) : null)
+      box.touchListening()
+    })
+  }
+
+  ////////////////
+  // ## Printing
+  ////////////////
+
+  /**
+   * The doc's review inbox, for a reply or (`json`) a script.
+   * - marks grouped by action (`ACTIONS`' order), oldest first, each with its item's title and whether it's sent
+   *   (`sent: false`:  newer than the last "send to Claude";
+   *   an immediate one, `details` or revisit `now`, counts as sent:  `unsentMarks`)
+   * - an item gone from the doc since it was marked:  title `null`, "(no such item)"
+   * - a new item (`new1`, epic `airplane` P2):  `new todo:  <its title>`, its note and what it's about after it
+   * - the comments waiting on the pages the epic owns (epic `epic-workflow` P13), by page, each `unsent` until the
+   *   page's Send:  `guides` in the JSON (`GuideSends.waiting()`)
+   */
+  private print(name: string, plan: PlanReader, file: string, json: boolean): void {
+    const path = ReviewInbox.pathFor(file)
+    const inbox = ReviewInbox.read(path)
+    const guides = new GuideSends(this.owner.files.root, name).waiting()
+    const unsent = new Set(inbox.unsentMarks.map((mark) => mark.id))
+    const unsentUrgency = new Set(inbox.unsentUrgency.map((entry) => entry.id))
+    const marks = Object.fromEntries(ACTIONS.map((action) => [action, [] as PrintedMark[]]))
+    for (const mark of inbox.markList)
+      marks[mark.action]?.push({ ...mark, title: markTitle(plan, mark), sent: !unsent.has(mark.id) })
+    const report = {
+      file: path,
+      sent: inbox.sent,
+      unsent: unsent.size,
+      unsentComments: inbox.unsentComments.map((comment) => comment.id),
+      marks,
+      now: inbox.now,
+      working: inbox.working,
+      drafts: inbox.drafts,
+      comments: inbox.commentList.waiting,
+      urgency: inbox.urgencyList.map((entry) => ({ ...entry, sent: !unsentUrgency.has(entry.id) })),
+      // `live:  false`:  its heartbeat stopped (`liveListener()`):  the session is gone, the page says nobody
+      listening: inbox.listening && { ...inbox.listening, live: !!inbox.liveListener() },
+      guides
+    }
+    if (json) return this.owner.print(JSON.stringify(report, null, 2))
+    const lines = [
+      `inbox:  ${relative(this.owner.files.content, path)}${existsSync(path) ? "" : "  (none:  no marks)"}`
+    ]
+    const { listening } = inbox
+    lines.push(
+      !listening
+        ? "listening:  nobody (no Claude session is reviewing this doc)"
+        : inbox.liveListener()
+          ? `listening:  session ${listening.session}, since ${listening.since}`
+          : `listening:  nobody (session ${listening.session} last seen ${listening.seen ?? listening.since}, over ${LISTEN_STALE_MS / 1000}s ago:  gone without \`ignore\`)`
+    )
+    const unsentCount = unsent.size + unsentUrgency.size + inbox.unsentComments.length
+    lines.push(`sent:  ${inbox.sent ?? "never"};  ${unsentCount} unsent`)
+    for (const action of ACTIONS) {
+      if (!marks[action].length) continue
+      lines.push(`${action} (${marks[action].length}):`)
+      for (const mark of marks[action])
+        lines.push(
+          `  - ${mark.id.toUpperCase()}  ${mark.kind ? `${mark.kind}:  ` : ""}${mark.title ?? "(no such item)"}${extra(mark)}`
+        )
+    }
+    const urgency = inbox.urgencyList
+    if (urgency.length) lines.push(`urgency, from the id chips (${urgency.length}):`)
+    for (const entry of urgency) {
+      const item = plan.findItem(entry.id)
+      const title = item ? PlanItem.titleOf(item) : "(no such item)"
+      lines.push(
+        `  - ${entry.id.toUpperCase()}  ${title}  · ${calmWords(entry.calm)}${unsentUrgency.has(entry.id) ? " · unsent" : ""}`
+      )
+    }
+    if (inbox.now.length) lines.push(`now (${inbox.now.length}):`)
+    for (const each of inbox.now)
+      lines.push(`  - ${each.id.toUpperCase()}  ${each.action}${each.note ? `  "${each.note}"` : ""}  (${each.at})`)
+    const working = Object.entries(inbox.working)
+    if (working.length) lines.push(`working (${working.length}):`)
+    for (const [id, { action, since }] of working) lines.push(`  - ${id.toUpperCase()}  ${action}  (since ${since})`)
+    const drafts = Object.entries(inbox.drafts)
+    if (drafts.length) lines.push(`drafts, still being written (${drafts.length}):`)
+    for (const [id, { action, note, at }] of drafts)
+      lines.push(`  - ${id.toUpperCase()}  ${action}  "${note.trim()}"  (${at})`)
+    const comments = inbox.commentList.waiting
+    const unsentComments = new Set(inbox.unsentComments.map((comment) => comment.id))
+    if (comments.length) lines.push(`comments, waiting for an answer (${comments.length}):`)
+    for (const comment of comments) lines.push(...commentLines(comment, "  ", unsentComments.has(comment.id)))
+    if (guides.length) {
+      const count = guides.reduce((total, guide) => total + guide.comments.length, 0)
+      lines.push(`comments on the pages ${name} owns, waiting for an answer (${count}):`)
+      for (const guide of guides) {
+        lines.push(`  ${guide.page}  (sent ${guide.sent ?? "never"})`)
+        for (const comment of guide.comments)
+          lines.push(...commentLines(comment, "    ", guide.unsent.includes(comment.id)))
+      }
+    }
+    this.owner.print(lines.join("\n"))
+
+    /** A mark's own fields after its title:  the pick, a revisit's when and note, unsent. */
+    function extra(mark: PrintedMark) {
+      const parts: string[] = []
+      if (mark.pick) parts.push(`picks ${mark.pick}${mark.choices ? ` (card set ${mark.choices + 1})` : ""}`)
+      if (mark.when) parts.push(mark.when)
+      if (mark.result) parts.push(TEST_WORDS[mark.result])
+      if (mark.note) parts.push(mark.action === "test" ? `comment "${mark.note}"` : `"${mark.note}"`)
+      if (mark.shot) parts.push(`screenshot ${mark.shot}`)
+      if (mark.near) parts.push(`about ${mark.near.toUpperCase()}`)
+      if (mark.comments?.length) parts.push(`his comments ${upper(mark.comments)}`)
+      if (!mark.sent) parts.push("unsent")
+      else if (ReviewInbox.isImmediate(mark)) parts.push("requested now")
+      return parts.length ? `  · ${parts.join(" · ")}` : ""
+    }
+  }
+
+  ////////////////
+  // ## Waiting
+  ////////////////
+
+  /**
+   * `inbox wait <name>`:  poll the inbox every second until there's work (`hasWork`),
+   * TAKE it under the lock (`takeWork()`) and print it (`printWork()`).
+   * - none by `timeout` (default 3300 seconds, 55 minutes;  a time with its unit too, `8h`:  `duration()`):  exit code 2
+   * - how a `/epic review` session hears the page:  run in the background, its EXIT wakes the session
+   * - the poll reads without the lock (atomic writes:  never half a file);  only taking locks
+   * - the session's HEARTBEAT:  stamps `listening.seen` at the start and every `LISTEN_HEARTBEAT_MS`
+   *   (`touchListening()`, one locked write), so a session killed mid-wait goes stale on the page (`liveListener()`)
+   * - the epic's GUIDES too (epic `epic-workflow` P13, J27):  a Send on any page the epic owns (`SeeAlso.ownerOf()`)
+   *   wakes it, its comments taken from the page's inbox (`GuideSends`), printed under the page they're on
+   */
+  private async waitForWork(name: string, file: string, { timeout = "3300", json }: Flags): Promise<number | void> {
+    const path = ReviewInbox.pathFor(file)
+    const seconds = timeoutOf(timeout)
+    const end = Date.now() + seconds * 1000
+    const guides = new GuideSends(this.owner.files.root, name)
+    let beat = 0
+    for (;;) {
+      let work = null as TakenWork | null
+      if (peek(path).hasWork) ReviewInbox.update(path, (box) => (work = box.takeWork()))
+      const sent = guides.take()
+      if (work || sent.length) return this.printWork(name, this.owner.read(file), work ?? NO_WORK, sent, Boolean(json))
+      if (Date.now() >= end) break
+      // a beat that didn't land (the inbox mid-write, unreadable) is tried again a second later, not 30s:  three missed
+      // in a row went stale, and the page told Owen nobody was listening (2026-10-25)
+      if (Date.now() - beat >= LISTEN_HEARTBEAT_MS && heartbeat()) beat = Date.now()
+      await sleep(1000)
+    }
+    if (json) this.owner.print(JSON.stringify({ timeout: seconds, now: [], sent: null, guides: [] }))
+    else this.owner.print(`nothing to do:  no send and no request in ${seconds}s`)
+    return 2
+
+    /** The inbox, or an empty one while it can't be read (hand-edited mid-poll):  the next poll tries again. */
+    function peek(path: string): ReviewInbox {
+      try {
+        return ReviewInbox.read(path)
+      } catch (error) {
+        if (error instanceof InboxError) return new ReviewInbox()
+        throw error
+      }
+    }
+
+    /**
+     * Stamp the listening session's heartbeat;  nobody listening:  no write at all.
+     * - returns whether it's done:  `false` when the file couldn't be read or written (hand-edited mid-poll, or its
+     *   lock held), so the loop tries again a second later
+     */
+    function heartbeat(): boolean {
+      try {
+        if (!ReviewInbox.read(path).listening) return true
+        ReviewInbox.update(path, (box) => box.touchListening())
+        return true
+      } catch (error) {
+        if (error instanceof InboxError) return false
+        console.error("inbox wait:  the heartbeat failed, trying again:", error)
+        return false
+      }
+    }
+  }
+
+  /**
+   * Print the work `wait` took (`takeWork()`'s `{ now, sent, canceled }`), each mark with its item (`describeItem()`):
+   * id, kind, status, title, the mark, the note, a pick's option card.
+   * - a send's comments too (Send hands them over, Owen 2026-10-10):  where each is, its words, his latest reply
+   * - plain lines for Claude to read, then what to run next
+   * - `guides`:  the sends taken from the epic's guides (P13), each page's comments under it, with the commands that
+   *   answer them one at a time (`epic comments working` / `answer`)
+   * - `json`:  `{ now, sent, canceled, guides }` with `item` (and `option`) on each mark;  `sent.comments` and each
+   *   guide's `comments` as the inboxes have them
+   */
+  private printWork(name: string, plan: PlanReader, work: TakenWork, guides: GuideWork[], json: boolean): void {
+    const now = work.now.map((each) => withItem(each))
+    const sent = work.sent && {
+      at: work.sent.at,
+      marks: work.sent.marks.map((mark) => withItem(mark)),
+      urgency: (work.sent.urgency ?? []).map((entry) => withItem(entry)),
+      comments: work.sent.comments ?? []
+    }
+    const canceled = (work.canceled ?? []).map((each) => withItem(each))
+    if (json) return this.owner.print(JSON.stringify({ now, sent, canceled, guides }, null, 2))
+    const lines: string[] = []
+    if (canceled.length) {
+      lines.push(
+        `canceled (${canceled.length}):  Owen said "nevermind":  stop each one's background agent (TaskStop), then ` +
+          `\`epic inbox done ${name}#<id>\``
+      )
+      for (const each of canceled) lines.push(`  - ${line(each)}  (${each.action})`)
+    }
+    if (now.length) {
+      lines.push(`now (${now.length}):  start a background agent for each;  \`epic inbox done ${name}#<id>\` after`)
+      for (const each of now) {
+        lines.push(`  - ${line(each)}`)
+        if (each.action === "details") lines.push("      Add Details")
+        else if (each.pick)
+          lines.push(`      revisit now:  ${PlanItem.pickAsks(each.pick, each.option ?? undefined, each.note)}`)
+        else lines.push(`      revisit now${each.note ? `:  "${each.note}"` : ""}`)
+      }
+    }
+    if (sent) {
+      const urgency = sent.urgency.length ? `, ${sent.urgency.length} urgency` : ""
+      const comments = sent.comments.length ? `, ${plural(sent.comments.length, "comment")}` : ""
+      lines.push(`sent ${sent.at} (${plural(sent.marks.length, "mark")}${urgency}${comments}):`)
+      for (const action of ACTIONS) {
+        const marks = sent.marks.filter((mark) => mark.action === action)
+        if (!marks.length) continue
+        lines.push(`  ${SENT_HEADINGS[action] ?? action} (${marks.length}):`)
+        for (const mark of marks) {
+          lines.push(`    - ${line(mark)}${mark.again ? "  (sent before)" : ""}`)
+          // a revisit with a pick:  "pick B, but ...", one line
+          if (mark.action === "revisit" && mark.pick)
+            lines.push(`        ${PlanItem.pickAsks(mark.pick, mark.option ?? undefined, mark.note)}`)
+          else {
+            if (mark.option) lines.push(`        picks ${mark.pick} · ${mark.option.title}`)
+            else if (mark.pick) lines.push(`        picks ${mark.pick} (no such option card)`)
+            if (mark.result) lines.push(`        ${TEST_WORDS[mark.result]}`)
+            // a test's note is Owen's COMMENT on it, with any result (it may still need work:  read every one)
+            if (mark.note) lines.push(`        ${mark.action === "test" ? "comment" : "note"}:  "${mark.note}"`)
+            if (mark.shot) lines.push(`        screenshot:  ${mark.shot}`)
+          }
+          // a revisit whose content is Owen's comments in its text (epic `epic-engine` I140):  they ARE his note
+          if (mark.inlineComments?.length) {
+            lines.push(`        his comments in its text, the revisit's content (${mark.inlineComments.length}):`)
+            for (const comment of mark.inlineComments) lines.push(...commentLines(comment, "          "))
+          }
+        }
+      }
+      if (sent.urgency.length) lines.push(`  urgency, from the id chips (${sent.urgency.length}):`)
+      for (const entry of sent.urgency) lines.push(`    - ${line(entry)}  · ${calmWords(entry.calm)}`)
+      if (sent.comments.length) lines.push(`  comments, to answer on their threads (${sent.comments.length}):`)
+      for (const comment of sent.comments) lines.push(...commentLines(comment, "    "))
+      const talk = sent.marks.filter((mark) => mark.action === "revisit")
+      if (sent.marks.length || sent.urgency.length)
+        lines.push(
+          `next:  \`epic inbox apply ${name}\` (approve, pick, todo, a todo's next phase or drop, skip, new, ` +
+            `test results, urgency)`
+        )
+      if (talk.length)
+        lines.push(
+          `then talk over ${talk.map((mark) => mark.id).join(", ")} in the chat;  \`epic inbox clear ${name}#<id>\` after each`
+        )
+      if (sent.comments.length)
+        lines.push(
+          `then each comment:  \`epic inbox working ${name}#<M id> on\`, answer it in the doc, ` +
+            `then \`epic inbox done ${name}#<M id> --file <answer.html>\``
+        )
+    }
+    if (guides.length) {
+      const count = guides.reduce((total, guide) => total + guide.comments.length, 0)
+      lines.push(`sent from the pages ${name} owns (${plural(count, "comment")}):`)
+      for (const guide of guides) {
+        lines.push(`  ${guide.page}  (sent ${guide.at}):`)
+        for (const comment of guide.comments) lines.push(...commentLines(comment, "    "))
+      }
+      lines.push(
+        "then each one, on its page:  `epic comments working <page>#<M id> on`, work it into the page (or say why " +
+          "not), then `epic comments answer <page>#<M id> --file <answer.html> [--commit <sha>]`"
+      )
+    }
+    this.owner.print(lines.join("\n"))
+
+    /** `mark` (or a `now` request) with its item, upper-case id, and a pick's option card. */
+    function withItem<M extends { id: string; action?: string; pick?: string; choices?: number }>(mark: M) {
+      const item = mark.action === "new" ? newItemOf(mark as M & ListedMark) : plan.describeItem(mark.id)
+      const element = item && plan.findItem(mark.id)
+      const option: OptionCard | null | undefined =
+        mark.pick && element
+          ? (plan.optionCards(element, mark.choices).find((card) => card.letter === mark.pick) ?? null)
+          : undefined
+      return { ...mark, id: mark.id.toUpperCase(), item, ...(option !== undefined && { option }) } as M & {
+        item: typeof item
+        option?: OptionCard | null
+      }
+    }
+
+    /** `Q7  question, open · <title>` */
+    function line(mark: { id: string; item: ReturnType<PlanReader["describeItem"]> }) {
+      if (!mark.item) return `${mark.id}  (no such item)`
+      return `${mark.id}  ${mark.item.kind}, ${mark.item.status} · ${mark.item.title}`
+    }
+  }
+
+  ////////////////
+  // ## Taking marks
+  ////////////////
+
+  /**
+   * `inbox apply <name> [ids...]`:  apply the SENT mechanical marks, all or those of `ids`, then clear them;
+   * prints a line per item, and what it left.
+   * - the marks (`PlanDoc.applyMark()`):
+   *   - approve, pick, todo
+   *   - a todo's `next` (queued into the next phase) and `drop` (canceled)
+   *   - `skip` (the note box's x:  reviewed, nothing to do)
+   *   - new
+   *   - `test`, a test run's answers (epic `epic-engine` P4):  passed, failed, skip, not now;
+   *     each failure's new issue listed after, for the session to tell Owen with its link
+   *   - `accept`, the page header's stage button (epic `epic-engine` P29):  the page on to its next stage;  the
+   *     session then writes the phases (after the Overview) or starts building (after the phases)
+   *   - `defer`, a phase's Defer while the phases are agreed:  moved after the others, still to do
+   *   - a change mark's (`ch3`, epic `epic-engine` P30):  `accept` makes it `accepted` (no orange, the chip stays),
+   *     `reopen` reopens the question it names (the words stay orange)
+   *   - and the sent urgency (an id chip clicked:  `PlanDoc.setCalm()`)
+   * - a dry run on a parsed copy first:  the doc is written (`edit()`, its lock) only when something applies
+   * - marks cleared under the inbox's lock, only while still the ones applied (`clearApplied()`, `clearUrgency()`);
+   *   marks of items gone from the doc are dropped too
+   * - `ids` without a sent mark:  named, left alone (unsent marks wait for Owen's send)
+   * - `--all` (`run()`):  every mark sent first, as Send does, then applied
+   *   (epic `airplane`, Q3:  the landing takes what Owen marked on the plane, sent or not)
+   */
+  private async apply(name: string, file: string, ids: string[]): Promise<void> {
+    const path = ReviewInbox.pathFor(file)
+    const want = ids.length ? new Set(ids.map(ReviewInbox.toItemId)) : null
+    const inbox = ReviewInbox.read(path)
+    const marks = inbox.sentMarks.filter((mark) => !want || want.has(mark.id))
+    const urgency = inbox.sentUrgency.filter((entry) => !want || want.has(entry.id))
+    const dry = this.owner.read(file)
+    const planned: Applied[] = marks.map((mark) => ({ mark, ...dry.applyMark(mark) }))
+    const plannedUrgency = urgency.map((entry) => urgencyOn(dry, entry))
+    const changes = planned.some((each) => each.applied) || plannedUrgency.some((each) => each.changed)
+    const { results, calmed } = changes
+      ? await this.owner.edit(file, (plan) => ({
+          results: marks.map((mark): Applied => ({ mark, ...plan.applyMark(mark) })),
+          calmed: urgency.map((entry) => urgencyOn(plan, entry))
+        }))
+      : { results: planned, calmed: plannedUrgency }
+    const cleared = results.filter((each) => each.applied || each.gone).map((each) => each.mark)
+    ReviewInbox.update(path, (box) => {
+      box.clearApplied(cleared)
+      box.clearUrgency(calmed.map((each) => each.entry))
+      box.touchListening()
+    })
+    const lines: string[] = []
+    for (const each of results) if (each.applied) lines.push(`${each.mark.id.toUpperCase()}  ${each.did}`)
+    for (const each of calmed) lines.push(`${each.entry.id.toUpperCase()}  ${each.did}`)
+    const filed = results.flatMap((each) =>
+      each.applied && each.filed ? [{ test: each.mark.id, issue: each.filed }] : []
+    )
+    if (filed.length)
+      lines.push(
+        `failed tests (${filed.length}):  tell Owen one line each, the issue's link ` +
+          `(\`epic pages link ${file} --hash <issue> --review\`):`
+      )
+    for (const { test, issue } of filed) lines.push(`  ${test.toUpperCase()} -> ${issue.toUpperCase()}`)
+    const left = results.filter((result) => !result.applied)
+    if (left.length) lines.push("left:")
+    for (const each of left)
+      if (!each.applied) lines.push(`  ${each.mark.id.toUpperCase()}  ${each.mark.action}:  ${each.left}`)
+    for (const id of want ?? [])
+      if (!marks.some((mark) => mark.id === id) && !urgency.some((entry) => entry.id === id))
+        lines.push(`  ${id.toUpperCase()}:  no sent mark`)
+    this.owner.print(lines.length ? lines.join("\n") : `nothing to apply:  no sent marks (\`epic inbox ${name}\`)`)
+  }
+
+  /**
+   * `done` / `clear` items `ids`:  their marks go, and their `working` too.
+   * - `done` keeps a mark Owen changed while the agent worked (`finishMarks()`);  `clear` drops it
+   * - a mark leaving with Owen's note in it:  the note is kept IN the item first, as his own reply card
+   *   (`PlanDoc.keepNote()`, epic `windows-and-review` P1):  what he wrote is never lost from the page
+   * - a request taken care of is recorded as handled that way
+   *   (`review-as`;  the page's buttons clear, the chip shows the result):
+   *   - an immediate one (Do Now:  Add Details, revisit now) as `now`
+   *   - a revisit talked over as `revisit`
+   * - a mark leaving with Owen's PICK on it ("pick B, but ..."):
+   *   the pick is kept too, as that card set's `chosen` with a Noted card (`PlanDoc.keepPick()`)
+   *   - unless the set has a `chosen` already (a `decide --option` after the talk)
+   *   - once Owen picked, the card shows Chosen (Owen, 2026-10-10, epic `airplane` P8)
+   */
+  private async finish(file: string, what: "done" | "clear", given: string[], flags: Flags = {}): Promise<void> {
+    if (!given.length) throw new PlanDocError(`${what} which items?  ids`)
+    const comments = given.map(ReviewInbox.toItemId).filter(CommentList.isCommentId)
+    if (comments.length) this.finishComments(file, what, comments, flags)
+    const ids = given.filter((id) => !CommentList.isCommentId(ReviewInbox.toItemId(id)))
+    if (!ids.length) return
+    // before the inbox changes:  a note it drops must land in the doc, which an old-markup doc refuses
+    this.owner.files.requireNewMarkup(file)
+    const path = ReviewInbox.pathFor(file)
+    const keys = ids.map(ReviewInbox.toItemId)
+    let had: string[] = []
+    let kept: string[] = []
+    let notes: { id: string; mark: KeptNote }[] = []
+    let handled: { id: string; as: "now" | "revisit" }[] = []
+    let picks: { id: string; pick: string; choices?: number }[] = []
+    ReviewInbox.update(path, (box) => {
+      const before = { ...box.marks }
+      if (what === "done") ({ had, kept } = box.finishMarks(keys))
+      else had = box.clearMarks(keys)
+      // a new item's note is its text, not a note on anything in the doc:  never kept as a reply
+      notes = had
+        .filter((id) => before[id]?.note && before[id]?.action !== "new")
+        .map((id) => ({ id, mark: before[id] as KeptNote }))
+      handled = had.flatMap((id): { id: string; as: "now" | "revisit" }[] => {
+        const mark = before[id]
+        if (mark && ReviewInbox.isImmediate(mark)) return [{ id, as: "now" }]
+        return mark?.action === "revisit" ? [{ id, as: "revisit" }] : []
+      })
+      // a pick riding on the mark ("pick B, but ..."):  Owen chose it, so it stays chosen on the page (P8)
+      picks = had.flatMap((id) => {
+        const pick = before[id]?.pick
+        return pick ? [{ id, pick, ...ReviewInbox.pickOf(before[id]) }] : []
+      })
+      for (const id of keys) box.setWorking(id, null)
+      box.touchListening()
+    })
+    if (notes.length || handled.length || picks.length)
+      await this.owner.edit(file, (plan) => {
+        for (const { id, mark } of notes) plan.keepNote(id, mark)
+        for (const { id, as } of handled) {
+          const item = plan.findItem(id)
+          if (item) plan.reviewedAs(item, as)
+        }
+        for (const { id, ...pick } of picks) {
+          const did = plan.keepPick(id, pick)
+          if (did) plan.log(`${id.toUpperCase()} ${did}`)
+        }
+      })
+    const none = keys.filter((id) => !had.includes(id) && !kept.includes(id))
+    const label = what === "done" ? "done" : "cleared"
+    const extras = [
+      none.length ? `no mark:  ${upper(none)}` : "",
+      kept.length ? `changed since, kept for the next send:  ${upper(kept)}` : "",
+      notes.length ? `Owen's note kept in the doc:  ${upper(notes.map(({ id }) => id))}` : ""
+    ].filter(Boolean)
+    this.owner.print(`${label}:  ${upper(keys)}${extras.length ? `  (${extras.join(";  ")})` : ""}`)
+  }
+
+  /**
+   * `done` / `clear` comments `ids` (`C3`, `c3` or `cm3`;  epic `airplane` P11).
+   * - `done`:  answered;  Owen's turn on the page's thread
+   *   - `--file <html>`:  the answer, on the thread (its markup, as is);  none:  answered in the doc
+   *   - `--commit <sha>`:  the commit it was built in (the thread's Done line shows it)
+   * - `clear`:  gone from the inbox
+   * - throws when one isn't there, or the file can't be read
+   * - SIDE EFFECT:  writes the inbox, under its lock
+   */
+  private finishComments(file: string, what: "done" | "clear", ids: string[], flags: Flags): void {
+    const reply = stringFlag(flags.file)
+    const html = reply !== undefined ? readFileSync(resolve(reply), "utf8") : ""
+    const commit = stringFlag(flags.commit)
+    ReviewInbox.update(ReviewInbox.pathFor(file), (box) => {
+      for (const id of ids) {
+        box.commentList.comment(id)
+        if (what === "done") box.commentList.answer(id, html, new Date(), commit)
+        else box.commentList.clear(id)
+      }
+      box.touchListening()
+    })
+    this.owner.print(`comments ${what === "done" ? "answered" : "cleared"}:  ${upper(ids)}`)
+  }
+}
+
+/****************
+ * ### `GuideSends`
+ * The pages an epic owns (`SeeAlso.ownedBy()`:  its details pages, the guides its See Also claims), and the comments
+ * Owen sent from them (epic `epic-workflow` P13, J27):  how `inbox wait <name>` hears a guide's Send.
+ * - the standing `feedback` epic (epic `epic-engine` T9):  every page no epic owns that holds comments
+ *   (`PageInboxes.unowned()`), Epic UI's pages too, besides its own `details/` pages
+ * - the pages are found again every `GUIDES_FOUND_MS`, so a guide linked mid-wait is heard
+ * - each page's inbox read without its lock (atomic writes);  only taking a send locks it (`GuideInbox.takeSent()`)
+ * - the session's monitor (`InboxMonitor`) peeks with it too (`hasNewSend`), and never takes;
+ *   its poller watches `files` for a change
+ ****************/
+export class GuideSends {
+  /** the checkout's root */
+  readonly root: string
+  /** the epic's name */
+  readonly name: string
+  /** the docs pages' inbox files:  where page paths' inboxes are (Epic UI's too), and the unowned pages */
+  private readonly inboxes: PageInboxes
+  /**
+   * the pages it owns, as page paths (from the content folder, or Epic UI's as served, `components/epics/...`), as
+   * last found
+   */
+  private pages: string[] = []
+  /** when they were found, ms */
+  private foundAt = -Infinity
+
+  constructor(root: string, name: string) {
+    this.root = root
+    this.name = name
+    this.inboxes = new PageInboxes({ root })
+  }
+
+  /** Take every send not taken yet from the epic's pages:  each page with its comments;  `[]` for none. */
+  take(): GuideWork[] {
+    return this.owned().flatMap((page): GuideWork[] => {
+      const file = this.inboxOf(page)
+      if (!this.peek(file)?.hasNewSend) return []
+      const taken = GuideInbox.update(file, (_comments, inbox) => inbox.takeSent())
+      return taken ? [{ page, ...taken }] : []
+    })
+  }
+
+  /** Whether one of the epic's pages holds a send not taken yet:  what `take()` would find.  Takes nothing. */
+  get hasNewSend(): boolean {
+    return this.owned().some((page) => Boolean(this.peek(this.inboxOf(page))?.hasNewSend))
+  }
+
+  /**
+   * The sends not taken yet on the epic's pages, as one string, `<page>@<sent>` each;  `""` for none.
+   * - names the batch the session's poller announces (`InboxMonitor`'s `batch`):  a newer Send is a new batch
+   */
+  get newSends(): string {
+    return this.owned()
+      .flatMap((page) => {
+        const inbox = this.peek(this.inboxOf(page))
+        return inbox?.hasNewSend ? [`${page}@${inbox.sent}`] : []
+      })
+      .join(" ")
+  }
+
+  /**
+   * The inbox files of the epic's pages, existing or not yet:  what the session's monitor watches for a Send
+   * (`InboxMonitor.check()`).
+   */
+  get files(): string[] {
+    return this.owned().map((page) => this.inboxOf(page))
+  }
+
+  /** The comments waiting on the epic's pages, by page:  when last sent, and which a Send would hand over. */
+  waiting(): GuideWaiting[] {
+    return this.owned().flatMap((page): GuideWaiting[] => {
+      const inbox = this.peek(this.inboxOf(page))
+      const comments = inbox?.commentList.waiting ?? []
+      if (!inbox || !comments.length) return []
+      return [{ page, sent: inbox.sent, unsent: inbox.unsentComments.map((comment) => comment.id), comments }]
+    })
+  }
+
+  /** The pages the epic owns, found again once `GUIDES_FOUND_MS` has passed. */
+  private owned(): string[] {
+    if (Date.now() - this.foundAt < GUIDES_FOUND_MS) return this.pages
+    const owned = new SeeAlso(this.root).ownedBy(this.name)
+    this.pages = this.name === FEEDBACK ? [...owned, ...this.inboxes.unowned()] : owned
+    this.foundAt = Date.now()
+    return this.pages
+  }
+
+  /** Page `page`'s inbox file:  in the content folder, or Epic UI's (`PageInboxes.fileOf()`). */
+  private inboxOf(page: string): string {
+    return GuideInbox.fileFor(this.inboxes.fileOf(page))
+  }
+
+  /** The inbox in `file`;  `undefined` while it can't be read (hand-edited mid-poll):  the next poll tries again. */
+  private peek(file: string): GuideInbox | undefined {
+    try {
+      return GuideInbox.read(file)
+    } catch (error) {
+      if (error instanceof CommentsError) return undefined
+      throw error
+    }
+  }
+}
+
+/** A send `wait` took from one of the epic's pages:  the page (a page path), when, its comments. */
+type GuideWork = { page: string } & GuideSend
+
+/** The comments waiting on one of the epic's pages, as `inbox` prints them. */
+type GuideWaiting = { page: string; sent: string | null; unsent: string[]; comments: IdentifiedComment[] }
+
+/** How often `wait` finds the epic's pages again, ms:  reading every epic's links is the slow part. */
+const GUIDES_FOUND_MS = 30_000
+
+/** No work in the review inbox:  `wait` woke for a guide's send alone. */
+const NO_WORK: TakenWork = { now: [], sent: null, canceled: [] }
+
+/** A sent mark's heading in `wait`'s print, where its action alone doesn't say it. */
+const SENT_HEADINGS: Partial<Record<string, string>> = {
+  revisit: "revisit, to talk over",
+  test: "test, Owen's test run:  passed closes, failed files an issue, skip cancels, not now defers",
+  next: "next, a todo for the next phase",
+  drop: "drop, a todo dropped",
+  skip: "skip, nothing to do"
+}
+
+/** A test answer's result in words, as `inbox` and `wait` print it. */
+const TEST_WORDS: Record<string, string> = {
+  passed: "passed",
+  failed: "FAILED",
+  skip: "skip:  no longer applies",
+  notnow: "not now:  can't do it yet"
+}
+
+/** A mark as `inbox` prints it:  with its item's title (`null` when the item's gone), and whether it's sent. */
+type PrintedMark = Omit<ListedMark, "title"> & { title: string | null; sent: boolean }
+
+/** A sent mark and what `PlanDoc.applyMark()` did with it. */
+type Applied = { mark: ListedMark } & MarkResult
+
+/** A sent urgency and what `urgencyOn()` did with it:  `changed` when the doc changed. */
+type UrgencyApplied = { entry: ListedUrgency; did: string; changed: boolean }
+
+/**
+ * Apply sent urgency `entry` to `plan` (`PlanDoc.setCalm()`), logged.
+ * - an item gone from the doc, or already so, changes nothing (its entry is cleared all the same)
+ */
+function urgencyOn(plan: PlanDoc, entry: ListedUrgency): UrgencyApplied {
+  if (!plan.findItem(entry.id)) return { entry, did: "no such item:  urgency dropped", changed: false }
+  const did = plan.setCalm(entry.id, entry.calm)
+  if (!did) return { entry, did: `${calmWords(entry.calm)} already`, changed: false }
+  plan.log(`${entry.id.toUpperCase()} ${did} (Owen, from its id chip)`)
+  return { entry, did: `marked ${did}`, changed: true }
+}
+
+/**
+ * A mark's title, as `inbox` prints it:  its item's (or phase's, Overview sub-section's, summary's:
+ * `describeItem()`);  a new item's `new todo:  <title>`;  `null` when the item's gone.
+ */
+function markTitle(plan: PlanReader, mark: ListedMark): string | null {
+  if (mark.action === "new") return mark.title ?? null
+  const item = plan.findItem(mark.id)
+  return item ? PlanItem.titleOf(item) : (plan.describeItem(mark.id)?.title ?? null)
+}
+
+/** A new item's mark (`new1`), described as an item is (`describeItem()`):  kind `new todo`, not made yet. */
+function newItemOf(mark: ListedMark): ItemDescription {
+  return { id: mark.id.toUpperCase(), kind: `new ${mark.kind}`, status: "not made yet", title: mark.title ?? "" }
+}
+
+/** `not urgent` (calm) / `urgent`. */
+function calmWords(calm: boolean): string {
+  return calm ? "not urgent" : "urgent"
+}
+
+/** What names a phase, not an item or a comment:  `p20`, a stable id `p-one-repo`. */
+const PHASE_REF = /^p(\d+|-[a-z0-9-]+)$/
+
+/** What an agent works on for a mark:  a revisit's answer, else details. */
+function workOf(mark: { action: string } | undefined): "revisit" | "details" {
+  return mark?.action === "revisit" ? "revisit" : "details"
+}
+
+/**
+ * Comment `comment`'s lines, as `inbox` and `wait` print it, each starting `indent`:
+ * its id, where it is, the quote, Owen's words and when;  then his latest reply on the thread, the work now.
+ * - `unsent`:  says so, waiting for Send
+ */
+function commentLines(comment: IdentifiedComment, indent: string, unsent = false): string[] {
+  const quote = comment.quote ? `  quoting "${comment.quote.slice(0, 60)}"` : ""
+  const lines = [
+    `${indent}- ${CommentList.label(comment.id)}  on ${comment.anchor} (${comment.kind})${quote}  ` +
+      `"${comment.text.slice(0, 120)}"  (${comment.at})${unsent ? "  · unsent" : ""}`
+  ]
+  const reply = comment.replies?.findLast((each) => each.by === "Owen")
+  if (reply) lines.push(`${indent}  Owen replied:  "${reply.text!.slice(0, 160)}"  (${reply.at})`)
+  return lines
+}
+
+/** `count` `noun`s:  `1 mark`, `2 marks`. */
+function plural(count: number, noun: string): string {
+  return `${count} ${noun}${count === 1 ? "" : "s"}`
+}
+
+/** `["q7", "i2", "c3"]` -> `Q7, I2, C3` */
+function upper(ids: string[]): string {
+  return ids.map(shown).join(", ")
+}
+
+/** An item's id as Owen reads it:  `q7` -> `Q7`;  a comment's, `C3` (`cm3`, `c3`:  `CommentList.label()`). */
+function shown(id: string): string {
+  return CommentList.isCommentId(id) ? CommentList.label(id) : id.toUpperCase()
+}
+
+/** A comment's first words, for a line:  at most `FIRST_WORDS` characters, its white space as one space. */
+function firstWords(text: string): string {
+  const words = text.replace(/\s+/g, " ").trim()
+  return words.length > FIRST_WORDS ? `${words.slice(0, FIRST_WORDS - 1).trimEnd()}…` : words
+}
+
+/** How long a comment's first words run (`firstWords()`). */
+const FIRST_WORDS = 60
+
+/**
+ * `inbox wait`'s `--timeout`, in seconds:  seconds, or a time with its unit (`duration()`:  `8h`, `30m`).
+ * - throws `PlanDocError` for one it can't read, or none at all (`0`)
+ */
+function timeoutOf(timeout: string | true): number {
+  try {
+    const seconds = duration(String(timeout)) / 1000
+    if (seconds > 0) return seconds
+  } catch (error) {
+    if (!(error instanceof EpicCommandError)) throw error
+  }
+  throw new PlanDocError(`--timeout:  seconds (3300) or a time with its unit (8h, 30m), not '${timeout}'`)
+}

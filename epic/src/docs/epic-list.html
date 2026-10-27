@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>epic-list</title>
+    <meta
+      name="description"
+      content="The &lt;epic-list&gt; element: the Epics page's list, every epic's card in five groups, under a row of saga chips."
+    />
+    <!-- Before first paint:  the viewer's colour scheme (Spell UI's `ThemePreference.HEAD_SCRIPT`).  The theme itself is restored by site.js. -->
+    <script>
+      try {
+        var l = localStorage,
+          d = document.documentElement,
+          s = l.getItem("spell-site:scheme") || l.getItem("spell-site:theme") || l.getItem("spell-ui-site:scheme")
+        if (s === "light" || s === "dark") {
+          d.classList.add("ui-" + s)
+          d.style.colorScheme = s
+        }
+      } catch (e) {}
+    </script>
+    <link rel="stylesheet" href="_assets/site.css" />
+    <script type="module" src="_assets/site.js"></script>
+    <!-- the comments (bullhorns, threads, Send):  the docs runtime's, alone, beside the site's Spell UI -->
+    <script defer src="/_epic/assets/spell-comments.js"></script>
+  </head>
+  <body class="ui-typography">
+    <main id="main" class="site-main" data-toc-header="&lt;epic-list&gt;">
+      <ui-segment appearance="vertical" class="site-masthead">
+        <ui-container>
+          <ui-header level="1" class="site-title">
+            &lt;epic-list&gt;
+            <ui-header>The &lt;epic-list&gt; element: the Epics page's list, every epic's card in five groups, under a row of saga chips.</ui-header>
+          </ui-header>
+        </ui-container>
+      </ui-segment>
+
+      <ui-container class="site-body">
+        <article class="site-article">
+          <p class="lede">
+            <code>&lt;epic-list&gt;</code> is the Epics page's list: its <code>&lt;epic-card&gt;</code>s, grouped,
+            sorted and filtered by the list itself.
+          </p>
+          <ul>
+            <li>Five groups, each a small heading with how many of its cards show: Favorites, Active, Planning, Urgent, Done.</li>
+            <li>By title in each group, or newest first, as the page's <a href="epic-sort.html" target="src-spell-epic-src-docs-epic-sort-html"><code>&lt;epic-sort&gt;</code></a> says.</li>
+            <li>A chip per saga above the groups, then No saga: a click shows only that saga's epics.</li>
+            <li>It never moves its cards: a live update, or the page server's running cards, just join it.</li>
+          </ul>
+          <p class="meta">
+            For anyone changing the Epics page, or what <code>epic pages index</code> writes.<br />
+            Status: <ui-label size="mini" color="green">built</ui-label> (epic <code>epic-engine</code> P3), in the
+            <a href="/epic/src/components/epic-list/" target="src-spell-epic-src-components-epic-list"><code title="epic/src/components/epic-list/">epic-list</code></a> family, with <code>&lt;epic-list&gt;</code>,
+            <code>&lt;epic-card&gt;</code> and <code>&lt;epic-sort&gt;</code>.<br />
+            Its vocabulary: <a href="/epic/src/components/epic-list/EpicList.en.ts" target="src-spell-epic-src-components-epic-list-epiclist-en-ts"><code title="epic/src/components/epic-list/EpicList.en.ts">EpicList.en.ts</code></a><br />
+            Its component: <a href="/epic/src/components/epic-list/EpicList.tsx" target="src-spell-epic-src-components-epic-list-epiclist-tsx"><code title="epic/src/components/epic-list/EpicList.tsx">EpicList.tsx</code></a><br />
+            What its family shares: <a href="/epic/src/components/epic-list/EpicList.types.ts" target="src-spell-epic-src-components-epic-list-epiclist-types-ts"><code title="epic/src/components/epic-list/EpicList.types.ts">EpicList.types.ts</code></a>.
+          </p>
+
+          <ui-section id="1-example" label="1. Example" sticky collapsible dividing open="false">
+            <ui-icon slot="icon" name="eye"></ui-icon>
+            <epic-sort></epic-sort>
+            <epic-list class="spell-epics" sagas="drawable-spell epics">
+              <epic-card id="epic-airplane" epic="airplane" updated="2026-10-19" phases="done done done" worked="2026-10-12T21:40-04:00" favorite saga="epics" saga-title="Epic Tooling" saga-purpose="Epics:  their pages, the review loop, comments, agents.">
+                <a href="/epics/airplane/airplane.plan.html" target="airplane">Airplane</a>
+                <span slot="description">Work with no Claude, on a plane.</span>
+                <span slot="meta">epics/airplane/airplane.plan.html</span>
+              </epic-card>
+              <epic-card id="epic-epic-engine" epic="epic-engine" updated="2026-10-19" phases="done done active todo" active="P3 · Pages as Components" running worked="2026-10-19T16:13-04:00" saga="epics" saga-title="Epic Tooling" saga-purpose="Epics:  their pages, the review loop, comments, agents.">
+                <a href="/epics/epic-engine/epic-engine.plan.html" target="epic-engine">Epic Engine</a>
+                <span slot="description">One engine for every repo's epics.</span>
+                <span slot="meta">P3 · Pages as Components · epics/epic-engine/epic-engine.plan.html</span>
+              </epic-card>
+              <epic-card id="epic-crdt" epic="crdt" updated="2026-10-19" phases="" future saga="drawable-spell" saga-title="Drawable Spell" saga-purpose="Spell that draws:  things on a page.">
+                <a href="/epics/crdt/crdt.plan.html" target="crdt">Shared Editing (CRDT)</a>
+                <span slot="description">Two people editing one spell.</span>
+                <span slot="meta">epics/crdt/crdt.plan.html</span>
+              </epic-card>
+              <epic-card id="epic-review-review" epic="review-review" updated="2026-10-19" phases="done done" urgent="q3 j7" worked="2026-10-18T10:02-04:00" saga="epics" saga-title="Epic Tooling" saga-purpose="Epics:  their pages, the review loop, comments, agents.">
+                <a href="/epics/review-review/review-review.plan.html" target="review-review">Review Review</a>
+                <span slot="description">The review loop, reviewed.</span>
+                <span slot="meta">epics/review-review/review-review.plan.html</span>
+              </epic-card>
+              <epic-card id="epic-people-and-orgs" epic="people-and-orgs" updated="2026-10-19" phases="done done done" worked="2026-10-18T17:35-04:00">
+                <a href="/epics/people-and-orgs/people-and-orgs.plan.html" target="people-and-orgs">People and Orgs</a>
+                <span slot="description">Who's who in spell.</span>
+                <span slot="meta">epics/people-and-orgs/people-and-orgs.plan.html</span>
+              </epic-card>
+            </epic-list>
+
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>The example above · 28 lines</ui-title>
+              <ui-content>
+                <ui-code language="html"
+                  ><script type="text/plain">
+                    <epic-sort></epic-sort>
+                    <epic-list class="spell-epics" sagas="drawable-spell epics">
+                      <epic-card id="epic-airplane" epic="airplane" updated="2026-10-19" phases="done done done" worked="2026-10-12T21:40-04:00" favorite saga="epics" saga-title="Epic Tooling" saga-purpose="Epics:  their pages, the review loop, comments, agents.">
+                        <a href="../../epics/airplane/airplane.plan.html" target="airplane">Airplane</a>
+                        <span slot="description">Work with no Claude, on a plane.</span>
+                        <span slot="meta">epics/airplane/airplane.plan.html</span>
+                      </epic-card>
+                      <epic-card id="epic-epic-engine" epic="epic-engine" updated="2026-10-19" phases="done done active todo" active="P3 · Pages as Components" running worked="2026-10-19T16:13-04:00" saga="epics" saga-title="Epic Tooling" saga-purpose="Epics:  their pages, the review loop, comments, agents.">
+                        <a href="../../epics/epic-engine/epic-engine.plan.html" target="epic-engine">Epic Engine</a>
+                        <span slot="description">One engine for every repo's epics.</span>
+                        <span slot="meta">P3 · Pages as Components · epics/epic-engine/epic-engine.plan.html</span>
+                      </epic-card>
+                      <epic-card id="epic-crdt" epic="crdt" updated="2026-10-19" phases="" future saga="drawable-spell" saga-title="Drawable Spell" saga-purpose="Spell that draws:  things on a page.">
+                        <a href="../../epics/crdt/crdt.plan.html" target="crdt">Shared Editing (CRDT)</a>
+                        <span slot="description">Two people editing one spell.</span>
+                        <span slot="meta">epics/crdt/crdt.plan.html</span>
+                      </epic-card>
+                      <epic-card id="epic-review-review" epic="review-review" updated="2026-10-19" phases="done done" urgent="q3 j7" worked="2026-10-18T10:02-04:00" saga="epics" saga-title="Epic Tooling" saga-purpose="Epics:  their pages, the review loop, comments, agents.">
+                        <a href="../../epics/review-review/review-review.plan.html" target="review-review">Review Review</a>
+                        <span slot="description">The review loop, reviewed.</span>
+                        <span slot="meta">epics/review-review/review-review.plan.html</span>
+                      </epic-card>
+                      <epic-card id="epic-people-and-orgs" epic="people-and-orgs" updated="2026-10-19" phases="done done done" worked="2026-10-18T17:35-04:00">
+                        <a href="../../epics/people-and-orgs/people-and-orgs.plan.html" target="people-and-orgs">People and Orgs</a>
+                        <span slot="description">Who's who in spell.</span>
+                        <span slot="meta">epics/people-and-orgs/people-and-orgs.plan.html</span>
+                      </epic-card>
+                    </epic-list>
+                  </script></ui-code
+                >
+              </ui-content>
+            </ui-accordion>
+            <p>
+              Five epics in two sagas, one of them starred. Its chips filter them, the sort buttons above order each
+              group, and a card's star works where the page is served with a write token. Each choice is remembered
+              in this browser, for every Epics page.
+            </p>
+          </ui-section>
+
+          <ui-section id="2-markup" label="2. Markup" sticky collapsible dividing open="false">
+            <ui-icon slot="icon" name="code"></ui-icon>
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>What epic pages index writes, shortened · 8 lines</ui-title>
+              <ui-content>
+                <ui-code language="html"
+                  ><script type="text/plain">
+                    <ui-section id="epics" label="Epics" sticky collapsible dividing>
+                      <ui-icon slot="icon" name="layer group"></ui-icon>
+                      <epic-list class="spell-epics" sagas="drawable-spell epics">
+                        <!-- running-epics -->
+                        <epic-card id="epic-airplane" epic="airplane" ...>...</epic-card>
+                        <!-- running-epics:end -->
+                      </epic-list>
+                    </ui-section>
+                  </script></ui-code
+                >
+              </ui-content>
+            </ui-accordion>
+            <ul>
+              <li>
+                Written by <a href="/epic/src/list/EpicCards.ts" target="src-spell-epic-src-list-epiccards-ts"><code title="epic/src/list/EpicCards.ts">epicListHtml()</code></a>, the cards by group then title:
+                the order it draws them in by default.
+              </li>
+              <li>
+                <code>class="spell-epics"</code>: the docs runtime counts its cards on the section's title, and its
+                state chips filter them, as on a saga page's lists.
+              </li>
+              <li>
+                The page server adds the running epics' cards before the end marker
+                (<a href="/epic/src/list/RunningEpics.ts" target="src-spell-epic-src-list-runningepics-ts"><code title="epic/src/list/RunningEpics.ts">RunningEpics</code></a>).
+              </li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="3-where-it-goes" label="3. Where it goes" sticky collapsible dividing open="false">
+            <ui-icon slot="icon" name="compass"></ui-icon>
+            <ui-table celled padding="compact" appearance="striped" unstackable>
+              <table>
+                <thead>
+                  <tr><th>Parent</th><th>How many</th><th>As</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>the Epics page's <code>&lt;ui-section id="epics"&gt;</code></td><td>one</td><td>Every epic's card.</td></tr>
+                </tbody>
+              </table>
+            </ui-table>
+            <p>Its children: <a href="epic-card.html" target="src-spell-epic-src-docs-epic-card-html"><code>&lt;epic-card&gt;</code></a>s, any number, in any order.</p>
+          </ui-section>
+
+          <ui-section id="4-attributes" label="4. Attributes" sticky collapsible dividing open="false">
+            <ui-icon slot="icon" name="table columns"></ui-icon>
+            <ui-table celled padding="compact" appearance="striped" unstackable>
+              <table>
+                <thead>
+                  <tr><th>Attribute</th><th>Value</th><th>What it is</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td><code>sagas</code></td><td>saga ids, space-separated</td><td>The sagas in Owen's order: the chips' order. A saga no card names gets no chip; a card naming a saga not listed is No saga's.</td></tr>
+                </tbody>
+              </table>
+            </ui-table>
+            <ui-section id="epic-list-parts" label="Parts" sticky collapsible dividing open="false">
+              <p>Pieces of what it draws, which a page's CSS can style from outside with <code>::part(name)</code>.</p>
+            <ui-table celled padding="compact" appearance="striped" unstackable>
+              <table>
+                <thead>
+                  <tr><th>Part</th><th>What it is</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td><code>base</code></td><td>The box around the chips and the groups.</td></tr>
+                  <tr><td><code>chips</code></td><td>The saga chips' row.</td></tr>
+                  <tr><td><code>chip</code></td><td>One saga's chip: its title and count, pressed while its epics show.</td></tr>
+                  <tr><td><code>cards</code></td><td>The grid of headings and cards.</td></tr>
+                  <tr><td><code>group-title</code></td><td>A group's heading: its icon, title and how many show.</td></tr>
+                </tbody>
+              </table>
+            </ui-table>
+            </ui-section>
+          </ui-section>
+
+          <ui-section id="5-how-it-looks" label="5. How it looks" sticky collapsible dividing open="false">
+            <ui-icon slot="icon" name="palette"></ui-icon>
+            <ul>
+              <li>The chips: a pill each, the toolbar's deeper ivory while shown, outlined while hidden.</li>
+              <li>The groups: one grid of 330px cards, as many to a row as fit; each heading a small eyebrow across the row.</li>
+              <li>A group with no card showing isn't drawn: hidden by a chip, or by the page's state chips.</li>
+              <li>
+                Each card is placed from its shadow root, by a <code>::slotted()</code> rule and CSS
+                <code>order</code>: nothing in the page changes.
+              </li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="6-written-by" label="6. Written by" sticky collapsible dividing open="false">
+            <ui-icon slot="icon" name="terminal"></ui-icon>
+            <ul>
+              <li><code>epic pages index</code>: the Epics page's list, between its <code>index:start</code> / <code>index:end</code> markers.</li>
+              <li>
+                Before epic <code>epic-engine</code> P3 the page held hand-made groups (<code>div.spell-epic-group</code>) and
+                the docs runtime moved cards between them. <code>epic pages index</code> writes the list anew: no
+                migration step.
+              </li>
+            </ul>
+          </ui-section>
+
+          <footer class="site-page-footer">
+            <ui-divider></ui-divider>
+            <p class="meta">Last checked 2026-10-19 against branch <code>epic-engine</code> (P3).</p>
+          </footer>
+        </article>
+      </ui-container>
+    </main>
+  </body>
+</html>

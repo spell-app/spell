@@ -95,7 +95,9 @@ export const lintBase = {
     // "ONE name per file";  epic `repo-split` P14).
     // - HERE, not in an `overrides` entry:  it holds for every file, so the kit's block and every package's
     //   (`packageLint()`) get it with the rest of `lintBase`, and it's on in tests too (`testLint` leaves it).
-    "spell/no-parent-import": "error"
+    "spell/no-parent-import": "error",
+    // An import up the kit's folders:  the kit, then its `workspaces` in order (epic `repo-split` P20)
+    "spell/no-upward-import": "error"
   }
 } satisfies OxlintConfig
 
@@ -360,7 +362,7 @@ export const fmtConfig = {
     // Spell UI's hand-laid-out pages, their parts and data (spell-ui's `docs/`;
     // the shared `ui/` at the root until epic `people-and-orgs` P18:  until it merges, that folder too)
     "**/ui/docs/**",
-    "**/spell-ui/docs/**",
+    "**/ui/docs/**",
     "ui/**",
     "**/vendor/**",
     "*results.json",

@@ -1,0 +1,42 @@
+<spell-notebook "video usage">
+	<header level="1">
+		Video
+		<header>A video plays a video file in the browser's own player.</>
+	</>
+	<video-tab-bar showing="usage"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#using-it">Using it</>
+				<ui-item link="#accessibility">Accessibility</>
+			</>
+		</>
+	</>
+
+	<!-- USAGE:  how to use it (attributes in practice, events, framework snippets), keyboard, accessibility. -->
+	<section label="Using it">
+		<markdown>
+			`<ui-video>` plays a video file in the browser's own player.  For another site's video (YouTube, Vimeo), use
+			[`<ui-embed>`](/components/ui/ui-embed.html).
+
+			- `src` is the file, relative to the page;  `poster` a picture shown before it plays.
+			- The browser's controls show unless `controls="false"`.
+			- `captions` is a captions file (WebVTT, `.vtt`), in the page's language:  the player offers them.
+			- `ratio` is its shape, width to height (`16/9`);  by default the video's own.
+			- `autoplay` starts it at once, but a browser only allows that when it's `muted`, or after the reader has clicked
+			  on the page.  There's no way round that, on purpose.
+			- `muted` and `loop` are the player's own.
+
+			From script:  `video.play()`, `video.pause()`, `video.currentTime`, `video.paused`, and the events `ui-play`,
+			`ui-pause` and `ui-ended`.
+		</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			- Name it with `label`:  what the video shows, for people who can't see it.
+			- Give it `captions` when it has speech:  people who can't hear it read them.
+			- The browser's controls are keyboard-ready:  Tab to them, Space to play and pause.
+		</>
+	</>
+</spell-notebook>

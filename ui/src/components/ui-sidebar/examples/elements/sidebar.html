@@ -1,0 +1,74 @@
+<!--
+  `src/components/ui-sidebar/examples/sidebar.html` as element markup.  Native buttons toggle the sidebars through invoker
+  commands (`commandfor` + `command="--toggle"`);  Escape or a click on the dimmed content closes a modal one.
+-->
+<div class="ui-stack">
+  <section>
+    <h4>Sidebar</h4>
+    <ui-pushable style="height: 14em">
+      <ui-sidebar id="sidebar-demo-left" inverted aria-label="Site">
+        <ui-menu direction="vertical" inverted fluid aria-label="Site">
+          <ui-item link="#home">Home</ui-item>
+          <ui-item link="#games">Games</ui-item>
+          <ui-item link="#channels">Channels</ui-item>
+        </ui-menu>
+      </ui-sidebar>
+      <ui-pusher>
+        <ui-segment appearance="basic">
+          <button type="button" class="ui button" commandfor="sidebar-demo-left" command="--toggle">Menu</button>
+          <p>The default left sidebar uncovers itself from under this content, which dims.</p>
+        </ui-segment>
+      </ui-pusher>
+    </ui-pushable>
+  </section>
+
+  <section>
+    <h4>Overlay, right, thin</h4>
+    <button type="button" class="ui button" commandfor="sidebar-demo-right" command="--toggle">Toggle right</button>
+    <ui-pushable style="height: 12em">
+      <ui-sidebar id="sidebar-demo-right" position="right" width="thin" transition="overlay" inverted>
+        <ui-menu direction="vertical" inverted fluid aria-label="Numbers">
+          <ui-item link="#one">One</ui-item>
+          <ui-item link="#two">Two</ui-item>
+        </ui-menu>
+      </ui-sidebar>
+      <ui-pusher>
+        <ui-segment appearance="basic"><p>An overlay sidebar covers the content without moving it.</p></ui-segment>
+      </ui-pusher>
+    </ui-pushable>
+  </section>
+
+  <section>
+    <h4>Persistent</h4>
+    <ui-pushable style="height: 10em">
+      <ui-sidebar position="left" width="thin" transition="push" persistent visible aria-label="Sections">
+        <ui-menu direction="vertical" fluid aria-label="Sections">
+          <ui-item link="#a">Alpha</ui-item>
+          <ui-item link="#b">Beta</ui-item>
+        </ui-menu>
+      </ui-sidebar>
+      <ui-pusher>
+        <ui-segment appearance="basic"
+          ><p>A persistent sidebar is part of the page: nothing is dimmed or blocked.</p></ui-segment
+        >
+      </ui-pusher>
+    </ui-pushable>
+  </section>
+
+  <section>
+    <h4>Width in columns</h4>
+    <ui-pushable style="height: 10em">
+      <ui-sidebar id="sidebar-demo-quarter" width="1/4" transition="overlay" inverted aria-label="Quarter">
+        <ui-menu direction="vertical" inverted fluid aria-label="Quarter">
+          <ui-item link="#quarter">A quarter of the page</ui-item>
+        </ui-menu>
+      </ui-sidebar>
+      <ui-pusher>
+        <ui-segment appearance="basic">
+          <button type="button" class="ui button" commandfor="sidebar-demo-quarter" command="--toggle">Quarter</button>
+          <p>A sidebar `width` in columns (here 1/4).</p>
+        </ui-segment>
+      </ui-pusher>
+    </ui-pushable>
+  </section>
+</div>

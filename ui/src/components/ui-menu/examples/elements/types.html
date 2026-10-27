@@ -1,0 +1,102 @@
+<!-- `src/components/ui-menu/examples/types.html` as element markup. -->
+<div class="ui-stack">
+  <section>
+    <h4>Menu</h4>
+    <ui-menu items="3" aria-label="Menu demo">
+      <ui-item link="#editorials" selected>Editorials</ui-item>
+      <ui-item link="#reviews">Reviews</ui-item>
+      <ui-item link="#events">Upcoming Events</ui-item>
+    </ui-menu>
+  </section>
+
+  <section>
+    <h4>Secondary menu</h4>
+    <ui-menu appearance="secondary" aria-label="Secondary demo">
+      <ui-item link="#home" active>Home</ui-item>
+      <ui-item link="#messages">Messages</ui-item>
+      <ui-item link="#friends">Friends</ui-item>
+      <ui-menu position="right">
+        <ui-item link="#logout">Logout</ui-item>
+      </ui-menu>
+    </ui-menu>
+  </section>
+
+  <section>
+    <h4>Pointing</h4>
+    <ui-menu appearance="pointing" aria-label="Pointing demo">
+      <ui-item link="#home">Home</ui-item>
+      <ui-item link="#messages" selected>Messages</ui-item>
+      <ui-item link="#friends">Friends</ui-item>
+      <ui-menu position="right">
+        <ui-item link="#search">Search</ui-item>
+      </ui-menu>
+    </ui-menu>
+    <ui-menu appearance="secondary pointing" aria-label="Secondary pointing demo">
+      <ui-item link="#home" selected>Home</ui-item>
+      <ui-item link="#messages">Messages</ui-item>
+      <ui-item link="#friends">Friends</ui-item>
+      <ui-menu position="right">
+        <ui-item link="#logout">Logout</ui-item>
+      </ui-menu>
+    </ui-menu>
+  </section>
+
+  <section>
+    <h4>Tabular</h4>
+    <ui-menu appearance="tabular" aria-label="Tabular demo">
+      <ui-item link="#bio" selected>Bio</ui-item>
+      <ui-item link="#photos">Photos</ui-item>
+    </ui-menu>
+    <ui-menu appearance="tabular" attach="top" aria-label="Attached tabular demo">
+      <ui-item link="#tab1" selected>Tab 1</ui-item>
+      <ui-item link="#tab2">Tab 2</ui-item>
+    </ui-menu>
+    <ui-segment attach="bottom"><p>Tab content</p></ui-segment>
+  </section>
+
+  <section>
+    <h4>Text</h4>
+    <ui-menu appearance="text" aria-label="Text demo">
+      <ui-item kind="header">Sort By</ui-item>
+      <ui-item link="#closest" selected>Closest</ui-item>
+      <ui-item link="#favorited">Most Comments</ui-item>
+      <ui-item link="#popular">Most Popular</ui-item>
+    </ui-menu>
+  </section>
+
+  <section>
+    <h4>Vertical menu</h4>
+    <ui-menu direction="vertical" aria-label="Vertical demo">
+      <ui-item link="#inbox" color="teal" selected>Inbox</ui-item>
+      <ui-item link="#spam">Spam</ui-item>
+      <ui-item link="#updates">Updates</ui-item>
+    </ui-menu>
+    <ui-menu appearance="secondary pointing" direction="vertical" aria-label="Vertical pointing demo">
+      <ui-item link="#home" selected>Home</ui-item>
+      <ui-item link="#messages">Messages</ui-item>
+      <ui-item link="#friends">Friends</ui-item>
+    </ui-menu>
+    <ui-menu appearance="text" direction="vertical" aria-label="Vertical text demo">
+      <ui-item kind="header">Sort By</ui-item>
+      <ui-item link="#closest" selected>Closest</ui-item>
+      <ui-item link="#comments">Most Comments</ui-item>
+      <ui-item link="#popular">Most Popular</ui-item>
+    </ui-menu>
+    <ui-menu direction="vertical" appearance="tabular" aria-label="Vertical tabular demo">
+      <ui-item link="#bio" selected>Bio</ui-item>
+      <ui-item link="#pics">Pics</ui-item>
+      <ui-item link="#companies">Companies</ui-item>
+    </ui-menu>
+  </section>
+
+  <section>
+    <h4>Pagination</h4>
+    <ui-menu pagination aria-label="Pagination demo">
+      <ui-item link="#p1" selected>1</ui-item>
+      <ui-item disabled>...</ui-item>
+      <ui-item link="#p10">10</ui-item>
+      <ui-item link="#p11">11</ui-item>
+      <ui-item link="#p12">12</ui-item>
+    </ui-menu>
+  </section>
+</div>

@@ -1,0 +1,1589 @@
+/*
+ * Page look of the `.html` docs -- what spell-ui doesn't cover:  the layout, headings, prose,
+ * `pre` / `code`, highlight.js colors, and a few adjustments to the widgets.  Driven by `spell-doc-runtime.js`.
+ * - Colors are UI's tokens (`--ui-background`, `--ui-text-color` ...):  `light-dark()` streams, so the page follows
+ *   UI's scheme (the OS unless something sets `color-scheme`).  Fallbacks cover the moment before UI loads.
+ * - Reaching INSIDE widget shadow roots, only through UI's supported routes:
+ *   - public component tokens on the host or an ancestor, e.g. `--ui-accordion-title-padding`, `--ui-sticky-z-index`
+ *   - `::part()` with plain properties, where a variation swaps the value so the token can't win (a `text` menu's
+ *     item padding, a `styled` accordion's width) -- outer `::part()` rules beat the shadow's own
+ *   - no `#ui-app-stylesheet`:  nothing here needs the class grammar
+ * - Phone width:  nothing may widen the page;  `pre` and tables scroll inside themselves.
+ */
+
+@layer ui.reset, ui.tokens, ui.base, ui.components, ui.utilities, ui.theme, ui.app;
+
+/* the comments' look (bullhorns, threads, the pane, Send's pill):  its own sheet, which Epic UI's pages load too */
+@import url("spell-comments.css");
+/* the toolbar's look (its menu, items, badges, the bullhorn) and the jump dialog:  its own sheet, Epic UI's pages too */
+@import url("spell-toolbar.css");
+
+/* Before UI adopts its tokens:  follow the OS already, so the page doesn't flash light. */
+@layer ui.tokens {
+  :root {
+    color-scheme: light dark;
+  }
+}
+
+/*
+ * The page's own names for what it paints, each from the theme's tokens.  The docs run on `spell-brand` (epic
+ * `design-system`, P9), whose BRAND ROLES (`--spell-surface-warm`, `--spell-text-strong`, `--spell-type-lede` ...)
+ * give the brand's docs look;  every role has a `--ui-*` (or plain) fallback, so a page under another theme still
+ * reads.
+ * - NEVER name one of ours after a brand role:  this sheet is unlayered, so it would replace the theme's value for
+ *   everything that reads it (hence `--spell-doc-accent`, not `--spell-accent`)
+ */
+:root {
+  --spell-mono: var(--ui-font-family-mono, ui-monospace, "SF Mono", Menlo, Consolas, monospace);
+  --spell-sans: var(--ui-font-family, -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif);
+  --spell-serif: var(--ui-font-family-heading, Palatino, "Palatino Linotype", "Book Antiqua", P052, serif);
+  --spell-bg: var(--ui-background, Canvas);
+  --spell-ink: var(--spell-text-body, var(--ui-text-color, CanvasText));
+  --spell-muted: var(--spell-text-muted, var(--ui-text-muted, GrayText));
+  --spell-rule: var(--spell-border-subtle, var(--ui-border-color, light-dark(#e3e0d8, #34343b)));
+  /* a table's cell borders:  stronger than the rule, so the grid reads (Owen, 2026-10-13:  "Lost table borders") */
+  --spell-table-rule: color-mix(in oklab, var(--spell-ink) 18%, transparent);
+  --spell-doc-accent: var(--spell-text-accent, var(--ui-link, LinkText));
+  --spell-doc-accent-soft: var(--spell-surface-selected, var(--ui-primary-background, light-dark(#e8eff8, #1f2b3b)));
+  /* the brand's panels:  ivory for asides and answers, a lavender wash for side columns, the code well */
+  --spell-warm: var(--spell-surface-warm, var(--ui-accent-background, light-dark(#faf5ea, #2c2152)));
+  --spell-tint: var(--spell-surface-tint, var(--ui-surface-muted, light-dark(#f7f9ff, #ffffff12)));
+  --spell-code-bg: var(--spell-surface-code, var(--ui-code-background, light-dark(#f3f2ef, #26272d)));
+  --spell-card: var(--ui-surface, Canvas);
+  /*
+   * headings:  the brand's serif (Palatino), bold, in its strongest ink (aubergine;  near-white in dark), as the
+   * brand's Spell Docs page;  `spell` had them in the system face (Owen, 2026-10-04), the brand look brings the serif
+   * back (P9)
+   */
+  --spell-heading-font: var(--spell-serif);
+  --spell-heading-ink: var(--spell-text-strong, var(--ui-text-dark, inherit));
+  /* the mono eyebrow:  small caps-height labels over titles and columns */
+  --spell-eyebrow-font: 500 11px/1.2 var(--spell-mono);
+  --spell-eyebrow-tracking: var(--spell-tracking-eyebrow, 0.14em);
+
+  /*
+   * ## Item states (the colour scheme, Q20 of epic `epic-components`, Owen 2026-10-08:  the table is in
+   * `templates/epics/plan-doc.md`, "Colours"):  a state's fill, and `-on` for what's drawn on it.  The saga pages'
+   * id chips, the Epics index's filter, the toolbar's counts, a details page's question badges.
+   * - red needs you;  yellow open, still undecided (DARK ink on it:  `--ui-yellow-on`);  blue Claude is working on
+   *   it;  green decided or done lately;  grey older;  orange (DARK ink) Claude answered with options, your turn to
+   *   pick (an epic page's `replied` items, Owen 2026-10-09)
+   * - the same values as `<epic-page>`'s `--epic-state-*` (`spell-epic`, `EpicPage.css`):  change both
+   * - red keeps its light-mode hue in dark mode:  dark's lighter red reads as orange
+   */
+  --spell-state-attention: light-dark(var(--ui-red, #db2828), var(--ui-red-on-light, #db2828));
+  --spell-state-attention-on: light-dark(var(--ui-red-on, #fff), var(--ui-ink-on-dark, #fff));
+  --spell-state-replied: var(--ui-orange, #f2711c);
+  --spell-state-replied-on: var(--ui-orange-on, #1b1c1d);
+  --spell-state-progress: var(--ui-blue, #2185d0);
+  --spell-state-progress-on: var(--ui-blue-on, #fff);
+  --spell-state-open: var(--ui-yellow, #fbbd08);
+  --spell-state-open-on: var(--ui-yellow-on, #1b1c1d);
+  --spell-state-recent: var(--ui-green, #21ba45);
+  --spell-state-recent-on: var(--ui-green-on, #fff);
+  --spell-state-old: var(--ui-grey-background, light-dark(#eeeeee, #34343b));
+  --spell-state-old-on: var(--ui-grey-text, GrayText);
+  /*
+   * an Epics card's star while it's a favourite:  the page's yellow, a star's own colour (epic `airplane` J22, Owen
+   * 2026-10-10:  "make it yellow";  the brand's gold-brown before).  Not starred:  its outline, grey.
+   * - the one place yellow doesn't mean "open":  a star reads as a favourite, never as a state
+   */
+  --spell-favorite: var(--spell-state-open);
+}
+
+* {
+  box-sizing: border-box;
+}
+/* a `ui-*` host's own `display` (in UI's layers) would beat the browser's `[hidden]` rule */
+:is(ui-button, ui-item, ui-title, ui-content, ui-card, ui-progress, ui-step, ui-event)[hidden] {
+  display: none;
+}
+html {
+  -webkit-text-size-adjust: 100%;
+}
+/*
+ * an epic page's top, the site's bar included, on the page's own background:  one block with its header and toolbar,
+ * one hairline under it all (Owen, 2026-10-24:  "rather have the top section stay all background rather than white")
+ */
+/* QUIET (the runtime's `quietFor()`):  a page coming up or taking a live change draws as it is, no motion (Owen,
+   2026-10-25:  "if page is already loaded, skip the animations");  the tokens reach every shadow root */
+:root[data-spell-quiet] {
+  --ui-duration-fast: 0s;
+  --ui-duration-normal: 0s;
+  --ui-duration-slow: 0s;
+  --ui-duration-slower: 0s;
+  --ui-duration-slowest: 0s;
+  --ui-section-duration: 0s;
+  --epic-turn-duration: 0s;
+  --epic-flash-duration: 0s;
+}
+body.plan-doc {
+  --spell-site-header-fill: var(--spell-bg);
+  --spell-site-header-rule: transparent;
+  --spell-site-header-shadow: 0 1px 0 light-dark(rgb(40 30 90 / 0.08), rgb(0 0 0 / 0.45));
+}
+/*
+ * the page's ground:  the theme's colour on the root, and the body see-through, so what a theme lays on the root shows
+ * (Fruity's wallpaper, `--glass-wallpaper`):  the body's own fill painted over it
+ */
+html {
+  background-color: var(--spell-bg);
+}
+body {
+  margin: 0;
+  background: transparent;
+  color: var(--spell-ink);
+  font: 16px/1.6 var(--spell-sans);
+  /* UI's own headings (section titles, cards) in the page's heading face */
+  --ui-font-family-heading: var(--spell-heading-font);
+}
+
+/*******************************
+            Layout
+*******************************/
+
+/*
+ * THE WIDE LAYOUT, every page's (epic `epic-engine` P2, Owen 2026-10-19;  tried on the spell syntax guide and an epic
+ * page first, as `<body class="spell-wide">`, epic `epic-workflow`, Owen 2026-10-12:  the one centred column of
+ * everything "is nice for reading prose, but horrible for tables").  Nothing beside the column:  the contents column
+ * went (Owen, 2026-10-08), and the floating rail (a toolbar in the sticky page header since epic `airplane` P8).
+ * - `<main>` runs the window's full width, with no side padding;  each kind of block places itself:
+ *   - BARS (the sticky page header and its toolbar, section titles, the footer, a bottom bar like the syntax guide's
+ *     Send):  their background and rule edge to edge, their contents in the reading column
+ *   - TABLES (`ui-table`, a bare `table`):  in the column, as prose, with an expand button over the top right corner
+ *     (right of the bullhorn, in the table's actions row) that runs one the full width, less the page's 16px gutter, remembered per table (the runtime's
+ *     `wireTableWidths()`;  Owen, 2026-10-13);  a table still scrolls inside its box when it's wider than that
+ *   - everything else, PROSE and INSETS (paragraphs, lists, asides, code, messages, cards, comment threads):  the
+ *     READING COLUMN, `--spell-measure` wide (880px, its 16px gutters included, so its text is 848px at most),
+ *     centred;  a paragraph keeps its 72ch
+ *   - a block a page wants full width anyway:  `class="spell-full-width"`
+ * - An epic page:  `<epic-page>` insets everything by `--epic-inset`, and its bands already run edge to edge (epics'
+ *   `EpicPage.css`), so the inset becomes the reading column's (`--spell-column-inset`)
+ * - Phone width:  the column is the window less the 16px gutter
+ * - `--spell-column-inset`:  from `<main>`'s edge to the reading column's text, at least the gutter.  Registered as a
+ *   length, so it's worked out once, in px, on `<main>`, and every block inherits the same number, inside shadow roots
+ *   too, however deep (a `%` would measure each block's own parent).  `100cqi`:  `.spell-doc`'s width, the window's.
+ * - `body.spell-doc-page` in front of a rule:  the weight it had as `body.spell-wide`'s, over the rules it overrides;
+ *   every page in this layout has the class.  A page still saying `spell-wide` (another branch's) is drawn the same:
+ *   nothing reads the class now.
+ * - `--spell-doc-pad-inline`:  `<main>`'s inline padding, as a token, 0 now, so a block may run edge to edge by
+ *   breaking out of it (`<epic-page>`, epic `epic-components` P14;  the toolbars);  the narrow layout's was 16px
+ * - little room above the page's first line, under the site header (Owen, 2026-10-10:  "Significantly less padding
+ *   above";  32px before):  none, the page's head is a band from the site header down (below)
+ * - a window's worth of empty ground below the last line (`--spell-doc-pad-end`):  the window, less the site header
+ *   and the page header that stick above everything
+ *   - so folding something near the page's end never makes the page shorter than where it's scrolled to:
+ *     the browser would pull the page back, and what was clicked would jump down
+ *   - epic `airplane` J10, Owen 2026-10-10:  "add spacer below the page, this happens more than you think";
+ *     96px before.  The runtime still holds the page's height while it folds (`holdWhileFolding()`), as a second guard
+ */
+:root {
+  --spell-measure: 880px;
+}
+@property --spell-column-inset {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 16px;
+}
+.spell-doc {
+  container-type: inline-size;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+}
+.spell-doc-main {
+  --spell-gutter: 16px;
+  --spell-column-inset: max(var(--spell-gutter), (100cqi - var(--spell-measure)) / 2 + var(--spell-gutter));
+  --spell-doc-pad-inline: 0px;
+  --spell-doc-pad-end: max(96px, calc(100vh - var(--spell-site-header-height, 0px) - var(--spell-top, 0px)));
+  min-width: 0;
+  padding: 0 0 var(--spell-doc-pad-end);
+}
+/* an epic page's test run is the window's, a modal's shape:  no ground below it (epic `epic-engine`, Owen 2026-10-22) */
+.spell-doc-main:has(epic-page:state(testing)) {
+  --spell-doc-pad-end: 0px;
+}
+/*
+ * PROSE and INSETS:  the reading column.  Not the comment pane:  it's fixed on the screen, and the column's margin
+ * pushed it 176px right of where it was put at 1200px, half off the window (epic `epic-engine` I26)
+ */
+body.spell-doc-page
+  :is(.spell-doc-main, .spell-doc-main ui-section)
+  > :not(
+    ui-section,
+    ui-sticky,
+    epic-page,
+    footer,
+    .spell-filter,
+    .spell-full-width,
+    #choices-bar,
+    epic-choices-bar,
+    .spell-toolbar-alone,
+    .spell-crumbs,
+    epic-actions:has(+ .spell-full-width),
+    .spell-table-pin,
+    epic-comment-pane,
+    [slot]
+  ) {
+  margin-inline: var(--spell-column-inset);
+}
+/*
+ * a block whose element is `display: contents` (Spell UI's message, feed and list:  the inner box IS the block) has
+ * no box for that margin:  a box of its own here, so it sits in the column too, not edge to edge
+ */
+body.spell-doc-page :is(.spell-doc-main, .spell-doc-main ui-section) > :is(ui-message, ui-feed, ui-list):not([slot]) {
+  display: block;
+}
+/*
+ * TABLES:  the expand button (`wireTableWidths()`), a `<ui-button appearance="basic" size="mini">` in the table's actions row, right
+ * of its bullhorn, over the table's top right corner, centred on its header row (`<epic-actions>`, `addBlockAction()`);
+ * its icon says which way it goes (`arrows left right`, `... to line` while the table runs wide)
+ * - a BARE icon (Owen, 2026-10-19:  "Should be bare icon without the circle border"):  no edge, no fill, hovered or
+ *   pressed;  hovered, the icon darkens
+ */
+:is(.spell-doc-main, .site-main) epic-actions ui-button.spell-table-toggle {
+  --ui-button-basic-border-width: 0px;
+  --ui-button-basic-background-hover: transparent;
+  --ui-button-basic-background-down: transparent;
+  --ui-button-basic-background-active: transparent;
+  background: transparent;
+}
+/* phone width:  the column is the page already */
+@container (max-width: 600px) {
+  .spell-table-toggle {
+    display: none;
+  }
+}
+/*
+ * TABLES:  the header row sticks under the stuck titles while the rows scroll past (Owen, 2026-10-19:  "make the
+ * table headers sticky";  epic `epic-engine` r4).  A copy of it does, a PIN (`wireTableHeads()`):  a `<thead>` can't
+ * stick inside the box a table scrolls sideways in.
+ * - a line of no height before the table, sticking at the line the runtime sets (`top`), above the rows (z 3) and
+ *   below the titles (4, 5) and the table's actions row stays where it is
+ * - its VIEW:  over the table's box as it shows, cutting the copy off at its edges;  no pointer, so the rows under it
+ *   take the clicks
+ * - the COPY:  the table's own classes, drawn by the page's rules;  each column as wide as the table's (the runtime
+ *   measures them), an opaque ground, a rule under it so the rows slide under a line, and square top corners (r24:
+ *   rows cut in half showed right under it, and at its rounded corners)
+ * - 1px up, over the stuck title's bottom edge:  between them, a line of rows showed through (r24, measured 1px)
+ */
+.spell-doc-main .spell-table-pin {
+  position: sticky;
+  z-index: 3;
+  height: 0;
+  margin: 0;
+}
+.spell-doc-main .spell-table-pin-view {
+  position: absolute;
+  top: -1px;
+  overflow: hidden;
+  pointer-events: none;
+}
+.spell-doc-main .spell-table-pin ui-table {
+  max-width: none;
+  margin: 0;
+  overflow: visible;
+}
+.spell-doc-main .spell-table-pin table {
+  display: table;
+  table-layout: fixed;
+  margin: 0;
+  overflow: visible;
+  border-bottom: 0;
+  border-radius: 0;
+  background: var(--spell-bg);
+  box-shadow: 0 1px 0 var(--spell-table-rule, var(--ui-border-color));
+}
+.spell-doc-main .spell-table-pin :is(th, td) {
+  box-sizing: border-box;
+}
+/*
+ * BARS:  edge to edge, their contents in the column.  The page's head is ONE ivory band, the breadcrumb, title and
+ * toolbar alike (Owen, 2026-10-13:  "white/ivory/white looks weird, especially when collapsed"), from right under the
+ * site header
+ */
+/* a page that starts with no band (a cheatsheet's plain header, the goals pages' hero):  a little room above, as before */
+.spell-doc-main > :first-child:not(.spell-crumbs, ui-sticky, epic-page) {
+  margin-top: 10px;
+}
+body.spell-doc-page .spell-doc-main > .spell-crumbs {
+  margin: 0;
+  padding: 10px var(--spell-column-inset) 2px;
+  background: var(--spell-head-fill);
+}
+body.spell-doc-page .spell-doc-main .spell-page-head {
+  background: var(--spell-head-fill);
+}
+body.spell-doc-page .spell-doc-main :is(.spell-page-head, .spell-filter, footer.spell-doc-footer) {
+  margin-inline: 0;
+  padding-inline: var(--spell-column-inset);
+}
+/* the header's tools row where the narrow layout had its bullhorn, 12px out past the column's edge */
+body.spell-doc-page .spell-doc-main .spell-page-head > .spell-head-tools {
+  inset-inline-end: calc(var(--spell-column-inset) - 12px);
+}
+body.spell-doc-page .spell-doc-main ui-section {
+  --ui-section-title-padding: var(--spell-title-top) var(--spell-column-inset) 8px;
+}
+body.spell-doc-page .spell-doc-main ui-section ui-section {
+  --ui-section-title-padding: var(--spell-title-top) var(--spell-column-inset) 6px;
+}
+body.spell-doc-page .spell-doc-main ui-section::part(title) {
+  margin-inline: 0;
+}
+body.spell-doc-page .spell-doc-main .spell-toolbar.spell-toolbar-titled {
+  --_out: var(--spell-column-inset);
+}
+body.spell-doc-page .spell-doc-main .spell-toolbar.spell-toolbar-alone {
+  margin-inline: 0;
+}
+body.spell-doc-page .spell-doc-main :is(#choices-bar.spell-choices-bar, epic-choices-bar) {
+  margin-inline: 0;
+  padding-inline: var(--spell-column-inset);
+}
+/* an epic page:  everything in `<epic-page>` sits the column's inset in from its bands */
+body.spell-doc-page epic-page {
+  --epic-inset: var(--spell-column-inset);
+}
+
+/*******************************
+        Sticky headings
+*******************************/
+
+/*
+ * The saga pages' markup (`section.s2|s3`;  every other page:  `<ui-section>`, "Sections" below).
+ * Each heading's `<ui-sticky>` is `display: contents`, so it sticks within its section.  The runtime sets the h3
+ * stickies' `offset` (their h2's height) and `--spell-h2-h` / `--spell-h3-h` on the sections.
+ * - h2 above h3:  when a section ends, its h3 slides up UNDER the h2 (`--ui-sticky-z-index`, a public token)
+ */
+ui-sticky.spell-h1 {
+  --ui-sticky-z-index: 5;
+}
+ui-sticky.spell-h2 {
+  --ui-sticky-z-index: 4;
+}
+ui-sticky.spell-h3 {
+  --ui-sticky-z-index: 3;
+}
+.spell-doc-main section {
+  --spell-h3-h: 0px;
+}
+.spell-doc-main section:has(> ui-sticky.spell-h2) {
+  margin-top: 40px;
+}
+.spell-doc-main section:has(> ui-sticky.spell-h3) {
+  margin-top: 22px;
+}
+/* the brand's headings:  serif, bold for h1 / h2 and the section titles, tight tracking at display size */
+:is(h1, h2, h3) {
+  color: var(--spell-heading-ink);
+  font-family: var(--spell-heading-font);
+  text-wrap: balance;
+}
+h1 {
+  font-size: 2.25rem;
+  font-weight: 700;
+  line-height: 1.1;
+  margin: 0 0 8px;
+  letter-spacing: var(--spell-tracking-display, -0.022em);
+}
+/*
+ * The sticky page header:  `<ui-sticky class="spell-h1"><header class="spell-page-head">` around the h1 and, in
+ * epic pages, the step label (`.plan-step`) at its right.  Smaller than a free h1:  it stays on screen.
+ */
+.spell-page-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 12px;
+  padding-block: 8px;
+  background: var(--spell-bg);
+  border-bottom: 1px solid var(--spell-rule);
+}
+/*
+ * ## The page's head on one line (the runtime's `oneLineHead()`;  Owen, 2026-10-13, as an epic page's):
+ * `DOCS / SPELL SYNTAX` -- the crumbs, then the title in their type (mono, capitals, tracked), twice their size and
+ * bold;  centred on the row, its padding halved;  the breadcrumb above it hidden (its copy is in the h1)
+ */
+body.spell-one-line-head .spell-doc-main > .spell-crumbs {
+  display: none;
+}
+body.spell-one-line-head .spell-doc-main {
+  padding-top: 0;
+}
+/* the lighter ivory, out to the column's edges as the toolbar under it (the wide layout's bars run edge to edge) */
+body.spell-one-line-head .spell-page-head {
+  margin-inline: calc(-1 * var(--spell-doc-pad-inline, 16px));
+  padding: 4px var(--spell-doc-pad-inline, 16px);
+  background: var(--spell-head-fill);
+}
+body.spell-one-line-head .spell-page-head > h1 {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 6px;
+  min-height: 28px;
+  font: 700 16px/1.2 var(--spell-mono);
+  letter-spacing: var(--spell-eyebrow-tracking);
+  text-transform: uppercase;
+}
+.spell-page-head > h1 > .spell-head-crumbs {
+  display: inline-block;
+  margin: 0;
+}
+/* the page's own crumb, emptied (the title after it says its words):  only the divider before it, at phone width none */
+.spell-page-head > h1 > .spell-head-crumbs > ui-breadcrumb[selected]::part(divider) {
+  margin-inline-start: 8px;
+}
+@media (max-width: 720px) {
+  .spell-page-head > h1 > .spell-head-crumbs > ui-breadcrumb[selected]::part(divider) {
+    display: none;
+  }
+}
+/*
+ * ## The reading time chip (the runtime's `drawReadingTime()`, epic `epic-engine` P14):  `48 min read` right after
+ * the title, a quiet outlined label in the body's type, muted:  not the title's tracked capitals
+ * - none at phone width:  the head's tools row lies over the title's end there, and would cut it off
+ */
+.spell-page-head > h1 > ui-label.spell-reading-time {
+  --ui-label-basic-color: var(--spell-muted);
+  --ui-label-basic-border: var(--spell-rule);
+  --ui-label-basic-background: transparent;
+  flex: none;
+  font-family: var(--spell-sans);
+  font-weight: 500;
+  letter-spacing: normal;
+  text-transform: none;
+}
+@media (max-width: 720px) {
+  .spell-page-head > h1 > ui-label.spell-reading-time {
+    display: none;
+  }
+}
+.spell-page-head > h1 {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+  font-size: 2rem;
+}
+/*
+ * ## The header's TOOLS ROW (`addHeadTool()`, epic `epic-engine` I38):  ONE row at the h1's line's right, so nothing in
+ * it overlaps:  the comments' Send, the page's own tools (the Epics page's New epic pill and sort), the page's bullhorn
+ * last.  It never wraps onto a row of its own:  it stays at the h1's row's right, over its end when it's long (Owen,
+ * 2026-10-10:  "They should stay in place and overlap the header instead"), on the head's fill
+ */
+.spell-page-head {
+  position: relative;
+}
+.spell-doc-main .spell-page-head > .spell-head-tools {
+  position: absolute;
+  top: 8px;
+  inset-inline-end: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  max-width: calc(100% - 8px);
+  height: calc(2rem * 1.1);
+  padding-inline-start: 8px;
+  background: var(--spell-head-fill, var(--spell-bg));
+}
+body.spell-one-line-head .spell-doc-main .spell-page-head > .spell-head-tools {
+  top: 4px;
+  height: 28px;
+}
+.spell-head-tools > * {
+  flex: none;
+}
+/*
+ * phone width:  over the title's end however many there are, the head's own fill under them, fading left, as an epic
+ * page's labels (`EpicPage.css`, `.status`;  Owen, 2026-10-26, epic `epic-engine` I138:  a row of their own before,
+ * from three tools)
+ */
+@media (max-width: 600px) {
+  .spell-doc-main .spell-page-head > .spell-head-tools {
+    box-shadow: -10px 0 8px -2px var(--spell-head-fill, var(--spell-bg));
+  }
+}
+/*
+ * ## A docs page's SEND (the runtime's `drawSend()`, epic `epic-workflow` P13):  first in the header's tools row;
+ * Send and its countdown (`<epic-send-buttons>`, epic `epic-engine` P20, which draws the fill rule itself), then who
+ * is listening, small and quiet
+ */
+.spell-doc-main .spell-head-tools > .spell-send {
+  --_tint: var(--ui-blue, #2185d0);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font: 600 13px/1.4 var(--spell-sans);
+  letter-spacing: normal;
+  text-transform: none;
+}
+/* the stuck headings' background reaches a few px past the column, over the cards' outer 1px borders */
+:is(ui-sticky.spell-h2 > h2, ui-sticky.spell-h3 > h3, .spell-filter, .spell-page-head) {
+  margin-inline: -4px;
+  padding-inline: 4px;
+}
+.spell-doc-main h2 {
+  font-size: 1.6rem;
+  line-height: 1.25;
+  letter-spacing: var(--spell-tracking-heading, -0.012em);
+  margin: 0 0 10px;
+  padding-block: 12px 8px;
+  background: var(--spell-bg);
+  border-bottom: 1px solid var(--spell-rule);
+}
+.spell-doc-main h3 {
+  font-size: 1.2rem;
+  line-height: 1.3;
+  margin: 0 0 6px;
+}
+ui-sticky.spell-h3 > h3 {
+  padding-block: 8px 6px;
+  background: var(--spell-bg);
+}
+.spell-doc-main h4 {
+  font-size: 1rem;
+  margin: 22px 0 6px;
+}
+/*
+ * Anchors land below the stuck headers:  an h2 at the top, an h3 below its h2, anything else (h4s, plan items)
+ * below both.  `--spell-top` is what sticks above every h2 (the page header, the CHEATSHEET's filter bar), set by
+ * the runtime.
+ * - LANDING (one model for every jump, `spell-doc-runtime.js`'s header):  `scroll-margin-top` is the landing line
+ *   MINUS the fixed site header.  Whoever scrolls adds the header once:  the runtime's own jumps (`scrollTo()`,
+ *   which no `scroll-padding` touches) add `--spell-site-header-height`;  the browser's add `:root`'s
+ *   `scroll-padding-top` (the site header installs it).  While titles are stuck, `StickyWatch` overrides that with
+ *   an inline `scroll-padding-top` on `<html>`, the lowest stuck edge, so the browser's paging keeps clear of them
+ *   (the runtime pages itself where it can:  `wirePaging()`).
+ */
+.spell-doc-main [id] {
+  scroll-margin-top: calc(var(--spell-top, 0px) + var(--spell-h2-h, 0px) + var(--spell-h3-h, 0px) + 8px);
+}
+/* a sticky heading lands AT its sticky line;  `.spell-doc-main` so these beat the `[id]` rule above */
+.spell-doc-main ui-sticky.spell-h2 > h2 {
+  scroll-margin-top: var(--spell-top, 0px);
+}
+.spell-doc-main ui-sticky.spell-h3 > h3 {
+  scroll-margin-top: calc(var(--spell-top, 0px) + var(--spell-h2-h, 0px));
+}
+/* badges in headings sit on the text's middle */
+:is(h2, h3, h4) ui-label {
+  vertical-align: middle;
+}
+/* an h2's open / all items (`ui-label.spell-count`, by the runtime):  at the right */
+h2 > ui-label.spell-count::part(label) {
+  float: right;
+  margin: 0.35em 0 0 8px;
+}
+
+/*
+ * Folding:  every h2 / h3 section folds from a chevron button at the start of its heading (the runtime adds it);
+ * a folded section shows only its heading.
+ */
+.spell-doc-main section.spell-folded > :not(ui-sticky) {
+  display: none;
+}
+.spell-foldable {
+  cursor: pointer;
+}
+ui-button.spell-fold {
+  margin-right: 6px;
+  vertical-align: middle;
+}
+/* a folded h3 doesn't need its sticky room:  the next one follows right under it */
+.spell-doc-main section.spell-folded:has(> ui-sticky.spell-h3) {
+  margin-top: 6px;
+}
+
+/*******************************
+          Sections
+*******************************/
+
+/*
+ * `<ui-section id header sticky collapsible dividing>`:  the page markup (the saga pages keep `section.s2` above).
+ * The element draws the title, the fold chevron, the rule and the stack of stuck titles;  its PUBLIC tokens give
+ * it the headings' look:  top-level titles as the h2s above (1.4rem), nested ones as the h3s (1.1rem), a rule
+ * under every title.
+ * - tokens are inherited:  set on every section, then again on the nested ones
+ * - the runtime sets top-level `offset`s (what sticks above them), and `--spell-section-top` (where a section's
+ *   title sticks) / `--spell-stack` (the bottom of its stack of stuck titles) on each, which anchors read below
+ * - a stuck title covers what scrolls under it:  the page's background, above the content;  the page header
+ *   (`ui-sticky.spell-h1`, 5) above every title, nested titles under their parents' (UI subtracts the depth)
+ */
+.spell-doc-main ui-section {
+  --ui-section-margin: 40px;
+  --ui-section-h2: 1.6;
+  --ui-section-h3: 1.2;
+  --ui-section-h4: 1;
+  --ui-section-h5: 0.95;
+  --ui-section-h6: 0.9;
+  --ui-section-title-line-height: 1.25;
+  --ui-section-title-gap: 0.4em;
+  --ui-section-title-color: var(--spell-heading-ink);
+  --ui-section-title-padding: var(--spell-title-top) 4px 8px;
+  /* the title's top padding:  the fold chevron sits on its first line (below) */
+  --spell-title-top: 12px;
+  --ui-section-content-padding: 10px 0 0;
+  --ui-section-dividing-border: 1px solid var(--spell-rule);
+  --ui-section-sticky-background: var(--spell-bg);
+  --ui-section-stuck-shadow: none;
+  --ui-section-z-index: 4;
+}
+/* a jump to a folded section (`spell-doc-runtime.js` `jump()`):  what it unfolds opens at once */
+:root[data-spell-jumping] .spell-doc-main ui-section {
+  --ui-section-duration: 0s;
+}
+.spell-doc-main ui-section ui-section {
+  --ui-section-margin: 22px;
+  --ui-section-title-padding: var(--spell-title-top) 4px 6px;
+  --spell-title-top: 8px;
+  --ui-section-content-padding: 6px 0 0;
+}
+/* a folded nested section doesn't need its room:  the next one follows right under it */
+.spell-doc-main ui-section ui-section:state(collapsed) {
+  --ui-section-margin: 6px;
+}
+/*
+ * nor a folded top-level one:  the section after it starts right under its rule, no empty band between folded rows
+ * (epic `epic-engine` I138);  after an open one, its room stays
+ */
+.spell-doc-main ui-section:not(:state(nested)):state(collapsed) + ui-section {
+  --ui-section-margin: 0px;
+}
+/*
+ * - prose inside keeps the page's line height (the section box sets UI's)
+ * - space goes ABOVE a section only, as the `section.s2` pages':  `--ui-section-margin` is both edges, and a
+ *   bottom margin would come between the content and what the page adds after it (epic pages' "none yet")
+ */
+.spell-doc-main ui-section::part(section) {
+  margin-bottom: 0;
+  line-height: inherit;
+}
+/* the stuck title's background reaches a few px past the column, over the cards' outer 1px borders */
+.spell-doc-main ui-section::part(title) {
+  margin-inline: -4px;
+  letter-spacing: var(--spell-tracking-heading, -0.012em);
+}
+/* a section's icon in the brand's accent (Spell Purple;  lilac in dark), as the brand's nav icons */
+.spell-doc-main ui-section > ui-icon[slot="icon"] {
+  color: var(--spell-doc-accent);
+}
+/*
+ * The fold chevron at the title's START, before its icon, as an epic page's sections and items have it, turning as
+ * the theme turns it there:  Spell UI's own, right folded and down open;  the Spell theme's, down and up (epic
+ * `epic-engine` I138:  one way on every page, as Owen moved the epic pages' there, 2026-10-25:  "put it on the left";
+ * at the far end, up when open, before:  J5 of `review-review`)
+ */
+.spell-doc-main ui-section {
+  --ui-section-fold-icon-size: 12px;
+}
+.spell-doc-main ui-section::part(fold-icon) {
+  color: var(--spell-muted);
+}
+/*
+ * a narrow title keeps its count and actions in place, on its row:  its text runs on under them, fading
+ * out, rather than wrapping them onto a row of their own (Owen, 2026-10-10:  "stay in place and overlap")
+ * - NOT on a DETAILS PAGE (`epic ask`'s):  Owen answers there, so a title shows IN FULL, wrapped, as an epic page's
+ *   titles do (Owen, 2026-10-19:  "make it always show the full title, wrapped";  epic `epic-engine` I21)
+ *   - the count and actions go to a row of their own, below, only when the title doesn't fit beside them
+ *   - the icon, like the fold arrow, beside the title's first line
+ *   - which pages:  `.spell-details-page` (the template's), any page with an `<epic-ask>` (those written before the
+ *     template had the class), and the older choices pages
+ */
+@media (max-width: 560px) {
+  .spell-doc-main ui-section::part(heading) {
+    min-width: 0;
+  }
+  /* the fade at the ROW's end, by the count and actions:  as wide as the room, not only its words (a short title's
+     own last letters faded:  "1. Summar(y)") */
+  body:not(.spell-details-page, .spell-choices-page, :has(epic-ask)) .spell-doc-main ui-section::part(header) {
+    flex: 1;
+    overflow: hidden;
+    white-space: nowrap;
+    mask-image: linear-gradient(to left, transparent, black 20px);
+  }
+  body:is(.spell-details-page, .spell-choices-page, :has(epic-ask)) .spell-doc-main ui-section {
+    &::part(title) {
+      flex-wrap: wrap;
+    }
+    &::part(icon) {
+      align-self: flex-start;
+      height: 1lh;
+    }
+  }
+}
+/*
+ * Stuck titles on ONE row (the runtime's `wireStuckTrail()`;  Owen, 2026-10-13:  "This could collapse to one row
+ * when stickified"):  the top-level stuck title carries the nested ones' titles after its own, `› 2.1 The repo`;  the
+ * nested stuck titles hide, the text scrolling under their room
+ */
+.spell-doc-main ui-section[data-spell-merged]::part(title) {
+  visibility: hidden;
+}
+.spell-doc-main ui-section[data-spell-trail]::part(header)::after {
+  content: var(--spell-stuck-trail);
+  font-size: 0.72em;
+  font-weight: 600;
+  white-space: pre;
+}
+/* the `open/all` count:  big enough to read at a glance beside a title */
+.spell-doc-main ui-section {
+  --ui-section-badge-font-size: 0.9em;
+}
+/*
+ * the content clips its block edges (`overflow-y: clip`, for the fold animation):  a card's or styled accordion's
+ * border is a box-shadow drawn past its box, so a section ending in one lost its bottom edge.  The clip reaches a
+ * few px past the box instead -- `overflow-clip-margin` needs `clip` on BOTH axes (Chromium), hence `overflow`.
+ * (`spell-docs/spell-ui-findings.md`)
+ */
+.spell-doc-main ui-section::part(content) {
+  overflow: clip;
+  overflow-clip-margin: 6px;
+}
+/*
+ * anchors:  a section lands with its title at its sticky line, anything in it below its stack of stuck titles --
+ * both measured from the site header's bottom (LANDING, above)
+ */
+.spell-doc-main ui-section[id] {
+  scroll-margin-top: var(--spell-section-top, var(--spell-top, 0px));
+}
+.spell-doc-main ui-section [id]:not(ui-section) {
+  scroll-margin-top: calc(var(--spell-stack, 0px) + 8px);
+}
+
+/*******************************
+            Prose
+*******************************/
+
+.spell-doc-main :is(p, li) {
+  max-width: 72ch;
+}
+.spell-doc-main a {
+  color: var(--spell-doc-accent);
+}
+/*
+ * The lede under the h1:  the brand's italic serif echo of the title, in the headings' ink (`--spell-type-lede`,
+ * a size down:  a docs lede runs a sentence or two, the brand's a few words)
+ */
+.lede,
+.spell-doc-main > header > h1 + p {
+  color: var(--spell-heading-ink);
+  font: italic 400 1.3rem/1.4 var(--spell-serif);
+  margin: 4px 0 18px;
+  text-wrap: pretty;
+}
+:is(.lede, .spell-doc-main > header > h1 + p) :is(code, em, i) {
+  font-style: normal;
+}
+:is(.lede, .spell-doc-main > header > h1 + p) code {
+  font-size: 0.78em;
+}
+/* a lede INSIDE a section (an epic page's summary, a changelog entry's) runs a paragraph:  upright, in the body face */
+ui-section .lede {
+  font: 400 1.06rem/1.6 var(--spell-sans);
+  margin: 0 0 14px;
+}
+ui-section .lede code {
+  font-size: 0.88em;
+}
+:is(.lede, .meta) + :is(ul, ui-list) {
+  color: var(--spell-muted);
+  margin-top: -8px;
+  font-size: 0.92rem;
+}
+.meta {
+  color: var(--spell-muted);
+  font-size: 0.9rem;
+}
+/*
+ * The breadcrumb above the h1 (`ui-breadcrumbs.spell-crumbs`) is the page's EYEBROW, as the brand's docs put one
+ * over every title:  small mono capitals, tracked out, the links in the accent and the page itself muted
+ */
+.spell-crumbs {
+  display: block;
+  margin: 0 0 10px;
+  --ui-font-size: 11px;
+  --ui-breadcrumb-link-color: var(--spell-doc-accent);
+  --ui-breadcrumb-active-color: var(--spell-muted);
+  --ui-breadcrumb-active-font-weight: 500;
+  --ui-breadcrumb-divider-color: var(--spell-muted);
+  --ui-breadcrumb-divider-spacing: 0.4em;
+  text-transform: uppercase;
+  letter-spacing: var(--spell-eyebrow-tracking);
+}
+.spell-crumbs::part(breadcrumb) {
+  font: var(--spell-eyebrow-font);
+}
+/*
+ * narrow (VS Code's side bar, a phone):  no eyebrow, to save room;  no breadcrumb at all there (Owen, 2026-10-10:
+ * "We don't need the breadcrumb").  The site header's narrow breakpoint, 720px (`SiteHeader.ts`)
+ */
+@media (max-width: 720px) {
+  .spell-crumbs {
+    display: none;
+  }
+}
+/* a page's meta lines (who it's for, status, how it was checked):  `ui-list.spell-meta` with an icon per item */
+ui-list.spell-meta {
+  display: block;
+  margin: 0 0 16px;
+  font-size: 0.94rem;
+  color: var(--spell-muted);
+}
+ui-list.spell-meta > ui-item::part(icon) {
+  color: var(--spell-doc-accent);
+}
+/* a coined term with a `<ui-popup>` after it:  dotted, so it reads as "hover me" */
+dfn.spell-term {
+  font-style: normal;
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+  cursor: help;
+}
+/* the page's last lines:  `<footer class="spell-doc-footer"><ui-divider>` + a `.meta` line */
+.spell-doc-footer {
+  margin-top: 56px;
+}
+/* code:  the brand's code well, its text in the strongest ink */
+code {
+  font-family: var(--spell-mono);
+  font-size: 0.88em;
+  background: var(--spell-code-bg);
+  color: var(--spell-heading-ink);
+  padding: 1px 5px;
+  border-radius: 4px;
+  overflow-wrap: break-word;
+}
+pre {
+  font-family: var(--spell-mono);
+  font-size: 0.84rem;
+  line-height: 1.6;
+  background: var(--spell-code-bg);
+  color: var(--spell-ink);
+  padding: 14px 16px;
+  border-radius: 12px;
+  overflow: auto;
+  max-width: 100%;
+  margin: 12px 0;
+}
+pre code {
+  background: none;
+  color: inherit;
+  padding: 0;
+  font-size: inherit;
+  overflow-wrap: normal;
+}
+
+/*******************************
+            Widgets
+*******************************/
+
+/*
+ * ## Item filter:  a section's state chips (`<epic-state-filter class="spell-item-filter">`, the epics pack's, slotted
+ * into its title's `actions` by the runtime's `wireItemFilters()`):  the saga pages' item lists (`.plan-items`) and the
+ * index's epics (`<epic-list class="spell-epics">`'s cards).  Just after the title, left of the count badge;  a click
+ * hides items (`data-spell-hidden`), with "6 hidden · show all" under them (`<epic-hidden-note>`).
+ * - the chips' look is the element's, an epic page's;  its state colours here are the page's (`--spell-state-*`):
+ *   SOLID while its items show, OUTLINED while hidden (Owen, 2026-10-10);  `old` the plain grey
+ */
+.spell-doc-main ui-section::part(actions) {
+  order: 1;
+}
+.spell-doc-main ui-section::part(badge) {
+  order: 2;
+}
+.spell-doc-main :is(epic-state-filter, epic-hidden-note) {
+  --epic-ink: var(--spell-ink);
+  --epic-muted: var(--spell-muted);
+  --epic-sans: var(--spell-sans);
+  --epic-accent: var(--spell-doc-accent);
+  --epic-state-attention: var(--spell-state-attention);
+  --epic-state-attention-on: var(--spell-state-attention-on);
+  --epic-state-replied: var(--spell-state-replied);
+  --epic-state-replied-on: var(--spell-state-replied-on);
+  --epic-state-progress: var(--spell-state-progress);
+  --epic-state-progress-on: var(--spell-state-progress-on);
+  --epic-state-open: var(--spell-state-open);
+  --epic-state-open-on: var(--spell-state-open-on);
+  --epic-state-recent: var(--spell-state-recent);
+  --epic-state-recent-on: var(--spell-state-recent-on);
+}
+.spell-doc-main :is(.plan-items, .spell-epics) > [data-spell-hidden] {
+  display: none;
+}
+.spell-doc-main epic-hidden-note.spell-hidden-note {
+  margin: 4px 0 0 4px;
+}
+.spell-doc-main epic-hidden-note.spell-hidden-note[hidden] {
+  display: none;
+}
+/*
+ * ## Page notes (epic `airplane`, P3):  `<spell-notes>` groups of `<spell-note>` cards, written into the page
+ * (`tools/PageNotes.js`), drawn by the runtime's "Page notes" (`wireNotes()`):  each note's head line is an
+ * `<epic-page-note-head>` (the epics pack, epic `epic-engine` P3), its look its own sheet's.
+ * - a note is Owen's:  an ivory card (`--spell-warm`);  Claude's replies under it, violet (Claude's voice)
+ * - FOLDED until opened (`spell-note[open]`):  only the head line shows, with the note's first line
+ * - its status, by the colour scheme:  new yellow (open), answered violet, done grey
+ * - read only since P11:  guide comments (below) replaced the bubbles that wrote them
+ */
+/* one column no wider than the group:  a folded note's one-line preview ends in "...", never past the column */
+.spell-doc-main spell-notes {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 6px;
+  margin: 12px 0;
+}
+.spell-doc-main spell-note {
+  display: block;
+  padding: 4px 10px;
+  border: 1px solid var(--spell-rule);
+  border-left: 3px solid var(--spell-state-open);
+  border-radius: 6px;
+  background: var(--spell-warm);
+  font-size: 0.95rem;
+}
+.spell-doc-main spell-note[status="answered"] {
+  border-left-color: var(--ui-violet, #6435c9);
+}
+.spell-doc-main spell-note[status="done"] {
+  border-left-color: var(--spell-rule);
+  color: var(--spell-muted);
+}
+.spell-doc-main spell-note > p {
+  margin: 6px 0;
+}
+/* folded:  the head line only (before the runtime draws one:  the text, so a `file://` page without it reads) */
+.spell-doc-main spell-note:has(> epic-page-note-head):not([open]) > :not(epic-page-note-head) {
+  display: none;
+}
+.spell-doc-main spell-note-reply {
+  display: block;
+  margin: 6px 0 4px 8px;
+  padding: 2px 10px;
+  border-left: 3px solid var(--ui-violet, #6435c9);
+  background: color-mix(in srgb, var(--ui-violet, #6435c9) 7%, var(--spell-bg));
+  border-radius: 0 6px 6px 0;
+}
+.spell-doc-main spell-note-reply::before {
+  content: "Claude · " attr(at);
+  display: block;
+  margin-top: 4px;
+  color: var(--ui-violet, #6435c9);
+  font: var(--spell-eyebrow-font);
+  letter-spacing: var(--spell-eyebrow-tracking);
+}
+/*
+ * the Epics page's sort pill (`<epic-sort>`, which the runtime's `wireEpicSort()` puts in the page header;  its look
+ * is its own, as are its list's groups, chips and cards:  the epics pack's `epic-list` family, epic `epic-engine` P3)
+ */
+.spell-doc-main epic-sort {
+  display: inline-flex;
+}
+/* the Epics page's New epic pill */
+.spell-doc-main .spell-new-epic {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+}
+
+/* the New epic box (outside `main`):  a textarea that grows with its text (`growField()`) */
+.spell-note-box textarea.spell-note-field {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 5lh;
+  max-height: 50vh;
+  padding: 8px 10px;
+  border: 1px solid var(--spell-rule);
+  border-radius: 6px;
+  background: var(--spell-bg);
+  color: var(--spell-ink);
+  font: inherit;
+  line-height: 1.4;
+  resize: vertical;
+}
+/* the New epic box:  about 80% of the window's height (Owen, 2026-10-10:  "I might have a lot to say"), nearly all
+   of it the prompt;  the rest is the header, the title line, the hint and the buttons */
+#spell-new-epic-box textarea.spell-note-field {
+  height: calc(80vh - 15rem);
+  min-height: calc(80vh - 15rem);
+  max-height: calc(80vh - 15rem);
+  resize: none;
+}
+/* the New epic box's title:  one line, above its prompt */
+.spell-note-box input.spell-note-field {
+  box-sizing: border-box;
+  width: 100%;
+  margin-bottom: 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--spell-rule);
+  border-radius: 6px;
+  background: var(--spell-bg);
+  color: var(--spell-ink);
+  font: inherit;
+}
+.spell-note-box .spell-note-hint {
+  margin: 6px 0 0;
+  color: var(--spell-muted);
+  font-size: 0.85rem;
+}
+
+/* ## Messages, tables, cards:  page spacing;  tables scroll inside their box at phone width */
+.spell-doc-main :is(ui-message, ui-cards, ui-accordion, ui-statistics, ui-steps, ui-tabs, ui-grid, ui-feed, ui-items) {
+  margin: 16px 0;
+}
+/*
+ * a step no wider than its group, its words wrapping beside its number:  a wrapping row of steps (`ui-steps`) sizes
+ * each to its text on one line, so a long description ran past the column (cut off at its section's edge in the
+ * narrow layout, past the window in the wide one)
+ */
+.spell-doc-main ui-steps > ui-step::part(step) {
+  max-width: 100%;
+}
+.spell-doc-main ui-steps > ui-step::part(content) {
+  flex: 1 1 0%;
+  min-width: 0;
+}
+/* tabs that don't fit the column on one row wrap onto the next, never past the window (phone width) */
+.spell-doc-main ui-tabs::part(menu) {
+  flex-wrap: wrap;
+}
+/* a code block inside a tab pane:  the tabs already space it */
+ui-tab > ui-accordion.spell-code {
+  margin: 8px 0 0;
+}
+ui-tab > pre {
+  margin: 8px 0 0;
+}
+/* ## Headline numbers:  `ui-statistics.spell-stats`, left-aligned with the text, wrapping at phone width */
+.spell-doc-main ui-statistics.spell-stats::part(group) {
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  margin: 0;
+}
+/*
+ * ## Trade-offs and options:  `ui-grid.spell-pros-cons` of `ui-segment`s, each with a top-attached label (pros /
+ * cons, or a plan item's A / B / C options), then `p`, `ul`, `pre` or `ui-code`.
+ * - the label is a light, small bar IN the flow (UI's is absolute, so it took no room and the text ran under
+ *   it):  static, pulled out to the segment's edges by the segment's padding (`--spell-card-pad`) plus its 1px
+ *   border, the content's own space below it
+ * - the content's first and last children drop their margins:  the segment's padding is the only space around
+ *   them, so no band under the text (the UA margins of a `<p>` made one)
+ * - columns in a row keep one height (`height: 100%`)
+ */
+.spell-doc-main ui-grid.spell-pros-cons {
+  --spell-card-pad: 12px;
+}
+.spell-doc-main ui-grid.spell-pros-cons ui-segment {
+  --ui-segment-padding: var(--spell-card-pad);
+  display: block;
+  height: 100%;
+}
+.spell-doc-main ui-grid.spell-pros-cons ui-label[attach="top"] {
+  --ui-label-background: var(--ui-surface-strong, var(--spell-code-bg));
+}
+.spell-doc-main ui-grid.spell-pros-cons ui-label[attach="top"]::part(label) {
+  position: static;
+  display: block;
+  width: auto;
+  margin: calc(-1 * var(--spell-card-pad) - 1px) calc(-1 * var(--spell-card-pad) - 1px) 10px;
+  padding: 5px var(--spell-card-pad);
+  font-size: 0.8rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+.spell-doc-main ui-grid.spell-pros-cons ui-segment > :is(p, ul, ol, pre, ui-code, ui-accordion, ui-message) {
+  margin-block: 8px;
+}
+.spell-doc-main ui-grid.spell-pros-cons ui-segment > :is(ui-label[attach="top"] + *, :first-child) {
+  margin-top: 0;
+}
+.spell-doc-main ui-grid.spell-pros-cons ui-segment > :last-child {
+  margin-bottom: 0;
+}
+.spell-doc-main ui-grid.spell-pros-cons :is(ul, ol) {
+  padding-left: 18px;
+}
+/* the source's density:  smaller type, tighter cells than Fomantic's `compact` (public tokens) */
+.spell-doc-main ui-table {
+  --ui-font-size: 0.92rem;
+  --ui-table-compact-padding-block: 7px;
+  --ui-table-compact-padding-inline: 10px;
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+  margin: 12px 0 20px;
+}
+.spell-doc-main ui-table :is(td, th) {
+  vertical-align: top;
+  /* whole words, even where the prose around it breaks anywhere (an epic phase's body):  a word a line, else */
+  overflow-wrap: normal;
+  word-break: normal;
+}
+/*
+ * NO table ever STACKS, `unstackable` written or not (Owen, 2026-10-19, I36 of `epic-engine`:  a table drawn as its
+ * header cells, then each row's cells one under another, at the side bar's width:  "I hate it").  Too wide for its
+ * column, it scrolls sideways inside its own box instead (the rule above), never the page.
+ * - Spell UI stacks a `<ui-table>` below a 768px VIEWPORT unless it's `unstackable`.  Its public way to say "never" for
+ *   a whole page is the token `--ui-table-stack-by: none` (`stack-by="none"` for one table;  epic `epic-engine` I40),
+ *   read on the `<ui-table>` itself.
+ * - Pages write `unstackable` too (the plan-doc rules, the migrations), so a page read without this sheet holds
+ * - NOT a table that asks to stack (`stackable`, `stack-by`):  a demo of stacking, as the component creation guide's
+ */
+ui-table:not([stackable], [stack-by]) {
+  --ui-table-stack-by: none;
+}
+/* cell borders in `--spell-table-rule`, a bare table's and a `ui-table`'s alike */
+.spell-doc-main ui-table {
+  --ui-table-border-color: var(--spell-table-rule);
+  --ui-table-row-border: 1px solid var(--spell-table-rule);
+  --ui-table-cell-border: 1px solid var(--spell-table-rule);
+  --ui-table-header-border: 1px solid var(--spell-table-rule);
+}
+/* a bare `<table>` (an epic page's prose, a guide's):  celled, as a `ui-table celled compact` */
+.spell-doc-main table:not(ui-table table) {
+  border-collapse: collapse;
+  margin: 8px 0 12px;
+  font-size: 0.92rem;
+}
+.spell-doc-main table:not(ui-table table) :is(td, th) {
+  border: 1px solid var(--spell-table-rule);
+  padding: 6px 10px;
+  text-align: start;
+  vertical-align: top;
+  /* whole words, even where the prose around it breaks anywhere (an epic item's details) */
+  overflow-wrap: normal;
+  word-break: normal;
+}
+/* phone width:  it scrolls inside its own box, never squeezing its words or widening the page */
+@media (max-width: 600px) {
+  .spell-doc-main table:not(ui-table table) {
+    display: block;
+    overflow-x: auto;
+  }
+}
+.spell-doc-main table:not(ui-table table) th {
+  background: var(--spell-code-bg);
+  font: 500 0.72rem/1.4 var(--spell-mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--spell-muted);
+}
+/* column heads as the brand's eyebrows:  small mono capitals, tracked, muted */
+.spell-doc-main ui-table :is(thead th, tr:not(:has(td)) > th) {
+  font: 500 0.72rem/1.4 var(--spell-mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--spell-muted);
+}
+.spell-doc-main ui-table :is(thead th, tr:not(:has(td)) > th) :is(code, a) {
+  text-transform: none;
+  letter-spacing: 0;
+}
+.spell-doc-main ui-table :is(td, th).num {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+/*
+ * A TWO-COLUMN table (every row two cells:  a term and what it is, `VERB | DOES`):  its first column doesn't wrap, the
+ * second takes the rest (Owen, 2026-10-19:  "Two column table -- left column shouldn't wrap").
+ * - UNTIL it would take more than 40% of the table, leaving the second too little (Owen, 2026-10-26:  "table layout
+ *   sucks", a word a line at the side bar's width;  epic `epic-engine` I145):  then it wraps, at the width the
+ *   runtime measured (`wireTwoColumnTables()`:  `data-spell-wrap-first`, `--spell-first-column`), and the second
+ *   keeps at least 12em
+ * - too wide even then (phone width):  the table scrolls sideways inside its own box, as every table does:  never the
+ *   page
+ * - a `ui-table`'s and a bare table's alike;  a row with a cell spanning both keeps wrapping
+ */
+.spell-doc-main
+  table:not([data-spell-wrap-first]):has(> :is(thead, tbody, tfoot) > tr > :nth-child(2)):not(
+    :has(> :is(thead, tbody, tfoot) > tr > :nth-child(3))
+  )
+  > :is(thead, tbody, tfoot)
+  > tr
+  > :first-child:not([colspan]) {
+  white-space: nowrap;
+}
+.spell-doc-main table[data-spell-wrap-first] > :is(thead, tbody, tfoot) > tr > :first-child:not([colspan]) {
+  box-sizing: border-box;
+  width: var(--spell-first-column);
+}
+.spell-doc-main table[data-spell-wrap-first] > :is(thead, tbody, tfoot) > tr > :nth-child(2):last-child {
+  min-width: 12em;
+}
+/* the runtime measuring it, for a moment:  every cell as wide as its words, the table as wide as its room */
+.spell-doc-main table[data-spell-measuring] {
+  display: block !important;
+}
+.spell-doc-main table[data-spell-measuring] > :is(thead, tbody, tfoot) > tr > * {
+  white-space: nowrap !important;
+  width: auto !important;
+  min-width: 0 !important;
+}
+/*
+ * A state message tints ALL its text (Fomantic's look);  the source's callouts kept prose in the ink colour, which
+ * reads better over paragraphs and lists.  The header keeps its tint:  it reads `--ui-color-header`, not `color`.
+ */
+.spell-doc-main ui-message::part(message) {
+  color: var(--spell-ink);
+}
+.spell-doc-main ui-message > :first-child {
+  margin-top: 0;
+}
+.spell-doc-main ui-message > :last-child {
+  margin-bottom: 0;
+}
+
+/*
+ * ## Code blocks:  `ui-accordion.spell-code styled`, one panel around a `<pre>`.
+ * `styled` swaps the width (37.5em), box and paddings, so plain properties through `::part()` win here.
+ * - the brand's example panel:  a code-well frame with a hairline, its title a mono label, the code on a card
+ *   inside it
+ */
+ui-accordion.spell-code::part(accordion) {
+  width: 100%;
+  border-radius: 14px;
+  background: var(--spell-code-bg);
+  box-shadow: 0 0 0 1px var(--spell-rule);
+}
+ui-accordion.spell-code::part(title) {
+  padding: 7px 14px;
+  font: 500 0.8rem/1.4 var(--spell-mono);
+  color: var(--spell-muted);
+}
+ui-accordion.spell-code::part(content) {
+  padding: 0 5px 5px;
+}
+ui-accordion.spell-code pre {
+  margin: 0;
+  max-height: 70vh;
+  border-radius: 10px;
+  background: var(--spell-card);
+}
+
+/*
+ * ## Asides:  `ui-accordion.spell-aside styled`, one collapsed panel for a digression the main text can skip.
+ * - the brand's IVORY panel (its tips and quotes):  warm, rounded, no border or shadow
+ * - an italic serif title in the headings' ink, so it reads as an aside, not a section
+ */
+ui-accordion.spell-aside::part(accordion) {
+  width: 100%;
+  border-radius: 16px;
+  background: var(--spell-warm);
+  box-shadow: none;
+}
+ui-accordion.spell-aside::part(title) {
+  padding: 9px 16px;
+  font: italic 400 1.02rem/1.4 var(--spell-serif);
+  color: var(--spell-heading-ink);
+}
+ui-accordion.spell-aside::part(content) {
+  padding: 0 16px 12px;
+}
+
+/*******************************
+            Toolbar
+*******************************/
+
+/*
+ * The toolbar's look, its items, badges and bullhorn, and the jump dialog:  `spell-toolbar.css`, `@import`ed above (epic
+ * `epic-engine` T11:  Epic UI's pages draw the same toolbar).  Here:  where a docs page puts it.
+ */
+
+/*
+ * ## Every other page's toolbar (`.spell-toolbar-titled`, the runtime's `buildPageToolbar()`;  Owen, 2026-10-10:
+ * "Make the floating sidebar in guides a sticky top toolbar like the epic page.  Have section titles in this one"):
+ * the last row of the sticky page header (`.spell-page-head`), or of the filter bar, or a sticky bar of its own
+ * (`.spell-toolbar-alone`)
+ * - an ivory band as the epic page's (Owen, 2026-10-10:  "full-page-width, no rounding like epic page ... a rule below,
+ *   but none above"):  out of `<main>`'s inline padding to the column's edges (`--spell-doc-pad-inline`), square, the
+ *   band's rule under it as the header's bottom edge (the header's own rule and bottom padding give way to it)
+ * - each button its mark and its title, the titles shrinking with `...` when they don't all fit;
+ *   `:state(icons-only)` (a title would be cut under 50px):  the marks only;  narrower still, one `...` button
+ *   (`<ui-toolbar shrinkable>`, Spell UI's fitting)
+ */
+.spell-toolbar.spell-toolbar-titled {
+  --_out: var(--spell-doc-pad-inline, 16px);
+  flex: 1 0 calc(100% + 2 * var(--_out));
+  /* wider than its row on purpose (edge to edge):  `<ui-toolbar>`'s own cap (`max-width: 100%`) kept it in the
+     column, so it shared the title's row and covered the page's Send (epic `epic-engine` I85) */
+  max-width: none;
+  margin-inline: calc(-1 * var(--_out));
+  /* the band's own rule, as the epic page's:  the page's rule is all but white on the ivory */
+  box-shadow: 0 1px 0 var(--spell-rail-edge);
+  background: var(--spell-rail-fill);
+}
+.spell-page-head:has(> .spell-toolbar-titled) {
+  border-bottom: none;
+}
+.spell-page-head > .spell-toolbar-titled {
+  margin-bottom: -8px;
+  /* an edge between it and the title too, as an epic page's (Owen, 2026-10-13) */
+  box-shadow:
+    0 -1px 0 var(--spell-rail-edge),
+    0 1px 0 var(--spell-rail-edge);
+}
+.spell-filter:has(> .spell-toolbar-titled) {
+  border-bottom: none;
+}
+.spell-filter > .spell-toolbar-titled {
+  margin-bottom: -10px;
+}
+/* a page without a sticky header or filter bar:  its toolbar sticks by itself, where the filter bar would */
+.spell-toolbar.spell-toolbar-alone {
+  position: sticky;
+  top: calc(var(--spell-site-header-height, 0px) + var(--spell-head-h, 0px));
+  z-index: 5;
+  margin: 12px calc(-1 * var(--_out)) 8px;
+}
+
+/*******************************
+            Cards
+*******************************/
+
+/*
+ * Cards in a grid, like the source's boxes.  A `<ui-card>` host is `display: contents`, so its `::part(card)`
+ * box is the grid item;  the group's flex row and the cards' fixed widths / margins are Fomantic's, overridden
+ * with plain properties.
+ */
+.spell-doc-main ui-cards::part(group) {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(var(--spell-card-min, 370px), 100%), 1fr));
+  gap: 14px;
+  margin: 0;
+}
+
+/* ## `.flow` steps:  small cards, as many to a row as fit (the source's 180px boxes);  public card tokens */
+.spell-doc-main ui-cards.spell-flow {
+  --spell-card-min: 180px;
+  --ui-font-size: 0.9rem;
+  --ui-card-content-padding: 10px 12px;
+  --ui-card-header-font-size: 1em;
+  --ui-card-description-distance: 4px;
+  --ui-card-description-color: var(--spell-ink);
+}
+.spell-doc-main ui-cards.spell-flow::part(group) {
+  gap: 10px;
+}
+
+/*******************************
+          CHEATSHEET
+*******************************/
+
+/*
+ * A page of card grids (`spell-grid`, the Epics page's `<epic-list>`) gets a wider reading column, so three cards fit
+ * (`<main>` works its inset out from the measure, "Layout");  cards as dense as the source's
+ */
+.spell-doc:has(ui-cards.spell-grid, epic-list) {
+  --spell-measure: 1080px;
+}
+.spell-doc-main ui-cards.spell-grid {
+  --spell-card-min: 330px;
+  --ui-font-size: 0.94rem;
+  --ui-card-content-padding: 12px 14px;
+}
+.spell-doc-main ui-cards.spell-grid::part(group) {
+  gap: 12px;
+}
+.spell-doc-main ui-cards.spell-grid h3 {
+  font-size: 0.98rem;
+}
+/* the source's cards indented their lists less:  a narrow card keeps its width for text */
+.spell-doc-main ui-cards.spell-grid :is(ul, ol) {
+  margin: 6px 0;
+  padding-left: 18px;
+}
+.spell-doc-main > header p {
+  color: var(--spell-muted);
+  max-width: 80ch;
+}
+.spell-doc-main ui-cards > ui-card::part(card) {
+  width: auto;
+  min-width: 0;
+  margin: 0;
+}
+.spell-doc-main ui-cards > ui-card[data-spell-wide]::part(card) {
+  grid-column: 1 / -1;
+}
+/*
+ * a card's title link reads as a title (the brand's serif, its ink), the accent and an underline on hover;  an
+ * `<epic-card>`'s too (its title link is its own child:  the page's link colour beats its `::slotted()` rule)
+ */
+.spell-doc-main :is(ui-card ui-header, epic-card) > a {
+  color: var(--spell-heading-ink);
+  text-decoration: none;
+}
+.spell-doc-main :is(ui-card ui-header, epic-card) > a:is(:hover, :focus-visible) {
+  color: var(--spell-doc-accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+/* a grid card's meta line (a page's file, a version):  mono, small, as the brand's machine-made text */
+.spell-doc-main ui-cards.spell-grid > ui-card ui-meta {
+  font: 400 0.78rem/1.5 var(--spell-mono);
+}
+.spell-doc-main ui-card h3 {
+  margin: 0 0 8px;
+}
+.spell-doc-main ui-card :is(p, li) {
+  font-size: 0.9rem;
+}
+.spell-doc-main ui-card pre {
+  font-size: 0.8rem;
+}
+.spell-filter-empty {
+  color: var(--spell-muted);
+  margin: 24px 0;
+}
+
+/*
+ * The filter bar sticks above everything but the site header and the page header (`--spell-head-h`, by the
+ * runtime);  the runtime sticks the section headers below it (`--spell-top`).
+ * - the text filter, then the badge filter (`ui-select[data-spell-filter-badge]`);  wrapping at phone width
+ */
+.spell-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  position: sticky;
+  top: calc(var(--spell-site-header-height, 0px) + var(--spell-head-h, 0px));
+  z-index: 5;
+  margin: 12px 0 8px;
+  padding-block: 10px;
+  background: var(--spell-bg);
+  border-bottom: 1px solid var(--spell-rule);
+}
+.spell-filter ui-input {
+  width: min(360px, 100%);
+}
+/*
+ * Command reference pages (`templates/commands.html`, drawn by `commands.js`):  a note under a cell's names, the
+ * packages after a yarn script;  names don't break at their dashes
+ */
+.spell-doc-main :is(.commands-notes, .commands-where) {
+  color: var(--spell-muted);
+  font-size: 0.85em;
+}
+.spell-doc-main .commands-notes {
+  margin-top: 4px;
+}
+.spell-doc-main [data-commands-family] td > code {
+  white-space: nowrap;
+}
+
+/* the badge legend under the header:  `ui-labels.spell-legend` */
+ui-labels.spell-legend {
+  display: block;
+  margin: 4px 0 0;
+}
+
+/*******************************
+     Pages Owen answers on
+*******************************/
+
+/*
+ * Details and choice pages (epic `epic-workflow` P12):  drawn by the epics pack's elements (`<epic-ask>`,
+ * `<epic-text-box>`, `<epic-send>`, `<epic-choice-rows>`, `<epic-choices-bar>`), so only the page's own lines are
+ * here.  Before P12:  `details.css` and `syntax-choices.css`, which a page script drew to.
+ * - the meta lines under the lede:  `<epic-field label>`s, close together
+ * - the "Where we are" box:  its lines, the same
+ * - a choice page's bar is its bottom:  no window's worth of ground under it
+ */
+.spell-details-meta {
+  margin: 0.5em 0 1em;
+}
+:is(.spell-details-meta, ui-message.spell-where) > epic-field {
+  margin: 2px 0;
+}
+.spell-doc-main:has(> epic-choices-bar) {
+  padding-bottom: 0;
+}
+/* a syntax-choices section's rule:  which question it answers, the recommended way */
+.spell-choices-rule {
+  margin: 0 0 0.5em;
+  color: var(--spell-muted);
+}
+/* a question's title a size down:  its cards are what matter */
+ui-section:has(> epic-ask)::part(heading) {
+  font-size: 1.1rem;
+}
+
+/*******************************
+        Syntax colors
+*******************************/
+
+/* highlight.js classes;  plain monospace if the script can't load */
+:root {
+  --hl-keyword: light-dark(#a626a4, #c678dd);
+  --hl-string: light-dark(#50a14f, #98c379);
+  --hl-number: light-dark(#986801, #d19a66);
+  --hl-comment: light-dark(#8a8a8a, #7f848e);
+  --hl-title: light-dark(#4078f2, #61afef);
+  --hl-type: light-dark(#c18401, #e5c07b);
+  --hl-attr: light-dark(#e45649, #e06c75);
+}
+.hljs-keyword,
+.hljs-built_in,
+.hljs-literal {
+  color: var(--hl-keyword);
+}
+.hljs-string,
+.hljs-regexp,
+.hljs-subst {
+  color: var(--hl-string);
+}
+.hljs-number {
+  color: var(--hl-number);
+}
+.hljs-comment {
+  color: var(--hl-comment);
+  font-style: italic;
+}
+.hljs-title,
+.hljs-title.function_ {
+  color: var(--hl-title);
+}
+.hljs-title.class_,
+.hljs-type {
+  color: var(--hl-type);
+}
+.hljs-attr,
+.hljs-property,
+.hljs-variable.language_ {
+  color: var(--hl-attr);
+}
+
+/* agent B:  cloak */
+/*
+ * Cloak:  a custom element not yet defined (`spell-ui.js` is the page's LAST script) draws nothing, so its raw
+ * markup never flashes before it upgrades.
+ * - `visibility`, not `display`:  the page keeps its layout, and so its scroll position
+ * - never forever:  `spell-uncloak` shows it anyway after 2s, e.g. a page opened from `file://` whose bundle failed
+ *   to load (`check-spell.js` still reports an element that never defines)
+ * - and an element a root defined before its family loads (`:state(pending)`)
+ * - NOT the page notes' plain markup (`<spell-notes>` ...):  no element is ever defined for it, so it would only
+ *   ever show 2s late
+ */
+:not(:defined, spell-notes, spell-note, spell-note-reply),
+:state(pending) {
+  visibility: hidden;
+  animation: spell-uncloak 0s 2s forwards;
+}
+
+@keyframes spell-uncloak {
+  to {
+    visibility: visible;
+  }
+}
+
+/* room between the stuck page header (its toolbar) and what starts the page (Owen, 2026-10-25:  "needs more padding on
+   top") */
+main > ui-sticky.spell-h1 + * {
+  margin-top: 18px;
+}
+
+/* a screenshot that opens full size on a click (`ImageZoom`, the runtime's `wireImageZoom()`):  marked as the pointer
+   comes over it (epic `epic-engine` I129) */
+img[data-ui-zoom] {
+  cursor: zoom-in;
+}

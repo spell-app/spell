@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>OutputEditor</title>
+    <meta name="description" content="The open file's compiled javascript, read only." />
+    <!-- Before first paint:  the viewer's colour scheme (Spell UI's `ThemePreference.HEAD_SCRIPT`).  The theme itself is restored by site.js. -->
+    <script>
+      try {
+        var l = localStorage,
+          d = document.documentElement,
+          s = l.getItem("spell-site:scheme") || l.getItem("spell-site:theme") || l.getItem("spell-ui-site:scheme")
+        if (s === "light" || s === "dark") {
+          d.classList.add("ui-" + s)
+          d.style.colorScheme = s
+        }
+      } catch (e) {}
+    </script>
+    <link rel="stylesheet" href="_assets/site.css" />
+    <script type="module" src="_assets/site.js"></script>
+    <!-- the comments (bullhorns, threads, Send):  the docs runtime's, alone, beside the site's Spell UI -->
+    <script defer src="/_epic/assets/spell-comments.js"></script>
+  </head>
+  <body class="ui-typography">
+    <main id="main" class="site-main" data-toc-header="OutputEditor">
+      <ui-segment appearance="vertical" class="site-masthead">
+        <ui-container>
+          <ui-menu icon class="site-page-links" aria-label="About this page">
+            <ui-item
+              link="../../src/app/solid/OutputEditor.tsx"
+              icon="code"
+              aria-label="Its code, OutputEditor.tsx"
+              title="Its code, OutputEditor.tsx"
+            ></ui-item>
+          </ui-menu>
+          <ui-header level="1" class="site-title">
+            OutputEditor
+            <ui-header>The open file's compiled javascript, read only.</ui-header>
+          </ui-header>
+        </ui-container>
+      </ui-segment>
+
+      <ui-container class="site-body">
+        <article class="site-article">
+          <p class="lede">
+            The JavaScript tab of the editor's Program panel, in Debug: the javascript the open spell file compiled to,
+            to read but not to edit. It changes each time the file compiles. Given a <code>target</code>, it shows the
+            whole project as that target writes it instead: the panel's TypeScript and Python tabs.
+          </p>
+          <ui-list class="spell-meta">
+            <ui-item icon="user">Written for: anyone changing the spell app's editor, or reading its code</ui-item>
+            <ui-item icon="image">A picture, not live: it needs the whole editor, and a file it compiled</ui-item>
+          </ui-list>
+
+          <ui-section id="1-what-it-looks-like" label="1. What it looks like" sticky collapsible dividing open="false">
+            <ui-icon slot="icon" name="image"></ui-icon>
+            <p>
+              <code>OutputRoot</code> on Solitaire's Card.spell: its "Javascript Output" toolbar, then the javascript.
+            </p>
+            <ui-image
+              src="_images/OutputEditor.png"
+              alt="The Javascript Output pane:  the compiled javascript of Card.spell, starting export class Card extends Thing"
+              appearance="bordered rounded"
+            >
+            </ui-image>
+            <p class="meta">
+              A picture, taken by <code>yarn site:pictures</code> in
+              <a href="../../" target="src-spell-app"><code>spell-app</code></a
+              >.
+            </p>
+          </ui-section>
+
+          <ui-section id="2-using-it" label="2. Using it" sticky collapsible dividing open="false">
+            <ui-icon slot="icon" name="code"></ui-icon>
+            <p>
+              In Debug, the editor's page draws it in three of the Program panel's tabs: as <code>OutputRoot</code>,
+              without its toolbar, for the open file's javascript; on its own, with a <code>target</code>, for the
+              project's TypeScript and Python:
+            </p>
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>SpellEditor.tsx · the Program panel's code tabs · 9 lines</ui-title>
+              <ui-content>
+                <ui-code language="typescript"
+                  ><script type="text/plain">
+                    <Match when={tab() === "javascript"}>
+                      <OutputRoot showToolbar={false} />
+                    </Match>
+                    <Match when={tab() === "typescript"}>
+                      <OutputEditor showError={editor.showError} target="ts/solid" />
+                    </Match>
+                    <Match when={tab() === "python"}>
+                      <OutputEditor showError={editor.showError} target="py" />
+                    </Match>
+                  </script></ui-code
+                >
+              </ui-content>
+            </ui-accordion>
+            <ul>
+              <li>
+                <a href="#OutputRoot">OutputRoot</a> is the pane: an <a href="#OutputToolbar">OutputToolbar</a> (just
+                its "Javascript Output" header today) above an <code>OutputEditor</code>.
+              </li>
+              <li>
+                <code>OutputEditor</code> is a read-only
+                <a href="MonacoEditor.html" target="src-packages-app-docs-monacoeditor-html">MonacoEditor</a>, coloured
+                as javascript, showing the open file's compiled code. Monaco loads the first time it's needed.
+              </li>
+              <li>
+                With <code>target</code> (<code>ts/solid</code> or <code>py</code>), it's coloured as that language, and
+                shows what <code>project.codeFor()</code> writes from the last compile. A project that target can't
+                write shows why, as a comment.
+              </li>
+              <li>It doesn't follow the cursor in the code pane.</li>
+              <li>An error drawing it shows in its place, and goes to <code>showError</code>.</li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="3-props" label="3. Props, and where it's drawn" sticky collapsible dividing open="false">
+            <ui-icon slot="icon" name="list check"></ui-icon>
+            <ui-docs-api family="OutputEditor"></ui-docs-api>
+            <p class="meta">
+              From its code, by <code>yarn site:data</code> in
+              <a href="../../" target="src-spell-app"><code>spell-app</code></a
+              >.
+            </p>
+          </ui-section>
+
+          <ui-section id="4-its-code" label="4. Its code" sticky collapsible dividing open="false">
+            <ui-icon slot="icon" name="folder open"></ui-icon>
+            <ul>
+              <li>
+                <a href="../../src/app/solid/OutputEditor.tsx" target="src-packages-app-src-solid-outputeditor-tsx"
+                  ><code title="src/app/solid/OutputEditor.tsx">OutputEditor.tsx</code></a
+                >: the pane, its toolbar and the editor, and their props
+              </li>
+              <li>
+                <a href="../../src/app/solid/OutputEditor.css" target="src-packages-app-src-solid-outputeditor-css"
+                  ><code title="src/app/solid/OutputEditor.css">OutputEditor.css</code></a
+                >: its look
+              </li>
+              <li>
+                Where it's drawn:
+                <a href="../../src/app/pages/SpellEditor.tsx" target="src-packages-app-src-pages-spelleditor-tsx"
+                  ><code title="src/app/pages/SpellEditor.tsx">SpellEditor.tsx</code></a
+                >
+              </li>
+              <li>
+                Its tests, with the code pane's:
+                <a
+                  href="../../tests/app/solid/InputEditor.browser.test.tsx"
+                  target="src-tests-app-src-solid-inputeditor-browser-test-tsx"
+                  ><code title="tests/app/solid/InputEditor.browser.test.tsx">InputEditor.browser.test.tsx</code></a
+                >
+              </li>
+            </ul>
+          </ui-section>
+
+          <footer class="site-page-footer">
+            <ui-divider></ui-divider>
+            <p class="meta">Last checked 2026-10-12 against branch <code>epic-workflow</code>.</p>
+          </footer>
+        </article>
+      </ui-container>
+    </main>
+  </body>
+</html>

@@ -1,14 +1,54 @@
 // This repo's GENERATED files, and the command that rebuilds each from the merged source (epic `epic-eject` T4;
-// spell-util's, spell-server's and spell-element's, one since epic `repo-split` P9 made them the kit's folders).
+// the kit's own, then its folders', each folder's list until epic `repo-split` P20 merged them in, paths now from the
+// repo's root).
 // - Read by `epic worktree merge-main` (`MainMerge.generatorsOf()`), from the checkout being merged:
 //   a branch that adds a generated file adds its line here, and its merge already knows it.
-// - IN ORDER:  a later one may read an earlier one's output.
+// - IN ORDER:  a later one may read an earlier one's output (the spell libraries read the syntax table).
 // - Each line's keys:
 //   - `outputs`:  globs, from the repo's root
 //   - `cwd`:  where `run` runs, from the repo's root
 // - Snapshots aren't here:  the merge makes one update per package, after these.
-// - The same paths are `merge=binary` in `.gitattributes`:  keep the two in step.
-// - `yarn.lock` is the kit's too (the one install for every repo), but not listed here.
+// - The same paths are `merge=binary` in the `.gitattributes` beside them (each folder keeps its own):  keep the two in
+//   step.
+// - `yarn.lock` is the kit's too (the one install), but not listed here.
 {
-  "generators": []
+  "generators": [
+    {
+      "name": "spell syntax table",
+      "outputs": ["parser/src/spell/spellSyntax.json"],
+      "cwd": "parser",
+      "run": ["yarn", "spell:gen:syntax"]
+    },
+    {
+      "name": "Spell UI theme sheets",
+      "outputs": [
+        "ui/src/styles/themes/{spell,glass,fruity,merlot,paper,midnight,crisp,pop}.css",
+        "ui/src/styles/themes/palettes/apple.css",
+        "ui/src/styles/themes/theme.schema.json"
+      ],
+      "cwd": "ui",
+      "run": ["yarn", "gen:styles"]
+    },
+    {
+      "name": "Spell UI site data",
+      "outputs": [
+        "ui/docs/__data/{components,icons,search}.json5",
+        "ui/docs/__data/{custom-elements,html-custom-data,css-custom-data}.json"
+      ],
+      "cwd": "ui",
+      "run": ["yarn", "site:data"]
+    },
+    {
+      "name": "spell libraries",
+      "outputs": ["app/spaces/@spell/library/**/*.lib.ts"],
+      "cwd": "app",
+      "run": ["node", "../bin/spell.mjs", "compile", "@spell/library"]
+    },
+    {
+      "name": "App UI data",
+      "outputs": ["app/app/docs/__data/{components,search}.json5"],
+      "cwd": "app",
+      "run": ["yarn", "site:data"]
+    }
+  ]
 }

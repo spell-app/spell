@@ -1,0 +1,59 @@
+<spell-notebook "tab theming">
+	<header level="1">
+		Tab
+		<header>A tab is a hidden section of content activated by a menu.</>
+	</>
+	<tab-tab-bar showing="theming"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#tokens">Tokens</>
+				<ui-item link="#themes">Themes</>
+			</>
+		</>
+	</>
+
+	<!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
+	<section label="Tokens">
+		<markdown>
+			The tab menu adopts the [menu](/components/ui/ui-menu.html)'s stylesheet and the panes the segment's, so they read
+			those families' `--ui-menu-*` and `--ui-segment-*` tokens: set them on the tab set or any ancestor.
+			The set's own token, `--ui-tabs-pane-margin` (the space between the tab list and the panes), works
+			the same way, or through `::part(tabs)`; attached and vertical sets swap it. Never set the `--_*`
+			names: they're the sheets' private plumbing.
+
+			Style the pieces with `::part()`: on `<ui-tabs>`, `tabs` (the whole set), `menu` (the tab list),
+			`tab` (each tab button) and `icon`; on a `<ui-tab>`, `tab` is the pane's box.
+		</>
+		<markdown>
+			```css
+			ui-tabs {
+			  --ui-tabs-pane-margin: 1.5em;
+			}
+			ui-tabs::part(tab) {
+			  font-weight: 600;
+			}
+			ui-tab::part(tab) {
+			  padding: 2em;
+			}
+			```
+		</>
+		<markdown>Edit a value below to try it.</>
+		<html>
+			<ui-docs-tokens family="ui-tab" playground>
+				<ui-tabs appearance="tabular" attach="top" aria-label="Tabular demo">
+					<ui-tab label="First">First</>
+					<ui-tab label="Second">Second</>
+					<ui-tab label="Third">Third</>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="Themes">
+		<markdown>
+			No theme restyles tabs themselves; the themes that restyle menus and segments reach the tab
+			menu and the panes through those sheets. The one in the header applies a theme to the whole site.
+		</>
+	</>
+</spell-notebook>

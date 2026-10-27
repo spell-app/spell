@@ -115,7 +115,7 @@ export type PageServerSettings = {
    * the COMPONENT SETS it serves, by id, in the top bar's order (`ComponentSet`, `componentSets()`):
    * each at `/components/<id>/`, its pages' folder with its site bundle laid over it at `_assets/`;  none by default
    * - e.g. spell-ui's part:  `"ui": { "name": "Spell UI", "dir": "docs", "assets": "site/_assets" }`
-   *   - read for a folder other than the kit (spell-app's):  a folder beside it (`../spell-ui/docs`) is served at
+   *   - read for a folder other than the kit (spell-app's):  a folder beside it (`../ui/docs`) is served at
    *     `/_beside/...` (`folderUrl()`, epic `repo-split` P8)
    * - the server knows nothing of what they are:  the folders come from here (epic `repo-split` P4, Q3)
    */
@@ -163,7 +163,7 @@ export type PageScript = {
  * - `name`:  what prose calls it, e.g. `Epic UI`
  * - `dir`:  its pages' folder, e.g. spell-ui's `docs`
  * - `assets`:  the site bundle its pages load as `_assets/`
- *   - today Spell UI's site bundle, for every set (`../spell-ui/site/_assets` in the other repos' parts):  it holds `globalThis.SpellUI`
+ *   - today Spell UI's site bundle, for every set (`../ui/site/_assets` in the other repos' parts):  it holds `globalThis.SpellUI`
  *     (`SitePacks`) for the component packs a set's pages load, the epics pack, for the comments, on all of them
  *   - the other sets had a build of their own (its `sets/`), from epic `epic-workflow` P10 until epic
  *     `epic-engine` gave Spell UI's pages the packs too

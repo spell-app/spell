@@ -1,0 +1,44 @@
+/*
+ *
+ *  Common syntax coloring methods
+ *
+ *  Light and dark (`light-dark()`):  the dark ones are Shades of Purple's, as the code's colours (`monaco/themes`).
+ *
+ *  VS Code's Semantic Tokens:  https://github.com/microsoft/vscode-extension-samples/tree/master/semantic-tokens-sample
+ *
+ */
+
+:root,
+:host {
+  --highlight-color: light-dark(#ffef95, #6b5a00);
+  --highlight-subtle: light-dark(#fffbe2, #3a3410); /* was lighten(@highlight-color, 15%) */
+
+  --syntax-error: light-dark(darkred, #ff628c);
+  --syntax-comment: light-dark(#a86, #b362ff);
+  --syntax-parser-annotation: light-dark(#ccc, #5c5891);
+  --syntax-parse-error: light-dark(darkred, #ff628c);
+  --syntax-string: light-dark(#a22, #a5ff90);
+  --syntax-enum: light-dark(#a22, #ff628c);
+  --syntax-keyword: light-dark(blue, #ff9d00);
+  --syntax-number: light-dark(#3a3, #ff628c);
+  --syntax-boolean: light-dark(#3a3, #ff628c);
+  --syntax-punctuation: light-dark(#999, #a599e9);
+  --syntax-operator: light-dark(#333, #e1efff);
+  --syntax-class: light-dark(darkgreen, #fad000);
+  --syntax-function: light-dark(chocolate, #9effff);
+  --syntax-variable: light-dark(cornflowerblue, #9effff);
+  --syntax-variable-declaration: light-dark(cornflowerblue, #9effff);
+  --syntax-global-variable: light-dark(mediumorchid, #fb94ff);
+  --syntax-parameter: light-dark(goldenrod, #ffee80);
+  --syntax-property: light-dark(sienna, #ffb454);
+  --syntax-tag-name: light-dark(saddlebrown, #fb94ff);
+  --syntax-tag-attribute: light-dark(peru, #9effff);
+}
+
+.syntax-function {
+  color: var(--syntax-function);
+}
+
+.syntax-property {
+  color: var(--syntax-property);
+}

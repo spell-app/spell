@@ -1,0 +1,2706 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>Components | Spell UI</title>
+    <meta name="description" content="Every Spell UI component family, by topic." />
+    <!-- Before first paint:  the viewer's colour scheme (`ThemePreference.HEAD_SCRIPT`, as oxfmt lays it out).  The theme itself is restored by site.js. -->
+    <script>
+      try {
+        var l = localStorage,
+          d = document.documentElement,
+          s = l.getItem("spell-site:scheme") || l.getItem("spell-site:theme") || l.getItem("spell-ui-site:scheme")
+        if (s === "light" || s === "dark") {
+          d.classList.add("ui-" + s)
+          d.style.colorScheme = s
+        }
+      } catch (e) {}
+    </script>
+    <link rel="stylesheet" href="_assets/site.css" />
+    <script type="module" src="_assets/site.js"></script>
+    <!-- the comments (bullhorns, threads, Send):  the docs runtime's, alone, beside the site's Spell UI -->
+    <script defer src="/_epic/assets/spell-comments.js"></script>
+  </head>
+  <body class="ui-typography">
+    <main id="main" class="site-main" data-toc-header="Components">
+      <ui-segment class="site-masthead" appearance="vertical">
+        <ui-container>
+          <ui-menu icon class="site-page-links" aria-label="About this page">
+            <ui-item
+              link="https://github.com/spell-app/spell-ui/issues/new?title=Components%3A%20%20"
+              target="_blank"
+              icon="bug"
+              aria-label="Report a bug"
+              title="Report a bug"
+            ></ui-item>
+          </ui-menu>
+          <ui-header level="1" class="site-title">
+            Components
+            <ui-header>Every Spell UI component family, by topic.</ui-header>
+          </ui-header>
+        </ui-container>
+      </ui-segment>
+
+      <ui-container class="site-body">
+        <article class="site-article">
+          <!--
+            COMPONENT INDEX:  every component tag, under each of its topics, as `<ui-cards>`.  The block between
+            the `components:` markers is GENERATED from `docs/__data/components.json5` by `yarn site:index`
+            (`scripts/site-index.ts`):  edit the script, never the block.
+          -->
+          <ui-markdown>
+            <script type="text/markdown">
+              Every `ui-*` element, filed under each topic it belongs to, so a tag can show up more than once.
+              The sidebar lists the same tags, A-Z or by topic, with a search box. Each card opens the
+              component's page: its examples, how to use it, its API and its theming tokens.
+            </script>
+          </ui-markdown>
+          <!-- components:start -->
+          <ui-section id="basic" label="Basic" sticky collapsible dividing>
+            <ui-cards>
+              <ui-card
+                link="ui-breadcrumbs.html"
+                heading="Breadcrumbs"
+                meta="&lt;ui-breadcrumbs&gt;"
+                description="A breadcrumb is used to show hierarchy between content."
+              ></ui-card>
+              <ui-card
+                link="ui-button.html"
+                heading="Button"
+                meta="&lt;ui-button&gt;"
+                description="A button indicates a possible action."
+              ></ui-card>
+              <ui-card
+                link="ui-checkbox.html"
+                heading="Checkbox"
+                meta="&lt;ui-checkbox&gt;"
+                description="A checkbox lets people choose a value from a small set of options, often on or off."
+              ></ui-card>
+              <ui-card
+                link="ui-container.html"
+                heading="Container"
+                meta="&lt;ui-container&gt;"
+                description="A container limits content to a maximum width."
+              ></ui-card>
+              <ui-card
+                link="ui-divider.html"
+                heading="Divider"
+                meta="&lt;ui-divider&gt;"
+                description="A divider visually segments content into groups."
+              ></ui-card>
+              <ui-card
+                link="ui-dropdown.html"
+                heading="Dropdown"
+                meta="&lt;ui-dropdown&gt;"
+                description="A dropdown lets people choose a value from a series of options."
+              ></ui-card>
+              <ui-card
+                link="ui-form.html"
+                heading="Form"
+                meta="&lt;ui-form&gt;"
+                description="A form displays a set of related input fields in a structured way."
+              ></ui-card>
+              <ui-card
+                link="ui-grid.html"
+                heading="Grid"
+                meta="&lt;ui-grid&gt;"
+                description="A grid is used to harmonize negative space in a layout."
+              ></ui-card>
+              <ui-card
+                link="ui-header.html"
+                heading="Header"
+                meta="&lt;ui-header&gt;"
+                description="A header provides a short summary of content."
+              ></ui-card>
+              <ui-card
+                link="ui-icon.html"
+                heading="Icon"
+                meta="&lt;ui-icon&gt;"
+                description="An icon is a glyph used to represent something else."
+              ></ui-card>
+              <ui-card
+                link="ui-image.html"
+                heading="Image"
+                meta="&lt;ui-image&gt;"
+                description="An image is a graphic representation of something."
+              ></ui-card>
+              <ui-card
+                link="ui-input.html"
+                heading="Input"
+                meta="&lt;ui-input&gt;"
+                description="An input is a field used to elicit a response from a person."
+              ></ui-card>
+              <ui-card
+                link="ui-label.html"
+                heading="Label"
+                meta="&lt;ui-label&gt;"
+                description="A label displays content classification."
+              ></ui-card>
+              <ui-card
+                link="ui-text.html#ui-link"
+                heading="Link"
+                meta="&lt;ui-link&gt;"
+                description="A link takes the reader somewhere else from inside a sentence."
+              ></ui-card>
+              <ui-card
+                link="ui-list.html"
+                heading="List"
+                meta="&lt;ui-list&gt;"
+                description="A list groups related content."
+              ></ui-card>
+              <ui-card
+                link="ui-menu.html"
+                heading="Menu"
+                meta="&lt;ui-menu&gt;"
+                description="A menu displays grouped navigation actions."
+              ></ui-card>
+              <ui-card
+                link="ui-root.html"
+                heading="Root"
+                meta="&lt;ui-root&gt;"
+                description="A root loads the components inside it on demand, sets their theme and size, and shows them once they&#39;re ready."
+              ></ui-card>
+              <ui-card
+                link="ui-segment.html"
+                heading="Segment"
+                meta="&lt;ui-segment&gt;"
+                description="A segment is used to create a grouping of related content."
+              ></ui-card>
+              <ui-card
+                link="ui-stack.html"
+                heading="Stack"
+                meta="&lt;ui-stack&gt;"
+                description="A stack lays its children out in a column, or a row that wraps, evenly spaced.  It has no look of its own."
+              ></ui-card>
+              <ui-card
+                link="ui-table.html"
+                heading="Table"
+                meta="&lt;ui-table&gt;"
+                description="A table displays a collection of data grouped into rows."
+              ></ui-card>
+              <ui-card
+                link="ui-text.html"
+                heading="Text"
+                meta="&lt;ui-text&gt;"
+                description="A text is used to style some inline text with a simple color, or to hold a paragraph."
+              ></ui-card>
+            </ui-cards>
+          </ui-section>
+
+          <ui-section id="layout" label="Layout" sticky collapsible dividing>
+            <ui-cards>
+              <ui-card
+                link="ui-ad.html"
+                heading="Ad"
+                meta="&lt;ui-ad&gt;"
+                description="An ad displays third-party promotional content."
+              ></ui-card>
+              <ui-card
+                link="ui-button.html#ui-buttons"
+                heading="Buttons"
+                meta="&lt;ui-buttons&gt;"
+                description="Buttons can exist together as a group."
+              ></ui-card>
+              <ui-card
+                link="ui-card.html#ui-cards"
+                heading="Cards"
+                meta="&lt;ui-cards&gt;"
+                description="A group of cards, laid out in a wrapping row."
+              ></ui-card>
+              <ui-card
+                link="ui-grid.html#ui-column"
+                heading="Column"
+                meta="&lt;ui-column&gt;"
+                description="A column is a vertical cell of a grid, N of 16 wide."
+              ></ui-card>
+              <ui-card
+                link="ui-container.html"
+                heading="Container"
+                meta="&lt;ui-container&gt;"
+                description="A container limits content to a maximum width."
+              ></ui-card>
+              <ui-card
+                link="ui-divider.html"
+                heading="Divider"
+                meta="&lt;ui-divider&gt;"
+                description="A divider visually segments content into groups."
+              ></ui-card>
+              <ui-card
+                link="ui-form.html#ui-fields"
+                heading="Fields"
+                meta="&lt;ui-fields&gt;"
+                description="A set of fields can appear grouped together, side by side or stacked."
+              ></ui-card>
+              <ui-card
+                link="ui-grid.html"
+                heading="Grid"
+                meta="&lt;ui-grid&gt;"
+                description="A grid is used to harmonize negative space in a layout."
+              ></ui-card>
+              <ui-card
+                link="ui-image.html#ui-images"
+                heading="Images"
+                meta="&lt;ui-images&gt;"
+                description="A group of images can be formatted together."
+              ></ui-card>
+              <ui-card
+                link="ui-include.html"
+                heading="Include"
+                meta="&lt;ui-include&gt;"
+                description="An include shows part of another page from this site in this one, loaded at once, when idle or when scrolled into view."
+              ></ui-card>
+              <ui-card
+                link="ui-page.html"
+                heading="Page"
+                meta="&lt;ui-page&gt;"
+                description="A page frames a whole window:  a header, navigation, the main content, a side column and a footer, each a landmark screen readers jump between.  It&#39;s a root too:  it loads the components inside it."
+              ></ui-card>
+              <ui-card
+                link="ui-panel.html"
+                heading="Panel"
+                meta="&lt;ui-panel&gt;"
+                description="A panel is an inspector:  a tinted box of fields under a header band, with sub-head bands that open and close.  It takes every &lt;ui-section&gt; attribute."
+              ></ui-card>
+              <ui-card
+                link="ui-property-editor.html#ui-property-group"
+                heading="Property group"
+                meta="&lt;ui-property-group&gt;"
+                description="A property group is a band of properties that opens and closes, in a property editor.  It takes &lt;ui-section&gt;&#39;s attributes."
+                extra="In progress"
+              ></ui-card>
+              <ui-card
+                link="ui-sidebar.html#ui-pushable"
+                heading="Pushable"
+                meta="&lt;ui-pushable&gt;"
+                description="The context a sidebar appears in:  it clips them and moves its pusher."
+              ></ui-card>
+              <ui-card
+                link="ui-sidebar.html#ui-pusher"
+                heading="Pusher"
+                meta="&lt;ui-pusher&gt;"
+                description="The content a sidebar pushes (and dims) when it appears."
+              ></ui-card>
+              <ui-card
+                link="ui-rail.html"
+                heading="Rail"
+                meta="&lt;ui-rail&gt;"
+                description="A rail is used to show accompanying content outside the boundaries of the main view of a site."
+              ></ui-card>
+              <ui-card
+                link="ui-root.html"
+                heading="Root"
+                meta="&lt;ui-root&gt;"
+                description="A root loads the components inside it on demand, sets their theme and size, and shows them once they&#39;re ready."
+              ></ui-card>
+              <ui-card
+                link="ui-grid.html#ui-row"
+                heading="Row"
+                meta="&lt;ui-row&gt;"
+                description="A row is a horizontal grouping of columns;  in a table, of cells."
+              ></ui-card>
+              <ui-card
+                link="ui-section.html"
+                heading="Section"
+                meta="&lt;ui-section&gt;"
+                description="A section is a titled block of content that can close and keep its title in view."
+                extra="In progress"
+              ></ui-card>
+              <ui-card
+                link="ui-section.html#ui-sections"
+                heading="Sections"
+                meta="&lt;ui-sections&gt;"
+                description="A group of sections:  with collapsing, every section in it can close, and closed ones stack with no space between."
+                extra="In progress"
+              ></ui-card>
+              <ui-card
+                link="ui-segment.html"
+                heading="Segment"
+                meta="&lt;ui-segment&gt;"
+                description="A segment is used to create a grouping of related content."
+              ></ui-card>
+              <ui-card
+                link="ui-segment.html#ui-segments"
+                heading="Segments"
+                meta="&lt;ui-segments&gt;"
+                description="A group of segments can be formatted to appear together."
+              ></ui-card>
+              <ui-card
+                link="ui-sidebar.html"
+                heading="Sidebar"
+                meta="&lt;ui-sidebar&gt;"
+                description="A sidebar hides additional content beside a page."
+              ></ui-card>
+              <ui-card
+                link="ui-stack.html"
+                heading="Stack"
+                meta="&lt;ui-stack&gt;"
+                description="A stack lays its children out in a column, or a row that wraps, evenly spaced.  It has no look of its own."
+              ></ui-card>
+              <ui-card
+                link="ui-statistic.html#ui-statistics"
+                heading="Statistics"
+                meta="&lt;ui-statistics&gt;"
+                description="A group of statistics."
+              ></ui-card>
+              <ui-card
+                link="ui-sticky.html"
+                heading="Sticky"
+                meta="&lt;ui-sticky&gt;"
+                description="Sticky content stays fixed to the viewport while its container is on screen."
+              ></ui-card>
+            </ui-cards>
+          </ui-section>
+
+          <ui-section id="containers" label="Containers" sticky collapsible dividing>
+            <ui-cards>
+              <ui-card
+                link="ui-accordion.html"
+                heading="Accordion"
+                meta="&lt;ui-accordion&gt;"
+                description="An accordion lets people show and hide sections of content."
+              ></ui-card>
+              <ui-card
+                link="ui-card.html"
+                heading="Card"
+                meta="&lt;ui-card&gt;"
+                description="A card displays site content in a manner similar to a playing card."
+              ></ui-card>
+              <ui-card
+                link="ui-container.html"
+                heading="Container"
+                meta="&lt;ui-container&gt;"
+                description="A container limits content to a maximum width."
+              ></ui-card>
+              <ui-card
+                link="ui-content.html"
+                heading="Content"
+                meta="&lt;ui-content&gt;"
+                description="The main content block of a card, item, event, comment, modal, message, list item, step ..."
+              ></ui-card>
+              <ui-card
+                link="ui-flyout.html"
+                heading="Flyout"
+                meta="&lt;ui-flyout&gt;"
+                description="A flyout is a modal that slides in from a side of the page."
+              ></ui-card>
+              <ui-card
+                link="ui-include.html"
+                heading="Include"
+                meta="&lt;ui-include&gt;"
+                description="An include shows part of another page from this site in this one, loaded at once, when idle or when scrolled into view."
+              ></ui-card>
+              <ui-card
+                link="ui-page.html"
+                heading="Page"
+                meta="&lt;ui-page&gt;"
+                description="A page frames a whole window:  a header, navigation, the main content, a side column and a footer, each a landmark screen readers jump between.  It&#39;s a root too:  it loads the components inside it."
+              ></ui-card>
+              <ui-card
+                link="ui-panel.html"
+                heading="Panel"
+                meta="&lt;ui-panel&gt;"
+                description="A panel is an inspector:  a tinted box of fields under a header band, with sub-head bands that open and close.  It takes every &lt;ui-section&gt; attribute."
+              ></ui-card>
+              <ui-card
+                link="ui-rail.html"
+                heading="Rail"
+                meta="&lt;ui-rail&gt;"
+                description="A rail is used to show accompanying content outside the boundaries of the main view of a site."
+              ></ui-card>
+              <ui-card
+                link="ui-root.html"
+                heading="Root"
+                meta="&lt;ui-root&gt;"
+                description="A root loads the components inside it on demand, sets their theme and size, and shows them once they&#39;re ready."
+              ></ui-card>
+              <ui-card
+                link="ui-section.html"
+                heading="Section"
+                meta="&lt;ui-section&gt;"
+                description="A section is a titled block of content that can close and keep its title in view."
+                extra="In progress"
+              ></ui-card>
+              <ui-card
+                link="ui-section.html#ui-sections"
+                heading="Sections"
+                meta="&lt;ui-sections&gt;"
+                description="A group of sections:  with collapsing, every section in it can close, and closed ones stack with no space between."
+                extra="In progress"
+              ></ui-card>
+              <ui-card
+                link="ui-segment.html"
+                heading="Segment"
+                meta="&lt;ui-segment&gt;"
+                description="A segment is used to create a grouping of related content."
+              ></ui-card>
+              <ui-card
+                link="ui-segment.html#ui-segments"
+                heading="Segments"
+                meta="&lt;ui-segments&gt;"
+                description="A group of segments can be formatted to appear together."
+              ></ui-card>
+              <ui-card
+                link="ui-tab.html"
+                heading="Tab"
+                meta="&lt;ui-tab&gt;"
+                description="A tab pane:  the content shown while its tab is selected."
+              ></ui-card>
+              <ui-card
+                link="ui-tab.html#ui-tabs"
+                heading="Tabs"
+                meta="&lt;ui-tabs&gt;"
+                description="A tab is a hidden section of content activated by a menu."
+              ></ui-card>
+              <ui-card
+                link="ui-title.html"
+                heading="Title"
+                meta="&lt;ui-title&gt;"
+                description="A title:  a step&#39;s, an accordion panel&#39;s, a search result&#39;s."
+              ></ui-card>
+            </ui-cards>
+          </ui-section>
+
+          <ui-section id="navigation" label="Navigation" sticky collapsible dividing>
+            <ui-cards>
+              <ui-card
+                link="ui-accordion.html"
+                heading="Accordion"
+                meta="&lt;ui-accordion&gt;"
+                description="An accordion lets people show and hide sections of content."
+              ></ui-card>
+              <ui-card
+                link="ui-breadcrumbs.html#ui-breadcrumb"
+                heading="Breadcrumb"
+                meta="&lt;ui-breadcrumb&gt;"
+                description="A section of a breadcrumb:  a link to a level of the hierarchy, or the current page."
+              ></ui-card>
+              <ui-card
+                link="ui-breadcrumbs.html"
+                heading="Breadcrumbs"
+                meta="&lt;ui-breadcrumbs&gt;"
+                description="A breadcrumb is used to show hierarchy between content."
+              ></ui-card>
+              <ui-card
+                link="ui-text.html#ui-link"
+                heading="Link"
+                meta="&lt;ui-link&gt;"
+                description="A link takes the reader somewhere else from inside a sentence."
+              ></ui-card>
+              <ui-card
+                link="ui-menu.html"
+                heading="Menu"
+                meta="&lt;ui-menu&gt;"
+                description="A menu displays grouped navigation actions."
+              ></ui-card>
+              <ui-card
+                link="ui-page.html"
+                heading="Page"
+                meta="&lt;ui-page&gt;"
+                description="A page frames a whole window:  a header, navigation, the main content, a side column and a footer, each a landmark screen readers jump between.  It&#39;s a root too:  it loads the components inside it."
+              ></ui-card>
+              <ui-card
+                link="ui-sidebar.html#ui-pushable"
+                heading="Pushable"
+                meta="&lt;ui-pushable&gt;"
+                description="The context a sidebar appears in:  it clips them and moves its pusher."
+              ></ui-card>
+              <ui-card
+                link="ui-sidebar.html#ui-pusher"
+                heading="Pusher"
+                meta="&lt;ui-pusher&gt;"
+                description="The content a sidebar pushes (and dims) when it appears."
+              ></ui-card>
+              <ui-card
+                link="ui-search.html"
+                heading="Search"
+                meta="&lt;ui-search&gt;"
+                description="A search module lets people query for results from a selection of data."
+              ></ui-card>
+              <ui-card
+                link="ui-sidebar.html"
+                heading="Sidebar"
+                meta="&lt;ui-sidebar&gt;"
+                description="A sidebar hides additional content beside a page."
+              ></ui-card>
+              <ui-card
+                link="ui-step.html"
+                heading="Step"
+                meta="&lt;ui-step&gt;"
+                description="One step of a set of steps."
+              ></ui-card>
+              <ui-card
+                link="ui-step.html#ui-steps"
+                heading="Steps"
+                meta="&lt;ui-steps&gt;"
+                description="A set of steps shows the progress of an activity in a series of steps."
+              ></ui-card>
+              <ui-card
+                link="ui-sticky.html"
+                heading="Sticky"
+                meta="&lt;ui-sticky&gt;"
+                description="Sticky content stays fixed to the viewport while its container is on screen."
+              ></ui-card>
+              <ui-card
+                link="ui-tab.html"
+                heading="Tab"
+                meta="&lt;ui-tab&gt;"
+                description="A tab pane:  the content shown while its tab is selected."
+              ></ui-card>
+              <ui-card
+                link="ui-tab.html#ui-tabs"
+                heading="Tabs"
+                meta="&lt;ui-tabs&gt;"
+                description="A tab is a hidden section of content activated by a menu."
+              ></ui-card>
+              <ui-card
+                link="ui-toc.html"
+                heading="Toc"
+                meta="&lt;ui-toc&gt;"
+                description="A table of contents lists the page&#39;s sections and examples as links, opens the one in view and follows the scroll.  Each section folds and opens by its chevron, and one button in its header opens or folds them all;  the viewer&#39;s folds are kept."
+              ></ui-card>
+              <ui-card
+                link="ui-toolbar.html"
+                heading="Toolbar"
+                meta="&lt;ui-toolbar&gt;"
+                description="A toolbar is a horizontal menu whose items scroll sideways when they don&#39;t fit, with a button at each end while there&#39;s more to see that way;  shrinkable, it fits their titles to its width instead.  It takes every &lt;ui-menu&gt; attribute."
+              ></ui-card>
+            </ui-cards>
+          </ui-section>
+
+          <ui-section id="menus" label="Menus" sticky collapsible dividing>
+            <ui-cards>
+              <ui-card
+                link="ui-action.html"
+                heading="Action"
+                meta="&lt;ui-action&gt;"
+                description="A menu item or toolbar button drawn from an action:  its title, icon and shortcut keys."
+              ></ui-card>
+              <ui-card
+                link="ui-dropdown.html"
+                heading="Dropdown"
+                meta="&lt;ui-dropdown&gt;"
+                description="A dropdown lets people choose a value from a series of options."
+              ></ui-card>
+              <ui-card
+                link="ui-menu.html"
+                heading="Menu"
+                meta="&lt;ui-menu&gt;"
+                description="A menu displays grouped navigation actions."
+              ></ui-card>
+              <ui-card
+                link="ui-sidebar.html"
+                heading="Sidebar"
+                meta="&lt;ui-sidebar&gt;"
+                description="A sidebar hides additional content beside a page."
+              ></ui-card>
+              <ui-card
+                link="ui-tab.html#ui-tabs"
+                heading="Tabs"
+                meta="&lt;ui-tabs&gt;"
+                description="A tab is a hidden section of content activated by a menu."
+              ></ui-card>
+              <ui-card
+                link="ui-theme-menu.html"
+                heading="Theme menu"
+                meta="&lt;ui-theme-menu&gt;"
+                description="A theme menu switches the page between light and dark, and picks its theme from Spell&#39;s own, and remembers both for the next page."
+              ></ui-card>
+              <ui-card
+                link="ui-toolbar.html"
+                heading="Toolbar"
+                meta="&lt;ui-toolbar&gt;"
+                description="A toolbar is a horizontal menu whose items scroll sideways when they don&#39;t fit, with a button at each end while there&#39;s more to see that way;  shrinkable, it fits their titles to its width instead.  It takes every &lt;ui-menu&gt; attribute."
+              ></ui-card>
+            </ui-cards>
+          </ui-section>
+
+          <ui-section id="forms" label="Forms" sticky collapsible dividing>
+            <ui-cards>
+              <ui-card
+                link="ui-button.html"
+                heading="Button"
+                meta="&lt;ui-button&gt;"
+                description="A button indicates a possible action."
+              ></ui-card>
+              <ui-card
+                link="ui-calendar.html"
+                heading="Calendar"
+                meta="&lt;ui-calendar&gt;"
+                description="A calendar lets a person pick a date, a time, or both."
+              ></ui-card>
+              <ui-card
+                link="ui-checkbox.html"
+                heading="Checkbox"
+                meta="&lt;ui-checkbox&gt;"
+                description="A checkbox lets people choose a value from a small set of options, often on or off."
+              ></ui-card>
+              <ui-card
+                link="ui-dropdown.html"
+                heading="Dropdown"
+                meta="&lt;ui-dropdown&gt;"
+                description="A dropdown lets people choose a value from a series of options."
+              ></ui-card>
+              <ui-card
+                link="ui-form.html#ui-field"
+                heading="Field"
+                meta="&lt;ui-field&gt;"
+                description="A field is a form element containing a label and an input, with a hint, a tip and its errors."
+              ></ui-card>
+              <ui-card
+                link="ui-form.html#ui-fields"
+                heading="Fields"
+                meta="&lt;ui-fields&gt;"
+                description="A set of fields can appear grouped together, side by side or stacked."
+              ></ui-card>
+              <ui-card
+                link="ui-form.html"
+                heading="Form"
+                meta="&lt;ui-form&gt;"
+                description="A form displays a set of related input fields in a structured way."
+              ></ui-card>
+              <ui-card
+                link="ui-icon-picker.html"
+                heading="Icon picker"
+                meta="&lt;ui-icon-picker&gt;"
+                description="An icon picker lets people choose an icon by searching for it and clicking its glyph."
+              ></ui-card>
+              <ui-card
+                link="ui-input.html"
+                heading="Input"
+                meta="&lt;ui-input&gt;"
+                description="An input is a field used to elicit a response from a person."
+              ></ui-card>
+              <ui-card
+                link="ui-property-editor.html#ui-property"
+                heading="Property"
+                meta="&lt;ui-property&gt;"
+                description="A property is one field of a property editor:  its label, tip, choices and rules come from the editor&#39;s schema."
+                extra="In progress"
+              ></ui-card>
+              <ui-card
+                link="ui-property-editor.html"
+                heading="Property editor"
+                meta="&lt;ui-property-editor&gt;"
+                description="A property editor draws a form from a schema:  one field per property, in folding groups, for one thing or many."
+                extra="In progress"
+              ></ui-card>
+              <ui-card
+                link="ui-property-editor.html#ui-property-group"
+                heading="Property group"
+                meta="&lt;ui-property-group&gt;"
+                description="A property group is a band of properties that opens and closes, in a property editor.  It takes &lt;ui-section&gt;&#39;s attributes."
+                extra="In progress"
+              ></ui-card>
+              <ui-card
+                link="ui-radio.html"
+                heading="Radio"
+                meta="&lt;ui-radio&gt;"
+                description="A radio button chooses exactly one value of a group."
+              ></ui-card>
+              <ui-card
+                link="ui-rating.html"
+                heading="Rating"
+                meta="&lt;ui-rating&gt;"
+                description="A rating indicates people&#39;s interest in content."
+              ></ui-card>
+              <ui-card
+                link="ui-form.html#ui-repeat"
+                heading="Repeat"
+                meta="&lt;ui-repeat&gt;"
+                description="A repeat shows its fields once per item of a list, each row bound to its own item."
+              ></ui-card>
+              <ui-card
+                link="ui-search.html"
+                heading="Search"
+                meta="&lt;ui-search&gt;"
+                description="A search module lets people query for results from a selection of data."
+              ></ui-card>
+              <ui-card
+                link="ui-select.html"
+                heading="Select"
+                meta="&lt;ui-select&gt;"
+                description="A select lets people choose one or more values from a native list of options."
+              ></ui-card>
+              <ui-card
+                link="ui-slider.html"
+                heading="Slider"
+                meta="&lt;ui-slider&gt;"
+                description="A slider lets people select values within a range."
+              ></ui-card>
+              <ui-card
+                link="ui-textarea.html"
+                heading="Textarea"
+                meta="&lt;ui-textarea&gt;"
+                description="A textarea is a multi-line field used to elicit a longer response."
+              ></ui-card>
+              <ui-card
+                link="ui-theme-editor.html"
+                heading="Theme editor"
+                meta="&lt;ui-theme-editor&gt;"
+                description="A theme editor makes a theme from an existing one:  pick its colours, fonts and shapes, watch real elements follow in light and dark, then copy the stylesheet or keep it in the browser."
+                extra="In progress"
+              ></ui-card>
+            </ui-cards>
+          </ui-section>
+
+          <ui-section id="inputs" label="Inputs" sticky collapsible dividing>
+            <ui-cards>
+              <ui-card
+                link="ui-calendar.html"
+                heading="Calendar"
+                meta="&lt;ui-calendar&gt;"
+                description="A calendar lets a person pick a date, a time, or both."
+              ></ui-card>
+              <ui-card
+                link="ui-checkbox.html"
+                heading="Checkbox"
+                meta="&lt;ui-checkbox&gt;"
+                description="A checkbox lets people choose a value from a small set of options, often on or off."
+              ></ui-card>
+              <ui-card
+                link="ui-dropdown.html"
+                heading="Dropdown"
+                meta="&lt;ui-dropdown&gt;"
+                description="A dropdown lets people choose a value from a series of options."
+              ></ui-card>
+              <ui-card
+                link="ui-form.html#ui-field"
+                heading="Field"
+                meta="&lt;ui-field&gt;"
+                description="A field is a form element containing a label and an input, with a hint, a tip and its errors."
+              ></ui-card>
+              <ui-card
+                link="ui-form.html"
+                heading="Form"
+                meta="&lt;ui-form&gt;"
+                description="A form displays a set of related input fields in a structured way."
+              ></ui-card>
+              <ui-card
+                link="ui-icon-picker.html"
+                heading="Icon picker"
+                meta="&lt;ui-icon-picker&gt;"
+                description="An icon picker lets people choose an icon by searching for it and clicking its glyph."
+              ></ui-card>
+              <ui-card
+                link="ui-input.html"
+                heading="Input"
+                meta="&lt;ui-input&gt;"
+                description="An input is a field used to elicit a response from a person."
+              ></ui-card>
+              <ui-card
+                link="ui-property-editor.html#ui-property"
+                heading="Property"
+                meta="&lt;ui-property&gt;"
+                description="A property is one field of a property editor:  its label, tip, choices and rules come from the editor&#39;s schema."
+                extra="In progress"
+              ></ui-card>
+              <ui-card
+                link="ui-property-editor.html"
+                heading="Property editor"
+                meta="&lt;ui-property-editor&gt;"
+                description="A property editor draws a form from a schema:  one field per property, in folding groups, for one thing or many."
+                extra="In progress"
+              ></ui-card>
+              <ui-card
+                link="ui-radio.html"
+                heading="Radio"
+                meta="&lt;ui-radio&gt;"
+                description="A radio button chooses exactly one value of a group."
+              ></ui-card>
+              <ui-card
+                link="ui-rating.html"
+                heading="Rating"
+                meta="&lt;ui-rating&gt;"
+                description="A rating indicates people&#39;s interest in content."
+              ></ui-card>
+              <ui-card
+                link="ui-search.html"
+                heading="Search"
+                meta="&lt;ui-search&gt;"
+                description="A search module lets people query for results from a selection of data."
+              ></ui-card>
+              <ui-card
+                link="ui-select.html"
+                heading="Select"
+                meta="&lt;ui-select&gt;"
+                description="A select lets people choose one or more values from a native list of options."
+              ></ui-card>
+              <ui-card
+                link="ui-slider.html"
+                heading="Slider"
+                meta="&lt;ui-slider&gt;"
+                description="A slider lets people select values within a range."
+              ></ui-card>
+              <ui-card
+                link="ui-textarea.html"
+                heading="Textarea"
+                meta="&lt;ui-textarea&gt;"
+                description="A textarea is a multi-line field used to elicit a longer response."
+              ></ui-card>
+            </ui-cards>
+          </ui-section>
+
+          <ui-section id="controls" label="Controls" sticky collapsible dividing>
+            <ui-cards>
+              <ui-card
+                link="ui-action.html"
+                heading="Action"
+                meta="&lt;ui-action&gt;"
+                description="A menu item or toolbar button drawn from an action:  its title, icon and shortcut keys."
+              ></ui-card>
+              <ui-card
+                link="ui-button.html"
+                heading="Button"
+                meta="&lt;ui-button&gt;"
+                description="A button indicates a possible action."
+              ></ui-card>
+              <ui-card
+                link="ui-button.html#ui-buttons"
+                heading="Buttons"
+                meta="&lt;ui-buttons&gt;"
+                description="Buttons can exist together as a group."
+              ></ui-card>
+              <ui-card
+                link="ui-calendar.html"
+                heading="Calendar"
+                meta="&lt;ui-calendar&gt;"
+                description="A calendar lets a person pick a date, a time, or both."
+              ></ui-card>
+              <ui-card
+                link="ui-checkbox.html"
+                heading="Checkbox"
+                meta="&lt;ui-checkbox&gt;"
+                description="A checkbox lets people choose a value from a small set of options, often on or off."
+              ></ui-card>
+              <ui-card
+                link="ui-dropdown.html"
+                heading="Dropdown"
+                meta="&lt;ui-dropdown&gt;"
+                description="A dropdown lets people choose a value from a series of options."
+              ></ui-card>
+              <ui-card
+                link="ui-icon-picker.html"
+                heading="Icon picker"
+                meta="&lt;ui-icon-picker&gt;"
+                description="An icon picker lets people choose an icon by searching for it and clicking its glyph."
+              ></ui-card>
+              <ui-card
+                link="ui-input.html"
+                heading="Input"
+                meta="&lt;ui-input&gt;"
+                description="An input is a field used to elicit a response from a person."
+              ></ui-card>
+              <ui-card
+                link="ui-button.html#ui-or"
+                heading="Or"
+                meta="&lt;ui-or&gt;"
+                description="A conditional between two buttons of a group."
+              ></ui-card>
+              <ui-card
+                link="ui-radio.html"
+                heading="Radio"
+                meta="&lt;ui-radio&gt;"
+                description="A radio button chooses exactly one value of a group."
+              ></ui-card>
+              <ui-card
+                link="ui-rating.html"
+                heading="Rating"
+                meta="&lt;ui-rating&gt;"
+                description="A rating indicates people&#39;s interest in content."
+              ></ui-card>
+              <ui-card
+                link="ui-select.html"
+                heading="Select"
+                meta="&lt;ui-select&gt;"
+                description="A select lets people choose one or more values from a native list of options."
+              ></ui-card>
+              <ui-card
+                link="ui-slider.html"
+                heading="Slider"
+                meta="&lt;ui-slider&gt;"
+                description="A slider lets people select values within a range."
+              ></ui-card>
+              <ui-card
+                link="ui-theme-editor.html"
+                heading="Theme editor"
+                meta="&lt;ui-theme-editor&gt;"
+                description="A theme editor makes a theme from an existing one:  pick its colours, fonts and shapes, watch real elements follow in light and dark, then copy the stylesheet or keep it in the browser."
+                extra="In progress"
+              ></ui-card>
+              <ui-card
+                link="ui-theme-menu.html"
+                heading="Theme menu"
+                meta="&lt;ui-theme-menu&gt;"
+                description="A theme menu switches the page between light and dark, and picks its theme from Spell&#39;s own, and remembers both for the next page."
+              ></ui-card>
+            </ui-cards>
+          </ui-section>
+
+          <ui-section id="buttons" label="Buttons" sticky collapsible dividing>
+            <ui-cards>
+              <ui-card
+                link="ui-action.html"
+                heading="Action"
+                meta="&lt;ui-action&gt;"
+                description="A menu item or toolbar button drawn from an action:  its title, icon and shortcut keys."
+              ></ui-card>
+              <ui-card
+                link="ui-actions.html"
+                heading="Actions"
+                meta="&lt;ui-actions&gt;"
+                description="Actions a person can take:  a modal&#39;s or toast&#39;s buttons, a comment&#39;s reply links."
+              ></ui-card>
+              <ui-card
+                link="ui-button.html"
+                heading="Button"
+                meta="&lt;ui-button&gt;"
+                description="A button indicates a possible action."
+              ></ui-card>
+              <ui-card
+                link="ui-button.html#ui-buttons"
+                heading="Buttons"
+                meta="&lt;ui-buttons&gt;"
+                description="Buttons can exist together as a group."
+              ></ui-card>
+              <ui-card
+                link="ui-button.html#ui-or"
+                heading="Or"
+                meta="&lt;ui-or&gt;"
+                description="A conditional between two buttons of a group."
+              ></ui-card>
+            </ui-cards>
+          </ui-section>
+
+          <ui-section id="selection" label="Selection" sticky collapsible dividing>
+            <ui-cards>
+              <ui-card
+                link="ui-checkbox.html"
+                heading="Checkbox"
+                meta="&lt;ui-checkbox&gt;"
+                description="A checkbox lets people choose a value from a small set of options, often on or off."
+              ></ui-card>
+              <ui-card
+                link="ui-dropdown.html"
+                heading="Dropdown"
+                meta="&lt;ui-dropdown&gt;"
+                description="A dropdown lets people choose a value from a series of options."
+              ></ui-card>
+              <ui-card
+                link="ui-icon-picker.html"
+                heading="Icon picker"
+                meta="&lt;ui-icon-picker&gt;"
+                description="An icon picker lets people choose an icon by searching for it and clicking its glyph."
+              ></ui-card>
+              <ui-card
+                link="ui-radio.html"
+                heading="Radio"
+                meta="&lt;ui-radio&gt;"
+                description="A radio button chooses exactly one value of a group."
+              ></ui-card>
+              <ui-card
+                link="ui-search.html"
+                heading="Search"
+                meta="&lt;ui-search&gt;"
+                description="A search module lets people query for results from a selection of data."
+              ></ui-card>
+              <ui-card
+                link="ui-select.html"
+                heading="Select"
+                meta="&lt;ui-select&gt;"
+                description="A select lets people choose one or more values from a native list of options."
+              ></ui-card>
+              <ui-card
+                link="ui-theme-menu.html"
+                heading="Theme menu"
+                meta="&lt;ui-theme-menu&gt;"
+                description="A theme menu switches the page between light and dark, and picks its theme from Spell&#39;s own, and remembers both for the next page."
+              ></ui-card>
+            </ui-cards>
+          </ui-section>
+
+          <ui-section id="date-time" label="Date &amp; time" sticky collapsible dividing>
+            <ui-cards>
+              <ui-card
+                link="ui-calendar.html"
+                heading="Calendar"
+                meta="&lt;ui-calendar&gt;"
+                description="A calendar lets a person pick a date, a time, or both."
+              ></ui-card>
+              <ui-card
+                link="ui-date.html"
+                heading="Date"
+                meta="&lt;ui-date&gt;"
+                description="When something happened;  inline and small inside a summary."
+              ></ui-card>
+            </ui-cards>
+          </ui-section>
+
+          <ui-section id="text" label="Text" sticky collapsible dividing>
+            <ui-cards>
+              <ui-card
+                link="ui-code.html"
+                heading="Code"
+                meta="&lt;ui-code&gt;"
+                description="Code shows a block of source code coloured by its language, from the element&#39;s own text or a file on this site."
+              ></ui-card>
+              <ui-card
+                link="ui-description.html"
+                heading="Description"
+                meta="&lt;ui-description&gt;"
+                description="A description of the content:  card / item / modal / list / step / search text, a comment&#39;s text."
+              ></ui-card>
+              <ui-card
+                link="ui-detail.html"
+                heading="Detail"
+                meta="&lt;ui-detail&gt;"
+                description="A label&#39;s dimmer second value, e.g. a count."
+              ></ui-card>
+              <ui-card
+                link="ui-emoji.html"
+                heading="Emoji"
+                meta="&lt;ui-emoji&gt;"
+                description="An emoji is a glyph used to represent something else."
+              ></ui-card>
+              <ui-card
+                link="ui-header.html"
+                heading="Header"
+                meta="&lt;ui-header&gt;"
+                description="A header provides a short summary of content."
+              ></ui-card>
+              <ui-card
+                link="ui-input.html"
+                heading="Input"
+                meta="&lt;ui-input&gt;"
+                description="An input is a field used to elicit a response from a person."
+              ></ui-card>
+              <ui-card
+                link="ui-keys.html"
+                heading="Keys"
+                meta="&lt;ui-keys&gt;"
+                description="Keys show a keyboard shortcut as key caps, the way the reader&#39;s own keyboard writes it."
+              ></ui-card>
+              <ui-card
+                link="ui-label.html"
+                heading="Label"
+                meta="&lt;ui-label&gt;"
+                description="A label displays content classification."
+              ></ui-card>
+              <ui-card
+                link="ui-text.html#ui-link"
+                heading="Link"
+                meta="&lt;ui-link&gt;"
+                description="A link takes the reader somewhere else from inside a sentence."
+              ></ui-card>
+              <ui-card
+                link="ui-markdown.html"
+                heading="Markdown"
+                meta="&lt;ui-markdown&gt;"
+                description="Markdown renders GitHub-flavoured markdown -- tables, task lists, code blocks -- from the element&#39;s own text or a file on this site."
+              ></ui-card>
+              <ui-card
+                link="ui-meta.html"
+                heading="Meta"
+                meta="&lt;ui-meta&gt;"
+                description="Metadata about the content, e.g. a date or a category;  a comment&#39;s metadata."
+              ></ui-card>
+              <ui-card
+                link="ui-quote.html"
+                heading="Quote"
+                meta="&lt;ui-quote&gt;"
+                description="A quote holds someone else&#39;s words:  a block of its own, or a few words inside a sentence."
+              ></ui-card>
+              <ui-card
+                link="ui-statistic.html"
+                heading="Statistic"
+                meta="&lt;ui-statistic&gt;"
+                description="A statistic emphasizes the current value of an attribute."
+              ></ui-card>
+              <ui-card
+                link="ui-terms.html#ui-term"
+                heading="Term"
+                meta="&lt;ui-term&gt;"
+                description="A term is one fact:  a label, and its value."
+              ></ui-card>
+              <ui-card
+                link="ui-terms.html"
+                heading="Terms"
+                meta="&lt;ui-terms&gt;"
+                description="Terms list facts as a label and a value each, lined up:  Suit hearts, Rank queen."
+              ></ui-card>
+              <ui-card
+                link="ui-text.html"
+                heading="Text"
+                meta="&lt;ui-text&gt;"
+                description="A text is used to style some inline text with a simple color, or to hold a paragraph."
+              ></ui-card>
+              <ui-card
+                link="ui-textarea.html"
+                heading="Textarea"
+                meta="&lt;ui-textarea&gt;"
+                description="A textarea is a multi-line field used to elicit a longer response."
+              ></ui-card>
+            </ui-cards>
+          </ui-section>
+
+          <ui-section id="typography" label="Typography" sticky collapsible dividing>
+            <ui-cards>
+              <ui-card
+                link="ui-code.html"
+                heading="Code"
+                meta="&lt;ui-code&gt;"
+                description="Code shows a block of source code coloured by its language, from the element&#39;s own text or a file on this site."
+              ></ui-card>
+              <ui-card
+                link="ui-divider.html"
+                heading="Divider"
+                meta="&lt;ui-divider&gt;"
+                description="A divider visually segments content into groups."
+              ></ui-card>
+              <ui-card
+                link="ui-header.html"
+                heading="Header"
+                meta="&lt;ui-header&gt;"
+                description="A header provides a short summary of content."
+              ></ui-card>
+              <ui-card
+                link="ui-keys.html"
+                heading="Keys"
+                meta="&lt;ui-keys&gt;"
+                description="Keys show a keyboard shortcut as key caps, the way the reader&#39;s own keyboard writes it."
+              ></ui-card>
+              <ui-card
+                link="ui-list.html"
+                heading="List"
+                meta="&lt;ui-list&gt;"
+                description="A list groups related content."
+              ></ui-card>
+              <ui-card
+                link="ui-markdown.html"
+                heading="Markdown"
+                meta="&lt;ui-markdown&gt;"
+                description="Markdown renders GitHub-flavoured markdown -- tables, task lists, code blocks -- from the element&#39;s own text or a file on this site."
+              ></ui-card>
+              <ui-card
+                link="ui-quote.html"
+                heading="Quote"
+                meta="&lt;ui-quote&gt;"
+                description="A quote holds someone else&#39;s words:  a block of its own, or a few words inside a sentence."
+              ></ui-card>
+              <ui-card
+                link="ui-text.html"
+                heading="Text"
+                meta="&lt;ui-text&gt;"
+                description="A text is used to style some inline text with a simple color, or to hold a paragraph."
+              ></ui-card>
+              <ui-card
+                link="ui-theme-editor.html"
+                heading="Theme editor"
+                meta="&lt;ui-theme-editor&gt;"
+                description="A theme editor makes a theme from an existing one:  pick its colours, fonts and shapes, watch real elements follow in light and dark, then copy the stylesheet or keep it in the browser."
+                extra="In progress"
+              ></ui-card>
+              <ui-card
+                link="ui-title.html"
+                heading="Title"
+                meta="&lt;ui-title&gt;"
+                description="A title:  a step&#39;s, an accordion panel&#39;s, a search result&#39;s."
+              ></ui-card>
+            </ui-cards>
+          </ui-section>
+
+          <ui-section id="media" label="Media" sticky collapsible dividing>
+            <ui-cards>
+              <ui-card
+                link="ui-ad.html"
+                heading="Ad"
+                meta="&lt;ui-ad&gt;"
+                description="An ad displays third-party promotional content."
+              ></ui-card>
+              <ui-card
+                link="ui-audio.html"
+                heading="Audio"
+                meta="&lt;ui-audio&gt;"
+                description="An audio plays a sound file:  in the browser&#39;s own player, or unseen, when the page says."
+              ></ui-card>
+              <ui-card
+                link="ui-embed.html"
+                heading="Embed"
+                meta="&lt;ui-embed&gt;"
+                description="An embed displays content from other websites, like YouTube videos, loaded only when asked for."
+              ></ui-card>
+              <ui-card
+                link="ui-emoji.html"
+                heading="Emoji"
+                meta="&lt;ui-emoji&gt;"
+                description="An emoji is a glyph used to represent something else."
+              ></ui-card>
+              <ui-card
+                link="ui-image.html"
+                heading="Image"
+                meta="&lt;ui-image&gt;"
+                description="An image is a graphic representation of something."
+              ></ui-card>
+              <ui-card
+                link="ui-image.html#ui-images"
+                heading="Images"
+                meta="&lt;ui-images&gt;"
+                description="A group of images can be formatted together."
+              ></ui-card>
+              <ui-card
+                link="ui-reveal.html"
+                heading="Reveal"
+                meta="&lt;ui-reveal&gt;"
+                description="A reveal displays additional content in place of previous content when activated."
+              ></ui-card>
+              <ui-card
+                link="ui-shape.html"
+                heading="Shape"
+                meta="&lt;ui-shape&gt;"
+                description="A shape is a three dimensional object displayed on a two dimensional plane."
+              ></ui-card>
+              <ui-card
+                link="ui-video.html"
+                heading="Video"
+                meta="&lt;ui-video&gt;"
+                description="A video plays a video file in the browser&#39;s own player."
+              ></ui-card>
+              <ui-card
+                link="ui-visibility.html"
+                heading="Visibility"
+                meta="&lt;ui-visibility&gt;"
+                description="Visibility provides a set of callbacks for when content appears in the viewport."
+              ></ui-card>
+              <ui-card
+                link="ui-zoom.html"
+                heading="Zoom"
+                meta="&lt;ui-zoom&gt;"
+                description="A zoom shows something full size, over the page.  Round any content it shows it shrunk, within a width and height, and full size on a click;  with src it shows that image full size.  Escape, a click outside it or its close button close it."
+              ></ui-card>
+            </ui-cards>
+          </ui-section>
+
+          <ui-section id="images" label="Images" sticky collapsible dividing>
+            <ui-cards>
+              <ui-card
+                link="ui-avatar.html"
+                heading="Avatar"
+                meta="&lt;ui-avatar&gt;"
+                description="A small picture of a person:  a comment&#39;s or a card&#39;s."
+              ></ui-card>
+              <ui-card
+                link="ui-flag.html"
+                heading="Flag"
+                meta="&lt;ui-flag&gt;"
+                description="A flag is used to represent a political state."
+              ></ui-card>
+              <ui-card
+                link="ui-icon.html"
+                heading="Icon"
+                meta="&lt;ui-icon&gt;"
+                description="An icon is a glyph used to represent something else."
+              ></ui-card>
+              <ui-card
+                link="ui-image.html"
+                heading="Image"
+                meta="&lt;ui-image&gt;"
+                description="An image is a graphic representation of something."
+              ></ui-card>
+              <ui-card
+                link="ui-image.html#ui-images"
+                heading="Images"
+                meta="&lt;ui-images&gt;"
+                description="A group of images can be formatted together."
+              ></ui-card>
+              <ui-card
+                link="ui-placeholder.html#ui-placeholder-image"
+                heading="Placeholder image"
+                meta="&lt;ui-placeholder-image&gt;"
+                description="The skeleton of an image:  a block of fixed height, or of a fixed aspect ratio."
+              ></ui-card>
+              <ui-card
+                link="ui-reveal.html"
+                heading="Reveal"
+                meta="&lt;ui-reveal&gt;"
+                description="A reveal displays additional content in place of previous content when activated."
+              ></ui-card>
+              <ui-card
+                link="ui-tree-diagram.html"
+                heading="Tree diagram"
+                meta="&lt;ui-tree-diagram&gt;"
+                description="A tree diagram draws a tree top-down:  a box for each node, a line to each of its children."
+              ></ui-card>
+              <ui-card
+                link="ui-zoom.html"
+                heading="Zoom"
+                meta="&lt;ui-zoom&gt;"
+                description="A zoom shows something full size, over the page.  Round any content it shows it shrunk, within a width and height, and full size on a click;  with src it shows that image full size.  Escape, a click outside it or its close button close it."
+              ></ui-card>
+            </ui-cards>
+          </ui-section>
+
+          <ui-section id="icons" label="Icons" sticky collapsible dividing>
+            <ui-cards>
+              <ui-card
+                link="ui-emoji.html"
+                heading="Emoji"
+                meta="&lt;ui-emoji&gt;"
+                description="An emoji is a glyph used to represent something else."
+              ></ui-card>
+              <ui-card
+                link="ui-flag.html"
+                heading="Flag"
+                meta="&lt;ui-flag&gt;"
+                description="A flag is used to represent a political state."
+              ></ui-card>
+              <ui-card
+                link="ui-icon.html"
+                heading="Icon"
+                meta="&lt;ui-icon&gt;"
+                description="An icon is a glyph used to represent something else."
+              ></ui-card>
+              <ui-card
+                link="ui-icon-picker.html"
+                heading="Icon picker"
+                meta="&lt;ui-icon-picker&gt;"
+                description="An icon picker lets people choose an icon by searching for it and clicking its glyph."
+              ></ui-card>
+              <ui-card
+                link="ui-icon.html#ui-icons"
+                heading="Icons"
+                meta="&lt;ui-icons&gt;"
+                description="Several icons can be used together as a group."
+              ></ui-card>
+            </ui-cards>
+          </ui-section>
+
+          <ui-section id="data-display" label="Data display" sticky collapsible dividing>
+            <ui-cards>
+              <ui-card
+                link="ui-accordion.html"
+                heading="Accordion"
+                meta="&lt;ui-accordion&gt;"
+                description="An accordion lets people show and hide sections of content."
+              ></ui-card>
+              <ui-card
+                link="ui-card.html"
+                heading="Card"
+                meta="&lt;ui-card&gt;"
+                description="A card displays site content in a manner similar to a playing card."
+              ></ui-card>
+              <ui-card
+                link="ui-code.html"
+                heading="Code"
+                meta="&lt;ui-code&gt;"
+                description="Code shows a block of source code coloured by its language, from the element&#39;s own text or a file on this site."
+              ></ui-card>
+              <ui-card
+                link="ui-comment.html#ui-comments"
+                heading="Comments"
+                meta="&lt;ui-comments&gt;"
+                description="A list of comments, or the thread of replies to one."
+              ></ui-card>
+              <ui-card
+                link="ui-example.html"
+                heading="Example"
+                meta="&lt;ui-example&gt;"
+                description="An example shows its own markup live, under a heading and description, with the same markup as code a button shows and hides."
+              ></ui-card>
+              <ui-card
+                link="ui-feed.html"
+                heading="Feed"
+                meta="&lt;ui-feed&gt;"
+                description="A feed presents people&#39;s activity chronologically."
+              ></ui-card>
+              <ui-card
+                link="ui-item.html"
+                heading="Item"
+                meta="&lt;ui-item&gt;"
+                description="An item of a dropdown, list, menu or Items view."
+              ></ui-card>
+              <ui-card
+                link="ui-items.html"
+                heading="Items"
+                meta="&lt;ui-items&gt;"
+                description="A group of items:  site content, each an image beside its header, meta, description and extra."
+              ></ui-card>
+              <ui-card
+                link="ui-list.html"
+                heading="List"
+                meta="&lt;ui-list&gt;"
+                description="A list groups related content."
+              ></ui-card>
+              <ui-card
+                link="ui-markdown.html"
+                heading="Markdown"
+                meta="&lt;ui-markdown&gt;"
+                description="Markdown renders GitHub-flavoured markdown -- tables, task lists, code blocks -- from the element&#39;s own text or a file on this site."
+              ></ui-card>
+              <ui-card
+                link="ui-statistic.html"
+                heading="Statistic"
+                meta="&lt;ui-statistic&gt;"
+                description="A statistic emphasizes the current value of an attribute."
+              ></ui-card>
+              <ui-card
+                link="ui-statistic.html#ui-statistics"
+                heading="Statistics"
+                meta="&lt;ui-statistics&gt;"
+                description="A group of statistics."
+              ></ui-card>
+              <ui-card
+                link="ui-table.html"
+                heading="Table"
+                meta="&lt;ui-table&gt;"
+                description="A table displays a collection of data grouped into rows."
+              ></ui-card>
+              <ui-card
+                link="ui-terms.html#ui-term"
+                heading="Term"
+                meta="&lt;ui-term&gt;"
+                description="A term is one fact:  a label, and its value."
+              ></ui-card>
+              <ui-card
+                link="ui-terms.html"
+                heading="Terms"
+                meta="&lt;ui-terms&gt;"
+                description="Terms list facts as a label and a value each, lined up:  Suit hearts, Rank queen."
+              ></ui-card>
+              <ui-card
+                link="ui-tree-diagram.html"
+                heading="Tree diagram"
+                meta="&lt;ui-tree-diagram&gt;"
+                description="A tree diagram draws a tree top-down:  a box for each node, a line to each of its children."
+              ></ui-card>
+              <ui-card
+                link="ui-value.html"
+                heading="Value"
+                meta="&lt;ui-value&gt;"
+                description="A statistic&#39;s value;  a search result&#39;s price."
+              ></ui-card>
+            </ui-cards>
+          </ui-section>
+
+          <ui-section id="lists" label="Lists" sticky collapsible dividing>
+            <ui-cards>
+              <ui-card
+                link="ui-card.html#ui-cards"
+                heading="Cards"
+                meta="&lt;ui-cards&gt;"
+                description="A group of cards, laid out in a wrapping row."
+              ></ui-card>
+              <ui-card
+                link="ui-comment.html#ui-comments"
+                heading="Comments"
+                meta="&lt;ui-comments&gt;"
+                description="A list of comments, or the thread of replies to one."
+              ></ui-card>
+              <ui-card
+                link="ui-feed.html"
+                heading="Feed"
+                meta="&lt;ui-feed&gt;"
+                description="A feed presents people&#39;s activity chronologically."
+              ></ui-card>
+              <ui-card
+                link="ui-item.html"
+                heading="Item"
+                meta="&lt;ui-item&gt;"
+                description="An item of a dropdown, list, menu or Items view."
+              ></ui-card>
+              <ui-card
+                link="ui-items.html"
+                heading="Items"
+                meta="&lt;ui-items&gt;"
+                description="A group of items:  site content, each an image beside its header, meta, description and extra."
+              ></ui-card>
+              <ui-card
+                link="ui-label.html#ui-labels"
+                heading="Labels"
+                meta="&lt;ui-labels&gt;"
+                description="Labels can be grouped to share a look."
+              ></ui-card>
+              <ui-card
+                link="ui-list.html"
+                heading="List"
+                meta="&lt;ui-list&gt;"
+                description="A list groups related content."
+              ></ui-card>
+              <ui-card
+                link="ui-form.html#ui-repeat"
+                heading="Repeat"
+                meta="&lt;ui-repeat&gt;"
+                description="A repeat shows its fields once per item of a list, each row bound to its own item."
+              ></ui-card>
+            </ui-cards>
+          </ui-section>
+
+          <ui-section id="tables" label="Tables" sticky collapsible dividing>
+            <ui-cards>
+              <ui-card
+                link="ui-table.html#ui-cell"
+                heading="Cell"
+                meta="&lt;ui-cell&gt;"
+                description="A cell holds one value of a table row;  a header cell names its column or row."
+              ></ui-card>
+              <ui-card
+                link="ui-table.html"
+                heading="Table"
+                meta="&lt;ui-table&gt;"
+                description="A table displays a collection of data grouped into rows."
+              ></ui-card>
+            </ui-cards>
+          </ui-section>
+
+          <ui-section id="cards" label="Cards" sticky collapsible dividing>
+            <ui-cards>
+              <ui-card
+                link="ui-card.html"
+                heading="Card"
+                meta="&lt;ui-card&gt;"
+                description="A card displays site content in a manner similar to a playing card."
+              ></ui-card>
+              <ui-card
+                link="ui-card.html#ui-cards"
+                heading="Cards"
+                meta="&lt;ui-cards&gt;"
+                description="A group of cards, laid out in a wrapping row."
+              ></ui-card>
+              <ui-card
+                link="ui-content.html"
+                heading="Content"
+                meta="&lt;ui-content&gt;"
+                description="The main content block of a card, item, event, comment, modal, message, list item, step ..."
+              ></ui-card>
+              <ui-card
+                link="ui-extra.html"
+                heading="Extra"
+                meta="&lt;ui-extra&gt;"
+                description="Extra content, set apart from the main content, e.g. a card&#39;s footer."
+              ></ui-card>
+            </ui-cards>
+          </ui-section>
+
+          <ui-section id="feedback" label="Feedback" sticky collapsible dividing>
+            <ui-cards>
+              <ui-card
+                link="ui-dimmer.html"
+                heading="Dimmer"
+                meta="&lt;ui-dimmer&gt;"
+                description="A dimmer hides distractions to focus attention on particular content."
+              ></ui-card>
+              <ui-card
+                link="ui-loader.html"
+                heading="Loader"
+                meta="&lt;ui-loader&gt;"
+                description="A loader tells people to wait for an activity to complete."
+              ></ui-card>
+              <ui-card
+                link="ui-message.html"
+                heading="Message"
+                meta="&lt;ui-message&gt;"
+                description="A message displays information that explains nearby content."
+              ></ui-card>
+              <ui-card
+                link="ui-placeholder.html"
+                heading="Placeholder"
+                meta="&lt;ui-placeholder&gt;"
+                description="A placeholder is used to reserve space for content that soon will appear in a layout."
+              ></ui-card>
+              <ui-card
+                link="ui-popup.html"
+                heading="Popup"
+                meta="&lt;ui-popup&gt;"
+                description="A popup displays additional information on top of a page."
+              ></ui-card>
+              <ui-card
+                link="ui-progress.html"
+                heading="Progress"
+                meta="&lt;ui-progress&gt;"
+                description="A progress bar shows the progression of a task."
+              ></ui-card>
+              <ui-card
+                link="ui-rating.html"
+                heading="Rating"
+                meta="&lt;ui-rating&gt;"
+                description="A rating indicates people&#39;s interest in content."
+              ></ui-card>
+              <ui-card
+                link="ui-toast.html"
+                heading="Toast"
+                meta="&lt;ui-toast&gt;"
+                description="A toast gives people a short, non-blocking notification."
+              ></ui-card>
+            </ui-cards>
+          </ui-section>
+
+          <ui-section id="messages" label="Messages" sticky collapsible dividing>
+            <ui-cards>
+              <ui-card
+                link="ui-message.html"
+                heading="Message"
+                meta="&lt;ui-message&gt;"
+                description="A message displays information that explains nearby content."
+              ></ui-card>
+              <ui-card
+                link="ui-nag.html"
+                heading="Nag"
+                meta="&lt;ui-nag&gt;"
+                description="A nag is a persistent message that stays until dismissed, and can remember the dismissal."
+              ></ui-card>
+              <ui-card
+                link="ui-toast.html"
+                heading="Toast"
+                meta="&lt;ui-toast&gt;"
+                description="A toast gives people a short, non-blocking notification."
+              ></ui-card>
+            </ui-cards>
+          </ui-section>
+
+          <ui-section id="notifications" label="Notifications" sticky collapsible dividing>
+            <ui-cards>
+              <ui-card
+                link="ui-message.html"
+                heading="Message"
+                meta="&lt;ui-message&gt;"
+                description="A message displays information that explains nearby content."
+              ></ui-card>
+              <ui-card
+                link="ui-nag.html"
+                heading="Nag"
+                meta="&lt;ui-nag&gt;"
+                description="A nag is a persistent message that stays until dismissed, and can remember the dismissal."
+              ></ui-card>
+              <ui-card
+                link="ui-toast.html"
+                heading="Toast"
+                meta="&lt;ui-toast&gt;"
+                description="A toast gives people a short, non-blocking notification."
+              ></ui-card>
+            </ui-cards>
+          </ui-section>
+
+          <ui-section id="overlays" label="Overlays" sticky collapsible dividing>
+            <ui-cards>
+              <ui-card
+                link="ui-dimmer.html"
+                heading="Dimmer"
+                meta="&lt;ui-dimmer&gt;"
+                description="A dimmer hides distractions to focus attention on particular content."
+              ></ui-card>
+              <ui-card
+                link="ui-flyout.html"
+                heading="Flyout"
+                meta="&lt;ui-flyout&gt;"
+                description="A flyout is a modal that slides in from a side of the page."
+              ></ui-card>
+              <ui-card
+                link="ui-modal.html"
+                heading="Modal"
+                meta="&lt;ui-modal&gt;"
+                description="A modal displays content that temporarily blocks interactions with the main view of a site."
+              ></ui-card>
+              <ui-card
+                link="ui-nag.html"
+                heading="Nag"
+                meta="&lt;ui-nag&gt;"
+                description="A nag is a persistent message that stays until dismissed, and can remember the dismissal."
+              ></ui-card>
+              <ui-card
+                link="ui-popup.html"
+                heading="Popup"
+                meta="&lt;ui-popup&gt;"
+                description="A popup displays additional information on top of a page."
+              ></ui-card>
+              <ui-card
+                link="ui-sidebar.html"
+                heading="Sidebar"
+                meta="&lt;ui-sidebar&gt;"
+                description="A sidebar hides additional content beside a page."
+              ></ui-card>
+              <ui-card
+                link="ui-toast.html"
+                heading="Toast"
+                meta="&lt;ui-toast&gt;"
+                description="A toast gives people a short, non-blocking notification."
+              ></ui-card>
+              <ui-card
+                link="ui-zoom.html"
+                heading="Zoom"
+                meta="&lt;ui-zoom&gt;"
+                description="A zoom shows something full size, over the page.  Round any content it shows it shrunk, within a width and height, and full size on a click;  with src it shows that image full size.  Escape, a click outside it or its close button close it."
+              ></ui-card>
+            </ui-cards>
+          </ui-section>
+
+          <ui-section id="dialogs" label="Dialogs" sticky collapsible dividing>
+            <ui-cards>
+              <ui-card
+                link="ui-actions.html"
+                heading="Actions"
+                meta="&lt;ui-actions&gt;"
+                description="Actions a person can take:  a modal&#39;s or toast&#39;s buttons, a comment&#39;s reply links."
+              ></ui-card>
+              <ui-card
+                link="ui-flyout.html"
+                heading="Flyout"
+                meta="&lt;ui-flyout&gt;"
+                description="A flyout is a modal that slides in from a side of the page."
+              ></ui-card>
+              <ui-card
+                link="ui-modal.html"
+                heading="Modal"
+                meta="&lt;ui-modal&gt;"
+                description="A modal displays content that temporarily blocks interactions with the main view of a site."
+              ></ui-card>
+            </ui-cards>
+          </ui-section>
+
+          <ui-section id="popups" label="Popups" sticky collapsible dividing>
+            <ui-cards>
+              <ui-card
+                link="ui-modal.html"
+                heading="Modal"
+                meta="&lt;ui-modal&gt;"
+                description="A modal displays content that temporarily blocks interactions with the main view of a site."
+              ></ui-card>
+              <ui-card
+                link="ui-popup.html"
+                heading="Popup"
+                meta="&lt;ui-popup&gt;"
+                description="A popup displays additional information on top of a page."
+              ></ui-card>
+            </ui-cards>
+          </ui-section>
+
+          <ui-section id="loading" label="Loading" sticky collapsible dividing>
+            <ui-cards>
+              <ui-card
+                link="ui-components.html"
+                heading="Components"
+                meta="&lt;ui-components&gt;"
+                description="Components name a pack of another package&#39;s elements, which the root around them loads on demand, once per page."
+              ></ui-card>
+              <ui-card
+                link="ui-dimmer.html"
+                heading="Dimmer"
+                meta="&lt;ui-dimmer&gt;"
+                description="A dimmer hides distractions to focus attention on particular content."
+              ></ui-card>
+              <ui-card
+                link="ui-loader.html"
+                heading="Loader"
+                meta="&lt;ui-loader&gt;"
+                description="A loader tells people to wait for an activity to complete."
+              ></ui-card>
+              <ui-card
+                link="ui-placeholder.html"
+                heading="Placeholder"
+                meta="&lt;ui-placeholder&gt;"
+                description="A placeholder is used to reserve space for content that soon will appear in a layout."
+              ></ui-card>
+              <ui-card
+                link="ui-placeholder.html#ui-placeholder-header"
+                heading="Placeholder header"
+                meta="&lt;ui-placeholder-header&gt;"
+                description="The skeleton of a header:  a block of taller, shorter lines, optionally beside an image."
+              ></ui-card>
+              <ui-card
+                link="ui-placeholder.html#ui-placeholder-image"
+                heading="Placeholder image"
+                meta="&lt;ui-placeholder-image&gt;"
+                description="The skeleton of an image:  a block of fixed height, or of a fixed aspect ratio."
+              ></ui-card>
+              <ui-card
+                link="ui-placeholder.html#ui-placeholder-line"
+                heading="Placeholder line"
+                meta="&lt;ui-placeholder-line&gt;"
+                description="One line of text&#39;s skeleton:  a bar."
+              ></ui-card>
+              <ui-card
+                link="ui-placeholder.html#ui-placeholder-paragraph"
+                heading="Placeholder paragraph"
+                meta="&lt;ui-placeholder-paragraph&gt;"
+                description="The skeleton of a paragraph:  a block of lines, of varied lengths unless set."
+              ></ui-card>
+              <ui-card
+                link="ui-progress.html"
+                heading="Progress"
+                meta="&lt;ui-progress&gt;"
+                description="A progress bar shows the progression of a task."
+              ></ui-card>
+              <ui-card
+                link="ui-root.html"
+                heading="Root"
+                meta="&lt;ui-root&gt;"
+                description="A root loads the components inside it on demand, sets their theme and size, and shows them once they&#39;re ready."
+              ></ui-card>
+            </ui-cards>
+          </ui-section>
+
+          <ui-section id="progress" label="Progress" sticky collapsible dividing>
+            <ui-cards>
+              <ui-card
+                link="ui-loader.html"
+                heading="Loader"
+                meta="&lt;ui-loader&gt;"
+                description="A loader tells people to wait for an activity to complete."
+              ></ui-card>
+              <ui-card
+                link="ui-progress.html"
+                heading="Progress"
+                meta="&lt;ui-progress&gt;"
+                description="A progress bar shows the progression of a task."
+              ></ui-card>
+              <ui-card
+                link="ui-step.html"
+                heading="Step"
+                meta="&lt;ui-step&gt;"
+                description="One step of a set of steps."
+              ></ui-card>
+              <ui-card
+                link="ui-step.html#ui-steps"
+                heading="Steps"
+                meta="&lt;ui-steps&gt;"
+                description="A set of steps shows the progress of an activity in a series of steps."
+              ></ui-card>
+            </ui-cards>
+          </ui-section>
+
+          <ui-section id="status" label="Status" sticky collapsible dividing>
+            <ui-cards>
+              <ui-card
+                link="ui-label.html"
+                heading="Label"
+                meta="&lt;ui-label&gt;"
+                description="A label displays content classification."
+              ></ui-card>
+              <ui-card
+                link="ui-label.html#ui-labels"
+                heading="Labels"
+                meta="&lt;ui-labels&gt;"
+                description="Labels can be grouped to share a look."
+              ></ui-card>
+              <ui-card
+                link="ui-message.html"
+                heading="Message"
+                meta="&lt;ui-message&gt;"
+                description="A message displays information that explains nearby content."
+              ></ui-card>
+              <ui-card
+                link="ui-progress.html"
+                heading="Progress"
+                meta="&lt;ui-progress&gt;"
+                description="A progress bar shows the progression of a task."
+              ></ui-card>
+              <ui-card
+                link="ui-step.html#ui-steps"
+                heading="Steps"
+                meta="&lt;ui-steps&gt;"
+                description="A set of steps shows the progress of an activity in a series of steps."
+              ></ui-card>
+            </ui-cards>
+          </ui-section>
+
+          <ui-section id="animation" label="Animation" sticky collapsible dividing>
+            <ui-cards>
+              <ui-card
+                link="ui-reveal.html"
+                heading="Reveal"
+                meta="&lt;ui-reveal&gt;"
+                description="A reveal displays additional content in place of previous content when activated."
+              ></ui-card>
+              <ui-card
+                link="ui-shape.html"
+                heading="Shape"
+                meta="&lt;ui-shape&gt;"
+                description="A shape is a three dimensional object displayed on a two dimensional plane."
+              ></ui-card>
+              <ui-card
+                link="ui-shape.html#ui-side"
+                heading="Side"
+                meta="&lt;ui-side&gt;"
+                description="One side of a shape."
+              ></ui-card>
+              <ui-card
+                link="ui-transition.html"
+                heading="Transition"
+                meta="&lt;ui-transition&gt;"
+                description="A transition is an animation used to show or hide content, or to draw attention to it."
+              ></ui-card>
+              <ui-card
+                link="ui-visibility.html"
+                heading="Visibility"
+                meta="&lt;ui-visibility&gt;"
+                description="Visibility provides a set of callbacks for when content appears in the viewport."
+              ></ui-card>
+            </ui-cards>
+          </ui-section>
+
+          <ui-section id="social" label="Social" sticky collapsible dividing>
+            <ui-cards>
+              <ui-card
+                link="ui-author.html"
+                heading="Author"
+                meta="&lt;ui-author&gt;"
+                description="Who wrote a comment or did a feed event (Fomantic&#39;s feed user)."
+              ></ui-card>
+              <ui-card
+                link="ui-avatar.html"
+                heading="Avatar"
+                meta="&lt;ui-avatar&gt;"
+                description="A small picture of a person:  a comment&#39;s or a card&#39;s."
+              ></ui-card>
+              <ui-card
+                link="ui-comment.html"
+                heading="Comment"
+                meta="&lt;ui-comment&gt;"
+                description="One comment:  who wrote it, when, what, and the replies to it."
+              ></ui-card>
+              <ui-card
+                link="ui-comment.html#ui-comments"
+                heading="Comments"
+                meta="&lt;ui-comments&gt;"
+                description="A list of comments, or the thread of replies to one."
+              ></ui-card>
+              <ui-card
+                link="ui-date.html"
+                heading="Date"
+                meta="&lt;ui-date&gt;"
+                description="When something happened;  inline and small inside a summary."
+              ></ui-card>
+              <ui-card
+                link="ui-feed.html#ui-event"
+                heading="Event"
+                meta="&lt;ui-event&gt;"
+                description="One event of a feed:  a label (a picture, an icon, a number) beside what happened."
+              ></ui-card>
+              <ui-card
+                link="ui-feed.html"
+                heading="Feed"
+                meta="&lt;ui-feed&gt;"
+                description="A feed presents people&#39;s activity chronologically."
+              ></ui-card>
+              <ui-card
+                link="ui-summary.html"
+                heading="Summary"
+                meta="&lt;ui-summary&gt;"
+                description="A feed event&#39;s summary line, e.g. who did what, with an inline date."
+              ></ui-card>
+            </ui-cards>
+          </ui-section>
+
+          <ui-section id="content-parts" label="Content parts" sticky collapsible dividing>
+            <ui-cards>
+              <ui-card
+                link="ui-actions.html"
+                heading="Actions"
+                meta="&lt;ui-actions&gt;"
+                description="Actions a person can take:  a modal&#39;s or toast&#39;s buttons, a comment&#39;s reply links."
+              ></ui-card>
+              <ui-card
+                link="ui-author.html"
+                heading="Author"
+                meta="&lt;ui-author&gt;"
+                description="Who wrote a comment or did a feed event (Fomantic&#39;s feed user)."
+              ></ui-card>
+              <ui-card
+                link="ui-avatar.html"
+                heading="Avatar"
+                meta="&lt;ui-avatar&gt;"
+                description="A small picture of a person:  a comment&#39;s or a card&#39;s."
+              ></ui-card>
+              <ui-card
+                link="ui-comment.html"
+                heading="Comment"
+                meta="&lt;ui-comment&gt;"
+                description="One comment:  who wrote it, when, what, and the replies to it."
+              ></ui-card>
+              <ui-card
+                link="ui-content.html"
+                heading="Content"
+                meta="&lt;ui-content&gt;"
+                description="The main content block of a card, item, event, comment, modal, message, list item, step ..."
+              ></ui-card>
+              <ui-card
+                link="ui-date.html"
+                heading="Date"
+                meta="&lt;ui-date&gt;"
+                description="When something happened;  inline and small inside a summary."
+              ></ui-card>
+              <ui-card
+                link="ui-description.html"
+                heading="Description"
+                meta="&lt;ui-description&gt;"
+                description="A description of the content:  card / item / modal / list / step / search text, a comment&#39;s text."
+              ></ui-card>
+              <ui-card
+                link="ui-detail.html"
+                heading="Detail"
+                meta="&lt;ui-detail&gt;"
+                description="A label&#39;s dimmer second value, e.g. a count."
+              ></ui-card>
+              <ui-card
+                link="ui-feed.html#ui-event"
+                heading="Event"
+                meta="&lt;ui-event&gt;"
+                description="One event of a feed:  a label (a picture, an icon, a number) beside what happened."
+              ></ui-card>
+              <ui-card
+                link="ui-extra.html"
+                heading="Extra"
+                meta="&lt;ui-extra&gt;"
+                description="Extra content, set apart from the main content, e.g. a card&#39;s footer."
+              ></ui-card>
+              <ui-card
+                link="ui-header.html"
+                heading="Header"
+                meta="&lt;ui-header&gt;"
+                description="A header provides a short summary of content."
+              ></ui-card>
+              <ui-card
+                link="ui-item.html"
+                heading="Item"
+                meta="&lt;ui-item&gt;"
+                description="An item of a dropdown, list, menu or Items view."
+              ></ui-card>
+              <ui-card
+                link="ui-meta.html"
+                heading="Meta"
+                meta="&lt;ui-meta&gt;"
+                description="Metadata about the content, e.g. a date or a category;  a comment&#39;s metadata."
+              ></ui-card>
+              <ui-card
+                link="ui-placeholder.html#ui-placeholder-header"
+                heading="Placeholder header"
+                meta="&lt;ui-placeholder-header&gt;"
+                description="The skeleton of a header:  a block of taller, shorter lines, optionally beside an image."
+              ></ui-card>
+              <ui-card
+                link="ui-placeholder.html#ui-placeholder-line"
+                heading="Placeholder line"
+                meta="&lt;ui-placeholder-line&gt;"
+                description="One line of text&#39;s skeleton:  a bar."
+              ></ui-card>
+              <ui-card
+                link="ui-placeholder.html#ui-placeholder-paragraph"
+                heading="Placeholder paragraph"
+                meta="&lt;ui-placeholder-paragraph&gt;"
+                description="The skeleton of a paragraph:  a block of lines, of varied lengths unless set."
+              ></ui-card>
+              <ui-card
+                link="ui-shape.html#ui-side"
+                heading="Side"
+                meta="&lt;ui-side&gt;"
+                description="One side of a shape."
+              ></ui-card>
+              <ui-card
+                link="ui-step.html"
+                heading="Step"
+                meta="&lt;ui-step&gt;"
+                description="One step of a set of steps."
+              ></ui-card>
+              <ui-card
+                link="ui-summary.html"
+                heading="Summary"
+                meta="&lt;ui-summary&gt;"
+                description="A feed event&#39;s summary line, e.g. who did what, with an inline date."
+              ></ui-card>
+              <ui-card
+                link="ui-tab.html"
+                heading="Tab"
+                meta="&lt;ui-tab&gt;"
+                description="A tab pane:  the content shown while its tab is selected."
+              ></ui-card>
+              <ui-card
+                link="ui-title.html"
+                heading="Title"
+                meta="&lt;ui-title&gt;"
+                description="A title:  a step&#39;s, an accordion panel&#39;s, a search result&#39;s."
+              ></ui-card>
+              <ui-card
+                link="ui-value.html"
+                heading="Value"
+                meta="&lt;ui-value&gt;"
+                description="A statistic&#39;s value;  a search result&#39;s price."
+              ></ui-card>
+            </ui-cards>
+          </ui-section>
+
+          <ui-section id="documentation" label="Documentation" sticky collapsible dividing>
+            <ui-cards>
+              <ui-card
+                link="ui-example.html"
+                heading="Example"
+                meta="&lt;ui-example&gt;"
+                description="An example shows its own markup live, under a heading and description, with the same markup as code a button shows and hides."
+              ></ui-card>
+              <ui-card
+                link="ui-toc.html"
+                heading="Toc"
+                meta="&lt;ui-toc&gt;"
+                description="A table of contents lists the page&#39;s sections and examples as links, opens the one in view and follows the scroll.  Each section folds and opens by its chevron, and one button in its header opens or folds them all;  the viewer&#39;s folds are kept."
+              ></ui-card>
+            </ui-cards>
+          </ui-section>
+
+          <ui-section id="elements" label="Elements" sticky collapsible dividing>
+            <ui-cards>
+              <ui-card
+                link="ui-audio.html"
+                heading="Audio"
+                meta="&lt;ui-audio&gt;"
+                description="An audio plays a sound file:  in the browser&#39;s own player, or unseen, when the page says."
+              ></ui-card>
+              <ui-card
+                link="ui-button.html"
+                heading="Button"
+                meta="&lt;ui-button&gt;"
+                description="A button indicates a possible action."
+              ></ui-card>
+              <ui-card
+                link="ui-button.html#ui-buttons"
+                heading="Buttons"
+                meta="&lt;ui-buttons&gt;"
+                description="Buttons can exist together as a group."
+              ></ui-card>
+              <ui-card
+                link="ui-container.html"
+                heading="Container"
+                meta="&lt;ui-container&gt;"
+                description="A container limits content to a maximum width."
+              ></ui-card>
+              <ui-card
+                link="ui-divider.html"
+                heading="Divider"
+                meta="&lt;ui-divider&gt;"
+                description="A divider visually segments content into groups."
+              ></ui-card>
+              <ui-card
+                link="ui-emoji.html"
+                heading="Emoji"
+                meta="&lt;ui-emoji&gt;"
+                description="An emoji is a glyph used to represent something else."
+              ></ui-card>
+              <ui-card
+                link="ui-flag.html"
+                heading="Flag"
+                meta="&lt;ui-flag&gt;"
+                description="A flag is used to represent a political state."
+              ></ui-card>
+              <ui-card
+                link="ui-header.html"
+                heading="Header"
+                meta="&lt;ui-header&gt;"
+                description="A header provides a short summary of content."
+              ></ui-card>
+              <ui-card
+                link="ui-icon.html"
+                heading="Icon"
+                meta="&lt;ui-icon&gt;"
+                description="An icon is a glyph used to represent something else."
+              ></ui-card>
+              <ui-card
+                link="ui-icon.html#ui-icons"
+                heading="Icons"
+                meta="&lt;ui-icons&gt;"
+                description="Several icons can be used together as a group."
+              ></ui-card>
+              <ui-card
+                link="ui-image.html"
+                heading="Image"
+                meta="&lt;ui-image&gt;"
+                description="An image is a graphic representation of something."
+              ></ui-card>
+              <ui-card
+                link="ui-image.html#ui-images"
+                heading="Images"
+                meta="&lt;ui-images&gt;"
+                description="A group of images can be formatted together."
+              ></ui-card>
+              <ui-card
+                link="ui-input.html"
+                heading="Input"
+                meta="&lt;ui-input&gt;"
+                description="An input is a field used to elicit a response from a person."
+              ></ui-card>
+              <ui-card
+                link="ui-label.html"
+                heading="Label"
+                meta="&lt;ui-label&gt;"
+                description="A label displays content classification."
+              ></ui-card>
+              <ui-card
+                link="ui-label.html#ui-labels"
+                heading="Labels"
+                meta="&lt;ui-labels&gt;"
+                description="Labels can be grouped to share a look."
+              ></ui-card>
+              <ui-card
+                link="ui-list.html"
+                heading="List"
+                meta="&lt;ui-list&gt;"
+                description="A list groups related content."
+              ></ui-card>
+              <ui-card
+                link="ui-loader.html"
+                heading="Loader"
+                meta="&lt;ui-loader&gt;"
+                description="A loader tells people to wait for an activity to complete."
+              ></ui-card>
+              <ui-card
+                link="ui-button.html#ui-or"
+                heading="Or"
+                meta="&lt;ui-or&gt;"
+                description="A conditional between two buttons of a group."
+              ></ui-card>
+              <ui-card
+                link="ui-placeholder.html"
+                heading="Placeholder"
+                meta="&lt;ui-placeholder&gt;"
+                description="A placeholder is used to reserve space for content that soon will appear in a layout."
+              ></ui-card>
+              <ui-card
+                link="ui-placeholder.html#ui-placeholder-header"
+                heading="Placeholder header"
+                meta="&lt;ui-placeholder-header&gt;"
+                description="The skeleton of a header:  a block of taller, shorter lines, optionally beside an image."
+              ></ui-card>
+              <ui-card
+                link="ui-placeholder.html#ui-placeholder-image"
+                heading="Placeholder image"
+                meta="&lt;ui-placeholder-image&gt;"
+                description="The skeleton of an image:  a block of fixed height, or of a fixed aspect ratio."
+              ></ui-card>
+              <ui-card
+                link="ui-placeholder.html#ui-placeholder-line"
+                heading="Placeholder line"
+                meta="&lt;ui-placeholder-line&gt;"
+                description="One line of text&#39;s skeleton:  a bar."
+              ></ui-card>
+              <ui-card
+                link="ui-placeholder.html#ui-placeholder-paragraph"
+                heading="Placeholder paragraph"
+                meta="&lt;ui-placeholder-paragraph&gt;"
+                description="The skeleton of a paragraph:  a block of lines, of varied lengths unless set."
+              ></ui-card>
+              <ui-card
+                link="ui-rail.html"
+                heading="Rail"
+                meta="&lt;ui-rail&gt;"
+                description="A rail is used to show accompanying content outside the boundaries of the main view of a site."
+              ></ui-card>
+              <ui-card
+                link="ui-reveal.html"
+                heading="Reveal"
+                meta="&lt;ui-reveal&gt;"
+                description="A reveal displays additional content in place of previous content when activated."
+              ></ui-card>
+              <ui-card
+                link="ui-segment.html"
+                heading="Segment"
+                meta="&lt;ui-segment&gt;"
+                description="A segment is used to create a grouping of related content."
+              ></ui-card>
+              <ui-card
+                link="ui-segment.html#ui-segments"
+                heading="Segments"
+                meta="&lt;ui-segments&gt;"
+                description="A group of segments can be formatted to appear together."
+              ></ui-card>
+              <ui-card
+                link="ui-step.html"
+                heading="Step"
+                meta="&lt;ui-step&gt;"
+                description="One step of a set of steps."
+              ></ui-card>
+              <ui-card
+                link="ui-step.html#ui-steps"
+                heading="Steps"
+                meta="&lt;ui-steps&gt;"
+                description="A set of steps shows the progress of an activity in a series of steps."
+              ></ui-card>
+              <ui-card
+                link="ui-text.html"
+                heading="Text"
+                meta="&lt;ui-text&gt;"
+                description="A text is used to style some inline text with a simple color, or to hold a paragraph."
+              ></ui-card>
+              <ui-card
+                link="ui-textarea.html"
+                heading="Textarea"
+                meta="&lt;ui-textarea&gt;"
+                description="A textarea is a multi-line field used to elicit a longer response."
+              ></ui-card>
+              <ui-card
+                link="ui-video.html"
+                heading="Video"
+                meta="&lt;ui-video&gt;"
+                description="A video plays a video file in the browser&#39;s own player."
+              ></ui-card>
+            </ui-cards>
+          </ui-section>
+
+          <ui-section id="collections" label="Collections" sticky collapsible dividing>
+            <ui-cards>
+              <ui-card
+                link="ui-breadcrumbs.html#ui-breadcrumb"
+                heading="Breadcrumb"
+                meta="&lt;ui-breadcrumb&gt;"
+                description="A section of a breadcrumb:  a link to a level of the hierarchy, or the current page."
+              ></ui-card>
+              <ui-card
+                link="ui-breadcrumbs.html"
+                heading="Breadcrumbs"
+                meta="&lt;ui-breadcrumbs&gt;"
+                description="A breadcrumb is used to show hierarchy between content."
+              ></ui-card>
+              <ui-card
+                link="ui-table.html#ui-cell"
+                heading="Cell"
+                meta="&lt;ui-cell&gt;"
+                description="A cell holds one value of a table row;  a header cell names its column or row."
+              ></ui-card>
+              <ui-card
+                link="ui-grid.html#ui-column"
+                heading="Column"
+                meta="&lt;ui-column&gt;"
+                description="A column is a vertical cell of a grid, N of 16 wide."
+              ></ui-card>
+              <ui-card
+                link="ui-form.html#ui-field"
+                heading="Field"
+                meta="&lt;ui-field&gt;"
+                description="A field is a form element containing a label and an input, with a hint, a tip and its errors."
+              ></ui-card>
+              <ui-card
+                link="ui-form.html#ui-fields"
+                heading="Fields"
+                meta="&lt;ui-fields&gt;"
+                description="A set of fields can appear grouped together, side by side or stacked."
+              ></ui-card>
+              <ui-card
+                link="ui-form.html"
+                heading="Form"
+                meta="&lt;ui-form&gt;"
+                description="A form displays a set of related input fields in a structured way."
+              ></ui-card>
+              <ui-card
+                link="ui-grid.html"
+                heading="Grid"
+                meta="&lt;ui-grid&gt;"
+                description="A grid is used to harmonize negative space in a layout."
+              ></ui-card>
+              <ui-card
+                link="ui-menu.html"
+                heading="Menu"
+                meta="&lt;ui-menu&gt;"
+                description="A menu displays grouped navigation actions."
+              ></ui-card>
+              <ui-card
+                link="ui-message.html"
+                heading="Message"
+                meta="&lt;ui-message&gt;"
+                description="A message displays information that explains nearby content."
+              ></ui-card>
+              <ui-card
+                link="ui-property-editor.html"
+                heading="Property editor"
+                meta="&lt;ui-property-editor&gt;"
+                description="A property editor draws a form from a schema:  one field per property, in folding groups, for one thing or many."
+                extra="In progress"
+              ></ui-card>
+              <ui-card
+                link="ui-form.html#ui-repeat"
+                heading="Repeat"
+                meta="&lt;ui-repeat&gt;"
+                description="A repeat shows its fields once per item of a list, each row bound to its own item."
+              ></ui-card>
+              <ui-card
+                link="ui-grid.html#ui-row"
+                heading="Row"
+                meta="&lt;ui-row&gt;"
+                description="A row is a horizontal grouping of columns;  in a table, of cells."
+              ></ui-card>
+              <ui-card
+                link="ui-table.html"
+                heading="Table"
+                meta="&lt;ui-table&gt;"
+                description="A table displays a collection of data grouped into rows."
+              ></ui-card>
+              <ui-card
+                link="ui-terms.html"
+                heading="Terms"
+                meta="&lt;ui-terms&gt;"
+                description="Terms list facts as a label and a value each, lined up:  Suit hearts, Rank queen."
+              ></ui-card>
+              <ui-card
+                link="ui-toolbar.html"
+                heading="Toolbar"
+                meta="&lt;ui-toolbar&gt;"
+                description="A toolbar is a horizontal menu whose items scroll sideways when they don&#39;t fit, with a button at each end while there&#39;s more to see that way;  shrinkable, it fits their titles to its width instead.  It takes every &lt;ui-menu&gt; attribute."
+              ></ui-card>
+            </ui-cards>
+          </ui-section>
+
+          <ui-section id="views" label="Views" sticky collapsible dividing>
+            <ui-cards>
+              <ui-card
+                link="ui-ad.html"
+                heading="Ad"
+                meta="&lt;ui-ad&gt;"
+                description="An ad displays third-party promotional content."
+              ></ui-card>
+              <ui-card
+                link="ui-card.html"
+                heading="Card"
+                meta="&lt;ui-card&gt;"
+                description="A card displays site content in a manner similar to a playing card."
+              ></ui-card>
+              <ui-card
+                link="ui-card.html#ui-cards"
+                heading="Cards"
+                meta="&lt;ui-cards&gt;"
+                description="A group of cards, laid out in a wrapping row."
+              ></ui-card>
+              <ui-card
+                link="ui-comment.html"
+                heading="Comment"
+                meta="&lt;ui-comment&gt;"
+                description="One comment:  who wrote it, when, what, and the replies to it."
+              ></ui-card>
+              <ui-card
+                link="ui-comment.html#ui-comments"
+                heading="Comments"
+                meta="&lt;ui-comments&gt;"
+                description="A list of comments, or the thread of replies to one."
+              ></ui-card>
+              <ui-card
+                link="ui-feed.html#ui-event"
+                heading="Event"
+                meta="&lt;ui-event&gt;"
+                description="One event of a feed:  a label (a picture, an icon, a number) beside what happened."
+              ></ui-card>
+              <ui-card
+                link="ui-feed.html"
+                heading="Feed"
+                meta="&lt;ui-feed&gt;"
+                description="A feed presents people&#39;s activity chronologically."
+              ></ui-card>
+              <ui-card
+                link="ui-item.html"
+                heading="Item"
+                meta="&lt;ui-item&gt;"
+                description="An item of a dropdown, list, menu or Items view."
+              ></ui-card>
+              <ui-card
+                link="ui-items.html"
+                heading="Items"
+                meta="&lt;ui-items&gt;"
+                description="A group of items:  site content, each an image beside its header, meta, description and extra."
+              ></ui-card>
+              <ui-card
+                link="ui-statistic.html"
+                heading="Statistic"
+                meta="&lt;ui-statistic&gt;"
+                description="A statistic emphasizes the current value of an attribute."
+              ></ui-card>
+              <ui-card
+                link="ui-statistic.html#ui-statistics"
+                heading="Statistics"
+                meta="&lt;ui-statistics&gt;"
+                description="A group of statistics."
+              ></ui-card>
+              <ui-card
+                link="ui-tree-diagram.html"
+                heading="Tree diagram"
+                meta="&lt;ui-tree-diagram&gt;"
+                description="A tree diagram draws a tree top-down:  a box for each node, a line to each of its children."
+              ></ui-card>
+            </ui-cards>
+          </ui-section>
+
+          <ui-section id="modules" label="Modules" sticky collapsible dividing>
+            <ui-cards>
+              <ui-card
+                link="ui-accordion.html"
+                heading="Accordion"
+                meta="&lt;ui-accordion&gt;"
+                description="An accordion lets people show and hide sections of content."
+              ></ui-card>
+              <ui-card
+                link="ui-calendar.html"
+                heading="Calendar"
+                meta="&lt;ui-calendar&gt;"
+                description="A calendar lets a person pick a date, a time, or both."
+              ></ui-card>
+              <ui-card
+                link="ui-checkbox.html"
+                heading="Checkbox"
+                meta="&lt;ui-checkbox&gt;"
+                description="A checkbox lets people choose a value from a small set of options, often on or off."
+              ></ui-card>
+              <ui-card
+                link="ui-components.html"
+                heading="Components"
+                meta="&lt;ui-components&gt;"
+                description="Components name a pack of another package&#39;s elements, which the root around them loads on demand, once per page."
+              ></ui-card>
+              <ui-card
+                link="ui-dimmer.html"
+                heading="Dimmer"
+                meta="&lt;ui-dimmer&gt;"
+                description="A dimmer hides distractions to focus attention on particular content."
+              ></ui-card>
+              <ui-card
+                link="ui-dropdown.html"
+                heading="Dropdown"
+                meta="&lt;ui-dropdown&gt;"
+                description="A dropdown lets people choose a value from a series of options."
+              ></ui-card>
+              <ui-card
+                link="ui-embed.html"
+                heading="Embed"
+                meta="&lt;ui-embed&gt;"
+                description="An embed displays content from other websites, like YouTube videos, loaded only when asked for."
+              ></ui-card>
+              <ui-card
+                link="ui-flyout.html"
+                heading="Flyout"
+                meta="&lt;ui-flyout&gt;"
+                description="A flyout is a modal that slides in from a side of the page."
+              ></ui-card>
+              <ui-card
+                link="ui-include.html"
+                heading="Include"
+                meta="&lt;ui-include&gt;"
+                description="An include shows part of another page from this site in this one, loaded at once, when idle or when scrolled into view."
+              ></ui-card>
+              <ui-card
+                link="ui-modal.html"
+                heading="Modal"
+                meta="&lt;ui-modal&gt;"
+                description="A modal displays content that temporarily blocks interactions with the main view of a site."
+              ></ui-card>
+              <ui-card
+                link="ui-nag.html"
+                heading="Nag"
+                meta="&lt;ui-nag&gt;"
+                description="A nag is a persistent message that stays until dismissed, and can remember the dismissal."
+              ></ui-card>
+              <ui-card
+                link="ui-popup.html"
+                heading="Popup"
+                meta="&lt;ui-popup&gt;"
+                description="A popup displays additional information on top of a page."
+              ></ui-card>
+              <ui-card
+                link="ui-progress.html"
+                heading="Progress"
+                meta="&lt;ui-progress&gt;"
+                description="A progress bar shows the progression of a task."
+              ></ui-card>
+              <ui-card
+                link="ui-sidebar.html#ui-pushable"
+                heading="Pushable"
+                meta="&lt;ui-pushable&gt;"
+                description="The context a sidebar appears in:  it clips them and moves its pusher."
+              ></ui-card>
+              <ui-card
+                link="ui-sidebar.html#ui-pusher"
+                heading="Pusher"
+                meta="&lt;ui-pusher&gt;"
+                description="The content a sidebar pushes (and dims) when it appears."
+              ></ui-card>
+              <ui-card
+                link="ui-radio.html"
+                heading="Radio"
+                meta="&lt;ui-radio&gt;"
+                description="A radio button chooses exactly one value of a group."
+              ></ui-card>
+              <ui-card
+                link="ui-rating.html"
+                heading="Rating"
+                meta="&lt;ui-rating&gt;"
+                description="A rating indicates people&#39;s interest in content."
+              ></ui-card>
+              <ui-card
+                link="ui-search.html"
+                heading="Search"
+                meta="&lt;ui-search&gt;"
+                description="A search module lets people query for results from a selection of data."
+              ></ui-card>
+              <ui-card
+                link="ui-select.html"
+                heading="Select"
+                meta="&lt;ui-select&gt;"
+                description="A select lets people choose one or more values from a native list of options."
+              ></ui-card>
+              <ui-card
+                link="ui-shape.html"
+                heading="Shape"
+                meta="&lt;ui-shape&gt;"
+                description="A shape is a three dimensional object displayed on a two dimensional plane."
+              ></ui-card>
+              <ui-card
+                link="ui-shape.html#ui-side"
+                heading="Side"
+                meta="&lt;ui-side&gt;"
+                description="One side of a shape."
+              ></ui-card>
+              <ui-card
+                link="ui-sidebar.html"
+                heading="Sidebar"
+                meta="&lt;ui-sidebar&gt;"
+                description="A sidebar hides additional content beside a page."
+              ></ui-card>
+              <ui-card
+                link="ui-slider.html"
+                heading="Slider"
+                meta="&lt;ui-slider&gt;"
+                description="A slider lets people select values within a range."
+              ></ui-card>
+              <ui-card
+                link="ui-sticky.html"
+                heading="Sticky"
+                meta="&lt;ui-sticky&gt;"
+                description="Sticky content stays fixed to the viewport while its container is on screen."
+              ></ui-card>
+              <ui-card
+                link="ui-tab.html"
+                heading="Tab"
+                meta="&lt;ui-tab&gt;"
+                description="A tab pane:  the content shown while its tab is selected."
+              ></ui-card>
+              <ui-card
+                link="ui-tab.html#ui-tabs"
+                heading="Tabs"
+                meta="&lt;ui-tabs&gt;"
+                description="A tab is a hidden section of content activated by a menu."
+              ></ui-card>
+              <ui-card
+                link="ui-toast.html"
+                heading="Toast"
+                meta="&lt;ui-toast&gt;"
+                description="A toast gives people a short, non-blocking notification."
+              ></ui-card>
+              <ui-card
+                link="ui-transition.html"
+                heading="Transition"
+                meta="&lt;ui-transition&gt;"
+                description="A transition is an animation used to show or hide content, or to draw attention to it."
+              ></ui-card>
+              <ui-card
+                link="ui-visibility.html"
+                heading="Visibility"
+                meta="&lt;ui-visibility&gt;"
+                description="Visibility provides a set of callbacks for when content appears in the viewport."
+              ></ui-card>
+            </ui-cards>
+          </ui-section>
+          <!-- components:end -->
+        </article>
+      </ui-container>
+    </main>
+  </body>
+</html>

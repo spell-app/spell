@@ -3,21 +3,24 @@ import { dirname, join, posix, relative, resolve, sep } from "node:path"
 
 import JSON5 from "json5"
 
+import { checkoutOf } from "spell/server/checkout"
 import { contentFolderOf } from "spell/server/contentFolder"
+import { kitFolders } from "spell/server/kitFolders"
 import type { ComponentSet, EngineRoute, PageServerSettings } from "spell/server/page"
 
 /**
- * The page server's settings for checkout `root`:  every installed repo's `"pageServer"` part, merged
- * (epic `repo-split` P16);  `{}` without any.
- * - Each repo declares ITS OWN part, in its own `package.json`, the way it declares its `"spell": { "commands" }`:
+ * The page server's settings for checkout `root`:  every part's `"pageServer"`, merged (epic `repo-split` P16, P20);
+ * `{}` without any.
+ * - Each part declares ITS OWN settings, in its own `package.json`, the way it declares its `"spell": { "commands" }`:
  *   the route modules, folders, component sets ... it adds to the page server.
- * - Which repos:  in a kit (`root` at or inside a folder holding `REPOS_FILE`), the kit first, then the content repo's
- *   (`CONTENT_SETTINGS`:  the site's tabs, the writable folders), then each child repo its `repos.json5` lists that's
- *   installed, in that order (`settingsParts()`);  outside a kit, `root`'s own.
- * - Every path in a part is relative to ITS repo's folder;  here they come back relative to `root`
- *   (`spell-ui`'s `"docs"` is `spell-ui/docs` from the kit, `../spell-ui/docs` from spell-app).
- * - How the parts merge (`mergeSettings()`):  the lists end to end, in repo order;  the maps (`componentSets`,
- *   `engineRoutes`, `localCopies`) entry by entry, a later repo's entry winning.
+ * - Which parts:  in a kit (`root` at or inside a folder holding `REPOS_FILE`), the kit first, then the content repo's
+ *   (`CONTENT_SETTINGS`:  the site's tabs, the writable folders), then each of the kit's folders (its `package.json`'s
+ *   `workspaces`, lowest first), then each repo beside it (`REPOS_FILE`'s peers:  spell-brand), then each project
+ *   the checkout names (`LOCAL_SETTINGS`), in that order (`settingsParts()`);  outside a kit, `root`'s own.
+ * - Every path in a part is relative to ITS folder;  here they come back relative to `root`
+ *   (Spell UI's `"docs"` is `ui/docs` from the kit, `../ui/docs` from the app's folder).
+ * - How the parts merge (`mergeSettings()`):  the lists end to end, in that order;  the maps (`componentSets`,
+ *   `engineRoutes`, `localCopies`) entry by entry, a later part's entry winning.
  * - Read fresh on each call:  a server reads it once as it starts, the tools as they need it.
  * - NOTE: plain `node` loads this file by path (spell-epic's tools, through `page.types.ts`):
  *   node built-ins, `json5` and type imports only
@@ -35,12 +38,13 @@ export type SettingsPart = { readonly dir: string; readonly settings: PageServer
 /**
  * The parts of the page server's settings for checkout `root`, in merge order:
  * - in a kit (`kitOf()`):  the kit's own part, then the content repo's (`CONTENT_SETTINGS`, in the content folder
- *   `contentFolderOf()` names), then each child repo's that `REPOS_FILE` lists, lowest first
- *   - a child repo is where it's cloned (`<kit>/<name>/`), else where it's installed (`<kit>/node_modules/<name>/`);
- *     one that's neither is left out:  the server runs with whatever is installed
- *   - names no repo of its own:  the list is the kit's data
+ *   `contentFolderOf()` names), then each of the kit's folders (`kitFolders()`:  `parser/`, `ui/`, `epic/`, `app/`),
+ *   then each repo beside the kit `REPOS_FILE` lists as a peer (`peerRepos()`:  spell-brand), then each project the
+ *   checkout's own `LOCAL_SETTINGS` names (`localProjects()`:  a tester's)
+ *   - names no folder or project of its own:  the lists are the kit's data and the checkout's
+ *   - a project that isn't there is left out:  the server runs with whatever is there
  * - outside a kit:  `root`'s own part, when it has one
- * - a repo whose `package.json` has no `"pageServer"`:  no part
+ * - a folder whose `package.json` has no `"pageServer"`:  no part
  */
 export function settingsParts(root: string): SettingsPart[] {
   const kit = kitOf(root)
@@ -52,9 +56,64 @@ export function settingsParts(root: string): SettingsPart[] {
   const parts = [
     { dir: kit, settings: repoSettings(kit) },
     { dir: content ?? kit, settings: content ? contentSettings(content) : undefined },
-    ...childRepos(kit).map((dir) => ({ dir, settings: repoSettings(dir) }))
+    ...[...new Set([...kitFolders(kit), ...peerRepos(kit), ...localProjects(kit)])].map((dir) => ({
+      dir,
+      settings: repoSettings(dir)
+    }))
   ]
   return parts.flatMap(({ dir, settings }) => (settings ? [{ dir, settings }] : []))
+}
+
+/**
+ * The repos beside the kit that `REPOS_FILE` lists as peers, that are there, absolute (epic `repo-split` P20,
+ * epic-engine Q48):  `{ name: "spell-brand", path: "../spell-brand", peer: true }`, a project of its own that uses
+ * `spell` as any other would.
+ * - `path` is from the kit's folder;  a kit WORKTREE (`~/www/spell.worktrees/<epic>/`) has none beside it, so there
+ *   it's from the MAIN checkout (`~/www/spell`):  every worktree sees main's spell-brand, `~/www/spell-brand`.
+ * - NEVER throws:  an unreadable `REPOS_FILE` lists none
+ */
+export function peerRepos(kit: string): string[] {
+  let repos: unknown
+  try {
+    repos = (JSON5.parse(readFileSync(join(kit, REPOS_FILE), "utf8")) as { repos?: unknown }).repos
+  } catch {
+    return []
+  }
+  if (!Array.isArray(repos)) return []
+  const main = checkoutOf(kit)?.main
+  return repos.flatMap((repo: { path?: unknown; peer?: unknown }) => {
+    if (repo?.peer !== true || typeof repo.path !== "string") return []
+    const path = repo.path
+    const found = [kit, main]
+      .filter((from): from is string => typeof from === "string")
+      .map((from) => resolve(from, path))
+      .find((dir) => existsSync(join(dir, "package.json")))
+    return found ? [found] : []
+  })
+}
+
+/**
+ * The checkout's own file naming more projects whose page server parts it serves, each folder from the kit's:
+ * `{ projects: ["../my-project"] }` (epic `repo-split` P20).
+ * - For a project of someone else's, trying the epic framework on it:  spell-brand, the kit's own peer, is in
+ *   `REPOS_FILE` instead (`peerRepos()`).
+ * - Git-ignored, each checkout's own:  where such a project sits is a fact of the machine, not of the branch.
+ */
+export const LOCAL_SETTINGS = "page-server.local.json5"
+
+/** The projects `LOCAL_SETTINGS` names that are there, absolute;  none without the file. */
+export function localProjects(kit: string): string[] {
+  let projects: unknown
+  try {
+    projects = (JSON5.parse(readFileSync(join(kit, LOCAL_SETTINGS), "utf8")) as { projects?: unknown }).projects
+  } catch {
+    return []
+  }
+  if (!Array.isArray(projects)) return []
+  return projects
+    .filter((project): project is string => typeof project === "string")
+    .map((project) => resolve(kit, project.replace(/^~(?=\/)/, process.env.HOME ?? "~")))
+    .filter((dir) => existsSync(join(dir, "package.json")))
 }
 
 /**
@@ -117,7 +176,7 @@ export function mergeSettings(root: string, parts: readonly SettingsPart[]): Pag
 /** The settings' lists, which `mergeSettings()` lays end to end. */
 type ListKey = "routes" | "watch" | "writable" | "gone" | "bundles" | "pageScripts" | "siteTabs"
 
-/** The kit's own file at its root, listing the child repos, lowest first:  what marks a folder as a kit. */
+/** The kit's own file at its root, listing the repos beside it:  what marks a folder as a kit. */
 export const REPOS_FILE = "repos.json5"
 
 /**
@@ -164,21 +223,6 @@ export function findRoot(start: string): string | undefined {
   }
 }
 
-/** The child repos of `kit` that are there, lowest first:  each one `REPOS_FILE` lists, by its folder. */
-function childRepos(kit: string): string[] {
-  let names: string[]
-  try {
-    const text = readFileSync(join(kit, REPOS_FILE), "utf8")
-    names = (JSON5.parse(text) as { repos?: { name: string }[] }).repos?.map((repo) => repo.name) ?? []
-  } catch {
-    return []
-  }
-  return names.flatMap(
-    (name) =>
-      [join(kit, name), join(kit, "node_modules", name)].find((dir) => existsSync(join(dir, "package.json"))) ?? []
-  )
-}
-
 /**
  * ONE repo's part of the page server's settings:  the `"pageServer"` field of the `package.json` in `dir`, its paths
  * from `dir`, never merged;  `undefined` without one.
@@ -218,8 +262,8 @@ export function componentSets(settings: PageServerSettings): ComponentSet[] {
 
 /**
  * Page `file`'s ADDRESS, when it's in a component set's folder of checkout `root`:  `/components/ui/ui-button.html`
- * for `<root>/spell-ui/docs/ui-button.html`;  `undefined` for any other file.
- * - what every link to a set's page must name:  served from its folder's own path (`/spell-ui/docs/ui-button.html`),
+ * for `<root>/ui/docs/ui-button.html`;  `undefined` for any other file.
+ * - what every link to a set's page must name:  served from its folder's own path (`/ui/docs/ui-button.html`),
  *   the page loads none of the `_assets/` it finds beside its address, and shows as unstyled text (epic `epic-engine`
  *   I136)
  * - each segment URL-encoded;  a worktree's page is this under `/worktrees/<w>` (`mainServerUrl()`)
@@ -243,7 +287,7 @@ export function componentSetAddressOf(
 
 /**
  * The file component-set ADDRESS `address` names in checkout `root` (`componentSetAddressOf()` turned round):
- * `<root>/spell-ui/docs/ui-button.html` for `/components/ui/ui-button.html`;  `undefined` for any other path.
+ * `<root>/ui/docs/ui-button.html` for `/components/ui/ui-button.html`;  `undefined` for any other path.
  * - `address`:  a URL path, encoded or not
  */
 export function componentSetFileOf(
@@ -264,7 +308,7 @@ export function componentSetFileOf(
 /**
  * The engine routes `settings` name (`"engineRoutes"`), each as a URL prefix and the URL path its folder is served at
  * (`folderUrl()`), both ending `/`:  `"/_epic/pack/": "x/__pack"` => `["/_epic/pack/", "/x/__pack/"]`;
- * `"../spell-epic/src/tools/_assets"` => `"/_beside/spell-epic/src/tools/_assets/"`.
+ * `"../epic/src/tools/_assets"` => `"/_beside/epic/src/tools/_assets/"`.
  */
 export function engineRoutes(settings: PageServerSettings): EngineRoute[] {
   return Object.entries(settings.engineRoutes ?? {}).map(([route, folder]) => [
@@ -276,30 +320,39 @@ export function engineRoutes(settings: PageServerSettings): EngineRoute[] {
 /**
  * Where the folders a page server serves from OUTSIDE its checkout are, as URL paths:  `/_beside/<folder>/`, the
  * folder's path from the checkout's PARENT (epic `repo-split` P8).
- * - e.g. settings read for spell-app's folder (`pageServerSettings()`) name `../spell-ui/docs`:
- *   Spell UI's component set, in the repo beside it, served at `/_beside/spell-ui/docs/`
+ * - e.g. settings read for spell-app's folder (`pageServerSettings()`) name `../ui/docs`:
+ *   Spell UI's component set, in the repo beside it, served at `/_beside/ui/docs/`
  *   - a page server of the kit has none:  every repo is inside it (epic `repo-split` P16)
  * - only the folders its settings name (`besideFolders()`), each mounted on its own:  never the parent folder whole
  */
 export const BESIDE_PREFIX = "/_beside"
 
+/** A level further up than the checkout's parent, in a `BESIDE_PREFIX` URL (`folderUrl()`). */
+const UP = "_up"
+
 /**
  * The URL path a settings folder (relative to the checkout) is served at, no trailing `/`:  inside the checkout its
- * own path (`app/docs` => `/app/docs`), beside it under `BESIDE_PREFIX` (`../spell-ui/docs` => `/_beside/spell-ui/docs`).
+ * own path (`app/docs` => `/app/docs`), beside it under `BESIDE_PREFIX` (`../ui/docs` => `/_beside/ui/docs`).
  * - the checkout itself:  `""`
- * - throws a `TypeError` for one further up than the checkout's parent (`../../x`)
+ * - further up than the checkout's parent, an `_up/` a level (`../../x` => `/_beside/_up/x`):  each is mounted on its
+ *   own, so its URL only has to be unique
  */
 export function folderUrl(folder: string): string {
   const path = posix.normalize(folder.replace(/^\/+/, "")).replace(/\/+$/, "")
   if (path === "." || path === "") return ""
   if (path === ".." || !path.startsWith("../")) return path === ".." ? BESIDE_PREFIX : `/${path}`
-  const beside = path.slice("../".length)
-  if (beside === ".." || beside.startsWith("../"))
-    throw new TypeError(`folderUrl():  '${folder}' is above the checkout's parent;  only a folder beside it is served`)
-  return `${BESIDE_PREFIX}/${beside}`
+  // each level further up than the parent is an `_up/` (a project beside the kit, from a kit worktree:
+  // `../../spell-brand.worktrees/x` => `/_beside/_up/spell-brand.worktrees/x`;  epic `repo-split` P20)
+  let beside = path.slice("../".length)
+  let up = ""
+  while (beside === ".." || beside.startsWith("../")) {
+    up += `${UP}/`
+    beside = beside === ".." ? "" : beside.slice("../".length)
+  }
+  return `${BESIDE_PREFIX}/${up}${beside}`.replace(/\/$/, "")
 }
 
-/** Is settings folder `folder` outside the checkout (`../spell-ui/docs`)? */
+/** Is settings folder `folder` outside the checkout (`../ui/docs`)? */
 export function isBeside(folder: string): boolean {
   return folderUrl(folder).startsWith(`${BESIDE_PREFIX}/`)
 }

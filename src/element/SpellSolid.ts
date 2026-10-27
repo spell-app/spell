@@ -7,7 +7,7 @@ import { E } from "spell/element"
  * - Why:  spell-element makes custom elements for EVERY set (Spell UI's, the epics', the app's, a space's),
  *   so it never imports one.
  *   What an element needs of the page's runtime (its words, style sheets, focus, animations) comes through here.
- * - Spell UI installs its own as `spell-ui/core` loads (`packages/ui/src/elements/SpellUISettings.ts`):
+ * - Spell UI installs its own as `spell/ui/core` loads (`packages/ui/src/elements/SpellUISettings.ts`):
  *   every other set's elements draw on a page that has Spell UI's runtime.
  * - A tag defined BEFORE any settings are in waits for them (`whenInstalled()`, `UIComponent.define()`).
  *   - Why:  a code-split bundle may run a family's chunk before the chunk that installs them,
@@ -18,7 +18,7 @@ import { E } from "spell/element"
 export class SpellSolid {
   /**
    * Hand spell-element the page's settings.
-   * - Called as the runtime loads:  `spell-ui/core` installs Spell UI's.
+   * - Called as the runtime loads:  `spell/ui/core` installs Spell UI's.
    * - Tags defined before that are defined now.
    * - A second call replaces the first (tests, a page that swaps its runtime).
    */
@@ -43,20 +43,20 @@ export class SpellSolid {
       if (!SpellSolid.waiting.length) return
       console.warn(
         `[spell/element] SpellSolid:  ${SpellSolid.waiting.length} element(s) wait to be defined, and no ` +
-          "settings are installed;  load a component set's runtime (Spell UI's `spell-ui/core`)"
+          "settings are installed;  load a component set's runtime (Spell UI's `spell/ui/core`)"
       )
     })
   }
 
   /**
    * The settings installed.
-   * - throws an `Error` when none are:  nothing has loaded a runtime for the elements (import `spell-ui/core` first)
+   * - throws an `Error` when none are:  nothing has loaded a runtime for the elements (import `spell/ui/core` first)
    */
   static get settings(): E.SpellSolidSettings {
     if (SpellSolid.installed) return SpellSolid.installed
     throw new Error(
       "SpellSolid.settings:  no settings installed;  a component set's runtime installs them as it loads " +
-        "(Spell UI's, as `spell-ui/core` loads):  import it before defining an element"
+        "(Spell UI's, as `spell/ui/core` loads):  import it before defining an element"
     )
   }
 

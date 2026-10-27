@@ -1,24 +1,25 @@
 /**
- * `tools/repos.ts`:  what the kit's yarn scripts run over the child repos (epic `repo-split` P7, Q17;  the top repo
- * became the kit, `spell`, in P9).
+ * `tools/repos.ts`:  what the kit's yarn scripts run over its folders and the repos beside it (epic `repo-split` P7,
+ * Q17;  the top repo became the kit, `spell`, in P9;  ONE repo in P20).
  * - Node 24 runs it as is (its types stripped):  `node tools/repos.ts <command>`, no build, no `tsx`.
- *   - So:  node's own modules, `json5` and the kit's plain-node files (`spell/server/Git`) only, `import type` for
- *     types, no `enum` or parameter property.
- * - The repos, lowest first, and what each needs:  `repos.json5` beside `package.json`.
+ *   - So:  node's own modules, `json5` and the kit's plain-node files (`spell/server/Git`, `spell/server/kitFolders`)
+ *     only, `import type` for types, no `enum` or parameter property.
+ * - The kit's folders, lowest first:  its `package.json`'s `workspaces` (`parser`, `ui`, `epic`, `app`).
+ * - The repos BESIDE it (spell-brand), each with its own install:  `repos.json5`, by `path` from the kit's folder.
  *
  * ```sh
- * yarn clone [repo ...]     # clone what's missing (the named repos and everything they need;  none named:  all),
- *                           # then ONE `yarn install` over every repo
+ * yarn clone [repo ...]     # clone the repos beside the kit that are missing (none named:  all), then each one's own
+ *                           # install
  *   --branch <name>         #   each at that branch when it has one, else its default branch (CI's)
  *   --https --shallow       #   over HTTPS only;  only the last commit (CI's)
  *   --no-install            #   clone only
- * yarn pull                 # `git pull --ff-only` in every child repo there
- * yarn status               # each child repo's branch and changes;  a clean one in one line
- * yarn repos                # the list:  which are cloned, and what each needs
- * node tools/repos.ts links       # `node_modules/spell`, a link to the kit, and each child repo's `agents`
- *                                 # link:  what `yarn install` runs after (`postinstall`)
+ * yarn pull                 # `git pull --ff-only` in every repo beside the kit that's there
+ * yarn status               # each one's branch and changes;  a clean one in one line
+ * yarn repos                # the list:  which are there
+ * node tools/repos.ts links       # `node_modules/spell`, a link to the kit, and each folder's `agents` link:
+ *                                 # what `yarn install` runs after (`postinstall`)
  * node tools/repos.ts link-kit    # the first of those alone
- * yarn ts | test | lint | review    # the kit's own (`kit:<script>`), then that script in every child repo there,
+ * yarn ts | test | lint | review    # the kit's own (`kit:<script>`), then that script in each of its folders,
  *                                   # lowest first
  * ```
  */
@@ -30,49 +31,43 @@ import JSON5 from "json5"
 
 // By the kit's own name, which node resolves inside the kit with no link:  `postinstall` runs this before the link
 import { Git } from "spell/server/Git"
+import { kitFolders } from "spell/server/kitFolders"
 
 /** The kit, the top repo:  this file is in its `tools/`. */
 const TOP = resolve(import.meta.dirname, "..")
 
-/** One child repo, as `repos.json5` lists it. */
+/** One repo beside the kit, as `repos.json5` lists it. */
 type Repo = {
-  /** its folder in the top repo, and its name on GitHub:  `spell-ui` */
+  /** its name on GitHub:  `spell-brand` */
   name: string
   /** where `yarn clone` clones it from */
   url: string
-  /** the repos its code uses, directly */
-  needs: string[]
-  /** repos it runs by its settings, never imports:  cloned with it too */
-  runs?: string[]
+  /** its folder, from the kit's:  `../spell-brand` */
+  path: string
 }
 
-/** Every child repo, lowest first (`repos.json5`). */
+/** Every repo beside the kit (`repos.json5`). */
 function repos(): Repo[] {
   const text = readFileSync(join(TOP, "repos.json5"), "utf8")
   return (JSON5.parse(text) as { repos: Repo[] }).repos
 }
 
-/** Is child repo `name` cloned:  its folder is a git checkout? */
-function isCloned(name: string): boolean {
-  return existsSync(join(TOP, name, ".git"))
+/** Repo `repo`'s folder, absolute. */
+function dirOf(repo: Repo): string {
+  return resolve(TOP, repo.path)
 }
 
-/**
- * The repos `names` need, with them, lowest first:  everything `yarn clone <names>` clones.
- * - Throws on a name `repos.json5` doesn't list.
- */
-export function closure(names: string[], all = repos()): Repo[] {
-  const byName = new Map(all.map((repo) => [repo.name, repo]))
-  const wanted = new Set<string>()
-  const visit = (name: string): void => {
-    const repo = byName.get(name)
-    if (!repo) throw new Error(`no repo ${name} in repos.json5;  it lists ${[...byName.keys()].join(", ")}`)
-    if (wanted.has(name)) return
-    wanted.add(name)
-    for (const other of [...repo.needs, ...(repo.runs ?? [])]) visit(other)
-  }
-  for (const name of names) visit(name)
-  return all.filter((repo) => wanted.has(repo.name))
+/** Is repo `repo` there:  its folder is a git checkout? */
+function isCloned(repo: Repo): boolean {
+  return existsSync(join(dirOf(repo), ".git"))
+}
+
+/** The repos `names` name, all of them when none;  throws on a name `repos.json5` doesn't list. */
+function named(names: string[], all = repos()): Repo[] {
+  for (const name of names)
+    if (!all.some((repo) => repo.name === name))
+      throw new Error(`no repo ${name} in repos.json5;  it lists ${all.map((repo) => repo.name).join(", ")}`)
+  return names.length ? all.filter((repo) => names.includes(repo.name)) : all
 }
 
 /** Runs `command` in `cwd`, its output shown;  its exit status. */
@@ -157,10 +152,8 @@ function remoteOf(repo: Repo, https: boolean): { url: string; branches: string[]
 }
 
 /**
- * `yarn clone [repo ...] [--branch <name>] [--https] [--shallow] [--no-install]`:  clone what's missing, then one
- * install over every repo.
- * - CI (each repo's `.github/workflows/checks.yml`, epic `repo-split` P12):  the repo under test is checked out
- *   already;  `yarn clone <it> --branch <its branch> --https --shallow` clones the repos it needs.
+ * `yarn clone [repo ...] [--branch <name>] [--https] [--shallow] [--no-install]`:  clone the repos beside the kit that
+ * are missing, each to its `path`, then each one's own `yarn install`:  each is a project of its own.
  */
 function clone(args: string[]): number {
   let parsed: ReturnType<typeof cloneArgs>
@@ -171,10 +164,16 @@ function clone(args: string[]): number {
     return 2
   }
   const { names, options } = parsed
-  const wanted = names.length ? closure(names) : repos()
-  const missing = wanted.filter((repo) => !isCloned(repo.name))
+  let wanted: Repo[]
+  try {
+    wanted = named(names)
+  } catch (error) {
+    console.error((error as Error).message)
+    return 2
+  }
+  const missing = wanted.filter((repo) => !isCloned(repo))
   for (const repo of missing) {
-    if (existsSync(join(TOP, repo.name))) {
+    if (existsSync(dirOf(repo))) {
       console.error(`${repo.name}:  the folder is there, but it isn't a git checkout:  move it away, then clone again`)
       return 1
     }
@@ -188,42 +187,46 @@ function clone(args: string[]): number {
     const branch = options.branch && remote.branches.includes(options.branch) ? options.branch : undefined
     console.log(`== cloning ${repo.name}  (${remote.url}, ${branch ? `branch ${branch}` : "its default branch"})`)
     const flags = [...(branch ? ["--branch", branch] : []), ...(options.shallow ? ["--depth", "1"] : [])]
-    if (run("git", ["clone", ...flags, signedIn(remote.url), repo.name]) !== 0) return 1
+    if (run("git", ["clone", ...flags, signedIn(remote.url), dirOf(repo)]) !== 0) return 1
     // the token stays out of the clone's settings
-    if (signedIn(remote.url) !== remote.url) git(join(TOP, repo.name), "remote", "set-url", "origin", remote.url)
+    if (signedIn(remote.url) !== remote.url) git(dirOf(repo), "remote", "set-url", "origin", remote.url)
   }
   if (!missing.length) console.log(`every repo asked for is cloned:  ${wanted.map((repo) => repo.name).join(", ")}`)
-  for (const repo of wanted) linkAgents(repo.name)
   if (!options.install) return 0
-  console.log("== yarn install:  one install over every repo")
-  return run("yarn", ["install"])
+  for (const repo of missing) {
+    console.log(`== ${repo.name}:  yarn install, its own`)
+    if (run("yarn", ["install"], dirOf(repo)) !== 0) return 1
+  }
+  return 0
 }
 
 /**
- * The repos whose root gets no `agents` link:  spell-epic, where a root `agents/` makes Claude Code load WWOD and the
- * logs as the plugin's agents (epic `epic-engine`'s move check).
+ * The folders that get no `agents` link:  the plugin's, `epic/`, where a root `agents/` makes Claude Code load WWOD and
+ * the logs as the plugin's agents (epic `epic-engine`'s move check).  By the folder's package name, so this file names
+ * no folder.
  */
 const NO_AGENTS_LINK = new Set(["spell-epic"])
 
-/** Where each child repo's `agents` link points, from the repo's root:  the kit's `agents/`. */
+/** Where each folder's `agents` link points, from the folder:  the kit's `agents/`. */
 const KIT_AGENTS = "../agents"
 
 /**
- * Links child repo `name`'s `agents` (git-ignored there) to the kit's `agents/`:  WWOD, tracked in the kit, and the
- * three logs (epic `repo-split` P9), so a repo's instructions find `agents/wwod/WWOD.md`, `agents/PAPERCUTS.md` ...
+ * Links folder `dir`'s `agents` (git-ignored there) to the kit's `agents/`:  WWOD, tracked in the kit, and the
+ * three logs (epic `repo-split` P9), so a folder's instructions find `agents/wwod/WWOD.md`, `agents/PAPERCUTS.md` ...
  * - Replaces a link pointing anywhere else:  a checkout from before the split links the content repo's old copy,
  *   `../spell.epics/agents` (epic `repo-split` I64).
  * - Leaves a real folder or file alone:  never deletes what isn't a link.
  */
-function linkAgents(name: string): void {
-  if (NO_AGENTS_LINK.has(name)) return
-  const link = join(TOP, name, "agents")
+function linkAgents(dir: string): void {
+  const { name } = JSON.parse(readFileSync(join(dir, "package.json"), "utf8")) as { name?: string }
+  if (name && NO_AGENTS_LINK.has(name)) return
+  const link = join(dir, "agents")
   if (isLink(link)) {
     if (readlinkSync(link) === KIT_AGENTS) return
     rmSync(link)
   } else if (existsSync(link)) return
   symlinkSync(KIT_AGENTS, link)
-  console.log(`${name}/agents -> ${KIT_AGENTS}  (the kit's WWOD and the logs)`)
+  console.log(`${dir.slice(TOP.length + 1)}/agents -> ${KIT_AGENTS}  (the kit's WWOD and the logs)`)
 }
 
 /** Is there a symbolic link at `path` (even one pointing nowhere)? */
@@ -236,22 +239,21 @@ function isLink(path: string): boolean {
 }
 
 /**
- * `postinstall`:  the links every install needs (epic `repo-split` P12):  the kit's own (`linkKit()`), and each cloned
- * child repo's `agents` (`linkAgents()`).
- * - So a checkout made without `yarn clone` gets its `agents` links too:  an epic's worktree (the worktree hook runs
- *   one `yarn install`), CI.
+ * `postinstall`:  the links every install needs (epic `repo-split` P12):  the kit's own (`linkKit()`), and each
+ * folder's `agents` (`linkAgents()`).
+ * - So every checkout gets its `agents` links:  an epic's worktree (the worktree hook runs `yarn install`), CI.
  */
 function links(): number {
   linkKit()
-  for (const repo of repos().filter((each) => isCloned(each.name))) linkAgents(repo.name)
+  for (const dir of kitFolders(TOP)) linkAgents(dir)
   return 0
 }
 
 /**
  * `node_modules/spell`, a link to the kit itself (epic `repo-split` P9).
  * - The kit is a package, `spell`, AND the install's root workspace, and yarn's node-modules linker links the root
- *   workspace nowhere:  without this, no child repo could import `spell/util` ... (yarn's own self-references,
- *   `nmSelfReferences`, leave the root out too).
+ *   workspace nowhere:  without this, no folder could import `spell/util`, `spell/ui/...` (yarn's own
+ *   self-references, `nmSelfReferences`, leave the root out too).
  * - Yarn leaves a link it didn't make alone on a quick install, and removes it on a full one:  so every install remakes
  *   it, if it's gone.
  * - Removes the kit's link by its old name, `node_modules/spell-kit` (epic `repo-split` P17, Q54).
@@ -267,12 +269,12 @@ function linkKit(): number {
   return 0
 }
 
-/** `yarn pull`:  `git pull --ff-only` in every child repo there. */
+/** `yarn pull`:  `git pull --ff-only` in every repo beside the kit that's there. */
 function pull(): number {
   let failed = 0
-  for (const repo of repos().filter((each) => isCloned(each.name))) {
+  for (const repo of repos().filter(isCloned)) {
     console.log(`== ${repo.name}`)
-    if (run("git", ["pull", "--ff-only"], join(TOP, repo.name)) !== 0) failed++
+    if (run("git", ["pull", "--ff-only"], dirOf(repo)) !== 0) failed++
   }
   return failed ? 1 : 0
 }
@@ -280,11 +282,11 @@ function pull(): number {
 /** How many of a repo's changed files `yarn status` lists. */
 const SHOWN = 12
 
-/** `yarn status`:  each child repo's branch, how far from its upstream, and its changes (the first `SHOWN`). */
+/** `yarn status`:  each repo beside the kit:  its branch, how far from its upstream, its changes (the first `SHOWN`). */
 function status(): number {
   for (const repo of repos()) {
-    const dir = join(TOP, repo.name)
-    if (!isCloned(repo.name)) {
+    const dir = dirOf(repo)
+    if (!isCloned(repo)) {
       console.log(`${repo.name.padEnd(14)} not cloned  (yarn clone ${repo.name})`)
       continue
     }
@@ -299,26 +301,23 @@ function status(): number {
     console.log(`${repo.name.padEnd(14)} ${branch}${away}${changes ? "" : "  clean"}`)
     const lines = changes ? changes.split("\n") : []
     for (const line of lines.slice(0, SHOWN)) console.log(`    ${line}`)
-    if (lines.length > SHOWN) console.log(`    ... and ${lines.length - SHOWN} more  (git -C ${repo.name} status)`)
+    if (lines.length > SHOWN) console.log(`    ... and ${lines.length - SHOWN} more  (git -C ${repo.path} status)`)
   }
   return 0
 }
 
-/** `yarn repos`:  the list, with what's cloned. */
+/** `yarn repos`:  the list, with what's there. */
 function list(): number {
-  for (const repo of repos()) {
-    const uses = [...repo.needs, ...(repo.runs ?? []).map((name) => `${name} (runs)`)]
-    console.log(`${isCloned(repo.name) ? "✓" : " "} ${repo.name.padEnd(14)} ${uses.length ? uses.join(", ") : "-"}`)
-  }
+  for (const repo of repos()) console.log(`${isCloned(repo) ? "✓" : " "} ${repo.name.padEnd(14)} ${repo.path}`)
   return 0
 }
 
 /**
- * `yarn ts | test | lint | review`:  the kit's own (`kit:<script>`), then that script in every child
- * repo there, lowest first, each in its own folder.
- * - Lowest first:  a repo's `ts` builds its declarations (epic `repo-split` I12), which the repos above it read;  the
- *   kit's are the lowest of all.
- * - Every repo runs, failed or not;  the summary says which failed, and the exit status is 1 if any did.
+ * `yarn ts | test | lint | review`:  the kit's own (`kit:<script>`), then that script in each of its folders, lowest
+ * first, each in its own folder.
+ * - Lowest first:  a folder's `ts` may build declarations the folders above it, or a project beside the kit, read.
+ * - Every folder runs, failed or not;  the summary says which failed, and the exit status is 1 if any did.
+ * - The repos beside the kit run their own:  each has its own install.
  */
 function runEverywhere(script: string): number {
   const results: Array<[string, string]> = []
@@ -329,20 +328,21 @@ function runEverywhere(script: string): number {
     const code = run("yarn", ["run", `kit:${script}`])
     results.push(["spell", `${code === 0 ? "passed" : "FAILED"}  (${Math.round((Date.now() - started) / 1000)}s)`])
   }
-  for (const repo of repos().filter((each) => isCloned(each.name))) {
-    const manifest = JSON.parse(readFileSync(join(TOP, repo.name, "package.json"), "utf8")) as {
+  for (const dir of kitFolders(TOP)) {
+    const folder = `${dir.slice(TOP.length + 1)}/`
+    const manifest = JSON.parse(readFileSync(join(dir, "package.json"), "utf8")) as {
       scripts?: Record<string, string>
     }
     if (!manifest.scripts?.[script]) {
-      results.push([repo.name, `no ${script} script`])
+      results.push([folder, `no ${script} script`])
       continue
     }
-    console.log(`\n==================== ${repo.name}:  yarn ${script}\n`)
+    console.log(`\n==================== ${folder}:  yarn ${script}\n`)
     const started = Date.now()
-    const code = run("yarn", ["run", script], join(TOP, repo.name))
-    results.push([repo.name, `${code === 0 ? "passed" : "FAILED"}  (${Math.round((Date.now() - started) / 1000)}s)`])
+    const code = run("yarn", ["run", script], dir)
+    results.push([folder, `${code === 0 ? "passed" : "FAILED"}  (${Math.round((Date.now() - started) / 1000)}s)`])
   }
-  console.log(`\n==================== yarn ${script}, every repo\n`)
+  console.log(`\n==================== yarn ${script}, the kit and its folders\n`)
   for (const [name, result] of results) console.log(`${name.padEnd(14)} ${result}`)
   return results.some(([, result]) => result.startsWith("FAILED")) ? 1 : 0
 }

@@ -1,0 +1,953 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>epic-page</title>
+    <meta name="description" content="The &lt;epic-page&gt; element: a whole epic page, one epic's page." />
+    <!-- Before first paint:  the viewer's colour scheme (Spell UI's `ThemePreference.HEAD_SCRIPT`).  The theme itself is restored by site.js. -->
+    <script>
+      try {
+        var l = localStorage,
+          d = document.documentElement,
+          s = l.getItem("spell-site:scheme") || l.getItem("spell-site:theme") || l.getItem("spell-ui-site:scheme")
+        if (s === "light" || s === "dark") {
+          d.classList.add("ui-" + s)
+          d.style.colorScheme = s
+        }
+      } catch (e) {}
+    </script>
+    <link rel="stylesheet" href="_assets/site.css" />
+    <script type="module" src="_assets/site.js"></script>
+    <!-- the comments (bullhorns, threads, Send):  the docs runtime's, alone, beside the site's Spell UI -->
+    <script defer src="/_epic/assets/spell-comments.js"></script>
+  </head>
+  <body class="ui-typography">
+    <main id="main" class="site-main" data-toc-header="&lt;epic-page&gt;">
+      <ui-segment appearance="vertical" class="site-masthead">
+        <ui-container>
+          <ui-menu icon class="site-page-links" aria-label="About this page">
+            <ui-item
+              link="/epic/src/tool/PLAN-DOC.md"
+              icon="book"
+              aria-label="The markup rules, PLAN-DOC.md"
+              title="The markup rules, PLAN-DOC.md"
+            ></ui-item>
+          </ui-menu>
+          <ui-header level="1" class="site-title">
+            &lt;epic-page&gt;
+            <ui-header>The &lt;epic-page&gt; element: a whole epic page, one epic's page.</ui-header>
+          </ui-header>
+        </ui-container>
+      </ui-segment>
+
+      <ui-container class="site-body">
+        <article class="site-article">
+          <p class="lede"><code>&lt;epic-page&gt;</code> is a whole epic page: one epic's page.</p>
+          <ul>
+            <li>
+              Its attributes hold the epic's data (name, title, branch, dates); its children are the Overview and the
+              sections.
+            </li>
+            <li>
+              It draws everything above them: the breadcrumbs, the sticky page header, the meta lines, and the review
+              buttons.
+            </li>
+          </ul>
+          <!-- no ui-list.spell-meta here:  any ui-item element on the page leaves epic-item unstyled (issue I9 of epic-components) -->
+          <p class="meta">
+            Written for: anyone reading or writing an epic page's markup, or changing this element.<br />
+            Status: <ui-label size="mini" color="green">built</ui-label> in
+            <a href="/epic/src/components/epic-page/" target="src-spell-epic-src-components-epic-page"
+              ><code title="epic/src/components/epic-page/">epic-page/</code></a
+            >.<br />
+            Its vocabulary (attributes, slots, parts, children):
+            <a
+              href="/epic/src/components/epic-page/EpicPage.en.ts"
+              target="src-spell-epic-src-components-epic-page-epicpage-en-ts"
+              ><code title="epic/src/components/epic-page/EpicPage.en.ts">EpicPage.en.ts</code></a
+            >.<br />
+            The component:
+            <a
+              href="/epic/src/components/epic-page/EpicPage.tsx"
+              target="src-spell-epic-src-components-epic-page-epicpage-tsx"
+              ><code title="epic/src/components/epic-page/EpicPage.tsx">EpicPage.tsx</code></a
+            >.
+          </p>
+
+          <ui-section id="1-example" label="1. Example" sticky collapsible dividing open="false">
+            <ui-icon slot="icon" name="eye"></ui-icon>
+            <p>As markup only, not drawn live: the note below says why.</p>
+            <ui-message state="info" heading="Not live on this page">
+              <p>
+                An <code>&lt;epic-page&gt;</code> takes over the page around it: its header sticks under the site
+                header, and its sections join the page's rail. So it shows only as markup here; to see one drawn, open
+                <a href="/epics/epic-components/epic-components.plan.html" target="epic-components"
+                  >this epic's own epic page</a
+                >.
+              </p>
+            </ui-message>
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>A small epic page · 20 lines</ui-title>
+              <ui-content>
+                <ui-code language="html"
+                  ><script type="text/plain">
+                    <epic-page
+                      epic="seo"
+                      title="Search Engines"
+                      branch="seo"
+                      worktree="/Users/owen/www/spell-app/spell-app/.claude/worktrees/seo"
+                      started="2026-10-01"
+                      updated="2026-10-07"
+                      saga="spell-ui"
+                    >
+                      <epic-overview id="overview" estimate="2h-3h in all, 1h left">
+                        <epic-summary>Every docs page gets a title, a description and a sitemap entry, so search engines can find it.</epic-summary>
+                      </epic-overview>
+                      <epic-section id="phases" kind="phases">
+                        <epic-phase id="p-page-titles" title="Page Titles" status="done" estimate="1-2h"></epic-phase>
+                        <epic-phase id="p-sitemap" title="Sitemap" status="active" estimate="1h"></epic-phase>
+                      </epic-section>
+                      <epic-section id="decisions" kind="questions"></epic-section>
+                      <epic-section id="log" kind="log">
+                        <epic-event at="2026-10-01T09:12-04:00">plan doc created</epic-event>
+                      </epic-section>
+                    </epic-page>
+                  </script></ui-code
+                >
+              </ui-content>
+            </ui-accordion>
+            <p>What that draws, above its blocks:</p>
+            <ul>
+              <li>
+                ONE line of crumbs, <code>DOCS / EPICS / SEO</code>, the epic's name in their type, twice their size and
+                bold: the h1 (a click on the name copies <code>/epic resume seo</code>, and a toast says so), and at the
+                header's right the step label: <code>P2</code>, the
+                phase under way, outlined grey
+              </li>
+              <li>
+                under the header, the review line (<code>To review this doc, type /epic review seo</code>), then the
+                meta lines: the branch, the worktree, <code>Started 10/1/26, updated 10/7/26</code>, and
+                <code>Saga: Spell UI</code>, a link to the saga's page, its purpose the tooltip (the page server says
+                the saga's title and purpose;  until it does, and from disk, the link reads <code>spell-ui</code>)
+              </li>
+              <li>
+                served by the page server, a See Also box above the blocks: the epic's guide, every page it made for
+                itself in its <a href="/pages/details/" target="src-pages-details"><code>details/</code></a> folder
+                (details pages, choice pages, its review page), then every guide its page and parts link to, each with
+                its kind's icon and word (guide, details, choices, guide)
+              </li>
+              <li>
+                no Send: it shows only while an epic page is being reviewed through the page server
+              </li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="2-markup" label="2. Markup" sticky collapsible dividing open="false">
+            <ui-icon slot="icon" name="code"></ui-icon>
+            <p>
+              The opening of a real epic page (<a
+                href="/epics/epic-components/epic-components.plan.html"
+                target="epic-components"
+                title="epics/epic-components/epic-components.plan.html"
+                ><code>epic-components.plan.html</code></a
+              >), its blocks cut short:
+            </p>
+
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>An epic page's page · 24 lines</ui-title>
+              <ui-content>
+                <ui-code language="html"
+                  ><script type="text/plain">
+                    <ui-root
+                      ><ui-components source="/_epic/pack/epics.pack.js"></ui-components
+                      ><spell-site-header root="../.."></spell-site-header>
+                      <div class="spell-doc">
+                        <main class="spell-doc-main">
+                          <epic-page
+                            epic="epic-components"
+                            title="Epic Pages as Components"
+                            branch="epic-components"
+                            worktree="/Users/owen/www/spell-app/spell-app/.claude/worktrees/epic-components"
+                            started="2026-10-07"
+                            updated="2026-10-09"
+                            bedtime="P15-P16"
+                            repo="https://github.com/spell-app/spell-app"
+                          >
+                            <epic-overview id="overview" estimate="44h-56h in all, 3h left">...</epic-overview>
+                            <epic-section id="phases" kind="phases">...</epic-section>
+                            <epic-section id="decisions" kind="questions">...</epic-section>
+                            ... judgements, todos, issues, tests ...
+                            <epic-section id="log" kind="log" source="parts/log.html"></epic-section>
+                          </epic-page>
+                        </main>
+                      </div>
+                    </ui-root>
+                  </script></ui-code
+                >
+              </ui-content>
+            </ui-accordion>
+            <ul>
+              <li>
+                <code>&lt;ui-root&gt;</code> loads the epics pack, the script that defines every
+                <code>&lt;epic-*&gt;</code> tag, from its <code>&lt;ui-components source&gt;</code>.
+              </li>
+              <li>
+                The file's <code>&lt;title&gt;</code> reads <code>Epic: &lt;title&gt;</code>; the page's
+                <code>title</code> holds the title alone.
+              </li>
+              <li>
+                None of the header is written in the file: the element draws it from the attributes and the phases
+                below.
+              </li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="3-where-it-goes" label="3. Where it goes" sticky collapsible dividing open="false">
+            <ui-icon slot="icon" name="compass"></ui-icon>
+
+            <ui-section id="epic-page-parents" label="Its parents" sticky collapsible dividing open="false">
+              <p>
+                None: it's the page. An epic page's file holds exactly one, in <code>main.spell-doc-main</code>, inside
+                <code>&lt;ui-root&gt;</code>.
+              </p>
+            </ui-section>
+
+            <ui-section id="epic-page-children" label="Its children" sticky collapsible dividing open="false">
+              <p>
+                The Overview first, then the sections, each <code>kind</code> once at most, with its fixed id. A report
+                (<code>kind="report"</code>) is the one section that isn't numbered: it sits right after the Overview.
+              </p>
+              <p>
+                In THIS order, always: the tool puts each child where it belongs, and the check refuses another order.
+              </p>
+              <ui-table celled padding="compact" appearance="striped" unstackable>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Child</th>
+                      <th>Where</th>
+                      <th>How many</th>
+                      <th>What it is</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>prose</td>
+                      <td><code>slot="durable"</code></td>
+                      <td>one at most</td>
+                      <td>The guide's link.</td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <a href="epic-overview.html" target="src-packages-epics-docs-epic-overview-html"
+                          ><code>&lt;epic-overview&gt;</code></a
+                        >
+                      </td>
+                      <td></td>
+                      <td>exactly one</td>
+                      <td>1. Overview.</td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <a href="epic-section.html" target="src-packages-epics-docs-epic-section-html"
+                          ><code>&lt;epic-section kind="report"&gt;</code></a
+                        >
+                      </td>
+                      <td></td>
+                      <td>any number</td>
+                      <td>
+                        Reports a run wrote (an overnight <code>/bedtime</code> report), after the Overview: unnumbered.
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <a href="epic-section.html" target="src-packages-epics-docs-epic-section-html"
+                          ><code>&lt;epic-section kind="epics"&gt;</code></a
+                        >
+                      </td>
+                      <td>a saga page only</td>
+                      <td>one at most</td>
+                      <td>A saga page's Epics, after its Overview: the cards of the epics serving it.</td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <a href="epic-section.html" target="src-packages-epics-docs-epic-section-html"
+                          ><code>&lt;epic-section kind="phases"&gt;</code></a
+                        >
+                      </td>
+                      <td></td>
+                      <td>one at most</td>
+                      <td>2. Phases.</td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <a href="epic-section.html" target="src-packages-epics-docs-epic-section-html"
+                          ><code>&lt;epic-section kind="questions"&gt;</code></a
+                        >
+                      </td>
+                      <td></td>
+                      <td>one at most</td>
+                      <td>3. Questions.</td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <a href="epic-section.html" target="src-packages-epics-docs-epic-section-html"
+                          ><code>&lt;epic-section kind="judgements"&gt;</code></a
+                        >
+                      </td>
+                      <td></td>
+                      <td>one at most</td>
+                      <td>4. Judgement calls.</td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <a href="epic-section.html" target="src-packages-epics-docs-epic-section-html"
+                          ><code>&lt;epic-section kind="todos"&gt;</code></a
+                        >
+                      </td>
+                      <td></td>
+                      <td>one at most</td>
+                      <td>5. Todo: work still to do, and limits to know about (<code>limit</code>); Caveats, <code>kind="caveats"</code>, from epic <code>epic-engine</code> P32 to P44.</td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <a href="epic-section.html" target="src-packages-epics-docs-epic-section-html"
+                          ><code>&lt;epic-section kind="issues"&gt;</code></a
+                        >
+                      </td>
+                      <td></td>
+                      <td>one at most</td>
+                      <td>6. Issues.</td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <a href="epic-section.html" target="src-packages-epics-docs-epic-section-html"
+                          ><code>&lt;epic-section kind="tests"&gt;</code></a
+                        >
+                      </td>
+                      <td></td>
+                      <td>one at most</td>
+                      <td>7. Manual tests (To test before epic <code>epic-engine</code> P44).</td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <a href="epic-section.html" target="src-packages-epics-docs-epic-section-html"
+                          ><code>&lt;epic-section kind="log"&gt;</code></a
+                        >
+                      </td>
+                      <td></td>
+                      <td>one at most</td>
+                      <td>8. Log.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </ui-table>
+            </ui-section>
+          </ui-section>
+
+          <ui-section id="4-attributes" label="4. Attributes" sticky collapsible dividing open="false">
+            <ui-icon slot="icon" name="table columns"></ui-icon>
+            <p>The epic's data. Dates are WRITTEN <code>2026-10-08</code> and DRAWN <code>10/8/26</code>.</p>
+            <ui-table celled padding="compact" appearance="striped" unstackable>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Values</th>
+                    <th>Meaning</th>
+                    <th>Required</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><code>epic</code></td>
+                    <td>text: epic name</td>
+                    <td>
+                      The epic's name: its folder in <a href="/epics/" target="src-epics"><code>epics/</code></a
+                      >, and its branch's (<code>epic-components</code>). Absent on a saga page, which
+                      <code>saga</code> names instead.
+                    </td>
+                    <td>on an epic page</td>
+                  </tr>
+                  <tr>
+                    <td><code>kind</code></td>
+                    <td>text: <code>saga</code></td>
+                    <td>
+                      Absent: an epic page. <code>saga</code>: a saga page (epic <code>epic-workflow</code> P15), see
+                      "7. As a saga page".
+                    </td>
+                    <td></td>
+                  </tr>
+                  <tr>
+                    <td><code>saga</code></td>
+                    <td>text: saga id</td>
+                    <td>
+                      On an epic page, the saga it serves (<code>drawable-spell</code>); on a saga page, the saga it is.
+                      One of
+                      <a href="/sagas/sagas.json5" target="src-sagas-sagas-json5"
+                        ><code title="sagas/sagas.json5">sagas.json</code></a
+                      >'s ids.
+                    </td>
+                    <td>on a saga page</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <code>title</code><br /><span class="meta">JS property: <code>epicTitle</code></span>
+                    </td>
+                    <td>text</td>
+                    <td>
+                      The epic's title (<code>Windows and Review</code>): the page's <code>&lt;title&gt;</code> and the
+                      Epics list's; not drawn on the page, whose h1 is the epic's name.
+                    </td>
+                    <td>yes</td>
+                  </tr>
+                  <tr>
+                    <td><code>branch</code></td>
+                    <td>text</td>
+                    <td>Its git branch; absent for a future epic.</td>
+                    <td></td>
+                  </tr>
+                  <tr>
+                    <td><code>worktree</code></td>
+                    <td>text</td>
+                    <td>Its worktree's folder, absolute; absent for a future epic, or once the worktree is gone.</td>
+                    <td></td>
+                  </tr>
+                  <tr>
+                    <td><code>started</code></td>
+                    <td>text: date</td>
+                    <td>The day the epic page was made.</td>
+                    <td></td>
+                  </tr>
+                  <tr>
+                    <td><code>updated</code></td>
+                    <td>text: date</td>
+                    <td>The day a command last changed it.</td>
+                    <td></td>
+                  </tr>
+                  <tr>
+                    <td><code>future</code></td>
+                    <td>boolean: there or not</td>
+                    <td>
+                      A FUTURE epic (<code>/epic future</code>): an idea written down, not planned yet; its open
+                      questions are on <code>details/analysis.html</code>.
+                    </td>
+                    <td></td>
+                  </tr>
+                  <tr>
+                    <td><code>saga</code></td>
+                    <td>text: saga id</td>
+                    <td>
+                      The saga this epic serves, by id (<code>drawable-spell</code>): one of the sagas' list, set by
+                      <code>epic saga set</code>. Drawn in the meta lines, a link to its saga page; absent: no saga.
+                    </td>
+                    <td></td>
+                  </tr>
+                  <tr>
+                    <td><code>stage</code></td>
+                    <td><code>overview</code> · <code>phases</code> · <code>building</code></td>
+                    <td>
+                      How far planning has got, and so which sections show (epic <code>epic-engine</code> P29): see
+                      "8. Stages". Absent: <code>building</code>, so a page made before stages looks as it did.
+                    </td>
+                    <td></td>
+                  </tr>
+                  <tr>
+                    <td><code>bedtime</code></td>
+                    <td>text</td>
+                    <td>
+                      A <code>/bedtime</code> run is on, and what it runs (<code>P3-P6</code>): items it changes are
+                      <code>recent</code>.
+                    </td>
+                    <td></td>
+                  </tr>
+                  <tr>
+                    <td><code>recent-since</code></td>
+                    <td>text: time</td>
+                    <td>
+                      Items decided, reviewed or closed since then are <code>recent</code> (green): the commit time of
+                      <code>HEAD~2</code> in the doc's checkout. Absent without git history.
+                    </td>
+                    <td></td>
+                  </tr>
+                  <tr>
+                    <td><code>repo</code></td>
+                    <td>text</td>
+                    <td>
+                      The repo's web address (<code>https://github.com/spell-app/spell-app</code>):
+                      <code>&lt;epic-commit&gt;</code> links are made from it. Absent: commits show without links.
+                    </td>
+                    <td></td>
+                  </tr>
+                  <tr>
+                    <td><code>reviewing</code></td>
+                    <td>boolean: there or not</td>
+                    <td>
+                      PAGE state, never in a doc: the page is being reviewed -- served by the page server with a token,
+                      its review inbox answering -- so items and Overview parts show their review controls, and the
+                      header Send and Review Now. Set by them (P9, <code>ReviewState</code>); the old runtime's
+                      <code>body.plan-reviewing</code>.
+                    </td>
+                    <td></td>
+                  </tr>
+                </tbody>
+              </table>
+            </ui-table>
+            <p>
+              TEST MODE (epic <code>epic-engine</code> P4), page state, never in a doc: from the Manual tests section's Start
+              testing, or <code>?test=1</code> on the address (<code>?test=1&amp;all=1</code> across every epic), the page
+              draws its test run over its blocks (<a href="epic-test-run.html" target="src-spell-epic-src-docs-epic-test-run-html"><code>&lt;epic-test-run&gt;</code></a>, its part <code>test-run</code>;
+              <code>:state(testing)</code>). Only the header and the pill stay;  Esc or Done testing brings the blocks back, the run's unsent answers sent to Claude.
+            </p>
+            <ui-section id="epic-page-slots" label="Slots" sticky collapsible dividing open="false">
+              <p>Where its children show: a child goes in a slot by its <code>slot</code> attribute.</p>
+              <ui-table celled padding="compact" appearance="striped" unstackable>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Slot</th>
+                      <th>What goes in it</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>(default)</td>
+                      <td>The Overview, then the sections.</td>
+                    </tr>
+                    <tr>
+                      <td><code>durable</code></td>
+                      <td>
+                        A link to the guide, once Doc Review wrote one:
+                        <code>&lt;a slot="durable" href="../../guides/x.html"&gt;X&lt;/a&gt;</code>.
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </ui-table>
+            </ui-section>
+
+            <ui-section id="epic-page-parts" label="Parts" sticky collapsible dividing open="false">
+              <p>Pieces of what it draws, which a page's CSS can style from outside with <code>::part(name)</code>.</p>
+              <ui-table celled padding="compact" appearance="striped" unstackable>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Part</th>
+                      <th>What it is</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><code>base</code></td>
+                      <td>The page.</td>
+                    </tr>
+                    <tr>
+                      <td><code>crumbs</code></td>
+                      <td>
+                        In the h1, before the epic's name: <code>Docs / Epics /</code>, the docs' eyebrow. None narrow,
+                        nor while the doc still holds its old <code>ui-breadcrumbs.spell-crumbs</code> before the page.
+                      </td>
+                    </tr>
+                    <tr>
+                      <td><code>header</code></td>
+                      <td>The sticky page header: the h1, then the tools and labels at its right.</td>
+                    </tr>
+                    <tr>
+                      <td><code>heading</code></td>
+                      <td>
+                        The h1: the crumbs, then the epic's name in their type, twice their size and bold; a click on
+                        the name copies
+                        <code>/epic resume &lt;name&gt;</code>.
+                      </td>
+                    </tr>
+                    <tr>
+                      <td><code>actions</code></td>
+                      <td>
+                        While the page is reviewed: Send (<a href="epic-send-buttons.html" target="src-spell-epic-src-docs-epic-send-buttons-html"><code>&lt;epic-send-buttons&gt;</code></a>:
+                        the paper plane grey, blue with unsent marks, outlined once sent;  no wand since 2026-10-25).
+                      </td>
+                    </tr>
+                    <tr>
+                      <td><code>send</code></td>
+                      <td>
+                        Send, an <code>&lt;epic-send-buttons&gt;</code>: every unsent mark and comment to Claude, on a
+                        press (epic <code>epic-engine</code> P20; its wand and countdown gone since Owen, 2026-10-25).
+                      </td>
+                    </tr>
+                    <tr>
+                      <td><code>git</code></td>
+                      <td>The git toggle: shows or hides every commit (only when the doc has some).</td>
+                    </tr>
+                    <tr>
+                      <td><code>status</code></td>
+                      <td>The state mark (in progress, errors or paused), then the bedtime and step labels.</td>
+                    </tr>
+                    <tr>
+                      <td><code>state</code></td>
+                      <td>
+                        The epic's state, an icon in its colour: in progress (blue), errors (red: every phase done,
+                        items need you), paused (grey: phases left, untouched for days); why on hover. None for a future
+                        epic or a done one: the step label says so.
+                      </td>
+                    </tr>
+                    <tr>
+                      <td><code>review-line</code></td>
+                      <td>
+                        Under the header: <code>To review this doc, type /epic review &lt;name&gt;</code>, copied on
+                        click; while the page is reviewed with nobody listening, it says no session is reviewing.
+                      </td>
+                    </tr>
+                    <tr>
+                      <td><code>pill</code></td>
+                      <td>
+                        Under the review line, while work waits and nobody listens (orange), or in airplane mode: no
+                        session is reviewing, or what the page server's wake did ("Typed /epic review &lt;name&gt; into
+                        🚧 &lt;name&gt;: press Enter there"). A click types the command into the epic's session.
+                      </td>
+                    </tr>
+                    <tr>
+                      <td><code>meta</code></td>
+                      <td>The meta lines: branch, worktree, dates, saga, guide.</td>
+                    </tr>
+                    <tr>
+                      <td><code>see-also</code></td>
+                      <td>
+                        Above the blocks: the pages the epic made or leans on (its guide, its
+                        <a href="/pages/details/" target="src-pages-details"><code>details/</code></a> folder, the
+                        guides it links), each a link with its kind (an <code>li[data-kind]</code>), gathered by the
+                        page server's <code>GET /api/epics/pages</code>. None, no box.
+                      </td>
+                    </tr>
+                    <tr>
+                      <td><code>notice</code></td>
+                      <td>A future epic's notice: not planned yet.</td>
+                    </tr>
+                    <tr>
+                      <td><code>hung</code></td>
+                      <td>
+                        A doc still planning (no phases, not future): the folded <code>Plan hung?</code> aside, with the
+                        prompt to copy.
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </ui-table>
+            </ui-section>
+
+            <ui-section id="epic-page-states" label="States" sticky collapsible dividing open="false">
+              <p>Custom states: CSS can match them with <code>epic-page:state(name)</code>.</p>
+              <ui-table celled padding="compact" appearance="striped" unstackable>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>State</th>
+                      <th>When</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><code>:state(future)</code></td>
+                      <td>A future epic.</td>
+                    </tr>
+                    <tr>
+                      <td><code>:state(commits)</code></td>
+                      <td>Every commit shows (the git toggle is on).</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </ui-table>
+            </ui-section>
+          </ui-section>
+
+          <ui-section id="5-how-it-looks" label="5. How it looks" sticky collapsible dividing open="false">
+            <ui-icon slot="icon" name="palette"></ui-icon>
+            <ul>
+              <li>
+                <b>Edge to edge:</b> it breaks out of the docs' page padding, so the section bands reach across the
+                window. Everything inside insets itself.
+              </li>
+              <li>
+                <b>The step label</b>, at the header's right, follows the phases (<a
+                  href="/guides/epic-components/colours.html"
+                  target="src-guides-epic-components-colours-html"
+                  >the colour scheme</a
+                >):
+                <ul>
+                  <li>
+                    the phase under way: OUTLINED grey, a link to it (Owen, 2026-10-25: "Make the P1/agent pill
+                    non-blue"); its half-filled circle says it's under way
+                  </li>
+                  <li>every phase done: <code>DONE</code>, SOLID green</li>
+                  <li>
+                    otherwise the next phase, grey; <code>FUTURE</code>, grey, for a future epic; nothing without phases
+                  </li>
+                </ul>
+              </li>
+              <li><b>The bedtime label</b> (<code>bedtime</code> set): violet, Claude's voice, with a bed icon.</li>
+              <li>
+                <b>The state mark</b>, by the same rule as the Epics list (<code>spell/epic/list/EpicState</code>, Owen
+                2026-10-10): in progress (blue: phases left, touched in the last 3 days or a session listening), errors
+                (red: every phase done, items need you), paused (grey: phases left, untouched for 3 days or more). Its
+                tooltip says why. None for a future epic or a done one: FUTURE and DONE say it.
+              </li>
+              <li>
+                <b>Send</b>, only while the page is reviewed: blue (do it now), by the
+                fill rule (<a href="epic-send-buttons.html" target="src-spell-epic-src-docs-epic-send-buttons-html"><code>&lt;epic-send-buttons&gt;</code></a>, epic <code>epic-engine</code> P20).
+                <ul>
+                  <li>
+                    The paper plane: a grey outline with nothing to send; DASHED blue with marks not sent yet;
+                    OUTLINED blue once sent
+                  </li>
+                  <li>
+                    No wand since Owen, 2026-10-25 ("remove the wand EVERYWHERE ... We may bring the wand back
+                    later"): the countdown it turned on never runs, and the plane is filled blue until he presses it.
+                  </li>
+                </ul>
+              </li>
+              <li>
+                <b>The review line:</b> a click copies the command. While the page is reviewed with no Claude session
+                listening, it says so in solid orange (a warning).
+              </li>
+              <li>
+                <b>Waking the epic</b> (epic <code>epic-workflow</code> P16): Send with nobody
+                listening makes the page server type <code>/epic review &lt;name&gt;</code> into the epic's
+                running session, or open a new session in its window, for Owen to press Enter there.
+                <ul>
+                  <li>
+                    The orange pill then says what it did, until a session listens: "Typed /epic review seo into 🚧 seo:
+                    press Enter there"
+                  </li>
+                  <li>Once per epic per 10 minutes: a second press says "Already ..." and the time</li>
+                  <li>A click on the pill still types the command on purpose</li>
+                </ul>
+              </li>
+              <li>
+                <b>The git toggle:</b> a bare icon, only when the doc lists commits. It shows or hides every commit,
+                remembered per page.
+              </li>
+              <li>
+                <b>Agents running</b> (<code>&lt;epic-agents&gt;</code>, epic <code>epic-engine</code> P35), while any
+                agent of the epic runs:
+                <ul>
+                  <li>
+                    the step label's pill goes on with <code>2</code> and a robot, at every width (Owen, 2026-10-25:
+                    "<code>1 &lt;robot icon&gt;</code> is sufficient, I can click to see what you mean");
+                    <code>2 agents running</code> is its tooltip and the name a screen reader hears
+                  </li>
+                  <li>
+                    a click opens their rows in a popover: each agent's name, status, age and task, and a note box
+                    that redirects it, sent by a blue plane in a circle, no word
+                  </li>
+                  <li>
+                    in the toolbar, the session's line (<code>Building P35</code>): a grey pill like the step label,
+                    a turning spinner where the label has its icon
+                  </li>
+                </ul>
+              </li>
+              <li>
+                <b>Folding:</b> the page itself doesn't fold. Its blocks do, and on an epic page they all start folded.
+              </li>
+              <li>
+                <b>The shared look:</b> it declares the pack's CSS tokens (<code>--epic-*</code>: colours, bands, the
+                inset, the chips), and every element inside inherits them.
+              </li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="6-written-by" label="6. Written by" sticky collapsible dividing open="false">
+            <ui-icon slot="icon" name="terminal"></ui-icon>
+            <ul>
+              <li>
+                <code>epic create &lt;epic&gt; [--title ...] [--prompt ...] [--future]</code>: copies the
+                tool's template (<a
+                  href="/epic/src/tool/templates/plan.html"
+                  target="src-spell-epic-src-tool-templates-plan-html"
+                  title="epic/src/tool/templates/plan.html"
+                  ><code>plan.html</code></a
+                >) and fills <code>epic</code>, <code>title</code>, <code>branch</code>, <code>worktree</code>,
+                <code>started</code> and <code>updated</code>. With <code>--future</code>: <code>future</code>, and no
+                branch or worktree.
+              </li>
+              <li>
+                <code>new</code> run on a future epic's doc, or adding its first phase, plans it:
+                <code>future</code> goes.
+              </li>
+              <li>
+                Every command that edits the doc stamps <code>updated</code> and refreshes <code>recent-since</code>.
+              </li>
+              <li>
+                <code>epic bedtime &lt;epic&gt; start "P3-P6"</code> sets <code>bedtime</code>;
+                <code>bedtime &lt;name&gt; done</code> removes it.
+              </li>
+              <li>
+                <code>epic commit</code> and
+                <code>epic commits &lt;epic&gt; --backfill</code> list commits, linked through
+                <code>repo</code>.
+              </li>
+              <li>
+                <code>epic convert</code> wrote it for every doc made before the switch (from the old
+                <code>ui-*</code> markup).
+              </li>
+              <li><code>reviewing</code> is never written: the page sets it on itself while it's being reviewed.</li>
+              <li>
+                The rules for the doc's data:
+                <a
+                  href="/epic/src/tool/PLAN-DOC.md"
+                  target="src-spell-epic-src-tool-plan-doc-md"
+                  title="epic/src/tool/PLAN-DOC.md"
+                  ><code>PLAN-DOC.md</code></a
+                >, "The page".
+              </li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="7-saga-page" label="7. As a saga page" sticky collapsible dividing open="false">
+            <ui-icon slot="icon" name="map"></ui-icon>
+            <p>
+              With <code>kind="saga"</code> it's a SAGA page (epic <code>epic-workflow</code> P15): one saga's page,
+              <code>sagas/&lt;id&gt;/&lt;id&gt;.saga.html</code>, built of the same elements, so its items, marks,
+              comments and Send work as an epic page's.
+            </p>
+            <ul>
+              <li>Crumbs <code>DOCS / SAGAS / &lt;ID&gt;</code>; a click on the id copies its review command.</li>
+              <li>
+                One meta line, its short address (<code>SAGA:/drawable-spell</code>, copied on click), then its dates.
+              </li>
+              <li>No step label, state, Plan hung?, See Also or Agents running: a saga has no phases or branch.</li>
+              <li>
+                Send and the review line as on an epic page. Its marks and comments wait in its own inbox, beside it,
+                for the session running <code>/epic review SAGA:/&lt;id&gt;</code>.
+              </li>
+              <li>
+                Its sections: the Overview (the saga's purpose, Done so far, Ideas not done yet), Epics (<a
+                  href="epic-cards.html"
+                  target="src-packages-epic-components-elements-epic-cards-html"
+                  ><code>&lt;epic-cards&gt;</code></a
+                >), Questions, Todos, Log.
+              </li>
+              <li>
+                Made by <code>epic saga page &lt;id&gt;</code> from the tool's
+                <a
+                  href="/epic/src/tool/templates/saga.html"
+                  target="src-spell-epic-src-tool-templates-saga-html"
+                  ><code title="epic/src/tool/templates/saga.html">saga.html</code></a
+                >; every <code>epic</code> verb edits it as <code>SAGA:/&lt;id&gt;</code>.
+              </li>
+            </ul>
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>A saga page's markup · 13 lines</ui-title>
+              <ui-content>
+                <ui-code language="html"
+                  ><script type="text/plain">
+                    <epic-page kind="saga" saga="epics" title="Epic Tooling" started="2026-10-14" updated="2026-10-14">
+                      <epic-overview id="overview">
+                        <epic-summary>Epics:  their pages, the review loop, comments, agents, and the skills around them.</epic-summary>
+                        <epic-section id="o1" kind="overview-part" title="Done so far">...</epic-section>
+                        <epic-section id="o2" kind="overview-part" title="Ideas not done yet">...</epic-section>
+                      </epic-overview>
+                      <epic-section id="epics" kind="epics"><epic-cards saga="epics"></epic-cards></epic-section>
+                      <epic-section id="decisions" kind="questions"></epic-section>
+                      <epic-section id="log" kind="log">...</epic-section>
+                    </epic-page>
+                  </script></ui-code
+                >
+              </ui-content>
+            </ui-accordion>
+          </ui-section>
+          <ui-section id="8-stages" label="8. Stages" sticky collapsible dividing open="false">
+            <ui-icon slot="icon" name="route"></ui-icon>
+            <p>
+              A page goes through three stages (epic <code>epic-engine</code> P29): the Overview is agreed first, then
+              the phases, then it's built. Its <code>stage</code> says which, and decides what the page shows.
+            </p>
+            <ui-table celled padding="compact" appearance="striped" unstackable>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Stage</th>
+                    <th>What shows</th>
+                    <th>The header's button</th>
+                    <th>An open phase's pills</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><code>overview</code></td>
+                    <td>the Overview, Questions, Todos</td>
+                    <td>Accept Overview</td>
+                    <td>(no phases show)</td>
+                  </tr>
+                  <tr>
+                    <td><code>phases</code></td>
+                    <td>the Phases too</td>
+                    <td>Accept Phases</td>
+                    <td>Looks good, Defer</td>
+                  </tr>
+                  <tr>
+                    <td><code>building</code>, or none</td>
+                    <td>everything</td>
+                    <td>Send (the paper plane)</td>
+                    <td>Make Todo, Revisit</td>
+                  </tr>
+                </tbody>
+              </table>
+            </ui-table>
+            <ul>
+              <li>
+                Hiding is only a view: the file still holds every section, and the toolbar lists only what shows. The
+                sections are numbered as they show (<code>2. Questions</code> while the Overview is agreed).
+              </li>
+              <li>
+                The button sits where Send's paper plane does. Its tooltip counts the open questions ("2 questions open"): a reminder, never a lock.
+              </li>
+              <li>
+                A press sends what's unsent with an accept mark. The session's <code>epic inbox apply</code> moves the
+                page on a stage, then writes the phases (after the Overview) or starts building (after the phases).
+                Pressed, the button is outlined green until then.
+              </li>
+              <li>
+                Building, while Claude's build plan for a phase waits for Owen's Accept, the header keeps Send,
+                never green (Owen, 2026-10-25: "I may not be accepting the phases"): the pill is RINGED, its border 2px
+                #666, darker than its hairline, waiting on him, dotted once each waiting phase has his mark; its tooltip names them,
+                "2 build plans wait for your Accept: P43, P44". Accepting is per phase, on its row, whose buttons wear
+                the same ring.
+              </li>
+              <li>
+                Defer moves a phase after the others, still to do; Looks good says it stands as written. Both wait for
+                Send, as every pill does.
+              </li>
+              <li>
+                <code>epic create</code> starts a new epic in <code>overview</code>, a future one too;
+                <code>epic stage &lt;epic&gt; overview|phases|building</code> sets it by hand.
+              </li>
+            </ul>
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>A page agreeing its Overview · 7 lines</ui-title>
+              <ui-content>
+                <ui-code language="html"
+                  ><script type="text/plain">
+                    <epic-page epic="seo" title="Search Engines" stage="overview">
+                      <epic-overview id="overview">...</epic-overview>
+                      <epic-section id="phases" kind="phases"></epic-section>
+                      <epic-section id="decisions" kind="questions">...</epic-section>
+                      <epic-section id="log" kind="log">...</epic-section>
+                    </epic-page>
+                  </script></ui-code
+                >
+              </ui-content>
+            </ui-accordion>
+          </ui-section>
+          <footer class="site-page-footer">
+            <ui-divider></ui-divider>
+            <p class="meta">
+              Last checked 2026-10-09 against branch <code>epic-components</code>: the tables come from its vocabulary
+              file, so they change with it.
+            </p>
+          </footer>
+        </article>
+      </ui-container>
+    </main>
+  </body>
+</html>

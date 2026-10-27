@@ -1,0 +1,48 @@
+<spell-notebook "advertisement theming">
+	<header level="1">
+		Advertisement
+		<header>An ad displays third-party promotional content.</>
+	</>
+	<advertisement-tab-bar showing="theming"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#tokens">Tokens</>
+				<ui-item link="#themes">Themes</>
+			</>
+		</>
+	</>
+
+	<!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
+	<section label="Tokens">
+		<markdown>
+			Theme with the public `--ui-ad-*` tokens: set one on the element, on any ancestor (a region,
+			`:root`), or on the ad's box through `::part(ad)`. They inherit into the shadow root, where the
+			sheet reads each through a private alias, so nothing inside blocks them. The unit sizes are fixed
+			by the IAB, so they aren't tokens. Never set the `--_ui-ad-*` names: they're the sheet's private
+			plumbing.
+		</>
+		<markdown>
+			```css
+			:root {
+			  --ui-ad-margin: 2em 0;
+			  --ui-ad-test-background: var(--ui-surface-muted);
+			  --ui-ad-test-color: var(--ui-text-muted);
+			}
+			```
+		</>
+		<markdown>Edit a value below to try it.</>
+		<html>
+			<ui-docs-tokens family="ui-ad" playground>
+				<ui-ad unit="medium rectangle" test="Medium rectangle"></>
+			</>
+		</>
+	</>
+
+	<section label="Themes">
+		<markdown>
+			Every theme of the set (Spell, Glass, Fruity, Merlot, Paper, Midnight, Crisp, Pop, Matrix) leaves ads their own look, and changes the
+			page around them.
+		</>
+	</>
+</spell-notebook>

@@ -1,0 +1,180 @@
+<spell-notebook "menu usage">
+	<header level="1">
+		Menu
+		<header>A menu displays grouped navigation actions.</>
+	</>
+	<menu-tab-bar showing="usage"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#using-it">Using it</>
+				<ui-item link="#navigation-or-menubar">Navigation or menubar</>
+				<ui-item link="#fitting-titles">Fitting titles</>
+				<ui-item link="#events">Events</>
+				<ui-item link="#keyboard">Keyboard</>
+				<ui-item link="#accessibility">Accessibility</>
+				<ui-item link="#framework-usage">Framework usage</>
+			</>
+		</>
+	</>
+
+	<!-- USAGE:  items, sub-menus, the two kinds of menu, events, keyboard, accessibility, frameworks. -->
+	<section label="Using it">
+		<markdown>
+			A menu's children are the one generic `<ui-item>`: the menu tells each item how to render, so there is no
+			`ui-menu-item`.
+
+			- An item with a `link` is a link; with `appearance="link"`, or in an `appearance="link"`, `pagination` or `interactive` menu, it is a button;
+			  otherwise a plain block that can hold text, inputs, buttons or a dropdown.
+			- `selected` marks the current item (Fomantic's `active` works too); `disabled` greys it out.
+			- `type="header"` makes an item a header; a `<ui-header>` inside an item heads a vertical menu's group.
+			- A `<ui-menu>` inside a menu (directly, or inside an item) is a sub-menu: `position` places it (`right` for
+			  Fomantic's right menu), and its items look like the outer menu's.
+			- `items="3"` divides the width evenly between three items; `items="equal"` between however many there are.
+		</>
+		<markdown>
+			```html
+			<ui-menu appearance="secondary pointing" aria-label="Account">
+			  <ui-item link="/" selected>Home</ui-item>
+			  <ui-item link="/messages">Messages</ui-item>
+			  <ui-menu position="right">
+			    <ui-item link="/logout" icon="sign out">Logout</ui-item>
+			  </ui-menu>
+			</ui-menu>
+			```
+		</>
+	</>
+
+	<section label="Navigation or menubar">
+		<markdown>
+			A menu comes in two kinds.
+
+			- By default it is site navigation: a `<nav>` landmark of links, the `selected` one marked as the current page.
+			- `interactive` makes it an application menubar instead, for commands: one Tab stop, arrow keys between the items
+			  (live example: Menubar, on the Examples tab).
+		</>
+	</>
+
+	<section label="Fitting titles">
+		<markdown>
+			`shrinkable` fits the items' titles to the menu's width, in four stages as it gets narrower:
+
+			1. every title whole, while they fit
+			2. the longest cut first, each ending in `…`, down to one width
+			3. once a title would be cut under `--ui-menu-title-min` (50px):  icons only, `:state(icons-only)`;
+			   each title is its item's tooltip, and an item with no icon shows its title's first letter
+			4. once a button would be under `--ui-menu-item-min` (34px):  every item folds into one `…` button,
+			   `:state(overflow)`, whose menu holds them all;  a dot on it while an item inside has a count
+
+			- Counts go in an item's `badge` slot, so they stay while its title is cut or gone.
+			- An item with no words (an icon button) stays in the row at every stage.
+			- `slot="overflow"` changes the `…`:  `<ui-icon slot="overflow" name="bars">`.
+			- Picking a row of the `…` menu clicks the real item:  `selected` and your listeners work as ever.
+			- A `segmented` one becomes a dropdown instead (`:state(dropdown)`):  its button shows the chosen item.
+			- Style the stages from outside:  `ui-menu:state(icons-only) ui-item::part(item) { width: 34px }`.
+		</>
+		<markdown>
+			```html
+			<ui-menu shrinkable label="Sections" style="--ui-menu-title-min: 60px; --ui-menu-item-min: 40px">
+			  <ui-item link="#questions" icon="question">Questions</ui-item>
+			  <ui-item link="#issues" icon="exclamation">Issues <ui-label slot="badge">2</ui-label></ui-item>
+			</ui-menu>
+			```
+		</>
+	</>
+
+	<section label="Events">
+		<markdown>
+			`ui-select` fires when a link or button item is activated (click, Enter or Space).
+
+			- `detail.value` is the item's `value`, else its text; `detail.item` is the `<ui-item>`.
+			- Only the top menu fires it, for sub-menu items too.
+			- The menu never moves `selected` itself:
+		</>
+		<markdown>
+			```js
+			const menu = document.querySelector("ui-menu[interactive]")
+			menu.addEventListener("ui-select", (event) => {
+			  for (const item of menu.querySelectorAll("ui-item")) {
+			    item.toggleAttribute("selected", item === event.detail.item)
+			  }
+			})
+			```
+		</>
+	</>
+
+	<section label="Keyboard">
+		<markdown>
+			A navigation menu keeps the browser's own keys: **Tab** moves through its links and buttons, **Enter** follows
+			them. An `interactive` menubar:
+
+			- **Tab** enters the menubar on the selected (else first) item; **Tab** again leaves.
+			- **Arrow Right** / **Arrow Left**: next / previous item, wrapping at the ends (flipped right-to-left).
+			- **Arrow Down** / **Arrow Up**: next / previous item in a `direction="vertical"` menubar.
+			- **Home** / **End**: first / last item.
+			- **Enter** / **Space**: activate the item (`ui-select`).
+
+			A `shrinkable` menu's `…` button (and a segmented one's dropdown):
+
+			- **Enter**, **Space** or **Arrow Down** opens its menu, on the selected item (else the first).
+			- **Arrow Down** / **Arrow Up**:  next / previous row, wrapping;  **Home** / **End**:  first / last.
+			- **Enter** / **Space** on a row picks it:  the real item is clicked, and focus goes back to the button.
+			- **Escape** closes it, focus back on the button;  **Tab** closes it and moves on.
+		</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			- By default the shadow root holds a `<nav>` landmark. Name it with `aria-label` on the `<ui-menu>`: two
+			  navigation menus on one page need different names. The `selected` link item is `aria-current="page"`.
+			- In an `appearance="link"` or `pagination` menu the items without a `link` are `<button>`s; a selected button item is
+			  `aria-current="true"`.
+			- `interactive` renders a `role="menubar"` (with `aria-orientation="vertical"` when `direction="vertical"`), named the same
+			  way. Each item's box is a `menuitem` and the item element itself has `role="none"`. The arrow keys skip
+			  disabled items.
+			- `type="header"` items are plain text, not links or menu items.
+			- An icon-only item needs a name: put `label` (or `aria-label`) on the `<ui-item>`.
+			- `shrinkable`:  a cut or hidden title is clipped, never removed, so it still names its item;  with icons
+			  only it is the item's tooltip too.  The `…` button is named "More", `aria-haspopup="menu"` and
+			  `aria-expanded`;  its menu is a `role="menu"`, a `menuitem` per row, the selected one a `menuitemradio`,
+			  `aria-checked`.
+			- `disabled` removes a link's `href` (and sets `aria-disabled`), disables a button, and marks a menu item
+			  `aria-disabled`.
+			- If the element fails to render, it shows its items through a bare `<slot>`, so their text and links
+			  stay and still work; the `<nav>` (or sub-menu box) and its look, `ui-select` and the menubar (arrow
+			  keys, `menuitem` roles) go.
+		</>
+	</>
+
+	<section label="Framework usage">
+		<markdown>Define the elements first, then listen for `ui-select` with your framework's custom-event syntax.</>
+		<header level="4" id="framework-react">React 19</>
+		<markdown>
+			```jsx
+			<ui-menu interactive aria-label="Editor" onui-select={(event) => run(event.detail.value)}>
+			  ...
+			</ui-menu>
+			```
+		</>
+		<header level="4" id="framework-vue">Vue 3.5</>
+		<markdown>
+			```html
+			<!-- compilerOptions.isCustomElement = (tag) => tag.startsWith("ui-") -->
+			<ui-menu interactive aria-label="Editor" @ui-select="(event) => run(event.detail.value)">...</ui-menu>
+			```
+		</>
+		<header level="4" id="framework-solid">Solid 2</>
+		<markdown>
+			```jsx
+			// events and rich data are plain props:  `on-<event>={...}`, `options={...}`
+			<ui-menu
+			  interactive
+			  aria-label="Editor"
+			  on-ui-choosing={(event) => run(event.detail.value)}
+			>
+			  ...
+			</ui-menu>
+			```
+		</>
+	</>
+</spell-notebook>

@@ -1,0 +1,125 @@
+<spell-notebook "card usage">
+	<header level="1">
+		Card
+		<header>A card displays site content in a manner similar to a playing card.</>
+	</>
+	<card-tab-bar showing="usage"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#using-it">Using it</>
+				<ui-item link="#groups">Groups</>
+				<ui-item link="#keyboard">Keyboard</>
+				<ui-item link="#accessibility">Accessibility</>
+				<ui-item link="#framework-usage">Framework usage</>
+			</>
+		</>
+	</>
+
+	<!-- USAGE:  how to use it (attributes in practice, events, framework snippets), keyboard, accessibility. -->
+	<section label="Using it">
+		<markdown>
+			A card is an `<article>`: a self-contained piece of the page, such as a person, a product or a post.
+			With `link="..."` the whole card becomes ONE link (an `<a>`), named by its text. `appearance="link"` is only the
+			hover lift, so a card that goes somewhere needs `link`.
+
+			- Its content is the generic [content parts](/components/ui/ui-header.html): `<ui-content>`, `<ui-header>`,
+			  `<ui-meta>`, `<ui-description>`, `<ui-extra>` and `<ui-avatar>` inside a card take the card's
+			  look, so there is no `ui-card-header`.
+			- A slotted `<img>` is a full-width image (a `<ui-image>` isn't: slot a plain `<img>`, or use
+			  `image`).
+			- The shorthand attributes `image`, `header`, `meta`, `description` and `extra` render the same
+			  parts for you, in that order: the image, one content block, your own content, then the extra
+			  content. Slot a part of the same kind (your own `<ui-header>`, or an `<img>` for `image`) and
+			  that shorthand steps aside.
+			- Cards fire no events of their own.
+		</>
+		<markdown>
+			```html
+			<ui-card link="/people/kristy">
+			  <img src="kristy.png" alt="Kristy" />
+			  <ui-content>
+			    <ui-header>Kristy</ui-header>
+			    <ui-meta>Joined in 2013</ui-meta>
+			    <ui-description>Kristy is an art director living in New York.</ui-description>
+			  </ui-content>
+			  <ui-extra>22 Friends</ui-extra>
+			</ui-card>
+			```
+		</>
+	</>
+
+	<section label="Groups">
+		<markdown>
+			A `<ui-cards>` group hands its variations to its cards: `size`, `color`, `direction`, `appearance`
+			and `inverted` on the group apply to every card that doesn't set its own (a card's looks join the group's).
+
+			- `columns` sets how many cards share a row; without it each card keeps a fixed width and the row
+			  wraps.
+			- `doubling` and `stackable` follow the group's own width, not the window's: a group narrower than
+			  768px shows fewer cards to a row (`doubling`) or one (`stackable`), so a group in a narrow column
+			  stacks even on a wide screen.
+			- Cards in a group match heights row by row.
+		</>
+	</>
+
+	<section label="Keyboard">
+		<markdown>
+			A card takes no focus of its own; a link card (`link`) is one Tab stop, and **Enter** follows it.
+			Links, buttons and inputs inside a plain card are Tab stops as usual.
+		</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			- A card is an `<article>`, so a screen reader can move from card to card. Give its `<ui-header>`
+			  a `level` when the card's title should also be a heading in the page outline.
+			- A link card is one link whose name is all of its text. Keep other links and buttons out of it:
+			  nested interactive content can't be reached or named properly. A card with its own links (a
+			  linked header, an extra link) should not have `link`.
+			- `disabled` sets `aria-disabled`, and a link card loses its `link`, so it is no longer a Tab stop.
+			- `loading` sets `aria-busy` and announces "Loading…" (translatable) through a hidden status
+			  message.
+			- A `<ui-cards>` group is a `role="list"` and each card in it a `listitem`, so a reader hears how
+			  many cards there are.
+			- The `image` shorthand is decorative (`alt=""`) unless you give `alt`; a slotted `<img>` needs its
+			  own `alt`.
+			- Colour is never the only signal: a coloured card's meaning belongs in its text.
+			- If the element fails to render, it shows its slotted parts through a bare `<slot>`, so their text,
+			  images and links stay; the card's own box and link, the shorthands, the group's variations,
+			  `aria-busy` and the loading announcement go.
+		</>
+	</>
+
+	<section label="Framework usage">
+		<markdown>
+			A card has no events or rich properties: write it like any element, with the shorthands bound to
+			your data.
+		</>
+		<header level="4" id="framework-react">React 19</>
+		<markdown>
+			```jsx
+			<ui-cards columns="3">
+			  {people.map((p) => <ui-card key={p.id} link={p.url} image={p.photo} alt={p.name} heading={p.name} meta={p.role} />)}
+			</ui-cards>
+			```
+		</>
+		<header level="4" id="framework-vue">Vue 3.5</>
+		<markdown>
+			```html
+			<!-- compilerOptions.isCustomElement = (tag) => tag.startsWith("ui-") -->
+			<ui-cards columns="3">
+			  <ui-card v-for="p in people" :key="p.id" :href="p.url" :image="p.photo" :alt="p.name" :heading="p.name" />
+			</ui-cards>
+			```
+		</>
+		<header level="4" id="framework-solid">Solid 2</>
+		<markdown>
+			```jsx
+			<ui-cards columns="3">
+			  <For each={people()}>{(p) => <ui-card link={p.url} image={p.photo} alt={p.name} heading={p.name} />}</For>
+			</ui-cards>
+			```
+		</>
+	</>
+</spell-notebook>

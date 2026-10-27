@@ -1,0 +1,205 @@
+<spell-notebook "button usage">
+	<header level="1">
+		Button
+		<header>A button indicates a possible user action.</>
+	</>
+	<button-tab-bar showing="usage"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#using-it">Using it</>
+				<ui-item link="#events">Events</>
+				<ui-item link="#state-texts">State texts</>
+				<ui-item link="#invoker-commands">Invoker commands</>
+				<ui-item link="#forms">Forms</>
+				<ui-item link="#keyboard">Keyboard</>
+				<ui-item link="#accessibility">Accessibility</>
+				<ui-item link="#framework-usage">Framework usage</>
+			</>
+		</>
+	</>
+
+	<!-- USAGE:  how to use it (attributes in practice, events, framework snippets), keyboard, accessibility. -->
+	<section label="Using it">
+		<markdown>
+			Write `<ui-button>` with its text inside, and add attributes for the look.
+
+			Most attributes become Fomantic's class words, on the real button in the shadow root:
+			`<ui-button size="small" color="primary" appearance="basic">` draws `ui small basic primary button`.
+
+			- A boolean attribute is true when it's there, or empty.
+			  `"true"` and `"yes"` mean true too;  `"false"` and `"no"` mean false.
+			- `medium` is a real size meaning "default":  it draws no class.
+			- Three attributes stand in for slots, and children in the slot win:
+			  - `icon` for the `icon` slot
+			  - `label` for the default slot (`content` is its old name)
+			  - `badge` for the `label` slot:  the joined badge
+			- `link` draws an `<a>` in place of the button, so it navigates like a link.
+			- Wrap buttons in `<ui-buttons>` to join them.
+			  The group's words (`size`, `color` ...) reach every button in it.
+		</>
+	</>
+
+	<section label="Events">
+		<markdown>
+			A plain click is the native `click`.
+			A toggle button also sends `ui-selected` as it turns on, and `ui-deselected` as it turns off.
+			Both carry the new state in `event.detail.active`.
+		</>
+		<markdown>
+			```js
+			const toggle = document.querySelector("ui-button[toggle]")
+			toggle.addEventListener("ui-selected", () => console.log("on"))
+			toggle.addEventListener("ui-deselected", () => console.log("off"))
+			```
+		</>
+	</>
+
+	<section label="State texts">
+		<markdown>
+			Fomantic's `state` behaviour is two attributes on a toggle button here, not a module of its own:
+
+			- `inactive-text` replaces the content while the button is off.
+			- `active-text` replaces it while the button is on (`selected`).
+			- With only one of them, the button's own content shows in the other state.
+
+			They're live on the Examples tab, under [State texts](/edit/@spell/notebooks/Button/Examples.spellx#states-state-texts).
+
+			The label SAYS the state, so a toggle button with a state text leaves `aria-pressed` off.
+			A toggle button whose name changes would announce the state twice (WAI-ARIA APG).
+			Listen for `ui-selected` and `ui-deselected` as usual.
+		</>
+		<markdown>
+			```js
+			const follow = document.querySelector("ui-button[active-text]")
+			follow.addEventListener("ui-selected", () => startFollowing())
+			follow.addEventListener("ui-deselected", () => stopFollowing())
+			```
+		</>
+	</>
+
+	<section label="Invoker commands">
+		<markdown>
+			A `<ui-button>` drives other elements with no script, as a native button does:
+
+			- `commandfor` is the target's id, looked up in the button's own tree.
+			- `command` is the action.
+
+			The actions:
+
+			- A `<dialog>` and a popover take the browser's own commands.
+			- A custom command's name starts with two dashes.
+			  It reaches the target as a `command` event.
+			- `<ui-modal>` answers three custom commands.
+
+			```text
+			<dialog>
+			  show-modal, close, request-close
+			a popover
+			  show-popover, hide-popover,
+			  toggle-popover
+			<ui-modal>
+			  --show, --close, --toggle
+			```
+
+			The button inside the shadow root can't see a light-DOM id,
+			so the element hands it the target itself (`commandForElement`).
+			In a browser without invoker commands (`UI.browser.supports.invokers`),
+			a click runs the built-in commands itself.
+		</>
+
+		<section label="Popup and modal" sticky collapsible dividing>
+			<example description="A button opens a popup and a modal with `commandfor` and `command`, no script.">
+				<button commandfor="button-invoker-popup" command="toggle-popover">Toggle popup</button>
+				<popup id="button-invoker-popup" open-on="manual" label="Toggled by the button, no script."/>
+				<button commandfor="button-invoker-modal" command="--show" color="primary">Open modal</button>
+				<modal id="button-invoker-modal" heading="Invoked" content="Opened by a ui-button." closable/>
+			</example>
+		</>
+	</>
+
+	<section label="Forms">
+		<markdown>
+			A `<ui-button>` is a form-associated element, so it works inside a `<form>` like a native button.
+
+			- `type` is `button` by default, so a plain one never submits by accident.
+			- `type="submit"` submits the form round it with `form.requestSubmit()`,
+			  so validation and the submit event run.
+			  `type="reset"` resets it.
+			- `name` / `value` are submitted with the form when this button submits it.
+			- `button.click()` from a script presses it as a click would:  it submits, toggles or follows its link.
+			  So Enter in a `<ui-input>` submits through the form's submit button.
+			- A disabled `<fieldset>` disables the buttons inside it.
+			- To submit, the buttons need a real `<form>` in the light DOM:  inside a `<ui-form>` too.
+		</>
+		<markdown>
+			```html
+			<ui-form>
+			  <form action="/subscribe">
+			    <ui-input name="email" type="email" required></ui-input>
+			    <ui-button type="submit" name="action" value="subscribe" color="primary">Subscribe</ui-button>
+			    <ui-button type="reset" appearance="basic">Reset</ui-button>
+			  </form>
+			</ui-form>
+			```
+		</>
+	</>
+
+	<section label="Keyboard">
+		<markdown>
+			The shadow root holds a real `<button>` (or `<a>`), so the browser does the keyboard work.
+
+			- **Tab** / **Shift+Tab** moves focus to and from the button. The host delegates focus
+			  (`delegatesFocus`), so it is never a tab stop of its own and the focus ring is drawn on the inner
+			  control.
+			- **Enter** or **Space** clicks a button; **Enter** follows a `link`.
+			- A toggle button flips `selected` on **Enter** or **Space**, as a click does.
+			- A `disabled` button is skipped by **Tab**.
+		</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			- Focus, **Enter** and **Space**, form submission and the accessible name
+			  all come from the browser's own `<button>`;  with `link`, from its `<a>`.
+			- An icon-only button needs a name:  put `aria-label` on the element.
+			  It forwards it to the inner button, and shows it as the button's tooltip.
+			- A toggle button sets `aria-pressed`, and keeps it in step with `selected`.
+			  Not with a state text:  see [State texts](#state-texts).
+			- `loading` sets `aria-busy`.
+			  `disabled` disables the inner button.
+			- `<ui-buttons>` has the group role:  give it an `aria-label` when the group needs a name.
+			- If the element fails to render, its native fallback keeps a plain `<button>` styled by the same
+			  class words, so the button still renders, focuses and submits its form.
+		</>
+	</>
+
+	<section label="Framework usage">
+		<markdown>
+			Define the elements first (load the bundle, or `<ui-root>`), then use the tag like any other. Events
+			are `ui-*`, so use your framework's custom-event syntax.
+		</>
+		<header level="4" id="framework-react">React 19</>
+		<markdown>
+			```jsx
+			<ui-button toggle onui-selected={() => setOn(true)} onui-deselected={() => setOn(false)} color="primary">Vote</ui-button>
+			```
+		</>
+		<header level="4" id="framework-vue">Vue 3.5</>
+		<markdown>
+			```html
+			<!-- compilerOptions.isCustomElement = (tag) => tag.startsWith("ui-") -->
+			<ui-button toggle @ui-selected="on = true" @ui-deselected="on = false" color="primary">Vote</ui-button>
+			```
+		</>
+		<header level="4" id="framework-solid">Solid 2</>
+		<markdown>
+			```jsx
+			// events and rich data are plain props:  `on-<event>={...}`, `options={...}`
+			<ui-button toggle on-ui-selected={(event) => setOn(event.detail.active)} on-ui-deselected={(event) => setOn(event.detail.active)} color="primary">
+			  Vote
+			</ui-button>
+			```
+		</>
+	</>
+</spell-notebook>

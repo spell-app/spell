@@ -1,0 +1,280 @@
+{
+  "spellVersion": "0.8.0",
+  "provides": [
+    "Task",
+    "Checklist",
+    "TaskList",
+    "test_checking_one_off",
+    "test_the_filter"
+  ],
+  "statements": [
+    {
+      "type": "Task",
+      "superType": "View",
+      "defined": "/Task.spellx:138-1496"
+    },
+    {
+      "property": "title",
+      "of": "Task",
+      "datatype": "text",
+      "defined": "/Task.spellx:159-206"
+    },
+    {
+      "property": "notes",
+      "of": "Task",
+      "datatype": "text",
+      "defined": "/Task.spellx:211-270"
+    },
+    {
+      "property": "priority",
+      "classVariable": "Priorities",
+      "of": "Task",
+      "enumeration": [
+        "low",
+        "normal",
+        "high"
+      ],
+      "defined": "/Task.spellx:275-323"
+    },
+    {
+      "property": "done",
+      "of": "Task",
+      "datatype": "choice",
+      "defined": "/Task.spellx:329-355"
+    },
+    {
+      "syntax": "{operator:is_or_is_not} done",
+      "output": "is_done",
+      "rule": "method_postfix",
+      "of": "Task",
+      "kind": "method",
+      "name": "\"is done\"",
+      "returns": "choice",
+      "defined": "/Task.spellx:360-395"
+    },
+    {
+      "syntax": "{operator:is_or_is_not} active",
+      "output": "is_active",
+      "rule": "method_postfix",
+      "of": "Task",
+      "kind": "method",
+      "name": "\"is active\"",
+      "returns": "choice",
+      "defined": "/Task.spellx:400-436"
+    },
+    {
+      "syntax": "draw {thisArg:expression}",
+      "output": "draw",
+      "rule": "method_call",
+      "of": "Task",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "draw it",
+      "defined": "/Task.spellx:671-1288"
+    },
+    {
+      "syntax": "test checking one off",
+      "output": "test_checking_one_off",
+      "rule": "method_call",
+      "alias": "statement",
+      "kind": "function",
+      "name": "checking one off",
+      "defined": "/Task.spellx:1300-1487"
+    },
+    {
+      "type": "Checklist",
+      "superType": "ViewableList",
+      "itemType": "Task",
+      "defined": "/TaskList.spellx:326-1306"
+    },
+    {
+      "property": "showing",
+      "classVariable": "Showings",
+      "of": "Checklist",
+      "enumeration": [
+        "all",
+        "active",
+        "done"
+      ],
+      "defined": "/TaskList.spellx:386-548"
+    },
+    {
+      "syntax": "{operator:is_or_is_not} showing (expression:all|alls|active|actives|done|dones)",
+      "output": "is_showing_$showing",
+      "rule": "quoted_property",
+      "of": "Checklist",
+      "kind": "method",
+      "name": "\"is showing (showing)\"",
+      "values": {
+        "showing": [
+          "all",
+          "active",
+          "done"
+        ]
+      },
+      "defined": "/TaskList.spellx:386-548"
+    },
+    {
+      "syntax": "test the filter",
+      "output": "test_the_filter",
+      "rule": "method_call",
+      "alias": "statement",
+      "kind": "function",
+      "name": "the filter",
+      "defined": "/TaskList.spellx:1065-1297"
+    },
+    {
+      "property": "checklist",
+      "of": "Task",
+      "datatype": "Checklist",
+      "exclusive": true,
+      "defined": "/TaskList.spellx:1371-1402"
+    },
+    {
+      "type": "TaskList",
+      "superType": "App",
+      "defined": "/TaskList.spellx:1514-4301"
+    },
+    {
+      "property": "checklist",
+      "of": "TaskList",
+      "datatype": "Checklist",
+      "defined": "/TaskList.spellx:1527-1564"
+    },
+    {
+      "property": "draft",
+      "of": "TaskList",
+      "datatype": "text",
+      "defined": "/TaskList.spellx:1569-1661"
+    },
+    {
+      "property": "active_count",
+      "asWritten": "active count",
+      "of": "TaskList",
+      "datatype": "number",
+      "defined": "/TaskList.spellx:1666-1748"
+    },
+    {
+      "syntax": "create {thisArg:expression}",
+      "output": "create",
+      "rule": "method_call",
+      "of": "TaskList",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "create it",
+      "defined": "/TaskList.spellx:1754-2288"
+    },
+    {
+      "syntax": "add the draft (of {thisArg:expression})?",
+      "output": "add_the_draft",
+      "rule": "method_call",
+      "of": "TaskList",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "add the draft",
+      "returns": "nothing",
+      "defined": "/TaskList.spellx:2302-2532"
+    },
+    {
+      "syntax": "draw {thisArg:expression}",
+      "output": "draw",
+      "rule": "method_call",
+      "of": "TaskList",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "draw it",
+      "defined": "/TaskList.spellx:3318-4292"
+    },
+    {
+      "syntax": "show all (of {thisArg:expression})?",
+      "output": "show_all",
+      "rule": "method_call",
+      "of": "TaskList",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "show all",
+      "defined": "/TaskList.spellx:2647-2762"
+    },
+    {
+      "syntax": "show to do (of {thisArg:expression})?",
+      "output": "show_to_do",
+      "rule": "method_call",
+      "of": "TaskList",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "show to do",
+      "defined": "/TaskList.spellx:2767-2900"
+    },
+    {
+      "syntax": "show done (of {thisArg:expression})?",
+      "output": "show_done",
+      "rule": "method_call",
+      "of": "TaskList",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "show done",
+      "defined": "/TaskList.spellx:2905-3039"
+    },
+    {
+      "syntax": "remove the done tasks (of {thisArg:expression})?",
+      "output": "remove_the_done_tasks",
+      "rule": "method_call",
+      "of": "TaskList",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "remove the done tasks",
+      "defined": "/TaskList.spellx:3044-3153"
+    }
+  ],
+  "codeLines": [
+    9,
+    13,
+    19,
+    24,
+    30,
+    35,
+    39,
+    44,
+    71,
+    96,
+    101,
+    107,
+    130,
+    144,
+    151,
+    154,
+    160,
+    165,
+    170,
+    183,
+    190,
+    256,
+    257,
+    258,
+    259
+  ]
+}

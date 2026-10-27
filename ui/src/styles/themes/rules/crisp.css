@@ -1,0 +1,26 @@
+/*
+ * Crisp's rules:  what its values can't say, `@layer ui.theme` (epic `debut` P20).
+ * - A rules sheet of the Crisp theme (`crisp.theme.json5`, `"rules": ["modern", "crisp"]`);  its sheet, `crisp.css`,
+ *   imports this one:  `yarn gen:styles` writes it.
+ * - In `rules/`, so no theme menu lists it (`UI.themes` reads the themes folder's top level only).
+ * - What's here:
+ *   - the page's own colour
+ *   - links always underlined, at full strength:  never colour alone
+ */
+
+@layer ui.theme {
+  /* the page's own colour;  page only:  `:root` matches nothing inside a shadow root */
+  :root {
+    background-color: var(--ui-background);
+  }
+
+  /* links:  underlined at full strength, at rest too (the modern rules soften them to 40% at rest) */
+  :where(a) {
+    text-decoration-thickness: from-font;
+  }
+  @media (hover: hover) {
+    :where(.ui-typography) :where(a) {
+      text-decoration-color: currentColor;
+    }
+  }
+}

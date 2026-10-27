@@ -1,0 +1,63 @@
+<spell-notebook "code theming">
+	<header level="1">
+		Code
+		<header>Code shows a block of source code coloured by its language, from the element's own text or a file on
+              this site.</>
+	</>
+	<code-tab-bar showing="theming"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#tokens">Tokens</>
+				<ui-item link="#themes">Themes</>
+			</>
+		</>
+	</>
+
+	<!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
+	<section label="Tokens">
+		<markdown>
+			Theme with the public `--ui-code-*` tokens: set one on the element, on any ancestor (`:root` for every block of
+			code), or on the box through `::part(box)`. They inherit into the shadow root, where the sheet reads each through a
+			private alias. Never set the `--_ui-code-*` names: they're the sheet's private plumbing.
+
+			The colours are one token per highlight group -- `keyword`, `string`, `number`, `comment`, `title`, `type`, `attr`,
+			`meta`, `addition`, `deletion` -- each with a light and a dark value, so code follows the colour scheme. Style the
+			pieces with `::part()`: `box`, `pre`, `code` and `copy`.
+		</>
+		<markdown>
+			```css
+			/* every block of code on the page */
+			:root {
+			  --ui-code-radius: 0;
+			  --ui-code-keyword: var(--ui-purple);
+			}
+			/* one kind, bigger */
+			ui-code.listing {
+			  --ui-code-font-size: 1em;
+			}
+			ui-code::part(copy) {
+			  font-weight: bold;
+			}
+			```
+		</>
+		<markdown>Edit a value below to try it.</>
+		<html>
+			<ui-docs-tokens family="ui-code" playground>
+				<ui-code language="typescript">
+					<script type="text/plain">
+						const greeting = "hello"
+						// one line each
+					</>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="Themes">
+		<markdown>
+			Code is ours, not Fomantic's:  the theme menu in the header changes the page around it.  Its colours
+			follow the light or dark scheme.
+		</>
+	</>
+</spell-notebook>

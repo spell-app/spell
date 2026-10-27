@@ -145,3 +145,42 @@ export function flatParentFor(element: Element): Element | undefined {
   const root = element.getRootNode() as Partial<ShadowRoot>
   return root.nodeType === NodeType.documentFragment && root.host ? root.host : undefined
 }
+
+////////////////
+// ## Rows that scroll sideways
+////////////////
+
+/** How much of a row's width one `scrollByRow()` step scrolls. */
+const ROW_STEP = 0.8
+
+/** The person asked for less motion. */
+const REDUCED_MOTION = "(prefers-reduced-motion: reduce)"
+
+/**
+ * Which ends of `row`, a box that scrolls sideways, can still scroll:  `start` while it's scrolled from its start,
+ * `end` while there's more past its end.
+ * - What a row's `‹` / `›` keys show by:  Spell UI's `<ui-toolbar>`, the kit's site header.
+ * - A pixel of slack each way:  fractional widths leave the end a hair short.
+ * - NOTE: left-to-right only:  in a right-to-left row `scrollLeft` counts the other way.
+ */
+export function scrollEnds(row: Element): ScrollEnds {
+  return { start: row.scrollLeft > 1, end: row.scrollLeft + row.clientWidth < row.scrollWidth - 1 }
+}
+
+/**
+ * Scroll `row` sideways by most of its width:  `-1` back, `1` on.
+ * - Most, not all (`ROW_STEP`):  the item cut at the end shows whole after the step.
+ * - Smoothly, unless the person asked for less motion (`prefers-reduced-motion`):  then at once.
+ */
+export function scrollByRow(row: Element, direction: -1 | 1): void {
+  const isReduced = !!row.ownerDocument.defaultView?.matchMedia(REDUCED_MOTION).matches
+  row.scrollBy({ left: direction * row.clientWidth * ROW_STEP, behavior: isReduced ? "instant" : "smooth" })
+}
+
+/** `scrollEnds()`'s answer:  which ends of a row can still scroll. */
+export type ScrollEnds = {
+  /** it's scrolled away from its start:  a `‹` key shows */
+  start: boolean
+  /** there's more past its end:  a `›` key shows */
+  end: boolean
+}

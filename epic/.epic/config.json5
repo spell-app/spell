@@ -1,0 +1,51 @@
+// Where spell-epic keeps its own epic things, as any repo the engine runs in does (`EpicConfig`, src/config/).
+// - Since 2026-10-18 (Owen, closing epic `epic-workflow`):  the engine's own work is an epic too, `epic-engine`, the
+//   standing tooling home;  its code is this repo's, its pages are in the shared content folder, `spell.epics`.
+// - Folders are relative to the MAIN checkout:  every worktree reads the main checkout's copy of this file.
+// - `epic config [key]` prints what's in force (`--json`:  all of it).
+{
+  // The shared content repo, beside the child repos in the top `spell` repo (epic `epic-engine` P10):  spell-app's
+  // too, so the engine's epics list beside spell-app's (Owen's pick).
+  "contentFolder": "../spell.epics",
+
+  // The branch worktrees start from and merge into.
+  "baseBranch": "main",
+
+  // Where NEW worktrees go:  one folder each, `<worktreesFolder>/<name>`, on branch `<name>`, beside the repo.
+  "worktreesFolder": "../spell-epic.worktrees",
+
+  // What makes a new worktree ready to run, from its root;  run BEFORE its window opens.
+  "installCommand": "yarn install",
+  "installOnCreate": true,
+  // Its own yarn project, outside the install:  the extension (epic `epic-engine` I65).
+  // - Only for a worktree of this repo alone:  in the kit, an epic's worktree is the top's, and the top's
+  //   "extraInstalls" names it.
+  "extraInstalls": ["vscode"],
+
+  // The VS Code windows (`epic window`).
+  "windows": {
+    // No package windows here:  a worktree's window is opened from the whole repo's.
+    "default": "spell-epic",
+    "repoName": "spell-epic",
+    "contentName": "spell.epics",
+    // Every worktree's window:  just its own folder and the content folder.
+    "worktreeOnly": true
+  },
+
+  // Each new worktree's saved-session folder linked to the main checkout's, so every window lists every session.
+  "linkSessionFolders": true,
+
+  // The content folder's folders linked in at the root (`epic shared link`):  NONE (epic `epic-eject` I23).
+  // - The tools read the content folder from `contentFolder` above, as spell-app's do since its P12.
+  // - Never `agents`:  this repo is the plugin, loaded in place, and Claude Code reads a plugin's root `agents/` as its
+  //   agent definitions (the content repo's logs and WWOD came up as 14 agent types).
+  "sharedFolders": [],
+
+  // This repo IS the engine:  no `spell-epic` link.
+  "engineFolder": "",
+
+  // The VS Code window files (`epic window`):  its own `workspaces/`, git-ignored here, as before epic `epic-eject`
+  // P13.  NOT the content folder's `windows/` (the default):  that's spell-app's, and two repos' windows in one
+  // folder would mix (`epic window init` and `epic status` read every file in it as their own).
+  "windowsFolder": "workspaces"
+}

@@ -1,0 +1,212 @@
+<spell-notebook "divider examples">
+	<header level="1">
+		Divider
+		<header>A divider visually segments content into groups.</>
+	</>
+	<divider-tab-bar showing="examples"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#types">Types</>
+				<ui-item link="#variations">Variations</>
+			</>
+		</>
+	</>
+
+	<!-- EXAMPLES:  Fomantic's divider page, in its order (Types, Variations), plus our own extra (Colored). -->
+	<section label="Types">
+		<section label="Divider" sticky collapsible dividing>
+			<example>
+				<html>
+					<p slot="description">A standard divider.</p>
+					<ui-message slot="description" state="warning" size="small">To add a divider between parts of a grid use a <code>divided</code> grid (<code>&lt;ui-grid divided&gt;</code>).</ui-message>
+				</html>
+				<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+				<divider/>
+				<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+			</example>
+		</>
+
+		<section label="Vertical Divider" sticky collapsible dividing>
+			<example>
+				<html>
+					<p slot="description">A divider can segment content vertically.</p>
+					<ui-message slot="description" size="small">Vertical dividers need <code>position: relative</code> on the element that contains them; <code>&lt;ui-segment&gt;</code> and <code>&lt;ui-grid&gt;</code> already are.</ui-message>
+				</html>
+				<segment>
+					<grid columns="2" spacing="xl">
+						<column>
+							<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+							<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+							<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+						</column>
+						<column>
+							<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+							<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+							<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+						</column>
+					</grid>
+					<divider direction="vertical">and</divider>
+				</segment>
+			</example>
+
+			<!-- GAP I45:  in a stacked grid the vertical divider stays vertical, and the grid's gutters clip the form. -->
+			<example>
+				<html>
+					<ui-message slot="description" state="info" size="small">A vertical divider swaps to a horizontal divider at mobile widths when used inside a <code>stackable</code> grid.</ui-message>
+					<ui-segment placeholder="">
+						<ui-grid columns="2" spacing="xl" stackable>
+							<ui-column>
+								<ui-form>
+									<form>
+										<ui-field>
+											<label for="divider-username">Username</label>
+											<ui-input id="divider-username" icon="user" icon-position="left" placeholder="Username"></ui-input>
+										</ui-field>
+										<ui-field>
+											<label for="divider-password">Password</label>
+											<ui-input id="divider-password" type="password" icon="lock" icon-position="left"></ui-input>
+										</ui-field>
+										<ui-button type="submit" color="blue">Login</ui-button>
+									</form>
+								</ui-form>
+							</ui-column>
+							<ui-divider direction="vertical">Or</ui-divider>
+							<ui-column vertical-align="middle">
+								<ui-button size="big" icon="user plus">Sign Up</ui-button>
+							</ui-column>
+						</ui-grid>
+					</ui-segment>
+				</html>
+			</example>
+		</>
+
+		<section label="Horizontal Divider" sticky collapsible dividing>
+			<example>
+				<html>
+					<p slot="description">A divider can segment content horizontally.</p>
+					<ui-message slot="description" size="small">Horizontal dividers can also hold an icon (<code>icon</code>) to label a section of content.</ui-message>
+				</html>
+				<message slot="description" state="info" size="small">Dividers automatically vary the size of their dividing rules to match the length of your text.</message>
+				<segment align="center" appearance="basic">
+					<input icon="search" icon-position="left" placeholder="Order #" aria-label="Order number">
+						<button slot="action" color="blue">Search</button>
+					</input>
+					<divider direction="horizontal">Or</divider>
+					<button color="green" labeled="right" icon="plus">Create New Order</button>
+				</segment>
+			</example>
+
+			<!-- GAP I93:  no `header` divider look:  Fomantic's divider headers keep their case in the header font. -->
+			<example>
+				<divider direction="horizontal" icon="tag">Description</divider>
+				<html>
+					<p>Doggie treats are good for all times of the year. Proven to be eaten by 99.9% of all dogs worldwide.</p>
+				</html>
+				<divider direction="horizontal" icon="chart bar">Specifications</divider>
+				<html>
+					<ui-table definition>
+						<table>
+							<tbody>
+								<tr>
+									<td>Size</td>
+									<td>1" x 2"</td>
+								</tr>
+								<tr>
+									<td>Weight</td>
+									<td>6 ounces</td>
+								</tr>
+								<tr>
+									<td>Color</td>
+									<td>Yellowish</td>
+								</tr>
+								<tr>
+									<td>Odor</td>
+									<td>Not Much Usually</td>
+								</tr>
+							</tbody>
+						</table>
+					</ui-table>
+				</html>
+			</example>
+		</>
+
+		<!-- GAP I93:  no `header` divider look (see above). -->
+		<section label="Horizontal Alignment" sticky collapsible dividing>
+			<example description="A horizontal divider can be aligned:  `align` is `left`, `center` or `right`.">
+				<divider direction="horizontal" align="left" icon="align left">Left Aligned</divider>
+				<divider direction="horizontal" icon="align center">Center Aligned</divider>
+				<divider direction="horizontal" align="right" icon="align right">Right Aligned</divider>
+			</example>
+		</>
+	</>
+
+	<section label="Variations">
+		<section label="Inverted" sticky collapsible dividing>
+			<example description="A divider can have its colors inverted.">
+				<segment inverted>
+					<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+					<divider inverted/>
+					<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+					<divider direction="horizontal" inverted>Horizontal</divider>
+				</segment>
+			</example>
+		</>
+
+		<section label="Fitted" sticky collapsible dividing>
+			<example description="A divider can be fitted, without any space above or below it.">
+				<segment>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. <divider padding="none"/> Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.</segment>
+			</example>
+		</>
+
+		<section label="Spacer" sticky collapsible dividing>
+			<example description="A spacer divider divides content without drawing a line (Fomantic calls it a hidden divider).">
+				<header level="3">Section One</header>
+				<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+				<divider spacer/>
+				<header level="3">Section Two</header>
+				<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+			</example>
+		</>
+
+		<section label="Section" sticky collapsible dividing>
+			<example description="A divider can provide greater margins to divide sections of content.">
+				<header level="3">Section One</header>
+				<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+				<divider section/>
+				<header level="3">Section Two</header>
+				<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+			</example>
+		</>
+
+		<section label="Clearing" sticky collapsible dividing>
+			<example description="A divider can clear the contents above it.">
+				<segment>
+					<image floated="right" size="mini" src="/components/ui/images/wireframe/square-image.png" alt=""/>
+					<divider clearing/>
+					<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+				</segment>
+			</example>
+		</>
+
+		<section label="Size" sticky collapsible dividing>
+			<example description="A divider text can vary in size.">
+				<divider direction="horizontal" size="mini">Mini</divider>
+				<divider direction="horizontal" size="tiny">Tiny</divider>
+				<divider direction="horizontal" size="small">Small</divider>
+				<divider direction="horizontal" size="large">Large</divider>
+				<divider direction="horizontal" size="big">Big</divider>
+				<divider direction="horizontal" size="huge">Huge</divider>
+				<divider direction="horizontal" size="massive">Massive</divider>
+			</example>
+		</>
+
+		<section label="Colored" sticky collapsible dividing>
+			<example description="A divider's rule and text can take a color.">
+				<divider color="red"/>
+				<divider direction="horizontal" color="blue">Blue</divider>
+				<divider direction="horizontal" color="green" icon="leaf">Green</divider>
+			</example>
+		</>
+	</>
+</spell-notebook>

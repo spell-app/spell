@@ -33,7 +33,7 @@ export type PublishSettings = {
 
 /**
  * A repo that publishes, as `publishedRepos()` finds it.
- * - `name`:  its package's name, which its own files import it by (`spell-ui/core`)
+ * - `name`:  its package's name, which its own files import it by (`spell/ui/core`)
  * - `root`:  its folder, absolute
  * - `manifest`:  its `package.json`, as it is in the checkout
  * - `settings`:  its `"spellPublish"`

@@ -29,8 +29,8 @@ SEE ALSO, per package (runners, helpers, fixtures stay there):
   - `<module>.test.ts(x)` next to `<module>.ts(x)`:  `Router.ts` => `Router.test.ts`.  Cross-cutting tests in the
     package's `test/`.
   - The test is renamed with its module (below, "Tests follow the logic").
-  - Shared helpers come from the package's test entry point:  `spell-parser/parser/test`, `spell-parser/spell/test`,
-    `spell-app/spaces/test` (the frozen test projects), `spell-ui/test-helpers/...`,
+  - Shared helpers come from the package's test entry point:  `spell/parser/parser/test`, `spell/parser/spell/test`,
+    `spell/app/spaces/test` (the frozen test projects), `spell/ui/test-helpers/...`,
     `spell/server/test/...` (WWOD §4);  every set's element helpers are the kit's, `spell/test-helpers/...`
     (`ElementFixture`, `A11y` ...).
 - **Hand-rolled fakes over mock libraries:**
@@ -39,7 +39,7 @@ SEE ALSO, per package (runners, helpers, fixtures stay there):
     (`packages/app/src/runner/runner.browser.test.tsx`).  When the test imports the module under test
     dynamically, `vi.mock()` comes before the `await import(...)`.
   - Mock paths follow the import rules:  `./peer` in the same folder, else `<package>/...`, e.g.
-    `vi.mock("spell-app/app/runner/shadowStyles", ...)` (`packages/app/src/spellEditor/spellEditor.browser.test.tsx`).
+    `vi.mock("spell/app/app/runner/shadowStyles", ...)` (`packages/app/src/spellEditor/spellEditor.browser.test.tsx`).
   - UPPERCASE fixture consts at module level:  `BOMB`, `OWNER_VOCABULARY`, `REAL_DATA`.
   - Factory helpers as function declarations, e.g. `owned(items)` in
     `packages/ui/components/ui-item/UIItem.test.tsx`.
@@ -94,7 +94,7 @@ SEE ALSO, per package (runners, helpers, fixtures stay there):
     names.
 - **Reusable suites are exported, parameterized functions:**
   - One function runs the same checks over each implementation or module, e.g.
-    `unitTestModuleRules(parser, moduleName)` (`spell-parser/parser/test`).
+    `unitTestModuleRules(parser, moduleName)` (`spell/parser/parser/test`).
   - Runner-agnostic case tables when the cases outlive the runner, e.g. `FALLBACK_CASES`
     (`packages/ui/test/fallback.cases.ts`).
   - Gate a long suite by a level argument (`"smoke" | "all"`);  namespace its fixtures with a unique test id so runs

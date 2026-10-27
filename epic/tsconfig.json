@@ -1,0 +1,28 @@
+{
+  // spell-epic's TypeScript program (epic `repo-split` P14, Q47):  everything in `src/`, `scripts/` and the configs.
+  // - It extends the settings every repo shares, the kit's toolchain's (`spell/toolchain/tsconfig.base.json`).
+  // - NO `paths`:  every file is imported by its package name and its path under `src/`
+  //   (`spell/epic/tool/PlanDoc`), spell-epic's own files too.
+  //   `customConditions` makes TypeScript read spell-epic's SOURCE for its own name (`exports`, `spell-source`).
+  //   Another repo's package is read by its built declarations (`types`, `dist-types/`:  `yarn ts` builds them first).
+  // - ONE program, browser and node code together, as before:  the elements, the node tools and the docs tools share
+  //   `src/` folder by folder (`markup/`, `links/`, `definitions/` run in both), so it keeps the DOM and node's types.
+  // - `bin/epic` and the extension's `tsx` runs read it too (`tsx` with this file):  the JSX and decorator settings.
+  "extends": "spell/toolchain/tsconfig.base.json",
+  "compilerOptions": {
+    "customConditions": ["spell-source"],
+    "target": "ES2022",
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    // the docs tools (`tools/`) are partly plain node scripts:  parsed (`allowJs`), not type-checked (no `checkJs`)
+    "allowJs": true,
+    "jsx": "preserve",
+    "jsxImportSource": "@solidjs/web",
+    // `spell/toolchain/types`:  the ambient helper types (`Prettify` ...), used bare (WWOD §9);  with Vite's client
+    // types
+    "types": ["vite/client", "node", "spell/toolchain/types"]
+  },
+  "include": ["src", "scripts", "vite.config.ts", "vitest.config.ts"],
+  // - `src/components/__pack/` is generated (`spell-pack build`, `yarn pack:build`):  not ours to check
+  // - `src/tools/_assets/`:  the docs pages' browser code (`spell-ui.entry.js` pulls in UI source), bundled, not checked
+  "exclude": ["src/components/__pack", "node_modules", "src/tools/_assets"]
+}

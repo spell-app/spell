@@ -1,0 +1,401 @@
+/*
+ * The style sheet of `<ui-theme-menu>`:  a page's theme and light / dark.
+ * Compact by default:  one quiet icon button, its overlay a small brand-styled panel
+ * (the Spell design system's icon buttons, segmented controls and menus).
+ * - It styles the component's shadow DOM:  `<div class="ui [size] [inverted] themes" part="controls">`,
+ *   holding by `show`:
+ *   - `both`:  `<button class="palette button" part="palette">`, then `<ui-popup class="overlay" part="overlay">`,
+ *     its tooltip `<ui-popup part="tip">`
+ *     - the overlay's slotted `.panel`:
+ *       - `.schemes` (`role=radiogroup`) of three `<button class="choice [checked]" role="radio">`
+ *         (an icon, `.name`):  Light | Dark | Auto, a segmented control
+ *       - a `.divider`, then `.heading`
+ *       - a `.menu` of `<button class="option [checked]" role="menuitemradio">` rows
+ *         (`.check`, `.name`, `.description`), with `.header` / `.divider` rows
+ *       - the `end` slot's rows, the page's own
+ *   - `scheme`:  `<button class="scheme light|dark button" part="scheme">`,
+ *     holding `.light.glyph` (sun) and `.dark.glyph` (moon), stacked;  the one matching the button's scheme shows.
+ *     Then its tooltip
+ *   - `theme`:  the theme `<ui-dropdown part="theme">` alone;  its look is the dropdown's own
+ * - Colours are foundation tokens (`--ui-surface`, `--ui-primary` ...), so every theme restyles it,
+ *   the Spell theme into the brand.
+ * - The overlay's box is `<ui-popup>`'s `::part(popup)`, restyled with plain properties
+ *   (a sheet never declares another family's tokens).
+ * - Public tokens (`--ui-theme-menu-*`) are never declared:  each is read through a private alias
+ *   (`notes/theming.md` "Component tokens").
+ */
+
+@layer ui.components.theme-menu.types, ui.components.theme-menu.content, ui.components.theme-menu.variations, ui.components.theme-menu.states;
+
+@layer ui.components.theme-menu.types {
+  :host {
+    display: inline-block;
+    vertical-align: middle;
+  }
+
+  .ui.themes {
+    /* Space between the controls. */
+    --_ui-theme-menu-gap: var(--ui-theme-menu-gap, 0.25em);
+    /* Diameter of the round buttons:  28px at 16px, a page header's other icon buttons. */
+    --_ui-theme-menu-button-size: var(--ui-theme-menu-button-size, 1.75em);
+    /* Width of the palette's overlay. */
+    --_ui-theme-menu-overlay-width: var(--ui-theme-menu-overlay-width, 17em);
+    /* Corner radius of the overlay;  its rows round to a bit less, so they nest. */
+    --_ui-theme-menu-overlay-radius: var(--ui-theme-menu-overlay-radius, 14px);
+    /*
+     * Corners of a row inside the overlay (a theme, the Light | Dark | Auto track):  the overlay's,
+     * inside its 1px border and its padding (`0.375em` of its text), so they nest
+     */
+    --_theme-menu-row-radius: calc(var(--_ui-theme-menu-overlay-radius) - 1px - 0.375em);
+    /* How long the sun / moon swap takes. */
+    --_ui-theme-menu-swap-duration: var(--ui-theme-menu-swap-duration, 280ms);
+    /* The chosen scheme's raised key in the segmented control:  its drop shadow. */
+    --_ui-theme-menu-choice-shadow: var(--ui-theme-menu-choice-shadow, 0 1px 2px oklch(0 0 0 / 0.16));
+    /* Ink of the `inverted` buttons (for dark backgrounds):  their fill, ring and icon are it, translucent. */
+    --_ui-theme-menu-inverted-ink: var(--ui-theme-menu-inverted-ink, oklch(1 0 0));
+
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--_ui-theme-menu-gap);
+    font-size: calc(var(--ui-font-size) * var(--ui-scale, 1));
+  }
+}
+
+@layer ui.components.theme-menu.content {
+  /* The dropdown takes what's left on a narrow row. */
+  [part~="theme"] {
+    flex: 0 1 auto;
+    min-width: 0;
+  }
+
+  /*
+   * ## Round icon buttons (`.palette`, `.scheme`):  quiet, as a page header's other icons
+   * no fill or ring at rest, a faint fill under the pointer
+   * (Owen:  "lose ring around hamburger, search, pallette icons")
+   */
+
+  .button {
+    position: relative;
+    display: inline-grid;
+    flex: none;
+    place-items: center;
+    box-sizing: border-box;
+    width: var(--_ui-theme-menu-button-size);
+    height: var(--_ui-theme-menu-button-size);
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--ui-text-muted);
+    font: inherit;
+    line-height: 1;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .button:hover {
+    background: color-mix(in oklab, currentColor 10%, transparent);
+    color: var(--ui-text-color);
+  }
+  .button:focus-visible {
+    outline: var(--ui-focus-width, 2px) solid var(--ui-focus-color);
+    outline-offset: var(--ui-focus-offset, 2px);
+  }
+  .button:active {
+    scale: 0.94;
+  }
+  .glyph {
+    display: grid;
+    grid-area: 1 / 1;
+    place-items: center;
+    width: 1em;
+    height: 1em;
+    font-size: 1em;
+    pointer-events: none;
+  }
+
+  /* The scheme button:  both glyphs stacked, the shown scheme's in front;  the other shrunk, faded and blurred. */
+  .scheme .glyph {
+    opacity: 0;
+    scale: 0.25;
+    filter: blur(4px);
+  }
+  .light.button .light.glyph,
+  .dark.button .dark.glyph {
+    opacity: 1;
+    scale: 1;
+    filter: blur(0);
+  }
+
+  /* ## The overlay:  a small rounded panel on the page's surface */
+
+  .overlay::part(popup) {
+    box-sizing: border-box;
+    width: var(--_ui-theme-menu-overlay-width);
+    max-width: calc(100vw - 16px);
+    padding: 0.375em;
+    border: 1px solid var(--ui-border-color);
+    border-radius: var(--_ui-theme-menu-overlay-radius);
+    background: var(--ui-surface);
+    box-shadow: var(--ui-shadow-floating);
+    color: var(--ui-text-color);
+    font-size: calc(var(--ui-font-size) * 0.875);
+    line-height: 1.3;
+    transform-origin: top right;
+  }
+  .panel {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+  .heading,
+  .menu > .header {
+    padding: 0.5em 0.75em 0.375em;
+    color: var(--ui-text-muted);
+    font-family: var(--ui-font-family-mono, ui-monospace, monospace);
+    font-size: 0.75em;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .menu > .header {
+    padding-top: 0.25em;
+  }
+  .menu {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    max-height: min(24em, 55vh);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+  }
+  .divider {
+    flex: none;
+    height: 1px;
+    margin: 0.375em 0.5em;
+    background: var(--ui-border-color);
+  }
+  /* The `end` slot's rows, the page's own:  a theme's row each, the first under a divider. */
+  .panel > slot::slotted(*) {
+    /* a theme's row's columns:  its icon where a row's check is, its words where its name is */
+    display: grid;
+    grid-template-columns: 1.125em minmax(0, 1fr);
+    column-gap: 0.5em;
+    align-items: center;
+    box-sizing: border-box;
+    width: 100%;
+    margin: 0;
+    padding: 0.5em 0.625em;
+    border: 0;
+    border-radius: var(--_theme-menu-row-radius);
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-align: start;
+    cursor: pointer;
+  }
+  /* the divider above the first, as `.divider` draws one:  inset 0.5em, 0.375em from what's above and below */
+  .panel > slot::slotted(:first-child) {
+    margin-block-start: 0.375em;
+    padding-block-start: calc(0.5em + 0.375em);
+    background-image: linear-gradient(var(--ui-border-color), var(--ui-border-color));
+    background-position: center top;
+    background-size: calc(100% - 1em) 1px;
+    background-repeat: no-repeat;
+  }
+  .panel > slot::slotted(:hover) {
+    background-color: var(--ui-surface-muted);
+  }
+
+  /*
+   * Light | Dark | Auto:  three keys on a sunken track, the chosen one raised.
+   * - the track as far in as the theme rows (the overlay's padding), so its corners nest in the overlay's
+   */
+  .schemes {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 2px;
+    margin: 0 0 0.125em;
+    padding: 2px;
+    border-radius: var(--_theme-menu-row-radius);
+    background: var(--ui-surface-strong);
+  }
+  .choice {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375em;
+    box-sizing: border-box;
+    min-width: 0;
+    margin: 0;
+    padding: 0.4em 0.375em;
+    border: 0;
+    border-radius: calc(var(--_theme-menu-row-radius) - 2px);
+    background: transparent;
+    color: var(--ui-text-muted);
+    font: inherit;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  .choice:hover {
+    color: var(--ui-text-color);
+  }
+  .choice:focus-visible {
+    outline: 2px solid var(--ui-focus-color);
+    outline-offset: -2px;
+  }
+  .choice > .name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* One theme:  check, name, and the one-line description under it. */
+  .option {
+    box-sizing: border-box;
+    width: 100%;
+    margin: 0;
+    padding: 0.5em 0.625em;
+    border: 0;
+    border-radius: var(--_theme-menu-row-radius);
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-align: start;
+    cursor: pointer;
+  }
+  .option {
+    display: grid;
+    grid-template-columns: 1.125em minmax(0, 1fr);
+    column-gap: 0.5em;
+    align-items: center;
+  }
+  .option:hover {
+    background: var(--ui-surface-muted);
+  }
+  /* A thin ring inside the row:  the theme's focus width (3px in Spell) is too heavy on a small list. */
+  .option:focus-visible {
+    outline: 2px solid var(--ui-focus-color);
+    outline-offset: -2px;
+  }
+  .option > .check {
+    display: grid;
+    place-items: center;
+    color: var(--ui-primary-text);
+    font-size: 0.857em;
+    opacity: 0;
+  }
+  /* Beside both lines of a described row (an undescribed one stays one line). */
+  .option:has(> .description) > .check {
+    grid-row: 1 / span 2;
+  }
+  .option > .name {
+    grid-column: 2;
+    overflow: hidden;
+    font-weight: 500;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .option > .description {
+    grid-column: 2;
+    color: var(--ui-text-muted);
+    font-size: 0.857em;
+  }
+
+  /* Tooltips:  the palette's hides while its overlay is open. */
+  [part~="tip"].muted {
+    display: none;
+  }
+}
+
+@layer ui.components.theme-menu.variations {
+  /* For dark backgrounds:  white ink, quiet as the plain buttons;  a faint white fill under the pointer. */
+  .ui.inverted.themes .button {
+    color: oklch(from var(--_ui-theme-menu-inverted-ink) l c h / 0.8);
+  }
+  .ui.inverted.themes .button:hover {
+    background: oklch(from var(--_ui-theme-menu-inverted-ink) l c h / 0.14);
+    color: var(--_ui-theme-menu-inverted-ink);
+  }
+}
+
+@layer ui.components.theme-menu.states {
+  .option.checked {
+    background: color-mix(in oklch, var(--ui-primary) 10%, transparent);
+  }
+  .option.checked:hover {
+    background: color-mix(in oklch, var(--ui-primary) 15%, transparent);
+  }
+  .option.checked > .check {
+    opacity: 1;
+  }
+  .option.checked > .name {
+    color: var(--ui-primary-text);
+  }
+  .choice.checked {
+    background: var(--ui-surface);
+    box-shadow:
+      var(--_ui-theme-menu-choice-shadow),
+      inset 0 0 0 1px var(--ui-border-color);
+    color: var(--ui-text-color);
+  }
+
+  /*
+   * Motion:  the sun / moon swap, the scheme keys, the buttons' press.
+   * - The swap is interfaces.dev's:  scale 0.25 -> 1, opacity, blur 4px -> 0, the old one reversed.
+   * - Named properties only;  none at all under reduced motion.
+   * - The swap's `!important`:  the Spell theme turns EVERY transition off for the frame a scheme switch lands in
+   *   (`html.ui-scheme-switching`, `transition: none !important` in `ui.theme`),
+   *   which is exactly the frame this swap starts in.
+   *   An `!important` in an EARLIER layer wins over a later layer's, so this one keeps it;
+   *   `reset.css`'s reduced-motion `!important` sits earlier still, and still wins.
+   */
+  @media (prefers-reduced-motion: no-preference) {
+    .scheme .glyph {
+      transition:
+        opacity var(--_ui-theme-menu-swap-duration) var(--ui-ease-out, ease-out),
+        scale var(--_ui-theme-menu-swap-duration) var(--ui-ease-out, ease-out),
+        filter var(--_ui-theme-menu-swap-duration) var(--ui-ease-out, ease-out) !important;
+    }
+    .button {
+      transition:
+        background-color var(--ui-duration-fast, 100ms) ease-out,
+        box-shadow var(--ui-duration-fast, 100ms) ease-out,
+        color var(--ui-duration-fast, 100ms) ease-out,
+        scale var(--ui-duration-fast, 100ms) ease-out;
+    }
+    .option {
+      transition: background-color var(--ui-duration-fast, 100ms) ease-out;
+    }
+    .choice {
+      transition:
+        background-color var(--ui-duration-normal, 200ms) ease-out,
+        box-shadow var(--ui-duration-normal, 200ms) ease-out,
+        color var(--ui-duration-fast, 100ms) ease-out;
+    }
+  }
+}
+
+/*
+ * `compact`:  the theme dropdown as an icon-only palette button,
+ * the quiet round icon button of a masthead's row:  no caret, no fill until hovered
+ * - The dropdown's box is a button (`UIButton.css`), so it takes the button's tokens.
+ */
+@layer ui.components.theme-menu.variations {
+  [part~="theme"].compact {
+    --ui-button-background: transparent;
+    --ui-button-background-hover: color-mix(in oklab, currentColor 10%, transparent);
+    --ui-button-background-down: color-mix(in oklab, currentColor 16%, transparent);
+    --ui-button-color: var(--ui-text-muted);
+    --ui-button-color-hover: var(--ui-text-color);
+    --ui-button-padding-block: 0.55em;
+    --ui-button-padding-inline: 0.55em;
+    --ui-button-radius: 50%;
+    --ui-button-box-shadow: none;
+  }
+  [part~="theme"].compact::part(icon) {
+    display: none;
+  }
+}

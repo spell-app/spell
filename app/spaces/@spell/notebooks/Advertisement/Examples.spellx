@@ -1,0 +1,150 @@
+<spell-notebook "advertisement examples">
+	<header level="1">
+		Advertisement
+		<header>An ad displays third-party promotional content.</>
+	</>
+	<advertisement-tab-bar showing="examples"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#types">Types</>
+				<ui-item link="#variations">Variations</>
+			</>
+		</>
+	</>
+
+	<!--
+		EXAMPLES:  Fomantic's page, section by section, in its order (Types, Content, States, Variations,
+		Groups ...).  Rules, the class-grammar mappings, gaps:  packages/docs/content/epics/spell-ui-pages/PAGES.md.
+		- A section:  `<ui-header level="2" dividing id="types">Types</ui-header>`, then its examples.
+		- An example:  `<ui-example heading="..." description="...">` around the live markup;  the markup
+		  IS the code shown.  A richer description:  `<p slot="description">` (+ `<ui-message slot="description">`).
+		- A gap:  an HTML comment `GAP I<n>:  ...` BEFORE the example (a comment inside it shows in its code).
+	-->
+	<section label="Types">
+		<section label="Ad" sticky collapsible dividing>
+			<example>
+				<html>
+					<p slot="description">A standard ad.</p>
+					<ui-message slot="description" size="small">The following example shows basic <a href="https://support.google.com/adsense/answer/181947" target="_blank">AdSense</a> usage: the network's <code>&lt;ins&gt;</code> goes inside, and its loader script fills it. Your code will vary depending on your ad network.</ui-message>
+					<ui-ad unit="banner">
+						<ins class="adsbygoogle" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="XXXXXXXXXXXXXXXX"></ins>
+					</ui-ad>
+				</html>
+			</example>
+		</>
+
+		<section label="Common Units" sticky collapsible dividing>
+			<example>
+				<html>
+					<p slot="description">An advertisement can appear in common ad unit sizes: <code>unit</code> takes the unit's words.</p>
+					<ui-message slot="description" state="info" size="small">These additional examples use the <a href="#examples-variations-test"><code>test</code></a> variation to appear on the page. <code>&lt;ui-ad&gt;</code> is best used as a wrapper for third party ad network content like AdSense or DoubleClick.</ui-message>
+				</html>
+				<ad unit="medium rectangle" test="Medium Rectangle"/>
+				<ad unit="banner" test="Banner"/>
+				<ad unit="leaderboard" test="Leaderboard"/>
+				<ad unit="large rectangle" test="Large Rectangle"/>
+				<ad unit="half page" test="Half Page"/>
+			</example>
+		</>
+
+		<!-- GAP I30:  no `mobile` modifier for other units (Fomantic's `mobile banner`);  only the `mobile leaderboard` / `large mobile banner` units. -->
+		<section label="Mobile" sticky collapsible dividing>
+			<example>
+				<html>
+					<p slot="description">An ad can use common mobile ad sizes.</p>
+				</html>
+				<message slot="description" state="info" size="small">Mobile ads will automatically only appear on mobile browser viewports, so this example is empty on a desktop.</message>
+				<ad unit="mobile leaderboard" test="Mobile Leaderboard"/>
+				<ad unit="large mobile banner" test="Large Mobile Banner"/>
+			</example>
+		</>
+
+		<section label="Rectangle" sticky collapsible dividing>
+			<example description="An ad can use a common rectangle ad unit size.">
+				<ad unit="vertical rectangle" test="Vertical Rectangle"/>
+				<ad unit="small rectangle" test="Small Rectangle"/>
+			</example>
+		</>
+
+		<section label="Button" sticky collapsible dividing>
+			<example description="An ad can use button ad unit size.">
+				<ad unit="button" test="Button"/>
+				<ad unit="square button" test="Square Button"/>
+				<ad unit="small button" test="Small Button"/>
+			</example>
+		</>
+
+		<section label="Square" sticky collapsible dividing>
+			<example description="An ad can use a square ad unit size.">
+				<ad unit="square" test="Square"/>
+				<ad unit="small square" test="Small Square"/>
+			</example>
+		</>
+
+		<section label="Skyscraper" sticky collapsible dividing>
+			<example description="An ad can use skyscraper ad unit size.">
+				<ad unit="skyscraper" test="Skyscraper"/>
+				<ad unit="wide skyscraper" test="Wide Skyscraper"/>
+			</example>
+		</>
+
+		<section label="Banner" sticky collapsible dividing>
+			<example description="An ad can use banner ad unit size.">
+				<ad unit="banner" test="Banner"/>
+				<ad unit="vertical banner" test="Vertical Banner"/>
+				<ad unit="top banner" test="Top Banner"/>
+				<ad unit="half banner" test="Half Banner"/>
+			</example>
+		</>
+
+		<!-- GAP I32:  units wider than the column (leaderboards, top banner, panorama) overflow it on desktop. -->
+		<section label="Leaderboards" sticky collapsible dividing>
+			<example description="An ad can use leaderboard ad unit size.">
+				<ad unit="leaderboard" test="Leaderboard"/>
+				<ad unit="large leaderboard" test="Large Leaderboard"/>
+				<ad unit="billboard" test="Billboard"/>
+			</example>
+		</>
+
+		<section label="Panorama" sticky collapsible dividing>
+			<example description="An ad can use panorama ad unit size.">
+				<ad unit="panorama" test="Panorama"/>
+			</example>
+		</>
+
+		<section label="Netboard" sticky collapsible dividing>
+			<example description="An ad can use netboard ad unit size.">
+				<ad unit="netboard" test="Netboard"/>
+			</example>
+		</>
+	</>
+
+	<section label="Variations">
+		<section label="Centered" sticky collapsible dividing>
+			<example description="An advertisement can appear centered.">
+				<ad unit="banner" align="center" test/>
+			</example>
+		</>
+
+		<section label="Test" sticky collapsible dividing id="variations-test">
+			<example>
+				<html>
+					<p slot="description">An advertisement can be formatted to help verify placement.</p>
+					<ui-message slot="description" state="info" size="small">Set the text of a test placement with <code>test="..."</code>, Fomantic's <code>data-text</code>. A bare <code>test</code> says "Ad", translated with the page's language.</ui-message>
+				</html>
+				<ad unit="medium rectangle" test="Ad Unit 1"/>
+				<ad unit="medium rectangle" test="Ad Unit 2"/>
+				<ad unit="small rectangle" test/>
+			</example>
+		</>
+
+		<section label="Content" sticky collapsible dividing>
+			<example description="The ad itself goes inside:  usually an `<iframe>` from the ad network, or an image link with its own `alt`.">
+				<ad unit="small rectangle">
+					<image link="#sponsor" src="/components/ui/images/wireframe/image.png" alt="Our sponsor"/>
+				</ad>
+			</example>
+		</>
+	</>
+</spell-notebook>

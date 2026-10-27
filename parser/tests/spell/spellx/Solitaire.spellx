@@ -1,0 +1,51 @@
+<spell-thing "card" />
+<spell-thing "column" template="list of cards" />
+
+<spell-app "solitaire" menu-bar="GameMenu">
+	Klondike solitaire:  deal seven columns, then build four foundations, ace to king, one suit each.
+
+	<property "columns" description="The seven piles cards are played on">a new list of columns</>
+	<property "moves" description="How many moves so far">0</>
+
+	<action "start a new game" shortcut="meta+N">
+		set its moves to 0
+	</action>
+	<action "undo the last move" shortcut="meta+Z" enabled-when="its moves > 0">
+		set its moves to its moves - 1
+	</action>
+
+	<menu "GameMenu">
+		<action "start a new game" />
+		<action "-" />
+		<action "undo the last move" />
+		<action "redo" />
+	</menu>
+
+	<on mouse down>
+		<comment>A press a card passed on.</>
+		print "pressed"
+	</>
+
+	<draw>
+		<toolbar menu="GameMenu" />
+		<text context-menu="GameMenu">{its moves} moves</text>
+		<for each column in its columns>
+			<segment>{draw the column}</segment>
+		</>
+	</draw>
+</spell-app>
+
+<spell-page-template "score page">
+	A page that lists games, best first.
+	<property "scores">a new list of numbers</>
+</spell-page-template>
+
+<spell-page "leaderboard" template="score page">
+	The ten best games, fastest first.
+	<draw>
+		<header>High scores</>
+		<for each score in its scores>
+			<text>{the score}</text>
+		</>
+	</draw>
+</spell-page>

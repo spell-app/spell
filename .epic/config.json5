@@ -1,37 +1,35 @@
 // The kit's epic settings (the top repo, `spell`, since epic `repo-split` P9):  where a session working HERE
 // (`~/www/spell`, every window's folder 1) keeps its epic things.
-// - Read by spell-epic's `EpicConfig` (spell-epic/src/config/EpicConfig.ts), as every repo's `.epic/config.json5` is:
+// - Read by spell-epic's `EpicConfig` (epic/src/config/EpicConfig.ts), as every repo's `.epic/config.json5` is:
 //   epic `epic-engine` P10 (spell-epic as a workspace of this install) and epic `repo-split` P9 (the multi-repo
 //   tooling) are what read it here.
 // - Folders are relative to the MAIN checkout of this repo:  `~/www/spell`.
 // - Written in P7 for P9:  the folders are this layout's;  the keys marked GUESS are P9's to settle.
 // - A key left out takes its default (`EpicConfig.DEFAULTS`);  `epic config [key]` prints what's in force.
 {
-  // The child repos (their list:  `repos.json5`, beside `package.json`).
-  // - Naming it switches spell-epic's MULTI-REPO mode on (epic `epic-engine` P10):
-  //   an epic's worktree is one of `spell`, with one of every child repo inside it.
-  "repos": "repos.json5",
+  // No "repos":  ONE repo since epic `repo-split` P20, so an epic's worktree is ONE worktree of `spell` (spell-epic's
+  // single-repo mode).  Until then it named `repos.json5`, the child repos, each with a worktree inside the kit's.
+  // - spell-brand, a project beside the kit, gets its own worktrees:  epic `epic-engine` P49 (its Q49).
 
   // The shared content repo:  epics, guides, sagas, pages, brand, and the three logs (the kit's `agents/` links them).
   // - In this repo, git-ignored (epic `repo-split` J5):  `~/www/spell/spell.epics`, a folder of its own in the main
   //   checkout, a link to it in an epic's worktree.
   "contentFolder": "spell.epics",
 
-  // The branch worktrees start from and merge into:  every child repo's is `main` too.
+  // The branch worktrees start from and merge into.
   "baseBranch": "main",
 
-  // Where an epic's worktree goes:  a worktree of `spell`, with a worktree of each child repo inside it (layout 2.5).
-  // GUESS:  P9 decides which child repos get one (every repo, or only those the epic changes).
+  // Where an epic's worktree goes:  one worktree of `spell`.
   "worktreesFolder": "../spell.worktrees",
 
-  // What makes a new worktree ready to run, from its root:  the ONE install, over every child repo there.
+  // What makes a new worktree ready to run, from its root:  the ONE install, over the kit and its folders.
   "installCommand": "yarn install",
   // The worktree hook runs it BEFORE the window opens, within "installTimeout" seconds (600 left out).
   "installOnCreate": true,
   // The yarn projects of their OWN in an epic's worktree, outside the one install (epic `epic-engine` I65):
   // the two VS Code extensions.
   // - The hook runs "installCommand" in each, after the one above;  one that fails is a warning.
-  "extraInstalls": ["spell-epic/vscode", "spell-app/vscode"],
+  "extraInstalls": ["epic/vscode", "app/vscode"],
 
   // The VS Code windows (`epic window`).
   "windows": {
@@ -58,11 +56,24 @@
   //   `agents/wwod/`, and links for the three logs into the content repo's `agents/`.
   "sharedFolders": [],
 
+  // The kit's old GitHub address, to its new one:  renamed in epic `repo-split` P17 (GitHub redirects the old one).
+  // - Epic pages started before then record the old address (`repo`):  `EpicRepo` reads it as this repo's
+  //   (epic `epic-engine` I150), so their sessions aren't told they're in the wrong repo.
+  "renamedRepos": { "https://github.com/spell-app/spell-kit": "https://github.com/spell-app/spell" },
+
   // The epic engine:  the spell-epic child repo, already inside the top repo, so no link (`""`, epic-engine P10).
   "engineFolder": "",
 
   // The VS Code window files, each machine's own:  the content repo's `windows/`, git-ignored there.
   "windowsFolder": "spell.epics/windows",
+
+  // The app's editor, served by the page server at its own address (spell-app's own settings until epic `repo-split`
+  // P20 made it a folder):  where it is, the file its server writes its address to, and how to start it.
+  "app": {
+    "path": "/editor/",
+    "urlFile": ".spell-server.editor.json",
+    "start": "node bin/spell.mjs server start"
+  },
 
   // The VOICES pages are written in (epic `readme` P13;  `epic voice`):  a name each, its file from here.
   // - `code`:  docstrings, comments, AGENTS.md files, epic pages:  WWOD's writing rules, §6 and its spoke.

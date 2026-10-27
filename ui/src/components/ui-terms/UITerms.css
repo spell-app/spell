@@ -1,0 +1,20 @@
+/*
+ * The style sheet of `<ui-terms>`:  a grid of two columns, the terms' labels then their values.
+ * - Each `<ui-term>` is a subgrid row of it (`UITerm.css`), so every value starts at the same place.
+ * - `direction="horizontal"` (`:state(horizontal)`):  the terms side by side, wrapping.
+ * - The gaps (`spacing`) are a `:host` rule the component writes (`UITerms.hostLayout`).
+ */
+
+@layer ui.components.terms.types {
+  :host {
+    display: grid;
+    grid-template-columns: max-content minmax(0, 1fr);
+    column-gap: var(--ui-terms-column-gap, var(--ui-space-l));
+    row-gap: var(--ui-space-xs);
+  }
+  :host(:state(horizontal)) {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+  }
+}

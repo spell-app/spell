@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vite-plus/test"
+import { afterEach, describe, expect, it, onTestFinished, vi } from "vite-plus/test"
 
 import {
   closestAcrossShadow,
@@ -7,6 +7,8 @@ import {
   isBrowser,
   nextFrame,
   NodeType,
+  scrollByRow,
+  scrollEnds,
   whenDefined
 } from "spell/util/dom"
 
@@ -129,6 +131,39 @@ describe("flatParentFor()", () => {
 
   it("is undefined at the top of a detached tree", () => {
     expect(flatParentFor(document.createElement("div"))).toBeUndefined()
+  })
+})
+
+describe("scrollEnds() and scrollByRow()", () => {
+  afterEach(() => vi.restoreAllMocks())
+
+  /** A 100px row of 300px of content, on the page. */
+  function row(): HTMLElement {
+    const box = document.createElement("div")
+    box.style.cssText = "width: 100px; overflow-x: auto; white-space: nowrap"
+    box.innerHTML = '<span style="display: inline-block; width: 300px">wide</span>'
+    document.body.append(box)
+    onTestFinished(() => box.remove())
+    return box
+  }
+
+  it("says which ends can still scroll", () => {
+    const box = row()
+    expect(scrollEnds(box)).toEqual({ start: false, end: true })
+    box.scrollLeft = 100
+    expect(scrollEnds(box)).toEqual({ start: true, end: true })
+    box.scrollLeft = 200
+    expect(scrollEnds(box)).toEqual({ start: true, end: false })
+  })
+
+  it("steps most of the row's width, smoothly;  at once under reduced motion", () => {
+    const box = row()
+    const scrollBy = vi.spyOn(box, "scrollBy")
+    scrollByRow(box, 1)
+    expect(scrollBy).toHaveBeenLastCalledWith({ left: 80, behavior: "smooth" })
+    vi.spyOn(window, "matchMedia").mockReturnValue({ matches: true } as MediaQueryList)
+    scrollByRow(box, -1)
+    expect(scrollBy).toHaveBeenLastCalledWith({ left: -80, behavior: "instant" })
   })
 })
 

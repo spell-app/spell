@@ -1,0 +1,42 @@
+/* A pane's header (its toolbar of tabs, then its tools), then what it's showing, filling the rest. */
+.RunnerPane {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+
+  /*
+   * the header:  a pane header, as the others:  40px, a hairline under it, the tabs' track and the tools in it
+   * (Owen:  "(/) and x buttons closer together, and included in the toolbar bg")
+   * - the track starts past the pane's rounded corner:  a pill tucked 10px into a 16px corner was rounder than the
+   *   corner round it (Owen:  "rounding of outer rings needs to be greater than rounding of inner bits")
+   */
+  & > .RunnerPaneHeader {
+    flex: 0 0 auto;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    height: 40px;
+    padding-block: 0;
+    padding-inline: max(10px, var(--spell-pane-radius, 0px)) 12px;
+    border-bottom: 1px solid var(--ui-border-color);
+    background: var(--spell-header-background);
+  }
+  /* its tabs the Inspector's size:  one look for every tab bar (`chrome.css`);  the track takes the room left */
+  & .RunnerPaneToolbar {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  /* the tools at the right:  spaced as every bar's icons (`chrome.css`) */
+  & .RunnerPaneTools {
+    flex: none;
+    display: flex;
+    align-items: center;
+  }
+
+  & > :not(.RunnerPaneHeader) {
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+}

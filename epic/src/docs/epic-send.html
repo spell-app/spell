@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>epic-send</title>
+    <meta
+      name="description"
+      content="A details page's Send: where the answer stands, and the round button that sends it."
+    />
+    <!-- Before first paint:  the viewer's colour scheme (Spell UI's `ThemePreference.HEAD_SCRIPT`).  The theme itself is restored by site.js. -->
+    <script>
+      try {
+        var l = localStorage,
+          d = document.documentElement,
+          s = l.getItem("spell-site:scheme") || l.getItem("spell-site:theme") || l.getItem("spell-ui-site:scheme")
+        if (s === "light" || s === "dark") {
+          d.classList.add("ui-" + s)
+          d.style.colorScheme = s
+        }
+      } catch (e) {}
+    </script>
+    <link rel="stylesheet" href="_assets/site.css" />
+    <script type="module" src="_assets/site.js"></script>
+    <!-- the comments (bullhorns, threads, Send):  the docs runtime's, alone, beside the site's Spell UI -->
+    <script defer src="/_epic/assets/spell-comments.js"></script>
+  </head>
+  <body class="ui-typography">
+    <main id="main" class="site-main" data-toc-header="&lt;epic-send&gt;">
+      <ui-segment appearance="vertical" class="site-masthead"
+        ><ui-container>
+          <ui-menu icon class="site-page-links" aria-label="About this page"
+            ><ui-item
+              link="/guides/details.html"
+              icon="book"
+              aria-label="How details pages work"
+              title="How details pages work"
+            ></ui-item
+          ></ui-menu>
+          <ui-header level="1" class="site-title"
+            >&lt;epic-send&gt;<ui-header
+              >A details page's Send: where the answer stands, and the round button that sends it.</ui-header
+            ></ui-header
+          >
+        </ui-container></ui-segment
+      >
+      <ui-container class="site-body"
+        ><article class="site-article">
+          <p class="lede">
+            A details page's Send, in its sticky header: where the answer stands, then Send (<a
+              href="epic-send-buttons.html" target="src-spell-epic-src-docs-epic-send-buttons-html"
+              ><code>&lt;epic-send-buttons&gt;</code></a
+            >). It sends the whole page, partial answers too, as often as Owen likes: the page never locks. No wand or
+            countdown since 2026-10-25: only a press sends. Beside them, the draft's
+            save: what's typed and not sent is kept beside the page, and comes back when the page reloads or is
+            rewritten. After the button, who hears it: <code>repo-split is listening</code> while a session waits for
+            the answer, else <code>nobody is waiting yet</code>. Send works either way.
+          </p>
+          <p class="meta">
+            For anyone writing a page Owen answers on (a details or choice page), or changing this element.<br />
+            <ui-label size="mini" color="green">built</ui-label> in
+            <a href="/epic/src/components/epic-send/" target="src-spell-epic-src-components-epic-send"
+              ><code title="epic/src/components/epic-send/">epic-send/</code></a
+            >
+            (epic <code>epic-workflow</code> P12; the draft P18; who hears it, epic <code>epic-engine</code> r6).<br />
+            Its vocabulary (every table below comes from it):
+            <a
+              href="/epic/src/components/epic-send/EpicSend.en.ts"
+              target="src-spell-epic-src-components-epic-send-epicsend-en-ts"
+              ><code title="epic/src/components/epic-send/EpicSend.en.ts">EpicSend.en.ts</code></a
+            >.
+          </p>
+          <ui-section id="1-example" label="1. Example" sticky collapsible dividing open="false"
+            ><ui-icon slot="icon" name="eye"></ui-icon>
+            <p>
+              Live: the real element, drawn by the epics pack this page loads. Off a details page's own address nothing
+              is saved or sent: Send says so.
+            </p>
+            <epic-send></epic-send
+          ></ui-section>
+          <ui-section id="2-markup" label="2. Markup" sticky collapsible dividing open="false"
+            ><ui-icon slot="icon" name="code"></ui-icon
+            ><ui-accordion class="spell-code" appearance="styled"
+              ><ui-title>details page · the header · 3 lines</ui-title
+              ><ui-content
+                ><ui-code language="html"
+                  ><script type="text/plain">
+                    <ui-sticky class="spell-h1"
+                      ><header class="spell-page-head"><h1>Pick a layout</h1><epic-send></epic-send></header></ui-sticky
+                    >
+                  </script></ui-code
+                ></ui-content
+              ></ui-accordion
+            ></ui-section
+          >
+          <ui-section id="3-where-it-goes" label="3. Where it goes" sticky collapsible dividing open="false"
+            ><ui-icon slot="icon" name="layer group"></ui-icon>
+            <ul>
+              <li>
+                Once a page, in its sticky header (<code>.spell-page-head</code>), after the h1: it sits at the header's
+                right.
+              </li>
+              <li>No children.</li>
+            </ul></ui-section
+          >
+          <ui-section id="4-attributes" label="4. Attributes" sticky collapsible dividing open="false"
+            ><ui-icon slot="icon" name="table columns"></ui-icon>
+            <p>None.</p>
+            <ui-section id="epic-send-parts" label="Parts" sticky collapsible dividing open="false"
+              ><p>
+                A part is a piece of what the element draws in its shadow root (its own hidden markup), named so a
+                stylesheet can reach it: <code>epic-send::part(base)</code>.
+              </p>
+              <ui-table celled padding="compact" appearance="striped" unstackable
+                ><table>
+                  <thead>
+                    <tr>
+                      <th>Part</th>
+                      <th>What it is</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><code>base</code></td>
+                      <td>Its box: the line, then an error when there is one.</td>
+                    </tr>
+                    <tr>
+                      <td><code>state</code></td>
+                      <td>Where the answer stands, in its colour: grey, blue (not sent), green (sent).</td>
+                    </tr>
+                    <tr>
+                      <td><code>draft</code></td>
+                      <td>
+                        The draft's save (P18), muted: <code>draft saved 14:04</code>,
+                        <code>draft from 14:04 put back</code>; when the page server can't take it, on its own line
+                        under the rest, red and bold (P15: the browser still keeps it, and it tries again every 3s).
+                      </td>
+                    </tr>
+                    <tr>
+                      <td><code>send</code></td>
+                      <td>
+                        Send (<code>&lt;epic-send-buttons&gt;</code>, epic <code>epic-engine</code>
+                        P20), by the fill rule: a grey outline with nothing to send, dashed blue with changes not sent, a
+                        blue outline once sent.
+                      </td>
+                    </tr>
+                    <tr>
+                      <td><code>who</code></td>
+                      <td>
+                        Who hears a Send, muted, after the button (r6): <code>repo-split is listening</code> with a
+                        green dot (a session's <code>epic ask wait</code>), or <code>nobody is waiting yet</code>; the
+                        tooltip says more. None where the page can't ask (no page server).
+                      </td>
+                    </tr>
+                    <tr>
+                      <td><code>error</code></td>
+                      <td>Why it couldn't send, under them.</td>
+                    </tr>
+                    <tr>
+                      <td><code>notice</code></td>
+                      <td>
+                        Sent with nobody waiting, under them in orange:
+                        <code>Saved: nobody is waiting yet; Claude reads it when it next looks.</code> Gone once a
+                        session waits, or at the next send.
+                      </td>
+                    </tr>
+                  </tbody>
+                </table></ui-table
+              ></ui-section
+            >
+            <ui-section id="epic-send-states" label="States" sticky collapsible dividing open="false"
+              ><p>
+                A state is a word the element sets on itself while something is true, for styling:
+                <code>epic-send:state(pending)</code>. Never written in the file.
+              </p>
+              <ui-table celled padding="compact" appearance="striped" unstackable
+                ><table>
+                  <thead>
+                    <tr>
+                      <th>State</th>
+                      <th>When</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><code>pending</code></td>
+                      <td>Something on the page isn't sent yet.</td>
+                    </tr>
+                    <tr>
+                      <td><code>sent</code></td>
+                      <td>The page as sent.</td>
+                    </tr>
+                  </tbody>
+                </table></ui-table
+              ></ui-section
+            >
+          </ui-section>
+          <ui-section id="5-how-it-looks" label="5. How it looks" sticky collapsible dividing open="false"
+            ><ui-icon slot="icon" name="palette"></ui-icon>
+            <ul>
+              <li>
+                The line: <code>Not sent</code> (grey; blue with something on the page),
+                <code>Changes not sent</code> (blue), <code>Sent 10/8/26 14:34 · 5 of 17 decided</code> (green;
+                <code>Sent 10/8/26 14:34</code> on a page with no questions, only comment boxes and notes).
+              </li>
+              <li>
+                Send by the fill rule: a grey outline with nothing to send, dashed blue with changes not sent, a blue
+                outline once sent; never solid, since the page can't tell when Claude is done with it.
+              </li>
+              <li>
+                The draft's save beside the line, muted (<code>draft not saved yet</code>, <code>saving draft…</code>,
+                <code>draft saved 14:04</code>, <code>draft from 14:04 put back</code>). Saved to the page server as
+                Owen types, half a second after each change, and kept in the browser at once. Gone once sent.
+              </li>
+              <li>
+                After Send, who hears it, muted (epic <code>epic-engine</code> r6): <code>repo-split is listening</code>
+                with a green dot while a session's <code>epic ask wait</code> (or <code>ask show --wait</code>) waits
+                for the answer, else <code>nobody is waiting yet</code>. The page asks again every 30s:
+                <code>ask wait</code> keeps a heartbeat in <code>~/.spell-epic/asks/</code>.
+              </li>
+              <li>
+                Send works with nobody waiting too: the answer is saved beside the page, and an orange line says so,
+                <code>Saved: nobody is waiting yet; Claude reads it when it next looks.</code>
+              </li>
+              <li>
+                A draft's save that failed, on its own line under them in red, bold, so the side bar's width never cuts
+                it short (epic <code>epic-engine</code> P15):
+                <code>draft kept in this browser only: ...; trying again every 3s</code>. It does try again, by
+                itself: once the page server answers (a restart's new token too), it saves with no keystroke.
+              </li>
+              <li>Why it couldn't send, in red, under them.</li>
+            </ul></ui-section
+          >
+          <ui-section id="6-written-by" label="6. Written by" sticky collapsible dividing open="false"
+            ><ui-icon slot="icon" name="terminal"></ui-icon>
+            <ul>
+              <li><code>epic ask create</code>: in the template's header.</li>
+              <li>Older pages: the migration step <code>answer-elements</code>.</li>
+            </ul></ui-section
+          >
+          <footer class="site-page-footer">
+            <ui-divider></ui-divider>
+            <p class="meta">
+              Last checked 2026-10-19 against branch <code>epic-engine</code> (r6): the tables are its vocabulary's
+              (epic-send); the rest from its component and its stylesheet.
+            </p>
+          </footer>
+        </article></ui-container
+      >
+    </main>
+  </body>
+</html>

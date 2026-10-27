@@ -1,0 +1,144 @@
+{
+  "name": "spell-ui",
+  "version": "0.8.0",
+  "description": "Beautiful, themeable, accessible components that load themselves on demand, for use in plain HTML or any framework",
+  "license": "MIT",
+  "repository": "https://github.com/spell-app/spell-ui",
+  "type": "module",
+  "sideEffects": [
+    "**/*.css",
+    "./src/index.ts",
+    "./src/components/*/index.ts",
+    "./src/docs-components/*/index.ts",
+    "./src/elements/SpellUISettings.ts",
+    "./site/_src/snapshot.ts",
+    "./site/_src/SitePacks.ts",
+    "./site/_src/site.ts",
+    "./src/tools/demo/**"
+  ],
+  "scripts": {
+    "dev": "vp dev --open /src/tools/demo/index.html",
+    "build": "tsc && vp build",
+    "preview": "vp preview",
+    "clean": "rm -rf ./.cache ./build ./dist ./dist-types ./coverage ./test-results ./vendor ./results ./src/tools/frameworks/solid/dist",
+    "/////// CORRECTNESS": "",
+    "review": "yarn ts && yarn lint:fix && yarn format && yarn test && echo '== REVIEW PASSED\n===========\n'",
+    "ts": "echo '>>>>>>>>>>>\\n>> RUNNING TSC' && spell-types && tsc -p ./tests && tsc -p ./tests/cli && echo '<< TSC PASSED\\n'",
+    "lint": "echo '>>>>>>>>>>>\\n>> LINTING WITH OXLINT' && vp lint --report-unused-disable-directives --max-warnings 0 src scripts site/_src && cd ./tests && vp lint --report-unused-disable-directives --max-warnings 0 . && echo '<< OXLINT PASSED\\n'",
+    "lint:fix": "echo '>>>>>>>>>>>\\n>> LINTING WITH OXLINT --fix' && vp lint --fix src scripts site/_src && cd ./tests && vp lint --fix . && echo '<< OXLINT PASSED\\n'",
+    "format": "echo '>>>>>>>>>>>\n>> FORMATTING WITH OXFMT' && vp fmt . && cd ./tests && vp fmt . && echo '<< OXFMT PASSED\n'",
+    "format:check": "vp fmt --check . && cd ./tests && vp fmt --check .",
+    "/////// TESTING": "",
+    "test": "echo '>>>>>>>>>>>\n>> RUNNING TESTS' && vp test run --project ssr && vp test run --project browser && echo '<< TESTS PASSED\n'",
+    "test:watch": "vp test",
+    "test:ui": "vp test --ui",
+    "test:all": "vp test run --project ssr && SPELL_UI_TEST_ALL=1 vp test run --project browser",
+    "test:visual": "tsx src/tools/visual/cli.ts",
+    "test:visual:update": "tsx src/tools/visual/cli.ts --update",
+    "test:hmr": "tsx src/tools/hmr.e2e.ts",
+    "test:browsers": "playwright install chromium firefox webkit",
+    "/////// PACKAGE TOOLING (src/tools/)": "",
+    "vendor": "tsx src/tools/cli.ts vendor",
+    "measure": "tsx src/tools/cli.ts measure",
+    "smoke": "vp build --logLevel warn && tsx src/tools/cli.ts declarations && tsx src/tools/cli.ts smoke",
+    "serve": "tsx src/tools/cli.ts serve",
+    "report": "tsx src/tools/cli.ts report",
+    "icons:pack": "tsx src/tools/cli.ts icons:pack",
+    "screenshots": "tsx src/tools/screenshots.ts",
+    "/////// DOCS SITE": "",
+    "site:dev": "tsx scripts/site-dev.ts",
+    "site:data": "tsc -p tsconfig.node.json && tsx scripts/site-data.ts",
+    "site:index": "tsx scripts/site-index.ts",
+    "site:kitchen": "tsx scripts/site-kitchen.ts",
+    "site:bundle": "tsx scripts/site-bundle.ts",
+    "site:build": "yarn site:data && yarn site:index && yarn site:kitchen && yarn site:bundle",
+    "site:new": "tsc -p tsconfig.node.json && tsx scripts/site-new.ts",
+    "site:sections": "tsx scripts/site-sections.ts",
+    "site:check": "tsx scripts/site-check.ts",
+    "readme:components": "tsx scripts/readme-components.ts",
+    "/////// GENERATED": "",
+    "gen:styles": "tsc -p tsconfig.node.json && tsx scripts/gen-styles.ts",
+    "gen:icons": "tsc -p tsconfig.node.json && tsx scripts/gen-icons.ts",
+    "gen:emoji": "tsc -p tsconfig.node.json && tsx scripts/gen-emoji.ts",
+    "gen:root": "tsc -p tsconfig.node.json && tsx scripts/gen-root.ts",
+    "tokens:alias": "tsx scripts/tokens-alias.ts",
+    "/////// DESIGN SYSTEM (claude.ai)": "",
+    "design:build": "tsc -p tsconfig.node.json && tsx scripts/design-build.ts",
+    "/////// MANIFEST": "",
+    "manifest": "custom-elements-manifest analyze --globs 'src/**/*.ts' 'src/**/*.tsx'"
+  },
+  "dependencies": {
+    "dompurify": "^3.4.0",
+    "highlight.js": "^11.12.0",
+    "linkedom": "^0.18.13",
+    "lodash-es": "^4.18.1",
+    "marked": "^18.0.0",
+    "postcss": "^8.5.28",
+    "temporal-polyfill": "^1.0.5"
+  },
+  "devDependencies": {
+    "@custom-elements-manifest/analyzer": "^0.11.0",
+    "@playwright/test": "1.63.0",
+    "@solidjs/h": "2.0.0-rc.17",
+    "@solidjs/vite-plugin": "3.0.0-next.51",
+    "@solidjs/web": "2.0.0-rc.17",
+    "@types/lodash-es": "^4.17.12",
+    "@types/node": "^22.20.4",
+    "@typescript/typescript6": "^6.0.2",
+    "@vitest/browser-playwright": "catalog:",
+    "@vitest/ui": "catalog:",
+    "axe-core": "^4.13.0",
+    "emojibase-data": "^17.0.0",
+    "esbuild": "^0.28.2",
+    "json5": "^2.2.3",
+    "lightningcss": "^1.33.0",
+    "playwright": "1.63.0",
+    "solid-js": "2.0.0-rc.17",
+    "spell": "workspace:*",
+    "tsx": "4.20.3",
+    "typescript": "^7.0.2",
+    "vite": "catalog:",
+    "vite-plugin-dts": "^5.1.1",
+    "vite-plus": "catalog:",
+    "vitest": "catalog:"
+  },
+  "engines": {
+    "node": ">=24.11"
+  },
+  "customElements": "./docs/__data/custom-elements.json",
+  "pageServer": {
+    "bundles": [
+      "site/_assets"
+    ],
+    "componentSets": {
+      "ui": {
+        "name": "Spell UI",
+        "dir": "docs",
+        "assets": "site/_assets"
+      }
+    }
+  },
+  "spell": {
+    "commands": "./src/cli/commands.ts"
+  },
+  "spellPublish": {
+    "exclude": [
+      "tools/**",
+      "cli/**",
+      "test-helpers/**",
+      "components/*/examples/**",
+      "styles/themes/archive/**",
+      "**/*.visual.ts"
+    ],
+    "verbatim": [
+      "icons/icon-packs/**"
+    ],
+    "exports": {
+      "./ui-*": "components/ui-*/index"
+    }
+  },
+  "spellTypes": [
+    "tsconfig.json",
+    "tsconfig.node.json"
+  ]
+}

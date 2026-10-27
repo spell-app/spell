@@ -29,8 +29,8 @@ const CONTENT_CITERS = ["goals/AGENTS.md", "guides/solid/solid-2.md"]
 
 /**
  * The coherence catalog and word list (epic `coherence` P2):  every FILE they name must exist, wherever it is
- * (`src/server/LiveReload.ts`, `spell-epic/src/window.mjs`), so a moved or renamed mechanism fails the check.
- * - Only files with an extension:  an import name (`spell-parser/parser`) isn't a path.
+ * (`src/server/LiveReload.ts`, `epic/src/window.mjs`), so a moved or renamed mechanism fails the check.
+ * - Only files with an extension:  an import name (`spell/parser/parser`) isn't a path.
  */
 const COHERENCE = ["agents/coherence/catalog.md", "agents/coherence/words.md"]
 

@@ -1,0 +1,76 @@
+<spell-notebook "icon-picker usage">
+	<header level="1">
+		Icon Picker
+		<header>An icon picker lets people choose an icon by searching for it and clicking its glyph.</>
+	</>
+	<icon-picker-tab-bar showing="usage"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#using-it">Using it</>
+				<ui-item link="#its-icons">Its icons</>
+				<ui-item link="#keyboard">Keyboard</>
+				<ui-item link="#accessibility">Accessibility</>
+			</>
+		</>
+	</>
+
+	<!-- USAGE:  how to use it, where its icons come from, keyboard, accessibility. -->
+	<section label="Using it">
+		<markdown>
+			`value` is an icon's NAME, as `<ui-icon name>` takes it (`star`, `address book`);  `""` is none.
+
+			- The attribute is the starting (and reset) value;  the `value` property is the live one.
+			- Picking sends the cancelable `ui-changing` (`{ value }`) first:  a handler that sets `el.value` again wins;  then
+			  `ui-changed` once it's in.
+			- In a `<ui-form value>` it binds like any control;  a property editor draws one for every
+			  `icon` attribute (a button's, a rating's).
+		</>
+		<markdown>
+			```js
+			document.querySelector("ui-icon-picker").addEventListener("ui-changed", (event) => {
+			  document.querySelector("ui-button").icon = event.detail.value
+			})
+			```
+		</>
+	</>
+
+	<section label="Its icons">
+		<markdown>
+			It offers every icon its page knows:  its nearest `<ui-root icons>`'s packs, else the page's
+			(Font Awesome's free icons by default), one cell per glyph.
+
+			- With no search, they're in groups:  Font Awesome's own categories, A-Z
+			  (Accessibility, Alert, Alphabet, Animals ...), each under its heading.
+			  - A glyph in several categories is in each, as on Font Awesome's site.
+			  - Glyphs in none come last, under Other:  most brands, and every glyph of a pack of your own.
+			  - The heading of the group at the top stays there as you scroll.
+			- A search is one list:  names first (exact, then starting with what you typed, then holding it),
+			  then Font Awesome's search terms.
+			- The categories and the search terms are one file, loaded as a picker first opens:
+			  until it's in, the grid is one list, A-Z.
+			- With `<ui-root icons="fomantic">`, Fomantic's names go to the glyphs they draw there.
+			- The grid draws only the rows in view:  each glyph is a file of its own, fetched as it scrolls in.
+		</>
+	</>
+
+	<section label="Keyboard">
+		<markdown>
+			- On the field:  Enter, Space, Down or Up opens it;  a letter opens it searching for that letter.
+			- In the panel, the focus stays in the search box:
+			  - the arrows move through the grid, Enter picks;  Down and Up step over a group's heading
+			  - Escape closes it, back on the field;  Tab closes it and moves on
+		</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			- The field is a button that opens a listbox;  named by the picker's `<label for>` or
+			  `aria-label`, then what it shows ("Icon, star").
+			- The search box is a combobox over the grid, a listbox of options, each named for its icon,
+			  the chosen one `aria-selected`.
+			- The group headings are hidden from screen readers:  a listbox holds only options.
+			- Each glyph's name is its tooltip too.
+		</>
+	</>
+</spell-notebook>

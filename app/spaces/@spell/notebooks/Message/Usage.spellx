@@ -1,0 +1,121 @@
+<spell-notebook "message usage">
+	<header level="1">
+		Message
+		<header>A message displays information that explains nearby content.</>
+	</>
+	<message-tab-bar showing="usage"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#using-it">Using it</>
+				<ui-item link="#events">Events</>
+				<ui-item link="#in-a-form">In a form</>
+				<ui-item link="#keyboard">Keyboard</>
+				<ui-item link="#accessibility">Accessibility</>
+				<ui-item link="#framework-usage">Framework usage</>
+			</>
+		</>
+	</>
+
+	<!-- USAGE:  how to use it (content, dismissing, forms), events, keyboard, accessibility, frameworks. -->
+	<section label="Using it">
+		<markdown>
+			The content is whatever you slot: paragraphs, a list, a `<ui-header>`, plain text.
+
+			- `heading` is the shorthand for a header above the content; a slotted `<ui-header>` is the rich version.
+			- `icon` names an icon shown large beside the content; the `icon` slot takes any markup (a spinning
+			  `<ui-icon loading>`).
+			- `state` picks the consequence (`positive`, `success`, `negative`, `error`, `warning`, `info`); `color` any hue.
+			  Both tint the surface, border and text.
+			- `attach="both"` (or `top`) joins the message to the segment or form below it; `attach="bottom"` to the one above.
+		</>
+	</>
+
+	<section label="Events">
+		<markdown>
+			A `dismissible` message fires the cancelable `ui-closing` when its close button is used (`detail.originalEvent`
+			is the click). Unless a handler cancels it, the message sets `hidden` on itself. It never removes itself, so a
+			framework that rendered it still owns the node; remove `hidden` to show it again.
+		</>
+		<markdown>
+			```js
+			const message = document.querySelector("ui-message[dismissible]")
+			message.addEventListener("ui-closing", (event) => {
+			  event.preventDefault() // keep it on screen
+			  message.remove() // ... or take it out yourself
+			})
+			```
+		</>
+	</>
+
+	<section label="In a form">
+		<markdown>
+			Inside a `<ui-form>`, a message with a `state` shows only while the form is in that state: an `error` message
+			appears when validation fails, a `success` one when the form is set to `success` (live examples on the Form
+			page).
+		</>
+	</>
+
+	<section label="Keyboard">
+		<markdown>
+			- The close button of a `dismissible` message is a real `<button>`: **Tab** reaches it, **Enter** or **Space**
+			  dismisses.
+			- Nothing else in a message takes focus unless you slot something focusable (a link).
+		</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			- A message has no role of its own, because most messages are part of the page. A message you insert to announce
+			  something should carry `role="status"` (or `role="alert"` when it is urgent), set by the page.
+			- The close button of a `dismissible` message is a real `<button>` named "Dismiss" (translatable), and a tab stop.
+			- The icon is decoration: it is hidden from assistive technology, so say what it means in the text.
+			- A `state` or `color` is never the only signal: write the meaning in the header or text as well.
+			- If the element fails to render, it shows its children through a bare `<slot>`, so the text stays;
+			  the message box and colours, the `icon` glyph (a slotted icon too),
+			  the close button and `ui-closing` go.
+		</>
+	</>
+
+	<section label="Framework usage">
+		<markdown>Listen for `ui-closing`, and cancel it when your framework should decide whether the message stays.</>
+		<header level="4" id="framework-react">React 19</>
+		<markdown>
+			```jsx
+			{shown && (
+			  <ui-message
+			    dismissible
+			    heading="Saved"
+			    onui-dismiss={(event) => {
+			      event.preventDefault()
+			      setShown(false)
+			    }}
+			  />
+			)}
+			```
+		</>
+		<header level="4" id="framework-vue">Vue 3.5</>
+		<markdown>
+			```html
+			<!-- compilerOptions.isCustomElement = (tag) => tag.startsWith("ui-") -->
+			<ui-message v-if="shown" dismissible heading="Saved" @ui-closing.prevent="shown = false" />
+			```
+		</>
+		<header level="4" id="framework-solid">Solid 2</>
+		<markdown>
+			```jsx
+			// events and rich data are plain props:  `on-<event>={...}`, `options={...}`
+			<Show when={shown()}>
+			  <ui-message
+			    dismissible
+			    heading="Saved"
+			    on-ui-closing={(event) => {
+			      event.preventDefault()
+			      setShown(false)
+			    }}
+			  />
+			</Show>
+			```
+		</>
+	</>
+</spell-notebook>

@@ -273,6 +273,23 @@ describe("UIComponent shared words", () => {
     expect(follow).not.toHaveBeenCalled()
   })
 
+  test("`linkTo` / `linkTarget`:  a family's own `<a>` goes to its `link`, in its `target`;  nowhere while disabled", async () => {
+    const element = await shown(`link="help.html" target="_blank"`, (component) => (
+      <a href={component.linkTo} target={component.linkTarget}>
+        go
+      </a>
+    ))
+    const anchor = element.shadowRoot!.querySelector("a")!
+    const linked = { href: anchor.getAttribute("href"), target: anchor.getAttribute("target") }
+    element.setAttribute("disabled", "")
+    await ElementFixture.settle()
+    const disabled = { href: anchor.getAttribute("href"), target: anchor.getAttribute("target") }
+    expect({ linked, disabled }).toEqual({
+      linked: { href: "help.html", target: "_blank" },
+      disabled: { href: null, target: null }
+    })
+  })
+
   test("`font` sets a state per word written, and clears the rest", async () => {
     const element = await shown(`font="bold italic"`)
     expect([element.matches(":state(font-bold)"), element.matches(":state(font-italic)")]).toEqual([true, true])
@@ -295,5 +312,87 @@ describe("UIComponent shared words", () => {
     const tag = defineLabel()
     const own = await ElementFixture.render<DOMElement>(`<${tag} label="Shown"></${tag}>`)
     expect(own.internals.ariaLabel).toBe(null)
+  })
+})
+
+////////////////
+// ## Parent
+////////////////
+
+/** A vocabulary's `parent` attribute. */
+const PARENT: AttributeSpec = { name: "parent", kind: "string", description: "The id of the container it joins." }
+
+describe("UIComponent parent", () => {
+  test("an element whose vocabulary declares `parent` joins the container with that id;  another tag stays put", async () => {
+    const joiner = defineElement("joiner", () => <slot />, [PARENT])
+    const plain = defineElement("plain", () => <slot />)
+    const root = container()
+    root.innerHTML =
+      `<div id="box-${tagCount}"></div><${joiner} parent="box-${tagCount}"></${joiner}>` +
+      `<${plain} parent="box-${tagCount}"></${plain}>`
+    await ElementFixture.settle(root)
+    const box = root.querySelector("div")!
+    expect({
+      joined: box.querySelector(joiner) !== null,
+      stayed: root.querySelector(`:scope > ${plain}`) !== null
+    }).toEqual({ joined: true, stayed: true })
+  })
+})
+
+////////////////
+// ## Its own `:host` rule
+////////////////
+
+/** A `gap` attribute, in pixels. */
+const GAP: AttributeSpec = { name: "gap", kind: "string", description: "Pixels between its children." }
+
+/** Define a test element whose `:host` rule is `layout(component)`, from its `gap`. */
+function defineLayout(layout: (component: TestComponent) => string): string {
+  const tag = nextTag("layout")
+  const vocabulary = {
+    tag,
+    noun: "layout",
+    attributes: [GAP],
+    events: [],
+    slots: [],
+    parts: [],
+    states: [],
+    texts: []
+  } satisfies ComponentVocabulary
+  /** The test element's component:  its own `:host` rule. */
+  class LayoutElement extends UIComponent {
+    protected get hostLayout(): string {
+      return layout(this as unknown as TestComponent)
+    }
+
+    render(): JSX.Element {
+      return <slot />
+    }
+  }
+  Object.defineProperty(LayoutElement.prototype, "vocabulary", { value: vocabulary })
+  ;(LayoutElement as unknown as UIComponentClass & typeof UIComponent).define()
+  return tag
+}
+
+describe("UIComponent hostLayout", () => {
+  test("a class's own `:host` rule follows its attributes, in a sheet of its own;  its `style` stays the page's", async () => {
+    const tag = defineLayout((component) => `display: flex;  gap: ${(component.gap as string | undefined) ?? 0}px`)
+    const element = await ElementFixture.render<DOMElement>(`<${tag} gap="7"><i>a</i><i>b</i></${tag}>`)
+    const before = getComputedStyle(element).columnGap
+    element.setAttribute("gap", "3")
+    await ElementFixture.settle()
+    expect({
+      before,
+      after: getComputedStyle(element).columnGap,
+      display: getComputedStyle(element).display,
+      sheets: element.shadowRoot!.adoptedStyleSheets.length,
+      style: element.getAttribute("style")
+    }).toEqual({ before: "7px", after: "3px", display: "flex", sheets: 1, style: null })
+  })
+
+  test("a class without one adopts no sheet for it", async () => {
+    const tag = defineLabel()
+    const element = await ElementFixture.render<DOMElement>(`<${tag} label="x"></${tag}>`)
+    expect(element.shadowRoot!.adoptedStyleSheets.length).toBe(0)
   })
 })

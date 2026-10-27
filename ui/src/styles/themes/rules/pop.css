@@ -1,0 +1,54 @@
+/*
+ * Pop's rules:  what its values can't say, `@layer ui.theme` (epic `debut` P20).
+ * - A rules sheet of the Pop theme (`pop.theme.json5`, `"rules": ["modern", "pop"]`);  its sheet, `pop.css`,
+ *   imports this one:  `yarn gen:styles` writes it.
+ * - In `rules/`, so no theme menu lists it (`UI.themes` reads the themes folder's top level only).
+ * - What's here:
+ *   - the page's own colour
+ *   - the buttons' sticker:  a button has no border or shadow token, so its outline and hard offset shadow are rules;
+ *     pressed, it sinks onto its shadow
+ *   - bold headings
+ */
+
+@layer ui.theme {
+  /* the page's own colour;  page only:  `:root` matches nothing inside a shadow root */
+  :root {
+    background-color: var(--ui-background);
+  }
+
+  /*******************************
+         The buttons' sticker
+  *******************************/
+
+  /*
+   * a filled button:  the ink outline and a 3px offset shadow;  basic, tertiary and text buttons stay flat,
+   * and so do icon buttons, plain icons in a bar (T22)
+   */
+  .ui.button:not(.basic, .tertiary, .text, .link, .inverted, .icon, .disabled, :disabled) {
+    box-shadow:
+      0 0 0 2px var(--pop-ink),
+      3px 3px 0 2px var(--pop-ink);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .ui.button:not(.basic, .tertiary, .text, .link, .inverted, .icon, .disabled, :disabled, .loading):active {
+      scale: none;
+      translate: 2px 2px;
+      box-shadow:
+        0 0 0 2px var(--pop-ink),
+        1px 1px 0 2px var(--pop-ink);
+    }
+  }
+  /* a basic button:  the outline alone;  not an icon button, nor a round one (a bar's palette) */
+  .ui.basic.button:not(.icon, .circular, .disabled, :disabled) {
+    box-shadow: 0 0 0 2px var(--pop-ink);
+  }
+
+  /*******************************
+              Headings
+  *******************************/
+
+  .ui.header,
+  :where(h1, h2, h3, h4, h5, h6) {
+    text-wrap-style: balance;
+  }
+}

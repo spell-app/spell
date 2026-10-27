@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Templates</title>
+    <meta name="description" content="A starting point for every kind of docs page, and how to write one." />
+    <link rel="stylesheet" href="/_epic/assets/spell-doc.css" />
+  </head>
+  <body class="spell-doc-page">
+    <spell-site-header></spell-site-header>
+    <div class="spell-doc">
+      <main class="spell-doc-main">
+        <ui-breadcrumbs class="spell-crumbs" size="small" aria-label="Breadcrumb">
+          <ui-breadcrumb link="/pages/index.html" target="_self">Docs</ui-breadcrumb>
+          <ui-breadcrumb selected>Templates</ui-breadcrumb>
+        </ui-breadcrumbs>
+        <ui-sticky class="spell-h1"
+          ><header class="spell-page-head"><h1>Templates</h1></header></ui-sticky
+        >
+        <p class="lede">A starting point for every kind of docs page, and how to write one.</p>
+        <!-- index:start -->
+        <ui-section id="templates" label="Templates" sticky collapsible dividing>
+          <ui-icon slot="icon" name="copy"></ui-icon>
+          <ui-cards class="spell-grid" stackable>
+            <ui-card
+              ><ui-content>
+                <ui-header
+                  ><a href="cheatsheet.html" target="src-templates-cheatsheet-html">Cheatsheet Template</a></ui-header
+                >
+                <ui-description
+                  >Template for an API reference: one card per feature, grouped into sections, filterable by
+                  text.</ui-description
+                >
+                <ui-meta>templates/cheatsheet.html</ui-meta>
+              </ui-content></ui-card
+            >
+            <ui-card
+              ><ui-content>
+                <ui-header
+                  ><a href="commands.html" target="src-templates-commands-html">Commands Page Template</a></ui-header
+                >
+                <ui-description
+                  >Template for a commands page: operations by family, which CLI / skill / yarn command does each, drawn
+                  from a JSON file.</ui-description
+                >
+                <ui-meta>templates/commands.html</ui-meta>
+              </ui-content></ui-card
+            >
+            <ui-card
+              ><ui-content>
+                <ui-header
+                  ><a href="component-set-docs.html" target="src-templates-component-set-docs-html"
+                    >Epic UI and App UI Components Page Template</a
+                  ></ui-header
+                >
+                <ui-description
+                  >Template for a components page or components guide of a component set (Epic UI, App UI): Spell UI's
+                  page shape, the set's side column, live examples from its pack.</ui-description
+                >
+                <ui-meta>templates/component-set-docs.html</ui-meta>
+              </ui-content></ui-card
+            >
+            <ui-card
+              ><ui-content>
+                <ui-header
+                  ><a href="details.html" target="src-templates-details-html">Details Page Template</a></ui-header
+                >
+                <ui-description
+                  >Template for a details page: a question Claude explains, answered on the page.</ui-description
+                >
+                <ui-meta>templates/details.html</ui-meta>
+              </ui-content></ui-card
+            >
+            <ui-card
+              ><ui-content>
+                <ui-header><a href="durable.html" target="src-templates-durable-html">Guide Template</a></ui-header>
+                <ui-description
+                  >Template for a guide (design notes, research, references): prose sections, tables, code, callouts,
+                  asides.</ui-description
+                >
+                <ui-meta>templates/durable.html</ui-meta>
+              </ui-content></ui-card
+            >
+            <ui-card
+              ><ui-content>
+                <ui-header><a href="review.html" target="src-templates-review-html">Review Page Template</a></ui-header>
+                <ui-description
+                  >Template for a review page: the calls of a finished run, one question each: keep, change or talk
+                  over</ui-description
+                >
+                <ui-meta>templates/review.html</ui-meta>
+              </ui-content></ui-card
+            >
+            <ui-card
+              ><ui-content>
+                <ui-header
+                  ><a href="spell-ui-docs.html" target="src-templates-spell-ui-docs-html"
+                    >Spell UI Components Page Template</a
+                  ></ui-header
+                >
+                <ui-description
+                  >Template for a Spell UI components page (or components guide): Fomantic's docs layout in ui-* widgets
+                  -- nav, masthead, Examples / Usage / API / Theming tabs, an On this page rail.</ui-description
+                >
+                <ui-meta>templates/spell-ui-docs.html</ui-meta>
+              </ui-content></ui-card
+            >
+            <ui-card
+              ><ui-content>
+                <ui-header
+                  ><a href="syntax-choices.html" target="src-templates-syntax-choices-html"
+                    >Choice Page Template</a
+                  ></ui-header
+                >
+                <ui-description
+                  >Template for a choice page: names Claude recommends, one row per use site, each one Owen's
+                  call.</ui-description
+                >
+                <ui-meta>templates/syntax-choices.html</ui-meta>
+              </ui-content></ui-card
+            >
+          </ui-cards>
+        </ui-section>
+        <!-- index:end -->
+        <ui-section id="writing-docs" label="Writing docs" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="pen to square"></ui-icon>
+          <ul>
+            <li>
+              Start from a template:
+              <code>epic pages create durable &lt;topic&gt;/&lt;topic&gt;.html --title "Title"</code>.
+            </li>
+            <li>
+              An epic page: run <code>/epic &lt;name&gt;</code> in Claude Code. Never copy the plan template by hand.
+            </li>
+            <li>
+              The rules: spell-epic's
+              <a href="/epic/src/AGENTS.md" target="src-spell-epic-src-agents-md"><code title="epic/src/AGENTS.md">src/AGENTS.md</code></a
+              >, where these templates live (<code>epic pages template</code>
+              prints the folder). How the pages work:
+              <a href="/guides/spell-docs/spell-docs.md" target="src-guides-spell-docs-spell-docs-md">spell-docs.md</a
+              >.
+            </li>
+            <li>
+              <code>pages create</code> lists the page on its area's page; after renaming one or changing its title, run
+              <code>epic pages index</code>.
+            </li>
+          </ul>
+        </ui-section>
+      </main>
+    </div>
+    <script src="/_epic/assets/highlight.min.js"></script>
+    <script src="/_epic/assets/spell-ui.js"></script>
+  </body>
+</html>

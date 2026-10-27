@@ -1,0 +1,200 @@
+<spell-notebook "shape examples">
+	<header level="1">
+		Shape
+		<header>A shape is a three dimensional object displayed on a two dimensional plane.</>
+	</>
+	<shape-tab-bar showing="examples"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#types">Types</>
+				<ui-item link="#variations">Variations</>
+				<ui-item link="#more-examples">More Examples</>
+			</>
+		</>
+	</>
+
+	<!--
+		EXAMPLES:  Fomantic's shape page, its Definition tab (Types), our own Variations, then its Examples tab (More
+		Examples).  The direction buttons turn each shape through invoker commands (`commandfor` + `command="--flip-up"`
+		...):  no script.
+	-->
+	<section label="Types">
+		<section label="Shape" sticky collapsible dividing>
+			<example description="A shape is a three dimensional object including any flat content as a side: one `<ui-side>` per face, in order.">
+				<html>
+					<ui-shape id="shape-people">
+						<ui-side>
+							<ui-card image="../images/avatar/large/steve.jpg" alt="">
+								<ui-content>
+									<ui-header>Steve Jobes</ui-header>
+									<ui-meta>
+										<a href="#acquaintances">Acquaintances</a>
+									</ui-meta>
+									<ui-description>Steve Jobes is a fictional character designed to resemble someone familiar to readers.</ui-description>
+								</ui-content>
+								<ui-extra><ui-icon name="user"></ui-icon> 151 Friends · Joined in 2014</ui-extra>
+							</ui-card>
+						</ui-side>
+						<ui-side>
+							<ui-card image="../images/avatar/large/stevie.jpg" alt="">
+								<ui-content>
+									<ui-header link="#stevie">Stevie Feliciano</ui-header>
+									<ui-meta>
+										<span>Joined in 2014</span>
+									</ui-meta>
+									<ui-description>Stevie Feliciano is a library scientist living in New York City. She likes to spend her time reading, running, and writing.</ui-description>
+								</ui-content>
+								<ui-extra>
+									<a href="#stevie-friends"><ui-icon name="user"></ui-icon> 22 Friends</a>
+								</ui-extra>
+							</ui-card>
+						</ui-side>
+					</ui-shape>
+				</html>
+				<divider/>
+				<buttons icon>
+					<button icon="long arrow alternate left" commandfor="shape-people" command="--flip-left" aria-label="Flip Left" title="Flip Left"/>
+					<button icon="long arrow alternate up" commandfor="shape-people" command="--flip-up" aria-label="Flip Up" title="Flip Up"/>
+					<button icon="long arrow alternate down" commandfor="shape-people" command="--flip-down" aria-label="Flip Down" title="Flip Down"/>
+					<button icon="long arrow alternate right" commandfor="shape-people" command="--flip-right" aria-label="Flip Right" title="Flip Right"/>
+				</buttons>
+				<buttons icon>
+					<button icon="retweet" commandfor="shape-people" command="--flip-over" aria-label="Flip Over" title="Flip Over"/>
+					<button commandfor="shape-people" command="--flip-back" aria-label="Flip Back" title="Flip Back">
+						<icon slot="icon" name="retweet" flipped/>
+					</button>
+				</buttons>
+			</example>
+		</>
+
+		<section label="Cube" sticky collapsible dividing>
+			<example description="A cube shape is formatted so that each side is the face of a cube:  `cube`.">
+				<shape id="shape-cube" cube>
+					<side>1</side>
+					<side>2</side>
+					<side>3</side>
+					<side>4</side>
+					<side>5</side>
+					<side>6</side>
+				</shape>
+				<divider/>
+				<buttons icon>
+					<button icon="long arrow alternate left" commandfor="shape-cube" command="--flip-left" aria-label="Flip Left" title="Flip Left"/>
+					<button icon="long arrow alternate up" commandfor="shape-cube" command="--flip-up" aria-label="Flip Up" title="Flip Up"/>
+					<button icon="long arrow alternate down" commandfor="shape-cube" command="--flip-down" aria-label="Flip Down" title="Flip Down"/>
+					<button icon="long arrow alternate right" commandfor="shape-cube" command="--flip-right" aria-label="Flip Right" title="Flip Right"/>
+				</buttons>
+				<buttons icon>
+					<button icon="retweet" commandfor="shape-cube" command="--flip-over" aria-label="Flip Over" title="Flip Over"/>
+					<button commandfor="shape-cube" command="--flip-back" aria-label="Flip Back" title="Flip Back">
+						<icon slot="icon" name="retweet" flipped/>
+					</button>
+				</buttons>
+			</example>
+		</>
+
+		<section label="Text" sticky collapsible dividing>
+			<example>
+				<html>
+					<p slot="description">A text shape is formatted to allow for sides of text to be displayed: <code>text</code>.</p>
+				</html>
+				<message slot="description" state="info" size="small" heading="Using Shapes">A shape's sides should have a set width and height, or text may reflow while it turns. Under reduced motion the sides swap at once.</message>
+				<shape id="shape-text" text>
+					<side>
+						<header>Did you know? This side starts visible.</header>
+					</side>
+					<side>
+						<header>Help, its another side!</header>
+					</side>
+					<side>
+						<header>This is the last side</header>
+					</side>
+				</shape>
+				<divider/>
+				<buttons icon>
+					<button icon="long arrow alternate left" commandfor="shape-text" command="--flip-left" aria-label="Flip Left" title="Flip Left"/>
+					<button icon="long arrow alternate up" commandfor="shape-text" command="--flip-up" aria-label="Flip Up" title="Flip Up"/>
+					<button icon="long arrow alternate down" commandfor="shape-text" command="--flip-down" aria-label="Flip Down" title="Flip Down"/>
+					<button icon="long arrow alternate right" commandfor="shape-text" command="--flip-right" aria-label="Flip Right" title="Flip Right"/>
+				</buttons>
+				<buttons icon>
+					<button icon="retweet" commandfor="shape-text" command="--flip-over" aria-label="Flip Over" title="Flip Over"/>
+					<button commandfor="shape-text" command="--flip-back" aria-label="Flip Back" title="Flip Back">
+						<icon slot="icon" name="retweet" flipped/>
+					</button>
+				</buttons>
+			</example>
+			<example description="A text shape is inline too:  a word that flips to another.  `active-index` picks the side shown first, from 0.">
+				<button commandfor="shape-inline" command="--flip-down" icon="long arrow alternate down">Flip down</button>
+				<html>
+					<p>Flip to <ui-shape id="shape-inline" text direction="down" active-index="1"><ui-side>Scale</ui-side><ui-side>Fade</ui-side><ui-side>Flip</ui-side></ui-shape> transitions.</p>
+				</html>
+			</example>
+		</>
+	</>
+
+	<section label="Variations">
+		<section label="Direction" sticky collapsible dividing>
+			<example description="`direction` says which way `--next`, `--previous`, `next()` and `previous()` turn:  `up`, `down`, `left` (the default), `right`, `over` or `back`.">
+				<buttons>
+					<button commandfor="shape-dice" command="--previous" labeled icon="chevron left">Previous</button>
+					<button commandfor="shape-dice" command="--next" labeled="right" icon="chevron right">Next</button>
+				</buttons>
+				<divider spacer/>
+				<shape id="shape-dice" cube direction="over">
+					<side>1</side>
+					<side>2</side>
+					<side>3</side>
+					<side>4</side>
+				</shape>
+			</example>
+		</>
+
+		<section label="Duration" sticky collapsible dividing>
+			<example description="`duration` sets the length of a flip:  ms or a CSS time;  Fomantic's 0.6s by default.">
+				<button commandfor="shape-slow" command="--next" icon="long arrow alternate right">Slow flip</button>
+				<divider spacer/>
+				<shape id="shape-slow" cube direction="right" duration="1.5s">
+					<side>A</side>
+					<side>B</side>
+				</shape>
+			</example>
+		</>
+	</>
+
+	<section label="More Examples">
+		<section label="Shape Types" sticky collapsible dividing>
+			<example>
+				<html>
+					<p slot="description">Shapes do not have to be regular or have their sides match up in length and width to animate correctly.</p>
+				</html>
+				<message slot="description" size="small" class="site-not-ported">Not ported: the demo's Auto / Square / Irregular switch -- it swaps classes from Fomantic's docs stylesheet, not the shape's own.</message>
+				<shape id="shape-leaves">
+					<side>
+						<image src="/components/ui/images/leaves/1.png" size="small" alt="A leaf"/>
+					</side>
+					<side>
+						<image src="/components/ui/images/leaves/3.png" size="small" alt="Another leaf"/>
+					</side>
+					<side>
+						<image src="/components/ui/images/leaves/5.png" size="small" alt="A third leaf"/>
+					</side>
+				</shape>
+				<divider/>
+				<buttons icon>
+					<button icon="long arrow alternate left" commandfor="shape-leaves" command="--flip-left" aria-label="Flip Left" title="Flip Left"/>
+					<button icon="long arrow alternate up" commandfor="shape-leaves" command="--flip-up" aria-label="Flip Up" title="Flip Up"/>
+					<button icon="long arrow alternate down" commandfor="shape-leaves" command="--flip-down" aria-label="Flip Down" title="Flip Down"/>
+					<button icon="long arrow alternate right" commandfor="shape-leaves" command="--flip-right" aria-label="Flip Right" title="Flip Right"/>
+				</buttons>
+				<buttons icon>
+					<button icon="retweet" commandfor="shape-leaves" command="--flip-over" aria-label="Flip Over" title="Flip Over"/>
+					<button commandfor="shape-leaves" command="--flip-back" aria-label="Flip Back" title="Flip Back">
+						<icon slot="icon" name="retweet" flipped/>
+					</button>
+				</buttons>
+			</example>
+		</>
+	</>
+</spell-notebook>

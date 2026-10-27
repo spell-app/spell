@@ -1,0 +1,8 @@
+// This repo's GENERATED files, and the command that rebuilds each from the merged source.
+// - Read by `epic worktree merge-main` (`MainMerge.generatorsOf()`), from the checkout being merged.
+// - The same paths are `merge=binary` in `.gitattributes`:  keep the two in step.
+{
+  "generators": [
+    { "name": "__pack__ pack", "outputs": ["src/components/__pack/**"], "cwd": ".", "run": ["yarn", "pack:build"] }
+  ]
+}

@@ -1,0 +1,94 @@
+<spell-notebook "description examples">
+	<header level="1">
+		Description
+		<header>A description is the text of a card, item, modal, list item, step or comment.</>
+	</>
+	<description-tab-bar showing="examples"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#owners">Owners</>
+			</>
+		</>
+	</>
+
+	<!--
+		EXAMPLES:  `<ui-description>` in each owner that gives it a look (from the owners' own pages and
+		`src/components/ui-parts/examples/elements/`), then its attributes.  The Content parts page
+		(`ui-header.html`) shows every part together.
+	-->
+	<section label="Owners">
+		<section label="Card" sticky collapsible dividing>
+			<example description="A card's description:  muted text under its header and meta.">
+				<html>
+					<ui-card>
+						<ui-content>
+							<ui-header>Elliot</ui-header>
+							<ui-meta>
+								<span>Joined in 2013</span>
+							</ui-meta>
+							<ui-description>Elliot is a sound engineer living in Nashville who enjoys playing guitar.</ui-description>
+						</ui-content>
+					</ui-card>
+				</html>
+			</example>
+		</>
+
+		<section label="Item" sticky collapsible dividing>
+			<example description="An item's description:  its body text.">
+				<html>
+					<ui-items>
+						<ui-item image="../images/wireframe/image.png">
+							<ui-content>
+								<ui-header>Cute Dog</ui-header>
+								<ui-description>
+									<p>Many people also have their own barometers for what makes a cute dog.</p>
+								</ui-description>
+							</ui-content>
+						</ui-item>
+					</ui-items>
+				</html>
+			</example>
+		</>
+
+		<section label="Comment" sticky collapsible dividing>
+			<example description="A comment's text (Fomantic's comment `text`).">
+				<comments>
+					<comment>
+						<avatar src="/components/ui/images/avatar/small/elliot.jpg"/>
+						<content>
+							<author link="#elliot">Elliot Fu</author>
+							<description>This has been very useful for my research. Thanks as well!</description>
+						</content>
+					</comment>
+				</comments>
+			</example>
+		</>
+
+		<section label="List" sticky collapsible dividing>
+			<example description="A list item's description:  a second line under its header.">
+				<list>
+					<item icon="map marker">
+						<content>
+							<header link="#krolewskie">Krolewskie Jadlo</header>
+							<description>An excellent polish restaurant, quick delivery and hearty, filling meals.</description>
+						</content>
+					</item>
+				</list>
+			</example>
+		</>
+
+		<section label="Step" sticky collapsible dividing>
+			<example description="A step's description:  a smaller line under its title.">
+				<steps>
+					<step icon="payment">
+						<content>
+							<title>Billing</title>
+							<description>Enter billing information</description>
+						</content>
+					</step>
+				</steps>
+			</example>
+		</>
+	</>
+</spell-notebook>

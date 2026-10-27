@@ -8,8 +8,9 @@ import { CoherenceScore, exportedNames, isUnder, totals, usersInMap, type ScoreS
 import type { MapGraph } from "spell/cli/map"
 
 /**
- * A made-up checkout of two git repos:  the kit, with a watcher's home and its copies, and Spell UI inside it.
- * - First commit:  one copy in the kit, one in Spell UI.  Then the kit gets one more, in the working tree only.
+ * A made-up checkout:  the kit, ONE git repo, with a watcher's home and its copies, and its folder `ui/` (epic
+ * `repo-split` P20).
+ * - First commit:  one copy in the kit, one in `ui/`.  Then the kit gets one more, in the working tree only.
  * - Beside the copies:  what's never counted (a comment, a bundle, a test, a path left out).
  */
 const CHECKOUT = mkdtempSync(join(tmpdir(), "spell-coherence-"))
@@ -17,9 +18,8 @@ afterAll(() => rmSync(CHECKOUT, { recursive: true, force: true }))
 
 const COPY = 'import { existsSync, watch } from "node:fs"'
 
-write("package.json", JSON.stringify({ name: "spell" }))
-write("repos.json5", "{ repos: [{ name: 'spell-ui' }] }")
-write(".gitignore", "spell-ui/\n")
+write("package.json", JSON.stringify({ name: "spell", workspaces: ["ui"] }))
+write("repos.json5", "{ repos: [] }")
 write("src/server/LiveReload.ts", `${COPY}\n\nexport class LiveReload {}\nexport function reload() {}\n`)
 write("src/server/CommandRun.ts", `${COPY}\nimport { SRV } from "spell/server"\n\nconst live = new SRV.LiveReload()\n`)
 write("src/server/commented.ts", `// ${COPY}\n`)
@@ -32,11 +32,10 @@ write(
   "tests/server/run.test.ts",
   'test("one", () => {})\ntest.skip("two", () => {})\n  it.each([1])("three", () => {})\n'
 )
+write("ui/package.json", JSON.stringify({ name: "spell-ui" }))
+write("ui/src/Watcher.ts", `${COPY}\nreload()\n`)
+write("ui/tests/a.test.ts", 'it("a", () => {})\n')
 commit("", "2026-10-25T10:00:00")
-write("spell-ui/package.json", JSON.stringify({ name: "spell-ui" }))
-write("spell-ui/src/Watcher.ts", `${COPY}\nreload()\n`)
-write("spell-ui/tests/a.test.ts", 'it("a", () => {})\n')
-commit("spell-ui", "2026-10-25T10:00:00")
 write("src/server/Another.ts", `${COPY}\n`)
 
 /** The searches the checkout's catalog would give:  a watcher, and one word. */
@@ -61,7 +60,7 @@ describe("CoherenceScore, over a made-up checkout", () => {
     expect(watching!.files).toEqual({
       "src/server/CommandRun.ts": 1,
       "src/server/Another.ts": 1,
-      "spell-ui/src/Watcher.ts": 1
+      "ui/src/Watcher.ts": 1
     })
     expect(watching!.copies).toBe(3)
   })
@@ -96,7 +95,7 @@ describe("users from the code map", () => {
     nodes: [
       { id: "home", label: "LiveReload", file_type: "code", source_file: "src/server/LiveReload.ts" },
       { id: "user", label: "CommandRun.ts", file_type: "code", source_file: "src/server/CommandRun.ts" },
-      { id: "ui", label: "Watcher.ts", file_type: "code", source_file: "spell-ui/src/Watcher.ts" },
+      { id: "ui", label: "Watcher.ts", file_type: "code", source_file: "ui/src/Watcher.ts" },
       { id: "test", label: "Run.test.ts", file_type: "code", source_file: "src/server/Run.test.ts" },
       { id: "self", label: "LiveReload.ts", file_type: "code", source_file: "src/server/LiveReload.ts" }
     ],
@@ -110,8 +109,8 @@ describe("users from the code map", () => {
 
   test("each file linking into a home, once;  never the home itself or a test", () => {
     expect(usersInMap(MAP, ["src/server/LiveReload.ts"]).sort()).toEqual([
-      "spell-ui/src/Watcher.ts",
-      "src/server/CommandRun.ts"
+      "src/server/CommandRun.ts",
+      "ui/src/Watcher.ts"
     ])
   })
 })
@@ -130,10 +129,10 @@ describe("the score's sums", () => {
   })
 
   test("a path left out:  a file, a folder, or a glob", () => {
-    expect(isUnder("spell-ui/src/a/B.ts", "spell-ui/src/a")).toBe(true)
-    expect(isUnder("spell-ui/src/ab/B.ts", "spell-ui/src/a")).toBe(false)
-    expect(isUnder("spell-ui/src/a/UIB.fallback.ts", "spell-ui/src/**.fallback.ts")).toBe(true)
-    expect(isUnder("spell-ui/src/a/UIB.ts", "spell-ui/src/**.fallback.ts")).toBe(false)
+    expect(isUnder("ui/src/a/B.ts", "ui/src/a")).toBe(true)
+    expect(isUnder("ui/src/ab/B.ts", "ui/src/a")).toBe(false)
+    expect(isUnder("ui/src/a/UIB.fallback.ts", "ui/src/**.fallback.ts")).toBe(true)
+    expect(isUnder("ui/src/a/UIB.ts", "ui/src/**.fallback.ts")).toBe(false)
   })
 })
 

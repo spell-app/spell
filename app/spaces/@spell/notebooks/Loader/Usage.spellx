@@ -1,0 +1,58 @@
+<spell-notebook "loader usage">
+	<header level="1">
+		Loader
+		<header>A loader alerts a user to wait for an activity to complete.</>
+	</>
+	<loader-tab-bar showing="usage"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#using-it">Using it</>
+				<ui-item link="#keyboard">Keyboard</>
+				<ui-item link="#accessibility">Accessibility</>
+			</>
+		</>
+	</>
+
+	<!-- USAGE:  showing and hiding a loader, where it sits, accessibility. -->
+	<section label="Using it">
+		<markdown>
+			A loader shows only while it is `visible` (the shared `visible` / `hidden`, one fact with two names), so you can
+			leave it in place and toggle it; `disabled` hides it again. A loader starts hidden.
+
+			- Without `inline` it is centred over the nearest ancestor with `position: relative` (or any other positioning),
+			  across component boundaries, so it covers that box whatever the markup in between. A `<ui-segment>` is
+			  positioned.
+			- Inside a `<ui-dimmer>` it takes the dimmer's colours, but still shows only while `visible`.
+			- With `inline` it sits in the line of text instead; add `align="center"` for a line of its own.
+			- `text` shows the slotted words below the spinner.
+			- To show that a whole block of content is loading, a [segment](/components/ui/ui-segment.html) with `loading` already draws its
+			  own spinner and announces it.
+			- Loaders have no events.
+		</>
+		<markdown>
+			```js
+			const loader = document.querySelector("ui-loader")
+			loader.visible = true
+			await saveChanges()
+			loader.visible = false
+			```
+		</>
+	</>
+
+	<section label="Keyboard">
+		<markdown>A loader takes no focus and has no keys: it's a status, not a control.</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			- The loader is a polite live region (`role="status"`): screen readers announce it without interrupting.
+			- Its name is its text, or "Loading…" (translatable) when it has none. The spinner itself is decorative.
+			- Mark the region that is loading with `aria-busy="true"` while the loader is active, so its half-loaded content
+			  isn't read out.
+			- With reduced motion turned on, the spinner shows a still arc; the status and its text still carry the message.
+			- If the loader fails to render, it shows its text, if any, through a bare `<slot>`: the spinner, the
+			  status role and its "Loading…" name go.
+		</>
+	</>
+</spell-notebook>

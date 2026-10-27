@@ -1,0 +1,57 @@
+<spell-notebook "search theming">
+	<header level="1">
+		Search
+		<header>A search module allows a user to query for results from a selection of data.</>
+	</>
+	<search-tab-bar showing="theming"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#tokens">Tokens</>
+				<ui-item link="#themes">Themes</>
+			</>
+		</>
+	</>
+
+	<!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
+	<section label="Tokens">
+		<markdown>
+			Theme with the public `--ui-search-*` tokens: set one on the element, on any ancestor (`:root` included), or on
+			one piece through `::part(input)` / `::part(results)`. They inherit into the shadow root, where the sheet reads
+			each through a private alias, so nothing inside blocks them. `prompt` is the text field itself.
+		</>
+		<markdown>
+			```css
+			/* every search on the page:  square-ish prompts */
+			:root {
+			  --ui-search-prompt-radius: var(--ui-radius);
+			}
+			/* one search's results, wider */
+			ui-search.site-search::part(results) {
+			  --ui-search-results-width: 24em;
+			}
+			```
+		</>
+		<message state="info" size="small">
+			<markdown>
+				`--ui-search-results-max-height` replaces the viewport-based height of `scrolling` results at every width;
+				`length` (`very-short`, `long` and `very-long`) scales whatever it is (0.75x, 2x, 3x). `category` results use the
+				`--ui-search-category-*` tokens. Never set the `--_ui-*` / `--_search-*` names: they're the sheet's private
+				plumbing.
+			</>
+		</>
+		<markdown>Edit a value below to try it.</>
+		<html>
+			<ui-docs-tokens family="ui-search" playground>
+				<ui-search placeholder="Common passwords..." source="\[{\"title\":\"123456\"},{\"title\":\"password\"},{\"title\":\"qwerty\"},{\"title\":\"letmein\"},{\"title\":\"dragon\"}]"></>
+			</>
+		</>
+	</>
+
+	<section label="Themes">
+		<markdown>
+			The theme menu in the header (Spell, Glass, Fruity, Merlot, Paper, Midnight, Crisp, Pop, Matrix) changes the colours, radii and fonts a
+			search inherits.
+		</>
+	</>
+</spell-notebook>

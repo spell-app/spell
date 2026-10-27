@@ -46,17 +46,17 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - anything needing a dependency Spell UI doesn't already have (`pluralize`, CommonJS `lodash` ...):
     it goes in `spell/`, never beside the generic files
   - anything only ONE package uses:
-    - Spell UI's `core.ts` re-exports its `spell-ui/util` wholesale, which imports every GENERIC file here
+    - Spell UI's `core.ts` re-exports its `spell/ui/util` wholesale, which imports every GENERIC file here
     - so each lands in Spell UI's `core` bundle (`yarn measure`), used or not
   - when in doubt, leave it in the package
 - Commands:  the kit's, at its root (`yarn kit:review`, `kit:ts`, `kit:lint`, `kit:format`, `kit:test`).
   - Its tests alone:  `yarn vp test run --project util --project util:node`, at the kit's root.
   - The tests:  a real browser (chromium) for the generic files;  node for `spell/`, `reactive/` and `node/`.
 - Barrel only, as WWOD §4 › "The barrel, from another sub-system" says, with ONE exception here:
-  [ui's util barrel](../../spell-ui/src/util/index.ts) imports the generic files one by one
+  [ui's util barrel](../../ui/src/util/index.ts) imports the generic files one by one
   (`spell/util/class` ...).
   - Why:  so spell's utilities never reach `ui`'s bundles or published declarations.
-  - Spell UI keeps its own util barrel (`spell-ui/util`) for package-specific helpers.
+  - Spell UI keeps its own util barrel (`spell/ui/util`) for package-specific helpers.
 
 ## Node-only helpers (`node/`)
 

@@ -1,0 +1,17 @@
+/*
+ * `<epic-threads>` (`EpicThreads.tsx`):  the comment threads under one block, a little apart.
+ * - Its edges are the block's it's under, set by the page's sheet (`spell-comments.css`), which knows the block.
+ */
+
+@layer ui.components.epic-threads;
+
+@layer ui.components.epic-threads {
+  :host {
+    display: block;
+    margin: 8px 0 12px;
+  }
+  .base {
+    display: grid;
+    gap: 6px;
+  }
+}

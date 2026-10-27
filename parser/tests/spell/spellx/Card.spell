@@ -1,0 +1,55 @@
+// A playing card has a suit and a rank.
+// Face up it shows them;  face down, the back every card shares.
+
+a playing card aka card is a two sided view where:
+
+	## Suit and color
+
+	// Which of the four suits it belongs to
+	- its "suit" is one of clubs, diamonds, hearts, spades
+		- it "is a (suit)"
+	- its "color" is one of red, black:
+		red if it is a diamond or it is a heart
+		black otherwise
+		- it "is (color)"
+		- it "is a (color) card"
+	// Its suit's sign, for drawing
+	- its "symbol" is:
+		"♣" if it is a club
+		"♦" if it is a diamond
+		"♥" if it is a heart
+		"♠" if it is a spade
+
+	## Rank
+
+	// Ace is low:  ace = 1 ... king = 13
+	- its "rank" is one of ace, 2 ... 10, jack, queen, king
+		- it "is a (rank)"
+	- it "is the (rank) of (suit)"
+	- it "is a face card" if its rank is jack, queen or king
+	- it "is a number card" if it is not a face card
+
+	## Playing it
+
+	// Turns it face up, if it isn't already.
+	// A pile shows its top card each time a card leaves it.
+	- to show it:
+		if it is face down
+			turn it over
+
+	- on mouse down:
+		// Face down:  turn it over.
+		if it is face down
+			turn it over
+
+	## Drawing it
+
+	- to draw its front:
+		// One line of text, the size of the text around it:  its pile scales it to fit.
+		<ui-text part="face" color={its color}>{its rank} {its symbol}</ui-text>
+	- to draw its back:
+		<ui-image part="back" src="card-back.svg" alt="the back of a card" />
+
+	- to test card setup:
+		get a new card whose rank is queen, suit is spades and direction is down
+		echo "testing the " + its rank + " of " + its suit

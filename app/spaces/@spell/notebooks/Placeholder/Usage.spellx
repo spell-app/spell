@@ -1,0 +1,66 @@
+<spell-notebook "placeholder usage">
+	<header level="1">
+		Placeholder
+		<header>A placeholder is used to reserve space for content that soon will appear in a layout.</>
+	</>
+	<placeholder-tab-bar showing="usage"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#using-it">Using it</>
+				<ui-item link="#keyboard">Keyboard</>
+				<ui-item link="#accessibility">Accessibility</>
+			</>
+		</>
+	</>
+
+	<!-- USAGE:  building a skeleton, swapping it for content, accessibility. -->
+	<section label="Using it">
+		<markdown>
+			Build a skeleton from four shapes inside a `<ui-placeholder>`:
+
+			- `<ui-placeholder-header>`: two taller bars, with an optional square `image` beside them
+			- `<ui-placeholder-paragraph>`: a group of lines
+			- `<ui-placeholder-line>`: one bar; `length` fixes its length, else it varies by its position
+			- `<ui-placeholder-image>`: a block of fixed height, or `square` (1:1) / `rectangular` (4:3) at its container's
+			  width
+
+			The shapes must sit inside a `<ui-placeholder>`: that is where their look comes from. A shimmer sweeps across every
+			shape on the page in step; it stops when the reader prefers reduced motion.
+
+			A placeholder has no events and no "loaded" state: replace it with the real content when that arrives.
+		</>
+		<markdown>
+			```html
+			<section aria-busy="true">
+			  <ui-placeholder>
+			    <ui-placeholder-paragraph>
+			      <ui-placeholder-line></ui-placeholder-line>
+			      <ui-placeholder-line></ui-placeholder-line>
+			    </ui-placeholder-paragraph>
+			  </ui-placeholder>
+			</section>
+			<!-- when the data is in:  swap the placeholder for the content, then remove aria-busy -->
+			```
+		</>
+		<markdown>
+			Every tag that has a `skeleton` in its vocabulary gets one from `<ui-root>` while its family loads: the same shapes,
+			built for you.
+		</>
+	</>
+
+	<section label="Keyboard">
+		<markdown>None: a placeholder takes no focus and holds nothing to reach.</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			- A placeholder is decorative: it is hidden from screen readers and holds no text.
+			- Announce the loading once, on the region that is loading: `aria-busy="true"` on it, a
+			  [loader](/components/ui/ui-loader.html), or a [segment](/components/ui/ui-segment.html) with `loading`.
+			- The shimmer stops for readers who prefer reduced motion; the shapes stay as a flat tint.
+			- If the placeholder fails to render, it shows its shapes through a bare `<slot>`, without the
+			  placeholder's own box and look.
+		</>
+	</>
+</spell-notebook>

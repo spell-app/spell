@@ -1,0 +1,37 @@
+<spell-view "double sided view">
+	A view with a front and a back:  it shows one side at a time.
+	A view that extends it says what each side looks like, in `<draw "front">` and `"back"`.
+
+	<property "direction" one-of="up, down"
+		description="Which way it faces"
+		alias="is face (direction)"
+	/>
+
+	<event "flipped" side="direction"
+		description="Sent each time it turns over;  side is the way it faces now"
+	/>
+
+	<action "turn it face up">
+		set its direction to up
+	</action>
+	<action "turn it face down">
+		set its direction to down
+	</action>
+	<action "turn it over">
+		<description>Flips it:  face up becomes face down, and back.</>
+		if it is face up
+			turn it face down
+		otherwise
+			turn it face up
+		send flipped with side = its direction
+	</action>
+
+	<draw>
+		<description>The front when it's face up, the back when it's face down.</>
+		<if it is face up>
+			<draw "front" />
+		<otherwise>
+			<draw "back" />
+		</>
+	</draw>
+</spell-view>

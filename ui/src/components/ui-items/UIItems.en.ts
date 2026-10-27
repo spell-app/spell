@@ -1,0 +1,86 @@
+/**
+ * The English vocabulary of `<ui-items>`:  every name the tag uses.
+ * - Its tag, attributes (each with its kind and allowed values), slots, parts and states.
+ *   The shape is `E.ComponentVocabulary` (`spell/ui/vocabulary`).
+ * - Class words come out through `ClassBuilder`, in Fomantic's grammar:
+ *   `<ui-items divided spacing="xl" appearance="link">` => `ui divided link very relaxed items`.  `UIItems.css` keys on those.
+ * - Fomantic's Items VIEW, with the SAME generic `<ui-item>` as dropdown, list and menu (`ownsParts:  item`) --
+ *   never a second item tag (decided 2026-09-29, `notes/grammar.md` "Items").  Here the item owns its content parts
+ *   (`ItemContext.ownsParts`), so they style themselves `:state(in-item)`.
+ */
+
+import type { E } from "spell/ui/core"
+import * as UIT from "spell/ui/components/components.types"
+
+/****************
+ * ### `itemsVocabulary`
+ * The names of `<ui-items>`, the Items view:  `<div class="ui ... items" role="list">` of `<ui-item>`s,
+ * each an image beside its content.
+ ****************/
+export const itemsVocabulary = {
+  tag: "ui-items",
+  topics: ["lists", "data display", "views"],
+  aka: ["item list", "media list", "product list", "results"],
+  skeleton: "header with image, 3 line paragraph",
+  noun: "items",
+  description: "A group of items:  site content, each an image beside its header, meta, description and extra.",
+  attributes: [
+    {
+      name: "size",
+      group: "appearance",
+      kind: "size",
+      description: "Text size of every item, `mini` ... `massive`;  `medium` is the default."
+    },
+    { name: "divided", group: "layout", kind: "keyOnly", description: "A rule between items." },
+    {
+      name: "spacing",
+      group: "layout",
+      kind: "valueOnly",
+      values: ["lg", "xl"],
+      classes: { lg: "relaxed", xl: "very relaxed" },
+      replaces: [{ from: "relaxed", value: "lg", values: { very: "xl" } }],
+      description: 'Room between items:  `lg` more, `xl` even more.  Its old name was `relaxed` (`relaxed="very"`).'
+    },
+    {
+      name: "appearance",
+      group: "appearance",
+      kind: "multiple",
+      values: ["link"],
+      // its words are Fomantic's classes as they are
+      classes: {},
+      replaces: [{ from: "link", value: "link" }],
+      description:
+        "The look:  `link` -- items react to hover (a pointer, the header in the link colour);  a LOOK:  a link " +
+        "needs an item's `link`.  Its old name was the bare `link` switch."
+    },
+    {
+      name: "unstackable",
+      group: "layout",
+      kind: "keyOnly",
+      description: "Keeps the image beside the content in a narrow group (mobile widths), where items otherwise stack."
+    },
+    {
+      name: "stack-with",
+      group: "layout",
+      kind: "enum",
+      values: UIT.StackWithValues,
+      description:
+        "What stacking and the tablet image width measure:  `container` (the default) -- the group's own " +
+        "width;  `page` -- the screen's, as in Fomantic.  Unset:  the page-wide `--ui-stack-with` token " +
+        "decides (`<ui-root stack-with>`)."
+    },
+    { name: "inverted", group: "appearance", kind: "keyOnly", description: "For dark backgrounds:  the dark scheme." },
+    { name: "disabled", group: "states", kind: "keyOnly", description: "Faded and inert." }
+  ],
+  events: [],
+  slots: [{ name: "", description: "`<ui-item>`s." }],
+  parts: [{ name: "items", description: "The group box." }],
+  states: [
+    {
+      name: "items",
+      description: "Always set:  the host is a block and the size container (`ui-items`) its items answer to."
+    }
+  ],
+  texts: [],
+  ownsParts: ["item"]
+} as const satisfies E.ComponentVocabulary

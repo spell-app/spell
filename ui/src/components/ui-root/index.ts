@@ -1,0 +1,34 @@
+/**
+ * The root family:  defines `<ui-root>` and exports its component, `UIRoot`, with what a root is built from.
+ * - SIDE EFFECT:  importing it defines
+ *   - `<ui-root>`
+ *   - `<ui-loader>`:  a root's loading message
+ *   - the `<ui-placeholder>`s:  its skeletons
+ *   - `<ui-components>`:  the component packs it loads, with `ComponentPacks` / `registerPack()`
+ * - SIDE EFFECT:  every other tag of the root's catalog is defined at once, PENDING (`RootLoader.defineEarly()`).
+ * - Every other family is imported on demand, by what's inside a root, and attaches its tags.
+ * - NOTE: the three families are imported HERE, not by `LoaderMessage` / `PlaceholderSkeleton` / `UIRoot`:
+ *   the static server render (`spell/ui/static`) loads `UIRoot` from its own file, and defining an element throws in node.
+ * - `RootCatalogEntry` is exported for component packs:  `spell pack build` writes a catalog of them.
+ * - `RootVocabulary`, for a subclass's vocabulary (`<spell-viewer>`'s).
+ * - Also the library's `spell/ui/ui-root` entry (its size is in `notes/report.md`).
+ */
+
+// Spell UI's settings for `spell/element` (a side effect), here too:  every page has a root, and `core`'s import of
+// it is dropped by a bundler that finds nothing of `core` itself used (`SpellUISettings`)
+import "spell/ui/elements/SpellUISettings"
+import { RootLoader } from "./RootLoader"
+import { UIRoot } from "./UIRoot"
+
+import "spell/ui/components/ui-loader"
+import "spell/ui/components/ui-placeholder"
+import "spell/ui/components/ui-components"
+
+UIRoot.define()
+// every other tag of the catalog, defined now and attached as its family loads (`RootLoader.defineEarly()`)
+RootLoader.defineEarly()
+
+export { UIRoot }
+export { LoaderMessage, type RootLoading } from "./LoaderMessage"
+export { RootLoader } from "./RootLoader"
+export type { RootCatalogEntry, RootFailure, RootFailureReason, RootVocabulary } from "./UIRoot.types"

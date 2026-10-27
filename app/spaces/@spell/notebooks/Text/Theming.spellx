@@ -1,0 +1,69 @@
+<spell-notebook "text theming">
+	<header level="1">
+		Text
+		<header>A text is used to style some inline text with a simple color.</>
+	</>
+	<text-tab-bar showing="theming"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#tokens">Tokens</>
+				<ui-item link="#themes">Themes</>
+			</>
+		</>
+	</>
+
+	<!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
+	<section label="Tokens">
+		<markdown>
+			Theme with the public `--ui-text-*` tokens: set one on the element, on any ancestor (a region, `:root`), or on the
+			inner box through `::part(text)`. They inherit into the shadow root, where the sheet reads each through a private
+			alias, so nothing inside blocks them.
+
+			- The hues themselves are global colour tokens (`--ui-red` and friends): change those to recolour every component
+			  at once.
+			- The component's tokens share the `--ui-text-` prefix with the GLOBAL text colours (`--ui-text-color`,
+			  `--ui-text-muted` ...); the table below lists only the component's own.
+			- Never set the `--_ui-text-*` names: they're the sheet's private plumbing.
+		</>
+		<markdown>
+			```css
+			/* every text on the page */
+			:root {
+			  --ui-text-disabled-opacity: 0.6;
+			}
+			/* one region */
+			.headline {
+			  --ui-text-line-height: 1.2;
+			}
+			```
+		</>
+		<markdown>Edit a value below to try it.</>
+		<html>
+			<ui-docs-tokens family="ui-text" playground>
+				<p>This is <ui-text color="red">red inline text</> and <ui-text color="blue">this is blue inline text</> and <ui-text color="purple">this is purple inline text</>.</>
+				<p>
+					<ui-text color="primary">Primary</>
+					<ui-text color="secondary">Secondary</>
+					<ui-text color="orange">Orange</>
+					<ui-text color="yellow">Yellow</>
+					<ui-text color="olive">Olive</>
+					<ui-text color="green">Green</>
+					<ui-text color="teal">Teal</>
+					<ui-text color="violet">Violet</>
+					<ui-text color="pink">Pink</>
+					<ui-text color="brown">Brown</>
+					<ui-text color="grey">Grey</>
+					<ui-text color="black">Black</>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="Themes">
+		<markdown>
+			The theme menu in the header (Spell, Glass, Fruity, Merlot, Paper, Midnight, Crisp, Pop, Matrix) changes text's colours and fonts through
+			the shared tokens.
+		</>
+	</>
+</spell-notebook>

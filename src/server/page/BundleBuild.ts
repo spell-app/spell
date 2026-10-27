@@ -207,7 +207,7 @@ export class BundleBuild {
    * - this checkout's own bundles only, not `/worktrees/<w>/...`, at the URL path each folder is served at
    *   (`folderUrl()`;  beside the checkout, `/_beside/...`):
    *   - `/_beside/spell-brand/_assets/ui/...`
-   *   - `/_beside/spell-ui/site/_assets/...`, and the same laid over a component set's pages at
+   *   - `/_beside/ui/site/_assets/...`, and the same laid over a component set's pages at
    *     `/components/<set>/_assets/...` (`componentSetPath()`)
    */
   wait: Handler = async (request, _reply, next) => {

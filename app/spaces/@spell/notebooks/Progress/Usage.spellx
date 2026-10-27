@@ -1,0 +1,163 @@
+<spell-notebook "progress usage">
+	<header level="1">
+		Progress
+		<header>A progress bar shows the progression of a task.</>
+	</>
+	<progress-tab-bar showing="usage"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#using-it">Using it</>
+				<ui-item link="#task-completion">Task completion</>
+				<ui-item link="#custom-labels">Custom labels</>
+				<ui-item link="#events">Events</>
+				<ui-item link="#behaviors">Behaviors</>
+				<ui-item link="#accessibility">Accessibility</>
+				<ui-item link="#framework-usage">Framework usage</>
+			</>
+		</>
+	</>
+
+	<!-- USAGE:  how to use it (numbers, labels, events), Fomantic's usage tab translated, accessibility, frameworks. -->
+	<section label="Using it">
+		<markdown>
+			Write `<ui-progress>` with its numbers as attributes (or the matching properties), and the bar follows. There is
+			no `.progress()` call to make: Fomantic's metadata (`data-percent`, `data-value`, `data-total`) and settings
+			object are the attributes.
+
+			- `value` is a share of `total`, or a percentage when there is no `total`; `percent` wins over both.
+			- A comma list (`value="10,20,30"`) makes several bars; `bar-colors` gives each a hue.
+			- `bar-text` puts `percent` (`45%`) or `ratio` (`9 of 20`, needs `total`) inside the bar; unset, none.
+			- `label` (or the slotted text) is the line under the bar, and names the bar for assistive tech.
+			- `precision` sets the decimal places shown in the texts.
+			- `state` (`success`, `warning`, `error`) tints the bar and its label; unset, a single bar turns `success` at
+			  100% by itself.
+			- `active` is only the look, on while you set it: Fomantic's JS pulsed every bar between 0 and 100% by itself.
+		</>
+	</>
+
+	<section label="Task completion">
+		<markdown>
+			With a `total`, a bar keeps track of the current value as a ratio of the total: useful for a series of steps
+			with a known count, like "uploading 1 of 20" photos. Each step is a write to `value`.
+		</>
+
+		<section label="Adding a total value" sticky collapsible dividing>
+			<example description="`total` sets what `value` counts up to;  `bar-text=\"ratio\"` shows the count.">
+				<progress indicating value="1" total="20" bar-text="ratio" label="Adding Photos"/>
+			</example>
+		</>
+		<markdown>
+			```js
+			const photos = document.querySelector("ui-progress[total]")
+			photos.value = String(Number(photos.value) + 1) // Fomantic's .progress("increment")
+			```
+		</>
+	</>
+
+	<section label="Custom labels">
+		<markdown>
+			`label` is a template: these words are filled in on every change.
+
+			- `{percent}` -- current percentage
+			- `{value}` -- current value
+			- `{total}` -- total value
+			- `{left}` -- distance to the total, or the percentage left
+		</>
+
+		<section label="Templated label" sticky collapsible dividing>
+			<example description="`label=\"Adding {value} of {total} photos\"`, filled in as the value changes.">
+				<html>
+					<ui-progress indicating value="7" total="20" label="Adding {value} of {total} photos"></ui-progress>
+					<ui-progress value="12" total="20" label="{left} photos to go"></ui-progress>
+				</html>
+			</example>
+		</>
+
+		<section label="Translation" sticky collapsible dividing>
+			<example description="The label is yours, so write it in the page's language;  the bar texts (`45%`, `9 of 20`) are the vocabulary's `progressPercent` / `progressRatio` texts, which a translation replaces.">
+				<html>
+					<ui-progress value="15" total="20" label="{value} de {total}: carga de archivos"></ui-progress>
+				</html>
+			</example>
+		</>
+		<html>
+			<ui-message size="small" class="site-not-ported">Not ported: Fomantic's per-state label texts (text.active, text.success ...), and its automatic <code>label: 'ratio'</> switch. One <code>label</> template covers both:  swap it on <code>ui-completed</> when the finished bar should say something else.</>
+		</>
+	</>
+
+	<section label="Events">
+		<markdown>
+			Both fire after the first render, whatever wrote the numbers (there is no user input).
+
+			- `ui-changed` -- the percentage changed; `detail` is `{ percent, percents, value?, total? }` (`percents` holds
+			  one entry per bar).
+			- `ui-completed` -- the percentage reached 100; `detail` is `{ value?, total? }`.
+		</>
+		<markdown>
+			```js
+			const progress = document.querySelector("ui-progress")
+			progress.addEventListener("ui-changed", (event) => console.log(event.detail.percent))
+			progress.addEventListener("ui-completed", () => console.log("done"))
+			for (let done = 0; done <= 20; done++) progress.value = String(done) // with total="20"
+			```
+		</>
+	</>
+
+	<section label="Behaviors">
+		<markdown>
+			Fomantic's behaviors are property writes here:
+
+			- `set percent(percent)` -- `progress.percent = "45"` (or `"20,30,50"` for several bars)
+			- `set progress(value)`, `update progress(value)` -- `progress.value = "9"`
+			- `set total(total)` -- `progress.total = 20`
+			- `increment` / `decrement` -- read `value`, write it back plus or minus a step
+			- `complete` -- `progress.percent = "100"`
+			- `set success` / `set warning` / `set error` -- `progress.state = "warning"`
+			- `is complete` -- `progress.matches(":state(complete)")`
+		</>
+		<message size="small" class="site-not-ported">Not ported: the random increment step, the animation duration / updateInterval settings, and the onChange / onSuccess ... callbacks. The bar transitions in CSS, and the callbacks are the two events.</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			- The element itself is the `progressbar`, with `aria-valuemin`, `aria-valuemax` (the `total`, else 100) and
+			  `aria-valuenow`; `aria-valuetext` reads like the bar text (`45%`, or `9 of 20`). An indeterminate bar has no
+			  value, which assistive tech reads as "progress unknown".
+			- Name every bar: `aria-label` on the host, or the `label` / slotted label text.
+			- Colour is never the only signal: pair `state` with a label that says what happened.
+			- The indeterminate and `active` animations stop under reduced motion.
+			- If the element fails to render, the bars, their value, text and label go: only children written
+			  inside the element still show, through a bare `<slot>`.
+		</>
+	</>
+
+	<section label="Framework usage">
+		<markdown>Numbers are plain attributes; listen for `ui-changed` / `ui-completed` like any custom event.</>
+		<header level="4" id="framework-react">React 19</>
+		<markdown>
+			```jsx
+			<ui-progress value={done} total={20} bar-text="ratio" onui-complete={() => setFinished(true)} />
+			```
+		</>
+		<header level="4" id="framework-vue">Vue 3.5</>
+		<markdown>
+			```html
+			<!-- compilerOptions.isCustomElement = (tag) => tag.startsWith("ui-") -->
+			<ui-progress :value="done" total="20" bar-text="ratio" @ui-completed="finished = true" />
+			```
+		</>
+		<header level="4" id="framework-solid">Solid 2</>
+		<markdown>
+			```jsx
+			// events and rich data are plain props:  `on-<event>={...}`, `options={...}`
+			<ui-progress
+			  value={done()}
+			  total="20"
+			  bar-text="ratio"
+			  on-ui-completed={() => setFinished(true)}
+			/>
+			```
+		</>
+	</>
+</spell-notebook>

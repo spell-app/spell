@@ -1,0 +1,67 @@
+<spell-notebook "rail theming">
+	<header level="1">
+		Rail
+		<header>A rail is used to show accompanying content outside the boundaries of the main view of a
+              site.</>
+	</>
+	<rail-tab-bar showing="theming"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#tokens">Tokens</>
+				<ui-item link="#themes">Themes</>
+			</>
+		</>
+	</>
+
+	<!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
+	<section label="Tokens">
+		<markdown>
+			Theme with the public `--ui-rail-*` tokens: set one on the element, on any ancestor (a region, `:root`), or on the
+			rail's box through `::part(rail)`. They inherit into the shadow root, where the sheet reads each through a private
+			alias, so nothing inside blocks them.
+
+			- `--ui-rail-width` is Fomantic's 300px; `close` and `dividing` rails add their own distance to it.
+			- `--ui-rail-distance` is the gap to the container, split between the rail's margin and padding.
+		</>
+		<markdown>
+			```css
+			/* every rail on the page */
+			:root {
+			  --ui-rail-width: 240px;
+			}
+			/* one layout */
+			.docs-page {
+			  --ui-rail-distance: 2em;
+			}
+			```
+		</>
+		<message state="info" size="small">
+			<markdown>
+				`close` and `dividing` replace the distance with their own tokens (`--ui-rail-close-distance`,
+				`--ui-rail-dividing-distance` ...). Never set the `--_ui-rail-*` / `--_rail-*` names: they're the sheet's private
+				plumbing.
+			</>
+		</>
+		<markdown>Edit a value below to try it.</>
+		<html>
+			<ui-docs-tokens family="ui-rail" playground>
+				<div style="margin-inline: 20em">
+					<ui-segment>
+						<ui-rail position="left">
+							<ui-segment>Left rail content</>
+						</>
+						<ui-rail position="right">
+							<ui-segment>Right rail content</>
+						</>
+						<p>Main content. Te eum doming eirmod, nominati pertinacia argumentum ad his.</>
+					</>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="Themes">
+		<markdown>A rail has no look of its own:  a theme changes what it holds.</>
+	</>
+</spell-notebook>

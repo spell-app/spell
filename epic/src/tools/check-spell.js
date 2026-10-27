@@ -1,0 +1,603 @@
+/**
+ * Check a `.html` doc in a real browser.
+ * Usage:  node tools/check-spell.js <folder>/<doc>.html [outDir]
+ * - screenshots (into outDir, default a temp folder):
+ *   - desktop top, desktop mid-page, phone mid-page
+ *   - an epic page:  also a phone-width open item, its line stuck (`phone-item.png`)
+ * - fails (exit 1) on:
+ *   - console / page errors
+ *   - a `ui-*` or `epic-*` element (the `epics` pack's, an epic page's) that isn't defined,
+ *     or never rendered (no shadow root)
+ *   - a toolbar (`.spell-toolbar`, Spell UI's menu;  epic `airplane` P8) that doesn't list every top-level section,
+ *     or an entry that points nowhere
+ *     - the goals pages' sections:  the h2s heading a sticky section
+ *     - an epic page's:  its `<epic-*>` blocks
+ *   - a page that still draws the old floating rail (`nav.spell-rail`)
+ *   - horizontal scroll at phone width
+ *   - a content column squeezed at phone width (a wide-screen grid rule leaking into the narrow layout)
+ *   - a top-level section's title that doesn't stick when scrolled into its section, or sticks under the fixed site
+ *     header
+ *     - its title:  `<ui-section>` pages, an epic page's `<epic-*>` blocks;  its h2:  `section.s2` pages
+ *     - an epic page's start folded:  its largest item section is opened first (`openBiggestSection()`)
+ *   - no toolbar entry marked current after scrolling
+ *   - a `ui-accordion.spell-code` without a `<pre>`
+ *   - a toolbar not stuck at the top at phone width, or wider than the window
+ *   - an epic page's open item (`<epic-item>`, epic `windows-and-review` Q6) whose line doesn't stick right under
+ *     its section's stuck title while its details are read
+ *     - at desktop and phone width (`checkItemLine()`)
+ * - loads the page from the page server, always (epic `epic-engine` P46);  `file://` before, for a page that didn't need it
+ *   - a page from disk (none since P46) had the engine's routes (`/_epic/assets/...`, `/_epic/pack/...`, epic
+ *     `epic-eject` P7) answered from this engine's own folders (`engineFileFor()`), as the epic server would serve them
+ * - a component set's page:  from the page server at its address (`/components/epics/...`),
+ *   since it loads its site bundle from there
+ *   - the sets:  `packages/ui/docs/` ..., the ones the checkout's settings name (its root `package.json`'s
+ *     `"pageServer"` `"componentSets"`, `componentSets()`)
+ *   - `--base <url>` checks it on another server, e.g. the main checkout's `http://localhost:4747/worktrees/<w>`
+ * - `--base <url>`:  ANY page from that server, as it's shown there (epic `epic-engine` I25:  python-target's
+ *   2px of sideways scroll came from the toolbar's bullhorn, drawn only when served), e.g. the epic server,
+ *   `http://127.0.0.1:4848`
+ *   - it has Spell UI's page shape, no toolbar:  the toolbar checks find no top-level section, and pass
+ * - reports, never fails on:  icons with no `<svg>` drawn in their shadow tree (no reliable "done loading" signal)
+ * - prints a JSON summary on stdout (last thing written), problems on stderr
+ * - Look at the screenshots too:  the checks can't see overlap, clipping or ugly wrapping.
+ */
+import { mkdtempSync, mkdirSync } from "node:fs"
+import { tmpdir } from "node:os"
+import { join } from "node:path"
+
+import { BrowserPage } from "spell/element-tools/BrowserPage"
+import { parseVerbArgs, stringFlag } from "spell/epic/command/command.types.ts"
+
+import { PACK_TAG, openPage, settle } from "./browserPage.js"
+import { browserUrlFor, componentSetAddress, pageFile } from "./pages.js"
+
+/** The page's navigation:  its toolbar, an epic page's or any other's (`spell-doc-runtime.js` `buildNavigation()`). */
+const NAV = ".spell-toolbar"
+
+const {
+  positional: [docArg, outArg],
+  flags
+} = parseVerbArgs(process.argv.slice(2))
+const baseArg = stringFlag(flags.base)
+if (!docArg) {
+  console.error(
+    "usage:  node tools/check-spell.js <page> [outDir]   (e.g. guides/solid/solid-2.html:  `pages.js` `pageFile()`)"
+  )
+  process.exit(2)
+}
+const docPath = pageFile(docArg, process.cwd())
+const out = outArg ?? mkdtempSync(join(tmpdir(), "check-spell-"))
+mkdirSync(out, { recursive: true })
+const seen = new Map()
+const url = pageUrl(docPath)
+const browser = await BrowserPage.launch()
+
+const desk = await open({ width: 1440, height: 900 })
+await desk.screenshot({ path: join(out, "desk-top.png") })
+const desktop = await desk.evaluate(inspectPage, NAV)
+if (desktop.undefinedTags.length) problem(`undefined elements:  ${desktop.undefinedTags.join(", ")}`)
+for (const [tag, count] of Object.entries(desktop.unrendered)) problem(`${count} <${tag}> without a shadow root`)
+if (desktop.missingFromRail.length)
+  problem(`top-level sections missing from the toolbar:  ${desktop.missingFromRail.join(", ")}`)
+if (desktop.oldRail) problem("the page drew the old floating rail, not a toolbar")
+if (desktop.danglingRail.length) problem(`toolbar entries pointing nowhere:  ${desktop.danglingRail.join(", ")}`)
+if (desktop.codeWithoutPre) problem(`${desktop.codeWithoutPre} ui-accordion.spell-code without a <pre>`)
+if (desktop.icons.blankCount) console.error(`NOTE: ${desktop.icons.blankCount} icon(s) with no <svg> drawn`)
+
+await desk.evaluate(openBiggestSection)
+await desk.waitForTimeout(800)
+const middle = await desk.evaluate(scrollToMiddleSection, NAV)
+await desk.waitForTimeout(600)
+await desk.screenshot({ path: join(out, "desk-mid.png") })
+const stuck = await desk.evaluate(stuckAndActive, { id: middle.id, nav: NAV })
+if (middle.id && !stuck.stuck)
+  problem(
+    `${middle.tag} #${middle.id} not stuck at the top (its title's top at ${stuck.top}px, ${stuck.covering ?? "nothing"} showing at its middle)`
+  )
+if (desktop.topLevel && !stuck.active) problem("no toolbar entry marked current after scrolling")
+
+const fold = await checkFold(desk)
+// a component set's page with no section at all (a set's home, an element with one example) has nothing to fold
+if (fold.problem && (fold.target || !componentSetAddress(docPath))) problem(`fold:  ${fold.problem}`)
+const itemLine = { desktop: await checkItemLine(desk) }
+
+const phone = await open({ width: 390, height: 844 })
+await phone.evaluate(() => window.scrollTo(0, document.body.scrollHeight / 2))
+await phone.waitForTimeout(400)
+await phone.screenshot({ path: join(out, "phone-mid.png") })
+const overflow = await phone.evaluate(() => document.documentElement.scrollWidth - innerWidth)
+if (overflow > 0) problem(`${overflow}px horizontal scroll at phone width`)
+itemLine.phone = await checkItemLine(phone, join(out, "phone-item.png"))
+await phone.evaluate(() => window.scrollTo(0, document.body.scrollHeight / 2))
+const mainWidth = await phone.evaluate(() =>
+  Math.round((document.querySelector("main") ?? document.body).getBoundingClientRect().width)
+)
+if (mainWidth < 390 - 40) problem(`content column only ${mainWidth}px wide at phone width (390px)`)
+const rail = await phone.evaluate(navOnScreen, NAV)
+if (desktop.topLevel && !rail.shown) problem("the toolbar isn't shown at the top at phone width")
+
+await browser.close()
+const problems = [...seen].map(([text, count]) => (count > 1 ? `${text}  (x${count})` : text))
+const summary = {
+  doc: docPath,
+  ok: problems.length === 0,
+  problems,
+  elements: desktop.elements,
+  topLevel: desktop.topLevel,
+  railEntries: desktop.railEntries,
+  codeBlocks: desktop.codeBlocks,
+  icons: {
+    total: desktop.icons.total,
+    drawn: desktop.icons.total - desktop.icons.blankCount,
+    blank: desktop.icons.blank
+  },
+  middle: middle.id,
+  stuck: stuck.stuck,
+  atTop: stuck.covering,
+  active: stuck.active,
+  fold,
+  itemLine,
+  overflow,
+  mainWidth,
+  rail,
+  screenshots: out
+}
+for (const problem of problems) console.error("PROBLEM:", problem)
+console.log(JSON.stringify(summary, null, 2))
+process.exit(problems.length ? 1 : 0)
+
+/**
+ * Where to load `file` from:  the page server, always (`browserUrlFor()`;  epic `epic-engine` P46:  its links are root
+ * paths, which mean something only served)
+ * - this checkout's page server, started if need be
+ * - `--base`:  every page from that server
+ * - a server that won't start ends the run
+ */
+function pageUrl(file) {
+  try {
+    // `--base`:  any page from that server, as it shows there (its comments, Send, the toolbar's bullhorn)
+    return browserUrlFor(file, { base: baseArg })
+  } catch (error) {
+    // outside the content folder, or no server:  say so, not what a 404 page breaks
+    console.error(error.message)
+    process.exit(2)
+  }
+}
+
+/**
+ * Record a problem, once per distinct first line:  a broken element logs the same error for every instance.
+ * - long stack traces are cut to their first line, 300 characters
+ */
+function problem(text) {
+  const line = String(text).split("\n")[0].slice(0, 300)
+  seen.set(line, (seen.get(line) ?? 0) + 1)
+}
+
+/** A page of the browser at `url`, at `viewport`, settled;  a server's error page ends the run (exit 1). */
+async function open(viewport) {
+  try {
+    return await openPage(browser, url, { viewport, onProblem: problem })
+  } catch (error) {
+    console.error(error.message)
+    await browser.close()
+    process.exit(1)
+  }
+}
+
+/**
+ * The FOLD check:  a reader's fold works, and the page remembers it.
+ * - the check that would have caught the old markup's dead chevron (2026-10-01)
+ * - target:
+ *   - `<ui-section>` pages:  the first top-level `ui-section[collapsible]` (an open one if any)
+ *   - old pages:  the first `section.s2`'s h2
+ * - clicks its toggle as a reader would:  the shadow `button[part~=toggle]`, or the old chevron `ui-button.spell-fold`
+ * - expects it:
+ *   - folded (not `open`, and `:state(collapsed)`;  or `section.spell-folded`), with its content hidden
+ *   - still folded after a reload
+ *   - unfolded by a second click
+ * - returns `{ target, steps, problem? }`;  starts from the page's own state, whatever it is
+ * - SIDE EFFECT:  clears the page's saved folds (`localStorage` `spell-folds:<path>`) at the end
+ */
+async function checkFold(page) {
+  await page.evaluate(() => window.scrollTo(0, 0))
+  await page.waitForTimeout(300)
+  const target = await page.evaluate(foldTarget)
+  if (!target) return { target, steps: [], problem: "no foldable section on the page" }
+  const steps = []
+  const initial = await page.evaluate(foldState, target)
+  steps.push({ step: "initial", ...initial })
+  let problem = await toggleAndExpect("click", !initial.folded)
+  if (!problem) {
+    await page.reload()
+    await settle(page)
+    const state = await page.evaluate(foldState, target)
+    steps.push({ step: "reload", ...state })
+    if (state.folded !== !initial.folded)
+      problem = `#${target.id} ${initial.folded ? "folded" : "unfolded"} again after a reload:  the fold wasn't remembered`
+  }
+  if (!problem) problem = await toggleAndExpect("click again", initial.folded)
+  await page.evaluate(() => localStorage.removeItem(`spell-folds:${location.pathname}`))
+  return problem ? { target, steps, problem } : { target, steps }
+
+  /** Click the target's toggle, wait out the fold animation, and check it is `folded`;  a problem, or undefined. */
+  async function toggleAndExpect(step, folded) {
+    const toggle = await page.evaluateHandle(foldToggle, target)
+    const element = toggle.asElement()
+    if (!element) return `#${target.id} has no fold toggle`
+    try {
+      await element.click({ timeout: 3000 })
+    } catch (error) {
+      return `#${target.id}'s toggle can't be clicked:  ${String(error).split("\n")[0]}`
+    }
+    await page.waitForTimeout(700)
+    const state = await page.evaluate(foldState, target)
+    steps.push({ step, ...state })
+    const word = folded ? "fold" : "unfold"
+    if (state.folded !== folded) return `#${target.id} didn't ${word} on a ${step} of its toggle`
+    if (state.contentVisible === folded)
+      return `#${target.id} ${word}ed, but its content is ${folded ? "still" : "not"} visible`
+    return undefined
+  }
+}
+
+/**
+ * The ITEM LINE check (epic pages, epic `windows-and-review` Q6):
+ * an open item's line sticks right under its section's stuck title while its details are read.
+ * - target:  the first `<epic-item>` with details (`source`, or children of its own) in a top-level item section
+ *   - its section and it opened, its part loaded
+ *   - details shorter than two windows get filler paragraphs (`p[data-check-filler]`), and `main` room below,
+ *     so the page can scroll anywhere in them
+ * - scrolled to the middle of its details:  its line's top within 2px of its section's stuck title's bottom
+ * - `shot`:  a screenshot of the stuck state, when given
+ * - returns `{ target, line, under }`, or `{ target: null }` on a page without plan items
+ * - records problems
+ * - SIDE EFFECT:  a reload afterwards drops the filler and the room
+ */
+async function checkItemLine(page, shot) {
+  const label = `${page.viewportSize().width}px`
+  const target = await page.evaluate(openItem)
+  if (!target) return { target: null }
+  await page
+    .waitForFunction(
+      (id) => {
+        const item = document.getElementById(id)
+        return !item.hasAttribute("source") || item.matches(":state(loaded), :state(error)")
+      },
+      target,
+      { timeout: 5000 }
+    )
+    .catch(() => {})
+  await page.waitForTimeout(400)
+  await page.evaluate(lengthenItem, target)
+  await page.waitForTimeout(400)
+  const stuck = await page.evaluate(itemStuck, target)
+  if (shot) await page.screenshot({ path: shot })
+  if (Math.abs(stuck.line - stuck.under) > 2)
+    problem(
+      `item ${target} (${label}):  its line at ${stuck.line}px, not stuck under its section's title (${stuck.under}px)`
+    )
+  await page.reload()
+  await settle(page)
+  return { target, ...stuck }
+}
+
+/** In the page:  open the first plan item with details, and the blocks around it;  its id, or null. */
+function openItem() {
+  const blocks = "epic-overview, epic-section, epic-phase"
+  const item = [...document.querySelectorAll("main epic-page > epic-section > epic-item")].find(
+    (it) => it.hasAttribute("source") || [...it.children].some((child) => !child.hasAttribute("slot"))
+  )
+  if (!item) return null
+  for (let block = item.parentElement.closest(blocks); block; block = block.parentElement?.closest(blocks))
+    block.open = true
+  item.open = true
+  return item.id
+}
+
+/** In the page:  item `id`'s details at least two windows tall (filler paragraphs), and room below `main`. */
+function lengthenItem(id) {
+  const item = document.getElementById(id)
+  for (let count = 0; count < 40 && item.getBoundingClientRect().height < 2 * innerHeight; count++) {
+    const filler = document.createElement("p")
+    filler.dataset.checkFiller = ""
+    filler.textContent = "Filler for the item line check, a line of text long enough to reach the right edge. ".repeat(
+      3
+    )
+    item.append(filler)
+  }
+  document.querySelector("main").style.paddingBottom = `${2 * innerHeight}px`
+}
+
+/**
+ * In the page, scrolled to the middle of item `id`'s details:
+ * - `line`:  where its line is
+ * - `under`:  where its section's stuck title ends
+ *   (the title of the `<ui-section>` the section draws in its shadow root)
+ */
+function itemStuck(id) {
+  const item = document.getElementById(id)
+  const box = item.getBoundingClientRect()
+  window.scrollBy(0, box.top + box.height / 2 - innerHeight / 2)
+  const line = item.shadowRoot.querySelector('[part~="line"]').getBoundingClientRect()
+  const section = item.parentElement.closest("epic-section")
+  const title = section.shadowRoot.querySelector("ui-section").shadowRoot.querySelector('[part~="title"]')
+  return { line: Math.round(line.top), under: Math.round(title.getBoundingClientRect().bottom) }
+}
+
+/**
+ * The section the fold check works on:  `{ id, kind }`, its kind
+ * - `ui-section`
+ * - `epic` for an epic page's top-level block
+ * - `section` for the old markup's h2 id
+ */
+function foldTarget() {
+  // one with content to hide, open to start with, if there is one
+  const filled = (section) => [...section.children].some((child) => !child.hasAttribute("slot"))
+  const blocks = [...document.querySelectorAll("main epic-page > :is(epic-overview, epic-section)[id]")]
+  if (blocks.length) {
+    const best = blocks.find((block) => filled(block) && block.open) ?? blocks.find(filled) ?? blocks[0]
+    return { id: best.id, kind: "epic" }
+  }
+  // a docs page's top-level sections;  a Spell UI-shaped page's (a component set's) are in its article, or in its
+  // article's tabs (Spell UI's element pages:  Examples, Usage ...)
+  const sections = [
+    ...document.querySelectorAll(
+      ":is(main, main .site-article, main .site-tabs > ui-tab) > ui-section[collapsible][id]"
+    )
+  ]
+  if (sections.length) {
+    const best =
+      sections.find((section) => filled(section) && section.getAttribute("open") !== "false") ??
+      sections.find(filled) ??
+      sections[0]
+    return { id: best.id, kind: "ui-section" }
+  }
+  const headings = [...document.querySelectorAll("main section.s2 > ui-sticky > h2[id]")]
+  const h2 = headings.find((heading) => heading.closest("section").children.length > 1) ?? headings[0]
+  return h2 ? { id: h2.id, kind: "section" } : null
+}
+
+/**
+ * The element a reader clicks to fold the target:  the shadow toggle button, or the old chevron host.
+ * - an epic page's block:  the toggle of the `<ui-section>` it draws in its shadow root
+ */
+function foldToggle({ id, kind }) {
+  const element = document.getElementById(id)
+  const section = kind === "epic" ? element?.shadowRoot?.querySelector("ui-section") : element
+  if (kind !== "section") return section?.shadowRoot?.querySelector('button[part~="toggle"]') ?? null
+  return element?.querySelector(":scope > ui-button.spell-fold") ?? null
+}
+
+/**
+ * The target's fold:  `{ folded, contentVisible }`.
+ * - `<ui-section>`:  folded when its `open` is false AND it says `:state(collapsed)`;
+ *   content:  its first unslotted child
+ * - an epic page's block:  folded when it isn't `open` and doesn't say `:state(open)`;  content:  the same
+ * - old markup:  `section.spell-folded`;  content:  the element after the heading's `ui-sticky`
+ * - visible:  `checkVisibility()`, which sees `hidden="until-found"` (content-visibility) and `display: none`
+ */
+function foldState({ id, kind }) {
+  const element = document.getElementById(id)
+  if (kind === "epic") {
+    const content = [...element.children].find((child) => !child.hasAttribute("slot"))
+    return {
+      folded: !element.open && !element.matches(":state(open)"),
+      contentVisible: content ? content.checkVisibility({ visibilityProperty: true }) : null
+    }
+  }
+  if (kind === "ui-section") {
+    let state = !element.open
+    try {
+      state = element.matches(":state(collapsed)")
+    } catch {
+      // a browser without custom states:  the property alone
+    }
+    const content = [...element.children].find((child) => !child.hasAttribute("slot"))
+    return {
+      folded: !element.open && state,
+      contentVisible: content ? content.checkVisibility({ visibilityProperty: true }) : null
+    }
+  }
+  const section = element.closest("section")
+  const content = section.children[1]
+  return {
+    folded: section.classList.contains("spell-folded"),
+    contentVisible: content ? content.checkVisibility({ visibilityProperty: true }) : null
+  }
+}
+
+/**
+ * Static checks, run in the page:
+ * element definitions and rendering, the rail vs the top-level sections, code blocks, icons.
+ * - the packs' elements:  `ui-*` (Spell UI) and `epic-*` (the `epics` pack)
+ *   - `PACK_TAG`, written out here, as this runs in the page
+ * - "rendered" means has a shadow root:  every spell-ui element renders into one, and so does every pack's.
+ * - icons:  `<ui-icon>` plus any `ui-*` with an `icon` attribute, looked for an `<svg>` anywhere in its shadow tree.
+ */
+function inspectPage(nav) {
+  const all = [...document.querySelectorAll("*")].filter((el) => /^(ui|epic)-/.test(el.localName))
+  const elements = {}
+  const unrendered = {}
+  for (const el of all) {
+    elements[el.localName] = (elements[el.localName] ?? 0) + 1
+    if (customElements.get(el.localName) && !el.shadowRoot)
+      unrendered[el.localName] = (unrendered[el.localName] ?? 0) + 1
+  }
+  const undefinedTags = Object.keys(elements).filter((tag) => !customElements.get(tag))
+  // the toolbar's entries:  the top-level sections (an epic page's blocks), or the h2s heading a sticky section
+  const top = "main > ui-section[id], main epic-page > :is(epic-overview, epic-section, epic-phase)[id]"
+  // only what SHOWS:  an epic page's stage hides sections (epic `epic-engine` P29), and the toolbar lists none of them
+  const sections = [...document.querySelectorAll(top)].filter((section) => section.getClientRects().length > 0)
+  const topLevel = (
+    sections.length ? sections : [...document.querySelectorAll("main section.s2 > ui-sticky > h2[id]")]
+  ).map((element) => element.id)
+  const railIds = [...document.querySelectorAll(`:is(${nav}) [data-rail]`)].map((entry) => entry.dataset.rail)
+  const icons = all.filter(
+    (el) => el.localName === "ui-icon" || (el.localName.startsWith("ui-") && el.hasAttribute("icon"))
+  )
+  const blank = icons.filter((el) => !hasSvg(el.shadowRoot))
+  return {
+    elements,
+    unrendered,
+    undefinedTags,
+    topLevel: topLevel.length,
+    railEntries: railIds.length,
+    oldRail: !!document.querySelector("nav.spell-rail"),
+    danglingRail: railIds.filter((id) => !document.getElementById(id)),
+    missingFromRail: topLevel.filter((id) => !railIds.includes(id)),
+    codeBlocks: document.querySelectorAll("ui-accordion.spell-code").length,
+    // a `<ui-code>` draws its own `<pre>`, in its shadow root;  so does spell-app's `<spell-code>` (epic `repo-split` I1)
+    codeWithoutPre: [...document.querySelectorAll("ui-accordion.spell-code")].filter(
+      (a) => !a.querySelector("pre, ui-code, spell-code")
+    ).length,
+    icons: { total: icons.length, blankCount: blank.length, blank: blank.slice(0, 10).map(describe) }
+  }
+
+  /** Whether `root` or any shadow root nested in it holds an `<svg>`. */
+  function hasSvg(root) {
+    if (!root) return false
+    if (root.querySelector("svg")) return true
+    return [...root.querySelectorAll("*")].some((el) => hasSvg(el.shadowRoot))
+  }
+
+  /** Short label for an element in the report, e.g. `ui-input[icon=search]`. */
+  function describe(el) {
+    const icon = el.getAttribute("icon") ?? el.getAttribute("name") ?? el.textContent.trim().slice(0, 20)
+    return `${el.localName}[${icon}]`
+  }
+}
+
+/**
+ * In the page:  open an epic page's top-level item section with the most items, as a reader would to read it.
+ * - why:  an epic page starts folded, so nothing would be tall enough to stick over
+ * - its items are in the doc itself, never in a part
+ * - not saved (no event):  the fold check starts from it
+ */
+function openBiggestSection() {
+  const sections = [...document.querySelectorAll("main epic-page > epic-section[id]")]
+  const items = (section) => section.querySelectorAll(":scope > epic-item").length
+  const biggest = sections.sort((a, b) => items(b) - items(a))[0]
+  if (biggest && items(biggest) > 2) biggest.open = true
+}
+
+/**
+ * Scroll part way down into the middle top-level section,
+ * and return its id (the h2's, for `section.s2`) and what it is.
+ * - the sections:
+ *   `main > ui-section` or a Spell UI-shaped page's article's, an epic page's top-level block, or `section.s2`
+ * - only sections that can scroll up to the top:  a short page's last section never sticks
+ * - "into" it from where its title starts to stick, the bottom of the page's sticky head (its toolbar, `nav`;  else
+ *   the site header):  scrolled from the window's top instead, a short section (epic `crdt`'s four Questions, 228px)
+ *   went most of the way under the head, its title pushed out with it (epic `epic-engine` I25)
+ */
+function scrollToMiddleSection(nav) {
+  const room = document.documentElement.scrollHeight - innerHeight
+  const header = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--spell-site-header-height"))
+  /** where titles stick:  the toolbar's bottom while it's in the window's top half, else the site header's */
+  const stack = () => {
+    const bottom = document.querySelector(nav)?.getBoundingClientRect().bottom
+    return bottom > 0 && bottom < innerHeight / 2 ? bottom : header || 0
+  }
+  // a section barely taller than its title (an empty "Todos" in a new epic page) has no middle to stick over:  skip it
+  const top =
+    ":is(main, main .site-article) > ui-section, main epic-page > :is(epic-overview, epic-section), section.s2"
+  // how far past its top the check scrolls:  the page must have room for all of it, or the title stays where it
+  // is, never stuck (epic `epic-workflow` I1:  a new epic page's Questions failed so, the page too short to scroll)
+  const into = (s) => Math.min(600, s.offsetHeight / 2)
+  const sections = [...document.querySelectorAll(top)].filter(
+    (s) => s.offsetHeight > 200 && s.getBoundingClientRect().top + scrollY + into(s) - stack() + 100 < room
+  )
+  const middle = sections[Math.floor(sections.length / 2)]
+  if (!middle) return { id: undefined }
+  middle.scrollIntoView()
+  const by = into(middle) - stack()
+  const target = scrollY + by
+  window.scrollBy(0, by)
+  // fell short (the page shorter than it measured, a part still loading):  nothing to judge
+  if (scrollY < target - 2) return { id: undefined }
+  if (middle.localName.startsWith("epic-")) return { id: middle.id, tag: middle.localName }
+  const section = middle.localName === "ui-section"
+  return { id: section ? middle.id : middle.querySelector("h2")?.id, tag: section ? "ui-section" : "h2" }
+}
+
+/**
+ * Whether section / h2 `id`'s title sits at the top of the viewport, and which rail entry is current.
+ * - stuck:  both of
+ *   - its title's top is within 160px BELOW the fixed site header (`--spell-site-header-height`;  never under it):
+ *     room for a sticky bar above it, e.g. an epic page's page header, CHEATSHEET's filter
+ *   - it's what shows at its own middle, 40px in from the title's left
+ *   - Scrolled mid-section, a title that DIDN'T stick is far above.
+ *     One stuck but covered, e.g. by an h3 sticking at the same offset, doesn't count.
+ *   - `<ui-section>`:  its title is its shadow `title` part, and it must ALSO say `:state(stuck)`;
+ *     what shows there is the section host (the shadow retargets to it), not a nested section's
+ *   - an epic page's block:  the same, of the `<ui-section>` it draws in its shadow root;
+ *     what shows there is the block's host
+ *   - h2:  one its short section's end pushed out (`:state(bound)`) counts:  it stuck, then left with its section
+ *     - only with its bottom AT its section's bottom, where the section's end pushes it:  `<ui-sticky>` says
+ *       `bound` of a title that never stuck too, scrolled away at its section's top (epic `epic-engine` I35)
+ * - active:  the name of the toolbar's current entry, the one `markCurrent()` marks `selected`
+ */
+function stuckAndActive({ id, nav }) {
+  const element = id && document.getElementById(id)
+  const epic = !!element?.localName.startsWith("epic-")
+  const section = epic
+    ? element.shadowRoot?.querySelector("ui-section")
+    : element?.localName === "ui-section"
+      ? element
+      : null
+  const title = section ? section.shadowRoot?.querySelector('[part~="title"]') : element
+  const rect = title?.getBoundingClientRect()
+  // 40px into the title itself:  `main` spans the window in the wide layout, the reading column centred in it, so
+  // `main`'s left + 40 is its margin, where nothing shows (epic `epic-engine` I33:  a goal page's h2 failed so)
+  const left =
+    (rect?.width ? rect.left : (document.querySelector("main") ?? document.body).getBoundingClientRect().left) + 40
+  const probe = rect ? Math.max(4, rect.top + rect.height / 2) : 16
+  const shown = document.elementFromPoint(left, probe)
+  const active = document.querySelector(`:is(${nav}) [data-rail][selected]`)
+  const covering = shown?.closest("h1, h2, h3, h4, [id]")
+  const header = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--spell-site-header-height"))
+  const below = header || 0
+  const atTop = !!rect && rect.top >= below - 2 && rect.top <= below + 160
+  // a short section's end pushes its h2 out (`:state(bound)`), under whatever sticks above it:  sticky works
+  let bound = false
+  let stuckState = false
+  try {
+    const sticky = element?.parentElement
+    const end = sticky?.parentElement?.getBoundingClientRect().bottom
+    bound = !!sticky?.matches("ui-sticky:state(bound)") && !!rect && Math.abs(rect.bottom - end) <= 2
+    stuckState = !!section?.matches(":state(stuck)")
+  } catch {
+    // a browser without custom states:  judge by position alone
+    stuckState = true
+  }
+  const host = epic ? element : section
+  const ownTitle = section
+    ? shown?.closest(epic ? element.localName : "ui-section") === host
+    : shown?.closest("h2")?.id === id
+  return {
+    stuck: section ? stuckState && atTop && ownTitle : bound || (atTop && ownTitle),
+    top: rect && Math.round(rect.top),
+    covering: covering && `${covering.localName}#${covering.id}`,
+    // its name, `aria-label`, always set (`toolbarItem()`):  NOT `title`, empty on an item with an access letter
+    // (its tooltip is the toolbar's own, `wireKeyTips()`), which read as "none marked" (epic `epic-engine` r36)
+    active: active && (active.getAttribute("aria-label")?.trim() || active.textContent.trim() || active.dataset.rail)
+  }
+}
+
+/**
+ * Whether the page's toolbar is shown inside the phone viewport, and where it is, how big.
+ * - shown:  stuck in the top half of the window (the page is scrolled mid-way), no wider than it
+ */
+function navOnScreen(nav) {
+  const element = document.querySelector(nav)
+  if (!element) return { shown: false }
+  const rect = element.getBoundingClientRect()
+  const visible = getComputedStyle(element).display !== "none" && rect.width > 0 && rect.height > 0
+  const placed = rect.left >= -1 && rect.right <= innerWidth + 1 && rect.top >= 0 && rect.bottom <= innerHeight / 2
+  return {
+    shown: visible && placed,
+    left: Math.round(rect.left),
+    top: Math.round(rect.top),
+    width: Math.round(rect.width)
+  }
+}

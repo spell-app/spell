@@ -370,6 +370,8 @@ export class Linker {
   /**
    * Root path `path` (no file there) at its file's ONE new home, when a move left one;  else `undefined`.
    * - `/spell-lang/...`:  the repo was renamed `spell-parser` (`/spell-parser/...`)
+   * - `/spell-ui/...` (and spell-parser, spell-epic, spell-app):  the repo is a folder of the kit's now (`/ui/...`,
+   *   `MERGED_REPOS`)
    * - an old monorepo path, `/packages/<name>/...` or `/<repo>/packages/<name>/...`:  that package's folder
    *   (`inPackage()`)
    * - a folder moved into its repo's one `src/` (epic `repo-split` P14):  `/<repo>/<folder>/src/x` => `/<repo>/src/<folder>/x`,
@@ -423,6 +425,9 @@ export class Linker {
     const moved: string[] = []
     const [first, ...rest] = path.split("/")
     if (first === "spell-lang") moved.push(["spell-parser", ...rest].join("/"))
+    // the four child repos are folders of the kit's ONE repo (epic `repo-split` P20):  `/spell-ui/x` => `/ui/x`
+    const folder = first ? MERGED_REPOS[first] : undefined
+    if (folder) moved.push([folder, ...rest].join("/"))
     const packages = path.indexOf("packages/")
     if (packages === 0 || (packages > 0 && path[packages - 1] === "/")) {
       const inPackage = this.inPackage(path.slice(packages))
@@ -571,7 +576,12 @@ export class Linker {
         .filter(isDir),
       ...[join(this.root, "src"), join(this.root, "tests")].filter(isDir),
       ...AREAS.map((area) => this.real(join(this.root, area))),
-      ...[...new Set([join(this.root, "spell-epic", "src"), join(this.top, "spell-epic", "src")])].filter(isDir),
+      // the engine's code:  the kit's `epic/` folder (epic `repo-split` P20), else an older checkout's `spell-epic`
+      ...[
+        ...new Set(
+          ["epic", "spell-epic"].flatMap((engine) => [join(this.root, engine, "src"), join(this.top, engine, "src")])
+        )
+      ].filter(isDir),
       join(this.ui, "notes")
     ]
   }
@@ -976,6 +986,14 @@ function spellPackagesIn(top: string): Map<string, string> {
     }
   }
   return found
+}
+
+/** The child repos merged into the kit's ONE repo by epic `repo-split` P20, each with its folder there. */
+const MERGED_REPOS: Readonly<Record<string, string>> = {
+  "spell-parser": "parser",
+  "spell-ui": "ui",
+  "spell-epic": "epic",
+  "spell-app": "app"
 }
 
 /** The repos that are ONE package of no folders of its own, by npm name:  the short name of the package each was. */

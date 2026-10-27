@@ -1,0 +1,83 @@
+<!doctype html>
+<!--
+  The Spell UI site's LAYOUT:  every page's chrome, written ONCE.  A page's own file holds only its `<head>` and
+  `<main id="main" class="site-main">`;  the site bundle wraps that `main` in this file's `<body>` on first load
+  (`site/_src/SiteShell.ts`), and from then on the router (`site/_src/SiteRouter.ts`) swaps
+  only the `main`, through a `<ui-include selector="main#main">` in `.site-content`, while everything here stays on
+  screen.
+  - Relative URLs here are against THIS file (`_parts/`):  the shell makes them absolute as it mounts, so they hold
+    whichever page is shown.
+  - `<ui-root display="when-ready">`:  the page stays hidden until the layout is in and every element in it is
+    ready, then shows at once:  no flash of unstyled markup (plan doc ui-docs-rework, D2).
+  - `.site-content`:  the shell puts the page's `main` in here.
+  - The COMMENTS (epic `epic-engine`, as every set's):  every page loads `/_epic/assets/spell-comments.js` in its
+    `<head>`, after the site's bundle:  the bullhorns, threads, Send and the page's toolbar;  its threads and pane are
+    the epics pack's elements, so this loads that pack (`/_epic/pack/epics.pack.js`, the epic server's engine route,
+    which spell-app's page server serves as well), sharing the site bundle's Solid and Spell UI (`SitePacks.ts`)
+  - Only `<body>` is used.
+-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Spell UI site layout</title>
+  </head>
+  <body>
+    <ui-root class="site" stack-with="page" icons="fa7-brands, fomantic" display="when-ready">
+      <!-- the epics pack, for the comments' threads and pane (`<epic-thread>`, `<epic-comment-pane>`):  every page loads
+        the comments, `/_epic/assets/spell-comments.js`, which draws them with this pack's elements -->
+      <ui-components source="/_epic/pack/epics.pack.js"></ui-components>
+      <!--
+        Top bar:  only while the right column is hidden (narrower than 1200px);
+        wide screens have none (Owen:  "lose the top bar entirely").
+        - The menu button and the brand only below 992px, where the nav panel moves into the flyout.
+        - A `<ui-toolbar>`'s bar slots:
+          - `icon`:  the menu button
+          - `title`:  the brand
+          - its items:  the site's links (they scroll sideways with `‹` / `›` when the bar is too narrow)
+          - `right`:  search and the look controls (at the right edge, whatever shows before them)
+        - Under it, the page header's title line sticks for the whole page (`SiteSections.splitSubtitle()`).
+      -->
+      <ui-toolbar class="site-topbar" aria-label="Site">
+        <ui-button slot="icon" class="site-menu-button" icon="bars" aria-label="Components" title="Components" commandfor="site-nav-flyout" command="--show" appearance="basic circular"></ui-button>
+        <a slot="title" class="site-topbar-brand site-wordmark" href="/components/ui/index.html"><span class="site-hat" aria-hidden="true"></span>Spell UI</a>
+        <spell-site-header class="site-topbar-links" docked no-tools></spell-site-header>
+        <ui-button slot="right" class="site-search-button" icon="search" aria-label="Search" title="Search (⌘K)" appearance="basic circular"></ui-button>
+        <ui-theme-menu slot="right" size="small" class="site-topbar-themes"></ui-theme-menu>
+      </ui-toolbar>
+
+      <!--
+        Narrower than 992px:  the nav panel lives in this flyout (the top bar's menu button opens it).
+        - The flyout itself is clear, so the panel reads as a card over the page (modeless:  no dimmer).
+        - Its brand is the top bar's (the hat, "Spell UI").
+        - The site's own links stay in the top bar (Owen, 2026-10-23:  "Don't need to duplicate Guides/etc in this sidebar").
+      -->
+      <ui-flyout id="site-nav-flyout" position="left" closable modeless class="site-nav-flyout" aria-label="Components">
+        <ui-docs-nav aria-label="Components (menu)">
+          <a slot="header" class="site-wordmark" href="/components/ui/index.html"><span class="site-hat" aria-hidden="true"></span>Spell UI</a>
+          <ui-theme-menu slot="header" inverted size="small" class="site-flyout-themes"></ui-theme-menu>
+        </ui-docs-nav>
+      </ui-flyout>
+
+      <div class="site-layout">
+        <aside class="site-nav">
+          <ui-docs-nav>
+            <a slot="header" class="site-wordmark" href="/components/ui/index.html"><span class="site-hat" aria-hidden="true"></span>Spell UI</a>
+          </ui-docs-nav>
+        </aside>
+
+        <div class="site-page">
+          <div class="site-content"></div>
+          <ui-include class="site-footer" source="footer.html" page-styles load="visible"></ui-include>
+        </div>
+
+        <!--
+          Right column (1200px and wider):  a card of "On this page", which the router points at each page
+          (`for` its tabs, `header` its main's data-toc-header).  Shown on every tab, the API tab too:  no width jump.
+        -->
+        <aside class="site-aside">
+          <ui-toc class="site-toc"></ui-toc>
+        </aside>
+      </div>
+    </ui-root>
+  </body>
+</html>

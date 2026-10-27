@@ -1,0 +1,129 @@
+<spell-notebook "input usage">
+	<header level="1">
+		Input
+		<header>An input is a field used to elicit a response from a user.</>
+	</>
+	<input-tab-bar showing="usage"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#using-it">Using it</>
+				<ui-item link="#forms-and-validation">Forms and validation</>
+				<ui-item link="#events">Events</>
+				<ui-item link="#keyboard">Keyboard</>
+				<ui-item link="#accessibility">Accessibility</>
+				<ui-item link="#framework-usage">Framework usage</>
+			</>
+		</>
+	</>
+
+	<!-- USAGE:  forms, validation, events, keyboard, accessibility, frameworks. -->
+	<section label="Using it">
+		<markdown>
+			`<ui-input>` is a single-line field; for a multi-line one, [`<ui-textarea>`](/components/ui/ui-textarea.html) shares its sheet and
+			most attributes.
+
+			- `type` passes through to the native input (`file` also gets Fomantic's file look).
+			- `icon` draws an icon inside the field, at the end (or the start, with `icon-position="left"`).
+			- `label` joins a label; `labeled` places it (`right`, `corner`, `left corner`). The `label` slot takes markup: a
+			  `<ui-label appearance="basic">`, a `<ui-dropdown>`.
+			- `<ui-button>`s (or a `<ui-dropdown button>`) in the `action` slot join the field; `action="left"` puts them
+			  first.
+			- `state` tints the field: `error`, `info`, `success`, `warning`.
+		</>
+	</>
+
+	<section label="Forms and validation">
+		<markdown>
+			An input is a real form control: put it inside a `<form>` and its `name` / `value` is submitted with it (a
+			`file` input submits one entry per chosen file).
+
+			- As with a native input, the `value` ATTRIBUTE is the starting value and the `value` PROPERTY the live one;
+			  `form.reset()` goes back to the attribute, and a disabled `<fieldset>` disables it.
+			- `readonly` keeps the value in the submission, `disabled` leaves it out.
+			- Constraint attributes (`required`, `pattern`, `min`, `max`, `step`, `minlength`, `maxlength`) validate natively;
+			  the `rules` property adds Fomantic's rules on top (`"email"`, `["notEmpty", "minLength[6]"]`).
+			- The field only shows as invalid once the user has interacted with it, as `:user-invalid` does.
+			- **Enter** submits its form.
+		</>
+	</>
+
+	<section label="Events">
+		<markdown>
+			- `ui-input` fires on every keystroke, with `event.detail.value`.
+			- `ui-changed` fires when the user commits (blur, **Enter**, picking a file).
+			- Setting `value` from a `ui-input` handler wins over what was typed, so a handler can reformat or reject input.
+		</>
+		<markdown>
+			```js
+			const input = document.querySelector("ui-input[name=email]")
+			input.rules = ["notEmpty", "email"]
+			input.addEventListener("ui-input", (event) => {
+			  input.value = event.detail.value.toLowerCase()
+			})
+			input.addEventListener("ui-changed", (event) => console.log(event.detail.value, input.validity.valid))
+			```
+		</>
+	</>
+
+	<section label="Keyboard">
+		<markdown>
+			The shadow root holds a real `<input>`, so the browser does the keyboard work.
+
+			- **Tab** / **Shift+Tab** moves focus to and from the field; the host delegates focus, so it is never a tab stop
+			  of its own, and clicking the host focuses the control.
+			- **Enter** submits its form (clicking the form's first submit button), as a native field does.
+			- Buttons in the `action` slot are tab stops of their own, after (or before) the field.
+		</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			- Typing, selection, autofill and the on-screen keyboard come from the browser's own control.
+			- Name the field with a `<label for>` pointing at the host's `id` (as in a form) or an `aria-label` on the host;
+			  either becomes the control's accessible name. A `placeholder` is not a label.
+			- A field that fails validation after the user has touched it gets `aria-invalid="true"`; a `<ui-form>` marks
+			  failing fields the same way. `loading` sets `aria-busy`.
+			- The `icon` and the `corner` label are decoration; they are hidden from assistive technology, so don't put
+			  meaning in them alone.
+			- If the element fails to render, its native fallback keeps the same box with a plain native control:
+			  it still submits, validates its native constraints and fires `ui-input` / `ui-changed`. It drops the
+			  icon glyph, the `icon`, `label` and `action` slots, corner labels, `rules`, the invalid state, reset
+			  to the starting value, **Enter** to submit,
+			  and naming through `<label for>` (only `aria-label` or `placeholder` name the control).
+		</>
+	</>
+
+	<section label="Framework usage">
+		<markdown>
+			Set `rules` as a property and listen for `ui-input` / `ui-changed`. Bind `value` as a property to control the
+			field.
+		</>
+		<header level="4" id="framework-react">React 19</>
+		<markdown>
+			```jsx
+			<ui-input name="email" type="email" value={email} rules={["email"]} onui-input={(e) => setEmail(e.detail.value)} />
+			```
+		</>
+		<header level="4" id="framework-vue">Vue 3.5</>
+		<markdown>
+			```html
+			<!-- compilerOptions.isCustomElement = (tag) => tag.startsWith("ui-") -->
+			<ui-input name="email" type="email" :value="email" :rules="['email']" @ui-input="(e) => (email = e.detail.value)" />
+			```
+		</>
+		<header level="4" id="framework-solid">Solid 2</>
+		<markdown>
+			```jsx
+			// events and rich data are plain props:  `on-<event>={...}`, `options={...}`
+			<ui-input
+			  name="email"
+			  type="email"
+			  value={email()}
+			  rules={["email"]}
+			  on-ui-typed={(e) => setEmail(e.detail.value)}
+			/>
+			```
+		</>
+	</>
+</spell-notebook>

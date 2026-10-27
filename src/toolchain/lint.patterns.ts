@@ -232,7 +232,7 @@ function hasJSX(root: ESTree.Node): boolean {
 // ## Plugin
 ////////////////
 
-/** The rules, by name:  `spell-ui/<name>` in a config or a disable comment. */
+/** The rules, by name:  `ui/<name>` in a config or a disable comment. */
 export const PATTERN_RULES = {
   "no-solid-effect": noSolidEffect,
   "no-mutation-observer": noMutationObserver,

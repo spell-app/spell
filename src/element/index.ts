@@ -8,11 +8,13 @@
  * - `Cell`, `SlotContent`
  * - `Disclosure`:  one open / closed state, its events, `aria-expanded` and find-in-page, for anything that shows
  *   and hides a box
+ * - `OwnControls`:  did a click land on a control inside an element (a button, a link, a field), not on the element?
+ * - `ParentLink`:  the `parent` attribute, an element joining the container with that id
  * - `PartContext` and `OwnerContext`:  the generic content parts, and the elements they belong to
- * - `SpellSolid`:  the settings a set's runtime hands it as it loads (Spell UI's, as `spell-ui/core` loads)
+ * - `SpellSolid`:  the settings a set's runtime hands it as it loads (Spell UI's, as `spell/ui/core` loads)
  * - the vocabulary's types (`ComponentVocabulary` ...)
  * - `spell/util/timing`:  when to run something (`afterSolidUpdate()`, `after()`, `waitUntil()` ...), re-exported
- * - `spell/util`'s GENERIC helpers, as `spell-ui/util` has them (`@proto`, `@lazy`, `camelCase()` ...):
+ * - `spell/util`'s GENERIC helpers, as `spell/ui/util` has them (`@proto`, `@lazy`, `camelCase()` ...):
  *   a component file reads them through `E` too (`@E.proto`)
  * - It imports only `spell/util`'s generic files and Solid:  NEVER Spell UI, or any other package.
  * - NOTE: `HotDefinitions` is left out:  dev-only, and a SIDE EFFECT on import (it wraps `UIComponent.define`);
@@ -24,7 +26,7 @@
  *   - What a file reads while it EVALUATES (a base class, a decorator, a static initializer)
  *     comes from its own file instead (WWOD §4 › "Circular imports").
  *   - The order below puts each such file before its readers;  `tests/element/barrel.test.ts` checks it.
- * - NOTE: Spell UI's `spell-ui/core` re-exports all of it, so its `E` holds these names too, and a page has ONE copy:
+ * - NOTE: Spell UI's `spell/ui/core` re-exports all of it, so its `E` holds these names too, and a page has ONE copy:
  *   Spell UI's core bundle carries it, and a component pack reads it from there (`SpellUI.packModules`).
  */
 
@@ -48,6 +50,8 @@ export * from "./PartContext"
 export * from "./UIComponent"
 export * from "./SlotContent"
 export * from "./Disclosure"
+export * from "./OwnControls"
+export * from "./ParentLink"
 
 /**
  * The package namespace (WWOD §4):

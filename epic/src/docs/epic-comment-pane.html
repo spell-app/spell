@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>epic-comment-pane</title>
+    <meta
+      name="description"
+      content="The &lt;epic-comment-pane&gt; element: the floating pane Owen writes a new comment in."
+    />
+    <!-- Before first paint:  the viewer's colour scheme (Spell UI's `ThemePreference.HEAD_SCRIPT`).  The theme itself is restored by site.js. -->
+    <script>
+      try {
+        var l = localStorage,
+          d = document.documentElement,
+          s = l.getItem("spell-site:scheme") || l.getItem("spell-site:theme") || l.getItem("spell-ui-site:scheme")
+        if (s === "light" || s === "dark") {
+          d.classList.add("ui-" + s)
+          d.style.colorScheme = s
+        }
+      } catch (e) {}
+    </script>
+    <link rel="stylesheet" href="_assets/site.css" />
+    <script type="module" src="_assets/site.js"></script>
+    <!-- the comments (bullhorns, threads, Send):  the docs runtime's, alone, beside the site's Spell UI -->
+    <script defer src="/_epic/assets/spell-comments.js"></script>
+  </head>
+  <body class="ui-typography">
+    <main id="main" class="site-main" data-toc-header="&lt;epic-comment-pane&gt;">
+      <ui-segment appearance="vertical" class="site-masthead">
+        <ui-container>
+          <ui-menu icon class="site-page-links" aria-label="About this page">
+            <ui-item
+              link="/epic/src/AGENTS.md"
+              icon="book"
+              aria-label="How comments work, src/AGENTS.md"
+              title="How comments work, src/AGENTS.md"
+            ></ui-item>
+          </ui-menu>
+          <ui-header level="1" class="site-title">
+            &lt;epic-comment-pane&gt;
+            <ui-header>The &lt;epic-comment-pane&gt; element: the floating pane Owen writes a new comment in.</ui-header>
+          </ui-header>
+        </ui-container>
+      </ui-segment>
+
+      <ui-container class="site-body">
+        <article class="site-article">
+          <p class="lede">
+            The small floating pane Owen writes a NEW comment in:  a bullhorn's, or ⌘ / Ctrl I's on selected text.  It
+            saves itself as he types;  once closed, the comment is a thread.
+          </p>
+          <p class="meta">
+            For anyone changing how comments look or work on a page.<br />
+            Its vocabulary (every name it uses):
+            <a href="/epic/src/components/epic-comment-pane/EpicCommentPane.en.ts" target="src-spell-epic-src-components-epic-comment-pane-epiccommentpane-en-ts"><code title="epic/src/components/epic-comment-pane/EpicCommentPane.en.ts">EpicCommentPane.en.ts</code></a>.<br />
+            Its component:
+            <a href="/epic/src/components/epic-comment-pane/EpicCommentPane.tsx" target="src-spell-epic-src-components-epic-comment-pane-epiccommentpane-tsx"><code title="epic/src/components/epic-comment-pane/EpicCommentPane.tsx">EpicCommentPane.tsx</code></a>, with its style
+            sheet (<code>.css</code>) and tests beside it.
+          </p>
+
+          <ui-section id="1-example" label="1. Example" sticky collapsible dividing>
+            <ui-icon slot="icon" name="eye"></ui-icon>
+            <p>
+              Click any bullhorn on this page (the masthead's, a section title's):  that's this element, opened by the
+              comments' code under it.  It's fixed on the screen, so no copy of it sits here.
+            </p>
+          </ui-section>
+
+          <ui-section id="2-markup" label="2. Markup" sticky collapsible dividing open="false">
+            <ui-icon slot="icon" name="code"></ui-icon>
+            <ui-code language="html"><script type="text/plain">
+<epic-comment-pane headline="“2. Context”" about="On a section in “2. Context”" saved="Saved 14:02 · waiting for Claude" deletable>
+  <textarea class="spell-comment-field" rows="3" aria-label="Your comment"></textarea>
+</epic-comment-pane>
+            </script></ui-code>
+            <p>Its <code>near</code> property, <code>{ left, top, bottom }</code>, is the box of what Owen clicked or selected.</p>
+          </ui-section>
+
+          <ui-section id="3-attributes" label="3. Attributes" sticky collapsible dividing open="false">
+            <ui-icon slot="icon" name="list check"></ui-icon>
+            <ui-table celled padding="compact" appearance="striped" unstackable>
+              <table>
+                <thead>
+                  <tr><th>Name</th><th>Values</th><th>Meaning</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td><code>headline</code></td><td>text</td><td>The first words it's on, in quotes, or <code>This page</code>.</td></tr>
+                  <tr><td><code>about</code></td><td>text</td><td>Which block it's on, in full:  its header's tooltip.</td></tr>
+                  <tr><td><code>saved</code></td><td>text</td><td>The floppy, and its tooltip.</td></tr>
+                  <tr><td><code>failed</code></td><td>boolean</td><td>The last save failed:  the floppy red.</td></tr>
+                  <tr><td><code>deletable</code></td><td>boolean</td><td>Saved:  the trash shows.</td></tr>
+                  <tr><td><code>near</code></td><td>JSON (a property)</td><td>Where to open:  8px under it, above it when there's no room below, inside the window.</td></tr>
+                </tbody>
+              </table>
+            </ui-table>
+            <ui-section id="events" label="Events" sticky collapsible dividing open="false">
+            <ui-table celled padding="compact" appearance="striped" unstackable>
+              <table>
+                <thead>
+                  <tr><th>Event</th><th>When</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td><code>epic-comment-closing</code></td><td>×:  the comments' code saves what's typed, then closes it.</td></tr>
+                  <tr><td><code>epic-comment-removing</code></td><td>The trash:  deleted at once, Undo in the toast.</td></tr>
+                </tbody>
+              </table>
+            </ui-table>
+            </ui-section>
+          </ui-section>
+
+          <ui-section id="4-how-it-looks" label="4. How it looks" sticky collapsible dividing open="false">
+            <ui-icon slot="icon" name="palette"></ui-icon>
+            <ul>
+              <li>Ivory, 8px inside on every side, lifted off the page by a shadow;  no buttons below its text.</li>
+              <li>Its header:  the bullhorn, the first words (italic, cut short), the floppy, the trash, ×.  Owen drags it by its header.</li>
+              <li>The page never scrolls for it (Owen, 2026-10-10:  "don't scroll the page and lose context!").</li>
+            </ul>
+          </ui-section>
+
+          <footer class="site-page-footer">
+            <ui-divider></ui-divider>
+            <p class="meta">Last checked 2026-10-19 against branch <code>epic-engine</code>.</p>
+          </footer>
+        </article>
+      </ui-container>
+    </main>
+  </body>
+</html>

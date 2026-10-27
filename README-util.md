@@ -25,7 +25,7 @@ turn it over
 it is face up should be yes
 ```
 
-_Two lines of `test card setup`, in Solitaire's [Card.spellx](https://github.com/spell-app/spell-app/blob/main/spaces/@spell/examples/Solitaire/Card.spellx):
+_Two lines of `test card setup`, in Solitaire's [Card.spellx](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/examples/Solitaire/Card.spellx):
 the test passes, all 19 checks._
 
 On signals that hold a write back, the second line would still read the card face down, and the language would fail its own test.
@@ -98,12 +98,12 @@ Use the barrel, except for these:
 
 | Import | Why not the barrel | Who imports it so |
 | --- | --- | --- |
-| `spell/util/class`, `/decorators`, `/dom`, `/string`, `/util.types` | the generic files one by one, so lodash, `chalk` and the rest never reach a bundle that doesn't want them | [Spell UI's util barrel](https://github.com/spell-app/spell-ui/blob/main/src/util/index.ts), [the element framework's](src/element/index.ts), the kit's test helpers |
+| `spell/util/class`, `/decorators`, `/dom`, `/string`, `/util.types` | the generic files one by one, so lodash, `chalk` and the rest never reach a bundle that doesn't want them | [Spell UI's util barrel](https://github.com/spell-app/spell/blob/main/ui/src/util/index.ts), [the element framework's](src/element/index.ts), the kit's test helpers |
 | `spell/util/reactive` | the cells without Spell's layer | util's own `spell/` files:  through the barrel, which re-exports them, it'd be a cycle |
 | `spell/util/persist` | the preferences and undo, without lodash:  the barrel would bundle it into every page | the kit's site header (`spell/server/site`) |
 | `spell/util/persist/PrefStore` | the pref store alone:  in Spell UI's core bundle the whole folder cost every page 1.9 kB | Spell UI's theme, nav, saved-theme and site-fold preferences |
 | `spell/util/spell/Derivative`, `/spell/Logger` | one class, and nothing else | spell-parser's parser:  its `Rule` and its tokenizer |
-| `spell/util/spell/ResponseErrors` | the `ResponseError` family is left out of the barrel on purpose | [spell-app's disk fetch](https://github.com/spell-app/spell-app/blob/main/src/spaces/server/node/projects/disk-fetch.ts), to throw a `MissingResourceError` as a 404 would |
+| `spell/util/spell/ResponseErrors` | the `ResponseError` family is left out of the barrel on purpose | [spell-app's disk fetch](https://github.com/spell-app/spell/blob/main/app/src/spaces/server/node/projects/disk-fetch.ts), to throw a `MissingResourceError` as a 404 would |
 | `spell/util/node/json5` | node only:  never through a barrel, so no browser code pulls it in | the tools that write JSON5 (below) |
 
 ## The generic helpers:  what lodash has no shape for
@@ -137,7 +137,7 @@ new WithProto()        // statement:  the default is on the prototype, there bef
 
 - Nothing is copied per instance:  `Object.keys()` of a `WithProto` is `[]`, of a `WithField`, `["alias"]`.
 - Spell's parser is built on it.
-  The [`print` rule](https://github.com/spell-app/spell-parser/blob/main/src/spell/rules/UI/Print.ts) starts `@proto static alias = "statement"`,
+  The [`print` rule](https://github.com/spell-app/spell/blob/main/parser/src/spell/rules/UI/Print.ts) starts `@proto static alias = "statement"`,
   and the five repos' code says `@proto static` over 400 times.
 - The edge:  a `static` field only.
   On an instance field it throws `@proto x: only works on 'static' fields.`
@@ -158,7 +158,7 @@ new WithProto()        // statement:  the default is on the prototype, there bef
 - Kept per object:  each instance its own, a `static` one per class.
 - `forget(object, "name")` drops a kept value;  the next read makes it anew.
 - `@resets("load") static accessor url` drops it on every write:
-  [Spell UI's site data](https://github.com/spell-app/spell-ui/blob/main/src/docs-components/SiteData.ts) fetches again when its URL changes.
+  [Spell UI's site data](https://github.com/spell-app/spell/blob/main/ui/src/docs-components/SiteData.ts) fetches again when its URL changes.
 - The edges:
   - not reactive:  a `@lazy` value is made once, whatever it read;  a reactive cached value is `@derived`, below
   - a getter or method that THROWS keeps nothing, and the next call tries again;
@@ -237,7 +237,7 @@ the store's tests check the same text in Chromium's own `localStorage`._
   | `session` | the browser's per-tab storage:  gone when the tab closes | text | at once |
   | `memory` | this store alone, for this page:  a server's request, a test | text | at once |
   | `DatabasePlace.shared` | the browser's database (IndexedDB), one for the site, `spell-prefs` | as it is:  a `Blob`, a `Date` or a file handle comes back as it went in | waited on |
-  | `ServerPlace.shared` | the page server's `/api/prefs`, in the person's space ([README-spaces](https://github.com/spell-app/spell-app/blob/main/README-spaces.md)), so it follows them to every browser | JSON:  plain data only | waited on |
+  | `ServerPlace.shared` | the page server's `/api/prefs`, in the person's space ([README-spaces](https://github.com/spell-app/spell/blob/main/app/README-spaces.md)), so it follows them to every browser | JSON:  plain data only | waited on |
   | a `StoragePlace` you make | over a storage you hand it (a test's) | text | at once |
 
 - `update()` reads, changes and saves a value as one step;
@@ -380,7 +380,7 @@ Who hears of a write depends on who's listening, and the two listeners behave in
 
 - `bridgeSolid({ enableExternalSource, flush })`, from `solid-js`, makes every Solid computation
   (a memo, an effect, a JSX expression) re-run when a cell it read changes.
-  - The HOST calls it, with its own Solid:  [the editor's bridge](https://github.com/spell-app/spell-app/blob/main/src/app/solid/cellsBridge.ts),
+  - The HOST calls it, with its own Solid:  [the editor's bridge](https://github.com/spell-app/spell/blob/main/app/src/app/solid/cellsBridge.ts),
     the command line's runner.
     Util never imports Solid, so the runtime compiled Spell loads (`spell-runtime.js`) holds none.
   - Once per Solid, however many hosts call it, and before anything that reads cells is drawn.
@@ -396,7 +396,7 @@ Who hears of a write depends on who's listening, and the two listeners behave in
 ### Compiled Spell and hand-written classes meet in one schema
 
 Each class has a schema:  its props' types, defaults and legal values.
-[The card example](https://github.com/spell-app/spell-app/blob/main/tests/spell/__examples__/Solitaire/Solitaire.snapshot.js) compiles to a declaration
+[The card example](https://github.com/spell-app/spell/blob/main/app/tests/spell/__examples__/Solitaire/Solitaire.snapshot.js) compiles to a declaration
 and an accessor pair;  `@prop` writes the same runtime shape by hand:
 
 ```js
@@ -590,7 +590,7 @@ Where a new helper goes, in order:
 2. Only one package uses it:  leave it in that package.
 3. Generic, dependency-free and worth its bytes on every Spell UI page:  beside the generic files.
    - Spell UI's core bundle carries every generic file, used or not.
-   - Add it to [Spell UI's util barrel](https://github.com/spell-app/spell-ui/blob/main/src/util/index.ts) and the element framework's,
+   - Add it to [Spell UI's util barrel](https://github.com/spell-app/spell/blob/main/ui/src/util/index.ts) and the element framework's,
      which import these files one by one.
 4. Part of the engine:  `reactive/`, still with no lodash, no Solid and nothing Spell-specific.
    What an app keeps for people (`PrefStore`, `UndoStack`):  `persist/`, generic too.
@@ -652,7 +652,7 @@ server running (`spell server start`, then the URL it prints):
 
 - [README-element.md](README-element.md):  the element framework, which re-exports the generic helpers
   and has a `@state` and `@derived` of its own
-- [spell-parser's README-core.md](https://github.com/spell-app/spell-parser/blob/main/README-core.md):  the runtime compiled Spell runs on,
+- [spell-parser's README-core.md](https://github.com/spell-app/spell/blob/main/parser/README-core.md):  the runtime compiled Spell runs on,
   where the same write-then-read happens in English
 - [README-toolchain.md](README-toolchain.md):  the decorator pre-pass every decorator on this page goes through
 - [README-server.md](README-server.md):  the page server, whose data files are written through the JSON5 helper

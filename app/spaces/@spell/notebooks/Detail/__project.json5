@@ -1,0 +1,22 @@
+{
+  "title": "Detail",
+  "description": "Spell UI's Detail page as notebooks:  its Examples, Usage and API tabs, each a notebook of its own, linked by the page's tab bar (written by `spell app notebook convert`)",
+  "imports": [
+    {
+      "path": "/Examples.spellx",
+      "active": true
+    },
+    {
+      "path": "/Usage.spellx",
+      "active": true
+    },
+    {
+      "path": "/API.spellx",
+      "active": true
+    },
+    {
+      "path": "/TabBar.spellx",
+      "active": true
+    }
+  ]
+}

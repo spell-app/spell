@@ -125,7 +125,7 @@ export type LinkResult = {
  * - `from` / `to`:  as written, and as written now (`to` is `""` for a dropped `<spell-site-header root>`)
  * - `kind`:
  *   - `rooted`:  the root path of the file it reached
- *   - `mended`:  it reached nothing, and a move's one new home was found (`spell-lang/` is `spell-parser/` ...)
+ *   - `mended`:  it reached nothing, and a move's one new home was found (`spell-lang/` is `parser/` ...)
  *   - `broken`:  it reaches nothing, then or now:  written as the browser reads it, for a person to fix
  *   - `dropped`:  a `<spell-site-header root>`, which only served pages opened from disk
  *   - `outside`:  it climbs above the root:  left as written
@@ -186,7 +186,7 @@ export type BundleSpec = {
   entry: string
   /**
    * files and folders the build reads:  a change to one makes the bundle stale
-   * - a package's, by its npm name and a path in it:  `spell-ui/src`
+   * - a package's, by its npm name and a path in it:  `ui/src`
    * - anything else, from the install's root (the folder holding `yarn.lock`):  `yarn.lock`
    */
   sources: string[]
@@ -196,7 +196,7 @@ export type BundleSpec = {
 export type BundleCheck = {
   /** the bundle's `name` */
   name: string
-  /** its `output` folder, relative to the checkout:  as the settings' `bundles` name it (`../spell-ui/site/_assets`) */
+  /** its `output` folder, relative to the checkout:  as the settings' `bundles` name it (`../ui/site/_assets`) */
   output: string
   /** the hash of its sources now */
   sources: string
@@ -248,13 +248,7 @@ export const BUNDLE_RECORD = ".bundle.json"
  * - the site header (`spell/server/site`)
  * - the lock file
  */
-const SPELL_UI_SOURCES = [
-  "spell-ui/src",
-  "spell/src/element",
-  "spell-ui/vite.config.ts",
-  "spell/src/server/site",
-  "yarn.lock"
-]
+const SPELL_UI_SOURCES = ["spell/ui/src", "spell/src/element", "spell/ui/vite.config.ts", "spell/src/server/site", "yarn.lock"]
 
 /**
  * How each bundle built on demand is built.
@@ -264,7 +258,9 @@ const SPELL_UI_SOURCES = [
  * - `sources`:  generous, so a change never leaves one stale unnoticed
  *   - `Bundle.sourceFiles()` skips tests, snapshots, dot files and the icon packs
  * - their `output` folders are in their own repos' `.gitignore`
- * - each by its PACKAGE, never by the checkout's layout (epic `repo-split` P8)
+ * - each by its PACKAGE, never by the checkout's layout (epic `repo-split` P8):  `sources` by the package's npm name
+ *   and a path in it (`spell/ui/src`:  the ONE package's `ui/src/`, epic `repo-split` P20);  a project beside the
+ *   kit (spell-brand) found as one of the page server's settings parts (`Bundle.packageDirFor()`)
  */
 export const BUNDLES: BundleSpec[] = [
   {
@@ -275,12 +271,7 @@ export const BUNDLES: BundleSpec[] = [
     run: ["yarn", "site:bundle"],
     output: "site/_assets",
     entry: "site.js",
-    sources: [
-      ...SPELL_UI_SOURCES,
-      "spell-ui/site/_src",
-      "spell-ui/vite.site.config.ts",
-      "spell-ui/scripts/site-bundle.ts"
-    ]
+    sources: [...SPELL_UI_SOURCES, "spell/ui/site/_src", "spell/ui/vite.site.config.ts", "spell/ui/scripts/site-bundle.ts"]
   },
   {
     name: "brand",

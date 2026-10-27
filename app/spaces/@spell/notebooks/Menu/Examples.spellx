@@ -1,0 +1,1325 @@
+<spell-notebook "menu examples">
+	<header level="1">
+		Menu
+		<header>A menu displays grouped navigation actions.</>
+	</>
+	<menu-tab-bar showing="examples"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#types">Types</>
+				<ui-item link="#content">Content</>
+				<ui-item link="#states">States</>
+				<ui-item link="#variations">Variations</>
+				<ui-item link="#fitting-titles">Fitting titles</>
+			</>
+		</>
+	</>
+
+	<!--
+		EXAMPLES:  Fomantic's menu page, section by section, in its order (Types, Content, States, Variations), plus our
+		own extras (Menubar, Floated).  A menu holds the GENERIC `<ui-item>`;  a `<ui-menu>` inside a menu is a sub-menu.
+		Every top-level menu is a `<nav>` landmark, so each example names its menu with its own `aria-label`.
+		`GAP I<n>` comments mark examples a widget can't render yet (plan-doc issues).
+	-->
+	<section label="Types">
+		<section label="Menu" sticky collapsible dividing>
+			<example description="A menu:  `items` divides its width evenly between that many items. `items=\"3\"` is Fomantic's `three item menu`.">
+				<menu items="3" aria-label="Sections">
+					<item link="#editorials" selected>Editorials</item>
+					<item link="#reviews">Reviews</item>
+					<item link="#events">Upcoming Events</item>
+				</menu>
+			</example>
+
+			<!-- GAP I69:  opened, the popup collapses its `<ui-grid>` to a sliver. -->
+			<!-- GAP I53:  Fomantic's `ui right dropdown item` is a dropdown that IS the item;  ours is a `<ui-dropdown>` (a select) inside an item. -->
+			<example>
+				<html>
+					<ui-message slot="description" state="info" size="small">Menus can hold dropdowns and popups: a <code>&lt;ui-dropdown&gt;</code> inside an item, a <code>&lt;ui-popup&gt;</code> after the item it opens from. See the Dropdown and Popup pages.</ui-message>
+					<ui-menu appearance="text" aria-label="School">
+						<ui-item>
+							<ui-image src="/components/ui/images/new-school.jpg" alt="New School" size="mini"></ui-image>
+						</ui-item>
+						<ui-item appearance="link">Browse Courses<ui-icon name="dropdown"></ui-icon></ui-item>
+						<ui-popup open-on="click" flowing appearance="basic" position="bottom left">
+							<ui-grid columns="3" spacing="lg" divided>
+								<ui-column>
+									<ui-header level="4">Business</ui-header>
+									<ui-list appearance="link">
+										<ui-item link="#design">Design &amp; Urban Ecologies</ui-item>
+										<ui-item link="#fashion">Fashion Design</ui-item>
+										<ui-item link="#fine-art">Fine Art</ui-item>
+										<ui-item link="#strategic">Strategic Design</ui-item>
+									</ui-list>
+								</ui-column>
+								<ui-column>
+									<ui-header level="4">Liberal Arts</ui-header>
+									<ui-list appearance="link">
+										<ui-item link="#anthropology">Anthropology</ui-item>
+										<ui-item link="#economics">Economics</ui-item>
+										<ui-item link="#media">Media Studies</ui-item>
+										<ui-item link="#philosophy">Philosophy</ui-item>
+									</ui-list>
+								</ui-column>
+								<ui-column>
+									<ui-header level="4">Social Sciences</ui-header>
+									<ui-list appearance="link">
+										<ui-item link="#food">Food Studies</ui-item>
+										<ui-item link="#journalism">Journalism</ui-item>
+										<ui-item link="#non-profit">Non Profit Management</ui-item>
+									</ui-list>
+								</ui-column>
+							</ui-grid>
+						</ui-popup>
+						<ui-menu position="right">
+							<ui-item>
+								<ui-dropdown label="More" aria-label="More">
+									<ui-item value="applications">Applications</ui-item>
+									<ui-item value="international">International Students</ui-item>
+									<ui-item value="scholarships">Scholarships</ui-item>
+								</ui-dropdown>
+							</ui-item>
+						</ui-menu>
+					</ui-menu>
+				</html>
+			</example>
+
+			<!-- GAP I53:  the wrench dropdown's nested `New` sub-menu, divider and header have no `<ui-dropdown>` equivalent (a select, not an action menu). -->
+			<example>
+				<menu attach="top" aria-label="Toolbar">
+					<item>
+						<dropdown aria-label="File">
+							<icon slot="trigger" name="wrench"/>
+							<item value="open">Open...</item>
+							<item value="save">Save...</item>
+							<item value="permissions">Edit Permissions</item>
+							<item kind="divider"/>
+							<item kind="header">Export</item>
+							<item value="share">Share...</item>
+						</dropdown>
+					</item>
+					<menu position="right">
+						<item>
+							<search category placeholder="Search animals..." aria-label="Search animals"/>
+						</item>
+					</menu>
+				</menu>
+				<segment attach="bottom">
+					<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
+				</segment>
+			</example>
+		</>
+
+		<section label="Secondary Menu" sticky collapsible dividing>
+			<example description="A menu can adjust its appearance to de-emphasize its contents.  A nested `<ui-menu position=\"right\">` holds the items at the far end.">
+				<menu appearance="secondary" aria-label="Secondary">
+					<item link="#home" selected>Home</item>
+					<item link="#messages">Messages</item>
+					<item link="#friends">Friends</item>
+					<menu position="right">
+						<item>
+							<input icon="search" placeholder="Search..." aria-label="Search"/>
+						</item>
+						<item link="#logout">Logout</item>
+					</menu>
+				</menu>
+			</example>
+		</>
+
+		<section label="Pointing" sticky collapsible dividing>
+			<example description="A menu can point to show its relationship to nearby content.  With `secondary` too, the active item is underlined.">
+				<menu appearance="pointing" aria-label="Pointing">
+					<item link="#home" selected>Home</item>
+					<item link="#messages">Messages</item>
+					<item link="#friends">Friends</item>
+					<menu position="right">
+						<item>
+							<input appearance="transparent" icon="search" placeholder="Search..." aria-label="Search"/>
+						</item>
+					</menu>
+				</menu>
+				<segment>
+					<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
+				</segment>
+			</example>
+			<example>
+				<menu appearance="secondary pointing" aria-label="Secondary pointing">
+					<item link="#home" selected>Home</item>
+					<item link="#messages">Messages</item>
+					<item link="#friends">Friends</item>
+					<menu position="right">
+						<item link="#logout">Logout</item>
+					</menu>
+				</menu>
+				<segment>
+					<image src="/components/ui/images/wireframe/media-paragraph.png" alt=""/>
+				</segment>
+			</example>
+		</>
+
+		<section label="Tabbed" sticky collapsible dividing>
+			<example description="A menu can be formatted to show tabs of information: `tabular` (Fomantic 2.10 renamed it `tabbed`). For tabs that switch their content, use `<ui-tabs>`.">
+				<menu appearance="tabular" aria-label="Tabbed">
+					<item link="#bio" selected>Bio</item>
+					<item link="#photos">Photos</item>
+				</menu>
+			</example>
+			<example>
+				<menu appearance="tabular" attach="top" aria-label="Tabbed, attached top">
+					<item link="#bio" selected>Bio</item>
+					<item link="#photos">Photos</item>
+					<menu position="right">
+						<item>
+							<input appearance="transparent" icon="search" placeholder="Search users..." aria-label="Search users"/>
+						</item>
+					</menu>
+				</menu>
+				<segment attach="bottom">
+					<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
+				</segment>
+			</example>
+			<example>
+				<segment attach="top">
+					<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
+				</segment>
+				<menu appearance="tabular" attach="bottom" aria-label="Tabbed, attached bottom">
+					<item link="#active-project" selected>Active Project</item>
+					<item link="#project-2">Project #2</item>
+					<item link="#project-3">Project #3</item>
+					<menu position="right">
+						<item link="#new-tab" icon="add">New Tab</item>
+					</menu>
+				</menu>
+			</example>
+
+			<!-- GAP I79:  the stretched column doesn't grow its `<ui-segment>`, so the segment doesn't match the tabs' height. -->
+			<example>
+				<html>
+					<ui-message slot="description" state="info" size="small">To make a vertical tabbed menu appear seamlessly attached to the related segment, use left / right <code>attached</code> grid columns and a <code>seamless attached</code> segment.</ui-message>
+				</html>
+				<grid>
+					<column width="4" attach="left">
+						<menu direction="vertical" fluid appearance="tabular" aria-label="Vertical tabbed">
+							<item link="#bio" selected>Bio</item>
+							<item link="#pics">Pics</item>
+							<item link="#companies">Companies</item>
+							<item link="#links">Links</item>
+						</menu>
+					</column>
+					<column width="12" stretched attach="right">
+						<segment seamless attach="right">This is an stretched grid column. This segment will always match the tab height</segment>
+					</column>
+				</grid>
+			</example>
+			<example description="`position=\"right\"` opens a vertical tabbed menu's tabs to the left, for a menu on the content's right.">
+				<grid>
+					<column width="12" stretched attach="left">
+						<segment seamless attach="left">This is an stretched grid column. This segment will always match the tab height</segment>
+					</column>
+					<column width="4" attach="right">
+						<menu direction="vertical" fluid appearance="tabular" position="right" aria-label="Vertical tabbed, right">
+							<item link="#bio" selected>Bio</item>
+							<item link="#pics">Pics</item>
+							<item link="#companies">Companies</item>
+							<item link="#links">Links</item>
+						</menu>
+					</column>
+				</grid>
+			</example>
+		</>
+
+		<section label="Text" sticky collapsible dividing>
+			<example description="A menu can be formatted for text content.">
+				<menu appearance="text" aria-label="Sort">
+					<item kind="header">Sort By</item>
+					<item link="#closest" selected>Closest</item>
+					<item link="#comments">Most Comments</item>
+					<item link="#popular">Most Popular</item>
+				</menu>
+			</example>
+		</>
+
+		<section label="Segmented" sticky collapsible dividing>
+			<example description="A menu can be a segmented control, a bordered group of joined items:  `appearance=\"segmented\"`.  The selected item is filled with the primary colour, or the menu's `color`.  It moves `selected` to the item chosen itself (cancel `ui-select` to keep the old one).">
+				<menu appearance="segmented" aria-label="View, segmented">
+					<item link="#list" selected>List</item>
+					<item link="#grid">Grid</item>
+					<item link="#map">Map</item>
+				</menu>
+				<divider spacer/>
+				<menu appearance="segmented" color="teal" aria-label="Range, segmented">
+					<item link="#day">Day</item>
+					<item link="#week" selected>Week</item>
+					<item link="#month">Month</item>
+				</menu>
+			</example>
+			<example description="Its `--ui-menu-segmented-*` tokens draw it as a pill track with a raised thumb instead:  the track's background, border, radius, padding and gap, the options' colour and corners, the thumb's fill, colour and shadow (the `spell-brand` theme sets them).">
+				<menu appearance="segmented link" aria-label="Scheme, pill" style="
+                      --ui-menu-segmented-background: oklch(from var(--ui-ink) l c h / 0.05);
+                      --ui-menu-segmented-border: 1px solid var(--ui-border-color);
+                      --ui-menu-segmented-radius: var(--ui-radius-pill);
+                      --ui-menu-segmented-padding: 2px;
+                      --ui-menu-segmented-gap: 2px;
+                      --ui-menu-segmented-divider: transparent;
+                      --ui-menu-segmented-item-padding: 0.58em 1.08em;
+                      --ui-menu-segmented-item-color: var(--ui-text-muted);
+                      --ui-menu-segmented-item-radius: var(--ui-radius-pill);
+                      --ui-menu-segmented-active-background: var(--ui-surface);
+                      --ui-menu-segmented-active-hover-background: var(--ui-surface);
+                      --ui-menu-segmented-active-color: var(--ui-text-color);
+                      --ui-menu-segmented-active-shadow: var(--ui-shadow-raised);
+                    ">
+					<item value="light" icon="sun outline" selected>Light</item>
+					<item value="dark" icon="moon outline">Dark</item>
+				</menu>
+			</example>
+		</>
+
+		<section label="Appearance" sticky collapsible dividing>
+			<example description="The look is `appearance`, several words at once:  `tabular`, `pointing`, `secondary`, `text`, `segmented`, `link`, `borderless`.  The older booleans (`<ui-menu appearance=\"pointing\">`, `secondary` ...) are its old names, and still work.  They combine:  `appearance=\"pointing\" secondary` ~== `secondary pointing`.">
+				<menu appearance="pointing secondary" aria-label="Profile, underlined">
+					<item link="#bio" selected>Bio</item>
+					<item link="#photos">Photos</item>
+					<item link="#friends">Friends</item>
+				</menu>
+			</example>
+		</>
+
+		<!-- GAP I81:  the item labels sit inline after the text, not floated right. -->
+		<section label="Vertical Menu" sticky collapsible dividing>
+			<example>
+				<html>
+					<p slot="description">A vertical menu displays elements vertically.</p>
+					<ui-message slot="description" state="warning" size="small">A vertical menu's width defaults to an arbitrary size. To have it fit your content more precisely use <code>fluid</code> in a <code>&lt;ui-grid&gt;</code> column.</ui-message>
+				</html>
+				<menu direction="vertical" aria-label="Mail">
+					<item link="#inbox" color="teal" selected>Inbox <label color="teal" pointing="left">1</label></item>
+					<item link="#spam">Spam <label>51</label></item>
+					<item link="#updates">Updates <label>1</label></item>
+					<item>
+						<input appearance="transparent" icon="search" placeholder="Search mail..." aria-label="Search mail"/>
+					</item>
+				</menu>
+			</example>
+			<example>
+				<menu appearance="secondary" direction="vertical" aria-label="Account">
+					<item link="#account" selected>Account</item>
+					<item link="#settings">Settings</item>
+					<item>
+						<dropdown label="Display Options" aria-label="Display Options">
+							<item kind="header">Text Size</item>
+							<item value="small">Small</item>
+							<item value="medium">Medium</item>
+							<item value="large">Large</item>
+						</dropdown>
+					</item>
+				</menu>
+			</example>
+			<example>
+				<menu direction="vertical" appearance="text" aria-label="Sort, vertical">
+					<item kind="header">Sort By</item>
+					<item link="#closest" selected>Closest</item>
+					<item link="#comments">Most Comments</item>
+					<item link="#popular">Most Popular</item>
+				</menu>
+			</example>
+			<example>
+				<menu direction="vertical" appearance="pointing" aria-label="Vertical pointing">
+					<item link="#home" selected>Home</item>
+					<item link="#messages">Messages</item>
+					<item link="#friends">Friends</item>
+				</menu>
+			</example>
+			<example>
+				<menu appearance="secondary pointing" direction="vertical" aria-label="Secondary vertical pointing">
+					<item link="#home" selected>Home</item>
+					<item link="#messages">Messages</item>
+					<item link="#friends">Friends</item>
+				</menu>
+			</example>
+		</>
+
+		<section label="Pagination" sticky collapsible dividing>
+			<example description="A pagination menu is specially formatted to present links to pages of content.  Its items are interactive, so one without a `link` is a button.">
+				<menu pagination aria-label="Pages">
+					<item link="#page-1" selected>1</item>
+					<item disabled>...</item>
+					<item link="#page-10">10</item>
+					<item link="#page-11">11</item>
+					<item link="#page-12">12</item>
+				</menu>
+			</example>
+		</>
+
+		<section label="Menubar" sticky collapsible dividing>
+			<example description="`interactive` makes an application menubar instead of a navigation landmark:  one Tab stop, arrow keys between the items.  Try it with the keyboard.">
+				<menu interactive aria-label="Editor">
+					<item appearance="link" value="file">File</item>
+					<item appearance="link" value="edit" selected>Edit</item>
+					<item appearance="link" value="view">View</item>
+					<item appearance="link" value="help" disabled>Help</item>
+				</menu>
+			</example>
+		</>
+	</>
+
+	<section label="Content">
+		<section label="Header" sticky collapsible dividing>
+			<example description="A menu item may include a header or may itself be a header:  `type=\"header\"` makes an item a header.">
+				<menu aria-label="Company">
+					<item kind="header">Our Company</item>
+					<item link="#about">About Us</item>
+					<item link="#jobs">Jobs</item>
+					<item link="#locations">Locations</item>
+				</menu>
+			</example>
+			<example description="A `<ui-header>` inside an item heads a vertical menu's group, a sub-menu.">
+				<menu direction="vertical" aria-label="Products">
+					<item>
+						<header>Products</header>
+						<menu>
+							<item link="#enterprise">Enterprise</item>
+							<item link="#consumer">Consumer</item>
+						</menu>
+					</item>
+					<item>
+						<header>CMS Solutions</header>
+						<menu>
+							<item link="#rails">Rails</item>
+							<item link="#python">Python</item>
+							<item link="#php">PHP</item>
+						</menu>
+					</item>
+					<item>
+						<header>Hosting</header>
+						<menu>
+							<item link="#shared">Shared</item>
+							<item link="#dedicated">Dedicated</item>
+						</menu>
+					</item>
+					<item>
+						<header>Support</header>
+						<menu>
+							<item link="#email-support">E-mail Support</item>
+							<item link="#faqs">FAQs</item>
+						</menu>
+					</item>
+				</menu>
+			</example>
+		</>
+
+		<section label="Text" sticky collapsible dividing>
+			<example description="A vertical menu item can include any type of text content.">
+				<html>
+					<ui-menu direction="vertical" aria-label="Offers">
+						<ui-item link="#promotions">
+							<ui-header level="4">Promotions</ui-header>
+							<p>Check out our new promotions</p>
+						</ui-item>
+						<ui-item link="#coupons">
+							<ui-header level="4">Coupons</ui-header>
+							<p>Check out our collection of coupons</p>
+						</ui-item>
+						<ui-item link="#rebates">
+							<ui-header level="4">Rebates</ui-header>
+							<p>Visit our rebate forum for information on claiming rebates</p>
+						</ui-item>
+					</ui-menu>
+				</html>
+			</example>
+		</>
+
+		<section label="Input" sticky collapsible dividing>
+			<example description="A menu item can contain an input inside of it.">
+				<menu aria-label="Navigate">
+					<item>
+						<input icon="search" placeholder="Search..." aria-label="Search"/>
+					</item>
+					<item position="right">
+						<input placeholder="Navigate to..." aria-label="Navigate to">
+							<button slot="action">Go</button>
+						</input>
+					</item>
+				</menu>
+			</example>
+		</>
+
+		<section label="Button" sticky collapsible dividing>
+			<example description="A menu item can contain a button inside of it.">
+				<menu aria-label="Account actions">
+					<item>
+						<button color="primary">Sign up</button>
+					</item>
+					<item>
+						<button>Log-in</button>
+					</item>
+				</menu>
+			</example>
+		</>
+
+		<section label="Link Item" sticky collapsible dividing>
+			<example description="A menu may contain a link item, or an item formatted as if it is a link:  `link` renders a link, `appearance=\"link\"` a button for actions you handle in script.">
+				<menu direction="vertical" aria-label="Links">
+					<item link="https://www.google.com">Visit Google</item>
+					<item appearance="link">Javascript Link</item>
+				</menu>
+			</example>
+		</>
+
+		<section label="Dropdown Item" sticky collapsible dividing>
+			<example description="An item may contain a nested menu in a dropdown.">
+				<menu direction="vertical" aria-label="Categories">
+					<item>
+						<dropdown label="Categories" aria-label="Categories">
+							<item value="electronics">Electronics</item>
+							<item value="automotive">Automotive</item>
+							<item value="home">Home</item>
+						</dropdown>
+					</item>
+				</menu>
+			</example>
+		</>
+
+		<!-- GAP I69:  opened, the `fluid` popup collapses its `<ui-grid>` to a sliver, not the menu's width. -->
+		<section label="Popup Menu" sticky collapsible dividing>
+			<example description="A menu item may show a large menu, or additional content using a popup:  a `<ui-popup>` right after the item opens from it.">
+				<menu aria-label="Shop">
+					<item appearance="link">Browse<icon name="dropdown"/></item>
+					<popup open-on="click" fluid position="bottom left">
+						<grid columns="4" spacing="lg" divided>
+							<column>
+								<header level="4">Fabrics</header>
+								<list appearance="link">
+									<item link="#cashmere">Cashmere</item>
+									<item link="#linen">Linen</item>
+									<item link="#cotton">Cotton</item>
+									<item link="#viscose">Viscose</item>
+								</list>
+							</column>
+							<column>
+								<header level="4">Size</header>
+								<list appearance="link">
+									<item link="#small">Small</item>
+									<item link="#medium">Medium</item>
+									<item link="#large">Large</item>
+									<item link="#plus">Plus Sizes</item>
+								</list>
+							</column>
+							<column>
+								<header level="4">Colored</header>
+								<list appearance="link">
+									<item link="#neutrals">Neutrals</item>
+									<item link="#brights">Brights</item>
+									<item link="#pastels">Pastels</item>
+								</list>
+							</column>
+							<column>
+								<header level="4">Types</header>
+								<list appearance="link">
+									<item link="#knitwear">Knitwear</item>
+									<item link="#outerwear">Outerwear</item>
+									<item link="#pants">Pants</item>
+									<item link="#shoes">Shoes</item>
+								</list>
+							</column>
+						</grid>
+					</popup>
+				</menu>
+			</example>
+		</>
+
+		<section label="Search" sticky collapsible dividing>
+			<example description="A menu can contain a search input.">
+				<menu aria-label="Animals">
+					<item>
+						<search category placeholder="Search animals..." aria-label="Search animals"/>
+					</item>
+				</menu>
+				<segment>
+					<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
+				</segment>
+			</example>
+		</>
+
+		<section label="Menu" sticky collapsible dividing>
+			<example description="A menu may contain another menu group in the same level as menu items:  `position=\"right\"` pushes it to the far end.">
+				<menu aria-label="Site">
+					<item link="#browse">Browse</item>
+					<item link="#submit">Submit</item>
+					<menu position="right">
+						<item link="#signup">Sign Up</item>
+						<item link="#help">Help</item>
+					</menu>
+				</menu>
+			</example>
+		</>
+
+		<section label="Sub Menu" sticky collapsible dividing>
+			<example description="A menu item may contain another menu nested inside that acts as a grouped sub-menu.">
+				<menu direction="vertical" aria-label="Sub menu">
+					<item>
+						<input placeholder="Search..." aria-label="Search"/>
+					</item>
+					<item>Home <menu><item link="#search" selected>Search</item> <item link="#add">Add</item> <item link="#remove">Remove</item></menu></item>
+					<item link="#browse" icon="grid layout">Browse</item>
+					<item link="#messages">Messages</item>
+					<item>
+						<dropdown label="More" aria-label="More">
+							<item value="profile" icon="edit">Edit Profile</item>
+							<item value="language" icon="globe">Choose Language</item>
+							<item value="settings" icon="settings">Account Settings</item>
+						</dropdown>
+					</item>
+				</menu>
+			</example>
+		</>
+	</>
+
+	<section label="States">
+		<section label="Hover" sticky collapsible dividing>
+			<example>
+				<html>
+					<p slot="description">A menu item can be hovered.</p>
+					<ui-message slot="description" state="warning" size="small">Menu items are only hoverable if they are links (<code>href</code>) or buttons (<code>link</code>).</ui-message>
+				</html>
+				<menu padding="compact" aria-label="Hover">
+					<item link="#link">A link</item>
+					<item appearance="link">div Link</item>
+				</menu>
+			</example>
+		</>
+
+		<section label="Active" sticky collapsible dividing>
+			<example description="A menu item can be active:  `selected` is the attribute;  Fomantic's `active` works too.">
+				<menu padding="compact" aria-label="Active">
+					<item selected>Link</item>
+				</menu>
+			</example>
+		</>
+
+		<section label="Disabled" sticky collapsible dividing>
+			<example description="A menu item can be disabled.">
+				<menu padding="compact" aria-label="Disabled">
+					<item disabled>Link</item>
+				</menu>
+			</example>
+		</>
+	</>
+
+	<section label="Variations">
+		<section label="Fixed" sticky collapsible dividing>
+			<example>
+				<html>
+					<p slot="description">A menu can be fixed to a side of its context:  <code>fixed</code> is top, bottom, left or right (with <code>vertical</code> for the sides).</p>
+					<ui-message slot="description" state="info" size="small">A fixed menu sticks to the browser viewport, so this example is code only. For a menu that sticks only while scrolling past, use <code>&lt;ui-sticky&gt;</code>.</ui-message>
+					<ui-code slot="description" language="html">
+						<script type="text/plain">
+							<ui-menu fixed="top" aria-label="Site">
+							  <ui-item><ui-image src="logo.png" alt="Logo" size="mini"></ui-image></ui-item>
+							  <ui-item link="#features">Features</ui-item>
+							  <ui-item link="#testimonials">Testimonials</ui-item>
+							  <ui-item link="#sign-in">Sign-in</ui-item>
+							</ui-menu>
+							<ui-menu fixed="left" direction="vertical" aria-label="Sections">...</ui-menu>
+						</script>
+					</ui-code>
+				</html>
+			</example>
+		</>
+
+		<section label="Stackable" sticky collapsible dividing>
+			<example>
+				<html>
+					<p slot="description">A menu can stack at mobile resolutions.</p>
+				</html>
+				<message slot="description" state="info" size="small">Stackable menus are intended to be used with only simple menu content.</message>
+				<menu stackable aria-label="Stackable">
+					<item>
+						<image src="/components/ui/images/logo.png" alt="Logo" size="mini"/>
+					</item>
+					<item link="#features">Features</item>
+					<item link="#testimonials">Testimonials</item>
+					<item link="#sign-in">Sign-in</item>
+				</menu>
+			</example>
+		</>
+
+		<section label="Inverted" sticky collapsible dividing>
+			<example description="A menu may have its colors inverted to show greater contrast.">
+				<menu inverted aria-label="Inverted">
+					<item link="#home" selected>Home</item>
+					<item link="#messages">Messages</item>
+					<item link="#friends">Friends</item>
+				</menu>
+			</example>
+			<example>
+				<menu inverted direction="vertical" aria-label="Inverted vertical">
+					<item link="#home" selected>Home</item>
+					<item link="#messages">Messages</item>
+					<item link="#friends">Friends</item>
+				</menu>
+			</example>
+			<example>
+				<menu inverted direction="vertical" appearance="pointing" aria-label="Inverted vertical pointing">
+					<item link="#home" selected>Home</item>
+					<item link="#messages">Messages</item>
+					<item link="#friends">Friends</item>
+				</menu>
+			</example>
+			<example>
+				<segment inverted>
+					<menu inverted appearance="secondary" aria-label="Inverted secondary">
+						<item link="#home" selected>Home</item>
+						<item link="#messages">Messages</item>
+						<item link="#friends">Friends</item>
+					</menu>
+				</segment>
+			</example>
+			<example>
+				<segment inverted>
+					<menu inverted appearance="secondary pointing" aria-label="Inverted secondary pointing">
+						<item link="#home" selected>Home</item>
+						<item link="#messages">Messages</item>
+						<item link="#friends">Friends</item>
+					</menu>
+				</segment>
+			</example>
+		</>
+
+		<section label="Colored" sticky collapsible dividing>
+			<example description="Additional colors can be specified:  an item's `color` tints it while selected.">
+				<menu aria-label="Colors, warm">
+					<item link="#red" color="red" selected>Red</item>
+					<item link="#orange" color="orange">Orange</item>
+					<item link="#yellow" color="yellow">Yellow</item>
+					<item link="#olive" color="olive">Olive</item>
+					<item link="#green" color="green">Green</item>
+					<item link="#teal" color="teal">Teal</item>
+				</menu>
+				<menu aria-label="Colors, cool">
+					<item link="#blue" color="blue">Blue</item>
+					<item link="#violet" color="violet">Violet</item>
+					<item link="#purple" color="purple">Purple</item>
+					<item link="#pink" color="pink">Pink</item>
+					<item link="#brown" color="brown">Brown</item>
+					<item link="#grey" color="grey">Grey</item>
+				</menu>
+			</example>
+			<example description="The menu's `color` tints its active item.">
+				<menu color="red" items="3" aria-label="Red">
+					<item link="#home" selected>Home</item>
+					<item link="#messages">Messages</item>
+					<item link="#friends">Friends</item>
+				</menu>
+				<menu color="orange" items="3" aria-label="Orange">
+					<item link="#home" selected>Home</item>
+					<item link="#messages">Messages</item>
+					<item link="#friends">Friends</item>
+				</menu>
+				<menu color="yellow" items="3" aria-label="Yellow">
+					<item link="#home" selected>Home</item>
+					<item link="#messages">Messages</item>
+					<item link="#friends">Friends</item>
+				</menu>
+				<menu color="olive" items="3" aria-label="Olive">
+					<item link="#home" selected>Home</item>
+					<item link="#messages">Messages</item>
+					<item link="#friends">Friends</item>
+				</menu>
+				<menu color="green" items="3" aria-label="Green">
+					<item link="#home" selected>Home</item>
+					<item link="#messages">Messages</item>
+					<item link="#friends">Friends</item>
+				</menu>
+				<menu color="teal" items="3" aria-label="Teal">
+					<item link="#home" selected>Home</item>
+					<item link="#messages">Messages</item>
+					<item link="#friends">Friends</item>
+				</menu>
+				<menu color="blue" items="3" aria-label="Blue">
+					<item link="#home" selected>Home</item>
+					<item link="#messages">Messages</item>
+					<item link="#friends">Friends</item>
+				</menu>
+				<menu color="violet" items="3" aria-label="Violet">
+					<item link="#home" selected>Home</item>
+					<item link="#messages">Messages</item>
+					<item link="#friends">Friends</item>
+				</menu>
+				<menu color="purple" items="3" aria-label="Purple">
+					<item link="#home" selected>Home</item>
+					<item link="#messages">Messages</item>
+					<item link="#friends">Friends</item>
+				</menu>
+				<menu color="pink" items="3" aria-label="Pink">
+					<item link="#home" selected>Home</item>
+					<item link="#messages">Messages</item>
+					<item link="#friends">Friends</item>
+				</menu>
+				<menu color="brown" items="3" aria-label="Brown">
+					<item link="#home" selected>Home</item>
+					<item link="#messages">Messages</item>
+					<item link="#friends">Friends</item>
+				</menu>
+				<menu color="grey" items="3" aria-label="Grey">
+					<item link="#home" selected>Home</item>
+					<item link="#messages">Messages</item>
+					<item link="#friends">Friends</item>
+				</menu>
+			</example>
+			<example description="These colors can also be inverted.">
+				<menu inverted aria-label="Inverted colors, warm">
+					<item link="#red" color="red" selected>Red</item>
+					<item link="#orange" color="orange">Orange</item>
+					<item link="#yellow" color="yellow">Yellow</item>
+					<item link="#olive" color="olive">Olive</item>
+					<item link="#green" color="green">Green</item>
+					<item link="#teal" color="teal">Teal</item>
+				</menu>
+				<menu inverted aria-label="Inverted colors, cool">
+					<item link="#blue" color="blue">Blue</item>
+					<item link="#violet" color="violet">Violet</item>
+					<item link="#purple" color="purple">Purple</item>
+					<item link="#pink" color="pink">Pink</item>
+					<item link="#brown" color="brown">Brown</item>
+					<item link="#grey" color="grey">Grey</item>
+				</menu>
+			</example>
+			<example description="An `inverted` menu with a `color` is filled with it.">
+				<menu inverted color="red" items="3" aria-label="Inverted red">
+					<item link="#home" selected>Home</item>
+					<item link="#messages">Messages</item>
+					<item link="#friends">Friends</item>
+				</menu>
+				<menu inverted color="orange" items="3" aria-label="Inverted orange">
+					<item link="#home" selected>Home</item>
+					<item link="#messages">Messages</item>
+					<item link="#friends">Friends</item>
+				</menu>
+				<menu inverted color="yellow" items="3" aria-label="Inverted yellow">
+					<item link="#home" selected>Home</item>
+					<item link="#messages">Messages</item>
+					<item link="#friends">Friends</item>
+				</menu>
+				<menu inverted color="olive" items="3" aria-label="Inverted olive">
+					<item link="#home" selected>Home</item>
+					<item link="#messages">Messages</item>
+					<item link="#friends">Friends</item>
+				</menu>
+				<menu inverted color="green" items="3" aria-label="Inverted green">
+					<item link="#home" selected>Home</item>
+					<item link="#messages">Messages</item>
+					<item link="#friends">Friends</item>
+				</menu>
+				<menu inverted color="teal" items="3" aria-label="Inverted teal">
+					<item link="#home" selected>Home</item>
+					<item link="#messages">Messages</item>
+					<item link="#friends">Friends</item>
+				</menu>
+				<menu inverted color="blue" items="3" aria-label="Inverted blue">
+					<item link="#home" selected>Home</item>
+					<item link="#messages">Messages</item>
+					<item link="#friends">Friends</item>
+				</menu>
+				<menu inverted color="violet" items="3" aria-label="Inverted violet">
+					<item link="#home" selected>Home</item>
+					<item link="#messages">Messages</item>
+					<item link="#friends">Friends</item>
+				</menu>
+				<menu inverted color="purple" items="3" aria-label="Inverted purple">
+					<item link="#home" selected>Home</item>
+					<item link="#messages">Messages</item>
+					<item link="#friends">Friends</item>
+				</menu>
+				<menu inverted color="pink" items="3" aria-label="Inverted pink">
+					<item link="#home" selected>Home</item>
+					<item link="#messages">Messages</item>
+					<item link="#friends">Friends</item>
+				</menu>
+				<menu inverted color="brown" items="3" aria-label="Inverted brown">
+					<item link="#home" selected>Home</item>
+					<item link="#messages">Messages</item>
+					<item link="#friends">Friends</item>
+				</menu>
+				<menu inverted color="grey" items="3" aria-label="Inverted grey">
+					<item link="#home" selected>Home</item>
+					<item link="#messages">Messages</item>
+					<item link="#friends">Friends</item>
+				</menu>
+			</example>
+		</>
+
+		<section label="Icons" sticky collapsible dividing>
+			<example description="A menu may have just icons.  An icon-only item needs an `aria-label`.">
+				<menu icon aria-label="Media">
+					<item link="#games" icon="gamepad" aria-label="Games"/>
+					<item link="#channels" icon="video camera" aria-label="Channels"/>
+					<item link="#videos" icon="video play" aria-label="Videos"/>
+				</menu>
+				<divider spacer/>
+				<menu direction="vertical" icon aria-label="Media, vertical">
+					<item link="#games" icon="gamepad" aria-label="Games"/>
+					<item link="#channels" icon="video camera" aria-label="Channels"/>
+					<item link="#videos" icon="video play" aria-label="Videos"/>
+				</menu>
+			</example>
+		</>
+
+		<section label="Labeled Icon" sticky collapsible dividing>
+			<example description="A menu may have labeled icons:  `labeled` puts a large icon above each item's text.">
+				<menu labeled icon aria-label="Media, labeled">
+					<item link="#games" icon="gamepad">Games</item>
+					<item link="#channels" icon="video camera">Channels</item>
+					<item link="#videos" icon="video play">Videos</item>
+				</menu>
+				<divider spacer/>
+				<menu direction="vertical" labeled icon aria-label="Media, labeled vertical">
+					<item link="#games" icon="gamepad">Games</item>
+					<item link="#channels" icon="video camera">Channels</item>
+					<item link="#videos" icon="video play">Videos</item>
+				</menu>
+			</example>
+		</>
+
+		<section label="Fluid" sticky collapsible dividing>
+			<example description="A vertical menu may take the size of its container.  (A horizontal menu does this by default.)">
+				<menu fluid direction="vertical" aria-label="Activities">
+					<item link="#run">Run</item>
+					<item link="#walk">Walk</item>
+					<item link="#bike">Bike</item>
+				</menu>
+			</example>
+		</>
+
+		<section label="Compact" sticky collapsible dividing>
+			<example description="A menu can take up only the space necessary to fit its content.">
+				<menu padding="compact" aria-label="Media, compact">
+					<item link="#games" icon="gamepad">Games</item>
+					<item link="#channels" icon="video camera">Channels</item>
+					<item link="#videos" icon="video play">Videos</item>
+				</menu>
+			</example>
+			<example>
+				<menu padding="compact" direction="vertical" labeled icon aria-label="Media, compact vertical">
+					<item link="#games" icon="gamepad">Games</item>
+					<item link="#channels" icon="video camera">Channels</item>
+					<item link="#videos" icon="video play">Videos</item>
+				</menu>
+			</example>
+		</>
+
+		<section label="Evenly Divided" sticky collapsible dividing>
+			<example description="A menu may divide its items evenly by either using `items=\"equal\"` ...">
+				<menu items="equal" aria-label="Listing, equal">
+					<item link="#buy">Buy</item>
+					<item link="#sell">Sell</item>
+					<item link="#rent">Rent</item>
+				</menu>
+			</example>
+			<example description="... or by declaring a fixed number of items like `items=\"3\"`.">
+				<menu items="3" aria-label="Listing, three">
+					<item link="#buy">Buy</item>
+					<item link="#sell">Sell</item>
+					<item link="#rent">Rent</item>
+				</menu>
+			</example>
+		</>
+
+		<section label="Equal" sticky collapsible dividing>
+			<example description="`equal` makes every item the same width, counted from the items themselves:  each as wide as the widest, the menu hugging them.  `items=\"3\"` / `items=\"equal\"` above are the older, count-based spellings.">
+				<menu equal aria-label="Listing, equal items">
+					<item link="#buy">Buy</item>
+					<item link="#sell" selected>Sell your home</item>
+					<item link="#rent">Rent</item>
+				</menu>
+			</example>
+			<example description="With `alignment=\"fluid\"`, each equal item takes an equal share of the bar.">
+				<menu equal align="fluid" aria-label="Listing, equal fluid">
+					<item link="#buy">Buy</item>
+					<item link="#sell" selected>Sell your home</item>
+					<item link="#rent">Rent</item>
+				</menu>
+			</example>
+		</>
+
+		<section label="Alignment" sticky collapsible dividing>
+			<example description="`align` places the items:  `left`, `center` or `right` packs them at that end of the bar;  `fluid` makes them fill it.">
+				<menu align="center" aria-label="Sections, centered">
+					<item link="#home" selected>Home</item>
+					<item link="#docs">Docs</item>
+					<item link="#blog">Blog</item>
+				</menu>
+				<menu align="fluid" aria-label="Sections, fluid">
+					<item link="#home" selected>Home</item>
+					<item link="#docs">Documentation</item>
+					<item link="#blog">Blog</item>
+				</menu>
+			</example>
+			<example description="A segmented menu is its items, so it moves as a whole.">
+				<menu appearance="segmented" align="right" aria-label="View, right">
+					<item link="#list" selected>List</item>
+					<item link="#grid">Grid</item>
+				</menu>
+				<menu appearance="segmented" align="fluid" equal aria-label="View, fluid">
+					<item link="#list" selected>List</item>
+					<item link="#grid">Grid</item>
+					<item link="#map">Map</item>
+				</menu>
+			</example>
+		</>
+
+		<section label="Pointing vertical" sticky collapsible dividing>
+			<example description="A vertical menu can point to content adjacent to itself to show ownership.">
+				<html>
+					<ui-menu appearance="pointing" direction="vertical" aria-label="Site sections">
+						<ui-item link="#title">Site Title</ui-item>
+						<ui-item>
+							<b>Grouped Section</b>
+							<ui-menu>
+								<ui-item link="#sub-1">Subsection 1</ui-item>
+								<ui-item link="#sub-2" selected>Subsection 2</ui-item>
+								<ui-item link="#sub-3">Subsection 3</ui-item>
+							</ui-menu>
+						</ui-item>
+						<ui-item>
+							<ui-dropdown label="Dropdown" aria-label="Dropdown">
+								<ui-item value="1">Choice 1</ui-item>
+								<ui-item value="2">Choice 2</ui-item>
+								<ui-item value="3">Choice 3</ui-item>
+							</ui-dropdown>
+						</ui-item>
+					</ui-menu>
+				</html>
+			</example>
+		</>
+
+		<section label="Attached" sticky collapsible dividing>
+			<example description="A menu may be attached to other content segments.">
+				<menu appearance="tabular" attach="top" aria-label="Attached tabs">
+					<item link="#tab-1" selected>Tab 1</item>
+					<item link="#tab-2">Tab 2</item>
+				</menu>
+				<segment attach="bottom">There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomized words which don't look even slightly believable.</segment>
+			</example>
+			<example>
+				<menu attach="top" aria-label="Attached top">
+					<item link="#section-1" selected>Section 1</item>
+					<item link="#section-2">Section 2</item>
+				</menu>
+				<segment attach="both">There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomized words which don't look even slightly believable.</segment>
+				<menu attach="bottom" aria-label="Attached bottom">
+					<item link="#section-1" selected>Section 1</item>
+					<item link="#section-2">Section 2</item>
+				</menu>
+			</example>
+		</>
+
+		<section label="Size" sticky collapsible dividing>
+			<example description="A menu can vary in size.">
+				<menu size="mini" aria-label="Mini">
+					<item link="#home" selected>Home</item>
+					<item link="#messages">Messages</item>
+					<menu position="right">
+						<item>
+							<dropdown label="Language" size="mini" aria-label="Language">
+								<item value="en">English</item>
+								<item value="ru">Russian</item>
+								<item value="es">Spanish</item>
+							</dropdown>
+						</item>
+						<item>
+							<button size="mini" color="primary">Sign Up</button>
+						</item>
+					</menu>
+				</menu>
+			</example>
+			<example>
+				<menu size="tiny" aria-label="Tiny">
+					<item link="#home" selected>Home</item>
+					<item link="#messages">Messages</item>
+					<menu position="right">
+						<item>
+							<dropdown label="Language" size="tiny" aria-label="Language">
+								<item value="en">English</item>
+								<item value="ru">Russian</item>
+								<item value="es">Spanish</item>
+							</dropdown>
+						</item>
+						<item>
+							<button size="tiny" color="primary">Sign Up</button>
+						</item>
+					</menu>
+				</menu>
+			</example>
+			<example>
+				<menu size="small" aria-label="Small">
+					<item link="#home" selected>Home</item>
+					<item link="#messages">Messages</item>
+					<menu position="right">
+						<item>
+							<dropdown label="Language" size="small" aria-label="Language">
+								<item value="en">English</item>
+								<item value="ru">Russian</item>
+								<item value="es">Spanish</item>
+							</dropdown>
+						</item>
+						<item>
+							<button size="small" color="primary">Sign Up</button>
+						</item>
+					</menu>
+				</menu>
+			</example>
+			<example>
+				<menu size="large" aria-label="Large">
+					<item link="#home" selected>Home</item>
+					<item link="#messages">Messages</item>
+					<menu position="right">
+						<item>
+							<dropdown label="Language" size="large" aria-label="Language">
+								<item value="en">English</item>
+								<item value="ru">Russian</item>
+								<item value="es">Spanish</item>
+							</dropdown>
+						</item>
+						<item>
+							<button size="large" color="primary">Sign Up</button>
+						</item>
+					</menu>
+				</menu>
+			</example>
+			<example>
+				<menu size="huge" aria-label="Huge">
+					<item link="#home" selected>Home</item>
+					<item link="#messages">Messages</item>
+					<menu position="right">
+						<item>
+							<dropdown label="Language" size="huge" aria-label="Language">
+								<item value="en">English</item>
+								<item value="ru">Russian</item>
+								<item value="es">Spanish</item>
+							</dropdown>
+						</item>
+						<item>
+							<button size="huge" color="primary">Sign Up</button>
+						</item>
+					</menu>
+				</menu>
+			</example>
+			<example>
+				<menu size="massive" aria-label="Massive">
+					<item link="#home" selected>Home</item>
+					<item link="#messages">Messages</item>
+					<menu position="right">
+						<item>
+							<dropdown label="Language" size="massive" aria-label="Language">
+								<item value="en">English</item>
+								<item value="ru">Russian</item>
+								<item value="es">Spanish</item>
+							</dropdown>
+						</item>
+						<item>
+							<button size="massive" color="primary">Sign Up</button>
+						</item>
+					</menu>
+				</menu>
+			</example>
+
+			<!-- GAP I81:  the labels don't float right, and the input keeps the page size in a mini menu. -->
+			<example description="A vertical menu can also vary in size.">
+				<menu size="mini" direction="vertical" aria-label="Mail, mini">
+					<item link="#inbox" selected><label color="green">1</label>Inbox</item>
+					<item link="#spam"><label>51</label>Spam</item>
+					<item link="#updates"><label>1</label>Updates</item>
+					<item>
+						<input icon="search" placeholder="Search mail..." aria-label="Search mail"/>
+					</item>
+				</menu>
+			</example>
+			<example>
+				<menu size="small" direction="vertical" aria-label="Mail, small">
+					<item link="#inbox" selected><label size="small" color="green">1</label>Inbox</item>
+					<item link="#spam"><label size="small">51</label>Spam</item>
+					<item link="#updates"><label size="small">1</label>Updates</item>
+					<item>
+						<input icon="search" placeholder="Search mail..." aria-label="Search mail"/>
+					</item>
+				</menu>
+			</example>
+			<example>
+				<menu size="large" direction="vertical" aria-label="Mail, large">
+					<item link="#inbox" selected><label size="small" color="green">1</label>Inbox</item>
+					<item link="#spam"><label size="small">51</label>Spam</item>
+					<item link="#updates"><label size="small">1</label>Updates</item>
+					<item>
+						<input icon="search" placeholder="Search mail..." aria-label="Search mail"/>
+					</item>
+				</menu>
+			</example>
+			<example>
+				<menu size="massive" direction="vertical" aria-label="Mail, massive">
+					<item link="#inbox" selected><label size="small" color="green">1</label>Inbox</item>
+					<item link="#spam"><label size="small">51</label>Spam</item>
+					<item link="#updates"><label size="small">1</label>Updates</item>
+					<item>
+						<input icon="search" placeholder="Search mail..." aria-label="Search mail"/>
+					</item>
+				</menu>
+			</example>
+		</>
+
+		<section label="Items" sticky collapsible dividing>
+			<section label="Fitted" sticky collapsible dividing>
+				<example description="A menu item or menu can remove element padding, vertically or horizontally.">
+					<menu aria-label="Fitted">
+						<item padding="none">No padding whatsoever</item>
+						<item padding="none-x">No horizontal padding</item>
+						<item padding="none-y">No vertical padding</item>
+					</menu>
+				</example>
+			</>
+
+			<section label="Borderless" sticky collapsible dividing>
+				<example description="A menu item or menu can have no borders.">
+					<menu appearance="borderless" aria-label="Borderless">
+						<item link="#1">1</item>
+						<item link="#2">2</item>
+						<item link="#3">3</item>
+						<item link="#4">4</item>
+						<item link="#5">5</item>
+						<item link="#6">6</item>
+					</menu>
+				</example>
+			</>
+
+			<section label="At the Right" sticky collapsible dividing>
+				<example description="A menu has no `floated` any more:  a `<ui-stack>` puts it at the left or the right.">
+					<stack direction="horizontal" justify="end">
+						<menu padding="compact" aria-label="At the right">
+							<item link="#1">1</item>
+							<item link="#2">2</item>
+						</menu>
+					</stack>
+				</example>
+			</>
+
+			<section label="Centered" sticky collapsible dividing>
+				<example description="A menu can be shown centered.">
+					<menu centered aria-label="Page tools">
+						<item link="#edit" icon="edit" aria-label="Edit"/>
+						<item link="#bug" icon="bug" aria-label="Report a bug"/>
+						<item link="#github" icon="github alternate" aria-label="GitHub"/>
+					</menu>
+				</example>
+				<example>
+					<menu centered pagination aria-label="Pages, centered">
+						<item link="#page-1" selected>1</item>
+						<item disabled>...</item>
+						<item link="#page-10">10</item>
+						<item link="#page-11">11</item>
+						<item link="#page-12">12</item>
+					</menu>
+				</example>
+			</>
+
+			<section label="Centered Fluid" sticky collapsible dividing>
+				<example description="A menu can be shown centered and fluid at the same time.">
+					<menu centered fluid aria-label="Page tools, fluid">
+						<item link="#edit" icon="edit" aria-label="Edit"/>
+						<item link="#bug" icon="bug" aria-label="Report a bug"/>
+						<item link="#github" icon="github alternate" aria-label="GitHub"/>
+					</menu>
+				</example>
+			</>
+
+			<section label="Wrapping" sticky collapsible dividing>
+				<example>
+					<html>
+						<p slot="description">Menu items can automatically wrap on responsive layouts.</p>
+						<ui-message slot="description" state="info" size="small">The optional <code>wrapped</code> word squares the corners where the lines meet. CSS can't tell whether items actually wrap, so set it when you know they do.</ui-message>
+					</html>
+					<menu inverted wrap color="green" wrapping aria-label="Numbers">
+						<item link="#1" selected>One</item>
+						<item link="#2">Two</item>
+						<item link="#3">Three</item>
+						<item link="#4">Four</item>
+						<item link="#5">Five</item>
+						<item link="#6">Six</item>
+						<item link="#7">Seven</item>
+						<item link="#8">Eight</item>
+						<item link="#9">Nine</item>
+						<item link="#10">Ten</item>
+						<item link="#11">Eleven</item>
+						<item link="#12">Twelve</item>
+						<item link="#13">Thirteen</item>
+						<item link="#14">Fourteen</item>
+						<item link="#15">Fifteen</item>
+						<item link="#16">Sixteen</item>
+						<item link="#17">Seventeen</item>
+						<item link="#18">Eighteen</item>
+						<item link="#19">Nineteen</item>
+						<item link="#20">Twenty</item>
+					</menu>
+				</example>
+			</>
+
+			<section label="Centered Fluid Wrapping" sticky collapsible dividing>
+				<example description="By combining `centered`, `fluid` and `wrapping` you could create a menu similar to wrapping button groups.">
+					<menu inverted wrap color="blue" centered fluid wrapping aria-label="Numbers, centered">
+						<item link="#1" selected>One</item>
+						<item link="#2">Two</item>
+						<item link="#3">Three</item>
+						<item link="#4">Four</item>
+						<item link="#5">Five</item>
+						<item link="#6">Six</item>
+						<item link="#7">Seven</item>
+						<item link="#8">Eight</item>
+						<item link="#9">Nine</item>
+						<item link="#10">Ten</item>
+						<item link="#11">Eleven</item>
+						<item link="#12">Twelve</item>
+						<item link="#13">Thirteen</item>
+						<item link="#14">Fourteen</item>
+						<item link="#15">Fifteen</item>
+						<item link="#16">Sixteen</item>
+						<item link="#17">Seventeen</item>
+						<item link="#18">Eighteen</item>
+						<item link="#19">Nineteen</item>
+						<item link="#20">Twenty</item>
+					</menu>
+				</example>
+			</>
+		</>
+	</>
+
+	<section label="Fitting titles">
+		<section label="Shrinkable" sticky collapsible dividing>
+			<example description="`shrinkable` fits the titles to the row:  drag the box's right edge narrower.  Every title whole while they fit;  then the longest cut first, with `…`;  then icons only, each title its tooltip (Judgement calls, with no icon, shows its first letter);  then every item folds into one `…` button, whose menu holds them all, a dot on it for Issues' count.">
+				<html>
+					<div style="resize: horizontal; overflow: hidden; box-sizing: border-box; width: 560px; max-width: 100%; min-width: 60px; padding: 4px; border: 1px dashed var(--ui-border-color)">
+						<ui-menu shrinkable label="Sections">
+							<ui-item link="#questions" icon="question" selected>Questions</ui-item>
+							<ui-item link="#issues" icon="exclamation">Issues<ui-label slot="badge" appearance="circular" size="mini" color="red">2</ui-label></ui-item>
+							<ui-item link="#judgements">Judgement calls</ui-item>
+							<ui-item link="#todos" icon="check">Todos</ui-item>
+						</ui-menu>
+					</div>
+				</html>
+			</example>
+		</>
+
+		<section label="Segmented" sticky collapsible dividing>
+			<example description="A `segmented` one is a single choice:  never cut, never icons only.  Too narrow for every choice whole, it becomes a dropdown:  one button showing the chosen one, its menu the others.">
+				<html>
+					<div style="resize: horizontal; overflow: hidden; box-sizing: border-box; width: 420px; max-width: 100%; min-width: 60px; padding: 4px; border: 1px dashed var(--ui-border-color)">
+						<ui-menu shrinkable appearance="segmented link" label="Views">
+							<ui-item icon="list">List view</ui-item>
+							<ui-item icon="th" selected>Grid view</ui-item>
+							<ui-item icon="calendar">Calendar view</ui-item>
+						</ui-menu>
+					</div>
+				</html>
+			</example>
+		</>
+	</>
+</spell-notebook>

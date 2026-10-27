@@ -85,7 +85,7 @@ SEE:  `packages/server/AGENTS.md` for `spell/server` itself (`SRV.Router`, `SRV.
       `packages/ui/src/static/StaticRender.ssr.ts`.  (Owen, 2026-10-06, epic `wwod-spell-ui` J19.)
   - Its server-only types:  `<folder>.types.server.ts` (above, "Shared constants live in `<folder>.types.ts`").
   - Anything touching the file system, `process` or node built-ins is server code.
-  - Today's `src/node/` folders (`spell-parser/spell/node/...`, WWOD §4) predate the suffix:  `agents/CODE-DEBT.md`.
+  - Today's `src/node/` folders (`spell/parser/spell/node/...`, WWOD §4) predate the suffix:  `agents/CODE-DEBT.md`.
 - **API docstrings use stock bullets:**
   - A request handler's docstring opens with `` `METHOD /api/path` -- what it does ``, then:
     - `- Client sends:  ...` -- route params, query, body shape

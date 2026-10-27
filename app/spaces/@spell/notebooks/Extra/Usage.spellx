@@ -1,0 +1,43 @@
+<spell-notebook "extra usage">
+	<header level="1">
+		Extra
+		<header>Extra content is set apart from the main content, such as a card's footer.</>
+	</>
+	<extra-tab-bar showing="usage"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#using-it">Using it</>
+				<ui-item link="#owners">Owners</>
+				<ui-item link="#accessibility">Accessibility</>
+			</>
+		</>
+	</>
+
+	<section label="Using it">
+		<markdown>
+			`<ui-extra>` is extra content, set apart from the main content: a card's footer, an item's extra line, a feed
+			event's extra text or images.
+
+			- In a card it is a bottom band, divided from the content above, muted until hovered.
+			- In a feed, `text` makes it a block of quoted text; without it, it holds images or other markup.
+		</>
+	</>
+
+	<section label="Owners">
+		<markdown>
+			`<ui-extra>` finds its nearest owner and sets `:state(in-<owner>)` on itself; `UIParts.css` styles it by that
+			state. Its owners, and what each makes of it:
+
+			- [Card](/components/ui/ui-card.html) (`:state(in-card)`): the bottom band, divided from the content and muted
+			- [Item](/components/ui/ui-items.html) (`:state(in-item)`): a muted line under the description
+			- [Feed](/components/ui/ui-feed.html) (`:state(in-feed)`): extra text (`text`) or images under the summary
+
+			Anywhere else it is an unstyled block. More on how parts find their owners: [Content parts](/components/ui/ui-header.html).
+		</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>- A neutral block with no role. Its muted colour is a look only: put nothing in it that a reader must not miss.</>
+	</>
+</spell-notebook>

@@ -69,7 +69,7 @@ import { AriaNames } from "./elements.types"
  *   - they're notified by the DOM element's change callbacks and a `MutationObserver`
  * - Writes never throw:  a notifier set inside an owned scope (a render, a memo), which Solid 2 forbids,
  *   is deferred to a microtask;  the record is written at once either way.
- * - A leaf of the element core:  imports only Solid, `spell-ui/util` and `elements.types`' constants,
+ * - A leaf of the element core:  imports only Solid, `spell/ui/util` and `elements.types`' constants,
  *   so element-core classes import its decorators directly (their class definitions read them)
  *   without entering the `E` cycle.
  * - Knows components only by shape (`ComponentShape`).

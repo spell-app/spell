@@ -39,12 +39,12 @@ function put(root: string, path: string, text: string): void {
 }
 
 /** The bundles' folders, as the repo root's `package.json` names them (`"pageServer": { "bundles": [...] }`). */
-const BUNDLES = ["spell-ui/site/_assets", "spell-brand/_assets/ui"]
+const BUNDLES = ["ui/site/_assets", "spell-brand/_assets/ui"]
 
 /** Two component sets, whose `_assets/` are Spell UI's bundle's folder, as the repo root's `package.json` names them. */
 const SETS = {
-  ui: { name: "Spell UI", dir: "spell-ui/docs", assets: "spell-ui/site/_assets" },
-  epics: { name: "Epic UI", dir: "spell-epic/src/docs", assets: "spell-ui/site/_assets" }
+  ui: { name: "Spell UI", dir: "ui/docs", assets: "ui/site/_assets" },
+  epics: { name: "Epic UI", dir: "epic/src/docs", assets: "ui/site/_assets" }
 }
 
 /** A checkout's `package.json` naming `BUNDLES` and `SETS`. */
@@ -122,7 +122,7 @@ describe("BundleBuild", () => {
     expect((await ask(port, "GET", "/spell-brand/_assets/ui/brand-ui.js")).text).toBe("export const OLD = 1")
     expect((await ask(port, "GET", "/guides/page.html")).status).toBe(200)
     expect(answered).toBe(false)
-    put(root, "spell-ui/site/_assets/site.js", "export const NEW = 1")
+    put(root, "ui/site/_assets/site.js", "export const NEW = 1")
     child.exit(0)
     expect(await waiting).toMatchObject({ status: 200, text: "export const NEW = 1" })
     expect(build.isBuilding).toBe(false)
@@ -192,12 +192,12 @@ describe("BundleBuild.bundleFileFor()", () => {
   test("this checkout's bundle folders, through the sets' overlay;  nothing else", () => {
     expect(build.folders).toEqual(BUNDLES)
     expect(build.bundleFileFor("/components/ui/_assets/ui-button.js")).toBe(
-      join(repo, "spell-ui/site/_assets/ui-button.js")
+      join(repo, "ui/site/_assets/ui-button.js")
     )
-    expect(build.bundleFileFor("/spell-ui/site/_assets/site.css")).toBe(join(repo, "spell-ui/site/_assets/site.css"))
+    expect(build.bundleFileFor("/ui/site/_assets/site.css")).toBe(join(repo, "ui/site/_assets/site.css"))
     expect(build.bundleFileFor("/spell-brand/_assets/ui/a%20b.js")).toBe(join(repo, "spell-brand/_assets/ui/a b.js"))
     expect(build.bundleFileFor("/components/ui/__data/components.json5")).toBeUndefined()
-    expect(build.bundleFileFor("/components/epics/_assets/site.js")).toBe(join(repo, "spell-ui/site/_assets/site.js"))
+    expect(build.bundleFileFor("/components/epics/_assets/site.js")).toBe(join(repo, "ui/site/_assets/site.js"))
     expect(build.bundleFileFor("/spell-brand/_assets/brand-pages.js")).toBeUndefined()
     expect(build.bundleFileFor("/worktrees/seo/components/ui/_assets/site.js")).toBeUndefined()
     expect(build.bundleFileFor("/spell-brand/_assets/ui/../../../x")).toBeUndefined()
@@ -209,24 +209,24 @@ describe("BundleBuild.bundleFileFor()", () => {
   test("a bundle folder beside the checkout, at /_beside/ (folderUrl()), and through the sets' overlay", () => {
     const beside = mkdtempSync(join(tmpdir(), "page-server-bundles-beside-"))
     const app = join(beside, "spell-app")
-    const sets = { ui: { name: "Spell UI", dir: "../spell-ui/docs", assets: "../spell-ui/site/_assets" } }
+    const sets = { ui: { name: "Spell UI", dir: "../ui/docs", assets: "../ui/site/_assets" } }
     put(
       app,
       "package.json",
-      JSON.stringify({ pageServer: { bundles: ["../spell-ui/site/_assets"], componentSets: sets } })
+      JSON.stringify({ pageServer: { bundles: ["../ui/site/_assets"], componentSets: sets } })
     )
     const there = new BundleBuild({ root: app })
-    expect(there.bundleFileFor("/_beside/spell-ui/site/_assets/site.js")).toBe(
-      join(beside, "spell-ui/site/_assets/site.js")
+    expect(there.bundleFileFor("/_beside/ui/site/_assets/site.js")).toBe(
+      join(beside, "ui/site/_assets/site.js")
     )
-    expect(there.bundleFileFor("/components/ui/_assets/site.js")).toBe(join(beside, "spell-ui/site/_assets/site.js"))
-    expect(there.bundleFileFor("/_beside/spell-ui/docs/ui-button.html")).toBeUndefined()
+    expect(there.bundleFileFor("/components/ui/_assets/site.js")).toBe(join(beside, "ui/site/_assets/site.js"))
+    expect(there.bundleFileFor("/_beside/ui/docs/ui-button.html")).toBeUndefined()
     rmSync(beside, { recursive: true, force: true })
   })
 
   test("a checkout whose settings name no bundles has none", () => {
     const bare = new BundleBuild({ root: join(repo, "nowhere") })
     expect(bare.folders).toEqual([])
-    expect(bare.bundleFileFor("/spell-ui/site/_assets/site.css")).toBeUndefined()
+    expect(bare.bundleFileFor("/ui/site/_assets/site.css")).toBeUndefined()
   })
 })

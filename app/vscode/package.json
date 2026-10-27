@@ -1,0 +1,344 @@
+{
+  "name": "spell-language",
+  "displayName": "Spell",
+  "version": "0.8.0",
+  "private": true,
+  "description": "Spell language support:  errors, hover, completion, go to definition, rename -- from spell's language server;  and custom elements' slots, parts, attributes and CSS data in JSX, HTML and CSS files.",
+  "license": "MIT",
+  "repository": "https://github.com/spell-app/spell-app",
+  "publisher": "spell-app",
+  "main": "./out/extension.js",
+  "scripts": {
+    "build": "node build.mjs",
+    "check": "cd ../.. && node_modules/.bin/tsc --noEmit -p app/vscode",
+    "test": "../../node_modules/.bin/vp test run",
+    "package": "vsce package --no-dependencies --skip-license --out spell-language.vsix",
+    "install-extension": "code --install-extension spell-language.vsix --force"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/vscode": "^1.100.0",
+    "@vscode/vsce": "^4.0.0",
+    "vscode-languageclient": "^10.1.2"
+  },
+  "contributes": {
+    "commands": [
+      {
+        "command": "spell.showCompiledTypeScript",
+        "title": "Show Compiled TypeScript",
+        "category": "Spell",
+        "icon": {
+          "light": "media/ts-light.svg",
+          "dark": "media/ts-dark.svg"
+        },
+        "enablement": "editorLangId =~ /^spellx?$/"
+      },
+      {
+        "command": "spell.showCompiled",
+        "title": "Show Compiled JavaScript",
+        "category": "Spell",
+        "icon": {
+          "light": "media/js-light.svg",
+          "dark": "media/js-dark.svg"
+        },
+        "enablement": "editorLangId =~ /^spellx?$/"
+      },
+      {
+        "command": "spell.showCompiledPython",
+        "title": "Show Compiled Python",
+        "category": "Spell",
+        "icon": {
+          "light": "media/py-light.svg",
+          "dark": "media/py-dark.svg"
+        },
+        "enablement": "editorLangId =~ /^spellx?$/"
+      },
+      {
+        "command": "spell.showCodeSpell",
+        "title": "Show as Code Spell",
+        "category": "Spell",
+        "icon": "$(symbol-text)",
+        "enablement": "editorLangId == spellx"
+      },
+      {
+        "command": "spell.showSpellx",
+        "title": "Show as Spellx",
+        "category": "Spell",
+        "icon": "$(symbol-text)",
+        "enablement": "editorLangId == spell"
+      },
+      {
+        "command": "spell.showLineTree",
+        "title": "Show Tree for This Line",
+        "category": "Spell",
+        "enablement": "editorLangId =~ /^spellx?$/"
+      },
+      {
+        "command": "spell.runProject",
+        "title": "Run Project",
+        "category": "Spell",
+        "icon": "$(play)",
+        "enablement": "editorLangId =~ /^spellx?$/"
+      },
+      {
+        "command": "spell.runTests",
+        "title": "Run Tests",
+        "category": "Spell",
+        "icon": "$(beaker)",
+        "enablement": "editorLangId =~ /^spellx?$/"
+      }
+    ],
+    "html": {
+      "customData": [
+        "./out/data/spell-ui.html-custom-data.json",
+        "./out/data/spell-brand.html-custom-data.json"
+      ]
+    },
+    "css": {
+      "customData": [
+        "./out/data/spell-ui.css-custom-data.json",
+        "./out/data/spell-brand.css-custom-data.json"
+      ]
+    },
+    "configuration": {
+      "title": "Spell",
+      "properties": {
+        "spell.parserRoot": {
+          "type": "string",
+          "default": "",
+          "description": "Folder of the spell-app checkout whose language server to run:  spell-app itself, the kit folder holding it, or any folder inside one.  Empty:  the window's own checkout."
+        },
+        "spell.compileOnSave": {
+          "type": "boolean",
+          "default": false,
+          "description": "On save, compile the project to its .output.js, so a running app picks it up."
+        }
+      }
+    },
+    "grammars": [
+      {
+        "language": "spell",
+        "scopeName": "source.spell",
+        "path": "./syntaxes/spell.tmLanguage.json",
+        "embeddedLanguages": {
+          "meta.embedded.block.css": "css",
+          "meta.embedded.block.markdown": "markdown"
+        }
+      },
+      {
+        "language": "spellx",
+        "scopeName": "source.spellx",
+        "path": "./syntaxes/spellx.tmLanguage.json",
+        "embeddedLanguages": {
+          "meta.embedded.block.css": "css",
+          "meta.embedded.block.markdown": "markdown"
+        }
+      },
+      {
+        "scopeName": "inline.spell.css-template",
+        "path": "./syntaxes/css-template.tmLanguage.json",
+        "injectTo": [
+          "source.js",
+          "source.js.jsx",
+          "source.ts",
+          "source.tsx"
+        ],
+        "embeddedLanguages": {
+          "meta.embedded.block.css": "css"
+        }
+      }
+    ],
+    "languages": [
+      {
+        "id": "spell",
+        "aliases": [
+          "Spell",
+          "spell"
+        ],
+        "extensions": [
+          ".spell",
+          ".en.spell",
+          ".es.spell"
+        ],
+        "configuration": "./language-configuration.json"
+      },
+      {
+        "id": "spellx",
+        "aliases": [
+          "Spellx",
+          "spellx"
+        ],
+        "extensions": [
+          ".spellx",
+          ".en.spellx",
+          ".es.spellx"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "command": "spell.showLineTree",
+          "when": "editorLangId =~ /^spellx?$/",
+          "group": "navigation"
+        }
+      ],
+      "editor/title": [
+        {
+          "command": "spell.showCodeSpell",
+          "when": "editorLangId == spellx",
+          "group": "navigation@0"
+        },
+        {
+          "command": "spell.showSpellx",
+          "when": "editorLangId == spell",
+          "group": "navigation@0"
+        },
+        {
+          "command": "spell.showCompiledTypeScript",
+          "when": "editorLangId =~ /^spellx?$/",
+          "group": "navigation@1"
+        },
+        {
+          "command": "spell.showCompiled",
+          "when": "editorLangId =~ /^spellx?$/",
+          "group": "navigation@2"
+        },
+        {
+          "command": "spell.showCompiledPython",
+          "when": "editorLangId =~ /^spellx?$/",
+          "group": "navigation@3"
+        },
+        {
+          "command": "spell.runProject",
+          "when": "editorLangId =~ /^spellx?$/",
+          "group": "navigation@4"
+        },
+        {
+          "command": "spell.runTests",
+          "when": "editorLangId =~ /^spellx?$/",
+          "group": "navigation@5"
+        }
+      ]
+    },
+    "configurationDefaults": {
+      "[spell]": {
+        "editor.insertSpaces": false,
+        "editor.detectIndentation": false,
+        "editor.formatOnType": true
+      },
+      "editor.semanticTokenColorCustomizations": {
+        "rules": {
+          "comment.heading1:spell": {
+            "bold": true
+          },
+          "comment.heading2:spell": {
+            "bold": true
+          },
+          "comment.heading3:spell": {
+            "bold": true
+          },
+          "comment.heading4:spell": {
+            "bold": true
+          },
+          "comment.bold:spell": {
+            "bold": true
+          },
+          "comment.italic:spell": {
+            "italic": true
+          },
+          "comment.link:spell": {
+            "underline": true
+          },
+          "comment.strikethrough:spell": {
+            "strikethrough": true
+          },
+          "comment.heading1:spellx": {
+            "bold": true
+          },
+          "comment.heading2:spellx": {
+            "bold": true
+          },
+          "comment.heading3:spellx": {
+            "bold": true
+          },
+          "comment.heading4:spellx": {
+            "bold": true
+          },
+          "comment.bold:spellx": {
+            "bold": true
+          },
+          "comment.italic:spellx": {
+            "italic": true
+          },
+          "comment.link:spellx": {
+            "underline": true
+          },
+          "comment.strikethrough:spellx": {
+            "strikethrough": true
+          }
+        }
+      },
+      "editor.tokenColorCustomizations": {
+        "textMateRules": [
+          {
+            "scope": "comment.line.number-sign.heading.spell",
+            "settings": {
+              "fontStyle": "bold"
+            }
+          }
+        ]
+      },
+      "[spellx]": {
+        "editor.insertSpaces": false,
+        "editor.detectIndentation": false,
+        "editor.formatOnType": true
+      }
+    },
+    "semanticTokenModifiers": [
+      {
+        "id": "heading1",
+        "description": "A top-level heading comment:  `#` at the start of a line, markdown-style."
+      },
+      {
+        "id": "heading2",
+        "description": "A second-level heading comment:  `##` at the start of a line."
+      },
+      {
+        "id": "heading3",
+        "description": "A third-level heading comment:  `###` at the start of a line."
+      },
+      {
+        "id": "heading4",
+        "description": "A fourth-level or deeper heading comment:  `####` ... at the start of a line."
+      },
+      {
+        "id": "bold",
+        "description": "Markdown `**bold**` inside a comment (spell docstrings are markdown)."
+      },
+      {
+        "id": "italic",
+        "description": "Markdown `*italic*` inside a comment."
+      },
+      {
+        "id": "link",
+        "description": "A markdown link inside a comment."
+      },
+      {
+        "id": "strikethrough",
+        "description": "Markdown `~~struck~~` inside a comment."
+      }
+    ]
+  },
+  "activationEvents": [
+    "onLanguage:spell",
+    "onLanguage:spellx",
+    "onLanguage:typescriptreact",
+    "onLanguage:javascriptreact"
+  ],
+  "engines": {
+    "vscode": "^1.100.0"
+  },
+  "packageManager": "yarn@4.18.0"
+}

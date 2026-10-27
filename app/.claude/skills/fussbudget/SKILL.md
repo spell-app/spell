@@ -1,0 +1,167 @@
+---
+name: fussbudget
+description: Rewrite the TEXT of code and docs so a reader new to it can follow -- docstrings, comments, READMEs, `AGENTS.md` files, docs pages, epic-page prose -- to WWOD §6's writing rules, in place and uncommitted, the diff left for Owen to review.  Never code, names or generated files.  Use for `/fussbudget <path...>` (folders, a package, files), `/fussbudget epic <name>` (an epic page), `/fussbudget branch` (what this branch changed), `/fussbudget` alone (asks what to cover), or when Owen says "clean up the docstrings", "make these comments readable", "fussbudget this folder", "fussbudget the plan doc".
+argument-hint: "[<path...> | epic <name> | branch]"
+---
+
+# /fussbudget
+
+Rewrites the words around the code, so future-Owen can read them cold (epic `skillz`, P7).
+- What it fixes:  text written from inside the builder's head.
+  - dense paragraphs, lines broken at the column instead of at phrases
+  - implementation words ("the fork") where the plain name ("the element layer") belongs
+  - why a squirrely choice was made, before what the thing IS
+  - file paths and exact settings in the running text, where what they MEAN belongs
+    (WWOD §6 › "Plain text, plain paths", epic `airplane`)
+- The rules are WWOD §6, "Comments & docs" ([WWOD.md](agents/wwod/WWOD.md)),
+  and its long before / afters, [writing.md](agents/wwod/writing.md).
+  This skill says how to run a pass;  those files say what good looks like.
+- Its checker:  `epic pages fuss <paths...> | --branch [--json]`.
+  - It lists the mechanical misses by file and line, and exits 1 on any:
+    - `phrase-split`:  a line ending in the first 1-4 words of a new phrase
+    - `dense`:  a docstring paragraph or bullet of 3+ sentences
+    - `jargon`:  a banned implementation word, from a short list per package
+    - `path-in-prose`:  a file path in a page's or Markdown's running text
+    - `code-dense`:  a sentence of 3+ code spans, in a page or Markdown
+  - It can't see the rest:  that's what the reading pass is for.
+- Every epic's Doc Review runs it:  [the epic skill](../epic/skills/epic/SKILL.md), "6. Doc Review".
+
+## Forms
+
+```
+/fussbudget <path...>       folders, a package, files:   /fussbudget src/spaces/server
+/fussbudget epic <name>     an epic page:                  /fussbudget epic skillz
+/fussbudget branch          what this branch changed since `main`, uncommitted work included
+/fussbudget                 asks what to cover
+```
+
+- `<path...>`:  every file under each path, whole.
+- `epic <name>`:  the epic page's prose:  Overview, phases, items' details.
+  - Through its part files, at the shared REAL path:
+    - the files:  `<content>/epics/<name>/parts/<id>.html`
+    - `<content>`:  what `epic config contentFolder` prints
+  - Never its structure:  no ids, no sections, no item lines, nothing `epic` writes.
+- `branch`:  every file this branch changed or added since `main`, WHOLE.
+  - The files:
+    - `git diff --name-only main...HEAD` and `git diff --name-only HEAD`
+    - `git ls-files --others --exclude-standard` (new, untracked)
+  - Whole files, not just the changed lines:  Owen can always undo a hunk (J14 of `skillz`).
+  - On `main` with nothing changed:  say so and stop.
+- Nothing after it:  AskUserQuestion, "What should /fussbudget cover?", options:
+  - "This branch's changes" (Recommended):  as `branch`
+  - "A folder or files":  Owen types the paths in "Other"
+  - "An epic page":  the epic this session works on, if any, else Owen types its name in "Other"
+  - Run by a background agent (no Owen to ask):  take `branch`, and say so in the report.
+- Doc Review names its scope in full (`branch`, `epic <name>`), so nothing asks.
+
+## What it rewrites
+
+- Yes:
+  - docstrings and comments, in code:  `.ts` / `.tsx`, `.js` / `.mjs`
+  - READMEs, `AGENTS.md` files, other Markdown
+  - docs pages (`guides/`, `ui/`, `pages/`):  their prose
+  - epic-page prose, as "Forms" says
+- Never:
+  - code, names, strings the code uses
+  - marker words:  `NOTE:`, `HACK:`, `REFACTOR:` ...
+  - generated files:
+    - any file `git check-attr linguist-generated` marks
+    - `vendor/`, bundles, snapshots, fixtures
+  - Owen's own words:  his quotes, an epic page's kickoff prompt, `<epic-original>`, `<epic-answer>`
+  - dated records:  an epic page's `log.html`, `<epic-updated>` lines, the changelog's old entries
+- Keeps every fact, number and caveat (WWOD §6).
+  - Shorter is good;  less said is not.
+  - Unsure whether a clause matters:  keep it, moved to the end.
+
+## Steps
+
+1. Read the rules WHOLE, first:  WWOD §6 and [writing.md](agents/wwod/writing.md).
+   - Every pass, even a small one:  this skill exists because the rule, half-remembered, hasn't worked.
+2. Is anyone else editing it?
+   - `epic worktree list`:  another session (not this one, not the one that started you)
+     working in this checkout.
+   - `epic agents list`:  another agent whose task names these files.
+     For an epic page:  any other epic-page agent (`<epic>-plan-doc`).
+   - Either:  say who, and STOP.  A mixed diff can't be reviewed.
+3. The scope, as "Forms" says:  a list of files.
+   - Drop what "What it rewrites" says never to touch.
+4. The checker, for the mechanical list, and its count BEFORE:
+   - `epic pages fuss <paths...> --json`, or `epic pages fuss --branch --json`
+   - an epic page:  `epic pages fuss <content>/epics/<name>/parts --json` (`<content>` as in "Forms")
+   - In HTML it checks everything but `phrase-split`:  the formatter wraps those lines.
+5. Big scope:  fan out ("Fanning out").  Else the session does it itself.
+6. Each file, top to bottom:
+   - fix each of the checker's misses ("The fixes, by kind")
+   - then READ, for what no tool sees:
+     - written from inside the builder's head:  would someone new to this part follow it?
+     - implementation words, where the plain name belongs
+     - why before what:  say what it IS and how to use it first
+     - run-together sentences, where bullets belong
+   - a block that already reads well:  leave it.  No churn for its own sake.
+7. Write in place.  Stage NOTHING, commit NOTHING.
+   - The diff IS the proposal:  Owen reviews it in Source Control,
+     and discards a file or a hunk he doesn't like.
+   - An epic page has no branch diff:  each turn's edits are one `auto:` commit in `spell-app-dev`,
+     which can be reverted whole.  Then `epic lint <name>`.
+8. The checker again:  the count AFTER.
+   - A miss left on purpose (a false hit, a line that can't break better):  name it in the report.
+9. Report ("Report").
+
+## The fixes, by kind
+
+- `phrase-split`:  break the line where the phrase starts, or move the whole phrase down.
+- `dense`:  a plain lead line saying what the sentences add up to, then bullets, one fact each.
+- `jargon`:  the name a newcomer would look for, in place of the implementation word.
+- `path-in-prose`:  name the thing, and move its path where a reader can still reach it.
+  - A page:  the path is the name's tooltip, the browser's own (`title`), never a second code span:
+
+    ```html
+    BEFORE  Built:  <code>buildTsx()</code>, <code>parser/src/spell/node/buildTsx.ts:40</code>
+    AFTER   Built:  <code title="parser/src/spell/node/buildTsx.ts">buildTsx()</code>
+    ```
+
+    `doc-links.js` links the name to its `title`'s file, so a click still opens it.
+  - A path with no name to hang it on ("see `guides/x/x.html`"):  the page's title as the link text.
+  - Markdown, which has no tooltips:  a link, `` [`buildTsx()`](../parser/src/spell/node/buildTsx.ts) ``.
+    In agent-facing Markdown (`AGENTS.md`, WWOD, `SKILL.md`), a path an agent must open stays reachable that way.
+- `code-dense`:  say what it MEANS, then one fact per bullet.
+  - The exact settings and values go in a tooltip, or a folded code block:
+    `<epic-code>` or `ui-accordion.spell-code` in a page, a fence in Markdown.
+  - Owen's before / after:  [writing.md](agents/wwod/writing.md), "A 'Built / Checked' line in an epic page".
+  - A list of names that IS the point (the methods a class has):  bullets, one name each.
+- Never in Owen's own words, or in a dated record ("What it rewrites").
+
+## Fanning out
+
+- One folder, a few files, or an epic page:  no agents, the session does it.
+- Several packages or folders:  one agent each, up to 5 in all.
+  - Or fewer, when you were given a smaller budget (`/bg` with `n`).
+  - More folders than agents:  group neighbours, one agent a group.
+  - Why:  one voice per package, and the session stays free.
+- Each one NAMED and LISTED, as the root `CLAUDE.md`'s "Delegated work" says
+  ([the bg skill](../epic/skills/bg/SKILL.md), "Names"):
+  - `epic agents add fussbudget-<folder> "<its task>"`:  prints its full name
+  - an `Agent` call:  type `general-purpose`, in the background (`run_in_background: true`),
+    its `description` starting with that full name
+  - `epic agents done fussbudget-<folder>` when it's back
+- Its prompt carries:
+  - its files, and the checker line for them
+  - "Read `agents/wwod/WWOD.md` §6 and `agents/wwod/writing.md` WHOLE, first."
+  - "Rewrite TEXT only:  never code, names, or generated files.  Keep every fact, number and caveat."
+  - "Write in place;  stage nothing, commit nothing.  In a worktree:  plain separate shell commands."
+  - "Report:  files touched, docstrings rewritten, the checker's count before and after,
+    and your 2-3 best before / afters."
+- The session picks the report's before / afters from theirs.
+
+## Report
+
+Short, in this order:
+1. Scope, and the files touched:  `[file.ts](path)` each, or a count per folder when there are many.
+2. Docstrings and comments rewritten:  a count.
+3. The checker:  `<before> -> <after>` misses;  any left, and why.
+4. 2-3 before / afters for Owen to judge FIRST:  the boldest changes, where a fact moved or a name changed.
+   - Each a short `before` / `after` pair, in fenced blocks.
+5. Where to review:  Source Control (code);  an epic page:  its link, `epic pages link <epic page> --review`.
+- Fanned out:  each agent's notice, as it arrives, gets a short reply,
+  its first line bold, by itself:  `**Agent <full name> came back with:**` (the root `CLAUDE.md`).
+  - The full report above comes once the last one is back.

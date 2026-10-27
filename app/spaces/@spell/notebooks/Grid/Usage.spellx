@@ -1,0 +1,77 @@
+<spell-notebook "grid usage">
+	<header level="1">
+		Grid
+		<header>A grid is used to harmonize negative space in a layout.</>
+	</>
+	<grid-tab-bar showing="usage"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#using-it">Using it</>
+				<ui-item link="#responsive-grids">Responsive grids</>
+				<ui-item link="#accessibility">Accessibility</>
+			</>
+		</>
+	</>
+
+	<!-- USAGE:  grid / row / column, widths, responsive behaviour, accessibility. -->
+	<section label="Using it">
+		<markdown>
+			A grid is 16 columns wide. Put `<ui-column>`s straight in a `<ui-grid>` and they wrap onto new lines as they
+			fill one; wrap them in a `<ui-row>` to force a line break or give one line its own settings.
+
+			- A column's width comes from, in order: its own `width`, its row's `columns`, its grid's `columns`, filling the
+			  line when it is the only child, else one of 16.
+			- `width` takes columns of 16 (`4`), fractions (`1/4`) or percentages (`25%`); NEVER Fomantic's `four wide`
+			  words.
+			- Rows and columns take no box of their own inside a grid, so style them through `::part(row)` and
+			  `::part(column)`.
+			- Grids have no events.
+		</>
+		<markdown>
+			```html
+			<ui-grid columns="3" divided>
+			  <ui-row>
+			    <ui-column>One</ui-column>
+			    <ui-column>Two</ui-column>
+			    <ui-column>Three</ui-column>
+			  </ui-row>
+			  <ui-row columns="2">
+			    <ui-column width="12">Main</ui-column>
+			    <ui-column width="4">Aside</ui-column>
+			  </ui-row>
+			</ui-grid>
+			```
+		</>
+	</>
+
+	<section label="Responsive grids">
+		<markdown>
+			Fomantic's grid reacts to the viewport. Here `stackable`, `doubling`, `reversed` and the per-device widths react
+			to the width the GRID is given (a container query):
+
+			- mobile below 768px, tablet 768px to 991px, computer from 992px, large screen 1200px to 1919px, widescreen from
+			  1920px;
+			- so a grid in a narrow sidebar stacks while the window is wide -- and the examples in this ~755px column show
+			  their narrow layout on a desktop screen too.
+			- `only` is the exception: it follows the VIEWPORT, since it says what the page shows on a phone, not how the
+			  grid lays out.
+			- A top-level `<ui-grid>` measures its own width, so it can't take its size from its content: inside a flex or
+			  inline layout, give it a width.
+		</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			- A grid is layout only: plain boxes with no role. Put headings, lists and landmarks inside the columns.
+			- Screen readers and the Tab key follow the source order, so `reversed` changes only what the eye sees.
+			  Keep the source in a sensible reading order.
+			- `only` hides rows and columns with `display: none`, from assistive tech too. Don't put anything there that the
+			  other devices need.
+			- `color` fills a row or column with a hue and switches its text to a contrasting colour; check any colours you
+			  add inside.
+			- If the element fails to render, it shows its rows and columns through a bare `<slot>`: the content
+			  stays, but the grid's own layout goes.
+		</>
+	</>
+</spell-notebook>

@@ -3684,7 +3684,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"esbuild@npm:^0.28.2, esbuild@npm:~0.28.0":
+"esbuild@npm:^0.28.2":
   version: 0.28.2
   resolution: "esbuild@npm:0.28.2"
   dependencies:
@@ -4814,7 +4814,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"json5@npm:^2.1.1, json5@npm:^2.2.3":
+"json5@npm:^2.2.3":
   version: 2.2.3
   resolution: "json5@npm:2.2.3"
   bin:
@@ -6005,7 +6005,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"playwright@npm:1.63.0, playwright@npm:^1.63.0":
+"playwright@npm:1.63.0":
   version: 1.63.0
   resolution: "playwright@npm:1.63.0"
   dependencies:
@@ -6635,9 +6635,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"spell-app@workspace:spell-app":
+"spell-app@workspace:app":
   version: 0.0.0-use.local
-  resolution: "spell-app@workspace:spell-app"
+  resolution: "spell-app@workspace:app"
   dependencies:
     "@inkjs/ui": "npm:^2"
     "@solidjs/h": "npm:2.0.0-rc.17"
@@ -6668,8 +6668,6 @@ __metadata:
     react: "npm:^18.2.0"
     solid-js: "npm:2.0.0-rc.17"
     spell: "workspace:*"
-    spell-parser: "workspace:*"
-    spell-ui: "workspace:*"
     tsx: "npm:4.20.3"
     typescript: "npm:^7.0.2"
     vite: "catalog:"
@@ -6682,27 +6680,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"spell-brand@workspace:spell-brand":
+"spell-epic@workspace:epic":
   version: 0.0.0-use.local
-  resolution: "spell-brand@workspace:spell-brand"
-  dependencies:
-    "@solidjs/web": "npm:2.0.0-rc.17"
-    "@types/node": "npm:^22.20.4"
-    esbuild: "npm:^0.28.2"
-    playwright: "npm:1.63.0"
-    solid-js: "npm:2.0.0-rc.17"
-    spell: "workspace:*"
-    spell-ui: "workspace:*"
-    tsx: "npm:^4.23.15"
-    typescript: "npm:^7.0.2"
-    vite: "catalog:"
-    vite-plus: "catalog:"
-  languageName: unknown
-  linkType: soft
-
-"spell-epic@workspace:spell-epic":
-  version: 0.0.0-use.local
-  resolution: "spell-epic@workspace:spell-epic"
+  resolution: "spell-epic@workspace:epic"
   dependencies:
     "@solidjs/h": "npm:2.0.0-rc.17"
     "@solidjs/web": "npm:2.0.0-rc.17"
@@ -6712,12 +6692,11 @@ __metadata:
     chalk: "npm:^5.6.0"
     commander: "npm:^14"
     esbuild: "npm:^0.28.2"
-    json5: "npm:^2.1.1"
+    json5: "npm:^2.2.3"
     linkedom: "npm:^0.18.13"
     playwright: "npm:1.63.0"
     solid-js: "npm:2.0.0-rc.17"
     spell: "workspace:*"
-    spell-ui: "workspace:*"
     tsx: "npm:4.20.3"
     typescript: "npm:^7.0.2"
     vite: "catalog:"
@@ -6728,9 +6707,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"spell-parser@workspace:*, spell-parser@workspace:spell-parser":
+"spell-parser@workspace:parser":
   version: 0.0.0-use.local
-  resolution: "spell-parser@workspace:spell-parser"
+  resolution: "spell-parser@workspace:parser"
   dependencies:
     "@solidjs/compiler": "npm:2.0.0-rc.17"
     "@solidjs/h": "npm:2.0.0-rc.17"
@@ -6748,7 +6727,7 @@ __metadata:
     json5: "npm:^2.2.3"
     linkedom: "npm:^0.18.13"
     lodash: "npm:^4.17.21"
-    playwright: "npm:^1.63.0"
+    playwright: "npm:1.63.0"
     pluralize: "npm:^8.0.0"
     pyright: "npm:1.1.414"
     semver: "npm:^7.8.5"
@@ -6762,9 +6741,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"spell-ui@workspace:*, spell-ui@workspace:spell-ui":
+"spell-ui@workspace:ui":
   version: 0.0.0-use.local
-  resolution: "spell-ui@workspace:spell-ui"
+  resolution: "spell-ui@workspace:ui"
   dependencies:
     "@custom-elements-manifest/analyzer": "npm:^0.11.0"
     "@playwright/test": "npm:1.63.0"
@@ -6781,7 +6760,7 @@ __metadata:
     emojibase-data: "npm:^17.0.0"
     esbuild: "npm:^0.28.2"
     highlight.js: "npm:^11.12.0"
-    json5: "npm:^2.1.1"
+    json5: "npm:^2.2.3"
     lightningcss: "npm:^1.33.0"
     linkedom: "npm:^0.18.13"
     lodash-es: "npm:^4.18.1"
@@ -6791,15 +6770,12 @@ __metadata:
     solid-js: "npm:2.0.0-rc.17"
     spell: "workspace:*"
     temporal-polyfill: "npm:^1.0.5"
-    tsx: "npm:^4.23.15"
+    tsx: "npm:4.20.3"
     typescript: "npm:^7.0.2"
     vite: "catalog:"
     vite-plugin-dts: "npm:^5.1.1"
     vite-plus: "catalog:"
     vitest: "catalog:"
-  peerDependencies:
-    "@solidjs/web": 2.0.0-rc.17
-    solid-js: 2.0.0-rc.17
   languageName: unknown
   linkType: soft
 
@@ -6807,31 +6783,68 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "spell@workspace:."
   dependencies:
+    "@custom-elements-manifest/analyzer": "npm:^0.11.0"
+    "@inkjs/ui": "npm:^2"
+    "@playwright/test": "npm:1.63.0"
+    "@solidjs/compiler": "npm:2.0.0-rc.17"
+    "@solidjs/h": "npm:2.0.0-rc.17"
+    "@solidjs/router": "npm:2.0.0-next.41"
     "@solidjs/vite-plugin": "npm:3.0.0-next.51"
     "@solidjs/web": "npm:2.0.0-rc.17"
+    "@types/fs-extra": "npm:^11.0.4"
     "@types/lodash": "npm:^4.17.17"
+    "@types/lodash-es": "npm:^4.17.12"
     "@types/node": "npm:^22.20.4"
+    "@types/pluralize": "npm:^0.0.33"
+    "@types/react": "npm:^18.2.56"
+    "@types/semver": "npm:^7.8.0"
     "@typescript/typescript6": "npm:^6.0.2"
     "@vitest/browser-playwright": "catalog:"
+    "@vitest/coverage-v8": "catalog:"
+    "@vitest/ui": "catalog:"
     axe-core: "npm:^4.13.0"
+    browser-or-node: "npm:^3.0.0"
     chalk: "npm:^5.6.0"
     commander: "npm:^14"
+    concurrently: "npm:^8.2.2"
+    dompurify: "npm:^3.4.0"
+    emojibase-data: "npm:^17.0.0"
+    entities: "npm:^6.0.1"
     esbuild: "npm:^0.28.2"
+    fs-extra: "npm:^11.3.0"
     global: "npm:^4.3.2"
+    highlight.js: "npm:^11.12.0"
+    ink: "npm:^5.2.1"
+    ink-testing-library: "npm:^4"
     json5: "npm:^2.2.3"
     json5-writer: "npm:^0.2.0"
     lightningcss: "npm:^1.33.0"
     linkedom: "npm:^0.18.13"
     lodash: "npm:^4.17.21"
+    lodash-es: "npm:^4.18.1"
+    marked: "npm:^18.0.0"
+    monaco-editor: "npm:^0.57.0"
+    node-filter-async: "npm:^3.0.0"
     parse5: "npm:^7.3.0"
     playwright: "npm:1.63.0"
+    pluralize: "npm:^8.0.0"
+    postcss: "npm:^8.5.28"
+    pyright: "npm:1.1.414"
     query-string: "npm:^6.12.1"
+    react: "npm:^18.2.0"
+    semver: "npm:^7.8.5"
     solid-js: "npm:2.0.0-rc.17"
+    temporal-polyfill: "npm:^1.0.5"
     tsx: "npm:4.20.3"
     typescript: "npm:^7.0.2"
     vite: "catalog:"
+    vite-plugin-dts: "npm:^5.1.1"
     vite-plus: "catalog:"
     vitest: "catalog:"
+    vscode-css-languageservice: "npm:^6.3.10"
+    vscode-languageserver: "npm:^10.1.2"
+    vscode-languageserver-textdocument: "npm:^1.0.15"
+    wrap-ansi: "npm:^9"
   peerDependencies:
     "@solidjs/web": 2.0.0-rc.17
     axe-core: ^4.13.0
@@ -7171,21 +7184,6 @@ __metadata:
   bin:
     tsx: dist/cli.mjs
   checksum: 10c0/6ff0d91ed046ec743fac7ed60a07f3c025e5b71a5aaf58f3d2a6b45e4db114c83e59ebbb078c8e079e48d3730b944a02bc0de87695088aef4ec8bbc705dc791b
-  languageName: node
-  linkType: hard
-
-"tsx@npm:^4.23.15":
-  version: 4.23.15
-  resolution: "tsx@npm:4.23.15"
-  dependencies:
-    esbuild: "npm:~0.28.0"
-    fsevents: "npm:~2.3.3"
-  dependenciesMeta:
-    fsevents:
-      optional: true
-  bin:
-    tsx: dist/cli.mjs
-  checksum: 10c0/3c5fc53e578da87d3a63565286b1ecbb0e01b9bb646daec1957294ef890d14f22cc67bb4b09b5daffab0e7ce0217b1e7645393feb0f524b1ddf26ae9595d7e75
   languageName: node
   linkType: hard
 

@@ -1,0 +1,698 @@
+<spell-notebook "button examples">
+	<header level="1">
+		Button
+		<header>A button indicates a possible user action.</>
+	</>
+	<button-tab-bar showing="examples"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#types">Types</>
+				<ui-item link="#groups">Groups</>
+				<ui-item link="#content">Content</>
+				<ui-item link="#states">States</>
+				<ui-item link="#variations">Variations</>
+				<ui-item link="#group-variations">Group Variations</>
+				<ui-item link="#not-ported-from-fomantic">Not ported from Fomantic</>
+			</>
+		</>
+	</>
+
+	<!--
+		EXAMPLES:  Fomantic's button page, section by section, in its order (Types, Groups, Content, States,
+		Variations, Group Variations), plus our own extras (Icon and text, Link, State texts).
+		- A section:  `<ui-header level="2" dividing id="types">Types</ui-header>`, then its examples.
+		- An example:  `<ui-example heading="..." description="...">` around the live markup;  the markup
+		  IS the code shown.  `GAP I<n>` comments mark examples a widget can't render yet (plan-doc issues).
+	-->
+	<section label="Types">
+		<section label="Button" sticky collapsible dividing>
+			<example description="A standard button.">
+				<button>Follow</button>
+			</example>
+		</>
+
+		<section label="Emphasis" sticky collapsible dividing>
+			<example>
+				<html>
+					<p slot="description">A button can be formatted to show different levels of emphasis.</p>
+					<ui-message slot="description" state="info" size="small">Set your brand colours in the <code>--ui-primary</code> and <code>--ui-secondary</code> tokens (see the Theming tab). Every element's primary and secondary look follows.</ui-message>
+				</html>
+				<button color="primary">Save</button>
+				<button>Discard</button>
+			</example>
+			<example>
+				<button color="secondary">Okay</button>
+				<button>Cancel</button>
+			</example>
+		</>
+
+		<!-- GAP I23:  Fomantic's `right arrow` / `left chevron` draw nothing;  use the canonical `arrow right`, `chevron left`. -->
+		<section label="Animated" sticky collapsible dividing>
+			<example>
+				<html>
+					<p slot="description">A button can animate to show hidden content. The <code>icon</code> slot (or the <code>icon</code> attribute) is the hidden half.</p>
+				</html>
+				<message slot="description" size="small">The button is sized by its visible content, so make sure there is room for the hidden content to show.</message>
+				<button reveal="slide" icon="arrow right">Next</button>
+				<button reveal="vertical" icon="shop">Shop</button>
+				<html>
+					<ui-button reveal="fade"><span slot="icon">$12.99 a month</span>Sign-up for a Pro account</ui-button>
+				</html>
+			</example>
+		</>
+
+		<section label="Labeled" sticky collapsible dividing id="types-labeled">
+			<example description="A button can appear alongside a badge:  `badge`, or the label slot, joins one. `labeled=\"left\"` puts it first.">
+				<button icon="heart" badge="2,048">Like</button>
+				<button labeled="left" icon="heart" badge="2,048">Like</button>
+				<button labeled="left" icon="fork" badge="1,048" aria-label="Fork"/>
+			</example>
+			<example>
+				<button color="red" icon="heart" badge="1,048">Like</button>
+				<button color="blue" icon="fork" badge="1,048" appearance="basic">Forks</button>
+			</example>
+		</>
+
+		<section label="Icon" sticky collapsible dividing>
+			<example description="A button can have only an icon.  Give it a name with `aria-label`.">
+				<button icon="cloud" aria-label="Cloud"/>
+			</example>
+		</>
+
+		<section label="Labeled Icon" sticky collapsible dividing>
+			<example description="A button can use an icon as a label:  `labeled` with an `icon`.  `labeled=\"right\"` puts it at the end.">
+				<button labeled icon="pause">Pause</button>
+				<button labeled="right" icon="arrow right">Next</button>
+				<button labeled><icon slot="icon" name="spinner" loading/>Loading</button>
+			</example>
+		</>
+
+		<section label="Basic" sticky collapsible dividing>
+			<example description="A basic button is less pronounced.">
+				<button icon="user" appearance="basic">Add Friend</button>
+			</example>
+			<example>
+				<button color="primary" appearance="basic">Primary</button>
+				<button color="secondary" appearance="basic">Secondary</button>
+				<button color="positive" appearance="basic">Positive</button>
+				<button color="negative" appearance="basic">Negative</button>
+			</example>
+			<example>
+				<button color="red" appearance="basic">Red</button>
+				<button color="orange" appearance="basic">Orange</button>
+				<button color="yellow" appearance="basic">Yellow</button>
+				<button color="olive" appearance="basic">Olive</button>
+				<button color="green" appearance="basic">Green</button>
+				<button color="teal" appearance="basic">Teal</button>
+				<button color="blue" appearance="basic">Blue</button>
+				<button color="violet" appearance="basic">Violet</button>
+				<button color="purple" appearance="basic">Purple</button>
+				<button color="pink" appearance="basic">Pink</button>
+				<button color="brown" appearance="basic">Brown</button>
+				<button color="grey" appearance="basic">Grey</button>
+				<button color="black" appearance="basic">Black</button>
+			</example>
+		</>
+
+		<section label="Tertiary" sticky collapsible dividing>
+			<example description="A borderless, less important button.">
+				<button appearance="tertiary">Cancel Action</button>
+			</example>
+			<example>
+				<button color="primary" appearance="tertiary">Primary</button>
+				<button color="secondary" appearance="tertiary">Secondary</button>
+				<button color="red" appearance="tertiary">Red</button>
+				<button color="orange" appearance="tertiary">Orange</button>
+				<button color="yellow" appearance="tertiary">Yellow</button>
+				<button color="olive" appearance="tertiary">Olive</button>
+				<button color="green" appearance="tertiary">Green</button>
+				<button color="teal" appearance="tertiary">Teal</button>
+				<button color="blue" appearance="tertiary">Blue</button>
+				<button color="violet" appearance="tertiary">Violet</button>
+				<button color="purple" appearance="tertiary">Purple</button>
+				<button color="pink" appearance="tertiary">Pink</button>
+				<button color="brown" appearance="tertiary">Brown</button>
+				<button color="grey" appearance="tertiary">Grey</button>
+				<button color="black" appearance="tertiary">Black</button>
+			</example>
+		</>
+
+		<section label="Inverted" sticky collapsible dividing>
+			<example description="A button can be formatted to appear on dark backgrounds.">
+				<segment inverted>
+					<button inverted>Standard</button>
+					<button inverted color="primary">Primary</button>
+					<button inverted color="secondary">Secondary</button>
+					<button inverted color="red">Red</button>
+					<button inverted color="orange">Orange</button>
+					<button inverted color="yellow">Yellow</button>
+					<button inverted color="olive">Olive</button>
+					<button inverted color="green">Green</button>
+					<button inverted color="teal">Teal</button>
+					<button inverted color="blue">Blue</button>
+					<button inverted color="violet">Violet</button>
+					<button inverted color="purple">Purple</button>
+					<button inverted color="pink">Pink</button>
+					<button inverted color="brown">Brown</button>
+					<button inverted color="grey">Grey</button>
+					<button inverted color="black">Black</button>
+				</segment>
+			</example>
+
+			<!-- GAP I21:  `inverted basic` buttons with a colour draw white, not the hue. -->
+			<example>
+				<segment inverted>
+					<button inverted appearance="basic">Basic</button>
+					<button inverted color="primary" appearance="basic">Primary</button>
+					<button inverted color="secondary" appearance="basic">Secondary</button>
+					<button inverted color="red" appearance="basic">Basic Red</button>
+					<button inverted color="orange" appearance="basic">Basic Orange</button>
+					<button inverted color="yellow" appearance="basic">Basic Yellow</button>
+					<button inverted color="olive" appearance="basic">Basic Olive</button>
+					<button inverted color="green" appearance="basic">Basic Green</button>
+					<button inverted color="teal" appearance="basic">Basic Teal</button>
+					<button inverted color="blue" appearance="basic">Basic Blue</button>
+					<button inverted color="violet" appearance="basic">Basic Violet</button>
+					<button inverted color="purple" appearance="basic">Basic Purple</button>
+					<button inverted color="pink" appearance="basic">Basic Pink</button>
+					<button inverted color="brown" appearance="basic">Basic Brown</button>
+					<button inverted color="grey" appearance="basic">Basic Grey</button>
+					<button inverted color="black" appearance="basic">Basic Black</button>
+				</segment>
+			</example>
+		</>
+	</>
+
+	<section label="Groups">
+		<section label="Buttons" sticky collapsible dividing>
+			<example description="Buttons can exist together as a group:  `<ui-buttons>`.">
+				<buttons>
+					<button>One</button>
+					<button>Two</button>
+					<button>Three</button>
+				</buttons>
+			</example>
+		</>
+
+		<section label="Icon Buttons" sticky collapsible dividing>
+			<example description="Button groups can show groups of icons.">
+				<buttons icon>
+					<button icon="align left" aria-label="Align left"/>
+					<button icon="align center" aria-label="Align center"/>
+					<button icon="align right" aria-label="Align right"/>
+					<button icon="align justify" aria-label="Justify"/>
+				</buttons>
+				<buttons icon>
+					<button icon="bold" aria-label="Bold"/>
+					<button icon="underline" aria-label="Underline"/>
+					<button icon="text width" aria-label="Text width"/>
+				</buttons>
+			</example>
+		</>
+	</>
+
+	<section label="Content">
+		<section label="Conditionals" sticky collapsible dividing>
+			<example description="Button groups can contain conditionals:  `<ui-or>`.">
+				<buttons>
+					<button>Cancel</button>
+					<or/>
+					<button color="positive">Save</button>
+				</buttons>
+			</example>
+			<example>
+				<html>
+					<ui-message slot="description" state="info" size="small">The <code>or</code> text is translated with the page's language, or set it with <code>label</code>. If the size of the conditional changes, adjust <code>--ui-button-or-size</code>.</ui-message>
+				</html>
+				<buttons>
+					<button>un</button>
+					<or label="ou"/>
+					<button color="positive">deux</button>
+				</buttons>
+			</example>
+		</>
+
+		<section label="Icon and text" sticky collapsible dividing>
+			<example description="The `icon` attribute takes a name;  the `icon` slot takes any markup.">
+				<button icon="cloud upload">Upload</button>
+				<button icon="download" color="primary">Download</button>
+				<button label="Next">
+					<icon slot="icon" name="arrow right"/>
+				</button>
+			</example>
+			<example description="`icon-position=\"right\"` puts the icon after the text (Fomantic's `right` icon), `--ui-button-icon-spacing` from it.">
+				<button icon="arrow right" icon-position="right">Next</button>
+				<button icon="arrow right" icon-position="right" color="primary" appearance="circular">Open app</button>
+			</example>
+		</>
+
+		<section label="Link" sticky collapsible dividing>
+			<example description="With `link` the button renders a real link, so it navigates and opens in a new tab.">
+				<button link="#link">A link styled as a button</button>
+			</example>
+			<example description="`download` saves the file instead of opening it, as `<a download>`;  a value names the saved file.">
+				<button link="/components/ui/images/wireframe/image.png" download="wireframe.png" icon="download">PNG</button>
+			</example>
+		</>
+	</>
+
+	<section label="States">
+		<section label="Active" sticky collapsible dividing>
+			<example description="A button can show it is currently the active user selection.">
+				<button selected icon="user">Follow</button>
+			</example>
+		</>
+
+		<section label="Disabled" sticky collapsible dividing>
+			<example description="A button can show it is currently unable to be interacted with.">
+				<button disabled icon="user">Followed</button>
+			</example>
+		</>
+
+		<!-- GAP I22:  Fomantic's second and third rows (`double` / `elastic` loading) have no attribute value. -->
+		<section label="Loading" sticky collapsible dividing>
+			<example description="A button can show a loading indicator.">
+				<button loading>Loading</button>
+				<button loading appearance="basic">Loading</button>
+				<button loading color="primary">Loading</button>
+				<button loading color="secondary">Loading</button>
+			</example>
+		</>
+
+		<section label="State texts" sticky collapsible dividing id="states-state-texts">
+			<example description="A toggle button's label can say its state:  `inactive-text` while off, `active-text` while on.  Click to follow, again to unfollow.">
+				<button toggle inactive-text="Follow" active-text="Following"/>
+				<button toggle selected inactive-text="Subscribe" active-text="Subscribed" color="primary"/>
+			</example>
+			<example description="With only `active-text`, the button's own content is the inactive label.">
+				<button toggle icon="bell" active-text="Watching">Watch</button>
+			</example>
+		</>
+	</>
+
+	<section label="Variations">
+		<section label="Size" sticky collapsible dividing>
+			<example description="A button can have different sizes.">
+				<button size="mini">Mini</button>
+				<button size="tiny">Tiny</button>
+				<button size="small">Small</button>
+				<button size="medium">Medium</button>
+				<button size="large">Large</button>
+				<button size="big">Big</button>
+				<button size="huge">Huge</button>
+				<button size="massive">Massive</button>
+			</example>
+		</>
+
+		<section label="Left and Right" sticky collapsible dividing>
+			<example description="A button has no `floated` any more:  a `<ui-stack>` puts one button at the left and one at the right.">
+				<stack direction="horizontal" justify="between">
+					<button>Left</button>
+					<button>Right</button>
+				</stack>
+			</example>
+		</>
+
+		<section label="Colored" sticky collapsible dividing>
+			<example description="A button can have different colors.">
+				<button color="red">Red</button>
+				<button color="orange">Orange</button>
+				<button color="yellow">Yellow</button>
+				<button color="olive">Olive</button>
+				<button color="green">Green</button>
+				<button color="teal">Teal</button>
+				<button color="blue">Blue</button>
+				<button color="violet">Violet</button>
+				<button color="purple">Purple</button>
+				<button color="pink">Pink</button>
+				<button color="brown">Brown</button>
+				<button color="grey">Grey</button>
+				<button color="black">Black</button>
+			</example>
+		</>
+
+		<section label="Compact" sticky collapsible dividing>
+			<example description="A button can reduce its padding to fit into tighter spaces.">
+				<button padding="compact">Hold</button>
+				<button icon="pause" aria-label="Pause" padding="compact"/>
+				<button labeled icon="pause" padding="compact">Pause</button>
+			</example>
+		</>
+
+		<section label="Unpadded" sticky collapsible dividing>
+			<example description="A button can drop its padding altogether, as `compact` taken to none:  the box hugs its text or icon.  A `labeled` icon button keeps room for its icon block.">
+				<button padding="none">Hold</button>
+				<button icon="pause" aria-label="Pause" padding="none"/>
+				<button labeled icon="pause" padding="none">Pause</button>
+				<button appearance="basic" padding="none">Basic</button>
+			</example>
+		</>
+
+		<section label="Toggle" sticky collapsible dividing>
+			<example description="A button can be formatted to toggle on and off:  a click flips `active` and fires `ui-selected` or `ui-deselected`.">
+				<button toggle>Vote</button>
+			</example>
+		</>
+
+		<section label="Positive" sticky collapsible dividing>
+			<example description="A button can hint towards a positive consequence.">
+				<button color="positive">Positive Button</button>
+			</example>
+		</>
+
+		<section label="Negative" sticky collapsible dividing>
+			<example description="A button can hint towards a negative consequence.">
+				<button color="negative">Negative Button</button>
+			</example>
+		</>
+
+		<section label="Fluid" sticky collapsible dividing>
+			<example description="A button can take the width of its container.">
+				<button fluid>Fits container</button>
+			</example>
+		</>
+
+		<section label="Wrapped" sticky collapsible dividing>
+			<example description="A button's text stays on one line, however narrow its container.  `wrapped` lets a long text wrap onto more lines instead.">
+				<html>
+					<div style="max-width: 10em">
+						<ui-button>Stays on one line, however long</ui-button>
+						<ui-divider spacer></ui-divider>
+						<ui-button wrap>Wraps onto more lines when it's long</ui-button>
+					</div>
+				</html>
+			</example>
+		</>
+
+		<section label="Ellipsis" sticky collapsible dividing>
+			<example description="`ellipsis` cuts a text that doesn't fit off with `…`, on one line.  It needs a width to cut at:  `fluid`, a width of its own, or a narrow parent, which it never grows past.">
+				<html>
+					<div style="max-width: 14em">
+						<ui-button ellipsis fluid icon="download">Download the whole archive</ui-button>
+						<ui-divider spacer></ui-divider>
+						<ui-button ellipsis color="primary">Save every change to this document</ui-button>
+						<ui-divider spacer></ui-divider>
+						<ui-button ellipsis style="width: 9em">A width of its own</ui-button>
+					</div>
+				</html>
+			</example>
+		</>
+
+		<section label="Circular" sticky collapsible dividing id="variations-circular">
+			<example description="A button can be circular.">
+				<button icon="settings" aria-label="Settings" appearance="circular"/>
+			</example>
+			<example description="Fomantic's circular social buttons, with a brand `icon` and a `color`.">
+				<button color="blue" icon="facebook" aria-label="Facebook" appearance="circular"/>
+				<button color="teal" icon="twitter" aria-label="Twitter" appearance="circular"/>
+				<button color="blue" icon="linkedin" aria-label="LinkedIn" appearance="circular"/>
+				<button color="red" icon="google plus" aria-label="Google Plus" appearance="circular"/>
+			</example>
+		</>
+
+		<!-- GAP I20:  `attached="top|bottom"` buttons stay content-wide. -->
+		<section label="Vertically Attached" sticky collapsible dividing>
+			<example description="A button can be attached to the top or bottom of other content.">
+				<button attach="top">Top</button>
+				<segment attach="both">
+					<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
+				</segment>
+				<button attach="bottom">Bottom</button>
+			</example>
+			<example>
+				<buttons width="2" attach="top">
+					<button>One</button>
+					<button>Two</button>
+				</buttons>
+				<segment attach="both">
+					<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
+				</segment>
+				<buttons width="2" attach="bottom">
+					<button>One</button>
+					<button>Two</button>
+				</buttons>
+			</example>
+		</>
+
+		<section label="Horizontally Attached" sticky collapsible dividing>
+			<example description="A button can be attached to the left or right of other content.">
+				<button attach="left">Left</button>
+				<button attach="right">Right</button>
+			</example>
+		</>
+	</>
+
+	<section label="Group Variations">
+		<section label="Vertical Buttons" sticky collapsible dividing>
+			<example description="Groups can be formatted to appear vertically.">
+				<buttons direction="vertical">
+					<button>Feed</button>
+					<button>Messages</button>
+					<button>Events</button>
+					<button>Photos</button>
+				</buttons>
+			</example>
+		</>
+
+		<section label="Stackable Buttons" sticky collapsible dividing>
+			<example description="Horizontal groups can automatically be stacked on mobile devices.">
+				<buttons stackable>
+					<button>Feed</button>
+					<button>Messages</button>
+					<button>Events</button>
+					<button>Photos</button>
+				</buttons>
+			</example>
+		</>
+
+		<section label="Icon Buttons" sticky collapsible dividing>
+			<example description="Groups can be formatted as icons.">
+				<buttons icon>
+					<button icon="play" aria-label="Play"/>
+					<button icon="pause" aria-label="Pause"/>
+					<button icon="shuffle" aria-label="Shuffle"/>
+				</buttons>
+			</example>
+		</>
+
+		<section label="Labeled Icon Buttons" sticky collapsible dividing>
+			<example description="Groups can be formatted as labeled icons.">
+				<buttons direction="vertical" labeled icon>
+					<button icon="pause">Pause</button>
+					<button icon="play">Play</button>
+					<button icon="shuffle">Shuffle</button>
+				</buttons>
+			</example>
+		</>
+
+		<section label="Mixed Group" sticky collapsible dividing>
+			<example description="Groups can be formatted to use multiple button types together.">
+				<buttons wrapping>
+					<button labeled icon="chevron left">Back</button>
+					<button icon="stop">Stop</button>
+					<button labeled="right" icon="chevron right">Forward</button>
+				</buttons>
+			</example>
+		</>
+
+		<section label="Equal Width" sticky collapsible dividing>
+			<example description="Groups can have their widths divided evenly:  `width` is the number of buttons.">
+				<buttons width="5" wrapping>
+					<button>Overview</button>
+					<button>Specs</button>
+					<button>Warranty</button>
+					<button>Reviews</button>
+					<button>Support</button>
+				</buttons>
+				<divider/>
+				<buttons width="3" wrapping>
+					<button>Overview</button>
+					<button>Specs</button>
+					<button>Support</button>
+				</buttons>
+			</example>
+		</>
+
+		<section label="Equal" sticky collapsible dividing>
+			<example description="`equal` makes every button as wide as the widest, and the group hugs them.  With `fluid`, each takes an equal share of the row instead.  `width=\"3\"` above is the older, count-based way to write `equal fluid`.">
+				<buttons equal>
+					<button>OK</button>
+					<button>Cancel</button>
+					<button>Save draft</button>
+				</buttons>
+				<divider/>
+				<buttons equal fluid wrapping appearance="basic">
+					<button>Overview</button>
+					<button>Specifications</button>
+					<button>Support</button>
+				</buttons>
+			</example>
+		</>
+
+		<section label="Colored Buttons" sticky collapsible dividing>
+			<example description="Groups can have a shared color.">
+				<buttons color="blue">
+					<button>One</button>
+					<button>Two</button>
+					<button>Three</button>
+				</buttons>
+			</example>
+		</>
+
+		<section label="Basic Buttons" sticky collapsible dividing>
+			<example description="A button group can be less pronounced.">
+				<buttons appearance="basic">
+					<button>One</button>
+					<button>Two</button>
+					<button>Three</button>
+				</buttons>
+				<divider/>
+				<buttons direction="vertical" appearance="basic">
+					<button>One</button>
+					<button>Two</button>
+					<button>Three</button>
+				</buttons>
+			</example>
+			<example>
+				<buttons>
+					<button color="red" appearance="basic">One</button>
+					<button color="blue" appearance="basic">Two</button>
+					<button color="green" appearance="basic">Three</button>
+				</buttons>
+			</example>
+		</>
+
+		<section label="Group Sizes" sticky collapsible dividing>
+			<example description="Groups can have a shared size.">
+				<buttons size="large">
+					<button>One</button>
+					<button>Two</button>
+					<button>Three</button>
+				</buttons>
+			</example>
+			<example>
+				<buttons size="small" icon appearance="basic">
+					<button icon="file" aria-label="New"/>
+					<button icon="save" aria-label="Save"/>
+					<button icon="upload" aria-label="Upload"/>
+					<button icon="download" aria-label="Download"/>
+				</buttons>
+			</example>
+			<example>
+				<buttons size="large">
+					<button>One</button>
+					<or/>
+					<button>Two</button>
+				</buttons>
+			</example>
+		</>
+
+		<section label="Wrapping Buttons" sticky collapsible dividing id="group-variations-wrapping-buttons">
+			<example description="Grouped buttons can automatically wrap, sharing the overall available width.">
+				<buttons wrapping>
+					<button>One</button>
+					<button>Two</button>
+					<button>Three</button>
+					<button>Four</button>
+					<button>Five</button>
+					<button>Six</button>
+					<button>Seven</button>
+					<button>Eight</button>
+					<button>Nine</button>
+					<button>Ten</button>
+					<button>Eleven</button>
+					<button>Twelve</button>
+					<button>Thirteen</button>
+					<button>Fourteen</button>
+					<button>Fifteen</button>
+					<button>Sixteen</button>
+					<button>Seventeen</button>
+					<button>Eighteen</button>
+					<button>Nineteen</button>
+					<button>Twenty</button>
+				</buttons>
+			</example>
+		</>
+
+		<section label="Spaced Buttons" sticky collapsible dividing>
+			<example>
+				<html>
+					<p slot="description">Buttons inside groups can get a margin so they don't appear attached together, especially with <code>wrapping</code> on responsive layouts.</p>
+					<ui-message slot="description" state="info" size="small">Add <code>padding="compact"</code> to a <code>wrapping</code> group when the buttons of each row should not share the row's width, especially for spaced buttons.</ui-message>
+				</html>
+				<buttons wrapping spacing="md">
+					<button>One</button>
+					<button>Two</button>
+					<button>Three</button>
+					<button>Four</button>
+					<button>Five</button>
+					<button>Six</button>
+					<button>Seven</button>
+					<button>Eight</button>
+					<button>Nine</button>
+					<button>Ten</button>
+					<button>Eleven</button>
+					<button>Twelve</button>
+					<button>Thirteen</button>
+					<button>Fourteen</button>
+					<button>Fifteen</button>
+					<button>Sixteen</button>
+					<button>Seventeen</button>
+					<button>Eighteen</button>
+					<button>Nineteen</button>
+					<button>Twenty</button>
+				</buttons>
+			</example>
+		</>
+
+		<section label="Circular Buttons" sticky collapsible dividing>
+			<example description="Circular buttons inside groups get a slight margin so they don't appear attached together.">
+				<buttons wrapping padding="compact" appearance="circular">
+					<button>One</button>
+					<button>Two</button>
+					<button>Three</button>
+					<button>Four</button>
+				</buttons>
+			</example>
+		</>
+
+		<section label="Fluid, compact and toggle groups" sticky collapsible dividing>
+			<example description="The same words as on a single button, applied to the whole group.">
+				<buttons fluid>
+					<button>Fluid</button>
+					<button>Group</button>
+				</buttons>
+				<divider/>
+				<buttons padding="compact">
+					<button>Compact</button>
+					<button>Group</button>
+				</buttons>
+				<buttons toggle>
+					<button selected>On</button>
+					<button>Off</button>
+				</buttons>
+			</example>
+		</>
+	</>
+
+	<section label="Not ported from Fomantic">
+		<markdown>
+			Five things from Fomantic's button page are left out on purpose.
+
+			- **Focusable `<div>` buttons** ([Types](#types)):  every `<ui-button>` draws a real
+			  button (or link), so it's always keyboard-focusable.
+			- **Pointing labels** ([Labeled](#types-labeled)):  the joined badge has no
+			  `right pointing` / `left pointing` shape.
+			  Shapes belong to `<ui-label>`, so the badge is a plain basic label.
+			- **The rest of the state behaviour** ([State texts](#states-state-texts)):
+			  hover texts, `flash`, `sync`, API and automatic states.
+			  A name that changes under the pointer confuses screen readers.
+			- **Social buttons** ([Circular](#variations-circular)):  no `facebook`, `twitter` ...
+			  Brand colours age fast:  colour a button with `color` or `--ui-color`, and give it a brand icon.
+			- **The `wrapped` helper** ([Wrapping Buttons](#group-variations-wrapping-buttons)):
+			  Fomantic's corner fix for a group known to wrap.
+			  Each row of a `wrapping` group is a rounded track of its own, so it needs no hint.
+		</>
+	</>
+</spell-notebook>

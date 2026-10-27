@@ -1,0 +1,9 @@
+{
+  // Spell UI's tests:  its browser settings (`../tsconfig.json`), over this folder
+  "extends": "../tsconfig.json",
+  // and Spell UI's own source, as its tsconfig includes it:  the JSX tags and Vitest types it declares reach the tests;
+  // the node tools too, which `src/tools/` and the static render's tests reach
+  "include": [".", "../src", "../site/_src"],
+  // the `spell` commands' tests:  node, with the commands' own settings (`../tsconfig.node.json`)
+  "exclude": ["cli", "../src/cli"]
+}

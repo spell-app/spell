@@ -1,0 +1,220 @@
+<spell-notebook "container examples">
+	<header level="1">
+		Container
+		<header>A container limits content to a maximum width.</>
+	</>
+	<container-tab-bar showing="examples"/>
+	<section>
+		<html>
+			<ui-menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+				<ui-item link="#types">Types</>
+				<ui-item link="#variations">Variations</>
+				<ui-item link="#in-layouts">In layouts</>
+			</>
+		</>
+	</>
+
+	<!--
+		EXAMPLES:  Fomantic's container page, in its order (Types, Variations, then its Examples tab as "In layouts"),
+		plus our own extras (Wide, Grid).  A container's maximum width only shows when the demo frame is wider than it:
+		on a phone every container is the frame's width.
+	-->
+	<section label="Types">
+		<section label="Container" sticky collapsible dividing>
+			<example description="A standard container.">
+				<html>
+					<ui-container>
+						<p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa <strong>strong</strong>. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede <a href="#container">link</a> mollis pretium.</p>
+					</ui-container>
+				</html>
+			</example>
+		</>
+
+		<section label="Text Container" sticky collapsible dividing>
+			<example>
+				<html>
+					<p slot="description">A container can reduce its maximum width to more naturally accommodate a single column of text.</p>
+				</html>
+				<message slot="description" state="info" size="small">A text container is a simpler markup alternative to using a grid with a single column, and is designed to have a reasonable maximum width for displaying flowing text.</message>
+				<html>
+					<ui-container text>
+						<ui-header level="2">Header</ui-header>
+						<p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa <strong>strong</strong>. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem.</p>
+						<p>Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede <a href="#text-container">link</a> mollis pretium.</p>
+					</ui-container>
+				</html>
+			</example>
+		</>
+	</>
+
+	<section label="Variations">
+		<section label="Text Alignment" sticky collapsible dividing>
+			<example description="A container can specify its text alignment:  `align` is `left`, `center`, `right` or `justified`.">
+				<container align="left">Left Aligned</container>
+				<container align="center">Center Aligned</container>
+				<container align="right">Right Aligned</container>
+				<html>
+					<ui-container align="justified">
+						<b>Justified</b>
+						<ui-divider></ui-divider>
+						<p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa <strong>strong</strong>. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo.</p>
+					</ui-container>
+				</html>
+			</example>
+		</>
+
+		<section label="Scrolling" sticky collapsible dividing>
+			<example>
+				<html>
+					<p slot="description">A scrolling container has a predefined height to allow its content to be scrollable.</p>
+					<ui-message slot="description" size="small">Add <code>resizable</code> to a <code>scrolling</code> container and a native resize handle appears at its bottom right.</ui-message>
+					<ui-container scrolling aria-label="Scrolling text">
+						<p>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.</p>
+						<p>Te eum doming eirmod, nominati pertinacia argumentum ad his. Ex eam alia facete scriptorem, est autem aliquip detraxit at. Usu ocurreret referrentur at, cu epicurei appellantur vix. Cum ea laoreet recteque electram, eos choro alterum definiebas in. Vim dolorum definiebas an. Mei ex natum rebum iisque.</p>
+						<p>Audiam quaerendum eu sea, pro omittam definiebas ex. Te est latine definitiones. Quot wisi nulla ex duo. Vis sint solet expetenda ne, his te phaedrum referrentur consectetuer. Id vix fabulas oporteat, ei quo vide phaedrum, vim vivendum maiestatis in.</p>
+						<p>Eu quo homero blandit intellegebat. Incorrupte consequuntur mei id. Mei ut facer dolores adolescens, no illum aperiri quo, usu odio brute at. Qui te porro electram, ea dico facete utroque quo. Populo quodsi te eam, wisi everti eos ex, eum elitr altera utamur at.</p>
+						<p>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.</p>
+						<p>Te eum doming eirmod, nominati pertinacia argumentum ad his. Ex eam alia facete scriptorem, est autem aliquip detraxit at. Usu ocurreret referrentur at, cu epicurei appellantur vix. Cum ea laoreet recteque electram, eos choro alterum definiebas in. Vim dolorum definiebas an. Mei ex natum rebum iisque.</p>
+					</ui-container>
+				</html>
+			</example>
+			<example description="A scrolling container optionally takes a predefined height:  `scrolling` is `long`, `very long`, `short` or `very short`.">
+				<html>
+					<ui-container scrolling="very short" resizable aria-label="Very short scrolling text">
+						<p>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.</p>
+						<p>Te eum doming eirmod, nominati pertinacia argumentum ad his. Ex eam alia facete scriptorem, est autem aliquip detraxit at. Usu ocurreret referrentur at, cu epicurei appellantur vix. Cum ea laoreet recteque electram, eos choro alterum definiebas in. Vim dolorum definiebas an. Mei ex natum rebum iisque.</p>
+						<p>Audiam quaerendum eu sea, pro omittam definiebas ex. Te est latine definitiones. Quot wisi nulla ex duo. Vis sint solet expetenda ne, his te phaedrum referrentur consectetuer. Id vix fabulas oporteat, ei quo vide phaedrum, vim vivendum maiestatis in.</p>
+						<p>Eu quo homero blandit intellegebat. Incorrupte consequuntur mei id. Mei ut facer dolores adolescens, no illum aperiri quo, usu odio brute at. Qui te porro electram, ea dico facete utroque quo. Populo quodsi te eam, wisi everti eos ex, eum elitr altera utamur at.</p>
+					</ui-container>
+				</html>
+			</example>
+		</>
+
+		<section label="Fluid" sticky collapsible dividing>
+			<example>
+				<html>
+					<p slot="description">A fluid container has no maximum width.</p>
+				</html>
+				<message slot="description" state="info" size="small">Fluid containers are useful for setting text alignment, or other variations on unstyled content.</message>
+				<html>
+					<ui-container fluid>
+						<ui-header level="2">Dogs Roles with Humans</ui-header>
+						<p>Domestic dogs inherited complex behaviors, such as bite inhibition, from their wolf ancestors, which would have been pack hunters with complex body language. These sophisticated forms of social cognition and communication may account for their trainability, playfulness, and ability to fit into human households and social situations.</p>
+						<p>The dogs' value to early human hunter-gatherers led to them quickly becoming ubiquitous across world cultures. Dogs perform many roles for people, such as hunting, herding, pulling loads, protection, assisting police and military, companionship, and, more recently, aiding handicapped individuals.</p>
+					</ui-container>
+				</html>
+			</example>
+		</>
+
+		<section label="Wide" sticky collapsible dividing>
+			<example description="A wide container is a fifth wider than the default (`--ui-container-wide-ratio`, 1.2).">
+				<html>
+					<ui-container wide>
+						<p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa <strong>strong</strong>. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.</p>
+					</ui-container>
+				</html>
+			</example>
+		</>
+
+		<section label="Grid" sticky collapsible dividing>
+			<example description="A container that holds a grid is widened by the grid's gutters, so its columns line up with other containers;  `spacing=\"lg\"` (or `xl`) makes room for a grid's wider gutters.">
+				<container grid>
+					<grid columns="2">
+						<column>
+							<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
+						</column>
+						<column>
+							<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
+						</column>
+					</grid>
+				</container>
+				<container grid spacing="xl">
+					<grid columns="2" spacing="xl">
+						<column>
+							<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
+						</column>
+						<column>
+							<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
+						</column>
+					</grid>
+				</container>
+			</example>
+		</>
+	</>
+
+	<section label="In layouts">
+		<section label="Containers Using Grids" sticky collapsible dividing>
+			<example>
+				<html>
+					<p slot="description">A container can be combined with a grid allowing you to use all of the layout and alignment available for grids, including responsive patterns.</p>
+					<ui-message slot="description" size="small">Fomantic writes one element, <code>ui four column doubling stackable grid container</code>;  ours is a grid container around a <code>&lt;ui-grid&gt;</code>. Our grid responds to the width of its container, not the screen's, so inside this demo frame (under 768px) the stackable grid stacks even on a desktop.</ui-message>
+				</html>
+				<container grid>
+					<grid columns="4" doubling stackable>
+						<column>
+							<image src="/components/ui/images/wireframe/media-paragraph.png" alt=""/>
+							<divider spacer/>
+							<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
+						</column>
+						<column>
+							<image src="/components/ui/images/wireframe/media-paragraph.png" alt=""/>
+							<divider spacer/>
+							<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
+						</column>
+						<column>
+							<image src="/components/ui/images/wireframe/media-paragraph.png" alt=""/>
+							<divider spacer/>
+							<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
+						</column>
+						<column>
+							<image src="/components/ui/images/wireframe/media-paragraph.png" alt=""/>
+							<divider spacer/>
+							<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
+						</column>
+					</grid>
+				</container>
+			</example>
+		</>
+
+		<!-- GAP I31:  items inside a <ui-container> in a <ui-menu> lose the menu's row layout and their icons. -->
+		<section label="Centered Menu" sticky collapsible dividing>
+			<example description="A container can be used inside of a menu to make sure menu items appear inline with page contents.  A `stackable` menu adjusts to small screens.">
+				<menu attach="both" stackable aria-label="Centered menu">
+					<container>
+						<item link="#centered-menu" icon="home">Home</item>
+						<item link="#centered-menu" icon="grip">Browse</item>
+						<item link="#centered-menu" icon="envelope">Messages</item>
+						<item>
+							<dropdown appearance="simple" label="More" aria-label="More">
+								<item value="edit" icon="pen to square">Edit Profile</item>
+								<item value="language" icon="globe">Choose Language</item>
+								<item value="settings" icon="gear">Account Settings</item>
+							</dropdown>
+						</item>
+						<menu position="right">
+							<item>
+								<input placeholder="Search..." aria-label="Search"/>
+							</item>
+						</menu>
+					</container>
+				</menu>
+			</example>
+		</>
+
+		<section label="Container Segment" sticky collapsible dividing>
+			<example>
+				<html>
+					<p slot="description">A container can be used with a segment.</p>
+					<ui-message slot="description" size="small">Fomantic writes one element, <code>ui raised very padded text container segment</code>. Ours is a <code>text</code> container around a <code>raised</code> segment.</ui-message>
+					<ui-container text>
+						<ui-segment padding="lg" appearance="raised">
+							<ui-header level="2">Dogs Roles with Humans</ui-header>
+							<p>Domestic dogs inherited complex behaviors, such as bite inhibition, from their wolf ancestors, which would have been pack hunters with complex body language. These sophisticated forms of social cognition and communication may account for their trainability, playfulness, and ability to fit into human households and social situations.</p>
+							<p>The dogs' value to early human hunter-gatherers led to them quickly becoming ubiquitous across world cultures. Dogs perform many roles for people, such as hunting, herding, pulling loads, protection, assisting police and military, companionship, and, more recently, aiding handicapped individuals.</p>
+						</ui-segment>
+					</ui-container>
+				</html>
+			</example>
+		</>
+	</>
+</spell-notebook>
