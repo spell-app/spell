@@ -9,7 +9,7 @@ import type {
   RunStatus
 } from "spell/server/runs/runs.types"
 
-import { ServerLink, clockOf, sentence, type ServerLinkOptions } from "spell-epic/review"
+import { PageStore, ServerLink, clockOf, sentence, type ServerLinkOptions } from "spell-epic/review"
 
 import { DraftSaver } from "./DraftSaver"
 import { RUN_POLL_MS, RUN_SAVE_MS, RUNS_API, type SendFill } from "./answers.types"
@@ -18,7 +18,7 @@ import { RUN_POLL_MS, RUN_SAVE_MS, RUNS_API, type SendFill } from "./answers.typ
  * ### `RunForm`
  * A RUN PAGE's answers, as `<epic-run>` holds them (epic `epic-engine` P23):  a command asked Owen through the kit's
  * `SRV.CommandRun`, and waits for his Send.
- * - One per page (`forPage()`), for the run its `<epic-run run>` names.
+ * - One per page (`forPage()`), for the run its `<epic-run run>` names:  a `PageStore` `<epic-run>` follows.
  * - Reads the run (`load()`):  `GET /api/runs/<id>` (`src/tools/runRoutes.ts`), what the command asks (`page`), what
  *   Owen answered so far (`answers`), and whether a command waits on it now (`isWaiting`).
  * - Each row's answer is SAVED AS HE GIVES IT (`answer()`), not only at Send:  the command's steering reads the same
@@ -41,7 +41,7 @@ import { RUN_POLL_MS, RUN_SAVE_MS, RUNS_API, type SendFill } from "./answers.typ
  * - Position in the import graph:  `spell-epic/review` (the link), `spell-epic/dates`, its peers, and the kit's run
  *   types (`spell/server/runs/runs.types`, types only).  NEVER imports Solid or Spell UI.
  ****************/
-export class RunForm {
+export class RunForm extends PageStore {
   /** What the command asks, once read;  `undefined` before. */
   page: RunPage | undefined
 
@@ -60,9 +60,6 @@ export class RunForm {
   /** A Send on its way. */
   isSending = false
 
-  /** Bumped on every change:  readers compare it. */
-  version = 0
-
   /** The answers given and not saved yet, by row id. */
   private readonly unsaved = new Map<string, RunAnswer>()
 
@@ -72,9 +69,6 @@ export class RunForm {
   /** The answers' saves:  one at a time, retried, sent as the page goes;  where they stand. */
   private readonly saves: DraftSaver
 
-  /** Called on every change. */
-  private readonly listeners = new Set<() => void>()
-
   /** The page server, as answers go to it. */
   private readonly link: ServerLink
 
@@ -82,11 +76,12 @@ export class RunForm {
     readonly runId: string,
     options: ServerLinkOptions
   ) {
+    super()
     this.link = new ServerLink(options)
     this.saves = new DraftSaver({
       save: (save) => this.saveUnsaved(save),
       wait: RUN_SAVE_MS,
-      onChange: () => this.notify()
+      onChange: () => this.changed()
     })
   }
 
@@ -94,18 +89,15 @@ export class RunForm {
   // ## The page's form
   ////////////////
 
-  /** The page's form, once made. */
-  private static current: RunForm | undefined
-
-  /** The page's form for run `runId`, made on the first call (browser only). */
+  /**
+   * The page's form for run `runId`, made on the first call (browser only), or again for another run;
+   * a test hands it its own (`adopt()`).
+   */
   static forPage(runId: string): RunForm {
-    if (RunForm.current?.runId !== runId) RunForm.current = new RunForm(runId, ServerLink.pageOptions())
-    return RunForm.current
-  }
-
-  /** Make `form` the page's from now on (`undefined`:  the next `forPage()` makes one):  tests. */
-  static adopt(form: RunForm | undefined) {
-    RunForm.current = form
+    return RunForm.onePerPage(
+      () => new RunForm(runId, ServerLink.pageOptions()),
+      (current) => current.runId === runId
+    )
   }
 
   ////////////////
@@ -205,7 +197,7 @@ export class RunForm {
     const answer: RunAnswer = { outcome, value, at: new Date().toISOString(), ...(ticked !== undefined && { ticked }) }
     this.answers = { ...this.answers, rows: { ...this.answers.rows, [rowId]: answer } }
     this.unsaved.set(rowId, answer)
-    this.notify()
+    this.changed()
     this.saves.changed({ now })
   }
 
@@ -220,7 +212,7 @@ export class RunForm {
     if (effort === this.effort) return
     this.answers = { ...this.answers, effort }
     this.unsavedEffort = effort
-    this.notify()
+    this.changed()
     this.saves.changed({ now: true })
   }
 
@@ -251,7 +243,7 @@ export class RunForm {
     if (this.isSending) return
     this.isSending = true
     this.sendError = ""
-    this.notify()
+    this.changed()
     try {
       await this.flush()
       if (this.unsaved.size || this.unsavedEffort !== undefined)
@@ -263,7 +255,7 @@ export class RunForm {
       this.sendError = `Couldn't send:  ${sentence((failure as Error).message)}`
     } finally {
       this.isSending = false
-      this.notify()
+      this.changed()
     }
   }
 
@@ -286,7 +278,7 @@ export class RunForm {
     } catch (failure) {
       this.loadError = sentence((failure as Error).message)
     }
-    this.notify()
+    this.changed()
   }
 
   /** `answers` from the server, with the answers (and effort) given here and not saved yet laid over them. */
@@ -319,18 +311,6 @@ export class RunForm {
       unwatch()
       unsave()
     }
-  }
-
-  /** Call `listener` on every change;  returns the undo. */
-  subscribe(listener: () => void): () => void {
-    this.listeners.add(listener)
-    return () => this.listeners.delete(listener)
-  }
-
-  /** Something changed:  `version` up, every listener told. */
-  private notify() {
-    this.version++
-    for (const listener of this.listeners) listener()
   }
 }
 

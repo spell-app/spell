@@ -4,7 +4,7 @@
  * with Python's name for each and whether spell_core has it yet;  then boots the docs bundle.
  * - Loaded INSTEAD of `spell-ui.js`, as `commands.js` is:  it fetches, draws, then adds `spell-ui.js` (same folder),
  *   whatever happened (`drawThenBoot()`).
- * - The data:  two JSON files, fetched from the checkout SERVING the page,
+ * - The data:  two JSON files, read from the checkout SERVING the page (the page's `ServerLink`, `getFile()`),
  *   so the page shows that checkout's core and can't go stale.
  *   Their paths are relative to the page, in `<body>`'s data attributes:
  *   - `data-core-declarations`:  `spell-parser/src/core/core.declarations.json5`, the core's method list
@@ -34,64 +34,49 @@
  *   writes them (`<ui-section>`, `<ui-table>` round a real `<table>`, `<ui-label>`, `<ui-statistic>`, `<ui-message>`,
  *   the source link a `<ui-button>`), in the page's light DOM, so the runtime's contents, sticky titles, table widths
  *   and comment anchors take them as hand-written ones
- * - From `file://` it shows a notice where the tables go:
+ * - From `file://` it shows a notice where the tables go (`drawThenBoot()`):
  *   the page needs the PAGE SERVER (`epic pages open <page>`).
  * - BUNDLED (epic `coherence` C12):  `node src/tools/bundle-spell-ui.js --data-pages` builds it into
  *   `core-reference.js`, a classic script with NO Spell UI in it;  edit THIS, never the bundle.  It imports the helpers
- *   that exist:  the docs helpers' `el()`, `titleInside()` and start, the kit's `slug()`.
+ *   that exist:  the docs helpers' `el()`, `titleInside()` and start, the kit's `slug()`, `ServerLink`.
  */
 import { slug } from "spell/util/string"
+import { ServerLink } from "spell-epic/review"
 
-import {
-  dataNotice,
-  drawThenBoot,
-  el,
-  fetchFile,
-  pagePath,
-  sectionNumber,
-  titleInside,
-  withCode as withCodeSpans
-} from "./spell-doc-helpers.js"
+import { drawThenBoot, el, sectionNumber, titleInside, withCode as withCodeSpans } from "./spell-doc-helpers.js"
 
 /** Columns of every file's table. */
 const COLUMNS = ["name", "Python", "in Python", "what it does"]
 
-void drawThenBoot(load, draw, (error) => notice(`Couldn't draw the reference:  ${error.message}`))
+void drawThenBoot({
+  load,
+  draw,
+  holder: "[data-core-modules]",
+  header: "Reference not drawn",
+  offServer: "This page draws the core's method list from the checkout serving it",
+  failure: "Couldn't draw the reference"
+})
 
 ////////////////
 // ## Start
 ////////////////
 
 /**
- * Both files, as `{ declarations, notPorted? }`, or `undefined` after showing why not.
+ * Both files, as `{ declarations, notPorted? }`.
  * - throws when the core's method list can't be read;  a missing `not_ported_yet.json5` only leaves `notPorted` out
+ * - each by its name now, `.json5`, first (`ServerLink.dataFileNames()`;  epic `people-and-orgs` P12):  the page names
+ *   the old file, `.json`, which an older checkout still has.  Both hold plain JSON.
  */
 async function load() {
   const { coreDeclarations, notPorted } = document.body.dataset
-  if (location.protocol === "file:") {
-    notice(
-      `This page draws the core's method list from the checkout serving it:  open it through the page server, e.g. \`epic pages open ${pagePath()}\`.`
-    )
-    return undefined
-  }
   if (!coreDeclarations) throw new Error("the page's `<body>` has no `data-core-declarations`")
+  const link = ServerLink.forPage()
   const [declarations, groups] = await Promise.all([
-    fetchJSON(coreDeclarations),
-    notPorted ? fetchJSON(notPorted).catch(() => undefined) : undefined
+    link.getFile(ServerLink.dataFileNames(coreDeclarations)),
+    notPorted ? link.getFile(ServerLink.dataFileNames(notPorted)).catch(() => undefined) : undefined
   ])
+  if (declarations === undefined) throw new Error(`${coreDeclarations}:  not found`)
   return { declarations, notPorted: groups }
-}
-
-/**
- * The JSON at `path`, relative to the page;  throws on a failed response.
- * - A `.json` path is read as `.json5` first (epic `people-and-orgs` P12):  the page names the old file, which an
- *   older checkout still has, and this checkout's file is the new one.  Both hold plain JSON.
- */
-async function fetchJSON(path) {
-  const renamed = path.endsWith(".json") ? await fetchFile(`${path}5`, { format: "json" }) : undefined
-  const found = renamed ?? (await fetchFile(path, { format: "json" }))
-  if (found === undefined) throw new Error(`${path}:  not found`)
-  return found
 }
 
 ////////////////
@@ -255,11 +240,6 @@ function notPortedList(statements, notPorted) {
     return el("li", {}, ...withCode(group.why), ` (${group.names.length}):`, el("br"), ...names)
   })
   return el("ul", {}, ...items)
-}
-
-/** Show `message` where the tables go (or at the top of `main`). */
-function notice(message) {
-  dataNotice(document.querySelector("[data-core-modules]"), "Reference not drawn", message)
 }
 
 ////////////////

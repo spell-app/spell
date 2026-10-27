@@ -3,7 +3,7 @@ import { isServer, type JSX } from "@solidjs/web"
 
 import { E } from "spell-ui/core"
 
-import { ChoicesForm, type ChoiceRowPart } from "spell-epic/answers"
+import { ChoicesForm, keepOneLine, stopNewLine, type ChoiceRowPart } from "spell-epic/answers"
 
 import { epicChoiceRowVocabulary } from "./EpicChoiceRow.en"
 import { ROW_TAG, ROWS_TAG } from "./EpicChoiceRows.types"
@@ -21,8 +21,9 @@ import rowsCSS from "./EpicChoiceRows.css?inline"
  *     `{ spell: "open", kind: "external" }`, which hands it to VS Code (`packages/vscode/src/DocView.ts`).
  *   - Purpose:  the purpose, `stays` when Claude would keep it, the note under it;  `` `code` `` in either is code
  *   - Current:  today's text, as code
- *   - Recommended:  the box, pre-filled with Claude's call;  one line of text that wraps and grows (Enter adds no
- *     line, a pasted line break goes);  changed, it's orange, with a round button putting the recommendation back
+ *   - Recommended:  the box, pre-filled with Claude's call;  one line of text that wraps and grows
+ *     (Enter adds no line, a pasted line break goes:  `keepOneLine()`);
+ *     changed, it's orange, with a round button putting the recommendation back
  * - `blank` (epic `epic-engine` P13, r12;  Owen picked layout A on its example page):  no recommendation.  ONE first
  *   cell, today's text with an EMPTY box under it, then Purpose.
  *   - Blank means no change:  it's changed once its box holds anything but today's text.
@@ -235,7 +236,7 @@ export class EpicChoiceRow extends E.UIComponent<typeof epicChoiceRowVocabulary>
           autocomplete="off"
           aria-label={label}
           onInput={this.onInput}
-          onKeyDown={this.onKeyDown}
+          onKeyDown={stopNewLine}
         />
         <Show when={this.layout.blank ? this.value !== "" : this.isChanged}>
           <button
@@ -328,17 +329,10 @@ export class EpicChoiceRow extends E.UIComponent<typeof epicChoiceRowVocabulary>
   // ## Events
   ////////////////
 
-  /** A keystroke in the box:  one line of text (a pasted line break goes);  the form told. */
+  /** A keystroke in the box:  one line of text (`keepOneLine()`);  the form told. */
   private readonly onInput = (event: InputEvent) => {
-    const box = event.currentTarget as BoxElement
-    if (/\n/.test(box.value)) box.value = box.value.replace(/\s*\n\s*/g, " ")
-    this.typed = box.value
-    this.form?.changed()
-  }
-
-  /** Enter in the box adds no line. */
-  private readonly onKeyDown = (event: KeyboardEvent) => {
-    if (event.key === "Enter") event.preventDefault()
+    this.typed = keepOneLine(event.currentTarget as BoxElement)
+    this.form?.edited()
   }
 
   /** Move up:  the row above goes below this one;  the form told. */
@@ -346,7 +340,7 @@ export class EpicChoiceRow extends E.UIComponent<typeof epicChoiceRowVocabulary>
     const above = this.domElement.previousElementSibling
     if (above?.localName !== ROW_TAG) return
     this.domElement.after(above)
-    this.form?.changed()
+    this.form?.edited()
   }
 
   /** Move down:  the row below goes above this one;  the form told. */
@@ -354,14 +348,14 @@ export class EpicChoiceRow extends E.UIComponent<typeof epicChoiceRowVocabulary>
     const below = this.domElement.nextElementSibling
     if (below?.localName !== ROW_TAG) return
     this.domElement.before(below)
-    this.form?.changed()
+    this.form?.edited()
   }
 
   /** With `blank`, today's text clicked:  copied into the box, the cursor at its end;  the form told. */
   private readonly onCopy = () => {
     const text = this.current ?? ""
     this.typed = text
-    this.form?.changed()
+    this.form?.edited()
     E.beforeNextPaint(() => {
       this.box?.focus()
       this.box?.shadowRoot?.querySelector("textarea")?.setSelectionRange(text.length, text.length)
@@ -371,7 +365,7 @@ export class EpicChoiceRow extends E.UIComponent<typeof epicChoiceRowVocabulary>
   /** The reset button:  the recommendation back in the box (with `blank`, the box cleared), the cursor in it. */
   private readonly onReset = () => {
     this.typed = undefined
-    this.form?.changed()
+    this.form?.edited()
     this.box?.focus()
   }
 

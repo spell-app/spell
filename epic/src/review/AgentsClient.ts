@@ -1,11 +1,12 @@
 import { AGENTS_API, AGENTS_FILE, agentsOf, type RunningAgent, type ServerLinkOptions } from "./review.types"
+import { PageStore } from "./PageStore"
 import { ServerLink } from "./ServerLink"
 
 /****************
  * ### `AgentsClient`
  * An epic page's RUNNING AGENTS, as the page sees them (epic `skillz` P3):  the epic's list.
  * - read from and written to the page server's agents routes (`src/tools/agentRoutes.ts`)
- * - one client per page (`forPage()`)
+ * - one client per page (`forPage()`), a `PageStore` the panel follows (`subscribe()`)
  * - `<epic-page>` draws its "Agents running" panel from it (`<epic-agents>`)
  *
  * - LISTED only when the page is an epic page served with a token, and the list answers (`listed`):
@@ -19,25 +20,19 @@ import { ServerLink } from "./ServerLink"
  *   - when the page server says the list's file changed (`agents.json5`, beside the epic page)
  * - Node-safe at import, and without `watch()`:  no `window` / `document` touched;
  *   `fetch` comes in through `ServerLinkOptions`, so tests stub it
- * - Position in the import graph:  its peers (types, `ServerLink`) only.
+ * - Position in the import graph:  its peers (types, `ServerLink`, `PageStore`) only.
  *   NEVER imports Solid, Spell UI or the `spell-epic` barrel:  the panel bridges its changes (`subscribe()`)
  *   into its own signal.
  ****************/
-export class AgentsClient {
+export class AgentsClient extends PageStore {
   /** The running agents as last read or written, oldest first. */
   agents: RunningAgent[] = []
 
   /** Served with a token, and the list answered:  the panel shows while an agent runs. */
   listed = false
 
-  /** Bumped on every change:  readers compare it, the panel tracks it. */
-  version = 0
-
   /** The page server, as the list is written to it:  the write token, its refresh, the watch. */
   private readonly link: ServerLink
-
-  /** Called on every change. */
-  private readonly listeners = new Set<() => void>()
 
   /** Redirects in flight:  a poll's answer can't overwrite what they're about to. */
   private writing = 0
@@ -46,6 +41,7 @@ export class AgentsClient {
   private starting: Promise<boolean> | undefined
 
   constructor(private readonly options: ServerLinkOptions) {
+    super()
     this.link = new ServerLink(options)
   }
 
@@ -53,27 +49,20 @@ export class AgentsClient {
   // ## The page's client
   ////////////////
 
-  /** The page's client, once made. */
-  private static current: AgentsClient | undefined
-
   /**
    * The page's client, made and started on the first call (browser only), and `watch()`ing the page once listed.
    * - SIDE EFFECT:  the first call reads the list and starts polling
+   * - a test hands it its own (`adopt()`)
    */
   static forPage(): AgentsClient {
-    if (AgentsClient.current) return AgentsClient.current
-    const client = new AgentsClient(ServerLink.pageOptions())
-    AgentsClient.current = client
-    void client
-      .start()
-      .then((listed) => listed && client.watch(window))
-      .catch((error: unknown) => console.error("AgentsClient:  couldn't start", error))
-    return client
-  }
-
-  /** Make `client` the page's from now on (`undefined`:  the next `forPage()` makes one):  tests, on a stubbed fetch. */
-  static adopt(client: AgentsClient | undefined) {
-    AgentsClient.current = client
+    return AgentsClient.onePerPage(() => {
+      const client = new AgentsClient(ServerLink.pageOptions())
+      void client
+        .start()
+        .then((listed) => listed && client.watch(window))
+        .catch((error: unknown) => console.error("AgentsClient:  couldn't start", error))
+      return client
+    })
   }
 
   ////////////////
@@ -118,16 +107,6 @@ export class AgentsClient {
   }
 
   ////////////////
-  // ## Listening
-  ////////////////
-
-  /** Call `listener` on every change (a read, a redirect);  returns the undo. */
-  subscribe(listener: () => void): () => void {
-    this.listeners.add(listener)
-    return () => this.listeners.delete(listener)
-  }
-
-  ////////////////
   // ## Redirect
   ////////////////
 
@@ -150,12 +129,6 @@ export class AgentsClient {
   ////////////////
   // ## Helpers
   ////////////////
-
-  /** Everyone told something changed. */
-  private changed() {
-    this.version++
-    for (const listener of this.listeners) listener()
-  }
 
   /** Read the list;  true when it answered (a redirect in flight wins:  its answer is newer). */
   private async load(): Promise<boolean> {

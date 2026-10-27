@@ -5,7 +5,7 @@
  * - a CHOICE page:  rows (`<epic-choice-row>`) and their bar (`<epic-choices-bar>`)
  * - The answers' shapes are COPIES of the page server's routes' (`src/tools/detailsRoutes.ts`,
  *   `choicesRoutes.ts`):  `epics` never imports `docs` (the root's dependency rule).
- * - Pure data and types:  nothing here runs.
+ * - Data, types and the one-line answer box's rule (`keepOneLine()`):  nothing here runs at import.
  */
 
 ////////////////
@@ -99,6 +99,28 @@ export const RUN_POLL_MS = 30_000
 
 /** The docs runtime's per-page fold store:  `spell-doc-runtime.js` `FOLD_KEY_PREFIX`, `{ [section id]: folded }`. */
 export const FOLD_KEY_PREFIX = "spell-folds:"
+
+////////////////
+// ## A one-line answer box
+////////////////
+
+/**
+ * Keep answer box `box` to ONE LINE, as it's typed in:  a line break pasted in becomes a space, the spaces round it
+ * gone;  returns its text.
+ * - the ONE rule of every one-line answer box (epic `coherence` P22):  the choice rows', the run rows' and the syntax
+ *   page's class names, a line that wraps and grows;  with `stopNewLine()` on its keys
+ * - `box`:  a `<ui-textarea>`, or a native `<textarea>`
+ * - SIDE EFFECT:  rewrites `box.value` when it held a line break
+ */
+export function keepOneLine(box: { value: string }): string {
+  if (box.value.includes("\n")) box.value = box.value.replace(/\s*\n\s*/g, " ")
+  return box.value
+}
+
+/** A key in a one-line answer box (`keepOneLine()`):  Enter adds no line. */
+export function stopNewLine(event: KeyboardEvent) {
+  if (event.key === "Enter") event.preventDefault()
+}
 
 ////////////////
 // ## A draft that saves itself

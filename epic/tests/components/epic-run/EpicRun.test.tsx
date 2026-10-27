@@ -7,6 +7,8 @@ import type { RunAnswers, RunPage } from "spell/server/runs/runs.types"
 import { RunForm } from "spell-epic/answers"
 
 import "spell-epic/components/epic-run"
+// the rows' boxes are `<ui-textarea grow>`s:  `<ui-root>` loads them on a page
+import "spell-ui/components/ui-input"
 
 ////////////////
 // ## Fakes

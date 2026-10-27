@@ -66,10 +66,22 @@
     align-items: flex-start;
     gap: 4px;
   }
+  /* a `<ui-textarea grow>` (epic `coherence` P22, as the choice row's):  this look on its native textarea, its
+     `control` part;  it grows to a third of the window, then scrolls */
   .box {
+    display: flex;
     flex: 1 1 auto;
     min-width: 0;
-    field-sizing: content;
+  }
+  .box::part(input) {
+    flex: 1 1 auto;
+    font: inherit;
+  }
+  .box::part(control) {
+    /* one line to start:  its line, and its 4px padding and 1px border each side */
+    min-block-size: calc(1lh + 10px);
+    margin: 0;
+    box-sizing: border-box;
     resize: none;
     overflow-wrap: anywhere;
     padding: 4px 8px;
@@ -80,7 +92,7 @@
     font: inherit;
     line-height: 1.4;
   }
-  .box:focus-visible {
+  .box::part(control):focus-visible {
     outline: 2px solid var(--ui-focus-color, Highlight);
     outline-offset: -1px;
   }
@@ -208,7 +220,7 @@
 }
 
 @layer ui.components.epic-run-row.states {
-  :host(:state(changed)) .box {
+  :host(:state(changed)) .box::part(control) {
     border-color: var(--_epic-run-changed);
     background: var(--ui-orange-background, light-dark(#fff3e8, #3a2a1c));
   }

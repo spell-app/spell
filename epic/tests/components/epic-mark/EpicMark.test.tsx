@@ -1,7 +1,9 @@
-import { describe, expect, test } from "vite-plus/test"
+import { describe, expect, test, vi } from "vite-plus/test"
 
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import { expectAccessible } from "spell/test-helpers/A11y"
+
+import { ReviewClient, type Inbox } from "spell-epic/review"
 
 import "spell-epic/components/epic-mark"
 import "spell-epic/components/epic-page"
@@ -47,6 +49,20 @@ describe("<epic-mark>", () => {
     expect(fills.size).toBe(3)
   })
 
+  test("follows the review inbox, as its item's own chip:  blue while Claude works on the item (`DrawnState`)", async () => {
+    await adoptWorking(["q9"])
+    try {
+      const root = await ElementFixture.render(page(`<epic-mark item="q9" link></epic-mark>`))
+      const mark = root.querySelector("epic-mark")!
+      await vi.waitFor(() => expect(chipOf(mark).dataset.state).toBe("progress"))
+      // the item's own chip says the same:  blue
+      const chip = root.querySelector("#q9")!.shadowRoot!.querySelector<HTMLElement>("[part~='id']")!
+      expect(chip.dataset.color).toBe("blue")
+    } finally {
+      ReviewClient.adopt(undefined)
+    }
+  })
+
   test("follows its item:  a state changed on the page recolours it", async () => {
     const root = await ElementFixture.render(page(`<epic-mark item="j9" link></epic-mark>`))
     root.querySelector("#j9")!.setAttribute("state", "progress")
@@ -63,3 +79,32 @@ describe("<epic-mark>", () => {
     expect(chipOf(mark).title).toBe("Not on this page:  T4")
   })
 })
+
+/** A started review client adopted as the page's, its inbox `working` on `ids` (item ids). */
+async function adoptWorking(ids: string[]): Promise<ReviewClient> {
+  const since = new Date().toISOString()
+  const inbox = {
+    marks: {},
+    drafts: {},
+    urgency: {},
+    sent: null,
+    now: [],
+    working: Object.fromEntries(ids.map((id) => [id, { action: "details", since }])),
+    listening: null,
+    unsentComments: [],
+    waitingComments: [],
+    woken: null,
+    doing: null
+  } as unknown as Inbox
+  const client = new ReviewClient({
+    page: "/epics/demo/demo.plan.html",
+    server: { token: "token" },
+    protocol: "http:",
+    fetch: (async () =>
+      new Response(JSON.stringify(inbox), { headers: { "content-type": "application/json" } })) as typeof fetch,
+    storage: null
+  })
+  await client.start()
+  ReviewClient.adopt(client)
+  return client
+}

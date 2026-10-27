@@ -12,6 +12,8 @@
  */
 
 import { nextFrame } from "spell/util/dom"
+import { clamp } from "spell/util/number"
+import { withoutAccents } from "spell/util/string"
 import { commentsOnPage, firstWords } from "./spell-doc-comments.js"
 import { FIELDS, el, titleInside } from "./spell-doc-helpers.js"
 import { ThreadFacts } from "spell-epic/comments"
@@ -68,17 +70,18 @@ const ITEM_ID = /^[A-Z](\d+)\b/
  * Each title's ACCESS LETTER, unique among them, lower case;  `undefined` for a title with no free letter.
  * - its title's first letter, else the next letter IN its title not taken yet:
  *   `Types` t, `Groups` g, `Content` c, `States` s, `Variations` v, `Group Variations` r
- * - first come, first served, in toolbar order;  letters only (a-z, accents folded), never a digit or a space
+ * - first come, first served, in toolbar order;  letters only (a-z, accents folded:  `withoutAccents()`), never a
+ *   digit or a space
  * - pure:  no DOM
  */
 export function accessLetters(titles) {
   const taken = new Set()
   return titles.map((title) => {
-    const letters = title
-      .normalize("NFD")
+    const letters = withoutAccents(title)
       .toLowerCase()
       .replace(/[^a-z]/g, "")
-    const letter = [...letters].find((candidate) => !taken.has(candidate))
+    // a-z alone by now:  a letter a character
+    const letter = letters.split("").find((candidate) => !taken.has(candidate))
     if (letter) taken.add(letter)
     return letter
   })
@@ -197,7 +200,7 @@ function wireKeyTips(toolbar) {
     tip.querySelector("kbd").textContent = item.dataset.key.toUpperCase()
     if (!tip.matches(":popover-open")) tip.showPopover()
     const width = tip.offsetWidth
-    tip.style.left = `${Math.max(8, Math.min(innerWidth - width - 8, box.left + box.width / 2 - width / 2))}px`
+    tip.style.left = `${clamp(box.left + box.width / 2 - width / 2, 8, innerWidth - width - 8)}px`
     tip.style.top = `${box.bottom + 6}px`
   }
   const hide = () => {

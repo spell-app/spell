@@ -16,11 +16,13 @@ import {
  * A page's LINK to the page server:  EVERY read, write and poll of the epic pages and the docs pages goes through one
  * (epic `coherence` C9).
  * - the review inbox's (`ReviewClient`), the running agents' (`AgentsClient`), the answer pages' forms (`AnswerForm`,
- *   `ChoicesForm`, `RunForm`), the epic page's own reads, the docs pages' comments and the syntax page
+ *   `ChoicesForm`, `RunForm`), the epic page's own reads, the docs pages' comments, and the data pages' files
+ *   (the commands page, the core reference, the syntax page:  `getFile()`)
  * - served?  `isServed`:  a page the page server served, with its token, never from `file://`;
  *   `ServerLink.isServed()` for a page with no link of its own
  * - reads:  `get()`, over the kit's `$fetch()`:  a missing file or route (404) answers its `missing` default,
  *   any other failure throws a `ResponseError`;  no caller checks a response itself
+ *   - a data file a page draws from:  `getFile()`, by its name now or its old one (`dataFileNames()`)
  * - writes:  `post()`, with the server's write token (`x-server-token`, `SRV.Guard`);  a 403 on the token (the page
  *   server restarted since the page loaded) takes the server's new token from the page as it's served now, and
  *   tries once more, so nothing typed is refused for a restart
@@ -151,7 +153,8 @@ export class ServerLink {
   }
 
   /**
-   * GET route `url` as JSON (`$fetch()`, never from the browser's cache);  `query`:  its query, e.g. `{ page }`.
+   * GET route `url` as JSON (`$fetch()`, never from the browser's cache), or its text (`format: "text"`);
+   * `query`:  its query, e.g. `{ page }`.
    * - `missing`:  what a 404 answers (no such file, a route an older server lacks), and what a page from `file://`
    *   answers without asking (`canRead()`);  default `undefined`
    * - throws any other failure as `$fetch()` does:  a `ResponseError` (`OfflineError`, a 500's ...), its message the
@@ -159,7 +162,7 @@ export class ServerLink {
    */
   async get<T>(
     url: string,
-    { query, missing }: { query?: Record<string, string>; missing?: T } = {}
+    { query, missing, format = "json" }: { query?: Record<string, string>; missing?: T; format?: "json" | "text" } = {}
   ): Promise<T | undefined> {
     if (!ServerLink.canRead(this.options.protocol)) return missing
     try {
@@ -168,7 +171,7 @@ export class ServerLink {
       const reply = await $fetch<T>({
         url,
         query: search,
-        format: "json",
+        format,
         cache: "no-store",
         fetch: this.options.fetch
       })
@@ -178,6 +181,42 @@ export class ServerLink {
       if (failure instanceof ResponseError) failure.message = routeError(failure.message) ?? failure.message
       throw failure
     }
+  }
+
+  /**
+   * A DATA FILE a page draws from (the commands page's rows, the core's method list ...), from the checkout serving it:
+   * the first of `names` it has (`dataFileNames()`:  a file's name now, then its old one), as JSON or its text
+   * (`format: "text"`).
+   * - `undefined` when it has none, and from `file://` (`get()`)
+   * - throws any other failure, its message starting with the file's name
+   */
+  async getFile<T>(
+    names: string | string[],
+    { format = "json" }: { format?: "json" | "text" } = {}
+  ): Promise<T | undefined> {
+    for (const name of typeof names === "string" ? [names] : names) {
+      let found: T | undefined
+      try {
+        found = await this.get<T>(name, { format })
+      } catch (failure) {
+        throw new Error(`${name.split("/").pop()}:  ${(failure as Error).message}`, { cause: failure })
+      }
+      if (found !== undefined) return found
+    }
+    return undefined
+  }
+
+  /**
+   * The names data file `file` goes by, its name now first:  `<name>.json5`, then its old `<name>.json`,
+   * whichever `file` says;  any other file, its own name alone.
+   * - the tooling's data files were renamed `.json5` (epic `epic-workflow` P21), spell-parser's generated lists too
+   *   (epic `people-and-orgs` P12):  a page may still name the old file, a checkout on older code still write it
+   * - the ONE old-name rule:  reading a data file (`getFile()`), and hearing it changed
+   *   (`watch()`, the comments' inbox)
+   */
+  static dataFileNames(file: string): string[] {
+    const name = file.replace(/\.json5?$/, "")
+    return name === file ? [file] : [`${name}.json5`, `${name}.json`]
   }
 
   /** GET route `url` for this link's page (`?page=`), as `get()` does. */
@@ -221,8 +260,8 @@ export class ServerLink {
    * page's live client:  never a connection of our own, each holds one of Chrome's 6 per host).  Returns the undo.
    * - `files`:  the file's URL path (`/epics/x/x.inbox.json5`), or a test of each changed path (decoded);
    *   `undefined`:  none, only the poll and the page coming back into view
-   * - a data file named (`<name>.json5`) by its old name too, `<name>.json`:  a checkout on older code writes that
-   *   (epic `epic-workflow` P21)
+   * - a data file named (`<name>.json5`) by its old name too, `<name>.json` (`dataFileNames()`):  a checkout on older
+   *   code writes that (epic `epic-workflow` P21)
    * - `every`:  `0` for no poll;  `polls`:  poll only while it answers true (a docs page's Send, while it shows)
    * - the one poll of every page (epic `coherence` C9):  a page that polls writes none of its own
    */
@@ -290,9 +329,9 @@ function routeError(body: string): string | undefined {
   }
 }
 
-/** `watch()`'s test for file `file`:  it, or its old `.json` name;  none for `undefined`. */
+/** `watch()`'s test for file `file`:  it, or its old `.json` name (`dataFileNames()`);  none for `undefined`. */
 function namedFiles(file: string | undefined): (path: string) => boolean {
   if (!file) return () => false
-  const names = [file, file.replace(/\.json5$/, ".json")]
+  const names = ServerLink.dataFileNames(file)
   return (path) => names.includes(path)
 }

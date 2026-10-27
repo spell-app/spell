@@ -3,9 +3,11 @@
  * from the JSON beside it, then boots the docs bundle.
  * - Loaded INSTEAD of `spell-ui.js`:  it fetches, draws, then adds `spell-ui.js` (same folder), whatever happened
  *   (`drawThenBoot()`).
- * - The data:  `<page>.json5` (`body[data-commands]` overrides), fetched, so the page needs the PAGE SERVER
- *   (`epic pages open <page>`);  from `file://` it shows a notice where the tables go.
- *   - JSON5, read by the kit's `parseJSON5()`;  its old name, `<page>.json`, fetched when there's no `.json5` yet
+ * - The data:  `<page>.json5` (`body[data-commands]` overrides), read through the page's `ServerLink` (`getFile()`),
+ *   so the page needs the PAGE SERVER (`epic pages open <page>`);  from `file://` a notice where the tables go says so
+ *   (`drawThenBoot()`).
+ *   - JSON5, read by the kit's `parseJSON5()`;  its old name, `<page>.json`, read when there's no `.json5` yet
+ *     (`ServerLink.dataFileNames()`)
  * - JSON:  `{ families: [{ id, title, icon?, intro?, rows: [Row] }] }` (a family `id` shares the page's id space:  never
  *   reuse a hand-written section's);  `Row`:
  *   - `op` -- the operation, in words;  `id?` -- anchor, default `<family id>-<slug of op>`
@@ -31,12 +33,13 @@
  * - BUNDLED (epic `coherence` C12):  `node src/tools/bundle-spell-ui.js --data-pages` builds it into `commands.js`, a
  *   classic script with NO Spell UI in it (the page's `spell-ui.js` draws the `<ui-*>` markup);  edit THIS, never
  *   the bundle.  It imports the helpers that exist:  the docs helpers' `el()` and start, the kit's `slug()` and
- *   `parseJSON5()`.
+ *   `parseJSON5()`, `ServerLink`.
  */
 import { slug } from "spell/util/string"
 import { parseJSON5 } from "spell/util/spell/json"
+import { ServerLink } from "spell-epic/review"
 
-import { dataNotice, drawThenBoot, el, fetchFile, pagePath, sectionNumber, withCode } from "./spell-doc-helpers.js"
+import { drawThenBoot, el, sectionNumber, withCode } from "./spell-doc-helpers.js"
 
 /** Cell marks:  the sign shown, the table cell's verdict class, the legend's words. */
 const MARKS = {
@@ -52,26 +55,29 @@ const SURFACES = [
   ["yarn", "yarn"]
 ]
 
-void drawThenBoot(load, draw, (error) => notice(`Couldn't draw the tables:  ${error.message}`))
+/** The page's data:  `<page>.json5` beside it, unless `<body data-commands>` names another. */
+const DATA_FILE =
+  document.body.dataset.commands || location.pathname.replace(/[^/]*$/, (name) => name.replace(/\.html?$/, ".json5"))
+
+void drawThenBoot({
+  load,
+  draw,
+  holder: "[data-commands-families]",
+  header: "Tables not drawn",
+  offServer: `This page draws its tables from ${DATA_FILE.split("/").pop()}`,
+  failure: "Couldn't draw the tables"
+})
 
 ////////////////
 // ## Start
 ////////////////
 
-/** The page's data, or `undefined` after showing why not. */
+/** The page's data;  throws when there's none. */
 async function load() {
-  const file =
-    document.body.dataset.commands || location.pathname.replace(/[^/]*$/, (name) => name.replace(/\.html?$/, ".json5"))
-  if (location.protocol === "file:") {
-    notice(
-      `This page draws its tables from ${file.split("/").pop()}:  open it through the page server, e.g. \`epic pages open ${pagePath()}\`.`
-    )
-    return undefined
-  }
   // not renamed yet (`epic migrate`):  its old name
-  const text = (await fetchFile(file)) ?? (file.endsWith(".json5") ? await fetchFile(file.slice(0, -1)) : undefined)
-  if (text === undefined) throw new Error(`${file}:  not found`)
-  return parseJSON5(text, file)
+  const text = await ServerLink.forPage().getFile(ServerLink.dataFileNames(DATA_FILE), { format: "text" })
+  if (text === undefined) throw new Error(`${DATA_FILE}:  not found`)
+  return parseJSON5(text, DATA_FILE)
 }
 
 ////////////////
@@ -179,11 +185,6 @@ function statistics(families) {
   function does(key) {
     return rows.filter((row) => ["same", "other"].includes(row[key]?.mark)).length
   }
-}
-
-/** Show `message` where the tables go (or at the top of `main`). */
-function notice(message) {
-  dataNotice(document.querySelector("[data-commands-families]"), "Tables not drawn", message)
 }
 
 ////////////////

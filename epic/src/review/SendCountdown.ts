@@ -10,6 +10,7 @@ import {
   storageNow,
   type StorageFinder
 } from "./review.types"
+import { PageStore } from "./PageStore"
 
 /****************
  * ### `SendCountdown`
@@ -17,7 +18,7 @@ import {
  * it sends by itself once Owen has left the page alone for 2 minutes (`COUNTDOWN_MS`).
  * - Owen, 2026-10-22:  "when it is on, you wait for 2 minutes of inactivity from me (I haven't typed / clicked /
  *   scrolled) and when that is reached you submit the answers.  When it's off, I have to press the plane."
- * - ONE per page (`forPage()`), shared by the page's Send (`<epic-send-buttons>`):
+ * - ONE per page (`forPage()`, a `PageStore`), shared by the page's Send (`<epic-send-buttons>`):
  *   a Send drawn again (a guide's, at every redraw of its comments) finds the countdown where it was
  * - the MODE:  on by default, remembered per viewer for every page (`COUNTDOWN_KEY`;  decision Q6)
  * - it RUNS only while the mode is on and something waits (`pending`, which the Send sets)
@@ -28,17 +29,15 @@ import {
  *     a send that failed tries again 2 minutes later, never in a loop
  * - Node-safe at import:  nothing touches `window` until `forPage()` or `watch()`;
  *   its clock, timers and storage come in through `SendCountdownOptions`, so tests run it on fake timers
- * - Position in the import graph:  its peer `review.types` only.
+ * - Position in the import graph:  its peers `review.types` and `PageStore` only.
  *   NEVER imports Solid, Spell UI or the `spell-epic` barrel:  the element follows it through `subscribe()`.
  ****************/
-export class SendCountdown {
-  /** Bumped on every change:  the mode, a start, a tick, a stop. */
-  version = 0
-
+export class SendCountdown extends PageStore {
   /** How long a quiet page waits before it sends, ms. */
   readonly delay: number
 
   constructor(private readonly options: SendCountdownOptions = {}) {
+    super()
     this.delay = options.delay ?? COUNTDOWN_MS
   }
 
@@ -46,25 +45,19 @@ export class SendCountdown {
   // ## The page's countdown
   ////////////////
 
-  /** The page's countdown, once made. */
-  private static current: SendCountdown | undefined
-
   /**
-   * The page's countdown, made on the first call (browser only), on the page's own clock and storage.
+   * The page's countdown, made on the first call (browser only), on the page's own clock and storage;
+   * its `version` bumped on every change:  the mode, a start, a tick, a stop.
    * - SIDE EFFECT:  the first call watches the page for Owen at work (`watch()`)
+   * - a test hands it its own, on fake timers (`adopt()`)
    */
   static forPage(): SendCountdown {
-    if (SendCountdown.current) return SendCountdown.current
-    // a browser that blocks it throws here:  `StoragePlace` keeps the mode in memory then
-    const countdown = new SendCountdown({ storage: () => window.localStorage })
-    SendCountdown.current = countdown
-    countdown.watch(window)
-    return countdown
-  }
-
-  /** Make `countdown` the page's from now on (`undefined`:  the next `forPage()` makes one):  tests. */
-  static adopt(countdown: SendCountdown | undefined) {
-    SendCountdown.current = countdown
+    return SendCountdown.onePerPage(() => {
+      // a browser that blocks it throws here:  `StoragePlace` keeps the mode in memory then
+      const countdown = new SendCountdown({ storage: () => window.localStorage })
+      countdown.watch(window)
+      return countdown
+    })
   }
 
   ////////////////
@@ -172,28 +165,16 @@ export class SendCountdown {
   private timer: (() => void) | undefined
 
   ////////////////
-  // ## Listeners
+  // ## Firing
   ////////////////
 
-  private readonly listeners = new Set<() => void>()
+  /** Called when the countdown reaches 0. */
   private readonly fireListeners = new Set<() => void>()
-
-  /** Call `listener` on every change;  returns the undo. */
-  subscribe(listener: () => void): () => void {
-    this.listeners.add(listener)
-    return () => this.listeners.delete(listener)
-  }
 
   /** Call `listener` when the countdown reaches 0:  the Send sends;  returns the undo. */
   onFire(listener: () => void): () => void {
     this.fireListeners.add(listener)
     return () => this.fireListeners.delete(listener)
-  }
-
-  /** Everyone told something changed. */
-  private changed() {
-    this.version++
-    for (const listener of this.listeners) listener()
   }
 
   ////////////////

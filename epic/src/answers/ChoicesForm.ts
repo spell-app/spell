@@ -1,6 +1,6 @@
 // Import directly:  the persist barrel would bring the database and server places too
 import { PrefStore } from "spell/util/persist/PrefStore"
-import { ServerLink, clockOf, sentence, type ServerInfo } from "spell-epic/review"
+import { PageStore, ServerLink, clockOf, sentence, type ServerInfo } from "spell-epic/review"
 
 import type { AnswerFormOptions } from "./AnswerForm"
 import { DraftSaver } from "./DraftSaver"
@@ -21,7 +21,7 @@ import {
  * ### `ChoicesForm`
  * A CHOICE page's boxes, as its elements hold them (epic `epic-workflow` P12):
  * what Owen typed over Claude's recommendations, the draft that keeps it, and "Do it".
- * - One per page (`forPage()`).
+ * - One per page (`forPage()`), a `PageStore` the elements follow (`subscribe()`).
  * - Each row, `<epic-choice-row>`, registers while connected (`add()`);
  *   `<epic-choices-bar>` holds the feedback and "Do it", and draws where things stand.
  * - Keeps a DRAFT of what's typed, so nothing typed lives only in the open page
@@ -50,7 +50,7 @@ import {
  * - Position in the import graph:  `spell-epic/review` (the link), `spell-epic/dates`, its peer types.
  *   NEVER imports Solid or Spell UI.
  ****************/
-export class ChoicesForm {
+export class ChoicesForm extends PageStore {
   /** The feedback box's text, as typed. */
   feedback = ""
 
@@ -66,9 +66,6 @@ export class ChoicesForm {
   /** "Do it" on its way. */
   isSending = false
 
-  /** Bumped on every change:  readers compare it, the bar and the rows' tables track it. */
-  version = 0
-
   /** The rows, by id. */
   private readonly rows = new Map<string, ChoiceRowPart>()
 
@@ -77,9 +74,6 @@ export class ChoicesForm {
 
   /** The order of each reorderable table read back on load, by its section's id:  the table puts its rows in it. */
   restoredOrder: ChoicesOrder = {}
-
-  /** Called on every change. */
-  private readonly listeners = new Set<() => void>()
 
   /** The page server, as drafts and answers are sent to it. */
   private readonly link: ServerLink
@@ -91,6 +85,7 @@ export class ChoicesForm {
   private note = ""
 
   constructor(private readonly options: AnswerFormOptions) {
+    super()
     this.link = new ServerLink(options)
     this.drafts = new DraftSaver({
       save: async ({ keepalive }) => ((await this.post("draft", keepalive)) as { draft: ChoicesDraft }).draft.saved,
@@ -98,7 +93,7 @@ export class ChoicesForm {
       key: `${CHOICES_KEY_PREFIX}${options.page}`,
       storage: options.storage,
       link: this.link,
-      onChange: () => this.notify()
+      onChange: () => this.changed()
     })
   }
 
@@ -106,19 +101,12 @@ export class ChoicesForm {
   // ## The page's form
   ////////////////
 
-  /** The page's form, once made. */
-  private static current: ChoicesForm | undefined
-
-  /** The page's form, made on the first call (browser only). */
+  /** The page's form, made on the first call (browser only);  a test hands it its own (`adopt()`). */
   static forPage(): ChoicesForm {
-    // a browser that blocks it throws here:  `StoragePlace` keeps the draft's copy in memory then
-    ChoicesForm.current ??= new ChoicesForm({ ...ServerLink.pageOptions(), storage: () => window.localStorage })
-    return ChoicesForm.current
-  }
-
-  /** Make `form` the page's from now on (`undefined`:  the next `forPage()` makes one):  tests. */
-  static adopt(form: ChoicesForm | undefined) {
-    ChoicesForm.current = form
+    return ChoicesForm.onePerPage(
+      // a browser that blocks it throws here:  `StoragePlace` keeps the draft's copy in memory then
+      () => new ChoicesForm({ ...ServerLink.pageOptions(), storage: () => window.localStorage })
+    )
   }
 
   ////////////////
@@ -130,10 +118,10 @@ export class ChoicesForm {
     this.rows.set(row.rowName, row)
     const value = this.restored[row.rowName]
     if (value !== undefined) row.showValue(value)
-    this.notify()
+    this.changed()
     return () => {
       if (this.rows.get(row.rowName) === row) this.rows.delete(row.rowName)
-      this.notify()
+      this.changed()
     }
   }
 
@@ -169,29 +157,23 @@ export class ChoicesForm {
   ////////////////
 
   /**
-   * A box or the feedback changed:  everyone listening hears it, and a sent answer is stale;  on a page that keeps
-   * drafts (`SAVED_CHOICES_PAGE`), the browser's copy is written at once, the server's a moment later
+   * Owen changed a box, the feedback or a row's place:  everyone listening hears it, and a sent answer is stale;  on a
+   * page that keeps drafts (`SAVED_CHOICES_PAGE`), the browser's copy is written at once, the server's a moment later
    * (`CHOICES_SAVE_MS`).
    */
-  changed() {
+  edited() {
     if (this.keepsDrafts) {
       this.writeLocal()
       this.saveSoon()
     }
     if (this.sent) this.isStale = true
-    this.notify()
+    this.changed()
   }
 
   /** The feedback box changed to `text`. */
   setFeedback(text: string) {
     this.feedback = text
-    this.changed()
-  }
-
-  /** Call `listener` on every change;  returns the undo. */
-  subscribe(listener: () => void): () => void {
-    this.listeners.add(listener)
-    return () => this.listeners.delete(listener)
+    this.edited()
   }
 
   /**
@@ -240,7 +222,7 @@ export class ChoicesForm {
     if (this.isSending) return
     this.error = ""
     this.isSending = true
-    this.notify()
+    this.changed()
     try {
       const { answer } = (await this.post("answer")) as { answer: ChoicesAnswer }
       this.sent = answer
@@ -252,7 +234,7 @@ export class ChoicesForm {
       this.error = `Not sent:  ${(failure as Error).message}`
     } finally {
       this.isSending = false
-      this.notify()
+      this.changed()
     }
   }
 
@@ -285,7 +267,7 @@ export class ChoicesForm {
     if (!this.keepsDrafts) {
       if (!isServed) return
       this.note = "a template:  nothing here is saved"
-      return this.notify()
+      return this.changed()
     }
     let draft: ChoicesDraft | undefined
     let answer: ChoicesAnswer | undefined
@@ -309,7 +291,7 @@ export class ChoicesForm {
     if (draft && !this.isSaveError) this.drafts.tell(`saved ${clockOf(draft.saved)}`)
     if (answer) this.sent = answer
     if (last && last === local) this.saveSoon()
-    this.notify()
+    this.changed()
   }
 
   /**
@@ -462,12 +444,6 @@ export class ChoicesForm {
       .catch(() => undefined)
     if (reply === null) throw new Error("page server too old, restart it")
     return reply?.[what] ?? undefined
-  }
-
-  /** Everyone listening hears of a change. */
-  private notify() {
-    this.version++
-    for (const listener of this.listeners) listener()
   }
 }
 

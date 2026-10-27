@@ -122,7 +122,7 @@ const SEND_POLL_MS = 30_000
  * - a docs section has its own (`ui-section`'s `actions` slot, `.at-section`)
  * - every other block (a paragraph, a table, a list, a message, cards, a phase's field, the summary) has no title row:
  *   its bullhorn sits over its corner, first in its actions row
- *   (`.at-block`, in `.spell-block-actions`, an epic page's `<epic-actions>`:  `addBlockAction()`)
+ *   (`.at-block`, in its `<epic-actions>`:  `addBlockAction()`)
  */
 const TITLE_ROW_BLOCKS = "epic-overview, epic-item, epic-update[at], epic-aside, epic-code"
 
@@ -244,11 +244,11 @@ export async function wireComments(main, { go, signal } = {}) {
 /**
  * The URL paths the page server may announce inbox file `inbox` (`<page>.inbox.json5`) by:
  * - it, and the same without a worktree's prefix (`/worktrees/<w>/`:  a shared folder's changes come without it)
- * - each by its old name too, `.inbox.json`
+ * - each by its old name too, `.inbox.json` (`ServerLink.dataFileNames()`)
  */
 function inboxPathsOf(inbox) {
   const paths = [inbox, inbox.replace(/^\/worktrees\/[^/]+(?=\/)/, "")]
-  return [...new Set([...paths, ...paths.map((path) => path.replace(/\.json5$/, ".json"))])]
+  return [...new Set(paths.flatMap((path) => ServerLink.dataFileNames(path)))]
 }
 
 /****************
@@ -406,7 +406,7 @@ class PageComments {
   /**
    * Keep a corner bullhorn off a thread's buttons (Owen, 2026-10-10:  "Overlap in bullhorn buttons").
    * - a block with no title row has its bullhorn over its top right corner, in its actions row
-   *   (`.spell-block-actions` or `<epic-actions>`, with a table's expand button)
+   *   (`<epic-actions>`, with a table's expand button)
    * - so a thread just under a short block (a one-line paragraph) can lie under them:
    *   that thread's header leaves room on its right, its buttons moving left
    *   (`--epic-thread-head-room`, which `<epic-thread>` reads)
@@ -417,7 +417,7 @@ class PageComments {
    */
   makeRoom() {
     alignBlockActions(this.main)
-    const horns = [...this.main.querySelectorAll(`:is(${BLOCK_ROW}) ui-button`)]
+    const horns = [...this.main.querySelectorAll(`${BLOCK_ROW} ui-button`)]
       .filter((each) => each?.checkVisibility?.({ contentVisibilityAuto: true }) !== false)
       .map((each) => each?.getBoundingClientRect())
       .filter((rect) => rect?.width)

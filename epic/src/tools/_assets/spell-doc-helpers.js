@@ -10,7 +10,7 @@
  * - What they keep in the browser goes through the kit's `PrefStore` (generic:  no Spell UI either)
  */
 import { PrefStore } from "spell/util/persist/PrefStore"
-import { $fetch } from "spell/util/spell/$fetch"
+import { ServerLink } from "spell-epic/review"
 
 /** What types or picks:  a key pressed in one is the field's (paging, the jump key). */
 export const FIELDS = "input, textarea, select, ui-input, ui-select, ui-dropdown"
@@ -68,33 +68,32 @@ const HEAD_TOOLS = ["folds", "send", "page", "comment"]
 /**
  * A block's ACTIONS ROW (epic `epic-engine` I26):  the ONE row of a block's own controls,
  * for a block with no title row of its own (a table, a paragraph, a list, a message ...).
- * - a line of no height just before the block, its buttons over the block's top right corner
- *   (`spell-comments.css`, "A block's actions row")
+ * - an `<epic-actions>` (epic `epic-engine` P45), on every page (epic `coherence` P22):
+ *   a line of no height just before the block, its buttons over the block's top right corner,
+ *   placed and styled by the element itself
+ *   - every page that draws one has the epics pack:  the runtime loads it on every docs page (`loadEpicsPack()`),
+ *     the component sets' layouts on theirs
  * - Owen, 2026-10-19:  "The expand button should be to the right of the bullhorn rather than in its own line"
  * - every feature puts its control here, never in a row of its own, so they never overlap or float apart:
  *   the comments' bullhorn (`addBullhorn()`), a table's expand button (`wireTableWidths()`)
  * - in `BLOCK_ACTIONS`' order, whoever adds first:  the bullhorn, then the expand button
  * - made on first use, `data-spell-added` (a live update steps around it);
  *   `dropBlockAction()` takes it away with its last control
- * - on an epic page (inside `<epic-page>`), an `<epic-actions>` (epic `epic-engine` P45):  the element draws and
- *   places its controls itself;  elsewhere a `div.spell-block-actions` holding a `span.spell-block-buttons`,
- *   which `spell-comments.css` styles
  * - `kind`:  one of `BLOCK_ACTIONS`;  returns the row
  */
 export function addBlockAction(block, control, kind) {
   let row = block.previousElementSibling
   if (!row?.matches(BLOCK_ROW)) {
-    row = block.closest(EPIC_PAGE) ? epicActionsRow() : plainActionsRow()
+    row = el(BLOCK_ROW, { "data-spell-added": true })
     // a block slotted into an element (a docs example's description) takes its row with it:
     // unslotted, the row landed in the element's default slot, somewhere else entirely
     if (block.slot) row.slot = block.slot
     block.before(row)
   }
-  const buttons = buttonsOf(row)
   control.dataset.action = kind
   const rank = BLOCK_ACTIONS.indexOf(kind)
-  const after = [...buttons.children].find((each) => BLOCK_ACTIONS.indexOf(each.dataset.action) > rank)
-  buttons.insertBefore(control, after ?? null)
+  const after = [...row.children].find((each) => BLOCK_ACTIONS.indexOf(each.dataset.action) > rank)
+  row.insertBefore(control, after ?? null)
   alignBlockActions(row)
   return row
 }
@@ -106,33 +105,8 @@ export function dropBlockAction(control) {
   if (row && !row.querySelector("[data-action]")) row.remove()
 }
 
-/**
- * Every block's actions row, of either kind (`addBlockAction()`):  an epic page's `<epic-actions>`, any other page's
- * `div.spell-block-actions`.
- */
-export const BLOCK_ROW = ".spell-block-actions, epic-actions"
-
-/** An epic page:  its blocks' actions rows are `<epic-actions>`. */
-const EPIC_PAGE = "epic-page"
-
-/** A new `<epic-actions>`:  its controls are its own children, which it places itself (P45). */
-function epicActionsRow() {
-  return el("epic-actions", { "data-spell-added": true })
-}
-
-/**
- * A new `div.spell-block-actions`:  the buttons in a box of their own, out of the flow, so the row stays a line of no
- * height, over the block's top edge however its margin falls (`alignBlockActions()`).
- */
-function plainActionsRow() {
-  const buttons = el("span", { class: "spell-block-buttons" })
-  return el("div", { class: "spell-block-actions", "data-spell-added": true }, buttons)
-}
-
-/** The box `row`'s controls go in:  an `<epic-actions>` itself, a plain row's `span.spell-block-buttons`. */
-function buttonsOf(row) {
-  return row.localName === "epic-actions" ? row : row.firstElementChild
-}
+/** A block's actions row (`addBlockAction()`):  its tag, and the selector that finds one. */
+export const BLOCK_ROW = "epic-actions"
 
 /** The controls of a block's actions row, in their order:  the bullhorn first (`addBlockAction()`). */
 const BLOCK_ACTIONS = ["comment", "expand"]
@@ -141,10 +115,10 @@ const BLOCK_ACTIONS = ["comment", "expand"]
  * Put the buttons of every actions row in `root` (or the one row `root` is) over their block's top edge, 2px in:
  * the row is a line of no height just before the block, but the block's own top margin (a table's 12px, a list's)
  * may lie between them, or collapse into the margin above:  CSS can't know which, so this measures it
- * (`--spell-block-gap`, read by `spell-comments.css`'s `.spell-block-buttons`).
+ * (`--spell-block-gap`, read by `<epic-actions>`' own sheet).
  * - a table's buttons are centred on its header row (its first row):
  *   the gap down to that ROW's top (the table's own top border lies above it), its height, `--spell-block-head`,
- *   and the row marked `.at-head-row`
+ *   and the row marked `head-row`
  *   - to the hundredth of a pixel, not whole pixels:  the gap to the TABLE's top, and both rounded,
  *     left the expand button 1.65px above the row's middle (epic `epic-engine` r1, the repo-split analysis page's Q5)
  * - all reads, then all writes
@@ -170,9 +144,7 @@ export function alignBlockActions(root) {
       if (value === undefined) row.style.removeProperty(name)
       else if (row.style.getPropertyValue(name) !== value) row.style.setProperty(name, value)
     }
-    // an `<epic-actions>` takes it as its attribute `head-row`, a plain row as its class
-    if (row.localName === "epic-actions") row.toggleAttribute("head-row", !!size.head)
-    else row.classList.toggle("at-head-row", !!size.head)
+    row.toggleAttribute("head-row", !!size.head)
   })
 }
 
@@ -254,43 +226,37 @@ const TOAST_ACTION_CLASS = "basic inverted compact"
  * whatever happened;  resolves to the data, or `undefined` (none, or it failed).
  * - why this order:  the runtime builds the toolbar and the sticky titles from `main`'s sections once, at start,
  *   so the drawn sections must be in the page before it runs
- * - `failed(error)`:  shows why it couldn't draw (`dataNotice()`)
+ * - `load()` reads its files through the page's `ServerLink` (`getFile()`), the checkout serving the page
+ * - what it can't draw, it says in a warning headed `header`, first where its drawing goes (`holder`, a selector;
+ *   else `main`'s top):
+ *   - from `file://`, `offServer`, "This page draws its tables from commands.json5", and how to open it served:
+ *     it reads nothing there (`ServerLink.canRead()`), and loads nothing
+ *   - a failure, `failure`, "Couldn't draw the tables", and why
  * - MUST be called as the script runs:  it finds the bundle beside `document.currentScript`
  */
-export function drawThenBoot(load, draw, failed) {
+export function drawThenBoot({ load, draw, holder, header, offServer, failure }) {
   const bundle = new URL("spell-ui.js", document.currentScript?.src ?? location.href).href
   return (async () => {
     let data
     try {
-      data = await load()
+      if (!ServerLink.canRead())
+        notice(`${offServer}:  open it through the page server, e.g. \`epic pages open ${pagePath()}\`.`)
+      else data = await load()
       if (data) draw(data)
     } catch (error) {
-      failed(error)
+      notice(`${failure}:  ${error.message}`)
       data = undefined
     }
     document.body.append(el("script", { src: bundle }))
     return data
   })()
-}
 
-/**
- * A data page's file at `url` (relative to the page), from the checkout serving it, never the browser's cache
- * (the kit's `$fetch()`):  its text, or as JSON (`format: "json"`);  `undefined` when there's none (404).
- * - throws any other failure, its message starting with the file's name
- */
-export async function fetchFile(url, { format = "text" } = {}) {
-  try {
-    return (await $fetch({ url, format, cache: "no-store", defaultContents: null })) ?? undefined
-  } catch (error) {
-    throw new Error(`${url.split("/").pop()}:  ${error.message}`, { cause: error })
+  /** Show `message` (its `` `code` `` as code) in a warning headed `header`, first in `holder` (else `main`). */
+  function notice(message) {
+    ;(document.querySelector(holder) ?? document.querySelector("main"))?.prepend(
+      el("ui-message", { state: "warning", heading: header }, el("p", {}, ...withCode(message)))
+    )
   }
-}
-
-/** Show `message` (its `` `code` `` as code) in a warning headed `header`, first in `holder` (else `main`). */
-export function dataNotice(holder, header, message) {
-  ;(holder ?? document.querySelector("main"))?.prepend(
-    el("ui-message", { state: "warning", heading: header }, el("p", {}, ...withCode(message)))
-  )
 }
 
 /**

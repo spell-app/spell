@@ -6,6 +6,7 @@ import { E } from "spell-ui/core"
 import type { RunAnswer, RunColumn, RunOutcome, RunRow } from "spell/server/runs/runs.types"
 
 import { clockOf } from "spell-epic/review"
+import { keepOneLine, stopNewLine } from "spell-epic/answers"
 
 import { epicRunRowVocabulary } from "./EpicRunRow.en"
 import { RUN_ANSWER, type RunAnswerDetail } from "./EpicRunRow.types"
@@ -18,8 +19,9 @@ import runRowCSS from "./EpicRunRow.css?inline"
  * about, drawn by `<epic-run>` in its table.
  * - The command's columns first, each a cell of plain text (`columns`, `row.cells`).
  * - Then the answer cell:
- *   - the box, pre-filled with the command's proposal (`row.value`), or Owen's answer once he gave one;  one line of
- *     text that wraps and grows (Enter adds no line, a pasted line break goes)
+ *   - the box, pre-filled with the command's proposal (`row.value`), or Owen's answer once he gave one;
+ *     one line of text that wraps and grows (Enter adds no line, a pasted line break goes:  `keepOneLine()`)
+ *   - a `<ui-textarea grow>`, as the choice row's (epic `coherence` P22)
  *   - changed from the proposal:  orange, with a round button putting the proposal back
  *   - the pick, when the command offers alternatives:  the proposal, then each one, as small pills;  the one the box
  *     holds is filled, so typing an alternative picks it too
@@ -103,6 +105,21 @@ export class EpicRunRow extends E.UIComponent<typeof epicRunRowVocabulary> {
     return this.runRow.alternatives?.includes(value) ? "picked" : "typed"
   }
 
+  /** Its box, as drawn:  a `<ui-textarea grow>`, its live text its `value`. */
+  private box: BoxElement | undefined
+
+  /** Its box, drawn:  kept, and given its text. */
+  private holdBox(element: BoxElement) {
+    this.box = element
+    element.value = this.value
+  }
+
+  /** Its text changed (an answer back, a pick, the reset):  the box shows it. */
+  @E.onChange("value")
+  protected onValueChanged(value: string) {
+    if (this.box && this.box.value !== value) this.box.value = value
+  }
+
   ////////////////
   // ## Drawing
   ////////////////
@@ -140,19 +157,19 @@ export class EpicRunRow extends E.UIComponent<typeof epicRunRowVocabulary> {
   private field(): JSX.Element {
     return (
       <div class={FIELD}>
-        <textarea
+        <ui-textarea
+          ref={(element: HTMLElement) => this.holdBox(element as BoxElement)}
           class={BOX}
           part={this.partForName("box")}
-          rows="1"
-          spellcheck={false}
+          grow=""
+          spellcheck="false"
           autocomplete="off"
           aria-label={this.translationForKey("boxLabel", {
             label: this.answerLabel ?? "",
             first: this.firstCell
           })}
-          value={this.value}
           onInput={this.onInput}
-          onKeyDown={this.onKeyDown}
+          onKeyDown={stopNewLine}
         />
         <Show when={this.isChanged}>
           <button
@@ -253,17 +270,11 @@ export class EpicRunRow extends E.UIComponent<typeof epicRunRowVocabulary> {
     this.send(RUN_ANSWER, detail)
   }
 
-  /** A keystroke in the box:  one line of text (a pasted line break goes);  said, saved a moment later. */
+  /** A keystroke in the box:  one line of text (`keepOneLine()`);  said, saved a moment later. */
   private readonly onInput = (event: InputEvent) => {
-    const box = event.currentTarget as HTMLTextAreaElement
-    if (/\n/.test(box.value)) box.value = box.value.replace(/\s*\n\s*/g, " ")
-    this.typed = box.value
-    this.tell(box.value.trim())
-  }
-
-  /** Enter in the box adds no line. */
-  private readonly onKeyDown = (event: KeyboardEvent) => {
-    if (event.key === "Enter") event.preventDefault()
+    const value = keepOneLine(event.currentTarget as BoxElement)
+    this.typed = value
+    this.tell(value.trim())
   }
 
   /** A pill picked:  into the box, said, saved at once. */
@@ -306,3 +317,6 @@ const CHANGED_AFTER_TAKEN = "changed-after-taken"
 
 /** The pick's radios' group:  one per row, each row its own shadow root. */
 const PICK_GROUP = "pick"
+
+/** Its box's DOM element:  a `<ui-textarea>`, its live text a property, as a native `<textarea>`'s. */
+type BoxElement = HTMLElement & { value: string }

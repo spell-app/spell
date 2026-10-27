@@ -8,14 +8,17 @@
  * - The data:  the JSON `<body data-choices-rows>` names, from the page:
  *   `spell-parser/src/spell/spellSyntax.json`, written by `yarn spell:gen:syntax` in spell-parser
  *   (spell-parser's `src/spell/node/spellSyntax.ts` has its shape, `SpellSyntaxData`).
- *   - Fetched from the checkout SERVING the page, so each branch shows its own rules.
- *   - From `file://` it says so where the tables go:  the page needs the page server.
+ *   - Read from the checkout SERVING the page (the page's `ServerLink`, `getFile()`), so each branch shows its own
+ *     rules.
+ *   - From `file://` it says so where the tables go (`drawThenBoot()`):  the page needs the page server.
  * - Built from elements (`el()`), never from markup in strings.
  *   - its buttons Spell UI's `<ui-button>`s (epic `epic-engine` P3):  the pencils, the resets, the wands, Expand all
  *     and Collapse all;  their icons centred by the component, each one's `title` on the button the pointer lands on too
  *     (`titleInside()`)
  *   - the boxes stay native `<textarea>`s:  750 of them, read and written as plain values;  a reset button is made
  *     only once its box first differs (`resetButton()`)
+ *   - a class name's box is ONE line, as every one-line answer box (`keepOneLine()`, `stopNewLine()`)
+ *   - the feedback a `<ui-textarea grow>`:  it grows with its text, to a third of the window
  * - Each module:  a nested `<ui-section>` where `[data-syntax-modules]` is,
  *   holding a table Rule name | Syntax | Purpose, a row per rule class (its internal classes first).
  *   - OPEN, as every section of this page, unlike other docs pages
@@ -56,9 +59,9 @@
  */
 import { slug } from "spell/util/string"
 import { ServerLink, clockOf } from "spell-epic/review"
-import { CHOICES_API, ChoicesForm, DraftSaver } from "spell-epic/answers"
+import { CHOICES_API, ChoicesForm, DraftSaver, keepOneLine, stopNewLine } from "spell-epic/answers"
 
-import { dataNotice, drawThenBoot, el, fetchFile, sectionNumber, titleInside, withCode } from "./spell-doc-helpers.js"
+import { drawThenBoot, el, sectionNumber, titleInside, withCode } from "./spell-doc-helpers.js"
 
 /** Where comments go (`commentsRoutes.ts`). */
 const COMMENTS_API = "/api/docs/comments"
@@ -94,25 +97,24 @@ const drafts = new DraftSaver({
 })
 
 // drawn, the bundle booted:  then what was typed and asked comes back
-void drawThenBoot(load, draw, (error) => notice(`Couldn't draw the rules:  ${error.message}`)).then(
-  (data) => data && restore()
-)
+void drawThenBoot({
+  load,
+  draw,
+  holder: "[data-syntax-modules]",
+  header: "Rules not drawn",
+  offServer: "This page draws its rules from the checkout serving it, and saves what you type",
+  failure: "Couldn't draw the rules"
+}).then((data) => data && restore())
 
 ////////////////
 // ## Start
 ////////////////
 
-/** The syntax table, or `undefined` after showing why not. */
+/** The syntax table;  throws when there's none. */
 async function load() {
   const path = document.body.dataset.choicesRows
   if (!path) throw new Error("the page's `<body>` has no `data-choices-rows`")
-  if (location.protocol === "file:") {
-    notice(
-      "This page draws its rules from the checkout serving it, and saves what you type, through the page server:  open it with `epic pages open guides/spell-syntax/spell-syntax.html`."
-    )
-    return undefined
-  }
-  const data = await fetchFile(path, { format: "json" })
+  const data = await ServerLink.forPage().getFile(path)
   if (data === undefined) throw new Error(`${path.split("/").pop()}:  not found`)
   return data
 }
@@ -285,7 +287,7 @@ function purposeCell(rule) {
 
 /**
  * A box holding `value`, keyed `<Class>.<field>`;  its round reset button comes once it differs (`mark()`).
- * - one line for the class's name (Enter adds none);  as many as the code has for a writer's output
+ * - one line for the class's name (`data-one-line`:  `keepOneLine()`);  as many as the code has for a writer's output
  */
 function box(rule, field, value, label) {
   const key = `${rule.className}.${field}`
@@ -350,7 +352,7 @@ function drawBar() {
   const feedback = el("ui-textarea", {
     class: "spell-choices-feedback",
     name: "feedback",
-    rows: "1",
+    grow: "",
     placeholder: "Feedback for Claude:  anything the boxes don't say",
     fluid: ""
   })
@@ -383,11 +385,6 @@ function drawBar() {
   return { feedback, send, saved, error, done }
 }
 
-/** Show `message` where the tables go. */
-function notice(message) {
-  dataNotice(document.querySelector("[data-syntax-modules]"), "Rules not drawn", message)
-}
-
 ////////////////
 // ## Editing
 ////////////////
@@ -399,13 +396,12 @@ function wire() {
     const holder = event.target.closest?.(".spell-syntax-box")
     if (!holder) return
     // the class's name is one line:  a pasted line break goes
-    if (event.target.hasAttribute("data-one-line") && /\n/.test(event.target.value))
-      event.target.value = event.target.value.replace(/\s*\n\s*/g, " ")
+    if (event.target.hasAttribute("data-one-line")) keepOneLine(event.target)
     mark(boxes.get(holder.dataset.box))
     changed()
   })
   main.addEventListener("keydown", (event) => {
-    if (event.key === "Enter" && event.target.hasAttribute?.("data-one-line")) event.preventDefault()
+    if (event.target.hasAttribute?.("data-one-line")) stopNewLine(event)
   })
   main.addEventListener("click", (event) => {
     const rename = event.target.closest?.(".spell-syntax-rename")

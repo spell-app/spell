@@ -1,5 +1,5 @@
 import { PlanDates } from "spell-epic/dates"
-import { ServerLink, clockOf, sentence, type ServerLinkOptions, type StorageFinder } from "spell-epic/review"
+import { PageStore, ServerLink, clockOf, sentence, type ServerLinkOptions, type StorageFinder } from "spell-epic/review"
 
 import { AnswerDraft } from "./AnswerDraft"
 import { DraftSaver } from "./DraftSaver"
@@ -38,7 +38,7 @@ export type AnswerFormOptions = ServerLinkOptions & {
  * ### `AnswerForm`
  * A DETAILS PAGE's answer, as its elements hold it (epic `epic-workflow` P12):
  * what Owen picked and wrote, what was sent, and the sending.
- * - One per page (`forPage()`).
+ * - One per page (`forPage()`), a `PageStore` the elements follow (`subscribe()`).
  * - The elements that hold part of the answer register while connected (`add()`):
  *   - each question, `<epic-ask>`:  its picks, "Provide more details"
  *   - each box, `<epic-text-box>`:  Other, a comment (on a section, on an option), the page's notes
@@ -77,7 +77,7 @@ export type AnswerFormOptions = ServerLinkOptions & {
  * - Position in the import graph:  `spell-epic/review` (the link), `spell-epic/dates`, its peers.
  *   NEVER imports Solid or Spell UI:  the elements bridge its changes (`subscribe()`) into their own state.
  ****************/
-export class AnswerForm {
+export class AnswerForm extends PageStore {
   /** The answer as last sent (or read back on load);  `undefined` before the first send. */
   sent: SentAnswer | undefined
 
@@ -86,9 +86,6 @@ export class AnswerForm {
 
   /** A send on its way. */
   isSending = false
-
-  /** Bumped on every change:  readers compare it, `<epic-send>` tracks it. */
-  version = 0
 
   /**
    * Text typed for questions, options or sections gone from the page (an agent's rewrite):  shown in its own box,
@@ -118,9 +115,6 @@ export class AnswerForm {
   /** The parts, as registered. */
   private readonly parts = new Set<AnswerPart>()
 
-  /** Called on every change. */
-  private readonly listeners = new Set<() => void>()
-
   /** The page server, as answers are sent to it:  the write token, its refresh. */
   private readonly link: ServerLink
 
@@ -140,6 +134,7 @@ export class AnswerForm {
   private settledAway: TypedAnswer | undefined
 
   constructor(private readonly options: AnswerFormOptions) {
+    super()
     this.link = new ServerLink(options)
     this.drafts = new DraftSaver({
       save: (save) => this.postDraft(save),
@@ -155,19 +150,12 @@ export class AnswerForm {
   // ## The page's form
   ////////////////
 
-  /** The page's form, once made. */
-  private static current: AnswerForm | undefined
-
-  /** The page's form, made on the first call (browser only). */
+  /** The page's form, made on the first call (browser only);  a test hands it its own (`adopt()`). */
   static forPage(): AnswerForm {
-    // a browser that blocks it throws here:  `StoragePlace` keeps the draft's copy in memory then
-    AnswerForm.current ??= new AnswerForm({ ...ServerLink.pageOptions(), storage: () => window.localStorage })
-    return AnswerForm.current
-  }
-
-  /** Make `form` the page's from now on (`undefined`:  the next `forPage()` makes one):  tests. */
-  static adopt(form: AnswerForm | undefined) {
-    AnswerForm.current = form
+    return AnswerForm.onePerPage(
+      // a browser that blocks it throws here:  `StoragePlace` keeps the draft's copy in memory then
+      () => new AnswerForm({ ...ServerLink.pageOptions(), storage: () => window.localStorage })
+    )
   }
 
   ////////////////
@@ -219,12 +207,6 @@ export class AnswerForm {
     return true
   }
 
-  /** Something on the page changed:  everyone listening hears it. */
-  changed() {
-    this.version++
-    for (const listener of this.listeners) listener()
-  }
-
   /**
    * Owen changed something (a pick, a box):  everyone hears it, and on a details page the draft follows:
    * `typed` at once, the browser's copy at once, the page server's a moment later.
@@ -236,12 +218,6 @@ export class AnswerForm {
       this.saveSoon()
     }
     this.changed()
-  }
-
-  /** Call `listener` on every change;  returns the undo. */
-  subscribe(listener: () => void): () => void {
-    this.listeners.add(listener)
-    return () => this.listeners.delete(listener)
   }
 
   /** The questions, in page order. */

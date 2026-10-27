@@ -26,6 +26,8 @@ import { ACTIONS_SLOT } from "./Fold.types"
  *   a click anywhere on the band folds, but on a link or another control in it.
  * - Draws the pieces every fold shares:
  *   - its fold button (`fold.button()`):  chevron, label, tooltip, for a card's band and every panel's title
+ *     - THE fold button of every `<epic-*>` element (epic `coherence` P22):  an item's line and an option's header
+ *       draw it too, on an open state of their own (`Fold.button()`, `Fold.band()`, handed an `Opener`)
  *   - the chevron (`Fold.chevron()`)
  *   - the collapse-all button of an open title (`Fold.collapseAllButton()`, folding all under it:  `foldAllUnder()`)
  *   - the expand-all button of a fold's title and the page toolbar (`Fold.expandAllButton()`, `expandAllUnder()`)
@@ -36,7 +38,7 @@ import { ACTIONS_SLOT } from "./Fold.types"
  *   - the chevrons must be on screen in the first frame, with no wait for an element to upgrade
  * - Its listeners are added by its refs, by hand:  `Fold` is no component, so no `@E.on`.
  ****************/
-export class Fold {
+export class Fold implements Opener {
   constructor(initial: Accessor<boolean>, kept?: KeptFold) {
     this.disclosure = new E.Disclosure({ initial, kept })
   }
@@ -72,33 +74,45 @@ export class Fold {
   // ## Drawing
   ////////////////
 
+  /** THE fold button of this fold (`Fold.button()`). */
+  button(options: FoldButtonOptions): JSX.Element {
+    return Fold.button(this, options)
+  }
+
   /**
-   * THE fold button:  the chevron, then its `label`;  its `aria-expanded` as the fold stands,
+   * THE fold button, of `opener`'s fold:  the chevron, then its `label`;  its `aria-expanded` as the fold stands,
    * its tooltip (`tips`) what a click does.
-   * - Two kinds:
+   * - Its kinds:
    *   - FIRST in a card's heading band, so everything boxed in a section folds (Owen, 2026-10-08):
    *     `<epic-reply>`, `<epic-answer>`, `<epic-status>`, `<epic-note>`, an `<epic-update>` note, `<epic-updated>`
    *     - named by the heading's words (`labelledBy`:  ids in the same shadow root), no `label`
    *     - no click handler of its own:  its band's (`heading`) takes a click on it, Enter and Space too,
    *       and a click on the rest of the band
+   *   - FIRST on an item's line, the chevron alone, named by its tooltip:  the line is its band (`Fold.band()`),
+   *     on the item's own open state (its details, or its note box under the line)
    *   - a panel's whole title, `clicks` (it folds on its own click), its words its `label`:
-   *     More Details, Original Discussion, Choices, an option's panel, an aside or code panel
+   *     More Details, Original Discussion, Choices, an option's panel (answering or reviewed), an aside or code panel
+   * - Named by `labelledBy`, else its `label`, else its tooltip (`aria-label`)
+   * - `options` is read as the button draws:  a getter there (an item's `controls`, an option's `tips`) follows
+   * - Always `FOLD_BUTTON` among its classes:  how its band knows it
    * - The chevron turns down while open (`Fold.css`, or the element's own sheet).
    */
-  button({ controls, labelledBy, part, tips, label, className = FOLD_BUTTON, clicks }: FoldButtonOptions): JSX.Element {
+  static button(opener: Opener, options: FoldButtonOptions): JSX.Element {
+    const tip = () => (opener.isOpen() ? options.tips.fold : options.tips.unfold)
     return (
       <button
         type="button"
-        class={className}
-        part={part}
-        aria-expanded={this.disclosure.ariaExpanded}
-        aria-controls={controls}
-        aria-labelledby={labelledBy}
-        title={this.isOpen() ? tips.fold : tips.unfold}
-        onClick={clicks ? this.toggle : undefined}
+        class={options.className ? [FOLD_BUTTON, options.className] : FOLD_BUTTON}
+        part={options.part}
+        aria-expanded={opener.isOpen() ? "true" : "false"}
+        aria-controls={options.controls}
+        aria-labelledby={options.labelledBy}
+        aria-label={options.labelledBy || options.label !== undefined ? undefined : tip()}
+        title={tip()}
+        onClick={options.clicks ? (event: MouseEvent) => opener.toggle(event) : undefined}
       >
         {Fold.chevron()}
-        {label}
+        {options.label}
       </button>
     )
   }
@@ -198,32 +212,48 @@ export class Fold {
   // ## The heading band
   ////////////////
 
+  /** A card's heading band's ref:  a click on it folds or unfolds (`Fold.band()`). */
+  readonly heading = Fold.band(this)
+
   /**
-   * A card's heading band's ref:  a click on it folds or unfolds (`onHeadingClick()`).
+   * The ref of a HEADING BAND that folds `opener`:  a card's heading, an item's line.  A click on it folds or unfolds:
+   * - on its fold button (`Fold.button()`):  a click, Enter or Space
+   * - on any other spot, unless it's a link or another control in the band (`CONTROLS`),
+   *   or the end of a drag selecting its words
+   * - nothing to fold (the band draws no fold button):  nothing
    * - a native listener, not JSX's `onClick`:  Solid delegates that to the document, where the click's
    *   `currentTarget` (where the band ends) is gone
    */
-  readonly heading = (band: HTMLElement) => {
-    band.addEventListener("click", this.onHeadingClick)
+  static band(opener: Opener): (band: HTMLElement) => void {
+    return (band) => band.addEventListener("click", (event) => Fold.clickOnBand(event, opener))
   }
 
-  /**
-   * A click on the heading band toggles.
-   * - on its fold button:  a click, Enter or Space
-   * - on any other spot, unless it's a link or another control in the band,
-   *   or the end of a drag selecting its words
-   */
-  private readonly onHeadingClick = (event: MouseEvent) => {
-    // nothing to fold (an empty body):  the band draws no button
-    if (!(event.currentTarget as Element).querySelector(`.${FOLD_BUTTON}`)) return
+  /** A click on a heading band:  `opener` folds or unfolds, as `Fold.band()` says. */
+  private static clickOnBand(event: MouseEvent, opener: Opener) {
+    const band = event.currentTarget as Element
+    if (!band.querySelector(`.${FOLD_BUTTON}`)) return
     for (const target of event.composedPath()) {
-      if (!(target instanceof Element) || target === event.currentTarget) break
-      if (target.classList.contains(FOLD_BUTTON)) return this.toggle()
+      if (!(target instanceof Element) || target === band) break
+      if (target.classList.contains(FOLD_BUTTON)) return void opener.toggle(event)
       if (target.matches(CONTROLS)) return
     }
-    if (String(window.getSelection() ?? "")) return
-    this.toggle()
+    // a drag that selected words isn't a click on them;  words selected in a FIELD are no drag (an item's note box's
+    // "do it", selected):  Chrome reads them out of the selection, but as a collapsed one
+    const selection = window.getSelection()
+    if (selection && !selection.isCollapsed && String(selection)) return
+    opener.toggle(event)
   }
+}
+
+/**
+ * What a fold button and its band fold (`Fold.button()`, `Fold.band()`):  a `Fold`, or an element's own open state
+ * (`<epic-item>`'s).
+ */
+export type Opener = {
+  /** open?  tracked */
+  isOpen: () => boolean
+  /** fold if open, open if folded:  a click on the button or its band, `originalEvent` */
+  toggle: (originalEvent?: Event) => unknown
 }
 
 /**
@@ -336,17 +366,17 @@ export type ActionsBoxOptions = {
   hidden?: () => boolean
 }
 
-/** What `fold.button()` takes. */
+/** What `Fold.button()` takes:  read as the button draws (a getter follows). */
 export type FoldButtonOptions = {
-  /** the `id` of the box it folds */
-  controls: string
+  /** the `id` of the box it folds;  none:  it folds no box of its own (an item's note box under its line) */
+  controls?: string
   /** a card's:  the `id`s of the heading's words, space-separated:  its name */
   labelledBy?: string
   /** a panel's title:  its words, after the chevron;  its name */
   label?: JSX.Element
   /** its `part`:  `toggle` in every card's vocabulary */
   part: string
-  /** its class.  Default:  `FOLD_BUTTON`, a card's (`Fold.css`) */
+  /** its look's class, beside `FOLD_BUTTON`.  Default:  none, a card's look (`Fold.css`) */
   className?: string
   /** it folds on its own click (a panel's title);  a card's band takes the click instead */
   clicks?: boolean
@@ -362,7 +392,10 @@ export type FoldTips = {
   unfold: string
 }
 
-/** Class of a card's fold button (`fold.button()`):  a click on it always folds. */
+/**
+ * Class of EVERY fold button (`Fold.button()`):  how its band knows it, so a click on it always folds;
+ * a card's look (`Fold.css`).
+ */
 export const FOLD_BUTTON = "fold-button"
 
 /** Class word of a heading band that folds its card (it has a body):  a pointer over it (`Fold.css`). */

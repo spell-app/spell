@@ -1,5 +1,5 @@
 import { Show, type Accessor } from "solid-js"
-import { Dynamic, type JSX } from "@solidjs/web"
+import type { JSX } from "@solidjs/web"
 
 import { E } from "spell-ui/core"
 
@@ -408,39 +408,52 @@ export class EpicOption extends E.UIComponent<typeof epicOptionVocabulary> {
     }
   }
 
-  /** An epic page's option's header:  the fold toggle (its whole title), the Choose pill while reviewed. */
+  /**
+   * An epic page's option's header:  the fold toggle (its whole title, THE fold button:  `fold.button()`), the Choose
+   * pill while reviewed.
+   * - nothing to fold (a card with no pros and cons):  its title, no button
+   */
   private reviewHeader(): JSX.Element {
     return (
       <div class={HEADER} part={this.partForName("header")}>
-        <Dynamic
-          component={this.canFold ? "button" : "span"}
-          type={this.canFold ? "button" : undefined}
-          class={TOGGLE}
-          part={this.partForName("toggle")}
-          aria-expanded={this.canFold ? (this.isOpen ? "true" : "false") : undefined}
-          aria-controls={this.canFold ? BODY_ID : undefined}
-          title={
-            this.canFold
-              ? this.translationForKey(this.isOpen ? "foldTip" : "unfoldTip", { letter: this.letter ?? "" })
-              : undefined
+        <Show
+          when={this.canFold}
+          fallback={
+            <span class={TOGGLE} part={this.partForName("toggle")}>
+              {this.reviewTitle()}
+            </span>
           }
-          onClick={this.onHeaderClick}
         >
-          <Show when={this.canFold}>{Fold.chevron()}</Show>
-          <Show when={this.isChosen && this.questionIsAnswered}>
-            <svg class={CHECK} part={this.partForName("check")} viewBox="0 0 16 16" aria-hidden="true">
-              <path d="M2.5 8.5l3.5 3.5 7.5-8" />
-            </svg>
-          </Show>
-          <span class={TITLE} part={this.partForName("title")}>
-            {this.letter}
-            {LETTER_SEPARATOR}
-            <slot name={this.slotForName("title")}>{this.title}</slot>
-            {this.recommendedMark()}
-          </span>
-        </Dynamic>
+          {this.fold.button({
+            className: TOGGLE,
+            part: this.partForName("toggle"),
+            controls: BODY_ID,
+            tips: this.foldTips,
+            label: this.reviewTitle(),
+            clicks: true
+          })}
+        </Show>
         <Show when={this.pill}>{(pill) => this.pillButton(pill)}</Show>
       </div>
+    )
+  }
+
+  /** A reviewed option's title, after the chevron:  its check once chosen, `A · title` and the thumbs-up. */
+  private reviewTitle(): JSX.Element {
+    return (
+      <>
+        <Show when={this.isChosen && this.questionIsAnswered}>
+          <svg class={CHECK} part={this.partForName("check")} viewBox="0 0 16 16" aria-hidden="true">
+            <path d="M2.5 8.5l3.5 3.5 7.5-8" />
+          </svg>
+        </Show>
+        <span class={TITLE} part={this.partForName("title")}>
+          {this.letter}
+          {LETTER_SEPARATOR}
+          <slot name={this.slotForName("title")}>{this.title}</slot>
+          {this.recommendedMark()}
+        </span>
+      </>
     )
   }
 
@@ -504,11 +517,6 @@ export class EpicOption extends E.UIComponent<typeof epicOptionVocabulary> {
     const more = !this.wantsMore
     const selected = more || this.isTicked
     this.send(selected ? "ui-selected" : "ui-deselected", { letter: this.letter ?? "", selected, more })
-  }
-
-  /** A click on its header:  folds its card or panel (a card with no pros and cons has nothing to fold). */
-  private readonly onHeaderClick = () => {
-    if (this.canFold) this.fold.toggle()
   }
 
   /**

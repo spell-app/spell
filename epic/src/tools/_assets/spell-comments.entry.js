@@ -36,6 +36,7 @@
  */
 
 import { nextFrame } from "spell/util/dom"
+import { clamp } from "spell/util/number"
 import { wireComments } from "./spell-doc-comments.js"
 import { el } from "./spell-doc-helpers.js"
 import { markCurrent, titledItems, toolbarMenu, wireJumpKey } from "./spell-doc-toolbar.js"
@@ -181,7 +182,7 @@ function drawToolbar(sections, { signal }) {
   }
   const holdQuiet = () => {
     clearTimeout(quiet)
-    quiet = setTimeout(release, Math.max(0, Math.min(GLIDE_QUIET_MS, heldSince + GLIDE_MAX_MS - Date.now())))
+    quiet = setTimeout(release, clamp(heldSince + GLIDE_MAX_MS - Date.now(), 0, GLIDE_QUIET_MS))
   }
   toolbar.addEventListener(
     "click",

@@ -1,5 +1,5 @@
 /*
- * `<epic-actions>` (`EpicActions.tsx`):  a block's actions row on an epic page (epic `epic-engine` P45).
+ * `<epic-actions>` (`EpicActions.tsx`):  a block's actions row, on every page (epic `epic-engine` P45).
  * - The host is a line of no height just before its block;  its controls' box is out of the flow,
  *   over the block's top right corner.
  * - Where that corner is, the docs runtime measures (`alignBlockActions()`) and hands in on the host:

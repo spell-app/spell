@@ -79,7 +79,9 @@
  */
 
 import { nextFrame } from "spell/util/dom"
+import { clamp } from "spell/util/number"
 import { PrefStore } from "spell/util/persist/PrefStore"
+import { slug } from "spell/util/string"
 import { PagePatch } from "spell/server/site"
 import { wireComments } from "./spell-doc-comments.js"
 import {
@@ -191,7 +193,10 @@ const EPICS_PACK = "/_epic/pack/epics.pack.js"
 /** The docs head's h1, its title (`oneLineHead()`):  an epic page has none, `<epic-page>` draws its own. */
 const PAGE_TITLE = ":scope > ui-sticky.spell-h1 > .spell-page-head > h1"
 
-/** Space between the stuck titles and an element a link lands on inside an epic page, px (`EpicFold`'s `LAND_GAP`). */
+/**
+ * Space between the stuck titles and an element a link lands on inside an epic page, px:  the page's own lander's
+ * (`landingLine()`), the ONE landing on an epic page since epic `coherence` P18.
+ */
 const EPIC_LAND_GAP = 8
 
 /**
@@ -436,7 +441,7 @@ function drawReadingTime(main) {
  *   column, the button hides.
  * - Inside a `<ui-table>`, the host is what moves.
  * - Remembered in this browser, per page, by the table's key (`tableKey()`):  `spell-table-wide:<path>`.
- * - Tables a part's body or a live update adds later get theirs too.
+ * - Tables a part's body or a live update adds later get theirs too (`eachTable()`).
  */
 function wireTableWidths(main) {
   // a page in the layout (`spell-doc.css`'s `body.spell-doc-page`), not one that only loads the bundle
@@ -445,10 +450,8 @@ function wireTableWidths(main) {
   const toggles = new Map()
   const narrow = new WeakMap()
   const sizes = new ResizeObserver((entries) => {
-    for (const entry of entries) for (const box of boxesIn(entry.target)) place(box)
+    for (const entry of entries) for (const box of tableBoxes(entry.target)) place(box)
   })
-  // the box that moves:  a `<ui-table>` host, else the bare table
-  const boxesIn = tableBoxes
   const isWide = (box) => !!readJSON(storeKey)[tableKey(box, main)]
   const place = (box) => {
     const toggle = toggles.get(box)
@@ -500,27 +503,27 @@ function wireTableWidths(main) {
     toggle.addEventListener("click", () => flip(box))
     return toggle
   }
-  const watch = () => {
-    // a table a live update replaced:  its button goes with it
-    for (const [box, toggle] of toggles) {
-      const row = toggle.closest(BLOCK_ROW)
-      if (box.isConnected && row?.nextElementSibling === box) continue
-      for (const name of ["width", "margin-inline-start"]) row?.style.removeProperty(name)
-      dropBlockAction(toggle)
-      toggles.delete(box)
-    }
-    for (const box of boxesIn(main)) {
-      if (toggles.has(box) || !box.parentElement) continue
+  const redrawSoon = eachTable(main, {
+    added(box) {
+      if (!box.parentElement) return false
       const toggle = toggleFor(box)
       addBlockAction(box, toggle, "expand")
       toggles.set(box, toggle)
       sizes.observe(box.parentElement)
       place(box)
-    }
-  }
-  watch()
-  new MutationObserver(() => requestAnimationFrame(watch)).observe(main, { childList: true, subtree: true })
-  addEventListener("resize", () => requestAnimationFrame(() => toggles.forEach((_toggle, box) => place(box))))
+    },
+    // a table a live update replaced, or moved away from its actions row:  its button goes with it
+    keeps: (box) => toggles.get(box)?.closest(BLOCK_ROW)?.nextElementSibling === box,
+    gone(box) {
+      const toggle = toggles.get(box)
+      const row = toggle?.closest(BLOCK_ROW)
+      for (const name of ["width", "margin-inline-start"]) row?.style.removeProperty(name)
+      if (toggle) dropBlockAction(toggle)
+      toggles.delete(box)
+    },
+    redraw: () => toggles.forEach((_toggle, box) => place(box))
+  })
+  addEventListener("resize", () => redrawSoon())
 }
 
 /**
@@ -540,32 +543,15 @@ function wireTableWidths(main) {
  *     - and only when that takes 2em or more off it (`TWO_COLUMN_LEAST_GAIN`):  never a word wrapped for a few px
  * - too narrow even then (a phone):  the table scrolls sideways inside its own box, as every table does
  * - again whenever its box changes size (a section or item opening, the side bar or window resizing, the expand
- *   button);  tables a part's body or a live update adds later get theirs too
+ *   button), a frame at a time;  tables a part's body or a live update adds later get theirs too (`eachTable()`)
  */
 function wireTwoColumnTables(main) {
-  const watched = new WeakSet()
-  let pending = new Set()
-  let frame = 0
-  const schedule = (box) => {
-    pending.add(box)
-    frame ||= requestAnimationFrame(() => {
-      frame = 0
-      const boxes = pending
-      pending = new Set()
-      for (const each of boxes) fitTwoColumns(each)
-    })
-  }
-  const sizes = new ResizeObserver((entries) => entries.forEach((entry) => schedule(entry.target)))
-  const watch = () => {
-    for (const box of tableBoxes(main)) {
-      if (watched.has(box)) continue
-      watched.add(box)
-      // its first notice comes at once:  the first fit
-      sizes.observe(box)
-    }
-  }
-  watch()
-  new MutationObserver(() => requestAnimationFrame(watch)).observe(main, { childList: true, subtree: true })
+  const sizes = new ResizeObserver((entries) => entries.forEach((entry) => redrawSoon(entry.target)))
+  const redrawSoon = eachTable(main, {
+    // its first notice comes at once:  the first fit
+    added: (box) => sizes.observe(box),
+    redraw: (boxes) => boxes.forEach((box) => fitTwoColumns(box))
+  })
 }
 
 /** How much of a two-column table's room its first column may take before it wraps (`wireTwoColumnTables()`). */
@@ -635,12 +621,11 @@ function fitTwoColumns(box) {
  * - the line, below the titles stuck over the table (`tableLine()`)
  * - read only for the tables on screen (an IntersectionObserver), a frame at a time,
  *   on any scroll (the page's, or a table's sideways) or resize
- * - tables a part's body or a live update adds later get theirs too
+ * - tables a part's body or a live update adds later get theirs too (`eachTable()`)
  */
 function wireTableHeads(main) {
   const pins = new Map()
   const onScreen = new Set()
-  const watched = new WeakSet()
   // tables whose copy can't stick (a scroll box between them and the page):  left alone until the window changes
   let unpinnable = new WeakSet()
   const screen = new IntersectionObserver((entries) => {
@@ -648,22 +633,16 @@ function wireTableHeads(main) {
       if (entry.isIntersecting) onScreen.add(entry.target)
       else onScreen.delete(entry.target)
     }
-    schedule()
+    redrawSoon()
   })
-  let frame = 0
-  const schedule = () => {
-    frame ||= requestAnimationFrame(() => {
-      frame = 0
-      update()
-    })
-  }
-  const watch = () => {
-    for (const box of tableBoxes(main)) {
-      if (watched.has(box) || !headRows(tableOf(box)).length) continue
-      watched.add(box)
+  const redrawSoon = eachTable(main, {
+    // a table with no header row (yet):  looked at again as the page changes
+    added(box) {
+      if (!headRows(tableOf(box)).length) return false
       screen.observe(box)
-    }
-  }
+    },
+    redraw: () => update()
+  })
   const update = () => {
     for (const [box, pin] of pins) {
       if (box.isConnected) continue
@@ -725,13 +704,11 @@ function wireTableHeads(main) {
     setStyle(view, "translate", up ? `0 ${up}px` : "")
     setStyle(view, "clip-path", up ? `inset(${-up}px 0 0 0)` : "")
   }
-  watch()
-  new MutationObserver(() => requestAnimationFrame(watch)).observe(main, { childList: true, subtree: true })
   // capture:  a table's own sideways scroll too, which doesn't bubble
-  document.addEventListener("scroll", schedule, { capture: true, passive: true })
+  document.addEventListener("scroll", () => redrawSoon(), { capture: true, passive: true })
   addEventListener("resize", () => {
     unpinnable = new WeakSet()
-    schedule()
+    redrawSoon()
   })
 }
 
@@ -927,6 +904,47 @@ function layoutParent(el) {
 function tableBoxes(root) {
   const tables = [...root.querySelectorAll("table")].filter((table) => !table.closest(".spell-table-pin"))
   return [...new Set(tables.map((table) => table.closest("ui-table") ?? table))]
+}
+
+/**
+ * Watch every TABLE in `main` (each by its box, `tableBoxes()`):  the ONE watch the table features run on
+ * (`wireTableWidths()`, `wireTwoColumnTables()`, `wireTableHeads()`;  epic `coherence` P22).
+ * - `added(box)`:  each box once, as it's first seen:  now, and as a part's body or a live update adds tables
+ *   - `false`:  not taken yet, so it's handed over again at the next change (a table with no header row yet)
+ * - `gone(box)`:  a box taken that's left the page, or that `keeps(box)` lets go:  handed to `added()` again while
+ *   it's there.  Default:  every box on the page is kept.
+ * - `redraw(boxes)`:  once a frame at most, with the boxes asked for since;  returns what asks for it,
+ *   `redrawSoon(box?)`:  a box, or none (a resize, a scroll:  every box is the caller's to redraw)
+ * - SIDE EFFECT:  watches `main`'s tree for the page's life
+ */
+function eachTable(main, { added, gone, keeps = () => true, redraw = () => {} }) {
+  const taken = new Set()
+  let asked = new Set()
+  let frame = 0
+  look()
+  new MutationObserver(() => requestAnimationFrame(look)).observe(main, { childList: true, subtree: true })
+  return redrawSoon
+
+  /** What's gone first, then the boxes not seen yet. */
+  function look() {
+    for (const box of taken) {
+      if (box.isConnected && keeps(box)) continue
+      taken.delete(box)
+      gone?.(box)
+    }
+    for (const box of tableBoxes(main)) if (!taken.has(box) && added(box) !== false) taken.add(box)
+  }
+
+  /** `redraw()` at the next frame, once however often it's asked, with every box asked for since. */
+  function redrawSoon(box) {
+    if (box) asked.add(box)
+    frame ||= requestAnimationFrame(() => {
+      frame = 0
+      const boxes = asked
+      asked = new Set()
+      redraw(boxes)
+    })
+  }
 }
 
 /**
@@ -1568,7 +1586,7 @@ function nodeOf(element) {
   }
   const section = element.localName === "ui-section"
   const label = section ? sectionLabel(element) : labelOf(element)
-  if (!element.id) element.id = uniqueId(slug(label) || "section")
+  if (!element.id) element.id = uniqueId(headingSlug(label) || "section")
   const glyph = section
     ? (element.querySelector(':scope > ui-icon[slot="icon"]')?.getAttribute("name") ?? element.getAttribute("icon"))
     : element.querySelector("ui-icon")?.getAttribute("name")
@@ -1635,13 +1653,9 @@ function labelOf(heading) {
   return clone.textContent.replace(/\s+/g, " ").trim()
 }
 
-/** Slug for a heading id. */
-function slug(label) {
-  return label
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "")
-    .slice(0, 48)
+/** A heading's id from its `label`:  the kit's `slug()`, cut at 48. */
+function headingSlug(label) {
+  return slug(label).slice(0, 48)
 }
 
 ////////////////
@@ -2746,7 +2760,7 @@ function wirePaging(main) {
     let top = scrollY
     let best = top
     for (let tries = 0; tries < 4; tries++) {
-      const next = Math.min(max, Math.max(0, bottom - stuckBottom(main)))
+      const next = clamp(bottom - stuckBottom(main), 0, max)
       if (Math.abs(next - top) < 1) break
       top = next
       scrollTo({ top, behavior: "instant" })

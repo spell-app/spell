@@ -81,62 +81,33 @@
   transition: opacity 0.15s;
 }
 /*
- * A block's ACTIONS ROW (`.spell-block-actions`, `addBlockAction()`;  epic `epic-engine` I26):  the one row of a
- * block's own controls when it has no title row, a line of no height just before the block, its buttons over the
- * block's top right corner, the bullhorn first, then a table's expand button (Owen, 2026-10-19:  "The expand button
- * should be to the right of the bullhorn rather than in its own line").  A text block's too:  its text keeps its full
- * width, the buttons on the page's ground over the end of its first line (Owen, 2026-10-10:  overlap, not wrap).
- * - the buttons are `<ui-button appearance="basic" size="mini">`s, as drawn:  the component centres their icons;  the bullhorn
- *   circular, the table's expand button a bare icon (`spell-doc.css`, "TABLES")
+ * A block's ACTIONS ROW (`addBlockAction()`;  epic `epic-engine` I26):  the one row of a block's own controls when it
+ * has no title row, a line of no height just before the block, its buttons over the block's top right corner, the
+ * bullhorn first, then a table's expand button (Owen, 2026-10-19:  "The expand button should be to the right of the
+ * bullhorn rather than in its own line").  A text block's too:  its text keeps its full width, the buttons on the
+ * page's ground over the end of its first line (Owen, 2026-10-10:  overlap, not wrap).
+ * - an element on every page, `<epic-actions>` (epic `epic-engine` P45;  epic `coherence` P22):  it places and styles
+ *   its own buttons
+ * - until its family loads it's a line of no height here too, so nothing in the page moves as it upgrades (the page's
+ *   cloak hides its buttons meanwhile, `spell-doc.css`)
+ * - the buttons are `<ui-button appearance="basic" size="mini">`s, as drawn:  the component centres their icons;  the
+ *   bullhorn circular, the table's expand button a bare icon (`spell-doc.css`, "TABLES")
  */
-:is(.spell-doc-main, .site-main) .spell-block-actions {
-  position: relative;
-  z-index: 2;
+:is(.spell-doc-main, .site-main) epic-actions:not([hidden]) {
+  display: block;
   height: 0;
-}
-/*
- * its buttons (`.spell-block-buttons`) out of the flow, 2px inside the block's top edge:  the block's own top margin
- * may lie between the row and it (`--spell-block-gap`, measured by `alignBlockActions()`)
- */
-:is(.spell-doc-main, .site-main) .spell-block-buttons {
-  position: absolute;
-  top: calc(var(--spell-block-gap, 0px) + 2px);
-  right: 2px;
-  display: flex;
-  align-items: center;
-  gap: 2px;
-}
-/*
- * a table's:  centred on its header row instead (Owen, 2026-10-19:  "expand button is not centered vertically"), its
- * height measured (`--spell-block-head`, `alignBlockActions()`)
- */
-:is(.spell-doc-main, .site-main) .spell-block-actions.at-head-row > .spell-block-buttons {
-  top: var(--spell-block-gap, 0px);
-  height: var(--spell-block-head);
 }
 /*
  * a docs EXAMPLE's (`<ui-example>`), and a block's in its demo (not slotted into its description):
  * left of the example's code button, level with it
  * - the code button holds that corner:  28px wide, 0.8em in
  * - on top of it, the two covered each other
+ * - here, on its buttons' box (its `base` part):  its own sheet can't see the block after it
  */
-:is(.spell-doc-main, .site-main) .spell-block-actions:has(+ ui-example) > .spell-block-buttons,
-:is(.spell-doc-main, .site-main) ui-example > .spell-block-actions:not([slot]) > .spell-block-buttons {
+:is(.spell-doc-main, .site-main) epic-actions:has(+ ui-example)::part(base),
+:is(.spell-doc-main, .site-main) ui-example > epic-actions:not([slot])::part(base) {
   top: calc(var(--spell-block-gap, 0px) + 0.8em - 1px);
   right: calc(0.8em + 28px + 4px);
-}
-:is(.spell-doc-main, .site-main) .spell-block-actions ui-button {
-  border-radius: 999px;
-  background: var(--spell-bg);
-}
-/*
- * An epic page's actions row is an element, `<epic-actions>` (epic `epic-engine` P45):  it places and styles its own
- * buttons.  Until its family loads it's a line of no height here too, so nothing in the page moves as it upgrades
- * (the page's cloak hides its buttons meanwhile, `spell-doc.css`).
- */
-:is(.spell-doc-main, .site-main) epic-actions:not([hidden]) {
-  display: block;
-  height: 0;
 }
 :is(.spell-doc-main, .site-main) .spell-comment-mark {
   position: relative;
@@ -164,7 +135,7 @@ ui-button.spell-comment-float::part(button) {
     :is(epic-item, epic-update, epic-aside, epic-code):hover > .spell-comment-mark,
     epic-overview:hover:not(:has(epic-section:hover)) > .spell-comment-mark,
     :is(.spell-page-head, .site-masthead):hover > .spell-comment-mark,
-    :is(.spell-block-actions, epic-actions):is(:hover, :has(+ :hover)) .spell-comment-mark,
+    epic-actions:is(:hover, :has(+ :hover)) .spell-comment-mark,
     .spell-comment-mark:focus-within
   ) {
   opacity: 1;

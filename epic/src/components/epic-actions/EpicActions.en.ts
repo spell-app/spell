@@ -8,7 +8,7 @@ import type { EpicVocabulary } from "spell-epic/definitions"
 
 /****************
  * ### `<epic-actions>`
- * A block's ACTIONS ROW on an epic page (epic `epic-engine` P45):  its own controls, over its top right corner.
+ * A block's ACTIONS ROW, on every page (epic `epic-engine` P45):  its own controls, over its top right corner.
  ****************/
 export const epicActionsVocabulary = {
   tag: "epic-actions",

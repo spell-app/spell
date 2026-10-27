@@ -168,6 +168,13 @@ describe("<epic-item>", () => {
     host.addEventListener("ui-opening", opened)
     expect([host.open, details.getAttribute("hidden")]).toEqual([false, "until-found"])
     expect(toggle()!.getAttribute("aria-expanded")).toBe("false")
+    // THE fold button (`Fold.button()`, epic `coherence` P22):  named by its tooltip, folding its details
+    expect([
+      toggle()!.classList.contains("fold-button"),
+      toggle()!.getAttribute("aria-label"),
+      toggle()!.title,
+      toggle()!.getAttribute("aria-controls")
+    ]).toEqual([true, "Unfold T1", "Unfold T1", "details"])
     line.click()
     await ElementFixture.tick()
     expect([host.open, host.matches(":state(open)"), details.hasAttribute("hidden")]).toEqual([true, true, false])

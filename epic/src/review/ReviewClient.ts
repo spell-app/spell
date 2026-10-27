@@ -40,13 +40,14 @@ import {
   wakeOf,
   type WriteOptions
 } from "./review.types"
+import { PageStore } from "./PageStore"
 import { ServerLink } from "./ServerLink"
 
 /****************
  * ### `ReviewClient`
  * A page's REVIEW INBOX, as the page sees it:  the marks Owen leaves on its items and Overview sections,
  * read from and written to the page server's review routes (`spell-epic/tool/reviewRoutes.ts`),
- * one client per page (`forPage()`).
+ * one client per page (`forPage()`), a `PageStore` the elements follow (`subscribe()`).
  * - Who uses it:
  *   - the review controls (`<epic-review>`, drawn by `<epic-item>`, `<epic-section>` ...) draw from it
  *   - P10's Send, Review Now and Choose pills call it (`send()`, `choose()`), and an item's id chip (`toggleCalm()`)
@@ -71,12 +72,12 @@ import { ServerLink } from "./ServerLink"
  * - who listens:  `inbox.listening` (`null` once a session's heartbeat stopped:  the routes say so)
  * - Node-safe at import, and without `watch()`:  no `window` / `document` touched;
  *   the browser's services come in through `ReviewClientOptions`, so tests stub `fetch` and storage
- * - Position in the import graph:  its peers (types, `ServerLink`) only;
+ * - Position in the import graph:  its peers (types, `ServerLink`, `PageStore`) only;
  *   the inbox's types from `spell-epic/tool/ReviewInbox` (erased).
  *   NEVER imports Solid, Spell UI or the `spell-epic` barrel:  elements bridge its changes (`subscribe()`)
  *   into their own signals.
  ****************/
-export class ReviewClient {
+export class ReviewClient extends PageStore {
   /** The inbox as last read or written. */
   inbox: Inbox = emptyInbox()
 
@@ -86,14 +87,8 @@ export class ReviewClient {
   /** Why the last write failed, in words:  for a caller that writes `quiet`. */
   lastWriteError = ""
 
-  /** Bumped on every change:  readers compare it, elements track it. */
-  version = 0
-
   /** The page server, as the inbox writes to it:  the write token, its refresh, the watch. */
   private readonly link: ServerLink
-
-  /** Called on every change. */
-  private readonly listeners = new Set<() => void>()
 
   /** Called with every notice. */
   private readonly noticeListeners = new Set<(message: string) => void>()
@@ -127,6 +122,7 @@ export class ReviewClient {
   private starting: Promise<boolean> | undefined
 
   constructor(private readonly options: ReviewClientOptions) {
+    super()
     this.link = new ServerLink(options)
   }
 
@@ -134,28 +130,21 @@ export class ReviewClient {
   // ## The page's client
   ////////////////
 
-  /** The page's client, once made. */
-  private static current: ReviewClient | undefined
-
   /**
    * The page's client, made and started on the first call (browser only):
    * `page` is `location.pathname`, the server's info `window.SPELL_SERVER`, and it `watch()`es the page.
    * - SIDE EFFECT:  the first call reads the inbox and starts polling
+   * - a test hands it its own, on a stubbed fetch (`adopt()`)
    */
   static forPage(): ReviewClient {
-    if (ReviewClient.current) return ReviewClient.current
-    const client = new ReviewClient(ReviewClient.pageOptions())
-    ReviewClient.current = client
-    void client
-      .start()
-      .then((reviewing) => reviewing && client.watch(window))
-      .catch((error: unknown) => console.error("ReviewClient:  couldn't start", error))
-    return client
-  }
-
-  /** Make `client` the page's from now on (`undefined`:  the next `forPage()` makes one):  tests, on a stubbed fetch. */
-  static adopt(client: ReviewClient | undefined) {
-    ReviewClient.current = client
+    return ReviewClient.onePerPage(() => {
+      const client = new ReviewClient(ReviewClient.pageOptions())
+      void client
+        .start()
+        .then((reviewing) => reviewing && client.watch(window))
+        .catch((error: unknown) => console.error("ReviewClient:  couldn't start", error))
+      return client
+    })
   }
 
   /** The page's facts and services, as the browser has them. */
@@ -211,12 +200,6 @@ export class ReviewClient {
   ////////////////
   // ## Listening
   ////////////////
-
-  /** Call `listener` on every change (a read, a write, a box opened);  returns the undo. */
-  subscribe(listener: () => void): () => void {
-    this.listeners.add(listener)
-    return () => this.listeners.delete(listener)
-  }
 
   /** Call `listener` with every notice (a failed write, nobody listening);  returns the undo. */
   onNotice(listener: (message: string) => void): () => void {
@@ -839,12 +822,6 @@ export class ReviewClient {
     return Object.values(this.inbox.urgency).filter(
       (entry) => !isSent({ action: "urgency", at: entry.at }, this.inbox.sent)
     )
-  }
-
-  /** Everyone told something changed. */
-  private changed() {
-    this.version++
-    for (const listener of this.listeners) listener()
   }
 
   /** Drop what was typed in `id`'s box:  its note became a mark. */

@@ -88,15 +88,10 @@
   align-items: flex-end;
   gap: 10px;
 }
+/* a `<ui-textarea grow>`:  it grows with its text, up to a third of the window, by itself */
 .spell-choices-feedback {
   flex: 1 1 auto;
   margin: 0;
-}
-/* grows with its text, up to a third of the window */
-.spell-choices-feedback::part(control) {
-  field-sizing: content;
-  min-block-size: 2.5em;
-  max-block-size: 33vh;
 }
 .spell-choices-send {
   flex: none;

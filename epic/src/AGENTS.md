@@ -905,11 +905,11 @@ In `tools/`:
         - a thread's and a note's fold are their own shadow markup now (J16's two raw buttons)
         - Owen's field in the pane or a thread stays a native `<textarea>` the comments' code makes and slots in:
           it lives through every redraw, the cursor with it
-    - a block's own controls share its ONE ACTIONS ROW (`addBlockAction()`, `.spell-block-actions`):
+    - a block's own controls share its ONE ACTIONS ROW (`addBlockAction()`, `<epic-actions>`):
       the bullhorn first, then a table's expand button;  never a row or corner of their own
       (see "Comments", WHERE it sits)
-      - on an epic page it's an element, `<epic-actions>` (epic `epic-engine` P45):  it places and styles its buttons
-        itself;  the runtime still measures where its block's top edge lies (`alignBlockActions()`)
+      - an element on every page (epic `epic-engine` P45;  every page's since epic `coherence` P22):  it places and
+        styles its buttons itself;  the runtime still measures where its block's top edge lies (`alignBlockActions()`)
   - `spell-comments.css`:  the comments' look on the page, `@import`ed first by `spell-doc.css`
     - the bullhorns, Send, Owen's field, where a box of threads sits
     - the threads and the pane draw themselves (their own sheets)

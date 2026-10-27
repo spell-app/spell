@@ -18,7 +18,7 @@ import {
 
 import { AnswerThread } from "./AnswerThread"
 import { epicItemVocabulary } from "./EpicItem.en"
-import { CONTROLS, Fold } from "./Fold"
+import { Fold, type FoldButtonOptions, type Opener } from "./Fold"
 import {
   BED_ICON,
   CANCELED,
@@ -113,6 +113,8 @@ import tooltipCSS from "./Tooltip.css?inline"
  * - FOLDING:  `open` (page state, never in the file).
  *   - a click on the line (not on a link or control in it), or Enter / Space on the chevron,
  *     go through the cancelable `ui-opening` / `ui-closing`
+ *   - the chevron is THE fold button (`Fold.button()`), the line its band (`Fold.band()`):  every fold's, on the
+ *     item's own open state (`showsOpen()`, `toggle()`;  epic `coherence` P22)
  *   - it opens for a link to the item, to an id in `part-ids`, or to an element inside it, and for find-in-page
  *   - folding while its line is stuck keeps the line where it is on screen (`keepLinePut()`)
  *   - its details fold and unfold by height, in Spell UI's section timing (`EpicItem.css`), however it folds:
@@ -504,25 +506,12 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
   private renderLine(): JSX.Element {
     return (
       <div
-        ref={(element) => (this.lineBox = element)}
+        ref={[(element: HTMLDivElement) => (this.lineBox = element), Fold.band(this.opener)]}
         class={LINE}
         part={this.partForName("line")}
-        onClick={this.onLineClick}
       >
         <span class={[CELL, FOLD]}>
-          <Show when={this.foldable()}>
-            <button
-              type="button"
-              class={TOGGLE}
-              part={this.partForName("toggle")}
-              aria-expanded={this.showsOpen() ? "true" : "false"}
-              aria-controls={this.hasDetails() ? DETAILS_ID : undefined}
-              aria-label={this.translationForKey(this.showsOpen() ? "fold" : "unfold", { id: this.label() })}
-              title={this.translationForKey(this.showsOpen() ? "fold" : "unfold", { id: this.label() })}
-            >
-              {Fold.chevron()}
-            </button>
-          </Show>
+          <Show when={this.foldable()}>{Fold.button(this.opener, this.foldButton)}</Show>
         </span>
         <span class={CELL}>
           <Show
@@ -824,18 +813,37 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
     this.reviewState.toggleCalm(!!this.calm)
   }
 
-  /** A click on the line:  folds, unless it landed on a link or control (the id chip, P9's buttons). */
-  private readonly onLineClick = (event: MouseEvent) => {
-    for (const target of event.composedPath()) {
-      if (!(target instanceof Element)) continue
-      if (target.classList.contains(TOGGLE) || target.classList.contains(LINE)) break
-      if (target.matches(CONTROLS)) return
+  /**
+   * What its line's chevron and the line fold (`Fold.button()`, `Fold.band()`):  its own open state, as it shows
+   * (its details, or its note box under the line), and `toggle()`.
+   */
+  private readonly opener: Opener = {
+    isOpen: () => this.showsOpen(),
+    toggle: (originalEvent) => this.toggle(originalEvent)
+  }
+
+  /** Its chevron's options (`Fold.button()`):  getters, read as it draws, so they follow its details and its id. */
+  private readonly foldButton: FoldButtonOptions = EpicItem.foldButtonOf(this)
+
+  /** `item`'s chevron's options:  the box it folds while it has details, its tooltip (its name too) by its id. */
+  private static foldButtonOf(item: EpicItem): FoldButtonOptions {
+    return {
+      className: TOGGLE,
+      get part() {
+        return item.partForName("toggle")
+      },
+      get controls() {
+        return item.hasDetails() ? DETAILS_ID : undefined
+      },
+      tips: {
+        get fold() {
+          return item.translationForKey("fold", { id: item.label() })
+        },
+        get unfold() {
+          return item.translationForKey("unfold", { id: item.label() })
+        }
+      }
     }
-    // a drag that selected text in the title isn't a click on it;  words selected in a FIELD are no drag (the
-    // note box's "do it", selected):  Chrome reads them out of the selection, but as a collapsed one
-    const selection = window.getSelection()
-    if (selection && !selection.isCollapsed && String(selection)) return
-    this.toggle(event)
   }
 
   /** Find-in-page matched inside the folded details:  the browser has revealed them;  adopt it. */

@@ -154,7 +154,7 @@ describe("ChoicesForm", () => {
     await form.send()
     expect(server.posts.at(-1)).toEqual(["answer", { page: PAGE, values: { a: "open" }, feedback: "" }])
     expect(form.sentText).toMatch(/^Sent to Claude at \d\d:\d\d:  1 changed, 1 as recommended\./)
-    form.changed()
+    form.edited()
     expect(form.isStale).toBe(true)
     expect(form.sentText).toMatch(/changed since:  press Do it again/)
   })
@@ -219,12 +219,12 @@ describe("ChoicesForm", () => {
     // the server goes away;  Owen types on
     server.isDown = true
     row.typed = "opened"
-    form.changed()
+    form.edited()
     await vi.advanceTimersByTimeAsync(CHOICES_SAVE_MS)
     expect(form.isSaveError).toBe(true)
     // a reload:  the browser's copy is newer than anything the server has
     vi.setSystemTime(Date.parse("2026-10-14T05:00:00.000Z"))
-    form.changed()
+    form.edited()
     server.isDown = false
     const again = formOn(server, PAGE, storage)
     const back = new FakeRow("a", "isOpen")
@@ -253,7 +253,7 @@ describe("ChoicesForm", () => {
     form.add(row)
     row.typed = "open"
     server.isDown = true
-    form.changed()
+    form.edited()
     await vi.advanceTimersByTimeAsync(CHOICES_SAVE_MS)
     expect([form.isSaveError, form.savedText]).toEqual([
       true,
@@ -281,13 +281,13 @@ describe("ChoicesForm", () => {
     const row = new FakeRow("a", "isOpen")
     form.add(row)
     row.typed = "open"
-    form.changed()
+    form.edited()
     expect(storage.items.size).toBe(1)
     await form.send()
     expect(storage.items.size).toBe(0)
     const template = formOn(server, "/templates/syntax-choices.html", storage)
     template.add(new FakeRow("a", "isOpen"))
-    template.changed()
+    template.edited()
     await vi.advanceTimersByTimeAsync(CHOICES_SAVE_MS)
     expect([storage.items.size, server.posts.length]).toEqual([0, 1])
   })

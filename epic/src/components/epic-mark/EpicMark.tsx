@@ -6,7 +6,9 @@ import { E } from "spell-ui/core"
 import { EpicAddress, PageTargets, type Landing } from "spell-epic/links"
 // Import directly:  the page's signals, not its family's barrel (which would define `<epic-page>` here)
 import { EpicPage } from "spell-epic/components/epic-page/EpicPage"
-import { ItemAge, STATUS_STATES, type ItemState } from "spell-epic/components/epic-item/EpicItem.types"
+import { DrawnState, type ItemState } from "spell-epic/components/epic-item/EpicItem.types"
+// its view of the review inbox:  the file, not `epic-review`'s barrel (`index.ts` defines that family)
+import { ReviewState } from "spell-epic/components/epic-review/ReviewState"
 
 import { epicMarkVocabulary } from "./EpicMark.en"
 
@@ -16,9 +18,11 @@ import markCSS from "./EpicMark.css?inline"
  * ### `<epic-mark>`
  * An item's id as a chip in the item's state colour:  `<epic-mark item="i126" link>` draws `I126`
  * (epic `epic-engine` P45;  Owen, 2026-10-25:  "`<epic-mark link>` for rendering the I126 mark").
- * - Its colour:  the item's `state`, else its status's (`STATUS_STATES`), as drawn (`ItemAge`):
- *   the same rule as the item's own id chip and the section's counts.
- *   - read again as the page changes (its `layout`:  a state, status or title changing, the live patch)
+ * - Its colour:  the item's state AS DRAWN (`DrawnState.of()`):  the ONE rule of the item's own id chip and every
+ *   count of it (epic `coherence` P22):  its `state`, else its status's, greyed with age;  blue while Claude works on
+ *   it, Owen's urgency and his check before they're applied (the review inbox, `ReviewState.liveOf()`)
+ *   - read again as the page changes (its `layout`:  a state, status or title changing, the live patch), and as the
+ *     review inbox does
  * - Its tooltip:  the item's title (`PageTargets`).
  * - `link`:  an `#id` link, which the docs runtime lands on as any (unfolding the item).
  * - An id the page doesn't have:  `:state(missing)`, the accent colour, saying so in its tooltip.
@@ -30,6 +34,15 @@ export class EpicMark extends E.UIComponent<typeof epicMarkVocabulary> {
   @E.protoMerged static elementSetup = {
     styleSheets: { "epic-mark": markCSS }
   } satisfies Partial<E.ElementSetup>
+
+  /** The page's review inbox, as the item's own chip reads it:  what it says of the item now (`state`). */
+  readonly reviewState = new ReviewState(() => undefined)
+
+  /** While connected, follow the review inbox:  its item's chip changes with it.  Returns the undo. */
+  @E.whileConnected
+  protected followReview() {
+    return this.reviewState.connect()
+  }
 
   /** The `<epic-page>` around it, once connected. */
   get page(): Element | null {
@@ -71,12 +84,11 @@ export class EpicMark extends E.UIComponent<typeof epicMarkVocabulary> {
     return this.isConnected && !this.landing
   }
 
-  /** The item's state as drawn:  `state`, else its status's, a day-old green turned grey (`ItemAge`). */
+  /** The item's state as drawn, as its own id chip draws it (`DrawnState.of()`, with what the inbox says now). */
   get state(): ItemState | undefined {
     const item = this.target
     if (!item) return undefined
-    const written = item.getAttribute("state") ?? STATUS_STATES[item.getAttribute("status") ?? ""] ?? "open"
-    return ItemAge.shown(written as ItemState, item.getAttribute("changed"), item.getAttribute("reviewed"))
+    return DrawnState.of(DrawnState.fieldsOf(item), this.reviewState.liveOf(item.id))
   }
 
   /** Its tooltip:  the item's title, or that the page doesn't have it. */
