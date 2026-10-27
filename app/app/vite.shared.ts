@@ -126,7 +126,7 @@ export const SHARED_FAMILIES: Readonly<Record<string, readonly string[]>> = {
  *   pack's `define()`);  else `spell-ui.js` does, as `spell-ui-shared.js` imports it.
  */
 const DRAWN_FAMILIES = ["ui-checkbox", "ui-divider", "ui-list", "ui-parts", "ui-segment", "ui-table"].map(
-  (family) => `spell-ui/components/${family}`
+  (family) => `spell/ui/components/${family}`
 )
 
 /**
