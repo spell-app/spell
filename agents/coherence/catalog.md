@@ -340,13 +340,31 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
 
 - **It is:**  `ServerLink` (`spell-epic/src/review/ServerLink.ts`):  the page's token, a stale token's retry,
   and every read, write and poll
-  - `isServed()`, `canRead()`, `get()` (on `$fetch()`), `post()`, `forPage()`
+  - `isServed()`, `canRead()`, `get()` (on `$fetch()`, JSON or its text), `post()`, `forPage()`
+  - a data page's file (the commands page's, the core reference's, the syntax page's):  `getFile()`, by its name now or
+    its old one, `.json` for `.json5` (`dataFileNames()`:  the ONE old-name rule, reading and watching alike);
+    its `file://` notice is `drawThenBoot()`'s, in the docs helpers (epic `coherence` P22)
   - the static `watch(window, files, refresh, { every, polls })`, with a path test:
     polling while the page is visible, and hearing the page server's file events
 - **Use it when:**  an epic element, form or docs page reads or writes through the page server.
 - **Flag:**  `SPELL_SERVER\?\.token|protocol !== "file:"`
 - **Score:**  `SPELL_SERVER\?\.token|protocol !== "file:"` · home `spell-epic/src/review/ServerLink.ts`
-- **Copies:**  `--` since epic `coherence` P9;  only the parked `goals-live.js` keeps its own
+- **Copies:**  `--` since epic `coherence` P9 (the data pages' reads since P22);  only the parked `goals-live.js` keeps
+  its own
+
+### A page's store the elements follow
+
+- **It is:**  `PageStore` (`spell-epic/src/review/PageStore.ts`;  epic `coherence` P22):  plain code holding what a
+  page's form or client knows, its `version` and `subscribe()`, `changed()` telling every element that follows it;
+  one per page and class (`onePerPage()`, a test's own handed over with `adopt()`)
+  - on it:  `ReviewClient`, `AgentsClient`, `SendCountdown`, `AnswerForm`, `ChoicesForm`, `RunForm`
+  - an element follows one with two lines:  `@E.state accessor version`, then
+    `store.subscribe(() => (this.version = store.version))`
+- **Use it when:**  a page's elements follow one object's changes:  a form, a client of the page server.
+- **Flag:**  `listeners = new Set<\(\) => void>\(\)|static adopt\(`
+- **Score:**  `listeners = new Set<\(\) => void>\(\)|static adopt\(` · in `spell-epic/src/`
+  · home `spell-epic/src/review/PageStore.ts`
+- **Copies:**  `--` since P22 (the six stores)
 
 ## Errors and logging
 
@@ -495,7 +513,7 @@ What a component, or a page built on Spell UI, reaches for first.
 
 ### The section being read;  landing on a link
 
-- **It is:**  `TocIndex` (`spell-ui/src/docs-components/ui-docs-toc/TocIndex.ts`):  `current()`, `reached()`, `decode()`,
+- **It is:**  `TocIndex` (`spell-ui/src/components/ui-toc/TocIndex.ts`):  `current()`, `reached()`, `decode()`,
   `slug()`;  and `HashLanding` beside it (epic `coherence` P11):  landing on a `#hash` below the stuck titles
   - a landing:  the page ready, its pane shown and folds opened, the scroll to its line, once more as it settles unless
     the reader moved;  one per document, a newer landing stops an older one
@@ -504,13 +522,12 @@ What a component, or a page built on Spell UI, reaches for first.
 - **Use it when:**  following the scroll, turning an address's `#hash` into a section, or landing a link.
 - **Flag:**  `scrollIntoView\(|hasReaderMoved`
 - **Score:**  `hasReaderMoved|decodeURIComponent\((\w+\.)*location\.hash`
-  · home `spell-ui/src/docs-components/ui-docs-toc/TocIndex.ts`, `spell-ui/src/docs-components/ui-docs-toc/HashLanding.ts`
+  · home `spell-ui/src/components/ui-toc/TocIndex.ts`, `spell-ui/src/components/ui-toc/HashLanding.ts`
 - **Copies:**  `--` since P11 (Spell UI's toc, site sections and API tables;  the docs pages' runtime)
   - Fine:  `spell-epic/src/components/epic-section/EpicFold.tsx`, `spell-epic/src/components/epic-item/EpicItem.tsx`:
     since P18 they only open for a link (a page whose lander doesn't know epic folds), never scroll
   - Left:  the comments' toolbar (`spell-comments.entry.js` `currentSection()`):  it bundles no Spell UI
-  - Left:  the runtime's `EPIC_LAND_GAP` still calls itself `EpicFold`'s `LAND_GAP`, gone (sweep 2, epic-pages #3):
-    the runtime waited for ui-gaps' merge, then for repo-split P20
+  - the runtime's `EPIC_LAND_GAP` is its own since P22, no mirror:  `EpicFold`'s `LAND_GAP` went in P18
   - Left:  the site sections' sticking, in the site (the finding's "later":  into Spell UI's own code)
 
 ### Copying, with VS Code's side bar
@@ -568,16 +585,22 @@ What a component, or a page built on Spell UI, reaches for first.
 
 ### A growing text box
 
-- **It is:**  `<epic-text-box>` (spell-epic):  grows with its text, to a third of the window or its `max-height`;
-  `type="note"` for a box another element reads itself (`value`)
+- **It is:**  Spell UI's `<ui-textarea grow>` (`spell-ui/src/components/ui-input/UITextarea.tsx`;  epic `ui-gaps`
+  P14):  grows with its text, to a third of the window or `max-rows`;  and on it spell-epic's `<epic-text-box>`, for a
+  note or a comment (`type="note"` for a box another element reads itself, `value`)
+  - a ONE-LINE answer box, a line that wraps and grows:  `keepOneLine()` on its input, `stopNewLine()` on its keys
+    (`spell-epic/src/answers/answers.types.ts`;  epic `coherence` P22):  the choice rows', the run rows', the syntax
+    page's class names
 - **Flag:**  `field-sizing|growField`
 - **Score:**  `field-sizing|function growField` · in `spell-epic/src/`
-  · home `spell-epic/src/components/epic-text-box/`
-- **Copies:**  since epic `coherence` P14 `<epic-agents>`' redirect note and `<epic-new-item>`'s note are text boxes;
-  left:
-  - `<epic-review>`'s note, `<epic-run-row>`'s and `<epic-choice-row>`'s one-line answers:  their own keys, focus and
-    looks, which the text box doesn't take yet
-  - the docs helpers' `growField()`, the syntax page's boxes (`syntax-choices.css`)
+  · home `spell-epic/src/components/epic-text-box/`, `spell-ui/src/components/ui-input/`
+- **Copies:**  `<epic-agents>`' redirect note and `<epic-new-item>`'s note since epic `coherence` P14;
+  `<epic-review>`'s note and the choice rows since epic `ui-gaps` P14;  the run rows and the syntax page's feedback
+  since P22.  Left:
+  - the docs helpers' `growField()`:  the comments' fields, native on purpose (made by the comments' code, kept
+    through every redraw), and the runtime's New epic box (an HTML string)
+  - the syntax page's boxes (`syntax-choices.css`):  native on purpose, 750 of them, each a `<ui-textarea>` would draw
+    a shadow root
 
 ### A draft that saves itself
 
@@ -586,6 +609,25 @@ What a component, or a page built on Spell UI, reaches for first.
 - **Flag:**  `draft saved|saveDraft`
 - **Score:**  `\bdraftTimer\b|setTimeout\(\(\) => (this\.)?saveDraft` · home `spell-epic/src/answers/DraftSaver.ts`
 - **Copies:**  `--` since epic `coherence` P9 (the seven forms)
+
+### A block's actions row
+
+- **It is:**  `<epic-actions>` (`spell-epic/src/components/epic-actions/`), made by the docs helpers'
+  `addBlockAction()` just before a block with no title row:  the bullhorn, then a table's expand button, over the
+  block's top right corner;  every page's since epic `coherence` P22 (an epic page's alone since epic `epic-engine` P45)
+- **Use it when:**  a docs-page feature puts a control on a block:  a paragraph, a table, a list.
+- **Flag:**  `spell-block-actions|spell-block-buttons`
+- **Copies:**  `--` since P22 (the plain `div.spell-block-actions` went)
+
+### A page's tables, watched
+
+- **It is:**  the docs runtime's `eachTable(main, { added, gone, keeps, redraw })`
+  (`spell-epic/src/tools/_assets/spell-doc-runtime.js`;  epic `coherence` P22):  each table's box handed over once,
+  now and as a part's body or a live update adds tables;  a redraw batched to a frame (`redrawSoon()`)
+- **Use it when:**  a docs-page feature works on every table:  the expand button, a two-column table's wrap, the stuck
+  header row.
+- **Flag:**  `new MutationObserver\(\(\) => requestAnimationFrame\(`
+- **Copies:**  `--` since P22 (the three table features)
 
 ### The same program in two forms
 
@@ -607,14 +649,20 @@ Generic files:  Spell UI imports them one by one, so they reach any page.
   · home `src/util/string.ts`
 - **Copies:**  left on purpose:  the parser's CommonMark `escapeHTML` (it leaves `'` alone, as the spec tests check);
   TocIndex's apostrophe rule (its ids are saved);  `InboxPoller.mjs` (node's built-ins only)
+  - the docs pages' heading ids on `slug()` since epic `coherence` P22 (the runtime's `headingSlug()`, cut at 48), and
+    the toolbar's access letters on `withoutAccents()`
+  - Fine:  `spell-epic/src/tools/_assets/spell-doc-toolbar.js`:  its `titleWithKey()` takes a title apart (`NFD`) to
+    mark the letter in place, it folds nothing
 
 ### Numbers
 
 - **It is:**  `clamp()`, `kb()` (one unit:  KB of 1024):  `src/util/number.ts`
 - **Flag:**  `Math\.min\(.*Math\.max\(|/ 1024`
 - **Score:**  `Math\.min\(.*Math\.max\(|Math\.max\(.*Math\.min\(|/ 1024\b` · home `src/util/number.ts`
-- **Copies:**  the docs pages' toolbar, runtime and comments entry, a clamp each (sweep 2, epic-pages #13):
-  left for after repo-split P20;  the comment pane's two on `clamp()` since P18
+- **Copies:**  the comment pane's two on `clamp()` since epic `coherence` P18;  the docs pages' toolbar, runtime
+  (paging) and comments entry since P22.  Left:
+  - the runtime's two-column tables (`fitTwoColumns()`):  `Math.max(0, Math.min(...))`, its floor winning when the
+    room is narrower than the second column's least, which `clamp()` would turn around
 
 ### Local dates and times
 
@@ -650,6 +698,8 @@ Generic files:  Spell UI imports them one by one, so they reach any page.
   - on it:  spell-epic's `Fold` (`spell-epic/src/components/epic-item/Fold.tsx`):  a box an epic element folds by
     itself, and THE fold button (`fold.button()`):  every card's band and every panel's title;
     fold-all and open-all (`foldAllUnder()`, `expandAllUnder()`) close and open each block's
+    - an open state of an element's own takes it too, handed as an `Opener` (`Fold.button()`, `Fold.band()`):
+      an item's line, a reviewed option's header (epic `coherence` P22)
 - **Use it when:**  anything that opens and closes.  The words:  [words.md](words.md), "open / close".
 - **Flag:**  `requestChange\("is(Open|Visible|Collapsed)|"ui-opening"|beforematch|aria-expanded=\{this\.is`
 - **Score:**  `requestChange\("is(Open|Visible|Collapsed)"|addEventListener\("beforematch"|aria-expanded=\{this\.isOpen`
