@@ -82,4 +82,23 @@ describe("<ui-docs-theme-bench>", () => {
     await ElementFixture.settle()
     expect(icon()).toBe(first)
   })
+
+  it("light and dark side by side:  each half tunes its own scheme;  Split gives a one-value token two", async () => {
+    const { bench, component } = await render()
+    // a token whose value differs by scheme shows a light and a dark control
+    const look = { reads: [], declares: [], overrides: [], values: { "--ui-surface": "light-dark(#ffffff, #222222)" } }
+    component.looks = { ui: look }
+    await ElementFixture.settle()
+    expect(component.isSplit("--ui-surface")).toBe(true)
+    component.tune("--ui-surface", "#eeeeee", "dark")
+    await ElementFixture.settle()
+    expect(component.css).toContain(":root.ui-dark {\n  --ui-surface: #eeeeee !important;")
+    expect(component.changes).toMatch(/"panel": \{\s*"light": [^,]+,\s*"dark": "#eeeeee"/)
+    // a one-value token:  one control, until it's split
+    expect(component.isSplit("--ui-radius-l")).toBe(false)
+    component.split("--ui-radius-l")
+    await ElementFixture.settle()
+    expect(component.isSplit("--ui-radius-l")).toBe(true)
+    expect(bench.shadowRoot!.querySelectorAll(".token.split .half").length).toBeGreaterThanOrEqual(4)
+  })
 })

@@ -107,6 +107,11 @@ export const docsThemeBenchVocabulary = {
       description: "The legend's half dot's tip."
     },
     { key: "reset", text: "Reset", description: "Put a token back to the theme's own value." },
+    {
+      key: "split",
+      text: "Split into light / dark",
+      description: "Give a token a light and a dark value of its own, each with its own control."
+    },
     { key: "resetAll", text: "Reset all", description: "Put every token of the theme shown back." },
     { key: "alpha", text: "Opacity", description: "Accessible name of a colour's opacity slider." },
     { key: "value", text: "Value", description: "Accessible name of a token's text field." },

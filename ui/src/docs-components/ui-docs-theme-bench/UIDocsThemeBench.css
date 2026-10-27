@@ -267,6 +267,63 @@
   font-variant-numeric: tabular-nums;
   color: var(--ui-text-muted);
 }
+/* split and reset:  quiet, until the row's hovered */
+.token-tool {
+  opacity: 0.55;
+}
+.token:hover .token-tool,
+.token-tool:focus-within {
+  opacity: 1;
+}
+
+/* a token shown light and dark apart:  the two halves side by side, each under its sun or moon */
+.halves {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+.half {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 4px;
+}
+/* a colour's half:  the scheme's icon, the swatch (the picker), its hex, its opacity and its % */
+.half.color {
+  grid-template-columns: auto 28px minmax(0, 1fr) 2.9em auto;
+  gap: 3px;
+}
+.half-scheme {
+  --ui-icon-width: 1em;
+  margin: 0;
+  color: var(--ui-text-muted);
+}
+.half .swatch-picker::part(control) {
+  inline-size: 28px;
+  block-size: 28px;
+  padding: 2px;
+}
+.half .hex::part(control),
+.half .opacity::part(control) {
+  padding-inline: 0.4em;
+  font-size: 0.85em;
+}
+.half .hex::part(control) {
+  font-family: var(--ui-font-family-mono, monospace);
+}
+/* the opacity:  a number, right-aligned against its unit (Owen's standing rule) */
+.half .opacity::part(control) {
+  text-align: end;
+  font-variant-numeric: tabular-nums;
+  appearance: textfield;
+}
+.half .opacity::part(control)::-webkit-inner-spin-button {
+  appearance: none;
+}
+.unit {
+  font-size: 0.8em;
+  color: var(--ui-text-muted);
+}
 
 /* the filter and the readers' legend:  stuck to the column's top as its tokens scroll under them */
 .tuning-head {

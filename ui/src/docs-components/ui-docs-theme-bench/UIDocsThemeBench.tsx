@@ -168,11 +168,21 @@ export class UIDocsThemeBench extends E.UIComponent<DocsThemeBenchVocabulary> {
     for (const key of this.frameKeys) void this.dress(key, { css: true })
   }
 
-  /** Set `token` to `value`:  for the scheme shown when its value differs by scheme, else for both. */
+  /**
+   * Set `token` to `value`:  for `scheme` alone, or for both (`undefined`).
+   * - By default:  the scheme shown when `token` shows light and dark apart (`isSplit()`), else both.
+   */
   @E.untracked
-  tune(token: string, value: string): void {
-    const scheme = this.isPerScheme(token) ? this.scheme : undefined
+  tune(token: string, value: string, scheme: Scheme | undefined = this.isSplit(token) ? this.scheme : undefined): void {
     this.keep(BenchEdits.set(this.edits, { theme: this.theme, token, value, scheme }))
+  }
+
+  /** Give `token` a light and a dark value of its own, each starting as it is now. */
+  @E.untracked
+  split(token: string): void {
+    const [light, dark] = [this.valueOf(token, "light"), this.valueOf(token, "dark")]
+    const edits = BenchEdits.set(this.edits, { theme: this.theme, token, value: light, scheme: "light" })
+    this.keep(BenchEdits.set(edits, { theme: this.theme, token, value: dark, scheme: "dark" }))
   }
 
   /** Put `token` back to the theme's own;  every token, when none is given. */
@@ -187,10 +197,15 @@ export class UIDocsThemeBench extends E.UIComponent<DocsThemeBenchVocabulary> {
     PREFS.set(EDITS_PREF, Object.keys(edits).length ? edits : undefined)
   }
 
-  /** Whether `token`'s value differs between light and dark, in the theme shown. */
-  private isPerScheme(token: string): boolean {
-    const value = this.tokens?.valueIn(this.theme, token) ?? this.nowOf(token)
-    return value.includes(LIGHT_DARK)
+  /**
+   * Whether `token` shows light and dark apart, each with its own control:  tuned per scheme,
+   * or (untuned) its value differs between them in the theme shown.
+   */
+  isSplit(token: string): boolean {
+    const edit = this.edits[this.theme]?.[token]
+    if (edit) return !("both" in edit)
+    const value = this.nowOf(token) || (this.tokens?.valueIn(this.theme, token) ?? "")
+    return BenchTokens.forScheme(value, "light") !== BenchTokens.forScheme(value, "dark")
   }
 
   /** What the tuning's copy holds:  the theme file's lines, then the editor's own. */
@@ -485,15 +500,15 @@ export class UIDocsThemeBench extends E.UIComponent<DocsThemeBenchVocabulary> {
     return ""
   }
 
-  /** `token`'s value for the scheme shown:  its tuning, else the pages' now. */
-  private valueOf(token: string): string {
-    const tuned = BenchEdits.valueFor(this.edits, this.theme, token, this.scheme)
-    return tuned ?? BenchTokens.forScheme(this.nowOf(token), this.scheme)
+  /** `token`'s value in `scheme` (the one shown by default):  its tuning, else the pages' now. */
+  private valueOf(token: string, scheme: Scheme = this.scheme): string {
+    const tuned = BenchEdits.valueFor(this.edits, this.theme, token, scheme)
+    return tuned ?? BenchTokens.forScheme(this.nowOf(token), scheme)
   }
 
-  /** What control `token` gets, from its value. */
-  private kindOf(token: string): TokenKind {
-    const value = this.valueOf(token)
+  /** What control `token` gets, from its value in `scheme`. */
+  private kindOf(token: string, scheme: Scheme = this.scheme): TokenKind {
+    const value = this.valueOf(token, scheme)
     if (BenchColor.isColor(value)) return "color"
     if (PIXELS.test(value)) return "length"
     return "text"
@@ -709,20 +724,35 @@ export class UIDocsThemeBench extends E.UIComponent<DocsThemeBenchVocabulary> {
     )
   }
 
-  /** One token's row:  its name and which pages read it, then its control. */
+  /**
+   * One token's row:  its name and which pages read it, then its control;
+   * a light and a dark control side by side when it shows them apart (`isSplit()`).
+   */
   private token(token: string): JSX.Element {
     const t = this.text
     const isTuned = () => this.edits[this.theme]?.[token] !== undefined
-    const kind = () => this.kindOf(token)
+    const isSplit = () => this.isSplit(token)
     return (
-      <div class={["token", { tuned: isTuned() }]} part={this.partForName("token")}>
+      <div class={["token", { tuned: isTuned(), split: isSplit() }]} part={this.partForName("token")}>
         <div class="token-head">
           <code class="token-name" title={this.tokens?.placeOf(token)}>
             {token}
           </code>
           {this.readersIcons(token)}
+          <Show when={!isSplit()}>
+            <ui-button
+              class="token-tool"
+              size="mini"
+              appearance="basic circular"
+              icon="adjust"
+              aria-label={t("split")}
+              title={t("split")}
+              onClick={() => this.split(token)}
+            ></ui-button>
+          </Show>
           <Show when={isTuned()}>
             <ui-button
+              class="token-tool"
               size="mini"
               appearance="basic circular"
               icon="undo"
@@ -732,39 +762,113 @@ export class UIDocsThemeBench extends E.UIComponent<DocsThemeBenchVocabulary> {
             ></ui-button>
           </Show>
         </div>
-        <div class={["token-control", kind()]}>
-          <Show when={kind() === "color"}>{this.colorPicker(token)}</Show>
-          <ui-input
-            size="small"
-            fluid=""
-            value={this.valueOf(token)}
-            aria-label={`${token}:  ${t("value")}`}
-            on-ui-changed={(event: CustomEvent<{ value: string }>) => this.tune(token, event.detail.value.trim())}
-          ></ui-input>
-          <Show when={kind() === "color"}>{this.opacitySlider(token)}</Show>
-          <Show when={kind() === "length"}>{this.lengthSlider(token)}</Show>
-        </div>
+        <Show when={isSplit()} fallback={this.control(token)}>
+          <div class="halves">
+            {this.half(token, "light")}
+            {this.half(token, "dark")}
+          </div>
+        </Show>
       </div>
     )
   }
 
-  /** `token`'s colour, as the picker and the opacity slider take it. */
-  private colorOf(token: string): { hex: string; opacity: number } {
+  /** `token`'s one control, for both schemes:  a colour's picker, text and opacity;  a length's text and slider. */
+  private control(token: string): JSX.Element {
+    const t = this.text
+    const kind = () => this.kindOf(token)
     return (
-      (this.probeBox && BenchColor.split(this.valueOf(token), this.probeBox)) || { hex: FALLBACK_HEX, opacity: FULL }
+      <div class={["token-control", kind()]}>
+        <Show when={kind() === "color"}>{this.colorPicker(token)}</Show>
+        <ui-input
+          size="small"
+          fluid=""
+          value={this.valueOf(token)}
+          aria-label={`${token}:  ${t("value")}`}
+          on-ui-changed={(event: CustomEvent<{ value: string }>) => this.tune(token, event.detail.value.trim())}
+        ></ui-input>
+        <Show when={kind() === "color"}>{this.opacitySlider(token)}</Show>
+        <Show when={kind() === "length"}>{this.lengthSlider(token)}</Show>
+      </div>
     )
   }
 
-  /** A colour's picker:  the browser's own, its opacity kept. */
-  private colorPicker(token: string): JSX.Element {
+  /**
+   * `token`'s control for `scheme` alone, under its sun or moon:  a colour's swatch (the picker), hex and opacity;
+   * anything else its text.
+   */
+  private half(token: string, scheme: Scheme): JSX.Element {
+    const t = this.text
+    const name = `${token}, ${t(scheme)}`
+    const color = () => this.colorOf(token, scheme)
+    return (
+      <div class={["half", scheme, this.kindOf(token, scheme)]} title={t(scheme)}>
+        <ui-icon class="half-scheme" name={scheme === "dark" ? "moon" : "sun"} aria-label={t(scheme)}></ui-icon>
+        <Show
+          when={this.kindOf(token, scheme) === "color"}
+          fallback={
+            <ui-input
+              size="small"
+              fluid=""
+              value={this.valueOf(token, scheme)}
+              aria-label={`${name}:  ${t("value")}`}
+              on-ui-changed={(event: CustomEvent<{ value: string }>) =>
+                this.tune(token, event.detail.value.trim(), scheme)
+              }
+            ></ui-input>
+          }
+        >
+          {this.colorPicker(token, scheme)}
+          <ui-input
+            class="hex"
+            size="small"
+            value={color().hex}
+            aria-label={`${name}:  ${t("value")}`}
+            on-ui-changed={(event: CustomEvent<{ value: string }>) =>
+              this.tune(token, BenchColor.join(event.detail.value.trim(), color().opacity), scheme)
+            }
+          ></ui-input>
+          <ui-input
+            class="opacity"
+            type="number"
+            size="small"
+            min="0"
+            max={String(FULL)}
+            step="1"
+            value={String(color().opacity)}
+            aria-label={`${name}:  ${t("alpha")}`}
+            on-ui-changed={(event: CustomEvent<{ value: string }>) =>
+              this.tune(token, BenchColor.join(color().hex, Number(event.detail.value) || 0), scheme)
+            }
+          ></ui-input>
+          <span class="unit" aria-hidden="true">
+            %
+          </span>
+        </Show>
+      </div>
+    )
+  }
+
+  /** `token`'s colour in `scheme` (the one shown by default), as the picker and the opacity take it. */
+  private colorOf(token: string, scheme: Scheme = this.scheme): { hex: string; opacity: number } {
+    return (
+      (this.probeBox && BenchColor.split(this.valueOf(token, scheme), this.probeBox)) || {
+        hex: FALLBACK_HEX,
+        opacity: FULL
+      }
+    )
+  }
+
+  /** A colour's picker, the browser's own, its opacity kept:  for `scheme` alone, or as `tune()` picks. */
+  private colorPicker(token: string, scheme?: Scheme): JSX.Element {
     return (
       <ui-input
+        class="swatch-picker"
         type="color"
         size="small"
-        value={this.colorOf(token).hex}
-        aria-label={token}
+        value={this.colorOf(token, scheme).hex}
+        aria-label={scheme ? `${token}, ${this.text(scheme)}` : token}
         on-ui-typed={(event: CustomEvent<{ value: string }>) =>
-          this.tune(token, BenchColor.join(event.detail.value, this.colorOf(token).opacity))
+          this.tune(token, BenchColor.join(event.detail.value, this.colorOf(token, scheme).opacity), scheme)
         }
       ></ui-input>
     )
@@ -885,6 +989,9 @@ export interface UIDocsThemeBench extends E.AttributeValues<DocsThemeBenchVocabu
 /** Which pages show:  all four, or one. */
 type BenchLayout = "grid" | BenchPlaceId
 
+/** A scheme a token's value can differ in. */
+type Scheme = "light" | "dark"
+
 /** How a page that reads a token treats it:  reads it, or reads it but sets its own below `:root` too. */
 type ReaderState = "reads" | "overrides"
 
@@ -972,9 +1079,6 @@ const DOCS_FIRST: readonly BenchPlaceId[] = ["ui", "epic", "editor", "notebook"]
 
 /** The editor app's own tokens start so. */
 const EDITOR_PREFIX = "--spell-"
-
-/** A value per scheme. */
-const LIGHT_DARK = "light-dark("
 
 /** A length the slider takes:  px. */
 const PIXELS = /^-?\d+(?:\.\d+)?px$/
