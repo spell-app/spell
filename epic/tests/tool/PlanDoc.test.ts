@@ -2150,6 +2150,42 @@ describe("PlanDoc status cards (P13)", () => {
     expect(problems(plan)).toEqual([])
   })
 
+  test("finishWork (I148):  an open issue or todo CLOSES with its Done card, logged, taken in the active phase;  the rest keep their status", () => {
+    const plan = freshPlan()
+    plan.addPhase("Build It")
+    plan.setPhase(plan.phases.length, "active")
+    const active = plan.phaseElements.at(-1)!.id
+    plan.addItem("issue", "it breaks")
+    plan.addItem("todo", "build it")
+    plan.addItem("limit", "slow")
+    plan.addItem("judgement", "one file each")
+    plan.addItem("question", "which?")
+    plan.addItem("test", "it shows")
+    plan.addItem("issue", "closed already")
+    plan.setItem("i2", "done")
+    const ids = ["i1", "t1", "t2", "j1", "q1", "m1", "i2", "o1"]
+    for (const id of ids) plan.addStatus(id, "Do it.")
+    const closed = ids.map((id) => plan.finishWork(id).closed)
+    expect(closed).toEqual([true, true, false, false, false, false, false, false])
+    expect(ids.slice(0, 7).map((id) => el(plan, id).getAttribute("status"))).toEqual([
+      "done",
+      "done",
+      "open",
+      "open",
+      "open",
+      "open",
+      "done"
+    ])
+    expect(["i1", "t1"].map((id) => el(plan, id).getAttribute("taken-in"))).toEqual([active, active])
+    expect(ids.map((id) => cards(el(plan, id)).at(-1)!.state)).toEqual(Array(ids.length).fill("done"))
+    const log = Array.from(plan.document.querySelectorAll("#log > epic-event"), (event) => event.textContent)
+    expect(log.slice(-2)).toEqual(["I1 closed:  it breaks", "T1 closed:  build it"])
+    plan.updateStates()
+    expect(["i1", "t1"].map((id) => el(plan, id).getAttribute("state"))).toEqual(["recent", "recent"])
+    expect(() => plan.finishWork("i1")).toThrow(/I1 has no underway status card/)
+    expect(problems(plan)).toEqual([])
+  })
+
   test("what comes next, for a Noted card:  the first phase still to do;  none, a phase to take it up", () => {
     const plan = freshPlan()
     for (const phase of plan.phases) plan.setPhase(phase.n, "done")

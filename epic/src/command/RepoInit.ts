@@ -138,6 +138,7 @@ export class RepoInit {
    * - `app`:  none (the default);  the file shows how to declare one, in a comment
    * - `checkoutPatches`:  none (`[]`);  the file shows one, in a comment
    * - `promptAck`:  on, the default
+   * - `renamedRepos`:  none (`{}`);  the file shows one, in a comment
    * - static:  needs no instance
    */
   static settingsFor(main: string): EpicSettings {
@@ -162,7 +163,8 @@ export class RepoInit {
       voices: {},
       pageVoices: { ...EpicConfig.DEFAULTS.pageVoices },
       checkoutPatches: [],
-      promptAck: true
+      promptAck: true,
+      renamedRepos: {}
     }
   }
 
@@ -232,6 +234,8 @@ export class RepoInit {
   // and fixes every checkout gets at once, the worktrees behind main too (\`epic worktree patch\`):  main's file
   // copied in where it isn't tracked yet, or a command run once in each checkout:
   // "checkoutPatches": [{ "id": "vscode-ignore", "date": "2026-10-22", "why": "...", "copy": ".ignore" }]
+  // and the repo's old GitHub addresses, once it's renamed, so epic pages recording one are still this repo's:
+  // "renamedRepos": { "https://github.com/o/old-name": "https://github.com/o/new-name" }
 }
 `
   }

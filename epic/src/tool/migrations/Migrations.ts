@@ -1,4 +1,5 @@
 import { ChangesAfterGoal } from "./ChangesAfterGoal"
+import { DoneCardsClose } from "./DoneCardsClose"
 import { ItemRenames } from "./ItemRenames"
 import { LinksAgree } from "./LinksAgree"
 import { MoreRequestsFirst } from "./MoreRequestsFirst"
@@ -40,7 +41,8 @@ export class Migrations {
     new ToReviewMarks(),
     new ChangesAfterGoal(),
     new ItemRenames(),
-    new RootLinks()
+    new RootLinks(),
+    new DoneCardsClose()
   ]
 
   /** The steps every edit runs too (`PlanDoc.migrate()`):  the cheap markup ones. */

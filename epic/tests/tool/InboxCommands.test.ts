@@ -457,6 +457,25 @@ test("status noted:  Claude only RECORDED Owen's choice -- an underway card turn
   expect(printed).toEqual(["J1 underway:  a real choice", "J1 noted:  a real choice"])
 })
 
+test("status done on an issue (I148):  the card turns green AND the issue closes, green, logged, in one write", async () => {
+  const owner = commands()
+  vi.spyOn(owner, "warn").mockImplementation(() => undefined)
+  const plan = PlanDoc.parse(readFileSync(file, "utf8"))
+  plan.addItem("issue", "it stays red")
+  plan.updateStates()
+  writeFileSync(file, plan.toString())
+  const issue = () => PlanDoc.parse(readFileSync(file, "utf8")).findItem("i1")!
+  expect(issue().getAttribute("state")).toBe("attention")
+  expect(await owner.run(["status", "x", "i1", "underway", "Fix it."])).toBe(0)
+  expect(await owner.run(["status", "x", "i1", "done", "Fixed:  CI is green."])).toBe(0)
+  expect([issue().getAttribute("status"), issue().getAttribute("state")]).toEqual(["done", "recent"])
+  expect(issue().querySelector("epic-status")!.getAttribute("state")).toBe("done")
+  const log = Array.from(PlanDoc.parse(readFileSync(file, "utf8")).document.querySelectorAll("#log > epic-event"))
+  // as written to disk, formatted:  one space
+  expect(log.at(-1)!.textContent).toMatch(/^I1 closed:\s+it stays red$/)
+  expect(printed).toEqual(["I1 underway:  it stays red", "I1 done, closed:  it stays red"])
+})
+
 test("clear / done:  a pick riding on the mark (pick B, but ...) stays CHOSEN, with a Noted card;  logged", async () => {
   const plan = PlanDoc.parse(readFileSync(file, "utf8"))
   const options = `<epic-choices><epic-option letter="A" title="Option A"></epic-option><epic-option letter="B" title="Option B"></epic-option></epic-choices>`

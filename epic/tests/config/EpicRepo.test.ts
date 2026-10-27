@@ -43,7 +43,9 @@ for (const [main, url] of [
     contentFolder: "../shared",
     worktreesFolder: `../${main.split("/").pop()}.worktrees`,
     installCommand: "",
-    sharedFolders: []
+    sharedFolders: [],
+    // the engine was `o/engine-old` on GitHub once (epic-engine I150, as spell-app/spell-kit became spell-app/spell)
+    ...(main === ENGINE && { renamedRepos: { "https://github.com/o/engine-old": "https://github.com/o/engine" } })
   }
   writeFileSync(join(main, ".epic", "config.json5"), JSON.stringify(config))
   git(main, "init", "-q", "-b", "main")
@@ -73,6 +75,8 @@ page("engine-work", { branch: "main", worktree: ENGINE, repo: "https://github.co
 page("app-work", { branch: "app-work", worktree: join(TEMP, "app.worktrees", "app-work") })
 page("by-url", { repo: "https://github.com/o/engine/" })
 page("someday", { future: "" })
+// started before the engine's repo was renamed:  its old address, and a worktree folder long gone (I150)
+page("renamed", { worktree: join(TEMP, "gone", "gone.worktrees", "renamed"), repo: "https://github.com/o/engine-old" })
 
 /** Run the worktree hook's `create` for `name`, from `cwd`. */
 function create(name: string, cwd: string) {
@@ -105,6 +109,34 @@ describe("EpicRepo", () => {
       url: "https://github.com/o/engine/"
     })
     expect(EpicRepo.of("by-url", ENGINE)?.own).toBe(true)
+  })
+
+  test("a RENAMED repo (I150):  the page's old address is still its repo's, from either side", () => {
+    expect(EpicRepo.of("renamed", ENGINE)?.own).toBe(true)
+    expect(EpicRepo.elsewhere("renamed", ENGINE)).toBeUndefined()
+    // from the app, which knows no renames:  the engine's own settings say it's its old name
+    expect(EpicRepo.of("renamed", APP)).toMatchObject({ own: false, checkout: ENGINE })
+  })
+
+  test("sameUrl() through renames:  old and new are one repo either way round, a chain too;  others aren't", () => {
+    const renames = EpicRepo.renamesOf([ENGINE])
+    expect(renames).toEqual(new Map([["github.com/o/engine-old", "github.com/o/engine"]]))
+    expect(EpicRepo.sameUrl("git@github.com:o/engine-old.git", "https://github.com/o/engine", renames)).toBe(true)
+    expect(EpicRepo.sameUrl("https://github.com/o/engine", "https://github.com/O/engine-old/", renames)).toBe(true)
+    expect(EpicRepo.sameUrl("https://github.com/o/engine-old", "https://github.com/o/engine")).toBe(false)
+    expect(EpicRepo.sameUrl("https://github.com/o/app", "https://github.com/o/engine-old", renames)).toBe(false)
+    const chain = new Map([
+      ["github.com/o/a", "github.com/o/b"],
+      ["github.com/o/b", "github.com/o/c"]
+    ])
+    expect(EpicRepo.sameUrl("https://github.com/o/a", "https://github.com/o/c", chain)).toBe(true)
+    // a loop ends
+    const loop = new Map([
+      ["github.com/o/x", "github.com/o/y"],
+      ["github.com/o/y", "github.com/o/x"]
+    ])
+    expect(typeof EpicRepo.sameUrl("https://github.com/o/x", "https://github.com/o/y", loop)).toBe("boolean")
+    expect(EpicRepo.renamesOf([APP, join(TEMP, "nowhere")])).toEqual(new Map())
   })
 
   test("can't tell, or no epic:  says nothing", () => {
@@ -197,6 +229,10 @@ describe("the prompt gate", () => {
     expect(PromptGate.gate({ prompt: "/epic resume engine-work", cwd: ENGINE }, null)).toEqual({
       hookSpecificOutput: { hookEventName: "UserPromptSubmit", sessionTitle: "🚧 engine-work" }
     })
+    // its page recording the repo's old address (I150)
+    expect(PromptGate.gate({ prompt: "/epic resume renamed", cwd: ENGINE }, null)).toEqual({
+      hookSpecificOutput: { hookEventName: "UserPromptSubmit", sessionTitle: "🚧 renamed" }
+    })
     expect(PromptGate.gate({ prompt: "/isolate not-an-epic", cwd: APP }, null)).toMatchObject({
       hookSpecificOutput: { sessionTitle: "🚧 not-an-epic" }
     })
@@ -214,6 +250,12 @@ describe("the session-start guard", () => {
 
   test("the epic's own worktree:  as before, nothing said (epic `epic-engine` P12:  recorded, never told to enter)", () => {
     const own = join(TEMP, "engine.worktrees", "engine-work")
+    expect(WorktreeGuard.check({ cwd: own, source: "startup" })).toBeUndefined()
+  })
+
+  test("its page recording the repo's OLD address (I150):  its own worktree all the same, nothing said", () => {
+    const own = join(TEMP, "engine.worktrees", "renamed")
+    git(ENGINE, "worktree", "add", "-q", "-b", "renamed", own)
     expect(WorktreeGuard.check({ cwd: own, source: "startup" })).toBeUndefined()
   })
 })
@@ -246,6 +288,9 @@ describe("the commands", () => {
       expect(EpicProgram.windowOptions(["launch", "engine-work"], ENGINE)).toEqual({})
       expect(EpicProgram.windowOptions(["which"], APP)).toEqual({})
       expect(EpicProgram.windowOptions(["launch", "app-work"], APP)).toEqual({})
+      // the old address (I150):  the engine's from the app, its own from the engine
+      expect(EpicProgram.windowOptions(["launch", "renamed"], APP)).toEqual({ cwd: ENGINE })
+      expect(EpicProgram.windowOptions(["launch", "renamed"], ENGINE)).toEqual({})
     } finally {
       said.mockRestore()
     }
@@ -256,6 +301,9 @@ describe("the commands", () => {
     expect(listed.get("engine-work")).toMatchObject({ repo: ENGINE, checkout: "../engine.worktrees/engine-work" })
     expect(listed.get("app-work")?.repo).toBeUndefined()
     expect(listed.get("app-work")?.checkout).toBe("../app.worktrees/app-work")
+    // the old address (I150):  the engine's own, listed with no `repo`
+    expect(new PlanDocFiles({ root: ENGINE }).listEpics().find((epic) => epic.name === "renamed")?.repo).toBeUndefined()
+    expect(listed.get("renamed")?.repo).toBe(ENGINE)
   })
 })
 

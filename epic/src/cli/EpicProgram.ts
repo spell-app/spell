@@ -1014,15 +1014,18 @@ The page (seo):
 Claude's status card on an item (seo#J3;  an Overview sub-section seo#o3, a phase seo#P3, seo#summary), a state
 word after the target, never with fields:
   underway "<reading>"                                    a blue card:  what Claude took the task to be;  spinner on
-  done ["<summary>"]                                      WORK was done:  that card green, the summary under it
-  noted "<what>"                                          Claude only RECORDED Owen's choice:  a calm Noted card
+  done ["<summary>"]                                      the item's WORK finished:  that card green, the summary
+                                                          under it;  an open issue or todo closes (as close does)
+  noted "<what>"                                          a STEP done, the item not finished:  Owen's choice
+                                                          recorded, an answer or details written:  a Noted card
 
 Examples:
   epic update seo#P3 --goal "<p>...</p>" --estimate 2h
   epic update seo#J3 --title "Clearer title"
   epic update epic-workflow --standing
-  epic update seo#J3 underway "Reading the routes"
-  epic update seo#J3 done "Answered;  one test skipped"`
+  epic update seo#I3 underway "Reading the routes"
+  epic update seo#I3 done "Fixed;  one test skipped"
+  epic update seo#J3 noted "Answered his note:  options A and B"`
 
 /** After `epic saga --help`. */
 const SAGA_HELP = `

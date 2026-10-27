@@ -1650,6 +1650,31 @@ export class PlanDoc extends PlanReader {
   }
 
   /**
+   * The WORK on item `id` is finished (`epic update <name>#<id> done`;  epic `epic-engine` I148):  its latest underway
+   * card turns Done (`finishStatus()`), and an open ISSUE or TODO closes in the same write, as `epic close` does.
+   * - closed:  `status="done"`, its phase stamped (`setItem()`;  `taken-in`, `PhaseTakes`), the log's
+   *   `I3 closed:  <title>`;  the state that follows (green) is worked out by the edit's `updateStates()`
+   * - only the card, the item left as it is:
+   *   - a question:  it's decided (`decide`), never done
+   *   - a judgement call, a manual test:  Owen closes those (Approve, his test run), so a call he hasn't seen
+   *     never turns green on Claude's word
+   *   - a `limit` todo:  nothing to do
+   *   - an Overview sub-section, a phase, the summary;  an item closed already
+   * - Before I148 it wrote only the card:  a fixed issue stayed red (repo-split's I65).
+   *   The migration `done-cards-close` closes the ones left so.
+   * - throws as `finishStatus()` does:  no underway card
+   */
+  finishWork(id: string, summary?: string): { title: string; closed: boolean } {
+    const title = this.finishStatus(id, summary)
+    const host = this.statusHost(id)
+    if (host.localName !== "epic-item" || host.getAttribute("status") !== "open" || !PhaseTakes.isWork(host))
+      return { title, closed: false }
+    this.setItem(host.id, "done")
+    this.log(`${host.id.toUpperCase()} closed:  ${title}`)
+    return { title, closed: true }
+  }
+
+  /**
    * Claude RECORDED what Owen chose on item `id` (or an Overview sub-section, a phase, the summary):
    * a Noted card, `what` (HTML, one line) saying what was recorded and what happens next.  Returns its title.
    * - its latest underway card, if any, turns `noted` (`finishStatus()`), `what` its summary:

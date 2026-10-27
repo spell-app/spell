@@ -140,10 +140,11 @@ Owen is back online.  Gather everything, work through it in the background, then
    They're named and listed (the root `CLAUDE.md`, "Delegated work").
    - Each request for now, revisit and phase note:  as `/epic review` answers one ("7.3", step 2).
      - The status card first, then the answer INTO the item.
-     - Then `status ... done`, and `inbox done | clear`.
+     - Then `status ... noted "<what was answered>"`, and `inbox done | clear`:  an answer is a step.
+       `done` only when the work FINISHED the item (an issue fixed, a todo built):  it closes an open issue or todo.
    - A mark that only asked to RECORD a choice (no answer to write):
      `status ... noted "<what was recorded;  what happens next>"`.
-     - Never `done` (Owen, 2026-10-10:  a Done card means work was done).
+     - Never `done` (Owen, 2026-10-10, and epic `epic-engine` I148:  a Done card means the item is finished).
      - The cards `apply --all` makes for picks, todos and new items are Noted already.
    - Each comment on an epic page (`epics[].comments`):  as `/epic review` answers one ("7.3", step 3b).
      - First `epic inbox working <name>#C3 on`:  his thread shows "Claude: thinking…" until the answer lands.

@@ -163,30 +163,25 @@
   }
   /*
    * Narrow (VS Code's side bar, a phone):  a section with tools (Phases, the item sections)
-   * puts its title (and its chevron) on a row of its own, and the tools and badge together on the next, at the right.
-   * - why:  squeezed onto one row, the title broke inside its words ("Questio / ns"),
-   *   and wrapping item by item split the badge from the tools
+   * keeps its badge and tools beside the title while the title fits on one line beside them;
+   * when it doesn't, they go together onto a row of their own under it, at the row's end
+   * (epic `epic-engine` I149;  Owen, 2026-10-26:  "Doesn't seem like we should need to wrap here").
+   * - the title's flex basis is its one-line width, so the row wraps only when that and the controls don't fit
+   * - wrapped, the title keeps the whole first row, wrapping at its words:
+   *   squeezed beside the tools, it broke inside them ("Questio / ns")
+   * - the row's end, not the badge's `auto` margin:  the item sections have tools but no badge
+   * - NOT overlapping the title's end, as a guide's `.status` does:  an epic page's titles always show in full
+   * - before:  under 480px the title always took a row of its own, however short (I138 saw it at 390px)
    */
   @container epic-page (max-width: 480px) {
     :host(:state(tools)) ui-section::part(title) {
       flex-wrap: wrap;
+      justify-content: flex-end;
       row-gap: 2px;
     }
-    :host(:state(tools)) ui-section::part(heading) {
-      flex-basis: 100%;
-    }
-    /* the badge leads the wrapped row (badge, tools) at the right:  a section with tools has a badge */
-    ui-section::part(badge) {
-      margin-inline-start: auto;
-    }
-    ui-section::part(actions) {
-      margin-inline-start: 0;
-    }
-    /* on a row of their own, under the title:  centred on that row, not on the title's line */
     :host(:state(tools)) ui-section::part(badge),
     :host(:state(tools)) ui-section::part(actions) {
-      align-self: center;
-      translate: none;
+      margin-inline-start: 0;
     }
   }
 

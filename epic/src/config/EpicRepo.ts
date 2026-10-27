@@ -33,6 +33,12 @@ import { EpicConfig } from "./EpicConfig.ts"
  * 2. else `repo`, its GitHub page:  compared with this checkout's `origin` (`sameUrl()`);  the repo's checkout then
  *    is a folder beside this one whose `origin` it is (`checkoutByUrl()`)
  * - Same repo when the main checkouts are one, or both have the same `origin` (another clone).
+ * - A RENAMED repo (GitHub's `spell-app/spell-kit` became `spell-app/spell` in repo-split's P17;  epic
+ *   `epic-engine` I150):  every address goes through the repo's `renamedRepos` first (`renamesOf()`), so a page
+ *   recording the old one, or a clone whose `origin` still is it, is the same repo.
+ *   - Offline:  the list is in each repo's own epic settings, never asked of GitHub (the hooks run with no network).
+ *   - Why not by a commit or git's folder:  a page's `repo` is only an address, with nothing on this machine to
+ *     compare a commit with;  the `worktree` compare (1.) already is by folder.
  * - Says nothing (`undefined`) when it can't tell:  no page, a future epic with neither attribute, no `origin`.
  *   Everything that reads it then goes on as before:  it only ever refuses when it's sure.
  *
@@ -70,16 +76,17 @@ export class EpicRepo {
     const owner = worktree ? EpicRepo.mainOfPath(worktree) : null
     // a multi-repo top and its child repos are ONE home (epic `epic-engine` P10):  an epic's worktree holds them all
     const family = EpicRepo.familyOf(here)
+    const renames = EpicRepo.renamesOf(owner ? [...family, owner] : family)
     let own: boolean
     if (owner)
       own =
         family.some((main) => RealPath.same(owner, main)) ||
-        family.some((main) => EpicRepo.sameUrl(origin(owner), origin(main)))
+        family.some((main) => EpicRepo.sameUrl(origin(owner), origin(main), renames))
     else if (repo && family.some((main) => origin(main)))
-      own = family.some((main) => EpicRepo.sameUrl(repo, origin(main)))
+      own = family.some((main) => EpicRepo.sameUrl(repo, origin(main), renames))
     else return undefined
     // a multi-repo top's own epic:  the TOP's checkout, whose worktree holds every repo's (`familyOf()`'s second)
-    const checkout = own ? (family[1] ?? here) : (owner ?? EpicRepo.checkoutByUrl(repo, here))
+    const checkout = own ? (family[1] ?? here) : (owner ?? EpicRepo.checkoutByUrl(repo, here, renames))
     const folder = checkout ? new EpicConfig(checkout).worktreeFolder(name) : null
     return {
       name,
@@ -178,16 +185,42 @@ export class EpicRepo {
   /**
    * Whether repo URLs `a` and `b` are one repo:  `git@github.com:o/r.git`, `https://github.com/o/r` and
    * `https://github.com/o/r/` all are;  never when either is missing.
+   * - `renames`:  old addresses to new (`renamesOf()`):  an old name and its new one are one repo, either way round
    */
-  static sameUrl(a: string | null, b: string | null): boolean {
-    return Boolean(a && b && normalUrl(a) === normalUrl(b))
+  static sameUrl(a: string | null, b: string | null, renames: ReadonlyMap<string, string> = NO_RENAMES): boolean {
+    return Boolean(a && b && currentUrl(a, renames) === currentUrl(b, renames))
   }
 
-  /** The main checkout beside `here` (a sibling folder) whose `origin` is `url`;  `null` when none is. */
-  static checkoutByUrl(url: string | null, here: string): string | null {
+  /**
+   * The renames main checkouts `mains` know of, from each one's `renamedRepos` (`EpicConfig`):
+   * old address to new, both normalised (`github.com/o/r`)
+   * - NEVER throws:  a checkout whose settings won't read adds none
+   */
+  static renamesOf(mains: readonly string[]): Map<string, string> {
+    const renames = new Map<string, string>()
+    for (const main of mains) {
+      try {
+        for (const [from, to] of Object.entries(new EpicConfig(main).renamedRepos))
+          renames.set(normalUrl(from), normalUrl(to))
+      } catch {
+        // settings that won't read:  no renames from there
+      }
+    }
+    return renames
+  }
+
+  /**
+   * The main checkout beside `here` (a sibling folder) whose `origin` is `url`;  `null` when none is.
+   * - `renames`:  as `sameUrl()` takes them, plus each sibling's own (it may be the repo that was renamed)
+   */
+  static checkoutByUrl(
+    url: string | null,
+    here: string,
+    renames: ReadonlyMap<string, string> = NO_RENAMES
+  ): string | null {
     if (!url) return null
     const parent = dirname(here)
-    const named = join(parent, basename(normalUrl(url)))
+    const named = join(parent, basename(currentUrl(url, renames)))
     let siblings: string[] = []
     try {
       siblings = readdirSync(parent).map((entry) => join(parent, entry))
@@ -195,7 +228,9 @@ export class EpicRepo {
       // an unreadable folder:  only the named one
     }
     const found = [named, ...siblings.filter((dir) => dir !== named)].find(
-      (dir) => existsSync(join(dir, ".git")) && EpicRepo.sameUrl(EpicRepo.originOf(dir), url)
+      (dir) =>
+        existsSync(join(dir, ".git")) &&
+        EpicRepo.sameUrl(EpicRepo.originOf(dir), url, new Map([...renames, ...EpicRepo.renamesOf([dir])]))
     )
     return found ?? null
   }
@@ -217,6 +252,19 @@ export type EpicHome = {
   url: string | null
   worktree: string | null
   made: boolean
+}
+
+/** No renames:  `sameUrl()`'s default. */
+const NO_RENAMES: ReadonlyMap<string, string> = new Map()
+
+/**
+ * `url` normalised (`normalUrl()`), then through `renames` to the address it has now;
+ * a few steps at most, so a rename of a rename counts and a loop ends
+ */
+function currentUrl(url: string, renames: ReadonlyMap<string, string>): string {
+  let current = normalUrl(url)
+  for (let step = 0; step < 5 && renames.has(current); step++) current = renames.get(current)!
+  return current
 }
 
 /** `url` with its scheme, user, `.git` and trailing `/` dropped, lower-cased:  `github.com/o/r`. */
