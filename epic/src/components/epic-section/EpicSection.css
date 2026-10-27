@@ -36,8 +36,8 @@
     /* never past the page's edge, where its inset is narrower than a card's (a phone;  `--epic-inset` 8px):  the words
        still start at the inset, margin plus padding */
     margin-inline: max(0px, calc(var(--epic-inset, 16px) - var(--epic-card-inset, 16px)));
-    padding-inline: min(var(--epic-inset, 16px), var(--epic-card-inset, 16px))
-      calc(min(var(--epic-inset, 16px), var(--epic-card-inset, 16px)) + var(--epic-controls-in, 26px));
+    /* its end:  as far from the right as its controls sit from the top (`EpicFold.css`) */
+    padding-inline: min(var(--epic-inset, 16px), var(--epic-card-inset, 16px)) var(--_epic-fold-end);
   }
   :host(:state(open):not([kind="overview-part"])) ui-section:not(:state(stuck))::part(title) {
     border-start-start-radius: var(--epic-section-radius, 14px);

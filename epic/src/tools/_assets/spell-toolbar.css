@@ -169,9 +169,17 @@
   background: var(--spell-state-progress);
   color: var(--spell-state-progress-on);
 }
-/* an epic page's buttons:  one round size, apart enough for a badge hanging off the one before */
+/*
+ * an epic page's buttons:  one round size, apart enough for a badge hanging off the one before;  one plain row, no
+ * box of a theme's round them (Owen, 2026-10-26, epic `epic-engine` I138);  on a phone it scrolls, `‹` / `›` at its
+ * ends (`<ui-toolbar>`'s)
+ */
 :is(ui-menu, ui-toolbar).spell-toolbar:not(.spell-toolbar-titled)::part(menu) {
   gap: 6px;
+  background: none;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
 }
 .spell-toolbar:not(.spell-toolbar-titled) > ui-item::part(item) {
   width: 30px;
@@ -221,6 +229,10 @@
   padding: 0;
   background: var(--spell-rail-fill);
   box-shadow: -6px 0 6px -2px var(--spell-rail-bg);
+}
+/* a `<ui-toolbar>` scrolling (an epic page's on a phone):  just left of its `›` (28px), never under it */
+.spell-toolbar:state(overflowing) > ui-item.spell-toolbar-waiting::part(item) {
+  right: calc(var(--ui-toolbar-button-size, 28px) + 2px);
 }
 .spell-toolbar > ui-item.spell-toolbar-waiting:hover::part(item) {
   background: linear-gradient(var(--spell-rail-hover), var(--spell-rail-hover)), var(--spell-rail-fill);
@@ -504,7 +516,8 @@ ui-tabs ui-sticky.spell-site-toolbar::part(sticky)::before {
   inset: calc(-1 * var(--_panel-up)) 0 auto;
   height: calc(var(--_panel-up) + var(--site-tabs-band, 8px));
   z-index: -1;
-  border-radius: var(--ui-radius-pill, 9999px);
+  /* the track's corner and the band round it, whatever the theme's track (a pill's ends;  merlot's 8px:  16px) */
+  border-radius: calc(var(--ui-menu-segmented-radius, 9999px) + var(--site-tabs-band, 8px));
   background: var(--_panel-glass);
   backdrop-filter: var(--ui-bar-filter, none);
 }
@@ -516,8 +529,12 @@ ui-tabs .spell-site-toolbar > .spell-toolbar-segmented {
   /* in past the top band's round ends, however long its row:  it scrolls instead (`--_panel-ends`, above) */
   max-width: calc(100% - var(--_panel-ends));
   padding: 0 var(--site-tabs-band, 8px) var(--site-tabs-band, 8px);
-  /* round the track's ends:  half its height (24px) and the band */
-  border-radius: 0 0 calc(12px + var(--site-tabs-band, 8px)) calc(12px + var(--site-tabs-band, 8px));
+  /*
+   * round the track's corners and the band:  its corner (a pill's, half its height, 24px), never more (merlot's 8px:
+   * 16px;  Owen, 2026-10-26:  "rounding of outer rings needs to be greater than rounding of inner bits")
+   */
+  --_panel-low-radius: calc(min(var(--ui-menu-segmented-radius, 9999px), 12px) + var(--site-tabs-band, 8px));
+  border-radius: 0 0 var(--_panel-low-radius) var(--_panel-low-radius);
   background: var(--_panel-glass);
   backdrop-filter: var(--ui-bar-filter, none);
 }

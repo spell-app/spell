@@ -66,6 +66,20 @@
     /* a pill, round at both ends (Owen, 2026-10-25:  "take these back to pills") */
     --ui-button-radius: 999px;
     --ui-buttons-radius: 999px;
+    /*
+     * its END's corners:  a pill, unless what it sits in sets `--epic-review-end-radius` (an item's line, whose
+     * rounded end it sits 1px inside:  designer rule T68)
+     */
+    --_epic-review-end-radius: var(--epic-review-end-radius, 999px);
+  }
+  .review-group::part(group) {
+    border-start-end-radius: var(--_epic-review-end-radius);
+    border-end-end-radius: var(--_epic-review-end-radius);
+  }
+  /* the last button's tile, inside the track's padding:  its end's corners less that padding */
+  .review-group > ui-button:last-child::part(button) {
+    border-start-end-radius: max(0px, calc(var(--_epic-review-end-radius) - var(--ui-space-3xs, 0.125em)));
+    border-end-end-radius: max(0px, calc(var(--_epic-review-end-radius) - var(--ui-space-3xs, 0.125em)));
   }
   .review-controls ui-button::part(button) {
     display: inline-grid;
@@ -206,7 +220,16 @@
      * little darker ... 1px shadow rather than 2";  tan before)
      */
     border: 1px solid var(--epic-note-frame, color-mix(in oklab, var(--ui-violet, #6550ca) 26%, transparent));
-    border-radius: 12px;
+    /*
+     * its corners, top and bottom:  an item's or a phase's drawer sets its own (`--epic-note-radius-top` / `-bottom`);
+     * what's inside is rounded to them, less the 7px between (its 1px frame, its 6px padding;  designer rule T68,
+     * Owen, 2026-10-26:  "rounding of outer rings needs to be greater than rounding of inner bits")
+     */
+    --_epic-note-top: var(--epic-note-radius-top, 12px);
+    --_epic-note-bottom: var(--epic-note-radius-bottom, var(--_epic-note-top));
+    --_epic-note-inner-top: max(0px, calc(var(--_epic-note-top) - 7px));
+    --_epic-note-inner-bottom: max(0px, calc(var(--_epic-note-bottom) - 7px));
+    border-radius: var(--_epic-note-top) var(--_epic-note-top) var(--_epic-note-bottom) var(--_epic-note-bottom);
     background: var(--epic-note-fill, color-mix(in oklab, var(--ui-violet, #6550ca) 5%, var(--_epic-act-paper)));
     box-shadow: 0 1px 0 color-mix(in oklab, var(--ui-violet, #6550ca) 12%, transparent);
     font-size: 15px;
@@ -238,7 +261,9 @@
     box-sizing: border-box;
     padding: 4px 22px 4px 6px;
     border: 1px solid var(--_epic-act-rule);
-    border-radius: 6px;
+    /* the box's corners less the 7px between (T68) */
+    border-radius: var(--_epic-note-inner-top) var(--_epic-note-inner-top) var(--_epic-note-inner-bottom)
+      var(--_epic-note-inner-bottom);
     background: var(--_epic-act-paper);
     color: var(--_epic-act-ink);
     font: inherit;
@@ -286,13 +311,23 @@
     height: 28px;
     padding: 0;
     border: none;
-    border-radius: 50%;
+    /*
+     * rounded squares, not circles:  a 28px circle 7px inside the box's corner pokes past its curve (T68);
+     * the first's top corner and the last's bottom one no rounder than the box's corner less the 7px between
+     */
+    border-radius: 5px;
     background: var(--_epic-act-paper);
     box-shadow: inset 0 0 0 1px var(--_epic-act-rule);
     color: var(--_epic-act-muted);
     font-size: 13px;
     line-height: 1;
     cursor: pointer;
+  }
+  .note-actions > button:first-child {
+    border-start-end-radius: min(5px, var(--_epic-note-inner-top));
+  }
+  .note-actions > button:last-child {
+    border-end-end-radius: min(5px, var(--_epic-note-inner-bottom));
   }
   .note-actions > button:is(:hover, :focus-visible, :active),
   .note-box[data-sent][data-mark="skip"] > .note-actions > button[data-how="skip"],
