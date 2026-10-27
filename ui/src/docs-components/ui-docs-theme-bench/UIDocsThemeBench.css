@@ -394,6 +394,48 @@
   border-radius: var(--ui-radius-l, 12px) var(--ui-radius-l, 12px) 0 0;
   border-block-end: 1px solid var(--ui-border-color-internal, var(--ui-border-color));
 }
+/* the filter, and expand all / collapse all at its right:  `<ui-toc>`'s double chevron, muted, a square on hover */
+.find-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.find-row .find {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.toggle-all {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 1.9em;
+  height: 1.9em;
+  padding: 0;
+  border: none;
+  border-radius: 0.45em;
+  background: none;
+  color: var(--ui-text-muted);
+  cursor: pointer;
+}
+.toggle-all:hover {
+  color: var(--ui-link, var(--ui-primary));
+  background: color-mix(in oklab, currentColor 10%, transparent);
+}
+.toggle-all:focus-visible {
+  outline: 2px solid var(--ui-focus-color, var(--ui-link));
+  outline-offset: 1px;
+}
+.chevrons {
+  display: block;
+  width: 1em;
+  height: 1em;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
 /* ### Who reads it:  the reading pages' icons on a token's name line;  their legend once, in the column's head */
 
 .readers {

@@ -163,9 +163,43 @@ export class UIDocsThemeBench extends E.UIComponent<DocsThemeBenchVocabulary> {
   /** Each branch's section, by its id:  so a fold is kept by the branch it's on. */
   private readonly branchSections = new Map<string, Element>()
 
-  /** Whether branch `id` is open:  every one while filtering;  else as folded, a group open by default. */
+  /** While filtering:  every matching branch folded by Collapse all (they all open otherwise). */
+  @E.state accessor isFilterFolded = false
+
+  /** Whether branch `id` is open:  every matching one while filtering (unless all were collapsed);  else as folded. */
   private isBranchOpen(id: string, isGroup: boolean): boolean {
-    return !!this.filter.trim() || (this.folds[id] ?? isGroup)
+    if (this.filter.trim()) return !this.isFilterFolded
+    return this.folds[id] ?? isGroup
+  }
+
+  /** Every branch of the tree shown (the filter applied), groups included. */
+  private get branchIds(): string[] {
+    const ids: string[] = []
+    const walk = (node: BenchTreeNode, isGroup: boolean) => {
+      if (!isGroup && !node.children.length) return
+      ids.push(node.id)
+      for (const child of node.children) walk(child, false)
+    }
+    for (const root of this.tree.roots) walk(root, true)
+    return ids
+  }
+
+  /** Every branch shown is open. */
+  get isAllOpen(): boolean {
+    const roots = new Set(this.tree.roots.map((node) => node.id))
+    return this.branchIds.every((id) => this.isBranchOpen(id, roots.has(id)))
+  }
+
+  /**
+   * Expand every branch shown, or collapse them all once they're all open:  the column head's double chevron,
+   * as `<ui-toc>`'s.  Kept, as a fold by hand is;  while filtering, the matching branches.
+   */
+  @E.untracked
+  toggleAll(): void {
+    const open = !this.isAllOpen
+    if (this.filter.trim()) this.isFilterFolded = !open
+    this.folds = { ...this.folds, ...Object.fromEntries(this.branchIds.map((id) => [id, open])) }
+    PREFS.set(FOLDS_PREF, this.folds)
   }
 
   /** Branch `id` folded or unfolded, by its title or find-in-page:  kept, unless it's the filter that opened it. */
@@ -789,16 +823,22 @@ export class UIDocsThemeBench extends E.UIComponent<DocsThemeBenchVocabulary> {
     return (
       <aside class="tuning" part={this.partForName("tuning")}>
         <div class="tuning-head">
-          <ui-input
-            class="find"
-            size="small"
-            icon="search"
-            fluid=""
-            placeholder={t("find")}
-            aria-label={t("find")}
-            value={this.filter}
-            on-ui-typed={(event: CustomEvent<{ value: string }>) => (this.filter = event.detail.value)}
-          ></ui-input>
+          <div class="find-row">
+            <ui-input
+              class="find"
+              size="small"
+              icon="search"
+              fluid=""
+              placeholder={t("find")}
+              aria-label={t("find")}
+              value={this.filter}
+              on-ui-typed={(event: CustomEvent<{ value: string }>) => {
+                this.filter = event.detail.value
+                this.isFilterFolded = false
+              }}
+            ></ui-input>
+            {this.toggleAllButton()}
+          </div>
           <Show when={this.tokens}>{this.readersLegend()}</Show>
         </div>
         <Show
@@ -853,6 +893,28 @@ export class UIDocsThemeBench extends E.UIComponent<DocsThemeBenchVocabulary> {
     const node = (): BenchTreeNode | undefined => this.tree.nodes.get(id)
     const token = node()?.token
     return token ? this.token(token, () => node()?.name ?? token) : undefined
+  }
+
+  /**
+   * The column head's ONE expand all / collapse all button (`toggleAll()`):  `<ui-toc>`'s double chevron,
+   * pointing down while it would open everything, up once everything is open.
+   */
+  private toggleAllButton(): JSX.Element {
+    const label = () => this.text(this.isAllOpen ? "collapseAll" : "expandAll")
+    return (
+      <button
+        type="button"
+        class="toggle-all"
+        aria-label={label()}
+        title={label()}
+        aria-pressed={this.isAllOpen ? "true" : "false"}
+        onClick={() => this.toggleAll()}
+      >
+        <svg class="chevrons" viewBox="0 0 16 16" aria-hidden="true">
+          <path d={this.isAllOpen ? COLLAPSE_ALL_PATH : EXPAND_ALL_PATH} />
+        </svg>
+      </button>
+    )
   }
 
   /**
@@ -1224,6 +1286,12 @@ const EDITOR_PREFIX = "--spell-"
 
 /** A `var()` with no nested brackets in its fallback:  its token. */
 const VAR = /var\(\s*(--[\w-]+)\s*(?:,[^()]*)?\)/g
+
+/** The expand all toggle's double chevron, pointing down (SEE:  `<ui-toc>`'s, the same). */
+const EXPAND_ALL_PATH = "M4 3.5 8 7.5 12 3.5M4 7.5 8 11.5 12 7.5"
+
+/** ... pointing up:  collapse all. */
+const COLLAPSE_ALL_PATH = "M4 8.5 8 4.5 12 8.5M4 12.5 8 8.5 12 12.5"
 
 /** A length the slider takes:  px. */
 const PIXELS = /^-?\d+(?:\.\d+)?px$/

@@ -9,11 +9,11 @@ import type { ThemeData, ThemeLeaf, ThemeTree } from "spell-ui/styles/styles.typ
  * - The files:  `<name>.theme.json5` and `palettes/<name>.palette.json5` in Spell UI's themes folder, read as they
  *   are built into the site's bundle (a lazy chunk each), parsed with json5, and worked out by `ThemeFile`, as
  *   `yarn gen:styles` does:  so a value here is the value the theme's sheet sets.
- * - The tokens, in the theme tree's groups (epic `debut` P18), the page's chrome first:
+ * - The tokens, in the theme tree's groups (epic `debut` P18), what makes the theme itself first, then the page's chrome:
+ *   - `own`:  the theme's private tokens (its glass), those of the theme shown and what it builds on
  *   - `surfaces`:  the page, panels, bars
  *   - `components.bar`, `components.menu`, `components.section`:  every name ANY theme sets there
  *     (the bars, the page tabs, the section titles)
- *   - `own`:  the theme's private tokens (its glass), those of the theme shown and what it builds on
  *   - `radii`, `shadows`, `borders`:  the few the chrome reads
  *   - `components.docs-nav`:  the docs' side column
  *   - `editor`:  what the editor app's own sheet declares (`--spell-*`), which no theme file holds
@@ -68,9 +68,10 @@ export class BenchTokens {
    */
   groupsFor(theme: string, editorTokens: readonly string[] = []): BenchGroup[] {
     const groups: BenchGroup[] = [
+      // first:  what makes each theme itself (Owen:  "the themes own" should be at the top)
+      { place: OWN, tokens: this.ownTokens(theme) },
       { place: "surfaces", tokens: leavesOf(themeTree.surfaces) },
       ...CHROME_FAMILIES.map((family) => ({ place: `${COMPONENTS}.${family}`, tokens: this.familyTokens(family) })),
-      { place: OWN, tokens: this.ownTokens(theme) },
       ...TREE_PICKS.map(({ place, names }) => ({ place, tokens: names.map((name) => this.treeToken(place, name)) })),
       { place: `${COMPONENTS}.${DOCS_NAV}`, tokens: this.familyTokens(DOCS_NAV) },
       { place: EDITOR, tokens: [...editorTokens].filter((token) => token.startsWith(EDITOR_PREFIX)).sort(byName) }

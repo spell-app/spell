@@ -3,16 +3,17 @@ import { describe, expect, it } from "vite-plus/test"
 import { BenchTokens } from "spell-ui/docs-components/ui-docs-theme-bench/BenchTokens"
 
 describe("BenchTokens.load()", () => {
-  it("reads Spell's theme files, and their groups, chrome first", async () => {
+  it("reads Spell's theme files, and their groups, the theme's own first", async () => {
     const tokens = await BenchTokens.load()
     expect(tokens.names).toEqual(expect.arrayContaining(["fruity", "glass", "merlot", "spell"]))
     const groups = tokens.groupsFor("fruity", ["--spell-pane-radius", "--ui-surface"])
+    // what makes the theme itself first, then the chrome
     expect(groups.map((group) => group.place).slice(0, 5)).toEqual([
+      "own",
       "surfaces",
       "components.bar",
       "components.menu",
-      "components.section",
-      "own"
+      "components.section"
     ])
     expect(groups.find((group) => group.place === "surfaces")!.tokens).toContain("--ui-surface")
     // Fruity's own tokens are Glass's too:  it extends Glass

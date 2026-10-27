@@ -98,6 +98,8 @@ export const docsThemeBenchVocabulary = {
       text: "The editor's own",
       description: "Group:  the editor app's tokens (`--spell-*`), in its own sheet, not a theme file."
     },
+    { key: "expandAll", text: "Expand all", description: "The column head's toggle, while a branch is folded." },
+    { key: "collapseAll", text: "Collapse all", description: "The column head's toggle, once every branch is open." },
     { key: "readBy", text: "Read by", description: "Accessible name of a token's row of the places that read it." },
     { key: "readsTip", text: "{place} reads it", description: "A reader's tip:  the page reads the token." },
     {

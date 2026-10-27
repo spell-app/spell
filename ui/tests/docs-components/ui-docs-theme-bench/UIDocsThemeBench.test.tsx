@@ -175,4 +175,24 @@ describe("<ui-docs-theme-bench>", () => {
     expect(row.querySelector("ui-item[selected]")?.getAttribute("value")).toBe(component.theme)
     expect(bench.shadowRoot!.querySelector(".tools ui-button[icon='redo']")).toBeNull()
   })
+
+  it("expand all / collapse all:  every branch, kept;  while filtering, the matching ones", async () => {
+    const { bench, component } = await render()
+    const toggle = bench.shadowRoot!.querySelector<HTMLButtonElement>(".find-row .toggle-all")!
+    expect(component.isAllOpen).toBe(false)
+    expect(toggle.title).toBe("Expand all")
+    toggle.click()
+    await ElementFixture.settle()
+    expect(component.isAllOpen).toBe(true)
+    expect(toggle.title).toBe("Collapse all")
+    expect(bench.shadowRoot!.querySelectorAll("ui-section.branch[open='false']")).toHaveLength(0)
+    expect(Object.values(JSON.parse(localStorage.getItem(FOLDS_KEY)!)).every(Boolean)).toBe(true)
+    // filtering:  the matching branches open, until Collapse all
+    component.filter = "segmented"
+    await ElementFixture.settle()
+    toggle.click()
+    await ElementFixture.settle()
+    expect(component.isAllOpen).toBe(false)
+    expect(bench.shadowRoot!.querySelectorAll("ui-section.group[open='false']").length).toBeGreaterThan(0)
+  })
 })
