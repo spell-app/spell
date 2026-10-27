@@ -1,4 +1,5 @@
 import { rgbToHex } from "spell/util/color"
+import { TokenColor } from "spell-ui/components/ui-theme-editor/TokenColor"
 
 import { FALLBACK_HEX } from "./UIDocsTokens.types"
 
@@ -11,8 +12,8 @@ import { FALLBACK_HEX } from "./UIDocsTokens.types"
  * - Lossy on purpose:  alpha is flattened onto the page background and wide-gamut colours clip,
  *   both the native input's limits.  The token keeps its real value until the viewer picks a colour.
  * - Scheme:  `light-dark()` resolves in `context`'s scheme at the time of the probe.
- * - The painting is the browser's;  the hex, the kit's `rgbToHex()`.
- * - Static:  one 1px canvas for the page, made on first use.
+ * - The painting is the browser's, on the theme editor's one canvas (`TokenColor.paint()`);  the hex, the kit's
+ *   `rgbToHex()`.
  ****************/
 export class ColorProbe {
   /**
@@ -45,41 +46,9 @@ export class ColorProbe {
    * `FALLBACK_HEX` if it can't be.
    */
   static hexFor(color: string, backdrop?: string): string {
-    const canvas = ColorProbe.canvas()
-    if (!canvas || !color) return FALLBACK_HEX
-    canvas.clearRect(0, 0, 1, 1)
-    if (backdrop) {
-      canvas.fillStyle = backdrop
-      canvas.fillRect(0, 0, 1, 1)
-    }
-    canvas.fillStyle = FALLBACK_HEX
-    canvas.fillStyle = color
-    canvas.fillRect(0, 0, 1, 1)
-    const [red, green, blue, alpha] = canvas.getImageData(0, 0, 1, 1).data
-    if (!alpha) return FALLBACK_HEX
-    return rgbToHex({ r: red! / 255, g: green! / 255, b: blue! / 255 })
-  }
-
-  ////////////////
-  // ## Internal
-  ////////////////
-
-  /** The 1px canvas the colours are painted on;  `undefined` before the first probe, or where there's no 2D context. */
-  private static context: CanvasRenderingContext2D | undefined
-
-  /** The canvas was made (whether or not it gave a 2D context):  never tried twice. */
-  private static hasTriedCanvas = false
-
-  /** The shared 1px canvas, made on first use. */
-  private static canvas(): CanvasRenderingContext2D | undefined {
-    if (!ColorProbe.hasTriedCanvas) {
-      ColorProbe.hasTriedCanvas = true
-      const canvas = document.createElement("canvas")
-      canvas.width = canvas.height = 1
-      // `getContext()` says "none" with `null`
-      ColorProbe.context = canvas.getContext("2d", { willReadFrequently: true }) ?? undefined
-    }
-    return ColorProbe.context
+    const painted = TokenColor.paint(color, backdrop)
+    if (!painted?.alpha) return FALLBACK_HEX
+    return rgbToHex({ r: painted.red / 255, g: painted.green / 255, b: painted.blue / 255 })
   }
 }
 
