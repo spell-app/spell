@@ -50,6 +50,8 @@ import benchCSS from "./UIDocsThemeBench.css?inline"
  *     then the CHANGES, as the lines to put in the theme's file (`BenchEdits`)
  * - The theme:  the bench's menu is the docs site's (`ThemePreference`);  a pick there is made in every page too,
  *   as its own menu would, remembered there (`BenchPlace.themeKey`).
+ *   - The bench itself always wears Glass (`CHROME_THEME`, `ThemePreference.wear()`), in the scheme picked:
+ *     only the pages in the frames change, and the tuning goes into the frames only.
  * - A tuning applies to the theme shown, live:  a sheet over each page (`BenchBridge.applyCss()`).
  *   - A token whose value differs between light and dark is tuned for the scheme shown.
  *   - Tunings are kept in this browser (`spell-ui-site:theme-bench`), per theme, until reset.
@@ -77,13 +79,21 @@ export class UIDocsThemeBench extends E.UIComponent<DocsThemeBenchVocabulary> {
   /** The scheme every page shows:  light or dark, never "the OS's", so a scheme's tuning has a class to sit under. */
   @E.state accessor scheme: "light" | "dark" = isServer ? "light" : ThemePreference.shownScheme()
 
-  /** While connected:  follow the bench's menu. */
+  /**
+   * While connected:  follow the bench's menu, for the pages in its frames;
+   * the bench itself wears Glass whatever is picked (`CHROME_THEME`;  Owen, epic `debut`), in the scheme picked.
+   */
   @E.whileConnected
   protected followMenu() {
-    return ThemePreference.subscribe((chosen) => {
+    void ThemePreference.wear(CHROME_THEME)
+    const stop = ThemePreference.subscribe((chosen) => {
       this.theme = chosen.theme
       this.scheme = ThemePreference.shownScheme(chosen.scheme)
     })
+    return () => {
+      stop()
+      void ThemePreference.wear(undefined)
+    }
   }
 
   /**
@@ -674,7 +684,10 @@ export class UIDocsThemeBench extends E.UIComponent<DocsThemeBenchVocabulary> {
             value={this.filter}
             on-ui-typed={(event: CustomEvent<{ value: string }>) => (this.filter = event.detail.value)}
           ></ui-input>
-          <Show when={this.tokens}>{this.themeHeads()}</Show>
+          <Show when={this.tokens}>
+            {this.readersLegend()}
+            {this.themeHeads()}
+          </Show>
         </div>
         <Show
           when={this.tokens}
@@ -733,6 +746,7 @@ export class UIDocsThemeBench extends E.UIComponent<DocsThemeBenchVocabulary> {
           <code class="token-name" title={this.tokens?.placeOf(token)}>
             {token}
           </code>
+          {this.readersIcons(token)}
           <Show when={isTuned()}>
             <ui-button
               size="mini"
@@ -757,7 +771,6 @@ export class UIDocsThemeBench extends E.UIComponent<DocsThemeBenchVocabulary> {
           <Show when={kind() === "length"}>{this.lengthSlider(token)}</Show>
         </div>
         {this.themesRow(token, kind)}
-        {this.readersRow(token)}
       </div>
     )
   }
@@ -869,29 +882,55 @@ export class UIDocsThemeBench extends E.UIComponent<DocsThemeBenchVocabulary> {
   }
 
   /**
-   * Which pages' sheets read `token`:  lit;  marked when a page also sets it on its own elements (a tuning on `:root`
-   * doesn't reach there);  struck out when it doesn't read it;  dashed while a page hasn't said.
+   * The icons of the pages whose sheets read `token`, on its name's line:  only those that do.
+   * - Badged with a half dot (◐) where the page also sets it on its own elements:  a tuning on `:root` doesn't reach
+   *   those.
+   * - Each named in its tip;  the legend is in the column's head (`readersLegend()`).
    */
-  private readersRow(token: string): JSX.Element {
+  private readersIcons(token: string): JSX.Element {
+    const t = this.text
+    const readers = () =>
+      BenchPlaceIds.flatMap((id) => {
+        const sets = this.readers[id]
+        if (!sets?.reads.has(token)) return []
+        return [{ id, state: sets.overrides.has(token) ? ("overrides" as const) : ("reads" as const) }]
+      })
+    return (
+      <span class="readers" role="list" aria-label={t("readBy")}>
+        <For each={readers()}>
+          {(reader) => (
+            <span
+              class={["reader", reader.state]}
+              role="listitem"
+              title={t(READER_TIPS[reader.state], { place: t(reader.id) })}
+              aria-label={t(READER_TIPS[reader.state], { place: t(reader.id) })}
+            >
+              <ui-icon name={BenchPlaces[reader.id].icon} aria-hidden="true"></ui-icon>
+            </span>
+          )}
+        </For>
+      </span>
+    )
+  }
+
+  /** Which icon is which page, once, in the column's head:  the pages, then the half dot's meaning. */
+  private readersLegend(): JSX.Element {
     const t = this.text
     return (
-      <div class="readers" role="group" aria-label={t("readBy")}>
-        <span class="readers-label">{t("readBy")}</span>
+      <div class="legend" aria-hidden="true">
+        <span class="legend-label">{t("readBy")}</span>
         <For each={BenchPlaceIds}>
-          {(id) => {
-            const state = (): ReaderState => {
-              const sets = this.readers[id]
-              if (!sets) return "unknown"
-              if (!sets.reads.has(token)) return "not"
-              return sets.overrides.has(token) ? "overrides" : "reads"
-            }
-            return (
-              <span class={["reader", state()]} title={t(READER_TIPS[state()], { place: t(id) })}>
-                {t(id)}
-              </span>
-            )
-          }}
+          {(id) => (
+            <span class="legend-item">
+              <ui-icon name={BenchPlaces[id].icon}></ui-icon>
+              {t(id)}
+            </span>
+          )}
         </For>
+        <span class="legend-item" title={t("overridesLegendTip")}>
+          <span class="half-dot" />
+          {t("overridesLegend")}
+        </span>
       </div>
     )
   }
@@ -923,15 +962,13 @@ export interface UIDocsThemeBench extends E.AttributeValues<DocsThemeBenchVocabu
 /** Which pages show:  all four, or one. */
 type BenchLayout = "grid" | BenchPlaceId
 
-/** How a page treats a token:  reads it, reads it but sets its own below `:root` too, doesn't, or hasn't said. */
-type ReaderState = "reads" | "overrides" | "not" | "unknown"
+/** How a page that reads a token treats it:  reads it, or reads it but sets its own below `:root` too. */
+type ReaderState = "reads" | "overrides"
 
 /** Each reader state's tip. */
 const READER_TIPS: Readonly<Record<ReaderState, ThemeBenchTextKey>> = {
   reads: "readsTip",
-  overrides: "overridesTip",
-  not: "notReadTip",
-  unknown: "unknownTip"
+  overrides: "overridesTip"
 }
 
 /** A cell's size, px. */
@@ -958,6 +995,12 @@ const CORE_MODULE = "spell-ui/core"
 
 /** Everything, for a page just loaded (or the editor just listening). */
 const ALL_PARTS: DressParts = { theme: true, scheme: true, css: true, titles: true, fullMonty: true, look: true }
+
+/**
+ * The theme the bench's own bar, columns and frames' surrounds wear, whatever is picked for the pages in them
+ * (Owen, epic `debut`:  "Make the \"chrome\" of the page ... stick to \"glass\"");  its tuning never reaches them.
+ */
+const CHROME_THEME = "glass"
 
 /** The theme on a server, where there's no menu to read:  Spell UI's pages' own. */
 const DEFAULT_THEME = "spell"

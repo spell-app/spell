@@ -164,6 +164,18 @@ export class ThemePreference {
     ThemePreference.tell(ThemePreference.chosen)
   }
 
+  /**
+   * Make this page wear theme `name` itself, whatever is chosen, from now on;  `undefined`:  the one chosen again.
+   * - Its menu still chooses, and remembers, for what the page shows of OTHER places, never for the page itself.
+   * - e.g. the theme bench (`<ui-docs-theme-bench>`, epic `debut`):  its own bar and columns stay Glass, while its menu
+   *   picks the theme of the pages in its frames (Owen:  "Make the \"chrome\" of the page ... stick to \"glass\"").
+   * - The scheme isn't worn:  the page still shows the one chosen.
+   */
+  static async wear(name: string | undefined): Promise<void> {
+    ThemePreference.worn = name
+    await ThemePreference.applyTheme(ThemePreference.chosen.theme)
+  }
+
   /** Forget the in-memory theme and scheme (tests):  the next read goes back to storage. */
   static reset(): void {
     ThemePreference.current = undefined
@@ -175,6 +187,9 @@ export class ThemePreference {
 
   /** The theme and scheme in memory;  `undefined` until first read. */
   @E.state private static accessor current: ThemeAndScheme | undefined = undefined
+
+  /** The theme the page wears whatever is chosen (`wear()`);  `undefined`:  the one chosen. */
+  private static worn: string | undefined
 
   /** `subscribe()`d listeners. */
   private static readonly listeners = new Set<(chosen: ThemeAndScheme) => void>()
@@ -217,7 +232,7 @@ export class ThemePreference {
   }
 
   /**
-   * Apply theme `name` with `UI.themes` (the runtime loaded now, if need be).
+   * Apply theme `name` with `UI.themes` (the runtime loaded now, if need be);  the one worn instead, if any (`wear()`).
    * - Only a theme of the set (`UI.themes.own`):
    *   an old name is chosen again as its new one, anything else as the default theme.
    */
@@ -225,7 +240,7 @@ export class ThemePreference {
     const { themes } = await UI.load()
     const known = ThemePreference.knownName(themes, name)
     if (known !== name) return ThemePreference.setTheme(known)
-    await themes.apply(name)
+    await themes.apply(ThemePreference.worn ?? name)
   }
 
   /**

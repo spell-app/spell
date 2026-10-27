@@ -44,6 +44,8 @@ export type BenchPlace = {
   width: number
   reach: BenchReach
   themeKey: string
+  /** its icon, where the tuning column says which pages read a token */
+  icon: string
 }
 
 /**
@@ -60,28 +62,32 @@ export const BenchPlaces: Readonly<Record<BenchPlaceId, BenchPlace>> = {
     path: "/epics/debut/debut.plan.html",
     width: 1280,
     reach: "page server",
-    themeKey: "spell-epic:theme"
+    themeKey: "spell-epic:theme",
+    icon: "tasks"
   },
   ui: {
     id: "ui",
     path: "/components/ui/ui-button.html",
     width: 1280,
     reach: "page server",
-    themeKey: "spell-ui-site:theme"
+    themeKey: "spell-ui-site:theme",
+    icon: "cubes"
   },
   notebook: {
     id: "notebook",
     path: "/edit/@spell/notebooks/Avatar",
     width: 1440,
     reach: "editor",
-    themeKey: "spell-app:theme"
+    themeKey: "spell-app:theme",
+    icon: "book open"
   },
   editor: {
     id: "editor",
     path: "/edit/@spell/examples/Solitaire",
     width: 1440,
     reach: "editor",
-    themeKey: "spell-app:theme"
+    themeKey: "spell-app:theme",
+    icon: "laptop code"
   }
 }
 

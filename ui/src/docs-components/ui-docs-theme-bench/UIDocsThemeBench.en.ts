@@ -94,14 +94,14 @@ export const docsThemeBenchVocabulary = {
     { key: "readsTip", text: "{place} reads it", description: "A reader's tip:  the page reads the token." },
     {
       key: "overridesTip",
-      text: "{place} reads it, and sets its own on some of its elements:  a tuning doesn't reach those",
-      description: "A reader's tip:  the page also sets the token below the page's root."
+      text: "{place} reads it (also set on its own elements)",
+      description: "A reader's tip:  the page also sets the token below the page's root, where a tuning doesn't reach."
     },
-    { key: "notReadTip", text: "{place} doesn't read it", description: "A reader's tip:  the page never reads it." },
+    { key: "overridesLegend", text: "also set", description: "The legend's half dot:  what it marks on an icon." },
     {
-      key: "unknownTip",
-      text: "{place} hasn't loaded yet",
-      description: "A reader's tip:  no answer from the page yet."
+      key: "overridesLegendTip",
+      text: "The page also sets it on its own elements:  a tuning doesn't reach those",
+      description: "The legend's half dot's tip."
     },
     { key: "notSet", text: "not set:  the base theme's", description: "A theme that doesn't set the token." },
     { key: "reset", text: "Reset", description: "Put a token back to the theme's own value." },

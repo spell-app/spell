@@ -368,46 +368,69 @@
   font-size: 0.7em;
 }
 
-/* ### Who reads it */
+/* ### Who reads it:  the reading pages' icons on a token's name line;  their legend once, in the column's head */
 
 .readers {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  flex: none;
+}
+.reader {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  color: var(--ui-primary-text, var(--ui-primary));
+  background: var(--ui-primary-background, transparent);
+}
+.reader ui-icon {
+  --ui-icon-width: auto;
+  margin: 0;
+  font-size: 0.8em;
+}
+/* it reads it, but sets its own below `:root` too, where a tuning doesn't reach:  a half dot on the icon's corner */
+
+.reader.overrides::after {
+  content: "";
+  position: absolute;
+  inset: auto -2px -2px auto;
+}
+.half-dot,
+.reader.overrides::after {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  box-sizing: border-box;
+  border-radius: 50%;
+  border: 1.5px solid var(--ui-warning-text, #b45309);
+  background: linear-gradient(90deg, var(--ui-warning-text, #b45309) 50%, var(--ui-surface) 50%);
+}
+.legend {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  gap: 4px 10px;
+  padding-inline: 8px;
+  font-size: 0.75em;
+  color: var(--ui-text-muted);
+}
+.legend-label {
+  font-weight: 600;
+}
+.legend-item {
+  display: inline-flex;
+  align-items: center;
   gap: 4px;
-  font-size: 0.8em;
+  white-space: nowrap;
 }
-.readers-label {
-  color: var(--ui-text-muted);
-  margin-inline-end: 2px;
-}
-.reader {
-  padding: 1px 7px;
-  border-radius: 999px;
-  border: 1px solid var(--ui-border-color);
-  color: var(--ui-text-muted);
-}
-.reader.reads {
+.legend-item ui-icon {
+  --ui-icon-width: auto;
+  margin: 0;
   color: var(--ui-primary-text, var(--ui-primary));
-  background: var(--ui-primary-background, transparent);
-  border-color: transparent;
-}
-/* it reads it, but sets its own below `:root` too:  a tuning doesn't reach every place */
-.reader.overrides {
-  color: var(--ui-warning-text, var(--ui-text-color));
-  background: var(--ui-warning-background, transparent);
-  border-color: transparent;
-  border-style: dashed;
-}
-.reader.overrides::after {
-  content: " ◐";
-}
-.reader.not {
-  opacity: 0.45;
-  text-decoration: line-through;
-}
-.reader.unknown {
-  border-style: dashed;
 }
 
 /* ## The colour probe:  out of sight, in the scheme shown */
