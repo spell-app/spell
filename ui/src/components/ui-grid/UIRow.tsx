@@ -1,7 +1,7 @@
 import { Show } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
-import { E } from "spell-ui/core"
+import { E } from "spell/ui/core"
 import { rowVocabulary } from "./UIRow.en"
 import { GridPart } from "./GridPart"
 

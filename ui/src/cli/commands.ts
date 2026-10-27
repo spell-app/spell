@@ -5,13 +5,13 @@
  * - `spell pack create | add | build | check`:  component packs, built on the kit's pack tooling
  * - `spell design build | bundle | check | pull | changed | pushed | state`:  Spell's claude.ai design system
  * - `spell ui rename [--write] <paths...>`:  old attribute names rewritten into their new ones (epic `ui-gaps` P6)
- * - Loads fast:  each action imports its command's file when it runs (`src/cli/`, `spell-ui/cli/...`).
+ * - Loads fast:  each action imports its command's file when it runs (`src/cli/`, `spell/ui/cli/...`).
  * - NOTE: the kit's `spell commands` reads this file's TEXT, for each `spell.command(...)` and `<group>.command(...)`
  *   call:  keep each command's name a literal at its call, and each group a `const`.
  */
 import { CLI } from "spell/cli"
 
-import type { IconsOptions, PackOptions, RenameOptions, SsrOptions } from "spell-ui/cli/cli.types"
+import type { IconsOptions, PackOptions, RenameOptions, SsrOptions } from "spell/ui/cli/cli.types"
 
 /** The `spell` program a command list adds to:  commander's `Command`. */
 type Program = Parameters<CLI.CommandList>[0]
@@ -29,7 +29,7 @@ const uiCommands: CLI.CommandList = (spell) => {
     .option("--json", "print the icons found as JSON")
     .option("--open", "show them as pictures in a browser, until Ctrl-C")
     .action((query: string[], options: IconsOptions) =>
-      CLI.runCommand(async () => (await import("spell-ui/cli/iconCommand")).iconCommand(query, options))
+      CLI.runCommand(async () => (await import("spell/ui/cli/iconCommand")).iconCommand(query, options))
     )
 
   spell
@@ -42,7 +42,7 @@ const uiCommands: CLI.CommandList = (spell) => {
     .option("--no-minify", "leave the stylesheet readable")
     .action((pages: string[], _options, command: Program) =>
       CLI.runCommand(async () =>
-        (await import("spell-ui/cli/ssrCommand")).ssrCommand(pages, command.optsWithGlobals<SsrOptions>())
+        (await import("spell/ui/cli/ssrCommand")).ssrCommand(pages, command.optsWithGlobals<SsrOptions>())
       )
     )
 
@@ -61,7 +61,7 @@ const uiCommands: CLI.CommandList = (spell) => {
     .option("--quiet", "print only the total")
     .option("--markup-only", "only tags a browser draws, never escaped markup:  pages that quote old names on purpose")
     .action((paths: string[], options: RenameOptions) =>
-      CLI.runCommand(async () => (await import("spell-ui/cli/renameCommand")).renameCommand(paths, options))
+      CLI.runCommand(async () => (await import("spell/ui/cli/renameCommand")).renameCommand(paths, options))
     )
 
   ////////////////
@@ -143,7 +143,7 @@ export default uiCommands
 
 /** `spell pack`'s work, loaded when a verb runs. */
 function packCommand() {
-  return import("spell-ui/cli/packCommand")
+  return import("spell/ui/cli/packCommand")
 }
 
 /**
@@ -159,7 +159,7 @@ function designVerb(command: Program, verb: string, description: string): void {
     .helpOption(false)
     .action(() =>
       CLI.runCommand(async () =>
-        (await import("spell-ui/cli/designCommand")).designCommand(verb, CLI.rawArgsAfter("design", verb))
+        (await import("spell/ui/cli/designCommand")).designCommand(verb, CLI.rawArgsAfter("design", verb))
       )
     )
 }

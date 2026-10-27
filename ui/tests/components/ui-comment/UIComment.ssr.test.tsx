@@ -2,15 +2,15 @@
 
 import { beforeAll, describe, expect, it } from "vite-plus/test"
 
-import { StaticRender } from "spell-ui/static"
-import { UIComment } from "spell-ui/components/ui-comment/UIComment"
-import { UIComments } from "spell-ui/components/ui-comment/UIComments"
-import { UIAuthor } from "spell-ui/components/ui-parts/UIAuthor"
-import { UIContent } from "spell-ui/components/ui-parts/UIContent"
-import { UIDescription } from "spell-ui/components/ui-parts/UIDescription"
+import { StaticRender } from "spell/ui/static"
+import { UIComment } from "spell/ui/components/ui-comment/UIComment"
+import { UIComments } from "spell/ui/components/ui-comment/UIComments"
+import { UIAuthor } from "spell/ui/components/ui-parts/UIAuthor"
+import { UIContent } from "spell/ui/components/ui-parts/UIContent"
+import { UIDescription } from "spell/ui/components/ui-parts/UIDescription"
 
 /**
- * `<ui-comments>` in the static server render (`spell-ui/static`):  `<article>` comments in a `ui comments` box,
+ * `<ui-comments>` in the static server render (`spell/ui/static`):  `<article>` comments in a `ui comments` box,
  * a nested `<ui-comments>` as the thread (`comments`, no `ui`), the `reply` slot in its own box.
  */
 describe("<ui-comment> static render", () => {

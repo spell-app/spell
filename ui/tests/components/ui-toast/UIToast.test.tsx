@@ -1,9 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, onTestFinished, vi } from "vite-plus/test"
 import { page, userEvent } from "vite-plus/test/browser"
-import { Keys } from "spell-ui/test-helpers/Keys"
+import { Keys } from "spell/ui/test-helpers/Keys"
 
-import { UI } from "spell-ui/runtime"
-import type { ToastActionDetail, ToastCloseDetail, ToastShowDetail } from "spell-ui/components/components.types"
+import { UI } from "spell/ui/runtime"
+import type { ToastActionDetail, ToastCloseDetail, ToastShowDetail } from "spell/ui/components/components.types"
 import { expectAccessible } from "spell/test-helpers/A11y"
 import { Fixture } from "spell/test-helpers/Fixture"
 import { Viewport } from "spell/test-helpers/Viewport"
@@ -11,7 +11,7 @@ import { Viewport } from "spell/test-helpers/Viewport"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import type { DOMElement } from "spell/element"
 
-import "spell-ui/components/ui-toast"
+import "spell/ui/components/ui-toast"
 
 /** Element-markup rewrites of every example, by path. */
 const EXAMPLES = import.meta.glob<string>("/src/components/ui-toast/examples/elements/*.html", {
@@ -787,7 +787,7 @@ describe("<ui-toast> invoker commands", () => {
     const was = supports.invokers
     supports.invokers = false
     try {
-      await import("spell-ui/components/ui-button")
+      await import("spell/ui/components/ui-button")
       const wrapper = await ElementFixture.render<HTMLElement>(
         `<div><ui-toast id="t" message="Hi"></ui-toast><ui-button id="x" commandfor="t" command="--close">Dismiss</ui-button></div>`
       )

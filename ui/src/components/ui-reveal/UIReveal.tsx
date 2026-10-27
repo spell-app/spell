@@ -1,6 +1,6 @@
 import { isServer, type JSX } from "@solidjs/web"
 
-import { E } from "spell-ui/core"
+import { E } from "spell/ui/core"
 import { revealVocabulary } from "./UIReveal.en"
 
 import revealCSS from "./UIReveal.css?inline"

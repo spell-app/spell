@@ -1,7 +1,7 @@
 /**
  * The English vocabulary of `<ui-segment>`:  every name the tag uses.
  * - Its tag, attributes (each with its kind and allowed values), slots, parts and states.
- *   The shape is `E.ComponentVocabulary` (`spell-ui/vocabulary`).
+ *   The shape is `E.ComponentVocabulary` (`spell/ui/vocabulary`).
  * - The attributes become Fomantic's class words, in Fomantic's order (`ClassBuilder`):
  *   `<ui-segment appearance="raised" padding="lg" attach="top">` => `ui very padded top attached raised segment`.
  * - No `ownsParts`:  Fomantic's segment styles no content parts of its own.
@@ -9,7 +9,7 @@
  *   see `UISegment.css`.
  */
 
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /****************
  * ### `segmentVocabulary`

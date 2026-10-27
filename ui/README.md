@@ -17,7 +17,7 @@
       }
     </script>
     <script type="module">
-      import "spell-ui/ui-root.js"
+      import "spell/ui/ui-root.js"
     </script>
   </head>
   <body>
@@ -69,7 +69,7 @@ and a page needs nothing else of Spell's to use it.
 
 **Real today:**  all of that, from a checkout of the kit, the folder every Spell repo is cloned into.
 **Not yet:  `npm install spell-ui`.**
-The page above maps `spell-ui/` onto the kit's own build of the library, and Solid onto one vendored copy:
+The page above maps `ui/` onto the kit's own build of the library, and Solid onto one vendored copy:
 [the thirty seconds below](#thirty-seconds-two-ways) make both, and show the map 🌱 npm will need instead.
 
 <details>
@@ -174,7 +174,7 @@ Each framework's recipe, and a fourth rule (`ready`, and custom states):
 [README-frameworks.md](README-frameworks.md#the-contract--four-rules-every-element-keeps).
 
 No page checks Svelte, Angular or Preact yet, though the same rules should hold;
-and only Solid's JSX knows the tags (`spell-ui/jsx`):  other frameworks' JSX has no typings yet.
+and only Solid's JSX knows the tags (`spell/ui/jsx`):  other frameworks' JSX has no typings yet.
 
 ### Your CSS stops at the shadow root;  four doors let it in
 
@@ -210,7 +210,7 @@ yarn clone spell-ui        # clones spell-ui and what it needs, then the one ins
 ```
 
 Spell UI needs only the kit;  `spell-epic` and `spell-app` need Spell UI.
-`yarn install` runs in the kit, never in `spell-ui/`, because the kit holds the one install for every repo.
+`yarn install` runs in the kit, never in `ui/`, because the kit holds the one install for every repo.
 Run `yarn clone spell-ui` again and it says the repo is there, then installs anyway (`--no-install` skips that):
 
 ```text
@@ -290,12 +290,12 @@ npm install spell-ui solid-js@2.0.0-rc.17 @solidjs/web@2.0.0-rc.17
 
 ```js
 // main.js
-import "spell-ui/ui-root"
+import "spell/ui/ui-root"
 ```
 
 Then the same `<ui-root>` markup, in your page or in your components' templates.
 
-Today that works inside the kit, under the name every Spell repo uses, `spell-ui/components/ui-root`:
+Today that works inside the kit, under the name every Spell repo uses, `spell/ui/components/ui-root`:
 Vite reads Spell UI's source, as it does for the Spell app's own `<spell-viewer>` element and for Spell UI's docs site.
 A program outside the kit can't do that yet:
 inside it, Spell UI's entries are its TypeScript source, which only the kit's one install resolves.
@@ -411,13 +411,13 @@ Each is a real entry of the package, by the name every Spell repo uses today, an
 
 | How | Inside the kit, today | 🌱 On npm | What it does |
 | --- | --- | --- | --- |
-| everything | `import "spell-ui"` | the same | defines every family at once |
-| one family | `import "spell-ui/components/ui-button"` | `spell-ui/ui-button` | each family is its own entry, so a page carries only what it imports |
-| on demand | `import "spell-ui/components/ui-root"` | `spell-ui/ui-root` | the root loads the rest:  this page's way, and the docs site's |
-| no JavaScript at all | `import "spell-ui/styles/ui.css"`, through your bundler | not among its published entries yet | tokens, utilities, typography and plain-HTML styling as one stylesheet;  `class="ui-typography"` on `<body>` for Fomantic's page typography |
+| everything | `import "spell/ui"` | the same | defines every family at once |
+| one family | `import "spell/ui/components/ui-button"` | `spell/ui/ui-button` | each family is its own entry, so a page carries only what it imports |
+| on demand | `import "spell/ui/components/ui-root"` | `spell/ui/ui-root` | the root loads the rest:  this page's way, and the docs site's |
+| no JavaScript at all | `import "spell/ui/styles/ui.css"`, through your bundler | not among its published entries yet | tokens, utilities, typography and plain-HTML styling as one stylesheet;  `class="ui-typography"` on `<body>` for Fomantic's page typography |
 | the static render | `spell ssr <pages>` | -- | `ui-*` pages turned into plain HTML in node, for search engines and readers without JavaScript ([README-runtime.md](README-runtime.md#the-static-render)) |
 
-- On the kit's build, an import map's `spell-ui/` reaches the same entries as files:
+- On the kit's build, an import map's `ui/` reaches the same entries as files:
   `spell-ui/index.js`, `spell-ui/ui-button.js`, `spell-ui/ui-root.js`.
 - `ui.css` is a build entry:  your bundler inlines its `@import`s and resolves its custom media queries,
   which no browser reads by itself.
@@ -439,7 +439,7 @@ After that, each family costs its own code, once:  5.7 kB on average, from Text'
 The first form control on a page adds the shared `forms` chunk, 6.8 kB.
 The page at the top used three families, with the two chunks they share with others:
 21.6 kB, so 137.3 kB in all, before its icon.
-Import every family at once (`import "spell-ui"`) and it's 421 kB, Solid included.
+Import every family at once (`import "spell/ui"`) and it's 421 kB, Solid included.
 
 - The changelog's budget, 8 kB a family, held for 49 of the 62 families there were when this was measured;
   nothing checks it.
@@ -461,7 +461,7 @@ so your app and Spell UI share the one copy, and your app runs that release cand
 
 ## Working on it
 
-From `spell-ui/`, inside the kit:
+From `ui/`, inside the kit:
 
 ```sh
 yarn dev           # every example, class grammar beside elements, with hot reload
@@ -512,9 +512,9 @@ each example's plain class markup on the left, the same example as elements on t
 | Path | What |
 | --- | --- |
 | [src/index.ts](src/index.ts) | `spell-ui`:  defines every family (a side effect) and re-exports them, plus the shared constants, the runtime, styles and icons |
-| [src/core.ts](src/core.ts) | `spell-ui/core`, the `E` namespace:  the element core and the foundation every family needs, in ONE chunk |
-| [src/forms.ts](src/forms.ts) | `spell-ui/forms`, the `F` namespace:  what only form controls need (`FormComponent`, `Validator`, `MenuOptions` ...) |
-| [src/api.ts](src/api.ts) | `spell-ui/api`:  `E`, `F`, and the vocabulary layer as `V` |
+| [src/core.ts](src/core.ts) | `spell/ui/core`, the `E` namespace:  the element core and the foundation every family needs, in ONE chunk |
+| [src/forms.ts](src/forms.ts) | `spell/ui/forms`, the `F` namespace:  what only form controls need (`FormComponent`, `Validator`, `MenuOptions` ...) |
+| [src/api.ts](src/api.ts) | `spell/ui/api`:  `E`, `F`, and the vocabulary layer as `V` |
 | [src/components/](src/components/) | one folder per component FAMILY (`ui-button/`):  components, vocabularies, sheet, fallback, examples;  `components.types.ts` (`UIT`), `ComponentDefinitions.ts` (every tag's vocabulary, rolled up) |
 | [src/elements/](src/elements/) | Spell UI's half of the element core:  `ClassBuilder`, `NativeFallback`, `LoadableComponent`, `PartComponent`, `SpellUISettings` ... |
 | *(none:  the kit's [src/element/](https://github.com/spell-app/spell/tree/main/src/element))* | the element bases every set shares:  `UIComponent`, `DOMElement`, the reactive decorators, `Cell`, `PartContext` ... |
@@ -536,7 +536,7 @@ each example's plain class markup on the left, the same example as elements on t
 | [tsconfig.json](tsconfig.json), [tsconfig.node.json](tsconfig.node.json) | the browser code's TypeScript settings (the generated JSX types, `src/jsx.ts`, too) and the node code's (`src/tools/`, `src/cli/`, `scripts/`, the configs):  no aliases, every file by its package name |
 | [vite.config.ts](vite.config.ts), [vitest.config.ts](vitest.config.ts), [vite.site.config.ts](vite.site.config.ts) | the library build (its families in `COMPONENTS`), the tests (two projects, `ssr` and `browser`), the docs site's bundle |
 | `results/` | what the tools write (git-ignored) |
-| *(none:  `spell-app`'s [`<spell-code>`](https://github.com/spell-app/spell-app/tree/main/src/app/components/spell-code))* | code in Spell, coloured by Spell's own parser:  a subclass of `<ui-code>`, in the Spell app |
+| *(none:  `spell-app`'s [`<spell-code>`](https://github.com/spell-app/spell/tree/main/app/src/app/components/spell-code))* | code in Spell, coloured by Spell's own parser:  a subclass of `<ui-code>`, in the Spell app |
 
 </details>
 

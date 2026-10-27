@@ -1,4 +1,4 @@
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /**
  * `<ui-components>` in Spanish:  `<es-componentes>`, with the names and texts only it uses (from `UIComponents.en.ts`).

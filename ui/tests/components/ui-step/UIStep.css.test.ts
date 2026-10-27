@@ -1,16 +1,16 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { colorsCSS, foundationCSS } from "spell-ui/styles"
+import { colorsCSS, foundationCSS } from "spell/ui/styles"
 
 import { Fixture } from "spell/test-helpers/Fixture"
-import { Sheets } from "spell-ui/test-helpers/Sheets"
+import { Sheets } from "spell/ui/test-helpers/Sheets"
 
-import { stepsVocabulary } from "spell-ui/components/ui-step/UISteps.en"
-import { stepVocabulary } from "spell-ui/components/ui-step/UIStep.en"
+import { stepsVocabulary } from "spell/ui/components/ui-step/UISteps.en"
+import { stepVocabulary } from "spell/ui/components/ui-step/UIStep.en"
 
-import stepCSS from "spell-ui/components/ui-step/UIStep.css?inline"
-import stepRaw from "spell-ui/components/ui-step/UIStep.css?raw"
-import partsCSS from "spell-ui/components/ui-parts/UIParts.css?inline"
+import stepCSS from "spell/ui/components/ui-step/UIStep.css?inline"
+import stepRaw from "spell/ui/components/ui-step/UIStep.css?raw"
+import partsCSS from "spell/ui/components/ui-parts/UIParts.css?inline"
 
 /**
  * `UIStep.css` (with `UIParts.css`, which draws the titles and descriptions) on the class-grammar examples:

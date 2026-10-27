@@ -1,4 +1,4 @@
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /**
  * `<ui-rail>` in Spanish:  `<es-riel>`, with the names and texts only it uses (from `UIRail.en.ts`).

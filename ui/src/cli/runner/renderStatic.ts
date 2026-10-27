@@ -9,9 +9,9 @@
  *   order), then a `stylesheet` per shared sheet, then `done`, and exits.
  * - NEVER imports the kit's `spell/cli`:  this process needs only Spell UI.
  */
-import { StaticRenderer } from "spell-ui/tools/StaticRenderer"
-import type { StaticDocumentModule } from "spell-ui/tools/tools.types"
-import type { StaticMessage } from "spell-ui/cli/cli.types"
+import { StaticRenderer } from "spell/ui/tools/StaticRenderer"
+import type { StaticDocumentModule } from "spell/ui/tools/tools.types"
+import type { StaticMessage } from "spell/ui/cli/cli.types"
 
 const server = await StaticRenderer.start()
 

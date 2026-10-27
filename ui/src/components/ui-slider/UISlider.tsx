@@ -1,8 +1,8 @@
 import { For, Repeat, Show } from "solid-js"
 import { isServer, type JSX } from "@solidjs/web"
 
-import { E, UI, UIT } from "spell-ui/core"
-import { F } from "spell-ui/forms"
+import { E, UI, UIT } from "spell/ui/core"
+import { F } from "spell/ui/forms"
 import { sliderVocabulary } from "./UISlider.en"
 import { SliderFallback } from "./UISlider.fallback"
 import { SliderScale } from "./SliderScale"
@@ -310,7 +310,7 @@ export class UISlider extends F.FormComponent<typeof sliderVocabulary> {
   }
 
   /**
-   * Server render only (`spell-ui/static`):  the `STATIC_CONTROL` mark on `target`,
+   * Server render only (`spell/ui/static`):  the `STATIC_CONTROL` mark on `target`,
    * when the DOM element's name belongs to it (a single slider's thumb, a range's group).
    * - `{}` in a browser.
    */
@@ -321,7 +321,7 @@ export class UISlider extends F.FormComponent<typeof sliderVocabulary> {
   }
 
   /**
-   * Server render only (`spell-ui/static`):  the value as hidden inputs (two for a `range`),
+   * Server render only (`spell/ui/static`):  the value as hidden inputs (two for a `range`),
    * so a static form submits it without script.
    * - In a browser the DOM element submits (`ElementInternals`).
    */

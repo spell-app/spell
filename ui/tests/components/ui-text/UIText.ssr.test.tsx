@@ -2,10 +2,10 @@
 
 import { beforeAll, describe, expect, it } from "vite-plus/test"
 
-import { StaticRender } from "spell-ui/static"
-import { UIText } from "spell-ui/components/ui-text/UIText"
+import { StaticRender } from "spell/ui/static"
+import { UIText } from "spell/ui/components/ui-text/UIText"
 
-/** `<ui-text>` in the static server render (`spell-ui/static`, seo plan P3). */
+/** `<ui-text>` in the static server render (`spell/ui/static`, seo plan P3). */
 describe("<ui-text> static render", () => {
   beforeAll(() => {
     StaticRender.define(UIText)

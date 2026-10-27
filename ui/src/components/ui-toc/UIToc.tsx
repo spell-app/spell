@@ -1,8 +1,8 @@
 import { For, Show } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
-import { E } from "spell-ui/core"
-import type { UIMenuAttributes } from "spell-ui/jsx"
+import { E } from "spell/ui/core"
+import type { UIMenuAttributes } from "spell/ui/jsx"
 import { tocVocabulary } from "./UIToc.en"
 import { HashLanding } from "./HashLanding"
 import { TocIndex } from "./TocIndex"

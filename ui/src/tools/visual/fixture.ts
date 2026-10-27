@@ -13,15 +13,15 @@
  *   `FamilySheets`.
  */
 
-import { E } from "spell-ui/core"
-import { UI } from "spell-ui/runtime"
-import { StubOwner } from "spell-ui/test-helpers/StubOwner"
-import type { VisualHooks } from "spell-ui/test-helpers/test.types"
+import { E } from "spell/ui/core"
+import { UI } from "spell/ui/runtime"
+import { StubOwner } from "spell/ui/test-helpers/StubOwner"
+import type { VisualHooks } from "spell/ui/test-helpers/test.types"
 
-import { FamilySheets } from "spell-ui/tools/demo/FamilySheets"
+import { FamilySheets } from "spell/ui/tools/demo/FamilySheets"
 import { VisualMarkups, type VisualMarkup } from "./visual.types.ts"
 
-import "spell-ui"
+import "spell/ui"
 
 /****************
  * ### `VisualPage`

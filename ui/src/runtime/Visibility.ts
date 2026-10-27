@@ -1,5 +1,5 @@
-import { soon, Warnings } from "spell-ui/util"
-import * as UIT from "spell-ui/components/components.types"
+import { soon, Warnings } from "spell/ui/util"
+import * as UIT from "spell/ui/components/components.types"
 
 import {
   CssDisplay,

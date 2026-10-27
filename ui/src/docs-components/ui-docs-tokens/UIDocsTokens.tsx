@@ -1,15 +1,15 @@
 import { For, Show } from "solid-js"
 import { isServer, type JSX } from "@solidjs/web"
 
-import { E, UIT } from "spell-ui/core"
-import { type SiteDataFile, type SiteToken, type SiteTokenType } from "spell-ui/docs-components/docs-components.types"
-import { SiteData } from "spell-ui/docs-components/SiteData"
+import { E, UIT } from "spell/ui/core"
+import { type SiteDataFile, type SiteToken, type SiteTokenType } from "spell/ui/docs-components/docs-components.types"
+import { SiteData } from "spell/ui/docs-components/SiteData"
 import { ColorProbe } from "./ColorProbe"
 import { TokenRows } from "./TokenRows"
 import { FALLBACK_HEX, type DocsTokensVocabulary, type TokenTable, type TokenView } from "./UIDocsTokens.types"
 import { docsTokensVocabulary } from "./UIDocsTokens.en"
 
-import tableCSS from "spell-ui/components/ui-table/UITable.css?inline"
+import tableCSS from "spell/ui/components/ui-table/UITable.css?inline"
 import tokensCSS from "./UIDocsTokens.css?inline"
 
 /****************

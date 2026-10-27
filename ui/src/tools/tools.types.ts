@@ -5,13 +5,13 @@
  * - The component packs' shapes (their reports, `ComponentPackError`) are the kit's, beside its pack tooling:
  *   `spell/element-tools/tools.types` (epic `repo-split` P10).
  * - At the BOTTOM of the tools' import graph:  `import type` only, so every tool (and Spell UI's `spell` commands, `src/cli/`,
- *   through `spell-ui/tools/tools.types`) imports it without loading another.
+ *   through `spell/ui/tools/tools.types`) imports it without loading another.
  * - Every `results/*-results.json` has one of these shapes;  `ReportTables` reads them.
  * - The perf shapes (`PerfRecord` ...) live beside the benchmark, in `src/test-helpers/PerfRun.ts` (it runs in the browser).
  */
 
-import type { SiteDataFile } from "spell-ui/docs-components/docs-components.types"
-import type { PerfResult } from "spell-ui/test-helpers/PerfRun"
+import type { SiteDataFile } from "spell/ui/docs-components/docs-components.types"
+import type { PerfResult } from "spell/ui/test-helpers/PerfRun"
 
 ////////////////
 // ## Package config

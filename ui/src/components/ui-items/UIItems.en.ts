@@ -1,7 +1,7 @@
 /**
  * The English vocabulary of `<ui-items>`:  every name the tag uses.
  * - Its tag, attributes (each with its kind and allowed values), slots, parts and states.
- *   The shape is `E.ComponentVocabulary` (`spell-ui/vocabulary`).
+ *   The shape is `E.ComponentVocabulary` (`spell/ui/vocabulary`).
  * - Class words come out through `ClassBuilder`, in Fomantic's grammar:
  *   `<ui-items divided spacing="xl" appearance="link">` => `ui divided link very relaxed items`.  `UIItems.css` keys on those.
  * - Fomantic's Items VIEW, with the SAME generic `<ui-item>` as dropdown, list and menu (`ownsParts:  item`) --
@@ -9,8 +9,8 @@
  *   (`ItemContext.ownsParts`), so they style themselves `:state(in-item)`.
  */
 
-import type { E } from "spell-ui/core"
-import * as UIT from "spell-ui/components/components.types"
+import type { E } from "spell/ui/core"
+import * as UIT from "spell/ui/components/components.types"
 
 /****************
  * ### `itemsVocabulary`

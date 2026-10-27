@@ -8,7 +8,7 @@
  */
 
 import type { Temporal } from "temporal-polyfill"
-import type { UIT } from "spell-ui/core"
+import type { UIT } from "spell/ui/core"
 import type { CalendarDates } from "./CalendarDates"
 import type { CalendarText } from "./CalendarText"
 import type { calendarVocabulary } from "./UICalendar.en"

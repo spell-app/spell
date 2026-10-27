@@ -7,7 +7,7 @@ import type {
   SiteEvent,
   SiteNamed,
   SiteTag
-} from "spell-ui/docs-components/docs-components.types"
+} from "spell/ui/docs-components/docs-components.types"
 import { SRV } from "spell/server"
 import type { CssCustomData, CssCustomDataEntry, CustomElementsManifest, HtmlCustomData } from "./tools.types.ts"
 
@@ -29,7 +29,7 @@ import { FamilyFiles } from "./FamilyFiles.ts"
  *     - for ANY selector:  VS Code can't tell which tag a selector names,
  *       so each one's docs list the tags that have it
  *   - loaded beside the HTML data
- * - `src/jsx.ts` (`spell-ui/jsx`, `jsxTypes()`):  every tag's attributes and events, as types for Solid's JSX
+ * - `src/jsx.ts` (`spell/ui/jsx`, `jsxTypes()`):  every tag's attributes and events, as types for Solid's JSX
  *   - so VS Code completes, explains and checks `<ui-*>` tags in a `.tsx` file of any program that imports it
  * - Written by `yarn site:data`, and committed:  editors read them with no build of Spell UI.
  *   - The HTML and CSS data show after spell-app's extension is rebuilt (`spell app vscode`):  it copies them.
@@ -46,7 +46,7 @@ import { FamilyFiles } from "./FamilyFiles.ts"
 export class ElementManifests {
   /** site data, as `yarn site:data` builds it */
   readonly data: SiteDataFile
-  /** the package folder (`spell-ui/`, `spell-brand/`), absolute:  where element class files are looked up */
+  /** the package folder (`ui/`, `spell-brand/`), absolute:  where element class files are looked up */
   readonly packageFolder: string
   /** family folders, relative to `packageFolder`:  `components`, as every set lays them out (Spell UI's, the brand's) */
   readonly componentsPath: string
@@ -272,7 +272,7 @@ export class ElementManifests {
   }
 
   /**
-   * The JSX types of every component tag, as TypeScript text:  `spell-ui/jsx`.
+   * The JSX types of every component tag, as TypeScript text:  `spell/ui/jsx`.
    * - Per tag, two interfaces:
    *   - `<Class>Attributes`:  the attributes its vocabulary names, aliases too, and its rich (`json`) properties
    *   - `<Class>JSXAttributes`:  those, plus HTML's global ones (`class`, `id`, `slot`, `onClick`, `aria-*` ...)
@@ -642,7 +642,7 @@ export type ElementManifestsProps = {
   readme?: string
 }
 
-/** The JSX types' file (`jsxOutput()`), from the package folder:  imported as `spell-ui/jsx`. */
+/** The JSX types' file (`jsxOutput()`), from the package folder:  imported as `spell/ui/jsx`. */
 const JSX_FILE = "src/jsx.ts"
 
 /**
@@ -681,7 +681,7 @@ const JSX_SCRIPT_PROPERTIES: readonly {
 
 /**
  * The Spell UI types an event's `detail` text names (`jsxDetailType()`), each as `src/jsx.ts` reaches it:
- * through `spell-ui/core`'s `E` (the element core's and runtime's types) or `UIT` (the components' types).
+ * through `spell/ui/core`'s `E` (the element core's and runtime's types) or `UIT` (the components' types).
  */
 const JSX_DETAIL_TYPES: Readonly<Record<string, string>> = {
   DimmerCloseReason: "UIT.DimmerCloseReason",
@@ -712,7 +712,7 @@ const JSX_HEADER = [
   " * - In VS Code:  completion, hover docs and checks.",
   " * - And each tag's events in plain DOM code.",
   " * - A program uses it by importing it once, in any of its files (its `.types.ts`, say):",
-  ' *   `import type {} from "spell-ui/jsx"`.',
+  ' *   `import type {} from "spell/ui/jsx"`.',
   " *   - Then every `<ui-*>` tag in that program's JSX is checked.",
   " *   - Not by `tsconfig`'s `types`:  that finds packages, not a package's files.",
   " * - EXACT:  an attribute the vocabulary doesn't name is an error.",
@@ -738,7 +738,7 @@ const JSX_HEADER = [
   "",
   'import type { JSX } from "@solidjs/web"',
   "",
-  'import type { E, UIT } from "spell-ui/core"',
+  'import type { E, UIT } from "spell/ui/core"',
   "",
   "/**",
   " * HTML's global attributes, which every `<ui-*>` tag takes:  Solid's own, `class`, `id`, `slot`, `ref`, `onClick` ...",

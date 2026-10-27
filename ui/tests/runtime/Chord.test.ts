@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { Chord } from "spell-ui/runtime/Chord"
+import { Chord } from "spell/ui/runtime/Chord"
 
 /** A `keydown` event with the given key and modifiers. */
 function keydown(key: string, init: KeyboardEventInit = {}) {

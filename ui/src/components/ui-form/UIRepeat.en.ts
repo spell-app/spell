@@ -1,11 +1,11 @@
 /**
  * The English vocabulary of `<ui-repeat>`:  every name the tag uses.
- * - Its tag, its one attribute and its slot.  The shape is `E.ComponentVocabulary` (`spell-ui/vocabulary`).
- * - Pure data:  node imports it (`yarn site:data`, `yarn gen:root`), so `spell-ui/core` for types only.
+ * - Its tag, its one attribute and its slot.  The shape is `E.ComponentVocabulary` (`spell/ui/vocabulary`).
+ * - Pure data:  node imports it (`yarn site:data`, `yarn gen:root`), so `spell/ui/core` for types only.
  * - The family's grammar notes are in `UIForm.en.ts`.
  */
 
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /****************
  * ### `repeatVocabulary`

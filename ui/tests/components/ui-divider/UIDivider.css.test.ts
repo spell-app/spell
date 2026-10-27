@@ -1,14 +1,14 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { colorsCSS, foundationCSS } from "spell-ui/styles"
+import { colorsCSS, foundationCSS } from "spell/ui/styles"
 
 import { Fixture } from "spell/test-helpers/Fixture"
-import { Sheets } from "spell-ui/test-helpers/Sheets"
+import { Sheets } from "spell/ui/test-helpers/Sheets"
 
-import { dividerVocabulary } from "spell-ui/components/ui-divider/UIDivider.en"
+import { dividerVocabulary } from "spell/ui/components/ui-divider/UIDivider.en"
 
-import dividerCSS from "spell-ui/components/ui-divider/UIDivider.css?inline"
-import dividerRaw from "spell-ui/components/ui-divider/UIDivider.css?raw"
+import dividerCSS from "spell/ui/components/ui-divider/UIDivider.css?inline"
+import dividerRaw from "spell/ui/components/ui-divider/UIDivider.css?raw"
 
 /**
  * `UIDivider.css` on its own, before any element exists:  the sheet's source rules and the computed styles of the

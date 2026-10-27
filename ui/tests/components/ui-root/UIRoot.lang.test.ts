@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vite-plus/test"
 
 import type { DOMElement } from "spell/element"
-import { E, UI } from "spell-ui/core"
+import { E, UI } from "spell/ui/core"
 import { Fixture } from "spell/test-helpers/Fixture"
-import { RootLoader, type UIRoot } from "spell-ui/components/ui-root"
+import { RootLoader, type UIRoot } from "spell/ui/components/ui-root"
 
 describe("<ui-root lang>:  the page's language", () => {
   it("loads Spanish, then each Spanish tag's family on demand, as `ui-*` tags load", async () => {

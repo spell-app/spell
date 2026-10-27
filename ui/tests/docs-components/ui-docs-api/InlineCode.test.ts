@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { InlineCode } from "spell-ui/docs-components/ui-docs-api/InlineCode"
+import { InlineCode } from "spell/ui/docs-components/ui-docs-api/InlineCode"
 
 describe("InlineCode.parse()", () => {
   test.each([

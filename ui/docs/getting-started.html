@@ -103,7 +103,7 @@
               the kit, the checkout every Spell repo is cloned into:
               <ul>
                 <li><code>yarn clone spell-ui</code> in the kit, which installs it</li>
-                <li>then <code>yarn build</code> in <code>spell-ui/</code>, which writes its dist folder</li>
+                <li>then <code>yarn build</code> in <code>ui/</code>, which writes its dist folder</li>
               </ul>
             </ui-message>
             <ui-markdown>
@@ -121,16 +121,16 @@
               <script type="text/markdown">
                 Then load the components, in one of three ways:
 
-                - **Everything**: `import "spell-ui"` registers every `ui-*` element.
-                - **One family at a time**: each family is its own entry, `import "spell-ui/ui-button"`, so a
+                - **Everything**: `import "spell/ui"` registers every `ui-*` element.
+                - **One family at a time**: each family is its own entry, `import "spell/ui/ui-button"`, so a
                   page loads only what it imports.
-                - **On demand**: wrap the page (or an app) in `<ui-root>` and import only `spell-ui/ui-root`.
+                - **On demand**: wrap the page (or an app) in `<ui-root>` and import only `spell/ui/ui-root`.
                   Each `ui-*` tag inside loads its family the first time it appears. This site works that way.
               </script>
             </ui-markdown>
             <ui-code language="js">
               <script type="text/plain">
-                import "spell-ui/ui-root" // the root;  it loads every other family on first use
+                import "spell/ui/ui-root" // the root;  it loads every other family on first use
               </script>
             </ui-code>
             <ui-code language="html">
@@ -249,7 +249,7 @@
               <script type="text/markdown">
                 Once published, `yarn up spell-ui` (or `npm update spell-ui`) is all there is: no
                 installer to rerun, no build to redo. Theme sheets and your token overrides are plain CSS, so they
-                survive an update untouched. [`CHANGELOG.md`](https://github.com/spell-app/spell-ui/blob/main/CHANGELOG.md)
+                survive an update untouched. [`CHANGELOG.md`](https://github.com/spell-app/spell/blob/main/ui/CHANGELOG.md)
                 lists what changed.
               </script>
             </ui-markdown>

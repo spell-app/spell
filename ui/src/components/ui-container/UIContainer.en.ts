@@ -1,12 +1,12 @@
 /**
  * The English vocabulary of `<ui-container>`:  every name the tag uses.
  * - Its tag, attributes (each with its kind and allowed values), slots and parts.
- *   The shape is `E.ComponentVocabulary` (`spell-ui/vocabulary`).
+ *   The shape is `E.ComponentVocabulary` (`spell/ui/vocabulary`).
  * - The attributes become Fomantic's class words, in Fomantic's order (`ClassBuilder`):
  *   `<ui-container text align="justified">` => `ui text justified container`.
  */
 
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /****************
  * ### `containerVocabulary`

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { ComponentTokens } from "spell-ui/styles/ComponentTokens"
+import { ComponentTokens } from "spell/ui/styles/ComponentTokens"
 
 /**
  * The component-token rule (`notes/theming.md`, "Component tokens"):

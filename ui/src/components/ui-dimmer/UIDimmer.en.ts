@@ -1,6 +1,6 @@
 /**
  * Every name `<ui-dimmer>` uses:  tag, attributes (kind + allowed values), events, slots, parts, states, texts.
- * Schema:  `E.ComponentVocabulary` (`spell-ui/vocabulary`).
+ * Schema:  `E.ComponentVocabulary` (`spell/ui/vocabulary`).
  * - Class words come out through `ClassBuilder`, in Fomantic's grammar:
  *   `<ui-dimmer shade="light" inverted vertical-align="top" visible>` => `ui light inverted top aligned active dimmer`.
  * - `active` is Fomantic's word for a shown dimmer (its class, and `.dimmer('show')`):
@@ -9,7 +9,7 @@
  * - `closedby` mirrors `<dialog closedby>`, as on `<ui-modal>`.
  */
 
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /****************
  * ### `<ui-dimmer>`

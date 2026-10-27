@@ -1,7 +1,7 @@
 /**
  * The message family:  defines `<ui-message>` and exports its component, `UIMessage`.
  * - SIDE EFFECT:  importing it defines the tag, which registers it as the owner of the `header` and `content` parts.
- * - Also the library's `spell-ui/ui-message` entry (its size is in `notes/report.md`).
+ * - Also the library's `spell/ui/ui-message` entry (its size is in `notes/report.md`).
  */
 
 import { UIMessage } from "./UIMessage"

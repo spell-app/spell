@@ -5,10 +5,10 @@ import { expectAccessible } from "spell/test-helpers/A11y"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import type { DOMElement } from "spell/element"
 
-import "spell-ui/components/ui-menu"
-import "spell-ui/components/ui-toolbar"
-import "spell-ui/components/ui-label"
-import "spell-ui/components/ui-icon"
+import "spell/ui/components/ui-menu"
+import "spell/ui/components/ui-toolbar"
+import "spell/ui/components/ui-label"
+import "spell/ui/components/ui-icon"
 
 /**
  * `<ui-menu shrinkable>` and `<ui-toolbar shrinkable>`:  the titles fit the row (`TitleFit`, epic `ui-gaps` P13),

@@ -1,15 +1,15 @@
 import { beforeEach, describe, expect, it } from "vite-plus/test"
 import { page } from "vite-plus/test/browser"
 
-import { colorsCSS, foundationCSS } from "spell-ui/styles"
+import { colorsCSS, foundationCSS } from "spell/ui/styles"
 
 import { Fixture } from "spell/test-helpers/Fixture"
-import { Sheets } from "spell-ui/test-helpers/Sheets"
+import { Sheets } from "spell/ui/test-helpers/Sheets"
 
-import { tableVocabulary } from "spell-ui/components/ui-table/UITable.en"
+import { tableVocabulary } from "spell/ui/components/ui-table/UITable.en"
 
-import tableCSS from "spell-ui/components/ui-table/UITable.css?inline"
-import tableRaw from "spell-ui/components/ui-table/UITable.css?raw"
+import tableCSS from "spell/ui/components/ui-table/UITable.css?inline"
+import tableRaw from "spell/ui/components/ui-table/UITable.css?raw"
 
 /**
  * `UITable.css` on its own, before any element exists:  the sheet's source rules, the computed styles of the

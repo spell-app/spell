@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import type { AttributeSpec, ComponentVocabulary } from "spell-ui/vocabulary"
+import type { AttributeSpec, ComponentVocabulary } from "spell/ui/vocabulary"
 import { SkeletonText } from "spell/element/SkeletonText"
-import { ROOT_CATALOG } from "spell-ui/components/ui-root/UIRoot.catalog"
-import { MemberClashes } from "spell-ui/test-helpers/MemberClashes"
+import { ROOT_CATALOG } from "spell/ui/components/ui-root/UIRoot.catalog"
+import { MemberClashes } from "spell/ui/test-helpers/MemberClashes"
 
 /** Every family's English vocabulary module, by path:  the components' and the doc-only elements'. */
 const MODULES = import.meta.glob<Record<string, unknown>>(
@@ -75,9 +75,9 @@ const DATA_FILES = import.meta.glob<string>(
 )
 
 describe("UI<Name>.en.ts / UI<Name>.types.ts imports", () => {
-  // `spell-ui/core` by VALUE loads the element layer, which node can't:  `yarn site:data` / `yarn gen:root` import every
+  // `spell/ui/core` by VALUE loads the element layer, which node can't:  `yarn site:data` / `yarn gen:root` import every
   // vocabulary through tsx (no `?inline` css, no JSX)
-  it.each(Object.entries(DATA_FILES))("%s imports `spell-ui/core` for types only", (_, source) => {
+  it.each(Object.entries(DATA_FILES))("%s imports `spell/ui/core` for types only", (_, source) => {
     // one statement:  `import { ... } from` (braces may span lines) or `import X from`, not `import type`
     const valueImports = [...source.matchAll(/^import (?!type )(?:\{[^}]*\}|[\w*][^\n{]*?) from "\$\/ui\/core"/gm)]
       .map((match) => match[0])

@@ -2,9 +2,9 @@ import { describe, expect, test } from "vite-plus/test"
 
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 
-import "spell-ui/components/ui-flag"
-import "spell-ui/components/ui-dropdown"
-import "spell-ui/components/ui-select"
+import "spell/ui/components/ui-flag"
+import "spell/ui/components/ui-dropdown"
+import "spell/ui/components/ui-select"
 
 /**
  * `--ui-flag-font-family` (epic `wwod-spell-ui`, J47):  a page that loads a flag font names it once, on an ancestor,

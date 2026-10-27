@@ -1,4 +1,4 @@
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /**
  * `<ui-author>` in Spanish:  `<es-autor>`, with the names and texts only it uses (from `UIAuthor.en.ts`).

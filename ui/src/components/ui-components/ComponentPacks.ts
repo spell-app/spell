@@ -1,5 +1,5 @@
-import { E } from "spell-ui/core"
-import type { RootCatalogEntry } from "spell-ui/components/ui-root/UIRoot.types"
+import { E } from "spell/ui/core"
+import type { RootCatalogEntry } from "spell/ui/components/ui-root/UIRoot.types"
 import type { ComponentPack, PackSwap, PackSwapResult } from "./UIComponents.types"
 
 /****************
@@ -298,7 +298,7 @@ export class ComponentPacks {
 
 /**
  * Register a component pack:  `ComponentPacks.register()`, under the name packs call it by,
- * `SpellUI.registerPack(pack)` (the docs bundle) or `registerPack(pack)` from `spell-ui`.
+ * `SpellUI.registerPack(pack)` (the docs bundle) or `registerPack(pack)` from `spell/ui`.
  */
 export function registerPack(pack: ComponentPack): void {
   ComponentPacks.register(pack)

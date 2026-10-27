@@ -1,5 +1,5 @@
-import { VisualOpen } from "spell-ui/test-helpers/VisualOpen"
-import type { VisualHooks } from "spell-ui/test-helpers/test.types"
+import { VisualOpen } from "spell/ui/test-helpers/VisualOpen"
+import type { VisualHooks } from "spell/ui/test-helpers/test.types"
 
 /**
  * Open states of `types.html` for `yarn test:visual`:  menus shown.

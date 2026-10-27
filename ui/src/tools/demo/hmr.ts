@@ -6,11 +6,11 @@
  * - NOTE: this module is not an HMR boundary:  editing it reloads the page.
  */
 
-import { UIButton } from "spell-ui/components/ui-button"
-import { es } from "spell-ui/test-helpers/dictionary.es"
+import { UIButton } from "spell/ui/components/ui-button"
+import { es } from "spell/ui/test-helpers/dictionary.es"
 
-import "spell-ui/components/ui-dropdown"
-import "spell-ui/components/ui-segment"
+import "spell/ui/components/ui-dropdown"
+import "spell/ui/components/ui-segment"
 
 UIButton.define("ie-boton", es)
 

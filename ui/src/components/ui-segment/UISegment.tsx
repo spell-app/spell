@@ -1,7 +1,7 @@
 import { Show } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
-import { E, UIT } from "spell-ui/core"
+import { E, UIT } from "spell/ui/core"
 import { segmentVocabulary } from "./UISegment.en"
 
 import segmentCSS from "./UISegment.css?inline"

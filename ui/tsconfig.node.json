@@ -5,10 +5,10 @@
   //   render, the demo and visual-test pages they serve), so they keep the DOM, Vite's client types and the JSX settings.
   // - The settings `tsx` runs `spell ssr`'s render under (`src/cli/ssrCommand.ts`).
   // - The declarations build (`spell-types`) builds it into `dist-types/` too, beside the browser program's:
-  //   other repos read the tools by their declarations (`spell-ui/tools/SiteDataBuilder` ...).
+  //   other repos read the tools by their declarations (`spell/ui/tools/SiteDataBuilder` ...).
   "extends": "spell/toolchain/tsconfig.base.json",
   "compilerOptions": {
-    "customConditions": ["spell-ui-source"],
+    "customConditions": ["spell-source"],
     "target": "ES2022",
     "lib": ["ES2023", "DOM", "DOM.Iterable"],
     "jsx": "preserve",

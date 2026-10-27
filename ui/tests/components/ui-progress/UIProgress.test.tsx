@@ -5,8 +5,8 @@ import { expectAccessible } from "spell/test-helpers/A11y"
 
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 
-import "spell-ui/components/ui-progress"
-import "spell-ui/components/ui-segment"
+import "spell/ui/components/ui-progress"
+import "spell/ui/components/ui-segment"
 
 /** Element-markup rewrites of every example, by path. */
 const EXAMPLES = import.meta.glob<string>("/src/components/ui-progress/examples/elements/*.html", {

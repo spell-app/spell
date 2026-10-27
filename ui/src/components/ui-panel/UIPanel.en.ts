@@ -1,6 +1,6 @@
 /**
  * The English vocabulary of `<ui-panel>`:  `<ui-section>`'s, under the panel's own tag, description and other names.
- * The shape is `E.ComponentVocabulary` (`spell-ui/vocabulary`).
+ * The shape is `E.ComponentVocabulary` (`spell/ui/vocabulary`).
  * - Built ON the section's:  the same attributes, slots, parts, events, states and texts,
  *   so it can't drift from what the component does,
  *   and an attribute the section gains reaches the panel with no change here.
@@ -12,8 +12,8 @@
  *   `<ui-panel color="violet">` => `ui violet panel section`.
  */
 
-import type { E } from "spell-ui/core"
-import { sectionVocabulary } from "spell-ui/components/ui-section/UISection.en"
+import type { E } from "spell/ui/core"
+import { sectionVocabulary } from "spell/ui/components/ui-section/UISection.en"
 
 // NOTE:  above the vocabulary, which reads them as it's built
 

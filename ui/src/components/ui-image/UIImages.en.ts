@@ -1,11 +1,11 @@
 /**
  * The English vocabulary of `<ui-images>`:  every name the tag uses.
  * - Its tag, attributes (each with its kind and allowed values), slots and parts.
- *   The shape is `E.ComponentVocabulary` (`spell-ui/vocabulary`).
+ *   The shape is `E.ComponentVocabulary` (`spell/ui/vocabulary`).
  * - How the family's attributes become class words:  `UIImage.en.ts`.
  */
 
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /****************
  * ### `imagesVocabulary`

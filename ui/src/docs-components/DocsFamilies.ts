@@ -1,6 +1,6 @@
-// A leaf, not the barrel:  `spell-ui/components/ui-root` defines `<ui-root>`, which the site defines only once its theme
+// A leaf, not the barrel:  `spell/ui/components/ui-root` defines `<ui-root>`, which the site defines only once its theme
 // is in
-import { RootLoader } from "spell-ui/components/ui-root/RootLoader"
+import { RootLoader } from "spell/ui/components/ui-root/RootLoader"
 
 /****************
  * ### `DocsFamilies`

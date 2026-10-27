@@ -2,8 +2,8 @@
 import { onSettled } from "solid-js"
 import { isServer } from "@solidjs/web"
 
-import { E, UIT } from "spell-ui/core"
-import { itemVocabulary } from "spell-ui/components/ui-item/UIItem.en"
+import { E, UIT } from "spell/ui/core"
+import { itemVocabulary } from "spell/ui/components/ui-item/UIItem.en"
 
 /****************
  * ### `SlottedItems`

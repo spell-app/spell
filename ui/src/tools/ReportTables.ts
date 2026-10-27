@@ -4,7 +4,7 @@ import { existsSync, readFileSync, writeFileSync } from "node:fs"
 import { join, resolve } from "node:path"
 
 import { kb } from "spell/util/number"
-import type { PerfRecord, PerfResult, PerfStep } from "spell-ui/test-helpers/PerfRun"
+import type { PerfRecord, PerfResult, PerfStep } from "spell/ui/test-helpers/PerfRun"
 import {
   REPORT_DIGITS,
   ScenarioNames,
@@ -453,7 +453,7 @@ const CHECK_LABELS: Record<keyof MeasureChecks, string> = {
 const VERSIONED = /^solid-js$|^@solidjs\//
 
 /** What each extra entry (`MeasureResults.extra`) holds, for the tier table. */
-const EXTRA: Record<string, string> = { api: "`E` / `V` namespaces, `spell-ui/api`" }
+const EXTRA: Record<string, string> = { api: "`E` / `V` namespaces, `spell/ui/api`" }
 
 /** LOC groups listed file by file (`loc-files`). */
 const LOC_FILE_GROUPS = ["element core", "components"]

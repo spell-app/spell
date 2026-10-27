@@ -162,7 +162,7 @@ export const TYPING_SELECTOR =
 
 /**
  * What the field reads "On this page" from when `page` isn't set:  the site's page `main`, else any `main`.
- * - A page's sections:  `PageOutline` (its `SECTIONS`;  `spell-ui/components/ui-toc`).
+ * - A page's sections:  `PageOutline` (its `SECTIONS`;  `spell/ui/components/ui-toc`).
  */
 export const DEFAULT_PAGE = "main#main, main"
 

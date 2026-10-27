@@ -1,5 +1,5 @@
 /**
- * Barrel for `spell-ui/util` -- general-purpose utilities with no dependency on the rest of the package.
+ * Barrel for `spell/ui/util` -- general-purpose utilities with no dependency on the rest of the package.
  * - Re-exports `packages/util`'s GENERIC files (`@proto`, class / string / DOM helpers, `Prettify` ...),
  *   shared with `spell`:  they live there, not here, so every package shares ONE copy.
  * - NOTE: imports them one by one (`spell/util/class` ...), NEVER `spell/util`'s barrel:
@@ -17,8 +17,8 @@
  * - NOTE: no namespace of its own.
  *   `core.ts` re-exports it, so component files and the element core use it as `E.proto`, `E.Warnings` ...
  *   (`AGENTS.md`, "Solid authoring").
- *   - Only what sits BELOW `core` imports it by name (`import { proto, suggest } from "spell-ui/util"`):
- *     `spell-ui/vocabulary`, `spell-ui/icons`, the runtime, types files.
+ *   - Only what sits BELOW `core` imports it by name (`import { proto, suggest } from "spell/ui/util"`):
+ *     `spell/ui/vocabulary`, `spell/ui/icons`, the runtime, types files.
  * - Also:
  *   - the kit's timing helpers (`spell/util/timing`), to run a function later:
  *     `afterSolidUpdate()`, `beforeNextPaint()`, `soon()`, `after()`, `every()`;  and to wait:  `waitUntil()`, `within()`

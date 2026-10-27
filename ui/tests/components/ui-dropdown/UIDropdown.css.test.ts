@@ -1,16 +1,16 @@
 import { describe, expect, it, onTestFinished } from "vite-plus/test"
 
-import { ClassBuilder } from "spell-ui/elements"
-import { colorsCSS, foundationCSS } from "spell-ui/styles"
-import type { AttributeSpec, ComponentVocabulary } from "spell-ui/vocabulary"
+import { ClassBuilder } from "spell/ui/elements"
+import { colorsCSS, foundationCSS } from "spell/ui/styles"
+import type { AttributeSpec, ComponentVocabulary } from "spell/ui/vocabulary"
 
 import { Fixture } from "spell/test-helpers/Fixture"
 
-import { dropdownVocabulary } from "spell-ui/components/ui-dropdown/UIDropdown.en"
+import { dropdownVocabulary } from "spell/ui/components/ui-dropdown/UIDropdown.en"
 
-import buttonCSS from "spell-ui/components/ui-button/UIButton.css?inline"
-import dropdownCSS from "spell-ui/components/ui-dropdown/UIDropdown.css?inline"
-import dropdownRaw from "spell-ui/components/ui-dropdown/UIDropdown.css?raw"
+import buttonCSS from "spell/ui/components/ui-button/UIButton.css?inline"
+import dropdownCSS from "spell/ui/components/ui-dropdown/UIDropdown.css?inline"
+import dropdownRaw from "spell/ui/components/ui-dropdown/UIDropdown.css?raw"
 
 /**
  * `UIDropdown.css` on its own, before any element exists:  the sheet's source rules, the computed styles of the

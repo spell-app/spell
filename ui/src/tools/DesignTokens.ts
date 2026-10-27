@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs"
 import { join } from "node:path"
 
 import { DesignColor, type Oklch } from "./DesignColor.ts"
-import type { SiteFoundationGroup } from "spell-ui/docs-components/docs-components.types"
+import type { SiteFoundationGroup } from "spell/ui/docs-components/docs-components.types"
 import type { DesignSkip, DesignTokenRow, DesignTokensFile, DesignTypeStyle, ThemedValue } from "./tools.types.ts"
 
 /****************

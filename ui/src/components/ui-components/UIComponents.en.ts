@@ -1,12 +1,12 @@
 /**
  * Every name `<ui-components>` uses:  tag, attributes (kind + allowed values), events, slots, parts, states, texts.
- * Schema:  `E.ComponentVocabulary` (`spell-ui/vocabulary`).
+ * Schema:  `E.ComponentVocabulary` (`spell/ui/vocabulary`).
  * - No Fomantic counterpart and nothing to draw:  one attribute, `source`, which the `<ui-root>` around it reads.
  *   Its load and failures are the root's (`ui-ready`'s `failed`, `ui-error`), so it has no events of its own.
  * - No skeleton:  it draws nothing.
  */
 
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 import { SOURCE } from "./UIComponents.types"
 

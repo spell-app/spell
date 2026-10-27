@@ -5,17 +5,17 @@ import { OLD_COLOR_SCHEME_KEYS } from "spell/util/persist"
 
 import { expectAccessible } from "spell/test-helpers/A11y"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
-import { UI } from "spell-ui/runtime"
-import { ThemePreference } from "spell-ui/components/ui-theme-menu/ThemePreference"
+import { UI } from "spell/ui/runtime"
+import { ThemePreference } from "spell/ui/components/ui-theme-menu/ThemePreference"
 import {
   THEME_KEYS,
   type SchemeChoice,
   type ShownScheme,
   type ThemeMenuChange
-} from "spell-ui/components/ui-theme-menu/UIThemeMenu.types"
+} from "spell/ui/components/ui-theme-menu/UIThemeMenu.types"
 
-import "spell-ui/components/ui-theme-menu"
-import "spell-ui/components/ui-button"
+import "spell/ui/components/ui-theme-menu"
+import "spell/ui/components/ui-button"
 
 ////////////////
 // ## Fixtures

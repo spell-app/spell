@@ -1,4 +1,4 @@
-import { E, UIT } from "spell-ui/core"
+import { E, UIT } from "spell/ui/core"
 import { searchVocabulary } from "./UISearch.en"
 import { INPUT, PROMPT, type Vocabulary } from "./UISearch.types"
 

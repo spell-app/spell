@@ -7,7 +7,7 @@
  * - Pure data:  `import type` only (a pack's catalog has the shape of `<ui-root>`'s own), so node can load it.
  */
 
-import type { RootCatalogEntry } from "spell-ui/components/ui-root/UIRoot.types"
+import type { RootCatalogEntry } from "spell/ui/components/ui-root/UIRoot.types"
 
 import type { componentsVocabulary } from "./UIComponents.en"
 
@@ -20,7 +20,7 @@ export const SOURCE = "source"
 /**
  * A COMPONENT PACK:  another package's custom elements (any tag prefix), loaded on demand by `<ui-root>`.
  * - A pack is a classic script calling `SpellUI.registerPack(pack)` as it runs (`ComponentPacks.register()`);
- *   an ES module may call `registerPack()` from `spell-ui` itself.
+ *   an ES module may call `registerPack()` from `spell/ui` itself.
  * - It shares the page's Solid and Spell UI (`SpellUI.packModules`), never bundling its own copy.
  */
 export type ComponentPack = {

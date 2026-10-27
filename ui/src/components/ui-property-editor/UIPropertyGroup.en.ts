@@ -6,9 +6,9 @@
  * - The shape is `E.ComponentVocabulary`.  Pure data.
  */
 
-import type { E } from "spell-ui/core"
-import * as UIT from "spell-ui/components/components.types"
-import { sectionVocabulary } from "spell-ui/components/ui-section/UISection.en"
+import type { E } from "spell/ui/core"
+import * as UIT from "spell/ui/components/components.types"
+import { sectionVocabulary } from "spell/ui/components/ui-section/UISection.en"
 import { passThrough } from "./UIPropertyEditor.types"
 
 /** The section's names that only work with `source`:  a group has none. */

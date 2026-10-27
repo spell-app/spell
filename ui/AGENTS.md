@@ -27,13 +27,13 @@ with live elements to click.
   - util's generic files, and the toolchain
   - `spell/server`, for its site tools and tests only
   - Every arrow points DOWN:  no repo below this one may import it.
-- It lives inside the kit `spell`, at `~/www/spell/spell-ui/`.
+- It lives inside the kit `spell`, at `~/www/spell/ui/`.
   - The kit holds the ONE install for every repo (no `yarn.lock` here).
   - [The kit's AGENTS.md](../AGENTS.md) has the rules across repos.
 - Every file is imported by its package name and its path under `src/`, inside this repo too:
-  `spell-ui/components/ui-button/UIButton`, `spell/util/string` ("Imports", below).
+  `spell/ui/components/ui-button/UIButton`, `spell/util/string` ("Imports", below).
   - No alias, no `paths`:
-    `package.json`'s `exports` and the `spell-ui-source` condition do it ([tsconfig.json](tsconfig.json)).
+    `package.json`'s `exports` and the `spell-source` condition do it ([tsconfig.json](tsconfig.json)).
 - `agents/` (WWOD and the three logs):  a link to the kit's `agents/`, git-ignored here.
   - Made by every `yarn install` in the kit (its `postinstall`).
 - Its design notes are in the content repo since epic `repo-split` P9 (Q34):
@@ -57,9 +57,9 @@ with live elements to click.
   - It's `@solidjs/element` and `component-register`, folded in and fixed (epic `spell-element`, 2026-10-09).
     Each such file carries their MIT notice.
   - It never imports `ui`:
-    [SpellUISettings](src/elements/SpellUISettings.ts) hands it what it needs of Spell UI, as `spell-ui/core` loads.
+    [SpellUISettings](src/elements/SpellUISettings.ts) hands it what it needs of Spell UI, as `spell/ui/core` loads.
     - the runtime, the vocabulary layer, style sheets, focus, animations
-  - `spell-ui/core` re-exports ALL of it, so `E` holds its names too:  `E.UIComponent`, `@E.state`, as before.
+  - `spell/ui/core` re-exports ALL of it, so `E` holds its names too:  `E.UIComponent`, `@E.state`, as before.
 - The approved design:  [the plan](../spell.epics/guides/ui/notes/plan.md).
   - Read its "Decisions" and "Architecture" BEFORE adding a component or runtime service.
   - [The report](../spell.epics/guides/ui/notes/report.md) is the generated status report:
@@ -87,14 +87,14 @@ Two words for the two objects behind every tag (epic `wwod-spell-ui`, P15):
     - the decorators `@proto` / `@protoMerged` / `@lazy` / `@once` / `@resets` (`decorators.ts`);
       component files say `@E.lazy`, `@E.once`, `@E.resets`, `E.forget()`
     - `class.ts`, `string.ts` (case, `numberToWord`, `suggest`), `dom.ts` (`closestAcrossShadow` ...), `util.types.ts`
-  - [`spell-ui/util`](src/util/index.ts) re-exports it, so source keeps saying `from "spell-ui/util"`.
+  - [`spell/ui/util`](src/util/index.ts) re-exports it, so source keeps saying `from "spell/ui/util"`.
     Its declarations ship in `dist/_util/`.
   - That file imports util's GENERIC files one by one (`spell/util/class` ...), never the `spell/util` barrel:
     - the barrel also holds spell's utilities (lodash, `chalk` ...)
     - so spell's utilities never reach `ui`'s bundles
     - one of the deep-import exceptions (WWOD §4 › "The barrel, from another sub-system")
   - Where a helper goes:  SEE:  WWOD §8 › "Promotion path".
-  - Everything in `spell-ui/util` lands in the `core` bundle (`core.ts` re-exports it), so keep it small.
+  - Everything in `spell/ui/util` lands in the `core` bundle (`core.ts` re-exports it), so keep it small.
 - [`src/vocabulary/`](src/vocabulary/) (`V`, through the `api` entry):  the naming layer.
   - the vocabulary schema's types, which every set's vocabularies follow:
     `spell/element`'s [vocabulary.types.ts](../src/element/vocabulary.types.ts)
@@ -137,7 +137,7 @@ Two words for the two objects behind every tag (epic `wwod-spell-ui`, P15):
     - `LoadableComponent` + `DOMLoadableElement`:  the base of the elements that show a text file
       (`source`, inline text, loading / error look, `save()`)
     - `LoadableBody` + `DOMLoadableBodyElement`:  a section's body, loaded from `source` the first time it opens
-  - [SpellUISettings](src/elements/SpellUISettings.ts):  what Spell UI hands the kit's element as `spell-ui/core` loads
+  - [SpellUISettings](src/elements/SpellUISettings.ts):  what Spell UI hands the kit's element as `spell/ui/core` loads
     (`SpellSolid.install()`), a side effect
   - The DOM element bases keep their own files (`DOMElement.ts`, `DOMFormControl.ts` ...).
     - Many families and the static render import them.
@@ -146,9 +146,9 @@ Two words for the two objects behind every tag (epic `wwod-spell-ui`, P15):
   one folder per component FAMILY, named after its main tag (`ui-button/`).
   - In `src/`, with the rest of Spell UI's code
     (epic `repo-split` P14;  at the package's top from epic `people-and-orgs` P18 until then).
-    - Imported as `spell-ui/components/ui-button` (the family's barrel), `spell-ui/components/ui-button/UIButton` ...
+    - Imported as `spell/ui/components/ui-button` (the family's barrel), `spell/ui/components/ui-button/UIButton` ...
     - Published under the short names too (Q47), beside the long ones:
-      - `spell-ui/ui-button` and `spell-ui/components/ui-button`
+      - `spell/ui/ui-button` and `spell/ui/components/ui-button`
       - the short names:  `"spellPublish": { "exports" }` in [package.json](package.json), which the kit's
         `spell publish` reads (epic `repo-split` P19)
     - Each family's barrel has its own key in `package.json`'s `exports`:  a new family adds one
@@ -177,12 +177,12 @@ Two words for the two objects behind every tag (epic `wwod-spell-ui`, P15):
     - The site's bundle does;  the library's own `RootLoader` never does (epic `wwod-spell-ui`, I12).
   - A family that renders other widgets in its shadow root imports their families in its barrel.
     - Their JSX types:
-      - a component tag's are generated (`spell-ui/jsx`)
+      - a component tag's are generated (`spell/ui/jsx`)
       - a docs tag (`<ui-docs-search>`) goes in `DocsJSXTags`, loose:  the generated set leaves the docs tags out
   - They read the site's data through `SiteData` ([the components data](docs/__data/components.json5)),
     NEVER the vocabularies.
   - The barrel's header says how to add one.
-- [`src/static/`](src/static/) (`spell-ui/static`, `SSR`):  the STATIC server render, for SEO.
+- [`src/static/`](src/static/) (`spell/ui/static`, `SSR`):  the STATIC server render, for SEO.
   - `StaticRender.page()` / `fragment()` turn `ui-*` markup into plain light-DOM HTML in node:
     no shadow DOM, no JS.
   - How:
@@ -196,15 +196,15 @@ Two words for the two objects behind every tag (epic `wwod-spell-ui`, P15):
     (WWOD §10 › "Server code stays out of the browser bundle").
     - `static.types.ssr.ts`;  tests are `<Name>.ssr.test.ts`, in the `ssr` project.
     - Except the barrel, `index.ts`.
-  - Its files import each other through `SSR` (`import { SSR } from "spell-ui/static"`),
-    and the element core through `spell-ui/core`.
+  - Its files import each other through `SSR` (`import { SSR } from "spell/ui/static"`),
+    and the element core through `spell/ui/core`.
     - A mark a static initializer reads comes from `./static.types.ssr` directly
       (WWOD §4 › "Circular imports";  `barrel.ssr.test.ts`).
-- [`core`](src/core.ts) and [`forms`](src/forms.ts):  the two SHARED lib entries (`spell-ui/core`, `spell-ui/forms`).
+- [`core`](src/core.ts) and [`forms`](src/forms.ts):  the two SHARED lib entries (`spell/ui/core`, `spell/ui/forms`).
   - `core`:  the element core, and the foundation JS every family needs.
   - `forms`:  what only form controls with a VALUE need (`FormComponent`, `DOMFormControl`, `Validator`, `MenuOptions`).
   - Component files import shared code ONLY through these (see "Solid authoring").
-- [`src/styles/`](src/styles/):  its own lib entry, `spell-ui/styles`.
+- [`src/styles/`](src/styles/):  its own lib entry, `spell/ui/styles`.
   - `layers.css`, tokens, colours, sizes, reset, typography, animations, utilities, `native.css`, `themes/`
 - [The package's entry](src/index.ts):  `spell-ui`.
   - Registers every family (side effect) and re-exports them,
@@ -216,7 +216,7 @@ Two words for the two objects behind every tag (epic `wwod-spell-ui`, P15):
     [`UIButton.test.tsx`](./tests/components/ui-button/UIButton.test.tsx), at the same path under `tests/`.
   - The cross-family tests are in [`tests/test-helpers/`](./tests/test-helpers/),
     the tools' in [`tests/tools/`](./tests/tools/).
-  - Spell UI's own helpers are in `src/test-helpers/` (`spell-ui/test-helpers/<Name>`);
+  - Spell UI's own helpers are in `src/test-helpers/` (`spell/ui/test-helpers/<Name>`);
     the generic ones are the kit's (below).
   - [Spell UI's Vitest config](vitest.config.ts) finds them there (`dir`).
     - `root` stays this package, so these still mean this package's files:
@@ -253,7 +253,7 @@ Two words for the two objects behind every tag (epic `wwod-spell-ui`, P15):
   (epic `repo-split` P13, Q42):
   - `spell icon`, `spell ssr`, `spell pack create | add | build | check`, `spell design ...`
   - its list:  [commands.ts](src/cli/commands.ts), named by `package.json`'s `"spell": { "commands" }`
-  - their code beside it (`spell-ui/cli/...`), their tests in [`tests/cli/`](./tests/cli/)
+  - their code beside it (`spell/ui/cli/...`), their tests in [`tests/cli/`](./tests/cli/)
 - The docs site, modelled on Fomantic's docs:  "The docs site", below.
 - Design notes, and the generated `report.md`:
   in the content repo (Q34, above), [its ui notes folder](../spell.epics/guides/ui/notes/).
@@ -279,7 +279,7 @@ Two words for the two objects behind every tag (epic `wwod-spell-ui`, P15):
   - `<ui-markdown>` draws with marked, `editable`'s preview too.
     A subclass may draw with its own engine (`UIMarkdown.loadEngine()`).
   - Spell's own are the app's subclasses, `<spell-code>` and `<spell-markdown>`
-    ([app's AGENTS.md](../spell-app/src/app/AGENTS.md), `components/`).
+    ([app's AGENTS.md](../app/src/app/AGENTS.md), `components/`).
     Loading `<spell-code>` registers spell with `UI.code`, so a `spell` block in any `<ui-markdown>` is coloured too.
 - `reference/Fomantic-UI/`:  a READ-ONLY, git-ignored clone of Fomantic, for porting.
   NEVER edit or import it.
@@ -308,7 +308,7 @@ In a family's folder, `ui-<name>/`, every file is named for its component:
     - So `LoadableComponent` keeps its `as DOMLoadableElement` casts.
 - `index.ts`:  the family barrel.
   - Calls `define()` for every tag (SIDE EFFECT), and re-exports the classes.
-  - Also the family's lib entry (`spell-ui/ui-button`), and its hot-reload boundary.
+  - Also the family's lib entry (`spell/ui/ui-button`), and its hot-reload boundary.
 - `UI<Name>.css`:  the port of Fomantic's `.less` + `.variables`.
   - A second sheet keeps its suffix (`UIDimmer.page.css`), or names its own tag's component (`UIBrandCheck.css`).
 - `UI<Name>.en.ts`:  the tag's VOCABULARY, named for its language.
@@ -358,14 +358,14 @@ In a family's folder, `ui-<name>/`, every file is named for its component:
   - A helper function becomes a private static on the one class that uses it,
     else a static on a small class here.
   - Constants used by SEVERAL folders live in [the shared types](src/components/components.types.ts),
-    used as `UIT.<NAME>` from `spell-ui/core`.
+    used as `UIT.<NAME>` from `spell/ui/core`.
   - NOTE:  a types file imports its vocabularies with `import type` only.
     - Vocabularies import values from it, so a value import is a cycle.
     - `UIParts.types.ts` is the exception.
 - Vocabularies and types files are PURE DATA:
-  - `spell-ui/core` for types only
+  - `spell/ui/core` for types only
   - shared constants by value come straight from `components.types`
-    (`import * as UIT from "spell-ui/components/components.types"`)
+    (`import * as UIT from "spell/ui/components/components.types"`)
   - Why:  core loads the element layer, which node can't,
     and `yarn site:data` / `yarn gen:root` import every vocabulary in node (tsx).
   - [The vocabularies test](./tests/test-helpers/vocabularies.test.ts) enforces it.
@@ -390,7 +390,7 @@ In a family's folder, `ui-<name>/`, every file is named for its component:
   - Plain `.html` pages on `<ui-*>` widgets:  no build step to view one.
   - From epic `spell-ui-pages`, which replaced the old Astro site.
   - A COMPONENT SET, laid out as every set is
-    (epic `people-and-orgs` P18;  [spell-app's AGENTS.md](../spell-app/AGENTS.md), "COMPONENT SETS"):
+    (epic `people-and-orgs` P18;  [spell-app's AGENTS.md](../app/AGENTS.md), "COMPONENT SETS"):
     - its pages in this repo's `docs/`, served at `/components/ui/`
     - the site bundle laid over them, at `_assets/`
     - From 2026-10-05 (claude-design P6) until P18, the pages were SHARED content, the checkout's `ui/`.
@@ -456,7 +456,7 @@ In a family's folder, `ui-<name>/`, every file is named for its component:
   - `search.json5`:  every page's sections
   - Written by `yarn site:data`, with the editors' manifests beside them:
     `custom-elements.json`, `html-custom-data.json`, `css-custom-data.json`.
-  - And, in `src/`, the JSX types of every `<ui-*>` tag, [`spell-ui/jsx`](src/jsx.ts):
+  - And, in `src/`, the JSX types of every `<ui-*>` tag, [`spell/ui/jsx`](src/jsx.ts):
     - each tag's attributes and events
     - each tag's element in the DOM's types (`querySelector("ui-button")`)
     - They type-check in Spell UI's main program, so its own JSX (the docs elements') uses them.
@@ -495,7 +495,7 @@ In a family's folder, `ui-<name>/`, every file is named for its component:
   - A change that alters rendering MUST update its baselines in the SAME change (`--update`),
     after reviewing every diff in the HTML report.
     NEVER update to silence a diff you haven't looked at.
-  - `--static`:  compares the STATIC server render (`spell-ui/static`) with the elements instead.
+  - `--static`:  compares the STATIC server render (`spell/ui/static`) with the elements instead.
     - The families:  [the static families](src/tools/visual/StaticFamilies.ts).
     - Report only:  `static-parity.md`, in the visual tests' results.
     - `--os local` by default.
@@ -530,7 +530,7 @@ In a family's folder, `ui-<name>/`, every file is named for its component:
   - Not watched:  `site:data` / `site:index` / `site:kitchen`.
   - A watch rebuild leaves stale hashed chunks:  harmless, they're not committed.
     The page server's next start rebuilds the bundle clean.
-- `yarn site:new`:  a site page, from spell-epic's [template](../spell-epic/templates/spell-ui-docs.html)
+- `yarn site:new`:  a site page, from spell-epic's [template](../epic/templates/spell-ui-docs.html)
   ([its script](scripts/site-new.ts)).
 
   ```sh
@@ -561,7 +561,7 @@ In a family's folder, `ui-<name>/`, every file is named for its component:
     - It also writes what editors read ([the element manifests](src/tools/ElementManifests.ts)):
       - in `docs/__data/`, `custom-elements.json`, `html-custom-data.json` and `css-custom-data.json`:
         VS Code's autocomplete for `<ui-*>`, and for their custom properties, parts and states in CSS
-      - the JSX types, [`spell-ui/jsx`](src/jsx.ts)
+      - the JSX types, [`spell/ui/jsx`](src/jsx.ts)
     - [The element manifests' test](./tests/tools/ElementManifests.test.ts) fails while they're stale.
 - `yarn site:check <page...> | --all`:
   loads the `docs/` pages from the page server, at `/components/ui/` (Playwright).
@@ -581,7 +581,7 @@ In a family's folder, `ui-<name>/`, every file is named for its component:
 - `yarn tokens:alias <family> [--write]`:  the codemod of [the theming doc](../spell.epics/guides/ui/notes/theming.md).
   It only prints, without `--write`.
 - `yarn tsc`, not `npx tsc`, and no hard-coded `node_modules` paths:
-  SEE:  [spell-app's AGENTS.md](../spell-app/AGENTS.md), "Toolchain:  Vite+".
+  SEE:  [spell-app's AGENTS.md](../app/AGENTS.md), "Toolchain:  Vite+".
   - Here, node code finds a dependency through the kit's [`NodePackage`](../src/element-tools/NodePackage.ts)
     (`spell/element-tools/NodePackage`).
 
@@ -623,7 +623,7 @@ In a family's folder, `ui-<name>/`, every file is named for its component:
     read it through the component's vocabulary.
   - A PLATFORM name is written inline ("Functions & types"):  `aria-label`, `click`, `slot`, `role="list"`.
 - Class defaults:  as WWOD §12 › "`@proto static` defaults", plus:
-  - vocabulary, default settings and part names are `@proto static` (from `spell-ui/util`),
+  - vocabulary, default settings and part names are `@proto static` (from `spell/ui/util`),
     so instances carry no per-instance copies
 - Libraries:  `lodash-es` only (it tree-shakes).
   - Any other runtime dependency:  WWOD §2 › "Ask before adding a dependency".
@@ -947,19 +947,19 @@ SHARED STATES:  states every element takes, though its vocabulary never names th
 ### Imports in component files
 
 Components, DOM element classes AND `UI<Name>.fallback.ts` import:
-- shared code ONLY from `spell-ui/core`, and `spell-ui/forms` for form controls
-  - never `spell-ui/util`, `spell-ui/vocabulary`, `spell-ui/elements` ... directly
+- shared code ONLY from `spell/ui/core`, and `spell/ui/forms` for form controls
+  - never `spell/ui/util`, `spell/ui/vocabulary`, `spell/ui/elements` ... directly
 - the family's own vocabulary, fallback, helpers and sheet as peers:  `./UIButton.en`, `./UIButton.css?inline`
-- Why:  the lib build puts everything `spell-ui/core` re-exports into `core.js` in `dist/`.
+- Why:  the lib build puts everything `spell/ui/core` re-exports into `core.js` in `dist/`.
   A leaf imported by a family AND by `core` splits into a hashed third chunk.
-  - For the same reason, `core.ts` / `forms.ts` re-export `spell-ui/elements` LEAVES,
-    and every `forms` file imports the core through `spell-ui/core`.
+  - For the same reason, `core.ts` / `forms.ts` re-export `spell/ui/elements` LEAVES,
+    and every `forms` file imports the core through `spell/ui/core`.
   - `yarn measure`'s checks catch a violation.
 - Through namespaces (WWOD §4 › "ONE namespace per sub-system"):
 
   ```ts
-  import { E, UI, UIT } from "spell-ui/core"
-  import { F } from "spell-ui/forms"
+  import { E, UI, UIT } from "spell/ui/core"
+  import { F } from "spell/ui/forms"
   ```
 
   - Then `E.UIComponent`, `@E.proto`, `UI.browser`, `UIT.FLUID`, `F.FormComponent` ("Types / Exports").
@@ -968,9 +968,9 @@ Components, DOM element classes AND `UI<Name>.fallback.ts` import:
     - family chunks come out byte-for-byte the same:  Rolldown turns `E.Cell` back into a plain import
     - `core` pays ~0.8 kB gzipped for the `E` object
 - The element core (`src/elements/`) too, though `core.ts` / `forms.ts` re-export its own files.
-  - The same two imports;  the `forms` files also `import { F } from "spell-ui/forms"`.
+  - The same two imports;  the `forms` files also `import { F } from "spell/ui/forms"`.
   - Then `E.Cell`, `E.Warnings`, `E.flatParentFor()`.
-  - Never named imports from `./elements.types`, `./Cell`, `spell-ui/util`, `spell-ui/runtime` ...
+  - Never named imports from `./elements.types`, `./Cell`, `spell/ui/util`, `spell/ui/runtime` ...
   - EXCEPT what a module reads while it EVALUATES:  a direct import from its file,
     under `// Import directly to avoid circular import` (WWOD §4 › "Circular imports").
     - the base class in `extends`
@@ -982,8 +982,8 @@ Components, DOM element classes AND `UI<Name>.fallback.ts` import:
     - Why:  the core never imports `forms`, and has always finished loading first.
     - A `forms` peer a class definition reads is still direct:  `FormComponent`'s `DOMFormControl`, `Validator`.
   - [The barrel test](tests/elements/barrel.test.ts) checks every export of both entries is live,
-    and that `spell-ui/core` carries every name of `spell/element`.
-  - NEVER import an element-core leaf by path (`spell-ui/elements/PartComponent`):  entering the cycle there breaks it.
+    and that `spell/ui/core` carries every name of `spell/element`.
+  - NEVER import an element-core leaf by path (`spell/ui/elements/PartComponent`):  entering the cycle there breaks it.
 
 ### Writing reactive code
 
@@ -1004,7 +1004,7 @@ Components, DOM element classes AND `UI<Name>.fallback.ts` import:
   - Tests `await ElementFixture.settle()` / `tick()` (which `flush()`) before checking the DOM.
     Never sleep.
 - **Running something later:**  through the timing helpers, never the platform's calls, so the code says WHEN.
-  - They're the kit's util's ([`timing`](../src/util/timing.ts)), re-exported by `spell-ui/util` (and `spell/element`).
+  - They're the kit's util's ([`timing`](../src/util/timing.ts)), re-exported by `spell/ui/util` (and `spell/element`).
   - `E.afterSolidUpdate(fn)`:  as soon as the current code finishes (a microtask:  `queueMicrotask()`)
   - `E.beforeNextPaint(fn)`:  just before the next paint (`requestAnimationFrame()`)
   - `E.soon(fn)`:  the next task (`setTimeout(fn, 0)`)
@@ -1026,7 +1026,7 @@ Components, DOM element classes AND `UI<Name>.fallback.ts` import:
       Solid sets a prop it doesn't know with `setAttribute()`, which our elements take over.
   - A THIRD-PARTY Solid app does the same ([the Solid host app](src/tools/frameworks/solid/app.tsx)).
     Our app:  WWOD §17 › "Events:  `onClick`, or `on()` for `ui-*`".
-    - `spell-ui/jsx` types both ways in ([README-frameworks.md](README-frameworks.md), "Events"):
+    - `spell/ui/jsx` types both ways in ([README-frameworks.md](README-frameworks.md), "Events"):
       - the `ref`'s element knows its tag's events, `event.detail` too
       - `on-ui-changed`, one prop per event, typed
       - rich data by its plain name (`options`);  its `prop:` name is typed too, `@deprecated`:
@@ -1071,7 +1071,7 @@ Components, DOM element classes AND `UI<Name>.fallback.ts` import:
   - NEVER `import * as` a Solid package in shipped code:  it pins every export into bundles and vendored copies.
 - SSR:  anything that reads the DOM in a constructor needs an `isServer` guard
   ([the SSR test](./tests/test-helpers/ssr.ssr.test.tsx)).
-  - Static render (`spell-ui/static`):  as WWOD §12 › "Brand checks only where `instanceof` can't work", plus:
+  - Static render (`spell/ui/static`):  as WWOD §12 › "Brand checks only where `instanceof` can't work", plus:
     - DOM elements are linkedom elements, and node has no such globals.
     - So NEVER `instanceof Element` / `Node` / `ShadowRoot` / `HTMLSlotElement` in shared code:
       use `nodeType`, `localName`.
@@ -1143,7 +1143,7 @@ THE LINT GUARD (epic `spell-element` P10):  `yarn lint` holds component files to
     - Read from the pack's `<Name>.en.ts` vocabularies by [the root catalog](../src/element-tools/RootCatalog.ts),
       as `yarn gen:root` reads ours (skeleton text, "Overview").
   - `prefix` ends in `-`, is never `ui-`, and starts every catalog tag.
-  - A pack's families are written like ours ([spell-epic's AGENTS.md](../spell-epic/src/AGENTS.md)).
+  - A pack's families are written like ours ([spell-epic's AGENTS.md](../epic/src/AGENTS.md)).
 - The `ui-components` family ([its folder](src/components/ui-components/)) holds the runtime side:
   - `<ui-components source>` (`UIComponents`):  invisible, no logic, no fallback.
     - The root reads its `source`.
@@ -1158,11 +1158,11 @@ THE LINT GUARD (epic `spell-element` P10):  `yarn lint` holds component files to
   - A `define()` may return a promise, when it imports its families first.
     - The load resolves once that settles, so the root waits for the tags.
     - spell-app's `spell.pack.js` (`<spell-viewer>`, `<spell-editor>`) imports two ES modules that way.
-      It's built by Vite, not `spell pack build` ([app's AGENTS.md](../spell-app/src/app/AGENTS.md), `components/`).
+      It's built by Vite, not `spell pack build` ([app's AGENTS.md](../app/src/app/AGENTS.md), `components/`).
   - A pack's events keep their own names (`spell-open`).
     - Only Spell UI's `ui-*` ones take a translated tag's prefix
       (`Vocabulary`;  [the translation doc](../spell.epics/guides/ui/notes/translation.md)).
-  - `registerPack()`:  exported from `spell-ui` and the family's barrel.
+  - `registerPack()`:  exported from `spell/ui` and the family's barrel.
     - The docs bundle puts it on `window.SpellUI`.
     - So does the site's bundle ([SitePacks.ts](site/_src/SitePacks.ts)).
   - A `define()` still running (it loads its families first):
@@ -1179,12 +1179,12 @@ THE LINT GUARD (epic `spell-element` P10):  `yarn lint` holds component files to
 - Modules a pack shares with the page are `SpellUI.packModules`:
   the specifier its build leaves external, by the name its source imports it by (epic `repo-split` P14, Q45)
   => the page's module.
-  - `solid-js`, `@solidjs/web`, `spell/element`, `spell-ui/core`, `spell-ui/forms`
+  - `solid-js`, `@solidjs/web`, `spell/element`, `spell/ui/core`, `spell/ui/forms`
   - `spell/element`, what a pack's elements are written on, is Spell UI's core module:  it carries all of it.
   - The site also offers the families a pack's elements may extend, once they load:
-    `spell-ui/components/ui-code`, `spell-ui/components/ui-markdown`, `spell-ui/components/ui-root`.
+    `spell/ui/components/ui-code`, `spell/ui/components/ui-markdown`, `spell/ui/components/ui-root`.
   - Built in two places, never in the library:
-    - [the docs bundle's entry](../spell-epic/src/tools/_assets/spell-ui.entry.js), spell-epic's
+    - [the docs bundle's entry](../epic/src/tools/_assets/spell-ui.entry.js), spell-epic's
     - the site's bundle, every component set's ([SitePacks.ts](site/_src/SitePacks.ts))
   - Those are the two places a Solid package is `import * as`'d, on purpose:
     a pack may use any export, so they must all stay ("One Solid per page" above).
@@ -1215,14 +1215,14 @@ As WWOD §8, plus our self-namespaces:  one per lib entry, since each entry is i
 
 | Name | Is | What's in it |
 | --- | --- | --- |
-| `E` | `spell-ui/core` | the element core and the foundation:  `E.UIComponent`, `E.proto`, `E.Cell`, `E.Converters`;  `spell/element`'s `E` is the element half of it, the same objects |
-| `F` | `spell-ui/forms` | what only form controls need:  `F.FormComponent`, `F.MenuOptions` |
-| `UI` | the runtime singleton, from `spell-ui/runtime` | an instance, read like an app singleton;  never through `E` |
-| `UIT` | `spell-ui/components/components.types` | the constants, types and `ToggleCommands` several families share:  `UIT.FLUID`, `UIT.Key.enter`, `UIT.ToggleCommands.action(...)`, `UIT.SelectValue` |
-| `V` | `spell-ui/vocabulary` | namespaced through `vocabulary.api.ts`, from the `api` entry only (why:  that file's header) |
-| `SSR` | `spell-ui/static` | node only |
+| `E` | `spell/ui/core` | the element core and the foundation:  `E.UIComponent`, `E.proto`, `E.Cell`, `E.Converters`;  `spell/element`'s `E` is the element half of it, the same objects |
+| `F` | `spell/ui/forms` | what only form controls need:  `F.FormComponent`, `F.MenuOptions` |
+| `UI` | the runtime singleton, from `spell/ui/runtime` | an instance, read like an app singleton;  never through `E` |
+| `UIT` | `spell/ui/components/components.types` | the constants, types and `ToggleCommands` several families share:  `UIT.FLUID`, `UIT.Key.enter`, `UIT.ToggleCommands.action(...)`, `UIT.SelectValue` |
+| `V` | `spell/ui/vocabulary` | namespaced through `vocabulary.api.ts`, from the `api` entry only (why:  that file's header) |
+| `SSR` | `spell/ui/static` | node only |
 
-- `UIT` is exported from `spell-ui/core` and `spell-ui`:  never flat, never through `E`.
+- `UIT` is exported from `spell/ui/core` and `spell-ui`:  never flat, never through `E`.
 - The components barrel exports classes by name (`UIButton`, `UIDropdown`), no namespace.
 
 ## Imports
@@ -1231,72 +1231,72 @@ As WWOD §4, plus these deliberate EXCEPTIONS.
 
 - ONE name per file, the same in every repo (epic `repo-split` P14, Q47):
   the package name and its path under `src/`, no extension, inside this repo too.
-  - `spell-ui` (the package barrel), `spell-ui/core`, `spell-ui/components/ui-button`,
-    `spell-ui/components/ui-button/UIButton`, `spell-ui/test-helpers/Sheets`, `spell-ui/tools/SiteDataBuilder`,
-    `spell-ui/components/ui-parts/UIParts.css?inline`
+  - `spell-ui` (the package barrel), `spell/ui/core`, `spell/ui/components/ui-button`,
+    `spell/ui/components/ui-button/UIButton`, `spell/ui/test-helpers/Sheets`, `spell/ui/tools/SiteDataBuilder`,
+    `spell/ui/components/ui-parts/UIParts.css?inline`
   - Same-folder peers stay `./UIButton.types`;  NEVER a `../` climb, NEVER an alias.
   - Files outside `src/` (`scripts/`, `tests/`, `site/_src`, the configs) import `src/` the same way.
   - What code imports from OUTSIDE `src/` has an explicit `exports` key:
-    - `spell-ui/vite.config.ts`, `spell-ui/vite.site.config.ts`
-    - `spell-ui/site/_src/site.types`, `spell-ui/package.json`
+    - `spell/ui/vite.config.ts`, `spell/ui/vite.site.config.ts`
+    - `spell/ui/site/_src/site.types`, `ui/package.json`
 - How every tool finds them:  `package.json`'s `exports`, no alias table anywhere.
-  - TypeScript:  the `spell-ui-source` condition (`customConditions` in [tsconfig.json](tsconfig.json))
+  - TypeScript:  the `spell-source` condition (`customConditions` in [tsconfig.json](tsconfig.json))
     reads Spell UI's own SOURCE.
   - Another repo's TypeScript reads its built declarations (`types`, `dist-types/src/...`, `spell-types`).
   - Vite, Vitest, `tsx`:  `default`, the source, adding the extension themselves.
   - Every folder barrel has an explicit key (`"./components/ui-button"`, `"./runtime"` ...):
     `tsx`, run from another repo through `node_modules`, finds a file without its extension but not a folder's `index`.
   - Plain node (a Vite config another repo's config imports) needs the extension written:
-    `vite.config.ts` imports `spell-ui/tools/environment.ts` (the `"./*.ts"` key).
+    `vite.config.ts` imports `spell/ui/tools/environment.ts` (the `"./*.ts"` key).
 
-- Component files import shared code from `spell-ui/core` / `spell-ui/forms` only, as `E` / `F` / `UI` / `UIT`
+- Component files import shared code from `spell/ui/core` / `spell/ui/forms` only, as `E` / `F` / `UI` / `UIT`
   ("Solid authoring").
   - Folder peers stay direct imports (`./UIButton.types`), one statement per module.
 - The element core (`src/elements/`) imports itself the same way, through `E` / `F`, NOT its peers.
   - Only what a module reads while it evaluates comes from its file directly ("Solid authoring").
-- Vocabularies and types files value-import `UIT` as `import * as UIT from "spell-ui/components/components.types"`,
-  not through `spell-ui/core`.
+- Vocabularies and types files value-import `UIT` as `import * as UIT from "spell/ui/components/components.types"`,
+  not through `spell/ui/core`.
   - Why:  they're PURE DATA that node imports (`yarn site:data`, `yarn gen:root`),
     and `core` loads the element layer, which node can't ("Overview", `UI<Name>.types.ts`).
-- What sits BELOW `core` NEVER imports the `spell-ui/core` entry:
-  - below it:  `spell-ui/runtime`, `spell-ui/vocabulary`, `spell-ui/icons`, `spell-ui/util`, types files
-  - they take shared helpers by name from `spell-ui/util` (no namespace of its own), and `UIT` as above
+- What sits BELOW `core` NEVER imports the `spell/ui/core` entry:
+  - below it:  `spell/ui/runtime`, `spell/ui/vocabulary`, `spell/ui/icons`, `spell/ui/util`, types files
+  - they take shared helpers by name from `spell/ui/util` (no namespace of its own), and `UIT` as above
   - Why:  `core` re-exports the runtime's loader.
     So a lazy runtime chunk importing the entry makes Rolldown split the modules both reach
     into a chunk every page loads (epic `wwod-spell-ui`, I16;  `yarn measure` catches it).
 - `src/tools/` and `scripts/` are node code, by package name like the rest:
-  `spell-ui/tools/SiteCheck`, `spell/element-tools/Terminal`, `spell/server`;  peers stay `./tools.types.ts`.
+  `spell/ui/tools/SiteCheck`, `spell/element-tools/Terminal`, `spell/server`;  peers stay `./tools.types.ts`.
   - PAGE scripts Vite serves or SSR-loads (the demo's `*.ts`, the visual tests' `fixture.ts`, `StaticFixture.ts`,
-    `StaticDocument.ts`) import Spell UI as `src/` does (`SSR` for `spell-ui/static`).
+    `StaticDocument.ts`) import Spell UI as `src/` does (`SSR` for `spell/ui/static`).
   - [`StyleGenerator`](src/styles/StyleGenerator.ts):  a leaf file, never a barrel with `?inline` CSS
 - Another repo imports Spell UI the same way, by those names:
   everything in `src/` is importable while developing (Q47 reverses J38), through `exports`.
   - What other repos' code, tools and tests import:
-    - `spell-ui/core`, `spell-ui/components/ui-code`, `spell-ui/property`, `spell-ui/test-helpers/MemberClashes`
-    - `spell-ui/components/ui-toc/TocIndex`, `.../HashLanding`, `.../PageOutline`:  a family's LEAVES, on purpose
+    - `spell/ui/core`, `spell/ui/components/ui-code`, `spell/ui/property`, `spell/ui/test-helpers/MemberClashes`
+    - `spell/ui/components/ui-toc/TocIndex`, `.../HashLanding`, `.../PageOutline`:  a family's LEAVES, on purpose
       (epic `ui-gaps` P14).
       - Plain DOM, no element:  a page's sections, the one in view, landing on a link's target.
       - The docs site's sections and search, the docs widgets, the site's node scripts and spell-epic's docs runtime
         read a page with them, without defining `<ui-toc>`;  what they keep page-wide is on `globalThis`.
-    - `spell-ui/components/ui-example/ExampleSource`:  the examples' markup, kept before they upgrade (the site's
+    - `spell/ui/components/ui-example/ExampleSource`:  the examples' markup, kept before they upgrade (the site's
       first import), without defining `<ui-example>`.
-    - `spell-ui/components/ui-zoom/ImageZoom`:  a family's LEAF, on purpose (epic `ui-gaps` P14).
+    - `spell/ui/components/ui-zoom/ImageZoom`:  a family's LEAF, on purpose (epic `ui-gaps` P14).
       - Plain DOM, no element:  the page's ONE zoom for its screenshots, and which images open in it.
       - The docs runtime imports it alone, so its bundle holds no second `<ui-zoom>`;
         a component pack shares the page's (`PACK_MODULES`), for `<epic-field>`'s request thumbnails.
-    - the site and static tools (`spell-ui/tools/SiteDataBuilder` ...)
-    - `spell-ui/vite.config.ts` (`baseConfig()`)
-    - `spell-ui/test-helpers/setup.ts` (a browser test project's `setupFiles`)
+    - the site and static tools (`spell/ui/tools/SiteDataBuilder` ...)
+    - `spell/ui/vite.config.ts` (`baseConfig()`)
+    - `spell/ui/test-helpers/setup.ts` (a browser test project's `setupFiles`)
   - NOT the generic test helpers, the pack tooling or `SkeletonText`:  the kit's since epic `repo-split` P10
     (`spell/test-helpers/...`, `spell/element-tools/...`, `spell/element/SkeletonText`).
   - The PUBLISHED package is the kit's `spell publish` build (epic `repo-split` P19, J197), not `yarn build`:
     - one JavaScript file per source file, so every name in `src/` resolves from npm too, by the same name
     - `spell/*` stays an import, never a copy:  a page loads one `DOMElement` (C22)
     - what ships:  `"spellPublish"` in [package.json](package.json) (`tools/`, `cli/`, `test-helpers/` and the
-      examples left out;  the icon packs as they are;  the short names `spell-ui/ui-button`)
+      examples left out;  the icon packs as they are;  the short names `spell/ui/ui-button`)
     - `yarn build` (the Vite library bundle in `dist/`), `yarn smoke` and `yarn measure` stay, for local checks:
       that bundle is published by nothing, and still holds its own copy of the kit's element code.
-    - An import map's names are the published ones (`DIST_IMPORTS`, `PropertyEditorPages`' `spell-ui/ui-property-editor`).
+    - An import map's names are the published ones (`DIST_IMPORTS`, `PropertyEditorPages`' `spell/ui/ui-property-editor`).
 - The kit's `util` and `element` ship inside the local bundle's `dist/` (not the npm package, above):
   `declarations()` in [vite.config.ts](vite.config.ts) maps their npm names to their source,
   and rewrites them, and Spell UI's own names, as relative paths.
@@ -1420,7 +1420,7 @@ As WWOD §19, EXCEPT the `Logger`:
 (epic `wwod-spell-ui`, Q5).
 Instead:
 
-- Every console warning goes through `Warnings` (`spell-ui/util`):
+- Every console warning goes through `Warnings` (`spell/ui/util`):
   - `Warnings.warn(source, message, ...data)`:  for what the page's author must fix
   - `Warnings.devWarn(...)`:  advice, in development builds only
   - ONE format:  `[spell-ui] <source>:  <what happened>`, then the data.

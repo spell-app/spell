@@ -1,7 +1,7 @@
 /**
  * The English vocabulary of `<ui-statistic>`:  every name the tag uses.
  * - Its tag, attributes (each with its kind and allowed values), slots, parts and states.
- *   The shape is `E.ComponentVocabulary` (`spell-ui/vocabulary`).
+ *   The shape is `E.ComponentVocabulary` (`spell/ui/vocabulary`).
  * - Class words come out through `ClassBuilder`, in Fomantic's grammar:
  *   `<ui-statistic size="large" color="red" direction="horizontal">` => `ui large red horizontal statistic`;
  *   `<ui-statistics widths="3" stackable>` => `ui stackable three statistics`.  `UIStatistic.css` keys on those words.
@@ -14,7 +14,7 @@
  *   slotted parts keep their order, so a `<ui-label>` before a `<ui-value>` is Fomantic's top label.
  */
 
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /****************
  * ### `statisticVocabulary`

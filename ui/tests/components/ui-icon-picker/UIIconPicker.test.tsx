@@ -1,13 +1,13 @@
 import { afterEach, describe, expect, test, vi } from "vite-plus/test"
 import { userEvent } from "vite-plus/test/browser"
 
-import type { DOMFormControl } from "spell-ui/elements"
-import { IconCatalog, type IconCategory, type IconChoice } from "spell-ui/components/ui-icon-picker"
+import type { DOMFormControl } from "spell/ui/elements"
+import { IconCatalog, type IconCategory, type IconChoice } from "spell/ui/components/ui-icon-picker"
 import { expectAccessible } from "spell/test-helpers/A11y"
 
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 
-import "spell-ui/components/ui-icon-picker"
+import "spell/ui/components/ui-icon-picker"
 
 /** Element-markup rewrites of every example, by path. */
 const EXAMPLES = import.meta.glob<string>("/src/components/ui-icon-picker/examples/elements/*.html", {

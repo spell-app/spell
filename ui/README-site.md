@@ -83,7 +83,7 @@ When the bundle is stale, the page server rebuilds it as it starts, and a page t
 - An open page reloads when the page, its layout, its data or the bundle changes.
 - `spell server stop all` stops them both.
 - The epic server serves the same pages, at the same path.
-- Just the elements, no server:  `yarn dev` in `spell-ui/` opens [the demo](src/tools/demo/index.html),
+- Just the elements, no server:  `yarn dev` in `ui/` opens [the demo](src/tools/demo/index.html),
   every example in class grammar beside the elements, with hot reload.
 
 Three catches, all found the hard way:
@@ -191,7 +191,7 @@ What a page can count on:
 ### Comments come with every page
 
 People comment on these pages as on every set's,
-with the bullhorns, threads and Send of `spell-epic`'s review tools ([its README-pages.md](https://github.com/spell-app/spell-epic/blob/main/README-pages.md)).
+with the bullhorns, threads and Send of `spell-epic`'s review tools ([its README-pages.md](https://github.com/spell-app/spell/blob/main/epic/README-pages.md)).
 
 - Every page loads them in its `<head>`, after the site's bundle:
   `<script defer src="/_epic/assets/spell-comments.js"></script>`.
@@ -200,7 +200,7 @@ with the bullhorns, threads and Send of `spell-epic`'s review tools ([its README
   its `<epic-thread>` and `<epic-comment-pane>` draw the threads and the pane.
 - Both are `spell-epic`'s engine routes, `/_epic/...`, which the page server serves too.
 - The site's bundle shares its Solid and Spell UI with the pack, by their npm names
-  (`solid-js`, `@solidjs/web`, `spell-ui/core`, `spell/element` ...):  [SitePacks.ts](site/_src/SitePacks.ts).
+  (`solid-js`, `@solidjs/web`, `spell/ui/core`, `spell/element` ...):  [SitePacks.ts](site/_src/SitePacks.ts).
 - A comment waits in `<page>.inbox.json5` beside its page, git-ignored,
   until Send hands it to the standing `feedback` epic.
 - **The cost:**  a pack may use any export of what it shares, so those modules stay whole in the bundle.
@@ -235,7 +235,7 @@ with the bullhorns, threads and Send of `spell-epic`'s review tools ([its README
 ## Writing a page:  start from the model, write it flat
 
 The model page is [ui-button.html](docs/ui-button.html):  open it beside yours, and copy its patterns.
-A new page comes from `yarn site:new`, in `spell-ui/`:
+A new page comes from `yarn site:new`, in `ui/`:
 
 ```sh
 yarn site:new ui-card                                                          # docs/ui-card.html
@@ -249,13 +249,13 @@ yarn site:new getting-started --title "Getting started" --summary "One line."  #
 - Anything else is a guide page, one column, no tabs:  `--title` (default:  the name in Title Case) and `--summary`.
 - Title, summary and status come from [the pages data](docs/__data/pages.json5):
   fix a summary THERE, then `yarn site:data`.
-- It starts from `spell-epic`'s template, [spell-ui-docs.html](https://github.com/spell-app/spell-epic/blob/main/templates/spell-ui-docs.html),
+- It starts from `spell/epic`'s template, [spell-ui-docs.html](https://github.com/spell-app/spell/blob/main/epic/templates/spell-ui-docs.html),
   found through the kit's install, and refuses to overwrite a page:  `--force` does, and loses what you wrote.
 
 ```text
 $ yarn site:new my-guide --title "My Guide"
 wrote docs/my-guide.html  (page)
-  view:  spell server url .../spell-ui/docs/my-guide.html   (from the repo root);  check:  yarn site:check my-guide.html
+  view:  spell server url .../ui/docs/my-guide.html   (from the repo root);  check:  yarn site:check my-guide.html
 ```
 
 ### The Examples pane:  write it flat, and let a script nest it
@@ -335,7 +335,7 @@ A sub-tag gets a page of its own once its family's entry in `pages.json5` lists 
 
 ## The scripts:  four rebuild what the site reads
 
-From `spell-ui/`.
+From `ui/`.
 After changing a vocabulary, a family's sheet, an example or any source the site shows, run `yarn site:build`:
 it runs the first four below, in turn.
 Then commit what it changed in `docs/`;  the bundle is never committed.
@@ -469,7 +469,7 @@ yarn test:visual [--os local|linux|both] [--browsers all|chrome|webkit|firefox] 
 | [tools.types.ts](src/tools/tools.types.ts) | `PackageConfig`, result shapes (`MeasureResults`, `SmokeResults`, `LocResults`) and `kB()`, `SolidIdentityHook`, the site's two halves (`SITE_PAGES`, `SITE_BUILD`), the static pages' and the design export's shapes, the error classes `IconPackError` and `SiteCheckError` |
 | [BundleMeasure.ts](src/tools/BundleMeasure.ts) | an in-memory `vite build` with the repo's config, modules bucketed into library / shared entries / own per family / lazy;  the library as used and in full;  standalone per-family builds;  structural checks |
 | [PeerVendor.ts](src/tools/PeerVendor.ts) | one ES module per peer specifier, plus `importmap.json`, in `vendor/`:  deduped (ONE Solid), tree-shaken to the bindings `dist/` and the pages import |
-| [DeclarationCheck.ts](src/tools/DeclarationCheck.ts) | run by `yarn smoke` after the build:  every published `exports` `types` path exists, and every import in `dist/`'s declarations is a bare package name or a path inside `dist/`:  no `#` alias, no `spell-ui/...`, no `spell/util` or `spell/element` (theirs ship in `dist/_util/` and `dist/_spell-element/`) |
+| [DeclarationCheck.ts](src/tools/DeclarationCheck.ts) | run by `yarn smoke` after the build:  every published `exports` `types` path exists, and every import in `dist/`'s declarations is a bare package name or a path inside `dist/`:  no `#` alias, no `spell/ui/...`, no `spell/util` or `spell/element` (theirs ship in `dist/_util/` and `dist/_spell-element/`) |
 | [HostApp.ts](src/tools/HostApp.ts) | compiles the Solid 2 host app (`frameworks/solid/app.tsx`) with Solid external |
 | [SmokeRunner.ts](src/tools/SmokeRunner.ts), [StaticServer.ts](src/tools/StaticServer.ts) | serve `dist/`, `vendor/` and `src/` from ONE static server (a thin wrapper over the kit's web server), inject the import map, drive each page in headless Chromium |
 | [LocCount.ts](src/tools/LocCount.ts) | lines and code lines per file, by group |
@@ -478,7 +478,7 @@ yarn test:visual [--os local|linux|both] [--browsers all|chrome|webkit|firefox] 
 | [IconPackBuilder.ts](src/tools/IconPackBuilder.ts) | `yarn icons:pack`:  checks a folder of SVGs (no script, no external resources) and writes its `pack.js`, keeping hand edits;  `--sanitize`, `--skip-unsafe`, `--allow-unsafe`;  also run by `gen:icons` |
 | [SiteDataBuilder.ts](src/tools/SiteDataBuilder.ts) | `yarn site:data`:  `components.json5` from every vocabulary and family sheet, `icons.json5`, and keeps `pages.json5` complete;  its test fails while they're stale.  Another component set's data too (`set`, `forSet()`):  the brand's, Epic UI's, App UI's |
 | [SiteSearchBuilder.ts](src/tools/SiteSearchBuilder.ts) | `search.json5`:  every page's title and sections, read from the page files, for `<ui-docs-search>` |
-| [ElementManifests.ts](src/tools/ElementManifests.ts) | what editors read about the elements, written by `yarn site:data`:  in `docs/__data/`, `custom-elements.json` (Custom Elements Manifest 2.1), `html-custom-data.json` (VS Code's HTML data) and `css-custom-data.json` (VS Code's CSS data:  custom properties, `::part()` and `:state()` names), which spell-app's VS Code extension copies when it's built, for every window;  and the JSX types, `src/jsx.ts` (`spell-ui/jsx`) |
+| [ElementManifests.ts](src/tools/ElementManifests.ts) | what editors read about the elements, written by `yarn site:data`:  in `docs/__data/`, `custom-elements.json` (Custom Elements Manifest 2.1), `html-custom-data.json` (VS Code's HTML data) and `css-custom-data.json` (VS Code's CSS data:  custom properties, `::part()` and `:state()` names), which spell-app's VS Code extension copies when it's built, for every window;  and the JSX types, `src/jsx.ts` (`spell/ui/jsx`) |
 | [FamilyFiles.ts](src/tools/FamilyFiles.ts) | where a family's own files are, by name:  `ui-button` => `UIButton.css`, `UIButton.types.ts` ...;  for the tools that look one up (`FamilyTokens`, `yarn gen:root`) |
 | [FamilyTokens.ts](src/tools/FamilyTokens.ts) | one family's public CSS tokens, read from its sheets:  its page's token table |
 | [FoundationTokens.ts](src/tools/FoundationTokens.ts) | the foundation tokens (`--ui-font-size`, palette, radii, motion ...), grouped for the theming page, read from the generated sheets |
@@ -518,7 +518,7 @@ The generic tools are the kit's, `spell/element-tools/<Name>`, in [its src/eleme
 - Output goes through `Terminal` (stdout and stderr), never `console.*`.
 - Environment variables are read through `environment`.
 - Imports:  these are node scripts, run by `tsx`.
-  - By package name, as all of Spell UI's code is (`spell-ui/tools/SiteCheck`, `spell/server`;
+  - By package name, as all of Spell UI's code is (`spell/ui/tools/SiteCheck`, `spell/server`;
     [AGENTS.md](AGENTS.md), "Imports");  a same-folder peer stays relative (`./tools.types.ts`).
   - Their TypeScript settings are the node ones, [tsconfig.node.json](tsconfig.node.json),
     with `src/cli/`, `scripts/` and the configs.

@@ -1,8 +1,8 @@
 /**
  * The English vocabulary of `<ui-form>`:  every name the tag uses.
  * - Its tag, attributes (each with its kind and allowed values), events, slots, parts, states and texts.
- *   The shape is `E.ComponentVocabulary` (`spell-ui/vocabulary`).
- * - Pure data:  node imports it (`yarn site:data`, `yarn gen:root`), so `spell-ui/core` for types only,
+ *   The shape is `E.ComponentVocabulary` (`spell/ui/vocabulary`).
+ * - Pure data:  node imports it (`yarn site:data`, `yarn gen:root`), so `spell/ui/core` for types only,
  *   `UIT` by value straight from `components.types`.
  * - The notes below are the whole family's:  `<ui-field>`, `<ui-fields>` and `<ui-repeat>` too.
  * - Class words come out through `ClassBuilder`, in Fomantic's grammar:
@@ -16,8 +16,8 @@
  *   `<ui-repeat name>` repeats its fields per item of one of its lists.
  */
 
-import type { E } from "spell-ui/core"
-import * as UIT from "spell-ui/components/components.types"
+import type { E } from "spell/ui/core"
+import * as UIT from "spell/ui/components/components.types"
 import { FormApplyModes, STATE_STATES, ValidationTriggers } from "./UIForm.types"
 
 /****************

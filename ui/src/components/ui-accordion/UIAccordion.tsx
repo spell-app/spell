@@ -1,7 +1,7 @@
 import { For, Show, type Accessor } from "solid-js"
 import { isServer, type JSX } from "@solidjs/web"
 
-import { E, UI, UIT } from "spell-ui/core"
+import { E, UI, UIT } from "spell/ui/core"
 import { accordionVocabulary } from "./UIAccordion.en"
 import { AccordionPanels } from "./AccordionPanels"
 
@@ -82,7 +82,7 @@ export class UIAccordion extends E.UIComponent<typeof accordionVocabulary> {
 
   /**
    * `name` of an exclusive accordion's `<details>`.
-   * - A server render (`spell-ui/static`) puts every accordion in ONE light DOM, where a `name` groups the whole page:
+   * - A server render (`spell/ui/static`) puts every accordion in ONE light DOM, where a `name` groups the whole page:
    *   a page-unique name there, so two exclusive accordions don't close each other.
    */
   readonly group = isServer ? UI.ids.next(DETAILS_GROUP) : DETAILS_GROUP
@@ -329,7 +329,7 @@ export class UIAccordion extends E.UIComponent<typeof accordionVocabulary> {
   /**
    * The `<slot>` showing `child` (a panel's title or content):  assigned by hand in a browser.
    * - A server render can't assign by hand (no refs run, no shadow root):  the slot gets a NAME,
-   *   and so does `child` (its `slot` attribute), which the flattener (`spell-ui/static`) matches and then drops.
+   *   and so does `child` (its `slot` attribute), which the flattener (`spell/ui/static`) matches and then drops.
    * - SIDE EFFECT, server only:  sets `child`'s `slot` attribute (the render's own parsed copy of the page).
    */
   private panelSlot(

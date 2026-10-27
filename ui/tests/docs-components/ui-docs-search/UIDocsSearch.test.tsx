@@ -5,14 +5,14 @@ import { expectAccessible } from "spell/test-helpers/A11y"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import { Fixture } from "spell/test-helpers/Fixture"
 import type { DOMElement } from "spell/element"
-import { DATA, PAGE, SEARCH } from "spell-ui/test-helpers/docsSearch.fixtures"
-import { SiteData } from "spell-ui/docs-components"
+import { DATA, PAGE, SEARCH } from "spell/ui/test-helpers/docsSearch.fixtures"
+import { SiteData } from "spell/ui/docs-components"
 
-import { SearchData } from "spell-ui/docs-components/ui-docs-search/SearchData"
-import type { DOMDocsSearchElement } from "spell-ui/docs-components/ui-docs-search/UIDocsSearch"
+import { SearchData } from "spell/ui/docs-components/ui-docs-search/SearchData"
+import type { DOMDocsSearchElement } from "spell/ui/docs-components/ui-docs-search/UIDocsSearch"
 
-import "spell-ui/docs-components/ui-docs-search"
-import "spell-ui/components/ui-flyout"
+import "spell/ui/docs-components/ui-docs-search"
+import "spell/ui/components/ui-flyout"
 
 ////////////////
 // ## Fixtures

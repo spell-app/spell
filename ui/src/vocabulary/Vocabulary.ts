@@ -1,4 +1,4 @@
-import { proto, withoutAccents } from "spell-ui/util"
+import { proto, withoutAccents } from "spell/ui/util"
 import type {
   AttributeSpec,
   ComponentDefiner,
@@ -30,7 +30,7 @@ import { ValueSets } from "./ValueSets"
  *     as it's defined (`registerComponent()`), and this defines it under each page language too.
  * - Pure data, NO DOM:  the runtime's `UI.vocabulary` service wraps one of these.
  *   - It defines components only through their own `define()`, the classes handed to it.
- *   - Imports only `spell-ui/util` and its folder's peers, so node can load it too.
+ *   - Imports only `spell/ui/util` and its folder's peers, so node can load it too.
  * - See `notes/translation.md`.
  ****************/
 export class Vocabulary {

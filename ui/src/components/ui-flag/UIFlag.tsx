@@ -1,6 +1,6 @@
 import type { JSX } from "@solidjs/web"
 
-import { E, UI } from "spell-ui/core"
+import { E, UI } from "spell/ui/core"
 import { flagVocabulary } from "./UIFlag.en"
 import { FlagCountry } from "./FlagCountry"
 

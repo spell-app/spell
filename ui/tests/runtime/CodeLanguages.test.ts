@@ -1,7 +1,7 @@
 import { describe, expect, test, vi } from "vite-plus/test"
 
-import { CodeLanguages } from "spell-ui/runtime/CodeLanguages"
-import { CODE_LANGUAGES_EVENT, type CodeHighlight } from "spell-ui/runtime/runtime.types"
+import { CodeLanguages } from "spell/ui/runtime/CodeLanguages"
+import { CODE_LANGUAGES_EVENT, type CodeHighlight } from "spell/ui/runtime/runtime.types"
 
 /** A highlighter that does nothing:  the registry never calls it. */
 const HIGHLIGHT = vi.fn() as unknown as CodeHighlight

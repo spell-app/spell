@@ -2,7 +2,7 @@ import { readdirSync, readFileSync, statSync, writeFileSync } from "node:fs"
 import { extname, join } from "node:path"
 
 import { CLI } from "spell/cli"
-import { OldNames } from "spell-ui/tools/OldNames"
+import { OldNames } from "spell/ui/tools/OldNames"
 
 import type { RenameOptions } from "./cli.types"
 

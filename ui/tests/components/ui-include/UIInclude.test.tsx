@@ -1,13 +1,13 @@
 import { afterEach, beforeAll, describe, expect, it, vi } from "vite-plus/test"
 
-import { UI, type SourceSaver } from "spell-ui/runtime"
+import { UI, type SourceSaver } from "spell/ui/runtime"
 import { expectAccessible } from "spell/test-helpers/A11y"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 
-import { UIInclude } from "spell-ui/components/ui-include/UIInclude"
-import type { DOMIncludeElement } from "spell-ui/components/ui-include/UIInclude"
+import { UIInclude } from "spell/ui/components/ui-include/UIInclude"
+import type { DOMIncludeElement } from "spell/ui/components/ui-include/UIInclude"
 
-import "spell-ui/components/ui-include"
+import "spell/ui/components/ui-include"
 
 /** Element-markup rewrites of every example, by path. */
 const EXAMPLES = import.meta.glob<string>("/src/components/ui-include/examples/elements/*.html", {

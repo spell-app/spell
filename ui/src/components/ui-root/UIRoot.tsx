@@ -1,10 +1,10 @@
 import { Show } from "solid-js"
 import { isServer, type JSX } from "@solidjs/web"
 
-import { E, UI } from "spell-ui/core"
-import { ComponentPacks } from "spell-ui/components/ui-components/ComponentPacks"
-import { componentsVocabulary } from "spell-ui/components/ui-components/UIComponents.en"
-import { SOURCE } from "spell-ui/components/ui-components/UIComponents.types"
+import { E, UI } from "spell/ui/core"
+import { ComponentPacks } from "spell/ui/components/ui-components/ComponentPacks"
+import { componentsVocabulary } from "spell/ui/components/ui-components/UIComponents.en"
+import { SOURCE } from "spell/ui/components/ui-components/UIComponents.types"
 import { LoaderMessage, type RootLoading } from "./LoaderMessage"
 import { PlaceholderSkeleton, type RootSkeletonRenderer } from "./PlaceholderSkeleton"
 import { RootBox } from "./RootBox"
@@ -53,7 +53,7 @@ import rootCSS from "./UIRoot.css?inline"
  *   width, height and the subtree's `--ui-scale` in the root's own sheet (`RootBox`).
  * - `stack-with`:  the subtree's `--ui-stack-with` token (also in `RootBox`),
  *   which every stacking element without a `stack-with` of its own follows (`UIT.STACK_WITH_TOKEN`).
- * - Static server render (`spell-ui/static`):  nothing loads and nothing is hidden;
+ * - Static server render (`spell/ui/static`):  nothing loads and nothing is hidden;
  *   the root is a plain wrapper (`serverWrapper()`).
  *   None of its `@E.onChange` effects runs there (none writes the DOM element).
  * - A subclass is a root too (`elementSetup.root`), under its own tag, e.g. `<spell-viewer>`:

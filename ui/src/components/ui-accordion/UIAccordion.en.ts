@@ -1,9 +1,9 @@
 /**
  * The English vocabulary of `<ui-accordion>`:  every name the tag uses.
  * - Its tag, attributes (each with its kind and allowed values), events, slots, parts, states and texts.
- *   The shape is `E.ComponentVocabulary` (`spell-ui/vocabulary`).
+ *   The shape is `E.ComponentVocabulary` (`spell/ui/vocabulary`).
  * - Pure data:  node imports it (`yarn site:data`, `yarn gen:root`),
- *   so `spell-ui/core` for types only, and `UIT` by value straight from `components.types`.
+ *   so `spell/ui/core` for types only, and `UIT` by value straight from `components.types`.
  * - The attributes become Fomantic's class words, in Fomantic's order (`ClassBuilder`):
  *   `<ui-accordion appearance="styled" padding="xs" inverted>` => `ui inverted styled very compact accordion`.
  *   `UIAccordion.css` keys on those words.
@@ -22,8 +22,8 @@
  *   it drops `ui` and takes its parent's look, as Fomantic's `.ui.accordion .accordion` does.
  */
 
-import type { E } from "spell-ui/core"
-import * as UIT from "spell-ui/components/components.types"
+import type { E } from "spell/ui/core"
+import * as UIT from "spell/ui/components/components.types"
 
 /****************
  * ### `accordionVocabulary`

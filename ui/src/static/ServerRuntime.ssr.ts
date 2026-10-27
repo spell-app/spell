@@ -3,12 +3,12 @@
 import { readFileSync } from "node:fs"
 import { fileURLToPath } from "node:url"
 
-import { E } from "spell-ui/core"
-// Service classes by path:  the runtime's barrel (and so `spell-ui/core`) exports them as types only (its header says why)
-import { Browser } from "spell-ui/runtime/Browser"
-import { I18n } from "spell-ui/runtime/I18n"
-import { IconPacks } from "spell-ui/runtime/IconPacks"
-import { SSR } from "spell-ui/static"
+import { E } from "spell/ui/core"
+// Service classes by path:  the runtime's barrel (and so `spell/ui/core`) exports them as types only (its header says why)
+import { Browser } from "spell/ui/runtime/Browser"
+import { I18n } from "spell/ui/runtime/I18n"
+import { IconPacks } from "spell/ui/runtime/IconPacks"
+import { SSR } from "spell/ui/static"
 
 /****************
  * ### `ServerRuntime`
@@ -18,7 +18,7 @@ import { SSR } from "spell-ui/static"
  * - Real:  `browser` (every `supports` flag false in node), `ids`, `i18n` (English), `vocabulary`, `icons`.
  * - Stubbed:  `styles` (nothing is adopted on a server;  page sheets registered while rendering are kept).
  * - Anything else a render reaches throws, naming the service:  a family that needs it isn't server-ready yet.
- * - Node only (`spell-ui/static`:  reads icon SVGs from disk);  NEVER imported by a component or `spell-ui`.
+ * - Node only (`spell/ui/static`:  reads icon SVGs from disk);  NEVER imported by a component or `spell-ui`.
  * - STATIC:  ONE runtime per process, like the page's ONE `UI`;  its registries are page-wide.
  ****************/
 export class ServerRuntime {

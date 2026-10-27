@@ -4,7 +4,7 @@
  * - Data only:  nothing here runs.
  */
 
-import type { SiteStatus } from "spell-ui/docs-components/docs-components.types"
+import type { SiteStatus } from "spell/ui/docs-components/docs-components.types"
 
 import type { docsNavVocabulary } from "./UIDocsNav.en"
 

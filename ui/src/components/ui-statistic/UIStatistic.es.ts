@@ -1,4 +1,4 @@
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /**
  * `<ui-statistic>` in Spanish:  `<es-estadistica>`, with the names and texts only it uses (from `UIStatistic.en.ts`).

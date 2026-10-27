@@ -1,4 +1,4 @@
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /**
  * `<ui-loader>` in Spanish:  `<es-cargador>`, with the names and texts only it uses (from `UILoader.en.ts`).

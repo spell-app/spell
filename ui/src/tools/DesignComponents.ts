@@ -5,7 +5,7 @@ import { clamp } from "spell/util/number"
 import { dedent, escapeHTML, indented } from "spell/util/string"
 
 import { ElementManifests } from "./ElementManifests.ts"
-import type { SiteAttribute, SiteDataFile, SiteFamily, SiteTag } from "spell-ui/docs-components/docs-components.types"
+import type { SiteAttribute, SiteDataFile, SiteFamily, SiteTag } from "spell/ui/docs-components/docs-components.types"
 import type { DesignExample, DesignFamily, DesignSource } from "./tools.types.ts"
 
 /****************

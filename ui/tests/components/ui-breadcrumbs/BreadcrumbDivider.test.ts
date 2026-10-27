@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { BreadcrumbDivider } from "spell-ui/components/ui-breadcrumbs/BreadcrumbDivider"
+import { BreadcrumbDivider } from "spell/ui/components/ui-breadcrumbs/BreadcrumbDivider"
 
 /** A tiny icon, without the SVG namespace. */
 const BARE_SVG = `<svg viewBox="0 0 1 1"><path d="M0 0h1v1z"/></svg>`

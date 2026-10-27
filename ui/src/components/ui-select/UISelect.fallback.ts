@@ -1,5 +1,5 @@
-import { E, UIT } from "spell-ui/core"
-import { SlottedItems } from "spell-ui/components/ui-dropdown/SlottedItems"
+import { E, UIT } from "spell/ui/core"
+import { SlottedItems } from "spell/ui/components/ui-dropdown/SlottedItems"
 import { selectVocabulary } from "./UISelect.en"
 import { DIVIDER, PLACEHOLDER, type Vocabulary } from "./UISelect.types"
 

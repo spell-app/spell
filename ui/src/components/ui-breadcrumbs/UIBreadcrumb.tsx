@@ -1,7 +1,7 @@
 import { Show } from "solid-js"
 import { isServer, type JSX } from "@solidjs/web"
 
-import { E } from "spell-ui/core"
+import { E } from "spell/ui/core"
 import { breadcrumbVocabulary } from "./UIBreadcrumb.en"
 
 import breadcrumbCSS from "./UIBreadcrumbs.css?inline"
@@ -41,7 +41,7 @@ export class UIBreadcrumb extends E.UIComponent<typeof breadcrumbVocabulary> {
         </Show>
       </>
     )
-    // a server render (`spell-ui/static`) has no element to be the list item:
+    // a server render (`spell/ui/static`) has no element to be the list item:
     // ONE root, which the flattener makes the `<li>` --
     // the class grammar's semantic form, `<li><span class="divider"></span><a class="section">`
     return isServer ? <span>{content}</span> : content

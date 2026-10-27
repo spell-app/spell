@@ -25,12 +25,12 @@ import { tmpdir } from "node:os"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
 
-import { IconName } from "spell-ui/icons/IconName"
-import { environment } from "spell-ui/tools/environment"
-import { IconPackBuilder } from "spell-ui/tools/IconPackBuilder"
+import { IconName } from "spell/ui/icons/IconName"
+import { environment } from "spell/ui/tools/environment"
+import { IconPackBuilder } from "spell/ui/tools/IconPackBuilder"
 import { Terminal } from "spell/element-tools/Terminal"
-import type { IconSearchFile, IconSearchFileCategory } from "spell-ui/icons"
-import type { IconPackReport } from "spell-ui/tools/tools.types"
+import type { IconSearchFile, IconSearchFileCategory } from "spell/ui/icons"
+import type { IconPackReport } from "spell/ui/tools/tools.types"
 import { ICON_EXTRAS } from "./iconExtras.ts"
 
 /****************

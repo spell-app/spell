@@ -8,7 +8,7 @@
  */
 ;(() => {
   const { registerPack, packModules } = globalThis.SpellUI
-  const { E } = packModules["spell-ui/core"]
+  const { E } = packModules["spell/ui/core"]
   const { version, families } = globalThis.__swapPack
 
   /** A vocabulary for tag `tag`:  nothing but its name and its text part. */

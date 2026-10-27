@@ -1,7 +1,7 @@
 /**
  * The English vocabulary of `<ui-icon>`:  every name the tag uses.
  * - Its tag, attributes (each with its kind and allowed values), slots, parts and states.
- *   The shape is `E.ComponentVocabulary` (`spell-ui/vocabulary`).
+ *   The shape is `E.ComponentVocabulary` (`spell/ui/vocabulary`).
  * - The attributes become Fomantic's class words, in Fomantic's order (`ClassBuilder`):
  *   `<ui-icon name="heart" size="large" color="red" appearance="circular">` => `ui large red circular icon`.
  *   `UIIcon.css` keys on those words;  `name`, `outline` and `label` write no class:  they pick the SVG (`UI.icons`).
@@ -9,7 +9,7 @@
  *   through `OwnerContext` and sets `:state(in-icons)`, which `UIIcon.css` stacks and positions it by.
  */
 
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /****************
  * ### `iconVocabulary`

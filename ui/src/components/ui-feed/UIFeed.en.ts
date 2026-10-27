@@ -1,7 +1,7 @@
 /**
  * The English vocabulary of `<ui-feed>`:  every name the tag uses.
  * - Its tag, attributes (each with its kind and allowed values), slots, parts and states.
- *   The shape is `E.ComponentVocabulary` (`spell-ui/vocabulary`).
+ *   The shape is `E.ComponentVocabulary` (`spell/ui/vocabulary`).
  * - Class words come out through `ClassBuilder`, in Fomantic's grammar:
  *   `<ui-feed connected ordered size="small">` => `ui small connected ordered feed`;  an event has no `ui`
  *   (`<ui-event appearance="basic">` => `basic event`).  `UIFeed.css` keys on those.
@@ -10,7 +10,7 @@
  *   `:state(in-feed)` -- Fomantic's `.ui.feed > .event > .content .summary`.
  */
 
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /****************
  * ### `feedVocabulary`

@@ -1,4 +1,4 @@
-import { E, type UIT } from "spell-ui/core"
+import { E, type UIT } from "spell/ui/core"
 import { tableVocabulary } from "./UITable.en"
 
 /****************

@@ -1,7 +1,7 @@
 import { Show } from "solid-js"
 import { isServer, type JSX } from "@solidjs/web"
 
-import { E, UI, UIT } from "spell-ui/core"
+import { E, UI, UIT } from "spell/ui/core"
 import { type DialogAttributes, type DialogEventName } from "./UIModal.types"
 
 /****************
@@ -359,7 +359,7 @@ export abstract class DialogComponent<
   /**
    * First slotted `<ui-header>` (any tag whose noun is `header`), which names the dialog.
    * - Read on the server too, NO `isServer` guard:
-   *   the static render (`spell-ui/static`, on linkedom elements) names the dialog by it (`serverLabelledBy()`).
+   *   the static render (`spell/ui/static`, on linkedom elements) names the dialog by it (`serverLabelledBy()`).
    */
   @E.state accessor slottedHeading: Element | undefined = this.findHeading()
 
@@ -401,7 +401,7 @@ export abstract class DialogComponent<
   }
 
   /**
-   * The dialog's `aria-labelledby` in a server render (`spell-ui/static`):
+   * The dialog's `aria-labelledby` in a server render (`spell/ui/static`):
    * the `heading` shorthand's id, else the slotted heading's,
    * unless the DOM element has an `aria-label` (which the static output moves onto the dialog).
    * - Why:  on a server no effect applies and no element reflects.

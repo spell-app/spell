@@ -4,8 +4,8 @@ import { expectAccessible } from "spell/test-helpers/A11y"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import type { DOMElement } from "spell/element"
 
-import "spell-ui/docs-components/ui-docs-inspector"
-import "spell-ui/components/ui-button"
+import "spell/ui/docs-components/ui-docs-inspector"
+import "spell/ui/components/ui-button"
 
 ////////////////
 // ## Fixtures

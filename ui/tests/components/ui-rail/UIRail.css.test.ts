@@ -1,15 +1,15 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { foundationCSS } from "spell-ui/styles"
+import { foundationCSS } from "spell/ui/styles"
 
 import { Fixture } from "spell/test-helpers/Fixture"
-import { Sheets } from "spell-ui/test-helpers/Sheets"
+import { Sheets } from "spell/ui/test-helpers/Sheets"
 
-import { railVocabulary } from "spell-ui/components/ui-rail/UIRail.en"
+import { railVocabulary } from "spell/ui/components/ui-rail/UIRail.en"
 
-import railCSS from "spell-ui/components/ui-rail/UIRail.css?inline"
-import railRaw from "spell-ui/components/ui-rail/UIRail.css?raw"
-import segmentCSS from "spell-ui/components/ui-segment/UISegment.css?inline"
+import railCSS from "spell/ui/components/ui-rail/UIRail.css?inline"
+import railRaw from "spell/ui/components/ui-rail/UIRail.css?raw"
+import segmentCSS from "spell/ui/components/ui-segment/UISegment.css?inline"
 
 /**
  * `UIRail.css` on the class-grammar examples (with `UISegment.css`:  a segment is the rails' container).

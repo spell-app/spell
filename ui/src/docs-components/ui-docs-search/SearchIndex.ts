@@ -1,7 +1,7 @@
-import { withoutAccents } from "spell-ui/util"
-import type { SiteDataFile, SiteSearchFile, SiteTag } from "spell-ui/docs-components/docs-components.types"
+import { withoutAccents } from "spell/ui/util"
+import type { SiteDataFile, SiteSearchFile, SiteTag } from "spell/ui/docs-components/docs-components.types"
 // A leaf, not the barrel:  the barrel defines `<ui-toc>`
-import { PageOutline } from "spell-ui/components/ui-toc/PageOutline"
+import { PageOutline } from "spell/ui/components/ui-toc/PageOutline"
 import {
   GROUP_LIMIT,
   INSIDE_MIN,

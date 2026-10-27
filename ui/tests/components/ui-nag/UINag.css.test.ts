@@ -1,15 +1,15 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { colorsCSS, foundationCSS } from "spell-ui/styles"
+import { colorsCSS, foundationCSS } from "spell/ui/styles"
 
 import { Fixture } from "spell/test-helpers/Fixture"
-import { Sheets } from "spell-ui/test-helpers/Sheets"
+import { Sheets } from "spell/ui/test-helpers/Sheets"
 
-import { nagVocabulary } from "spell-ui/components/ui-nag/UINag.en"
-import { Painted } from "spell-ui/test-helpers/Painted"
+import { nagVocabulary } from "spell/ui/components/ui-nag/UINag.en"
+import { Painted } from "spell/ui/test-helpers/Painted"
 
-import nagCSS from "spell-ui/components/ui-nag/UINag.css?inline"
-import nagRaw from "spell-ui/components/ui-nag/UINag.css?raw"
+import nagCSS from "spell/ui/components/ui-nag/UINag.css?inline"
+import nagRaw from "spell/ui/components/ui-nag/UINag.css?raw"
 
 /**
  * `UINag.css` on its own, before any element exists:

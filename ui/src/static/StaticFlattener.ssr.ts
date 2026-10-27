@@ -1,5 +1,5 @@
-import { E, UIT } from "spell-ui/core"
-import { SSR } from "spell-ui/static"
+import { E, UIT } from "spell/ui/core"
+import { SSR } from "spell/ui/static"
 
 /****************
  * ### `StaticFlattener`
@@ -13,7 +13,7 @@ import { SSR } from "spell-ui/static"
  *   - internals ARIA becomes attributes;  a `listitem` DOM element is wrapped in `<li>` instead
  *   - `data-ui="<kind>"` marks the root:  the static stylesheet's `@scope` boundary
  * - NOTE: the DOM element's `slot` attribute moves to the outermost replacement node, for its parent's slots.
- * - Node only (`spell-ui/static`), plain DOM on linkedom:  reads `ServerDOMElement`'s state, imports no Solid;
+ * - Node only (`spell/ui/static`), plain DOM on linkedom:  reads `ServerDOMElement`'s state, imports no Solid;
  *   NEVER imported by a component or `spell-ui`.
  ****************/
 export class StaticFlattener {

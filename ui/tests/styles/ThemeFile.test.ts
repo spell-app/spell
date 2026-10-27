@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vite-plus/test"
 
 import { parseJSON5 } from "spell/util/spell/json"
-import { ThemeFile, type ThemeFileSet } from "spell-ui/styles/ThemeFile"
-import type { ThemeData } from "spell-ui/styles/styles.types"
+import { ThemeFile, type ThemeFileSet } from "spell/ui/styles/ThemeFile"
+import type { ThemeData } from "spell/ui/styles/styles.types"
 
 /*
  * `ThemeFile`, in the browser:  the same writer `yarn gen:styles` runs in node (epic `debut` P18).

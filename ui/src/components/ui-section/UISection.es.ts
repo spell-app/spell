@@ -1,4 +1,4 @@
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /**
  * `<ui-section>` in Spanish:  `<es-seccion>`, with the names and texts only it uses (from `UISection.en.ts`).

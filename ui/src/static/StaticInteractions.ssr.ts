@@ -1,6 +1,6 @@
-// `UIT` in the constants below the class:  safe, `spell-ui/core` never imports `spell-ui/static`, so it loads first
-import { UIT } from "spell-ui/core"
-import { SSR } from "spell-ui/static"
+// `UIT` in the constants below the class:  safe, `spell/ui/core` never imports `spell/ui/static`, so it loads first
+import { UIT } from "spell/ui/core"
+import { SSR } from "spell/ui/static"
 
 /****************
  * ### `StaticInteractions`
@@ -14,7 +14,7 @@ import { SSR } from "spell-ui/static"
  *   inside the same component root (`aria-controls`, `for`, `commandfor` ...) following it
  * - Runs after `StaticFlattener`, on the whole document.  Anything else stays as rendered (tabs, hover popups:
  *   no zero-JS path, caveat C1).
- * - Node only (`spell-ui/static`), plain DOM:  knows the flattened markup and `UIT`'s command names, not the families;
+ * - Node only (`spell/ui/static`), plain DOM:  knows the flattened markup and `UIT`'s command names, not the families;
  *   NEVER imported by a component or `spell-ui`.
  ****************/
 export class StaticInteractions {

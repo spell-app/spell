@@ -1,12 +1,12 @@
 /**
  * The English vocabulary of `<ui-divider>`:  every name the tag uses.
  * - Its tag, attributes (each with its kind and allowed values), slots and parts.
- *   The shape is `E.ComponentVocabulary` (`spell-ui/vocabulary`).
+ *   The shape is `E.ComponentVocabulary` (`spell/ui/vocabulary`).
  * - The attributes become Fomantic's class words, in Fomantic's order (`ClassBuilder`):
  *   `<ui-divider direction="horizontal" align="left">` => `ui horizontal left aligned divider`.
  */
 
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /****************
  * ### `dividerVocabulary`

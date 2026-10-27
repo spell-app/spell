@@ -7,11 +7,11 @@ import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import { Viewport } from "spell/test-helpers/Viewport"
 import type { DOMElement } from "spell/element"
 
-import "spell-ui/components/ui-statistic"
-import "spell-ui/components/ui-parts"
-import "spell-ui/components/ui-label"
-import "spell-ui/components/ui-icon"
-import "spell-ui/components/ui-segment"
+import "spell/ui/components/ui-statistic"
+import "spell/ui/components/ui-parts"
+import "spell/ui/components/ui-label"
+import "spell/ui/components/ui-icon"
+import "spell/ui/components/ui-segment"
 
 /** Element-markup rewrites of every example, by path. */
 const EXAMPLES = import.meta.glob<string>("/src/components/ui-statistic/examples/elements/*.html", {

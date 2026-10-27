@@ -41,12 +41,12 @@ import { parseArgs } from "node:util"
 import { readJSON5File } from "spell/util/node/json5"
 import { escapeHTML } from "spell/util/string"
 
-import type { SiteDataFile, SiteFamily, SiteTag } from "spell-ui/docs-components/docs-components.types"
+import type { SiteDataFile, SiteFamily, SiteTag } from "spell/ui/docs-components/docs-components.types"
 import { Terminal } from "spell/element-tools/Terminal"
 import { spliceGenerated, writeOrCheck, type GeneratedOutput } from "spell/element-tools/generatedFiles"
-import { SITE_DATA, SITE_PAGES } from "spell-ui/tools/tools.types"
+import { SITE_DATA, SITE_PAGES } from "spell/ui/tools/tools.types"
 
-import { withoutTicks } from "spell-ui/tools/generatedFiles"
+import { withoutTicks } from "spell/ui/tools/generatedFiles"
 import { SiteSections } from "./site-sections.ts"
 
 /** `packages/ui/`. */

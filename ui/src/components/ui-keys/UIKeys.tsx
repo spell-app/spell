@@ -1,7 +1,7 @@
 import { For } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
-import { E, UI } from "spell-ui/core"
+import { E, UI } from "spell/ui/core"
 import { keysVocabulary } from "./UIKeys.en"
 
 import keysCSS from "./UIKeys.css?inline"

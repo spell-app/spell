@@ -1,7 +1,7 @@
 import { Show } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
-import { E } from "spell-ui/core"
+import { E } from "spell/ui/core"
 import { commentVocabulary } from "./UIComment.en"
 
 import commentCSS from "./UIComment.css?inline"

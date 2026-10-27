@@ -4,7 +4,7 @@ import { spawn, type ChildProcess } from "node:child_process"
 import { existsSync, readdirSync, rmSync } from "node:fs"
 
 import { DevServer } from "spell/element-tools/DevServer"
-import { VisualVariables } from "spell-ui/tools/environment"
+import { VisualVariables } from "spell/ui/tools/environment"
 import { NodePackage } from "spell/element-tools/NodePackage"
 import { Terminal } from "spell/element-tools/Terminal"
 import { VisualError, type VisualBrowser, type VisualOs } from "./visual.types.ts"

@@ -6,14 +6,14 @@ import { fileURLToPath } from "node:url"
 import { afterAll, beforeAll, describe, expect, test, vi } from "vite-plus/test"
 
 import { CLI } from "spell/cli"
-import { buildPack, checkPack, packNames, readPack } from "spell-ui/cli/packBuild"
-import { addElement, createPack } from "spell-ui/cli/packCreate"
+import { buildPack, checkPack, packNames, readPack } from "spell/ui/cli/packBuild"
+import { addElement, createPack } from "spell/ui/cli/packCreate"
 
 /**
  * ONE throwaway kit, with a tiny pack repo in it:  `pack create` + `pack add` (unbuilt), on a kit's root files
  *   (`fixtures/kit/`).
  * - `node_modules` is a link to the install's:  the pack's `tsconfig.json` extends
- *   `spell/toolchain/tsconfig.base.json`, and its elements import Spell UI by its npm name (`spell-ui/core`)
+ *   `spell/toolchain/tsconfig.base.json`, and its elements import Spell UI by its npm name (`spell/ui/core`)
  * - the tests run in order
  */
 const ROOT = realpathSync(mkdtempSync(join(tmpdir(), "pack-build-")))
@@ -126,8 +126,8 @@ describe("buildPack() / checkPack()", () => {
   test("refuses an import of Spell UI the page can't share, and a tag without the prefix", () => {
     const element = join(CARD, "DemoCard.tsx")
     const source = readFileSync(element, "utf8")
-    writeFileSync(element, `import "spell-ui/util"\n${source}`)
-    expect(spell("build", "demo").out).toContain("imports 'spell-ui/util', which the page can't share")
+    writeFileSync(element, `import "spell/ui/util"\n${source}`)
+    expect(spell("build", "demo").out).toContain("imports 'spell/ui/util', which the page can't share")
     writeFileSync(element, source)
     const vocabulary = join(CARD, "DemoCard.en.ts")
     const words = readFileSync(vocabulary, "utf8")

@@ -1,8 +1,8 @@
 import { createContext, createSignal, Show, useContext } from "solid-js"
 import { render } from "@solidjs/web"
 
-import type {} from "spell-ui/jsx"
-import type { SolidIdentityHook } from "spell-ui/tools/tools.types"
+import type {} from "spell/ui/jsx"
+import type { SolidIdentityHook } from "spell/ui/tools/tools.types"
 
 /**
  * The Solid 2 host app of `solid.html`, compiled by `HostApp` (`@solidjs/vite-plugin`) with `solid-js` and
@@ -107,7 +107,7 @@ const APP_CONTEXT_VALUE = { from: "the app" }
 /** Reported for identity checks when the page sets no hook. */
 const NO_HOOK = "n/a (no __uiSolidIdentity hook)"
 
-/** Page-wide `UI` runtime key (`spell-ui/runtime`'s `RUNTIME_KEY`), read without importing the foundation. */
+/** Page-wide `UI` runtime key (`spell/ui/runtime`'s `RUNTIME_KEY`), read without importing the foundation. */
 const RUNTIME_KEY = Symbol.for("spell-ui:runtime")
 
 /** Version of `solid-js` the app was COMPILED against (the page may load another). */

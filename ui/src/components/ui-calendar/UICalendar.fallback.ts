@@ -1,4 +1,4 @@
-import { E, UIT } from "spell-ui/core"
+import { E, UIT } from "spell/ui/core"
 import { calendarVocabulary } from "./UICalendar.en"
 import { DEFAULT_TYPE, type Vocabulary } from "./UICalendar.types"
 

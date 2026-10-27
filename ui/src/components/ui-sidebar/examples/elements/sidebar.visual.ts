@@ -1,5 +1,5 @@
-import { VisualOpen } from "spell-ui/test-helpers/VisualOpen"
-import type { VisualHooks } from "spell-ui/test-helpers/test.types"
+import { VisualOpen } from "spell/ui/test-helpers/VisualOpen"
+import type { VisualHooks } from "spell/ui/test-helpers/test.types"
 
 /**
  * Open states of `sidebar.html` for `yarn test:visual`:  the sidebars shown inside their pushables.

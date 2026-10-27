@@ -1,4 +1,4 @@
-import type { SiteDataFile, SiteSearchFile, SiteTag } from "spell-ui/docs-components"
+import type { SiteDataFile, SiteSearchFile, SiteTag } from "spell/ui/docs-components"
 
 /**
  * `<ui-docs-search>`'s test data, shared by its element test and `SearchIndex.test.ts` / `PageOutline.test.ts`:  the

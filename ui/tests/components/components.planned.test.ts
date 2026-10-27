@@ -1,8 +1,8 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { es } from "spell-ui/components/components.es"
-import { PLANNED_COMPONENTS } from "spell-ui/components/components.planned"
-import { ROOT_CATALOG } from "spell-ui/components/ui-root/UIRoot.catalog"
+import { es } from "spell/ui/components/components.es"
+import { PLANNED_COMPONENTS } from "spell/ui/components/components.planned"
+import { ROOT_CATALOG } from "spell/ui/components/ui-root/UIRoot.catalog"
 
 /** A name an author types:  ASCII, lowercase, kebab-case. */
 const ASCII_NAME = /^[a-z][a-z0-9]*(-[a-z0-9]+)*$/

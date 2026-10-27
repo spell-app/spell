@@ -1,4 +1,4 @@
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /**
  * `<ui-row>` in Spanish:  `<es-fila>`, with the names and texts only it uses (from `UIRow.en.ts`).

@@ -1,4 +1,4 @@
-import { type E, UIT } from "spell-ui/core"
+import { type E, UIT } from "spell/ui/core"
 import type { ThemeMenuText, ThemeMenuTextKey } from "./UIThemeMenu.types"
 
 /****************

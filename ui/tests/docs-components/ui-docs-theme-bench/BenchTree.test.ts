@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { BenchTree } from "spell-ui/docs-components/ui-docs-theme-bench/BenchTree"
+import { BenchTree } from "spell/ui/docs-components/ui-docs-theme-bench/BenchTree"
 
 /** A tree of `tokens` in group `place`, each token's path its name's parts after `--ui-<place>-`. */
 function treeOf(place: string, tokens: string[]) {

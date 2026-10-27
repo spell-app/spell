@@ -1,4 +1,4 @@
-import { E, UIT } from "spell-ui/core"
+import { E, UIT } from "spell/ui/core"
 import { FLAG_ALIASES } from "./UIFlag.types"
 
 /****************

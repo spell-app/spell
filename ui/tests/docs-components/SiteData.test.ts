@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, test } from "vite-plus/test"
 
-import { SiteData } from "spell-ui/docs-components/SiteData"
-import type { SiteDataFile } from "spell-ui/docs-components/docs-components.types"
+import { SiteData } from "spell/ui/docs-components/SiteData"
+import type { SiteDataFile } from "spell/ui/docs-components/docs-components.types"
 
 /** `<x-button>` and its sub-tag `<x-or>`, a docs tag, and the `x-button` family. */
 const DATA = {

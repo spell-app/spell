@@ -1,11 +1,11 @@
-import { IconName, type IconPackIndex } from "spell-ui/icons"
+import { IconName, type IconPackIndex } from "spell/ui/icons"
 
 import type { IconPackIcon, IconPackOptions, ResolvedIcon } from "./runtime.types"
 
 /****************
  * ### `IconPack`
  * One loaded icon pack:  its index, the names it answers, and where its SVGs live.
- * - In the runtime's lazy chunk;  imports the icon PACK format (`spell-ui/icons`), never a pack itself.
+ * - In the runtime's lazy chunk;  imports the icon PACK format (`spell/ui/icons`), never a pack itself.
  * - Built by `IconPacks.use()` (`UI.icons`);  the page-wide order and the SVG cache are `IconPacks`'.
  * - Names follow `IconName.claim()`:  an `alias` beats a file name, else the first entry keeps a shared name.
  ****************/

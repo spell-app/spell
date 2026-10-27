@@ -3,9 +3,9 @@ import { commands } from "vite-plus/test/browser"
 import { flush } from "solid-js"
 
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
-import { PerfRun } from "spell-ui/test-helpers/PerfRun"
+import { PerfRun } from "spell/ui/test-helpers/PerfRun"
 
-import "spell-ui/components/ui-dropdown"
+import "spell/ui/components/ui-dropdown"
 
 /** Solid's `PerfAdapter`:  writes land on a microtask;  `flush()` applies them now. */
 const SOLID_SETTLE = { settle: () => flush() }

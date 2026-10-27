@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { TableSort } from "spell-ui/components/ui-table/TableSort"
+import { TableSort } from "spell/ui/components/ui-table/TableSort"
 
 /** A structured head (two rows, a colspan) over a body whose numbers sort differently as text. */
 const STRUCTURED =

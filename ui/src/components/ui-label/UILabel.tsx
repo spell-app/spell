@@ -1,11 +1,11 @@
 import { Show } from "solid-js"
 import { Dynamic, type JSX } from "@solidjs/web"
 
-import { E, UIT } from "spell-ui/core"
+import { E, UIT } from "spell/ui/core"
 import { labelVocabulary } from "./UILabel.en"
 
 import labelCSS from "./UILabel.css?inline"
-import partsCSS from "spell-ui/components/ui-parts/UIParts.css?inline"
+import partsCSS from "spell/ui/components/ui-parts/UIParts.css?inline"
 
 /****************
  * ### `UILabel`

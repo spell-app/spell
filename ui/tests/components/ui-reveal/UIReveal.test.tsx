@@ -1,14 +1,14 @@
 /// <reference types="vite-plus/test/browser-playwright" />
 import { describe, expect, it, onTestFinished } from "vite-plus/test"
 import { commands, userEvent } from "vite-plus/test/browser"
-import { Keys } from "spell-ui/test-helpers/Keys"
+import { Keys } from "spell/ui/test-helpers/Keys"
 
 import { expectAccessible } from "spell/test-helpers/A11y"
 
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import type { DOMElement } from "spell/element"
 
-import "spell-ui/components/ui-reveal"
+import "spell/ui/components/ui-reveal"
 
 /** Element-markup rewrites of every example, by path. */
 const EXAMPLES = import.meta.glob<string>("/src/components/ui-reveal/examples/elements/*.html", {

@@ -1,14 +1,14 @@
 /**
  * The English vocabulary of `<ui-action>`:  `<ui-item>`'s, under the action's own tag, with the action it draws.
- * The shape is `E.ComponentVocabulary` (`spell-ui/vocabulary`).
+ * The shape is `E.ComponentVocabulary` (`spell/ui/vocabulary`).
  * - Built ON the item's:  the same attributes, slots and states, so a menu or toolbar draws it as one of its items
  *   (the same noun, `item`).
  * - Its own:  the `action` it draws (a property), its `shortcut` and the key caps that show it, and the names of
  *   the keys that aren't letters.
  */
 
-import type { E } from "spell-ui/core"
-import { itemVocabulary } from "spell-ui/components/ui-item/UIItem.en"
+import type { E } from "spell/ui/core"
+import { itemVocabulary } from "spell/ui/components/ui-item/UIItem.en"
 
 /****************
  * ### `actionVocabulary`

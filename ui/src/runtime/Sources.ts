@@ -1,4 +1,4 @@
-import { LoadOnce } from "spell-ui/util"
+import { LoadOnce } from "spell/ui/util"
 
 import {
   answerOf,
@@ -16,7 +16,7 @@ import {
  * ### `Sources`
  * Text files elements show and save, as `UI.sources`:  `<ui-include>`, `<ui-code>` and `<ui-markdown>` load their
  * `source` here, and `save()` goes back through here.
- * - In the runtime's lazy chunk;  imports only `./runtime.types` and `LoadOnce` (`spell-ui/util`).
+ * - In the runtime's lazy chunk;  imports only `./runtime.types` and `LoadOnce` (`spell/ui/util`).
  *   `LoadableComponent` (the elements' base) calls it.
  * - Same origin ONLY:  a URL on another origin is refused before any fetch (`SourceError` `cross-origin`), and so
  *   is everything on a `file://` page (`file-protocol`), whose fetches the browser blocks anyway.  Why:  included

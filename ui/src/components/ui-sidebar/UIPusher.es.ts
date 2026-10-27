@@ -1,4 +1,4 @@
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /**
  * `<ui-pusher>` in Spanish:  `<es-empujador>`, with the names and texts only it uses (from `UIPusher.en.ts`).

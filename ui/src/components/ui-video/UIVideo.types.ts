@@ -3,7 +3,7 @@
  * - Pure data:  the vocabularies import it, and node reads them.
  */
 
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /** The attributes every player takes:  what to play, and how. */
 export const MediaAttributes = [

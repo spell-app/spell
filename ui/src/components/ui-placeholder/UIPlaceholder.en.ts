@@ -1,7 +1,7 @@
 /**
  * The English vocabulary of `<ui-placeholder>`:  every name the tag uses.
  * - Its tag, attributes (each with its kind and allowed values), slots, parts and states.
- *   The shape is `E.ComponentVocabulary` (`spell-ui/vocabulary`).
+ *   The shape is `E.ComponentVocabulary` (`spell/ui/vocabulary`).
  * - The attributes become Fomantic's class words, in Fomantic's order (`ClassBuilder`):
  *   `<ui-placeholder fluid>` => `ui fluid placeholder`;
  *   `<ui-placeholder-line length="very long">` => `very long line`;  `<ui-placeholder-header image>` => `image header`.
@@ -13,7 +13,7 @@
  *   whatever is loading announces itself.  No texts.
  */
 
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /****************
  * ### `placeholderVocabulary`

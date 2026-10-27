@@ -1,5 +1,5 @@
 /**
- * Barrel for `spell-ui/elements` -- the element core every component builds on.
+ * Barrel for `spell/ui/elements` -- the element core every component builds on.
  * - No Solid:
  *   - `ClassBuilder`, `Validator`, `MenuOptions`, `OwnerContext`, `Shorthand`
  *   - `NativeFallback`:  the base of the per-component `*.fallback.ts`, plain DOM when a render throws
@@ -16,7 +16,7 @@
  *   - `SourceMarkup` (fetched HTML made ready for the page)
  *   - `LoadableBody` + `DOMLoadableBodyElement` (content loaded from `source` the first time it opens)
  * - NOTE: components never import this barrel:
- *   they import the `spell-ui/core` / `spell-ui/forms` ENTRIES (`src/core.ts`, `src/forms.ts`),
+ *   they import the `spell/ui/core` / `spell/ui/forms` ENTRIES (`src/core.ts`, `src/forms.ts`),
  *   which split the same files into the two shared chunks of the build.
  * - NOTE: `HotDefinitions` is left out:  dev-only, and a SIDE EFFECT on import (it wraps `UIComponent.define`);
  *   the HMR plugin loads it into each component barrel (the kit's `src/element-tools/HotElements.ts`).

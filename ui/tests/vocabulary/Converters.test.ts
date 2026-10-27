@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vite-plus/test"
 
-import { Converters } from "spell-ui/vocabulary"
+import { Converters } from "spell/ui/vocabulary"
 
 afterEach(() => {
   vi.restoreAllMocks()

@@ -1,6 +1,6 @@
 /**
  * Every name `<ui-calendar>` uses:  tag, attributes (kind + allowed values), events, parts, states, texts.
- * Schema:  `E.ComponentVocabulary` (`spell-ui/vocabulary`).
+ * Schema:  `E.ComponentVocabulary` (`spell/ui/vocabulary`).
  * - Class words come out through `ClassBuilder`, in Fomantic's grammar:
  *   `<ui-calendar size="small" inverted>` => `ui small inverted calendar`.  `UICalendar.css` keys on those words.
  * - Values are ISO strings by `type` (`2026-09-30`, `14:30`, `2026-09-30T14:30`, `2026-09`, `2026`),
@@ -10,8 +10,8 @@
  * - NOTE: text keys are prefixed (`calendarToday`):  every family's texts share one `UI.i18n` key space.
  */
 
-import type { E } from "spell-ui/core"
-import * as UIT from "spell-ui/components/components.types"
+import type { E } from "spell/ui/core"
+import * as UIT from "spell/ui/components/components.types"
 
 /****************
  * ### `<ui-calendar>`

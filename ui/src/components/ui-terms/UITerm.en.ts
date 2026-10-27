@@ -1,12 +1,12 @@
 /**
  * The English vocabulary of `<ui-term>`:  every name the tag uses.
  * - Its tag, attributes (each with its kind and allowed values), slots, parts and states.
- *   The shape is `E.ComponentVocabulary` (`spell-ui/vocabulary`).
+ *   The shape is `E.ComponentVocabulary` (`spell/ui/vocabulary`).
  * - One fact (epic `ui-gaps` P12):  `<ui-term label="Suit" value="hearts">`, or its label and value written
  *   inside it (`slot="label"`, then the value), as HTML's `<dt>` and `<dd>`.
  */
 
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /****************
  * ### `termVocabulary`

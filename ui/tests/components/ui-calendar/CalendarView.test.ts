@@ -1,11 +1,11 @@
 import { Temporal } from "temporal-polyfill"
 import { beforeAll, describe, expect, test } from "vite-plus/test"
 
-import { UI } from "spell-ui/runtime"
-import { CalendarDates } from "spell-ui/components/ui-calendar/CalendarDates"
-import { CalendarText } from "spell-ui/components/ui-calendar/CalendarText"
-import { CalendarView } from "spell-ui/components/ui-calendar/CalendarView"
-import type { Moment, ViewInput } from "spell-ui/components/ui-calendar/UICalendar.types"
+import { UI } from "spell/ui/runtime"
+import { CalendarDates } from "spell/ui/components/ui-calendar/CalendarDates"
+import { CalendarText } from "spell/ui/components/ui-calendar/CalendarText"
+import { CalendarView } from "spell/ui/components/ui-calendar/CalendarView"
+import type { Moment, ViewInput } from "spell/ui/components/ui-calendar/UICalendar.types"
 
 /** The focus:  Wednesday, September 30, 2026 (September 1st is a Tuesday). */
 const FOCUS = Temporal.PlainDateTime.from("2026-09-30T14:37")

@@ -1,4 +1,4 @@
-import { E } from "spell-ui/core"
+import { E } from "spell/ui/core"
 import {
   SITE_DATA_META,
   SITE_DATA_PATH,
@@ -20,7 +20,7 @@ import {
  *   An element shows its error;  it never guesses.
  * - Plain fetch, no Solid:  elements wrap `load()` in their own async memo.
  * - The site's other files go through `request()` too (`SearchData`, the layout's `SiteShell`):  one way to fail.
- * - Imports `spell-ui/core` for `E.SourceError`, `@E.once` and `@E.resets` only:
+ * - Imports `spell/ui/core` for `E.SourceError`, `@E.once` and `@E.resets` only:
  *   every bundle that loads this already has the core.
  * - Static only:  the data is one per page.
  ****************/

@@ -1,7 +1,7 @@
 /**
  * The English vocabulary of `<ui-list>`:  every name the tag uses.
  * - Its tag, attributes (each with its kind and allowed values), events, slots, parts and states.
- *   The shape is `E.ComponentVocabulary` (`spell-ui/vocabulary`).
+ *   The shape is `E.ComponentVocabulary` (`spell/ui/vocabulary`).
  * - Class words come out through `ClassBuilder`, in Fomantic's grammar:
  *   `<ui-list spacing="xl" divided size="large">` => `ui large divided very relaxed list`.
  *   `UIList.css` keys on those words.
@@ -11,7 +11,7 @@
  *   and `content` / `header` / `description`, which `UIParts.css` styles `:state(in-list)`.
  */
 
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /****************
  * ### `listVocabulary`

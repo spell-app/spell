@@ -1,7 +1,7 @@
-// Import directly:  the `spell-ui/styles` barrel carries every foundation sheet as text, which the bench never needs
-import { ThemeFile } from "spell-ui/styles/ThemeFile"
-import { themeTree } from "spell-ui/styles/styles.en"
-import type { ThemeData, ThemeLeaf, ThemeTree } from "spell-ui/styles/styles.types"
+// Import directly:  the `spell/ui/styles` barrel carries every foundation sheet as text, which the bench never needs
+import { ThemeFile } from "spell/ui/styles/ThemeFile"
+import { themeTree } from "spell/ui/styles/styles.en"
+import type { ThemeData, ThemeLeaf, ThemeTree } from "spell/ui/styles/styles.types"
 
 /****************
  * ### `BenchTokens`

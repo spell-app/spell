@@ -1,4 +1,4 @@
-import { E, UI, UIT } from "spell-ui/core"
+import { E, UI, UIT } from "spell/ui/core"
 import { CodeLines } from "./CodeLines"
 import type { CodeEngine } from "./CodeEngine"
 import type { Highlighted } from "./UICode.types"

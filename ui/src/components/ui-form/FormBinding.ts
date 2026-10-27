@@ -1,7 +1,7 @@
 // oxlint-disable-next-line spell-ui/no-solid-effect -- a helper class, not a component:  one effect per bound control, in a root of its own
 import { createEffect } from "solid-js"
 
-import { E, UIT } from "spell-ui/core"
+import { E, UIT } from "spell/ui/core"
 import { FormFields } from "./FormFields"
 import { FIELD_SELECTOR, type FieldApply } from "./UIForm.types"
 

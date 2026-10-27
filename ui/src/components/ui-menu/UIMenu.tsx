@@ -1,7 +1,7 @@
 import { For, Match, Show, Switch, untrack } from "solid-js"
 import { isServer, type JSX } from "@solidjs/web"
 
-import { E, UI, UIT } from "spell-ui/core"
+import { E, UI, UIT } from "spell/ui/core"
 import { menuVocabulary } from "./UIMenu.en"
 import { SegmentedThumb } from "./SegmentedThumb"
 import { TitleFit, type FitAnswer, type FitRow } from "./TitleFit"
@@ -797,7 +797,7 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
   /**
    * The item DOM element whose link / button root the event went through, if any.
    * - STATIC:  needs no instance, only the event's path.
-   * - `instanceof` is safe here:  a click handler, which the static render (`spell-ui/static`) never runs.
+   * - `instanceof` is safe here:  a click handler, which the static render (`spell/ui/static`) never runs.
    */
   private static activatedItem(event: Event): Element | undefined {
     for (const target of event.composedPath()) {

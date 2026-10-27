@@ -1,8 +1,8 @@
 import type { JSX } from "@solidjs/web"
 
-import { protoMerged } from "spell-ui/util"
-import { PartVocabularies } from "spell-ui/components/ui-parts/UIParts.types"
-import type { ComponentVocabulary } from "spell-ui/vocabulary"
+import { protoMerged } from "spell/ui/util"
+import { PartVocabularies } from "spell/ui/components/ui-parts/UIParts.types"
+import type { ComponentVocabulary } from "spell/ui/vocabulary"
 import { UIComponent, type ElementSetup, type UIComponentClass } from "spell/element"
 
 /** Host layout of a stub:  a block, like the static `<div class="ui card">` it replaces. */

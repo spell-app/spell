@@ -2,10 +2,10 @@ import { describe, expect, it } from "vite-plus/test"
 import { userEvent } from "vite-plus/test/browser"
 
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
-import { UI } from "spell-ui/core"
-import type { PropertySchema } from "spell-ui/vocabulary"
+import { UI } from "spell/ui/core"
+import type { PropertySchema } from "spell/ui/vocabulary"
 
-import "spell-ui"
+import "spell/ui"
 
 ////////////////
 // ## Helpers

@@ -2,12 +2,12 @@
 import { createRenderEffect, type Accessor } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
-import { E } from "spell-ui/core"
-import { placeholderHeaderVocabulary } from "spell-ui/components/ui-placeholder/UIPlaceholderHeader.en"
-import { placeholderImageVocabulary } from "spell-ui/components/ui-placeholder/UIPlaceholderImage.en"
-import { placeholderLineVocabulary } from "spell-ui/components/ui-placeholder/UIPlaceholderLine.en"
-import { placeholderParagraphVocabulary } from "spell-ui/components/ui-placeholder/UIPlaceholderParagraph.en"
-import { placeholderVocabulary } from "spell-ui/components/ui-placeholder/UIPlaceholder.en"
+import { E } from "spell/ui/core"
+import { placeholderHeaderVocabulary } from "spell/ui/components/ui-placeholder/UIPlaceholderHeader.en"
+import { placeholderImageVocabulary } from "spell/ui/components/ui-placeholder/UIPlaceholderImage.en"
+import { placeholderLineVocabulary } from "spell/ui/components/ui-placeholder/UIPlaceholderLine.en"
+import { placeholderParagraphVocabulary } from "spell/ui/components/ui-placeholder/UIPlaceholderParagraph.en"
+import { placeholderVocabulary } from "spell/ui/components/ui-placeholder/UIPlaceholder.en"
 import type { RootSkeleton } from "./UIRoot.types"
 
 /****************

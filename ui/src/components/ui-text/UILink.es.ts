@@ -1,4 +1,4 @@
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /**
  * `<ui-link>` in Spanish:  `<es-enlace>`, with the names and texts only it uses (from `UILink.en.ts`).

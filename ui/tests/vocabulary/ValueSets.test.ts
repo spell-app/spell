@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { ValueSets } from "spell-ui/vocabulary"
+import { ValueSets } from "spell/ui/vocabulary"
 
 ////////////////
 // ## The sets

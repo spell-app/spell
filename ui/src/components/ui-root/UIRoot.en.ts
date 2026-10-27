@@ -1,13 +1,13 @@
 /**
  * Every name `<ui-root>` uses:  tag, attributes (kind + allowed values), events, slots, parts, states, texts.
- * Schema:  `E.ComponentVocabulary` (`spell-ui/vocabulary`).
+ * Schema:  `E.ComponentVocabulary` (`spell/ui/vocabulary`).
  * - No Fomantic counterpart, so no class grammar:  every attribute is a property (`enum`, `string`, `boolean`),
  *   plus `size` (kind `size`, for the shared value set), which the root applies to its subtree, not to a class.
  * - Design:  `epics/ui-component-creation/ui-component-creation.plan.html`, Overview 3.5 and D51-D68.
  */
 
-import type { E } from "spell-ui/core"
-import * as UIT from "spell-ui/components/components.types"
+import type { E } from "spell/ui/core"
+import * as UIT from "spell/ui/components/components.types"
 
 /****************
  * ### `<ui-root>`

@@ -8,7 +8,7 @@
  * - The file is written by `yarn site:data` (`scripts/site-data.ts`, built by `src/tools/SiteDataBuilder.ts`)
  *   and committed;  its test (`tests/tools/SiteDataBuilder.test.ts`) fails while it's stale.
  * - Also the JSX types of the `<ui-docs-*>` tags the docs elements render in their shadow roots (`DocsJSXTags`),
- *   and the exact ones of every component tag they render (`spell-ui/jsx`).
+ *   and the exact ones of every component tag they render (`spell/ui/jsx`).
  * - Runtime-light:
  *   types and constants only, plus the docs families' small pure helper `VocabularyTexts`.
  *   - What they share with the components (`HeadingLevels`, `CODE_SPAN`, `TocMarks`) is `UIT`'s, since epic `ui-gaps`
@@ -17,7 +17,7 @@
 
 import type { JSX } from "@solidjs/web"
 
-import type { OutlineSection } from "spell-ui/components/ui-toc"
+import type { OutlineSection } from "spell/ui/components/ui-toc"
 
 ////////////////
 // ## `<ui-*>` in JSX
@@ -25,7 +25,7 @@ import type { OutlineSection } from "spell-ui/components/ui-toc"
 
 /**
  * The docs tags (`<ui-docs-*>`) a docs element may render in its JSX, each as loose attributes.
- * - Every COMPONENT tag (`<ui-button>` ...) has exact types, generated:  `spell-ui/jsx`, imported here.
+ * - Every COMPONENT tag (`<ui-button>` ...) has exact types, generated:  `spell/ui/jsx`, imported here.
  *   The docs tags aren't in that set, so they're named here.
  * - Named tags, NOT `` [tag: `ui-${string}`] ``:  that would loosen every component tag too.
  * - A docs element that renders another docs tag adds it here.

@@ -1,9 +1,9 @@
 import { describe, expect, it, vi } from "vite-plus/test"
 
-import { nextFrame } from "spell-ui/util"
+import { nextFrame } from "spell/ui/util"
 import { Fixture } from "spell/test-helpers/Fixture"
-import { Visibility } from "spell-ui/runtime/Visibility"
-import type { VisibilityCalculations, VisibilityCallbacks } from "spell-ui/runtime/runtime.types"
+import { Visibility } from "spell/ui/runtime/Visibility"
+import type { VisibilityCalculations, VisibilityCallbacks } from "spell/ui/runtime/runtime.types"
 
 /** A 1x1 GIF, so image tests never touch the network. */
 const PIXEL = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"

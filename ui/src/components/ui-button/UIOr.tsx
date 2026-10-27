@@ -1,6 +1,6 @@
 import type { JSX } from "@solidjs/web"
 
-import { E } from "spell-ui/core"
+import { E } from "spell/ui/core"
 import { orVocabulary } from "./UIOr.en"
 
 import buttonCSS from "./UIButton.css?inline"

@@ -2,11 +2,11 @@ import { describe, expect, it, onTestFinished } from "vite-plus/test"
 
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import type { DOMElement } from "spell/element"
-import { UI } from "spell-ui/core"
+import { UI } from "spell/ui/core"
 
-import type { UIDocsThemeBench } from "spell-ui/docs-components/ui-docs-theme-bench"
+import type { UIDocsThemeBench } from "spell/ui/docs-components/ui-docs-theme-bench"
 
-import "spell-ui/docs-components/ui-docs-theme-bench"
+import "spell/ui/docs-components/ui-docs-theme-bench"
 
 /** The bench's kept tunings, in the browser's storage. */
 const EDITS_KEY = "spell-ui-site:theme-bench"

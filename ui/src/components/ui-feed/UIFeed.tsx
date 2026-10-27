@@ -1,6 +1,6 @@
 import { Dynamic, type JSX } from "@solidjs/web"
 
-import { E } from "spell-ui/core"
+import { E } from "spell/ui/core"
 import { feedVocabulary } from "./UIFeed.en"
 
 import feedCSS from "./UIFeed.css?inline"

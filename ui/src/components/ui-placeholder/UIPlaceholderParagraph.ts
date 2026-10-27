@@ -1,4 +1,4 @@
-import { E } from "spell-ui/core"
+import { E } from "spell/ui/core"
 import { PlaceholderShape } from "./PlaceholderShape"
 import { placeholderParagraphVocabulary } from "./UIPlaceholderParagraph.en"
 

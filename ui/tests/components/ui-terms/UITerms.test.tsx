@@ -4,8 +4,8 @@ import { expectAccessible } from "spell/test-helpers/A11y"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import type { DOMElement } from "spell/element"
 
-import "spell-ui/components/ui-terms"
-import "spell-ui/components/ui-label"
+import "spell/ui/components/ui-terms"
+import "spell/ui/components/ui-label"
 
 /** Render `html` in a 600px box;  each term's label and value boxes. */
 async function terms(html: string) {

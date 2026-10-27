@@ -5,12 +5,12 @@ import { expectAccessible } from "spell/test-helpers/A11y"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import { Fixture } from "spell/test-helpers/Fixture"
 import type { DOMElement } from "spell/element"
-import { SiteData, type SiteDataFile, type SiteTag } from "spell-ui/docs-components"
+import { SiteData, type SiteDataFile, type SiteTag } from "spell/ui/docs-components"
 
-import { STORAGE_KEYS } from "spell-ui/docs-components/ui-docs-nav/UIDocsNav.types"
-import type { DOMDocsNavElement } from "spell-ui/docs-components/ui-docs-nav/UIDocsNav"
+import { STORAGE_KEYS } from "spell/ui/docs-components/ui-docs-nav/UIDocsNav.types"
+import type { DOMDocsNavElement } from "spell/ui/docs-components/ui-docs-nav/UIDocsNav"
 
-import "spell-ui/docs-components/ui-docs-nav"
+import "spell/ui/docs-components/ui-docs-nav"
 
 ////////////////
 // ## Fixtures

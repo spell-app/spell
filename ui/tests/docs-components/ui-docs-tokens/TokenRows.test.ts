@@ -1,8 +1,8 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import type { SiteDataFile, SiteToken } from "spell-ui/docs-components/docs-components.types"
+import type { SiteDataFile, SiteToken } from "spell/ui/docs-components/docs-components.types"
 
-import { TokenRows } from "spell-ui/docs-components/ui-docs-tokens/TokenRows"
+import { TokenRows } from "spell/ui/docs-components/ui-docs-tokens/TokenRows"
 
 /** `--x-a`:  a length with a description. */
 const ROW: SiteToken = { name: "--x-a", default: "1em", description: "Space around", type: "length" }

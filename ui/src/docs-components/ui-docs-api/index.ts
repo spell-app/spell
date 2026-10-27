@@ -14,12 +14,12 @@ import { UIDocsApi } from "./UIDocsApi"
 import { ApiModel } from "./ApiModel"
 import { InlineCode } from "./InlineCode"
 // A leaf, not the barrel, which would define `<ui-toc>`
-import { TocIndex } from "spell-ui/components/ui-toc/TocIndex"
+import { TocIndex } from "spell/ui/components/ui-toc/TocIndex"
 
-import "spell-ui/components/ui-parts"
-import "spell-ui/components/ui-table"
-import "spell-ui/components/ui-label"
-import "spell-ui/components/ui-message"
+import "spell/ui/components/ui-parts"
+import "spell/ui/components/ui-table"
+import "spell/ui/components/ui-label"
+import "spell/ui/components/ui-message"
 
 TocIndex.addShadowHost(UIDocsApi.vocabulary.tag)
 UIDocsApi.define()

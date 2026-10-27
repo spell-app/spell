@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { foundationCSS } from "spell-ui/styles"
+import { foundationCSS } from "spell/ui/styles"
 
-import { Sheets } from "spell-ui/test-helpers/Sheets"
+import { Sheets } from "spell/ui/test-helpers/Sheets"
 
-import navCSS from "spell-ui/docs-components/ui-docs-nav/UIDocsNav.css?inline"
-import navRaw from "spell-ui/docs-components/ui-docs-nav/UIDocsNav.css?raw"
+import navCSS from "spell/ui/docs-components/ui-docs-nav/UIDocsNav.css?inline"
+import navRaw from "spell/ui/docs-components/ui-docs-nav/UIDocsNav.css?raw"
 
 /**
  * `UIDocsNav.css`:  the sheet's source rules, and its layout on the shadow markup contract.

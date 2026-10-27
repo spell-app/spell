@@ -1,4 +1,4 @@
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /**
  * `<ui-popup>` in Spanish:  `<es-emergente>`, with the names and texts only it uses (from `UIPopup.en.ts`).

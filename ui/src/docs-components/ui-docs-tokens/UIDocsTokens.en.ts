@@ -1,7 +1,7 @@
 /**
  * The English vocabulary of `<ui-docs-tokens>`:  every name the tag uses.
  * - Its tag, attributes, events, slots, parts, states and texts.
- *   The shape is `E.ComponentVocabulary` (`spell-ui/vocabulary`).
+ *   The shape is `E.ComponentVocabulary` (`spell/ui/vocabulary`).
  * - A DOC-ONLY element (`src/docs-components/`):  filed under the `documentation` topic,
  *   left out of the component list, and loaded by `<ui-root>` like any family.
  * - Class words:  `global`, `playground` (`ui global playground tokens`).
@@ -9,7 +9,7 @@
  * - Texts:  every column header, label and message it shows;  the data's own descriptions are English.
  */
 
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /****************
  * ### `docsTokensVocabulary`

@@ -2,7 +2,7 @@
  * The placeholder family:  defines `<ui-placeholder>` and its shapes
  * (`<ui-placeholder-header>`, `-paragraph`, `-line`, `-image`), and exports their components.
  * - SIDE EFFECT:  importing it defines the tags.
- * - Also the library's `spell-ui/ui-placeholder` entry (its size is in `notes/report.md`).
+ * - Also the library's `spell/ui/ui-placeholder` entry (its size is in `notes/report.md`).
  * - `PlaceholderShape` (the shapes' base) is internal:  not exported.
  */
 

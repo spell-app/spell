@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { StaticSelectors } from "spell-ui/static"
+import { StaticSelectors } from "spell/ui/static"
 
 /** Shadow selectors => light-DOM selectors inside the component's `@scope` (`:scope` = its root). */
 describe("StaticSelectors.rewrite()", () => {

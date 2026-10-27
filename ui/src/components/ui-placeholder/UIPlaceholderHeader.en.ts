@@ -1,12 +1,12 @@
 /**
  * The English vocabulary of `<ui-placeholder-header>`:  every name the tag uses.
  * - Its tag, attributes (each with its kind and allowed values), slots and parts.
- *   The shape is `E.ComponentVocabulary` (`spell-ui/vocabulary`).
+ *   The shape is `E.ComponentVocabulary` (`spell/ui/vocabulary`).
  * - A skeleton shape, `ui: false`:  it sits inside a `<ui-placeholder>`,
  *   whose vocabulary (`UIPlaceholder.en.ts`) says how the family's attributes become class words.
  */
 
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /****************
  * ### `placeholderHeaderVocabulary`

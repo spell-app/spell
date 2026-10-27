@@ -2,11 +2,11 @@
 
 import { beforeAll, describe, expect, it } from "vite-plus/test"
 
-import { StaticRender } from "spell-ui/static"
-import { UIImage } from "spell-ui/components/ui-image/UIImage"
-import { UIImages } from "spell-ui/components/ui-image/UIImages"
+import { StaticRender } from "spell/ui/static"
+import { UIImage } from "spell/ui/components/ui-image/UIImage"
+import { UIImages } from "spell/ui/components/ui-image/UIImages"
 
-/** `<ui-image>` / `<ui-images>` in the static server render (`spell-ui/static`, seo plan P3). */
+/** `<ui-image>` / `<ui-images>` in the static server render (`spell/ui/static`, seo plan P3). */
 describe("<ui-image> static render", () => {
   beforeAll(() => {
     StaticRender.define(UIImage, UIImages)

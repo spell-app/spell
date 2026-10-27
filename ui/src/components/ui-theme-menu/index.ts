@@ -11,17 +11,17 @@
  * - It applies themes through the runtime (`UI.themes`, in the runtime's chunk),
  *   and every theme sheet stays its own lazy chunk, fetched on `apply()`.
  * - A page that only restores the remembered theme (no menu yet) imports `ThemePreference` by its file,
- *   `spell-ui/components/ui-theme-menu/ThemePreference`:  this barrel would define the menu too.
+ *   `spell/ui/components/ui-theme-menu/ThemePreference`:  this barrel would define the menu too.
  */
 
 import { UIThemeMenu } from "./UIThemeMenu"
 import { ThemeMenu } from "./ThemeMenu"
 import { ThemePreference } from "./ThemePreference"
 
-import "spell-ui/components/ui-dropdown"
-import "spell-ui/components/ui-item"
-import "spell-ui/components/ui-popup"
-import "spell-ui/components/ui-icon"
+import "spell/ui/components/ui-dropdown"
+import "spell/ui/components/ui-item"
+import "spell/ui/components/ui-popup"
+import "spell/ui/components/ui-icon"
 
 UIThemeMenu.define()
 

@@ -40,7 +40,7 @@ export class Toasts {
   /** `Toasts.provider`;  throws until the `ui-toast` family has registered one. */
   private get registeredProvider(): ToastProvider {
     if (!Toasts.provider) {
-      throw new Error("UI.toasts:  ui-toast not registered;  import its family (`spell-ui/ui-toast`) first")
+      throw new Error("UI.toasts:  ui-toast not registered;  import its family (`spell/ui/ui-toast`) first")
     }
     return Toasts.provider
   }

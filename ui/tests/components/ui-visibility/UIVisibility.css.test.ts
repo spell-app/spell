@@ -1,14 +1,14 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { foundationCSS } from "spell-ui/styles"
+import { foundationCSS } from "spell/ui/styles"
 
 import { Fixture } from "spell/test-helpers/Fixture"
-import { Sheets } from "spell-ui/test-helpers/Sheets"
+import { Sheets } from "spell/ui/test-helpers/Sheets"
 
-import { visibilityVocabulary } from "spell-ui/components/ui-visibility/UIVisibility.en"
+import { visibilityVocabulary } from "spell/ui/components/ui-visibility/UIVisibility.en"
 
-import visibilityCSS from "spell-ui/components/ui-visibility/UIVisibility.css?inline"
-import visibilityRaw from "spell-ui/components/ui-visibility/UIVisibility.css?raw"
+import visibilityCSS from "spell/ui/components/ui-visibility/UIVisibility.css?inline"
+import visibilityRaw from "spell/ui/components/ui-visibility/UIVisibility.css?raw"
 
 /**
  * `UIVisibility.css` on its own:  the DOM element's box.  Visibility has no look;  the examples are plain content.

@@ -1,6 +1,6 @@
 /**
  * The calendar family:  defines `<ui-calendar>`, and exports its component.
- * - Also the `calendar` lib entry (`spell-ui/ui-calendar`), measured in `notes/report.md`.
+ * - Also the `calendar` lib entry (`spell/ui/ui-calendar`), measured in `notes/report.md`.
  * - SIDE EFFECT:  importing it defines the tag.
  * - NOTE: `CalendarDates` / `CalendarText` / `CalendarView` are the family's helpers, not exported:
  *   their shapes follow the component.  `temporal-polyfill` is NOT imported here:

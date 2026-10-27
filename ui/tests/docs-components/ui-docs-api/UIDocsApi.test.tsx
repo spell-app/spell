@@ -3,12 +3,12 @@ import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from "vite-
 import { expectAccessible } from "spell/test-helpers/A11y"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import type { DOMElement } from "spell/element"
-import { SiteData, type SiteDataFile, type SiteTag } from "spell-ui/docs-components"
+import { SiteData, type SiteDataFile, type SiteTag } from "spell/ui/docs-components"
 
-import type { UIDocsApi } from "spell-ui/docs-components/ui-docs-api/UIDocsApi"
-import { HashLanding } from "spell-ui/components/ui-toc/HashLanding"
+import type { UIDocsApi } from "spell/ui/docs-components/ui-docs-api/UIDocsApi"
+import { HashLanding } from "spell/ui/components/ui-toc/HashLanding"
 
-import "spell-ui/docs-components/ui-docs-api"
+import "spell/ui/docs-components/ui-docs-api"
 
 ////////////////
 // ## Fixtures

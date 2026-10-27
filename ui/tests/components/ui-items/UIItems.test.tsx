@@ -1,6 +1,6 @@
 import { describe, expect, it, onTestFinished, vi } from "vite-plus/test"
 import { userEvent } from "vite-plus/test/browser"
-import { Keys } from "spell-ui/test-helpers/Keys"
+import { Keys } from "spell/ui/test-helpers/Keys"
 
 import { expectAccessible } from "spell/test-helpers/A11y"
 
@@ -8,11 +8,11 @@ import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import { Viewport } from "spell/test-helpers/Viewport"
 import type { DOMElement } from "spell/element"
 
-import "spell-ui/components/ui-items"
-import "spell-ui/components/ui-list"
-import "spell-ui/components/ui-image"
-import "spell-ui/components/ui-button"
-import "spell-ui/components/ui-segment"
+import "spell/ui/components/ui-items"
+import "spell/ui/components/ui-list"
+import "spell/ui/components/ui-image"
+import "spell/ui/components/ui-button"
+import "spell/ui/components/ui-segment"
 
 /** Element-markup rewrites of every example, by path. */
 const EXAMPLES = import.meta.glob<string>("/src/components/ui-items/examples/elements/*.html", {

@@ -1,14 +1,14 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { foundationCSS } from "spell-ui/styles"
+import { foundationCSS } from "spell/ui/styles"
 
 import { Fixture } from "spell/test-helpers/Fixture"
-import { Sheets } from "spell-ui/test-helpers/Sheets"
+import { Sheets } from "spell/ui/test-helpers/Sheets"
 
-import { embedVocabulary } from "spell-ui/components/ui-embed/UIEmbed.en"
+import { embedVocabulary } from "spell/ui/components/ui-embed/UIEmbed.en"
 
-import embedCSS from "spell-ui/components/ui-embed/UIEmbed.css?inline"
-import embedRaw from "spell-ui/components/ui-embed/UIEmbed.css?raw"
+import embedCSS from "spell/ui/components/ui-embed/UIEmbed.css?inline"
+import embedRaw from "spell/ui/components/ui-embed/UIEmbed.css?raw"
 
 /**
  * `UIEmbed.css` on its own, before any element exists:  the sheet's source rules and the computed styles of the

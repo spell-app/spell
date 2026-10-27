@@ -1,5 +1,5 @@
-import type { E } from "spell-ui/core"
-import { rootEs } from "spell-ui/components/ui-root/UIRoot.es"
+import type { E } from "spell/ui/core"
+import { rootEs } from "spell/ui/components/ui-root/UIRoot.es"
 
 /**
  * `<ui-page>` in Spanish:  `<es-pagina>`, with the names and texts only it uses (from `UIPage.en.ts`),

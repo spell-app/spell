@@ -1,4 +1,4 @@
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /**
  * `<ui-feed>` in Spanish:  `<es-actividad>`, with the names and texts only it uses (from `UIFeed.en.ts`).

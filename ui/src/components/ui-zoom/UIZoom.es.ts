@@ -1,4 +1,4 @@
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /**
  * `<ui-zoom>` in Spanish:  `<es-ampliacion>` (epic `epic-engine` Q23), with the names and texts only it uses

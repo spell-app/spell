@@ -12,7 +12,7 @@
  *   slotted ones get `:state(in-flyout)` and style themselves from `UIParts.css`.
  */
 
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /****************
  * ### `<ui-flyout>`

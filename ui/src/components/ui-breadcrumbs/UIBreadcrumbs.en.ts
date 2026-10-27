@@ -1,7 +1,7 @@
 /**
  * The English vocabulary of `<ui-breadcrumbs>`:  every name the tag uses.
  * - Its tag, attributes (each with its kind and allowed values), slots, parts, states and texts.
- *   The shape is `E.ComponentVocabulary` (`spell-ui/vocabulary`).
+ *   The shape is `E.ComponentVocabulary` (`spell/ui/vocabulary`).
  * - The family's attributes become Fomantic's class words, in Fomantic's order (`ClassBuilder`):
  *   `<ui-breadcrumbs size="large" inverted>` => `ui large inverted breadcrumb`;
  *   `<ui-breadcrumb selected>` => `active section` (no `ui`:  Fomantic styles sections by context).
@@ -9,7 +9,7 @@
  *   (`--ui-breadcrumb-divider*`, `BreadcrumbDividerTokens`):  see `UIBreadcrumbs.css`.
  */
 
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /****************
  * ### `breadcrumbsVocabulary`

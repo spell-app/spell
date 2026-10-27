@@ -4,9 +4,9 @@ import { fileURLToPath } from "node:url"
 
 import { readJSON5File } from "spell/util/node/json5"
 
-import { SharedVocabulary } from "spell-ui/vocabulary/SharedVocabulary"
-import { ValueSets } from "spell-ui/vocabulary/ValueSets"
-import type { IconSearchFile } from "spell-ui/icons"
+import { SharedVocabulary } from "spell/ui/vocabulary/SharedVocabulary"
+import { ValueSets } from "spell/ui/vocabulary/ValueSets"
+import type { IconSearchFile } from "spell/ui/icons"
 import {
   SITE_DATA_VERSION,
   type SiteAttribute,
@@ -17,7 +17,7 @@ import {
   type SiteSet,
   type SiteTag,
   type SiteTagPage
-} from "spell-ui/docs-components/docs-components.types"
+} from "spell/ui/docs-components/docs-components.types"
 import type { AttributeSpec, ComponentVocabulary, ValueSetName } from "spell/element/vocabulary.types"
 import { SITE_DATA, SITE_PAGES } from "./tools.types.ts"
 import { FamilyTokens } from "./FamilyTokens.ts"

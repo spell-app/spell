@@ -1,18 +1,18 @@
 import { describe, expect, it, onTestFinished } from "vite-plus/test"
 import { userEvent } from "vite-plus/test/browser"
 
-import { ClassBuilder } from "spell-ui/elements"
-import { UI } from "spell-ui/runtime"
-import { colorsCSS, foundationCSS } from "spell-ui/styles"
-import type { AttributeSpec, ComponentVocabulary } from "spell-ui/vocabulary"
+import { ClassBuilder } from "spell/ui/elements"
+import { UI } from "spell/ui/runtime"
+import { colorsCSS, foundationCSS } from "spell/ui/styles"
+import type { AttributeSpec, ComponentVocabulary } from "spell/ui/vocabulary"
 
 import { Fixture } from "spell/test-helpers/Fixture"
-import { Sheets } from "spell-ui/test-helpers/Sheets"
+import { Sheets } from "spell/ui/test-helpers/Sheets"
 
-import { selectVocabulary } from "spell-ui/components/ui-select/UISelect.en"
+import { selectVocabulary } from "spell/ui/components/ui-select/UISelect.en"
 
-import selectCSS from "spell-ui/components/ui-select/UISelect.css?inline"
-import selectRaw from "spell-ui/components/ui-select/UISelect.css?raw"
+import selectCSS from "spell/ui/components/ui-select/UISelect.css?inline"
+import selectRaw from "spell/ui/components/ui-select/UISelect.css?raw"
 
 /**
  * `UISelect.css` on its own, before any element exists:  the sheet's source rules, the computed styles of the

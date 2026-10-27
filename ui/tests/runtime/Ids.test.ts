@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vite-plus/test"
 
 import { Fixture } from "spell/test-helpers/Fixture"
-import { Ids } from "spell-ui/runtime/Ids"
+import { Ids } from "spell/ui/runtime/Ids"
 
 describe("Ids.next()", () => {
   it("hands out unique ids, skipping ones already in the document", () => {

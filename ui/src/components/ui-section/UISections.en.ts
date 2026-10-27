@@ -1,14 +1,14 @@
 /**
  * The English vocabulary of `<ui-sections>`:  every name the tag uses.
  * - Its tag, attributes (each with its kind and allowed values), slots, parts and states.
- *   The shape is `E.ComponentVocabulary` (`spell-ui/vocabulary`).
+ *   The shape is `E.ComponentVocabulary` (`spell/ui/vocabulary`).
  * - The attributes become Fomantic's class words (`ClassBuilder`):
  *   `<ui-sections collapsing>` => `ui collapsing sections`.
  * - `ownsParts: ["section"]`:  a `<ui-section>` finds its group the way it finds an enclosing section
  *   (`PartContext`), so its default `collapsible` follows the NEAREST group, at any depth (`UISection.group`).
  */
 
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /****************
  * ### `sectionsVocabulary`

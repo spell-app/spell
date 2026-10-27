@@ -1,7 +1,7 @@
 import { isServer } from "@solidjs/web"
 
-import { E, UIT } from "spell-ui/core"
-import { F } from "spell-ui/forms"
+import { E, UIT } from "spell/ui/core"
+import { F } from "spell/ui/forms"
 import { type CommonAttributes } from "./UIInput.types"
 
 /****************
@@ -205,7 +205,7 @@ export abstract class TextControl<V extends E.ComponentVocabulary = E.ComponentV
   }
 
   /**
-   * The native control's extra attributes in a server render (`spell-ui/static`).
+   * The native control's extra attributes in a server render (`spell/ui/static`).
    * - What it needs to submit without script:  `name` and the starting `value`;  and the `STATIC_CONTROL` mark.
    * - `{}` in a browser, where the DOM element submits (`ElementInternals`)
    *   and the effects keep the control in step.

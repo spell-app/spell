@@ -4,8 +4,8 @@ import { expect, test, type Page, type TestInfo } from "@playwright/test"
 import { mkdirSync, writeFileSync } from "node:fs"
 
 import { BrowserPage } from "spell/element-tools/BrowserPage"
-import type { VisualState } from "spell-ui/test-helpers/test.types"
-import { environment } from "spell-ui/tools/environment"
+import type { VisualState } from "spell/ui/test-helpers/test.types"
+import { environment } from "spell/ui/tools/environment"
 import type {
   ParityKind,
   ParityResult,

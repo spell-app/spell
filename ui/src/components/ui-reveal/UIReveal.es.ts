@@ -1,4 +1,4 @@
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /**
  * `<ui-reveal>` in Spanish:  `<es-revelar>`, with the names and texts only it uses (from `UIReveal.en.ts`).

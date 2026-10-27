@@ -401,7 +401,7 @@
   }
 
   /*
-   * Static markup whose box IS the popover (a server render's, `spell-ui/static`):  hidden until open,
+   * Static markup whose box IS the popover (a server render's, `spell/ui/static`):  hidden until open,
    * as the DOM element is.
    * Never matches inside the element's shadow root, where the DOM element carries `popover`.
    */

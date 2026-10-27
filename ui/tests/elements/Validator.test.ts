@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vite-plus/test"
 
-import { type FieldValue, Validator } from "spell-ui/elements"
+import { type FieldValue, Validator } from "spell/ui/elements"
 
 afterEach(() => {
   vi.restoreAllMocks()

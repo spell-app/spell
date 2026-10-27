@@ -1,4 +1,4 @@
-import type { UIT } from "spell-ui/core"
+import type { UIT } from "spell/ui/core"
 
 /****************
  * ### `DismissalStore`

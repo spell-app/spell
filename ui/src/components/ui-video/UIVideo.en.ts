@@ -1,12 +1,12 @@
 /**
  * The English vocabulary of `<ui-video>`:  every name the tag uses.
  * - Its tag, attributes (each with its kind and allowed values), events, slots, parts and states.
- *   The shape is `E.ComponentVocabulary` (`spell-ui/vocabulary`).
+ *   The shape is `E.ComponentVocabulary` (`spell/ui/vocabulary`).
  * - The browser's own video player (epic `ui-gaps` P11):  a video FILE, where `<ui-embed>` plays another site's.
  * - Its name for a screen reader is the shared `label`.
  */
 
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 import { MediaAttributes, MediaEvents } from "./UIVideo.types"
 
 /****************

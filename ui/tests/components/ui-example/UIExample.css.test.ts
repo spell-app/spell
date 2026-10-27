@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { foundationCSS } from "spell-ui/styles"
+import { foundationCSS } from "spell/ui/styles"
 
-import { Sheets } from "spell-ui/test-helpers/Sheets"
+import { Sheets } from "spell/ui/test-helpers/Sheets"
 
-import exampleCSS from "spell-ui/components/ui-example/UIExample.css?inline"
-import exampleRaw from "spell-ui/components/ui-example/UIExample.css?raw"
+import exampleCSS from "spell/ui/components/ui-example/UIExample.css?inline"
+import exampleRaw from "spell/ui/components/ui-example/UIExample.css?raw"
 
 /**
  * `UIExample.css`:  the sheet's source rules, and its layout on the shadow markup contract.

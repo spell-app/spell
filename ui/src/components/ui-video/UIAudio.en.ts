@@ -1,12 +1,12 @@
 /**
  * The English vocabulary of `<ui-audio>`:  every name the tag uses.
  * - Its tag, attributes (each with its kind and allowed values), events, slots, parts and states.
- *   The shape is `E.ComponentVocabulary` (`spell-ui/vocabulary`).
+ *   The shape is `E.ComponentVocabulary` (`spell/ui/vocabulary`).
  * - The browser's own audio player (epic `ui-gaps` P11).
  *   Without `controls` it draws nothing:  a sound the page plays from script (a game's).
  */
 
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 import { MediaAttributes, MediaEvents } from "./UIVideo.types"
 
 /****************

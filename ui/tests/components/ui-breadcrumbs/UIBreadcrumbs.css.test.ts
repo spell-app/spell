@@ -1,16 +1,16 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { colorsCSS, foundationCSS } from "spell-ui/styles"
+import { colorsCSS, foundationCSS } from "spell/ui/styles"
 
 import { Fixture } from "spell/test-helpers/Fixture"
-import { Sheets } from "spell-ui/test-helpers/Sheets"
+import { Sheets } from "spell/ui/test-helpers/Sheets"
 
-import { breadcrumbVocabulary } from "spell-ui/components/ui-breadcrumbs/UIBreadcrumb.en"
-import { breadcrumbsVocabulary } from "spell-ui/components/ui-breadcrumbs/UIBreadcrumbs.en"
-import { Painted } from "spell-ui/test-helpers/Painted"
+import { breadcrumbVocabulary } from "spell/ui/components/ui-breadcrumbs/UIBreadcrumb.en"
+import { breadcrumbsVocabulary } from "spell/ui/components/ui-breadcrumbs/UIBreadcrumbs.en"
+import { Painted } from "spell/ui/test-helpers/Painted"
 
-import breadcrumbCSS from "spell-ui/components/ui-breadcrumbs/UIBreadcrumbs.css?inline"
-import breadcrumbRaw from "spell-ui/components/ui-breadcrumbs/UIBreadcrumbs.css?raw"
+import breadcrumbCSS from "spell/ui/components/ui-breadcrumbs/UIBreadcrumbs.css?inline"
+import breadcrumbRaw from "spell/ui/components/ui-breadcrumbs/UIBreadcrumbs.css?raw"
 
 /**
  * `UIBreadcrumbs.css` on its own, before any element exists:  the sheet's source rules, the computed styles of the

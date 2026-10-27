@@ -1,4 +1,4 @@
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /**
  * `<ui-icon-picker>` in Spanish:  `<es-selector-icono>`, with the names and texts only it uses

@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it } from "vite-plus/test"
 
 import { Fixture } from "spell/test-helpers/Fixture"
-import { Transitions } from "spell-ui/runtime/Transitions"
+import { Transitions } from "spell/ui/runtime/Transitions"
 
 /** Stand-in for `animations.css`:  a short `fade` in / out, driven by `data-ui-animation`. */
 const KEYFRAMES = `

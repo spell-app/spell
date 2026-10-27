@@ -12,7 +12,7 @@ import { dirname, join, normalize, relative, resolve } from "node:path"
  *   it has none since P19, so the bundle's entries go unchecked.
  * - Every import / export STATEMENT is a bare package name, or a relative path that resolves INSIDE `dist/`:
  *   - no `#...` alias, which a consumer can't resolve
- *   - no `spell-ui/...`:  `dist/` names its own files relatively (the published `exports` name only the entries)
+ *   - no `spell/ui/...`:  `dist/` names its own files relatively (the published `exports` name only the entries)
  *   - no `spell/util` or `spell/element`:  not published on their own, their declarations ship in
  *     `dist/_util/` and `dist/_spell-element/`
  *   - nothing escaping `dist/`

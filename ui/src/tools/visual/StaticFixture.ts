@@ -9,7 +9,7 @@
  */
 
 import type { UIComponentClass } from "spell/element"
-import { ServerRuntime, StaticRender, StaticStylesheet } from "spell-ui/static"
+import { ServerRuntime, StaticRender, StaticStylesheet } from "spell/ui/static"
 
 import { StaticFamilies } from "./StaticFamilies.ts"
 

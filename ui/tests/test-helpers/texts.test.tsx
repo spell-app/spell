@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vite-plus/test"
 
 import type { UIComponent, DOMElement } from "spell/element"
-import { UI } from "spell-ui/runtime"
+import { UI } from "spell/ui/runtime"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 
 // NOTE: order matters:  table registers its `label` text BEFORE breadcrumb does
-import "spell-ui/components/ui-table"
-import "spell-ui/components/ui-breadcrumbs"
+import "spell/ui/components/ui-table"
+import "spell/ui/components/ui-breadcrumbs"
 
 /** Text `key` as the element `host` resolves it. */
 function textOf(host: Element, key: string): string {

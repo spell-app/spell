@@ -1,6 +1,6 @@
 import type { JSX } from "@solidjs/web"
 
-import { E, UIT } from "spell-ui/core"
+import { E, UIT } from "spell/ui/core"
 import { cardsVocabulary } from "./UICards.en"
 
 import cardCSS from "./UICard.css?inline"

@@ -1,4 +1,4 @@
-import { E, UI, UIT } from "spell-ui/core"
+import { E, UI, UIT } from "spell/ui/core"
 import { modalVocabulary } from "./UIModal.en"
 import { type Vocabulary } from "./UIModal.types"
 
@@ -18,7 +18,7 @@ import { type Vocabulary } from "./UIModal.types"
  * - Other families' tags (`<ui-content>`, `<ui-actions>`, `<ui-button>`) are looked up at CALL time,
  *   by class noun, in the vocabulary registry (`UI.vocabulary`).
  *   - Why:  importing their vocabulary files would reach into other families' files,
- *     which `AGENTS.md` keeps behind `spell-ui/core`.
+ *     which `AGENTS.md` keeps behind `spell/ui/core`.
  *   - The family barrel imports `parts` and `button`, so both are defined before any dialog opens.
  * - Registered by the family barrel as `UI.modals`' provider;  the runtime never imports it.
  ****************/
@@ -132,7 +132,7 @@ export class ModalDialogs implements E.ModalProvider {
     for (const vocabulary of UI.vocabulary.vocabularies.values()) if (vocabulary.noun === noun) return vocabulary.tag
     throw new Error(
       `UI.modals:  no component with the class noun "${noun}" is registered;  ` +
-        `import its family (\`spell-ui/components/ui-parts\`, \`ui-button\`) before opening a dialog`
+        `import its family (\`spell/ui/components/ui-parts\`, \`ui-button\`) before opening a dialog`
     )
   }
 }

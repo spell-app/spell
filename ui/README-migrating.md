@@ -225,7 +225,7 @@ Spell UI's own look isn't Fomantic's:  the system's UI font, a 16px base, an OKL
 For the page you had, apply `classic`, Fomantic's original look:
 
 ```js
-import { UI } from "spell-ui/core"
+import { UI } from "spell/ui/core"
 
 const { themes } = await UI.load()
 await themes.apply("classic")
@@ -305,7 +305,7 @@ After, the same object, as a property:
 </ui-form>
 
 <script type="module">
-  import "spell-ui"
+  import "spell/ui"
 
   document.querySelector("#signup").rules = {
     email: "email",

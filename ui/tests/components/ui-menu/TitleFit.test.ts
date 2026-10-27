@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { TitleFit } from "spell-ui/components/ui-menu/TitleFit"
+import { TitleFit } from "spell/ui/components/ui-menu/TitleFit"
 
 // the docs runtime's `titleCap()` and `titleFit()` cases (spell-epic's `titleCap.test.ts`, gone), plus the new ones
 

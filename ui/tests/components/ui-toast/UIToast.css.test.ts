@@ -1,17 +1,17 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { colorsCSS, foundationCSS } from "spell-ui/styles"
+import { colorsCSS, foundationCSS } from "spell/ui/styles"
 
 import { Fixture } from "spell/test-helpers/Fixture"
-import { Sheets } from "spell-ui/test-helpers/Sheets"
+import { Sheets } from "spell/ui/test-helpers/Sheets"
 
-import { toastVocabulary } from "spell-ui/components/ui-toast/UIToast.en"
-import { Painted } from "spell-ui/test-helpers/Painted"
+import { toastVocabulary } from "spell/ui/components/ui-toast/UIToast.en"
+import { Painted } from "spell/ui/test-helpers/Painted"
 
-import toastCSS from "spell-ui/components/ui-toast/UIToast.css?inline"
-import toastRaw from "spell-ui/components/ui-toast/UIToast.css?raw"
-import containerCSS from "spell-ui/components/ui-toast/UIToast.container.css?inline"
-import containerRaw from "spell-ui/components/ui-toast/UIToast.container.css?raw"
+import toastCSS from "spell/ui/components/ui-toast/UIToast.css?inline"
+import toastRaw from "spell/ui/components/ui-toast/UIToast.css?raw"
+import containerCSS from "spell/ui/components/ui-toast/UIToast.container.css?inline"
+import containerRaw from "spell/ui/components/ui-toast/UIToast.container.css?raw"
 
 /**
  * `UIToast.css` (and the page sheet `UIToast.container.css`) on their own, before any element exists:

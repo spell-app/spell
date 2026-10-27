@@ -1,6 +1,6 @@
 /**
  * One form of every value-carrying `ui-*` control, and what submitting it sends:  the round trip a static server
- * render (`spell-ui/static`) must keep (seo plan, P4).
+ * render (`spell/ui/static`) must keep (seo plan, P4).
  * - `staticForm.ssr.test.tsx` renders it statically and computes the browser's form data set from the plain HTML;
  *   `staticForm.test.ts` submits the LIVE elements and reads `FormData`.  Both compare with `STATIC_FORM_ENTRIES`.
  * - PURE DATA:  read by a node test and a browser test.

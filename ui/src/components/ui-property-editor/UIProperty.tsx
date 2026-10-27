@@ -1,11 +1,11 @@
-import { E, UI } from "spell-ui/core"
+import { E, UI } from "spell/ui/core"
 // the family barrel, not the leaf:  the lib build then imports `ui-form.js` instead of splitting a shared chunk
 // (SIDE EFFECT:  defines the form family:  a property is a field, in a form)
-import { DOMFieldElement, UIField } from "spell-ui/components/ui-form"
-import type { fieldVocabulary } from "spell-ui/components/ui-form/UIField.en"
-import { PropertySchemas } from "spell-ui/property"
-import type { AttributeSpec, PropertySchema, ValueType } from "spell-ui/vocabulary"
-import type { Choice, PropertyControl } from "spell-ui/runtime"
+import { DOMFieldElement, UIField } from "spell/ui/components/ui-form"
+import type { fieldVocabulary } from "spell/ui/components/ui-form/UIField.en"
+import { PropertySchemas } from "spell/ui/property"
+import type { AttributeSpec, PropertySchema, ValueType } from "spell/ui/vocabulary"
+import type { Choice, PropertyControl } from "spell/ui/runtime"
 import { propertyVocabulary } from "./UIProperty.en"
 import {
   EDITOR_SELECTOR,

@@ -1,15 +1,15 @@
 import { afterEach, beforeEach, describe, expect, it, onTestFinished, vi } from "vite-plus/test"
 import { userEvent } from "vite-plus/test/browser"
 
-import { UI } from "spell-ui/runtime"
-import type { DropdownOptions } from "spell-ui/components/components.types"
-import { FlagCountry } from "spell-ui/components/ui-flag"
+import { UI } from "spell/ui/runtime"
+import type { DropdownOptions } from "spell/ui/components/components.types"
+import { FlagCountry } from "spell/ui/components/ui-flag"
 import { expectAccessible } from "spell/test-helpers/A11y"
 
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import type { DOMElement } from "spell/element"
 
-import "spell-ui/components/ui-dropdown"
+import "spell/ui/components/ui-dropdown"
 
 /** Element-markup rewrites of every example, by path. */
 const EXAMPLES = import.meta.glob<string>("/src/components/ui-dropdown/examples/elements/*.html", {
@@ -494,7 +494,7 @@ describe("<ui-dropdown> value", () => {
     const late = container.firstElementChild as Dropdown
     late.options = [{ value: "a", text: "Alpha" }]
     late.value = "a"
-    const { UIDropdown } = await import("spell-ui/components/ui-dropdown")
+    const { UIDropdown } = await import("spell/ui/components/ui-dropdown")
     UIDropdown.define("ui-late-dropdown")
     document.body.append(container)
     await ElementFixture.settle(container)
@@ -726,7 +726,7 @@ describe("<ui-dropdown> invoker commands", () => {
     const was = supports.invokers
     supports.invokers = false
     try {
-      await import("spell-ui/components/ui-button")
+      await import("spell/ui/components/ui-button")
       const wrapper = await ElementFixture.render<HTMLElement>(
         `<div><ui-dropdown id="d" selection><ui-item value="a">Alpha</ui-item></ui-dropdown>
          <ui-button id="flip" commandfor="d" command="--toggle">Flip</ui-button></div>`

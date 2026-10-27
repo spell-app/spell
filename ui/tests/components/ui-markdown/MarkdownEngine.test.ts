@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { MarkdownEngine } from "spell-ui/components/ui-markdown/MarkdownEngine"
+import { MarkdownEngine } from "spell/ui/components/ui-markdown/MarkdownEngine"
 
 /** Render options:  no line breaks, no offset, unsanitized. */
 const PLAIN = { breaks: false, headingOffset: 0, sanitized: false }

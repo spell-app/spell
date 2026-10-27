@@ -1,4 +1,4 @@
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /**
  * `<ui-actions>` in Spanish:  `<es-acciones>`, with the names and texts only it uses (from `UIActions.en.ts`).

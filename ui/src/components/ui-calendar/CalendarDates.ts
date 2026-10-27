@@ -1,6 +1,6 @@
 import type { Temporal } from "temporal-polyfill"
 
-import type { E, UIT } from "spell-ui/core"
+import type { E, UIT } from "spell/ui/core"
 import { MINUTE_STEP, type ModeOptions, type Moment, type MomentFields, type MomentLike } from "./UICalendar.types"
 
 /****************

@@ -1,7 +1,7 @@
 import { Show } from "solid-js"
 import { isServer, type JSX } from "@solidjs/web"
 
-import { E, UI } from "spell-ui/core"
+import { E, UI } from "spell/ui/core"
 import { codeVocabulary } from "./UICode.en"
 import { CodeHighlighter } from "./CodeHighlighter"
 import { CodeLines } from "./CodeLines"

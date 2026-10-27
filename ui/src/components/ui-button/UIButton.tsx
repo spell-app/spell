@@ -1,7 +1,7 @@
 import { Show } from "solid-js"
 import { isServer, type JSX } from "@solidjs/web"
 
-import { E, UI, UIT } from "spell-ui/core"
+import { E, UI, UIT } from "spell/ui/core"
 import { buttonVocabulary } from "./UIButton.en"
 import { DOMElementClick } from "./UIButton.types"
 import { ButtonFallback } from "./UIButton.fallback"
@@ -39,7 +39,7 @@ import buttonCSS from "./UIButton.css?inline"
  * - `click()` on the DOM element (`<ui-input>`'s implicit submission sends one) presses the inner control,
  *   as `click()` on a native button does;  the page sees only the DOM element's own click (`onDOMElementClick`).
  *
- * - In a static server render (`spell-ui/static`), the inner `<button>` IS the submitter:
+ * - In a static server render (`spell/ui/static`), the inner `<button>` IS the submitter:
  *   it carries the DOM element's `type`, `name`, `value` and `form*` attributes,
  *   so a form without script submits as the element would (`nativeType`, `staticControl`).
  ****************/
@@ -228,7 +228,7 @@ export class UIButton extends E.UIComponent<typeof buttonVocabulary> {
   /**
    * The inner `<button>`'s `type`.
    * - In a browser, `button`:  a click submits or resets through `internals.form` (`onClick`).
-   * - In a server render (`spell-ui/static`), the DOM element's own `type`:
+   * - In a server render (`spell/ui/static`), the DOM element's own `type`:
    *   no script runs there, so a static form's `<button type="submit">` submits it natively.
    */
   private get nativeType(): "button" | "submit" | "reset" {
@@ -240,7 +240,7 @@ export class UIButton extends E.UIComponent<typeof buttonVocabulary> {
    * - `name`, `value`, and the DOM element's own `form` / `formaction` ... (`FORM_ATTRIBUTES`).
    * - The `STATIC_CONTROL` mark:  the DOM element's `id` and ARIA names go there, under a joined label too.
    * - `commandfor` as written (`command` renders on a server too):
-   *   a static page's invoker, for the server's no-script pass (`spell-ui/static`) to point at its target.
+   *   a static page's invoker, for the server's no-script pass (`spell/ui/static`) to point at its target.
    *   A browser sets `commandForElement` instead.
    * - `{}` in a browser, where the DOM element itself submits (`submit()`).
    */
@@ -410,7 +410,7 @@ export class UIButton extends E.UIComponent<typeof buttonVocabulary> {
 export interface UIButton extends E.AttributeValues<typeof buttonVocabulary> {}
 
 /**
- * The native submitter's attributes, which a server render (`spell-ui/static`) copies from the DOM element
+ * The native submitter's attributes, which a server render (`spell/ui/static`) copies from the DOM element
  * onto the inner `<button>`, so a static form submits as the browser would with that button.
  * - Not in the vocabulary:  read off the DOM element as written.
  */

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { REACH, StaticPageStyles } from "spell-ui/static"
+import { REACH, StaticPageStyles } from "spell/ui/static"
 
 /** The families the render knows:  tag -> its `data-ui` name. */
 const TAGS = new Map([

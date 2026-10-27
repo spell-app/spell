@@ -1,6 +1,6 @@
 // Import directly:  the one dark-mode query, with no pref store
 import { DARK_QUERY } from "spell/util/persist/persist.types"
-import { isBrowser, lazy } from "spell-ui/util"
+import { isBrowser, lazy } from "spell/ui/util"
 
 import type { BrowserSupports } from "./runtime.types"
 

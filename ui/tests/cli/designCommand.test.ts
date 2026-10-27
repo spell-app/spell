@@ -3,14 +3,14 @@ import { join } from "node:path"
 import { describe, expect, test } from "vite-plus/test"
 
 import { CLI } from "spell/cli"
-import { DESIGN_TOOLS, designBuildArgs, designCommand } from "spell-ui/cli/designCommand"
+import { DESIGN_TOOLS, designBuildArgs, designCommand } from "spell/ui/cli/designCommand"
 
 describe("DESIGN_TOOLS", () => {
   test("build:  Spell UI's own script, under tsx, from the kit's root", () => {
     expect(CLI.toolArgs(DESIGN_TOOLS.build, "/kit")).toEqual([
       "--import",
       CLI.TSX_LOADER,
-      "/kit/spell-ui/scripts/design-build.ts"
+      "/kit/ui/scripts/design-build.ts"
     ])
   })
   test("the bundle and its check:  spell-brand's, under tsx", () => {
@@ -18,7 +18,7 @@ describe("DESIGN_TOOLS", () => {
     expect(CLI.toolArgs(DESIGN_TOOLS.check, "/kit").at(-1)).toBe("/kit/spell-brand/scripts/design-check.ts")
   })
   test("the sync verbs:  spell-epic's design tool, plain node", () => {
-    expect(CLI.toolArgs(DESIGN_TOOLS.sync, "/kit")).toEqual(["/kit/spell-epic/src/tools/design.js"])
+    expect(CLI.toolArgs(DESIGN_TOOLS.sync, "/kit")).toEqual(["/kit/epic/src/tools/design.js"])
   })
   test("each tool's tsconfig is there:  a missing one stops `spell design build` before it starts", () => {
     const kit = join(import.meta.dirname, "../../..")

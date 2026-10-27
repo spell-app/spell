@@ -1,4 +1,4 @@
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /**
  * `<ui-comments>` in Spanish:  `<es-comentarios>`, with the names and texts only it uses (from `UIComments.en.ts`).

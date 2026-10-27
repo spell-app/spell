@@ -2,13 +2,13 @@ import { afterEach, beforeEach, describe, expect, it, onTestFinished } from "vit
 import { userEvent } from "vite-plus/test/browser"
 
 import { localDate } from "spell/util/time"
-import { UI } from "spell-ui/runtime"
+import { UI } from "spell/ui/runtime"
 import { expectAccessible } from "spell/test-helpers/A11y"
 
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import type { DOMElement } from "spell/element"
 
-import "spell-ui/components/ui-calendar"
+import "spell/ui/components/ui-calendar"
 
 /** Element-markup rewrites of every example, by path. */
 const EXAMPLES = import.meta.glob<string>("/src/components/ui-calendar/examples/elements/*.html", {

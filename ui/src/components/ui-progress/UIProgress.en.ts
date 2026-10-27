@@ -1,7 +1,7 @@
 /**
  * The English vocabulary of `<ui-progress>`:  every name the tag uses.
  * - Its tag, attributes (each with its kind and allowed values), events, slots, parts, states and texts.
- *   The shape is `E.ComponentVocabulary` (`spell-ui/vocabulary`).
+ *   The shape is `E.ComponentVocabulary` (`spell/ui/vocabulary`).
  * - The attributes become Fomantic's class words, in Fomantic's order (`ClassBuilder`):
  *   `<ui-progress size="small" color="teal" active indicating attach="top">` =>
  *   `ui small teal active indicating top attached progress`.
@@ -9,7 +9,7 @@
  * - `value` / `percent` are STRINGS:  one number, or a comma list for several bars (`value="10,20,30"`).
  */
 
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /****************
  * ### `progressVocabulary`

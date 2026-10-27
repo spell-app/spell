@@ -1,4 +1,4 @@
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /**
  * `<ui-property>` in Spanish:  `<es-propiedad>`, with the names and texts only it uses (from `UIProperty.en.ts`).

@@ -1,8 +1,8 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import type { UIT } from "spell-ui/core"
+import type { UIT } from "spell/ui/core"
 
-import { SearchMatcher } from "spell-ui/components/ui-search/SearchMatcher"
+import { SearchMatcher } from "spell/ui/components/ui-search/SearchMatcher"
 
 /** Fruit, one with a price, one a link. */
 const FRUIT: UIT.SearchResult[] = [

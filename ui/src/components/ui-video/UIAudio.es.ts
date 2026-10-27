@@ -1,4 +1,4 @@
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /**
  * `<ui-audio>` in Spanish:  `<es-audio>`, with the names and texts only it uses (from `UIAudio.en.ts`).

@@ -1,13 +1,13 @@
 /**
  * Every name `<ui-rail>` uses:  tag, attributes (kind + allowed values), slots, parts.
- * Schema:  `E.ComponentVocabulary` (`spell-ui/vocabulary`).
+ * Schema:  `E.ComponentVocabulary` (`spell/ui/vocabulary`).
  * - Class words come out through `ClassBuilder`, in Fomantic's grammar:
  *   `<ui-rail position="left" close="very">` => `ui left very close rail`.  `UIRail.css` keys on those words.
  * - `position` is the SIDE, emitted as a bare word (`left rail`), hence `kind: "valueOnly"` (as the
  *   menu's `position`).  Fomantic has no side-less rail:  without one the rail sits over its container's start.
  */
 
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /****************
  * ### `<ui-rail>`

@@ -5,12 +5,12 @@ import { expectAccessible } from "spell/test-helpers/A11y"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import type { DOMElement } from "spell/element"
 
-import { TocIndex } from "spell-ui/components/ui-toc/TocIndex"
-import { TOC_PREFS, type TocEntry } from "spell-ui/components/ui-toc/UIToc.types"
+import { TocIndex } from "spell/ui/components/ui-toc/TocIndex"
+import { TOC_PREFS, type TocEntry } from "spell/ui/components/ui-toc/UIToc.types"
 
-import "spell-ui/components/ui-toc"
-import "spell-ui/components/ui-section"
-import "spell-ui/components/ui-tab"
+import "spell/ui/components/ui-toc"
+import "spell/ui/components/ui-section"
+import "spell/ui/components/ui-tab"
 
 ////////////////
 // ## Fixtures

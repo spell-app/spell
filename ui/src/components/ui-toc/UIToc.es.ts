@@ -1,4 +1,4 @@
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /**
  * `<ui-toc>` in Spanish:  `<es-indice>` (epic `epic-engine` Q23), with the names and texts only it uses

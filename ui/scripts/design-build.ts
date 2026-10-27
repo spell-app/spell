@@ -15,8 +15,8 @@ import { join, resolve } from "node:path"
 import { parseArgs } from "node:util"
 
 import { kb } from "spell/util/number"
-import { DesignExport } from "spell-ui/tools/DesignExport"
-import { environment } from "spell-ui/tools/environment"
+import { DesignExport } from "spell/ui/tools/DesignExport"
+import { environment } from "spell/ui/tools/environment"
 import { Terminal } from "spell/element-tools/Terminal"
 
 const { values } = parseArgs({

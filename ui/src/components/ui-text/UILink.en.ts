@@ -1,13 +1,13 @@
 /**
  * The English vocabulary of `<ui-link>`:  every name the tag uses.
  * - Its tag, attributes (each with its kind and allowed values), slots, parts and states.
- *   The shape is `E.ComponentVocabulary` (`spell-ui/vocabulary`).
+ *   The shape is `E.ComponentVocabulary` (`spell/ui/vocabulary`).
  * - A link inside running text (epic `ui-gaps` P9):  the shared `link` and `target` every tag takes, as a tag of
  *   its own, `<ui-link link="help.html">help</ui-link>`, for a drawing's sentence.
  * - Its look is `<ui-text link>`'s (`UIText.css`):  the same class words, `ui [size] [color] text`.
  */
 
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /****************
  * ### `linkVocabulary`

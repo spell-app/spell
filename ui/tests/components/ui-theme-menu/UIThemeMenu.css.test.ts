@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { foundationCSS } from "spell-ui/styles"
+import { foundationCSS } from "spell/ui/styles"
 
-import { Sheets } from "spell-ui/test-helpers/Sheets"
+import { Sheets } from "spell/ui/test-helpers/Sheets"
 
-import themesCSS from "spell-ui/components/ui-theme-menu/UIThemeMenu.css?inline"
-import themesRaw from "spell-ui/components/ui-theme-menu/UIThemeMenu.css?raw"
+import themesCSS from "spell/ui/components/ui-theme-menu/UIThemeMenu.css?inline"
+import themesRaw from "spell/ui/components/ui-theme-menu/UIThemeMenu.css?raw"
 
 /** The scheme button and the overlay's rows, as the element renders them (the shadow markup contract). */
 const MARKUP = `<div class="ui themes" part="controls">

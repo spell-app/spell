@@ -4,9 +4,9 @@
  * - A page script, served by Vite (browser code, Spell UI by its package name):  never imported by node.
  */
 
-import { UI } from "spell-ui/runtime"
+import { UI } from "spell/ui/runtime"
 
-import popupAnchoredCSS from "spell-ui/components/ui-popup/UIPopup.anchored.css?raw"
+import popupAnchoredCSS from "spell/ui/components/ui-popup/UIPopup.anchored.css?raw"
 
 /****************
  * ### `FamilySheets`

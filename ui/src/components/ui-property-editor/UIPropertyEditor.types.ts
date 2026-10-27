@@ -3,7 +3,7 @@
  * - Pure data, at the bottom of the folder's imports (`import type` only):  node loads it (`yarn site:data`).
  */
 
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /**
  * What an element PASSES THROUGH from the element it's built on:

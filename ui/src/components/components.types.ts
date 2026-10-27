@@ -4,16 +4,16 @@
  * - the CSS contracts every implementation of a component (the element and its native fallback) must honour
  * - vocabulary pieces, and the words more than one family reads (`UIT.ACTIVE`, `UIT.Key`)
  *
- * - Read as `UIT.X`:  element and fallback files `import { E, UI, UIT } from "spell-ui/core"`;
+ * - Read as `UIT.X`:  element and fallback files `import { E, UI, UIT } from "spell/ui/core"`;
  *   vocabularies and types files, which node imports (`yarn site:data`, `yarn gen:root`),
- *   value-import this file directly, `import * as UIT from "spell-ui/components/components.types"` (`AGENTS.md` "Imports").
+ *   value-import this file directly, `import * as UIT from "spell/ui/components/components.types"` (`AGENTS.md` "Imports").
  * - PURE DATA, at the bottom of the import graph:
  *   `import type` only, so node loads it and it never pulls in the element layer.
  *   Its small helper classes (`Flags`, `StackClasses`, `ToggleCommands`) read only what's here.
  * - A constant ONE family reads stays in that family's types file;  it moves here once a second family needs it.
  */
 
-import type { E, Themes } from "spell-ui/core"
+import type { E, Themes } from "spell/ui/core"
 
 ////////////////
 // ## Button
@@ -265,7 +265,7 @@ export const PartOwnerTokens = {
 export const PART_STATIC_CLASS_PREFIX = "in-"
 
 /**
- * Marks the NATIVE control in a static server render (`spell-ui/static`), for the flattener:
+ * Marks the NATIVE control in a static server render (`spell/ui/static`), for the flattener:
  * the DOM element's `id` and ARIA names belong there,
  * so a `<label for>` naming the DOM element's id labels the control.
  * - Elements NEVER set it in a browser;
@@ -275,7 +275,7 @@ export const PART_STATIC_CLASS_PREFIX = "in-"
 export const STATIC_CONTROL = "data-ui-control"
 
 /**
- * Marks each component ROOT in a static server render (`spell-ui/static`) with its family's kind (`data-ui="table"`).
+ * Marks each component ROOT in a static server render (`spell/ui/static`) with its family's kind (`data-ui="table"`).
  * - The flattener writes it (as `SSR.ROOT_ATTRIBUTE`, which IS this);
  *   a component writes it itself only on what the flattener never sees as a root:
  *   `<ui-table>`'s slotted author table.

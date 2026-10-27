@@ -1,6 +1,6 @@
 /**
  * The input family:  defines `<ui-input>` and `<ui-textarea>`, and exports their components.
- * - Also the `input` lib entry (`spell-ui/ui-input`), measured in `notes/report.md`.
+ * - Also the `input` lib entry (`spell/ui/ui-input`), measured in `notes/report.md`.
  * - SIDE EFFECT:  importing it defines the tags.
  */
 

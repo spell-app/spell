@@ -1,14 +1,14 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { colorsCSS, foundationCSS } from "spell-ui/styles"
+import { colorsCSS, foundationCSS } from "spell/ui/styles"
 
 import { Fixture } from "spell/test-helpers/Fixture"
-import { Sheets } from "spell-ui/test-helpers/Sheets"
+import { Sheets } from "spell/ui/test-helpers/Sheets"
 
-import { sliderVocabulary } from "spell-ui/components/ui-slider/UISlider.en"
+import { sliderVocabulary } from "spell/ui/components/ui-slider/UISlider.en"
 
-import sliderCSS from "spell-ui/components/ui-slider/UISlider.css?inline"
-import sliderRaw from "spell-ui/components/ui-slider/UISlider.css?raw"
+import sliderCSS from "spell/ui/components/ui-slider/UISlider.css?inline"
+import sliderRaw from "spell/ui/components/ui-slider/UISlider.css?raw"
 
 /**
  * `UISlider.css` on its own, before any element exists:  the sheet's source rules and the computed layout of the

@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, test, vi } from "vite-plus/test"
 
-import { Warnings } from "spell-ui/util"
+import { Warnings } from "spell/ui/util"
 
 describe("Warnings.warn()", () => {
   afterEach(() => vi.restoreAllMocks())

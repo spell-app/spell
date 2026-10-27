@@ -1,7 +1,7 @@
 import { For, Show } from "solid-js"
 import { isServer, type JSX } from "@solidjs/web"
 
-import { E, UI, UIT } from "spell-ui/core"
+import { E, UI, UIT } from "spell/ui/core"
 import { SavedTheme } from "./SavedTheme"
 import { ThemeSheet } from "./ThemeSheet"
 import { themeEditorVocabulary } from "./UIThemeEditor.en"

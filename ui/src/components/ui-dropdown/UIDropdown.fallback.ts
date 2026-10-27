@@ -1,4 +1,4 @@
-import { E, UIT } from "spell-ui/core"
+import { E, UIT } from "spell/ui/core"
 import { dropdownVocabulary } from "./UIDropdown.en"
 import { SlottedItems } from "./SlottedItems"
 

@@ -3,7 +3,7 @@
 import { existsSync, readdirSync } from "node:fs"
 import { pathToFileURL } from "node:url"
 
-import type { VisualHooks } from "spell-ui/test-helpers/test.types"
+import type { VisualHooks } from "spell/ui/test-helpers/test.types"
 import type { VisualBrowser, VisualExample, VisualScheme } from "./visual.types.ts"
 import { VisualSettings } from "./VisualSettings.ts"
 

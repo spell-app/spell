@@ -1,12 +1,12 @@
 import { Show } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
-import { E, UI } from "spell-ui/core"
+import { E, UI } from "spell/ui/core"
 // the family barrel, not the leaf:
 // the lib build then imports `ui-menu.js` instead of splitting a shared chunk
 // (SIDE EFFECT:  defines `<ui-menu>` and `<ui-item>`, which a toolbar extends and holds)
-import { UIMenu } from "spell-ui/components/ui-menu"
-import type { menuVocabulary } from "spell-ui/components/ui-menu/UIMenu.en"
+import { UIMenu } from "spell/ui/components/ui-menu"
+import type { menuVocabulary } from "spell/ui/components/ui-menu/UIMenu.en"
 import { toolbarVocabulary } from "./UIToolbar.en"
 
 import toolbarCSS from "./UIToolbar.css?inline"

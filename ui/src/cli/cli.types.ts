@@ -8,7 +8,7 @@ import type {
   StaticDocumentOptions,
   StaticDocumentResult,
   StaticStylesheetResult
-} from "spell-ui/tools/tools.types"
+} from "spell/ui/tools/tools.types"
 
 ////////////////
 // ## `spell icon`

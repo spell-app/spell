@@ -1,15 +1,15 @@
 import { afterEach, beforeAll, describe, expect, it, vi } from "vite-plus/test"
 import type { JSX } from "@solidjs/web"
 
-import { UI, type SourceSaver } from "spell-ui/runtime"
-import type { ComponentVocabulary } from "spell-ui/vocabulary"
-import * as UIT from "spell-ui/components/components.types"
+import { UI, type SourceSaver } from "spell/ui/runtime"
+import type { ComponentVocabulary } from "spell/ui/vocabulary"
+import * as UIT from "spell/ui/components/components.types"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import { type UIComponentClass, UIComponent } from "spell/element"
-import { LoadableComponent, type DOMLoadableElement } from "spell-ui/elements"
+import { LoadableComponent, type DOMLoadableElement } from "spell/ui/elements"
 
-import "spell-ui/components/ui-loader"
-import "spell-ui/components/ui-message"
+import "spell/ui/components/ui-loader"
+import "spell/ui/components/ui-message"
 
 /** Test-only source element:  shows its text in a `<pre part="text">`. */
 class XSource extends LoadableComponent<typeof X_SOURCE> {

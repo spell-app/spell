@@ -58,7 +58,7 @@ The first three are the DOM's own, so a framework that can drive a `<video>` alr
      It then has `:state(errored)` and has sent a cancelable `ui-error`, and the rest of the page carries on.
 
 Define the elements BEFORE the framework renders them:
-`import "spell-ui"` for every family, or `import "spell-ui/ui-dropdown"` for one.
+`import "spell/ui"` for every family, or `import "spell/ui/ui-dropdown"` for one.
 As a backstop, a property set before the tag is defined is kept, and applied once it is.
 
 ```mermaid
@@ -109,7 +109,7 @@ which sets the property and the listener before the element is defined, to prove
   dropdown.options = OPTIONS // a property, before the tag is even defined
   dropdown.addEventListener("ui-change", (event) => (output.textContent = event.detail.value))
   document.querySelector("#open").addEventListener("click", () => (dropdown.open = true))
-  await import("spell-ui") // defined last, on purpose:  the element keeps `options`
+  await import("spell/ui") // defined last, on purpose:  the element keeps `options`
 </script>
 ```
 
@@ -123,7 +123,7 @@ React 19 passes a prop as a PROPERTY when the element has one (`key in el`),
 and listens to a custom event through `on<event-name>`:  `onui-change`.
 
 ```jsx
-import "spell-ui"
+import "spell/ui"
 
 function App() {
   const [value, setValue] = useState("b")
@@ -148,7 +148,7 @@ function App() {
 - **The catch:**  React decides property or attribute by looking at the element as it renders it.
   A tag that isn't defined yet has no `options` property, so React writes an attribute,
   and an array doesn't survive being a string.
-  - Import the families up front:  `import "spell-ui"`, or `import "spell-ui/ui-dropdown"`.
+  - Import the families up front:  `import "spell/ui"`, or `import "spell/ui/ui-dropdown"`.
   - Don't leave them to `<ui-root>`'s loading on demand:  it defines a tag after the page first shows one,
     and by then React has written its props.
 - React 18 and older pass every prop as an attribute, and don't listen to custom events:
@@ -161,7 +161,7 @@ function App() {
 Vue binds `:options` as a property when the element has one, and `@ui-change` listens as on any element.
 
 ```js
-import "spell-ui"
+import "spell/ui"
 import { createApp } from "vue"
 
 const app = createApp(App)
@@ -201,7 +201,7 @@ Every prop is a plain one, the same name as in HTML:
 ```tsx
 import { createSignal } from "solid-js"
 import { render } from "@solidjs/web"
-import "spell-ui" // solid.html imports it before it mounts the app
+import "spell/ui" // solid.html imports it before it mounts the app
 
 const [value, setValue] = createSignal("b")
 const [open, setOpen] = createSignal(true)
@@ -295,14 +295,14 @@ Spell UI ships what an editor reads, four files describing all 104 tags:
 - [`css-custom-data.json`](docs/__data/css-custom-data.json), VS Code's CSS data:
   every `--ui-*` custom property, part (`::part(icon)`) and custom state (`:state(open)`) in CSS files,
   with hover docs
-- [`spell-ui/jsx`](src/jsx.ts), the JSX types for Solid 2:
+- [`spell/ui/jsx`](src/jsx.ts), the JSX types for Solid 2:
   autocomplete, hover docs and checks for `<ui-*>` in `.tsx` files
 - `yarn site:data` writes all four, from the same vocabularies as everything else.
 
 For Solid's JSX, import the types once, in any file of your program:
 
 ```ts
-import type {} from "spell-ui/jsx"
+import type {} from "spell/ui/jsx"
 ```
 
 - Then every `<ui-*>` tag is checked:
@@ -341,7 +341,7 @@ button.addEventListener("ui-toggle", (event) => setActive(event.detail.active))
 - On any other element, or the document, every `ui-*` name completes, but its `detail` is `unknown`.
   - The same name is many tags' (`ui-change` is 18 of Spell UI's, and other sets' too), each with its own `detail`.
   - Narrow it yourself, or listen on the tag.
-- Each tag's own events, by name:  `UIInputEventMap` ..., exported by `spell-ui/jsx`.
+- Each tag's own events, by name:  `UIInputEventMap` ..., exported by `spell/ui/jsx`.
 
 ## Using it today:  the kit's build and an import map
 
@@ -357,20 +357,20 @@ A page then maps the names onto those folders, exactly as the smoke pages do:
       "solid-js": "/vendor/solid-js.js",
       "@solidjs/web": "/vendor/@solidjs/web.js",
       "spell-ui": "/dist/index.js",
-      "spell-ui/ui-dropdown": "/dist/ui-dropdown.js"
+      "spell/ui/ui-dropdown": "/dist/ui-dropdown.js"
     }
   }
 </script>
 ```
 
 - `spell-ui` is every family, `spell-ui/ui-<family>` one.
-  - `spell-ui/core`, `spell-ui/forms` and `spell-ui/api` are the shared entries.
+  - `spell/ui/core`, `spell/ui/forms` and `spell/ui/api` are the shared entries.
 - `yarn vendor` writes the two Solid lines to `vendor/importmap.json`,
   after compiling the Solid smoke app when it's out of date.
 - `yarn serve` serves `dist/`, `vendor/` and `src/` with the whole map injected into every page,
   and prints each smoke page's address, on port 5199;  Ctrl-C stops it.
 
-🌱 Once Spell UI is on npm, this whole section becomes one install and `import "spell-ui"` in any framework app:
+🌱 Once Spell UI is on npm, this whole section becomes one install and `import "spell/ui"` in any framework app:
 where that stands is on [the front page](README.md#-coming).
 
 ## What the smoke pages prove, and what they don't

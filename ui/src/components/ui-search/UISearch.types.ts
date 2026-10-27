@@ -1,12 +1,12 @@
 /**
  * Constants and types of the `ui-search` family:  what its component (`UISearch`) and its native fallback
  * (`SearchFallback`) share.
- * - Pure data:  types only (`spell-ui/core`, the vocabulary), so node can load it (`yarn site:data`).
+ * - Pure data:  types only (`spell/ui/core`, the vocabulary), so node can load it (`yarn site:data`).
  * - Its other class words and ids are module constants below `UISearch`, the one class that uses them;
  *   `SearchMatcher`'s props live with it.
  */
 
-import type { UIT } from "spell-ui/core"
+import type { UIT } from "spell/ui/core"
 import type { searchVocabulary } from "./UISearch.en"
 
 ////////////////

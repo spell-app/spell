@@ -1,7 +1,7 @@
 /**
  * The English vocabulary of `<ui-section>`:  every name the tag uses.
  * - Its tag, attributes (each with its kind and allowed values), events, slots, parts, states and texts.
- *   The shape is `E.ComponentVocabulary` (`spell-ui/vocabulary`).
+ *   The shape is `E.ComponentVocabulary` (`spell/ui/vocabulary`).
  * - The attributes become Fomantic's class words, in Fomantic's order (`ClassBuilder`):
  *   `<ui-section color="teal" dividing sticky>` => `ui teal dividing sticky section`.
  * - Not class words, which the component draws or reads instead:
@@ -19,8 +19,8 @@
  *   - Its old words (`header`, `subhead`, `info`, `ui-opening`, `ui-closing`, `ui-loaded`) went in epic `repo-split` P14 (Q45).
  */
 
-import type { E } from "spell-ui/core"
-import * as UIT from "spell-ui/components/components.types"
+import type { E } from "spell/ui/core"
+import * as UIT from "spell/ui/components/components.types"
 
 /****************
  * ### `sectionVocabulary`

@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from "vite-plus/test"
 
-import { after, afterSolidUpdate, beforeNextPaint, every, soon, type CancelablePromise } from "spell-ui/util"
+import { after, afterSolidUpdate, beforeNextPaint, every, soon, type CancelablePromise } from "spell/ui/util"
 
 beforeEach(() => {
   vi.useFakeTimers()

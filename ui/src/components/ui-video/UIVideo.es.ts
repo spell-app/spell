@@ -1,4 +1,4 @@
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /**
  * `<ui-video>` in Spanish:  `<es-video>`, with the names and texts only it uses (from `UIVideo.en.ts`).

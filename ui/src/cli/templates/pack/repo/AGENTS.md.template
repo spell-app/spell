@@ -39,7 +39,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - `__pack__.entry.ts` -- the script's entry:  `SpellUI.registerPack({ name, prefix, catalog, define })`, where
       `define()` imports every family barrel
     - `__pack__.pack.js` -- the CLASSIC script (an IIFE) a page loads, minified;  Solid and Spell UI's shared
-      modules (`solid-js`, `@solidjs/web`, `spell/element`, `spell-ui/core`, `spell-ui/forms`) are NOT in it:
+      modules (`solid-js`, `@solidjs/web`, `spell/element`, `spell/ui/core`, `spell/ui/forms`) are NOT in it:
       it takes them from `globalThis.SpellUI.packModules`, the docs bundle's, so a page has ONE Solid and one
       `UIComponent`
 - Outside `src/`:  `tests/` (at the same paths as the code:  `tests/components/<tag>/<Name>.test.tsx`, and
@@ -48,7 +48,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 ## Imports
 
 - Every file is imported by its package name and its path under `src/`, the pack's own files too:
-  `spell-__pack__/components/__prefix__card`, `spell-ui/core`, `spell/test-helpers/ElementFixture`.
+  `spell-__pack__/components/__prefix__card`, `spell/ui/core`, `spell/test-helpers/ElementFixture`.
   - Same-folder peers stay `./<Name>.types`;  never a `../` climb.
   - How the tools find them:  `package.json`'s `exports`;  TypeScript reads the pack's own source through the
     `spell-__pack__-source` condition (`customConditions` in `tsconfig.json`).  No alias table.
@@ -61,8 +61,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   `spell pack build __pack__` (`yarn pack:build`), and commit `src/components/__pack/` in the same change.
   - `yarn pack:check` exits 1 while `src/components/__pack/` is stale, and `tests/pack.test.ts` runs it:
     so `yarn test` and `yarn review` fail until you build.
-- Elements import Spell UI's code ONLY from `spell-ui/core` / `spell-ui/forms` (as a Spell UI family does), and Solid from
-  `solid-js` / `@solidjs/web`:  the build fails on any other `spell-ui/...` or Solid import, which the page couldn't
+- Elements import Spell UI's code ONLY from `spell/ui/core` / `spell/ui/forms` (as a Spell UI family does), and Solid from
+  `solid-js` / `@solidjs/web`:  the build fails on any other `spell/ui/...` or Solid import, which the page couldn't
   share.  Another shared module:  add it to Spell UI's `packModules` AND `PACK_MODULES` in the kit's
   `spell/element-tools/packModules`.
 - Every tag starts `__prefix__`:  `<ui-root>` knows the pack's tags by that prefix.

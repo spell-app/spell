@@ -1,5 +1,5 @@
-import { E } from "spell-ui/core"
-import type { F } from "spell-ui/forms"
+import { E } from "spell/ui/core"
+import type { F } from "spell/ui/forms"
 
 /****************
  * ### `LabelWatch`
@@ -10,7 +10,7 @@ import type { F } from "spell-ui/forms"
  * - Targeted:  a label with `for` refreshes the controls with that id (old and new `for`);  one without (a wrapping
  *   label) refreshes every control in the root.
  * - `ControlLabels`' helper, in a file of its own (WWOD §8 › "One exported class per file"):  only it imports this,
- *   so it's in neither the `spell-ui/elements` barrel nor the `forms` entry.  Knows `ControlLabels` as a type only.
+ *   so it's in neither the `spell/ui/elements` barrel nor the `forms` entry.  Knows `ControlLabels` as a type only.
  ****************/
 export class LabelWatch {
   /** Controls in this root. */

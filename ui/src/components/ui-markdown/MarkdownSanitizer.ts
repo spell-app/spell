@@ -1,6 +1,6 @@
 import DOMPurify from "dompurify"
 
-import { SourceError } from "spell-ui/runtime/runtime.types"
+import { SourceError } from "spell/ui/runtime/runtime.types"
 
 /****************
  * ### `MarkdownSanitizer`
@@ -15,7 +15,7 @@ import { SourceError } from "spell-ui/runtime/runtime.types"
  *   than hand back markup it didn't clean.
  * - NEVER a value import but DOMPurify and `SourceError`:  the docs bundler builds this file ALONE into a classic
  *   script (`MarkdownRenderer.sanitizerLoader`).
- * - Imports `SourceError` straight from `spell-ui/runtime/runtime.types` (built into `core.js`), and USES it,
+ * - Imports `SourceError` straight from `spell/ui/runtime/runtime.types` (built into `core.js`), and USES it,
  *   as `MarkdownEngine` / `CodeEngine` do:  without it this chunk needed Rolldown's helpers (`keepNames`) without
  *   depending on core, and Rolldown split them into a `rolldown-runtime-<hash>.js` EVERY page loaded (epic
  *   `wwod-spell-ui`, I12;  `yarn measure`'s `runtimeChunks`).

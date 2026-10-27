@@ -1,13 +1,13 @@
 import { For, Show } from "solid-js"
 import { isServer, type JSX } from "@solidjs/web"
 
-import { E, UIT } from "spell-ui/core"
-import type { UILabelAttributes } from "spell-ui/jsx"
-import type { SiteDataFile, SiteTag } from "spell-ui/docs-components/docs-components.types"
-import { SiteData } from "spell-ui/docs-components/SiteData"
+import { E, UIT } from "spell/ui/core"
+import type { UILabelAttributes } from "spell/ui/jsx"
+import type { SiteDataFile, SiteTag } from "spell/ui/docs-components/docs-components.types"
+import { SiteData } from "spell/ui/docs-components/SiteData"
 // Leaves, not the barrel, which would define `<ui-toc>`:  the landing, and the slugs the page's section ids use
-import { HashLanding } from "spell-ui/components/ui-toc/HashLanding"
-import { TocIndex } from "spell-ui/components/ui-toc/TocIndex"
+import { HashLanding } from "spell/ui/components/ui-toc/HashLanding"
+import { TocIndex } from "spell/ui/components/ui-toc/TocIndex"
 import { ApiModel } from "./ApiModel"
 import { InlineCode } from "./InlineCode"
 import {
@@ -22,7 +22,7 @@ import {
 } from "./UIDocsApi.types"
 import { docsApiVocabulary } from "./UIDocsApi.en"
 
-import tableCSS from "spell-ui/components/ui-table/UITable.css?inline"
+import tableCSS from "spell/ui/components/ui-table/UITable.css?inline"
 import apiCSS from "./UIDocsApi.css?inline"
 
 /****************

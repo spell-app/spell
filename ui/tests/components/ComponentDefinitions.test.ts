@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import * as library from "spell-ui"
-import { ComponentDefinitions } from "spell-ui/components/ComponentDefinitions"
-import { ValueSets } from "spell-ui/vocabulary"
+import * as library from "spell/ui"
+import { ComponentDefinitions } from "spell/ui/components/ComponentDefinitions"
+import { ValueSets } from "spell/ui/vocabulary"
 
 /** Tag of every element class `spell-ui` exports (each carries its vocabulary). */
 const EXPORTED_TAGS = Object.values(library)

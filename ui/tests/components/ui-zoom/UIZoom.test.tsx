@@ -1,13 +1,13 @@
 import { afterEach, describe, expect, test, vi } from "vite-plus/test"
 import { userEvent } from "vite-plus/test/browser"
 
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import { expectAccessible } from "spell/test-helpers/A11y"
 
-import "spell-ui/components/ui-zoom"
-import "spell-ui/components/ui-image"
-import { ImageZoom } from "spell-ui/components/ui-zoom"
+import "spell/ui/components/ui-zoom"
+import "spell/ui/components/ui-image"
+import { ImageZoom } from "spell/ui/components/ui-zoom"
 
 /** Element-markup examples, by path. */
 const EXAMPLES = import.meta.glob<string>("/src/components/ui-zoom/examples/elements/*.html", {

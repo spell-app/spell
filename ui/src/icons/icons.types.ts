@@ -1,8 +1,8 @@
 /**
- * Shared types and constants for `spell-ui/icons`:  the icon PACK format (`pack.js`) and the names around it.
- * - The BOTTOM of `spell-ui/icons`' import graph, and runtime-light:  no imports, so node tooling
+ * Shared types and constants for `spell/ui/icons`:  the icon PACK format (`pack.js`) and the names around it.
+ * - The BOTTOM of `spell/ui/icons`' import graph, and runtime-light:  no imports, so node tooling
  *   (`src/tools/IconPackBuilder.ts`, `scripts/gen-icons.ts`) can import it by relative path, and the runtime service
- *   (`UI.icons`) by `spell-ui/icons`.
+ *   (`UI.icons`) by `spell/ui/icons`.
  * - See `notes/icons.md` for the format and how names resolve.
  */
 

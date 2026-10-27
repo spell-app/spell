@@ -1,4 +1,4 @@
-import type { AttributeSpec, PropertySchema, ValueType } from "spell-ui/vocabulary"
+import type { AttributeSpec, PropertySchema, ValueType } from "spell/ui/vocabulary"
 
 /****************
  * ### `PropertyControls`

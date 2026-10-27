@@ -1,4 +1,4 @@
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /**
  * `<ui-stack>` in Spanish:  `<es-pila>`, with the names and texts only it uses (from `UIStack.en.ts`).

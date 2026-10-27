@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { SliderScale } from "spell-ui/components/ui-slider/SliderScale"
+import { SliderScale } from "spell/ui/components/ui-slider/SliderScale"
 
 describe("SliderScale.snap()", () => {
   test("snaps to the step grid within min ... max;  a step of 0 keeps the value", () => {

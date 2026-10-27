@@ -1,13 +1,13 @@
 import { beforeAll, describe, expect, it, vi } from "vite-plus/test"
 
-import { UI } from "spell-ui/runtime"
+import { UI } from "spell/ui/runtime"
 import { expectAccessible } from "spell/test-helpers/A11y"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 
-import { MarkdownRenderer } from "spell-ui/components/ui-markdown/MarkdownRenderer"
-import type { DOMMarkdownElement } from "spell-ui/components/ui-markdown/UIMarkdown"
+import { MarkdownRenderer } from "spell/ui/components/ui-markdown/MarkdownRenderer"
+import type { DOMMarkdownElement } from "spell/ui/components/ui-markdown/UIMarkdown"
 
-import "spell-ui/components/ui-markdown"
+import "spell/ui/components/ui-markdown"
 
 /** Element-markup rewrites of every example, by path. */
 const EXAMPLES = import.meta.glob<string>("/src/components/ui-markdown/examples/elements/*.html", {
@@ -146,7 +146,7 @@ describe("<ui-markdown> rendering", () => {
   })
 
   it("keeps a SHORT inline code span on one line;  a long one may still wrap", async () => {
-    const long = "spell-ui/components/ui-button/UIButton"
+    const long = "spell/ui/components/ui-button/UIButton"
     const host = await markdown(md(`Run \`--toggle\` or read \`${long}\`.`))
     const [short, path] = [...body(host).querySelectorAll("code")]
     expect([short!.className, path!.className]).toEqual(["short", ""])

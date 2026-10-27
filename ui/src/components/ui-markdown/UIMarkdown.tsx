@@ -1,8 +1,8 @@
 import { For, Show } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
-import { E, UI } from "spell-ui/core"
-import type { codeVocabulary } from "spell-ui/components/ui-code/UICode.en"
+import { E, UI } from "spell/ui/core"
+import type { codeVocabulary } from "spell/ui/components/ui-code/UICode.en"
 import { MarkdownRenderer } from "./MarkdownRenderer"
 import type { MarkdownHeading, MarkdownOptions, MarkdownRendering } from "./UIMarkdown.types"
 import { markdownVocabulary } from "./UIMarkdown.en"

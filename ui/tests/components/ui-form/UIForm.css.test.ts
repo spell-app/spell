@@ -1,20 +1,20 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { colorsCSS, foundationCSS } from "spell-ui/styles"
+import { colorsCSS, foundationCSS } from "spell/ui/styles"
 
 import { Fixture } from "spell/test-helpers/Fixture"
-import { Sheets } from "spell-ui/test-helpers/Sheets"
+import { Sheets } from "spell/ui/test-helpers/Sheets"
 
-import { formVocabulary } from "spell-ui/components/ui-form/UIForm.en"
-import { fieldsVocabulary } from "spell-ui/components/ui-form/UIFields.en"
-import { fieldVocabulary } from "spell-ui/components/ui-form/UIField.en"
+import { formVocabulary } from "spell/ui/components/ui-form/UIForm.en"
+import { fieldsVocabulary } from "spell/ui/components/ui-form/UIFields.en"
+import { fieldVocabulary } from "spell/ui/components/ui-form/UIField.en"
 
-import checkboxCSS from "spell-ui/components/ui-checkbox/UICheckbox.css?inline"
-import inputCSS from "spell-ui/components/ui-input/UIInput.css?inline"
-import labelCSS from "spell-ui/components/ui-label/UILabel.css?inline"
-import messageCSS from "spell-ui/components/ui-message/UIMessage.css?inline"
-import formCSS from "spell-ui/components/ui-form/UIForm.css?inline"
-import formRaw from "spell-ui/components/ui-form/UIForm.css?raw"
+import checkboxCSS from "spell/ui/components/ui-checkbox/UICheckbox.css?inline"
+import inputCSS from "spell/ui/components/ui-input/UIInput.css?inline"
+import labelCSS from "spell/ui/components/ui-label/UILabel.css?inline"
+import messageCSS from "spell/ui/components/ui-message/UIMessage.css?inline"
+import formCSS from "spell/ui/components/ui-form/UIForm.css?inline"
+import formRaw from "spell/ui/components/ui-form/UIForm.css?raw"
 
 /**
  * `UIForm.css` on its own, before any element exists:  the sheet's source rules and the computed styles of the

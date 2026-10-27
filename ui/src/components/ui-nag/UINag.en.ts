@@ -1,12 +1,12 @@
 /**
  * Every name `<ui-nag>` uses:  tag, attributes (kind + allowed values), events, slots, parts, states, texts.
- * Schema:  `E.ComponentVocabulary` (`spell-ui/vocabulary`).
+ * Schema:  `E.ComponentVocabulary` (`spell/ui/vocabulary`).
  * - Class words come out through `ClassBuilder`, in Fomantic's grammar:
  *   `<ui-nag size="small" bottom fixed inverted>` => `ui small bottom fixed inverted nag`.
  * - Persistence is opt-in:  only a nag with a `key` reads or writes `storage`.
  */
 
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /****************
  * ### `<ui-nag>`

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { type ComponentVocabulary, type Dictionary, Vocabulary } from "spell-ui/vocabulary"
+import { type ComponentVocabulary, type Dictionary, Vocabulary } from "spell/ui/vocabulary"
 
 /** Cut-down card vocabulary, shaped like a real `UICard.en.ts`. */
 const CARD = {

@@ -1,6 +1,6 @@
 import { isServer, type JSX } from "@solidjs/web"
 
-import { E, UI, UIT } from "spell-ui/core"
+import { E, UI, UIT } from "spell/ui/core"
 import { BreadcrumbDivider } from "./BreadcrumbDivider"
 import { breadcrumbsVocabulary } from "./UIBreadcrumbs.en"
 
@@ -69,7 +69,7 @@ export class UIBreadcrumbs extends E.UIComponent<typeof breadcrumbsVocabulary> {
 
   /**
    * `divider-icon`'s glyph as a CSS `url()`, once loaded;  tracked.
-   * - A server render (`spell-ui/static`) has no `<svg>` template (`svgTemplate` stays empty):
+   * - A server render (`spell/ui/static`) has no `<svg>` template (`svgTemplate` stays empty):
    *   the url comes from the icon's markup, read at once.
    */
   private get dividerIconUrl(): string | undefined {

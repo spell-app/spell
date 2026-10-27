@@ -1,13 +1,13 @@
 import { For, Show } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
-import { E, UI, UIT } from "spell-ui/core"
+import { E, UI, UIT } from "spell/ui/core"
 // the family barrel, not the leaf:
 // the lib build then imports `ui-item.js` instead of splitting a shared chunk
 // (SIDE EFFECT:  defines `<ui-item>`, which an action extends)
-import { UIItem } from "spell-ui/components/ui-item"
-import type { itemVocabulary } from "spell-ui/components/ui-item/UIItem.en"
-import { UIKeys } from "spell-ui/components/ui-keys/UIKeys"
+import { UIItem } from "spell/ui/components/ui-item"
+import type { itemVocabulary } from "spell/ui/components/ui-item/UIItem.en"
+import { UIKeys } from "spell/ui/components/ui-keys/UIKeys"
 import { actionVocabulary } from "./UIAction.en"
 
 import actionCSS from "./UIAction.css?inline"

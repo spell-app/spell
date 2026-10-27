@@ -1,4 +1,4 @@
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /**
  * `<ui-value>` in Spanish:  `<es-valor>`, with the names and texts only it uses (from `UIValue.en.ts`).

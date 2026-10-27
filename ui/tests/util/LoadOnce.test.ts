@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, test, vi } from "vite-plus/test"
 
-import { LoadOnce } from "spell-ui/util"
+import { LoadOnce } from "spell/ui/util"
 
 afterEach(() => {
   vi.restoreAllMocks()

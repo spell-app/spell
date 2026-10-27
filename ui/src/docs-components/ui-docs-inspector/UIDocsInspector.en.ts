@@ -1,13 +1,13 @@
 /**
  * The English vocabulary of `<ui-docs-inspector>`:  every name the tag uses.
  * - Its tag, attributes, events, slots, parts, states and texts.
- *   The shape is `E.ComponentVocabulary` (`spell-ui/vocabulary`).
+ *   The shape is `E.ComponentVocabulary` (`spell/ui/vocabulary`).
  * - A DOC-ONLY element (`src/docs-components/`):  filed under the `documentation` topic,
  *   left out of the component list, and loaded by `<ui-root>` like any family.
  * - No class words:  its two attributes are `string` and `boolean`, which never make a class (`ui inspector`).
  */
 
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /****************
  * ### `docsInspectorVocabulary`

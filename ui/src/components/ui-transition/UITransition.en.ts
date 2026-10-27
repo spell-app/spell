@@ -1,6 +1,6 @@
 /**
  * Every name `<ui-transition>` uses:  tag, attributes (kind + allowed values), events, slots, parts, states, texts.
- * Schema:  `E.ComponentVocabulary` (`spell-ui/vocabulary`).
+ * Schema:  `E.ComponentVocabulary` (`spell/ui/vocabulary`).
  * - Class words come out through `ClassBuilder`, in Fomantic's grammar:
  *   `<ui-transition color="red" pulsating looping>` => `ui red looping pulsating transition`;
  *   the element adds its state before the noun (`visible`, `animating`), the words Fomantic's script added.
@@ -10,7 +10,7 @@
  *     attention ones (`shake`) included.
  */
 
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /****************
  * ### `<ui-transition>`

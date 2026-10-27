@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { PropertySchemas, type JSONSchema } from "spell-ui/property"
-import { fieldVocabulary } from "spell-ui/components/ui-form/UIField.en"
+import { PropertySchemas, type JSONSchema } from "spell/ui/property"
+import { fieldVocabulary } from "spell/ui/components/ui-form/UIField.en"
 
 describe("PropertySchemas.fromVocabulary()", () => {
   it("reads a component's vocabulary as it is:  its tag is the name", () => {

@@ -1,6 +1,6 @@
 import { beforeAll, describe, expect, test } from "vite-plus/test"
 
-import { OldNames } from "spell-ui/tools/OldNames"
+import { OldNames } from "spell/ui/tools/OldNames"
 
 // spell ui rename: leave this file (its cases are the old names)
 
@@ -84,8 +84,8 @@ describe("OldNames.rewrite()", () => {
     ],
     [
       "never a renamed tag's old folder",
-      `import "spell-ui/docs-components/ui-docs-themes"`,
-      `import "spell-ui/docs-components/ui-docs-themes"`
+      `import "spell/ui/docs-components/ui-docs-themes"`,
+      `import "spell/ui/docs-components/ui-docs-themes"`
     ]
   ])("%s", (_name, before, after) => {
     expect(rewrite(before)).toBe(after)

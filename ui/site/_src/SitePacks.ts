@@ -1,7 +1,7 @@
 /**
  * Lets a page of ANY component set load component packs (`<ui-components source="x.pack.js">`):  `globalThis.SpellUI`,
  * what a pack's classic script calls `registerPack()` on and takes its shared modules from (`packModules`), as the
- * docs bundle gives them (`spell-epic/src/tools/_assets/spell-ui.entry.js`).
+ * docs bundle gives them (`epic/src/tools/_assets/spell-ui.entry.js`).
  * - Why:  every set's pages (the page server's `componentSets` setting:  Spell UI's at `/components/ui/`, Epic UI's at
  *   `/components/epics/`, App UI's at `/components/app/`, the brand's at `/components/brand/`) load the epics pack,
  *   `epics.pack.js`, whose `<epic-thread>` and `<epic-comment-pane>` draw the comments (epic `epic-engine`);  and the
@@ -31,12 +31,12 @@
 import * as solidH from "@solidjs/h"
 import * as solidWeb from "@solidjs/web"
 import * as solid from "solid-js"
-import * as uiCore from "spell-ui/core"
-import * as uiForms from "spell-ui/forms"
-import * as imageZoom from "spell-ui/components/ui-zoom/ImageZoom"
-import type { ComponentPack } from "spell-ui/components/ui-components/UIComponents.types"
-import { registerPack } from "spell-ui/components/ui-components/ComponentPacks"
-import { PackHotSwap } from "spell-ui/hot"
+import * as uiCore from "spell/ui/core"
+import * as uiForms from "spell/ui/forms"
+import * as imageZoom from "spell/ui/components/ui-zoom/ImageZoom"
+import type { ComponentPack } from "spell/ui/components/ui-components/UIComponents.types"
+import { registerPack } from "spell/ui/components/ui-components/ComponentPacks"
+import { PackHotSwap } from "spell/ui/hot"
 
 // a rebuilt pack (a merge) swaps into the live page instead of reloading it (epic `epic-engine` I116):
 // installed now, before any pack defines its tags
@@ -44,18 +44,18 @@ PackHotSwap.install()
 
 /**
  * What a pack imports, by its `packModules` key => the page's copy of that module.
- * - The keys are the pack build's externals, by the names its source imports them by:  `spell-ui/core`.
- * - `spell/element`:  Spell UI's core module, which carries all of it (`spell-ui/core` re-exports it):  one per page.
+ * - The keys are the pack build's externals, by the names its source imports them by:  `spell/ui/core`.
+ * - `spell/element`:  Spell UI's core module, which carries all of it (`spell/ui/core` re-exports it):  one per page.
  */
 const packModules: Record<string, unknown> = {
   "solid-js": solid,
   "@solidjs/web": solidWeb,
   "@solidjs/h": solidH,
   "spell/element": uiCore,
-  "spell-ui/core": uiCore,
-  "spell-ui/forms": uiForms,
+  "spell/ui/core": uiCore,
+  "spell/ui/forms": uiForms,
   // the page's zoom for its screenshots:  plain DOM, no element (epic `ui-gaps` P14)
-  "spell-ui/components/ui-zoom/ImageZoom": imageZoom
+  "spell/ui/components/ui-zoom/ImageZoom": imageZoom
 }
 
 /**
@@ -63,17 +63,17 @@ const packModules: Record<string, unknown> = {
  * - The families a pack's elements may EXTEND join `packModules` first (`shareFamilies()`).
  */
 function registerWithFamilies(pack: ComponentPack): void {
-  registerPack({ ...pack, define: () => import("spell-ui").then(shareFamilies).then(() => pack.define()) })
+  registerPack({ ...pack, define: () => import("spell/ui").then(shareFamilies).then(() => pack.define()) })
 }
 
 /** Put the families a pack's elements may extend in `packModules`, by their keys. */
 async function shareFamilies(): Promise<void> {
   const [code, markdown] = await Promise.all([
-    import("spell-ui/components/ui-code"),
-    import("spell-ui/components/ui-markdown")
+    import("spell/ui/components/ui-code"),
+    import("spell/ui/components/ui-markdown")
   ])
-  packModules["spell-ui/components/ui-code"] = code
-  packModules["spell-ui/components/ui-markdown"] = markdown
+  packModules["spell/ui/components/ui-code"] = code
+  packModules["spell/ui/components/ui-markdown"] = markdown
 }
 
 const spellUI = (globalThis as { SpellUI?: object }).SpellUI

@@ -3,9 +3,9 @@ import { describe, expect, it, vi } from "vite-plus/test"
 import { expectAccessible } from "spell/test-helpers/A11y"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import type { DOMElement } from "spell/element"
-import type { DOMMediaElement } from "spell-ui/components/ui-video"
+import type { DOMMediaElement } from "spell/ui/components/ui-video"
 
-import "spell-ui/components/ui-video"
+import "spell/ui/components/ui-video"
 
 /** Render `html`;  the element and its native player. */
 async function player(html: string) {

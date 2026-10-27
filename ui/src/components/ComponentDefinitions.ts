@@ -1,4 +1,4 @@
-import { ValueSets, type ComponentTopic, type ComponentVocabulary } from "spell-ui/vocabulary"
+import { ValueSets, type ComponentTopic, type ComponentVocabulary } from "spell/ui/vocabulary"
 
 /** One tag, as the docs' component browser (and later `<ui-root>`'s loader) needs it. */
 export type ComponentDefinition = {

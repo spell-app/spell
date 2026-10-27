@@ -1,7 +1,7 @@
 import { isServer, type JSX } from "@solidjs/web"
 
-import { E, UI, UIT } from "spell-ui/core"
-import { F } from "spell-ui/forms"
+import { E, UI, UIT } from "spell/ui/core"
+import { F } from "spell/ui/forms"
 import { CheckboxFallback } from "./UICheckbox.fallback"
 import { type CheckVocabulary, type CommonAttributes } from "./UICheckbox.types"
 
@@ -255,7 +255,7 @@ export abstract class CheckControl<V extends CheckVocabulary = CheckVocabulary> 
   }
 
   /**
-   * The native input's extra attributes in a server render (`spell-ui/static`).
+   * The native input's extra attributes in a server render (`spell/ui/static`).
    * - What it needs to submit without script:  `name`, `value`, `checked`;  and the `STATIC_CONTROL` mark.
    * - `{}` in a browser, where the DOM element submits (`ElementInternals`) and an effect sets `checked`.
    * - `value` left out when it's the native default.

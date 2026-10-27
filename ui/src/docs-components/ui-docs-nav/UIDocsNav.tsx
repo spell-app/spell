@@ -1,9 +1,9 @@
 import { For, Match, Show, Switch, createMemo } from "solid-js"
 import { isServer, type JSX } from "@solidjs/web"
 
-import { E, UIT } from "spell-ui/core"
-import { SiteData } from "spell-ui/docs-components/SiteData"
-import type { DOMDocsSearchElement } from "spell-ui/docs-components/ui-docs-search/UIDocsSearch"
+import { E, UIT } from "spell/ui/core"
+import { SiteData } from "spell/ui/docs-components/SiteData"
+import type { DOMDocsSearchElement } from "spell/ui/docs-components/ui-docs-search/UIDocsSearch"
 import { docsNavVocabulary } from "./UIDocsNav.en"
 import { NavIndex } from "./NavIndex"
 import { NavPreferences } from "./NavPreferences"

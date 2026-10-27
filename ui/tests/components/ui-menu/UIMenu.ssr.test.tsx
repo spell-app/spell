@@ -2,12 +2,12 @@
 
 import { beforeAll, describe, expect, it } from "vite-plus/test"
 
-import { StaticRender } from "spell-ui/static"
-import { UIItem } from "spell-ui/components/ui-item/UIItem"
-import { UIMenu } from "spell-ui/components/ui-menu/UIMenu"
+import { StaticRender } from "spell/ui/static"
+import { UIItem } from "spell/ui/components/ui-item/UIItem"
+import { UIMenu } from "spell/ui/components/ui-menu/UIMenu"
 
 /**
- * `<ui-menu>` in the static server render (`spell-ui/static`):  a `<nav>` landmark of link items,
+ * `<ui-menu>` in the static server render (`spell/ui/static`):  a `<nav>` landmark of link items,
  * a sub-menu as `<div class="right menu">`, and the `interactive` menubar with `menuitem` buttons.
  */
 describe("<ui-menu> static render", () => {

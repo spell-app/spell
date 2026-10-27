@@ -1,14 +1,14 @@
 import { beforeEach, describe, expect, it, onTestFinished } from "vite-plus/test"
 
-import { UI } from "spell-ui/runtime"
-import { nextFrame } from "spell-ui/util"
-import type { StickyDetail } from "spell-ui/components/components.types"
+import { UI } from "spell/ui/runtime"
+import { nextFrame } from "spell/ui/util"
+import type { StickyDetail } from "spell/ui/components/components.types"
 import { expectAccessible } from "spell/test-helpers/A11y"
 
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import type { DOMElement } from "spell/element"
 
-import "spell-ui/components/ui-sticky"
+import "spell/ui/components/ui-sticky"
 
 /** Element-markup rewrites of every example, by path. */
 const EXAMPLES = import.meta.glob<string>("/src/components/ui-sticky/examples/elements/*.html", {

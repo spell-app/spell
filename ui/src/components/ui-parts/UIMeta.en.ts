@@ -1,6 +1,6 @@
 /**
  * The English vocabulary of `<ui-meta>`, one of the 13 generic content parts:  every name the tag uses.
- * - The shape is `E.ComponentVocabulary` (`spell-ui/vocabulary`).
+ * - The shape is `E.ComponentVocabulary` (`spell/ui/vocabulary`).
  * - The noun IS the part word, and the class its root carries:  `<ui-meta>` => `class="meta"`.
  *   Parts have no `ui` class (`ui: false`), except a STANDALONE `<ui-header>`, which is Fomantic's `ui header`.
  * - Owners declare the parts they own (`ownsParts` in THEIR vocabularies).
@@ -9,7 +9,7 @@
  * - `UIParts.css` styles every part;  its header lists the tokens owners must set.
  */
 
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /****************
  * ### `metaVocabulary`

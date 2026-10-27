@@ -1,17 +1,17 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { colorsCSS, foundationCSS } from "spell-ui/styles"
+import { colorsCSS, foundationCSS } from "spell/ui/styles"
 
 import { Fixture } from "spell/test-helpers/Fixture"
-import { Sheets } from "spell-ui/test-helpers/Sheets"
+import { Sheets } from "spell/ui/test-helpers/Sheets"
 import { Viewport } from "spell/test-helpers/Viewport"
 
-import { gridVocabulary } from "spell-ui/components/ui-grid/UIGrid.en"
-import { columnVocabulary } from "spell-ui/components/ui-grid/UIColumn.en"
-import { rowVocabulary } from "spell-ui/components/ui-grid/UIRow.en"
+import { gridVocabulary } from "spell/ui/components/ui-grid/UIGrid.en"
+import { columnVocabulary } from "spell/ui/components/ui-grid/UIColumn.en"
+import { rowVocabulary } from "spell/ui/components/ui-grid/UIRow.en"
 
-import gridCSS from "spell-ui/components/ui-grid/UIGrid.css?inline"
-import gridRaw from "spell-ui/components/ui-grid/UIGrid.css?raw"
+import gridCSS from "spell/ui/components/ui-grid/UIGrid.css?inline"
+import gridRaw from "spell/ui/components/ui-grid/UIGrid.css?raw"
 
 /**
  * `UIGrid.css` on its own, before any element exists:  the sheet's source rules, the computed layout of the

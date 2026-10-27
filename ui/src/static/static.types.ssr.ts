@@ -1,5 +1,5 @@
 /**
- * Shared types and constants of `spell-ui/static`, the static (no shadow DOM, no JS) server render of `ui-*` pages.
+ * Shared types and constants of `spell/ui/static`, the static (no shadow DOM, no JS) server render of `ui-*` pages.
  * - The BOTTOM of the folder's import graph:  `import type` only (and `UIT`, pure data), no class file of its folder;
  *   every class file above it reads it.
  * - Its marks are read while their users EVALUATE (the module constants of `StaticSelectors`, `StaticStylesheet`),
@@ -7,8 +7,8 @@
  * - Node only, like the folder:  NEVER imported by a component or `spell-ui`.
  */
 
-import * as UIT from "spell-ui/components/components.types"
-import type { E } from "spell-ui/core"
+import * as UIT from "spell/ui/components/components.types"
+import type { E } from "spell/ui/core"
 
 ////////////////
 // ## Static marks

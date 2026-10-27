@@ -6,18 +6,18 @@ import {
   EMPTY_FORM_HTML,
   STATIC_FORM_ENTRIES,
   STATIC_FORM_HTML
-} from "spell-ui/test-helpers/staticForm.cases"
+} from "spell/ui/test-helpers/staticForm.cases"
 
-import "spell-ui/components/ui-button"
-import "spell-ui/components/ui-calendar"
-import "spell-ui/components/ui-checkbox"
-import "spell-ui/components/ui-dropdown"
-import "spell-ui/components/ui-input"
-import "spell-ui/components/ui-item"
-import "spell-ui/components/ui-rating"
-import "spell-ui/components/ui-search"
-import "spell-ui/components/ui-select"
-import "spell-ui/components/ui-slider"
+import "spell/ui/components/ui-button"
+import "spell/ui/components/ui-calendar"
+import "spell/ui/components/ui-checkbox"
+import "spell/ui/components/ui-dropdown"
+import "spell/ui/components/ui-input"
+import "spell/ui/components/ui-item"
+import "spell/ui/components/ui-rating"
+import "spell/ui/components/ui-search"
+import "spell/ui/components/ui-select"
+import "spell/ui/components/ui-slider"
 
 /**
  * A static form's round trip, the LIVE half (seo plan, P4):  `STATIC_FORM_HTML` as elements, submitted with its Save

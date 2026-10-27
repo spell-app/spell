@@ -1,4 +1,4 @@
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /**
  * `<ui-markdown>` in Spanish:  `<es-markdown>`, with the names and texts only it uses (from `UIMarkdown.en.ts`).

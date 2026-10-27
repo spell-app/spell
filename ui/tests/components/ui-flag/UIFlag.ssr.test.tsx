@@ -2,10 +2,10 @@
 
 import { beforeAll, describe, expect, it } from "vite-plus/test"
 
-import { StaticRender } from "spell-ui/static"
-import { UIFlag } from "spell-ui/components/ui-flag/UIFlag"
+import { StaticRender } from "spell/ui/static"
+import { UIFlag } from "spell/ui/components/ui-flag/UIFlag"
 
-/** `<ui-flag>` in the static server render (`spell-ui/static`, seo plan P3). */
+/** `<ui-flag>` in the static server render (`spell/ui/static`, seo plan P3). */
 describe("<ui-flag> static render", () => {
   beforeAll(() => {
     StaticRender.define(UIFlag)

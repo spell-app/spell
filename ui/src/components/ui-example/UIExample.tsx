@@ -1,7 +1,7 @@
 import { Show } from "solid-js"
 import { isServer, type JSX } from "@solidjs/web"
 
-import { E, UIT } from "spell-ui/core"
+import { E, UIT } from "spell/ui/core"
 import { ExampleSource } from "./ExampleSource"
 import { exampleVocabulary } from "./UIExample.en"
 

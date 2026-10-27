@@ -1,4 +1,4 @@
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /**
  * `<ui-toolbar>` in Spanish:  `<es-barra-herramientas>`, with the names and texts only it uses (from `UIToolbar.en.ts`).

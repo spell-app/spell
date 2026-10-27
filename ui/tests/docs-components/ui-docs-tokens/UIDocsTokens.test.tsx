@@ -3,12 +3,12 @@ import { afterAll, describe, expect, it, onTestFinished } from "vite-plus/test"
 import { expectAccessible } from "spell/test-helpers/A11y"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import type { DOMElement } from "spell/element"
-import { SiteData } from "spell-ui/docs-components/SiteData"
-import type { SiteDataFile, SiteTag, SiteToken } from "spell-ui/docs-components/docs-components.types"
+import { SiteData } from "spell/ui/docs-components/SiteData"
+import type { SiteDataFile, SiteTag, SiteToken } from "spell/ui/docs-components/docs-components.types"
 
-import { UIDocsTokens } from "spell-ui/docs-components/ui-docs-tokens/UIDocsTokens"
+import { UIDocsTokens } from "spell/ui/docs-components/ui-docs-tokens/UIDocsTokens"
 
-import "spell-ui/docs-components/ui-docs-tokens"
+import "spell/ui/docs-components/ui-docs-tokens"
 
 ////////////////
 // ## Fixtures

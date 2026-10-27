@@ -1,7 +1,7 @@
 /**
  * Every name `<ui-sidebar>`, `<ui-pushable>` and `<ui-pusher>` use:
  * tags, attributes (kind + allowed values), events, slots, parts, states, texts.
- * Schema:  `E.ComponentVocabulary` (`spell-ui/vocabulary`).
+ * Schema:  `E.ComponentVocabulary` (`spell/ui/vocabulary`).
  * - Class words come out through `ClassBuilder`, in Fomantic's grammar:
  *   `<ui-sidebar position="right" width="thin" transition="scale down" visible>` =>
  *   `ui right thin scale down visible sidebar`.
@@ -14,7 +14,7 @@
  * - `pushable` / `pusher` have no `ui` (Fomantic's `.pushable`, `.pusher`).
  */
 
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /****************
  * ### `<ui-pushable>`

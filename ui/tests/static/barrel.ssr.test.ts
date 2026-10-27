@@ -1,7 +1,7 @@
 import { describe, expect, test, vi } from "vite-plus/test"
 
 /**
- * Barrel / circular-import smoke tests for `spell-ui/static` (WWOD §8 › "Barrels").
+ * Barrel / circular-import smoke tests for `spell/ui/static` (WWOD §8 › "Barrels").
  * - Every file of the folder imports the barrel back as `SSR`, so the barrel sits in a cycle with all of them:  a
  *   value read while a file EVALUATES would come back `undefined`, and `tsc` would never say so.
  * - So enter by every route (the barrel, then each file first) and check every export is live, flat and under `SSR`.
@@ -40,28 +40,28 @@ const VALUES = [
 
 /** Ways in:  the barrel, then each of its files imported BEFORE it. */
 const ENTRIES = [
-  "spell-ui/static",
-  "spell-ui/static/static.types.ssr",
-  "spell-ui/static/ServerIds.ssr",
-  "spell-ui/static/ServerDOMElement.ssr",
-  "spell-ui/static/StaticSelectors.ssr",
-  "spell-ui/static/ServerRuntime.ssr",
-  "spell-ui/static/StaticFlattener.ssr",
-  "spell-ui/static/StaticInteractions.ssr",
-  "spell-ui/static/StaticPageStyles.ssr",
-  "spell-ui/static/StaticStylesheet.ssr",
-  "spell-ui/static/StaticRender.ssr",
-  "spell-ui/static/StaticCatalog.ssr"
+  "spell/ui/static",
+  "spell/ui/static/static.types.ssr",
+  "spell/ui/static/ServerIds.ssr",
+  "spell/ui/static/ServerDOMElement.ssr",
+  "spell/ui/static/StaticSelectors.ssr",
+  "spell/ui/static/ServerRuntime.ssr",
+  "spell/ui/static/StaticFlattener.ssr",
+  "spell/ui/static/StaticInteractions.ssr",
+  "spell/ui/static/StaticPageStyles.ssr",
+  "spell/ui/static/StaticStylesheet.ssr",
+  "spell/ui/static/StaticRender.ssr",
+  "spell/ui/static/StaticCatalog.ssr"
 ]
 
 /**
- * `spell-ui/static` imported fresh, after `entry`, as an indexable record.
+ * `spell/ui/static` imported fresh, after `entry`, as an indexable record.
  * - SIDE EFFECT:  resets the module registry.
  */
 async function freshBarrel(entry: string): Promise<Record<string, any>> {
   vi.resetModules()
   await import(/* @vite-ignore */ entry)
-  return (await import("spell-ui/static")) as Record<string, any>
+  return (await import("spell/ui/static")) as Record<string, any>
 }
 
 /** Names `barrel` fails to expose:  flattened, and under `SSR`. */
@@ -76,7 +76,7 @@ function missingFrom(barrel: Record<string, any>) {
 // ## Tests
 ////////////////
 
-describe("spell-ui/static barrel", () => {
+describe("spell/ui/static barrel", () => {
   test.each(ENTRIES)(
     "entered at %s, every export is DEFINED, flat and under SSR",
     async (entry) => {
@@ -86,12 +86,12 @@ describe("spell-ui/static barrel", () => {
   )
 
   test("SSR hands back the same bindings as the flat exports", async () => {
-    const barrel = await freshBarrel("spell-ui/static")
+    const barrel = await freshBarrel("spell/ui/static")
     for (const name of VALUES) if (name !== "SSR") expect(barrel.SSR[name], name).toBe(barrel[name])
   })
 
   test("the module constants that read marks got them, not undefined", async () => {
-    const { StaticStylesheet, ROOT, SLOTTED } = await freshBarrel("spell-ui/static/StaticStylesheet.ssr")
+    const { StaticStylesheet, ROOT, SLOTTED } = await freshBarrel("spell/ui/static/StaticStylesheet.ssr")
     const css = StaticStylesheet.scope(".ui.button { color: red }", ROOT)
     expect(css).not.toContain("undefined")
     expect(css).toContain(SLOTTED)

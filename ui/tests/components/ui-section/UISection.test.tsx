@@ -1,21 +1,21 @@
 import { userEvent } from "vite-plus/test/browser"
 import { afterEach, beforeAll, describe, expect, it, vi } from "vite-plus/test"
 
-import type { SectionToggleDetail } from "spell-ui/components/components.types"
-import { UI } from "spell-ui/runtime"
-import { nextFrame } from "spell-ui/util"
+import type { SectionToggleDetail } from "spell/ui/components/components.types"
+import { UI } from "spell/ui/runtime"
+import { nextFrame } from "spell/ui/util"
 import { expectAccessible } from "spell/test-helpers/A11y"
 
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import { Fixture } from "spell/test-helpers/Fixture"
 import type { DOMElement } from "spell/element"
-import { ParentLink } from "spell-ui/core"
+import { ParentLink } from "spell/ui/core"
 
-import "spell-ui/components/ui-section"
-import "spell-ui/components/ui-icon"
-import "spell-ui/components/ui-label"
-import "spell-ui/components/ui-button"
-import "spell-ui/components/ui-segment"
+import "spell/ui/components/ui-section"
+import "spell/ui/components/ui-icon"
+import "spell/ui/components/ui-label"
+import "spell/ui/components/ui-button"
+import "spell/ui/components/ui-segment"
 
 /** Element-markup rewrites of every example, by path. */
 const EXAMPLES = import.meta.glob<string>("/src/components/ui-section/examples/elements/*.html", {

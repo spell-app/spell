@@ -2,10 +2,10 @@
 
 import { beforeAll, describe, expect, it } from "vite-plus/test"
 
-import { StaticRender } from "spell-ui/static"
-import { UIDivider } from "spell-ui/components/ui-divider/UIDivider"
+import { StaticRender } from "spell/ui/static"
+import { UIDivider } from "spell/ui/components/ui-divider/UIDivider"
 
-/** `<ui-divider>` in the static server render (`spell-ui/static`, seo plan P3). */
+/** `<ui-divider>` in the static server render (`spell/ui/static`, seo plan P3). */
 describe("<ui-divider> static render", () => {
   beforeAll(() => {
     StaticRender.define(UIDivider)

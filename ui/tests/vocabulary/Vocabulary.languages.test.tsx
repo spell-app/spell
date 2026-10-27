@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vite-plus/test"
 
 import type { DOMElement } from "spell/element"
-import { UI } from "spell-ui/core"
-import { UIButton } from "spell-ui/components/ui-button"
-import { es } from "spell-ui/components/components.es"
+import { UI } from "spell/ui/core"
+import { UIButton } from "spell/ui/components/ui-button"
+import { es } from "spell/ui/components/components.es"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 
 /** The page's runtime, with Spanish defined:  once for the file (a page picks its language once). */
@@ -42,7 +42,7 @@ describe("UI.vocabulary.defineComponents({ prefix, dictionary })", () => {
   })
 
   it("names a Spanish tag's properties in Spanish:  `apariencia` is `appearance`, by attribute and by property", async () => {
-    await import("spell-ui/components/ui-card")
+    await import("spell/ui/components/ui-card")
     const cardRoot = (host: DOMElement) => host.shadowRoot!.querySelector("[part~=card]")!
     // by its Spanish attribute
     const byAttribute = await ElementFixture.render<DOMElement>(`<es-tarjeta apariencia="dashed"></es-tarjeta>`)
@@ -67,7 +67,7 @@ describe("UI.vocabulary.defineComponents({ prefix, dictionary })", () => {
 
   it("defines a family loaded afterwards as it's defined", async () => {
     expect(customElements.get("es-etiqueta")).toBeUndefined()
-    await import("spell-ui/components/ui-label")
+    await import("spell/ui/components/ui-label")
     expect(customElements.get("es-etiqueta")).toBeDefined()
   })
 
@@ -107,7 +107,7 @@ describe("UI.i18n.registerDictionary()", () => {
 
 describe("NativeFallback.send()", () => {
   it("a Spanish select's FALLBACK sends its change under the Spanish name, as the component would", async () => {
-    await import("spell-ui/components/ui-select")
+    await import("spell/ui/components/ui-select")
     const host = await ElementFixture.render<DOMElement>(
       `<es-selector aria-label="Fruta"><ui-item value="a">A</ui-item><ui-item value="b">B</ui-item></es-selector>`
     )

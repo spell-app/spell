@@ -1,4 +1,4 @@
-import { E } from "spell-ui/core"
+import { E } from "spell/ui/core"
 
 /****************
  * ### `IconCatalog`
@@ -19,7 +19,7 @@ import { E } from "spell-ui/core"
  * - A search matches, best first:
  *   - a name that IS the query, then names starting with it, then names holding it
  *   - then Font Awesome's search terms for the glyph's file (`envelope` for `mail`)
- * - The categories and the terms are ONE file, `spell-ui/icons/data/search.json` (`IconSearchFile`):
+ * - The categories and the terms are ONE file, `spell/ui/icons/data/search.json` (`IconSearchFile`):
  *   ~110 KB, so it's loaded (`searchWords()`) only as a picker first opens, once per page.
  * - STATIC and instance-free on purpose:  a page's packs are the page's, and the search words are one file;
  *   each picker holds the list it was given.
@@ -109,7 +109,7 @@ export class IconCatalog {
    *   and the next call tries again.
    */
   static searchWords(): Promise<IconSearchWords> {
-    IconCatalog.loading ??= import("spell-ui/icons/data/search.json").then(
+    IconCatalog.loading ??= import("spell/ui/icons/data/search.json").then(
       (module) => IconCatalog.wordsOf(module.default as E.IconSearchFile),
       () => {
         IconCatalog.loading = undefined

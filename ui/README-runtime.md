@@ -75,7 +75,7 @@ Each service is a class, built when the runtime is, and held as one of its field
 Your own code reads them the way the elements do, once the runtime is in:
 
 ```js
-import { UI } from "spell-ui/core"
+import { UI } from "spell/ui/core"
 
 const { themes, i18n } = await UI.load()
 await themes.apply("merlot") //             Spell's Merlot theme, on the page and in every shadow root
@@ -152,8 +152,8 @@ This is a Spell UI page, written in Spanish:
 From code, the same thing is two calls on the runtime:
 
 ```js
-import { UI } from "spell-ui/core"
-import { es } from "spell-ui/components/components.es"
+import { UI } from "spell/ui/core"
+import { es } from "spell/ui/components/components.es"
 
 const { vocabulary, i18n } = await UI.load()
 vocabulary.defineComponents({ prefix: "es", dictionary: es }) // every component, named in Spanish
@@ -436,7 +436,7 @@ The foundation is a set of sheets in [`src/styles/`](src/styles/), one per conce
 
 - \* Generated from [`styles.en.ts`](src/styles/styles.en.ts) by `yarn gen:styles`, and committed,
   so nobody using Spell UI needs a build step.
-- `spell-ui/styles` exports each sheet as text, plus the two lists the runtime adopts:
+- `spell/ui/styles` exports each sheet as text, plus the two lists the runtime adopts:
   - `foundationCSS`:  for the page AND every shadow root
   - `pageCSS`:  for the page only, which adds typography and the native-markup rules
 - Each family adds its own sheet, in `ui.components.<name>`, split into four sub-layers:
@@ -552,11 +552,11 @@ Where it stops:
 <details>
 <summary>The static render from code</summary>
 
-It's the `SSR` namespace, `spell-ui/static`, in [`src/static/`](src/static/):  node only, never in a browser bundle.
+It's the `SSR` namespace, `spell/ui/static`, in [`src/static/`](src/static/):  node only, never in a browser bundle.
 `StaticRender.page()` and `fragment()` do the work:
 
 ```ts
-import { SSR } from "spell-ui/static"
+import { SSR } from "spell/ui/static"
 
 SSR.StaticRender.define(...SSR.StaticCatalog.classes) // the 55 families it can render, once per process
 await SSR.StaticRender.prepare(html) //                  what the render reads:  icon packs, each family's own data
@@ -594,7 +594,7 @@ def stylesheet():
 - Run with Flask's own server, both answer 200, `text/html` and `text/css`, and the modal above still opens.
 - Quart, or any static host, serves them the same way.
 - A Spell program compiled to Python runs its logic on Quart, and draws with JavaScript and Spell UI as usual:
-  its compile writes a short Quart app beside it ([spell-parser's README-targets.md](https://github.com/spell-app/spell-parser/blob/main/README-targets.md)).
+  its compile writes a short Quart app beside it ([spell-parser's README-targets.md](https://github.com/spell-app/spell/blob/main/parser/README-targets.md)).
 
 ### 🌱 Coming:  rendering from a Python app
 
@@ -626,7 +626,7 @@ and hands the framework its runtime, words and styles as its core loads.
 | `SpellUISettings` | what Spell UI hands the kit's element framework as it loads:  the runtime, the words, the styles |
 
 - Every family imports these through two entries:
-  `spell-ui/core` (`E`) and, for form controls, `spell-ui/forms` (`F`).
+  `spell/ui/core` (`E`) and, for form controls, `spell/ui/forms` (`F`).
 - The states every element shares are the kit's `UIComponent`'s:
   `disabled`, `loading`, `visible` / `hidden`, `animation`.
   Spell UI's elements style them through the reset sheet.

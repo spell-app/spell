@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { SourceError } from "spell-ui/runtime"
-import { SourceMarkup } from "spell-ui/elements"
+import { SourceError } from "spell/ui/runtime"
+import { SourceMarkup } from "spell/ui/elements"
 
 /** A file one folder down, as `source` names it. */
 const SOURCE = "parts/intro.html"

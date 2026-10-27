@@ -1,4 +1,4 @@
-import { E } from "spell-ui/core"
+import { E } from "spell/ui/core"
 import { emojiChunkFor } from "./UIEmoji.types"
 
 // Above the class:  the static `set` reads it while the class is defined
@@ -30,7 +30,7 @@ export class EmojiData {
   /**
    * Where a chunk's names come from instead of this module's own lazy `import()`s:  `(set, chunk) => names`.
    * - For a build that can't load ES modules lazily, e.g. the docs' single-file bundle on `file://`,
-   *   which loads each chunk as a classic `<script>` (`spell-epic/src/tools/bundle-spell-ui.js`).
+   *   which loads each chunk as a classic `<script>` (`epic/src/tools/bundle-spell-ui.js`).
    *   Set it before the first lookup.
    */
   static chunkLoader?: (set: string, chunk: string) => Promise<Record<string, string>>
@@ -118,7 +118,7 @@ export class EmojiData {
    * Load the chunks of every name in `names`, in each of `sets` (default:  every set that ships),
    * so later `peek()`s find them synchronously.
    * - NEVER rejects.
-   * - For the static server render (`spell-ui/static`), which is synchronous:  see `UIEmoji.preload()`.
+   * - For the static server render (`spell/ui/static`), which is synchronous:  see `UIEmoji.preload()`.
    */
   static async preload(names: Iterable<string>, sets: Iterable<string> = SETS): Promise<void> {
     const list = [...new Set(names)]

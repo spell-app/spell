@@ -1,4 +1,4 @@
-import type { VisualHooks } from "spell-ui/test-helpers/test.types"
+import type { VisualHooks } from "spell/ui/test-helpers/test.types"
 
 /** A tag for a host whose `ready` never resolves:  NOT `ui-*`, so the visual fixture's settle doesn't wait for it. */
 const WAIT = "x-visual-wait"

@@ -2,15 +2,15 @@
 
 import { beforeAll, describe, expect, it } from "vite-plus/test"
 
-import { StaticRender } from "spell-ui/static"
-import { UICheckbox } from "spell-ui/components/ui-checkbox/UICheckbox"
-import { UIInput } from "spell-ui/components/ui-input/UIInput"
-import { UIField } from "spell-ui/components/ui-form/UIField"
-import { UIFields } from "spell-ui/components/ui-form/UIFields"
-import { UIForm } from "spell-ui/components/ui-form/UIForm"
+import { StaticRender } from "spell/ui/static"
+import { UICheckbox } from "spell/ui/components/ui-checkbox/UICheckbox"
+import { UIInput } from "spell/ui/components/ui-input/UIInput"
+import { UIField } from "spell/ui/components/ui-form/UIField"
+import { UIFields } from "spell/ui/components/ui-form/UIFields"
+import { UIForm } from "spell/ui/components/ui-form/UIForm"
 
 /**
- * `<ui-form>`, `<ui-fields>`, `<ui-field>` in a static server render (`spell-ui/static`):  a slotted `<form>` merges
+ * `<ui-form>`, `<ui-fields>`, `<ui-field>` in a static server render (`spell/ui/static`):  a slotted `<form>` merges
  * into the root, which becomes Fomantic's `<form class="ui form">`, and the controls submit natively.
  */
 describe("<ui-form> static render", () => {

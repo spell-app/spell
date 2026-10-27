@@ -1,5 +1,5 @@
-import { E, UIT } from "spell-ui/core"
-import { F } from "spell-ui/forms"
+import { E, UIT } from "spell/ui/core"
+import { F } from "spell/ui/forms"
 import { FIELD_SELECTOR, type Field, type FieldSpec } from "./UIForm.types"
 
 /****************

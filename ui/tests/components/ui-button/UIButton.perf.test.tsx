@@ -5,7 +5,7 @@ import { flush } from "solid-js"
 import { localDate } from "spell/util/time"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 
-import "spell-ui/components/ui-button"
+import "spell/ui/components/ui-button"
 
 /** Buttons per run. */
 const COUNT = 1000

@@ -23,7 +23,7 @@ import { execFileSync } from "node:child_process"
 import path from "node:path"
 import { build, type Rolldown } from "vite"
 
-import { KIT_ROOT, SPELL_CLI } from "spell-ui/tools/pageServer"
+import { KIT_ROOT, SPELL_CLI } from "spell/ui/tools/pageServer"
 import { Terminal } from "spell/element-tools/Terminal"
 
 /** Spell UI's folder. */

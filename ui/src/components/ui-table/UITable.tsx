@@ -2,7 +2,7 @@
 import { For, Show, createRenderEffect } from "solid-js"
 import { Portal, isServer, type JSX } from "@solidjs/web"
 
-import { E, UI, UIT } from "spell-ui/core"
+import { E, UI, UIT } from "spell/ui/core"
 import { tableVocabulary } from "./UITable.en"
 import { TableClassMirror } from "./TableClassMirror"
 import { ATTACH, TableGrammar } from "./TableGrammar"
@@ -73,7 +73,7 @@ import tableCSS from "./UITable.css?inline"
  *
  * - `caption`:  drawn above the scroller (attribute, or the `caption` slot);  a native table's `<caption>` wins.
  *
- * - Static server render (`spell-ui/static`):  no observers, effects or listeners.
+ * - Static server render (`spell/ui/static`):  no observers, effects or listeners.
  *   `decorateStatic()` writes the author table's classes, marker and `aria-sort` once,
  *   and data mode draws its table inside the scroller (the page's static style sheet styles it there).
  ****************/

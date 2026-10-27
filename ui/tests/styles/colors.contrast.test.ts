@@ -1,18 +1,18 @@
 import { describe, expect, it, onTestFinished } from "vite-plus/test"
 
 import { clipped, CONTRAST_LARGE, CONTRAST_TEXT, CONTRAST_TEXT_AAA, oklchToRgb } from "spell/util/color"
-import { UI } from "spell-ui/runtime"
-import { hueAliases, hueStates, hues, semanticAliases, semanticColors } from "spell-ui/styles"
+import { UI } from "spell/ui/runtime"
+import { hueAliases, hueStates, hues, semanticAliases, semanticColors } from "spell/ui/styles"
 
 import { A11y } from "spell/test-helpers/A11y"
 import { Fixture } from "spell/test-helpers/Fixture"
-import { ThemeHarness } from "spell-ui/test-helpers/ThemeHarness"
+import { ThemeHarness } from "spell/ui/test-helpers/ThemeHarness"
 
-import layersRaw from "spell-ui/styles/layers.css?raw"
-import tokensRaw from "spell-ui/styles/tokens.css?raw"
-import colorsRaw from "spell-ui/styles/colors.css?raw"
-import sizesRaw from "spell-ui/styles/sizes.css?raw"
-import utilitiesRaw from "spell-ui/styles/utilities.css?raw"
+import layersRaw from "spell/ui/styles/layers.css?raw"
+import tokensRaw from "spell/ui/styles/tokens.css?raw"
+import colorsRaw from "spell/ui/styles/colors.css?raw"
+import sizesRaw from "spell/ui/styles/sizes.css?raw"
+import utilitiesRaw from "spell/ui/styles/utilities.css?raw"
 
 /**
  * WCAG contrast of the palette and the text, per colour and per scheme, with no theme and in each theme of Spell's

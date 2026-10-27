@@ -6,7 +6,7 @@ import type {
   SiteTag,
   SiteText,
   SiteUse
-} from "spell-ui/docs-components/docs-components.types"
+} from "spell/ui/docs-components/docs-components.types"
 import { InlineCode } from "./InlineCode"
 import {
   ApiSectionIds,

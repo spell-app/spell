@@ -21,11 +21,11 @@ import { writeFileSync } from "node:fs"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
 
-import { FamilyFiles } from "spell-ui/tools/FamilyFiles"
+import { FamilyFiles } from "spell/ui/tools/FamilyFiles"
 import { RootCatalog } from "spell/element-tools/RootCatalog"
 import { Terminal } from "spell/element-tools/Terminal"
 
-import { formatFiles } from "spell-ui/tools/generatedFiles"
+import { formatFiles } from "spell/ui/tools/generatedFiles"
 
 /** `src/components/`. */
 const COMPONENTS = fileURLToPath(new URL("../src/components/", import.meta.url))

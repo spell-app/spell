@@ -1,14 +1,14 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { colorsCSS, foundationCSS } from "spell-ui/styles"
+import { colorsCSS, foundationCSS } from "spell/ui/styles"
 
 import { Fixture } from "spell/test-helpers/Fixture"
-import { Sheets } from "spell-ui/test-helpers/Sheets"
+import { Sheets } from "spell/ui/test-helpers/Sheets"
 
-import { ratingVocabulary } from "spell-ui/components/ui-rating/UIRating.en"
+import { ratingVocabulary } from "spell/ui/components/ui-rating/UIRating.en"
 
-import ratingCSS from "spell-ui/components/ui-rating/UIRating.css?inline"
-import ratingRaw from "spell-ui/components/ui-rating/UIRating.css?raw"
+import ratingCSS from "spell/ui/components/ui-rating/UIRating.css?inline"
+import ratingRaw from "spell/ui/components/ui-rating/UIRating.css?raw"
 
 /**
  * `UIRating.css` on its own, before any element exists:  the sheet's source rules and the computed styles of the

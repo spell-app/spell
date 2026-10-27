@@ -1,4 +1,4 @@
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /**
  * `<ui-or>` in Spanish:  `<es-o>`, with the names and texts only it uses (from `UIOr.en.ts`).

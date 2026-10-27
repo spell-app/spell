@@ -1,9 +1,9 @@
-import { E } from "spell-ui/core"
+import { E } from "spell/ui/core"
 // the family barrel, not the leaf:
 // the lib build then imports `ui-section.js` instead of splitting a shared chunk
 // (SIDE EFFECT:  defines `<ui-section>` / `<ui-sections>`, which panels nest in and hold)
-import { UISection } from "spell-ui/components/ui-section"
-import { FoldIconPlace, type SectionVocabulary } from "spell-ui/components/ui-section/UISection.types"
+import { UISection } from "spell/ui/components/ui-section"
+import { FoldIconPlace, type SectionVocabulary } from "spell/ui/components/ui-section/UISection.types"
 import { panelVocabulary } from "./UIPanel.en"
 
 import panelCSS from "./UIPanel.css?inline"

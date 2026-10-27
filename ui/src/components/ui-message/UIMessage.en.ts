@@ -1,7 +1,7 @@
 /**
  * The English vocabulary of `<ui-message>`:  every name the tag uses.
  * - Its tag, attributes (each with its kind and allowed values), events, slots, parts, states and texts.
- *   The shape is `E.ComponentVocabulary` (`spell-ui/vocabulary`).
+ *   The shape is `E.ComponentVocabulary` (`spell/ui/vocabulary`).
  * - The attributes become Fomantic's class words, in Fomantic's order (`ClassBuilder`):
  *   `<ui-message state="negative" attach="bottom" size="small">` => `ui small negative bottom attached message`.
  *   The component adds `icon` when it shows an icon.
@@ -11,7 +11,7 @@
  *   `:state(in-message)` and style themselves from `UIParts.css`, reading `--_ui-message-layout` (`UIMessage.css`).
  */
 
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /****************
  * ### `messageVocabulary`

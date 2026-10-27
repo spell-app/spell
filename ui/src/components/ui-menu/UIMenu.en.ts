@@ -1,13 +1,13 @@
 /**
  * The English vocabulary of `<ui-menu>`:  every name the tag uses.
  * - Its tag, attributes (each with its kind and allowed values), events, slots, parts, states and texts.
- *   The shape is `E.ComponentVocabulary` (`spell-ui/vocabulary`).
- * - Pure data:  node imports it (`yarn site:data`, `yarn gen:root`), so `spell-ui/core` for types only,
+ *   The shape is `E.ComponentVocabulary` (`spell/ui/vocabulary`).
+ * - Pure data:  node imports it (`yarn site:data`, `yarn gen:root`), so `spell/ui/core` for types only,
  *   `UIT` by value straight from `components.types`.
  * - Class words come out through `ClassBuilder`, in Fomantic's grammar:
  *   `<ui-menu appearance="secondary pointing" size="large" items="3">` => `ui large three item secondary pointing menu`.
  *   `UIMenu.css` keys on those words.
- * - Items are the generic `<ui-item>` (`spell-ui/components/ui-item`), styled by owner context:  `ownsParts` has `item`.
+ * - Items are the generic `<ui-item>` (`spell/ui/components/ui-item`), styled by owner context:  `ownsParts` has `item`.
  *   A `<ui-menu>` inside a menu is a SUB-MENU (Fomantic's `<div class="right menu">`), so `menu` is owned too;
  *   a `<ui-header>` inside an item is a vertical menu's sub header.
  * - `tabular` is Fomantic's classic word;  2.9 renamed it `tabbed` (`@variationMenuTabbedLegacyTabular`).
@@ -20,8 +20,8 @@
  *   overflow button;  its slot, parts, states and text are its own.
  */
 
-import type { E } from "spell-ui/core"
-import * as UIT from "spell-ui/components/components.types"
+import type { E } from "spell/ui/core"
+import * as UIT from "spell/ui/components/components.types"
 
 /****************
  * ### `menuVocabulary`

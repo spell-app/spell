@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, it, vi } from "vite-plus/test"
 
-import { SourceError } from "spell-ui/runtime"
+import { SourceError } from "spell/ui/runtime"
 
-import { Sources } from "spell-ui/runtime/Sources"
+import { Sources } from "spell/ui/runtime/Sources"
 
 /** A fixture file the test server serves. */
 const HELLO = "/src/test-helpers/fixtures/sources/hello.txt"

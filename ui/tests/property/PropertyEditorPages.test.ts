@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { PropertyEditorPages } from "spell-ui/property"
-import type { V } from "spell-ui/api"
+import { PropertyEditorPages } from "spell/ui/property"
+import type { V } from "spell/ui/api"
 
 /** A theme's schema:  three properties. */
 const THEME: V.PropertySchema = {
@@ -65,7 +65,7 @@ describe("PropertyEditorPages", () => {
 describe("PropertyEditorPages.compile()", () => {
   it("makes a module defining <theme-editor>:  its layout and schema inlined, no page loading", async () => {
     // the elements are on the page already:  the module imports nothing more
-    await import("spell-ui")
+    await import("spell/ui")
     const editor = editorOf(`<ui-property-editor schema="Theme" label="Theme" source="nope.html">
       <ui-property name="title" hint="Used for the file name."></ui-property>
       <ui-property-group label="Look"><ui-property name="size" as="buttons"></ui-property></ui-property-group>

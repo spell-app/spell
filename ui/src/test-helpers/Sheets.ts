@@ -1,7 +1,7 @@
 import { onTestFinished } from "vite-plus/test"
 
-import { ClassBuilder } from "spell-ui/elements"
-import type { AttributeSpec, ComponentVocabulary } from "spell-ui/vocabulary"
+import { ClassBuilder } from "spell/ui/elements"
+import type { AttributeSpec, ComponentVocabulary } from "spell/ui/vocabulary"
 
 import { Fixture } from "spell/test-helpers/Fixture"
 

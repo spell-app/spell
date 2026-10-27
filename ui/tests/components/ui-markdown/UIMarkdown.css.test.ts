@@ -1,14 +1,14 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { foundationCSS } from "spell-ui/styles"
+import { foundationCSS } from "spell/ui/styles"
 
 import { Fixture } from "spell/test-helpers/Fixture"
-import { Sheets } from "spell-ui/test-helpers/Sheets"
+import { Sheets } from "spell/ui/test-helpers/Sheets"
 
-import { markdownVocabulary } from "spell-ui/components/ui-markdown/UIMarkdown.en"
+import { markdownVocabulary } from "spell/ui/components/ui-markdown/UIMarkdown.en"
 
-import markdownCSS from "spell-ui/components/ui-markdown/UIMarkdown.css?inline"
-import markdownRaw from "spell-ui/components/ui-markdown/UIMarkdown.css?raw"
+import markdownCSS from "spell/ui/components/ui-markdown/UIMarkdown.css?inline"
+import markdownRaw from "spell/ui/components/ui-markdown/UIMarkdown.css?raw"
 
 /** Every example fragment, by path. */
 const EXAMPLES = import.meta.glob<string>("./examples/*.html", {

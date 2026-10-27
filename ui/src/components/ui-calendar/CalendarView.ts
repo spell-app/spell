@@ -1,4 +1,4 @@
-import { UIT } from "spell-ui/core"
+import { UIT } from "spell/ui/core"
 import {
   MINUTE_STEP,
   type CalendarCell,

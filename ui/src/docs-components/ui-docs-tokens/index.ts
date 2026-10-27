@@ -12,13 +12,13 @@ import { UIDocsTokens } from "./UIDocsTokens"
 import { TokenRows } from "./TokenRows"
 import { ColorProbe } from "./ColorProbe"
 
-import "spell-ui/components/ui-table"
-import "spell-ui/components/ui-label"
-import "spell-ui/components/ui-input"
-import "spell-ui/components/ui-segment"
-import "spell-ui/components/ui-button"
-import "spell-ui/components/ui-parts"
-import "spell-ui/components/ui-message"
+import "spell/ui/components/ui-table"
+import "spell/ui/components/ui-label"
+import "spell/ui/components/ui-input"
+import "spell/ui/components/ui-segment"
+import "spell/ui/components/ui-button"
+import "spell/ui/components/ui-parts"
+import "spell/ui/components/ui-message"
 
 UIDocsTokens.define()
 

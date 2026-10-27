@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { DesignTokens } from "spell-ui/tools/DesignTokens"
+import { DesignTokens } from "spell/ui/tools/DesignTokens"
 
 describe("DesignTokens.rootDeclarations()", () => {
   test("reads only top-level :root declarations, inside @layer", () => {

@@ -1,6 +1,6 @@
 // Import directly:  in `core`'s util barrel it cost every page 1.9 kB
 import { PrefStore } from "spell/util/persist/PrefStore"
-import { E, UI, UIT } from "spell-ui/core"
+import { E, UI, UIT } from "spell/ui/core"
 import { EDITS_SHEET } from "./UIThemeEditor.types"
 
 /****************
@@ -12,7 +12,7 @@ import { EDITS_SHEET } from "./UIThemeEditor.types"
  *   - `follow(theme)`, each time its theme changes:  the kept sheet goes on while that theme is its base,
  *     so picking another look takes it off
  *   - `restore()` puts the kept base on too;  `has` says whether one is kept, for a menu entry
- *   - imported by its file, `spell-ui/components/ui-theme-editor/SavedTheme`:
+ *   - imported by its file, `spell/ui/components/ui-theme-editor/SavedTheme`:
  *     the family's barrel would load the editor too
  * - Kept in `localStorage` under `STORAGE_KEY`:  the choices AND the stylesheet's text,
  *   so a page restores it without the editor's texts or code (`ThemeSheet`).

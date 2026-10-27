@@ -1,4 +1,4 @@
-import { E, UI, UIT } from "spell-ui/core"
+import { E, UI, UIT } from "spell/ui/core"
 import { buttonVocabulary } from "./UIButton.en"
 import { DOMElementClick } from "./UIButton.types"
 import { Invoker } from "./Invoker"

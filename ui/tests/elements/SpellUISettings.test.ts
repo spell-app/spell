@@ -2,7 +2,7 @@ import { describe, expect, test } from "vite-plus/test"
 
 import { SpellSolid, UIComponent } from "spell/element"
 
-import "spell-ui/core"
+import "spell/ui/core"
 
 /** `SpellUISettings`:  what Spell UI hands `spell/element` as its core loads. */
 describe("SpellUISettings", () => {

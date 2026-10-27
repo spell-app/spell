@@ -6,7 +6,7 @@
  */
 ;(() => {
   const { registerPack, packModules } = globalThis.SpellUI
-  const { DOMElement } = packModules["spell-ui/core"]
+  const { DOMElement } = packModules["spell/ui/core"]
 
   class LaterCard extends DOMElement {
     connectedCallback() {

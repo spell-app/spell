@@ -1,6 +1,6 @@
-// the types-only leaf, as `V`:  `spell-ui/api` would bring every element (and Solid's JSX) into a node tool's type check
+// the types-only leaf, as `V`:  `spell/ui/api` would bring every element (and Solid's JSX) into a node tool's type check
 import type * as V from "spell/element/vocabulary.types"
-import { kebabCase } from "spell-ui/util"
+import { kebabCase } from "spell/ui/util"
 import { PropertySchemas } from "./PropertySchemas"
 
 /****************
@@ -242,7 +242,7 @@ export class PropertyEditorPages {
 
 /** What `compile()` takes. */
 export type CompileOptions = {
-  /** What the module imports for Spell UI's property editor;  default `spell-ui/ui-property-editor`. */
+  /** What the module imports for Spell UI's property editor;  default `spell/ui/ui-property-editor`. */
   uiModule?: string
 }
 
@@ -300,7 +300,7 @@ const KIND_TYPES: Record<string, readonly V.ValueType[]> = {
 }
 
 /** What a compiled page imports for Spell UI's property editor, by default. */
-const UI_MODULE = "spell-ui/ui-property-editor"
+const UI_MODULE = "spell/ui/ui-property-editor"
 
 /** A page's editor's attributes a compiled page leaves out:  the schema is inlined, and nothing is loaded. */
 const NOT_COMPILED = new Set(["schema", "source", "select"])

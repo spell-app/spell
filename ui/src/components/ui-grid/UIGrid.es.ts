@@ -1,4 +1,4 @@
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /**
  * `<ui-grid>` in Spanish:  `<es-cuadricula>`, with the names and texts only it uses (from `UIGrid.en.ts`).

@@ -1,13 +1,13 @@
 /**
  * The English vocabulary of `<ui-stack>`:  every name the tag uses.
  * - Its tag, attributes (each with its kind and allowed values) and slots.
- *   The shape is `E.ComponentVocabulary` (`spell-ui/vocabulary`).
+ *   The shape is `E.ComponentVocabulary` (`spell/ui/vocabulary`).
  * - A plain layout box, with no look of its own (epic `ui-gaps` P8):  Web Awesome's stack and cluster in one tag,
  *   as the `.ui-stack` / `.ui-cluster` utilities are for plain HTML.
  * - No class words:  every attribute is property-only, drawn as the box's own layout.
  */
 
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /****************
  * ### `stackVocabulary`

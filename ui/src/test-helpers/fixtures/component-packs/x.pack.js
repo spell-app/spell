@@ -8,7 +8,7 @@
  */
 ;(() => {
   const { registerPack, packModules } = globalThis.SpellUI
-  const { DOMElement } = packModules["spell-ui/core"]
+  const { DOMElement } = packModules["spell/ui/core"]
   const state = (globalThis.__xPack ??= { runs: 0, cards: new Set() })
   state.runs += 1
 

@@ -5,10 +5,10 @@ import { expectAccessible } from "spell/test-helpers/A11y"
 import { Fixture } from "spell/test-helpers/Fixture"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import { Viewport } from "spell/test-helpers/Viewport"
-import { E } from "spell-ui/core"
+import { E } from "spell/ui/core"
 import { DOMElement } from "spell/element"
 
-import { UIRoot, type RootFailure } from "spell-ui/components/ui-root"
+import { UIRoot, type RootFailure } from "spell/ui/components/ui-root"
 
 /** Element examples, by path. */
 const EXAMPLES = import.meta.glob<string>("/src/components/ui-root/examples/elements/*.html", {

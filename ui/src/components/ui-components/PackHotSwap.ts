@@ -1,7 +1,7 @@
 import { HotDefinitions } from "spell/element/HotDefinitions"
 
 // Through the family's barrel, its lib entry:  so `hot.js` shares `ComponentPacks` with `ui-components.js`
-import { ComponentPacks } from "spell-ui/components/ui-components"
+import { ComponentPacks } from "spell/ui/components/ui-components"
 import type { PackSwap } from "./UIComponents.types"
 
 /****************
@@ -18,7 +18,7 @@ import type { PackSwap } from "./UIComponents.types"
  *   what it loses:  state inside its component (an open popover).
  * - `install()` it as the page's bundle loads, BEFORE any pack defines its tags:  `HotDefinitions` records each
  *   definition as it happens.  The docs bundle (spell-epic's `spell-ui.entry.js`) and the site's (`SitePacks.ts`) do.
- * - Its own lib entry, `spell-ui/hot`:  only the pages that swap carry `HotDefinitions`.
+ * - Its own lib entry, `spell/ui/hot`:  only the pages that swap carry `HotDefinitions`.
  * - STATIC:  one per page.
  ****************/
 export class PackHotSwap {

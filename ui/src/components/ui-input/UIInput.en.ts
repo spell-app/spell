@@ -1,6 +1,6 @@
 /**
  * Every name `<ui-input>` and `<ui-textarea>` use:  tags, attributes (kind + allowed values), events, slots, parts,
- * states, texts.  Schema:  `ComponentVocabulary` (`spell-ui/vocabulary`).
+ * states, texts.  Schema:  `ComponentVocabulary` (`spell/ui/vocabulary`).
  * - Class words come out through `ClassBuilder`, in Fomantic's grammar:
  *   `<ui-input icon="search" icon-position="left" labeled="right" size="small">` =>
  *   `ui small left icon right labeled input`.  The element adds `icon` (no position), `labeled` / `action` (a
@@ -12,10 +12,10 @@
  *   whose validity merges with the Fomantic `rules` property's.
  */
 
-// pure data (vocabularies / types) never import `spell-ui/core` by value:  it loads the element layer,
+// pure data (vocabularies / types) never import `spell/ui/core` by value:  it loads the element layer,
 // which node can't (`yarn site:data` / `yarn gen:root` import every vocabulary through tsx:  no `?inline` css, no JSX)
-import * as UIT from "spell-ui/components/components.types"
-import type { ComponentVocabulary } from "spell-ui/vocabulary"
+import * as UIT from "spell/ui/components/components.types"
+import type { ComponentVocabulary } from "spell/ui/vocabulary"
 
 /** Input types passed through to the inner `<input>`. */
 const INPUT_TYPES = [

@@ -2,9 +2,9 @@ import { describe, expect, it } from "vite-plus/test"
 
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 
-import { ElementSnapshot, type SnapshotRow } from "spell-ui/docs-components/ui-docs-inspector/ElementSnapshot"
+import { ElementSnapshot, type SnapshotRow } from "spell/ui/docs-components/ui-docs-inspector/ElementSnapshot"
 
-import "spell-ui/components/ui-button"
+import "spell/ui/components/ui-button"
 
 describe("ElementSnapshot()", () => {
   it("reads a plain element's attributes, as written;  no properties, no states", () => {

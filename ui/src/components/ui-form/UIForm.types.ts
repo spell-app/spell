@@ -6,8 +6,8 @@
  * - A word only ONE class uses sits below that class instead (epic `wwod-spell-ui`, Q18).
  */
 
-import type { E } from "spell-ui/core"
-import * as UIT from "spell-ui/components/components.types"
+import type { E } from "spell/ui/core"
+import * as UIT from "spell/ui/components/components.types"
 
 ////////////////
 // ## Vocabulary pieces

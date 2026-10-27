@@ -1,21 +1,21 @@
 // Import directly to avoid circular import:  everything here sits below the `core` entry, which imports this file
 import { SpellSolid, type SpellSolidSettings } from "spell/element"
-import { Warnings } from "spell-ui/util"
-import { Converters, SharedVocabulary, ValueSets, Vocabulary } from "spell-ui/vocabulary"
-import { UI } from "spell-ui/runtime"
-import { RUNTIME_KEY, type RuntimeGlobal } from "spell-ui/runtime/runtime.types"
-import * as UIT from "spell-ui/components/components.types"
+import { Warnings } from "spell/ui/util"
+import { Converters, SharedVocabulary, ValueSets, Vocabulary } from "spell/ui/vocabulary"
+import { UI } from "spell/ui/runtime"
+import { RUNTIME_KEY, type RuntimeGlobal } from "spell/ui/runtime/runtime.types"
+import * as UIT from "spell/ui/components/components.types"
 import { ClassBuilder } from "./ClassBuilder"
 
 /****************
  * ### `SpellUISettings`
  * What Spell UI hands spell-element as it loads (`SpellSolid.install()`), which every set's elements draw with:
  * its runtime (`UI`), its vocabulary layer, its style sheets, focus and animations (`E.SpellSolidSettings`).
- * - Installed as `spell-ui/core` loads (`core.ts` imports this file), so before any family's `define()`:
- *   a family imports `spell-ui/core` first.
+ * - Installed as `spell/ui/core` loads (`core.ts` imports this file), so before any family's `define()`:
+ *   a family imports `spell/ui/core` first.
  * - What each one is in Spell UI:
- *   - `runtime`:  the page's `UI` runtime, lazy (`spell-ui/runtime`):  elements show once it has loaded
- *   - `words`:  `spell-ui/vocabulary` (`Vocabulary`, `SharedVocabulary`, `Converters`, `ValueSets`), `ClassBuilder`,
+ *   - `runtime`:  the page's `UI` runtime, lazy (`spell/ui/runtime`):  elements show once it has loaded
+ *   - `words`:  `spell/ui/vocabulary` (`Vocabulary`, `SharedVocabulary`, `Converters`, `ValueSets`), `ClassBuilder`,
  *     and the runtime's `UI.vocabulary` and `UI.i18n`
  *   - `styles`, `focus`:  the runtime's `UI.styles`, `UI.focus`
  *   - `motion`:  Fomantic's animations (`UIT.Animations`), run by `UI.transitions`;  `--ui-motion`

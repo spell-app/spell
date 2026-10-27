@@ -9,7 +9,7 @@
  *   A `<ui-root>` only loads what's in the page's light DOM, so a family that is built of other widgets
  *   imports them itself.
  * - Code that only reads a page or lands a link (the docs site's sections and search, the epic pages' runtime,
- *   the site's node scripts) imports the helpers by their files (`spell-ui/components/ui-toc/TocIndex`,
+ *   the site's node scripts) imports the helpers by their files (`spell/ui/components/ui-toc/TocIndex`,
  *   `.../HashLanding`, `.../PageOutline`):  this barrel would define the tag too.
  */
 
@@ -18,9 +18,9 @@ import { TocIndex } from "./TocIndex"
 import { HashLanding } from "./HashLanding"
 import { PageOutline } from "./PageOutline"
 
-import "spell-ui/components/ui-menu"
-import "spell-ui/components/ui-item"
-import "spell-ui/components/ui-parts"
+import "spell/ui/components/ui-menu"
+import "spell/ui/components/ui-item"
+import "spell/ui/components/ui-parts"
 
 UIToc.define()
 

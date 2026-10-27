@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { type ComponentVocabulary, SharedVocabulary, ValueSets, Vocabulary } from "spell-ui/vocabulary"
-import { es, sharedEs } from "spell-ui/components/components.es"
+import { type ComponentVocabulary, SharedVocabulary, ValueSets, Vocabulary } from "spell/ui/vocabulary"
+import { es, sharedEs } from "spell/ui/components/components.es"
 
 /** Every family's English vocabulary module, by path. */
 const ENGLISH = import.meta.glob<Record<string, unknown>>("/src/components/*/*.en.ts", { eager: true })

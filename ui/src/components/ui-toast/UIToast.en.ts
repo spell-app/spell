@@ -1,6 +1,6 @@
 /**
  * Every name `<ui-toast>` uses:  tag, attributes (kind + allowed values), events, slots, parts, states, texts.
- * Schema:  `E.ComponentVocabulary` (`spell-ui/vocabulary`).
+ * Schema:  `E.ComponentVocabulary` (`spell/ui/vocabulary`).
  * - Class words come out through `ClassBuilder`, in Fomantic's grammar:
  *   `<ui-toast type="success" inverted>` => `ui success inverted toast`.  The element adds the layout words after
  *   the noun (`vertical`, `actions`, `attached top`, `compact`), as Fomantic's JS did.
@@ -11,7 +11,7 @@
  *   a `<ui-toast>` written in the page shows where it is.
  */
 
-import type { E } from "spell-ui/core"
+import type { E } from "spell/ui/core"
 
 /****************
  * ### `<ui-toast>`

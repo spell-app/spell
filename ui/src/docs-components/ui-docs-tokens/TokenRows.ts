@@ -1,5 +1,5 @@
-import type { SiteDataFile, SiteToken } from "spell-ui/docs-components/docs-components.types"
-import { SiteData } from "spell-ui/docs-components/SiteData"
+import type { SiteDataFile, SiteToken } from "spell/ui/docs-components/docs-components.types"
+import { SiteData } from "spell/ui/docs-components/SiteData"
 import type { TokenPattern, TokenRowsText, TokenTable, TokenView, TokenViewParams } from "./UIDocsTokens.types"
 
 /****************

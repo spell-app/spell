@@ -1,12 +1,12 @@
 import { userEvent } from "vite-plus/test/browser"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vite-plus/test"
 
-import { UI } from "spell-ui/runtime"
-import { foundationCSS } from "spell-ui/styles"
-import { Sheets } from "spell-ui/test-helpers/Sheets"
+import { UI } from "spell/ui/runtime"
+import { foundationCSS } from "spell/ui/styles"
+import { Sheets } from "spell/ui/test-helpers/Sheets"
 import { expectAccessible } from "spell/test-helpers/A11y"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
-import { SavedTheme, ThemeSheet, type DOMThemeEditorElement } from "spell-ui/components/ui-theme-editor"
+import { SavedTheme, ThemeSheet, type DOMThemeEditorElement } from "spell/ui/components/ui-theme-editor"
 
 /** The editor in the fixture, drawn. */
 async function editor(html = "<ui-theme-editor></ui-theme-editor>"): Promise<DOMThemeEditorElement> {

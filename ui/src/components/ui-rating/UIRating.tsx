@@ -1,8 +1,8 @@
 import { Repeat, Show } from "solid-js"
 import { isServer, type JSX } from "@solidjs/web"
 
-import { E, UI, UIT } from "spell-ui/core"
-import { F } from "spell-ui/forms"
+import { E, UI, UIT } from "spell/ui/core"
+import { F } from "spell/ui/forms"
 import { ratingVocabulary } from "./UIRating.en"
 import { DEFAULT_MAX, RatingFallback } from "./UIRating.fallback"
 
@@ -254,7 +254,7 @@ export class UIRating extends F.FormComponent<typeof ratingVocabulary> {
   }
 
   /**
-   * Server render only (`spell-ui/static`):  the radio of `point` named for the form (the DOM element's `name`),
+   * Server render only (`spell/ui/static`):  the radio of `point` named for the form (the DOM element's `name`),
    * and `checked` when it is the rating, so a static form submits it.
    * - `{}` in a browser, where the DOM element submits (`ElementInternals`)
    *   and the radios share a generated name.

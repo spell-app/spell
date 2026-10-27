@@ -1,5 +1,5 @@
-import { E } from "spell-ui/core"
-import type { F } from "spell-ui/forms"
+import { E } from "spell/ui/core"
+import type { F } from "spell/ui/forms"
 
 /****************
  * ### `DOMFormControl`
@@ -13,7 +13,7 @@ import type { F } from "spell-ui/forms"
  *   through `DOMElement`.
  *   - A reset clears the component's `isTouched` first:  so no control's `onFormReset()` has to.
  * - `<ui-button type="submit|reset">` is form-associated too, but keeps `DOMElement`:  it needs no value or validity.
- * - Part of the `forms` entry:  extends `E.DOMElement` through the `spell-ui/core` ENTRY, never its leaf.
+ * - Part of the `forms` entry:  extends `E.DOMElement` through the `spell/ui/core` ENTRY, never its leaf.
  *   Safe while this module evaluates, since the core never imports `forms` (see `FormComponent`).
  * - `null` where the platform says it (`form`):  the same API as a native control.
  ****************/

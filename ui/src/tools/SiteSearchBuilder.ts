@@ -2,8 +2,8 @@ import { existsSync, readdirSync, readFileSync } from "node:fs"
 import { join } from "node:path"
 import { parseHTML } from "linkedom"
 
-import { PageOutline } from "spell-ui/components/ui-toc/PageOutline"
-import type { SiteSearchFile, SiteSearchPage } from "spell-ui/docs-components/docs-components.types"
+import { PageOutline } from "spell/ui/components/ui-toc/PageOutline"
+import type { SiteSearchFile, SiteSearchPage } from "spell/ui/docs-components/docs-components.types"
 
 /****************
  * ### `SiteSearchBuilder`

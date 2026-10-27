@@ -6,7 +6,7 @@
  * - A word only ONE class uses sits below that class instead.
  */
 
-import * as UIT from "spell-ui/components/components.types"
+import * as UIT from "spell/ui/components/components.types"
 import type { checkboxVocabulary } from "./UICheckbox.en"
 import type { radioVocabulary } from "./UIRadio.en"
 

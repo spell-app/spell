@@ -3,25 +3,25 @@
 import { parseHTML } from "linkedom"
 import { beforeAll, describe, expect, it } from "vite-plus/test"
 
-import { StaticRender } from "spell-ui/static"
-import { UIButton } from "spell-ui/components/ui-button/UIButton"
-import { UICalendar } from "spell-ui/components/ui-calendar/UICalendar"
-import { UICheckbox } from "spell-ui/components/ui-checkbox/UICheckbox"
-import { UIRadio } from "spell-ui/components/ui-checkbox/UIRadio"
-import { UIDropdown } from "spell-ui/components/ui-dropdown/UIDropdown"
-import { UIInput } from "spell-ui/components/ui-input/UIInput"
-import { UITextarea } from "spell-ui/components/ui-input/UITextarea"
-import { UIItem } from "spell-ui/components/ui-item/UIItem"
-import { UIRating } from "spell-ui/components/ui-rating/UIRating"
-import { UISearch } from "spell-ui/components/ui-search/UISearch"
-import { UISelect } from "spell-ui/components/ui-select/UISelect"
-import { UISlider } from "spell-ui/components/ui-slider/UISlider"
+import { StaticRender } from "spell/ui/static"
+import { UIButton } from "spell/ui/components/ui-button/UIButton"
+import { UICalendar } from "spell/ui/components/ui-calendar/UICalendar"
+import { UICheckbox } from "spell/ui/components/ui-checkbox/UICheckbox"
+import { UIRadio } from "spell/ui/components/ui-checkbox/UIRadio"
+import { UIDropdown } from "spell/ui/components/ui-dropdown/UIDropdown"
+import { UIInput } from "spell/ui/components/ui-input/UIInput"
+import { UITextarea } from "spell/ui/components/ui-input/UITextarea"
+import { UIItem } from "spell/ui/components/ui-item/UIItem"
+import { UIRating } from "spell/ui/components/ui-rating/UIRating"
+import { UISearch } from "spell/ui/components/ui-search/UISearch"
+import { UISelect } from "spell/ui/components/ui-select/UISelect"
+import { UISlider } from "spell/ui/components/ui-slider/UISlider"
 import {
   EMPTY_FORM_ENTRIES,
   EMPTY_FORM_HTML,
   STATIC_FORM_ENTRIES,
   STATIC_FORM_HTML
-} from "spell-ui/test-helpers/staticForm.cases"
+} from "spell/ui/test-helpers/staticForm.cases"
 
 /**
  * A static form's round trip (seo plan, P4):  `STATIC_FORM_HTML` rendered by `StaticRender.page()`, then the entry

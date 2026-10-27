@@ -1,7 +1,7 @@
 import { contrast, CONTRAST_TEXT, type Oklch as OklchColor } from "spell/util/color"
 import { clamp } from "spell/util/number"
 import { DARK_QUERY } from "spell/util/persist/persist.types"
-import { kebabCase } from "spell-ui/util"
+import { kebabCase } from "spell/ui/util"
 
 import type {
   ColorRecipe,
@@ -52,8 +52,8 @@ import {
  * `styles.en.ts`.
  * - Pure:  returns CSS text and touches no file system, so it runs both in node (`scripts/gen-styles.ts`,
  *   `yarn gen:styles`) and in the browser test that checks the committed sheets are current.
- * - Imports only its own folder (the vocabulary, types), `spell-ui/util`'s `kebabCase` and the kit's `color` and
- *   `number`, by file:  never the element layer, which node can't load.  Build-time only, so left out of the `spell-ui/styles` barrel.
+ * - Imports only its own folder (the vocabulary, types), `spell/ui/util`'s `kebabCase` and the kit's `color` and
+ *   `number`, by file:  never the element layer, which node can't load.  Build-time only, so left out of the `spell/ui/styles` barrel.
  * - Output is close to oxfmt's CSS style;  the script runs oxfmt afterwards, and the staleness test
  *   compares with whitespace stripped, so line breaking never matters.
  * - Token declarations go on `:root`, plus a `:host` copy guarded by

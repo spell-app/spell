@@ -8,10 +8,10 @@
 
 import { flush } from "solid-js"
 
-import type { E } from "spell-ui/core"
-import { PerfRun } from "spell-ui/test-helpers/PerfRun"
+import type { E } from "spell/ui/core"
+import { PerfRun } from "spell/ui/test-helpers/PerfRun"
 
-import "spell-ui/components/ui-dropdown"
+import "spell/ui/components/ui-dropdown"
 
 const domElement = document.getElementById("perf") as E.DOMElement
 await domElement.ready

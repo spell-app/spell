@@ -2,13 +2,13 @@
 
 import { beforeAll, describe, expect, it } from "vite-plus/test"
 
-import { StaticRender } from "spell-ui/static"
-import { UIInput } from "spell-ui/components/ui-input/UIInput"
-import { UIRating } from "spell-ui/components/ui-rating/UIRating"
-import { UISlider } from "spell-ui/components/ui-slider/UISlider"
+import { StaticRender } from "spell/ui/static"
+import { UIInput } from "spell/ui/components/ui-input/UIInput"
+import { UIRating } from "spell/ui/components/ui-rating/UIRating"
+import { UISlider } from "spell/ui/components/ui-slider/UISlider"
 
 /**
- * `ControlLabels` in a static server render (`spell-ui/static`):  the inner control's name is read once from the parsed
+ * `ControlLabels` in a static server render (`spell/ui/static`):  the inner control's name is read once from the parsed
  * page (seo plan, T6) -- what a `<label for>` can't reach on the static page either (a slider thumb, a rating group).
  */
 describe("ControlLabels.name in a static render", () => {

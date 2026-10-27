@@ -9,7 +9,7 @@
  *   - `custom-elements.json`:  a Custom Elements Manifest
  *   - `html-custom-data.json`:  VS Code's `html.customData`
  *   - `css-custom-data.json`:  its `css.customData`
- *   - and the JSX types of every `<ui-*>` tag, `src/jsx.ts` (`spell-ui/jsx`)
+ *   - and the JSX types of every `<ui-*>` tag, `src/jsx.ts` (`spell/ui/jsx`)
  * - All COMMITTED:  the docs pages fetch them as they are, with no build step.
  *   - Rerun after changing a vocabulary, a family's sheet (its tokens), `pages.json5` or a page's sections.
  *   - `tests/tools/SiteDataBuilder.test.ts` fails while they're stale.
@@ -24,8 +24,8 @@ import path from "node:path"
 import { parseArgs } from "node:util"
 
 import { kb } from "spell/util/number"
-import { ElementManifests } from "spell-ui/tools/ElementManifests"
-import { SiteDataBuilder } from "spell-ui/tools/SiteDataBuilder"
+import { ElementManifests } from "spell/ui/tools/ElementManifests"
+import { SiteDataBuilder } from "spell/ui/tools/SiteDataBuilder"
 import { Terminal } from "spell/element-tools/Terminal"
 import { type GeneratedOutput, writeOrCheck } from "spell/element-tools/generatedFiles"
 

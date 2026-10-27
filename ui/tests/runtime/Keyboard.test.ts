@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vite-plus/test"
 
 import { Fixture } from "spell/test-helpers/Fixture"
-import { Keyboard } from "spell-ui/runtime/Keyboard"
+import { Keyboard } from "spell/ui/runtime/Keyboard"
 
 /** Dispatch a bubbling, composed `keydown` from `target`;  returns the event. */
 function press(target: EventTarget, key: string, init: KeyboardEventInit = {}) {
