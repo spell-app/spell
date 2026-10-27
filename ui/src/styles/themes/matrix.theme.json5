@@ -204,6 +204,10 @@
       "header-background": "transparent",
       "header-color": "{text.muted}"
     },
+    "statistic": {
+      // a count's label quiet, as the console's are:  muted, its own case and weight (`rules/matrix.css`)
+      "label-color": "{text.muted}"
+    },
     "bar": {
       "panel-background": "{own.matrix-panel}"
     },

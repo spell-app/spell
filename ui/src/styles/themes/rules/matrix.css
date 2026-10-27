@@ -8,6 +8,7 @@
  *   - headings tightly tracked:  no heading token holds letter spacing
  *   - the console's labels in the monospace, uppercase and spaced out:  eyebrows (a `sub` header, in the accent)
  *     and a table's header row
+ *   - a statistic's label quiet:  its own case, normal weight (its muted colour is a value, `statistic.label-color`)
  */
 
 @layer ui.theme {
@@ -49,5 +50,13 @@
     font-weight: 600;
     letter-spacing: 0.08em;
     text-transform: uppercase;
+  }
+
+  /* a count's label:  quiet, as the console's "Connected" over its count, not the default's bold capitals */
+  ui-statistic::part(label),
+  ui-statistic > ui-label::part(label),
+  .ui.statistic > .label {
+    font-weight: var(--ui-font-weight-normal);
+    text-transform: none;
   }
 }

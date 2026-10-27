@@ -120,6 +120,7 @@
     --ui-header-sub-color: var(--ui-text-muted);
     --ui-table-header-background: transparent;
     --ui-table-header-color: var(--ui-text-muted);
+    --ui-statistic-label-color: var(--ui-text-muted);
     --ui-bar-panel-background: var(--matrix-panel);
     --ui-docs-nav-background: var(--matrix-panel);
     --ui-docs-nav-header-background: var(--matrix-inset);
