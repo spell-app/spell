@@ -257,13 +257,6 @@
   ::slotted([slot="actions"]) {
     flex: none;
   }
-  /*
-   * the review buttons' group, 1px from the line's end:  its end squared to the line's run corner less that 1px, its
-   * start still a pill (designer rule T68;  Owen, 2026-10-26, I138:  "keep the 1px gap")
-   */
-  .extras > [part~="review-buttons"] {
-    --epic-review-end-radius: calc(var(--epic-section-run-radius, 8px) - 1px);
-  }
   .extras[hidden] {
     display: none;
   }
