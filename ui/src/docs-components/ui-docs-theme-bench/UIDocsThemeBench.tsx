@@ -80,10 +80,14 @@ export class UIDocsThemeBench extends E.UIComponent<DocsThemeBenchVocabulary> {
     })
   }
 
-  /** A new theme or scheme:  every page wears it, and says again what its sheets read. */
+  /**
+   * A new theme or scheme:  every frame wears it, and says again what its sheets read.
+   * - A pair's frames keep their own schemes:  a new scheme moves only a one-scheme frame, and which half of each pair
+   *   the tuning column reads.
+   */
   @E.onChange("theme", "scheme", { defer: true })
   protected onThemeChanged() {
-    for (const id of BenchPlaceIds) void this.dress(id, { theme: true, scheme: true, css: true, look: true })
+    for (const key of this.frameKeys) void this.dress(key, { theme: true, scheme: true, css: true, look: true })
   }
 
   ////////////////
@@ -605,7 +609,7 @@ export class UIDocsThemeBench extends E.UIComponent<DocsThemeBenchVocabulary> {
                 type="button"
                 class={["theme-head", { current: name === this.theme }]}
                 title={UIT.ThemeNames.titleOf(name)}
-                aria-pressed={name === this.theme}
+                aria-pressed={name === this.theme ? "true" : "false"}
                 onClick={() => void ThemePreference.setTheme(name)}
               >
                 {UIT.ThemeNames.titleOf(name)}
