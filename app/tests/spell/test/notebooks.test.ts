@@ -34,6 +34,15 @@ describe("every notebook means the same in code spell", () => {
   for (const { name } of notebooks) test(name, () => meansTheSame(name))
 })
 
+// epic `elemental-spell` J159:  the page's `<!-- GAP ... -->` notes were warning messages, drawn on the page
+test("the Button's GAP notes are comments:  never drawn", () => {
+  const contents = readFileSync(resolve(NOTEBOOKS_DIR, "Button", "Examples.spellx"), "utf8")
+  expect(contents).toContain("<!-- GAP I23:")
+  const files = [{ path: "/Examples.spellx", contents }]
+  const [file] = parseSpellProject(files, { parentScope: importScopeIn(resolve(NOTEBOOKS_DIR, "Button"), []) }).files
+  expect(codeOf(file!.compiled)).not.toContain("GAP")
+})
+
 /** Notebook project `name`'s `.spellx` files compile cleanly, and their code spell to the same javascript. */
 function meansTheSame(name: string) {
   const folder = resolve(NOTEBOOKS_DIR, name)

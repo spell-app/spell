@@ -129,6 +129,26 @@ describe("SpellTokensProvider.forSpellx()", () => {
     ])
   })
 
+  // Owen, 2026-10-26:  `<!-- ... -->` is a spellx comment, anywhere
+  test("a `<!-- ... -->` comment is a comment, every line of it, and the line after it is a tag again", () => {
+    const [, one, open, inside, close, after] = colour(
+      [
+        '<spell-view "card">',
+        "\t<!-- its rank -->",
+        "\t<!--",
+        '\t\t<property "rank"> is no tag here',
+        "\t-->",
+        '\t<alias "is red" />'
+      ],
+      spellx
+    )
+    expect(one).toEqual(['"<!-- its rank -->" comment'])
+    expect(open).toEqual(['"<!--" comment'])
+    expect(inside).toEqual(['"<property \\"rank\\"> is no tag here" comment'])
+    expect(close).toEqual(['"-->" comment'])
+    expect(after).toContain('"alias" keyword')
+  })
+
   test("a tag's body is spell, and the lines after its closer are tags again", () => {
     const [, , body, close, after] = colour(
       [

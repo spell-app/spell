@@ -18,6 +18,13 @@
 		</html>
 	</section>
 
+	<!--
+		EXAMPLES:  Fomantic's button page, section by section, in its order (Types, Groups, Content, States,
+		Variations, Group Variations), plus our own extras (Icon and text, Link, State texts).
+		- A section:  `<ui-header level="2" dividing id="types">Types</ui-header>`, then its examples.
+		- An example:  `<ui-example heading="..." description="...">` around the live markup;  the markup
+		  IS the code shown.  `GAP I<n>` comments mark examples a widget can't render yet (plan-doc issues).
+	-->
 	<section label="Types">
 		<section label="Button" sticky collapsible dividing>
 			<example description="A standard button.">
@@ -40,10 +47,8 @@
 			</example>
 		</section>
 
+		<!-- GAP I23:  Fomantic's `right arrow` / `left chevron` draw nothing;  use the canonical `arrow right`, `chevron left`. -->
 		<section label="Animated" sticky collapsible dividing>
-			<message size="small" state="warning">
-				<markdown>GAP I23:  Fomantic's `right arrow` / `left chevron` draw nothing;  use the canonical `arrow right`, `chevron left`.</markdown>
-			</message>
 			<example>
 				<html>
 					<p slot="description">A button can animate to show hidden content. The <code>icon</code> slot (or the <code>icon</code> attribute) is the hidden half.</p>
@@ -154,9 +159,8 @@
 					<button inverted color="black">Black</button>
 				</segment>
 			</example>
-			<message size="small" state="warning">
-				<markdown>GAP I21:  `inverted basic` buttons with a colour draw white, not the hue.</markdown>
-			</message>
+
+			<!-- GAP I21:  `inverted basic` buttons with a colour draw white, not the hue. -->
 			<example>
 				<segment inverted>
 					<button inverted appearance="basic">Basic</button>
@@ -266,10 +270,8 @@
 			</example>
 		</section>
 
+		<!-- GAP I22:  Fomantic's second and third rows (`double` / `elastic` loading) have no attribute value. -->
 		<section label="Loading" sticky collapsible dividing>
-			<message size="small" state="warning">
-				<markdown>GAP I22:  Fomantic's second and third rows (`double` / `elastic` loading) have no attribute value.</markdown>
-			</message>
 			<example description="A button can show a loading indicator.">
 				<button loading>Loading</button>
 				<button loading appearance="basic">Loading</button>
@@ -409,10 +411,8 @@
 			</example>
 		</section>
 
+		<!-- GAP I20:  `attached="top|bottom"` buttons stay content-wide. -->
 		<section label="Vertically Attached" sticky collapsible dividing>
-			<message size="small" state="warning">
-				<markdown>GAP I20:  `attached="top|bottom"` buttons stay content-wide.</markdown>
-			</message>
 			<example description="A button can be attached to the top or bottom of other content.">
 				<button attach="top">Top</button>
 				<segment attach="both">

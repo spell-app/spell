@@ -19,6 +19,7 @@
 		</html>
 	</section>
 
+	<!-- USAGE:  how to use it (attributes in practice, events, framework snippets), keyboard, accessibility. -->
 	<section label="Using it">
 		<markdown>
 			Write `<ui-button>` with its text inside, and add attributes for the look.
