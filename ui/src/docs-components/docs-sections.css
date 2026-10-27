@@ -144,4 +144,16 @@
   :is(.site-main, .ui-docs-sections) ui-section[sticky]:state(collapsed) + ui-section[sticky]::part(section) {
     margin-block: 0;
   }
+  /*
+   * folded sections one after another:  ONE group, round only at its top and its bottom (Owen, 2026-10-27:  "Card and
+   * Item should be stuck together when closed, with round just at top and bottom of the group");  an open one splits it
+   */
+  :is(.site-main, .ui-docs-sections) ui-section[sticky]:state(collapsed):has(+ ui-section[sticky]:state(collapsed))::part(title) {
+    border-end-start-radius: 0;
+    border-end-end-radius: 0;
+  }
+  :is(.site-main, .ui-docs-sections) ui-section[sticky]:state(collapsed) + ui-section[sticky]:state(collapsed)::part(title) {
+    border-start-start-radius: 0;
+    border-start-end-radius: 0;
+  }
 }
