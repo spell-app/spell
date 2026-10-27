@@ -250,21 +250,39 @@ export class UIDocsThemeBench extends E.UIComponent<DocsThemeBenchVocabulary> {
     return () => window.removeEventListener("message", onMessage)
   }
 
-  /** Follow the page server's `/editor` to the editor app's address, once. */
+  /**
+   * Follow the page server's `/editor` to the editor app's address, once:  under the bench's own site address first
+   * (a worktree's, on the main checkout's server), then at the server's root.
+   */
   @E.once
   private async findEditor(): Promise<void> {
-    try {
-      const response = await fetch(EDITOR_REDIRECT)
-      this.editorBase = response.ok && response.redirected ? response.url.replace(/\/$/, "") : ""
-    } catch {
-      this.editorBase = ""
+    for (const address of new Set([this.siteRoot + EDITOR_REDIRECT, EDITOR_REDIRECT])) {
+      try {
+        const response = await fetch(address)
+        if (response.ok && response.redirected) {
+          this.editorBase = response.url.replace(/\/$/, "")
+          return
+        }
+      } catch {
+        // not there:  the next
+      }
     }
+    this.editorBase = ""
+  }
+
+  /**
+   * Where the bench's site starts on its server:  `""` at the root, `/worktrees/debut` for a worktree's pages on the
+   * main checkout's server;  the pages beside it are found under it, so a worktree's bench shows the worktree's pages.
+   */
+  @E.lazy
+  private get siteRoot(): string {
+    return isServer ? "" : location.pathname.replace(BENCH_PAGE_PATH, "")
   }
 
   /** Page `id`'s address;  `undefined` for the editor's while it isn't found, or running. */
   private urlOf(id: BenchPlaceId): string | undefined {
     const place = BenchPlaces[id]
-    if (place.reach === "page server") return place.path
+    if (place.reach === "page server") return this.siteRoot + place.path
     return this.editorBase ? this.editorBase + place.path : undefined
   }
 
@@ -848,6 +866,9 @@ const FULL = 100
 
 /** The picker's colour while a value can't be painted. */
 const FALLBACK_HEX = "#000000"
+
+/** The bench's page, from its site's root:  what's before it is the site's address. */
+const BENCH_PAGE_PATH = /\/components\/ui\/[^/]*$/
 
 /** How long after its frame loads a page shows, dressed or not, in seconds. */
 const LOADED_ANYWAY_SECONDS = 12
