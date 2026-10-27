@@ -46,7 +46,7 @@ import benchCSS from "./UIDocsThemeBench.css?inline"
  *     - a pair's dark editor frame is the editor at this machine's other name (`127.0.0.1`):  another origin,
  *       so the two keep their own schemes
  *   - the TUNING:  every token, in the theme tree's groups (`BenchTokens`), each with a control (a colour's picker and
- *     opacity, a length's slider, its text), every theme's value for it, and which pages' sheets read it;
+ *     opacity, a length's slider, its text) and which pages' sheets read it;
  *     then the CHANGES, as the lines to put in the theme's file (`BenchEdits`)
  * - The theme:  the bench's menu is the docs site's (`ThemePreference`);  a pick there is made in every page too,
  *   as its own menu would, remembered there (`BenchPlace.themeKey`).
@@ -142,14 +142,6 @@ export class UIDocsThemeBench extends E.UIComponent<DocsThemeBenchVocabulary> {
   /** Every token the groups hold, filtered or not:  what the pages are asked about. */
   private get tokenList(): string[] {
     return (this.tokens?.groupsFor(this.theme, this.looks.editor?.declares) ?? []).flatMap((group) => group.tokens)
-  }
-
-  /** The themes, in the menu's order (Spell's own first), those with a file. */
-  get themeNames(): string[] {
-    const tokens = this.tokens
-    if (!tokens) return []
-    const own = this.isReady ? UI.themes.own.filter((name) => name in tokens.themes) : []
-    return [...own, ...tokens.names.filter((name) => !own.includes(name))]
   }
 
   ////////////////
@@ -672,13 +664,12 @@ export class UIDocsThemeBench extends E.UIComponent<DocsThemeBenchVocabulary> {
   }
 
   /**
-   * The tuning column:  the filter and the themes' names over the columns of every token's swatches, both sticky;
-   * every group of tokens;  the changes.
+   * The tuning column:  the filter and the readers' legend, sticky;  every group of tokens;  the changes.
    */
   private tuning(): JSX.Element {
     const t = this.text
     return (
-      <aside class="tuning" part={this.partForName("tuning")} style={`--_themes: ${this.themeNames.length || 1}`}>
+      <aside class="tuning" part={this.partForName("tuning")}>
         <div class="tuning-head">
           <ui-input
             class="find"
@@ -690,10 +681,7 @@ export class UIDocsThemeBench extends E.UIComponent<DocsThemeBenchVocabulary> {
             value={this.filter}
             on-ui-typed={(event: CustomEvent<{ value: string }>) => (this.filter = event.detail.value)}
           ></ui-input>
-          <Show when={this.tokens}>
-            {this.readersLegend()}
-            {this.themeHeads()}
-          </Show>
+          <Show when={this.tokens}>{this.readersLegend()}</Show>
         </div>
         <Show
           when={this.tokens}
@@ -703,29 +691,6 @@ export class UIDocsThemeBench extends E.UIComponent<DocsThemeBenchVocabulary> {
         </Show>
         {this.changesSection()}
       </aside>
-    )
-  }
-
-  /** The themes' names, once, over the columns of every token's swatches;  a click wears that theme. */
-  private themeHeads(): JSX.Element {
-    return (
-      <ul class="theme-heads" aria-label={this.text("themesRow")}>
-        <For each={this.themeNames}>
-          {(name) => (
-            <li>
-              <button
-                type="button"
-                class={["theme-head", { current: name === this.theme }]}
-                title={UIT.ThemeNames.titleOf(name)}
-                aria-pressed={name === this.theme ? "true" : "false"}
-                onClick={() => void ThemePreference.setTheme(name)}
-              >
-                {UIT.ThemeNames.titleOf(name)}
-              </button>
-            </li>
-          )}
-        </For>
-      </ul>
     )
   }
 
@@ -741,7 +706,7 @@ export class UIDocsThemeBench extends E.UIComponent<DocsThemeBenchVocabulary> {
     )
   }
 
-  /** One token's row:  its name, its control, every theme's value, which pages read it. */
+  /** One token's row:  its name and which pages read it, then its control. */
   private token(token: string): JSX.Element {
     const t = this.text
     const isTuned = () => this.edits[this.theme]?.[token] !== undefined
@@ -776,7 +741,6 @@ export class UIDocsThemeBench extends E.UIComponent<DocsThemeBenchVocabulary> {
           <Show when={kind() === "color"}>{this.opacitySlider(token)}</Show>
           <Show when={kind() === "length"}>{this.lengthSlider(token)}</Show>
         </div>
-        {this.themesRow(token, kind)}
       </div>
     )
   }
@@ -838,52 +802,6 @@ export class UIDocsThemeBench extends E.UIComponent<DocsThemeBenchVocabulary> {
         ></ui-slider>
         <span class="amount">{px()}px</span>
       </div>
-    )
-  }
-
-  /**
-   * Every theme's value for `token`, in the themes' columns (named once, `themeHeads()`):
-   * a bare swatch (light and dark halves) or its text;  a click wears that theme.
-   */
-  private themesRow(token: string, kind: () => TokenKind): JSX.Element {
-    const t = this.text
-    return (
-      <ul class="themes" aria-label={t("themesRow")}>
-        <For each={this.themeNames}>
-          {(name) => {
-            const light = () => this.tokens?.resolvedIn(name, token, "light")
-            const dark = () => this.tokens?.resolvedIn(name, token, "dark")
-            const tip = () => {
-              const [lightText, darkText] = [light(), dark()]
-              const value =
-                lightText === undefined
-                  ? t("notSet")
-                  : lightText === darkText
-                    ? lightText
-                    : `${lightText}  /  ${darkText}`
-              return `${UIT.ThemeNames.titleOf(name)}:  ${value}`
-            }
-            return (
-              <li>
-                <button
-                  type="button"
-                  class={["cell", { current: name === this.theme, unset: light() === undefined }]}
-                  title={tip()}
-                  aria-label={tip()}
-                  onClick={() => void ThemePreference.setTheme(name)}
-                >
-                  <Show when={kind() === "color"} fallback={<span class="cell-text">{light() ?? "–"}</span>}>
-                    <span
-                      class="swatch"
-                      style={`--_light: ${light() ?? "transparent"}; --_dark: ${dark() ?? "transparent"}`}
-                    />
-                  </Show>
-                </button>
-              </li>
-            )
-          }}
-        </For>
-      </ul>
     )
   }
 

@@ -21,13 +21,9 @@ describe("BenchTokens.load()", () => {
     expect(groups.at(-1)).toEqual({ place: "editor", tokens: ["--spell-pane-radius"] })
   })
 
-  it("every theme's value, as far as its files go", async () => {
+  it("a theme's value, as its sheet sets it", async () => {
     const tokens = await BenchTokens.load()
     expect(tokens.valueIn("fruity", "--ui-surface")).toBe("var(--glass-surface-strong)")
-    expect(tokens.resolvedIn("fruity", "--ui-surface", "light")).toMatch(/^#ffffff/)
-    expect(tokens.resolvedIn("fruity", "--ui-surface", "dark")).not.toBe(
-      tokens.resolvedIn("fruity", "--ui-surface", "light")
-    )
   })
 })
 

@@ -102,26 +102,6 @@ export class BenchTokens {
   }
 
   /**
-   * `theme`'s value for `token` in `scheme`, worked out as far as its files go:
-   * every `var()` of a token it sets replaced by that value, every `light-dark()` by its half for `scheme`.
-   * - A `var()` of a token it doesn't set stays:  the base theme's, which the page resolves.
-   */
-  resolvedIn(theme: string, token: string, scheme: "light" | "dark"): string | undefined {
-    const values = this.valuesOf(theme)
-    const resolve = (text: string, depth: number): string => {
-      const picked = pickScheme(text, scheme)
-      if (depth > MAX_DEPTH) return picked
-      return picked.replace(VAR, (whole, name: string, fallback: string | undefined) => {
-        const value = values.get(name)
-        if (value !== undefined) return resolve(value, depth + 1)
-        return fallback !== undefined ? resolve(fallback, depth + 1) : whole
-      })
-    }
-    const value = values.get(token)
-    return value === undefined ? undefined : resolve(value, 0)
-  }
-
-  /**
    * CSS text as a theme file writes it:  each `var(--x)` of a token in a theme file's groups as its pointer,
    * `{surfaces.panel}`;  any other `var()` as it is.
    */
@@ -292,9 +272,6 @@ const TREE_PICKS: readonly { place: string; names: readonly string[] }[] = [
 
 /** How deep pointers and `extends` are followed. */
 const MAX_DEPTH = 12
-
-/** A `var()`:  its name, and its fallback if any (one level of brackets inside). */
-const VAR = /var\(\s*(--[\w-]+)\s*(?:,\s*((?:[^()]|\([^()]*\))*))?\)/g
 
 /** A `var()` with no fallback:  its token. */
 const PLAIN_VAR = /var\(\s*(--[\w-]+)\s*\)/g

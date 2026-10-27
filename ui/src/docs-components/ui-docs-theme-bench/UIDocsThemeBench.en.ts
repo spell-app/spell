@@ -32,7 +32,7 @@ export const docsThemeBenchVocabulary = {
     { name: "pages", description: "The pages' grid." },
     { name: "page", description: "One page:  its title row and its frame." },
     { name: "tuning", description: "The tuning column:  every token, by group, and the changes." },
-    { name: "token", description: "One token's row:  its name, its control, every theme's value, who reads it." }
+    { name: "token", description: "One token's row:  its name, who reads it, its control." }
   ],
   states: [{ name: "tuned", description: "Some token of the theme shown is tuned." }],
   texts: [
@@ -89,7 +89,6 @@ export const docsThemeBenchVocabulary = {
       text: "The editor's own",
       description: "Group:  the editor app's tokens (`--spell-*`), in its own sheet, not a theme file."
     },
-    { key: "themesRow", text: "Every theme", description: "Accessible name of a token's row of theme values." },
     { key: "readBy", text: "Read by", description: "Accessible name of a token's row of the places that read it." },
     { key: "readsTip", text: "{place} reads it", description: "A reader's tip:  the page reads the token." },
     {
@@ -107,7 +106,6 @@ export const docsThemeBenchVocabulary = {
       text: "The page also sets it on its own elements:  a tuning doesn't reach those",
       description: "The legend's half dot's tip."
     },
-    { key: "notSet", text: "not set:  the base theme's", description: "A theme that doesn't set the token." },
     { key: "reset", text: "Reset", description: "Put a token back to the theme's own value." },
     { key: "resetAll", text: "Reset all", description: "Put every token of the theme shown back." },
     { key: "alpha", text: "Opacity", description: "Accessible name of a colour's opacity slider." },
@@ -117,13 +115,6 @@ export const docsThemeBenchVocabulary = {
       key: "noChanges",
       text: "Nothing tuned in {theme} yet.",
       description: "The changes section, while nothing is tuned in the theme shown."
-    },
-    { key: "copy", text: "Copy", description: "Copy the changes." },
-    { key: "copied", text: "Copied", description: "Shown for a moment after a copy." },
-    {
-      key: "tunedIn",
-      text: "Tuned in {scheme}",
-      description: "A token's tip:  its tuned value applies to this scheme only."
     }
   ]
 } as const satisfies E.ComponentVocabulary
