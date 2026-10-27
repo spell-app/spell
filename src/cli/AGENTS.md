@@ -56,8 +56,13 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - The bin hands `tsx` [tsconfig.tsx.json](../../tsconfig.tsx.json), which extends them over EVERY repo's files:
     `tsx` applies a tsconfig only to the files it includes, and `tsconfig.node.json` includes only the kit's
     (epic `repo-split` I69:  spell-app's screens crashed in a terminal with "React is not defined").
-- ONE `CliError` class for every repo:  spell-app's `CLI.CliError` re-exports this one.
+- ONE `CliError` class for every repo:  spell-app's `CLI.CliError` re-exports this one, and spell-epic's
+  `EpicCommandError` is it too (epic `coherence` P20).
   `runCommand()` knows a mistake from a crash by it.
+  - spell-epic's `epic` is built on this base:  `runCommand()`, `rawArgsAfter()`, `runChild()`, `toolArgs()`, `out()`;
+    never on the program (`main.ts`)
+  - plain `node` (spell-epic's prompt gate, its docs tools) loads `cli.types.ts` by file, with its extension:
+    `EXIT`, `CliError` and the types, no other import
 - Where a command works:  the checkout the current folder is in, found by a file only it has
   (`findCheckout(marker)`), else the kit `spell` runs from.
   - Why:  `spell` is linked to the MAIN checkout, but in an epic's worktree the files are the worktree's.

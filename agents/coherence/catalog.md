@@ -183,7 +183,8 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
 - **Copies:**  three in spell-epic, kept, each saying why:  they load in plain `node`, which can't load `PidFile`
   (it imports the server's barrel)
   - `spell-epic/src/window.mjs`, `spell-epic/src/command/CheckoutServers.ts`, `spell-epic/src/tools/AskListeners.ts`
-  - `RunningEpics` and `Sessions` use the kit's since epic `coherence` P7.
+  - `RunningEpics` and `Sessions` use the kit's since epic `coherence` P7:  they hand it to `ClaudeHome.liveSessions()`
+    since P20, which plain `node` loads and so takes the check from its caller (the window script hands its own).
   - Fine:  `spell-epic/src/tool/InboxPoller.mjs` keeps its own:  it loads node's built-ins only, to stay small.
   - spell-epic's VS Code extension on `isProcessAlive()` and `serverAt()` since P24;  the same read of
     `/api/server` left in the kit's `src/server/mainServer.ts` (`liveInfo()`) and spell-epic's
@@ -251,25 +252,46 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
 - **Score:**  `["'\x60](\.\./)*spell(-app)?\.epics["'\x60/]` · home `src/server/contentFolder.ts`
 - **Copies:**  `--`
 
+### Claude Code's folder:  its sessions and transcripts
+
+- **It is:**  `ClaudeHome` (`spell-epic/src/config/ClaudeHome.ts`;  epic `coherence` P20):  where it is (`home()`:
+  `$CLAUDE_CONFIG_DIR`, Claude Code's own variable, which a test sets too, else `~/.claude`), its running sessions
+  (`liveSessions()`), every transcript and one session's (`transcripts()`, `transcriptOf()`);  and `Transcript` beside
+  it (`spell-epic/src/config/Transcript.ts`), one transcript read one way:  a line (`parseLine()`), a message's blocks
+  (`blocksOf()`), its titles, the end first (`titles()`), its end (`tail()`), the question waiting
+  (`pendingQuestion()`)
+  - plain `node` loads both (the hooks, the window script)
+- **Use it when:**  anything reads Claude Code's sessions, transcripts or queued titles.
+- **Flag:**  `homedir\(\), "\.claude"|SPELL_CLAUDE_HOME|CLAUDE_CONFIG_DIR`
+- **Score:**  `homedir\(\), "\.claude"|SPELL_CLAUDE_HOME|SPELL_SESSION_TITLES_DIR|process\.env\.CLAUDE_CONFIG_DIR`
+  · in `spell-epic/src/` · home `spell-epic/src/config/ClaudeHome.ts`
+- **Copies:**  `--` since P20 (`Sessions`, `SessionFolders`, `RunningEpics`, the window script, `ReviewBackfill`, the
+  prompt gate and the handoff hook, which named it by three variables, and could disagree).  Left:
+  - four rules for what Owen typed, each its own job:  `Sessions.promptText()`, `ActiveTime`'s gaps,
+    `ReviewBackfill`'s `NOT_OWEN`, `Requests.promptBlocks()`
+  - `ReviewBackfill.sessionsOf()`:  its own walk of an epic's sessions, beside `Sessions.named()` and its index
+
 ## Command lines
 
 ### A command
 
 - **It is:**  a verb of `spell` (each repo's `src/cli/commands.ts`), or of `epic` (spell-epic's `EpicProgram`):
   commander, with help, flags and the commands page's check
+  - `epic`'s on the kit's base since epic `coherence` P20 (`spell/cli`:  `runCommand()`, `rawArgsAfter()`, `runChild()`,
+    `CliError`):  each verb's flags listed in its help, any other refused (`epicGroups.ts`, `EpicProgram.checkFlags()`)
+  - and its tools read their command lines ONE way:  `parseVerbArgs()`, `stringFlag()`, a wait's `duration()`
+    (`spell-epic/src/command/command.types.ts`, which plain `node` loads)
 - **Use it when:**  any new tool a person or a skill runs.
   Where it goes and what it's called:  the commands guide, in the shared content folder's guides.
 - **Flag:**  `function parseArgs\(|argv\.indexOf\(["']--`
 - **Score:**  `function parseArgs\(|argv\.indexOf\(["']--`
   · home `src/cli/`, `spell-epic/src/cli/`
-- **Copies:**  six hand-written `parseArgs()`
-  - `spell-epic/src/tool/PlanDocCommands.ts`
-  - `spell-epic/src/tools/design.js`, `spell-epic/src/tools/details.js`, `spell-epic/src/tools/new-page.js`,
-    `spell-epic/src/tools/pages.js`
-  - `spell-epic/src/window.mjs`
+- **Copies:**
   - `spell-brand/scripts/compare.ts`
-  - six more flag readers (sweep 1):  spell-epic's `parseVerbArgs` and `flagsOf`, `check-spell.js`, the kit's
-    `tools/content-links.ts`, `scripts/favicon.ts`, `tools/repos.ts`
+  - the kit's `tools/content-links.ts`, `scripts/favicon.ts`, `tools/repos.ts`;  spell-epic's demo checks'
+    `flagValue()`
+  - P20 moved spell-epic's onto `parseVerbArgs()`:  six hand-written `parseArgs()` (`PlanDocCommands`, `design.js`,
+    `details.js`, `new-page.js`, `pages.js`, the window script), `flagsOf()`, `check-spell.js`
   - beside them, node's own `parseArgs` in Spell UI's tools (`spell-ui/src/tools/cli.ts` ...):  fine for a
     package-local tool
 
@@ -324,8 +346,9 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
   - Fine:  `src/server/liveClient.ts`, served to pages as one function's text:  it imports nothing
   - Fine:  `spell-epic/src/tool/InboxPoller.mjs`:  node's built-ins only, to stay small
   - the node waits and timers sweep 2 found (epic-tools-kit #3, parser-app #2), left for after epic `repo-split` P20:
-    the kit's `PidFile`, `FileLock`, `LiveReload`, `CommandRun`, `BundleBuild`, `spell server`'s editor wait, `run.ts`'s
-    drain, `TaskList`;  spell-epic's `details.js`, `comments.ts`, `agents.ts`, `Parking`, `InboxCommands`, the window
+    the kit's `PidFile`, `FileLock`, `LiveReload`, `CommandRun`, `BundleBuild`, `spell server`'s editor wait,
+    `TaskList` (`run.ts`'s drain is `within()`'s since P20);  spell-epic's `details.js`, `comments.ts`, `agents.ts`,
+    `Parking`, `InboxCommands` (their times read by `duration()` since P20, their waits still by hand), the window
     script, `showRoutes`, `CheckoutServers`, the demo checks;  spell-app's `serveCommand.ts`, `runTarget.ts`
   - `spell-epic/src/answers/AnswerForm.ts`, `spell-epic/src/answers/RunForm.ts`,
     `spell-epic/src/answers/ChoicesForm.ts`
@@ -761,6 +784,20 @@ What a component, or a page built on Spell UI, reaches for first.
 - **Copies:**  `--` (the theme editor writes its own sheet until it moves onto theme data, epic `debut` P22)
 
 ## In spell-epic and the parser
+
+### An item's id, and its letter
+
+- **It is:**  `ItemLetters` (each section's letter), with `ITEM_ID` and `isItemId()` beside it
+  (`spell-epic/src/definitions/definitions.types.ts`;  epic `coherence` P20):  a letter or two and a number, any case
+  (`J3`, a comment's `c3`, an Overview part's `o2`);  the tool's `KINDS` and `epic`'s kinds take their letters from it
+- **Use it when:**  reading an id someone typed or a page holds, or naming a kind by its letter.
+- **Flag:**  `\[a-z\]\{1,2\}\\d\+|\[qcitvd\]`
+- **Score:**  `(ITEM_ID|ITEM_REF)\s*=\s*/|\[qcitvd\]` · in `spell-epic/src/`
+  · home `spell-epic/src/definitions/definitions.types.ts`
+- **Copies:**  `--` since P20 (`PlanDoc`, `PhaseTakes`, `ReviewInbox`, `ToReviewMarks`, `epicArgs`;  `ReviewBackfill`'s
+  letters, which missed J and M).  Left:
+  - `spell-epic/src/tools/_assets/spell-doc-toolbar.js`:  a section label's leading id, in the docs runtime (P22's folder)
+  - Fine:  `spell-epic/src/tool/migrations/ItemRenames.ts`:  one letter on purpose, the old ids it renames
 
 ### A growing text box
 
