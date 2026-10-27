@@ -16,10 +16,12 @@
 //     monospace, uppercase and spaced out;  body text a muted grey-green
 //   - light, "daylight":  the same subtlety:  a cool grey-green page with a white haze at the top, panels a hair
 //     lighter on hairlines, the mint deepened so white reads on it
-//   - the system font and its monospace;  6px chips, 8px controls, 14px cards and panels, 18px modals
+//   - Inter for headings, the system font and its monospace for the rest;
+//     6px chips, 8px controls, 14px cards and panels, 18px modals
 //     (the box round a thing always rounder than it)
 //   - Apple's system colours for the hues (its palette, `apple`)
-// - NO font files ship:  every face is the platform's own.
+// - ONE font file ships:  Inter for the headings (`matrix/`, latin only, self-hosted);  body and monospace are the
+//   platform's own.
 {
   "$schema": "./theme.schema.json",
   "palette": "apple",
@@ -53,7 +55,8 @@
     "size": "15px",
     "family": {
       "body": "system-ui, -apple-system, \"Segoe UI\", \"Noto Sans\", Cantarell, Ubuntu, \"Helvetica Neue\", Arial, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Noto Color Emoji\"",
-      "heading": "{typography.family.body}",
+      // Inter (`rules/matrix.css`'s `@font-face`), its display cut at heading sizes;  the system font behind it
+      "heading": "\"Inter Matrix\", {typography.family.body}",
       "mono": "ui-monospace, \"SF Mono\", \"JetBrains Mono\", Menlo, Consolas, monospace"
     }
   },
@@ -64,7 +67,9 @@
   },
   "text": {
     "ink": { "light": "#0c1916", "dark": "#ebf0ed" },
-    "body": { "light": "#1e2e2a", "dark": "#c3d0cc" },
+    // the console's paragraphs are its label grey (Owen, 2026-10-27:  "Dim #95a19e, as the screenshot"):
+    // 7:1 on the page, 6.2:1 on a raised row;  daylight the same idea, its muted grey
+    "body": { "light": "#4c5f5a", "dark": "#95a19e" },
     "strong": { "light": "#07110e", "dark": "#ebf0ed" },
     // the console's grey:  its paragraphs and labels
     "muted": { "light": "#4c5f5a", "dark": "#95a19e" },

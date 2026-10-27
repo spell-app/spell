@@ -170,7 +170,9 @@ the runtime globs the folder, so dropping a `<name>.css` in makes a theme.
     thick ink outlines and a hard offset shadow on cards, panels and buttons;  dark is a deep plum page.
   - `matrix`:  a dark ops console:  a near-black green-grey page with a faint glow from the top, panels only just off
     it on hairlines and a slight lift, one mint accent, amber for what needs attention and coral for what's wrong,
-    heavy tight headings, and its labels (a table's header row, a `sub` header) in the monospace, uppercase;
+    heavy tight headings in Inter (the one font a theme of the set ships:  self-hosted, latin only, fetched only
+    when Matrix is applied), dim grey-green body text,
+    and its labels (a table's header row, a `sub` header) in the monospace, uppercase;
     light is a cool grey-green with a deep mint.
   - Two more of Spell UI's font stacks came with them, for any theme to use:
     `--ui-font-family-serif` (Palatino first) and `--ui-font-family-rounded`.
@@ -204,7 +206,7 @@ the last column is what a theme restyles on purpose.
 | `paper` | Warm and bookish:  a cream page, ink-brown text, an oxblood primary, a serif for reading, hairlines and 4px corners;  dark a lamplit brown.  Page-wide. | everything, through the global tokens |
 | `midnight` | Dark first:  a blue-black page, panels a step lighter with lit edges, a glowing teal primary, the system font, 10px corners;  light a pale blue-grey dawn.  Page-wide. | everything, through the global tokens |
 | `crisp` | High contrast:  pure white or black, one strong blue, 2px borders, a thick focus ring, no shadows;  text at 7:1.  Page-wide. | everything, through the global tokens |
-| `matrix` | A dark ops console:  a near-black green-grey page with a faint glow, panels only just off it on hairlines, one mint accent, amber and coral for warnings and errors, heavy tight headings, monospace labels, 8px controls and 14px cards;  light a cool grey-green.  Page-wide. | everything, through the global tokens;  table header rows and `sub` headers in the monospace |
+| `matrix` | A dark ops console:  a near-black green-grey page with a faint glow, panels only just off it on hairlines, one mint accent, amber and coral for warnings and errors, heavy tight headings in Inter (self-hosted), monospace labels, 8px controls and 14px cards;  light a cool grey-green.  Page-wide. | everything, through the global tokens;  table header rows and `sub` headers in the monospace |
 | `pop` | Playful:  the rounded font, a hot pink primary, thick ink outlines and a hard offset shadow (a sticker look), 16px cards;  dark a deep plum.  Page-wide. | everything, through the global tokens;  filled buttons get the sticker |
 | `merlot` | A code studio in wine reds:  the system font, flat panels joined by hairlines a step off the page, no glass;  a warm gold primary on deep wine in dark, a maroon one on pale rose-grey in light.  Page-wide;  tokens only so far. | everything, through the global tokens |
 | `classic` | Fomantic's original look, and the base of every theme above:  Lato, 14px, Fomantic's palette and size ratios, 4px radii.  Page-wide. | everything, through the global tokens |

@@ -26,14 +26,14 @@
     --ui-font-family:
       system-ui, -apple-system, "Segoe UI", "Noto Sans", Cantarell, Ubuntu, "Helvetica Neue", Arial, sans-serif,
       "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji";
-    --ui-font-family-heading: var(--ui-font-family);
+    --ui-font-family-heading: "Inter Matrix", var(--ui-font-family);
     --ui-font-family-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
     --ui-radius-s: 6px;
     --ui-radius-m: 8px;
     --ui-radius-l: 14px;
     --ui-ink-on-light: #0c1916;
     --ui-ink-on-dark: #ebf0ed;
-    --ui-text-color: light-dark(#1e2e2a, #c3d0cc);
+    --ui-text-color: light-dark(#4c5f5a, #95a19e);
     --ui-text-dark: light-dark(#07110e, #ebf0ed);
     --ui-text-muted: light-dark(#4c5f5a, #95a19e);
     --ui-text-light: light-dark(#56685f, #808c8a);
