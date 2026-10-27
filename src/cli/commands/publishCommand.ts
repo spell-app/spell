@@ -1,16 +1,18 @@
 import chalk from "chalk"
 import { execFileSync } from "node:child_process"
 import { existsSync, mkdirSync, readFileSync, rmSync } from "node:fs"
-import { join } from "node:path"
+import { basename, join } from "node:path"
 
 import { kb } from "spell/util/number"
-import { readJSON5File } from "spell/util/node/json5"
 import { CLI } from "spell/cli"
+import { kitFolders } from "spell/server/kitFolders"
 import {
   PACKS_FOLDER,
+  PluginPackage,
   PublishedPackage,
   STAGE_FOLDER,
   ScratchInstall,
+  UIBundle,
   type PackedPackage,
   type PublishCheck,
   type PublishedRepo,
@@ -18,52 +20,50 @@ import {
 } from "spell/cli/publish"
 
 /**
- * `spell publish [--dry-run] [--no-scratch] [--json]`:  every repo that publishes, built, packed and checked, then
- * published to npm, lowest first (epic `repo-split` P19).
- * - Which repos:  the kit, `spell`, then each installed child repo with a `"spellPublish"` in its `package.json`,
- *   lowest first (`repos.json5`):  `spell`, then `spell-parser` and `spell-ui`, then `spell-epic` and `spell-app`.
- * - Each one:  its declarations rebuilt (`spell-types`, where it has them), then staged and packed by
- *   `PublishedPackage` into the kit's `dist-packs/` (git-ignored), its file list summed up and checked.
- * - ONE version for all:  the kit's `package.json` `version`, stamped on every package and on their dependencies on
- *   each other.  A checkout's own `version` that differs is reported, never published.
- * - `npm install spell` brings everything:  the published `spell` depends on every other package (only the PACKED
- *   one:  in the checkout they stay workspaces).
+ * `spell publish [--dry-run] [--no-scratch] [--json]`:  the packages built, packed and checked, then published to
+ * npm (epic `repo-split` P19;  three packages since P20, One Repo, Q65).
+ * - `spell`:  the ONE package (Q62), the kit's `src/` and every folder's (`dist/ui/...`, `dist/parser/...`), with
+ *   every name the checkout has (`spell/ui/core`), its commands, and every folder's runtime dependency.
+ * - `spell-ui`:  Spell UI on its own, its Vite library build with the element code inside (Q63, `UIBundle`).
+ * - `spell-epic`:  the epic plugin, its parts at its root, its code `spell`'s (Q64, `PluginPackage`).
+ * - Which folders publish on their own:  by their package's name, `spell-ui` and `spell-epic` (`BUNDLED`, `PLUGIN`).
+ *   spell-parser and spell-app stay held names, never published again (Q65).
+ * - Each one:  declarations rebuilt (`spell-types`, where a program lists them), then staged and packed into the
+ *   kit's `dist-packs/` (git-ignored), its file list summed up and checked.
+ * - ONE version for all:  the kit's `package.json` `version`.
  * - Then the scratch install (`ScratchInstall`):  the packed files installed outside the checkout, a node import,
- *   a Vite page with a `<ui-button>`, `npx spell help`.  `--no-scratch` skips it (it needs the network).
+ *   a Vite page with a `<ui-button>`, `npx spell help`, `npx epic --help`.  `--no-scratch` skips it (it needs the
+ *   network).
  * - `--dry-run`:  stops there;  publishes nothing.
- *   Without it, and only when every check passed:  `npm publish <tgz>` for each, lowest first.
+ *   Without it, and only when every check passed:  `npm publish <tgz>` for each.
  *   NOTE: `npm login` first;  npm asks for a one-time password itself when the account has one.
  * - Which kit:  the nearest from the current folder (`findCheckout(KIT_MARKER)`).
  * - Exits 1 when a check fails or a publish does.
  */
 export async function publishCommand(options: CLI.PublishOptions = {}): Promise<number> {
   const kit = CLI.findCheckout(CLI.KIT_MARKER)
-  const repos = publishedRepos(kit)
-  const kitManifest = repos[0]!.manifest
-  const version = kitManifest.version
+  const { kit: kitRepo, folders } = publishedRepos(kit)
+  const version = kitRepo.manifest.version
   const packsDir = join(kit, PACKS_FOLDER)
   rmSync(packsDir, { recursive: true, force: true })
   mkdirSync(join(packsDir, STAGE_FOLDER), { recursive: true })
 
   const catalog = yarnCatalog(kit)
-  const others = Object.fromEntries(repos.slice(1).map((repo) => [repo.name, version]))
   const say = options.json ? () => {} : CLI.out
   const checks: PublishCheck[] = []
   const packed: PackedPackage[] = []
-  say(chalk.bold(`spell publish${options.dryRun ? " --dry-run" : ""}:  ${repos.length} packages at ${version}`))
+  const stage = (name: string) => join(packsDir, STAGE_FOLDER, name)
+  const ui = folders.find((folder) => folder.manifest.name === BUNDLED)
+  const plugin = folders.find((folder) => folder.manifest.name === PLUGIN)
+  const packages: PublishedPackage[] = [
+    new PublishedPackage(kitRepo, stage(kitRepo.name), version, {}, catalog, folders),
+    ...(ui ? [new UIBundle({ ...ui, name: BUNDLED }, stage(BUNDLED), version, {}, catalog)] : []),
+    ...(plugin ? [new PluginPackage({ ...plugin, name: PLUGIN }, stage(PLUGIN), version, {}, catalog)] : [])
+  ]
+  say(chalk.bold(`spell publish${options.dryRun ? " --dry-run" : ""}:  ${packages.length} packages at ${version}`))
+  for (const repo of [kitRepo, ...folders]) buildDeclarations(kit, repo)
 
-  for (const repo of repos) {
-    if (repo.manifest.version !== version) {
-      say(chalk.dim(`  ${repo.name}'s checkout says ${repo.manifest.version}:  published as ${version}`))
-    }
-    buildDeclarations(kit, repo)
-    const pkg = new PublishedPackage(
-      repo,
-      join(packsDir, STAGE_FOLDER, repo.name),
-      version,
-      repo === repos[0] ? others : {},
-      catalog
-    )
+  for (const pkg of packages) {
     const built = await pkg.stage()
     const result = pkg.pack(packsDir)
     packed.push(result)
@@ -111,22 +111,27 @@ export async function publishCommand(options: CLI.PublishOptions = {}): Promise<
 ////////////////
 
 /**
- * The repos that publish, lowest first:  the kit, then each child repo `repos.json5` lists that's in the kit and has
- * a `"spellPublish"` (a repo without one never publishes:  spell-brand).
+ * What publishes:  the kit, and each of its folders (`kitFolders()`) with a `"spellPublish"`, each as a repo named by
+ * its import names (`spell/ui`:  its files are `spell/ui/...`).
  * - Throws `CliError` when the kit has no `"spellPublish"` of its own.
  */
-export function publishedRepos(kit: string): PublishedRepo[] {
-  const repos: PublishedRepo[] = []
-  const names = readJSON5File<{ repos?: { name: string }[] }>(join(kit, CLI.KIT_MARKER)).repos?.map((r) => r.name) ?? []
-  for (const root of [kit, ...names.map((name) => join(kit, name))]) {
-    const file = join(root, "package.json")
-    if (!existsSync(file)) continue
-    const manifest = JSON.parse(readFileSync(file, "utf8")) as SourceManifest
-    if (manifest.spellPublish) repos.push({ name: manifest.name, root, manifest, settings: manifest.spellPublish })
-  }
-  if (repos[0]?.root !== kit) throw new CLI.CliError(`${kit}'s package.json has no "spellPublish":  nothing to publish`)
-  return repos
+export function publishedRepos(kit: string): { kit: PublishedRepo; folders: PublishedRepo[] } {
+  const manifestOf = (root: string) => JSON.parse(readFileSync(join(root, "package.json"), "utf8")) as SourceManifest
+  const own = manifestOf(kit)
+  if (!own.spellPublish) throw new CLI.CliError(`${kit}'s package.json has no "spellPublish":  nothing to publish`)
+  const folders = kitFolders(kit).flatMap((root) => {
+    const manifest = manifestOf(root)
+    if (!manifest.spellPublish) return []
+    return [{ name: `${own.name}/${basename(root)}`, root, manifest, settings: manifest.spellPublish }]
+  })
+  return { kit: { name: own.name, root: kit, manifest: own, settings: own.spellPublish }, folders }
 }
+
+/** The folder whose package publishes on its own as Spell UI's bundle (Q63). */
+const BUNDLED = "spell-ui"
+
+/** The folder whose package publishes as the epic plugin (Q64). */
+const PLUGIN = "spell-epic"
 
 /** The yarn `catalog:` versions in the kit's `.yarnrc.yml`, by package. */
 export function yarnCatalog(kit: string): Record<string, string> {

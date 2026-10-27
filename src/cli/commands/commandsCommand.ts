@@ -5,6 +5,7 @@ import { join } from "node:path"
 
 import { contentFolderOf } from "spell/server/contentFolder"
 import { DataFile } from "spell/server/DataFile"
+import { kitFolders } from "spell/server/kitFolders"
 import { CLI } from "spell/cli"
 
 /**
@@ -71,26 +72,24 @@ function packageNames(root: string): Set<string> {
 /**
  * Each yarn package's `package.json` in kit `root`, as `[page name, absolute path]`:
  * - the kit's own, as `root`
- * - each child repo inside it (each `spell-<repo>` folder), by its package's name:  each repo is ONE package named after it since
- *   epic `repo-split` P11 (`spell-parser`, `spell-app` ...)
+ * - each of its folders (`kitFolders()`:  `parser/`, `ui/` ...), by its package's name, the old repo's
+ *   (`spell-parser`, `spell-app` ...:  their scripts' page names since epic `repo-split` P11)
  * - Spell UI's site, `ui-site`
  * - only the ones that are there
  */
 function packageManifests(root: string): Array<[string, string]> {
   const found: Array<[string, string]> = [["root", join(root, "package.json")]]
-  for (const repo of childRepos(root)) {
-    const file = join(root, repo, "package.json")
-    found.push([(JSON.parse(readFileSync(file, "utf8")) as { name: string }).name, file])
-  }
-  found.push(["ui-site", join(root, "spell-ui", "site", "package.json")])
+  for (const [name, dir] of folders(root)) found.push([name, join(dir, "package.json")])
+  const ui = folders(root).get("spell-ui")
+  if (ui) found.push(["ui-site", join(ui, "site", "package.json")])
   return found.filter(([, file]) => existsSync(file))
 }
 
-/** The child repos inside kit `root`:  each `spell-*` folder with a `package.json`, sorted. */
-function childRepos(root: string): string[] {
-  return readdirSync(root)
-    .filter((name) => name.startsWith("spell-") && existsSync(join(root, name, "package.json")))
-    .sort()
+/** The kit's folders, by their package's name (`spell-epic` => `<root>/epic`), in the kit's order. */
+function folders(root: string): Map<string, string> {
+  return new Map(
+    kitFolders(root).map((dir) => [(JSON.parse(readFileSync(join(dir, "package.json"), "utf8")) as { name: string }).name, dir])
+  )
 }
 
 /** A yarn command's page name, `<package> <script>`:  not a skill (`/name`), a `spell` or an `epic` command. */
@@ -105,7 +104,7 @@ function isYarnName(name: string): boolean {
  * - CLI:  `spell <command>` and `spell <group> <command>`, from every repo's command list (`cliSources()`);
  *   `epic <verb>`, from spell-epic's `EpicProgram.ts`.  NOTE: the SOURCE, not this process's commander program:
  *   the checkout checked may not be the one `spell` runs from.
- * - skills:  `/<name>` for each `SKILL.md` in the kit's and each child repo's `.claude/skills/*`, and spell-epic's
+ * - skills:  `/<name>` for each `SKILL.md` in the kit's and each folder's `.claude/skills/*`, and the engine's
  *   `skills/*`;  plus `sources.userSkills` found in `~/.claude/skills`;  minus `sources.ignore`
  */
 export function commandSources(root: string, sources: CommandsData["sources"] = {}, home = homedir()): CommandSource[] {
@@ -119,8 +118,9 @@ export function commandSources(root: string, sources: CommandsData["sources"] = 
   for (const { file, receiver, groups } of cliSources(root)) {
     for (const name of commandNames(readFileSync(file, "utf8"), receiver, groups)) found.push({ surface: "cli", name })
   }
-  const skillFolders = [join(root, ".claude", "skills"), join(root, ENGINE_SKILLS)].concat(
-    childRepos(root).map((repo) => join(root, repo, ".claude", "skills"))
+  const engine = folders(root).get(ENGINE)
+  const skillFolders = [join(root, ".claude", "skills"), ...(engine ? [join(engine, "skills")] : [])].concat(
+    [...folders(root).values()].map((dir) => join(dir, ".claude", "skills"))
   )
   for (const folder of skillFolders) {
     if (!existsSync(folder)) continue
@@ -146,10 +146,11 @@ export function commandSources(root: string, sources: CommandsData["sources"] = 
  */
 function cliSources(root: string): { file: string; receiver: string; groups: boolean }[] {
   const lists = CLI.spellRepos(root).flatMap((repo) => (repo.commands ? [repo.commands] : []))
-  const engine = join(root, EPIC_PROGRAM)
+  const folder = folders(root).get(ENGINE)
+  const engine = folder ? join(folder, EPIC_PROGRAM) : ""
   return [
     ...lists.map((file) => ({ file, receiver: "spell", groups: true })),
-    ...(existsSync(engine) ? [{ file: engine, receiver: "epic", groups: false }] : [])
+    ...(engine && existsSync(engine) ? [{ file: engine, receiver: "epic", groups: false }] : [])
   ]
 }
 
@@ -175,11 +176,11 @@ export function commandNames(text: string, receiver: string, groups: boolean): s
   return names
 }
 
-/** spell-epic's `epic` command's verbs, from the kit's root. */
-const EPIC_PROGRAM = join("spell-epic", "src", "cli", "EpicProgram.ts")
+/** The folder of the epic engine's package:  its `epic` command and the plugin's skills (`skills/`). */
+const ENGINE = "spell-epic"
 
-/** spell-epic's plugin's skills, from the kit's root. */
-const ENGINE_SKILLS = join("spell-epic", "skills")
+/** The `epic` command's verbs, from the engine's folder. */
+const EPIC_PROGRAM = join("src", "cli", "EpicProgram.ts")
 
 /** Every command name the page's rows give, in any surface's `names`. */
 export function pageNames(data: CommandsData): Set<string> {

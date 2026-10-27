@@ -14,6 +14,10 @@
  *   code is, from the catalog's searches (epic `coherence` P15)
  * - `spell publish [--dry-run]`:  every repo's npm package, built, packed and checked, then published, lowest first
  *   (epic `repo-split` P19)
+ * - `spell rename imports [--dry-run] [repos...]`:  the import rename of epic `repo-split` P20 (`spell-ui/x` =>
+ *   `spell/ui/x` ...), kept for branches open when it landed
+ * - `spell rename branches [--dry-run]`:  an epic's old child-repo branches carried into the merged folders, rewritten
+ *   as P20's history was (`tools/one-repo/one-repo.ts --step carry-on`)
  * - `spell pony`:  a pony, which proves `spell` runs with nothing else installed
  * - `spell help`:  the program's own (`addHelp()`), not this list's
  * - Loads fast:  each action imports its command's file when it runs.
@@ -21,6 +25,7 @@
  *   keep each command's name a literal at its call.
  */
 import type { Command } from "commander"
+import { join } from "node:path"
 
 import { CLI } from "spell/cli"
 
@@ -127,13 +132,13 @@ export default function kitCommands(spell: Command): void {
   readme
     .command("check")
     .description("links, anchors, captions and words of every README (yarn readme:check) -- exits 1 on a finding")
-    .argument("[pages...]", "only these pages, from the kit's root (spell-parser/README.md)")
+    .argument("[pages...]", "only these pages, from the kit's root (parser/README.md)")
     .action((pages: string[]) => CLI.runCommand(() => CLI.runTool(README_CHECK, pages)))
 
   readme
     .command("test")
     .description("run every example a README prints with its Output fold, and compare -- exits 1 when one differs")
-    .argument("[pages...]", "only these pages, from the kit's root (spell-parser/README.md)")
+    .argument("[pages...]", "only these pages, from the kit's root (parser/README.md)")
     .option("--list", "only list the examples, without running them")
     .action((pages: string[], options: { list?: boolean }) =>
       CLI.runCommand(() => CLI.runTool(README_TEST, [...pages, ...(options.list ? ["--list"] : [])]))
@@ -142,7 +147,7 @@ export default function kitCommands(spell: Command): void {
   readme
     .command("pictures")
     .description("take the pictures of every README's `html example` blocks, headlessly, where missing or stale")
-    .argument("[pages...]", "only these pages, from the kit's root (spell-ui/README.md)")
+    .argument("[pages...]", "only these pages, from the kit's root (ui/README.md)")
     .option("--all", "take every picture again, not only the stale and missing ones")
     .option("--base <url>", "the page server to draw them with (default:  this checkout's own, else localhost:4747)")
     .action((pages: string[], options: { all?: boolean; base?: string }) =>
@@ -237,6 +242,40 @@ export default function kitCommands(spell: Command): void {
     .option("--json", "print the packed packages and every check as JSON")
     .action((options: CLI.PublishOptions) =>
       CLI.runCommand(async () => (await import("spell/cli/commands/publishCommand")).publishCommand(options))
+    )
+
+  ////////////////
+  // ## Renames kept for open branches
+  ////////////////
+
+  const rename = spell
+    .command("rename")
+    .description("the renames a branch open when they landed reruns over its own lines before merging main")
+
+  rename
+    .command("imports")
+    .description("spell-ui/x => spell/ui/x (and parser, epic, app), their source conditions and folder paths (P20)")
+    .argument("[repos...]", "the checkouts to rename in;  none:  this kit, its old child repos and its peers")
+    .option("--dry-run", "only report what it would change")
+    .option("--json", "print each repo's report as JSON")
+    .action((repos: string[], options: CLI.RenameOptions) =>
+      CLI.runCommand(async () => {
+        const { renameImportsCommand } = await import("spell/cli/commands/renameImports")
+        renameImportsCommand(CLI.findCheckout(CLI.KIT_MARKER), { ...options, repos })
+        return CLI.EXIT.OK
+      })
+    )
+
+  rename
+    .command("branches")
+    .description("an epic's old child-repo branches (ui/ ...) carried into the merged folders, after P20 is on main")
+    .option("--dry-run", "only list the branches it would carry on")
+    .action((options: CLI.RenameOptions) =>
+      CLI.runCommand(() => {
+        const kit = CLI.findCheckout(CLI.KIT_MARKER)
+        const args = [join(kit, "tools", "one-repo", "one-repo.ts"), "--step", "carry-on"]
+        return CLI.runChild(process.execPath, options.dryRun ? [...args, "--dry-run"] : args, { cwd: kit })
+      })
     )
 
   ////////////////

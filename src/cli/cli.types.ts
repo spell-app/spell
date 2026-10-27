@@ -87,6 +87,16 @@ export type PublishOptions = GlobalOptions & {
 }
 
 /**
+ * `spell rename imports` flags.
+ * - `dryRun`:  only report what it would change
+ * - `json`:  print each repo's report as JSON
+ */
+export type RenameOptions = GlobalOptions & {
+  dryRun?: boolean
+  json?: boolean
+}
+
+/**
  * `spell map` flags.
  * - `docs`:  ask the docs map, not the code map
  * - `budget`:  `query`'s answer, at most this many tokens (graphify's `--budget`)

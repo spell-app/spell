@@ -1,8 +1,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs"
-import { basename, dirname, extname, join } from "node:path"
+import { basename, dirname, extname, join, relative, sep } from "node:path"
 
-import { readJSON5File } from "spell/util/node/json5"
-import { CLI } from "spell/cli"
+import { kitFolders } from "spell/server/kitFolders"
 
 import { Graphify } from "./Graphify"
 import { bareName, importsOf, moduleFileFor } from "./importLinks"
@@ -20,14 +19,14 @@ import {
  * ### `CodeMap`
  * The code map:  every repo's code in ONE graph, which graphify's questions run on
  * (`spell map query`, `explain`, `uses`).
- * - Each repo is mapped by graphify on its own (`Graphify.mapRepo()`):  graphify skips what git ignores, so a map
- *   of the kit alone has none of its child repos.
- * - Then merged:  each repo's ids prefixed with its name (`spell-ui::...`), as graphify's own `merge-graphs` does.
+ * - Each repo is mapped by graphify on its own (`Graphify.mapRepo()`):  the kit is ONE repo, its folders inside it
+ *   (epic `repo-split` P20).
+ * - Then merged:  each repo's ids prefixed with its name (`spell::...`), as graphify's own `merge-graphs` does.
  * - Then linked:  graphify can't follow our package-name imports (`spell/util/node/json5`), so the merge reads each
  *   file's imports and adds the links itself (`importsOf()`):
  *   - `imports_from`:  the file to the module it imports
  *   - `uses`:  the file to each name it takes, found in that module, or in the folder a barrel exports
- *     (`import { P } from "spell-parser/parser"`, then `P.Tokenizer`:  a link to `Tokenizer`)
+ *     (`import { P } from "spell/parser/parser"`, then `P.Tokenizer`:  a link to `Tokenizer`)
  * - Written to the checkout's `graphify-out/code.json` (git-ignored).
  ****************/
 export class CodeMap {
@@ -38,17 +37,29 @@ export class CodeMap {
     return join(this.checkout, MAP_FOLDER, CODE_FILE)
   }
 
-  /** The repos it covers, lowest first:  the kit, then each child repo `repos.json5` lists that's in the checkout. */
+  /**
+   * The repos graphify maps, each on its own:  the kit, ONE repo since epic `repo-split` P20, its folders (`ui/` ...)
+   * inside it.
+   */
   get repos(): MappedRepo[] {
-    const names = readJSON5File<{ repos?: { name: string }[] }>(join(this.checkout, CLI.KIT_MARKER)).repos ?? []
-    const repos = [{ name: "spell", folder: "" }, ...names.map(({ name }) => ({ name, folder: name }))]
-    return repos.flatMap(({ name, folder }) => {
-      const root = join(this.checkout, folder)
-      const manifest = join(root, "package.json")
-      if (!existsSync(manifest)) return []
-      const packageName = (JSON.parse(readFileSync(manifest, "utf8")) as { name: string }).name
-      return [{ name, root, folder, packageName }]
+    const manifest = join(this.checkout, "package.json")
+    if (!existsSync(manifest)) return []
+    const packageName = (JSON.parse(readFileSync(manifest, "utf8")) as { name: string }).name
+    return [{ name: packageName, root: this.checkout, folder: "", packageName }]
+  }
+
+  /**
+   * Where each package-name import resolves, longest name first:  each of the kit's folders (`spell/ui` =>
+   * `ui/src/`), then the kit itself (`spell` => `src/`).
+   */
+  get importRoots(): MappedRepo[] {
+    const [kit] = this.repos
+    if (!kit) return []
+    const folders = kitFolders(this.checkout).map((root) => {
+      const folder = relative(this.checkout, root).split(sep).join("/")
+      return { name: kit.name, root, folder, packageName: `${kit.packageName}/${folder}` }
     })
+    return [...folders, kit]
   }
 
   /**
@@ -89,10 +100,7 @@ export class CodeMap {
           source_file: inRepo(link.source_file)
         })
     }
-    const linked = this.linkImports(
-      graphs.map(({ repo }) => repo),
-      nodes
-    )
+    const linked = this.linkImports(this.importRoots, nodes)
     return {
       directed: true,
       nodes: dropResolved(nodes, linked.resolved),

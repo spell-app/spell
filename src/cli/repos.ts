@@ -1,46 +1,26 @@
 import { existsSync, readFileSync } from "node:fs"
-import { basename, dirname, join, resolve } from "node:path"
+import { join, resolve } from "node:path"
 import { pathToFileURL } from "node:url"
 
-import { readJSON5File } from "spell/util/node/json5"
+import { kitFolders } from "spell/server/kitFolders"
 import { CLI } from "spell/cli"
 
 /**
- * Every repo that adds to `spell`, lowest first:  the kit, then each child repo `repos.json5` lists that's installed
- * and whose `package.json` has a `"spell"` entry (epic `repo-split` Q33).
- * - Where a child repo is:  in the kit, at its folder (`<kit>/spell-parser/`), else installed as a package
- *   (`<kit>/node_modules/spell-parser/`), else beside the kit when the kit is itself installed from npm
- *   (`<project>/node_modules/spell/`, and `spell-parser` beside it:  epic `repo-split` P19).
+ * Every part of `spell` that adds to it, lowest first:  the kit, then each of its folders whose `package.json` has a
+ * `"spell"` entry (epic `repo-split` Q33;  the folders since P20, One Repo:  `parser/`, `ui/`, `epic/`, `app/`).
+ * - Which folders:  the kit's `package.json`'s `workspaces`, in its order (`kitFolders()`), the same list wherever the
+ *   kit is:  a checkout, or installed from npm (`<project>/node_modules/spell/`).
  * - `kit`:  the kit to look in, default the one `spell` runs from;  a test passes a made-up one.
- * - NEVER throws for a repo that isn't there:  it isn't listed.
+ * - NEVER throws for a folder that isn't there:  it isn't listed.
  */
 export function spellRepos(kit = CLI.KIT_ROOT): CLI.SpellRepo[] {
-  const found: CLI.SpellRepo[] = []
-  const kitRepo = repoAt(kit)
-  if (kitRepo) found.push(kitRepo)
-  for (const name of childRepoNames(kit)) {
-    const root = [join(kit, name), join(kit, "node_modules", name), ...besideKit(kit, name)].find((dir) =>
-      existsSync(join(dir, "package.json"))
-    )
-    const repo = root && repoAt(root)
-    if (repo) found.push(repo)
-  }
-  return found
+  return [kit, ...kitFolders(kit)].flatMap((root) => repoAt(root) ?? [])
 }
 
-/** Where package `name` is when the kit is installed in a `node_modules` folder:  beside it;  else nowhere. */
-function besideKit(kit: string, name: string): string[] {
-  return basename(dirname(kit)) === "node_modules" ? [join(dirname(kit), name)] : []
-}
-
-/** The child repos' names, lowest first, from the kit's `repos.json5`;  none without one. */
-function childRepoNames(kit: string): string[] {
-  const file = join(kit, CLI.KIT_MARKER)
-  if (!existsSync(file)) return []
-  return readJSON5File<{ repos?: { name: string }[] }>(file).repos?.map((repo) => repo.name) ?? []
-}
-
-/** The word repo `name`'s commands go under in a clash:  the kit's, `spell`, is `kit`;  the others less `spell-`. */
+/**
+ * The word a part's commands go under in a clash:  the kit's, `spell`, is `kit`;  a folder's is its package name less
+ * `spell-` (`spell-parser` => `parser`:  `spell parser check`).
+ */
 function shortNameFor(name: string): string {
   return name === "spell" ? "kit" : name.replace(/^spell-/, "")
 }

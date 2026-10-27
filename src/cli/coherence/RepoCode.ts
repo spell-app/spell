@@ -10,7 +10,7 @@ import { CODE_FILE, GENERATED_FILE, TEST_CALL, TEST_FILE } from "./coherence.typ
  * ### `RepoCode`
  * One repo's code, as the score reads it:  its `src/`, at a commit or in the working tree, by `git grep`.
  * - Code only:  never tests or their helpers, generated files or bundles (`isScored()`).
- * - Paths are from the CHECKOUT's root, as the catalog writes them:  `spell-ui/src/runtime/Sources.ts`.
+ * - Paths are from the CHECKOUT's root, as the catalog writes them:  `ui/src/runtime/Sources.ts`.
  * - `commit`:  none:  the working tree, untracked files too (a plan's new files count before they're committed)
  * - Every git run through the kit's `Git`:  NEVER throws for a search that finds nothing.
  ****************/
@@ -21,12 +21,14 @@ export class RepoCode {
   /**
    * - `root`:  the repo's folder;  `folder`:  that from the checkout's root (the kit's:  `""`)
    * - `commit`:  the commit to read;  none:  the working tree
+   * - `inside`:  folders inside `root` that are code of their own (the kit's folders, `ui` ...), left out here
    */
   constructor(
     readonly name: string,
     readonly root: string,
     readonly folder: string,
-    readonly commit?: string
+    readonly commit?: string,
+    readonly inside: readonly string[] = []
   ) {}
 
   /** Each scored file, from the checkout's root. */
@@ -89,7 +91,19 @@ export class RepoCode {
   /** How many tests the repo has:  each `it(` / `test(` at a line's start, in its test files, wherever they are. */
   get testCount(): number {
     const run = Git.run(
-      ["grep", "-c", "-I", "-P", ...this.grepFlags, "-e", TEST_CALL, ...this.revision, "--", "."],
+      [
+        "grep",
+        "-c",
+        "-I",
+        "-P",
+        ...this.grepFlags,
+        "-e",
+        TEST_CALL,
+        ...this.revision,
+        "--",
+        ".",
+        ...this.inside.map((folder) => `:(exclude)${folder}`)
+      ],
       this.root
     )
     let count = 0

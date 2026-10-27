@@ -1,6 +1,6 @@
 import { execFileSync } from "node:child_process"
 import { chmodSync, cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs"
-import { dirname, join, posix } from "node:path"
+import { basename, dirname, join, posix } from "node:path"
 
 import {
   DIST,
@@ -27,6 +27,9 @@ export class PublishedPackage {
   /** What the build reported, once `stage()` ran. */
   built?: BuildReport
 
+  /** Does it ship its own copy of the kit's element code on purpose (the `spell-ui` bundle, Q63)? */
+  holdsElementCode = false
+
   constructor(
     readonly repo: PublishedRepo,
     /** its staging folder, absolute */
@@ -39,7 +42,12 @@ export class PublishedPackage {
      */
     readonly extraDependencies: Record<string, string> = {},
     /** the yarn `catalog:` versions, by package (the kit's `.yarnrc.yml`) */
-    readonly catalog: Record<string, string> = {}
+    readonly catalog: Record<string, string> = {},
+    /**
+     * the kit's folders, built into this ONE package (epic `repo-split` P20, Q62):  each into `dist/<folder>/`
+     * (`spell/ui/core` => `dist/ui/core.js`), its `files` into `<folder>/`, its commands in `<folder>/package.json`
+     */
+    readonly folders: PublishedRepo[] = []
   ) {}
 
   /** The package's name. */
@@ -52,6 +60,7 @@ export class PublishedPackage {
     rmSync(this.stageDir, { recursive: true, force: true })
     mkdirSync(this.stageDir, { recursive: true })
     this.built = await new PackageBuild(this.repo, this.stageDir, this.version).build()
+    for (const folder of this.folders) this.addReport(await this.stageFolder(folder))
     this.writeBins()
     for (const file of readdirSync(this.repo.root)) {
       if (DOC_FILES.test(file)) cpSync(join(this.repo.root, file), join(this.stageDir, file))
@@ -62,6 +71,45 @@ export class PublishedPackage {
     }
     writeFileSync(join(this.stageDir, "package.json"), `${JSON.stringify(this.manifest(), null, 2)}\n`)
     return this.built
+  }
+
+  /**
+   * One of the kit's folders, built into the ONE package:  its code into `dist/<folder>/`, its `files` into
+   * `<folder>/`, and a `<folder>/package.json` naming its commands (`"spell": { "commands" }`), which the published
+   * kit finds by its `"spell": { "folders" }` (`kitFolders()`).
+   */
+  private async stageFolder(folder: PublishedRepo): Promise<BuildReport> {
+    const name = basename(folder.root)
+    const folderStage = join(this.stageDir, name)
+    const report = await new PackageBuild(folder, folderStage, this.version, join(this.stageDir, DIST, name)).build()
+    for (const file of folder.settings.files ?? []) {
+      mkdirSync(dirname(join(folderStage, file)), { recursive: true })
+      cpSync(join(folder.root, file), join(folderStage, file), { recursive: true })
+    }
+    const entry = folder.manifest.spell as Record<string, string> | undefined
+    const shipped = Object.entries(entry ?? {})
+      .map(([key, path]) => [key, builtPath(path).replace(/^(\.\/)?dist\//, `../${DIST}/${name}/`)] as const)
+      .filter(([, path]) => existsSync(join(folderStage, path)))
+    const manifest = {
+      name: folder.manifest.name,
+      version: this.version,
+      private: true,
+      type: "module",
+      ...(shipped.length && { spell: Object.fromEntries(shipped) })
+    }
+    mkdirSync(folderStage, { recursive: true })
+    writeFileSync(join(folderStage, "package.json"), `${JSON.stringify(manifest, null, 2)}\n`)
+    return report
+  }
+
+  /** `report`'s counts added to the package's own. */
+  private addReport(report: BuildReport): void {
+    const built = this.built!
+    built.compiled += report.compiled
+    built.modules += report.modules
+    built.copied += report.copied
+    built.declarations += report.declarations
+    built.warnings.push(...report.warnings)
   }
 
   ////////////////
@@ -84,7 +132,7 @@ export class PublishedPackage {
     const out: Record<string, unknown> = {}
     for (const field of KEPT_FIELDS) if (source[field] !== undefined) out[field] = source[field]
     out.version = this.version
-    const exports = publishedExports(source, this.distFiles())
+    const exports = { ...publishedExports(source, this.distFiles()), ...this.folderExports() }
     if (exports["."]) Object.assign(out, { main: "./dist/index.js", types: "./dist/index.d.ts" })
     out.exports = exports
     const bins = Object.keys(this.repo.settings.bin ?? {})
@@ -95,11 +143,30 @@ export class PublishedPackage {
     else if (sideEffects !== undefined) out.sideEffects = sideEffects
     out.dependencies = this.dependencies()
     if (source.spell) out.spell = this.shippedSpellEntry(source.spell as Record<string, string>)
+    if (this.folders.length) out.spell = { ...(out.spell as object), folders: this.folders.map((f) => basename(f.root)) }
     if (source.pageServer) out.pageServer = mapStrings(source.pageServer, builtPath)
     for (const field of ["peerDependencies", "optionalDependencies"] as const) {
       if (out[field]) out[field] = this.resolvedVersions(out[field] as Record<string, string>)
     }
     return out
+  }
+
+  /**
+   * The folders' own extra names (`"spellPublish": { "exports" }`), under the folder:  Spell UI's short names,
+   * `./ui/ui-*` => `dist/ui/components/ui-*`'s `index.js`.
+   */
+  private folderExports(): Record<string, unknown> {
+    const exports: Record<string, unknown> = {}
+    for (const folder of this.folders) {
+      const name = basename(folder.root)
+      for (const [key, module] of Object.entries(folder.settings.exports ?? {})) {
+        exports[`./${name}${key.slice(1)}`] = {
+          types: `./${DIST}/${name}/${module}.d.ts`,
+          default: `./${DIST}/${name}/${module}.js`
+        }
+      }
+    }
+    return exports
   }
 
   /**
@@ -228,7 +295,7 @@ export class PublishedPackage {
       .filter((target) => !target.includes("*"))
       .filter((target) => !packed.files.includes(target.replace(/^\.\//, "")))
     const elementCopies =
-      this.name === "spell"
+      this.name === "spell" || this.holdsElementCode
         ? []
         : packed.files.filter(
             (file) =>
@@ -303,7 +370,7 @@ function mapStrings(value: unknown, map: (text: string) => string): unknown {
  *   `index`, so `./*` alone would look for `dist/util.js`.
  * - An explicit entry of the checkout's (`./toolchain/lint/imports`) keeps its name, at its built file.
  * - `./*.json`, `./*.css`, `./*.d.ts`, `./*.mjs`, `./*.js`:  those files as they are (spell-epic's hooks import
- *   `spell-epic/window.mjs`).
+ *   `spell/epic/window.mjs`).
  * - Entries outside `src/` (a `vite.config.ts`) are dropped:  they don't ship.
  * - The repo's own extra names (`"spellPublish": { "exports" }`):  Spell UI's short names, `./ui-*`.
  * - Only `types` and `default`:  the `<package>-source` condition is the checkout's.

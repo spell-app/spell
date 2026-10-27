@@ -28,7 +28,7 @@ import { ALWAYS_EXCLUDED, DIST, type BuildReport, type PublishedRepo } from "spe
  *   - Solid's JSX through Solid's own compiler (`@solidjs/compiler`, the Vite plugin's), for the DOM;
  *     React's (Ink's screens, `reactJsx`) through esbuild.
  * - Every import made one node and any bundler run as written:
- *   - the repo's own names (`spell-ui/core`) and `./peer` imports become relative paths to the built file
+ *   - the repo's own names (`spell/ui/core`) and `./peer` imports become relative paths to the built file
  *     (`../core.js`)
  *   - another package's names stay names (`spell/element`):  its own package, a dependency, answers them
  *   - `x.css?inline`, `x.css?raw` and `x.json` become JavaScript modules beside the file, each exporting the text
@@ -62,9 +62,14 @@ export class PackageBuild {
     readonly repo: PublishedRepo,
     readonly stage: string,
     /** the one version every package publishes at:  `__PACKAGE_VERSION__` */
-    readonly version: string
+    readonly version: string,
+    /**
+     * where the built files go, when not `<stage>/dist/`:  a folder of the ONE package builds into its own
+     * `dist/<folder>/` (`spell/ui/core` => `dist/ui/core.js`), its other files in `<stage>`, its folder
+     */
+    dist?: string
   ) {
-    this.dist = join(stage, DIST)
+    this.dist = dist ?? join(stage, DIST)
     this.root = realpathSync(repo.root)
     this.src = join(this.root, "src")
   }

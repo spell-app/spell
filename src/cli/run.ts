@@ -1,11 +1,10 @@
 import chalk from "chalk"
 import { relative } from "node:path"
 
-import { within } from "spell/util/timing"
 import { CLI } from "spell/cli"
 
 /**
- * Run `work`, then exit with the code it resolves to:  every command's action ends here, `spell`'s and `epic`'s.
+ * Run `work`, then exit with the code it resolves to:  every command's action ends here.
  * - A `CliError` prints just its message, and exits with its code;  anything else is a crash, and prints its stack.
  * - NOTE: exits explicitly:  a parse can leave timers running, which would keep the process alive.
  * - Never resolves.
@@ -19,18 +18,15 @@ export async function runCommand(work: () => Promise<number>): Promise<never> {
     process.stderr.write(`${chalk.red(isCliError ? error.message : ((error as Error)?.stack ?? String(error)))}\n`)
     exitCode = isCliError ? error.exitCode : CLI.EXIT.ERRORS
   }
-  // let stdout and stderr drain first, e.g. into a pipe, or `process.exit()` cuts them short -- but never wait long:
+  // let stdout drain first, e.g. into a pipe, or `process.exit()` cuts it short -- but never wait long for it:
   // on CI a command printed all of its answer, then never exited (epic `repo-split` I73)
-  const streams = [process.stdout, process.stderr]
-  await within(
-    Promise.all(streams.map((stream) => new Promise<void>((done) => stream.write("", () => done())))),
-    DRAIN_WAIT
-  )
+  const drained = new Promise<void>((done) => process.stdout.write("", () => done()))
+  await Promise.race([drained, new Promise<void>((done) => setTimeout(done, DRAIN_WAIT_MS))])
   process.exit(exitCode)
 }
 
-/** How long `runCommand()` waits for stdout and stderr to drain before it exits anyway, in seconds. */
-const DRAIN_WAIT = 2
+/** How long `runCommand()` waits for stdout to drain before it exits anyway. */
+const DRAIN_WAIT_MS = 2000
 
 /**
  * Everything on the command line after `words`, as typed:  `rawArgsAfter("design")` of `spell design build --out x`

@@ -96,11 +96,11 @@ const PASSED_SIGNALS: NodeJS.Signals[] = ["SIGTERM", "SIGHUP"]
 // ## The `epic` command
 ////////////////
 
-/** spell-epic, the epic engine:  a child repo of the kit, at its root. */
-export const ENGINE = "spell-epic"
+/** The epic engine's folder in the kit:  `epic/` (spell-epic's repo until epic `repo-split` P20). */
+export const ENGINE = "epic"
 
 /**
- * The `epic` command to run:  spell-epic's `bin/epic` in the nearest checkout that has one (`findCheckout()`, else
+ * The `epic` command to run:  the engine's `bin/epic` (`epic/bin/epic`) in the nearest checkout that has one (`findCheckout()`, else
  * the kit `spell` runs from);  else plain `epic`, on the `PATH`.
  * - `from`:  where to look from, default the current folder
  */

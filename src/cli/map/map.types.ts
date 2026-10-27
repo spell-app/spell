@@ -25,7 +25,7 @@ export type MapGraph = {
  * - `id`:  unique in its map;  in the merged code map, prefixed with its repo:  `spell-ui::src_runtime_sources`
  * - `label`:  what people call it, and what `graphify explain "<label>"` finds it by:  `readJSON5File()`, `PrefStore`
  * - `file_type`:  graphify's kind:  `code`, `document`, `concept` ...
- * - `source_file`:  its file, relative to the checkout's root:  `spell-ui/src/runtime/Sources.ts`
+ * - `source_file`:  its file, relative to the checkout's root:  `ui/src/runtime/Sources.ts`
  * - `source_location`:  its line, `L30`
  * - `repo`:  the repo it's in, as `repos.json5` names it;  the kit's:  `spell`
  * - Other keys graphify writes are kept as they are.
