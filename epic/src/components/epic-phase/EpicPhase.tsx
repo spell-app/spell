@@ -53,6 +53,8 @@ import tooltipCSS from "spell-epic/components/epic-item/Tooltip.css?inline"
  *   - while the page's phases are agreed (`<epic-page stage="phases">`, epic `epic-engine` P29), an open phase's are
  *     Looks good and Defer instead (`buttons="proposal"`;  Owen, 2026-10-24);  the usual ones once building starts
  *   - while Claude's build plan for it waits (`plan="waiting"`, P33):  Accept plan and Revisit (`buttons="plan"`)
+ *   - still to do, its plan accepted (`plan="accepted"`, I140):  Make Todo, Revisit and a green check, a state saying
+ *     it's good to go (`buttons="accepted"`;  Owen, 2026-10-26:  "so I can see they are good to go")
  * - SIDE EFFECT:  follows the review inbox while connected.
  ****************/
 export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
@@ -133,6 +135,21 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
     return (
       this.plan === "waiting" && this.shownStatus !== "done" && !DOC_REVIEW.test(EpicPhase.titleText(this.domElement))
     )
+  }
+
+  /**
+   * Still to do, and Owen accepted Claude's build plan for it (`plan="accepted"`, epic `epic-engine` I140):  good to
+   * go, its review group ending in a green check.
+   */
+  get isPlanAccepted(): boolean {
+    return this.plan === "accepted" && this.shownStatus === "todo"
+  }
+
+  /** Which review controls it draws, by where it stands (`<epic-review buttons>`). */
+  get reviewKind(): "proposal" | "plan" | "accepted" | "part" {
+    if (this.isProposed) return "proposal"
+    if (this.isPlanWaiting) return "plan"
+    return this.isPlanAccepted ? "accepted" : "part"
   }
 
   /**
@@ -267,7 +284,7 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
         of={this.id}
         label={`P${this.phaseNumber}`}
         shows={shows}
-        buttons={this.isProposed ? "proposal" : this.isPlanWaiting ? "plan" : "part"}
+        buttons={this.reviewKind}
         part={this.partForName(part)}
       />
     )

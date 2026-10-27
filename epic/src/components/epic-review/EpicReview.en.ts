@@ -52,7 +52,8 @@ export const epicReviewVocabulary = {
         "comment thread's answer, drawn by `<epic-thread>` with no inbox behind it:  `thread` (That's good, Reply, " +
         "Skip it), `closed` (Reopen);  `proposal` (an open phase while the page's phases are agreed:  Looks good, " +
         "Defer);  `change` (a change mark, `<epic-change>`:  Reopen);  `plan` (a phase whose build plan waits:  " +
-        "Accept plan, Revisit)."
+        "Accept plan, Revisit);  `accepted` (a to-do phase whose plan is accepted:  Make Todo, Revisit, then a green " +
+        "check, a state, not a button)."
     },
     {
       name: "label",

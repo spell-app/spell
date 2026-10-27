@@ -40,8 +40,20 @@ export type ReviewShows = (typeof REVIEW_SHOWS)[number]
  *   (`PLAN_BUTTONS`);  its note box a part's
  * - `change`:  a change mark's (`<epic-change>`, epic `epic-engine` P30):  Reopen (`CHANGE_BUTTONS`);
  *   no note box
+ * - `accepted`:  a to-do phase whose build plan Owen accepted (`<epic-phase plan="accepted">`, epic `epic-engine`
+ *   I140):  a part's buttons, then the green check of a plan accepted, a STATE, not a button (`ACCEPTED_CHECK`)
  */
-export const REVIEW_KINDS = ["item", "todo", "part", "thread", "closed", "proposal", "change", "plan"] as const
+export const REVIEW_KINDS = [
+  "item",
+  "todo",
+  "part",
+  "thread",
+  "closed",
+  "proposal",
+  "change",
+  "plan",
+  "accepted"
+] as const
 
 /** One of `REVIEW_KINDS`. */
 export type ReviewKind = (typeof REVIEW_KINDS)[number]
@@ -184,8 +196,17 @@ export const BUTTONS_OF: Readonly<Record<ReviewKind, readonly ReviewButtonSpec[]
   closed: [],
   proposal: PROPOSAL_BUTTONS,
   change: CHANGE_BUTTONS,
-  plan: PLAN_BUTTONS
+  plan: PLAN_BUTTONS,
+  accepted: PART_BUTTONS
 }
+
+/**
+ * The check of a to-do phase whose plan is accepted (`buttons="accepted"`;  Owen, 2026-10-26, epic `epic-engine` I140:
+ * "Accepted-but-unstarted phases should show checkmark pill green so I can see they are good to go"):
+ * - last in the group, where an item's Approve is, drawn as a chosen Approve, its mark sent:  outlined green
+ * - a STATE, not a mark:  a click does nothing (Revisit is how the plan is talked over again);  no `data-action`
+ */
+export const ACCEPTED_CHECK = { color: "green", icon: "check", label: "planAccepted", tip: "planAcceptedTip" } as const
 
 /**
  * A comment THREAD's answer buttons (`buttons="thread"` or `"closed"`;  epic `epic-engine` P3):
@@ -298,7 +319,8 @@ export const NOTE_BUTTONS_OF: Readonly<Record<ReviewKind, readonly NoteButtonSpe
   closed: [],
   proposal: NOTE_BUTTONS,
   change: [],
-  plan: NOTE_BUTTONS
+  plan: NOTE_BUTTONS,
+  accepted: NOTE_BUTTONS
 }
 
 ////////////////
@@ -446,6 +468,22 @@ export const REVIEW_TEXTS = [
     description: "Review button:  what Make Todo does."
   },
   { key: "revisitTip", text: "Talk it over:  write in the box at its end", description: "Review button:  Revisit." },
+  {
+    key: "revisitCommentsTip",
+    text: "Talk it over:  your comments in its text ({ids}) are your note",
+    description:
+      "Review button:  Revisit, on a part with Owen's comments waiting in its text (epic `epic-engine` I140):  a click marks it at once."
+  },
+  {
+    key: "planAccepted",
+    text: "Plan accepted",
+    description: "A to-do phase's green check, its build plan accepted (epic `epic-engine` I140):  its name."
+  },
+  {
+    key: "planAcceptedTip",
+    text: "ready to build:  you accepted Claude's plan for this phase",
+    description: "A to-do phase's green check:  what it says.  A state:  a click does nothing."
+  },
   {
     key: "nextTip",
     text: "Queued into the next phase still to do, once Claude applies it",

@@ -20,6 +20,7 @@ import type {
   NowRequest,
   PageInbox,
   PickFields,
+  WaitingComment,
   WorkingEntry
 } from "spell-epic/tool/ReviewInbox"
 import type { WakeResult } from "spell-epic/tool/ReviewStart"
@@ -203,6 +204,8 @@ export const AGENTS_FILE = "agents.json5"
  * The inbox as the page keeps it:  every field a route's reply has that the page reads.
  * - `unsentComments`:  the ids of the comments Send would hand over, as the routes work it out
  *   (`ReviewInbox.forPage()`);  `[]` from a server started before Send took comments
+ * - `waitingComments`:  every comment waiting for Claude, with where it is (its anchor), so Revisit on a part with
+ *   Owen's comments in its text marks them at once (epic `epic-engine` I140);  `[]` from an older server
  * - `woken`:  the page server's wake of the epic (epic `epic-workflow` P16), while it counts and nobody listens;
  *   `null` otherwise, or from a server started before it woke epics
  * - `doing`:  what the listening session is doing now (epic `epic-engine` P35), the toolbar's line;  `null` for
@@ -210,7 +213,17 @@ export const AGENTS_FILE = "agents.json5"
  */
 export type Inbox = Pick<
   PageInbox,
-  "marks" | "drafts" | "urgency" | "sent" | "now" | "working" | "listening" | "unsentComments" | "woken" | "doing"
+  | "marks"
+  | "drafts"
+  | "urgency"
+  | "sent"
+  | "now"
+  | "working"
+  | "listening"
+  | "unsentComments"
+  | "waitingComments"
+  | "woken"
+  | "doing"
 >
 
 /** What the session is doing, as the page reads it (`Inbox.doing`). */
@@ -329,6 +342,7 @@ export type {
   NowAction,
   NowRequest,
   PickFields,
+  WaitingComment,
   WorkingEntry
 }
 
@@ -360,6 +374,14 @@ export function inboxOf(reply: unknown): Inbox {
     listening: isObject(record.listening) ? (record.listening as InboxListener) : null,
     unsentComments: Array.isArray(record.unsentComments)
       ? record.unsentComments.filter((id): id is string => typeof id === "string")
+      : [],
+    waitingComments: Array.isArray(record.waitingComments)
+      ? record.waitingComments.filter(
+          (each): each is WaitingComment =>
+            isObject(each) &&
+            typeof (each as WaitingComment).id === "string" &&
+            typeof (each as WaitingComment).anchor === "string"
+        )
       : [],
     woken:
       isObject(record.woken) && typeof (record.woken as InboxWoken).message === "string"
@@ -404,6 +426,30 @@ export function isImmediate(mark: { action: string; when?: string }): boolean {
 export function pickOf(mark: PickFields | null | undefined): PickFields {
   if (!mark?.pick) return {}
   return { pick: mark.pick, ...(mark.choices !== undefined && { choices: mark.choices }) }
+}
+
+/** `mark`'s comments, to carry into another revisit (epic `epic-engine` I140):  `{ comments }`, or `{}`. */
+export function commentsOf(mark: { comments?: string[] } | null | undefined): { comments?: string[] } {
+  return mark?.comments?.length ? { comments: mark.comments } : {}
+}
+
+/**
+ * Is a comment at `anchor` in the text of `id` (an item, a phase, an Overview part)?
+ * - its anchor is `id` itself, or a block placed in it, `<id>#<kind>-<n>` (`BlockAnchors.js`)
+ * - NOT a block with an id of its own inside it, nor one in a part nested in it:  those are anchored by their own id
+ */
+export function isAnchoredIn(anchor: string, id: string): boolean {
+  const container = anchor.split("#")[0]!.toLowerCase()
+  return container === id.toLowerCase()
+}
+
+/**
+ * The note of a revisit made of Owen's comments in its text (epic `epic-engine` I140):
+ * `see my comments in its text:  C1, C3`.
+ * - Owen's words to Claude, which Claude reads, as `DO_IT_NOTE`:  never translated
+ */
+export function inlineCommentsNote(ids: readonly string[]): string {
+  return `see my comments in its text:  ${ids.map((id) => id.replace(/^c/i, "C")).join(", ")}`
 }
 
 /**

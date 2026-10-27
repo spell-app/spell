@@ -122,6 +122,14 @@
     box-shadow: inset 0 0 0 1.5px var(--_act);
     color: var(--_act);
   }
+  /*
+   * a to-do phase's plan accepted (`buttons="accepted"`, epic `epic-engine` I140):  a chosen Approve's look, but a
+   * state, so no hand and no change under the pointer
+   */
+  .review-controls ui-button[data-state="accepted"]::part(button) {
+    cursor: default;
+    color: var(--_act);
+  }
   /* Claude is on it:  its icon turns (Owen, 2026-10-08, the colour page's example B) */
   ui-button[data-busy]::part(icon) {
     animation: epic-review-turn 3s linear infinite;

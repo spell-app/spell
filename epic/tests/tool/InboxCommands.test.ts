@@ -305,6 +305,30 @@ function ownGuide(): string {
   return guide
 }
 
+// epic `epic-engine` I140:  a revisit made of Owen's comments in a part's text
+test("wait:  a revisit whose content is Owen's comments prints them under it;  `inbox` names them", async () => {
+  ReviewInbox.update(inboxFile, (inbox) => {
+    const id = inbox.commentList.add(
+      { anchor: "j1#para-1", kind: "para", label: "J1", excerpt: "build time" },
+      "It should work in the browser too.",
+      new Date(M1)
+    )
+    inbox.setMark(
+      "j1",
+      { action: "revisit", when: "soon", note: "see my comments in its text:  C1", comments: [id] },
+      M1
+    )
+  })
+  await commands().inbox.run("x", file, [], {})
+  expect(printed.join("\n")).toMatch(/J1 {2}[^\n]*· "see my comments in its text: {2}C1" · his comments C1 · unsent/)
+  printed = []
+  ReviewInbox.update(inboxFile, (inbox) => inbox.markSent(M2))
+  expect(await commands().inbox.run("x", file, ["wait"], { timeout: "5" })).toBeUndefined()
+  expect(printed.join("\n")).toMatch(
+    /note: {2}"see my comments in its text: {2}C1"\n {8}his comments in its text, the revisit's content \(1\):\n {10}- C1 {2}on j1#para-1 \(para\) {2}"It should work in the browser too\."/
+  )
+})
+
 // epic `epic-workflow` P13 (J27):  the epic's own listener hears the guides it owns
 test("wait:  a Send on a guide the epic owns wakes it, each comment under its page;  once;  `inbox` lists it", async () => {
   const guide = GuideInbox.fileFor(ownGuide())

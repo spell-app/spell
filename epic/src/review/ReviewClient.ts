@@ -9,8 +9,11 @@ import {
   SUMMARY_ID,
   TESTS_API,
   TEST_RESULTS,
+  commentsOf,
   emptyInbox,
   inboxOf,
+  inlineCommentsNote,
+  isAnchoredIn,
   isImmediate,
   isSent,
   pickOf,
@@ -366,7 +369,9 @@ export class ReviewClient {
    *   a revisit carrying a pick keeps the pick ("pick B, but ..." without the "but")
    * - else:
    *   - Approve and Make Todo mark it
-   *   - Revisit opens the note box
+   *   - Revisit opens the note box;  but on a part with Owen's comments in its text (`commentsIn()`) and nothing
+   *     typed, it marks the revisit at once, its note pointing at them, its `comments` naming them:  the inline
+   *     comments ARE his note (Owen, 2026-10-26, epic `epic-engine` I140:  "don't make me type in the comment section")
    *   - Do Now (`details`, decision Q20) asks at once:
    *     with a note in the box, Claude answers it now (a revisit now, as the note box's Do Now was);
    *     without, Claude adds details
@@ -385,7 +390,18 @@ export class ReviewClient {
       const pick = action === "revisit" ? pickOf(mark) : {}
       return void this.save(id, pick.pick ? { action: "pick", ...pick } : null)
     }
-    if (action === "revisit") return "open-box"
+    if (action === "revisit") {
+      const inline = this.commentsIn(id)
+      if (!inline.length || this.typedOf(id).trim()) return "open-box"
+      void this.save(id, {
+        action: "revisit",
+        when: "soon",
+        note: inlineCommentsNote(inline),
+        comments: inline,
+        ...pickOf(mark)
+      })
+      return "chosen"
+    }
     if (action === "next" || action === "drop") {
       const note = this.typedOf(id).trim()
       if (note) {
@@ -395,6 +411,15 @@ export class ReviewClient {
     }
     void this.save(id, { action })
     return "chosen"
+  }
+
+  /**
+   * The ids of the comments waiting for Claude in `id`'s text (an item, a phase, an Overview part), in their order:
+   * `["c1", "c3"]` (`isAnchoredIn()`;  epic `epic-engine` I140).
+   * - waiting:  Owen spoke last on the thread, as the server works it out (`inbox.waitingComments`)
+   */
+  commentsIn(id: string): string[] {
+    return this.inbox.waitingComments.filter((each) => isAnchoredIn(each.anchor, id)).map((each) => each.id)
   }
 
   /**
@@ -518,7 +543,8 @@ export class ReviewClient {
     this.boxes.delete(id)
     if (how === "now") return this.askNow(id, "revisit", note)
     if (how !== "soon") return this.save(id, { action: how, note })
-    return this.save(id, { action: "revisit", when: "soon", note, ...pickOf(this.inbox.marks[id]) })
+    const mark = this.inbox.marks[id]
+    return this.save(id, { action: "revisit", when: "soon", note, ...pickOf(mark), ...commentsOf(mark) })
   }
 
   /**
@@ -560,7 +586,8 @@ export class ReviewClient {
       return pick.pick ? { action: "pick", ...pick } : null
     }
     if (mark && TYPED_KEEPS.has(mark.action)) return { action: mark.action, note }
-    return { action: "revisit", when: "soon", note, ...pickOf(mark) }
+    // his comments in its text stay its content (I140)
+    return { action: "revisit", when: "soon", note, ...pickOf(mark), ...commentsOf(mark) }
   }
 
   /** Save `text` as `id`'s draft in the inbox;  true when saved (the backup then goes). */

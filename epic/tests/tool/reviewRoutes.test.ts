@@ -148,7 +148,7 @@ test("GET:  an empty inbox before any mark, and no file", async () => {
   const got = await ask(port, "GET", `/api/epics/review/inbox?page=${encodeURIComponent(PLAN_URL)}`)
   expect(got.status).toBe(200)
   // the file's JSON, plus the comments Send would hand over (none)
-  expect(JSON.parse(got.text)).toEqual({ ...new ReviewInbox().toRecord(), unsentComments: [] })
+  expect(JSON.parse(got.text)).toEqual({ ...new ReviewInbox().toRecord(), unsentComments: [], waitingComments: [] })
   expect(existsSync(inboxFile(PAGES.plan))).toBe(false)
 })
 
@@ -161,7 +161,7 @@ test("mark:  set (stamped here), replaced, removed;  every answer is the whole i
   expect(first.status).toBe(200)
   expect(first.body.marks.j3.action).toBe("approve")
   expect(first.body.marks.j3.at).toMatch(/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{3}[+-]\d\d:\d\d$/)
-  expect({ ...written(PAGES.plan), unsentComments: [] }).toEqual(first.body)
+  expect({ ...written(PAGES.plan), unsentComments: [], waitingComments: [] }).toEqual(first.body)
   const picked = await post("mark", { page: PLAN_URL, id: "q8", mark: { action: "pick", pick: "B" } })
   expect(picked.body.marks.q8).toMatchObject({ action: "pick", pick: "B" })
   const gone = await post("mark", { page: PLAN_URL, id: "j3", mark: null })
