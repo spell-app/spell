@@ -18,7 +18,7 @@ import { SP } from "spell/parser/spell"
  *   - in a template:  its members (`<property>`, `<action>`, `<on ...>` ...), and any word spellx doesn't know,
  *     which is an error
  *   - in a body of spell:  notes, and the controls (`<if ...>`)
- *   - in a drawing:  notes, controls and a placed part (`<draw "front" />`);  any other tag is markup
+ *   - in a drawing:  notes, controls and a placed slot (`<draw "front" />`);  any other tag is markup
  * - Mistakes are noted on the tokens (`SP.addSpellxError()`), in the file's language:  a word spellx doesn't know, a closer that closes
  *   nothing, a tag never closed, a line indented less than its tag's body.  `SP.SpellxTwin` reports them on their line.
  * - Tags nest by INDENT, as spell's blocks do;  a closer is checked, never needed to find where a body ends.
@@ -278,7 +278,7 @@ export class SpellxTokenizer extends P.Tokenizer {
    * Is a tag with `word`, on a line `indent` in, spellx's here -- else spell's markup?
    * - At the top, and among a template's members:  every tag;  a word spellx doesn't know is an error.
    * - In a body of spell:  notes and controls.
-   * - In a drawing (or a control in one):  notes, controls and a placed part, `<draw "front" />`.
+   * - In a drawing (or a control in one):  notes, controls and a placed slot, `<draw "front" />`.
    * - In a menu:  its actions, `<action "start a new game" />` (Q34, Q41;  P10 reads them).
    * - In a note:  none;  its text is prose.
    */

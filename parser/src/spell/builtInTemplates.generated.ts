@@ -16,7 +16,7 @@ export const BUILT_IN_TEMPLATE_DECLARATIONS: Record<string, Record<string, SP.Sp
         },
         {
           of: "TwoSidedView",
-          parts: ["front", "back"],
+          slots: ["front", "back"],
           defined: "/TwoSidedView.spell:319-350"
         },
         {
@@ -79,7 +79,7 @@ export const BUILT_IN_TEMPLATE_DECLARATIONS: Record<string, Record<string, SP.Sp
           defined: "/TwoSidedView.spell:724-803"
         }
       ],
-      codeLines: [8, 11, 14, 20, 24, 28, 32, 38]
+      codeLines: [9, 12, 15, 21, 25, 29, 33, 39]
     },
     es: {
       spellVersion: "0.8.0",
@@ -90,13 +90,13 @@ export const BUILT_IN_TEMPLATE_DECLARATIONS: Record<string, Record<string, SP.Sp
           type: "TwoSidedView",
           superType: "View",
           gender: "feminine",
-          defined: "/TwoSidedView.es.spell:305-902"
+          defined: "/TwoSidedView.es.spell:305-903"
         },
         {
           of: "TwoSidedView",
-          parts: ["frente", "dorso"],
-          defined: "/TwoSidedView.es.spell:351-386",
-          partOutputs: {
+          slots: ["frente", "dorso"],
+          defined: "/TwoSidedView.es.spell:351-387",
+          slotOutputs: {
             frente: "front",
             dorso: "back"
           }
@@ -106,7 +106,7 @@ export const BUILT_IN_TEMPLATE_DECLARATIONS: Record<string, Record<string, SP.Sp
           classVariable: "Direcciones",
           of: "TwoSidedView",
           enumeration: ["abajo", "arriba"],
-          defined: "/TwoSidedView.es.spell:442-474",
+          defined: "/TwoSidedView.es.spell:443-475",
           output: "direction"
         },
         {
@@ -119,7 +119,7 @@ export const BUILT_IN_TEMPLATE_DECLARATIONS: Record<string, Record<string, SP.Sp
           values: {
             direction: ["abajo", "arriba"]
           },
-          defined: "/TwoSidedView.es.spell:478-501",
+          defined: "/TwoSidedView.es.spell:479-502",
           valueOutputs: {
             direction: {
               abajo: "down",
@@ -135,7 +135,7 @@ export const BUILT_IN_TEMPLATE_DECLARATIONS: Record<string, Record<string, SP.Sp
           alias: ["statement", "expression"],
           kind: "method",
           name: "voltearla boca arriba",
-          defined: "/TwoSidedView.es.spell:505-562"
+          defined: "/TwoSidedView.es.spell:506-563"
         },
         {
           syntax: "voltear {thisArg:expression}? boca abajo",
@@ -145,7 +145,7 @@ export const BUILT_IN_TEMPLATE_DECLARATIONS: Record<string, Record<string, SP.Sp
           alias: ["statement", "expression"],
           kind: "method",
           name: "voltearla boca abajo",
-          defined: "/TwoSidedView.es.spell:566-621"
+          defined: "/TwoSidedView.es.spell:567-622"
         },
         {
           syntax: "voltear {thisArg:expression}?",
@@ -155,10 +155,10 @@ export const BUILT_IN_TEMPLATE_DECLARATIONS: Record<string, Record<string, SP.Sp
           alias: ["statement", "expression"],
           kind: "method",
           name: "voltearla",
-          defined: "/TwoSidedView.es.spell:625-732"
+          defined: "/TwoSidedView.es.spell:626-733"
         }
       ],
-      codeLines: [8, 11, 14, 20, 24, 28, 32]
+      codeLines: [9, 12, 15, 21, 25, 29, 33]
     }
   },
   notebook: {
@@ -173,7 +173,7 @@ export const BUILT_IN_TEMPLATE_DECLARATIONS: Record<string, Record<string, SP.Sp
         },
         {
           of: "Notebook",
-          parts: ["content"],
+          slots: ["content"],
           defined: "/Notebook.spell:368-390"
         },
         {
@@ -194,7 +194,7 @@ export const BUILT_IN_TEMPLATE_DECLARATIONS: Record<string, Record<string, SP.Sp
           defined: "/Notebook.spell:638-668"
         }
       ],
-      codeLines: [9, 12, 15, 22]
+      codeLines: [10, 13, 16, 23]
     },
     es: {
       spellVersion: "0.8.0",
@@ -205,13 +205,13 @@ export const BUILT_IN_TEMPLATE_DECLARATIONS: Record<string, Record<string, SP.Sp
           type: "Notebook",
           superType: "Page",
           gender: "masculine",
-          defined: "/Notebook.es.spell:367-744"
+          defined: "/Notebook.es.spell:367-745"
         },
         {
           of: "Notebook",
-          parts: ["contenido"],
-          defined: "/Notebook.es.spell:405-433",
-          partOutputs: {
+          slots: ["contenido"],
+          defined: "/Notebook.es.spell:405-434",
+          slotOutputs: {
             contenido: "content"
           }
         },
@@ -220,11 +220,11 @@ export const BUILT_IN_TEMPLATE_DECLARATIONS: Record<string, Record<string, SP.Sp
           classVariable: "Candados",
           of: "Notebook",
           enumeration: ["desbloqueado", "bloqueado"],
-          defined: "/Notebook.es.spell:554-594",
+          defined: "/Notebook.es.spell:555-595",
           output: "lock"
         }
       ],
-      codeLines: [9, 12, 15]
+      codeLines: [10, 13, 16]
     }
   }
 }

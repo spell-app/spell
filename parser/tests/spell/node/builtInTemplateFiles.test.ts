@@ -35,7 +35,7 @@ describe("a built-in template", () => {
       expect(type?.superType, language.lang).toBe("View")
       // in the language's own words, e.g. `frente` in Spanish:  each compiles by the English name, `front`
       expect(
-        type?.parts?.map((part) => type.partOutput(part)),
+        type?.slots?.map((slot) => type.slotOutput(slot)),
         language.lang
       ).toEqual(["front", "back"])
       expect(SP.isBuiltInTypeScope(type)).toBe(true)
@@ -46,9 +46,9 @@ describe("a built-in template", () => {
     expect(SP.Language.default.bareRootScope().types.get("two sided view", "LOCAL_ONLY")).toBeUndefined()
   })
 
-  test("another language's words name the English class's members:  Spanish's parts, property and phrases", () => {
+  test("another language's words name the English class's members:  Spanish's slots, property and phrases", () => {
     const spanish = SP.Language.for("es").rootScope.types.get("two sided view", "LOCAL_ONLY")!
-    expect(spanish.partOutput("frente")).toBe("front")
+    expect(spanish.slotOutput("frente")).toBe("front")
     expect(spanish.variables.get("dirección", "LOCAL_ONLY")?.output).toBe("direction")
   })
 })

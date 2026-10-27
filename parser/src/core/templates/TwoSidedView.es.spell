@@ -2,7 +2,7 @@
 // Integrada en spell (épica `elemental-spell` Q71):  compilada una vez, en el `TwoSidedView` del núcleo.
 // Una vista hecha de ella dice cómo se ve cada lado, con `para dibujar su frente:` y `para dibujar su dorso:`.
 una "vista reversible" es una vista donde:
-	- tiene las partes "frente" y "dorso"
+	- tiene las ranuras "frente" y "dorso"
 	// hacia dónde mira:  una nueva empieza boca abajo
 	- su "dirección" es abajo o arriba
 	- "está boca (dirección)"

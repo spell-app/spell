@@ -18,20 +18,20 @@ import { SpellStatement } from "spell/parser/spell/rules/Statement"
  * 		<ui-image source="card-back.svg" />
  * ```
  * - The spell lines around it decide which:  `if`, `otherwise`, loops.
- * - So does a part placed on a line of its own, `draw its front` (`draw_part`).
+ * - So does a slot placed on a line of its own, `draw its front` (`draw_slot`).
  * - Several draw all of them, in order, and a loop draws one each time round:  `DrawnLines.gather()` (C28).
- * - Only in a drawing (`DrawIt.drawingIn()`):  `to draw it`, `to draw each item`, a part's own `to draw its front`,
+ * - Only in a drawing (`DrawIt.drawingIn()`):  `to draw it`, `to draw each item`, a slot's own `to draw its front`,
  *   and a loop in one.
- * - In a part's drawing, its element carries the part's name as a CSS part (J6):  see `DrawIt.withPart()`.
+ * - In a slot's drawing, its element carries the slot's name as a CSS part (J6):  see `DrawIt.withPart()`.
  * - `return <...>` still works, as before.
  */
-export class DrawnMarkup extends SpellStatement<"markup", { part?: string }> {
+export class DrawnMarkup extends SpellStatement<"markup", { slot?: string }> {
   /** Beats `draw_thing` (`Priority.preferred`), which reads `draw its front` as drawing a `front`, and does nothing. */
   @proto static priority = Priority.specific
   @proto static alias = "statement"
 
   /**
-   * Only in a drawing;  notes which part's, if a part's, for `getAST()`.
+   * Only in a drawing;  notes which slot's, if a slot's, for `getAST()`.
    * - The tokens first (`test()`):  they turn down nearly every line at once,
    *   while `drawingIn()` asks the method around it for its signature.
    */
@@ -40,7 +40,7 @@ export class DrawnMarkup extends SpellStatement<"markup", { part?: string }> {
     if (!match) return undefined
     const drawing = DrawIt.drawingIn(scope)
     if (!drawing) return undefined
-    if (drawing.part) match.data.part = drawing.part
+    if (drawing.slot) match.data.slot = drawing.slot
     return match
   }
 
@@ -56,7 +56,7 @@ export class DrawnMarkup extends SpellStatement<"markup", { part?: string }> {
 
   getAST(match: P.MatchFor<this>): P.ASTReturnStatement {
     const markup = P.matchAST<P.ASTExpression>(match.groups.markup)
-    const { part } = match.data
-    return new P.ASTReturnStatement(match, { value: part ? DrawIt.withPart(markup, part) : markup })
+    const { slot } = match.data
+    return new P.ASTReturnStatement(match, { value: slot ? DrawIt.withPart(markup, slot) : markup })
   }
 }

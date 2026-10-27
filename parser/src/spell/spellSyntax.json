@@ -1363,7 +1363,7 @@
             "at_least_or_at_most",
             "url_or_email",
             "draw_method",
-            "draw_its_part",
+            "draw_its_slot",
             "create_method",
             "create_hook_words",
             "pause_units",
@@ -1418,7 +1418,7 @@
               "syntax": "((draw:draw it)|(draw_each_item:draw each item)|(draw_its_placeholder:draw its placeholder))"
             },
             {
-              "syntax": "((draw_its_part:draw its|draw the))"
+              "syntax": "((draw_its_slot:draw its|draw the))"
             },
             {
               "syntax": "(create:create it|create them)"
@@ -3840,15 +3840,15 @@
           "aliases": ["expression"]
         },
         {
-          "className": "DrawPart",
-          "ruleNames": ["draw_part"],
+          "className": "DrawSlot",
+          "ruleNames": ["draw_slot"],
           "internal": false,
-          "file": "src/spell/rules/classes/DrawPart.ts",
-          "line": 23,
-          "purpose": "PLACE one of a view's parts in its drawing (epic `elemental-spell` P5, Q55, Q56).",
+          "file": "src/spell/rules/classes/DrawSlot.ts",
+          "line": 29,
+          "purpose": "PLACE one of a view's slots in its drawing (epic `elemental-spell` P5, Q55, Q56; P27).",
           "syntaxes": [
             {
-              "syntax": "draw its {part:member_words}"
+              "syntax": "draw its {slot:member_words}"
             }
           ],
           "aliases": ["expression"]
@@ -5410,27 +5410,27 @@
               "syntax": "to {phrase:draw_method} :? {statement_body}?"
             },
             {
-              "syntax": "to draw its {part:member_words} :? {statement_body}?"
+              "syntax": "to draw its {slot:member_words} :? {statement_body}?"
             }
           ],
           "aliases": ["statement"]
         },
         {
-          "className": "HasParts",
-          "ruleNames": ["has_parts"],
+          "className": "HasSlots",
+          "ruleNames": ["has_slots"],
           "internal": false,
-          "file": "src/spell/rules/classes/HasParts.ts",
-          "line": 21,
-          "purpose": "A view's PARTS, the named drawings it places (epic `elemental-spell` P5, Q55, Q56).",
+          "file": "src/spell/rules/classes/HasSlots.ts",
+          "line": 25,
+          "purpose": "A view's SLOTS, the named drawings it places (epic `elemental-spell` P5, Q55, Q56; P27).",
           "syntaxes": [
             {
-              "syntax": "{type:subject_it} has (the)? parts [parts:{part:text} (,|and)]"
+              "syntax": "{type:subject_it} has (the)? (slots|parts) [slots:{slot:text} (,|and)]"
             },
             {
-              "syntax": "{type:subject_implied} has (the)? parts [parts:{part:text} (,|and)]"
+              "syntax": "{type:subject_implied} has (the)? (slots|parts) [slots:{slot:text} (,|and)]"
             },
             {
-              "syntax": "(a|an) {type:singular_type} has (the)? parts [parts:{part:text} (,|and)]"
+              "syntax": "(a|an) {type:singular_type} has (the)? (slots|parts) [slots:{slot:text} (,|and)]"
             }
           ],
           "aliases": ["statement"]
@@ -5456,7 +5456,7 @@
               "syntax": "{markup:jsxFragment}"
             },
             {
-              "syntax": "{markup:draw_part}"
+              "syntax": "{markup:draw_slot}"
             }
           ],
           "aliases": ["statement"]
@@ -5816,7 +5816,7 @@
           "ruleNames": ["jsxElement"],
           "internal": false,
           "file": "src/spell/rules/JSX/SpellJSX.ts",
-          "line": 51,
+          "line": 55,
           "purpose": "Match a JSX element (`<tag attr=.../>` or `<tag>...</tag>`) as an `expression`/`jsxChild`.",
           "syntaxes": [
             {

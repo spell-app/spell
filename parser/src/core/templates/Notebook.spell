@@ -3,7 +3,7 @@
 // A notebook made from it says what's on its page with `to draw its content:`;  a `.spellx` notebook writes that as
 // its body:  markdown, drawing tags and `<example>`s.
 a "notebook" is a page where:
-	- it has parts "content"
+	- it has slots "content"
 	// whether whoever can't write its file may change it:  a locked notebook's other readers only try things out
 	- its "lock" is unlocked or locked
 	// its content:  the editor app draws its own page around it, with the sections and the toolbar

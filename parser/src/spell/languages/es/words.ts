@@ -116,6 +116,8 @@ export const spanishWords: SP.LanguageWords = {
     "lista dibujable": "lista visible",
     "lista-dibujable": "lista visible"
   },
+  /** Spell's own old words, each an error naming its new one (epic `elemental-spell` P27):  a view's parts are slots. */
+  retiredWords: { partes: "ranuras" },
 
   /**
    * Spellx's words in Spanish (epic `elemental-spell`):  see `SP.SpellxWords`.
@@ -222,8 +224,8 @@ export const spanishWords: SP.LanguageWords = {
       eventParam: "{param} como {a value} {value}",
       eventAnd: "y",
       draw: "para dibujar eso :",
-      drawPart: "para dibujar su {words} :",
-      placePart: "dibujar su {words}",
+      drawSlot: "para dibujar su {words} :",
+      placeSlot: "dibujar su {words}",
       menu: "su {name} es un menú de",
       menuAnd: "y",
       menuBar: "su barra de menú es {quoted menu-bar}",

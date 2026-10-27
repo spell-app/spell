@@ -132,6 +132,8 @@ export const englishWords: SP.LanguageWords = {
     "drawable list": "viewable list",
     "drawable-list": "viewable list"
   },
+  /** Spell's own old words, each an error naming its new one (epic `elemental-spell` P27):  a view's parts are slots. */
+  retiredWords: { parts: "slots" },
 
   /**
    * Spellx's words, the tag-shaped form of a spell file (epic `elemental-spell`):  see `SP.SpellxWords`.
@@ -224,8 +226,8 @@ export const englishWords: SP.LanguageWords = {
       eventParam: "{param} as {a value} {value}",
       eventAnd: "and",
       draw: "to draw it :",
-      drawPart: "to draw its {words} :",
-      placePart: "draw its {words}",
+      drawSlot: "to draw its {words} :",
+      placeSlot: "draw its {words}",
       menu: "its {name} is a menu of",
       menuAnd: "and",
       menuBar: "its menu bar is {quoted menu-bar}",

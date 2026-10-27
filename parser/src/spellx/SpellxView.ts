@@ -218,7 +218,7 @@ export class SpellxView {
         return { kind: "choice", branches: [branch], span }
       }
       default:
-        // a part placed in a drawing:  `<draw "front" />` (Q55)
+        // a slot placed in a drawing:  `<draw "front" />` (Q55)
         if (where === "drawing" && tag.kind === "draw" && tag.selfClosing && tag.name)
           return { kind: "place", word: tag.word, name: tag.name.text, nameSpan: this.textSpan(tag.name)!, span }
         return {

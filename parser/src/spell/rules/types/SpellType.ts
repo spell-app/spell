@@ -103,25 +103,33 @@ export class SpellType extends P.Pattern<never, TypeMatchData> {
   }
 
   /**
-   * `match`, noting a retired type word its RULE spells literally, e.g. `drawable list` in `a pile is a drawable list
-   * of cards` (`create_viewable_list_type`):  its `data.retired` and `data.retiredTokens`.
-   * - Looks only at the words the rule matched itself (its syntax's literal words), two at a time,
-   *   never inside its named groups.
+   * `match`, noting a retired word its RULE spells literally:  its `data.retired` and `data.retiredTokens`.
+   * - A type word, two at a time, e.g. `drawable list` in `a pile is a drawable list of cards`
+   *   (`create_viewable_list_type`):  the language's `retiredTypeWords`.
+   * - Or one of spell's own words, e.g. `parts` in `it has parts "front" and "back"` (`has_slots`):
+   *   the language's `retiredWords`.
+   * - Looks only at the words the rule matched itself (its syntax's literal words), never inside its named groups.
    */
   static noteRetiredLiterals<M extends P.Match>(match: M): M {
-    const retired = SP.Language.of(match.scope).words.retiredTypeWords
-    if (!retired) return match
+    const { retiredTypeWords = {}, retiredWords = {} } = SP.Language.of(match.scope).words
     // a syntax's literal words are its tokens, or an unnamed match's:  `is a drawable list of`
     const literal = match.matched.flatMap((item) => (item instanceof P.Match && !item.rule?.name ? item.matched : item))
     const words = literal.filter((item): item is P.WordToken => item instanceof P.WordToken)
-    for (let index = 0; index < words.length - 1; index++) {
-      const pair = words.slice(index, index + 2)
-      const replacement = retired[pair.map((token) => `${token.value}`.toLowerCase()).join(" ")]
-      if (!replacement) continue
+    const note = (tokens: P.WordToken[], replacement: string) => {
       const data = match.data as RetiredData
       data.retired = replacement
-      data.retiredTokens = pair
+      data.retiredTokens = tokens
       return match
+    }
+    for (let index = 0; index < words.length - 1; index++) {
+      const pair = words.slice(index, index + 2)
+      const replacement = retiredTypeWords[pair.map((token) => `${token.value}`.toLowerCase()).join(" ")]
+      if (replacement) return note(pair, replacement)
+    }
+    // one of spell's own old words, e.g. `parts` in `it has parts "front" and "back"` (epic `elemental-spell` P27)
+    for (const word of words) {
+      const replacement = retiredWords[`${word.value}`.toLowerCase()]
+      if (replacement) return note([word], replacement)
     }
     return match
   }

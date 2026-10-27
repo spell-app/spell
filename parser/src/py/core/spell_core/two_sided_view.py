@@ -7,6 +7,7 @@
 from typing import Any
 
 from spell_core.apps import View
+from spell_core.drawing import h
 from spell_core.things import prop
 
 
@@ -16,7 +17,7 @@ class TwoSidedView(View):
     A view made from it says what each side looks like, with `to draw its front:` and `to draw its back:`.
     """
 
-    parts = ("front", "back")
+    slots = ("front", "back")
 
     # which way it faces:  a new one starts face down
     # - its "direction" is down or up
@@ -41,9 +42,9 @@ class TwoSidedView(View):
     def draw(self) -> Any:
         """its front when it's face up, its back when it's face down"""
         if self.is_face_direction("down"):
-            return self.draw_back()
+            return h("slot", {"name": "back"}, self.draw_back())
         else:
-            return self.draw_front()
+            return h("slot", {"name": "front"}, self.draw_front())
 
     def draw_front(self) -> Any:
         """Its front:  nothing, until a view made from it draws it, `to draw its front:`."""

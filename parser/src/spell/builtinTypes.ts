@@ -429,7 +429,7 @@ export const BUILT_IN_TYPE_TABLE: SP.BuiltInType[] = [
       "- Everything a view has.",
       "- And its own words:  `its direction` (up or down;  a new one starts up), `it is face up`, `it is face down`,",
       "  `turn it face up`, `turn it face down`, `turn it over`.",
-      "- Its parts `front` and `back`:  write `to draw its front` and `to draw its back`;  it draws its front face up,",
+      "- Its slots `front` and `back`:  write `to draw its front` and `to draw its back`;  it draws its front face up,",
       "  its back face down.",
       "",
       "```spell",

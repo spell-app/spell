@@ -21,8 +21,8 @@ import { CSSBlock } from "./CSSBlock"
 import { DefinePropertyHas, RULES } from "./DefinePropertyHas"
 import { DrawIt } from "./DrawIt"
 import { DrawnMarkup } from "./DrawnMarkup"
-import { DrawPart } from "./DrawPart"
-import { HasParts } from "./HasParts"
+import { DrawSlot } from "./DrawSlot"
+import { HasSlots } from "./HasSlots"
 import { DefineMenu } from "./DefineMenu"
 import { DefineGroup } from "./DefineGroup"
 import { MenuBar } from "./MenuBar"
@@ -121,9 +121,9 @@ classes.addRule(
   }
 )
 
-// a part's drawing, quoted:  `to "draw its front":` -- the words before the part's name (epic `elemental-spell` P5)
-classes.addRule(Wording.specialize({ ruleName: "draw_its_part", meanings: ["draw_its_part"] }), {
-  syntax: "((draw_its_part:draw its|draw the))"
+// a slot's drawing, quoted:  `to "draw its front":` -- the words before the slot's name (epic `elemental-spell` P5)
+classes.addRule(Wording.specialize({ ruleName: "draw_its_slot", meanings: ["draw_its_slot"] }), {
+  syntax: "((draw_its_slot:draw its|draw the))"
 })
 
 classes.addRule(WithNestedStatements, {
@@ -1720,24 +1720,24 @@ classes.addRule(DrawIt, {
   syntax: "to {phrase:draw_method} :? {statement_body}?"
 })
 
-// a part's own drawing (epic `elemental-spell` P5):  `- to draw its front:`, its lines drawing it
+// a slot's own drawing (epic `elemental-spell` P5):  `- to draw its front:`, its lines drawing it
 classes.addRule(DrawIt, {
-  syntax: "to draw its {part:member_words} :? {statement_body}?"
+  syntax: "to draw its {slot:member_words} :? {statement_body}?"
 })
 
-// a view's parts:  `- it has parts "front" and "back"`
-classes.addRule(HasParts, {
-  syntax: "{type:subject_it} has (the)? parts [parts:{part:text} (,|and)]"
+// a view's slots (P27):  `- it has slots "front" and "back"`
+classes.addRule(HasSlots, {
+  syntax: "{type:subject_it} has (the)? (slots|parts) [slots:{slot:text} (,|and)]"
 })
 
-// ... with the subject left out:  `- has parts "front" and "back"`
-classes.addRule(HasParts, {
-  syntax: "{type:subject_implied} has (the)? parts [parts:{part:text} (,|and)]"
+// ... with the subject left out:  `- has slots "front" and "back"`
+classes.addRule(HasSlots, {
+  syntax: "{type:subject_implied} has (the)? (slots|parts) [slots:{slot:text} (,|and)]"
 })
 
-// ... and in the sentence style:  `a card has parts "front" and "back"`
-classes.addRule(HasParts, {
-  syntax: "(a|an) {type:singular_type} has (the)? parts [parts:{part:text} (,|and)]"
+// ... and in the sentence style:  `a card has slots "front" and "back"`
+classes.addRule(HasSlots, {
+  syntax: "(a|an) {type:singular_type} has (the)? (slots|parts) [slots:{slot:text} (,|and)]"
 })
 
 // a template's menu of its actions (epic `elemental-spell` P10):  `- its "game menu" is a menu of "deal" and "undo"`
@@ -1930,12 +1930,12 @@ classes.addRule(MenuBar, {
   ]
 })
 
-// placing a part in a drawing:  `draw its front`
-classes.addRule(DrawPart, {
-  syntax: "draw its {part:member_words}"
+// placing a slot in a drawing:  `draw its front`
+classes.addRule(DrawSlot, {
+  syntax: "draw its {slot:member_words}"
 })
 
-// a line of a drawing that IS the drawing:  markup, or a part placed
+// a line of a drawing that IS the drawing:  markup, or a slot placed
 // - a notebook's example, or block of markdown, on a line of its own:  theirs, not an element's (P16)
 classes.addRule(DrawnMarkup, {
   syntax: "{markup:example_block}"
@@ -1954,7 +1954,7 @@ classes.addRule(DrawnMarkup, {
 })
 
 classes.addRule(DrawnMarkup, {
-  syntax: "{markup:draw_part}"
+  syntax: "{markup:draw_slot}"
 })
 
 classes.addRule(QuotedPropertyFormula, {

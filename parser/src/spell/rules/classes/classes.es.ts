@@ -30,8 +30,8 @@ import { CSSBlock } from "./CSSBlock"
 import { DefinePropertyHas } from "./DefinePropertyHas"
 import { DrawIt } from "./DrawIt"
 import { DrawnMarkup } from "./DrawnMarkup"
-import { DrawPart } from "./DrawPart"
-import { HasParts } from "./HasParts"
+import { DrawSlot } from "./DrawSlot"
+import { HasSlots } from "./HasSlots"
 import { DefineMenu } from "./DefineMenu"
 import { DefineGroup } from "./DefineGroup"
 import { MenuBar } from "./MenuBar"
@@ -186,10 +186,10 @@ classesEs.addRule(
   }
 )
 
-// el dibujo de una parte, entre comillas:  `para "dibujar su frente":` -- las palabras antes del nombre de la parte
+// el dibujo de una ranura, entre comillas:  `para "dibujar su frente":` -- las palabras antes del nombre de la ranura
 // (épica `elemental-spell` P5)
-classesEs.addRule(Wording.specialize({ ruleName: "draw_its_part", meanings: ["draw_its_part"] }), {
-  syntax: "((draw_its_part:dibujar su|dibujar el|dibujar la))"
+classesEs.addRule(Wording.specialize({ ruleName: "draw_its_slot", meanings: ["draw_its_slot"] }), {
+  syntax: "((draw_its_slot:dibujar su|dibujar el|dibujar la))"
 })
 
 classesEs.addRule(WithNestedStatements, {
@@ -1801,24 +1801,24 @@ classesEs.addRule(DrawIt, {
   syntax: "para {phrase:draw_method} :? {statement_body}?"
 })
 
-// el dibujo propio de una parte (épica `elemental-spell` P5):  `- para dibujar su frente:`, sus líneas lo dibujan
+// el dibujo propio de una ranura (épica `elemental-spell` P5):  `- para dibujar su frente:`, sus líneas lo dibujan
 classesEs.addRule(DrawIt, {
-  syntax: "para dibujar su {part:member_words} :? {statement_body}?"
+  syntax: "para dibujar su {slot:member_words} :? {statement_body}?"
 })
 
-// las partes de una vista:  `- ella tiene las partes "frente" y "dorso"`
-classesEs.addRule(HasParts, {
-  syntax: "{type:subject_it} tiene (las)? partes [parts:{part:text} (,|y)]"
+// las ranuras de una vista (P27):  `- ella tiene las ranuras "frente" y "dorso"`
+classesEs.addRule(HasSlots, {
+  syntax: "{type:subject_it} tiene (las)? (ranuras|partes) [slots:{slot:text} (,|y)]"
 })
 
-// ... sin el sujeto, como se dice en español:  `- tiene las partes "frente" y "dorso"`
-classesEs.addRule(HasParts, {
-  syntax: "{type:subject_implied} tiene (las)? partes [parts:{part:text} (,|y)]"
+// ... sin el sujeto, como se dice en español:  `- tiene las ranuras "frente" y "dorso"`
+classesEs.addRule(HasSlots, {
+  syntax: "{type:subject_implied} tiene (las)? (ranuras|partes) [slots:{slot:text} (,|y)]"
 })
 
-// ... y en el estilo de oraciones:  `una carta tiene las partes "frente" y "dorso"`
-classesEs.addRule(HasParts, {
-  syntax: `${A} {type:singular_type} tiene (las)? partes [parts:{part:text} (,|y)]`
+// ... y en el estilo de oraciones:  `una carta tiene las ranuras "frente" y "dorso"`
+classesEs.addRule(HasSlots, {
+  syntax: `${A} {type:singular_type} tiene (las)? (ranuras|partes) [slots:{slot:text} (,|y)]`
 })
 
 // un grupo de los miembros de una plantilla, un encabezado en su esquema (épica `elemental-spell` P16):
@@ -1969,12 +1969,12 @@ classesEs.addRule(MenuBar, {
   ]
 })
 
-// poner una parte en un dibujo:  `dibujar su frente`
-classesEs.addRule(DrawPart, {
-  syntax: "dibujar su {part:member_words}"
+// poner una ranura en un dibujo:  `dibujar su frente`
+classesEs.addRule(DrawSlot, {
+  syntax: "dibujar su {slot:member_words}"
 })
 
-// una línea de un dibujo que ES el dibujo:  marcado, o una parte puesta
+// una línea de un dibujo que ES el dibujo:  marcado, o una ranura puesta
 // - el ejemplo de un cuaderno, o un bloque de markdown, en una línea propia:  los suyos, no los de un elemento (P16)
 classesEs.addRule(DrawnMarkup, {
   syntax: "{markup:example_block}"
@@ -1993,7 +1993,7 @@ classesEs.addRule(DrawnMarkup, {
 })
 
 classesEs.addRule(DrawnMarkup, {
-  syntax: "{markup:draw_part}"
+  syntax: "{markup:draw_slot}"
 })
 
 classesEs.addRule(QuotedPropertyFormula, {

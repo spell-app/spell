@@ -104,6 +104,11 @@ export type JSXMatchData = {
   htmlBlock?: boolean
   /** (`jsxElement`) A chain branch's error if it turns out to stand alone, outside any element. */
   aloneError?: P.Match
+  /**
+   * (`jsxElement`) The project's own view a spellx drawing names bare, `<carta>`:
+   * its children's `slot="frente"` name its slots as they compile, `front` -- see `SpellJSX.withSlotNames()`.
+   */
+  view?: P.TypeScope
 }
 
 /**

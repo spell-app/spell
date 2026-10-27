@@ -1,6 +1,8 @@
 import { elementTagFor, proto } from "spell/util"
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
+// Through the folder:  read only when called, once the folder has loaded
+import { DrawIt } from "spell/parser/spell/rules/classes"
 import { isBareComponentName, SPELL_TAG_WORDS, webWordFor, type JSXMatchData } from "./JSX.shared"
 import { ExampleBlock } from "./ExampleBlock"
 import { MarkdownBlock } from "./MarkdownBlock"
@@ -30,6 +32,8 @@ import { SpellJSXContent } from "./SpellJSXContent"
  *     `SPELL_TAG_WORDS`, `SPELL_ATTRIBUTE_WORDS`
  * - In a spellx file, a BARE name is a component's (epic `elemental-spell` P7, Q46):  `componentTagFor()`.
  *   - `<card>`:  one of the project's own views, `<solitaire-card>`;  else `<button>`:  a pack's, `<ui-button>`.
+ *   - A view's slots can be filled there, `<card><text slot="front">Ace</text></card>`, each named as it compiles
+ *     (P27):  see `withSlotNames()`.
  *   - No native HTML (Q46, C1):  `<div>` is an error unless a pack has it.
  *   - Except in a `<spell>` chunk, code spell as written (J83):  there `<div>` is the web's (`SP.isCodeSpell()`).
  * - AN IF-CHAIN INSIDE MARKUP (epic `elemental-spell`, Owen 2026-10-25:  "Inside an element:  hidden"):
@@ -107,6 +111,9 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
     const isSpellx = (scope.parser as SP.SpellParser | undefined)?.form === "spellx" && !codeSpell
     if (isSpellx && match.data.tagName === element.tagName) {
       const tag = SpellJSX.componentTagFor(scope, element.tagName)
+      const view = tag ? scope.getType(SP.typeName(element.tagName)) : undefined
+      // one of the project's own views:  its children may fill its slots (`withSlotNames()`)
+      if (view?.isA("View")) match.data.view = view
       if (tag) match.data.tagName = tag
       else if (isBareComponentName(element.tagName)) {
         const language = SP.Language.of(scope)
@@ -137,10 +144,35 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
       return new P.ASTJSXFragment(match, { children: this.childASTs(match) })
     const tagName = match.data.tagName ?? (match.matched[0] as P.JSXElementToken).tagName
     const attrs = match.data.attributes?.map((attr) => P.asAST<P.ASTJSXAttribute>(attr?.AST))
+    const children = this.childASTs(match)
     return new P.ASTJSXElement(match, {
       tagName,
       attrs: SpellJSX.clickableAttrs(match, attrs),
-      children: this.childASTs(match)
+      children: match.data.view ? SpellJSX.withSlotNames(match.data.view, children) : children
+    })
+  }
+
+  /**
+   * `children` of a drawn view, `<carta>`, each `slot="..."` naming one of its slots as it compiles
+   * (epic `elemental-spell` P27):  a Spanish two sided view's `slot="frente"` fills its `front`;
+   * `slot="back cover"`, its `back_cover`.
+   * - The view's element draws each slot as the web's `<slot name="front">` (`draw_slot`), so the name must match.
+   * - A worked-out `slot={...}`, or a name that isn't one of its slots, is left as written.
+   */
+  private static withSlotNames(view: P.TypeScope, children: P.ASTJSXElementProps["children"]) {
+    return children.map((child) => {
+      if (!(child instanceof P.ASTJSXElement) || child instanceof P.ASTJSXFragment) return child
+      const index = child.attrs?.findIndex((attr) => attr.name === "slot") ?? -1
+      const said = index < 0 ? undefined : child.attrs![index]!.value
+      if (!(said instanceof P.ASTStringLiteral)) return child
+      const slot = DrawIt.slotName(`${said.value}`)
+      if (!view.hasSlot(slot)) return child
+      const name = view.slotOutput(slot)
+      if (name === said.value) return child
+      const attrs = [...child.attrs!]
+      const value = new P.ASTStringLiteral(said.match, { value: name, quote: '"' })
+      attrs[index] = new P.ASTJSXAttribute(attrs[index]!.match, { name: "slot", value })
+      return new P.ASTJSXElement(child.match, { tagName: child.tagName, attrs, children: child.children })
     })
   }
 

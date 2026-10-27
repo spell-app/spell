@@ -393,8 +393,8 @@ export class SpellxTwin {
       case "test":
         return this.lineAndBlock(this.expand(words.test))
       case "draw":
-        if (tag.selfClosing && tag.name) return this.lineAndBlock(this.expand(words.placePart))
-        return this.lineAndBlock(this.expand(tag.name ? words.drawPart : words.draw))
+        if (tag.selfClosing && tag.name) return this.lineAndBlock(this.expand(words.placeSlot))
+        return this.lineAndBlock(this.expand(tag.name ? words.drawSlot : words.draw))
       case "event":
         return this.lineAndBlock(this.event())
       case "menu":

@@ -575,12 +575,12 @@ export type SpellWordsData = {
   messages?: Record<string, string>
 }
 
-/** The parts `- it has parts "front" and "back"` declared on its type, for the project's declarations -- see `HasParts`. */
-export type DeclaredParts = {
+/** The slots `- it has slots "front" and "back"` declared on its type, for the project's declarations -- see `HasSlots`. */
+export type DeclaredSlots = {
   /** The type they're on, by class name, e.g. `TwoSidedView`. */
   of: string
   /** Their names, e.g. `["front", "back"]`. */
-  parts: string[]
+  slots: string[]
 }
 
 /**
@@ -659,15 +659,15 @@ export type SpellDeclaration = {
   /** Compiled output of any `constants` NOT output as just their name, quoted. */
   constantOutputs?: Record<string, string>
   /**
-   * The parts a view declared, e.g. `["front", "back"]` for `- it has parts "front" and "back"`, on type `of`
-   * (epic `elemental-spell` P5) -- see `DeclaredParts`.
+   * The slots a view declared, e.g. `["front", "back"]` for `- it has slots "front" and "back"`, on type `of`
+   * (epic `elemental-spell` P5) -- see `DeclaredSlots`.
    */
-  parts?: string[]
+  slots?: string[]
   /**
-   * The name each part compiles by, when it isn't its own:  a built-in template's Spanish `frente` draws its `front`
-   * (epic `elemental-spell` Q71) -- see `P.TypeScope.partOutputs`.
+   * The name each slot compiles by, when it isn't its own:  a built-in template's Spanish `frente` draws its `front`
+   * (epic `elemental-spell` Q71) -- see `P.TypeScope.slotOutputs`.
    */
-  partOutputs?: Record<string, string>
+  slotOutputs?: Record<string, string>
   /**
    * `importableAs` name of the class its rule was `specialize()`d from, e.g. `"method_call"`.
    * - Its OTHER keys here are what that class's `specialize()` takes, e.g. `output` + `alias`.
