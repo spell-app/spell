@@ -548,6 +548,10 @@
   .meta b {
     color: var(--epic-ink);
   }
+  /* a meta line's link (the saga's):  the page's accent, visited or not -- the browser's own purple otherwise */
+  .meta a {
+    color: var(--epic-accent);
+  }
   .icon {
     display: inline-flex;
     align-items: center;
