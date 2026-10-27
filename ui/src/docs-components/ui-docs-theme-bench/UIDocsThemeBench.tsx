@@ -9,6 +9,7 @@ import { BenchBridge } from "./BenchBridge"
 import { BenchColor } from "./BenchColor"
 import { BenchEdits } from "./BenchEdits"
 import { BenchTokens, type BenchGroup } from "./BenchTokens"
+import { BenchTree, type BenchTreeNode } from "./BenchTree"
 import { docsThemeBenchVocabulary } from "./UIDocsThemeBench.en"
 import {
   BENCH_MESSAGE,
@@ -129,14 +130,50 @@ export class UIDocsThemeBench extends E.UIComponent<DocsThemeBenchVocabulary> {
     }
   }
 
-  /** The groups for the theme shown, each its tokens, the filter applied. */
+  /** The groups for the theme shown, each its tokens, the filter applied:  to the CSS name, or the path in the tree. */
   get groups(): BenchGroup[] {
-    const groups = this.tokens?.groupsFor(this.theme, this.looks.editor?.declares) ?? []
+    const tokens = this.tokens
+    const groups = tokens?.groupsFor(this.theme, this.looks.editor?.declares) ?? []
     const filter = this.filter.trim().toLowerCase()
-    if (!filter) return groups
+    if (!filter || !tokens) return groups
+    const matches = (token: string, place: string) =>
+      token.includes(filter) || [place, ...tokens.pathOf(token, place)].join(" ").includes(filter)
     return groups
-      .map((group) => ({ ...group, tokens: group.tokens.filter((token) => token.includes(filter)) }))
+      .map((group) => ({ ...group, tokens: group.tokens.filter((token) => matches(token, group.place)) }))
       .filter((group) => group.tokens.length)
+  }
+
+  /** The groups as a tree, the way a theme file nests them (Owen:  "can we show this as a tree?"). */
+  @E.derived
+  get tree(): BenchTree {
+    const tokens = this.tokens
+    return new BenchTree({
+      groups: this.groups,
+      pathOf: (token, place) => tokens?.pathOf(token, place) ?? [token],
+      labelOf: (place) => this.text(GROUP_TEXTS[place] ?? "groupOwn")
+    })
+  }
+
+  /** Each branch's fold, by its id:  open or not;  kept in this browser (a branch never folded keeps its default). */
+  @E.state accessor folds: Readonly<Record<string, boolean>> = isServer
+    ? {}
+    : (PREFS.get<Record<string, boolean>>(FOLDS_PREF) ?? {})
+
+  /** Each branch's section, by its id:  so a fold is kept by the branch it's on. */
+  private readonly branchSections = new Map<string, Element>()
+
+  /** Whether branch `id` is open:  every one while filtering;  else as folded, a group open by default. */
+  private isBranchOpen(id: string, isGroup: boolean): boolean {
+    return !!this.filter.trim() || (this.folds[id] ?? isGroup)
+  }
+
+  /** Branch `id` folded or unfolded, by its title or find-in-page:  kept, unless it's the filter that opened it. */
+  private onBranchFolded(event: CustomEvent<{ open: boolean; section: Element }>, id: string): void {
+    // a branch inside it sends its own, which bubbles here:  each keeps only its own section's
+    if (event.detail.section !== this.branchSections.get(id) || this.filter.trim()) return
+    if (this.folds[id] === event.detail.open) return
+    this.folds = { ...this.folds, [id]: event.detail.open }
+    PREFS.set(FOLDS_PREF, this.folds)
   }
 
   /** Every token the groups hold, filtered or not:  what the pages are asked about. */
@@ -702,42 +739,73 @@ export class UIDocsThemeBench extends E.UIComponent<DocsThemeBenchVocabulary> {
           when={this.tokens}
           fallback={<p class="note">{this.tokensError ? t("failed", { error: this.tokensError }) : t("loading")}</p>}
         >
-          <For each={this.groups.map((group) => group.place)}>{(place) => this.group(place)}</For>
+          <For each={this.tree.roots.map((node) => node.id)}>{(id) => this.branch(id, true)}</For>
         </Show>
         {this.changesSection()}
       </aside>
     )
   }
 
-  /** One group of tokens, folding. */
-  private group(place: string): JSX.Element {
-    // By its place, not the group's object:  each page's report makes new groups, and a new object would draw the
-    // whole group again (its fold, and the read-by icon under the pointer with its tooltip, lost)
-    const tokens = () => this.groups.find((group) => group.place === place)?.tokens ?? []
+  /**
+   * Branch `id` of the tree, folding:  its own token first when it's one too, then what's under it, drawn only while
+   * it's open.
+   * - By its id, never the node object:  each page's report makes a new tree, and a new object would draw the whole
+   *   branch again (its fold, and the read-by icon under the pointer with its tooltip, lost).
+   */
+  private branch(id: string, isGroup = false): JSX.Element {
+    const node = () => this.tree.nodes.get(id)
+    const isOpen = () => this.isBranchOpen(id, isGroup)
+    const onFolded = (event: CustomEvent<{ open: boolean; section: Element }>) => this.onBranchFolded(event, id)
     return (
-      <ui-section class="group" label={this.text(GROUP_TEXTS[place] ?? "groupOwn")} collapsible="" level="4">
-        <code slot="actions" class="group-place">
-          {place}
-        </code>
-        <For each={tokens()}>{(token) => this.token(token)}</For>
+      <ui-section
+        ref={(section) => this.branchSections.set(id, section)}
+        class={isGroup ? "group" : "branch"}
+        label={node()?.name ?? ""}
+        collapsible=""
+        level={isGroup ? "4" : "5"}
+        open={isOpen() ? "" : "false"}
+        on-ui-opened={onFolded}
+        on-ui-closed={onFolded}
+      >
+        <Show when={isGroup}>
+          <code slot="actions" class="group-place">
+            {id}
+          </code>
+        </Show>
+        <Show when={isOpen()}>
+          <Show when={node()?.token}>{this.leaf(id)}</Show>
+          <For each={node()?.children.map((child) => child.id) ?? []}>
+            {(childId) => (this.tree.nodes.get(childId)?.children.length ? this.branch(childId) : this.leaf(childId))}
+          </For>
+        </Show>
       </ui-section>
     )
+  }
+
+  /** Node `id`'s token, by its short name in the tree. */
+  private leaf(id: string): JSX.Element {
+    const node = (): BenchTreeNode | undefined => this.tree.nodes.get(id)
+    const token = node()?.token
+    return token ? this.token(token, () => node()?.name ?? token) : undefined
   }
 
   /**
    * One token's row:  its name and which pages read it, then its control;
    * a light and a dark control side by side when it shows them apart (`isSplit()`).
    */
-  private token(token: string): JSX.Element {
+  private token(token: string, label: () => string = () => token): JSX.Element {
     const t = this.text
     const isTuned = () => this.edits[this.theme]?.[token] !== undefined
     const isSplit = () => this.isSplit(token)
     return (
       <div class={["token", { tuned: isTuned(), split: isSplit() }]} part={this.partForName("token")}>
         <div class="token-head">
-          <code class="token-name" title={this.tokens?.placeOf(token)}>
-            {token}
-          </code>
+          <span class="token-name" title={`${token}  ·  ${this.tokens?.placeOf(token) ?? ""}`}>
+            {label()}
+            <Show when={this.filter.trim()}>
+              <code class="token-css">{token}</code>
+            </Show>
+          </span>
           {this.readersIcons(token)}
           <Show when={!isSplit()}>
             <ui-button
@@ -1038,6 +1106,7 @@ const DEFAULT_THEME = "spell"
 /** The bench's kept tunings:  the docs site's store (`spell-ui-site:theme-bench`). */
 const PREFS = new PrefStore("spell-ui-site")
 const EDITS_PREF = "theme-bench"
+const FOLDS_PREF = "theme-bench-folds"
 
 /** The titles' places, in the menu's order. */
 const TITLE_PLACES: readonly TitlesAt[] = ["rest", "stuck"]

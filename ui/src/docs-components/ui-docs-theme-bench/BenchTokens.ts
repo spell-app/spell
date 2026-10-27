@@ -73,9 +73,22 @@ export class BenchTokens {
       { place: OWN, tokens: this.ownTokens(theme) },
       ...TREE_PICKS.map(({ place, names }) => ({ place, tokens: names.map((name) => this.treeToken(place, name)) })),
       { place: `${COMPONENTS}.${DOCS_NAV}`, tokens: this.familyTokens(DOCS_NAV) },
-      { place: EDITOR, tokens: [...editorTokens].filter((token) => token.startsWith(EDITOR_PREFIX)).sort() }
+      { place: EDITOR, tokens: [...editorTokens].filter((token) => token.startsWith(EDITOR_PREFIX)).sort(byName) }
     ]
     return groups.filter((group) => group.tokens.length)
+  }
+
+  /**
+   * `token`'s path in its group `place`, by its name's parts:  the tree the bench shows (`BenchTree`).
+   * - `--ui-menu-segmented-background` in `components.menu`:  `["segmented", "background"]`
+   * - `--glass-blur` in `own`:  `["glass", "blur"]`;  `--ui-radius-l` in `radii`:  `["l"]`
+   * - the editor's own, which no theme file places:  `--spell-accent-x` => `["accent", "x"]`
+   */
+  pathOf(token: string, place: string): string[] {
+    if (token.startsWith(EDITOR_PREFIX)) return token.slice(EDITOR_PREFIX.length).split("-")
+    const where = this.placeOf(token)
+    const rest = where.startsWith(`${place}.`) ? where.slice(place.length + 1) : where.slice(where.lastIndexOf(".") + 1)
+    return rest.split(/[.-]/).filter(Boolean)
   }
 
   /** Where `token` lives in a theme file:  `surfaces.panel`, `components.menu.radius`, `own.glass-blur`, `editor`. */
@@ -145,17 +158,17 @@ export class BenchTokens {
   // ## Tokens of a group
   ////////////////
 
-  /** Every token any theme sets for family `family`, A-Z. */
+  /** Every token any theme sets for family `family`, in name order (`byName()`). */
   private familyTokens(family: string): string[] {
     const names = new Set<string>()
     for (const data of Object.values(this.themes)) {
       const tokens = data.components?.[family]
       if (tokens) for (const name of Object.keys(tokens)) names.add(`--ui-${family}-${name}`)
     }
-    return [...names].sort()
+    return [...names].sort(byName)
   }
 
-  /** The private tokens of `theme` and the themes it builds on, A-Z. */
+  /** The private tokens of `theme` and the themes it builds on, in name order (`byName()`). */
   private ownTokens(theme: string): string[] {
     const names = new Set<string>()
     for (let name: string | undefined = theme, hops = 0; name && hops <= MAX_DEPTH; hops++) {
@@ -163,7 +176,7 @@ export class BenchTokens {
       for (const own of Object.keys(data?.own ?? {})) names.add(`--${own}`)
       name = data?.extends
     }
-    return [...names].sort()
+    return [...names].sort(byName)
   }
 
   /** The token at `place` + `name` in the theme tree:  `radii` + `l` => `--ui-radius-l`. */
@@ -225,6 +238,14 @@ function splitPair(text: string, open: number): [string, string, number] {
     } else if (char === "," && depth === 0 && comma < 0) comma = index
   }
   return ["", "", -1]
+}
+
+/**
+ * Names in order, their numbers as numbers (Owen:  "these should sort as numbers"):
+ * `--spell-brand-25` before `--spell-brand-100`.
+ */
+function byName(a: string, b: string): number {
+  return a.localeCompare(b, "en", { numeric: true })
 }
 
 /** Whether `value` is a plain object. */

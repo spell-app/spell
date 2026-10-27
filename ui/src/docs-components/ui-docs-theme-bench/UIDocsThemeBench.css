@@ -215,6 +215,29 @@
   color: var(--ui-text-muted);
 }
 
+/* ### The tree:  a branch under its group, indented on a guide line, its title a step quieter */
+
+.branch {
+  display: block;
+  margin-inline-start: 10px;
+  padding-inline-start: 6px;
+  border-inline-start: 1px solid var(--ui-border-color-internal, var(--ui-border-color));
+}
+.branch::part(title) {
+  padding-block: 4px;
+}
+.branch::part(heading) {
+  font-size: 0.9em;
+  font-weight: 600;
+  font-family: var(--ui-font-family-mono, monospace);
+}
+/* a token's short name in the tree;  its CSS name beside it while filtering */
+.token-css {
+  margin-inline-start: 0.6em;
+  font-size: 0.8em;
+  color: var(--ui-text-muted);
+}
+
 /* ### One token */
 
 .token {
@@ -236,6 +259,7 @@
   min-height: 24px;
 }
 .token-name {
+  font-family: var(--ui-font-family-mono, monospace);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

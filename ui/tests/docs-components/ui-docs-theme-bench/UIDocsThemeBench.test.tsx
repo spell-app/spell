@@ -10,10 +10,17 @@ import "spell-ui/docs-components/ui-docs-theme-bench"
 /** The bench's kept tunings, in the browser's storage. */
 const EDITS_KEY = "spell-ui-site:theme-bench"
 
+/** The bench's kept folds of its tree. */
+const FOLDS_KEY = "spell-ui-site:theme-bench-folds"
+
 /** Render a bench;  returns its DOM element and component, once its theme files are in and its groups drawn. */
 async function render() {
   localStorage.removeItem(EDITS_KEY)
-  onTestFinished(() => localStorage.removeItem(EDITS_KEY))
+  localStorage.removeItem(FOLDS_KEY)
+  onTestFinished(() => {
+    localStorage.removeItem(EDITS_KEY)
+    localStorage.removeItem(FOLDS_KEY)
+  })
   const bench = await ElementFixture.render<DOMElement>(`<ui-docs-theme-bench></ui-docs-theme-bench>`)
   const component = bench.component as unknown as UIDocsThemeBench
   await expect.poll(() => bench.shadowRoot?.querySelectorAll(".group").length, { timeout: 5000 }).toBeGreaterThan(3)
@@ -100,5 +107,39 @@ describe("<ui-docs-theme-bench>", () => {
     await ElementFixture.settle()
     expect(component.isSplit("--ui-radius-l")).toBe(true)
     expect(bench.shadowRoot!.querySelectorAll(".token.split .half").length).toBeGreaterThanOrEqual(4)
+  })
+
+  it("a tree:  a branch folds and stays folded;  the filter opens every branch it matches in", async () => {
+    const { bench, component } = await render()
+    const root = bench.shadowRoot!
+    // a branch starts folded, its tokens not drawn;  opening it is kept, by its id
+    const branch = root.querySelector<HTMLElement & { open: boolean }>("ui-section.branch")!
+    expect(branch.getAttribute("open")).toBe("false")
+    expect(component.folds).toEqual({})
+    branch.open = true
+    await ElementFixture.settle()
+    const [opened] = Object.keys(component.folds)
+    expect(component.tree.nodes.get(opened!)?.name).toBe(branch.getAttribute("label"))
+    expect(JSON.parse(localStorage.getItem(FOLDS_KEY)!)).toEqual({ [opened!]: true })
+    // the filter matches the tree's path too:  "segmented" finds the menu's segmented tokens, every branch open
+    component.filter = "segmented"
+    await ElementFixture.settle()
+    expect(component.groups.flatMap((group) => group.tokens).every((token) => token.includes("segmented"))).toBe(true)
+    expect(root.querySelectorAll("ui-section.branch[open='false']")).toHaveLength(0)
+  })
+
+  it("lists names with their numbers as numbers", async () => {
+    const { component } = await render()
+    component.looks = {
+      editor: {
+        reads: [],
+        overrides: [],
+        values: {},
+        declares: ["--spell-brand-100", "--spell-brand-25", "--spell-brand-50"]
+      }
+    }
+    await ElementFixture.settle()
+    const editor = component.groups.find((group) => group.place === "editor")!
+    expect(editor.tokens).toEqual(["--spell-brand-25", "--spell-brand-50", "--spell-brand-100"])
   })
 })
