@@ -51,10 +51,10 @@ import { join, relative, resolve } from "node:path"
 import { ImportRenamer, renameImportsCommand } from "spell/cli/commands/renameImports.ts"
 
 /** The kit:  this file is in its `tools/one-repo/`. */
-const KIT = resolve(import.meta.dirname, "..", "..")
+const KIT = process.env.ONE_REPO_KIT ?? resolve(import.meta.dirname, "..", "..")
 
-/** Where the commit maps go. */
-const HERE = import.meta.dirname
+/** Where the commit maps go.  `ONE_REPO_KIT` points the script at a scratch kit, for its tests. */
+const HERE = join(KIT, "tools", "one-repo")
 
 /** The repos merged, lowest first, and each one's folder (Q56). */
 const REPOS = [
@@ -183,7 +183,8 @@ function manifest(): void {
       exports[key === "." ? `./${folder}` : `./${folder}${key.slice(1)}`] = readBySource(retarget(target, folder, repo))
     }
     // its published short names (`"spellPublish": { "exports" }`, `./ui-*`), as the ONE package's (`spell/ui/ui-button`)
-    for (const [key, target] of Object.entries(shortNames(own))) exports[`./${folder}${key.slice(1)}`] = sourceExport(folder, target)
+    for (const [key, target] of Object.entries(shortNames(own)))
+      exports[`./${folder}${key.slice(1)}`] = sourceExport(folder, target)
     for (const [list, into] of [
       [own.dependencies, dependencies],
       [own.devDependencies, devDependencies]
@@ -202,7 +203,10 @@ function manifest(): void {
     }
     // the folder keeps its dependencies, at the kit's versions (ONE copy each), and gains the kit itself
     own.dependencies = aligned(own.dependencies, names, dependencies, devDependencies)
-    own.devDependencies = { [kit.name]: "workspace:*", ...aligned(own.devDependencies, names, dependencies, devDependencies) }
+    own.devDependencies = {
+      [kit.name]: "workspace:*",
+      ...aligned(own.devDependencies, names, dependencies, devDependencies)
+    }
     if (!Object.keys(own.dependencies).length) delete own.dependencies
     delete own.peerDependencies
     delete own.packageManager
@@ -258,7 +262,10 @@ function readBySource(target: unknown): unknown {
 
 /** A folder's published short names, `"spellPublish": { "exports" }`:  `{ "./ui-*": ... }`, its family barrels. */
 function shortNames(own: Manifest): Record<string, string> {
-  return ((own.spellPublish as { exports?: Record<string, string> } | undefined)?.exports ?? {}) as Record<string, string>
+  return ((own.spellPublish as { exports?: Record<string, string> } | undefined)?.exports ?? {}) as Record<
+    string,
+    string
+  >
 }
 
 /** The kit's export entry for `path` under `folder`'s `src/` (a family barrel:  `components/ui-button/index`):  source, declarations, default. */
@@ -356,12 +363,15 @@ function carryOn(): void {
   }
   for (const { repo, folder } of present) {
     if (!existsSync(join(KIT, folder, "package.json")))
-      throw new Error(`carry-on:  no ${folder}/ here yet:  merge main (with epic repo-split P20) into this branch first`)
+      throw new Error(
+        `carry-on:  no ${folder}/ here yet:  merge main (with epic repo-split P20) into this branch first`
+      )
     if (git(join(KIT, repo), ["status", "--porcelain", "--untracked-files=no"]).trim())
       throw new Error(`carry-on:  ${repo}/ has uncommitted changes;  commit them on its branch first`)
   }
   const renamer = new ImportRenamer(KIT)
   const scratch = mkdtempSync(join(tmpdir(), "spell-carry-on-"))
+  let carried = 0
   try {
     for (const { repo, folder } of present) {
       const source = join(KIT, repo)
@@ -369,14 +379,26 @@ function carryOn(): void {
       const clone = join(scratch, repo)
       const mapFile = join(HERE, `commit-map-${folder}-${branch.replace(/[^\w.-]+/g, "-")}.txt`)
       console.log(`${repo} (its branch ${branch}) => ${folder}/`)
+      if (!ownCommits(source, branch, join(HERE, `commit-map-${folder}.txt`))) {
+        console.log(`${repo}: nothing of its own, skipped`)
+        continue
+      }
       if (dryRun) continue
       const head = rewrite(source, branch, folder, clone, mapFile)
       const base = git(KIT, ["merge-base", "HEAD", head], true).trim()
       if (!base) throw new Error(`carry-on:  ${repo}'s ${branch}, rewritten, shares no commit with this branch`)
+      if (gitOk(KIT, ["merge-base", "--is-ancestor", head, "HEAD"])) {
+        console.log(`${repo}: its ${branch} is already merged into ${folder}/, skipped`)
+        // never leave a map file untracked
+        if (!gitOk(KIT, ["ls-files", "--error-unmatch", mapFile])) rmSync(mapFile, { force: true })
+        continue
+      }
       const own = git(KIT, ["rev-list", "--count", `${base}..${head}`]).trim()
       console.log(`  ${own} commits of its own, on ${base.slice(0, 10)} (the merged history's)`)
       // rename its imports first, as the merged history's were:  both sides then changed each import line alike
-      const report = renamer.renameRepo(clone, false)
+      // only the files its own commits changed:  main's files, old-layout fixtures included, stay as they are
+      const ownFiles = new Set(git(KIT, ["diff", "--name-only", "-z", base, head]).split("\0").filter(Boolean))
+      const report = renamer.renameRepo(clone, false, ownFiles)
       let tip = head
       if (report.names) {
         git(clone, ["add", "--update"])
@@ -391,13 +413,33 @@ function carryOn(): void {
             "then run carry-on again for the rest"
         )
       }
+      carried++
       git(KIT, ["add", mapFile])
-      commit(`repo-split P20:  carry on -- ${repo}'s branch ${branch}:  its commit map, ${relative(KIT, mapFile)}`)
+      if (staged())
+        commit(`repo-split P20:  carry on -- ${repo}'s branch ${branch}:  its commit map, ${relative(KIT, mapFile)}`)
     }
   } finally {
     rmSync(scratch, { recursive: true, force: true })
   }
-  if (!dryRun) imports()
+  if (!dryRun && carried) imports()
+}
+
+/**
+ * Does the old repo's `branch` hold a commit that isn't in `mapFile`, the commit map of the `main` P20 merged?
+ * - No such commit:  every one is already in the merged history, so there's nothing to carry on.
+ * - No map file:  assume it does.
+ */
+function ownCommits(source: string, branch: string, mapFile: string): boolean {
+  if (!existsSync(mapFile)) return true
+  const merged = new Set(
+    readFileSync(mapFile, "utf8")
+      .split("\n")
+      .map((line) => line.split(/\s+/)[0]!)
+  )
+  return git(source, ["rev-list", `refs/heads/${branch}`])
+    .split("\n")
+    .filter(Boolean)
+    .some((sha) => !merged.has(sha))
 }
 
 /**
