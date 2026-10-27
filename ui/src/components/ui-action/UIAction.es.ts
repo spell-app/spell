@@ -1,4 +1,5 @@
 import type { E } from "spell-ui/core"
+import { keyCapTextsEs } from "spell-ui/components/ui-keys/UIKeys.es"
 
 /**
  * `<ui-action>` in Spanish:  `<es-accion>`, with the names and texts only it uses (from `UIAction.en.ts`).
@@ -13,5 +14,5 @@ export const actionEs = {
   aka: ["acción", "orden", "elemento de menú", "botón de barra", "atajo de teclado"],
   attributes: { flag: "bandera", action: "accion", shortcut: "atajo" },
   parts: { title: "titulo", shortcut: "atajo" },
-  texts: { keyControl: "Ctrl", keyShift: "Mayús", keyAlt: "Alt", keySpace: "Espacio" }
+  texts: { ...keyCapTextsEs }
 } as const satisfies E.TagDictionary

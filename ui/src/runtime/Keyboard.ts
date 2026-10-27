@@ -42,11 +42,13 @@ export class Keyboard {
   }
 
   /**
-   * Parse `text` with this keyboard's platform (`Mod` -> Meta on Apple).
-   * - Exposed so components can match chords in their own handlers without importing `Chord`.
+   * Parse `text` with this keyboard's platform (`Mod` -> Meta on Apple), or the one `isApple` names.
+   * - Exposed so components can match chords in their own handlers, and draw them
+   *   (`<ui-keys>`, `<ui-action>`, whose `platform` may name another keyboard), without importing `Chord`.
+   * - Throws a `SyntaxError` on a shortcut it can't read (`Chord.parse()`).
    */
-  chord(text: string): Chord {
-    return Chord.parse(text, { isApple: this.isApple })
+  chord(text: string, { isApple = this.isApple }: { isApple?: boolean } = {}): Chord {
+    return Chord.parse(text, { isApple })
   }
 
   ////////////////

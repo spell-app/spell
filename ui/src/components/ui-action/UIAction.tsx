@@ -31,8 +31,9 @@ import actionCSS from "./UIAction.css?inline"
  * - Knows nothing of spell:  any object of that shape will do.
  *   Spell's runner hands it each item of `core.menuOf()`;  the `disabled`, `selected` and `icon` attributes still
  *   work without one.
- * - Its shortcut's key caps, as `<ui-keys>` draws them (`keyCapsFor()`):
+ * - Its shortcut's key caps, read and drawn as `<ui-keys>`' are (`keyCapsFor()`):
  *   `mod` is ⌘ on a Mac and Ctrl elsewhere;  `meta` is the Meta key itself.
+ *   Plain caps, as a menu shows them, where `<ui-keys>` draws boxes.
  ****************/
 export class UIAction extends UIItem {
   // the item's names under the action's tag, and its own:  TypeScript only knows the item's literals
@@ -133,19 +134,22 @@ export class UIAction extends UIItem {
   /**
    * The key caps of `shortcut` as a template writes it:  `mod+shift+Z` is `⌘ ⇧ Z` on a Mac, `Ctrl Shift Z`
    * elsewhere.
-   * - Read and drawn as `<ui-keys>` reads and draws them (`UIKeys.keysOf()`, `UIKeys.capOf()`):
+   * - Read as every shortcut is (`UI.keyboard.chord()`), drawn from `<ui-keys>`' caps (`UIKeys.capsOf()`):
    *   `mod` is command on a Mac and control elsewhere;  `meta` the Meta key (⌘ on a Mac);
    *   `ctrl`, `alt` (Option) and `shift` those keys.
    * - Off a Mac, the words are the page's language (Ctrl, Shift, Alt), and so is `space`'s.
+   * - A shortcut it can't read draws no caps, and warns.
    */
   keyCapsFor(shortcut: string): string[] {
     const isApple = UI.browser.isApple
-    return UIKeys.keysOf(shortcut.trim()).map((key) => {
-      const name = UIKeys.nameOf(key)
-      const text = name === "space" || !isApple ? WORD_TEXTS[name] : undefined
+    try {
+      const chord = UI.keyboard.chord(shortcut, { isApple })
       // its vocabulary adds these texts to the item's, which TypeScript knows
-      return text ? this.translationForKey(text as never) : UIKeys.capOf(key, isApple)
-    })
+      return UIKeys.capsOf(chord, isApple, (word) => this.translationForKey(word as never))
+    } catch (error) {
+      E.Warnings.warn("<ui-action>", `can't read the shortcut ${JSON.stringify(shortcut)}`, error)
+      return []
+    }
   }
 
   /** A part of the action's own (its vocabulary adds them to the item's, which TypeScript knows). */
@@ -181,12 +185,3 @@ export type ActionToDraw = {
 
 /** Class word and part of the key caps' box. */
 const SHORTCUT = "shortcut"
-
-/** The keys whose caps are words in the page's language (off a Mac;  `space` everywhere), by `UIKeys.nameOf()`. */
-const WORD_TEXTS: Readonly<Record<string, "keyControl" | "keyShift" | "keyAlt" | "keySpace">> = {
-  mod: "keyControl",
-  ctrl: "keyControl",
-  shift: "keyShift",
-  alt: "keyAlt",
-  space: "keySpace"
-}

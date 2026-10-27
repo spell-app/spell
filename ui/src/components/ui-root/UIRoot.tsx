@@ -50,7 +50,7 @@ import rootCSS from "./UIRoot.css?inline"
  *   - `emoji`:  a name set
  *   - a change redraws the icons / emoji inside (`E.RootSettings.generation`)
  * - Theme, size, box:  `:state(light | dark)`, `:state(box)`, `:state(fixed)` in `UIRoot.css`;
- *   width, height and the subtree's `--ui-scale` in the root's own sheet (`RootBox`).
+ *   width, height and the subtree's `--ui-scale` in the root's own `:host` rule (`RootBox`, `hostLayout`).
  * - `stack-with`:  the subtree's `--ui-stack-with` token (also in `RootBox`),
  *   which every stacking element without a `stack-with` of its own follows (`UIT.STACK_WITH_TOKEN`).
  * - Static server render (`spell-ui/static`):  nothing loads and nothing is hidden;
@@ -192,19 +192,13 @@ export class UIRoot<V extends E.ComponentVocabulary = RootVocabulary> extends E.
     return this.isBox || this.isFixed
   }
 
-  /** The root's own sheet. */
-  private readonly rootBox = new RootBox({ root: this.domElement.renderRoot })
-
-  /** The root's own declarations (`RootBox`):  width, height, `--ui-scale`, `--ui-stack-with`. */
+  /**
+   * The root's own `:host` rule (`RootBox`):  width, height, `--ui-scale`, `--ui-stack-with`.
+   * - `UIComponent` writes it into the root's own sheet;  the server wrapper's inline style is the same.
+   */
   @E.derived
-  get boxCSS(): string {
+  protected get hostLayout(): string {
     return RootBox.css({ width: this.width, height: this.height, size: this.size, stackWith: this.stackWith })
-  }
-
-  /** Keep the root's own sheet current. */
-  @E.onChange("boxCSS")
-  protected onBoxCSSChanged(css: string) {
-    this.rootBox.set(css)
   }
 
   ////////////////
@@ -273,7 +267,7 @@ export class UIRoot<V extends E.ComponentVocabulary = RootVocabulary> extends E.
 
   /** The server wrapper's inline style:  `RootBox`'s declarations, or `display: contents` when not a box. */
   private get serverStyle(): string | undefined {
-    const declarations = [this.scrolls ? "" : SERVER_CONTENTS, this.boxCSS].filter(Boolean)
+    const declarations = [this.scrolls ? "" : SERVER_CONTENTS, this.hostLayout].filter(Boolean)
     return declarations.join("; ") || undefined
   }
 

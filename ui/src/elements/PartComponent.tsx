@@ -16,8 +16,8 @@ import partsCSS from "spell-ui/components/ui-parts/UIParts.css?inline"
  *   climbing the flat tree with a barrier at every non-part component,
  *   and keeps `:state(in-<owner>)` on the DOM element.
  * - Markup:  `<div class="<noun> [keyOnly ...]" part="<noun>"><slot></slot></div>`.
- *   - Subclasses change the tag (`rootTag`:  `<a>` for `href`, `<time>`, `<span>`),
- *     the link / time attributes and the content.
+ *   - Subclasses change the tag (`rootTag`:  `<a>` for `link`, `<time>`, `<span>`), the time attribute and the content.
+ *   - An `<a>` root goes where the element's link goes (`UIComponent.linkTo`, `linkTarget`).
  *   - `rootClass` is the class grammar (`[keyOnly ...] <noun>`, no `ui`).
  * - `--_ui-part`:  `UIParts.css` declares it on the ROOT from the noun class, never on the DOM element --
  *   a DOM element declaring it would be what its own root's `@container style(--_ui-part: summary)` queries,
@@ -43,8 +43,8 @@ export abstract class PartComponent<V extends E.ComponentVocabulary = E.Componen
         component={this.rootTag}
         class={this.rootClass}
         part={this.partForName(this.vocabulary.noun as E.PartName<V>)}
-        href={this.rootHref}
-        target={this.rootTarget}
+        href={this.rootTag === "a" ? this.linkTo : undefined}
+        target={this.rootTag === "a" ? this.linkTarget : undefined}
         datetime={this.rootDatetime}
         tabindex={this.rootTabIndex}
       >
@@ -55,20 +55,10 @@ export abstract class PartComponent<V extends E.ComponentVocabulary = E.Componen
 
   /**
    * Root element name;  default `div`.  Tracked.
-   * - Named for the ROOT:  `tag` / `href` / `target` are the vocabulary's attribute getters (`this.href`).
+   * - Named for the ROOT:  `tag` would be a vocabulary's attribute getter.
    */
   protected get rootTag(): string {
     return "div"
-  }
-
-  /** `href` of a link root.  Tracked. */
-  protected get rootHref(): string | undefined {
-    return undefined
-  }
-
-  /** `target` of a link root.  Tracked. */
-  protected get rootTarget(): string | undefined {
-    return undefined
   }
 
   /** `datetime` of a `<time>` root.  Tracked. */

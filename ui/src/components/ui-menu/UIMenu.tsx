@@ -661,9 +661,6 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
   /** The menubar root, while rendered. */
   private bar: HTMLElement | undefined
 
-  /** A refresh of the roving set is queued. */
-  private refreshIsQueued = false
-
   /** SIDE EFFECT:  a roving tabindex over the item DOM elements while this is a menubar;  returns its stop. */
   @E.onChange("isMenubar", "orientation")
   protected onMenubarChanged(isMenubar: boolean, orientation: E.RovingOrientation) {
@@ -696,19 +693,22 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
   }
 
   /**
-   * Re-apply the roving `tabindex`es once, after the item set may have changed (restarting before any focus);
-   * a `shrinkable` menu fits again.
+   * Re-apply the roving `tabindex`es once after Solid's update, however often asked,
+   * after the item set may have changed (restarting before any focus);  a `shrinkable` menu fits again.
    */
+  private readonly rovingRefresh = new E.Queued({ when: E.afterSolidUpdate, run: () => this.refreshRoving() })
+
+  /** Queue `refreshRoving()`. */
   private queueRefresh() {
-    if (this.refreshIsQueued) return
-    this.refreshIsQueued = true
-    E.afterSolidUpdate(() => {
-      this.refreshIsQueued = false
-      this.titleFit?.update()
-      if (!this.rovingTabindex) return
-      if (this.domElement.matches(":focus-within")) this.rovingTabindex.refresh()
-      else this.startRoving(this.orientation)
-    })
+    this.rovingRefresh.ask()
+  }
+
+  /** The item set may have changed:  fit a `shrinkable` menu again, and re-apply the roving `tabindex`es. */
+  private refreshRoving() {
+    this.titleFit?.update()
+    if (!this.rovingTabindex) return
+    if (this.domElement.matches(":focus-within")) this.rovingTabindex.refresh()
+    else this.startRoving(this.orientation)
   }
 
   /**

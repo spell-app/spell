@@ -6,7 +6,7 @@ import { formVocabulary } from "./UIForm.en"
 import { FormBinding } from "./FormBinding"
 import { FormFields } from "./FormFields"
 import type { DOMFieldElement } from "./UIField"
-import { ERROR, FIELD_SELECTOR, INFO, SUCCESS, WARNING, type Field } from "./UIForm.types"
+import { ERROR, FIELD_SELECTOR, FormStateFlags, type Field } from "./UIForm.types"
 
 import formCSS from "./UIForm.css?inline"
 
@@ -187,28 +187,9 @@ export class UIForm extends E.UIComponent<typeof formVocabulary> {
     return this.lastCheckFailed ? ERROR : this.state
   }
 
-  /** `:state(error)`:  the state shown is `error`. */
-  @E.cssState("error")
-  get isError(): boolean {
-    return this.shownState === ERROR
-  }
-
-  /** `:state(info)`:  the state shown is `info`. */
-  @E.cssState("info")
-  get isInfo(): boolean {
-    return this.shownState === INFO
-  }
-
-  /** `:state(success)`:  the state shown is `success`. */
-  @E.cssState("success")
-  get isSuccess(): boolean {
-    return this.shownState === SUCCESS
-  }
-
-  /** `:state(warning)`:  the state shown is `warning`. */
-  @E.cssState("warning")
-  get isWarning(): boolean {
-    return this.shownState === WARNING
+  /** `:state(error)`, `:state(info)` ...:  the state shown. */
+  protected cssStates() {
+    return FormStateFlags.of(this.shownState)
   }
 
   /** `:state(changed)`:  `apply="on save"` holds edits, not saved yet. */

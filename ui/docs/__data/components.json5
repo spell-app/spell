@@ -804,6 +804,36 @@
           "description": "The Alt key's cap, away from a Mac."
         },
         {
+          "key": "keyMeta",
+          "text": "Meta",
+          "description": "The Meta key's cap, away from a Mac."
+        },
+        {
+          "key": "keyEnter",
+          "text": "Enter",
+          "description": "The Enter key's cap, away from a Mac."
+        },
+        {
+          "key": "keyEscape",
+          "text": "Esc",
+          "description": "The Escape key's cap, away from a Mac."
+        },
+        {
+          "key": "keyTab",
+          "text": "Tab",
+          "description": "The Tab key's cap, away from a Mac."
+        },
+        {
+          "key": "keyBackspace",
+          "text": "Backspace",
+          "description": "The Backspace key's cap, away from a Mac."
+        },
+        {
+          "key": "keyDelete",
+          "text": "Del",
+          "description": "The Delete key's cap, away from a Mac."
+        },
+        {
           "key": "keySpace",
           "text": "Space",
           "description": "The space bar's cap."
@@ -14537,6 +14567,56 @@
           "key": "or",
           "text": "or",
           "description": "Between two shortcuts, as a screen reader says them."
+        },
+        {
+          "key": "keyControl",
+          "text": "Ctrl",
+          "description": "The Control key's cap, away from a Mac."
+        },
+        {
+          "key": "keyShift",
+          "text": "Shift",
+          "description": "The Shift key's cap, away from a Mac."
+        },
+        {
+          "key": "keyAlt",
+          "text": "Alt",
+          "description": "The Alt key's cap, away from a Mac."
+        },
+        {
+          "key": "keyMeta",
+          "text": "Meta",
+          "description": "The Meta key's cap, away from a Mac."
+        },
+        {
+          "key": "keyEnter",
+          "text": "Enter",
+          "description": "The Enter key's cap, away from a Mac."
+        },
+        {
+          "key": "keyEscape",
+          "text": "Esc",
+          "description": "The Escape key's cap, away from a Mac."
+        },
+        {
+          "key": "keyTab",
+          "text": "Tab",
+          "description": "The Tab key's cap, away from a Mac."
+        },
+        {
+          "key": "keyBackspace",
+          "text": "Backspace",
+          "description": "The Backspace key's cap, away from a Mac."
+        },
+        {
+          "key": "keyDelete",
+          "text": "Del",
+          "description": "The Delete key's cap, away from a Mac."
+        },
+        {
+          "key": "keySpace",
+          "text": "Space",
+          "description": "The space bar's cap."
         }
       ],
       "mainTag": "ui-keys",
@@ -16872,7 +16952,7 @@
         {
           "name": "dismissible",
           "kind": "boolean",
-          "description": "Shows a close button;  clicking it dispatches `ui-closing`, then hides the message."
+          "description": "Shows a close button;  clicking it dispatches `ui-closing`, then hides the message (`ui-closed`)."
         },
         {
           "name": "disabled",
@@ -16992,6 +17072,11 @@
           "detail": "{ originalEvent?: Event }",
           "cancelable": true,
           "description": "The close button of a `dismissible` message was activated.  Unless cancelled the element sets `hidden` on itself (it never removes itself)."
+        },
+        {
+          "name": "ui-closed",
+          "detail": "{}",
+          "description": "Closed by its close button:  the element is `hidden` now."
         }
       ],
       "parts": [

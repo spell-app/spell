@@ -49,8 +49,8 @@ export class TitleFit {
   /** Stops the fonts' listener. */
   private fonts: AbortController | undefined
 
-  /** Cancels a queued refit. */
-  private cancelQueued: (() => void) | undefined
+  /** `refit()` just before the next paint, once however often `update()` asks. */
+  private readonly refits = new E.Queued({ when: E.beforeNextPaint, run: () => this.refit() })
 
   ////////////////
   // ## Starting and stopping
@@ -73,18 +73,12 @@ export class TitleFit {
 
   /** Refit just before the next paint, once whatever changed has drawn. */
   update(): void {
-    if (!this.resizes) return
-    this.cancelQueued?.()
-    this.cancelQueued = E.beforeNextPaint(() => {
-      this.cancelQueued = undefined
-      this.refit()
-    })
+    if (this.resizes) this.refits.ask()
   }
 
   /** Stop watching, and take its look away:  every title whole again. */
   stop(): void {
-    this.cancelQueued?.()
-    this.cancelQueued = undefined
+    this.refits.cancel()
     this.resizes?.disconnect()
     this.resizes = undefined
     this.watched.clear()

@@ -1,13 +1,15 @@
-import { UI, UIT } from "spell-ui/core"
+import { E, UI } from "spell-ui/core"
 
 /****************
  * ### `TableRows`
- * A table made of `<ui-row>`s and `<ui-cell>`s, read as `TableSort` reads a native one (epic `ui-gaps` P7):
- * its rows, header cells, columns, and reordering its body rows (`client-sort`).  Plain DOM, no state.
+ * How a table made of `<ui-row>`s and `<ui-cell>`s is read (epic `ui-gaps` P7):  its shape for `TableSort`'s walk
+ * (`TableShape`:  the class itself is it), and the rows-mode grid's own questions (its rows, its column count).
+ * - Plain DOM, no state.
  * - Rows are the table's own children;  cells, each row's.
  *   Tags by their CANONICAL name (`UI.vocabulary.canonicalTagFor()`), so a translated page's `<es-fila>` counts.
  * - A row is a header row with `header`, a footer row with `footer`;  every other row is the body.
- * - Columns count `span`s, as `TableSort` counts `colspan`s;  cells never span rows.
+ * - Every cell of a header row is a header;  columns count `span`s, as a native table's count `colspan`s;
+ *   cells never span rows.
  * - STATIC and instance-free on purpose:  it holds no state, as `TableSort` doesn't.
  ****************/
 export class TableRows {
@@ -23,18 +25,17 @@ export class TableRows {
 
   /** Is `row` a header row? */
   static isHeaderRow(row: Element): boolean {
-    return TableRows.isOn(TableRows.value(row, HEADER))
+    return TableRows.isOn(row, HEADER)
   }
 
   /** Is `row` a footer row? */
   static isFooterRow(row: Element): boolean {
-    return TableRows.isOn(TableRows.value(row, FOOTER))
+    return TableRows.isOn(row, FOOTER)
   }
 
-  /** Columns `cell` covers:  its `span`, at least 1. */
+  /** Columns `cell` covers:  its `span`, a whole number, at least 1. */
   static span(cell: Element): number {
-    const span = Math.floor(Number(TableRows.value(cell, SPAN)))
-    return Number.isFinite(span) && span > 1 ? span : 1
+    return TableRows.spanOf(TableRows.value(cell, SPAN))
   }
 
   /** Columns of `table`:  the widest row's spans added up;  at least 1. */
@@ -47,73 +48,43 @@ export class TableRows {
     return widest
   }
 
-  /** Every header cell of `table`'s header rows, row by row. */
-  static headers(table: Element): Element[] {
-    return TableRows.rows(table)
-      .filter((row) => TableRows.isHeaderRow(row))
-      .flatMap((row) => TableRows.cells(row))
+  ////////////////
+  // ## Its shape, for `TableSort`
+  ////////////////
+
+  /** The header rows of `table`, top first. */
+  static headerRows(table: Element): Element[] {
+    return TableRows.rows(table).filter((row) => TableRows.isHeaderRow(row))
   }
 
-  /**
-   * The header cell of `table` that `target` is in, or `undefined`.
-   * - Only `table`'s own header rows:  a table nested in a cell doesn't count.
-   */
-  static header(table: Element, target: EventTarget | null): Element | undefined {
-    for (let element = target instanceof Element ? target : null; element && element !== table;) {
-      const row = element.parentElement
-      if (row?.parentElement === table && TableRows.is(element, CELL) && TableRows.is(row, ROW))
-        return TableRows.isHeaderRow(row) ? element : undefined
-      element = row
-    }
-    return undefined
+  /** The body rows, one group:  every row but the header and footer rows. */
+  static bodies(table: Element): Element[][] {
+    return [TableRows.rows(table).filter((row) => !TableRows.isHeaderRow(row) && !TableRows.isFooterRow(row))]
   }
 
-  /** Column index of `cell` in its row, counting the `span`s before it. */
-  static column(cell: Element): number {
-    let column = 0
-    for (let previous = cell.previousElementSibling; previous; previous = previous.previousElementSibling) {
-      if (TableRows.is(previous, CELL)) column += TableRows.span(previous)
-    }
-    return column
+  /** Every cell of a header row is a header. */
+  static isHeader(_cell: Element): boolean {
+    return true
   }
 
-  /** The header for `column`:  the lowest header row's cell covering it (the most specific), if any. */
-  static headerAt(table: Element, column: number): Element | undefined {
-    const rows = TableRows.rows(table)
-      .filter((row) => TableRows.isHeaderRow(row))
-      .reverse()
-    for (const row of rows) {
-      const cell = TableRows.cellAt(row, column)
-      if (cell) return cell
-    }
-    return undefined
-  }
-
-  /** `row`'s cell covering `column`, if any. */
-  static cellAt(row: Element, column: number): Element | undefined {
-    let start = 0
-    for (const cell of TableRows.cells(row)) {
-      const span = TableRows.span(cell)
-      if (column < start + span) return cell
-      start += span
-    }
-    return undefined
-  }
-
-  /**
-   * Reorder `table`'s body rows by the text of their cell in `column` (`TableSort.compare()`).
-   * - SIDE EFFECT:  moves row elements, only when the order changes;  header rows stay first, footer rows last.
-   * - Rows without that cell sort last, in their order.
-   */
-  static sortRows(table: Element, column: number, direction: UIT.TableSortDirection, compare: Compare) {
-    const sign = direction === "descending" ? -1 : 1
-    const body = TableRows.rows(table).filter((row) => !TableRows.isHeaderRow(row) && !TableRows.isFooterRow(row))
-    const texts = new Map(body.map((row) => [row, TableRows.cellAt(row, column)?.textContent?.trim()]))
-    const sorted = [...body].sort((a, b) => compare(texts.get(a), texts.get(b), sign))
-    if (sorted.every((row, index) => row === body[index])) return
+  /** Put the body rows back, sorted:  before the first footer row, header rows staying first. */
+  static place(table: Element, sorted: Element[]) {
     const footer = TableRows.rows(table).find((row) => TableRows.isFooterRow(row))
     for (const row of sorted) table.insertBefore(row, footer ?? null)
   }
+
+  /**
+   * A span from what a `span` or `colspan` attribute says (`"2"`, `2`):  a whole number, at least 1.
+   * - Static:  a native table's `colspan` (`TableSort`) and `<ui-cell>`'s own read through it too.
+   */
+  static spanOf(value: unknown): number {
+    const span = Math.floor(Number(value))
+    return Number.isFinite(span) && span > 1 ? span : 1
+  }
+
+  ////////////////
+  // ## Reading the elements
+  ////////////////
 
   /**
    * Is `element` the canonical `tag` (or its translation on this page)?
@@ -139,14 +110,12 @@ export class TableRows {
     return element.getAttribute(name) ?? undefined
   }
 
-  /** A boolean attribute's value, or its text before the element upgrades (`""`, `"true"`), is on. */
-  private static isOn(value: unknown): boolean {
-    return value === true || value === "" || value === "true" || value === "yes"
+  /** Is boolean attribute `name` of `element` on:  its value, or its text before the element upgrades (`""`, `"true"`)? */
+  private static isOn(element: Element, name: string): boolean {
+    const value = TableRows.value(element, name)
+    return E.Converters.boolean(typeof value === "boolean" || typeof value === "string" ? value : undefined, name)
   }
 }
-
-/** How two cell texts order (`TableSort.compare()`), handed in:  this file never imports `TableSort`. */
-type Compare = (a: unknown, b: unknown, sign: number) => number
 
 /** The row tag. */
 const ROW = "ui-row"

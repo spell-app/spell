@@ -86,22 +86,6 @@ export class UITab extends E.UIComponent<typeof tabVocabulary> {
   }
 
   ////////////////
-  // ## Parent
-  ////////////////
-
-  /** `parent`:  written elsewhere on the page, it joins the `<ui-tabs>` with that id (`ParentLink`). */
-  private readonly parentLink = new E.ParentLink({
-    domElement: this.domElement,
-    attribute: this.elementDefinition.localAttribute("parent")
-  })
-
-  /** Connected with a `parent`:  join that container;  the cleanup stops waiting for it. */
-  @E.onChange("isConnected", "parent")
-  protected onParentChanged(isConnected: boolean, parent: string | undefined) {
-    return isConnected ? this.parentLink.follow(parent) : undefined
-  }
-
-  ////////////////
   // ## Selection
   ////////////////
 

@@ -1,4 +1,4 @@
-import { soon, Warnings } from "spell-ui/util"
+import { Queued, soon, Warnings } from "spell-ui/util"
 import * as UIT from "spell-ui/components/components.types"
 
 import {
@@ -129,8 +129,13 @@ class VisibilityWatch {
   private previous?: VisibilityCalculations
   /** element top at the last check, for `direction` */
   private lastTop?: number
-  /** a check is queued, see `checkSoon()` */
-  private isCheckQueued = false
+  /** ONE check for this task, however many observers report the crossing (`checkSoon()`) */
+  private readonly checks = new Queued({
+    when: soon,
+    run: () => {
+      if (this.observers.length) this.check()
+    }
+  })
   /** stops watching the screen size */
   private readonly unwatchSize: () => void
 
@@ -155,6 +160,7 @@ class VisibilityWatch {
   /** Stop:  observers and size watching. */
   dispose() {
     for (const observer of this.observers.splice(0)) observer.disconnect()
+    this.checks.cancel()
     this.unwatchSize()
   }
 
@@ -185,12 +191,7 @@ class VisibilityWatch {
 
   /** Queue ONE check for this task, however many observers report the crossing. */
   private checkSoon() {
-    if (this.isCheckQueued) return
-    this.isCheckQueued = true
-    soon(() => {
-      this.isCheckQueued = false
-      if (this.observers.length) this.check()
-    })
+    this.checks.ask()
   }
 
   ////////////////

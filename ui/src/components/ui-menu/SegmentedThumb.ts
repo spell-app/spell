@@ -32,8 +32,8 @@ export class SegmentedThumb {
   /** The chosen box the observer watches too. */
   private watchedBox: HTMLElement | undefined
 
-  /** Cancels a queued `update()`. */
-  private cancelQueued: (() => void) | undefined
+  /** `place()` just before the next paint, once however often `update()` asks. */
+  private readonly placing = new E.Queued({ when: E.beforeNextPaint, run: () => this.place() })
 
   /**
    * Draw the thumb, and follow sizes.
@@ -49,17 +49,12 @@ export class SegmentedThumb {
 
   /** Move the thumb to the chosen option, just before the next paint (once the option has redrawn). */
   update(): void {
-    this.cancelQueued?.()
-    this.cancelQueued = E.beforeNextPaint(() => {
-      this.cancelQueued = undefined
-      this.place()
-    })
+    this.placing.ask()
   }
 
   /** Take the thumb down:  the options draw their own fill again. */
   stop(): void {
-    this.cancelQueued?.()
-    this.cancelQueued = undefined
+    this.placing.cancel()
     this.resizes?.disconnect()
     this.resizes = undefined
     this.watchedBox = undefined

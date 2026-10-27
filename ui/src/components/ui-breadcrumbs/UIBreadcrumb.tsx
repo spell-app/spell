@@ -35,7 +35,7 @@ export class UIBreadcrumb extends E.UIComponent<typeof breadcrumbVocabulary> {
       <>
         <span class={DIVIDER} part={this.partForName("divider")} aria-hidden="true" />
         <Show when={this.link && !this.selected} fallback={this.plainSection()}>
-          <a class={this.rootClass} part={this.partForName("section")} href={this.link} target={this.target}>
+          <a class={this.rootClass} part={this.partForName("section")} href={this.linkTo} target={this.linkTarget}>
             <slot />
           </a>
         </Show>

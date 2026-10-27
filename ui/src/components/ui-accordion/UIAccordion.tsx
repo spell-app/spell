@@ -153,7 +153,7 @@ export class UIAccordion extends E.UIComponent<typeof accordionVocabulary> {
    *   as the native `<summary>` would.
    */
   private onTitleClick(index: number, event: MouseEvent) {
-    if (UIT.TitleControls.isClicked(event, "summary")) return
+    if (E.OwnControls.isClicked(event, { before: "summary" })) return
     event.preventDefault()
     this.toggle(index, event)
   }

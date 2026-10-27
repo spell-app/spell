@@ -23,8 +23,8 @@ import messageCSS from "./UIMessage.css?inline"
  *   reading the owner tokens `UIMessage.css` declares on the inner box.
  *   `define()` registers it as their owner;  nothing to do here.
  *
- * - Dismissing:  the close button sends the cancelable `ui-closing`.
- *   - Unless it's cancelled, the element sets `hidden` on ITSELF.
+ * - Dismissing (`disclosure`, as the nag and the toast close):  the close button sends the cancelable `ui-closing`.
+ *   - Unless it's cancelled, the element sets `hidden` on ITSELF, then sends `ui-closed`.
  *   - It never removes itself:  a framework that drew the node still owns it.
  *
  * - No role:  a message inserted to announce something gets `role="status"` or `alert` from the page.
@@ -42,10 +42,33 @@ export class UIMessage extends E.UIComponent<typeof messageVocabulary> {
   /** The glyph of the `icon` shorthand. */
   readonly iconGlyph = new E.IconGlyph({ owner: this, name: () => this.icon })
 
-  /** The glyph of the close button. */
-  readonly closeGlyph = new E.IconGlyph({
+  /**
+   * Shown until its close button closes it:  the cancelable `ui-closing`, then `hidden` on the DOM element and
+   * `ui-closed`.
+   * - Open means not `hidden`:  the page shows it again by taking `hidden` off.
+   */
+  readonly disclosure = new E.Disclosure({
+    component: this,
+    kept: {
+      isOpen: () => !this.domElement.hidden,
+      setOpen: (open) => {
+        this.domElement.hidden = !open
+      }
+    },
+    detail: (_open, originalEvent): UIT.MessageDismissDetail => ({ originalEvent }),
+    afterDetail: () => ({}),
+    onChange: (open) => {
+      if (!open) this.disclosure.sendAfter(false)
+    }
+  })
+
+  /** The close button of a `dismissible` message. */
+  readonly closeButton = new E.CloseButton({
     owner: this,
-    name: () => (this.dismissible ? UIT.CLOSE_ICON : undefined)
+    shows: () => !!this.dismissible,
+    label: () => this.translationForKey("dismiss"),
+    part: this.partForName("close"),
+    onClick: (event) => this.disclosure.close(event)
   })
 
   /** Has an icon (shorthand or `icon` slot)? */
@@ -78,29 +101,9 @@ export class UIMessage extends E.UIComponent<typeof messageVocabulary> {
           </Show>
           <slot />
         </div>
-        <Show when={this.dismissible}>
-          <button
-            type="button"
-            class={UIT.CLOSE_CLASS}
-            part={this.partForName("close")}
-            aria-label={this.translationForKey("dismiss")}
-            onClick={this.onDismiss}
-          >
-            {this.closeGlyph.svg}
-          </button>
-        </Show>
+        {this.closeButton.draw()}
       </div>
     )
-  }
-
-  ////////////////
-  // ## Behaviour
-  ////////////////
-
-  /** The close button:  announce, then hide, unless a handler cancelled. */
-  private readonly onDismiss = (event: MouseEvent) => {
-    const detail: UIT.MessageDismissDetail = { originalEvent: event }
-    if (this.send("ui-closing", detail)) this.domElement.hidden = true
   }
 }
 /** The vocabulary's attribute getters, typed (see "Attributes" in `UIComponent`). */

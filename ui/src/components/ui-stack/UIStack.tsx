@@ -13,7 +13,8 @@ import stackCSS from "./UIStack.css?inline"
  *   `direction="horizontal"` a row, `wrap` one that wraps.
  * - No look:  no padding, border or colour.  For a drawing, which holds no `<div>` to put `.ui-stack` on.
  * - The shadow root is a bare slot:  the children are the DOM element's flex items.
- * - Its attributes become one `:host` rule of its own (`hostLayout`), so the page's own `style` stays the author's.
+ * - Its attributes become one `:host` rule of its own (`hostLayout`, written by `UIComponent`),
+ *   so the page's own `style` stays the author's.
  * - Nothing focusable:  no `delegatesFocus`.
  ****************/
 export class UIStack extends E.UIComponent<typeof stackVocabulary> {
@@ -30,7 +31,7 @@ export class UIStack extends E.UIComponent<typeof stackVocabulary> {
 
   /** Its `:host` rule:  direction, wrap, spacing, alignment, width. */
   @E.derived
-  get hostLayout(): string {
+  protected get hostLayout(): string {
     const rules = [`gap: ${SPACING[this.spacing as keyof typeof SPACING] ?? SPACING.md}`]
     if (this.isHorizontal) rules.push("flex-direction: row", "align-items: center")
     if (this.wrap) rules.push("flex-wrap: wrap")
@@ -39,16 +40,11 @@ export class UIStack extends E.UIComponent<typeof stackVocabulary> {
     const justify = JUSTIFY[this.justify as keyof typeof JUSTIFY]
     if (justify) rules.push(`justify-content: ${justify}`)
     if (this.fluid) rules.push("inline-size: 100%")
-    return `:host { ${rules.join(";  ")} }`
+    return rules.join(";  ")
   }
 
   render(): JSX.Element {
-    return (
-      <>
-        <style>{this.hostLayout}</style>
-        <slot />
-      </>
-    )
+    return <slot />
   }
 }
 

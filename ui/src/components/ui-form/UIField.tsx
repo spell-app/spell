@@ -3,7 +3,7 @@ import type { JSX } from "@solidjs/web"
 
 import { E, UIT } from "spell-ui/core"
 import { fieldVocabulary } from "./UIField.en"
-import { ERROR, INFO, SUCCESS, WARNING } from "./UIForm.types"
+import { ERROR, FormStateFlags } from "./UIForm.types"
 
 import formCSS from "./UIForm.css?inline"
 import fieldCSS from "./UIField.css?inline"
@@ -177,28 +177,9 @@ export class UIField extends E.UIComponent<typeof fieldVocabulary> {
     return this.errors.length ? ERROR : this.state
   }
 
-  /** `:state(error)`:  the state shown is `error`. */
-  @E.cssState("error")
-  get isError(): boolean {
-    return this.shownState === ERROR
-  }
-
-  /** `:state(info)`:  the state shown is `info`. */
-  @E.cssState("info")
-  get isInfo(): boolean {
-    return this.shownState === INFO
-  }
-
-  /** `:state(success)`:  the state shown is `success`. */
-  @E.cssState("success")
-  get isSuccess(): boolean {
-    return this.shownState === SUCCESS
-  }
-
-  /** `:state(warning)`:  the state shown is `warning`. */
-  @E.cssState("warning")
-  get isWarning(): boolean {
-    return this.shownState === WARNING
+  /** `:state(error)`, `:state(info)` ...:  the state shown. */
+  protected cssStates() {
+    return FormStateFlags.of(this.shownState)
   }
 
   /** `:state(mixed)`:  the things being edited disagree (`mixed`). */

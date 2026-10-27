@@ -3,12 +3,13 @@
  * The shape is `E.ComponentVocabulary` (`spell-ui/vocabulary`).
  * - Built ON the item's:  the same attributes, slots and states, so a menu or toolbar draws it as one of its items
  *   (the same noun, `item`).
- * - Its own:  the `action` it draws (a property), its `shortcut` and the key caps that show it, and the names of
- *   the keys that aren't letters.
+ * - Its own:  the `action` it draws (a property), its `shortcut` and the key caps that show it, and the words of
+ *   the caps with no symbol:  `<ui-keys>`' (`keyCapTexts`), as it draws its caps through `<ui-keys>`' table.
  */
 
 import type { E } from "spell-ui/core"
 import { itemVocabulary } from "spell-ui/components/ui-item/UIItem.en"
+import { keyCapTexts } from "spell-ui/components/ui-keys/UIKeys.en"
 
 /****************
  * ### `actionVocabulary`
@@ -47,10 +48,5 @@ export const actionVocabulary = {
     ...itemVocabulary.parts,
     { name: "shortcut", description: "The key caps of its shortcut, at the end:  a `<kbd>` each." }
   ],
-  texts: [
-    { key: "keyControl", text: "Ctrl", description: "The Control key's cap, away from a Mac." },
-    { key: "keyShift", text: "Shift", description: "The Shift key's cap, away from a Mac." },
-    { key: "keyAlt", text: "Alt", description: "The Alt key's cap, away from a Mac." },
-    { key: "keySpace", text: "Space", description: "The space bar's cap." }
-  ]
+  texts: [...keyCapTexts]
 } as const satisfies E.ComponentVocabulary

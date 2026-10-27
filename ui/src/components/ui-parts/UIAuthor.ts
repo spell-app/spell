@@ -14,14 +14,6 @@ export class UIAuthor extends E.PartComponent<typeof authorVocabulary> {
   protected get rootTag(): string {
     return this.link ? "a" : "span"
   }
-
-  protected get rootHref(): string | undefined {
-    return this.link
-  }
-
-  protected get rootTarget(): string | undefined {
-    return this.link ? this.target : undefined
-  }
 }
 
 /** The vocabulary's attribute getters, typed (see "Attributes" in `UIComponent`). */

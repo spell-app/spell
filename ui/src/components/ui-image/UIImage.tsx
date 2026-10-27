@@ -68,8 +68,8 @@ export class UIImage extends E.UIComponent<typeof imageVocabulary> {
         <a
           class={this.rootClass}
           part={this.partForName("image")}
-          href={this.disabled ? undefined : this.link}
-          target={this.sharedTarget}
+          href={this.linkTo}
+          target={this.linkTarget}
           aria-disabled={this.disabled ? "true" : undefined}
           onClick={this.onZoomClick}
         >

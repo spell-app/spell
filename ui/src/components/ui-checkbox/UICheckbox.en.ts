@@ -4,8 +4,8 @@
  * - Pure data:  node imports it (`yarn site:data`, `yarn gen:root`), so `spell-ui/core` for types only.
  * - Class words come out through `ClassBuilder`, in Fomantic's grammar:
  *   `<ui-checkbox appearance="toggle" size="large" padding="none">` => `ui large toggle fitted checkbox`;
- *   a `<ui-radio>` is `ui radio checkbox` (the element adds `radio` unless its `type` is `slider` / `toggle`).
- * - `type` is `kind: "valueOnly"`:  it emits its value alone, right after the colour, as Fomantic writes it.
+ *   a `<ui-radio>` is `ui radio checkbox` (the element adds `radio` unless its `appearance` is `slider` / `toggle`).
+ * - `appearance` is `kind: "valueOnly"`:  it emits its value alone, right after the colour, as Fomantic writes it.
  * - Chosen state:  `selected` is canonical (`AGENTS.md`);  `checked` is accepted as another name for it:
  *   the DOM element's `checked` PROPERTY reads and writes `selected`, and a `checked` ATTRIBUTE in markup selects it.
  *   The DOM element's class, `DOMCheckElement`, owns that name:  it is not a vocabulary attribute.

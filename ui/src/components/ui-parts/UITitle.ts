@@ -13,14 +13,6 @@ export class UITitle extends E.PartComponent<typeof titleVocabulary> {
   protected get rootTag(): string {
     return this.link ? "a" : "div"
   }
-
-  protected get rootHref(): string | undefined {
-    return this.link
-  }
-
-  protected get rootTarget(): string | undefined {
-    return this.link ? this.sharedTarget : undefined
-  }
 }
 
 /** The vocabulary's attribute getters, typed (see "Attributes" in `UIComponent`). */

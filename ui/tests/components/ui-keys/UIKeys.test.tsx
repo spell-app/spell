@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vite-plus/test"
+import { describe, expect, it, onTestFinished, vi } from "vite-plus/test"
 
 import { expectAccessible } from "spell/test-helpers/A11y"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
@@ -39,6 +39,21 @@ describe("<ui-keys>", () => {
     const { caps, spoken } = await keys(`shortcut="shift+alt+up escape" platform="apple"`)
     expect(caps).toEqual([["⇧", "⌥", "↑"], ["esc"]])
     expect(spoken).toBe("Shift Option ↑, or esc")
+  })
+
+  it("reads a shortcut as `UI.keyboard` does:  the plus key, its keys in the order written, a key as written", async () => {
+    expect((await keys(`shortcut="mod++" platform="other"`)).caps).toEqual([["Ctrl", "+"]])
+    expect((await keys(`shortcut="shift+mod+PageUp" platform="other"`)).caps).toEqual([["Shift", "Ctrl", "PageUp"]])
+  })
+
+  it("draws nothing for a shortcut it can't read, and warns", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
+    onTestFinished(() => warn.mockRestore())
+    const { caps } = await keys(`shortcut="hyper+K mod+S" platform="other"`)
+    expect({ caps, warned: warn.mock.calls.some(([message]) => String(message).includes("hyper+K")) }).toEqual({
+      caps: [["Ctrl", "S"]],
+      warned: true
+    })
   })
 
   it("is accessible:  the caps hidden, the whole named", async () => {

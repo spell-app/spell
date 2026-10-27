@@ -353,8 +353,8 @@ export class UIItem extends E.UIComponent<typeof itemVocabulary> implements E.Co
         component={this.rootTag}
         class={this.rootClass}
         part={this.partForName("item")}
-        href={this.rootTag === "a" && !this.isDisabled ? this.link : undefined}
-        target={this.rootTag === "a" ? this.target : undefined}
+        href={this.rootTag === "a" ? this.linkTo : undefined}
+        target={this.rootTag === "a" ? this.linkTarget : undefined}
         type={this.rootTag === "button" ? "button" : undefined}
         role={this.kind === UIT.ITEM ? this.itemContext?.role : undefined}
         disabled={isDisabledButton() && !this.itemContext?.role ? true : undefined}

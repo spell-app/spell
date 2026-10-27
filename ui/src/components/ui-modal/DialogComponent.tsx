@@ -317,10 +317,13 @@ export abstract class DialogComponent<
   // ## Buttons
   ////////////////
 
-  /** Glyph of the close icon. */
-  readonly closeGlyph = new E.IconGlyph({
+  /** The close icon, while `closable`. */
+  readonly closeButton = new E.CloseButton({
     owner: this,
-    name: () => (this.closable ? UIT.CLOSE_ICON : undefined)
+    shows: () => !!this.closable,
+    label: () => this.closeText,
+    part: this.dialogPart(UIT.CLOSE),
+    onClick: (event) => this.onCloseIcon(event)
   })
 
   /**
@@ -442,17 +445,7 @@ export abstract class DialogComponent<
           </div>
         </Show>
         <slot />
-        <Show when={this.closable}>
-          <button
-            type="button"
-            class={UIT.CLOSE_CLASS}
-            part={this.dialogPart(UIT.CLOSE)}
-            aria-label={this.closeText}
-            onClick={this.onCloseIcon}
-          >
-            {this.closeGlyph.svg}
-          </button>
-        </Show>
+        {this.closeButton.draw()}
       </dialog>
     )
   }
@@ -471,22 +464,16 @@ export abstract class DialogComponent<
   /**
    * The approve / deny element `event` activated, with which it is;  `undefined` for none.
    * - The innermost light-DOM element on its path (in `domElement`'s tree)
-   *   matching `UIT.ModalActionSelectors`, up to `domElement`.
+   *   matching `UIT.ModalActionSelectors`, up to `domElement` (`UIT.ModalActions`, the toast's walk too).
    */
-  private static actionFor(event: Event, domElement: Element): [DialogAction, Element] | undefined {
-    const scope = domElement.getRootNode()
-    for (const target of event.composedPath()) {
-      if (target === domElement) return undefined
-      if (!(target instanceof Element) || target.getRootNode() !== scope) continue
-      if (target.matches(UIT.ModalActionSelectors.approve)) return ["approve", target]
-      if (target.matches(UIT.ModalActionSelectors.deny)) return ["deny", target]
+  private static actionFor(event: Event, domElement: Element): [UIT.ModalAction, Element] | undefined {
+    for (const target of UIT.ModalActions.lightPath(event, domElement)) {
+      const action = UIT.ModalActions.of(target)
+      if (action) return [action, target]
     }
     return undefined
   }
 }
-
-/** What an activated element inside a dialog does:  `approve` or `deny` it (`UIT.ModalActionSelectors`). */
-type DialogAction = keyof typeof UIT.ModalActionSelectors
 
 /** The attribute of the close icon (and of Fomantic's `closable: false`). */
 const CLOSABLE = "closable"

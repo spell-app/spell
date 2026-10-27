@@ -1,7 +1,7 @@
 /*
  * The style sheet of `<ui-video>` and `<ui-audio>`:  the browser's own players, as wide as their box allows.
  * - Shadow markup:  `<video class="ui video" part="video">` (or `<audio class="ui audio" part="audio">`).
- * - A video is a block, never wider than its container;  `ratio` is its own `aspect-ratio` (`hostLayout`).
+ * - A video is a block, never wider than its container;  `ratio` is its own `aspect-ratio`, on the `<video>` itself.
  * - An audio without `controls` draws nothing (`:state(silent)`):  a sound the page plays.
  */
 

@@ -46,20 +46,23 @@ export type FieldApply = { mode: "immediately" } | { mode: "delayed"; delay: num
 // ## Form states
 ////////////////
 
-// Each is also the state the DOM element of a form, field or fields carries for it
-// (`:state(error)` ...;  `UIT.FormStates`).
+// Each of `UIT.FormStates` is also the state the DOM element of a form, field or fields carries for it
+// (`:state(error)` ...;  `FormStateFlags`).
 
 /** The validation state:  failed validation shows it over the author's `state`. */
 export const ERROR = "error"
 
-/** The `info` state. */
-export const INFO = "info"
-
-/** The `success` state. */
-export const SUCCESS = "success"
-
-/** The `warning` state. */
-export const WARNING = "warning"
+/** The form states as `:state()`s:  `<ui-form>`, `<ui-fields>` and `<ui-field>` each show one. */
+export class FormStateFlags {
+  /**
+   * Every form state, only `shown` on:  `{ error: true, info: false, success: false, warning: false }`.
+   * - What each component's `cssStates()` hands `UIComponent`;  each works out its own `shownState`.
+   * - Static:  pure.
+   */
+  static of(shown: UIT.FormState | undefined): Record<UIT.FormState, boolean> {
+    return Object.fromEntries(UIT.FormStates.map((state) => [state, state === shown])) as Record<UIT.FormState, boolean>
+  }
+}
 
 ////////////////
 // ## Fields

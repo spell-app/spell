@@ -623,6 +623,7 @@ and hands the framework its runtime, words and styles as its core loads.
 | `ClassBuilder` | attributes to Fomantic's class words:  `<ui-button size="small" color="primary">` → `ui small primary button` |
 | `Validator`, `MenuOptions` | form rules;  the options of dropdowns, selects and searches |
 | `IconGlyph`, `RootSettings` | one icon, drawn from the packs of the root it's in;  what each `<ui-root>` sets for what's inside |
+| `CloseButton` | the close button of a box that closes:  a message, a toast, a nag, a dialog |
 | `SpellUISettings` | what Spell UI hands the kit's element framework as it loads:  the runtime, the words, the styles |
 
 - Every family imports these through two entries:

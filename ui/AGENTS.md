@@ -125,15 +125,15 @@ Two words for the two objects behind every tag (epic `wwod-spell-ui`, P15):
   on `spell/element`'s half ([the kit's element AGENTS.md](../src/element/AGENTS.md)).
   - the kit's element's:  `UIComponent`, `DOMElement`, `ElementDefinition`, `Reactive`, `Cell`, `SlotContent`,
     `PartContext`, `OwnerContext`, `HotDefinitions`
-  - library-neutral:  `ClassBuilder`, `Validator`, `MenuOptions`, `Shorthand`, `NativeFallback`,
-    `ParentLink` (the `parent` attribute:  an element joining the container with that id)
+  - library-neutral:  `ClassBuilder`, `Validator`, `MenuOptions`, `Shorthand`, `NativeFallback`
+    (the `parent` attribute's `ParentLink` is the kit's `spell/element`'s since epic `coherence` P21)
   - on Solid:
     - `FormComponent` + `DOMFormControl` (form controls)
     - `PopoverPanel`:  the panel a control opens under itself (dropdown, calendar, search, icon picker,
       a shrinkable menu's overflow), a `Disclosure` (the kit's `spell/element`) with the popover,
       its `UI.overlays` entry and its anchor on top;  in `core`, as a menu has no value
     - `PartComponent`:  the generic content parts' component, styled by their owner
-    - `IconGlyph`
+    - `IconGlyph`;  `CloseButton`, the close button of a box that closes (message, toast, nag, dialog)
     - `LoadableComponent` + `DOMLoadableElement`:  the base of the elements that show a text file
       (`source`, inline text, loading / error look, `save()`)
     - `LoadableBody` + `DOMLoadableBodyElement`:  a section's body, loaded from `source` the first time it opens

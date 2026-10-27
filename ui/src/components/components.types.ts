@@ -688,6 +688,36 @@ export const ModalActionSelectors = {
   deny: `.deny, .cancel, .negative, [color="negative"], [negative]:not([negative="false"], [negative="no"])`
 } as const
 
+/** One of `ModalActionSelectors`:  `approve` or `deny`. */
+export type ModalAction = keyof typeof ModalActionSelectors
+
+/**
+ * Which element a click inside a `<ui-modal>` or `<ui-toast>` acted through (`ModalActionSelectors`):
+ * the dialog's and the toast's ONE walk.
+ */
+export class ModalActions {
+  /** How `element` acts:  `approve`, `deny`, or neither (`undefined`). */
+  static of(element: Element): ModalAction | undefined {
+    if (element.matches(ModalActionSelectors.approve)) return "approve"
+    if (element.matches(ModalActionSelectors.deny)) return "deny"
+    return undefined
+  }
+
+  /**
+   * The light-DOM elements `event` went through inside `host`, innermost first, up to `host` (not included):
+   * the elements of `host`'s own tree on its composed path.
+   */
+  static *lightPath(event: Event, host: Element): Generator<Element> {
+    const scope = host.getRootNode()
+    for (const target of event.composedPath()) {
+      if (target === host) return
+      // elements only:  the path ends in shadow roots, the document and the window, which can't `matches()`
+      const element = target as Partial<Element>
+      if (element.matches && element.getRootNode?.() === scope) yield target as Element
+    }
+  }
+}
+
 ////////////////
 // ## Select
 ////////////////
@@ -1305,31 +1335,6 @@ export type AccordionToggleDetail = {
   content?: Element
   /** the click / key event on the title;  none for a browser-made change (find-in-page) */
   originalEvent?: Event
-}
-
-/**
- * What acts on its own inside a title that folds (a `<ui-accordion>` panel's, a collapsible `<ui-section>`'s):
- * a click on one never folds it.
- */
-export const TITLE_CONTROLS = "a[href], button, input, select, textarea, label, [contenteditable], [tabindex]"
-
-/** Tells a click on a folding title from a click on a control inside it (`TITLE_CONTROLS`). */
-export class TitleControls {
-  /**
-   * Did `event` land on a control inside the title, before reaching its toggle (`toggle`, a selector:
-   * the accordion's `summary`, the section's fold button)?
-   * - Climbs `composedPath()`, so a control slotted into the title counts.
-   */
-  static isClicked(event: Event, toggle: string): boolean {
-    for (const target of event.composedPath()) {
-      // elements only:  the path ends in shadow roots, the document and the window, which can't `matches()`
-      const element = target as Partial<Element>
-      if (!element.matches) continue
-      if (element.matches(toggle)) return false
-      if (element.matches(TITLE_CONTROLS)) return true
-    }
-    return false
-  }
 }
 
 ////////////////

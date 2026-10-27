@@ -98,7 +98,7 @@ export const messageVocabulary = {
       name: "dismissible",
       group: "behaviour",
       kind: "boolean",
-      description: "Shows a close button;  clicking it dispatches `ui-closing`, then hides the message."
+      description: "Shows a close button;  clicking it dispatches `ui-closing`, then hides the message (`ui-closed`)."
     }
   ],
   events: [
@@ -109,7 +109,8 @@ export const messageVocabulary = {
       description:
         "The close button of a `dismissible` message was activated.  Unless cancelled the element sets `hidden` " +
         "on itself (it never removes itself)."
-    }
+    },
+    { name: "ui-closed", detail: "{}", description: "Closed by its close button:  the element is `hidden` now." }
   ],
   slots: [
     { name: "", description: "Content:  text, `<p>`s, a `<ul>` list, `<ui-header>` / `<ui-content>` parts." },

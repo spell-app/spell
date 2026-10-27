@@ -86,23 +86,21 @@ export class UITabs extends E.UIComponent<typeof tabsVocabulary> implements TabO
     return this.tabs.map((pane, index) => UITabs.componentOf(pane).value ?? String(index))
   }
 
-  /** A pane re-read is queued. */
-  private refreshIsQueued = false
-
   /** Read the panes again (a slot change, or a pane that upgraded late). */
   private refreshPanes() {
     this.panes = this.readPanes()
   }
 
-  /** Queue `refreshPanes()` once:  it writes a member, so never from the tracked scope that asked. */
+  /**
+   * `refreshPanes()` once after Solid's update, however often asked:
+   * it writes a member, so never from the tracked scope that asked.
+   */
+  private readonly paneRefresh = new E.Queued({ when: E.afterSolidUpdate, run: () => this.refreshPanes() })
+
+  /** Queue `refreshPanes()`. */
   private queueRefresh() {
     // a server render reads every pane before it renders, and writes nothing after
-    if (isServer || this.refreshIsQueued) return
-    this.refreshIsQueued = true
-    E.afterSolidUpdate(() => {
-      this.refreshIsQueued = false
-      this.refreshPanes()
-    })
+    if (!isServer) this.paneRefresh.ask()
   }
 
   /** The pane children, in order, upgraded or not. */

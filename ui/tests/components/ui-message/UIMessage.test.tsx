@@ -259,6 +259,15 @@ describe("<ui-message> dismiss", () => {
     expect(root.getBoundingClientRect().height).toBe(0)
   })
 
+  it("sends `ui-closed` once it's hidden, as every closable box does", async () => {
+    const { host, root } = await message(`<ui-message dismissible>x</ui-message>`)
+    const heard: string[] = []
+    host.addEventListener("ui-closing", () => heard.push(`closing:  hidden ${host.hidden}`))
+    host.addEventListener("ui-closed", () => heard.push(`closed:  hidden ${host.hidden}`))
+    root.querySelector("button")!.click()
+    expect(heard).toEqual(["closing:  hidden false", "closed:  hidden true"])
+  })
+
   it("stays visible when a handler cancels", async () => {
     const { host, root } = await message(`<ui-message dismissible>x</ui-message>`)
     host.addEventListener("ui-closing", (event) => event.preventDefault())

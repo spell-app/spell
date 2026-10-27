@@ -28,6 +28,13 @@ describe("CheckboxFallback", () => {
     await expectAccessible(host, AXE)
   })
 
+  it("reads its look as the component does:  `appearance`'s old name, `type`, reads nothing (ui-gaps Q28)", () => {
+    const host = Fixture.render<StubHost>(`<x-fb-checkbox type="toggle">Wifi</x-fb-checkbox>`)
+    const root = FallbackStub.shadow(host).firstElementChild!
+    const role = root.querySelector("input[part=control]")!.getAttribute("role")
+    expect({ classes: root.className, role }).toEqual({ classes: "ui checkbox", role: null })
+  })
+
   it("is still a form control:  value while chosen, validity, ui-changed", () => {
     const form = Fixture.render<HTMLFormElement>(
       `<form><x-fb-checkbox name="terms" value="yes" required>Terms</x-fb-checkbox></form>`

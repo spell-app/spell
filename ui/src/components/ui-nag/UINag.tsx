@@ -1,4 +1,3 @@
-import { Show } from "solid-js"
 import { isServer, type JSX } from "@solidjs/web"
 
 import { E, UI, UIT } from "spell-ui/core"
@@ -247,24 +246,20 @@ export class UINag extends E.UIComponent<Vocabulary> {
   // ## Rendering
   ////////////////
 
-  /** Glyph of the close icon. */
-  readonly closeGlyph = new E.IconGlyph({ owner: this, name: () => (this.closable ? UIT.CLOSE_ICON : undefined) })
+  /** The close icon, while `closable`. */
+  readonly closeButton = new E.CloseButton({
+    owner: this,
+    shows: () => !!this.closable,
+    label: () => this.translationForKey("close"),
+    part: this.partForName("close"),
+    onClick: (event) => this.onCloseIcon(event)
+  })
 
   render(): JSX.Element {
     return (
       <div ref={(element) => (this.root = element)} class={this.rootClass} part={this.partForName("nag")}>
         <slot />
-        <Show when={this.closable}>
-          <button
-            type="button"
-            class={UIT.CLOSE_CLASS}
-            part={this.partForName("close")}
-            aria-label={this.translationForKey("close")}
-            onClick={this.onCloseIcon}
-          >
-            {this.closeGlyph.svg}
-          </button>
-        </Show>
+        {this.closeButton.draw()}
       </div>
     )
   }

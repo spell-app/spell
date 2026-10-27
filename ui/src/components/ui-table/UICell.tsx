@@ -2,6 +2,7 @@ import type { JSX } from "@solidjs/web"
 
 import { E } from "spell-ui/core"
 import { cellVocabulary } from "./UICell.en"
+import { TableRows } from "./TableRows"
 
 /****************
  * ### `UICell`
@@ -14,8 +15,8 @@ import { cellVocabulary } from "./UICell.en"
  *   - `rowheader`:  a `header` cell in a body row
  *   - `cell`:  any other cell of a table;  nothing outside one
  *   - `span` sets `aria-colspan` too
- * - Its own layout (`span`, `align`, `vertical-align`) is a `:host` rule of its own, so the page's own `style`
- *   stays the author's.
+ * - Its own layout (`span`, `align`, `vertical-align`) is a `:host` rule of its own (`hostLayout`),
+ *   so the page's own `style` stays the author's.
  * - Which table it's in:  its OWNER (`PartContext`), climbing through its row (a part too).
  ****************/
 export class UICell extends E.UIComponent<typeof cellVocabulary> {
@@ -34,10 +35,9 @@ export class UICell extends E.UIComponent<typeof cellVocabulary> {
     return this.context.owner?.ownerNoun === TABLE
   }
 
-  /** Columns it covers:  `span`, a whole number, at least 1. */
+  /** Columns it covers:  `span`, a whole number, at least 1, as its table counts it (`TableRows.spanOf()`). */
   get columnSpan(): number {
-    const span = Math.floor(Number(this.span))
-    return Number.isFinite(span) && span > 1 ? span : 1
+    return TableRows.spanOf(this.span)
   }
 
   /**
@@ -61,22 +61,17 @@ export class UICell extends E.UIComponent<typeof cellVocabulary> {
 
   /** Its own `:host` layout:  the columns it spans, its alignment. */
   @E.derived
-  get hostLayout(): string {
+  protected get hostLayout(): string {
     const rules = [`grid-column: span ${this.columnSpan}`]
     const align = this.align === "justified" ? "justify" : this.align
     if (align) rules.push(`text-align: ${align}`)
     const vertical = this.verticalAlign
     if (vertical) rules.push(`align-self: ${VERTICAL[vertical as keyof typeof VERTICAL] ?? "stretch"}`)
-    return `:host { ${rules.join(";  ")} }`
+    return rules.join(";  ")
   }
 
   render(): JSX.Element {
-    return (
-      <>
-        <style>{this.hostLayout}</style>
-        <slot />
-      </>
-    )
+    return <slot />
   }
 }
 

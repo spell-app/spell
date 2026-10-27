@@ -27,6 +27,12 @@ describe("TableSort.header()", () => {
     expect(TableSort.header(table, inner!)).toBeUndefined()
     expect(TableSort.header(table, null)).toBeUndefined()
   })
+
+  test("a table nested in a header cell keeps its own clicks", () => {
+    const table = tableOf(`<thead><tr><th>Outer<table><thead><tr><th>Inner</th></tr></thead></table></th></tr></thead>`)
+    const inner = table.querySelectorAll("th")[1]!
+    expect(TableSort.header(table, inner)).toBeUndefined()
+  })
 })
 
 describe("TableSort.headers()", () => {
@@ -47,15 +53,17 @@ describe("TableSort.isSortable()", () => {
 
 describe("TableSort.column()", () => {
   test("counts the colspans before a cell", () => {
-    const [person, count] = TableSort.headers(tableOf(STRUCTURED))
-    expect([TableSort.column(person!), TableSort.column(count!)]).toEqual([0, 2])
+    const table = tableOf(STRUCTURED)
+    const [person, count] = TableSort.headers(table)
+    expect([TableSort.column(table, person!), TableSort.column(table, count!)]).toEqual([0, 2])
   })
 })
 
 describe("TableSort.cellAt()", () => {
   test("finds the cell covering a column;  nothing past the row's end", () => {
-    const row = tableOf(STRUCTURED).tHead!.rows[0]!
-    expect([0, 1, 2, 3].map((column) => TableSort.cellAt(row, column)?.textContent)).toEqual([
+    const table = tableOf(STRUCTURED)
+    const row = table.tHead!.rows[0]!
+    expect([0, 1, 2, 3].map((column) => TableSort.cellAt(table, row, column)?.textContent)).toEqual([
       "Person",
       "Person",
       "Count",
@@ -64,13 +72,12 @@ describe("TableSort.cellAt()", () => {
   })
 })
 
-describe("TableSort.headerAt() / staticHeaderAt()", () => {
-  test("answer the LOWEST header row's cell covering a column, the same with or without the table DOM API", () => {
+describe("TableSort.headerAt()", () => {
+  test("answers the LOWEST header row's cell covering a column", () => {
     const table = tableOf(STRUCTURED)
     const lowest = [0, 1, 2].map((column) => TableSort.headerAt(table, column)?.textContent)
     // a `rowspan` from the row above isn't counted:  column 2's lowest header is the top row's
     expect(lowest).toEqual(["First", "Last", "Count"])
-    expect([0, 1, 2].map((column) => TableSort.staticHeaderAt(table, column)?.textContent)).toEqual(lowest)
   })
 })
 

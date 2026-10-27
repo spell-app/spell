@@ -29,18 +29,13 @@ export class UITerms extends E.UIComponent<typeof termsVocabulary> {
   }
 
   /** Its `:host` rule:  the gaps `spacing` asks for. */
-  get hostLayout(): string {
+  protected get hostLayout(): string {
     const gap = SPACING[this.spacing as keyof typeof SPACING] ?? SPACING.md
-    return this.isHorizontal ? `:host { gap: ${gap} var(--ui-space-l) }` : `:host { row-gap: ${gap} }`
+    return this.isHorizontal ? `gap: ${gap} var(--ui-space-l)` : `row-gap: ${gap}`
   }
 
   render(): JSX.Element {
-    return (
-      <>
-        <style>{this.hostLayout}</style>
-        <slot />
-      </>
-    )
+    return <slot />
   }
 }
 

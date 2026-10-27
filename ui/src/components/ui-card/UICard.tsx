@@ -144,8 +144,8 @@ export class UICard extends E.UIComponent<typeof cardVocabulary> {
         component={this.rootTag}
         class={this.rootClass}
         part={this.partForName("card")}
-        href={isLink() && !this.disabled ? this.link : undefined}
-        target={isLink() ? this.target : undefined}
+        href={this.linkTo}
+        target={this.linkTarget}
         aria-disabled={isLink() && this.disabled ? "true" : undefined}
       >
         <Show when={this.rendersShorthand(UIT.IMAGE)}>

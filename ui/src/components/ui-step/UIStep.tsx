@@ -52,22 +52,6 @@ export class UIStep extends E.UIComponent<typeof stepVocabulary> {
   } satisfies Partial<E.ElementSetup>
 
   ////////////////
-  // ## Parent
-  ////////////////
-
-  /** `parent`:  written elsewhere on the page, it joins the `<ui-steps>` with that id (`ParentLink`). */
-  private readonly parentLink = new E.ParentLink({
-    domElement: this.domElement,
-    attribute: this.elementDefinition.localAttribute("parent")
-  })
-
-  /** Connected with a `parent`:  join that container;  the cleanup stops waiting for it. */
-  @E.onChange("isConnected", "parent")
-  protected onParentChanged(isConnected: boolean, parent: string | undefined) {
-    return isConnected ? this.parentLink.follow(parent) : undefined
-  }
-
-  ////////////////
   // ## State
   ////////////////
 
@@ -158,8 +142,8 @@ export class UIStep extends E.UIComponent<typeof stepVocabulary> {
         component={this.rootTag}
         class={this.rootClass}
         part={this.partForName("step")}
-        href={this.rootTag === "a" && !this.disabled ? this.link : undefined}
-        target={this.rootTag === "a" ? this.target : undefined}
+        href={this.linkTo}
+        target={this.linkTarget}
         type={this.rootTag === "button" ? "button" : undefined}
         disabled={this.rootTag === "button" && this.disabled ? true : undefined}
         aria-disabled={this.rootTag !== "button" && this.disabled ? "true" : undefined}

@@ -1,7 +1,7 @@
 import { Show } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
-import { E, UI } from "spell-ui/core"
+import { E } from "spell-ui/core"
 // the family barrel, not the leaf:
 // the lib build then imports `ui-menu.js` instead of splitting a shared chunk
 // (SIDE EFFECT:  defines `<ui-menu>` and `<ui-item>`, which a toolbar extends and holds)
@@ -94,18 +94,18 @@ export class UIToolbar extends UIMenu {
     if (!box) return
     // a shrinkable one fits its titles instead:  no keys, no fades
     const canScroll = !this.shrinkable
-    // a pixel of slack:  fractional widths leave the end a hair short
-    this.canScrollStart = canScroll && box.scrollLeft > 1
-    this.canScrollEnd = canScroll && box.scrollLeft + box.clientWidth < box.scrollWidth - 1
+    const { start, end } = E.scrollEnds(box)
+    this.canScrollStart = canScroll && start
+    this.canScrollEnd = canScroll && end
   }
 
-  /** Scroll by most of the box's width:  `-1` back, `1` on;  smoothly, unless the person asked for less motion. */
+  /**
+   * Scroll by most of the box's width:  `-1` back, `1` on;  smoothly, unless the person asked for less motion.
+   * - The kit's `scrollByRow()`, as the site header's keys scroll its tabs.
+   */
   @E.untracked
   scrollByPage(direction: -1 | 1) {
-    const box = this.box
-    if (!box) return
-    const behavior = UI.browser.isReducedMotion ? "instant" : "smooth"
-    box.scrollBy({ left: direction * box.clientWidth * PAGE_SHARE, behavior })
+    if (this.box) E.scrollByRow(this.box, direction)
   }
 
   ////////////////
@@ -192,9 +192,6 @@ const CHEVRON_START = "chevron left"
 
 /** The `›` button's icon. */
 const CHEVRON_END = "chevron right"
-
-/** How much of the box's width one click scrolls:  most of it, so the last item seen stays in sight. */
-const PAGE_SHARE = 0.8
 
 /** Class word of a toolbar with no items:  its menu box takes no room. */
 const EMPTY = "empty"

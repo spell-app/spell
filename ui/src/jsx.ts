@@ -17348,6 +17348,11 @@ export interface UIMessageEventMap {
    * - cancelable:  `preventDefault()` vetoes it
    */
   "ui-closing": CustomEvent<{ originalEvent?: Event }>
+  /**
+   * `ui-closed`:  Closed by its close button:  the element is `hidden` now.
+   * - `event.detail`:  `{}`
+   */
+  "ui-closed": CustomEvent<{}>
 }
 
 /** `<ui-message>`'s own attributes, from its vocabulary. */
@@ -17497,7 +17502,7 @@ export interface UIMessageAttributes {
    */
   "prop:heading"?: string
   /**
-   * Shows a close button;  clicking it dispatches `ui-closing`, then hides the message.
+   * Shows a close button;  clicking it dispatches `ui-closing`, then hides the message (`ui-closed`).
    * - takes:  flag (present / absent)
    */
   dismissible?: boolean | ""
@@ -17672,6 +17677,11 @@ export interface UIMessageAttributes {
    * - cancelable:  `preventDefault()` vetoes it
    */
   "on-ui-closing"?: (event: UIMessageEventMap["ui-closing"]) => void
+  /**
+   * `ui-closed`:  Closed by its close button:  the element is `hidden` now.
+   * - `event.detail`:  `{}`
+   */
+  "on-ui-closed"?: (event: UIMessageEventMap["ui-closed"]) => void
 }
 
 /** `<ui-message>` in JSX:  its own attributes, and HTML's global ones. */
@@ -36496,7 +36506,7 @@ declare module "@solidjs/web/types/jsx.js" {
        * - slots:
        *   - default:  Content:  text, `<p>`s, a `<ul>` list, `<ui-header>` / `<ui-content>` parts.
        *   - `icon`:  Icon, instead of the `icon` attribute;  shown large beside the content.
-       * - events:  `ui-closing`
+       * - events:  `ui-closing`, `ui-closed`
        */
       "ui-message": UIMessageJSXAttributes
       /**

@@ -206,8 +206,8 @@ export class UIButton extends E.UIComponent<typeof buttonVocabulary> {
           ref={(element) => (this.innerControl = element)}
           class={this.rootClass}
           part={this.partForName("button")}
-          href={this.isDisabled ? undefined : this.link}
-          target={this.target}
+          href={this.linkTo}
+          target={this.linkTarget}
           download={this.download}
           role={this.isDisabled ? "link" : undefined}
           aria-disabled={this.isDisabled ? "true" : undefined}

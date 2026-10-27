@@ -90,14 +90,11 @@ export class CheckboxFallback extends E.NativeFallback<typeof checkboxVocabulary
    */
   private static counter = 0
 
-  /** The `appearance` (`toggle`, `slider`), or `type`, its old name. */
+  /** The `appearance`:  `toggle`, `slider`. */
   private get look(): string | undefined {
-    return this.attr("appearance") ?? this.domElement.getAttribute(OLD_LOOK) ?? undefined
+    return this.attr("appearance")
   }
 }
-
-/** `appearance`'s old name on a checkbox or radio (epic `ui-gaps` P4). */
-const OLD_LOOK = "type"
 
 /**
  * What the fallback reads and writes of the DOM element (`DOMCheckElement`).

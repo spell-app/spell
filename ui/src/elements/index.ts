@@ -4,12 +4,11 @@
  *   - `ClassBuilder`, `Validator`, `MenuOptions`, `OwnerContext`, `Shorthand`
  *   - `NativeFallback`:  the base of the per-component `*.fallback.ts`, plain DOM when a render throws
  *   - `StickyWatch`:  reports and reserves room for a `position: sticky` box
- *   - `ParentLink`:  the `parent` attribute, an element joining the container with that id
  * - The Solid layer:
  *   - `DOMElement` / `DOMFormControl` (DOM element bases), `UIComponent` (the component base), `FormComponent`
  *   - `Reactive` (its reactive members' decorators)
  *   - `ElementDefinition` (vocabulary => attribute names and conversions)
- *   - `Cell`, `SlotContent`, `IconGlyph`, `ControlLabels`
+ *   - `Cell`, `SlotContent`, `IconGlyph`, `CloseButton`, `ControlLabels`
  *   - `PartContext` + `PartComponent` (owner context)
  *   - `RootSettings` (what a `<ui-root>` sets for its subtree)
  *   - `LoadableComponent` + `DOMLoadableElement` (elements showing a text file)
@@ -22,7 +21,8 @@
  *   the HMR plugin loads it into each component barrel (the kit's `src/element-tools/HotElements.ts`).
  * - NOTE: `ShadowEvents` (Solid's events kept from leaking out of shadow roots) is left out too:
  *   only `UIComponent` uses it, directly.
- * - NOTE: only `OwnerContext.find()`, `StickyWatch`, `ParentLink` and the Solid layer touch the DOM, and only when called.
+ * - NOTE: only `OwnerContext.find()`, `StickyWatch` and the Solid layer touch the DOM, and only when called.
+ * - NOTE: the `parent` attribute's `ParentLink` is the kit's (`spell/element`), wired by `UIComponent`.
  */
 
 export * from "./elements.types"
@@ -34,10 +34,10 @@ export * from "./HighlightedOption"
 export * from "./Shorthand"
 export * from "./NativeFallback"
 export * from "./StickyWatch"
-export * from "./ParentLink"
 export * from "./PartComponent"
 export * from "./RootSettings"
 export * from "./IconGlyph"
+export * from "./CloseButton"
 export * from "./ClipboardCopy"
 export * from "./DOMLoadableElement"
 export * from "./LoadableComponent"

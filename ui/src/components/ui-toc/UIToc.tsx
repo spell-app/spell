@@ -312,10 +312,10 @@ export class UIToc extends E.UIComponent<TocVocabulary> {
   // ## Following the page
   ////////////////
 
-  /** Cancels the frame scheduled for a pending scan / follow, if any. */
-  private cancelScheduledFrame?: () => void
+  /** The next frame's scan or follow (`onFrame()`), once however often asked. */
+  private readonly frame = new E.Queued({ when: E.beforeNextPaint, run: () => this.onFrame() })
 
-  /** What the scheduled frame does:  a rescan wins over a follow. */
+  /** What the queued frame does:  a rescan wins over a follow. */
   private queuedUpdate: TocUpdate | undefined
 
   /**
@@ -361,8 +361,8 @@ export class UIToc extends E.UIComponent<TocVocabulary> {
       view.removeEventListener("scroll", onScroll)
       view.removeEventListener("resize", onScroll)
       view.removeEventListener("hashchange", onHash)
-      this.cancelScheduledFrame?.()
-      this.cancelScheduledFrame = undefined
+      this.frame.cancel()
+      this.queuedUpdate = undefined
     }
   }
 
@@ -391,13 +391,11 @@ export class UIToc extends E.UIComponent<TocVocabulary> {
   private schedule(update: TocUpdate): void {
     if (update === "rescan") this.queuedUpdate = update
     else this.queuedUpdate ??= update
-    if (this.cancelScheduledFrame) return
-    this.cancelScheduledFrame = E.beforeNextPaint(() => this.onFrame())
+    this.frame.ask()
   }
 
-  /** The scheduled frame:  do what's queued. */
+  /** The queued frame:  do what's queued. */
   private onFrame(): void {
-    this.cancelScheduledFrame = undefined
     const update = this.queuedUpdate
     this.queuedUpdate = undefined
     if (update === "rescan") this.rescan()

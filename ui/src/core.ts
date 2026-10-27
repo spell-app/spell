@@ -5,8 +5,8 @@
  *   and each family entry holds only its own classes, sheet, vocabulary and fallback.
  * - Pulls in:
  *   - `spell/element`, whole:  the element bases every set's elements are written on (`UIComponent`, `DOMElement`,
- *     `ElementDefinition`, the `Reactive` decorators, `Cell`, `SlotContent`, `PartContext`, `OwnerContext`, timing,
- *     the vocabulary's types), so `E` holds all of them
+ *     `ElementDefinition`, the `Reactive` decorators, `Cell`, `SlotContent`, `PartContext`, `OwnerContext`,
+ *     `Disclosure`, `OwnControls`, `ParentLink`, timing, the vocabulary's types), so `E` holds all of them
  *   - `spell-ui/util`, `spell-ui/vocabulary` -- foundation JS (`proto`, `Warnings`, `ValueSets`, `Converters` ...)
  *   - `spell-ui/components/components.types` as the namespace `UIT` (`UIT.FLUID`, `UIT.ToggleCommands`, `UIT.SelectValue` ...)
  *   - from `spell-ui/elements`, what doesn't use Solid:
@@ -14,10 +14,10 @@
  *     - `ClassBuilder`, `Shorthand`
  *     - `NativeFallback` (the fallbacks' base)
  *     - `StickyWatch` (`<ui-sticky>` and `<ui-section sticky>`)
- *     - `ParentLink` (the `parent` attribute of `<ui-tab>`, `<ui-step>` and `<ui-section>`)
  *   - from `spell-ui/elements`, Spell UI's own on Solid:
  *     - `SpellUISettings`:  what Spell UI hands `spell/element` (a side effect, below)
  *     - `IconGlyph`, `PartComponent` (the generic content parts)
+ *     - `CloseButton`:  the close button of a box that closes (message, toast, nag, dialog)
  *     - `ClipboardCopy`:  a copy button's copy, then "Copied" for a moment
  *     - `PopoverPanel`:  the panel a control opens under itself (dropdown, calendar, search, icon picker, a
  *       shrinkable menu's overflow), a `Disclosure` with its popover, overlay entry and anchor
@@ -60,7 +60,6 @@ export * from "spell-ui/elements/ClassBuilder"
 export * from "spell-ui/elements/Shorthand"
 export * from "spell-ui/elements/NativeFallback"
 export * from "spell-ui/elements/StickyWatch"
-export * from "spell-ui/elements/ParentLink"
 export * from "spell-ui/runtime"
 export * from "spell-ui/icons"
 export * as UIT from "spell-ui/components/components.types"
@@ -68,6 +67,7 @@ export * as UIT from "spell-ui/components/components.types"
 export * from "spell-ui/elements/PartComponent"
 export * from "spell-ui/elements/RootSettings"
 export * from "spell-ui/elements/IconGlyph"
+export * from "spell-ui/elements/CloseButton"
 export * from "spell-ui/elements/ClipboardCopy"
 export * from "spell-ui/elements/PopoverPanel"
 export * from "spell-ui/elements/DOMLoadableElement"

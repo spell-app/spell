@@ -118,18 +118,6 @@ export class UISection extends E.UIComponent<SectionVocabulary> {
     return owner instanceof UISection ? owner : undefined
   }
 
-  /** `parent`:  written elsewhere on the page, it nests in the section (or group) with that id (`ParentLink`). */
-  private readonly parentLink = new E.ParentLink({
-    domElement: this.domElement,
-    attribute: this.elementDefinition.localAttribute("parent")
-  })
-
-  /** Connected with a `parent`:  join that container;  the cleanup stops waiting for it. */
-  @E.onChange("isConnected", "parent")
-  protected onParentChanged(isConnected: boolean, parent: string | undefined) {
-    return isConnected ? this.parentLink.follow(parent) : undefined
-  }
-
   /** Nearest `<ui-sections>` group's component, directly or through enclosing sections, or `undefined`. */
   get group(): UISections | undefined {
     const owner = this.context.ownerComponent<UISection | UISections>()
@@ -232,7 +220,7 @@ export class UISection extends E.UIComponent<SectionVocabulary> {
   /** A click on the toggle (Enter / Space on the button click it too). */
   private readonly onToggleClick = (event: MouseEvent) => {
     // a link or control inside a rich `slot="label"` title acts on its own, as in an accordion's title
-    if (UIT.TitleControls.isClicked(event, TOGGLE_BUTTON)) return
+    if (E.OwnControls.isClicked(event, { before: TOGGLE_BUTTON })) return
     this.toggle(event)
   }
 

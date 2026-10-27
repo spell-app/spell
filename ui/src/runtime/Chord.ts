@@ -5,11 +5,13 @@ import { Browser } from "./Browser"
  * One keyboard shortcut, e.g. `Mod+Shift+K`, `Escape`, `Alt+ArrowUp`, `?`.
  * - In the runtime's lazy chunk, with `Keyboard`;  imports only `Browser` (its platform sniff), so tests use it alone.
  * - Parse once with `Chord.parse()`, then test events with `matches()`.
+ * - Spell UI's ONE reading of a shortcut:  `UI.keyboard` matches with it, `<ui-keys>` and `<ui-action>` draw what
+ *   it reads (`UI.keyboard.chord()`:  its `modifiers` in the order written, then its key).
  * - Syntax:  modifiers then one key, joined by `+`, case-insensitive:
- *   - modifiers:  `Mod` (Meta on Apple, Ctrl elsewhere), `Ctrl` / `Control`, `Meta` / `Cmd` / `Command`,
- *     `Alt` / `Option`, `Shift`
+ *   - modifiers:  `Mod` / `Modifier` (Meta on Apple, Ctrl elsewhere), `Ctrl` / `Control`,
+ *     `Meta` / `Cmd` / `Command` (the Meta key itself), `Alt` / `Option`, `Shift`
  *   - key:  any `KeyboardEvent.key` (`ArrowDown`, `Enter`, `k`, `/`), plus aliases `Esc`, `Space`, `Up`,
- *     `Down`, `Left`, `Right`, `Del`, `Plus`;  a trailing `++` means the `+` key
+ *     `Down`, `Left`, `Right`, `Del`, `Return`, `Plus`;  a trailing `++`, or `+` alone, means the `+` key
  * - Modifiers match EXACTLY:  `Mod+K` does not fire for `Mod+Shift+K`.
  *   - Exception:  a symbol key without `Shift` in the chord ignores Shift, since `?` / `+` need it on most layouts.
  * - Letters and digits also match by `event.code` (`KeyK`, `Digit1`), so `Alt+K` still fires on macOS,
@@ -18,6 +20,10 @@ import { Browser } from "./Browser"
 export class Chord {
   /** normalized key:  lowercased, aliases resolved, e.g. `"k"`, `"arrowdown"`, `" "` */
   readonly key: string
+  /** the key as the shortcut wrote it, e.g. `"K"`, `"PageUp"`:  how a key cap shows a key it has no symbol for */
+  readonly keyText: string
+  /** the modifiers that must be down, in the order the shortcut wrote them (`Mod` already resolved) */
+  readonly modifiers: readonly ChordModifier[]
   /** Ctrl must be down */
   readonly ctrl: boolean
   /** Meta (Cmd / Windows key) must be down */
@@ -27,12 +33,14 @@ export class Chord {
   /** Shift must be down */
   readonly shift: boolean
 
-  constructor({ key, ctrl = false, meta = false, alt = false, shift = false }: ChordProps) {
+  constructor({ key, modifiers = [] }: ChordProps) {
     this.key = Chord.normalizeKey(key)
-    this.ctrl = ctrl
-    this.meta = meta
-    this.alt = alt
-    this.shift = shift
+    this.keyText = key
+    this.modifiers = modifiers
+    this.ctrl = modifiers.includes("ctrl")
+    this.meta = modifiers.includes("meta")
+    this.alt = modifiers.includes("alt")
+    this.shift = modifiers.includes("shift")
   }
 
   /** True when any of Ctrl / Meta / Alt is part of the chord -- such chords fire inside editable fields. */
@@ -82,22 +90,33 @@ export class Chord {
    *   not silently never firing.
    */
   static parse(text: string, { isApple = Browser.isApplePlatform() }: { isApple?: boolean } = {}): Chord {
-    const parts = text.endsWith("++") ? [...text.slice(0, -2).split("+"), "+"] : text.split("+")
+    const parts = Chord.partsOf(text.trim())
     const key = parts.pop()?.trim()
     if (!key) throw new SyntaxError(`Chord.parse():  no key in ${JSON.stringify(text)};  end it with one, e.g. "Mod+K"`)
-    const modifiers = { ctrl: false, meta: false, alt: false, shift: false }
+    const modifiers: ChordModifier[] = []
     for (const part of parts) {
-      const modifier = MODIFIER_ALIASES[part.trim().toLowerCase()]
-      if (!modifier) {
+      const word = MODIFIER_ALIASES[part.trim().toLowerCase()]
+      if (!word) {
         throw new SyntaxError(
           `Chord.parse():  unknown modifier ${JSON.stringify(part)} in ${JSON.stringify(text)};  ` +
             `use Mod, Ctrl, Meta, Alt or Shift`
         )
       }
-      if (modifier === "mod") modifiers[isApple ? "meta" : "ctrl"] = true
-      else modifiers[modifier] = true
+      const modifier = word === "mod" ? (isApple ? "meta" : "ctrl") : word
+      if (!modifiers.includes(modifier)) modifiers.push(modifier)
     }
-    return new Chord({ key, ...modifiers })
+    return new Chord({ key, modifiers })
+  }
+
+  /**
+   * `text`'s parts, the key last:  `"Mod+Shift+K"` => `["Mod", "Shift", "K"]`.
+   * - A trailing `++`, or `+` alone, is the `+` key:  `"Ctrl++"` => `["Ctrl", "+"]`.
+   * - STATIC:  pure, part of `parse()`.
+   */
+  private static partsOf(text: string): string[] {
+    if (text === "+") return [text]
+    if (text.endsWith("++")) return [...text.slice(0, -2).split("+"), "+"]
+    return text.split("+")
   }
 
   /**
@@ -113,21 +132,19 @@ export class Chord {
 
 /** Constructor props for `Chord`:  the key, and which modifiers must be down (default none). */
 export type ChordProps = {
-  /** any `KeyboardEvent.key`, or an alias (`Esc`, `Space` ...);  normalized by the constructor */
+  /** any `KeyboardEvent.key`, or an alias (`Esc`, `Space` ...), as written;  normalized by the constructor */
   key: string
-  /** Ctrl must be down */
-  ctrl?: boolean
-  /** Meta (Cmd / Windows key) must be down */
-  meta?: boolean
-  /** Alt (Option) must be down */
-  alt?: boolean
-  /** Shift must be down */
-  shift?: boolean
+  /** the modifiers that must be down, in the order written */
+  modifiers?: readonly ChordModifier[]
 }
 
+/** A key a chord holds down with its key:  `Mod` is already one of the first two. */
+export type ChordModifier = "ctrl" | "meta" | "alt" | "shift"
+
 /** Modifier words accepted by `Chord.parse()`, lowercased -> canonical. */
-const MODIFIER_ALIASES: Record<string, "mod" | "ctrl" | "meta" | "alt" | "shift" | undefined> = {
+const MODIFIER_ALIASES: Record<string, "mod" | ChordModifier | undefined> = {
   mod: "mod",
+  modifier: "mod",
   ctrl: "ctrl",
   control: "ctrl",
   meta: "meta",
@@ -148,5 +165,6 @@ const KEY_ALIASES: Record<string, string | undefined> = {
   left: "arrowleft",
   right: "arrowright",
   del: "delete",
+  return: "enter",
   plus: "+"
 }

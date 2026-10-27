@@ -171,8 +171,14 @@ export class UIToast extends E.UIComponent<Vocabulary> {
   /** Glyph of the icon:  the `icon` name, or the type's own for a bare `icon`. */
   readonly iconGlyph = new E.IconGlyph({ owner: this, name: () => this.iconName })
 
-  /** Glyph of the close icon. */
-  readonly closeGlyph = new E.IconGlyph({ owner: this, name: () => (this.closable ? UIT.CLOSE_ICON : undefined) })
+  /** The close icon, while `closable`. */
+  readonly closeButton = new E.CloseButton({
+    owner: this,
+    shows: () => !!this.closable,
+    label: () => this.translationForKey("close"),
+    part: this.partForName("close"),
+    onClick: (event) => this.onCloseIcon(event)
+  })
 
   /** Icon name:  `icon`, or the type's own for a bare `icon`;  `undefined` for none. */
   private get iconName(): string | undefined {
@@ -238,17 +244,7 @@ export class UIToast extends E.UIComponent<Vocabulary> {
           </Show>
           <slot />
         </div>
-        <Show when={this.closable}>
-          <button
-            type="button"
-            class={UIT.CLOSE_CLASS}
-            part={this.partForName("close")}
-            aria-label={this.translationForKey("close")}
-            onClick={this.onCloseIcon}
-          >
-            {this.closeGlyph.svg}
-          </button>
-        </Show>
+        {this.closeButton.draw()}
         <Show when={this.hasActions && !this.actionsAreAttached}>{this.actionsBox()}</Show>
       </div>
     )
@@ -571,7 +567,9 @@ export class UIToast extends E.UIComponent<Vocabulary> {
       this.close(kind, event)
       return
     }
-    if (!this.anyClickCloses || this.domElement.querySelector(FORM_CONTROLS) || this.landedOnClickable(event)) return
+    // a click on a control of its own inside is that control's (`E.OwnControls`)
+    if (!this.anyClickCloses || this.domElement.querySelector(FORM_CONTROLS)) return
+    if (E.OwnControls.isClicked(event, { upTo: this.domElement })) return
     this.close("click", event)
   }
 
@@ -585,29 +583,16 @@ export class UIToast extends E.UIComponent<Vocabulary> {
    * counted only inside a child slotted as `actions`.
    */
   private actionFor(event: Event): [ToastAction, Element] | undefined {
-    const scope = this.domElement.getRootNode()
     const slotName = this.slotForName(ACTIONS)
     let found: [ToastAction, Element] | undefined
-    for (const target of event.composedPath()) {
-      if (target === this.domElement) return undefined
-      if (!(target instanceof Element) || target.getRootNode() !== scope) continue
+    for (const target of UIT.ModalActions.lightPath(event, this.domElement)) {
       if (!found) {
-        if (target.matches(UIT.ModalActionSelectors.approve)) found = ["approve", target]
-        else if (target.matches(UIT.ModalActionSelectors.deny)) found = ["deny", target]
-        else if (UIToast.isButton(target)) found = ["action", target]
+        const action = UIT.ModalActions.of(target) ?? (UIToast.isButton(target) ? "action" : undefined)
+        if (action) found = [action, target]
       }
       if (target.parentElement === this.domElement) return target.slot === slotName ? found : undefined
     }
     return undefined
-  }
-
-  /** Did `event` land on something interactive inside the toast (`CLICKABLE`)? */
-  private landedOnClickable(event: Event): boolean {
-    for (const target of event.composedPath()) {
-      if (target === this.domElement) return false
-      if (target instanceof Element && target.matches(CLICKABLE)) return true
-    }
-    return false
   }
 
   /**
@@ -686,9 +671,6 @@ const ESSENTIAL = "essential"
 
 /** Buttons an action click can come from, besides `<ui-button>`s. */
 const BUTTONS = "button, a[href], [role=button], input[type=button], input[type=submit]"
-
-/** A click on one of these doesn't close a `close-on-click` toast (Fomantic's `selector.clickable`). */
-const CLICKABLE = "a, button, details, summary, label, input, select, textarea, [role=button], [tabindex]"
 
 /** Form controls that turn `close-on-click` off (Fomantic's `selector.input`). */
 const FORM_CONTROLS = "input:not([type=hidden]), textarea, select, button"

@@ -19704,7 +19704,7 @@
       "name": "ui-message",
       "description": {
         "kind": "markdown",
-        "value": "A message displays information that explains nearby content.\n\nAlso known as:  alert, callout, notice, banner, info box, error message.\n\n**Slots:**  default, `icon`\n\n**Events:**  `ui-closing`"
+        "value": "A message displays information that explains nearby content.\n\nAlso known as:  alert, callout, notice, banner, info box, error message.\n\n**Slots:**  default, `icon`\n\n**Events:**  `ui-closing`, `ui-closed`"
       },
       "attributes": [
         {
@@ -19911,7 +19911,7 @@
           "name": "dismissible",
           "description": {
             "kind": "markdown",
-            "value": "Shows a close button;  clicking it dispatches `ui-closing`, then hides the message.\n\nTakes:  flag (present / absent)"
+            "value": "Shows a close button;  clicking it dispatches `ui-closing`, then hides the message (`ui-closed`).\n\nTakes:  flag (present / absent)"
           }
         },
         {

@@ -17254,7 +17254,7 @@
             },
             {
               "name": "dismissible",
-              "description": "Shows a close button;  clicking it dispatches `ui-closing`, then hides the message.",
+              "description": "Shows a close button;  clicking it dispatches `ui-closing`, then hides the message (`ui-closed`).",
               "type": {
                 "text": "boolean"
               },
@@ -17340,6 +17340,13 @@
               "description": "The close button of a `dismissible` message was activated.  Unless cancelled the element sets `hidden` on itself (it never removes itself).  Cancelable:  `preventDefault()` vetoes it.",
               "type": {
                 "text": "CustomEvent<{ originalEvent?: Event }>"
+              }
+            },
+            {
+              "name": "ui-closed",
+              "description": "Closed by its close button:  the element is `hidden` now.",
+              "type": {
+                "text": "CustomEvent<{}>"
               }
             }
           ],

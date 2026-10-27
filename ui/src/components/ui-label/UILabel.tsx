@@ -116,8 +116,8 @@ export class UILabel extends E.UIComponent<typeof labelVocabulary> {
         component={this.link ? "a" : "span"}
         class={this.rootClass}
         part={this.partForName("label")}
-        href={this.disabled ? undefined : this.link}
-        target={this.link ? this.target : undefined}
+        href={this.linkTo}
+        target={this.linkTarget}
         aria-label={this.ariaLabel}
         aria-disabled={this.disabled && this.link ? "true" : undefined}
         role={this.ariaLabel && !this.link ? "img" : undefined}

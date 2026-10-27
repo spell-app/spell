@@ -6,10 +6,32 @@
  *   Ctrl S elsewhere.
  * - `mod` (or `modifier`) is ⌘ on a Mac and Ctrl elsewhere, as the runtime's `Chord` reads it;
  *   `meta` is the Meta key itself (Owen, 2026-10-25).
- * - The texts are what a screen reader says for each modifier:  the caps themselves are symbols.
+ * - The texts:  what a screen reader says for each modifier, and the words of the caps a keyboard prints no symbol
+ *   for (off a Mac:  Ctrl, Shift ...;  the space bar everywhere), `keyCapTexts`, which `<ui-action>` shares.
  */
 
 import type { E } from "spell-ui/core"
+
+/**
+ * The words of the key caps a keyboard prints no symbol for:  every modifier and named key off a Mac, the space bar
+ * everywhere (`UIKeys.capsOf()`).
+ * - Spread into the texts of both tags that draw caps, `<ui-keys>` and `<ui-action>`:  each translates its own.
+ */
+export const keyCapTexts = [
+  { key: "keyControl", text: "Ctrl", description: "The Control key's cap, away from a Mac." },
+  { key: "keyShift", text: "Shift", description: "The Shift key's cap, away from a Mac." },
+  { key: "keyAlt", text: "Alt", description: "The Alt key's cap, away from a Mac." },
+  { key: "keyMeta", text: "Meta", description: "The Meta key's cap, away from a Mac." },
+  { key: "keyEnter", text: "Enter", description: "The Enter key's cap, away from a Mac." },
+  { key: "keyEscape", text: "Esc", description: "The Escape key's cap, away from a Mac." },
+  { key: "keyTab", text: "Tab", description: "The Tab key's cap, away from a Mac." },
+  { key: "keyBackspace", text: "Backspace", description: "The Backspace key's cap, away from a Mac." },
+  { key: "keyDelete", text: "Del", description: "The Delete key's cap, away from a Mac." },
+  { key: "keySpace", text: "Space", description: "The space bar's cap." }
+] as const
+
+/** One of `keyCapTexts`' keys:  `keyShift`. */
+export type KeyCapText = (typeof keyCapTexts)[number]["key"]
 
 /****************
  * ### `keysVocabulary`
@@ -54,6 +76,7 @@ export const keysVocabulary = {
     { key: "alt", text: "Alt", description: "What a screen reader says for Alt." },
     { key: "shift", text: "Shift", description: "What a screen reader says for Shift." },
     { key: "meta", text: "Meta", description: "What a screen reader says for the Meta key, off a Mac." },
-    { key: "or", text: "or", description: "Between two shortcuts, as a screen reader says them." }
+    { key: "or", text: "or", description: "Between two shortcuts, as a screen reader says them." },
+    ...keyCapTexts
   ]
 } as const satisfies E.ComponentVocabulary

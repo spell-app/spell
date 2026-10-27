@@ -240,7 +240,7 @@ export class UITable extends E.UIComponent<typeof tableVocabulary> {
     const column = this.sortColumn
     const direction = this.effectiveSortDirection
     if (!this.sortable || column === undefined || !direction) return
-    TableSort.staticHeaderAt(table, column)?.setAttribute("aria-sort", direction)
+    TableSort.headerAt(table, column)?.setAttribute("aria-sort", direction)
   }
 
   ////////////////
@@ -459,7 +459,7 @@ export class UITable extends E.UIComponent<typeof tableVocabulary> {
    * - the sorted column's header gets `aria-sort`;  every other header in the `thead` loses it
    */
   private decorateHeaders({ table, isSortable, column, direction }: HeaderSort) {
-    const headers = table && isSortable ? this.headersOf(table) : []
+    const headers = table && isSortable ? TableSort.headers(table) : []
     const focusable = new Set(
       headers.filter((header) => TableSort.isSortable(header) && !header.querySelector("button"))
     )
@@ -474,14 +474,14 @@ export class UITable extends E.UIComponent<typeof tableVocabulary> {
       header.setAttribute("tabindex", "0")
       this.headersMadeFocusable.add(header)
     }
-    const sorted = table && isSortable && column !== undefined ? this.headerAt(table, column) : undefined
+    const sorted = table && isSortable && column !== undefined ? TableSort.headerAt(table, column) : undefined
     if (this.sortedHeader && this.sortedHeader !== sorted) this.sortedHeader.removeAttribute("aria-sort")
     for (const header of headers) if (header !== sorted) header.removeAttribute("aria-sort")
     if (sorted && direction) sorted.setAttribute("aria-sort", direction)
     this.sortedHeader = sorted
   }
 
-  /** `client-sort`:  reorder the author table's `tbody` rows by the sorted column's cell text. */
+  /** `client-sort`:  reorder the body rows (the author table's, or rows mode's) by the sorted column's cell text. */
   @E.onChange("authorTable", "isInRowsMode", "clientSort", "sortColumn", "effectiveSortDirection")
   protected onClientSortChanged(
     table: HTMLTableElement | undefined,
@@ -490,19 +490,8 @@ export class UITable extends E.UIComponent<typeof tableVocabulary> {
     column: number | undefined,
     direction: UIT.TableSortDirection | undefined
   ) {
-    if (!clientSort || column === undefined || !direction) return
-    if (table) TableSort.sortRows(table, column, direction)
-    else if (isInRowsMode) TableRows.sortRows(this.domElement, column, direction, TableSort.compare)
-  }
-
-  /** Header cells of `table`:  a native table's `thead` headers, or the header rows' cells. */
-  private headersOf(table: Element): Element[] {
-    return table instanceof HTMLTableElement ? TableSort.headers(table) : TableRows.headers(table)
-  }
-
-  /** The header for `column`, either kind of table. */
-  private headerAt(table: Element, column: number): Element | undefined {
-    return table instanceof HTMLTableElement ? TableSort.headerAt(table, column) : TableRows.headerAt(table, column)
+    const sorted = table ?? (isInRowsMode ? this.domElement : undefined)
+    if (clientSort && sorted && column !== undefined && direction) TableSort.sortRows(sorted, column, direction)
   }
 
   /** A click on (or inside) a sortable header sorts by it. */
@@ -527,8 +516,7 @@ export class UITable extends E.UIComponent<typeof tableVocabulary> {
   private sortableHeader(event: Event): Element | undefined {
     const table = this.sortTarget
     if (!table || !this.sortable) return undefined
-    const header =
-      table instanceof HTMLTableElement ? TableSort.header(table, event.target) : TableRows.header(table, event.target)
+    const header = TableSort.header(table, event.target)
     return header && TableSort.isSortable(header) ? header : undefined
   }
 
@@ -539,7 +527,9 @@ export class UITable extends E.UIComponent<typeof tableVocabulary> {
    */
   @E.untracked
   private requestSort(header: Element, originalEvent: Event) {
-    const column = header instanceof HTMLTableCellElement ? TableSort.column(header) : TableRows.column(header)
+    const table = this.sortTarget
+    if (!table) return
+    const column = TableSort.column(table, header)
     const current = this.sortColumn
     const direction: UIT.TableSortDirection =
       column === current && this.effectiveSortDirection === "ascending" ? "descending" : "ascending"

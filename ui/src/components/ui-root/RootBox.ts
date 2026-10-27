@@ -4,27 +4,17 @@ import { UIT } from "spell-ui/core"
 
 /****************
  * ### `RootBox`
- * One root's own sheet:
- * `:host { width; height; --ui-scale; --ui-stack-with }` from its `width`, `height`, `size` and `stack-with`.
- * - A constructed sheet adopted into the root's shadow (`UI.styles.adoptInto()` keeps sheets it didn't make),
+ * One root's own `:host` rule:
+ * `width; height; --ui-scale; --ui-stack-with` from its `width`, `height`, `size` and `stack-with`.
+ * - `UIRoot.hostLayout`:  `UIComponent` writes it into a sheet of the root's own, adopted into its shadow,
  *   not an inline `style`:  the DOM element's `style` attribute is the author's.  Not a custom state either:
  *   the token is read by style queries inside `@media`,
  *   which a `:state()` rule left stale in WebKit (`UIT.STACK_WITH_CLASS`).
  * - Lengths are checked with `CSS.supports()`, `stack-with` against its values, so an attribute can never inject
  *   other declarations;  a static server render (no `CSS` in node) checks lengths against `SERVER_LENGTH` instead.
- * - `css()` / `isBox()` are static:  pure, and the static server render needs them with no sheet to write.
+ * - STATIC and instance-free:  pure, and the static server render needs it with no sheet to write.
  ****************/
 export class RootBox {
-  /** Shadow root the sheet is adopted into:  STATIC for the box's life. */
-  private readonly root: ShadowRoot
-
-  /** Created on first use (never on the server). */
-  private sheet?: CSSStyleSheet
-
-  constructor({ root }: RootBoxProps) {
-    this.root = root
-  }
-
   /** The declarations for these values;  `""` when there's nothing to set. */
   static css({ width, height, size, stackWith }: RootBoxValues): string {
     const declarations = RootBox.lengths({ width, height }).map(([property, value]) => `${property}: ${value}`)
@@ -38,16 +28,6 @@ export class RootBox {
   /** A box (block, scrolling) when a width or height is set. */
   static isBox({ width, height }: Pick<RootBoxValues, "width" | "height">): boolean {
     return RootBox.lengths({ width, height }).length > 0
-  }
-
-  /** Apply `declarations` to the DOM element. */
-  set(declarations: string) {
-    if (!declarations && !this.sheet) return
-    if (!this.sheet) {
-      this.sheet = new CSSStyleSheet()
-      this.root.adoptedStyleSheets = [...this.root.adoptedStyleSheets, this.sheet]
-    }
-    this.sheet.replaceSync(declarations ? `:host { ${declarations} }` : "")
   }
 
   /** `[property, value]` for each of `width` / `height` that is a valid length (`window`:  the viewport's). */
@@ -68,12 +48,6 @@ export class RootBox {
     if (isServer) return SERVER_LENGTH.test(trimmed) ? trimmed : undefined
     return CSS.supports(property, trimmed) ? trimmed : undefined
   }
-}
-
-/** What a `RootBox` is made from. */
-export type RootBoxProps = {
-  /** The root's shadow root, where its sheet is adopted. */
-  root: ShadowRoot
 }
 
 /** A root's attributes the box is built from. */

@@ -3,6 +3,7 @@ import { Dynamic, type JSX } from "@solidjs/web"
 
 import { E, UIT } from "spell-ui/core"
 import { textVocabulary } from "./UIText.en"
+import type { UILink } from "./UILink"
 
 import textCSS from "./UIText.css?inline"
 
@@ -12,7 +13,8 @@ import textCSS from "./UIText.css?inline"
  *
  * - Its shadow DOM is one span, `<span class="ui … text" part="text">`, around a slot for the text.
  *   - With a `link`, that box is a real link instead, `<a href>`:  a link in running text (epic `ui-gaps` P3).
- *     `disabled` drops the link:  a span again.
+ *     `disabled` drops the link:  a span again (`UIComponent.linkTo`).
+ *     `<ui-link>` draws the same box (`inlineBox()`).
  *   - With `paragraph`, a `<p>` (epic `ui-gaps` P9):  a block, with the body's line height;
  *     a `link` is then an `<a>` inside it.
  * - Each `font` word written is drawn as its HTML element around the slot (`<strong>`, `<em>`, `<code>` ...),
@@ -32,35 +34,35 @@ export class UIText extends E.UIComponent<typeof textVocabulary> {
     cssStates: ["paragraph"]
   } satisfies Partial<E.ElementSetup>
 
-  /** Where it links:  `link`, unless `disabled`. */
-  get linkAddress(): string | undefined {
-    return this.disabled ? undefined : this.sharedLink
-  }
-
   render(): JSX.Element {
     return (
-      <Show
-        when={this.paragraph}
-        fallback={
-          <Dynamic
-            component={this.linkAddress ? "a" : "span"}
-            class={this.rootClass}
-            part={this.partForName("text")}
-            href={this.linkAddress}
-            target={(this.linkAddress && this.attributes.target) || undefined}
-          >
-            {UIText.styled(this.fontStates)}
-          </Dynamic>
-        }
-      >
+      <Show when={this.paragraph} fallback={UIText.inlineBox(this)}>
         <p class={this.rootClass} part={this.partForName("text")}>
-          <Show when={this.linkAddress} fallback={UIText.styled(this.fontStates)}>
-            <a href={this.linkAddress} target={this.attributes.target || undefined}>
+          <Show when={this.linkTo} fallback={UIText.styled(this.fontStates)}>
+            <a href={this.linkTo} target={this.linkTarget}>
               {UIText.styled(this.fontStates)}
             </a>
           </Show>
         </p>
       </Show>
+    )
+  }
+
+  /**
+   * The inline box:  a real link while it links (`linkTo`, `<a href>`), else a span, around its text.
+   * - Static:  `<ui-link>` draws itself with it.
+   */
+  static inlineBox(component: UIText | UILink): JSX.Element {
+    return (
+      <Dynamic
+        component={component.linkTo ? "a" : "span"}
+        class={component.rootClass}
+        part={component.partForName("text")}
+        href={component.linkTo}
+        target={component.linkTarget}
+      >
+        {UIText.styled(component.fontStates)}
+      </Dynamic>
     )
   }
 
