@@ -205,6 +205,41 @@ describe("<ui-zoom> round content", () => {
   })
 })
 
+describe("<ui-zoom>:  the arrow keys", () => {
+  test("step to the next zoomable in document order and back, wrapping;  Escape closes", async () => {
+    const first = png(800, 400)
+    const second = png(640, 320)
+    const host = document.createElement("main")
+    host.innerHTML =
+      `<img src="${first}" alt="First" style="width: 200px">` +
+      `<ui-zoom><p>Middle</p></ui-zoom>` +
+      `<img src="${second}" alt="Last" style="width: 200px">`
+    document.body.append(host)
+    await Promise.all([...host.querySelectorAll("img")].map((image) => image.decode()))
+    const content = host.querySelector<E.DOMElement>("ui-zoom")!
+    await content.ready
+    await ElementFixture.settle()
+    ImageZoom.show(host.querySelector("img")!)
+    const zoom = await theZoom()
+    expect(zoom.getAttribute("src")).toBe(first)
+    // next:  the content zoom (the page's picture goes, the content opens)
+    await userEvent.keyboard("{ArrowRight}")
+    await vi.waitFor(() => expect(content.hasAttribute("open")).toBe(true))
+    expect(zoom.hasAttribute("src")).toBe(false)
+    // next:  the last picture, in the page's zoom;  the content closes
+    await userEvent.keyboard("{ArrowDown}")
+    await vi.waitFor(() => expect(zoom.getAttribute("src")).toBe(second))
+    expect(content.hasAttribute("open")).toBe(false)
+    // next wraps to the first;  previous goes back
+    await userEvent.keyboard("{ArrowRight}")
+    await vi.waitFor(() => expect(zoom.getAttribute("src")).toBe(first))
+    await userEvent.keyboard("{ArrowLeft}")
+    await vi.waitFor(() => expect(zoom.getAttribute("src")).toBe(second))
+    await userEvent.keyboard("{Escape}")
+    await vi.waitFor(() => expect(zoom.hasAttribute("src")).toBe(false))
+  })
+})
+
 describe("<ui-image zoom>", () => {
   test("is a button that shows it full size, in the page's zoom;  Enter too", async () => {
     const shot = png(120, 60)
