@@ -82,7 +82,7 @@ and Spell for VS Code, a code editor many programmers use.
 The editor itself is a web page, so it runs in your browser, and on any page that wants a Spell program in it.
 The language has a home of its own, [spell-parser](https://github.com/spell-app/spell/blob/main/parser/README.md);
 so do the buttons, lists and forms every page draws with, [Spell UI](https://github.com/spell-app/spell/blob/main/ui/README.md);
-and all of them sit in [the kit](https://github.com/spell-app/spell/blob/main/README.md#the-five-repos), with one setup for everything.
+and all of them sit in [the kit](https://github.com/spell-app/spell/blob/main/README.md#one-repo-five-parts), with one setup for everything.
 Here to run it?  [Setup](#setup-from-zero) is near the end.
 
 ## Spaces:  every project has an owner and an address
@@ -346,7 +346,7 @@ _Each folder uses only what's to its right;  the kit's page server loads spaces'
 from spell-app's settings._
 
 - spell-app is the top repo:  it uses spell-parser, Spell UI and the kit, and nothing uses it
-  ([the map of the repos](https://github.com/spell-app/spell/blob/main/README.md#the-five-repos)).
+  ([the map of the repos](https://github.com/spell-app/spell/blob/main/README.md#one-repo-five-parts)).
 - It names spell-epic nowhere:  spell-epic declares its own part of the kit's page server, as spell-app does.
 - Each folder's `AGENTS.md` holds the rules for working in it:
   [app](src/app/AGENTS.md), [spaces](src/spaces/AGENTS.md), [lsp](src/lsp/AGENTS.md), [cli](src/cli/AGENTS.md);

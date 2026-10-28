@@ -41,31 +41,31 @@ What ships in [UICode.tsx](https://github.com/spell-app/spell/blob/main/ui/src/c
 The rule is one of six the house wrote for its own components, and it ships the way everything here ships:
 as source.
 The toolchain is the lint and format settings, the TypeScript settings and the few small programs
-that every Spell repo's checks run on, and the five repos import ONE copy of it, by package name.
+that every folder's checks run on, and every folder imports ONE copy of it, by package name.
 
 If you've kept ESLint and Prettier in step across several repos, you know the usual answer:
 a shared config package, published, then bumped in each repo.
 Here there's nothing to publish and no version to bump:
-change a rule in the kit, and the next `yarn lint` in every repo runs it.
-The catch:  no repo is checked on its own, outside the kit, so CI builds the kit around each one
-([README-development.md](README-development.md#ci-checks-a-branch-name-not-a-commit)).
+change a rule here, and the next `yarn lint` in every folder runs it.
+The catch:  no folder is checked on its own, outside the repo:  CI checks them all together
+([README-development.md](README-development.md#ci-checks-every-folder-on-every-pull-request)).
 
 ```mermaid
 %%{init: {"theme":"base","themeVariables":{"fontFamily":"-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif","fontSize":"15px","primaryColor":"#EFECFB","primaryBorderColor":"#6550CA","primaryTextColor":"#1A1C27","secondaryColor":"#F4F1E9","tertiaryColor":"#F7F6FC","lineColor":"#7F6FD6","textColor":"#7F6FD6","clusterBkg":"#F7F6FC","clusterBorder":"#B9B0E8","titleColor":"#1A1C27","edgeLabelBackground":"#F7F6FC","actorBkg":"#EFECFB","actorBorder":"#6550CA","actorTextColor":"#1A1C27","actorLineColor":"#9C90DE","signalColor":"#7F6FD6","signalTextColor":"#7F6FD6","labelBoxBkgColor":"#EFECFB","labelBoxBorderColor":"#6550CA","labelTextColor":"#1A1C27","loopTextColor":"#7F6FD6","noteBkgColor":"#F1E7D4","noteBorderColor":"#C9B48A","noteTextColor":"#1A1C27","activationBkgColor":"#DCD6F7","activationBorderColor":"#6550CA","sequenceNumberColor":"#FFFFFF"},"flowchart":{"curve":"basis","padding":12,"nodeSpacing":40,"rankSpacing":44}}}%%
 flowchart BT
   toolchain["spell/toolchain<br/>lint and format settings · component rules<br/>decorator pre-pass · TypeScript settings · spell-types"]
-  kit["the kit"] --> toolchain
-  lang["spell-parser"] --> toolchain
-  ui["spell-ui"] --> toolchain
-  epic["spell-epic"] --> toolchain
-  app["spell-app"] --> toolchain
+  kit["src/, the shared code"] --> toolchain
+  lang["parser/"] --> toolchain
+  ui["ui/"] --> toolchain
+  epic["epic/"] --> toolchain
+  app["app/"] --> toolchain
   %% the Spell look:  yarn mermaid:pretty
   classDef default fill:#EFECFB,stroke:#6550CA,stroke-width:1.5px,color:#1A1C27,rx:8px,ry:8px
   classDef repo fill:#6550CA,stroke:#4A3AA0,stroke-width:2px,color:#FFFFFF,rx:10px,ry:10px,font-weight:600
   class kit,lang,ui,epic,app repo
 ```
 
-_Every repo's `vite.config.ts` and `tsconfig.json` start from the same files, the kit's own included._
+_Every folder's `vite.config.ts` and `tsconfig.json` start from the same files, the root's own included._
 
 The code is in [src/toolchain/](src/toolchain/), its command `spell-types` in [bin/](bin/),
 and its tests in [tests/toolchain/](tests/toolchain/).
@@ -107,8 +107,7 @@ Tools:
 - The type checker isn't in the set:  every repo names TypeScript 7, the native compiler (`typescript ^7.0.2`).
 - The versions live in one place, the catalog in the kit's [.yarnrc.yml](.yarnrc.yml);
   every repo's `package.json` says `catalog:` for each of them it uses.
-- To bump them:  `vite-plus` and every catalog entry together, in the kit, never one tool on its own;
-  then the copy of the catalog in each child repo's `.yarnrc.yml`.
+- To bump them:  `vite-plus` and every catalog entry together, at the root, never one tool on its own.
 
 The cost:  Vite+ is the same engines, repackaged, so a dev server, a build or one repo's tests run no faster for it.
 What it buys is versions that move together;
@@ -223,7 +222,7 @@ One more house rule runs on every file of every repo, not only components:  `spe
 It fails a `../` that climbs into a package's `src/`, and its message is the fix:
 `` `../util/string` climbs into spell's `src/`:  import it by its package name, `spell/util/string` ``.
 A same-folder `./Peer` doesn't climb, and neither does a config reaching `../vite.config.ts`;  why the rule exists:
-[README-development.md](README-development.md#one-name-per-file-from-every-repo).
+[README-development.md](README-development.md#one-name-per-file-from-every-folder).
 
 A use that has to stay says why, after `--`, on the line above.
 Spell UI's `<ui-form>` keeps one, because its observer must stop when the form leaves the page:
@@ -281,13 +280,14 @@ spell run @spell/examples/fizzbuzz --no-browser
 
 ## Every tool reads source, but one
 
-No repo is built before another uses it.
-Vite, Vitest, `tsx` and node all run the other repos' `.ts` files as they are, through the one install.
-The exception is the type check, because `tsc` reading another repo's source would check it under the READER's
-settings:  the kit's node code under Spell UI's browser libraries, say.
+No folder is built before another uses it.
+Vite, Vitest, `tsx`, node and the type check all read the other folders' `.ts` files as they are, through the one install.
+The exception is one type check, the app's node program (its terminal screens, drawn with Ink, React for the terminal):
+`tsc` reading the others' source there would check it under the READER's settings, React's JSX among them.
+So it reads built declarations instead.
 
-So one wildcard entry in each package's `exports` serves both, by condition.
-The kit's:
+So one wildcard entry in the package's `exports` serves both, by condition, one per folder.
+The root's own:
 
 ```json
 "./*": {
@@ -301,9 +301,9 @@ The kit's:
 %%{init: {"theme":"base","themeVariables":{"fontFamily":"-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif","fontSize":"15px","primaryColor":"#EFECFB","primaryBorderColor":"#6550CA","primaryTextColor":"#1A1C27","secondaryColor":"#F4F1E9","tertiaryColor":"#F7F6FC","lineColor":"#7F6FD6","textColor":"#7F6FD6","clusterBkg":"#F7F6FC","clusterBorder":"#B9B0E8","titleColor":"#1A1C27","edgeLabelBackground":"#F7F6FC","actorBkg":"#EFECFB","actorBorder":"#6550CA","actorTextColor":"#1A1C27","actorLineColor":"#9C90DE","signalColor":"#7F6FD6","signalTextColor":"#7F6FD6","labelBoxBkgColor":"#EFECFB","labelBoxBorderColor":"#6550CA","labelTextColor":"#1A1C27","loopTextColor":"#7F6FD6","noteBkgColor":"#F1E7D4","noteBorderColor":"#C9B48A","noteTextColor":"#1A1C27","activationBkgColor":"#DCD6F7","activationBorderColor":"#6550CA","sequenceNumberColor":"#FFFFFF"},"flowchart":{"curve":"basis","padding":12,"nodeSpacing":40,"rankSpacing":44}}}%%
 flowchart LR
   entry["spell/element<br/>one exports entry"]
-  entry -- "spell-source:<br/>the kit's own tsc" --> src["src/element/index.ts"]
+  entry -- "spell-source:<br/>every program's tsc" --> src["src/element/index.ts"]
   entry -- "default:<br/>Vite, Vitest, tsx" --> src
-  entry -- "types:<br/>every other repo's tsc" --> dts["dist-types/src/element/index.d.ts"]
+  entry -- "types:<br/>the app's node tsc" --> dts["dist-types/src/element/index.d.ts"]
   src -. "spell-types builds" .-> dts
   %% the Spell look:  yarn mermaid:pretty
   classDef default fill:#EFECFB,stroke:#6550CA,stroke-width:1.5px,color:#1A1C27,rx:8px,ry:8px
@@ -311,10 +311,9 @@ flowchart LR
   class src,dts data
 ```
 
-_One name, three readers:  only another repo's type check reads declarations._
+_One name, three readers:  only the app's node type check reads declarations._
 
-The kit's own `tsc` takes `spell-source` because its tsconfig asks for it, in `customConditions`;
-every repo has a condition of its own, named for its package (`spell-source` ...),
+A program's `tsc` takes `spell-source` because its tsconfig asks for it, in `customConditions`,
 and Vite, Vitest and `tsx` add the `.ts` that `default` leaves off.
 How an import names a file in the first place:  [README-development.md](README-development.md).
 
@@ -327,10 +326,10 @@ spell-types --below    # first, the packages of the lower repos this repo uses, 
 spell-types --clean    # dist-types/ deleted first:  a full build
 ```
 
-- Three repos build them, because other repos import them:  the kit, spell-parser and spell-ui.
-  spell-epic and spell-app build none, because nothing imports them:  their `yarn ts` runs a plain `tsc`.
-- Every child repo's `yarn ts` runs `spell-types --below` first, so the declarations it reads are never stale;
-  a lower repo with nothing changed takes a second or two.
+- The root, the parser and Spell UI build them in their `yarn ts`, so the app's node program can read them;
+  the epic folder builds none, and its `yarn ts` runs a plain `tsc`.
+- The app's `yarn ts` runs `spell-types --below` first, so the declarations it reads are never stale;
+  a folder with nothing changed takes a second or two.
 
 <details>
 <summary>How <code>spell-types</code> builds them</summary>
@@ -344,16 +343,16 @@ spell-types --clean    # dist-types/ deleted first:  a full build
 - With declaration maps, so "Go to Definition" lands in the source, not the `.d.ts`.
 - The settings it generates for each program sit in `dist-types/`, rewritten on every build:
   `.tsconfig.tsconfig.json`, `.tsconfig.node.tsconfig.json`.
-- `--below` finds the lower repos by the `workspace:` dependencies in each `package.json` (`spell`,
+- `--below` finds the lower folders by the `workspace:` dependencies in each `package.json` (`spell`,
   `spell-ui` ...), through `node_modules`.
 
 </details>
 
 The edges:
 - `dist-types/` is git-ignored.
-  In a fresh clone, before it's built, the repos above say TS2307, "Cannot find module":  their `yarn ts` builds it.
+  In a fresh clone, before it's built, the app's node program says TS2307, "Cannot find module":  its `yarn ts` builds it.
 - One program's own `tsc` (`yarn tsc -p tsconfig.node.json`) runs no `--below`:
-  it reads whatever the lower repos last built, so after you pull one of them, run `yarn ts` once before trusting it.
+  it reads whatever the folders below last built, so after a pull, run `yarn ts` once before trusting it.
 
 <details>
 <summary>What each runner needs to find the source</summary>

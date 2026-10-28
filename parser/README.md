@@ -507,7 +507,7 @@ and the command line's base is the kit's:
 | the language server, and the VS Code extension that runs it | spell-app's [src/lsp/](https://github.com/spell-app/spell/tree/main/app/src/lsp) and [vscode/](https://github.com/spell-app/spell/tree/main/app/vscode), [README-lsp](https://github.com/spell-app/spell/blob/main/app/README-lsp.md) |
 | projects on disk, their addresses and groups, the editor's server | spell-app's [src/spaces/](https://github.com/spell-app/spell/tree/main/app/src/spaces), [README-spaces](https://github.com/spell-app/spell/blob/main/app/README-spaces.md) |
 | the example projects people open and edit | spell-app's [spaces/@spell/examples/](https://github.com/spell-app/spell/tree/main/app/spaces/@spell/examples), [README-examples](https://github.com/spell-app/spell/blob/main/app/README-examples.md) |
-| the `spell` command's base:  arguments, help, finding each repo's commands | the kit's [src/cli/](https://github.com/spell-app/spell/tree/main/src/cli), [README-cli](https://github.com/spell-app/spell/blob/main/README-cli.md#each-repo-brings-its-own-commands) |
+| the `spell` command's base:  arguments, help, finding each repo's commands | the kit's [src/cli/](https://github.com/spell-app/spell/tree/main/src/cli), [README-cli](https://github.com/spell-app/spell/blob/main/README-cli.md#each-folder-brings-its-own-commands) |
 
 The language's own commands are this repo's (above):  the command line finds them here.
 

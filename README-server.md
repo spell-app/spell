@@ -118,9 +118,9 @@ Vite runs a dev server per project, each on a port of its own.
 Here the MAIN checkout's server serves every epic's worktree too, at `/worktrees/<epic>/...`:
 one port, one tab, one live reload, however many epics are open.
 
-- It serves the kit, and every repo cloned inside it, from the kit's root:
-  `spell server start` from any folder of the kit finds that root, and so does `yarn server <verb>`.
-- What it serves beyond plain files comes from the repos' settings, each repo declaring its own part
+- It serves the whole repo, every folder of it, from the root:
+  `spell server start` from any folder finds that root, and so does `yarn server <verb>`.
+- What it serves beyond plain files comes from the folders' settings, each folder declaring its own part
   ([below](#settings-and-route-modules--each-repo-brings-its-own)).
 - It starts from the kit's root ONLY.
   Point it anywhere else, and it stops before it starts:
@@ -215,14 +215,11 @@ the rest of `/api/` is the editor's:  spell-app's module is listed last, and see
   its output goes to `.spell-server.editor.log`.
 - Old addresses get no redirect:  they answer "not found".
 - The docs home comes from the content folder, which someone new hasn't got:
-  start at `/components/ui/`, Spell UI's pages, which need nothing but the repos.
+  start at `/components/ui/`, Spell UI's pages, which need nothing but the repo.
 
-What serves depends on what's cloned, because each repo brings its own part:
-- **Without spell-app,** the epic pages, the guides and the Spell UI and Epic UI sets all serve.
-  The App/UI tab is left out of the header;  there's no editor, no `/api/projects/`, and no Spell colouring.
-  The edge:  the App tab stays, and its `/editor/` answers 404.
-- **Without spell-epic,** as in a child repo's CI, there are no epic pages and no guides:
-  the content folder is served by one of spell-epic's modules, so it goes too.
+Each folder brings its own part:
+- the app folder's:  the editor, `/api/projects/`, Spell colouring, and the App/UI tab
+- the epic folder's:  the content folder itself, so the epic pages and the guides come from one of its modules
 
 ## Five flows, a picture each
 
@@ -420,7 +417,7 @@ _The server knows nothing of epics:  a route module tells it where the worktrees
 - A page served from a worktree is told its own branch and worktree name, for the site header's badge.
 - The content folder is served after each worktree's own files, at its address:
   `/worktrees/<w>/epics/...` works, from one shared copy.
-- A child repo's file in an epic's worktree is the kit worktree's, since that's whose server it is:
+- A folder's file in an epic's worktree is the worktree's, since that's whose server it is:
   `spell server url app/README.md`, in an epic's worktree named `readme`, printed
   `http://127.0.0.1:4747/worktrees/readme/app/README.md`.
 
@@ -678,13 +675,14 @@ its site bundle, built on demand, and its component set, at `/components/ui/`._
 `pageServerSettings()` merges the parts as the server starts, in a fixed order:
 1. the kit's own:  none today
 2. the content repo's, a file of its own at the content folder's root, `page-server.json5`
-3. each child repo's that's installed, lowest first, as the kit's [repos.json5](repos.json5) lists them
+3. each folder's, lowest first, in the order of the root's `workspaces`
+4. each repo beside the repo that [repos.json5](repos.json5) lists as a peer
 
-Each part's paths are read from its own repo's folder, so spell-ui writes `docs`, and the server serves
+Each part's paths are read from its own folder, so Spell UI's writes `docs`, and the server serves
 `ui/docs`.
 The lists are laid end to end, in that order;  in the maps (`componentSets`, `engineRoutes`, `localCopies`),
-a later repo's entry wins.
-A repo that isn't cloned brings nothing, and the server runs with whatever is there.
+a later part's entry wins.
+A peer repo that isn't there brings nothing, and the server runs with whatever is.
 
 | Whose part | What it adds |
 | --- | --- |
