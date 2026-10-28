@@ -20,7 +20,6 @@
 	<section label="Types">
 		<section label="Placeholder" sticky="stack" collapsible dividing>
 			<example "Placeholder" description="A placeholder is used to reserve space for content that soon will appear in a layout.">
-				<message slot="description" state="info" size="small">Placeholders can include <text code>&lt;ui-placeholder-paragraph&gt;</text>, <text code>&lt;ui-placeholder-header&gt;</text> (<text code>image</text> for an image header) and <text code>&lt;ui-placeholder-image&gt;</text> to let you format the placeholder to emulate the content being loaded.</message>
 				<placeholder>
 					<placeholder-header image>
 						<placeholder-line/>
@@ -34,6 +33,7 @@
 						<placeholder-line/>
 					</placeholder-paragraph>
 				</placeholder>
+				<message slot="description" state="info" size="small">Placeholders can include <text code>&lt;ui-placeholder-paragraph&gt;</text>, <text code>&lt;ui-placeholder-header&gt;</text> (<text code>image</text> for an image header) and <text code>&lt;ui-placeholder-image&gt;</text> to let you format the placeholder to emulate the content being loaded.</message>
 			</example>
 			<example "Placeholder">
 				<grid columns="3" stackable>
@@ -82,7 +82,6 @@
 				</grid>
 			</example>
 			<example "Placeholder">
-				<message slot="description" size="small" class="site-not-ported">Not ported: Fomantic's "Simulate Loading" button, which swaps the skeleton for a loaded card -- a page script, not part of the placeholder. Replace the placeholder with the real content when it arrives.</message>
 				<cards columns="3" doubling stackable>
 					<card>
 						<placeholder>
@@ -145,6 +144,7 @@
 						</extra>
 					</card>
 				</cards>
+				<message slot="description" size="small" class="site-not-ported">Not ported: Fomantic's "Simulate Loading" button, which swaps the skeleton for a loaded card -- a page script, not part of the placeholder. Replace the placeholder with the real content when it arrives.</message>
 			</example>
 		</>
 	</>
@@ -152,7 +152,6 @@
 	<section label="Content">
 		<section label="Lines" sticky="stack" collapsible dividing>
 			<example "Lines" description="A placeholder can contain lines of text.">
-				<message slot="description" state="info" size="small">By default, repeated lines appear varied in width. It may be useful to give an exact <text code>length</text> to make them match up with the content more closely.</message>
 				<placeholder>
 					<placeholder-line/>
 					<placeholder-line/>
@@ -160,18 +159,19 @@
 					<placeholder-line/>
 					<placeholder-line/>
 				</placeholder>
+				<message slot="description" state="info" size="small">By default, repeated lines appear varied in width. It may be useful to give an exact <text code>length</text> to make them match up with the content more closely.</message>
 			</example>
 		</>
 
 		<section label="Headers" sticky="stack" collapsible dividing>
 			<example "Headers" description="A placeholder can contain a header.">
-				<message slot="description" state="info" size="small">Header lines are slightly taller than paragraph lines.</message>
 				<placeholder>
 					<placeholder-header image>
 						<placeholder-line/>
 						<placeholder-line/>
 					</placeholder-header>
 				</placeholder>
+				<message slot="description" state="info" size="small">Header lines are slightly taller than paragraph lines.</message>
 			</example>
 			<example "Headers">
 				<placeholder>
@@ -185,7 +185,6 @@
 
 		<section label="Paragraph" sticky="stack" collapsible dividing>
 			<example "Paragraph" description="A placeholder can contain a paragraph.">
-				<message slot="description" state="info" size="small">Paragraphs are used to group lines together.</message>
 				<placeholder>
 					<placeholder-paragraph>
 						<placeholder-line/>
@@ -200,6 +199,7 @@
 						<placeholder-line/>
 					</placeholder-paragraph>
 				</placeholder>
+				<message slot="description" state="info" size="small">Paragraphs are used to group lines together.</message>
 			</example>
 		</>
 
@@ -211,7 +211,6 @@
 				</placeholder>
 			</example>
 			<example "Image">
-				<message slot="description" state="info" size="small">Using <text code>square</text> (1:1) or <text code>rectangular</text> (4:3) embeds an aspect ratio into the image placeholder, so it keeps its shape in responsive layouts.</message>
 				<cards columns="3">
 					<card>
 						<content>
@@ -235,6 +234,7 @@
 						</content>
 					</card>
 				</cards>
+				<message slot="description" state="info" size="small">Using <text code>square</text> (1:1) or <text code>rectangular</text> (4:3) embeds an aspect ratio into the image placeholder, so it keeps its shape in responsive layouts.</message>
 			</example>
 			<example "Image">
 				<cards columns="3">

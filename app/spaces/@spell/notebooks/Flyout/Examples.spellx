@@ -20,7 +20,6 @@
 	<section label="Types">
 		<section label="Flyout" sticky="stack" collapsible dividing>
 			<example "Flyout" description="A flyout: a modal panel that slides in from the left, with a header, content and actions. The approve / deny buttons close it.">
-				<message slot="description" size="small" state="warning">On a phone, a side flyout is never wider than the viewport (Fomantic shows it <text code>fullscreen</text> there).</message>
 				<button commandfor="flyout-types-standard" command="--show">Show</button>
 				<flyout id="flyout-types-standard" closable>
 					<header>
@@ -35,6 +34,7 @@
 						<button class="ok" color="green" icon="checkmark">Yes</button>
 					</actions>
 				</flyout>
+				<message slot="description" size="small" state="warning">On a phone, a side flyout is never wider than the viewport (Fomantic shows it <text code>fullscreen</text> there).</message>
 			</example>
 		</>
 
@@ -61,7 +61,6 @@
 				<flyout id="flyout-width-very-wide" width="very wide" heading="Very wide" content="A very wide flyout." closable/>
 			</example>
 			<example "Width" description="Width can also be defined like the grid system: columns of sixteen (`width=\"5\"`), a fraction (`1/4`) or a percentage (`25%`).">
-				<message slot="description" size="small" state="warning">A flyout's width applies only to <text code>left</text> and <text code>right</text> flyouts.</message>
 				<button commandfor="flyout-width-2" command="--show">Two wide</button>
 				<button commandfor="flyout-width-5" command="--show">Five wide</button>
 				<button commandfor="flyout-width-8" command="--show">Eight wide</button>
@@ -70,12 +69,12 @@
 				<flyout id="flyout-width-5" width="5" heading="Five wide" content="Five columns of sixteen." closable/>
 				<flyout id="flyout-width-8" width="8" heading="Eight wide" content="Half the viewport." closable/>
 				<flyout id="flyout-width-12" width="12" heading="Twelve wide" content="Three quarters of the viewport." closable/>
+				<message slot="description" size="small" state="warning">A flyout's width applies only to <text code>left</text> and <text code>right</text> flyouts.</message>
 			</example>
 		</>
 
 		<section label="Position" sticky="stack" collapsible dividing>
 			<example "Position" description="A flyout can specify its display position:  `position` is left (the default), right, top or bottom.">
-				<message slot="description" size="small" state="info">Top and bottom flyouts are full width, and their height is defined by their content.</message>
 				<button commandfor="flyout-position-left" command="--show">Left</button>
 				<button commandfor="flyout-position-right" command="--show">Right</button>
 				<button commandfor="flyout-position-top" command="--show">Top</button>
@@ -91,6 +90,7 @@
 						<button class="approve" color="primary">Got it</button>
 					</actions>
 				</flyout>
+				<message slot="description" size="small" state="info">Top and bottom flyouts are full width, and their height is defined by their content.</message>
 			</example>
 		</>
 
@@ -103,7 +103,6 @@
 
 		<section label="Scrolling Content" sticky collapsible dividing>
 			<example "Scrolling Content" description="A flyout can have a scrolling content.">
-				<message slot="description" size="small" state="info">The flyout is a column: header at the top, actions at the bottom, and the content grows between them. The flyout itself scrolls when it's too tall, so <text code>&lt;ui-content scrolling&gt;</text> caps nothing here.</message>
 				<button commandfor="flyout-content-scrolling" command="--show">Show terms</button>
 				<flyout id="flyout-content-scrolling" position="right" heading="Terms" closable>
 					<content scrolling>
@@ -120,6 +119,7 @@
 						<button class="approve" color="primary">I agree</button>
 					</actions>
 				</flyout>
+				<message slot="description" size="small" state="info">The flyout is a column: header at the top, actions at the bottom, and the content grows between them. The flyout itself scrolls when it's too tall, so <text code>&lt;ui-content scrolling&gt;</text> caps nothing here.</message>
 			</example>
 		</>
 

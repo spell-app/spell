@@ -111,9 +111,9 @@
 
 		<section label="Link" sticky="stack" collapsible dividing>
 			<example "Link" description="An icon can be formatted as a link.">
-				<message slot="description" size="small"><text code>appearance="link"</text> is only the look (dimmed until hovered, a pointer cursor). For interaction, wrap the icon in a real <text code>&lt;a&gt;</text> or <text code>&lt;button&gt;</text>.</message>
 				<icon name="close" appearance="link"/>
 				<icon name="help" appearance="link"/>
+				<message slot="description" size="small"><text code>appearance="link"</text> is only the look (dimmed until hovered, a pointer cursor). For interaction, wrap the icon in a real <text code>&lt;a&gt;</text> or <text code>&lt;button&gt;</text>.</message>
 			</example>
 		</>
 
@@ -143,20 +143,20 @@
 
 		<section label="Circular Colored" sticky collapsible dividing>
 			<example "Circular Colored" description="The circular color can appear in the same color as the icon itself.">
-				<message slot="description" size="small" class="site-not-ported">Not ported: the <text code>colored</text> word -- a coloured circular or bordered icon's ring always follows its colour.</message>
 				<icon name="users" color="red" appearance="circular"/>
 				<icon name="users" color="green" appearance="circular"/>
 				<icon name="users" color="blue" appearance="circular"/>
+				<message slot="description" size="small" class="site-not-ported">Not ported: the <text code>colored</text> word -- a coloured circular or bordered icon's ring always follows its colour.</message>
 			</example>
 		</>
 
 		<section label="Bordered" sticky="stack" collapsible dividing>
 			<example "Bordered" description="An icon can be formatted to appear bordered.">
-				<message slot="description" state="info" size="small">In Fomantic <text code>0.x.x</text> bordered was formerly known as <text code>squared</text>.</message>
 				<icon name="users" appearance="bordered"/>
 				<icon name="users" color="teal" appearance="bordered"/>
 				<icon name="users" color="black" inverted appearance="bordered"/>
 				<icon name="users" color="teal" inverted appearance="bordered"/>
+				<message slot="description" state="info" size="small">In Fomantic <text code>0.x.x</text> bordered was formerly known as <text code>squared</text>.</message>
 			</example>
 		</>
 

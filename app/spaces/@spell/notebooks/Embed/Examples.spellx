@@ -31,8 +31,8 @@
 
 		<section label="Custom Content" sticky="stack" collapsible dividing>
 			<example "Custom Content" description="An embed can display any web content: `url` frames any `http(s)` address.">
-				<message slot="description" size="small" state="info">Embeds use an intrinsic aspect ratio to embed content responsively: content keeps its aspect ratio at every browser size.</message>
 				<embed url="https://rasterbuster.lubber.de" label="Rasterbuster" placeholder="../images/image-16by9.png" icon="arrow circle right"/>
+				<message slot="description" size="small" state="info">Embeds use an intrinsic aspect ratio to embed content responsively: content keeps its aspect ratio at every browser size.</message>
 			</example>
 		</>
 

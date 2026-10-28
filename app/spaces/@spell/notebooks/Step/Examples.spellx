@@ -47,12 +47,12 @@
 	<section label="Groups">
 		<section label="Steps" sticky="stack" collapsible dividing>
 			<example "Steps" description="A set of steps: `<ui-steps>`.">
-				<message slot="description" state="positive" size="small" icon="mobile" heading="Responsive Element">Steps will automatically stack on mobile. To make steps automatically stack for tablet use <text code>stackable="tablet"</text>.</message>
 				<steps>
 					<step icon="truck" heading="Shipping" description="Choose your shipping options"/>
 					<step selected icon="payment" heading="Billing" description="Enter billing information"/>
 					<step disabled icon="info" heading="Confirm Order"/>
 				</steps>
+				<message slot="description" state="positive" size="small" icon="mobile" heading="Responsive Element">Steps will automatically stack on mobile. To make steps automatically stack for tablet use <text code>stackable="tablet"</text>.</message>
 			</example>
 		</>
 

@@ -32,9 +32,9 @@
 
 		<section label="Emphasis" sticky="stack" collapsible dividing>
 			<example "Emphasis" description="A button can be formatted to show different levels of emphasis.">
-				<message slot="description" state="info" size="small">Set your brand colours in the <text code>--ui-primary</text> and <text code>--ui-secondary</text> tokens (see the Theming tab). Every element's primary and secondary look follows.</message>
 				<button color="primary">Save</button>
 				<button>Discard</button>
+				<message slot="description" state="info" size="small">Set your brand colours in the <text code>--ui-primary</text> and <text code>--ui-secondary</text> tokens (see the Theming tab). Every element's primary and secondary look follows.</message>
 			</example>
 			<example "Emphasis">
 				<button color="secondary">Okay</button>
@@ -45,10 +45,10 @@
 		<!-- GAP I23:  Fomantic's `right arrow` / `left chevron` draw nothing;  use the canonical `arrow right`, `chevron left`. -->
 		<section label="Animated" sticky="stack" collapsible dividing>
 			<example "Animated" description="A button can animate to show hidden content. The `icon` slot (or the `icon` attribute) is the hidden half.">
-				<message slot="description" size="small">The button is sized by its visible content, so make sure there is room for the hidden content to show.</message>
 				<button reveal="slide" icon="arrow right">Next</button>
 				<button reveal="vertical" icon="shop">Shop</button>
 				<button reveal="fade"><text slot="icon">$12.99 a month</text>Sign-up for a Pro account</button>
+				<message slot="description" size="small">The button is sized by its visible content, so make sure there is room for the hidden content to show.</message>
 			</example>
 		</>
 
@@ -212,12 +212,12 @@
 				</buttons>
 			</example>
 			<example "Conditionals">
-				<message slot="description" state="info" size="small">The <text code>or</text> text is translated with the page's language, or set it with <text code>label</text>. If the size of the conditional changes, adjust <text code>--ui-button-or-size</text>.</message>
 				<buttons>
 					<button>un</button>
 					<or label="ou"/>
 					<button color="positive">deux</button>
 				</buttons>
+				<message slot="description" state="info" size="small">The <text code>or</text> text is translated with the page's language, or set it with <text code>label</text>. If the size of the conditional changes, adjust <text code>--ui-button-or-size</text>.</message>
 			</example>
 		</>
 
@@ -601,7 +601,6 @@
 
 		<section label="Spaced Buttons" sticky collapsible dividing>
 			<example "Spaced Buttons" description="Buttons inside groups can get a margin so they don't appear attached together, especially with `wrapping` on responsive layouts.">
-				<message slot="description" state="info" size="small">Add <text code>padding="compact"</text> to a <text code>wrapping</text> group when the buttons of each row should not share the row's width, especially for spaced buttons.</message>
 				<buttons wrapping spacing="md">
 					<button>One</button>
 					<button>Two</button>
@@ -624,6 +623,7 @@
 					<button>Nineteen</button>
 					<button>Twenty</button>
 				</buttons>
+				<message slot="description" state="info" size="small">Add <text code>padding="compact"</text> to a <text code>wrapping</text> group when the buttons of each row should not share the row's width, especially for spaced buttons.</message>
 			</example>
 		</>
 

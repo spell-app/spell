@@ -22,7 +22,6 @@
 	<section label="Types">
 		<section label="Items" sticky="stack" collapsible dividing>
 			<example "Items" description="A group of items.">
-				<message slot="description" state="positive" size="small">Item views are designed to be responsive, with images stacking at mobile widths. By default ours stack by the width of the GROUP (<text code>stack-with="container"</text>);  this site sets <text code>stack-with="page"</text>, so here they stack by the window, as in Fomantic.</message>
 				<items>
 					<item image="../images/wireframe/image.png">
 						<content>
@@ -49,6 +48,7 @@
 						</content>
 					</item>
 				</items>
+				<message slot="description" state="positive" size="small">Item views are designed to be responsive, with images stacking at mobile widths. By default ours stack by the width of the GROUP (<text code>stack-with="container"</text>);  this site sets <text code>stack-with="page"</text>, so here they stack by the window, as in Fomantic.</message>
 			</example>
 		</>
 	</>
@@ -110,7 +110,6 @@
 
 		<section label="Metadata" sticky="stack" collapsible dividing>
 			<example "Metadata" description="An item can contain content metadata.">
-				<message slot="description" state="info" size="small">You can include an arbitrary amount of metadata in <text code>&lt;ui-meta&gt;</text>: every child is spaced automatically.</message>
 				<items>
 					<item>
 						<image size="small" src="/components/ui/images/wireframe/image.png" alt=""/>
@@ -152,12 +151,12 @@
 						</content>
 					</item>
 				</items>
+				<message slot="description" state="info" size="small">You can include an arbitrary amount of metadata in <text code>&lt;ui-meta&gt;</text>: every child is spaced automatically.</message>
 			</example>
 		</>
 
 		<section label="Link" sticky="stack" collapsible dividing>
 			<example "Link" description="An item can contain links as images, headers, or inside content.">
-				<message slot="description" state="warning" size="small">To make the entire content of an item a link, see the Link Item variation below.</message>
 				<items>
 					<item>
 						<image size="tiny" link="#" src="/components/ui/images/avatar/large/stevie.jpg" alt=""/>
@@ -187,6 +186,7 @@
 						</content>
 					</item>
 				</items>
+				<message slot="description" state="warning" size="small">To make the entire content of an item a link, see the Link Item variation below.</message>
 			</example>
 		</>
 
@@ -226,7 +226,6 @@
 
 		<section label="Rating" sticky="stack" collapsible dividing>
 			<example "Rating" description="An item can contain icons signifying a 'like' or 'favorite' action.">
-				<message slot="description" state="info" size="small">Use <text code>&lt;ui-rating&gt;</text> to attach events to like and favorite icons.</message>
 				<items>
 					<item>
 						<image size="tiny" link="#" src="/components/ui/images/avatar/large/jenny.jpg" alt=""/>
@@ -241,6 +240,7 @@
 						</content>
 					</item>
 				</items>
+				<message slot="description" state="info" size="small">Use <text code>&lt;ui-rating&gt;</text> to attach events to like and favorite icons.</message>
 			</example>
 		</>
 	</>
@@ -507,7 +507,6 @@
 
 		<section label="Inverted" sticky="stack" collapsible dividing>
 			<example "Inverted" description="An item can be inverted to appear on a dark background.">
-				<message slot="description" state="info" size="small">Set a dark background yourself, or wrap the items in an <text code>&lt;ui-segment inverted&gt;</text>.</message>
 				<segment inverted>
 					<items inverted>
 						<item>
@@ -538,6 +537,7 @@
 						</item>
 					</items>
 				</segment>
+				<message slot="description" state="info" size="small">Set a dark background yourself, or wrap the items in an <text code>&lt;ui-segment inverted&gt;</text>.</message>
 			</example>
 		</>
 

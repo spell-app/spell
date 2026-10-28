@@ -40,7 +40,6 @@
 
 		<section label="General" sticky="stack" collapsible dividing>
 			<example "General" description="You can provide the emoji's name with or without colons.">
-				<message slot="description" state="info" size="small">A name is case-blind, and its words may be joined any way: <text code>thumbs_up</text>, <text code>thumbs up</text>, <text code>thumbs-up</text>, <text code>thumbsUp</text>, <text code>thumbsup</text>. No build setting needed (Fomantic 2.10's <text code>@variationEmojiNoColons</text>).</message>
 				<text paragraph>I <emoji name=":heart_with_arrow:"/> Spell UI</text>
 				<text paragraph>I <emoji name="heart_with_arrow"/> Spell UI</text>
 				<text paragraph>
@@ -51,6 +50,7 @@
 					<emoji name=":woman_technologist:"/>
 					<emoji name="womanTechnologist"/>
 				</text>
+				<message slot="description" state="info" size="small">A name is case-blind, and its words may be joined any way: <text code>thumbs_up</text>, <text code>thumbs up</text>, <text code>thumbs-up</text>, <text code>thumbsUp</text>, <text code>thumbsup</text>. No build setting needed (Fomantic 2.10's <text code>@variationEmojiNoColons</text>).</message>
 			</example>
 		</>
 
@@ -90,8 +90,8 @@
 	<section label="Variations">
 		<section label="Size" sticky="stack" collapsible dividing>
 			<example "Size" description="An emoji can vary in size.">
-				<message slot="description" size="small">Sizes are ratios of the surrounding text: <text code>small</text> 1.5em, <text code>large</text> 6em, <text code>big</text> 7.5em. <text code>medium</text> is the default, the size of the text -- NOT Fomantic's fixed 3em.</message>
 				<segment appearance="basic"><emoji name="smiling_face" size="small"/> Small <space/> <emoji name="smiling_face" size="medium"/> Medium <space/> <emoji name="smiling_face" size="large"/> Large <space/> <emoji name="smiling_face" size="big"/> Big</segment>
+				<message slot="description" size="small">Sizes are ratios of the surrounding text: <text code>small</text> 1.5em, <text code>large</text> 6em, <text code>big</text> 7.5em. <text code>medium</text> is the default, the size of the text -- NOT Fomantic's fixed 3em.</message>
 			</example>
 		</>
 
@@ -110,12 +110,12 @@
 
 		<section label="Link" sticky="stack" collapsible dividing>
 			<example "Link" description="An emoji can be formatted as a link.">
-				<message slot="description" size="small"><text code>appearance="link"</text> is only the look, a pointer cursor. Wrap the emoji in a <text code>&lt;ui-button&gt;</text> or <text code>&lt;a&gt;</text> that does the work, and name that.</message>
 				<segment size="massive" appearance="basic">
 					<link aria-label="React with a smile" link="#link">
 						<emoji name="slightly_smiling_face" appearance="link"/>
 					</link>
 				</segment>
+				<message slot="description" size="small"><text code>appearance="link"</text> is only the look, a pointer cursor. Wrap the emoji in a <text code>&lt;ui-button&gt;</text> or <text code>&lt;a&gt;</text> that does the work, and name that.</message>
 			</example>
 		</>
 	</>
@@ -123,7 +123,6 @@
 	<section label="Fomantic's names">
 		<section label="Fomantic's names" sticky collapsible dividing>
 			<example "Fomantic's names" description="A page written for Fomantic's emoji list can keep its names:  a `<ui-root emoji=\"fomantic\">` around them switches every emoji inside to Fomantic's set. Its names are Fomantic's:  `thumbsup`, `smile`, `flag_us`, `one` for the keycap;  and so are its meanings:  `dog` is the dog's face there, the whole dog in CLDR.">
-				<message slot="description" size="small">The two sets are never mixed inside a root, so the CLDR names stop working there. A page with no root switches page-wide from JS with <text code>EmojiData.use("fomantic")</text>.</message>
 				<root emoji="fomantic" display="immediately">
 					<text paragraph>
 						<emoji name="smile"/>
@@ -134,6 +133,7 @@
 						<emoji name=":cupid:"/>
 					</text>
 				</root>
+				<message slot="description" size="small">The two sets are never mixed inside a root, so the CLDR names stop working there. A page with no root switches page-wide from JS with <text code>EmojiData.use("fomantic")</text>.</message>
 			</example>
 		</>
 	</>

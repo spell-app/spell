@@ -64,6 +64,8 @@ describe("NotebookFromPage:  the web's tags as Spell UI's (P26)", () => {
     )
     expect(example).toContain('<example "Animated" description="Use `icon`, as \\[here](#y).">')
     expect(example).toContain(`<message slot="description">More</message>`)
+    // the slotted description markup comes after the example's own Spell
+    expect(example.indexOf("<button>Go</button>")).toBeLessThan(example.indexOf(`<message slot="description">`))
   })
 })
 

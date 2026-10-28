@@ -22,9 +22,9 @@
 		<!-- GAP I87:  Fomantic's 2nd and 3rd blocks wrap an <img> / an <svg> in `ui image`;  <ui-image> has no slot. -->
 		<section label="Image" sticky="stack" collapsible dividing>
 			<example "Image" description="An image.">
+				<image size="small" src="/components/ui/images/wireframe/image.png" alt=""/>
 				<message slot="description" size="small">Unless a size is specified, images will use the original dimensions of the image up to the size of its container.</message>
 				<message slot="description" state="info" size="small"><text code>&lt;ui-image&gt;</text> renders a real <text code>&lt;img&gt;</text>, so the image attributes work as on the native element:  src, alt, width, height and loading.</message>
-				<image size="small" src="/components/ui/images/wireframe/image.png" alt=""/>
 			</example>
 		</>
 
@@ -144,6 +144,13 @@
 
 		<section label="Size" sticky="stack" collapsible dividing>
 			<example "Size" description="An image may appear at different sizes.">
+				<image size="mini" src="/components/ui/images/wireframe/image.png" alt=""/>
+				<divider spacer/>
+				<image size="tiny" src="/components/ui/images/wireframe/image.png" alt=""/>
+				<divider spacer/>
+				<image size="small" src="/components/ui/images/wireframe/image.png" alt=""/>
+				<divider spacer/>
+				<image size="medium" src="/components/ui/images/wireframe/image.png" alt=""/>
 				<message slot="description" state="warning" size="small"><text code>medium</text> is the image's natural size here, not Fomantic's 300px (I56): elsewhere on this page the medium images are <text code>size="large"</text> (450px).</message>
 				<message slot="description" state="info" size="small">Fomantic's default widths for <text code>mini</text> ... <text code>massive</text> are arbitrary. Set the ones your project uses in the <text code>--ui-image-width-*</text> tokens (Theming tab).</message>
 				<table slot="description" definition padding="compact" unstackable>
@@ -184,13 +191,6 @@
 						<cell>960px</cell>
 					</row>
 				</table>
-				<image size="mini" src="/components/ui/images/wireframe/image.png" alt=""/>
-				<divider spacer/>
-				<image size="tiny" src="/components/ui/images/wireframe/image.png" alt=""/>
-				<divider spacer/>
-				<image size="small" src="/components/ui/images/wireframe/image.png" alt=""/>
-				<divider spacer/>
-				<image size="medium" src="/components/ui/images/wireframe/image.png" alt=""/>
 			</example>
 		</>
 	</>

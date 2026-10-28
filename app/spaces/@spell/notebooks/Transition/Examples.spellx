@@ -193,7 +193,6 @@
 
 		<section label="Pulsating" sticky="stack" collapsible dividing>
 			<example "Pulsating" description="An element can have pulsating edges. This works best on circular or square elements.">
-				<message slot="description" size="small">Fomantic's ring adopts the colour of the element inside; ours takes the transition's own <text code>color</text>, so give both the same one.</message>
 				<transition color="green" pulsating looping inline visible>
 					<label color="green">Label</label>
 				</transition>
@@ -206,6 +205,7 @@
 				<transition pulsating looping inline visible>
 					<button>CSS only transition</button>
 				</transition>
+				<message slot="description" size="small">Fomantic's ring adopts the colour of the element inside; ours takes the transition's own <text code>color</text>, so give both the same one.</message>
 			</example>
 		</>
 

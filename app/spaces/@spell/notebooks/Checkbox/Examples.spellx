@@ -46,7 +46,6 @@
 		<!-- GAP:  Fomantic styles an invisible checkbox's LABEL as any component (button, message, segment);  ours is a bordered label tinted when chosen. -->
 		<section label="Invisible" sticky="stack" collapsible dividing>
 			<example "Invisible" description="An invisible checkbox has no box: the label itself is the control, bordered while unchosen and tinted when chosen. Its content can be any markup.">
-				<message slot="description" size="small" class="site-not-ported">Not ported: styling the label as another component (Fomantic's <text code>label class="ui purple button"</text>, or an orange message or teal segment label), and <text code>compact invisible</text>. The label is in the shadow root, so it can't take another component's classes.</message>
 				<form>
 					<fields grouped>
 						<checkbox invisible name="invisible-one"><text bold>Option One</text><space/>I am a checkbox styled as a bordered label</checkbox>
@@ -54,6 +53,7 @@
 						<checkbox invisible name="invisible-three" selected><text bold>Option Three</text><space/>I am chosen</checkbox>
 					</fields>
 				</form>
+				<message slot="description" size="small" class="site-not-ported">Not ported: styling the label as another component (Fomantic's <text code>label class="ui purple button"</text>, or an orange message or teal segment label), and <text code>compact invisible</text>. The label is in the shadow root, so it can't take another component's classes.</message>
 			</example>
 			<example "Invisible" description="Icons, emojis, flags or images can be the whole label.">
 				<form>
@@ -91,13 +91,13 @@
 
 		<section label="Indeterminate" sticky="stack" collapsible dividing>
 			<example "Indeterminate" description="A checkbox can be indeterminate: neither on nor off. A click clears it, as natively.">
-				<message slot="description" state="info" size="small">Unlike Fomantic's, which needs JavaScript, <text code>indeterminate</text> is an attribute.</message>
 				<segment appearance="basic">
 					<checkbox indeterminate>Indeterminate</checkbox>
 				</segment>
 				<segment appearance="basic">
 					<checkbox appearance="toggle" indeterminate>Indeterminate</checkbox>
 				</segment>
+				<message slot="description" state="info" size="small">Unlike Fomantic's, which needs JavaScript, <text code>indeterminate</text> is an attribute.</message>
 			</example>
 		</>
 
@@ -212,7 +212,6 @@
 	<section label="Examples">
 		<section label="Grouped Checkboxes" sticky collapsible dividing>
 			<example "Grouped Checkboxes" description="The `indeterminate` state can be used to represent a value that is neither checked or unchecked. This can be useful with groups where a \"master\" checkbox should display the selections of several other checkboxes.">
-				<message slot="description" state="info" size="small">The wiring (children set the master, the master sets the children) is a few lines on <text code>ui-changed</text>: see "Grouped checkboxes" on the Usage tab. Here the states are set in markup.</message>
 				<list celled spacing="lg">
 					<item>
 						<checkbox name="fruits" indeterminate>Fruits</checkbox>
@@ -243,12 +242,12 @@
 						</list>
 					</item>
 				</list>
+				<message slot="description" state="info" size="small">The wiring (children set the master, the master sets the children) is a few lines on <text code>ui-changed</text>: see "Grouped checkboxes" on the Usage tab. Here the states are set in markup.</message>
 			</example>
 		</>
 
 		<section label="One-Way Choices" sticky="stack" collapsible dividing>
 			<example "One-Way Choices" description="A disabled checkbox can't be used at all; a read-only one shows its state but can't change it.">
-				<message slot="description" size="small" class="site-not-ported">Not ported: Fomantic's <text code>uncheckable: false</text> setting (check once, never uncheck) -- veto the change in a <text code>ui-changed</text> listener instead (Usage tab, "Vetoing a change").</message>
 				<form>
 					<field>
 						<checkbox disabled>Disabled</checkbox>
@@ -257,6 +256,7 @@
 						<checkbox readonly>Read-only</checkbox>
 					</field>
 				</form>
+				<message slot="description" size="small" class="site-not-ported">Not ported: Fomantic's <text code>uncheckable: false</text> setting (check once, never uncheck) -- veto the change in a <text code>ui-changed</text> listener instead (Usage tab, "Vetoing a change").</message>
 			</example>
 		</>
 

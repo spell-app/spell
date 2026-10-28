@@ -21,7 +21,6 @@
 	<section label="Types">
 		<section label="Table" sticky="stack" collapsible dividing>
 			<example "Table" description="A standard table:  `<ui-table>` around a native `<table>`. Rows, cells and their class words (positive, right aligned, collapsing ...) stay plain HTML.">
-				<message slot="description" state="positive" size="small">Tables will automatically stack their layouts for mobile devices. To disable this behavior, use <text code>unstackable</text>, or <text code>stackable="tablet"</text> to allow responsive adjustments for tablet.</message>
 				<table celled>
 					<row header>
 						<cell>Name</cell>
@@ -44,6 +43,7 @@
 						<cell data-label="Job">Designer</cell>
 					</row>
 				</table>
+				<message slot="description" state="positive" size="small">Tables will automatically stack their layouts for mobile devices. To disable this behavior, use <text code>unstackable</text>, or <text code>stackable="tablet"</text> to allow responsive adjustments for tablet.</message>
 			</example>
 			<example "Table">
 				<html>
@@ -192,7 +192,6 @@
 
 		<section label="Definition" sticky="stack" collapsible dividing>
 			<example "Definition" description="A table may be formatted to emphasize a first column that defines a rows content.">
-				<message slot="description" state="info" size="small">Definition tables are designed to display on a single background color. You can adjust this with the <text code>--ui-table-definition-page-background</text> token, or by giving the first cell a background.</message>
 				<table definition>
 					<row header>
 						<cell/>
@@ -210,6 +209,7 @@
 						<cell>Sets the current star rating to specified value</cell>
 					</row>
 				</table>
+				<message slot="description" state="info" size="small">Definition tables are designed to display on a single background color. You can adjust this with the <text code>--ui-table-definition-page-background</text> token, or by giving the first cell a background.</message>
 			</example>
 			<example "Definition">
 				<html>
@@ -291,10 +291,6 @@
 
 		<section label="Structured" sticky="stack" collapsible dividing>
 			<example "Structured" description="A table can be formatted to display complex structured data">
-				<message slot="description" state="info" size="small">
-					<text paragraph>Tables use <text code>border-collapse: separate</text> to allow for tables to receive styles that cannot usually be applied to tables like <text code>border-radius</text>. However this can cause some cell borders to appear missing with complex layouts that use <text code>rowspan</text> or <text code>colspan</text> and rows with varying column count.</text>
-					<text paragraph>A <text code>structured</text> table does not support some style features, but can correctly display all valid HTML table content.</text>
-				</message>
 				<html>
 					<ui-table celled appearance="structured">
 						<table>
@@ -354,6 +350,10 @@
 						</table>
 					</ui-table>
 				</html>
+				<message slot="description" state="info" size="small">
+					<text paragraph>Tables use <text code>border-collapse: separate</text> to allow for tables to receive styles that cannot usually be applied to tables like <text code>border-radius</text>. However this can cause some cell borders to appear missing with complex layouts that use <text code>rowspan</text> or <text code>colspan</text> and rows with varying column count.</text>
+					<text paragraph>A <text code>structured</text> table does not support some style features, but can correctly display all valid HTML table content.</text>
+				</message>
 			</example>
 		</>
 	</>
@@ -703,7 +703,6 @@
 
 		<section label="Marked" sticky="stack" collapsible dividing>
 			<example "Marked" description="A cell or row can be marked by a colored left or right border.">
-				<message slot="description" state="warning" size="small">Follow the class order: first the color name, then <text code>marked</text>. This is to support <link link="#examples-states-colored-and-marked">colored and marked</link> cells.</message>
 				<html>
 					<ui-table celled>
 						<table>
@@ -739,16 +738,12 @@
 						</table>
 					</ui-table>
 				</html>
+				<message slot="description" state="warning" size="small">Follow the class order: first the color name, then <text code>marked</text>. This is to support <link link="#examples-states-colored-and-marked">colored and marked</link> cells.</message>
 			</example>
 		</>
 
 		<section label="Colored and Marked" sticky collapsible dividing id="states-colored-and-marked">
 			<example "Colored and Marked">
-				<text slot="description" paragraph>
-					If you need colored cells which are also marked at the same time in a different color, you have to follow a specific class order and add the <text code>colored</text> class to the cell color.
-
-					For example <text code>red colored right blue marked</text> .
-				</text>
 				<html>
 					<ui-table celled>
 						<table>
@@ -769,6 +764,11 @@
 						</table>
 					</ui-table>
 				</html>
+				<text slot="description" paragraph>
+					If you need colored cells which are also marked at the same time in a different color, you have to follow a specific class order and add the <text code>colored</text> class to the cell color.
+
+					For example <text code>red colored right blue marked</text> .
+				</text>
 			</example>
 		</>
 	</>
@@ -807,7 +807,6 @@
 
 		<section label="Fixed" sticky="stack" collapsible dividing>
 			<example "Fixed">
-				<text slot="description" paragraph>A table can use <link link="https://developer.mozilla.org/en-US/docs/Web/CSS/table-layout"><text code>table-layout: fixed</text></link>, a special faster form of table rendering that does not resize table cells based on content.</text>
 				<table fixed>
 					<row header>
 						<cell>Name</cell>
@@ -830,9 +829,9 @@
 						<cell>Jill is an alright girl but sometimes you don't really have enough room to describe everything you'd like</cell>
 					</row>
 				</table>
+				<text slot="description" paragraph>A table can use <link link="https://developer.mozilla.org/en-US/docs/Web/CSS/table-layout"><text code>table-layout: fixed</text></link>, a special faster form of table rendering that does not resize table cells based on content.</text>
 			</example>
 			<example "Fixed">
-				<message slot="description" state="info" size="small">Fixed <text code>single-line</text> tables will automatically ensure content that does not fit in a single line will receive "..." ellipsis</message>
 				<table single-line fixed celled>
 					<row header>
 						<cell>Name</cell>
@@ -855,6 +854,7 @@
 						<cell>Shorter description</cell>
 					</row>
 				</table>
+				<message slot="description" state="info" size="small">Fixed <text code>single-line</text> tables will automatically ensure content that does not fit in a single line will receive "..." ellipsis</message>
 			</example>
 		</>
 
@@ -983,7 +983,6 @@
 
 		<section label="Selectable Cell" sticky="stack" collapsible dividing>
 			<example "Selectable Cell" description="A table cell can be selectable.">
-				<message slot="description" state="info" size="small">Using an <text code>a</text> link inside a selectable cell will automatically make the hit box the entire cell area. By default links will inherit their cell color.</message>
 				<html>
 					<ui-table celled>
 						<table>
@@ -1041,6 +1040,7 @@
 						</table>
 					</ui-table>
 				</html>
+				<message slot="description" state="info" size="small">Using an <text code>a</text> link inside a selectable cell will automatically make the hit box the entire cell area. By default links will inherit their cell color.</message>
 			</example>
 		</>
 
@@ -1228,7 +1228,6 @@
 				</table>
 			</example>
 			<example "Basic">
-				<message slot="description" state="info" size="small">Very basic tables have loose padding unless they are also <link link="#examples-variations-sortable"><text code>sortable</text></link> or <link link="#examples-variations-striped"><text code>striped</text></link>.</message>
 				<table appearance="very-basic">
 					<row header>
 						<cell>Name</cell>
@@ -1251,12 +1250,12 @@
 						<cell>None</cell>
 					</row>
 				</table>
+				<message slot="description" state="info" size="small">Very basic tables have loose padding unless they are also <link link="#examples-variations-sortable"><text code>sortable</text></link> or <link link="#examples-variations-striped"><text code>striped</text></link>.</message>
 			</example>
 		</>
 
 		<section label="Collapsing Cell" sticky="stack" collapsible dividing>
 			<example "Collapsing Cell" description="A cell can be collapsing so that it only uses as much space as required.">
-				<message slot="description" state="warning" size="small" icon="warning">To ensure icons don't wrap to a separate line you must either specify <text code>collapsing</text> on the widest row in the collapsing column, or on all rows.</message>
 				<html>
 					<ui-table>
 						<table>
@@ -1280,6 +1279,7 @@
 						</table>
 					</ui-table>
 				</html>
+				<message slot="description" state="warning" size="small" icon="warning">To ensure icons don't wrap to a separate line you must either specify <text code>collapsing</text> on the widest row in the collapsing column, or on all rows.</message>
 			</example>
 		</>
 
@@ -1327,7 +1327,6 @@
 
 		<section label="Column Width" sticky="stack" collapsible dividing id="variations-column-width">
 			<example "Column Width" description="A table can specify the width of individual columns independently.">
-				<message slot="description" state="info" size="small">Tables use a 16 column grid similar to <link link="/components/ui/ui-grid.html">the grid</link>: <text code>class="ten wide"</text> on a header cell.</message>
 				<html>
 					<ui-table>
 						<table>
@@ -1360,6 +1359,7 @@
 						</table>
 					</ui-table>
 				</html>
+				<message slot="description" state="info" size="small">Tables use a 16 column grid similar to <link link="/components/ui/ui-grid.html">the grid</link>: <text code>class="ten wide"</text> on a header cell.</message>
 			</example>
 		</>
 
@@ -1844,7 +1844,6 @@
 
 		<section label="Sortable" sticky="stack" collapsible dividing id="variations-sortable">
 			<example "Sortable" description="A table may allow a user to sort contents by clicking on a table header.">
-				<message slot="description" state="info" size="small">No plugin needed:  a header click (or Enter / Space) fires <text code>ui-sorting</text>, and marks the column with sort-column, sort-direction and aria-sort. <text code>client-sort</text> also reorders the rows; click a header to try it.</message>
 				<html>
 					<ui-table sortable celled client-sort>
 						<table>
@@ -1882,6 +1881,7 @@
 						</table>
 					</ui-table>
 				</html>
+				<message slot="description" state="info" size="small">No plugin needed:  a header click (or Enter / Space) fires <text code>ui-sorting</text>, and marks the column with sort-column, sort-direction and aria-sort. <text code>client-sort</text> also reorders the rows; click a header to try it.</message>
 			</example>
 		</>
 
@@ -2210,8 +2210,6 @@
 
 		<section label="Scrolling" sticky="stack" collapsible dividing>
 			<example "Scrolling" description="A table body can scroll vertically: `scrolling`, with the head and foot stuck.">
-				<message slot="description" state="warning" size="small">Some table variants like <link link="#examples-variations-column-width">column width</link> or <link link="#examples-variations-single-line">single line</link> do not work with a scrolling table. If you need such combinations use a <link link="#examples-variations-stuck">stuck table</link> instead.</message>
-				<message slot="description" state="info" size="small">Add <text code>resizable</text> and a native resize drag handler will appear to the bottom right of the table body.</message>
 				<table unstackable celled scrolling aria-label="People">
 					<row header>
 						<cell>Name</cell>
@@ -2314,6 +2312,8 @@
 						<cell>2 Job-Types</cell>
 					</row>
 				</table>
+				<message slot="description" state="warning" size="small">Some table variants like <link link="#examples-variations-column-width">column width</link> or <link link="#examples-variations-single-line">single line</link> do not work with a scrolling table. If you need such combinations use a <link link="#examples-variations-stuck">stuck table</link> instead.</message>
+				<message slot="description" state="info" size="small">Add <text code>resizable</text> and a native resize drag handler will appear to the bottom right of the table body.</message>
 			</example>
 			<example "Scrolling" description="A scrolling table optionally supports predefined heights:  `scrolling` is long, very long, short or very short.">
 				<table scrolling="long" unstackable celled aria-label="People, long">
@@ -2538,7 +2538,6 @@
 
 		<section label="Stuck" sticky="stack" collapsible dividing id="variations-stuck">
 			<example "Stuck" description="A table can scroll horizontally, with its head, foot, first or last column staying stuck (`stuck`).  You can freely stick any combination like `stuck=\"head first\"`, `\"foot first last\"`, `\"head foot first\"`, `\"first last\"`, etc.">
-				<message slot="description" state="info" size="small">A stuck table possibly needs to be wrapped into an overflowing container like a <link link="/components/ui/ui-container.html">scrolling container</link> or <link link="/components/ui/ui-segment.html">scrolling segment</link>. If you don't want an extra wrapper, use <text code>overflowing</text> on the table; this only works if the table's columns exceed the available width.</message>
 				<container scrolling="short">
 					<table stuck="head foot first last" unstackable celled aria-label="Jobs">
 						<row header>
@@ -2663,6 +2662,7 @@
 						</row>
 					</table>
 				</container>
+				<message slot="description" state="info" size="small">A stuck table possibly needs to be wrapped into an overflowing container like a <link link="/components/ui/ui-container.html">scrolling container</link> or <link link="/components/ui/ui-segment.html">scrolling segment</link>. If you don't want an extra wrapper, use <text code>overflowing</text> on the table; this only works if the table's columns exceed the available width.</message>
 			</example>
 		</>
 	</>

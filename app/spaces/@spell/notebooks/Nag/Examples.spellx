@@ -62,7 +62,6 @@
 	<section label="Groups">
 		<section label="Nags" sticky="stack" collapsible dividing>
 			<example "Nags" description="A group of nags can be formatted to appear together.">
-				<message slot="description" size="small" class="site-not-ported">Not ported: the <text code>.ui.nags</text> group (several nags joined in one bar) -- here they simply stack, each with its own close icon.</message>
 				<nag>
 					<text class="title">First nag</text>
 				</nag>
@@ -72,6 +71,7 @@
 				<nag>
 					<text class="title">Third nag</text>
 				</nag>
+				<message slot="description" size="small" class="site-not-ported">Not ported: the <text code>.ui.nags</text> group (several nags joined in one bar) -- here they simply stack, each with its own close icon.</message>
 			</example>
 		</>
 	</>

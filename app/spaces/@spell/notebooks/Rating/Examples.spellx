@@ -78,7 +78,6 @@
 
 		<section label="Partial Ratings" sticky="stack" collapsible dividing>
 			<example "Partial Ratings" description="You can use decimal values for showing partially filled ratings.">
-				<message slot="description" state="info" size="small">A fractional <text code>value</text> only draws a partly filled icon: no radio is chosen until the user rates, and the group is described as "Rated 2.5 of 5". Fomantic's jQuery and browser caveats don't apply: every supported browser draws it.</message>
 				<rating color="black" value="0.5" max-rating="5" aria-label="Black"/>
 				<space/>
 				<rating color="pink" value="1.25" max-rating="5" aria-label="Pink"/>
@@ -94,6 +93,7 @@
 				<rating color="blue" value="4.375" max-rating="5" aria-label="Blue"/>
 				<space/>
 				<rating color="brown" value="4.75" max-rating="5" aria-label="Brown"/>
+				<message slot="description" state="info" size="small">A fractional <text code>value</text> only draws a partly filled icon: no radio is chosen until the user rates, and the group is described as "Rated 2.5 of 5". Fomantic's jQuery and browser caveats don't apply: every supported browser draws it.</message>
 			</example>
 		</>
 	</>

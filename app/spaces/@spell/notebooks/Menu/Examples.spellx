@@ -33,7 +33,6 @@
 			<!-- GAP I69:  opened, the popup collapses its `<ui-grid>` to a sliver. -->
 			<!-- GAP I53:  Fomantic's `ui right dropdown item` is a dropdown that IS the item;  ours is a `<ui-dropdown>` (a select) inside an item. -->
 			<example "Menu">
-				<message slot="description" state="info" size="small">Menus can hold dropdowns and popups: a <text code>&lt;ui-dropdown&gt;</text> inside an item, a <text code>&lt;ui-popup&gt;</text> after the item it opens from. See the Dropdown and Popup pages.</message>
 				<menu appearance="text" aria-label="School">
 					<item>
 						<image src="/components/ui/images/new-school.jpg" alt="New School" size="mini"/>
@@ -79,6 +78,7 @@
 						</item>
 					</menu>
 				</menu>
+				<message slot="description" state="info" size="small">Menus can hold dropdowns and popups: a <text code>&lt;ui-dropdown&gt;</text> inside an item, a <text code>&lt;ui-popup&gt;</text> after the item it opens from. See the Dropdown and Popup pages.</message>
 			</example>
 
 			<!-- GAP I53:  the wrench dropdown's nested `New` sub-menu, divider and header have no `<ui-dropdown>` equivalent (a select, not an action menu). -->
@@ -191,7 +191,6 @@
 
 			<!-- GAP I79:  the stretched column doesn't grow its `<ui-segment>`, so the segment doesn't match the tabs' height. -->
 			<example "Tabbed">
-				<message slot="description" state="info" size="small">To make a vertical tabbed menu appear seamlessly attached to the related segment, use left / right <text code>attached</text> grid columns and a <text code>seamless attached</text> segment.</message>
 				<grid>
 					<column width="4" attach="left">
 						<menu direction="vertical" fluid appearance="tabular" aria-label="Vertical tabbed">
@@ -205,6 +204,7 @@
 						<segment seamless attach="right">This is an stretched grid column. This segment will always match the tab height</segment>
 					</column>
 				</grid>
+				<message slot="description" state="info" size="small">To make a vertical tabbed menu appear seamlessly attached to the related segment, use left / right <text code>attached</text> grid columns and a <text code>seamless attached</text> segment.</message>
 			</example>
 			<example "Tabbed" description="`position=\"right\"` opens a vertical tabbed menu's tabs to the left, for a menu on the content's right.">
 				<grid>
@@ -283,7 +283,6 @@
 		<!-- GAP I81:  the item labels sit inline after the text, not floated right. -->
 		<section label="Vertical Menu" sticky="stack" collapsible dividing>
 			<example "Vertical Menu" description="A vertical menu displays elements vertically.">
-				<message slot="description" state="warning" size="small">A vertical menu's width defaults to an arbitrary size. To have it fit your content more precisely use <text code>fluid</text> in a <text code>&lt;ui-grid&gt;</text> column.</message>
 				<menu direction="vertical" aria-label="Mail">
 					<item link="#inbox" color="teal" selected>Inbox <label color="teal" pointing="left">1</label></item>
 					<item link="#spam">Spam <label>51</label></item>
@@ -292,6 +291,7 @@
 						<input appearance="transparent" icon="search" placeholder="Search mail..." aria-label="Search mail"/>
 					</item>
 				</menu>
+				<message slot="description" state="warning" size="small">A vertical menu's width defaults to an arbitrary size. To have it fit your content more precisely use <text code>fluid</text> in a <text code>&lt;ui-grid&gt;</text> column.</message>
 			</example>
 			<example "Vertical Menu">
 				<menu appearance="secondary" direction="vertical" aria-label="Account">
@@ -568,11 +568,11 @@
 	<section label="States">
 		<section label="Hover" sticky="stack" collapsible dividing>
 			<example "Hover" description="A menu item can be hovered.">
-				<message slot="description" state="warning" size="small">Menu items are only hoverable if they are links (<text code>href</text>) or buttons (<text code>link</text>).</message>
 				<menu padding="compact" aria-label="Hover">
 					<item link="#link">A link</item>
 					<item appearance="link">div Link</item>
 				</menu>
+				<message slot="description" state="warning" size="small">Menu items are only hoverable if they are links (<text code>href</text>) or buttons (<text code>link</text>).</message>
 			</example>
 		</>
 
@@ -615,7 +615,6 @@
 
 		<section label="Stackable" sticky="stack" collapsible dividing>
 			<example "Stackable" description="A menu can stack at mobile resolutions.">
-				<message slot="description" state="info" size="small">Stackable menus are intended to be used with only simple menu content.</message>
 				<menu stackable aria-label="Stackable">
 					<item>
 						<image src="/components/ui/images/logo.png" alt="Logo" size="mini"/>
@@ -624,6 +623,7 @@
 					<item link="#testimonials">Testimonials</item>
 					<item link="#sign-in">Sign-in</item>
 				</menu>
+				<message slot="description" state="info" size="small">Stackable menus are intended to be used with only simple menu content.</message>
 			</example>
 		</>
 
@@ -1214,7 +1214,6 @@
 
 			<section label="Wrapping" sticky="stack" collapsible dividing>
 				<example "Wrapping" description="Menu items can automatically wrap on responsive layouts.">
-					<message slot="description" state="info" size="small">The optional <text code>wrapped</text> word squares the corners where the lines meet. CSS can't tell whether items actually wrap, so set it when you know they do.</message>
 					<menu inverted wrap color="green" wrapping aria-label="Numbers">
 						<item link="#1" selected>One</item>
 						<item link="#2">Two</item>
@@ -1237,6 +1236,7 @@
 						<item link="#19">Nineteen</item>
 						<item link="#20">Twenty</item>
 					</menu>
+					<message slot="description" state="info" size="small">The optional <text code>wrapped</text> word squares the corners where the lines meet. CSS can't tell whether items actually wrap, so set it when you know they do.</message>
 				</example>
 			</>
 

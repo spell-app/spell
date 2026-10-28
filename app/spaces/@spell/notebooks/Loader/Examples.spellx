@@ -17,13 +17,13 @@
 		<!-- GAP I43:  an active <ui-dimmer> neither shows nor inverts its <ui-loader>:  every loader in a dimmer says `visible` (and `inverted` in a dark one). -->
 		<section label="Loader" sticky="stack" collapsible dividing>
 			<example "Loader" description="A loader.">
-				<message slot="description" state="info" size="small">Loaders are hidden unless <text code>visible</text>, even inside a <text code>&lt;ui-dimmer&gt;</text>.</message>
 				<segment>
 					<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
 					<dimmer visible>
 						<loader visible inverted/>
 					</dimmer>
 				</segment>
+				<message slot="description" state="info" size="small">Loaders are hidden unless <text code>visible</text>, even inside a <text code>&lt;ui-dimmer&gt;</text>.</message>
 			</example>
 		</>
 
@@ -61,11 +61,11 @@
 
 		<section label="Active" sticky="stack" collapsible dividing>
 			<example "Active" description="A loader can be active (`visible`).">
-				<message slot="description" state="info" size="small">An active loader may not be easy to see without a <text code>&lt;ui-dimmer&gt;</text>.</message>
 				<segment>
 					<loader visible/>
 					<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
 				</segment>
+				<message slot="description" state="info" size="small">An active loader may not be easy to see without a <text code>&lt;ui-dimmer&gt;</text>.</message>
 			</example>
 		</>
 
@@ -189,7 +189,6 @@
 				</segment>
 			</example>
 			<example "Inverted">
-				<message slot="description" state="info" size="small">Inside an <text code>inverted</text> (light) dimmer a loader keeps its normal colours: no <text code>inverted</text> on the loader.</message>
 				<segment>
 					<dimmer visible inverted>
 						<loader visible size="mini" text>Loading</loader>
@@ -217,6 +216,7 @@
 					<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
 					<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
 				</segment>
+				<message slot="description" state="info" size="small">Inside an <text code>inverted</text> (light) dimmer a loader keeps its normal colours: no <text code>inverted</text> on the loader.</message>
 			</example>
 		</>
 

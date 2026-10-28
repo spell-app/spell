@@ -24,7 +24,6 @@
 	<section label="Types">
 		<section label="Card" sticky="stack" collapsible dividing>
 			<example "Card" description="A single card.">
-				<message slot="description" state="warning" size="small">To ensure cards are equal height use the plural, <text code>&lt;ui-cards&gt;</text>: a group lays its cards out with flex, so cards in the same row match heights.</message>
 				<card>
 					<image alt="Kristy" src="/components/ui/images/avatar2/large/kristy.png"/>
 					<content>
@@ -36,6 +35,7 @@
 						<link link="#card-kristy-friends"><icon name="user"/> 22 Friends</link>
 					</extra>
 				</card>
+				<message slot="description" state="warning" size="small">To ensure cards are equal height use the plural, <text code>&lt;ui-cards&gt;</text>: a group lays its cards out with flex, so cards in the same row match heights.</message>
 			</example>
 
 			<!-- I125:  Fomantic's `right floated` meta and likes:  a `<ui-stack>` puts them at the right. -->
@@ -63,7 +63,6 @@
 
 		<section label="Cards" sticky="stack" collapsible dividing>
 			<example "Cards" description="A group of cards: `<ui-cards>`.">
-				<message slot="description" state="info" size="small">Cards are designed to be flexible to your content: <text code>&lt;ui-content&gt;</text> blocks can include any custom elements related to your content.</message>
 				<cards>
 					<card>
 						<content>
@@ -94,6 +93,7 @@
 						</extra>
 					</card>
 				</cards>
+				<message slot="description" state="info" size="small">Cards are designed to be flexible to your content: <text code>&lt;ui-content&gt;</text> blocks can include any custom elements related to your content.</message>
 			</example>
 			<example "Cards" description="A group hands its variations to every card in it:  here `link`.">
 				<cards appearance="link">
@@ -167,7 +167,6 @@
 		<!-- GAP I126:  a <ui-reveal> (or a dimmed image) isn't laid out as the card's image;  the plain image shows. -->
 		<section label="Image" sticky="stack" collapsible dividing>
 			<example "Image" description="A card can contain an image: a slotted `<img>` spans the card's width.">
-				<message slot="description" state="info" size="small">Fomantic's cards use a reveal or a dimmer to show more on hover; ours can't yet (see the notes below), so this card shows the plain image.</message>
 				<card>
 					<image alt="Jenny Hess" src="/components/ui/images/avatar/large/jenny.jpg"/>
 					<content>
@@ -178,6 +177,7 @@
 						<link link="#card-members"><icon name="users"/> 2 Members</link>
 					</extra>
 				</card>
+				<message slot="description" state="info" size="small">Fomantic's cards use a reveal or a dimmer to show more on hover; ours can't yet (see the notes below), so this card shows the plain image.</message>
 			</example>
 		</>
 		<message size="small" class="site-not-ported">Not ported: a dimmer over a card's image (Fomantic's <text code>blurring dimmable image</> special cards) -- left out of the card sheet on purpose (dimmer looks inside cards), and <text code>&lt;ui-image&gt;</> holds no dimmer (I55).</>
@@ -212,7 +212,6 @@
 
 		<section label="Metadata" sticky="stack" collapsible dividing>
 			<example "Metadata" description="A card can contain content metadata.">
-				<message slot="description" state="info" size="small">You can include any amount of metadata, in your own markup: the children of a <text code>&lt;ui-meta&gt;</text> are spaced for you.</message>
 				<card>
 					<content>
 						<header>Cute Dog</header>
@@ -223,13 +222,13 @@
 						<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
 					</content>
 				</card>
+				<message slot="description" state="info" size="small">You can include any amount of metadata, in your own markup: the children of a <text code>&lt;ui-meta&gt;</text> are spaced for you.</message>
 			</example>
 		</>
 
 		<!-- GAP I126:  an image link (`<a class="image" href>`) isn't laid out as the card's image;  the image is plain. -->
 		<section label="Link" sticky="stack" collapsible dividing>
 			<example "Link" description="A card can contain links as images, headers, or inside content.">
-				<message slot="description" state="info" size="small">To make the entire content of a card a link, see the Link Card variation below.</message>
 				<card>
 					<image alt="Steve Jobes" src="/components/ui/images/avatar/large/steve.jpg"/>
 					<content>
@@ -239,12 +238,12 @@
 						</meta>
 					</content>
 				</card>
+				<message slot="description" state="info" size="small">To make the entire content of a card a link, see the Link Card variation below.</message>
 			</example>
 		</>
 
 		<section label="Buttons" sticky="stack" collapsible dividing>
 			<example "Buttons" description="A card can contain buttons.">
-				<message slot="description" size="small" class="site-not-ported">Not ported: a button attached to the card's bottom edge (<text code>.ui.card &gt; .button</text>). A <text code>&lt;ui-button&gt;</text> element has no box for the card to widen:  put a fluid button in a <text code>&lt;ui-extra&gt;</text>.</message>
 				<cards>
 					<card>
 						<content>
@@ -274,12 +273,12 @@
 						</extra>
 					</card>
 				</cards>
+				<message slot="description" size="small" class="site-not-ported">Not ported: a button attached to the card's bottom edge (<text code>.ui.card &gt; .button</text>). A <text code>&lt;ui-button&gt;</text> element has no box for the card to widen:  put a fluid button in a <text code>&lt;ui-extra&gt;</text>.</message>
 			</example>
 		</>
 
 		<section label="Approval" sticky="stack" collapsible dividing>
 			<example "Approval" description="A card can contain a like or star action.">
-				<message slot="description" size="small" class="site-not-ported">Not ported: the <text code>like</text> / <text code>star</text> icons that colour on hover -- left out of the card sheet on purpose; use real buttons, which take focus and say what they do.</message>
 				<card>
 					<content>
 						<header>Cute Dog</header>
@@ -294,6 +293,7 @@
 						</stack>
 					</extra>
 				</card>
+				<message slot="description" size="small" class="site-not-ported">Not ported: the <text code>like</text> / <text code>star</text> icons that colour on hover -- left out of the card sheet on purpose; use real buttons, which take focus and say what they do.</message>
 			</example>
 		</>
 

@@ -26,12 +26,12 @@
 	<section label="Types">
 		<section label="Tab" sticky="stack" collapsible dividing>
 			<example "Tab" description="A basic tab.">
-				<message slot="description" state="info" size="small">Two tags:  each <text code>&lt;ui-tab&gt;</text> is a pane of content, and <text code>&lt;ui-tabs&gt;</text> draws the row of tabs from its panes' labels. A pane is hidden until it's the selected one;  see the Usage tab.</message>
 				<tabs appearance="tabular" attach="top" aria-label="Tab demo">
 					<tab label="Tab">
 						<text paragraph>The pane:  whatever you put inside the <text code>&lt;ui-tab&gt;</text> shows here.</text>
 					</tab>
 				</tabs>
+				<message slot="description" state="info" size="small">Two tags:  each <text code>&lt;ui-tab&gt;</text> is a pane of content, and <text code>&lt;ui-tabs&gt;</text> draws the row of tabs from its panes' labels. A pane is hidden until it's the selected one;  see the Usage tab.</message>
 			</example>
 		</>
 
@@ -65,16 +65,16 @@
 
 		<section label="Segmented" sticky="stack" collapsible dividing>
 			<example "Segmented" description="The tabs can be a segmented control:  one rounded bar, the selected tab filled with colour.">
-				<list slot="description" bulleted>
-					<item><text code>appearance="segmented"</text> turns it on.</item>
-					<item>The fill is the primary colour, or the tabs' <text code>color</text>.</item>
-					<item><text code>appearance</text> takes every look the menu has;  the words in the examples above (<text code>pointing</text>, <text code>text</text> ...) are short forms of it.</item>
-				</list>
 				<tabs appearance="segmented" aria-label="Segmented demo">
 					<tab label="Examples">Examples pane</tab>
 					<tab label="Usage">Usage pane</tab>
 					<tab label="API">API pane</tab>
 				</tabs>
+				<list slot="description" bulleted>
+					<item><text code>appearance="segmented"</text> turns it on.</item>
+					<item>The fill is the primary colour, or the tabs' <text code>color</text>.</item>
+					<item><text code>appearance</text> takes every look the menu has;  the words in the examples above (<text code>pointing</text>, <text code>text</text> ...) are short forms of it.</item>
+				</list>
 			</example>
 		</>
 
@@ -203,25 +203,20 @@
 
 		<section label="Alignment" sticky="stack" collapsible dividing>
 			<example "Alignment" description="`alignment` places the tabs in their row.  A segmented tab list moves as a whole.">
-				<list slot="description" bulleted>
-					<item><text code>left</text>, <text code>center</text> or <text code>right</text>:  packed at that end</item>
-					<item><text code>fluid</text>:  the tabs fill the row</item>
-				</list>
 				<tabs appearance="segmented" align="center" aria-label="Centered demo, segmented">
 					<tab label="Day">Today's numbers</tab>
 					<tab label="Week">This week's numbers</tab>
 					<tab label="Month">This month's numbers</tab>
 				</tabs>
+				<list slot="description" bulleted>
+					<item><text code>left</text>, <text code>center</text> or <text code>right</text>:  packed at that end</item>
+					<item><text code>fluid</text>:  the tabs fill the row</item>
+				</list>
 			</example>
 		</>
 
 		<section label="Equal" sticky="stack" collapsible dividing>
 			<example "Equal" description="`equal` makes every tab the same width, worked out from the tabs themselves:  no count of tabs to keep up to date.">
-				<list slot="description" bulleted>
-					<item>On its own:  each tab as wide as the widest one.</item>
-					<item>With <text code>alignment="fluid"</text>:  each tab an equal share of the row.</item>
-					<item>This site's own tabs (Examples, Usage ...) use both, as a segmented control: <text code>appearance="segmented" alignment="fluid" equal</text>.</item>
-				</list>
 				<tabs appearance="segmented" equal aria-label="Equal demo">
 					<tab label="Bio">Biography</tab>
 					<tab label="Photos and videos">Pictures</tab>
@@ -232,6 +227,11 @@
 					<tab label="Photos and videos">Pictures</tab>
 					<tab label="Friends">Friends</tab>
 				</tabs>
+				<list slot="description" bulleted>
+					<item>On its own:  each tab as wide as the widest one.</item>
+					<item>With <text code>alignment="fluid"</text>:  each tab an equal share of the row.</item>
+					<item>This site's own tabs (Examples, Usage ...) use both, as a segmented control: <text code>appearance="segmented" alignment="fluid" equal</text>.</item>
+				</list>
 			</example>
 		</>
 
@@ -267,18 +267,17 @@
 	<section label="Basic Examples">
 		<section label="Basic Tabs" sticky="stack" collapsible dividing>
 			<example "Basic Tabs" description="Each `<ui-tab>` inside a `<ui-tabs>` is a pane, and its label becomes a tab. No script, and no `data-tab` paths to pair up.">
-				<message slot="description" state="info" size="small">To have a tab visible on page load, give its pane <text code>selected</text> (or set the tabs' <text code>value</text>); otherwise the first enabled pane shows.</message>
 				<tabs appearance="tabular" attach="top" aria-label="Basic tabs demo">
 					<tab label="First">First</tab>
 					<tab label="Second">Second</tab>
 					<tab label="Third">Third</tab>
 				</tabs>
+				<message slot="description" state="info" size="small">To have a tab visible on page load, give its pane <text code>selected</text> (or set the tabs' <text code>value</text>); otherwise the first enabled pane shows.</message>
 			</example>
 		</>
 
 		<section label="Multiple Tab Groups" sticky collapsible dividing>
 			<example "Multiple Tab Groups" description="Every `<ui-tabs>` is its own independent tab group, even nested inside another one's pane.">
-				<message slot="description" size="small" class="site-not-ported">Not ported:  settings to limit a tab group to one part of the page (<text code>context</text>, <text code>childrenOnly</text>) -- a tab set only ever owns its own <text code>&lt;ui-tab&gt;</text> children, so groups never mix.</message>
 				<tabs appearance="secondary" aria-label="Group one">
 					<tab label="First">
 						<tabs appearance="tabular" attach="top" aria-label="First, inner">
@@ -308,6 +307,7 @@
 					<tab label="Fifth" selected>5</tab>
 					<tab label="Sixth">6</tab>
 				</tabs>
+				<message slot="description" size="small" class="site-not-ported">Not ported:  settings to limit a tab group to one part of the page (<text code>context</text>, <text code>childrenOnly</text>) -- a tab set only ever owns its own <text code>&lt;ui-tab&gt;</text> children, so groups never mix.</message>
 			</example>
 		</>
 
@@ -343,7 +343,6 @@
 	<section label="Remote Examples">
 		<section label="Retrieving Remote Content" sticky collapsible dividing>
 			<example "Retrieving Remote Content" description="A `lazy` pane stamps its `<template>` into itself the first time it's shown, so hidden panes cost nothing up front. To fetch content instead, listen for `ui-opened` and fill the pane when `event.detail.first` is true (see Usage).">
-				<message slot="description" size="small" class="site-not-ported">Not ported:  settings that fetch a pane's content from a URL and cache it (<text code>auto</text>, <text code>apiSettings</text>, <text code>cache</text>) -- a fetch is a few lines in a <text code>ui-opened</text> listener, and the pane's <text code>loading</text> shows the spinner meanwhile.</message>
 				<html>
 					<ui-tabs appearance="pointing secondary" aria-label="Lazy demo">
 						<ui-tab label="First">
@@ -364,6 +363,7 @@
 						</ui-tab>
 					</ui-tabs>
 				</html>
+				<message slot="description" size="small" class="site-not-ported">Not ported:  settings that fetch a pane's content from a URL and cache it (<text code>auto</text>, <text code>apiSettings</text>, <text code>cache</text>) -- a fetch is a few lines in a <text code>ui-opened</text> listener, and the pane's <text code>loading</text> shows the spinner meanwhile.</message>
 			</example>
 		</>
 		<message size="small" class="site-not-ported">Not ported:  running the scripts in a pane's fetched HTML (<text code>evaluateScripts</>) -- panes load no remote HTML, so there are no scripts to run.</>

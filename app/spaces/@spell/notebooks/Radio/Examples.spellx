@@ -115,7 +115,6 @@
 		<!-- GAP:  Fomantic styles an invisible checkbox's LABEL as any component (button, message, segment);  ours is a bordered label tinted when chosen. -->
 		<section label="Invisible" sticky="stack" collapsible dividing>
 			<example "Invisible" description="An invisible radio has no box: the label itself is the control, bordered while unchosen and tinted when chosen. Its content can be any markup.">
-				<message slot="description" size="small" class="site-not-ported">Not ported: styling the label as another component (Fomantic's <text code>label class="ui purple button"</text>, or an orange message or teal segment label). The label is in the shadow root, so it can't take another component's classes.</message>
 				<form>
 					<fields grouped>
 						<radio invisible name="invisible-example" value="one"><text bold>Option One</text><space/>I am a radio styled as a bordered label</radio>
@@ -123,6 +122,7 @@
 						<radio invisible name="invisible-example" value="three" selected><text bold>Option Three</text><space/>I am chosen</radio>
 					</fields>
 				</form>
+				<message slot="description" size="small" class="site-not-ported">Not ported: styling the label as another component (Fomantic's <text code>label class="ui purple button"</text>, or an orange message or teal segment label). The label is in the shadow root, so it can't take another component's classes.</message>
 			</example>
 		</>
 	</>

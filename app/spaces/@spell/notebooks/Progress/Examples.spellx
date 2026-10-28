@@ -116,11 +116,11 @@
 		<!-- GAP I29:  no text inside an indeterminate bar;  each bar's words are its `label` instead. -->
 		<section label="Indeterminate" sticky="stack" collapsible dividing>
 			<example "Indeterminate" description="A progress bar can be shown in different indeterminate states:  bare `indeterminate` pulses, or it takes filling, sliding or swinging.">
-				<message slot="description" state="warning" size="small">The <text code>indeterminate</text> progress state is not supposed to be used in combination with multiple progress bars.</message>
 				<progress indeterminate color="blue" label="Pulsating (default)"/>
 				<progress indeterminate="filling" color="blue" label="Filling"/>
 				<progress indeterminate="sliding" color="blue" label="Sliding"/>
 				<progress indeterminate="swinging" color="blue" label="Swinging"/>
+				<message slot="description" state="warning" size="small">The <text code>indeterminate</text> progress state is not supposed to be used in combination with multiple progress bars.</message>
 			</example>
 			<example "Indeterminate" description="Indeterminate progress can also vary in speed:  `speed=\"slow\"` or `\"fast\"`.">
 				<progress indeterminate speed="slow" color="blue" label="Slow"/>
@@ -181,12 +181,12 @@
 
 		<section label="Size" sticky="stack" collapsible dividing>
 			<example "Size" description="A progress bar can vary in size.">
-				<message slot="description" state="info" size="small">Some small sizes may not be able to fit an inlined label.</message>
 				<progress size="tiny" value="20" label="Tiny"/>
 				<progress size="small" value="40" label="Small"/>
 				<progress value="50" label="Standard"/>
 				<progress size="large" value="60" label="Large"/>
 				<progress size="big" value="80" label="Big"/>
+				<message slot="description" state="info" size="small">Some small sizes may not be able to fit an inlined label.</message>
 			</example>
 		</>
 

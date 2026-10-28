@@ -26,7 +26,6 @@
 	<section label="Types">
 		<section label="Form" sticky="stack" collapsible dividing>
 			<example "Form" description="A form: `<ui-form>` around a native `<form>`.">
-				<message slot="description" state="warning" size="small">Looking for validation? It is built in: see Validation on the Usage tab.</message>
 				<form>
 					<field label="First Name">
 						<input id="form-first-name-1" name="first-name" placeholder="First Name"/>
@@ -39,6 +38,7 @@
 					</field>
 					<button type="submit">Submit</button>
 				</form>
+				<message slot="description" state="warning" size="small">Looking for validation? It is built in: see Validation on the Usage tab.</message>
 			</example>
 			<example "Form">
 				<form>
@@ -208,7 +208,6 @@
 
 		<section label="Fields" sticky="stack" collapsible dividing>
 			<example "Fields" description="A set of fields can appear grouped together: `<ui-fields>`.">
-				<message slot="description" state="positive" size="small">Field groups automatically receive responsive styling, swapping to one field per row below 768px of the FORM's width, or of the screen with <text code>stack-with="page"</text> (as on this site). Add <text code>unstackable</text> to keep a row.</message>
 				<form>
 					<fields>
 						<field label="First name">
@@ -222,6 +221,7 @@
 						</field>
 					</fields>
 				</form>
+				<message slot="description" state="positive" size="small">Field groups automatically receive responsive styling, swapping to one field per row below 768px of the FORM's width, or of the screen with <text code>stack-with="page"</text> (as on this site). Add <text code>unstackable</text> to keep a row.</message>
 			</example>
 			<example "Fields" description="`widths=\"3\"` shares the row equally between three fields.">
 				<form>
@@ -257,8 +257,6 @@
 
 		<section label="Text Area" sticky="stack" collapsible dividing>
 			<example "Text Area">
-				<text slot="description" paragraph>A <link target="src-spell-app-dev-ui-components-ui-textarea-html" link="/components/ui/ui-textarea.html">textarea</link> can be used to allow for extended user input: <text code>&lt;ui-textarea&gt;</text>.</text>
-				<message slot="description" state="info" size="small">To specify an approximate text area size use the <text code>rows</text> attribute.</message>
 				<form>
 					<field label="Text">
 						<textarea id="form-text-23"/>
@@ -267,13 +265,13 @@
 						<textarea id="form-short-text-24" rows="2"/>
 					</field>
 				</form>
+				<text slot="description" paragraph>A <link target="src-spell-app-dev-ui-components-ui-textarea-html" link="/components/ui/ui-textarea.html">textarea</link> can be used to allow for extended user input: <text code>&lt;ui-textarea&gt;</text>.</text>
+				<message slot="description" state="info" size="small">To specify an approximate text area size use the <text code>rows</text> attribute.</message>
 			</example>
 		</>
 
 		<section label="Checkbox" sticky="stack" collapsible dividing>
 			<example "Checkbox">
-				<text slot="description" paragraph>A form can contain a <link target="src-spell-app-dev-ui-components-ui-checkbox-html" link="/components/ui/ui-checkbox.html">checkbox</link>.</text>
-				<message slot="description" state="info" size="small">UI checkboxes are special, styled versions of standard HTML checkboxes. They need no script to start.</message>
 				<form>
 					<field inline>
 						<checkbox>Checkbox</checkbox>
@@ -285,12 +283,13 @@
 						<checkbox appearance="toggle">Toggle</checkbox>
 					</field>
 				</form>
+				<text slot="description" paragraph>A form can contain a <link target="src-spell-app-dev-ui-components-ui-checkbox-html" link="/components/ui/ui-checkbox.html">checkbox</link>.</text>
+				<message slot="description" state="info" size="small">UI checkboxes are special, styled versions of standard HTML checkboxes. They need no script to start.</message>
 			</example>
 		</>
 
 		<section label="Radio Checkbox" sticky="stack" collapsible dividing>
 			<example "Radio Checkbox">
-				<text slot="description" paragraph>A form can include a <link target="src-spell-app-dev-ui-components-ui-radio-html" link="/components/ui/ui-radio.html">radio checkbox</link>: <text code>&lt;ui-radio&gt;</text>.</text>
 				<html>
 					<ui-form>
 						<ui-fields inline role="radiogroup" aria-labelledby="form-fruit-label-25">
@@ -325,13 +324,12 @@
 						</ui-fields>
 					</ui-form>
 				</html>
+				<text slot="description" paragraph>A form can include a <link target="src-spell-app-dev-ui-components-ui-radio-html" link="/components/ui/ui-radio.html">radio checkbox</link>: <text code>&lt;ui-radio&gt;</text>.</text>
 			</example>
 		</>
 
 		<section label="Dropdown" sticky="stack" collapsible dividing>
 			<example "Dropdown">
-				<text slot="description" paragraph>A form can contain a <link target="src-spell-app-dev-ui-components-ui-dropdown-html" link="/components/ui/ui-dropdown.html">dropdown</link>.</text>
-				<message slot="description" state="info" size="small">A <text code>&lt;ui-dropdown&gt;</text> is form-associated: its name and value submit with the form, no hidden input needed.</message>
 				<form>
 					<field label="Gender">
 						<dropdown id="form-gender-27" selection placeholder="Gender" name="gender">
@@ -340,6 +338,8 @@
 						</dropdown>
 					</field>
 				</form>
+				<text slot="description" paragraph>A form can contain a <link target="src-spell-app-dev-ui-components-ui-dropdown-html" link="/components/ui/ui-dropdown.html">dropdown</link>.</text>
+				<message slot="description" state="info" size="small">A <text code>&lt;ui-dropdown&gt;</text> is form-associated: its name and value submit with the form, no hidden input needed.</message>
 			</example>
 			<example "Dropdown">
 				<form>
@@ -417,19 +417,17 @@
 
 		<section label="Calendar" sticky="stack" collapsible dividing>
 			<example "Calendar">
-				<text slot="description" paragraph>A form can contain a <link target="src-spell-app-dev-ui-components-ui-calendar-html" link="/components/ui/ui-calendar.html">calendar</link>.</text>
 				<form>
 					<field label="Date">
 						<calendar id="form-date-30" type="date" placeholder="Pick up a date" name="date"/>
 					</field>
 				</form>
+				<text slot="description" paragraph>A form can contain a <link target="src-spell-app-dev-ui-components-ui-calendar-html" link="/components/ui/ui-calendar.html">calendar</link>.</text>
 			</example>
 		</>
 
 		<section label="Message" sticky="stack" collapsible dividing>
 			<example "Message">
-				<text slot="description" paragraph>A form can contain a <link target="src-spell-app-dev-ui-components-ui-message-html" link="/components/ui/ui-message.html">message</link>.</text>
-				<message slot="description" state="info" size="small">A message inside a form is hidden until the form is in its state: info, error, success or warning. A message with no <text code>state</text> always shows.</message>
 				<form>
 					<message heading="We had some issues">
 						<list bulleted>
@@ -438,6 +436,8 @@
 						</list>
 					</message>
 				</form>
+				<text slot="description" paragraph>A form can contain a <link target="src-spell-app-dev-ui-components-ui-message-html" link="/components/ui/ui-message.html">message</link>.</text>
+				<message slot="description" state="info" size="small">A message inside a form is hidden until the form is in its state: info, error, success or warning. A message with no <text code>state</text> always shows.</message>
 			</example>
 		</>
 	</>
@@ -844,7 +844,6 @@
 
 		<section label="Required" sticky="stack" collapsible dividing>
 			<example "Required" description="A field can show that input is mandatory.">
-				<message slot="description" state="info" size="small"><text code>required</text> on a <text code>&lt;ui-field&gt;</text> only draws the asterisk. To enforce it, put <text code>required</text> on the control too, or a <text code>notEmpty</text> rule.</message>
 				<form>
 					<field label="Last name" required>
 						<input id="form-last-name-77" placeholder="Full Name" required/>
@@ -853,6 +852,7 @@
 						<checkbox name="terms">I agree to the terms and conditions</checkbox>
 					</field>
 				</form>
+				<message slot="description" state="info" size="small"><text code>required</text> on a <text code>&lt;ui-field&gt;</text> only draws the asterisk. To enforce it, put <text code>required</text> on the control too, or a <text code>notEmpty</text> rule.</message>
 			</example>
 		</>
 

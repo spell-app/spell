@@ -28,12 +28,12 @@
 
 		<section label="Text Container" sticky="stack" collapsible dividing>
 			<example "Text Container" description="A container can reduce its maximum width to more naturally accommodate a single column of text.">
-				<message slot="description" state="info" size="small">A text container is a simpler markup alternative to using a grid with a single column, and is designed to have a reasonable maximum width for displaying flowing text.</message>
 				<container text>
 					<header level="2">Header</header>
 					<text paragraph>Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa <text bold>strong</text>. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem.</text>
 					<text paragraph>Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede <link link="#text-container">link</link> mollis pretium.</text>
 				</container>
+				<message slot="description" state="info" size="small">A text container is a simpler markup alternative to using a grid with a single column, and is designed to have a reasonable maximum width for displaying flowing text.</message>
 			</example>
 		</>
 	</>
@@ -54,7 +54,6 @@
 
 		<section label="Scrolling" sticky="stack" collapsible dividing>
 			<example "Scrolling" description="A scrolling container has a predefined height to allow its content to be scrollable.">
-				<message slot="description" size="small">Add <text code>resizable</text> to a <text code>scrolling</text> container and a native resize handle appears at its bottom right.</message>
 				<container scrolling aria-label="Scrolling text">
 					<text paragraph>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.</text>
 					<text paragraph>Te eum doming eirmod, nominati pertinacia argumentum ad his. Ex eam alia facete scriptorem, est autem aliquip detraxit at. Usu ocurreret referrentur at, cu epicurei appellantur vix. Cum ea laoreet recteque electram, eos choro alterum definiebas in. Vim dolorum definiebas an. Mei ex natum rebum iisque.</text>
@@ -63,6 +62,7 @@
 					<text paragraph>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.</text>
 					<text paragraph>Te eum doming eirmod, nominati pertinacia argumentum ad his. Ex eam alia facete scriptorem, est autem aliquip detraxit at. Usu ocurreret referrentur at, cu epicurei appellantur vix. Cum ea laoreet recteque electram, eos choro alterum definiebas in. Vim dolorum definiebas an. Mei ex natum rebum iisque.</text>
 				</container>
+				<message slot="description" size="small">Add <text code>resizable</text> to a <text code>scrolling</text> container and a native resize handle appears at its bottom right.</message>
 			</example>
 			<example "Scrolling" description="A scrolling container optionally takes a predefined height:  `scrolling` is `long`, `very long`, `short` or `very short`.">
 				<container scrolling="very short" resizable aria-label="Very short scrolling text">
@@ -76,12 +76,12 @@
 
 		<section label="Fluid" sticky="stack" collapsible dividing>
 			<example "Fluid" description="A fluid container has no maximum width.">
-				<message slot="description" state="info" size="small">Fluid containers are useful for setting text alignment, or other variations on unstyled content.</message>
 				<container fluid>
 					<header level="2">Dogs Roles with Humans</header>
 					<text paragraph>Domestic dogs inherited complex behaviors, such as bite inhibition, from their wolf ancestors, which would have been pack hunters with complex body language. These sophisticated forms of social cognition and communication may account for their trainability, playfulness, and ability to fit into human households and social situations.</text>
 					<text paragraph>The dogs' value to early human hunter-gatherers led to them quickly becoming ubiquitous across world cultures. Dogs perform many roles for people, such as hunting, herding, pulling loads, protection, assisting police and military, companionship, and, more recently, aiding handicapped individuals.</text>
 				</container>
+				<message slot="description" state="info" size="small">Fluid containers are useful for setting text alignment, or other variations on unstyled content.</message>
 			</example>
 		</>
 
@@ -122,7 +122,6 @@
 	<section label="In layouts">
 		<section label="Containers Using Grids" sticky collapsible dividing>
 			<example "Containers Using Grids" description="A container can be combined with a grid allowing you to use all of the layout and alignment available for grids, including responsive patterns.">
-				<message slot="description" size="small">Fomantic writes one element, <text code>ui four column doubling stackable grid container</text>;  ours is a grid container around a <text code>&lt;ui-grid&gt;</text>. Our grid responds to the width of its container, not the screen's, so inside this demo frame (under 768px) the stackable grid stacks even on a desktop.</message>
 				<container grid>
 					<grid columns="4" doubling stackable>
 						<column>
@@ -147,6 +146,7 @@
 						</column>
 					</grid>
 				</container>
+				<message slot="description" size="small">Fomantic writes one element, <text code>ui four column doubling stackable grid container</text>;  ours is a grid container around a <text code>&lt;ui-grid&gt;</text>. Our grid responds to the width of its container, not the screen's, so inside this demo frame (under 768px) the stackable grid stacks even on a desktop.</message>
 			</example>
 		</>
 
@@ -177,7 +177,6 @@
 
 		<section label="Container Segment" sticky collapsible dividing>
 			<example "Container Segment" description="A container can be used with a segment.">
-				<message slot="description" size="small">Fomantic writes one element, <text code>ui raised very padded text container segment</text>. Ours is a <text code>text</text> container around a <text code>raised</text> segment.</message>
 				<container text>
 					<segment padding="lg" appearance="raised">
 						<header level="2">Dogs Roles with Humans</header>
@@ -185,6 +184,7 @@
 						<text paragraph>The dogs' value to early human hunter-gatherers led to them quickly becoming ubiquitous across world cultures. Dogs perform many roles for people, such as hunting, herding, pulling loads, protection, assisting police and military, companionship, and, more recently, aiding handicapped individuals.</text>
 					</segment>
 				</container>
+				<message slot="description" size="small">Fomantic writes one element, <text code>ui raised very padded text container segment</text>. Ours is a <text code>text</text> container around a <text code>raised</text> segment.</message>
 			</example>
 		</>
 	</>

@@ -136,7 +136,6 @@
 
 		<section label="Corner" sticky="stack" collapsible dividing>
 			<example "Corner" description="A label can position itself in the corner of an element.">
-				<message slot="description" state="warning" size="small">A corner label sits in the corner of its owner, the nearest positioned box around it: a <text code>&lt;ui-segment&gt;</text> is one, and clips the label to its rounded corner.</message>
 				<grid columns="2">
 					<column>
 						<segment>
@@ -151,6 +150,7 @@
 						</segment>
 					</column>
 				</grid>
+				<message slot="description" state="warning" size="small">A corner label sits in the corner of its owner, the nearest positioned box around it: a <text code>&lt;ui-segment&gt;</text> is one, and clips the label to its rounded corner.</message>
 			</example>
 		</>
 
@@ -216,7 +216,6 @@
 		<!-- GAP I77:  attached labels overlay the paragraph:  the segment doesn't pad the content after them. -->
 		<section label="Attached" sticky="stack" collapsible dividing>
 			<example "Attached" description="A label can attach to a content segment.">
-				<message slot="description" state="warning" size="small">Attached labels try to pad the other content in the owner to make room, but may not get it right in every case; then correct the padding of the other content yourself.</message>
 				<grid columns="3">
 					<column>
 						<segment>
@@ -255,6 +254,7 @@
 						</segment>
 					</column>
 				</grid>
+				<message slot="description" state="warning" size="small">Attached labels try to pad the other content in the owner to make room, but may not get it right in every case; then correct the padding of the other content yourself.</message>
 			</example>
 		</>
 
@@ -271,7 +271,6 @@
 
 		<section label="Floating" sticky="stack" collapsible dividing>
 			<example "Floating" description="A label can float above or below another element.">
-				<message slot="description" state="warning" size="small">A floating label sits on the corner of its owner, the nearest positioned box around it: a menu item is one.</message>
 				<menu padding="compact">
 					<item link="#label" icon="mail">Messages<label color="red" floating>22</label></item>
 					<item link="#label" icon="users">Friends<label color="blue" floating>22</label></item>
@@ -291,6 +290,7 @@
 					<item link="#label" icon="mail">Messages<label color="red" floating="bottom">22 Mails</label></item>
 					<item link="#label" icon="users">Friends<label color="blue" floating="bottom">22 Friends</label></item>
 				</menu>
+				<message slot="description" state="warning" size="small">A floating label sits on the corner of its owner, the nearest positioned box around it: a menu item is one.</message>
 			</example>
 		</>
 

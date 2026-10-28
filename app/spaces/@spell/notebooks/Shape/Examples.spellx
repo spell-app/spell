@@ -92,7 +92,6 @@
 
 		<section label="Text" sticky="stack" collapsible dividing>
 			<example "Text" description="A text shape is formatted to allow for sides of text to be displayed: `text`.">
-				<message slot="description" state="info" size="small" heading="Using Shapes">A shape's sides should have a set width and height, or text may reflow while it turns. Under reduced motion the sides swap at once.</message>
 				<shape id="shape-text" text>
 					<side>
 						<header>Did you know? This side starts visible.</header>
@@ -117,6 +116,7 @@
 						<icon slot="icon" name="retweet" flipped/>
 					</button>
 				</buttons>
+				<message slot="description" state="info" size="small" heading="Using Shapes">A shape's sides should have a set width and height, or text may reflow while it turns. Under reduced motion the sides swap at once.</message>
 			</example>
 			<example "Text" description="A text shape is inline too:  a word that flips to another.  `active-index` picks the side shown first, from 0.">
 				<button commandfor="shape-inline" command="--flip-down" icon="long arrow alternate down">Flip down</button>
@@ -157,7 +157,6 @@
 	<section label="More Examples">
 		<section label="Shape Types" sticky="stack" collapsible dividing>
 			<example "Shape Types" description="Shapes do not have to be regular or have their sides match up in length and width to animate correctly.">
-				<message slot="description" size="small" class="site-not-ported">Not ported: the demo's Auto / Square / Irregular switch -- it swaps classes from Fomantic's docs stylesheet, not the shape's own.</message>
 				<shape id="shape-leaves">
 					<side>
 						<image src="/components/ui/images/leaves/1.png" size="small" alt="A leaf"/>
@@ -182,6 +181,7 @@
 						<icon slot="icon" name="retweet" flipped/>
 					</button>
 				</buttons>
+				<message slot="description" size="small" class="site-not-ported">Not ported: the demo's Auto / Square / Irregular switch -- it swaps classes from Fomantic's docs stylesheet, not the shape's own.</message>
 			</example>
 		</>
 	</>

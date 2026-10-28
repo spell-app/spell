@@ -93,7 +93,6 @@
 	<section label="Variations">
 		<section label="Blurring" sticky="stack" collapsible dividing>
 			<example "Blurring" description="A dimmer can blur its contents: `blurring` blurs and greys what's behind it.">
-				<message slot="description" size="small" class="site-not-ported">Fomantic puts <text code>blurring</text> on the dimmable parent (<text code>ui blurring segment</text>). Ours goes on the dimmer, which blurs through <text code>backdrop-filter</text>.</message>
 				<segment>
 					<dimmer id="dimmer-blurring" blurring/>
 					<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
@@ -103,6 +102,7 @@
 					<button icon="plus" commandfor="dimmer-blurring" command="--show" aria-label="Show"/>
 					<button icon="minus" commandfor="dimmer-blurring" command="--close" aria-label="Hide"/>
 				</buttons>
+				<message slot="description" size="small" class="site-not-ported">Fomantic puts <text code>blurring</text> on the dimmable parent (<text code>ui blurring segment</text>). Ours goes on the dimmer, which blurs through <text code>backdrop-filter</text>.</message>
 			</example>
 			<example "Blurring">
 				<segment>
@@ -168,11 +168,11 @@
 
 		<section label="Dimmer Shades" sticky="stack" collapsible dividing>
 			<example "Dimmer Shades" description="A dimmer can be formatted to have a different depth of background shading: `shade` is medium, light or very light.">
-				<message slot="description" state="info" size="small">Also works in combination with <text code>inverted</text>.</message>
 				<segment>
 					<dimmer shade="medium" visible closedby="none"/>
 					<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
 				</segment>
+				<message slot="description" state="info" size="small">Also works in combination with <text code>inverted</text>.</message>
 			</example>
 			<example "Dimmer Shades">
 				<segment>
@@ -230,13 +230,13 @@
 				</segment>
 			</example>
 			<example "Loaders inside Dimmers">
-				<message slot="description" size="small" class="site-not-ported">Not ported: Fomantic's loader settings (displayLoader, loaderVariation, loaderText). Put the loader you want inside the dimmer.</message>
 				<segment>
 					<dimmer visible closedby="none">
 						<loader text visible inverted speed="slow" color="orange" elastic>Wait a second, please...</loader>
 					</dimmer>
 					<image src="/components/ui/images/wireframe/image.png" size="large" alt=""/>
 				</segment>
+				<message slot="description" size="small" class="site-not-ported">Not ported: Fomantic's loader settings (displayLoader, loaderVariation, loaderText). Put the loader you want inside the dimmer.</message>
 			</example>
 		</>
 	</>

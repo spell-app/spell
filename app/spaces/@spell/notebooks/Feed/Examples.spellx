@@ -100,7 +100,6 @@
 				</feed>
 			</example>
 			<example "Label" description="A `<ui-text>` in the `label` slot.">
-				<message slot="description" size="small" class="site-not-ported">Not ported: Fomantic's <text code>multiline</text> label text (a nudge for a text label that wraps) -- the label box stays one line; keep label texts short.</message>
 				<feed>
 					<event>
 						<text slot="label" color="purple">NEW</text>
@@ -111,6 +110,7 @@
 						<content>Only in selected theaters!</content>
 					</event>
 				</feed>
+				<message slot="description" size="small" class="site-not-ported">Not ported: Fomantic's <text code>multiline</text> label text (a nudge for a text label that wraps) -- the label box stays one line; keep label texts short.</message>
 			</example>
 			<example "Label" description="A `<ui-label>` in the `label` slot.">
 				<feed>
@@ -121,7 +121,6 @@
 				</feed>
 			</example>
 			<example "Label" description="`label` (Fomantic's `data-text`) makes a round label holding the given text.">
-				<message slot="description" state="info" size="small">Add a <text code>color</text> too, and <text code>basic</text> for a variant without background color.</message>
 				<feed>
 					<event label="Run">
 						<content>Run, Forrest, run!</content>
@@ -133,6 +132,7 @@
 						<content>Nap time</content>
 					</event>
 				</feed>
+				<message slot="description" state="info" size="small">Add a <text code>color</text> too, and <text code>basic</text> for a variant without background color.</message>
 			</example>
 		</>
 
@@ -161,7 +161,6 @@
 		<!-- GAP I42:  `<ui-date>` has no `floated`, so Fomantic's right floated date sits above the summary. -->
 		<section label="Additional information" sticky collapsible dividing>
 			<example "Additional information" description="An event can contain additional information like a set of images or text.">
-				<message slot="description" state="info" size="small">Fomantic's <text code>right floated</text> date (to the right of the content block) has no attribute yet: the date sits above the summary.</message>
 				<feed>
 					<event image="../images/avatar/small/helen.jpg">
 						<content>
@@ -183,6 +182,7 @@
 						</content>
 					</event>
 				</feed>
+				<message slot="description" state="info" size="small">Fomantic's <text code>right floated</text> date (to the right of the content block) has no attribute yet: the date sits above the summary.</message>
 			</example>
 		</>
 	</>
@@ -243,7 +243,6 @@
 	<section label="Variations">
 		<section label="Connected" sticky="stack" collapsible dividing>
 			<example "Connected" description="Feed events can be connected to visualize a linear timeline.">
-				<message slot="description" state="info" size="small">Add a <text code>color</text>, <text code>&lt;ui-feed connected color="blue"&gt;</text>, to colour the connection line.</message>
 				<feed connected>
 					<event image="../images/avatar/small/elliot.jpg">
 						<content>
@@ -278,12 +277,12 @@
 						</content>
 					</event>
 				</feed>
+				<message slot="description" state="info" size="small">Add a <text code>color</text>, <text code>&lt;ui-feed connected color="blue"&gt;</text>, to colour the connection line.</message>
 			</example>
 		</>
 
 		<section label="Ordered" sticky="stack" collapsible dividing>
 			<example "Ordered" description="Ordered feeds number their events' labels by themselves. You can again colour the whole feed or each event, and a basic variant is available too.">
-				<message slot="description" state="warning" size="small">With <text code>connected</text> the connection line takes the feed's color. An event's own <text code>color</text> colours both its circle and the line to the next event (Fomantic can colour the label alone).</message>
 				<feed color="orange" ordered connected>
 					<event color="blue">
 						<content>
@@ -306,6 +305,7 @@
 						</content>
 					</event>
 				</feed>
+				<message slot="description" state="warning" size="small">With <text code>connected</text> the connection line takes the feed's color. An event's own <text code>color</text> colours both its circle and the line to the next event (Fomantic can colour the label alone).</message>
 			</example>
 		</>
 

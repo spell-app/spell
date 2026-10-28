@@ -55,10 +55,10 @@
 
 		<section label="Dismissable Block" sticky="stack" collapsible dividing>
 			<example "Dismissable Block" description="A message that the user can choose to hide: `dismissible` adds a close button.">
-				<message slot="description" state="info" size="small">Unlike Fomantic's, the close button works by itself: it fires the cancelable <text code>ui-closing</text>, then the message sets <text code>hidden</text> on itself (see the Usage tab). Reload the page to bring it back.</message>
 				<message dismissible heading="Welcome back!">
 					<text paragraph>This is a special notification which you can dismiss if you're bored with it.</text>
 				</message>
+				<message slot="description" state="info" size="small">Unlike Fomantic's, the close button works by itself: it fires the cancelable <text code>ui-closing</text>, then the message sets <text code>hidden</text> on itself (see the Usage tab). Reload the page to bring it back.</message>
 			</example>
 		</>
 	</>
@@ -96,10 +96,10 @@
 
 		<section label="Visible" sticky="stack" collapsible dividing>
 			<example "Visible" description="A message can be set to visible to force itself to be shown.">
-				<message size="small" slot="description" class="site-not-ported">Not ported: the <text code>visible</text> class -- a message without <text code>hidden</text> is always shown.</message>
 				<message>
 					<text paragraph>You can always see me</text>
 				</message>
+				<message size="small" slot="description" class="site-not-ported">Not ported: the <text code>visible</text> class -- a message without <text code>hidden</text> is always shown.</message>
 			</example>
 		</>
 	</>
@@ -195,10 +195,10 @@
 
 		<section label="Positive / Success" sticky collapsible dividing>
 			<example "Positive / Success" description="A message may be formatted to display a positive message.">
-				<message slot="description" state="info" size="small" icon="attention">Positive / success and negative / error messages use the same colours by default, but each has its own colour token that a theme can tell apart.</message>
 				<message state="positive" dismissible heading="You are eligible for a reward">
 					<text paragraph>Go to your <text bold>special offers</text> page to see now.</text>
 				</message>
+				<message slot="description" state="info" size="small" icon="attention">Positive / success and negative / error messages use the same colours by default, but each has its own colour token that a theme can tell apart.</message>
 			</example>
 			<example "Positive / Success">
 				<message state="success" dismissible heading="Your user registration was successful.">

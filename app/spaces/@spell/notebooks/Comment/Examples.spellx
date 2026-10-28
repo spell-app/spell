@@ -21,7 +21,6 @@
 	<section label="Types">
 		<section label="Comments" sticky="stack" collapsible dividing>
 			<example "Comments" description="A basic list of comments: a `<ui-comments>` inside a comment is its thread of replies, and the `reply` slot takes a reply form.">
-				<message slot="description" state="warning" size="small"><text bold>UI Views</text> provide structured layouts, but do not hook up site specific code. You will need to add your own JavaScript behaviors to hide and show the appropriate forms, for example a reply button opening a reply form.</message>
 				<comments>
 					<header level="3" dividing>Comments</header>
 					<comment>
@@ -87,6 +86,7 @@
 						<button color="blue" labeled icon="pen to square" type="submit">Add Reply</button>
 					</form>
 				</comments>
+				<message slot="description" state="warning" size="small"><text bold>UI Views</text> provide structured layouts, but do not hook up site specific code. You will need to add your own JavaScript behaviors to hide and show the appropriate forms, for example a reply button opening a reply form.</message>
 			</example>
 		</>
 	</>
@@ -146,7 +146,6 @@
 		<!-- GAP I35:  a comment's `reply` slot sits below the whole comment, not beside the avatar. -->
 		<section label="Reply Form" sticky="stack" collapsible dividing>
 			<example "Reply Form" description="A comment can contain a form to reply to a comment. This may have arbitrary content.">
-				<message slot="description" state="info" size="small">A form in a <text code>&lt;ui-comment&gt;</text>'s <text code>reply</text> slot is a nested reply to that comment. One in the <text code>&lt;ui-comments&gt;</text> list's reply slot, after every comment, is a normal reply form.</message>
 				<comments>
 					<comment>
 						<avatar src="/components/ui/images/avatar/small/steve.jpg"/>
@@ -168,6 +167,7 @@
 						</form>
 					</comment>
 				</comments>
+				<message slot="description" state="info" size="small">A form in a <text code>&lt;ui-comment&gt;</text>'s <text code>reply</text> slot is a nested reply to that comment. One in the <text code>&lt;ui-comments&gt;</text> list's reply slot, after every comment, is a normal reply form.</message>
 			</example>
 			<example "Reply Form">
 				<comments>

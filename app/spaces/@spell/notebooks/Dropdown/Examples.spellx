@@ -46,7 +46,6 @@
 
 		<section label="Selection" sticky="stack" collapsible dividing>
 			<example "Selection" description="A dropdown can be used to select between choices in a form:  `selection`, with a name and a placeholder.">
-				<message slot="description" size="small" class="site-not-ported">Not ported: initializing on a native <text code>&lt;select&gt;</text> (write the items instead:  the native fallback IS a select), and <text code>scrollhint</text> (a touch-only scroll animation).</message>
 				<dropdown selection name="pet" placeholder="Pet">
 					<item value="0">Cat</item>
 					<item value="1">Dog</item>
@@ -57,6 +56,7 @@
 					<item value="6">Turtle</item>
 					<item value="7">Parrot</item>
 				</dropdown>
+				<message slot="description" size="small" class="site-not-ported">Not ported: initializing on a native <text code>&lt;select&gt;</text> (write the items instead:  the native fallback IS a select), and <text code>scrollhint</text> (a touch-only scroll animation).</message>
 			</example>
 			<example "Selection" description="Items can lead with an image:  `image`.">
 				<dropdown fluid selection name="user" placeholder="Select Friend">

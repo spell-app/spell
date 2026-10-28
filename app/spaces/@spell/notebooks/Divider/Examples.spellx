@@ -15,16 +15,15 @@
 	<section label="Types">
 		<section label="Divider" sticky="stack" collapsible dividing>
 			<example "Divider" description="A standard divider.">
-				<message slot="description" state="warning" size="small">To add a divider between parts of a grid use a <text code>divided</text> grid (<text code>&lt;ui-grid divided&gt;</text>).</message>
 				<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
 				<divider/>
 				<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+				<message slot="description" state="warning" size="small">To add a divider between parts of a grid use a <text code>divided</text> grid (<text code>&lt;ui-grid divided&gt;</text>).</message>
 			</example>
 		</>
 
 		<section label="Vertical Divider" sticky="stack" collapsible dividing>
 			<example "Vertical Divider" description="A divider can segment content vertically.">
-				<message slot="description" size="small">Vertical dividers need <text code>position: relative</text> on the element that contains them; <text code>&lt;ui-segment&gt;</text> and <text code>&lt;ui-grid&gt;</text> already are.</message>
 				<segment>
 					<grid columns="2" spacing="xl">
 						<column>
@@ -40,11 +39,11 @@
 					</grid>
 					<divider direction="vertical">and</divider>
 				</segment>
+				<message slot="description" size="small">Vertical dividers need <text code>position: relative</text> on the element that contains them; <text code>&lt;ui-segment&gt;</text> and <text code>&lt;ui-grid&gt;</text> already are.</message>
 			</example>
 
 			<!-- GAP I45:  in a stacked grid the vertical divider stays vertical, and the grid's gutters clip the form. -->
 			<example "Vertical Divider">
-				<message slot="description" state="info" size="small">A vertical divider swaps to a horizontal divider at mobile widths when used inside a <text code>stackable</text> grid.</message>
 				<segment placeholder="">
 					<grid columns="2" spacing="xl" stackable>
 						<column>
@@ -64,13 +63,12 @@
 						</column>
 					</grid>
 				</segment>
+				<message slot="description" state="info" size="small">A vertical divider swaps to a horizontal divider at mobile widths when used inside a <text code>stackable</text> grid.</message>
 			</example>
 		</>
 
 		<section label="Horizontal Divider" sticky collapsible dividing>
 			<example "Horizontal Divider" description="A divider can segment content horizontally.">
-				<message slot="description" size="small">Horizontal dividers can also hold an icon (<text code>icon</text>) to label a section of content.</message>
-				<message slot="description" state="info" size="small">Dividers automatically vary the size of their dividing rules to match the length of your text.</message>
 				<segment align="center" appearance="basic">
 					<input icon="search" icon-position="left" placeholder="Order #" aria-label="Order number">
 						<button slot="action" color="blue">Search</button>
@@ -78,6 +76,8 @@
 					<divider direction="horizontal">Or</divider>
 					<button color="green" labeled="right" icon="plus">Create New Order</button>
 				</segment>
+				<message slot="description" size="small">Horizontal dividers can also hold an icon (<text code>icon</text>) to label a section of content.</message>
+				<message slot="description" state="info" size="small">Dividers automatically vary the size of their dividing rules to match the length of your text.</message>
 			</example>
 
 			<!-- GAP I93:  no `header` divider look:  Fomantic's divider headers keep their case in the header font. -->

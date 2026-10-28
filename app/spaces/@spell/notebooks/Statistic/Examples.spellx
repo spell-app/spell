@@ -121,7 +121,6 @@
 
 		<section label="Stackable" sticky="stack" collapsible dividing>
 			<example "Stackable" description="A statistic group can automatically stack rows to a single column on mobile devices.">
-				<message slot="description" state="info" size="small"><text code>stackable</text> answers to the GROUP's width (below 768px), not the window's. This page's example column is narrower than that, so the group shows stacked here even on a wide screen.</message>
 				<statistics stackable>
 					<statistic color="red" value="27" label="Red"/>
 					<statistic color="orange" value="8" label="Orange"/>
@@ -136,6 +135,7 @@
 					<statistic color="brown" value="36" label="Brown"/>
 					<statistic color="grey" value="49" label="Grey"/>
 				</statistics>
+				<message slot="description" state="info" size="small"><text code>stackable</text> answers to the GROUP's width (below 768px), not the window's. This page's example column is narrower than that, so the group shows stacked here even on a wide screen.</message>
 			</example>
 		</>
 

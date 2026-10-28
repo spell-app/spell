@@ -446,7 +446,6 @@
 
 		<section label="Animated" sticky="stack" collapsible dividing>
 			<example "Animated" description="A list can animate to set the current item apart from the list.">
-				<message slot="description" state="info" size="small">Be sure content can fit on one line when using the animated variation, otherwise text content will reflow when hovered.</message>
 				<list hover="indent" vertical-align="middle">
 					<item image="../images/avatar/small/helen.jpg">
 						<content>
@@ -464,6 +463,7 @@
 						</content>
 					</item>
 				</list>
+				<message slot="description" state="info" size="small">Be sure content can fit on one line when using the animated variation, otherwise text content will reflow when hovered.</message>
 			</example>
 		</>
 

@@ -26,7 +26,6 @@
 	<section label="Types">
 		<section label="Page Headers" sticky="stack" collapsible dividing>
 			<example "Page Headers" description="Headers may be oriented to give the hierarchy of a section in the context of the page: `level` renders an h1 ... h6.">
-				<message slot="description" state="info" size="small">Page headings are sized from <text code>--ui-font-size</text> by level and are not affected by surrounding content size.</message>
 				<header level="1">First header</header>
 				<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
 				<header level="2">Second header</header>
@@ -37,12 +36,12 @@
 				<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
 				<header level="5">Fifth header</header>
 				<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+				<message slot="description" state="info" size="small">Page headings are sized from <text code>--ui-font-size</text> by level and are not affected by surrounding content size.</message>
 			</example>
 		</>
 
 		<section label="Content Headers" sticky="stack" collapsible dividing>
 			<example "Content Headers" description="Headers may be oriented to give the importance of a section in the context of the content that surrounds it: `size`.">
-				<message slot="description" state="info" size="small">Content headings are sized with <text code>em</text> and are based on the font-size of their container.</message>
 				<segment appearance="vertical">
 					<header size="huge">Huge Header</header>
 					<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
@@ -55,6 +54,7 @@
 					<header size="tiny">Tiny Header</header>
 					<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
 				</segment>
+				<message slot="description" state="info" size="small">Content headings are sized with <text code>em</text> and are based on the font-size of their container.</message>
 			</example>
 			<example "Content Headers" description="A page header takes a `size` too, which wins over its level.">
 				<header level="2" size="massive">A sized page header</header>
@@ -202,7 +202,6 @@
 				</segment>
 			</example>
 			<example "Seamless attached">
-				<message slot="description" state="warning" size="small">This variant is not available for the bottom header, which doesn't have the attached border. To get a seamless bottom header, make the previous attached element seamless.</message>
 				<segment attach="both">
 					<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
 				</segment>
@@ -210,6 +209,7 @@
 					<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
 				</segment>
 				<header level="3" attach="bottom">Seamless Bottom Attached</header>
+				<message slot="description" state="warning" size="small">This variant is not available for the bottom header, which doesn't have the attached border. To get a seamless bottom header, make the previous attached element seamless.</message>
 			</example>
 		</>
 
@@ -256,7 +256,6 @@
 
 		<section label="Inverted" sticky="stack" collapsible dividing>
 			<example "Inverted" description="A header can have its colors inverted for contrast.">
-				<message slot="description" state="info" size="small">Inverted headers use light versions of the site's colours, adapted to have more contrast on a dark background.</message>
 				<segment inverted>
 					<header level="4" color="red" inverted>Red</header>
 					<header level="4" color="orange" inverted>Orange</header>
@@ -271,6 +270,7 @@
 					<header level="4" color="brown" inverted>Brown</header>
 					<header level="4" color="grey" inverted>Grey</header>
 				</segment>
+				<message slot="description" state="info" size="small">Inverted headers use light versions of the site's colours, adapted to have more contrast on a dark background.</message>
 			</example>
 		</>
 

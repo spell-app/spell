@@ -22,30 +22,30 @@
 	<section label="Types">
 		<section label="Ad" sticky="stack" collapsible dividing>
 			<example "Ad" description="A standard ad.">
-				<message slot="description" size="small">The following example shows basic <link target="_blank" link="https://support.google.com/adsense/answer/181947">AdSense</link> usage: the network's <text code>&lt;ins&gt;</text> goes inside, and its loader script fills it. Your code will vary depending on your ad network.</message>
 				<ad unit="banner">
 					<text data-ad-slot="XXXXXXXXXXXXXXXX" data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" class="adsbygoogle" underline/>
 				</ad>
+				<message slot="description" size="small">The following example shows basic <link target="_blank" link="https://support.google.com/adsense/answer/181947">AdSense</link> usage: the network's <text code>&lt;ins&gt;</text> goes inside, and its loader script fills it. Your code will vary depending on your ad network.</message>
 			</example>
 		</>
 
 		<section label="Common Units" sticky="stack" collapsible dividing>
 			<example "Common Units" description="An advertisement can appear in common ad unit sizes: `unit` takes the unit's words.">
-				<message slot="description" state="info" size="small">These additional examples use the <link link="#examples-variations-test"><text code>test</text></link> variation to appear on the page. <text code>&lt;ui-ad&gt;</text> is best used as a wrapper for third party ad network content like AdSense or DoubleClick.</message>
 				<ad unit="medium rectangle" test="Medium Rectangle"/>
 				<ad unit="banner" test="Banner"/>
 				<ad unit="leaderboard" test="Leaderboard"/>
 				<ad unit="large rectangle" test="Large Rectangle"/>
 				<ad unit="half page" test="Half Page"/>
+				<message slot="description" state="info" size="small">These additional examples use the <link link="#examples-variations-test"><text code>test</text></link> variation to appear on the page. <text code>&lt;ui-ad&gt;</text> is best used as a wrapper for third party ad network content like AdSense or DoubleClick.</message>
 			</example>
 		</>
 
 		<!-- GAP I30:  no `mobile` modifier for other units (Fomantic's `mobile banner`);  only the `mobile leaderboard` / `large mobile banner` units. -->
 		<section label="Mobile" sticky="stack" collapsible dividing>
 			<example "Mobile" description="An ad can use common mobile ad sizes.">
-				<message slot="description" state="info" size="small">Mobile ads will automatically only appear on mobile browser viewports, so this example is empty on a desktop.</message>
 				<ad unit="mobile leaderboard" test="Mobile Leaderboard"/>
 				<ad unit="large mobile banner" test="Large Mobile Banner"/>
+				<message slot="description" state="info" size="small">Mobile ads will automatically only appear on mobile browser viewports, so this example is empty on a desktop.</message>
 			</example>
 		</>
 
@@ -118,10 +118,10 @@
 
 		<section label="Test" sticky="stack" collapsible dividing id="variations-test">
 			<example "Test" description="An advertisement can be formatted to help verify placement.">
-				<message slot="description" state="info" size="small">Set the text of a test placement with <text code>test="..."</text>, Fomantic's <text code>data-text</text>. A bare <text code>test</text> says "Ad", translated with the page's language.</message>
 				<ad unit="medium rectangle" test="Ad Unit 1"/>
 				<ad unit="medium rectangle" test="Ad Unit 2"/>
 				<ad unit="small rectangle" test/>
+				<message slot="description" state="info" size="small">Set the text of a test placement with <text code>test="..."</text>, Fomantic's <text code>data-text</text>. A bare <text code>test</text> says "Ad", translated with the page's language.</message>
 			</example>
 		</>
 

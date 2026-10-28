@@ -64,7 +64,6 @@
 
 			<section label="Pre-Existing" sticky collapsible dividing>
 				<example "Pre-Existing" description="An element can display a popup that is already included in the page.">
-					<message slot="description" size="small" state="info">Every <text code>&lt;ui-popup&gt;</text> is markup already in the page: there is no <text code>data-html</text> string to build one from.</message>
 					<card>
 						<image alt="" src="/components/ui/images/movies/watchmen-horizontal.jpg"/>
 						<content>
@@ -79,6 +78,7 @@
 					<popup heading="User Rating">
 						<rating color="yellow" value="3" readonly/>
 					</popup>
+					<message slot="description" size="small" state="info">Every <text code>&lt;ui-popup&gt;</text> is markup already in the page: there is no <text code>data-html</text> string to build one from.</message>
 				</example>
 			</>
 
@@ -106,9 +106,9 @@
 		<section label="No JavaScript" sticky="stack" collapsible dividing>
 			<section label="Tooltip" sticky="stack" collapsible dividing>
 				<example "Tooltip" description="An element can specify a simple tooltip that can appear without JavaScript via the `data-tooltip` attribute. If the tooltip should be shown inverted, also add the `data-inverted` attribute.">
-					<message slot="description" size="small" state="warning">Tooltips use an element's <text code>::before</text> and <text code>::after</text> pseudo-elements, and screen readers don't reliably announce them. Use them for hints only, and a <text code>&lt;ui-popup&gt;</text> for anything that matters.</message>
 					<button icon="plus" aria-label="Add users" data-tooltip="Add users to your feed"/>
 					<button icon="plus" aria-label="Add users" data-tooltip="Add users to your feed" data-inverted/>
+					<message slot="description" size="small" state="warning">Tooltips use an element's <text code>::before</text> and <text code>::after</text> pseudo-elements, and screen readers don't reliably announce them. Use them for hints only, and a <text code>&lt;ui-popup&gt;</text> for anything that matters.</message>
 				</example>
 			</>
 
@@ -147,7 +147,6 @@
 
 			<section label="Tooltip Size" sticky collapsible dividing>
 				<example "Tooltip Size" description="A tooltip can vary in size via the `data-variation` attribute.">
-					<message slot="description" size="small" state="info">The <text code>data-variation</text> attribute takes several words, just like a class would:  sizes, basic, fixed, multiline, visible and colours.</message>
 					<button data-tooltip="Add users to your feed" data-variation="mini">Mini</button>
 					<button data-tooltip="Add users to your feed" data-variation="tiny">Tiny</button>
 					<button data-tooltip="Add users to your feed" data-variation="small">Small</button>
@@ -161,6 +160,7 @@
 					<button data-inverted data-tooltip="Add users to your feed" data-variation="medium">Medium</button>
 					<button data-inverted data-tooltip="Add users to your feed" data-variation="large">Large</button>
 					<button data-inverted data-tooltip="Add users to your feed" data-variation="huge">Huge</button>
+					<message slot="description" size="small" state="info">The <text code>data-variation</text> attribute takes several words, just like a class would:  sizes, basic, fixed, multiline, visible and colours.</message>
 				</example>
 			</>
 
@@ -175,11 +175,11 @@
 
 			<section label="Multiline Tooltip" sticky collapsible dividing>
 				<example "Multiline Tooltip" description="A tooltip can show multiple lines via line breaks in the attribute and adding `multiline` to the `data-variation` attribute.">
-					<message slot="description" size="small" state="warning">Line breaks in the attribute become tooltip line breaks; a non-breaking space must be the U+A0 character itself, not <text code>&amp;nbsp;</text>.</message>
 					<button data-tooltip="Look, I have multiple lines!
                   -one
                   -two
                   -three" data-position="bottom center" data-variation="multiline">Multiline tooltip</button>
+					<message slot="description" size="small" state="warning">Line breaks in the attribute become tooltip line breaks; a non-breaking space must be the U+A0 character itself, not <text code>&amp;nbsp;</text>.</message>
 				</example>
 			</>
 
@@ -244,17 +244,16 @@
 
 		<section label="Width" sticky="stack" collapsible dividing>
 			<example "Width" description="A popup can be extra wide to allow for longer content: `wide`, `wide=\"very\"`.">
-				<message slot="description" size="small" state="info">A popup's width is capped by its maximum width, so short content stays narrow even when it is <text code>wide</text>. Add <text code>fixed</text> to make it always that wide;  the CSS-only tooltip takes these in its <text code>data-variation</text>:  fixed, wide fixed and very wide fixed.</message>
 				<icon name="heart" aria-label="Wide" appearance="circular link"/>
 				<popup wide label="Hello. This is a wide pop-up which allows for lots of content with additional space. You can fit a lot of words here and the paragraphs will be pretty wide."/>
 				<icon name="heart" aria-label="Very wide" appearance="circular link"/>
 				<popup wide="very" label="Hello. This is a very wide pop-up which allows for lots of content with additional space. You can fit a lot of words here and the paragraphs will be pretty wide."/>
+				<message slot="description" size="small" state="info">A popup's width is capped by its maximum width, so short content stays narrow even when it is <text code>wide</text>. Add <text code>fixed</text> to make it always that wide;  the CSS-only tooltip takes these in its <text code>data-variation</text>:  fixed, wide fixed and very wide fixed.</message>
 			</example>
 		</>
 
 		<section label="Fluid" sticky="stack" collapsible dividing>
 			<example "Fluid" description="A fluid popup takes up the entire width of its target.">
-				<message slot="description" size="small" state="info">Fomantic's fluid popup spans its offset container; ours spans its target, so make the target as wide as the popup should be (here a <text code>fluid</text> button).</message>
 				<button fluid>Show fluid popup</button>
 				<popup fluid position="bottom left">
 					<grid columns="4" divided align="center">
@@ -264,6 +263,7 @@
 						<column>4</column>
 					</grid>
 				</popup>
+				<message slot="description" size="small" state="info">Fomantic's fluid popup spans its offset container; ours spans its target, so make the target as wide as the popup should be (here a <text code>fluid</text> button).</message>
 			</example>
 		</>
 

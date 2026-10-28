@@ -65,11 +65,11 @@
 
 		<section label="Rotate" sticky="stack" collapsible dividing>
 			<example "Rotate" description="An element can rotate to reveal content below:  bare `rotate` turns right, `rotate=\"left\"` turns left.">
-				<message slot="description" size="small" class="site-not-ported">Not ported: Fomantic's <text code>circular reveal image</text> coupling -- the reveal has no image look of its own, so put a <text code>&lt;ui-image appearance="circular"&gt;</text> in each content.</message>
 				<reveal rotate aria-label="Rotate demo">
 					<image slot="visible" size="small" src="/components/ui/images/wireframe/square-image.png" alt="" appearance="circular"/>
 					<image slot="hidden" size="small" src="/components/ui/images/avatar/large/stevie.jpg" alt="Stevie" appearance="circular"/>
 				</reveal>
+				<message slot="description" size="small" class="site-not-ported">Not ported: Fomantic's <text code>circular reveal image</text> coupling -- the reveal has no image look of its own, so put a <text code>&lt;ui-image appearance="circular"&gt;</text> in each content.</message>
 			</example>
 			<example "Rotate">
 				<reveal rotate="left" aria-label="Rotate left demo">
@@ -96,11 +96,11 @@
 	<section label="Content">
 		<section label="Visible Content" sticky="stack" collapsible dividing>
 			<example "Visible Content" description="A reveal may contain content that is visible before interaction: its `visible` slot.">
-				<message slot="description" state="info" size="small">Visible and hidden content should be the same aspect ratio.</message>
 				<reveal fade aria-label="Visible content demo">
 					<image height="150" width="150" alt="Ade" src="/components/ui/images/avatar/large/ade.jpg" slot="visible"/>
 					<image height="150" width="150" alt="" src="/components/ui/images/wireframe/square-image.png" slot="hidden"/>
 				</reveal>
+				<message slot="description" state="info" size="small">Visible and hidden content should be the same aspect ratio.</message>
 			</example>
 		</>
 
@@ -117,11 +117,11 @@
 	<section label="States">
 		<section label="Active" sticky="stack" collapsible dividing>
 			<example "Active" description="An active reveal displays its hidden content.">
-				<message slot="description" state="info" size="small">Setting <text code>active</text> shows the hidden content programmatically, without hover or focus.</message>
 				<reveal active move aria-label="Active demo">
 					<image slot="visible" size="small" src="/components/ui/images/wireframe/square-image.png" alt=""/>
 					<image slot="hidden" size="small" src="/components/ui/images/avatar/large/nan.jpg" alt="Nan"/>
 				</reveal>
+				<message slot="description" state="info" size="small">Setting <text code>active</text> shows the hidden content programmatically, without hover or focus.</message>
 			</example>
 		</>
 

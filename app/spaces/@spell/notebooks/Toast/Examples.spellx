@@ -165,8 +165,8 @@
 	<section label="Actions">
 		<section label="General" sticky="stack" collapsible dividing>
 			<example "General" description="Define click actions on your toast with a text and/or icon, optional class and click handler.">
-				<message slot="description" size="small">The default click handler closes the toast, so leave it out when the button should only close it;  a handler returning <text code>false</text> keeps the toast open. In the page, put <text code>&lt;ui-button slot="actions"&gt;</text>s in the toast: any activated one closes it unless its click was <text code>preventDefault()</text>ed.</message>
 				<button onClick={notify "Do you really want to star Fomantic-UI?" in black with "Yes"}>Show</button>
+				<message slot="description" size="small">The default click handler closes the toast, so leave it out when the button should only close it;  a handler returning <text code>false</text> keeps the toast open. In the page, put <text code>&lt;ui-button slot="actions"&gt;</text>s in the toast: any activated one closes it unless its click was <text code>preventDefault()</text>ed.</message>
 			</example>
 			<example "General">
 				<toast color="black" message="Do you really want to star Fomantic-UI?">

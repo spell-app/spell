@@ -23,7 +23,6 @@
 	<section label="Usage">
 		<section label="How To Use" sticky="stack" collapsible dividing>
 			<example "How To Use" description="Visibility reports an element's position on screen: wrap the content in `<ui-visibility>` and listen for its events, each with the calculations as `detail`. Scroll the page and watch the table: it updates at every check.">
-				<message slot="description" state="info" size="small">Checks happen when something crosses (the element entering or leaving, an edge crossing the screen's top or bottom), not on every scrolled pixel: visibility runs on <text code>IntersectionObserver</text>, with no scroll listener. The table beside the demo is filled by this page's script from the events.</message>
 				<html>
 					<ui-grid columns="2" stackable>
 						<ui-column>
@@ -105,6 +104,7 @@
 						</ui-column>
 					</ui-grid>
 				</html>
+				<message slot="description" state="info" size="small">Checks happen when something crosses (the element entering or leaving, an edge crossing the screen's top or bottom), not on every scrolled pixel: visibility runs on <text code>IntersectionObserver</text>, with no scroll listener. The table beside the demo is filled by this page's script from the events.</message>
 			</example>
 		</>
 

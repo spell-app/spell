@@ -35,7 +35,6 @@
 				</segment>
 			</example>
 			<example "Placeholder Segment">
-				<message slot="description" state="info" size="small">To put buttons side by side in a placeholder (Fomantic's <text code>inline</text> wrapper), group them in a <text code>&lt;ui-buttons&gt;</text>.</message>
 				<segment placeholder="">
 					<header icon><icon name="search"/> We don't have any documents matching your query</header>
 					<buttons spacing="md">
@@ -43,6 +42,7 @@
 						<button>Add Document</button>
 					</buttons>
 				</segment>
+				<message slot="description" state="info" size="small">To put buttons side by side in a placeholder (Fomantic's <text code>inline</text> wrapper), group them in a <text code>&lt;ui-buttons&gt;</text>.</message>
 			</example>
 
 			<!-- GAP I45:  Fomantic's grid is `stackable`, but a stacked grid keeps the divider vertical and clips the form (phones):  left out. -->
@@ -88,13 +88,13 @@
 
 		<section label="Piled" sticky="stack" collapsible dividing>
 			<example "Piled" description="A segment can be formatted to look like a pile of pages.">
-				<message slot="description" state="info" size="small">Fomantic's piled segments need a <text code>z-index</text> on their offset container; a <text code>&lt;ui-segment appearance="piled"&gt;</text> makes its own host the stacking context the pages sit behind, so nothing is needed.</message>
 				<segment appearance="piled">
 					<header level="4">A header</header>
 					<text paragraph>Te eum doming eirmod, nominati pertinacia argumentum ad his. Ex eam alia facete scriptorem, est autem aliquip detraxit at. Usu ocurreret referrentur at, cu epicurei appellantur vix. Cum ea laoreet recteque electram, eos choro alterum definiebas in. Vim dolorum definiebas an. Mei ex natum rebum iisque.</text>
 					<text paragraph>Audiam quaerendum eu sea, pro omittam definiebas ex. Te est latine definitiones. Quot wisi nulla ex duo. Vis sint solet expetenda ne, his te phaedrum referrentur consectetuer. Id vix fabulas oporteat, ei quo vide phaedrum, vim vivendum maiestatis in.</text>
 					<text paragraph>Eu quo homero blandit intellegebat. Incorrupte consequuntur mei id. Mei ut facer dolores adolescens, no illum aperiri quo, usu odio brute at. Qui te porro electram, ea dico facete utroque quo. Populo quodsi te eam, wisi everti eos ex, eum elitr altera utamur at. Quodsi convenire mnesarchum eu per, quas minimum postulant per id.</text>
 				</segment>
+				<message slot="description" state="info" size="small">Fomantic's piled segments need a <text code>z-index</text> on their offset container; a <text code>&lt;ui-segment appearance="piled"&gt;</text> makes its own host the stacking context the pages sit behind, so nothing is needed.</message>
 			</example>
 		</>
 
@@ -368,7 +368,6 @@
 
 		<section label="Attached" sticky="stack" collapsible dividing>
 			<example "Attached" description="A segment can be attached to other content on a page.">
-				<message slot="description" state="info" size="small">Attached segments are designed to be used with other attached variations, like an attached <text code>&lt;ui-header&gt;</text> or an attached <text code>&lt;ui-message&gt;</text>.</message>
 				<segment attach="top">
 					<text paragraph>This segment is on top</text>
 				</segment>
@@ -378,6 +377,7 @@
 				<segment attach="bottom">
 					<text paragraph>This segment is on bottom</text>
 				</segment>
+				<message slot="description" state="info" size="small">Attached segments are designed to be used with other attached variations, like an attached <text code>&lt;ui-header&gt;</text> or an attached <text code>&lt;ui-message&gt;</text>.</message>
 			</example>
 			<example "Attached">
 				<header level="5" attach="top">Dogs</header>
@@ -527,13 +527,13 @@
 
 		<section label="Circular" sticky="stack" collapsible dividing>
 			<example "Circular" description="A segment can be circular.">
-				<message slot="description" state="info" size="small">A circular segment will most likely have to have its content manually sized to be equal width and height, otherwise it will flow to the size of your content. The host is <text code>display: contents</text>, so size the box through <text code>::part(segment)</text> (see the Usage tab).</message>
 				<segment appearance="circular">
 					<header level="2">Buy Now <header>$10.99</header></header>
 				</segment>
 				<segment inverted appearance="circular">
 					<header level="2" inverted>Buy Now <header>$10.99</header></header>
 				</segment>
+				<message slot="description" state="info" size="small">A circular segment will most likely have to have its content manually sized to be equal width and height, otherwise it will flow to the size of your content. The host is <text code>display: contents</text>, so size the box through <text code>::part(segment)</text> (see the Usage tab).</message>
 			</example>
 		</>
 
@@ -576,7 +576,6 @@
 
 		<section label="Scrolling" sticky="stack" collapsible dividing>
 			<example "Scrolling" description="A scrolling segment has a predefined height to allow its content to be scrollable.">
-				<message slot="description" size="small">Add <text code>resizable</text> to a scrolling segment and a native resize handle appears at its bottom right.</message>
 				<segment scrolling>
 					<text paragraph>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.</text>
 					<text paragraph>Te eum doming eirmod, nominati pertinacia argumentum ad his. Ex eam alia facete scriptorem, est autem aliquip detraxit at. Usu ocurreret referrentur at, cu epicurei appellantur vix. Cum ea laoreet recteque electram, eos choro alterum definiebas in. Vim dolorum definiebas an. Mei ex natum rebum iisque.</text>
@@ -587,6 +586,7 @@
 					<text paragraph>Audiam quaerendum eu sea, pro omittam definiebas ex. Te est latine definitiones. Quot wisi nulla ex duo. Vis sint solet expetenda ne, his te phaedrum referrentur consectetuer. Id vix fabulas oporteat, ei quo vide phaedrum, vim vivendum maiestatis in.</text>
 					<text paragraph>Eu quo homero blandit intellegebat. Incorrupte consequuntur mei id. Mei ut facer dolores adolescens, no illum aperiri quo, usu odio brute at. Qui te porro electram, ea dico facete utroque quo. Populo quodsi te eam, wisi everti eos ex, eum elitr altera utamur at. Quodsi convenire mnesarchum eu per, quas minimum postulant per id.</text>
 				</segment>
+				<message slot="description" size="small">Add <text code>resizable</text> to a scrolling segment and a native resize handle appears at its bottom right.</message>
 			</example>
 			<example "Scrolling" description="A scrolling segment optionally supports predefined heights `long`, `very long`, `short` and `very short`.">
 				<segment scrolling="very short" resizable>

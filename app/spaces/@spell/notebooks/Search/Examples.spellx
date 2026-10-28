@@ -28,22 +28,22 @@
 				</html>
 			</example>
 			<example "Standard">
-				<message slot="description" state="info" size="small">Every <text code>&lt;ui-search&gt;</text> is drawn as Fomantic's <text code>ui icon input</text>, so the icon input needs no extra markup. The <text code>icon</text> slot swaps the magnifying glass.</message>
 				<html>
 					<ui-search placeholder="Github Repositories..." source="\[{\"title\":\"Fomantic-UI\"},{\"title\":\"Fomantic-UI-Docs\"},{\"title\":\"Fomantic-UI-CSS\"},{\"title\":\"Fomantic-UI-LESS\"}]"></ui-search>
 				</html>
+				<message slot="description" state="info" size="small">Every <text code>&lt;ui-search&gt;</text> is drawn as Fomantic's <text code>ui icon input</text>, so the icon input needs no extra markup. The <text code>icon</text> slot swaps the magnifying glass.</message>
 			</example>
 		</>
 
 		<!-- GAP I38:  no `clearable` remove icon;  Escape clears the text instead. -->
 		<section label="Clearable" sticky="stack" collapsible dividing>
 			<example "Clearable" description="A search can show a remove icon to be able to cancel a previous search term.">
-				<message slot="description" size="small">Not yet: there is no remove icon. Escape closes the results, and a second Escape clears the text.</message>
 				<html>
 					<ui-search placeholder="Github Repositories..." value="fomantic" source="\[{\"title\":\"Fomantic-UI\"},{\"title\":\"Fomantic-UI-Docs\"},{\"title\":\"Fomantic-UI-CSS\"},{\"title\":\"Fomantic-UI-LESS\"}]">
 						<ui-icon slot="icon" name="github"></ui-icon>
 					</ui-search>
 				</html>
+				<message slot="description" size="small">Not yet: there is no remove icon. Escape closes the results, and a second Escape clears the text.</message>
 			</example>
 		</>
 
@@ -65,10 +65,10 @@
 
 		<section label="Local Search" sticky="stack" collapsible dividing>
 			<example "Local Search" description="A search can look for results inside a static local source.">
-				<message slot="description" state="info" size="small">Results that begin with the query come first, then content that matches the query anywhere inside. To match word starts only, set <text code>full-text-search="prefix"</text> (Fomantic's <text code>fullTextSearch: false</text>).</message>
 				<html>
 					<ui-search placeholder="Search countries..." source="\[{\"title\":\"Andorra\"},{\"title\":\"United Arab Emirates\"},{\"title\":\"Afghanistan\"},{\"title\":\"Antigua\"},{\"title\":\"Anguilla\"},{\"title\":\"Albania\"},{\"title\":\"Armenia\"},{\"title\":\"Netherlands Antilles\"},{\"title\":\"Angola\"},{\"title\":\"Argentina\"},{\"title\":\"American Samoa\"},{\"title\":\"Austria\"},{\"title\":\"Australia\"},{\"title\":\"Aruba\"},{\"title\":\"Aland Islands\"},{\"title\":\"Azerbaijan\"},{\"title\":\"Bosnia\"},{\"title\":\"Barbados\"},{\"title\":\"Bangladesh\"},{\"title\":\"Belgium\"},{\"title\":\"Burkina Faso\"},{\"title\":\"Bulgaria\"},{\"title\":\"Bahrain\"},{\"title\":\"Burundi\"}]"></ui-search>
 				</html>
+				<message slot="description" state="info" size="small">Results that begin with the query come first, then content that matches the query anywhere inside. To match word starts only, set <text code>full-text-search="prefix"</text> (Fomantic's <text code>fullTextSearch: false</text>).</message>
 			</example>
 		</>
 
@@ -123,20 +123,20 @@
 
 		<section label="Scrolling" sticky="stack" collapsible dividing>
 			<example "Scrolling" description="A search can have its results scroll.">
-				<message slot="description" state="info" size="small">The scroll height depends on the viewport: 4 results' height, 6 / 8 / 12 from 768px / 992px / 1920px. <text code>--ui-search-results-max-height</text> replaces it at every width.</message>
-				<message slot="description" size="small">Add <text code>resizable</text> to <text code>scrolling</text> and a native resize handle appears at the bottom right of the results.</message>
 				<html>
 					<ui-search scrolling max-results="0" placeholder="Search countries..." source="\[{\"title\":\"Andorra\"},{\"title\":\"United Arab Emirates\"},{\"title\":\"Afghanistan\"},{\"title\":\"Antigua\"},{\"title\":\"Anguilla\"},{\"title\":\"Albania\"},{\"title\":\"Armenia\"},{\"title\":\"Netherlands Antilles\"},{\"title\":\"Angola\"},{\"title\":\"Argentina\"},{\"title\":\"American Samoa\"},{\"title\":\"Austria\"},{\"title\":\"Australia\"},{\"title\":\"Aruba\"},{\"title\":\"Aland Islands\"},{\"title\":\"Azerbaijan\"},{\"title\":\"Bosnia\"},{\"title\":\"Barbados\"},{\"title\":\"Bangladesh\"},{\"title\":\"Belgium\"},{\"title\":\"Burkina Faso\"},{\"title\":\"Bulgaria\"},{\"title\":\"Bahrain\"},{\"title\":\"Burundi\"}]"></ui-search>
 				</html>
+				<message slot="description" state="info" size="small">The scroll height depends on the viewport: 4 results' height, 6 / 8 / 12 from 768px / 992px / 1920px. <text code>--ui-search-results-max-height</text> replaces it at every width.</message>
+				<message slot="description" size="small">Add <text code>resizable</text> to <text code>scrolling</text> and a native resize handle appears at the bottom right of the results.</message>
 			</example>
 		</>
 
 		<section label="Height" sticky="stack" collapsible dividing>
 			<example "Height" description="A search can be `very-short` (0.75x of the default height) so that more results can be glanced. Or it can be short, long (2x) or very-long.">
-				<message slot="description" state="info" size="small">The default height is the height of one result times the number of results shown at the current breakpoint.</message>
 				<html>
 					<ui-search length="very-short" max-results="0" placeholder="Search countries..." source="\[{\"title\":\"Andorra\"},{\"title\":\"United Arab Emirates\"},{\"title\":\"Afghanistan\"},{\"title\":\"Antigua\"},{\"title\":\"Anguilla\"},{\"title\":\"Albania\"},{\"title\":\"Armenia\"},{\"title\":\"Netherlands Antilles\"},{\"title\":\"Angola\"},{\"title\":\"Argentina\"},{\"title\":\"American Samoa\"},{\"title\":\"Austria\"},{\"title\":\"Australia\"},{\"title\":\"Aruba\"},{\"title\":\"Aland Islands\"},{\"title\":\"Azerbaijan\"},{\"title\":\"Bosnia\"},{\"title\":\"Barbados\"},{\"title\":\"Bangladesh\"},{\"title\":\"Belgium\"},{\"title\":\"Burkina Faso\"},{\"title\":\"Bulgaria\"},{\"title\":\"Bahrain\"},{\"title\":\"Burundi\"}]"></ui-search>
 				</html>
+				<message slot="description" state="info" size="small">The default height is the height of one result times the number of results shown at the current breakpoint.</message>
 			</example>
 			<example "Height" description="Long:  2x of the default height.">
 				<html>
@@ -190,12 +190,12 @@
 		<!-- GAP I40:  no `onResponse` hook to regroup a third-party answer. -->
 		<section label="Using API Settings" sticky collapsible dividing>
 			<example "Using API Settings" description="Fomantic's `apiSettings.onResponse` regroups GitHub's answer by language. Ours: a `category` search over results that carry a `category`, here a local source.">
-				<message slot="description" state="warning" size="small" heading="Be careful with foreign remote API services">Results are rendered as TEXT, never HTML, so a hostile title or description can't inject markup.</message>
 				<html>
 					<ui-search category min-characters="3" placeholder="Search GitHub" source="\[{\"category\":\"JavaScript\",\"title\":\"Fomantic-UI\",\"description\":\"A shared vocabulary for UI\"},{\"category\":\"JavaScript\",\"title\":\"create-fomantic-icons\",\"description\":\"Create Fomantic icons from Font Awesome\"},{\"category\":\"CSS\",\"title\":\"Fomantic-UI-CSS\",\"description\":\"CSS only distribution\"},{\"category\":\"Less\",\"title\":\"Fomantic-UI-LESS\",\"description\":\"LESS only distribution\"}]">
 						<ui-icon slot="icon" name="github"></ui-icon>
 					</ui-search>
 				</html>
+				<message slot="description" state="warning" size="small" heading="Be careful with foreign remote API services">Results are rendered as TEXT, never HTML, so a hostile title or description can't inject markup.</message>
 			</example>
 		</>
 	</>

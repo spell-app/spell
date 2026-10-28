@@ -19,11 +19,11 @@
 	<section label="Types">
 		<section label="Text" sticky="stack" collapsible dividing>
 			<example "Text" description="A text is always used inline and uses one color from the palette.">
-				<message slot="description" state="info" size="small">Fomantic limits <text code>ui text</text> to <text code>&lt;span&gt;</text> tags, so it can't clash with other colourable elements. <text code>&lt;ui-text&gt;</text> is its own tag, so there is nothing to clash with.</message>
 				<segment>This is <text color="red">red</text> inline text and this is <text color="blue">blue</text> inline text and this is <text color="purple">purple</text> inline text</segment>
 				<segment inverted>This is <text inverted color="red">red</text> inline text and this is <text inverted color="blue">blue</text> inline text and this is <text inverted color="purple">purple</text> inline text</segment>
 				<segment>This is <text state="info">info</text> inline text and this is <text state="success">success</text> inline text and this is <text state="warning">warning</text> inline text and this is <text state="error">error</text> inline text</segment>
 				<segment inverted>This is <text state="info">info</text> inline text and this is <text state="success">success</text> inline text and this is <text state="warning">warning</text> inline text and this is <text state="error">error</text> inline text</segment>
+				<message slot="description" state="info" size="small">Fomantic limits <text code>ui text</text> to <text code>&lt;span&gt;</text> tags, so it can't clash with other colourable elements. <text code>&lt;ui-text&gt;</text> is its own tag, so there is nothing to clash with.</message>
 			</example>
 		</>
 

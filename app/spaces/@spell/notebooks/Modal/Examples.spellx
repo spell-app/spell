@@ -104,8 +104,6 @@
 
 		<section label="Actions" sticky="stack" collapsible dividing>
 			<example "Actions" description="A modal can contain a row of actions: `<ui-actions>`.">
-				<message slot="description" size="small" state="info">Buttons anywhere inside act by Fomantic's classes: <list bulleted><item>approve:  <text code>approve</text> / <text code>ok</text> / <text code>positive</text>, or <text code>&lt;ui-button color="positive"&gt;</text></item> <item>deny:  <text code>deny</text> / <text code>cancel</text> / <text code>negative</text>, or <text code>&lt;ui-button color="negative"&gt;</text></item></list> Each fires the cancelable <text code>ui-approving</text> / <text code>ui-denying</text>, then closes the modal.</message>
-				<message slot="description" size="small" state="warning">To keep a modal open after an action, call <text code>preventDefault()</text> on its approve or deny event. That's Fomantic's callback returning <text code>false</text>.</message>
 				<button commandfor="modal-content-actions" command="--show">Show</button>
 				<modal id="modal-content-actions" heading="Header">
 					<content>
@@ -117,6 +115,8 @@
 						<button class="cancel">Cancel</button>
 					</actions>
 				</modal>
+				<message slot="description" size="small" state="info">Buttons anywhere inside act by Fomantic's classes: <list bulleted><item>approve:  <text code>approve</text> / <text code>ok</text> / <text code>positive</text>, or <text code>&lt;ui-button color="positive"&gt;</text></item> <item>deny:  <text code>deny</text> / <text code>cancel</text> / <text code>negative</text>, or <text code>&lt;ui-button color="negative"&gt;</text></item></list> Each fires the cancelable <text code>ui-approving</text> / <text code>ui-denying</text>, then closes the modal.</message>
+				<message slot="description" size="small" state="warning">To keep a modal open after an action, call <text code>preventDefault()</text> on its approve or deny event. That's Fomantic's callback returning <text code>false</text>.</message>
 			</example>
 		</>
 	</>
@@ -131,9 +131,9 @@
 
 		<section label="Overlay Full Screen" sticky collapsible dividing>
 			<example "Overlay Full Screen" description="A modal can overlay the entire screen: `overlay fullscreen`.">
-				<message slot="description" size="small" state="info">An overlay fullscreen modal hides the dimmer, so a click on it can't close the modal: give it a close icon (<text code>closable</text>) or an action button.</message>
 				<button commandfor="modal-variations-overlay" command="--show">Show</button>
 				<modal id="modal-variations-overlay" overlay fullscreen heading="Overlay full screen" content="Edge to edge." closable/>
+				<message slot="description" size="small" state="info">An overlay fullscreen modal hides the dimmer, so a click on it can't close the modal: give it a close icon (<text code>closable</text>) or an action button.</message>
 			</example>
 		</>
 
@@ -152,7 +152,6 @@
 
 		<section label="Inverted" sticky="stack" collapsible dividing>
 			<example "Inverted" description="A modal can be shown inverted: the dark scheme.">
-				<message slot="description" size="small" class="site-not-ported">Not ported: Fomantic's <text code>inverted: true</text> setting (a white dimmer). The dimmer is the dialog's <text code>::backdrop</text>:  colour it with <text code>--ui-modal-dimmer-background</text> (Theming tab).</message>
 				<button commandfor="modal-variations-inverted" command="--show">Show</button>
 				<modal id="modal-variations-inverted" inverted size="mini" heading="Inverted" closable>
 					<content>
@@ -162,12 +161,12 @@
 						<button class="ok" inverted>OK</button>
 					</actions>
 				</modal>
+				<message slot="description" size="small" class="site-not-ported">Not ported: Fomantic's <text code>inverted: true</text> setting (a white dimmer). The dimmer is the dialog's <text code>::backdrop</text>:  colour it with <text code>--ui-modal-dimmer-background</text> (Theming tab).</message>
 			</example>
 		</>
 
 		<section label="Scrolling Content" sticky collapsible dividing>
 			<example "Scrolling Content" description="A modal can have a scrolling content: `<ui-content scrolling>` caps its height and scrolls.">
-				<message slot="description" size="small" class="site-not-ported">Not ported: <text code>resizable scrolling content</text> (a native resize handle on the content).</message>
 				<button commandfor="modal-content-scrolling" command="--show">Show terms</button>
 				<modal id="modal-content-scrolling" heading="Terms" closable>
 					<content scrolling>
@@ -185,6 +184,7 @@
 						<button class="approve" color="primary">I agree</button>
 					</actions>
 				</modal>
+				<message slot="description" size="small" class="site-not-ported">Not ported: <text code>resizable scrolling content</text> (a native resize handle on the content).</message>
 			</example>
 		</>
 

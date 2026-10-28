@@ -39,8 +39,8 @@
 
 		<section label="File Input" sticky="stack" collapsible dividing>
 			<example "File Input" description="A file input: `type=\"file\"`.">
-				<message slot="description" size="small">For a trigger button with your own text or an icon, use a <link link="#examples-variations-file-action">File Action</link> input.</message>
 				<input type="file" aria-label="Upload"/>
+				<message slot="description" size="small">For a trigger button with your own text or an icon, use a <link link="#examples-variations-file-action">File Action</link> input.</message>
 			</example>
 		</>
 
@@ -57,8 +57,8 @@
 
 		<section label="Loading" sticky="stack" collapsible dividing>
 			<example "Loading" description="An icon input field can show that it is currently loading data.">
-				<message slot="description" size="small">Loading inputs automatically turn their icon into a spinner while loading.</message>
 				<input loading icon="search" icon-position="left" placeholder="Search..." aria-label="Search"/>
+				<message slot="description" size="small">Loading inputs automatically turn their icon into a spinner while loading.</message>
 			</example>
 			<example "Loading">
 				<input loading icon="search" placeholder="Search..." aria-label="Search"/>
@@ -98,8 +98,8 @@
 	<section label="Variations">
 		<section label="Icon" sticky="stack" collapsible dividing>
 			<example "Icon" description="An input can be formatted with an icon: `icon`, at the end by default.">
-				<message slot="description" size="small">Input icons don't receive pointer events unless they're <text code>link</text> icons (the <text code>icon</text> slot).</message>
 				<input icon="search" placeholder="Search..." aria-label="Search"/>
+				<message slot="description" size="small">Input icons don't receive pointer events unless they're <text code>link</text> icons (the <text code>icon</text> slot).</message>
 			</example>
 			<example "Icon" description="`icon-position=\"left\"` puts it at the start.">
 				<input icon="users" icon-position="left" placeholder="Search users..." aria-label="Search users"/>
@@ -242,8 +242,8 @@
 
 		<section label="Size" sticky="stack" collapsible dividing>
 			<example "Size" description="An input can vary in size.">
-				<message slot="description" state="info" size="small">Inputs size themselves unless you give them a width.</message>
 				<input size="mini" icon="search" placeholder="Search mini..." aria-label="Search"/>
+				<message slot="description" state="info" size="small">Inputs size themselves unless you give them a width.</message>
 			</example>
 			<example "Size">
 				<input size="small" icon="search" placeholder="Search small..." aria-label="Search"/>

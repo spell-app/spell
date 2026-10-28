@@ -269,7 +269,8 @@ export class NotebookFromPage {
   /**
    * An example:  `<example description="...">`, its header its quoted name, its markup in bare names.
    * - A `<p slot="description">` of text and `<code>` is its `description=`;
-   *   other description markup (a `<ui-message>`) stays, slotted, in bare names where it can be.
+   *   other description markup (a `<ui-message>`) stays, slotted, in bare names where it can be,
+   *   AFTER the example's own markup (Owen, 2026-10-27).
    */
   private writeExample(out: Writer, example: Element, indent: number, place: Place) {
     const children = childElements(example)
@@ -304,7 +305,10 @@ export class NotebookFromPage {
           !(node.nodeType === TEXT && !node.textContent!.trim()) &&
           node.nodeType !== COMMENT
       ) as Element[]
-    this.writeMarkup(out, body, indent + 1, { ...place, inExample: true })
+    // the slotted description markup (a `<message>`) after the example's own Spell:  the code reads first
+    const isDescription = (node: Element) => node.nodeType !== TEXT && node.getAttribute("slot") === "description"
+    const ordered = [...body.filter((node) => !isDescription(node)), ...body.filter(isDescription)]
+    this.writeMarkup(out, ordered, indent + 1, { ...place, inExample: true })
     out.line(indent, "</example>")
   }
 

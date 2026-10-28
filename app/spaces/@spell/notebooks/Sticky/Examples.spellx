@@ -31,7 +31,6 @@
 	<section label="Examples">
 		<section label="Sticking to Adjacent Context" sticky collapsible dividing>
 			<example "Sticking to Adjacent Context" description="Sticky content attaches itself to the viewport when it is passed, and stays fixed to the viewport until it collides with the bottom edge of its context. Additional static content can exist above sticky content without affecting its position.">
-				<message slot="description" state="info" size="small">The context is the sticky's PARENT, here a stretched <text code>&lt;ui-column&gt;</text> (Fomantic uses rails outside the segment, where this site keeps its own columns). Fomantic's <text code>context</text> setting (any element) has no CSS equivalent, so put the sticky inside the element it belongs to.</message>
 				<segment>
 					<grid>
 						<column width="4" stretched>
@@ -62,6 +61,7 @@
 						</column>
 					</grid>
 				</segment>
+				<message slot="description" state="info" size="small">The context is the sticky's PARENT, here a stretched <text code>&lt;ui-column&gt;</text> (Fomantic uses rails outside the segment, where this site keeps its own columns). Fomantic's <text code>context</text> setting (any element) has no CSS equivalent, so put the sticky inside the element it belongs to.</message>
 			</example>
 		</>
 
@@ -103,7 +103,6 @@
 		<!-- GAP I67:  the narrow column stacks the items, so each tiny image grows to the column width (fixed in source;  shows after the next site build). -->
 		<section label="Oversized Content" sticky collapsible dividing>
 			<example "Oversized Content" description="Sticky content that is larger than the viewport stays where the page puts it: a `position: sticky` box taller than the view scrolls with the page until its end is reached, then sticks.">
-				<message slot="description" size="small" class="site-not-ported">Not ported: Fomantic's scrolling of oversized content against the scroll direction -- the browser's <text code>position: sticky</text> does the sticking, with no scroll listener.</message>
 				<segment>
 					<grid>
 						<column width="4" stretched>
@@ -222,6 +221,7 @@
 						</column>
 					</grid>
 				</segment>
+				<message slot="description" size="small" class="site-not-ported">Not ported: Fomantic's scrolling of oversized content against the scroll direction -- the browser's <text code>position: sticky</text> does the sticking, with no scroll listener.</message>
 			</example>
 		</>
 
