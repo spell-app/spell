@@ -185,8 +185,8 @@ The epic folder adds none:  its tools are `epic`'s._
 - The base looks at the root's own `package.json`, then each folder's, lowest first (`spellRepos()`):
   `parser/`, `ui/`, `epic/`, `app/`, the root's `workspaces`, the same list in a clone or installed from npm.
   Only a `package.json` with a `"spell"` entry counts.
-- `spell help` lists them in that order, one heading per folder, by its `package.json`'s name:
-  `spell:`, `spell-parser:`, `spell-ui:`, `spell-app:`.
+- `spell help` lists them in that order, one heading per folder, by its folder's name:
+  `spell:` (the root's own), `parser:`, `ui:`, `app:`.
 - Names stay plain:  `spell compile`, `spell icon`.
   A word two repos both add goes under EACH one's short name, the repo's name less `spell-`,
   and the bare word, hidden from the help, only says where they went.

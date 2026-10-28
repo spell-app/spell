@@ -54,7 +54,7 @@ import {
  *   - `run.json5`:  written ONLY here, whole, under its `FileLock`
  *   - `answers.json5`:  read ONLY here;  the page writes it
  *   - `waiting.json5`:  the heartbeat, while `wait()` or `answersAsTheyCome()` runs
- * - Knows nothing of the page's elements, nor of any child repo:  it writes files, and reads them back.
+ * - Knows nothing of the page's elements, nor of any big folder:  it writes files, and reads them back.
  * - Node only:  node's own modules, and of the kit `DataFile`, `FileLock`, `contentFolderOf()`, `isProcessAlive()`,
  *   `openBrowser()`, all through `SRV`.
  ****************/
@@ -170,7 +170,7 @@ export class CommandRun {
   /**
    * Show the page to Owen;  returns where:  its URL, else its path, when nothing could open it.
    * - an `epic` program on the `PATH` (spell-epic's):  `epic pages open <run folder> --review`, the side bar's Review
-   *   tab;  run as a PROGRAM, never imported, since the kit imports no child repo
+   *   tab;  run as a PROGRAM, never imported, since the kit's `src/` imports no big folder
    * - else a page server running for this checkout (its main checkout's first):  its URL, in the browser
    *   (`openBrowser()`).  It starts none:  without spell-epic, no server answers `/runs/`.
    * - else nothing opens:  the caller prints the path

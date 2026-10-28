@@ -83,7 +83,7 @@ export class Layout {
   private names = new Map<string, Map<string, string[]>>()
 
   /**
-   * Kit-relative files named `name` in `repo` (a child repo's folder, or `""`:  the kit's own `src/`, `tests/`,
+   * Kit-relative files named `name` in `repo` (a big folder, or `""`:  the kit's own `src/`, `tests/`,
    * `bin/`, `scripts/`, `tools/`), outside built and installed folders.
    */
   namesakes(repo: string, name: string): string[] {

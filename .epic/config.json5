@@ -86,12 +86,5 @@
   // - The session-start hook applies them in the background;  `epic worktree patch --all` does it everywhere now.
   // - `copy`:  main's file, put in each checkout that doesn't track it yet, git-excluded there;  once the branch merges
   //   main it tracks the file, and the patch does nothing there.  `run`:  a command, run once in each checkout.
-  "checkoutPatches": [
-    {
-      "id": "vscode-ignore",
-      "date": "2026-10-22",
-      "why": "VS Code's Open File and search find the child repos' files again (the .gitignore leaves them out)",
-      "copy": ".ignore"
-    }
-  ]
+  "checkoutPatches": []
 }

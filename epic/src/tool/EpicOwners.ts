@@ -16,7 +16,7 @@ import { PARTS_DIR } from "./PlanParts"
  * - An epic owns a path two ways (`Ownership`):
  *   - `branch`:  its branch changes it.
  *     - Its worktree's commits since it left the base branch (`git diff <base>...HEAD`), and what's not committed yet.
- *     - In the checkout and in each child repo inside it (spell-ui, spell-epic ...), named from the checkout's root:
+ *     - In the checkout and in each child repo inside it (a multi-repo top's), named from the checkout's root:
  *       `epic/src/window.mjs`.
  *     - Only an epic in progress whose checkout is a worktree:  the main checkout's own changes are nobody's.
  *   - `plan`:  its epic page names the path:  the skeleton or one of its part files (`parts/*.html`) has the path's
@@ -159,7 +159,7 @@ export class EpicOwners {
 
   /**
    * The git repos of checkout `checkout`:  it, then each folder right inside it that's a repo of its own (has a
-   * `.git`:  the child repos of a multi-repo top, `spell-ui` ...).
+   * `.git`:  the child repos of a multi-repo top, `spell-brand` ...).
    * - a single repo's checkout:  just it
    * - a LINK is never one:  a worktree's link to the content folder is the shared repo, nobody's branch
    */

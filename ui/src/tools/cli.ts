@@ -91,7 +91,7 @@ switch (command) {
   case "report": {
     loc()
     // the report is in the content repo's guides, with the rest of the old `notes/` (epic `repo-split` P9, Q34):
-    // the kit's content folder, Spell UI being a child repo of the kit
+    // the kit's content folder, Spell UI being a folder of the kit
     const content = contentFolderOf(resolve(PACKAGE.root, "..")) ?? resolve(PACKAGE.root, "../spell.epics")
     const { values } = parseArgs({ args, options: { check: { type: "boolean", default: false } } })
     new ReportTables({ root: PACKAGE.root, file: join(content, "guides/ui/notes/report.md") }).write({

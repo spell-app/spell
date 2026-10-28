@@ -35,7 +35,7 @@ const EXCLUDE_HEADER = "# epic checkout patches:  untracked copies of files main
  * ### `CheckoutPatches`
  * `epic worktree patch [--all] [--dry-run]`:  gives each checkout the fixes its repo lists in `"checkoutPatches"`
  * (`.epic/config.json5`), so a fix to how a checkout is SET UP reaches every one at once (epic `epic-engine` P17).
- * - e.g. the kit's `.ignore`, which lets VS Code's Open File see the child repos' files:  committed on `main`, it
+ * - e.g. the kit's old `.ignore` (gone since the one repo), which let VS Code's Open File see the child repos' files:  committed on `main`, it
  *   reached a worktree only when that worktree's branch merged `main`, and Owen couldn't find `Card.spell` until then.
  * - The list is read from the MAIN checkout's file (`EpicConfig`), so a worktree however far behind gets today's.
  * - A patch (`CheckoutPatch`):

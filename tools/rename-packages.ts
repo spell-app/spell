@@ -6,7 +6,7 @@
  * - Node 24 runs it as is (its types stripped):  `node tools/repos.ts`'s rules, node's own modules only.
  *
  * ```sh
- * node tools/rename-packages.ts [--dry-run]    # from the kit's root:  the kit and every child repo there
+ * node tools/rename-packages.ts [--dry-run]    # from the kit's root:  the kit and every old child repo there
  * yarn install                                 # after:  the links follow (`node_modules/spell`, `spell-parser`)
  * ```
  *

@@ -1,7 +1,7 @@
 /**
  * Types and constants for `spell publish` (`spell/cli/publish`):  what a repo says about its published package, and
  * what each step reports.
- * - NEVER names a child repo:  each one says how it publishes in its own `package.json` (`"spellPublish"`), and the
+ * - NEVER names a folder:  each one says how it publishes in its own `package.json` (`"spellPublish"`), and the
  *   kit publishes every installed repo that has one, lowest first (`repos.json5`).
  */
 

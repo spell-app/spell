@@ -1,8 +1,8 @@
 /**
- * The `spell` command's entry, run by `bin/spell.mjs`:  every installed repo's commands, then the command line.
+ * The `spell` command's entry, run by `bin/spell.mjs`:  every folder's commands, then the command line.
  * - Loads only what `spell help` needs:  commander, and each repo's command list (`spellRepos()`, `commandLists()`).
  *   A command's action imports its own work when it runs, so `spell pony` never loads spell.
- * - `spell --version`:  each repo's version, the kit's first.
+ * - `spell --version`:  each folder's version, the kit's first.
  * - NOT in the barrel:  importing it runs the command line.
  */
 import { CLI } from "spell/cli"
@@ -14,7 +14,7 @@ const repos = CLI.spellRepos()
 const program = CLI.spellProgram().version(
   repos.map((repo) => `${repo.name} ${repo.version}`).join("\n"),
   "-V, --version",
-  "each repo's version"
+  "each folder's version"
 )
 CLI.addRepoCommands(program, await CLI.commandLists(repos))
 CLI.addHelp(program)

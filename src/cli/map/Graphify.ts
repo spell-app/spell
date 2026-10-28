@@ -37,7 +37,7 @@ export class Graphify {
   /**
    * Map the code of the repo at `root`:  graphify's code pass, which reads the code's structure, with no model.
    * - Writes `<root>/graphify-out/graph.json`;  only files changed since its last run are read again.
-   * - Skips what git ignores:  so the kit's map has none of its child repos.
+   * - Skips what git ignores:  so the kit's map has none of the old child repos' folders.
    * - throws when graphify fails, with what it printed
    */
   static mapRepo(root: string): void {

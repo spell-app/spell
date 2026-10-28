@@ -6,7 +6,7 @@
  *   (and util's standalone `spell/util/string.ts`), `import type` for types, no `enum` or parameter property.
  *
  * ```sh
- * yarn readme:check               # every page:  README.md and README-*.md at the root of the kit and each child repo
+ * yarn readme:check               # every page:  README.md and README-*.md at the root of the kit and each big folder
  * yarn readme:check README.md     # only those pages (paths from the kit's root)
  * ```
  *
@@ -22,7 +22,7 @@ import { slug } from "spell/util/string.ts"
 
 /****************
  * ### `ReadmeCheck`
- * The README check over the pages of the kit and its child repos.
+ * The README check over the pages of the kit and its folders.
  * - Each page is read line by line:  fenced code blocks, `<details>` folds and Mermaid blocks tracked as it goes.
  * - Links are checked against the disk:  the file, and its heading (GitHub's slugs) for a `#anchor`.
  * - Words are checked too:  the stale and banned names, and the house's rules about Spell's own name:

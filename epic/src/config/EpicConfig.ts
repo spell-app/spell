@@ -852,7 +852,7 @@ export type RepoCheckout = { repo: string; main: string; worktree: string; top: 
  * - `checkoutPatches`:  fixes to a checkout's setup that every checkout gets at once, `main` and each worktree,
  *   however far behind `main` its branch is (`CheckoutPatch`, `CheckoutPatches`;  epic `epic-engine` P17);  `[]`
  *   (the default):  none
- *   - e.g. the kit's `.ignore`, which lets VS Code's Open File find the child repos' files
+ *   - e.g. the kit's old `.ignore` (gone since the one repo), which let VS Code's Open File find the child repos' files
  *   - each repo's own:  a multi-repo top's patches are the top's checkouts', each child repo's its own
  * - `promptAck`:  whether the prompt hook shows a line, "On it:  <what Owen asked, in a sentence>", for a message
  *   sent while the session is busy (`PromptAck`, epic `epic-engine` P18);  on (the default), `false` turns it off

@@ -1,6 +1,6 @@
 // This repo's GENERATED files, and the command that rebuilds each from the merged source (epic `epic-eject` T4;
 // the kit's own, then its folders', each folder's list until epic `repo-split` P20 merged them in, paths now from the
-// repo's root).
+// repo's root;  the folders' own `.epic/generators.json5` were never read after that, and are gone).
 // - Read by `epic worktree merge-main` (`MainMerge.generatorsOf()`), from the checkout being merged:
 //   a branch that adds a generated file adds its line here, and its merge already knows it.
 // - IN ORDER:  a later one may read an earlier one's output (the spell libraries read the syntax table).
@@ -22,7 +22,7 @@
     {
       "name": "Spell UI theme sheets",
       "outputs": [
-        "ui/src/styles/themes/{spell,glass,fruity,merlot,paper,midnight,crisp,pop}.css",
+        "ui/src/styles/themes/{spell,glass,fruity,merlot,paper,midnight,crisp,pop,matrix}.css",
         "ui/src/styles/themes/palettes/apple.css",
         "ui/src/styles/themes/theme.schema.json"
       ],
