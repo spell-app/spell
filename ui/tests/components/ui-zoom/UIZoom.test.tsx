@@ -206,7 +206,7 @@ describe("<ui-zoom> round content", () => {
 })
 
 describe("<ui-zoom>:  the arrow keys", () => {
-  test("step to the next zoomable in document order and back, wrapping;  Escape closes", async () => {
+  test("step to the next zoomable in document order and back, stopping at either end;  Escape closes", async () => {
     const first = png(800, 400)
     const second = png(640, 320)
     const host = document.createElement("main")
@@ -230,11 +230,16 @@ describe("<ui-zoom>:  the arrow keys", () => {
     await userEvent.keyboard("{ArrowDown}")
     await vi.waitFor(() => expect(zoom.getAttribute("src")).toBe(second))
     expect(content.hasAttribute("open")).toBe(false)
-    // next wraps to the first;  previous goes back
+    // next on the last stays on it (no wrap);  back to the first, previous on it stays
     await userEvent.keyboard("{ArrowRight}")
+    await ElementFixture.tick()
+    expect(zoom.getAttribute("src")).toBe(second)
+    await userEvent.keyboard("{ArrowLeft}{ArrowLeft}")
     await vi.waitFor(() => expect(zoom.getAttribute("src")).toBe(first))
     await userEvent.keyboard("{ArrowLeft}")
-    await vi.waitFor(() => expect(zoom.getAttribute("src")).toBe(second))
+    await ElementFixture.tick()
+    expect(zoom.getAttribute("src")).toBe(first)
+    expect(content.hasAttribute("open")).toBe(false)
     await userEvent.keyboard("{Escape}")
     await vi.waitFor(() => expect(zoom.hasAttribute("src")).toBe(false))
   })

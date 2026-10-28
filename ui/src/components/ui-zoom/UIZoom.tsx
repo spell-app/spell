@@ -23,7 +23,7 @@ import zoomCSS from "./UIZoom.css?inline"
  *   - as large as fits the window (never cropped, never enlarged past its own size), its alt text under it
  *   - open while `src` is set;  Escape, a click anywhere or the close button close it, and it removes its own `src`
  *   - the page's ONE zoom for its screenshots is one of these, made by `ImageZoom.show()`;  `<ui-image zoom>` uses it
- * - Arrow keys while showing:  the next / previous zoomable on the page, wrapping round (`ImageZoom.step()`)
+ * - Arrow keys while showing:  the next / previous zoomable on the page;  past either end the picture bounces (`ImageZoom.step()`)
  * - The modal's own events (`ui-opened`, `ui-closed` ...) come out of it, as from any `<ui-modal>`.
  ****************/
 export class UIZoom extends E.UIComponent<typeof zoomVocabulary> {
