@@ -2184,16 +2184,7 @@
 		<section label="Size" sticky="stack" collapsible dividing>
 			<example "Size" description="A flag can vary in size.">
 				<message slot="description" size="small">Sizes are ratios of the surrounding text, <text code>small</text> (1.5em) ... <text code>massive</text> (12em). <text code>medium</text> is the default, the size of the text -- NOT Fomantic's fixed 3em.</message>
-				<segment appearance="basic">
-					<stack spacing="none">
-						<text><flag country="de" size="small"/> Small</text>
-						<text><flag country="fr" size="medium"/> Medium</text>
-						<text><flag country="li" size="large"/> Large</text>
-						<text><flag country="jp" size="big"/> Big</text>
-						<text><flag country="gb" size="huge"/> Huge</text>
-						<text><flag country="un" size="massive"/> Massive</text>
-					</stack>
-				</segment>
+				<segment appearance="basic"><flag country="de" size="small"/> Small <space/> <flag country="fr" size="medium"/> Medium <space/> <flag country="li" size="large"/> Large <space/> <flag country="jp" size="big"/> Big <space/> <flag country="gb" size="huge"/> Huge <space/> <flag country="un" size="massive"/> Massive</segment>
 			</example>
 		</>
 

@@ -20,11 +20,20 @@ describe("NotebookFromPage:  the web's tags as Spell UI's (P26)", () => {
     expect(example).not.toContain("<html>")
   })
 
-  test("a paragraph's `<br>` is a blank line in its text;  lines of elements between `<br>`s a `<stack>`", () => {
+  test("a paragraph's `<br>` is a blank line in its text;  any other `<br>` a `<space/>` where it was", () => {
     const paragraph = examplesOf(`<p>One<br>Two</p>`)
     expect(paragraph).toContain("\t\t\t\t<text paragraph>\n\t\t\t\t\tOne\n\n\t\t\t\t\tTwo\n\t\t\t\t</text>")
     const lines = examplesOf(`<ui-rating></ui-rating><br><ui-rating></ui-rating> <ui-icon></ui-icon>`)
-    expect(lines).toContain(`<stack spacing="none">\n\t\t\t\t\t<rating/>\n\t\t\t\t\t<text>\n\t\t\t\t\t\t<rating/>\n`)
+    expect(lines).toContain(`\t\t\t\t<rating/>\n\t\t\t\t<space/>\n\t\t\t\t<rating/>\n\t\t\t\t<icon/>\n`)
+    expect(lines).not.toContain("<stack")
+    const nested = examplesOf(`<ui-segment><ui-label>A</ui-label><br><ui-label>B</ui-label></ui-segment>`)
+    expect(nested).toContain(`<label>A</label>\n\t\t\t\t\t<space/>\n\t\t\t\t\t<label>B</label>`)
+    // in an `<html>` block, the web's own `<br>` as written
+    const kept = examplesOf(
+      `<ui-table><table><tbody><tr><td class="positive">A<br>B</td></tr></tbody></table></ui-table>`
+    )
+    expect(kept).toContain("A<br />B")
+    expect(kept).not.toContain("ui-space")
   })
 
   test("a table's rows and cells are `<row>`s and `<cell>`s;  a class word a cell can't say keeps the table", () => {

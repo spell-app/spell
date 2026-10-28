@@ -47,12 +47,7 @@
 				<statistics>
 					<statistic value="22" label="Saves"/>
 					<statistic label="Signups">
-						<value text>
-							<stack spacing="none">
-								<text>Three</text>
-								<text>Thousand</text>
-							</stack>
-						</value>
+						<value text>Three<space/>Thousand</value>
 					</statistic>
 					<statistic label="Flights">
 						<value><icon name="plane"/> 5</value>
@@ -149,12 +144,7 @@
 				<statistics widths="4">
 					<statistic value="22" label="Saves"/>
 					<statistic label="Signups">
-						<value text>
-							<stack spacing="none">
-								<text>Three</text>
-								<text>Thousand</text>
-							</stack>
-						</value>
+						<value text>Three<space/>Thousand</value>
 					</statistic>
 					<statistic label="Flights">
 						<value><icon name="plane"/> 5</value>

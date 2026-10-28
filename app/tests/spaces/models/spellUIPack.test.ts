@@ -23,4 +23,20 @@ describe("SPELL_UI_PACK", () => {
     expect(file!.errors).toEqual([])
     expect(file!.compiled).toContain('h("ui-button", "Go")')
   })
+
+  test("<space/> is ui-space (<espacio/> in Spanish):  a drawing's line break (P28)", () => {
+    expect(SPACES.SPELL_UI_PACK.tagFor("space", "en")).toBe("ui-space")
+    expect(SPACES.SPELL_UI_PACK.tagFor("espacio", "es")).toBe("es-espacio")
+    const contents = [
+      '<spell-view "card">',
+      "\t<draw>",
+      "\t\t<button>Go</>",
+      "\t\t<space fluid/>",
+      "\t</draw>",
+      "</spell-view>"
+    ].join("\n")
+    const [file] = parseSpellProject([{ path: "/card.spellx", contents }]).files
+    expect(file!.errors).toEqual([])
+    expect(file!.compiled).toContain('h("ui-space"')
+  })
 })

@@ -225,12 +225,7 @@
 					<text paragraph>Give it a name, then adjust the sections below.</text>
 				</section>
 				<section label="Color" level="4" dividing>
-					<text slot="description">
-						<stack spacing="none">
-							<text>Pick a <text bold>colour set</text> for each job in the app.</text>
-							<text>Spell chooses the right <text bold>shade</text> for light and dark mode.</text>
-						</stack>
-					</text>
+					<text slot="description">Pick a <text bold>colour set</text> for each job in the app.<space/>Spell chooses the right <text bold>shade</text> for light and dark mode.</text>
 					<text paragraph>Primary, secondary and the rest.</text>
 				</section>
 			</example>

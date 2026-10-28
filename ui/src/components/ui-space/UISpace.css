@@ -1,0 +1,18 @@
+/*
+ * The style sheet of `<ui-space>`:  an empty box with no look of its own.
+ * - Bare, it is a line break:  a block with no size, so what follows starts on a new line;
+ *   in a stack or a row, an item with no size.
+ * - What its attributes set (inline, width, height, fluid, grow, shrink) is a `:host` rule the component writes
+ *   for each element (`UISpace.hostLayout`):  this sheet is the default.
+ */
+
+@layer ui.components.space.types {
+  :host {
+    display: block;
+    flex: none;
+    inline-size: 0;
+    block-size: 0;
+    min-inline-size: 0;
+    min-block-size: 0;
+  }
+}

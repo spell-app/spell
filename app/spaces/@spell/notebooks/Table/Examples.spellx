@@ -67,12 +67,7 @@
 									<td>
 										<ui-rating color="yellow" value="3" max-rating="3" readonly aria-label="Efficacy"></ui-rating>
 									</td>
-									<td class="right aligned">
-										<ui-stack spacing="none">
-											<ui-text>80%</ui-text>
-											<ui-link link="#">18 studies</ui-link>
-										</ui-stack>
-									</td>
+									<td class="right aligned">80% <br /> <ui-link link="#">18 studies</ui-link></td>
 									<td>Creatine supplementation is the reference compound for increasing muscular creatine levels; there is variability in this increase, however, with some nonresponders.</td>
 								</tr>
 								<tr>
@@ -83,12 +78,7 @@
 									<td>
 										<ui-rating color="yellow" value="3" max-rating="3" readonly aria-label="Efficacy"></ui-rating>
 									</td>
-									<td class="right aligned">
-										<ui-stack spacing="none">
-											<ui-text>100%</ui-text>
-											<ui-link link="#">65 studies</ui-link>
-										</ui-stack>
-									</td>
+									<td class="right aligned">100% <br /> <ui-link link="#">65 studies</ui-link></td>
 									<td>Creatine is the reference compound for power improvement, with numbers from one meta-analysis to assess potency</td>
 								</tr>
 							</tbody>

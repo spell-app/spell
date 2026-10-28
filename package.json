@@ -542,6 +542,11 @@
       "types": "./ui/dist-types/src/components/ui-slider/index.d.ts",
       "default": "./ui/src/components/ui-slider/index.ts"
     },
+    "./ui/components/ui-space": {
+      "spell-source": "./ui/src/components/ui-space/index.ts",
+      "types": "./ui/dist-types/src/components/ui-space/index.d.ts",
+      "default": "./ui/src/components/ui-space/index.ts"
+    },
     "./ui/components/ui-stack": {
       "spell-source": "./ui/src/components/ui-stack/index.ts",
       "types": "./ui/dist-types/src/components/ui-stack/index.d.ts",

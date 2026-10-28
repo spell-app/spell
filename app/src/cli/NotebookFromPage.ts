@@ -14,7 +14,7 @@ import { SP } from "spell/parser/spell"
  * - Each example's markup in spellx's bare names (`<button>` is `<ui-button>`), as Avatar's notebooks are written:
  *   - the web's own tags as Spell UI's (epic `elemental-spell` P26;  `webTagsAsSpellUI()`):  `<p>` is
  *     `<text paragraph>`, `<b>` `<text bold>`, `<a>` `<link>`, a table's rows `<row>`s of `<cell>`s, `<div>` a `<stack>`,
- *     a paragraph's `<br>` a blank line ...
+ *     a `<br>` a `<space/>` (P28), but a paragraph's `<br>` a blank line ...
  *   - what's left, a run of markup that holds one of the web's own tags (a `<pre>`, a data `<script>`), or a tag no
  *     pack has (`<ui-docs-api>`), is an `<html>` block, written as the web writes it
  *   - a bare element whose text holds the web's inline tags it couldn't write stays bare, only its text an `<html>`
@@ -49,6 +49,8 @@ export class NotebookFromPage {
   private readonly tabs: Tab[]
   /** Every in-page id something links to (`examples-types-labeled`). */
   private readonly linkedIds: Set<string>
+  /** The `<ui-space>`s that were the page's `<br>`s:  an `<html>` block writes them as `<br />` again. */
+  private readonly swappedBreaks = new WeakSet<Element>()
 
   constructor(
     /** the page's HTML */
@@ -558,6 +560,8 @@ export class NotebookFromPage {
 
   /** `element`'s markup on one line:  void tags closed (`<img ... />`), comments left out, URLs served. */
   private htmlOf(element: Element, place: Place): string {
+    // a `<br>` swapped for a space (`spaceFor()`) stays the web's own in an `<html>` block
+    if (this.swappedBreaks.has(element)) return "<br />"
     const open = this.htmlOpenTag(element)
     if (VOID_TAGS.has(element.localName)) return `${open} />`
     const inner = [...element.childNodes]
@@ -588,13 +592,13 @@ export class NotebookFromPage {
   /**
    * `nodes`, the web's own tags in them (and inside them) swapped for Spell UI's where it has one:
    * `<p>` => `<ui-text paragraph>`, `<b>` => `<ui-text bold>`, `<a href>` => `<ui-link link>`, a table's rows =>
-   * `<ui-row>`s of `<ui-cell>`s ... (`WEB_TAGS`, `tableRowsOf()`).
+   * `<ui-row>`s of `<ui-cell>`s, `<br>` => `<ui-space>` ... (`WEB_TAGS`, `tableRowsOf()`, `spaceFor()`).
    * - SIDE EFFECT:  rewrites the page's parsed document in place;  returns `nodes` as they now are.
    * - A tag is left as it is when it has an attribute its Spell UI tag has no word for (`rowspan`),
    *   so it's written in an `<html>` block, as before.
    */
   private webTagsAsSpellUI(nodes: Element[]): Element[] {
-    return (this.stackLines(nodes) as Element[]).flatMap((node) => {
+    return nodes.flatMap((node) => {
       if (node.nodeType !== ELEMENT) return [node]
       const swapped = this.swapped(node)
       for (const each of swapped) this.swapInside(each)
@@ -605,7 +609,6 @@ export class NotebookFromPage {
   /** The web's tags inside `parent`, as Spell UI's (`webTagsAsSpellUI()`). */
   private swapInside(parent: Element) {
     if (KEPT_AS_WRITTEN.has(parent.localName)) return
-    if (!isParagraph(parent)) this.stackLines([...parent.childNodes])
     for (const child of [...parent.childNodes]) {
       if (child.nodeType !== ELEMENT) continue
       for (const each of this.swapped(child as Element)) this.swapInside(each)
@@ -631,6 +634,7 @@ export class NotebookFromPage {
     }
     if (tag === "label") return this.fieldLabelOf(element) ? [] : [element]
     if (tag === "kbd") return [this.keysOf(element) ?? element]
+    if (tag === "br") return [this.spaceFor(element)]
     const swap = WEB_TAGS[tag]
     if (!swap || hasOwnAttributes(element, Object.keys(swap.renamed ?? {}))) return [element]
     const replacement = this.document.createElement(swap.tag)
@@ -726,35 +730,16 @@ export class NotebookFromPage {
   }
 
   /**
-   * `nodes`, lines between `<br>`s (Rating's ratings, one under the other), as a `<ui-stack>` of the lines, swapped
-   * in their place:  a drawing has no `<br>`.  Else `nodes` as they are.
-   * - A line of one element is that element;  of more, or of text, a `<ui-text>` around them, one line of text.
+   * A `<br>` as `<ui-space>`, a line break, swapped in its place (epic `elemental-spell` P28):  a drawing has no `<br>`.
    * - Not a paragraph's `<br>`:  a blank line in its text (`writeParagraph()`).
+   * - SIDE EFFECT:  swaps it in the page's parsed document;  an `<html>` block still writes it `<br />` (`htmlOf()`).
    */
-  private stackLines(nodes: ChildNode[]): ChildNode[] {
-    // an example's description markup (`slot="description"`) stays where it is, outside the lines
-    const isSlotted = (node: ChildNode) => node.nodeType === ELEMENT && (node as Element).hasAttribute("slot")
-    const children = nodes.filter((node) => node.nodeType !== COMMENT && !isBlank(node) && !isSlotted(node))
-    if (!children.some(isLineBreak)) return nodes
-    const lines: ChildNode[][] = [[]]
-    for (const node of children) {
-      if (isLineBreak(node)) lines.push([])
-      else lines.at(-1)!.push(node)
-    }
-    if (lines.some((line) => !line.length)) return nodes
-    const stack = this.document.createElement("ui-stack")
-    stack.setAttribute("spacing", "none")
-    children[0]!.before(stack)
-    for (const line of lines) {
-      if (line.length === 1 && line[0]!.nodeType === ELEMENT) stack.append(line[0]!)
-      else {
-        const text = this.document.createElement("ui-text")
-        text.append(...line)
-        stack.append(text)
-      }
-    }
-    for (const node of children) if (isLineBreak(node)) (node as Element).remove()
-    return [...nodes.filter(isSlotted), stack]
+  private spaceFor(br: Element): Element {
+    if (br.parentElement && isParagraph(br.parentElement)) return br
+    const space = this.document.createElement("ui-space")
+    br.replaceWith(space)
+    this.swappedBreaks.add(space)
+    return space
   }
 
   ////////////////

@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>Space | Spell UI</title>
+    <meta
+      name="description"
+      content="A space is a gap between things:  a line break, a gap in a line, or the room left in a row."
+    />
+    <!-- Before first paint:  the viewer's colour scheme (`ThemePreference.HEAD_SCRIPT`, as oxfmt lays it out).  The theme itself is restored by site.js. -->
+    <script>
+      try {
+        var l = localStorage,
+          d = document.documentElement,
+          s = l.getItem("spell-site:scheme") || l.getItem("spell-site:theme") || l.getItem("spell-ui-site:scheme")
+        if (s === "light" || s === "dark") {
+          d.classList.add("ui-" + s)
+          d.style.colorScheme = s
+        }
+      } catch (e) {}
+    </script>
+    <link rel="stylesheet" href="/components/ui/_assets/site.css" />
+    <script type="module" src="/components/ui/_assets/site.js"></script>
+    <!-- the comments (bullhorns, threads, Send):  the docs runtime's, alone, beside the site's Spell UI -->
+    <script defer src="/_epic/assets/spell-comments.js"></script>
+  </head>
+  <body class="ui-typography">
+    <main id="main" class="site-main" data-toc-header="Space">
+      <ui-segment appearance="vertical" class="site-masthead">
+        <ui-container>
+          <ui-menu icon class="site-page-links" aria-label="About this page">
+            <ui-item
+              link="https://github.com/spell-app/spell-app/issues/new?title=ui-space%3A%20%20"
+              target="_blank"
+              icon="bug"
+              aria-label="Report a bug"
+              title="Report a bug"
+            ></ui-item>
+          </ui-menu>
+          <ui-header level="1" class="site-title">
+            Space
+            <ui-header>A space is a gap between things:  a line break, a gap in a line, or the room left in a row.</ui-header>
+          </ui-header>
+          <ui-theme-menu show="theme" compact class="site-themes"></ui-theme-menu>
+        </ui-container>
+      </ui-segment>
+
+      <ui-container class="site-body">
+        <ui-tabs id="site-tabs" class="site-tabs" history appearance="segmented basic" align="fluid" equal>
+          <ui-tab value="examples" label="Examples">
+            <!--
+              EXAMPLES:  Fomantic's page, section by section, in its order (Types, Content, States, Variations,
+              Groups ...).  Rules, the class-grammar mappings, gaps:  epics/spell-ui-pages/PAGES.md.
+              - A section:  `<ui-section id="examples-types" label="Types" sticky="stack" collapsible dividing>` around
+                its examples;  ids spell out the nesting (`<tab>-<section>-<example>`, lowercase kebab of the headers).
+              - An example:  its own nested section (`label` = the example's name) around
+                `<ui-example description="...">` and the live markup;  the markup IS the code shown.  A richer
+                description:  `<p slot="description">` (+ `<ui-message slot="description">`).  Fomantic's header-less
+                `.another.example`:  a second `<ui-example>` in the same section.
+              - Or write it flat (`<ui-header level="2">`, `<ui-example heading>`) and run `yarn site:sections`:
+                it nests it and writes the ids (and fixes them after a title changes).
+              - A gap:  an HTML comment `GAP I<n>:  ...` BEFORE the example's section (a comment inside the example
+                shows in its code).
+            -->
+            <ui-section id="examples-types" label="Types" sticky="stack" collapsible dividing>
+              <ui-section id="examples-types-line-break" label="Line break" sticky="stack" collapsible dividing>
+                <ui-example description="A bare space is a line break:  what follows it starts on a new line, as after a `&lt;br&gt;`.  A drawing has no `&lt;br&gt;`:  it writes `&lt;space/&gt;`.">
+                  <ui-rating value="3" max-rating="5"></ui-rating>
+                  <ui-space></ui-space>
+                  <ui-rating value="4" max-rating="5"></ui-rating>
+                  <ui-space></ui-space>
+                  <ui-rating value="5" max-rating="5"></ui-rating>
+                </ui-example>
+              </ui-section>
+              <ui-section id="examples-types-inline" label="Inline" sticky="stack" collapsible dividing>
+                <ui-example description="`inline`:  a gap inside the line instead of a break, a space&#39;s width unless `width` says.">
+                  <ui-label>Design</ui-label><ui-space inline width="lg"></ui-space><ui-label>Engineering</ui-label><ui-space inline width="40"></ui-space><ui-label>Research</ui-label>
+                </ui-example>
+              </ui-section>
+              <ui-section id="examples-types-fluid" label="Fluid" sticky="stack" collapsible dividing>
+                <ui-example description="`fluid`:  takes the room left in its row or column, and gives it back when there&#39;s none.  Between two buttons, it puts one left and one right.">
+                  <ui-stack direction="horizontal">
+                    <ui-button>Back</ui-button>
+                    <ui-space fluid></ui-space>
+                    <ui-button color="primary">Next</ui-button>
+                  </ui-stack>
+                </ui-example>
+              </ui-section>
+            </ui-section>
+            <ui-section id="examples-variations" label="Variations" sticky="stack" collapsible dividing>
+              <ui-section id="examples-variations-height" label="Height" sticky="stack" collapsible dividing>
+                <ui-example description="`height`:  a band of blank space between lines.  A number is pixels;  `xs`, `sm`, `md`, `lg`, `xl` the theme&#39;s space steps;  anything else a CSS length (`2em`, `10%`).">
+                  <ui-text>Above</ui-text>
+                  <ui-space height="xl"></ui-space>
+                  <ui-text>Below, 2em further down</ui-text>
+                </ui-example>
+              </ui-section>
+              <ui-section id="examples-variations-grow" label="Grow" sticky="stack" collapsible dividing>
+                <ui-example description="`grow`:  how much of the room left it takes, bare (1) or a number.  The second space takes twice the first&#39;s.">
+                  <ui-stack direction="horizontal" spacing="none">
+                    <ui-label>Start</ui-label>
+                    <ui-space grow></ui-space>
+                    <ui-label>One third</ui-label>
+                    <ui-space grow="2"></ui-space>
+                    <ui-label>End</ui-label>
+                  </ui-stack>
+                </ui-example>
+              </ui-section>
+              <ui-section id="examples-variations-width" label="Width" sticky="stack" collapsible dividing>
+                <ui-example description="`width` in a row:  a fixed gap between two things, where the row&#39;s own spacing is none.">
+                  <ui-stack direction="horizontal" spacing="none">
+                    <ui-button>Cut</ui-button>
+                    <ui-space width="xl"></ui-space>
+                    <ui-button>Paste</ui-button>
+                  </ui-stack>
+                </ui-example>
+              </ui-section>
+            </ui-section>
+          </ui-tab>
+
+          <ui-tab value="usage" label="Usage">
+            <!-- USAGE:  how to use it (attributes in practice, events, framework snippets), keyboard, accessibility. -->
+            <ui-section id="usage-using-it" label="Using it" sticky="stack" collapsible dividing>
+              <ui-markdown>
+                <script type="text/markdown">
+                  `<ui-space>` is an empty box with no look of its own:  a gap between things.
+
+                  - Bare, it is a line break:  what follows starts on a new line.
+                  - `inline` makes it a gap inside the line instead.
+                  - `width` and `height` size it:  a number is pixels, `xs` ... `xl` the theme's space steps, anything
+                    else a CSS length.
+                  - In a row or a column (`<ui-stack>`, a flex box):
+                    - `fluid` takes the room left, and gives it back when there's none
+                    - `grow` and `shrink` do each half on their own, bare (1) or by a number (`grow="2"`)
+                  - In a stack, the stack's own spacing still falls either side of it.
+
+                  In plain HTML a `<br>` or a margin does the same.
+                  The tag is for where there's no `<br>`:  a drawing, which writes `<space/>`.
+                </script>
+              </ui-markdown>
+            </ui-section>
+            <ui-section id="usage-accessibility" label="Accessibility" sticky="stack" collapsible dividing>
+              <ui-markdown>
+                <script type="text/markdown">
+                  A space has no role and no text:  screen readers pass over it, as over a `<br>`.
+                </script>
+              </ui-markdown>
+            </ui-section>
+          </ui-tab>
+
+          <ui-tab value="api" label="API">
+            <!-- API:  generated from the vocabularies (`site/_data/components.json5`);  nothing to write. -->
+            <ui-section id="api-attributes" label="Attributes" sticky="stack" collapsible dividing>
+              <ui-docs-api family="ui-space" only="attributes"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-states" label="States" sticky="stack" collapsible dividing>
+              <ui-docs-api family="ui-space" only="states"></ui-docs-api>
+            </ui-section>
+          </ui-tab>
+        </ui-tabs>
+
+      </ui-container>
+    </main>
+  </body>
+</html>

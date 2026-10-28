@@ -118,24 +118,9 @@
 				<message slot="description" size="small" class="site-not-ported">Not ported: styling the label as another component (Fomantic's <text code>label class="ui purple button"</text>, or an orange message or teal segment label). The label is in the shadow root, so it can't take another component's classes.</message>
 				<form>
 					<fields grouped>
-						<radio invisible name="invisible-example" value="one">
-							<stack spacing="none">
-								<text bold>Option One</text>
-								<text>I am a radio styled as a bordered label</text>
-							</stack>
-						</radio>
-						<radio invisible name="invisible-example" value="two">
-							<stack spacing="none">
-								<text bold>Option Two</text>
-								<text>I am tinted when chosen</text>
-							</stack>
-						</radio>
-						<radio invisible name="invisible-example" value="three" selected>
-							<stack spacing="none">
-								<text bold>Option Three</text>
-								<text>I am chosen</text>
-							</stack>
-						</radio>
+						<radio invisible name="invisible-example" value="one"><text bold>Option One</text><space/>I am a radio styled as a bordered label</radio>
+						<radio invisible name="invisible-example" value="two"><text bold>Option Two</text><space/>I am tinted when chosen</radio>
+						<radio invisible name="invisible-example" value="three" selected><text bold>Option Three</text><space/>I am chosen</radio>
 					</fields>
 				</form>
 			</example>

@@ -30664,6 +30664,203 @@
     },
     {
       "kind": "javascript-module",
+      "path": "src/components/ui-space/index.ts",
+      "declarations": [
+        {
+          "kind": "class",
+          "name": "UISpace",
+          "tagName": "ui-space",
+          "customElement": true,
+          "summary": "A space is a gap between things.  Bare, it is a line break;  `inline`, a gap inside the line;  `fluid`, it takes the room left in its row or column.  It has no look of its own.",
+          "description": "A space is a gap between things.  Bare, it is a line break;  `inline`, a gap inside the line;  `fluid`, it takes the room left in its row or column.  It has no look of its own.\n\nAlso known as:  spacer, gap, line break, br, spring, filler, strut.",
+          "attributes": [
+            {
+              "name": "inline",
+              "description": "A gap inside the line, not a line break:  a space's width (0.25em) unless `width` says.  Without it, what follows the space starts on a new line.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "inline"
+            },
+            {
+              "name": "width",
+              "description": "How wide:  a number of pixels (`20`), a space step (`xs`, `sm`, `md`, `lg`, `xl`, or `none`) or any CSS length (`2em`, `50%`).",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "width"
+            },
+            {
+              "name": "height",
+              "description": "How tall, in the same forms as `width`:  a band of blank space between lines (`height=\"md\"`, 1em).",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "height"
+            },
+            {
+              "name": "fluid",
+              "description": "Grows into the room left in its row or column, and gives it back when there's none (`flex: 1 1`):  `<ui-stack direction=\"horizontal\">` with a `fluid` space between two buttons puts one left and one right.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "fluid"
+            },
+            {
+              "name": "grow",
+              "description": "How much it grows into the room left, bare (1) or a number:  `grow=\"2\"` takes twice the room of a bare `grow` beside it.  Wins over `fluid`'s half.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "grow"
+            },
+            {
+              "name": "shrink",
+              "description": "How much room it gives back when there's too little, bare (1) or a number.  Wins over `fluid`'s half.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "shrink"
+            },
+            {
+              "name": "disabled",
+              "description": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "disabled"
+            },
+            {
+              "name": "loading",
+              "description": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "loading"
+            },
+            {
+              "name": "visible",
+              "description": "Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible=\"false\"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "visible"
+            },
+            {
+              "name": "animation",
+              "description": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.",
+              "type": {
+                "text": "\"fade\" | \"fade up\" | \"fade down\" | \"fade left\" | \"fade right\" | \"scale\" | \"zoom\" | \"drop\" | \"browse\" | \"browse right\" | \"fly\" | \"fly up\" | \"fly down\" | \"fly left\" | \"fly right\" | \"slide\" | \"slide up\" | \"slide down\" | \"slide left\" | \"slide right\" | \"swing\" | \"swing up\" | \"swing down\" | \"swing left\" | \"swing right\" | \"horizontal flip\" | \"vertical flip\" | \"flash\" | \"shake\" | \"bounce\" | \"tada\" | \"pulse\" | \"jiggle\" | \"glow\" | \"none\""
+              },
+              "fieldName": "animation"
+            },
+            {
+              "name": "link",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "link"
+            },
+            {
+              "name": "target",
+              "description": "Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "target"
+            },
+            {
+              "name": "font",
+              "description": "How its letters look, several words at once:  `bold`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript`, `all-caps`, `title-caps` (`font=\"bold italic\"`);  a family from the theme, `headline`, `subhead`, `serif`, `sans-serif` or `typewriter`;  and a size in pixels, `14`, or with its line height, `10/20` (`font=\"bold serif 10/20\"`).  `<ui-text>` draws each face as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it, and takes each word as a bare attribute too (`<ui-text bold serif>`);  every other element shows the look alone.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "font"
+            },
+            {
+              "name": "tooltip",
+              "description": "Its tooltip:  the browser's own, written as the element's `title`.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "tooltip"
+            },
+            {
+              "name": "label",
+              "description": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "label"
+            }
+          ],
+          "members": [],
+          "events": [],
+          "slots": [],
+          "cssParts": [],
+          "cssStates": [
+            {
+              "name": "disabled",
+              "description": "`disabled` is set (or, on a form control, a `<fieldset disabled>` around it)."
+            },
+            {
+              "name": "loading",
+              "description": "`loading` is set."
+            },
+            {
+              "name": "busy",
+              "description": "`loading`, and the element draws the shared loader:  a spinner over it (`elementSetup.loading`)."
+            },
+            {
+              "name": "dimmed",
+              "description": "Disabled or loading the shared way:  everything inside is inert, and dimmed."
+            },
+            {
+              "name": "hidden",
+              "description": "Hidden (`hidden`, or `visible=\"false\"`), once its animation has run."
+            },
+            {
+              "name": "still",
+              "description": "`animation=\"none\"`:  no motion here, nor anywhere inside it (`--ui-motion: none`)."
+            },
+            {
+              "name": "hiding",
+              "description": "Animating out:  `hidden` is already set, and the element stays on screen until it ends."
+            },
+            {
+              "name": "pending",
+              "description": "Defined by its `<ui-root>` before its family loaded:  no component yet, its values kept until it arrives."
+            },
+            {
+              "name": "ready",
+              "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            }
+          ],
+          "cssProperties": []
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "UISpace",
+          "declaration": {
+            "name": "UISpace",
+            "module": "src/components/ui-space/index.ts"
+          }
+        },
+        {
+          "kind": "custom-element-definition",
+          "name": "ui-space",
+          "declaration": {
+            "name": "UISpace",
+            "module": "src/components/ui-space/index.ts"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
       "path": "src/components/ui-stack/index.ts",
       "declarations": [
         {

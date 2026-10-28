@@ -49,24 +49,9 @@
 				<message slot="description" size="small" class="site-not-ported">Not ported: styling the label as another component (Fomantic's <text code>label class="ui purple button"</text>, or an orange message or teal segment label), and <text code>compact invisible</text>. The label is in the shadow root, so it can't take another component's classes.</message>
 				<form>
 					<fields grouped>
-						<checkbox invisible name="invisible-one">
-							<stack spacing="none">
-								<text bold>Option One</text>
-								<text>I am a checkbox styled as a bordered label</text>
-							</stack>
-						</checkbox>
-						<checkbox invisible name="invisible-two">
-							<stack spacing="none">
-								<text bold>Option Two</text>
-								<text>I am tinted when chosen</text>
-							</stack>
-						</checkbox>
-						<checkbox invisible name="invisible-three" selected>
-							<stack spacing="none">
-								<text bold>Option Three</text>
-								<text>I am chosen</text>
-							</stack>
-						</checkbox>
+						<checkbox invisible name="invisible-one"><text bold>Option One</text><space/>I am a checkbox styled as a bordered label</checkbox>
+						<checkbox invisible name="invisible-two"><text bold>Option Two</text><space/>I am tinted when chosen</checkbox>
+						<checkbox invisible name="invisible-three" selected><text bold>Option Three</text><space/>I am chosen</checkbox>
 					</fields>
 				</form>
 			</example>

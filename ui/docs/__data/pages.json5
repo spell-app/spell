@@ -480,6 +480,11 @@
       "summary": "A slider allows users to select values within a range.",
       "status": "done"
     },
+    "ui-space": {
+      "title": "Space",
+      "summary": "A space is a gap between things:  a line break, a gap in a line, or the room left in a row.",
+      "status": "done"
+    },
     "ui-stack": {
       "title": "Stack",
       "summary": "A stack lays its children out in a column, or a row that wraps, evenly spaced.",

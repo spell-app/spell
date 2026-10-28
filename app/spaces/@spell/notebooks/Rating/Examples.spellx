@@ -30,51 +30,70 @@
 
 		<section label="Icon" sticky="stack" collapsible dividing>
 			<example "Icon" description="You can use any available icon as rating indicator:  `icon` takes an icon name.">
-				<stack spacing="none">
-					<rating color="yellow" icon="star" value="2" aria-label="Stars"/>
-					<rating color="red" icon="heart" value="2" aria-label="Hearts"/>
-					<rating color="purple" icon="female" value="2" aria-label="Women"/>
-					<rating color="blue" icon="male" value="2" aria-label="Men"/>
-					<rating color="grey" icon="cloud" value="2" aria-label="Clouds"/>
-					<rating color="pink" icon="cat" value="2" aria-label="Cats"/>
-					<rating color="orange" icon="circle" value="2" aria-label="Circles"/>
-				</stack>
+				<rating color="yellow" icon="star" value="2" aria-label="Stars"/>
+				<space/>
+				<rating color="red" icon="heart" value="2" aria-label="Hearts"/>
+				<space/>
+				<rating color="purple" icon="female" value="2" aria-label="Women"/>
+				<space/>
+				<rating color="blue" icon="male" value="2" aria-label="Men"/>
+				<space/>
+				<rating color="grey" icon="cloud" value="2" aria-label="Clouds"/>
+				<space/>
+				<rating color="pink" icon="cat" value="2" aria-label="Cats"/>
+				<space/>
+				<rating color="orange" icon="circle" value="2" aria-label="Circles"/>
 			</example>
 		</>
 
 		<section label="Color" sticky="stack" collapsible dividing>
 			<example "Color" description="You can specify any color of the palette with `color`.">
-				<stack spacing="none">
-					<rating color="red" value="1" max-rating="7" aria-label="Red"/>
-					<rating color="orange" value="2" max-rating="7" aria-label="Orange"/>
-					<rating color="yellow" value="3" max-rating="7" aria-label="Yellow"/>
-					<rating color="olive" value="4" max-rating="7" aria-label="Olive"/>
-					<rating color="green" value="5" max-rating="7" aria-label="Green"/>
-					<rating color="teal" value="6" max-rating="7" aria-label="Teal"/>
-					<rating color="blue" value="6" max-rating="7" aria-label="Blue"/>
-					<rating color="violet" value="5" max-rating="7" aria-label="Violet"/>
-					<rating color="purple" value="4" max-rating="7" aria-label="Purple"/>
-					<rating color="pink" value="3" max-rating="7" aria-label="Pink"/>
-					<rating color="brown" value="2" max-rating="7" aria-label="Brown"/>
-					<rating color="grey" value="1" max-rating="7" aria-label="Grey"/>
-					<rating color="black" value="1" max-rating="7" aria-label="Black"/>
-				</stack>
+				<rating color="red" value="1" max-rating="7" aria-label="Red"/>
+				<space/>
+				<rating color="orange" value="2" max-rating="7" aria-label="Orange"/>
+				<space/>
+				<rating color="yellow" value="3" max-rating="7" aria-label="Yellow"/>
+				<space/>
+				<rating color="olive" value="4" max-rating="7" aria-label="Olive"/>
+				<space/>
+				<rating color="green" value="5" max-rating="7" aria-label="Green"/>
+				<space/>
+				<rating color="teal" value="6" max-rating="7" aria-label="Teal"/>
+				<space/>
+				<rating color="blue" value="6" max-rating="7" aria-label="Blue"/>
+				<space/>
+				<rating color="violet" value="5" max-rating="7" aria-label="Violet"/>
+				<space/>
+				<rating color="purple" value="4" max-rating="7" aria-label="Purple"/>
+				<space/>
+				<rating color="pink" value="3" max-rating="7" aria-label="Pink"/>
+				<space/>
+				<rating color="brown" value="2" max-rating="7" aria-label="Brown"/>
+				<space/>
+				<rating color="grey" value="1" max-rating="7" aria-label="Grey"/>
+				<space/>
+				<rating color="black" value="1" max-rating="7" aria-label="Black"/>
 			</example>
 		</>
 
 		<section label="Partial Ratings" sticky="stack" collapsible dividing>
 			<example "Partial Ratings" description="You can use decimal values for showing partially filled ratings.">
 				<message slot="description" state="info" size="small">A fractional <text code>value</text> only draws a partly filled icon: no radio is chosen until the user rates, and the group is described as "Rated 2.5 of 5". Fomantic's jQuery and browser caveats don't apply: every supported browser draws it.</message>
-				<stack spacing="none">
-					<rating color="black" value="0.5" max-rating="5" aria-label="Black"/>
-					<rating color="pink" value="1.25" max-rating="5" aria-label="Pink"/>
-					<rating color="red" value="1.775" max-rating="5" aria-label="Red"/>
-					<rating color="yellow" value="2.5" max-rating="5" aria-label="Yellow"/>
-					<rating color="green" value="3.225" max-rating="5" aria-label="Green"/>
-					<rating color="purple" value="3.65" max-rating="5" aria-label="Purple"/>
-					<rating color="blue" value="4.375" max-rating="5" aria-label="Blue"/>
-					<rating color="brown" value="4.75" max-rating="5" aria-label="Brown"/>
-				</stack>
+				<rating color="black" value="0.5" max-rating="5" aria-label="Black"/>
+				<space/>
+				<rating color="pink" value="1.25" max-rating="5" aria-label="Pink"/>
+				<space/>
+				<rating color="red" value="1.775" max-rating="5" aria-label="Red"/>
+				<space/>
+				<rating color="yellow" value="2.5" max-rating="5" aria-label="Yellow"/>
+				<space/>
+				<rating color="green" value="3.225" max-rating="5" aria-label="Green"/>
+				<space/>
+				<rating color="purple" value="3.65" max-rating="5" aria-label="Purple"/>
+				<space/>
+				<rating color="blue" value="4.375" max-rating="5" aria-label="Blue"/>
+				<space/>
+				<rating color="brown" value="4.75" max-rating="5" aria-label="Brown"/>
 			</example>
 		</>
 	</>
@@ -99,15 +118,19 @@
 	<section label="Variations">
 		<section label="Size" sticky="stack" collapsible dividing>
 			<example "Size" description="A rating can vary in size.">
-				<stack spacing="none">
-					<rating size="mini" color="yellow" value="3" aria-label="Mini"/>
-					<rating size="tiny" color="yellow" value="3" aria-label="Tiny"/>
-					<rating size="small" color="yellow" value="3" aria-label="Small"/>
-					<rating color="yellow" value="3" aria-label="Medium"/>
-					<rating size="large" color="yellow" value="3" aria-label="Large"/>
-					<rating size="huge" color="yellow" value="3" aria-label="Huge"/>
-					<rating size="massive" color="yellow" value="3" aria-label="Massive"/>
-				</stack>
+				<rating size="mini" color="yellow" value="3" aria-label="Mini"/>
+				<space/>
+				<rating size="tiny" color="yellow" value="3" aria-label="Tiny"/>
+				<space/>
+				<rating size="small" color="yellow" value="3" aria-label="Small"/>
+				<space/>
+				<rating color="yellow" value="3" aria-label="Medium"/>
+				<space/>
+				<rating size="large" color="yellow" value="3" aria-label="Large"/>
+				<space/>
+				<rating size="huge" color="yellow" value="3" aria-label="Huge"/>
+				<space/>
+				<rating size="massive" color="yellow" value="3" aria-label="Massive"/>
 			</example>
 		</>
 	</>

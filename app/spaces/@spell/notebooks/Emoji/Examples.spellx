@@ -91,14 +91,7 @@
 		<section label="Size" sticky="stack" collapsible dividing>
 			<example "Size" description="An emoji can vary in size.">
 				<message slot="description" size="small">Sizes are ratios of the surrounding text: <text code>small</text> 1.5em, <text code>large</text> 6em, <text code>big</text> 7.5em. <text code>medium</text> is the default, the size of the text -- NOT Fomantic's fixed 3em.</message>
-				<segment appearance="basic">
-					<stack spacing="none">
-						<text><emoji name="smiling_face" size="small"/> Small</text>
-						<text><emoji name="smiling_face" size="medium"/> Medium</text>
-						<text><emoji name="smiling_face" size="large"/> Large</text>
-						<text><emoji name="smiling_face" size="big"/> Big</text>
-					</stack>
-				</segment>
+				<segment appearance="basic"><emoji name="smiling_face" size="small"/> Small <space/> <emoji name="smiling_face" size="medium"/> Medium <space/> <emoji name="smiling_face" size="large"/> Large <space/> <emoji name="smiling_face" size="big"/> Big</segment>
 			</example>
 		</>
 

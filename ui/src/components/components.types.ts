@@ -339,6 +339,27 @@ export class StackClasses {
 }
 
 ////////////////
+// ## Space
+////////////////
+
+/**
+ * The theme's space steps by the words a page writes => their token:
+ * `<ui-stack spacing="sm">`, `<ui-space width="lg">`.
+ * - `none` is no space at all.
+ */
+export const SpaceSteps = {
+  none: "0",
+  xs: "var(--ui-space-xs)",
+  sm: "var(--ui-space-s)",
+  md: "var(--ui-space-m)",
+  lg: "var(--ui-space-l)",
+  xl: "var(--ui-space-xl)"
+} as const
+
+/** One of the words of `SpaceSteps`. */
+export type SpaceStep = keyof typeof SpaceSteps
+
+////////////////
 // ## Menu appearance
 ////////////////
 

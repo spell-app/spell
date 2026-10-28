@@ -93,18 +93,19 @@
 
 		<section label="Size" sticky="stack" collapsible dividing>
 			<example "Size" description="An icon can vary in size.">
-				<stack spacing="none">
-					<text>
-						<icon name="home" size="mini"/>
-						<icon name="home" size="tiny"/>
-						<icon name="home" size="small"/>
-					</text>
-					<icon name="home"/>
-					<icon name="home" size="large"/>
-					<icon name="home" size="big"/>
-					<icon name="home" size="huge"/>
-					<icon name="home" size="massive"/>
-				</stack>
+				<icon name="home" size="mini"/>
+				<icon name="home" size="tiny"/>
+				<icon name="home" size="small"/>
+				<space/>
+				<icon name="home"/>
+				<space/>
+				<icon name="home" size="large"/>
+				<space/>
+				<icon name="home" size="big"/>
+				<space/>
+				<icon name="home" size="huge"/>
+				<space/>
+				<icon name="home" size="massive"/>
 			</example>
 		</>
 

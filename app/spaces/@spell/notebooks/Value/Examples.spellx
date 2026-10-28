@@ -37,12 +37,7 @@
 		<section label="Text Value" sticky="stack" collapsible dividing>
 			<example "Text Value" description="`text` makes a word value, smaller and bold.">
 				<statistic>
-					<value text>
-						<stack spacing="none">
-							<text>Three</text>
-							<text>Thousand</text>
-						</stack>
-					</value>
+					<value text>Three<space/>Thousand</value>
 					<label>Signups</label>
 				</statistic>
 			</example>
