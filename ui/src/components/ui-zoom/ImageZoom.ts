@@ -1,3 +1,5 @@
+import { beforeNextPaint } from "spell/util/timing"
+
 /****************
  * ### `ImageZoom`
  * Which images on a page open full size when clicked, and showing one in the page's ONE `<ui-zoom>`.
@@ -23,6 +25,10 @@
  * - Stepping (`step()`):  while a zoom shows, the arrow keys go to the next / previous ZOOMABLE on the page
  *   (`zoomables()`:  every `<ui-zoom>` of content, every `<ui-image zoom>` and every zoomable `<img>`, in document
  *   order;  past either end the shown one bounces, it doesn't wrap)
+ * - Motion (all skipped for `prefers-reduced-motion`):
+ *   - paging slides the shown picture out and the next in, like scrolling (`slide()`);  a picture's zoom stays open
+ *   - the bounce at either end nudges the whole figure, picture and caption (`bounce()`)
+ *   - growing out of the page's picture and shrinking back into it are `<ui-zoom>`'s own (`ZoomMotion`)
  * - Moved from the epics pack, with `<epic-zoom>` (epic `ui-gaps` P14):  any page can open its screenshots full size.
  ****************/
 export class ImageZoom {
@@ -90,12 +96,56 @@ export class ImageZoom {
 
   /** A short nudge of `shown` in `direction`'s way and back, to say there's no more;  skipped for reduced motion. */
   private static bounce(shown: Element | null | undefined, direction: 1 | -1) {
-    if (!shown || matchMedia("(prefers-reduced-motion: reduce)").matches) return
-    const away = `translateY(${direction > 0 ? -BOUNCE_PX : BOUNCE_PX}px)`
+    if (!shown || ZoomMotion.isStill()) return
+    const away = `translateY(${direction > 0 ? -ZoomMotion.bouncePx : ZoomMotion.bouncePx}px)`
     shown.animate([{ transform: "none" }, { transform: away }, { transform: "none" }], {
-      duration: BOUNCE_MS,
+      duration: ZoomMotion.bounceMs,
       easing: "ease-out"
     })
+  }
+
+  /**
+   * Paging a picture in the page's zoom, like scrolling:  the shown one slides out (up for next, down for previous)
+   * as the next slides in from the other side.
+   * - `update()` makes the zoom show the next picture;  a copy of the shown one slides out meanwhile, so for a
+   *   moment there are two
+   * - SIDE EFFECT:  the copy is added beside the figure (fixed where it was), and removed when it has gone
+   * - reduced motion, or nothing drawn yet:  just `update()`
+   */
+  private static async slide(zoom: Element, direction: 1 | -1, update: () => void) {
+    const figure = zoom.shadowRoot?.querySelector<HTMLElement>(".figure")
+    if (!figure || ZoomMotion.isStill()) return update()
+    const box = figure.getBoundingClientRect()
+    const copy = figure.cloneNode(true) as HTMLElement
+    Object.assign(copy.style, {
+      position: "fixed",
+      left: `${box.left}px`,
+      top: `${box.top}px`,
+      width: `${box.width}px`,
+      margin: "0",
+      pointerEvents: "none"
+    })
+    figure.after(copy)
+    const away = direction > 0 ? "-100vh" : "100vh"
+    const from = direction > 0 ? "100vh" : "-100vh"
+    // held below (or above) the window until its picture is ready
+    figure.style.transform = `translateY(${from})`
+    update()
+    await new Promise((resolve) => beforeNextPaint(() => resolve(undefined)))
+    await figure
+      .querySelector("img")
+      ?.decode()
+      .catch(() => undefined)
+    const timing = { duration: ZoomMotion.slideMs, easing: ZoomMotion.ease }
+    copy.animate([{ transform: "none" }, { transform: `translateY(${away})` }], timing).finished.then(
+      () => copy.remove(),
+      () => copy.remove()
+    )
+    const entering = figure.animate([{ transform: `translateY(${from})` }, { transform: "none" }], timing)
+    entering.finished.then(
+      () => (figure.style.transform = ""),
+      () => (figure.style.transform = "")
+    )
   }
 
   /** What the page's zoom was last handed:  the image, or the `<ui-image>` whose shadow root holds it. */
@@ -121,7 +171,7 @@ export class ImageZoom {
     const target = list[(at < 0 ? (direction > 0 ? -1 : list.length) : at) + direction]
     if (!target) {
       const zoom = from ?? document.querySelector(`body > ${ZOOM_TAG}[${ADDED}]`)
-      ImageZoom.bounce(zoom?.shadowRoot?.querySelector(from ? ".content" : "img"), direction)
+      ImageZoom.bounce(zoom?.shadowRoot?.querySelector(from ? ".content" : ".figure"), direction)
       return
     }
     if (target.localName === ZOOM_TAG) {
@@ -131,8 +181,14 @@ export class ImageZoom {
     }
     const image = target instanceof HTMLImageElement ? target : target.shadowRoot?.querySelector("img")
     if (!image) return
-    ImageZoom.show(image)
-    if (from) shut()
+    if (from) {
+      ImageZoom.show(image)
+      shut()
+      return
+    }
+    const zoom = document.querySelector(`body > ${ZOOM_TAG}[${ADDED}]`)
+    if (zoom) void ImageZoom.slide(zoom, direction, () => ImageZoom.show(image))
+    else ImageZoom.show(image)
   }
 
   /** Does `link` lead to an image:  `image`'s own file, a `data:image/` address, or a file with an image's extension? */
@@ -147,9 +203,26 @@ export class ImageZoom {
 /** The page's zoom. */
 const ZOOM_TAG = "ui-zoom"
 
-/** The bounce at either end:  how far (px) and how long (ms). */
-const BOUNCE_PX = 40
-const BOUNCE_MS = 320
+/**
+ * The zoom's motion, for `<ui-zoom>` and `ImageZoom`.
+ * - growing out of the page's picture, shrinking back, paging, the bounce at either end
+ * - none of it for `prefers-reduced-motion`:  `isStill()`
+ */
+export const ZoomMotion = {
+  /** the easing of every move but the bounce */
+  ease: "cubic-bezier(.2, .8, .2, 1)",
+  /** growing out of the page's picture (ms) */
+  growMs: 320,
+  /** shrinking back into it (ms) */
+  shrinkMs: 240,
+  /** paging, in and out (ms) */
+  slideMs: 380,
+  /** the bounce at either end:  how far (px) and how long (ms) */
+  bouncePx: 40,
+  bounceMs: 320,
+  /** The person asked for less motion. */
+  isStill: () => matchMedia("(prefers-reduced-motion: reduce)").matches
+}
 
 /** What zooms:  content zooms, `<ui-image zoom>`s and plain images (`isZoomable()` picks those). */
 const ZOOMABLES = "ui-zoom, ui-image[zoom], img"

@@ -2,7 +2,7 @@ import { Show } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
 import { E } from "spell/ui/core"
-import { ImageZoom } from "./ImageZoom"
+import { ImageZoom, ZoomMotion } from "./ImageZoom"
 import { zoomVocabulary } from "./UIZoom.en"
 
 import zoomCSS from "./UIZoom.css?inline"
@@ -23,6 +23,10 @@ import zoomCSS from "./UIZoom.css?inline"
  *   - as large as fits the window (never cropped, never enlarged past its own size), its alt text under it
  *   - open while `src` is set;  Escape, a click anywhere or the close button close it, and it removes its own `src`
  *   - the page's ONE zoom for its screenshots is one of these, made by `ImageZoom.show()`;  `<ui-image zoom>` uses it
+ * - Motion (none under `prefers-reduced-motion`):
+ *   - it GROWS out of its place on the page (the content's view, or the picture clicked) and SHRINKS back into it
+ *     before the modal closes, however it's closed (Escape, a click, the close button)
+ *   - paging with the arrow keys slides the next picture in, like scrolling (`ImageZoom`)
  * - Arrow keys while showing:  the next / previous zoomable on the page;  past either end the picture bounces (`ImageZoom.step()`)
  * - The modal's own events (`ui-opened`, `ui-closed` ...) come out of it, as from any `<ui-modal>`.
  ****************/
@@ -97,10 +101,110 @@ export class UIZoom extends E.UIComponent<typeof zoomVocabulary> {
     this.shut()
   }
 
+  /**
+   * About to close (Escape, the backdrop, its close button):  shrink back into place first, then close.
+   * - `ui-closing` is vetoed while it shrinks, then `shut()` closes the modal without asking again
+   */
+  @E.on("ui-closing", { target: "renderRoot" })
+  protected onClosing(event: Event) {
+    if (event.target !== this.modal) return
+    if (!this.isShrinking && !this.canMove()) return
+    event.preventDefault()
+    void this.dismiss()
+  }
+
   /** A click on the zoomed image:  shut too, as a lightbox does. */
   @E.on("click", { target: "renderRoot" })
   protected onClick(event: MouseEvent) {
-    if (event.target instanceof Element && event.target.closest(`.${FIGURE}`)) this.shut()
+    if (event.target instanceof Element && event.target.closest(`.${FIGURE}`)) void this.dismiss()
+  }
+
+  ////////////////
+  // ## Growing and shrinking
+  ////////////////
+
+  /** Shown now, for `onShowingChanged()`. */
+  private wasShowing = false
+
+  /** It shrinks back into the page:  shutting waits for it. */
+  private isShrinking = false
+
+  /** It came up (a picture's `src`, or `open`):  grow out of its place. */
+  @E.onChange("src", "isOpen")
+  protected onShowingChanged() {
+    const showing = this.isShowing
+    if (showing && !this.wasShowing) void this.grow()
+    this.wasShowing = showing
+  }
+
+  /** What's drawn full size:  the picture, or the content's box. */
+  private get zoomed(): HTMLElement | null {
+    return this.modal?.querySelector<HTMLElement>(`.${IMAGE}, .${CONTENT}`) ?? null
+  }
+
+  /** Where it sits on the page:  the picture clicked (still the one `src` shows), or the content's view. */
+  private get placeOnPage(): DOMRect | undefined {
+    let box: DOMRect | undefined
+    if (this.src) {
+      const shown = ImageZoom.shown
+      const image = shown instanceof HTMLImageElement ? shown : shown?.shadowRoot?.querySelector("img")
+      if (image?.isConnected && (image.currentSrc || image.src) === this.src) box = image.getBoundingClientRect()
+    } else box = this.view?.getBoundingClientRect()
+    return box?.width ? box : undefined
+  }
+
+  /** Can it grow or shrink:  motion allowed, something drawn, and its place on the page known? */
+  private canMove(): boolean {
+    return !ZoomMotion.isStill() && !!this.zoomed && !!this.placeOnPage
+  }
+
+  /** The transform that draws `zoomed` over `place`:  centred on it, scaled to its width. */
+  private static over(place: DOMRect, zoomed: DOMRect): string {
+    const dx = place.left + place.width / 2 - (zoomed.left + zoomed.width / 2)
+    const dy = place.top + place.height / 2 - (zoomed.top + zoomed.height / 2)
+    return `translate(${dx}px, ${dy}px) scale(${place.width / zoomed.width})`
+  }
+
+  /** Grow out of its place on the page. */
+  private async grow() {
+    if (ZoomMotion.isStill()) return
+    // once it's drawn into the modal:  the first time, that takes the element's own set-up too
+    let zoomed = this.zoomed
+    for (let frame = 0; !zoomed && frame < DRAW_FRAMES; frame++) {
+      await new Promise((resolve) => E.beforeNextPaint(() => resolve(undefined)))
+      zoomed = this.zoomed
+    }
+    const place = this.placeOnPage
+    if (!zoomed || !place) return
+    if (zoomed instanceof HTMLImageElement) await zoomed.decode().catch(() => undefined)
+    const frames = [
+      { transform: UIZoom.over(place, zoomed.getBoundingClientRect()), opacity: 0.6 },
+      { transform: "none", opacity: 1 }
+    ]
+    zoomed.animate(frames, { duration: ZoomMotion.growMs, easing: ZoomMotion.ease })
+  }
+
+  /** Shrink back into its place on the page, then `shut()`;  at once when it can't move. */
+  @E.untracked
+  private async dismiss() {
+    if (this.isShrinking) return
+    const zoomed = this.zoomed
+    const place = this.placeOnPage
+    if (!zoomed || !place || ZoomMotion.isStill()) return this.shut()
+    this.isShrinking = true
+    const frames = [
+      { transform: "none", opacity: 1 },
+      { transform: UIZoom.over(place, zoomed.getBoundingClientRect()), opacity: 0.4 }
+    ]
+    // held at the end while the modal fades
+    const shrinking = zoomed.animate(frames, {
+      duration: ZoomMotion.shrinkMs,
+      easing: ZoomMotion.ease,
+      fill: "forwards"
+    })
+    await shrinking.finished.catch(() => undefined)
+    this.isShrinking = false
+    this.shut()
   }
 
   /**
@@ -205,6 +309,9 @@ const ARROW_STEPS: Record<string, 1 | -1 | undefined> = { ArrowRight: 1, ArrowDo
 
 /** What keeps its own arrow keys. */
 const TEXT_FIELDS = "input:not([type=checkbox], [type=radio], [type=button]), textarea, select, [contenteditable]"
+
+/** How many frames it waits for its picture or content to be drawn, before it gives up growing. */
+const DRAW_FRAMES = 30
 
 /** `shrink`'s default:  half size. */
 const DEFAULT_RATIO = 0.5
