@@ -20,6 +20,9 @@
  *   - with a modifier key:  the link's, as usual (a new tab)
  * - Plain DOM, no Solid and no Spell UI's core:  the docs runtime imports this leaf alone, so the element isn't
  *   bundled there.  It makes the `<ui-zoom>` by its tag, which `<ui-root>` loads like any other.
+ * - Stepping (`step()`):  while a zoom shows, the arrow keys go to the next / previous ZOOMABLE on the page
+ *   (`zoomables()`:  every `<ui-zoom>` of content, every `<ui-image zoom>` and every zoomable `<img>`, in document
+ *   order;  past either end the shown one bounces, it doesn't wrap)
  * - Moved from the epics pack, with `<epic-zoom>` (epic `ui-gaps` P14):  any page can open its screenshots full size.
  ****************/
 export class ImageZoom {
@@ -79,8 +82,57 @@ export class ImageZoom {
       zoom.setAttribute(ADDED, "")
       document.body.append(zoom)
     }
+    const root = image.getRootNode()
+    ImageZoom.shown = root instanceof ShadowRoot ? root.host : image
     zoom.setAttribute("alt", image.alt)
     zoom.setAttribute("src", image.currentSrc || image.src)
+  }
+
+  /** A short nudge of `shown` in `direction`'s way and back, to say there's no more;  skipped for reduced motion. */
+  private static bounce(shown: Element | null | undefined, direction: 1 | -1) {
+    if (!shown || matchMedia("(prefers-reduced-motion: reduce)").matches) return
+    const away = `translateY(${direction > 0 ? -BOUNCE_PX : BOUNCE_PX}px)`
+    shown.animate([{ transform: "none" }, { transform: away }, { transform: "none" }], {
+      duration: BOUNCE_MS,
+      easing: "ease-out"
+    })
+  }
+
+  /** What the page's zoom was last handed:  the image, or the `<ui-image>` whose shadow root holds it. */
+  static shown: Element | undefined
+
+  /** Everything on the page that zooms, in document order:  the ONE list the arrow keys step through. */
+  static zoomables(): Element[] {
+    return [...document.querySelectorAll(ZOOMABLES)].filter((element) =>
+      element instanceof HTMLImageElement ? ImageZoom.isZoomable(element) : !element.hasAttribute(ADDED)
+    )
+  }
+
+  /**
+   * Show the zoomable `direction` (1 next, -1 previous) after `from`;  `from` is shut by `shut()`
+   * - at either end it doesn't wrap:  the shown one bounces (`bounce()`)
+   * - `from`:  a content `<ui-zoom>`, or `undefined` for the page's own zoom (showing `ImageZoom.shown`)
+   * - an image replaces the page zoom's picture in place:  its modal stays open
+   */
+  static step(direction: 1 | -1, from: Element | undefined, shut: () => void) {
+    const list = ImageZoom.zoomables()
+    if (list.length < 2) return
+    const at = list.indexOf(from ?? ImageZoom.shown!)
+    const target = list[(at < 0 ? (direction > 0 ? -1 : list.length) : at) + direction]
+    if (!target) {
+      const zoom = from ?? document.querySelector(`body > ${ZOOM_TAG}[${ADDED}]`)
+      ImageZoom.bounce(zoom?.shadowRoot?.querySelector(from ? ".content" : "img"), direction)
+      return
+    }
+    if (target.localName === ZOOM_TAG) {
+      shut()
+      target.shadowRoot?.querySelector<HTMLButtonElement>("button.show")?.click()
+      return
+    }
+    const image = target instanceof HTMLImageElement ? target : target.shadowRoot?.querySelector("img")
+    if (!image) return
+    ImageZoom.show(image)
+    if (from) shut()
   }
 
   /** Does `link` lead to an image:  `image`'s own file, a `data:image/` address, or a file with an image's extension? */
@@ -94,6 +146,13 @@ export class ImageZoom {
 
 /** The page's zoom. */
 const ZOOM_TAG = "ui-zoom"
+
+/** The bounce at either end:  how far (px) and how long (ms). */
+const BOUNCE_PX = 40
+const BOUNCE_MS = 320
+
+/** What zooms:  content zooms, `<ui-image zoom>`s and plain images (`isZoomable()` picks those). */
+const ZOOMABLES = "ui-zoom, ui-image[zoom], img"
 
 /** The attribute that marks a zoomable image under the pointer:  the page's sheet draws its cursor. */
 const ZOOM_MARK = "data-ui-zoom"

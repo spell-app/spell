@@ -2,6 +2,7 @@ import { Show } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
 import { E } from "spell/ui/core"
+import { ImageZoom } from "./ImageZoom"
 import { zoomVocabulary } from "./UIZoom.en"
 
 import zoomCSS from "./UIZoom.css?inline"
@@ -22,6 +23,7 @@ import zoomCSS from "./UIZoom.css?inline"
  *   - as large as fits the window (never cropped, never enlarged past its own size), its alt text under it
  *   - open while `src` is set;  Escape, a click anywhere or the close button close it, and it removes its own `src`
  *   - the page's ONE zoom for its screenshots is one of these, made by `ImageZoom.show()`;  `<ui-image zoom>` uses it
+ * - Arrow keys while showing:  the next / previous zoomable on the page;  past either end the picture bounces (`ImageZoom.step()`)
  * - The modal's own events (`ui-opened`, `ui-closed` ...) come out of it, as from any `<ui-modal>`.
  ****************/
 export class UIZoom extends E.UIComponent<typeof zoomVocabulary> {
@@ -99,6 +101,20 @@ export class UIZoom extends E.UIComponent<typeof zoomVocabulary> {
   @E.on("click", { target: "renderRoot" })
   protected onClick(event: MouseEvent) {
     if (event.target instanceof Element && event.target.closest(`.${FIGURE}`)) this.shut()
+  }
+
+  /**
+   * Arrow keys while showing:  the next / previous zoomable on the page (`ImageZoom.step()`).
+   * Not from a text field in the zoomed content, which keeps its arrows.
+   */
+  @E.on("keydown", { target: "renderRoot" })
+  protected onKeyDown(event: KeyboardEvent) {
+    const step = ARROW_STEPS[event.key]
+    if (!step || event.defaultPrevented || event.metaKey || event.ctrlKey || event.altKey || !this.isShowing) return
+    const typing = event.composedPath()[0]
+    if (typing instanceof HTMLElement && typing.matches(TEXT_FIELDS)) return
+    event.preventDefault()
+    ImageZoom.step(step, this.src ? undefined : this.domElement, () => this.shut())
   }
 
   /** Shut:  no `src`, not open. */
@@ -183,6 +199,12 @@ export class UIZoom extends E.UIComponent<typeof zoomVocabulary> {
 
 /** The vocabulary's attribute getters, typed (see "Attributes" in `UIComponent`). */
 export interface UIZoom extends E.AttributeValues<typeof zoomVocabulary> {}
+
+/** Arrow keys that step to the next (1) or previous (-1) zoomable. */
+const ARROW_STEPS: Record<string, 1 | -1 | undefined> = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }
+
+/** What keeps its own arrow keys. */
+const TEXT_FIELDS = "input:not([type=checkbox], [type=radio], [type=button]), textarea, select, [contenteditable]"
 
 /** `shrink`'s default:  half size. */
 const DEFAULT_RATIO = 0.5
