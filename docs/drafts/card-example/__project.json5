@@ -1,0 +1,8 @@
+{
+  "imports": [
+    {
+      "path": "/Card.spell",
+      "active": true
+    }
+  ]
+}
