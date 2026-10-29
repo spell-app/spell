@@ -207,7 +207,7 @@ any folder here -> any folder below     (by import name:  spell/parser/spell, sp
   - Spell's project groups (`@spell/examples`, `owen@spell` ...) are spaces'.
     Loading `spell/app/spaces` registers them with spell,
     so every program that reads a spell path loads spaces first ([spaces' AGENTS.md](src/spaces/AGENTS.md)).
-  - Owen's own projects are NOT in git:  they're in spell.spaces, at the kit's root (`../spell.spaces` from here),
+  - Owen's own projects are NOT in git:  they're in spell.spaces, beside the kit (`../../spell.spaces` from here),
     one folder for main and every worktree (`SPELL_SPACES_DIR` sets it;  `../spell-spaces` before epic `repo-split` P8).
   - Folders of the kit it needs at run time (spell's `src/`, the core's) it finds by
     PACKAGE, through `node_modules` (`environment.packageFolder("spell/parser/py")` ...), never by a path into that

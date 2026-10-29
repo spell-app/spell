@@ -75,15 +75,15 @@ const staticDir = resolve(packagesDir, "app", "static")
 /**
  * The MAIN checkout's root, from this checkout's:  the one a worktree's git shares (`SRV.checkoutOf()`).
  * - found wherever the worktree's folder is
- * - spell.spaces sits in the kit, so every worktree reads the same spaces.
+ * - spell.spaces sits beside it, so every worktree reads the same spaces.
  */
 const mainRepoDir = checkoutOf(repoDir)?.main ?? repoDir
 
 /**
  * spell.spaces:  every person's and org's space (decisions Q10, Q24).
  * - ONE folder for main and every worktree, outside git.
- * - By default it's beside the main checkout, `<main checkout>/../spell.spaces`:  in the top repo `spell`
- *   (`~/www/spell/spell.spaces`, epic `repo-split` J5;  `../spell-spaces` before).
+ * - By default it's beside the main checkout, `<main checkout>/../spell.spaces`:  `~/www/spell.spaces`
+ *   (`../spell-spaces` before epic `repo-split` P8).
  * - `SPELL_SPACES_DIR` sets it, e.g. tests' temporary folder.
  * - Laid out by org, each person's space inside it:  `@spell/owen@/errors/` is `owen@spell/errors`.
  * - The page server's `--spaces <dir>` sets it (P8).

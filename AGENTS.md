@@ -267,7 +267,8 @@ Lowest first, each using only the ones above it in this table (the lint's `spell
   (`"spell": "portal:../spell"`), at `~/www/spell-brand` (`repos.json5`, a peer).
   - Brand work is its own `/isolate`, in its own repo.
   - The kit's page server serves its part of the settings from that peer entry;  a kit worktree uses main's.
-- Data, not code, beside them:  `spell.epics/` (the content repo) and `spell.spaces/` (your projects).
+- Data, not code:  `spell.epics/` (the content repo), inside the kit, and `spell.spaces/` (your projects), beside it
+  (`~/www/spell.spaces`).
 
 ## Imports across repos
 
