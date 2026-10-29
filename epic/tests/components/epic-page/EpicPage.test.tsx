@@ -10,6 +10,8 @@ import { AgentsClient, ReviewClient, clockOf, type Inbox } from "spell/epic/revi
 import "spell/ui/components/ui-button"
 import "spell/ui/components/ui-icon"
 import "spell/ui/components/ui-section"
+// the gear menus (I166)
+import "spell/ui/components/ui-dropdown"
 import "spell/ui/components/ui-label"
 import "spell/ui/components/ui-message"
 import "spell/ui/components/ui-code"

@@ -139,8 +139,15 @@ export const epicSectionVocabulary = {
     {
       name: "tools",
       description:
-        "At the title's end:  the page's own buttons (the `actions` slot), then the Phases section's Files / " +
-        "Verify toggles and its state filter;  an item section's state filter;  an Overview sub-section's review buttons."
+        "At the title's end:  the page's own buttons (the `actions` slot), then the Phases section's state filter " +
+        "and its gear;  an item section's state filter;  an Overview sub-section's review buttons."
+    },
+    {
+      name: "gear",
+      description:
+        "The Phases section's gear, last on its title row (epic `epic-engine` I166;  the Files / Verify toggles " +
+        'before):  a `<ui-dropdown>` menu, "Show each phase\'s files" and "Show each phase\'s checks", ticked ' +
+        "while on.  A pick shows or hides that field in every phase, forgetting each phase's own choice of it."
     },
     {
       name: "filter",
@@ -179,7 +186,7 @@ export const epicSectionVocabulary = {
   ],
   states: [
     ...FOLD_STATES,
-    { name: "tools", description: "Its title has tools:  the Phases toggles, or a state filter (items in it)." }
+    { name: "tools", description: "Its title has tools:  the Phases gear, or a state filter (items in it)." }
   ],
   texts: [
     ...FOLD_TEXTS,
@@ -192,10 +199,17 @@ export const epicSectionVocabulary = {
     { key: "testsTitle", text: "Manual tests" },
     { key: "logTitle", text: "Log" },
     { key: "noneYet", text: "None yet", description: "An item section with no items." },
-    { key: "showFiles", text: "Show each phase's Files", description: "The Phases title's Files toggle, off." },
-    { key: "hideFiles", text: "Hide each phase's Files", description: "The Files toggle, on." },
-    { key: "showVerify", text: "Show each phase's Verify", description: "The Phases title's Verify toggle, off." },
-    { key: "hideVerify", text: "Hide each phase's Verify", description: "The Verify toggle, on." },
+    { key: "gearTip", text: "Settings for every phase", description: "The Phases gear's tooltip and name (I166)." },
+    {
+      key: "showFiles",
+      text: "Show each phase's files",
+      description: "The Phases gear menu:  every phase's Files field, ticked while shown."
+    },
+    {
+      key: "showVerify",
+      text: "Show each phase's checks",
+      description: "The Phases gear menu:  every phase's Verify field, ticked while shown."
+    },
     {
       key: "addNew",
       text: "New {kind}",

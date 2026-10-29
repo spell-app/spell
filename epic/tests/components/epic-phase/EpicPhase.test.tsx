@@ -8,6 +8,9 @@ import { expectAccessible } from "spell/test-helpers/A11y"
 import { ReviewClient, type Inbox } from "spell/epic/review"
 
 import "spell/ui/components/ui-section"
+// the gear menus (I166)
+import "spell/ui/components/ui-dropdown"
+import "spell/ui/components/ui-button"
 import "spell/epic/components/epic-section"
 import "spell/epic/components/epic-phase"
 import "spell/epic/components/epic-update"
@@ -16,6 +19,31 @@ import "spell/epic/components/epic-mark"
 import "spell/ui/components/ui-modal"
 // what a request's thumbnail opens in:  `<ui-root>` loads it on a page
 import "spell/ui/components/ui-zoom"
+
+/** `host`'s gear (I166), drawn. */
+async function gearOf(host: Element): Promise<E.DOMElement> {
+  const gear = host.shadowRoot!.querySelector<E.DOMElement>('[part~="gear"]')!
+  await gear.ready
+  return gear
+}
+
+/** Each entry of `gear`'s menu, `<text>:  on` (ticked) or `off`. */
+function gearEntries(gear: Element): string[] {
+  return Array.from(
+    gear.querySelectorAll("ui-item"),
+    (item) => `${item.textContent!.trim()}:  ${item.getAttribute("icon") === "square check" ? "on" : "off"}`
+  )
+}
+
+/** Open `gear`'s menu and pick the entry saying `text`, as a person does. */
+async function pickGear(gear: E.DOMElement, text: string) {
+  gear.shadowRoot!.querySelector<HTMLElement>('[part~="trigger"]')!.click()
+  await ElementFixture.tick()
+  const rows = Array.from(gear.shadowRoot!.querySelectorAll<HTMLElement>('[part~="item"]'))
+  rows.find((row) => row.textContent!.includes(text))!.click()
+  await ElementFixture.tick()
+  await ElementFixture.tick()
+}
 
 /** `host`'s inner `<ui-section>`. */
 function inner(host: Element): E.DOMElement {
@@ -229,7 +257,7 @@ describe("<epic-phase> plan changes (Owen, 2026-10-11:  no Plan changes surround
 })
 
 describe("<epic-field>", () => {
-  test("its icon and label before its prose;  Files and Verify hidden until the Phases toggles show them", async () => {
+  test("its icon and label before its prose;  Files and Verify hidden until a gear shows them", async () => {
     const section = await render<E.DOMElement>(
       `<epic-section id="phases" kind="phases" open><epic-phase id="p1" title="One" status="todo" open>` +
         `<epic-field name="goal"><p>Win.</p></epic-field><epic-field name="files">a.ts</epic-field>` +
@@ -240,12 +268,54 @@ describe("<epic-field>", () => {
     expect(goal.shadowRoot!.querySelector('[part~="label"]')!.textContent).toBe("Goal:")
     expect(goal.shadowRoot!.querySelector('[part~="icon"]')).not.toBeNull()
     expect(getComputedStyle(files).display).toBe("none")
-    section.shadowRoot!.querySelector<HTMLButtonElement>("button.toggle")!.click()
-    await ElementFixture.tick()
+    const gear = await gearOf(section)
+    await pickGear(gear, "Show each phase's files")
     expect(getComputedStyle(files).display).toBe("block")
-    section.shadowRoot!.querySelector<HTMLButtonElement>("button.toggle")!.click()
-    await ElementFixture.tick()
+    await pickGear(gear, "Show each phase's files")
     await expectAccessible(goal)
+  })
+
+  // epic `epic-engine` I166:  "In each phase header, that's the same for this phase"
+  test("each phase's GEAR, last on its row:  its own files and checks, over the Phases section's for it", async () => {
+    const section = await render<E.DOMElement>(
+      `<epic-section id="phases" kind="phases" open>` +
+        `<epic-phase id="p1" title="One" status="todo" estimate="1h" open><epic-field name="files">a.ts</epic-field>` +
+        `<epic-field name="verify">yarn test</epic-field></epic-phase>` +
+        `<epic-phase id="p2" title="Two" status="todo" open><epic-field name="files">b.ts</epic-field></epic-phase>` +
+        `</epic-section>`
+    )
+    const [one, two] = Array.from(section.querySelectorAll("epic-phase"))
+    const shown = () =>
+      Array.from(section.querySelectorAll("epic-field"), (field) => getComputedStyle(field).display !== "none")
+    const oneGear = await gearOf(one!)
+    expect(oneGear.title).toBe("Settings for this phase")
+    expect(oneGear.closest('[part~="tools"]')!.lastElementChild).toBe(oneGear)
+    expect(gearEntries(oneGear)).toEqual(["Show this phase's files:  off", "Show this phase's checks:  off"])
+    // this phase alone
+    await pickGear(oneGear, "Show this phase's checks")
+    expect(shown()).toEqual([false, true, false])
+    expect(gearEntries(oneGear)).toEqual(["Show this phase's files:  off", "Show this phase's checks:  on"])
+    expect(one!.matches(":state(open)")).toBe(true)
+    // every phase's files, but this one's, which it hides
+    await pickGear(await gearOf(section), "Show each phase's files")
+    expect(shown()).toEqual([true, true, true])
+    expect(gearEntries(await gearOf(two!))).toEqual(["Show this phase's files:  on", "Show this phase's checks:  off"])
+    await pickGear(oneGear, "Show this phase's files")
+    expect(shown()).toEqual([false, true, true])
+    expect(JSON.parse(localStorage.getItem(`epic-phase-own-fields:${location.pathname}`)!)).toEqual({
+      p1: { verify: true, files: false }
+    })
+    // every phase's again:  each phase's own choice of it forgotten
+    await pickGear(await gearOf(section), "Show each phase's files")
+    expect(shown()).toEqual([false, true, false])
+    await pickGear(await gearOf(section), "Show each phase's files")
+    expect(shown()).toEqual([true, true, true])
+    // back as it was
+    await pickGear(await gearOf(section), "Show each phase's files")
+    await pickGear(oneGear, "Show this phase's checks")
+    expect(shown()).toEqual([false, false, false])
+    expect(localStorage.getItem(`epic-phase-own-fields:${location.pathname}`)).toBe("{}")
+    await expectAccessible(section)
   })
 
   test("a labelled block in prose (`label`, P14):  `Where:` before its prose, no icon", async () => {

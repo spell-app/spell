@@ -169,6 +169,9 @@ const ICONS = {
   "solid/flask": ["flask"],
   "solid/code-branch": ["code branch"],
   "solid/folder": ["folder"],
+  "solid/gear": ["gear", "cog"], // a fold's gear menu (`EpicFold.renderGear()`, I166)
+  "solid/square-check": ["square check", "check square"], // a gear menu's entry, on
+  "regular/square": ["square outline"], // ... and off
   // a test run's screenshot picker (`<epic-test-run>`, epic `epic-engine` I75)
   "regular/file-image": ["file image"],
   "solid/calendar": ["calendar"],

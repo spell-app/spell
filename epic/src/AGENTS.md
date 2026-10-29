@@ -105,6 +105,20 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         - every chevron's tooltip ends with what ⌥-click does (`DEEP_TIPS`;  `<ui-section>`'s `toggleTipMore`)
         - the Log stays folded under it, as under the page's expand-all (`staysFolded`, I155)
         - the page toolbar keeps its one toggle-all (`Fold.toggleAllButton()`):  it has no chevron to hold
+      - a GEAR in its place, last in the row, on the Phases section and each phase (epic `epic-engine` I166;  Owen,
+        2026-10-29:  "'Show each phase's files' etc is something I'd rarely choose ... we can change the 'expand
+        all' to a gear icon which shows menu"):
+        - Spell UI's menu (`EpicFold.renderGear()`):  a `<ui-dropdown>` whose trigger is a round `<ui-button
+          icon="gear">`, its tooltip "Settings for every phase" / "Settings for this phase";  each entry a `<ui-item>`,
+          a ticked box while on
+        - the Phases section's:  "Show each phase's files", "Show each phase's checks" (the Files / Verify toggles
+          before, their memory kept);  each phase's:  "Show this phase's files", "Show this phase's checks", which win
+          over the section's for that phase
+        - one `PhaseFields` per page holds both, remembered per page in this browser;  a pick for every phase forgets
+          each phase's own choice of that field
+        - its entries are a LIST the element builds (`GearEntry`):  a new setting is one more entry
+        - the state chips stay in the row, before it:  frequent changes keep their place (Owen:  "do NOT move filter
+          badges into that menu")
       - its cursors (I161;  Owen:  "pointer when over content in these headers, drag cursor when over whitespace"):
         the fold button is only as wide as its chevron, icon and title;  the pointer over those, the badge and the
         buttons;  over the row's empty space, the pointer too (a click there folds it, `onTitleRowClick()`), but the grab
@@ -1265,6 +1279,9 @@ In `tools/`:
       - everything showing:  only that state
       - else a hidden one shows too, and a shown one hides
       - the only one showing:  everything again
+    - An ⌥-click (Alt-click) on ANY chip, every list's and an epic page's alike:  only that state, whatever showed
+      (epic `epic-engine` I166;  Owen, 2026-10-29:  "if I option-click on one of those badges, turn just that one on").
+      - the element sends it as `how: "only"` (`StateFilter.nextShown(..., "only")`);  each chip's tooltip says so
     - A filtered list says "N hidden · show all" under it.
       Remembered per page.
   - An EPIC PAGE:  `<epic-page>` markup, drawn by the `epics` pack (see "Overview").

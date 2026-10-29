@@ -11,7 +11,13 @@ import { CHOSEN, stopIfOwn, type ReviewShows } from "spell/epic/components/epic-
 import { STATUS_SLOT } from "spell/epic/components/epic-item/EpicItem.types"
 // Import directly:  the fold base, not the `epic-section` barrel (which defines `<epic-section>`)
 import { EpicFold } from "spell/epic/components/epic-section/EpicFold"
-import { DOC_REVIEW, type ContentsEntry } from "spell/epic/components/epic-section/EpicSection.types"
+import { phaseFields } from "spell/epic/components/epic-section/PhaseFields"
+import {
+  DOC_REVIEW,
+  PHASE_FIELDS,
+  type ContentsEntry,
+  type PhaseFieldName
+} from "spell/epic/components/epic-section/EpicSection.types"
 
 import { epicPhaseVocabulary } from "./EpicPhase.en"
 import { ICON } from "./EpicPhase.types"
@@ -43,7 +49,8 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
  *   - Done, `<epic-commit>`s, Files, Verify, To review
  *   - An older doc's `<epic-updated>` lines (its `changes` slot, P6) show at the end of its body, unboxed,
  *     until the epic tool's next write migrates them (`updates-as-epic-update`)
- *   - Files and Verify show only while the Phases title's toggles say so;  commits while the page's git toggle does
+ *   - Files and Verify show only while the Phases title's gear says so, or its own;  commits while the page's git
+ *     toggle does
  * - Its body is usually a part (`source="parts/p-epic-migrate.html"`), loaded the first time it opens.
  * - REVIEWED as an Overview sub-section is, only while the page is reviewed
  *   (epic `airplane` P2;  `<epic-review buttons="part">`):
@@ -56,6 +63,11 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
  *   - while Claude's build plan for it waits (`plan="waiting"`, P33):  Accept plan and Revisit (`buttons="plan"`)
  *   - still to do, its plan accepted (`plan="accepted"`, I140):  Make Todo, Revisit and a green check, a state saying
  *     it's good to go (`buttons="accepted"`;  Owen, 2026-10-26:  "so I can see they are good to go")
+ * - Its GEAR (epic `epic-engine` I166;  `EpicFold.renderGear()`), last on its title row, with an `id`:
+ *   "Show this phase's files" and "Show this phase's checks", ticked while it shows them
+ *   - its own choice (`PhaseFields.setOwn()`), which wins over the Phases section's gear for it:  its fields' custom
+ *     properties set on its own box (`foldStyle()`), over the ones they'd inherit from the section
+ *   - a list of entries:  more settings for one phase come as more entries
  * - SIDE EFFECT:  follows the review inbox while connected.
  ****************/
 export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
@@ -257,6 +269,7 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
             )}
           </Show>
           {this.reviewButtons()}
+          <Show when={this.id}>{(id) => this.gear(id())}</Show>
         </>
       ),
       before: () => this.saidNote(),
@@ -270,6 +283,38 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
         </>
       )
     })
+  }
+
+  ////////////////
+  // ## Its gear (I166)
+  ////////////////
+
+  /** Its gear:  "Show this phase's files" and "... checks", ticked while it shows them. */
+  private gear(id: string): JSX.Element {
+    return this.renderGear({
+      title: () => this.translationForKey("gearTip"),
+      entries: () =>
+        PHASE_FIELDS.map((it) => ({
+          value: it.field,
+          text: this.translationForKey(it.one),
+          isOn: phaseFields.shows(id, it.field)
+        })),
+      pick: (field) => phaseFields.setOwn(id, field as PhaseFieldName, !phaseFields.shows(id, field as PhaseFieldName))
+    })
+  }
+
+  /**
+   * Its own choice of fields (`PhaseFields.ownOf()`):  each field's custom property, `block` or `none`, on its own box;
+   * a field it hasn't chosen inherits the Phases section's.
+   */
+  protected foldStyle(): Record<string, string> | undefined {
+    const id = this.id
+    if (!id) return undefined
+    const own = phaseFields.ownOf(id)
+    const style: Record<string, string> = {}
+    for (const it of PHASE_FIELDS)
+      if (own[it.field] !== undefined) style[it.property] = own[it.field] ? "block" : "none"
+    return style
   }
 
   ////////////////

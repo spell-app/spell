@@ -14,7 +14,7 @@ import { NOBODY_LISTENING, SAGA_PREFIX, STAGE_ID, ServerLink, isAirplane, isImme
 import { ReviewState } from "spell/epic/components/epic-review/ReviewState"
 // the fold and filter pieces the blocks share:  their files, not their families' barrels (which would define them here)
 import { Fold, expandAllUnder, foldAllUnder } from "spell/epic/components/epic-item/Fold"
-import { StateFilter } from "spell/epic/components/epic-section/StateFilter"
+import { StateFilter, type ChipPick } from "spell/epic/components/epic-section/StateFilter"
 import { STATE_PICK, type StatePickDetail } from "spell/epic/components/epic-state-filter/EpicStateFilter.types"
 import { FILTER, FILTER_STATES, type StateFilterEntry } from "spell/epic/components/epic-section/EpicSection.types"
 import {
@@ -974,7 +974,8 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
    * The page's state filter, in the toolbar:  a chip per state the page's items are in, with how many
    * (`<epic-state-filter>`, the one chip element:  epic `epic-engine` P3).
    * - solid while EVERY section showing that state shows it
-   * - a click (`epic-state-changed`) filters every section at once, by the sections' own rule (`StateFilter.nextShown()`)
+   * - a click (`epic-state-changed`) filters every section at once, by the sections' own rule
+   *   (`StateFilter.nextShown()`);  an ⌥-click, only its state (I166)
    * - the items marked in this pass in its blue badge, left of the chips, whatever the filter (P43)
    */
   private pageFilter(): JSX.Element {
@@ -1005,7 +1006,7 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
   @E.on(STATE_PICK, { target: "renderRoot" })
   protected onStatePick(event: CustomEvent<StatePickDetail>) {
     event.stopPropagation()
-    this.pickState(event.detail.state)
+    this.pickState(event.detail.state, event.detail.how)
   }
 
   /**
@@ -1312,17 +1313,19 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
   }
 
   /**
-   * A toolbar chip, clicked:  every section filtered at once, by the sections' own rule (`StateFilter.nextShown()`).
+   * A toolbar chip, clicked:  every section filtered at once, by the sections' own rule (`StateFilter.nextShown()`);
+   * ⌥-clicked (`how`, I166), only its state.
    * - everything again:  each section's choice forgotten, so a state that comes later shows too
    */
   @E.untracked
-  private pickState(state: string) {
+  private pickState(state: string, how: ChipPick = "click") {
     const chips = this.filterChips()
     const present = chips.map((it) => it.state as string)
     const next = StateFilter.nextShown(
       present,
       chips.filter((it) => it.on).map((it) => it.state),
-      state
+      state,
+      how
     )
     const states = next.length === present.length ? undefined : next
     for (const section of this.filterHosts()) if (section.stateFilter) section.showStates?.(states)

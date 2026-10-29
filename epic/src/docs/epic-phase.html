@@ -700,7 +700,15 @@
                         open phase's are Looks good and Defer (after the others, still to do); while its build plan waits, Accept,
                         Revisit and Defer; still to do with its plan accepted, Make Todo, Revisit and a green check, a
                         state saying it's ready to build. Revisit on a phase with your comments in its text marks it at
-                        once: those comments are its note.
+                        once: those comments are its note. Its gear comes last.
+                      </td>
+                    </tr>
+                    <tr>
+                      <td><code>gear</code></td>
+                      <td>
+                        Its gear, last in its title row, with an <code>id</code> (epic <code>epic-engine</code> I166): a
+                        <code>&lt;ui-dropdown&gt;</code> menu, "Show this phase's files" and "Show this phase's checks",
+                        ticked while it shows them. Its choice wins over the Phases section's gear, for this phase.
                       </td>
                     </tr>
                     <tr>
@@ -837,8 +845,9 @@
                 read inside it.
               </li>
               <li>
-                <b>Files and Verify</b> stay hidden until the Phases title's toggles show them; commits until the page's
-                git toggle does.
+                <b>Files and Verify</b> stay hidden until a gear shows them: the Phases section's, for every phase, or
+                the phase's own, last in its title row, which wins for it (epic <code>epic-engine</code> I166). Commits
+                stay hidden until the page's git toggle shows them.
               </li>
               <li>
                 <b>Folding:</b> a click on the title folds it; on an epic page it starts folded. With

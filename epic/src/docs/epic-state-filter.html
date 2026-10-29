@@ -45,6 +45,9 @@
           </p>
           <ul>
             <li>It filters nothing itself: a click tells its owner what was picked, and what should show next.</li>
+            <li>
+              ⌥-click (Alt-click) a chip to show ONLY its state, whatever showed (epic <code>epic-engine</code> I166).
+            </li>
             <li>ONE element for every filter by state: an item section's title, an epic page's toolbar, the Epics page's lists.</li>
           </ul>
           <p class="meta">
@@ -146,7 +149,7 @@
                   <tr><th>Event</th><th>Detail</th><th>When</th></tr>
                 </thead>
                 <tbody>
-                  <tr><td><code>epic-state-changed</code></td><td><code>{ state, shown }</code></td><td>A chip was clicked: its state, and what should show next by the one rule (<code>StateFilter.nextShown()</code>).</td></tr>
+                  <tr><td><code>epic-state-changed</code></td><td><code>{ state, shown, how }</code></td><td>A chip was clicked: its state, and what should show next by the one rule (<code>StateFilter.nextShown()</code>); <code>how</code> is <code>click</code>, or <code>only</code> for an ⌥-click, which shows its state alone.</td></tr>
                 </tbody>
               </table>
             </ui-table>
@@ -158,7 +161,7 @@
             <ul>
               <li>Each state in its colour: blue Claude is on it, red needs Owen, orange his turn to pick, yellow open, green done lately, grey older.</li>
               <li>The colours come from the page: an epic page's <code>--epic-state-*</code>, a docs page's <code>--spell-state-*</code>.</li>
-              <li>Each chip's tooltip says how many, which state, and what a click does.</li>
+              <li>Each chip's tooltip says how many, which state, and what a click does; its second line, that ⌥-click shows only these.</li>
               <li>The marked badge: solid blue, the Send plane's, with white numbers, first in the row; its tooltip "3 marked in this pass, waiting for Claude".</li>
             </ul>
           </ui-section>

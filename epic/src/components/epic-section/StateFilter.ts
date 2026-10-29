@@ -1,7 +1,7 @@
 /****************
  * ### `StateFilter`
- * The state filter's click rule, shared by a section's chips (`<epic-section>`) and the page's (`<epic-page>`'s
- * toolbar, which filters every section at once).
+ * The state filter's click rule (and its ⌥-click's), shared by a section's chips (`<epic-section>`)
+ * and the page's (`<epic-page>`'s toolbar, which filters every section at once).
  * - Pure:  states in, states out;  no DOM, no Solid.
  * - The docs runtime's filter (`spell-doc-runtime.js` `nextShown()`, the Epics list page) is the same rule, restated:
  *   it can't import the pack.
@@ -15,8 +15,16 @@ export class StateFilter {
    * - `clicked` showing, and others too:  it hides
    * - `clicked` the only one showing:  everything again
    * - in `present`'s order
+   * - `how`:  `only` for an ⌥-click (epic `epic-engine` I166;  Owen, 2026-10-29:  "if I option-click on one of those
+   *   badges, turn just that one on"):  only `clicked`, whatever shows now
    */
-  static nextShown(present: readonly string[], shown: readonly string[], clicked: string): string[] {
+  static nextShown(
+    present: readonly string[],
+    shown: readonly string[],
+    clicked: string,
+    how: ChipPick = "click"
+  ): string[] {
+    if (how === "only") return [clicked]
     const showing = present.filter((state) => shown.includes(state))
     if (showing.length === present.length) return [clicked]
     if (!showing.includes(clicked)) return present.filter((state) => state === clicked || showing.includes(state))
@@ -35,6 +43,9 @@ export class StateFilter {
     return next.includes(clicked) ? "also" : "hide"
   }
 }
+
+/** How a chip was picked:  a plain click (`nextShown()`'s rule), or an ⌥-click (`only` its state). */
+export type ChipPick = "click" | "only"
 
 /** What a chip's click does (`StateFilter.clickDoes()`). */
 export type ChipClick = "all" | "only" | "also" | "hide"

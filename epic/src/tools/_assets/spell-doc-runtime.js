@@ -1880,6 +1880,7 @@ function markItemStates(main) {
  *   - everything showing:  only that state
  *   - else a hidden state shows too, and a shown one hides
  *   - the only one showing:  everything again
+ *   - an ⌥-click:  only that state, whatever showed (epic `epic-engine` I166:  the element's `shown` says so)
  * - in the title's `actions` slot (`.spell-item-filter`);  `spell-doc.css` puts it left of the count badge
  * - a filtered list shows "3 hidden · show all" under it (`<epic-hidden-note class="spell-hidden-note">`):
  *   a click there (`epic-all-showing`) shows all

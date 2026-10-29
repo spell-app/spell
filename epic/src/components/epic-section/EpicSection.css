@@ -65,37 +65,6 @@
     font-variant-numeric: tabular-nums;
   }
 
-  /* ## The Phases title's toggles:  bare icons, square, muted;  the accent while pressed */
-  .toggle {
-    display: inline-grid;
-    place-items: center;
-    box-sizing: border-box;
-    width: 28px;
-    height: 28px;
-    padding: 0;
-    border: none;
-    border-radius: 6px;
-    background: none;
-    color: var(--epic-muted, var(--ui-text-muted));
-    cursor: pointer;
-  }
-  .toggle svg {
-    display: block;
-    width: auto;
-    height: 14px;
-    fill: currentColor;
-  }
-  .toggle:hover {
-    background: var(--epic-accent-soft, var(--ui-primary-background));
-  }
-  .toggle[aria-pressed="true"] {
-    color: var(--epic-accent, var(--ui-link));
-  }
-  .toggle:focus-visible {
-    outline: 2px solid var(--ui-focus-color, var(--epic-accent));
-    outline-offset: 1px;
-  }
-
   /* ## An item section with no items */
   .empty {
     margin: 0 0 4px;
@@ -105,7 +74,7 @@
   }
 
   /*
-   * ## The title's end:  the count badge, then its tools (toggles, the state filter) ending in collapse-all;
+   * ## The title's end:  the count badge, then its tools (the state filter;  the Phases section's ending in its gear);
    * the chevron at the row's START, before the icon (Owen, 2026-10-25:  "put it on the left")
    */
   ui-section::part(badge) {

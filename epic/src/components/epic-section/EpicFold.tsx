@@ -1,4 +1,4 @@
-import { Show } from "solid-js"
+import { For, Show } from "solid-js"
 import { isServer, type JSX } from "@solidjs/web"
 
 import { E } from "spell/ui/core"
@@ -473,6 +473,63 @@ export abstract class EpicFold<V extends E.ComponentVocabulary> extends E.UIComp
     return undefined
   }
 
+  ////////////////
+  // ## Its gear (epic `epic-engine` I166)
+  ////////////////
+
+  /**
+   * A GEAR for its title row's end:  a round gear button opening a menu of ticked entries (Owen, 2026-10-29:  "we can
+   * change the 'expand all' to a gear icon which shows menu").
+   * - Spell UI's own menu:  a `<ui-dropdown>`, its trigger a `<ui-button>`, its menu opening leftwards, no caret
+   *   - each entry a `<ui-item>`, a ticked box while on, an empty one while off
+   *   - a pick calls `gear.pick(value)`;  the dropdown keeps no value, so the same entry picks again next time
+   * - Drawn by the Phases section (every phase's fields) and each phase (its own), as their tools' last piece;  the
+   *   entries are a LIST the subclass builds (`GearEntry`), so a new setting is one more entry
+   * - its `part`:  `gear`;  its look:  `EpicFold.css` (`.gear`)
+   * - a click on it never folds the row (`TITLE_ROW_CONTROLS`)
+   */
+  protected renderGear(gear: GearPieces): JSX.Element {
+    return (
+      <ui-dropdown
+        class={GEAR}
+        part={this.partForName("gear" as never)}
+        direction="left"
+        title={gear.title()}
+        aria-label={gear.title()}
+        on-ui-changed={(event: CustomEvent<{ value: string | string[] }>) => this.onGearPick(event, gear)}
+      >
+        {/* named too:  the dropdown's own button takes the focus, but this one is a button all the same */}
+        <ui-button
+          slot="trigger"
+          appearance="circular basic"
+          size="mini"
+          icon="gear"
+          tabindex="-1"
+          aria-label={gear.title()}
+        />
+        {/* no caret:  the gear says it's a menu */}
+        <span slot="icon" />
+        <For each={gear.entries()} keyed={(it) => it.value}>
+          {(it) => (
+            <ui-item value={it().value} icon={it().isOn ? GEAR_TICKED : GEAR_UNTICKED}>
+              {it().text}
+            </ui-item>
+          )}
+        </For>
+      </ui-dropdown>
+    )
+  }
+
+  /** An entry of its gear picked:  the subclass acts on it, and the dropdown lets go of its value, to pick again. */
+  @E.untracked
+  private onGearPick(event: CustomEvent<{ value: string | string[] }>, gear: GearPieces) {
+    const value = String(event.detail.value)
+    const dropdown = event.currentTarget as HTMLElement & { value: string }
+    if (value) gear.pick(value)
+    // picked again next time:  a dropdown tells only of a new value
+    E.afterSolidUpdate(() => (dropdown.value = ""))
+  }
+
   /**
    * What the page's rail shows for it (`DOMEpicFoldElement.contentsEntry`):
    * by default its title, its id when it has none.
@@ -546,12 +603,38 @@ export type FoldPieces = {
   after?: () => JSX.Element
 }
 
+/** What a subclass hands its gear (`EpicFold.renderGear()`). */
+export type GearPieces = {
+  /** its entries, in order;  read where they're drawn */
+  entries: () => readonly GearEntry[]
+  /** its tooltip and name */
+  title: () => string
+  /** an entry picked:  its `value` */
+  pick: (value: string) => void
+}
+
+/** One entry of a gear's menu. */
+export type GearEntry = {
+  /** what a pick hands the subclass */
+  value: string
+  /** its words */
+  text: string
+  /** ticked */
+  isOn: boolean
+}
+
+/** Class of a gear's dropdown;  an entry's icon while on, and while off. */
+const GEAR = "gear"
+const GEAR_TICKED = "square check"
+const GEAR_UNTICKED = "square outline"
+
 /** The rounds of `expandAll()` at most:  each opens one level deeper, once the level above has loaded its parts. */
 const EXPAND_ROUNDS = 6
 
 /** What, in a title row, acts by itself:  a click there doesn't fold (`onTitleRowClick()`). */
 const TITLE_ROW_CONTROLS =
-  "a[href], button, input, select, textarea, label, summary, [role='button'], [contenteditable], ui-button, epic-review"
+  "a[href], button, input, select, textarea, label, summary, [role='button'], [contenteditable], ui-button, " +
+  "ui-dropdown, epic-review"
 
 /** The attribute naming a fold's or an item's part file. */
 const SOURCE = "source"

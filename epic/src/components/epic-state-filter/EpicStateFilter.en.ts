@@ -24,7 +24,8 @@ export const epicStateFilterVocabulary = {
     "per state the items are in, in the state's colour, with how many;  solid while that state's items show, " +
     "outlined while hidden.  A click asks its owner to filter (`epic-state-changed`), which sets `shown`:  an item " +
     "section's title (`<epic-section>`), an epic page's toolbar (`<epic-page>`), and the docs runtime's lists (the " +
-    "Epics page).  What a click does, by the one rule (`StateFilter.nextShown()`), is each chip's tooltip.  The items " +
+    "Epics page).  What a click does, by the one rule (`StateFilter.nextShown()`), is each chip's tooltip;  an " +
+    "⌥-click (Alt-click) shows only its state, whatever showed (epic `epic-engine` I166).  The items " +
     "marked in this pass (`marked`) count in a solid blue badge (Send's blue) first, whatever the filter.",
   attributes: [
     {
@@ -53,10 +54,11 @@ export const epicStateFilterVocabulary = {
   events: [
     {
       name: "epic-state-changed",
-      detail: "{ state, shown }",
+      detail: "{ state, shown, how }",
       description:
         "A chip was clicked:  its `state`, and what should show next by the one rule (`shown`, the states;  " +
-        "`StateFilter.nextShown()`).  The owner filters, and sets `shown`."
+        "`StateFilter.nextShown()`);  `how`, `click`, or `only` for an ⌥-click, which shows its state alone.  The " +
+        "owner filters, and sets `shown`."
     }
   ],
   slots: [],

@@ -8,6 +8,9 @@ import { expectAccessible } from "spell/test-helpers/A11y"
 import { expandAllUnder } from "spell/epic/components/epic-item/Fold"
 
 import "spell/ui/components/ui-section"
+// the gear menus (I166)
+import "spell/ui/components/ui-dropdown"
+import "spell/ui/components/ui-button"
 import "spell/epic/components/epic-section"
 import "spell/epic/components/epic-phase"
 import "spell/epic/components/epic-item"
@@ -27,6 +30,31 @@ function inner(host: Element): E.DOMElement {
 /** The fold button of `host`'s inner section. */
 function toggle(host: Element): HTMLButtonElement {
   return inner(host).shadowRoot!.querySelector('[part~="toggle"]') as HTMLButtonElement
+}
+
+/** `host`'s gear (I166), drawn. */
+async function gearOf(host: Element): Promise<E.DOMElement> {
+  const gear = host.shadowRoot!.querySelector<E.DOMElement>('[part~="gear"]')!
+  await gear.ready
+  return gear
+}
+
+/** Each entry of `gear`'s menu, `<text>:  on` (ticked) or `off`. */
+function gearEntries(gear: Element): string[] {
+  return Array.from(
+    gear.querySelectorAll("ui-item"),
+    (item) => `${item.textContent!.trim()}:  ${item.getAttribute("icon") === "square check" ? "on" : "off"}`
+  )
+}
+
+/** Open `gear`'s menu and pick the entry saying `text`, as a person does. */
+async function pickGear(gear: E.DOMElement, text: string) {
+  gear.shadowRoot!.querySelector<HTMLElement>('[part~="trigger"]')!.click()
+  await ElementFixture.tick()
+  const rows = Array.from(gear.shadowRoot!.querySelectorAll<HTMLElement>('[part~="item"]'))
+  rows.find((row) => row.textContent!.includes(text))!.click()
+  await ElementFixture.tick()
+  await ElementFixture.tick()
 }
 
 /** An ⌥-click (Alt-click) on `element`:  everything inside too (I161). */
@@ -170,22 +198,32 @@ describe("<epic-section>", () => {
     expect(host.matches(":state(error)")).toBe(true)
   })
 
-  test("an item section with no items says None yet;  the Phases toggles show the fields they name", async () => {
-    const host = await render(
-      `<div><epic-section id="todos" kind="todos" open></epic-section>` +
-        `<epic-section id="phases" kind="phases" open></epic-section></div>`
-    )
+  test("an item section with no items says None yet", async () => {
+    const host = await render(`<epic-section id="todos" kind="todos" open></epic-section>`)
     expect(host.shadowRoot!.querySelector('[part~="empty"]')?.textContent).toBe("None yet")
-    const phases = host.parentElement!.querySelector<FoldHost>("#phases")!
-    const base = phases.shadowRoot!.querySelector<HTMLElement>('[part~="base"]')!
-    const [files] = phases.shadowRoot!.querySelectorAll<HTMLButtonElement>("button.toggle")
+  })
+
+  // epic `epic-engine` I166 (Owen, 2026-10-29:  "we can change the 'expand all' to a gear icon which shows menu")
+  test("the Phases title's GEAR, last on its row:  its menu shows or hides each phase's files and checks", async () => {
+    const host = await render(`<epic-section id="phases" kind="phases" open></epic-section>`)
+    const base = host.shadowRoot!.querySelector<HTMLElement>('[part~="base"]')!
+    const gear = await gearOf(host)
+    expect(host.shadowRoot!.querySelector("button.toggle")).toBeNull()
+    expect(gear.title).toBe("Settings for every phase")
+    expect(gear.closest('[part~="tools"]')!.lastElementChild).toBe(gear)
+    expect(gearEntries(gear)).toEqual(["Show each phase's files:  off", "Show each phase's checks:  off"])
     expect(base.style.getPropertyValue("--epic-files-display")).toBe("")
-    files!.click()
-    await ElementFixture.tick()
+    await pickGear(gear, "Show each phase's files")
     expect(base.style.getPropertyValue("--epic-files-display")).toBe("block")
-    expect(files!.getAttribute("aria-pressed")).toBe("true")
-    files!.click()
-    await ElementFixture.tick()
+    expect(gearEntries(gear)).toEqual(["Show each phase's files:  on", "Show each phase's checks:  off"])
+    // the toggles' old key:  a choice made with them holds
+    expect(JSON.parse(localStorage.getItem(`epic-phase-fields:${location.pathname}`)!)).toEqual({ files: true })
+    // picked again (the dropdown keeps no value):  off
+    await pickGear(gear, "Show each phase's files")
+    expect(base.style.getPropertyValue("--epic-files-display")).toBe("")
+    // a click on it never folds the section
+    expect(host.matches(":state(open)")).toBe(true)
+    await expectAccessible(host)
   })
 
   test("a link into it (`#hash` on an id in its `part-ids`) opens it and loads its part", async () => {
@@ -332,7 +370,7 @@ describe("<epic-section> counts and state filter", () => {
       host.shadowRoot!.querySelector('[part~="filter"] epic-state-filter')!.shadowRoot!.querySelector("svg")
     ).toBeNull()
     const open = chip(host, "open")
-    expect(open.title).toBe("2 open, still undecided:  show only these")
+    expect(open.title).toBe("2 open, still undecided:  show only these\n⌥-click:  show only these")
     expect(getComputedStyle(open).backgroundColor).not.toMatch(/^rgba\(0, 0, 0, 0\)$|^transparent$/)
     await expectAccessible(host)
   })
@@ -350,7 +388,7 @@ describe("<epic-section> counts and state filter", () => {
     // hidden, outlined:  no fill
     const red = chip(host, "attention")
     expect(getComputedStyle(red).backgroundColor).toMatch(/^rgba\(0, 0, 0, 0\)$|^transparent$/)
-    expect(red.title).toBe("1 needs attention:  show these too")
+    expect(red.title).toBe("1 needs attention:  show these too\n⌥-click:  show only these")
     await click("attention")
     expect(chips(host)).toEqual({ attention: true, open: true, recent: false })
     await click("open")
@@ -360,6 +398,31 @@ describe("<epic-section> counts and state filter", () => {
     expect(shownIds(host)).toEqual(["q1", "q2", "q3", "q4"])
     // everything showing is remembered as no choice:  a state that comes later shows too
     expect(JSON.parse(localStorage.getItem(`spell-item-state:${location.pathname}`)!)).toEqual({})
+  })
+
+  // epic `epic-engine` I166 (Owen, 2026-10-29:  "if I option-click on one of those badges, turn just that one on")
+  test("an ⌥-click on a chip shows ONLY its state, whatever showed;  remembered as a click's is", async () => {
+    const host = await render(questions(["open:attention", "open:open", "decided:recent", "open:open"]))
+    chip(host, "open").click()
+    await ElementFixture.tick()
+    chip(host, "attention").click()
+    await ElementFixture.tick()
+    expect(chips(host)).toEqual({ attention: true, open: true, recent: false })
+    // showing, with another:  a plain click would hide it
+    altClick(chip(host, "open"))
+    await ElementFixture.tick()
+    expect(chips(host)).toEqual({ attention: false, open: true, recent: false })
+    expect(shownIds(host)).toEqual(["q2", "q4"])
+    // hidden:  a plain click would show it too
+    altClick(chip(host, "recent"))
+    await ElementFixture.tick()
+    expect(chips(host)).toEqual({ attention: false, open: false, recent: true })
+    expect(shownIds(host)).toEqual(["q3"])
+    expect(JSON.parse(localStorage.getItem(`spell-item-state:${location.pathname}`)!)).toEqual({
+      decisions: ["recent"]
+    })
+    hiddenNote(host).click()
+    await ElementFixture.tick()
   })
 
   test("remembered per page;  a choice its states have left hides the list, and says so", async () => {
@@ -486,9 +549,9 @@ describe("<epic-section> actions slot", () => {
     const button = host.querySelector<HTMLElement>("button[slot=actions]")!
     const tools = host.shadowRoot!.querySelector('[part~="tools"]')!
     expect(tools.contains(button.assignedSlot)).toBe(true)
-    const [files] = host.shadowRoot!.querySelectorAll<HTMLButtonElement>("button.toggle")
+    const gear = await gearOf(host)
     const chevron = inner(host).shadowRoot!.querySelector('[part~="fold-icon"]')!
-    const [b, own, fold] = [button, files!, chevron].map((each) => each.getBoundingClientRect())
+    const [b, own, fold] = [button, gear, chevron].map((each) => each.getBoundingClientRect())
     expect([b.right <= own.left + 0.5, fold.right <= b.left + 0.5]).toEqual([true, true])
     button.click()
     await ElementFixture.tick()

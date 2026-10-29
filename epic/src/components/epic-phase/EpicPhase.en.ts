@@ -158,13 +158,21 @@ export const epicPhaseVocabulary = {
       name: "tools",
       description:
         "At the title's end:  the page's own buttons (the `actions` slot), then its estimate (once done and timed, " +
-        "what it took), then its review buttons, while the page is reviewed."
+        "what it took), then its review buttons, while the page is reviewed, then its gear."
     },
     {
       name: "estimate",
       description:
         "Its `estimate`, a small pill just before its review buttons (`2-3h`), so they line up row to row;  done and " +
         "timed, what it `took` (`21m`), the estimate its tooltip."
+    },
+    {
+      name: "gear",
+      description:
+        "Its gear, last on its title row (epic `epic-engine` I166):  a `<ui-dropdown>` menu of what this phase " +
+        "shows, " +
+        '"Show this phase\'s files" and "Show this phase\'s checks", ticked while on;  its choice wins over the ' +
+        "Phases section's gear for this phase.  Only with an `id`."
     },
     ...REVIEW_PARTS
   ],
@@ -197,6 +205,17 @@ export const epicPhaseVocabulary = {
       key: "workingOn",
       text: "Claude is working on it",
       description: "Its spinner while Claude is at work on it, its plan accepted or the phase under way."
+    },
+    { key: "gearTip", text: "Settings for this phase", description: "Its gear's tooltip and name (I166)." },
+    {
+      key: "showPhaseFiles",
+      text: "Show this phase's files",
+      description: "Its gear menu:  its Files field, ticked while it shows (its own choice, else every phase's)."
+    },
+    {
+      key: "showPhaseVerify",
+      text: "Show this phase's checks",
+      description: "Its gear menu:  its Verify field, ticked while it shows (its own choice, else every phase's)."
     },
     {
       key: "tookTip",

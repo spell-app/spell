@@ -200,21 +200,33 @@ export const NUMBERED_BLOCKS = `:scope > epic-overview, :scope > epic-section:no
 /** The kinds that hold items:  an empty one says "none yet". */
 export const ITEM_KINDS = ["questions", "judgements", "todos", "issues", "tests"] as const
 
-/** The Phases section's toggles:  which fields each shows, its icon, its texts, the custom property it sets. */
-export const PHASE_TOGGLES = [
-  { field: "files", icon: "folder", show: "showFiles", hide: "hideFiles", property: "--epic-files-display" },
-  { field: "verify", icon: "flask", show: "showVerify", hide: "hideVerify", property: "--epic-verify-display" }
+/**
+ * The fields a phase shows or hides by its gear menu, and the Phases section's for every phase (epic `epic-engine`
+ * I166):  each its field, its menu texts (every phase's, one phase's), the custom property it sets.
+ * - a list:  a new entry is a new line of both menus
+ */
+export const PHASE_FIELDS = [
+  { field: "files", every: "showFiles", one: "showPhaseFiles", property: "--epic-files-display" },
+  { field: "verify", every: "showVerify", one: "showPhaseVerify", property: "--epic-verify-display" }
 ] as const
 
-/** One of `PHASE_TOGGLES`. */
-export type PhaseToggle = (typeof PHASE_TOGGLES)[number]
+/** One of `PHASE_FIELDS`. */
+export type PhaseField = (typeof PHASE_FIELDS)[number]
 
-/** `localStorage` key prefix of the Phases toggles, per page path. */
-export const PHASE_TOGGLES_KEY = "epic-phase-fields:"
+/** One of `PHASE_FIELDS`' field names:  `files`, `verify`. */
+export type PhaseFieldName = PhaseField["field"]
 
-/** Class of the toggles' group, the toggles, an empty section's line, the body wrapper. */
+/**
+ * `localStorage` key prefix of the Phases section's choice for every phase, per page path:  `{ files: true }`.
+ * - the Files / Verify toggles' before I166, so a choice made with them holds
+ */
+export const PHASE_FIELDS_KEY = "epic-phase-fields:"
+
+/** `localStorage` key prefix of each phase's own choices, per page path:  `{ "p-x": { verify: false } }` (I166). */
+export const PHASE_OWN_FIELDS_KEY = "epic-phase-own-fields:"
+
+/** Class of the title's tools, an empty section's line, the body wrapper. */
 export const TOOLS = "tools"
-export const TOGGLE = "toggle"
 export const EMPTY = "empty"
 export const BODY = "body"
 export const NOTE = "note"
@@ -287,8 +299,15 @@ export const FILTER_TEXTS = [
   { key: "filterLabel", text: "Show items by state", description: "The state filter's group, for a screen reader." },
   {
     key: "chipWords",
-    text: "{count} {words}:  {does}",
-    description: "A state chip's name and tooltip:  how many, its state, what a click does (`showAll`, `chipOnly` ...)."
+    text: "{count} {words}:  {does}\n{only}",
+    description:
+      "A state chip's name and tooltip:  how many, its state, what a click does (`showAll`, `chipOnly` ...), " +
+      "then what an ⌥-click does (`chipAltOnly`)."
+  },
+  {
+    key: "chipAltOnly",
+    text: "⌥-click:  show only these",
+    description: "A state chip's ⌥-click (epic `epic-engine` I166):  only its state shows, whatever showed."
   },
   {
     key: "markedWords",
