@@ -38,6 +38,22 @@ describe("UI.themes.scopedTokens()", () => {
     expect(token(inside)).toContain("Spell Serif")
     expect(token(document.body)).not.toContain("Spell Serif")
   })
+
+  test("light or dark stays the page's:  the scope re-declares no scheme (epic `debut` I80)", async () => {
+    await UI.load()
+    const css = await UI.themes.scopedTokens("spell", ".scoped")
+    expect(css).not.toMatch(/color-scheme|--ui-scheme/)
+    const style = document.head.appendChild(document.createElement("style"))
+    style.textContent = css
+    // a part set to dark, whatever the OS says:  the scope inside it stays dark
+    const dark = document.body.appendChild(Object.assign(document.createElement("div"), { className: "ui-dark" }))
+    const inside = dark.appendChild(Object.assign(document.createElement("div"), { className: "scoped" }))
+    onTestFinished(() => {
+      style.remove()
+      dark.remove()
+    })
+    expect(getComputedStyle(inside).colorScheme).toBe("dark")
+  })
 })
 
 describe("Themes.RENAMED", () => {

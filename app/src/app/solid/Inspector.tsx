@@ -357,6 +357,18 @@ export class Inspector {
     return Inspector.thingLabel(thing)
   }
 
+  /**
+   * A part's title in two pieces, for the views tree:  what it is, then which one, shown muted.
+   * - A drawn thing:  its type, then `· ` its name, if it has one (`DiscardPile`, `· discards`).
+   * - A Spell UI element:  its whole title (`labelFor()`), nothing after.
+   */
+  static labelPartsFor(element: Element): { title: string; which: string } {
+    const thing = SpellElement.thingOf(element)
+    if (!thing) return { title: Inspector.labelFor(element), which: "" }
+    const name = Inspector.nameOf(thing)
+    return { title: thing.constructor.name, which: name ? `· ${name}` : "" }
+  }
+
   /** A part's icon:  a stub for now, one for drawn things and one for Spell UI elements. */
   static iconFor(element: Element): string {
     return SpellElement.thingOf(element) ? THING_ICON : CONTROL_ICON
