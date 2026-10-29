@@ -70,7 +70,7 @@ function nameOf(id: string): string {
   return id.slice(id.lastIndexOf("/") + 1)
 }
 
-/** `.spell` and `.spellx` files in `folder` and below, as paths relative to it, sorted -- skipping hidden folders. */
+/** `.spell` and `.spellml` files in `folder` and below, as paths relative to it, sorted -- skipping hidden folders. */
 function spellFilesIn(folder: string): string[] {
   const entries = readdirSync(folder, { recursive: true, withFileTypes: true })
   return entries

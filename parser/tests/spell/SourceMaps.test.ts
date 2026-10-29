@@ -2,18 +2,19 @@ import { readFileSync, readdirSync } from "fs"
 import { beforeAll, describe, expect, test } from "vite-plus/test"
 
 import { P } from "spell/parser/parser"
+import { SP } from "spell/parser/spell"
 import { compiledSpellProject, registerTestComponentPack } from "spell/parser/spell/test"
 
 /**
  * Source maps (epic `elemental-spell` P14):  each line of compiled javascript back to the spell line it came from.
  * - Marks made as the code is written, then taken out again (`P.SourceMarks`):
  *   the code must be EXACTLY what it is with no map.
- * - Every mapped line points at its statement's line, in `.spell` and `.spellx` files alike.
+ * - Every mapped line points at its statement's line, in `.spell` and `.spellml` files alike.
  */
 describe("source maps", () => {
   beforeAll(registerTestComponentPack)
 
-  const pairs = readdirSync(new URL("./spellx/", import.meta.url)).filter((name) => /\.spellx?$/.test(name))
+  const pairs = readdirSync(new URL("./spellx/", import.meta.url)).filter((name) => SP.isSpellSourceName(name))
 
   test.each(pairs)("%s:  the same code with a map as without one", (name) => {
     const files = [fixture(name)]

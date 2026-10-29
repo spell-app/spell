@@ -114,7 +114,7 @@ export class SpellParser extends P.Parser {
   }
 
   /**
-   * Which FORM of spell we read:  code spell (`Card.spell`), or spellx, its tag-shaped form (`Card.spellx`).
+   * Which FORM of spell we read:  code spell (`Card.spell`), or spellx, its tag-shaped form (`Card.spellml`).
    * - Only our tokenizer differs:  a spellx file's tags are tokens of their own (`SP.SpellxTokenizer`), and each tag
    *   line reads as its code-spell twin (`SP.SpellxTwin`), parsed by the same rules (epic `elemental-spell` P6).
    * - A project's spellx files parse with its twin of that form (`twinFor()`).
@@ -242,7 +242,7 @@ export class SpellParser extends P.Parser {
 
   /**
    * This project parser's twin reading `language` in `form`, for a file written so -- us, for our own.
-   * - `form`:  `spellx` for a spellx file, `Card.spellx` (epic `elemental-spell` P6):  the same rules, its own tokenizer.
+   * - `form`:  `spellx` for a spellx file, `Card.spellml` (epic `elemental-spell` P6):  the same rules, its own tokenizer.
    * - So one project can mix languages (epic `spanish` P19):  `Carta.es.spell` beside `Card.spell`.
    * - The twin has `language`'s own rules, plus every rule our project added, ours and our imports':
    *   - the ones there already, copied from each layer between us and our language's parser

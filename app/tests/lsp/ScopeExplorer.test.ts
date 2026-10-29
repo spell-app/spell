@@ -14,8 +14,8 @@ import { scopesFromPacks } from "spell/app/lsp/ScopesSource"
 import { compiledSpellProject } from "spell/parser/spell/test"
 import { copyFixtureProject, fixtureFolder, lineOf, loadFixtureProject } from "spell/app/spaces/test"
 
-/** The Solitaire example's Card.spellx:  the tests name its lines by what they say (`lineOf()`), as it changes. */
-const CARD_TEXT = readFileSync(fixtureFolder("Solitaire", "Card.spellx"), "utf8")
+/** The Solitaire example's Card.spellml:  the tests name its lines by what they say (`lineOf()`), as it changes. */
+const CARD_TEXT = readFileSync(fixtureFolder("Solitaire", "Card.spellml"), "utf8")
 /** Its line declaring the card's type. */
 const CARD_TYPE = '<spell-view "card"'
 /** Its line declaring the card's suit, whose node is `suit`. */
@@ -32,7 +32,7 @@ const PLAYING_HEADING = "Playing a card"
 describe("ScopeExplorer", () => {
   const dir = mkdtempSync(resolve(tmpdir(), "spell-scopes-"))
   copyFixtureProject("Solitaire", resolve(dir, "Solitaire"))
-  const cardPath = resolve(dir, "Solitaire/Card.spellx")
+  const cardPath = resolve(dir, "Solitaire/Card.spellml")
   const cardUri = pathToFileURL(cardPath).href
   const workspace = new SpellDiskWorkspace()
   const explorer = new LSP.ScopeExplorer(new LSP.SpellLanguageService(workspace))
@@ -74,7 +74,7 @@ describe("ScopeExplorer", () => {
     const member = (name: string) => card.members.find((it) => it.name === name)!
     // the card's moves are declared in the game's file, under its `## Playing a card`
     expect(member("play a card").section).toBe(PLAYING_HEADING)
-    expect(details(member("play a card")).uri).toMatch(/\/Solitaire\.spellx$/)
+    expect(details(member("play a card")).uri).toMatch(/\/Solitaire\.spellml$/)
     expect(member("count the points for a card on a pile").section).toBe(PLAYING_HEADING)
     // the card's own file has no `##` heading
     expect(member("suit").section).toBeUndefined()
@@ -101,7 +101,7 @@ describe("ScopeExplorer", () => {
 
   // known gap, epic `elemental-spell` I9:  a spellx declaration's source stops before its tag's `/>`
   test.fails("a declaration's details:  its docstring, spell source and compiled javascript", () => {
-    expect(find(tree, "suit").path).toBe("project:Solitaire/file:Card.spellx/type:Card/property:suit")
+    expect(find(tree, "suit").path).toBe("project:Solitaire/file:Card.spellml/type:Card/property:suit")
     // its `description=`:  its docstring
     expect(details("state").description).toBe(STATE_DESCRIPTION)
     const suit = details("suit")
@@ -131,7 +131,7 @@ describe("ScopeExplorer", () => {
   test("constants show on the type whose statement declared them, NOT the project", () => {
     const project = [...all(tree)].find((node) => node.path === "project:Solitaire")!
     expect(project.members.map((member) => member.name)).not.toContain("ace")
-    expect(find(tree, "ace").path).toBe("project:Solitaire/file:Card.spellx/type:Card/constant:ace")
+    expect(find(tree, "ace").path).toBe("project:Solitaire/file:Card.spellml/type:Card/constant:ace")
   })
 
   test("a node lists the rules its statement made", () => {
@@ -248,9 +248,9 @@ describe("ScopeExplorer of a project importing another, compiled", () => {
 
   beforeAll(async () => {
     installDiskFetch()
-    lib = makeProject("lib", ["Card.spellx", "Deck.spellx", "Pile.spellx"])
+    lib = makeProject("lib", ["Card.spellml", "Deck.spellml", "Pile.spellml"])
     await lib.compile()
-    app = makeProject("app", ["Solitaire.spellx"], [{ path: lib.projectId, active: true }])
+    app = makeProject("app", ["Solitaire.spellml"], [{ path: lib.projectId, active: true }])
     await app.parse()
     // as the server does, before asking for the tree
     for (const imported of LSP.ScopeExplorer.importedProjects(app)) await imported.parse()
@@ -263,7 +263,7 @@ describe("ScopeExplorer of a project importing another, compiled", () => {
 
   test("its types are from its sources:  docs and locations", () => {
     const suit = find(tree, "Card").members.find((member) => member.name === "suit")!
-    expect(find(tree, "suit").uri).toMatch(/\/lib\/Card\.spellx$/)
+    expect(find(tree, "suit").uri).toMatch(/\/lib\/Card\.spellml$/)
     expect(explorer.details(app, suit.path)?.line).toBe(lineOf(CARD_TEXT, SUIT))
   })
 
@@ -272,14 +272,14 @@ describe("ScopeExplorer of a project importing another, compiled", () => {
     const fromPile = tableau.members.filter((member) => member.inheritedFrom === "Pile")
     expect(fromPile.length).toBeGreaterThan(0)
     // pointing at the members of its OWN Pile, in the imported project -- NOT the declarations-only one
-    for (const member of fromPile) expect(member.path).toMatch(/^project:lib\/file:Pile\.spellx\/type:Pile\//)
-    expect(find(tree, "Tableau").super).toBe("project:lib/file:Pile.spellx/type:Pile")
+    for (const member of fromPile) expect(member.path).toMatch(/^project:lib\/file:Pile\.spellml\/type:Pile\//)
+    expect(find(tree, "Tableau").super).toBe("project:lib/file:Pile.spellml/type:Pile")
     expect(explorer.details(app, fromPile[0]!.path)?.line).toBeDefined()
   })
 
   test("once tracked, the imported project's files changing on disk show next time -- as the server does", async () => {
     await disk.track(lib)
-    const cardPath = resolve(workspace, "lib", "Card.spellx")
+    const cardPath = resolve(workspace, "lib", "Card.spellml")
     writeFileSync(cardPath, `${readFileSync(cardPath, "utf8")}\n<spell>\n\tcards have a weight as a number\n</spell>\n`)
     await disk.diskChanged(pathToFileURL(cardPath).href, "changed")
     const card = find(explorer.tree(app), "Card")
@@ -287,7 +287,7 @@ describe("ScopeExplorer of a project importing another, compiled", () => {
   })
 
   test("a compiled-only import -- no sources:  our types inherit its methods from its declarations", async () => {
-    const cards = makeProject("cards", ["Card.spellx", "Deck.spellx", "Pile.spellx"])
+    const cards = makeProject("cards", ["Card.spellml", "Deck.spellml", "Pile.spellml"])
     await cards.compile()
     const game = makeProject("game", [], [{ path: cards.projectId, active: true }], {
       "Wildcard.spell": "a wildcard is a card\n"
@@ -314,7 +314,7 @@ describe("ScopeExplorer of a project importing another, compiled", () => {
     expect(projects.map((entry) => entry.path)).toEqual(["project:lib", "project:app"])
     const json = JSON.stringify(pack)
     expect(json).not.toContain("file://")
-    expect(json).toContain(`spell:/${encodeURI(lib.projectId)}/Card.spellx`)
+    expect(json).toContain(`spell:/${encodeURI(lib.projectId)}/Card.spellml`)
   })
 
   /**
@@ -344,7 +344,7 @@ describe("ScopeExplorer of a project importing another, compiled", () => {
 describe("ScopeExplorer scope packs", () => {
   const dir = mkdtempSync(resolve(tmpdir(), "spell-scope-packs-"))
   copyFixtureProject("Solitaire", resolve(dir, "Solitaire"))
-  const cardPath = resolve(dir, "Solitaire/Card.spellx")
+  const cardPath = resolve(dir, "Solitaire/Card.spellml")
   const cardUri = pathToFileURL(cardPath).href
   const workspace = new SpellDiskWorkspace()
   const explorer = new LSP.ScopeExplorer(new LSP.SpellLanguageService(workspace))
@@ -382,7 +382,7 @@ describe("ScopeExplorer scope packs", () => {
   test("no `file://` URIs -- a file's own is `spell:/<file.path>`, and what's in it has none", () => {
     expect(JSON.stringify(pack)).not.toContain("file://")
     const card = workspace.fileFor(cardUri)!
-    const file = pack.entries.find((entry) => entry.path === "project:Solitaire/file:Card.spellx")!
+    const file = pack.entries.find((entry) => entry.path === "project:Solitaire/file:Card.spellml")!
     expect(file.uri).toBe(`spell:/${encodeURI(card.path)}`)
     expect(pack.entries.find((entry) => entry.path.endsWith("/property:suit"))!.uri).toBeUndefined()
   })
@@ -463,7 +463,7 @@ describe("ScopeExplorer scope packs", () => {
 describe("ScopeExplorer built-in types", () => {
   const dir = mkdtempSync(resolve(tmpdir(), "spell-scope-built-ins-"))
   copyFixtureProject("Solitaire", resolve(dir, "Solitaire"))
-  const cardPath = resolve(dir, "Solitaire/Card.spellx")
+  const cardPath = resolve(dir, "Solitaire/Card.spellml")
   const cardUri = pathToFileURL(cardPath).href
   const workspace = new SpellDiskWorkspace()
   const service = new LSP.SpellLanguageService(workspace)

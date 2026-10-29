@@ -2,7 +2,7 @@ import { describe, expect, test } from "vite-plus/test"
 
 import { NotebookCells, type ChunkCell } from "spell/app/app/solid/NotebookCells"
 
-/** A small `.spellx` file:  prose, two properties, an alias and an action, in one view. */
+/** A small `.spellml` file:  prose, two properties, an alias and an action, in one view. */
 const CARD = [
   `<spell-view "card">`,
   `\tA card has a suit.`,
@@ -22,14 +22,14 @@ const CARD = [
 
 /** The chunk cell titled `title`. */
 function chunk(text: string, title: string): ChunkCell {
-  const found = NotebookCells.of(text, "/Card.spellx").find((cell) => cell.kind === "chunk" && cell.title === title)
+  const found = NotebookCells.of(text, "/Card.spellml").find((cell) => cell.kind === "chunk" && cell.title === title)
   if (!found || found.kind !== "chunk") throw new Error(`no chunk ${title}`)
   return found
 }
 
 describe("NotebookCells.of()", () => {
   test("a template, then its prose and chunks in order", () => {
-    const cells = NotebookCells.of(CARD, "/Card.spellx")
+    const cells = NotebookCells.of(CARD, "/Card.spellml")
     expect(cells.map((cell) => (cell.kind === "chunk" ? `${cell.type} ${cell.title}` : "prose"))).toEqual([
       "view card",
       "prose",
@@ -47,7 +47,7 @@ describe("NotebookCells.of()", () => {
   })
 
   test("a template's cell is its head alone;  its members' ids name it", () => {
-    const cells = NotebookCells.of(CARD, "/Card.spellx")
+    const cells = NotebookCells.of(CARD, "/Card.spellml")
     expect(chunk(CARD, "card").code).toBe(`<spell-view "card">`)
     expect(chunk(CARD, "suit").id).toBe("view:card/property:suit")
     expect(NotebookCells.membersOf(cells, undefined).map((cell) => cell.id)).toEqual(["view:card"])
@@ -73,7 +73,7 @@ describe("NotebookCells.of()", () => {
       `</spell-view>`,
       ``
     ].join("\n")
-    const prose = NotebookCells.of(text, "/Card.spellx").flatMap((cell) => (cell.kind === "prose" ? [cell.text] : []))
+    const prose = NotebookCells.of(text, "/Card.spellml").flatMap((cell) => (cell.kind === "prose" ? [cell.text] : []))
     expect(prose).toEqual([`# A card\n\nIt has a suit.\n- SEE:  the deck`, `## card rank`])
   })
 
@@ -94,15 +94,17 @@ describe("edits", () => {
   })
 
   test("moved() swaps a chunk with the one before it, prose left in place", () => {
-    const cells = NotebookCells.of(CARD, "/Card.spellx")
+    const cells = NotebookCells.of(CARD, "/Card.spellml")
     const text = NotebookCells.moved(CARD, cells, chunk(CARD, "color"), "up")
-    const titles = NotebookCells.of(text, "/Card.spellx").flatMap((cell) => (cell.kind === "chunk" ? [cell.title] : []))
+    const titles = NotebookCells.of(text, "/Card.spellml").flatMap((cell) =>
+      cell.kind === "chunk" ? [cell.title] : []
+    )
     expect(titles).toEqual(["card", "color", "suit", "is red", "turn it over"])
     expect(text).toContain("A card has a suit.")
   })
 
   test("moved() past the end leaves the text alone", () => {
-    const cells = NotebookCells.of(CARD, "/Card.spellx")
+    const cells = NotebookCells.of(CARD, "/Card.spellml")
     expect(NotebookCells.moved(CARD, cells, chunk(CARD, "turn it over"), "down")).toBe(CARD)
   })
 
@@ -121,7 +123,7 @@ describe("edits", () => {
 
   test("withProperty() in Spanish writes the file's words", () => {
     const carta = `<encanto-vista "carta">\n\t<propiedad "palo" uno-de="oros, copas" />\n</encanto-vista>\n`
-    const cell = NotebookCells.of(carta, "/Carta.es.spellx").find(
+    const cell = NotebookCells.of(carta, "/Carta.es.spellml").find(
       (each): each is ChunkCell => each.kind === "chunk" && each.title === "palo"
     )!
     const text = NotebookCells.withProperty(carta, cell, {

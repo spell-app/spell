@@ -4,11 +4,11 @@ import { beforeAll, describe, test, expect } from "vite-plus/test"
 import { parseSpellProject, registerTestComponentPack } from "spell/parser/spell/test"
 import { SX } from "spell/parser/spellx"
 
-/** spell's spellx pairs:  each `X.spellx` beside the `X.spell` it means (`tests/spell/spellx/`). */
+/** spell's spellx pairs:  each `X.spellml` beside the `X.spell` it means (`tests/spell/spellx/`). */
 const PAIRS = ["Card", "FlipTile", "Deck", "Scores", "Carta.es", "Ficha.es", "DoubleSidedView", "Solitaire"]
 
 /**
- * The CODE SPELL a `.spellx` file means, as text (epic `elemental-spell` P8):  `SX.CodeSpellWriter.write()`.
+ * The CODE SPELL a `.spellml` file means, as text (epic `elemental-spell` P8):  `SX.CodeSpellWriter.write()`.
  * - Each pair's spellx, written as code spell, compiles to what its `.spell` twin does:
  *   the text is the program, not a sketch of it.
  * - It differs from the twin `.spell` only in layout:  prose stays where it was (inside the template, not above it),
@@ -17,8 +17,8 @@ const PAIRS = ["Card", "FlipTile", "Deck", "Scores", "Carta.es", "Ficha.es", "Do
 describe("CodeSpellWriter", () => {
   beforeAll(registerTestComponentPack)
 
-  test.each(PAIRS)("%s.spellx, written as code spell, compiles as %s.spell does", (name) => {
-    const written = SX.CodeSpellWriter.write(pair(`${name}.spellx`), { path: `/${name}.spellx` })
+  test.each(PAIRS)("%s.spellml, written as code spell, compiles as %s.spell does", (name) => {
+    const written = SX.CodeSpellWriter.write(pair(`${name}.spellml`), { path: `/${name}.spellml` })
     const fromSpellx = compiled(written, `/${name}.spell`)
     const twin = compiled(pair(`${name}.spell`), `/${name}.spell`)
     expect(fromSpellx.errors).toEqual([])
@@ -26,7 +26,7 @@ describe("CodeSpellWriter", () => {
   })
 
   test("a member is bulleted, its details and aliases under it, a closer gone", () => {
-    const written = SX.CodeSpellWriter.write(pair("FlipTile.spellx"), { path: "/FlipTile.spellx" })
+    const written = SX.CodeSpellWriter.write(pair("FlipTile.spellml"), { path: "/FlipTile.spellml" })
     expect(written).toContain('a "flip tile" is a view:\n\t// A tile that shows one side at a time.\n')
     expect(written).toContain('\t- its "side" is one of up, down\n\t\t- it "is showing (side)"\n')
     expect(written).toContain("\t// Turns it over.\n\t- to flip it:\n\t\t- shortcut meta+F\n")
@@ -35,7 +35,7 @@ describe("CodeSpellWriter", () => {
   })
 
   test("a drawing's bare names are their components' tags, each `</>` naming what it closes", () => {
-    const written = SX.CodeSpellWriter.write(pair("FlipTile.spellx"), { path: "/FlipTile.spellx" })
+    const written = SX.CodeSpellWriter.write(pair("FlipTile.spellml"), { path: "/FlipTile.spellml" })
     expect(written).toContain("\t- to draw its back:\n\t\t<ui-text>back</ui-text>\n")
     // the editor knows a project's own views:  its `componentTag`
     const card = SX.CodeSpellWriter.write('<spell-view "board">\n\t<draw>\n\t\t<card />\n\t</>\n</spell-view>\n', {
@@ -45,7 +45,8 @@ describe("CodeSpellWriter", () => {
   })
 
   test("the language's example word stays an example, though a pack has a component by that name (`<ui-example>`)", () => {
-    const text = '<spell-view "board">\n\t<draw>\n\t\t<example "one">\n\t\t\t<text>hi</>\n\t\t</>\n\t</>\n</spell-view>\n'
+    const text =
+      '<spell-view "board">\n\t<draw>\n\t\t<example "one">\n\t\t\t<text>hi</>\n\t\t</>\n\t</>\n</spell-view>\n'
     const written = SX.CodeSpellWriter.write(text, {
       componentTag: (word) => (word === "example" ? "ui-example" : word === "text" ? "ui-text" : undefined)
     })
@@ -55,7 +56,8 @@ describe("CodeSpellWriter", () => {
   })
 
   test("a paragraph's blank line stays:  its line break (Owen, 2026-10-27)", () => {
-    const text = '<spell-view "note">\n\t<draw>\n\t\t<text paragraph>\n\t\t\tFirst line\n\n\t\t\tSecond line\n\t\t</>\n\t</>\n</spell-view>\n'
+    const text =
+      '<spell-view "note">\n\t<draw>\n\t\t<text paragraph>\n\t\t\tFirst line\n\n\t\t\tSecond line\n\t\t</>\n\t</>\n</spell-view>\n'
     const written = SX.CodeSpellWriter.write(text, {
       componentTag: (word) => (word === "text" ? "ui-text" : undefined)
     })
@@ -88,7 +90,7 @@ describe("CodeSpellWriter", () => {
       "</spell-notebook>",
       ""
     ].join("\n")
-    const written = SX.CodeSpellWriter.write(text, { path: "/Avatar.spellx" })
+    const written = SX.CodeSpellWriter.write(text, { path: "/Avatar.spellml" })
     expect(written).toContain('\t\t<example description="A button.">\n')
     expect(written).not.toContain('<example ""')
   })

@@ -14,7 +14,8 @@ import { join } from "node:path"
  * What it leaves:
  * - the old ending where code still reads it on purpose ("support both for now"):  a line that already says
  *   `.spellml` (`".spellml", ".spellx"`), and the files in `KEPT`
- * - a regular expression's `\.spellx`, which the code that matches both ends writes itself
+ * - a regular expression's `\.spellx?`, which matches `.spell` and `.spellx` both:
+ *   its code moves to `SP.isSpellSourceName()` by hand;  a plain `\.spellx` follows
  * - every name that isn't the ending:  the form `spellx`, `SpellxTwin`, `spell/parser/spellx`, the language id
  * - the record (`KEPT`):  the changelog, the commit maps, the logs;  and the content repo, whose pages keep their history
  */
@@ -52,9 +53,9 @@ export class SpellmlRenamer {
     let count = 0
     const lines = text.split("\n").map((line) => {
       if (line.includes(NEW_SUFFIX)) return line
-      return line.replace(MENTION, () => {
+      return line.replace(MENTION, (_mention, backslash: string) => {
         count++
-        return NEW_SUFFIX
+        return backslash + NEW_SUFFIX
       })
     })
     return { text: lines.join("\n"), count }
@@ -94,12 +95,12 @@ const OLD_SUFFIX = ".spellx"
 const NEW_SUFFIX = ".spellml"
 
 /**
- * A mention of the old ending, `Card.spellx`, `*.spellx`, `` `.spellx` ``;  but not
- * - a regular expression's `\.spellx`
+ * A mention of the old ending, `Card.spellx`, `*.spellx`, `` `.spellx` ``, a regular expression's `Card\.spellx`;  but not
+ * - a regular expression's `\.spellx?`, `.spell` or `.spellx`
  * - a property, `words.spellx`, `this.spellx`
  * - part of a longer word (`.spellxTab`)
  */
-const MENTION = /(?<!\\)(?<!\b(?:this|words))\.spellx(?![\w-])/g
+const MENTION = /(?<!\b(?:this|words))(\\?)\.spellx(?![\w?-])/g
 
 /**
  * Files never moved or rewritten:  the record, and the code that names the old ending on purpose.

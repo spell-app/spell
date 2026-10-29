@@ -9,7 +9,7 @@ import { SX } from "spell/parser/spellx"
  * COMMENTS in spellx, `<!-- ... -->` (epic `elemental-spell`, Owen 2026-10-26:  "`<!-- ... -->` (Recommended)").
  * - Anywhere in a file:  among a template's members, in a body, in a drawing's markup, in an `<html>` block, over
  *   several lines;  never drawn.
- * - Its code-spell twin is a `//` line per line, so a `.spellx` file and its `.spell` twin compile the same,
+ * - Its code-spell twin is a `//` line per line, so a `.spellml` file and its `.spell` twin compile the same,
  *   comments too:  a comment above a member is its docstring either way.
  * - The writers turn one into the other:  `SX.CodeSpellWriter` writes `//` lines, `SX.SpellxWriter` writes a drawing's
  *   `//` lines back as `<!-- -->`.
@@ -58,7 +58,7 @@ describe("spellx comments, `<!-- ... -->`", () => {
   ]
 
   test("compiles as its code-spell twin does, its comments too:  none drawn", () => {
-    const spellx = compiled(SPELLX, "/Card.spellx")
+    const spellx = compiled(SPELLX, "/Card.spellml")
     const spell = compiled(SPELL, "/Card.spell")
     expect(spellx.errors).toEqual([])
     expect(spell.errors).toEqual([])
@@ -69,7 +69,7 @@ describe("spellx comments, `<!-- ... -->`", () => {
   })
 
   test("written as code spell:  a `//` line for each of its lines", () => {
-    expect(SX.CodeSpellWriter.write(SPELLX.join("\n"), { path: "/Card.spellx" })).toBe(`${SPELL.join("\n")}\n`)
+    expect(SX.CodeSpellWriter.write(SPELLX.join("\n"), { path: "/Card.spellml" })).toBe(`${SPELL.join("\n")}\n`)
   })
 
   test("and back:  a drawing's `//` lines as `<!-- -->`, a member's as its description", () => {
@@ -79,7 +79,7 @@ describe("spellx comments, `<!-- ... -->`", () => {
     expect(written).toContain("\t\t<!-- above the markup -->")
     expect(written).toContain("\t\t\t<!-- inside it -->")
     expect(written).toContain("\t\t\t<!-- GAP I23:  inside it, over lines -->")
-    expect(compiled(written.split("\n"), "/Again.spellx")).toEqual(compiled(SPELL, "/Card.spell"))
+    expect(compiled(written.split("\n"), "/Again.spellml")).toEqual(compiled(SPELL, "/Card.spell"))
   })
 
   test("in an `<html>` block, and between a notebook's elements:  never drawn", () => {
@@ -101,7 +101,7 @@ describe("spellx comments, `<!-- ... -->`", () => {
         "\t</text>",
         "</spell-notebook>"
       ],
-      "/Notes.spellx"
+      "/Notes.spellml"
     )
     expect(errors).toEqual([])
     expect(code).not.toMatch(/GAP|between|html block/)
@@ -109,12 +109,12 @@ describe("spellx comments, `<!-- ... -->`", () => {
   })
 
   test("one never closed is an error on its first line", () => {
-    const { errors } = compiled(['<spell-view "card">', "\t<!-- never closed", '\t<property "suit">1</>'], "/C.spellx")
+    const { errors } = compiled(['<spell-view "card">', "\t<!-- never closed", '\t<property "suit">1</>'], "/C.spellml")
     expect(errors.map(String)).toContainEqual(expect.stringMatching(/^2:1 "<!--" is never closed/))
   })
 
   test("a template's chunk tree:  a comment line is prose;  in markup, it's no node", () => {
-    const file = SX.SpellxView.read(SPELLX.join("\n"), { path: "/Card.spellx" })
+    const file = SX.SpellxView.read(SPELLX.join("\n"), { path: "/Card.spellml" })
     expect(file.diagnostics).toEqual([])
     const outline = file.toOutline()
     expect(outline).toContain('prose 2:2-2:37 "<!-- its suit, for now a number -->"')

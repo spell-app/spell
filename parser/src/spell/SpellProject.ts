@@ -255,7 +255,7 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
   /**
    * Parse our active spell files from scratch into `scope`, in order, and hand each file its result.
    * - Each by its own language's rules:  a file in another language than our scope's parser reads
-   *   parses with its twin (`SP.SpellParser.twinFor()`);  so does a spellx file, `Card.spellx`.
+   *   parses with its twin (`SP.SpellParser.twinFor()`);  so does a spellx file, `Card.spellml`.
    * - Other files, e.g. `.css`, parse themselves.
    */
   parseImports(): void {
@@ -345,7 +345,7 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
 
   /**
    * File for `target`'s source map, beside its output in our build folder, e.g. `Solitaire.spell.js.map` (epic
-   * `elemental-spell` P14):  each line of its code back to the `.spell` / `.spellx` line it came from.
+   * `elemental-spell` P14):  each line of its code back to the `.spell` / `.spellml` line it came from.
    * - Written for a javascript-family target that runs (`P.JSWriter` and its subclasses):  see `P.SourceMarks`.
    *   - Never for a library (`ts/lib`):  its `.lib.ts` sits beside its source, committed, so a map there would
    *     write a `sourceMappingURL` into hand-checked code.
@@ -1279,7 +1279,7 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
 export type CompileChunkOptions = {
   /** the project the file is parsed into */
   into: P.IncrementalProject
-  /** the file's path in it, e.g. `/Counter.spellx` */
+  /** the file's path in it, e.g. `/Counter.spellml` */
   path: string
   /** the file's whole new text */
   text: string

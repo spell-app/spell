@@ -97,7 +97,7 @@ describe("an <if> inside markup", () => {
   }
 
   test("every branch is on the page;  the one whose phrase holds shows, the rest are hidden until found", () => {
-    drawnCard("/Card.spellx", SPELLX)
+    drawnCard("/Card.spellml", SPELLX)
     expect(shown()).toEqual(["ui-text hidden", "span hidden", "ui-button"])
     const [text, span] = [...element.firstElementChild!.children]
     // a Spell UI element by its own `hidden`;  text, in a span of its own, until found
@@ -107,7 +107,7 @@ describe("an <if> inside markup", () => {
   })
 
   test("a flip keeps every element, the same node with what it holds:  only `hidden` changes", () => {
-    const card = drawnCard("/Card.spellx", SPELLX)
+    const card = drawnCard("/Card.spellml", SPELLX)
     const segment = element.firstElementChild!
     const before = [...segment.children]
     ;(before[2] as HTMLElement & { held?: string }).held = "kept"
@@ -147,6 +147,6 @@ describe("an <if> inside markup", () => {
         .filter((line) => line.trim() && !line.trim().startsWith("//"))
         .join("\n")
     }
-    expect(code("/Card.spellx", SPELLX)).toBe(code("/Card.spell", CODE_SPELL))
+    expect(code("/Card.spellml", SPELLX)).toBe(code("/Card.spell", CODE_SPELL))
   })
 })

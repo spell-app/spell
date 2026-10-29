@@ -317,7 +317,7 @@ export function fixtureImportScope(projectName: string): P.Scope {
 /**
  * The import layer the project in `folder` parses under:  `fixtureImportScope()`, for any project's folder,
  * e.g. the Counter notebook's, under the Counter example's declarations.
- * - `paths`:  its files', e.g. `/Counter.spellx`:  their languages, by their names, pick its root scope.
+ * - `paths`:  its files', e.g. `/Counter.spellml`:  their languages, by their names, pick its root scope.
  */
 export function importScopeIn(folder: string, paths: string[]): P.Scope {
   const { imports } = readProjectFile(folder)
@@ -339,7 +339,7 @@ function moduleFor(projectId: string): string {
   return `${SP.SPELL_PROJECT_MODULE}${encodeURI(projectId)}`
 }
 
-/** `{ path, contents }` of each spell file (`.spell` or `.spellx`) in test project `projectName`, in its project file's order. */
+/** `{ path, contents }` of each spell file (`.spell` or `.spellml`) in test project `projectName`, in its project file's order. */
 export function loadFixtureProject(projectName: string): SpellSourceFile[] {
   const projectDir = fixtureFolder(projectName)
   return readProjectFile(projectDir)
@@ -349,12 +349,12 @@ export function loadFixtureProject(projectName: string): SpellSourceFile[] {
 
 /**
  * The code-spell twins of the showcase examples' spellx files, kept beside the tests:  `tests/spell/__spell__/<Example>/`.
- * - Each is the same program as the example's `.spellx` file:  `spellxExamples.test.ts` checks it.
+ * - Each is the same program as the example's `.spellml` file:  `spellxExamples.test.ts` checks it.
  */
 export const CODE_SPELL_TWINS_DIR = resolve(environment.repoDir, "tests", "spell", "__spell__")
 
 /**
- * `loadFixtureProject()`, each `.spellx` file as its code-spell twin (`CODE_SPELL_TWINS_DIR`):  `/Card.spellx` =>
+ * `loadFixtureProject()`, each `.spellml` file as its code-spell twin (`CODE_SPELL_TWINS_DIR`):  `/Card.spellml` =>
  * `/Card.spell`, the same program written as code spell.
  * - For a test of code spell itself (its parse, its journal, its edits) on a whole example written in spellx,
  *   e.g. `loadCodeSpellTwin("Solitaire")`.

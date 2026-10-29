@@ -22,7 +22,7 @@ import "./NotebookPage.css"
 
 /****************
  * ### `<NotebookPage>`
- * A `.spellx` NOTEBOOK's page (epic `elemental-spell` P16):  the page its `<spell-notebook>` template draws, in the
+ * A `.spellml` NOTEBOOK's page (epic `elemental-spell` P16):  the page its `<spell-notebook>` template draws, in the
  * editor app, editable in place.
  * - Drawn as Spell UI's docs site draws a component page, on the pane's own glass (no background of its own):
  *   a masthead, the page's title and the line under it;  each section a `<ui-section sticky collapsible>`, listed in

@@ -73,7 +73,7 @@ export const PROJECT_GROUPS: SP.ProjectRootSpec[] = [
     title: "Notebooks",
     Type: "Notebook",
     type: "notebook",
-    description: "Pages of prose and live examples you can edit, each a `.spellx` notebook",
+    description: "Pages of prose and live examples you can edit, each a `.spellml` notebook",
     icon: "sticky note"
   },
   {

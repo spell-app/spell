@@ -21,7 +21,7 @@ import { CellRunner, ChunkTreeAdapter } from "./NotebookPatch"
  * every edit the page makes, saved cell by cell;  adding, moving and deleting cells;  what the page says of saving;
  * the code view, the lock.
  * - The page is `<NotebookPage>`:  it draws what this says, and calls these methods from its clicks and editors.
- * - Its text is the notebook's `.spellx` file's:  an edit changes only its own cell's span (`NotebookPageCells`), and
+ * - Its text is the notebook's `.spellml` file's:  an edit changes only its own cell's span (`NotebookPageCells`), and
  *   the file is saved 600ms after the last one, through the spaces API the editor saves with (`SP.SpellFile.save()`).
  * - Only the edited cell draws again, never the page:
  *   - each drawing cell (`<example>`, `<section>`) is compiled ON ITS OWN (`SP.SpellProject.compileChunk()`) and
@@ -71,7 +71,7 @@ export class NotebookController {
   }
 
   /**
-   * `project`'s notebooks:  its `.spellx` files holding a `<spell-notebook>` (`<encanto-cuaderno>`), in its order.
+   * `project`'s notebooks:  its `.spellml` files holding a `<spell-notebook>` (`<encanto-cuaderno>`), in its order.
    * - Read from the files' text, so the page shows as soon as the project's loaded;  `[]` until then.
    */
   static notebooksIn(project: SP.SpellProject | undefined): SP.SpellFile[] {

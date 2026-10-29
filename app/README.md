@@ -94,7 +94,7 @@ in the editor's address bar, on the command line, or inside another project that
 | Address | What it names |
 | --- | --- |
 | `@spell/examples/TaskList` | Task List above, in Spell's own space |
-| `@spell/examples/TaskList/TaskList.spellx` | one file of it |
+| `@spell/examples/TaskList/TaskList.spellml` | one file of it |
 | `@spell/library/people` | a library:  a project other projects use, here people |
 | `owen@spell/errors` | a project in a person's own space |
 

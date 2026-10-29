@@ -11,7 +11,7 @@ import "spell/app/spaces"
  * `spell app notebook convert <page>`:  a Spell UI component page as notebooks, one per tab (epic `elemental-spell`
  * P19) -- `CLI.NotebookFromPage`.
  * - `<page>`:  the page's file, `ui/docs/ui-button.html`;  it's served at `/components/ui/<its name>`.
- * - Writes `@spell/notebooks/<Title>/`:  `Examples.spellx` ..., `TabBar.spellx`, `__project.json5`, over any there.
+ * - Writes `@spell/notebooks/<Title>/`:  `Examples.spellml` ..., `TabBar.spellml`, `__project.json5`, over any there.
  * - `--dry-run`:  writes nothing, and prints each file instead, under a `// <name>` line.
  * - Prints what it couldn't write as the page has it on stderr, for a person to tidy by hand.
  * - Returns the exit code.

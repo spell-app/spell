@@ -8,7 +8,7 @@
       "import": ["Counter"]
     },
     {
-      "path": "/Counter.spellx",
+      "path": "/Counter.spellml",
       "active": true
     }
   ]

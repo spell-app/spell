@@ -1,7 +1,7 @@
 import { SX } from "spell/parser/spellx"
 
 /**
- * A `.spellx` file as NOTEBOOK CELLS, and the edits a notebook makes to its text (epic `elemental-spell` P11).
+ * A `.spellml` file as NOTEBOOK CELLS, and the edits a notebook makes to its text (epic `elemental-spell` P11).
  * - The cells come from `SX.SpellxView`, the file's chunk tree with exact spans:  each template is a cell,
  *   then its own cells in order:  PROSE (markdown) and CHUNKS (a property, alias, action, drawing, event, test,
  *   handler or note), each the text of its span.
@@ -14,7 +14,7 @@ import { SX } from "spell/parser/spellx"
  */
 export class NotebookCells {
   /**
-   * The cells of `text`, a `.spellx` file at `path` (its language from its name, `Carta.es.spellx`).
+   * The cells of `text`, a `.spellml` file at `path` (its language from its name, `Carta.es.spellml`).
    * - NEVER throws:  a file the view can't make sense of is one prose-less list of whatever it found.
    */
   static of(text: string, path?: string): NotebookCell[] {

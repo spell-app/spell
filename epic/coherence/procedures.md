@@ -12,7 +12,7 @@ One of three kinds:
    - The bar:  the copies do the SAME job, and one mechanism, handed what differs (an argument, a callback, a
      subclass), would serve all of them.  Two things that only look alike are not a finding.
 2. **Rebuilt:**  new code, or a plan, building what a mechanism already does.
-   - e.g. a plan to "write a reader for `.spellx`" when the parser's tokenizer is meant to be subclassed
+   - e.g. a plan to "write a reader for `.spellml`" when the parser's tokenizer is meant to be subclassed
    - In a plan review, the main kind:  name the mechanism, where it is, and who already uses it (`spell map uses`).
 3. **Two words:**  one idea named two ways:  `fold` beside `open`, `dismiss` beside `close`.
    - The word list says which word wins;  an idea it doesn't list yet is a question, not a finding.

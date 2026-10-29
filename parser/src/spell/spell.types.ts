@@ -22,7 +22,7 @@ export type AnySpellFile = SpellFile | SpellJSFile | SpellCSSFile
 export type CompilableSpellFile = SpellFile | SpellCSSFile
 
 /**
- * The FORM a spell file is written in:  code spell (`Card.spell`), or spellx, its tag-shaped form (`Card.spellx`).
+ * The FORM a spell file is written in:  code spell (`Card.spell`), or spellx, its tag-shaped form (`Card.spellml`).
  * - Both read by the same rules, to the same program:  see `SP.SpellParser.form`.
  */
 export type SpellForm = "spell" | "spellx"

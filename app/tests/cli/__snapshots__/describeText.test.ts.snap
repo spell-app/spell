@@ -1,7 +1,7 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`describeOverview() > a file:  each thing it declares, a type's members grouped 1`] = `
-"Card.spellx
+"Card.spellml
   A playing card
   template Card  is a TwoSidedView
     Properties  rank, value, suit, color, symbol, name, state, picture, pile
@@ -14,7 +14,7 @@ exports[`describeOverview() > a file:  each thing it declares, a type's members 
 
 exports[`describeThing() > a property, with its compiled javascript 1`] = `
 "property color of Card
-Card.spellx:15
+Card.spellml:15
 
 Spell
     <property "color" one-of="red, black">
@@ -37,7 +37,7 @@ Compiled
 
 exports[`describeThing() > a type 1`] = `
 "template Card is a TwoSidedView
-Card.spellx:6
+Card.spellml:6
 
 Properties  rank, value, suit, color, symbol, name, state, picture, pile
 Actions     is a (rank), is a face card, is a number card, is a (suit), is the (rank) of (suit),

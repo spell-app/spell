@@ -17,7 +17,7 @@ import type { JSXMatchData } from "./JSX.shared"
  * - Its word is the language's (`exampleTag`):  `<example>`, Spanish's `<ejemplo>`.
  * - Named as spellx names its tags, by a quoted name after its word:  the tokenizer reads that as `name="..."`
  *   (`P.Tokenizer.quotedNameTags`).  `name="one counter"` works too.
- * - The same in code spell and spellx:  so a `.spell` notebook and its `.spellx` twin compile the same.
+ * - The same in code spell and spellx:  so a `.spell` notebook and its `.spellml` twin compile the same.
  * - What's inside is drawn as any drawing's markup is:  `<counter/>` is the project's view in a spellx file.
  * - Compiles to `h("spell-example", { name: "one counter" }, ...)`:  the result alone.
  *   Its code isn't compiled in:  the notebook shows it from the file (`SX.NotebookPage`), in spellx or html.

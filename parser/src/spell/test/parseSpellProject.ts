@@ -145,7 +145,7 @@ function languagesOf(files: SpellSourceFile[]): SP.Language[] {
 
 /**
  * The parser file `path` parses with in `projectScope`:  its parser's twin in the language and form the path names
- * (`SP.SpellParser.twinFor()`), e.g. `/Carta.es.spell`, `/Card.spellx` -- else that parser itself.
+ * (`SP.SpellParser.twinFor()`), e.g. `/Carta.es.spell`, `/Card.spellml` -- else that parser itself.
  */
 function parserFor(projectScope: P.Scope, path: string): SP.SpellParser {
   const parser = projectScope.parser as SP.SpellParser

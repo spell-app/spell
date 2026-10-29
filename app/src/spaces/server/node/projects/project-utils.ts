@@ -279,7 +279,6 @@ function languageOf(files: string[]): string | undefined {
   return languages.size === 1 && language !== "en" ? language : undefined
 }
 
-
 /**
  * `GET /api/projects/list/<group>` -- list projects in a group, e.g. `/api/projects/list/@spell/examples`.
  * - Returns: `SP.ProjectList`, each project's address, and its title and description if its file has them:

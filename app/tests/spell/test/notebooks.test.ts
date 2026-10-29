@@ -15,14 +15,14 @@ import "spell/app/spaces"
 /**
  * Every built-in NOTEBOOK (`@spell/notebooks`, epic `elemental-spell` P16) compiles cleanly, and means the same in
  * code spell:  written as code spell in memory (`SX.CodeSpellWriter`), it compiles to the same javascript.
- * - A notebook is only ever a `.spellx` file (Owen, 2026-10-25:  "one file.  notebooks are only `.spellx`"):
+ * - A notebook is only ever a `.spellml` file (Owen, 2026-10-25:  "one file.  notebooks are only `.spellml`"):
  *   its code spell is made here, never written beside it.
  * - Its bare names are written as the tags its own compile chose, as the editor's "Show as Code Spell" writes them:
  *   `<counter/>` is `<counter-counter/>`.
  * - Parsed under the projects it imports, as the editor parses it:  the Counter notebook draws the Counter example's
  *   counter (`@spell/examples/Counter`), so it keeps no template of its own.
  * - A project of several notebooks (Avatar's Examples, Usage and API, and the tab bar they share;  P18):  every
- *   `.spellx` file in its folder, parsed together, and their code spell twins together.
+ *   `.spellml` file in its folder, parsed together, and their code spell twins together.
  * - Compared without comments and the `DECLARES` header, which carry line numbers.
  */
 const NOTEBOOKS_DIR = resolve(environment.systemFilesRoot, "notebooks")
@@ -36,18 +36,18 @@ describe("every notebook means the same in code spell", () => {
 
 // epic `elemental-spell` J159:  the page's `<!-- GAP ... -->` notes were warning messages, drawn on the page
 test("the Button's GAP notes are comments:  never drawn", () => {
-  const contents = readFileSync(resolve(NOTEBOOKS_DIR, "Button", "Examples.spellx"), "utf8")
+  const contents = readFileSync(resolve(NOTEBOOKS_DIR, "Button", "Examples.spellml"), "utf8")
   expect(contents).toContain("<!-- GAP I23:")
-  const files = [{ path: "/Examples.spellx", contents }]
+  const files = [{ path: "/Examples.spellml", contents }]
   const [file] = parseSpellProject(files, { parentScope: importScopeIn(resolve(NOTEBOOKS_DIR, "Button"), []) }).files
   expect(codeOf(file!.compiled)).not.toContain("GAP")
 })
 
-/** Notebook project `name`'s `.spellx` files compile cleanly, and their code spell to the same javascript. */
+/** Notebook project `name`'s `.spellml` files compile cleanly, and their code spell to the same javascript. */
 function meansTheSame(name: string) {
   const folder = resolve(NOTEBOOKS_DIR, name)
   const files = readdirSync(folder)
-    .filter((file) => file.endsWith(".spellx"))
+    .filter((file) => file.endsWith(".spellml"))
     .map((file) => ({ path: `/${file}`, contents: readFileSync(resolve(folder, file), "utf8") }))
   const parentScope = importScopeIn(
     folder,
@@ -70,7 +70,7 @@ function meansTheSame(name: string) {
       path,
       componentTag: (word, start) => tags.get(start) ?? SP.ComponentPacks.tagFor(word, "en")
     })
-    return { path: path.replace(/\.spellx$/, ".spell"), contents: code }
+    return { path: path.replace(/\.spellml$/, ".spell"), contents: code }
   })
   const twins = parseSpellProject(written, { parentScope }).files
   twins.forEach((spell, index) => {

@@ -3,7 +3,7 @@ import { SP } from "spell/parser/spell"
 import { SX } from "spell/parser/spellx"
 
 /**
- * A `.spellx` file's CHUNK TREE, built from the tokens spell's own parser reads it as (epic `elemental-spell` P6, J30):
+ * A `.spellml` file's CHUNK TREE, built from the tokens spell's own parser reads it as (epic `elemental-spell` P6, J30):
  * `SpellxView.read(text)` => `SX.SpellxFile`.
  * - Spellx is read by spell's tokenizer and rules (`SP.SpellxTokenizer`, `SP.SpellxTwin`):  each tag line as its
  *   code-spell twin.  This view is what the file SAYS, for the notebook (P12), the editor and agents:
@@ -17,8 +17,8 @@ import { SX } from "spell/parser/spellx"
  */
 export class SpellxView {
   /**
-   * The chunk tree of `text`, a `.spellx` file.
-   * - `options.path`:  the file's path, which says its language (`Carta.es.spellx` is Spanish)
+   * The chunk tree of `text`, a `.spellml` file.
+   * - `options.path`:  the file's path, which says its language (`Carta.es.spellml` is Spanish)
    * - `options.language`:  its language, over what its path says
    * - NEVER throws on a file:  what's wrong is a diagnostic.
    */
