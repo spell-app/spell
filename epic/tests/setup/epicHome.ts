@@ -17,3 +17,5 @@ const TEST_PERSON = "Owen"
 const home = mkdtempSync(join(tmpdir(), "epic-home-"))
 writeFileSync(join(home, "person.json5"), `{ name: "${TEST_PERSON}" }\n`)
 process.env.SPELL_EPIC_HOME = home
+// and no `gh` to ask:  a test never looks the machine's person up on GitHub (`EpicHome.refreshGithub()`)
+process.env.SPELL_EPIC_GH = join(home, "no-gh")

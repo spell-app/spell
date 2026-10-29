@@ -106,12 +106,27 @@ describe("epic whoami", () => {
     process.chdir(TEMP)
     try {
       expect(await printed(() => commands.whoami([]))).toEqual([
-        "Ana Lima  (git's user.name)",
-        "  epic whoami <name> keeps another"
+        "Ana Lima",
+        "  git's user.name;  epic whoami <name> keeps another"
       ])
     } finally {
       process.chdir(cwd)
     }
+  })
+
+  test("the person in one line:  the short name, then the full name and the GitHub login (Owen, 2026-10-29)", () => {
+    const github = { fullName: "Owen Williams", github: "owenoak" }
+    expect([
+      PersonCommands.whoLine({ name: "owenoak", source: "github", ...github }),
+      PersonCommands.whoLine({ name: "Owen", source: "kept", ...github }),
+      PersonCommands.whoLine({ name: "Ana Lima", source: "git", fullName: "Ana Lima" }),
+      PersonCommands.whoLine({ name: "Ana", source: "kept" })
+    ]).toEqual([
+      "owenoak  (Owen Williams, github: owenoak)",
+      "Owen  (Owen Williams, github: owenoak)",
+      "Ana Lima",
+      "Ana"
+    ])
   })
 
   test("with a name:  keeps it, and says the old one still on pages", async () => {
@@ -122,8 +137,11 @@ describe("epic whoami", () => {
       "  before:  Ana (kept)",
       "  4 replies and comments still name Ana:  epic whoami --rename Ana Silva rewrites them"
     ])
-    expect(EpicHome.person()).toEqual({ name: "Ana Silva", source: "kept" })
-    expect(await printed(() => commands.whoami([]))).toEqual([`Ana Silva  (kept in ${EpicHome.personFile()})`])
+    expect(EpicHome.person()).toMatchObject({ name: "Ana Silva", source: "kept" })
+    expect(await printed(() => commands.whoami([]))).toEqual([
+      "Ana Silva  (Ana Lima)",
+      `  kept in ${EpicHome.personFile()}`
+    ])
   })
 
   test("--json:  the person, where it's kept, and what it was", async () => {
@@ -241,7 +259,7 @@ describe("epic whoami --rename", () => {
   test("keeps the new name and rewrites the old one;  again:  nothing to rename", async () => {
     const lines = await printed(() => commands.whoami(["--rename", "Ana", "Lima"]))
     expect(lines[0]).toBe("renamed Ana as Ana Lima in 10 places, 4 files;  you're Ana Lima now")
-    expect(EpicHome.person()).toEqual({ name: "Ana Lima", source: "kept" })
+    expect(EpicHome.person()).toMatchObject({ name: "Ana Lima", source: "kept" })
     expect(swept("epics/seo/parts/q3.html")).toContain("<b>Ana Lima:</b>")
     expect(await printed(() => commands.whoami(["--rename", "Ana", "Lima"]))).toEqual([
       "you're Ana Lima already:  nothing to rename"

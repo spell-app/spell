@@ -1,3 +1,4 @@
+import { spawnSync } from "node:child_process"
 import { mkdirSync } from "node:fs"
 import { homedir } from "node:os"
 import { join } from "node:path"
@@ -15,8 +16,9 @@ import { HOME_ENV, HOME_FOLDER } from "spell/epic/server/server.types.ts"
  * ```ts
  * EpicHome.folder()            // => "/Users/ana/.spell-epic"
  * EpicHome.subfolder("asks")   // => "/Users/ana/.spell-epic/asks"
- * EpicHome.person()            // => { name: "Ana Lima", source: "git" }
- * EpicHome.keepPerson("Ana")   // => { name: "Ana", source: "kept" }, from now on
+ * EpicHome.person()            // => { name: "analima", source: "github", fullName: "Ana Lima", github: "analima" }
+ * EpicHome.keepPerson("Ana")   // => { name: "Ana", source: "kept", ... }, from now on
+ * EpicHome.refreshGithub()     // => "analima", looked up with `gh` and kept
  * ```
  *
  * - Where:  `$SPELL_EPIC_HOME`, else `~/.spell-epic` (`folder()`)
@@ -25,10 +27,14 @@ import { HOME_ENV, HOME_FOLDER } from "spell/epic/server/server.types.ts"
  *     heartbeats (`asks/`), the worktree guard's records, ditched files, the window bridges' registry (`windows/`)
  *     ... and the person (`person.json5`)
  *   - before epic `epic-friend` P1, seven classes each spelled the rule out;  two ignored `$SPELL_EPIC_HOME`
- * - The PERSON:  the name this machine's person goes by on the epics (`person()`).
- *   - kept in `person.json5`, `{ name }`, once they've said (`epic whoami <name>`, `epic init`);
- *     else git's own `user.name`;  else none
- *   - the name IS who they are:  no id or email beside it (Owen, 2026-10-29, Q10)
+ * - The PERSON (`person()`):  their SHORT NAME, the one stamped on everything they write and the name that IS who they
+ *   are (Owen, 2026-10-29, Q10:  no id or email beside it), and their full name
+ *   - the short name:  kept in `person.json5` (`{ name }`) once they've said (`epic whoami <name>`, `epic init`);
+ *     else their GitHub login;  else git's own `user.name`;  else none
+ *     (Owen, 2026-10-29:  "Default to gh username as 'short name' for the person")
+ *   - the full name:  git's `user.name`
+ *   - the GitHub login:  `gh api user -q .login`, looked up ONLY by `refreshGithub()` (`epic whoami`, `epic init`)
+ *     and kept in `person.json5` as `github`, so serving a page or running a hook never runs `gh`
  * - STATIC:  the folder is the machine's.
  * - Its position:  node's own modules, the kit's `DataFile` and `Git` by their own names, and this folder's server
  *   types by path, so plain `node` loads it (the hooks, the window script), types stripped;
@@ -56,10 +62,45 @@ export class EpicHome {
    * - NEVER throws
    */
   static person(cwd = process.cwd()): EpicPerson {
-    const kept = EpicHome.keptName()
-    if (kept) return { name: kept, source: "kept" }
-    const fromGit = Git.config("user.name", cwd)
-    return fromGit ? { name: fromGit, source: "git" } : { name: undefined, source: "none" }
+    const { name: kept, github } = EpicHome.keptFile()
+    const fullName = Git.config("user.name", cwd)
+    const known = { ...(fullName && { fullName }), ...(github && { github }) }
+    if (kept) return { name: kept, source: "kept", ...known }
+    if (github) return { name: github, source: "github", ...known }
+    if (fullName) return { name: fullName, source: "git", ...known }
+    return { name: undefined, source: "none" }
+  }
+
+  /**
+   * Look up this machine's GitHub login (`gh api user -q .login`) and keep it in `person.json5` as `github`;  the
+   * login, or `undefined` when gh is missing, logged out or offline (the one kept before stays, then).
+   * - `command`:  the `gh` to run;  default `$SPELL_EPIC_GH`, else `gh` (a test names a stand-in, or none)
+   * - a few seconds at most (`GH_TIMEOUT_MS`);  NEVER throws
+   * - SIDE EFFECT:  writes the file when the login is new
+   */
+  static refreshGithub(command = process.env[GH_ENV] || "gh"): string | undefined {
+    const login = EpicHome.lookUpGithub(command)
+    if (!login) return EpicHome.keptFile().github
+    if (login !== EpicHome.keptFile().github) {
+      try {
+        mkdirSync(EpicHome.folder(), { recursive: true })
+        DataFile.edit<PersonFile>(EpicHome.personFile(), (file) => ({ ...file, github: login }))
+      } catch (error) {
+        console.error(`EpicHome.refreshGithub():  couldn't keep the GitHub login ${login}:`, error)
+      }
+    }
+    return login
+  }
+
+  /** The GitHub login `command` (`gh`) says the person is logged in as;  `undefined` for none.  NEVER throws. */
+  private static lookUpGithub(command: string): string | undefined {
+    try {
+      const run = spawnSync(command, ["api", "user", "-q", ".login"], { encoding: "utf8", timeout: GH_TIMEOUT_MS })
+      const login = run.status === 0 ? run.stdout.trim() : ""
+      return GITHUB_LOGIN.test(login) ? login : undefined
+    } catch {
+      return undefined
+    }
   }
 
   /**
@@ -85,7 +126,7 @@ export class EpicHome {
     if (!trimmed) throw new TypeError('EpicHome.keepPerson():  no name given;  pass the name to go by, e.g. "Ana"')
     mkdirSync(EpicHome.folder(), { recursive: true })
     DataFile.edit<PersonFile>(EpicHome.personFile(), (file) => ({ ...file, name: trimmed }))
-    return { name: trimmed, source: "kept" }
+    return EpicHome.person()
   }
 
   /** The person's file:  `<home>/person.json5`. */
@@ -93,30 +134,51 @@ export class EpicHome {
     return join(EpicHome.folder(), EpicHome.PERSON_FILE)
   }
 
-  /** The name kept in the person's file;  `undefined` for none, or a file that won't read. */
-  private static keptName(): string | undefined {
+  /** What the person's file keeps, its names trimmed;  `{}` for none, or a file that won't read. */
+  private static keptFile(): PersonFile {
     try {
-      const name = DataFile.read<PersonFile>(EpicHome.personFile())?.name
-      return typeof name === "string" && name.trim() ? name.trim() : undefined
+      const { name, github } = DataFile.read<PersonFile>(EpicHome.personFile()) ?? {}
+      return {
+        ...(typeof name === "string" && name.trim() && { name: name.trim() }),
+        ...(typeof github === "string" && GITHUB_LOGIN.test(github.trim()) && { github: github.trim() })
+      }
     } catch {
-      return undefined
+      return {}
     }
   }
 }
 
 /** Who is at the keyboard, and where the name came from:  `EpicHome.person()`. */
 export type EpicPerson = {
-  /** the name they go by;  `undefined` when nobody said and git doesn't know */
+  /** their SHORT NAME, the one on what they write;  `undefined` when nobody said and neither GitHub nor git knows */
   name: string | undefined
-  /** where it came from:  kept in the epic home, git's `user.name`, or neither */
+  /** where it came from:  kept in the epic home, their GitHub login, git's `user.name`, or none */
   source: PersonSource
+  /** their full name:  git's `user.name` */
+  fullName?: string
+  /** their GitHub login, as last looked up (`refreshGithub()`) */
+  github?: string
 }
 
-/** Where a person's name came from:  `kept` (`epic whoami <name>`, `epic init`), `git`, or `none`. */
-export type PersonSource = "kept" | "git" | "none"
+/**
+ * Where a person's short name came from:  `kept` (`epic whoami <name>`, `epic init`), `github` (their login), `git`
+ * (`user.name`), or `none`.
+ */
+export type PersonSource = "kept" | "github" | "git" | "none"
 
 /** `person.json5`'s shape. */
 type PersonFile = {
-  /** the name they go by */
+  /** the short name they said they go by */
   name?: string
+  /** their GitHub login, as `refreshGithub()` last found it */
+  github?: string
 }
+
+/** What names the `gh` command `refreshGithub()` runs, when set:  a test's stand-in, or a path to none. */
+const GH_ENV = "SPELL_EPIC_GH"
+
+/** How long `refreshGithub()` waits for `gh`:  it may be offline. */
+const GH_TIMEOUT_MS = 5000
+
+/** A GitHub login:  letters, digits and single hyphens, at most 39. */
+const GITHUB_LOGIN = /^[A-Za-z\d](?:[A-Za-z\d]|-(?=[A-Za-z\d])){0,38}$/

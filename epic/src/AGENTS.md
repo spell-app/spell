@@ -316,8 +316,12 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         hooks all ask it;  plain `node` loads it
     - `EpicHome` (epic `epic-friend` P1):  the epic tools' own folder, the ONE reader of where it is:
       `$SPELL_EPIC_HOME` (tests set it), else `~/.spell-epic`;  `folder()`, `subfolder(name)`
-      - and who is at the keyboard:  `person()`, the name kept in its `person.json5`, else git's `user.name`;
-        `keepPerson(name)` (`epic whoami <name>`, `epic init`).  The name is the identity:  no id beside it.
+      - and who is at the keyboard:  `person()`, their SHORT NAME, kept in its `person.json5`, else their GitHub
+        login, else git's `user.name`;  `fullName` git's;  `keepPerson(name)` (`epic whoami <name>`, `epic init`).
+        The short name is the identity:  no id beside it.
+        - the GitHub login:  `refreshGithub()` (`gh api user`, a few seconds, never throws) keeps it in
+          `person.json5` as `github`;  only `epic whoami` and `epic init` run it, so a page served never runs `gh`
+          (Owen, 2026-10-29);  `$SPELL_EPIC_GH` names another `gh` (the tests' stand-ins)
       - `personName()`:  the name put on what they write, "someone" when nobody said (epic `epic-friend` P2):
         the page server stamps a comment's and a reply's `by` with it (never the page's word), the tool passes it to
         `PlanDoc` (`PlanDocOptions.person`) for kept notes, picks, test runs, log lines and Claude's status cards

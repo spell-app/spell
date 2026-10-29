@@ -1,4 +1,13 @@
-import { mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from "node:fs"
+import {
+  chmodSync,
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  realpathSync,
+  rmSync,
+  writeFileSync
+} from "node:fs"
 import { homedir, tmpdir } from "node:os"
 import { join } from "node:path"
 import { afterAll, beforeEach, describe, expect, test } from "vite-plus/test"
@@ -47,15 +56,15 @@ describe("EpicHome", () => {
     expect(EpicHome.person(NOWHERE)).toEqual({ name: undefined, source: "none" })
   })
 
-  test("person():  nobody kept:  git's user.name", () => {
+  test("person():  nobody kept, no GitHub login:  git's user.name, its full name too", () => {
     writeFileSync(GIT_CONFIG, "[user]\n  name = Ana Lima\n")
-    expect(EpicHome.person(NOWHERE)).toEqual({ name: "Ana Lima", source: "git" })
+    expect(EpicHome.person(NOWHERE)).toEqual({ name: "Ana Lima", source: "git", fullName: "Ana Lima" })
   })
 
   test("keepPerson():  kept in person.json5, over git's from then on", () => {
     writeFileSync(GIT_CONFIG, "[user]\n  name = Ana Lima\n")
-    expect(EpicHome.keepPerson("  Ana ")).toEqual({ name: "Ana", source: "kept" })
-    expect(EpicHome.person(NOWHERE)).toEqual({ name: "Ana", source: "kept" })
+    expect(EpicHome.keepPerson("  Ana ")).toMatchObject({ name: "Ana", source: "kept" })
+    expect(EpicHome.person(NOWHERE)).toEqual({ name: "Ana", source: "kept", fullName: "Ana Lima" })
     expect(JSON.parse(readFileSync(join(HOME, "person.json5"), "utf8"))).toEqual({ name: "Ana" })
   })
 
@@ -73,6 +82,44 @@ describe("EpicHome", () => {
     writeFileSync(GIT_CONFIG, "[user]\n  name = Ana Lima\n")
     mkdirSync(HOME, { recursive: true })
     writeFileSync(EpicHome.personFile(), "{ not json5")
-    expect(EpicHome.person(NOWHERE)).toEqual({ name: "Ana Lima", source: "git" })
+    expect(EpicHome.person(NOWHERE)).toEqual({ name: "Ana Lima", source: "git", fullName: "Ana Lima" })
+  })
+})
+
+/** A stand-in `gh` in the scratch folder:  a script printing `login` (exit 0), or failing as a logged-out one does. */
+function fakeGh(name: string, { login, fails = false }: { login?: string; fails?: boolean }): string {
+  const script = join(TEMP, name)
+  writeFileSync(script, fails ? "#!/bin/sh\necho 'not logged in' >&2\nexit 4\n" : `#!/bin/sh\necho ${login}\n`)
+  chmodSync(script, 0o755)
+  return script
+}
+
+describe("EpicHome:  the GitHub login (Owen, 2026-10-29)", () => {
+  test("refreshGithub():  gh's login kept as `github`;  the short name from then on, git's the full name", () => {
+    writeFileSync(GIT_CONFIG, "[user]\n  name = Ana Lima\n")
+    expect(EpicHome.refreshGithub(fakeGh("gh-ana", { login: "analima" }))).toBe("analima")
+    expect(JSON.parse(readFileSync(EpicHome.personFile(), "utf8"))).toEqual({ github: "analima" })
+    expect(EpicHome.person(NOWHERE)).toEqual({
+      name: "analima",
+      source: "github",
+      fullName: "Ana Lima",
+      github: "analima"
+    })
+    EpicHome.keepPerson("Ana")
+    expect(EpicHome.person(NOWHERE)).toEqual({ name: "Ana", source: "kept", fullName: "Ana Lima", github: "analima" })
+  })
+
+  test("gh missing, or logged out:  nothing looked up, the login kept before stays;  NEVER throws", () => {
+    expect(EpicHome.refreshGithub(join(TEMP, "no-such-gh"))).toBeUndefined()
+    expect(EpicHome.refreshGithub(fakeGh("gh-out", { fails: true }))).toBeUndefined()
+    expect(EpicHome.person(NOWHERE)).toEqual({ name: undefined, source: "none" })
+    EpicHome.refreshGithub(fakeGh("gh-ben", { login: "ben" }))
+    expect(EpicHome.refreshGithub(fakeGh("gh-out", { fails: true }))).toBe("ben")
+    expect(EpicHome.person(NOWHERE)).toMatchObject({ name: "ben", source: "github" })
+  })
+
+  test("a login gh answers with that isn't one (an error page, a blank) is never kept", () => {
+    expect(EpicHome.refreshGithub(fakeGh("gh-odd", { login: "'<html> oops'" }))).toBeUndefined()
+    expect(existsSync(EpicHome.personFile())).toBe(false)
   })
 })

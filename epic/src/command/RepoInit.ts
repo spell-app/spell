@@ -30,7 +30,8 @@ import { Shared } from "./Shared"
  *      they're in the content folder since epic `epic-eject` P13, whose `.gitignore` takes them (`Shared.init()`)
  * 5. keeps the name this machine's person goes by on the epics (`EpicHome.keepPerson()`;  epic `epic-friend` P1)
  *    - `--name <name>`;  else, with no name kept yet, asks "What do you want to be called?" in a terminal,
- *      suggesting git's `user.name` (`CLI.ask()`);  with no terminal (a skill, a Claude session), git's name
+ *      suggesting their GitHub login, else git's `user.name` (`CLI.ask()`, `EpicHome.refreshGithub()`);
+ *      with no terminal (a skill, a Claude session), that suggestion
  *    - a name kept already stays, unless `--name` gives another
  *
  * - `--dry-run`:  says what it would do, and writes nothing
@@ -146,14 +147,17 @@ export class RepoInit {
   }
 
   /**
-   * The name to keep, asked in a terminal:  "What do you want to be called?", suggesting git's `user.name`.
-   * - `undefined` when a name is kept already (it stays), or nothing was said and git has no name
-   * - no terminal:  git's name, asking nothing (`CLI.ask()`)
+   * The name to keep, asked in a terminal:  "What do you want to be called?", suggesting their GitHub login, else
+   * git's `user.name` (Owen, 2026-10-29).
+   * - the login looked up first (`EpicHome.refreshGithub()`), and kept, so pages never run `gh`
+   * - `undefined` when a name is kept already (it stays), or nothing was said and neither knows a name
+   * - no terminal:  the suggestion, asking nothing (`CLI.ask()`)
    */
   static async askName(): Promise<string | undefined> {
+    EpicHome.refreshGithub()
     const now = EpicHome.person()
     if (now.source === "kept") return undefined
-    return (await CLI.ask(NAME_QUESTION, { suggestion: now.name ?? "" })) || undefined
+    return (await CLI.ask(NAME_QUESTION, { suggestion: now.github ?? now.fullName ?? "" })) || undefined
   }
 
   /**

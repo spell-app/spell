@@ -583,7 +583,8 @@ export class EpicProgram {
 
     this.verb(epic.command("whoami"), (args) => new PersonCommands().whoami(args))
       .description(
-        "who you are on the epics:  your name and where it came from (kept, else git's user.name);  " +
+        "who you are on the epics:  your short name (kept, else your GitHub login, else git's user.name), your full " +
+          "name and GitHub login;  " +
           "with a name, keeps it;  --rename also writes it over the old one on every page"
       )
       .usage("[<name>] [--rename [--dry-run]] [--json]")
@@ -1018,7 +1019,8 @@ In the repo's main checkout (or any worktree of it), each step skipped when it's
 Then commit .epic/config.json5 and .gitignore on the base branch.
 
 --name <name> is the name you go by on the epics, kept in ~/.spell-epic/person.json5 (epic whoami);
-without it, epic init asks in a terminal, suggesting git's user.name, and takes git's name anywhere else.
+without it, epic init asks in a terminal, suggesting your GitHub login (else git's user.name), and takes that
+anywhere else.
 
 Examples:
   epic init --dry-run
@@ -1026,8 +1028,12 @@ Examples:
   epic init`
 
 const WHOAMI_HELP = `
-Your name is who you are on the epics:  kept in ~/.spell-epic/person.json5 ($SPELL_EPIC_HOME), else git's user.name.
-epic init asks for it too.
+Your short name is who you are on the epics, and what's stamped on what you write:  kept in
+~/.spell-epic/person.json5 ($SPELL_EPIC_HOME), else your GitHub login, else git's user.name.  Your full name is git's.
+whoami looks your GitHub login up (gh api user) and keeps it there, so pages never run gh.  epic init asks too.
+
+  owenoak  (Owen Williams, github: owenoak)       nothing kept:  the GitHub login
+  Owen  (Owen Williams, github: owenoak)          epic whoami Owen kept it
 
 The name is who you are:  --rename writes the new one over the old wherever it says who wrote something (a reply's
 from, a comment's by, "Ana's run", "Ana picked B" ...), on every page, part and inbox;  never in running text.

@@ -1,5 +1,6 @@
 import { execFileSync } from "node:child_process"
 import {
+  chmodSync,
   existsSync,
   lstatSync,
   mkdirSync,
@@ -146,7 +147,23 @@ describe("epic init:  the person's name", () => {
     } finally {
       out.mockRestore()
     }
-    expect(EpicHome.person()).toEqual({ name: "Ana", source: "kept" })
+    expect(EpicHome.person()).toMatchObject({ name: "Ana", source: "kept" })
+  })
+
+  test("the name suggested:  the GitHub login, looked up and kept;  else git's", async () => {
+    rmSync(EpicHome.folder(), { recursive: true, force: true })
+    const gh = join(TEMP, "gh-ana")
+    writeFileSync(gh, "#!/bin/sh\necho analima\n")
+    chmodSync(gh, 0o755)
+    const was = process.env.SPELL_EPIC_GH
+    process.env.SPELL_EPIC_GH = gh
+    try {
+      expect(await RepoInit.askName()).toBe("analima")
+      expect(EpicHome.person()).toMatchObject({ source: "github", github: "analima" })
+    } finally {
+      process.env.SPELL_EPIC_GH = was
+      rmSync(EpicHome.folder(), { recursive: true, force: true })
+    }
   })
 
   test("no terminal to ask in:  git's name, asking nothing", async () => {

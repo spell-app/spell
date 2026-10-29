@@ -16,7 +16,7 @@ import { NameSweep, type SweepResult } from "./NameSweep"
  * says who wrote something (P2, `NameSweep`).
  *
  * ```sh
- * epic whoami          # Ana Lima  (git's user.name)
+ * epic whoami          # analima  (Ana Lima, github: analima)
  * epic whoami Ana      # you're Ana now, kept in ~/.spell-epic/person.json5
  * epic whoami --rename Ana Lima --dry-run   # what renaming Ana would change, file by file
  * epic whois Owen      # Owen:  264 replies and comments in 31 places, last on 2026-10-29 ...
@@ -51,6 +51,8 @@ export class PersonCommands {
     const { positional, flags } = parseVerbArgs(args, WHOAMI_SWITCHES)
     const name = positional.join(" ").trim()
     if (flags.rename) return this.rename(name, { dryRun: flags.dryRun === true, json: flags.json === true })
+    // the one place (with `epic init`) that runs `gh`:  its login kept, so a page served never does
+    EpicHome.refreshGithub()
     const before = EpicHome.person()
     const person = name ? EpicHome.keepPerson(name) : before
     const stillNamed = name && before.name && before.name !== person.name ? this.activityOf(before.name).count : 0
@@ -214,11 +216,26 @@ export class PersonCommands {
       return lines
     }
     if (!person.name)
-      return ["nobody yet:  no name kept, and git has no user.name.", "  epic whoami <name> keeps the one you go by"]
+      return [
+        "nobody yet:  no name kept, no GitHub login, and git has no user.name.",
+        "  epic whoami <name> keeps the one you go by"
+      ]
     return [
-      `${person.name}  (${person.source === "kept" ? `kept in ${file}` : SOURCE_WORDS[person.source]})`,
-      ...(person.source === "git" ? ["  epic whoami <name> keeps another"] : [])
+      PersonCommands.whoLine(person),
+      person.source === "kept"
+        ? `  kept in ${file}`
+        : `  ${SOURCE_WORDS[person.source]};  epic whoami <name> keeps another`
     ]
+  }
+
+  /**
+   * The person in one line:  the short name, then the full name and the GitHub login (Owen, 2026-10-29):
+   * `owenoak  (Owen Williams, github: owenoak)`, `Owen  (Owen Williams, github: owenoak)`;  the full name only when
+   * it isn't the short name;  neither known:  the name alone.
+   */
+  static whoLine({ name, fullName, github }: EpicPerson): string {
+    const known = [fullName !== name && fullName, github && `github: ${github}`].filter(Boolean)
+    return known.length ? `${name}  (${known.join(", ")})` : `${name}`
   }
 
   /** `epic whoami --rename`'s lines:  what changed (or would), then a line per file. */
@@ -292,6 +309,7 @@ const RECORD = /\{[^{}]*\}/g
 /** How `whoami` says where a name came from. */
 const SOURCE_WORDS: Record<EpicPerson["source"], string> = {
   kept: "kept",
+  github: "your GitHub login",
   git: "git's user.name",
   none: "nobody said"
 }
