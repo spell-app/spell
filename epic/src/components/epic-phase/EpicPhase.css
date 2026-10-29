@@ -2,7 +2,7 @@
  * `<epic-phase>` (EpicPhase.tsx):  one phase, on top of the fold (`EpicFold.css`).
  * - A nested block:  its title on the row band, reaching past the Phases section's inset, edge to edge;  a small
  *   gap below it open, none folded (a rule instead).
- * - The status icon in its status's colour;  a done phase's title quieter.
+ * - The status icon in its Phases chip's colour and fill (`data-state`, I170);  a done phase's title quieter.
  * - Its plan changed:  the title's orange pen and count while it isn't done (the changes themselves are
  *   `<epic-update>` blocks among its children, which draw themselves).
  * - Public tokens (`--epic-phase-*`) are never declared here:  read through private aliases.
@@ -99,21 +99,43 @@
     color: var(--ui-green-text, var(--ui-green));
     cursor: help;
   }
-  .icon.todo {
-    color: var(--ui-grey-text, var(--ui-text-muted));
+  /*
+   * ## Its status circle:  its shape by its status (outline, half, check), its COLOUR and fill as its Phases chip's
+   * (`data-state`, `PhaseState.of()`;  epic `epic-engine` I170;  Owen, 2026-10-29:  red needs him, orange changed since
+   * he looked, blue working, a dotted blue outline scheduled, green finished recently, grey finished long ago)
+   * - the chips' own colours (`EpicStateFilter.css`):  the page's state tokens, else Spell UI's
+   */
+  .icon[data-state="attention"] {
+    color: var(--epic-state-attention, var(--ui-red));
   }
-  .icon.active {
-    color: var(--ui-blue-text, var(--ui-blue));
+  .icon[data-state="updated"] {
+    color: var(--epic-state-replied, var(--ui-orange));
   }
-  .icon.done {
-    color: var(--ui-green-text, var(--ui-green));
+  .icon[data-state="progress"],
+  .icon[data-state="scheduled"] {
+    color: var(--epic-state-progress, var(--ui-blue));
+  }
+  .icon[data-state="recent"] {
+    color: var(--epic-state-recent, var(--ui-green));
+  }
+  .icon[data-state="old"] {
+    color: var(--ui-grey, #767676);
+  }
+  /* scheduled:  the chip's DOTTED outline, drawn as the glyph's circle (no dotted circle in the icon set) */
+  .icon[data-state="scheduled"]:not(.working) svg {
+    box-sizing: border-box;
+    width: 0.9em;
+    border: 2px dotted currentColor;
+    border-radius: 50%;
+  }
+  .icon[data-state="scheduled"]:not(.working) svg path {
+    display: none;
   }
   /*
-   * Claude at work on it (`:state(working)`, I147):  the header's turning spinner (`EpicAgents.css`), in blue,
-   * a glyph's size in the icon's box
+   * Claude at work on it (`:state(working)`, I147):  the header's turning spinner (`EpicAgents.css`), in its state's
+   * colour (blue, unless red or orange come first), a glyph's size in the icon's box
    */
   .icon.working {
-    color: var(--ui-blue-text, var(--ui-blue));
     cursor: help;
   }
   .spinner {

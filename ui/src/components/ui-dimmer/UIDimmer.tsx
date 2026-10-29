@@ -244,11 +244,17 @@ export class UIDimmer extends E.UIComponent<typeof dimmerVocabulary> {
     this.shown = { kind, box }
   }
 
-  /** Once the box's own transitions end:  `true` unless another show / hide started meanwhile. */
+  /**
+   * Once the box's own transitions end:  `true` unless another show / hide started meanwhile.
+   * - Asks the box again after each round:  a transition restarted while it ran (a redraw on a slow machine)
+   *   settles the old one at once, canceled, and the new one is still running (main's CI, repo-split P23).
+   */
   private async transitionsEnd(): Promise<boolean> {
     const generation = ++this.generation
-    const animations = this.box?.getAnimations() ?? []
-    await Promise.allSettled(animations.map((animation) => animation.finished))
+    for (let running = this.box?.getAnimations() ?? []; running.length; running = this.box?.getAnimations() ?? []) {
+      await Promise.allSettled(running.map((animation) => animation.finished))
+      if (generation !== this.generation) return false
+    }
     return generation === this.generation
   }
 

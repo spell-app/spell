@@ -8,8 +8,9 @@ import { StateFilter, type ChipPick } from "spell/epic/components/epic-section/S
 import {
   CHIP,
   CHIP_CLICK_KEYS,
-  CHIP_STATES,
   FILTER,
+  FILTER_STATES,
+  PHASE_FILTER_STATES,
   type ChipState
 } from "spell/epic/components/epic-section/EpicSection.types"
 
@@ -23,8 +24,9 @@ import filterCSS from "./EpicStateFilter.css?inline"
  * ### `<epic-state-filter>`
  * The state filter's CHIPS (epic `airplane` P8, ONE element since epic `epic-engine` P3):  a pill per state the items
  * are in, in the state's colour, with how many (Owen, 2026-10-10:  no filter icon).
- * - the Phases section's phases the same, by a phase's three states:  undone, updated, complete (epic `epic-engine`
- *   I157)
+ * - the Phases section's phases the same (`phases`), by a phase's six states in Owen's order (epic `epic-engine` I157,
+ *   I170):  red needs him, orange changed since he looked, blue under way (in the blue badge, as an item's
+ *   `progress`), a DOTTED blue outline scheduled, green done lately, grey done before
  * - SOLID while that state's items show, OUTLINED while hidden (`shown`)
  * - a click asks the owner to filter:  `epic-state-changed`, with the clicked state and what should show next, by the one
  *   rule (`StateFilter.nextShown()`:  everything showing, only that state;  else a hidden state shows too and a shown
@@ -66,12 +68,13 @@ export class EpicStateFilter extends E.UIComponent<typeof epicStateFilterVocabul
 
   /**
    * The states with items (or phases), in the filter's order:  a chip each.
-   * - an item's states (`FILTER_STATES`) or a phase's (`PHASE_FILTER_STATES`, the Phases section's:  epic
-   *   `epic-engine` I157), whichever `counts` names
+   * - an item's states (`FILTER_STATES`), or a phase's with `phases` (`PHASE_FILTER_STATES`, the Phases section's:
+   *   epic `epic-engine` I157, I170):  some names are in both, so ONE list
    */
   get present(): ChipState[] {
     const counts = this.stateCounts
-    return CHIP_STATES.filter((it) => counts.has(it.state))
+    const order: readonly ChipState[] = this.phases ? PHASE_FILTER_STATES : FILTER_STATES
+    return order.filter((it) => counts.has(it.state))
   }
 
   /**
@@ -114,7 +117,8 @@ export class EpicStateFilter extends E.UIComponent<typeof epicStateFilterVocabul
         >
           <Show when={this.markedCount}>
             {(count) => {
-              const words = () => this.translationForKey("markedWords", { count: count() })
+              const words = () =>
+                this.translationForKey(this.phases ? "markedPhaseWords" : "markedWords", { count: count() })
               return (
                 <span
                   class={[CHIP, MARKED]}
@@ -138,6 +142,7 @@ export class EpicStateFilter extends E.UIComponent<typeof epicStateFilterVocabul
                   part={this.partForName("chip")}
                   data-state={state.state}
                   data-color={state.color}
+                  data-fill={"fill" in state ? state.fill : undefined}
                   aria-pressed={this.showing.has(state.state) ? "true" : "false"}
                   aria-label={words()}
                   title={words()}

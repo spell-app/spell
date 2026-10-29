@@ -103,11 +103,14 @@ const COMMENT_SAVE_MS = 600
 const REDRAW_MS = 150
 
 /**
- * How often a docs page with a Send asks again who is listening, ms.
+ * How often a docs page with a Send asks again who is listening, and an epic page for its comments, ms.
  * - the server calls a session gone once its heartbeat is 90s old (`ReviewInbox` `LISTEN_STALE_MS`),
  *   with no file change to announce it
  */
 const SEND_POLL_MS = 30_000
+
+/** An epic page's or a saga page's path:  its comments live in the epic's review inbox. */
+const EPIC_PAGE = /\.(plan|saga)\.html$/
 
 /**
  * The blocks with a title row and an `actions` slot in it (epic `epic-workflow` P25).
@@ -192,6 +195,7 @@ const THREADS_FIRST = /^(ui-section|epic-overview)$/
  *   - when the page's content changes (an epic page's part loading)
  *   - when the inbox file changes (`spell-server:changed`:  another window, Claude)
  *   - when the page comes back into view
+ *   - every 30s on an epic or saga page, for a change the live socket missed (I169), and on a docs page with a Send
  * - what it adds in `main` carries `data-spell-added`:  a patch steps around it, the anchors never count it
  * - NEVER throws:  a page with no server, or a server without the routes, shows no bullhorns
  * - options:
@@ -211,11 +215,14 @@ export async function wireComments(main, { go, signal } = {}) {
   const reload = () => void comments.load().then((takes) => takes && !signal?.aborted && comments.draw())
   const listening = { signal }
   addEventListener("spell-doc:updated", () => comments.draw(), listening)
-  // its inbox files changing, the page coming into view;  and, while a docs page's Send shows, every 30s:
-  // who is listening, as a session that stopped leaves no file change, only an old heartbeat
+  // its inbox files changing, the page coming into view;  and every 30s:
+  // - a docs page's Send:  who is listening, as a session that stopped leaves no file change, only an old heartbeat
+  // - an epic or saga page:  a change the live socket missed (epic `epic-engine` I169:  a thread said "thinking…"
+  //   20 minutes after its answer, while the review client's own 4s poll had the inbox right)
+  const epicPage = EPIC_PAGE.test(location.pathname)
   const unwatch = ServerLink.watch(window, (path) => comments.inboxPaths.includes(path), reload, {
     every: SEND_POLL_MS,
-    polls: () => !!comments.send
+    polls: () => !!comments.send || epicPage
   })
   // leaving (a reload, another page):  what's typed in the pane or a reply box and not saved yet goes now
   const flush = () => {

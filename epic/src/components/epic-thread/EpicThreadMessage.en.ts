@@ -23,7 +23,7 @@ export const epicThreadMessageVocabulary = {
   description:
     "One message of a comment's thread (`<epic-thread>`, which draws it in its shadow root, never written in a " +
     "doc):  Owen's words plain on the thread's ivory, Claude's in a light violet box, the green Done line, or " +
-    'Claude\'s "thinking…" stub;  a bold "You:" / "Claude:" starts its first line, its time in its top right ' +
+    'Claude\'s "thinking…" stub in the page\'s blue (Claude at work on it);  a bold "You:" / "Claude:" starts its first line, its time in its top right ' +
     "corner.  Every message but the last a step smaller and quieter.",
   attributes: [
     {

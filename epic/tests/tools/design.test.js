@@ -98,4 +98,9 @@ describe("changedFiles()", () => {
     expect(changed).toEqual(["project/README.md"])
     expect(removed).toEqual(["project/old.md"])
   })
+
+  it("throws, naming the build to run, when nothing's built:  never every pushed file 'removed' (I27)", () => {
+    const empty = mkdtempSync(join(tmpdir(), "design-"))
+    expect(() => changedFiles(empty, { files: { "project/README.md": "x" } })).toThrow(/run `spell design build` first/)
+  })
 })

@@ -90,7 +90,9 @@ const EXCEPTIONS: Record<string, Record<string, string>> = {
     "--ui-button-padding-block": "the same",
     "--ui-button-padding-inline": "the same",
     "--ui-button-radius": "the same",
-    "--ui-button-box-shadow": "the same"
+    "--ui-button-box-shadow": "the same",
+    "--ui-icon-width": "the Theme bench row's icon sits in the menu's icon column, its glyph a little wider",
+    "--ui-icon-distance": "the same:  the row's gap, not the icon's, spaces it from its label"
   }
 }
 

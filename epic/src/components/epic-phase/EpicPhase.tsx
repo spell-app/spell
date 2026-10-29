@@ -3,7 +3,6 @@ import type { JSX } from "@solidjs/web"
 
 import { E } from "spell/ui/core"
 
-import { PlanDates } from "spell/epic/dates"
 import { PageStages, PhaseIds } from "spell/epic/phases"
 
 // its view of the review inbox:  the file, not `epic-review`'s barrel (`index.ts` defines that family)
@@ -13,11 +12,13 @@ import { STATUS_SLOT } from "spell/epic/components/epic-item/EpicItem.types"
 // Import directly:  the fold base, not the `epic-section` barrel (which defines `<epic-section>`)
 import { EpicFold } from "spell/epic/components/epic-section/EpicFold"
 import { phaseFields } from "spell/epic/components/epic-section/PhaseFields"
+import { PhaseState, type PhaseFields } from "spell/epic/components/epic-section/PhaseState"
 import {
-  DOC_REVIEW,
   PHASE_FIELDS,
+  PHASE_FILTER_STATES,
   type ContentsEntry,
-  type PhaseFieldName
+  type PhaseFieldName,
+  type PhaseStateName
 } from "spell/epic/components/epic-section/EpicSection.types"
 
 import { epicPhaseVocabulary } from "./EpicPhase.en"
@@ -32,9 +33,12 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
  * The component behind `<epic-phase>`:  one phase of the plan, in the Phases section --
  * a fold (`EpicFold`) titled `P3 · <title>`.
  * - Its title line:
- *   - the status icon in its colour (grey to do, blue under way, green done);  while Claude is at work on it (the
- *     review inbox's `working`, I147), a blue turning spinner, its tooltip "Claude is writing this phase's plan" or
- *     "Claude is working on it"
+ *   - the status icon, its shape by its status (an outline to do, half filled under way, a check done), its COLOUR
+ *     by where it stands, as its Phases chip (`PhaseState.of()`, epic `epic-engine` I170;  Owen, 2026-10-29):  red
+ *     needs Owen (a plan to accept, a choice open), orange changed since he looked, blue under way, a DOTTED blue
+ *     circle scheduled, green done in the last 3 days, grey done before;  while Claude is at work on it (the review
+ *     inbox's `working`, I147), a turning spinner in that colour (blue, unless red or orange come first), its tooltip
+ *     "Claude is writing this phase's plan" or "Claude is working on it"
  *   - `P3 · <title>` (`title`, or `slot="title"`);  a done phase's title reads quieter
  *     - `P3`:  its NUMBER, its place among the phases, worked out as it draws (`number`);  NOT its id, which is
  *       stable (`p-epic-migrate`, epic `epic-workflow` P15:  `PhaseIds`), so an insert renumbers no link
@@ -99,28 +103,47 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
   /** The pen of its title's mark:  its plan changed. */
   readonly changedGlyph = new E.IconGlyph({ owner: this, name: () => "pen to square" })
 
-  /**
-   * Its update blocks still NEW, by id (epic `epic-engine` I168):  `to-see`'s, less the ones gone quiet since it was
-   * written (`PlanDates.isQuiet()`) or marked Seen in the review inbox, while it isn't done.
-   */
-  get newUpdates(): string[] {
-    if (this.shownStatus === "done") return []
-    const now = new Date()
-    return (this.toSee ?? "")
-      .split(/\s+/)
-      .filter(Boolean)
-      .map((token) => token.split("@"))
-      .filter(([id, at]) => !PlanDates.isQuiet(at, now) && this.reviewState.markOf(id)?.action !== "seen")
-      .map(([id]) => id)
+  /** What `PhaseState` reads of it:  its attributes as its props (tracked), its title as text. */
+  get stateFields(): PhaseFields {
+    return {
+      status: this.shownStatus,
+      plan: this.plan,
+      toSee: this.toSee,
+      changes: this.changes,
+      choicesOpen: this.choicesOpen,
+      doneAt: this.doneAt,
+      title: EpicPhase.titleText(this.domElement)
+    }
   }
 
   /**
-   * How many plan changes its title's pen counts:  its new updates (`newUpdates`);  0 for none.
-   * - an older page, with `changes` and no `to-see` yet:  `changes`, until the epic tool's next write
+   * Its update blocks still NEW, by id (epic `epic-engine` I168;  `PhaseState.newUpdates()`):  `to-see`'s, less the
+   * ones gone quiet since it was written (`PlanDates.isQuiet()`) or marked Seen in the review inbox, while it isn't done.
+   * - an older page, with `changes` and no `to-see` yet:  that many, unnamed, until the epic tool's next write
    */
+  get newUpdates(): string[] {
+    return PhaseState.newUpdates(this.stateFields, this.live, new Date())
+  }
+
+  /** How many plan changes its title's pen counts:  its new updates (`newUpdates`);  0 for none. */
   get changedCount(): number {
-    if (this.toSee === undefined && this.changes) return this.shownStatus === "done" ? 0 : this.changes
     return this.newUpdates.length
+  }
+
+  /**
+   * Where it stands, as its Phases chip counts it (`PhaseState.of()`, epic `epic-engine` I170):  its status circle's
+   * colour and fill, the same as the chip's.
+   */
+  get drawnState(): PhaseStateName {
+    return PhaseState.of(this.stateFields, this.live)
+  }
+
+  /** What the review inbox says of it now, for `PhaseState`:  Claude at work on it;  an update marked Seen. */
+  private get live() {
+    return {
+      workedOn: this.reviewState.workedOn(),
+      isSeen: (id: string) => this.reviewState.markOf(id)?.action === "seen"
+    }
   }
 
   /** What it took (`took`), shown once it's done;  `undefined` before, or never measured. */
@@ -167,9 +190,7 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
    */
   get isPlanWaiting(): boolean {
     // the doc pass never asks (Owen, 2026-10-25:  "I shouldn't have to accept `doc review` phase")
-    return (
-      this.plan === "waiting" && this.shownStatus !== "done" && !DOC_REVIEW.test(EpicPhase.titleText(this.domElement))
-    )
+    return PhaseState.isPlanWaiting(this.stateFields)
   }
 
   /**
@@ -227,7 +248,9 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
     const written = this.domElement.getAttribute("status") ?? ""
     const status: PhaseStatus = written in STATUS_ICONS ? (written as PhaseStatus) : "todo"
     const label = `${PhaseIds.labelOf(this.domElement)} · ${EpicPhase.titleText(this.domElement)}`
-    return { label, icon: STATUS_ICONS[status], color: STATUS_COLORS[status] }
+    const state = PhaseState.of(PhaseState.fieldsOf(this.domElement), this.live)
+    const color = PHASE_FILTER_STATES.find((it) => it.state === state)!.color
+    return { label, icon: STATUS_ICONS[status], color }
   }
 
   /** Follow the review inbox while connected (kept alive:  a removed phase stops). */
@@ -256,6 +279,7 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
             <span
               class={[ICON, this.shownStatus]}
               part={this.partForName("status")}
+              data-state={this.drawnState}
               role="img"
               aria-label={this.translationForKey(STATUS_TEXTS[this.shownStatus])}
             >
@@ -267,6 +291,7 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
           <span
             class={[ICON, WORKING]}
             part={this.partForName("status")}
+            data-state={this.drawnState}
             role="img"
             aria-label={this.workingText}
             title={this.workingText}
@@ -461,16 +486,6 @@ const STATUS_TEXTS = {
   todo: "statusTodo",
   active: "statusActive",
   done: "statusDone"
-} as const satisfies Record<PhaseStatus, string>
-
-/**
- * A phase's status => its icon's colour (Spell UI's `color`), as `EpicPhase.css`'s:
- * its `contentsEntry`'s, which only the contents list drew (gone 2026-10-08).
- */
-const STATUS_COLORS = {
-  todo: "grey",
-  active: "blue",
-  done: "green"
 } as const satisfies Record<PhaseStatus, string>
 
 /** Class of its time pill (the estimate, or what it took), before its review controls. */
