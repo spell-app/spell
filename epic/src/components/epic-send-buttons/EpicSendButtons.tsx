@@ -178,13 +178,13 @@ export class EpicSendButtons extends E.UIComponent<typeof epicSendButtonsVocabul
   private ring(): JSX.Element {
     const done = () => (1 - this.fractionLeft) * 100
     return (
-      <svg class={RING} part={this.partForName("ring")} viewBox="0 0 40 40" aria-hidden="true">
-        <circle class={TRACK} cx="20" cy="20" r="17.5" pathLength="100" />
+      <svg class={RING} part={this.partForName("ring")} viewBox="0 0 28 28" aria-hidden="true">
+        <circle class={TRACK} cx="14" cy="14" r="11.5" pathLength="100" />
         <circle
           class={[DONE, { [EMPTY]: done() < 0.5 }]}
-          cx="20"
-          cy="20"
-          r="17.5"
+          cx="14"
+          cy="14"
+          r="11.5"
           pathLength="100"
           style={{ "stroke-dasharray": `${done()} 100` }}
         />

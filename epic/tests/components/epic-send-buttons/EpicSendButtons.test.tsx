@@ -104,8 +104,8 @@ describe("<epic-send-buttons>", () => {
       expect(group.matches(":state(counting)")).toBe(true)
       // the pill's own outline goes while it counts:  ring and button never one border
       expect(getComputedStyle(part(group, "base")!).borderTopColor).toBe("rgba(0, 0, 0, 0)")
-      // set apart from the plane:  wider than its round end
-      expect(ring.getBoundingClientRect().width).toBeGreaterThan(part(group, "send")!.getBoundingClientRect().width + 6)
+      // never over the element's edge
+      expect(ring.getBoundingClientRect().height).toBeLessThanOrEqual(group.getBoundingClientRect().height + 0.5)
       vi.advanceTimersByTime(COUNTDOWN_MS / 2)
       await ElementFixture.settle()
       const left = ring.querySelector<SVGCircleElement>(".done")!

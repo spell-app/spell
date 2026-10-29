@@ -10,12 +10,13 @@
  * - Auto Send off with something not sent (`:state(waiting)`):  the plane FILLED blue, its icon white.
  * - The COUNTDOWN's ring (`countdown`, `:state(counting)`;  epic `epic-engine` P53, Owen's comment C10:  "Prettier ring,
  *   with pill edges, not just border.  Should look distinct from the button itself"):
- *   - round the plane, OUTSIDE its pill:  a 1px gap, then a 5px stroke over a light grey track, its ends round (Owen, 2026-10-29:  "ring can be tighter on the button", "make ring 2px thicker")
+ *   - round the plane, the element's own height, never over its edge, round a light blue disc:
+ *     a 1px gap, then a 5px stroke over a light grey track, its ends round
+ *     (Owen, 2026-10-29:  "ring can be tighter on the button", "make ring 2px thicker", "don't overlap edge of element")
  *   - how much of the wait has gone, filling in blue clockwise from the top (`stroke-dasharray`, set each second
  *     by the element, eased over the second)
  *   - the pill's own outline goes while it counts:  ring and button never read as one border
- *   - room kept for it on both sides whenever `countdown` is set, so nothing beside it moves as it comes and goes;
- *     above and below, the owner leaves the room (the epic page's header)
+ *   - started again (a key, a click, a scroll):  it unwinds back to empty in 0.3s, never jumps there
  *   - the stage button's ring:  round its check, inside the pill
  * - Public tokens (`--epic-send-buttons-*`) are never declared here:  read through private aliases.
  *   - `--epic-send-buttons-size`:  the pill's height (the plane's round end).  Default 28px (an epic page's
@@ -33,6 +34,7 @@
     --_green: var(--ui-green-text, var(--ui-green, #21ba45));
     --_rule: var(--epic-send-buttons-rule, var(--ui-border-color, rgb(34 36 38 / 0.15)));
     --_muted: var(--epic-send-buttons-muted, var(--ui-text-muted, GrayText));
+    --_light: color-mix(in oklab, var(--_tint) 55%, white);
     display: inline-flex;
     flex: none;
     vertical-align: middle;
@@ -93,8 +95,23 @@
     outline-offset: 1px;
   }
   /* the plane wears the group's state */
-  .send:is([data-state="unsent"], [data-state="sent"]) {
+  .send[data-state="sent"] {
     color: var(--_tint);
+  }
+  /* something not sent:  a light blue disc, the plane white (Owen, 2026-10-29:  "make bg of send button light blue,
+     white plane when changes present") */
+  .send[data-state="unsent"] {
+    background: var(--_light);
+    color: #fff;
+  }
+  .send[data-state="unsent"]:hover {
+    background: color-mix(in oklab, var(--_tint) 75%, white);
+  }
+  /* inside the ring while it counts:  the disc 1px in from it, so it fills the ring's middle and no more */
+  :host(:state(counting)) .send:not(.accept) {
+    padding: calc((var(--_size) - 2px - var(--_disc)) / 2);
+    background-clip: content-box;
+    font-size: 10px;
   }
   /* Auto Send off, something not sent:  it waits for a press, plainly */
   :host(:state(waiting)) .send {
@@ -155,14 +172,11 @@
     display: inline-grid;
     place-items: center;
   }
-  /* room for the ring on both sides, whenever it may come:  nothing beside it moves */
-  :host([countdown]) {
-    padding-inline: var(--_ring-room);
-  }
   :host {
-    /* the ring's diameter round the plane:  its round end, a 1px gap and a 5px stroke on each side */
-    --_ring: calc(var(--_size) + 12px);
-    --_ring-room: 6px;
+    /* the ring:  exactly the element's height, never over its edge (Owen, 2026-10-29:  "ring should still be smaller,
+       don't overlap edge of element");  the disc inside it:  a 1px gap, then the 5px stroke, on each side */
+    --_ring: var(--_size);
+    --_disc: calc(var(--_size) - 12px);
   }
   /* while it counts, the pill's own outline goes:  the ring is the only border */
   :host(:state(counting)) .group:not([data-asks]) {
@@ -188,7 +202,7 @@
   }
   .ring circle {
     fill: none;
-    /* 5px at the plane's size (the 40-unit box drawn 40px wide);  its outer edge the box's */
+    /* 5px at the plane's size (the 28-unit box drawn 28px wide);  its outer edge the box's */
     stroke-width: 5;
   }
   .accept .ring circle {
@@ -211,8 +225,13 @@
   .accept .ring .track {
     opacity: 0.25;
   }
+  /* started again:  it UNWINDS to empty (Owen, 2026-10-29:  "lost 'unwind' on ring when scrolled, it jumped back to
+     0"), then hides, so a round end's dot never shows at nothing */
   .ring .done.empty {
     visibility: hidden;
+    transition:
+      stroke-dasharray 0.3s ease-out,
+      visibility 0s 0.3s;
   }
   @media (prefers-reduced-motion: reduce) {
     .ring .done {
