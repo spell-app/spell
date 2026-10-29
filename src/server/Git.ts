@@ -13,6 +13,7 @@ import { GitError, type GitOptions, type GitResult } from "./server.types.ts"
  * Git.out(["rev-parse", "HEAD"], root)            // => "9bc821d..." or undefined when it failed
  * Git.lines(["ls-files"], root)                   // => ["README.md", ...], [] when it failed
  * Git.mustRun(["merge", "--ff-only", "x"], root)  // => its output;  throws a `GitError`
+ * Git.config("user.name")                         // => "Ana Lima", or undefined when git doesn't know it
  * Git.mainRoot(root)                              // => the MAIN checkout of the repo holding `root`
  * ```
  *
@@ -63,6 +64,14 @@ export class Git {
     if (run.ok) return run.out
     const why = run.err || run.out.trim() || `exit ${run.code}`
     throw new GitError(`git ${args.join(" ")} failed in ${cwd}:  ${why}`, { cause: run })
+  }
+
+  /**
+   * `git config <key>` as git reads it in `cwd` (the repo's, then the person's own, then the machine's):
+   * e.g. `user.name`;  `undefined` when it's unset or empty.  NEVER throws.
+   */
+  static config(key: string, cwd = process.cwd()): string | undefined {
+    return Git.out(["config", key], cwd) || undefined
   }
 
   /**

@@ -28,7 +28,7 @@ export const epicListVocabulary = {
       name: "sagas",
       kind: "string",
       description:
-        "The sagas' ids, in Owen's order, space-separated:  the chips' order.  A saga none of its cards names gets " +
+        "The sagas' ids, in your order, space-separated:  the chips' order.  A saga none of its cards names gets " +
         "no chip;  a card naming a saga not listed is No saga's."
     },
     {
@@ -36,7 +36,7 @@ export const epicListVocabulary = {
       kind: "boolean",
       description:
         "No Favorites group:  a starred card stays in its own group.  A saga page's Epics (`<epic-cards>`):  Favorites " +
-        "is Owen's own list, on the Epics page."
+        "is your own list, on the Epics page."
     }
   ],
   events: [],
@@ -56,7 +56,7 @@ export const epicListVocabulary = {
     { key: "favoritesTitle", text: "Favorites", description: "A group:  the starred epics, whatever their state." },
     { key: "activeTitle", text: "Active", description: "A group:  phases left, in progress or paused." },
     { key: "planningTitle", text: "Planning", description: "A group:  future epics, and ones with no phases yet." },
-    { key: "urgentTitle", text: "Urgent", description: "A group:  every phase done, items waiting on Owen." },
+    { key: "urgentTitle", text: "Urgent", description: "A group:  every phase done, items waiting on you." },
     { key: "doneTitle", text: "Done", description: "A group:  every phase done, nothing waiting." },
     { key: "chipsLabel", text: "Show the epics of a saga", description: "The chips' row, spoken." },
     { key: "noSaga", text: "No saga", description: "The chip of the epics that name no saga." },

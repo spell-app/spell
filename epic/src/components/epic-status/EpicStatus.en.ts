@@ -8,8 +8,8 @@ import type { EpicVocabulary } from "spell/epic/definitions"
 
 /****************
  * ### `<epic-status>`
- * Claude's status card on an item:  what Claude took Owen's review mark to mean,
- * then that it's done (work was done) or noted (Owen's choice recorded).
+ * Claude's status card on an item:  what Claude took your review mark to mean,
+ * then that it's done (work was done) or noted (your choice recorded).
  ****************/
 export const epicStatusVocabulary = {
   tag: "epic-status",
@@ -21,10 +21,10 @@ export const epicStatusVocabulary = {
     "Claude's status card on an item or an Overview sub-section (P13):  `Claude • Underway` (blue) with Claude's " +
     "reading of the task, then the same card `Claude • Done` (green) when work was done, the reading kept, a " +
     "summary added when there's something worth saying.  `Claude • Noted` (a calm outline) when Claude only " +
-    "recorded what Owen chose (a pick, a todo made or queued):  what was recorded and what happens next.  The " +
+    "recorded what you chose (a pick, a todo made or queued):  what was recorded and what happens next.  The " +
     "heading and the date at its right are drawn;  the reading and the summary are its children.  In an item, a " +
     "LINE instead (epic `epic-engine` P27):  a run of cards about one task is one line, `✓ Noted 10/24/26 15:21 " +
-    "→ Done 15:25 · what Claude did`, last in the item's thread;  a drive-by's (taken before Owen's first reply) " +
+    "→ Done 15:25 · what Claude did`, last in the item's thread;  a drive-by's (taken before your first reply) " +
     "first in the item's details, above the Choices.",
   attributes: [
     {
@@ -35,7 +35,7 @@ export const epicStatusVocabulary = {
       // makes `Markup.set()`'s untyped data `never`.  The tool always writes it
       description:
         "`underway` (blue:  Claude is on it;  absent too), `done` (green:  work was done), `noted` (a calm " +
-        "outline:  Claude recorded what Owen chose, nothing built yet;  Owen, 2026-10-10)."
+        "outline:  Claude recorded what you chose, nothing built yet;  Owen, 2026-10-10)."
     },
     {
       name: "at",
@@ -51,6 +51,20 @@ export const epicStatusVocabulary = {
       description:
         "When it was done or noted (a card that was underway first);  drawn in its place once there.  A card born " +
         "noted (a pick or a todo `inbox apply` recorded) has `at` alone."
+    },
+    {
+      name: "from",
+      kind: "string",
+      description:
+        "Whose session wrote it (epic `epic-friend` P2):  the person's name, `Ana`, drawn `Claude (Ana)` to anyone " +
+        "but Ana, and plain `Claude` to her.  None (a card written before):  `Claude`."
+    },
+    {
+      name: "agent",
+      kind: "string",
+      description:
+        "Which agent wrote it (epic `epic-friend` P10):  its id, `codex`, drawn by its name:  `Codex (Ana)`, or " +
+        "`Codex` to Ana.  None (a card written before):  `Claude`."
     }
   ],
   events: [],
@@ -61,7 +75,7 @@ export const epicStatusVocabulary = {
         "The reading:  what Claude understood the task to be, in a sentence or two;  a card born noted:  what was " +
         "recorded and what happens next, in one line."
     },
-    { name: "summary", description: "Once done, and only when worth saying:  what Owen should know about it." }
+    { name: "summary", description: "Once done, and only when worth saying:  what you should know about it." }
   ],
   parts: [
     { name: "base", description: "The card:  blue underway, green done, a calm outline noted." },
@@ -70,7 +84,12 @@ export const epicStatusVocabulary = {
       description: "Its heading band, a flex row:  the fold chevron, `who` left, `date` right;  a click folds it."
     },
     { name: "toggle", description: "The fold chevron, a `<button>`, first in the band:  folds reading and summary." },
-    { name: "who", description: "The heading's left:  `Claude • Underway` / `Claude • Done` / `Claude • Noted`." },
+    {
+      name: "who",
+      description:
+        "The heading's left:  `Claude • Underway` / `Claude • Done` / `Claude • Noted`;  `Claude (Ana) • Done` for " +
+        "a card Ana's session wrote, to anyone but Ana (`from`);  `Codex • Underway` for Codex's (`agent`)."
+    },
     { name: "date", description: "The heading's right:  `done-at`, else `at`, as `10/8/26 14:34`;  never wraps." },
     { name: "body", description: "The reading." },
     { name: "summary", description: "The summary, under the reading;  not drawn without one.  A line's text." },
@@ -84,8 +103,11 @@ export const epicStatusVocabulary = {
     { name: "open", description: "Unfolded:  it starts so (page state, never written)." },
     { name: "line", description: "In an item:  drawn as a line, not a card." },
     { name: "merged", description: "A line's earlier card, drawn in by the run's last one:  hidden." },
-    { name: "drive-by", description: "Taken before Owen's first reply on the item:  its line above the Choices." },
-    { name: "in-thread", description: "Its line in the item's thread, after the replies:  inside the thread's one frame." },
+    { name: "drive-by", description: "Taken before your first reply on the item:  its line above the Choices." },
+    {
+      name: "in-thread",
+      description: "Its line in the item's thread, after the replies:  inside the thread's one frame."
+    },
     { name: "thread-end", description: "Last in the thread:  the frame's bottom edge and corners." },
     { name: "thread-hidden", description: "The thread's head is folded:  hidden with the rest of the thread." }
   ],
@@ -93,16 +115,28 @@ export const epicStatusVocabulary = {
     { key: "foldTip", text: "Close this status card", description: "Tooltip of its fold button while open." },
     { key: "unfoldTip", text: "Open this status card", description: "Tooltip of its fold button while folded." },
 
-    { key: "underway", text: "Claude • Underway", description: "The heading while Claude is on it." },
-    { key: "done", text: "Claude • Done", description: "The heading once work was done." },
-    { key: "noted", text: "Claude • Noted", description: "The heading once Claude recorded what Owen chose." },
+    { key: "underway", text: "{who} • Underway", description: "The heading while Claude is on it." },
+    { key: "done", text: "{who} • Done", description: "The heading once work was done." },
+    { key: "noted", text: "{who} • Noted", description: "The heading once Claude recorded what you chose." },
+    {
+      key: "agent",
+      text: "{agent}",
+      description:
+        "Who wrote it, in its heading:  the agent by its name (`Claude`, `Codex`):  your own session's, or a card " +
+        "from before `from`."
+    },
+    {
+      key: "agentOf",
+      text: "{agent} ({person})",
+      description: "Who wrote it, in its heading:  another person's session's agent (`from`, `agent`):  `Codex (Ana)`."
+    },
     { key: "stepUnderway", text: "Underway", description: "A line's step while Claude is on it." },
     { key: "stepDone", text: "Done", description: "A line's step once work was done." },
-    { key: "stepNoted", text: "Noted", description: "A line's step once Claude recorded what Owen chose." },
+    { key: "stepNoted", text: "Noted", description: "A line's step once Claude recorded what you chose." },
     {
       key: "earlier",
       text: "your earlier comment",
-      description: "After a drive-by's steps:  it's about a comment Owen made before answering."
+      description: "After a drive-by's steps:  it's about a comment you made before answering."
     },
     {
       key: "started",

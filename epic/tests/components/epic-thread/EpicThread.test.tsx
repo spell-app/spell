@@ -26,7 +26,7 @@ function comment(fields: Partial<ThreadComment> = {}): ThreadComment {
     text: "Why asyncio?\n\nAnd `await`?",
     at: "2026-10-17T13:12:00.000Z",
     status: "new",
-    turn: "claude",
+    turn: "agent",
     ...fields
   }
 }
@@ -50,6 +50,18 @@ function messages(host: Element) {
     latest: each.hasAttribute("latest"),
     words: each.textContent?.trim()
   }))
+}
+
+/** The page server's word on who's reading (`window.SPELL_SERVER.person`):  set for `run`, then put back. */
+async function asViewer<T>(person: string, run: () => Promise<T>): Promise<T> {
+  const holder = globalThis as { SPELL_SERVER?: unknown }
+  const before = holder.SPELL_SERVER
+  holder.SPELL_SERVER = { person }
+  try {
+    return await run()
+  } finally {
+    holder.SPELL_SERVER = before
+  }
 }
 
 describe("<epic-thread>", () => {
@@ -84,7 +96,7 @@ describe("<epic-thread>", () => {
       pen: true,
       trash: true,
       pills: false,
-      messages: [{ by: "owen", older: false, latest: false, words: "Why asyncio?And await?" }],
+      messages: [{ by: "person", older: false, latest: false, words: "Why asyncio?And await?" }],
       paragraphs: 2,
       code: "await"
     })
@@ -93,7 +105,7 @@ describe("<epic-thread>", () => {
   test("Owen's turn, orange:  the review pills (That's good, Reply, Skip it), Claude's latest stronger", async () => {
     const answered = comment({
       status: "answered",
-      turn: "owen",
+      turn: "person",
       replies: [{ by: "Claude", at: "2026-10-18T08:05:00.000Z", html: "<p>Because <code>await</code>.</p>" }]
     })
     const host = await thread(answered, "open unseen")
@@ -106,8 +118,8 @@ describe("<epic-thread>", () => {
       pen: !!host.shadowRoot!.querySelector("ui-button.edit")
     }).toEqual({ buttons: "thread", acts: ["good", "reply", "skip"], pen: false })
     expect(messages(host)).toEqual([
-      { by: "owen", older: true, latest: false, words: "Why asyncio?And await?" },
-      { by: "claude", older: false, latest: true, words: "Because await." }
+      { by: "person", older: true, latest: false, words: "Why asyncio?And await?" },
+      { by: "agent", older: false, latest: true, words: "Because await." }
     ])
     const ivory = getComputedStyle(host).backgroundColor
     host.removeAttribute("unseen")
@@ -118,7 +130,7 @@ describe("<epic-thread>", () => {
   test("thinking:  the stub last, in Claude's box;  done:  the Done line and Reopen, no stub", async () => {
     const thinking = await thread(comment({ working: "2026-10-17T14:00:00.000Z" }), "open")
     expect(messages(thinking).map((each) => [each.by, each.words])).toEqual([
-      ["owen", "Why asyncio?And await?"],
+      ["person", "Why asyncio?And await?"],
       ["thinking", "thinking…"]
     ])
     const done = await thread(
@@ -220,7 +232,7 @@ describe("<epic-thread>", () => {
     const host = await thread(
       comment({
         status: "answered",
-        turn: "owen",
+        turn: "person",
         replies: [{ by: "Claude", at: "2026-10-18T08:05:00.000Z", html: "<p>x</p>" }]
       }),
       "open"
@@ -249,13 +261,119 @@ describe("<epic-thread>", () => {
         const host = wrap.querySelector<DOMThreadElement & { comment: unknown }>("epic-thread")!
         host.comment = comment({
           status: "answered",
-          turn: "owen",
+          turn: "person",
           replies: [{ by: "Claude", at: "2026-10-18T08:05:00.000Z", html: "<p>Answered.</p>" }]
         })
         await ElementFixture.settle(wrap)
         // its id chip (`C3`, 10px) included:  epic `epic-engine` I41
         await expectAccessible(host)
       }
+  })
+  test("who, to a reader named Ana:  her words `You:`, Ben's `Ben:`, her Claude `Claude:`, Ben's `Claude (Ben):`;  an old comment with no `by` is the reader's own", async () => {
+    const said = comment({
+      by: "Ana",
+      status: "answered",
+      turn: "person",
+      replies: [
+        { by: "Ana", agent: "claude", at: "2026-11-02T10:00:00.000Z", html: "<p>Mine.</p>" },
+        { by: "Ben", at: "2026-11-02T10:01:00.000Z", text: "Hm." },
+        { by: "Ben", agent: "claude", at: "2026-11-02T10:02:00.000Z", html: "<p>His.</p>" },
+        { by: "Claude", at: "2026-11-05T10:00:00.000Z", text: "A person named Claude." }
+      ]
+    })
+    const whoOf = (host: Element) =>
+      [...host.shadowRoot!.querySelectorAll("epic-thread-message")].map((each) => [
+        each.getAttribute("by"),
+        each.shadowRoot!.querySelector(".who")?.textContent
+      ])
+    const [named, old] = await asViewer("Ana", async () => [
+      whoOf(await thread(said, "open")),
+      whoOf(await thread(comment(), "open"))
+    ])
+    expect(named).toEqual([
+      ["person", "You:"],
+      ["agent", "Claude:"],
+      ["person", "Ben:"],
+      ["agent", "Claude (Ben):"],
+      ["person", "Claude:"]
+    ])
+    expect(old).toEqual([["person", "You:"]])
+  })
+
+  test("any agent by its name (epic `epic-friend` P10):  Bob's Codex `Codex (Bob):`, Ana's own `Codex:`, thinking too", async () => {
+    const said = comment({
+      by: "Ana",
+      status: "answered",
+      turn: "agent",
+      replies: [
+        { by: "Bob", agent: "codex", at: "2026-11-02T10:00:00.000Z", html: "<p>Bob's.</p>" },
+        { by: "Ana", agent: "codex", at: "2026-11-02T10:01:00.000Z", html: "<p>Mine.</p>" },
+        { by: "Ana", at: "2026-11-02T10:02:00.000Z", text: "And?" }
+      ],
+      working: "2026-11-02T10:03:00.000Z",
+      claim: { by: "Bob", agent: "gemini", at: "2026-11-02T10:03:00.000Z" }
+    })
+    const whoOf = (host: Element) =>
+      [...host.shadowRoot!.querySelectorAll("epic-thread-message")]
+        .slice(1)
+        .map((each) => [each.getAttribute("by"), each.shadowRoot!.querySelector(".who")?.textContent])
+    expect(await asViewer("Ana", async () => whoOf(await thread(said, "open")))).toEqual([
+      ["agent", "Codex (Bob):"],
+      ["agent", "Codex:"],
+      ["person", "You:"],
+      ["thinking", "Gemini (Bob):"]
+    ])
+  })
+
+  test("colours (epic `epic-friend` P10, Q16):  an agent's box in the agent's voice;  a speaker's own colour from the settings", async () => {
+    const said = comment({
+      by: "Ana",
+      status: "answered",
+      turn: "person",
+      replies: [
+        { by: "Ana", agent: "claude", at: "2026-11-02T10:00:00.000Z", html: "<p>Claude's.</p>" },
+        { by: "Bob", agent: "codex", at: "2026-11-02T10:01:00.000Z", html: "<p>Codex's.</p>" }
+      ]
+    })
+    const looks = async (server: Record<string, unknown>) => {
+      const holder = globalThis as { SPELL_SERVER?: unknown }
+      const before = holder.SPELL_SERVER
+      holder.SPELL_SERVER = server
+      try {
+        const host = await thread(said, "open")
+        return [...host.shadowRoot!.querySelectorAll("epic-thread-message")].map((each) => ({
+          voice: (each as HTMLElement).style.getPropertyValue("--_epic-voice") || undefined,
+          ring: getComputedStyle(each).boxShadow,
+          who: getComputedStyle(each.shadowRoot!.querySelector(".who")!).color
+        }))
+      } finally {
+        holder.SPELL_SERVER = before
+      }
+    }
+    const plain = await looks({ person: "Ana" })
+    // no colours set:  no token's fallback, so every agent's box is the shared agent voice (terracotta, not violet)
+    expect(plain.map((each) => each.voice)).toEqual([
+      "var(--epic-voice-person-ana)",
+      "var(--epic-voice-agent-claude)",
+      "var(--epic-voice-agent-codex)"
+    ])
+    expect(plain[1]!.ring).toBe(plain[2]!.ring)
+    // terracotta, #c96442, 16% (`EpicThreadMessage.css`)
+    expect(plain[1]!.ring).toContain("color(srgb 0.788235 0.392157 0.258824 / 0.16)")
+    const colored = await looks({
+      person: "Ana",
+      colors: { people: { ana: "rgb(0, 128, 0)" }, agents: { codex: "rgb(0, 0, 255)" } }
+    })
+    expect(colored.map((each) => each.voice)).toEqual([
+      "var(--epic-voice-person-ana, rgb(0, 128, 0))",
+      "var(--epic-voice-agent-claude)",
+      "var(--epic-voice-agent-codex, rgb(0, 0, 255))"
+    ])
+    expect([colored[0]!.who, colored[1]!.ring === plain[1]!.ring, colored[2]!.ring]).toEqual([
+      "rgb(0, 128, 0)",
+      true,
+      expect.stringContaining("color(srgb 0 0 1 / 0.16)")
+    ])
   })
 })
 

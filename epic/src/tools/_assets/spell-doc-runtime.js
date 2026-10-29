@@ -20,9 +20,9 @@
  *   a row of the top-level sections' buttons, the last row of the sticky page header (`buildPageToolbar()`)
  *   - mark and title, the titles shrinking, then gone on a narrow window
  *   - No contents list:  Owen, 2026-10-08
- *   - an EPIC PAGE's (`buildToolbar()`):  its blocks' icons only, with badges of the items waiting on Owen,
+ *   - an EPIC PAGE's (`buildToolbar()`):  its blocks' icons only, with badges of the items waiting on the person,
  *     in `<epic-page>`'s header;  and Cmd / Ctrl + K asks for an item to jump to (`wireJumpKey()`)
- *   - at its right, on any page that takes comments, a bullhorn counting the threads waiting on Owen,
+ *   - at its right, on any page that takes comments, a bullhorn counting the threads waiting on the person,
  *     landing on the next at each click (`PageComments.drawWaiting()`);  Cmd / Ctrl + K takes a comment's id too (`C3`)
  * - sticky headers:  the page header (`ui-sticky.spell-h1`) sticks at the top, each top-level title below it,
  *   nested ones below their parents' (re-measured on resize);
@@ -1699,13 +1699,13 @@ const CLOSED = new Set(["done", "decided", "canceled"])
  * An epic page's block's items that need Owen, when its `contentsEntry` count doesn't say:
  * its own items (`COUNTED` in `spell-epic`'s `EpicSection.types.ts`) the `epic` tool marked
  * - `attention` (red)
- * - or `replied` (orange:  Claude answered with options, Owen's turn to pick;  `EpicItem.types.ts` `NEEDS_OWEN`).
+ * - or `replied` (orange:  Claude answered with options, the person's turn to pick;  `EpicItem.types.ts` `NEEDS_PERSON`).
  */
 const EPIC_ATTENTION =
   ':scope > epic-item:is([state="attention"], [state="replied"]), :scope > epic-phase[state="attention"]'
 
 /**
- * Of those, the ones Claude answered with options, waiting on Owen's pick (`replied`, orange):
+ * Of those, the ones Claude answered with options, waiting on the person's pick (`replied`, orange):
  * the plan-doc toolbar shows them apart from the urgent ones (red;  `buildToolbar()`).
  */
 const EPIC_REPLIED = ':scope > :is(epic-item, epic-phase)[state="replied"]'
@@ -1725,7 +1725,7 @@ function needYou({ attention }) {
  * Each top-level section's items -- `[data-status]` elements, not counting ones inside another --
  * as `{ open, total, attention }`, by the group's element (the `<ui-section>`, or the h2).
  * - "open":  any status but `CLOSED`'s
- * - "attention":  the items that need Owen (`stateOf()`:  the toolbar's red badge, Q20 of epic `epic-components`)
+ * - "attention":  the items that need the person (`stateOf()`:  the toolbar's red badge, Q20 of epic `epic-components`)
  * - sections without items are left out;  nested sections get no count of their own
  * - the Epics index's epic cards, the saga pages' items
  * - an epic page's sections count themselves (`<epic-section>`, on their titles):  their count is read from their
@@ -1825,18 +1825,18 @@ const STATE_NAMES = new Set(ITEM_STATES.map(([state]) => state))
 const STATE_ITEMS = ":is(.plan-items, .spell-epics) > [data-status]"
 
 /** The saga pages' items that wait on Owen while open:  their questions (`/goals` talks them through with him). */
-const ASKS_OWEN = '.plan-items[data-kind="question"] > *'
+const ASKS_PERSON = '.plan-items[data-kind="question"] > *'
 
 /**
  * An item's state:  its `data-state`, else (the index's epic cards, the saga pages' items) from its status:
- * `done` / `decided` are `recent`, `canceled` `old` (`CLOSED_STATES`);  an open goals question (`ASKS_OWEN`)
+ * `done` / `decided` are `recent`, `canceled` `old` (`CLOSED_STATES`);  an open goals question (`ASKS_PERSON`)
  * `attention`;  anything else `open`.
  */
 function stateOf(item) {
   const state = item.dataset.state
   if (STATE_NAMES.has(state)) return state
   if (CLOSED.has(item.dataset.status)) return CLOSED_STATES[item.dataset.status]
-  return item.matches(ASKS_OWEN) ? "attention" : "open"
+  return item.matches(ASKS_PERSON) ? "attention" : "open"
 }
 
 /**
@@ -2034,7 +2034,7 @@ function buildPageToolbar(main, outline, counts) {
  *   section anyway");  scroll-follow marks the current one `selected`, by `data-rail` (as the rail's)
  * - BADGES:  how many of the block's items wait on Owen, from `counts` (none:  no badge)
  *   - red:  urgent (`state="attention"`)
- *   - orange:  Claude answered with options, his turn to pick (`state="replied"`)
+ *   - orange:  Claude answered with options, their turn to pick (`state="replied"`)
  *   - blue:  the Phases button's, how many phases run now (`status="active"`;  epic `epic-engine` P43)
  *   - several kinds:  every one, red first, then orange, then blue
  *   - over the icon's top right, a third of a badge on the icon:  every button is the same width, badge or not
@@ -3100,7 +3100,7 @@ function wireNotes(main) {
 
 /**
  * Give each `<spell-note>` its head line, again after every update (the status or replies may have changed):
- * an `<epic-page-note-head>`, "Owen · 10/10 14:02", the first line of the note while folded, its status, how many
+ * an `<epic-page-note-head>`, "Note · 10/10 14:02", the first line of the note while folded, its status, how many
  * replies.
  * - a click on it folds and unfolds the card (the note's `open`, which a live patch keeps)
  */

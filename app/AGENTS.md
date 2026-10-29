@@ -104,7 +104,7 @@ Each folder of `src/` links to its own `AGENTS.md`:  read it before working ther
 | [app](src/app/AGENTS.md) | `spell/app/app` | `UI` | the web app, the runner, and the `<spell-viewer>` / `<spell-editor>` web components (`src/app/components/`);  `yarn start` / `build*` are its scripts, at `app/`'s root;  its build folder is `app/` (Vite's configs and root), with App UI, the docs pages of its components, in `app/docs/` (at `/components/app/`) |
 | [spaces](src/spaces/AGENTS.md) | `spell/app/spaces` | `SPACES` | where projects and people live:  its models (`models/`, browser-safe:  spell's project groups and lists), projects on disk (`server/node/projects/`), and the servers that serve them, the editor's (`server/node/`) and Python's, `spell_quart` (`server/py/`, a uv project);  the built-in projects are in `spaces/@spell/`, beside `src/` |
 | [lsp](src/lsp/AGENTS.md) | `spell/app/lsp` | `LSP` | spell's language server:  the service browser-safe, its process (`server.ts`) and disk workspace node only |
-| [cli](src/cli/AGENTS.md) | `spell/app/cli` | `CLI` | the app's part of the `spell` command-line tool, running the kit's SOURCE through `tsx`;  see the kit's [README-cli.md](../README-cli.md) too |
+| [cli](src/cli/AGENTS.md) | `spell/app/cli` | `CLI` | the app's part of the `spell` command-line tool, running the kit's SOURCE through `tsx`;  see the kit's [README/cli.md](../README/cli.md) too |
 | `vscode/` | | | the spell language's VS Code extension (below) |
 
 More on some of them:

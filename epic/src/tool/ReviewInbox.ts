@@ -1,6 +1,8 @@
 import { localTime } from "spell/util/time"
 import { SRV } from "spell/server"
 
+import { ThreadFacts } from "spell/epic/comments"
+import { EpicHome } from "spell/epic/config/EpicHome"
 import { DataFile } from "spell/epic/data/DataFile"
 // By file:  the definitions' barrel loads every vocabulary, which reading an inbox doesn't need
 import { isItemId } from "spell/epic/definitions/definitions.types"
@@ -9,6 +11,7 @@ import { PageStages, PhaseIds, type PageStage } from "spell/epic/phases"
 import { STAGE_COUNTDOWN_MS, isHeld, partOf, withInlineComments } from "spell/epic/review/review.types"
 
 import { CommentList, type Comment, type IdentifiedComment } from "./CommentList"
+import { SharedComments } from "./SharedComments"
 
 /****************
  * ### `ReviewInbox`
@@ -21,6 +24,10 @@ import { CommentList, type Comment, type IdentifiedComment } from "./CommentList
  *     `<id>.saga.html`, its marks and comments in this same shape
  * - per machine, NOT committed (`.gitignore`):  pending notes and session state, not the record;
  *   what Claude makes of a mark lands in the epic page itself
+ *   - EXCEPT its comments (epic `epic-friend` P9):  shared through the content repo, one file per person beside it,
+ *     `<name>.comments.<person>.json5` (`SharedComments`).  `comments` here is every person's, put together as it's
+ *     read;  a write puts this machine's person's part back in their file, and keeps none in the inbox file.
+ *     An inbox file from before P9 still holds its comments:  read as this machine's, moved by the next write
  * - writers:  the page server's route module (`reviewRoutes.ts`, the page's clicks)
  *   and `epic inbox ...` (Claude taking the marks:  `watch`, `wait`, `apply`, `done`, `clear`).
  *   Both go through `ReviewInbox.update()` / `updateAsync()`:
@@ -138,11 +145,14 @@ export class ReviewInbox {
   working: Record<string, WorkingEntry> = {}
   /** requests Owen called off ("nevermind"), per item */
   canceled: Record<string, InboxCancel> = {}
-  /** the Claude session waiting on this inbox, else `null` */
+  /** the session waiting on this inbox (Claude's, Codex's ...), else `null` */
   listening: InboxListener | null = null
   /** the `sent` time a waiting session last took, else `null` */
   handedOver: string | null = null
-  /** Owen's comments on the page's blocks, by id (`c1` ...;  `m1` or `cm1` in an older file):  `CommentList` */
+  /**
+   * every person's comments on the page's blocks, by id (`c1` ...;  `m1` or `cm1` in an older file):  `CommentList`;
+   * kept in their comments files, never the inbox file (`SharedComments`, epic `epic-friend` P9)
+   */
   comments: Record<string, Comment> = {}
   /** the page server's last wake of the epic (P16), else `null` */
   woken: InboxWoken | null = null
@@ -161,9 +171,13 @@ export class ReviewInbox {
     CommentList.migrate(this.comments)
   }
 
-  /** The comments, to read or change (in place). */
+  /**
+   * The comments, to read or change (in place).
+   * - what's written through it names this machine's person (`EpicHome.personName()`, read when something's written),
+   *   and an answer the agent running `epic` (`EpicHome.agentName()`, epic `epic-friend` P10)
+   */
   get commentList(): CommentList {
-    return new CommentList(this.comments)
+    return new CommentList(this.comments, { person: () => EpicHome.personName(), agent: () => EpicHome.agentName() })
   }
 
   ////////////////
@@ -184,21 +198,60 @@ export class ReviewInbox {
    * The inbox in `file`;  an empty one when there's no file.
    * - fills in missing fields, so readers never check:  an older or hand-edited file still reads
    * - its old `.json` name when there's no `.json5` (`DataFile.read()`)
+   * - its comments:  every person's comments file beside it, put together (`SharedComments.merged()`), with any the
+   *   file itself still holds (from before epic `epic-friend` P9)
    * - NEVER throws on a missing file;  a file that isn't JSON5 throws an `InboxError` naming it
    */
   static read(file: string): ReviewInbox {
     let raw: Record<string, unknown> | undefined
+    let shared: SharedComments
     try {
       raw = DataFile.read<Record<string, unknown>>(file)
     } catch (error) {
       throw new InboxError(`${file} is not JSON5:  ${(error as Error).message}`)
     }
-    if (!raw) return new ReviewInbox()
-    return new ReviewInbox({ ...raw, version: (raw.version as number | undefined) ?? INBOX_VERSION })
+    try {
+      shared = SharedComments.read(file)
+    } catch (error) {
+      throw new InboxError((error as Error).message)
+    }
+    const local = (raw?.comments ?? {}) as Record<string, Comment>
+    const comments = shared.merged(local)
+    const inbox = new ReviewInbox({ ...raw, version: (raw?.version as number | undefined) ?? INBOX_VERSION, comments })
+    return inbox.sharing(shared)
+  }
+
+  /**
+   * This inbox's comments files, as `read()` found them (`SharedComments`):  a write splits `comments` by them.
+   * Not a field:  the file's JSON is the inbox's own fields.
+   */
+  declare private shared: SharedComments | undefined
+
+  /** This inbox, its comments read from `shared` (`read()`). */
+  private sharing(shared: SharedComments): this {
+    Object.defineProperty(this, "shared", { value: shared, enumerable: false, writable: true })
+    return this
+  }
+
+  /**
+   * Write `comments` into this machine's person's comments file beside inbox file `file` (`SharedComments.write()`).
+   * - an inbox made, not read:  the files there now
+   * - SIDE EFFECT:  writes or removes that file
+   */
+  private writeComments(file: string): void {
+    const shared = this.shared?.inbox === file ? this.shared : SharedComments.read(file)
+    shared.write(this.comments, EpicHome.personName())
+  }
+
+  /** What the inbox FILE holds:  every field but the comments (`SharedComments`' files hold those). */
+  private get fileRecord(): Omit<InboxRecord, "comments"> {
+    const { comments: _comments, ...rest } = this.toRecord()
+    return rest
   }
 
   /**
    * Write this inbox to `file`, atomically;  delete the file instead when the inbox is empty (`isEmpty`).
+   * - its comments into this machine's person's comments file instead (`SharedComments`, epic `epic-friend` P9)
    * - a temp file (`<file>.tmp`) renamed over it:  readers (the page's poll, `epic inbox`) never see half of it
    * - a comment added to the file by hand stays (`DataFile.write()`);  its old `.json` goes
    * - call it under the lock (`update()`), or two writers may lose each other's changes
@@ -206,8 +259,9 @@ export class ReviewInbox {
    * - SIDE EFFECT:  writes or removes `file`
    */
   writeTo(file: string): void {
+    this.writeComments(file)
     if (this.isEmpty) return DataFile.remove(file)
-    DataFile.write(file, this)
+    DataFile.write(file, this.fileRecord)
   }
 
   /**
@@ -217,8 +271,9 @@ export class ReviewInbox {
    * - SIDE EFFECT:  writes or removes `file`
    */
   private async writeAsync(file: string): Promise<void> {
+    this.writeComments(file)
     if (this.isEmpty) return DataFile.remove(file)
-    await SRV.FileOperations.writeAtomic(file, DataFile.textFor(DataFile.text(file) ?? "", this))
+    await SRV.FileOperations.writeAtomic(file, DataFile.textFor(DataFile.text(file) ?? "", this.fileRecord))
     DataFile.removeOld(file)
   }
 
@@ -252,7 +307,8 @@ export class ReviewInbox {
 
   /**
    * Is there nothing in this inbox worth a file?
-   * No marks, no drafts, no urgency, no requests, no agents at work, nobody listening, no wake still cooling down.
+   * No marks, no drafts, no urgency, no requests, no agents at work, nobody listening, no wake still cooling down,
+   * no comment in any person's file (they keep `sent` meaning something).
    * - `sent` and `handedOver` alone don't count:  they only date marks, and there are none
    * - a wake does while it counts (`liveWoken()`):  a guide's Send wakes its epic through this file (P16),
    *   and the record must outlast a write
@@ -613,14 +669,27 @@ export class ReviewInbox {
   }
 
   /**
-   * Claude session `session` started (or, `null`, stopped) waiting on this inbox.
+   * Session `session` started (or, `null`, stopped) waiting on this inbox.
    * - `seen`:  its first heartbeat (`touchListening()`)
-   * - `pid`:  the session's MONITOR's process (`InboxMonitor`, its poller):  live while it runs, with no heartbeat
+   * - `pid`:  the process that listens, live while it runs, with no heartbeat:  a Claude session's MONITOR
+   *   (`InboxMonitor`, its poller), or the `epic inbox wait` of an agent that listens by itself (epic `epic-friend` P11)
+   * - who:  the machine's person and the agent running `epic` (`EpicHome.personName()`, `agentName()`), so the page
+   *   can say whose agent it is:  "Your Codex is listening".
    * - the page says "No Claude session is reviewing this doc" while it's `null`, or stale
    *   (`liveListener()`;  decision D6)
    */
   setListening(session: string | null, at = isoTime(), pid?: number): InboxListener | null {
-    this.listening = session === null ? null : { session, since: at, seen: at, ...(pid ? { pid } : {}) }
+    this.listening =
+      session === null
+        ? null
+        : {
+            session,
+            since: at,
+            seen: at,
+            ...(pid ? { pid } : {}),
+            person: EpicHome.personName(),
+            agent: EpicHome.agentName()
+          }
     // nobody listening:  nobody doing anything either (P35)
     if (session === null) this.doing = null
     // a session took over:  the wake did its job, and the next Send with nobody listening may wake again
@@ -678,6 +747,8 @@ export class ReviewInbox {
   /**
    * The inbox as the page reads it (every route's answer):
    * the whole inbox, but `listening` `null` once stale (`liveListener()`), so the page keeps no clock rule of its own.
+   * - `lastListener`:  who listened last, while nobody does now (the stale record):  the page names that agent, and
+   *   how to wake it (epic `epic-friend` P11);  `null` while someone listens, or nobody ever did
    * - plus `unsentComments`, the ids of the comments Send would hand over (`unsentComments`):
    *   the threads' rules stay here, in `CommentList`
    * - a plain copy:  this inbox is untouched
@@ -688,12 +759,13 @@ export class ReviewInbox {
     return {
       ...this.toRecord(),
       listening,
+      lastListener: listening ? null : this.listening,
       // a session gone (or none) is doing nothing:  its last line never lingers (P35)
       doing: listening ? this.doing : null,
       // a wake under way has nothing to say yet
       woken: woken?.state === "waking" ? null : woken,
       unsentComments: this.unsentComments.map((comment) => comment.id),
-      waitingComments: this.commentList.waiting.map(({ id, anchor }) => ({ id, anchor }))
+      waitingComments: this.commentList.ownWaiting.map(({ id, anchor }) => ({ id, anchor }))
     }
   }
 
@@ -723,7 +795,7 @@ export class ReviewInbox {
    * - SIDE EFFECT:  the mark is stamped `at`, so it waits for the next Send
    */
   noteComment(commentId: string, parts: ReadonlySet<string>, at = isoTime()): string | null {
-    const comment = this.commentList.waiting.find((each) => each.id === commentId)
+    const comment = this.commentList.ownWaiting.find((each) => each.id === commentId)
     const part = comment && partOf(comment.anchor)
     if (!part || !parts.has(part) || !isMarkKey(part)) return null
     const mark = this.marks[part]
@@ -820,7 +892,7 @@ export class ReviewInbox {
       // a comment a sent revisit carries goes over inside it, never on its own too (I158)
       const carried = new Set(marks.flatMap((mark) => mark.comments ?? []))
       const comments = this.sentComments.filter(
-        (comment) => !carried.has(comment.id) && Date.parse(CommentList.lastWordsAt(comment)) > before
+        (comment) => !carried.has(comment.id) && Date.parse(ThreadFacts.lastWordsAt(comment)) > before
       )
       this.handedOver = this.sent
       if (marks.length || urgency.length || comments.length) sent = { at: this.sent!, marks, urgency, comments }
@@ -940,6 +1012,21 @@ export class ReviewInbox {
       if (!(container! in renames)) continue
       comment.anchor = place === undefined ? renames[container!]! : `${renames[container!]}#${place}`
       moved++
+    }
+    return moved
+  }
+
+  /**
+   * Comments renumbered by `renames` (`c3` => `c5`:  two people both made `c3`, and the content repo's sync gives this
+   * machine's the next free number;  `Renumber.comments()`, epic `epic-friend` P9):  each under its new id, every
+   * revisit naming one following, its note's last line too;  how many comments moved.
+   */
+  renameComments(renames: Record<string, string>): number {
+    const moved = CommentList.renumber(this.comments, renames)
+    for (const [id, mark] of Object.entries(this.marks)) {
+      if (!mark.comments?.some((each) => Object.hasOwn(renames, each))) continue
+      const comments = mark.comments.map((each) => renames[each] ?? each)
+      this.marks[id] = { ...mark, comments, note: withInlineComments(mark.note ?? "", comments) }
     }
     return moved
   }
@@ -1193,7 +1280,12 @@ export type DoingItem = { id: string; title: string }
  * The inbox as the routes answer (`ReviewInbox.forPage()`):
  * the file's JSON, plus `unsentComments`, the ids of the comments the page's Send would hand over.
  */
-export type PageInbox = InboxRecord & { unsentComments: string[]; waitingComments: WaitingComment[] }
+export type PageInbox = InboxRecord & {
+  unsentComments: string[]
+  waitingComments: WaitingComment[]
+  /** who listened last, while nobody does now (`forPage()`);  `null` while someone does, or nobody ever did */
+  lastListener: InboxListener | null
+}
 
 /**
  * A comment waiting for Claude, as the page reads it (`PageInbox.waitingComments`):  its id and where it is
@@ -1298,10 +1390,18 @@ export type InboxCancel = { action: NowAction; at: string; told: boolean }
 
 /**
  * The session waiting on the inbox:  `seen` its last heartbeat (missing in an old file).
- * - `pid`:  the session's monitor's process, when the monitor listens:  live while it runs, with no heartbeat
- *   (`liveListener()`)
+ * - `pid`:  the process that listens, a session's monitor or an agent's own `epic inbox wait`:  live while it runs,
+ *   with no heartbeat (`liveListener()`)
+ * - `person`, `agent`:  whose agent it is (`setListening()`;  missing in a file from before epic `epic-friend` P11)
  */
-export type InboxListener = { session: string; since: string; seen?: string; pid?: number }
+export type InboxListener = {
+  session: string
+  since: string
+  seen?: string
+  pid?: number
+  person?: string
+  agent?: string
+}
 
 /**
  * The page server's wake of the epic (`ReviewInbox.claimWake()`, epic `epic-workflow` P16).

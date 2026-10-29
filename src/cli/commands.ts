@@ -20,6 +20,8 @@
  *   `repo-split` P21):  moved with `git mv`, and every mention but the record's;  kept for branches open when it landed
  * - `spell rename branches [--dry-run]`:  an epic's old child-repo branches carried into the merged folders, rewritten
  *   as P20's history was (`tools/one-repo/one-repo.ts --step carry-on`)
+ * - `spell epic <args>`:  the epic tool (`epic`), wherever it is:  `npx spell@next epic init` sets a repo up for epics
+ *   (epic `epic-friend` P13;  `runSpellEpic()`)
  * - `spell pony`:  a pony, which proves `spell` runs with nothing else installed
  * - `spell help`:  the program's own (`addHelp()`), not this list's
  * - Loads fast:  each action imports its command's file when it runs.
@@ -294,6 +296,18 @@ export default function kitCommands(spell: Command): void {
         return CLI.runChild(process.execPath, options.dryRun ? [...args, "--dry-run"] : args, { cwd: kit })
       })
     )
+
+  ////////////////
+  // ## Epics
+  ////////////////
+
+  spell
+    .command("epic")
+    .description("the epic tool, epic, with its own verbs -- spell epic init sets a repo up for epics")
+    .argument("[args...]", "epic's verb and what it takes, as epic takes them:  init, whoami, help ...")
+    .allowUnknownOption()
+    .helpOption(false)
+    .action(() => CLI.runCommand(() => CLI.runSpellEpic(CLI.rawArgsAfter("epic"))))
 
   ////////////////
   // ## And a pony

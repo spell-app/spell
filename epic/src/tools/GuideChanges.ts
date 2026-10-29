@@ -3,6 +3,7 @@ import { dirname, join, posix, relative } from "node:path"
 
 import { escapeHTML } from "spell/util/string"
 import { PhaseIds } from "spell/epic/phases"
+import { ThreadFacts } from "spell/epic/comments"
 import { EpicConfig } from "spell/epic/config/EpicConfig"
 import { CommentList, type IdentifiedComment } from "spell/epic/tool/CommentList"
 import { GuideInbox } from "spell/epic/tool/GuideInbox"
@@ -23,7 +24,7 @@ const NOTE_FOLDERS = ["guides", "pages", "epics"]
 
 /** The kickoff prompt of the epic, when the first gather makes it (the real one's is written by hand). */
 const PROMPT =
-  "Owen's comments on the pages no epic owns (guides no epic claims, Epic UI's pages, the list pages, the " +
+  "Comments on the pages no epic owns (guides no epic claims, Epic UI's pages, the list pages, the " +
   "changelog), sent with each page's Send or gathered from each page's inbox by `epic comments gather`:  one phase " +
   "per page.  Work each comment into its page, send it on to the epic that should do it, or say why not;  then " +
   "answer it under the comment:  `epic comments answer <page>#<id> --file <reply.html>`."
@@ -46,7 +47,7 @@ const PROMPT =
  *     - Epic UI's since epic `epic-engine` P2;  App UI's and Brand's since they load the comments (`epic-engine`)
  * - ONE PHASE PER PAGE:  the comments its goal, each linked back to the page and its block, quoted;
  *   a page with a phase still open (to do or under way) gets an update in it instead (`addPhaseUpdate()`):
- *   an `<epic-update>` block at the end of its description, `Update: N comments more from Owen`
+ *   an `<epic-update>` block at the end of its description, `Update: N comments more`
  *   - a page's phase is found by the link to it in the phase's Symptom
  * - the epic is made the first time, if it isn't there yet (`epic create feedback --title "Feedback"`, then
  *   `epic update feedback --standing on`):  each phase done merges on its own, the epic never done
@@ -102,7 +103,8 @@ export class GuideChanges {
       // another epic's page:  its comments are that epic's, unless the caller named the page
       const owner = !pages && owners.ownerOf(page)
       if (owner && owner !== this.epic) continue
-      const comments = GuideInbox.read(inbox).commentList.waiting
+      // this person's own:  another person's agent gathers theirs (epic `epic-friend` P9)
+      const comments = GuideInbox.read(inbox).commentList.ownWaiting
       if (comments.length) entry(page).comments.push(...comments)
     }
     for (const note of notes) entry(note.page).notes.push(note)
@@ -136,12 +138,12 @@ export class GuideChanges {
         let phase: number
         if (open) {
           phase = open.n
-          plan.addPhaseUpdate(phase, `<p>${many(count)} more from Owen:</p>${list}`, {
-            summary: `${many(count)} more from Owen`
+          plan.addPhaseUpdate(phase, `<p>${many(count)} more:</p>${list}`, {
+            summary: `${many(count)} more`
           })
         } else {
           phase = plan.addPhase(page.title, {
-            symptom: `Owen left ${many(count)} on <a href="${link}">${escapeHTML(page.title)}</a> (<code>${escapeHTML(page.page)}</code>).`,
+            symptom: `${many(count)} left on <a href="${link}">${escapeHTML(page.title)}</a> (<code>${escapeHTML(page.page)}</code>).`,
             changes:
               `Work each into the page, or say why not;  then answer it under the comment:  ` +
               `<code>epic comments answer ${escapeHTML(page.page)}#&lt;id&gt; --file reply.html</code>.`,
@@ -209,9 +211,11 @@ export class GuideChanges {
         ? ` (<q>${escapeHTML(comment.excerpt)}</q>)`
         : ""
     const words = htmlOf(comment.text).join("")
-    // a reply on its thread since Claude answered:  his latest words are the work now
-    const reply = comment.replies?.findLast((each) => each.by === "Owen" && each.text)
-    const replied = reply ? `<p>Owen replied on the thread:</p>${htmlOf(reply.text!).join("")}` : ""
+    // a reply on its thread since Claude answered:  the person's latest words are the work now
+    const reply = ThreadFacts.lastPersonReply(comment)
+    const replied = reply?.text
+      ? `<p>${escapeHTML(reply.by)} replied on the thread:</p>${htmlOf(reply.text).join("")}`
+      : ""
     return `<li><a href="${this.hrefTo(page, targetOf(comment.anchor))}">${escapeHTML(where || comment.anchor)}</a>${about}, <code>${CommentList.label(comment.id)}</code>:  ${words}${replied}</li>`
   }
 

@@ -454,7 +454,7 @@ export type SectionCount = {
   /** every one */
   total: number
   /**
-   * the items that need Owen (`NEEDS_OWEN`:  `state="attention"`, red, or `replied`, orange:  his turn to pick):
+   * the items that need the person (`NEEDS_PERSON`:  `state="attention"`, red, or `replied`, orange:  their turn to pick):
    * what the rail counts (decision Q20:  red, only what needs him;  no pill for none)
    */
   attention: number

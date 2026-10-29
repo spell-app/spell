@@ -14,6 +14,7 @@ import { PlanDoc } from "spell/epic/tool/PlanDoc"
 import { PlanDocCommands } from "spell/epic/tool/PlanDocCommands"
 import { PlanDocFiles } from "spell/epic/tool/PlanDocFiles"
 import { LISTEN_STALE_MS, ReviewInbox } from "spell/epic/tool/ReviewInbox"
+import { SharedComments } from "spell/epic/tool/SharedComments"
 
 import { PageInboxes } from "spell/epic/tools/PageInboxes"
 
@@ -47,6 +48,7 @@ beforeEach(() => {
   plan.updateStates()
   writeFileSync(file, plan.toString())
   rmSync(inboxFile, { force: true })
+  for (const each of SharedComments.pathsBeside(inboxFile)) rmSync(each)
 })
 
 afterEach(() => {
@@ -109,7 +111,9 @@ test("apply:  a sent pick on a judgement call's reply cards (I8) approves it wit
     j1.querySelector("epic-status")
   ]).toEqual(["done", "approve", `recorded, the call accepted;  ${after.nextStepWords()}`, null])
   expect(after.findItem("q1")!.querySelector("epic-choices")!.getAttribute("chosen")).toBe("B")
-  expect(printed.join("\n")).toContain("J1  picked C:  Option C (a reply's options);  approved:  closed (accepted)")
+  expect(printed.join("\n")).toContain(
+    "J1  Owen picked C:  Option C (a reply's options);  approved:  closed (accepted)"
+  )
   expect(ReviewInbox.read(inboxFile).isEmpty).toBe(true)
 })
 
@@ -262,7 +266,7 @@ test("done C1 --file:  the answer goes on the comment's thread;  Owen's reply li
   writeFileSync(answer, "<p>Because.</p>\n")
   await commands().inbox.run("x", file, ["done", id], { file: answer, commit: "8c7e1d3" })
   expect(ReviewInbox.read(inboxFile).comments[id].replies).toEqual([
-    { by: "Claude", at: expect.any(String), html: "<p>Because.</p>", commit: "8c7e1d3" }
+    { by: "Owen", agent: "claude", at: expect.any(String), html: "<p>Because.</p>", commit: "8c7e1d3" }
   ])
   ReviewInbox.update(inboxFile, (inbox) => inbox.commentList.reply(id, "Say more"))
   await commands().inbox.run("x", file, [], {})
@@ -492,7 +496,7 @@ test("clear / done:  a pick riding on the mark (pick B, but ...) stays CHOSEN, i
   expect(j1.querySelector("epic-choices")!.getAttribute("chosen")).toBe("B")
   expect(j1.querySelector("epic-choices")!.getAttribute("chosen-note")).toMatch(/^recorded after the talk/)
   expect(j1.querySelector('epic-status[state="noted"]')).toBeNull()
-  expect(after.toString()).toMatch(/J1 picked B:\s+Option B \(kept from the revisit\)/)
+  expect(after.toString()).toMatch(/J1 Owen picked B:\s+Option B \(kept from the revisit\)/)
   expect(ReviewInbox.read(inboxFile).isEmpty).toBe(true)
 })
 
@@ -590,7 +594,7 @@ test("a test run's answers:  printed, handed over by wait, applied;  each failur
   await commands().inbox.run("x", file, ["wait"], { timeout: "5" })
   const work = printed.join("\n")
   expect(work).toContain(
-    "test, Owen's test run:  passed closes, failed files an issue, skip cancels, not now defers (4):"
+    "test, the person's test run:  passed closes, failed files an issue, skip cancels, not now defers (4):"
   )
   expect(work).toMatch(
     /M2 {2}test, open · two\n {8}FAILED\n {8}comment: {2}"grey"\n {8}screenshot: {2}tests\/m2-20261007-1000\.png/
@@ -603,7 +607,7 @@ test("a test run's answers:  printed, handed over by wait, applied;  each failur
     "M2  failed (Owen's run):  filed I1",
     "M3  canceled:  no longer applies (Owen's run)",
     "M4  not now:  deferred (Owen's run)",
-    `failed tests (1):  tell Owen one line each, the issue's link (\`epic pages link ${file} --hash <issue> --review\`):`,
+    `failed tests (1):  tell the person one line each, the issue's link (\`epic pages link ${file} --hash <issue> --review\`):`,
     "  M2 -> I1"
   ])
   const after = PlanDoc.parse(readFileSync(file, "utf8"))
@@ -1055,6 +1059,30 @@ test("phase P1 planning [off];  phase-body sets it by itself while the plan isn'
   expect(printed.slice(0, 2)).toEqual(["P1 planning:  on", "P1 planning:  off"])
 })
 
+// epic `epic-friend` P11:  any agent hears a Send with `epic inbox wait`;  the page says whose agent it is
+test("wait:  LISTENS while it waits, as this process, naming the person and the agent;  a session already listening keeps the place", async () => {
+  const before = process.env.SPELL_EPIC_AGENT
+  process.env.SPELL_EPIC_AGENT = "codex"
+  try {
+    expect(await commands().inbox.run("x", file, ["wait"], { timeout: "1", session: "thread-9" })).toBe(2)
+    expect(ReviewInbox.read(inboxFile).listening).toMatchObject({
+      session: "thread-9",
+      pid: process.pid,
+      person: "Owen",
+      agent: "codex"
+    })
+    // a Claude session listening (`watch`):  its place, untouched
+    ReviewInbox.update(inboxFile, (inbox) => inbox.setListening("claude-1"))
+    process.env.SPELL_EPIC_AGENT = "claude"
+    const watched = ReviewInbox.read(inboxFile).listening
+    await commands().inbox.run("x", file, ["wait"], { timeout: "1", session: "thread-9" })
+    const { seen: _seen, ...kept } = watched!
+    expect(ReviewInbox.read(inboxFile).listening).toMatchObject(kept)
+  } finally {
+    process.env.SPELL_EPIC_AGENT = before
+  }
+})
+
 // epic `epic-engine` I163 (Owen, 2026-10-29):  "When I approve a phase to which I have just added comments, you should
 // just incorporate the feedback and auto-approve rather than asking me again"
 test("an Accept plan carrying his comments:  wait says to fold them in, apply accepts the plan and leaves them", async () => {
@@ -1099,7 +1127,7 @@ test("phase-body --plan ... --accepted writes the plan ACCEPTED:  no waiting, no
   const after = PlanDoc.parse(readFileSync(file, "utf8"))
   expect(after.phase(2).getAttribute("plan")).toBe("accepted")
   expect(after.phase(2).querySelector('epic-field[name="plan"]')!.hasAttribute("accepted")).toBe(true)
-  expect(after.toString()).toMatch(/P2 plan written: +accepted, Owen's comments folded in/)
+  expect(after.toString()).toMatch(/P2 plan written: +accepted, the person's comments folded in/)
   expect(await owner.run(["phase-body", "x", "P1", "--plan", "<ol><li>Waits.</li></ol>"])).toBe(0)
   expect(PlanDoc.parse(readFileSync(file, "utf8")).phase(1).getAttribute("plan")).toBe("waiting")
 })

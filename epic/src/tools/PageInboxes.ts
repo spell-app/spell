@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url"
 
 import { EpicConfig } from "spell/epic/config/EpicConfig"
 import { GuideInbox } from "spell/epic/tool/GuideInbox"
+import { SharedComments } from "spell/epic/tool/SharedComments"
 import { SeeAlso } from "spell/epic/tool/SeeAlso"
 
 import { EPIC_UI } from "spell/epic/server/server.types"
@@ -66,7 +67,8 @@ export class PageInboxes {
   /**
    * Every docs page's inbox file (`<page>.inbox.json5` beside a `<page>.html`, never an epic page's), sorted:  the
    * content folder's, then each component set's (`ComponentSetFolders`' order).
-   * - by its `.json5` name, also when only its old `.json` is there (`GuideInbox.read()` reads either)
+   * - by its `.json5` name, also when only its old `.json` is there (`GuideInbox.read()` reads either), or only a
+   *   person's comments file (`SharedComments`, epic `epic-friend` P9:  the inbox file holds only this machine's Send)
    */
   inboxFiles(): string[] {
     const tops = [
@@ -81,6 +83,7 @@ export class PageInboxes {
         return []
       }
       const pages = names
+        .map((name) => (SharedComments.isCommentsFile(name) ? SharedComments.inboxOf(name) : name))
         .filter((name) => INBOX_FILE.test(name) && !SKIPPED.test(name))
         .map((name) => join(top, name.replace(INBOX_FILE, ".html")))
         .filter((page) => existsSync(page))

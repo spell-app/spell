@@ -483,6 +483,7 @@ class FakeRoutes {
     now: [],
     working: {},
     listening: null,
+    lastListener: null,
     unsentComments: [],
     waitingComments: [],
     woken: null,
@@ -616,6 +617,45 @@ describe("<epic-page> Send and its countdown", () => {
       expect(routes.posts.at(-1)).toEqual(["send", { page: "/epics/demo/demo.plan.html", now: true }])
     )
     await expectAccessible(host)
+  })
+
+  // epic `epic-friend` P11, Q14:  "Bob's Codex is listening";  Send never wakes a Codex, so the pill says how to
+  test("another agent listening is NAMED after the review line;  gone, the pill says to ask it to run epic inbox wait, and a click only copies it", async () => {
+    const holder = globalThis as { SPELL_SERVER?: unknown }
+    const before = holder.SPELL_SERVER
+    holder.SPELL_SERVER = { person: "Owen" }
+    try {
+      const routes = new FakeRoutes()
+      const at = new Date().toISOString()
+      routes.inbox.listening = { session: "thread-1", since: at, seen: at, pid: 1, person: "Owen", agent: "codex" }
+      const client = await adoptClient(routes)
+      const host = await render(page("", ["todo"]))
+      const line = () => host.shadowRoot!.querySelector<HTMLElement>('[part~="review-line"]')!
+      await vi.waitFor(() => expect(line().textContent).toContain("Your Codex is listening"))
+      // Claude listening:  nothing said, as before
+      routes.inbox.listening = { session: "s1", since: at, seen: at, person: "Owen", agent: "claude" }
+      await client.refresh()
+      await ElementFixture.tick()
+      expect(line().textContent).not.toContain("listening")
+      // nobody listening now, Bob's Codex the last, and marks sent:  the pill names it, and copies its command
+      routes.inbox.listening = null
+      routes.inbox.lastListener = { session: "thread-2", since: at, seen: at, pid: 1, person: "Bob", agent: "codex" }
+      routes.inbox.marks = { q1: { action: "approve", at } }
+      routes.inbox.sent = new Date(Date.now() + 1000).toISOString()
+      await client.refresh()
+      await ElementFixture.tick()
+      const pill = host.shadowRoot!.querySelector<HTMLElement>('[part~="pill"]')!
+      expect(pill.textContent!.replace(/\s+/g, " ").trim()).toBe(
+        "Bob's Codex isn't listening: ask it to run epic inbox wait demo"
+      )
+      expect(pill.title).toBe("Copy the command, for the agent to run")
+      pill.click()
+      await ElementFixture.tick()
+      // nothing woken:  no POST at all (the Claude pill's click starts a review)
+      expect(routes.posts).toEqual([])
+    } finally {
+      holder.SPELL_SERVER = before
+    }
   })
 
   // Owen, 2026-10-10:  "send button at top of page doesn't appear to be hooked up" -- with only a comment waiting,

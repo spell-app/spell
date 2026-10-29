@@ -13,6 +13,7 @@ import { ask } from "spell/server/test/serve"
 import { CommentList } from "spell/epic/tool/CommentList"
 import { GuideInbox } from "spell/epic/tool/GuideInbox"
 import { ReviewInbox } from "spell/epic/tool/ReviewInbox"
+import { SharedComments } from "spell/epic/tool/SharedComments"
 
 import { run } from "spell/epic/tools/comments"
 import commentsRoutes from "spell/epic/tools/commentsRoutes"
@@ -143,24 +144,44 @@ async function post(body: object, extra?: Record<string, string>) {
   return { status: got.status, answer: JSON.parse(got.text || "{}") }
 }
 
-/** the inbox file of page `relative`, as written */
+/**
+ * The inbox of page `relative` as written:  its inbox file (none:  `{}`), and its `comments` as every person's
+ * comments file beside it holds them (`SharedComments`, epic `epic-friend` P9)
+ */
 function inboxOf(relative: string) {
-  return JSON.parse(readFileSync(join(root, relative.replace(/\.html$/, ".inbox.json5")), "utf8"))
+  const file = join(root, relative.replace(/\.html$/, ".inbox.json5"))
+  const local = existsSync(file) ? JSON.parse(readFileSync(file, "utf8")) : {}
+  return { ...local, comments: SharedComments.read(file).merged() }
 }
 
-test("adds a comment to the page's INBOX FILE, never the page;  the answer lists the page's comments", async () => {
+/** Remove page `relative`'s inbox file and every comments file beside it. */
+function removeInbox(relative: string) {
+  const file = join(root, relative.replace(/\.html$/, ".inbox.json5"))
+  rmSync(file, { force: true })
+  for (const each of SharedComments.pathsBeside(file)) rmSync(each)
+}
+
+test("adds a comment to its person's COMMENTS FILE beside the page, never the page, stamped with the server's person;  the answer lists them", async () => {
   const { status, answer } = await post({
     page: "/guides/solid/solid-2.html",
     action: "add",
     ...ON_TABLE,
-    text: "Too wide on a phone?"
+    text: "Too wide on a phone?",
+    // the page's word for who wrote it counts for nothing:  the server stamps its own person (epic `epic-friend` P2)
+    by: "Mallory"
   })
   expect(status).toBe(200)
   expect(answer).toMatchObject({ ok: true, id: "c1", comments: [{ id: "c1", ...ON_TABLE, status: "new" }] })
-  expect(inboxOf("guides/solid/solid-2.html")).toMatchObject({
+  // the server's person's file (epic `epic-friend` P9):  shared through the content repo;  the inbox file keeps none
+  expect(JSON.parse(readFileSync(join(root, "guides/solid/solid-2.comments.owen.json5"), "utf8"))).toMatchObject({
     version: 1,
-    comments: { c1: { ...ON_TABLE, text: "Too wide on a phone?", status: "new" } }
+    comments: { c1: { ...ON_TABLE, text: "Too wide on a phone?", by: "Owen", status: "new" } },
+    on: {}
   })
+  expect(existsSync(join(root, "guides/solid/solid-2.inbox.json5"))).toBe(true)
+  expect(JSON.parse(readFileSync(join(root, "guides/solid/solid-2.inbox.json5"), "utf8"))).not.toHaveProperty(
+    "comments"
+  )
   expect(readFileSync(join(root, "guides/solid/solid-2.html"), "utf8")).toBe(PAGE)
 })
 
@@ -249,7 +270,7 @@ test("a page no epic owns:  Send goes to feedback;  nobody listening wakes feedb
   expect(heard.send).toMatchObject({ epic: "feedback", listening: "feedback-1" })
   expect(heard.wake).toBeNull()
   // the tests after it start from no inbox, and no feedback epic
-  rmSync(join(root, "epic/src/docs/epic-item.inbox.json5"))
+  removeInbox("epic/src/docs/epic-item.html")
   rmSync(join(root, "epics/feedback"), { recursive: true })
 })
 
@@ -311,16 +332,19 @@ test("a THREAD:  `reply` (saved as typed), `resolve` (that's good / skip it), `r
   const page = "/epics/big/notes.html"
   const inbox = join(root, "epics/big/notes.inbox.json5")
   const { id, comments } = (await post({ page, action: "add", ...ON_TABLE, text: "Why?" })).answer
-  expect(comments.find((each: { id: string }) => each.id === id).turn).toBe("claude")
+  expect(comments.find((each: { id: string }) => each.id === id).turn).toBe("agent")
   GuideInbox.update(inbox, (list) => list.answer(id, "<p>Because.</p>"))
   const read = JSON.parse((await ask(port, "GET", `/api/docs/comments?page=${encodeURIComponent(page)}`)).text)
-  expect(read.comments.find((each: { id: string }) => each.id === id).turn).toBe("owen")
+  expect(read.comments.find((each: { id: string }) => each.id === id).turn).toBe("person")
   // typed in two goes:  one reply, the second save's words
   await post({ page, action: "reply", id, text: "Say" })
   const replied = await post({ page, action: "reply", id, text: "Say more" })
   expect(replied.answer.comments.find((each: { id: string }) => each.id === id)).toMatchObject({
-    turn: "claude",
-    replies: [{ by: "Claude" }, { by: "Owen", text: "Say more" }]
+    turn: "agent",
+    replies: [
+      { by: "Owen", agent: "claude" },
+      { by: "Owen", text: "Say more" }
+    ]
   })
   // new work for Claude, as a new comment is
   expect(GuideInbox.read(inbox).commentList.waiting.map((each) => each.id)).toContain(id)
@@ -331,7 +355,7 @@ test("a THREAD:  `reply` (saved as typed), `resolve` (that's good / skip it), `r
     done: { how: "good" }
   })
   const reopened = await post({ page, action: "reopen", id })
-  expect(reopened.answer.comments.find((each: { id: string }) => each.id === id).turn).toBe("owen")
+  expect(reopened.answer.comments.find((each: { id: string }) => each.id === id).turn).toBe("person")
   expect((await post({ page, action: "resolve", id, how: "skip" })).status).toBe(200)
   expect(GuideInbox.read(inbox).commentList.comment(id).done?.how).toBe("skip")
   expect((await post({ page, action: "resolve", id, how: "maybe" })).status).toBe(400)
@@ -352,14 +376,14 @@ test("WORKING:  `epic comments working` -- the GET carries it (the thread's thin
   const error = vi.spyOn(console, "error").mockImplementation(() => undefined)
   try {
     expect(await run(["working", file, id, "on"], {})).toBe(0)
-    expect(await shown()).toMatchObject({ turn: "claude", working: expect.any(String) })
+    expect(await shown()).toMatchObject({ turn: "agent", working: expect.any(String) })
     expect(await run(["working", file, id, "off"], {})).toBe(0)
     expect((await shown()).working).toBeUndefined()
     expect(await run(["working", file, id, "on"], {})).toBe(0)
     const answer = join(root, "answer.html")
     writeFileSync(answer, "<p>Because.</p>")
     expect(await run(["answer", file, id], { file: answer })).toBe(0)
-    expect(await shown()).toMatchObject({ turn: "owen" })
+    expect(await shown()).toMatchObject({ turn: "person" })
     expect((await shown()).working).toBeUndefined()
     // a comment that isn't there:  1;  on | off missing:  usage
     expect(await run(["working", file, "c99", "on"], {})).toBe(1)
@@ -440,7 +464,7 @@ test("App UI's and Brand's pages, at their addresses:  their inboxes in the sets
     expect(inboxOf(file)).toMatchObject({ comments: { [answer.id]: { text: `On ${page}`, status: "new" } } })
     const read = JSON.parse((await ask(port, "GET", `/api/docs/comments?page=${page}`)).text)
     expect(read).toMatchObject({ takesComments: true, comments: [{ id: answer.id }], send: { epic: "feedback" } })
-    rmSync(join(root, file.replace(/\.html$/, ".inbox.json5")))
+    removeInbox(file)
   }
   const layout = JSON.parse(
     (await ask(port, "GET", "/api/docs/comments?page=/components/app/__parts/layout.html")).text
@@ -462,7 +486,7 @@ test("an epic page's comments go in the epic's REVIEW INBOX, beside its marks;  
   const quoted = { ...ON_TABLE, anchor: "p3#field-2", kind: "field", quote: "the inbox file", offset: 14 }
   const { status, answer } = await post({ page, action: "add", ...quoted, text: "which one?" })
   expect([status, answer.id]).toEqual([200, "c1"])
-  expect(JSON.parse(readFileSync(join(root, "epics/big/big.inbox.json5"), "utf8"))).toMatchObject({
+  expect(inboxOf("epics/big/big.html")).toMatchObject({
     marks: {},
     comments: { c1: { anchor: "p3#field-2", quote: "the inbox file", offset: 14, text: "which one?" } }
   })
@@ -538,7 +562,7 @@ test("a saga page's comments go in its own REVIEW INBOX beside it;  its Send is 
   const page = "/sagas/epics/epics.saga.html"
   const { status, answer } = await post({ page, action: "add", ...ON_TABLE, anchor: "o1#field-1", text: "more?" })
   expect([status, answer.id]).toEqual([200, "c1"])
-  expect(JSON.parse(readFileSync(join(root, "sagas/epics/epics.inbox.json5"), "utf8"))).toMatchObject({
+  expect(inboxOf("sagas/epics/epics.html")).toMatchObject({
     comments: { c1: { anchor: "o1#field-1", text: "more?" } }
   })
   const read = JSON.parse((await ask(port, "GET", `/api/docs/comments?page=${encodeURIComponent(page)}`)).text)

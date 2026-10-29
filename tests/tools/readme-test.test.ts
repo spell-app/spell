@@ -57,6 +57,13 @@ describe("ReadmeTest.examples()", () => {
   })
 })
 
+describe("ReadmeTest.examples():  a page in the kit's README/ folder", () => {
+  test("runs from the kit's root, not from README/", () => {
+    const [example] = new ReadmeTest(SCRATCH).examples(join(SCRATCH, "README", "cli.md"), PAGE)
+    expect(example).toMatchObject({ page: "README/cli.md", folder: SCRATCH })
+  })
+})
+
 describe("ReadmeTest.examples() under a bullet", () => {
   test("an indented example counts, its commands and output without the indent", () => {
     const page = [

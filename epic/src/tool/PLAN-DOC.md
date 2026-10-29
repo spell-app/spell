@@ -122,11 +122,16 @@ one saga's page, `sagas/<id>/<id>.saga.html`, in the same markup, so the tool ed
 ## Ids
 
 As `plan-doc.md`, "Ids":
+- A new id is the next number of its letter, so two people can both make `T22`:  the content repo's sync gives THIS
+  machine's the next free number before it rebases (`Renumber`, `SharedSync`;  epic `epic-friend` P5), every reference
+  following, and the log says so (`Renumbered as the plans synced:  T22 → T23`).
+  Change marks (`ch12`) and requests (`r3`) too;  and comments (`c4`), each person's in their own comments file
+  beside the page (`Renumber.comments()`, epic `epic-friend` P9, T15), with no log line:  a comment isn't on the page.
 - The letters:
   - `q` question (an answered one is a decision)
   - `j` judgement call, `t` todo (work still to do, or with `limit` a limit to know about)
   - `i` issue, `m` manual test
-  - a comment is `c` (`C3`), in the inbox, never an item
+  - a comment is `c` (`C3`), in its writer's comments file (`SharedComments`), never an item
   - before epic `epic-engine` P44:  `c` caveat (the todos), `t` test, and comments `m` ("M" for mark);  the migration
     `item-renames` renamed them, every number kept ("Migrations", below)
   - before epic `epic-engine` P32:  `t` todo and `v` test;  the migration `caveats-and-tests` renumbered them (retired)
@@ -1116,6 +1121,15 @@ Named, dated, idempotent steps that bring an older page's markup up to today's, 
     - its first dry run (2026-10-29):  only epic-engine's P51 · Tests Inline, Owen's case;  epic-friend's three hold
       their marks, debut's P23 and epic-engine's P48 say an estimate
     - idempotent:  a dropped block is gone
+  - `agents-marked` (2026-10-29, every edit;  epic `epic-friend` P2, Q9):  Claude's old replies marked his,
+    `<epic-reply from="Claude" agent="claude">` (`AgentsMarked`), so a reply's name never says who wrote it
+    - which:  no `agent`, `from` "Claude" (any case), dated before `ThreadFacts.AGENTS_MARKED` (or undated);
+      a person's reply and one written since (a person who calls themselves Claude) are left
+    - the inboxes' comment replies the same way, on every read (`CommentList.markAgents()`)
+    - a reply an agent hands in (`details --file`, `add --details`) is marked on the way in instead, its `from` the
+      session's person, its `agent` the one running the command (`IncomingHtml.markAgents()`, any agent since epic
+      `epic-friend` P10):  `<epic-reply from="Ana" agent="codex">`, drawn "Codex (Ana)" to anyone but Ana
+    - idempotent:  a marked reply is left
   - `engine-links` (2026-10-19, epic `epic-engine` I27) went in epic `repo-split` P14, once the content rewrite left
     no epic page linking the engine's old places in spell-app;  its code is in git history
   - `log-commits` (2026-10-29, on command;  epic `epic-engine` P52, J151):  the Log gets an entry per commit of the

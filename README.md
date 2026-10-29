@@ -262,7 +262,7 @@ attributes, properties and events on the outside, a component behind it drawing 
   A thousand `<ui-button>`s are built, rendered and ready in about 80 ms (the median of the last recorded run).
 - So it works from plain HTML and from any framework, React included, with no wrapper,
   and each element is its own error boundary.
-- [Spell UI](https://github.com/spell-app/spell/blob/main/ui/README.md) is about sixty families of these, on [the element framework](README-element.md) every set of them shares.
+- [Spell UI](https://github.com/spell-app/spell/blob/main/ui/README.md) is about sixty families of these, on [the element framework](README/element.md) every set of them shares.
   A page imports ONE, `<ui-root>`, and it loads each of the others the first time the page uses it.
 - Your program's things are elements too:  that card is a `view`, so it draws as its own `<solitaire-card>`.
 - Any project can use it:  `npm install spell-ui@next`, or an import map onto a CDN
@@ -417,7 +417,7 @@ the versions and counts will have moved on by the time you run it.
 
 5. Put `spell` on your `PATH`.
    It links into the first folder on your `PATH` that it can write to
-   ([README-cli.md](README-cli.md#setting-it-up) has the rest).
+   ([README/cli.md](README/cli.md#setting-it-up) has the rest).
 
    ```sh
    cd ~/www/spell
@@ -501,7 +501,7 @@ core.console.log(1 + 2 * 3)
 That's its match tree:  each indented line is a rule that matched, inside the one that holds it.
 The last line is the JavaScript it compiles to.
 
-**A whole program, under node** ([README-cli.md](README-cli.md)).
+**A whole program, under node** ([README/cli.md](README/cli.md)).
 [FizzBuzz.spell](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/examples/fizzbuzz/FizzBuzz.spell) is eight lines:
 a loop from 1 to 100, an "if" for fizzbuzz, and an "otherwise if" each for fizz and buzz
 ([the parser's front page](https://github.com/spell-app/spell/blob/main/parser/README.md#fizzbuzz) has all eight, beside what they compile to).
@@ -662,23 +662,24 @@ Here a file's import name is its address:  the package's name, then its path und
 So `spell/util/string` is [string.ts](src/util/string.ts), from every folder and from its own neighbours,
 with nothing to look up and no `../` to count;
 a folder's file adds the folder's name, as `spell/ui/core` does
-([README-development.md](README-development.md#one-name-per-file-from-every-folder)).
+([README/development.md](README/development.md#one-name-per-file-from-every-folder)).
 
 | Folder | Import name | What it is | Its page |
 | --- | --- | --- | --- |
-| [src/util/](src/util/) | `spell/util` | the helpers every folder shares:  decorators, strings, the reactive engine, preferences and undo, a `fetch` that throws | [README-util.md](README-util.md) |
-| [src/toolchain/](src/toolchain/) | `spell/toolchain/...` | what every folder's checks and builds share:  the lint and format rules, the decorator pre-pass, the TypeScript settings and declarations, the resolver every esbuild build uses | [README-toolchain.md](README-toolchain.md) |
-| [src/server/](src/server/) | `spell/server` | the page server, and the steps a tool runs to write a page:  links, formatting, bundles, data files | [README-server.md](README-server.md) |
-| [src/element/](src/element/) | `spell/element` | the element framework every set of web components is written on | [README-element.md](README-element.md) |
-| [src/element-tools/](src/element-tools/) | `spell/element-tools/...` | the elements' build tools:  the pack build, the root catalog, their Vite settings | [README-element.md](README-element.md) |
-| [src/test-helpers/](src/test-helpers/) | `spell/test-helpers/...` | the test helpers every set of elements' tests use | [README-element.md](README-element.md) |
-| [src/cli/](src/cli/) | `spell/cli` | the `spell` command's base:  arguments, help, every folder's commands, and its own | [README-cli.md](README-cli.md) |
-| [tests/](tests/) | -- | the tests, at the same paths as the code:  [Router.test.ts](tests/server/Router.test.ts) tests [Router.ts](src/server/Router.ts) | [README-development.md](README-development.md) |
-| [bin/](bin/) | -- | the repo's programs:  `spell`, `spell-pack`, `spell-types` | [README-cli.md](README-cli.md) |
+| [src/util/](src/util/) | `spell/util` | the helpers every folder shares:  decorators, strings, the reactive engine, preferences and undo, a `fetch` that throws | [README/util.md](README/util.md) |
+| [src/toolchain/](src/toolchain/) | `spell/toolchain/...` | what every folder's checks and builds share:  the lint and format rules, the decorator pre-pass, the TypeScript settings and declarations, the resolver every esbuild build uses | [README/toolchain.md](README/toolchain.md) |
+| [src/server/](src/server/) | `spell/server` | the page server, and the steps a tool runs to write a page:  links, formatting, bundles, data files | [README/server.md](README/server.md) |
+| [src/element/](src/element/) | `spell/element` | the element framework every set of web components is written on | [README/element.md](README/element.md) |
+| [src/element-tools/](src/element-tools/) | `spell/element-tools/...` | the elements' build tools:  the pack build, the root catalog, their Vite settings | [README/element.md](README/element.md) |
+| [src/test-helpers/](src/test-helpers/) | `spell/test-helpers/...` | the test helpers every set of elements' tests use | [README/element.md](README/element.md) |
+| [src/cli/](src/cli/) | `spell/cli` | the `spell` command's base:  arguments, help, every folder's commands, and its own | [README/cli.md](README/cli.md) |
+| [tests/](tests/) | -- | the tests, at the same paths as the code:  [Router.test.ts](tests/server/Router.test.ts) tests [Router.ts](src/server/Router.ts) | [README/npm.md](README/npm.md) | <ul><li>`spell publish`:  three packages, one version, checked in a scratch project first</li><li>`next` until you say `latest`</li><li>logging in with a 30-day token, not `npm login`</li><li>what trips people up:  zsh, tarball paths, versions never reused</li></ul> |
+| [README/development.md](README/development.md) |
+| [bin/](bin/) | -- | the repo's programs:  `spell`, `spell-pack`, `spell-types` | [README/cli.md](README/cli.md) |
 | [scripts/](scripts/) | -- | what `yarn cli:install` and `yarn favicon` run | -- |
-| [tools/](tools/) | -- | <ul><li>[repos.ts](tools/repos.ts):  the checks over every folder (`yarn ts`, `test`, `lint`, `review`), and the links the install makes</li><li>[readme-check.ts](tools/readme-check.ts) and [mermaid-pretty.ts](tools/mermaid-pretty.ts):  the READMEs' check, and their pictures' look ([README-toolchain.md](README-toolchain.md#the-houses-own-lint-rules))</li></ul> | [README-development.md](README-development.md) |
-| [agents/](agents/) | -- | WWOD, the house style, and links to the three logs | [README-agents.md](README-agents.md) |
-| the root | -- | <ul><li>[package.json](package.json):  the one package, its `exports`, its four folders as workspaces, its scripts</li><li>the settings:  `tsconfig.json`, `vite.config.ts`, `vitest.config.ts`, `.yarnrc.yml`</li><li>[CI](.github/workflows/checks.yml), and [the epic settings](.epic/config.json5)</li></ul> | [README-toolchain.md](README-toolchain.md) |
+| [tools/](tools/) | -- | <ul><li>[repos.ts](tools/repos.ts):  the checks over every folder (`yarn ts`, `test`, `lint`, `review`), and the links the install makes</li><li>[readme-check.ts](tools/readme-check.ts) and [mermaid-pretty.ts](tools/mermaid-pretty.ts):  the READMEs' check, and their pictures' look ([README/toolchain.md](README/toolchain.md#the-houses-own-lint-rules))</li></ul> | [README/development.md](README/development.md) |
+| [agents/](agents/) | -- | WWOD, the house style, and links to the three logs | [README/agents.md](README/agents.md) |
+| the root | -- | <ul><li>[package.json](package.json):  the one package, its `exports`, its four folders as workspaces, its scripts</li><li>the settings:  `tsconfig.json`, `vite.config.ts`, `vitest.config.ts`, `.yarnrc.yml`</li><li>[CI](.github/workflows/checks.yml), and [the epic settings](.epic/config.json5)</li></ul> | [README/toolchain.md](README/toolchain.md) |
 
 One more thing makes the folders one package:  the ONE install runs here, at the root, never in a folder.
 Its `postinstall` links `node_modules/spell` back to the repo, since yarn links the root package nowhere by itself;
@@ -696,9 +697,9 @@ You'll type three commands, and the job tells you which.
 
 `spell` is one command over every folder.
 Nobody installs its verbs:  each folder brings its own, named in its `package.json`, and `spell help` groups them.
-[README-cli.md](README-cli.md) lists every one under the folder that adds it
-([the shared code's](README-cli.md#the-kit), [the parser's](README-cli.md#spell-parser), [Spell UI's](README-cli.md#spell-ui),
-[the app's](README-cli.md#spell-app)), and `epic` [beside them](README-cli.md#epic).
+[README/cli.md](README/cli.md) lists every one under the folder that adds it
+([the shared code's](README/cli.md#the-kit), [the parser's](README/cli.md#spell-parser), [Spell UI's](README/cli.md#spell-ui),
+[the app's](README/cli.md#spell-app)), and `epic` [beside them](README/cli.md#epic).
 
 ## Working on it:  two folders, one commit, no publish
 
@@ -722,7 +723,7 @@ the folder above runs the lower one's source through this one install, so it's r
 And CI checks it the same way:  one workflow runs `yarn ts`, `yarn lint` and `yarn test` over everything,
 on every pull request.
 
-The rest is [README-development.md](README-development.md):
+The rest is [README/development.md](README/development.md):
 one folder's tests, an epic's worktree, CI, and every script.
 
 ## WWOD, the house style
@@ -745,7 +746,7 @@ each folder's own `AGENTS.md` comes in where it works, and WWOD's spoke for the 
 The rules are plain Markdown, and Codex reads the same `AGENTS.md` files.
 The tooling around them is Claude Code's alone, for now:  the epic plugin, with its skills and hooks
 (🌱 the same for other agents is coming).
-The whole order, the logs agents keep, and the plugin:  [README-agents.md](README-agents.md).
+The whole order, the logs agents keep, and the plugin:  [README/agents.md](README/agents.md).
 
 ## 🌱 Coming
 
@@ -761,18 +762,20 @@ Two things that would make this page shorter, and neither is here yet:
 Every page of the repo, a row each, with what you'll find on it.
 This `README.md` is the front page, and each of the four folders has a `README.md` of its own;
 each `README-<topic>.md` beside one goes deep on one folder or topic.
+The shared code's topic pages are in [README/](README/), beside this one.
 
 | Page | What's on it |
 | --- | --- |
 | [README.md](README.md) | <ul><li>a card in Spell, and three things that move if you know React</li><li>where Spell is going;  one repo, five parts</li><li>setup from zero;  things to try, from one line to the whole editor</li><li>the shared code under `src/`, the command line, working across two folders, WWOD</li><li>this index of every README</li></ul> |
-| [README-util.md](README-util.md) | <ul><li>the helpers every folder shares, and when lodash is the better answer</li><li>one import name over three layers</li><li>`@proto`, `@lazy`, `@once`, and DOM helpers across shadow roots</li><li>preferences people and plain scripts can read (`PrefStore`), and undo for everything an action does (`UndoStack`)</li><li>Spell cells, the reactive engine:  a read after a write is always fresh</li><li>a fetch that throws, files that load themselves;  JSON5 for node</li></ul> |
-| [README-toolchain.md](README-toolchain.md) | <ul><li>Vite+:  one dependency pins every tool</li><li>settings imported like code;  the house's own lint rules, and the READMEs' check</li><li>every tool reads source but the type check:  declarations</li><li>standard decorators, lowered first;  thin checks, the same in every folder</li><li>the files, and the settings they hold</li></ul> |
-| [README-server.md](README-server.md) | <ul><li>the page server, by contrast with Vite and Express:  one port, every address</li><li>five flows, a picture each, from a request to editing a section in place</li><li>writing a page:  links, formatting, bundles built on demand, data files</li><li>settings each folder declares, merged;  route modules</li><li>one server per clone, from its root;  what serves without spell-app;  the library underneath;  safety</li><li>`spell server` and `spell bundle`</li></ul> |
-| [README-element.md](README-element.md) | <ul><li>custom elements on Solid 2, mapped from React</li><li>what every element gets without asking;  making one, in eight steps</li><li>nothing loads up front:  packs and `<ui-root>`</li><li>styling through the shadow root;  testing in a real browser</li><li>the build tools, who's written on it, and what it costs</li></ul> |
-| [README-cli.md](README-cli.md) | <ul><li>setting up `spell`;  naming projects by path, address or group</li><li>every command, under the folder that brings it</li><li>`epic`, and two more programs for yarn scripts</li><li>output, exit codes, and what writes files</li><li>how a command is built</li></ul> |
-| [README-development.md](README-development.md) | <ul><li>a change from branch to merged, in eight steps</li><li>workspaces, with two differences;  the checks, and what "done" means</li><li>tests in a second tree;  one name per file</li><li>an epic's worktree, one branch for every folder;  CI over every folder</li><li>where to change what;  the papercuts;  every script</li></ul> |
+| [README/util.md](README/util.md) | <ul><li>the helpers every folder shares, and when lodash is the better answer</li><li>one import name over three layers</li><li>`@proto`, `@lazy`, `@once`, and DOM helpers across shadow roots</li><li>preferences people and plain scripts can read (`PrefStore`), and undo for everything an action does (`UndoStack`)</li><li>Spell cells, the reactive engine:  a read after a write is always fresh</li><li>a fetch that throws, files that load themselves;  JSON5 for node</li></ul> |
+| [README/toolchain.md](README/toolchain.md) | <ul><li>Vite+:  one dependency pins every tool</li><li>settings imported like code;  the house's own lint rules, and the READMEs' check</li><li>every tool reads source but the type check:  declarations</li><li>standard decorators, lowered first;  thin checks, the same in every folder</li><li>the files, and the settings they hold</li></ul> |
+| [README/server.md](README/server.md) | <ul><li>the page server, by contrast with Vite and Express:  one port, every address</li><li>five flows, a picture each, from a request to editing a section in place</li><li>writing a page:  links, formatting, bundles built on demand, data files</li><li>settings each folder declares, merged;  route modules</li><li>one server per clone, from its root;  what serves without spell-app;  the library underneath;  safety</li><li>`spell server` and `spell bundle`</li></ul> |
+| [README/element.md](README/element.md) | <ul><li>custom elements on Solid 2, mapped from React</li><li>what every element gets without asking;  making one, in eight steps</li><li>nothing loads up front:  packs and `<ui-root>`</li><li>styling through the shadow root;  testing in a real browser</li><li>the build tools, who's written on it, and what it costs</li></ul> |
+| [README/cli.md](README/cli.md) | <ul><li>setting up `spell`;  naming projects by path, address or group</li><li>every command, under the folder that brings it</li><li>`epic`, and two more programs for yarn scripts</li><li>output, exit codes, and what writes files</li><li>how a command is built</li></ul> |
+| [README/development.md](README/development.md) | <ul><li>a change from branch to merged, in eight steps</li><li>workspaces, with two differences;  the checks, and what "done" means</li><li>tests in a second tree;  one name per file</li><li>an epic's worktree, one branch for every folder;  CI over every folder</li><li>where to change what;  the papercuts;  every script</li></ul> |
 | [README-vscode.md](README-vscode.md) | <ul><li>the Spell extension, which runs the Spell on your disk</li><li>two extensions you build, the rest from the Marketplace</li><li>what it does for a `.spell` file;  the settings the repo ships</li><li>Spell Epic, the pages beside your code;  windows and worktrees</li><li>working on the extensions</li></ul> |
-| [README-agents.md](README-agents.md) | <ul><li>the first minute of an epic, and what's different here</li><li>what an agent reads, in order;  WWOD, and citing its rules;  do this, not that</li><li>the three logs</li><li>epics on a page;  the epic plugin, its skills and hooks</li><li>what's Claude-specific, and 🌱 other agents</li></ul> |
+| [README/agents.md](README/agents.md) | <ul><li>the first minute of an epic, and what's different here</li><li>what an agent reads, in order;  WWOD, and citing its rules;  do this, not that</li><li>the three logs</li><li>epics on a page;  the epic plugin, its skills and hooks</li><li>what's Claude-specific, and 🌱 other agents</li></ul> |
+| [README-epics.md](README-epics.md) | <ul><li>epics in a repo that isn't Spell:  the plans live beside it, shared through GitHub</li><li>setting it up, in four steps and an extension</li><li>working with others:  joining, who you are, every turn syncs, two people on one page</li><li>the content folder, the config file, the worktrees;  one epic server per machine</li><li>what's still Spell-shaped</li></ul> |
 | [parser/README.md](https://github.com/spell-app/spell/blob/main/parser/README.md) | <ul><li>English you can run:  FizzBuzz, and what it compiles to</li><li>a parser that knows no language;  languages in, targets out</li><li>the pipeline, nine steps;  sentences or an outline, one meaning</li><li>try it in two minutes;  the language commands;  the pieces</li><li>Spell in Spanish;  🌱 a third language, more targets, any program read back as Spell</li></ul> |
 | [parser/README-parser.md](https://github.com/spell-app/spell/blob/main/parser/README-parser.md) | <ul><li>rules as classes, for any language, by contrast with parser generators</li><li>one line through six stages:  tokens, rules, matches, the Spell tree, output, running it</li><li>how a choice is settled, and how earlier lines teach later ones</li><li>parsers for other languages, a date one in 23 lines</li><li>testing rules;  what it costs</li></ul> |
 | [parser/README-rulex.md](https://github.com/spell-app/spell/blob/main/parser/README-rulex.md) | <ul><li>Rulex, regular expressions for words, by contrast with the ones you know</li><li>three real rules from Spell's grammar</li><li>your program writes Rulex too</li><li>what it can't say, and when it compiles</li><li>the cheat sheet</li></ul> |
@@ -793,7 +796,6 @@ each `README-<topic>.md` beside one goes deep on one folder or topic.
 | [epic/README-skills.md](https://github.com/spell-app/spell/blob/main/epic/README-skills.md) | <ul><li>seventeen skills you type, eight hooks that run by themselves</li><li>planning and review;  worktrees and sessions</li><li>background and offline</li><li>what the hooks do, and the prompt gate first</li><li>two names for every skill in Claude Code</li></ul> |
 | [epic/README-cli.md](https://github.com/spell-app/spell/blob/main/epic/README-cli.md) | <ul><li>the `epic` command:  six you'll actually type</li><li>an address is a page and an id</li><li>one copy of the code;  a session wakes when its `wait` exits</li><li>`--help`, and every verb by group</li><li>where it stops</li></ul> |
 | [epic/README-vscode.md](https://github.com/spell-app/spell/blob/main/epic/README-vscode.md) | <ul><li>the Spell Epic extension, installed in three commands and a reload</li><li>two views, each a page that stays</li><li>which server answers, the first of four</li><li>the window bridge:  a session finds its own window</li><li>working on it</li></ul> |
-| [epic/README-adopting.md](https://github.com/spell-app/spell/blob/main/epic/README-adopting.md) | <ul><li>epics in a repo that isn't Spell:  the plans live beside it</li><li>setting it up, in three steps and an extension</li><li>the content folder, the config file, the worktrees</li><li>your own AGENTS.md;  one epic server per machine</li><li>what's still Spell-shaped</li></ul> |
 | [app/README.md](https://github.com/spell-app/spell/blob/main/app/README.md) | <ul><li>the Spell app;  spaces:  every project has an owner and an address</li><li>the live loop, from a keystroke to the app changing</li><li>what you can do today, and 🌱 the ambition</li><li>five example apps;  its folders, a page each</li><li>setup from zero;  working on it</li></ul> |
 | [app/README-app.md](https://github.com/spell-app/spell/blob/main/app/README-app.md) | <ul><li>the editor and the runners:  four elements, for any page</li><li>one runner, three places;  a runtime per program</li><li>the editor:  one object behind every pane</li><li>the builds:  one Solid per page</li><li>App UI, a page for every component</li></ul> |
 | [app/README-examples.md](https://github.com/spell-app/spell/blob/main/app/README-examples.md) | <ul><li>six example apps, simplest first, and the four parts of each</li><li>FizzBuzz:  a loop, and printing</li><li>Task List:  things that draw themselves, a list, and a property editor</li><li>Solitaire, in spellx and drawn</li><li>ideas for your own;  the frozen test projects</li></ul> |
@@ -804,7 +806,7 @@ each `README-<topic>.md` beside one goes deep on one folder or topic.
 ## See also
 
 - [AGENTS.md](AGENTS.md):  the rules for working in the repo and across its folders, before you change a line
-- [README-development.md](README-development.md):  once you're set up, how the work goes day to day
+- [README/development.md](README/development.md):  once you're set up, how the work goes day to day
 - [the parser's README](https://github.com/spell-app/spell/blob/main/parser/README.md):  the language, if the card hooked you
 - [the app's README](https://github.com/spell-app/spell/blob/main/app/README.md):  the editor, if the cards on the table did
-- [README-cli.md](README-cli.md):  every command, once you've outgrown the five things you tried
+- [README/cli.md](README/cli.md):  every command, once you've outgrown the five things you tried

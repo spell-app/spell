@@ -42,6 +42,15 @@ not to what this session builds, SEND it, don't do it.
   Unsure:  ask in the modal.
 - The tooling home's own session (`🚧 <home>`) does tooling work itself.
 
+Content requests (epic `content`, Owen, 2026-10-29):  a fix to Spell's built-in projects, everything under app's
+`spaces/@spell/` but its test projects (`test/`), belongs to the standing epic `content`.
+- A content change this session's own epic CAUSED (it renamed a word, changed a component, so an example broke):
+  fix it here, on this branch, no question.
+- A content fix it only FOUND (a typo in an example, a stale notebook, a guide that tells the old way):
+  ask in the modal, "Fix it here, or send it to the content epic?", send recommended.
+  - Send:  `/send content <what>`, then carry on.
+- The content epic's own session (`🚧 content`) just fixes it.
+
 When a summary closes out the session's work, end it with a line of its own, `*You can close this tab*`,
 if nothing is left for THIS session.
 - Closing out:

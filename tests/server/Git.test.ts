@@ -49,6 +49,12 @@ describe("Git", () => {
     )
   })
 
+  test("config():  a key as git reads it in the folder;  `undefined` when unset", () => {
+    execFileSync("git", ["-C", REPO, "config", "spell.test", "Ana Lima"])
+    expect(SRV.Git.config("spell.test", REPO)).toBe("Ana Lima")
+    expect(SRV.Git.config("spell.no-such-key", REPO)).toBeUndefined()
+  })
+
   test("mainRoot():  the main checkout, from a worktree too;  outside git, the folder itself", () => {
     expect(SRV.Git.mainRoot(WORKTREE)).toBe(REPO)
     expect(SRV.Git.mainRoot(REPO)).toBe(REPO)

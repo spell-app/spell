@@ -188,8 +188,8 @@ export const epicPageVocabulary = {
         "the page is left alone, a ring round the plane counting down.  The plane in " +
         "every stage too (epic `epic-engine` I180):  Accept Overview and Accept Phases are on their sections' title rows.  " +
         "While building, " +
-        "with Claude's build plans waiting for Owen's Accept on their phases, the pill is ringed, its border 2px #666 (`asks`), " +
-        "dotted once each has his mark;  its tooltip names them."
+        "with Claude's build plans waiting for your Accept on their phases, the pill is ringed, its border 2px #666 (`asks`), " +
+        "dotted once each has your mark;  its tooltip names them."
     },
     {
       name: "centre",
@@ -400,6 +400,40 @@ export const epicPageVocabulary = {
       key: "nobodyPill",
       text: "No Claude session is reviewing:  start one with",
       description: "The pill while nobody listens, before the command it copies."
+    },
+    {
+      key: "listeningMine",
+      text: "Your {agent} is listening",
+      description:
+        "After the review line, while an agent other than Claude waits on the inbox (`epic inbox wait`, epic " +
+        "`epic-friend` P11):  `{agent}` its name, Codex.  Claude listening says nothing, as before."
+    },
+    {
+      key: "listeningOf",
+      text: "{person}'s {agent} is listening",
+      description: "The same, for someone else's agent:  `{person}`, whose it is."
+    },
+    {
+      key: "listeningTitle",
+      text: "It waits for your Send (epic inbox wait), and hears it at once",
+      description: "The listening words' tooltip."
+    },
+    {
+      key: "idleMine",
+      text: "Your {agent} isn't listening:  ask it to run",
+      description:
+        "The pill while nobody listens and the last to listen was an agent other than Claude (Q14:  Send never " +
+        "wakes it), before the command it copies, `epic inbox wait <epic>`."
+    },
+    {
+      key: "idleOf",
+      text: "{person}'s {agent} isn't listening:  ask it to run",
+      description: "The same, for someone else's agent."
+    },
+    {
+      key: "copyWait",
+      text: "Copy the command, for the agent to run",
+      description: "The pill's tooltip, while it names an agent that isn't listening."
     },
     {
       key: "airplanePill",

@@ -92,14 +92,6 @@ export type PreviewOptions = GlobalOptions & {
 }
 
 /**
- * `spell app notebook convert` flags.
- * - `dryRun`:  write nothing;  print each notebook file instead
- */
-export type NotebookConvertOptions = GlobalOptions & {
-  dryRun?: boolean
-}
-
-/**
  * `spell app serve` flags.
  * - `port`:  the editor's port -- default 3000;  its server's is the next one up
  * - `headless`:  don't open a browser

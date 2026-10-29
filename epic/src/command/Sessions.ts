@@ -1,4 +1,3 @@
-import { execFileSync, spawnSync } from "node:child_process"
 import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs"
 import { basename, join, relative } from "node:path"
 
@@ -176,6 +175,8 @@ export class Sessions {
    * `open <key>`:  open the one session whose id starts with `key` (else whose title is exactly `key`).
    * - one transcript copied into two project folders is one session
    * - a session running in a terminal or Desktop is refused:  the panel can't take it over
+   * - in the editor the tools drive (`EpicConfig.editor`, epic `epic-friend` P16):
+   *   `cursor --open-url cursor://...` in Cursor
    */
   private open(key: string): number {
     if (!key) throw new EpicCommandError("open:  which session?")
@@ -192,9 +193,12 @@ export class Sessions {
       throw new EpicCommandError(`open:  ${hit.id.slice(0, 8)} is running in the ${place}, not VS Code`, EXIT.ERRORS)
     }
     const target = Sessions.windowOf(live ? live.pid : Sessions.thisPid())
-    const url = `vscode://anthropic.claude-code/open?session=${hit.id}${target === undefined ? "" : `&windowId=${target}`}`
-    const run = spawnSync("code", ["--open-url", url], { stdio: "inherit" })
-    if (run.status !== 0) throw new EpicCommandError("open:  `code --open-url` failed", EXIT.ERRORS)
+    const editor = EpicConfig.of(Git.mainRoot()).editor
+    const url = editor.url(
+      `anthropic.claude-code/open?session=${hit.id}${target === undefined ? "" : `&windowId=${target}`}`
+    )
+    const run = editor.run(["--open-url", url], { stdio: "inherit" })
+    if (run.status !== 0) throw new EpicCommandError(`open:  \`${editor.command} --open-url\` failed`, EXIT.ERRORS)
     CLI.out(`opened ${hit.id.slice(0, 8)} "${hit.title}" in window ${target ?? "?"}${live ? " (where it runs)" : ""}`)
     return EXIT.OK
   }
@@ -341,7 +345,7 @@ export class Sessions {
       CLI.out(JSON.stringify(digest, null, 2))
       return EXIT.OK
     }
-    CLI.out(`transcript:  ${digest.path}\n\n## Owen's prompts\n\n`)
+    CLI.out(`transcript:  ${digest.path}\n\n## The person's prompts\n\n`)
     for (const { when, text } of digest.prompts) CLI.out(`- ${when}  ${cut(text, PROMPT_LIMIT)}`)
     CLI.out(`\n## Last reply\n\n${cut(digest.lastReply ?? "(none)", REPLY_LIMIT)}`)
     if (digest.pending?.length) {
@@ -637,26 +641,27 @@ export class Sessions {
    * - static:  this process's, whatever the folder
    */
   static ancestorPids(): Set<number> {
+    const parents = SRV.Processes.parents()
     const pids = new Set<number>()
-    for (let pid = process.ppid; pid > 1 && !pids.has(pid);) {
-      pids.add(pid)
-      pid = Number(run("ps", ["-o", "ppid=", "-p", String(pid)]).trim() || 0)
-    }
+    for (let pid = process.ppid; pid > 1 && !pids.has(pid); pid = parents.get(pid) ?? 0) pids.add(pid)
     return pids
   }
 
   /**
    * The VS Code window id hosting process `pid` (or an ancestor), or `undefined`.
    * - the extension host above a Claude panel session keeps log files open under `.../logs/<stamp>/window<n>/exthost/`
-   * - walks up the parents (`ps -o ppid=`) until one has them
+   * - walks up the parents until one has them (`SRV.Processes`)
+   * - Windows:  a process's open files can't be told there, so `undefined`:  the URL opens in the last window
    * - static:  about processes, not Claude's folder
    */
   static windowOf(pid: number): number | undefined {
-    for (let at = pid; at > 1;) {
-      const files = run("lsof", ["-p", String(at)])
-      const match = /\/logs\/[^/]+\/window(\d+)\/exthost\//.exec(files)
+    const parents = SRV.Processes.parents()
+    const seen = new Set<number>()
+    for (let at = pid; at > 1 && !seen.has(at); at = parents.get(at) ?? 0) {
+      seen.add(at)
+      const files = SRV.Processes.openFiles(at).join("\n")
+      const match = /[\\/]logs[\\/][^\\/]+[\\/]window(\d+)[\\/]exthost[\\/]/.exec(files)
       if (match) return Number(match[1])
-      at = Number(run("ps", ["-o", "ppid=", "-p", String(at)]).trim() || 0)
     }
     return undefined
   }
@@ -749,16 +754,6 @@ function readJSON(path: string): Record<string, unknown> {
 /** `text` with every run of whitespace one space, trimmed. */
 function collapse(text: string): string {
   return text.split(/\s+/).filter(Boolean).join(" ")
-}
-
-/** `command args` stdout, or "" when it fails. */
-function run(command: string, args: string[]): string {
-  try {
-    return execFileSync(command, args, { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] })
-  } catch (error) {
-    // lsof exits 1 when some files can't be listed, but still prints the rest
-    return String((error as { stdout?: string }).stdout ?? "")
-  }
 }
 
 /** `ms` as local `MM-DD HH:MM`. */

@@ -5,18 +5,22 @@ import { suggest } from "spell/util/string"
 import { Git } from "spell/server/Git"
 import { CLI } from "spell/cli"
 import { EpicCheckout } from "spell/epic/command/EpicCheckout"
+import { EpicGuide } from "spell/epic/command/EpicGuide"
 import { EXIT, EpicCommandError, flagName } from "spell/epic/command/command.types"
 import { EpicTools, type EpicToolName } from "spell/epic/command/EpicTools"
 import { Hub } from "spell/epic/command/Hub"
 import { LinesOfCode } from "spell/epic/command/LinesOfCode"
 import { Parking } from "spell/epic/command/Parking"
+import { PersonCommands } from "spell/epic/command/PersonCommands"
 import { PluginInstall } from "spell/epic/command/PluginInstall"
+import { SkillsCheck } from "spell/epic/command/SkillsCheck"
 import { RepoInit } from "spell/epic/command/RepoInit"
 import { Repos } from "spell/epic/command/Repos"
 import { Requests } from "spell/epic/command/Requests"
 import { Sessions } from "spell/epic/command/Sessions"
 import { Shared } from "spell/epic/command/Shared"
 import { Stock } from "spell/epic/command/Stock"
+import { TurnEnd } from "spell/epic/command/TurnEnd"
 import { Worktrees } from "spell/epic/command/Worktrees"
 import { EpicConfig } from "spell/epic/config/EpicConfig"
 import { EpicRepo } from "spell/epic/config/EpicRepo"
@@ -44,7 +48,11 @@ import { GROUP_VERBS, VERB_FLAGS, type GroupName, type VerbFlags } from "./epicG
  *   - `pages`:  the docs pages' tools (spell-app's `spell dev docs` until epic `repo-split` P13;  epic `epic-eject` P9), passed through
  *   - `loc`:  lines of code per repo and folder, and the LOC guide rewritten (`LinesOfCode`, epic `epic-engine` I122)
  *   - `init`:  a repo set up for epics (`RepoInit`, epic `epic-eject` P9)
- *   - `plugin install`:  the epic plugin installed in Claude Code, `epic@spell` (`PluginInstall`, epic `epic-engine` P49)
+ *   - `plugin install`:  the epic plugin installed in Claude Code, `epic@spell` (`PluginInstall`, epic `epic-engine` P49);
+ *     `--codex`:  for Codex, its hooks, skills and custom agents (epic `epic-friend` P11, P12)
+ *   - `guide`, `turn end`:  the workflow for ANY agent, and the step that ends its turn (`EpicGuide`, `TurnEnd`;  epic
+ *     `epic-friend` P11)
+ *   - `skills check`:  the plugin's skills hold for Claude Code and Codex alike (`SkillsCheck`, epic `epic-friend` P12)
  *   - `config`:  the repo's `.epic/config.json5`, a value or all of them (`config()`)
  * - Help and mistakes:
  *   - each group's verbs are listed (`epicGroups.ts`) for their help, `epic ask create --help`,
@@ -78,7 +86,7 @@ export class EpicProgram {
   constructor() {
     const epic = new Command("epic")
       .description(
-        "Work with epics:  their pages (epics/<name>/), the pages Owen answers on, worktrees, sessions, windows, " +
+        "Work with epics:  their pages (epics/<name>/), the pages you answer on, worktrees, sessions, windows, " +
           "agents, airplane mode."
       )
       .usage("<verb> <epic>[#<id>] [arguments]")
@@ -127,7 +135,7 @@ export class EpicProgram {
     const requests = (verb: Command) => this.verb(verb, (args) => new Requests().run([verb.name(), ...args]))
 
     requests(epic.command("send"))
-      .description("send an epic a request:  Owen's words and screenshots;  no epic:  the tooling home")
+      .description("send an epic a request:  your words and screenshots;  no epic:  the tooling home")
       .usage('[<epic>] --text "..." | --file <file> [--images <n>] [--context "..."] [--from <session>] [--json]')
       .addHelpText("after", example('epic send seo --text "the comment box is too narrow" --images 1'))
 
@@ -138,7 +146,7 @@ export class EpicProgram {
 
     requests(epic.command("file"))
       .description(
-        "file a request into a phase:  Owen's words and screenshots into its Requests field;  or, with no phase, " +
+        "file a request into a phase:  your words and screenshots into its Requests field;  or, with no phase, " +
           'mark where it went:  "dropped:  done in P3"'
       )
       .usage('<epic>#P3 <request id>  |  <epic> <request id> "where it went"')
@@ -152,7 +160,7 @@ export class EpicProgram {
     requests(epic.command("merge"))
       .description(
         "a standing epic's phase onto main at once, fast-forward only;  run in the main checkout;  a stray snapshot " +
-          "or generated file there is moved aside first, and --ditch moves up to 3 others too, once Owen says so"
+          "or generated file there is moved aside first, and --ditch moves up to 3 others too, once you say so"
       )
       .usage("<epic> [--ditch]")
       .addHelpText("after", example("epic merge epic-workflow"))
@@ -328,7 +336,7 @@ export class EpicProgram {
     ).usage('<epic>#Q3 "answer" [--details <html>] [--option A]')
     this.page(
       epic.command("choose"),
-      "an option Owen settled in conversation, on ANY item, recorded as the page's pick does:  chosen on its latest " +
+      "an option you settled in conversation, on ANY item, recorded as the page's pick does:  chosen on its latest " +
         "card set (--set N:  the Nth), the item answered / closed / reviewed, a Noted card;  several letters in a " +
         "pick-any set;  a phase's set or a standing set (s-upgrades) too",
       `epic choose seo#J9 A "Owen, 2026-10-06:  'require the parens';  built"`
@@ -357,7 +365,7 @@ export class EpicProgram {
     this.page(
       epic.command("summarize"),
       "condense an item after a lot of back and forth:  the file replaces what it shows;  its text and every reply " +
-        "move into its Original Discussion, folded;  Owen's picks and the answer stay",
+        "move into its Original Discussion, folded;  your picks and the answer stay",
       "epic summarize seo#J3 --file condensed.html"
     ).usage("<epic>#J3 --file <condensed.html>")
     this.page(
@@ -390,7 +398,7 @@ export class EpicProgram {
 
     this.page(
       epic.command("inbox"),
-      "the marks and comments Owen sends from the page, and how a review session takes them"
+      "the marks and comments you send from the page, and how a review session takes them"
     )
       .usage(
         '[watch | ignore | wait | apply] <epic>  |  status <epic> "<text>" [--items q3,c2] | --clear  |  ' +
@@ -399,7 +407,7 @@ export class EpicProgram {
       .addHelpText("after", INBOX_HELP)
     this.page(
       epic.command("test"),
-      "Owen's testing:  the page in the Review tab, Start testing pressed (Claude prepares the tests, then the first " +
+      "your testing:  the page in the Review tab, Start testing pressed (Claude prepares the tests, then the first " +
         "opens);  --all:  every epic's;  --list:  the open tests"
     )
       .usage("<epic>[#M3] [--list [--json]]  |  --all [--list] [--json]")
@@ -428,7 +436,7 @@ export class EpicProgram {
     ).usage('<epic> start "P3-P6,P9" | done "summary"')
     this.page(
       epic.command("backfill"),
-      "items Owen already went through in past sessions:  a dry run unless --apply",
+      "items you already went through in past sessions:  a dry run unless --apply",
       "epic backfill seo --apply"
     ).usage("<epic> | --all [--apply]")
     this.page(
@@ -498,6 +506,27 @@ export class EpicProgram {
         "a checkout links in only the folders its config names (sharedFolders)",
       (args) => new Shared().run(args)
     )
+
+    epic.commandsGroup("Any agent:  the workflow, and each turn's end:")
+
+    this.verb(epic.command("guide"), (args) => new EpicGuide().run(args))
+      .description(
+        "the epic workflow in plain steps, for any agent (Codex, Claude Code ...):  find, plan, build, review, end " +
+          "each turn, finish;  a topic alone, claude-only-tools among them"
+      )
+      .usage("[<topic>] [--list] [--path] [--root]")
+      .addHelpText("after", example("epic guide build"))
+    this.group(
+      epic.command("turn"),
+      "an agent's turn:  end, the shared plans committed and synced, what the end-of-turn hooks run",
+      (args) => new TurnEnd().run(args)
+    )
+    this.group(
+      epic.command("skills"),
+      "the epic plugin's skills:  check, that each holds for Claude Code and Codex alike (an In Codex: line beside " +
+        "each Claude-only step)",
+      (args) => new SkillsCheck().run(args)
+    )
   }
 
   ////////////////
@@ -519,6 +548,16 @@ export class EpicProgram {
     return { cwd: home.checkout }
   }
 
+  /**
+   * `epic server <args>` in a repo with no page server of its own (one `epic init` set up):  the machine's epic
+   * server (`Hub`), this repo registered with it first, for the verbs that serve (`start`, `ensure`, `url`).
+   */
+  static hubHere(args: string[], cwd = process.cwd()): Promise<number> {
+    const hub = new Hub()
+    if (["start", "ensure", "url"].includes(args[0] ?? "")) hub.registerHere(cwd)
+    return hub.run(args)
+  }
+
   /** `window`, `server`:  scripts passed through;  `hub`, `repo`:  the machine's epic server (`Hub`, `Repos`). */
   private addWindowVerbs(): void {
     const epic = this.epic
@@ -533,9 +572,10 @@ export class EpicProgram {
       epic.command("server"),
       "this checkout's page server;  start --all:  every web server (page server, editor, Spell UI)",
       (args) =>
-        // a repo without its own page server (one `epic init` set up):  the machine's epic server, same verbs
+        // a repo without its own page server (one `epic init` set up):  the machine's epic server, same verbs,
+        // serving this repo from the first time
         !EpicTools.hasPageServer()
-          ? new Hub().run(args)
+          ? EpicProgram.hubHere(args)
           : args[0] === "start" && args.includes("--all")
             ? EpicTools.run("serve", ["server", "start", "all", ...args.slice(1).filter((arg) => arg !== "--all")])
             : EpicTools.run("server", args)
@@ -568,7 +608,7 @@ export class EpicProgram {
   // ## The repo's settings
   ////////////////
 
-  /** `config`, `voice`, `init`, `plugin`. */
+  /** `config`, `voice`, `init`, `whoami`, `whois`, `plugin`. */
   private addSettingsVerbs(): void {
     const epic = this.epic
     epic.commandsGroup("The repo's settings:")
@@ -587,15 +627,34 @@ export class EpicProgram {
 
     this.verb(epic.command("init"), (args) => new RepoInit().run(args))
       .description(
-        "set this repo up for epics:  its .epic/config.json5, the content repo beside it, the links and their " +
-          ".gitignore lines;  safe to run again"
+        "set this repo up for epics, the one command to start (npx spell@next epic init):  the plugin, its " +
+          ".epic/config.json5, the content repo beside it (made, or cloned from the team's), shared on GitHub, the " +
+          "links and their .gitignore lines, your name and colour, then the epic server;  safe to run again"
       )
-      .usage("[--dry-run] [--json]")
+      .usage(
+        "[--name <name>] [--color <colour>] [--content-repo <name> | --remote <address> | --no-remote] [--public] " +
+          "[--no-plugin] [--no-commit] [--no-server] [--dry-run] [--json]"
+      )
       .addHelpText("after", INIT_HELP)
+
+    this.verb(epic.command("whoami"), (args) => new PersonCommands().whoami(args))
+      .description(
+        "who you are on the epics:  your short name (kept, else your GitHub login, else git's user.name), your full " +
+          "name and GitHub login;  " +
+          "with a name, keeps it;  --rename also writes it over the old one on every page"
+      )
+      .usage("[<name>] [--rename [--dry-run]] [--json]")
+      .addHelpText("after", WHOAMI_HELP)
+
+    this.verb(epic.command("whois"), (args) => new PersonCommands().whois(args))
+      .description("what the epics know about someone:  the replies and comments naming them, by place, and when last")
+      .usage("<name> [--json]")
+      .addHelpText("after", example("epic whois Owen"))
 
     this.group(
       epic.command("plugin"),
-      "the epic plugin in Claude Code, epic@spell from the kit's epic/:  install (moves an old spell-epic@spell-epic)",
+      "the epic plugin in Claude Code, epic@spell from the kit's epic/:  install (moves an old spell-epic@spell-epic);  " +
+        "install --codex:  its hooks, skills and custom agents for Codex",
       (args) => new PluginInstall().run(args)
     )
   }
@@ -607,27 +666,27 @@ export class EpicProgram {
   /** `ask`, `choices`, `comments`, `notes`, `agents`, `airplane`:  the docs tools passed through. */
   private addToolGroups(): void {
     const epic = this.epic
-    epic.commandsGroup("Pages Owen answers on, agents, airplane mode:")
+    epic.commandsGroup("Pages you answer on, agents, airplane mode:")
 
     const tool = (name: EpicToolName) => (args: string[]) => EpicTools.run(name, args)
     this.group(
       epic.command("ask"),
-      "details pages:  a question explained on a page in VS Code's side bar, Owen answering on it",
+      "details pages:  a question explained on a page in VS Code's side bar, you answering on it",
       tool("details")
     )
     this.group(
       epic.command("choices"),
-      "choice pages:  a table of names Claude recommends, Owen's call on each",
+      "choice pages:  a table of names Claude recommends, your call on each",
       tool("choices")
     )
     this.group(
       epic.command("comments"),
-      "comments Owen leaves on docs pages:  list, wait for, gather, mark and answer them",
+      "comments you leave on docs pages:  list, wait for, gather, mark and answer them",
       tool("comments")
     )
     this.group(
       epic.command("notes"),
-      "page notes Owen left on docs pages (before comments):  list, answer, mark done",
+      "page notes you left on docs pages (before comments):  list, answer, mark done",
       tool("notes")
     )
     this.group(
@@ -963,7 +1022,8 @@ Examples:
 const CONFIG_HELP = `
 The keys (folders print absolute;  the file's are relative to the main checkout):
   contentFolder        the shared content repo:  epics, guides, sagas, the logs
-  baseBranch           the branch worktrees start from and merge into
+  contentRemote        its address, which everyone pulls from and pushes to ("":  none);  epic init writes it
+  baseBranch          the branch worktrees start from and merge into
   worktreesFolder      where new worktrees go, <worktreesFolder>/<name>;  may be beside the repo
                        (../spell-app.worktrees), the old .claude/worktrees still read then
   installCommand       what makes a new worktree ready to run
@@ -984,7 +1044,8 @@ The keys (folders print absolute;  the file's are relative to the main checkout)
   pageVoices.<kind>    the voice each kind of page is written in ("pageVoices", over the defaults)
   checkoutPatches      the ids of the fixes every checkout gets, comma-separated:  a file copied from main, or
                        a command run once (epic worktree patch)
-Any worktree reads the main checkout's file;  a key it leaves out takes its default.
+Any worktree reads the main checkout's file;  a key it leaves out reads as epic init would write it for
+this repo.
 
 Examples:
   epic config contentFolder
@@ -1007,18 +1068,60 @@ Examples:
 
 /** After `epic init --help`. */
 const INIT_HELP = `
-In the repo's main checkout (or any worktree of it), each step skipped when it's done:
+From any folder of the repo (a worktree's too), each step skipped when it's done:
+  the plugin           epic, installed for Claude Code when it isn't yet (epic plugin install):  the machine's,
+                       once;  --no-plugin skips it
   .epic/config.json5   written for this repo:  content folder ../<repo>.epics, worktrees ../<repo>.worktrees,
                        the base branch from git, the install command its lock file names (none without one),
                        window names from the repo's;  a file already there is kept
-  ../<repo>.epics      the content repo, a git repo of its own:  epics/, sagas/, guides/, pages/
+  ../<repo>.epics      the content repo, a git repo of its own:  epics/, sagas/, guides/, pages/;
+                       cloned instead, when the config names the team's (contentRemote) and it isn't here
+  the shared repo      the content repo on GitHub, so the team shares the plans:  asks what to call it
+                       (<repo>-epics) and "Private or public?" (private), makes it, pushes, and writes its
+                       address in the config (contentRemote);  needs GitHub's command, gh, logged in:  without
+                       it, says how to get it
   the links            each of those folders linked in at the checkout's root
   .gitignore           the links listed between # shared:start and # shared:end
-Then commit .epic/config.json5 and .gitignore on the base branch.
+  your name            "What do you want to be called?" (--name), kept in ~/.spell-epic/person.json5
+  your colour          "Which colour should your words be?", from the colour names nobody has (--color), kept
+                       with the plans, in the content repo's people/
+  the commit           .epic/config.json5 and .gitignore committed on the base branch ("Commit ... on main?",
+                       yes suggested);  on another branch it says so;  --no-commit skips it
+  the epic server      started, serving this repo:  its address printed;  --no-server skips it
+Then push the base branch:  a teammate's epic init then clones the plans.
+
+--content-repo <name> names the shared repo without asking;  --remote <address> uses one made already;
+--no-remote makes none, and the plans stay on this machine.
+--public makes the shared repo public without asking;  with no terminal to ask in, it's private unless --public.
+A public one shows everything in the plans (epic pages, guides, comments) to anyone.
+
+--name <name> is the name you go by on the epics, kept in ~/.spell-epic/person.json5 (epic whoami);
+without it, epic init asks in a terminal, suggesting your GitHub login (else git's user.name), and takes that
+anywhere else.
 
 Examples:
+  npx spell@next epic init        the same, before anything is installed
   epic init --dry-run
+  epic init --name Ana --color green
+  epic init --content-repo my-app-epics
+  epic init --remote git@github.com:my-team/my-app-epics.git
   epic init`
+
+const WHOAMI_HELP = `
+Your short name is who you are on the epics, and what's stamped on what you write:  kept in
+~/.spell-epic/person.json5 ($SPELL_EPIC_HOME), else your GitHub login, else git's user.name.  Your full name is git's.
+whoami looks your GitHub login up (gh api user) and keeps it there, so pages never run gh.  epic init asks too.
+
+  owenoak  (Owen Williams, github: owenoak)       nothing kept:  the GitHub login
+  Owen  (Owen Williams, github: owenoak)          epic whoami Owen kept it
+
+The name is who you are:  --rename writes the new one over the old wherever it says who wrote something (a reply's
+from, a comment's by, "Ana's run", "Ana picked B" ...), on every page, part and inbox;  never in running text.
+
+Examples:
+  epic whoami
+  epic whoami Ana
+  epic whoami --rename Ana Lima --dry-run`
 
 /** After `epic file --help`. */
 const FILE_HELP = `
@@ -1045,7 +1148,7 @@ word after the target, never with fields:
   underway "<reading>"                                    a blue card:  what Claude took the task to be;  spinner on
   done ["<summary>"]                                      the item's WORK finished:  that card green, the summary
                                                           under it;  an open issue or todo closes (as close does)
-  noted "<what>"                                          a STEP done, the item not finished:  Owen's choice
+  noted "<what>"                                          a STEP done, the item not finished:  your choice
                                                           recorded, an answer or details written:  a Noted card
 
 Examples:
@@ -1058,7 +1161,7 @@ Examples:
 
 /** After `epic saga --help`. */
 const SAGA_HELP = `
-The sagas' list, in Owen's order:  sagas/sagas.json5.  An epic names its saga:  <epic-page saga="<id>">.
+The sagas' list, in your order:  sagas/sagas.json5.  An epic names its saga:  <epic-page saga="<id>">.
   epic saga list [--json]                         the sagas in order, each with its epics and guide count
   epic saga set <epic> <saga>                     the saga an epic serves (--none:  no saga);  logged
   epic saga create <id> "Title" --purpose "..." [--after <id>]
@@ -1080,8 +1183,8 @@ Prints the new item's id.  The letter after # is its kind:
   J judgement   Q question   I issue   T todo   M manual test (checked by hand)   D decision (a question born answered)
 A todo (T) is work still to do;  --limit:  a limit to know about, not work.
 The letters before epic-engine P44 (C caveat, T test) moved:  #C is refused, naming these;  C is a comment's now.
---calm (last):  a judgement or issue that wouldn't surprise Owen, yellow rather than red.
-A manual test (M), answered by Owen on the epic page, its fields HTML, or plain text:
+--calm (last):  a judgement or issue that wouldn't surprise you, yellow rather than red.
+A manual test (M), answered by you on the epic page, its fields HTML, or plain text:
 steps as "1. ... 2. ..." become a numbered list, "- " lines bullets (epic details seo#M3 takes them too):
   --step <html>       exactly what to do;  <a class="epic-test-action" href="...">Open ...</a> a page to open;
                       the app, window and menu or keys named;  everything to type in a <pre><code> block (or a
@@ -1099,16 +1202,16 @@ Examples:
 
 /** After `epic test --help`. */
 const TEST_HELP = `
-Owen answers each test where it is, in the epic page's Manual tests section:  Approve if it passed, a note (a
-screenshot pasted or dropped in it) for what he saw, the note box's x if it no longer applies;  Send hands them to the
+You answer each test where it is, in the epic page's Manual tests section:  Approve if it passed, a note (a
+screenshot pasted or dropped in it) for what you saw, the note box's x if it no longer applies;  Send hands them to the
 session listening (epic inbox apply seo).  Start testing, first, has Claude prepare them:  the open tests checked
 where Claude can, the rest written out (epic details seo#M3 --step ... --prepared 1), then the first one opens.
 
 Examples:
   epic test seo                   the page in the Review tab, Start testing pressed (?test=1)
   epic test seo#M3                ... landing on M3
-  epic test seo --list [--json]   its open tests, in Owen's order:  prepared first, then page order, Not now last
-  epic test --all [--list]        every epic with open tests, in Owen's saga order;  the first one opened,
+  epic test seo --list [--json]   its open tests, in your order:  prepared first, then page order, Not now last
+  epic test --all [--list]        every epic with open tests, in your saga order;  the first one opened,
                                   its Manual tests section linking the next once all are answered`
 
 /** After `epic inbox --help`. */
@@ -1116,7 +1219,7 @@ const INBOX_HELP = `
 The inbox's own verb first, then the epic:  epic inbox wait seo, epic inbox done seo#J3.
 
 Examples:
-  epic inbox seo                  what Owen sent from the page:  requests, marks, comments
+  epic inbox seo                  what you sent from the page:  requests, marks, comments
   epic inbox watch seo            this session waits on the inbox (the page says someone's reviewing);  ignore:  stopped
   epic inbox wait seo             block until there's work, print it, exit 0 (run it in the background)
   epic inbox apply seo [ids...]   apply the sent approve / pick / todo marks and test answers;  --all:  sent or not

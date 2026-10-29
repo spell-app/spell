@@ -1,5 +1,4 @@
-import { execFileSync } from "child_process"
-
+import { Git } from "spell/server/Git"
 import {
   checkEntry,
   Loader,
@@ -264,24 +263,12 @@ function sameAs(a: People.Person | undefined, b: People.Person): boolean {
  * A new person's file:  a comment saying what it is, their id, and their names and email from git, if it knows them.
  */
 function starterPerson(id: string): string {
-  const names = gitConfig("user.name")
-  const email = gitConfig("user.email")
+  const names = Git.config("user.name")
+  const email = Git.config("user.email")
   const entry = JSON.stringify({ $type: "Person", id, names: names ?? id, emails: email ? [email] : [] }, null, 2)
   return [
     "// You, as spell knows you:  a person of spell's people library (@spell/library/people).",
     "// The app's You panel changes it;  so can you, here.  Comments stay where they are.",
     `${entry}\n`
   ].join("\n")
-}
-
-/** `git config <key>`, e.g. your name;  `undefined` if git doesn't know it. */
-function gitConfig(key: string): string | undefined {
-  try {
-    return (
-      execFileSync("git", ["config", key], { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim() ||
-      undefined
-    )
-  } catch {
-    return undefined
-  }
 }

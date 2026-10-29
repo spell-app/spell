@@ -1,10 +1,13 @@
 ---
 name: wait-for
-description: Park this session's work, wait in the background for another session / worktree / plan to finish (merged into `main`, worktree removed, session exited, or every plan phase done), then merge the new `main` in and carry on by itself.  `/wait-for ?` lists the candidates in a modal.  Use for `/wait-for <name>`, `/wait-for ?`, or when Owen says "wait for <name> to finish, then pick this back up".
+description: Park this session's work, wait in the background for another session / worktree / plan to finish (merged into `main`, worktree removed, session exited, or every plan phase done), then merge the new `main` in and carry on by itself.  `/wait-for ?` lists the candidates in a modal.  Use for `/wait-for <name>`, `/wait-for ?`, or when the person says "wait for <name> to finish, then pick this back up".
 argument-hint: "<name> | ?"
 ---
 
 # /wait-for
+
+In Codex:  each step that needs a Claude Code tool says what Codex does instead, in a line like this one
+(the long form:  `epic guide claude-only-tools`).
 
 Another session is changing things this one depends on (e.g. moving packages).
 - Park here, watch it, and resume when it's done, with no one supervising.
@@ -18,15 +21,16 @@ Another session is changing things this one depends on (e.g. moving packages).
   - its worktree removed
   - every running session of `<name>` exited
   - every phase of its epic page done
-  - NEVER "idle":  a session goes idle whenever it waits for Owen.
+  - NEVER "idle":  a session goes idle whenever it waits for the person.
 
 ## 1. Which one
 
 - `?`, or no argument:  `epic park candidates`.
   - none:  say so, and stop
   - else AskUserQuestion "Wait for which?", one option per candidate
+    - In Codex:  ask in the chat, the candidates numbered.
     - labelled with its `name`, described by its `label`
-    - 4 per question;  more in extra questions, or Owen types a name in "Other"
+    - 4 per question;  more in extra questions, or the person types a name in "Other"
 - Else `<name>` is `$ARGUMENTS`.
   - `epic worktree status <name>` gives nothing (no `worktree`, `branch`, `plan` or `sessions`):
     say so, and offer `/wait-for ?`.
@@ -46,6 +50,8 @@ Another session is changing things this one depends on (e.g. moving packages).
 
 1. `epic worktree status <name>` already `finished`:  say why in one line, then step 4.
 2. Else start the wait in the background:  `epic park wait <name>`.
+   - In Codex:  run `epic park wait <name>` in the foreground:  the turn waits with it (up to ~2h), then step 4;
+     Ctrl-C stops it.
    - It checks every 60s, and gives up after ~2h.
    - The `Bash` call's settings:  `run_in_background: true`, `timeout: 7200000`
 3. One line:
@@ -55,8 +61,9 @@ Another session is changing things this one depends on (e.g. moving packages).
    - 0:  finished, and its JSON's `why` says which:  step 4.
    - 2:  still going after 2 hours:  start it again (step 3.2), no message.
    - 3, or anything else:  say what it printed, and stop, still parked.
-   - Owen writes while it waits:  answer him;  the wait goes on.
+   - The person writes while it waits:  answer them;  the wait goes on.
      "Stop waiting":  stop it (`TaskStop`), and leave the note at `parked`.
+     - In Codex:  the wait runs in the foreground:  Ctrl-C stops it.
 - NOTE:  the wait lives only as long as this session.
   Closed or restarted (VS Code reload, window move):  `/wait-for <name>` again, or `/unpark`.
 
@@ -66,4 +73,4 @@ Another session is changing things this one depends on (e.g. moving packages).
 2. [The unpark skill](../unpark/SKILL.md), step 3 (the right window),
    then [the park skill](../park/SKILL.md)'s "Resume".
    - Its stopping points (conflicts it can't resolve, failing checks) still stop and ask:
-     that's the only time this needs Owen.
+     that's the only time this needs the person.

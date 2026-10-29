@@ -16,11 +16,15 @@
  *   - a SAGA page's (`sagas/<id>/<id>.saga.html`, epic `epic-workflow` P15):  the same, in its own inbox,
  *     `<id>.inbox.json5`;  its Send is `<epic-page>`'s, for the session running `/epic review SAGA:/<id>`
  *   - both git-ignored in the shared repo:  waiting work, per machine, never the record
+ *   - EXCEPT the comments themselves (epic `epic-friend` P9):  one file per person beside the inbox,
+ *     `<page>.comments.<person>.json5`, committed and synced with the plans (`SharedComments`), so everyone sees every
+ *     thread;  each person's Send hands their own agent only their own threads (`CommentList.ownWaiting`)
+ *   - only a comment's writer edits, deletes or clears it (409 for anyone else);  anyone replies, closes, reopens
  * - `GET /api/docs/comments?page=<path>` -- the page's comments, every status:
  *   `{ page, takesComments, comments, send? }`
  *   - the runtime asks as the page loads, and draws the bullhorns only when `takesComments`:
  *     a server without this module, `file://`, or a page that takes none shows none
- *   - each comment with its thread (`replies`, `done`) and whose `turn` it is (`CommentList.turnOf()`)
+ *   - each comment with its thread (`replies`, `done`) and whose `turn` it is (`ThreadFacts.turnOf()`)
  *   - `working` while Claude thinks about it (`epic comments working`):  the thread's "Claude: thinking…" stub
  *   - `send`, for the page header's Send (epic `epic-workflow` P13):
  *     `{ epic, owned, wakes, listening, sent, unsent, waiting }` (`PageSend`)
@@ -80,6 +84,7 @@ import { join } from "node:path"
 
 import { SRV } from "spell/server"
 import { COMPONENTS_PREFIX, type RouteModule } from "spell/server/page"
+import { ThreadFacts } from "spell/epic/comments"
 import { EpicConfig } from "spell/epic/config/EpicConfig"
 import { DataFile } from "spell/epic/data/DataFile"
 import {
@@ -227,7 +232,7 @@ export function sendOf(root: string, page: string, file: string): { send?: PageS
       listening: review.liveListener()?.session ?? null,
       sent: inbox.sent,
       unsent: inbox.unsentComments.map((comment) => comment.id),
-      waiting: inbox.commentList.waiting.map((comment) => comment.id)
+      waiting: inbox.commentList.ownWaiting.map((comment) => comment.id)
     }
   }
 }
@@ -242,7 +247,7 @@ export function sendOf(root: string, page: string, file: string): { send?: PageS
  * - `listening`:  the session listening to that epic's review inbox, else `null`
  * - `sent`:  Owen's last Send on the page, ISO, else `null`
  * - `unsent`:  the ids of the comments a Send would hand over
- * - `waiting`:  the ids of every comment waiting for Claude, sent or not (`CommentList.waiting`)
+ * - `waiting`:  the ids of every comment waiting for this person's agent, sent or not (`CommentList.ownWaiting`)
  */
 export type PageSend = {
   epic: string
@@ -261,7 +266,7 @@ function planDocOf(root: string, epic: string): string {
 
 /** `comments` as the page gets them:  each with whose `turn` it is on its thread. */
 function shown(comments: CommentList): (IdentifiedComment & { turn: Turn })[] {
-  return comments.all.map((comment) => ({ ...comment, turn: CommentList.turnOf(comment) }))
+  return comments.all.map((comment) => ({ ...comment, turn: ThreadFacts.turnOf(comment) }))
 }
 
 /**

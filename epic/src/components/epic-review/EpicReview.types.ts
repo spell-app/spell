@@ -547,7 +547,7 @@ export const REVIEW_TEXTS = [
     key: "revisitCommentsTip",
     text: "Talk it over:  your comments in its text ({ids}) are your note",
     description:
-      "Review button:  Revisit, on a part with Owen's comments waiting in its text (epic `epic-engine` I140):  a click marks it at once."
+      "Review button:  Revisit, on a part with your comments waiting in its text (epic `epic-engine` I140):  a click marks it at once."
   },
   {
     key: "planAccepted",

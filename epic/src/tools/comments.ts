@@ -46,6 +46,7 @@ import { join, resolve } from "node:path"
 
 import { clamp } from "spell/util/number"
 import { EpicCommandError, duration, parseVerbArgs, stringFlag } from "spell/epic/command/command.types"
+import { ThreadFacts } from "spell/epic/comments"
 import { CommentList, CommentsError } from "spell/epic/tool/CommentList"
 import { GuideInbox } from "spell/epic/tool/GuideInbox"
 import { ReviewInbox } from "spell/epic/tool/ReviewInbox"
@@ -168,13 +169,13 @@ function pageComments(files: string[], which: "all" | "waiting") {
   })
 }
 
-/** What makes a waiting comment new to `wait`:  its page, its id, and Owen's last words on it. */
+/** What makes a waiting comment new to `wait`:  its page, its id, and a person's last words on it. */
 function waitingKey(comment: ReturnType<typeof pageComments>[number]): string {
-  const owen = comment.replies?.findLast((each) => each.by === "Owen")
-  return `${comment.page}#${comment.id}@${owen?.at ?? comment.at}`
+  const said = ThreadFacts.lastPersonReply(comment)
+  return `${comment.page}#${comment.id}@${said?.at ?? comment.at}`
 }
 
-/** Print `comments` as `list` does:  page, id, where, when;  the quote;  the text;  Owen's latest reply. */
+/** Print `comments` as `list` does:  page, id, where, when;  the quote;  the text;  the person's latest reply. */
 function printComments(comments: ReturnType<typeof pageComments>) {
   for (const comment of comments) {
     const where =
@@ -183,10 +184,10 @@ function printComments(comments: ReturnType<typeof pageComments>) {
     console.log(`${comment.page}#${CommentList.label(comment.id)}  ${where || comment.anchor}  ${comment.at}${state}`)
     if (comment.quote) console.log(`  on "${comment.quote}"`)
     for (const line of comment.text.split("\n")) console.log(line ? `  ${line}` : "")
-    // his reply on the thread since Claude answered:  the work now
-    const reply = CommentList.isWaiting(comment) && comment.replies?.findLast((each) => each.by === "Owen")
-    if (!reply) continue
-    console.log(`  Owen replied ${reply.at}:`)
+    // their reply on the thread since Claude answered:  the work now
+    const reply = ThreadFacts.isWaiting(comment) ? ThreadFacts.lastPersonReply(comment) : undefined
+    if (!reply?.text) continue
+    console.log(`  ${reply.by} replied ${reply.at}:`)
     for (const line of reply.text!.split("\n")) console.log(line ? `    ${line}` : "")
   }
 }

@@ -19,8 +19,8 @@ export const epicChoiceRowVocabulary = {
   description:
     "One row of a choice page (epic `epic-workflow` P12), in an `<epic-choice-rows>`:  the use site " +
     "(File, opening VS Code at the line), what it's for, how it reads today, and a box pre-filled with Claude's " +
-    "recommendation.  Owen types over it, or leaves it;  a changed box is orange, with a round button putting " +
-    "the recommendation back.  In a table Owen puts in order (`<epic-choice-rows reorder>`), its place first, " +
+    "recommendation.  You type over it, or leaves it;  a changed box is orange, with a round button putting " +
+    "the recommendation back.  In a table you put in order (`<epic-choice-rows reorder>`), its place first, " +
     "with move up / move down.",
   attributes: [
     {
@@ -54,7 +54,7 @@ export const epicChoiceRowVocabulary = {
     { name: "base", description: "Its cells, laid out on its table's columns." },
     {
       name: "order",
-      description: "The Order cell, in a table Owen puts in order:  its place, and its move up / move down buttons."
+      description: "The Order cell, in a table you put in order:  its place, and its move up / move down buttons."
     },
     { name: "up", description: "The move up button:  it swaps places with the row above." },
     { name: "down", description: "The move down button:  it swaps places with the row below." },

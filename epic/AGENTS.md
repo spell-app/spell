@@ -4,8 +4,8 @@ This file guides AI coding agents (Claude Code, Codex, and others) working in `e
 a folder of the kit `spell`.
 
 - It's the epic tooling, a Claude Code plugin, lifted out of spell-app (epic `epic-eject` P6).
-  [The README](README.md) says what it is and how it's laid out;  [README-adopting.md](README-adopting.md), how it's
-  installed.
+  [The README](README.md) says what it is and how it's laid out;  [README-epics.md](../README-epics.md), at the kit's
+  root, how it's installed in another repo, and shared by a team.
 - The house style is Spell's, WWOD:  **READ it FIRST**, from the kit:  [WWOD](../agents/wwod/WWOD.md).
   - No `agents/` link at the folder's root (epic `epic-eject` I23):  Claude Code reads a plugin's root `agents/` as
     agent types.
@@ -38,6 +38,15 @@ a folder of the kit `spell`.
 - Skills:  the plugin's, a `SKILL.md` per skill in [the skills folder](skills/).
   - They link each other by relative path (`../isolate/SKILL.md`).
   - They reach the plugin's own files through `${CLAUDE_PLUGIN_ROOT}`.
+  - ONE copy for Claude Code AND Codex (epic `epic-friend` P12, J29):  the Codex manifest
+    ([.codex-plugin/plugin.json](.codex-plugin/plugin.json)) names this same folder, and `epic plugin install --codex`
+    links each skill into `~/.agents/skills/`.
+    - A step that names a Claude-only tool (the question modal, `Agent`, `EnterWorktree`, `SendMessage`, plan mode,
+      a background Bash ...) keeps a one-line `In Codex:` way within 10 lines of it;  the long form is the epic
+      skill's [guide.md](skills/epic/guide.md), `claude-only-tools`.
+    - A Claude-only skill (`bg`, `bedtime`, `comment`, `session`, `title`) says `In Codex:  Claude Code only` first,
+      and has `agents/openai.yaml` turning off `policy.allow_implicit_invocation`.
+    - `epic skills check` (`SkillsCheck`) fails either rule, and a description past Codex's list;  its test runs it.
 - Voices:  how a kind of people-facing page is written, one file each in [the voices folder](voices/)
   (epic `readme` P12).
   - `readme` ([readme.md](voices/readme.md)):  READMEs, an epic's guide, reference pages.
@@ -54,7 +63,17 @@ a folder of the kit `spell`.
     The skills ask by name:  `epic voice <name>`, `epic voice --for <kind>` print the file (`EpicConfig.voiceFile()`).
   - The skills that write such pages name the voice they use:  the epic skill's "6. Doc Review", `/docs-check`.
   - A repo's own house style adds its specifics on top, and wins where they disagree.
-- Hooks:  [hooks.json](hooks/hooks.json) and the scripts beside it.
+- Working an epic WITHOUT the skills (Codex, or any agent but Claude Code):  run `epic guide` and follow it
+  (epic `epic-friend` P11).
+  - It prints the workflow in plain steps, from [the epic skill's guide.md](skills/epic/guide.md):
+    find the epic, plan, build each phase, take what the person sends, finish.
+  - End EVERY turn with `epic turn end`:  the shared plans committed and synced.
+    Codex's hooks run it for you once installed (`epic plugin install --codex`) and trusted (`/hooks`).
+  - Wait for the person's next Send with `epic inbox wait <epic>`.
+- Hooks:  [hooks.json](hooks/hooks.json) and the scripts beside it;  Codex's, [codex-hooks.json](hooks/codex-hooks.json),
+  three of the same scripts, and the Codex manifest beside Claude Code's ([.codex-plugin/](.codex-plugin/plugin.json)).
+  - Codex's file passes each script `--codex-plugin`:  started so, a script stands down while Codex's own
+    `~/.codex/hooks.json` runs it (`CodexHome.skipPluginHook()`), so they never run twice (J37).
   - Every hook exits 0 whatever happens.
   - Except the worktree hook:  its failure is Claude Code's answer.
   - And the inbox poller, the `asyncRewake` `Stop` hook (`monitors/listen.mjs --hook`, epic `epic-engine` I144):
@@ -79,8 +98,8 @@ As WWOD §4, plus these.
     `spell/epic/components/epic-page`
   - Same-folder peers stay `./PlanItem`;  NEVER a `../` climb, NEVER a `$/` alias.
   - Files outside `src/` (`tests/`, `scripts/`, `hooks/`, the extension's `vscode/`) import `src/` the same way.
-    The one file code imports from OUTSIDE `src/` has an explicit key in the kit's `exports`:
-    `spell/epic/vscode/src/docUrls.ts`, for its test.
+    The two files code imports from OUTSIDE `src/` have an explicit key each in the kit's `exports`, for their tests:
+    `spell/epic/vscode/src/docUrls.ts`, `spell/epic/vscode/src/ClipboardImage.ts` (epic `epic-friend` P15).
   - Nothing imports by the folder's old name, `spell-epic/...`:  the hooks too say `spell/epic/...`.
 - How every tool finds them:  the kit's [package.json](../package.json) `exports`, no alias table anywhere.
   - TypeScript:  the `spell-source` condition (`customConditions` in [tsconfig.json](tsconfig.json)) reads the

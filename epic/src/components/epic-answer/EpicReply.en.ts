@@ -19,9 +19,23 @@ export const epicReplyVocabulary = {
   description:
     "A reply on an item, after its answer:  `<from> · re: <re>` is drawn, the date at the right;  the reply is its " +
     "children.  In an item, one of its thread's section, one frame round them all, the first reply's fold folding " +
-    "the whole thread;  Claude's newest wears an orange edge and NEW until Owen has seen it.",
+    "the whole thread;  Claude's newest wears an orange edge and NEW until you've seen it.",
   attributes: [
-    { name: "from", kind: "string", description: "Who wrote it (`Claude`, `Owen`)." },
+    {
+      name: "from",
+      kind: "string",
+      description:
+        "Who wrote it, a person's name (`Ana`);  on an agent's reply, whose session wrote it.  Drawn `You` when " +
+        "it's the reader's own;  before epic `epic-friend` P2, Claude's said `Claude`."
+    },
+    {
+      name: "agent",
+      kind: "string",
+      description:
+        "The agent that wrote it (`claude`, `codex` ...), else none:  the person in `from` did.  Drawn by its name, " +
+        "`Codex (Ana)`, or `Codex` for the reader's own session.  An old reply without it is Claude's when `from` says `Claude` " +
+        "(`ThreadFacts.agentOf()`);  the migration `agents-marked` adds it."
+    },
     {
       name: "at",
       kind: "string",
@@ -33,16 +47,21 @@ export const epicReplyVocabulary = {
   events: [],
   slots: [{ name: "", description: "The reply." }],
   parts: [
-    { name: "base", description: "The card:  Claude's violet, Owen's ivory (`from`)." },
+    { name: "base", description: "The card:  an agent's look, or every person's (`agent`)." },
     {
       name: "header",
       description: "Its heading band, a flex row:  the fold chevron, `who` left, `date` right;  a click folds it."
     },
     { name: "toggle", description: "The fold chevron, a `<button>`, first in the band;  only with a body." },
-    { name: "who", description: "The heading's left:  `<from> · re: <re>`;  wraps within itself." },
+    {
+      name: "who",
+      description:
+        "The heading's left:  who (`You`, a name, `Claude`, `Codex (Ana)`) and `re: <re>`, after a round mark of " +
+        "its initial;  wraps within itself."
+    },
     {
       name: "new",
-      description: "`NEW`, after `who`, on Claude's newest reply in an item until Owen has seen it (orange)."
+      description: "`NEW`, after `who`, on Claude's newest reply in an item until you've seen it (orange)."
     },
     { name: "date", description: "The heading's right:  `at`, `10/6/26 23:55`, on the top line;  never wraps." },
     { name: "body", description: "The reply;  not drawn when empty;  hidden (`until-found`) while folded." }
@@ -51,12 +70,15 @@ export const epicReplyVocabulary = {
     { name: "open", description: "Unfolded:  it starts so (page state, never written)." },
     { name: "in-thread", description: "In its item's thread:  inside the thread's one frame (`AnswerThread`)." },
     { name: "thread-start", description: "First in the thread:  the frame's top edge and corners." },
-    { name: "thread-end", description: "Last in the thread, or its folded head:  the frame's bottom edge and corners." },
+    {
+      name: "thread-end",
+      description: "Last in the thread, or its folded head:  the frame's bottom edge and corners."
+    },
     { name: "thread-hidden", description: "After the thread's head, which is folded:  hidden with it." },
     {
       name: "new",
       description:
-        "Claude's newest reply in its item (none of Owen's after it), not seen yet in this browser:  an orange " +
+        "Claude's newest reply in its item (none of yours after it), not seen yet in this browser:  an orange " +
         "edge and `NEW`.  Seen once on screen for 1.2s."
     }
   ],
@@ -64,7 +86,20 @@ export const epicReplyVocabulary = {
     { key: "foldTip", text: "Close this reply", description: "Tooltip of its fold button while open." },
     { key: "unfoldTip", text: "Open this reply", description: "Tooltip of its fold button while folded." },
     { key: "re", text: "re: {re}", description: "What the reply is about, in its heading." },
-    { key: "new", text: "NEW", description: "The tag on Claude's newest reply, until Owen has seen it." },
+    { key: "you", text: "You", description: "Who wrote it, in its heading:  the reader (`from` is their name)." },
+    {
+      key: "agent",
+      text: "{agent}",
+      description:
+        "Who wrote it, in its heading:  the agent by its name (`Claude`, `Codex`), the reader's own session's, or a " +
+        "reply from before `agent`."
+    },
+    {
+      key: "agentOf",
+      text: "{agent} ({person})",
+      description: "Who wrote it, in its heading:  another person's session's agent (`agent`, `from`):  `Codex (Bob)`."
+    },
+    { key: "new", text: "NEW", description: "The tag on Claude's newest reply, until you've seen it." },
     {
       key: "newTip",
       text: "Claude's newest reply:  new since you looked",

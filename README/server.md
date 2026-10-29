@@ -75,8 +75,8 @@ and spell-epic's local copy of highlight.js, which the page's cdnjs tag is point
 
 - Its import name is `spell/server`, an entry of the kit's one package, its namespace `SRV`:
   node only, but for the site header's browser code, `spell/server/site` ([below](#the-library-underneath)).
-- Code:  [src/server/](src/server/), its tests in [tests/server/](tests/server/).
-- Rules for working on it:  [server's AGENTS.md](src/server/AGENTS.md).
+- Code:  [src/server/](../src/server/), its tests in [tests/server/](../tests/server/).
+- Rules for working on it:  [server's AGENTS.md](../src/server/AGENTS.md).
 
 ## If you know Vite and Express, three things are different
 
@@ -164,7 +164,7 @@ Read the right-hand column first:  when an address misbehaves, it says where to 
 | Address | What it serves | Who answers |
 | --- | --- | --- |
 | `/` | a redirect to the docs home, `/pages/index.html` | the kit |
-| `/epics/`, `/guides/`, `/sagas/`, `/pages/`, `/goals/` ... | the content folder, `spell.epics/` (named in the kit's [epic settings](.epic/config.json5)), after the kit's own files;  the Epics list gets each running epic's card as it's served | spell-epic's `runningRoutes` |
+| `/epics/`, `/guides/`, `/sagas/`, `/pages/`, `/goals/` ... | the content folder, `spell.epics/` (named in the kit's [epic settings](../.epic/config.json5)), after the kit's own files;  the Epics list gets each running epic's card as it's served | spell-epic's `runningRoutes` |
 | `/worktrees/<w>/...` | an epic's worktree, with the same addresses inside;  on the main checkout's server only | `runningRoutes` |
 | `/components/<set>/` | a component set's docs, with Spell UI's site bundle laid over them at `_assets/`:  `/components/ui/`, `/components/epics/`, `/components/app/` | the settings' `componentSets`, one set from each of spell-ui, spell-epic and spell-app |
 | `/_epic/assets/`, `/_epic/pack/`, `/templates/` | spell-epic's page scripts and styles, its elements' pack, its templates;  the same copy under every worktree's address | spell-epic's `engineRoutes` |
@@ -395,7 +395,7 @@ _Only the element's own bytes change, so a diff shows only the edit;  a stale ET
 ### 5. Every epic on the main checkout's port
 
 An epic is worked in its own worktree, but its pages are read on the main checkout's server.
-This page, in an epic's worktree, is at `http://127.0.0.1:4747/worktrees/<epic>/README-server.md`.
+This page, in an epic's worktree, is at `http://127.0.0.1:4747/worktrees/<epic>/README/server.md`.
 
 ```mermaid
 %%{init: {"theme":"base","themeVariables":{"fontFamily":"-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif","fontSize":"15px","primaryColor":"#EFECFB","primaryBorderColor":"#6550CA","primaryTextColor":"#1A1C27","secondaryColor":"#F4F1E9","tertiaryColor":"#F7F6FC","lineColor":"#7F6FD6","textColor":"#7F6FD6","clusterBkg":"#F7F6FC","clusterBorder":"#B9B0E8","titleColor":"#1A1C27","edgeLabelBackground":"#F7F6FC","actorBkg":"#EFECFB","actorBorder":"#6550CA","actorTextColor":"#1A1C27","actorLineColor":"#9C90DE","signalColor":"#7F6FD6","signalTextColor":"#7F6FD6","labelBoxBkgColor":"#EFECFB","labelBoxBorderColor":"#6550CA","labelTextColor":"#1A1C27","loopTextColor":"#7F6FD6","noteBkgColor":"#F1E7D4","noteBorderColor":"#C9B48A","noteTextColor":"#1A1C27","activationBkgColor":"#DCD6F7","activationBorderColor":"#6550CA","sequenceNumberColor":"#FFFFFF"},"flowchart":{"curve":"basis","padding":12,"nodeSpacing":40,"rankSpacing":44}}}%%
@@ -471,8 +471,8 @@ Not a file:  <code>no/such.ts</code></p>
 
 ```html
 <p>
-  The clone command: <a href="tools/repos.ts" target="src-tools-repos-ts"><code>tools/repos.ts</code></a
-  >, and <a href="repos.json5" target="src-repos-json5"><code title="repos.json5">the list of repos</code></a
+  The clone command: <a href="../tools/repos.ts" target="src-tools-repos-ts"><code>tools/repos.ts</code></a
+  >, and <a href="../repos.json5" target="src-repos-json5"><code title="repos.json5">the list of repos</code></a
   >. Not a file: <code>no/such.ts</code>
 </p>
 ```
@@ -542,7 +542,7 @@ for (const bundle of SRV.Bundle.all(root)) if (bundle.isStale) bundle.build()
 - A new bundle:  a `BUNDLES` entry;  its output folder in the settings' `bundles` list, and in its repo's `.gitignore`.
 
 The page server builds the stale ones itself, as it starts
-([BundleBuild.ts](src/server/page/BundleBuild.ts)):
+([BundleBuild.ts](../src/server/page/BundleBuild.ts)):
 - It runs `spell bundle --stale` as a child process, which rebuilds only a bundle whose sources changed.
   A start with nothing changed builds nothing.
 - It runs the kit's OWN `spell`, as the kit's install finds it, never the one on your PATH:
@@ -569,7 +569,7 @@ DataFile.write(file, answer)
 
 - Read by the `.json5` name, else an old `.json`.
 - Written keeping hand-written comments
-  ([README-util.md](README-util.md#node-only--json5-with-its-comments-kept), "JSON5 with its comments kept"),
+  ([README/util.md](util.md#node-only--json5-with-its-comments-kept), "JSON5 with its comments kept"),
   laid out as `JSON.stringify(value, null, 2)` would, all at once.
 - No lock of its own:  callers hold the `FileLock`.
 
@@ -598,7 +598,7 @@ run.finish()
   - `waiting.json5`:  a heartbeat while `wait()` runs, so the page says the command is waiting;  gone after
 - `setRows()` replaces the rows, and a row already answered keeps its answer:  answers are kept by row id.
 - `wait()` returns at the time limit, with `timedOut`, rather than throwing.
-- Their shapes are one file, [runs.types.ts](src/server/runs/runs.types.ts):  the contract with the page side.
+- Their shapes are one file, [runs.types.ts](../src/server/runs/runs.types.ts):  the contract with the page side.
 
 Or the command runs on while its answers come in, and is steered from the page:
 each answer reaches it as it's given, the page shows its passes, and the effort picked there takes at the next one.
@@ -676,7 +676,7 @@ its site bundle, built on demand, and its component set, at `/components/ui/`._
 1. the kit's own:  none today
 2. the content repo's, a file of its own at the content folder's root, `page-server.json5`
 3. each folder's, lowest first, in the order of the root's `workspaces`
-4. each repo beside the repo that [repos.json5](repos.json5) lists as a peer
+4. each repo beside the repo that [repos.json5](../repos.json5) lists as a peer
 
 Each part's paths are read from its own folder, so Spell UI's writes `docs`, and the server serves
 `ui/docs`.
@@ -749,8 +749,8 @@ export default helloRoutes
 | `siteTabs` | the site header's tabs, in order:  label, home, and what lights each;  handed to every page as `SPELL_SERVER.siteTabs` | URLs |
 | `engineRoutes` | URL prefixes served from a folder, the same copy under every worktree's address:  `{ "/_epic/pack/": "src/components/__pack" }` | its repo |
 
-- Read by `pageServerSettings()` ([settings.ts](src/server/page/settings.ts)):
-  its types in [page.types.ts](src/server/page/page.types.ts).
+- Read by `pageServerSettings()` ([settings.ts](../src/server/page/settings.ts)):
+  its types in [page.types.ts](../src/server/page/page.types.ts).
 - Read once, as the server starts.
 - Settings that name no sets serve no sets;  a new set is one more entry.
 - `spell-language.js` is added only while its file exists:
@@ -795,7 +795,7 @@ They're the content repo's, since they describe its areas and the sets beside th
 - A tab whose home is a component set none of whose sets is served is left out:  without spell-app, no App/UI.
 - A component set or a path pattern lights a tab first;  a page's folder (`guides/` ...) only when none does.
 - The header's code names no tab:  they're data.
-  The kit's [siteTabs.test.ts](tests/server/site/siteTabs.test.ts) pins the order, and which tab lights for 59 page
+  The kit's [siteTabs.test.ts](../tests/server/site/siteTabs.test.ts) pins the order, and which tab lights for 59 page
   paths;  it skips itself where there's no content repo, as in the kit's CI.
 
 </details>
@@ -832,11 +832,11 @@ Most of what the server serves is a setting, not code:  one entry in a repo's pa
 | To add | Where | And |
 | --- | --- | --- |
 | a component set | one entry in `componentSets`:  its id, name, pages' folder and site bundle | usually a tab in `siteTabs` too |
-| a tab | one entry in the content repo's `siteTabs`, in the order the header shows it | update [siteTabs.test.ts](tests/server/site/siteTabs.test.ts), which pins the order |
+| a tab | one entry in the content repo's `siteTabs`, in the order the header shows it | update [siteTabs.test.ts](../tests/server/site/siteTabs.test.ts), which pins the order |
 | a folder served under a fixed prefix | one entry in `engineRoutes`:  the prefix, then the folder | the same copy is served under every worktree's address |
 | a script on every page | one entry in `pageScripts`:  its URL, its file, the prefixes to skip | it's added only while its file exists |
 | a folder pages may save into | one entry in the content repo's `writable` | a folder of the content folder |
-| a bundle built on demand | its output folder in `bundles` | and its build in [the bundle list](src/server/server.types.ts):  a folder no bundle builds into is an error |
+| a bundle built on demand | its output folder in `bundles` | and its build in [the bundle list](../src/server/server.types.ts):  a folder no bundle builds into is an error |
 
 </details>
 
@@ -937,7 +937,7 @@ What compiling to Python writes beside the program:  [spell-parser's README-targ
 
 ## Commands:  `spell server` and `spell bundle`
 
-Every verb and flag, `start all` and `stop all` included, is on [README-cli.md](README-cli.md#the-kit), "The kit".
+Every verb and flag, `start all` and `stop all` included, is on [README/cli.md](cli.md#the-kit), "The kit".
 This page has used them where they matter:
 `start`, `url`, `local` and `prune` in the flows above (2 and 5), `bundle` and `bundle check` under
 "Bundles built on demand".
@@ -945,7 +945,7 @@ What's left is a handful of facts the reference doesn't explain:
 - `--root <dir>` names another kit's root than the one the current folder is in;  any other folder is an error.
 - `epic server <verb>` is the same command line, from spell-epic's `epic`.
 - `--spaces <dir>` sets `SPELL_SPACES_DIR`, which spaces' route modules read, and a background server inherits.
-- `spell app serve [project]` brings up the editor and this server together ([README-cli.md](README-cli.md#spell-app)).
+- `spell app serve [project]` brings up the editor and this server together ([README/cli.md](cli.md#spell-app)).
 - `yarn favicon [--hat 0.74]`, at the kit's root, regenerates Spell's favicon from the hat mark
   (headless Chromium draws the PNGs).
 - The tests alone:  `yarn vp test run --project server`, at the kit's root.
@@ -994,25 +994,25 @@ What's left is a handful of facts the reference doesn't explain:
 
 | File | What |
 | --- | --- |
-| [index.ts](src/server/index.ts) | the barrel, `SRV` (node only) |
-| [WebServer.ts](src/server/WebServer.ts) | the server, and the request order |
-| [StaticHandler.ts](src/server/StaticHandler.ts), [mime.ts](src/server/mime.ts), [safePath.ts](src/server/safePath.ts) | static files, content types, the path check |
-| [Router.ts](src/server/Router.ts), [Request.ts](src/server/Request.ts), [Reply.ts](src/server/Reply.ts), [bodies.ts](src/server/bodies.ts), [listener.ts](src/server/listener.ts) | the Express-shaped part |
-| [LiveReload.ts](src/server/LiveReload.ts), [liveClient.ts](src/server/liveClient.ts), [webSocket.ts](src/server/webSocket.ts) | live reload |
-| [Guard.ts](src/server/Guard.ts), [FileLock.ts](src/server/FileLock.ts), [FileOperations.ts](src/server/FileOperations.ts), [PidFile.ts](src/server/PidFile.ts) | safety, locks, writes, the pid file |
-| [ports.ts](src/server/ports.ts), [open.ts](src/server/open.ts), [proxy.ts](src/server/proxy.ts), [checkout.ts](src/server/checkout.ts), [mainServer.ts](src/server/mainServer.ts), [untilInterrupted.ts](src/server/untilInterrupted.ts) | ports, openers, proxies, checkouts |
-| [page/](src/server/page/) | the page server:  `PageServer`, `PageEditor`, `BundleBuild`, its settings (`pageServerSettings()`, `kitRootOf()`), its command line, `prune` |
-| [site/](src/server/site/) | browser code:  `<spell-site-header>`, `<spell-section-editor>`, the page patcher (`PagePatch`:  an edited page patched in place), the favicon, the logo |
-| [test/](src/server/test/) | the test helpers |
-| [scripts/favicon.ts](scripts/favicon.ts) | `yarn favicon` |
-| [runs/](src/server/runs/) | command runs:  `CommandRun`, and the files it shares with the page side ([runs.types.ts](src/server/runs/runs.types.ts)) |
-| [Linker.ts](src/server/Linker.ts), [format.ts](src/server/format.ts), [Bundle.ts](src/server/Bundle.ts), [DataFile.ts](src/server/DataFile.ts), [contentFolder.ts](src/server/contentFolder.ts) | writing a page:  `Linker` (`link()`, `check()`, `resolve()`, `targetFor()`);  `formatHTML()`;  `Bundle` (`all()`, `check()`, `isStale`, `build()`, `sourcesHash()`, `sourceFiles()`;  a build script's steps, `clearOutput()`, `linkIconPacks()`, `sizeReport()`);  `DataFile`;  `contentFolderOf()`;  their types in [server.types.ts](src/server/server.types.ts) (`LinkResult`, `LinkCheck`, `BundleSpec`, `BundleCheck`, `BundleBuilt`, `BundleSizeParams`, `BundleRecord`, `BUNDLES`) |
+| [index.ts](../src/server/index.ts) | the barrel, `SRV` (node only) |
+| [WebServer.ts](../src/server/WebServer.ts) | the server, and the request order |
+| [StaticHandler.ts](../src/server/StaticHandler.ts), [mime.ts](../src/server/mime.ts), [safePath.ts](../src/server/safePath.ts) | static files, content types, the path check |
+| [Router.ts](../src/server/Router.ts), [Request.ts](../src/server/Request.ts), [Reply.ts](../src/server/Reply.ts), [bodies.ts](../src/server/bodies.ts), [listener.ts](../src/server/listener.ts) | the Express-shaped part |
+| [LiveReload.ts](../src/server/LiveReload.ts), [liveClient.ts](../src/server/liveClient.ts), [webSocket.ts](../src/server/webSocket.ts) | live reload |
+| [Guard.ts](../src/server/Guard.ts), [FileLock.ts](../src/server/FileLock.ts), [FileOperations.ts](../src/server/FileOperations.ts), [PidFile.ts](../src/server/PidFile.ts) | safety, locks, writes, the pid file |
+| [ports.ts](../src/server/ports.ts), [open.ts](../src/server/open.ts), [proxy.ts](../src/server/proxy.ts), [checkout.ts](../src/server/checkout.ts), [mainServer.ts](../src/server/mainServer.ts), [untilInterrupted.ts](../src/server/untilInterrupted.ts) | ports, openers, proxies, checkouts |
+| [page/](../src/server/page/) | the page server:  `PageServer`, `PageEditor`, `BundleBuild`, its settings (`pageServerSettings()`, `kitRootOf()`), its command line, `prune` |
+| [site/](../src/server/site/) | browser code:  `<spell-site-header>`, `<spell-section-editor>`, the page patcher (`PagePatch`:  an edited page patched in place), the favicon, the logo |
+| [test/](../src/server/test/) | the test helpers |
+| [scripts/favicon.ts](../scripts/favicon.ts) | `yarn favicon` |
+| [runs/](../src/server/runs/) | command runs:  `CommandRun`, and the files it shares with the page side ([runs.types.ts](../src/server/runs/runs.types.ts)) |
+| [Linker.ts](../src/server/Linker.ts), [format.ts](../src/server/format.ts), [Bundle.ts](../src/server/Bundle.ts), [DataFile.ts](../src/server/DataFile.ts), [contentFolder.ts](../src/server/contentFolder.ts) | writing a page:  `Linker` (`link()`, `check()`, `resolve()`, `targetFor()`);  `formatHTML()`;  `Bundle` (`all()`, `check()`, `isStale`, `build()`, `sourcesHash()`, `sourceFiles()`;  a build script's steps, `clearOutput()`, `linkIconPacks()`, `sizeReport()`);  `DataFile`;  `contentFolderOf()`;  their types in [server.types.ts](../src/server/server.types.ts) (`LinkResult`, `LinkCheck`, `BundleSpec`, `BundleCheck`, `BundleBuilt`, `BundleSizeParams`, `BundleRecord`, `BUNDLES`) |
 
 - Entries of their own, which plain `node` loads:
   `spell/server/checkout`, `/page/settings`, `/page/prune`, `/DataFile`, `/contentFolder`.
 
-Tests (node), at the same paths under [tests/server/](tests/server/):
-[Router.test.ts](tests/server/Router.test.ts) tests [Router.ts](src/server/Router.ts).
+Tests (node), at the same paths under [tests/server/](../tests/server/):
+[Router.test.ts](../tests/server/Router.test.ts) tests [Router.ts](../src/server/Router.ts).
 - `Router`, `StaticHandler`, `WebServer`, `LiveReload`, `PidFile`, `FileOperations`
 - `checkout`, `mainServer`, `ports`, `proxy`, `safePath`, `webSocket`, `liveClient`
 - `runs/CommandRun`
@@ -1038,7 +1038,7 @@ The docs site needs a checkout with the content folder beside it, and this page 
 
 - [spell-app's README-page-server.md](https://github.com/spell-app/spell/blob/main/app/README-page-server.md):  what the app's part adds,
   the editor and its API
-- [README-element.md](README-element.md):  the element framework, whose packs and component pages this server serves
+- [README/element.md](element.md):  the element framework, whose packs and component pages this server serves
 - [spell-epic's README](https://github.com/spell-app/spell/blob/main/epic/README.md):  the epic pages, and the route modules that serve them
-- [README-cli.md](README-cli.md#the-kit):  `spell server`, `spell bundle` and the kit's other commands
-- [README.md](README.md#setup-from-zero):  setup from zero, if nothing above has run for you yet
+- [README/cli.md](cli.md#the-kit):  `spell server`, `spell bundle` and the kit's other commands
+- [README.md](../README.md#setup-from-zero):  setup from zero, if nothing above has run for you yet

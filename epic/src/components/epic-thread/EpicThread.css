@@ -19,7 +19,6 @@
 
 @layer ui.components.epic-thread {
   :host {
-    --_epic-thread-violet: var(--ui-violet, #6435c9);
     --_epic-thread-green: var(--ui-green-text, var(--ui-green, #21ba45));
     --_epic-thread-orange: var(--ui-orange, #f2711c);
     --_epic-thread-ivory: var(--spell-rail-bg, var(--ui-brown-background, light-dark(#f7efe2, #2c2152)));

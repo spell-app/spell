@@ -47,3 +47,27 @@ jobs:
       - run: yarn ts
       - run: yarn lint
       - run: yarn test
+
+  # The epic tools on Windows (epic `epic-friend` P15):  the process, link and clipboard helpers (`Processes`,
+  # `Links`, the extension's `ClipboardImage`), then epic's node tests and the window script's.
+  # - Linux runs everything in `checks` above.
+  # - It doesn't fail the run yet:  nobody has run the epic tools on Windows, and what this job finds is epic
+  #   `epic-windows`' to fix;  once it's green, take `continue-on-error` out.
+  epic-on-windows:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - run: corepack enable
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: yarn
+      - run: yarn install
+      - run: git config --global user.name CI && git config --global user.email ci@spell.invalid
+      - run: yarn vp test run --project server tests/server/Processes.test.ts
+      - run: yarn test:node
+        working-directory: epic
+      - run: yarn test:scripts
+        working-directory: epic

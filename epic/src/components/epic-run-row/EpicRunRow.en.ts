@@ -8,7 +8,7 @@ import type { EpicVocabulary } from "spell/epic/definitions"
 
 /****************
  * ### `<epic-run-row>`
- * One row of a run page:  a thing a command asks Owen about, and his answer to it.
+ * One row of a run page:  a thing a command asks you about, and your answer to it.
  ****************/
 export const epicRunRowVocabulary = {
   tag: "epic-run-row",
@@ -18,11 +18,11 @@ export const epicRunRowVocabulary = {
   ui: false,
   description:
     "One row of a run page (epic `epic-engine` P23), drawn by `<epic-run>` in its table:  the command's own " +
-    "columns, then the answer.  The answer is the command's proposal, pre-filled in a box Owen types over;  a pick " +
+    "columns, then the answer.  The answer is the command's proposal, pre-filled in a box you type over;  a pick " +
     "of the few alternatives the command offers, when it offers any, with the proposal first;  the row's tick box, " +
     "with the command's own label (`Use for every project`);  and its details, folded under it.  Each change says " +
-    "so (`epic-run-answered`), and `<epic-run>` saves it:  typing half a second after he stops, a pick or a tick at " +
-    "once.  A row he answered differently from the proposal is orange, with a round button putting the proposal back.  " +
+    "so (`epic-run-answered`), and `<epic-run>` saves it:  typing half a second after you stop, a pick or a tick at " +
+    "once.  A row you answered differently from the proposal is orange, with a round button putting the proposal back.  " +
     "A row the command has taken (acted on, epic `epic-engine` P25) has a quiet `taken` mark, its time in the " +
     "tooltip;  changed after that, an orange note says so:  the command may pick the change up if it can.",
   attributes: [
@@ -44,7 +44,7 @@ export const epicRunRowVocabulary = {
       name: "answer",
       kind: "json",
       description:
-        "Owen's answer so far (`RunAnswer`:  `outcome`, `value`, `ticked`), as saved;  none:  the proposal, and the " +
+        "Your answer so far (`RunAnswer`:  `outcome`, `value`, `ticked`), as saved;  none:  the proposal, and the " +
         "tick box as the command set it."
     },
     { name: "answer-label", kind: "string", description: "The answer column's name (`Spanish`):  the box's name." },
@@ -61,7 +61,7 @@ export const epicRunRowVocabulary = {
       name: "epic-run-answered",
       detail: "{ rowId: string, outcome: RunOutcome, value: string, ticked?: boolean, now: boolean }",
       description:
-        "Owen answered the row:  typed in the box (`now: false`, saved a moment later), picked an alternative or " +
+        "You answered the row:  typed in the box (`now: false`, saved a moment later), picked an alternative or " +
         "ticked the box (`now: true`).  `outcome` says which:  `accepted` (the proposal), `picked` (an alternative), " +
         "`typed` (anything else)."
     }
@@ -92,11 +92,11 @@ export const epicRunRowVocabulary = {
   ],
   states: [
     { name: "changed", description: "The answer isn't the proposal:  orange." },
-    { name: "answered", description: "Owen answered it (anything saved, the proposal included)." },
+    { name: "answered", description: "You answered it (anything saved, the proposal included)." },
     { name: "taken", description: "The command took the row (acted on it)." },
     {
       name: "changed-after-taken",
-      description: "Owen's answer is newer than the command's taking of it:  the orange note shows."
+      description: "Your answer is newer than the command's taking of it:  the orange note shows."
     }
   ],
   texts: [

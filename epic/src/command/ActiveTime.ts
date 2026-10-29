@@ -23,6 +23,8 @@ import type { TimeSpan } from "./command.types"
  *   finding the transcripts is `WorkTime`'s.
  * - Its position:  its types file, and `Transcript` (a line, a message's blocks);  plain node can load it (no aliases, no
  *   parameter properties).
+ * - "Owen" here (`ASKS_OWEN`, `OWEN_WAITS`, `OwenCalls`):  whoever typed into the session, on any machine;
+ *   named when only Owen used it, and kept:  it reads a session's own transcript, not an epic page's person
  ****************/
 export class ActiveTime {
   /** The longest a tool's result may take, in a turn, and still count as work:  15 minutes, in ms. */

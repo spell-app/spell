@@ -1,6 +1,6 @@
 ---
 name: coherence
-description: Find where the code does one thing more than one way, or where a plan is about to -- a mechanism written twice that one shared one, handed what differs, would replace; new code rebuilding what already exists; two words for one idea -- and land each finding with the epic that owns it. Use for `/coherence sweep [area]` (code already written, an agent per area), `/coherence epic <name>` (an epic's kickoff, Overview and build plans, before they're agreed), or when Owen asks "do we already have this?", "is anything doing this twice?", "check this plan for reuse".
+description: Find where the code does one thing more than one way, or where a plan is about to -- a mechanism written twice that one shared one, handed what differs, would replace; new code rebuilding what already exists; two words for one idea -- and land each finding with the epic that owns it. Use for `/coherence sweep [area]` (code already written, an agent per area), `/coherence epic <name>` (an epic's kickoff, Overview and build plans, before they're agreed), or when the person asks "do we already have this?", "is anything doing this twice?", "check this plan for reuse".
 ---
 
 # /coherence
@@ -54,7 +54,7 @@ A reviewer for ONE way of doing each thing (epic `coherence`).
    - **building:**  a question on its page, `epic add <epic>#Q "<title> (coherence)" --details "..."`:  its session
      takes it up.
    - **no epic, or done:**  a calm issue on the coherence epic's page,
-     `epic add coherence#I "<title> (coherence)" --calm --details "..."`;  Owen marks which become its phases.
+     `epic add coherence#I "<title> (coherence)" --calm --details "..."`;  the person marks which become its phases.
    - Each item's details:  the finding in procedures.md's shape, its **Net effect** right after "The one" and
      BEFORE "Saves" (Owen, 2026-10-25), its places and evidence in a folded `<epic-code>`.
 6. **Reply:**  one line per finding, where it landed, with its link (`epic pages link ... --hash <id>`);  the
@@ -63,7 +63,7 @@ A reviewer for ONE way of doing each thing (epic `coherence`).
      "Coherence 81 → 83, 2% better (score up);  copies 233 → 220, 6% better (fewer copies)" (procedures.md,
      "The score").
    - A plan review:  "this plan adds N copies" per mechanism, where the agent could tell.
-7. **Learn,** whenever Owen gives a verdict on a finding (here or on the page):
+7. **Learn,** whenever the person gives a verdict on a finding (here or on the page):
    - agreed, and the mechanism exists:  its entry in the catalog gets the copies;  a new one:  a new entry
    - a word settled:  the word list gets it, with where it was decided
    - "that's fine as it is":  a line in the catalog's "Fine as it is", with why

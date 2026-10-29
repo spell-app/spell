@@ -222,7 +222,7 @@ test("reorder:  a section's rows keep the data's order, its table says reorder; 
   const moved = formatAnswer(file, { ...answer, order: { q1: ["q1-A-7", "q1-A-9"] } })
   expect(moved).toContain(
     [
-      "  Order of Q1 · Members (Owen moved rows):",
+      "  Order of Q1 · Members (rows moved):",
       "    1. q1-A-7  this.isOpen  (was 2)",
       "    2. q1-A-9  UI.isDark  (was 1)"
     ].join("\n")

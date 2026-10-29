@@ -82,7 +82,7 @@ describe("sendRequest()", () => {
     expect(readFileSync(join(sent.folder, "image-1.png"), "utf8")).toBe("red pixel")
     expect(readFileSync(join(sent.folder, "image-2.jpg"), "utf8")).toBe("blue pixel")
     const markdown = readFileSync(join(sent.folder, "request.md"), "utf8")
-    expect(markdown).toContain('## Owen\'s words\n\nthe "comment" box covers the text\n')
+    expect(markdown).toContain('## The person\'s words\n\nthe "comment" box covers the text\n')
     expect(markdown).toContain("## Context\n\nepic python's epic page, P4\n")
   })
 

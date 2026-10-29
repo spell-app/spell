@@ -18,7 +18,7 @@ export const epicMarkVocabulary = {
   ui: false,
   description:
     "An item's id as a chip, in the colour of the item's state:  `<epic-mark item=\"i126\" link>` draws `I126`, red " +
-    "while it waits on Owen, green when it's newly decided, grey once it's old (the same rule as the item's own chip, " +
+    "while it waits on you, green when it's newly decided, grey once it's old (the same rule as the item's own chip, " +
     "`ItemAge`).  The item's title is its tooltip;  with `link`, a click lands on the item.  The tool writes them in a " +
     'phase\'s To review field (Owen, 2026-10-25:  "`<epic-mark link>` for rendering the I126 mark").',
   attributes: [

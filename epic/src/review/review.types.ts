@@ -248,6 +248,8 @@ export const AGENTS_FILE = "agents.json5"
  *   `null` otherwise, or from a server started before it woke epics
  * - `doing`:  what the listening session is doing now (epic `epic-engine` P35), the toolbar's line;  `null` for
  *   nothing, nobody listening, or a server started before it
+ * - `lastListener`:  who listened last, while nobody does (epic `epic-friend` P11);  `null` otherwise, or from an
+ *   older server
  */
 export type Inbox = Pick<
   PageInbox,
@@ -258,6 +260,7 @@ export type Inbox = Pick<
   | "now"
   | "working"
   | "listening"
+  | "lastListener"
   | "unsentComments"
   | "waitingComments"
   | "woken"
@@ -412,6 +415,7 @@ export function inboxOf(reply: unknown): Inbox {
     now: Array.isArray(record.now) ? (record.now as NowRequest[]) : [],
     working: isObject(record.working) ? (record.working as Inbox["working"]) : {},
     listening: isObject(record.listening) ? (record.listening as InboxListener) : null,
+    lastListener: isObject(record.lastListener) ? (record.lastListener as InboxListener) : null,
     unsentComments: Array.isArray(record.unsentComments)
       ? record.unsentComments.filter((id): id is string => typeof id === "string")
       : [],

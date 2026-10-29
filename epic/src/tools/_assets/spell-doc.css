@@ -84,6 +84,22 @@
   --spell-state-old: var(--ui-grey-background, light-dark(#eeeeee, #34343b));
   --spell-state-old-on: var(--ui-grey-text, GrayText);
   /*
+   * ## Voices:  who said it (epic `epic-friend` T11):  an agent's (Claude's) terracotta, a person's (you, everyone)
+   * violet;  a reply card's round mark, its name, a person's card fill and rule.  TWEAK THEM HERE for the docs pages.
+   * - the same values as `<epic-page>`'s `--epic-voice-*` (`spell-epic`, `EpicPage.css`):  change both
+   * - handed to the `<epic-*>` elements on a docs page below ("Voices on a docs page")
+   */
+  --spell-voice-agent: light-dark(#c96442, #d97757);
+  --spell-voice-agent-text: light-dark(#a8502f, #e59a7c);
+  --spell-voice-person: var(--ui-violet, #6550ca);
+  --spell-voice-person-text: var(--ui-violet-text, var(--spell-voice-person));
+  --spell-voice-person-fill: color-mix(
+    in oklab,
+    var(--spell-voice-person) 5%,
+    light-dark(#fff, var(--ui-background, Canvas))
+  );
+  --spell-voice-person-rule: color-mix(in oklab, var(--spell-voice-person) 26%, transparent);
+  /*
    * an Epics card's star while it's a favourite:  the page's yellow, a star's own colour (epic `airplane` J22, Owen
    * 2026-10-10:  "make it yellow";  the brand's gold-brown before).  Not starred:  its outline, grey.
    * - the one place yellow doesn't mean "open":  a star reads as a favourite, never as a state
@@ -927,6 +943,19 @@ pre > .spell-code-copy {
   --epic-state-recent: var(--spell-state-recent);
   --epic-state-recent-on: var(--spell-state-recent-on);
 }
+/*
+ * ## Voices on a docs page:  a reply card, a note box, a comment thread or a page note's head outside an epic page
+ *   takes the page's (`--spell-voice-*`)
+ * - never one inside an `<epic-page>`:  it inherits the page's own, which a page's `epic-page { ... }` may override
+ */
+.spell-doc-main :is(epic-reply, epic-review, epic-thread, epic-page-note-head):not(epic-page *) {
+  --epic-voice-agent: var(--spell-voice-agent);
+  --epic-voice-agent-text: var(--spell-voice-agent-text);
+  --epic-voice-person: var(--spell-voice-person);
+  --epic-voice-person-text: var(--spell-voice-person-text);
+  --epic-voice-person-fill: var(--spell-voice-person-fill);
+  --epic-voice-person-rule: var(--spell-voice-person-rule);
+}
 .spell-doc-main :is(.plan-items, .spell-epics) > [data-spell-hidden] {
   display: none;
 }
@@ -940,9 +969,10 @@ pre > .spell-code-copy {
  * ## Page notes (epic `airplane`, P3):  `<spell-notes>` groups of `<spell-note>` cards, written into the page
  * (`tools/PageNotes.js`), drawn by the runtime's "Page notes" (`wireNotes()`):  each note's head line is an
  * `<epic-page-note-head>` (the epics pack, epic `epic-engine` P3), its look its own sheet's.
- * - a note is Owen's:  an ivory card (`--spell-warm`);  Claude's replies under it, violet (Claude's voice)
+ * - a note is Owen's:  an ivory card (`--spell-warm`);  Claude's replies under it, in an agent's voice
+ *   (`--spell-voice-agent`, terracotta;  epic `epic-friend` P10, Q16:  violet before, which now means a person)
  * - FOLDED until opened (`spell-note[open]`):  only the head line shows, with the note's first line
- * - its status, by the colour scheme:  new yellow (open), answered violet, done grey
+ * - its status, by the colour scheme:  new yellow (open), answered in the agent's voice, done grey
  * - read only since P11:  guide comments (below) replaced the bubbles that wrote them
  */
 /* one column no wider than the group:  a folded note's one-line preview ends in "...", never past the column */
@@ -962,7 +992,7 @@ pre > .spell-code-copy {
   font-size: 0.95rem;
 }
 .spell-doc-main spell-note[status="answered"] {
-  border-left-color: var(--ui-violet, #6435c9);
+  border-left-color: var(--spell-voice-agent);
 }
 .spell-doc-main spell-note[status="done"] {
   border-left-color: var(--spell-rule);
@@ -979,15 +1009,15 @@ pre > .spell-code-copy {
   display: block;
   margin: 6px 0 4px 8px;
   padding: 2px 10px;
-  border-left: 3px solid var(--ui-violet, #6435c9);
-  background: color-mix(in srgb, var(--ui-violet, #6435c9) 7%, var(--spell-bg));
+  border-left: 3px solid var(--spell-voice-agent);
+  background: color-mix(in srgb, var(--spell-voice-agent) 7%, var(--spell-bg));
   border-radius: 0 6px 6px 0;
 }
 .spell-doc-main spell-note-reply::before {
   content: "Claude · " attr(at);
   display: block;
   margin-top: 4px;
-  color: var(--ui-violet, #6435c9);
+  color: var(--spell-voice-agent-text);
   font: var(--spell-eyebrow-font);
   letter-spacing: var(--spell-eyebrow-tracking);
 }
@@ -1498,7 +1528,7 @@ ui-labels.spell-legend {
 }
 
 /*******************************
-     Pages Owen answers on
+     Pages you answer on
 *******************************/
 
 /*

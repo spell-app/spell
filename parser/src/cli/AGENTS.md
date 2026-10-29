@@ -9,7 +9,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 
 ## Overview
 
-- The language's commands for `spell`, the kit's command line ([README-cli.md](../../../README-cli.md)):
+- The language's commands for `spell`, the kit's command line ([README/cli.md](../../../README/cli.md)):
 
   ```
   compile  lint  run  test  watch  format  describe  explain  parse  repl  speedtest

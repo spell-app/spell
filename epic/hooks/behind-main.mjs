@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 /**
- * Claude Code's `SessionStart` and `PostToolUse` (`EnterWorktree`) hooks (the plugin's `hooks/hooks.json`):
+ * Claude Code's `SessionStart` and `PostToolUse` (`EnterWorktree`) hooks (the plugin's `hooks/hooks.json`), and
+ * Codex's `SessionStart` ([codex-hooks.json](codex-hooks.json), epic `epic-friend` P11):
  * says when the session's worktree is behind `main` (epic `epic-eject` P1).
  * - `main` here is the repo's base branch:  `baseBranch` in its `.epic/config.json5` (`EpicConfig`).
  * - Why:  a worktree runs its OWN copy of the repo's code and pages, as old as its branch.
@@ -8,28 +9,32 @@
  * - stdin `{ cwd, hook_event_name, tool_input, ... }`.
  *   The folder checked:  `tool_input.path` (an `EnterWorktree` by path), else `cwd` (by name, the skills' way since
  *   epic `epic-engine` P16).
- * - Only in a repo that uses epics (it has `.epic/config.json5`):  the plugin's hooks run in every repo.
+ * - Only in a repo set up for epics (`EpicConfig.ofSetUp()`:  it has `.epic/config.json5`):
+ *   the plugin's hooks run in every repo.
  * - On `main`, outside git, or not behind:  nothing.
- * - Behind:  a line for Owen (`systemMessage`), and one for Claude (`additionalContext`):
- *   offer the merge.
+ * - Behind:  a line for the person (`systemMessage`), and one for the agent (`additionalContext`):
+ *   offer the merge, in its question modal if it has one, else in the chat.
  * - Then, behind or not:  starts `patch-checkout.mjs` for the checkout, DETACHED (epic `epic-engine` P17), which gives
  *   it the fixes its repo lists in `"checkoutPatches"` that it lacks (`CheckoutPatches`);  its lines go to
  *   `epic-patches.log` in the checkout's git folder, and nothing is said:  a patch is meant to go unnoticed.
  * - Always exits 0, within a few seconds:  never blocks a session.
+ * - Run by the Codex PLUGIN (`--codex-plugin`) while Codex's own hooks file runs it too:  nothing (`CodexHome`, J37).
  */
 import { spawn } from "node:child_process"
-import { existsSync, openSync, readFileSync } from "node:fs"
+import { openSync, readFileSync } from "node:fs"
 import { join } from "node:path"
 
 import { Git } from "spell/server/Git"
 
 try {
+  // the plugin started it (--codex-plugin) while Codex's user hooks file runs it too:  one route, never both
+  const { CodexHome } = await import("spell/epic/config/CodexHome.ts")
+  if (CodexHome.skipPluginHook()) process.exit(0)
   const input = JSON.parse(readFileSync(0, "utf8") || "{}")
   const dir = input.tool_input?.path ?? input.cwd
   // loaded in here, so a config that won't read never fails the hook
   const { EpicConfig } = await import("spell/epic/config/EpicConfig.ts")
-  const config = dir && EpicConfig.of(dir)
-  const main = config && existsSync(config.file) && config.baseBranch
+  const main = dir && EpicConfig.ofSetUp(dir)?.baseBranch
   if (main) patchInBackground(dir)
   const behind = main && behindMain(dir, main)
   if (behind) {
@@ -42,8 +47,9 @@ try {
           hookEventName: input.hook_event_name ?? "SessionStart",
           additionalContext:
             `This worktree (branch ${branch}) is ${commits} behind ${main}, so its code and pages are that old.  ` +
-            `Tell Owen in one line, and offer (AskUserQuestion) to merge ${main} in ` +
-            `now:  \`epic worktree merge-main\`, "Merge ${main} now (Recommended)" / "Not now".`
+            `Tell the person in one line, and offer to merge ${main} in now:  \`epic worktree merge-main\`, ` +
+            `"Merge ${main} now (Recommended)" / "Not now" -- in your question modal if you have one ` +
+            `(Claude Code's AskUserQuestion), else in the chat.`
         }
       })
     )

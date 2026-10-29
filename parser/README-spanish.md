@@ -349,7 +349,7 @@ Spanish (es):  complete, 19 modules
 - `spell translate fix es` writes a stub for each missing registration, the English copied and marked to translate;
   `--ai` asks Claude to draft each one, marked for review.
 - A difference on purpose is marked in the pack's file, `// packs: ok -- why`, so the check passes.
-- Every option:  [the command line's page](https://github.com/spell-app/spell/blob/main/README-cli.md#spell-parser).
+- Every option:  [the command line's page](https://github.com/spell-app/spell/blob/main/README/cli.md#spell-parser).
 
 ## Translating a project
 
@@ -417,7 +417,7 @@ with no Send in time (30 minutes, `--review-timeout`), the answers given by then
 The page also shows each pass as it runs, and picks the effort for the next one.
 
 - Every option, and what it leaves for a person:
-  [the command line's page](https://github.com/spell-app/spell/blob/main/README-cli.md#translating-a-project).
+  [the command line's page](https://github.com/spell-app/spell/blob/main/README/cli.md#translating-a-project).
 
 **The edge:**  the translation reads differently from a person's.
 Translated cold, Solitaire's names match the hand-made Solitario's about 7 times in 10
@@ -474,6 +474,6 @@ Spell UI's Spanish, the runtime's messages and the editor's words are first draf
 - [README-parser](README-parser.md#spell-in-another-human-language):  one rule's code in both languages, and how a third starts
 - [README-spell](README-spell.md):  everything a line of Spell can say, in English, and how to add a rule in both languages
 - [README-examples](https://github.com/spell-app/spell/blob/main/app/README-examples.md#solitario--the-same-game-in-spanish):  Solitario beside Solitaire
-- [The command line's page](https://github.com/spell-app/spell/blob/main/README-cli.md#translating-a-project):  `spell translate` and `speedtest`, every option
+- [The command line's page](https://github.com/spell-app/spell/blob/main/README/cli.md#translating-a-project):  `spell translate` and `speedtest`, every option
 - [Spell UI's runtime page](https://github.com/spell-app/spell/blob/main/ui/README-runtime.md#vocabularies-and-localization):  a Spell UI page written in Spanish
 - [spell-parser's README](README.md):  the language, its pipeline, and every page of the folder

@@ -7,6 +7,7 @@ import { Git } from "spell/server/Git"
 import { RealPath } from "spell/server/RealPath"
 import { CLI } from "spell/cli"
 import { EpicConfig } from "spell/epic/config/EpicConfig"
+import { EpicHome } from "spell/epic/config/EpicHome"
 import { EpicRepo } from "spell/epic/config/EpicRepo"
 import { SessionFolders } from "spell/epic/config/SessionFolders"
 import { URGENT_STATES } from "spell/epic/list/EpicState"
@@ -50,6 +51,9 @@ import { tsxImports } from "spell/epic/tools/packageDir"
  *     - was `status.py <name>`
  *   - `move <name> | --idle [--dry-run] [--json]`:  move a worktree (`--idle`:  every one no session works in)
  *     from the old place, `.claude/worktrees`, to the new one beside the repo (`move()`;  epic `epic-eject` P8)
+ *   - `create <name>`:  make worktree `<name>` on branch `<name>`, as Claude Code's `EnterWorktree` does through the
+ *     plugin's worktree hook, and print its folder (`create()`, epic `epic-friend` P12):  for Codex, or any agent with no
+ *     worktree hook;  a worktree already there is reused
  *   - `path <name>`:  worktree `<name>`'s folder, absolute (epic `epic-eject` P8)
  *     - an epic worked in ANOTHER repo (`EpicRepo.elsewhere()`, epic `epic-engine` I47):  that repo's, said on stderr
  *     - where it is (the old place included), else where a new one goes (`EpicConfig.worktreeFolder()`)
@@ -112,6 +116,11 @@ export class Worktrees {
         if (!name) throw new EpicCommandError("status:  which name?")
         CLI.out(JSON.stringify(this.nameStatus(name), null, 2))
         return EXIT.OK
+      case "create": {
+        if (!name) throw new EpicCommandError("create:  which name?  (the epic's, for its worktree and branch)")
+        CLI.out(Worktrees.create(name))
+        return EXIT.OK
+      }
       case "path": {
         if (!name) throw new EpicCommandError("path:  which worktree?")
         // another repo's epic:  ITS worktree, said on stderr (epic `epic-engine` I47)
@@ -170,6 +179,30 @@ export class Worktrees {
           `unknown verb '${verb}':  list, status, path, move, remove, repos, merge-main or patch`
         )
     }
+  }
+
+  /**
+   * Make worktree `name` (branch `name`, from the local base branch) as the plugin's worktree hook makes one for Claude
+   * Code's `EnterWorktree`, in the repo of the current folder;  its folder.
+   * - the SAME code:  it runs the hook ([worktree.mjs](../../hooks/worktree.mjs) `create`), so links, the install and the
+   *   other-repo refusal are all the hook's;  its progress goes to stderr
+   * - for an agent with no worktree hook (Codex, epic `epic-friend` P12), which then works from that folder
+   * - throws `EpicCommandError` when the hook fails, with its last words
+   */
+  static create(name: string, cwd = process.cwd()): string {
+    const result = spawnSync(process.execPath, [WORKTREE_HOOK, "create"], {
+      cwd,
+      input: JSON.stringify({ name, cwd }),
+      encoding: "utf8",
+      stdio: ["pipe", "pipe", "inherit"]
+    })
+    const folder = result.stdout?.trim().split("\n").at(-1)
+    if (result.status !== 0 || !folder)
+      throw new EpicCommandError(
+        `create:  the worktree hook couldn't make ${name} (exit ${result.status})`,
+        EXIT.ERRORS
+      )
+    return folder
   }
 
   ////////////////
@@ -303,7 +336,7 @@ export class Worktrees {
     if (!removed.ok && !leftover) throw new EpicCommandError(`git worktree remove ${path} failed:  ${removed.err}`)
     const lines = [`removed ${path}`]
     if (leftover) {
-      const cleared = LeftoverFolders.clear(path, { home: CheckoutServers.homeFolder() })
+      const cleared = LeftoverFolders.clear(path, { home: EpicHome.folder() })
       Git.run(["worktree", "prune"], main)
       const said = LeftoverFolders.said(path, cleared)
       if (said) lines.push(said)
@@ -760,3 +793,6 @@ function mergeResultLines(report: MergeMainReport): string[] {
     ...crossed
   ]
 }
+
+/** The plugin's worktree hook, which `create()` runs:  `epic/hooks/worktree.mjs`. */
+const WORKTREE_HOOK = join(dirname(dirname(import.meta.dirname)), "hooks", "worktree.mjs")

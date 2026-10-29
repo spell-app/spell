@@ -46,7 +46,7 @@ export const epicCardVocabulary = {
       name: "urgent",
       kind: "string",
       format: "ids",
-      description: "The ids of its items that need Owen (red and orange chips), space-separated:  `q3 j12`."
+      description: "The ids of its items that need you (red and orange chips), space-separated:  `q3 j12`."
     },
     { name: "future", kind: "boolean", description: "Written down with `/epic future`, not planned yet." },
     { name: "standing", kind: "boolean", description: "Open for good:  every phase done is NOT done." },

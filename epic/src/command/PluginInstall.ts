@@ -7,7 +7,7 @@ import {
   readlinkSync,
   realpathSync,
   rmSync,
-  symlinkSync,
+  statSync,
   writeFileSync
 } from "node:fs"
 import { createRequire } from "node:module"
@@ -15,8 +15,11 @@ import { homedir } from "node:os"
 import { dirname, join, resolve } from "node:path"
 
 import { Git } from "spell/server/Git"
+import { Links } from "spell/server/Links"
 import { CLI } from "spell/cli"
 import { ClaudeHome } from "spell/epic/config/ClaudeHome"
+import { CodexHome, EPIC_HOOK, PLUGIN_HOOK_FLAG } from "spell/epic/config/CodexHome"
+import { Editor } from "spell/epic/config/Editor"
 
 import { EXIT, EpicCommandError, parseVerbArgs, stringFlag } from "./command.types"
 import { SessionMoves } from "./SessionMoves"
@@ -26,7 +29,7 @@ import { SessionMoves } from "./SessionMoves"
  * `epic plugin install [--kit <folder>] [--dry-run] [--json]`:  the epic plugin installed for Claude Code as
  * `epic@spell`, run in place from the kit's `epic/` folder (epic `epic-engine` P49, Q45).
  *
- * It does what the kit's README-agents.md once listed as five commands to type, in order, each step skipped when it's
+ * It does what the kit's README/agents.md once listed as five commands to type, in order, each step skipped when it's
  * done already, so it's safe to run again:
  * 1. Claude Code's settings (`<claude>/settings.json`):
  *    - the old plugin, `spell-epic@spell-epic`, and its marketplace taken out of `enabledPlugins` and
@@ -59,6 +62,25 @@ import { SessionMoves } from "./SessionMoves"
  * - Claude Code's folder:  `ClaudeHome.home()` (`$CLAUDE_CONFIG_DIR`, else `~/.claude`);  the `PATH` folder:
  *   `~/.local/bin`.  A test hands in both.
  * - Throws `EpicCommandError` when the kit has no plugin in `epic/`, or a list of Claude Code's won't parse.
+ *
+ * `--codex` (epic `epic-friend` P11) sets it up for Codex instead (`installCodex()`):
+ * 1. the plugin's Codex hooks ([codex-hooks.json](../../hooks/codex-hooks.json)) in Codex's own hooks file,
+ *    `<codex>/hooks.json`, run from the kit's `epic/` by its full path:  each turn's end runs `epic turn end`, and a
+ *    new session hears when its worktree is behind `main` or the last sync stopped on a conflict
+ *    - Codex's user hooks file, not the plugin's own:  Codex's docs say a plugin's hooks run in a plugin installed by
+ *      hand in its desktop app, and say nothing of the CLI;  `~/.codex/hooks.json` reaches every Codex
+ *    - its other hooks kept;  ours from an older install (another kit folder) replaced, never doubled
+ *    - Codex runs a hook only once the person trusts it, in its `/hooks` screen, and again after it changes
+ *    - ONE route (J37):  the plugin's own hooks file passes `--codex-plugin`, and a script started so does nothing
+ *      while this file runs it (`CodexHome.skipPluginHook()`), so a plugin added in Codex's desktop app too never
+ *      runs them twice
+ * 2. a link in `~/.agents/skills/` to each of the plugin's skills (epic `epic-friend` P12):  the SAME files, which
+ *    Codex lists in every repo, called as `$epic review`
+ * 3. the plugin's agents (the designer, coherence) as Codex's custom agents, `<codex>/agents/epic-<name>.toml`,
+ *    generated from Claude Code's agent files
+ * 4. `epic` on the terminal's `PATH`, as step 6 above
+ * - Codex's folder:  `$CODEX_HOME`, else `~/.codex` (`CodexHome`);  the skills' `$SPELL_EPIC_AGENTS_HOME`, else
+ *   `~/.agents`;  a test hands both in, and the tests' setup points both at scratch folders.
  ****************/
 export class PluginInstall {
   /** Claude Code's own folder (`~/.claude`) */
@@ -69,20 +91,40 @@ export class PluginInstall {
   readonly bin: string
   /** the time written into Claude Code's lists */
   readonly now: () => Date
+  /** Codex's own folder (`~/.codex`):  `--codex` writes its hooks file and custom agents there */
+  readonly codexHome: string
+  /** the open skills format's own folder (`~/.agents`):  `--codex` links the skills into its `skills/` */
+  readonly agentsHome: string
   /** the plugin's folder:  the kit's `epic/`, or the published `spell-epic` package (`pluginFolder()`) */
   readonly engine: string
+  /** the system it installs on:  links and `epic`'s place on the `PATH` differ on Windows */
+  readonly platform: NodeJS.Platform
+  /** the editor the extension goes into, VS Code or Cursor (`Editor`, epic `epic-friend` P16) */
+  readonly editor: Editor
+  /** runs the editor's command (`code`, `cursor`):  its output, or `undefined` when it can't run or fails */
+  readonly code: (args: string[]) => string | undefined
 
   constructor({
     home = ClaudeHome.home(),
     kit = PluginInstall.mainKit(),
     bin = join(homedir(), ".local", "bin"),
-    now = () => new Date()
+    now = () => new Date(),
+    codexHome = CodexHome.home(),
+    agentsHome = CodexHome.agentsHome(),
+    platform = process.platform,
+    editor = Editor.of(),
+    code = (args) => runEditor(editor, args)
   }: PluginInstallProps = {}) {
     this.home = home
     this.kit = kit
     this.bin = bin
     this.now = now
+    this.codexHome = codexHome
+    this.agentsHome = agentsHome
     this.engine = PluginInstall.pluginFolder(kit)
+    this.platform = platform
+    this.editor = editor
+    this.code = code
   }
 
   /**
@@ -123,12 +165,21 @@ export class PluginInstall {
 
   /** Run `epic plugin <args>`;  resolves to the exit code.  Throws `EpicCommandError` for a bad command line. */
   async run(args: string[]): Promise<number> {
-    const { positional, flags } = parseVerbArgs(args, ["dryRun", "json"])
+    const { positional, flags } = parseVerbArgs(args, ["dryRun", "json", "codex"])
     const [verb] = positional
     if (verb !== "install") throw new EpicCommandError(`unknown verb '${verb ?? ""}':  epic plugin install`)
     const kit = stringFlag(flags.kit)
-    const installer = kit ? new PluginInstall({ home: this.home, kit: resolve(kit), bin: this.bin }) : this
-    const report = installer.install({ dryRun: flags.dryRun === true })
+    const installer = kit
+      ? new PluginInstall({
+          home: this.home,
+          kit: resolve(kit),
+          bin: this.bin,
+          codexHome: this.codexHome,
+          agentsHome: this.agentsHome
+        })
+      : this
+    const dryRun = flags.dryRun === true
+    const report = flags.codex ? installer.installCodex({ dryRun }) : installer.install({ dryRun })
     if (flags.json) CLI.out(JSON.stringify(report, null, 2))
     else for (const line of PluginInstall.lines(report)) CLI.out(line)
     return EXIT.OK
@@ -168,7 +219,44 @@ export class PluginInstall {
     this.knownMarketplaces(marketplace, { dryRun, change })
     this.installedPlugins(`${plugin}@${marketplace}`, version, { dryRun, change })
     this.cache(plugin, marketplace, version, { dryRun, change })
-    this.skills({ dryRun, change })
+    this.linkSkills(join(this.home, "skills"), "skills", { dryRun, change })
+    this.binLink({ dryRun, change })
+    this.extension({ dryRun, change })
+    return report
+  }
+
+  /**
+   * Whether Claude Code has the plugin already:  its installed plugins list (`plugins/installed_plugins.json`) names
+   * `epic@spell`, and the folder it runs it from is there (epic `epic-friend` P13:  `epic init` installs it when not).
+   * - only installed or not:  `install()` itself brings an older install up to date
+   * - throws `EpicCommandError` when the kit has no plugin
+   */
+  isInstalled(): boolean {
+    const { plugin, marketplace } = this.names()
+    const file = join(this.home, "plugins", "installed_plugins.json")
+    const installed = existsSync(file) ? (readJson(file) as InstalledPlugins) : undefined
+    const [entry] = installed?.plugins?.[`${plugin}@${marketplace}`] ?? []
+    return !!entry?.installPath && existsSync(entry.installPath)
+  }
+
+  /**
+   * Set the plugin up for Codex (`--codex`, the class's Codex steps);  what it changed, or would with `dryRun`.
+   * - SIDE EFFECT (not `dryRun`):  writes Codex's hooks file and custom agents, the skill links, and the `epic` link
+   * - throws `EpicCommandError` when the kit has no Codex hooks file, or Codex's won't parse
+   */
+  installCodex({ dryRun = false }: { dryRun?: boolean } = {}): PluginInstallReport {
+    const report: PluginInstallReport = {
+      plugin: "epic for Codex",
+      version: this.version(),
+      from: this.engine,
+      dryRun,
+      changes: [],
+      agent: "codex"
+    }
+    const change = (text: string) => report.changes.push(text)
+    this.codexHooks({ dryRun, change })
+    this.codexSkills({ dryRun, change })
+    this.codexAgents({ dryRun, change })
     this.binLink({ dryRun, change })
     return report
   }
@@ -178,10 +266,15 @@ export class PluginInstall {
     const head = `${report.plugin} ${report.version}, from ${report.from}`
     if (!report.changes.length) return [`${head}:  already installed;  nothing to change`]
     const verb = report.dryRun ? "would change" : "changed"
+    const then =
+      report.agent === "codex"
+        ? "then:  in Codex, /hooks, and trust them (once, and again whenever they change);  a new session runs them, " +
+          "and lists the skills ($epic review ...)"
+        : "then:  /reload-plugins in each running session (or start a new one)"
     return [
       `${head}:  ${verb} ${report.changes.length}`,
       ...report.changes.map((line) => `  ${line}`),
-      ...(report.dryRun ? [] : ["then:  /reload-plugins in each running session (or start a new one)"])
+      ...(report.dryRun ? [] : [then])
     ]
   }
 
@@ -299,6 +392,121 @@ export class PluginInstall {
   }
 
   ////////////////
+  // ## Codex
+  ////////////////
+
+  /** Codex's step 1:  the plugin's Codex hooks in `<codex>/hooks.json`, by full path;  its other hooks kept. */
+  private codexHooks(step: Step): void {
+    const source = join(this.engine, "hooks", CODEX_HOOKS)
+    if (!existsSync(source))
+      throw new EpicCommandError(
+        `epic plugin install --codex:  ${this.kit} has no Codex hooks (epic/hooks/${CODEX_HOOKS});  ` +
+          "pass the kit's checkout:  --kit ~/www/spell",
+        EXIT.ERRORS
+      )
+    const ours = PluginInstall.codexHooksFor(this.engine)
+    const file = join(this.codexHome, "hooks.json")
+    const theirs = (existsSync(file) ? readJson(file) : {}) as CodexHooksFile
+    const merged = PluginInstall.withCodexHooks(theirs, ours)
+    if (JSON.stringify(merged) === JSON.stringify(theirs)) return
+    const events = Object.keys(ours.hooks).join(", ")
+    step.change(`${file}:  the epic hooks (${events}), run from ${join(this.engine, "hooks")}`)
+    if (!step.dryRun) writeJson(file, merged)
+  }
+
+  /**
+   * The plugin's Codex hooks, as the file in its `hooks/` holds them, each command's `${PLUGIN_ROOT}` made `engine`:
+   * a user hooks file has no plugin root to name.
+   * - and without `--codex-plugin`:  that flag tells a script the PLUGIN started it, and it then does nothing while
+   *   this file runs it (`CodexHome.skipPluginHook()`):  one route for the hooks, never both (J37)
+   */
+  static codexHooksFor(engine: string): CodexHooksFile {
+    const text = readFileSync(join(engine, "hooks", CODEX_HOOKS), "utf8")
+    const hooks = JSON.parse(text) as CodexHooksFile
+    for (const groups of Object.values(hooks.hooks))
+      for (const group of groups)
+        for (const hook of group.hooks)
+          hook.command = hook.command.replaceAll(PLUGIN_ROOT, engine).replaceAll(` ${PLUGIN_HOOK_FLAG}`, "")
+    return hooks
+  }
+
+  /**
+   * `theirs` (Codex's hooks file) with `ours` in it:  every group of ours appended to its event, after taking out any
+   * group whose command runs one of the plugin's hook scripts (an older install, from wherever).
+   * - their own hooks, and their file's other keys, kept as they are;  a plain copy
+   */
+  static withCodexHooks(theirs: CodexHooksFile, ours: CodexHooksFile): CodexHooksFile {
+    const merged = JSON.parse(JSON.stringify(theirs)) as CodexHooksFile
+    const events = (merged.hooks ??= {})
+    for (const [event, groups] of Object.entries(events))
+      events[event] = groups.filter((group) => !group.hooks?.some((hook) => EPIC_HOOK.test(hook.command ?? "")))
+    for (const [event, groups] of Object.entries(ours.hooks)) events[event] = [...(events[event] ?? []), ...groups]
+    for (const [event, groups] of Object.entries(events)) if (!groups.length) delete events[event]
+    return merged
+  }
+
+  /**
+   * Codex's step 2:  a link in `~/.agents/skills/` to each of the plugin's skills, which the Codex CLI lists in every
+   * repo (`$epic review`;  it follows links).
+   * - the SAME files Claude Code reads (epic `epic-friend` J29):  each Claude-only step says its Codex way beside it,
+   *   and the five Claude-only skills carry `agents/openai.yaml`, so Codex never picks one by itself
+   * - the person's skills folder, not the plugin's:  Codex's docs install a local plugin only through its desktop app
+   */
+  private codexSkills(step: Step): void {
+    this.linkSkills(CodexHome.skillsFolder(this.agentsHome), "Codex skills", step)
+  }
+
+  /**
+   * Codex's step 3:  the plugin's agents (the designer, coherence) as Codex's custom agents, a TOML file each in
+   * `<codex>/agents/`, written from Claude Code's agent files (`.claude-plugin/plugin.json`'s `agents`).
+   * - GENERATED:  each file says so, and names its source;  written again when that changes
+   */
+  private codexAgents(step: Step): void {
+    const manifest = readJson(join(this.engine, ".claude-plugin", "plugin.json")) as { agents?: string[] }
+    for (const path of manifest.agents ?? []) {
+      const source = join(this.engine, path)
+      if (!existsSync(source)) continue
+      const agent = PluginInstall.codexAgent(readFileSync(source, "utf8"), { engine: this.engine, source: path })
+      const file = join(CodexHome.agentsFolder(this.codexHome), `epic-${agent.name}.toml`)
+      if (existsSync(file) && readFileSync(file, "utf8") === agent.toml) continue
+      step.change(`${file}:  Codex's ${agent.name} agent, from ${source}`)
+      if (step.dryRun) continue
+      mkdirSync(dirname(file), { recursive: true })
+      writeFileSync(file, agent.toml)
+    }
+  }
+
+  /**
+   * A Claude Code agent file (front matter `name`, `description`, then its instructions) as a Codex custom agent:
+   * its name, and its TOML with the three keys Codex requires, `name`, `description` and `developer_instructions`.
+   * - every `${CLAUDE_PLUGIN_ROOT}` made `engine`:  Codex has none to fill in
+   * - Claude Code's `tools` list left out:  a Codex agent keeps its parent's sandbox;  the instructions say
+   *   "Change no file"
+   * - SEE:  https://learn.chatgpt.com/docs/agent-configuration/subagents.md
+   * - throws `EpicCommandError` for a file with no front matter, or no name
+   */
+  static codexAgent(markdown: string, { engine, source }: { engine: string; source: string }): CodexAgent {
+    const [, head = "", body = ""] = FRONT_MATTER.exec(markdown) ?? []
+    const field = (key: string) =>
+      head
+        .split("\n")
+        .find((line) => line.startsWith(`${key}:`))
+        ?.slice(key.length + 1)
+    const name = field("name")?.trim()
+    if (!name) throw new EpicCommandError(`epic plugin install --codex:  ${source} has no name`, EXIT.ERRORS)
+    const instructions = body.trim().replaceAll(CLAUDE_PLUGIN_ROOT, engine)
+    const toml = [
+      `# GENERATED by epic plugin install --codex, from the epic plugin's ${source}:  edit that, then run it again`,
+      `name = ${JSON.stringify(name)}`,
+      `description = ${JSON.stringify(field("description")?.trim() ?? "")}`,
+      // a TOML basic string:  JSON's escapes are TOML's
+      `developer_instructions = ${JSON.stringify(instructions)}`,
+      ""
+    ].join("\n")
+    return { name, toml }
+  }
+
+  ////////////////
   // ## The links
   ////////////////
 
@@ -319,9 +527,11 @@ export class PluginInstall {
     }
   }
 
-  /** Step 5:  a link in `<claude>/skills/` to each of the plugin's skills. */
-  private skills(step: Step): void {
-    const folder = join(this.home, "skills")
+  /**
+   * Step 5:  a link in `folder` to each of the plugin's skills:  Claude Code's `<claude>/skills/`, or (`--codex`)
+   * `~/.agents/skills/`;  each change said under `label`.
+   */
+  private linkSkills(folder: string, label: string, step: Step): void {
     const own = join(this.engine, "skills")
     const names = readdirSync(own, { withFileTypes: true })
       .filter((entry) => entry.isDirectory())
@@ -331,12 +541,12 @@ export class PluginInstall {
       const at = join(folder, name)
       const stat = lstatSync(at, { throwIfNoEntry: false })
       if (stat && !stat.isSymbolicLink()) {
-        step.change(`skills:  ${at} is a folder of your own;  left as it is`)
+        step.change(`${label}:  ${at} is a folder of your own;  left as it is`)
         continue
       }
       if (this.link(at, join(own, name), step)) moved.push(name)
     }
-    if (moved.length) step.change(`skills:  ${moved.length} linked to ${own}:  ${moved.join(", ")}`)
+    if (moved.length) step.change(`${label}:  ${moved.length} linked to ${own}:  ${moved.join(", ")}`)
     // a link to an older folder of the plugin's skill the plugin no longer has:  it leads nowhere
     if (!existsSync(folder)) return
     for (const entry of readdirSync(folder, { withFileTypes: true })) {
@@ -345,7 +555,7 @@ export class PluginInstall {
       const target = readlinkSync(at)
       if (!OLD_SKILL.test(target)) continue
       if (!step.dryRun) rmSync(at)
-      step.change(`skills:  ${at} removed (it led to ${target}, gone)`)
+      step.change(`${label}:  ${at} removed (it led to ${target}, gone)`)
     }
   }
 
@@ -354,13 +564,61 @@ export class PluginInstall {
    * - the published `spell` without `spell-epic`, which has none:  skipped, saying so
    */
   private binLink(step: Step): void {
-    const at = join(this.bin, "epic")
     const target = join(this.engine, "bin", "epic")
+    const at = join(this.bin, this.platform === "win32" ? "epic.cmd" : "epic")
     if (!existsSync(target)) {
       step.change(`PATH:  ${target} doesn't exist, so no ${at};  for the epic command:  npm install ${PLUGIN_PACKAGE}`)
       return
     }
+    if (this.platform === "win32") return this.binScript(at, target, step)
     if (this.link(at, target, step)) step.change(`PATH:  ${at} links to ${target}`)
+  }
+
+  /**
+   * Step 6 on Windows:  `epic.cmd`, a script that runs the plugin's `bin/epic` with node (epic `epic-friend` P15).
+   * - Windows runs no file without an extension, and links one only with Developer Mode on:  a `.cmd` needs neither
+   * - SIDE EFFECT (not `dryRun`):  writes it, and makes its folder
+   */
+  private binScript(at: string, target: string, step: Step): void {
+    const script = `@echo off\r\nnode "${target}" %*\r\n`
+    if (existsSync(at) && readFileSync(at, "utf8") === script) return
+    if (!step.dryRun) {
+      mkdirSync(this.bin, { recursive: true })
+      writeFileSync(at, script)
+    }
+    step.change(`PATH:  ${at} runs ${target};  put ${this.bin} on your PATH if it isn't`)
+  }
+
+  /**
+   * Step 7:  the epic VS Code extension (its Review tab, the window moves), from the plugin's
+   * `vscode/spell-epic.vsix`, with `code --install-extension` (epic `epic-friend` P15);  skipped when the editor has
+   * that version already.
+   * - into the editor `Editor` names (P16):  VS Code, or Cursor (`cursor --install-extension`, the same flags)
+   * - no `.vsix` (a checkout that hasn't built one:  `yarn vscode:package`):  nothing, and no change said
+   * - no editor command (`code`, `cursor`):  one line saying so
+   */
+  private extension(step: Step): void {
+    const folder = join(this.engine, "vscode")
+    const vsix = join(folder, VSIX)
+    if (!existsSync(vsix) || !existsSync(join(folder, "package.json"))) return
+    const { publisher, name, version } = readJson(join(folder, "package.json")) as Record<string, string>
+    const id = `${publisher}.${name}`
+    const { name: editorName, command } = this.editor
+    const listed = this.code(["--list-extensions", "--show-versions"])
+    if (listed === undefined) {
+      step.change(
+        `${editorName}:  no ${command} command, so ${vsix} isn't installed;  in ${editorName}:  Install from VSIX...`
+      )
+      return
+    }
+    if (listed.split(/\r?\n/).some((line) => line.trim().toLowerCase() === `${id}@${version}`.toLowerCase())) return
+    if (!step.dryRun && this.code(["--install-extension", vsix, "--force"]) === undefined) {
+      step.change(
+        `${editorName}:  \`${command} --install-extension ${vsix}\` failed;  in ${editorName}:  Install from VSIX...`
+      )
+      return
+    }
+    step.change(`${editorName}:  extension ${id} ${version} installed;  then:  Developer:  Reload Window`)
   }
 
   /**
@@ -375,7 +633,9 @@ export class PluginInstall {
     if (dryRun) return true
     if (stat) rmSync(at, { recursive: true, force: true })
     mkdirSync(dirname(at), { recursive: true })
-    symlinkSync(target, at)
+    // a folder:  a junction on Windows, which needs no special rights
+    if (statSync(target).isDirectory()) Links.folder(at, target, this.platform)
+    else Links.file(at, target, this.platform)
     return true
   }
 }
@@ -390,6 +650,16 @@ export type PluginInstallProps = {
   bin?: string
   /** the time written into Claude Code's lists;  default now */
   now?: () => Date
+  /** Codex's folder;  default `$CODEX_HOME`, else `~/.codex` */
+  codexHome?: string
+  /** the open skills format's folder, whose `skills/` Codex lists;  default `$SPELL_EPIC_AGENTS_HOME`, else `~/.agents` */
+  agentsHome?: string
+  /** the system to install on;  default `process.platform` */
+  platform?: NodeJS.Platform
+  /** the editor the extension goes into;  default `Editor.of()`:  this machine's, else the window's, else VS Code */
+  editor?: Editor
+  /** runs the editor's command;  default the real one (`Editor.run()`), a test hands in a stand-in */
+  code?: (args: string[]) => string | undefined
 }
 
 /** What `install()` did, or would do. */
@@ -404,6 +674,25 @@ export type PluginInstallReport = {
   dryRun: boolean
   /** each change, a line;  none:  it was installed already */
   changes: string[]
+  /** the agent it was set up for, when not Claude Code:  `codex` (`--codex`) */
+  agent?: "codex"
+}
+
+/** One of the plugin's agents as a Codex custom agent:  its name, and the TOML file's text. */
+export type CodexAgent = {
+  /** its `name`, Codex's handle for it:  `designer` */
+  name: string
+  /** the whole file, `<codex>/agents/epic-<name>.toml` */
+  toml: string
+}
+
+/**
+ * A Codex hooks file (`~/.codex/hooks.json`, and the plugin's `hooks/codex-hooks.json`):  each event's groups, each
+ * group's command hooks.  The rest of its keys kept as they are.
+ * - SEE:  https://learn.chatgpt.com/docs/hooks
+ */
+export type CodexHooksFile = Record<string, unknown> & {
+  hooks: Record<string, { matcher?: string; hooks: { type: string; command: string; [key: string]: unknown }[] }[]>
 }
 
 /** A step's options:  whether to write, and where its changes are said. */
@@ -449,6 +738,21 @@ const NEW_TEMPLATES = "epic/templates/epics/"
 /** A skill link's target in an older folder of the plugin's:  `.../spell-epic/skills/epic`, `.../epic/skills/epic`. */
 const OLD_SKILL = /(?:^|\/)(?:spell-)?epic\/skills\/[^/]+\/?$/
 
+/** The VS Code extension's package, in the plugin's `vscode/`:  `yarn vscode:package` writes it. */
+const VSIX = "spell-epic.vsix"
+
+/** The plugin's Codex hooks, in its `hooks/`. */
+const CODEX_HOOKS = "codex-hooks.json"
+
+/** What the plugin's Codex hooks name its folder by, in a plugin;  the kit's `epic/` in a user hooks file. */
+const PLUGIN_ROOT = "${PLUGIN_ROOT}"
+
+/** What Claude Code's agent files and skills name the plugin's folder by. */
+const CLAUDE_PLUGIN_ROOT = "${CLAUDE_PLUGIN_ROOT}"
+
+/** A Markdown file's front matter and the rest:  `---\nname: designer\n---\nYou are ...`. */
+const FRONT_MATTER = /^---\n([\s\S]*?)\n---\n([\s\S]*)$/
+
 /** Whether `key` is the old plugin, or any plugin of its marketplace:  `spell-epic@spell-epic`. */
 function isOldPlugin(key: string): boolean {
   return key.startsWith(`${OLD}@`) || key.endsWith(`@${OLD}`)
@@ -457,6 +761,12 @@ function isOldPlugin(key: string): boolean {
 /** Where `source` is, for a report line:  the folder, or `github:<repo>`. */
 function sourceName(source: MarketplaceSource): string {
   return source.source === "directory" ? source.path : `github:${source.repo}`
+}
+
+/** `editor`'s command (`code`, `cursor`) run with `args`:  its output, or `undefined` when it can't run or fails. */
+function runEditor(editor: Editor, args: string[]): string | undefined {
+  const run = editor.run(args)
+  return run.status === 0 ? run.stdout : undefined
 }
 
 /** JSON file `file`;  throws `EpicCommandError` when it won't parse. */

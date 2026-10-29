@@ -13,6 +13,7 @@ import {
 import { PlanDates } from "spell/epic/dates"
 import { Markup, type MarkupContent } from "spell/epic/markup"
 import { PageStages, PhaseIds, type PageStage } from "spell/epic/phases"
+import { ThreadFacts } from "spell/epic/comments"
 
 import {
   CALM_ID,
@@ -58,6 +59,7 @@ import {
   type StatusState
 } from "./planDoc.types"
 
+import { AuthorWords } from "./AuthorWords"
 import { ChangeOriginals } from "./ChangeOriginals"
 import { CommentList } from "./CommentList"
 import { IncomingHtml } from "./IncomingHtml"
@@ -556,8 +558,8 @@ export class PlanDoc extends PlanReader {
       const said = docReview
         ? "accepted, the doc pass"
         : accepted
-          ? "accepted, Owen's comments folded in"
-          : "waiting for Owen's Accept"
+          ? "accepted, the person's comments folded in"
+          : "waiting for the person's Accept"
       const label = PhaseIds.labelOf(phase)
       this.log(values.plan ? `${label} plan written:  ${said}` : `${label} plan removed`)
     }
@@ -1291,7 +1293,7 @@ export class PlanDoc extends PlanReader {
         if (note || shot) this.keepNote(item.id, { note: note ?? "", action: "drop", at, shot })
         this.setItem(item.id, "canceled")
         this.review(item.id)
-        return { applied: true, did: "canceled:  dropped by Owen in review" }
+        return { applied: true, did: `canceled:  ${AuthorWords.droppedBy(this.person)}` }
       }
       case "skip": {
         // a TEST's x (epic `epic-engine` P51):  it no longer applies, as a test run's Skip did
@@ -1341,26 +1343,30 @@ export class PlanDoc extends PlanReader {
         if (item.getAttribute("status") !== "done") this.setItem(item.id, "done")
         Markup.set(item, { failed: undefined })
         this.review(item.id)
-        return { applied: true, did: `passed (${OWENS_RUN})` }
+        return { applied: true, did: `passed (${AuthorWords.run(this.person)})` }
       case "failed": {
         const issue = this.fileFailure(item, { note, shot, at })
         if (item.getAttribute("status") !== "open") this.setItem(item.id, "open")
         Markup.set(item, { failed: issue })
         this.review(item.id)
         const link = `<a href="#${issue}">${issue.toUpperCase()}</a>`
-        this.noteStatus(item.id, `Failed in Owen's test run:  filed as ${link}.`)
-        return { applied: true, did: `failed (${OWENS_RUN}):  filed ${issue.toUpperCase()}`, filed: issue }
+        this.noteStatus(item.id, `Failed in ${AuthorWords.testRun(PlanMarkup.text(this.person))}:  filed as ${link}.`)
+        return {
+          applied: true,
+          did: `failed (${AuthorWords.run(this.person)}):  filed ${issue.toUpperCase()}`,
+          filed: issue
+        }
       }
       case "skip":
         this.setItem(item.id, "canceled")
         this.review(item.id)
         return {
           applied: true,
-          did: `canceled:  no longer applies (${OWENS_RUN})${note ? `:  "${PlanMarkup.squeeze(note)}"` : ""}`
+          did: `canceled:  no longer applies (${AuthorWords.run(this.person)})${note ? `:  "${PlanMarkup.squeeze(note)}"` : ""}`
         }
       case "notnow":
         this.defer(item.id)
-        return { applied: true, did: `not now:  deferred (${OWENS_RUN})` }
+        return { applied: true, did: `not now:  deferred (${AuthorWords.run(this.person)})` }
       default:
         return { applied: false, left: `a test's answer?  ${result}` }
     }
@@ -1375,9 +1381,10 @@ export class PlanDoc extends PlanReader {
     const label = item.id.toUpperCase()
     const title = PlanItem.titleOf(item)
     const when = PlanTime.clockTime(at ? new Date(at) : this.now)
-    const run = `<p>Owen's test run, ${PlanMarkup.text(when)}:  <a href="#${item.id}">${label}</a> failed.</p>`
-    const said = note ? promptHTML(note).replace("<p>", "<p><b>Owen:</b>  ") : ""
-    const alt = PlanMarkup.text(`Owen's screenshot of ${label}`)
+    const person = PlanMarkup.text(this.person)
+    const run = `<p>${AuthorWords.testRun(person)}, ${PlanMarkup.text(when)}:  <a href="#${item.id}">${label}</a> failed.</p>`
+    const said = note ? promptHTML(note).replace("<p>", `<p>${AuthorWords.said(person)}  `) : ""
+    const alt = `${AuthorWords.screenshot(person)} of ${label}`
     const image = shot ? `<p><img src="${PlanMarkup.text(shot)}" alt="${alt}"></p>` : ""
     return this.addItem("issue", `${label} failed:  ${title}`, { details: `${run}${said}${image}` })
   }
@@ -1431,7 +1438,7 @@ export class PlanDoc extends PlanReader {
     const option = PlanItem.optionsIn(set).find((card) => card.letter === pick)
     if (!option) return { applied: false, left: `no option ${pick}${cardSetWords(choices)}` }
     const where = set.closest(REPLY_TAG) ? " (a reply's options)" : set.closest(MORE_TAG) ? " (More Details')" : ""
-    const picked = `picked ${option.letter}:  ${option.title}${where}`
+    const picked = `${AuthorWords.picked(this.person, option.letter)}:  ${option.title}${where}`
     let did: string
     let recorded: string
     if (kind === "question") {
@@ -1496,7 +1503,7 @@ export class PlanDoc extends PlanReader {
     if (!option) return undefined
     this.chooseOption(item, option.letter, choices)
     this.notePick(item, set, option, `recorded after the talk;  ${this.nextStepWords()}`)
-    return `picked ${option.letter}:  ${option.title} (kept from the revisit)`
+    return `${AuthorWords.picked(this.person, option.letter)}:  ${option.title} (kept from the revisit)`
   }
 
   /**
@@ -1634,8 +1641,9 @@ export class PlanDoc extends PlanReader {
     const replies = Array.from(host.querySelectorAll(":scope > epic-reply"))
     if (replies.some(isSame)) return
     const said = note ? `<p>${PlanMarkup.text(note)}</p>` : ""
-    const image = shot ? `<p><img src="${PlanMarkup.text(shot)}" alt="Owen's screenshot"></p>` : ""
-    const reply = this.make("epic-reply", { from: "Owen", at: stamp, re: how }, `${said}${image}`)
+    const alt = AuthorWords.screenshot(PlanMarkup.text(this.person))
+    const image = shot ? `<p><img src="${PlanMarkup.text(shot)}" alt="${alt}"></p>` : ""
+    const reply = this.make("epic-reply", { from: this.person, at: stamp, re: how }, `${said}${image}`)
     if (host.localName === "epic-summary") reply.setAttribute("slot", NOTES_SLOT)
     const next = replies.find((each) => (each.getAttribute("at") ?? "") >= stamp)
     const answeredBy = PlanDoc.moreAnswering(host, action, when)
@@ -1644,10 +1652,10 @@ export class PlanDoc extends PlanReader {
     else Markup.place(host, reply)
     if (host.localName === "epic-item") this.stamp(host)
 
-    /** Is `reply` this note's already:  Owen's, at the same time, saying the same? */
+    /** Is `reply` this note's already:  a person's, at the same time, saying the same? */
     function isSame(reply: Element): boolean {
       return (
-        reply.getAttribute("from") === "Owen" &&
+        !ThreadFacts.isAgents(reply) &&
         reply.getAttribute("at") === stamp &&
         reply.querySelector(":scope > p")?.textContent === note
       )
@@ -1750,7 +1758,8 @@ export class PlanDoc extends PlanReader {
     const blocks = this.statusBlocks(reading)
     if (!blocks.length) throw new PlanDocError(`${id.toUpperCase()}:  a status card needs a reading`)
     const at = PlanTime.clockTime(this.now)
-    const card = this.make("epic-status", { state, at }, blocks)
+    // whose session wrote it (epic `epic-friend` P2), and which agent (P10):  "Codex (Ana)" to anyone but Ana
+    const card = this.make("epic-status", { state, at, from: this.person, agent: this.agent }, blocks)
     card.setAttribute("slot", STATUS_SLOT)
     Markup.place(host, card)
     if (host.localName === "epic-item") this.stamp(host)
@@ -1771,7 +1780,7 @@ export class PlanDoc extends PlanReader {
     if (!card)
       throw new PlanDocError(
         `${id.toUpperCase()} has no underway status card:  \`epic update <name>#${id} underway "<reading>"\` first ` +
-          `(or \`epic update <name>#${id} noted "<what was recorded>"\` when you only recorded Owen's choice)`
+          `(or \`epic update <name>#${id} noted "<what was recorded>"\` when you only recorded the person's choice)`
       )
     Markup.set<"epic-status">(card, { state, doneAt: PlanTime.clockTime(this.now) })
     for (const block of this.statusBlocks(summary ?? "")) {
@@ -2329,7 +2338,7 @@ export class PlanDoc extends PlanReader {
    */
   private incoming(html: string | undefined, { question = false }: { question?: boolean } = {}): Node[] {
     if (!html?.trim()) return []
-    const nodes = IncomingHtml.nodes(this.document, html)
+    const nodes = IncomingHtml.nodes(this.document, html, { person: this.person, agent: this.agent })
     return question ? IncomingHtml.asQuestion(this.document, nodes) : nodes
   }
 
@@ -2720,7 +2729,7 @@ export class PlanDoc extends PlanReader {
    */
   private followUp(from: Pick<ReviewPart, "label" | "link" | "what" | "title">, note: string | undefined): string {
     // Owen's note (Make Todo's box, epic `windows-and-review` P2) goes in as his words
-    const said = note ? `<p><b>Owen:</b>  ${PlanMarkup.text(note)}</p>` : ""
+    const said = note ? `<p>${AuthorWords.said(PlanMarkup.text(this.person))}  ${PlanMarkup.text(note)}</p>` : ""
     const link = `<a href="#${from.link}">${PlanMarkup.text(from.label)}</a>`
     const details = `<p>From ${link} (${from.what}), marked "Make Todo" on the page:  ${PlanMarkup.text(from.title)}</p>${said}`
     return this.addItem("todo", `Follow up:  ${from.title}`, { details })
@@ -2744,8 +2753,10 @@ export class PlanDoc extends PlanReader {
     const details = `${promptHTML(note)}${about}`
     const id = this.addItem(kind, title, { details: details || undefined })
     const written = at ? `, written ${PlanTime.clockTime(new Date(at))}` : ""
-    this.noteStatus(id, `Made from the page:  Owen's new ${kind}${written}.`)
-    this.log(`${id.toUpperCase()} made from the page:  Owen's new ${kind} (${String(key).toUpperCase()})`)
+    this.noteStatus(id, `Made from the page:  ${AuthorWords.newItem(PlanMarkup.text(this.person), kind)}${written}.`)
+    this.log(
+      `${id.toUpperCase()} made from the page:  ${AuthorWords.newItem(this.person, kind)} (${String(key).toUpperCase()})`
+    )
     return { applied: true, did: `made ${kind} ${id.toUpperCase()}:  ${title}` }
   }
 
@@ -2792,7 +2803,8 @@ export class PlanDoc extends PlanReader {
 
   /** Owen's note on an Overview sub-section, as a paragraph at its end;  once. */
   private keepNoteInPart(part: Element, { note, stamp, how }: { note: string; stamp: string; how: string }): void {
-    const line = `<p><b>Owen · ${PlanMarkup.text(stamp)} · ${PlanMarkup.text(how)}:</b>  ${PlanMarkup.text(note)}</p>`
+    const lead = AuthorWords.noteLead(PlanMarkup.text(this.person), PlanMarkup.text(stamp), PlanMarkup.text(how))
+    const line = `<p>${lead}  ${PlanMarkup.text(note)}</p>`
     const same = Array.from(part.querySelectorAll(":scope > p")).some(
       (p) => PlanMarkup.squeeze(p.outerHTML) === PlanMarkup.squeeze(line)
     )
@@ -2807,9 +2819,6 @@ function textNodes(node: Node): Node[] {
 
 /** `PlanItem.asProse()`'s option for text as a reader sees it:  every element's heading, at any depth. */
 const PLAIN = { plain: true }
-
-/** Who a test answer's log line names (epic `epic-engine` P4):  `M3 passed (Owen's run)`. */
-const OWENS_RUN = "Owen's run"
 
 /** What Owen's note on a test answer is kept as (`<epic-reply re>`):  its result in words. */
 const TEST_NOTE_AS: Record<string, string> = {

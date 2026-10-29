@@ -20,7 +20,7 @@
     },
     {
       "id": "answering",
-      "title": "Pages Owen answers on"
+      "title": "Pages you answer on"
     },
     {
       "id": "epics-page",
@@ -302,7 +302,7 @@
         "form question",
         "picker"
       ],
-      "description": "A question Owen answers ON the page (a details page's;  epic `epic-workflow` P12):  its text an `<epic-question>`, its options an `<epic-choices>` of `<epic-option>`s, each with a tick box, then an Other box.  Its line shows a chip in the epic page's state colours (red:  nothing yet;  green:  picked;  blue:  Claude has more to do).  Its answer goes under its section's id.",
+      "description": "A question you answer ON the page (a details page's;  epic `epic-workflow` P12):  its text an `<epic-question>`, its options an `<epic-choices>` of `<epic-option>`s, each with a tick box, then an Other box.  Its line shows a chip in the epic page's state colours (red:  nothing yet;  green:  picked;  blue:  Claude has more to do).  Its answer goes under its section's id.",
       "noun": "ask",
       "attributes": [
         {
@@ -349,11 +349,11 @@
         },
         {
           "name": "chip",
-          "description": "Its id chip (`Q1`), in the epic page's state colours:  red needs Owen, green picked, blue Claude's."
+          "description": "Its id chip (`Q1`), in the epic page's state colours:  red needs you, green picked, blue Claude's."
         },
         {
           "name": "how",
-          "description": "`Pick one` / `Pick any`:  a switch Owen flips (`role=\"switch\"`, epic `epic-engine` P50)."
+          "description": "`Pick one` / `Pick any`:  a switch you flip (`role=\"switch\"`, epic `epic-engine` P50)."
         },
         {
           "name": "tools",
@@ -494,7 +494,7 @@
         {
           "name": "urgent",
           "kind": "string",
-          "description": "The ids of its items that need Owen (red and orange chips), space-separated:  `q3 j12`."
+          "description": "The ids of its items that need you (red and orange chips), space-separated:  `q3 j12`."
         },
         {
           "name": "future",
@@ -756,7 +756,7 @@
         {
           "name": "accepted",
           "kind": "string",
-          "description": "When Owen accepted it (`2026-10-24 19:02`), on a page from before changes needed no approval:  quiet, no orange;  an old Accept mark still writes it.  None:  orange while new (`at`, 3 days)."
+          "description": "When you accepted it (`2026-10-24 19:02`), on a page from before changes needed no approval:  quiet, no orange;  an old Accept mark still writes it.  None:  orange while new (`at`, 3 days)."
         }
       ],
       "slots": [
@@ -848,7 +848,7 @@
         "name choice",
         "row"
       ],
-      "description": "One row of a choice page (epic `epic-workflow` P12), in an `<epic-choice-rows>`:  the use site (File, opening VS Code at the line), what it's for, how it reads today, and a box pre-filled with Claude's recommendation.  Owen types over it, or leaves it;  a changed box is orange, with a round button putting the recommendation back.  In a table Owen puts in order (`<epic-choice-rows reorder>`), its place first, with move up / move down.",
+      "description": "One row of a choice page (epic `epic-workflow` P12), in an `<epic-choice-rows>`:  the use site (File, opening VS Code at the line), what it's for, how it reads today, and a box pre-filled with Claude's recommendation.  You type over it, or leaves it;  a changed box is orange, with a round button putting the recommendation back.  In a table you put in order (`<epic-choice-rows reorder>`), its place first, with move up / move down.",
       "noun": "choice row",
       "attributes": [
         {
@@ -896,7 +896,7 @@
         },
         {
           "name": "order",
-          "description": "The Order cell, in a table Owen puts in order:  its place, and its move up / move down buttons."
+          "description": "The Order cell, in a table you put in order:  its place, and its move up / move down buttons."
         },
         {
           "name": "up",
@@ -1015,7 +1015,7 @@
         "rename table",
         "choices table"
       ],
-      "description": "One section's table on a choice page (epic `epic-workflow` P12):  the column heads File | Purpose | Current | Recommended, then its rows, each an `<epic-choice-row>` whose Recommended box Owen types over.  It counts its section's rows on the section's title (`3 to change · 1 stay · 1 changed`).  With `reorder`, Owen puts the rows in order too (epic `epic-workflow` P15).  With `blank`, every box starts empty and Owen types only what he'd change (epic `epic-engine` P13).  Under 720px it scrolls inside its own box.",
+      "description": "One section's table on a choice page (epic `epic-workflow` P12):  the column heads File | Purpose | Current | Recommended, then its rows, each an `<epic-choice-row>` whose Recommended box you type over.  It counts its section's rows on the section's title (`3 to change · 1 stay · 1 changed`).  With `reorder`, you put the rows in order too (epic `epic-workflow` P15).  With `blank`, every box starts empty and you type only what you'd change (epic `epic-engine` P13).  Under 720px it scrolls inside its own box.",
       "noun": "choice rows",
       "attributes": [
         {
@@ -1031,7 +1031,7 @@
         {
           "name": "blank",
           "kind": "boolean",
-          "description": "Boxes Owen types into, not recommendations (`blank: true`;  epic `epic-engine` P13, r12):  one first column, today's text with an EMPTY box under it, then Purpose.  Blank means no change;  a click on today's text copies it into the box.  The count says how many rows and how many he changed."
+          "description": "Boxes you type into, not recommendations (`blank: true`;  epic `epic-engine` P13, r12):  one first column, today's text with an EMPTY box under it, then Purpose.  Blank means no change;  a click on today's text copies it into the box.  The count says how many rows and how many you changed."
         },
         {
           "name": "noun",
@@ -1041,7 +1041,7 @@
         {
           "name": "reorder",
           "kind": "boolean",
-          "description": "Owen puts the rows in order (a section's `reorder: true`):  a first column, Order, with each row's place and its move up / move down buttons.  The order goes with the draft and \"Do it\"."
+          "description": "You put the rows in order (a section's `reorder: true`):  a first column, Order, with each row's place and its move up / move down buttons.  The order goes with the draft and \"Do it\"."
         }
       ],
       "slots": [
@@ -1110,7 +1110,7 @@
         {
           "key": "countBlank",
           "text": "{rows} {noun} · {changed} changed",
-          "description": "Its section's badge with `blank`:  how many rows, and how many Owen changed."
+          "description": "Its section's badge with `blank`:  how many rows, and how many you changed."
         },
         {
           "key": "count",
@@ -1125,12 +1125,12 @@
         {
           "key": "countMoved",
           "text": "{count} · moved",
-          "description": "Its section's badge with `reorder`, once Owen moved a row from the order Claude proposed."
+          "description": "Its section's badge with `reorder`, once you moved a row from the order Claude proposed."
         },
         {
           "key": "countChanged",
           "text": "{count} · {changed} changed",
-          "description": "Its section's badge, once Owen changed some."
+          "description": "Its section's badge, once you changed some."
         }
       ]
     },
@@ -1162,17 +1162,17 @@
         {
           "name": "multiple",
           "kind": "boolean",
-          "description": "Pick any:  Owen may pick several of its options (epic `epic-engine` P50).  None:  pick one.  While the page is reviewed its heading's switch flips it;  the flip goes with his Send."
+          "description": "Pick any:  you may pick several of its options (epic `epic-engine` P50).  None:  pick one.  While the page is reviewed its heading's switch flips it;  the flip goes with your Send."
         },
         {
           "name": "fixed",
           "kind": "boolean",
-          "description": "Owen may NOT add options:  no Add choice.  None:  every open set takes his (Owen's comment C4)."
+          "description": "You may NOT add options:  no Add choice.  None:  every open set takes yours (comment C4)."
         },
         {
           "name": "closed",
           "kind": "boolean",
-          "description": "The set is DONE (Owen's comment C11):  no more picks, and no options added, edited or removed;  drawn answered.  `epic option close`."
+          "description": "The set is DONE (comment C11):  no more picks, and no options added, edited or removed;  drawn answered.  `epic option close`."
         },
         {
           "name": "standing",
@@ -1188,7 +1188,7 @@
         {
           "name": "chosen-on",
           "kind": "string",
-          "description": "The day Owen's pick was recorded (`epic inbox apply`, `epic choose`, a revisit's pick kept);  shown inside the unfolded Choices, with `chosen-note`."
+          "description": "The day your pick was recorded (`epic inbox apply`, `epic choose`, a revisit's pick kept);  shown inside the unfolded Choices, with `chosen-note`."
         },
         {
           "name": "chosen-note",
@@ -1203,7 +1203,7 @@
         },
         {
           "name": "picked",
-          "description": "A standing set's options Owen picked (`picked-on`):  folded under Picked."
+          "description": "A standing set's options you picked (`picked-on`):  folded under Picked."
         },
         {
           "name": "removed",
@@ -1234,7 +1234,7 @@
         },
         {
           "name": "cards",
-          "description": "Open:  the cards' grid, Owen's added ones and Add choice's form too (P50)."
+          "description": "Open:  the cards' grid, the ones you added and Add choice's form too (P50)."
         },
         {
           "name": "heading",
@@ -1254,7 +1254,7 @@
         },
         {
           "name": "added",
-          "description": "An option Owen added, not applied yet:  a card in the options' look, dashed until sent."
+          "description": "An option you added, not applied yet:  a card in the options' look, dashed until sent."
         },
         {
           "name": "picked",
@@ -1276,7 +1276,7 @@
         },
         {
           "name": "answering",
-          "description": "An `<epic-ask>`'s options (a page Owen answers on):  one card a row, each with a tick box."
+          "description": "An `<epic-ask>`'s options (a page you answer on):  one card a row, each with a tick box."
         },
         {
           "name": "reviewed",
@@ -1463,7 +1463,7 @@
         "send bar",
         "feedback"
       ],
-      "description": "A choice page's bar (epic `epic-workflow` P12), last on the page and pinned to the window's bottom:  the feedback box, then \"Do it\", which sends every changed box and the feedback to Claude;  under them, the save status when a save failed (red), Copy my answers and Expand all;  then what was sent, or why not.  What's typed is kept in the browser at once and saves itself to the page server as a draft as Owen types, and as the page goes away;  a save that fails tries again every 3s.  Once a page.",
+      "description": "A choice page's bar (epic `epic-workflow` P12), last on the page and pinned to the window's bottom:  the feedback box, then \"Do it\", which sends every changed box and the feedback to Claude;  under them, the save status when a save failed (red), Copy my answers and Expand all;  then what was sent, or why not.  What's typed is kept in the browser at once and saves itself to the page server as a draft as you type, and as the page goes away;  a save that fails tries again every 3s.  Once a page.",
       "noun": "choices bar",
       "attributes": [],
       "slots": [],
@@ -1673,13 +1673,13 @@
         "new comment",
         "floating pane"
       ],
-      "description": "The small floating pane Owen writes a NEW comment in (epic `airplane` P11;  Owen, 2026-10-10:  \"a little floating pane below the selected text that I can move around -- don't scroll the page and lose context!\"), drawn by the docs runtime's comments when he clicks a bullhorn or comments on selected text.  Fixed on the screen just under what he clicked (`near`), above it when there's no room below;  he drags it by its header.  Ivory, 8px inside on every side, no buttons below its text.  Its header:  the bullhorn, the first words it's on (its tooltip the block in full), the floppy once saved, the trash once saved, and ×.  Its field is slotted:  the comments' code saves it as he types.",
+      "description": "The small floating pane you write a NEW comment in (epic `airplane` P11;  Owen, 2026-10-10:  \"a little floating pane below the selected text that I can move around -- don't scroll the page and lose context!\"), drawn by the docs runtime's comments when you click a bullhorn or comments on selected text.  Fixed on the screen just under what you clicked (`near`), above it when there's no room below;  you drag it by its header.  Ivory, 8px inside on every side, no buttons below its text.  Its header:  the bullhorn, the first words it's on (its tooltip the block in full), the floppy once saved, the trash once saved, and ×.  Its field is slotted:  the comments' code saves it as you type.",
       "noun": "comment pane",
       "attributes": [
         {
           "name": "headline",
           "kind": "string",
-          "description": "The first words it's on, in quotes (`“Owen leaves a comment …”`), or `This page`."
+          "description": "The first words it's on, in quotes (`“Leave a comment …”`), or `This page`."
         },
         {
           "name": "about",
@@ -1704,13 +1704,13 @@
         {
           "name": "near",
           "kind": "json",
-          "description": "Where to open:  the box of what Owen clicked or selected, `{ left, top, bottom }` in the window's pixels.  It goes 8px under it, above it when there's no room below, never past the window's edges, 8px in.  A property;  none:  centred near the top."
+          "description": "Where to open:  the box of what you clicked or selected, `{ left, top, bottom }` in the window's pixels.  It goes 8px under it, above it when there's no room below, never past the window's edges, 8px in.  A property;  none:  centred near the top."
         }
       ],
       "slots": [
         {
           "name": "",
-          "description": "Owen's field (a `<ui-textarea>`), under the header."
+          "description": "Your field (a `<ui-textarea>`), under the header."
         }
       ],
       "events": [
@@ -1964,12 +1964,12 @@
             "verify",
             "to-review"
           ],
-          "description": "A phase's field (every field in a phase has one):  `symptom` (one line), `changes` (two or three), `goal` (a bullet per outcome), `plan` (Claude's build plan, for Owen to accept before the build:  epic `epic-engine` P33), `requests` (what Owen sent it from other sessions:  `epic file`), `done` (what was built), `files`, `verify` (both hidden until the Phases title's toggles), `choices` (its own option sets, `<epic-choices>`, epic `epic-engine` P50), `to-review` (the script's:  an `<epic-mark item link>` per item, epic `epic-engine` P45)."
+          "description": "A phase's field (every field in a phase has one):  `symptom` (one line), `changes` (two or three), `goal` (a bullet per outcome), `plan` (Claude's build plan, for you to accept before the build:  epic `epic-engine` P33), `requests` (what you sent it from other sessions:  `epic file`), `done` (what was built), `files`, `verify` (both hidden until the Phases title's toggles), `choices` (its own option sets, `<epic-choices>`, epic `epic-engine` P50), `to-review` (the script's:  an `<epic-mark item link>` per item, epic `epic-engine` P45)."
         },
         {
           "name": "accepted",
           "kind": "string",
-          "description": "A `plan` field:  when Owen accepted it (`YYYY-MM-DD HH:MM`), the build's go-ahead;  none:  waiting for him."
+          "description": "A `plan` field:  when you accepted it (`YYYY-MM-DD HH:MM`), the build's go-ahead;  none:  waiting for you."
         },
         {
           "name": "label",
@@ -2050,12 +2050,12 @@
         {
           "key": "plan",
           "text": "Claude's plan:",
-          "description": "A phase's build plan, waiting for Owen's Accept."
+          "description": "A phase's build plan, waiting for your Accept."
         },
         {
           "key": "planAccepted",
           "text": "Claude's plan, accepted:",
-          "description": "A phase's build plan Owen accepted."
+          "description": "A phase's build plan you accepted."
         },
         {
           "key": "done",
@@ -2235,7 +2235,7 @@
             "handled",
             "old"
           ],
-          "description": "Its id chip's colour, written by the script on every edit:  `attention` (red:  needs Owen), `replied` (orange:  Claude answered with options, Owen's turn to pick), `progress` (blue:  Claude is working on it), `open` (yellow:  still undecided, or queued work), `recent` (green:  decided or done, however long ago), `handled` (grey:  its answer is in a phase's text now, `handled`), `old` (grey:  no longer relevant, canceled)."
+          "description": "Its id chip's colour, written by the script on every edit:  `attention` (red:  needs you), `replied` (orange:  Claude answered with options, your turn to pick), `progress` (blue:  Claude is working on it), `open` (yellow:  still undecided, or queued work), `recent` (green:  decided or done, however long ago), `handled` (grey:  its answer is in a phase's text now, `handled`), `old` (grey:  no longer relevant, canceled)."
         },
         {
           "name": "handled",
@@ -2265,7 +2265,7 @@
         {
           "name": "reviewed",
           "kind": "string",
-          "description": "Gone through with Owen, that day."
+          "description": "Gone through with you, that day."
         },
         {
           "name": "review-as",
@@ -2279,7 +2279,7 @@
             "drop",
             "skip"
           ],
-          "description": "How Owen's review mark was handled (`now`:  a request for now, done;  `next`, `drop`:  a todo queued into the next phase, or dropped;  `skip`:  the note box's x, nothing to do):  the record, not drawn on the buttons (they clear once handled);  `approve` or `todo` on an open item make it `recent` (green)."
+          "description": "How your review mark was handled (`now`:  a request for now, done;  `next`, `drop`:  a todo queued into the next phase, or dropped;  `skip`:  the note box's x, nothing to do):  the record, not drawn on the buttons (they clear once handled);  `approve` or `todo` on an open item make it `recent` (green)."
         },
         {
           "name": "deferred",
@@ -2319,17 +2319,17 @@
         {
           "name": "calm",
           "kind": "boolean",
-          "description": "Not urgent:  an open judgement call or issue not reviewed yet is `open` (yellow), not `attention` (red).  For a call that simply follows WWOD (`plan-doc add ... --calm`);  Owen flips it by clicking the id chip while the page is reviewed (the inbox's `urgency`, applied by `epic inbox apply`)."
+          "description": "Not urgent:  an open judgement call or issue not reviewed yet is `open` (yellow), not `attention` (red).  For a call that simply follows WWOD (`plan-doc add ... --calm`);  you flip it by clicking the id chip while the page is reviewed (the inbox's `urgency`, applied by `epic inbox apply`)."
         },
         {
           "name": "failed",
           "kind": "string",
-          "description": "A test that FAILED in Owen's test run (epic `epic-engine` P4):  the issue it was filed as (`i42`).  It stays open;  gone once a run passes it."
+          "description": "A test that FAILED in your test run (epic `epic-engine` P4):  the issue it was filed as (`i42`).  It stays open;  gone once a run passes it."
         },
         {
           "name": "prepared",
           "kind": "string",
-          "description": "A manual test Start testing wrote out for Owen (epic `epic-engine` P51):  its place in his order, `1` first.  The Manual tests section opens the prepared tests in that order, and once every open test has it, its button is Next test."
+          "description": "A manual test Start testing wrote out for you (epic `epic-engine` P51):  its place in your order, `1` first.  The Manual tests section opens the prepared tests in that order, and once every open test has it, its button is Next test."
         },
         {
           "name": "source",
@@ -2349,7 +2349,7 @@
         {
           "name": "to-accept",
           "kind": "string",
-          "description": "The change marks inside it still waiting for Owen's Accept (`ch3 ch5`), written by the epic tool on every edit (epic `epic-engine` P30):  the page counts and finds them while its body, a part, isn't loaded."
+          "description": "The change marks inside it still waiting for your Accept (`ch3 ch5`), written by the epic tool on every edit (epic `epic-engine` P30):  the page counts and finds them while its body, a part, isn't loaded."
         },
         {
           "name": "to-see",
@@ -2377,7 +2377,7 @@
         },
         {
           "name": "status",
-          "description": "Claude's status cards (`<epic-status slot=\"status\">`, P13):  drawn last in its details, under Owen's marked note, above the note box."
+          "description": "Claude's status cards (`<epic-status slot=\"status\">`, P13):  drawn last in its details, under your marked note, above the note box."
         }
       ],
       "events": [
@@ -2627,22 +2627,22 @@
         {
           "key": "tipUrgencyUnsent",
           "text": "not sent yet",
-          "description": "Id chip tooltip:  Owen changed its urgency, not sent yet."
+          "description": "Id chip tooltip:  You changed its urgency, not sent yet."
         },
         {
           "key": "tipMarkUnsent",
           "text": "you chose {chosen} · not sent yet",
-          "description": "Id chip tooltip:  Owen's mark (the chosen button, `{chosen}`), not sent:  the chip dashed."
+          "description": "Id chip tooltip:  Your mark (the chosen button, `{chosen}`), not sent:  the chip dashed."
         },
         {
           "key": "tipMarkSent",
           "text": "you chose {chosen} · sent",
-          "description": "Id chip tooltip:  Owen's mark (the chosen button, `{chosen}`), sent:  the chip outlined."
+          "description": "Id chip tooltip:  Your mark (the chosen button, `{chosen}`), sent:  the chip outlined."
         },
         {
           "key": "tipPick",
           "text": "pick {letter}",
-          "description": "Id chip tooltip:  Owen's pick, as `{chosen}`."
+          "description": "Id chip tooltip:  Your pick, as `{chosen}`."
         },
         {
           "key": "failedMark",
@@ -2860,12 +2860,12 @@
         {
           "name": "sagas",
           "kind": "string",
-          "description": "The sagas' ids, in Owen's order, space-separated:  the chips' order.  A saga none of its cards names gets no chip;  a card naming a saga not listed is No saga's."
+          "description": "The sagas' ids, in your order, space-separated:  the chips' order.  A saga none of its cards names gets no chip;  a card naming a saga not listed is No saga's."
         },
         {
           "name": "no-favorites",
           "kind": "boolean",
-          "description": "No Favorites group:  a starred card stays in its own group.  A saga page's Epics (`<epic-cards>`):  Favorites is Owen's own list, on the Epics page."
+          "description": "No Favorites group:  a starred card stays in its own group.  A saga page's Epics (`<epic-cards>`):  Favorites is your own list, on the Epics page."
         }
       ],
       "slots": [
@@ -2917,7 +2917,7 @@
         {
           "key": "urgentTitle",
           "text": "Urgent",
-          "description": "A group:  every phase done, items waiting on Owen."
+          "description": "A group:  every phase done, items waiting on you."
         },
         {
           "key": "doneTitle",
@@ -2969,7 +2969,7 @@
         "item reference",
         "to review"
       ],
-      "description": "An item's id as a chip, in the colour of the item's state:  `<epic-mark item=\"i126\" link>` draws `I126`, red while it waits on Owen, green when it's newly decided, grey once it's old (the same rule as the item's own chip, `ItemAge`).  The item's title is its tooltip;  with `link`, a click lands on the item.  The tool writes them in a phase's To review field (Owen, 2026-10-25:  \"`<epic-mark link>` for rendering the I126 mark\").",
+      "description": "An item's id as a chip, in the colour of the item's state:  `<epic-mark item=\"i126\" link>` draws `I126`, red while it waits on you, green when it's newly decided, grey once it's old (the same rule as the item's own chip, `ItemAge`).  The item's title is its tooltip;  with `link`, a click lands on the item.  The tool writes them in a phase's To review field (Owen, 2026-10-25:  \"`<epic-mark link>` for rendering the I126 mark\").",
       "noun": "mark",
       "attributes": [
         {
@@ -3264,7 +3264,7 @@
         {
           "name": "letter",
           "kind": "string",
-          "description": "`A`, `B` ...:  what `<epic-choices chosen>` and Owen's pick name."
+          "description": "`A`, `B` ...:  what `<epic-choices chosen>` and your pick name."
         },
         {
           "name": "title",
@@ -3295,12 +3295,12 @@
         {
           "name": "picked-on",
           "kind": "string",
-          "description": "A STANDING set's option Owen picked, and the day it was recorded (P50):  it sits in its set's `picked` slot, folded under `Picked`."
+          "description": "A STANDING set's option you picked, and the day it was recorded (P50):  it sits in its set's `picked` slot, folded under `Picked`."
         },
         {
           "name": "selected",
           "kind": "boolean",
-          "description": "In an `<epic-ask>`:  ticked to start with, until Owen picks (the review's item picker ticks what isn't reviewed yet).  The tick itself is page state, its question's."
+          "description": "In an `<epic-ask>`:  ticked to start with, until you pick (the review's item picker ticks what isn't reviewed yet).  The tick itself is page state, its question's."
         },
         {
           "name": "done",
@@ -3352,12 +3352,12 @@
         {
           "name": "ui-selected",
           "detail": "{ letter: string, selected: true, more: boolean }",
-          "description": "In an `<epic-ask>`:  Owen ticked it, or pressed its (?) (`more`).  Its question takes it, and draws the result."
+          "description": "In an `<epic-ask>`:  You ticked it, or pressed its (?) (`more`).  Its question takes it, and draws the result."
         },
         {
           "name": "ui-deselected",
           "detail": "{ letter: string, selected: false, more: boolean }",
-          "description": "In an `<epic-ask>`:  Owen unticked it.  Its question takes it, and draws the result."
+          "description": "In an `<epic-ask>`:  You unticked it.  Its question takes it, and draws the result."
         }
       ],
       "parts": [
@@ -4010,7 +4010,7 @@
         },
         {
           "name": "send",
-          "description": "In the header's middle while the page is reviewed, Send (`<epic-send-buttons countdown>`, epic `epic-engine` P20, P53):  the paper plane sends every unsent mark and comment to Claude (grey with nothing to send, blue with some unsent, outlined blue once sent);  a press sends at once, and Auto Send (the gear) sends by itself after the page is left alone, a ring round the plane counting down.  The plane in every stage too (epic `epic-engine` I180):  Accept Overview and Accept Phases are on their sections' title rows.  While building, with Claude's build plans waiting for Owen's Accept on their phases, the pill is ringed, its border 2px #666 (`asks`), dotted once each has his mark;  its tooltip names them."
+          "description": "In the header's middle while the page is reviewed, Send (`<epic-send-buttons countdown>`, epic `epic-engine` P20, P53):  the paper plane sends every unsent mark and comment to Claude (grey with nothing to send, blue with some unsent, outlined blue once sent);  a press sends at once, and Auto Send (the gear) sends by itself after the page is left alone, a ring round the plane counting down.  The plane in every stage too (epic `epic-engine` I180):  Accept Overview and Accept Phases are on their sections' title rows.  While building, with Claude's build plans waiting for your Accept on their phases, the pill is ringed, its border 2px #666 (`asks`), dotted once each has your mark;  its tooltip names them."
         },
         {
           "name": "centre",
@@ -4369,6 +4369,36 @@
           "description": "The pill while nobody listens, before the command it copies."
         },
         {
+          "key": "listeningMine",
+          "text": "Your {agent} is listening",
+          "description": "After the review line, while an agent other than Claude waits on the inbox (`epic inbox wait`, epic `epic-friend` P11):  `{agent}` its name, Codex.  Claude listening says nothing, as before."
+        },
+        {
+          "key": "listeningOf",
+          "text": "{person}'s {agent} is listening",
+          "description": "The same, for someone else's agent:  `{person}`, whose it is."
+        },
+        {
+          "key": "listeningTitle",
+          "text": "It waits for your Send (epic inbox wait), and hears it at once",
+          "description": "The listening words' tooltip."
+        },
+        {
+          "key": "idleMine",
+          "text": "Your {agent} isn't listening:  ask it to run",
+          "description": "The pill while nobody listens and the last to listen was an agent other than Claude (Q14:  Send never wakes it), before the command it copies, `epic inbox wait <epic>`."
+        },
+        {
+          "key": "idleOf",
+          "text": "{person}'s {agent} isn't listening:  ask it to run",
+          "description": "The same, for someone else's agent."
+        },
+        {
+          "key": "copyWait",
+          "text": "Copy the command, for the agent to run",
+          "description": "The pill's tooltip, while it names an agent that isn't listening."
+        },
+        {
           "key": "airplanePill",
           "text": "Airplane mode:  this waits for",
           "description": "The pill in airplane mode, before `/airplane land`."
@@ -4437,13 +4467,13 @@
         "spell note",
         "old note"
       ],
-      "description": "The head line of an old page note (`<spell-note>`, epic `airplane` P3:  written into a guide before comments replaced them, read only since), drawn by the docs runtime first in each note:  \"Owen · 10/10 14:02\", the note's first line while it's folded, its status (new yellow, answered violet, done grey) and how many replies.  The whole line is one button:  a click folds or unfolds the note.",
+      "description": "The head line of an old page note (`<spell-note>`, epic `airplane` P3:  written into a guide before comments replaced them, read only since), drawn by the docs runtime first in each note:  \"You · 10/10 14:02\", the note's first line while it's folded, its status (new yellow, answered violet, done grey) and how many replies.  The whole line is one button:  a click folds or unfolds the note.",
       "noun": "note head",
       "attributes": [
         {
           "name": "at",
           "kind": "string",
-          "description": "When Owen wrote it, as the note says:  `2026-10-09 22:10`."
+          "description": "When it was written, as the note says:  `2026-10-09 22:10`."
         },
         {
           "name": "status",
@@ -4477,12 +4507,12 @@
         {
           "name": "epic-note-opened",
           "detail": "{ open: true }",
-          "description": "Owen clicked it:  the note should open."
+          "description": "You clicked it:  the note should open."
         },
         {
           "name": "epic-note-closed",
           "detail": "{ open: false }",
-          "description": "Owen clicked it:  the note should fold."
+          "description": "You clicked it:  the note should fold."
         }
       ],
       "parts": [
@@ -4499,8 +4529,8 @@
       "texts": [
         {
           "key": "who",
-          "text": "Owen",
-          "description": "Who wrote a page note."
+          "text": "Note",
+          "description": "The line's first word:  old page notes name no author (written before names were kept)."
         },
         {
           "key": "reply",
@@ -4531,7 +4561,7 @@
         "step",
         "stage"
       ],
-      "description": "One phase of the plan:  its status icon and estimate (once done, what it took) in its title line;  its fields (Symptom, Requests, Goal, Changes), Owen's kept notes, its plan changes (`<epic-update>` blocks, at the end of its description), then Done, commits, Files, Verify and To review, as children in that order.  While the page is reviewed, it takes review notes as an Overview sub-section does:  Do this (a thumbs up:  build it), Revisit.",
+      "description": "One phase of the plan:  its status icon and estimate (once done, what it took) in its title line;  its fields (Symptom, Requests, Goal, Changes), your kept notes, its plan changes (`<epic-update>` blocks, at the end of its description), then Done, commits, Files, Verify and To review, as children in that order.  While the page is reviewed, it takes review notes as an Overview sub-section does:  Do this (a thumbs up:  build it), Revisit.",
       "noun": "phase",
       "attributes": [
         {
@@ -4564,12 +4594,12 @@
         {
           "name": "estimate",
           "kind": "string",
-          "description": "Wall-clock time for Claude to do it, agents included, Owen's review not:  `30m`, `2h`, `1h30m`, `1-2h`."
+          "description": "Wall-clock time for Claude to do it, agents included, your review not:  `30m`, `2h`, `1h30m`, `1-2h`."
         },
         {
           "name": "took",
           "kind": "string",
-          "description": "How long Claude really worked on it, written by the epic tool when it's done (`epic phase … done`, or `… took` later;  epic `epic-engine` P41):  `21m`, `1h 30m`.  Its agents' and sessions' working time, side by side counted once, never the time waiting on Owen.  A done phase shows it in place of its estimate, the estimate in its tooltip (`~3-4h`)."
+          "description": "How long Claude really worked on it, written by the epic tool when it's done (`epic phase … done`, or `… took` later;  epic `epic-engine` P41):  `21m`, `1h 30m`.  Its agents' and sessions' working time, side by side counted once, never the time waiting on you.  A done phase shows it in place of its estimate, the estimate in its tooltip (`~3-4h`)."
         },
         {
           "name": "source",
@@ -4589,7 +4619,7 @@
         {
           "name": "to-accept",
           "kind": "string",
-          "description": "The change marks inside it still waiting for Owen's Accept (`ch3 ch5`), written by the epic tool on every edit (epic `epic-engine` P30):  the page counts and finds them while its body, a part, isn't loaded."
+          "description": "The change marks inside it still waiting for your Accept (`ch3 ch5`), written by the epic tool on every edit (epic `epic-engine` P30):  the page counts and finds them while its body, a part, isn't loaded."
         },
         {
           "name": "to-see",
@@ -4608,7 +4638,7 @@
             "waiting",
             "accepted"
           ],
-          "description": "Claude's build plan (its `plan` field, epic `epic-engine` P33):  `waiting` for Owen's Accept (its review buttons Accept plan and Revisit), or `accepted` (still to do, its review group ends in a green check:  good to go, epic `epic-engine` I140);  written by the epic tool, so the title row knows with its body not loaded."
+          "description": "Claude's build plan (its `plan` field, epic `epic-engine` P33):  `waiting` for your Accept (its review buttons Accept plan and Revisit), or `accepted` (still to do, its review group ends in a green check:  good to go, epic `epic-engine` I140);  written by the epic tool, so the title row knows with its body not loaded."
         },
         {
           "name": "done-at",
@@ -4629,7 +4659,7 @@
       "slots": [
         {
           "name": "",
-          "description": "Its fields, Owen's kept notes, its plan changes and commits."
+          "description": "Its fields, your kept notes, its plan changes and commits."
         },
         {
           "name": "title",
@@ -4645,7 +4675,7 @@
         },
         {
           "name": "status",
-          "description": "Claude's status cards on Owen's marks (`<epic-status slot=\"status\">`, P13):  at the end of its body, above the note box."
+          "description": "Claude's status cards on your marks (`<epic-status slot=\"status\">`, P13):  at the end of its body, above the note box."
         }
       ],
       "events": [
@@ -4701,7 +4731,7 @@
         },
         {
           "name": "choices-open",
-          "description": "In its title (P50):  `1 choice open`, red, while a set in its body waits for Owen's pick."
+          "description": "In its title (P50):  `1 choice open`, red, while a set in its body waits for your pick."
         },
         {
           "name": "changed",
@@ -4821,17 +4851,17 @@
         {
           "key": "tookTip",
           "text": "~{estimate}",
-          "description": "A done phase's time pill:  its tooltip, the estimate it had (`~3-4h`;  Owen, M3 on P41)."
+          "description": "A done phase's time pill:  its tooltip, the estimate it had (`~3-4h`;  M3 on P41)."
         },
         {
           "key": "choiceOpen",
           "text": "1 choice open",
-          "description": "After its title (P50):  a set in its body waits for Owen's pick."
+          "description": "After its title (P50):  a set in its body waits for your pick."
         },
         {
           "key": "choicesOpenCount",
           "text": "{count} choices open",
-          "description": "After its title (P50):  sets in its body wait for Owen's picks."
+          "description": "After its title (P50):  sets in its body wait for your picks."
         },
         {
           "key": "changedTip",
@@ -4863,7 +4893,7 @@
         "request",
         "quote"
       ],
-      "description": "The prompt that started the plan, as Owen typed it:  folded under `Kickoff prompt` in the Overview, on the ivory of his voice;  unfolded, a quoted card.  The prompt stays the page's own children.",
+      "description": "The prompt that started the plan, as you typed it:  folded under `Kickoff prompt` in the Overview, on the ivory of your voice;  unfolded, a quoted card.  The prompt stays the page's own children.",
       "noun": "prompt",
       "attributes": [],
       "slots": [
@@ -4964,13 +4994,18 @@
         "response",
         "note"
       ],
-      "description": "A reply on an item, after its answer:  `<from> · re: <re>` is drawn, the date at the right;  the reply is its children.  In an item, one of its thread's section, one frame round them all, the first reply's fold folding the whole thread;  Claude's newest wears an orange edge and NEW until Owen has seen it.",
+      "description": "A reply on an item, after its answer:  `<from> · re: <re>` is drawn, the date at the right;  the reply is its children.  In an item, one of its thread's section, one frame round them all, the first reply's fold folding the whole thread;  Claude's newest wears an orange edge and NEW until you've seen it.",
       "noun": "reply",
       "attributes": [
         {
           "name": "from",
           "kind": "string",
-          "description": "Who wrote it (`Claude`, `Owen`)."
+          "description": "Who wrote it, a person's name (`Ana`);  on an agent's reply, whose session wrote it.  Drawn `You` when it's the reader's own;  before epic `epic-friend` P2, Claude's said `Claude`."
+        },
+        {
+          "name": "agent",
+          "kind": "string",
+          "description": "The agent that wrote it (`claude`, `codex` ...), else none:  the person in `from` did.  Drawn by its name, `Codex (Ana)`, or `Codex` for the reader's own session.  An old reply without it is Claude's when `from` says `Claude` (`ThreadFacts.agentOf()`);  the migration `agents-marked` adds it."
         },
         {
           "name": "at",
@@ -4993,7 +5028,7 @@
       "parts": [
         {
           "name": "base",
-          "description": "The card:  Claude's violet, Owen's ivory (`from`)."
+          "description": "The card:  an agent's look, or every person's (`agent`)."
         },
         {
           "name": "header",
@@ -5005,11 +5040,11 @@
         },
         {
           "name": "who",
-          "description": "The heading's left:  `<from> · re: <re>`;  wraps within itself."
+          "description": "The heading's left:  who (`You`, a name, `Claude`, `Codex (Ana)`) and `re: <re>`, after a round mark of its initial;  wraps within itself."
         },
         {
           "name": "new",
-          "description": "`NEW`, after `who`, on Claude's newest reply in an item until Owen has seen it (orange)."
+          "description": "`NEW`, after `who`, on Claude's newest reply in an item until you've seen it (orange)."
         },
         {
           "name": "date",
@@ -5043,7 +5078,7 @@
         },
         {
           "name": "new",
-          "description": "Claude's newest reply in its item (none of Owen's after it), not seen yet in this browser:  an orange edge and `NEW`.  Seen once on screen for 1.2s."
+          "description": "Claude's newest reply in its item (none of yours after it), not seen yet in this browser:  an orange edge and `NEW`.  Seen once on screen for 1.2s."
         }
       ],
       "texts": [
@@ -5063,9 +5098,24 @@
           "description": "What the reply is about, in its heading."
         },
         {
+          "key": "you",
+          "text": "You",
+          "description": "Who wrote it, in its heading:  the reader (`from` is their name)."
+        },
+        {
+          "key": "agent",
+          "text": "{agent}",
+          "description": "Who wrote it, in its heading:  the agent by its name (`Claude`, `Codex`), the reader's own session's, or a reply from before `agent`."
+        },
+        {
+          "key": "agentOf",
+          "text": "{agent} ({person})",
+          "description": "Who wrote it, in its heading:  another person's session's agent (`agent`, `from`):  `Codex (Bob)`."
+        },
+        {
           "key": "new",
           "text": "NEW",
-          "description": "The tag on Claude's newest reply, until Owen has seen it."
+          "description": "The tag on Claude's newest reply, until you've seen it."
         },
         {
           "key": "newTip",
@@ -5091,7 +5141,7 @@
         "command run",
         "review page for a command"
       ],
-      "description": "A run page's body (epic `epic-engine` P23):  a COMMAND stopped to ask Owen (the kit's `SRV.CommandRun`), and waits for his answers.  It reads the run from the page server (`GET /api/runs/<id>`) and draws who is waiting (`spell translate todos --to es` is waiting, with a green dot;  nobody, once the run stopped, finished or its heartbeat went stale), the command's progress lines, updated live, then a table:  the command's columns and a row per thing to answer (`<epic-run-row>`).  Each answer is saved as he gives it;  Send, at the bottom, says the answers are done, and the waiting command carries on with them.  Send again whenever he likes:  the page never locks.  Steering (P25):  a STATUS CARD of the run's passes when the command writes them (a line each:  its name, a small bar and `212 of 380`, its calls, its time;  the running one live, done ones quiet), and an EFFORT picker when it offers one (`fast | balanced | best`, saved at once, taking effect at the next pass).  How the run ended shows in the waiting line:  finished, stopped, or its wait ran out.  Once a page, from the run page's template.",
+      "description": "A run page's body (epic `epic-engine` P23):  a COMMAND stopped to ask you (the kit's `SRV.CommandRun`), and waits for your answers.  It reads the run from the page server (`GET /api/runs/<id>`) and draws who is waiting (`spell translate todos --to es` is waiting, with a green dot;  nobody, once the run stopped, finished or its heartbeat went stale), the command's progress lines, updated live, then a table:  the command's columns and a row per thing to answer (`<epic-run-row>`).  Each answer is saved as you give it;  Send, at the bottom, says the answers are done, and the waiting command carries on with them.  Send again whenever you like:  the page never locks.  Steering (P25):  a STATUS CARD of the run's passes when the command writes them (a line each:  its name, a small bar and `212 of 380`, its calls, its time;  the running one live, done ones quiet), and an EFFORT picker when it offers one (`fast | balanced | best`, saved at once, taking effect at the next pass).  How the run ended shows in the waiting line:  finished, stopped, or its wait ran out.  Once a page, from the run page's template.",
       "noun": "run",
       "attributes": [
         {
@@ -5312,7 +5362,7 @@
         "review row",
         "name review"
       ],
-      "description": "One row of a run page (epic `epic-engine` P23), drawn by `<epic-run>` in its table:  the command's own columns, then the answer.  The answer is the command's proposal, pre-filled in a box Owen types over;  a pick of the few alternatives the command offers, when it offers any, with the proposal first;  the row's tick box, with the command's own label (`Use for every project`);  and its details, folded under it.  Each change says so (`epic-run-answered`), and `<epic-run>` saves it:  typing half a second after he stops, a pick or a tick at once.  A row he answered differently from the proposal is orange, with a round button putting the proposal back.  A row the command has taken (acted on, epic `epic-engine` P25) has a quiet `taken` mark, its time in the tooltip;  changed after that, an orange note says so:  the command may pick the change up if it can.",
+      "description": "One row of a run page (epic `epic-engine` P23), drawn by `<epic-run>` in its table:  the command's own columns, then the answer.  The answer is the command's proposal, pre-filled in a box you type over;  a pick of the few alternatives the command offers, when it offers any, with the proposal first;  the row's tick box, with the command's own label (`Use for every project`);  and its details, folded under it.  Each change says so (`epic-run-answered`), and `<epic-run>` saves it:  typing half a second after you stop, a pick or a tick at once.  A row you answered differently from the proposal is orange, with a round button putting the proposal back.  A row the command has taken (acted on, epic `epic-engine` P25) has a quiet `taken` mark, its time in the tooltip;  changed after that, an orange note says so:  the command may pick the change up if it can.",
       "noun": "run row",
       "attributes": [
         {
@@ -5328,7 +5378,7 @@
         {
           "name": "answer",
           "kind": "json",
-          "description": "Owen's answer so far (`RunAnswer`:  `outcome`, `value`, `ticked`), as saved;  none:  the proposal, and the tick box as the command set it."
+          "description": "Your answer so far (`RunAnswer`:  `outcome`, `value`, `ticked`), as saved;  none:  the proposal, and the tick box as the command set it."
         },
         {
           "name": "answer-label",
@@ -5346,7 +5396,7 @@
         {
           "name": "epic-run-answered",
           "detail": "{ rowId: string, outcome: RunOutcome, value: string, ticked?: boolean, now: boolean }",
-          "description": "Owen answered the row:  typed in the box (`now: false`, saved a moment later), picked an alternative or ticked the box (`now: true`).  `outcome` says which:  `accepted` (the proposal), `picked` (an alternative), `typed` (anything else)."
+          "description": "You answered the row:  typed in the box (`now: false`, saved a moment later), picked an alternative or ticked the box (`now: true`).  `outcome` says which:  `accepted` (the proposal), `picked` (an alternative), `typed` (anything else)."
         }
       ],
       "parts": [
@@ -5402,7 +5452,7 @@
         },
         {
           "name": "answered",
-          "description": "Owen answered it (anything saved, the proposal included)."
+          "description": "You answered it (anything saved, the proposal included)."
         },
         {
           "name": "taken",
@@ -5410,7 +5460,7 @@
         },
         {
           "name": "changed-after-taken",
-          "description": "Owen's answer is newer than the command's taking of it:  the orange note shows."
+          "description": "Your answer is newer than the command's taking of it:  the orange note shows."
         }
       ],
       "texts": [
@@ -5528,7 +5578,7 @@
         {
           "name": "to-accept",
           "kind": "string",
-          "description": "The change marks inside it still waiting for Owen's Accept (`ch3 ch5`), written by the epic tool on every edit (epic `epic-engine` P30):  the page counts and finds them while its body, a part, isn't loaded."
+          "description": "The change marks inside it still waiting for your Accept (`ch3 ch5`), written by the epic tool on every edit (epic `epic-engine` P30):  the page counts and finds them while its body, a part, isn't loaded."
         },
         {
           "name": "to-see",
@@ -5634,7 +5684,7 @@
         },
         {
           "name": "filter",
-          "description": "An item section's state filter:  one chip per state its items are in, with how many, solid while that state's items show, outlined while hidden.  The Phases section's the same, by a phase's state, the first that holds (epic `epic-engine` I157, I170):  red needs Owen (a plan to accept, a choice open), orange changed since he looked, blue under way (in the blue badge), dotted blue scheduled, green done in the last 3 days, grey done before."
+          "description": "An item section's state filter:  one chip per state its items are in, with how many, solid while that state's items show, outlined while hidden.  The Phases section's the same, by a phase's state, the first that holds (epic `epic-engine` I157, I170):  red needs you (a plan to accept, a choice open), orange changed since you looked, blue under way (in the blue badge), dotted blue scheduled, green done in the last 3 days, grey done before."
         },
         {
           "name": "hidden-note",
@@ -5670,7 +5720,7 @@
         },
         {
           "name": "start-testing",
-          "description": "The Manual tests section's button on its title (epic `epic-engine` P51), only while the page is reviewed and a test is open:  \"Start testing · 9\" asks Claude to prepare the tests (a request for now:  it checks what it can, writes out the rest), \"Preparing tests\" while it does, then \"Next test · 3 left\", which opens the next test Owen hasn't answered.  The address's `?test=1` presses it as the page loads."
+          "description": "The Manual tests section's button on its title (epic `epic-engine` P51), only while the page is reviewed and a test is open:  \"Start testing · 9\" asks Claude to prepare the tests (a request for now:  it checks what it can, writes out the rest), \"Preparing tests\" while it does, then \"Next test · 3 left\", which opens the next test you haven't answered.  The address's `?test=1` presses it as the page loads."
         },
         {
           "name": "next-epic",
@@ -5811,7 +5861,7 @@
         {
           "key": "testsReady",
           "text": "Tests ready:  Next test opens the first",
-          "description": "The notice when the tests are prepared while Owen is typing:  the first test doesn't open under him."
+          "description": "The notice when the tests are prepared while you type:  the first test doesn't open under you."
         },
         {
           "key": "nextEpic",
@@ -5841,12 +5891,12 @@
         {
           "key": "newTest",
           "text": "Manual test",
-          "description": "Kind:  a manual test, for Owen to try by hand."
+          "description": "Kind:  a manual test, for you to try by hand."
         },
         {
           "key": "newPhase",
           "text": "Phase",
-          "description": "Kind:  a phase, which Claude drafts from its name and Owen's note."
+          "description": "Kind:  a phase, which Claude drafts from its name and your note."
         },
         {
           "key": "newUnsent",
@@ -5892,7 +5942,7 @@
         "send bar",
         "answer"
       ],
-      "description": "A details page's Send, in its sticky header (epic `epic-workflow` P12):  where the answer stands (`Not sent`, `Changes not sent`, `Sent 10/8/26 14:34 · 5 of 17 decided`), then Send and its countdown (`<epic-send-buttons>`, epic `epic-engine` P20).  It sends the whole page, partial answers too, as often as Owen likes:  the page never locks;  with countdown mode on, by itself 2 minutes after he stops.  Beside them, the draft's save (P18):  what's typed and not sent is kept in the browser at once and beside the page as Owen types, and comes back when it reloads;  a save that fails says so in red under them, and tries again every 3s.  After the button, who hears it (epic `epic-engine` r6):  `repo-split is listening` while a session's `epic ask wait` waits for the answer, else `nobody is waiting yet`;  Send works either way, and with nobody waiting says the answer is saved for Claude's next look.  Once a page.",
+      "description": "A details page's Send, in its sticky header (epic `epic-workflow` P12):  where the answer stands (`Not sent`, `Changes not sent`, `Sent 10/8/26 14:34 · 5 of 17 decided`), then Send and its countdown (`<epic-send-buttons>`, epic `epic-engine` P20).  It sends the whole page, partial answers too, as often as you like:  the page never locks;  with countdown mode on, by itself 2 minutes after you stop.  Beside them, the draft's save (P18):  what's typed and not sent is kept in the browser at once and beside the page as you type, and comes back when it reloads;  a save that fails says so in red under them, and tries again every 3s.  After the button, who hears it (epic `epic-engine` r6):  `repo-split is listening` while a session's `epic ask wait` waits for the answer, else `nobody is waiting yet`;  Send works either way, and with nobody waiting says the answer is saved for Claude's next look.  Once a page.",
       "noun": "send",
       "attributes": [],
       "slots": [],
@@ -6166,12 +6216,12 @@
         {
           "name": "marked",
           "kind": "number",
-          "description": "How many of its items Owen marked in this pass, not applied yet (epic `epic-engine` P43):  counted in a blue badge with a dotted outline, left of the chips, and left out of `counts`.  Drawn whatever `shown` says;  a click does nothing.  None, or 0:  no badge."
+          "description": "How many of its items you marked in this pass, not applied yet (epic `epic-engine` P43):  counted in a blue badge with a dotted outline, left of the chips, and left out of `counts`.  Drawn whatever `shown` says;  a click does nothing.  None, or 0:  no badge."
         },
         {
           "name": "phases",
           "kind": "boolean",
-          "description": "The Phases section's chips (epic `epic-engine` I170):  `counts` names a PHASE's states, in Owen's order (`PHASE_FILTER_STATES`):  red needs him, orange changed since he looked, blue under way (in the blue badge), a DOTTED blue outline scheduled, green done in the last 3 days, grey done before;  each with its own words."
+          "description": "The Phases section's chips (epic `epic-engine` I170):  `counts` names a PHASE's states, in the order they're shown (`PHASE_FILTER_STATES`):  red needs you, orange changed since you looked, blue under way (in the blue badge), a DOTTED blue outline scheduled, green done in the last 3 days, grey done before;  each with its own words."
         },
         {
           "name": "shown",
@@ -6335,7 +6385,7 @@
         "task",
         "work"
       ],
-      "description": "Claude's status card on an item or an Overview sub-section (P13):  `Claude • Underway` (blue) with Claude's reading of the task, then the same card `Claude • Done` (green) when work was done, the reading kept, a summary added when there's something worth saying.  `Claude • Noted` (a calm outline) when Claude only recorded what Owen chose (a pick, a todo made or queued):  what was recorded and what happens next.  The heading and the date at its right are drawn;  the reading and the summary are its children.  In an item, a LINE instead (epic `epic-engine` P27):  a run of cards about one task is one line, `✓ Noted 10/24/26 15:21 → Done 15:25 · what Claude did`, last in the item's thread;  a drive-by's (taken before Owen's first reply) first in the item's details, above the Choices.",
+      "description": "Claude's status card on an item or an Overview sub-section (P13):  `Claude • Underway` (blue) with Claude's reading of the task, then the same card `Claude • Done` (green) when work was done, the reading kept, a summary added when there's something worth saying.  `Claude • Noted` (a calm outline) when Claude only recorded what you chose (a pick, a todo made or queued):  what was recorded and what happens next.  The heading and the date at its right are drawn;  the reading and the summary are its children.  In an item, a LINE instead (epic `epic-engine` P27):  a run of cards about one task is one line, `✓ Noted 10/24/26 15:21 → Done 15:25 · what Claude did`, last in the item's thread;  a drive-by's (taken before your first reply) first in the item's details, above the Choices.",
       "noun": "status",
       "attributes": [
         {
@@ -6346,7 +6396,7 @@
             "done",
             "noted"
           ],
-          "description": "`underway` (blue:  Claude is on it;  absent too), `done` (green:  work was done), `noted` (a calm outline:  Claude recorded what Owen chose, nothing built yet;  Owen, 2026-10-10)."
+          "description": "`underway` (blue:  Claude is on it;  absent too), `done` (green:  work was done), `noted` (a calm outline:  Claude recorded what you chose, nothing built yet;  Owen, 2026-10-10)."
         },
         {
           "name": "at",
@@ -6357,6 +6407,16 @@
           "name": "done-at",
           "kind": "string",
           "description": "When it was done or noted (a card that was underway first);  drawn in its place once there.  A card born noted (a pick or a todo `inbox apply` recorded) has `at` alone."
+        },
+        {
+          "name": "from",
+          "kind": "string",
+          "description": "Whose session wrote it (epic `epic-friend` P2):  the person's name, `Ana`, drawn `Claude (Ana)` to anyone but Ana, and plain `Claude` to her.  None (a card written before):  `Claude`."
+        },
+        {
+          "name": "agent",
+          "kind": "string",
+          "description": "Which agent wrote it (epic `epic-friend` P10):  its id, `codex`, drawn by its name:  `Codex (Ana)`, or `Codex` to Ana.  None (a card written before):  `Claude`."
         }
       ],
       "slots": [
@@ -6366,7 +6426,7 @@
         },
         {
           "name": "summary",
-          "description": "Once done, and only when worth saying:  what Owen should know about it."
+          "description": "Once done, and only when worth saying:  what you should know about it."
         }
       ],
       "events": [],
@@ -6385,7 +6445,7 @@
         },
         {
           "name": "who",
-          "description": "The heading's left:  `Claude • Underway` / `Claude • Done` / `Claude • Noted`."
+          "description": "The heading's left:  `Claude • Underway` / `Claude • Done` / `Claude • Noted`;  `Claude (Ana) • Done` for a card Ana's session wrote, to anyone but Ana (`from`);  `Codex • Underway` for Codex's (`agent`)."
         },
         {
           "name": "date",
@@ -6435,7 +6495,7 @@
         },
         {
           "name": "drive-by",
-          "description": "Taken before Owen's first reply on the item:  its line above the Choices."
+          "description": "Taken before your first reply on the item:  its line above the Choices."
         },
         {
           "name": "in-thread",
@@ -6463,18 +6523,28 @@
         },
         {
           "key": "underway",
-          "text": "Claude • Underway",
+          "text": "{who} • Underway",
           "description": "The heading while Claude is on it."
         },
         {
           "key": "done",
-          "text": "Claude • Done",
+          "text": "{who} • Done",
           "description": "The heading once work was done."
         },
         {
           "key": "noted",
-          "text": "Claude • Noted",
-          "description": "The heading once Claude recorded what Owen chose."
+          "text": "{who} • Noted",
+          "description": "The heading once Claude recorded what you chose."
+        },
+        {
+          "key": "agent",
+          "text": "{agent}",
+          "description": "Who wrote it, in its heading:  the agent by its name (`Claude`, `Codex`):  your own session's, or a card from before `from`."
+        },
+        {
+          "key": "agentOf",
+          "text": "{agent} ({person})",
+          "description": "Who wrote it, in its heading:  another person's session's agent (`from`, `agent`):  `Codex (Ana)`."
         },
         {
           "key": "stepUnderway",
@@ -6489,12 +6559,12 @@
         {
           "key": "stepNoted",
           "text": "Noted",
-          "description": "A line's step once Claude recorded what Owen chose."
+          "description": "A line's step once Claude recorded what you chose."
         },
         {
           "key": "earlier",
           "text": "your earlier comment",
-          "description": "After a drive-by's steps:  it's about a comment Owen made before answering."
+          "description": "After a drive-by's steps:  it's about a comment you made before answering."
         },
         {
           "key": "started",
@@ -6530,11 +6600,11 @@
         },
         {
           "name": "status",
-          "description": "Claude's status cards on Owen's marks (`<epic-status slot=\"status\">`, P13):  under the lede."
+          "description": "Claude's status cards on your marks (`<epic-status slot=\"status\">`, P13):  under the lede."
         },
         {
           "name": "notes",
-          "description": "Owen's notes on the summary from the page, kept once Claude took them (`<epic-reply slot=\"notes\">`):  under the lede."
+          "description": "Your notes on the summary from the page, kept once Claude took them (`<epic-reply slot=\"notes\">`):  under the lede."
         }
       ],
       "events": [],
@@ -6566,7 +6636,7 @@
         "other",
         "feedback"
       ],
-      "description": "A box Owen types in, on a page he answers on (epic `epic-workflow` P12):  one line to start, growing with its text.  What he types is part of the page's answer, by `type` and `for`:  the page's notes, a comment on a section or an option, a question's Other, a choice page's feedback.  The page's notes box also shows what the page KEPT (P18):  text typed for a question, option or section an agent's rewrite took off the page, under its old title, sent with the rest until Owen drops it.",
+      "description": "A box you type in, on a page you answer on (epic `epic-workflow` P12):  one line to start, growing with its text.  What you type is part of the page's answer, by `type` and `for`:  the page's notes, a comment on a section or an option, a question's Other, a choice page's feedback.  The page's notes box also shows what the page KEPT (P18):  text typed for a question, option or section an agent's rewrite took off the page, under its old title, sent with the rest until you drop it.",
       "noun": "text box",
       "attributes": [
         {
@@ -6707,7 +6777,7 @@
         "conversation",
         "reply"
       ],
-      "description": "One comment's whole thread (epic `airplane` P11;  an element since epic `epic-engine` P3), drawn by the docs runtime's comments under the paragraph, list item or cell holding its quote, else under its block, on a guide, an epic page or an Epic UI page:  one ivory pane that folds.  Its header:  a chevron, the bullhorn (a green check circle once done), its id (`C3`), the first words it's on;  while it's Owen's turn, his answer (an item's review pills:  That's good, Reply, Skip it), Reopen once done, the pen while Claude hasn't had his words, the trash.  Then the messages in order (`<epic-thread-message>`), and his reply box, slotted.  Orange while Claude spoke last and Owen hasn't answered (`unseen`).  It draws what it's given and says what Owen did:  the comments' code saves and redraws.",
+      "description": "One comment's whole thread (epic `airplane` P11;  an element since epic `epic-engine` P3), drawn by the docs runtime's comments under the paragraph, list item or cell holding its quote, else under its block, on a guide, an epic page or an Epic UI page:  one ivory pane that folds.  Its header:  a chevron, the bullhorn (a green check circle once done), its id (`C3`), the first words it's on;  while it's your turn, your answer (an item's review pills:  That's good, Reply, Skip it), Reopen once done, the pen while Claude hasn't had your words, the trash.  Then the messages in order (`<epic-thread-message>`), and your reply box, slotted.  Orange while Claude spoke last and you haven't answered (`unseen`).  It draws what it's given and says what you did:  the comments' code saves and redraws.",
       "noun": "thread",
       "attributes": [
         {
@@ -6723,7 +6793,7 @@
         {
           "name": "unseen",
           "kind": "boolean",
-          "description": "ORANGE:  Claude spoke last and Owen hasn't answered yet (✓, a reply, ×).  The whole thread's ground, Claude's latest reply stronger.  Orange is our colour for \"changed since you looked\"."
+          "description": "ORANGE:  Claude spoke last and you haven't answered yet (✓, a reply, ×).  The whole thread's ground, Claude's latest reply stronger.  Orange is our colour for \"changed since you looked\"."
         },
         {
           "name": "moved",
@@ -6737,7 +6807,7 @@
             "first",
             "pending"
           ],
-          "description": "Owen's words now in the box under it, so the thread leaves them out:  `first` (his first words, in the pen's box), `pending` (his pending reply, in the reply box).  The pen hides while `first`."
+          "description": "Your words now in the box under it, so the thread leaves them out:  `first` (your first words, in the pen's box), `pending` (your pending reply, in the reply box).  The pen hides while `first`."
         },
         {
           "name": "saved",
@@ -6753,34 +6823,34 @@
       "slots": [
         {
           "name": "",
-          "description": "Owen's box, last in its body while open:  the reply box, or the pen's box over his first words (a `<ui-textarea>`, which the comments' code keeps across redraws)."
+          "description": "Your box, last in its body while open:  the reply box, or the pen's box over your first words (a `<ui-textarea>`, which the comments' code keeps across redraws)."
         }
       ],
       "events": [
         {
           "name": "epic-thread-opened",
           "detail": "{ open: true }",
-          "description": "Owen clicked its header (not one of its buttons):  it unfolded."
+          "description": "You clicked its header (not one of its buttons):  it unfolded."
         },
         {
           "name": "epic-thread-closed",
           "detail": "{ open: false }",
-          "description": "Owen clicked its header (not one of its buttons):  it folded."
+          "description": "You clicked its header (not one of its buttons):  it folded."
         },
         {
           "name": "epic-thread-editing",
           "detail": "{}",
-          "description": "The pen:  Owen will change his first words, while Claude hasn't had them."
+          "description": "The pen:  You'll change your first words, while Claude hasn't had them."
         },
         {
           "name": "epic-thread-removing",
           "detail": "{}",
-          "description": "The trash:  Owen deletes the comment, at once (Undo in the toast that follows)."
+          "description": "The trash:  You delete the comment, at once (Undo in the toast that follows)."
         },
         {
           "name": "epic-thread-answered",
           "detail": "{ act: \"good\" | \"reply\" | \"skip\" | \"reopen\" }",
-          "description": "Owen's answer, from its review pills (an `<epic-review buttons=thread>` in its shadow root):  That's good, Reply, Skip it;  Reopen once done."
+          "description": "Your answer, from its review pills (an `<epic-review buttons=thread>` in its shadow root):  That's good, Reply, Skip it;  Reopen once done."
         }
       ],
       "parts": [
@@ -6790,7 +6860,7 @@
         },
         {
           "name": "header",
-          "description": "Its header:  the fold, Owen's answer, the pen, the trash;  a click folds it."
+          "description": "Its header:  the fold, your answer, the pen, the trash;  a click folds it."
         },
         {
           "name": "fold",
@@ -6806,7 +6876,7 @@
         },
         {
           "name": "answer",
-          "description": "Owen's answer while it's his turn (the review pills), or Reopen once done."
+          "description": "Your answer while it's your turn (the review pills), or Reopen once done."
         },
         {
           "name": "body",
@@ -6814,7 +6884,7 @@
         },
         {
           "name": "reply",
-          "description": "Owen's box, its floppy in the corner."
+          "description": "Your box, its floppy in the corner."
         }
       ],
       "states": [],
@@ -6877,12 +6947,12 @@
         {
           "key": "good",
           "text": "That's good.",
-          "description": "The Done line:  Owen said that's good."
+          "description": "The Done line:  You said that's good."
         },
         {
           "key": "skip",
           "text": "Skipped:  nothing more to do.",
-          "description": "The Done line:  Owen skipped it."
+          "description": "The Done line:  You skipped it."
         },
         {
           "key": "builtIn",
@@ -6977,7 +7047,7 @@
         {
           "name": "seen",
           "kind": "string",
-          "description": "When Owen marked it seen (`2026-10-29 14:30`;  epic `epic-engine` I168), written by `epic inbox apply` from its Seen mark:  folded to one grey line, out of its phase's pen, for everyone.  None:  new until `PlanDates.QUIET_DAYS` after `at`, then quiet all the same."
+          "description": "When you marked it seen (`2026-10-29 14:30`;  epic `epic-engine` I168), written by `epic inbox apply` from its Seen mark:  folded to one grey line, out of its phase's pen, for everyone.  None:  new until `PlanDates.QUIET_DAYS` after `at`, then quiet all the same."
         }
       ],
       "slots": [

@@ -7,6 +7,7 @@ import { parseHTML } from "linkedom"
 
 import { RealPath } from "spell/server/RealPath"
 import { EpicConfig } from "spell/epic/config/EpicConfig"
+import { EpicHome } from "spell/epic/config/EpicHome"
 import { EpicRepo } from "spell/epic/config/EpicRepo"
 import { DataFile, type DataFileMove } from "spell/epic/data/DataFile"
 import { RepoList } from "spell/epic/server/RepoList"
@@ -265,7 +266,8 @@ export class PlanDocFiles {
   ////////////////
 
   /**
-   * The epic page at `file`, parsed:  a `PlanDoc`.  `options` as its constructor's.
+   * The epic page at `file`, parsed:  a `PlanDoc`.  `options` as its constructor's;  its `person` this machine's
+   * (`EpicHome.personName()`) unless they say.
    * - a SPLIT doc comes back WHOLE:  every part read into its host;  `plan.parts` says how it was stored
    * - throws a `PlanDocError` for a doc in the old markup
    * - SIDE EFFECT:  names each missing part on stderr
@@ -275,7 +277,12 @@ export class PlanDocFiles {
       throw new PlanDocError(`no epic page ${relative(this.content, file)}:  \`epic create\` first`)
     const html = readFileSync(file, "utf8")
     if (!isEpicMarkup(html)) throw this.oldMarkup(file)
-    const plan = PlanDoc.parse(html, undefined, options)
+    // who is at the keyboard, and which agent runs `epic`:  the names on what they write, read when something's written
+    const plan = PlanDoc.parse(html, undefined, {
+      person: () => EpicHome.personName(),
+      agent: () => EpicHome.agentName(),
+      ...options
+    })
     plan.parts = assembleEpic(plan.document, file)
     for (const id of plan.parts.missing)
       process.stderr.write(

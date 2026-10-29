@@ -2,6 +2,7 @@
  * Tests of `epic repo` (`Repos`) and of `epic hub`'s checks before it starts anything (`Hub`), in a temp home folder.
  * - no server is started here (the server itself:  `EpicServer.test.ts`);  a port taken:  a plain web server's
  */
+import { execFileSync } from "node:child_process"
 import { existsSync, mkdirSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from "node:fs"
 import { createServer } from "node:http"
 import type { AddressInfo } from "node:net"
@@ -80,6 +81,22 @@ describe("epic hub, before it starts anything", () => {
     await expect(hub.urlOf(join(top, "elsewhere.html"))).rejects.toThrow(/in no registered repo's content/)
     await expect(hub.run(["url"])).rejects.toThrow(/which file/)
     await expect(hub.run(["bogus"])).rejects.toThrow(/unknown verb 'bogus'/)
+  })
+
+  // epic `epic-friend` P7:  `epic server start` in a fresh `epic init` repo said "no repos to serve yet"
+  test("registerHere():  a repo epic init set up, registered once (served at /);  a repo not set up, never", () => {
+    const home = join(top, "home5")
+    const hub = new Hub({ home })
+    const errors = vi.spyOn(process.stderr, "write").mockImplementation(() => true)
+    const mine = repo("mine")
+    execFileSync("git", ["init", "-q"], { cwd: mine })
+    expect(hub.registerHere(join(mine, "docs"))).toBe("mine")
+    expect(errors.mock.calls.map(([text]) => String(text)).join("")).toMatch(/^epic server:  now serves mine /m)
+    expect(hub.registerHere(mine)).toBeUndefined()
+    const plain = join(top, "plain")
+    mkdirSync(plain)
+    expect(hub.registerHere(plain)).toBeUndefined()
+    expect(new RepoList({ home }).repos().map((each) => [each.name, each.isDefault])).toEqual([["mine", true]])
   })
 
   test("status with no server:  'not running', exit 1", async () => {

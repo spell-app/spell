@@ -1,12 +1,11 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs"
-import { homedir } from "node:os"
 import { basename, join } from "node:path"
 
 import { RealPath } from "spell/server/RealPath"
 // By relative path, `.ts` and all:  the `SessionStart` hook loads this file with plain `node` (types stripped)
 import { EpicConfig } from "spell/epic/config/EpicConfig.ts"
+import { EpicHome } from "spell/epic/config/EpicHome.ts"
 import { EpicRepo } from "spell/epic/config/EpicRepo.ts"
-import { HOME_ENV, HOME_FOLDER } from "spell/epic/server/server.types.ts"
 
 /****************
  * ### `WorktreeGuard`
@@ -20,7 +19,7 @@ import { HOME_ENV, HOME_FOLDER } from "spell/epic/server/server.types.ts"
  * - the Claude panel's own reopen can't be fixed from here (it marks only `.claude/worktrees/<name>` folders),
  *   and a hook can't move a session:  it can only tell Claude
  *
- * What it tells Claude (`check()`), on a start-up or a resume, in a repo that uses epics (`.epic/config.json5`):
+ * What it tells Claude (`check()`), on a start-up or a resume, in a repo set up for epics (`EpicConfig.ofSetUp()`):
  * 1. LOST:  the transcript's last worktree note names a worktree that still exists,
  *    but the session's folder is outside it.
  *    Claude is told to `EnterWorktree` back into it before anything else.
@@ -56,9 +55,9 @@ export class WorktreeGuard {
     const { cwd, transcript_path: transcript, source } = input
     if (!cwd || (source !== "startup" && source !== "resume")) return undefined
     // a child repo of a multi-repo top (epic `epic-engine` P10):  the TOP's worktrees, whose each holds every repo's
-    const own = EpicConfig.of(cwd)
+    const own = EpicConfig.ofSetUp(cwd)
+    if (!own) return undefined
     const config = own.top ?? own
-    if (!existsSync(config.file)) return undefined
     const here = RealPath.of(cwd)
     // Claude Code's own note first;  none at all (never entered, never left):  the guard's record (rule 2)
     const last = WorktreeGuard.lastNote(transcript)
@@ -72,8 +71,8 @@ export class WorktreeGuard {
         `⎇ ${name}:  this session was reopened outside its worktree;  Claude moves back in first.`,
         `This session worked in worktree ${name} (${recorded}) when it was last open, but it was reopened in ` +
           `${here}, the folder of the window it was opened from.  Before anything else, run EnterWorktree with ` +
-          `name "${name}" (never its path, which makes Claude Code ask Owen), unless \`pwd\` already prints ` +
-          `${recorded}, and say so in one line.  Stay where you are only if Owen says it left that worktree on ` +
+          `name "${name}" (never its path, which makes Claude Code ask the person), unless \`pwd\` already prints ` +
+          `${recorded}, and say so in one line.  Stay where you are only if the person says it left that worktree on ` +
           `purpose.`
       )
     }
@@ -111,9 +110,9 @@ export class WorktreeGuard {
     }
   }
 
-  /** Where the guard's records go:  `$SPELL_EPIC_HOME`, else `~/.spell-epic`, then `session-worktrees/`. */
+  /** Where the guard's records go:  `session-worktrees/` in the epic home (`EpicHome`). */
   static recordsFolder(): string {
-    return join(process.env[HOME_ENV] || join(homedir(), HOME_FOLDER), "session-worktrees")
+    return EpicHome.subfolder("session-worktrees")
   }
 
   /** Session `id`'s record file;  the id's own characters only, so it can't name another folder. */
@@ -136,8 +135,8 @@ export class WorktreeGuard {
       `This session works in, or was last in, worktree ${name} of ${config.main} (${folder}), but epic ${name} is ` +
         `worked in ANOTHER repo:  ${EpicRepo.refusal(home)}  Before anything else:  edit NOTHING in ${folder} ` +
         `(a link in it may lead into the other repo's main checkout);  if you're in it, ExitWorktree with action ` +
-        `"keep";  never EnterWorktree it.  Tell Owen in one line, and offer \`epic window launch ${name}\`.  ` +
-        `Removing the stray worktree is Owen's call, once no session works in it.`
+        `"keep";  never EnterWorktree it.  Tell the person in one line, and offer \`epic window launch ${name}\`.  ` +
+        `Removing the stray worktree is the person's call, once no session works in it.`
     )
   }
 
@@ -162,10 +161,10 @@ export class WorktreeGuard {
     return last
   }
 
-  /** The hook's JSON:  `systemMessage` for Owen, `additionalContext` for Claude. */
-  static output(forOwen: string, forClaude: string): GuardOutput {
+  /** The hook's JSON:  `systemMessage` for the person, `additionalContext` for Claude. */
+  static output(forPerson: string, forClaude: string): GuardOutput {
     return {
-      systemMessage: forOwen,
+      systemMessage: forPerson,
       hookSpecificOutput: { hookEventName: "SessionStart", additionalContext: forClaude }
     }
   }
@@ -174,7 +173,7 @@ export class WorktreeGuard {
 /** The `SessionStart` hook's stdin, as far as the guard reads it. */
 export type GuardInput = { cwd?: string; transcript_path?: string; source?: string; session_id?: string }
 
-/** The hook's answer:  a line for Owen, and context for Claude. */
+/** The hook's answer:  a line for the person, and context for Claude. */
 export type GuardOutput = {
   systemMessage: string
   hookSpecificOutput: { hookEventName: "SessionStart"; additionalContext: string }
