@@ -1296,6 +1296,9 @@ In `tools/`:
     - The patch is the kit's ONE patcher (`PagePatch`, `spell/server/site`;  epic `epic-engine` P40), with this
       runtime's rules (`patcher`):  a list of small steps, text edited in place;  the page comes with the change.
     - Scroll, folds, open panels and typed text stay.
+    - Shown as ONE short cross-fade when it changes what's on screen (`patcher.redraw()`, the kit's `PagePatch.crossFade()`;
+      epic `epic-engine` I164):  never a half-drawn frame;  straight in when it's off screen, motion is reduced, or a
+      field has the focus.
     - Anything the runtime adds inside `main` must carry `data-spell-added`, so the patch steps around it.
     - Pages with scripts of their own still reload.
       Inert data blocks (`<script type="text/plain">`) don't count.
@@ -1310,6 +1313,9 @@ In `tools/`:
       - every fold open before it, items and a link's unfolds too:
         this runtime keeps them as the page goes (`keepFoldsForReload()`, `sessionStorage`)
       - a half-written note (the review inbox's drafts) and comment drafts (`localStorage`)
+    - with no flash (epic `epic-engine` I164):  the new page waits behind the old one (the kit's `holdReveal()`, a
+      cross-document view transition) until this runtime has landed and the page wears its theme
+      (`SpellUI.themed`), then cross-fades in:  `SPELL_SERVER.reveal()`
     - not while you type in a field:  an "Updated:  reload" pill waits, and it reloads once you leave the field
     - so a merge's new widgets show up by themselves:  VS Code's window needs reloading only when the EXTENSION changes
     - `<body>`'s attributes are patched too.
@@ -1321,6 +1327,8 @@ In `tools/`:
     - an epic page's `<epic-*>` blocks and items:  a split epic page's parts (`wireSourceBodies()`)
     - The patch leaves what a host loaded alone.
     - A changed body file (the live client's `spell-server:changed`) re-fetches its open host in place.
+      - the old body stays up until the new one is in, then one short cross-fade (`PagePatch.crossFade()`, at most
+        `BODY_WAIT_MS`), when the host is on screen
     - Each body that loads re-runs the outline, the toolbar, counts, item filters and code colors.
     - A link to an id inside an unloaded body loads it first.
       The ids are in its host's `data-part-ids`, or an `<epic-*>` host's `part-ids`.

@@ -162,6 +162,12 @@ const FOLD_HOLD_MS = 600
  */
 const RESTORE_HOLD_MS = 1500
 
+/**
+ * How long a part's body swapped in may hold the old one on screen, in ms (`reloadBody()`'s cross-fade):  the page
+ * shows the old frame meanwhile, and takes no clicks
+ */
+const BODY_WAIT_MS = 1000
+
 /** What the reader does that stops the page landing by itself:  he's moving it. */
 const READER_INPUT = ["wheel", "touchstart", "keydown", "pointerdown"]
 
@@ -329,6 +335,8 @@ async function start() {
   await nextFrame(2)
   sticky.measure()
   land(landing, jump, follow)
+  // a live reload held the new page behind the old one until now:  it cross-fades in, landed and themed (I164)
+  void Promise.resolve(window.SpellUI?.themed).then(() => window.SPELL_SERVER?.reveal?.())
   live.ready({ main, rail, sticky, follow, entries: railKey(outline, counts) })
   wireNotes(main)
   void wireComments(main, { go })
@@ -1105,6 +1113,7 @@ const patcher = new PagePatch({
  *   its `ETag` is the one served) with the new source, and changes only what differs in the live page:
  *   the kit's patcher (`patcher`, `PagePatch.page()`), a list of small steps, text edited in place;
  *   everything else keeps its scroll, folds, open panels, focus and typed text
+ * - drawn as ONE short cross-fade when it changes what's on screen (`patcher.redraw()`;  epic `epic-engine` I164)
  * - then re-wires what the runtime built from the markup (`rewire()`) and fires `spell-doc:updated` on `window`,
  *   `detail.changed`:  the elements added, replaced or re-attributed
  * - a full reload instead (`reload()`, which keeps the scroll) when the page can't be patched safely:
@@ -1163,7 +1172,7 @@ function wireLiveUpdate(main) {
       patched =
         before === null
           ? null
-          : patcher.page({
+          : await patcher.redraw({
               before: parse(before),
               after: parse(html),
               live: page.main,
@@ -1247,7 +1256,8 @@ function canPatch(main) {
  *   - `ui-loaded` (`LOADED`), from a Spell UI host or an `<epic-*>` block
  *   the outline (headings inside), contents, counts, item filters, code colors
  * - a body's FILE changed (the page server's `spell-server:changed`, `liveClient.ts`):  a host that has loaded it
- *   re-fetches it in place (`reload()`), the reading position kept (`PagePatch.readingAnchor()`);  one that hasn't drops the
+ *   re-fetches it in place (`reload()`), the reading position kept (`PagePatch.readingAnchor()`), the old body on screen
+ *   until the new one is in, then a short cross-fade (`PagePatch.crossFade()`, I164);  one that hasn't drops the
  *   cached copy, so its first open fetches the new one
  * - `enqueue`:  the live update's queue (`wireLiveUpdate()`):  a re-fetch waits for a patch in flight
  */
@@ -1286,8 +1296,13 @@ function wireSourceBodies(main, live, enqueue) {
         host.addEventListener(LOADED, done, { once: true })
         setTimeout(done, 2000)
       })
-    await host.reload?.()
-    PagePatch.keepAnchor(anchor)
+    // the old body stays up until the new one is in, then one short cross-fade (I164):  never the host's loading look
+    await PagePatch.crossFade(async () => {
+      const swapped = loaded || bodyIn(host)
+      await host.reload?.()
+      await swapped
+      PagePatch.keepAnchor(anchor)
+    }, PagePatch.isOnScreen(host))
     if (!active) return
     await loaded
     for (let frame = 0; frame < 60 && !active.isConnected; frame++) await nextFrame(1)
@@ -1297,6 +1312,14 @@ function wireSourceBodies(main, live, enqueue) {
     active.focus({ preventScroll: true })
     if (caret) active.setSelectionRange(...caret)
   }
+}
+
+/** Resolves once `host`'s body is in (its `ui-loaded`), or after `BODY_WAIT_MS` at most. */
+function bodyIn(host) {
+  return new Promise((done) => {
+    host.addEventListener(LOADED, done, { once: true })
+    setTimeout(done, BODY_WAIT_MS)
+  })
 }
 
 /** The element with the focus, inside shadow roots too (`document.activeElement` stops at their hosts). */

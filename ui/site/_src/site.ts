@@ -46,7 +46,7 @@ import { E, UI } from "spell/ui/core"
 import { DocsFamilies } from "spell/ui/docs-components/DocsFamilies"
 import { SiteData } from "spell/ui/docs-components/SiteData"
 import { ThemePreference } from "spell/ui/components/ui-theme-menu/ThemePreference"
-import { LOGO_MARK, defineSite } from "spell/server/site"
+import { LOGO_MARK, defineSite, serverConfig } from "spell/server/site"
 import { SitePatch } from "./SitePatch"
 import { SiteRouter } from "./SiteRouter"
 import { SiteShell } from "./SiteShell"
@@ -80,7 +80,7 @@ document.addEventListener("click", (event) => {
   document.querySelector<HTMLElement & { focusSearch?(): void }>("#site-nav-flyout ui-docs-nav")?.focusSearch?.()
 })
 
-void SiteShell.mount(SITE_ROOT).then(async (content) => {
+const mounted = SiteShell.mount(SITE_ROOT).then(async (content) => {
   // the hat before the top bar's brand (`site.css`, "Top bar"):  the site header's own mark, a constant SVG
   for (const hat of document.querySelectorAll(".site-hat")) hat.innerHTML = LOGO_MARK
   keepCurrentTabInView()
@@ -99,6 +99,9 @@ void SiteShell.mount(SITE_ROOT).then(async (content) => {
   if (packModules) packModules["spell/ui/components/ui-root"] = root
   router?.start()
 })
+// a live reload's new page waits behind the old one until its layout is in (the kit's `holdReveal()`, epic
+// `epic-engine` I164):  `load` comes before that, and the live client would show it bare
+serverConfig()?.revealAfter?.(mounted)
 
 /**
  * The top bar's links scrolled so the CURRENT tab shows, centred where it can be,

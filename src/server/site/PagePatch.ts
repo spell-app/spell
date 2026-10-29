@@ -13,6 +13,8 @@
  *   - what's never replaced:  an open editor (Monaco in a cell), the field being typed in
  *   - what reader state is kept:  folds, open panels, typed text, the scroll, the selection
  *   - spell-epic's docs runtime adds the epic pages' (`spell-doc-runtime.js`), Spell UI's site its own (`SitePatch`)
+ * - A runtime shows a patch with `redraw()`:  one short cross-fade when it changes what's on screen, never a half-drawn
+ *   frame (`crossFade()`, a view transition;  epic `epic-engine` I164);  a part's body swapped in uses `crossFade()` too
  * - Plain DOM, NO imports:  any page's bundle can take it.
  *
  * How a node is matched (Owen, comment M1 on P40):
@@ -192,7 +194,29 @@ export class PagePatch {
    *   `top()`:  how far down the window the stuck titles end, ABOVE which nothing counts as read
    * - `<body>`'s attributes are patched too, but never its `class` (runtimes add their own)
    */
-  page({ before, after, live, mainOf, top = () => 0 }: PageEdit): PageRun | null {
+  page(edit: PageEdit): PageRun | null {
+    return this.pagePlan(edit)?.run() ?? null
+  }
+
+  /**
+   * `page()`, drawn as ONE short cross-fade (`crossFade()`) when it changes what's on screen
+   * (epic `epic-engine` I164;  Owen, 2026-10-29:  "use a page transition to redraw without visual flash").
+   * - the same refusals as `page()`:  null, nothing changed
+   * - straight in, no fade:  everything it changes is off screen, motion is reduced, the field being typed in has the
+   *   focus, or the browser has no view transitions (`crossFade()` says which)
+   * - resolves once the page has the change;  the fade finishes by itself
+   */
+  async redraw(edit: PageEdit): Promise<PageRun | null> {
+    const plan = this.pagePlan(edit)
+    if (!plan) return null
+    return PagePatch.crossFade(() => plan.run(), plan.isOnScreen())
+  }
+
+  /**
+   * The checks and plan behind `page()` and `redraw()`:  null when it's refused, else its steps, whether any of them
+   * changes what's on screen, and the run (null when the live page doesn't line up after all).
+   */
+  private pagePlan({ before, after, live, mainOf, top = () => 0 }: PageEdit): PagePlan | null {
     const was = mainOf(before)
     const now = mainOf(after)
     if (!was || !now || headKey(before) !== headKey(after) || shellKey(before, mainOf) !== shellKey(after, mainOf))
@@ -204,18 +228,89 @@ export class PagePatch {
       0
     )
     if (weight > now.outerHTML.length / 2) return null
-    const anchor = PagePatch.readingAnchor(live, top())
-    let run: PatchRun
-    try {
-      run = this.run(steps, live)
-    } catch (error) {
-      if (error instanceof PatchError) return null
-      throw error
+    const rules = this.rules
+    return {
+      isOnScreen: () =>
+        steps.some((step) => {
+          try {
+            return PagePatch.isOnScreen(resolveAddress(live, "target" in step ? step.target : step.parent, rules))
+          } catch {
+            return true
+          }
+        }),
+      run: () => {
+        const anchor = PagePatch.readingAnchor(live, top())
+        let run: PatchRun
+        try {
+          run = this.run(steps, live)
+        } catch (error) {
+          if (error instanceof PatchError) return null
+          throw error
+        }
+        patchBodyAttributes(before.body, after.body, live.ownerDocument.body)
+        if (after.title !== before.title) live.ownerDocument.title = after.title
+        PagePatch.keepAnchor(anchor)
+        return { ...run, steps, weight }
+      }
     }
-    patchBodyAttributes(before.body, after.body, live.ownerDocument.body)
-    if (after.title !== before.title) live.ownerDocument.title = after.title
-    PagePatch.keepAnchor(anchor)
-    return { ...run, steps, weight }
+  }
+
+  ////////////////
+  // ## Redrawing without a flash
+  ////////////////
+
+  /**
+   * Run `change`, a change to the page, as ONE short cross-fade from the page as it was to the page as it is after
+   * (a same-document view transition, `document.startViewTransition()`;  epic `epic-engine` I164).
+   * - the old frame stays up until `change` resolves, so nothing half drawn ever shows:  a part's body loading, an
+   *   element drawing its new state;  then old and new cross-fade, `FADE_MS`, no slide
+   * - just `change()`, no transition, when:
+   *   - `onScreen` is false:  nothing the reader sees moves
+   *   - the reader asked for less motion (`prefers-reduced-motion`)
+   *   - the page is out of sight, or the browser has no view transitions
+   *   - a field has the focus:  what's typed would freeze for the fade
+   * - resolves with what `change` returns;  rejects as it does
+   */
+  static async crossFade<T>(change: () => T | Promise<T>, onScreen = true): Promise<T> {
+    const doc = document as Document & { startViewTransition?: (update: () => Promise<void>) => ViewTransition }
+    if (
+      !onScreen ||
+      typeof doc.startViewTransition !== "function" ||
+      doc.visibilityState !== "visible" ||
+      matchMedia("(prefers-reduced-motion: reduce)").matches ||
+      typingIn(doc.documentElement)
+    )
+      return change()
+    let result: T
+    const transition = doc.startViewTransition(async () => {
+      result = await change()
+    })
+    transition.ready.then(
+      () => {
+        for (const animation of doc.getAnimations()) {
+          const effect = animation.effect as KeyframeEffect | null
+          if (effect?.pseudoElement?.startsWith("::view-transition")) effect.updateTiming({ duration: FADE_MS })
+        }
+      },
+      // skipped (another transition started, or the page went out of sight):  the change still ran
+      () => undefined
+    )
+    await transition.updateCallbackDone
+    return result!
+  }
+
+  /**
+   * Does `node` show in the window now?  Its box, else its nearest ancestor's that has one (an element drawn as
+   * `display: contents`, like `<epic-item>`, has none of its own), crosses the window's height.
+   */
+  static isOnScreen(node: Node): boolean {
+    let element: Element | null = isElement(node) ? node : node.parentElement
+    while (element) {
+      const box = element.getBoundingClientRect()
+      if (box.width || box.height) return box.bottom > 0 && box.top < innerHeight
+      element = element.parentElement ?? ((element.getRootNode() as ShadowRoot).host as Element | undefined) ?? null
+    }
+    return false
   }
 
   ////////////////
@@ -416,6 +511,13 @@ export type PageEdit = {
   top?(): number
 }
 
+/**
+ * A page's patch, planned but not run (`PagePatch.pagePlan()`):
+ * - `isOnScreen()`:  does any step change what the window shows now?
+ * - `run()`:  apply it;  null when the live page doesn't line up with the old source
+ */
+type PagePlan = { isOnScreen(): boolean; run(): PageRun | null }
+
 /** What the reader is looking at:  an element and its top, px from the window's (`PagePatch.readingAnchor()`). */
 export type ReadingAnchor = { element: Element; top: number }
 
@@ -425,6 +527,9 @@ export type ReadingAnchor = { element: Element; top: number }
 
 /** The address of the root of a tree. */
 const ROOT = "/"
+
+/** How long a redraw's cross-fade takes, in ms (`PagePatch.crossFade()`):  short, so it reads as a swap, not motion. */
+const FADE_MS = 150
 
 /**
  * One matched pair's children, as the planner lines them up:  `match[i]`, the old child new child `i` is (an index
