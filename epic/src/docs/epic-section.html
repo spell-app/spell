@@ -651,8 +651,17 @@
                       <td><code>tools</code></td>
                       <td>
                         At the title's end: the page's own buttons (the <code>actions</code> slot), then the Phases
-                        section's state filter and gear; an item section's state filter; an Overview sub-section's
+                        section's state filter, its Accept Phases while the phases are agreed, and its gear; an item section's state filter; an Overview sub-section's
                         review buttons.
+                      </td>
+                    </tr>
+                    <tr>
+                      <td><code>stage-button</code></td>
+                      <td>
+                        The Phases section's "Accept Phases" (an <code>&lt;epic-stage-button&gt;</code>, epic
+                        <code>epic-engine</code> I180), before its gear:  only while the page is reviewed and agrees its
+                        phases. A press accepts the phases and every build plan waiting, and sends;  outlined green until
+                        the session moves the page on.
                       </td>
                     </tr>
                     <tr>
@@ -828,7 +837,10 @@
               <li>
                 <b>Phases</b>: its title ends in a gear (epic <code>epic-engine</code> I166), whose menu shows or hides
                 each phase's files and checks (its Files and Verify), remembered per page; each phase's own gear chooses
-                for that phase alone. The state chips stay before it, in the row. No box above the phases since
+                for that phase alone. The state chips stay before it, in the row. While the page agrees its phases
+                (<code>stage="phases"</code>), <b>Accept Phases</b> sits before the gear, a green check and its words
+                (epic <code>epic-engine</code> I180;  in the header's Send before):  one press accepts the phases and every
+                build plan waiting. No box above the phases since
                 2026-10-11: each phase shows its own changes, in a <b>Plan changes</b> box atop its body (<a
                   href="epic-phase.html"
                   target="src-packages-epics-docs-epic-phase-html"

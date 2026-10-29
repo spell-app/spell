@@ -40,6 +40,9 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
  *   - a marked note, then the note box once Revisit or Edit opens it, at the top of its body, under the title row
  *     (`under-line`:  leaving it empty closes it, as an item's under its line);  Revisit and Edit unfold it
  *   - before epic `epic-engine` I55 `<epic-summary>` drew them under its lede, the note box always there
+ * - While the page agrees its Overview (`<epic-page stage="overview">`, reviewed), "Accept Overview" last on its
+ *   title row (`<epic-stage-button>`, `EpicFold.renderStageButton()`;  epic `epic-engine` I180):  the header's green
+ *   pill in Send's place before (P29);  with or without a summary
  * - SIDE EFFECT:  follows the review inbox while connected.
  ****************/
 export class EpicOverview extends EpicFold<typeof epicOverviewVocabulary> {
@@ -98,7 +101,13 @@ export class EpicOverview extends EpicFold<typeof epicOverviewVocabulary> {
     return this.renderFold({
       title: () => `${this.number}. ${this.translationForKey("title")}`,
       icon: () => this.icons.title.svg,
-      tools: () => <Show when={this.reviewed}>{this.reviewControl("buttons", "review-buttons")}</Show>,
+      tools: () => (
+        <>
+          <Show when={this.reviewed}>{this.reviewControl("buttons", "review-buttons")}</Show>
+          {/* Accept Overview, last, while the Overview is agreed (I180) */}
+          {this.renderStageButton("overview", this.reviewState.reviewing)}
+        </>
+      ),
       before: () => (
         <>
           {/* under the title row:  a marked note, then the note box once opened */}

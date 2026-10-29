@@ -3,7 +3,7 @@ import { isServer, type JSX } from "@solidjs/web"
 
 import { E } from "spell/ui/core"
 
-import { PhaseIds } from "spell/epic/phases"
+import { PageStages, PhaseIds, type PlanningStage } from "spell/epic/phases"
 
 // Import directly:  the page's signals, not its family's barrel (which would define `<epic-page>` here)
 import { EpicPage } from "spell/epic/components/epic-page/EpicPage"
@@ -474,6 +474,34 @@ export abstract class EpicFold<V extends E.ComponentVocabulary> extends E.UIComp
   }
 
   ////////////////
+  // ## Its stage button (epic `epic-engine` I180)
+  ////////////////
+
+  /**
+   * The STAGE BUTTON for its title row (`<epic-stage-button>`):  "Accept Overview" on the Overview's, "Accept Phases"
+   * on the Phases section's, where the work it accepts is (Owen, 2026-10-29, on the green pill in Send's place:  "This
+   * should just be normal paper plane").
+   * - only while `reviewing()` and its page is in `stage`;  on the title row, so it's there while folded
+   * - its tooltip counts the page's open questions (`PageStages.openQuestions()`), read again on every layout change
+   * - its `part`:  `stage-button`;  a click on it never folds the row (`TITLE_ROW_CONTROLS`)
+   */
+  protected renderStageButton(stage: PlanningStage, reviewing: () => boolean): JSX.Element {
+    const shown = () => {
+      void this.layout
+      return reviewing() && PageStages.of(this.page) === stage
+    }
+    const open = () => {
+      void this.layout
+      return PageStages.openQuestions(this.page)
+    }
+    return (
+      <Show when={shown()}>
+        <epic-stage-button stage={stage} open={open()} part={this.partForName("stage-button" as never)} />
+      </Show>
+    )
+  }
+
+  ////////////////
   // ## Its gear (epic `epic-engine` I166)
   ////////////////
 
@@ -634,7 +662,7 @@ const EXPAND_ROUNDS = 6
 /** What, in a title row, acts by itself:  a click there doesn't fold (`onTitleRowClick()`). */
 const TITLE_ROW_CONTROLS =
   "a[href], button, input, select, textarea, label, summary, [role='button'], [contenteditable], ui-button, " +
-  "ui-dropdown, epic-review"
+  "ui-dropdown, epic-review, epic-stage-button"
 
 /** The attribute naming a fold's or an item's part file. */
 const SOURCE = "source"
