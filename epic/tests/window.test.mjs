@@ -4,10 +4,12 @@
  * - Registry entries go in a temp folder (`SPELL_WINDOWS_DIR`), never `~/.spell/windows`.
  * - The "window" is a stand-in:  our own parent pid (an ancestor, like a session's extension host), a `sleep`
  *   child (alive, but not an ancestor), or a pid that has exited.
- * - The repo the windows are for is a temp one, with no `.epic/config.json5` settings of its own.
+ * - The repo the windows are for is a temp one, its `.epic/config.json5` naming spell-app's OLD layout:
  *   - `EPIC_CHECKOUT`, set before the script loads:  it reads the config once
- *   - so it has the defaults, spell-app's OLD layout:
- *     worktrees nested in `.claude/worktrees`, the main root in every window
+ *   - worktrees nested in `.claude/worktrees`, the main root in every window, the content folder `../spell-app-dev`,
+ *     the old shared folders (`agents` among them)
+ *   - written out, not left to the defaults:  since epic `epic-friend` P6 a key left out reads as `epic init` writes
+ *     it for THIS repo (worktrees and content folder beside it, worktree-only windows), never spell-app's
  *   - Never the checkout the tests run in:  its config moves worktrees beside the repo (spell-epic's since 2ad9973,
  *     spell-app's since epic `epic-eject` T18), and a session's `EPIC_CHECKOUT` picks whichever it's in.
  *   - The layout beside the repo has a test of its own (epic-eject P8), in a child process.
@@ -29,11 +31,19 @@ import { tmpdir } from "node:os"
 import { dirname, join } from "node:path"
 import { after, beforeEach, test } from "node:test"
 
-/** The repo the windows are for:  a temp main checkout, its config the defaults. */
+/** The repo the windows are for:  a temp main checkout, its config spell-app's old layout. */
 const repo = join(mkdtempSync(join(tmpdir(), "spell-windows-repo-")), "spell-app")
 mkdirSync(join(repo, ".git"), { recursive: true })
 mkdirSync(join(repo, ".epic"))
-writeFileSync(join(repo, ".epic", "config.json5"), "{}\n")
+writeFileSync(
+  join(repo, ".epic", "config.json5"),
+  JSON.stringify({
+    contentFolder: "../spell-app-dev",
+    worktreesFolder: ".claude/worktrees",
+    windows: { worktreeOnly: false },
+    sharedFolders: ["epics", "guides", "pages", "brand", "goals", "sagas", "agents"]
+  })
+)
 // a checkout with a `package.json`, as spell-app is:  its links sit beside it
 writeFileSync(join(repo, "package.json"), '{ "name": "spell-app" }\n')
 process.env.EPIC_CHECKOUT = repo
@@ -298,7 +308,11 @@ test("worktrees beside the repo (epic-eject P8):  a worktree-only window;  an ol
   const repo = join(top, "repo")
   mkdirSync(join(repo, ".git", "worktrees"), { recursive: true })
   mkdirSync(join(repo, ".epic"))
-  writeFileSync(join(repo, ".epic", "config.json5"), '{ "worktreesFolder": "../repo.worktrees" }')
+  // `worktreeOnly` off:  on (the default since epic `epic-friend` P6), every window is worktree-only
+  writeFileSync(
+    join(repo, ".epic", "config.json5"),
+    '{ "worktreesFolder": "../repo.worktrees", "windows": { "worktreeOnly": false } }'
+  )
   mkdirSync(join(repo, ".claude", "worktrees", "old"), { recursive: true })
   const code =
     // by an env var, not an argument:  the script runs its CLI when it's `argv[1]`
@@ -315,10 +329,10 @@ test("worktrees beside the repo (epic-eject P8):  a worktree-only window;  an ol
   // no main checkout, nothing of main's hidden
   assert.deepEqual(seo.folders, [{ path: "../../../repo.worktrees/seo", name: "⎇ seo" }])
   assert.equal(seo.settings["files.exclude"]["*"], undefined)
-  // the old layout:  main first, its files hidden beside the marker
+  // the old layout:  main first (named for the repo's folder), its files hidden beside the marker
   assert.deepEqual(
     old.folders.map(({ name }) => name),
-    ["spell-app", "⎇ old"]
+    ["repo", "⎇ old"]
   )
   assert.deepEqual(old.settings["files.exclude"]["*"], { when: ".spell-main" })
   // the old place is still hidden in every window while worktrees may be left there
@@ -1032,9 +1046,9 @@ test("a BROKEN worktree (git no longer knows it):  the main checkout's settings,
   try {
     assert.equal(run.status, 0, run.stderr)
     const { file, record } = JSON.parse(run.stdout.trim().split("\n").at(-1))
-    // the main checkout's windows folder (the default content folder's, beside it), never one beside the broken
-    // worktree:  before P26, `repo.worktrees/spell-app-dev/windows/...`
-    const windows = join(realpathSync(top), "spell-app-dev", "windows")
+    // the main checkout's windows folder (the default content folder's, `../repo.epics` beside it), never one beside
+    // the broken worktree:  before P26, `repo.worktrees/...`
+    const windows = join(realpathSync(top), "repo.epics", "windows")
     assert.equal(file, join(windows, "ongoing", "elemental-spell.code-workspace"))
     assert.equal(record.to, file)
     assert.equal(existsSync(file), true)
@@ -1065,10 +1079,7 @@ function sawHooks(id) {
  */
 function pluginListsAt(folder) {
   const marketplace = { source: { source: "directory", path: folder } }
-  writeFileSync(
-    join(claudeHome, "settings.json"),
-    JSON.stringify({ extraKnownMarketplaces: { spell: marketplace } })
-  )
+  writeFileSync(join(claudeHome, "settings.json"), JSON.stringify({ extraKnownMarketplaces: { spell: marketplace } }))
   mkdirSync(join(claudeHome, "plugins"), { recursive: true })
   const known = { spell: { ...marketplace, installLocation: folder } }
   writeFileSync(join(claudeHome, "plugins", "known_marketplaces.json"), JSON.stringify(known))
