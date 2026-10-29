@@ -178,8 +178,9 @@
     --_ring: var(--_size);
     --_disc: calc(var(--_size) - 12px);
   }
-  /* while it counts, the pill's own outline goes:  the ring is the only border */
-  :host(:state(counting)) .group:not([data-asks]) {
+  /* while it counts, the pill's own outline goes, a waiting-on-you one too:  the ring is the only border (Owen,
+     2026-10-29:  "dotted line came back");  the stage button keeps its own, the ring inside it */
+  :host(:state(counting)) .group:not(:has(.accept)) {
     border-color: transparent;
   }
   .ring {

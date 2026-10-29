@@ -150,9 +150,18 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
   /**
    * Where it stands, as its Phases chip counts it (`PhaseState.of()`, epic `epic-engine` I170):  its status circle's
    * colour and fill, the same as the chip's.
+   * - marked by Owen in this pass and not done (an Accept plan sent, say):  blue, with Claude, as the Phases section's
+   *   blue badge counts it (`EpicSection.isWithClaude()`;  Owen, 2026-10-29, on a red circle beside a plan he had
+   *   accepted:  "dot next to P13 -- shouldn't be red?")
    */
   get drawnState(): PhaseStateName {
-    return PhaseState.of(this.stateFields, this.live)
+    return this.withOwensMark(PhaseState.of(this.stateFields, this.live))
+  }
+
+  /** `state`, or blue (`progress`) while Owen's mark on it waits for Claude and it isn't done:  `drawnState`. */
+  private withOwensMark(state: PhaseStateName): PhaseStateName {
+    const isDone = state === "recent" || state === "old"
+    return !isDone && this.reviewState.isMarked(this.id ?? "") ? "progress" : state
   }
 
   /** What the review inbox says of it now, for `PhaseState`:  Claude at work on it;  an update marked Seen. */
@@ -265,7 +274,7 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
     const written = this.domElement.getAttribute("status") ?? ""
     const status: PhaseStatus = written in STATUS_ICONS ? (written as PhaseStatus) : "todo"
     const label = `${PhaseIds.labelOf(this.domElement)} · ${EpicPhase.titleText(this.domElement)}`
-    const state = PhaseState.of(PhaseState.fieldsOf(this.domElement), this.live)
+    const state = this.withOwensMark(PhaseState.of(PhaseState.fieldsOf(this.domElement), this.live))
     const color = PHASE_FILTER_STATES.find((it) => it.state === state)!.color
     return { label, icon: STATUS_ICONS[status], color }
   }
