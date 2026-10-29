@@ -569,6 +569,47 @@ describe("ReviewInbox comments and Send", () => {
     })
   })
 
+  // epic `epic-engine` I158:  a comment saved in a part's text presses its Revisit (the comments route)
+  test("noteComment() presses a part's Revisit for a new comment;  dropComment() lets go;  wait hands it over ONCE", () => {
+    const inbox = new ReviewInbox()
+    const parts = new Set(["p-build", "t1"])
+    const at = (anchor: string, text: string) => inbox.commentList.add({ ...PLACE, anchor }, text, new Date(M1))
+    const c1 = at("p-build#field-1", "this step?")
+    const onPage = at("page", "the whole page")
+    const elsewhere = at("t9", "not on this page")
+    expect([
+      inbox.noteComment(c1, parts, M2),
+      inbox.noteComment(onPage, parts),
+      inbox.noteComment(elsewhere, parts)
+    ]).toEqual(["p-build", null, null])
+    expect(inbox.marks["p-build"]).toEqual({
+      action: "revisit",
+      when: "soon",
+      note: "see my comments in its text:  C1",
+      comments: [c1],
+      at: M2
+    })
+    // sent:  one mark, carrying the comment;  the comment never goes over by itself too
+    inbox.markSent(M3)
+    const sent = inbox.takeWork(M3)!.sent!
+    expect(sent.marks.map((mark) => [mark.id, mark.inlineComments?.map((each) => each.id)])).toEqual([
+      ["p-build", [c1]]
+    ])
+    expect(sent.comments.map((comment) => comment.id)).toEqual([onPage, elsewhere])
+    // a second one joins it;  deleted, it leaves;  the last one gone takes the mark
+    const c4 = at("p-build", "and this")
+    inbox.noteComment(c4, parts)
+    expect(inbox.marks["p-build"]).toMatchObject({ note: "see my comments in its text:  C1, C4", comments: [c1, c4] })
+    expect(inbox.dropComment(c1)).toEqual(["p-build"])
+    expect(inbox.marks["p-build"]).toMatchObject({ note: "see my comments in its text:  C4", comments: [c4] })
+    inbox.dropComment(c4)
+    expect(inbox.marks["p-build"]).toBeUndefined()
+    // Approve stays Approve
+    inbox.setMark("t1", { action: "approve" })
+    inbox.noteComment(at("t1", "hm"), parts)
+    expect(inbox.marks.t1).toMatchObject({ action: "approve" })
+  })
+
   test("a send with ONLY comments wakes a waiting session, and hands them over once", () => {
     const inbox = new ReviewInbox()
     const id = inbox.commentList.add(PLACE, "is this hooked up?", new Date(M1))

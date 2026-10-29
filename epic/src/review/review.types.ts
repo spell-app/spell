@@ -439,9 +439,22 @@ export function commentsOf(mark: { comments?: string[] } | null | undefined): { 
  * - NOT a block with an id of its own inside it, nor one in a part nested in it:  those are anchored by their own id
  */
 export function isAnchoredIn(anchor: string, id: string): boolean {
-  const container = anchor.split("#")[0]!.toLowerCase()
-  return container === id.toLowerCase()
+  return partOf(anchor) === id.toLowerCase()
 }
+
+/**
+ * The part a comment at `anchor` lies in, lower-case:  `t3` for `t3` or `t3#list-1`;  `page` for `page#list-1`.
+ * - whether that part takes a mark is the caller's to say (`ReviewInbox.itemIds()`)
+ */
+export function partOf(anchor: string): string {
+  return anchor.split("#")[0]!.toLowerCase()
+}
+
+/** How `inlineCommentsNote()` starts. */
+const INLINE_NOTE_LEAD = "see my comments in its text:  "
+
+/** `inlineCommentsNote()`'s line, at a note's end. */
+const INLINE_NOTE = new RegExp(`(?:^|\\n+)${INLINE_NOTE_LEAD}[^\\n]*$`)
 
 /**
  * The note of a revisit made of Owen's comments in its text (epic `epic-engine` I140):
@@ -449,7 +462,18 @@ export function isAnchoredIn(anchor: string, id: string): boolean {
  * - Owen's words to Claude, which Claude reads, as `DO_IT_NOTE`:  never translated
  */
 export function inlineCommentsNote(ids: readonly string[]): string {
-  return `see my comments in its text:  ${ids.map((id) => id.replace(/^c/i, "C")).join(", ")}`
+  return `${INLINE_NOTE_LEAD}${ids.map((id) => id.replace(/^c/i, "C")).join(", ")}`
+}
+
+/**
+ * A revisit's note with its comments in its text named again (epic `epic-engine` I158):
+ * Owen's own words, then `see my comments in its text:  C1, C4` on a line of its own;  `""` with neither.
+ * - the line already there is dropped first, so there's ever one, naming `ids` (none:  no line)
+ * - a comment saved or deleted in a part's text writes it (`ReviewInbox.noteComment()`, `dropComment()`)
+ */
+export function withInlineComments(note: string, ids: readonly string[]): string {
+  const own = note.replace(INLINE_NOTE, "").trim()
+  return [own, ids.length ? inlineCommentsNote(ids) : ""].filter(Boolean).join("\n\n")
 }
 
 /**

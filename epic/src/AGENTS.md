@@ -1579,7 +1579,23 @@ Each kind of page has ONE name, written everywhere a person reads it.
     - which comments:  those waiting for Claude whose anchor is the part's (`<id>` or `<id>#<kind>-<n>`), from the
       routes' `waitingComments`
     - `wait` prints them under the revisit, its content (`takeWork()`'s `inlineComments`);  `inbox` names them
+      - never on their own too:  `takeWork()`'s `comments` leaves out the ones a sent revisit carries (I158)
     - NOT the phase's orange pen:  that counts its plan changes (`changes`, `<epic-update>` blocks)
+  - A COMMENT SAVED IN A PART'S TEXT presses its Revisit by itself (epic `epic-engine` I158;  Owen, 2026-10-29:
+    "When I add a comment to a phase, it should show as `revisit` automatically")
+    - the comments route does it as it saves the comment, under the inbox's lock (`ReviewInbox.noteComment()`):
+      the docs runtime writes comments, so the review client never sees one saved;  the page reads the new mark
+    - a new comment (or one put back, Undo) whose anchor lies in an item, a phase or an Overview part (`partOf()`,
+      `itemIds()`):
+      - no mark yet:  the revisit above, `{ action: "revisit", when: "soon", note: "see my comments in its text:  C4",
+        comments: ["c4"] }`
+      - a revisit:  the comment joins its `comments`, its note's last line names them all (`withInlineComments()`)
+      - a pick:  that revisit, carrying the pick ("pick B, but ...")
+      - any other mark (Approve, Make Todo, a revisit asked now):  left alone
+    - deleted or cleared (`dropComment()`):  out of every revisit naming it;  nothing left in one (no comment, no words
+      of Owen's):  a pick goes back to the plain pick, else the mark goes
+    - Send counts one mark and the comment;  `wait` hands the comment over once, inside the revisit
+    - the page header, the Overview as a whole, a guide:  nothing new
   - A PHASE DRAGGED to another place (epic `epic-engine` P34;  the Phases section's `PhaseDrag`):  a to-do phase,
     by its title row, while the page is reviewed;  `{ action: "move", to }` under its id (`ReviewClient.move()`)
     - a press that moves 6px is a drag, else a click (it folds);  a line shows where it would land, only where every
