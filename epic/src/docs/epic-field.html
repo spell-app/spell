@@ -140,6 +140,13 @@
                 A phase's fields: an icon in a column, then the bold label and the prose beside it. A list drops below
                 the label.
               </li>
+              <li>
+                Each named field folds: a click on its chevron, its icon or its label. Folded, its label row stays,
+                with one line of its text after the label, or a list's count ("2 items"), so a folded phase still
+                reads. They start open, and the page remembers the ones you fold, in this browser.
+                <kbd>⌥</kbd>-click on a phase's chevron, and the page's expand all and collapse all, reach them too;
+                a link or a comment landing inside one opens it.
+              </li>
               <li>The third is a labelled block, as items use it: no icon column.</li>
               <li>
                 The last is a phase's Requests field, as <code>epic file</code> writes it: each request in it folds,
@@ -457,6 +464,18 @@
                       <td><code>label</code></td>
                       <td>Its label: <code>Symptom:</code>, <code>Where:</code> ...</td>
                     </tr>
+                    <tr>
+                      <td><code>toggle</code></td>
+                      <td>The fold button: a named field's, before its icon;  a request's, before its label.</td>
+                    </tr>
+                    <tr>
+                      <td><code>body</code></td>
+                      <td>A named field's or a request's prose, hidden while folded.</td>
+                    </tr>
+                    <tr>
+                      <td><code>taste</code></td>
+                      <td>A folded named field's one line after its label: its text, or a list's count.</td>
+                    </tr>
                   </tbody>
                 </table>
               </ui-table>
@@ -480,7 +499,12 @@
                 relevant.
               </li>
               <li><b>A labelled block:</b> no icon column, a paragraph's spacing.</li>
-              <li>No fold: it shows whenever its phase (or item) is open.</li>
+              <li>
+                <b>A named field</b> folds, a chevron before its icon, open to start with;  folded, its label and one grey
+                line of its text, cut off with "…".  Hidden by a phase's settings (Files, Verify), it stays hidden however
+                it's folded.
+              </li>
+              <li><b>A labelled block</b> doesn't fold:  a line or two of prose in an item that folds already.</li>
             </ul>
           </ui-section>
 

@@ -68,6 +68,11 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       colours
     - `<epic-actions>`:  a block's actions row, made by the docs runtime (`addBlockAction()`)
     - a field's label and icon come from its `name` alone (`<epic-field>`)
+      - a named field folds by its label row, open to start with (epic `epic-engine` I167;  Owen, 2026-10-29:  "These
+        should be collapsable"):  `Fold`'s chevron before its icon;  folded, its label and a one-line taste of its text
+        (a list's count);  remembered per page in its own key (`FieldFolds`, `spell-field-folds:<path>`);  collapse-all,
+        expand-all (`opensWithAll`) and ⌥-click reach it;  the runtime's `reveal()` opens one a link or comment lands in
+      - a labelled block (`Where:`, a test's Step) doesn't fold
     - a list's RUNS (rounded ends) and its filter's hidden items:  one page sheet, by position
       (`EpicSection.runs.css`;  Owen:  "generic CSS, using sibling selectors ... rather than with explicit ids"),
       the filter marking what it hides `data-epic-filtered`

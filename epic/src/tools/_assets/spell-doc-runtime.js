@@ -180,6 +180,12 @@ const EPIC_FOLDS = "epic-overview, epic-section, epic-phase"
 /** What a link into an epic page opens on its way:  the folding blocks, and the items (which fold too). */
 const EPIC_OPENERS = `${EPIC_FOLDS}, epic-item`
 
+/**
+ * The fields that fold inside an epic page's blocks (`<epic-field>`, epic `epic-engine` I167):  `reveal()` opens one a
+ * link or a comment lands in, through its own `reveal()`.
+ */
+const FIELDS_THAT_FOLD = "epic-field"
+
 /** Every element the outline takes for a section:  `<ui-section>`s and an epic page's folding blocks. */
 const SECTIONS = `ui-section, ${EPIC_FOLDS}`
 /** What folds, for `holdWhileFolding()`:  the sections and epic blocks, and accordions (asides, code) */
@@ -2104,8 +2110,8 @@ function buildToolbar(page, outline, counts) {
  *   folded:  `section.spell-folded`, all but the heading hidden by CSS.
  *   Starts folded as saved, else when the section says `data-fold="closed"`.
  * - `reveal()` unfolding for a link is never saved
- * - returns `{ reveal(element) }`:  unfold every section hiding `element` (an epic page's blocks and items too),
- *   and open its own panel, or itself if it's a folded plan item;
+ * - returns `{ reveal(element) }`:  unfold every section hiding `element` (an epic page's blocks and items too, and
+ *   a phase's folded fields:  `<epic-field>`'s `reveal()`), and open its own panel, or itself if it's a folded plan item;
  *   true when it unfolded something (it draws a little later)
  *   - a `<ui-section>` unfolds WITHOUT its height animation (`--ui-section-duration: 0s` on `main` for a few frames):
  *     the jump measures the target once it has drawn,
@@ -2332,6 +2338,13 @@ function wireFolds(main, outline, kept) {
       )
         setFolded(section, false)
     }
+    // a folded field around it (a phase's Symptom, Goal ...;  epic `epic-engine` I167):  opened, never remembered
+    for (
+      let field = self ? element.closest(FIELDS_THAT_FOLD) : element.parentElement?.closest(FIELDS_THAT_FOLD);
+      field;
+      field = field.parentElement?.closest(FIELDS_THAT_FOLD)
+    )
+      if (field.component?.reveal?.()) unfolded = true
     const panel = self ? element.querySelector(":scope > ui-accordion > ui-title") : null
     if (panel && !isPanelOpen(panel)) setPanel(panel, true)
     // an id INSIDE a closed panel (an old decision's `#d7`, now the answer card in its question):

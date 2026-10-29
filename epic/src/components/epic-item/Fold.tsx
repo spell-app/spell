@@ -356,7 +356,7 @@ export function expandAllUnder(root: Element, { cards = false }: { cards?: boole
     if (!component || insideFolded(element, root)) continue
     const open = component.expand
       ? component.expand()
-      : cards && component.fold instanceof Fold && component.fold.open()
+      : (cards || !!component.opensWithAll) && component.fold instanceof Fold && component.fold.open()
     if (open) opened++
   }
   return opened
@@ -382,6 +382,8 @@ type Collapsible = {
   expand?: () => boolean
   /** its box's fold */
   fold?: unknown
+  /** the page's expand-all opens its `fold` too, not only ⌥-click (`<epic-field>`'s named fields, I167) */
+  opensWithAll?: boolean
   /** expand-all leaves it, and what's inside it, folded (`EpicSection.staysFolded`:  the Log) */
   staysFolded?: boolean
 }

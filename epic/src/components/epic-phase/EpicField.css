@@ -12,6 +12,9 @@
  * - A request (a labelled field in a Requests field, r31):  a fold, its chevron and label the title row,
  *   its prose below, folded `until-found`;  its screenshots' thumbnails are the page sheet's (`EpicField.requests.css`)
  * - To review:  its `<epic-mark>`s draw their own chips (epic `epic-engine` P45).
+ * - A NAMED field folds (I167):  a chevron column before the icon;  open, its prose's box is `display: contents`
+ *   (today's look, a first paragraph running on after the label);  folded, the label row alone, its taste after the
+ *   label on one line, cut off with "…"
  * - Public tokens (`--epic-field-*`) are never declared here:  read through private aliases.
  */
 
@@ -138,6 +141,41 @@
     padding-inline-start: 8px;
     border-inline-start: 3px solid var(--ui-orange, #f2711c);
     border-radius: 2px;
+  }
+
+  /* ## A named field (I167):  the chevron's column, then the icon's, then the label and prose */
+  .field.folding {
+    grid-template-columns: auto 1.25em minmax(0, 1fr);
+  }
+  .folding .icon,
+  .folding .label {
+    cursor: pointer;
+  }
+  .folding > .text > .body {
+    display: contents;
+  }
+  .folding > .text > .body[hidden="until-found"] {
+    display: block;
+    content-visibility: hidden;
+  }
+  /* folded:  the label, then one line of its text, cut off */
+  .folded > .text {
+    display: flex;
+    align-items: baseline;
+    min-width: 0;
+  }
+  .folded .label {
+    flex: none;
+    white-space: nowrap;
+  }
+  .taste {
+    flex: 1 1 auto;
+    min-width: 0;
+    margin-inline-start: 0.35em;
+    overflow: hidden;
+    color: var(--epic-muted, var(--ui-text-muted));
+    white-space: nowrap;
+    text-overflow: ellipsis;
   }
 
   /* ## A request (r31):  folds by its title row;  its prose below, lined up with the label */

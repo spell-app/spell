@@ -1709,7 +1709,7 @@
         "where",
         "step"
       ],
-      "description": "One field of a phase, by `name`:  its icon and label are drawn;  its prose is its children.  In an item's prose (anywhere prose goes), a labelled block by `label` instead:  `<epic-field label=\"Where\">` draws `Where:` before its prose, no icon (epic `epic-components` P14).  A labelled field in a phase's Requests field is ONE REQUEST (`epic file`):  it folds, its label the title, folded to start with;  its screenshots are thumbnails, a click shows one full size, over the page (the page's `<ui-zoom>`).",
+      "description": "One field of a phase, by `name`:  its icon and label are drawn;  its prose is its children.  In an item's prose (anywhere prose goes), a labelled block by `label` instead:  `<epic-field label=\"Where\">` draws `Where:` before its prose, no icon (epic `epic-components` P14).  A labelled field in a phase's Requests field is ONE REQUEST (`epic file`):  it folds, its label the title, folded to start with;  its screenshots are thumbnails, a click shows one full size, over the page (the page's `<ui-zoom>`).  A NAMED field folds too (epic `epic-engine` I167):  a chevron before its icon, a click on it, the icon or the label folds or opens it;  folded, its label row stays with one line of its text (a list's count);  open to start with, the reader's folds remembered per page;  ⌥-click and the page's expand-all and collapse-all reach it, and a link or comment landing inside opens it.",
       "noun": "field",
       "attributes": [
         {
@@ -1766,11 +1766,15 @@
         },
         {
           "name": "toggle",
-          "description": "A request's fold button, before its label."
+          "description": "The fold button:  a request's, before its label;  a named field's, before its icon."
         },
         {
           "name": "body",
-          "description": "A request's prose, under its label:  folded, `hidden=\"until-found\"`."
+          "description": "A request's or a named field's prose:  folded, `hidden=\"until-found\"`."
+        },
+        {
+          "name": "taste",
+          "description": "A folded named field's line after its label:  its text, cut off at the line's end, or a list's count."
         }
       ],
       "states": [
@@ -1780,7 +1784,7 @@
         },
         {
           "name": "open",
-          "description": "A request, unfolded."
+          "description": "A request, or a named field, unfolded."
         }
       ],
       "texts": [
@@ -1840,6 +1844,36 @@
           "key": "unfoldTip",
           "text": "Open this request",
           "description": "A request's fold button, while folded."
+        },
+        {
+          "key": "foldFieldTip",
+          "text": "Fold this field",
+          "description": "A named field's fold button, while open."
+        },
+        {
+          "key": "unfoldFieldTip",
+          "text": "Open this field",
+          "description": "A named field's fold button, while folded."
+        },
+        {
+          "key": "tasteItem",
+          "text": "1 item",
+          "description": "A folded field that's a list of one."
+        },
+        {
+          "key": "tasteItems",
+          "text": "{count} items",
+          "description": "A folded field that's a list:  how many."
+        },
+        {
+          "key": "tasteRequest",
+          "text": "1 request",
+          "description": "A folded Requests field holding one."
+        },
+        {
+          "key": "tasteRequests",
+          "text": "{count} requests",
+          "description": "A folded Requests field:  how many it holds."
         }
       ]
     },
@@ -4297,11 +4331,15 @@
         },
         {
           "name": "tools",
-          "description": "At the title's end:  the page's own buttons (the `actions` slot), then its estimate (once done and timed, what it took), then its review buttons, while the page is reviewed."
+          "description": "At the title's end:  the page's own buttons (the `actions` slot), then its estimate (once done and timed, what it took), then its review buttons, while the page is reviewed, then its gear."
         },
         {
           "name": "estimate",
           "description": "Its `estimate`, a small pill just before its review buttons (`2-3h`), so they line up row to row;  done and timed, what it `took` (`21m`), the estimate its tooltip."
+        },
+        {
+          "name": "gear",
+          "description": "Its gear, last on its title row (epic `epic-engine` I166):  a `<ui-dropdown>` menu of what this phase shows, \"Show this phase's files\" and \"Show this phase's checks\", ticked while on;  its choice wins over the Phases section's gear for this phase.  Only with an `id`."
         },
         {
           "name": "review-buttons",
@@ -4373,6 +4411,21 @@
           "key": "workingOn",
           "text": "Claude is working on it",
           "description": "Its spinner while Claude is at work on it, its plan accepted or the phase under way."
+        },
+        {
+          "key": "gearTip",
+          "text": "Settings for this phase",
+          "description": "Its gear's tooltip and name (I166)."
+        },
+        {
+          "key": "showPhaseFiles",
+          "text": "Show this phase's files",
+          "description": "Its gear menu:  its Files field, ticked while it shows (its own choice, else every phase's)."
+        },
+        {
+          "key": "showPhaseVerify",
+          "text": "Show this phase's checks",
+          "description": "Its gear menu:  its Verify field, ticked while it shows (its own choice, else every phase's)."
         },
         {
           "key": "tookTip",
@@ -5162,7 +5215,11 @@
         },
         {
           "name": "tools",
-          "description": "At the title's end:  the page's own buttons (the `actions` slot), then the Phases section's Files / Verify toggles and its state filter;  an item section's state filter;  an Overview sub-section's review buttons."
+          "description": "At the title's end:  the page's own buttons (the `actions` slot), then the Phases section's state filter and its gear;  an item section's state filter;  an Overview sub-section's review buttons."
+        },
+        {
+          "name": "gear",
+          "description": "The Phases section's gear, last on its title row (epic `epic-engine` I166;  the Files / Verify toggles before):  a `<ui-dropdown>` menu, \"Show each phase's files\" and \"Show each phase's checks\", ticked while on.  A pick shows or hides that field in every phase, forgetting each phase's own choice of it."
         },
         {
           "name": "filter",
@@ -5220,7 +5277,7 @@
         },
         {
           "name": "tools",
-          "description": "Its title has tools:  the Phases toggles, or a state filter (items in it)."
+          "description": "Its title has tools:  the Phases gear, or a state filter (items in it)."
         }
       ],
       "texts": [
@@ -5272,24 +5329,19 @@
           "description": "An item section with no items."
         },
         {
-          "key": "showFiles",
-          "text": "Show each phase's Files",
-          "description": "The Phases title's Files toggle, off."
+          "key": "gearTip",
+          "text": "Settings for every phase",
+          "description": "The Phases gear's tooltip and name (I166)."
         },
         {
-          "key": "hideFiles",
-          "text": "Hide each phase's Files",
-          "description": "The Files toggle, on."
+          "key": "showFiles",
+          "text": "Show each phase's files",
+          "description": "The Phases gear menu:  every phase's Files field, ticked while shown."
         },
         {
           "key": "showVerify",
-          "text": "Show each phase's Verify",
-          "description": "The Phases title's Verify toggle, off."
-        },
-        {
-          "key": "hideVerify",
-          "text": "Hide each phase's Verify",
-          "description": "The Verify toggle, on."
+          "text": "Show each phase's checks",
+          "description": "The Phases gear menu:  every phase's Verify field, ticked while shown."
         },
         {
           "key": "addNew",
@@ -5671,7 +5723,7 @@
         "chips",
         "filter by state"
       ],
-      "description": "The state filter's chips (epic `epic-engine` P3:  ONE copy, drawn wherever items, or phases, are filtered by state):  a pill per state the items are in, in the state's colour, with how many;  solid while that state's items show, outlined while hidden.  A click asks its owner to filter (`epic-state-changed`), which sets `shown`:  an item section's title (`<epic-section>`), an epic page's toolbar (`<epic-page>`), and the docs runtime's lists (the Epics page).  What a click does, by the one rule (`StateFilter.nextShown()`), is each chip's tooltip.  The items marked in this pass (`marked`) count in a solid blue badge (Send's blue) first, whatever the filter.",
+      "description": "The state filter's chips (epic `epic-engine` P3:  ONE copy, drawn wherever items, or phases, are filtered by state):  a pill per state the items are in, in the state's colour, with how many;  solid while that state's items show, outlined while hidden.  A click asks its owner to filter (`epic-state-changed`), which sets `shown`:  an item section's title (`<epic-section>`), an epic page's toolbar (`<epic-page>`), and the docs runtime's lists (the Epics page).  What a click does, by the one rule (`StateFilter.nextShown()`), is each chip's tooltip;  an ⌥-click (Alt-click) shows only its state, whatever showed (epic `epic-engine` I166).  The items marked in this pass (`marked`) count in a solid blue badge (Send's blue) first, whatever the filter.",
       "noun": "state-filter",
       "attributes": [
         {
@@ -5694,8 +5746,8 @@
       "events": [
         {
           "name": "epic-state-changed",
-          "detail": "{ state, shown }",
-          "description": "A chip was clicked:  its `state`, and what should show next by the one rule (`shown`, the states;  `StateFilter.nextShown()`).  The owner filters, and sets `shown`."
+          "detail": "{ state, shown, how }",
+          "description": "A chip was clicked:  its `state`, and what should show next by the one rule (`shown`, the states;  `StateFilter.nextShown()`);  `how`, `click`, or `only` for an ⌥-click, which shows its state alone.  The owner filters, and sets `shown`."
         }
       ],
       "parts": [
@@ -5721,8 +5773,13 @@
         },
         {
           "key": "chipWords",
-          "text": "{count} {words}:  {does}",
-          "description": "A state chip's name and tooltip:  how many, its state, what a click does (`showAll`, `chipOnly` ...)."
+          "text": "{count} {words}:  {does}\n{only}",
+          "description": "A state chip's name and tooltip:  how many, its state, what a click does (`showAll`, `chipOnly` ...), then what an ⌥-click does (`chipAltOnly`)."
+        },
+        {
+          "key": "chipAltOnly",
+          "text": "⌥-click:  show only these",
+          "description": "A state chip's ⌥-click (epic `epic-engine` I166):  only its state shows, whatever showed."
         },
         {
           "key": "markedWords",
