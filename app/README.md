@@ -442,8 +442,8 @@ yarn ts    yarn lint    yarn format    yarn test    yarn review
   [projectGroups.test.ts](tests/spaces/models/projectGroups.test.ts).
 - [tests/spell/](tests/spell/) checks the language on the frozen test projects, [spaces/@spell/test/](spaces/@spell/test/):
   each one's snapshots, what `tsc` and pyright say of it, whole-project parsing.
-  - `yarn spell:test:fixtures` runs the snapshot tests;  `yarn spell:test:fixtures:bless` rewrites the snapshots,
-    and the diff is the review.
+  - `spell content check` runs them, with every other check of the examples, notebooks and Spell guides;
+    `spell content check --bless` rewrites the snapshots, and the diff is the review.
   The app's browser tests (`*.browser.test.tsx`, and `.ts`) run in headless Chromium.
 - App UI, the docs pages of the app's components, is at `http://127.0.0.1:4747/components/app/`
   while the page server runs:  one page per component, with live examples and pictures.

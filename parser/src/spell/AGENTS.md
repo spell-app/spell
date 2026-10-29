@@ -193,7 +193,7 @@ when working with code in this folder, `src/spell/` of the kit's parser folder (
       every fixture but `todos-form-based` and `cartas`, so far.
       The Python writer can't write its method's named arguments yet.
     - Add a fixture by copying a project in.
-    - After a deliberate change, `yarn spell:test:fixtures:bless` at the app folder's root, and read the diff.
+    - After a deliberate change, `spell content check --bless`, and read the diff.
 - [README-spell.md](../../README-spell.md), at the parser folder's root, is this folder's page for people;
   [the parser folder's README](../../README.md) is its front page.
   - Other docs live in the content repo, their tooling in [the epic folder's tools](../../../epic/src/tools/)

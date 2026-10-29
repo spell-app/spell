@@ -49,7 +49,7 @@ const REPO_ROOT = resolve(import.meta.dirname, "..", "..")
 const SERVER_ROOT = pageServerRoot(REPO_ROOT)
 
 /** The Solitaire example's folder:  its files are spell files a test can name, `Card.spellml`. */
-const SOLITAIRE = fixtureFolder("Solitaire")
+const SOLITAIRE = fixtureFolder("@spell/examples/Solitaire")
 
 /** Temp folder holding `tempProject()`s -- its REAL path:  on macOS `tmpdir()` is a symlink, and spell reports real paths. */
 const TEMP = realpathSync(mkdtempSync(resolve(tmpdir(), "spell-cli-")))
@@ -281,7 +281,7 @@ describe("spell compile", () => {
   // which `yarn scopes` can't show here:  it takes a root's project id, not a temp folder.
   test("a clean project writes its words and scope pack too", () => {
     const copy = resolve(TEMP, "Solitaire")
-    cpSync(fixtureFolder("Solitaire"), copy, { recursive: true })
+    cpSync(fixtureFolder("@spell/examples/Solitaire"), copy, { recursive: true })
     const { status, stderr } = spell(["compile", "."], copy)
     expect(status).toBe(0)
     const wrote = [SP.COMPILED_JS_SUFFIX, SP.DECLARATIONS_JSON_SUFFIX, SP.WORDS_JS_SUFFIX, SP.SCOPES_JS_SUFFIX]
@@ -503,7 +503,7 @@ describe("spell describe", () => {
   })
 
   test("one thing, by name -- ignoring case, and spaces ~== `_`", () => {
-    const { status, stdout } = spell(["describe", ".", "STOCK pile"], fixtureFolder("Solitaire"))
+    const { status, stdout } = spell(["describe", ".", "STOCK pile"], fixtureFolder("@spell/examples/Solitaire"))
     expect(status).toBe(0)
     expect(stdout).toMatch(/^template StockPile is a Pile\nSolitaire\.spellml:\d+\n/)
   })
@@ -561,7 +561,7 @@ describe("spell run", () => {
 
   test("a UI project runs in the browser, in <spell-viewer>, until interrupted -- writing nothing into it", async () => {
     // the fixture's files and its build folder's, each by when it last changed:  none added or written by the run
-    const before = fixtureFiles("Solitaire")
+    const before = fixtureFiles("@spell/examples/Solitaire")
     const child = spawn(process.execPath, [SPELL, "run", "@spell/examples/Solitaire"], {
       cwd: fixturePath(),
       env: { ...process.env, SPELL_NO_BROWSER: "1" },
@@ -580,7 +580,7 @@ describe("spell run", () => {
 
     child.kill("SIGINT")
     expect(await new Promise((done) => child.on("exit", done))).toBe(0)
-    expect(fixtureFiles("Solitaire")).toEqual(before)
+    expect(fixtureFiles("@spell/examples/Solitaire")).toEqual(before)
   }, 180_000)
 })
 

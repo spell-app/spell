@@ -21,7 +21,7 @@ import { fixtureFolder } from "spell/app/spaces/test"
  *   disk reader, which spell-parser's tests never import.
  */
 describe("SpellProject imports", () => {
-  const solitaire = fixtureFolder("Solitaire")
+  const solitaire = fixtureFolder("@spell/examples/Solitaire")
   const workspace = mkdtempSync(resolve(tmpdir(), "spell-imports-"))
   let root = ""
 

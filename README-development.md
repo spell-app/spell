@@ -446,7 +446,7 @@ The root (`~/www/spell`)
 
 `app/`
 - checks:  `ts`, `test`, `test:watch`, `lint`, `lint:fix`, `format`, `format:check`, `review`
-- the frozen test projects:  `spell:test:fixtures`, `spell:test:fixtures:bless`
+- the content checks (`spell content check [--bless]`):  `spell:test:fixtures`, `spell:test:fixtures:bless`
 - the editor:  `start` (an install, a fresh page server, then the editor, printing its URL), `stop`,
   `start:dev` (Vite alone), `start:server` (the API alone, port 3001), `start:server:prod`, `build`, `build:runner`,
   `build:element`, `build:page`, `preview`, `site:data`, `site:pictures`, `examples:readme`, `clean`

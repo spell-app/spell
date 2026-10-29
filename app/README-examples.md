@@ -79,16 +79,17 @@ spell app serve @spell/examples/calculator
 
 The table and its pictures come from the example projects, so a new example shows up by running one command.
 Everything else on this page is written by hand.
+A new example is tested as soon as its folder is there:  no list to add it to.
 
 1. Make the project in `spaces/@spell/examples/<name>/`:  a `__project.json5` and its `.spell` or `.spellml` files.
    `spell app create <name> --in spaces/@spell/examples` writes a first one.
 2. Give its project file a `"description"`:  one line of what it shows.
    - Without one, the table takes the first comment of its first Spell file.
    - A `"title"` names it, when its folder's name can't (`ListaDeTareas` is "Lista de tareas").
-3. Add its name to the learning order at the top of [the script](scripts/examples-readme.ts), where it fits;
-   one not listed comes after the listed ones, by name.
-4. Start the editor, `yarn start` in spell-app, and leave it running.
-5. In spell-app's folder, `yarn examples:readme`:
+   - Its place in the table:  the learning order at the top of [the script](scripts/examples-readme.ts);
+     one not listed there comes after the listed ones, by name.
+3. Start the editor, `yarn start` in spell-app, and leave it running.
+4. In spell-app's folder, `yarn examples:readme`:
    it opens each example in the editor, headless, in a window 1280 by 800,
    gives it 5 seconds after the page goes quiet to compile, run and draw,
    saves a picture of it into [the pictures folder](docs/images/examples/),
@@ -100,6 +101,10 @@ Everything else on this page is written by hand.
    ...
    README-examples.md:  7 projects
    ```
+
+5. `spell content check --bless`, then read the diff:
+   it writes the new example's snapshots (its compiled output, and what it prints on every target)
+   and runs every other check of the examples, notebooks and Spell guides, this page's table among them.
 
 - `yarn examples:readme --no-pictures` rewrites only the table, without a browser;
   `yarn examples:readme calculator` takes only that example's picture.

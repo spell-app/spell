@@ -11,7 +11,7 @@ import { fixtureWords } from "spell/app/spaces/test"
  */
 describe("SpellWords", () => {
   test("Solitaire's:  every member of its types, its own cards, deck and piles too, by javascript's names", () => {
-    const words = SP.SpellWords.read(fixtureWords("Solitaire"))!
+    const words = SP.SpellWords.read(fixtureWords("@spell/examples/Solitaire"))!
     expect(Object.keys(words.types)).toEqual([
       "Card",
       "Deck",
@@ -40,7 +40,7 @@ describe("SpellWords", () => {
   })
 
   test("Solitaire's card:  its own, as written", () => {
-    const words = SP.SpellWords.read(fixtureWords("Solitaire"))!
+    const words = SP.SpellWords.read(fixtureWords("@spell/examples/Solitaire"))!
     expect(words.types.Card).toMatchObject({
       isARank: "is a (rank)",
       isASuit: "is a (suit)",
