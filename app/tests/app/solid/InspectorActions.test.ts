@@ -70,6 +70,8 @@ describe("InspectorActions.of()", () => {
   test("what it takes, from its words:  `a pile` is the program's `Pile`", () => {
     const put = InspectorActions.of(new Card(), coreFor([]), WORDS).find((action) => action.name === "putOnPile")!
     expect(put.parameters).toEqual([{ words: "a pile", type: "Pile" }])
+    // its button leaves the field's words to the field:  `put it on` [a pile ▾]
+    expect(put.label).toBe("put it on")
   })
 
   test("no words file:  each by its method's name, what it takes unnamed", () => {

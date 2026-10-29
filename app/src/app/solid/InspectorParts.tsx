@@ -512,7 +512,7 @@ function ActionRow(props: { thing: object; action: InspectorAction }): JSX.Eleme
         loading={isRunning() ? "" : undefined}
         onClick={press}
       >
-        {props.action.words}
+        {props.action.label}
       </ui-button>
       <For each={props.action.parameters}>
         {(parameter, index) => (

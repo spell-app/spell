@@ -135,6 +135,11 @@ export type InspectorAction = {
   name: string
   /** Its words, the thing itself as `it`:  `put it on a pile`;  `turn over` for one with no words. */
   words: string
+  /**
+   * Its button's words:  its own, less each field's, which the field's placeholder says (`put it on` [a pile ▾];
+   * Owen:  "no need to repeat the words since menu placeholder states them")
+   */
+  label: string
   /** What it takes, in order:  `[{ words: "a pile", type: "Pile" }]`. */
   parameters: ActionParameter[]
   /** The type it's written in:  `Card`, `TwoSidedView`. */
@@ -158,7 +163,13 @@ function actionFrom(
   typeWords: [string, string][]
 ): InspectorAction {
   if (!written)
-    return { name, words: wordsOfName(name), parameters: Array.from({ length: arity }, () => ({ words: "" })), type }
+    return {
+      name,
+      words: wordsOfName(name),
+      label: wordsOfName(name),
+      parameters: Array.from({ length: arity }, () => ({ words: "" })),
+      type
+    }
   // the thing itself:  the first `a card` in a card's action
   const own = new RegExp(`\\b(?:an?|the)\\s+${wordsOfName(type)}\\b`, "i")
   const words = written.replace(own, "it")
@@ -175,7 +186,10 @@ function actionFrom(
     if (known) named.push({ words: `${token} ${known[0]}`, type: known[1] })
   })
   const parameters = Array.from({ length: arity }, (_, index) => named[index] ?? { words: "" })
-  return { name, words, parameters, type }
+  const label = named
+    .reduce((rest, parameter) => rest.replace(new RegExp(`\\s*\\b${parameter.words}\\b`, "i"), ""), words)
+    .trim()
+  return { name, words, label: label || words, parameters, type }
 }
 
 /** A class or method name in words:  `StockPile` => `stock pile`, `turnOver` => `turn over`. */
