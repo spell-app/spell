@@ -1352,6 +1352,7 @@
             "and_or",
             "is_greater_or_less_than",
             "rounding",
+            "passive_event",
             "list_end",
             "before_or_after",
             "print_kind",
@@ -1364,6 +1365,7 @@
             "drag_moment",
             "right_away",
             "draggable_or_droppable",
+            "when_or_if",
             "at_least_or_at_most",
             "url_or_email",
             "draw_method",
@@ -1387,6 +1389,9 @@
             },
             {
               "syntax": "(off|(up:up)|(down:down))"
+            },
+            {
+              "syntax": "((click:clicked)|(double_click:double clicked)|(right_click:right clicked)|(drag:dragged)|(drag_cancelled:drag is cancelled|the drag is cancelled|drag cancelled))"
             },
             {
               "syntax": "((start:start|front|top)|(end:end|back|bottom))"
@@ -1416,13 +1421,16 @@
               "syntax": "((dragged:dragged)|(dropped_on:dropped on)|(selected:selected))"
             },
             {
-              "syntax": "((dragged_over:dragged over)|(dragged_out_of:dragged out of)|(dropped_on:dropped on))"
+              "syntax": "((dragged_over:dragged over)|(dragged_out_of:dragged out of|dragged out)|(dropped_on:dropped on|dropped))"
             },
             {
               "syntax": "((immediately:immediately|right away))"
             },
             {
-              "syntax": "((dragged:draggable)|(dropped_on:droppable)|(selected:selectable))"
+              "syntax": "((dragged:draggable)|(dropped_on:droppable)|(selected:selectable)|(clicked:clickable))"
+            },
+            {
+              "syntax": "((when:when)|(if:if))"
             },
             {
               "syntax": "((at_least:at least)|(at_most:at most))"
@@ -2245,7 +2253,7 @@
           "ruleNames": ["on"],
           "internal": false,
           "file": "src/spell/rules/events/On.ts",
-          "line": 25,
+          "line": 30,
           "purpose": "Watches a global event, with an inline statement or nested block as the handler body.",
           "syntaxes": [
             {
@@ -2275,6 +2283,21 @@
                 },
                 "py": {
                   "code": "core.on(\"card-click\")"
+                }
+              }
+            },
+            {
+              "syntax": "when {passive:passive_event} :? {statement_body}?",
+              "example": "a card is a view where:\n\t- when double clicked print 1\n\t- when the drag is cancelled print 2",
+              "outputs": {
+                "js": {
+                  "code": "export class Card extends View {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n\n  onDoubleClick(event) {\n    return core.console.log(1)\n  }\n\n  onDragCancelled(event) {\n    return core.console.log(2)\n  }\n}"
+                },
+                "ts": {
+                  "code": "export class Card extends View {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n\n  onDoubleClick(event: any ) {\n    return core.console.log(1)\n  }\n\n  onDragCancelled(event: any ) {\n    return core.console.log(2)\n  }\n}\n\nexport class CardElement extends SpellElement<Card> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-card\", \"card\", [])\n\n  onDoubleClick(event: any ) {\n    return this.currentThing?.onDoubleClick(event)\n  }\n\n  onDragCancelled(event: any ) {\n    return this.currentThing?.onDragCancelled(event)\n  }\n}\ncore.useElement(Card, CardElement)"
+                },
+                "py": {
+                  "code": "class Card(View):\n    element_tag = \"syntax-block-card\"\n\n    def on_double_click(self, event: Any) -> Any:\n        return print(1)\n\n    def on_drag_cancelled(self, event: Any) -> Any:\n        return print(2)"
                 }
               }
             },
@@ -2381,7 +2404,7 @@
           "ruleNames": ["event_words"],
           "internal": false,
           "file": "src/spell/rules/events/EventWords.ts",
-          "line": 17,
+          "line": 21,
           "purpose": "An event's name of several words, e.g. `card click` (epic page `outline-spell`, P26).",
           "syntaxes": [],
           "aliases": []
@@ -4346,21 +4369,21 @@
           "ruleNames": ["drag_and_drop"],
           "internal": false,
           "file": "src/spell/rules/classes/DragAndDrop.ts",
-          "line": 29,
-          "purpose": "Which things a page lets people drag and select, and which lists they may drop them on.",
+          "line": 47,
+          "purpose": "What people may do to a type's things on the page -- drag, click, select, drop on them.",
           "syntaxes": [
             {
               "syntax": "(a|an) {type:known_type} can be {what:drag_or_drop}",
               "example": "a card can be dragged",
               "outputs": {
                 "js": {
-                  "code": "Card.canBeDragged = true"
+                  "code": "Card.draggable = true"
                 },
                 "ts": {
-                  "code": "Card.canBeDragged = true"
+                  "code": "Card.draggable = true"
                 },
                 "py": {
-                  "code": "Card.can_be_dragged = True"
+                  "code": "Card.draggable = True"
                 }
               }
             },
@@ -4369,13 +4392,28 @@
               "example": "a card is draggable",
               "outputs": {
                 "js": {
-                  "code": "Card.canBeDragged = true"
+                  "code": "Card.draggable = true"
                 },
                 "ts": {
-                  "code": "Card.canBeDragged = true"
+                  "code": "Card.draggable = true"
                 },
                 "py": {
-                  "code": "Card.can_be_dragged = True"
+                  "code": "Card.draggable = True"
+                }
+              }
+            },
+            {
+              "syntax": "(a|an) {type:known_type} {is:is_or_is_not} {what:draggable_or_droppable} when :? {expression_body}",
+              "example": "a card is clickable when its rank is 1",
+              "outputs": {
+                "js": {
+                  "code": "Object.defineProperty(Card.prototype, \"clickableWhen\", {\n  get() {\n    return this.rank === 1\n  },\n  configurable: true\n})\nCard.clickable = true"
+                },
+                "ts": {
+                  "code": "export interface Card { readonly clickableWhen: boolean }\nObject.defineProperty(Card.prototype, \"clickableWhen\", {\n  get(this: Card) {\n    return this.rank === 1\n  },\n  configurable: true\n})\nCard.clickable = true"
+                },
+                "py": {
+                  "code": "@Card.add_property(\"clickable_when\")\ndef _card_clickable_when(self) -> bool:\n    return self.rank == 1\n\nCard.clickable = True"
                 }
               }
             },
@@ -4386,10 +4424,22 @@
               "syntax": "{type:subject_it} {is:is_or_is_not} {what:draggable_or_droppable}"
             },
             {
+              "syntax": "{type:subject_it} {is:is_or_is_not} {what:draggable_or_droppable} when :? {expression_body}"
+            },
+            {
               "syntax": "{type:subject_implied} can be {what:drag_or_drop}"
             },
             {
               "syntax": "{type:subject_implied} {is:is_or_is_not} {what:draggable_or_droppable}"
+            },
+            {
+              "syntax": "{type:subject_implied} {is:is_or_is_not} {what:draggable_or_droppable} when :? {expression_body}"
+            },
+            {
+              "syntax": "{type:subject_implied} {what:draggable_or_droppable}"
+            },
+            {
+              "syntax": "{type:subject_implied} {what:draggable_or_droppable} when :? {expression_body}"
             }
           ],
           "aliases": ["statement"]
@@ -4530,12 +4580,12 @@
           "ruleNames": ["list_guard"],
           "internal": false,
           "file": "src/spell/rules/classes/ListGuard.ts",
-          "line": 38,
+          "line": 57,
           "purpose": "What a list type takes, or gives up, when something MOVES (epic page Q23 - Q25).",
           "syntaxes": [
             {
-              "syntax": "(a|an) {type:known_type} can {verb:take_or_give_up} (a|an) {item:type} if :? {expression_body}?",
-              "example": "a pile can take a card if: it is empty",
+              "syntax": "(a|an) {type:known_type} can {verb:take_or_give_up} (a|an) {item:type} {when:when_or_if} :? {expression_body}?",
+              "example": "a pile can take a card when: it is empty",
               "outputs": {
                 "js": {
                   "code": "Pile.prototype.canTake = function (card) {\n  return this.isEmpty\n}"
@@ -4564,16 +4614,25 @@
               }
             },
             {
-              "syntax": "{type:subject_it} can {verb:take_or_give_up} (a|an) {item:type} if :? {expression_body}?"
+              "syntax": "{type:subject_it} can {verb:take_or_give_up} (a|an) {item:type} {when:when_or_if} :? {expression_body}?"
             },
             {
               "syntax": "{type:subject_it} can (never:never) {verb:take_or_give_up} (a|an) {item:type}"
             },
             {
-              "syntax": "{type:subject_implied} can {verb:take_or_give_up} (a|an) {item:type} if :? {expression_body}?"
+              "syntax": "{type:subject_implied} can {verb:take_or_give_up} (a|an) {item:type} {when:when_or_if} :? {expression_body}?"
             },
             {
               "syntax": "{type:subject_implied} can (never:never) {verb:take_or_give_up} (a|an) {item:type}"
+            },
+            {
+              "syntax": "{type:subject_its} {item:plural_type} are draggable when :? {expression_body}"
+            },
+            {
+              "syntax": "{type:subject_implied} droppable when :? {expression_body}"
+            },
+            {
+              "syntax": "{type:subject_it} is droppable when :? {expression_body}"
             }
           ],
           "aliases": ["statement"]
@@ -5369,16 +5428,22 @@
           "purpose": "What a list does on the page as a thing is dragged over it, out of it, or dropped on it.",
           "syntaxes": [
             {
-              "syntax": "when (a|an) {item:type} is {moment:drag_moment} it :? {statement_body}?"
+              "syntax": "(on|when) (a|an) {item:type} is? {moment:drag_moment} it? :? {statement_body}?"
             },
             {
-              "syntax": "when something is {moment:drag_moment} it :? {statement_body}?"
+              "syntax": "(on|when) {item:known_type} is? {moment:drag_moment} it? :? {statement_body}?"
             },
             {
-              "syntax": "while (a|an) {item:type} is dragged over it :? {statement_body}?"
+              "syntax": "(on|when) something is? {moment:drag_moment} it? :? {statement_body}?"
             },
             {
-              "syntax": "while something is dragged over it :? {statement_body}?"
+              "syntax": "while (a|an) {item:type} is? dragged over it? :? {statement_body}?"
+            },
+            {
+              "syntax": "while {item:known_type} is? dragged over it? :? {statement_body}?"
+            },
+            {
+              "syntax": "while something is? dragged over it? :? {statement_body}?"
             }
           ],
           "aliases": ["statement"]

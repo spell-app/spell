@@ -18,7 +18,7 @@
     {
       "type": "Card",
       "superType": "TwoSidedView",
-      "defined": "/Card.spellml:264-3526"
+      "defined": "/Card.spellml:325-3422"
     },
     {
       "property": "rank",
@@ -39,7 +39,7 @@
         "queen",
         "king"
       ],
-      "defined": "/Card.spellml:377-455"
+      "defined": "/Card.spellml:448-526"
     },
     {
       "syntax": "{operator:is_or_is_not_a} (expression:ace|aces|2|3|4|5|6|7|8|9|10|jack|jacks|queen|queens|king|kings)",
@@ -65,13 +65,13 @@
           "king"
         ]
       },
-      "defined": "/Card.spellml:377-455"
+      "defined": "/Card.spellml:448-526"
     },
     {
       "property": "value",
       "of": "Card",
       "datatype": "number",
-      "defined": "/Card.spellml:459-501"
+      "defined": "/Card.spellml:530-572"
     },
     {
       "syntax": "{operator:is_or_is_not_a} face card",
@@ -81,7 +81,7 @@
       "kind": "method",
       "name": "\"is a face card\"",
       "returns": "choice",
-      "defined": "/Card.spellml:506-564"
+      "defined": "/Card.spellml:577-635"
     },
     {
       "syntax": "{operator:is_or_is_not_a} number card",
@@ -91,7 +91,7 @@
       "kind": "method",
       "name": "\"is a number card\"",
       "returns": "choice",
-      "defined": "/Card.spellml:569-619"
+      "defined": "/Card.spellml:640-690"
     },
     {
       "property": "suit",
@@ -103,7 +103,7 @@
         "hearts",
         "spades"
       ],
-      "defined": "/Card.spellml:642-721"
+      "defined": "/Card.spellml:713-792"
     },
     {
       "syntax": "{operator:is_or_is_not_a} (expression:clubs|club|diamonds|diamond|hearts|heart|spades|spade)",
@@ -120,7 +120,7 @@
           "spades"
         ]
       },
-      "defined": "/Card.spellml:642-721"
+      "defined": "/Card.spellml:713-792"
     },
     {
       "property": "color",
@@ -130,19 +130,19 @@
         "red",
         "black"
       ],
-      "defined": "/Card.spellml:725-823"
+      "defined": "/Card.spellml:796-894"
     },
     {
       "property": "symbol",
       "of": "Card",
       "datatype": "text",
-      "defined": "/Card.spellml:838-943"
+      "defined": "/Card.spellml:909-1014"
     },
     {
       "property": "name",
       "of": "Card",
       "datatype": "text",
-      "defined": "/Card.spellml:1037-1082"
+      "defined": "/Card.spellml:1108-1153"
     },
     {
       "syntax": "{operator:is_or_is_not} {definite_article} (expression:ace|aces|2|3|4|5|6|7|8|9|10|jack|jacks|queen|queens|king|kings) of (expression:clubs|club|diamonds|diamond|hearts|heart|spades|spade)",
@@ -174,13 +174,13 @@
           "spades"
         ]
       },
-      "defined": "/Card.spellml:1087-1119"
+      "defined": "/Card.spellml:1158-1190"
     },
     {
       "property": "state",
       "of": "Card",
       "datatype": "text",
-      "defined": "/Card.spellml:1123-1383"
+      "defined": "/Card.spellml:1194-1454"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -193,13 +193,13 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/Card.spellml:1723-1888"
+      "defined": "/Card.spellml:1619-1784"
     },
     {
       "property": "picture",
       "of": "Card",
       "datatype": "text",
-      "defined": "/Card.spellml:1899-2492"
+      "defined": "/Card.spellml:1795-2388"
     },
     {
       "syntax": "play {thisArg:expression}",
@@ -262,7 +262,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "card setup",
-      "defined": "/Card.spellml:2635-3517"
+      "defined": "/Card.spellml:2531-3413"
     },
     {
       "type": "Deck",
@@ -302,13 +302,13 @@
       "type": "Pile",
       "superType": "ViewableList",
       "itemType": "Card",
-      "defined": "/Pile.spellml:237-1987"
+      "defined": "/Pile.spellml:327-1932"
     },
     {
       "property": "name",
       "of": "Pile",
       "datatype": "text",
-      "defined": "/Pile.spellml:292-362"
+      "defined": "/Pile.spellml:392-462"
     },
     {
       "property": "layout",
@@ -320,24 +320,24 @@
         "horizontal",
         "fanned"
       ],
-      "defined": "/Pile.spellml:367-433"
+      "defined": "/Pile.spellml:467-533"
     },
     {
       "property": "color",
       "of": "Pile",
-      "defined": "/Pile.spellml:568-708"
+      "defined": "/Pile.spellml:668-808"
     },
     {
       "property": "value",
       "of": "Pile",
       "datatype": "number",
-      "defined": "/Pile.spellml:723-829"
+      "defined": "/Pile.spellml:823-929"
     },
     {
       "property": "state",
       "of": "Pile",
       "datatype": "text",
-      "defined": "/Pile.spellml:844-1068"
+      "defined": "/Pile.spellml:944-1168"
     },
     {
       "syntax": "test piles",
@@ -346,60 +346,60 @@
       "alias": "statement",
       "kind": "function",
       "name": "piles",
-      "defined": "/Pile.spellml:1239-1978"
+      "defined": "/Pile.spellml:1184-1923"
     },
     {
       "property": "pile",
       "of": "Card",
       "datatype": "Pile",
       "exclusive": true,
-      "defined": "/Pile.spellml:2099-2125"
+      "defined": "/Pile.spellml:2044-2070"
     },
     {
       "type": "StockPile",
       "superType": "Pile",
-      "defined": "/Solitaire.spellml:8071-8596"
+      "defined": "/Solitaire.spellml:8049-8574"
     },
     {
       "property": "layout",
       "of": "StockPile",
-      "defined": "/Solitaire.spellml:8230-8256"
+      "defined": "/Solitaire.spellml:8208-8234"
     },
     {
       "type": "DiscardPile",
       "superType": "Pile",
-      "defined": "/Solitaire.spellml:8612-8854"
+      "defined": "/Solitaire.spellml:8590-8835"
     },
     {
       "property": "layout",
       "of": "DiscardPile",
-      "defined": "/Solitaire.spellml:8721-8747"
+      "defined": "/Solitaire.spellml:8699-8725"
     },
     {
       "type": "Foundation",
       "superType": "Pile",
-      "defined": "/Solitaire.spellml:8870-9467"
+      "defined": "/Solitaire.spellml:8851-9441"
     },
     {
       "property": "layout",
       "of": "Foundation",
-      "defined": "/Solitaire.spellml:8985-9011"
+      "defined": "/Solitaire.spellml:8966-8992"
     },
     {
       "property": "suit",
       "of": "Foundation",
       "datatype": "CardSuit",
-      "defined": "/Solitaire.spellml:9016-9044"
+      "defined": "/Solitaire.spellml:8997-9025"
     },
     {
       "type": "Tableau",
       "superType": "Pile",
-      "defined": "/Solitaire.spellml:9483-11382"
+      "defined": "/Solitaire.spellml:9457-11352"
     },
     {
       "property": "layout",
       "of": "Tableau",
-      "defined": "/Solitaire.spellml:9598-9625"
+      "defined": "/Solitaire.spellml:9572-9599"
     },
     {
       "type": "Solitaire",
@@ -618,7 +618,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "the moves",
-      "defined": "/Solitaire.spellml:9867-11373"
+      "defined": "/Solitaire.spellml:9837-11343"
     }
   ],
   "codeLines": [
@@ -640,53 +640,53 @@
     110,
     124,
     139,
-    164,
-    207,
-    211,
-    216,
-    223,
+    162,
+    206,
+    210,
+    215,
+    222,
     245,
     250,
     256,
     263,
     269,
     275,
-    298,
-    334,
-    344,
-    347,
-    371,
-    374,
+    296,
+    332,
+    342,
+    345,
+    369,
+    372,
     388,
     391,
     395,
-    416,
-    419,
-    433,
-    436,
+    418,
+    421,
+    439,
     442,
-    447,
-    452,
-    457,
-    462,
-    467,
-    472,
-    477,
-    482,
-    487,
-    492,
-    497,
-    502,
-    507,
-    512,
+    448,
+    453,
+    458,
+    463,
+    468,
+    473,
+    478,
+    483,
+    488,
+    493,
+    498,
+    503,
+    508,
+    513,
     518,
-    523,
-    533,
-    550,
-    579,
-    681,
-    684,
+    524,
+    529,
+    539,
+    556,
+    585,
     687,
-    701
+    690,
+    693,
+    707
   ]
 }

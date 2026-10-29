@@ -417,14 +417,14 @@ describe("SpellElement", () => {
       static elementTag = core.defineElement(this, "Game")
       static exclusive = true
       // `a tray can be dropped on`
-      static canBeDroppedOn = true
+      static droppable = true
     }
     const trays = [new Tray(), new Tray()]
     /** A token, drawn as its label;  its tray is the one holding it. */
     class Token extends View {
       static elementTag = core.defineElement(this, "Game")
       // `a token can be dragged`
-      static canBeDragged = true
+      static draggable = true
       constructor(public label = "") {
         super()
       }
@@ -442,7 +442,7 @@ describe("SpellElement", () => {
     /** A token whose type never says `can be dragged`. */
     class Pebble extends Token {
       static elementTag = core.defineElement(this, "Game")
-      static canBeDragged = false
+      static draggable = false
     }
 
     /** `trays`, drawn side by side, big enough to drop on even empty:  returns the root and how to take it down. */
@@ -467,6 +467,78 @@ describe("SpellElement", () => {
       // nobody listens for token-drop:  it moved, as the trays' rules let it
       expect([...trays[1]!.items]).toEqual([token])
       done()
+    })
+
+    test("`draggable when it is face up`:  a face-down token can't be dragged, a face-up one can (debut P27)", async () => {
+      /** A token that drags only face up:  `- draggable when it is face up`. */
+      class Domino extends Token {
+        static elementTag = core.defineElement(this, "Game")
+        faceUp = false
+        get draggableWhen() {
+          return this.faceUp
+        }
+      }
+      const [down, up] = [new Domino("down"), new Domino("up")]
+      up.faceUp = true
+      core.append(trays[0]!, down)
+      core.append(trays[0]!, up)
+      const { root, done } = await drawTrays()
+      const [downElement, upElement] = [...root.querySelectorAll("game-domino")] as HTMLElement[]
+      expect(downElement!.matches(":state(draggable)")).toBe(false)
+      expect(upElement!.matches(":state(draggable)")).toBe(true)
+      done()
+    })
+
+    test("`on drag` runs as a drag starts, once;  `on drag cancelled` for a drop nobody takes and at Escape, never after a drop that's taken (debut P27)", async () => {
+      const heard: string[] = []
+      /** A token that hears its own drags. */
+      class Puck extends Token {
+        static elementTag = core.defineElement(this, "Game")
+        onDrag() {
+          heard.push("drag")
+        }
+        onDragCancelled() {
+          heard.push("cancelled")
+        }
+      }
+      const puck = new Puck("a")
+      core.append(trays[0]!, puck)
+      const { root, done } = await drawTrays()
+      const nowhere = document.createElement("div")
+      nowhere.style.cssText = "width: 60px; height: 60px; margin-top: 80px"
+      root.after(nowhere)
+      const puckElement = () => root.querySelector("game-puck") as HTMLElement
+      try {
+        // dropped where nothing takes it:  it slides back, and hears so
+        expect(puckElement().matches(":state(draggable)")).toBe(true)
+        await drag(puckElement(), nowhere)
+        expect(heard).toEqual(["drag", "cancelled"])
+        // taken:  no cancel
+        heard.length = 0
+        await drag(puckElement(), root.querySelectorAll<HTMLElement>("game-tray")[1]!)
+        expect(heard).toEqual(["drag"])
+        expect([...trays[1]!.items]).toEqual([puck])
+        // Escape, mid-drag:  it slides back, stays where it was, and hears so
+        heard.length = 0
+        const element = puckElement()
+        const box = element.getBoundingClientRect()
+        const point = (dx: number) => ({ clientX: box.x + box.width / 2 + dx, clientY: box.y + box.height / 2 })
+        const pointer = (on: EventTarget, type: string, dx: number) =>
+          on.dispatchEvent(
+            new PointerEvent(type, { bubbles: true, composed: true, pointerId: 3, pointerType: "touch", ...point(dx) })
+          )
+        pointer(element, "pointerdown", 0)
+        pointer(window, "pointermove", 40)
+        window.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }))
+        pointer(window, "pointerup", 40)
+        core.flush()
+        await ElementFixture.settle(document.body)
+        expect(heard).toEqual(["drag", "cancelled"])
+        expect([...trays[1]!.items]).toEqual([puck])
+      } finally {
+        nowhere.remove()
+        done()
+      }
     })
 
     test("the program hears <thing>-drop, with the thing and the list it landed on, by each of its types (outline-spell P28)", async () => {
@@ -603,7 +675,7 @@ describe("SpellElement", () => {
       /** A token people may select:  `a bead can be selected`. */
       class Bead extends Token {
         static elementTag = core.defineElement(this, "Game")
-        static canBeSelected = true
+        static selectable = true
       }
       const beads = ["a", "b", "c", "d"].map((label) => new Bead(label))
       core.append(trays[0]!, ...beads)
@@ -687,8 +759,8 @@ describe("SpellElement", () => {
     /** A chit, drawn as its label and a field:  `a chit can be dragged`, `can be selected`. */
     class Chit extends View {
       static elementTag = core.defineElement(this, "Game")
-      static canBeDragged = true
-      static canBeSelected = true
+      static draggable = true
+      static selectable = true
       constructor(public label = "") {
         super()
       }

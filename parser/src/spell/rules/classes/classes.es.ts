@@ -60,7 +60,7 @@ import { RandomKindValue } from "./RandomKindValue"
 import { ReopenType } from "./ReopenType"
 import { RuleSuggestion } from "./RuleSuggestion"
 import { SavedInFile } from "./SavedInFile"
-import { DragAndDrop } from "./DragAndDrop"
+import { DragAndDrop, OLD_ABILITY_WORDS, ABILITY_CONDITION_ES } from "./DragAndDrop"
 import { DragHandler } from "./DragHandler"
 import { ItemsReordered } from "./ItemsReordered"
 import { SavedInline } from "./SavedInline"
@@ -85,7 +85,7 @@ export const classesEs = new SpellParser({ module: "classes" })
 const RULES = "(,? que {rule:must_rule})? {nested_statements}?"
 
 /** What a list takes or gives up, after its subject:  `puede tomar una carta si: ...` -- English's `CAN_MOVE`. */
-const CAN_MOVE = "(puede|pueden) {verb:take_or_give_up} (un|una) {item:type} si :? {expression_body}?"
+const CAN_MOVE = "(puede|pueden) {verb:take_or_give_up} (un|una) {item:type} {when:when_or_if} :? {expression_body}?"
 
 /** What a list never takes or gives up:  `nunca puede soltar una carta` -- English's `CAN_NEVER_MOVE`. */
 const CAN_NEVER_MOVE =
@@ -158,11 +158,19 @@ classesEs.addRule(Wording.specialize({ ruleName: "right_away", meanings: ["immed
 
 // The same, as adjectives:  `es arrastrable`, `no es soltable`
 classesEs.addRule(
-  Wording.specialize({ ruleName: "draggable_or_droppable", meanings: ["dragged", "dropped_on", "selected"] }),
+  Wording.specialize({
+    ruleName: "draggable_or_droppable",
+    meanings: ["dragged", "dropped_on", "selected", "clicked"]
+  }),
   {
-    syntax: "((dragged:arrastrable)|(dropped_on:soltable)|(selected:seleccionable))"
+    syntax: "((dragged:arrastrable)|(dropped_on:soltable)|(selected:seleccionable)|(clicked:pulsable))"
   }
 )
+
+// What starts a list's rule, for `list_guard`:  `cuando`, or the old `si`, which still works with a warning (Q42)
+classesEs.addRule(Wording.specialize({ ruleName: "when_or_if", meanings: ["when", "if"] }), {
+  syntax: "((when:cuando)|(if:si))"
+})
 
 // Which bound, for `must_rule`:  `debe tener al menos 3 letras`
 classesEs.addRule(Wording.specialize({ ruleName: "at_least_or_at_most", meanings: ["at_least", "at_most"] }), {
@@ -572,7 +580,7 @@ classesEs.addRule(CanBelongToMany, {
 })
 
 // `una carta se puede arrastrar`, `una pila se puede soltar encima`:  English's `can be dragged`, `can be dropped on`
-classesEs.addRule(DragAndDrop, {
+classesEs.addRule(OLD_ABILITY_WORDS, {
   syntax: `${A} {type:known_type} se puede {what:drag_or_drop}`,
   tests: [
     {
@@ -581,9 +589,9 @@ classesEs.addRule(DragAndDrop, {
         scope.parse(["una carta es una vista", "una pila es una lista visible de cartas"].join("\n"), "block")
       },
       tests: [
-        ["una carta se puede arrastrar", "Carta.canBeDragged = true"],
-        ["una pila se puede soltar encima", "Pila.canBeDroppedOn = true"],
-        ["una carta se puede seleccionar", "Carta.canBeSelected = true"]
+        ["una carta se puede arrastrar", "Carta.draggable = true"],
+        ["una pila se puede soltar encima", "Pila.droppable = true"],
+        ["una carta se puede seleccionar", "Carta.selectable = true"]
       ]
     }
   ]
@@ -598,8 +606,46 @@ classesEs.addRule(DragAndDrop, {
         scope.parse(["una carta es una vista", "una pila es una lista visible de cartas"].join("\n"), "block")
       },
       tests: [
-        ["una carta es arrastrable", "Carta.canBeDragged = true"],
-        ["una pila no es soltable", "Pila.canBeDroppedOn = false"]
+        ["una carta es arrastrable", "Carta.draggable = true"],
+        ["una pila no es soltable", "Pila.droppable = false"],
+        ["una carta es pulsable", "Carta.clickable = true"]
+      ]
+    }
+  ]
+})
+
+// con una condición:  `una carta es pulsable cuando está boca abajo`
+classesEs.addRule(DragAndDrop, {
+  syntax: `${A} {type:known_type} {is:is_or_is_not} {what:draggable_or_droppable} ${ABILITY_CONDITION_ES}`,
+  tests: [
+    {
+      compileAs: "block",
+      beforeEach(scope: P.Scope) {
+        scope.parse(["una carta es una vista", "una carta tiene un rango como un número"].join("\n"), "block")
+      },
+      tests: [
+        [
+          "una carta es pulsable cuando su rango es 1",
+          [
+            'Object.defineProperty(Carta.prototype, "clickableWhen", {',
+            "  get() {",
+            "    return this.rango === 1",
+            "  },",
+            "  configurable: true",
+            "})",
+            "Carta.clickable = true"
+          ],
+          [
+            "export interface Carta { readonly clickableWhen: boolean }",
+            'Object.defineProperty(Carta.prototype, "clickableWhen", {',
+            "  get(this: Carta) {",
+            "    return this.rango === 1",
+            "  },",
+            "  configurable: true",
+            "})",
+            "Carta.clickable = true"
+          ]
+        ]
       ]
     }
   ]
@@ -609,9 +655,16 @@ classesEs.addRule(DragAndDrop, {
 classesEs.addRule(DragHandler, {
   syntax: "cuando (un|una) {item:type} se {moment:drag_moment} (él|ella|ello) :? {statement_body}?"
 })
+// sin artículo, un tipo que conoce (épica `debut` P27, Q47):  `- al carta se suelta:`, "sobre ella" se entiende
+classesEs.addRule(DragHandler, {
+  syntax: "(al|cuando) {item:known_type} se? {moment:drag_moment} (él|ella|ello)? :? {statement_body}?"
+})
 classesEs.addRule(DragHandler, { syntax: "cuando algo se {moment:drag_moment} (él|ella|ello) :? {statement_body}?" })
 classesEs.addRule(DragHandler, {
   syntax: "mientras (un|una) {item:type} se arrastra sobre (él|ella|ello) :? {statement_body}?"
+})
+classesEs.addRule(DragHandler, {
+  syntax: "mientras {item:known_type} se? arrastra sobre (él|ella|ello)? :? {statement_body}?"
 })
 classesEs.addRule(DragHandler, { syntax: "mientras algo se arrastra sobre (él|ella|ello) :? {statement_body}?" })
 // `- sus elementos se pueden reordenar`:  English's `- its items can be reordered`
@@ -621,9 +674,18 @@ classesEs.addRule(ItemsReordered, {
 })
 
 for (const subject of ["subject_it", "subject_implied"]) {
-  classesEs.addRule(DragAndDrop, { syntax: `{type:${subject}} se puede {what:drag_or_drop}` })
-  classesEs.addRule(DragAndDrop, { syntax: `{type:${subject}} {is:is_or_is_not} {what:draggable_or_droppable}` })
+  classesEs.addRule(OLD_ABILITY_WORDS, { syntax: `{type:${subject}} se puede {what:drag_or_drop}` })
+  classesEs.addRule(DragAndDrop, {
+    syntax: `{type:${subject}} {is:is_or_is_not} {what:draggable_or_droppable}`
+  })
+  classesEs.addRule(DragAndDrop, {
+    syntax: `{type:${subject}} {is:is_or_is_not} {what:draggable_or_droppable} ${ABILITY_CONDITION_ES}`
+  })
 }
+classesEs.addRule(DragAndDrop, { syntax: `{type:subject_implied} {what:draggable_or_droppable}` })
+classesEs.addRule(DragAndDrop, {
+  syntax: `{type:subject_implied} {what:draggable_or_droppable} ${ABILITY_CONDITION_ES}`
+})
 
 classesEs.addRule(SavedInline, {
   syntax: `${A} {type:known_type} se guarda dentro`,
@@ -753,7 +815,7 @@ classesEs.addRule(ListGuard, {
       },
       tests: [
         [
-          "una pile puede tomar una carta si: la pile está vacía",
+          "una pile puede tomar una carta cuando: la pile está vacía",
           ["Pile.prototype.canTake = function (carta) {", "  return this.isEmpty", "}"],
           [
             "export interface Pile { canTake(carta: Carta): boolean }",
@@ -858,6 +920,16 @@ for (const subject of ["subject_it", "subject_implied"]) {
     classesEs.addRule(ListGuard, { syntax: `{type:${subject}} ${guard}` })
   }
 }
+// las formas cortas:  `- sus cartas son arrastrables cuando la carta está boca arriba`, `- soltable cuando ...`
+classesEs.addRule(ListGuard.specialize({ shortFor: "give_up" }), {
+  syntax: "{type:subject_its} {item:plural_type} son arrastrables cuando :? {expression_body}"
+})
+classesEs.addRule(ListGuard.specialize({ shortFor: "take" }), {
+  syntax: "{type:subject_implied} soltable cuando :? {expression_body}"
+})
+classesEs.addRule(ListGuard.specialize({ shortFor: "take" }), {
+  syntax: "{type:subject_it} es soltable cuando :? {expression_body}"
+})
 
 classesEs.addRule(NewThing, {
   syntax: `${A} (nuevo|nueva) {type:known_type} ((con|donde|cuyo|cuya|cuyos|cuyas) {props:object_literal_properties})?`,

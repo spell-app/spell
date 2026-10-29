@@ -346,7 +346,9 @@ describe("SpellxView.read():  mistakes are diagnostics, and reading goes on", ()
 </spell-view>
 `)
     const [word, attribute] = messagesOf(file)
-    expect(word).toMatch(/"<xyz>" isn't a spellx word:  here, use one of <property>, <alias>, .*<on>, <when>, <while>$/)
+    expect(word).toMatch(
+      /"<xyz>" isn't a spellx word:  here, use one of <property>, <alias>, .*<on>, <when>, <while>, <draggable>, <clickable>, <selectable>, <droppable>$/
+    )
     expect(attribute).toMatch(/<property> has no "zzz":  it takes "name", "aka", .*"group"$/)
   })
 

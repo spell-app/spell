@@ -250,7 +250,7 @@ una "pila de reserva" es una pila donde:
 una "pila de descartes" es una pila donde:
 	- su disposición es apilada
 	- nunca puede tomar una carta
-	- puede soltar una carta si: la carta es su última carta
+	- sus cartas son arrastrables cuando la carta es su última carta
 
 // una fundación:  donde se arma un palo, del as al rey
 una "fundación" es una pila donde:
@@ -258,7 +258,7 @@ una "fundación" es una pila donde:
 	- su "palo" es un palo de carta
 	- nunca puede soltar una carta
 	// una carta a la vez:  la última de su pila
-	- puede tomar una carta si:
+	- soltable cuando:
 		si la carta no es la última carta de la pila de la carta devolver no
 		devolver su palo es el palo de la carta y su valor + 1 es el valor de la carta
 	// vacía:  un as gris claro de su palo, boca arriba
@@ -268,8 +268,8 @@ una "fundación" es una pila donde:
 // una columna:  se arma hacia abajo, del rey al as, rojo y negro alternados
 una "columna" es una pila donde:
 	- su disposición es vertical
-	- puede soltar una carta si: la carta está boca arriba
-	- puede tomar una carta si:
+	- sus cartas son arrastrables cuando la carta está boca arriba
+	- soltable cuando:
 		si está vacía
 			devolver la carta es un rey
 		devolver su color no es el color de la carta y su valor es el valor de la carta + 1

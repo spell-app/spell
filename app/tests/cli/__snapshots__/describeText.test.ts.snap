@@ -46,7 +46,7 @@ Constants   Ranks (ace, jack, queen, king), Suits (clubs, diamonds, hearts, spad
             Colors (red, black)
 
 Spell
-  <spell-view "card" template="two sided view">
+  <spell-view "card" template="two sided view" draggable>
     <group "rank" description="Ace is low:  ace = 1 ... king = 13"/>
     <property "rank" one-of="ace, 2 ... 10, jack, queen, king" alias="is a (rank)"/>
     <property "value">the position of its rank</>
@@ -74,11 +74,6 @@ Spell
       direction is "↑" if it is face up otherwise "↓"
       return rank + its symbol + direction
     </property>
-  
-    <group "playing" description="A drag puts it where it's dropped, if its pile's rules let it go;  what a click does is the game's"/>
-    <spell>
-      - it can be dragged
-    </spell>
   
     <group "drawing" description="One letter of unicode's Playing Cards, at the size of the text around it:  its pile scales it to fit -- styles.css"/>
     <draw description="Both its sides, one over the other:  styles.css shows the one it's turned to, and flips it over as it turns">

@@ -113,7 +113,7 @@ core.useElement(Pile, PileElement)
 
 /**
  * The rule that makes it Solitaire:  a column takes a card one lower than its last, in the other color.
- * - "can take a card if" is a yes-or-no question the pile answers for each card
+ * - "can take a card when" is a yes-or-no question the pile answers for each card
  * - "return" gives the answer:  the first line that returns, wins
  */
 export class Column extends Pile {

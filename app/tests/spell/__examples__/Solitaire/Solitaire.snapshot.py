@@ -11,7 +11,7 @@ from spell_core import core, List, App, TwoSidedView, ViewableList, prop, h, pos
 ###################
 # A card says what its rank, suit and color are:  a deck, a pile or the game only reads them.
 # It's a two sided view:  face up it shows its picture, face down the back every card shares.
-# On the page each card is its own element, `<solitaire-card>`.
+# On the page each card is its own element, `<solitaire-card>`:  people may drag it (`draggable`), when its pile lets it go.
 
 
 class Card(TwoSidedView):
@@ -167,7 +167,7 @@ class Card(TwoSidedView):
         """a click plays it"""
         return await self.play()
 
-    can_be_dragged = True
+    draggable = True
 
     @property
     def pile(self) -> Pile | None:
@@ -177,8 +177,6 @@ class Card(TwoSidedView):
 # Ace is low:  ace = 1 ... king = 13
 
 # What a person, a test or the console calls it
-
-# A drag puts it where it's dropped, if its pile's rules let it go;  what a click does is the game's
 
 # One letter of unicode's Playing Cards, at the size of the text around it:  its pile scales it to fit -- styles.css
 
@@ -301,6 +299,7 @@ def test_a_new_deck() -> Any:
 ####################
 # A game's stock, its discards, a column on the table:  the game names its piles, and says what each kind takes.
 # Each pile is its own element around its cards' elements, `<solitaire-tableau>` around `<solitaire-card>`s.
+# A card dragged over it glows when it would take the card, by its own rules (`droppable`).
 
 
 class Pile(ViewableList):
@@ -347,12 +346,9 @@ class Pile(ViewableList):
     async def when_card_dropped_on(self, card: Card) -> None:
         await card.put_on_pile(self)
 
-    can_be_dropped_on = True
+    droppable = True
 
     exclusive = True
-
-
-# A card dragged over it glows when it would take the card, by its own rules
 
 
 def test_piles() -> Any:
@@ -454,6 +450,8 @@ class DiscardPile(Pile):
     def can_give_up(self, card: Card) -> bool:
         return card == self.last_item
 
+    items_draggable = True
+
 
 class Foundation(Pile):
     """Where a suit is built up, ace to king, one card at a time"""
@@ -470,16 +468,18 @@ class Foundation(Pile):
     def can_give_up(self, card: Card) -> bool:
         return False
 
+    # A light grey ace of its suit, face up
+
+    def draw_its_placeholder(self) -> Any:
+        return h("ui-text", {"part": "placeholder"}, Card(rank="ace", suit=self.suit).picture)
+
     def can_take(self, card: Card) -> bool:
         assert card.pile is not None
         if card != card.pile.last_item:
             return False
         return self.suit == card.suit and self.value + 1 == card.value
 
-    # A light grey ace of its suit, face up
-
-    def draw_its_placeholder(self) -> Any:
-        return h("ui-text", {"part": "placeholder"}, Card(rank="ace", suit=self.suit).picture)
+    droppable = True
 
 
 class Tableau(Pile):
@@ -494,10 +494,14 @@ class Tableau(Pile):
     def can_give_up(self, card: Card) -> bool:
         return card.is_face_direction("up")
 
+    items_draggable = True
+
     def can_take(self, card: Card) -> bool:
         if not self:
             return card.is_a_rank("king")
         return self.color != card.color and self.value == card.value + 1
+
+    droppable = True
 
 
 class Solitaire(App):

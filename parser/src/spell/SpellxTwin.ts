@@ -136,8 +136,11 @@ export class SpellxTwin {
         return this.template()
       case "declaration":
         return this.declaration()
-      case "handler":
-        return this.lineAndBlock(this.expand(this.words.handlers[tag.kind] ?? "{phrase} :"))
+      case "handler": {
+        // a list's `<cards draggable ...>`:  its items' word, `cards`
+        const items = tag.kind === "items draggable" ? this.wordsOfTag(tag.word.split(/\s+/)[0]!) : undefined
+        return this.lineAndBlock(this.expand(this.words.handlers[tag.kind] ?? "{phrase} :", { items }))
+      }
       case "control":
         return this.lineAndBlock(this.expand(this.words.controls[tag.kind] ?? "{phrase}"))
       case "start":
@@ -682,6 +685,12 @@ export class SpellxTwin {
       })
     }
     return tokens
+  }
+
+  /** `word`, as written in the tag's head, just after its `<`:  a list's items, `cards` in `<cards draggable>`. */
+  private wordsOfTag(word: string): SP.SpellxText {
+    const start = this.head.start + 1
+    return { text: word, start, tokens: this.spellTokens(word, start) }
   }
 
   /** A text of `words`, synthetic, e.g. a template's default super-type, `view`. */

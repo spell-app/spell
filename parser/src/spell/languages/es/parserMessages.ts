@@ -16,6 +16,8 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   ////////////////
 
   "did-you-mean": '¿Querías decir "{phrase}"?',
+  "say-is-able": 'Di "{line}":  "{old}" deja de funcionar en una versión próxima',
+  "say-when": 'Di "cuando:":  aquí "si:" deja de funcionar en una versión próxima',
   "untyped-parameter": 'Di qué es "{name}", p. ej. "({name} como {type})"',
   "untyped-property": 'Di qué es "{name}", p. ej. "{line} como {type}"',
   "untyped-list-property": 'Di qué contiene "{name}", p. ej. "{line} como una nueva lista de {items}"',
@@ -110,6 +112,8 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   "spellx-unexpected-closer": '"{closer}" no cierra nada:  quítalo',
   "spellx-mismatched-closer": '"{closer}" no puede cerrar {open}:  escribe "</>"',
   "spellx-unclosed-tag": '{tag} nunca se cierra:  termínalo con "</>"',
+  "spellx-one-line-tag":
+    '{tag} se cierra en su propia línea, "... />":  pon el código más largo entre "{open}" y "</>"',
   "spellx-unclosed-head": '{tag} nunca termina:  ciérralo con ">", o con "/>" si nada va dentro',
   "spellx-unclosed-comment": '"<!--" nunca se cierra:  termina el comentario con "-->"',
   "chain-outside-markup":

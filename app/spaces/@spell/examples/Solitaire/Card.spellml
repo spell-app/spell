@@ -1,9 +1,9 @@
 # A playing card
 A card says what its rank, suit and color are:  a deck, a pile or the game only reads them.
 It's a two sided view:  face up it shows its picture, face down the back every card shares.
-On the page each card is its own element, `<solitaire-card>`.
+On the page each card is its own element, `<solitaire-card>`:  people may drag it (`draggable`), when its pile lets it go.
 
-<spell-view "card" template="two sided view">
+<spell-view "card" template="two sided view" draggable>
 	<group "rank" description="Ace is low:  ace = 1 ... king = 13"/>
 	<property "rank" one-of="ace, 2 ... 10, jack, queen, king" alias="is a (rank)"/>
 	<property "value">the position of its rank</>
@@ -31,11 +31,6 @@ On the page each card is its own element, `<solitaire-card>`.
 		direction is "↑" if it is face up otherwise "↓"
 		return rank + its symbol + direction
 	</property>
-
-	<group "playing" description="A drag puts it where it's dropped, if its pile's rules let it go;  what a click does is the game's"/>
-	<spell>
-		- it can be dragged
-	</spell>
 
 	<group "drawing" description="One letter of unicode's Playing Cards, at the size of the text around it:  its pile scales it to fit -- styles.css"/>
 	<draw description="Both its sides, one over the other:  styles.css shows the one it's turned to, and flips it over as it turns">

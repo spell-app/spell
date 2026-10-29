@@ -59,7 +59,7 @@ describe("eventsInSource()", () => {
 
   test("a card:  its ability, then its click, as written, with its code", () => {
     expect(eventsInSource(["card"], SOLITAIRE)).toEqual([
-      { kind: "ability", words: "it can be dragged", code: "" },
+      { kind: "ability", words: "draggable", code: "" },
       { kind: "event", words: "on click", code: "play it" }
     ])
   })
@@ -67,11 +67,11 @@ describe("eventsInSource()", () => {
   test("a tableau:  its own conditions first, then what it inherits from a pile;  each event's lines under it", () => {
     const rows = eventsInSource(["tableau", "pile"], SOLITAIRE)
     expect(rows.map((row) => [row.kind, row.words])).toEqual([
-      ["ability", "it can give up a card if"],
-      ["ability", "it can take a card if"],
-      ["ability", "it can be dropped on"],
-      ["event", "while a card is dragged over it"],
-      ["event", "when a card is dropped on it"]
+      ["ability", "its cards are draggable when"],
+      ["ability", "droppable when"],
+      ["ability", "droppable"],
+      ["event", "while card dragged over"],
+      ["event", "on card dropped"]
     ])
     expect(rows[0]!.code).toBe("the card is face up")
     expect(rows[1]!.code.split("\n")[0]).toBe("if it is empty")

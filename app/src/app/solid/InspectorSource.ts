@@ -209,6 +209,9 @@ function rowsInTypeTags(source: string, name: string): WrittenEvent[] {
     if (end < 0) continue
     const close = source.indexOf(`</spell-${match[1]}>`, end)
     const body = source.slice(end + 1, close < 0 ? undefined : close)
+    // its bare ability attributes, `<spell-view "card" draggable>` (epic `debut` P27):  each an ability, as written
+    const head = source.slice(match.index, end)
+    for (const ability of head.matchAll(BARE_ABILITY)) rows.push({ kind: "ability", words: ability[1]!, code: "" })
     rows.push(...rowsInTags(body))
     for (const block of body.matchAll(/<spell>([\s\S]*?)<\/spell>/g)) rows.push(...rowsInLines(block[1]!.split("\n")))
   }
@@ -290,8 +293,14 @@ function rowsInLines(lines: readonly string[]): WrittenEvent[] {
 /**
  * A short ability with its condition in the same words, no colon (`draggable when it is face up`):
  * its words up to `when` / `if`, its code after.
+ * - A one-line event of the thing's own, no colon (`on click play it`, epic `debut` P27):
+ *   its event's words, then its code (`ONE_LINE_EVENT`).
  */
 function splitShortForm(row: WrittenEvent): WrittenEvent {
+  if (row.kind === "event") {
+    const event = ONE_LINE_EVENT.exec(row.words)
+    return event ? { kind: row.kind, words: event[1]!.trim(), code: event[2]!.trim() } : row
+  }
   if (row.kind !== "ability") return row
   const split = /^(.*?\b(?:when|if|cuando|si))\s+(.+)$/i.exec(row.words)
   return split ? { kind: row.kind, words: split[1]!.trim(), code: split[2]!.trim() } : row
@@ -303,6 +312,18 @@ function kindOf(words: string): WrittenEvent["kind"] | undefined {
   if (ABILITY_START.test(words)) return "ability"
   return undefined
 }
+
+/**
+ * A one-line event of a thing's own, its code after it with no colon:  `on click play it`, `when dragged ...`.
+ * - Only the page's own events:  a program's several-word event name can't be told from its code by text alone.
+ * - REFACTOR:  ask spell's parser where the name ends (its `event_words`), as the compiler does (J145).
+ */
+const ONE_LINE_EVENT =
+  /^((?:on|when)\s+(?:double\s+click(?:ed)?|right\s+click(?:ed)?|click(?:ed)?|drag\s+cancelled|(?:the\s+)?drag\s+is\s+cancelled|dragged|drag|mouse\s+(?:down|up|enter|leave)))\s+(\S.*)$/i
+
+/** A template tag's bare ability attribute:  `draggable` in `<spell-view "card" template="..." draggable>`. */
+const BARE_ABILITY =
+  /\s(draggable|clickable|selectable|droppable|arrastrable|pulsable|seleccionable|soltable)(?=[\s/>]|$)/gi
 
 /** How an event starts, in English and Spanish:  `on click`, `when a card is dropped on it`, `mientras ...`. */
 const EVENT_START = /^(?:on|when|while|al|cuando|mientras)\s/i

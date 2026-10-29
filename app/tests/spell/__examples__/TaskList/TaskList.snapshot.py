@@ -10,6 +10,8 @@ from spell_core import core, List, App, View, ViewableList, prop, h
 ###########
 # Something to do:  its title, its priority, and whether it's done.
 # Each task is its own element on the page, `<task-list-task>`.
+# A click selects it, shift and command (ctrl) more, for the property editor (`selectable`);
+# its grip drags it, the selected ones with it (`draggable`).
 
 
 class Task(View):
@@ -65,16 +67,13 @@ class Task(View):
             ),
         )
 
-    can_be_selected = True
+    draggable = True
 
-    can_be_dragged = True
+    selectable = True
 
     @property
     def checklist(self) -> Checklist | None:
         return Checklist.owner_of(self)
-
-
-# A click selects it, shift and command (ctrl) more, for the property editor;  its grip drags it, the selected ones with it
 
 
 def test_checking_one_off() -> Any:

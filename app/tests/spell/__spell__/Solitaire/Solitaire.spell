@@ -179,14 +179,14 @@ to count the points for a card on a pile
 
 a card:
 	// a click plays it
-	- on click: play it
+	- on click play it
 
 a pile:
 	// while a card it would take is over it, the score shows what the move would add -- gone as the card leaves
-	- while a card is dragged over it:
+	- while card dragged over:
 		set points to count the points for the card on it
 		if it can take the card and points > 0: set the hint of the solitaire to " (+" + points + ")"
-	- when a card is dropped on it:
+	- on card dropped:
 		put the card on it
 
 ## The piles
@@ -209,14 +209,14 @@ a "stock pile" is a pile:
 a "discard pile" is a pile:
 	- its "layout" is stacked
 	- it can never take a card
-	- it can give up a card if: the card is its last card
+	- its cards are draggable when the card is its last card
 
 // Where a suit is built up, ace to king, one card at a time
 a "foundation" is a pile:
 	- its "layout" is stacked
 	- its "suit" is a card suit
 	- it can never let go of a card
-	- it can take a card if:
+	- droppable when:
 		if the card is not the last card of the pile of the card return no
 		return its suit is the suit of the card and its value + 1 is the value of the card
 	// A light grey ace of its suit, face up
@@ -226,8 +226,8 @@ a "foundation" is a pile:
 // A column, built down from king to ace, red and black in turn
 a "tableau" is a pile:
 	- its "layout" is vertical
-	- it can give up a card if: the card is face up
-	- it can take a card if:
+	- its cards are draggable when the card is face up
+	- droppable when:
 		if it is empty
 			return the card is a king
 		return its color is not the color of the card and its value is the value of the card + 1

@@ -63,9 +63,9 @@ export class Tarea extends View {
     )
   }
 
-  static canBeSelected = true
+  static selectable = true
 
-  static canBeDragged = true
+  static draggable = true
 
   get agenda() {
     return Agenda.ownerOf(this)
