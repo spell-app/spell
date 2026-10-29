@@ -199,13 +199,71 @@ describe("HotDefinitions.update()", () => {
     expect(textOf(spanish)).toBe("two c")
   })
 
+  test("takes a new attribute the platform doesn't observe:  read from the markup, then heard as it changes (I171)", async () => {
+    const tag = nextTag()
+    makeVersion("one", vocabularyFor(tag)).define()
+    const element = await mount(`<${tag} caption="a" extra="x"></${tag}>`)
+    const extra = { name: "extra", kind: "string", description: "Extra." }
+    makeVersion("two", vocabularyFor(tag, [CAPTION, extra])).define()
+    expect(await update()).toEqual({ reloaded: [tag], refused: [] })
+    expect(textOf(element)).toBe("two a x")
+    element.setAttribute("extra", "y")
+    await ElementFixture.settle()
+    expect(textOf(element)).toBe("two a y")
+    // an element made after the swap hears it too, from its markup on
+    const later = await mount(`<${tag} caption="b" extra="z"></${tag}>`)
+    expect(textOf(later)).toBe("two b z")
+    later.setAttribute("extra", "w")
+    await ElementFixture.settle()
+    expect(textOf(later)).toBe("two b w")
+  })
+
+  test("takes a dropped attribute:  the platform still reports it, and nothing hears it", async () => {
+    const tag = nextTag()
+    makeVersion("one", vocabularyFor(tag)).define()
+    const element = await mount(`<${tag} caption="a"></${tag}>`)
+    makeVersion("two", vocabularyFor(tag, [])).define()
+    expect(await update()).toEqual({ reloaded: [tag], refused: [] })
+    element.setAttribute("caption", "b")
+    await ElementFixture.settle()
+    expect(textOf(element)).toBe("two")
+  })
+
+  test("takes a new version of the family's DOM element class:  its live elements inherit from it (I171)", async () => {
+    const tag = nextTag()
+    /** A family's DOM class, as a pack defines it:  every run of the pack makes a new one, of the same name. */
+    const familyVersion = (says: string) =>
+      class DOMHotElement extends DOMElement {
+        get says() {
+          return says
+        }
+      }
+    makeVersion("one", vocabularyFor(tag), { elementSetup: { DOMElement: familyVersion("old") } }).define()
+    const element = await mount(`<${tag} caption="a"></${tag}>`)
+    expect(element.says).toBe("old")
+    makeVersion("two", vocabularyFor(tag), { elementSetup: { DOMElement: familyVersion("new") } }).define()
+    expect(await update()).toEqual({ reloaded: [tag], refused: [] })
+    expect(element.says).toBe("new")
+    expect(textOf(element)).toBe("two a")
+  })
+
+  test("refuses a new version of the family's DOM class with its own lifecycle callback:  the platform kept the old", async () => {
+    const tag = nextTag()
+    const familyVersion = () =>
+      class DOMHotElement extends DOMElement {
+        override connectedCallback() {
+          super.connectedCallback()
+        }
+      }
+    makeVersion("one", vocabularyFor(tag), { elementSetup: { DOMElement: familyVersion() } }).define()
+    await mount(`<${tag} caption="a"></${tag}>`)
+    makeVersion("two", vocabularyFor(tag), { elementSetup: { DOMElement: familyVersion() } }).define()
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
+    expect(await update()).toEqual({ reloaded: [], refused: [{ tag, reason: "DOM element class changed" }] })
+    warn.mockRestore()
+  })
+
   test.each([
-    [
-      "a new observed attribute",
-      { attributes: [CAPTION, { name: "extra", kind: "string" }] },
-      "observed attributes changed (+extra)"
-    ],
-    ["a removed observed attribute", { attributes: [] }, "observed attributes changed (-caption)"],
     [
       "the DOM element class",
       { elementSetup: { DOMElement: class extends DOMElement {} } },

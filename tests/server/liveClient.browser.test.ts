@@ -61,7 +61,7 @@ async function opened(hash = "", y = 0): Promise<Page> {
   const page = await browser.newPage({ viewport: { width: 800, height: 600 } })
   await page.addInitScript(logArrival)
   await page.goto(`http://127.0.0.1:${server.info.port}/docs/page.html${hash}`)
-  await page.waitForFunction(() => !!(window as { SPELL_SERVER?: { reload?: unknown } }).SPELL_SERVER?.reload)
+  await page.waitForFunction(() => !!(window as { SPELL_SERVER?: { reloadNow?: unknown } }).SPELL_SERVER?.reloadNow)
   await page.evaluate((top) => scrollTo(0, top), y)
   return page
 }
@@ -76,11 +76,21 @@ describe("liveClient's reload:  the new page held behind the old one (holdReveal
     const page = await opened("#more", 1234)
     await Promise.all([
       page.waitForEvent("load"),
-      page.evaluate(() => (window as unknown as { SPELL_SERVER: { reload(): void } }).SPELL_SERVER.reload())
+      page.evaluate(() => (window as unknown as { SPELL_SERVER: { reloadNow(): void } }).SPELL_SERVER.reloadNow())
     ])
     await page.waitForFunction(() => (window as unknown as { came: { finished: boolean } }).came.finished)
     expect(await came(page)).toEqual({ transition: true, heldAtStart: true, finished: true })
     expect(await page.evaluate(() => [Math.round(scrollY), location.hash])).toEqual([1234, "#more"])
+    await page.close()
+  })
+
+  it('`reload()` never reloads a page in view:  the "Updated" pill waits instead (I171)', async () => {
+    const page = await opened()
+    const origin = await page.evaluate(() => performance.timeOrigin)
+    await page.evaluate(() => (window as unknown as { SPELL_SERVER: { reload(): void } }).SPELL_SERVER.reload())
+    await page.waitForTimeout(800)
+    expect(await page.evaluate(() => performance.timeOrigin)).toBe(origin)
+    expect(await page.getByRole("button", { name: "Updated:  reload" }).isVisible()).toBe(true)
     await page.close()
   })
 

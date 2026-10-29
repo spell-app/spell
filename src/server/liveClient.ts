@@ -28,8 +28,14 @@ import type { SiteTab } from "spell/server/site/site.types"
  *   - `takeScroll()`:  the scroll position a live reload saved, once
  *     - the docs runtime restores it itself, after its folds and definitions settle;
  *       else the client does, on `load`
- * - `reload()`:  added by `liveClient()`:  reload NOW, keeping the scroll, the new page held behind the old one until it's
- *   ready (`holdReveal()`);  for a page whose own hot reload failed half way (Spell UI's `PackHotSwap`)
+ * - `reload()`, `reloadNow()`:  added by `liveClient()`:  reload, keeping the scroll, the new page held behind the old one
+ *   until it's ready (`holdReveal()`)
+ *   - `reload()`:  NEVER in front of the reader (epic `epic-engine` I116, I171):  at once when the page is out of sight,
+ *     else the "Updated:  reload" pill, and the reload once it's out of sight (or on a click);  for a page whose own hot
+ *     reload failed half way (Spell UI's `PackHotSwap`)
+ *     - it reloaded NOW until I171:  a merge whose pack the swap refused reloaded every epic page in view, in every
+ *       VS Code window
+ *   - `reloadNow()`:  now, whatever the reader is doing
  * - `reveal(settle?)`, `revealAfter(ready)`:  added by `holdReveal()`:  a live reload's new page waits behind the old
  *   one until it's ready
  *   - `reveal()`:  it's ready:  show it (a short cross-fade) once every `revealAfter()` promise has settled and its
@@ -75,6 +81,7 @@ export type ServerConfig = {
   readPage?: () => Promise<PageSource>
   takeScroll?: () => number | undefined
   reload?: () => void
+  reloadNow?: () => void
   reveal?: (settle?: () => void) => void
   revealAfter?: (ready: Promise<unknown>) => void
 }
@@ -244,7 +251,8 @@ export function liveClient(scrollKey: string): void {
     return y
   }
   config.readPage = readPage
-  config.reload = reload
+  config.reload = reloadUnseen
+  config.reloadNow = reload
   // in a frame (VS Code's "Epic Docs" view):  say where we are, and step back / forward when the frame's parent asks
   if (window.parent !== window) {
     reportPlace()
@@ -377,8 +385,6 @@ export function liveClient(scrollKey: string): void {
       return false
     }
   }
-
-  /** reload, keeping the scroll position */
   /**
    * The scripts changed (or the server restarted):  offer the changed scripts to the page first
    * (`spell-server:scripts-reloading`, `ScriptsChange`);  a page that takes them ALL (`preventDefault()`) runs the new code
