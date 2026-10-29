@@ -186,7 +186,10 @@ export class EpicSendButtons extends E.UIComponent<typeof epicSendButtonsVocabul
           cy="14"
           r="11.5"
           pathLength="100"
-          style={{ "stroke-dasharray": `${done()} 100` }}
+          // 5% past the circle's start, turned back 18deg so it still starts at the top:  Chrome cuts a round cap off where
+          // it crosses a closed path's start point
+          transform="rotate(-18 14 14)"
+          style={{ "stroke-dasharray": `${done()} 100`, "stroke-dashoffset": "-5" }}
         />
       </svg>
     )

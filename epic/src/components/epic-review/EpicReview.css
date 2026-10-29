@@ -153,6 +153,12 @@
   :host(:is([buttons="thread"], [buttons="closed"])) .review-controls ui-button::part(button) {
     background: var(--_epic-act-paper);
   }
+  /* the group itself filled too, round its ends:  no thread colour between or behind its buttons (Owen, 2026-10-29:
+     "no bg in pill group") */
+  :host(:is([buttons="thread"], [buttons="closed"])) .review-controls ui-buttons::part(group) {
+    border-radius: 999px;
+    background: var(--_epic-act-paper);
+  }
   :host(:is([buttons="thread"], [buttons="closed"])) .review-controls ui-button:hover::part(button) {
     box-shadow: inset 0 0 0 1.5px var(--_act);
     color: var(--_act);

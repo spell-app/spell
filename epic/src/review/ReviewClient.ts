@@ -439,13 +439,30 @@ export class ReviewClient extends PageStore {
    * - a revisit keeps its note and comments, its pick fields replaced ("pick B, but ...");  one asked NOW turns
    *   `soon`, as `choose()` does
    * - anything else becomes a plain pick mark, or none
+   * - a page server older than the set's changes (started before P50:  it keeps a pick, and drops the flip and the
+   *   options added, edited or removed) answers with less than was sent:  said in a notice, false (epic
+   *   `epic-engine` I178:  the switch flipped back by itself, and nothing said why)
    */
-  changeSet(id: string, change: PickFields): Promise<boolean> {
+  async changeSet(id: string, change: PickFields): Promise<boolean> {
     const mark = this.inbox.marks[id]
     const fields = pickOf(change)
     const changed = hasSetChange(fields)
-    if (mark?.action !== "revisit") return this.save(id, changed ? { action: "pick", ...fields } : null)
-    return this.save(id, { action: "revisit", when: "soon", note: mark.note ?? "", ...commentsOf(mark), ...fields })
+    const saved =
+      mark?.action !== "revisit"
+        ? await this.save(id, changed ? { action: "pick", ...fields } : null)
+        : await this.save(id, {
+            action: "revisit",
+            when: "soon",
+            note: mark.note ?? "",
+            ...commentsOf(mark),
+            ...fields
+          })
+    if (!saved) return false
+    const kept = pickOf(this.inbox.marks[id])
+    const dropped = (Object.keys(fields) as (keyof PickFields)[]).filter((key) => kept[key] === undefined)
+    if (!dropped.length) return true
+    this.notify(`${OLD_SERVER}  (It dropped ${dropped.map((key) => `\`${key}\``).join(", ")}.)`)
+    return false
   }
 
   /**
@@ -961,6 +978,13 @@ const TYPED_KEEPS: ReadonlySet<string> = new Set(["todo", "skip", "next", "drop"
  * The note box's marks (epic `epic-engine` P51):  what a picture pasted in the box joins, rather than making a revisit.
  */
 const NOTE_MARKS: ReadonlySet<string> = new Set(["revisit", "todo", "skip", "next", "drop"])
+
+/**
+ * What `changeSet()` says when the page server kept less of a set's change than was sent (epic `epic-engine` I178):
+ * its code is older than the page's, and `spell server start` restarts a server older than its code.
+ */
+const OLD_SERVER =
+  "The page server is older than this page and didn't keep that change:  restart it (`spell server start`), then try again."
 
 /** `mark` as a mark to save again:  its own fields, without the stamp. */
 function stripped({ at: _at, ...mark }: InboxMark): MarkInput {
