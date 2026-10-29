@@ -886,7 +886,7 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
   }
 
   /** The `SpellElement` behind `element`, if it's a view's element. */
-  private static componentOf(element: Element): SpellElement | undefined {
+  static componentOf(element: Element): SpellElement | undefined {
     const { component } = element as Partial<E.DOMElement>
     return component instanceof SpellElement ? component : undefined
   }
@@ -1489,6 +1489,12 @@ Dragging.isDropTarget = (element) => {
   const list = SpellElement.listOf(element)
   const Class = list?.constructor as { canBeDroppedOn?: boolean; reorderItemsAfter?: number } | undefined
   return !!Class && (Class.canBeDroppedOn === true || Class.reorderItemsAfter !== undefined)
+}
+
+// ... and takes it if its rules say so:  `can take a card if: ...`
+Dragging.takesDrop = (element) => {
+  const component = SpellElement.componentOf(element)
+  return !!component && component.takesDrag()
 }
 
 /** What a press in starts no drag:  it's the control's, e.g. typing in a task's title. */
