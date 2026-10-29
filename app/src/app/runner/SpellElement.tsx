@@ -30,6 +30,7 @@ import { ActionMenus } from "./ActionMenus"
  */
 const STATES_CSS = `
   :host(:state(clickable)) { cursor: pointer; }
+  :host(:state(clickable)), :host(:state(draggable)) { user-select: none; -webkit-user-select: none; }
   :host(:state(draggable)) { touch-action: none; }
   :host(:state(draggable)), :host(:state(draggable)) * { cursor: grab !important; }
   :host(:state(dragging)), :host(:state(dragging)) * { cursor: grabbing !important; }

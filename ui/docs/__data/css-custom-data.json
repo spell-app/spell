@@ -6036,6 +6036,13 @@
       }
     },
     {
+      "name": "--ui-menu-segmented-pressed-shadow",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-menu>`'s token.  Default:  `inset 0 1px 3px rgb(0 0 0 / 0.28), inset 0 0 0 1px color-mix(in oklab, var(--ui-text-color) 12%, transparent)`"
+      }
+    },
+    {
       "name": "--ui-message-margin",
       "description": {
         "kind": "markdown",

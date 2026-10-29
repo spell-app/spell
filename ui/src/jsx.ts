@@ -17065,6 +17065,11 @@ export interface UIMenuEventMap {
    * - cancelable:  `preventDefault()` vetoes it
    */
   "ui-choosing": CustomEvent<{ value: string; item: Element; originalEvent?: Event }>
+  /**
+   * `ui-changed`:  A `choose="many"` menu's toggles changed:  `values` are the items now on, in order (each one's `value`, else its text).
+   * - `event.detail`:  `{ values: string[] }`
+   */
+  "ui-changed": CustomEvent<{ values: string[] }>
 }
 
 /** `<ui-menu>`'s own attributes, from its vocabulary. */
@@ -17133,6 +17138,16 @@ export interface UIMenuAttributes {
    * @deprecated write `appearance` -- `prop:` stays only for compiled spell
    */
   "prop:appearance"?: string
+  /**
+   * A `segmented` menu's choice:  `one` (the default) selects the item chosen and unselects the rest;  `many` makes each item a toggle, pressed in while selected (`aria-pressed`), with no sliding thumb.  One stays on:  turning off the only one on turns on the next, to its right or below (round to the first).
+   * - takes:  `one` · `many`
+   */
+  choose?: "one" | "many"
+  /**
+   * `choose`, as the DOM element's property.
+   * @deprecated write `choose` -- `prop:` stays only for compiled spell
+   */
+  "prop:choose"?: "one" | "many"
   /**
    * Sub-menu:  pushes it to the `right` / `left` end, or the `center`.  A `vertical tabular` menu:  `right` opens its tabs to the left, for a menu on the content's right (`ui right vertical tabular menu`).
    * - takes:  `left` · `right` · `center`
@@ -17523,6 +17538,11 @@ export interface UIMenuAttributes {
    * - cancelable:  `preventDefault()` vetoes it
    */
   "on-ui-choosing"?: (event: UIMenuEventMap["ui-choosing"]) => void
+  /**
+   * `ui-changed`:  A `choose="many"` menu's toggles changed:  `values` are the items now on, in order (each one's `value`, else its text).
+   * - `event.detail`:  `{ values: string[] }`
+   */
+  "on-ui-changed"?: (event: UIMenuEventMap["ui-changed"]) => void
 }
 
 /** `<ui-menu>` in JSX:  its own attributes, and HTML's global ones. */
@@ -34909,6 +34929,11 @@ export interface UIToolbarEventMap {
    * - cancelable:  `preventDefault()` vetoes it
    */
   "ui-choosing": CustomEvent<{ value: string; item: Element; originalEvent?: Event }>
+  /**
+   * `ui-changed`:  A `choose="many"` menu's toggles changed:  `values` are the items now on, in order (each one's `value`, else its text).
+   * - `event.detail`:  `{ values: string[] }`
+   */
+  "ui-changed": CustomEvent<{ values: string[] }>
 }
 
 /** `<ui-toolbar>`'s own attributes, from its vocabulary. */
@@ -34977,6 +35002,16 @@ export interface UIToolbarAttributes {
    * @deprecated write `appearance` -- `prop:` stays only for compiled spell
    */
   "prop:appearance"?: string
+  /**
+   * A `segmented` menu's choice:  `one` (the default) selects the item chosen and unselects the rest;  `many` makes each item a toggle, pressed in while selected (`aria-pressed`), with no sliding thumb.  One stays on:  turning off the only one on turns on the next, to its right or below (round to the first).
+   * - takes:  `one` · `many`
+   */
+  choose?: "one" | "many"
+  /**
+   * `choose`, as the DOM element's property.
+   * @deprecated write `choose` -- `prop:` stays only for compiled spell
+   */
+  "prop:choose"?: "one" | "many"
   /**
    * Sub-menu:  pushes it to the `right` / `left` end, or the `center`.  A `vertical tabular` menu:  `right` opens its tabs to the left, for a menu on the content's right (`ui right vertical tabular menu`).
    * - takes:  `left` · `right` · `center`
@@ -35367,6 +35402,11 @@ export interface UIToolbarAttributes {
    * - cancelable:  `preventDefault()` vetoes it
    */
   "on-ui-choosing"?: (event: UIToolbarEventMap["ui-choosing"]) => void
+  /**
+   * `ui-changed`:  A `choose="many"` menu's toggles changed:  `values` are the items now on, in order (each one's `value`, else its text).
+   * - `event.detail`:  `{ values: string[] }`
+   */
+  "on-ui-changed"?: (event: UIToolbarEventMap["ui-changed"]) => void
 }
 
 /** `<ui-toolbar>` in JSX:  its own attributes, and HTML's global ones. */
@@ -37310,7 +37350,7 @@ declare module "@solidjs/web/types/jsx.js" {
        * - slots:
        *   - default:  `<ui-item>`s, sub-menus (`<ui-menu position>`), and other content.
        *   - `overflow`:  `shrinkable`:  what the overflow button shows instead of its `…`, e.g. `<ui-icon name="bars">`.
-       * - events:  `ui-choosing`
+       * - events:  `ui-choosing`, `ui-changed`
        */
       "ui-menu": UIMenuJSXAttributes
       /**
@@ -37782,7 +37822,7 @@ declare module "@solidjs/web/types/jsx.js" {
        *   - `title`:  After the icon:  the title, never squeezed.
        *   - `center`:  After the title, taking the room left:  e.g. a row of links.
        *   - `right`:  Last, pushed to the end:  e.g. search and settings.
-       * - events:  `ui-choosing`
+       * - events:  `ui-choosing`, `ui-changed`
        */
       "ui-toolbar": UIToolbarJSXAttributes
       /**

@@ -70,6 +70,17 @@ export const menuVocabulary = {
         "`secondary`, `text`, `link`, `borderless`."
     },
     {
+      name: "choose",
+      group: "behaviour",
+      kind: "valueOnly",
+      values: ["one", "many"],
+      classes: { one: "", many: "toggles" },
+      description:
+        "A `segmented` menu's choice:  `one` (the default) selects the item chosen and unselects the rest;  " +
+        "`many` makes each item a toggle, pressed in while selected (`aria-pressed`), with no sliding thumb.  " +
+        "One stays on:  turning off the only one on turns on the next, to its right or below (round to the first)."
+    },
+    {
       name: "position",
       group: "layout",
       kind: "valueOnly",
@@ -214,6 +225,13 @@ export const menuVocabulary = {
         "An interactive item (a link or button) was activated.  `value` is the item's `value`, else its text.  " +
         "The menu doesn't move `selected` itself, except a `segmented` one (a single-choice control), which " +
         "selects the item and unselects the rest:  `preventDefault()` keeps the old choice."
+    },
+    {
+      name: "ui-changed",
+      detail: "{ values: string[] }",
+      description:
+        'A `choose="many"` menu\'s toggles changed:  `values` are the items now on, in order ' +
+        "(each one's `value`, else its text)."
     }
   ],
   slots: [

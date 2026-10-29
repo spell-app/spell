@@ -463,15 +463,6 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
     return this.shownPageIds.includes(id)
   }
 
-  /** Turn page `id` on or off, and keep it so;  the last page on stays on. */
-  @E.untracked
-  togglePage(id: string): void {
-    const shown = this.shownPageIds
-    const isShown = shown.includes(id)
-    if (isShown && shown.length === 1) return
-    this.showPages(this.orderedPageIds, isShown ? shown.filter((each) => each !== id) : [...shown, id])
-  }
-
   /** Whether page `id` takes a whole row:  it shows alone, or it's the odd last one. */
   isPageWide(id: string): boolean {
     const shown = this.shownPageIds
@@ -1190,23 +1181,22 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
   }
 
   /**
-   * The pages, each a toggle in one pill group, as the bar's other groups:  a page shown is pressed in (Owen:
-   * "feel like the other pills, but with a \"depressed\" aesthetic"), one hidden flat;  any number on at once.
+   * The pages, each a toggle in one pill group (`<ui-menu choose="many">`), as the bar's other groups:  a page shown
+   * is pressed in (Owen:  "feel like the other pills, but with a \"depressed\" aesthetic"), one hidden flat;
+   * any number on at once, and one always:  the only one on, turned off, turns on the next (the menu does it).
    */
   private pageToggles(): JSX.Element {
     const t = this.text
-    const onChoosing = (event: CustomEvent<{ value: string }>) => {
-      // toggles, never a choice:  the menu keeps none selected
-      event.preventDefault()
-      this.togglePage(event.detail.value)
-    }
     return (
       <ui-menu
         class="page-toggles"
         appearance="segmented link"
+        choose="many"
         size="small"
         aria-label={t("pages")}
-        on-ui-choosing={onChoosing}
+        on-ui-changed={(event: CustomEvent<{ values: string[] }>) =>
+          this.showPages(this.orderedPageIds, event.detail.values)
+        }
       >
         <For each={this.orderedPageIds}>
           {(id) => {
@@ -1214,10 +1204,9 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
             const isShown = () => this.isPageShown(id)
             return (
               <ui-item
-                class={["toggle", { on: isShown() }]}
                 value={id}
                 icon={this.pageOf(id)?.icon ?? "file"}
-                aria-pressed={isShown() ? "true" : "false"}
+                selected={isShown() ? "" : undefined}
                 title={t(isShown() ? "hidePageTip" : "showPageTip", { page: label() })}
               >
                 {label()}
