@@ -96,9 +96,6 @@ export type PageReach = "same origin" | "messages"
 /** The width every page is drawn at in Phone, px:  a phone's. */
 export const PHONE_WIDTH = 390
 
-/** Which pages show:  `grid` (all, two by two), or one, by its id. */
-export type PagesShown = string
-
 /**
  * Which schemes show, frames and token values alike (Owen:  "Light" "Dark" "Both"):  one, or both side by side
  * (a pair of frames per page).

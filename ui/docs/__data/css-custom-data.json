@@ -10080,7 +10080,7 @@
       "name": "::part(bar)",
       "description": {
         "kind": "markdown",
-        "value": "Part of:\n\n- `<ui-progress>`:  One bar.\n- `<ui-theme-editor>`:  The top bar, one line:  its title, the theme, which pages, how they show.\n- `<ui-toast>`:  The progress bar."
+        "value": "Part of:\n\n- `<ui-progress>`:  One bar.\n- `<ui-theme-editor>`:  The top bar, one line:  its title, Light / Dark / Both, the pages on or off, the theme, how they show.\n- `<ui-toast>`:  The progress bar."
       }
     },
     {
@@ -10102,6 +10102,13 @@
       "description": {
         "kind": "markdown",
         "value": "Part of:\n\n- `<ui-theme-editor>`:  The Basics:  the theme's name and base, and its big choices."
+      }
+    },
+    {
+      "name": "::part(bench)",
+      "description": {
+        "kind": "markdown",
+        "value": "Part of:\n\n- `<ui-theme-menu>`:  The overlay's Theme bench row, a link opening it in a new window."
       }
     },
     {
@@ -12078,13 +12085,6 @@
       "description": {
         "kind": "markdown",
         "value": "Custom state of:\n\n- `<ui-table>`:  Set while it holds `<ui-row>`s rather than a native table:  a CSS grid, its rows subgrids."
-      }
-    },
-    {
-      "name": ":state(saved)",
-      "description": {
-        "kind": "markdown",
-        "value": "Custom state of:\n\n- `<ui-theme-editor>`:  The theme it shows is the one kept in this browser (Use this theme)."
       }
     },
     {

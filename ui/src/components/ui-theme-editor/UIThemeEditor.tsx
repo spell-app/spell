@@ -26,7 +26,6 @@ import {
   type PageReply,
   type PageSchemes,
   type PageSlot,
-  type PagesShown,
   type PreviewPage,
   type ThemeEditorTextKey,
   type ThemeEditorVocabulary,
@@ -72,21 +71,24 @@ export class DOMThemeEditorElement extends E.DOMElement<UIThemeEditor> {
  * It makes a theme on an existing one, and shows it live on real pages.
  *
  * - Its shadow DOM:
- *   - the BAR, one line (Owen:  "dont' wrap"):  the title (its lede in its tooltip), the theme it builds on, one click
- *     each, light / dark, which pages, where their section titles sit, light and dark side by side or one scheme,
- *     Phone, ⇄;  too narrow, the line scrolls sideways
- *   - the PREVIEW:  the `pages` it's handed, real pages in frames, two by two (Editor and Epic page on top, Spell UI
- *     and Notebook below, as the docs' theme bench hands them), each drawn at a desk's width and scaled to its cell
+ *   - the BAR, one line (Owen:  "dont' wrap"):  the title (its lede in its tooltip), then Light / Dark / Both (with ⇄
+ *     while Both shows), the pages, each on or off, the theme it builds on, one click each, where the pages' section
+ *     titles sit, Phone;  too narrow, the line scrolls sideways.  Every control's words are its tooltip too.
+ *   - the PREVIEW:  the `pages` it's handed and turned on, real pages in frames, laid out to fit:  two a row, an odd
+ *     last one the row's width (App and Epic page on top, Spell UI and Notebook below, as the docs' theme bench hands
+ *     them), each drawn at a desk's width and scaled to its cell
  *     - each in light and dark side by side, a pair of frames;  a row's two pairs mirror each other, so its two darks
  *       sit side by side (⇄ swaps every pair);  or once, in the scheme picked
  *     - given no pages, a sample app of real elements, light and dark, and the PAGE itself wears the theme
  *   - the SIDE COLUMN:
- *     - Use this theme, Stop using, Start over
+ *     - Start over;  Stop using, while a theme is kept in this browser from before
  *     - the BASICS:  name, the theme it builds on, a row of colours per role, fonts and text size, corners, depth,
  *       glass;  each sets many tokens (`ThemeDraft.basicsData`)
  *     - EVERY TOKEN, in the theme file's groups as a tree (`ThemeTokens`, `TokenTree`), the theme's own first:
  *       light and dark controls side by side, which pages read each one, a filter, expand / collapse all;
  *       a token set here wins over the Basics
+ *     - its section titles stick as it scrolls, each under the one above (the Basics' head or the tree's, then a
+ *       group's, then its branches'), as the docs pages' nested section titles do
  *     - the CHANGES:  the theme file's JSON5, colours in hex, and Copy changes
  * - The theme is `ThemeDraft`'s, a theme FILE:  its base as `extends`, the Basics' values, the tokens set by hand.
  *   `ThemeFile` writes every sheet from it:  the frames', the page's, what's kept.
@@ -100,9 +102,9 @@ export class DOMThemeEditorElement extends E.DOMElement<UIThemeEditor> {
  * - It starts from (`theme`):  `value`, else the theme being made in this browser, else the one kept (`SavedTheme`),
  *   else `base` as it is, else the page's theme, else `fruity`.
  *   - What's being made is kept in this browser as it changes (`DRAFT_KEY`), so a reload carries on.
- * - Use this theme keeps it in this browser (`SavedTheme.save()`):  the Spell editor, and any page that calls
- *   `SavedTheme.restore()`, starts in it.  `:state(saved)` while the theme shown is the one kept.
- * - Events:  `ui-changed` on every change, `ui-copied` from Copy changes, `ui-saved` from Use this theme / Stop using.
+ * - A theme kept in this browser from before (`SavedTheme`;  Owen deleted its Use this theme button, epic `debut`):
+ *   Stop using forgets it.
+ * - Events:  `ui-changed` on every change, `ui-copied` from Copy changes, `ui-saved` from Stop using.
  *   - The events of the elements it's built of stop at its shadow root:  their `ui-changed`'s detail isn't ours.
  * - SIDE EFFECTS:  the page's theme (without pages), or the chrome's (`ThemePreference.wear()`);  each framed page's
  *   remembered theme, as its own menu would;  `window`'s messages while connected.
@@ -300,26 +302,11 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
   }
 
   ////////////////
-  // ## Use, copy
+  // ## Forget, copy
   ////////////////
 
   /** The stylesheet kept in this browser (`SavedTheme`);  `undefined`:  none. */
   @E.state accessor savedCss: string | undefined = isServer ? undefined : SavedTheme.css
-
-  /** `:state(saved)`:  the theme shown is the one kept. */
-  @E.cssState("saved")
-  get isSaved(): boolean {
-    return this.savedCss !== undefined && this.savedCss === this.draft.css
-  }
-
-  /** Keep the theme in this browser (`SavedTheme.save()`).  Sends `ui-saved`. */
-  @E.untracked
-  use(): void {
-    const { css } = this.draft
-    SavedTheme.save(this.theme, css)
-    this.savedCss = css
-    this.send("ui-saved", { value: this.theme, css })
-  }
 
   /** Forget the kept theme (`SavedTheme.forget()`).  Sends `ui-saved` with no `value`. */
   @E.untracked
@@ -397,8 +384,41 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
     return this.schemes === "dark" ? "dark" : "light"
   }
 
-  /** Which pages show:  all, or one. */
-  @E.state accessor layout: PagesShown = "grid"
+  /**
+   * The pages turned off in the bar, by id (Owen:  "on/off states");  kept in this browser.
+   * - The ones OFF, so a page added later shows until it's turned off.
+   */
+  @E.state accessor hiddenPages: readonly string[] = isServer
+    ? []
+    : ((PrefStore.getAt(HIDDEN_PAGES_KEY) as string[] | undefined) ?? [])
+
+  /** The pages shown, in order:  every page not turned off;  all of them, should every one be off. */
+  get shownPageIds(): string[] {
+    const shown = this.pageIds.filter((id) => !this.hiddenPages.includes(id))
+    return shown.length ? shown : this.pageIds
+  }
+
+  /** Whether page `id` shows. */
+  isPageShown(id: string): boolean {
+    return this.shownPageIds.includes(id)
+  }
+
+  /** Turn page `id` on or off, and keep it so;  the last page on stays on. */
+  @E.untracked
+  togglePage(id: string): void {
+    const isShown = this.isPageShown(id)
+    if (isShown && this.shownPageIds.length === 1) return
+    const hidden = isShown ? [...this.hiddenPages, id] : this.hiddenPages.filter((each) => each !== id)
+    this.hiddenPages = hidden
+    PrefStore.setAt(HIDDEN_PAGES_KEY, hidden.length ? hidden : undefined)
+  }
+
+  /** Whether page `id` takes a whole row:  it shows alone, or it's the odd last one. */
+  isPageWide(id: string): boolean {
+    const shown = this.shownPageIds
+    const index = shown.indexOf(id)
+    return shown.length === 1 || (shown.length % 2 === 1 && index === shown.length - 1)
+  }
 
   /** Where the pages' section titles sit. */
   @E.state accessor titles: TitlesAt = "rest"
@@ -422,7 +442,7 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
    */
   @E.state accessor isSwapped: boolean = isServer ? false : PrefStore.getAt(SWAP_KEY) === true
 
-  /** Swap every pair's light and dark sides (the bar's ⇄). */
+  /** Swap every pair's light and dark sides (the bar's ⇄, beside Both). */
   @E.untracked
   swap(): void {
     this.isSwapped = !this.isSwapped
@@ -431,11 +451,11 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
 
   /**
    * Whether page `id`'s pair shows its dark side first:  the right-hand page of each row of the grid, unless swapped;
-   * a page shown alone, only when swapped.
+   * a page a row's width, only when swapped.
    * - By the frames' order on screen, never in the DOM:  a frame moved in the DOM loads its page again.
    */
   isDarkFirst(id: string): boolean {
-    const isRight = this.layout === "grid" && this.pageIds.indexOf(id) % 2 === 1
+    const isRight = !this.isPageWide(id) && this.shownPageIds.indexOf(id) % 2 === 1
     return isRight !== this.isSwapped
   }
 
@@ -461,12 +481,18 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
   @E.state accessor loaded: Readonly<Partial<Record<FrameKey, boolean>>> = {}
 
   /**
-   * Whether frame `key` may start loading:  every frame before it is drawn, or can't be (no address).
+   * Whether frame `key` may start loading:  it already has, or it's shown and every shown frame before it is drawn,
+   * or can't be (no address).
    * - One at a time, in the grid's order:  the Spell editor's dev server sends each frame ~800 modules, and four at
    *   once is more than a browser holds open (headless Chromium's `ERR_INSUFFICIENT_RESOURCES`).
+   * - A frame once started stays:  reloading one page (its ↻) marks its frames not drawn, and must never take the
+   *   frames after it off the page, which would load them again too (Owen:  "should only reload that one").
    */
   private isTurnOf(key: FrameKey): boolean {
+    if (this.begun.has(key)) return true
+    if (!this.isPageShown(splitKey(key)[0])) return false
     for (const each of this.frameKeys) {
+      if (!this.isPageShown(splitKey(each)[0])) continue
       if (each === key) return true
       if (!this.loaded[each] && this.urlOf(each)) return false
     }
@@ -500,6 +526,9 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
 
   /** Each frame, by key. */
   private readonly frames = new Map<FrameKey, HTMLIFrameElement>()
+
+  /** The frames given their page:  each keeps it from then on (`isTurnOf()`). */
+  private readonly begun = new Set<FrameKey>()
 
   /** Asks sent, so each reply finds its page. */
   private asked = 0
@@ -601,7 +630,7 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
     win.postMessage(message, new URL(url, location.href).origin)
   }
 
-  /** Reload page `id`'s frames (its title row's icon). */
+  /** Reload page `id`'s frames (its title row's ↻), and no other page's. */
   @E.untracked
   reload(id: string): void {
     for (const key of this.frameKeys) {
@@ -644,7 +673,39 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
     this.resizer.observe(cell)
   }
 
-  /** One observer of every cell's size. */
+  /**
+   * Where the side column's section titles stick, px from the column's top (`<ui-section offset>`):
+   * - `basics`, `tokens`:  under the Basics' head, under the token tree's head, which stick first
+   * - `top`:  the column's very top, as the heads stick (above its padding)
+   * - Each section's nested titles stack under its own (`sticky`), as the docs pages' do (Owen:  "make section
+   *   headers in the sidebar stack").
+   */
+  @E.state accessor headBottom: Readonly<Record<SideHead | "top", number>> = { basics: 0, tokens: 0, top: 0 }
+
+  /** The side column's heads, by name, once drawn. */
+  private readonly heads = new Map<SideHead, HTMLElement>()
+
+  /** Watch side head `name`, `head`, for its height:  the titles under it stick below it. */
+  private watchHead(name: SideHead, head: HTMLElement): void {
+    this.heads.set(name, head)
+    if (isServer) return
+    head.dataset.head = name
+    this.resizer.observe(head)
+  }
+
+  /** Say where each side head ends, as it sticks:  its sticky `top` (the column's padding, negative) plus its height. */
+  private measureHeads(): void {
+    const bottom = { ...this.headBottom }
+    for (const [name, head] of this.heads) {
+      const top = parseFloat(getComputedStyle(head).top) || 0
+      bottom[name] = Math.round(top + head.offsetHeight)
+      bottom.top = Math.round(top)
+    }
+    const isSame = (Object.keys(bottom) as (keyof typeof bottom)[]).every((key) => bottom[key] === this.headBottom[key])
+    if (!isSame) this.headBottom = bottom
+  }
+
+  /** One observer of every cell's size, the bar's row's and the side heads'. */
   @E.lazy
   private get resizer(): ResizeObserver {
     return new ResizeObserver((entries) => {
@@ -652,6 +713,10 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
       for (const entry of entries) {
         if (entry.target === this.toolsBox) {
           this.measureTools()
+          continue
+        }
+        if ((entry.target as HTMLElement).dataset.head) {
+          this.measureHeads()
           continue
         }
         const key = (entry.target as HTMLElement).dataset.frame as FrameKey
@@ -947,15 +1012,11 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
 
   render(): JSX.Element {
     return (
-      <div
-        class={["ui theme-editor", { saved: this.isSaved, paged: this.hasPages }]}
-        part={this.partForName("editor")}
-        ref={stopInner}
-      >
+      <div class={["ui theme-editor", { paged: this.hasPages }]} part={this.partForName("editor")} ref={stopInner}>
         {this.bar()}
         <div class="body">
           <Show when={this.hasPages} fallback={this.samples()}>
-            <div class={["pages", { grid: this.layout === "grid" }]} part={this.partForName("pages")}>
+            <div class={["pages", { grid: this.shownPageIds.length > 1 }]} part={this.partForName("pages")}>
               <For each={this.pageIds}>{(id) => this.page(id)}</For>
             </div>
           </Show>
@@ -972,8 +1033,11 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
   ////////////////
 
   /**
-   * The bar, ONE line (Owen:  "dont' wrap"):  the title (its lede in its tooltip), the theme row, which pages, the
-   * titles' place, the schemes, Phone, ⇄;  too narrow, the row scrolls sideways, never onto a second line.
+   * The bar, ONE line (Owen:  "dont' wrap"):  the title (its lede in its tooltip), then Light / Dark / Both and ⇄,
+   * the pages' toggles, the theme row, the titles' place, Phone;  too narrow, the row scrolls sideways, never onto a
+   * second line.
+   * - Owen:  "Move \"light|dark|both\" to the left, add \"swap light/dark\" to that group, only shown when
+   *   \"both\" is chosen";  the pages "to on/off states ... Move to the right of light/dark".
    */
   private bar(): JSX.Element {
     const t = this.text
@@ -982,23 +1046,20 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
         <div class="title" title={t("lede")}>
           <ui-icon name="swatchbook" aria-hidden="true"></ui-icon>
           <h1>{t("label")}</h1>
-          <ui-theme-menu show="scheme" size="small" aria-label={t("schemes")}></ui-theme-menu>
         </div>
         <div class={["tools-wrap", { "more-start": this.barMore.start, "more-end": this.barMore.end }]}>
           {this.edgeButton("start")}
           <div class="tools" ref={(tools) => this.watchTools(tools)} onScroll={() => this.measureTools()}>
-            {this.themesRow()}
+            {this.schemesGroup()}
+            <Show when={this.hasPages}>{this.pageToggles()}</Show>
+            {this.menu("theme", this.bases, this.baseTheme, (base) => this.choose({ base }), {
+              labelOf: UIT.ThemeNames.titleOf,
+              tipOf: (base) => t("themeTip", { theme: UIT.ThemeNames.titleOf(base) })
+            })}
             <Show when={this.hasPages}>
-              {this.menu(
-                "layout",
-                ["grid", ...this.pageIds],
-                this.layout,
-                (value) => (this.layout = value),
-                (value) => (value === "grid" ? t("grid") : (this.pageOf(value)?.label ?? value))
-              )}
-              {this.menu("titles", TITLE_PLACES, this.titles, (value) => (this.titles = value as TitlesAt))}
-            </Show>
-            <Show when={this.hasPages}>
+              {this.menu("titles", TITLE_PLACES, this.titles, (value) => (this.titles = value as TitlesAt), {
+                tipOf: (value) => t(`${value as TitlesAt}Tip`)
+              })}
               <ui-button
                 class="bar-toggle"
                 size="small"
@@ -1008,21 +1069,62 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
                 title={t("phoneTip")}
                 onClick={() => (this.device = this.device === "phone" ? "desk" : "phone")}
               ></ui-button>
-              <ui-button
-                class="bar-toggle"
-                size="small"
-                icon="exchange alternate"
-                disabled={this.schemes !== "both" ? "" : undefined}
-                aria-pressed={this.isSwapped ? "true" : "false"}
-                aria-label={t("swap")}
-                title={t("swap")}
-                onClick={() => this.swap()}
-              ></ui-button>
             </Show>
           </div>
           {this.edgeButton("end")}
         </div>
       </header>
+    )
+  }
+
+  /** Light / Dark / Both, and ⇄ beside them while Both shows (with pages:  it swaps their pairs). */
+  private schemesGroup(): JSX.Element {
+    const t = this.text
+    return (
+      <div class="schemes-group">
+        {this.menu("schemes", SCHEME_CHOICES, this.schemes, (value) => this.showSchemes(value as PageSchemes), {
+          tipOf: (value) => t(`${value as PageSchemes}Tip`)
+        })}
+        <Show when={this.hasPages && this.schemes === "both"}>
+          <ui-button
+            class="bar-toggle"
+            size="small"
+            icon="exchange alternate"
+            aria-pressed={this.isSwapped ? "true" : "false"}
+            aria-label={t("swap")}
+            title={t("swapTip")}
+            onClick={() => this.swap()}
+          ></ui-button>
+        </Show>
+      </div>
+    )
+  }
+
+  /** The pages, each a toggle:  on, it shows in the grid;  remembered (`hiddenPages`). */
+  private pageToggles(): JSX.Element {
+    const t = this.text
+    return (
+      <div class="page-toggles" role="group" aria-label={t("pages")}>
+        <For each={this.pageIds}>
+          {(id) => {
+            const label = () => this.pageOf(id)?.label ?? id
+            const isShown = () => this.isPageShown(id)
+            return (
+              <ui-button
+                class="bar-toggle page-toggle"
+                size="small"
+                icon={this.pageOf(id)?.icon ?? "file"}
+                value={id}
+                aria-pressed={isShown() ? "true" : "false"}
+                title={t(isShown() ? "hidePageTip" : "showPageTip", { page: label() })}
+                onClick={() => this.togglePage(id)}
+              >
+                {label()}
+              </ui-button>
+            )
+          }}
+        </For>
+      </div>
     )
   }
 
@@ -1064,13 +1166,19 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
     if (start !== this.barMore.start || end !== this.barMore.end) this.barMore = { start, end }
   }
 
-  /** A segmented menu of the bar, named `name`:  `values`, `chosen` picked, each called `labelOf(value)`. */
+  /**
+   * A segmented menu of the bar, named `name`:  `values`, `chosen` picked, each called `labelOf(value)`, its
+   * tooltip `tipOf(value)`.
+   */
   private menu(
     name: ThemeEditorTextKey,
     values: readonly string[],
     chosen: string,
     choose: (value: string) => void,
-    labelOf: (value: string) => string = (value) => this.text(value as ThemeEditorTextKey)
+    {
+      labelOf = (value) => this.text(value as ThemeEditorTextKey),
+      tipOf
+    }: { labelOf?: (value: string) => string; tipOf: (value: string) => string }
   ): JSX.Element {
     return (
       <ui-menu
@@ -1081,7 +1189,7 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
       >
         <For each={values}>
           {(value) => (
-            <ui-item value={value} selected={chosen === value ? "" : undefined}>
+            <ui-item value={value} selected={chosen === value ? "" : undefined} title={tipOf(value)}>
               {labelOf(value)}
             </ui-item>
           )}
@@ -1091,19 +1199,9 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
   }
 
   /**
-   * The theme it builds on, one click each (Owen:  "Spread themes out in the top bar like \"all four\""):  every theme
-   * of Spell's own (`UI.themes.own`, so a new one shows by itself), then Light / Dark / Both beside it (Owen).
+   * The themes it can build on, one click each in the bar (Owen:  "Spread themes out in the top bar like \"all
+   * four\""):  Spell UI's own (`UI.themes.own`, so a new one shows by itself), and the theme's own base, if another.
    */
-  private themesRow(): JSX.Element {
-    return (
-      <div class="themes-row">
-        {this.menu("theme", this.bases, this.baseTheme, (base) => this.choose({ base }), UIT.ThemeNames.titleOf)}
-        {this.menu("schemes", SCHEME_CHOICES, this.schemes, (value) => this.showSchemes(value as PageSchemes))}
-      </div>
-    )
-  }
-
-  /** The themes it can build on:  Spell UI's own (`UI.themes.own`), and the theme's own base, if another. */
   private get bases(): string[] {
     if (!this.isReady) return [this.baseTheme]
     const own = [...UI.themes.own]
@@ -1114,13 +1212,27 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
   // ## The pages
   ////////////////
 
-  /** Page `id`:  its title row, then its frames (a light and dark pair, or one), each scaled into its cell. */
+  /**
+   * Page `id`:  its title row, then its frames (a light and dark pair, or one), each scaled into its cell.
+   * - Its ↗ opens the page as its first frame on screen shows it:  the theme it builds on and that frame's scheme in
+   *   its address (`?theme=`, `?scheme=`, `ThemePreference.addressWith()`);  the edits aren't carried.
+   */
   private page(id: string): JSX.Element {
     const t = this.text
     const page = () => this.pageOf(id)
-    const url = () => this.urlOf(frameKey(id, this.slots[0]!))
+    const firstScheme = (): Scheme =>
+      this.schemes === "both" ? (this.isDarkFirst(id) ? "dark" : "light") : this.shownSchemes[0]!
+    const url = () => this.urlOf(frameKey(id, firstScheme()))
+    const popout = () => {
+      const address = url()
+      return address ? ThemePreference.addressWith(address, { theme: this.baseTheme, scheme: firstScheme() }) : ""
+    }
     return (
-      <figure class="page" part={this.partForName("page")} hidden={this.layout !== "grid" && this.layout !== id}>
+      <figure
+        class={["page", { wide: this.isPageWide(id) }]}
+        part={this.partForName("page")}
+        hidden={!this.isPageShown(id)}
+      >
         <figcaption class="page-head">
           <ui-icon class="page-icon" name={page()?.icon ?? "file"} aria-hidden="true"></ui-icon>
           <span class="page-title">{page()?.label}</span>
@@ -1133,11 +1245,11 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
             link=""
             appearance="link"
             label={t("reload")}
-            title={t("reload")}
+            title={t("reloadTip")}
             onClick={() => this.reload(id)}
           ></ui-icon>
           <Show when={url()}>
-            <a class="page-tool" href={url()} target="_blank" title={t("open")} aria-label={t("open")}>
+            <a class="page-tool" href={popout()} target="_blank" title={t("openTip")} aria-label={t("open")}>
               <ui-icon name="external alternate" appearance="link" aria-hidden="true"></ui-icon>
             </a>
           </Show>
@@ -1167,7 +1279,10 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
               src={url()}
               title={`${label()}, ${t(slot)}`}
               style={this.frameStyle(key)}
-              ref={(frame) => this.frames.set(key, frame)}
+              ref={(frame) => {
+                this.frames.set(key, frame)
+                this.begun.add(key)
+              }}
               onLoad={() => this.onPageLoaded(key)}
             ></iframe>
             <Show when={!this.loaded[key]}>
@@ -1258,29 +1373,25 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
     )
   }
 
-  /** Use this theme, Stop using, Start over. */
+  /** Start over;  Stop using, while a theme is kept in this browser. */
   private actions(): JSX.Element {
     const t = this.text
     return (
       <div class="actions">
         <ui-button
           size="small"
-          icon={this.isSaved ? CHECK_ICON : undefined}
-          title={t("useTip")}
-          disabled={this.isSaved ? "" : undefined}
-          onClick={() => this.use()}
-          color="primary"
+          icon={UNDO_ICON}
+          title={t("startOverTip")}
+          onClick={() => this.startOver()}
+          appearance="basic"
         >
-          {this.isSaved ? t("inUse") : t("use")}
+          {t("startOver")}
         </ui-button>
         <Show when={this.savedCss !== undefined}>
-          <ui-button size="small" onClick={() => this.forget()} appearance="basic">
+          <ui-button size="small" title={t("forgetTip")} onClick={() => this.forget()} appearance="basic">
             {t("forget")}
           </ui-button>
         </Show>
-        <ui-button size="small" icon={UNDO_ICON} onClick={() => this.startOver()} appearance="basic">
-          {t("startOver")}
-        </ui-button>
       </div>
     )
   }
@@ -1294,11 +1405,13 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
     const t = this.text
     return (
       <section class="basics" part={this.partForName("basics")} aria-label={t("basics")}>
-        <header class="tokens-bar">
-          <h2 class="tokens-title" title={t("basicsTip")}>
-            {t("basics")}
-          </h2>
-        </header>
+        <div class="side-head" ref={(head) => this.watchHead("basics", head)}>
+          <header class="tokens-bar">
+            <h2 class="tokens-title" title={t("basicsTip")}>
+              {t("basics")}
+            </h2>
+          </header>
+        </div>
         {this.basicsGroup(
           "theme",
           t("theme"),
@@ -1377,6 +1490,8 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
         label={label}
         collapsible=""
         level="3"
+        sticky=""
+        offset={this.headBottom.basics}
         open={(this.folds[key] ?? true) ? "" : "false"}
         on-ui-opened={onFolded}
         on-ui-closed={onFolded}
@@ -1655,7 +1770,7 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
     const t = this.text
     return (
       <section class="tokens" part={this.partForName("tokens")} aria-label={t("tokens")}>
-        <div class="tokens-head">
+        <div class="side-head tokens-head" ref={(head) => this.watchHead("tokens", head)}>
           <header class="tokens-bar">
             <h2 class="tokens-title" title={t("tokensTip")}>
               {t("themeTitle", { theme: UIT.ThemeNames.titleOf(this.baseTheme) })}
@@ -1732,6 +1847,8 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
         label={node()?.name ?? ""}
         collapsible=""
         level={isGroup ? "3" : "4"}
+        sticky=""
+        offset={isGroup ? this.headBottom.tokens : undefined}
         open={isOpen() ? "" : "false"}
         on-ui-opened={onFolded}
         on-ui-closed={onFolded}
@@ -1997,6 +2114,8 @@ export class UIThemeEditor extends E.UIComponent<ThemeEditorVocabulary> {
         label={t("changes")}
         collapsible=""
         level="2"
+        sticky=""
+        offset={this.headBottom.top}
       >
         <span slot="actions" class="file">
           {this.draft.fileName}
@@ -2039,6 +2158,9 @@ type FontKey = "headingFont" | "bodyFont"
 /** The choices drawn as segmented menus. */
 type SegmentedKey = "corners" | "depth" | "glass"
 
+/** The side column's heads that stick:  the Basics', the token tree's. */
+type SideHead = "basics" | "tokens"
+
 /** A cell's size, px. */
 type CellSize = { width: number; height: number }
 
@@ -2075,6 +2197,9 @@ const DRAFT_KEY = "spell-ui:theme-draft"
 
 /** Where the tree's folds are kept. */
 const FOLDS_KEY = "spell-ui:theme-editor-folds"
+
+/** Where the pages turned off are kept. */
+const HIDDEN_PAGES_KEY = "spell-ui:theme-editor-hidden-pages"
 
 /** Where ⇄ is kept. */
 const SWAP_KEY = "spell-ui:theme-editor-swapped"

@@ -12,6 +12,9 @@ import {
   type ThemeAndScheme
 } from "./UIThemeMenu.types"
 
+/** The query parameters a page's address says its theme and scheme in (`?theme=glass&scheme=dark`). */
+const ADDRESS_PARAMS = { theme: "theme", scheme: "scheme" } as const
+
 /****************
  * ### `ThemePreference`
  * The theme (`UI.themes`) and colour scheme a viewer chose,
@@ -47,6 +50,13 @@ import {
  * - Static only:  one theme and scheme per page.
  * - Each place keeps its own default theme and theme key (`site()`, epic `debut` J87):
  *   the editor app starts in `fruity`, and remembers its theme apart from the docs';  the SCHEME stays shared.
+ * - A page's ADDRESS can say its theme and scheme for this load:  `?theme=glass&scheme=dark` (Owen:  "Have a
+ *   `?theme=x` for all pages which sets this?";  `addressWith()` writes one, as the theme bench's ↗ does).
+ *   - It wins over the remembered choice, but is NEVER stored:  the next page without it shows the remembered one,
+ *     and picking from the menu stores the pick as ever (and wins from then on).
+ *   - `theme`:  a theme of the set, or one of its old names (`studio`);  any other is ignored, with a warning.
+ *   - `scheme`:  `light` or `dark`, read by `ColorScheme` (so the site header follows it too);  any other is
+ *     ignored, with a warning.  `HEAD_SCRIPT` reads it too.
  ****************/
 export class ThemePreference {
   /** The theme a viewer who never picked one sees:  `DEFAULT_THEME`, unless a place set its own (`site()`). */
@@ -75,9 +85,10 @@ export class ThemePreference {
    *   whose text it matches (a scheme is kept as `dark`, unquoted).
    * - Reads the old keys too (`OLD_COLOR_SCHEME_KEYS`) while the new one is absent:  `restore()` moves them over.
    * - Its keys are `ColorScheme`'s own constants;  every page that inlines it holds a copy of its text.
+   * - The address's `?scheme=light|dark` first, as `read()` takes it.
    */
   static readonly HEAD_SCRIPT =
-    `try{var l=localStorage,d=document.documentElement,s=` +
+    `try{var l=localStorage,d=document.documentElement,s=(/[?&]${ADDRESS_PARAMS.scheme}=(light|dark)(&|$)/.exec(location.search)||[])[1]||` +
     [COLOR_SCHEME_KEY, ...OLD_COLOR_SCHEME_KEYS].map((key) => `l.getItem(${JSON.stringify(key)})`).join("||") +
     `;if(s==="light"||s==="dark"){d.classList.add("ui-"+s);d.style.colorScheme=s}}catch(e){}`
 
@@ -177,9 +188,23 @@ export class ThemePreference {
     await ThemePreference.applyTheme(ThemePreference.chosen.theme)
   }
 
-  /** Forget the in-memory theme and scheme (tests):  the next read goes back to storage. */
+  /**
+   * `address` with `theme` and `scheme` in its query (`?theme=glass&scheme=dark`):  a page opened at it shows in
+   * them, whatever its viewer chose there, without storing them (see the class doc).
+   * - A relative `address` is read against this page's;  what comes back is a full one.
+   */
+  static addressWith(address: string, { theme, scheme }: { theme?: string; scheme?: ShownScheme }): string {
+    const url = new URL(address, typeof location === "undefined" ? "http://localhost" : location.href)
+    if (theme) url.searchParams.set(ADDRESS_PARAMS.theme, theme)
+    if (scheme) url.searchParams.set(ADDRESS_PARAMS.scheme, scheme)
+    return url.href
+  }
+
+  /** Forget the in-memory theme and scheme, and the address's (tests):  the next read goes back to both. */
   static reset(): void {
     ThemePreference.current = undefined
+    ThemePreference.addressed = undefined
+    ColorScheme.rereadAddress()
   }
 
   ////////////////
@@ -188,6 +213,16 @@ export class ThemePreference {
 
   /** The theme and scheme in memory;  `undefined` until first read. */
   @E.state private static accessor current: ThemeAndScheme | undefined = undefined
+
+  /** The theme this page's address says (`?theme=`), read once;  never stored.  Its scheme is `ColorScheme`'s. */
+  private static addressed: { theme?: string } | undefined
+
+  /** The address's theme, read on first use. */
+  private static get fromAddress(): { theme?: string } {
+    if (ThemePreference.addressed) return ThemePreference.addressed
+    const params = new URLSearchParams(typeof location === "undefined" ? "" : location.search)
+    return (ThemePreference.addressed = { theme: params.get(ADDRESS_PARAMS.theme) || undefined })
+  }
 
   /** The theme the page wears whatever is chosen (`wear()`);  `undefined`:  the one chosen. */
   private static worn: string | undefined
@@ -240,8 +275,24 @@ export class ThemePreference {
   private static async applyTheme(name: string): Promise<void> {
     const { themes } = await UI.load()
     const known = ThemePreference.knownName(themes, name)
+    if (known !== name && name === ThemePreference.fromAddress.theme)
+      return ThemePreference.applyAddressed(themes, name)
     if (known !== name) return ThemePreference.setTheme(known)
     await themes.apply(ThemePreference.worn ?? name)
+  }
+
+  /**
+   * The address's theme, `name`, isn't one of the set as it's written:  its new name, if it's an old one;  else
+   * ignored, with a warning, for the remembered theme.  Neither is stored.
+   */
+  private static async applyAddressed(themes: Themes, name: string): Promise<void> {
+    const now = UIT.ThemeNames.nameNow(themes, name)
+    const isKnown = themes.own.includes(now)
+    if (!isKnown) E.Warnings.warn("ThemePreference", `the address's theme \`${name}\` isn't a theme;  ignored`)
+    ThemePreference.addressed = { ...ThemePreference.fromAddress, theme: isKnown ? now : undefined }
+    const theme = ThemePreference.read().theme
+    ThemePreference.update({ ...ThemePreference.chosen, theme })
+    await ThemePreference.applyTheme(theme)
   }
 
   /**
@@ -253,10 +304,16 @@ export class ThemePreference {
     return themes.own.includes(now) ? now : ThemePreference.defaultTheme
   }
 
-  /** The stored theme and scheme;  anything unreadable is the default (`defaultTheme`, `system`). */
+  /**
+   * The theme and scheme:  the address's, else the stored ones (the scheme's, `ColorScheme`'s);  anything unreadable is the default (`defaultTheme`,
+   * `system`).
+   */
   private static read(): ThemeAndScheme {
     return {
-      theme: ThemePreference.load(ThemePreference.themeKey) || ThemePreference.defaultTheme,
+      theme:
+        ThemePreference.fromAddress.theme ||
+        ThemePreference.load(ThemePreference.themeKey) ||
+        ThemePreference.defaultTheme,
       scheme: ColorScheme.chosen() ?? "system"
     }
   }

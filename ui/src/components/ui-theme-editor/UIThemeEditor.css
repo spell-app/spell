@@ -1,9 +1,11 @@
 /*
  * The style sheet of `<ui-theme-editor>`:  a one-line bar, then the preview beside the side column.
- * - `.bar`:  ONE line (Owen:  "dont' wrap"):  the title, then the tools, which scroll sideways when there's no room.
+ * - `.bar`:  ONE line (Owen:  "dont' wrap"):  the title, then the tools from the left (Light / Dark / Both and ⇄, the
+ *   pages' toggles, the themes, the titles, Phone), which scroll sideways when there's no room.
  * - `.body`:  the preview (the pages' grid, or the sample app) beside the side column, 440px;
  *   stacked when the element is narrow (a container query on the host, so it fits a side panel as well as a page).
- * - `.side`:  the actions, the Basics, the token tree (its filter stuck at the column's top as it scrolls), the changes.
+ * - `.side`:  the actions, the Basics, the token tree, the changes;  the Basics' and the tree's heads (`.side-head`)
+ *   stick at the column's top as it scrolls, on top of everything, and the section titles stack under them.
  * - `.swatches`:  the colour rows, small round swatches as macOS's accent colours;  the base's own a ring of hues.
  * - `.sample`:  the sample app, once per scheme (`ui-light` / `ui-dark` on it), on the page's own background.
  * - Every colour, font and radius here is a token.
@@ -88,7 +90,7 @@
     flex: 1 1 auto;
     min-width: 0;
   }
-  /* the theme row and the menus:  one row at the bar's end, scrolling sideways when there's no room;
+  /* the groups and menus:  one row from the bar's left, scrolling sideways when there's no room;
      a side with more out of sight fades out under its ‹ or › */
   .tools {
     --_fade-start: 0px;
@@ -112,15 +114,22 @@
   }
   /* each keeps its width:  the row scrolls, never squeezes a menu under its neighbour */
   .tools > *,
-  .themes-row > * {
+  .schemes-group > *,
+  .page-toggles > * {
     flex: none;
   }
-  /* the theme row first, pushed to the end with the rest while there's room */
-  .themes-row {
+  /* Light / Dark / Both, and ⇄ beside them while Both shows */
+  .schemes-group {
     display: flex;
     align-items: center;
-    gap: 8px;
-    margin-inline-start: auto;
+    gap: 4px;
+  }
+  /* the pages, each a toggle with its icon and name */
+  .page-toggles {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    --ui-button-margin-inline: 0;
   }
 
   .more-start .tools {
@@ -158,13 +167,17 @@
     --ui-icon-width: auto;
     margin: 0;
   }
-  /* Phone and ⇄:  plain icons;  pressed, the segmented menus' chosen fill, in a pill */
+  /* Phone, ⇄ and the pages:  plain;  pressed, the segmented menus' chosen fill, in a pill */
   .bar-toggle {
     --ui-button-radius: 9999px;
     --ui-button-background: transparent;
   }
   .bar-toggle[aria-pressed="true"] {
     --ui-button-background: var(--ui-menu-segmented-active-background, var(--ui-surface-strong));
+  }
+  /* a page turned off:  faded, so the ones on read at a glance */
+  .page-toggle[aria-pressed="false"] {
+    opacity: 0.45;
   }
 
   /* ## The pages */
@@ -176,8 +189,12 @@
     gap: var(--_ui-theme-editor-gap);
     min-height: 0;
   }
+  /* two or more pages:  two a row, an odd last one the row's width */
   .pages.grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .pages.grid > .page.wide {
+    grid-column: 1 / -1;
   }
   .page {
     display: grid;
@@ -473,10 +490,15 @@
     background: color-mix(in oklab, var(--ui-surface) 55%, transparent);
     overflow: clip;
   }
-  /* the group's title band:  the docs pages' resting section title */
+  /* the group's title band:  the docs pages' resting section title;  opaque, as it sticks over what scrolls under it */
   .group::part(title) {
     padding: 6px 8px;
-    background: var(--ui-section-title-background, var(--ui-surface-strong));
+    background:
+      linear-gradient(
+        var(--ui-section-title-background, var(--ui-surface-strong)),
+        var(--ui-section-title-background, var(--ui-surface-strong))
+      ),
+      linear-gradient(var(--ui-surface), var(--ui-surface)), var(--ui-background);
     border-block-end: 1px solid var(--ui-border-color-internal, var(--ui-border-color));
   }
   .group::part(heading) {
@@ -489,8 +511,10 @@
     margin-inline-start: 12px;
     border-inline-start: 1px solid var(--ui-border-color-internal, var(--ui-border-color));
   }
+  /* a branch's title, opaque as it sticks under its group's */
   .branch::part(title) {
     padding: 4px 8px;
+    background: linear-gradient(var(--ui-surface), var(--ui-surface)), var(--ui-background);
   }
   .branch::part(heading) {
     font-size: 0.85em;
@@ -544,11 +568,14 @@
   /* a colour's half:  the scheme's icon, the swatch (the picker), its hex, its opacity and its % */
   /* the opacity:  a number, right-aligned against its unit (Owen's standing rule) */
 
-  /* the tree's title, filter and readers' legend:  stuck to the column's top as the tokens scroll under them */
-  .tokens-head {
+  /*
+   * The Basics' head, and the tree's (its title, filter and readers' legend):  stuck to the column's top (over its
+   * padding) as the column scrolls under them, above every stuck section title, which stack below (`offset`)
+   */
+  .side-head {
     position: sticky;
     top: -12px;
-    z-index: 1;
+    z-index: calc(var(--ui-z-sticky, 10) + 10);
     display: grid;
     gap: 8px;
     margin: 0 -12px;
@@ -561,7 +588,7 @@
   }
   /* stuck:  a soft shadow under it, so the tokens read as passing beneath */
   @container scroll-state(stuck: top) {
-    .tokens-head::after {
+    .side-head::after {
       content: "";
       position: absolute;
       inset: 100% 0 auto;

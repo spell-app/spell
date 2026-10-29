@@ -406,7 +406,7 @@ describe("<ui-theme-menu> scheme", () => {
 describe("<ui-theme-menu> dropdown (show=theme)", () => {
   it("lists Spell's own themes, its text the chosen one's", async () => {
     const host = await render(`<ui-theme-menu show="theme"></ui-theme-menu>`)
-    expect(dropdownRows(host).map(([value]) => value)).toEqual([...UI.themes.own])
+    expect(dropdownRows(host).map(([value]) => value)).toEqual([...UI.themes.own, "theme bench"])
     expect(dropdownRows(host)).toContainEqual(["glass", "Glass"])
     expect(labelOf(host)).toBe("Spell theme")
   })
@@ -425,6 +425,40 @@ describe("<ui-theme-menu> dropdown (show=theme)", () => {
     expect(inner).toEqual([])
     await ElementFixture.settle()
     expect(labelOf(host)).toBe("Merlot theme")
+  })
+})
+
+describe("<ui-theme-menu> Theme bench", () => {
+  it("the overlay's row opens the theme bench in a new window, in the theme chosen, under this page's site", async () => {
+    const host = await render(`<ui-theme-menu></ui-theme-menu>`)
+    const bench = part<HTMLAnchorElement>(host, "bench")
+    expect(bench.target).toBe("_blank")
+    expect(bench.getAttribute("title")).toBe("Open the theme bench in a new window, in this theme")
+    expect(bench.href).toBe(`${location.origin}/components/ui/theme-bench.html?theme=spell`)
+    row(host, "merlot").click()
+    await ElementFixture.settle()
+    expect(part<HTMLAnchorElement>(host, "bench").href).toContain("?theme=merlot")
+  })
+
+  it("`bench` names the site it's on;  `none`:  no row", async () => {
+    const host = await render(`<ui-theme-menu bench="http://127.0.0.1:4747/"></ui-theme-menu>`)
+    expect(part<HTMLAnchorElement>(host, "bench").href).toBe(
+      "http://127.0.0.1:4747/components/ui/theme-bench.html?theme=spell"
+    )
+    const none = await render(`<ui-theme-menu bench="none"></ui-theme-menu>`)
+    expect(none.shadowRoot!.querySelector("[part~=bench]")).toBeNull()
+  })
+
+  it("the dropdown's Theme bench opens it, and chooses no theme", async () => {
+    const open = vi.spyOn(window, "open").mockReturnValue(null)
+    const host = await render(`<ui-theme-menu show="theme"></ui-theme-menu>`)
+    pick(host, "theme bench")
+    expect(open).toHaveBeenCalledWith(
+      `${location.origin}/components/ui/theme-bench.html?theme=spell`,
+      "_blank",
+      "noopener"
+    )
+    expect(ThemePreference.chosen.theme).toBe("spell")
   })
 })
 

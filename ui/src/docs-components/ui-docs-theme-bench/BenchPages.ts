@@ -4,7 +4,8 @@ import type { PreviewPage } from "spell/ui/components/ui-theme-editor/UIThemeEdi
  * ### `BenchPages`
  * The four real pages Spell's theme editor previews while it's worked on (epic `debut` P24), as
  * `<ui-theme-editor pages>` takes them:  the docs' theme bench hands them in, and so does the Spell editor's Theme page.
- * - Two by two, in this order (Owen):  the Editor and the Epic page on top, Spell UI and the Notebook under them.
+ * - Two by two, in this order (Owen):  the App (the Spell editor) and the Epic page on top, Spell UI and the Notebook
+ *   under them;  each turned on or off in the theme editor's bar.
  * - Spell UI's components name no page of Spell's:  this docs widget does, for the pages around it.
  * - Static and pure:  data in, pages out;  the editor app imports it by its file
  *   (`spell/ui/docs-components/ui-docs-theme-bench/BenchPages`).
@@ -51,7 +52,7 @@ export type BenchPagesProps = {
   noEditor: string
 }
 
-/** The four pages' ids, in the grid's order, two by two (Owen):  the editor and the epic page on top. */
+/** The four pages' ids, in the grid's order, two by two (Owen):  the App (the editor) and the epic page on top. */
 export const BENCH_PAGE_IDS = ["editor", "epic", "ui", "notebook"] as const
 
 /** One of them. */

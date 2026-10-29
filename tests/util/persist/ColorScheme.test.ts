@@ -70,6 +70,39 @@ describe("ColorScheme.chosen()", () => {
 // ## Showing it
 ////////////////
 
+describe("ColorScheme:  the address's ?scheme=", () => {
+  /** Run `check` with this page at `search`, as a page opened at an address with it. */
+  function at(search: string, check: () => void) {
+    const before = location.href
+    history.replaceState(null, "", `${location.pathname}${search}`)
+    ColorScheme.rereadAddress()
+    try {
+      check()
+    } finally {
+      history.replaceState(null, "", before)
+      ColorScheme.rereadAddress()
+    }
+  }
+
+  test("wins over the one kept, for this visit, and is never kept;  choosing drops it", () => {
+    localStorage.setItem(COLOR_SCHEME_KEY, "light")
+    at("?scheme=dark", () => {
+      expect(ColorScheme.chosen()).toBe("dark")
+      expect(localStorage.getItem(COLOR_SCHEME_KEY)).toBe("light")
+      ColorScheme.choose("light")
+      expect(ColorScheme.chosen()).toBe("light")
+    })
+  })
+
+  test("any other value is ignored, with a warning", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined)
+    at("?scheme=sepia", () => {
+      expect(ColorScheme.chosen()).toBeUndefined()
+      expect(String(warn.mock.calls[0]?.[0])).toContain("sepia")
+    })
+  })
+})
+
 describe("ColorScheme.forcedBy()", () => {
   test("reads the scheme `<html>`'s classes force:  what the site header's icon shows", () => {
     expect(ColorScheme.forcedBy(classes(COLOR_SCHEME_CLASSES.dark))).toBe("dark")

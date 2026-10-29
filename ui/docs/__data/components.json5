@@ -33349,7 +33349,7 @@
         {
           "name": "ui-saved",
           "detail": "{ value?: ThemeChoices, css: string }",
-          "description": "Use this theme kept it in the browser, for the Spell editor and any page that calls `SavedTheme.restore()`;  no `value`:  Stop using forgot it."
+          "description": "Stop using forgot the theme kept in this browser (`SavedTheme`), which the Spell editor wore over its base;  `value` is never sent now."
         }
       ],
       "parts": [
@@ -33359,7 +33359,7 @@
         },
         {
           "name": "bar",
-          "description": "The top bar, one line:  its title, the theme, which pages, how they show."
+          "description": "The top bar, one line:  its title, Light / Dark / Both, the pages on or off, the theme, how they show."
         },
         {
           "name": "basics",
@@ -33391,10 +33391,6 @@
         }
       ],
       "states": [
-        {
-          "name": "saved",
-          "description": "The theme it shows is the one kept in this browser (Use this theme)."
-        },
         {
           "name": "changed",
           "description": "Something is changed:  a Basic, or a token set by hand."
@@ -33763,24 +33759,14 @@
           "description": "A glass choice."
         },
         {
-          "key": "use",
-          "text": "Use this theme",
-          "description": "The button that keeps the theme in the browser."
-        },
-        {
-          "key": "useTip",
-          "text": "Keep it in this browser:  the Spell editor starts in it.",
-          "description": "Its tooltip."
-        },
-        {
-          "key": "inUse",
-          "text": "In use",
-          "description": "The use button, while the theme shown is the one kept."
-        },
-        {
           "key": "forget",
           "text": "Stop using",
           "description": "The button that forgets the kept theme."
+        },
+        {
+          "key": "forgetTip",
+          "text": "Forget the theme kept in this browser:  the Spell editor stops wearing it",
+          "description": "Its tooltip."
         },
         {
           "key": "startOver",
@@ -33788,14 +33774,29 @@
           "description": "The button that drops every change."
         },
         {
-          "key": "layout",
-          "text": "Show",
-          "description": "Accessible name of the pages' menu."
+          "key": "startOverTip",
+          "text": "Drop every change but the name and the theme it builds on",
+          "description": "Its tooltip."
         },
         {
-          "key": "grid",
-          "text": "All",
-          "description": "The pages' menu:  every page, two by two."
+          "key": "pages",
+          "text": "Pages",
+          "description": "Accessible name of the bar's page toggles."
+        },
+        {
+          "key": "showPageTip",
+          "text": "Show {page}",
+          "description": "A page's toggle, while it's off."
+        },
+        {
+          "key": "hidePageTip",
+          "text": "Hide {page}",
+          "description": "A page's toggle, while it's on."
+        },
+        {
+          "key": "themeTip",
+          "text": "Build on {theme}",
+          "description": "Each theme in the bar's theme row:  its tooltip."
         },
         {
           "key": "titles",
@@ -33808,9 +33809,19 @@
           "description": "Scroll each page to its top, its titles at rest."
         },
         {
+          "key": "restTip",
+          "text": "Scroll each page to its top, its section titles at rest",
+          "description": "Its tooltip."
+        },
+        {
           "key": "stuck",
           "text": "Stuck",
           "description": "Scroll each page so its section titles stick."
+        },
+        {
+          "key": "stuckTip",
+          "text": "Scroll each page so its section titles stick",
+          "description": "Its tooltip."
         },
         {
           "key": "schemes",
@@ -33823,14 +33834,29 @@
           "description": "Light and dark side by side:  pages, samples and token values."
         },
         {
+          "key": "bothTip",
+          "text": "Light and dark side by side",
+          "description": "Its tooltip."
+        },
+        {
           "key": "light",
           "text": "Light",
           "description": "Light alone;  the light half of a pair;  the light sample's label."
         },
         {
+          "key": "lightTip",
+          "text": "Light only",
+          "description": "Its tooltip."
+        },
+        {
           "key": "dark",
           "text": "Dark",
           "description": "Dark alone;  the dark half of a pair;  the dark sample's label."
+        },
+        {
+          "key": "darkTip",
+          "text": "Dark only",
+          "description": "Its tooltip."
         },
         {
           "key": "phone",
@@ -33845,7 +33871,12 @@
         {
           "key": "swap",
           "text": "Swap light and dark",
-          "description": "The bar's button:  every pair's light and dark sides change places."
+          "description": "The bar's button, beside Both:  every pair's light and dark sides change places."
+        },
+        {
+          "key": "swapTip",
+          "text": "Swap light and dark:  each page's pair changes sides",
+          "description": "Its tooltip."
         },
         {
           "key": "scrollBack",
@@ -33863,9 +33894,19 @@
           "description": "Reload one page's frames (its title row's icon)."
         },
         {
+          "key": "reloadTip",
+          "text": "Reload this page",
+          "description": "Its tooltip:  the other pages stay as they are."
+        },
+        {
           "key": "open",
           "text": "Open in a tab",
           "description": "Open a page in a tab of its own."
+        },
+        {
+          "key": "openTip",
+          "text": "Open this page in a tab of its own, in the theme and scheme shown",
+          "description": "Its tooltip."
         },
         {
           "key": "loadingPage",
@@ -34321,6 +34362,11 @@
           "description": "With `show=\"theme\"`:  the dropdown is an icon-only palette button, its text (`Spell theme`) its tooltip and name, for a masthead's row of icon buttons."
         },
         {
+          "name": "bench",
+          "kind": "string",
+          "description": "Where the site with the theme bench starts (`http://127.0.0.1:4747`), for its Theme bench row, which opens Spell UI's theme bench page there in a new window, in the theme chosen;  none given:  this page's own site;  `none`:  no row."
+        },
+        {
           "name": "disabled",
           "kind": "boolean",
           "shared": true,
@@ -34432,7 +34478,7 @@
       "slots": [
         {
           "name": "end",
-          "description": "At the foot of the palette's panel, under the themes and a divider:  a row of the page's own, e.g. the Spell editor's 'Edit theme...'.  Styled as a theme's row.  Not in the theme list's arrow keys."
+          "description": "At the foot of the palette's panel, under the themes and Theme bench:  a row of the page's own, e.g. the Spell editor's 'Edit theme...'.  Styled as a theme's row.  Not in the theme list's arrow keys."
         }
       ],
       "events": [
@@ -34482,6 +34528,10 @@
         {
           "name": "theme",
           "description": "The theme `<ui-dropdown>` (`show=\"theme\"`)."
+        },
+        {
+          "name": "bench",
+          "description": "The overlay's Theme bench row, a link opening it in a new window."
         }
       ],
       "states": [
@@ -34629,6 +34679,16 @@
           "key": "auto",
           "text": "Auto",
           "description": "The scheme control's choice that follows the device's scheme."
+        },
+        {
+          "key": "bench",
+          "text": "Theme bench",
+          "description": "The row opening the theme bench."
+        },
+        {
+          "key": "benchTip",
+          "text": "Open the theme bench in a new window, in this theme",
+          "description": "Its tooltip."
         }
       ],
       "mainTag": "ui-theme-menu",
@@ -39438,8 +39498,8 @@
         },
         {
           "key": "editor",
-          "text": "Editor",
-          "description": "The editor's title."
+          "text": "App",
+          "description": "The Spell editor app's title (Owen renamed it from Editor)."
         },
         {
           "key": "noEditor",

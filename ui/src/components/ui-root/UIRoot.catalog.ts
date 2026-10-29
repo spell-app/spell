@@ -1460,7 +1460,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
   "ui-theme-menu": {
     folder: "ui-theme-menu",
     skeleton: { display: "inline", width: "5em", height: "2.25em" },
-    attributes: ["show", "size", "inverted", "compact"]
+    attributes: ["show", "size", "inverted", "compact", "bench"]
   },
   "ui-theme-token": { folder: "ui-theme-editor", skeleton: { height: "2em" }, attributes: ["row"] },
   "ui-title": { folder: "ui-parts", attributes: ["link"] },

@@ -3468,7 +3468,7 @@
         {"id":"examples-types","title":"Types","tab":"examples"},
         {"id":"examples-types-theme-editor","title":"Theme editor","parent":0},
         {"id":"usage-using-it","title":"Using it","tab":"usage"},
-        {"id":"usage-use-this-theme","title":"Use this theme","tab":"usage"},
+        {"id":"usage-kept-theme","title":"A kept theme","tab":"usage"},
         {"id":"usage-keyboard","title":"Keyboard","tab":"usage"},
         {"id":"usage-accessibility","title":"Accessibility","tab":"usage"},
         {"id":"api-tags","title":"Tags","tab":"api"},
