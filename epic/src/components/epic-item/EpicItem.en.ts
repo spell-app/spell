@@ -172,7 +172,7 @@ export const epicItemVocabulary = {
       kind: "string",
       format: "place",
       description:
-        "A manual test Start testing wrote out for Owen (epic `epic-engine` P51):  its place in his order, `1` first.  " +
+        "A manual test Start testing wrote out for you (epic `epic-engine` P51):  its place in your order, `1` first.  " +
         "The Manual tests section opens the prepared tests in that order, and once every open test has it, its " +
         "button is Next test."
     },

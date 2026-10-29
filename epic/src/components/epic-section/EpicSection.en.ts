@@ -189,7 +189,7 @@ export const epicSectionVocabulary = {
         "The Manual tests section's button on its title (epic `epic-engine` P51), only while the page is reviewed and " +
         'a test is open:  "Start testing · 9" asks Claude to prepare the tests (a request for now:  it checks what it ' +
         'can, writes out the rest), "Preparing tests" while it does, then "Next test · 3 left", which opens the next ' +
-        "test Owen hasn't answered.  The address's `?test=1` presses it as the page loads."
+        "test you haven't answered.  The address's `?test=1` presses it as the page loads."
     },
     {
       name: "next-epic",
@@ -276,8 +276,7 @@ export const epicSectionVocabulary = {
     {
       key: "testsReady",
       text: "Tests ready:  Next test opens the first",
-      description:
-        "The notice when the tests are prepared while Owen is typing:  the first test doesn't open under him."
+      description: "The notice when the tests are prepared while you type:  the first test doesn't open under you."
     },
     {
       key: "nextEpic",

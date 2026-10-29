@@ -971,6 +971,7 @@ want you to just do it").
      - No status card (it's no item):  `epic inbox status <name> "Preparing tests"`, the toolbar's line;
        `wait` already marked `<name>#tests` working, so their button says "Preparing tests".
      - Then ONE background agent, which:
+       - In Codex:  no background agents:  do these steps yourself, in order, then tell the person the tests are ready.
        1. lists the open tests:  `epic test <name> --list --json`
        2. checks each one it can itself:  runs its commands, reads CI (`gh run list`), takes a headless Playwright
           screenshot from the kit's root (`node epic/src/tools/check-spell.js`, or a script);
