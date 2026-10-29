@@ -38,7 +38,8 @@ import itemCSS from "./UIItem.css?inline"
  *
  * - Semantics:
  *   - the DOM element's role comes from the owner (`listitem`), and so does the box's (`menuitem` in a menubar);
- *   - selected => `aria-current` (the owner's value, `page`, on a link;  `true` otherwise);
+ *   - selected => `aria-current` (the owner's value, `page`, on a link;  `true` otherwise),
+ *     or `aria-pressed` on a toggle's button (`<ui-menu choose="many">`);
  *   - the DOM element's `aria-label` names the box (an icon-only item;  its `label` too, with no words of its own),
  *     and its `aria-expanded` goes to a `<button>` box (a disclosure:  a menu item that opens a group below it).
  *
@@ -139,8 +140,13 @@ export class UIItem extends E.UIComponent<typeof itemVocabulary> implements E.Co
 
   /** `aria-current` while selected:  the owner's value on a link (`page`), else `true`. */
   private get ariaCurrent(): UIT.ItemContext["current"] | undefined {
-    if (!this.isSelected || this.kind !== UIT.ITEM) return undefined
+    if (!this.isSelected || this.kind !== UIT.ITEM || this.isAToggle) return undefined
     return this.rootTag === "a" ? (this.itemContext?.current ?? "page") : "true"
+  }
+
+  /** A toggle in its owner (`ItemContext.pressed`):  a button box, pressed while selected. */
+  private get isAToggle(): boolean {
+    return !!this.itemContext?.pressed && this.kind === UIT.ITEM && this.rootTag === "button"
   }
 
   ////////////////
@@ -360,6 +366,7 @@ export class UIItem extends E.UIComponent<typeof itemVocabulary> implements E.Co
         disabled={isDisabledButton() && !this.itemContext?.role ? true : undefined}
         aria-disabled={this.isDisabled && !(isDisabledButton() && !this.itemContext?.role) ? "true" : undefined}
         aria-current={this.ariaCurrent}
+        aria-pressed={this.isAToggle ? (this.isSelected ? "true" : "false") : undefined}
         aria-label={this.boxLabel}
         title={this.boxTooltip}
         aria-expanded={

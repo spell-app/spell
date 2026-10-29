@@ -678,6 +678,45 @@ describe("<ui-menu> ui-select", () => {
 // ## Appearance, alignment, equal
 ////////////////
 
+describe('<ui-menu appearance="segmented" choose="many"> (toggles)', () => {
+  const TOGGLES = `<ui-item value="a" selected>A</ui-item><ui-item value="b">B</ui-item><ui-item value="c">C</ui-item>`
+
+  it("each item toggles on and off by itself, aria-pressed, with no thumb;  ui-changed says which are on", async () => {
+    const { host, items } = await menu(`appearance="segmented" choose="many"`, TOGGLES)
+    expect(host.shadowRoot!.querySelector("[part~=menu]")!.className).toContain("toggles")
+    const seen: string[][] = []
+    host.addEventListener("ui-changed", (event) =>
+      seen.push((event as CustomEvent<{ values: string[] }>).detail.values)
+    )
+    expect(boxOf(items[0]!).getAttribute("aria-pressed")).toBe("true")
+    expect(boxOf(items[1]!).getAttribute("aria-pressed")).toBe("false")
+    expect(boxOf(items[0]!).hasAttribute("aria-current")).toBe(false)
+    await userEvent.click(boxOf(items[2]!))
+    await ElementFixture.settle()
+    expect(items.map((item) => item.matches(":state(selected)"))).toEqual([true, false, true])
+    await userEvent.click(boxOf(items[0]!))
+    await ElementFixture.settle()
+    expect(seen).toEqual([["a", "c"], ["c"]])
+    expect(boxOf(items[0]!).getAttribute("aria-pressed")).toBe("false")
+  })
+
+  it("the only one on, turned off, turns on the next:  to its right, round to the first", async () => {
+    const { host, items } = await menu(`appearance="segmented" choose="many"`, TOGGLES)
+    const seen: string[][] = []
+    host.addEventListener("ui-changed", (event) =>
+      seen.push((event as CustomEvent<{ values: string[] }>).detail.values)
+    )
+    await userEvent.click(boxOf(items[0]!))
+    await ElementFixture.settle()
+    expect(items.map((item) => item.matches(":state(selected)"))).toEqual([false, true, false])
+    await userEvent.click(boxOf(items[1]!))
+    await userEvent.click(boxOf(items[2]!))
+    await ElementFixture.settle()
+    expect(items.map((item) => item.matches(":state(selected)"))).toEqual([true, false, false])
+    expect(seen).toEqual([["b"], ["c"], ["a"]])
+  })
+})
+
 describe("<ui-menu> appearance, alignment, equal", () => {
   it("segmented:  a bordered group hugging its items, the selected one filled with the primary colour", async () => {
     const { root, items } = await bar('appearance="segmented"')

@@ -19,7 +19,8 @@ function isSameContext(a: UIT.ItemContext, b: UIT.ItemContext): boolean {
     a.interactive === b.interactive &&
     a.current === b.current &&
     a.shrinkable === b.shrinkable &&
-    a.iconsOnly === b.iconsOnly
+    a.iconsOnly === b.iconsOnly &&
+    a.pressed === b.pressed
   )
 }
 
@@ -68,6 +69,8 @@ function isSameFolded(a: readonly FoldedItem[], b: readonly FoldedItem[]): boole
  *   (a click, or Enter or Space on it);  only the TOP menu sends it.
  *   - A menu never moves `selected` itself, EXCEPT a `segmented` one (a single-choice control):
  *     it selects the activated item and unselects the rest, unless a listener cancels the `ui-select`.
+ *   - `segmented choose="many"`:  each item a toggle, turned on and off by itself (`aria-pressed`), then
+ *     `ui-changed` (`{ values }`, the items on);  one always stays on (`toggle()`).
  *
  * - A top-level `segmented` menu draws ONE sliding thumb under its items (`SegmentedThumb`),
  *   moved to each new choice as Apple's segmented control slides.
@@ -123,6 +126,11 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
     return this.hasLook(SEGMENTED)
   }
 
+  /** A segmented menu of toggles (`choose="many"`):  no thumb, each item pressed in while selected. */
+  get choosesMany(): boolean {
+    return this.isSegmented && this.choose === MANY
+  }
+
   /** Its items run top to bottom (`direction="vertical"`):  `:state(vertical)`. */
   @E.cssState("vertical")
   get isVertical(): boolean {
@@ -161,8 +169,9 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
     return {
       domElementRole: isInteractive ? "none" : undefined,
       role: isInteractive ? "menuitem" : undefined,
-      interactive: isInteractive || this.hasLook(LINK_LOOK) || this.pagination,
+      interactive: isInteractive || this.hasLook(LINK_LOOK) || this.pagination || this.choosesMany,
       current: "page",
+      pressed: this.choosesMany && !isInteractive,
       shrinkable: this.isShrinking,
       iconsOnly: this.isIconsOnly
     }
@@ -199,10 +208,16 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
     if (this.parentMenu) return
     const item = UIMenu.activatedItem(event)
     if (!item || item.matches(UIT.DISABLED_STATE)) return
+    const isChosen = this.send("ui-choosing", { value: UIMenu.valueOf(item), item, originalEvent: event })
+    if (!isChosen || !this.isSegmented) return
+    if (this.choosesMany) this.toggle(item as ChoosableItem)
+    else this.chooseOnly(item)
+  }
+
+  /** An item's `value`, else its text. */
+  private static valueOf(item: Element): string {
     const component = (item as E.DOMElement).component as ItemComponent | undefined
-    const value = component?.value ?? item.textContent?.trim() ?? ""
-    const isChosen = this.send("ui-choosing", { value, item, originalEvent: event })
-    if (isChosen && this.isSegmented) this.choose(item)
+    return component?.value ?? item.textContent?.trim() ?? ""
   }
 
   /**
@@ -210,12 +225,44 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
    * (the `active` alias too).
    * - Only items that asked THIS menu for their context:  a nested component's items stay alone.
    */
-  private choose(item: Element) {
-    for (const element of this.domElement.querySelectorAll<ChoosableItem>("*")) {
-      if (!this.itemsThatAsked.has(element)) continue
+  private chooseOnly(item: Element) {
+    for (const element of this.ownedItems()) {
       if (element !== item) element.removeAttribute(UIT.ACTIVE)
       element.selected = element === item
     }
+  }
+
+  /**
+   * A toggle menu's press (`choose="many"`):  `item` turns on, or off;  then `ui-changed` with the items on.
+   * - One stays on:  turning off the only one on turns on the next that can be (shown, not disabled),
+   *   to its right or below, round to the first (Owen:  "the stuck value is \"squirting over\" to the next one").
+   */
+  private toggle(item: ChoosableItem) {
+    const items = this.ownedItems().filter((each) => !each.hidden && !each.matches(UIT.DISABLED_STATE))
+    // the property, fresh right after a write (its `:state(selected)` follows a moment later)
+    const isOn = (each: ChoosableItem) => !!each.selected
+    if (!isOn(item)) item.selected = true
+    else {
+      if (!items.some((each) => each !== item && isOn(each))) {
+        const index = items.indexOf(item)
+        const next = [...items.slice(index + 1), ...items.slice(0, Math.max(0, index))][0]
+        if (!next) return
+        next.selected = true
+      }
+      item.removeAttribute(UIT.ACTIVE)
+      item.selected = false
+    }
+    this.send("ui-changed", {
+      values: this.ownedItems()
+        .filter(isOn)
+        .map((each) => UIMenu.valueOf(each))
+    })
+  }
+
+  /** Item DOM elements that asked THIS menu for their context, in page order. */
+  @E.untracked
+  private ownedItems(): ChoosableItem[] {
+    return [...this.domElement.querySelectorAll<ChoosableItem>("*")].filter((each) => this.itemsThatAsked.has(each))
   }
 
   ////////////////
@@ -230,7 +277,7 @@ export class UIMenu extends E.UIComponent<typeof menuVocabulary> implements UIT.
 
   /** A top-level `segmented` menu, rendered:  it draws a sliding thumb. */
   get hasThumb(): boolean {
-    return !this.parentMenu && this.isSegmented && this.isReady
+    return !this.parentMenu && this.isSegmented && !this.choosesMany && this.isReady
   }
 
   /** SIDE EFFECT:  the thumb, drawn on the menu's box while `hasThumb`;  its cleanup takes it down. */
@@ -825,6 +872,8 @@ const ITEM_BOX = `.${UIT.ITEM}`
 
 /** The `appearance` of a single-choice menu:  it moves `selected` itself. */
 const SEGMENTED: UIT.MenuAppearance = "segmented"
+/** `choose` of a menu of toggles. */
+const MANY = "many"
 
 /** The `appearance` word that makes every item interactive, with the link hover. */
 const LINK_LOOK = "link"
@@ -908,7 +957,7 @@ type FoldedItem = {
 }
 
 /** What the menu writes on an item's DOM element it chooses (`UIItem`'s reflected `selected`). */
-type ChoosableItem = Element & {
+type ChoosableItem = HTMLElement & {
   /** the item's `selected` property */
   selected?: boolean
 }
