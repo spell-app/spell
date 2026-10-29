@@ -684,6 +684,13 @@ export type PlanDocOptions = {
    * `null`:  no git history, so the attribute goes;  `undefined`:  left as the doc has it
    */
   recentSince?: string | null
+  /**
+   * who is at the keyboard (epic `epic-friend` P2):  the name the edits put on what a person wrote (their kept notes,
+   * picks, test runs, log lines) and on Claude's status cards and replies, as whose session wrote them;
+   * a function is asked only when something's written.  Default:  "someone"
+   * - the command line passes this machine's person (`EpicHome.personName()`), so the doc stays pure
+   */
+  person?: string | (() => string)
 }
 
 /**

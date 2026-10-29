@@ -52,6 +52,18 @@ function messages(host: Element) {
   }))
 }
 
+/** The page server's word on who's reading (`window.SPELL_SERVER.person`):  set for `run`, then put back. */
+async function asViewer<T>(person: string, run: () => Promise<T>): Promise<T> {
+  const holder = globalThis as { SPELL_SERVER?: unknown }
+  const before = holder.SPELL_SERVER
+  holder.SPELL_SERVER = { person }
+  try {
+    return await run()
+  } finally {
+    holder.SPELL_SERVER = before
+  }
+}
+
 describe("<epic-thread>", () => {
   test("its header:  the bullhorn, its id `C3`, the first words it's on, the fold's tooltip the block in full", async () => {
     const host = await thread(comment())
@@ -84,7 +96,7 @@ describe("<epic-thread>", () => {
       pen: true,
       trash: true,
       pills: false,
-      messages: [{ by: "owen", older: false, latest: false, words: "Why asyncio?And await?" }],
+      messages: [{ by: "person", older: false, latest: false, words: "Why asyncio?And await?" }],
       paragraphs: 2,
       code: "await"
     })
@@ -93,7 +105,7 @@ describe("<epic-thread>", () => {
   test("Owen's turn, orange:  the review pills (That's good, Reply, Skip it), Claude's latest stronger", async () => {
     const answered = comment({
       status: "answered",
-      turn: "owen",
+      turn: "person",
       replies: [{ by: "Claude", at: "2026-10-18T08:05:00.000Z", html: "<p>Because <code>await</code>.</p>" }]
     })
     const host = await thread(answered, "open unseen")
@@ -106,7 +118,7 @@ describe("<epic-thread>", () => {
       pen: !!host.shadowRoot!.querySelector("ui-button.edit")
     }).toEqual({ buttons: "thread", acts: ["good", "reply", "skip"], pen: false })
     expect(messages(host)).toEqual([
-      { by: "owen", older: true, latest: false, words: "Why asyncio?And await?" },
+      { by: "person", older: true, latest: false, words: "Why asyncio?And await?" },
       { by: "claude", older: false, latest: true, words: "Because await." }
     ])
     const ivory = getComputedStyle(host).backgroundColor
@@ -118,7 +130,7 @@ describe("<epic-thread>", () => {
   test("thinking:  the stub last, in Claude's box;  done:  the Done line and Reopen, no stub", async () => {
     const thinking = await thread(comment({ working: "2026-10-17T14:00:00.000Z" }), "open")
     expect(messages(thinking).map((each) => [each.by, each.words])).toEqual([
-      ["owen", "Why asyncio?And await?"],
+      ["person", "Why asyncio?And await?"],
       ["thinking", "thinking…"]
     ])
     const done = await thread(
@@ -192,7 +204,7 @@ describe("<epic-thread>", () => {
     const host = await thread(
       comment({
         status: "answered",
-        turn: "owen",
+        turn: "person",
         replies: [{ by: "Claude", at: "2026-10-18T08:05:00.000Z", html: "<p>x</p>" }]
       }),
       "open"
@@ -221,13 +233,43 @@ describe("<epic-thread>", () => {
         const host = wrap.querySelector<DOMThreadElement & { comment: unknown }>("epic-thread")!
         host.comment = comment({
           status: "answered",
-          turn: "owen",
+          turn: "person",
           replies: [{ by: "Claude", at: "2026-10-18T08:05:00.000Z", html: "<p>Answered.</p>" }]
         })
         await ElementFixture.settle(wrap)
         // its id chip (`C3`, 10px) included:  epic `epic-engine` I41
         await expectAccessible(host)
       }
+  })
+  test("who, to a reader named Ana:  her words `You:`, Ben's `Ben:`, her Claude `Claude:`, Ben's `Claude (Ben):`;  an old comment with no `by` is the reader's own", async () => {
+    const said = comment({
+      by: "Ana",
+      status: "answered",
+      turn: "person",
+      replies: [
+        { by: "Ana", agent: "claude", at: "2026-11-02T10:00:00.000Z", html: "<p>Mine.</p>" },
+        { by: "Ben", at: "2026-11-02T10:01:00.000Z", text: "Hm." },
+        { by: "Ben", agent: "claude", at: "2026-11-02T10:02:00.000Z", html: "<p>His.</p>" },
+        { by: "Claude", at: "2026-11-05T10:00:00.000Z", text: "A person named Claude." }
+      ]
+    })
+    const whoOf = (host: Element) =>
+      [...host.shadowRoot!.querySelectorAll("epic-thread-message")].map((each) => [
+        each.getAttribute("by"),
+        each.shadowRoot!.querySelector(".who")?.textContent
+      ])
+    const [named, old] = await asViewer("Ana", async () => [
+      whoOf(await thread(said, "open")),
+      whoOf(await thread(comment(), "open"))
+    ])
+    expect(named).toEqual([
+      ["person", "You:"],
+      ["claude", "Claude:"],
+      ["person", "Ben:"],
+      ["claude", "Claude (Ben):"],
+      ["person", "Claude:"]
+    ])
+    expect(old).toEqual([["person", "You:"]])
   })
 })
 

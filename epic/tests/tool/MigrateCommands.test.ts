@@ -201,6 +201,7 @@ describe("migrate:  the runner", () => {
       "epic 2026-10-25 item-renames",
       "epic 2026-10-25 root-links",
       "epic 2026-10-26 done-cards-close",
+      "epic 2026-10-29 agents-marked",
       expect.stringMatching(/detail,choice 2026-10-19 components-not-markup$/),
       expect.stringMatching(/goal-set 2026-10-21 engine-asset-paths$/),
       expect.stringMatching(/goal-set 2026-10-25 root-links$/)
@@ -311,7 +312,10 @@ describe("migrate --step root-links", () => {
     // a part and a details page written before P46:  their links climb from their own folders
     const part = readdirSync(join(root, "epics", "links", "parts")).find((name) => name.startsWith("p-"))!
     const partFile = join(root, "epics", "links", "parts", part)
-    writeFileSync(partFile, readFileSync(partFile, "utf8").replace("</ul>", '</ul><p><a href="../../../guides/g.html">g</a></p>'))
+    writeFileSync(
+      partFile,
+      readFileSync(partFile, "utf8").replace("</ul>", '</ul><p><a href="../../../guides/g.html">g</a></p>')
+    )
     mkdirSync(join(root, "epics", "links", "details"), { recursive: true })
     const details = join(root, "epics", "links", "details", "d.html")
     writeFileSync(details, '<p><a href="../../../guides/g.html">g</a> <a href="../links.plan.html#p-one">one</a></p>\n')

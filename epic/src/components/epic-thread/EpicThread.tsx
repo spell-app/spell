@@ -128,14 +128,23 @@ export class EpicThread extends E.UIComponent<typeof epicThreadVocabulary> {
   get messages(): ThreadMessage[] {
     const comment = this.comment as ThreadComment | undefined
     if (!comment) return []
-    const said = [{ by: OWEN, at: comment.at, text: comment.text }, ...(comment.replies ?? [])]
-    if (this.boxed === "first") said.shift()
-    else if (this.boxed === "pending" && ThreadFacts.pendingReplyOf(comment)) said.pop()
-    const messages: ThreadMessage[] = said.map((each) =>
-      each.by === OWEN
-        ? { by: "owen", at: each.at, text: each.text ?? "" }
-        : { by: "claude", at: each.at, html: "html" in each ? each.html || undefined : undefined }
-    )
+    const viewer = ThreadFacts.viewer()
+    // the comment's first words:  a person's, `by` them (none before epic `epic-friend` P2:  the reader's own)
+    const first: ThreadMessage = {
+      by: "person",
+      at: comment.at,
+      text: comment.text,
+      person: comment.by,
+      mine: !comment.by || ThreadFacts.sameName(comment.by, viewer)
+    }
+    const replies: ThreadMessage[] = (comment.replies ?? []).map((each) => {
+      const { person, agent, mine } = ThreadFacts.speakerOf(each, viewer)
+      return agent
+        ? { by: "claude", at: each.at, html: each.html || undefined, person, mine }
+        : { by: "person", at: each.at, text: each.text ?? "", person, mine }
+    })
+    if (this.boxed === "pending" && ThreadFacts.pendingReplyOf(comment)) replies.pop()
+    const messages = this.boxed === "first" ? replies : [first, ...replies]
     const { taken, done } = comment
     if (taken) {
       const into = ThreadFacts.takenInto(taken)
@@ -148,7 +157,7 @@ export class EpicThread extends E.UIComponent<typeof epicThreadVocabulary> {
       messages.splice(after < 0 ? messages.length : after, 0, line)
     }
     // answered before threads, in an epic page:  no entry of Claude's at all
-    if (comment.status === "answered" && !comment.replies?.some((each) => each.by !== OWEN))
+    if (comment.status === "answered" && !comment.replies?.some((each) => ThreadFacts.isAgents(each)))
       messages.push({ by: "claude", at: "" })
     if (done) {
       const commit = comment.replies?.findLast((each) => each.commit)?.commit
@@ -231,7 +240,7 @@ export class EpicThread extends E.UIComponent<typeof epicThreadVocabulary> {
             {comment() ? ThreadFacts.headline(comment()!) : ""}
           </span>
         </button>
-        <Show when={this.turn === "owen" || done()}>
+        <Show when={this.turn === "person" || done()}>
           <epic-review
             part={this.partForName("answer")}
             of={comment()?.id ?? ""}
@@ -269,6 +278,8 @@ export class EpicThread extends E.UIComponent<typeof epicThreadVocabulary> {
     return (
       <epic-thread-message
         by={message.by}
+        person={message.person || undefined}
+        mine={message.mine ? "" : undefined}
         at={message.at || undefined}
         stamp={message.stamp || undefined}
         older={message.older ? "" : undefined}
@@ -289,7 +300,7 @@ export class EpicThread extends E.UIComponent<typeof epicThreadVocabulary> {
    * - the thinking stub:  a turning notch, "thinking…"
    */
   private words(message: ThreadMessage): JSX.Element {
-    if (message.by === "owen") return paragraphsOf(message.text ?? "")
+    if (message.by === "person") return paragraphsOf(message.text ?? "")
     if (message.by === "done")
       return (
         <p>
@@ -377,8 +388,12 @@ type ThreadMessage = {
   by: MessageBy
   /** when, ISO;  `""` for none */
   at: string
-  /** Owen's words, as typed */
+  /** a person's words, as typed */
   text?: string
+  /** whose words, or whose session's Claude:  a person's name;  none for an old reply of Claude's */
+  person?: string
+  /** `person` is whoever is reading:  "You", or plain "Claude" */
+  mine?: boolean
   /** Claude's answer, as the server gave it */
   html?: string
   /** where Claude took it:  the phase's link, and what it says */
@@ -393,9 +408,6 @@ type ThreadMessage = {
   /** Claude's latest reply, on an orange thread */
   latest?: boolean
 }
-
-/** Who writes Owen's words on a thread. */
-const OWEN = "Owen"
 
 /** What, in its header, acts by itself:  a click there doesn't fold. */
 const BUTTONS = "ui-button, epic-review"

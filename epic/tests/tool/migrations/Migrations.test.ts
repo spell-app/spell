@@ -31,7 +31,8 @@ describe("Migrations", () => {
       "changes-after-goal",
       "item-renames",
       "root-links",
-      "done-cards-close"
+      "done-cards-close",
+      "agents-marked"
     ])
     expect(Migrations.named("links-agree")?.kind).toBe("epic")
     expect(Migrations.named("nope")).toBeUndefined()
@@ -47,7 +48,8 @@ describe("Migrations", () => {
       "took-as-minutes",
       "whole-phase-numbers",
       "to-review-marks",
-      "changes-after-goal"
+      "changes-after-goal",
+      "agents-marked"
     ])
   })
 

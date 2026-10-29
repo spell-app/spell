@@ -1,3 +1,5 @@
+import { ThreadFacts } from "spell/epic/comments"
+
 import type { Migration, MigrationContext } from "./migrations.types"
 
 /****************
@@ -35,14 +37,11 @@ export class MoreRequestsFirst implements Migration {
     return changed
   }
 
-  /** Is `reply` Owen's note asking for More Details? */
+  /** Is `reply` a person's note asking for More Details? */
   private static asksForMore(reply: Element): boolean {
-    return FROM_OWEN.test(reply.getAttribute("from") ?? "") && ASKS_FOR_MORE.test(reply.getAttribute("re") ?? "")
+    return !ThreadFacts.isAgents(reply) && ASKS_FOR_MORE.test(reply.getAttribute("re") ?? "")
   }
 }
-
-/** A reply Owen wrote. */
-const FROM_OWEN = /^owen$/i
 
 /** What `keepNote()` names a request for More Details by:  Add Details, revisit now. */
 const ASKS_FOR_MORE = /^(details|revisit now)$/

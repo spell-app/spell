@@ -127,8 +127,8 @@ async function stubbedPage(url, anchors, answered = [true, false, true]) {
       text: `Comment ${index + 1}:  what about this?`,
       at,
       status: answered[index] ? "answered" : "new",
-      ...(answered[index] && { replies: [{ by: "Claude", at, html: "<p>Answered.</p>" }] }),
-      turn: answered[index] ? "owen" : "claude"
+      ...(answered[index] && { replies: [{ by: "Ana", agent: "claude", at, html: "<p>Answered.</p>" }] }),
+      turn: answered[index] ? "person" : "claude"
     }))
     await route.fulfill({ json: { takesComments: true, comments } })
   })
@@ -172,7 +172,7 @@ async function checkPage(name, url, anchors) {
   check(`${name}:  each thread shows its id, C1 ...`, now.ids.join(" ") === "C1 C2 C3", now.ids.join(" "))
   await page.screenshot({ path: join(out, `${name}-top.png`) })
   const order = await page.evaluate(() =>
-    [...document.querySelectorAll("epic-thread")].filter((each) => each.comment?.turn === "owen").map((each) => each.id)
+    [...document.querySelectorAll("epic-thread")].filter((each) => each.comment?.turn === "person").map((each) => each.id)
   )
   for (const [step, want] of [
     ["lands on the first waiting thread", order[0]],

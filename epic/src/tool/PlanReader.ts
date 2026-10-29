@@ -65,11 +65,23 @@ export abstract class PlanReader {
   /** how the doc was stored (split or not), set by the command line's `read()`;  never read here */
   parts?: PlanDocParts
 
-  constructor(document: Document, now = new Date(), { recentSince }: PlanDocOptions = {}) {
+  constructor(document: Document, now = new Date(), { recentSince, person = SOMEONE }: PlanDocOptions = {}) {
     this.document = document
     this.now = now
     this.recentSince = recentSince
+    this.whoWrites = typeof person === "function" ? person : () => person
   }
+
+  /**
+   * Who is at the keyboard:  the name on what a person writes through the edits, and on Claude's cards and replies as
+   * whose session wrote them (`PlanDocOptions.person`;  asked when it's read).
+   */
+  get person(): string {
+    return this.whoWrites()
+  }
+
+  /** The constructor's `person`, as a function. */
+  private readonly whoWrites: () => string
 
   /** `now`'s date, `YYYY-MM-DD`. */
   get today(): string {
@@ -316,3 +328,6 @@ export abstract class PlanReader {
     }
   }
 }
+
+/** Who wrote it, when nobody said (`PlanDocOptions.person`):  as `EpicHome.personName()` has it. */
+const SOMEONE = "someone"

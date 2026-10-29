@@ -684,7 +684,9 @@ server types `/epic review` into it, above):
    is Owen's to close). The card's markup: `PLAN-DOC.md` "Status cards".
 5. `wait` again. On leaving: `inbox ignore <name>`.
 
-A reply to Owen's revisit note (`details --append`), dated, quoting the note:
+A reply to Owen's revisit note (`details --append`), dated, quoting the note.
+Write `from="Claude"`:  the tool marks it yours on the way in, `agent="claude"`, its `from` whose session wrote it
+(epic `epic-friend` P2), so the page draws "Claude (Ana)" to everyone but Ana.
 
 ```html
 <epic-reply from="Claude" at="2026-10-04 17:20" re="why not reuse the details route?">

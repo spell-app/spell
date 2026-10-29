@@ -56,6 +56,14 @@ The coherence agent reads it too, and flags a second word for the same idea (epi
 - **Not the same word:**  WWOD §6's "reader", the person reading any text we write (a docstring, a README, a page):
   it's about writing, not the code's name for who looks at a page, so it stays.
 
+### from / by
+
+- **Say:**  `from` in a page's markup (`<epic-reply from>`, `<epic-status from>`), `by` in data (a comment's reply,
+  `{ by }`):  ONE idea, who wrote it, or whose session did.
+- **Not:**  `role` (the browser's accessibility attribute), `author`.
+- An agent's words say so by `agent` (`agent="claude"`), never by the name:  a person may be called "Claude".
+- **Decided:**  Owen, 2026-10-29, epic `epic-friend` Q9 (A, the marker generalized to `agent`).
+
 ### Booleans on an element
 
 - **Say:**  bare, as the platform's are, on a custom element's public side:  `open`, `disabled`, `readOnly`.

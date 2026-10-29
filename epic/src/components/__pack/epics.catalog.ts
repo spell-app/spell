@@ -1,5 +1,5 @@
 /* GENERATED -- do not edit:  `spell pack build epics`, from every vocabulary, `<Name>.en.ts` */
-// sources:  7e2e8ac5cf1e3cdf
+// sources:  6f42ce8b0d2ce716
 
 import type { RootCatalogEntry } from "spell/ui"
 
@@ -39,7 +39,7 @@ export const CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
   "epic-phase": {"folder":"epic-phase","attributes":["id","number","title","status","estimate","took","source","part-ids","commits","to-accept","plan","changes","open"]},
   "epic-prompt": {"folder":"epic-prompt","attributes":[]},
   "epic-question": {"folder":"epic-question","attributes":[]},
-  "epic-reply": {"folder":"epic-answer","attributes":["from","at","re"]},
+  "epic-reply": {"folder":"epic-answer","attributes":["from","agent","at","re"]},
   "epic-review": {"folder":"epic-review","skeleton":{"display":"inline","width":"6em","height":"1.5em"},"attributes":["of","shows","buttons","label","tip","under-line"]},
   "epic-run": {"folder":"epic-run","skeleton":{"height":"4em"},"attributes":["run"]},
   "epic-run-row": {"folder":"epic-run-row","attributes":["row","columns","answer","answer-label","taken"]},
@@ -48,12 +48,12 @@ export const CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
   "epic-send-buttons": {"folder":"epic-send-buttons","skeleton":{"display":"inline","width":"4em","height":"1.6em"},"attributes":["state","send-tip","count","busy","accept","accepted","asks","wand"]},
   "epic-sort": {"folder":"epic-list","skeleton":{"display":"inline","width":"6em","height":"1.5em"},"attributes":[]},
   "epic-state-filter": {"folder":"epic-state-filter","skeleton":{"display":"inline","width":"4em","height":"1.2em"},"attributes":["counts","marked","shown"]},
-  "epic-status": {"folder":"epic-status","attributes":["state","at","done-at"]},
+  "epic-status": {"folder":"epic-status","attributes":["state","at","done-at","from"]},
   "epic-summary": {"folder":"epic-summary","attributes":[]},
   "epic-test-run": {"folder":"epic-test-run","skeleton":{"parts":[{"shape":"header"},{"shape":"paragraph","lines":6}]},"attributes":["all"]},
   "epic-text-box": {"folder":"epic-text-box","skeleton":{"height":"2em"},"attributes":["type","for","placeholder","label","max-height"]},
   "epic-thread": {"folder":"epic-thread","attributes":["comment","open","unseen","moved","boxed","saved","failed"]},
-  "epic-thread-message": {"folder":"epic-thread","attributes":["by","at","stamp","older","latest"]},
+  "epic-thread-message": {"folder":"epic-thread","attributes":["by","person","mine","at","stamp","older","latest"]},
   "epic-threads": {"folder":"epic-thread","attributes":[]},
   "epic-update": {"folder":"epic-update","attributes":["at","summary","phase"]},
   "epic-updated": {"folder":"epic-phase","attributes":["at","phase","of"]},

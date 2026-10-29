@@ -4505,7 +4505,12 @@
         {
           "name": "from",
           "kind": "string",
-          "description": "Who wrote it (`Claude`, `Owen`)."
+          "description": "Who wrote it, a person's name (`Ana`);  on an agent's reply, whose session wrote it.  Drawn `You` when it's the reader's own;  before epic `epic-friend` P2, Claude's said `Claude`."
+        },
+        {
+          "name": "agent",
+          "kind": "string",
+          "description": "The agent that wrote it (`claude`), else none:  the person in `from` did.  Drawn `Claude (Ana)`, or `Claude` for the reader's own session.  An old reply without it is Claude's when `from` says `Claude` (`ThreadFacts.agentOf()`);  the migration `agents-marked` adds it."
         },
         {
           "name": "at",
@@ -4528,7 +4533,7 @@
       "parts": [
         {
           "name": "base",
-          "description": "The card:  Claude's violet, Owen's ivory (`from`)."
+          "description": "The card:  an agent's look, or every person's (`agent`)."
         },
         {
           "name": "header",
@@ -4540,7 +4545,7 @@
         },
         {
           "name": "who",
-          "description": "The heading's left:  `<from> · re: <re>`;  wraps within itself."
+          "description": "The heading's left:  who (`You`, a name, `Claude`, `Claude (Ana)`) and `re: <re>`, after a round mark of its initial;  wraps within itself."
         },
         {
           "name": "new",
@@ -4592,6 +4597,21 @@
           "key": "re",
           "text": "re: {re}",
           "description": "What the reply is about, in its heading."
+        },
+        {
+          "key": "you",
+          "text": "You",
+          "description": "Who wrote it, in its heading:  the reader (`from` is their name)."
+        },
+        {
+          "key": "claude",
+          "text": "Claude",
+          "description": "Who wrote it, in its heading:  Claude, the reader's own session's, or a reply from before `agent`."
+        },
+        {
+          "key": "claudeOf",
+          "text": "Claude ({person})",
+          "description": "Who wrote it, in its heading:  another person's session's Claude (`agent`, `from`)."
         },
         {
           "key": "new",
@@ -5837,6 +5857,11 @@
           "name": "done-at",
           "kind": "string",
           "description": "When it was done or noted (a card that was underway first);  drawn in its place once there.  A card born noted (a pick or a todo `inbox apply` recorded) has `at` alone."
+        },
+        {
+          "name": "from",
+          "kind": "string",
+          "description": "Whose session wrote it (epic `epic-friend` P2):  the person's name, `Ana`, drawn `Claude (Ana)` to anyone but Ana, and plain `Claude` to her.  None (a card written before):  `Claude`."
         }
       ],
       "slots": [
@@ -5865,7 +5890,7 @@
         },
         {
           "name": "who",
-          "description": "The heading's left:  `Claude • Underway` / `Claude • Done` / `Claude • Noted`."
+          "description": "The heading's left:  `Claude • Underway` / `Claude • Done` / `Claude • Noted`;  `Claude (Ana) • Done` for a card Ana's session wrote, to anyone but Ana (`from`)."
         },
         {
           "name": "date",
@@ -5939,18 +5964,28 @@
         },
         {
           "key": "underway",
-          "text": "Claude • Underway",
+          "text": "{who} • Underway",
           "description": "The heading while Claude is on it."
         },
         {
           "key": "done",
-          "text": "Claude • Done",
+          "text": "{who} • Done",
           "description": "The heading once work was done."
         },
         {
           "key": "noted",
-          "text": "Claude • Noted",
+          "text": "{who} • Noted",
           "description": "The heading once Claude recorded what Owen chose."
+        },
+        {
+          "key": "claude",
+          "text": "Claude",
+          "description": "Who wrote it, in its heading:  your own session's Claude, or a card from before `from`."
+        },
+        {
+          "key": "claudeOf",
+          "text": "Claude ({person})",
+          "description": "Who wrote it, in its heading:  another person's session's Claude (`from`)."
         },
         {
           "key": "stepUnderway",

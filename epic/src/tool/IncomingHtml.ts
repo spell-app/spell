@@ -1,3 +1,4 @@
+import { ThreadFacts } from "spell/epic/comments"
 import { Markup } from "spell/epic/markup"
 
 import { unstackTables } from "spell/epic/tools/to-components.js"
@@ -30,7 +31,7 @@ import { ProseRewrite } from "./ProseRewrite"
  ****************/
 export class IncomingHtml {
   /** `html`, parsed into `document`'s nodes (out of it), old shapes made elements;  blank text at the ends dropped. */
-  static nodes(document: Document, html: string): Node[] {
+  static nodes(document: Document, html: string, { person }: { person?: string } = {}): Node[] {
     const box = document.createElement("div")
     box.innerHTML = html
     const rewrite = ProseRewrite.plain(document)
@@ -38,10 +39,28 @@ export class IncomingHtml {
       if (child.matches(ProseBlocks.reply)) child.replaceWith(rewrite.reply(child))
     }
     rewrite.rewrite(box, { history: false })
+    IncomingHtml.markClaudes(box, person)
     unstackTables(box)
     PathTooltips.rewrite(box)
     PlanMarkup.trimWhitespace(box)
     return Array.from(box.childNodes)
+  }
+
+  /**
+   * Claude's own replies in `box` (a command's HTML) marked his, IN PLACE (epic `epic-friend` P2, Q9):
+   * `<epic-reply from="Claude">` with no `agent` becomes `<epic-reply from="Ana" agent="claude">`, `person` (whose
+   * session wrote it) its `from`;  no `person`:  `from` stays.
+   * - Claude writes his replies by hand, `from="Claude"` as the skills had it:  marked on the way in, a reply written
+   *   after the marker never needs the old rule (`ThreadFacts.agentOf()`) to be read as his
+   * - any other `from` (a person's reply, quoted), one with `agent` already, and one in an Original Discussion:  left
+   */
+  static markClaudes(box: Element, person?: string): void {
+    for (const reply of Array.from(box.querySelectorAll(REPLY_TAG))) {
+      if (reply.hasAttribute("agent") || reply.closest(ORIGINAL_TAG)) continue
+      if (!ThreadFacts.sameName(reply.getAttribute("from") ?? "", CLAUDE_NAME)) continue
+      reply.setAttribute("agent", CLAUDE_AGENT)
+      if (person) reply.setAttribute("from", person)
+    }
   }
 
   /**
@@ -80,3 +99,11 @@ function endsLead(element: Element): boolean {
     LABEL_LINE.test(PlanMarkup.squeeze(element.textContent ?? ""))
   )
 }
+
+/** A reply's tag, and the Original Discussion's, which keeps history as it was (`markClaudes()`). */
+const REPLY_TAG = "epic-reply"
+const ORIGINAL_TAG = "epic-original"
+
+/** The name Claude's hand-written replies go by, and the marker they get (`markClaudes()`). */
+const CLAUDE_NAME = "Claude"
+const CLAUDE_AGENT = "claude"

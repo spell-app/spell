@@ -1,3 +1,4 @@
+import { ThreadFacts } from "spell/epic/comments"
 import { PlanDates } from "spell/epic/dates"
 
 /****************
@@ -56,15 +57,15 @@ export class AnswerThread {
     let start = flow.length
     while (start > 0 && flow[start - 1].localName === REPLY_TAG) start--
     const replies = flow.slice(start)
-    const owenStarts = AnswerThread.timeOf(replies.find(AnswerThread.isOwens)?.getAttribute("at"))
+    const owenStarts = AnswerThread.timeOf(replies.find(AnswerThread.isPersons)?.getAttribute("at"))
 
     // Claude's newest:  his last reply, with none of Owen's after it
     const last = allReplies.at(-1)
-    this.newestReply = last && !AnswerThread.isOwens(last) ? last : undefined
+    this.newestReply = last && !AnswerThread.isPersons(last) ? last : undefined
 
     // Owen's request for More Details, his note kept just before Claude's card:  it starts folded
     for (const [index, child] of flow.entries())
-      if (child.localName === REPLY_TAG && AnswerThread.isOwens(child) && flow[index + 1]?.localName === MORE_TAG)
+      if (child.localName === REPLY_TAG && AnswerThread.isPersons(child) && flow[index + 1]?.localName === MORE_TAG)
         this.moreRequests.add(child)
 
     // the lines:  drive-bys first (above the Choices), then the thread's
@@ -138,9 +139,9 @@ export class AnswerThread {
   // ## Helpers
   ////////////////
 
-  /** Is `reply` Owen's (`from="Owen"`)? */
-  static isOwens(reply: Element): boolean {
-    return FROM_OWEN.test(reply.getAttribute("from") ?? "")
+  /** Is `reply` a person's, not an agent's (`ThreadFacts.isAgents()`:  `<epic-reply agent>`, or Claude's old one)? */
+  static isPersons(reply: Element): boolean {
+    return !ThreadFacts.isAgents(reply)
   }
 
   /** A date attribute as a moment, to the minute;  `undefined` for none, or one that won't parse. */
@@ -229,9 +230,6 @@ export type StatusLine = {
 
 /** A minute, in ms:  times compare to the minute, as the cards write them. */
 const MINUTE = 60_000
-
-/** A reply Owen wrote (`from="Owen"`). */
-const FROM_OWEN = /^owen$/i
 
 /** `Node.ELEMENT_NODE`, `Node.TEXT_NODE`:  no DOM global needed on a server. */
 const ELEMENT_NODE = 1

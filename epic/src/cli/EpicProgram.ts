@@ -584,9 +584,9 @@ export class EpicProgram {
     this.verb(epic.command("whoami"), (args) => new PersonCommands().whoami(args))
       .description(
         "who you are on the epics:  your name and where it came from (kept, else git's user.name);  " +
-          "with a name, keeps it"
+          "with a name, keeps it;  --rename also writes it over the old one on every page"
       )
-      .usage("[<name>] [--json]")
+      .usage("[<name>] [--rename [--dry-run]] [--json]")
       .addHelpText("after", WHOAMI_HELP)
 
     this.verb(epic.command("whois"), (args) => new PersonCommands().whois(args))
@@ -1029,9 +1029,13 @@ const WHOAMI_HELP = `
 Your name is who you are on the epics:  kept in ~/.spell-epic/person.json5 ($SPELL_EPIC_HOME), else git's user.name.
 epic init asks for it too.
 
+The name is who you are:  --rename writes the new one over the old wherever it says who wrote something (a reply's
+from, a comment's by, "Ana's run", "Ana picked B" ...), on every page, part and inbox;  never in running text.
+
 Examples:
   epic whoami
-  epic whoami Ana`
+  epic whoami Ana
+  epic whoami --rename Ana Lima --dry-run`
 
 /** After `epic file --help`. */
 const FILE_HELP = `

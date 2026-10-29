@@ -1,8 +1,9 @@
-import { mkdirSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from "node:fs"
+import { mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { dirname, join } from "node:path"
 import { afterAll, beforeEach, describe, expect, test, vi } from "vite-plus/test"
 
+import { NameSweep } from "spell/epic/command/NameSweep"
 import { PersonCommands } from "spell/epic/command/PersonCommands"
 import { EpicHome } from "spell/epic/config/EpicHome"
 
@@ -119,7 +120,7 @@ describe("epic whoami", () => {
     expect(lines).toEqual([
       `you're Ana Silva now, kept in ${EpicHome.personFile()}`,
       "  before:  Ana (kept)",
-      "  4 replies and comments still name Ana:  epic whois Ana"
+      "  4 replies and comments still name Ana:  epic whoami --rename Ana Silva rewrites them"
     ])
     expect(EpicHome.person()).toEqual({ name: "Ana Silva", source: "kept" })
     expect(await printed(() => commands.whoami([]))).toEqual([`Ana Silva  (kept in ${EpicHome.personFile()})`])
@@ -128,5 +129,126 @@ describe("epic whoami", () => {
   test("--json:  the person, where it's kept, and what it was", async () => {
     const json = JSON.parse((await printed(() => commands.whoami(["Bob", "--json"]))).join("\n"))
     expect(json).toMatchObject({ name: "Bob", source: "kept", file: EpicHome.personFile(), stillNamed: 0 })
+  })
+})
+
+////////////////
+// ## The rename sweep
+////////////////
+
+/** A content folder of its own for the sweep, made fresh:  Ana's page, its part and log, an inbox. */
+const SWEPT = join(TEMP, "swept")
+
+/** The files `sweptFolder()` writes, by path. */
+const SWEPT_FILES: Record<string, string> = {
+  "epics/seo/seo.plan.html":
+    '<epic-page><epic-reply from="Ana" at="2026-10-12 20:16"><p>Ana thinks so.</p></epic-reply>' +
+    '<epic-reply from="Ana" agent="claude" at="2026-11-02 09:00">b</epic-reply>' +
+    '<epic-reply from="Anabel" at="2026-10-12 20:20">c</epic-reply>' +
+    '<epic-status from="ana" at="2026-11-02 09:00">d</epic-status>' +
+    '<pre>&lt;epic-reply from="Ana"&gt;shown&lt;/epic-reply&gt;</pre></epic-page>',
+  "epics/seo/parts/q3.html": "<p><b>Ana:</b>  why?</p><p>Failed in Ana's test run.</p><p>Ask Ana about it.</p>",
+  "epics/seo/parts/log.html":
+    "<epic-event>Q3 Ana picked B:  Bananas</epic-event><epic-event>M3 passed (Ana's run)</epic-event>" +
+    "<epic-event>T2 not urgent (Ana, from its id chip)</epic-event><epic-event>Ana's plan renamed</epic-event>",
+  "guides/python-target.inbox.json5":
+    '{ "comments": { "c1": { "text": "Ana?", "by": "Ana", "replies": [{ "by": "Ana", "agent": "claude" },\n' +
+    '  { by: "Anabel" }] } } }'
+}
+
+/** Write the sweep's content folder afresh. */
+function sweptFolder(): void {
+  rmSync(SWEPT, { recursive: true, force: true })
+  for (const [path, text] of Object.entries(SWEPT_FILES)) {
+    mkdirSync(dirname(join(SWEPT, path)), { recursive: true })
+    writeFileSync(join(SWEPT, path), text)
+  }
+}
+
+/** File `path` of the sweep's folder, as it is now. */
+function swept(path: string): string {
+  return readFileSync(join(SWEPT, path), "utf8")
+}
+
+describe("NameSweep", () => {
+  test("renames the author in markup, the writers' phrases and data;  running text, Anabel and shown markup left", () => {
+    sweptFolder()
+    const result = new NameSweep({ content: SWEPT }).run("Ana", "Ana Lima")
+    expect(result).toEqual({
+      from: "Ana",
+      to: "Ana Lima",
+      dryRun: false,
+      count: 10,
+      files: [
+        { path: "epics/seo/parts/log.html", count: 3 },
+        { path: "epics/seo/parts/q3.html", count: 2 },
+        { path: "epics/seo/seo.plan.html", count: 3 },
+        { path: "guides/python-target.inbox.json5", count: 2 }
+      ]
+    })
+    expect(swept("epics/seo/seo.plan.html")).toBe(
+      '<epic-page><epic-reply from="Ana Lima" at="2026-10-12 20:16"><p>Ana thinks so.</p></epic-reply>' +
+        '<epic-reply from="Ana Lima" agent="claude" at="2026-11-02 09:00">b</epic-reply>' +
+        '<epic-reply from="Anabel" at="2026-10-12 20:20">c</epic-reply>' +
+        '<epic-status from="Ana Lima" at="2026-11-02 09:00">d</epic-status>' +
+        '<pre>&lt;epic-reply from="Ana"&gt;shown&lt;/epic-reply&gt;</pre></epic-page>'
+    )
+    expect(swept("epics/seo/parts/q3.html")).toBe(
+      "<p><b>Ana Lima:</b>  why?</p><p>Failed in Ana Lima's test run.</p><p>Ask Ana about it.</p>"
+    )
+    expect(swept("epics/seo/parts/log.html")).toBe(
+      "<epic-event>Q3 Ana Lima picked B:  Bananas</epic-event><epic-event>M3 passed (Ana Lima's run)</epic-event>" +
+        "<epic-event>T2 not urgent (Ana Lima, from its id chip)</epic-event><epic-event>Ana's plan renamed</epic-event>"
+    )
+    expect(swept("guides/python-target.inbox.json5")).toBe(
+      '{ "comments": { "c1": { "text": "Ana?", "by": "Ana Lima", "replies": [{ "by": "Ana Lima", "agent": "claude" },\n' +
+        '  { by: "Anabel" }] } } }'
+    )
+    // a second run finds nothing
+    expect(new NameSweep({ content: SWEPT }).run("Ana", "Ana Lima").count).toBe(0)
+  })
+
+  test("a dry run counts the same, and writes nothing", () => {
+    sweptFolder()
+    const result = new NameSweep({ content: SWEPT }).run("Ana", "Ana Lima", { dryRun: true })
+    expect([result.dryRun, result.count, result.files.length]).toEqual([true, 10, 4])
+    for (const [path, text] of Object.entries(SWEPT_FILES)) expect(swept(path)).toBe(text)
+  })
+})
+
+describe("epic whoami --rename", () => {
+  const commands = new PersonCommands({ content: SWEPT })
+
+  beforeEach(() => {
+    rmSync(EpicHome.folder(), { recursive: true, force: true })
+    writeFileSync(GIT_CONFIG, "[user]\n  name = Ana Lima\n")
+    sweptFolder()
+    EpicHome.keepPerson("Ana")
+  })
+
+  test("--dry-run:  says what it would change, file by file;  keeps nothing, writes nothing", async () => {
+    expect(await printed(() => commands.whoami(["--rename", "Ana", "Lima", "--dry-run"]))).toEqual([
+      "would rename Ana as Ana Lima in 10 places, 4 files  (dry run:  nothing written, name not kept)",
+      "  epics/seo/parts/log.html             3",
+      "  epics/seo/parts/q3.html              2",
+      "  epics/seo/seo.plan.html              3",
+      "  guides/python-target.inbox.json5     2"
+    ])
+    expect(EpicHome.person().name).toBe("Ana")
+    expect(swept("epics/seo/parts/q3.html")).toBe(SWEPT_FILES["epics/seo/parts/q3.html"])
+  })
+
+  test("keeps the new name and rewrites the old one;  again:  nothing to rename", async () => {
+    const lines = await printed(() => commands.whoami(["--rename", "Ana", "Lima"]))
+    expect(lines[0]).toBe("renamed Ana as Ana Lima in 10 places, 4 files;  you're Ana Lima now")
+    expect(EpicHome.person()).toEqual({ name: "Ana Lima", source: "kept" })
+    expect(swept("epics/seo/parts/q3.html")).toContain("<b>Ana Lima:</b>")
+    expect(await printed(() => commands.whoami(["--rename", "Ana", "Lima"]))).toEqual([
+      "you're Ana Lima already:  nothing to rename"
+    ])
+  })
+
+  test("--rename with no name:  a usage error", async () => {
+    await expect(commands.whoami(["--rename"])).rejects.toThrow(/to what\?/)
   })
 })

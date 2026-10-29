@@ -25,9 +25,12 @@ const FIXTURES = fileURLToPath(new URL("fixtures", import.meta.url))
 /** When the tests' edits happen:  local 2026-10-01 09:05. */
 const NOW = new Date(2026, 9, 1, 9, 5)
 
-/** A fresh epic page in `<epic-*>` markup. */
-function freshPlan(now = NOW) {
-  return PlanDoc.parse(readFileSync(join(FIXTURES, "epic-plan.html"), "utf8"), now)
+/** Who is at the keyboard in these tests (`PlanDocOptions.person`):  the name on what they write. */
+const PERSON = "Owen"
+
+/** A fresh epic page in `<epic-*>` markup, its person `PERSON`. */
+function freshPlan(now = NOW, person = PERSON) {
+  return PlanDoc.parse(readFileSync(join(FIXTURES, "epic-plan.html"), "utf8"), now, { person })
 }
 
 /** Element `id` of `plan`;  `p3`, a phase by its number (its id is stable, made from its name:  `PhaseIds`). */
@@ -77,7 +80,7 @@ describe("PlanDoc page", () => {
       "2026-10-01",
       "2026-10-03T21:14:02-04:00"
     ])
-    const kept = PlanDoc.parse(plan.toString(), NOW)
+    const kept = PlanDoc.parse(plan.toString(), NOW, { person: PERSON })
     kept.updateStates()
     expect(kept.page.getAttribute("recent-since")).toBe("2026-10-03T21:14:02-04:00")
     const none = PlanDoc.parse(plan.toString(), NOW, { recentSince: null })
@@ -455,7 +458,7 @@ describe("PlanDoc phases", () => {
     plan.setPhase(1, "done")
     plan.updateStates()
     expect(counts()).toEqual(["1", null, "2"])
-    expect(PlanDoc.parse(plan.toString(), NOW).updateChangeCounts()).toBe(false)
+    expect(PlanDoc.parse(plan.toString(), NOW, { person: PERSON }).updateChangeCounts()).toBe(false)
   })
 
   test("phase N done:  drops its bare labels and its prose updates;  a phase's own plan changes stay", () => {
@@ -1397,7 +1400,7 @@ describe("PlanDoc bedtime", () => {
     expect([plan.bedtime, plan.bedtimeRun, plan.summary().bedtime]).toEqual([false, null, null])
     plan.startBedtime("P3-P6")
     expect([plan.bedtime, plan.page.getAttribute("bedtime"), plan.summary().bedtime]).toEqual([true, "P3-P6", "P3-P6"])
-    const again = PlanDoc.parse(plan.toString(), NOW)
+    const again = PlanDoc.parse(plan.toString(), NOW, { person: PERSON })
     expect(again.finishBedtime()).toBe(true)
     expect([again.bedtime, again.summary().bedtime]).toEqual([false, null])
     expect(again.finishBedtime()).toBe(false)
@@ -1503,8 +1506,8 @@ describe("PlanDoc review inbox", () => {
     '<epic-option letter="B" title="Unfold it" recommended><p>b</p></epic-option></epic-choices>'
 
   /** A doc with one item of each kind, details where they matter. */
-  function inboxPlan() {
-    const plan = freshPlan()
+  function inboxPlan(person = PERSON) {
+    const plan = freshPlan(NOW, person)
     plan.addItem("question", "which?", { details: `<p>why</p>${OPTIONS}` })
     plan.addItem("question", "no recommendation?", { details: "<p>talk</p>" })
     plan.addItem("judgement", "chose X")
@@ -1661,7 +1664,7 @@ describe("PlanDoc review inbox", () => {
 
   test("pick, todo (with Owen's note);  revisit and details left;  a gone item flagged", () => {
     const plan = inboxPlan()
-    expect(plan.applyMark({ id: "q1", action: "pick", pick: "A" }).did).toBe("picked A:  Keep folds")
+    expect(plan.applyMark({ id: "q1", action: "pick", pick: "A" }).did).toBe("Owen picked A:  Keep folds")
     expect(el(plan, "q1").querySelector("epic-answer")!.getAttribute("title")).toBe("Keep folds")
     expect(el(plan, "q1").getAttribute("review-as")).toBe("approve")
     expect(plan.applyMark({ id: "q1", action: "pick", pick: "C" })).toMatchObject({
@@ -1721,7 +1724,7 @@ describe("PlanDoc review inbox", () => {
     plan.addItem("judgement", "which store?", { details: `<p>weighed</p>${OPTIONS}` })
     expect(plan.applyMark({ id: "j1", action: "pick", pick: "A" })).toEqual({
       applied: true,
-      did: "picked A:  Keep folds;  approved:  closed (accepted)"
+      did: "Owen picked A:  Keep folds;  approved:  closed (accepted)"
     })
     expect(Markup.read(el(plan, "j1"))).toMatchObject({ status: "done", reviewed: "2026-10-01", reviewAs: "approve" })
     expect(chosen(plan, "j1")).toEqual(["A"])
@@ -1729,7 +1732,7 @@ describe("PlanDoc review inbox", () => {
     expect(el(plan, "j1").querySelector("epic-status")!.textContent).toBe(
       `Chose A · Keep folds:  recorded, the call accepted;  ${plan.nextStepWords()}`
     )
-    expect(lastLog(plan)).toBe("J1 picked A:  Keep folds;  approved:  closed (accepted)")
+    expect(lastLog(plan)).toBe("J1 Owen picked A:  Keep folds;  approved:  closed (accepted)")
     expect(problems(plan)).toEqual([])
   })
 
@@ -1737,7 +1740,7 @@ describe("PlanDoc review inbox", () => {
     const plan = freshPlan()
     plan.addItem("issue", "slow", { details: `<p>two fixes</p>${OPTIONS}` })
     expect(plan.applyMark({ id: "i1", action: "pick", pick: "B" }).did).toBe(
-      "picked B:  Unfold it;  approved:  reviewed"
+      "Owen picked B:  Unfold it;  approved:  reviewed"
     )
     expect([el(plan, "i1").getAttribute("status"), chosen(plan, "i1")]).toEqual(["open", ["B"]])
   })
@@ -1748,7 +1751,7 @@ describe("PlanDoc review inbox", () => {
     plan.setDetails("j1", replyWith("A", "B", "C"), { append: true })
     expect(plan.optionCards(el(plan, "j1"), 1).map((card) => card.letter)).toEqual(["A", "B", "C"])
     expect(plan.applyMark({ id: "j1", action: "pick", pick: "C", choices: 1 }).did).toBe(
-      "picked C:  Option C (a reply's options);  approved:  closed (accepted)"
+      "Owen picked C:  Option C (a reply's options);  approved:  closed (accepted)"
     )
     expect(chosen(plan, "j1")).toEqual([null, "C"])
     expect(el(plan, "j1").querySelector("epic-status")!.textContent).toBe(
@@ -1764,7 +1767,7 @@ describe("PlanDoc review inbox", () => {
     plan.decide("q1", "Keep folds", { option: "A" })
     expect(chosen(plan, "q1")).toEqual(["A", null])
     expect(plan.applyMark({ id: "q1", action: "pick", pick: "C", choices: 1 }).did).toBe(
-      "picked C:  Option C (a reply's options)"
+      "Owen picked C:  Option C (a reply's options)"
     )
     expect(el(plan, "q1").querySelector(":scope > epic-answer")!.getAttribute("title")).toBe("Option C")
     expect(chosen(plan, "q1")).toEqual([null, "C"])
@@ -1778,12 +1781,12 @@ describe("PlanDoc review inbox", () => {
     expect(PlanItem.choiceSets(el(plan, "j1")).length).toBe(2)
     // two sets in one item's text:  valid (`flow`, P14)
     expect(problems(plan)).toEqual([])
-    expect(plan.applyMark({ id: "j1", action: "pick", pick: "B", choices: 1 }).did).toMatch(/^picked B:  Linked;/)
+    expect(plan.applyMark({ id: "j1", action: "pick", pick: "B", choices: 1 }).did).toMatch(/^Owen picked B:  Linked;/)
     expect(chosen(plan, "j1")).toEqual([null, "B"])
     // an old mark, `{ pick }` alone:  the item's own set, the first that's its child
     const other = freshPlan()
     other.addItem("judgement", "two calls", { details: `<p>first</p>${OPTIONS}<p>second</p>${second}` })
-    expect(other.applyMark({ id: "j1", action: "pick", pick: "A" }).did).toMatch(/^picked A:  Keep folds;/)
+    expect(other.applyMark({ id: "j1", action: "pick", pick: "A" }).did).toMatch(/^Owen picked A:  Keep folds;/)
     expect(chosen(other, "j1")).toEqual(["A", null])
   })
 
@@ -1864,8 +1867,10 @@ describe("PlanDoc review inbox", () => {
       "epic-original",
       "epic-commit"
     ])
+    // Claude's reply, handed in as `from="Claude"`:  marked his, whose session wrote it its `from`
     expect(Markup.read(el(plan, "q1").querySelector("epic-reply")!)).toEqual({
-      from: "Claude",
+      from: "Owen",
+      agent: "claude",
       at: "2026-10-01 09:20",
       re: '"why?"'
     })
@@ -1885,7 +1890,7 @@ describe("PlanDoc review inbox", () => {
     plan.setDetails("j1", replyWith("A", "B", "C"), { append: true })
     const outcome = "Owen, 2026-10-01:  'option a';  built"
     expect(plan.choose("j1", "a", { outcome })).toBe(
-      "picked A:  Option A (a reply's options);  approved:  closed (accepted)"
+      "Owen picked A:  Option A (a reply's options);  approved:  closed (accepted)"
     )
     expect(chosen(plan, "j1")).toEqual([null, "A"])
     expect(Markup.read(el(plan, "j1"))).toMatchObject({ status: "done", reviewed: "2026-10-01", reviewAs: "approve" })
@@ -1893,7 +1898,7 @@ describe("PlanDoc review inbox", () => {
       `Chose A · Option A:  recorded, the call accepted;  ${outcome}`
     )
     expect(lastLog(plan)).toBe(
-      `J1 picked A:  Option A (a reply's options);  approved:  closed (accepted);  settled in conversation:  ${outcome}`
+      `J1 Owen picked A:  Option A (a reply's options);  approved:  closed (accepted);  settled in conversation:  ${outcome}`
     )
     expect(problems(plan)).toEqual([])
   })
@@ -1902,7 +1907,7 @@ describe("PlanDoc review inbox", () => {
     const plan = freshPlan()
     plan.addItem("question", "which?", { details: `<p>why</p>${OPTIONS}` })
     plan.setDetails("q1", replyWith("A", "B", "C"), { append: true })
-    expect(plan.choose("q1", "B", { set: 1 })).toBe("picked B:  Unfold it")
+    expect(plan.choose("q1", "B", { set: 1 })).toBe("Owen picked B:  Unfold it")
     expect(Markup.read(el(plan, "q1"))).toMatchObject({ status: "decided", answered: true, reviewAs: "approve" })
     expect(el(plan, "q1").querySelector(":scope > epic-answer")!.getAttribute("title")).toBe("Unfold it")
     expect(chosen(plan, "q1")).toEqual(["B", null])
@@ -1911,7 +1916,7 @@ describe("PlanDoc review inbox", () => {
       `Chose B · Unfold it:  recorded as the answer;  ${plan.nextStepWords()}`
     )
     plan.addItem("issue", "slow", { details: `<p>two fixes</p>${OPTIONS}` })
-    expect(plan.choose("i1", "A")).toBe("picked A:  Keep folds;  approved:  reviewed")
+    expect(plan.choose("i1", "A")).toBe("Owen picked A:  Keep folds;  approved:  reviewed")
     expect([status(plan, "i1"), chosen(plan, "i1")]).toEqual(["open", ["A"]])
     expect(problems(plan)).toEqual([])
   })
@@ -1930,6 +1935,21 @@ describe("PlanDoc review inbox", () => {
     expect(plan.document.documentElement.outerHTML).toBe(before)
   })
 
+  // epic `epic-friend` P2:  what a person writes names them;  Claude's replies name whose session wrote them
+  test("NAMES:  Ana's note, pick and test run name her;  Claude's reply handed in is marked his, from Ana's session", () => {
+    const plan = inboxPlan("Ana")
+    plan.setDetails("t1", '<epic-reply from="Claude" at="2026-10-01 09:20"><p>a</p></epic-reply>', { append: true })
+    plan.keepNote("t1", { action: "revisit", when: "soon", note: "why?", at: "2026-10-01T09:10:00" })
+    expect(Array.from(el(plan, "t1").querySelectorAll("epic-reply"), (reply) => Markup.read(reply))).toEqual([
+      { from: "Ana", at: "2026-10-01 09:10", re: "revisit soon" },
+      { from: "Ana", agent: "claude", at: "2026-10-01 09:20" }
+    ])
+    expect(plan.applyMark({ id: "q1", action: "pick", pick: "A" }).did).toBe("Ana picked A:  Keep folds")
+    expect(plan.applyMark({ id: "m1", action: "test", result: "passed" }).did).toBe("passed (Ana's run)")
+    expect(plan.applyMark({ id: "j1", action: "drop" }).did).toBe("canceled:  dropped by Ana in review")
+    expect(problems(plan)).toEqual([])
+  })
+
   test("keepNote:  Owen's note as his reply, before Claude's answer to it;  once", () => {
     const plan = inboxPlan()
     plan.setDetails("t1", '<epic-reply from="Claude" at="2026-10-01 09:20"><p>a</p></epic-reply>', { append: true })
@@ -1939,7 +1959,7 @@ describe("PlanDoc review inbox", () => {
     const replies = Array.from(el(plan, "t1").querySelectorAll("epic-reply"))
     expect(replies.map((reply) => Markup.read(reply))).toEqual([
       { from: "Owen", at: "2026-10-01 09:10", re: "revisit soon" },
-      { from: "Claude", at: "2026-10-01 09:20" }
+      { from: "Owen", agent: "claude", at: "2026-10-01 09:20" }
     ])
     expect(replies[0]!.querySelector("p")!.textContent).toBe("why not B?\nreally")
   })
@@ -1986,15 +2006,34 @@ describe("PlanDoc status cards (P13)", () => {
     '<epic-choices><epic-option letter="A" title="Keep folds"><p>a</p></epic-option>' +
     '<epic-option letter="B" title="Unfold it" recommended><p>b</p></epic-option></epic-choices>'
 
-  /** `element`'s status cards, as data plus their reading and summary text. */
+  /**
+   * `element`'s status cards, as data plus their reading and summary text;  whose session wrote each (`from`) left
+   * out:  its own test says
+   */
   function cards(element: Element) {
     return Array.from(element.querySelectorAll(":scope > epic-status"), (card) => ({
-      ...Markup.read<"epic-status">(card),
+      ...withoutFrom(Markup.read<"epic-status">(card)),
       slot: card.getAttribute("slot"),
       reading: Array.from(card.querySelectorAll(":scope > :not([slot])"), (block) => block.outerHTML).join(""),
       summary: Array.from(card.querySelectorAll(':scope > [slot="summary"]'), (block) => block.outerHTML).join("")
     }))
   }
+
+  /** `data` without its `from`. */
+  function withoutFrom<T extends { from?: string }>({ from: _from, ...data }: T): Omit<T, "from"> {
+    return data
+  }
+
+  test("a card names WHOSE SESSION wrote it (`from`, epic `epic-friend` P2):  the doc's person", () => {
+    const plan = freshPlan(NOW, "Ana")
+    plan.addItem("judgement", "templates", { details: "<p>one file each</p>" })
+    plan.addStatus("j1", "Weigh it.")
+    plan.noteStatus("j1", "Recorded.")
+    expect(Array.from(el(plan, "j1").querySelectorAll("epic-status"), (card) => card.getAttribute("from"))).toEqual([
+      "Ana"
+    ])
+    expect(problems(plan)).toEqual([])
+  })
 
   test("underway:  a slotted orange card, stamped now, the reading in a <p>;  a later mark adds a second;  valid", () => {
     const plan = freshPlan()
@@ -2201,7 +2240,7 @@ describe("PlanDoc status cards (P13)", () => {
       PlanItem.choiceSets(el(plan, id)).map((set) => set.getAttribute("chosen"))
     plan.addItem("question", "which?", { details: `<p>why</p>${OPTIONS}` })
     plan.addItem("judgement", "which store?", { details: `<p>weighed</p>${OPTIONS}` })
-    expect(plan.keepPick("q1", { pick: "B" })).toBe("picked B:  Unfold it (kept from the revisit)")
+    expect(plan.keepPick("q1", { pick: "B" })).toBe("Owen picked B:  Unfold it (kept from the revisit)")
     expect([chosen(plan, "q1"), el(plan, "q1").getAttribute("status")]).toEqual([["B"], "open"])
     expect(el(plan, "q1").querySelector('epic-status[state="noted"]')!.textContent).toBe(
       `Chose B · Unfold it:  recorded after the talk;  ${plan.nextStepWords()}`

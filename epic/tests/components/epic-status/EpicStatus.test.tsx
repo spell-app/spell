@@ -28,6 +28,18 @@ const NOTED =
   `<p>Chose B · Keep one file per template:  recorded as the answer;  waiting for the next phase, P9 · Build</p>` +
   `</epic-status>`
 
+/** The page server's word on who's reading (`window.SPELL_SERVER.person`):  set for `run`, then put back. */
+async function asViewer<T>(person: string, run: () => Promise<T>): Promise<T> {
+  const holder = globalThis as { SPELL_SERVER?: unknown }
+  const before = holder.SPELL_SERVER
+  holder.SPELL_SERVER = { person }
+  try {
+    return await run()
+  } finally {
+    holder.SPELL_SERVER = before
+  }
+}
+
 describe("<epic-status>", () => {
   test("underway:  `Claude • Underway` left, `at` right as `10/8/26 14:20`, the reading;  blue (Claude on it, Q20);  passes axe", async () => {
     const host = await ElementFixture.render(UNDERWAY)
@@ -137,5 +149,15 @@ describe("<epic-status>", () => {
     const [header, who, date] = ["header", "who", "date"].map((name) => part(host, name)!.getBoundingClientRect())
     expect(Math.abs(date.top - who.top)).toBeLessThan(4)
     expect([date.right <= header.right + 0.5, date.left >= who.right]).toEqual([true, true])
+  })
+  test("whose Claude, to a reader named Ana:  `Claude • Done` for her session's and an old card, `Claude (Ben) • Done` for Ben's", async () => {
+    const card = (from: string) =>
+      `<epic-status state="done" at="2026-11-02 10:00"${from}><p>Built it.</p></epic-status>`
+    const drawn = await asViewer("Ana", async () => {
+      const hosts = []
+      for (const from of [' from="Ana"', "", ' from="Ben"']) hosts.push(await ElementFixture.render(card(from)))
+      return hosts.map((host) => part(host, "who")!.textContent)
+    })
+    expect(drawn).toEqual(["Claude • Done", "Claude • Done", "Claude (Ben) • Done"])
   })
 })

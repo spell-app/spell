@@ -20,7 +20,7 @@
  *   `{ page, takesComments, comments, send? }`
  *   - the runtime asks as the page loads, and draws the bullhorns only when `takesComments`:
  *     a server without this module, `file://`, or a page that takes none shows none
- *   - each comment with its thread (`replies`, `done`) and whose `turn` it is (`CommentList.turnOf()`)
+ *   - each comment with its thread (`replies`, `done`) and whose `turn` it is (`ThreadFacts.turnOf()`)
  *   - `working` while Claude thinks about it (`epic comments working`):  the thread's "Claude: thinking…" stub
  *   - `send`, for the page header's Send (epic `epic-workflow` P13):
  *     `{ epic, owned, wakes, listening, sent, unsent, waiting }` (`PageSend`)
@@ -78,6 +78,7 @@ import { join } from "node:path"
 
 import { SRV } from "spell/server"
 import { COMPONENTS_PREFIX, type RouteModule } from "spell/server/page"
+import { ThreadFacts } from "spell/epic/comments"
 import { EpicConfig } from "spell/epic/config/EpicConfig"
 import { DataFile } from "spell/epic/data/DataFile"
 import {
@@ -255,7 +256,7 @@ function planDocOf(root: string, epic: string): string {
 
 /** `comments` as the page gets them:  each with whose `turn` it is on its thread. */
 function shown(comments: CommentList): (IdentifiedComment & { turn: Turn })[] {
-  return comments.all.map((comment) => ({ ...comment, turn: CommentList.turnOf(comment) }))
+  return comments.all.map((comment) => ({ ...comment, turn: ThreadFacts.turnOf(comment) }))
 }
 
 /**

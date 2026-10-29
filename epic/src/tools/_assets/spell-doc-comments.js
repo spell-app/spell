@@ -345,7 +345,7 @@ class PageComments {
   unseen(comment) {
     // orange while it's Owen's turn, seen or not, until he answers (✓, a reply, ×):  Owen, 2026-10-10, on a thread
     // gone ivory once looked at:  "I was expecting this to be orange, not ivory"
-    return comment.turn === "owen" && !!ThreadFacts.latestClaudeAt(comment)
+    return comment.turn === "person" && !!ThreadFacts.latestClaudeAt(comment)
   }
 
   /**
@@ -617,7 +617,7 @@ class PageComments {
 
   /** The comments waiting on Owen:  Claude spoke last on their threads (`turn` `owen`). */
   get waitingOnOwen() {
-    return this.list.filter((comment) => comment.turn === "owen")
+    return this.list.filter((comment) => comment.turn === "person")
   }
 
   /** The comments waiting on Owen whose threads are drawn, in page order. */
@@ -1009,7 +1009,7 @@ class PageComments {
     const writing = !!replying && (replying.busy() || !!editing)
     if (comment.turn === "done") this.replyBoxes.delete(comment.id)
     const thinking = !!comment.working && comment.turn !== "done"
-    const open = writing || (this.folds.get(comment.id) ?? (comment.turn === "owen" || thinking))
+    const open = writing || (this.folds.get(comment.id) ?? (comment.turn === "person" || thinking))
     thread.comment = comment
     thread.toggleAttribute("open", open)
     // orange while it has a reply from Claude Owen hasn't answered (`unseen()`):  the whole thread, that reply stronger

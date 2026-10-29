@@ -12,22 +12,29 @@ import { ReviewInbox } from "spell/epic/tool/ReviewInbox"
 /** A comment's place:  the second field of phase 3. */
 const ON_FIELD = { anchor: "p3#field-2", kind: "field", label: "Notes", excerpt: "A note bubble" }
 
+/** Who writes through the lists:  their name on every entry. */
+const PERSON = "Owen"
+
 /** When everything happens. */
 const NOW = new Date("2026-10-10T14:02:00.000Z")
 
+/** A time after agents' replies were marked (`ThreadFacts.AGENTS_MARKED`):  no name says who wrote it. */
+const MARKED = new Date("2026-11-05T10:00:00.000Z")
+
 describe("CommentList", () => {
   test("adds comments `c1`, `c2` ... (shown C1) (never a todo's `t1`);  a quote rides along with its offset", () => {
-    const comments = new CommentList({})
+    const comments = new CommentList({}, { person: PERSON })
     expect(comments.add(ON_FIELD, "  Which file?  ", NOW)).toBe("c1")
     expect(comments.add({ ...ON_FIELD, quote: " the inbox file ", offset: 14 }, "This one?", NOW)).toBe("c2")
     expect(comments.all).toEqual([
-      { id: "c1", ...ON_FIELD, text: "Which file?", at: NOW.toISOString(), status: "new" },
+      { id: "c1", ...ON_FIELD, text: "Which file?", by: PERSON, at: NOW.toISOString(), status: "new" },
       {
         id: "c2",
         ...ON_FIELD,
         quote: "the inbox file",
         offset: 14,
         text: "This one?",
+        by: PERSON,
         at: NOW.toISOString(),
         status: "new"
       }
@@ -36,7 +43,7 @@ describe("CommentList", () => {
   })
 
   test("Owen edits or deletes one only while it waits;  Claude takes it, or answers it", () => {
-    const comments = new CommentList({})
+    const comments = new CommentList({}, { person: PERSON })
     const id = comments.add(ON_FIELD, "one", NOW)
     comments.edit(id, "one, better", NOW)
     expect(comments.comment(id)).toMatchObject({ text: "one, better", edited: NOW.toISOString() })
@@ -47,7 +54,7 @@ describe("CommentList", () => {
     expect(comments.comment(id)).toMatchObject({
       status: "taken",
       taken: { epic: "guide-changes", phase: 4 },
-      replies: [{ by: "Claude", html: "<p>Done.</p>" }]
+      replies: [{ by: PERSON, agent: "claude", html: "<p>Done.</p>" }]
     })
     const other = comments.add(ON_FIELD, "two", NOW)
     comments.answer(other)
@@ -56,7 +63,7 @@ describe("CommentList", () => {
 
   // epic `epic-engine` I16:  a phase's number moves when one goes in ahead of it;  its id never does
   test("taken into a phase by its id and title too:  its thread links by the id;  an older one by its number", () => {
-    const comments = new CommentList({})
+    const comments = new CommentList({}, { person: PERSON })
     const id = comments.add(ON_FIELD, "one", NOW)
     const into = { epic: "guide-changes", phase: 4, phaseId: "p-memory", title: "Memory" }
     comments.take(id, into, NOW)
@@ -77,7 +84,7 @@ describe("CommentList", () => {
   })
 
   test("Undo:  a deleted or cleared comment comes back as it was, under its id unless a new one took it", () => {
-    const comments = new CommentList({})
+    const comments = new CommentList({}, { person: PERSON })
     const id = comments.add({ ...ON_FIELD, quote: "the inbox file", offset: 14 }, "Which one?", NOW)
     comments.take(id, { epic: "guide-changes", phase: 4 }, NOW)
     comments.answer(id, "<p>That one.</p>", NOW)
@@ -101,27 +108,28 @@ describe("CommentList", () => {
   })
 
   test("a THREAD:  Claude answers, Owen replies (saved as typed, one pending reply), Claude answers again", () => {
-    const comments = new CommentList({})
+    const comments = new CommentList({}, { person: PERSON })
     const id = comments.add(ON_FIELD, "Why here?", NOW)
-    expect([CommentList.turnOf(comments.comment(id)), comments.waiting.length]).toEqual(["claude", 1])
+    expect([ThreadFacts.turnOf(comments.comment(id)), comments.waiting.length]).toEqual(["claude", 1])
     comments.answer(id, "<p>Because.</p>", NOW)
-    expect([CommentList.turnOf(comments.comment(id)), comments.waiting]).toEqual(["owen", []])
+    expect([ThreadFacts.turnOf(comments.comment(id)), comments.waiting]).toEqual(["person", []])
     // typed in two goes:  the second save replaces the first
     const later = new Date("2026-10-10T14:05:00.000Z")
     comments.reply(id, "Not good enough", later)
     comments.reply(id, "  Not good enough:  say more.  ", later)
     expect(comments.comment(id).replies).toEqual([
-      { by: "Claude", at: NOW.toISOString(), html: "<p>Because.</p>" },
-      { by: "Owen", at: later.toISOString(), text: "Not good enough:  say more.", edited: later.toISOString() }
+      { by: PERSON, agent: "claude", at: NOW.toISOString(), html: "<p>Because.</p>" },
+      { by: PERSON, at: later.toISOString(), text: "Not good enough:  say more.", edited: later.toISOString() }
     ])
     // a reply is new work, as a new comment is
-    expect([CommentList.turnOf(comments.comment(id)), comments.waiting.map((each) => each.id)]).toEqual([
+    expect([ThreadFacts.turnOf(comments.comment(id)), comments.waiting.map((each) => each.id)]).toEqual([
       "claude",
       [id]
     ])
     comments.answer(id, "<p>More.</p>", later, "8c7e1d3")
     expect(comments.comment(id).replies?.at(-1)).toMatchObject({
-      by: "Claude",
+      by: PERSON,
+      agent: "claude",
       html: "<p>More.</p>",
       commit: "8c7e1d3"
     })
@@ -132,40 +140,40 @@ describe("CommentList", () => {
   })
 
   test("Owen's pending reply emptied goes;  none pending, a blank reply is refused", () => {
-    const comments = new CommentList({})
+    const comments = new CommentList({}, { person: PERSON })
     const id = comments.add(ON_FIELD, "Why?", NOW)
     comments.answer(id, "<p>Because.</p>", NOW)
     expect(() => comments.reply(id, "  ")).toThrow(expect.objectContaining({ status: 400 }))
     comments.reply(id, "Hm", NOW)
     comments.reply(id, " ", NOW)
-    expect([comments.comment(id).replies?.length, CommentList.turnOf(comments.comment(id))]).toEqual([1, "owen"])
+    expect([comments.comment(id).replies?.length, ThreadFacts.turnOf(comments.comment(id))]).toEqual([1, "person"])
     expect(() => comments.reply("c9", "x")).toThrow(expect.objectContaining({ status: 404 }))
   })
 
   test("that's good / skip it close a thread;  reopen, or a reply, opens it again", () => {
-    const comments = new CommentList({})
+    const comments = new CommentList({}, { person: PERSON })
     const id = comments.add(ON_FIELD, "Why?", NOW)
     comments.answer(id, "<p>Because.</p>", NOW)
     comments.resolve(id, "good", NOW)
-    expect([comments.comment(id).done, CommentList.turnOf(comments.comment(id)), comments.waiting]).toEqual([
+    expect([comments.comment(id).done, ThreadFacts.turnOf(comments.comment(id)), comments.waiting]).toEqual([
       { how: "good", at: NOW.toISOString() },
       "done",
       []
     ])
     comments.reopen(id)
-    expect(CommentList.turnOf(comments.comment(id))).toBe("owen")
+    expect(ThreadFacts.turnOf(comments.comment(id))).toBe("person")
     comments.resolve(id, "skip", NOW)
     expect(comments.comment(id).done?.how).toBe("skip")
     comments.reply(id, "One more thing", NOW)
-    expect([comments.comment(id).done, CommentList.turnOf(comments.comment(id))]).toEqual([undefined, "claude"])
+    expect([comments.comment(id).done, ThreadFacts.turnOf(comments.comment(id))]).toEqual([undefined, "claude"])
     expect(() => comments.resolve(id, "maybe")).toThrow(expect.objectContaining({ status: 400 }))
   })
 
   test("a reply on a TAKEN comment waits until it's taken again;  an epic page's answered in the doc is Owen's turn", () => {
-    const comments = new CommentList({})
+    const comments = new CommentList({}, { person: PERSON })
     const id = comments.add(ON_FIELD, "Fix it", NOW)
     comments.take(id, { epic: "guide-changes", phase: 4 }, NOW)
-    expect([CommentList.turnOf(comments.comment(id)), comments.waiting]).toEqual(["claude", []])
+    expect([ThreadFacts.turnOf(comments.comment(id)), comments.waiting]).toEqual(["claude", []])
     const later = new Date("2026-10-10T15:00:00.000Z")
     comments.reply(id, "And the table too", later)
     expect(comments.waiting.map((each) => each.id)).toEqual([id])
@@ -175,16 +183,16 @@ describe("CommentList", () => {
     const doc = comments.add(ON_FIELD, "Epic page", NOW)
     comments.answer(doc)
     comments.answer(doc)
-    expect([comments.comment(doc).replies, CommentList.turnOf(comments.comment(doc))]).toEqual([
-      [{ by: "Claude", at: expect.any(String), html: "" }],
-      "owen"
+    expect([comments.comment(doc).replies, ThreadFacts.turnOf(comments.comment(doc))]).toEqual([
+      [{ by: PERSON, agent: "claude", at: expect.any(String), html: "" }],
+      "person"
     ])
     // before threads:  answered, no replies at all, is Owen's turn too
-    expect(CommentList.turnOf({ ...comments.comment(doc), replies: undefined })).toBe("owen")
+    expect(ThreadFacts.turnOf({ ...comments.comment(doc), replies: undefined })).toBe("person")
   })
 
   test("Undo keeps the whole thread:  Owen's replies, Claude's commits, done", () => {
-    const comments = new CommentList({})
+    const comments = new CommentList({}, { person: PERSON })
     const id = comments.add(ON_FIELD, "Why?", NOW)
     comments.answer(id, "<p>Because.</p>", NOW, "abc1234")
     comments.reply(id, "Fine", NOW)
@@ -197,7 +205,7 @@ describe("CommentList", () => {
   })
 
   test("refuses a bad anchor or kind, blank text, a comment that isn't there", () => {
-    const comments = new CommentList({})
+    const comments = new CommentList({}, { person: PERSON })
     expect(() => comments.add({ ...ON_FIELD, anchor: "two words" }, "x")).toThrow(/isn't an anchor/)
     expect(() => comments.add({ ...ON_FIELD, kind: "Field!" }, "x")).toThrow(/kind of block/)
     expect(() => comments.add(ON_FIELD, "   ")).toThrow(/needs some text/)
@@ -205,7 +213,7 @@ describe("CommentList", () => {
   })
 
   test("NEVER an empty comment:  white space, or characters that draw nothing, are refused on add and edit", () => {
-    const comments = new CommentList({})
+    const comments = new CommentList({}, { person: PERSON })
     for (const blank of ["", " \n\t ", " ", "​‍", " ⁠ ", undefined])
       expect(() => comments.add(ON_FIELD, blank as string)).toThrow(/needs some text/)
     const id = comments.add(ON_FIELD, "  kept  ", NOW)
@@ -214,7 +222,7 @@ describe("CommentList", () => {
   })
 
   test("WORKING:  Claude thinking about it -- not waiting, his last reply read;  answer() turns it off", () => {
-    const comments = new CommentList({})
+    const comments = new CommentList({}, { person: PERSON })
     const id = comments.add(ON_FIELD, "Why?", NOW)
     const later = (minutes: number) => new Date(NOW.getTime() + minutes * 60_000)
     comments.answer(id, "<p>Because.</p>", later(1))
@@ -224,7 +232,7 @@ describe("CommentList", () => {
     // set again:  the first time stays
     comments.setWorking(id, true, later(4))
     expect(comments.comment(id).working).toBe(later(3).toISOString())
-    expect([comments.waiting, CommentList.turnOf(comments.comment(id))]).toEqual([[], "claude"])
+    expect([comments.waiting, ThreadFacts.turnOf(comments.comment(id))]).toEqual([[], "claude"])
     // his reply is read:  more words go after it, as a new reply, and wait again
     comments.reply(id, "And the other one", later(5))
     expect(comments.comment(id).replies!.map((each) => each.text ?? each.html)).toEqual([
@@ -243,17 +251,17 @@ describe("CommentList", () => {
 
   test("lastWordsAt:  when Owen last changed his words on the thread -- his comment, his replies, their edits", () => {
     const later = (minutes: number) => new Date(NOW.getTime() + minutes * 60_000)
-    const comments = new CommentList({})
+    const comments = new CommentList({}, { person: PERSON })
     const id = comments.add(ON_FIELD, "one", NOW)
-    expect(CommentList.lastWordsAt(comments.comment(id))).toBe(NOW.toISOString())
+    expect(ThreadFacts.lastWordsAt(comments.comment(id))).toBe(NOW.toISOString())
     comments.edit(id, "one, better", later(1))
-    expect(CommentList.lastWordsAt(comments.comment(id))).toBe(later(1).toISOString())
+    expect(ThreadFacts.lastWordsAt(comments.comment(id))).toBe(later(1).toISOString())
     comments.answer(id, "<p>Because.</p>", later(2))
     // Claude's words never count
-    expect(CommentList.lastWordsAt(comments.comment(id))).toBe(later(1).toISOString())
+    expect(ThreadFacts.lastWordsAt(comments.comment(id))).toBe(later(1).toISOString())
     comments.reply(id, "Say more", later(3))
     comments.reply(id, "Say more, please", later(4))
-    expect(CommentList.lastWordsAt(comments.comment(id))).toBe(later(4).toISOString())
+    expect(ThreadFacts.lastWordsAt(comments.comment(id))).toBe(later(4).toISOString())
   })
 })
 
@@ -287,7 +295,7 @@ describe("ids:  shown C3, typed C3 / c3 / cm3, keyed c3;  an older file's cm3 re
   })
 
   test("every method takes C3, c3 or the old cm3 for the comment the file keys c3", () => {
-    const comments = new CommentList({})
+    const comments = new CommentList({}, { person: PERSON })
     const id = comments.add(ON_FIELD, "one", NOW)
     expect(id).toBe("c1")
     comments.edit("C1", "one, better", NOW)
@@ -303,7 +311,7 @@ describe("ids:  shown C3, typed C3 / c3 / cm3, keyed c3;  an older file's cm3 re
   })
 
   test("Undo under the old cm3 comes back keyed c3", () => {
-    const comments = new CommentList({})
+    const comments = new CommentList({}, { person: PERSON })
     const id = comments.add(ON_FIELD, "one", NOW)
     const before = comments.all[0]!
     comments.remove(id)
@@ -344,6 +352,73 @@ describe("ids:  shown C3, typed C3 / c3 / cm3, keyed c3;  an older file's cm3 re
     expect(Object.keys(guide.comments)).toEqual(["c4"])
     expect(guide.commentList.comment("C4").text).toBe("on a guide")
     expect(Object.keys(JSON.parse(JSON.stringify(guide)).comments)).toEqual(["c4"])
+  })
+})
+
+describe("CommentList:  who wrote it (epic `epic-friend` P2)", () => {
+  test("each entry names its person:  the comment and a reply by `by`;  Claude's answer `agent` too, `by` whose session", () => {
+    const comments = new CommentList({}, { person: "Ana" })
+    const id = comments.add(ON_FIELD, "Why?", NOW)
+    comments.answer(id, "<p>Because.</p>", NOW)
+    comments.reply(id, "And then?", NOW)
+    expect(comments.comment(id)).toMatchObject({
+      by: "Ana",
+      replies: [
+        { by: "Ana", agent: "claude", html: "<p>Because.</p>" },
+        { by: "Ana", text: "And then?" }
+      ]
+    })
+    expect([ThreadFacts.turnOf(comments.comment(id)), comments.waiting.length]).toEqual(["claude", 1])
+  })
+
+  test("a person NAMED Claude replying is a person:  Claude's turn, the reply theirs to change", () => {
+    const comments = new CommentList({}, { person: "Claude" })
+    const id = comments.add(ON_FIELD, "Hello", MARKED)
+    comments.answer(id, "<p>Hi.</p>", MARKED)
+    comments.reply(id, "I'm a person", MARKED)
+    expect([ThreadFacts.turnOf(comments.comment(id)), ThreadFacts.pendingOf(comments.comment(id))]).toEqual([
+      "claude",
+      "reply"
+    ])
+  })
+
+  test("the person is asked only when something's written;  none given:  someone", () => {
+    let asked = 0
+    const comments = new CommentList({}, { person: () => (asked++, "Ben") })
+    expect([comments.all, asked]).toEqual([[], 0])
+    expect(comments.comment(comments.add(ON_FIELD, "Hm", NOW)).by).toBe("Ben")
+    const plain = new CommentList({})
+    expect(plain.comment(plain.add(ON_FIELD, "x", NOW)).by).toBe("someone")
+  })
+
+  test("migrate():  Claude's old answers marked his (`agent`), once;  a person's reply, and one dated since, left", () => {
+    const record: Record<string, Comment> = {
+      c1: {
+        ...ON_FIELD,
+        text: "Why?",
+        at: NOW.toISOString(),
+        status: "answered",
+        replies: [
+          { by: "Claude", at: "2026-10-12T08:00:00.000Z", html: "<p>Because.</p>" },
+          { by: "Owen", at: "2026-10-12T09:00:00.000Z", text: "Hm" },
+          { by: "Claude", at: "2026-11-05T09:00:00.000Z", text: "a person named Claude" }
+        ]
+      }
+    }
+    CommentList.migrate(record)
+    expect(record.c1!.replies!.map((reply) => reply.agent)).toEqual(["claude", undefined, undefined])
+    expect(CommentList.markAgents(record)).toBe(false)
+  })
+
+  test("restore():  each entry keeps who wrote it, and Claude's its marker", () => {
+    const comments = new CommentList({}, { person: "Ana" })
+    const id = comments.add(ON_FIELD, "Why?", NOW)
+    comments.answer(id, "<p>Because.</p>", NOW)
+    comments.reply(id, "Ok", NOW)
+    const gone = structuredClone(comments.comment(id))
+    comments.clear(id)
+    comments.restore(id, gone)
+    expect(comments.comment(id)).toEqual(gone)
   })
 })
 

@@ -1,5 +1,7 @@
 import { SRV } from "spell/server"
 
+import { ThreadFacts } from "spell/epic/comments"
+import { EpicHome } from "spell/epic/config/EpicHome"
 import { DataFile } from "spell/epic/data/DataFile"
 
 import { CommentList, CommentsError, type Comment, type IdentifiedComment } from "./CommentList"
@@ -50,9 +52,12 @@ export class GuideInbox {
     CommentList.migrate(this.comments)
   }
 
-  /** The comments, to read or change (in place). */
+  /**
+   * The comments, to read or change (in place).
+   * - what's written through it names this machine's person (`EpicHome.personName()`, read when something's written)
+   */
   get commentList(): CommentList {
-    return new CommentList(this.comments)
+    return new CommentList(this.comments, { person: () => EpicHome.personName() })
   }
 
   ////////////////
@@ -91,7 +96,7 @@ export class GuideInbox {
   takeSent(): GuideSend | null {
     if (!this.hasNewSend) return null
     const before = this.handedOver ? Date.parse(this.handedOver) : -Infinity
-    const comments = this.sentComments.filter((comment) => Date.parse(CommentList.lastWordsAt(comment)) > before)
+    const comments = this.sentComments.filter((comment) => Date.parse(ThreadFacts.lastWordsAt(comment)) > before)
     this.handedOver = this.sent
     return comments.length ? { at: this.sent!, comments } : null
   }

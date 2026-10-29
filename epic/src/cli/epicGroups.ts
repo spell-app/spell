@@ -1304,6 +1304,10 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
     "--dry-run": "only say what it would do",
     "--json": "print what it did as JSON"
   },
-  whoami: { "--json": "print it as JSON" },
+  whoami: {
+    "--rename": "keep the name, and write it over your old one wherever it says who wrote something",
+    "--dry-run": "with --rename:  only say what it would change",
+    "--json": "print it as JSON"
+  },
   whois: { "--json": "print it as JSON" }
 }

@@ -345,7 +345,8 @@ async function walk() {
 
 /**
  * Claude's side, on the copy:  `epic inbox apply <copy>` (the tool, in this process):  each COMMENT lands on its test
- * as Owen's reply (`<epic-reply from="Owen">`), in its details:  the passed one's and the not-now one's.
+ * as the person's reply (`<epic-reply from="<name>">`, no `agent`;  epic `epic-friend` P2), in its details:  the
+ * passed one's and the not-now one's.
  */
 async function applied() {
   const tool = new PlanDocCommands({ files: new PlanDocFiles({ root: CONTENT, content: CONTENT }) })
@@ -361,7 +362,9 @@ async function applied() {
     ["v1", PASSED_COMMENT, "test passed"],
     ["v5", NOTNOW_COMMENT, "test not now"]
   ]) {
-    const reply = new RegExp(`<epic-reply[^>]*from="Owen"[^>]*re="${re}"[^>]*>\\s*<p>\\s*${comment.replace(/ /g, "\\s+")}\\s*</p>`)
+    const reply = new RegExp(
+      `<epic-reply(?![^>]*\\bagent=)[^>]*from="[^"]+"[^>]*re="${re}"[^>]*>\\s*<p>\\s*${comment.replace(/ /g, "\\s+")}\\s*</p>`
+    )
     if (!reply.test(html)) problems.push(`after apply:  ${id}'s comment isn't its reply ("${re}")`)
   }
 }

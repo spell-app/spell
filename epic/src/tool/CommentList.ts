@@ -1,3 +1,5 @@
+import { ThreadFacts } from "spell/epic/comments"
+
 /** A kind of block (`table`, `field` ...):  lower case;  the page's runtime names them (`BlockAnchors.js`). */
 const KIND = /^[a-z][a-z-]{0,19}$/
 
@@ -19,8 +21,11 @@ const STATUSES: readonly string[] = ["new", "taken", "answered"]
 /** How Owen closes a thread (`resolve()`):  "that's good", or "skip it". */
 const RESOLUTIONS: readonly string[] = ["good", "skip"]
 
-/** Who writes Owen's replies (`reply()`):  the name on them. */
-const OWEN = "Owen"
+/** Who wrote a person's words, when nobody said (`CommentList`'s `person`):  as `EpicHome.personName()` has it. */
+const SOMEONE = "someone"
+
+/** The agent Claude's answers are marked as (`answer()`):  `agent: "claude"` (`ThreadFacts.agentOf()`). */
+const CLAUDE_AGENT = "claude"
 
 /** A commit, as Claude names one under an answer (`answer()`):  7-40 hex digits. */
 const COMMIT = /^[0-9a-f]{7,40}$/
@@ -79,21 +84,41 @@ CommentsError.prototype.name = "CommentsError"
  *   - `answered`:  Claude answered it (an epic page's:  in the doc;  `replies` may hold the answer)
  * - a THREAD (Owen, 2026-10-10:  "the entire comment thread should be in one collapsable pane"):  the comment, then
  *   `replies` in order, Claude's (`answer()`) and Owen's (`reply()`), then maybe `done` (`resolve()`)
- *   - WHOSE TURN (`turnOf()`):  Owen's once Claude spoke last;  Claude's while Owen did;  nobody's once done
- *   - WAITING (`waiting`):  Claude's turn, and he hasn't taken it yet.  So a reply on a thread is new work, as a
+ *   - WHOSE TURN (`ThreadFacts.turnOf()`):  the person's once Claude spoke last;  Claude's while a person did;
+ *     nobody's once done
+ *   - WAITING (`waiting`, `ThreadFacts.isWaiting()`):  Claude's turn, and he hasn't taken it yet.  So a reply on a thread is new work, as a
  *     new comment is (`/epic review`, `/airplane land`, `epic comments gather`)
  *     - an epic page's waiting comment goes to Claude with its page's Send, as a mark does:
- *       `ReviewInbox.unsentComments`, by Owen's last words (`lastWordsAt()`)
+ *       `ReviewInbox.unsentComments`, by a person's last words (`ThreadFacts.lastWordsAt()`)
  *   - WORKING (`setWorking()`):  Claude is thinking about it now;  the page shows a "Claude: thinking…" stub at the
  *     thread's end until his answer lands (`answer()` turns it off).  What Owen said before it counts as read:  not
  *     waiting any more, and his last reply no longer his to change (a new one goes after it)
+ * - WHO WROTE IT (epic `epic-friend` P2):  every entry names its person, `by`;  Claude's answers are marked
+ *   `agent: "claude"` too, `by` naming whose session wrote them (`ThreadFacts.agentOf()`)
+ *   - the person:  the list's `person`, the page server's or the command's (`EpicHome.personName()`), never the page's
  * - pure:  no files;  the owner reads and writes them under its lock
  ****************/
 export class CommentList {
-  /** - `comments`:  the inbox's record, by id;  edited IN PLACE, any key spelt the other way respelt first (`migrate()`) */
-  constructor(readonly comments: Record<string, Comment>) {
+  /**
+   * - `comments`:  the inbox's record, by id;  edited IN PLACE, any key spelt the other way respelt first (`migrate()`)
+   * - `person`:  who is writing through it, stamped as `by` on what they write and on Claude's answers;
+   *   a function is asked only when something is written.  Default:  "someone"
+   */
+  constructor(
+    readonly comments: Record<string, Comment>,
+    { person = SOMEONE }: { person?: string | (() => string) } = {}
+  ) {
     CommentList.migrate(comments)
+    this.whoWrites = typeof person === "function" ? person : () => person
   }
+
+  /** Who is writing through it:  the name stamped as `by` (`person`, asked when something's written). */
+  get person(): string {
+    return this.whoWrites()
+  }
+
+  /** The constructor's `person`, as a function. */
+  private readonly whoWrites: () => string
 
   ////////////////
   // ## Ids
@@ -139,6 +164,7 @@ export class CommentList {
    */
   static migrate(this: void, comments: Record<string, Comment>): Record<string, Comment> {
     if (!comments || typeof comments !== "object") return comments
+    CommentList.markAgents(comments)
     // spelt as the file keys it, or no comment id at all
     const keyed = (id: string) => CommentList.keyOf(id) === id
     if (Object.keys(comments).every(keyed)) return comments
@@ -154,6 +180,24 @@ export class CommentList {
     for (const [id] of ordered) delete comments[id]
     for (const [id, comment] of ordered) comments[id] = comment
     return comments
+  }
+
+  /**
+   * Mark Claude's old answers on `comments`' threads as his, IN PLACE:  `agent: "claude"` on each reply written before
+   * the marker (`ThreadFacts.isOldClaudes()`:  by "Claude", dated before `AGENTS_MARKED`);  did it change any?
+   * - the inboxes' half of the migration `agents-marked` (epic `epic-friend` P2):  every read sees them marked, and the
+   *   next write keeps them so;  `epic migrate` marks every inbox in the content folder at once
+   * - IDEMPOTENT:  a marked reply is left
+   */
+  static markAgents(this: void, comments: Record<string, Comment>): boolean {
+    let changed = false
+    for (const comment of Object.values(comments ?? {}))
+      for (const reply of Array.isArray(comment?.replies) ? comment.replies : [])
+        if (reply && typeof reply === "object" && ThreadFacts.isOldClaudes(reply)) {
+          reply.agent = CLAUDE_AGENT
+          changed = true
+        }
+    return changed
   }
 
   ////////////////
@@ -172,17 +216,17 @@ export class CommentList {
    * (`isWaiting()`).
    */
   get waiting(): IdentifiedComment[] {
-    return this.all.filter((comment) => CommentList.isWaiting(comment))
+    return this.all.filter((comment) => ThreadFacts.isWaiting(comment))
   }
 
   /**
    * The waiting comments a Send at `sent` (ISO;  `null`:  never sent) has NOT handed over:
-   * Owen's last words newer than it (`lastWordsAt()`), all of them before the first send.
+   * a person's last words newer than it (`ThreadFacts.lastWordsAt()`), all of them before the first send.
    * - an epic page's Send (`ReviewInbox.unsentComments`) and a guide's (`GuideInbox.unsentComments`) alike
    */
   unsentSince(sent: string | null): IdentifiedComment[] {
     const since = sent ? Date.parse(sent) : -Infinity
-    return this.waiting.filter((comment) => Date.parse(CommentList.lastWordsAt(comment)) > since)
+    return this.waiting.filter((comment) => Date.parse(ThreadFacts.lastWordsAt(comment)) > since)
   }
 
   /**
@@ -192,42 +236,7 @@ export class CommentList {
   sentBy(sent: string | null): IdentifiedComment[] {
     if (!sent) return []
     const at = Date.parse(sent)
-    return this.waiting.filter((comment) => Date.parse(CommentList.lastWordsAt(comment)) <= at)
-  }
-
-  /**
-   * Whose turn it is on `comment`'s thread:
-   * - `done`:  Owen closed it (`resolve()`)
-   * - `owen`:  Claude spoke last.  Also an epic page's comment answered in the doc, with no words here.
-   * - `claude`:  Owen spoke last (the comment, or his reply).  Claude may have TAKEN it, but hasn't answered yet.
-   */
-  static turnOf(comment: Comment): Turn {
-    if (comment.done) return "done"
-    const last = comment.replies?.at(-1)
-    if (last) return last.by === OWEN ? "claude" : "owen"
-    return comment.status === "answered" ? "owen" : "claude"
-  }
-
-  /** Is `comment` new work for Claude:  his turn, and not taken (nor being worked on) since Owen last spoke? */
-  static isWaiting(comment: Comment): boolean {
-    if (CommentList.turnOf(comment) !== "claude") return false
-    const spoke = comment.replies?.findLast((reply) => reply.by === OWEN)?.at ?? comment.at
-    const held = heldSince(comment)
-    return !held || held < spoke
-  }
-
-  /**
-   * When Owen last changed his words on `comment`'s thread, ISO:
-   * the latest of the comment, his replies, and their edits.
-   * - what an epic page's Send compares with its `sent` (`ReviewInbox.unsentComments`):
-   *   words newer than the last send haven't gone to Claude yet
-   */
-  static lastWordsAt(comment: Comment): string {
-    const times = [comment.at, comment.edited]
-    for (const reply of comment.replies ?? []) if (reply.by === OWEN) times.push(reply.at, reply.edited)
-    return times
-      .filter((each): each is string => !!each)
-      .reduce((latest, each) => (Date.parse(each) > Date.parse(latest) ? each : latest))
+    return this.waiting.filter((comment) => Date.parse(ThreadFacts.lastWordsAt(comment)) <= at)
   }
 
   /** Comment `id` (`C3`, `c3`, `cm3`);  throws a 404 `CommentsError` when there's none. */
@@ -257,6 +266,7 @@ export class CommentList {
       label: short(where.label),
       excerpt: short(where.excerpt),
       text: checkedText(text),
+      by: this.person,
       at: now.toISOString(),
       status: "new"
     }
@@ -310,6 +320,7 @@ export class CommentList {
       at: stamp(comment.at) ?? new Date().toISOString(),
       status
     }
+    if (short(comment.by)) back.by = short(comment.by)
     if (typeof quote === "string" && quote.trim()) {
       back.quote = quote.trim().slice(0, MAX_QUOTE)
       back.offset = Number.isInteger(offset) && Number(offset) >= 0 ? Number(offset) : 0
@@ -355,7 +366,7 @@ export class CommentList {
     if (pending) {
       pending.text = words
       pending.edited = now.toISOString()
-    } else comment.replies = [...(comment.replies ?? []), { by: OWEN, at: now.toISOString(), text: words }]
+    } else comment.replies = [...(comment.replies ?? []), { by: this.person, at: now.toISOString(), text: words }]
   }
 
   /**
@@ -373,15 +384,9 @@ export class CommentList {
     delete this.comment(id).done
   }
 
-  /**
-   * Owen's pending reply on `comment`:  the last entry, his, not taken since, nor being worked on;  else
-   * `undefined`.
-   */
+  /** A person's pending reply on `comment` (`ThreadFacts.pendingReplyOf()`);  else `undefined`. */
   private pendingReply(comment: Comment): CommentReply | undefined {
-    const last = comment.replies?.at(-1)
-    if (last?.by !== OWEN) return undefined
-    const held = heldSince(comment)
-    return held && held >= last.at ? undefined : last
+    return ThreadFacts.pendingReplyOf(comment) ?? undefined
   }
 
   ////////////////
@@ -417,14 +422,15 @@ export class CommentList {
    *   thread, so it's Owen's turn, unless Claude spoke last already.
    * - `commit`:  the commit the answer was built in (the thread's Done line shows it);  throws a 400 when it isn't one
    * - Claude's done thinking about it:  its `working` goes
+   * - marked his (`agent: "claude"`), `by` the list's `person`:  whose session answered
    */
   answer(id: string, html = "", now = new Date(), commit?: string): void {
     const comment = this.comment(id)
     const markup = String(html ?? "").trim()
     if (commit !== undefined && !COMMIT.test(commit)) throw new CommentsError(`"${commit}" isn't a commit`)
-    const reply: CommentReply = { by: "Claude", at: now.toISOString(), html: markup }
+    const reply: CommentReply = { by: this.person, agent: CLAUDE_AGENT, at: now.toISOString(), html: markup }
     if (commit) reply.commit = commit
-    if (markup || commit || CommentList.turnOf(comment) === "claude")
+    if (markup || commit || ThreadFacts.turnOf(comment) === "claude")
       comment.replies = [...(comment.replies ?? []), reply]
     if (comment.status === "new") comment.status = "answered"
     delete comment.working
@@ -470,6 +476,8 @@ export type Comment = Required<Omit<CommentPlace, "quote" | "offset">> &
   Pick<CommentPlace, "quote" | "offset"> & {
     /** Owen's words, as typed:  plain text, blank lines between paragraphs */
     text: string
+    /** who wrote them (epic `epic-friend` P2):  the person's name, as the page server stamped it;  none before */
+    by?: string
     /** when written, ISO */
     at: string
     /** when last edited, ISO */
@@ -487,48 +495,46 @@ export type Comment = Required<Omit<CommentPlace, "quote" | "offset">> &
   }
 
 /**
- * One entry of a comment's thread:
- * - Claude's (`by` not `Owen`):  `html`, as is (`""`:  answered elsewhere, an epic page's in the doc), and `commit`,
- *   the commit it was built in
- * - Owen's (`by: "Owen"`):  `text`, as typed (plain, as a comment's), and `edited`, when he last changed it
+ * One entry of a comment's thread (who wrote it:  `ThreadFacts.agentOf()`):
+ * - Claude's (`agent: "claude"`;  before the marker, `by: "Claude"`):  `html`, as is (`""`:  answered elsewhere, an
+ *   epic page's in the doc), and `commit`, the commit it was built in;  `by` whose session wrote it
+ * - a person's (no `agent`, `by` their name):  `text`, as typed (plain, as a comment's), and `edited`, when they last
+ *   changed it
  */
-export type CommentReply = { by: string; at: string; html?: string; text?: string; commit?: string; edited?: string }
+export type CommentReply = {
+  /** who wrote it, or whose session did:  a person's name (`"Ana"`);  Claude's before the marker:  `"Claude"` */
+  by: string
+  /** the agent that wrote it (`"claude"`);  none:  the person did */
+  agent?: string
+  at: string
+  html?: string
+  text?: string
+  commit?: string
+  edited?: string
+}
 
 /** How Owen closed a thread:  "that's good", or "skip it". */
 export type Resolution = "good" | "skip"
 
-/** Whose turn it is on a thread (`CommentList.turnOf()`). */
-export type Turn = "owen" | "claude" | "done"
+/** Whose turn it is on a thread (`ThreadFacts.turnOf()`):  a person's, Claude's, or nobody's once done. */
+export type Turn = "person" | "claude" | "done"
 
 /** A comment with its id (`c3`). */
 export type IdentifiedComment = Comment & { id: string }
 
-/** When Claude last took `comment`, ISO;  `taken` with no record of it:  when written;  never taken:  `undefined`. */
-function takenAt(comment: Comment): string | undefined {
-  return comment.taken?.at ?? (comment.status === "taken" ? comment.at : undefined)
-}
-
-/**
- * Since when Claude has held `comment`, ISO:  the later of when he took it (`takenAt()`) and when he started thinking
- * about it (`working`);  `undefined` for neither.
- */
-function heldSince(comment: Comment): string | undefined {
-  const times = [takenAt(comment), comment.working].filter((each): each is string => !!each)
-  return times.sort().at(-1)
-}
-
-/** `reply` as `restore()` keeps it:  one entry;  none when it's neither Claude's answer nor Owen's words. */
+/** `reply` as `restore()` keeps it:  one entry;  none when it's neither Claude's answer nor a person's words. */
 function restoredReply(reply: CommentReply, fallback: string): CommentReply[] {
   if (typeof reply?.by !== "string") return []
   const at = stamp(reply.at) ?? fallback
-  if (reply.by === OWEN) {
+  const agent = ThreadFacts.agentOf(reply)
+  if (!agent) {
     if (typeof reply.text !== "string" || !reply.text.trim()) return []
-    const kept: CommentReply = { by: OWEN, at, text: checkedText(reply.text) }
+    const kept: CommentReply = { by: reply.by, at, text: checkedText(reply.text) }
     if (stamp(reply.edited)) kept.edited = stamp(reply.edited)
     return [kept]
   }
   if (typeof reply.html !== "string") return []
-  const kept: CommentReply = { by: reply.by, at, html: reply.html }
+  const kept: CommentReply = { by: reply.by, agent, at, html: reply.html }
   if (typeof reply.commit === "string" && COMMIT.test(reply.commit)) kept.commit = reply.commit
   return [kept]
 }

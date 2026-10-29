@@ -32,10 +32,18 @@ export class EpicThreadMessage extends E.UIComponent<typeof epicThreadMessageVoc
     delegatesFocus: false
   } satisfies Partial<E.ElementSetup>
 
-  /** Who, in bold, before what was said:  "You:", "Claude:";  none on the Done line. */
+  /**
+   * Who, in bold, before what was said (epic `epic-friend` P2):  "You:", "Ana:", "Claude:", "Claude (Ana):";
+   * none on the Done line.
+   * - a person's words:  "You:" when they're the reader's (`mine`), or name nobody (a comment from before names)
+   * - Claude's:  "Claude (Ana):" for another person's session's, else "Claude:"
+   */
   get who(): string | undefined {
-    if (this.by === "owen") return this.translationForKey("owen")
-    if (this.by === "claude" || this.by === "thinking") return this.translationForKey("claude")
+    const person = this.person?.trim()
+    if (this.by === "person")
+      return this.mine || !person ? this.translationForKey("you") : this.translationForKey("person", { person })
+    if (this.by === "claude" || this.by === "thinking")
+      return person && !this.mine ? this.translationForKey("claudeOf", { person }) : this.translationForKey("claude")
     return undefined
   }
 

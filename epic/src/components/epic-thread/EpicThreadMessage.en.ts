@@ -23,7 +23,7 @@ export const epicThreadMessageVocabulary = {
   description:
     "One message of a comment's thread (`<epic-thread>`, which draws it in its shadow root, never written in a " +
     "doc):  Owen's words plain on the thread's ivory, Claude's in a light violet box, the green Done line, or " +
-    'Claude\'s "thinking…" stub;  a bold "You:" / "Claude:" starts its first line, its time in its top right ' +
+    'Claude\'s "thinking…" stub;  a bold "You:" / "Ana:" / "Claude:" / "Claude (Ana):" starts its first line, its time in its top right ' +
     "corner.  Every message but the last a step smaller and quieter.",
   attributes: [
     {
@@ -32,8 +32,20 @@ export const epicThreadMessageVocabulary = {
       values: MESSAGE_BY,
       required: true,
       description:
-        "Who said it, which its colour says:  `owen`, `claude`, `done` (the Done line, a check where a name would " +
+        "Who said it, which its colour says:  `person`, `claude`, `done` (the Done line, a check where a name would " +
         "be), `thinking` (Claude at work on it)."
+    },
+    {
+      name: "person",
+      kind: "string",
+      description:
+        "Whose words (`by=person`), or whose session's Claude (`by=claude`):  a person's name (epic `epic-friend` " +
+        "P2).  None:  the reader's own words, or an old reply of Claude's."
+    },
+    {
+      name: "mine",
+      kind: "boolean",
+      description: "`person` is whoever is reading:  `You:`, or plain `Claude:` for their own session's."
     },
     { name: "at", kind: "string", description: "When, ISO:  its tooltip says the full local date and time." },
     {
@@ -62,8 +74,18 @@ export const epicThreadMessageVocabulary = {
   ],
   states: [],
   texts: [
-    { key: "owen", text: "You:", description: "Who, before Owen's words." },
-    { key: "claude", text: "Claude:", description: "Who, before Claude's words, and his thinking stub." }
+    { key: "you", text: "You:", description: "Who, before the reader's own words." },
+    { key: "person", text: "{person}:", description: "Who, before another person's words." },
+    {
+      key: "claude",
+      text: "Claude:",
+      description: "Who, before Claude's words and his thinking stub:  the reader's own session's, or an old reply."
+    },
+    {
+      key: "claudeOf",
+      text: "Claude ({person}):",
+      description: "Who, before the words of another person's session's Claude."
+    }
   ],
   children: []
 } as const satisfies EpicVocabulary

@@ -138,6 +138,14 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     `<epic-thread>` family, the docs runtime's comments and the epic tool's `CommentList` (epic `epic-engine` P3).
     - whose turn, Owen's words Claude hasn't had, its id as Owen sees it (`C3`), the few words it's on, its times,
       where a taken comment went (`takenInto()`)
+    - WHO WROTE IT, the ONE check (epic `epic-friend` P2, Q9):  `isAgents()` / `agentOf()`, `lastPersonReply()`,
+      `speakerOf()` (You, a name, Claude, Claude (Ana)), for a page's `<epic-reply>` and a comment's reply alike
+      - an agent's words carry a marker:  `<epic-reply from="Ana" agent="claude">`, `{ by: "Ana", agent: "claude" }`
+        (`from` / `by`:  who wrote it, or whose session did);  no marker:  the person did
+      - a reply by "Claude" with no marker, dated before `AGENTS_MARKED`:  Claude's (the old rule);  the migration
+        `agents-marked` and `CommentList.markAgents()` write the marker on them
+      - Claude's hand-written `<epic-reply from="Claude">` is marked on the way in (`IncomingHtml.markClaudes()`),
+        `from` the session's person
     - pure, node-safe at import, NOT in the `spell-epic` barrel:  `spell-comments.js` imports it alone, with no Spell UI
   - `review/` -- `ReviewClient`, one per page:  the review inbox's reads and writes (`/api/epics/review/*`).
     - Also token refresh, polling, and note-draft backups (the old page runtime's localStorage keys).
@@ -310,6 +318,11 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       `$SPELL_EPIC_HOME` (tests set it), else `~/.spell-epic`;  `folder()`, `subfolder(name)`
       - and who is at the keyboard:  `person()`, the name kept in its `person.json5`, else git's `user.name`;
         `keepPerson(name)` (`epic whoami <name>`, `epic init`).  The name is the identity:  no id beside it.
+      - `personName()`:  the name put on what they write, "someone" when nobody said (epic `epic-friend` P2):
+        the page server stamps a comment's and a reply's `by` with it (never the page's word), the tool passes it to
+        `PlanDoc` (`PlanDocOptions.person`) for kept notes, picks, test runs, log lines and Claude's status cards
+        and replies;  the phrases in text are `AuthorWords`'s, the one list `epic whoami --rename` (`NameSweep`) reads
+
       - the repo list, the ask listeners, the worktree guard, ditched files, the server prune and the window registry
         all ask it;  plain `node` loads it
     - `Transcript`:  one transcript, read one way:  a line (`parseLine()`), a message's blocks (`blocksOf()`), its
@@ -1954,8 +1967,8 @@ Each kind of page has ONE name, written everywhere a person reads it.
       the comments' code saves, keeps the box (a `<textarea>`, slotted) and draws it again
     - what it shows is worked out by `ThreadFacts` (`spell/epic/comments`), the comments' code's too
     - A thread is the comment, then its `replies` in order (Claude's answers, Owen's replies), then maybe `done`.
-    - WHOSE TURN (`CommentList.turnOf()`, sent by the GET as each comment's `turn`):
-      - `owen`:  Claude spoke last.  Also an epic page's comment answered in the doc, with no words on the thread.
+    - WHOSE TURN (`ThreadFacts.turnOf()`, sent by the GET as each comment's `turn`):
+      - `person`:  Claude spoke last (`owen` before epic `epic-friend` P2;  `withTurns()` reads it so).  Also an epic page's comment answered in the doc, with no words on the thread.
       - `claude`:  Owen spoke last, his comment or his reply.  Claude may have taken it, not answered yet.
       - `done`:  Owen closed it.
     - Where (Owen, 2026-10-10:  "show them under the paragraph where they were defined"):

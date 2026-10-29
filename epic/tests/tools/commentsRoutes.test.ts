@@ -146,18 +146,20 @@ function inboxOf(relative: string) {
   return JSON.parse(readFileSync(join(root, relative.replace(/\.html$/, ".inbox.json5")), "utf8"))
 }
 
-test("adds a comment to the page's INBOX FILE, never the page;  the answer lists the page's comments", async () => {
+test("adds a comment to the page's INBOX FILE, never the page, stamped with the server's person;  the answer lists them", async () => {
   const { status, answer } = await post({
     page: "/guides/solid/solid-2.html",
     action: "add",
     ...ON_TABLE,
-    text: "Too wide on a phone?"
+    text: "Too wide on a phone?",
+    // the page's word for who wrote it counts for nothing:  the server stamps its own person (epic `epic-friend` P2)
+    by: "Mallory"
   })
   expect(status).toBe(200)
   expect(answer).toMatchObject({ ok: true, id: "c1", comments: [{ id: "c1", ...ON_TABLE, status: "new" }] })
   expect(inboxOf("guides/solid/solid-2.html")).toMatchObject({
     version: 1,
-    comments: { c1: { ...ON_TABLE, text: "Too wide on a phone?", status: "new" } }
+    comments: { c1: { ...ON_TABLE, text: "Too wide on a phone?", by: "Owen", status: "new" } }
   })
   expect(readFileSync(join(root, "guides/solid/solid-2.html"), "utf8")).toBe(PAGE)
 })
@@ -312,13 +314,16 @@ test("a THREAD:  `reply` (saved as typed), `resolve` (that's good / skip it), `r
   expect(comments.find((each: { id: string }) => each.id === id).turn).toBe("claude")
   GuideInbox.update(inbox, (list) => list.answer(id, "<p>Because.</p>"))
   const read = JSON.parse((await ask(port, "GET", `/api/docs/comments?page=${encodeURIComponent(page)}`)).text)
-  expect(read.comments.find((each: { id: string }) => each.id === id).turn).toBe("owen")
+  expect(read.comments.find((each: { id: string }) => each.id === id).turn).toBe("person")
   // typed in two goes:  one reply, the second save's words
   await post({ page, action: "reply", id, text: "Say" })
   const replied = await post({ page, action: "reply", id, text: "Say more" })
   expect(replied.answer.comments.find((each: { id: string }) => each.id === id)).toMatchObject({
     turn: "claude",
-    replies: [{ by: "Claude" }, { by: "Owen", text: "Say more" }]
+    replies: [
+      { by: "Owen", agent: "claude" },
+      { by: "Owen", text: "Say more" }
+    ]
   })
   // new work for Claude, as a new comment is
   expect(GuideInbox.read(inbox).commentList.waiting.map((each) => each.id)).toContain(id)
@@ -329,7 +334,7 @@ test("a THREAD:  `reply` (saved as typed), `resolve` (that's good / skip it), `r
     done: { how: "good" }
   })
   const reopened = await post({ page, action: "reopen", id })
-  expect(reopened.answer.comments.find((each: { id: string }) => each.id === id).turn).toBe("owen")
+  expect(reopened.answer.comments.find((each: { id: string }) => each.id === id).turn).toBe("person")
   expect((await post({ page, action: "resolve", id, how: "skip" })).status).toBe(200)
   expect(GuideInbox.read(inbox).commentList.comment(id).done?.how).toBe("skip")
   expect((await post({ page, action: "resolve", id, how: "maybe" })).status).toBe(400)
@@ -357,7 +362,7 @@ test("WORKING:  `epic comments working` -- the GET carries it (the thread's thin
     const answer = join(root, "answer.html")
     writeFileSync(answer, "<p>Because.</p>")
     expect(await run(["answer", file, id], { file: answer })).toBe(0)
-    expect(await shown()).toMatchObject({ turn: "owen" })
+    expect(await shown()).toMatchObject({ turn: "person" })
     expect((await shown()).working).toBeUndefined()
     // a comment that isn't there:  1;  on | off missing:  usage
     expect(await run(["working", file, "c99", "on"], {})).toBe(1)

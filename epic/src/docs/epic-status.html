@@ -253,6 +253,16 @@
                     <td>yes</td>
                   </tr>
                   <tr>
+                    <td><code>from</code></td>
+                    <td>text</td>
+                    <td>
+                      Whose session wrote it (epic <code>epic-friend</code> P2): the person's name, <code>Ana</code>,
+                      drawn <code>Claude (Ana) • Done</code> to anyone but Ana, and plain <code>Claude • Done</code> to
+                      her. None (a card written before): <code>Claude</code>.
+                    </td>
+                    <td></td>
+                  </tr>
+                  <tr>
                     <td><code>done-at</code></td>
                     <td>a time, <code>2026-10-06 23:55</code></td>
                     <td>
@@ -323,7 +333,10 @@
                     </tr>
                     <tr>
                       <td><code>who</code></td>
-                      <td>The heading's left: <code>Claude • Underway</code> / <code>Claude • Done</code>.</td>
+                      <td>
+                        The heading's left: <code>Claude • Underway</code> / <code>Claude • Done</code>;
+                        <code>Claude (Ana) • Done</code> for a card another person's session wrote (<code>from</code>).
+                      </td>
                     </tr>
                     <tr>
                       <td><code>date</code></td>

@@ -3,6 +3,7 @@ import { relative, resolve } from "node:path"
 import { setTimeout as sleep } from "node:timers/promises"
 
 import { EpicCommandError, duration, stringFlag } from "spell/epic/command/command.types"
+import { ThreadFacts } from "spell/epic/comments"
 import { PageInboxes } from "spell/epic/tools/PageInboxes"
 
 import { PlanDocError, type ItemDescription, type KeptNote, type MarkResult, type OptionCard } from "./planDoc.types"
@@ -12,6 +13,7 @@ import { GuideInbox, type GuideSend } from "./GuideInbox"
 import type { PlanDoc } from "./PlanDoc"
 import type { PlanReader } from "./PlanReader"
 import type { Flags, PlanDocCommands } from "./PlanDocCommands"
+import { AuthorWords } from "./AuthorWords"
 import { PlanItem } from "./PlanItem"
 import {
   ACTIONS,
@@ -768,7 +770,7 @@ function urgencyOn(plan: PlanDoc, entry: ListedUrgency): UrgencyApplied {
   if (!plan.findItem(entry.id)) return { entry, did: "no such item:  urgency dropped", changed: false }
   const did = plan.setCalm(entry.id, entry.calm)
   if (!did) return { entry, did: `${calmWords(entry.calm)} already`, changed: false }
-  plan.log(`${entry.id.toUpperCase()} ${did} (Owen, from its id chip)`)
+  plan.log(`${entry.id.toUpperCase()} ${did} ${AuthorWords.fromChip(plan.person)}`)
   return { entry, did: `marked ${did}`, changed: true }
 }
 
@@ -802,7 +804,7 @@ function workOf(mark: { action: string } | undefined): "revisit" | "details" {
 
 /**
  * Comment `comment`'s lines, as `inbox` and `wait` print it, each starting `indent`:
- * its id, where it is, the quote, Owen's words and when;  then his latest reply on the thread, the work now.
+ * its id, where it is, the quote, the person's words and when;  then their latest reply on the thread, the work now.
  * - `unsent`:  says so, waiting for Send
  */
 function commentLines(comment: IdentifiedComment, indent: string, unsent = false): string[] {
@@ -811,8 +813,8 @@ function commentLines(comment: IdentifiedComment, indent: string, unsent = false
     `${indent}- ${CommentList.label(comment.id)}  on ${comment.anchor} (${comment.kind})${quote}  ` +
       `"${comment.text.slice(0, 120)}"  (${comment.at})${unsent ? "  · unsent" : ""}`
   ]
-  const reply = comment.replies?.findLast((each) => each.by === "Owen")
-  if (reply) lines.push(`${indent}  Owen replied:  "${reply.text!.slice(0, 160)}"  (${reply.at})`)
+  const reply = ThreadFacts.lastPersonReply(comment)
+  if (reply?.text) lines.push(`${indent}  ${reply.by} replied:  "${reply.text.slice(0, 160)}"  (${reply.at})`)
   return lines
 }
 

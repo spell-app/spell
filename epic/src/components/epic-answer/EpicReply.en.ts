@@ -21,7 +21,21 @@ export const epicReplyVocabulary = {
     "children.  In an item, one of its thread's brown block;  Claude's newest wears an orange edge and NEW until " +
     "Owen has seen it.",
   attributes: [
-    { name: "from", kind: "string", description: "Who wrote it (`Claude`, `Owen`)." },
+    {
+      name: "from",
+      kind: "string",
+      description:
+        "Who wrote it, a person's name (`Ana`);  on an agent's reply, whose session wrote it.  Drawn `You` when " +
+        "it's the reader's own;  before epic `epic-friend` P2, Claude's said `Claude`."
+    },
+    {
+      name: "agent",
+      kind: "string",
+      description:
+        "The agent that wrote it (`claude`), else none:  the person in `from` did.  Drawn `Claude (Ana)`, or `Claude` " +
+        "for the reader's own session.  An old reply without it is Claude's when `from` says `Claude` " +
+        "(`ThreadFacts.agentOf()`);  the migration `agents-marked` adds it."
+    },
     {
       name: "at",
       kind: "string",
@@ -33,13 +47,18 @@ export const epicReplyVocabulary = {
   events: [],
   slots: [{ name: "", description: "The reply." }],
   parts: [
-    { name: "base", description: "The card:  Claude's violet, Owen's ivory (`from`)." },
+    { name: "base", description: "The card:  an agent's look, or every person's (`agent`)." },
     {
       name: "header",
       description: "Its heading band, a flex row:  the fold chevron, `who` left, `date` right;  a click folds it."
     },
     { name: "toggle", description: "The fold chevron, a `<button>`, first in the band;  only with a body." },
-    { name: "who", description: "The heading's left:  `<from> · re: <re>`;  wraps within itself." },
+    {
+      name: "who",
+      description:
+        "The heading's left:  who (`You`, a name, `Claude`, `Claude (Ana)`) and `re: <re>`, after a round mark of " +
+        "its initial;  wraps within itself."
+    },
     {
       name: "new",
       description: "`NEW`, after `who`, on Claude's newest reply in an item until Owen has seen it (orange)."
@@ -63,6 +82,17 @@ export const epicReplyVocabulary = {
     { key: "foldTip", text: "Close this reply", description: "Tooltip of its fold button while open." },
     { key: "unfoldTip", text: "Open this reply", description: "Tooltip of its fold button while folded." },
     { key: "re", text: "re: {re}", description: "What the reply is about, in its heading." },
+    { key: "you", text: "You", description: "Who wrote it, in its heading:  the reader (`from` is their name)." },
+    {
+      key: "claude",
+      text: "Claude",
+      description: "Who wrote it, in its heading:  Claude, the reader's own session's, or a reply from before `agent`."
+    },
+    {
+      key: "claudeOf",
+      text: "Claude ({person})",
+      description: "Who wrote it, in its heading:  another person's session's Claude (`agent`, `from`)."
+    },
     { key: "new", text: "NEW", description: "The tag on Claude's newest reply, until Owen has seen it." },
     {
       key: "newTip",

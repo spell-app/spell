@@ -3,6 +3,7 @@ import { dirname, join, posix, relative } from "node:path"
 
 import { escapeHTML } from "spell/util/string"
 import { PhaseIds } from "spell/epic/phases"
+import { ThreadFacts } from "spell/epic/comments"
 import { EpicConfig } from "spell/epic/config/EpicConfig"
 import { CommentList, type IdentifiedComment } from "spell/epic/tool/CommentList"
 import { GuideInbox } from "spell/epic/tool/GuideInbox"
@@ -209,9 +210,11 @@ export class GuideChanges {
         ? ` (<q>${escapeHTML(comment.excerpt)}</q>)`
         : ""
     const words = htmlOf(comment.text).join("")
-    // a reply on its thread since Claude answered:  his latest words are the work now
-    const reply = comment.replies?.findLast((each) => each.by === "Owen" && each.text)
-    const replied = reply ? `<p>Owen replied on the thread:</p>${htmlOf(reply.text!).join("")}` : ""
+    // a reply on its thread since Claude answered:  the person's latest words are the work now
+    const reply = ThreadFacts.lastPersonReply(comment)
+    const replied = reply?.text
+      ? `<p>${escapeHTML(reply.by)} replied on the thread:</p>${htmlOf(reply.text).join("")}`
+      : ""
     return `<li><a href="${this.hrefTo(page, targetOf(comment.anchor))}">${escapeHTML(where || comment.anchor)}</a>${about}, <code>${CommentList.label(comment.id)}</code>:  ${words}${replied}</li>`
   }
 

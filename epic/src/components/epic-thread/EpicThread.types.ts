@@ -57,12 +57,12 @@ export const FLOPPY = "floppy"
 
 /**
  * Who said a message (`<epic-thread-message by>`), which its colour says:
- * - `owen`:  his words, plain on the thread's ivory
+ * - `person`:  a person's words, plain on the thread's ivory (whose:  its `person`, epic `epic-friend` P2)
  * - `claude`:  Claude's, a light violet box
  * - `done`:  the green Done line, once closed
  * - `thinking`:  Claude thinking about it now:  the stub his answer replaces
  */
-export const MESSAGE_BY = ["owen", "claude", "done", "thinking"] as const
+export const MESSAGE_BY = ["person", "claude", "done", "thinking"] as const
 
 /** One of `MESSAGE_BY`. */
 export type MessageBy = (typeof MESSAGE_BY)[number]

@@ -108,7 +108,9 @@ test("apply:  a sent pick on a judgement call's reply cards (I8) approves it wit
     j1.querySelector("epic-status")!.textContent!.replace(/\s+/g, " ").trim()
   ]).toEqual(["done", "approve", `Chose C · Option C: recorded, the call accepted; ${after.nextStepWords()}`])
   expect(after.findItem("q1")!.querySelector("epic-choices")!.getAttribute("chosen")).toBe("B")
-  expect(printed.join("\n")).toContain("J1  picked C:  Option C (a reply's options);  approved:  closed (accepted)")
+  expect(printed.join("\n")).toContain(
+    "J1  Owen picked C:  Option C (a reply's options);  approved:  closed (accepted)"
+  )
   expect(ReviewInbox.read(inboxFile).isEmpty).toBe(true)
 })
 
@@ -261,7 +263,7 @@ test("done C1 --file:  the answer goes on the comment's thread;  Owen's reply li
   writeFileSync(answer, "<p>Because.</p>\n")
   await commands().inbox.run("x", file, ["done", id], { file: answer, commit: "8c7e1d3" })
   expect(ReviewInbox.read(inboxFile).comments[id].replies).toEqual([
-    { by: "Claude", at: expect.any(String), html: "<p>Because.</p>", commit: "8c7e1d3" }
+    { by: "Owen", agent: "claude", at: expect.any(String), html: "<p>Because.</p>", commit: "8c7e1d3" }
   ])
   ReviewInbox.update(inboxFile, (inbox) => inbox.commentList.reply(id, "Say more"))
   await commands().inbox.run("x", file, [], {})
@@ -490,7 +492,7 @@ test("clear / done:  a pick riding on the mark (pick B, but ...) stays CHOSEN, w
   const j1 = after.findItem("j1")!
   expect(j1.querySelector("epic-choices")!.getAttribute("chosen")).toBe("B")
   expect(j1.querySelector('epic-status[state="noted"]')!.textContent).toMatch(/^Chose B · Option B:\s+recorded after/)
-  expect(after.toString()).toMatch(/J1 picked B:\s+Option B \(kept from the revisit\)/)
+  expect(after.toString()).toMatch(/J1 Owen picked B:\s+Option B \(kept from the revisit\)/)
   expect(ReviewInbox.read(inboxFile).isEmpty).toBe(true)
 })
 

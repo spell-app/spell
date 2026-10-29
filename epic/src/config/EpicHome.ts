@@ -63,6 +63,18 @@ export class EpicHome {
   }
 
   /**
+   * The name to put on what this machine's person writes (epic `epic-friend` P2):  `person()`'s, else "someone"
+   * (`SOMEONE`), so every reply, comment and log line names somebody.
+   * - NEVER throws
+   */
+  static personName(cwd = process.cwd()): string {
+    return EpicHome.person(cwd).name ?? EpicHome.SOMEONE
+  }
+
+  /** The name on what's written when nobody said who they are and git doesn't know:  "someone". */
+  static readonly SOMEONE = "someone"
+
+  /**
    * Keep `name` as this machine's person, in `person.json5`, from now on;  the person as now known.
    * - surrounding spaces dropped
    * - throws a `TypeError` for an empty name

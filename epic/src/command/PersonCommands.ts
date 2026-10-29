@@ -7,15 +7,18 @@ import { EpicHome, type EpicPerson } from "spell/epic/config/EpicHome"
 
 import { EXIT, EpicCommandError, parseVerbArgs } from "./command.types"
 import { EpicCheckout } from "./EpicCheckout"
+import { NameSweep, type SweepResult } from "./NameSweep"
 
 /****************
  * ### `PersonCommands`
  * `epic whoami [<name>]` and `epic whois <name>`:  who is at this machine's keyboard, and what the epics know about
- * someone (epic `epic-friend` P1).
+ * someone (epic `epic-friend` P1);  `epic whoami --rename <name>`:  a new name, written over the old one wherever it
+ * says who wrote something (P2, `NameSweep`).
  *
  * ```sh
  * epic whoami          # Ana Lima  (git's user.name)
  * epic whoami Ana      # you're Ana now, kept in ~/.spell-epic/person.json5
+ * epic whoami --rename Ana Lima --dry-run   # what renaming Ana would change, file by file
  * epic whois Owen      # Owen:  264 replies and comments in 31 places, last on 2026-10-29 ...
  * ```
  *
@@ -37,20 +40,50 @@ export class PersonCommands {
   }
 
   /**
-   * `epic whoami [<name>] [--json]`:  the name and where it came from;  with a name, keeps it first.
+   * `epic whoami [<name>] [--rename] [--dry-run] [--json]`:  the name and where it came from;  with a name, keeps it
+   * first.
    * - a name in several words is one name:  `epic whoami Ana Lima`
-   * - a new name, while pages still name the old one:  says how many, so the person knows
+   * - a new name, while pages still name the old one:  says how many, and how to rename them
+   * - `--rename`:  `rename()`
    * - Returns 0.
    */
   async whoami(args: string[]): Promise<number> {
-    const { positional, flags } = parseVerbArgs(args, ["json"])
+    const { positional, flags } = parseVerbArgs(args, WHOAMI_SWITCHES)
     const name = positional.join(" ").trim()
+    if (flags.rename) return this.rename(name, { dryRun: flags.dryRun === true, json: flags.json === true })
     const before = EpicHome.person()
     const person = name ? EpicHome.keepPerson(name) : before
     const stillNamed = name && before.name && before.name !== person.name ? this.activityOf(before.name).count : 0
     if (flags.json) CLI.out(JSON.stringify({ ...person, file: EpicHome.personFile(), before, stillNamed }, null, 2))
     else
       for (const line of PersonCommands.whoamiLines(person, { kept: Boolean(name), before, stillNamed })) CLI.out(line)
+    return EXIT.OK
+  }
+
+  /**
+   * `epic whoami --rename <name> [--dry-run] [--json]`:  keep `name`, and write it over the old one wherever the old
+   * one says who wrote something, in every page, part, inbox and data file of the content folder (`NameSweep`).
+   * - the old name:  the person's before, kept or git's
+   * - `dryRun`:  keeps nothing, writes nothing;  says what it would change
+   * - the same name, or no old name:  says so, changes nothing
+   * - Returns 0;  throws `EpicCommandError` (exit 2) with no name.
+   */
+  async rename(name: string, { dryRun = false, json = false }: { dryRun?: boolean; json?: boolean } = {}) {
+    if (!name)
+      throw new EpicCommandError(
+        "epic whoami --rename <name>:  to what?  e.g. epic whoami --rename Ana Lima",
+        EXIT.USAGE
+      )
+    const before = EpicHome.person()
+    // the same name, as written:  a change of case ("ana" -> "Ana") is still a rename
+    const same = before.name === name
+    const result: SweepResult =
+      before.name && !same
+        ? new NameSweep({ content: this.content }).run(before.name, name, { dryRun })
+        : { from: before.name ?? "", to: name, dryRun, count: 0, files: [] }
+    if (!dryRun) EpicHome.keepPerson(name)
+    if (json) CLI.out(JSON.stringify({ ...result, before, file: EpicHome.personFile() }, null, 2))
+    else for (const line of PersonCommands.renameLines(result, { before, same })) CLI.out(line)
     return EXIT.OK
   }
 
@@ -173,7 +206,10 @@ export class PersonCommands {
       if (before.name && before.name !== person.name) {
         lines.push(`  before:  ${before.name} (${SOURCE_WORDS[before.source]})`)
         if (stillNamed)
-          lines.push(`  ${stillNamed} replies and comments still name ${before.name}:  epic whois ${before.name}`)
+          lines.push(
+            `  ${stillNamed} replies and comments still name ${before.name}:  ` +
+              `epic whoami --rename ${person.name} rewrites them`
+          )
       }
       return lines
     }
@@ -183,6 +219,23 @@ export class PersonCommands {
       `${person.name}  (${person.source === "kept" ? `kept in ${file}` : SOURCE_WORDS[person.source]})`,
       ...(person.source === "git" ? ["  epic whoami <name> keeps another"] : [])
     ]
+  }
+
+  /** `epic whoami --rename`'s lines:  what changed (or would), then a line per file. */
+  static renameLines(result: SweepResult, { before, same }: { before: EpicPerson; same: boolean }): string[] {
+    const { from, to, dryRun, count, files } = result
+    const kept = dryRun ? "  (dry run:  nothing written, name not kept)" : `;  you're ${to} now`
+    if (!before.name) return [`nothing to rename:  you had no name${kept}`]
+    if (same) return [`you're ${to} already:  nothing to rename`]
+    const verb = dryRun ? "would rename" : "renamed"
+    const head = `${verb} ${from} as ${to} in ${count} ${count === 1 ? "place" : "places"}, ${files.length} ${files.length === 1 ? "file" : "files"}`
+    const width = Math.max(0, ...files.map((file) => file.path.length))
+    return [head + kept, ...files.map((file) => `  ${file.path.padEnd(width)}  ${String(file.count).padStart(4)}`)]
+  }
+
+  /** Whether `written` names `name`:  the same words, any case, spaces trimmed (as `whois` matches). */
+  static sameName(written: string, name: string): boolean {
+    return sameName(written, name)
   }
 
   /** `epic whois`'s lines:  the total, then a line per place. */
@@ -223,6 +276,9 @@ export type PlaceActivity = {
   /** the newest one's time;  `undefined` when none says */
   last: string | undefined
 }
+
+/** `whoami`'s switches:  flags that never take a value (the name is its words). */
+const WHOAMI_SWITCHES = ["json", "rename", "dryRun"]
 
 /** The content folder's folders people write replies and comments in. */
 const PLACES = ["epics", "sagas", "guides", "pages"]

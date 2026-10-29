@@ -1,6 +1,8 @@
 import { localTime } from "spell/util/time"
 import { SRV } from "spell/server"
 
+import { ThreadFacts } from "spell/epic/comments"
+import { EpicHome } from "spell/epic/config/EpicHome"
 import { DataFile } from "spell/epic/data/DataFile"
 // By file:  the definitions' barrel loads every vocabulary, which reading an inbox doesn't need
 import { isItemId } from "spell/epic/definitions/definitions.types"
@@ -146,9 +148,12 @@ export class ReviewInbox {
     CommentList.migrate(this.comments)
   }
 
-  /** The comments, to read or change (in place). */
+  /**
+   * The comments, to read or change (in place).
+   * - what's written through it names this machine's person (`EpicHome.personName()`, read when something's written)
+   */
   get commentList(): CommentList {
-    return new CommentList(this.comments)
+    return new CommentList(this.comments, { person: () => EpicHome.personName() })
   }
 
   ////////////////
@@ -727,7 +732,7 @@ export class ReviewInbox {
         ...(mark.comments?.length && { inlineComments: this.commentsOf(mark) })
       }))
       const urgency = this.sentUrgency
-      const comments = this.sentComments.filter((comment) => Date.parse(CommentList.lastWordsAt(comment)) > before)
+      const comments = this.sentComments.filter((comment) => Date.parse(ThreadFacts.lastWordsAt(comment)) > before)
       this.handedOver = this.sent
       if (marks.length || urgency.length || comments.length) sent = { at: this.sent!, marks, urgency, comments }
     }

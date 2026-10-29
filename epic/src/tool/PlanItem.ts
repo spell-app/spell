@@ -1,3 +1,4 @@
+import { ThreadFacts } from "spell/epic/comments"
 import { Markup } from "spell/epic/markup"
 
 import { KINDS, OLD_DECISION, type OptionCard } from "./planDoc.types"
@@ -148,14 +149,14 @@ export class PlanItem {
   }
 
   /**
-   * Is `item` waiting for Owen to pick?  Claude answered it last, with options:  its LAST reply
-   * (`<epic-reply>`, its child) is Claude's, and holds a card set with nothing chosen yet.
-   * - a pick (`<epic-choices chosen>`), or a newer reply from Owen:  no longer waiting
+   * Is `item` waiting for a person to pick?  Claude answered it last, with options:  its LAST reply
+   * (`<epic-reply>`, its child) is an agent's (`ThreadFacts.isAgents()`), and holds a card set with nothing chosen yet.
+   * - a pick (`<epic-choices chosen>`), or a newer reply from a person:  no longer waiting
    * - a reply asking without cards (a yes / no in prose):  not this;  only unpicked cards count
    */
   static awaitsPick(item: Element): boolean {
     const reply = Array.from(item.querySelectorAll(`:scope > ${REPLY_TAG}`)).at(-1)
-    if (!reply || Markup.read<"epic-reply">(reply).from !== CLAUDE) return false
+    if (!reply || !ThreadFacts.isAgents(reply)) return false
     return Array.from(reply.querySelectorAll(CHOICES_TAG)).some((choices) => !choices.hasAttribute("chosen"))
   }
 
@@ -267,7 +268,6 @@ const ORIGINAL_TAG = "epic-original"
 
 /** A reply on an item, and the `from` of Claude's (`awaitsPick()`). */
 const REPLY_TAG = "epic-reply"
-const CLAUDE = "Claude"
 
 /** Each card's heading as prose (`PlanItem.asProse()`):  what its element draws from its data. */
 const CARD_HEADINGS: Record<string, (element: Element) => string | undefined> = {

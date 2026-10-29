@@ -5,8 +5,9 @@
  * ugly, try to spiff them up"):  a white card, a 1px rule and one line of shadow, on the drawer's light body
  * - the answer:  a quiet line, no card (I111)
  * - a reply:  who said it first, as a small round mark and their name;  the date quiet at the right (`.dated`)
- *   - Claude's:  white, its mark Claude's terracotta
- *   - Owen's (`.owen`):  his violet, faint, as his comment box;  its mark violet
+ *   - an agent's (Claude's):  white, its mark Claude's terracotta
+ *   - a person's (`.person`, everyone's alike):  violet, faint, as the comment box;  its mark violet
+ *   - the mark's letter:  the name's initial, from the heading's `data-initial` (`EpicReply.initial`)
  * - More Details:  plain, its heading a small muted eyebrow that folds it
  * - every card folds, the folded box `hidden="until-found"`:
  *   - the answer, a reply and a status card by their band, the chevron first
@@ -132,9 +133,9 @@
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
   }
-  /* who said it:  a small round mark with their initial, before their name (`--_epic-who-mark`, `--_epic-who-initial`) */
+  /* who said it:  a small round mark with their initial, before their name (`--_epic-who-mark`, `data-initial`) */
   .reply .who::before {
-    content: var(--_epic-who-initial, "C");
+    content: attr(data-initial);
     display: inline-grid;
     place-items: center;
     width: 18px;
@@ -253,9 +254,8 @@
     --_epic-who-mark: light-dark(#c96442, #d97757);
     --_epic-card-accent: light-dark(#a8502f, #e59a7c);
   }
-  /* Owen's voice:  his violet, faint, as his comment box (I111) */
-  .reply.owen {
-    --_epic-who-initial: "O";
+  /* a person's voice:  violet, faint, as the comment box (I111);  every person's alike (epic `epic-friend` P2) */
+  .reply.person {
     --_epic-who-mark: var(--ui-violet, #6550ca);
     /* faint on the page's own dark, not black:  `Canvas` is the browser's, near-black under every theme */
     --_epic-card-fill: color-mix(

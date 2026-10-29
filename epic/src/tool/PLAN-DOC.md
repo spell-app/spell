@@ -921,6 +921,15 @@ Named, dated, idempotent steps that bring an older page's markup up to today's, 
     - each one a note in the report, with its card's time and title:  an older page's Done card may have meant only
       "this step done" (an answer written), Noted today, so read the dry run's list before running it
     - idempotent:  a closed item is left
+  - `agents-marked` (2026-10-29, every edit;  epic `epic-friend` P2, Q9):  Claude's old replies marked his,
+    `<epic-reply from="Claude" agent="claude">` (`AgentsMarked`), so a reply's name never says who wrote it
+    - which:  no `agent`, `from` "Claude" (any case), dated before `ThreadFacts.AGENTS_MARKED` (or undated);
+      a person's reply and one written since (a person who calls themselves Claude) are left
+    - the inboxes' comment replies the same way, on every read (`CommentList.markAgents()`)
+    - a reply Claude hands in (`details --file`, `add --details`) is marked on the way in instead, its `from` the
+      session's person (`IncomingHtml.markClaudes()`):  `<epic-reply from="Ana" agent="claude">`, drawn "Claude (Ana)"
+      to anyone but Ana
+    - idempotent:  a marked reply is left
   - `engine-links` (2026-10-19, epic `epic-engine` I27) went in epic `repo-split` P14, once the content rewrite left
     no epic page linking the engine's old places in spell-app;  its code is in git history
 - A new step:  a class implementing `Migration` in `migrations/`, its instance added LAST to `Migrations.all`, in the

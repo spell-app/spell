@@ -3,6 +3,7 @@ import type { JSX } from "@solidjs/web"
 
 import { E } from "spell/element"
 
+import { ThreadFacts, type Speaker } from "spell/epic/comments"
 import { PlanDates } from "spell/epic/dates"
 // the fold pieces every `<epic-*>` fold shares:  their files, not `epic-item`'s barrel (which would define it here)
 import { FOLDS, Fold } from "spell/epic/components/epic-item/Fold"
@@ -41,11 +42,15 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
  *   - open to start with, as it's what's being read;  page state, never written
  *   - but Owen's note asking for More Details, above Claude's card, starts FOLDED (Owen, 2026-10-24)
  *   - folded, the reply is `hidden="until-found"`
- * - Claude's (or anyone's but Owen's):  violet, the brand's action colour, apart from the warm answer card.
- * - Owen's (`from="Owen"`):  his ivory, as his note box and answer card (decision Q20).
+ * - WHO wrote it (epic `epic-friend` P2, Q7, Q9), by `ThreadFacts.speakerOf()`:
+ *   - a person's (no `agent`):  `You` when it's the reader's own (`window.SPELL_SERVER.person`), else their name;
+ *     every person's in the one person's look (`.person`)
+ *   - an agent's (`agent="claude"`, or an old `from="Claude"`):  `Claude (Ana)` for another person's session,
+ *     plain `Claude` for the reader's own or an old one;  Claude's look
+ *   - the round mark before the name:  its initial
  * - In an item (epic `epic-engine` P27, Owen's layout A):
  *   - one of the THREAD's brown block, with the item's other replies and its status lines (`AnswerThread`)
- *   - Claude's NEWEST reply (none of Owen's after it):  an orange edge and a NEW tag in its band, until Owen has
+ *   - Claude's NEWEST reply (no person's after it):  an orange edge and a NEW tag in its band, until Owen has
  *     seen it (`SeenReplies`:  on screen for 1.2s, remembered in this browser);  orange:  changed since you looked
  ****************/
 export class EpicReply extends E.UIComponent<typeof epicReplyVocabulary> {
@@ -124,10 +129,34 @@ export class EpicReply extends E.UIComponent<typeof epicReplyVocabulary> {
     return this.slots.hasContent("")
   }
 
+  /** Who wrote it, as the reader sees it (`ThreadFacts.speakerOf()`):  its person, its agent, and whether it's theirs. */
+  get speaker(): Speaker {
+    const attributes: Record<string, string | undefined> = { from: this.from, agent: this.agent, at: this.at }
+    return ThreadFacts.speakerOf({ getAttribute: (name) => attributes[name] ?? null })
+  }
+
+  /**
+   * Who wrote it, in words:  `You`, a person's name, `Claude`, or `Claude (Ana)` for another person's session;
+   * `""` for a reply that names nobody.
+   */
+  get author(): string {
+    const { person, agent, mine } = this.speaker
+    if (agent)
+      return person && !mine ? this.translationForKey("claudeOf", { person }) : this.translationForKey("claude")
+    if (!person) return ""
+    return mine ? this.translationForKey("you") : person
+  }
+
+  /** The round mark's letter:  the agent's (`C`), else the person's first. */
+  get initial(): string {
+    const { person, agent } = this.speaker
+    return (agent ? this.translationForKey("claude") : (person ?? "")).trim().charAt(0).toUpperCase()
+  }
+
   /** Its heading's left:  who, about what. */
   get who(): string {
-    const { from, re } = this
-    return [from, re && this.translationForKey("re", { re })].filter(Boolean).join(HEADING_SEPARATOR)
+    const { re } = this
+    return [this.author, re && this.translationForKey("re", { re })].filter(Boolean).join(HEADING_SEPARATOR)
   }
 
   /** Its heading's right:  when, as drawn (`10/7/26 10:50`). */
@@ -136,7 +165,7 @@ export class EpicReply extends E.UIComponent<typeof epicReplyVocabulary> {
   }
 
   protected get extraClass(): string | undefined {
-    return [FROM_OWEN.test(this.from ?? "") && OWEN, this.isNew && NEW].filter(Boolean).join(" ") || undefined
+    return [!this.speaker.agent && PERSON, this.isNew && NEW].filter(Boolean).join(" ") || undefined
   }
 
   render(): JSX.Element {
@@ -156,7 +185,7 @@ export class EpicReply extends E.UIComponent<typeof epicReplyVocabulary> {
               tips: { fold: this.translationForKey("foldTip"), unfold: this.translationForKey("unfoldTip") }
             })}
           </Show>
-          <span id={WHO_ID} class={WHO} part={this.partForName("who")}>
+          <span id={WHO_ID} class={WHO} part={this.partForName("who")} data-initial={this.initial}>
             {this.who}
           </span>
           <Show when={this.isNew}>
@@ -187,8 +216,5 @@ export class EpicReply extends E.UIComponent<typeof epicReplyVocabulary> {
 /** The vocabulary's attribute getters, typed (see "Attributes" in `UIComponent`). */
 export interface EpicReply extends E.AttributeValues<typeof epicReplyVocabulary> {}
 
-/** A reply Owen wrote (`from="Owen"`):  his ivory, not Claude's violet. */
-const FROM_OWEN = /^owen$/i
-
-/** Class word on a reply box:  Owen's. */
-const OWEN = "owen"
+/** Class word on a reply box:  a person's, not an agent's. */
+const PERSON = "person"
