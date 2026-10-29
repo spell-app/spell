@@ -6,9 +6,9 @@
  * finds projects the app's way, then `translateProject.ts`;  `spell translate speedtest` times it (P29,
  * `translateTimes.ts`), the same way;
  * and `spell spellx convert`, a `.spell` file or project written as spellx (epic `elemental-spell` P12).
- * - Their WORK comes through the `"language"` hook (`LanguageCommands`), which spell-app provides today:
+ * - Their WORK comes through the `"language"` hook (`LanguageCommands`), which the app folder provides today:
  *   every one loads projects the app's way (addresses like `@spell/examples/solitaire`, the editor's language service).
- *   - Without spell-app, each says so and exits 2.
+ *   - Without the app folder (never, in a checkout), `needHook()` says so and exits 2.
  *   - Moving the work down here, command by command, is epic `repo-split`'s open issue (P13).
  *   - `spell translate check|fix` is the exception:  it needs no project, so its work is here, `packsCommand.ts`.
  * - Loads fast:  nothing of spell until a command runs.

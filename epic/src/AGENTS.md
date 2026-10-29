@@ -1,19 +1,19 @@
 # AGENTS.md
 
-This file guides AI coding agents (Claude Code, Codex, and others) working in this package, `spell-epic`:
-spell-epic's `src/`, the whole repo's code (epic `epic-eject` J14).
+This file guides AI coding agents (Claude Code, Codex, and others) working in `epic/src/`:
+the epic folder's code, all of it (epic `epic-eject` J14).
 
-**READ the repo root's [AGENTS.md](../AGENTS.md) and [WWOD](../../agents/wwod/WWOD.md) FIRST:**
-the repo's layout, and the house style every package shares.
+**READ [the epic folder's AGENTS.md](../AGENTS.md) and [WWOD](../../agents/wwod/WWOD.md) FIRST:**
+the folder's layout, and the house style every folder shares.
 Only what's local is below;  a section named like a WWOD rule extends it.
 
-`spell-epic` holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
+The epic folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
 - the epic pages' elements and tool:  the `<epic-*>` component pack, and `epic` ("Overview", "Rules", "Epic pages")
 - EVERY docs page's tooling, not only the epics' ("Layout" onwards):
   `tools/`, the scripts and the `_assets` every page loads
   - That was the old docs package (spell-app's `packages/docs/`) until P16 of `people-and-orgs`.
-  - The pages themselves are shared root folders, tracked by no package
-    ([spell-app's AGENTS.md](../../app/AGENTS.md), "Shared content").
+  - The pages themselves are the content repo's folders, tracked by no code repo
+    ([the kit's AGENTS.md](../../AGENTS.md), "Shared content").
 
 ## Overview
 
@@ -37,8 +37,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 
 - Made by `spell pack create epics --prefix epic-`.
   - Its build and check are the kit's pack tooling, `spell-pack`
-    ([ComponentPack.ts](../../src/element-tools/ComponentPack.ts);  Spell UI's `spell-ui-pack` from epic `repo-split` P5
-    to P10), which the CLI's `spell pack` calls too:  every pack builds and checks the same way.
+    ([ComponentPack.ts](../../src/element-tools/ComponentPack.ts);  Spell UI's own `spell-ui-pack` from epic
+    `repo-split` P5 to P10), which the CLI's `spell pack` calls too:  every pack builds and checks the same way.
 - `components/<tag>/` (`spell/epic/components`) -- one folder per element family.
   - Written exactly like a Spell UI family:
     [ui's AGENTS.md](../../ui/AGENTS.md), "Overview" and "Solid authoring".
@@ -47,7 +47,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - `<Name>.en.ts`:  its tag's vocabulary (topics + aka, skeleton text)
     - `<Name>.css`
     - `<Name>.types.ts`:  only what several of its files share
-    - its test, `<Name>.test.tsx`, at the same path in the repo's `tests/`:
+    - its test, `<Name>.test.tsx`, at the same path in the folder's `tests/`:
       `tests/components/<tag>/`
     - `index.ts`:  defines its tags (SIDE EFFECT)
   - No native fallback:  only form controls have one.
@@ -138,7 +138,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       [Fold.types.ts](components/epic-item/Fold.types.ts), which each vocabulary imports.
     - The docs runtime puts a block's bullhorn there (see "Comments").
     - NOT the cards with a heading band (a reply, a status card, a note ...):  nothing needs it there yet.
-- `src/` (`spell-epic`, `EP`) -- code the elements and the node tools share.
+- `src/` (`spell/epic`, `EP`) -- code the elements and the node tools share.
   - Its test, [pack.test.ts](../tests/pack.test.ts), runs `spell-pack check` (`yarn pack:check`).
   - `definitions/` -- the ONE description of every element:
     - `Definitions.all`:  each vocabulary as data, plus `children` (the content model)
@@ -168,7 +168,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     `<epic-thread>` family, the docs runtime's comments and the epic tool's `CommentList` (epic `epic-engine` P3).
     - whose turn, Owen's words Claude hasn't had, its id as Owen sees it (`C3`), the few words it's on, its times,
       where a taken comment went (`takenInto()`)
-    - pure, node-safe at import, NOT in the `spell-epic` barrel:  `spell-comments.js` imports it alone, with no Spell UI
+    - pure, node-safe at import, NOT in the `spell/epic` barrel:  `spell-comments.js` imports it alone, with no Spell UI
   - `review/` -- `ReviewClient`, one per page:  the review inbox's reads and writes (`/api/epics/review/*`).
     - Also token refresh, polling, and note-draft backups (the old page runtime's localStorage keys).
     - It touches no browser global until `forPage()` / `watch()`.
@@ -246,7 +246,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       AND drawn by others in their shadow roots (Other, an option's comment, the feedback).
       - Each family drawing it imports its barrel first.
   - `links/` (`spell/epic/links`) -- pointing at a saga, an epic, a phase or an item (epic `epic-workflow` P15, J32).
-    - pure, node-safe at import, NOT in the `spell-epic` barrel (the docs runtime imports it alone)
+    - pure, node-safe at import, NOT in the `spell/epic` barrel (the docs runtime imports it alone)
     - `EpicAddress`:  a short address, or `<epic-link>`'s attributes,
       as the page, the `#id` and the short form a link draws
       - the short address:  `SAGA:/drawable-spell/python-target#T1`, the colon form read too
@@ -320,7 +320,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         `repoSessions()`), `Sessions.live()`'s `inRepo`, `Stock`, `RunningEpics`, `RepoList`, `WorktreeGuard`,
         `SharedMigration`, the window script, the extension's `WindowBridge.indexOf()` (`folderIndex()`)
       - plain `node` loads it by its own name:  node's own modules only
-    - node only, NOT in the `spell-epic` barrel (`spell/epic/config/EpicConfig`)
+    - node only, NOT in the `spell/epic` barrel (`spell/epic/config/EpicConfig`)
       - plain `node` loads it by path too, before a worktree's `yarn install`:
         the hooks ([hooks/](../hooks/)) and the window script ([window.mjs](./window.mjs))
       - it reads its JSON5 with `json5` (any valid JSON5, as the page server does), from the same install as the
@@ -364,7 +364,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - `summarize`, `status` (taking stock, `stock` before)
       - an item's status card is `update`'s (`epic update seo#J3 underway`, J140)
       - `add-request`, `overnight` and `plan-doc` gone
-    - node only, NOT in the `spell-epic` barrel:  imported by path, `spell/epic/cli/EpicProgram`
+    - node only, NOT in the `spell/epic` barrel:  imported by path, `spell/epic/cli/EpicProgram`
     - its tests:  `tests/cli/`
   - `command/` -- what the `epic` command's verbs run (epic `epic-eject` P5).
     - a class per verb group, a method per verb:
@@ -467,7 +467,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - `epicArgs.ts`:  `epic <verb> <epic>#<id>` turned into the `epic` tool's own order (`planDocArgs()`)
     - this folder's base is the kit's `spell/cli` (`CLI.out()`, `runChild()`, `toolArgs()`;  `EXIT` and
       `EpicCommandError`, its `CliError`), NEVER the kit's program (`spell/cli/main`), and it loads no spell
-    - node only, NOT in the `spell-epic` barrel:  imported by path, `spell/epic/command/Worktrees` ...
+    - node only, NOT in the `spell/epic` barrel:  imported by path, `spell/epic/command/Worktrees` ...
     - its tests:  `tests/command/`
   - `data/` -- `DataFile`:  the tooling's DATA FILES in the shared folders, as JSON5 (epic `epic-workflow` P21).
     - review inboxes, details pages' answers and drafts, choice pages' rows, running agents, the docs home's lists
@@ -477,7 +477,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - read by the `.json5` name first, then the old `.json`;  written as `.json5` only (the old `.json` removed)
       - a checkout on older code keeps reading its files until it merges
       - every file was renamed by the migration step `json5-data-files` (gone since epic `repo-split` Q45)
-    - node only, NOT in the `spell-epic` barrel
+    - node only, NOT in the `spell/epic` barrel
       - it loads in plain `node` too (the docs tools' `details.js` ...):
         it imports spaces' editor by its relative path
   - `tool/` -- the `epic` tool (`epic`), node only, never bundled into the pack.
@@ -664,7 +664,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 `docs/`:  the pages of the `<epic-*>` elements, a COMPONENT SET (epic `epic-workflow` P10).
 Laid out as every set is since P18 of `people-and-orgs`
 ([spell-app's AGENTS.md](../../app/AGENTS.md), "COMPONENT SETS").
-- Served by the kit's page server, as spell-epic's part of its settings names it (its `package.json`'s `"pageServer"`
+- Served by the kit's page server, as the epic folder's part of its settings names it (its folder manifest's
+  `"pageServer"`
   `"componentSets"`, `componentSets()` in [settings.ts](../../src/server/page/settings.ts)), and by the epic server:
   - at `/components/epics/`
   - and at `/worktrees/<w>/components/epics/` for a worktree's
@@ -699,7 +700,7 @@ Laid out as every set is since P18 of `people-and-orgs`
   x.html                             a sibling:  the page's own folder stays relative
   /components/ui/ui-button.html      a Spell UI page
   /components/app/spell-viewer.html  an App UI page
-  /epic/src/components/        this repo's files, from the kit's root
+  /epic/src/components/              the epic folder's files, from the kit's root
   /guides/x.html                     a page of the content folder
   /_epic/pack/epics.pack.js          the epics pack, the epic server's engine route (the layout's `<ui-components>`)
   _assets/site.js                    the site bundle a page loads, below its folder:  stays relative
@@ -710,7 +711,7 @@ Laid out as every set is since P18 of `people-and-orgs`
     before epic `epic-engine` I37 at spell-app's old `../../packages/epics/...`.
   - `yarn tsx src/tools/doc-links.js --check src/docs/*.html` checks them, from the kit (its linker is the kit's, the
     checkout the page server serves).
-- Check a page:  `node src/tools/check-spell.js src/docs/<tag>.html`, from spell-epic's root.
+- Check a page:  `node src/tools/check-spell.js src/docs/<tag>.html`, from the epic folder, `epic/`.
   It loads the page from the page server, at its address.
 - Comments (epic `epic-engine` P2, T3):  Owen comments on these pages as on a guide.
   - So he does on App UI's and Brand's, spell-app's sets, which load the same script (see "Comments" below).
@@ -773,9 +774,9 @@ The pages live in SHARED root folders;  the tooling lives here, in `tools/`.
     - The old URLs answer "not found":  the page server redirects none (Q30 of `people-and-orgs`).
 - `tools/`:  the tooling, tracked here and versioned per branch.
   - the scripts (see "Scripts")
-  - their tests:  in the repo's `tests/tools/`, by the same names ([fuss.test.ts](../tests/tools/fuss.test.ts))
+  - their tests:  in the folder's `tests/tools/`, by the same names ([fuss.test.ts](../tests/tools/fuss.test.ts))
   - `_assets/`
-  - Run a script from spell-epic's root, or through its `yarn` script:
+  - Run a script from the epic folder, `epic/`, or through its `yarn` script:
 
     ```sh
     node src/tools/check-spell.js guides/x.html
@@ -1534,7 +1535,7 @@ Each kind of page has ONE name, written everywhere a person reads it.
   - one question each (keep, change, talk over), then "Where first?"
   - saved from `ui-docs-rework`'s morning review, as the model
 - No `templates/goals/` any more (epic `epic-engine` P2, T1):  the parked goal sets' templates are only in spell-app's
-  `goals.zip`, an older copy;  their last versions are in this repo's history, before P2.
+  `goals.zip`, an older copy;  their last versions are in git history, before P2.
 - [spell-ui-docs.html](../templates/spell-ui-docs.html):  a components page (one element's),
   for Spell UI's set ([its docs](../../ui/docs/)).
   - Fomantic's docs layout in `<ui-*>` widgets:
@@ -2360,7 +2361,7 @@ Each kind of page has ONE name, written everywhere a person reads it.
 - They live in the shared repo, so they DON'T run in place any more.
   - Node runs them from their real path in the content folder, where there's no `node_modules` to find packages in.
   - To re-measure, copy one into a checkout with packages, and run it there:
-    spell-epic's root, or another repo's, e.g. spell-ui's.
+    the kit's checkout, at its root or in a folder (`epic/`, `ui/`).
 - Tables quote medians of several runs, never a single run.
 - Keep the scripts:  they re-measure on upgrades.
 - A guide's own LIVE elements, e.g. the custom elements guide's `<ui-counter>`:
@@ -2382,7 +2383,7 @@ Each kind of page has ONE name, written everywhere a person reads it.
   should NEVER be `../`", and "Root paths.  Opening files is a no-go for many reasons."):
 
   ```text
-  /ui/src/x.ts                  a repo's file, from the kit's root
+  /ui/src/x.ts                        a folder's file, from the kit's root
   /guides/server.html                 a page of the content folder
   /epics/seo/seo.plan.html#t3         an epic page and an id on it
   /epics/seo/details/q.html           a page BELOW the page's folder:  a root path too
@@ -2397,7 +2398,7 @@ Each kind of page has ONE name, written everywhere a person reads it.
     rule).  A hover shows main's address until then, and a link copied by hand points at main.
   - The tools write nothing else:  `SRV.Linker.link()` turns every relative link it meets into its root path (a
     broken one at its ONE new home, when a move left one:  `spell-lang/` is `parser/`), on every write.
-  - `doc-links.js --check` and `epic lint` refuse one:  `relative:  ../x.ts -- write /spell-ui/x.ts`.
+  - `doc-links.js --check` and `epic lint` refuse one:  `relative:  ../x.ts -- write /ui/src/x.ts`.
   - The pages written before P46:  the migration step `root-links` (`RootLinks`;  `epic migrate --step root-links`
     for the content folder, `doc-links.js --root-links <file>...` for a repo's own pages).
 - Every reference to a file, folder or external page is a link that opens a NEW TAB.
@@ -2413,8 +2414,9 @@ Each kind of page has ONE name, written everywhere a person reads it.
     - no nested links
   - The rules themselves live in `spell/server` (`SRV.Linker`):  how a path resolves, which target a link gets.
   - Every page links as it's served:  from the checkout that serves it (epic `epic-engine` I22, P46), the kit.
-    - a code name in a spell-epic page links `/epic/src/...`, never `/src/...` (the kit's own)
-    - which checkout:  `RepoList.linkRootOf()`:  the kit for a child repo's checkout
+    - a code name in an Epic UI page links `/epic/src/...`, never `/src/...` (the kit's own)
+    - which checkout:  `RepoList.linkRootOf()`:  a multi-repo top's for its child repo's checkout;  else the
+      checkout itself (the kit, one repo since epic `repo-split` P20)
       - for `PlanDocFiles`' linker and `doc-links.js`'s, one linker for content and repo pages alike
     - both told that checkout's SERVED folders (`ServedFolders`, epic `epic-engine` I27):
       a link to `components/epics/` or `templates/` checks as the folder it serves (`epic lint` called them missing)
@@ -2437,7 +2439,7 @@ Each kind of page has ONE name, written everywhere a person reads it.
 
 ## Finishing a page
 
-In this order, from spell-epic's root (a page by its path in the checkout it's in):
+In this order, from the epic folder, `epic/` (a page by its path in the checkout it's in):
 
 1. `yarn tsx src/tools/doc-links.js <page>`
 2. `yarn vp fmt <page>` (`yarn format` would reformat it anyway)

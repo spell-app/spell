@@ -1,11 +1,11 @@
 # AGENTS.md
 
 This file provides guidance to AI coding agents (Claude Code, Codex, and others)
-when working with code in this folder, `src/spaces/` of the `spell-app` package (`spell/app/spaces`),
-and with the `@spell` space's built-in projects, `spaces/@spell/` at the repo's root.
+when working with code in this folder, `src/spaces/` of the kit's app folder (`spell/app/spaces`),
+and with the `@spell` space's built-in projects, `spaces/@spell/` at the app folder's root.
 
-**READ the repo root's [AGENTS.md](../../AGENTS.md) and [WWOD](../../agents/wwod/WWOD.md) FIRST:**
-the repo's layout, and the house style every package shares.
+**READ the app folder's [AGENTS.md](../../AGENTS.md) and [WWOD](../../agents/wwod/WWOD.md) FIRST:**
+the folder's layout, and the house style every folder shares.
 Only what's local is below;  a section named like a WWOD rule extends it.
 
 ## Overview
@@ -40,12 +40,12 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - [prefs/](server/node/prefs/):  see "Preferences" below
     - [routes/](server/node/routes/):  the editor's server (below)
   - [the Python side](server/py/pyproject.toml):  `spell_quart`, Python's web server, a uv project (below)
-- Tests live in the repo's `tests/spaces/`, at the same paths as the code they test:
+- Tests live in the app folder's `tests/spaces/`, at the same paths as the code they test:
   - TypeScript, found by vitest (the root's `vitest.config.ts`, its `spaces` project):
     - [api.ts](server/node/routes/api.ts) => [api.test.ts](../../tests/spaces/server/node/routes/api.test.ts)
   - Python:  [the Python server's tests](../../tests/spaces/server/py/tests/), found by its pytest (`testpaths`)
   - The frozen test projects themselves are beside the built-ins, in `spaces/@spell/test/` (see "Projects" below).
-    The tests that compile them whole are the repo's `tests/spell/`, its `spell` project, not ours.
+    The tests that compile them whole are the app folder's `tests/spell/`, its `spell` project, not ours.
     - Among them `counter`, a frozen counter library, which `counter-app` imports:
       for the tests of one project importing another.
       - Those of the runner, the core contract, `spell compile` and `spell explain --in`.
@@ -61,8 +61,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - `fixtureProjectId()`
     - `compiledFixture()` ...
   - Imported by tests only, by name, never from the barrel.
-  - Inline projects are spell-parser's helpers', `spell/parser/spell/test` (`parseSpellProject()`).
-- The repo's checks (its root `package.json`'s scripts) cover both:
+  - Inline projects are the parser folder's helpers', `spell/parser/spell/test` (`parseSpellProject()`).
+- The app folder's checks (its `package.json`'s scripts) cover both:
   - the TypeScript:  tsc, oxlint / oxfmt and vitest
   - then `spell_quart`:  ruff and pytest, through uv
 
@@ -83,7 +83,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   | `@spell/test` | `spaces/@spell/test/`, committed and frozen (spell-parser's `tests/spaces/` until epic `spanish` P18) |
   | `owen@spell` | spell.spaces' `@spell/owen@/`, outside git |
 
-  - spell.spaces:  `<main checkout>/../spell.spaces`, in the kit `spell`:  ONE folder for main and every worktree.
+  - spell.spaces:  in the kit `spell`, at its main checkout's root (`~/www/spell/spell.spaces`):
+    ONE folder for main and every worktree.
     - It was `../spell-spaces` before epic `repo-split` P8.
     - `SPELL_SPACES_DIR` sets it.
     - Laid out by org, each person's space inside it:  `owen@spell/errors` is `@spell/owen@/errors/`.
@@ -100,10 +101,10 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   | Name | Folder | Tests set it with |
   | --- | --- | --- |
   | `spaceFolders.builtins` | `spaces/`:  the built-in groups and the test projects, `testFilesRoot` | `SPELL_BUILTINS_DIR` |
-  | `spaceFolders.spaces`, `spellSpacesDir` | spell.spaces, `../spell.spaces` beside the main checkout | `SPELL_SPACES_DIR` |
-  | `buildDir` | `build/` at the repo root | `SPELL_BUILD_DIR` |
-  | `repoDir`, `packagesDir` | this checkout's root (its folders are there) | |
-  | `srcDir`, `coreDir`, `packageFolder()` | spell-parser's folders, found by package through `node_modules` | |
+  | `spaceFolders.spaces`, `spellSpacesDir` | spell.spaces, at the kit's main checkout's root | `SPELL_SPACES_DIR` |
+  | `buildDir` | `build/` at the app folder's root | `SPELL_BUILD_DIR` |
+  | `repoDir`, `packagesDir` | the app folder's root, `app/` (its `src/`, `spaces/` and build folder are there) | |
+  | `srcDir`, `coreDir`, `packageFolder()` | the parser folder's folders, found by package through `node_modules` | |
 
 - Projects on disk:  [projects/](server/node/projects/).
   - [project-utils.ts](server/node/projects/project-utils.ts):  where each project is, a group's list,
@@ -119,14 +120,14 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - [file-utils](server/node/projects/file-utils.ts)
     - [response-utils](server/node/projects/response-utils.ts)
     - [server.types](server/node/projects/server.types.ts)
-- What spell BUILDS for a project goes in `build/` at the repo root, each checkout its own, never committed:
+- What spell BUILDS for a project goes in `build/` at the app folder's root, each checkout its own, never committed:
 
   | Source | Built into | e.g. |
   | --- | --- | --- |
-  | this repo's `tests/X` | `build/X` | |
-  | this repo's `X` | `build/X` | `build/spaces/@spell/examples/Solitaire/`, `build/spaces/@spell/test/fizzbuzz/` |
+  | the app folder's `tests/X` | `build/X` | |
+  | the app folder's `X` | `build/X` | `build/spaces/@spell/examples/Solitaire/`, `build/spaces/@spell/test/fizzbuzz/` |
   | spell.spaces' `X` | `build/spell-spaces/X` | `build/spell-spaces/@spell/owen@/errors/` |
-  | another spell-app checkout's `spaces/X` or `tests/X` | THAT checkout's `build/...` | a worktree's example, opened by the main checkout's language server (epic `spanish` P21) |
+  | another checkout's `app/spaces/X` or `app/tests/X` | THAT checkout's `build/...` | a worktree's example, opened by the main checkout's language server (epic `spanish` P21) |
   | anywhere else | beside the source | |
 
   - `buildFolderFor()`, in project-utils;  "Projects" in [spell's PARSING.md](../../../parser/src/spell/PARSING.md) has the rest.
@@ -206,7 +207,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - [api.test.ts](../../tests/spaces/server/node/routes/api.test.ts) pins its behaviour over HTTP.
 - [appRoutes.ts](server/node/routes/appRoutes.ts):  the app on the PAGE server.
   - A route module ([the kit's server AGENTS.md](../../../src/server/AGENTS.md)):  the page server loads it by its path,
-    from the root `package.json`'s `"pageServer": { "routes": [...] }`.
+    from the app folder's `package.json`, its `"pageServer": { "routes": [...] }`.
   - What it serves (vite's proxy passes the first three on to it, from the editor):
     - `/api`
     - `/spaces`
@@ -246,7 +247,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - runs its app under uv here, until `Ctrl-C`
 - cli's [quartApp.test.ts](../../tests/cli/quartApp.test.ts) plays Solitaire through a compiled app,
   in headless Chromium.
-- The repo's checks run its own, from the repo's root:
+- The app folder's checks run its own, from the app folder's root:
 
   ```sh
   uv run --directory src/spaces/server/py pytest -q                                              # yarn test

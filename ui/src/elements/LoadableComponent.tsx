@@ -194,7 +194,7 @@ export abstract class LoadableComponent<V extends E.ComponentVocabulary = E.Comp
         if (!controller.signal.aborted) undo = UI.visibility.observe(this.domElement, { onOnScreen: start, once: true })
       })
     } else if (policy === "idle" && typeof requestIdleCallback === "function") {
-      const id = requestIdleCallback(start)
+      const id = requestIdleCallback(start, { timeout: IDLE_LOAD_LIMIT_MS })
       undo = () => cancelIdleCallback(id)
     } else start()
     return () => {
@@ -471,6 +471,12 @@ export abstract class LoadableComponent<V extends E.ComponentVocabulary = E.Comp
     return lines.map((line) => line.slice(Math.min(indent, line.length - line.trimStart().length))).join("\n")
   }
 }
+
+/**
+ * `load="idle"`:  the longest it waits for the browser to be idle, in ms, before it loads anyway.
+ * - A busy page (or a slow machine running tests) may never be idle:  without it, the text never came.
+ */
+const IDLE_LOAD_LIMIT_MS = 2_000
 
 /**
  * Attributes each status element gets, by tag:

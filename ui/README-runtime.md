@@ -291,10 +291,11 @@ spell icon rocket
 <summary>Output</summary>
 
 ```text
-rocket      fa7-free
-rocket      fomantic
-rocketchat  fa7-brands
-rocketchat  fomantic
+rocket         fa7-free
+rocket         fomantic
+rocketchat     fa7-brands
+rocketchat     fomantic
+space awesome  fa7-brands
 ```
 
 </details>
@@ -336,7 +337,7 @@ Two catches:
 The builder runs in `spell-ui`, in a checkout of the kit ([setup from zero](https://github.com/spell-app/spell/blob/main/README.md#setup-from-zero)):
 
 ```sh
-cd ~/www/spell/spell-ui
+cd ~/www/spell/ui
 yarn icons:pack ../my-site/icons --id my-icons
 ```
 

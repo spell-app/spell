@@ -159,8 +159,8 @@ So three can run at once without touching each other, and your main checkout isn
 
 - Each phase is committed on its own, in every repo it touched, under one subject (`P1:  Name -- summary`).
   Then the agent stops, and asks before it starts the next.
-- In Spell, an epic's worktree holds every repo, each on the epic's branch:
-  [the kit's README-development.md](https://github.com/spell-app/spell/blob/main/README-development.md) follows a change across repos.
+- In Spell, an epic's worktree is one worktree of the whole kit, every folder on the epic's branch:
+  [the kit's README-development.md](https://github.com/spell-app/spell/blob/main/README-development.md) follows a change across its folders.
 - And when it merges, it leaves a GUIDE behind for the next reader, and a changelog entry.
 
 Every worktree is another checkout, with an install of its own:  that's the price of three at once.
@@ -188,7 +188,7 @@ Then open the kit's folder in VS Code, start a Claude Code session, and give it 
 1. The session is titled `🚧 hello-epic` before the agent reads a word:  the prompt hook does it.
 2. The agent asks two things in Claude Code's question modal:
    where to run, a new window or this one (with a recommendation);  and which saga the epic serves, if any.
-3. It makes the worktree, `~/www/spell.worktrees/hello-epic`, with every repo on branch `hello-epic`,
+3. It makes the worktree, `~/www/spell.worktrees/hello-epic`, the whole kit on branch `hello-epic`,
    and writes the epic page with your prompt quoted at the top.
 4. Picked a new window?  When its turn ends, the session moves to `⎇ hello-epic` and types `continue` there:
    press Enter.
@@ -359,10 +359,10 @@ The steps, every setting and the rest of the edges:  [README-adopting.md](README
 
 ## Working on it
 
-This repo is ONE package, `spell-epic`, laid out like any one-package repo:
-the code in `src/`, its tests in `tests/` at the same paths, the plugin's parts at the root.
-The rules for working on it:  [the repo's AGENTS.md](AGENTS.md) and [the code's](src/AGENTS.md),
-on top of WWOD, [the house style](https://github.com/spell-app/spell/blob/main/README.md#wwod-the-house-style) every repo shares.
+This folder is the plugin, `spell-epic`, laid out like any one-package repo:
+the code in `src/`, its tests in `tests/` at the same paths, the plugin's parts at the folder's root.
+The rules for working on it:  [the folder's AGENTS.md](AGENTS.md) and [the code's](src/AGENTS.md),
+on top of WWOD, [the house style](https://github.com/spell-app/spell/blob/main/README.md#wwod-the-house-style) every folder shares.
 
 | Folder | What's in it |
 | --- | --- |
@@ -383,19 +383,20 @@ on top of WWOD, [the house style](https://github.com/spell-app/spell/blob/main/R
 There's ONE copy per machine, and every repo and every window runs it, so your edit is everyone's at once:
 `epic` and the hooks on their next run, a skill's new text after `/reload-plugins`.
 
-It's a child repo of the kit:  `yarn clone spell-epic` brings it and Spell UI,
+It's a folder of the kit, cloned with it,
 and the kit's one `yarn install` installs it, never an install in here.
 It stands on the kit (`spell`:  the page server, the element framework, the toolchain) and on Spell UI,
 by their package names.
 Nothing stands on it:  it declares its own part of the kit's page server's settings, in its `package.json`
 (its route modules, its folders, Epic UI), and the server runs them by their paths, importing none of it.
 
-Its git history starts on 2026-10-17, when it was lifted out of spell-app:
-the first commit names the spell-app commit the files came from, so anything older is there.
+Its git history, kept when it was merged into the kit, starts on 2026-10-17, when it was lifted out of spell-app:
+the first commit names the spell-app commit the files came from, so anything older is there
+(its SHA from before the merge:  [the commit map](https://github.com/spell-app/spell/blob/main/tools/one-repo/commit-map-app.txt) gives its new one).
 
 ```sh
 # from the plugin's folder, ~/www/spell/epic
-yarn ts                 # src/ and tests/, after the declarations of the repos below
+yarn ts                 # src/ and tests/
 yarn test               # node and browser (chromium) projects, then the window script's and the extension's tests
 yarn lint
 yarn review             # ts, lint and test:  the finishing pass
@@ -408,14 +409,14 @@ yarn vscode:package     # the extension's bundle and spell-epic.vsix:  NOT insta
 <details>
 <summary>Imports</summary>
 
-- Every file is imported by its package's name and its path under `src/`, with no extension, inside spell-epic too:
+- Every file is imported by `spell/epic` and its path under `src/`, with no extension, inside this folder too:
   `spell/epic/tool/PlanDoc`, `spell/ui/core`, `spell/server`.
   - A same-folder peer stays `./PlanItem`, and nothing climbs into `src/` with `../`:
     lint fails it, and its message names the package-name import to write.
   - Files outside `src/` (`tests/`, `scripts/`, `hooks/`, `vscode/`) import `src/` the same way.
 - Plain `node` (the hooks, the window script, the docs tools' `.js` scripts) imports a file with its extension:
   `spell/epic/config/EpicConfig.ts`.
-- More:  [the repo's AGENTS.md](AGENTS.md), "Imports";
+- More:  [the folder's AGENTS.md](AGENTS.md), "Imports";
   the names a page's packs share one Solid and one Spell UI by:  [README-pages.md](README-pages.md#how-a-page-draws-them).
 
 </details>
@@ -427,8 +428,9 @@ yarn vscode:package     # the extension's bundle and spell-epic.vsix:  NOT insta
   The pages, the `epic` command and the content folder are plain files and programs any agent can use;
   the skills and hooks around them are Claude Code's.
   Where it stands:  planned;  Claude Code only for now.
-- **npm packages:**  spell-epic, Spell UI and the kit published, so a repo that isn't Spell installs it alone.
-  Where it stands:  planned;  today everything installs inside the kit.
+- **Installing from npm:**  a repo that isn't Spell installs the plugin alone, from npm.
+  Where it stands:  `spell-epic`, `spell-ui` and `spell` are published, under the `next` tag until Spell's first release
+  (planned for December 1, 2026);  the plugin still installs only inside a Spell checkout.
 
 ## The pages
 
@@ -441,14 +443,14 @@ yarn vscode:package     # the extension's bundle and spell-epic.vsix:  NOT insta
 | [README-vscode.md](README-vscode.md) | <ul><li>the Spell Epic extension:  three commands and a reload</li><li>two views, each a page that stays;  which server answers</li><li>the window bridge, and how a session moves</li><li>working on it</li></ul> |
 | [README-adopting.md](README-adopting.md) | <ul><li>epics in your own repo:  three steps and an extension</li><li>the content folder, the config file, worktrees, your `AGENTS.md`</li><li>one epic server for the machine</li><li>what's still Spell-shaped</li></ul> |
 
-Every other repo's pages:  [the kit's index](https://github.com/spell-app/spell/blob/main/README.md#every-readme).
+Every other folder's pages:  [the kit's index](https://github.com/spell-app/spell/blob/main/README.md#every-readme).
 
 ## See also
 
 - [README-pages.md](README-pages.md):  the next step, an epic page section by section and a review round on it
 - [The kit's README-agents.md](https://github.com/spell-app/spell/blob/main/README-agents.md#the-epic-plugin):  installing the plugin,
   and what every session reads before your first prompt
-- [The kit's README-development.md](https://github.com/spell-app/spell/blob/main/README-development.md):  one epic's worktree across the five repos,
+- [The kit's README-development.md](https://github.com/spell-app/spell/blob/main/README-development.md):  one epic's worktree of the whole kit,
   and merging `main` into it
 - [The kit's README-element.md](https://github.com/spell-app/spell/blob/main/README-element.md):  how `<ui-root>` loads a pack like Epic UI
-- [The five repos](https://github.com/spell-app/spell/blob/main/README.md#one-repo-five-parts):  where spell-epic sits, and what it needs
+- [One repo, five parts](https://github.com/spell-app/spell/blob/main/README.md#one-repo-five-parts):  where the epic folder sits, and what it needs

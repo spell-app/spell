@@ -1,11 +1,11 @@
 # AGENTS.md
 
 This file provides guidance to AI coding agents (Claude Code, Codex, and others)
-when working with code in this folder, `src/lsp/` of the `spell-app` package (`spell/app/lsp`).
+when working with code in this folder, `src/lsp/` of the kit's app folder (`spell/app/lsp`).
 
-**READ the repo root's [AGENTS.md](../../AGENTS.md) and [WWOD](../../agents/wwod/WWOD.md) FIRST:**
-- the root's:  the repo's layout
-- WWOD:  the house style every package shares
+**READ the app folder's [AGENTS.md](../../AGENTS.md) and [WWOD](../../agents/wwod/WWOD.md) FIRST:**
+- the folder's:  its layout
+- WWOD:  the house style every folder shares
 - Only what's local is below.
   A section named like a WWOD rule extends it.
 
@@ -22,9 +22,9 @@ when working with code in this folder, `src/lsp/` of the `spell-app` package (`s
   - `ScopesSource` / `ScopePack`:  the scope packs, `<Project>.scopes.js`
   - `SpellDiskWorkspace`:  loads from disk, through spaces' disk reader (`installDiskFetch()`)
   - See "Language server" in [PARSING.md](../../../parser/src/spell/PARSING.md).
-- The VS Code extension that runs it is the repo's [vscode/](../../vscode/), its own yarn project.
+- The VS Code extension that runs it is the app folder's [vscode/](../../vscode/), its own yarn project.
   - It runs THIS folder's source.
-- The commands:  the repo root's scripts, which run this folder's files with `tsx`.
+- The commands:  the app folder's scripts, which run this folder's files with `tsx`.
   - Named `start:lsp` and `scopes` before epic `repo-split` P11.
 
   ```sh
@@ -49,7 +49,7 @@ when working with code in this folder, `src/lsp/` of the `spell-app` package (`s
 
 - As WWOD §4.
 - [barrel.test.ts](../../tests/lsp/barrel.test.ts) is the smoke test for circular imports through the barrel.
-  - The tests live in the repo's `tests/lsp/`, at the same paths as the code.
+  - The tests live in the app folder's `tests/lsp/`, at the same paths as the code.
 
 ## Decorators
 

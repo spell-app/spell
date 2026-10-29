@@ -96,10 +96,13 @@ beside the main checkout rather than inside it.
 ## Setting it up:  three steps and an extension
 
 You need Claude Code, VS Code, git and Node 24.11 or later.
-And a Spell checkout:  today `spell-epic` installs only inside one.
-- [Setup from zero](https://github.com/spell-app/spell/blob/main/README.md#setup-from-zero), on the kit's front page, makes it.
-- `yarn clone spell-epic` brings `spell-epic` and the repos it needs.
+And a Spell checkout:  today the plugin installs from one.
+- [Setup from zero](https://github.com/spell-app/spell/blob/main/README.md#setup-from-zero), on the kit's front page,
+  makes it, with the plugin in its `epic/` folder.
 - The commands below assume the checkout is at `~/www/spell`.
+- 🌱 Without a checkout:  the plugin's package is on npm, `npm install spell-epic@next`
+  (`@next` until Spell's first release, planned for December 1, 2026), and its `epic` command answers.
+  Its `epic plugin install` doesn't run from there yet:  it looks for the checkout's `epic/bin/`.
 
 ### 1. The plugin, and `epic` on your PATH
 
@@ -116,8 +119,8 @@ each of its steps does.
 - It puts `epic` on your terminal's `PATH`.
 - Run again, it changes nothing;  `--dry-run` says what it would change.
 - The plugin's marketplace is the kit repo's root `.claude-plugin/marketplace.json`, `spell`:
-  its `epic` entry's source is the `epic/` folder until the plugin is published, then the npm package `spell-epic`
-  (`spell publish` turns it).  Once it's out:  `/plugin marketplace add spell-app/spell`, `/plugin install epic@spell`.
+  its `epic` entry's source is the `epic/` folder until the first release, then the npm package `spell-epic`
+  (`spell publish` turns it).  Then:  `/plugin marketplace add spell-app/spell`, `/plugin install epic@spell`.
 
 Then check that `epic` answers:
 
@@ -129,7 +132,7 @@ epic --version
 <summary>Output</summary>
 
 ```text
-epic ... (...) .../spell-epic
+epic ... (...) .../epic
 ```
 
 </details>
@@ -419,8 +422,9 @@ epic hub url ~/www/my-app.epics/epics/seo/seo.plan.html
 
 What you'd trip on today, roughly in the order you'd meet it.
 
-1. **It installs only inside a Spell checkout.**
-   `spell-epic` depends on Spell UI and the kit through the kit's one install, not from npm.
+1. **It installs from a Spell checkout.**
+   `spell-epic` is on npm (`npm install spell-epic@next`, with `spell` as its dependency), and its `epic` command runs
+   from there, but `epic plugin install` needs the checkout's `epic/` folder.
    So you clone Spell to plan work in a repo that has nothing to do with it.
 2. **Its worktree hook runs in every repo.**
    Installed for the machine, the plugin makes EVERY Claude Code worktree, in repos with no config too,
@@ -447,6 +451,23 @@ What you'd trip on today, roughly in the order you'd meet it.
 9. **VS Code and macOS.**
    The window bridge finds a session's window through its parent processes;
    `vscode://` links are avoided because macOS hands them to whichever window is focused.
+10. **Spell's own page server knows your project only by a file you write.**
+    You need it only to see your own component set or bundles on Spell's pages, not for epics:
+    the epic server above serves your plans.
+    The kit's page server knows its own folders and, beside them, the projects two lists name:
+    - `repos.json5`, the kit's tracked list:  only the kit's own peers, so not yours
+    - `page-server.local.json5`, at the kit checkout's root, git-ignored, yours:
+      `{ projects: ["../my-app"] }`, each folder from the kit's, with a `"pageServer"` part in its `package.json`
+    - A kit WORKTREE reads the peers beside the MAIN checkout (`~/www/spell`), not beside itself.
+    - A folder beside the kit is served under `/_beside/` (`/_beside/_up/` for one further up).
+    - Your project needs its own install with `spell` in it (`"spell": "portal:../spell"`):
+      its bundles are found by its npm name, through its `node_modules`.
+    - What else assumes the kit's own layout:
+      - `spell-types --below`, in your project, builds the local packages it depends on (`workspace:`, `portal:` ...),
+        a kit among them with its folders
+      - the lint's `spell-ui/*` pattern rules know only the component folders of Spell's own sets
+      - `spell rename imports` renames in the peers `repos.json5` names, so never in your project
+      - `spell publish` publishes only the kit's folders that have a `"spellPublish"`
 
 **Real today:**  a repo that isn't Spell, set up in three steps, its epics planned, built in worktrees and reviewed
 on their pages.
@@ -460,8 +481,8 @@ on their pages.
   - `windowsFolder`
   - `windows.settings`
 
-🌱 The first two are planned:  `npm install spell-epic`, with no Spell checkout, once the npm packages exist,
-and the same workflow driven from Codex and other agents
+🌱 The first two are planned:  `epic plugin install` from the npm package, with no Spell checkout
+(the package is out under `next`, above), and the same workflow driven from Codex and other agents
 ([`spell-epic`'s front page](README.md#-coming) says where each stands).
 
 ## See also

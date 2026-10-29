@@ -150,7 +150,7 @@ the runtime globs the folder, so dropping a `<name>.css` in makes a theme.
   - kept only to copy from, the way they were ported (below)
 - Spell's own nine, `themes.own`, the one set every place offers:
   - `spell`:  Spell's own look, and the docs site's default:  serif headings with italic ledes, Spell Purple,
-    pill buttons, an aubergine dark mode, and the brand's warm and inverse surfaces for Spell's own pages.
+    pill buttons, an aubergine dark mode, and warm and inverse surfaces for Spell's own pages.
     It ships no font either:  the serif is whichever Palatino the system has.
   - `glass`:  macOS today:  the system font, rounded rectangles, Apple's system colours,
     and GLASS:  cards, menus, popups and modals are translucent and blur what's behind them, on a solid page.
@@ -177,7 +177,7 @@ the runtime globs the folder, so dropping a `<name>.css` in makes a theme.
   - Two more of Spell UI's font stacks came with them, for any theme to use:
     `--ui-font-family-serif` (Palatino first) and `--ui-font-family-rounded`.
   - A theme remembered under an old name comes back under its new one (`Themes.RENAMED`):
-    `studio` as `merlot`, `spell-brand` as `spell`.
+    `studio` as `merlot`, and `spell`'s own older name as `spell`.
 - Spell's own nine are written as data:  a theme file each, `<name>.theme.json5`, beside its sheet.
   - Its values sit in nested groups, as the token tables group them:  `surfaces > page`, `typography > family > body`.
     Each is one value, or a light one and a dark one.

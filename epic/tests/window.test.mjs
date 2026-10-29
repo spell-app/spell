@@ -8,6 +8,7 @@
  *   - `EPIC_CHECKOUT`, set before the script loads:  it reads the config once
  *   - so it has the defaults, spell-app's OLD layout:
  *     worktrees nested in `.claude/worktrees`, the main root in every window
+ *     (its folder is still `spell-app/`, but a window names the main root by the default `windows.repoName`, `spell`)
  *   - Never the checkout the tests run in:  its config moves worktrees beside the repo (spell-epic's since 2ad9973,
  *     spell-app's since epic `epic-eject` T18), and a session's `EPIC_CHECKOUT` picks whichever it's in.
  *   - The layout beside the repo has a test of its own (epic-eject P8), in a child process.
@@ -206,7 +207,7 @@ test("a worktree's window:  the main root first, then the worktree's root, then 
   const workspace = Window.worktreeWorkspace("ui", "seo")
   // the file's in the content folder's windows/ongoing (epic-eject P13):  paths relative to it
   assert.deepEqual(workspace.folders, [
-    { path: "../../../spell-app", name: "spell-app" },
+    { path: "../../../spell-app", name: "spell" },
     { path: "../../../spell-app/.claude/worktrees/seo", name: "⎇ seo" },
     // `[]` on a machine without `../spell-app-dev`
     ...Window.sharedFolder(dirname(Window.worktreeFile("seo")))
@@ -318,7 +319,7 @@ test("worktrees beside the repo (epic-eject P8):  a worktree-only window;  an ol
   // the old layout:  main first, its files hidden beside the marker
   assert.deepEqual(
     old.folders.map(({ name }) => name),
-    ["spell-app", "⎇ old"]
+    ["spell", "⎇ old"]
   )
   assert.deepEqual(old.settings["files.exclude"]["*"], { when: ".spell-main" })
   // the old place is still hidden in every window while worktrees may be left there
@@ -466,7 +467,7 @@ test("a repo moved behind a compat link (I59):  `init` drops the content folder 
 test("a package window:  the whole branch, then the shared repo;  shared links shown only under the shared repo", () => {
   const workspace = Window.workspace("ui")
   assert.deepEqual(workspace.folders, [
-    { path: "../../spell-app", name: "spell-app" },
+    { path: "../../spell-app", name: "spell" },
     ...Window.sharedFolder(dirname(Window.file("ui")))
   ])
   const exclude = workspace.settings["files.exclude"]
