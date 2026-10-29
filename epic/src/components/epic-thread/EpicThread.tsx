@@ -107,7 +107,17 @@ export class EpicThread extends E.UIComponent<typeof epicThreadVocabulary> {
   /** The pen shows:  his first words wait, Claude hasn't had them, and its box isn't open. */
   get hasPen(): boolean {
     const comment = this.comment as ThreadComment | undefined
-    return !!comment && this.boxed !== "first" && ThreadFacts.pendingOf(comment) === "edit"
+    return !!comment && this.boxed !== "first" && ThreadFacts.pendingOf(comment, ThreadFacts.viewer()) === "edit"
+  }
+
+  /**
+   * The trash shows:  the reader wrote the comment, or nobody's name is on it, or the page doesn't say who reads it
+   * (epic `epic-friend` P9:  only a comment's writer deletes it;  everyone may reply)
+   */
+  get hasTrash(): boolean {
+    const by = (this.comment as ThreadComment | undefined)?.by
+    const viewer = ThreadFacts.viewer()
+    return !by || !viewer || ThreadFacts.sameName(by, viewer)
   }
 
   /** Where it is, in full, then what a click on its header does:  the fold's tooltip. */
@@ -143,7 +153,7 @@ export class EpicThread extends E.UIComponent<typeof epicThreadVocabulary> {
         ? { by: "claude", at: each.at, html: each.html || undefined, person, mine }
         : { by: "person", at: each.at, text: each.text ?? "", person, mine }
     })
-    if (this.boxed === "pending" && ThreadFacts.pendingReplyOf(comment)) replies.pop()
+    if (this.boxed === "pending" && ThreadFacts.pendingReplyOf(comment, viewer)) replies.pop()
     const messages = this.boxed === "first" ? replies : [first, ...replies]
     const { taken, done } = comment
     if (taken) {
@@ -164,7 +174,11 @@ export class EpicThread extends E.UIComponent<typeof epicThreadVocabulary> {
       messages.push({ by: "done", at: done.at, how: done.how, commit })
     }
     // Claude thinking about it now (Owen, 2026-10-10:  "You could put in a stub and replace that when you've thought")
-    if (comment.working && !done) messages.push({ by: "thinking", at: comment.working })
+    // whose agent it is (epic `epic-friend` P9):  "Claude (Ana): thinking…" to anyone but Ana
+    if (comment.working && !done) {
+      const person = comment.claim?.by
+      messages.push({ by: "thinking", at: comment.working, person, mine: ThreadFacts.sameName(person, viewer) })
+    }
     const latest = messages.findLastIndex((each) => each.by === "claude" && each.at)
     let day = ""
     return messages.map((each, index) => {
@@ -260,15 +274,17 @@ export class EpicThread extends E.UIComponent<typeof epicThreadVocabulary> {
             onClick={(event: MouseEvent) => this.say(event, THREAD_EDIT)}
           />
         </Show>
-        <ui-button
-          class={[TOOL, "delete"]}
-          appearance="circular basic"
-          size="mini"
-          icon="trash can"
-          title={this.translationForKey("deleteTitle")}
-          aria-label={this.translationForKey(comment()?.status === "new" ? "deleteNew" : "deleteHad")}
-          onClick={(event: MouseEvent) => this.say(event, THREAD_DELETE)}
-        />
+        <Show when={this.hasTrash}>
+          <ui-button
+            class={[TOOL, "delete"]}
+            appearance="circular basic"
+            size="mini"
+            icon="trash can"
+            title={this.translationForKey("deleteTitle")}
+            aria-label={this.translationForKey(comment()?.status === "new" ? "deleteNew" : "deleteHad")}
+            onClick={(event: MouseEvent) => this.say(event, THREAD_DELETE)}
+          />
+        </Show>
       </div>
     )
   }

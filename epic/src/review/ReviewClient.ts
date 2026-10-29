@@ -189,12 +189,18 @@ export class ReviewClient extends PageStore {
    * Keep the inbox fresh on `window`'s page;  returns the undo.
    * - a poll every `REVIEW_POLL_MS` while visible
    * - a read when it becomes visible
-   * - one when the page server says the inbox file changed (`spell-server:changed`, the page's live client:
+   * - one when the page server says the inbox file, or a person's comments file beside it, changed
+   *   (`spell-server:changed`, the page's live client:
    *   never a connection of our own, each holds one of Chrome's 6 per host)
    */
   watch(window: Window): () => void {
     const inboxFile = this.link.file.replace(/(?:\.plan|\.saga)?\.html$/, ".inbox.json5")
-    return ServerLink.watch(window, inboxFile, () => void this.refresh())
+    // and each person's comments file beside it (epic `epic-friend` P9):  a comment saved changes only that one
+    const base = inboxFile.replace(/\.inbox\.json5$/, ".comments.")
+    const inboxFiles = ServerLink.dataFileNames(inboxFile)
+    const isOurs = (path: string) =>
+      inboxFiles.includes(path) || (path.startsWith(base) && /^[^/.]+\.json5$/.test(path.slice(base.length)))
+    return ServerLink.watch(window, isOurs, () => void this.refresh())
   }
 
   ////////////////

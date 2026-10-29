@@ -662,9 +662,10 @@ An agent's full name starts with the epic's name, else the worktree's, else `mai
   Each verb writes at once.
   The undo is git:  the content folder commits after every turn,
   and `epic restore` puts an item's old text back from a file you took from it.
-- **Shared plans, local comments.**
-  A team shares the epic pages through the content repo, every turn, each reply under its writer's name;
-  but marks and comments wait on your own machine until they're answered.
+- **Shared plans and comments, local marks.**
+  A team shares the epic pages and every comment on them through the content repo, every turn, each under its
+  writer's name, and each person's Claude answers that person's comments;
+  but the marks you press on items, and your Send, stay on your own machine.
   [README-epics.md](https://github.com/spell-app/spell/blob/main/README-epics.md#working-with-others) says so, with the other edges a repo that isn't Spell would meet.
 
 ## See also

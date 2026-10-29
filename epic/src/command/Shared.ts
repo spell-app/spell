@@ -517,7 +517,8 @@ export class Shared {
    * Keep the content repo's own `.gitignore` and `.gitattributes` current:  each holds ONE marked block of ours
    * (`# epic:start` ... `# epic:end`), written on every init, commit and sync (epic `epic-friend` P5);  anything
    * outside the markers is the team's.
-   * - `.gitignore`:  locks, temp files, scratch details pages, review inboxes, running agents, the window files
+   * - `.gitignore`:  locks, temp files, scratch details pages, review inboxes, running agents, the window files;
+   *   NOT the comments files beside the inboxes (`SharedComments`, epic `epic-friend` P9), said so in it
    * - `.gitattributes`:  every page's log merged by `union` (both people's lines kept;  the sync re-sorts them)
    * - a file without the markers that was wholly ours (it starts `# written by ... shared init`, the old unmarked
    *   copy):  replaced by the block;  else the block is added at its end
@@ -661,6 +662,11 @@ const REPO_FILES = {
     "sagas/**/*.inbox.json*",
     "guides/**/*.inbox.json*",
     "pages/**/*.inbox.json*",
+    "# the comments themselves, one file per person beside each page (epic epic-friend P9):  committed and synced",
+    "!epics/**/*.comments.*.json5",
+    "!sagas/**/*.comments.*.json5",
+    "!guides/**/*.comments.*.json5",
+    "!pages/**/*.comments.*.json5",
     "# an epic's running agents (`epic agents`):  what's running now, never committed;  `.json` before P21",
     "epics/*/agents.json",
     "epics/*/agents.json5",

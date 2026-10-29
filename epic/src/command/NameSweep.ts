@@ -1,9 +1,11 @@
-import { readFileSync, writeFileSync } from "node:fs"
-import { relative } from "node:path"
+import { existsSync, readFileSync, realpathSync, writeFileSync } from "node:fs"
+import { join, relative } from "node:path"
 
+import { Git } from "spell/server/Git"
 import { SRV } from "spell/server"
 import { AuthorWords } from "spell/epic/tool/AuthorWords"
 import { RootLinks } from "spell/epic/tool/migrations/RootLinks"
+import { SharedComments } from "spell/epic/tool/SharedComments"
 
 import { PersonCommands } from "./PersonCommands"
 
@@ -26,6 +28,9 @@ import { PersonCommands } from "./PersonCommands"
  * - The name matched whole, any case (`PersonCommands.sameName()`, as `whois` counts):  "Anabel" is someone else.
  * - Each file written only when it changed, every other byte kept, under the lock its writers take
  *   (`RootLinks.lockOf()`:  a part locks its page);  `dryRun` writes nothing and counts the same.
+ * - Then each of their COMMENTS FILES moves to the new name (`SharedComments.rename()`, epic `epic-friend` P9):
+ *   `seo.comments.ana.json5` => `seo.comments.ana-lima.json5`;  and when the content folder is a repo of its own,
+ *   all of it is ONE commit there (`commit()`), so a teammate's sync sees a move, not a new person.
  * - Its position:  the command layer's;  knows the content folder's files, never a page's elements.
  ****************/
 export class NameSweep {
@@ -44,11 +49,38 @@ export class NameSweep {
    */
   run(from: string, to: string, { dryRun = false }: { dryRun?: boolean } = {}): SweepResult {
     const files: SweptFile[] = []
-    for (const file of PersonCommands.filesIn(this.content)) {
+    const all = PersonCommands.filesIn(this.content)
+    for (const file of all) {
       const count = dryRun ? this.sweepFile(file, from, to, "count") : this.sweepUnderLock(file, from, to)
       if (count) files.push({ path: relative(this.content, file), count })
     }
-    return { from, to, dryRun, count: files.reduce((sum, file) => sum + file.count, 0), files }
+    const moved = SharedComments.rename(all, from, to, { dryRun }).map(
+      ([old, now]) => [relative(this.content, old), relative(this.content, now)] as [string, string]
+    )
+    return { from, to, dryRun, count: files.reduce((sum, file) => sum + file.count, 0), files, moved }
+  }
+
+  /**
+   * Commit what `result` (`run()`'s) changed in the content folder, as ONE commit, when the folder is a git repo of
+   * its own (the content repo):  its short hash, else `undefined` (not a repo, a dry run, nothing changed).
+   * - only those files:  anything else waiting stays for the turn's commit (`epic shared commit`)
+   * - NEVER throws:  a git failure leaves the files for the turn's commit
+   * - SIDE EFFECT:  `git add` and `git commit` in the content repo
+   */
+  commit(result: SweepResult): string | undefined {
+    if (result.dryRun) return undefined
+    const top = Git.out(["rev-parse", "--show-toplevel"], this.content)
+    if (!top || realpathSync(top) !== realpathSync(this.content)) return undefined
+    const paths = [...result.files.map((file) => file.path), ...result.moved.flat()]
+    const known = [...new Set(paths)].filter(
+      (path) =>
+        existsSync(join(this.content, path)) || Git.run(["ls-files", "--error-unmatch", "--", path], this.content).ok
+    )
+    if (!known.length) return undefined
+    if (!Git.run(["add", "-A", "--", ...known], this.content).ok) return undefined
+    const message = `epic whoami --rename:  ${result.from} as ${result.to}`
+    const commit = Git.run(["-c", "commit.gpgsign=false", "commit", "-q", "-m", message, "--", ...known], this.content)
+    return commit.ok ? Git.out(["rev-parse", "--short", "HEAD"], this.content) : undefined
   }
 
   /** `file` swept under its writers' lock;  how many names changed. */
@@ -114,6 +146,8 @@ export type SweepResult = {
   count: number
   /** each file that names them, its path from the content folder */
   files: SweptFile[]
+  /** each comments file moved to the new name, `[from, to]` from the content folder (`SharedComments.rename()`) */
+  moved: [string, string][]
 }
 
 /** One file's part of a `SweepResult`. */

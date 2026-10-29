@@ -202,7 +202,8 @@ describe("NameSweep", () => {
         { path: "epics/seo/parts/q3.html", count: 2 },
         { path: "epics/seo/seo.plan.html", count: 3 },
         { path: "guides/python-target.inbox.json5", count: 2 }
-      ]
+      ],
+      moved: []
     })
     expect(swept("epics/seo/seo.plan.html")).toBe(
       '<epic-page><epic-reply from="Ana Lima" at="2026-10-12 20:16"><p>Ana thinks so.</p></epic-reply>' +

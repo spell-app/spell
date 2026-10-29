@@ -64,7 +64,8 @@ export class PersonCommands {
 
   /**
    * `epic whoami --rename <name> [--dry-run] [--json]`:  keep `name`, and write it over the old one wherever the old
-   * one says who wrote something, in every page, part, inbox and data file of the content folder (`NameSweep`).
+   * one says who wrote something, in every page, part, inbox and data file of the content folder (`NameSweep`);
+   * their comments files move to the new name, all of it one commit in the content repo (epic `epic-friend` P9)
    * - the old name:  the person's before, kept or git's
    * - `dryRun`:  keeps nothing, writes nothing;  says what it would change
    * - the same name, or no old name:  says so, changes nothing
@@ -79,13 +80,15 @@ export class PersonCommands {
     const before = EpicHome.person()
     // the same name, as written:  a change of case ("ana" -> "Ana") is still a rename
     const same = before.name === name
+    const sweep = new NameSweep({ content: this.content })
     const result: SweepResult =
       before.name && !same
-        ? new NameSweep({ content: this.content }).run(before.name, name, { dryRun })
-        : { from: before.name ?? "", to: name, dryRun, count: 0, files: [] }
+        ? sweep.run(before.name, name, { dryRun })
+        : { from: before.name ?? "", to: name, dryRun, count: 0, files: [], moved: [] }
     if (!dryRun) EpicHome.keepPerson(name)
-    if (json) CLI.out(JSON.stringify({ ...result, before, file: EpicHome.personFile() }, null, 2))
-    else for (const line of PersonCommands.renameLines(result, { before, same })) CLI.out(line)
+    const commit = before.name && !same ? sweep.commit(result) : undefined
+    if (json) CLI.out(JSON.stringify({ ...result, commit, before, file: EpicHome.personFile() }, null, 2))
+    else for (const line of PersonCommands.renameLines(result, { before, same, commit })) CLI.out(line)
     return EXIT.OK
   }
 
@@ -239,15 +242,23 @@ export class PersonCommands {
   }
 
   /** `epic whoami --rename`'s lines:  what changed (or would), then a line per file. */
-  static renameLines(result: SweepResult, { before, same }: { before: EpicPerson; same: boolean }): string[] {
-    const { from, to, dryRun, count, files } = result
+  static renameLines(
+    result: SweepResult,
+    { before, same, commit }: { before: EpicPerson; same: boolean; commit?: string }
+  ): string[] {
+    const { from, to, dryRun, count, files, moved } = result
     const kept = dryRun ? "  (dry run:  nothing written, name not kept)" : `;  you're ${to} now`
     if (!before.name) return [`nothing to rename:  you had no name${kept}`]
     if (same) return [`you're ${to} already:  nothing to rename`]
     const verb = dryRun ? "would rename" : "renamed"
     const head = `${verb} ${from} as ${to} in ${count} ${count === 1 ? "place" : "places"}, ${files.length} ${files.length === 1 ? "file" : "files"}`
     const width = Math.max(0, ...files.map((file) => file.path.length))
-    return [head + kept, ...files.map((file) => `  ${file.path.padEnd(width)}  ${String(file.count).padStart(4)}`)]
+    return [
+      head + kept,
+      ...files.map((file) => `  ${file.path.padEnd(width)}  ${String(file.count).padStart(4)}`),
+      ...moved.map(([old, now]) => `  ${dryRun ? "would move" : "moved"} ${old} -> ${now}`),
+      ...(commit ? [`committed in the content repo:  ${commit}`] : [])
+    ]
   }
 
   /** Whether `written` names `name`:  the same words, any case, spaces trimmed (as `whois` matches). */

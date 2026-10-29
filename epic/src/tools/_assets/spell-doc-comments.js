@@ -213,7 +213,7 @@ export async function wireComments(main, { go, signal } = {}) {
   addEventListener("spell-doc:updated", () => comments.draw(), listening)
   // its inbox files changing, the page coming into view;  and, while a docs page's Send shows, every 30s:
   // who is listening, as a session that stopped leaves no file change, only an old heartbeat
-  const unwatch = ServerLink.watch(window, (path) => comments.inboxPaths.includes(path), reload, {
+  const unwatch = ServerLink.watch(window, (path) => comments.isItsFile(path), reload, {
     every: SEND_POLL_MS,
     polls: () => !!comments.send
   })
@@ -250,6 +250,19 @@ function inboxPathsOf(inbox) {
   const paths = [inbox, inbox.replace(/^\/worktrees\/[^/]+(?=\/)/, "")]
   return [...new Set(paths.flatMap((path) => ServerLink.dataFileNames(path)))]
 }
+
+/**
+ * Whether `path` (a URL path the page server announced) is a person's COMMENTS FILE beside one of the inbox files
+ * `inboxPaths` (`<page>.comments.<person>.json5`, epic `epic-friend` P9):  where the comments are kept since they're
+ * shared, one file per person (`SharedComments`).
+ */
+function isCommentsFileOf(inboxPaths, path) {
+  const named = COMMENTS_FILE.exec(path)
+  return !!named && inboxPaths.includes(`${path.slice(0, named.index)}.inbox.json5`)
+}
+
+/** A person's comments file's own part of its name:  `.comments.ana-lima.json5` (`SharedComments`). */
+const COMMENTS_FILE = /\.comments\.[\p{L}\p{N}]+(?:-[\p{L}\p{N}]+)*\.json5$/u
 
 /****************
  * ### `PageComments`
@@ -334,6 +347,14 @@ class PageComments {
     this.seenTimers = new Map()
     /** a docs page's Send, as the server last answered (`keepSend()`);  `null` on an epic page */
     this.send = null
+  }
+
+  /**
+   * Whether the page server's change of `path` (a URL path) is one of the page's:  an inbox file of its, or a
+   * person's comments file beside one (`isCommentsFileOf()`).
+   */
+  isItsFile(path) {
+    return this.inboxPaths.includes(path) || isCommentsFileOf(this.inboxPaths, path)
   }
 
   /**
@@ -1039,7 +1060,8 @@ class PageComments {
    *   holds, so Claude taking his reply empties it
    */
   replyBoxFor(comment) {
-    const saved = ThreadFacts.pendingReplyOf(comment)?.text ?? ""
+    // only this reader's own last words:  another person's are theirs to change (epic `epic-friend` P9)
+    const saved = ThreadFacts.pendingReplyOf(comment, ThreadFacts.viewer())?.text ?? ""
     const kept = this.replyBoxes.get(comment.id)
     if (kept && (kept.busy() || kept.saved() === saved)) return kept
     kept?.drop()

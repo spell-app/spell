@@ -4,8 +4,10 @@ import { join } from "node:path"
 import { Git } from "spell/server/Git"
 import { PlanDocFiles } from "spell/epic/tool/PlanDocFiles"
 import { PlanParts } from "spell/epic/tool/PlanParts"
+import { DataFile } from "spell/epic/data/DataFile"
 import { PlanTime } from "spell/epic/tool/PlanTime"
 import { Renumber } from "spell/epic/tool/Renumber"
+import { SharedComments } from "spell/epic/tool/SharedComments"
 
 import { ContentMerge } from "./ContentMerge"
 import { EpicCheckout } from "./EpicCheckout"
@@ -24,6 +26,8 @@ import { SyncState, type SyncRecord, type SyncResult } from "./SyncState"
  *   2. RENUMBER (Q6, A):  ids THIS machine made (a todo `t22`, a change mark `ch12`, a request `r3`) that the remote
  *      has too get the next free number, on this side, every reference following (`Renumber.epic()`), a log line on
  *      the page;  BEFORE the rebase, since two new `parts/t22.html` would stop it.
+ *      A page's comments the same way (`c3`, in each person's comments file:  `Renumber.comments()`, epic
+ *      `epic-friend` P9, T15), with no log line:  a comment isn't on the page.
  *      This machine's commits not pushed yet are then made again as one per group (`Shared.commitPending()`), so no
  *      commit of theirs still adds the old file
  *   3. rebase onto the remote's branch;  what stops it is settled by `ContentMerge` (two adds at one place, a later
@@ -33,7 +37,9 @@ import { SyncState, type SyncRecord, type SyncResult } from "./SyncState"
  *      field a phase now holds twice (a request filed by each):  joined into one (`joinTwinFields()`)
  *   5. push;  refused or offline:  kept, the next sync pushes
  * - git through the kit's `Git` (`EpicCheckout.mustGit()` where a failure is the verb's), in the content repo
- * - NOT the review inboxes:  git-ignored, each machine's own, until the Shared Comments phase
+ * - NOT the review inboxes:  git-ignored, each machine's own;  but the comments beside them, one file per person
+ *   (`SharedComments`, epic `epic-friend` P9), are committed and synced as the pages are:  each machine writes only
+ *   its own person's, so they never conflict
  ****************/
 export class SharedSync {
   /** the content folder's verbs:  its config, its commits.  STATIC */
@@ -107,7 +113,55 @@ export class SharedSync {
       await Renumber.epic(files, epic, renames, logLine(renames))
       renumbered.push({ epic, renames })
     }
+    return [...renumbered, ...(await this.renumberComments(base, theirs))]
+  }
+
+  /**
+   * Renumber the comments this machine made since `base` whose ids `theirs` has too (epic `epic-friend` P9, T15):  for
+   * each page whose comments files this side changed, its new ids (in any person's file) that the remote's files use
+   * too, each to the next free `c<N>` (`Renumber.comments()`);  what it renumbered, by epic (an epic page's) or page.
+   * - SIDE EFFECT:  writes those comments files and inboxes (not committed)
+   */
+  private async renumberComments(base: string, theirs: string): Promise<Renumbered[]> {
+    const inboxes = new Set(
+      Git.lines(["diff", "--name-only", base, "HEAD"], this.dir)
+        .filter((path) => SharedComments.isCommentsFile(path))
+        .map((path) => SharedComments.inboxOf(path))
+    )
+    const renumbered: Renumbered[] = []
+    for (const inbox of [...inboxes].sort()) {
+      const [before, mine, other] = [base, "HEAD", theirs].map((rev) => this.commentIdsAt(rev, inbox))
+      const renames: Record<string, string> = {}
+      let highest = Math.max(0, ...[...mine!, ...other!].map((id) => Number(NUMBERED.exec(id)?.[2] ?? 0)))
+      for (const id of [...mine!].sort(byNumber)) {
+        if (before!.has(id) || !other!.has(id)) continue
+        renames[id] = `c${++highest}`
+      }
+      if (!Object.keys(renames).length) continue
+      await Renumber.comments(join(this.dir, inbox), renames)
+      const epic = EPIC_INBOX.exec(inbox)
+      renumbered.push({
+        epic: epic && epic[1] === epic[2] ? epic[1]! : inbox.replace(/\.inbox\.json5$/, ".html"),
+        renames
+      })
+    }
     return renumbered
+  }
+
+  /** The comment ids every person's comments file beside inbox `inbox` (from the repo) holds at `rev`. */
+  private commentIdsAt(rev: string, inbox: string): Set<string> {
+    const folder = inbox.includes("/") ? inbox.slice(0, inbox.lastIndexOf("/")) : ""
+    const ids = new Set<string>()
+    for (const name of Git.lines(["ls-tree", "--name-only", rev, "--", `${folder}/`], this.dir)) {
+      if (!SharedComments.isCommentsFile(name) || SharedComments.inboxOf(name) !== inbox) continue
+      const text = Git.out(["show", `${rev}:${name}`], this.dir, { trim: false }) ?? ""
+      try {
+        for (const id of Object.keys(DataFile.parse<{ comments?: object }>(text).comments ?? {})) ids.add(id)
+      } catch {
+        // a file that won't read holds no ids to clash
+      }
+    }
+    return ids
   }
 
   /**
@@ -347,6 +401,9 @@ const CONFLICT_CODES = new Set(["DD", "AU", "UD", "UA", "DU", "AA", "UU"])
 
 /** An `<epic-item>`'s opening tag, its attributes `$1`, quoted values holding any `>`. */
 const ITEM_TAG = /<epic-item((?:\s+[\w-]+(?:="[^"]*")?)*)\s*>/g
+
+/** An epic page's inbox, from the content repo:  `epics/<name>/<name>.inbox.json5` (`$1`, `$2` the same). */
+const EPIC_INBOX = /^epics\/([^/]+)\/([^/]+)\.inbox\.json5$/
 
 /** A numbered id:  its kind (`t`, `ch`, `r`) `$1`, its number `$2`. */
 const NUMBERED = /^([a-z]+)(\d+)$/

@@ -156,7 +156,7 @@ describe("CommentList", () => {
     comments.answer(id, "<p>Because.</p>", NOW)
     comments.resolve(id, "good", NOW)
     expect([comments.comment(id).done, ThreadFacts.turnOf(comments.comment(id)), comments.waiting]).toEqual([
-      { how: "good", at: NOW.toISOString() },
+      { how: "good", at: NOW.toISOString(), by: PERSON },
       "done",
       []
     ])

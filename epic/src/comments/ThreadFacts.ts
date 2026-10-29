@@ -170,21 +170,24 @@ export class ThreadFacts {
    * - `edit`:  their first words, while the comment is `new` and Claude isn't thinking about it
    * - `reply`:  their pending reply (`pendingReplyOf()`)
    * - else `null`
+   * - `person`:  whose words (epic `epic-friend` P9):  only their own comment, and their own reply;  none:  anyone's
    */
-  static pendingOf(comment: Comment): "edit" | "reply" | null {
+  static pendingOf(comment: Comment, person?: string): "edit" | "reply" | null {
     if (comment.done) return null
-    if (comment.status === "new" && !comment.replies?.length) return comment.working ? null : "edit"
-    return ThreadFacts.pendingReplyOf(comment) ? "reply" : null
+    if (comment.status === "new" && !comment.replies?.length)
+      return comment.working || !isTheirs(comment.by, person) ? null : "edit"
+    return ThreadFacts.pendingReplyOf(comment, person) ? "reply" : null
   }
 
   /**
    * A person's PENDING reply on `comment`:  its thread's last entry, a person's, not taken since, nor being thought
    * about (`working`);  else `null`.
    * - as the server's `CommentList` has it:  the next save changes it, rather than adding another
+   * - `person`:  only theirs (epic `epic-friend` P9):  Ben's box never holds Ana's last words;  none:  anyone's
    */
-  static pendingReplyOf(comment: Comment): CommentReply | null {
+  static pendingReplyOf(comment: Comment, person?: string): CommentReply | null {
     const last = comment.replies?.at(-1)
-    if (!last || ThreadFacts.isAgents(last)) return null
+    if (!last || ThreadFacts.isAgents(last) || !isTheirs(last.by, person)) return null
     const held = heldSince(comment)
     return held && held >= last.at ? null : last
   }
@@ -344,6 +347,11 @@ const KIND_NAMES: Readonly<Record<string, string>> = {
 /** Whether `written` and `name` are one name:  the same words, any case, spaces trimmed (as `epic whois` matches). */
 function sameName(written: string, name: string): boolean {
   return !!written.trim() && written.trim().localeCompare(name.trim(), undefined, { sensitivity: "accent" }) === 0
+}
+
+/** Did `person` write what `by` names (no `person`, or no `by`:  yes, anyone's)? */
+function isTheirs(by: string | undefined, person: string | undefined): boolean {
+  return !person || !by || sameName(by, person)
 }
 
 /** When Claude last took `comment`, ISO;  `taken` with no record of it:  when written;  never taken:  `undefined`. */

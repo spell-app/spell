@@ -1592,6 +1592,16 @@ Each kind of page has ONE name, written everywhere a person reads it.
     It's `<name>.inbox.json5`, beside the doc in `epics/<name>/`.
   - Absent until the first mark;  deleted once empty.
   - Git-ignored:  per-machine pending state, never the record.
+  - EXCEPT its comments (epic `epic-friend` P9):  shared, ONE FILE PER PERSON beside it,
+    `<name>.comments.<person>.json5`, committed and synced with the plans ([`SharedComments`](tool/SharedComments.ts))
+    - each machine writes only its own person's file:  their comments, and what they said on others' threads (`on`)
+    - the inbox's `comments` is everyone's, put together as it's read;  a write splits them back by who said what
+    - an inbox file from before P9 still holding comments:  read as this machine's, moved by its next write
+    - everyone sees every thread;  each person's AGENT answers that person's (`CommentList.ownWaiting`):  a Send
+      hands over only its person's, and the thread says whose agent took it (`claim`:  "Claude (Ana): thinking…")
+    - only a comment's writer edits, deletes or clears it (409);  anyone replies, closes or reopens it
+    - two people's new `c4` at once:  the sync renumbers this machine's before it rebases (`Renumber.comments()`)
+    - `epic whoami --rename` moves the person's files to the new name, one commit in the content repo
   - Its shape and methods:  [`ReviewInbox`](tool/ReviewInbox.ts).
 
     ```text

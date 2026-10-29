@@ -809,13 +809,22 @@ function workOf(mark: { action: string } | undefined): "revisit" | "details" {
  */
 function commentLines(comment: IdentifiedComment, indent: string, unsent = false): string[] {
   const quote = comment.quote ? `  quoting "${comment.quote.slice(0, 60)}"` : ""
+  // whose it is, and whose agent took it (epic `epic-friend` P9):  everyone's are listed, each person's agent answers theirs
+  const by = comment.by ? `  · ${comment.by}'s` : ""
+  const { claim } = comment
+  const taken = claim && comment.working ? `  · taken by ${claim.by}'s ${agentName(claim.agent)}` : ""
   const lines = [
     `${indent}- ${CommentList.label(comment.id)}  on ${comment.anchor} (${comment.kind})${quote}  ` +
-      `"${comment.text.slice(0, 120)}"  (${comment.at})${unsent ? "  · unsent" : ""}`
+      `"${comment.text.slice(0, 120)}"  (${comment.at})${by}${taken}${unsent ? "  · unsent" : ""}`
   ]
   const reply = ThreadFacts.lastPersonReply(comment)
   if (reply?.text) lines.push(`${indent}  ${reply.by} replied:  "${reply.text.slice(0, 160)}"  (${reply.at})`)
   return lines
+}
+
+/** An agent's name as people say it:  `claude` -> `Claude`. */
+function agentName(agent: string): string {
+  return agent.charAt(0).toUpperCase() + agent.slice(1)
 }
 
 /** `count` `noun`s:  `1 mark`, `2 marks`. */

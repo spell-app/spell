@@ -14,6 +14,7 @@ import { PlanDoc } from "spell/epic/tool/PlanDoc"
 import { PlanDocCommands } from "spell/epic/tool/PlanDocCommands"
 import { PlanDocFiles } from "spell/epic/tool/PlanDocFiles"
 import { LISTEN_STALE_MS, ReviewInbox } from "spell/epic/tool/ReviewInbox"
+import { SharedComments } from "spell/epic/tool/SharedComments"
 
 import { PageInboxes } from "spell/epic/tools/PageInboxes"
 
@@ -47,6 +48,7 @@ beforeEach(() => {
   plan.updateStates()
   writeFileSync(file, plan.toString())
   rmSync(inboxFile, { force: true })
+  for (const each of SharedComments.pathsBeside(inboxFile)) rmSync(each)
 })
 
 afterEach(() => {

@@ -21,6 +21,8 @@ PARKED-*.md
 /site/_assets/
 # the docs pages' waiting comments (`<page>.inbox.json5` beside a page, and its lock):  per machine
 /docs/**/*.inbox.json*
+# and their comments files (`<page>.comments.<person>.json5`, epic epic-friend P9):  shared only in the content repo
+/docs/**/*.comments.*.json5
 # `agents/`:  a link to the kit's agents/ (WWOD and the three logs), made by the kit's every `yarn install` (epic repo-split P9, P12)
 /agents
 

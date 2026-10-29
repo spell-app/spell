@@ -432,13 +432,23 @@ Anything else, the same words changed two ways, is a real conflict:
 - to settle it:  in the content repo, `git pull --rebase`, keep both people's words in each file, `git add` it,
   `git rebase --continue`, then `epic shared sync`
 
-### Comments stay on your machine until they're answered
+### Everyone sees every comment;  your Claude answers yours
 
-The marks and comments you leave on a page wait in its review inbox, a file on YOUR machine, never in git.
-Your Claude session answers them, and its answer lands in the epic page, under your name, which everyone shares.
+A comment you leave on a page is shared with the plans, the moment the turn's sync runs, answered or not.
+- It's kept in a file of YOUR comments beside the page, `<page>.comments.<you>.json5`:
+  only your machine writes it, so two people commenting never clash.
+- A teammate's sync brings your thread to their page.
+  They can reply on it;  their reply goes in their own file, and your sync brings it back.
+- **Each person's Claude answers that person's threads.**
+  Your Send hands your session only yours;  a teammate's waits for theirs.
+  The thread says whose Claude took it:  "Claude (Ana): thinking…".
+- Only the comment's writer edits, deletes or clears it.
+- Two people adding a comment between syncs may both make `C4`:  the sync gives yours the next free number.
+- `epic whoami --rename` moves your comments file to your new name, in one commit.
 
-**The catch, for now:**  a teammate doesn't see your question until it's answered.
-🌱 Sharing comments before they're answered, with a rule for whose Claude takes each one, is planned.
+**Still on your machine:**  your marks (the pills you press on items), your Send, and who's listening,
+in the page's review inbox, a file never committed.
+What Claude makes of a mark lands in the epic page, under your name, which everyone shares.
 
 ## The content folder:  your plans, in a repo of their own
 
@@ -457,6 +467,7 @@ Every page the agent writes lands in one of four folders, each linked into your 
   With a shared repo, the same hook syncs it ("Every turn syncs", above).
 - **Never committed:**  review and comment inboxes, locks, the running-agents lists, scratch details pages,
   and the VS Code window files, each machine's own (`windows/`).
+  The comments beside the inboxes ARE committed, a file per person.
 - **Its own `.gitignore` and `.gitattributes`** hold a marked block each, which `epic init` and every sync keep
   current:  the logs' `union` merge is in the second.
 - **No `templates/`.**
@@ -656,12 +667,12 @@ What you'd trip on today, roughly in the order you'd meet it.
    The extension is built and installed by hand.
 
 **Real today:**  a repo that isn't Spell, set up in four steps, its plans shared by a team through GitHub,
-its epics planned, built in worktrees and reviewed on their pages, each reply under its writer's name.
+its epics planned, built in worktrees and reviewed on their pages, each reply and comment under its writer's name,
+every comment seen by the team and answered by its writer's own Claude.
 **Not yet:**
 - an install without a clone of Spell
 - an agent other than Claude Code
 - a host other than GitHub, without making the shared repo by hand
-- comments a teammate sees before they're answered
 - two repos reviewed from one server
 - the keys added since the first outside run, tried anywhere but Spell's own repos:
   - `app`
@@ -669,8 +680,8 @@ its epics planned, built in worktrees and reviewed on their pages, each reply un
   - `windowsFolder`
   - `windows.settings`
 
-🌱 Three are planned:  the plugin from Claude Code's plugin marketplace, with no clone,
-comments shared before they're answered, and the same workflow driven from Codex and other agents
+🌱 Two are planned:  the plugin from Claude Code's plugin marketplace, with no clone,
+and the same workflow driven from Codex and other agents
 ([the epic engine's front page](epic/README.md#-coming) says where each stands).
 
 ## See also

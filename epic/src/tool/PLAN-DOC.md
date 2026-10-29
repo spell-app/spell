@@ -121,12 +121,13 @@ As `plan-doc.md`, "Ids":
 - A new id is the next number of its letter, so two people can both make `T22`:  the content repo's sync gives THIS
   machine's the next free number before it rebases (`Renumber`, `SharedSync`;  epic `epic-friend` P5), every reference
   following, and the log says so (`Renumbered as the plans synced:  T22 → T23`).
-  Change marks (`ch12`) and requests (`r3`) too;  comments stay in the local inbox, so they never meet.
+  Change marks (`ch12`) and requests (`r3`) too;  and comments (`c4`), each person's in their own comments file
+  beside the page (`Renumber.comments()`, epic `epic-friend` P9, T15), with no log line:  a comment isn't on the page.
 - The letters:
   - `q` question (an answered one is a decision)
   - `j` judgement call, `t` todo (work still to do, or with `limit` a limit to know about)
   - `i` issue, `m` manual test
-  - a comment is `c` (`C3`), in the inbox, never an item
+  - a comment is `c` (`C3`), in its writer's comments file (`SharedComments`), never an item
   - before epic `epic-engine` P44:  `c` caveat (the todos), `t` test, and comments `m` ("M" for mark);  the migration
     `item-renames` renamed them, every number kept ("Migrations", below)
   - before epic `epic-engine` P32:  `t` todo and `v` test;  the migration `caveats-and-tests` renumbered them (retired)

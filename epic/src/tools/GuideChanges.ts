@@ -103,7 +103,8 @@ export class GuideChanges {
       // another epic's page:  its comments are that epic's, unless the caller named the page
       const owner = !pages && owners.ownerOf(page)
       if (owner && owner !== this.epic) continue
-      const comments = GuideInbox.read(inbox).commentList.waiting
+      // this person's own:  another person's agent gathers theirs (epic `epic-friend` P9)
+      const comments = GuideInbox.read(inbox).commentList.ownWaiting
       if (comments.length) entry(page).comments.push(...comments)
     }
     for (const note of notes) entry(note.page).notes.push(note)

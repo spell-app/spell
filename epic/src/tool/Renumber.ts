@@ -1,6 +1,8 @@
 import { existsSync, readFileSync, renameSync, writeFileSync } from "node:fs"
 import { dirname, join } from "node:path"
 
+import { CommentList } from "./CommentList"
+import { GuideInbox } from "./GuideInbox"
 import { ContentRelink, type RelinkCount } from "./migrations/ContentRelink"
 import type { PlanDocFiles } from "./PlanDocFiles"
 import { ReviewInbox } from "./ReviewInbox"
@@ -18,6 +20,8 @@ import { ReviewInbox } from "./ReviewInbox"
  *   its review inbox (`ReviewInbox.renameIds()`), its request folders, and links on OTHER pages (`others()`)
  * - `others()`:  links on other pages of the content folder (`ContentRelink`):  `epic migrate` runs it after the
  *   pages, for every epic it renumbered
+ * - `comments()`:  a page's comments (`c3` => `c5`, epic `epic-friend` P9, T15):  two people both made `c3` in their
+ *   own comments files (`SharedComments`), and this machine's takes the next free number
  * - node only:  `epic()` and `others()` write files;  `page()` is pure DOM, on linkedom or a browser's
  ****************/
 export class Renumber {
@@ -109,6 +113,23 @@ export class Renumber {
         writeFileSync(markdown, readFileSync(markdown, "utf8").replace(new RegExp(`^id: ${from}$`, "m"), `id: ${to}`))
     }
     return Renumber.others(files.content, { [name]: renames }).links
+  }
+
+  /**
+   * Renumber the comments beside inbox file `inbox` (an epic page's, a saga page's or a docs page's) by `renames`
+   * (old => new, `c3` => `c5`), as the sync does (`SharedSync`, epic `epic-friend` P9):  how many moved.
+   * - under the inbox's lock, as every comment's change (`ReviewInbox.updateAsync()`, `GuideInbox.updateAsync()`):
+   *   the comment moves in this machine's person's comments file;  an epic page's revisits naming it follow
+   *   (`ReviewInbox.renameComments()`)
+   * - SIDE EFFECT:  writes the inbox and the comments file
+   */
+  static async comments(inbox: string, renames: Record<string, string>): Promise<number> {
+    let moved = 0
+    const page = inbox.replace(/\.inbox\.json5$/, "")
+    if (existsSync(`${page}.plan.html`) || existsSync(`${page}.saga.html`))
+      await ReviewInbox.updateAsync(inbox, (box) => (moved = box.renameComments(renames)))
+    else await GuideInbox.updateAsync(inbox, (_list, box) => (moved = CommentList.renumber(box.comments, renames)))
+    return moved
   }
 
   /**
