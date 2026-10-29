@@ -148,12 +148,15 @@ export class RepoInit {
     if (REMOTE_WRITTEN.has(report.remote.action) && report.remote.address)
       report.config.settings = { ...report.config.settings, contentRemote: report.remote.address }
     // the links:  what each is now, and what linking does;  none into a content repo that isn't there
-    report.links = report.content.action === "missing" ? [] : dryRun
-      ? folders.map((path) => {
-          const state = shared.linkState(main, path)
-          return { path, action: state === "ok" ? "ok" : `would link (${state})` }
-        })
-      : shared.link(main).map(({ path, action, state }) => ({ path, action: action ?? state }))
+    report.links =
+      report.content.action === "missing"
+        ? []
+        : dryRun
+          ? folders.map((path) => {
+              const state = shared.linkState(main, path)
+              return { path, action: state === "ok" ? "ok" : `would link (${state})` }
+            })
+          : shared.link(main).map(({ path, action, state }) => ({ path, action: action ?? state }))
     // the `.gitignore` block
     const ignoreFile = report.gitignore.file
     const before = existsSync(ignoreFile) ? readFileSync(ignoreFile, "utf8") : ""
@@ -176,7 +179,15 @@ export class RepoInit {
    * - a push that failed is in `error`:  the repo and its address stand
    * - SIDE EFFECT (not `dryRun`):  the repo on GitHub, the remote, the push, `contentRemote` in the config
    */
-  async remoteStep({ shared, settings, dryRun, remote, contentRepo, noRemote, ask }: RemoteStepOptions): Promise<RemoteReport> {
+  async remoteStep({
+    shared,
+    settings,
+    dryRun,
+    remote,
+    contentRepo,
+    noRemote,
+    ask
+  }: RemoteStepOptions): Promise<RemoteReport> {
     const configFile = join(this.main, EpicConfig.FILE)
     const origin = shared.remote
     if (origin) {
@@ -205,7 +216,7 @@ export class RepoInit {
     const suggestion = `${basename(this.main)}-epics`
     const repoName = contentRepo ?? (ask ? await CLI.ask(REPO_QUESTION, { suggestion }) : suggestion)
     if (!REPO_NAME.test(repoName))
-      return { action: "failed", repo: `${owner}/${repoName}`, error: "letters, digits, \".\", \"-\" and \"_\" only" }
+      return { action: "failed", repo: `${owner}/${repoName}`, error: 'letters, digits, ".", "-" and "_" only' }
     const repo = `${owner}/${repoName}`
     if (dryRun) return { action: "would make", repo }
     let address: string
@@ -257,7 +268,11 @@ export class RepoInit {
   static keepRemote(file: string, address: string): void {
     const text = readFileSync(file, "utf8")
     const line = /^(\s*"contentRemote":\s*)"(?:[^"\\]|\\.)*"/m
-    if (line.test(text)) writeFileSync(file, text.replace(line, (_all, key: string) => key + JSON.stringify(address)))
+    if (line.test(text))
+      writeFileSync(
+        file,
+        text.replace(line, (_all, key: string) => key + JSON.stringify(address))
+      )
     else DataFile.edit<Record<string, unknown>>(file, (settings) => ({ ...settings, contentRemote: address }))
   }
 
@@ -495,8 +510,8 @@ function contentLineFor({ content, remote, dryRun }: InitReport): string {
       return `${folder}:  would clone it from ${remote.address}`
     case "missing":
       return `${folder}:  couldn't clone ${remote.address}:  ${remote.error}`
-    default /* case "created" */:
-      return `${folder}:  ${dryRun ? "would make it" : "made"}, a git repo with ${content.made.join(", ")}`
+    default:
+      /* case "created" */ return `${folder}:  ${dryRun ? "would make it" : "made"}, a git repo with ${content.made.join(", ")}`
   }
 }
 
@@ -523,7 +538,9 @@ function remoteLinesFor({ remote, content, main }: InitReport): string[] {
       return [`shared repo:  would make ${address} the content repo's remote, push to it, and write it in ${inConfig}`]
     case "recorded":
     case "would record":
-      return [`shared repo:  ${address}, ${remote.action === "recorded" ? "written" : "would be written"} in ${inConfig}`]
+      return [
+        `shared repo:  ${address}, ${remote.action === "recorded" ? "written" : "would be written"} in ${inConfig}`
+      ]
     case "already":
       return [`shared repo:  ${address}`]
     case "skipped":
@@ -533,7 +550,7 @@ function remoteLinesFor({ remote, content, main }: InitReport): string[] {
         `shared repo:  couldn't make ${repo} on GitHub:  ${error}`,
         `  another name:  epic init --content-repo <name>;  a repo you made:  epic init --remote <address>`
       ]
-    default /* case "no gh", "logged out" */: {
+    default: /* case "no gh", "logged out" */ {
       const why = remote.action === "no gh" ? "GitHub's command, gh, isn't installed" : "gh isn't logged in to GitHub"
       return [
         `shared repo:  not made:  ${why}.  Sharing the epics works only with GitHub for now:`,

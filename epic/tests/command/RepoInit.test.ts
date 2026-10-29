@@ -222,7 +222,9 @@ describe("epic init:  the shared repo (epic-friend P4)", () => {
     )
     expect(lines).toContain("  brew install gh        (other systems:  https://cli.github.com)")
     expect(lines).toContain("  gh auth login")
-    expect(lines.at(-1)).toBe("more on sharing the epics:  https://github.com/spell-app/spell/blob/main/README-epics.md")
+    expect(lines.at(-1)).toBe(
+      "more on sharing the epics:  https://github.com/spell-app/spell/blob/main/README-epics.md"
+    )
   })
 
   test("gh logged out:  nothing made, the same two commands", async () => {
