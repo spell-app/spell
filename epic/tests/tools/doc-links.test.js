@@ -53,6 +53,19 @@ describe("command line", () => {
     expect(run.status).toBe(0)
   })
 
+  it("links from the kit's root when run in the epic folder, as AGENTS.md says (epic `repo-split` I46)", () => {
+    // Without EPIC_CHECKOUT, ROOT is the epic folder:  its pages' root paths (`/epic/src/...`) must still resolve
+    const env = { ...process.env }
+    delete env.EPIC_CHECKOUT
+    const run = spawnSync(
+      process.execPath,
+      ["--import", "tsx", "src/tools/doc-links.js", "--check", "src/docs/epic-commit.html"],
+      { cwd: PACKAGE, encoding: "utf8", env: { ...env, TSX_TSCONFIG_PATH: join(PACKAGE, "tsconfig.json") } }
+    )
+    expect(run.stdout).toMatch(/^epic-commit\.html: {2}\d+ destinations, 0 problems\n$/)
+    expect(run.status).toBe(0)
+  })
+
   it("prints usage and exits 1 with no pages", () => {
     const run = cli("--check")
     expect(run.status).toBe(1)
