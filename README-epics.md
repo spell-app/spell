@@ -124,7 +124,11 @@ gh auth login
 ### 2. Spell, the plugin, and `epic` on your PATH
 
 The plugin comes from a clone of Spell, for now:
-[Setup from zero](README.md#setup-from-zero), on Spell's front page, clones and installs it at `~/www/spell`.
+[Setup from zero](README.md#setup-from-zero), on Spell's front page, clones and installs it at `~/www/spell`,
+with the plugin in its `epic/` folder.
+- 🌱 Without a clone:  the plugin's package is on npm, `npm install spell-epic@next`
+  (`@next` until Spell's first release, planned for December 1, 2026), and its `epic` command answers.
+  Its `epic plugin install` doesn't run from there yet:  it looks for the clone's `epic/bin/`.
 
 Then, once per machine, from that clone:
 
@@ -762,7 +766,8 @@ epic server url ~/www/my-app.epics/epics/seo/seo.plan.html
 What you'd trip on today, roughly in the order you'd meet it.
 
 1. **It installs from a clone of Spell.**
-   The engine runs on Spell UI and Spell's shared code through Spell's one install, not from npm.
+   `spell-epic` is on npm (`npm install spell-epic@next`, with `spell` as its dependency), and its `epic` command runs
+   from there, but `epic plugin install` needs the clone's `epic/` folder.
    So you clone Spell to plan work in a repo that has nothing to do with it.
 2. **Sharing needs GitHub.**
    `epic init` makes the shared repo only through GitHub's `gh`;
@@ -783,12 +788,29 @@ What you'd trip on today, roughly in the order you'd meet it.
    The window bridge finds a session's window through its parent processes;
    `vscode://` links are avoided because macOS hands them to whichever window is focused.
    The extension is built and installed by hand.
+8. **Spell's own page server knows your project only by a file you write.**
+   You need it only to see your own component set or bundles on Spell's pages, not for epics:
+   the epic server above serves your plans.
+   The kit's page server knows its own folders and, beside them, the projects two lists name:
+   - `repos.json5`, the kit's tracked list:  only the kit's own peers, so not yours
+   - `page-server.local.json5`, at the kit checkout's root, git-ignored, yours:
+     `{ projects: ["../my-app"] }`, each folder from the kit's, with a `"pageServer"` part in its `package.json`
+   - A kit WORKTREE reads the peers beside the MAIN checkout (`~/www/spell`), not beside itself.
+   - A folder beside the kit is served under `/_beside/` (`/_beside/_up/` for one further up).
+   - Your project needs its own install with `spell` in it (`"spell": "portal:../spell"`):
+     its bundles are found by its npm name, through its `node_modules`.
+   - What else assumes the kit's own layout:
+     - `spell-types --below`, in your project, builds the local packages it depends on (`workspace:`, `portal:` ...),
+       a kit among them with its folders
+     - the lint's `spell-ui/*` pattern rules know only the component folders of Spell's own sets
+     - `spell rename imports` renames in the peers `repos.json5` names, so never in your project
+     - `spell publish` publishes only the kit's folders that have a `"spellPublish"`
 
 **Real today:**  a repo that isn't Spell, set up in four steps, its plans shared by a team through GitHub,
 its epics planned, built in worktrees and reviewed on their pages, each reply and comment under its writer's name,
 every comment seen by the team and answered by its writer's own Claude.
 **Not yet:**
-- an install without a clone of Spell
+- `epic plugin install` from the npm package, without a clone of Spell (the package is out under `next`, above)
 - the skills under an agent other than Claude Code, and Send waking one
 - a host other than GitHub, without making the shared repo by hand
 - two repos reviewed from one server

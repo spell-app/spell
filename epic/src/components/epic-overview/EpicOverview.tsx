@@ -14,7 +14,6 @@ import type { ContentsEntry } from "spell/epic/components/epic-section/EpicSecti
 
 import { epicOverviewVocabulary } from "./EpicOverview.en"
 
-import collapseAllCSS from "spell/epic/components/epic-item/CollapseAll.css?inline"
 import foldCSS from "spell/epic/components/epic-section/EpicFold.css?inline"
 import overviewCSS from "./EpicOverview.css?inline"
 import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
@@ -36,8 +35,7 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
  *   TODO:  drop the two slots once every doc is migrated (`epic-components` P14, wave 2).
  * - REVIEWED, while the page is reviewed and it holds an `<epic-summary>`:  keyed `summary` in the inbox, as the
  *   summary was (`<epic-review buttons="part">`:  Make Todo, Revisit)
- *   - its review buttons IN its title row, after the page's own buttons (the bullhorn), before expand-all,
- *     collapse-all and the fold, as an item's sit on its line (Owen, 2026-10-20:  "The buttons on the left should move
+ *   - its review buttons IN its title row, after the page's own buttons (the bullhorn), as an item's sit on its line (Owen, 2026-10-20:  "The buttons on the left should move
  *     into the 1. Overview header, as well as a bullhorn")
  *   - a marked note, then the note box once Revisit or Edit opens it, at the top of its body, under the title row
  *     (`under-line`:  leaving it empty closes it, as an item's under its line);  Revisit and Edit unfold it
@@ -50,7 +48,6 @@ export class EpicOverview extends EpicFold<typeof epicOverviewVocabulary> {
     styleSheets: {
       "epic-tooltip": tooltipCSS,
       "epic-fold": foldCSS,
-      "epic-collapse-all": collapseAllCSS,
       "epic-overview": overviewCSS
     }
   } satisfies Partial<E.ElementSetup>

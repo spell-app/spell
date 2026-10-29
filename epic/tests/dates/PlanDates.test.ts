@@ -61,6 +61,27 @@ describe("PlanDates.clock()", () => {
   })
 })
 
+// epic `epic-engine` I168:  the change marks' 3-day rule, lifted out so update blocks and the pen share it
+describe("PlanDates.isQuiet()", () => {
+  test("more than `QUIET_DAYS` (3) after `at`:  quiet;  no `at`, or one that won't parse:  never", () => {
+    const at = "2026-10-11 14:30"
+    expect(PlanDates.QUIET_DAYS).toBe(3)
+    expect(
+      [new Date(2026, 9, 14, 14, 30), new Date(2026, 9, 14, 14, 31), new Date(2026, 9, 11, 9, 0)].map((now) =>
+        PlanDates.isQuiet(at, now)
+      )
+    ).toEqual([false, true, false])
+    // the `to-see` form, with a `T`
+    expect(PlanDates.isQuiet("2026-10-08T08:00", new Date(2026, 9, 12))).toBe(true)
+    expect([undefined, null, "", "soon"].map((each) => PlanDates.isQuiet(each, new Date(2030, 0, 1)))).toEqual([
+      false,
+      false,
+      false,
+      false
+    ])
+  })
+})
+
 /** `7` -> `07`. */
 function pad(value: number): string {
   return String(value).padStart(2, "0")

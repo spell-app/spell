@@ -1,19 +1,19 @@
 # AGENTS.md
 
 This file provides guidance to AI coding agents (Claude Code, Codex, and others)
-when working with code in this folder, `src/app/` of the `spell-app` package (`spell/app/app`),
-and in the app's build folder, `app/` at the repo's root.
+when working with code in this folder, `src/app/` of the kit's app folder (`spell/app/app`),
+and in the app's build folder, `app/` at the app folder's root.
 
-**READ the repo root's [AGENTS.md](../../AGENTS.md) and [WWOD](../../agents/wwod/WWOD.md) FIRST:**
-- the root's:  the repo's layout
-- WWOD:  the house style every package shares
+**READ the app folder's [AGENTS.md](../../AGENTS.md) and [WWOD](../../agents/wwod/WWOD.md) FIRST:**
+- the folder's:  its layout
+- WWOD:  the house style every folder shares
 - Only what's local is below.
   A section named like a WWOD rule extends it.
 
 ## Overview
 
 - The top of the chain (below `cli`):  the web app and the embeddable web components.
-  - Everything else is a package it imports:  spell, lsp, parser, util, Spell UI ...
+  - Everything else is a folder it imports:  spell, lsp, parser, util, Spell UI ...
   - Its server is spaces' (below).
 - The app is Solid 2 (READ the root's Solid 2 pointer for Solid work).
   - So is what compiled spell draws, on the page's Spell UI (epic `output-targets` P10-P11):
@@ -21,7 +21,7 @@ and in the app's build folder, `app/` at the repo's root.
   - No React:  every `.tsx` is Solid.
   - `build.test.ts` pins that no chunk holds React, `spell-runtime.js` included.
   - Two test projects (the root's `vitest.config.ts`):
-    - Both read the repo's `tests/app/`, where the tests live at the same paths as the code:
+    - Both read the app folder's `tests/app/`, where the tests live at the same paths as the code:
       the test of this folder's `index.tsx` is [solid.test.tsx](../../tests/app/solid.test.tsx).
     - `app:node`, for most tests:  there Solid is its SERVER build
       (`renderToString`;  writes NOT staged, see [solid.test.tsx](../../tests/app/solid.test.tsx))
@@ -45,17 +45,17 @@ and in the app's build folder, `app/` at the repo's root.
 - Its server is NOT here (epic `people-and-orgs` P14):  it's spaces' ([spaces' AGENTS.md](../spaces/AGENTS.md)).
   - the API, the editor's route module and `ProjectBuild`
   - in spaces' [route modules folder](../spaces/server/node/routes/)
-- In its build folder, [app/](../../app/) at the repo's root (Vite's root:  its paths are from there):
+- In its build folder, [app/](../../app/) at the app folder's root (Vite's root:  its paths are from there):
   - the page, `index.html`
   - `demo/`, `static/`, `scripts/` (App UI's data and pictures, `stop.mjs`)
   - the vite configs, `vite*.config.ts`;  the tests' are the root's `vitest.config.ts`
   - `docs/`, App UI (below);  the builds, `dist*/`
-- Its scripts are the repo root's, the builds `cd app && ...` (epic `repo-split` P11):
+- Its scripts are the app folder's (its `package.json`), the builds `cd app && ...` (epic `repo-split` P11):
   - The editor (vite, port 3000 if free, else any) is the PAGE SERVER's child.
     - Spaces' [appRoutes.ts](../spaces/server/node/routes/appRoutes.ts) starts it (`EditorServer`)
       once the page server listens, and stops it with the page server.
       - It's a route module ([the kit's server AGENTS.md](../../../src/server/AGENTS.md)).
-    - So `spell server` (repo root) runs the API AND the editor.
+    - So `spell server` (the kit's root) runs the API AND the editor.
       - its URL:  in `.spell-server.editor.json`, at the checkout's root
       - its output:  in `.spell-server.editor.log`
     - `SPELL_NO_EDITOR=1` skips it.
@@ -109,7 +109,7 @@ and in the app's build folder, `app/` at the repo's root.
     - `spell-runtime.js` takes Solid and `h` through it too, since compiled spell draws with Solid.
       It never takes `spell-ui.js`.
     - Pinned by `element.build.test.ts`.
-  - `spell app vscode` is NOT here:  it's the repo root's.
+  - `spell app vscode` is NOT here:  it's the app folder's (its `src/cli/`).
   - `yarn lsp:start` and `yarn lsp:scopes` are [lsp](../lsp/)'s.
 - [The app's Monaco plumbing](ui/monaco/) (no UI).
   - Its language features call the SAME `LSP.SpellLanguageService`, in-process.
@@ -214,7 +214,7 @@ and in the app's build folder, `app/` at the repo's root.
 - `components/`:  `<spell-viewer>` and `<spell-editor>` (epic `spell-element`, P4);
   `<spell-code>` and `<spell-markdown>` (epic `repo-split` P2).
   - They're Spell UI components, written as a component pack's families are
-    ([spell-epic's AGENTS.md](../../../epic/src/AGENTS.md)).
+    ([the epic folder's AGENTS.md](../../../epic/src/AGENTS.md)).
   - `components/<tag>/` holds:
     - `<Name>.en.ts`:  the vocabulary
     - `<Name>.tsx`:  two classes
@@ -279,7 +279,7 @@ and in the app's build folder, `app/` at the repo's root.
     - `_images/` (the pictures) and `_examples/` (snippets a page shows):
       they aren't frame or data, so they keep one `_`
   - Spell UI's page shape, on Spell UI's site bundle:  the page server lays its `_assets/` over the folder.
-    - the page server's `componentSets` setting, in the root [package.json](../../package.json)
+    - the page server's `componentSets` setting, in the app folder's [package.json](../../package.json)
   - Links are written as from the page's SERVED address (`/components/app/x.html`):
     - `../../` is the checkout's root
     - `../../ui/ui-button.html` is a Spell UI page
@@ -330,17 +330,17 @@ and in the app's build folder, `app/` at the repo's root.
 
 ## Imports
 
-- As WWOD §4, with our own source as `spell/app/app` / `spell/app/app/*`:  a file's path under the repo's `src/`.
+- As WWOD §4, with our own source as `spell/app/app` / `spell/app/app/*`:  a file's path under the app folder's `src/`.
   - e.g. `import { UI } from "spell/app/app/ui"`, `import "spell/app/app/components/spell-code"`
   - Vite's own entries and `index.html`'s script are paths from `app/`, Vite's root:  `../src/app/index.tsx`.
     - The dev server asks for that one as `/src/app/index.tsx`, as a URL can't go above its root:
-      `repoSourceInDev()`, in [vite.config.ts](../../app/vite.config.ts), finds it in the repo's `src/`.
+      `repoSourceInDev()`, in [vite.config.ts](../../app/vite.config.ts), finds it in the app folder's `src/`.
 - Nothing imports THIS folder except `cli`.
   And the `<script>` entries in its own pages:  `index.html` and the demos.
-- It may import spaces' models, `spell/app/spaces` (the same repo, spell-app);
+- It may import spaces' models, `spell/app/spaces` (the same folder, `app/`);
   NEVER `spell/app/spaces/server/node/...`, which is node only.
-  - Another repo's packages by npm name (`spell/parser/spell`, `spell/ui/core` ...):
-    the root's [AGENTS.md](../../AGENTS.md), "Import names and global types".
+  - Another folder's files by name (`spell/parser/spell`, `spell/ui/core` ...):
+    the app folder's [AGENTS.md](../../AGENTS.md), "Import names and global types".
   - The editor ([editor.ts](editor.ts)) does:
     - a group's projects are `SPACES.SpellProjectRoot`
     - a project's file create, copy, rename and delete are `SPACES.ProjectFiles` (never `SpellProject`'s)

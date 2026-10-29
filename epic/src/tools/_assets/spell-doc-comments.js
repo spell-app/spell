@@ -103,11 +103,14 @@ const COMMENT_SAVE_MS = 600
 const REDRAW_MS = 150
 
 /**
- * How often a docs page with a Send asks again who is listening, ms.
+ * How often a docs page with a Send asks again who is listening, and an epic page for its comments, ms.
  * - the server calls a session gone once its heartbeat is 90s old (`ReviewInbox` `LISTEN_STALE_MS`),
  *   with no file change to announce it
  */
 const SEND_POLL_MS = 30_000
+
+/** An epic page's or a saga page's path:  its comments live in the epic's review inbox. */
+const EPIC_PAGE = /\.(plan|saga)\.html$/
 
 /**
  * The blocks with a title row and an `actions` slot in it (epic `epic-workflow` P25).
@@ -181,7 +184,7 @@ const THREADS_FIRST = /^(ui-section|epic-overview)$/
  *   shown `C3`, small and muted in each thread's header, before its summary (`<epic-thread>`)
  *   - the server keys them `c3`, and a typed id takes `C3`, `c3` or `cm3` (`ThreadFacts.numberOf()`);  `M3` is a
  *     manual test's
- * - JUMPING to the threads waiting on the person (Claude spoke last;
+ * - JUMPING to the threads waiting on Owen (Claude spoke last;
  *   Owen, 2026-10-10:  "Is there a way to jump to comments in replies?"):
  *   - a BULLHORN at the right of the page's toolbar, an orange count of them on it;  none:  hidden
  *     - each click lands on the next (`nextWaiting()`), in page order, round again after the last:
@@ -192,6 +195,7 @@ const THREADS_FIRST = /^(ui-section|epic-overview)$/
  *   - when the page's content changes (an epic page's part loading)
  *   - when the inbox file changes (`spell-server:changed`:  another window, Claude)
  *   - when the page comes back into view
+ *   - every 30s on an epic or saga page, for a change the live socket missed (I169), and on a docs page with a Send
  * - what it adds in `main` carries `data-spell-added`:  a patch steps around it, the anchors never count it
  * - NEVER throws:  a page with no server, or a server without the routes, shows no bullhorns
  * - options:
@@ -211,11 +215,14 @@ export async function wireComments(main, { go, signal } = {}) {
   const reload = () => void comments.load().then((takes) => takes && !signal?.aborted && comments.draw())
   const listening = { signal }
   addEventListener("spell-doc:updated", () => comments.draw(), listening)
-  // its inbox files changing, the page coming into view;  and, while a docs page's Send shows, every 30s:
-  // who is listening, as a session that stopped leaves no file change, only an old heartbeat
-  const unwatch = ServerLink.watch(window, (path) => comments.isItsFile(path), reload, {
+  // its inbox files changing, the page coming into view;  and every 30s:
+  // - a docs page's Send:  who is listening, as a session that stopped leaves no file change, only an old heartbeat
+  // - an epic or saga page:  a change the live socket missed (epic `epic-engine` I169:  a thread said "thinking…"
+  //   20 minutes after its answer, while the review client's own 4s poll had the inbox right)
+  const epicPage = EPIC_PAGE.test(location.pathname)
+  const unwatch = ServerLink.watch(window, (path) => comments.inboxPaths.includes(path), reload, {
     every: SEND_POLL_MS,
-    polls: () => !!comments.send
+    polls: () => !!comments.send || epicPage
   })
   // leaving (a reload, another page):  what's typed in the pane or a reply box and not saved yet goes now
   const flush = () => {
@@ -250,19 +257,6 @@ function inboxPathsOf(inbox) {
   const paths = [inbox, inbox.replace(/^\/worktrees\/[^/]+(?=\/)/, "")]
   return [...new Set(paths.flatMap((path) => ServerLink.dataFileNames(path)))]
 }
-
-/**
- * Whether `path` (a URL path the page server announced) is a person's COMMENTS FILE beside one of the inbox files
- * `inboxPaths` (`<page>.comments.<person>.json5`, epic `epic-friend` P9):  where the comments are kept since they're
- * shared, one file per person (`SharedComments`).
- */
-function isCommentsFileOf(inboxPaths, path) {
-  const named = COMMENTS_FILE.exec(path)
-  return !!named && inboxPaths.includes(`${path.slice(0, named.index)}.inbox.json5`)
-}
-
-/** A person's comments file's own part of its name:  `.comments.ana-lima.json5` (`SharedComments`). */
-const COMMENTS_FILE = /\.comments\.[\p{L}\p{N}]+(?:-[\p{L}\p{N}]+)*\.json5$/u
 
 /****************
  * ### `PageComments`
@@ -350,14 +344,6 @@ class PageComments {
   }
 
   /**
-   * Whether the page server's change of `path` (a URL path) is one of the page's:  an inbox file of its, or a
-   * person's comments file beside one (`isCommentsFileOf()`).
-   */
-  isItsFile(path) {
-    return this.inboxPaths.includes(path) || isCommentsFileOf(this.inboxPaths, path)
-  }
-
-  /**
    * Whether `comment` is ORANGE:  Claude spoke last and Owen hasn't answered yet (✓, a reply, ×).
    * - Looking at it doesn't clear it (Owen, 2026-10-10:  "I was expecting this to be orange, not ivory"):
    *   `markSeen()` only records the reply as read.
@@ -366,7 +352,7 @@ class PageComments {
   unseen(comment) {
     // orange while it's Owen's turn, seen or not, until he answers (✓, a reply, ×):  Owen, 2026-10-10, on a thread
     // gone ivory once looked at:  "I was expecting this to be orange, not ivory"
-    return comment.turn === "person" && !!ThreadFacts.latestAgentAt(comment)
+    return comment.turn === "owen" && !!ThreadFacts.latestClaudeAt(comment)
   }
 
   /**
@@ -378,7 +364,7 @@ class PageComments {
     if (!comment || !this.unseen(comment)) return
     const read = readJSON(this.readKey)
     // read already:  nothing to change (the thread stays orange until Owen answers, so the watcher fires again)
-    const latest = ThreadFacts.latestAgentAt(comment)
+    const latest = ThreadFacts.latestClaudeAt(comment)
     if ((read[id] ?? "") >= latest) return
     read[id] = latest
     writeJSON(this.readKey, read)
@@ -589,7 +575,7 @@ class PageComments {
       const at = block ?? head
       if (!at) continue
       const quoted = block && comment.quote && quoteIn(block, comment.quote, comment.offset)
-      if (quoted) quotes.push({ ...quoted, id: comment.id, waiting: comment.turn === "agent" })
+      if (quoted) quotes.push({ ...quoted, id: comment.id, waiting: comment.turn === "claude" })
       if (this.open?.id === comment.id) continue
       const under = quoted ? holderOf(block, quoted) : at
       if (!groups.has(under)) groups.set(under, [])
@@ -633,17 +619,17 @@ class PageComments {
   }
 
   ////////////////
-  // ## Jumping to the threads waiting on the person
+  // ## Jumping to the threads waiting on Owen
   ////////////////
 
-  /** The comments waiting on the person:  Claude spoke last on their threads (`turn` `person`). */
-  get waitingOnPerson() {
-    return this.list.filter((comment) => comment.turn === "person")
+  /** The comments waiting on Owen:  Claude spoke last on their threads (`turn` `owen`). */
+  get waitingOnOwen() {
+    return this.list.filter((comment) => comment.turn === "owen")
   }
 
-  /** The comments waiting on the person whose threads are drawn, in page order. */
+  /** The comments waiting on Owen whose threads are drawn, in page order. */
   waitingInPageOrder() {
-    return this.waitingOnPerson
+    return this.waitingOnOwen
       .map((comment) => ({ comment, thread: this.threadOf(comment.id) }))
       .filter((each) => each.thread)
       .sort((a, b) => (a.thread.compareDocumentPosition(b.thread) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1))
@@ -663,7 +649,7 @@ class PageComments {
 
   /**
    * The toolbar's BULLHORN:  at the right of the page's toolbar (`.spell-toolbar`, an epic page's and a guide's alike),
-   * an orange count of the threads waiting on the person;  hidden when none.
+   * an orange count of the threads waiting on Owen;  hidden when none.
    * - Owen, 2026-10-10:  "a bullhorn at the right of the toolbar, with an orange count,
    *   jumps to the next thread waiting on you"
    * - an item of the toolbar's menu like its section buttons (epic `epic-engine` P3):
@@ -703,7 +689,7 @@ class PageComments {
   }
 
   /**
-   * The toolbar's bullhorn, clicked:  land on the next thread waiting on the person after the one it last landed on, in
+   * The toolbar's bullhorn, clicked:  land on the next thread waiting on Owen after the one it last landed on, in
    * page order;  after the last, the first again.
    */
   nextWaiting() {
@@ -1030,7 +1016,7 @@ class PageComments {
     const writing = !!replying && (replying.busy() || !!editing)
     if (comment.turn === "done") this.replyBoxes.delete(comment.id)
     const thinking = !!comment.working && comment.turn !== "done"
-    const open = writing || (this.folds.get(comment.id) ?? (comment.turn === "person" || thinking))
+    const open = writing || (this.folds.get(comment.id) ?? (comment.turn === "owen" || thinking))
     thread.comment = comment
     thread.toggleAttribute("open", open)
     // orange while it has a reply from Claude Owen hasn't answered (`unseen()`):  the whole thread, that reply stronger
@@ -1060,8 +1046,7 @@ class PageComments {
    *   holds, so Claude taking his reply empties it
    */
   replyBoxFor(comment) {
-    // only this reader's own last words:  another person's are theirs to change (epic `epic-friend` P9)
-    const saved = ThreadFacts.pendingReplyOf(comment, ThreadFacts.viewer())?.text ?? ""
+    const saved = ThreadFacts.pendingReplyOf(comment)?.text ?? ""
     const kept = this.replyBoxes.get(comment.id)
     if (kept && (kept.busy() || kept.saved() === saved)) return kept
     kept?.drop()

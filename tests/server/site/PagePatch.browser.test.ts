@@ -256,3 +256,80 @@ describe("PagePatch.run()", () => {
     await page.close()
   })
 })
+
+describe("PagePatch.redraw():  one cross-fade, only when the reader would see it (epic `epic-engine` I164)", () => {
+  /** A long page:  `#intro` at the top, `#far` well below the window. */
+  const LONG = MAIN.replace(
+    "</main>",
+    `<section id="filler">${"<p>filler text</p>".repeat(200)}</section><section id="far"><p>Far away</p></section></main>`
+  )
+
+  /**
+   * Redraw the live page from `LONG` to `after`, counting `document.startViewTransition()` calls:
+   * what changed, and how many transitions it started.
+   */
+  async function redrawn(page: Page, after: string): Promise<{ transitions: number; intro: string; far: string }> {
+    return page.evaluate(
+      async ({ before, after }) => {
+        const parse = (html: string) => new DOMParser().parseFromString(html, "text/html")
+        let transitions = 0
+        const real = document.startViewTransition.bind(document)
+        document.startViewTransition = ((update: ViewTransitionUpdateCallback) => {
+          transitions++
+          return real(update)
+        }) as typeof document.startViewTransition
+        const patcher = (window as unknown as { patcher: any }).patcher
+        const run = await patcher.redraw({
+          before: parse(before),
+          after: parse(after),
+          live: document.querySelector("main"),
+          mainOf: (root: ParentNode) => root.querySelector("main")
+        })
+        return {
+          transitions: run ? transitions : -1,
+          intro: document.querySelector("#intro p")!.textContent!,
+          far: document.querySelector("#far p")!.textContent!
+        }
+      },
+      { before: pageWith(LONG), after: pageWith(after) }
+    )
+  }
+
+  it("fades a change in view through ONE view transition, the page changed once it resolves", async () => {
+    const page = await opened(LONG)
+    expect(await redrawn(page, LONG.replace("Hello world", "Hello there"))).toEqual({
+      transitions: 1,
+      intro: "Hello there, from the page.",
+      far: "Far away"
+    })
+    await page.close()
+  })
+
+  it("changes what's off screen straight in:  no transition", async () => {
+    const page = await opened(LONG)
+    expect(await redrawn(page, LONG.replace("Far away", "Far off"))).toEqual({
+      transitions: 0,
+      intro: "Hello world, from the page.",
+      far: "Far off"
+    })
+    await page.close()
+  })
+
+  it("never fades when the reader asked for less motion", async () => {
+    const page = await opened(LONG)
+    await page.emulateMedia({ reducedMotion: "reduce" })
+    expect(await redrawn(page, LONG.replace("Hello world", "Hello there"))).toEqual({
+      transitions: 0,
+      intro: "Hello there, from the page.",
+      far: "Far away"
+    })
+    await page.close()
+  })
+
+  it("never fades while a field has the focus:  what's typed would freeze", async () => {
+    const page = await opened(LONG)
+    await page.focus("#field")
+    expect((await redrawn(page, LONG.replace("Hello world", "Hello there"))).transitions).toBe(0)
+    await page.close()
+  })
+})

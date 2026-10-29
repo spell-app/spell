@@ -1017,6 +1017,7 @@ export class TSWriter extends JSWriter {
     "isAcceptingDrop",
     "isConnected",
     "isControlledByPage",
+    "isClickable",
     "isDraggable",
     "isDragging",
     "isDisabled",

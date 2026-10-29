@@ -24,6 +24,7 @@ import { epicListVocabulary } from "spell/epic/components/epic-list/EpicList.en"
 import { epicSortVocabulary } from "spell/epic/components/epic-list/EpicSort.en"
 import { epicNetEffectVocabulary } from "spell/epic/components/epic-net-effect/EpicNetEffect.en"
 import { epicNewItemVocabulary } from "spell/epic/components/epic-new-item/EpicNewItem.en"
+import { epicOptionFormVocabulary } from "spell/epic/components/epic-option-form/EpicOptionForm.en"
 import { epicNoteVocabulary } from "spell/epic/components/epic-note/EpicNote.en"
 import { epicOriginalVocabulary } from "spell/epic/components/epic-original/EpicOriginal.en"
 import { epicVersionVocabulary } from "spell/epic/components/epic-original/EpicVersion.en"
@@ -127,6 +128,7 @@ export class Definitions {
     // drawn only inside other elements' shadow roots, never written in a doc
     "epic-review": epicReviewVocabulary,
     "epic-new-item": epicNewItemVocabulary,
+    "epic-option-form": epicOptionFormVocabulary,
     "epic-agents": epicAgentsVocabulary,
     "epic-thread-message": epicThreadMessageVocabulary,
     // what the docs runtime's comments draw on every page that takes comments (epic `epic-engine` P3)

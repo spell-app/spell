@@ -10,6 +10,8 @@ import { AgentsClient, ReviewClient, clockOf, type Inbox } from "spell/epic/revi
 import "spell/ui/components/ui-button"
 import "spell/ui/components/ui-icon"
 import "spell/ui/components/ui-section"
+// the gear menus (I166)
+import "spell/ui/components/ui-dropdown"
 import "spell/ui/components/ui-label"
 import "spell/ui/components/ui-message"
 import "spell/ui/components/ui-code"
@@ -835,13 +837,9 @@ describe("<epic-page> toolbar", () => {
     const item = host.querySelector<E.DOMElement>("#q1")!
     // an item has no collapse-all of its own (Owen, 2026-10-25:  "lose it entirely")
     expect(item.shadowRoot!.querySelector('[part~="collapse-all"]')).toBe(null)
-    // the section's:  its items fold, it stays open
-    // the section's ONE toggle:  first it opens everything inside, then the same button folds it
-    const sectionButton = questions.shadowRoot!.querySelector<HTMLButtonElement>('[part~="toggle-all"]')!
-    expect(sectionButton.title).toBe("Open everything in 3. Questions")
-    sectionButton.click()
-    await vi.waitFor(() => expect(sectionButton.title).toBe("Fold everything in 3. Questions"))
-    sectionButton.click()
+    // the section's:  no button of its own (I161);  its collapse-all folds its items, it stays open
+    expect(questions.shadowRoot!.querySelector('[part~="toggle-all"]')).toBe(null)
+    ;(questions.component as unknown as { collapseAll(): number }).collapseAll()
     await ElementFixture.tick()
     expect([
       aside.component!.fold.isOpen(),
@@ -991,7 +989,7 @@ describe("<epic-page> live badges (epic `epic-engine` P43)", () => {
     expect(status().title).toBe("Claude is writing this phase's plan")
     expect(p2.matches(":state(working)")).toBe(true)
     expect(host.querySelector("#p1")!.shadowRoot!.querySelector(".spinner")).toBeNull()
-    expect(markedBadge(phases)).toEqual(["1", "1 with Claude:  marked in this pass, or being worked on"])
+    expect(markedBadge(phases)).toEqual(["1", "1 with Claude:  under way, being worked on, or marked in this pass"])
     expect(rail().running).toBe(1)
     await vi.waitFor(() => expect(markedBadge(host)?.[0]).toBe("1"))
     // its plan accepted:  Claude is working on it, no longer writing the plan

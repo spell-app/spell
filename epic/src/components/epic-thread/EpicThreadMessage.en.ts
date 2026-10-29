@@ -23,8 +23,8 @@ export const epicThreadMessageVocabulary = {
   description:
     "One message of a comment's thread (`<epic-thread>`, which draws it in its shadow root, never written in a " +
     "doc):  a person's words plain on the thread's ivory, an agent's in a light box of the agent's colour, the green " +
-    'Done line, or an agent\'s "thinking…" stub;  a bold "You:" / "Ana:" / "Claude:" / "Codex (Ana):" starts its first ' +
-    "line, its time in its top right " +
+    'Done line, or an agent\'s "thinking…" stub in the page\'s blue (at work on it);  a bold "You:" / "Ana:" / ' +
+    '"Claude:" / "Codex (Ana):" starts its first line, its time in its top right ' +
     "corner.  Every message but the last a step smaller and quieter.",
   attributes: [
     {

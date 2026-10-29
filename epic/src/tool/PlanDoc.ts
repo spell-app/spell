@@ -10,6 +10,7 @@ import {
   type EpicTag,
   type PageSectionKind
 } from "spell/epic/definitions"
+import { PlanDates } from "spell/epic/dates"
 import { Markup, type MarkupContent } from "spell/epic/markup"
 import { PageStages, PhaseIds, type PageStage } from "spell/epic/phases"
 import { ThreadFacts } from "spell/epic/comments"
@@ -60,6 +61,7 @@ import {
 
 import { AuthorWords } from "./AuthorWords"
 import { ChangeOriginals } from "./ChangeOriginals"
+import { CommentList } from "./CommentList"
 import { IncomingHtml } from "./IncomingHtml"
 import { PhaseTakes } from "./PhaseTakes"
 import { PhaseNumbers } from "./PhaseNumbers"
@@ -71,7 +73,8 @@ import { PlanTime } from "./PlanTime"
 import { UpdateMarks } from "./UpdateMarks"
 import { UpdateSummary } from "./UpdateSummary"
 import { Migrations } from "./migrations"
-import { CHANGE_ID, STAGE_ID, SUMMARY_ID } from "./ReviewInbox"
+import { OptionSets } from "./OptionSets"
+import { CHANGE_ID, STAGE_ID, SUMMARY_ID, UPDATE_ID } from "./ReviewInbox"
 
 /****************
  * ### `PlanDoc`
@@ -467,12 +470,15 @@ export class PlanDoc extends PlanReader {
    * - `done` accepts a build plan still marked waiting (`acceptPlan()`)
    * - `done` with `{ minutes }`:  how long Claude worked on it (`WorkTime`), as `<epic-phase took>`, and the log
    *   line says it:  `P41 done:  took 21m` (epic `epic-engine` P41);  0 or none:  no `took`
+   * - `done` stamps when, `done-at` (epic `epic-engine` I170:  green for 3 days, then grey);  any other status
+   *   removes it
    * - throws on any other status
    * - SIDE EFFECT:  logs the change
    */
   setPhase(n: number, status: string, { done, minutes }: { done?: string; minutes?: number } = {}): void {
     if (!isPhaseStatus(status)) throw new PlanDocError(`status must be ${PHASE_STATUSES.join(" / ")}, not "${status}"`)
-    Markup.set<"epic-phase">(this.phase(n), { status })
+    const doneAt = status === "done" ? PlanTime.isoMinutes(this.now) : undefined
+    Markup.set<"epic-phase">(this.phase(n), { status, doneAt })
     const took = status === "done" && minutes ? PlanTime.formatMinutes(minutes) : undefined
     if (status === "done") {
       this.removeUpdateMarkers(n)
@@ -523,10 +529,12 @@ export class PlanDoc extends PlanReader {
   }
 
   /**
-   * Set phase `n`'s fields:  `{ symptom, changes, goal, files, verify }`, as HTML;  each one given replaces that
+   * Set phase `n`'s fields:  `{ symptom, changes, goal, files, verify, choices }`, as HTML;  each one given replaces that
    * field, or is made in its place;  `""` removes it.  Returns the fields set, by label (`Symptom` ...).
+   * - `plan`:  Claude's build plan, waiting for Owen's Accept;  `accepted` (`--accepted`, epic `epic-engine` I163):
+   *   written accepted, for a plan Owen accepted with comments that it now folds in (no second Accept)
    */
-  setPhaseFields(n: number, values: PhaseFieldValues): string[] {
+  setPhaseFields(n: number, values: PhaseFieldValues, { accepted = false }: { accepted?: boolean } = {}): string[] {
     const phase = this.phase(n)
     const set: string[] = []
     for (const name of PHASE_FIELDS) {
@@ -535,13 +543,23 @@ export class PlanDoc extends PlanReader {
       this.setField(phase, name, html)
       set.push(`${name[0]!.toUpperCase()}${name.slice(1)}`)
     }
+    // its own option sets (epic `epic-engine` P50):  a field of `<epic-choices>`, not one `addPhase()` fills with TBD
+    if (values.choices !== undefined) {
+      this.setField(phase, "choices", values.choices)
+      set.push("Choices")
+    }
     // Claude's build plan (epic `epic-engine` P33):  a new one waits for Owen's Accept;  removed, nothing waits
     if (values.plan !== undefined) {
-      // the doc pass never waits for an Accept (Owen, 2026-10-25:  "I shouldn't have to accept `doc review` phase")
+      // the doc pass never waits for an Accept (Owen, 2026-10-25:  "I shouldn't have to accept `doc review` phase");
+      // nor a plan Owen accepted with comments, now folded in (`accepted`, epic `epic-engine` I163)
       const docReview = DOC_REVIEW.test(PhaseIds.titleOf(phase))
-      if (values.plan && docReview) this.acceptPlan(phase)
+      if (values.plan && (docReview || accepted)) this.acceptPlan(phase)
       else Markup.set<"epic-phase">(phase, { plan: values.plan ? "waiting" : undefined })
-      const said = docReview ? "accepted, the doc pass" : "waiting for the person's Accept"
+      const said = docReview
+        ? "accepted, the doc pass"
+        : accepted
+          ? "accepted, the person's comments folded in"
+          : "waiting for the person's Accept"
       const label = PhaseIds.labelOf(phase)
       this.log(values.plan ? `${label} plan written:  ${said}` : `${label} plan removed`)
     }
@@ -551,11 +569,14 @@ export class PlanDoc extends PlanReader {
   /**
    * Owen accepted phase `phase`'s build plan (Accept plan, epic `epic-engine` P33):  the plan field `accepted` (now),
    * the phase `plan="accepted"`;  Claude builds it next.
+   * - an option set in its body still open takes its recommended option, as an approval does on a question (epic
+   *   `epic-engine` P50:  `OptionSets.takeRecommended()`);  returns what it took, for the log line (`""` for none)
    */
-  acceptPlan(phase: Element): void {
+  acceptPlan(phase: Element): string {
     const field = phase.querySelector(':scope > epic-field[name="plan"]')
     if (field) Markup.set<"epic-field">(field, { accepted: PlanTime.clockTime(this.now) })
     Markup.set<"epic-phase">(phase, { plan: "accepted" })
+    return new OptionSets(this).takeRecommended(phase)
   }
 
   /**
@@ -586,8 +607,8 @@ export class PlanDoc extends PlanReader {
    *   (`Markup.place()`, the vocabulary's order)
    * - `at`:  now, `YYYY-MM-DD HH:MM`;  `phase`:  the phase active when it was written, if any
    * - `summary`:  as given, else the first sentence of `html` (`UpdateSummary`);  drawn `Update: <summary>`
-   * - it STAYS when a phase is done (unlike the UPDATE markers);  the phase's `changes` counts it
-   *   (`writeChangeCounts()`, every edit)
+   * - it STAYS when a phase is done (unlike the UPDATE markers);  given its id, and the phase's `to-see` lists it while
+   *   it's new (`updateUpdates()`, every edit)
    * - old prose shapes in `html` (a Net effect paragraph, a code accordion ...) become elements (`IncomingHtml`)
    * - NOT for a change an answer caused, which its change marks say:  `marksSay()` first (`updated` asks it)
    * - SIDE EFFECT:  logs it
@@ -630,27 +651,43 @@ export class PlanDoc extends PlanReader {
   }
 
   /**
-   * How many plan changes each phase holds, in its `changes` (none:  no attribute);  changed?
-   * - its `<epic-update>` blocks (and an older doc's `<epic-updated>` lines, until migrated)
-   * - in the skeleton, so a folded phase's title says its plan changed while its body, a part, isn't loaded
-   * - STATIC:  the converter writes the same (`DocPass`);  `section` must hold its phases' updates (an ASSEMBLED doc:
-   *   a skeleton alone would read as no changes)
+   * Bring the UPDATE blocks up to date, as every edit does (`updateStates()`;  epic `epic-engine` I168);  returns how
+   * many things changed.
+   * - each block (`<epic-update at>` or `summary`;  never a bare label) is given its id, the next free `up<N>`, after
+   *   the highest in the doc (`UPDATE_ID`:  its Seen mark's inbox key)
+   * - each body host (an Overview sub-section, a phase, an item, the log) lists the blocks inside it still NEW, in
+   *   `to-see`:  `up3@2026-10-27T10:00 up5@...`, each id and its `at` (none:  no attribute)
+   *   - new:  not `seen`, and not quiet yet (`PlanDates.isQuiet()`, as of this write);  the page drops the ones that
+   *     went quiet since, as it draws
+   *   - the SKELETON's, as `to-accept` is:  a folded phase's pen counts them, and the review routes take their
+   *     Seen marks (`ReviewInbox.itemIds()`), with the bodies not loaded
+   * - a phase's old `changes` (every plan change, counted before I168) goes:  `to-see` says what the pen counts
    */
-  static writeChangeCounts(section: Element): boolean {
-    let changed = false
-    for (const phase of section.querySelectorAll(":scope > epic-phase")) {
-      const count = phase.querySelectorAll(PLAN_CHANGES).length
-      if (phase.getAttribute("changes") === (count ? String(count) : null)) continue
-      Markup.set<"epic-phase">(phase, { changes: count || undefined })
-      changed = true
+  updateUpdates(): number {
+    let changed = 0
+    const updates = Array.from(this.document.querySelectorAll(UPDATE_BLOCKS))
+    let next = Math.max(0, ...updates.map((update) => (UPDATE_ID.test(update.id) ? Number(update.id.slice(2)) : 0))) + 1
+    for (const update of updates) {
+      if (UPDATE_ID.test(update.id)) continue
+      Markup.set<"epic-update">(update, { id: `up${next++}` })
+      changed++
+    }
+    const waiting = new Map<Element, string[]>()
+    for (const update of updates) {
+      const at = update.getAttribute("at")
+      if (update.hasAttribute("seen") || PlanDates.isQuiet(at, this.now)) continue
+      const host = update.parentElement?.closest(CHANGE_HOSTS)
+      const token = at ? `${update.id}@${at.trim().replace(" ", "T")}` : update.id
+      if (host) waiting.set(host, [...(waiting.get(host) ?? []), token])
+    }
+    for (const host of this.document.querySelectorAll(CHANGE_HOSTS)) {
+      const ids = waiting.get(host)?.join(" ")
+      if ((host.getAttribute("to-see") ?? undefined) === ids && !host.hasAttribute("changes")) continue
+      if (host.localName === "epic-phase") Markup.set<"epic-phase">(host, { toSee: ids, changes: undefined })
+      else Markup.set<"epic-section">(host, { toSee: ids })
+      changed++
     }
     return changed
-  }
-
-  /** How many plan changes each of this doc's phases holds (`writeChangeCounts()`);  changed? */
-  updateChangeCounts(): boolean {
-    const section = this.findSection("phases")
-    return section ? PlanDoc.writeChangeCounts(section) : false
   }
 
   /**
@@ -1124,15 +1161,26 @@ export class PlanDoc extends PlanReader {
    * - `defer`, a phase's Defer while the phases are agreed (P29):  moved after the other phases, still to do
    * - `accept` / `reopen` on a change mark (`ch3`, epic `epic-engine` P30;  `applyChange()`):  the change stands
    *   (`accepted`), or its question opens again
+   * - `seen` on an update block (`up3`, epic `epic-engine` I168;  `applySeen()`):  stamped `seen`, for everyone
+   * - a pick is an option set's whole change (epic `epic-engine` P50;  `OptionSets`):  picks, the pick-one / pick-any
+   *   flip, options added, edited and removed;  a phase's set and a standing set (`s-upgrades`) too;  a `closed` set's
+   *   mark is left
    * - an applied mark adds ONE log line (`J9 approved:  closed (accepted)`);  the methods it calls stamp the item
+   * - an approve carrying Owen's comments in its text (`comments`, epic `epic-engine` I163):  applied as any approve
+   *   (a waiting plan accepted), its line saying `, with comments to fold in:  C4, C5`;  the comments stay waiting,
+   *   for the session to fold in and answer
    */
   applyMark(mark: PlanMark): MarkResult {
     if (mark.action === "new") return this.addFromPage(mark)
     if (String(mark.id).toLowerCase() === STAGE_ID) return this.applyAccept(mark)
     if (CHANGE_ID.test(String(mark.id).toLowerCase())) return this.applyChange(mark)
+    if (UPDATE_ID.test(String(mark.id).toLowerCase())) return this.applySeen(mark)
+    // a phase's or a standing option set's change (epic `epic-engine` P50):  `OptionSets`
+    const options = new OptionSets(this).applyToHolder(mark)
+    if (options) return options
     const part = this.reviewPart(mark.id)
     if (part) {
-      const result = this.applyToPart(part, mark)
+      const result = withCommentsToFold(this.applyToPart(part, mark), mark)
       if (result.applied) this.log(`${String(mark.id).toUpperCase()} ${result.did}`)
       return result
     }
@@ -1141,7 +1189,7 @@ export class PlanDoc extends PlanReader {
     // skipping a todo IS dropping it (its own note box's x is Drop It;  a skip comes from a page drawn before)
     const todoSkip = mark.action === "skip" && PlanItem.kindOfItem(item) === "todo"
     const applied = todoSkip ? { ...mark, action: "drop" as const } : mark
-    const result = this.applyAction(item, applied)
+    const result = withCommentsToFold(this.applyAction(item, applied), mark)
     if (result.applied) {
       this.log(`${item.id.toUpperCase()} ${result.did}`)
       this.reviewedAs(item, applied.action === "pick" ? "approve" : applied.action)
@@ -1162,7 +1210,8 @@ export class PlanDoc extends PlanReader {
   }
 
   /** `applyMark()`'s work on `item`, the log line aside. */
-  applyAction(item: Element, { action, pick, choices, when, note, at, result, shot }: PlanMark): MarkResult {
+  applyAction(item: Element, mark: PlanMark): MarkResult {
+    const { action, pick, choices, when, note, at, result, shot } = mark
     const kind = PlanItem.kindOfItem(item)
     const open = item.getAttribute("status") === "open"
     switch (action) {
@@ -1176,7 +1225,7 @@ export class PlanDoc extends PlanReader {
         return { applied: true, did: `approved:  ${this.approve(item, kind, open)}` }
       }
       case "pick":
-        return this.pickOption(item, kind, open, pick, choices)
+        return new OptionSets(this).applyToItem(item, mark)
       case "todo": {
         const from = { label: item.id.toUpperCase(), link: item.id, what: kind, title: PlanItem.titleOf(item) }
         const todo = this.followUp(from, note)
@@ -1305,7 +1354,7 @@ export class PlanDoc extends PlanReader {
    * - an open judgement call:  closed (accepted);  an open test:  closed (it passed);  both reviewed
    * - anything else (an open todo, limit or issue;  a closed item):  reviewed
    */
-  private approve(item: Element, kind: string, open: boolean): string {
+  approve(item: Element, kind: string, open: boolean): string {
     if (open && (kind === "judgement" || kind === "test")) {
       this.setItem(item.id, "done")
       this.review(item.id)
@@ -1327,7 +1376,7 @@ export class PlanDoc extends PlanReader {
    *   - `outcome` (`choose()`'s, a choice settled in conversation):  in place of what happens next
    * - left for Claude when the item has no such set, or the set no such option
    */
-  private pickOption(
+  pickOption(
     item: Element,
     kind: string,
     open: boolean,
@@ -1414,7 +1463,7 @@ export class PlanDoc extends PlanReader {
    * - the item's underway card, if any, still turns Noted with the pick's words (`Chose B · <title>:  <what>`):
    *   a spinner is never left running
    */
-  private notePick(item: Element, set: Element, option: OptionCard, what: string) {
+  notePick(item: Element, set: Element, option: OptionCard, what: string): void {
     Markup.set<"epic-choices">(set, { chosenOn: this.today, chosenNote: what })
     if (this.underwayCard(this.statusHost(item.id))) this.noteStatus(item.id, pickedWords(option, what))
   }
@@ -1784,8 +1833,9 @@ export class PlanDoc extends PlanReader {
    * - each item's `state` (`itemState()`):  what the page colours its id chip by
    * - which phase took each closed item up, from the phases' links (`taken-in`:  `PhaseTakes.stamp()`, I128)
    * - each phase's "To review" field (`updateToReview()`)
-   * - how many plan changes each phase holds (`updateChangeCounts()`)
+   * - the update blocks:  their ids, and each host's `to-see` (`updateUpdates()`, I168)
    * - the change marks:  new ones given their id, time and answer, each host's `to-accept` (`updateChanges()`)
+   * - each done phase's `done-at`, from the log when it has none (`updateDoneAt()`, I170)
    */
   updateStates(): number {
     let changed = 0
@@ -1805,7 +1855,31 @@ export class PlanDoc extends PlanReader {
       changed++
     }
     for (const phase of this.phaseElements) if (this.updateToReview(phase)) changed++
-    if (this.updateChangeCounts()) changed++
+    changed += this.updateUpdates()
+    changed += this.updateDoneAt()
+    changed += OptionSets.updateOpenCounts(this.phaseElements)
+    return changed
+  }
+
+  /**
+   * Give each done phase with no `done-at` the time its log says it was done (its last `P3 done` line;  epic
+   * `epic-engine` I170):  its Phases chip and circle are green for 3 days after, then grey.  Returns how many.
+   * - a phase done before I170 gets it on the page's next write;  `setPhase()` stamps the rest as they're done
+   * - no such line:  none (drawn grey);  the log names a phase by its number at the time (`activeWindow()`'s caveat)
+   */
+  updateDoneAt(): number {
+    let changed = 0
+    for (const phase of this.phaseElements) {
+      if (phase.getAttribute("status") !== "done" || phase.hasAttribute("done-at")) continue
+      const said = new RegExp(`^${escapeRegExp(PhaseIds.labelOf(phase))} done\\b`)
+      const done = Array.from(this.findSection("log")?.querySelectorAll("epic-event") ?? []).findLast((event) =>
+        said.test(event.textContent?.trim() ?? "")
+      )
+      const at = done?.getAttribute("at")
+      if (!at) continue
+      Markup.set<"epic-phase">(phase, { doneAt: at })
+      changed++
+    }
     return changed
   }
 
@@ -2266,8 +2340,8 @@ export class PlanDoc extends PlanReader {
       case "approve":
         // a phase whose build plan waits:  Accept plan (P33)
         if (part.kind === "phase" && part.element.getAttribute("plan") === "waiting") {
-          this.acceptPlan(part.element)
-          return { applied: true, did: "plan accepted:  build it" }
+          const took = this.acceptPlan(part.element)
+          return { applied: true, did: `plan accepted:  build it${took}` }
         }
         return { applied: true, did: "approved" }
       case "skip":
@@ -2377,18 +2451,38 @@ export class PlanDoc extends PlanReader {
     return { applied: false, left: `${label}:  a change takes Accept or Reopen, not ${action}` }
   }
 
+  /**
+   * An update block's Seen (`<epic-update id="up3">`, epic `epic-engine` I168), as Owen pressed it:  stamped
+   * `seen` (now), so it's one grey line for everyone, and out of its phase's pen (`updateUpdates()` rewrites `to-see`).
+   * - the block gone from the doc:  dropped (`gone`);  seen already:  nothing more to do
+   * - logs it (`UP3 seen:  Split in two`)
+   */
+  private applySeen({ id, action }: PlanMark): MarkResult {
+    const label = String(id).toUpperCase()
+    const key = String(id).toLowerCase()
+    const update = this.document.getElementById(key)
+    if (update?.localName !== "epic-update")
+      return { applied: false, gone: true, left: `${label}:  no such update any more:  dropped` }
+    if (action !== "seen") return { applied: false, left: `${label}:  an update takes Seen, not ${action}` }
+    if (update.hasAttribute("seen")) return { applied: true, did: "seen already" }
+    Markup.set<"epic-update">(update, { seen: PlanTime.clockTime(this.now) })
+    const summary = update.getAttribute("summary")
+    const did = `seen${summary ? `:  ${summary}` : ""}`
+    this.log(`${label} ${did}`)
+    return { applied: true, did }
+  }
+
   ////////////////
   // ## Change marks (epic `epic-engine` P30)
   ////////////////
 
   /**
-   * Is change mark `change` NEW:  stamped less than `CHANGE_NEW_DAYS` ago, and not `accepted` (a page from before
+   * Is change mark `change` NEW:  stamped less than `PlanDates.QUIET_DAYS` ago (`PlanDates.isQuiet()`), and not `accepted` (a page from before
    * changes needed no approval)?  As the page draws it:  orange while new (`<epic-change>`'s `isQuiet`).
    */
   isNewChange(change: Element): boolean {
     if (change.hasAttribute("accepted")) return false
-    const at = Date.parse((change.getAttribute("at") ?? "").replace(" ", "T"))
-    return !Number.isFinite(at) || this.now.getTime() - at < CHANGE_NEW_DAYS * 24 * 60 * 60 * 1000
+    return !PlanDates.isQuiet(change.getAttribute("at"), this.now)
   }
 
   /** Every change mark in the doc, `<epic-change>`, in page order. */
@@ -2657,6 +2751,17 @@ function filedTodo(todo: string): string {
 }
 
 /**
+ * An approve's result, saying the comments it carries (epic `epic-engine` I163):
+ * `plan accepted:  build it, with comments to fold in:  C4, C5`.
+ * - any other mark, or none carried:  `result` as it is
+ */
+function withCommentsToFold(result: MarkResult, mark: PlanMark): MarkResult {
+  if (!result.applied || mark.action !== "approve" || !mark.comments?.length) return result
+  const ids = mark.comments.map(CommentList.label).join(", ")
+  return { ...result, did: `${result.did}, with comments to fold in:  ${ids}` }
+}
+
+/**
  * A Noted card's line for Owen's pick:  `Chose B · Bananas:  <what>`.
  * - e.g. `Chose B · Bananas:  recorded as the answer;  waiting for the next phase, P9 · Build`
  */
@@ -2673,22 +2778,14 @@ function cardSetWords(choices: number | undefined): string {
   return choices === undefined ? "" : ` in card set ${choices + 1}`
 }
 
-/**
- * A phase's plan changes, counted in its `changes` (`PlanDoc.writeChangeCounts()`):  its `<epic-update>` blocks, and
- * an older doc's `<epic-updated>` lines until they're migrated.
- */
-const PLAN_CHANGES = ":scope > epic-update[at], :scope > epic-update[summary], :scope > epic-updated"
+/** The update BLOCKS (`updateUpdates()`):  dated or titled;  a bare UPDATE label is none. */
+const UPDATE_BLOCKS = "epic-update[at], epic-update[summary]"
 
 /** The tags whose `phase` names a phase by number:  renumbered with it (`PlanDoc.makeRoomForPhase()`). */
 
 /** A prompt's text as `<p>`s:  blank lines split paragraphs, single newlines become `<br>`;  `""` for none. */
 function promptHTML(prompt: string | null | undefined): string {
-  return String(prompt ?? "")
-    .trim()
-    .split(/\n\s*\n/)
-    .filter((paragraph) => paragraph.trim())
-    .map((paragraph) => `<p>${PlanMarkup.text(paragraph.trim()).replace(/\n/g, "<br>")}</p>`)
-    .join("")
+  return PlanMarkup.paragraphs(prompt)
 }
 
 /** The doc pass's phase, by its name:  `Doc Review` (epic `epic-engine` P33:  it floats to the end). */
@@ -2710,9 +2807,6 @@ const CHANGE_HOSTS = [
   "epic-section > epic-item",
   "epic-page > epic-section[kind='log']"
 ].join(", ")
-
-/** How long a change mark stays NEW, in days (`isNewChange()`;  `<epic-change>`'s `NEW_DAYS`, the same). */
-const CHANGE_NEW_DAYS = 3
 
 /** The longest answer a change mark's chip keeps (`answer`):  a line or two. */
 const ANSWER_MAX = 160

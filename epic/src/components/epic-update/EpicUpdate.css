@@ -9,6 +9,8 @@
  *     smaller, tabular figures, muted;  its float takes the title's font, so its line box and baseline are the
  *     title's first line's, and the smaller date sits on that baseline.
  *   - What changed below the title row, folded `until-found` (findable).
+ * - QUIET (`:state(quiet)`:  seen, or more than 3 days old;  epic `epic-engine` I168):  grey, the page's muted ink on a
+ *   faint grey ground, a grey outline;  folded to its title row by the element.
  * - A bare label:  an inline orange `UPDATE`, its text centred, sitting on the text's middle.
  * - Public tokens (`--epic-update-*`) are never declared here:  read through private aliases.
  *   - `--epic-update-accent`:  the orange of the box, its outline and the label (default `--ui-orange`)
@@ -92,6 +94,13 @@
   }
   ::slotted(:last-child) {
     margin-bottom: 0;
+  }
+
+  /* ## Quiet:  seen, or old */
+  :host(:state(quiet)) .block {
+    border-color: color-mix(in srgb, var(--epic-muted, var(--ui-text-muted)) 30%, transparent);
+    background: color-mix(in srgb, var(--epic-muted, var(--ui-text-muted)) 6%, var(--epic-bg, var(--ui-background)));
+    color: var(--epic-muted, var(--ui-text-muted));
   }
 
   /* ## The bare label */

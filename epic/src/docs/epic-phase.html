@@ -86,7 +86,7 @@
           <ui-section id="1-example" label="1. Example" sticky="stack" collapsible dividing open="false">
             <ui-icon slot="icon" name="eye"></ui-icon>
 
-            <epic-phase id="p-converter" title="Converter" status="active" estimate="4-6h" changes="1">
+            <epic-phase id="p-converter" title="Converter" status="active" estimate="4-6h" to-see="up1">
               <epic-field name="symptom">26 docs in today's markup, in several generations of it.</epic-field>
               <epic-field name="changes"
                 ><code>epic convert</code> rewrites a doc into <code>epic-*</code> markup, and proves
@@ -98,7 +98,7 @@
                   <li>the 6 docs still in one file come out split</li>
                 </ul></epic-field
               >
-              <epic-update at="2026-10-07 12:40" summary="The Overnight report section goes" phase="6"
+              <epic-update id="up1" at="2026-10-07 12:40" summary="The Overnight report section goes" phase="6"
                 ><p>Owen's review: the old Overnight report section goes, so P6 is open again.</p></epic-update
               >
             </epic-phase>
@@ -108,7 +108,7 @@
               <ui-content>
                 <ui-code language="html"
                   ><script type="text/plain">
-                    <epic-phase id="p-converter" title="Converter" status="active" estimate="4-6h" changes="1">
+                    <epic-phase id="p-converter" title="Converter" status="active" estimate="4-6h" to-see="up1">
                       <epic-field name="symptom">26 docs in today's markup, in several generations of it.</epic-field>
                       <epic-field name="changes"
                         ><code>epic convert</code> rewrites a doc into <code>epic-*</code> markup, and proves nothing was lost:
@@ -120,7 +120,7 @@
                           <li>the 6 docs still in one file come out split</li>
                         </ul></epic-field
                       >
-                      <epic-update at="2026-10-07 12:40" summary="The Overnight report section goes" phase="6"
+                      <epic-update id="up1" at="2026-10-07 12:40" summary="The Overnight report section goes" phase="6"
                         ><p>Owen's review:  the old Overnight report section goes, so P6 is open again.</p></epic-update
                       >
                     </epic-phase>
@@ -131,8 +131,14 @@
             <ul>
               <li>
                 Its title line: the half-filled blue circle (under way), <code>P6 · Converter</code>, and the estimate
-                <code>4-6h</code>; and, since its plan changed, an orange pen and <code>1</code> (its
-                <code>changes</code>).
+                <code>4-6h</code>; and, since it has a new update, an orange pen and <code>1</code> (its
+                <code>to-see</code>, written by the epic tool).
+              </li>
+              <li>
+                The pen counts only updates still NEW (epic <code>epic-engine</code> I168): not marked Seen, and written
+                less than 3 days ago. None left, no pen. Its tooltip says what Seen does. While the page is reviewed, a
+                round ✓ after it marks every one Seen at once. (This example's update is weeks old, so it's grey already:
+                its <code>to-see</code> is written by hand here, with no date.)
               </li>
               <li>
                 Click it to open: Symptom, Changes and Goal, then its plan change, titled
@@ -159,13 +165,20 @@
               </p>
               <ul>
                 <li>
-                  They sit after the title, before its review buttons (while the page is reviewed), expand-all,
-                  collapse-all and the fold chevron.
+                  They sit after the title, before its review buttons (while the page is reviewed); the fold chevron is
+                  at the row's start.
                 </li>
                 <li>
-                  Expand-all, the double chevron pointing down, shows folded or open: it opens the block and everything
-                  in it (sections, phases, items, asides and cards), parts loading as they open. Collapse-all shows
-                  beside it while it's open.
+                  ⌥-click (Alt-click) on its chevron or title, or ⌥+Enter on the focused chevron, opens it and
+                  everything in it (sections, phases, items, asides and cards), parts loading as they open; on an open
+                  one it folds everything inside, then the block itself. The chevron's tooltip says so. Its title row
+                  has no expand-all or collapse-all button of its own (epic <code>epic-engine</code> I161): the page's
+                  toolbar keeps one.
+                </li>
+                <li>
+                  The pointer over its chevron, status icon, title, time pill and buttons. Over the row's empty space:
+                  the grab cursor on a to-do phase while the page is reviewed (it drags there), else the pointer, as a
+                  click there folds it.
                 </li>
                 <li>A click on one never folds or unfolds it.</li>
                 <li>The docs runtime puts the block's bullhorn there too, so it never sits over a button.</li>
@@ -231,7 +244,7 @@
             <ui-section id="epic-phase-working" label="While Claude works on it" sticky="stack" collapsible dividing open="false">
               <p>
                 While Claude is at work on a phase that isn't done, its status icon turns into the header's turning
-                spinner, in blue. Epic <code>epic-engine</code> I147 (Owen, 2026-10-26: "repo-split is actively
+                spinner, in blue (orange when its plan changed since you looked, red when it needs you; I170). Epic <code>epic-engine</code> I147 (Owen, 2026-10-26: "repo-split is actively
                 planning this (writing the plan) but there is no indication in the phase header").
               </p>
               <ul>
@@ -693,7 +706,15 @@
                         open phase's are Looks good and Defer (after the others, still to do); while its build plan waits, Accept,
                         Revisit and Defer; still to do with its plan accepted, Make Todo, Revisit and a green check, a
                         state saying it's ready to build. Revisit on a phase with your comments in its text marks it at
-                        once: those comments are its note.
+                        once: those comments are its note. Its gear comes last.
+                      </td>
+                    </tr>
+                    <tr>
+                      <td><code>gear</code></td>
+                      <td>
+                        Its gear, last in its title row, with an <code>id</code> (epic <code>epic-engine</code> I166): a
+                        <code>&lt;ui-dropdown&gt;</code> menu, "Show this phase's files" and "Show this phase's checks",
+                        ticked while it shows them. Its choice wins over the Phases section's gear, for this phase.
                       </td>
                     </tr>
                     <tr>
@@ -706,8 +727,9 @@
                     <tr>
                       <td><code>status</code></td>
                       <td>
-                        Its status icon, in its status's colour; while Claude is at work on it
-                        (<code>:state(working)</code>), a blue turning spinner instead.
+                        Its status icon, in its Phases chip's colour and fill (<code>data-state</code>, epic
+                        <code>epic-engine</code> I170); while Claude is at work on it (<code>:state(working)</code>),
+                        a turning spinner instead, in that colour.
                       </td>
                     </tr>
                     <tr>
@@ -808,12 +830,15 @@
                 <b>The status icon</b>, in
                 <a href="/guides/epic-components/colours.html" target="src-guides-epic-components-colours-html"
                   >the colour scheme</a
-                >: to do, an empty grey circle; under way, a half-filled BLUE circle (Claude is working on it); done, a
-                GREEN circle with a check. A done phase's title reads quieter (muted).
+                >: its SHAPE by its status (to do, an empty circle; under way, half filled; done, a check), its COLOUR
+                as its Phases chip's, the first that holds (epic <code>epic-engine</code> I170; Owen, 2026-10-29): red,
+                its plan waits for your Accept or a choice in it is open; orange, changed since you looked; blue, under
+                way or worked on; a DOTTED blue circle, scheduled; green, done in the last 3 days
+                (<code>done-at</code>); grey, done before. A done phase's title reads quieter (muted).
               </li>
               <li>
-                <b>Claude at work on it:</b> the status icon is a blue turning spinner, the header's, its tooltip saying
-                whether he's writing its plan or working on it.
+                <b>Claude at work on it:</b> the status icon is a turning spinner, the header's, its tooltip saying
+                whether he's writing its plan or working on it; blue, unless it's red or orange first.
               </li>
               <li><b>The estimate</b> as a badge at the title's end.</li>
               <li>
@@ -830,8 +855,9 @@
                 read inside it.
               </li>
               <li>
-                <b>Files and Verify</b> stay hidden until the Phases title's toggles show them; commits until the page's
-                git toggle does.
+                <b>Files and Verify</b> stay hidden until a gear shows them: the Phases section's, for every phase, or
+                the phase's own, last in its title row, which wins for it (epic <code>epic-engine</code> I166). Commits
+                stay hidden until the page's git toggle shows them.
               </li>
               <li>
                 <b>Folding:</b> a click on the title folds it; on an epic page it starts folded. With

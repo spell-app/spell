@@ -189,19 +189,62 @@ export class Dragging {
    * The element under (`x`, `y`) that may take the drop, searching up from the topmost there, through shadow roots:
    * the first one `isDropTarget()` accepts -- `undefined` if none.
    * - Looked for in `element`'s own tree, where the board is (a runner's shadow root, or the page).
+   * - One that won't take it, or a gap between lists:  the one list of that row that would, if only one would
+   *   (`rowTargetAt()`), e.g. a card anywhere over a game's foundations lands on its own suit's.
    */
   static dropTargetAt(element: HTMLElement, x: number, y: number): HTMLElement | undefined {
     const root = element.getRootNode() as Document | ShadowRoot
-    for (const hit of root.elementsFromPoint(x, y)) {
-      for (let at: Element | null = hit; at; at = at.parentElement ?? (at.getRootNode() as ShadowRoot).host ?? null) {
-        if (Dragging.isDropTarget(at)) return at as HTMLElement
+    const hits = root.elementsFromPoint(x, y)
+    let under: HTMLElement | undefined
+    for (const hit of hits) {
+      under = Dragging.upFrom(hit).find((at) => Dragging.isDropTarget(at)) as HTMLElement | undefined
+      if (under) break
+    }
+    if (under && Dragging.takesDrop(under)) return under
+    return Dragging.rowTargetAt(hits, x, y, under) ?? under
+  }
+
+  /**
+   * A row of lists of one kind is one place to drop, e.g. a game's foundations:  the one list in it that would take
+   * what's dragged -- `undefined` if none would, or more than one.
+   * - The row:  the lists side by side under the pointer, in the nearest element around it that holds lists,
+   *   of the kind it's over (its tag), or whose span it's in.
+   */
+  private static rowTargetAt(hits: Element[], x: number, y: number, under: HTMLElement | undefined) {
+    for (const hit of hits) {
+      for (const at of Dragging.upFrom(hit)) {
+        const lists = [...at.children].filter((child) => Dragging.isDropTarget(child)) as HTMLElement[]
+        if (lists.length < 2) continue
+        const row = lists
+          .map((list) => ({ list, box: list.getBoundingClientRect() }))
+          .filter(({ box }) => box.top <= y && y <= box.bottom)
+        const kind =
+          under?.localName ??
+          row.find(({ list }) => {
+            const span = row.filter((other) => other.list.localName === list.localName).map(({ box }) => box)
+            return Math.min(...span.map((box) => box.left)) <= x && x <= Math.max(...span.map((box) => box.right))
+          })?.list.localName
+        const taking = row.filter(({ list }) => list.localName === kind && Dragging.takesDrop(list))
+        return taking.length === 1 ? taking[0]!.list : undefined
       }
     }
     return undefined
   }
 
+  /** `element` and every element around it, up through shadow roots. */
+  private static upFrom(element: Element): Element[] {
+    const chain: Element[] = []
+    for (let at: Element | null = element; at; at = at.parentElement ?? (at.getRootNode() as ShadowRoot).host ?? null) {
+      chain.push(at)
+    }
+    return chain
+  }
+
   /** May `element` take a drop?  Set by its owner:  `SpellElement` says a viewable list's element may. */
   static isDropTarget: (element: Element) => boolean = () => false
+
+  /** Would drop target `element` take what's dragged now?  Set by its owner, as `isDropTarget()`. */
+  static takesDrop: (element: Element) => boolean = () => true
 
   /** The click a drag's pointer up makes is no click:  swallowed, once, before anything hears it. */
   private static swallowNextClick() {

@@ -17,7 +17,7 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
  * ### `<epic-change>`
  * A CHANGE MARK (epic `epic-engine` P30;  Q13, B):  words an answer changed or added, marked in the text itself.
  * - The words on an orange ground (our colour for "changed since you looked") while the change is NEW:  stamped less
- *   than `NEW_DAYS` ago.  No approval (Owen, 2026-10-25:  "i shouldn't have to approve those -- I already answered
+ *   than `PlanDates.QUIET_DAYS` ago.  No approval (Owen, 2026-10-25:  "i shouldn't have to approve those -- I already answered
  *   the question"):  then it goes quiet by itself.
  * - After them, a small chip naming the question (`Q16`), folded;  a click unfolds the question's title and its answer,
  *   in a line, after it.
@@ -63,14 +63,13 @@ export class EpicChange extends E.UIComponent<typeof epicChangeVocabulary> {
   }
 
   /**
-   * QUIET:  no orange.  Older than `NEW_DAYS`, or `accepted` (written on a page from before changes needed no
+   * QUIET:  no orange.  Older than `PlanDates.QUIET_DAYS` (`PlanDates.isQuiet()`, the one rule), or `accepted` (written on a page from before changes needed no
    * approval).
    */
   @E.cssState("quiet")
   get isQuiet(): boolean {
     if (this.accepted !== undefined && this.accepted !== null) return true
-    const at = this.at ? Date.parse(this.at.replace(" ", "T")) : NaN
-    return Number.isFinite(at) && Date.now() - at > NEW_DAYS * DAY_MS
+    return PlanDates.isQuiet(this.at, new Date())
   }
 
   /** Reopen shows:  reviewed, stamped (an id), still new. */
@@ -205,12 +204,6 @@ const QA = "qa"
 
 /** The Q&A's id in its shadow root:  the chip's `aria-controls`. */
 const QA_ID = "qa"
-
-/** How long a change stays NEW, orange, in days (`isQuiet`). */
-const NEW_DAYS = 3
-
-/** A day, in ms. */
-const DAY_MS = 24 * 60 * 60 * 1000
 
 /** The changed words' id:  the popup points at them. */
 const WORDS_ID = "words"

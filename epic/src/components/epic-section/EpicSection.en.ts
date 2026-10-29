@@ -50,6 +50,7 @@ export const epicSectionVocabulary = {
       values: [
         "overview-part",
         "epics",
+        "choices",
         "phases",
         "questions",
         "judgements",
@@ -91,6 +92,14 @@ export const epicSectionVocabulary = {
       description:
         "The change marks inside it still waiting for your Accept (`ch3 ch5`), written by the epic tool on every " +
         "edit (epic `epic-engine` P30):  the page counts and finds them while its body, a part, isn't loaded."
+    },
+    {
+      name: "to-see",
+      kind: "string",
+      description:
+        "The update blocks inside it still new (`up3@2026-10-27T10:00 up5@...`:  each id and its `at`), written by the " +
+        "epic tool on every edit (epic `epic-engine` I168):  not seen, not quiet as of that write.  The page counts " +
+        "them (a phase's pen) and takes their Seen while its body, a part, isn't loaded."
     },
     FOLD_OPEN_ATTRIBUTE
   ],
@@ -139,15 +148,24 @@ export const epicSectionVocabulary = {
     {
       name: "tools",
       description:
-        "At the title's end:  the page's own buttons (the `actions` slot), then the Phases section's Files / " +
-        "Verify toggles and its state filter;  an item section's state filter;  an Overview sub-section's review buttons."
+        "At the title's end:  the page's own buttons (the `actions` slot), then the Phases section's state filter " +
+        "and its gear;  an item section's state filter;  an Overview sub-section's review buttons."
+    },
+    {
+      name: "gear",
+      description:
+        "The Phases section's gear, last on its title row (epic `epic-engine` I166;  the Files / Verify toggles " +
+        'before):  a `<ui-dropdown>` menu, "Show each phase\'s files" and "Show each phase\'s checks", ticked ' +
+        "while on.  A pick shows or hides that field in every phase, forgetting each phase's own choice of it."
     },
     {
       name: "filter",
       description:
         "An item section's state filter:  one chip per state its items are in, with how many, solid while that " +
-        "state's items show, outlined while hidden.  The Phases section's the same, by a phase's state:  undone, " +
-        "updated (a plan waiting for your Accept, or changed), complete (epic `epic-engine` I157)."
+        "state's items show, outlined while hidden.  The Phases section's the same, by a phase's state, the first " +
+        "that holds (epic `epic-engine` I157, I170):  red needs you (a plan to accept, a choice open), orange " +
+        "changed since you looked, blue under way (in the blue badge), dotted blue scheduled, green done in the last " +
+        "3 days, grey done before."
     },
     {
       name: "hidden-note",
@@ -179,11 +197,12 @@ export const epicSectionVocabulary = {
   ],
   states: [
     ...FOLD_STATES,
-    { name: "tools", description: "Its title has tools:  the Phases toggles, or a state filter (items in it)." }
+    { name: "tools", description: "Its title has tools:  the Phases gear, or a state filter (items in it)." }
   ],
   texts: [
     ...FOLD_TEXTS,
     { key: "epicsTitle", text: "Epics" },
+    { key: "choicesTitle", text: "Choices", description: "The standing option sets' section (P50)." },
     { key: "phasesTitle", text: "Phases" },
     { key: "questionsTitle", text: "Questions" },
     { key: "judgementsTitle", text: "Judgement calls" },
@@ -192,10 +211,17 @@ export const epicSectionVocabulary = {
     { key: "testsTitle", text: "Manual tests" },
     { key: "logTitle", text: "Log" },
     { key: "noneYet", text: "None yet", description: "An item section with no items." },
-    { key: "showFiles", text: "Show each phase's Files", description: "The Phases title's Files toggle, off." },
-    { key: "hideFiles", text: "Hide each phase's Files", description: "The Files toggle, on." },
-    { key: "showVerify", text: "Show each phase's Verify", description: "The Phases title's Verify toggle, off." },
-    { key: "hideVerify", text: "Hide each phase's Verify", description: "The Verify toggle, on." },
+    { key: "gearTip", text: "Settings for every phase", description: "The Phases gear's tooltip and name (I166)." },
+    {
+      key: "showFiles",
+      text: "Show each phase's files",
+      description: "The Phases gear menu:  every phase's Files field, ticked while shown."
+    },
+    {
+      key: "showVerify",
+      text: "Show each phase's checks",
+      description: "The Phases gear menu:  every phase's Verify field, ticked while shown."
+    },
     {
       key: "addNew",
       text: "New {kind}",
@@ -235,6 +261,17 @@ export const epicSectionVocabulary = {
       slot: "status",
       when: { attribute: "kind", values: ["overview-part"] },
       description: "An Overview sub-section's status cards from Claude, oldest first (`plan-doc status`)."
+    },
+    {
+      tag: "epic-choices",
+      when: { attribute: "kind", values: ["choices"] },
+      description:
+        'The Choices section\'s standing sets (epic `epic-engine` P50):  `<epic-choices id="s-<slug>" title standing>`.'
+    },
+    {
+      tag: "flow",
+      when: { attribute: "kind", values: ["choices"] },
+      description: "The Choices section's notes:  a set's lead, before it (`epic add <epic>#choices --note`)."
     },
     { tag: "epic-phase", when: { attribute: "kind", values: ["phases"] }, description: "The phases, in order." },
     {

@@ -214,19 +214,28 @@ describe("ThreadFacts", () => {
     expect([ThreadFacts.label("c3"), ThreadFacts.label("cm7"), ThreadFacts.label("x")]).toEqual(["C3", "C7", "x"])
   })
 
-  test("what it's on:  the quote's first words, else the block's;  its tooltip the block in full", () => {
+  test("its headline:  Owen's own first words once he's written some (I162)", () => {
     expect([
       ThreadFacts.headline(comment()),
-      ThreadFacts.headline(comment({ quote: "a quote longer than forty characters, cut short here" })),
-      ThreadFacts.headline(comment({ kind: "page" })),
-      ThreadFacts.headline(comment({ excerpt: "", label: "", kind: "code" }))
+      ThreadFacts.headline(comment({ text: "  a comment longer than forty characters,\n cut short here" })),
+      ThreadFacts.headline(comment({ kind: "page" }))
+    ]).toEqual(["“Why?”", "“a comment longer than forty characters,…”", "“Why?”"])
+  })
+
+  test("what it's on, before he writes:  the quote's first words, else the block's;  its tooltip the block in full", () => {
+    const place = (overrides: Parameters<typeof comment>[0] = {}) => comment({ text: "", ...overrides })
+    expect([
+      ThreadFacts.headline(place()),
+      ThreadFacts.headline(place({ quote: "a quote longer than forty characters, cut short here" })),
+      ThreadFacts.headline(place({ kind: "page" })),
+      ThreadFacts.headline(place({ excerpt: "", label: "", kind: "code" }))
     ]).toEqual(["“Name Kind Where”", "“a quote longer than forty characters, cu…”", "This page", "This code block"])
     expect(ThreadFacts.aboutTip({ id: "c3", place: comment({ quote: "Kind" }) })).toBe(
       "Comment C3, on a table in “2. Context”:  “Kind”"
     )
     expect(ThreadFacts.aboutTip({ place: comment({ kind: "section" }) })).toBe("On “2. Context”")
     // the whole Overview (epic `epic-engine` I55):  "the", as the page
-    const overview = comment({ kind: "overview", excerpt: "", label: "" })
+    const overview = place({ kind: "overview", excerpt: "", label: "" })
     expect([ThreadFacts.headline(overview), ThreadFacts.aboutTip({ place: overview })]).toEqual([
       "This Overview",
       "On the Overview"

@@ -41,6 +41,17 @@ const OWENS_ROWS: [string[], string[][]][] = [
   [["test", "--all"], [["test", "--all"]]],
   [["decide", "seo#Q3", "yes", "--option", "A"], [["decide", "seo", "Q3", "yes", "--option", "A"]]],
   [["choose", "seo#J9", "A", "built", "--set", "2"], [["choose", "seo", "J9", "A", "built", "--set", "2"]]],
+  // epic `epic-engine` P50:  option sets
+  [["choose", "seo#Q4", "A", "C", "built"], [["choose", "seo", "Q4", "A", "C", "built"]]],
+  [["choose", "seo#s-upgrades", "B"], [["choose", "seo", "s-upgrades", "B"]]],
+  [
+    ["option", "add", "seo#Q4", "Faster", "note", "--image", "a.png"],
+    [["option", "seo", "add", "Q4", "Faster", "note", "--image", "a.png"]]
+  ],
+  [["option", "edit", "seo#P50", "B", "--title", "T"], [["option", "seo", "edit", "P50", "B", "--title", "T"]]],
+  [["option", "close", "seo#s-upgrades"], [["option", "seo", "close", "s-upgrades"]]],
+  [["add", "seo#choices", "Upgrades", "--multiple"], [["add", "seo", "choices", "Upgrades", "--multiple"]]],
+  [["update", "seo#P3", "--choices", "<epic-choices>"], [["phase-body", "seo", "3", "--choices", "<epic-choices>"]]],
   [["close", "seo#J3"], [["close", "seo", "J3"]]],
   [["reopen", "seo#J3"], [["reopen", "seo", "J3"]]],
   [["cancel", "seo#J3", "why"], [["cancel", "seo", "J3", "why"]]],
@@ -229,6 +240,14 @@ describe("planDocArgs():  update", () => {
       ["estimate", "seo", "3", "2h"],
       ["rename", "seo", "P3", "New"]
     ])
+  })
+
+  // epic `epic-engine` I163:  a plan Owen accepted with comments, folded in and written accepted
+  test("a phase:  --plan ... --accepted goes to phase-body;  --accepted alone is refused", () => {
+    expect(planDocArgs("update", ["seo#P3", "--plan", "<ol></ol>", "--accepted"])).toEqual([
+      ["phase-body", "seo", "3", "--plan", "<ol></ol>", "--accepted"]
+    ])
+    expect(() => planDocArgs("update", ["seo#P3", "--accepted"])).toThrow("--accepted goes with --plan")
   })
 
   test("an item:  --title renames it, --calm / --loud", () => {

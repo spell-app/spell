@@ -128,14 +128,26 @@ async function check(doc) {
         const found = []
         if (document.querySelector("#phases").shadowRoot.querySelector('[part~="changes"]'))
           found.push("a Plan changes box above the phases")
-        // folded, its title says its plan changed (`changes`), while it isn't done
+        // folded, its title counts its NEW updates (`to-see`, less the ones 3 days old since;  epic `epic-engine`
+        // I168), while it isn't done;  an older page's `changes` until the tool's next write
+        const DAY = 24 * 60 * 60 * 1000
+        const fresh = (token) => {
+          const at = Date.parse(token.split("@")[1] ?? "")
+          return !Number.isFinite(at) || Date.now() - at <= 3 * DAY
+        }
         for (const phase of document.querySelectorAll("#phases > epic-phase")) {
-          const count = Number(phase.getAttribute("changes") ?? 0)
+          const toSee = phase.getAttribute("to-see")
+          const count =
+            toSee === null
+              ? Number(phase.getAttribute("changes") ?? 0)
+              : toSee.split(/\s+/).filter(Boolean).filter(fresh).length
           const want = phase.getAttribute("status") === "done" ? "" : count ? String(count) : ""
           const mark = phase.shadowRoot.querySelector('[part~="changed"]')?.textContent ?? ""
           if (mark !== want) found.push(`#${phase.id}'s pen says "${mark}", wanted "${want}"`)
         }
-        const first = document.querySelector("#phases > epic-phase[changes]:not([status='done'])")
+        const first = document.querySelector(
+          "#phases > epic-phase[to-see]:not([status='done']), #phases > epic-phase[changes]:not([status='done'])"
+        )
         return { found, first: first?.id ?? null }
       })
       for (const problem of marks.found) problems.push(`${where}:  ${problem}`)
@@ -169,7 +181,8 @@ async function check(doc) {
           }
         }, marks.first)
         if (drawn.box) problems.push(`${where}:  #${marks.first} draws a Plan changes box`)
-        if (String(drawn.updates.length) !== drawn.count)
+        // an older page's `changes` counts them all;  `to-see` lists only the new ones, some maybe in its fields
+        if (drawn.count !== null && String(drawn.updates.length) !== drawn.count)
           problems.push(`${where}:  #${marks.first} counts ${drawn.count}, holds ${drawn.updates.length} updates`)
         for (const [index, update] of drawn.updates.entries()) {
           const which = `#${marks.first}'s update ${index + 1}`

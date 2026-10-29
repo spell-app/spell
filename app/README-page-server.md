@@ -13,12 +13,13 @@
 }
 ```
 
-_spell-app's whole part of the page server's settings, from its [package.json](package.json)._
+_The app folder's whole part of the page server's settings, from its [package.json](package.json)._
 
 The page server is the kit's, and so is this page's old content:  every address, every setting, bundles, tabs, live
 reload and editing in place are on [the kit's README/server.md](https://github.com/spell-app/spell/blob/main/README/server.md).
-spell-app brings only its own part, the four settings above, the way each repo does.
-The kit merges every installed repo's part as the server starts, each read from its own repo's folder.
+The app folder brings only its own part, the four settings above, the way each of the kit's folders does.
+The kit merges every folder's part as the server starts, each read from that folder's `package.json`,
+with the content repo's and those of any repos beside the kit.
 
 ## What the four settings add
 
@@ -29,7 +30,7 @@ The kit merges every installed repo's part as the server starts, each read from 
 | `componentSets` | App UI, the docs pages of the app's components, from [app/docs/](app/docs/), at `/components/app/` ([README-app.md](README-app.md)) |
 | `engineRoutes` | the editor's element bundles at `/element/`, from `app/dist-element/`, so the page server serves them under every worktree's address too, not only through `appRoutes` |
 
-spell-app names no other repo's routes:  spell-epic, Spell UI and the content repo each declare their own.
+The app names no other folder's routes:  the epic folder, Spell UI and the content repo each declare their own.
 
 ## What `appRoutes` serves
 

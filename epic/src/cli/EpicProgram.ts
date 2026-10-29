@@ -321,7 +321,7 @@ export class EpicProgram {
 
     this.page(epic.command("add"), "add an item (J judgement, Q question, I issue, T todo, M manual test, D decision)")
       .usage(
-        '<epic>#J "Title" [--details <html>] [--calm]  |  <epic>#T "Title" [--limit]  |  <epic>#M "Title" --step <html> ...'
+        '<epic>#J "Title" [--details <html>] [--options "*Do it | Don\'t"] [--calm]  |  <epic>#T "Title" [--limit]  |  <epic>#M "Title" --step <html> ...'
       )
       .addHelpText("after", ADD_HELP)
     this.page(
@@ -337,9 +337,19 @@ export class EpicProgram {
     this.page(
       epic.command("choose"),
       "an option you settled in conversation, on ANY item, recorded as the page's pick does:  chosen on its latest " +
-        "card set (--set N:  the Nth), the item answered / closed / reviewed, a Noted card",
+        "card set (--set N:  the Nth), the item answered / closed / reviewed, a Noted card;  several letters in a " +
+        "pick-any set;  a phase's set or a standing set (s-upgrades) too",
       `epic choose seo#J9 A "Owen, 2026-10-06:  'require the parens';  built"`
-    ).usage('<epic>#J9 <letter> ["outcome"] [--set N]')
+    ).usage('<epic>#J9 <letter> [<letter> ...] ["outcome"] [--set N]')
+    this.page(
+      epic.command("option"),
+      "an option set's options (epic-engine P50):  add one (the next letter), edit one in place (its old text kept, " +
+        "folded), remove one (kept, folded), or close the set (done);  on an item, a phase or a standing set",
+      'epic option add seo#Q4 "Inline the sitemap" "<p>One file fewer.</p>"'
+    ).usage(
+      'add <epic>#Q4 "Title" ["note"] [--image <png>]  |  edit <epic>#Q4 B [--title "..."] [--note "..."]  |  ' +
+        "remove <epic>#Q4 B  |  close <epic>#Q4  [--set N]"
+    )
     this.page(epic.command("close"), "close an item:  done", "epic close seo#J3").usage("<epic>#J3")
     this.page(epic.command("reopen"), "open a closed or canceled item again", "epic reopen seo#J3").usage("<epic>#J3")
     this.page(
@@ -1173,7 +1183,8 @@ Examples:
   epic add seo#J "Kept one file per template" --details "<p>Why ...</p>" --calm
   epic add seo#T "Retry the upload once it's online"
   epic add seo#T "Find-in-page misses folded text" --limit
-  epic add seo#M "The sitemap lists every page" --step "Open /sitemap.xml" --should "Every guide is in it"`
+  epic add seo#M "The sitemap lists every page" --step "Open /sitemap.xml" --should "Every guide is in it"
+  epic add seo#choices "Upgrades on offer" --multiple   (a standing option set, s-upgrades-on-offer, in the Choices section)`
 
 /** After `epic test --help`. */
 const TEST_HELP = `

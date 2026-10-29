@@ -9,6 +9,7 @@ import { fileURLToPath } from "node:url"
 
 import { afterAll, afterEach, beforeEach, describe, expect, test, vi } from "vite-plus/test"
 
+import { Markup } from "spell/epic/markup"
 import { PhaseIds } from "spell/epic/phases"
 import { PlanDoc } from "spell/epic/tool/PlanDoc"
 import { PlanDocCommands, movedDown } from "spell/epic/tool/PlanDocCommands"
@@ -273,6 +274,91 @@ describe("PlanDocCommands choose:  an option Owen settled in conversation, on an
     expect(await owner.run(["choose", "x", "i1", "A"])).toBe(1)
     expect(warned.at(-1)).toBe("epic:  I1 has no option cards to choose from")
     expect(readFileSync(file, "utf8")).toBe(doc)
+  })
+})
+
+// epic `epic-engine` P50
+describe("PlanDocCommands option sets:  choose several, option add | edit | remove | close, #choices, --choices", () => {
+  const options = (...letters: string[]) =>
+    letters
+      .map((letter) => `<epic-option letter="${letter}" title="Way ${letter}"><p>${letter}</p></epic-option>`)
+      .join("")
+
+  test("choose several letters in a pick-any set;  refused in a pick-one set, writing nothing", async () => {
+    const owner = commands()
+    await owner.run([
+      "add",
+      "x",
+      "question",
+      "Which?",
+      "--details",
+      `<p>why</p><epic-choices multiple>${options("A", "B", "C")}</epic-choices>`
+    ])
+    await owner.run([
+      "add",
+      "x",
+      "question",
+      "One?",
+      "--details",
+      `<p>why</p><epic-choices>${options("A", "B")}</epic-choices>`
+    ])
+    printed = []
+    expect(await owner.run(["choose", "x", "Q1", "A", "c", "both, Owen said"])).toBe(0)
+    expect(printed).toEqual(["Q1 picked A · Way A, C · Way C"])
+    const plan = FILES.read(file)
+    expect(plan.item("q1").querySelector("epic-choices")!.getAttribute("chosen")).toBe("A C")
+    expect(plan.item("q1").getAttribute("status")).toBe("decided")
+    const doc = readFileSync(file, "utf8")
+    expect(await owner.run(["choose", "x", "Q2", "A,B"])).toBe(1)
+    expect(warned.at(-1)).toBe("epic:  Q2:  a pick-one set takes one letter, not A B")
+    expect(readFileSync(file, "utf8")).toBe(doc)
+  })
+
+  test("option add | edit | remove | close;  --choices into a phase;  a standing set by #choices", async () => {
+    const owner = commands()
+    await owner.run([
+      "add",
+      "x",
+      "question",
+      "Which?",
+      "--details",
+      `<p>why</p><epic-choices>${options("A", "B")}</epic-choices>`
+    ])
+    printed = []
+    expect(await owner.run(["option", "x", "add", "Q1", "Neither", "skip it"])).toBe(0)
+    expect(await owner.run(["option", "x", "edit", "Q1", "A", "--note", "<p>new</p>"])).toBe(0)
+    expect(await owner.run(["option", "x", "remove", "Q1", "B"])).toBe(0)
+    expect(await owner.run(["option", "x", "close", "Q1"])).toBe(0)
+    expect(printed).toEqual([
+      "Q1 option C:  Neither",
+      "Q1 option A edited",
+      "Q1 option B removed:  Way B",
+      "Q1 option set closed"
+    ])
+    expect(await owner.run(["option", "x", "add", "Q1", "More"])).toBe(1)
+    expect(await owner.run(["option", "x", "bogus", "Q1"])).toBe(1)
+
+    expect(
+      await owner.run(["phase-body", "x", "2", "--choices", `<epic-choices>${options("A", "B")}</epic-choices>`])
+    ).toBe(0)
+    let plan = FILES.read(file)
+    expect(plan.phase(2).querySelector(':scope > epic-field[name="choices"] > epic-choices')).not.toBeNull()
+    expect(plan.phase(2).getAttribute("choices-open")).toBe("1")
+    expect(await owner.run(["choose", "x", "P2", "B"])).toBe(0)
+    expect(FILES.read(file).phase(2).hasAttribute("choices-open")).toBe(false)
+
+    printed = []
+    expect(await owner.run(["add", "x", "choices", "Upgrades on offer", "--multiple"])).toBe(0)
+    expect(await owner.run(["option", "x", "add", "s-upgrades-on-offer", "Dark mode"])).toBe(0)
+    expect(printed).toEqual(["s-upgrades-on-offer", "S-UPGRADES-ON-OFFER option A:  Dark mode"])
+    plan = FILES.read(file)
+    const section = plan.document.querySelector('epic-page > epic-section[kind="choices"]')!
+    expect(section.nextElementSibling!.getAttribute("kind")).toBe("phases")
+    printed = []
+    expect(await owner.run(["summary", "x"])).toBe(0)
+    expect(printed[0]).toContain("choices:  1 set open, 1 option")
+    // the markup checks clean (`epic lint`'s structure check;  its browser check needs the page server)
+    expect(Markup.validate(plan.document).map((problem) => problem.message)).toEqual([])
   })
 })
 

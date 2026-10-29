@@ -111,4 +111,19 @@ describe.skipIf(!hasFilterRepo)("spell rename branches, which files it renames",
     run()
     expect(readFileSync(join(kit, "app/fixture.ts"), "utf8")).toContain("spell-app/vscode")
   })
+
+  test("its last pass, after the merges, renames only what they brought in:  main's old-layout files stay (T61)", () => {
+    const { run, kit } = scratchKit()
+    const old = join(kit, "spell-app")
+    // main's own file naming the old layout on purpose, as its AGENTS.md and old-layout tests do
+    write(kit, "app/old-layout.ts", 'import "spell-ui/ui-button"\n')
+    git(kit, "add", "-A")
+    git(kit, "commit", "-qm", "main's old-layout fixture")
+    write(old, "b.ts", 'import "spell-ui/ui-button"\n')
+    git(old, "add", "-A")
+    git(old, "commit", "-qm", "two")
+    run()
+    expect(readFileSync(join(kit, "app/b.ts"), "utf8")).toContain("spell/ui/ui-button")
+    expect(readFileSync(join(kit, "app/old-layout.ts"), "utf8")).toContain('"spell-ui/ui-button"')
+  })
 })

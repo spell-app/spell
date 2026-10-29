@@ -4,12 +4,13 @@ import type { JSX } from "@solidjs/web"
 import { E } from "spell/ui/core"
 
 // the filter's rule, states and words:  their files, not `epic-section`'s barrel (which would define it here)
-import { StateFilter } from "spell/epic/components/epic-section/StateFilter"
+import { StateFilter, type ChipPick } from "spell/epic/components/epic-section/StateFilter"
 import {
   CHIP,
   CHIP_CLICK_KEYS,
-  CHIP_STATES,
   FILTER,
+  FILTER_STATES,
+  PHASE_FILTER_STATES,
   type ChipState
 } from "spell/epic/components/epic-section/EpicSection.types"
 
@@ -23,13 +24,16 @@ import filterCSS from "./EpicStateFilter.css?inline"
  * ### `<epic-state-filter>`
  * The state filter's CHIPS (epic `airplane` P8, ONE element since epic `epic-engine` P3):  a pill per state the items
  * are in, in the state's colour, with how many (Owen, 2026-10-10:  no filter icon).
- * - the Phases section's phases the same, by a phase's three states:  undone, updated, complete (epic `epic-engine`
- *   I157)
+ * - the Phases section's phases the same (`phases`), by a phase's six states in Owen's order (epic `epic-engine` I157,
+ *   I170):  red needs him, orange changed since he looked, blue under way (in the blue badge, as an item's
+ *   `progress`), a DOTTED blue outline scheduled, green done lately, grey done before
  * - SOLID while that state's items show, OUTLINED while hidden (`shown`)
  * - a click asks the owner to filter:  `epic-state-changed`, with the clicked state and what should show next, by the one
  *   rule (`StateFilter.nextShown()`:  everything showing, only that state;  else a hidden state shows too and a shown
  *   one hides;  the only one showing, everything again);  the owner filters, and sets `shown`
- * - each chip's tooltip and name:  how many, which state, what its click does
+ * - an ⌥-click (Alt-click;  epic `epic-engine` I166, Owen, 2026-10-29:  "if I option-click on one of those badges,
+ *   turn just that one on"):  only that state, whatever showed;  `how: "only"` in the event, its `shown` that state alone
+ * - each chip's tooltip and name:  how many, which state, what its click does, and its ⌥-click
  * - the items MARKED in this pass (`marked`, epic `epic-engine` P43):  a solid badge in Send's blue (a dotted outline at first;  Owen chose solid), first,
  *   left of the chips (Owen, 2026-10-25:  "remove from the red/green/etc and put in a blue badge with dotted outline
  *   to the left");  drawn whatever `shown` says, and not a filter:  a click does nothing
@@ -64,12 +68,13 @@ export class EpicStateFilter extends E.UIComponent<typeof epicStateFilterVocabul
 
   /**
    * The states with items (or phases), in the filter's order:  a chip each.
-   * - an item's states (`FILTER_STATES`) or a phase's (`PHASE_FILTER_STATES`, the Phases section's:  epic
-   *   `epic-engine` I157), whichever `counts` names
+   * - an item's states (`FILTER_STATES`), or a phase's with `phases` (`PHASE_FILTER_STATES`, the Phases section's:
+   *   epic `epic-engine` I157, I170):  some names are in both, so ONE list
    */
   get present(): ChipState[] {
     const counts = this.stateCounts
-    return CHIP_STATES.filter((it) => counts.has(it.state))
+    const order: readonly ChipState[] = this.phases ? PHASE_FILTER_STATES : FILTER_STATES
+    return order.filter((it) => counts.has(it.state))
   }
 
   /**
@@ -112,7 +117,8 @@ export class EpicStateFilter extends E.UIComponent<typeof epicStateFilterVocabul
         >
           <Show when={this.markedCount}>
             {(count) => {
-              const words = () => this.translationForKey("markedWords", { count: count() })
+              const words = () =>
+                this.translationForKey(this.phases ? "markedPhaseWords" : "markedWords", { count: count() })
               return (
                 <span
                   class={[CHIP, MARKED]}
@@ -136,10 +142,11 @@ export class EpicStateFilter extends E.UIComponent<typeof epicStateFilterVocabul
                   part={this.partForName("chip")}
                   data-state={state.state}
                   data-color={state.color}
+                  data-fill={"fill" in state ? state.fill : undefined}
                   aria-pressed={this.showing.has(state.state) ? "true" : "false"}
                   aria-label={words()}
                   title={words()}
-                  onClick={() => this.pick(state.state)}
+                  onClick={(event: MouseEvent) => this.pick(state.state, event.altKey ? "only" : "click")}
                 >
                   {this.stateCounts.get(state.state) ?? 0}
                 </button>
@@ -157,20 +164,20 @@ export class EpicStateFilter extends E.UIComponent<typeof epicStateFilterVocabul
     const count = this.stateCounts.get(state.state) ?? 0
     const present = this.present.map((it) => it.state as string)
     const does = this.translationForKey(CHIP_CLICK_KEYS[StateFilter.clickDoes(present, [...this.showing], state.state)])
-    return this.translationForKey("chipWords", { count, words, does })
+    return this.translationForKey("chipWords", { count, words, does, only: this.translationForKey("chipAltOnly") })
   }
 
-  /** A chip, clicked:  the owner is told what was picked, and what should show next. */
+  /** A chip, clicked (`how`:  ⌥-clicked, `only`):  the owner is told what was picked, and what should show next. */
   @E.untracked
-  private pick(state: string) {
+  private pick(state: string, how: ChipPick) {
     const present = this.present.map((it) => it.state as string)
-    const next = StateFilter.nextShown(present, [...this.showing], state)
+    const next = StateFilter.nextShown(present, [...this.showing], state, how)
     // what's handed to Claude has no chip of its own:  it never hides behind one
     const withSubmitted =
       present.includes(SUBMITTED_STATE) && !next.includes(SUBMITTED_STATE) ? [...next, SUBMITTED_STATE] : next
     // the grey chip is `old` and `handled` both:  shown or hidden together
     const shown = withSubmitted.includes(SETTLED) ? [...withSubmitted, SETTLED_TOO] : withSubmitted
-    this.send(STATE_PICK, { state, shown } satisfies StatePickDetail)
+    this.send(STATE_PICK, { state, shown, how } satisfies StatePickDetail)
   }
 }
 

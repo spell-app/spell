@@ -200,7 +200,8 @@ The cost:
 - `spell run <project> --target ts` does that build and runs it under node:  its prints and tests in the terminal.
   **A program that draws can't open in a browser that way yet:**  `--target js`, or none, does.
 - A view's element imports `@spell/elements`, which is spell-app's `SpellElement` and Spell UI's `E`.
-  So the type check needs spell-app installed beside spell-parser;  without it, the check skips itself.
+  So the type check reads the app folder's types, which every checkout of the kit has;
+  where they're missing, it skips itself.
 
 ## A library:  Spell's classes, for code that isn't Spell
 

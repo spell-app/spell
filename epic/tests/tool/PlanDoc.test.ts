@@ -7,7 +7,7 @@ import { describe, expect, test } from "vite-plus/test"
 import { Markup } from "spell/epic/markup"
 import { PhaseIds } from "spell/epic/phases"
 
-import { PlanDocError } from "spell/epic/tool/planDoc.types"
+import { PlanDocError, type PlanMark } from "spell/epic/tool/planDoc.types"
 
 import { EpicTests } from "spell/epic/tool/EpicTests"
 import { ItemPicker } from "spell/epic/tool/ItemPicker"
@@ -196,6 +196,32 @@ describe("PlanDoc phases", () => {
     expect(el(plan, "p1").querySelector('[name="done"]')!.textContent).toBe("built it again")
   })
 
+  // epic `epic-engine` I170:  green for 3 days after it's done, then grey
+  test("done stamps `done-at`;  any other status removes it;  an older done phase takes its log's `P1 done`", () => {
+    const plan = freshPlan()
+    plan.addPhase("One")
+    plan.addPhase("Two")
+    plan.setPhase(1, "done")
+    expect(el(plan, "p1").getAttribute("done-at")).toBe(PlanTime.isoMinutes(NOW))
+    plan.setPhase(1, "active")
+    expect(el(plan, "p1").hasAttribute("done-at")).toBe(false)
+    plan.setPhase(1, "done")
+    plan.setPhase(2, "done")
+    // a phase done before I170:  no `done-at`, its log line the record
+    el(plan, "p2").removeAttribute("done-at")
+    const said = Array.from(plan.document.querySelectorAll("#log > epic-event")).findLast(
+      (event) => event.textContent === "P2 done"
+    )!
+    said.setAttribute("at", "2026-09-20T08:00+00:00")
+    expect(plan.updateStates()).toBeGreaterThan(0)
+    expect(el(plan, "p2").getAttribute("done-at")).toBe("2026-09-20T08:00+00:00")
+    // no log line:  none, and nothing to change
+    el(plan, "p2").removeAttribute("done-at")
+    said.remove()
+    expect(plan.updateDoneAt()).toBe(0)
+    expect(el(plan, "p2").hasAttribute("done-at")).toBe(false)
+  })
+
   test("estimates:  the phase's attribute, totalled in the Overview, what's left;  none without one", () => {
     const plan = freshPlan()
     const total = () => plan.overview.getAttribute("estimate")
@@ -259,7 +285,7 @@ describe("PlanDoc phases", () => {
     plan.addPhaseUpdate(4, "<p>four changed</p>")
     const item = plan.addItem("todo", "after four", { details: '<p>see <a href="#p-four">P4 · Four</a></p>' })
     Markup.set<"epic-item">(el(plan, item), { phase: "4" })
-    plan.updateChangeCounts()
+    plan.updateUpdates()
     expect(plan.addPhase("Inserted", { before: 3, estimate: "1h" })).toBe(3)
     expect(plan.phases.map((phase) => `${phase.n} ${phase.name} ${phase.status}`)).toEqual([
       "1 One done",
@@ -274,7 +300,13 @@ describe("PlanDoc phases", () => {
     const line = el(plan, "p5").querySelector(":scope > epic-update")!
     expect([line.textContent, line.getAttribute("phase")]).toEqual(["four changed", "2"])
     plan.updateStates()
-    expect(plan.phaseElements.map((phase) => phase.getAttribute("changes"))).toEqual([null, null, null, null, "1"])
+    expect(plan.phaseElements.map((phase) => phase.getAttribute("to-see"))).toEqual([
+      null,
+      null,
+      null,
+      null,
+      "up1@2026-10-01T09:05"
+    ])
     const link = el(plan, item).querySelector('a[href^="#p"]')!
     expect([link.getAttribute("href"), link.textContent]).toEqual(["#p-four", "P5 · Four"])
     expect(el(plan, item).getAttribute("phase")).toBe("5")
@@ -470,7 +502,8 @@ describe("PlanDoc phases", () => {
     expect(later.marksSay(1, "<p>Owen answered Q1</p>", ["q1"])).toEqual(["Q1"])
   })
 
-  test("plan changes:  counted in each phase's `changes`;  a phase done keeps them and its count", () => {
+  // epic `epic-engine` I168 (Owen, 2026-10-29:  "How do I clear these 'update' marks?")
+  test("update blocks:  each given its id (`up1`);  each host's `to-see` lists the new ones, with their `at`", () => {
     const plan = freshPlan()
     plan.addPhase("One", { symptom: "s", changes: "c" })
     plan.addPhase("Two", { symptom: "s", changes: "c" })
@@ -479,17 +512,58 @@ describe("PlanDoc phases", () => {
     plan.addPhaseUpdate(1, '<p>Kept <a id="anchor" href="#q1">small</a></p>')
     plan.addPhaseUpdate(3, "split in two")
     plan.addPhaseUpdate(3, "and again")
+    // an older page's count goes:  `to-see` says what the pen counts now
+    Markup.set<"epic-phase">(el(plan, "p2"), { changes: 4 })
     plan.updateStates()
-    const counts = () => plan.phaseElements.map((phase) => phase.getAttribute("changes"))
-    expect(counts()).toEqual(["1", null, "2"])
+    const toSee = () => plan.phaseElements.map((phase) => phase.getAttribute("to-see"))
+    expect(Array.from(plan.document.querySelectorAll("epic-update"), (update) => update.id)).toEqual([
+      "up1",
+      "up2",
+      "up3"
+    ])
+    expect(toSee()).toEqual(["up1@2026-10-01T09:05", null, "up2@2026-10-01T09:05 up3@2026-10-01T09:05"])
+    expect(plan.phaseElements.map((phase) => phase.getAttribute("changes"))).toEqual([null, null, null])
     expect(plan.document.querySelectorAll("#anchor")).toHaveLength(1)
     expect(problems(plan)).toEqual([])
-    // the same again:  nothing to change;  a phase done keeps its updates and its count (the element hides its mark)
-    expect(plan.updateChangeCounts()).toBe(false)
+    // the same again:  nothing to change;  a phase done keeps its updates (the element hides its pen)
+    expect(plan.updateUpdates()).toBe(0)
     plan.setPhase(1, "done")
     plan.updateStates()
-    expect(counts()).toEqual(["1", null, "2"])
-    expect(PlanDoc.parse(plan.toString(), NOW, { person: PERSON }).updateChangeCounts()).toBe(false)
+    expect(toSee()[0]).toBe("up1@2026-10-01T09:05")
+    expect(PlanDoc.parse(plan.toString(), NOW, { person: PERSON }).updateUpdates()).toBe(0)
+    // a block seen, or more than 3 days old as of the write (`PlanDates.isQuiet()`):  out of the list
+    Markup.set<"epic-update">(el(plan, "up2"), { seen: "2026-10-01 10:00" })
+    plan.updateStates()
+    expect(toSee()[2]).toBe("up3@2026-10-01T09:05")
+    const later = PlanDoc.parse(plan.toString(), new Date(2026, 9, 4, 9, 6))
+    later.updateStates()
+    expect(later.phaseElements.map((phase) => phase.getAttribute("to-see"))).toEqual([null, null, null])
+    // a new block takes the next free id, after the highest
+    el(plan, "up1").remove()
+    plan.addPhaseUpdate(2, "new")
+    plan.updateStates()
+    expect(el(plan, "p2").querySelector("epic-update")!.id).toBe("up4")
+  })
+
+  test("Seen on an update (`up3`):  `inbox apply` stamps `seen`, logged;  out of its phase's `to-see`", () => {
+    const plan = freshPlan()
+    plan.addPhase("One", { symptom: "s", changes: "c" })
+    plan.addPhaseUpdate(1, "split in two", { summary: "Split in two" })
+    plan.addPhaseUpdate(1, "and again")
+    plan.updateStates()
+    expect(plan.applyMark({ id: "UP1", action: "seen", at: "2026-10-01T09:06:00Z" } as PlanMark)).toEqual({
+      applied: true,
+      did: "seen:  Split in two"
+    })
+    expect(el(plan, "up1").getAttribute("seen")).toBe("2026-10-01 09:05")
+    expect(Array.from(plan.document.querySelectorAll("#log > epic-event")).at(-1)!.textContent).toBe(
+      "UP1 seen:  Split in two"
+    )
+    expect(plan.applyMark({ id: "up1", action: "seen" } as PlanMark)).toEqual({ applied: true, did: "seen already" })
+    plan.updateStates()
+    expect(el(plan, "p1").getAttribute("to-see")).toBe("up2@2026-10-01T09:05")
+    expect(plan.applyMark({ id: "up9", action: "seen" } as PlanMark)).toMatchObject({ applied: false, gone: true })
+    expect(problems(plan)).toEqual([])
   })
 
   test("phase N done:  drops its bare labels and its prose updates;  a phase's own plan changes stay", () => {
@@ -1586,9 +1660,10 @@ describe("PlanDoc review inbox", () => {
     expect(todo.textContent).toContain("Owen:  after the flight")
     const phase = el(plan, "p1")
     expect(phase.querySelector(':scope > epic-status[slot="status"][state="noted"] a[href="#t2"]')).not.toBeNull()
+    // a phase's pick is its own option sets' (epic `epic-engine` P50):  none here
     expect(plan.applyMark({ id: "p1", action: "pick", pick: "A" })).toEqual({
       applied: false,
-      left: "P1 (phase):  can't pick A"
+      left: "P1 has no option cards"
     })
     expect(plan.applyMark({ id: "p1", action: "revisit", when: "soon", note: "too big?" })).toMatchObject({
       applied: false,

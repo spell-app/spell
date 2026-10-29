@@ -9,12 +9,12 @@ import { packageRootFor } from "./sourceNames.ts"
 
 /****************
  * ### `Declarations`
- * Builds a package's `.d.ts` files, which the repos ABOVE its repo read instead of its source (epic `repo-split` I12,
- * Owen's pick (c)).
+ * Builds the `.d.ts` files of the kit or one of its folders, which a program that can't read their source reads
+ * instead (epic `repo-split` I12, Owen's pick (c)):  the app's node program, and spell-brand beside the kit.
  *
  * ```sh
  * spell-types            # this package (the current folder):  type-checks it and writes `dist-types/`
- * spell-types --below    # first, every package of the LOWER repos this repo's packages use, lowest first
+ * spell-types --below    # first, the kit's and every folder below this one (`below()`), lowest first
  * spell-types --clean    # this package's `dist-types/` deleted first:  a full build
  * ```
  *
@@ -25,8 +25,8 @@ import { packageRootFor } from "./sourceNames.ts"
  *   `src/util/string.ts` => `dist-types/src/util/string.d.ts`.
  *   - Nothing to rewrite:  the declarations name the package's files by its package name, as the source does, and
  *     every reader resolves those through the package's `exports` (`types`).
- *   - Its own program reads its own SOURCE for its own name (`customConditions`:  `<package>-source`), never these.
- * - Why:  `tsc` in a repo above reads a package's declarations, not its source, so it type-checks only its own files,
+ *   - Every other program reads the SOURCE (`customConditions`:  `spell-source`), never these.
+ * - Why:  a reader with other settings reads declarations, not source, so it type-checks only its own files,
  *   under its own settings.
  * - Where:  `<package>/dist-types/`, git-ignored.
  *   - Its `exports` say so:  each entry `{ "types": "./dist-types/src/core.d.ts", "default": "./src/core.ts" }`.
@@ -35,10 +35,9 @@ import { packageRootFor } from "./sourceNames.ts"
  * - How, for one program:  `tsc` on its `tsconfig`, emitting declarations only (and their maps, so "Go to
  *   Definition" lands in the source), incrementally:  nothing changed, nothing to do.
  *   - It IS the package's type check:  a package's `yarn ts` runs it in place of a bare `tsc`.
- * - `--below`:  the packages of OTHER repos that this repo's packages depend on (`spell`, `spell-ui` ... in their
- *   `package.json`s, and theirs, and so on), lowest first, each built as above.  A repo's `yarn ts` runs it first, so
- *   what it reads is never stale;  up-to-date ones take a second or two each.
- *   - Only the ones with `"spellTypes"`:  a package no repo reads by its types (spell-epic, spell-app) has none.
+ * - `--below`:  what this one reads, lowest first, each built as above (`below()` says which).  The app's `yarn ts`
+ *   runs it first, so what it reads is never stale;  up-to-date ones take a second or two each.
+ *   - Only the ones with `"spellTypes"`:  a folder nobody reads by its types (`epic/`, `app/`) has none.
  * - Node runs this file as is (types stripped, `bin/spell-types.ts`):  node's modules and `json5` only, no `enum`, no
  *   parameter property.
  ****************/

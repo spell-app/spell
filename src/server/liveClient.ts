@@ -28,6 +28,18 @@ import type { SiteTab } from "spell/server/site/site.types"
  *   - `takeScroll()`:  the scroll position a live reload saved, once
  *     - the docs runtime restores it itself, after its folds and definitions settle;
  *       else the client does, on `load`
+ * - `reload()`, `reloadNow()`:  added by `liveClient()`:  reload, keeping the scroll, the new page held behind the old one
+ *   until it's ready (`holdReveal()`)
+ *   - `reload()`:  QUIETLY (epic `epic-engine` I172):  at once, held and cross-faded, unless the reader is typing in a
+ *     field;  then once the field loses the focus (or the page goes out of sight);  for a page whose own hot
+ *     reload failed half way (Spell UI's `PackHotSwap`)
+ *   - `reloadNow()`:  now, whatever the reader is doing
+ * - `reveal(settle?)`, `revealAfter(ready)`:  added by `holdReveal()`:  a live reload's new page waits behind the old
+ *   one until it's ready
+ *   - `reveal()`:  it's ready:  show it (a short cross-fade) once every `revealAfter()` promise has settled and its
+ *     `<ui-root>`s are ready;  `settle()` runs just before.  The docs runtime calls it once it has landed, else the
+ *     client on `load`
+ *   - `revealAfter(ready)`:  wait for `ready` too (Spell UI's site:  its layout mounted);  call it before `load`
  * - `etag` follows the page:  an in-place update (`PageChange`) moves it to the new version's
  */
 export type ServerConfig = {
@@ -71,6 +83,10 @@ export type ServerConfig = {
   saveFile?: (save: FileSave) => Promise<PageEditResult>
   readPage?: () => Promise<PageSource>
   takeScroll?: () => number | undefined
+  reload?: () => void
+  reloadNow?: () => void
+  reveal?: (settle?: () => void) => void
+  revealAfter?: (ready: Promise<unknown>) => void
 }
 
 /** The page's file as served now:  its HTML (with what the server injects) and `ETag`. */
@@ -148,13 +164,15 @@ export type PageEditResult = { ok: boolean; status: number; etag?: string; error
  *   - which scripts:  its `<script src>` tags, and every script it fetched (`performance`'s resource entries:
  *     a lazy chunk, the pack `<ui-components source>` imported, an experiment's bundle)
  *   - half a second after the last change (a build writes many files), through `reloadGate()`
- *   - NEVER a reload the reader sees (epic `epic-engine` I116;  Owen, 2026-10-25:  "This is really, really, REALLY
- *     bugging me"):  a page in view keeps its old code, a small "Updated" pill says new code waits, and it reloads
- *     the moment it's out of sight (another tab, VS Code's view hidden:  `visibilitychange`), or on a click on the pill
- *   - one out of sight already reloads at once, keeping its place
+ *   - QUIETLY (epic `epic-engine` I172;  Owen, 2026-10-29, of the pill before it:  "why do we have this?"):
+ *     the reload is held behind the old frame until the new page is ready, then cross-faded in (`holdReveal()`),
+ *     its scroll and folds kept, so the reader sees the page change and nothing else
+ *     - except while the reader TYPES in a field (`typing()`):  it waits until the field loses the focus,
+ *       or the page goes out of sight
+ *     - it replaced I116's "Updated:  reload" pill, which held new code back until the page was out of sight
  *   - any other `.js` (a repo tool) is none of the page's business
  * - the server restarted (its socket says `hello` from another `run`):
- *   reloads the same way, out of sight, for the new `/api/server/live.js` and write token
+ *   reloads the same way, quietly, for the new `/api/server/live.js` and write token
  * - any other file changed:  says so (`spell-server:changed`, `FileChange`), and does nothing else
  *   - a page that loads it (a body from a file) re-fetches it
  * - keeps its place across a reload:  the scroll position (`sessionStorage`, when it works);
@@ -176,14 +194,11 @@ export type PageEditResult = { ok: boolean; status: number; etag?: string; error
  *   (`layUnderWorktree()`, `worktreeHref()`;  epic `epic-engine` P46)
  * - runs once per page
  */
-export function liveClient(): void {
+export function liveClient(scrollKey: string): void {
   const holder = window as unknown as LiveWindow
   const config = holder.SPELL_SERVER
   if (!config || holder.__spellLive) return
   holder.__spellLive = true
-  // `sessionStorage` key for the scroll position kept across a reload
-  // NOT util's `PrefStore`:  this file is sent to the page as text (`editPage()`), so it imports nothing
-  const scrollKey = "spell-server:scroll"
   // the scroll position a live reload left, until restored (`takeScroll()`, or `load`)
   let savedScroll: number | undefined
   // updates of the page's file, one at a time and in order
@@ -214,24 +229,35 @@ export function liveClient(): void {
   const RELOAD_QUIET_MS = 500
   // every script the page fetched, as served paths (`servedPath()`):  `performance` drops entries past its buffer
   const fetched = new Set<string>()
-  // the small "Updated" pill, while a hot reload waits for the reader to finish typing
-  let pill: HTMLButtonElement | undefined
   // the scripts changed since the last hot reload, as served paths:  offered to the page first (`hotReload()`)
   const changedScripts = new Set<string>()
   // the `ETag`s the page's own saves got back, of versions it shows already (`shown`):  their changes are `own`
   const ownEtags = new Set<string>()
   // the server restarted since:  the page reloads whatever it takes, for the new client and write token
   let restarted = false
-  // new code the page couldn't take waits for a reload:  it comes once the page is out of sight (`reloadUnseen()`)
+  // a reload waits for the reader to leave the field they type in (`reloadQuietly()`)
   let stale = false
-  const gate = reloadGate({ wait: RELOAD_QUIET_MS, typing, reload: hotReload, waiting: showPill })
+  // the reader typed or changed something in the focused field since it got the focus (`typing()`)
+  let edited = false
+  const gate = reloadGate({ wait: RELOAD_QUIET_MS, typing, reload: hotReload })
 
   restoreScroll()
   watchFetches()
   // a worktree's page:  its root links open the worktree's files (`worktreeHref()`), however they're followed
   // (a click, a middle click, the keyboard);  before `followInFrame()` reads the link
   for (const type of ["pointerdown", "click", "auxclick"]) addEventListener(type, layUnderWorktree, true)
-  addEventListener("focusout", () => gate.settle(), true)
+  // a field's text counts as typed once it changes after the field got the focus (`input` crosses shadow roots)
+  addEventListener("focusin", () => (edited = false), true)
+  addEventListener("input", () => (edited = true), true)
+  addEventListener(
+    "focusout",
+    () => {
+      gate.settle()
+      // after the focus lands:  moved on to another field, that one isn't typed in yet
+      if (stale) setTimeout(() => stale && !typing() && reload())
+    },
+    true
+  )
   document.addEventListener("visibilitychange", () => {
     if (stale && document.visibilityState === "hidden") reload()
   })
@@ -241,6 +267,8 @@ export function liveClient(): void {
     return y
   }
   config.readPage = readPage
+  config.reload = reloadQuietly
+  config.reloadNow = reload
   // in a frame (VS Code's "Epic Docs" view):  say where we are, and step back / forward when the frame's parent asks
   if (window.parent !== window) {
     reportPlace()
@@ -315,7 +343,7 @@ export function liveClient(): void {
     }
     const address = servedPath(location.pathname, location.href, config!.worktreesPath)
     const action = liveAction(path, { file: config!.file, scripts: scriptsLoaded(), address })
-    if (action === "page") updating = updating.then(() => updatePage(page)).catch(reloadUnseen)
+    if (action === "page") updating = updating.then(() => updatePage(page)).catch(reloadQuietly)
     else if (action === "style") swapStyles(path)
     else if (action === "script") {
       changedScripts.add(path)
@@ -373,8 +401,6 @@ export function liveClient(): void {
       return false
     }
   }
-
-  /** reload, keeping the scroll position */
   /**
    * The scripts changed (or the server restarted):  offer the changed scripts to the page first
    * (`spell-server:scripts-reloading`, `ScriptsChange`);  a page that takes them ALL (`preventDefault()`) runs the new code
@@ -390,26 +416,40 @@ export function liveClient(): void {
     })
     if (!restarted && paths.length && !dispatchEvent(offer)) return
     restarted = false
-    reloadUnseen()
+    reloadQuietly()
   }
 
   /**
-   * Reload for new code, but never in front of the reader (I116):  at once when the page is out of sight, else
-   * the "Updated" pill, and the reload when it next goes out of sight (or a click on the pill).
+   * Reload for new code, quietly (epic `epic-engine` I172):  at once, held behind the old frame and cross-faded in
+   * (`reload()`), unless the reader is typing in a field (`typing()`);  then once it loses the focus, or the page
+   * goes out of sight.
+   * - it replaced I116's "Updated:  reload" pill, which waited for the page to go out of sight
    */
-  function reloadUnseen() {
-    if (document.visibilityState === "hidden") return reload()
+  function reloadQuietly() {
+    if (document.visibilityState === "hidden" || !typing()) return reload()
     stale = true
-    showPill(true)
   }
 
+  /**
+   * Reload, keeping the scroll position (and the address's `#id`), the new page held behind the old one until it has
+   * drawn and landed, then cross-faded in (`holdReveal()`;  epic `epic-engine` I164).
+   * - a REPLACE navigation to the page itself, not `location.reload()`:  Chromium (VS Code's view, Chrome) runs a
+   *   cross-document view transition for that, never for a reload
+   *   - to the address without its `#id`, else it would only scroll there;  the new page puts it back
+   * - no view transitions (another browser):  `location.reload()`, as before
+   * - storage blocked:  reload at the top, with no hold
+   */
   function reload() {
     try {
-      sessionStorage.setItem(scrollKey, JSON.stringify({ path: location.pathname, y: scrollY }))
+      sessionStorage.setItem(
+        scrollKey,
+        JSON.stringify({ path: location.pathname, y: scrollY, hash: location.hash, hold: true } satisfies KeptPlace)
+      )
     } catch {
-      // storage blocked:  reload at the top
+      return location.reload()
     }
-    location.reload()
+    if ("onpagereveal" in window) location.replace(location.pathname + location.search)
+    else location.reload()
   }
 
   /**
@@ -423,11 +463,10 @@ export function liveClient(): void {
     const server = config as ServerConfig
     const page = pushed ?? (await readPage())
     const own = !!page.etag && ownEtags.delete(page.etag)
-    // the reload, if the page can't take the change (or a patch fails), never in front of the reader (I116):
-    // it waits until the page is out of sight, the "Updated" pill meanwhile
-    const detail: PageChange = { path: server.file, html: page.html, etag: page.etag, own, reload: reloadUnseen }
+    // the reload, if the page can't take the change (or a patch fails):  quietly, never while the reader types (I172)
+    const detail: PageChange = { path: server.file, html: page.html, etag: page.etag, own, reload: reloadQuietly }
     const change = new CustomEvent("spell-server:reloading", { cancelable: true, detail })
-    if (dispatchEvent(change) && !own) return reloadUnseen()
+    if (dispatchEvent(change) && !own) return reloadQuietly()
     etag = page.etag
     server.etag = page.etag
   }
@@ -510,40 +549,19 @@ export function liveClient(): void {
   }
 
   /**
-   * Is the reader typing in a field?  Then a hot reload waits (`reloadGate()`).
+   * Is the reader typing in a field?  Then a reload waits (`reloadGate()`, `reloadQuietly()`).
    * - the focused element, through shadow roots (`ui-textarea`'s own textarea):
    *   a text input, a textarea, rich text (contenteditable)
+   * - and its text typed or changed since it got the focus (`edited`):  a field merely clicked into doesn't hold it
    */
   function typing(): boolean {
+    if (!edited) return false
     let focused = document.activeElement
     while (focused?.shadowRoot?.activeElement) focused = focused.shadowRoot.activeElement
     if (!(focused instanceof HTMLElement)) return false
     if (focused.isContentEditable || focused instanceof HTMLTextAreaElement) return true
     const notText = /^(button|checkbox|radio|range|reset|submit|color|file|image|hidden)$/
     return focused instanceof HTMLInputElement && !notText.test(focused.type)
-  }
-
-  /**
-   * Show (`on`) or drop the "Updated:  reload" pill:  a hot reload waits for the reader to leave the field they type in.
-   * - bottom right, small;  a click reloads now
-   * - on `<body>`, outside `main`, and marked `data-spell-added`:  a live update in place never touches it
-   */
-  function showPill(on: boolean) {
-    if (!on) return pill?.remove()
-    if (pill?.isConnected) return
-    pill = document.createElement("button")
-    pill.dataset.spellAdded = ""
-    pill.type = "button"
-    pill.textContent = "Updated:  reload"
-    pill.title =
-      "This page's code changed.  It reloads by itself, keeping its place, once it's out of sight;  click to reload now."
-    pill.style.cssText =
-      "position:fixed;bottom:12px;right:12px;z-index:2147483647;padding:4px 10px;border:0;border-radius:999px;" +
-      "background:#1e70bf;color:#fff;font:12px system-ui,sans-serif;cursor:pointer;box-shadow:0 2px 8px rgb(0 0 0 / 25%)"
-    // a click mustn't take the focus:  the field's `focusout` would start the reload's wait first
-    pill.addEventListener("mousedown", (event) => event.preventDefault())
-    pill.addEventListener("click", () => reload())
-    document.body.append(pill)
   }
 
   /**
@@ -972,21 +990,28 @@ export function liveClient(): void {
   }
 
   /**
-   * Scroll back to where the last live reload left this page, on `load`.
+   * Scroll back to where the last live reload left this page, on `load`, then show it (`reveal()`).
    * - unless the page took the position first, with `takeScroll()`:
-   *   the docs runtime restores it once its sections have drawn
+   *   the docs runtime restores it once its sections have drawn, and reveals the page itself
    */
   function restoreScroll() {
     try {
-      const saved = JSON.parse(sessionStorage.getItem(scrollKey) ?? "null") as { path: string; y: number } | null
+      const saved = JSON.parse(sessionStorage.getItem(scrollKey) ?? "null") as KeptPlace | null
       sessionStorage.removeItem(scrollKey)
       if (saved?.path !== location.pathname) return
       savedScroll = saved.y
       addEventListener(
         "load",
         () => {
-          if (savedScroll !== undefined) scrollTo(0, savedScroll)
+          // taken:  the page lands, and says when it has (`reveal()`)
+          if (savedScroll === undefined) return
+          const y = savedScroll
           savedScroll = undefined
+          scrollTo(0, y)
+          // shown once drawn (`holdReveal()`), at the place again:  a page laid out as it draws moves meanwhile
+          config!.reveal?.(() => {
+            if (Math.abs(scrollY - y) >= 1) scrollTo(0, y)
+          })
         },
         { once: true }
       )
@@ -1101,23 +1126,20 @@ export function worktreeHref(href: string, pagePath: string): string {
 
 /**
  * One hot reload for many changes:  `request()` reloads `wait` ms after the LAST request.
- * - `typing()` by then:  the reload waits (`waiting(true)`) until `settle()` (focus left a field),
- *   then `wait` ms more for quiet, and asks again
- * - `waiting(false)` just before it reloads
+ * - `typing()` by then:  the reload waits until `settle()` (focus left a field), then `wait` ms more for quiet,
+ *   and asks again
  * - MUST stay self-contained:  `liveClientScript()` serves it beside `liveClient()`
  */
-export function reloadGate({ wait, typing, reload, waiting }: ReloadGateProps): ReloadGate {
+export function reloadGate({ wait, typing, reload }: ReloadGateProps): ReloadGate {
   let timer: ReturnType<typeof setTimeout> | undefined
   let held = false
   const fire = () => {
     timer = undefined
     if (typing()) {
       held = true
-      waiting?.(true)
       return
     }
     held = false
-    waiting?.(false)
     reload()
   }
   const later = () => {
@@ -1137,13 +1159,11 @@ export function reloadGate({ wait, typing, reload, waiting }: ReloadGateProps): 
  * - `wait`:  ms of quiet before it reloads
  * - `typing()`:  is the reader typing in a field now?
  * - `reload()`:  reload the page
- * - `waiting(on)`:  a reload waits for the reader (`true`), or doesn't any more
  */
 export type ReloadGateProps = {
   wait: number
   typing: () => boolean
   reload: () => void
-  waiting?: (on: boolean) => void
 }
 
 /** What `reloadGate()` returns:  `request()` a reload;  `settle()` when focus leaves a field. */
@@ -1162,6 +1182,157 @@ type LiveWindow = Window & {
 }
 
 /**
+ * A live reload's NEW page, held behind the old one until it has drawn and landed, then cross-faded in
+ * (epic `epic-engine` I164;  Owen, 2026-10-29:  "Page still redraws awkwardly sometimes.  Can you use a page
+ * transition to redraw without visual flash?").
+ * - Measured before, on an epic page:  a reload showed a white frame, then ~150ms of the bare background (the
+ *   elements not drawn yet), then the page at its top, then the page where the reader was.
+ * - Runs INLINE in every served page's `<head>` (`holdRevealScript()`, `WebServer`'s injected tags), before
+ *   anything draws:  the live client itself comes later, deferred.
+ * - Every page opts in to cross-document view transitions (`@view-transition { navigation: auto }`), so the live
+ *   client's `reload()` (a replace navigation to the page itself) runs one;  any other navigation skips it
+ *   (`pageswap`):  links open as they always did
+ * - the new page, after such a reload (`KeptPlace.hold`, for this path):
+ *   - its address's `#id` is put back, before any runtime reads it
+ *   - its view transition's animations wait at their start:  the old frame stays up, the new page draws behind it
+ *   - `SPELL_SERVER.reveal()` lets them run, `FADE_MS`, no slide, once what the page asked to wait for
+ *     (`revealAfter()`) has settled and its `<ui-root>`s are ready:  the docs runtime calls it once it has landed and
+ *     wears its theme, the live client on `load` for any other page (`restoreScroll()`);  at the latest after `HOLD_MS`
+ *   - measured on Spell UI's site:  `load` came before its layout was even mounted, so the site waits for that too
+ *   - less motion asked for (`prefers-reduced-motion`):  no fade, the new page just shows when it's ready
+ * - MUST stay self-contained, as `liveClient()`:  served as text
+ * - NEVER throws:  without view transitions or storage, a reload is a plain reload
+ */
+export function holdReveal(scrollKey: string): void {
+  // how long the new page may stay hidden behind the old one at most, in ms:  a page that never says it's ready
+  const HOLD_MS = 2500
+  // how long the cross-fade takes, in ms:  short, so it reads as a swap, not motion
+  const FADE_MS = 150
+  const config = (window as unknown as LiveWindow).SPELL_SERVER
+  if (!config) return
+  try {
+    const style = document.createElement("style")
+    style.textContent = "@view-transition { navigation: auto; }"
+    ;(document.head ?? document.documentElement).append(style)
+  } catch {
+    return
+  }
+  const kept = (): KeptPlace | null => {
+    try {
+      return JSON.parse(sessionStorage.getItem(scrollKey) ?? "null") as KeptPlace | null
+    } catch {
+      return null
+    }
+  }
+  // only the live client's own reload cross-fades:  a link, a form, back and forward stay as they were
+  addEventListener("pageswap", (event) => {
+    const transition = (event as Event & { viewTransition?: ViewTransition | null }).viewTransition
+    const place = kept()
+    if (transition && !(place?.hold && place.path === location.pathname)) transition.skipTransition()
+  })
+  // what the page said to wait for (`revealAfter()`), whether it's asked to show, whether it has
+  const waits: Promise<unknown>[] = []
+  let isAsked = false
+  let isShown = false
+  let held: ViewTransition | undefined
+  config.revealAfter = (ready) => {
+    waits.push(Promise.resolve(ready).catch(() => undefined))
+  }
+  config.reveal = (settle) => {
+    if (isAsked) return
+    isAsked = true
+    void Promise.all(waits)
+      .then(rootsDrawn)
+      .then(() => {
+        settle?.()
+        show()
+      })
+  }
+  const place = kept()
+  if (!place?.hold || place.path !== location.pathname) return
+  if (place.hash && !location.hash) history.replaceState(history.state, "", place.hash)
+  addEventListener(
+    "pagereveal",
+    (event) => {
+      const transition = (event as Event & { viewTransition?: ViewTransition | null }).viewTransition
+      if (!transition) return
+      held = transition
+      transition.ready.then(
+        () => {
+          for (const animation of fades()) {
+            animation.effect?.updateTiming({ duration: FADE_MS })
+            if (!isShown) animation.pause()
+          }
+        },
+        () => undefined
+      )
+      setTimeout(show, HOLD_MS)
+    },
+    { once: true }
+  )
+
+  /** Let the held transition run:  the cross-fade, or with less motion asked for, straight to the new page. */
+  function show() {
+    if (isShown) return
+    isShown = true
+    if (!held) return
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) return held.skipTransition()
+    for (const animation of fades()) animation.play()
+  }
+
+  /** The view transition's animations:  its old and new snapshots, and their group. */
+  function fades(): Animation[] {
+    return document.getAnimations().filter((animation) => {
+      const effect = animation.effect as KeyframeEffect | null
+      return !!effect?.pseudoElement?.startsWith("::view-transition")
+    })
+  }
+
+  /**
+   * Resolves once every `<ui-root>` on the page is ready (`:state(ready)`:  its elements drawn), two frames later;
+   * polled each frame, since its `ui-ready` may have gone by
+   */
+  function rootsDrawn(): Promise<void> {
+    const isWaiting = (root: Element) => {
+      try {
+        return !root.matches(":state(ready)")
+      } catch {
+        return false
+      }
+    }
+    return new Promise((done) => {
+      const look = () => {
+        if (isShown || !Array.from(document.querySelectorAll("ui-root")).some(isWaiting))
+          requestAnimationFrame(() => requestAnimationFrame(() => done()))
+        else requestAnimationFrame(look)
+      }
+      look()
+    })
+  }
+}
+
+/** `holdReveal()` as inline script text, for every served page's `<head>` (`WebServer`). */
+export function holdRevealScript(): string {
+  // the shim:  as `liveClientScript()`'s
+  return `var __name = (fn) => fn;(${holdReveal.toString()})(${JSON.stringify(SCROLL_KEY)})`
+}
+
+/**
+ * Where a live reload leaves the page, in `sessionStorage` (`SCROLL_KEY`), for the new page to pick up:
+ * - `path`:  the page's path, so another page never takes it
+ * - `y`:  the scroll
+ * - `hash`:  the address's `#id`, which the reload leaves off (`reload()`)
+ * - `hold`:  the new page waits behind the old one until it's ready (`holdReveal()`)
+ */
+type KeptPlace = { path: string; y: number; hash?: string; hold?: boolean }
+
+/**
+ * `sessionStorage` key for the place a live reload keeps (`KeptPlace`).
+ * - NOT util's `PrefStore`:  `liveClient()` is sent to the page as text, so it imports nothing
+ */
+const SCROLL_KEY = "spell-server:scroll"
+
+/**
  * `liveClient` as a classic script, for `/api/server/live.js`:  the helpers it calls first
  * (`forVsCode()`, `liveAction()`, `servedPath()`, `worktreeHref()`, `reloadGate()`).
  * - HACK: `__name` is a no-op shim:  tsx / esbuild's `keepNames` wraps nested functions in `__name(fn, "fn")`,
@@ -1176,7 +1347,7 @@ export function liveClientScript(): string {
     servedPath.toString(),
     worktreeHref.toString(),
     reloadGate.toString(),
-    `(${liveClient.toString()})()`,
+    `(${liveClient.toString()})(${JSON.stringify(SCROLL_KEY)})`,
     ""
   ].join("\n")
 }

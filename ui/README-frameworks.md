@@ -343,12 +343,25 @@ button.addEventListener("ui-toggle", (event) => setActive(event.detail.active))
   - Narrow it yourself, or listen on the tag.
 - Each tag's own events, by name:  `UIInputEventMap` ..., exported by `spell/ui/jsx`.
 
-## Using it today:  the kit's build and an import map
+## Loading it:  npm, or a build and an import map
 
-Spell UI isn't on npm yet, so a framework app uses the build in a checkout of the kit:
-`yarn build` for the library, `yarn vendor` for ONE copy of Solid, as
-[the front page's thirty seconds](README.md#thirty-seconds-two-ways) run them.
-A page then maps the names onto those folders, exactly as the smoke pages do:
+A framework app with a bundler installs it, with Solid 2 as a peer, and imports what it uses:
+
+```sh
+npm install spell-ui@next solid-js@2.0.0-rc.17 @solidjs/web@2.0.0-rc.17
+```
+
+```js
+import "spell-ui" // every family;  or one, "spell-ui/ui-dropdown"
+```
+
+- `@next` until Spell's first release (planned for December 1, 2026);  from then on, plain `spell-ui`.
+- The same app can map the names from a CDN instead, with no install:
+  [the front page's thirty seconds](README.md#thirty-seconds-three-ways) has the map.
+
+The smoke pages use the build in a checkout of the kit instead:
+`yarn build` for the library, `yarn vendor` for ONE copy of Solid.
+A page maps the names onto those folders:
 
 ```html
 <script type="importmap">
@@ -357,21 +370,18 @@ A page then maps the names onto those folders, exactly as the smoke pages do:
       "solid-js": "/vendor/solid-js.js",
       "@solidjs/web": "/vendor/@solidjs/web.js",
       "spell-ui": "/dist/index.js",
-      "spell/ui/ui-dropdown": "/dist/ui-dropdown.js"
+      "spell-ui/ui-dropdown": "/dist/ui-dropdown.js"
     }
   }
 </script>
 ```
 
 - `spell-ui` is every family, `spell-ui/ui-<family>` one.
-  - `spell/ui/core`, `spell/ui/forms` and `spell/ui/api` are the shared entries.
+  - `spell-ui/core`, `spell-ui/forms` and `spell-ui/api` are the shared entries.
 - `yarn vendor` writes the two Solid lines to `vendor/importmap.json`,
   after compiling the Solid smoke app when it's out of date.
 - `yarn serve` serves `dist/`, `vendor/` and `src/` with the whole map injected into every page,
   and prints each smoke page's address, on port 5199;  Ctrl-C stops it.
-
-🌱 Once Spell UI is on npm, this whole section becomes one install and `import "spell/ui"` in any framework app:
-where that stands is on [the front page](README.md#-coming).
 
 ## What the smoke pages prove, and what they don't
 

@@ -126,7 +126,8 @@
               </li>
               <li>
                 At the title's end, the STATE FILTER: a grey filter chip, then one round chip per state its items are in
-                (red needs Owen, yellow open, green decided). Click a chip to hide that state's items.
+                (red needs Owen, yellow open, green decided). Click a chip to hide that state's items; ⌥-click (Alt-click)
+                one to show only its state.
               </li>
             </ul>
             <ui-section
@@ -143,13 +144,15 @@
               </p>
               <ul>
                 <li>
-                  They sit after the title, before its tools (the Phases toggles, an item section's state filter, an
-                  Overview sub-section's review buttons), expand-all, collapse-all and the fold chevron.
+                  They sit after the title, before its tools (the Phases section's state filter and gear, an item section's state filter, an
+                  Overview sub-section's review buttons); the fold chevron is at the row's start.
                 </li>
                 <li>
-                  Expand-all, the double chevron pointing down, shows folded or open: it opens the block and everything
-                  in it (sections, phases, items, asides and cards), parts loading as they open. Collapse-all shows
-                  beside it while it's open.
+                  ⌥-click (Alt-click) on its chevron or title, or ⌥+Enter on the focused chevron, opens it and
+                  everything in it (sections, phases, items, asides and cards), parts loading as they open; on an open
+                  one it folds everything inside, then the block itself. The chevron's tooltip says so. Its title row
+                  has no expand-all or collapse-all button of its own (epic <code>epic-engine</code> I161): the page's
+                  toolbar keeps one.
                 </li>
                 <li>A click on one never folds or unfolds it.</li>
                 <li>The docs runtime puts the block's bullhorn there too, so it never sits over a button.</li>
@@ -622,8 +625,17 @@
                       <td><code>tools</code></td>
                       <td>
                         At the title's end: the page's own buttons (the <code>actions</code> slot), then the Phases
-                        section's Files / Verify toggles; an item section's state filter; an Overview sub-section's
+                        section's state filter and gear; an item section's state filter; an Overview sub-section's
                         review buttons.
+                      </td>
+                    </tr>
+                    <tr>
+                      <td><code>gear</code></td>
+                      <td>
+                        The Phases section's gear, last in its title row (epic <code>epic-engine</code> I166): a
+                        <code>&lt;ui-dropdown&gt;</code> menu, "Show each phase's files" and "Show each phase's
+                        checks", ticked while on. A pick shows or hides that field in every phase, forgetting each
+                        phase's own choice of it.
                       </td>
                     </tr>
                     <tr>
@@ -685,7 +697,7 @@
                     </tr>
                     <tr>
                       <td><code>:state(tools)</code></td>
-                      <td>Its title has tools: the Phases toggles, or a state filter (items in it).</td>
+                      <td>Its title has tools: the Phases gear, or a state filter (items in it).</td>
                     </tr>
                   </tbody>
                 </table>
@@ -772,8 +784,18 @@
                 red. The Phases section shows the same blue badge for its phases marked or being worked on.
               </li>
               <li>
-                <b>Phases</b>: its title holds the Files and Verify toggles (show or hide those fields in every phase,
-                remembered per page). No box above the phases since 2026-10-11: each phase shows its own changes, in a
+                <b>Phase chips</b> (epic <code>epic-engine</code> I157, recoloured in I170; Owen, 2026-10-29: "The
+                order, one chip per phase: red, orange, blue (working), dotted blue, green, grey"): the Phases section's
+                chips count each phase once, by the first that holds. Red: its plan waits for your Accept, or a choice
+                in it is open. Orange: changed since you looked. Blue: under way, or Claude at work on it (in the blue
+                badge). A dotted blue outline: scheduled, still to do. Green: done in the last 3 days. Grey: done before.
+                Each phase's status circle wears the same colour, and the toolbar's Phases button counts the red ones and
+                the blue ones.
+              </li>
+              <li>
+                <b>Phases</b>: its title ends in a gear (epic <code>epic-engine</code> I166), whose menu shows or
+                hides each phase's files and checks (its Files and Verify), remembered per page; each phase's own gear
+                chooses for that phase alone. The state chips stay before it, in the row. No box above the phases since 2026-10-11: each phase shows its own changes, in a
                 <b>Plan changes</b> box atop its body (<a
                   href="epic-phase.html"
                   target="src-packages-epics-docs-epic-phase-html"

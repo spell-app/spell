@@ -274,7 +274,8 @@ const CARD_HEADINGS: Record<string, (element: Element) => string | undefined> = 
   "epic-choices": () => "Choices",
   "epic-option": (option) => {
     const data = Markup.read<"epic-option">(option)
-    const chosen = option.parentElement?.getAttribute("chosen") === data.letter
+    // a pick-any set's `chosen` names several (`A C`, epic `epic-engine` P50)
+    const chosen = (option.parentElement?.getAttribute("chosen") ?? "").split(" ").includes(data.letter)
     const marks = [data.recommended ? " (recommended)" : "", chosen ? ", chosen" : ""].join("")
     return `${data.letter} · ${PlanItem.titleOf(option)}${marks}`
   },

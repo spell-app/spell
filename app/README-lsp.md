@@ -458,7 +458,7 @@ and `spell lsp`, a command VS Code would start the server by instead of a `tsx` 
 ## Working on it
 
 ```sh
-cd ~/www/spell/spell-app
+cd ~/www/spell/app
 yarn lsp:start                                           # the server, over stdio
 yarn lsp:scopes [--compile] <address...>                 # write projects' scope packs
 yarn lsp:scopes --compile @spell/examples/Solitaire

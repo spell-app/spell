@@ -1,10 +1,10 @@
 # AGENTS.md
 
 This file provides guidance to AI coding agents (Claude Code, Codex, and others)
-when working with code in this folder, `src/cli/` of the `spell-parser` package (`spell/parser/cli`).
+when working with code in this folder, `src/cli/` of the kit's parser folder (`spell/parser/cli`).
 
-**READ the repo root's [AGENTS.md](../../AGENTS.md) and [WWOD](../../agents/wwod/WWOD.md) FIRST:**
-the repo's layout, and the house style every package shares.
+**READ the parser folder's [AGENTS.md](../../AGENTS.md) and [WWOD](../../agents/wwod/WWOD.md) FIRST:**
+the folder's layout, and the house style every folder shares.
 Only what's local is below;  a section named like a WWOD rule extends it.
 
 ## Overview
@@ -20,25 +20,26 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - `lint` was `spell check`
     - `speedtest` was `spell speed`
     - `spell explore` is gone
-  - [spell-parser's README](../../README.md#the-language-commands), "Moving each command's work down into spell-parser",
+  - [the parser folder's README](../../README.md#the-language-commands), "Moving each command's work down into spell-parser",
     has what each needs to move down here.
 - How the kit finds them:  `package.json`'s `"spell": { "commands": "./src/cli/commands.ts" }`.
   - [commands.ts](commands.ts) adds each command to the `spell` program it's handed (commander):
     its name, arguments, flags and help.
-  - It MUST load fast:  `spell help` loads every repo's list.  It imports nothing of spell.
+  - It MUST load fast:  `spell help` loads every folder's list.  It imports nothing of spell.
   - The kit's `spell commands` check reads its TEXT:  keep each name a literal at its `spell.command("...")` call.
 - Their WORK is NOT here yet:
-  it comes through the `"language"` hook, which [spell-app's hooks](../../../app/src/cli/hooks.ts) provide.
+  it comes through the `"language"` hook, which [the app folder's hooks](../../../app/src/cli/hooks.ts) provide.
   - Why:  every one finds projects the app's way:
     addresses like `@spell/examples/solitaire`, groups, the editor's language service.
-  - Without spell-app, each says "clone spell-app" and exits 2 (`CLI.needHook()`).
+  - Without the app folder, each says the commands come with `app/`, to run `spell` from a checkout of the whole
+    repo, and exits 2 (`CLI.needHook()`).
 - `spell translate check|fix` (epic `spanish` P7) are the exception:
-  their work IS here, in [packsCommand.ts](packsCommand.ts), as they need no project, only spell-parser's own rule files.
+  their work IS here, in [packsCommand.ts](packsCommand.ts), as they need no project, only the parser folder's own rule files.
   - `commands.ts` imports it dynamically, when one runs:  it loads all of spell.
   - The checking and the stubs are spell's [packs.ts](../spell/languages/packs.ts), on text.
   - This file reads, writes, asks `claude -p` (`--ai`) and prints.
 - `spell translate` (epic `spanish` P24-P29) is half and half:
-  - spell-app's `translateCommand` finds and parses the project (the hook), as every project command does,
+  - the app's `translateCommand` finds and parses the project (the hook), as every project command does,
     and hands over what only the app has:  its declarations, its imports, Spell UI's names, a checker that lints
     and tests the translation
   - then [translateProject.ts](translateProject.ts), here, runs the three passes (names, lines, fix-ups),
@@ -74,25 +75,25 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - `translationOf()`:  the same translation, returning what it did in numbers (`TranslationResult`), printing
     nothing with `print: false`;  `translateProject()` is it, returning only the exit code
 - `spell translate speedtest` (epic `spanish` P29) times it the same way, half and half:
-  - spell-app's `translateTimeCommand` finds the projects (default Solitaire and todos-form-based) and the
+  - the app's `translateTimeCommand` finds the projects (default Solitaire and todos-form-based) and the
     examples' twins a person translated (Solitaire's Solitario), and translates each run's copy, a session of its own
   - [translateTimes.ts](translateTimes.ts), here, copies each project to a scratch folder (without its own lists),
     runs it in each mode (`cold`, `glossary`, `update`) and tier, prints a table of min, median and max, writes
     `--json`, and deletes every scratch folder, a failed run's too
-- [index.ts](index.ts) (`spell/parser/cli`, here and from every other repo):  TYPES only, today.
+- [index.ts](index.ts) (`spell/parser/cli`, here and from every other folder):  TYPES only, today.
   - [cli.types.ts](cli.types.ts):
     - `LanguageCommands`, the hook's shape
     - each command's flags:  `CompileOptions`, `LintOptions` ...
-  - spell-app implements the hook against them:  every arrow points down.
-- NEVER imports spell-app:  it's above spell-parser.
+  - The app folder implements the hook against them:  every arrow points down.
+- NEVER imports the app folder:  it's above the parser folder.
 
 ## Tests
 
 As WWOD §20, plus:
 
-- In the repo's [tests/cli/](../../tests/cli/):  the command list's names and help.
-- The commands themselves run end to end in [spell-app's tests](../../../app/tests/cli/cli.test.ts):
-  their work is spell-app's.
+- In the parser folder's [tests/cli/](../../tests/cli/):  the command list's names and help.
+- The commands themselves run end to end in [the app folder's tests](../../../app/tests/cli/cli.test.ts):
+  their work is the app's.
 - `spell translate check|fix`' work:  [packs.test.ts](../../tests/spell/languages/packs.test.ts), beside the `packs.ts` it drives.
 - `spell translate`'s:  each pass's own tests, [tests/spell/translate/](../../tests/spell/translate/);
   its three passes together, with a fake `claude` and a fake checker, [translateProject.test.ts](../../tests/cli/translateProject.test.ts);
@@ -103,4 +104,4 @@ As WWOD §20, plus:
   in the same file;
   the timing, with a fake translation, [translateTimes.test.ts](../../tests/cli/translateTimes.test.ts);
   the two runners, the API's with a fake `fetch`, [claudeRunners.test.ts](../../tests/cli/claudeRunners.test.ts);
-  the command end to end, spell-app's [cli.test.ts](../../../app/tests/cli/cli.test.ts).
+  the command end to end, the app folder's [cli.test.ts](../../../app/tests/cli/cli.test.ts).

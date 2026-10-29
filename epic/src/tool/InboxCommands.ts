@@ -11,6 +11,7 @@ import { PlanDocError, type ItemDescription, type KeptNote, type MarkResult, typ
 
 import { CommentList, CommentsError, type IdentifiedComment } from "./CommentList"
 import { GuideInbox, type GuideSend } from "./GuideInbox"
+import { OptionSets } from "./OptionSets"
 import type { PlanDoc } from "./PlanDoc"
 import type { PlanReader } from "./PlanReader"
 import type { Flags, PlanDocCommands } from "./PlanDocCommands"
@@ -260,6 +261,9 @@ export class InboxCommands {
     function extra(mark: PrintedMark) {
       const parts: string[] = []
       if (mark.pick) parts.push(`picks ${mark.pick}${mark.choices ? ` (card set ${mark.choices + 1})` : ""}`)
+      // an option set's other changes (epic `epic-engine` P50):  added, edited, removed, the flip
+      const change = OptionSets.markWords(mark)
+      if (change) parts.push(change)
       if (mark.when) parts.push(mark.when)
       if (mark.result) parts.push(TEST_WORDS[mark.result])
       if (mark.note) parts.push(mark.action === "test" ? `comment "${mark.note}"` : `"${mark.note}"`)
@@ -359,6 +363,8 @@ export class InboxCommands {
    * Print the work `wait` took (`takeWork()`'s `{ now, sent, canceled }`), each mark with its item (`describeItem()`):
    * id, kind, status, title, the mark, the note, a pick's option card.
    * - a send's comments too (Send hands them over, Owen 2026-10-10):  where each is, its words, his latest reply
+   * - an approve carrying his comments in its text (epic `epic-engine` I163):  "accepted, with comments to fold in:
+   *   C4, C5", each comment under it, and how to fold them in (`--plan ... --accepted`) with no second Accept
    * - plain lines for Claude to read, then what to run next
    * - `guides`:  the sends taken from the epic's guides (P13), each page's comments under it, with the commands that
    *   answer them one at a time (`epic comments working` / `answer`)
@@ -414,8 +420,14 @@ export class InboxCommands {
             if (mark.note) lines.push(`        ${mark.action === "test" ? "comment" : "note"}:  "${mark.note}"`)
             if (mark.shot) lines.push(`        screenshot:  ${mark.shot}`)
           }
+          // an Accept that kept his comments in its text (epic `epic-engine` I163):  fold them in, no second Accept
+          if (mark.action === "approve" && mark.inlineComments?.length) {
+            const ids = mark.inlineComments.map((comment) => comment.id)
+            lines.push(`        accepted, with comments to fold in:  ${upper(ids)}`)
+            for (const comment of mark.inlineComments) lines.push(...commentLines(comment, "          "))
+          }
           // a revisit whose content is Owen's comments in its text (epic `epic-engine` I140):  they ARE his note
-          if (mark.inlineComments?.length) {
+          else if (mark.inlineComments?.length) {
             lines.push(`        his comments in its text, the revisit's content (${mark.inlineComments.length}):`)
             for (const comment of mark.inlineComments) lines.push(...commentLines(comment, "          "))
           }
@@ -426,10 +438,18 @@ export class InboxCommands {
       if (sent.comments.length) lines.push(`  comments, to answer on their threads (${sent.comments.length}):`)
       for (const comment of sent.comments) lines.push(...commentLines(comment, "    "))
       const talk = sent.marks.filter((mark) => mark.action === "revisit")
+      const fold = sent.marks.filter((mark) => mark.action === "approve" && mark.inlineComments?.length)
       if (sent.marks.length || sent.urgency.length)
         lines.push(
           `next:  \`epic inbox apply ${name}\` (approve, pick, todo, a todo's next phase or drop, skip, new, ` +
             `test results, urgency)`
+        )
+      if (fold.length)
+        lines.push(
+          `then fold each accepted part's comments in, no second Accept:  a phase's plan with ` +
+            `\`epic update ${name}#P<n> --plan "..." --accepted\`;  answer each comment ` +
+            `(\`epic inbox done ${name}#<C id> --file <answer.html>\`);  only one against what he decided, or ` +
+            `changing the scope a lot, becomes a Q item instead`
         )
       if (talk.length)
         lines.push(

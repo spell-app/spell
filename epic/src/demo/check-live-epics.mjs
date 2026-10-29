@@ -30,7 +30,7 @@
  *      skipped on a page without one
  * - then the CODE changes (`spell-ui.js`, announced the same way):  see `codeReload()`
  *   - first a section and two of its items opened by hand, the page scrolled into them
- *   - no reload while the note box has the focus, an "Updated:  reload" pill instead;  one once the focus leaves it
+ *   - no reload while the reader types in the note box;  one once the focus leaves it (epic `epic-engine` I172)
  *   - after it:  the scroll (2px), every block and item open before (the one a link opened too), the note's text
  *     (from the inbox's drafts, which the faked routes keep)
  * - `--bundle`:  serve this file in place of the checkout's `spell-ui.js` (a runtime not yet built into it)
@@ -170,7 +170,7 @@ try {
    *    reader's place (epic `epic-engine` I23).
    * - first more of the reader's state:  a section and two of its items opened by hand, the page scrolled into the
    *   second item, so the address (which follows the section being read) names the section, far above
-   * - while the note box has the focus:  no reload yet, the "Updated:  reload" pill shows
+   * - while the reader types in the note box:  no reload yet, and no pill (epic `epic-engine` I172)
    * - the focus leaves the box:  the page reloads, then must keep the scroll, every block open before (the item a
    *   link opened too), and the note's text
    */
@@ -192,7 +192,7 @@ try {
       pill: !!document.querySelector("body > button[data-spell-added]")
     }))
     if (!waited.marker) problems.push(`${label}:  reloaded while the note box had the focus`)
-    else if (!waited.pill) problems.push(`${label}:  no "Updated:  reload" pill while the note box had the focus`)
+    else if (waited.pill) problems.push(`${label}:  a pill showed while the note box had the focus`)
     const reloaded = page.waitForEvent("load", { timeout: EDIT_TIMEOUT_MS })
     await page.evaluate(blurNote, itemId)
     try {
@@ -209,7 +209,8 @@ try {
     summary.codeReload = { opened, before, after, note }
     const lost = []
     if (after.marker) lost.push("the page didn't reload")
-    if (Math.abs(after.y - before.y) > 2) lost.push(`scroll moved:  ${before.y} -> ${after.y} (address #${before.hash})`)
+    if (Math.abs(after.y - before.y) > 2)
+      lost.push(`scroll moved:  ${before.y} -> ${after.y} (address #${before.hash})`)
     const folded = before.open.filter((id) => !after.open.includes(id))
     if (folded.length) lost.push(`folded again:  ${folded.join(", ")}`)
     if (!note?.includes(NOTE)) lost.push(`the note's text lost:  ${JSON.stringify(note)}`)
@@ -343,7 +344,10 @@ function blurNote(id) {
 /** In the page:  what item `id`'s note box holds, `null` without one. */
 function noteOf(id) {
   const root = document.getElementById(id)?.shadowRoot
-  const typed = root?.querySelector("[part~='note-box']")?.shadowRoot?.querySelector("ui-textarea")?.shadowRoot?.querySelector("textarea")?.value
+  const typed = root
+    ?.querySelector("[part~='note-box']")
+    ?.shadowRoot?.querySelector("ui-textarea")
+    ?.shadowRoot?.querySelector("textarea")?.value
   // saved as the item's mark (epic `epic-engine` P20):  its marked note, over the box
   const said = root?.querySelector("[part~='said']")?.shadowRoot?.textContent ?? ""
   return typed || said.replace(/\s+/g, " ").trim() || (typed ?? null)
@@ -413,7 +417,8 @@ async function openByHand(page, noteId) {
   const section = await page.evaluate((noteId) => {
     const sections = [...document.querySelectorAll("epic-section")]
     const found = sections.find(
-      (section) => !section.open && section.querySelectorAll("epic-item").length >= 2 && !section.querySelector(`#${noteId}`)
+      (section) =>
+        !section.open && section.querySelectorAll("epic-item").length >= 2 && !section.querySelector(`#${noteId}`)
     )
     return found?.id
   }, noteId)
@@ -463,4 +468,3 @@ function valueOf(flag) {
   const at = args.indexOf(flag)
   return at < 0 ? undefined : args[at + 1]
 }
-

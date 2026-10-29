@@ -25,6 +25,14 @@ describe("StateFilter.nextShown()", () => {
     expect(StateFilter.nextShown(PRESENT, [], "open")).toEqual(["open"])
   })
 
+  // epic `epic-engine` I166:  an ⌥-click
+  test('`how: "only"`:  only the clicked state, whatever showed', () => {
+    expect(StateFilter.nextShown(PRESENT, ["attention"], "open", "only")).toEqual(["open"])
+    expect(StateFilter.nextShown(PRESENT, ["attention", "open"], "open", "only")).toEqual(["open"])
+    expect(StateFilter.nextShown(PRESENT, ["open"], "open", "only")).toEqual(["open"])
+    expect(StateFilter.nextShown(PRESENT, PRESENT, "recent", "only")).toEqual(["recent"])
+  })
+
   test("states no longer there are left out", () => {
     expect(StateFilter.nextShown(["open", "recent"], ["old", "open"], "recent")).toEqual(["open", "recent"])
   })

@@ -348,7 +348,7 @@ Codex reads the same `SKILL.md` files Claude Code does:  type `$epic review seo`
 <details>
 <summary>More in the docs site</summary>
 
-In the content folder, so only where `spell.epics` sits beside the repos, served by `spell server start`:
+In the content folder, so only where a checkout has `spell.epics`, served by `spell server start`:
 
 - "Background agents:  /bg":  `/guides/background-agents.html`
 - "Airplane Mode":  `/guides/airplane.html`

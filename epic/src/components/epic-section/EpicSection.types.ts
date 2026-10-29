@@ -63,13 +63,6 @@ export const FOLD_PARTS = [
     description: "The `<ui-section>` drawing the title bar and fold:  its own parts through `::part()` from inside."
   },
   { name: "body", description: "Around its children:  sets `--epic-stack` for them." },
-  {
-    name: "toggle-all",
-    description:
-      "Always, before the fold chevron, ONE double chevron (Owen, 2026-10-25):  down, it opens it and everything inside " +
-      "it (sections, phases, items, cards and panels, parts loading as they open);  up once it has, it folds " +
-      "everything inside again."
-  },
   { name: "note", description: "The `Loads from parts/x.html ...` line, when its part can't load." }
 ] as const
 
@@ -87,17 +80,7 @@ export const FOLD_TEXTS = [
     text: "Loads from {source} when opened (needs the page server).",
     description: "Its part can't load:  the page was opened from disk."
   },
-  { key: "partError", text: "Couldn't load {source}.", description: "Its part couldn't be loaded." },
-  {
-    key: "expandAll",
-    text: "Open everything in {name}",
-    description: "The expand-all button's name and tooltip;  `name` its title (`3. Questions`)."
-  },
-  {
-    key: "collapseAll",
-    text: "Fold everything in {name}",
-    description: "The collapse-all button's name and tooltip;  `name` its title (`3. Questions`)."
-  }
+  { key: "partError", text: "Couldn't load {source}.", description: "Its part couldn't be loaded." }
 ] as const
 
 ////////////////
@@ -116,6 +99,8 @@ export type SectionStack = {
   readonly stickTop: number
   /** where titles inside it stick:  below its own, px from the viewport's top */
   readonly innerStackTop: number
+  /** its fold button's tooltip's last line:  what ⌥-click does (`EpicFold.onTipShown()`) */
+  toggleTipMore: string | undefined
 }
 
 /** `detail` of a folding element's `ui-opening` / `ui-closing`. */
@@ -180,6 +165,7 @@ export type FoldAttributes = {
  */
 export const SECTION_LOOKS = {
   epics: { icon: "map", title: "epicsTitle" },
+  choices: { icon: "square check", title: "choicesTitle" },
   phases: { icon: "layer group", title: "phasesTitle" },
   questions: { icon: "file circle question", title: "questionsTitle" },
   judgements: { icon: "gavel", title: "judgementsTitle" },
@@ -194,7 +180,7 @@ export const SECTION_LOOKS = {
  * (`EpicSection.staysFolded`):  the Log.
  * - Owen, 2026-10-29 (epic `epic-engine` I155):  "epic log:  Should start out collapsed always, doesn't auto expand
  *   with 'expand all'"
- * - a link into it, its own title and its own expand-all still open it
+ * - a link into it, its own title and ⌥-click on its own chevron still open it
  * - SEE:  the docs runtime's `STAYS_FOLDED` (`spell-doc-helpers.js`), the same kinds as a selector:
  *   it restores the folds before the components are defined
  */
@@ -215,21 +201,33 @@ export const NUMBERED_BLOCKS = `:scope > epic-overview, :scope > epic-section:no
 /** The kinds that hold items:  an empty one says "none yet". */
 export const ITEM_KINDS = ["questions", "judgements", "todos", "issues", "tests"] as const
 
-/** The Phases section's toggles:  which fields each shows, its icon, its texts, the custom property it sets. */
-export const PHASE_TOGGLES = [
-  { field: "files", icon: "folder", show: "showFiles", hide: "hideFiles", property: "--epic-files-display" },
-  { field: "verify", icon: "flask", show: "showVerify", hide: "hideVerify", property: "--epic-verify-display" }
+/**
+ * The fields a phase shows or hides by its gear menu, and the Phases section's for every phase (epic `epic-engine`
+ * I166):  each its field, its menu texts (every phase's, one phase's), the custom property it sets.
+ * - a list:  a new entry is a new line of both menus
+ */
+export const PHASE_FIELDS = [
+  { field: "files", every: "showFiles", one: "showPhaseFiles", property: "--epic-files-display" },
+  { field: "verify", every: "showVerify", one: "showPhaseVerify", property: "--epic-verify-display" }
 ] as const
 
-/** One of `PHASE_TOGGLES`. */
-export type PhaseToggle = (typeof PHASE_TOGGLES)[number]
+/** One of `PHASE_FIELDS`. */
+export type PhaseField = (typeof PHASE_FIELDS)[number]
 
-/** `localStorage` key prefix of the Phases toggles, per page path. */
-export const PHASE_TOGGLES_KEY = "epic-phase-fields:"
+/** One of `PHASE_FIELDS`' field names:  `files`, `verify`. */
+export type PhaseFieldName = PhaseField["field"]
 
-/** Class of the toggles' group, the toggles, an empty section's line, the body wrapper. */
+/**
+ * `localStorage` key prefix of the Phases section's choice for every phase, per page path:  `{ files: true }`.
+ * - the Files / Verify toggles' before I166, so a choice made with them holds
+ */
+export const PHASE_FIELDS_KEY = "epic-phase-fields:"
+
+/** `localStorage` key prefix of each phase's own choices, per page path:  `{ "p-x": { verify: false } }` (I166). */
+export const PHASE_OWN_FIELDS_KEY = "epic-phase-own-fields:"
+
+/** Class of the title's tools, an empty section's line, the body wrapper. */
 export const TOOLS = "tools"
-export const TOGGLE = "toggle"
 export const EMPTY = "empty"
 export const BODY = "body"
 export const NOTE = "note"
@@ -251,9 +249,21 @@ export const COUNTED = ":scope > epic-item, :scope > epic-phase"
 /**
  * The attributes of a counted child that change its count or its state:  a change re-counts.
  * - an item's drawn state reads them all (`DrawnState.fieldsOf()`, `STATE_ATTRIBUTES`)
- * - a phase's chip state reads `status`, `plan` and `changes` (`PhaseState.of()`)
+ * - a phase's chip state reads `status`, `plan`, `to-see`, `changes`, `choices-open` and `done-at` (`PhaseState.of()`)
  */
-export const COUNT_ATTRIBUTES = ["status", "state", "changed", "reviewed", "queued", "working", "plan", "changes"]
+export const COUNT_ATTRIBUTES = [
+  "status",
+  "state",
+  "changed",
+  "reviewed",
+  "queued",
+  "working",
+  "plan",
+  "to-see",
+  "changes",
+  "choices-open",
+  "done-at"
+]
 
 /*
  * Its runs (the item lines and phase title rows drawn as rounded cards) are the page sheet's since epic `epic-engine`
@@ -277,22 +287,24 @@ export const FILTER_STATES = [
 ] as const
 
 /**
- * Where a PHASE stands, for the Phases section's chips (epic `epic-engine` I157), in the filter's order:
- * its state, its chip's colour (the epic page's, `plan-doc.md` "Colours"), its texts' keys.
- * - Owen, 2026-10-29:  "In phases header, would be cool to have badges for 'undone|updated|complete' -- e.g. 49
- *   phases in this plan are a lot to scroll past"
- * - ONE state per phase (`PhaseState.of()`):  news wins, so an updated phase still to do counts as `updated` only
- * - `undone` yellow, as an open todo's chip ("to do");  `updated` orange, a changed phase's pen;  `complete`
- *   green, a done phase's icon
+ * Where a PHASE stands, for the Phases section's chips (epic `epic-engine` I157, recoloured in I170), in Owen's order of
+ * precedence:  its state, its chip's colour and fill (the epic page's, `plan-doc.md` "Colours"), its texts' keys.
+ * - Owen, 2026-10-29:  "this doesn't match our other colors.  finished long ago - grey;  finished recently - green;
+ *   need urgent input - red;  you are updating - orange;  scheduled not running - blue dotted outline;  working - blue"
+ * - ONE state per phase, the first that holds (`PhaseState.of()`):  a phase both changed and worked on is orange
+ * - the item states' names where the meaning is the item's (`attention` red, `progress` blue, `recent` green, `old`
+ *   grey), so the chips draw them alike, and `progress` counts in the blue badge as an item's does;  two of a phase's
+ *   own:  `updated` (orange, its plan changed) and `scheduled` (a DOTTED blue outline:  queued, not running)
+ * - `<epic-state-filter phases>` draws these, not the items'
  */
 export const PHASE_FILTER_STATES = [
-  { state: "undone", color: "yellow", words: "phaseUndone" },
+  { state: "attention", color: "red", words: "phaseAttention" },
   { state: "updated", color: "orange", words: "phaseUpdated" },
-  { state: "complete", color: "green", words: "phaseComplete" }
+  { state: "progress", color: "blue", words: "phaseProgress" },
+  { state: "scheduled", color: "blue", fill: "dotted", words: "phaseScheduled" },
+  { state: "recent", color: "green", words: "phaseRecent" },
+  { state: "old", color: "grey", words: "phaseOld" }
 ] as const
-
-/** Every state a chip can stand for:  an item's (`FILTER_STATES`), then a phase's (`PHASE_FILTER_STATES`). */
-export const CHIP_STATES = [...FILTER_STATES, ...PHASE_FILTER_STATES] as const
 
 /**
  * The state filter's texts:  `<epic-state-filter>`'s vocabulary, the one element that draws its chips (for
@@ -302,8 +314,15 @@ export const FILTER_TEXTS = [
   { key: "filterLabel", text: "Show items by state", description: "The state filter's group, for a screen reader." },
   {
     key: "chipWords",
-    text: "{count} {words}:  {does}",
-    description: "A state chip's name and tooltip:  how many, its state, what a click does (`showAll`, `chipOnly` ...)."
+    text: "{count} {words}:  {does}\n{only}",
+    description:
+      "A state chip's name and tooltip:  how many, its state, what a click does (`showAll`, `chipOnly` ...), " +
+      "then what an ⌥-click does (`chipAltOnly`)."
+  },
+  {
+    key: "chipAltOnly",
+    text: "⌥-click:  show only these",
+    description: "A state chip's ⌥-click (epic `epic-engine` I166):  only its state shows, whatever showed."
   },
   {
     key: "markedWords",
@@ -335,18 +354,39 @@ export const FILTER_TEXTS = [
   },
   { key: "stateOld", text: "no longer relevant", description: "A state chip's words:  `old` (grey)." },
   {
-    key: "phaseUndone",
-    text: "still to do",
-    description: "A Phases chip's words:  `undone` (yellow:  to do or under way, nothing new for Owen)."
+    key: "markedPhaseWords",
+    text: "{count} with Claude:  under way, being worked on, or marked in this pass",
+    description:
+      "The Phases section's blue badge:  its phases under way or being worked on (`progress`), and the ones marked " +
+      "in this pass (epic `epic-engine` I170)."
+  },
+  {
+    key: "phaseAttention",
+    text: "need you:  a plan to accept, or a choice open",
+    description:
+      "A Phases chip's words:  `attention` (red:  its build plan waits for Owen's Accept, or a choice in it is open)."
   },
   {
     key: "phaseUpdated",
-    text: "with news for you (a plan to accept, or changed)",
-    description:
-      "A Phases chip's words:  `updated` (orange:  not done, and its build plan waits for Owen's Accept, or its " +
-      "plan changed, the orange pen)."
+    text: "changed since you looked",
+    description: "A Phases chip's words:  `updated` (orange:  new plan changes, not seen and not 3 days old yet)."
   },
-  { key: "phaseComplete", text: "done", description: "A Phases chip's words:  `complete` (green)." }
+  {
+    key: "phaseProgress",
+    text: "under way, or being worked on",
+    description: "A Phases chip's words:  `progress` (blue:  active, or Claude at work on it)."
+  },
+  {
+    key: "phaseScheduled",
+    text: "scheduled, not running yet",
+    description: "A Phases chip's words:  `scheduled` (dotted blue:  still to do, nothing waiting on Owen)."
+  },
+  { key: "phaseRecent", text: "done in the last 3 days", description: "A Phases chip's words:  `recent` (green)." },
+  {
+    key: "phaseOld",
+    text: "done a while ago",
+    description: "A Phases chip's words:  `old` (grey:  done over 3 days ago)."
+  }
 ] as const
 
 /** Each chip click (`StateFilter.clickDoes()`) => its words' text key. */
@@ -358,10 +398,13 @@ export type FilterState = (typeof FILTER_STATES)[number]
 /** One of `FILTER_STATES`' state names. */
 export type ItemStateName = FilterState["state"]
 
-/** One of `CHIP_STATES`:  an item's state, or a phase's. */
-export type ChipState = (typeof CHIP_STATES)[number]
+/**
+ * A state a chip can stand for:  an item's (`FILTER_STATES`), or a phase's (`PHASE_FILTER_STATES`).
+ * - some names in both (`attention`, `progress` ...):  a filter draws ONE list, the items' or the phases'
+ */
+export type ChipState = FilterState | (typeof PHASE_FILTER_STATES)[number]
 
-/** One of `CHIP_STATES`' state names. */
+/** One of `ChipState`'s state names. */
 export type ChipStateName = ChipState["state"]
 
 /** One of `PHASE_FILTER_STATES`' state names. */
@@ -372,51 +415,6 @@ export type PhaseStateName = (typeof PHASE_FILTER_STATES)[number]["state"]
  * `doc review` phase").
  */
 export const DOC_REVIEW = /^doc review$/i
-
-/**
- * Where a phase stands, as its Phases chip counts it (epic `epic-engine` I157):  ONE state, the first that holds.
- * - `complete`:  done
- * - `updated`:  news for Owen, as the phase itself draws it:
- *   - its build plan waits for his Accept (`plan="waiting"`, but the doc pass:  `EpicPhase.isPlanWaiting`)
- *   - or its plan changed (`changes`, the orange pen:  `EpicPhase.changedCount`)
- * - `undone`:  any other, to do or under way
- * - NEVER reads the page:  the caller hands it the fields (`fieldsOf()`)
- */
-export class PhaseState {
-  /** `fields`' state. */
-  static of({ status, plan, changes, title }: PhaseFields): PhaseStateName {
-    if (status === "done") return "complete"
-    const isPlanWaiting = plan === "waiting" && !DOC_REVIEW.test(title)
-    return isPlanWaiting || Number(changes) > 0 ? "updated" : "undone"
-  }
-
-  /**
-   * The fields of `phase`, an `<epic-phase>`, off its attributes as they are now, and its title as `title` (the
-   * attribute, else `slot="title"`'s text).
-   * - a section re-counts when any of them changes (`COUNT_ATTRIBUTES`)
-   */
-  static fieldsOf(phase: Element): PhaseFields {
-    const slotted = phase.querySelector(':scope > [slot="title"]')?.textContent
-    return {
-      status: phase.getAttribute("status"),
-      plan: phase.getAttribute("plan"),
-      changes: phase.getAttribute("changes"),
-      title: (slotted ?? phase.getAttribute("title") ?? "").replace(/\s+/g, " ").trim()
-    }
-  }
-}
-
-/** What `PhaseState.of()` reads of a phase. */
-export type PhaseFields = {
-  /** `todo`, `active`, `done` */
-  status: string | null
-  /** its build plan:  `waiting` for Owen, `accepted` */
-  plan: string | null
-  /** how many plan changes it holds (the orange pen) */
-  changes: string | null
-  /** its title, as text */
-  title: string
-}
 
 /**
  * `localStorage` key prefix of the state filters, per page path:  `{ [section id]: [states shown] }`.

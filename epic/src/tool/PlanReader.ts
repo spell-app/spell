@@ -29,6 +29,7 @@ import {
   type ReviewStatus
 } from "./planDoc.types"
 
+import { OptionSets } from "./OptionSets"
 import { PlanItem } from "./PlanItem"
 import { PlanTime } from "./PlanTime"
 
@@ -218,6 +219,7 @@ export abstract class PlanReader {
 
   /**
    * What needs attention:  the phases, the next one to do, and the open questions / issues / todos / limits / manual tests.
+   * - and the option sets:  the Choices section's standing sets, each phase's open ones (epic `epic-engine` P50)
    * - feeds the end-of-phase reply and its AskUserQuestion options
    */
   summary(): PlanSummary {
@@ -235,7 +237,8 @@ export abstract class PlanReader {
       future: this.future,
       standing: this.standing,
       saga: this.saga,
-      open
+      open,
+      choices: OptionSets.summaryOf(this.document)
     }
   }
 

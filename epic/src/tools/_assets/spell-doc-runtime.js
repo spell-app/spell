@@ -162,6 +162,12 @@ const FOLD_HOLD_MS = 600
  */
 const RESTORE_HOLD_MS = 1500
 
+/**
+ * How long a part's body swapped in may hold the old one on screen, in ms (`reloadBody()`'s cross-fade):  the page
+ * shows the old frame meanwhile, and takes no clicks
+ */
+const BODY_WAIT_MS = 1000
+
 /** What the reader does that stops the page landing by itself:  he's moving it. */
 const READER_INPUT = ["wheel", "touchstart", "keydown", "pointerdown"]
 
@@ -173,6 +179,12 @@ const EPIC_FOLDS = "epic-overview, epic-section, epic-phase"
 
 /** What a link into an epic page opens on its way:  the folding blocks, and the items (which fold too). */
 const EPIC_OPENERS = `${EPIC_FOLDS}, epic-item`
+
+/**
+ * The fields that fold inside an epic page's blocks (`<epic-field>`, epic `epic-engine` I167):  `reveal()` opens one a
+ * link or a comment lands in, through its own `reveal()`.
+ */
+const FIELDS_THAT_FOLD = "epic-field"
 
 /** Every element the outline takes for a section:  `<ui-section>`s and an epic page's folding blocks. */
 const SECTIONS = `ui-section, ${EPIC_FOLDS}`
@@ -329,6 +341,8 @@ async function start() {
   await nextFrame(2)
   sticky.measure()
   land(landing, jump, follow)
+  // a live reload held the new page behind the old one until now:  it cross-fades in, landed and themed (I164)
+  void Promise.resolve(window.SpellUI?.themed).then(() => window.SPELL_SERVER?.reveal?.())
   live.ready({ main, rail, sticky, follow, entries: railKey(outline, counts) })
   wireNotes(main)
   void wireComments(main, { go })
@@ -1105,6 +1119,7 @@ const patcher = new PagePatch({
  *   its `ETag` is the one served) with the new source, and changes only what differs in the live page:
  *   the kit's patcher (`patcher`, `PagePatch.page()`), a list of small steps, text edited in place;
  *   everything else keeps its scroll, folds, open panels, focus and typed text
+ * - drawn as ONE short cross-fade when it changes what's on screen (`patcher.redraw()`;  epic `epic-engine` I164)
  * - then re-wires what the runtime built from the markup (`rewire()`) and fires `spell-doc:updated` on `window`,
  *   `detail.changed`:  the elements added, replaced or re-attributed
  * - a full reload instead (`reload()`, which keeps the scroll) when the page can't be patched safely:
@@ -1163,7 +1178,7 @@ function wireLiveUpdate(main) {
       patched =
         before === null
           ? null
-          : patcher.page({
+          : await patcher.redraw({
               before: parse(before),
               after: parse(html),
               live: page.main,
@@ -1247,7 +1262,8 @@ function canPatch(main) {
  *   - `ui-loaded` (`LOADED`), from a Spell UI host or an `<epic-*>` block
  *   the outline (headings inside), contents, counts, item filters, code colors
  * - a body's FILE changed (the page server's `spell-server:changed`, `liveClient.ts`):  a host that has loaded it
- *   re-fetches it in place (`reload()`), the reading position kept (`PagePatch.readingAnchor()`);  one that hasn't drops the
+ *   re-fetches it in place (`reload()`), the reading position kept (`PagePatch.readingAnchor()`), the old body on screen
+ *   until the new one is in, then a short cross-fade (`PagePatch.crossFade()`, I164);  one that hasn't drops the
  *   cached copy, so its first open fetches the new one
  * - `enqueue`:  the live update's queue (`wireLiveUpdate()`):  a re-fetch waits for a patch in flight
  */
@@ -1286,8 +1302,13 @@ function wireSourceBodies(main, live, enqueue) {
         host.addEventListener(LOADED, done, { once: true })
         setTimeout(done, 2000)
       })
-    await host.reload?.()
-    PagePatch.keepAnchor(anchor)
+    // the old body stays up until the new one is in, then one short cross-fade (I164):  never the host's loading look
+    await PagePatch.crossFade(async () => {
+      const swapped = loaded || bodyIn(host)
+      await host.reload?.()
+      await swapped
+      PagePatch.keepAnchor(anchor)
+    }, PagePatch.isOnScreen(host))
     if (!active) return
     await loaded
     for (let frame = 0; frame < 60 && !active.isConnected; frame++) await nextFrame(1)
@@ -1297,6 +1318,14 @@ function wireSourceBodies(main, live, enqueue) {
     active.focus({ preventScroll: true })
     if (caret) active.setSelectionRange(...caret)
   }
+}
+
+/** Resolves once `host`'s body is in (its `ui-loaded`), or after `BODY_WAIT_MS` at most. */
+function bodyIn(host) {
+  return new Promise((done) => {
+    host.addEventListener(LOADED, done, { once: true })
+    setTimeout(done, BODY_WAIT_MS)
+  })
 }
 
 /** The element with the focus, inside shadow roots too (`document.activeElement` stops at their hosts). */
@@ -1857,6 +1886,7 @@ function markItemStates(main) {
  *   - everything showing:  only that state
  *   - else a hidden state shows too, and a shown one hides
  *   - the only one showing:  everything again
+ *   - an ⌥-click:  only that state, whatever showed (epic `epic-engine` I166:  the element's `shown` says so)
  * - in the title's `actions` slot (`.spell-item-filter`);  `spell-doc.css` puts it left of the count badge
  * - a filtered list shows "3 hidden · show all" under it (`<epic-hidden-note class="spell-hidden-note">`):
  *   a click there (`epic-all-showing`) shows all
@@ -2080,8 +2110,8 @@ function buildToolbar(page, outline, counts) {
  *   folded:  `section.spell-folded`, all but the heading hidden by CSS.
  *   Starts folded as saved, else when the section says `data-fold="closed"`.
  * - `reveal()` unfolding for a link is never saved
- * - returns `{ reveal(element) }`:  unfold every section hiding `element` (an epic page's blocks and items too),
- *   and open its own panel, or itself if it's a folded plan item;
+ * - returns `{ reveal(element) }`:  unfold every section hiding `element` (an epic page's blocks and items too, and
+ *   a phase's folded fields:  `<epic-field>`'s `reveal()`), and open its own panel, or itself if it's a folded plan item;
  *   true when it unfolded something (it draws a little later)
  *   - a `<ui-section>` unfolds WITHOUT its height animation (`--ui-section-duration: 0s` on `main` for a few frames):
  *     the jump measures the target once it has drawn,
@@ -2308,6 +2338,13 @@ function wireFolds(main, outline, kept) {
       )
         setFolded(section, false)
     }
+    // a folded field around it (a phase's Symptom, Goal ...;  epic `epic-engine` I167):  opened, never remembered
+    for (
+      let field = self ? element.closest(FIELDS_THAT_FOLD) : element.parentElement?.closest(FIELDS_THAT_FOLD);
+      field;
+      field = field.parentElement?.closest(FIELDS_THAT_FOLD)
+    )
+      if (field.component?.reveal?.()) unfolded = true
     const panel = self ? element.querySelector(":scope > ui-accordion > ui-title") : null
     if (panel && !isPanelOpen(panel)) setPanel(panel, true)
     // an id INSIDE a closed panel (an old decision's `#d7`, now the answer card in its question):

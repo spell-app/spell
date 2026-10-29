@@ -137,6 +137,48 @@
                 </ui-content>
               </ui-accordion>
             </ui-section>
+            <ui-section id="epic-update-seen" label="New, seen, quiet" sticky collapsible dividing open="false">
+              <ui-icon slot="icon" name="check"></ui-icon>
+              <p>
+                Owen, 2026-10-29: "How do I clear these 'update' marks?" Two ways, both kept (epic
+                <code>epic-engine</code> I168):
+              </p>
+              <ul>
+                <li>
+                  Seen: a round ✓ before the date of a new block, while the page is reviewed. Pressed, the block folds to
+                  one grey line at once, and its phase's pen counts one fewer. The mark waits in the review inbox, as a
+                  change mark's Reopen does; Send carries it, and <code>epic inbox apply</code> writes
+                  <code>seen="&lt;time&gt;"</code> on the block, so it's seen for everyone.
+                </li>
+                <li>
+                  By itself: a block not marked seen goes quiet 3 days after its date, as a change mark does (one rule,
+                  <code>PlanDates.isQuiet()</code>).
+                </li>
+                <li>
+                  A phase's pen (<code>&lt;epic-phase&gt;</code>) counts only the new ones, and has a ✓ of its own for all of
+                  them at once.
+                </li>
+                <li>
+                  The epic tool gives each block its id (<code>up3</code>, the Seen mark's key) on its next write. Older
+                  blocks need no migration: they go quiet by age.
+                </li>
+              </ul>
+              <epic-update at="2026-10-11 14:30" seen="2026-10-12 08:00" summary="Seen, the day after" phase="6"
+                ><p>Folded to one grey line: its date's tooltip says when it was seen.</p></epic-update
+              >
+              <ui-accordion class="spell-code" appearance="styled">
+                <ui-title>The example above · 3 lines</ui-title>
+                <ui-content>
+                  <ui-code language="html"
+                    ><script type="text/plain">
+                      <epic-update id="up3" at="2026-10-11 14:30" seen="2026-10-12 08:00" summary="Seen, the day after" phase="6">
+                        <p>Folded to one grey line:  its date's tooltip says when it was seen.</p>
+                      </epic-update>
+                    </script></ui-code
+                  >
+                </ui-content>
+              </ui-accordion>
+            </ui-section>
           </ui-section>
 
           <ui-section id="2-markup" label="2. Markup" sticky="stack" collapsible dividing open="false">
@@ -292,6 +334,24 @@
                     </td>
                     <td>a label's</td>
                   </tr>
+                  <tr>
+                    <td><code>id</code></td>
+                    <td><code>up3</code></td>
+                    <td>
+                      Given by the epic tool on its next write (I168): its Seen mark's key in the review inbox, and a
+                      link's target. None: just written, no Seen yet.
+                    </td>
+                    <td>no</td>
+                  </tr>
+                  <tr>
+                    <td><code>seen</code></td>
+                    <td>a time (<code>2026-10-29 14:30</code>)</td>
+                    <td>
+                      When Owen marked it seen, written by <code>epic inbox apply</code> (I168): quiet for everyone. New
+                      and optional: an older block without it goes quiet 3 days after <code>at</code>.
+                    </td>
+                    <td>no</td>
+                  </tr>
                 </tbody>
               </table>
             </ui-table>
@@ -375,6 +435,13 @@
                       </td>
                     </tr>
                     <tr>
+                      <td><code>seen</code></td>
+                      <td>
+                        A new block's ✓ Seen, before its date, while the page is reviewed:
+                        <code>&lt;epic-review buttons="update"&gt;</code>.
+                      </td>
+                    </tr>
+                    <tr>
                       <td><code>body</code></td>
                       <td>What changed; hidden (<code>until-found</code>) while folded.</td>
                     </tr>
@@ -410,7 +477,14 @@
                     </tr>
                     <tr>
                       <td><code>open</code></td>
-                      <td>A block, unfolded. It starts so.</td>
+                      <td>A block, unfolded. It starts so while new, folded once quiet.</td>
+                    </tr>
+                    <tr>
+                      <td><code>quiet</code></td>
+                      <td>
+                        A block seen (<code>seen</code>, or its Seen mark in the inbox) or more than 3 days old: grey,
+                        folded to its title row.
+                      </td>
                     </tr>
                   </tbody>
                 </table>
@@ -432,7 +506,12 @@
                   ><code title="epic/templates/epics/plan-doc.md">plan-doc.md</code></a
                 >, "Colours").
               </li>
-              <li>A block: a faint orange ground and an orange hairline, rounded.</li>
+              <li>A block: a faint orange ground and an orange hairline, rounded, while it's new.</li>
+              <li>
+                Quiet (epic <code>epic-engine</code> I168): seen, or more than 3 days after its date, the change marks'
+                rule. Grey: the page's muted ink on a faint grey ground, a grey hairline. Folded to one line, its date
+                and summary; it stays, as the record, and opens on a click.
+              </li>
               <li>
                 Its title row: the chevron, then <b>Update</b>: &lt;summary&gt;, free to wrap; the date pinned to the
                 right of its first line, as a comment thread's message shows its time (smaller, tabular figures, muted).

@@ -565,7 +565,7 @@ uv run --directory src/py/core pytest    # spell_core's:  25 modules in tests/py
 yarn core:gen:declarations               # rewrite the method list, after adding, renaming or removing a name on core
 ```
 
-- The repo's `yarn test` runs both, and so does `yarn review`.
+- The folder's `yarn test` runs both, and so does `yarn review`.
 - The rules for changing the core (who holds a card, what a list's items go through, the JSON, saving):
   [core's AGENTS.md](src/core/AGENTS.md).
 

@@ -1,12 +1,12 @@
 # AGENTS.md
 
 This file provides guidance to AI coding agents (Claude Code, Codex, and others)
-when working with code in this folder, `src/spell/` of the `spell-parser` package (`spell/parser/spell`).
+when working with code in this folder, `src/spell/` of the kit's parser folder (`spell/parser/spell`).
 - Code imports it as `spell/parser/spell`;  its namespace is `SP`.
 
-**READ the repo root's `AGENTS.md` and [WWOD](../../agents/wwod/WWOD.md) FIRST:**
-- the root's:  the repo's layout
-- WWOD:  the house style every package shares
+**READ the parser folder's [AGENTS.md](../../AGENTS.md) and [WWOD](../../agents/wwod/WWOD.md) FIRST:**
+- the folder's:  its layout
+- WWOD:  the house style every folder shares
 - Only what's local is below.
   A section named like a WWOD rule extends it.
 
@@ -16,7 +16,7 @@ when working with code in this folder, `src/spell/` of the `spell-parser` packag
   It (namespace `SP`) holds:
   - spell's rules
   - `SpellParser`, `SpellProject` and friends
-- The pieces around it are folders of their own, beside this one or in another repo:
+- The pieces around it are folders of their own, beside this one or in another of the kit's folders:
   - [parser](../parser/AGENTS.md), `spell/parser/parser` (`P`):  the generic rule-based parser.
     [PARSING.md](PARSING.md), here, maps its pipeline.
   - [core](../core/AGENTS.md), `spell/parser/core` (`SC`):  the runtime compiled spell runs on.
@@ -27,32 +27,32 @@ when working with code in this folder, `src/spell/` of the `spell-parser` packag
     Its own yarn project, NOT a workspace.
   - [app](../../../app/src/app/AGENTS.md), `spell/app/app`:  the web app.
     - Also the runner, and the `<spell-viewer>` / `<spell-editor>` elements.
-    - `yarn start` is run THERE, at spell-app's root (epic `repo-split` P11).
+    - `yarn start` is run THERE, at the app folder's root (epic `repo-split` P11).
   - [spaces](../../../app/src/spaces/AGENTS.md), `spell/app/spaces`:
     where projects live, and the editor's server.
     - Spell's project groups (`@spell/examples`, `owen@spell` ...), their lists, and a project's file edits.
     - The built-in projects and the test projects, and reading and writing projects on disk.
     - This folder NEVER imports it (see "Projects live in spaces" below).
-  - [cli](../../../app/src/cli/AGENTS.md), `spell/app/cli`:  the `spell` command line's spell-app half.
+  - [cli](../../../app/src/cli/AGENTS.md), `spell/app/cli`:  the `spell` command line's app half.
     It runs this folder's SOURCE (and the others') through `tsx`.
 - `rules/`:  spell's rule modules (see "Parser rules" below).
-- Tests live in the repo's `tests/spell/`, at the same paths as the code they test:
+- Tests live in the parser folder's `tests/spell/`, at the same paths as the code they test:
   [SpellProject.ts](SpellProject.ts) => [SpellProject.test.ts](../../tests/spell/SpellProject.test.ts).
-  - `yarn vp test run --project spell` runs them (the repo's `vitest.config.ts`).
-    `yarn test` runs the whole repo's.
+  - `yarn vp test run --project spell` runs them (the parser folder's `vitest.config.ts`).
+    `yarn test` runs the whole folder's.
   - Their helpers stay here, in `test/` (`spell/parser/spell/test`).
   - They write the projects they parse inline:  `parseSpellProject()`, `runSpell()`.
-  - The tests that compile a WHOLE frozen test project (`@spell/test`) are spell-app's, beside the projects:
+  - The tests that compile a WHOLE frozen test project (`@spell/test`) are the app folder's, beside the projects:
     its `tests/spell/`, at the same paths they had here (epic `spanish` P18;  see "Projects live in spaces" below).
   - `tests/spell/parserTests/`:  parser tests that need the spell grammar.
     The generic ones are parser's, in `tests/parser/`.
-- `node/` (`spell/parser/spell/node/...`) is NODE-ONLY:  the repo's `tsconfig.node.json` checks it.
+- `node/` (`spell/parser/spell/node/...`) is NODE-ONLY:  the parser folder's `tsconfig.node.json` checks it.
   - Its files:
     - `packageVersion.node`
   - And for the targets beyond javascript:
     - `typecheck`:  `tsc` on the TypeScript target
       - Also the code folders compiled spell is checked against, `CODE_FOLDERS`:
-        spell's folder, the repo's root, and `core`'s folder
+        spell's folder, the parser folder's root, and `core`'s folder
     - `buildTsx`:  the TypeScript target's build
     - `pyright`:  pyright on the Python target
   - And the spell syntax table (see "Parser rules"):
@@ -65,7 +65,7 @@ when working with code in this folder, `src/spell/` of the `spell-parser` packag
     - `writeBuiltInTemplates`, the script behind `yarn core:gen:templates`
   - Projects on disk are NOT here:  they're spaces' (`spell/app/spaces/server/node/...`).
   - The barrel NEVER exports it.
-  - Other repos import these files by name, e.g. `spell/parser/spell/node/buildTsx`.
+  - Other folders import these files by name, e.g. `spell/parser/spell/node/buildTsx`.
     Spaces, the language server and the `spell` command do.
   - Nothing reachable from `spell/parser/spell`'s barrel may import it (WWOD §8 › "Barrels").
 - `translate/` (epic `spanish` P24-P29):  writing a project in another language, names first, then rule by rule
@@ -92,7 +92,7 @@ when working with code in this folder, `src/spell/` of the `spell-parser` packag
   - `FixUps`:  each line that fails lint, a test or the shape check, or the writer couldn't write or flagged,
     written again by Claude in context, one call a round;  an answer that isn't JSON, asked again in two halves
   - `ElementNames`:  the tags, attributes and values a project draws with, `<ui-*>` through Spell UI's names
-    (handed in by spell-app:  spell-parser never imports Spell UI), in its JSX and its style sheets
+    (handed in by the app:  the parser folder never imports Spell UI), in its JSX and its style sheets
     - a form control's `name` binds it to a property:  the property's name in the other language, as code names it
       (`name="newTaskName"` => `name="nombreNuevaTarea"`;  epic `spanish` P28)
   - `TranslationNames`:  the project's names dictionary, `<Project>.<lang>.names.json5`, with its nouns' genders;
@@ -125,13 +125,13 @@ when working with code in this folder, `src/spell/` of the `spell-parser` packag
         - Each compile rewrites it only while nobody has edited it.
         - `appSuffix`, and `spell/parser/py`'s [quartApp.ts](../py/quartApp.ts)
   - `ts/lib` (epic `people-and-orgs` P3):
-    a LIBRARY, the project's classes alone, for the repo's code to import
+    a LIBRARY, the project's classes alone, for the kit's code to import
     - `<Project>.lib.ts`, one file with its own types:
       no drawing, none of its top-level steps, the core with no Solid
     - checked by `tsc`, as `ts/solid` is
-    - committed beside its source, and marked generated in spell-app's `.gitattributes`:
+    - committed beside its source, and marked generated in the app folder's `.gitattributes`:
       a merge recompiles `@spell/library`
-  - What a target builds goes in the project's build folder, `build/` at the repo root, never committed.
+  - What a target builds goes in the project's build folder, `build/` at the app folder's root, never committed.
     - That's its compiled code, the scope pack, `.scopes.js`, its declarations and its words (since epic
       `elemental-spell` P4):
 
@@ -150,7 +150,7 @@ when working with code in this folder, `src/spell/` of the `spell-parser` packag
   - The writers are `spell/parser/parser`'s:  "Compile" in [PARSING.md](PARSING.md).
 - `test/` (`spell/parser/spell/test`):  the test helpers for projects a test writes inline,
   e.g. `parseSpellProject()`, `compiledSpellProject()`, `incrementalSpellProject()`, `runSpell()`, `solidSample()`.
-  - The frozen test projects' own helpers are spell-app's, `spell/app/spaces/test` (below).
+  - The frozen test projects' own helpers are the app folder's, `spell/app/spaces/test` (below).
 - Projects live in spaces, not here:  this folder reads and compiles them, but holds none.
   - Spell's project groups (`@spell/examples` ...) are spaces' `SPACES.PROJECT_GROUPS`.
     - Spell's registry, `SP.SpellSetup`, starts EMPTY:  loading spaces' groups registers them there.
@@ -167,18 +167,18 @@ when working with code in this folder, `src/spell/` of the `spell-parser` packag
   - See "Projects" in [PARSING.md](PARSING.md).
   - Tests read the test projects:  frozen projects, which never change to follow an example.
     - Their group:  `@spell/test`, e.g. `@spell/test/fizzbuzz`, listed in the app in dev only.
-    - They and the tests that compile them are spell-app's (Owen, 2026-10-22, epic `spanish` P18):
+    - They and the tests that compile them are the app folder's (Owen, 2026-10-22, epic `spanish` P18):
       every `@spell` group lives there, so a test project may import another, e.g. `counter-app` the frozen `counter`.
     - Two examples are tested as they are, Solitaire and Solitario (epic `spanish` P21):
-      their snapshots are spell-app's, in its `tests/spell/__examples__/`, re-blessed when an example changes.
-      - A lower repo's tests never read a higher one's:  spell-parser's own tests write their projects inline.
-    - In spell-app's tests, read them with the helpers from `spell/app/spaces/test`:
+      their snapshots are the app folder's, in its `tests/spell/__examples__/`, re-blessed when an example changes.
+      - A lower folder's tests never read a higher one's:  the parser folder's own tests write their projects inline.
+    - In the app folder's tests, read them with the helpers from `spell/app/spaces/test`:
       - `loadFixtureProject()`
       - `fixturePath()`
       - `fixtureProjectId()`
     - NEVER update a fixture to follow its example.
   - Each fixture's compiled output is checked against the snapshots beside it
-    (spell-app's [fixtures.test.ts](../../../app/tests/spell/test/fixtures.test.ts)):
+    (the app folder's [fixtures.test.ts](../../../app/tests/spell/test/fixtures.test.ts)):
     - `<Project>.snapshot.js`:  the javascript target
     - `<Project>.snapshot.declarations.json5`:  its declarations
     - `<Project>.<lang>.snapshot.js`:  its words (`SP.SpellWords`), one per language its files are in (`.en`, `.es`)
@@ -193,10 +193,10 @@ when working with code in this folder, `src/spell/` of the `spell-parser` packag
       every fixture but `todos-form-based` and `cartas`, so far.
       The Python writer can't write its method's named arguments yet.
     - Add a fixture by copying a project in.
-    - After a deliberate change, `yarn spell:test:fixtures:bless` at spell-app's root, and read the diff.
-- [README-spell.md](../../README-spell.md), at the repo's root, is this folder's page for people;
-  [the repo's README](../../README.md) is spell-parser's front page.
-  - Other docs live in the content repo, their tooling in [spell-epic's tools](../../../epic/src/tools/)
+    - After a deliberate change, `yarn spell:test:fixtures:bless` at the app folder's root, and read the diff.
+- [README-spell.md](../../README-spell.md), at the parser folder's root, is this folder's page for people;
+  [the parser folder's README](../../README.md) is its front page.
+  - Other docs live in the content repo, their tooling in [the epic folder's tools](../../../epic/src/tools/)
     (see "Creating docs").
 - [The barrel](index.ts) is loaded in browsers AND the editor's server, in spaces (WWOD §8 › "Barrels").
   - It imports `spell/parser/core`'s TYPES only, never its code.
@@ -219,8 +219,8 @@ when working with code in this folder, `src/spell/` of the `spell-parser` packag
 
 - Docs for people (design notes, research, references), for every package, live in the content repo, `spell.epics/`:
   `guides/` mostly.
-  - Their tooling is [spell-epic's tools](../../../epic/src/tools/), in `spell-epic`, its own repo.
-- How to write one:  [spell-epic's AGENTS.md](../../../epic/src/AGENTS.md), "Writing a page".
+  - Their tooling is [the epic folder's tools](../../../epic/src/tools/), in the kit's `epic/`.
+- How to write one:  [the epic folder's AGENTS.md](../../../epic/src/AGENTS.md), "Writing a page".
 
 ## Parser rules
 
@@ -372,7 +372,7 @@ when working with code in this folder, `src/spell/` of the `spell-parser` packag
       <module>.shared.ts    what several of its rule files share, if anything
       index.ts              exports every rule class
 
-    tests/spell/rules/<module>/   (from the repo root)
+    tests/spell/rules/<module>/   (from the parser folder's root)
       <module>.test.ts      its tests
       __snapshots__/        its group specs
     ```
@@ -474,7 +474,7 @@ when working with code in this folder, `src/spell/` of the `spell-parser` packag
 - A built-in type's members (`the length of the name`) are DATA in `SP.BUILT_IN_TYPE_TABLE`, NOT rules.
   - The table:  [builtinTypes.ts](builtinTypes.ts).
   - Add one there, with the real `core` method or javascript property its `readAs` names.
-  - Then `yarn lsp:scopes --builtins`, in spell-app.
+  - Then `yarn lsp:scopes --builtins`, in the app folder.
   - See "Built-in types" in `PARSING.md`.
 - A `parse()` which understood a statement but mustn't take it REFUSES it, NOT returns `undefined`.
   - `return SpellStatement.refuse(match, "why")`:  the line's error then says why.
@@ -514,7 +514,7 @@ when working with code in this folder, `src/spell/` of the `spell-parser` packag
 
 As WWOD §12, plus:
 
-- The toolchain's decorator pre-pass (`spell/toolchain/decorators`) is used by the repo's `vitest.config.ts`.
+- The toolchain's decorator pre-pass (`spell/toolchain/decorators`) is used by the parser folder's `vitest.config.ts`.
 
 ## Imports
 

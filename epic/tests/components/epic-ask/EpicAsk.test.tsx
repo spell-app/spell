@@ -51,6 +51,11 @@ async function tick(root: Element, letter: string) {
   await ElementFixture.settle()
 }
 
+/** Is a Choose pill on (`aria-checked`)? */
+function checked(pill: Element): boolean {
+  return pill.getAttribute("aria-checked") === "true"
+}
+
 /** Press `key` where the focus is, as the keyboard does:  on the focused element, deep in its shadow roots. */
 function press(key: string) {
   let focused = document.activeElement
@@ -68,7 +73,7 @@ function gathered(): PageAnswer {
 ////////////////
 
 describe("<epic-ask>", () => {
-  test("its line:  a red chip (its section's key), Pick one;  its options a tick box each, a comment box, Other;  axe", async () => {
+  test("its line:  a red chip (its section's key), Pick one;  its options a Choose pill each, a comment box, Other;  axe", async () => {
     const section = await ElementFixture.render(question())
     const ask = section.querySelector("epic-ask")!
     await ElementFixture.settle()
@@ -76,7 +81,9 @@ describe("<epic-ask>", () => {
     const red = getComputedStyle(part(ask, "chip")).backgroundColor
     expect(red).not.toBe("rgba(0, 0, 0, 0)")
     expect(part(ask, "how").textContent).toBe("Pick one")
-    expect(part<HTMLInputElement>(option(section, "A"), "tick").type).toBe("radio")
+    // the epic page's Choose pill (epic `epic-engine` P50, Q55), a radio to a screen reader
+    expect(part(option(section, "A"), "tick").getAttribute("role")).toBe("radio")
+    expect(part(option(section, "A"), "tick").textContent).toBe("Choose")
     expect(part(option(section, "A"), "comment").getAttribute("for")).toBe("q1-A")
     expect(part(ask, "other").getAttribute("for")).toBe("q1")
     expect(section.getAttribute("data-state")).toBe("attention")
@@ -92,7 +99,7 @@ describe("<epic-ask>", () => {
     await tick(section, "A")
     await tick(section, "B")
     expect(gathered().answers.q1).toEqual({ picked: ["B"] })
-    expect(part<HTMLInputElement>(option(section, "A"), "tick").checked).toBe(false)
+    expect(checked(part<HTMLInputElement>(option(section, "A"), "tick"))).toBe(false)
     expect(option(section, "B").matches(":state(ticked)")).toBe(true)
     expect(ask.matches(":state(done)")).toBe(true)
     expect(section.getAttribute("data-state")).toBe("done")
@@ -117,7 +124,7 @@ describe("<epic-ask>", () => {
     press("ArrowDown")
     await ElementFixture.settle()
     expect(gathered().answers.q1).toEqual({ picked: ["C"] })
-    expect([box("C").checked, box("B").checked, option(section, "C").shadowRoot!.activeElement]).toEqual([
+    expect([checked(box("C")), checked(box("B")), option(section, "C").shadowRoot!.activeElement]).toEqual([
       true,
       false,
       box("C")
@@ -217,8 +224,8 @@ describe("<epic-ask>", () => {
     const ask = section.querySelector("epic-ask")! as HTMLElement & { component: { showAnswer(answer: object): void } }
     ask.component.showAnswer({ answers: { q1: { picked: ["J2"] } }, comments: {}, notes: "" })
     await ElementFixture.settle()
-    expect(part<HTMLInputElement>(option(section, "J2"), "tick").checked).toBe(true)
-    expect(part<HTMLInputElement>(option(section, "J1"), "tick").checked).toBe(false)
+    expect(checked(part<HTMLInputElement>(option(section, "J2"), "tick"))).toBe(true)
+    expect(checked(part<HTMLInputElement>(option(section, "J1"), "tick"))).toBe(false)
   })
 
   test("its ids, for a draft (P18):  its key under its section's title, each option's under its own", async () => {

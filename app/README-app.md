@@ -108,8 +108,9 @@ Where it stops:
 - The pack defines all four tags as it registers, so it fetches `spell-editor.js`, 2.0 MB, even where no editor is.
   Monaco still waits for an editor to open.
   A page of apps alone is lighter loading `spell-viewer.js` by itself.
-- Only a checkout's page server serves the elements today:  `spell-app` is a private package, not on npm,
-  and `dist-element/` is never committed, so a fresh checkout serves nothing there until it's built.
+- Only a checkout's page server serves the elements today:  the `spell` package on npm ships the app's code,
+  but not its element bundles, `dist-element/`, which are never committed either;
+  so a fresh checkout serves nothing there until it's built.
   `src` runs a compiled program from any address;  `dist-element/` copied to another host hasn't been tried.
 
 <details>
@@ -762,7 +763,7 @@ It's 31 pages in seven groups, from the four web components through the panes an
   node tests, and `*.browser.test.tsx` in headless Chromium.
 
   ```sh
-  cd ~/www/spell/spell-app
+  cd ~/www/spell/app
   yarn vp test run --project app:node --project app:browser
   ```
 
@@ -775,7 +776,7 @@ It's 31 pages in seven groups, from the four web components through the panes an
 
 ## See also
 
-- [The Spell app](README.md):  this repo's front page, with the live loop drawn for people who don't program
+- [The Spell app](README.md):  this folder's front page, with the live loop drawn for people who don't program
 - [Spaces](README-spaces.md):  where the projects come from, and the server the editor saves through
 - [The element framework](https://github.com/spell-app/spell/blob/main/README/element.md):  what all four elements are written on, and how a pack loads
 - [The language server](README-lsp.md):  the service Monaco asks in the page, and VS Code asks over stdio

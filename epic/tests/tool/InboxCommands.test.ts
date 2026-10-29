@@ -824,6 +824,49 @@ test("the inbox takes ONLY Accept and Reopen on a change, and neither anywhere e
 })
 
 ////////////////
+// ## Seen on an update block (epic `epic-engine` I168)
+////////////////
+
+// Owen, 2026-10-29:  "How do I clear these 'update' marks?"
+test("the inbox takes ONLY Seen on an update (`up3`), and Seen nowhere else", () => {
+  const inbox = ReviewInbox.read(inboxFile)
+  expect(inbox.setMark("up3", { action: "seen" }, M1)).toMatchObject({ action: "seen" })
+  expect(() => inbox.setMark("up3", { action: "approve" }, M1)).toThrow("an update takes Seen, not approve")
+  expect(() => inbox.setMark("q1", { action: "seen" }, M1)).toThrow("only an update (up3 ...) takes Seen")
+  expect(() => inbox.setMark("ch2", { action: "seen" }, M1)).toThrow()
+})
+
+test("itemIds:  an update block takes Seen while its host's `to-see` lists it, or it's in the page not `seen`", () => {
+  const html =
+    `<epic-section id="phases" kind="phases"><epic-phase id="p-one" title="One" status="active" ` +
+    `to-see="up1@2026-10-01T09:05 up2"></epic-phase></epic-section>` +
+    `<epic-update id="up5" at="2026-10-01 09:05" summary="x"></epic-update>` +
+    `<epic-update id="up6" at="2026-10-01 09:05" seen="2026-10-02 10:00" summary="y"></epic-update>`
+  const ids = ReviewInbox.itemIds(html)
+  expect(["up1", "up2", "up5", "up6"].map((id) => ids.has(id))).toEqual([true, true, true, false])
+})
+
+test("apply:  Seen stamps `seen` on the block, for everyone;  it leaves its phase's `to-see`;  the mark is cleared", async () => {
+  const plan = PlanDoc.parse(readFileSync(file, "utf8"))
+  plan.addPhase("Retry Logic", { goal: "<ul><li>retries</li></ul>" })
+  plan.addPhaseUpdate(1, "<p>split in two</p>", { summary: "Split in two" })
+  plan.updateStates()
+  const update = plan.document.querySelector("epic-update")!.id
+  expect(plan.phaseElements[0]!.getAttribute("to-see")).toMatch(new RegExp(`^${update}@`))
+  writeFileSync(file, plan.toString())
+  ReviewInbox.update(inboxFile, (inbox) => {
+    inbox.setMark(update, { action: "seen" }, M1)
+    inbox.markSent(M2)
+  })
+  await commands().inbox.run("x", file, ["apply"], {})
+  const after = PlanDoc.parse(readFileSync(file, "utf8"))
+  expect(after.document.getElementById(update)!.hasAttribute("seen")).toBe(true)
+  expect(after.phaseElements[0]!.hasAttribute("to-see")).toBe(false)
+  expect(printed.join("\n")).toContain(`${update.toUpperCase()}  seen:  Split in two`)
+  expect(ReviewInbox.read(inboxFile).marks[update]).toBeUndefined()
+})
+
+////////////////
 // ## The new flow (epic `epic-engine` P33)
 ////////////////
 
@@ -1020,4 +1063,53 @@ test("wait:  LISTENS while it waits, as this process, naming the person and the 
   } finally {
     process.env.SPELL_EPIC_AGENT = before
   }
+})
+
+// epic `epic-engine` I163 (Owen, 2026-10-29):  "When I approve a phase to which I have just added comments, you should
+// just incorporate the feedback and auto-approve rather than asking me again"
+test("an Accept plan carrying his comments:  wait says to fold them in, apply accepts the plan and leaves them", async () => {
+  const plan = PlanDoc.parse(readFileSync(file, "utf8"))
+  plan.addPhase("Retry Logic", { goal: "<ul><li>retries</li></ul>" })
+  plan.setPhaseFields(1, { plan: "<ol><li>Write the loop</li></ol>" })
+  const phase = plan.phaseElements[0]!.id
+  writeFileSync(file, plan.toString())
+  let ids: string[] = []
+  ReviewInbox.update(inboxFile, (inbox) => {
+    const place = { anchor: `${phase}#field-1`, kind: "field", label: "P1", excerpt: "plan" }
+    ids = [
+      inbox.commentList.add(place, "shorter steps", new Date(M1)),
+      inbox.commentList.add(place, "test it", new Date(M1))
+    ]
+    inbox.setMark(phase, { action: "approve", note: "see my comments in its text:  C1, C2", comments: ids }, M1)
+    inbox.markSent(M2)
+  })
+  expect(await commands().inbox.run("x", file, ["wait"], { timeout: "5" })).toBeUndefined()
+  const said = printed.join("\n")
+  expect(said).toMatch(/accepted, with comments to fold in: {2}C1, C2\n {10}- C1 [^\n]*"shorter steps"/)
+  expect(said).toMatch(/--plan "\.\.\." --accepted/)
+  // carried by the approve:  not listed again as comments of their own
+  expect(said).not.toMatch(/comments, to answer on their threads/)
+  printed = []
+  await commands().inbox.run("x", file, ["apply"], {})
+  expect(printed.join("\n")).toContain("plan accepted:  build it, with comments to fold in:  C1, C2")
+  expect(PlanDoc.parse(readFileSync(file, "utf8")).phaseElements[0]!.getAttribute("plan")).toBe("accepted")
+  const inbox = ReviewInbox.read(inboxFile)
+  expect(inbox.marks[phase]).toBeUndefined()
+  expect(inbox.commentList.waiting.map((comment) => comment.id)).toEqual(ids)
+})
+
+test("phase-body --plan ... --accepted writes the plan ACCEPTED:  no waiting, no planning spinner;  without, it waits", async () => {
+  withPhases()
+  const owner = commands()
+  const working = () => Object.keys(ReviewInbox.read(inboxFile).working)
+  expect(await owner.run(["phase-body", "x", "P2", "--goal", "<ul><li>fresh</li></ul>"])).toBe(0)
+  expect(working()).toEqual(["p-docs"])
+  expect(await owner.run(["phase-body", "x", "P2", "--plan", "<ol><li>Folded in.</li></ol>", "--accepted"])).toBe(0)
+  expect(working()).toEqual([])
+  const after = PlanDoc.parse(readFileSync(file, "utf8"))
+  expect(after.phase(2).getAttribute("plan")).toBe("accepted")
+  expect(after.phase(2).querySelector('epic-field[name="plan"]')!.hasAttribute("accepted")).toBe(true)
+  expect(after.toString()).toMatch(/P2 plan written: +accepted, the person's comments folded in/)
+  expect(await owner.run(["phase-body", "x", "P1", "--plan", "<ol><li>Waits.</li></ol>"])).toBe(0)
+  expect(PlanDoc.parse(readFileSync(file, "utf8")).phase(1).getAttribute("plan")).toBe("waiting")
 })

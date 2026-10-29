@@ -62,7 +62,10 @@ export const epicAskVocabulary = {
       name: "chip",
       description: "Its id chip (`Q1`), in the epic page's state colours:  red needs you, green picked, blue Claude's."
     },
-    { name: "how", description: "`Pick one` or `Pick several`." },
+    {
+      name: "how",
+      description: '`Pick one` / `Pick any`:  a switch Owen flips (`role="switch"`, epic `epic-engine` P50).'
+    },
     { name: "tools", description: "Its buttons:  Select all, Open | All." },
     { name: "other", description: 'The Other box, an `<epic-text-box type="other">`, after the options.' }
   ],
@@ -72,8 +75,18 @@ export const epicAskVocabulary = {
     { name: "working", description: '"Provide more details" asked, or only Other written:  blue, Claude\'s to do.' }
   ],
   texts: [
-    { key: "pickOne", text: "Pick one", description: "Its line, without `multiple`." },
-    { key: "pickSeveral", text: "Pick several", description: "Its line, with `multiple`." },
+    { key: "pickOne", text: "Pick one", description: "Its line's switch, off:  without `multiple` (or flipped)." },
+    { key: "pickSeveral", text: "Pick any", description: "Its line's switch, on:  `multiple` (or flipped)." },
+    {
+      key: "toSeveralTip",
+      text: "Let me pick several",
+      description: "The switch's tooltip while it's pick one (epic `epic-engine` P50)."
+    },
+    {
+      key: "toOneTip",
+      text: "Back to one pick:  the newest pick stays, the others turn off",
+      description: "The switch's tooltip while it's pick any."
+    },
     { key: "selectAll", text: "Select all", description: "Ticks every option shown." },
     { key: "selectNone", text: "Select none", description: "Once every option shown is ticked:  unticks them." },
     { key: "open", text: "Open", description: "The filter's first half:  only the options not marked `done`." },

@@ -228,7 +228,7 @@ and `spell` on your `PATH` ([README/cli.md](README/cli.md#setting-it-up), "Setti
 2. Spell:
 
    ```sh
-   cd ~/www/spell/spell-app
+   cd ~/www/spell/app
    spell app vscode        # builds spell-language.vsix, then installs it into VS Code
    ```
 
@@ -415,7 +415,7 @@ there, your own settings decide what formats on save.
 
 - The HTML and CSS data don't depend on that:  the extension carries them, in every window.
 
-For spell-app's settings and its F5, open spell-app in a window of its own, `code ~/www/spell/spell-app`;
+For spell-app's settings and its F5, open spell-app in a window of its own, `code ~/www/spell/app`;
 its Claude panel then lists only the sessions started there.
 
 <details>

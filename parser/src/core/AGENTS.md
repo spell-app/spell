@@ -3,8 +3,8 @@
 This file guides AI coding agents (Claude Code, Codex, and others) working in this folder:
 the core, `spell/parser/core` (its `src/core/`).
 
-**READ the repo root's [AGENTS.md](../../AGENTS.md) and [WWOD](../../agents/wwod/WWOD.md) FIRST:**
-the repo's layout, and the house style every package shares.
+**READ the parser folder's [AGENTS.md](../../AGENTS.md) and [WWOD](../../agents/wwod/WWOD.md) FIRST:**
+the folder's layout, and the house style every folder shares.
 Only what's local is below;  a section named like a WWOD rule extends it.
 
 ## Overview
@@ -17,7 +17,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 - Its Python twin is `spell_core`, what spell compiled to Python imports ("The Python core", below).
 - [core.scopes.js](core.scopes.js) is GENERATED:  the built-in types' docs, for pages with no parser.
   - Built from spell's table of built-in types, `BUILT_IN_TYPE_TABLE` ([builtinTypes.ts](../spell/builtinTypes.ts)).
-  - By `yarn lsp:scopes --builtins`, in spell-app.
+  - By `yarn lsp:scopes --builtins`, in the app folder.
   - NEVER edit it by hand:  edit the table, run that.
 - [core.declarations.json5](core.declarations.json5) is GENERATED too:
   the core's method list, what another target's core must have (Python's `spell_core`, say).
@@ -107,7 +107,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - The core with no drawing, so no Solid, and no running program's list of things.
     - References by name are in it all the same, searching what `searchThings()` was given (P9).
   - What a compiled LIBRARY imports, e.g. `people.lib.ts` (the `ts/lib` target).
-    - By its name, `spell/parser/core/model`, through spell-parser's `exports`.
+    - By its name, `spell/parser/core/model`, through the kit's `exports`.
   - So the server and the app may value-import it, through a library:
     its things are plain data, belonging to no program, so a copy of its own is fine.
   - Code it loads NEVER imports the barrel, and asks `programThings()` for the running program's things,
@@ -269,7 +269,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 
   - Kept in the person's preferences:  a `PrefStore` named for the project's id (`spell/util/persist`).
   - The runner names the project after `resetRuntime()`, before the program loads:  `await core.remember(projectId)`.
-    - spell-app's `runCompiled()` does, when it's handed the project's id:  the editor and `<spell-viewer>` hand it one.
+    - The app's `runCompiled()` does, when it's handed the project's id:  the editor and `<spell-viewer>` hand it one.
     - Its tests never remember.
   - The store is read whole as the run starts:
     so one that must be waited on (the page server's) answers every read at once after that.
@@ -351,7 +351,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 
 As WWOD §12, plus:
 
-- The repo's [vitest.config.ts](../../vitest.config.ts) uses the toolchain's decorator pre-pass
+- The parser folder's [vitest.config.ts](../../vitest.config.ts) uses the toolchain's decorator pre-pass
   (`spell/toolchain/decorators`).
 
 ## Types / Exports

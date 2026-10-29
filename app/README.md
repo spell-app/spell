@@ -306,14 +306,14 @@ and six ideas for a project of your own.
 ---
 
 **If you want to work on Spell itself**, the rest of this page is for you:
-what's in this repository, setting it up, and checking a change.
+what's in this folder, setting it up, and checking a change.
 
 ## The folders, and the page for each
 
-`spell-app` is one npm package, and all its code is in ONE folder, [src/](src/), a folder per part.
-A file is imported by the package's name and its path under `src/`, with no extension:
+`app/` is a folder of the kit's one npm package, `spell`, and all its code is in ONE folder, [src/](src/), a folder per part.
+A file is imported by `spell/app` and its path under `src/`, with no extension:
 `spell/app/app/solid` (a folder's `index.ts`), `spell/app/spaces/models/projectGroups`.
-It's the same name inside spell-app as from any other repo.
+It's the same name inside this folder as from any other.
 
 | Page | The folder it covers | What's on it |
 | --- | --- | --- |
@@ -333,8 +333,8 @@ Dependencies flow one way, down:
 ```mermaid
 %%{init: {"theme":"base","themeVariables":{"fontFamily":"-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif","fontSize":"15px","primaryColor":"#EFECFB","primaryBorderColor":"#6550CA","primaryTextColor":"#1A1C27","secondaryColor":"#F4F1E9","tertiaryColor":"#F7F6FC","lineColor":"#7F6FD6","textColor":"#7F6FD6","clusterBkg":"#F7F6FC","clusterBorder":"#B9B0E8","titleColor":"#1A1C27","edgeLabelBackground":"#F7F6FC","actorBkg":"#EFECFB","actorBorder":"#6550CA","actorTextColor":"#1A1C27","actorLineColor":"#9C90DE","signalColor":"#7F6FD6","signalTextColor":"#7F6FD6","labelBoxBkgColor":"#EFECFB","labelBoxBorderColor":"#6550CA","labelTextColor":"#1A1C27","loopTextColor":"#7F6FD6","noteBkgColor":"#F1E7D4","noteBorderColor":"#C9B48A","noteTextColor":"#1A1C27","activationBkgColor":"#DCD6F7","activationBorderColor":"#6550CA","sequenceNumberColor":"#FFFFFF"},"flowchart":{"curve":"basis","padding":12,"nodeSpacing":40,"rankSpacing":44}}}%%
 flowchart LR
-  cli --> app --> lsp --> spaces --> lang["spell-parser"] --> kit["the kit"]
-  app --> ui["spell-ui"] --> kit
+  cli --> app --> lsp --> spaces --> lang["parser/"] --> kit["the kit's src/"]
+  app --> ui["ui/"] --> kit
   routes["spaces' appRoutes"] -. "loaded by its path" .-> kitServer["the kit's page server"]
   %% the Spell look:  yarn mermaid:pretty
   classDef default fill:#EFECFB,stroke:#6550CA,stroke-width:1.5px,color:#1A1C27,rx:8px,ry:8px
@@ -343,30 +343,24 @@ flowchart LR
 ```
 
 _Each folder uses only what's to its right;  the kit's page server loads spaces' route module by its path,
-from spell-app's settings._
+from the app folder's settings._
 
-- spell-app is the top repo:  it uses spell-parser, Spell UI and the kit, and nothing uses it
-  ([the map of the repos](https://github.com/spell-app/spell/blob/main/README.md#one-repo-five-parts)).
-- It names spell-epic nowhere:  spell-epic declares its own part of the kit's page server, as spell-app does.
+- The app is the kit's top folder:  it uses the parser, Spell UI and the kit's shared code, and nothing uses it
+  ([the map of the kit](https://github.com/spell-app/spell/blob/main/README.md#one-repo-five-parts)).
+- It names the epic engine nowhere:  the epic folder declares its own part of the kit's page server, as this one does.
 - Each folder's `AGENTS.md` holds the rules for working in it:
   [app](src/app/AGENTS.md), [spaces](src/spaces/AGENTS.md), [lsp](src/lsp/AGENTS.md), [cli](src/cli/AGENTS.md);
-  the repo's own, [AGENTS.md](AGENTS.md).
+  the app folder's own, [AGENTS.md](AGENTS.md).
 
 ## Setup from zero
 
-The kit holds the one install for every repo, so start with [its setup](https://github.com/spell-app/spell/blob/main/README.md#setup-from-zero).
-It clones spell-app with the rest, puts `spell` on your PATH, and names uv, which the Python parts need.
-Cloned only part of it?  Bring spell-app, with every repo it needs or runs:
+The app is a folder of the kit, with the kit's one install, so start with [its setup](https://github.com/spell-app/spell/blob/main/README.md#setup-from-zero).
+It clones the app with every other folder, puts `spell` on your PATH, and names uv, which the Python parts need.
+
+Start the editor, in the app folder:
 
 ```sh
-cd ~/www/spell
-yarn clone spell-app
-```
-
-Start the editor, in spell-app's folder:
-
-```sh
-cd ~/www/spell/spell-app
+cd ~/www/spell/app
 yarn start
 ```
 
@@ -420,7 +414,7 @@ It needs `spell` on your PATH, the kit's `yarn cli:install` ([Setting it up](htt
 and VS Code's `code` command ([README-vscode.md](https://github.com/spell-app/spell/blob/main/README-vscode.md)):
 
 ```sh
-cd ~/www/spell/spell-app
+cd ~/www/spell/app
 spell app vscode    # builds the Spell extension for VS Code, and installs it
 ```
 
@@ -433,7 +427,7 @@ spell app vscode    # builds the Spell extension for VS Code, and installs it
 
 ## Working on it
 
-The checks, at spell-app's root, each over the whole repo:
+The checks, at the app folder's root, each over the whole folder:
 
 ```sh
 yarn ts    yarn lint    yarn format    yarn test    yarn review
@@ -453,24 +447,24 @@ yarn ts    yarn lint    yarn format    yarn test    yarn review
   The app's browser tests (`*.browser.test.tsx`, and `.ts`) run in headless Chromium.
 - App UI, the docs pages of the app's components, is at `http://127.0.0.1:4747/components/app/`
   while the page server runs:  one page per component, with live examples and pictures.
-- Where to change what, across every repo:  [the kit's development page](https://github.com/spell-app/spell/blob/main/README/development.md).
-- The house style every repo shares is WWOD, introduced on [the kit's front page](https://github.com/spell-app/spell/blob/main/README.md#wwod-the-house-style):
+- Where to change what, across every folder:  [the kit's development page](https://github.com/spell-app/spell/blob/main/README/development.md).
+- The house style every folder shares is WWOD, introduced on [the kit's front page](https://github.com/spell-app/spell/blob/main/README.md#wwod-the-house-style):
   its rules in [agents/wwod/](agents/wwod/WWOD.md), and the three logs beside them in [agents/](agents/),
   papercuts, suspected bugs and code debt.
 
 <details>
 <summary>Every yarn script, one line each</summary>
 
-All of them are spell-app's root `package.json`'s, run from its root (the folders have none of their own).
+All of them are in the app folder's [package.json](package.json), run from its root (the folders under `src/` have none of their own).
 Where a page says more, the row links it.
 
 | Script | What it does |
 | --- | --- |
-| `ts`, `test`, `lint`, `lint:fix`, `format`, `format:check` | each check, over the whole repo;  `test`, `lint` and `format` run spaces' Python too, through uv |
+| `ts`, `test`, `lint`, `lint:fix`, `format`, `format:check` | each check, over the whole folder;  `test`, `lint` and `format` run spaces' Python too, through uv |
 | `review` | `ts`, `lint:fix`, `format` and `test`, in turn |
 | `test:watch` | Vitest in watch mode, over every folder |
 | `start` | the install, then stop the kit's page server, then `spell app serve --headless`:  the page server and the editor, printing the editor's address |
-| `stop` | stop the servers started in spell-app's folder, the editor's Vite even when it's left running;  never the language server |
+| `stop` | stop the servers started in the app folder, the editor's Vite even when it's left running;  never the language server |
 | `start:dev` | the editor's Vite alone, with no page server |
 | `start:server`, `start:server:prod` | the app's API alone, on port 3001 (the first restarts on a change) |
 | `build`, `build:runner`, `build:element`, `build:page` | the four builds, each into a folder of `app/`:  [the builds](README-app.md#the-builds--one-solid-per-page-however-many-bundles) |

@@ -18,6 +18,8 @@
             - The tool's own template, in <epic-*> markup (spell-epic's src/tool/PLAN-DOC.md):  data in attributes,
               prose in children;  the elements draw the rest (crumbs, header, meta lines, step label, chips ...).
             - Sections are fixed:  each <epic-section kind> once, in this order, with its id.
+            - A Choices section (<epic-section id="choices" kind="choices">, standing option sets) goes between the
+              Overview and the Phases, only once a page has one:  `epic add <name>#choices "Title"` makes it.
           -->
           <epic-page
             epic="{{name}}"

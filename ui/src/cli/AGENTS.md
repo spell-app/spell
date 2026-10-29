@@ -1,7 +1,7 @@
 # AGENTS.md
 
 This file guides AI coding agents (Claude Code, Codex, and others)
-working with code in `src/cli/` of the `spell-ui` repo:  Spell UI's `spell` commands.
+working with code in `ui/src/cli/`, in Spell UI's folder of the kit:  Spell UI's `spell` commands.
 
 **READ [Spell UI's AGENTS.md](../../AGENTS.md) and [WWOD](../../agents/wwod/WWOD.md) FIRST.**
 Only what's local is below;  a section named like a WWOD rule extends it.
@@ -15,13 +15,14 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - `spell design build | bundle | check | pull | changed | pushed | state`:  Spell's claude.ai design system
   - They were spell-app's until epic `repo-split` P13, and are named as Owen named them then.
     - Before:  `spell icons`, `spell static`, `spell dev pack`, `spell dev design`
-- How the kit finds them:  `package.json`'s `"spell": { "commands": "./src/cli/commands.ts" }`.
+- How the kit finds them:  the folder manifest's `"spell": { "commands": "./src/cli/commands.ts" }`
+  ([package.json](../../package.json)).
   - [commands.ts](commands.ts) adds each command to the `spell` program it's handed (commander), and nothing more.
-  - It MUST load fast:  `spell help` loads every repo's list.
+  - It MUST load fast:  `spell help` loads every folder's list.
     So each action imports its work when it runs:  `(await import("spell/ui/cli/iconCommand")).iconCommand(...)`.
   - The kit's `spell commands` check reads its TEXT:  keep each name a literal at its `.command("...")` call,
     and each group (`pack`, `design`) a `const`.
-- The code:  this folder, imported as `spell/ui/cli/<file>`, by its package name (epic `repo-split` P14).
+- The code:  this folder, imported as `spell/ui/cli/<file>` (epic `repo-split` P14).
   - Node code:  Spell UI's node settings type-check it (`tsconfig.node.json`).
   - Each command's work is `(args, options) => Promise<exitCode>`, run through the kit's `CLI.runCommand()`.
     A `CLI.CliError` prints its message, anything else its stack.
@@ -31,16 +32,20 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     It never imports `spell/cli`:  it needs only Spell UI.
 - Where they work:
   - `spell pack` and `spell design`:  the nearest kit from the current folder up,
-    so in an epic's worktree they work on the worktree's repos (`CLI.findCheckout(CLI.KIT_MARKER)`).
-  - `spell design`'s tools are other repos' scripts, RUN, never imported (`CLI.runTool()`):
+    so in an epic's worktree they work on the worktree's files (`CLI.findCheckout(CLI.KIT_MARKER)`).
+  - `spell design`'s tools are scripts of other folders and repos, RUN, never imported (`CLI.runTool()`):
     - Spell UI's own [design-build.ts](../../scripts/design-build.ts)
-    - spell-brand's `design-bundle` / `design-check`
-    - spell-epic's [design.js](../../../epic/src/tools/design.js)
-- `spell pack create <name>` makes `spell-<name>/`, a pack that is a repo of its own, laid out as spell-brand is.
-  - From [templates/](templates/README.md);  the kit needs no wiring (its `spell-*` workspaces), only the
-    commands page gets the new repo's scripts.
+    - spell-brand's `design-bundle` / `design-check` (beside the kit)
+    - the epic folder's [design.js](../../../epic/src/tools/design.js)
+- `spell pack create <name>` makes `spell-<name>/` in the kit, a pack that is a repo of its own,
+  laid out as spell-brand is.
+  - From [templates/](templates/README.md);  the commands page gets the new repo's scripts.
+  - NOTE:  the kit's `workspaces` name only its four folders since epic `repo-split` P20, not `spell-*`,
+    so the next `yarn install` doesn't take the new repo in by itself (`createPack()` still says it does).
   - It never touches the kit's `repos.json5`:  the new repo has no remote yet, and says what to do next.
-- NEVER imports spell-app, spell-parser or spell-epic:  they're above Spell UI, or beside it.
+- NEVER imports `epic/` or `app/`:  they're above Spell UI (the lint's `spell/no-upward-import`).
+  - Nor `parser/`, though it's below:  Spell UI uses nothing of Spell's language
+    ([Spell UI's AGENTS.md](../../AGENTS.md), "Layout", "Nothing of spell").
 
 ## Tests
 
@@ -49,6 +54,6 @@ As WWOD §20, plus:
 - In [tests/cli/](../../tests/cli/), run by Spell UI's `ssr` project, in node (`vitest.config.ts`, `TOOL_TESTS`).
 - `ssrCommand.test.ts` and `packBuild.test.ts` run the REAL `spell`, as separate processes:
   the kit's [spell.mjs](../../../bin/spell.mjs).
-  - Every installed repo's command list loads, so a broken one elsewhere fails them too.
+  - Every folder's command list loads (and every installed repo's), so a broken one elsewhere fails them too.
 - The pack tests make throwaway kits from [fixtures/kit/](../../tests/cli/fixtures/kit/README.md), and point
   `SPELL_SHARED_DIR` at them:  never the real commands page.

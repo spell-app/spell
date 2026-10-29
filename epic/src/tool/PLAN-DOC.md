@@ -165,7 +165,7 @@ As `plan-doc.md`, "Ids":
 ## Phases
 
 ```html
-<epic-phase id="p-short-name" title="Short Name" status="active" estimate="1-2h" changes="1">
+<epic-phase id="p-short-name" title="Short Name" status="active" estimate="1-2h" to-see="up1@2026-10-29T10:00">
   <epic-field name="symptom">what's wrong today, one line</epic-field>
   <epic-field name="requests"
     ><epic-field label="r3 · 🚧 python (83d39e12)"><blockquote><p>Owen's words</p></blockquote> ...</epic-field
@@ -196,6 +196,15 @@ As `plan-doc.md`, "Ids":
     (`<epic-review buttons="plan">`).
   - Accept plan is the inbox mark `approve` on the phase;  `inbox apply` writes the field's `accepted` (now) and
     `plan="accepted"` (`PlanDoc.acceptPlan()`):  "plan accepted:  build it".
+  - Accept plan pressed on a phase whose text holds Owen's comments (its auto revisit, I158) KEEPS them (epic
+    `epic-engine` I163):  the mark `{ action: "approve", note, comments: ["c4", "c5"] }`;  a comment saved on a phase
+    already approved joins it, still approved (`ReviewInbox.noteComment()`).
+    - `wait` prints "accepted, with comments to fold in:  C4, C5", each comment under it;  `inbox apply` accepts the
+      plan as usual ("plan accepted:  build it, with comments to fold in:  C4, C5") and leaves the comments waiting.
+    - Claude folds them in and keeps it accepted:  `update <name>#P3 --plan "..." --accepted` writes the plan
+      `accepted` (logged `P3 plan written:  accepted, Owen's comments folded in`), no `waiting`, no spinner;  then
+      answers each comment.  Without `--accepted`, `--plan` waits as before.
+    - Only a comment against something he decided, or changing the scope a lot, becomes a Q item instead.
 - Children in that order, always (the vocabulary's `childOrder: "listed"`):
   the tool puts each where it belongs.
   - Owen's kept notes (`<epic-reply>`) after Requests, before Goal;  slotted children (status cards) at the end.
@@ -260,7 +269,8 @@ As `plan-doc.md`, "Ids":
   - `phase`:  the phase active then.
   - They stay once the phase is done.
   - No box around them (Owen, 2026-10-11:  "lose the "Plan changes" surround"):  each is its own block.
-  - The phase's `changes`:  how many, written by the tool on every edit, in the skeleton.
+  - The phase's `to-see`:  the new ones (not seen, not quiet), written by the tool on every edit, in the skeleton;
+    its pen counts them ("Updates", I168).  Its `changes`, the count before I168, goes on the next write.
     While the phase isn't done, its title shows an orange pen and that count, folded too (its part not loaded).
   - Older docs:  `<epic-updated>` lines, in the phase's `changes` slot (P6, 2026-10-11) or in no slot, and COPIES of
     the to-do phases' first in the Phases section (`<epic-updated slot="changes" of="N">`, T14).
@@ -282,6 +292,11 @@ As `plan-doc.md`, "Ids":
     - side by side, counted once;  never the wait for Owen's next prompt, an answer, a permission, or his notes
   - Its title row shows it in place of the estimate, `~3-4h` its tooltip.
   - Older phases have none, until asked.
+- `done-at`:  WHEN it was done, written as it's set done (`isoMinutes`, the log's time;  epic `epic-engine` I170),
+  removed when it's set to anything else.
+  - A phase done before I170 takes its log's last `P3 done` line's time on the page's next write (`updateDoneAt()`);
+    none, no attribute.
+  - The page draws it green for 3 days after (`PlanDates.isQuiet()`), then grey:  its Phases chip and status circle.
 - `to-review`:  written by the tool on every edit, LAST.
   - It lists items added while this phase was active (`phase="N"`),
     still open, not reviewed, not under way.
@@ -759,6 +774,30 @@ easily"), `components/epic-update/`:
   - `phase N done` removes phase N's bare labels and its updates OUTSIDE a phase (prose updates):  once the phase is
     finished, those changes are just the plan.
   - A phase's own plan changes (`epic-phase > epic-update`) stay for good:  the record of how the plan moved.
+- NEW, then QUIET (epic `epic-engine` I168;  Owen, 2026-10-29:  "How do I clear these 'update' marks?"):
+  - New:  orange, open, counted on its phase's pen.
+  - Quiet:  grey, folded to its title row (its date and summary), out of the pen;  kept, as the record.
+    - seen:  `seen="<time>"` on the block, written by `epic inbox apply` from its Seen mark (below), for everyone
+    - or old:  3 days after `at`, the change marks' rule (`PlanDates.isQuiet()`, one copy for both)
+  - `id`:  each block's `up3`, given by the tool on every write (`updateUpdates()`), after the highest in the doc;
+    its Seen mark's inbox key.  A bare label never has one.
+  - SEEN, a review mark (`{ action: "seen" }` under the block's id):
+    - a ✓ before a new block's date while the page is reviewed (`<epic-review buttons="update">`), and a ✓ after
+      its phase's pen for all of them at once
+    - the block folds to a grey line at once (its mark in the inbox), for Owen;  Send carries it, as a change mark's
+      Reopen;  `inbox apply` stamps `seen`, logged (`UP3 seen:  Split in two`)
+    - only an update takes it, and an update takes nothing else (`ReviewInbox`)
+  - Each body host (an Overview sub-section, a phase, an item, the log) lists the new blocks inside it in `to-see`,
+    the skeleton's, as `to-accept` lists change marks:  `up3@2026-10-27T10:00 up5@...`, each id and its `at`, not
+    seen and not quiet as of that write.
+    - a phase's pen counts its entries less the ones gone quiet since, or marked Seen in the inbox;  none, no pen
+    - the review routes take a Seen mark on an id it lists (`ReviewInbox.itemIds()`), the body not loaded
+    - it replaces a phase's `changes` (every plan change, before I168), which the tool drops on its next write;
+      until then the pen shows `changes`
+  - No migration step:  `seen` is new and optional, an older block goes quiet by age, and every write stamps the ids
+    and `to-see`.
+  - Why a review mark, not a write at once:  the review routes never write the page (only `inbox apply` does, under
+    its lock), and Reopen, the other button that changes a mark's look, already goes this way.
 
 ## Change marks
 
@@ -840,6 +879,65 @@ question's does.
 - Left alone:  an item taken in a phase already, one `handled`, a test, an open or canceled one;  a phase's "To review"
   field (open items added during it) and items nested in a phase don't count.
 - Reopened or canceled (`setItem()`):  `taken-in` goes.
+
+## Option sets
+
+An option set (`<epic-choices>`) works anywhere on the page (epic `epic-engine` P50):
+on a question, inside a phase, or as a standing set.
+The code:  `OptionSets` (the changes) and `OptionCommands` (the commands), beside this file.
+
+- Where a choice goes:
+  - a fork that belongs to ONE phase:  inside that phase, its Choices field, not a separate question
+  - a cross-cutting one:  a question, as before
+  - an open-ended list Owen picks from round after round:  a standing set, in the Choices section
+- Its settings, any mix:
+  - `multiple`:  pick any;  `chosen` may name several letters, `chosen="A C"`
+  - `fixed`:  Owen may NOT add options (every other open set takes his)
+  - `closed`:  done;  no picks, adds or edits, and a mark on it is left, not applied
+  - `standing`, `title`:  a standing set, in the Choices section
+- Where they sit, and what keys their marks (`choices`, a set's position, counts as written):
+  - an item's:  any of its sets, never one in its Original Discussion (`PlanItem.choiceSets()`)
+  - a phase's:  `<epic-field name="choices">`, after Changes, before its Update blocks and Plan;  every set in its
+    body counts, keyed by the phase's id
+    - `epic update <epic>#P3 --choices "<epic-choices>...</epic-choices>"` writes or replaces it
+    - the skeleton's `<epic-phase choices-open="1">`:  its sets neither `chosen` nor `closed` (every edit)
+    - Accept plan takes an open set's recommended option, as an approval does on a question
+  - a standing set:  `<epic-section id="choices" kind="choices">`, between the Overview and the Phases, only on a page
+    that has one;  in the skeleton, never a part
+    - each set `<epic-choices id="s-<slug>" title="..." standing [multiple]>`, keyed by its id
+    - `epic add <epic>#choices "Title" [--multiple] [--note "..."]` makes the section the first time, then the set
+- ONE mark per set carries its whole change (`ReviewInbox`'s `PickFields`):
+
+  ```text
+  { action: "pick", pick: "A C +1", choices: 0, multiple: true,
+    added: [{ key: "+1", title, note?, shot? }], edited: [{ letter, title, note? }], removed: ["E"] }
+  ```
+
+  - `pick` the whole pick list after the change;  `+1` names the first added option;  absent when only the set changes
+  - an old mark, `{ pick: "B" }`, reads as before
+- What `epic inbox apply` does with it, in order:
+  - the flip (`multiple` set or taken away), removals, edits, then each added option with the next free letter,
+    `by="owen"`, its note as `<p>`s, its picture an `<img>`
+  - an edit keeps the earlier text:  `<div slot="was" data-title="<old title>">` holding the old body, one per edit,
+    oldest first;  `edited` its day
+  - a removal stays:  `removed` its day, `slot="removed"`, out of `chosen`
+  - the picks:  an item's into `chosen` (a pick-one set keeps the newest), a question answered with their titles;  a
+    phase's into `chosen` too, the phase NOT approved, its line asking the session to adjust its plan;  a standing
+    set's stamped `picked-on`, `slot="picked"`, never `chosen`, the set staying open
+  - its line names it all:  `picked A · Keep folds, D · Faster builds;  added D · Faster builds;  edited B;  removed C`
+- From the tool, the same changes:
+
+  ```sh
+  epic choose seo#Q4 A C ["outcome"] [--set N]       # several letters:  a pick-any set
+  epic option add seo#Q4 "Title" ["note"] [--image <png>] [--set N]
+  epic option edit seo#Q4 B [--title "..."] [--note "..."]
+  epic option remove seo#Q4 B
+  epic option close seo#s-upgrades
+  ```
+
+- Lint (`Markup.validate()`):  a standing set's id `s-<slug>` and its title;  `slot="removed"` needs `removed`,
+  `slot="picked"` needs `picked-on`;  several letters in `chosen` only in a `multiple` set.
+- No migration:  an existing set stays pick-one, and takes Owen's options by the new default.
 
 ## Migrations
 

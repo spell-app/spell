@@ -121,6 +121,11 @@ function addThemeMenu() {
 
 // an epic page:  read before the first read of the pair (`restore()`, the menu)
 if (document.querySelector("epic-page")) ThemePreference.site(EPIC_PAGES)
-void ThemePreference.restore().catch((error) => console.error("spell-ui:  the page's theme", error))
+/**
+ * Resolves once the page wears its theme (`ThemePreference.restore()`);  never rejects.
+ * - a live reload's new page waits for it before it shows (the docs runtime's `reveal()`, epic `epic-engine` I164):
+ *   without it, the reload cross-faded through a frame in Spell UI's plain look (white bands, no Fruity backdrop)
+ */
+export const themed = ThemePreference.restore().catch((error) => console.error("spell-ui:  the page's theme", error))
 addThemeMenu()
 defineSite()

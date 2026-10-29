@@ -7,7 +7,7 @@
     <title>epic-ask</title>
     <meta
       name="description"
-      content="A question Owen answers on the page: its options with tick boxes, Other, its state as a chip."
+      content="A question Owen answers on the page: its options as the epic page's cards, each with a Choose pill, Other, its state as a chip."
     />
     <!-- Before first paint:  the viewer's colour scheme (Spell UI's `ThemePreference.HEAD_SCRIPT`).  The theme itself is restored by site.js. -->
     <script>
@@ -40,7 +40,7 @@
           ></ui-menu>
           <ui-header level="1" class="site-title"
             >&lt;epic-ask&gt;<ui-header
-              >A question Owen answers on the page: its options with tick boxes, Other, its state as a chip.</ui-header
+              >A question Owen answers on the page: its options as the epic page's cards, each with a Choose pill, Other, its state as a chip.</ui-header
             ></ui-header
           >
         </ui-container></ui-segment
@@ -49,7 +49,7 @@
         ><article class="site-article">
           <p class="lede">
             A question Owen answers ON the page: a details page's. Its text and options are an epic page's own elements,
-            so it reads as an epic page's question does; it adds a tick box to each option, a comment box under each, an
+            so it reads as an epic page's question does; it adds a Choose pill to each option (the epic page's card look, epic <code>epic-engine</code> P50), a comment box folded under each, an
             Other box, and a chip in the epic page's state colours.
           </p>
           <p class="meta">
@@ -209,7 +209,7 @@
                     </td>
                     <td>one at most</td>
                     <td>
-                      Its options, <code>&lt;epic-option&gt;</code>s: each draws a tick box, as an option of an ask.
+                      Its options, <code>&lt;epic-option&gt;</code>s: each draws a Choose pill, as an option of an ask.
                     </td>
                   </tr>
                   <tr>
@@ -246,7 +246,7 @@
                   <tr>
                     <td><code>multiple</code></td>
                     <td>present or absent</td>
-                    <td>Pick several (tick boxes); without it, pick one (round ones).</td>
+                    <td>Pick several to start with; without it, pick one. Its line's switch flips it on the page (P50).</td>
                     <td></td>
                   </tr>
                   <tr>
@@ -395,7 +395,7 @@
               </li>
               <li>Then the Other box, a box Owen types in, growing with its text.</li>
               <li>
-                Pick one: its round tick boxes are one radio group to the keyboard. Tab stops on the picked one (else
+                Pick one: its Choose pills are one radio group to the keyboard. Tab stops on the picked one (else
                 the first), and the arrow keys move the pick to the next option shown or the one before.
               </li>
             </ul></ui-section

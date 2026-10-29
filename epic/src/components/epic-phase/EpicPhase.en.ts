@@ -106,6 +106,22 @@ export const epicPhaseVocabulary = {
         "edit (epic `epic-engine` P30):  the page counts and finds them while its body, a part, isn't loaded."
     },
     {
+      name: "to-see",
+      kind: "string",
+      description:
+        "The update blocks inside it still new (`up3@2026-10-27T10:00 up5@...`:  each id and its `at`), written by the " +
+        "epic tool on every edit (epic `epic-engine` I168):  not seen, not quiet as of that write.  The page counts " +
+        "them (a phase's pen) and takes their Seen while its body, a part, isn't loaded."
+    },
+    {
+      name: "choices-open",
+      kind: "number",
+      description:
+        "How many option sets in its body are still open (neither `chosen` nor `closed`;  epic `epic-engine` P50), " +
+        "written by the epic tool on every edit:  its title row says so while its body, a part, isn't loaded.  None:  " +
+        "no attribute."
+    },
+    {
       name: "plan",
       kind: "enum",
       values: ["waiting", "accepted"],
@@ -116,11 +132,19 @@ export const epicPhaseVocabulary = {
         "loaded."
     },
     {
+      name: "done-at",
+      kind: "string",
+      format: "time",
+      description:
+        "When it was done (ISO), written by the epic tool as it's set done, and for an older done phase from the " +
+        "log's `P3 done` line (epic `epic-engine` I170):  done in the last 3 days, green;  before, or none, grey."
+    },
+    {
       name: "changes",
       kind: "number",
       description:
-        "How many plan changes (`<epic-update>` blocks) it holds, written by the epic tool on every edit:  its " +
-        "title row says so while it isn't done, folded too (its body, a part, loads only when it opens)."
+        "An OLDER page's count of its plan changes (`<epic-update>` blocks), from before epic `epic-engine` I168:  its " +
+        "pen says so until the epic tool's next write puts `to-see` in its place."
     },
     FOLD_OPEN_ATTRIBUTE
   ],
@@ -151,20 +175,39 @@ export const epicPhaseVocabulary = {
         "spinner instead."
     },
     {
+      name: "choices-open",
+      description: "In its title (P50):  `1 choice open`, red, while a set in its body waits for Owen's pick."
+    },
+    {
       name: "changed",
-      description: "In its title, while it isn't done:  its plan changed, an orange pen and how many times (`changes`)."
+      description:
+        "In its title, while it isn't done:  its new updates, an orange pen and how many (`to-see`, less the ones quiet " +
+        "or marked Seen since)."
+    },
+    {
+      name: "seen-all",
+      description:
+        "After the pen, while the page is reviewed:  a round ✓ `<ui-button>` marking every new update Seen at once."
     },
     {
       name: "tools",
       description:
         "At the title's end:  the page's own buttons (the `actions` slot), then its estimate (once done and timed, " +
-        "what it took), then its review buttons, while the page is reviewed."
+        "what it took), then its review buttons, while the page is reviewed, then its gear."
     },
     {
       name: "estimate",
       description:
         "Its `estimate`, a small pill just before its review buttons (`2-3h`), so they line up row to row;  done and " +
         "timed, what it `took` (`21m`), the estimate its tooltip."
+    },
+    {
+      name: "gear",
+      description:
+        "Its gear, last on its title row (epic `epic-engine` I166):  a `<ui-dropdown>` menu of what this phase " +
+        "shows, " +
+        '"Show this phase\'s files" and "Show this phase\'s checks", ticked while on;  its choice wins over the ' +
+        "Phases section's gear for this phase.  Only with an `id`."
     },
     ...REVIEW_PARTS
   ],
@@ -198,15 +241,43 @@ export const epicPhaseVocabulary = {
       text: "Claude is working on it",
       description: "Its spinner while Claude is at work on it, its plan accepted or the phase under way."
     },
+    { key: "gearTip", text: "Settings for this phase", description: "Its gear's tooltip and name (I166)." },
+    {
+      key: "showPhaseFiles",
+      text: "Show this phase's files",
+      description: "Its gear menu:  its Files field, ticked while it shows (its own choice, else every phase's)."
+    },
+    {
+      key: "showPhaseVerify",
+      text: "Show this phase's checks",
+      description: "Its gear menu:  its Verify field, ticked while it shows (its own choice, else every phase's)."
+    },
     {
       key: "tookTip",
       text: "~{estimate}",
       description: "A done phase's time pill:  its tooltip, the estimate it had (`~3-4h`;  M3 on P41)."
     },
     {
+      key: "choiceOpen",
+      text: "1 choice open",
+      description: "After its title (P50):  a set in its body waits for Owen's pick."
+    },
+    {
+      key: "choicesOpenCount",
+      text: "{count} choices open",
+      description: "After its title (P50):  sets in its body wait for Owen's picks."
+    },
+    {
       key: "changedTip",
-      text: "Its plan changed:  {count} × Update, at the end of its description",
-      description: "The title's pen while it isn't done:  its tooltip and name;  `count` how many changes."
+      text:
+        "{count} × Update new in this phase.  ✓ Seen on one (or the ✓ here, on all) folds it to a grey line for " +
+        "everyone;  unseen, each goes quiet by itself 3 days after it was written",
+      description: "The title's pen while it isn't done:  its tooltip and name;  `count` how many new updates."
+    },
+    {
+      key: "seenAllTip",
+      text: "Seen:  all {count} new updates in this phase, folded to grey lines for everyone once Claude applies it",
+      description: "The pen's ✓:  what it does."
     }
   ],
   children: [
@@ -262,6 +333,14 @@ export const epicPhaseVocabulary = {
       description:
         "Changes:  what changes, two or three lines;  after Goal, next to the plan (epic `epic-engine` P45;  " +
         'Owen, 2026-10-25:  "Move `changes` below `goal` so it\'s next to the plan").'
+    },
+    {
+      tag: "epic-field",
+      where: { attribute: "name", values: ["choices"] },
+      max: 1,
+      description:
+        "Choices:  the phase's own option sets (`<epic-choices>`, epic `epic-engine` P50), a fork that belongs to this " +
+        "phase alone;  picked on the page, keyed by the phase (`epic update ...#P3 --choices`)."
     },
     {
       tag: "epic-update",

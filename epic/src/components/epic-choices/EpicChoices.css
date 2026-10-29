@@ -53,8 +53,8 @@
     outline-offset: -2px;
   }
 
-  /* ## An open question:  the cards side by side, as many as fit at 14em;  one column when narrow */
-  .choices:not(.answered) {
+  /* ## An open set:  the cards side by side, as many as fit at 14em;  one column when narrow */
+  .cards {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(min(100%, 14em), 1fr));
     gap: 8px;
@@ -77,9 +77,15 @@
     line-height: 1.35;
   }
   .card > .header {
+    flex-wrap: wrap;
+    row-gap: 4px;
     padding: 5px 10px;
     border-bottom: 1px solid var(--_epic-choices-rule);
     background: var(--_epic-choices-band);
+  }
+  /* a narrow card:  the title keeps 9em, and the pencil, ✕ and pill wrap under it at its end (P50) */
+  .card > .header > .toggle {
+    flex: 1 1 9em;
   }
   /* a card folds by its header too (Owen, 2026-10-08):  folded, its header alone, as tall as itself in the grid */
   .card button.toggle {
@@ -267,10 +273,12 @@
   /*
    * ## Answering:  the options of an `<epic-ask>` (epic `epic-workflow` P12), on a page Owen answers on
    * - one card a row, full width:  each has its comment box under it
-   * - the header:  chevron, tick box and title (a click on the title ticks it), badge;  the (?) and state icon last
+   * - the epic page's card (epic `epic-engine` P50, Q55):  its title folds it, the badge, the (?) and state icon,
+   *   then the Choose pill (`role="radio"` / `"checkbox"`), picked:  dashed green, as an epic page's not sent
    * - ticked:  framed green, a pick is a decision (Q20 of epic `epic-components`)
+   * - its comment box folds under a Comment link, until opened or holding text
    */
-  :host(epic-choices:state(answering)) .choices:not(.answered) {
+  :host(epic-choices:state(answering)) .cards {
     grid-template-columns: minmax(0, 1fr);
   }
   :host(epic-option:state(filtered)) {
@@ -281,32 +289,6 @@
   }
   .answering > .header {
     gap: 8px;
-  }
-  .fold {
-    display: inline-flex;
-    flex: none;
-    align-self: flex-start;
-    padding: 0;
-    border: none;
-    background: none;
-    color: inherit;
-    cursor: pointer;
-  }
-  .pick {
-    display: flex;
-    flex: 1 1 auto;
-    align-items: flex-start;
-    gap: 8px;
-    min-width: 0;
-    cursor: pointer;
-  }
-  .tick {
-    flex: none;
-    width: 1.05em;
-    height: 1.05em;
-    margin: calc((1lh - 1.05em) / 2) 0 0;
-    accent-color: var(--ui-green, #21ba45);
-    cursor: pointer;
   }
   .badge {
     flex: none;
@@ -320,6 +302,9 @@
     gap: 6px;
     height: 1lh;
     margin-inline-start: auto;
+  }
+  .marks + .actions {
+    margin-inline-start: 0;
   }
   .marks:empty {
     display: none;
@@ -370,8 +355,263 @@
     margin: 0;
     padding: 0 10px 8px;
   }
+  .comment-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 0;
+    border: none;
+    background: none;
+    color: var(--_epic-choices-muted);
+    font: inherit;
+    font-size: 0.85em;
+    cursor: pointer;
+  }
+  .comment-link:hover {
+    color: var(--ui-blue-text, var(--ui-blue, #2185d0));
+    text-decoration: underline;
+  }
+  .comment-link:focus-visible {
+    outline: 2px solid var(--ui-focus-color, Highlight);
+    outline-offset: 1px;
+  }
+  .comment-link ui-icon::part(icon) {
+    width: auto;
+    margin: 0;
+  }
+  /* folded:  the link alone, until opened or the box holds text (a draft put back) */
+  .comment:not(.open) epic-text-box:not(:state(filled)) {
+    display: none;
+  }
+  .comment:is(.open, :has(epic-text-box:state(filled))) .comment-link {
+    display: none;
+  }
   .answering > .body.empty + .comment {
     padding-top: 8px;
+  }
+}
+
+@layer ui.components.epic-choices.types {
+  /*
+   * ## P50:  how a set is answered, Add choice, Owen's options, changes not applied yet, the folded lists
+   * - the heading:  a standing set's title, then `Pick one` / `Pick any` (a switch while reviewed)
+   * - a change not applied yet wears the fill rule as a pick does:  dashed until sent, then outlined
+   */
+  .set-heading {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 10px;
+    margin-bottom: 6px;
+    min-width: 0;
+  }
+  .set-title {
+    color: var(--ui-text-dark, inherit);
+    font: 600 1em / 1.35 var(--ui-font-family-heading, inherit);
+  }
+  .mode {
+    color: var(--_epic-choices-muted);
+    font-size: 0.85em;
+  }
+  /* the switch:  a small track and knob, then its words;  flipped from the set's own, the track dashed until sent */
+  .switch {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0;
+    border: none;
+    background: none;
+    color: var(--_epic-choices-muted);
+    font: 600 0.8em / 1.4 var(--ui-font-family, inherit);
+    cursor: pointer;
+  }
+  .knob {
+    position: relative;
+    box-sizing: border-box;
+    width: 26px;
+    height: 15px;
+    border: 1px solid var(--ui-border-color-strong, var(--_epic-choices-rule));
+    border-radius: 999px;
+    background: var(--_epic-choices-card);
+    transition: background-color var(--epic-turn-duration, 0.12s);
+  }
+  .knob::after {
+    content: "";
+    position: absolute;
+    top: 1.5px;
+    left: 2px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--_epic-choices-muted);
+    transition: translate var(--epic-turn-duration, 0.12s);
+  }
+  .switch[aria-checked="true"] {
+    color: var(--_epic-choices-pick-text);
+  }
+  .switch[aria-checked="true"] .knob {
+    border-color: var(--_epic-choices-pick);
+    background: color-mix(in oklab, var(--_epic-choices-pick) 18%, var(--_epic-choices-card));
+  }
+  .switch[aria-checked="true"] .knob::after {
+    translate: 11px 0;
+    background: var(--_epic-choices-pick);
+  }
+  .switch.flipped .knob {
+    border-style: dashed;
+  }
+  .switch:hover {
+    color: var(--_epic-choices-pick-text);
+  }
+  .switch:focus-visible {
+    outline: 2px solid var(--ui-focus-color, Highlight);
+    outline-offset: 2px;
+  }
+
+  /* Add choice:  a quiet pill under the cards, as a section's New todo */
+  .add {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 26px;
+    margin-top: 6px;
+    padding: 0 12px 0 10px;
+    border: 1px solid var(--_epic-choices-rule);
+    border-radius: 999px;
+    background: none;
+    color: var(--_epic-choices-muted);
+    font: inherit;
+    font-size: 0.85em;
+    line-height: 1;
+    cursor: pointer;
+  }
+  .add:hover {
+    border-color: var(--_epic-choices-pick);
+    color: var(--_epic-choices-pick-text);
+  }
+  .add:focus-visible {
+    outline: 2px solid var(--ui-focus-color, Highlight);
+    outline-offset: 1px;
+  }
+  .add ui-icon::part(icon) {
+    width: auto;
+    margin: 0;
+  }
+  .form {
+    margin-top: 8px;
+  }
+
+  /* a card's pencil and ✕:  before the pill, shown on hover and focus */
+  .tools {
+    display: inline-flex;
+    gap: 2px;
+    margin-inline-end: 4px;
+    opacity: 0;
+    transition: opacity 0.12s;
+  }
+  :host(epic-option:is(:hover, :focus-within)) .tools,
+  .card:is(:hover, :focus-within) .tools {
+    opacity: 1;
+  }
+  @media (hover: none) {
+    .tools {
+      opacity: 1;
+    }
+  }
+  .tools ui-button {
+    --ui-button-basic-border-width: 0px;
+  }
+
+  /* Owen's added option, and a change not applied yet:  its line under the card, Undo */
+  .draft-line {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin: 0;
+    padding: 2px 10px 6px;
+    color: var(--_epic-choices-pick-text);
+    font-size: 0.8em;
+    font-weight: 600;
+  }
+  .body > .draft-line {
+    padding: 4px 0 0;
+    color: var(--_epic-choices-muted);
+  }
+  .undo {
+    padding: 0;
+    border: none;
+    background: none;
+    color: var(--ui-blue-text, var(--ui-blue, #2185d0));
+    font: inherit;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+  .new-text {
+    font-style: normal;
+  }
+  .body > p {
+    margin-block: 0.35em;
+  }
+  .thumb {
+    display: block;
+    max-width: min(200px, 100%);
+    max-height: 140px;
+    margin-top: 6px;
+    border: 1px solid var(--_epic-choices-rule);
+    border-radius: 4px;
+    cursor: zoom-in;
+  }
+
+  /* the folded lists at the set's end (Picked, Removed), and an option's earlier text (Was) */
+  .folded-list,
+  .was {
+    margin-top: 6px;
+  }
+  .panels > .folded-list {
+    margin: 0;
+    border-top: 1px solid var(--_epic-choices-rule);
+  }
+  .folded-list > .toggle,
+  .was > .toggle {
+    padding: 2px 0;
+    color: var(--_epic-choices-muted);
+    font-size: 0.85em;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .panels > .folded-list > .toggle {
+    padding: 5px 8px;
+  }
+  .list-body {
+    margin-top: 4px;
+    overflow: hidden;
+    border: 1px solid var(--_epic-choices-rule);
+    border-radius: 8px;
+  }
+  .panels .list-body {
+    margin: 0 8px 8px;
+  }
+  .list-body[hidden] {
+    display: block;
+    content-visibility: hidden;
+    margin: 0;
+    border: none;
+  }
+  .was .list-body {
+    padding: 4px 8px;
+    color: var(--_epic-choices-muted);
+    font-size: 0.9em;
+  }
+  ::slotted([slot="was"]) {
+    margin-block: 0.25em;
+  }
+  ::slotted([slot="was"])::before {
+    content: attr(data-title);
+    display: block;
+    font-weight: 600;
+  }
+  :is(.folded-list, .was) > .toggle .chevron {
+    margin-block: calc((1lh - 12px) / 2);
   }
 }
 
@@ -379,6 +619,10 @@
   .card.ticked {
     border-color: var(--_epic-choices-pick);
     box-shadow: 0 0 0 1px var(--_epic-choices-pick);
+  }
+  .choose.ticked {
+    border: 1.5px dashed var(--_epic-choices-pick);
+    color: var(--_epic-choices-pick-text);
   }
   .choices.answered:has(> .panels:not([hidden])) > .toggle .chevron,
   :is(.panel, .card):has(> .body:not([hidden])) .chevron {
@@ -421,6 +665,29 @@
   .card.picked.sent {
     border-style: solid;
     outline-style: solid;
+  }
+  :is(.folded-list, .was):has(> .list-body:not([hidden])) > .toggle .chevron {
+    rotate: 90deg;
+  }
+
+  /* P50:  a change not applied yet, by the fill rule:  dashed until sent, outlined once sent */
+  .card.edited,
+  .card.added {
+    border: 1px dashed var(--_epic-choices-pick);
+  }
+  .card.edited.sent,
+  .card.added.sent {
+    border-style: solid;
+  }
+  .card.removing {
+    border-style: dashed;
+    opacity: 0.55;
+  }
+  .card.removing .title {
+    text-decoration: line-through;
+  }
+  .draft-line:has(+ *) {
+    padding-bottom: 0;
   }
   .panel.picked > .header .toggle {
     color: var(--_epic-choices-pick-text);

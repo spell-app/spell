@@ -318,15 +318,15 @@ element takes its colour from this table, never a colour that means something el
 
 | Colour | Means                                       | Examples                                                                                                                                                                                                            |
 | ------ | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| red    | needs you (Owen)                            | an open question's chip; an unreviewed judgement call or issue; the toolbar's count; a details question with nothing picked; a details page "waiting for your answer"; an open goals question; an epic with errors (every phase done, items need you) |
+| red    | needs you (Owen)                            | an open question's chip; an unreviewed judgement call or issue; a phase whose plan waits for your Accept, or with a choice open in it; the toolbar's count; a details question with nothing picked; a details page "waiting for your answer"; an open goals question; an epic with errors (every phase done, items need you) |
 | yellow | open, still undecided                       | an open todo or test (a todo a review queued too); a reviewed issue or judgement call; "to do"; a saga "in dialog". DARK text and icons on a yellow fill. NOT a state: a favourite epic's star (Owen, 2026-10-10) |
-| blue   | do it now, or Claude is working on it       | Revisit, Send (everywhere: the page header, the agents panel, details pages); the Underway status card; an item Claude is working on (its chip, the spinner); an epic in progress; a goals topic "building" |
-| green  | decided or done (however long ago)          | Approve, Make Todo, a todo's "next phase" plane; a pick, the chosen option (a details page's chosen card); a phase done, the Done status card (filled: the item's work finished), the Noted status card (outlined: a step done, your choice recorded or an answer written, the item not finished); an item decided, done, or approved as it stands, for good; an epic done; a goals topic "agreed", "shipped" |
-| orange | ONLY changed since you looked, and warnings; an item Claude answered with options, waiting for your pick (Owen, 2026-10-09) | UPDATE labels, `<epic-update>` blocks, a phase's changed pen; "nobody is listening" (inverted, to stand out); a `replied` item's chip (DARK text on it)                                         |
+| blue   | do it now, or Claude is working on it       | Revisit, Send (everywhere: the page header, the agents panel, details pages); the Underway status card; an item Claude is working on (its chip, the spinner); a phase under way or worked on; a phase SCHEDULED, still to do (a DOTTED blue outline); an epic in progress; a goals topic "building" |
+| green  | decided or done (however long ago)          | Approve, Make Todo, a todo's "next phase" plane; a pick, the chosen option (a details page's chosen card); a phase done in the last 3 days, the Done status card (filled: the item's work finished), the Noted status card (outlined: a step done, your choice recorded or an answer written, the item not finished); an item decided, done, or approved as it stands, for good; an epic done; a goals topic "agreed", "shipped" |
+| orange | ONLY changed since you looked, and warnings; an item Claude answered with options, waiting for your pick (Owen, 2026-10-09) | UPDATE labels, `<epic-update>` blocks, a phase's changed pen, a phase changed since you looked (its chip and circle); "nobody is listening" (inverted, to stand out); a `replied` item's chip (DARK text on it)                                         |
 | violet | a person's voice (you, everyone alike): `--epic-voice-person`, `-text`, `-fill`, `-rule` | a person's reply cards (their mark, name, faint fill and rule); the note box; "recommended" (a thumbs-up, no word) |
 | terracotta | an agent's voice (Claude's, Codex's ...): `--epic-voice-agent`, `-text` | an agent's reply cards: their round mark, and their name (the card stays white); an agent's comment-thread messages (their light box) and its "thinking…" stub; a page note's Claude replies and its "answered" chip; a comment's quote while it waits for an agent (epic `epic-friend` P10, Q16: violet before) |
 | ivory  | the page's own warm ground (the brand's brown tint) | the answer card; a marked note (what you said, once marked); the toolbar; a comment thread's ground, where a person's words sit plain |
-| grey   | no longer relevant, inactive, not chosen    | a canceled item (made moot); a todo's "drop it" x; the note box's "skip this" x; buttons at rest, and once Claude has handled them; a phase to do; a future epic; a paused epic (phases left, untouched for 3 days); a goals topic "draft"                                                                                 |
+| grey   | no longer relevant, inactive, not chosen    | a canceled item (made moot); a todo's "drop it" x; the note box's "skip this" x; buttons at rest, and once Claude has handled them; a phase done longer ago; a future epic; a paused epic (phases left, untouched for 3 days); a goals topic "draft"                                                                                 |
 
 - The voices are theme tokens (epic `epic-friend` T11): tweak them in `<epic-page>`'s theme block (`EpicPage.css`,
   "Voices"), or on a page with `epic-page { --epic-voice-agent: ... }`; the docs pages' copies are `spell-doc.css`'s
@@ -337,6 +337,14 @@ element takes its colour from this table, never a colour that means something el
   words in the agent's. Anyone without one keeps the shared voice.
 - No light blue, no light green: one shade per meaning.
 - Colour-blind readers tell red and green apart least: the chip's id, the icons and the words keep them readable.
+- A PHASE takes ONE of these, the first that holds (epic `epic-engine` I170; Owen, 2026-10-29: "The order, one chip
+  per phase: red, orange, blue (working), dotted blue, green, grey"): its Phases chip and its status circle alike.
+  - red: its plan waits for your Accept, or a choice in it is open
+  - orange: changed since you looked (new updates, not Seen, under 3 days old)
+  - blue: under way, or Claude at work on it (counted in the blue badge)
+  - DOTTED blue: scheduled, still to do
+  - green: done in the last 3 days (`done-at`)
+  - grey: done longer ago
 
 ### The fill
 

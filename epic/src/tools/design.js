@@ -223,8 +223,17 @@ function writeState(state, file = stateFile()) {
   writeFileSync(file, `${JSON.stringify({ by: "Owen Williams", ...state }, null, 2)}\n`)
 }
 
-/** Every file under `<root>/project/`, by its `project/...` path:  its sha256. */
+/**
+ * Every file under `<root>/project/`, by its `project/...` path:  its sha256.
+ * - throws if nothing's built there:  `changed` would call every pushed file removed, and `pushed` record none
+ *   (epic `repo-split` I27)
+ */
 export function hashTree(root) {
+  if (!existsSync(join(root, "project")))
+    throw new Error(
+      `spell design:  nothing built in ${root}:  run \`spell design build\` first ` +
+        "(spell-brand's `yarn design:bundle` then adds the bundle)"
+    )
   const files = {}
   for (const file of walk(join(root, "project"))) {
     files[relative(root, file)] = createHash("sha256").update(readFileSync(file)).digest("hex")
@@ -272,5 +281,11 @@ function usage(text) {
 }
 
 if (import.meta.main) {
-  process.exitCode = await main(process.argv.slice(2))
+  try {
+    process.exitCode = await main(process.argv.slice(2))
+  } catch (error) {
+    // a mistake to fix, said in one line:  no stack
+    console.error(error instanceof Error ? error.message : String(error))
+    process.exitCode = 1
+  }
 }

@@ -687,7 +687,7 @@ The snapshots, for a project `<Project>`:
   What `tsc` and pyright found, and why the to-do app has no Python yet:
   [README-targets](README-targets.md#typescript--the-same-program-typed-as-solid-developers-write-it).
 - They and their tests are spell-app's, beside its other `@spell` groups:
-  so a test project can import another `@spell` project, and Spell's own tests never read a repo above it.
+  so a test project can import another `@spell` project, and Spell's own tests never read a folder above it.
 - `yarn spell:test:fixtures` checks them all, in spell-app
   ([fixtures.test.ts](https://github.com/spell-app/spell/blob/main/app/tests/spell/test/fixtures.test.ts), [typescript.test.ts](https://github.com/spell-app/spell/blob/main/app/tests/spell/test/typescript.test.ts),
   [python.test.ts](https://github.com/spell-app/spell/blob/main/app/tests/spell/test/python.test.ts)).
@@ -815,7 +815,7 @@ and one project may mix them, each file read by its own language's rules.
 
 Spell reads and compiles projects;  it doesn't keep them.
 Where projects live, and the editor, the language server and the extension people use them in, are spell-app's,
-all on one language service built on this parser ([what isn't in this repo](README.md#whats-not-here)).
+all on one language service built on this parser ([what isn't in this folder](README.md#whats-not-here)).
 Two seams show when you work in this folder:
 - **Project groups:**  Spell's registry of groups starts empty.
   spell-app's spaces registers `@spell/examples` and the rest ([README-spaces](https://github.com/spell-app/spell/blob/main/app/README-spaces.md)),

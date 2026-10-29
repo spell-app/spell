@@ -33,12 +33,14 @@ export class TestShots {
    * resolves to its path from that folder, `tests/m3-20261019-1432.png` (`-2` ... when one is there).
    * - from the epic page's folder, so the page's `<img src>` finds it, and so does a part's (parts load into the page)
    * - `now`:  the time it's stamped with, local, to the minute
-   * - throws an `InboxError` for an id that isn't a test's
+   * - a test's (Owen's test run), or the holder of an option set's (an item, a phase, a standing set:  a picture for an
+   *   option he adds, epic `epic-engine` P50)
+   * - throws an `InboxError` for any other id (the summary, the stage, a new item's key)
    * - SIDE EFFECT:  writes the file (and `tests/`), never over one
    */
   static async saveShot(file: string, id: string, bytes: Buffer, now = new Date()): Promise<string> {
     const key = id.toLowerCase()
-    if (!TEST_ID.test(key)) throw new InboxError(`only a test takes a screenshot:  ${id}`)
+    if (!SHOT_ID.test(key)) throw new InboxError(`only a test or an option set's holder takes a screenshot:  ${id}`)
     const stem = `${TEST_SHOTS}/${key}-${compactTime(now)}`
     for (let n = 1; ; n++) {
       const shot = n === 1 ? `${stem}.png` : `${stem}-${n}.png`
@@ -55,8 +57,11 @@ export class TestShots {
 /** The folder of an epic's test screenshots, beside its page:  `epics/<epic>/tests/`. */
 export const TEST_SHOTS = "tests"
 
-/** A test item's id. */
-const TEST_ID = /^m\d+$/
+/**
+ * What takes a screenshot:  a test (`m3`), any other item holding option sets (`q52`), a phase (`p-choices`, an older
+ * page's `p3`), a standing set (`s-upgrades`;  epic `epic-engine` P50).
+ */
+const SHOT_ID = /^(?:[a-z]{1,2}\d+|[ps]-[a-z0-9][a-z0-9-]*)$/
 
 /** A pasted PNG's data URL's start. */
 const PNG_DATA_URL = "data:image/png;base64,"

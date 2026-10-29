@@ -17,6 +17,7 @@ import { EpicCommandError, parseVerbArgs } from "./command.types"
  *     - a verb that takes only a phase (`phase`, `updated`, `file`) takes its name too:
  *       `seo#epic-migrate`, `"seo#Epic Migrate"` (the tool finds it, `PlanDoc.phasePlace()`)
  *   - `seo#J`:  a NEW item of that kind, for `add`
+ * - `option`:  its own verb first too (`epic option add seo#Q4 "Title"`, epic `epic-engine` P50:  `optionArgs()`)
  * - `inbox`:  its own verb FIRST, then the epic (Owen's names, epic `repo-split` P13):
  *   `epic inbox wait seo`, `epic inbox done seo#J3`;  `epic inbox seo` alone prints it (`inboxArgs()`)
  * - The tool's own order, with no `#` (`epic close seo J3`), is REFUSED,
@@ -29,6 +30,7 @@ import { EpicCommandError, parseVerbArgs } from "./command.types"
  */
 export function planDocArgs(verb: string, args: string[]): string[][] {
   if (verb === "inbox") return [inboxArgs(args)]
+  if (verb === "option") return [optionArgs(args)]
   const at = args.findIndex((arg) => !arg.startsWith("--"))
   const target = at === -1 ? undefined : parseTarget(args[at]!)
   // the command line with the target swapped for `epic`, plus `inserted` right after it
@@ -41,6 +43,8 @@ export function planDocArgs(verb: string, args: string[]): string[][] {
   switch (verb) {
     case "add": {
       if (ref === undefined) return [["add", ...args]]
+      // a standing option set, in the Choices section (epic `epic-engine` P50)
+      if (ref.toLowerCase() === CHOICES_REF) return [["add", ...around([CHOICES_REF])]]
       const kind = kindOf(ref)
       if (!kind && OLD_KIND_LETTERS.includes(ref.toLowerCase()))
         throw new EpicCommandError(`add:  ${args[at]}?  ${MOVED_LETTERS} (${KIND_HELP})`)
@@ -135,6 +139,27 @@ function inboxArgs(args: string[]): string[] {
 }
 
 /**
+ * `epic option <verb> <epic>#<id> ...` as the tool takes it, `option <epic> <verb> <id> ...` (epic `epic-engine` P50):
+ * its own verb FIRST, as `inbox`'s.
+ * - `<id>`:  an item (`Q4`), a phase (`P50`, its id), a standing set (`s-upgrades`)
+ * - throws `EpicCommandError` (a usage error) for no verb or one it lacks, no epic, or no id after the `#`
+ */
+function optionArgs(args: string[]): string[] {
+  const words = args.flatMap((arg, i) => (arg.startsWith("--") ? [] : [i]))
+  const [verb, target] = [args[words[0]!], args[words[1]!]]
+  if (verb === undefined || !OPTION_VERBS.includes(verb))
+    throw new EpicCommandError(`option:  ${OPTION_VERBS.join(" | ")} <epic>#<id> ...  (not "${verb ?? ""}")`)
+  if (target === undefined) throw new EpicCommandError(`option ${verb}:  which set?  epic option ${verb} seo#Q4 ...`)
+  const { epic, ref } = parseTarget(target)
+  if (ref === undefined)
+    throw new EpicCommandError(
+      `option ${verb}:  epic option ${verb} ${epic}#Q4 ...  (the item, phase or set after a #)`
+    )
+  const rest = args.filter((_, i) => i !== words[0] && i !== words[1])
+  return ["option", epic, verb, ref, ...rest]
+}
+
+/**
  * `<epic>` or `<epic>#<ref>`, split.
  * - throws `EpicCommandError` for an empty epic or ref (`#J3`, `seo#`)
  */
@@ -202,6 +227,8 @@ export function phaseRanges(text: string): string {
  * (Owen, 2026-10-12);  the tool's commands it takes, run in order.
  * - a phase (`seo#P3`):
  *   - `--symptom`, `--changes`, `--goal`, `--files`, `--verify` (`phase-body`;  `""` removes one)
+ *   - `--choices`:  its option sets, `<epic-choices>` HTML, its Choices field (epic `epic-engine` P50)
+ *   - `--plan` [`--accepted`:  written accepted, his comments folded in;  epic `epic-engine` I163]
  *   - `--estimate` (`estimate`), `--title` [`--html`] (`rename`)
  * - an item (`seo#J3`):  `--title` [`--html`] (`rename`), `--calm` / `--loud` (`calm`)
  * - the page (`seo`):  `--standing` [`on` | `off`], `--no-standing` (`standing`)
@@ -241,6 +268,9 @@ function updateArgs(args: string[], at: number, target: EpicTarget | undefined):
     }
   } else if (phase !== undefined) {
     const body = PHASE_BODY.filter((key) => key in flags).flatMap((key) => [`--${key}`, value(key)])
+    // a plan Owen accepted with his comments, folded in and written accepted (epic `epic-engine` I163)
+    if (flags.accepted && !("plan" in flags)) throw new EpicCommandError("update:  --accepted goes with --plan")
+    if (flags.accepted) body.push("--accepted")
     if (body.length) runs.push(["phase-body", epic, phase, ...body])
     if ("estimate" in flags) runs.push(["estimate", epic, phase, value("estimate")])
     rename(phaseLabel(phase))
@@ -415,7 +445,7 @@ const INBOX_VERBS = [...INBOX_PAGE_VERBS, ...INBOX_ITEM_VERBS]
 /** What follows the item in an example, for the verbs that take more:  `epic decide seo#Q3 "answer"`. */
 const ITEM_EXAMPLES: Record<string, string> = {
   decide: ' "answer"',
-  choose: ' A ["outcome"]',
+  choose: ' A [C ...] ["outcome"]',
   cancel: ' ["why"]',
   details: " --file <reply.html>",
   summarize: " --file <condensed.html>",
@@ -467,8 +497,14 @@ const MOVED_LETTERS = "the letters moved (epic-engine P44):  T todo, M manual te
 /** The kinds, for a message:  `J judgement, Q question ...`. */
 const KIND_HELP = "J judgement, Q question, I issue, T todo (--limit:  a limit, not work), M manual test, D decision"
 
-/** A phase's body fields, `phase-body`'s flags. */
-const PHASE_BODY = ["symptom", "changes", "goal", "plan", "files", "verify"]
+/** A phase's body fields, `phase-body`'s flags;  `choices`:  its option sets (epic `epic-engine` P50). */
+const PHASE_BODY = ["symptom", "changes", "goal", "choices", "plan", "files", "verify"]
+
+/** `option`'s verbs (epic `epic-engine` P50):  `epic option add seo#Q4 "Title"`. */
+const OPTION_VERBS = ["add", "edit", "remove", "close"]
+
+/** `add`'s ref for a standing option set (epic `epic-engine` P50):  `epic add seo#choices "Title"`. */
+const CHOICES_REF = "choices"
 
 /** A status card's states, the word after the target that makes `update` write one:  `epic update seo#J3 done`. */
 const CARD_STATES = ["underway", "done", "noted"]
@@ -481,7 +517,7 @@ const CARD_EXAMPLES: Record<string, string> = {
 }
 
 /** What `update` sets on a phase. */
-const PHASE_FIELDS = [...PHASE_BODY, "estimate", "title", "html"]
+const PHASE_FIELDS = [...PHASE_BODY, "accepted", "estimate", "title", "html"]
 
 /** What `update` sets on an item. */
 const ITEM_FIELDS = ["title", "html", "calm", "loud"]

@@ -15,6 +15,7 @@ import { PAGE_MAIN } from "./site.types"
  *   this takes it, and the kit's patcher (`PagePatch`) changes only what differs in `main`,
  *   from the page's source as it LOADED (`shown()`)
  *   - scroll, folds, the tab shown, focus and typed text stay
+ *   - shown as one short cross-fade when it changes what's on screen (`PagePatch.redraw()`, epic `epic-engine` I164)
  * - The site's rules, over the shared ones:
  *   - `<ui-example>` and `<ui-docs-api>` are replaced whole when they change:
  *     an example draws its live demo and its code from its markup once (`ExampleSource.keep()`, on the copy)
@@ -86,7 +87,7 @@ export class SitePatch {
     if (own) return
     const patched =
       before !== null && main
-        ? this.patcher.page({
+        ? await this.patcher.redraw({
             before: parse(before),
             after: parse(html),
             live: main,

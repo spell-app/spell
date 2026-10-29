@@ -33,6 +33,34 @@ export const epicOptionVocabulary = {
       description: "The option in a few words, WITHOUT its letter (`A named palette`)."
     },
     { name: "recommended", kind: "boolean", description: "The one Claude recommends." },
+    {
+      name: "by",
+      kind: "string",
+      description: "Who added it, when not Claude:  `owen`, an option he added from the page (Add choice, P50)."
+    },
+    {
+      name: "edited",
+      kind: "string",
+      format: "date",
+      description:
+        "The day it was last edited in place (P50):  its earlier title and text are kept in its `was` slot, folded."
+    },
+    {
+      name: "removed",
+      kind: "string",
+      format: "date",
+      description:
+        "The day it was removed (P50), never erased:  it sits in its set's `removed` slot, folded under " +
+        "`Removed (1)`;  no pill, no pencil."
+    },
+    {
+      name: "picked-on",
+      kind: "string",
+      format: "date",
+      description:
+        "A STANDING set's option Owen picked, and the day it was recorded (P50):  it sits in its set's `picked` slot, " +
+        "folded under `Picked`."
+    },
 
     // an option of an `<epic-ask>`, on a page you answer on (epic `epic-workflow` P12)
     {
@@ -79,7 +107,8 @@ export const epicOptionVocabulary = {
   ],
   slots: [
     { name: "", description: "Its pros and cons." },
-    { name: "title", description: "A title with markup, in place of `title`." }
+    { name: "title", description: "A title with markup, in place of `title`." },
+    { name: "was", description: "Its earlier titles and text, one `<div data-title>` per edit, oldest first (P50)." }
   ],
   parts: [
     { name: "base", description: "The card;  answered, a panel." },
@@ -104,13 +133,24 @@ export const epicOptionVocabulary = {
         "on the chosen option, solid and `aria-disabled`:  the pick applied."
     },
     { name: "body", description: "Its pros and cons;  hidden (`until-found`) while folded." },
-    { name: "tick", description: "In an `<epic-ask>`:  its tick box (round for pick one), labelled by its title." },
+    {
+      name: "tick",
+      description:
+        'In an `<epic-ask>`:  its Choose pill, the epic page\'s (P50, Q55), a `<button role="radio">` (pick one) or ' +
+        '`role="checkbox"`, labelled by its title.'
+    },
+    { name: "comment-link", description: "In an `<epic-ask>`:  the Comment link its comment box folds under." },
     { name: "badge", description: "In an `<epic-ask>`:  its `badge`, a small `<ui-label>`." },
     { name: "more", description: "In an `<epic-ask more-details>`:  the (?) `<button aria-pressed>`." },
     { name: "state", description: "In an `<epic-ask>`:  its state icon, `state-label` its tooltip." },
     {
       name: "comment",
       description: "In an `<epic-ask>`:  the comment box under it, an `<epic-text-box>` for `<key>-<letter>`."
+    },
+    { name: "was", description: "With earlier text (its `was` slot, P50):  the folded `Was` line at its body's end." },
+    {
+      name: "change",
+      description: "An edit or removal not applied yet (P50):  `Edited · not sent` and Undo, under the card."
     }
   ],
   states: [
@@ -128,7 +168,12 @@ export const epicOptionVocabulary = {
     },
     { name: "answering", description: "An option of an `<epic-ask>`:  a tick box, a comment box." },
     { name: "ticked", description: "In an `<epic-ask>`:  ticked, framed green (a pick is a decision)." },
-    { name: "filtered", description: "In an `<epic-ask filter>`:  `done`, and hidden while it shows Open." }
+    { name: "filtered", description: "In an `<epic-ask filter>`:  `done`, and hidden while it shows Open." },
+    {
+      name: "retired",
+      description: "Removed (`removed`), or a standing set's picked one (`picked-on`):  a small panel in a folded list."
+    },
+    { name: "removing", description: "Removed in its set's mark, not applied yet:  faded, with Undo." }
   ],
   texts: [
     { key: "foldTip", text: "Fold option {letter}", description: "Tooltip of its fold button while open." },
@@ -148,6 +193,16 @@ export const epicOptionVocabulary = {
       description: "The Choose pill, its letter picked and sent:  Claude has it, the doc doesn't yet."
     },
     { key: "tipChoose", text: "Pick {letter}", description: "The pill's tooltip." },
+    {
+      key: "tipTicked",
+      text: "{letter} is picked:  click to un-pick",
+      description: "In an `<epic-ask>`:  a picked option's pill's tooltip."
+    },
+    {
+      key: "commentLink",
+      text: "Comment",
+      description: "In an `<epic-ask>`:  the link its comment box folds under (P50, Q55)."
+    },
     { key: "tipChosen", text: "{letter} is picked:  click to un-pick", description: "The picked pill's tooltip." },
     { key: "tipSent", text: "sent", description: "The picked pill's tooltip, once its mark went to Claude." },
     { key: "tipNotSent", text: "not sent yet", description: "The picked pill's tooltip, before Send." },
@@ -162,10 +217,27 @@ export const epicOptionVocabulary = {
       key: "commentLabel",
       text: "Comment on {letter} · {title}",
       description: "In an `<epic-ask>`:  its comment box's name, for a screen reader."
-    }
+    },
+    { key: "editHeading", text: "Edit {letter}", description: "The pencil's form:  its heading." },
+    { key: "pickedOn", text: "Picked {date}", description: "A standing set's picked option:  when." },
+    { key: "was", text: "Was", description: "The folded line of its earlier text." },
+    { key: "foldWasTip", text: "Fold its earlier text", description: "The `Was` line's button, while open." },
+    { key: "unfoldWasTip", text: "Show its earlier text", description: "The `Was` line's button, while folded." },
+    { key: "editedNotSent", text: "Edited · not sent", description: "Under a card edited, not sent yet." },
+    { key: "editedSent", text: "Edited · sent", description: "Under a card edited, sent, not applied yet." },
+    { key: "removedNotSent", text: "Removed · not sent", description: "Under a card removed, not sent yet." },
+    { key: "removedSent", text: "Removed · sent", description: "Under a card removed, sent, not applied yet." },
+    { key: "undo", text: "Undo", description: "After a change's line:  takes it back out of the mark." },
+    { key: "undoTip", text: "Take this change back", description: "Undo's tooltip." }
   ],
   children: [
     { tag: "flow", slot: "title", max: 1, description: "A title with markup." },
-    { tag: "flow", description: "Its pros and cons." }
+    { tag: "flow", description: "Its pros and cons." },
+    {
+      tag: "flow",
+      slot: "was",
+      description:
+        'Its earlier text, one `<div slot="was" data-title="<old title>">` per edit, oldest first (P50):  folded.'
+    }
   ]
 } as const satisfies EpicVocabulary

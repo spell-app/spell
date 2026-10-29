@@ -1,4 +1,4 @@
-import { Show } from "solid-js"
+import { For, Show } from "solid-js"
 import { isServer, type JSX } from "@solidjs/web"
 
 import { E } from "spell/ui/core"
@@ -9,7 +9,7 @@ import { PhaseIds } from "spell/epic/phases"
 import { EpicPage } from "spell/epic/components/epic-page/EpicPage"
 import { SHOW_NOTE, stopIfOwn } from "spell/epic/components/epic-review/EpicReview.types"
 // the fold pieces every `<epic-*>` fold shares:  their files, not `epic-item`'s barrel
-import { Fold, expandAllUnder, foldAllUnder } from "spell/epic/components/epic-item/Fold"
+import { CONTROLS, DEEP_TIPS, Fold, expandAllUnder, foldAllUnder } from "spell/epic/components/epic-item/Fold"
 
 import {
   BODY,
@@ -53,14 +53,16 @@ export class DOMEpicFoldElement extends E.DOMLoadableBodyElement<EpicFold<any>> 
  *   - The inner section's own `ui-opening` / `ui-closing` are CANCELLED and stopped there:
  *     the DOM element announces its own (cancelable), then `open` changes and the inner section follows.
  *   - Find-in-page (`beforematch`, not cancelable) is adopted.
- * - Collapse-all (epic `airplane` P8):
- *   - while open, a double chevron at the row's end folds everything inside it, not itself
- *     (`collapseAll()`;  each subclass adopts `CollapseAll.css`)
- *   - `<epic-page>`'s toolbar folds the whole page, every block through its `collapse()`
- * - Expand-all (Owen, 2026-10-20:  "This should have an 'Expand all' next to collapse all"):
- *   - always, folded or open, a double chevron pointing down just before collapse-all:  opens it and everything inside
- *     it, parts loading as they open (`expandAll()`);  on a folded block, all of it in one click
+ * - ⌥-click (Alt-click) on its chevron or title, or ⌥+Enter / ⌥+Space on its focused chevron (epic `epic-engine` I161;
+ *   Owen, 2026-10-29:  "holding down option is 'expand all'"):  `toggleDeep()`
+ *   - folded:  opens it and everything inside it, parts loading as they open (`expandAll()`)
+ *   - open:  folds everything inside it, and then itself (`foldAll()`)
  *   - each open is the reader's, as a click's:  the page remembers the blocks' and items' folds
+ *   - the chevron's tooltip says so (`DEEP_TIPS`, on `<ui-section>`'s `toggleTipMore`)
+ *   - before:  a double-chevron toggle-all button in its title row (airplane P8, Owen 2026-10-20 / 2026-10-25),
+ *     gone with I161;  `<epic-page>`'s toolbar keeps one, which has no chevron to hold
+ * - Its title row's empty space folds it too (`onTitleRowClick()`), and shows the pointer;  a to-do phase on a reviewed
+ *   page shows the grab cursor there instead, where it drags (`PhaseDrag`, `EpicPhase.css`)
  * - Sticky line:  a top-level fold sticks below the page header (`EpicPage.signalsOf(page).top`);
  *   a nested one below its parent's title (the inner sections stack themselves).
  *   Its children get `--epic-stack`, the bottom of the stuck titles above them (px from the viewport top),
@@ -141,32 +143,24 @@ export abstract class EpicFold<V extends E.ComponentVocabulary> extends E.UIComp
     return this.disclosure.open()
   }
 
-  /** Its toggle-all's last use, holding while it stays open:  everything inside opened. */
-  private readonly allOpenCell = new E.Cell(false)
-
-  /** Everything inside opened by its toggle-all (`allOpenCell`). */
-  get allOpen(): boolean {
-    return this.allOpenCell.get()
-  }
-
-  set allOpen(value: boolean) {
-    this.allOpenCell.set(value)
-  }
-
-  /** Its toggle-all clicked:  everything inside opened, or folded again. */
+  /**
+   * ⌥-click on its chevron or title (`Fold.toggleFrom()`):  folded, open it and everything inside (`expandAll()`);
+   * open, fold everything inside and then itself (`foldAll()`).
+   */
   @E.untracked
-  toggleAll() {
-    if (this.isOpen && this.allOpen) {
-      this.allOpen = false
-      this.collapseAll()
-    } else {
-      this.allOpen = true
-      void this.expandAll()
-    }
+  toggleDeep(): void {
+    if (this.isOpen) this.foldAll()
+    else void this.expandAll()
+  }
+
+  /** Fold everything inside it (`collapseAll()`), then itself, as a click would;  how many it folded, itself too. */
+  @E.untracked
+  foldAll(): number {
+    return this.collapseAll() + (this.collapse() ? 1 : 0)
   }
 
   /**
-   * Collapse-all, the double chevron on its title:  fold everything inside it, itself staying open.
+   * Collapse-all:  fold everything inside it, itself staying open (`foldAll()`'s first step).
    * - what folds:  nested blocks, items, cards, asides, code (`foldAllUnder()`),
    *   and its own boxes (`foldOwnBoxes()`)
    * - its title stuck (the reader is inside it):
@@ -181,7 +175,7 @@ export abstract class EpicFold<V extends E.ComponentVocabulary> extends E.UIComp
   }
 
   /**
-   * Expand-all, the double chevron pointing down on its title:  open it and everything inside it.
+   * Expand-all, ⌥-click on its folded chevron (`toggleDeep()`):  open it and everything inside it.
    * - itself first, as a click would (`expand()`), its part loaded
    * - then, round by round:  every section, phase and item inside, through its `expand()`, and every card and panel
    *   (`expandAllUnder()`, `cards`);  each part loaded before the next round, which opens what it brought
@@ -220,10 +214,58 @@ export abstract class EpicFold<V extends E.ComponentVocabulary> extends E.UIComp
     window.scrollTo({ top: window.scrollY + top - stickTop, behavior: "instant" })
   }
 
-  /** The inner section, as it's drawn:  read its stack once it's ready. */
+  /** The inner section, as it's drawn:  read its stack once it's ready;  its title row's clicks (`onTitleRowClick()`). */
   private readonly watchInner = (element: HTMLElement) => {
     const section = element as E.DOMElement
     void section.ready.then(() => (this.inner = section.component as unknown as SectionStack))
+    element.addEventListener("click", (event) => this.onTitleRowClick(event, element))
+    element.addEventListener("keydown", (event) => this.onToggleKey(event, element))
+  }
+
+  /** ⌥+Enter or ⌥+Space on its fold button (`Fold.deepKey()`):  `toggleDeep()`, as ⌥-click. */
+  private onToggleKey(event: KeyboardEvent, section: Element) {
+    const onToggle = EpicFold.titleRowPath(event, section)?.some((node) => EpicFold.hasPart(node, "toggle"))
+    if (onToggle && Fold.deepKey(event)) this.toggleDeep()
+  }
+
+  /**
+   * The elements `event` passed through inside `section`'s OWN title row, innermost first;  `undefined` when it
+   * didn't start there (its body, or a nested fold's title row, whose events bubble out through it).
+   */
+  private static titleRowPath(event: Event, section: Element): Element[] | undefined {
+    const path = event.composedPath()
+    const title = path.findIndex(
+      (node) => node instanceof Element && node.getRootNode() === section.shadowRoot && EpicFold.hasPart(node, "title")
+    )
+    return title < 0 ? undefined : path.slice(0, title).filter((node): node is Element => node instanceof Element)
+  }
+
+  /**
+   * A click on its title row, but not on the fold button (`<ui-section>`'s own, which folds by itself):  the row's
+   * empty space, its badge, an estimate pill, the gaps between its buttons fold it too, ⌥ as on the chevron
+   * (Owen, 2026-10-29:  the empty space is part of the header)
+   * - NOT on a control (`CONTROLS`, any `<ui-button>` or `<epic-review>`), nor a drag that selected words
+   * - a native listener on the inner section:  its shadow root's path is open to it (`composedPath()`)
+   */
+  private onTitleRowClick(event: MouseEvent, section: Element) {
+    if (event.defaultPrevented) return
+    const inTitle = EpicFold.titleRowPath(event, section)
+    if (!inTitle) return
+    for (const node of inTitle) {
+      if (EpicFold.hasPart(node, "toggle") || node.matches(TITLE_ROW_CONTROLS)) return
+      // the page's own actions slot (its box, `slot="actions"`), not the inner section's slot its tools go through
+      if (node.localName === "slot" && node.getRootNode() === this.domElement.renderRoot && node.matches(CONTROLS))
+        return
+    }
+    const selection = window.getSelection()
+    if (selection && !selection.isCollapsed && String(selection)) return
+    if (Fold.isDeep(event)) this.toggleDeep()
+    else this.toggle(event)
+  }
+
+  /** `node`'s `part` names hold `name`. */
+  private static hasPart(node: Element, name: string): boolean {
+    return (node.getAttribute("part") ?? "").split(/\s+/).includes(name)
   }
 
   /**
@@ -247,7 +289,15 @@ export abstract class EpicFold<V extends E.ComponentVocabulary> extends E.UIComp
       return
     }
     event.preventDefault()
-    this.toggle(detail.originalEvent)
+    // ⌥-click (or ⌥+Enter / ⌥+Space) on the chevron or title:  everything inside too
+    if (Fold.isDeep(detail.originalEvent)) this.toggleDeep()
+    else this.toggle(detail.originalEvent)
+  }
+
+  /** The inner section's fold button's tooltip ends with what ⌥-click does (`DEEP_TIPS`), as every fold's does. */
+  @E.onChange("isOpen", "inner")
+  protected onTipShown(open: boolean, inner: SectionStack | undefined) {
+    if (inner) inner.toggleTipMore = open ? DEEP_TIPS.fold : DEEP_TIPS.open
   }
 
   /**
@@ -393,19 +443,10 @@ export abstract class EpicFold<V extends E.ComponentVocabulary> extends E.UIComp
             <span class="words">{pieces.title()}</span>
             {pieces.mark?.()}
           </span>
-          {/* always:  expand-all shows folded or open */}
+          {/* the page's own buttons first, then its tools;  no toggle-all:  ⌥-click on the chevron (I161) */}
           <span slot="actions" class="tools" part={this.partForName("tools" as never)}>
-            {/* the page's own buttons first, then its tools */}
             <slot name={this.slotForName("actions" as never)} />
             {pieces.tools?.()}
-            {/* last:  ONE toggle, open everything / fold everything (Owen, 2026-10-25) */}
-            {Fold.toggleAllButton({
-              expandLabel: this.translationForKey("expandAll" as never, { name: this.contentsEntry().label }),
-              collapseLabel: this.translationForKey("collapseAll" as never, { name: this.contentsEntry().label }),
-              part: this.partForName("toggle-all" as never),
-              expanded: () => this.isOpen && this.allOpen,
-              onToggle: () => this.toggleAll()
-            })}
           </span>
           <div class={BODY} part={this.partForName("body" as never)} style={{ [STACK_PROPERTY]: `${this.stack}px` }}>
             <Show when={this.failureText}>
@@ -430,6 +471,63 @@ export abstract class EpicFold<V extends E.ComponentVocabulary> extends E.UIComp
   /** Inline style of the base box:  custom properties its children inherit;  none by default. */
   protected foldStyle(): Record<string, string> | undefined {
     return undefined
+  }
+
+  ////////////////
+  // ## Its gear (epic `epic-engine` I166)
+  ////////////////
+
+  /**
+   * A GEAR for its title row's end:  a round gear button opening a menu of ticked entries (Owen, 2026-10-29:  "we can
+   * change the 'expand all' to a gear icon which shows menu").
+   * - Spell UI's own menu:  a `<ui-dropdown>`, its trigger a `<ui-button>`, its menu opening leftwards, no caret
+   *   - each entry a `<ui-item>`, a ticked box while on, an empty one while off
+   *   - a pick calls `gear.pick(value)`;  the dropdown keeps no value, so the same entry picks again next time
+   * - Drawn by the Phases section (every phase's fields) and each phase (its own), as their tools' last piece;  the
+   *   entries are a LIST the subclass builds (`GearEntry`), so a new setting is one more entry
+   * - its `part`:  `gear`;  its look:  `EpicFold.css` (`.gear`)
+   * - a click on it never folds the row (`TITLE_ROW_CONTROLS`)
+   */
+  protected renderGear(gear: GearPieces): JSX.Element {
+    return (
+      <ui-dropdown
+        class={GEAR}
+        part={this.partForName("gear" as never)}
+        direction="left"
+        title={gear.title()}
+        aria-label={gear.title()}
+        on-ui-changed={(event: CustomEvent<{ value: string | string[] }>) => this.onGearPick(event, gear)}
+      >
+        {/* named too:  the dropdown's own button takes the focus, but this one is a button all the same */}
+        <ui-button
+          slot="trigger"
+          appearance="circular basic"
+          size="mini"
+          icon="gear"
+          tabindex="-1"
+          aria-label={gear.title()}
+        />
+        {/* no caret:  the gear says it's a menu */}
+        <span slot="icon" />
+        <For each={gear.entries()} keyed={(it) => it.value}>
+          {(it) => (
+            <ui-item value={it().value} icon={it().isOn ? GEAR_TICKED : GEAR_UNTICKED}>
+              {it().text}
+            </ui-item>
+          )}
+        </For>
+      </ui-dropdown>
+    )
+  }
+
+  /** An entry of its gear picked:  the subclass acts on it, and the dropdown lets go of its value, to pick again. */
+  @E.untracked
+  private onGearPick(event: CustomEvent<{ value: string | string[] }>, gear: GearPieces) {
+    const value = String(event.detail.value)
+    const dropdown = event.currentTarget as HTMLElement & { value: string }
+    if (value) gear.pick(value)
+    // picked again next time:  a dropdown tells only of a new value
+    E.afterSolidUpdate(() => (dropdown.value = ""))
   }
 
   /**
@@ -505,8 +603,38 @@ export type FoldPieces = {
   after?: () => JSX.Element
 }
 
+/** What a subclass hands its gear (`EpicFold.renderGear()`). */
+export type GearPieces = {
+  /** its entries, in order;  read where they're drawn */
+  entries: () => readonly GearEntry[]
+  /** its tooltip and name */
+  title: () => string
+  /** an entry picked:  its `value` */
+  pick: (value: string) => void
+}
+
+/** One entry of a gear's menu. */
+export type GearEntry = {
+  /** what a pick hands the subclass */
+  value: string
+  /** its words */
+  text: string
+  /** ticked */
+  isOn: boolean
+}
+
+/** Class of a gear's dropdown;  an entry's icon while on, and while off. */
+const GEAR = "gear"
+const GEAR_TICKED = "square check"
+const GEAR_UNTICKED = "square outline"
+
 /** The rounds of `expandAll()` at most:  each opens one level deeper, once the level above has loaded its parts. */
 const EXPAND_ROUNDS = 6
+
+/** What, in a title row, acts by itself:  a click there doesn't fold (`onTitleRowClick()`). */
+const TITLE_ROW_CONTROLS =
+  "a[href], button, input, select, textarea, label, summary, [role='button'], [contenteditable], ui-button, " +
+  "ui-dropdown, epic-review"
 
 /** The attribute naming a fold's or an item's part file. */
 const SOURCE = "source"

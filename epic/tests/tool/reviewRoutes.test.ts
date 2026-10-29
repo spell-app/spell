@@ -639,10 +639,10 @@ describe("a test run:  answers and screenshots", () => {
     expect(written(PAGES.plan).marks.m1).toMatchObject(mark)
   })
 
-  test("shot:  only a PNG, only a test's, at most 8 MB;  the guard as every write", async () => {
+  test("shot:  only a PNG, only a test's or an option set holder's, at most 8 MB;  the guard as every write", async () => {
     expect((await post("shot", { page: PLAN_URL, id: "m1", png: "data:image/jpeg;base64,AAAA" })).status).toBe(400)
     expect((await post("shot", { page: PLAN_URL, id: "m1", png: dataUrl(Buffer.from("not a png")) })).status).toBe(400)
-    expect((await post("shot", { page: PLAN_URL, id: "j3", png: dataUrl(png()) })).status).toBe(400)
+    expect((await post("shot", { page: PLAN_URL, id: "summary", png: dataUrl(png()) })).status).toBe(400)
     expect((await post("shot", { page: PLAN_URL, id: "m9", png: dataUrl(png()) })).status).toBe(400)
     expect((await post("shot", { page: `/${PAGES.other}`, id: "m1", png: dataUrl(png()) })).status).toBe(403)
     const big = await post("shot", { page: PLAN_URL, id: "m1", png: dataUrl(png(8 * 1024 * 1024 + 1)) })
@@ -651,6 +651,12 @@ describe("a test run:  answers and screenshots", () => {
       (await post("shot", { page: PLAN_URL, id: "m1", png: dataUrl(png()) }, { "x-server-token": "nope" })).status
     ).toBe(403)
     expect(existsSync(shots())).toBe(false)
+  })
+
+  // epic `epic-engine` P50:  a picture for an option Owen adds, named by the set's holder
+  test("shot:  an option set's holder (an item) takes one too", async () => {
+    const saved = await post("shot", { page: PLAN_URL, id: "j3", png: dataUrl(png()) })
+    expect([saved.status, saved.body.shot]).toEqual([200, expect.stringMatching(/^tests\/j3-\d{8}-\d{4}\.png$/)])
   })
 
   test("mark:  a test's answer only on a test, with a result", async () => {

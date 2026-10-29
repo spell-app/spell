@@ -27,6 +27,7 @@ import { EpicTargets } from "./EpicTargets"
 import { InboxCommands } from "./InboxCommands"
 import { ItemPicker } from "./ItemPicker"
 import { MigrateCommands, type SessionFinder } from "./MigrateCommands"
+import { OptionCommands } from "./OptionCommands"
 import { PlanDoc } from "./PlanDoc"
 import { PlanCommits } from "./PlanCommits"
 import { EPIC_STATUSES, PlanDocFiles, type EpicListing } from "./PlanDocFiles"
@@ -48,7 +49,7 @@ import { TestCommands } from "./TestCommands"
  * edit the structured parts of an epic page, `epics/<name>/<name>.plan.html`.
  * Used by the `/epic` skill and its agents.
  * - what's data:  `PLAN-DOC.md` beside this;  the elements:  `spell/epic/definitions`
- * - Commands:  `create`, `add-phase`, `phase`, `rename`, `estimate`, `add`, `calm`, `decide`, `choose`, `close`,
+ * - Commands:  `create`, `add-phase`, `phase`, `rename`, `estimate`, `add`, `calm`, `decide`, `choose`, `option`, `close`,
  *   `cancel`, `reopen`, `commit`, `commits`, `log`, `bedtime`, `prompt`, `summary`, `docs`, `decisions`,
  *   `owns`, `lint`, `open`, `migrate`, `split`, `join`, `inbox`, `details`, `summarize`, `status`, `original`
  *   (with no command, `yarn plan-doc` in spell-epic lists them:  `USAGE`).
@@ -95,6 +96,9 @@ export class PlanDocCommands {
   /** the `test` command, and `add` / `details`' test fields, on this object's files and output */
   readonly tests: TestCommands
 
+  /** the `option` command, `choose`, and `add`'s standing sets (epic `epic-engine` P50), on this object's files */
+  readonly options: OptionCommands
+
   /**
    * how long Claude worked on a phase while it was active, in minutes (`phase ... done`, `phase ... took`;  epic
    * `epic-engine` P41):  STATIC for the object's life
@@ -118,6 +122,7 @@ export class PlanDocCommands {
     this.migrator = new MigrateCommands(this, sessionsOf)
     this.sagas = new SagaCommands(this)
     this.tests = new TestCommands(this)
+    this.options = new OptionCommands(this)
   }
 
   ////////////////
@@ -218,9 +223,9 @@ export class PlanDocCommands {
       case "phase-body": {
         const planning = await this.edit(file, (plan) => {
           const n = plan.phasePlace(need(rest[0], "a phase"))
-          const set = plan.setPhaseFields(n, flags)
+          const set = plan.setPhaseFields(n, flags, { accepted: flags.accepted === true })
           if (!set.length)
-            throw new PlanDocError(`phase-body what?  --symptom / --changes / --goal / --files / --verify`)
+            throw new PlanDocError(`phase-body what?  --symptom / --changes / --goal / --files / --verify / --choices`)
           plan.log(`${plan.phaseLabel(n)} ${set.join(", ")} set`)
           return PlanDocCommands.planningAfter(plan.phase(n), flags)
         })
@@ -282,6 +287,8 @@ export class PlanDocCommands {
         })
       case "add": {
         const [kind, title] = [need(rest[0], "a kind"), need(rest[1], "a title")]
+        // a standing option set, in the Choices section (epic `epic-engine` P50)
+        if (kind === "choices") return this.options.addStanding(file, title, flags)
         const { id, example } = await this.edit(file, (plan) => this.tests.addItem(plan, kind, title, flags))
         this.tests.saveExample(file, example)
         return this.print(id.toUpperCase())
@@ -300,13 +307,11 @@ export class PlanDocCommands {
         })
         return this.print(id.toUpperCase())
       }
-      case "choose": {
-        const id = need(rest[0], "an item id")
-        const letter = need(rest[1], "the option's letter")
-        const set = flags.set === undefined ? undefined : Number(flags.set)
-        const did = await this.edit(file, (plan) => plan.choose(id, letter, { outcome: rest[2], set }))
-        return this.print(`${id.toUpperCase()} ${did}`)
-      }
+      case "choose":
+        // several letters, a phase or a standing set too (epic `epic-engine` P50)
+        return this.options.choose(file, rest, flags)
+      case "option":
+        return this.options.run(file, rest, flags)
       case "commit":
         return this.commit(file, rest, flags)
       case "commits":
@@ -1087,6 +1092,13 @@ export class PlanDocCommands {
     }
     if (summary.estimate) lines.push(`estimate:  ${summary.estimate}`)
     if (summary.next) lines.push(`next:  P${summary.next.number} · ${summary.next.name}`)
+    // the option sets (epic `epic-engine` P50):  "choices:  2 sets open, 5 options;  P50 1 open"
+    const { choices } = summary
+    const standing = choices.sets
+      ? `${choices.open} set${choices.open === 1 ? "" : "s"} open, ${choices.options} option${choices.options === 1 ? "" : "s"}`
+      : ""
+    const phases = choices.phases.map(({ phase, open }) => `${phase} ${open} open`)
+    if (standing || phases.length) lines.push(`choices:  ${[standing, ...phases].filter(Boolean).join(";  ")}`)
     for (const kind of OPEN_KINDS) {
       const open = summary.open[kind]
       if (!open.length) continue
@@ -1266,8 +1278,11 @@ export const USAGE = `usage:  yarn plan-doc <command> <name> ...    (doc:  epics
                                                    items, links and "P5 · Name" text following, then
                                                    links-agree (stderr says);  neither, with a Doc Review last:
                                                    before it, the Doc Review moving down one, back to do
-  phase-body <name> <N> [--symptom html] [--changes html] [--goal html] [--files html] [--verify html]
-                                                   set (or "" removes) a phase's body fields
+  phase-body <name> <N> [--symptom html] [--changes html] [--goal html] [--plan html [--accepted]]
+            [--files html] [--verify html]
+                                                   set (or "" removes) a phase's body fields;  --plan waits
+                                                   for Owen's Accept, unless --accepted:  he accepted it with
+                                                   comments, folded in now
   updated <name> <N> "html" | --file path [--summary "..."] [--for <item ids>]
                                                    a change to phase N's plan:  an <epic-update> block at the
                                                    end of its description, "Update: <summary>" and the date
@@ -1332,11 +1347,21 @@ export const USAGE = `usage:  yarn plan-doc <command> <name> ...    (doc:  epics
   decide <name> <Q id> "answer" [--details html] [--option A]
                                                    answer a question:  the answer goes INTO it (an ivory card);
                                                    --option marks the chosen option card;  prints its id
-  choose <name> <id> <letter> ["outcome"] [--set N]
+  choose <name> <id> <letter>... ["outcome"] [--set N]
                                                    an option you settled IN CONVERSATION, on any item, as the
                                                    page's pick records it:  chosen on the item's latest card
                                                    set (--set N:  the Nth);  a question answered, a judgement
-                                                   call closed, any item reviewed;  the outcome in its Choices
+                                                   call closed, any item reviewed;  the outcome in its Choices;
+                                                   several letters in a pick-any set;  a phase's set, or a
+                                                   standing set (s-upgrades), as its target
+  option <name> add <id> "title" ["note"] [--set N] [--image <png>]
+  option <name> edit <id> <letter> [--title "..."] [--note "..."] [--set N]
+  option <name> remove | close <id> [<letter>] [--set N]
+                                                   an option set's options:  added (the next letter), edited
+                                                   in place (the old text kept, folded), removed (kept, folded),
+                                                   or the set closed (done);  on an item, a phase or a standing set
+  add <name> choices "title" [--multiple] [--note "..."]
+                                                   a standing option set (s-<slug>), in the Choices section
   close <name> <id>  /  reopen <name> <id>         close an item (done) / open it again
   cancel <name> <id> ["why"]                       an item made moot by another decision:  struck through;
                                                    reopen undoes it

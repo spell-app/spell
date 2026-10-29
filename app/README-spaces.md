@@ -44,7 +44,7 @@ flowchart LR
     guides["@spell/guides"]
     tests["@spell/test, frozen"]
   end
-  subgraph yours["spell.spaces/, beside the repos:  in no repo"]
+  subgraph yours["spell.spaces/, in the kit's folder:  in no repo"]
     own["owen@spell, your own"]
   end
   server --> app
@@ -90,7 +90,7 @@ The groups, and where each one's folder is:
 
 | Group | In the editor | Its folder | What's in it |
 | --- | --- | --- | --- |
-| `owen@spell` | Projects | `spell.spaces/@spell/owen@/`, beside the repos, in no repo | your own projects:  where `spell app create` makes one |
+| `owen@spell` | Projects | `spell.spaces/@spell/owen@/`, in the kit's folder, in no repo | your own projects:  where `spell app create` makes one |
 | `@spell/examples` | Examples | [spaces/@spell/examples/](spaces/@spell/examples/), committed | the eleven example apps ([README-examples.md](README-examples.md)) |
 | `@spell/library` | Libraries | [spaces/@spell/library/](spaces/@spell/library/), committed | projects other projects import:  people |
 | `@spell/guides` | Guides | [spaces/@spell/guides/](spaces/@spell/guides/), committed | twelve guides, each a Spell program that reads as prose:  a first walkthrough, A tour of Spell, and how each example works ([README-examples.md](README-examples.md#guides--programs-that-read-as-prose)) |
@@ -110,7 +110,7 @@ Your own projects live in `owen@spell`, the editor's "Projects" list, and that's
 
 ## Setting up spaces for your own project
 
-Your spaces folder is `spell.spaces`, beside the repos:  `~/www/spell/spell.spaces/`.
+Your spaces folder is `spell.spaces`, in the kit's folder and ignored by git:  `~/www/spell/spell.spaces/`.
 It's ONE folder for the main checkout and every worktree, and it's in no git repo.
 A new checkout doesn't have one, and nothing makes it for you, so that's the first step.
 
@@ -333,7 +333,7 @@ So a program that reads an address must load the groups first, and there are thr
 - through spaces' disk reader, `installDiskFetch()`:  the [language server](README-lsp.md) and `spell` do this
 - or `spell/app/spaces/models/projectGroups` alone, as `<spell-viewer>` does to stay clear of the parser
 
-The line between the two repos is sharp.
+The line between the two folders is sharp.
 A project's own reading, compiling and saving is its `SpellProject`
 ([README-spell.md](https://github.com/spell-app/spell/blob/main/parser/README-spell.md));  making, copying and renaming projects happens here.
 Each model asks the server, and throws with what it was doing ("renaming file") for the editor to show.
@@ -596,7 +596,7 @@ Where it stands:  the people and organizations are built;  sign-in, permissions 
 
 ## See also
 
-- [The Spell app](README.md):  this repo's front page, and where spaces sit among its folders
+- [The Spell app](README.md):  this folder's front page, and where spaces sit among its folders
 - [The editor](README-app.md):  what calls these models and saves through this API
 - [The example apps](README-examples.md):  what's in `@spell/examples`, and ideas for a project of your own
 - [The command line](https://github.com/spell-app/spell/blob/main/README/cli.md#spell-app):  every option of `spell app create`, `spell app serve` and

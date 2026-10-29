@@ -8,15 +8,12 @@ spell --version
 <summary>Output</summary>
 
 ```text
-spell 0.8.0
-spell-parser 0.8.0
-spell-ui 0.8.0
-spell-app 0.8.0
+spell ...
 ```
 
 </details>
 
-_Every repo that adds commands to `spell` answers for itself, the kit's first:  four lines, in about 0.1 s._
+_One package, one version, in about 0.1 s:  every folder that adds commands to `spell` ships inside it._
 
 One command over every Spell repo.
 If you've used `git`, `gh` or `cargo`, you know the shape:  one program, a verb after it, `--help` on everything.
@@ -130,7 +127,7 @@ spell lint --all @spell/examples
 </details>
 
 - A group holding one project uses it without asking.
-- `owen@spell` is your own space:  the folder `spell.spaces/@spell/owen@/` beside the repos,
+- `owen@spell` is your own space:  the folder `spell.spaces/@spell/owen@/` in the kit's folder, in no repo,
   ONE folder for the main checkout and every worktree.
   It has that name for everyone, for now:  the code fixes it.
   `spell projects` lists every group ([below](#spell-app)).
@@ -346,8 +343,8 @@ A new syntax is a third subclass, not a new parser.
 
 - **The code map** is graphify's, an open-source engine that reads each file's structure, with no model:
   its classes, functions, calls and imports.
-  - graphify maps each repo on its own:  it skips what git ignores, and the kit ignores its child repos.
-  - Then `spell map` merges them, and links what graphify can't follow:  imports by package name
+  - graphify maps the kit, ONE repo with its folders inside it, and skips what git ignores.
+  - Then `spell map` links what graphify can't follow:  imports by package name
     (`spell/util/node/json5`), the names each file takes from them, and classes that extend an imported one
     (`extends P.Tokenizer`).
   - About 40 seconds for every repo;  44,000 things and 126,000 links.
@@ -972,11 +969,12 @@ spell projects
 <summary>Output</summary>
 
 ```text
-owen@spell       Projects       ...
-@spell/examples  Examples       10 projects
-@spell/guides    Guides         12 projects
-@spell/library   Libraries      1 project
-@spell/test      Test fixtures  7 projects
+owen@spell        Projects       ...
+@spell/examples   Examples       ... projects
+@spell/guides     Guides         ... projects
+@spell/notebooks  Notebooks      ... projects
+@spell/library    Libraries      1 project
+@spell/test       Test fixtures  ... projects
 ```
 
 </details>
@@ -1238,29 +1236,29 @@ If you find yourself writing a second copy of any of these, stop and reuse.
 | [publish/publish.types.ts](../src/cli/publish/publish.types.ts) | `"spellPublish"`'s shape, the reports, the folders |
 | [commands/ponyCommand.ts](../src/cli/commands/ponyCommand.ts) | `spell pony` |
 | [tsconfig.node.json](../tsconfig.node.json) | the kit's node settings, and its node type check |
-| [tsconfig.tsx.json](../tsconfig.tsx.json) | the settings `tsx` runs every repo's commands under:  `tsconfig.node.json`'s, over every repo's files |
+| [tsconfig.tsx.json](../tsconfig.tsx.json) | the settings `tsx` runs every folder's commands under:  `tsconfig.node.json`'s, over every folder's files |
 
-- `tsx` takes one settings file for every file it runs, so this one holds what every repo's commands need:
-  JSX for `spell-app`'s Ink screens, and standard decorators lowered for `spell-parser`.
+- `tsx` takes one settings file for every file it runs, so this one holds what every folder's commands need:
+  JSX for the app's Ink screens, and standard decorators lowered for the parser.
 - It applies those settings only to the files the settings file includes.
-  So `spell` runs under `tsconfig.tsx.json`, which includes every repo:
-  under `tsconfig.node.json` alone, `spell-app`'s screens crashed in a terminal with `React is not defined`.
-- The tests:  the kit's in [tests/cli/](../tests/cli/), each repo's commands' in that repo's `tests/cli/`.
-  - The kit's run the real `spell` as separate processes, so a broken command list in any repo fails them.
-  - `spell-app`'s include end-to-end runs of every language command, through the kit's bin.
-- The other repos' lists:  [spell-parser's](https://github.com/spell-app/spell/blob/main/parser/src/cli/commands.ts)
+  So `spell` runs under `tsconfig.tsx.json`, which includes every folder:
+  under `tsconfig.node.json` alone, the app's screens crashed in a terminal with `React is not defined`.
+- The tests:  the kit's in [tests/cli/](../tests/cli/), each folder's commands' in that folder's `tests/cli/`.
+  - The kit's run the real `spell` as separate processes, so a broken command list in any folder fails them.
+  - The app's include end-to-end runs of every language command, through the kit's bin.
+- The folders' lists:  [the parser's](https://github.com/spell-app/spell/blob/main/parser/src/cli/commands.ts)
   (the `language` hook's shape is its [cli.types.ts](https://github.com/spell-app/spell/blob/main/parser/src/cli/cli.types.ts)),
   [Spell UI's](https://github.com/spell-app/spell/blob/main/ui/src/cli/commands.ts) ([its README-site.md](https://github.com/spell-app/spell/blob/main/ui/README-site.md)),
-  [spell-app's](https://github.com/spell-app/spell/blob/main/app/src/cli/commands.ts) and [its hooks](https://github.com/spell-app/spell/blob/main/app/src/cli/hooks.ts).
+  [the app's](https://github.com/spell-app/spell/blob/main/app/src/cli/commands.ts) and [its hooks](https://github.com/spell-app/spell/blob/main/app/src/cli/hooks.ts).
 
 </details>
 
 <details>
 <summary>Under the hood:  working copies, the pinned Ink, and a warning you can ignore</summary>
 
-- `spell` runs the other repos' working copies:  whatever is in their folders right now.
-  - A half-finished change there breaks `spell`.
-  - And a repo's `yarn ts` reports their type errors too.
+- `spell` runs the kit's working copy:  whatever is in each folder right now.
+  - A half-finished change in any folder breaks `spell`.
+  - And a folder's `yarn ts` reports the type errors of the folders below it too.
 - Ink is at 5, with React 18:  Ink 6 and later need React 19.
   This React is only the terminal screens', so it's free to move.
 - `yarn` warns `YN0072 ... --preserve-symlinks` about the links:  ignore it.
@@ -1281,8 +1279,9 @@ Planned, and none of it started:
 - The language commands' work, moved down from `spell/app` into `spell-parser` command by command,
   so they run with `spell-parser` alone.
 - `spell lsp`, which starts the language server, so the VS Code extension runs it rather than a `tsx` path.
-- A bundled `spell` on npm, which installs and runs with no checkout at all.
-  It needs `keepNames` (rules register by class name), the version stamp, and the projects folder found some other
+- A BUNDLED `spell` on npm, one file.
+  Today's `npm install spell@next` already runs `npx spell help` with no checkout, from the built folders.
+  A bundle needs `keepNames` (rules register by class name), the version stamp, and the projects folder found some other
   way than next to `src/`.
 - The repo-wide checks as commands, `ts`, `lint`, `format`, `test` and `review` over every repo,
   under a group of their own, since `lint`, `test` and `format` are the language's words.
@@ -1302,7 +1301,7 @@ They're named in the command line's goals and the commands page's roadmap.
 <details>
 <summary>More in the docs site</summary>
 
-These guides live in the content folder, so they need a checkout with `spell.epics` beside the repos and the page
+These guides live in the content folder, so they need a checkout with `spell.epics` in it and the page
 server running (`spell server start`, then the address it prints):
 
 - "Commands", the map of every command, skill and yarn script, and its roadmap:  `/guides/dev/commands/commands.html`;

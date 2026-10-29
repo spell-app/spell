@@ -1,7 +1,7 @@
 /*
- * `Fold.collapseAllButton()` (`Fold.tsx`):  the double up-chevron beside an open title's fold chevron.
- * - Adopted as `epic-collapse-all` by
- *   `<epic-overview>`, `<epic-section>`, `<epic-phase>`, `<epic-item>` and `<epic-page>`.
+ * `Fold.toggleAllButton()` (`Fold.tsx`):  the page toolbar's double chevron, opening or folding the whole page.
+ * - Adopted as `epic-collapse-all` by `<epic-page>`.
+ * - A fold's own title row has none since epic `epic-engine` I161:  ⌥-click on its chevron does it.
  * - Square and muted, as the Phases toggles;  the chevron's stroke, a size up.
  */
 

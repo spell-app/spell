@@ -40,6 +40,8 @@ export type ReviewShows = (typeof REVIEW_SHOWS)[number]
  *   (`PLAN_BUTTONS`);  its note box a part's
  * - `change`:  a change mark's (`<epic-change>`, epic `epic-engine` P30):  Reopen (`CHANGE_BUTTONS`);
  *   no note box
+ * - `update`:  a new update block's (`<epic-update id="up3">`, epic `epic-engine` I168):  Seen (`UPDATE_BUTTONS`);
+ *   no note box
  * - `accepted`:  a to-do phase whose build plan Owen accepted (`<epic-phase plan="accepted">`, epic `epic-engine`
  *   I140):  a part's buttons, then the green check of a plan accepted, a STATE, not a button (`ACCEPTED_CHECK`)
  */
@@ -51,6 +53,7 @@ export const REVIEW_KINDS = [
   "closed",
   "proposal",
   "change",
+  "update",
   "plan",
   "accepted"
 ] as const
@@ -87,7 +90,7 @@ export type ReviewButtonSpec = {
   /**
    * what it does (`ReviewClient.press()`;  `next` and `drop` a todo's plane and x)
    */
-  action: "approve" | "todo" | "revisit" | "next" | "drop" | "defer" | "accept" | "reopen"
+  action: "approve" | "todo" | "revisit" | "next" | "drop" | "defer" | "accept" | "reopen" | "seen"
   /** its colour once pressed:  green decided, blue an ask of Claude (Q20), grey no longer relevant */
   color: ReviewColor
   /** its `ui-icon` */
@@ -103,6 +106,7 @@ export type ReviewButtonSpec = {
     | "looksGood"
     | "defer"
     | "reopenChange"
+    | "seenUpdate"
     | "acceptPlan"
     | "deferPhase"
   /** what it does, for a screen reader */
@@ -116,6 +120,7 @@ export type ReviewButtonSpec = {
     | "looksGoodTip"
     | "deferTip"
     | "reopenChangeTip"
+    | "seenUpdateTip"
     | "acceptPlanTip"
 }
 
@@ -188,6 +193,16 @@ export const CHANGE_BUTTONS: readonly ReviewButtonSpec[] = [
   { action: "reopen", color: "blue", icon: "history", label: "reopenChange", tip: "reopenChangeTip" }
 ]
 
+/**
+ * A new update block's button (`<epic-update id="up3">`, epic `epic-engine` I168;  Owen, 2026-10-29:  "How do I clear
+ * these 'update' marks?"), at its title row's right while it's new and the page is reviewed:
+ * - Seen (`seen`, grey:  no longer news):  the block folds to one grey line at once;  `inbox apply` writes `seen` into
+ *   the page, so it's seen for everyone
+ */
+export const UPDATE_BUTTONS: readonly ReviewButtonSpec[] = [
+  { action: "seen", color: "grey", icon: "check", label: "seenUpdate", tip: "seenUpdateTip" }
+]
+
 /** The line's buttons of each `buttons`:  none of the review inbox's for a thread's (`THREAD_BUTTONS_OF`). */
 export const BUTTONS_OF: Readonly<Record<ReviewKind, readonly ReviewButtonSpec[]>> = {
   item: REVIEW_BUTTONS,
@@ -197,6 +212,7 @@ export const BUTTONS_OF: Readonly<Record<ReviewKind, readonly ReviewButtonSpec[]
   closed: [],
   proposal: PROPOSAL_BUTTONS,
   change: CHANGE_BUTTONS,
+  update: UPDATE_BUTTONS,
   plan: PLAN_BUTTONS,
   accepted: PART_BUTTONS
 }
@@ -320,6 +336,7 @@ export const NOTE_BUTTONS_OF: Readonly<Record<ReviewKind, readonly NoteButtonSpe
   closed: [],
   proposal: NOTE_BUTTONS,
   change: [],
+  update: [],
   plan: NOTE_BUTTONS,
   accepted: NOTE_BUTTONS
 }
@@ -468,6 +485,7 @@ export const REVIEW_NAME_TEXTS = [
   },
   { key: "defer", text: "Defer", description: "A phase's review button while the phases are agreed:  its name." },
   { key: "reopenChange", text: "Reopen", description: "A change mark's button (the history):  its name." },
+  { key: "seenUpdate", text: "Seen", description: "A new update block's button (the check):  its name." },
   { key: "boxSkip", text: "Skip this", description: "Note box button (the x):  its name." }
 ] as const
 
@@ -521,6 +539,11 @@ export const REVIEW_TEXTS = [
     key: "deferTip",
     text: "Later:  after the other phases, still to do, once Claude applies it",
     description: "A phase's review button while the phases are agreed:  what Defer does."
+  },
+  {
+    key: "seenUpdateTip",
+    text: "Seen:  fold it to one grey line, for everyone, once Claude applies it",
+    description: "A new update block's button:  what Seen does."
   },
   {
     key: "reopenChangeTip",

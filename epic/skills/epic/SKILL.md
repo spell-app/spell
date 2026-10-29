@@ -324,6 +324,15 @@ NO plan mode, ever, for an epic (epic `epic-engine` P33;  Owen, 2026-10-24).
 3. Each open question:  `epic add <name>#Q "title" --details "..."`, explained with examples ("5. Each phase", item 7).
    - ONE question, ONE choice set (`<epic-choices>`):  two choices are two questions.
      `epic lint` says `ASKS:` for an item asking two open sets at once (I88):  the person could pick in only one.
+   - WHERE a choice goes (epic `epic-engine` P50;  `PLAN-DOC.md`, "Option sets"):
+     - a fork that belongs to ONE phase:  inside that phase, its Choices field
+       (`epic update <name>#P3 --choices "<epic-choices>...</epic-choices>"`), not a separate question:
+       the phase's story stays together, and Accept plan takes its recommended option
+     - a cross-cutting one:  a question, as here
+     - an open-ended list the person picks from round after round:  a STANDING set in the Choices section
+       (`epic add <name>#choices "Title" [--multiple]`, then `epic option add <name>#s-<slug> "Title" "note"`)
+     - `multiple` where several can be picked;  `fixed` where an added option makes no sense (every other set takes
+       the person's);  `epic option close <name>#<id>` once a set is done
    - Loose ends:  `#T` (a todo, work still to do), `#T ... --limit` (a limit to know about).
 4. `epic lint <name>`, `epic open <name> --review`, then LISTEN:  `epic inbox listen <name>`, then
    `epic inbox wait <name>` in the background ("7. Review", 7.3:  every Send wakes this session).
@@ -433,6 +442,14 @@ than just being able to move on").
   ONE press, I125), or Accept Phase on each (once building:  the header's Send is ringed (2px #666) while any waits, its tooltip naming them);  one Send.  Or they say "go"
   in chat:  every waiting plan accepted.
   - Revisit on one:  rewrite that plan (a new `--plan` waits again);  the accepted ones stay accepted.
+  - Accept Phase on one they have just COMMENTED in (its Revisit pressed by itself, I158):  the Accept keeps their comments
+    (epic `epic-engine` I163;  Owen, 2026-10-29:  "just incorporate the feedback and auto-approve rather than asking
+    me again").  `wait` prints "accepted, with comments to fold in:  C4, C5";  `inbox apply` accepts the plan as usual.
+    - Fold them into the plan and KEEP it accepted:  `epic update <name>#P<N> --plan "<ol>...</ol>" --accepted`
+      (no `waiting`, no spinner), then answer each comment on its thread
+      (`epic inbox done <name>#C4 --file <answer.html>`:  what changed in the plan).  NO new Accept, no stop.
+    - Only a comment that goes against something they decided, or changes the scope a lot, becomes a Q item instead
+      (`epic add <name>#Q`, its thread answered with the link);  the rest are still folded in.
   - A plan rewritten from an ANSWER (a question decided, a revisit's pick):  the changed words marked
     (`<epic-change item="q<n>">`, then `epic change`), and NO `epic updated` block (epic `epic-engine` I159;  Owen,
     2026-10-29, on P51's orange Update under its Q53 marks:  "Do we still need the orange update section like this?").
@@ -455,6 +472,8 @@ than just being able to move on").
        (`--plan`, it waits), with the coherence review over it ("4b. Build plans"), listen, and END THE TURN with the
        phase's link pair:  "P<N>'s plan changed:  ...".  Only then a stop.
    - No accepted plan (a phase from before I117, or added without one):  write it now, as "4b. Build plans", and wait.
+   - Accepted WITH their comments ("accepted, with comments to fold in", epic `epic-engine` I163):  fold them in as
+     "4b. Build plans" says, `--plan ... --accepted`, answer each comment, and go on.  NO stop.
    - No plan at all only when the person said to start the phase without one ("just do it"), or in bedtime mode.
 2. Do the work.
    Record as you go, not at the end:
@@ -463,6 +482,9 @@ than just being able to move on").
    - A choice:  `add <name>#D` (a question born answered).
    - The person settles an item's options IN WORDS (a reply, the chat:  "require the parens"), not with the page's pick:
      `choose <name>#<id> <letter> "<outcome>"` right away, before or with building it.
+     - several letters in a pick-any set (`choose <name>#Q4 A C "..."`);  a phase's set (`#P3`) or a standing set
+       (`#s-upgrades`) as its target
+     - an option to add, reword or drop:  `epic option add | edit | remove <name>#<id> ...` (the old text kept, folded)
      - It records it as their pick would:  that card set's `chosen`, the item green (a question answered, a call
        closed;  an issue or todo only reviewed), the outcome on the set, shown in its Choices (no Noted card, I153).
      - Skipped, the item stays red with nothing chosen, though the work is built (`outline-spell` J9, 2026-10-19).
@@ -479,6 +501,11 @@ than just being able to move on").
          - it needs their answer before work can go on
        - Following the repo's house style is one case of calm, not the only one.
        - Never ask:  decide, and record it.
+       - A call that needs their YES / NO (it went ahead, but they may say "don't"):  give it an option set, so they pick on
+         the page (epic `epic-engine` P50, request r44;  Owen, 2026-10-29:  "In future, this could be a question
+         block!"):  `add <name>#J "..." --options "*Do it | Don't" --calm`, `*` the one taken.
+         - a question takes `--options` too (`add <name>#Q "..." --options "A:Red | B:Blue"`)
+         - pros and cons on an option afterwards:  `epic option edit <name>#J5 A --note "..."`
        - The person flips it from its id chip while reviewing;  `epic calm <name>#<id> [<id>...] [--loud]` from the CLI.
    - Items added while the phase is active carry it.
      - The phase's "To review" line lists the ones the person hasn't reviewed;  the script writes it on every edit.
@@ -797,6 +824,9 @@ epic inbox watch <name>  /  ignore <name>  this session is (no longer) reviewing
 epic inbox wait <name>                     Bash run_in_background:  exits with work (or 2:  timeout)
                                            In Codex:  run it in the foreground;  it returns with the work
 epic inbox apply <name> [ids]              approve / pick / Make Todo marks into the doc;  prints what's left
+                                           a pick on a PHASE's set ("P3's choices:  ...;  adjust its plan"):  rewrite
+                                           that phase's plan to it;  on a STANDING set ("...:  act on this round"):
+                                           act on the picked options, add new ones as they come (epic-engine P50)
 epic inbox working <name>#<id> on|off      the page's spinner on an item, or a phase (P20)
 epic inbox status <name> "<text>" [--items q3,c2] | --clear   the toolbar's line:  what you're doing, what you answer
 epic update <name>#<id> underway "<reading>"   Claude's blue status card on an item, spinner on
@@ -926,6 +956,11 @@ want you to just do it").
    - Up to 5 agents at once (root rules);  more:  the rest after.
 3. SENT marks:  `epic inbox apply <name>`.
    - Approvals, picks and todos made or queued land in the doc;  it prints each.
+   - An Accept that carries their comments in its text ("accepted, with comments to fold in:  C4, C5";  epic
+     `epic-engine` I163):  `apply` accepts the plan and leaves the comments.  Fold them into the plan, keeping it
+     accepted (`epic update <name>#P<N> --plan "..." --accepted`), then answer each (`epic inbox done <name>#C4
+     --file <answer.html>`).  No new Accept.  Only a comment against something they decided, or a big change of
+     scope, becomes a Q item instead ("4b. Build plans").
    - TEST RESULTS from the person's test run (epic `epic-engine` P4):  `wait` prints them under
      "test, the person's test run", each test with its result (`passed`, `FAILED`, `skip`, `not now`), their COMMENT and their
      screenshot's path.  `apply` applies them all:
@@ -1404,6 +1439,7 @@ add-phase <name> "Short Name" --symptom .. --changes .. [--goal ..] [--files ..]
                                                     PN;  either way the to-do phases after it move down a number
 update <name>#P<N> [--symptom ..] [--changes ..] [--goal ..] [--files ..] [--verify ..]   set ("" removes) fields
 update <name>#P<N> --plan "<ol>..</ol>"             Claude's build plan:  waits for the person's Accept plan (5., step 1)
+update <name>#P<N> --plan "<ol>..</ol>" --accepted  their Accept carried comments:  folded in, stays accepted (4b.)
 updated <name>#P<N> "<p>what changed</p>" [--summary ".."] [--for <ids>]   phase N's plan changed, no item the
                                                     cause:  <epic-update>, after Goal;  nothing when marks say it
 file <name>#P<N> <rN>                               a request into phase N's Requests field, marked filed there

@@ -1653,7 +1653,12 @@ export const FormControlStates = {
 // ## Sources:  shared by ui-include, ui-code, ui-markdown (`LoadableComponent`)
 ////////////////
 
-/** When a `source` is fetched:  now, once scrolled into view, or when the browser is idle (Astro's islands). */
+/**
+ * When a `source` is fetched (Astro's islands):
+ * - `eager`:  now
+ * - `visible`:  once scrolled into view
+ * - `idle`:  when the browser is idle, or 2s later at most
+ */
 export const SourceLoadModes = ["eager", "visible", "idle"] as const
 
 /** One of `SourceLoadModes`. */

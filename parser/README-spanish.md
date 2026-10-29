@@ -38,7 +38,7 @@ _Solitario open in the editor, in a Spanish browser:  the program, the game, and
 
 ## Try it
 
-You need the kit's checkout with its child repos, and `spell` on your `PATH`:
+You need a checkout of the kit, and `spell` on your `PATH`:
 the kit's [setup from zero](https://github.com/spell-app/spell/blob/main/README.md#setup-from-zero) does both.
 
 **Run Solitario's tests.**
@@ -109,7 +109,7 @@ plantilla Carta, subplantilla de View
 La carta dice cuáles son sus palos, rangos y colores:  un mazo, una pila o un juego solo los leen.
 Una vista:  cada carta es un elemento propio en la página, p. ej. <solitario-carta>.
 
-propiedades:  rango, valor, palo, color, nombre, dirección, imagen, símbolo, estado, pila
+propiedades:  rango, valor, palo, color, nombre, dirección, imagen, cara, símbolo, estado, pila
 enumeraciones:  Rangos, Palos, Direcciones
 declarado en Carta.es.spell:4
 
@@ -476,4 +476,4 @@ Spell UI's Spanish, the runtime's messages and the editor's words are first draf
 - [README-examples](https://github.com/spell-app/spell/blob/main/app/README-examples.md#solitario--the-same-game-in-spanish):  Solitario beside Solitaire
 - [The command line's page](https://github.com/spell-app/spell/blob/main/README/cli.md#translating-a-project):  `spell translate` and `speedtest`, every option
 - [Spell UI's runtime page](https://github.com/spell-app/spell/blob/main/ui/README-runtime.md#vocabularies-and-localization):  a Spell UI page written in Spanish
-- [spell-parser's README](README.md):  the language, its pipeline, and every page of the repo
+- [spell-parser's README](README.md):  the language, its pipeline, and every page of the folder

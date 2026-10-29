@@ -16,8 +16,8 @@ import messageCSS from "./EpicThreadMessage.css?inline"
  * shadow root (Owen, 2026-10-10:  "lose the 'claude' 'You' bit -- move the time to the top-right of each bit position
  * absolute";  then "Put You in bold, same line, before me and Claude: before yours").
  * - The colour says who (`by`):  a person's plain on the thread's ivory, an agent's a light box in the agent's colour
- *   (`--epic-voice-agent`, epic `epic-friend` P10;  violet before), the Done line green, the thinking stub in the
- *   agent's colour and italic (`EpicThreadMessage.css`).
+ *   (`--epic-voice-agent`, epic `epic-friend` P10;  violet before), the Done line green, the thinking stub blue and
+ *   italic (at work on it, epic `epic-engine` I169) (`EpicThreadMessage.css`).
  *   - a speaker with a colour of their own (the repo's settings):  `--_epic-voice`, which `<epic-thread>` sets on it
  * - A bold "You:" / "Codex:" starts its first line:  floated before what was said (its slot), so it sits on the
  *   first line of the first paragraph, whatever that paragraph is.  The Done line has its check instead.

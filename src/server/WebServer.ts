@@ -6,7 +6,7 @@ import type { FileTransform, HtmlTransform, Mount, ServedFile } from "spell/serv
 // Import directly:  through the `SRV` barrel, the Linker's HTML parser lands in spell-epic's extension (I58)
 import { Guard } from "./Guard"
 import { toListener } from "./listener"
-import { liveClientScript, type ServerConfig } from "./liveClient"
+import { holdRevealScript, liveClientScript, type ServerConfig } from "./liveClient"
 import { LiveReload } from "./LiveReload"
 import { type ListenOptions, listenPreferred } from "./ports"
 import { underPrefix } from "./proxy"
@@ -173,7 +173,7 @@ export class WebServer {
     const config = JSON.stringify(this.config(served)).replace(/</g, "\\u003c")
     const head = page.search(/<\/head>/i)
     const icons = HAS_ICON.test(head < 0 ? "" : page.slice(0, head)) ? "" : FAVICON_LINKS
-    const tags = `${icons}<script>window.SPELL_SERVER = ${config}</script>\n<script src="${LIVE_SCRIPT}" defer></script>\n`
+    const tags = `${icons}<script>window.SPELL_SERVER = ${config}</script>\n<script>${holdRevealScript()}</script>\n<script src="${LIVE_SCRIPT}" defer></script>\n`
     return head < 0 ? tags + page : page.slice(0, head) + tags + page.slice(head)
   }
 }
