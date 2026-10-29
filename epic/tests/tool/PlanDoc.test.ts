@@ -499,6 +499,55 @@ describe("PlanDoc phases", () => {
     expect(later.marksSay(1, "<p>Owen answered Q1</p>", ["q1"])).toEqual(["Q1"])
   })
 
+  // epic `epic-engine` I179 (Owen, 2026-10-29:  "If its 'accepting the update' I shouldn't have to do that if you are
+  // doing what I said")
+  test("Owen's own answer (I179):  an Update block carrying it out is written seen, out of `to-see`, logged", () => {
+    const plan = freshPlan()
+    plan.addPhase("One", { symptom: "s", changes: "c" })
+    expect(plan.addItem("decision", "Glass")).toBe("q1")
+    plan.addItem("question", "still open?")
+    // names an answered question, by link or in its words:  seen at its own `at`, with the line
+    expect(plan.addPhaseUpdate(1, '<p>Owen picked Glass (<a href="#q1">Q1</a>).</p>')).toBe(
+      "P1:  Update block is Owen's own answer (Q1):  no Seen needed"
+    )
+    expect(plan.addPhaseUpdate(1, "<p>As his comment C3 asked</p>")).toBe(
+      "P1:  Update block is Owen's own answer (C3):  no Seen needed"
+    )
+    // news for Owen:  no item, an open one too, a file, an estimate
+    expect(plan.addPhaseUpdate(1, "<p>Split in two</p>")).toBe("")
+    expect(plan.addPhaseUpdate(1, "<p>Q1, and a new question, Q2</p>")).toBe("")
+    expect(plan.addPhaseUpdate(1, "<p>Q1:  moved to <code>src/tool/X.ts</code></p>")).toBe("")
+    expect(plan.addPhaseUpdate(1, "<p>Q1:  the estimate goes to 6-8h</p>")).toBe("")
+    // `--for`:  every item it's for answered, whatever the words name
+    expect(plan.addPhaseUpdate(1, "<p>moved to <code>X.ts</code></p>", { forIds: ["q1"] })).toMatch(/\(Q1\)/)
+    expect(plan.addPhaseUpdate(1, "<p>anything</p>", { forIds: ["q1", "q2"] })).toBe("")
+    plan.updateStates()
+    const updates = Array.from(plan.document.querySelectorAll("epic-update"))
+    expect(updates.map((update) => [update.id, update.getAttribute("seen")])).toEqual([
+      ["up1", "2026-10-01 09:05"],
+      ["up2", "2026-10-01 09:05"],
+      ["up3", null],
+      ["up4", null],
+      ["up5", null],
+      ["up6", null],
+      ["up7", "2026-10-01 09:05"],
+      ["up8", null]
+    ])
+    expect(el(plan, "p1").getAttribute("to-see")).toBe(
+      ["up3", "up4", "up5", "up6", "up8"].map((id) => `${id}@2026-10-01T09:05`).join(" ")
+    )
+    const said = Array.from(plan.document.querySelectorAll("#log > epic-event"), (event) => event.textContent)
+    expect(said.filter((line) => line!.includes("Owen's own answer"))).toHaveLength(3)
+    // a block written by hand, not through `updated`:  the write's pass stamps it, once
+    const block = plan.document.createElement("epic-update")
+    Markup.set<"epic-update">(block, { at: "2026-10-01 09:00", summary: "Q1 carried out" })
+    Markup.place(el(plan, "p1"), block)
+    expect(plan.updateUpdates()).toBeGreaterThan(0)
+    expect(block.getAttribute("seen")).toBe("2026-10-01 09:00")
+    expect(plan.updateUpdates()).toBe(0)
+    expect(problems(plan)).toEqual([])
+  })
+
   // epic `epic-engine` I168 (Owen, 2026-10-29:  "How do I clear these 'update' marks?")
   test("update blocks:  each given its id (`up1`);  each host's `to-see` lists the new ones, with their `at`", () => {
     const plan = freshPlan()

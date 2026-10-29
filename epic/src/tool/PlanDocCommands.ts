@@ -245,8 +245,9 @@ export class PlanDocCommands {
           const html = flags.file ? readFileSync(flags.file as string, "utf8") : need(rest[1], "what changed (html)")
           const ids = plan.marksSay(n, html, forIds?.filter(Boolean))
           if (ids.length) return `${plan.phaseLabel(n)}:  no Update block, the change marks say it (${ids.join(", ")})`
-          plan.addPhaseUpdate(n, html, { summary: stringFlag(flags.summary) })
-          return undefined
+          // Owen's own answer carried out:  written seen, no news for him (I179)
+          const given = forIds?.filter(Boolean)
+          return plan.addPhaseUpdate(n, html, { summary: stringFlag(flags.summary), forIds: given }) || undefined
         })
         if (said) this.print(said)
         return undefined

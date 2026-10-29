@@ -812,6 +812,19 @@ easily"), `components/epic-update/`:
   - Quiet:  grey, folded to its title row (its date and summary), out of the pen;  kept, as the record.
     - seen:  `seen="<time>"` on the block, written by `epic inbox apply` from its Seen mark (below), for everyone
     - or old:  3 days after `at`, the change marks' rule (`PlanDates.isQuiet()`, one copy for both)
+  - NEVER NEW:  a block carrying out OWEN'S OWN ANSWER is no news for him (epic `epic-engine` I179;  Owen, 2026-10-29,
+    on debut's P21 and P22 orange for his own picks on Q39 and Q41:  "If its 'accepting the update' I shouldn't have to
+    do that if you are doing what I said")
+    - written `seen="<its at>"`, never in `to-see`:  no orange, no pen count, no Seen to press
+    - Owen's:  every item it names (its words, summary or `#q39` links) is one he answered (`answered`, `decided`, a
+      `chosen` set, `taken-in`, `handled`) or a comment of his (`C3`);  and it names no file (a move) and no estimate
+      (a scope change)
+      - or `updated --for <ids>`:  every item it's for is his, whatever the words name
+    - the rule:  `UpdateMarks.owensAnswer()`;  the write:  `PlanDoc.seenAsOwens()`, from `addPhaseUpdate()` (`updated`
+      prints "P21:  Update block is Owen's own answer (Q39):  no Seen needed", logged too) and from every write's
+      `updateUpdates()` (a block written by hand)
+    - a change Claude made on its own (a plan adjusted while building, a file moved, a scope change) stays new
+    - the pages nothing has written since:  the migration `owens-answers-seen` (below)
   - `id`:  each block's `up3`, given by the tool on every write (`updateUpdates()`), after the highest in the doc;
     its Seen mark's inbox key.  A bare label never has one.
   - SEEN, a review mark (`{ action: "seen" }` under the block's id):
@@ -829,6 +842,7 @@ easily"), `components/epic-update/`:
       until then the pen shows `changes`
   - No migration step:  `seen` is new and optional, an older block goes quiet by age, and every write stamps the ids
     and `to-see`.
+    - Except Owen's own answers (I179):  `owens-answers-seen` stamps the new ones seen and takes them out of `to-see`.
   - Why a review mark, not a write at once:  the review routes never write the page (only `inbox apply` does, under
     its lock), and Reopen, the other button that changes a mark's look, already goes this way.
 

@@ -4,6 +4,7 @@ import { ItemRenames } from "./ItemRenames"
 import { LinksAgree } from "./LinksAgree"
 import { LogCommits } from "./LogCommits"
 import { MoreRequestsFirst } from "./MoreRequestsFirst"
+import { OwensAnswersSeen } from "./OwensAnswersSeen"
 import { PicksInChoices } from "./PicksInChoices"
 import { RootLinks } from "./RootLinks"
 import { TakenInPhase } from "./TakenInPhase"
@@ -48,7 +49,8 @@ export class Migrations {
     new DoneCardsClose(),
     new PicksInChoices(),
     new UpdatesSaidByMarks(),
-    new LogCommits()
+    new LogCommits(),
+    new OwensAnswersSeen()
   ]
 
   /** The steps every edit runs too (`PlanDoc.migrate()`):  the cheap markup ones. */

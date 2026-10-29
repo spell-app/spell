@@ -41,7 +41,8 @@ export class UpdatesSaidByMarks implements Migration {
         if (!at) continue
         const summary = block.getAttribute("summary") ?? ""
         const text = `${summary} ${block.textContent ?? ""}`.replace(/\s+/g, " ").trim()
-        if (block.querySelector("epic-change") || UpdateMarks.namesFile(text) || ESTIMATE.test(text)) continue
+        if (block.querySelector("epic-change") || UpdateMarks.namesFile(text) || UpdateMarks.namesEstimate(text))
+          continue
         const said = UpdateMarks.marked(phase, UpdateMarks.idsIn(text), at)
         if (!said.length) continue
         block.remove()
@@ -72,6 +73,3 @@ export class UpdatesSaidByMarks implements Migration {
     log.append(event)
   }
 }
-
-/** An estimate in text:  the word, or a duration in hours (`4-5h`, `1.5h`). */
-const ESTIMATE = /\bestimate\b|\b\d+(?:\.\d+)?(?:-\d+(?:\.\d+)?)?h\b/i

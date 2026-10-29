@@ -609,9 +609,15 @@ export class PlanDoc extends PlanReader {
    *   it's new (`updateUpdates()`, every edit)
    * - old prose shapes in `html` (a Net effect paragraph, a code accordion ...) become elements (`IncomingHtml`)
    * - NOT for a change an answer caused, which its change marks say:  `marksSay()` first (`updated` asks it)
+   * - Owen's own answer carried out (`forIds`, the items it's for, else the ids it names):  written seen, no news for
+   *   him (`seenAsOwens()`, I179);  returns the line saying so, else `""`
    * - SIDE EFFECT:  logs it
    */
-  addPhaseUpdate(n: number, html: string, { summary }: { summary?: string } = {}): void {
+  addPhaseUpdate(
+    n: number,
+    html: string,
+    { summary, forIds }: { summary?: string; forIds?: readonly string[] } = {}
+  ): string {
     const phase = this.phase(n)
     const nodes = this.incoming(html)
     const given = PlanMarkup.squeeze(summary ?? "")
@@ -620,8 +626,10 @@ export class PlanDoc extends PlanReader {
       phase: this.activePhase,
       summary: given || UpdateSummary.of(nodes) || undefined
     }
-    Markup.place(phase, this.make("epic-update", data, nodes))
+    const update = this.make("epic-update", data, nodes)
+    Markup.place(phase, update)
     this.log(`${PhaseIds.labelOf(phase)} plan updated${data.summary ? `:  ${data.summary}` : ""}`)
+    return this.seenAsOwens(update, forIds)
   }
 
   /**
@@ -660,6 +668,7 @@ export class PlanDoc extends PlanReader {
    *   - the SKELETON's, as `to-accept` is:  a folded phase's pen counts them, and the review routes take their
    *     Seen marks (`ReviewInbox.itemIds()`), with the bodies not loaded
    * - a phase's old `changes` (every plan change, counted before I168) goes:  `to-see` says what the pen counts
+   * - a new block carrying out Owen's own answer is written seen, never listed (`seenAsOwens()`, I179)
    */
   updateUpdates(): number {
     let changed = 0
@@ -674,6 +683,10 @@ export class PlanDoc extends PlanReader {
     for (const update of updates) {
       const at = update.getAttribute("at")
       if (update.hasAttribute("seen") || PlanDates.isQuiet(at, this.now)) continue
+      if (this.seenAsOwens(update)) {
+        changed++
+        continue
+      }
       const host = update.parentElement?.closest(CHANGE_HOSTS)
       const token = at ? `${update.id}@${at.trim().replace(" ", "T")}` : update.id
       if (host) waiting.set(host, [...(waiting.get(host) ?? []), token])
@@ -686,6 +699,25 @@ export class PlanDoc extends PlanReader {
       changed++
     }
     return changed
+  }
+
+  /**
+   * Is Update block `update` OWEN'S OWN ANSWER, carried out (`UpdateMarks.owensAnswer()`, epic `epic-engine` I179)?
+   * Then it's no news for him:  stamped `seen` at its own `at`, so it's never orange, never on its phase's pen, and
+   * has no Seen to press.
+   * - `forIds`:  the items it's for (`updated --for q39`), else the ids it names
+   * - returns the line said (`P21:  Update block is Owen's own answer (Q39):  no Seen needed`), logged;  `""`:  news
+   *   for Owen, left as it is
+   */
+  seenAsOwens(update: Element, forIds?: readonly string[]): string {
+    const ids = UpdateMarks.owensAnswer(update, forIds)
+    if (!ids.length) return ""
+    Markup.set<"epic-update">(update, { seen: update.getAttribute("at") ?? PlanTime.clockTime(this.now) })
+    const phase = update.closest("epic-phase")
+    const where = phase ? PhaseIds.labelOf(phase) : (update.parentElement?.closest("[id]")?.id ?? "the page")
+    const said = `${where}:  Update block is Owen's own answer (${ids.join(", ")}):  no Seen needed`
+    this.log(said)
+    return said
   }
 
   /**
