@@ -990,7 +990,8 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
       name: "install",
       usage: "[--codex] [--kit <folder>] [--dry-run] [--json]",
       description:
-        "install the epic plugin in Claude Code as epic@spell, run in place from the kit's epic/:  the old " +
+        "install the epic plugin in Claude Code as epic@spell, run in place from the kit's epic/ (from npm:  the " +
+        "spell-epic package beside spell, its marketplace from GitHub):  the old " +
         "spell-epic@spell-epic taken out, the marketplace spell added, the cache, skill and epic links made;  " +
         "--codex:  for Codex instead, its hooks in ~/.codex/hooks.json, its skills linked in ~/.agents/skills, " +
         "the designer and coherence as Codex agents (~/.codex/agents) and epic on your PATH;  safe to run again",
@@ -1308,7 +1309,8 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
     "--step <html>": "a manual test:  exactly what to do",
     "--should <html>": "a manual test:  what should happen",
     "--example <png>": "a manual test:  a screenshot of it, or a line of text",
-    "--if-not <html>": "a manual test:  what to tell Claude when it doesn't"
+    "--if-not <html>": "a manual test:  what to tell Claude when it doesn't",
+    "--prepared <n>": "a manual test:  written out for Owen by Start testing, nth in his order"
   },
   summarize: { "--file <condensed.html>": "what the item shows now, as HTML" },
   restore: {
@@ -1339,7 +1341,7 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
   },
 
   // an epic page:  log and upkeep
-  log: {},
+  log: { "--last <n>": "with no text:  how many of the newest review lines to print (default 20)" },
   prompt: { "--file <file>": "the prompt, from a file" },
   bedtime: {},
   backfill: { "--all": "every epic", "--apply": "mark them:  a dry run without it" },

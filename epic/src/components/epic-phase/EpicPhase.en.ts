@@ -96,7 +96,7 @@ export const epicPhaseVocabulary = {
       format: "ids",
       description: "The ids inside its part file:  a link to one loads the body first, then lands."
     },
-    { name: "commits", kind: "boolean", description: "Its body lists commits (the page's git buttons)." },
+    { name: "commits", kind: "boolean", description: "Its body lists commits:  its git icon shows." },
     {
       name: "to-accept",
       kind: "string",
@@ -169,6 +169,12 @@ export const epicPhaseVocabulary = {
   parts: [
     ...FOLD_PARTS,
     {
+      name: "git",
+      description:
+        "Its git icon (epic `epic-engine` P53), before its gear, while it lists commits:  shows or hides its own " +
+        "commits;  pressed while they show."
+    },
+    {
       name: "status",
       description:
         "Its status icon, in its status's colour;  while Claude is at work on it (`:state(working)`), a blue turning " +
@@ -213,6 +219,7 @@ export const epicPhaseVocabulary = {
   ],
   states: [
     ...FOLD_STATES,
+    { name: "commits", description: "Its own commits show:  its git icon pressed." },
     {
       name: "movable",
       description:
@@ -242,6 +249,12 @@ export const epicPhaseVocabulary = {
       description: "Its spinner while Claude is at work on it, its plan accepted or the phase under way."
     },
     { key: "gearTip", text: "Settings for this phase", description: "Its gear's tooltip and name (I166)." },
+    { key: "showCommits", text: "Show this phase's commits", description: "The git icon's tooltip (P53, J163)." },
+    {
+      key: "hideCommits",
+      text: "Hide this phase's commits",
+      description: "The git icon's tooltip, its commits shown."
+    },
     {
       key: "showPhaseFiles",
       text: "Show this phase's files",

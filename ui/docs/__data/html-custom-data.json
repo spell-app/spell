@@ -20590,7 +20590,7 @@
       "name": "ui-menu",
       "description": {
         "kind": "markdown",
-        "value": "A menu displays grouped navigation actions.\n\nAlso known as:  navbar, nav, tabs bar, toolbar, sidebar menu, pagination.\n\n**Slots:**  default, `overflow`\n\n**Events:**  `ui-choosing`"
+        "value": "A menu displays grouped navigation actions.\n\nAlso known as:  navbar, nav, tabs bar, toolbar, sidebar menu, pagination.\n\n**Slots:**  default, `overflow`\n\n**Events:**  `ui-choosing`, `ui-changed`"
       },
       "attributes": [
         {
@@ -20713,6 +20713,21 @@
             },
             {
               "name": "borderless"
+            }
+          ]
+        },
+        {
+          "name": "choose",
+          "description": {
+            "kind": "markdown",
+            "value": "A `segmented` menu's choice:  `one` (the default) selects the item chosen and unselects the rest;  `many` makes each item a toggle, pressed in while selected (`aria-pressed`), with no sliding thumb.  One stays on:  turning off the only one on turns on the next, to its right or below (round to the first).\n\nTakes:  `one` · `many`"
+          },
+          "values": [
+            {
+              "name": "one"
+            },
+            {
+              "name": "many"
             }
           ]
         },
@@ -40291,7 +40306,7 @@
           "name": "show",
           "description": {
             "kind": "markdown",
-            "value": "Which controls to show:  `both` (the palette button, whose overlay picks the theme and light / dark), `scheme` (a light / dark button alone) or `theme` (a theme dropdown).\n\nTakes:  `both` · `theme` · `scheme`\nDefault:  `both`"
+            "value": "Which controls to show:  `both` (the palette button, whose overlay picks the theme and light / dark), `scheme` (a light / dark button alone), `theme` (a theme dropdown) or `menu` (the overlay's panel alone, drawn in place:  the body of a sub-menu in another menu, which calls `focusChosen()` as it opens it).\n\nTakes:  `both` · `theme` · `scheme` · `menu`\nDefault:  `both`"
           },
           "values": [
             {
@@ -40302,6 +40317,9 @@
             },
             {
               "name": "scheme"
+            },
+            {
+              "name": "menu"
             }
           ]
         },
@@ -41750,7 +41768,7 @@
       "name": "ui-toolbar",
       "description": {
         "kind": "markdown",
-        "value": "A toolbar is a horizontal menu whose items scroll sideways when they don't fit, with a button at each end while there's more to see that way;  `shrinkable`, it fits their titles to its width instead.  It takes every `<ui-menu>` attribute.\n\nAlso known as:  toolbar, tool bar, scrolling tabs, overflow menu, chip bar, scrollable menu.\n\n**Slots:**  default, `overflow`, `icon`, `title`, `center`, `right`\n\n**Events:**  `ui-choosing`"
+        "value": "A toolbar is a horizontal menu whose items scroll sideways when they don't fit, with a button at each end while there's more to see that way;  `shrinkable`, it fits their titles to its width instead.  It takes every `<ui-menu>` attribute.\n\nAlso known as:  toolbar, tool bar, scrolling tabs, overflow menu, chip bar, scrollable menu.\n\n**Slots:**  default, `overflow`, `icon`, `title`, `center`, `right`\n\n**Events:**  `ui-choosing`, `ui-changed`"
       },
       "attributes": [
         {
@@ -41873,6 +41891,21 @@
             },
             {
               "name": "borderless"
+            }
+          ]
+        },
+        {
+          "name": "choose",
+          "description": {
+            "kind": "markdown",
+            "value": "A `segmented` menu's choice:  `one` (the default) selects the item chosen and unselects the rest;  `many` makes each item a toggle, pressed in while selected (`aria-pressed`), with no sliding thumb.  One stays on:  turning off the only one on turns on the next, to its right or below (round to the first).\n\nTakes:  `one` · `many`"
+          },
+          "values": [
+            {
+              "name": "one"
+            },
+            {
+              "name": "many"
             }
           ]
         },

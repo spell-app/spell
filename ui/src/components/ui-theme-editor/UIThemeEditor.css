@@ -113,25 +113,30 @@
     --ui-menu-margin: 0;
   }
   /* each keeps its width:  the row scrolls, never squeezes a menu under its neighbour */
-  .tools > *,
-  /* the pages' toggles, then Phone:  at the far right (Owen:  "Put visible panes then \"mobile\" button to the far
-     right") */
+  /* the pages' toggles, then Phone right beside them:  at the far right (Owen:  "Put visible panes then \"mobile\"
+     button to the far right", "Align right next to mobile button") */
   .page-toggles {
     margin-inline-start: auto;
   }
   /*
-   * A toggle segment in a pill group (the pages, ⇄):  pressed IN while on, an inset well (Owen:  "feel like the other
-   * pills, but with a \"depressed\" aesthetic"), flat and quieter while off;  never the raised thumb of a choice
+   * The bar's toggles, pressed IN while on:  the pages (`<ui-menu choose="many">`, which draws its own), ⇄ and
+   * Phone, all alike:  a choice's fill (white, in a pill theme), in an inset well (Owen:  "feel like the other pills,
+   * but with a \"depressed\" aesthetic", "white bg when depressed.  Change other things to match")
    */
+  .bar {
+    --_pressed-background: var(--ui-menu-segmented-active-background, var(--ui-surface-strong));
+    --_pressed-shadow:
+      inset 0 1px 3px rgb(0 0 0 / 0.28), inset 0 0 0 1px color-mix(in oklab, var(--ui-text-color) 12%, transparent);
+    --ui-menu-segmented-pressed-shadow: var(--_pressed-shadow);
+  }
+  /* ⇄, a toggle inside the Light / Dark / Both choice:  quieter while off */
   .toggle::part(item) {
     color: var(--ui-text-muted);
   }
   .toggle.on::part(item) {
-    color: var(--ui-text-color);
-    background: color-mix(in oklab, var(--ui-text-color) 9%, transparent);
-    box-shadow:
-      inset 0 1px 3px rgb(0 0 0 / 0.28),
-      inset 0 0 0 1px color-mix(in oklab, var(--ui-text-color) 12%, transparent);
+    color: var(--ui-menu-segmented-active-color, var(--ui-text-color));
+    background: var(--_pressed-background);
+    box-shadow: var(--_pressed-shadow);
   }
 
   .more-start .tools {
@@ -169,13 +174,16 @@
     --ui-icon-width: auto;
     margin: 0;
   }
-  /* Phone:  plain;  pressed, the segmented menus' chosen fill, in a pill */
+  /* Phone:  plain;  pressed, as the other toggles, in a pill */
   .bar-toggle {
     --ui-button-radius: 9999px;
     --ui-button-background: transparent;
   }
   .bar-toggle[aria-pressed="true"] {
-    --ui-button-background: var(--ui-menu-segmented-active-background, var(--ui-surface-strong));
+    --ui-button-background: var(--_pressed-background);
+  }
+  .bar-toggle[aria-pressed="true"]::part(button) {
+    box-shadow: var(--_pressed-shadow);
   }
 
   /* ## The pages */

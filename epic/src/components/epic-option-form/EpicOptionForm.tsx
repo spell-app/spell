@@ -3,7 +3,7 @@ import type { JSX } from "@solidjs/web"
 
 import { E } from "spell/element"
 
-import { ReviewClient, SHOT_MAX_BYTES } from "spell/epic/review"
+import { Pictures, ReviewClient } from "spell/epic/review"
 import type { DOMTextBoxElement } from "spell/epic/components/epic-text-box/EpicTextBox"
 
 import { epicOptionFormVocabulary } from "./EpicOptionForm.en"
@@ -212,9 +212,7 @@ export class EpicOptionForm extends E.UIComponent<typeof epicOptionFormVocabular
   /** A paste on the page while the form has the focus:  an image in it is the option's picture. */
   private readonly onPaste = (event: ClipboardEvent) => {
     if (!this.domElement.matches(":focus-within")) return
-    const file = Array.from(event.clipboardData?.items ?? [])
-      .find((item) => item.kind === "file" && item.type.startsWith("image/"))
-      ?.getAsFile()
+    const file = Pictures.fileOf(event)
     if (!file) return
     event.preventDefault()
     void this.takeShot(file)
@@ -232,7 +230,7 @@ export class EpicOptionForm extends E.UIComponent<typeof epicOptionFormVocabular
   @E.untracked
   private onDrop(event: DragEvent) {
     event.preventDefault()
-    const file = event.dataTransfer?.files[0]
+    const file = Pictures.fileOf(event)
     if (file) void this.takeShot(file)
   }
 
@@ -245,9 +243,9 @@ export class EpicOptionForm extends E.UIComponent<typeof epicOptionFormVocabular
   @E.untracked
   private async takeShot(file: File) {
     const client = ReviewClient.forPage()
-    if (!file.type.startsWith("image/")) return client.notify(this.translationForKey("notImage"))
-    if (file.size > SHOT_MAX_BYTES) return client.notify(this.translationForKey("tooBig"))
-    const png = await EpicOptionForm.dataUrlOf(file).catch(() => undefined)
+    const problem = Pictures.problemOf(file)
+    if (problem) return client.notify(this.translationForKey(problem))
+    const png = await Pictures.pngOf(file).catch(() => undefined)
     if (!png) return
     this.shown = png
     this.savedShot = undefined
@@ -264,16 +262,6 @@ export class EpicOptionForm extends E.UIComponent<typeof epicOptionFormVocabular
   private removeShot() {
     this.shown = undefined
     this.savedShot = undefined
-  }
-
-  /** `file` as a data URL. */
-  private static dataUrlOf(file: Blob): Promise<string> {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader()
-      reader.onload = () => resolve(reader.result as string)
-      reader.onerror = () => reject(reader.error ?? new Error("couldn't read the picture"))
-      reader.readAsDataURL(file)
-    })
   }
 }
 

@@ -20,10 +20,11 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
  * The component behind `<epic-send>`:  a details page's Send (epic `epic-workflow` P12), in its sticky header.
  * - Draws the page's `AnswerForm`:
  *   - where the answer stands:  "Not sent", "Changes not sent", "Sent 10/8/26 14:34 · 5 of 17 decided"
- *   - Send and its countdown (`<epic-send-buttons>`, epic `epic-engine` P20), blue as every Send is, by the fill rule
+ *   - Send (`<epic-send-buttons>`, epic `epic-engine` P20), blue as every Send is, by the fill rule
  *     (`templates/epics/plan-doc.md`, "Colours"):  a grey outline with nothing to send, dashed with changes not sent,
  *     an outline once sent;  never solid, since the page can't tell when Claude is done with it
- *     - countdown on:  the answer goes by itself 2 minutes after Owen stops;  off, the plane is filled until pressed
+ *     - a press sends:  no countdown here (epic `epic-engine` P53, J142:  only an epic page's header has the gear
+ *       that sets Auto Send), so the plane is filled until pressed
  *   - the draft's save, muted beside them ("draft saved 14:04";  epic `epic-workflow` P18)
  *     - a save that FAILED, on its own line under them, in red, bold (epic `epic-engine` P15):  never cut short by the
  *       side bar's width;  the browser still keeps the draft, and the form tries again every 3s

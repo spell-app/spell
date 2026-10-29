@@ -82,6 +82,15 @@
                   <ui-theme-menu show="scheme"></ui-theme-menu>
                 </ui-example>
               </ui-section>
+              <ui-section id="examples-types-in-a-menu" label="In a menu" sticky="stack" collapsible dividing>
+                <ui-example
+                  description="The palette's panel alone, drawn in place:  `show=&quot;menu&quot;`.  For the body of a sub-menu in a menu of your own, which gives it its box;  `bench=&quot;none&quot;` leaves out Theme bench."
+                >
+                  <ui-segment style="max-width: 15em">
+                    <ui-theme-menu show="menu" bench="none"></ui-theme-menu>
+                  </ui-segment>
+                </ui-example>
+              </ui-section>
             </ui-section>
 
             <ui-section id="examples-variations" label="Variations" sticky="stack" collapsible dividing>
@@ -110,6 +119,9 @@
                     `ThemePreference.restore()`;  a place with its own default theme and remembered pick calls
                     `ThemePreference.site({ defaultTheme, themeKey })` first, as the Spell editor does.
                   - Its `end` slot adds rows of the page's own under the themes:  the editor's "Edit theme...".
+                  - `show="menu"` draws the panel alone, in place, as the body of a sub-menu in a menu of your own
+                    (an epic page's gear menu).  Its `chosenTheme` names the theme chosen, for the row that opens it
+                    ("Theme · Paper").
                 </script>
               </ui-markdown>
               <ui-code language="js">
@@ -127,6 +139,9 @@
                     to compare.
                   - Shift+Tab reaches Light | Dark | Auto:  the arrows move and choose, as in any radio group.
                   - Escape closes the panel, and focus goes back to the palette button.
+                  - In a menu (`show="menu"`), the menu around it calls `focusChosen()` as it opens it:
+                    the chosen theme is focused, and the keys are the panel's.  ArrowLeft, ArrowRight and Escape
+                    are left to the menu around it, to close it.
                 </script>
               </ui-markdown>
             </ui-section>

@@ -106,6 +106,31 @@ describe("PlanDocCommands phase … done / took", () => {
   })
 })
 
+// epic `epic-engine` P52 (Q56 C):  the page shows only the Log's commits;  `epic log` prints the review lines
+describe("PlanDocCommands log", () => {
+  test("no text:  the newest review lines, newest last, as `<time>  <text>`;  --last <n>;  a commit is none", async () => {
+    for (const line of ["one", "two", "three"]) expect(await commands().run(["log", "x", line])).toBe(0)
+    await FILES.edit(file, (plan) =>
+      plan.logCommit(
+        { sha: "a".repeat(40), subject: "x P1:  One -- built", time: "2026-10-20T12:00:00-04:00" },
+        {
+          sentence: "built",
+          refs: []
+        }
+      )
+    )
+    printed = []
+    expect(await commands().run(["log", "x", "--last", "2"])).toBe(0)
+    expect(printed).toHaveLength(2)
+    expect(printed.map((line) => line.replace(/^\d{4}-\d\d-\d\d \d\d:\d\d  /, ""))).toEqual(["two", "three"])
+    printed = []
+    expect(await commands().run(["log", "x"])).toBe(0)
+    expect(printed.at(-1)).toMatch(/^\d{4}-\d\d-\d\d \d\d:\d\d  three$/)
+    expect(printed.join("\n")).not.toMatch(/built/)
+    expect(await commands().run(["log", "x", "--last", "none"])).toBe(1)
+  })
+})
+
 describe("PlanDocCommands add-phase --before", () => {
   test("inserts the phase, logs what moved;  ids stay, so every part file stays where it is", async () => {
     expect(await commands().run(["add-phase", "x", "Inserted", "--before", "2"])).toBe(0)

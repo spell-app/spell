@@ -634,12 +634,33 @@ export type CommitLogEntry = {
   sha: string
   /** its subject line */
   subject: string
-  /** the GitHub page of the repo it's in (`PlanDocFiles.sharedDocLog()`):  a child repo's commit links there */
+  /**
+   * the GitHub page of the repo it's in (`PlanDocFiles.sharedDocLog()`):  a child repo's or a peer's commit links
+   * there
+   */
   repo?: string | null
+  /** when it went in:  git's commit time, ISO with its offset (`%cI`, `2026-10-29T11:46:12-04:00`);  the Log's `at` */
+  time?: string
 }
 
-/** A commit `PlanDoc.backfillCommits()` listed:  its sha, and where. */
-export type BackfilledCommit = Prettify<CommitTarget & { sha: string }>
+/**
+ * An epic page's history, for `PlanDoc.backfillCommits()` (`PlanDocFiles.epicHistory()`):
+ * its commits, newest first, its repo's GitHub page and its epic's name.
+ */
+export type CommitHistory = {
+  /** its commits, newest first, none another epic's page lists */
+  log: CommitLogEntry[]
+  /** the page's repo's GitHub page, or `null` */
+  base: string | null
+  /** the epic's name, from its file */
+  epic: string
+}
+
+/**
+ * A commit `PlanDoc.backfillCommits()` listed:  its sha, and where.
+ * - under a phase (`phase`) or an item (`item`);  or, `log`, as an entry in the Log (epic `epic-engine` P52)
+ */
+export type BackfilledCommit = Prettify<CommitTarget & { sha: string; log?: true }>
 
 /** `PlanDoc.addCommit()`'s options. */
 export type CommitOptions = {
@@ -656,6 +677,11 @@ export type CommitOptions = {
 export type BackfillOptions = CommitOptions & {
   /** the epic's name:  a commit naming ANOTHER epic first (`other-epic P7:`) is left out */
   epic?: string
+  /**
+   * the Log's entries only, nothing listed under phases and items (the migration `log-commits`, epic `epic-engine`
+   * P52):  an old page's lists hold its commits by their shas before the repos were merged into one
+   */
+  logOnly?: boolean
 }
 
 /** What a commit subject says it did (`PlanCommits.parseCommitSubject()`). */

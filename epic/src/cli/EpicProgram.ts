@@ -407,8 +407,8 @@ export class EpicProgram {
       .addHelpText("after", INBOX_HELP)
     this.page(
       epic.command("test"),
-      "your test run:  the page in the Review tab, one test at a time, answered on the page;  --all:  every " +
-        "epic's;  --list:  the open tests"
+      "your testing:  the page in the Review tab, Start testing pressed (Claude prepares the tests, then the first " +
+        "opens);  --all:  every epic's;  --list:  the open tests"
     )
       .usage("<epic>[#M3] [--list [--json]]  |  --all [--list] [--json]")
       .addHelpText("after", TEST_HELP)
@@ -419,9 +419,11 @@ export class EpicProgram {
 
     epic.commandsGroup("Epic page:  log and upkeep:")
 
-    this.page(epic.command("log"), "a timestamped line in the page's log", 'epic log seo "P3 started"').usage(
-      '<epic> "text"'
-    )
+    this.page(
+      epic.command("log"),
+      "a timestamped review line in the page's log;  no text:  print the newest (the page shows only its commits)",
+      'epic log seo "P3 started"'
+    ).usage('<epic> ["text"]  |  <epic> --last <n>')
     this.page(
       epic.command("prompt"),
       'set the prompt that started the epic ("" removes it)',
@@ -1172,11 +1174,11 @@ Prints the new item's id.  The letter after # is its kind:
 A todo (T) is work still to do;  --limit:  a limit to know about, not work.
 The letters before epic-engine P44 (C caveat, T test) moved:  #C is refused, naming these;  C is a comment's now.
 --calm (last):  a judgement or issue that wouldn't surprise you, yellow rather than red.
-A manual test (M) your test run steps you through, its fields HTML, or plain text:
+A manual test (M), answered by you on the epic page, its fields HTML, or plain text:
 steps as "1. ... 2. ..." become a numbered list, "- " lines bullets (epic details seo#M3 takes them too):
-  --step <html>       exactly what to do;  <a class="epic-test-action" href="...">Open ...</a> is a button in the run;
+  --step <html>       exactly what to do;  <a class="epic-test-action" href="...">Open ...</a> a page to open;
                       the app, window and menu or keys named;  everything to type in a <pre><code> block (or a
-                      fenced block in plain text), which the run shows with a Copy button;  a wait its own step
+                      fenced block in plain text), which the page shows with a Copy button;  a wait its own step
   --should <html>     what should happen
   --example <png>     a screenshot of it, copied to tests/<id>.png beside the page;  or a line of text
   --if-not <html>     what to tell Claude when it doesn't
@@ -1190,15 +1192,17 @@ Examples:
 
 /** After `epic test --help`. */
 const TEST_HELP = `
-The run shows one open test at a time:  its Step, Should, Example and If not;  you answer Passed, Failed (a note
-and a screenshot), Skip or Not now, and Send hands them to the session listening (epic inbox apply seo).
+You answer each test where it is, in the epic page's Manual tests section:  Approve if it passed, a note (a
+screenshot pasted or dropped in it) for what you saw, the note box's x if it no longer applies;  Send hands them to the
+session listening (epic inbox apply seo).  Start testing, first, has Claude prepare them:  the open tests checked
+where Claude can, the rest written out (epic details seo#M3 --step ... --prepared 1), then the first one opens.
 
 Examples:
-  epic test seo                   the run, in the Review tab (the page with ?test=1)
-  epic test seo#M3                ... at M3
-  epic test seo --list [--json]   its open tests, in the run's order:  page order, Not now ones last
+  epic test seo                   the page in the Review tab, Start testing pressed (?test=1)
+  epic test seo#M3                ... landing on M3
+  epic test seo --list [--json]   its open tests, in your order:  prepared first, then page order, Not now last
   epic test --all [--list]        every epic with open tests, in your saga order;  the first one opened,
-                                  its last card leading to the next`
+                                  its Manual tests section linking the next once all are answered`
 
 /** After `epic inbox --help`. */
 const INBOX_HELP = `

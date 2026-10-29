@@ -136,6 +136,7 @@ export type AttributeTest = {
  * - `letters` -- option letters, space-separated:  a pick-any set's `chosen="A C"` (epic `epic-engine` P50)
  * - `epic name` -- the epic's folder name, `epic-components`
  * - `saga id` -- a saga's id, one or two words:  `drawable-spell`, `epics` (`sagas/sagas.json5`;  epic `epic-workflow` P15)
+ * - `place` -- a place in an order, `1` first:  a prepared test's (`<epic-item prepared="2">`, epic `epic-engine` P51)
  */
 export const Formats = {
   date: /^\d{4}-\d{2}-\d{2}$/,
@@ -151,7 +152,8 @@ export const Formats = {
   letter: /^[A-Z]$/,
   letters: /^[A-Z]( [A-Z])*$/,
   "epic name": /^[a-z0-9]+(-[a-z0-9]+)*$/,
-  "saga id": /^[a-z][a-z0-9]*(-[a-z0-9]+)?$/
+  "saga id": /^[a-z][a-z0-9]*(-[a-z0-9]+)?$/,
+  place: /^[1-9]\d*$/
 } as const
 
 /** A `Formats` name. */

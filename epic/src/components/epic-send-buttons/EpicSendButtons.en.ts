@@ -10,23 +10,23 @@ import { SEND_ASKS, SEND_STATES } from "./EpicSendButtons.types"
 
 /****************
  * ### `<epic-send-buttons>`
- * Send and its countdown, one group:  the paper plane, then the wand that turns countdown mode on and off.
+ * Send, the paper plane, with its countdown's ring round it when asked for (`countdown`).
  ****************/
 export const epicSendButtonsVocabulary = {
   tag: "epic-send-buttons",
   topics: ["buttons", "forms"],
-  aka: ["send", "send button", "countdown", "auto send", "paper plane", "wand"],
+  aka: ["send", "send button", "countdown", "auto send", "paper plane", "ring"],
   skeleton: "inline 4 x 1.6",
   noun: "send-buttons",
   ui: false,
   description:
-    'Send, the paper plane, ALONE since 2026-10-25 (Owen:  "remove the wand EVERYWHERE").  With `wand`, its countdown ' +
-    "too (epic `epic-engine` P20):  the wand turns COUNTDOWN " +
-    "MODE on and off.  With it on and something not sent, the wand is filled light blue, and a light grey ring round it turns blue, clockwise, over 2 minutes, starting " +
-    "again at every key, click or scroll on the page;  at the end the owner is asked to send, as Review Now did.  " +
-    "With it off and something not sent, the plane is filled blue:  it waits for a press.  The mode is on by " +
-    "default, and remembered in this browser for every page.  Drawn by an epic page's header (`<epic-page>`), a " +
-    "details page's Send (`<epic-send>`) and a docs page's comments Send.",
+    "Send, the paper plane.  With `countdown` (an epic page's header;  epic `epic-engine` P53), Auto Send too:  with " +
+    "something not sent, a ring round the plane, set apart from it with rounded ends, drains clockwise over the wait " +
+    "the page header's gear chose (2 minutes by default, or 5), starting again at every key, click or scroll on the " +
+    "page and held full while a note box is typed in;  at the end the owner is asked to send, as a press would.  " +
+    "Immediately:  no ring, each change goes as it's finished.  Off, or without `countdown`, with something not sent:  " +
+    "the plane is filled blue, waiting for a press.  Drawn by an epic page's header (`<epic-page>`), a details page's " +
+    "Send (`<epic-send>`) and a docs page's comments Send.",
   attributes: [
     {
       name: "state",
@@ -55,7 +55,7 @@ export const epicSendButtonsVocabulary = {
       description:
         "A STAGE BUTTON in the paper plane's place (epic `epic-engine` P29):  a check and these words (`Accept " +
         "Overview`), green;  a press asks the owner to send, as the plane's does, and the owner accepts the stage.  " +
-        "The wand stays.  Drawn by an epic page's header while the page is in a stage (`<epic-page stage>`)."
+        "The countdown's ring goes round its check, and its end only sends marks, never accepts.  Drawn by an epic page's header while the page is in a stage (`<epic-page stage>`)."
     },
     {
       name: "accepted",
@@ -74,12 +74,12 @@ export const epicSendButtonsVocabulary = {
         "The same ring as a waiting plan's own buttons on its phase."
     },
     {
-      name: "wand",
+      name: "countdown",
       kind: "boolean",
       description:
-        "Draws the wand, and with it COUNTDOWN MODE.  Off by default:  the wand is gone everywhere, so only a press " +
-        'sends (Owen, 2026-10-25:  "remove the wand EVERYWHERE ...  We may bring the wand back later").  ' +
-        "`manual` before, the other way round, for a page a command waits on (`<epic-run>`)."
+        "Counts down to Send by itself, on the page's Auto Send (`SendCountdown`, chosen in an epic page header's " +
+        "gear):  the ring round the plane.  Off by default:  only an epic page's header sets it, as only it has the " +
+        "gear (J142);  a details page or a guide sends when you press."
     }
   ],
   events: [
@@ -88,12 +88,13 @@ export const epicSendButtonsVocabulary = {
       detail: "{ auto }",
       description:
         "A send asked for:  the paper plane pressed (`auto` false), or the countdown ran out (`auto` true).  The " +
-        "owner sends;  a countdown's send asks every revisit now, as Review Now did (decision Q7)."
+        "owner sends, waking the epic when nobody listens (Q59, B);  a countdown's send asks every revisit now, as " +
+        "Review Now did (decision Q7)."
     }
   ],
   slots: [],
   parts: [
-    { name: "base", description: "The group:  one pill, the plane's end and the wand's." },
+    { name: "base", description: "The group:  one pill round the plane." },
     {
       name: "send",
       description: "The paper plane, a `<button>`:  `data-state`, filled blue while it waits for a press."
@@ -103,48 +104,30 @@ export const epicSendButtonsVocabulary = {
       description: "The badge on the plane:  how many things a press sends;  none on the stage button."
     },
     {
-      name: "countdown",
-      description: "The wand, a `<button aria-pressed>`, only with `wand`:  countdown mode on (blue) or off (grey)."
-    },
-    {
       name: "ring",
       description:
-        "The countdown's ring round the wand, light grey turning blue as the 2 minutes run;  only while it runs."
+        "The countdown's ring round the plane (the stage button's check), its ends round, draining clockwise;  only " +
+        "while it counts."
     }
   ],
   states: [
-    { name: "countdown", description: "Countdown mode is on." },
-    { name: "counting", description: "The countdown is running:  something waits, and the ring turns blue." },
-    { name: "waiting", description: "Countdown mode is off and something isn't sent:  the plane is filled blue." },
+    { name: "countdown", description: "Auto Send is on, and this Send counts down (`countdown`)." },
+    { name: "counting", description: "The countdown is running:  something waits, and the ring drains." },
+    { name: "waiting", description: "Auto Send is off and something isn't sent:  the plane is filled blue." },
     { name: "stage", description: "The plane's place holds the stage button (`accept`)." }
   ],
   texts: [
     { key: "group", text: "Send", description: "The group's name, for a screen reader." },
     { key: "send", text: "Send", description: "The plane's tooltip and name, when the owner gives none (`send-tip`)." },
     {
-      key: "countdownOn",
-      text: "Countdown on:  {when}.  Click to send only when you press the plane",
-      description: "The wand's tooltip, mode on;  `{when}` says when it sends."
+      key: "counting",
+      text: "sends by itself in {time};  click to send now",
+      description: "After the plane's words while the ring counts;  `{time}` like `1:42`."
     },
     {
-      key: "countdownOff",
-      text: "Countdown off:  press the plane to send.  Click to send by itself 2 minutes after you stop",
-      description: "The wand's tooltip, mode off."
-    },
-    {
-      key: "whenCounting",
-      text: "sends by itself in {time} unless you keep typing, clicking or scrolling",
-      description: "When a running countdown sends;  `{time}` like `1:42`."
-    },
-    {
-      key: "whenIdle",
-      text: "what you leave unsent goes by itself 2 minutes after you stop",
-      description: "When it sends, with nothing waiting yet."
-    },
-    {
-      key: "countdownName",
-      text: "Countdown",
-      description: "The wand's name, for a screen reader (its state is `aria-pressed`)."
+      key: "held",
+      text: "sends by itself once you leave the note box;  click to send now",
+      description: "After the plane's words while a note box with words has the focus:  the ring stays full."
     }
   ],
   children: []

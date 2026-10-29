@@ -165,6 +165,11 @@ export type ItemContext = {
   shrinkable?: boolean
   /** The menu shows its items' icons only (`:state(icons-only)`):  each title is its box's tooltip too. */
   iconsOnly?: boolean
+  /**
+   * Each item is a toggle (`<ui-menu appearance="segmented" choose="many">`):  its button box says `aria-pressed`,
+   * never `aria-current`.
+   */
+  pressed?: boolean
 }
 
 /** Roles an owner may give an item's root. */

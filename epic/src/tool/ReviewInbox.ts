@@ -429,6 +429,8 @@ export class ReviewInbox {
     if (checked && (checked.action === "new") !== NEW_ID.test(key))
       throw new InboxError(`a new item is asked for under its own key (new1 ...), never on an item:  ${key}`)
     if (checked?.action === "test" && !TEST_ID.test(key)) throw new InboxError(`only a test is tested:  ${key}`)
+    if (checked && (checked.action === "prepare") !== (key === TESTS_ID))
+      throw new InboxError(`only the Manual tests section is prepared, and it takes nothing else:  ${key}`)
     if (checked) checkChangeMark(key, checked)
     if (checked) checkSeenMark(key, checked)
     if (!checked || !ReviewInbox.isImmediate(checked)) this.now = this.now.filter((each) => each.id !== key)
@@ -520,7 +522,7 @@ export class ReviewInbox {
     delete this.working[key]
     if (mark && ReviewInbox.isImmediate(mark)) delete this.marks[key]
     // a request still queued was never taken:  nobody to tell
-    const action = work?.action ?? queued?.action ?? (mark?.action === "revisit" ? "revisit" : "details")
+    const action = work?.action ?? queued?.action ?? (isNowAction(mark?.action) ? mark.action : "details")
     this.canceled[key] = { action, at, told: !work }
     return this.canceled[key]
   }
@@ -1031,6 +1033,8 @@ export class ReviewInbox {
    * - with a pick:  `choices` too, when given:
    *   which of the holder's option card sets it's from, by position (`0`, `1` ...:  I8);  none, the item's own
    * - `todo`, `next`, `drop`, `skip`:  `note` trimmed, kept only when there is one
+   * - a note box's mark (`revisit`, `todo`, `next`, `drop`, `skip`):  `shot` too, when given, the picture Owen pasted
+   *   or dropped in the box (epic `epic-engine` P51):  `tests/j3-20261029-1432.png` (`NOTE_SHOT`)
    * - `accept` (the page header's stage button, epic `epic-engine` P29):  `stage`, the stage it ends, one of
    *   `ACCEPT_STAGES`;  none:  a change mark's Accept (P30), `{ action: "accept" }`
    * - `reopen` (a change mark's Reopen, P30):  the action alone
@@ -1057,14 +1061,16 @@ export class ReviewInbox {
         throw new InboxError(`revisit when?  ${REVISIT_WHEN.join(" | ")}`)
       if (typeof note !== "string") throw new InboxError("a revisit's note is text")
       const inline = toCommentIds((mark as Record<string, unknown>).comments)
+      const shot = toNoteShot((mark as Record<string, unknown>).shot)
       if (pick === undefined || pick === null)
-        return { action, when: when as RevisitWhen, note: note.trim(), ...inline }
+        return { action, when: when as RevisitWhen, note: note.trim(), ...inline, ...shot }
       return {
         action,
         when: when as RevisitWhen,
         note: note.trim(),
         ...toPickFields(mark as Record<string, unknown>),
-        ...inline
+        ...inline,
+        ...shot
       }
     }
     if (action === "pick") return { action, ...toPickFields(mark as Record<string, unknown>) }
@@ -1094,7 +1100,8 @@ export class ReviewInbox {
     // a todo's plane and x, and every note box's x (skip this), take the note box's words too (Owen, 2026-10-09)
     if (action === "todo" || action === "next" || action === "drop" || action === "skip") {
       if (typeof note !== "string") throw new InboxError(`a ${action} mark's note is text`)
-      return note.trim() ? { action, note: note.trim() } : { action }
+      const shot = toNoteShot((mark as Record<string, unknown>).shot)
+      return note.trim() ? { action, note: note.trim(), ...shot } : { action, ...shot }
     }
     return { action }
   }
@@ -1106,7 +1113,7 @@ export class ReviewInbox {
    */
   static toItemId(this: void, id: unknown): string {
     const key = typeof id === "string" ? id.toLowerCase() : ""
-    if (!isMarkKey(key) && key !== SUMMARY_ID && key !== STAGE_ID && !NEW_ID.test(key))
+    if (!isMarkKey(key) && key !== SUMMARY_ID && key !== STAGE_ID && key !== TESTS_ID && !NEW_ID.test(key))
       throw new InboxError(`not an item id:  ${id}`)
     return key
   }
@@ -1136,7 +1143,7 @@ export class ReviewInbox {
 
   /** Is `mark` an immediate request (`requestNow()`), not one waiting for a send? */
   static isImmediate(mark: { action: string; when?: string }): boolean {
-    return mark.action === "details" || (mark.action === "revisit" && mark.when === "now")
+    return mark.action === "details" || mark.action === "prepare" || (mark.action === "revisit" && mark.when === "now")
   }
 
   /**
@@ -1149,6 +1156,7 @@ export class ReviewInbox {
    * - every change mark waiting for Accept (`ch3`, epic `epic-engine` P30):  listed in its host's `to-accept` (the
    *   skeleton's:  its body, a part, may not be in `html`), or an `<epic-change id>` not `accepted` in `html` itself
    * - every STANDING option set not closed (`<epic-choices id="s-upgrades" standing>`, epic `epic-engine` P50)
+   * - the Manual tests section, `tests` (`TESTS_ID`):  its Start testing (epic `epic-engine` P51)
    * - every update block not seen (`up3`, epic `epic-engine` I168):  listed in its host's `to-see` (`up3@<at>`), or
    *   an `<epic-update id>` without `seen` in `html` itself
    * - text, not a DOM:  cheap enough to run on every request;  attributes in any order, across lines
@@ -1189,6 +1197,11 @@ export class ReviewInbox {
       }
       const id = /\sid="([^"]+)"/.exec(tag)?.[1]
       if (!id) continue
+      // the Manual tests section:  its Start testing (epic `epic-engine` P51)
+      if (name === "epic-section" && /\skind="tests"/.test(tag)) {
+        ids.add(TESTS_ID)
+        continue
+      }
       const markable =
         name === "epic-item" || name === "epic-phase" || (name === "epic-section" && /\skind="overview-part"/.test(tag))
       if (markable) ids.add(id.toLowerCase())
@@ -1263,7 +1276,8 @@ export type InboxMark = CheckedMark & { at: string }
  * - `pick`:  a pick's letter, or a revisit's "pick B, but ..."
  * - `choices`:  with a pick, which of the item's option card sets it's from, by position (I8);  none:  its own
  * - `kind`, `title`, `near`:  a new item's (`action: "new"`, epic `airplane` P2)
- * - `result`, `shot`:  a test answer's (`action: "test"`, epic `epic-engine` P4)
+ * - `result`, `shot`:  a test answer's (`action: "test"`, epic `epic-engine` P4);  `shot` a note box's picture too
+ *   (`revisit`, `todo`, `next`, `drop`, `skip`:  epic `epic-engine` P51)
  * - `stage`:  the stage a stage button ends (`action: "accept"`, epic `epic-engine` P29)
  * - `to`:  a dragged phase's new place (`action: "move"`, epic `epic-engine` P34)
  * - `comments`:  a revisit's content, Owen's comments in its part's text (`c1` ...;  epic `epic-engine` I140);
@@ -1412,6 +1426,7 @@ export const INBOX_VERSION = 1
  * - `drop`:  a todo's x:  drop it, canceled
  * - `skip`:  every other note box's x (Owen, 2026-10-09):  skip this, nothing to do;  marked reviewed, a note kept
  * - `details`:  write more details into it (an immediate request:  `requestNow()`)
+ * - `prepare`:  Start testing (epic `epic-engine` P51), on the Manual tests section (`TESTS_ID`):  an immediate request
  * - `revisit`:  talk it through again;  `when` `soon` (with the next batch) or `now` (immediate), `note` Owen's text
  * - `pick`:  an option card, by letter (`pick: "B"`), on any item (I8):  `choices` says which card set
  * - `new`:  a new todo or question Owen asks for from the page (`setNew()`, epic `airplane` P2), under its own key
@@ -1429,6 +1444,7 @@ export const ACTIONS = [
   "skip",
   "details",
   "revisit",
+  "prepare",
   "pick",
   "new",
   "test",
@@ -1461,6 +1477,12 @@ export type TestResult = (typeof TEST_RESULTS)[number]
 export const SUMMARY_ID = "summary"
 
 /**
+ * The Manual tests section's key in the inbox (`<epic-section id="tests" kind="tests">`, epic `epic-engine` P51):  its
+ * Start testing is a request for now (`prepare`), and only that;  markable while the page has the section (`itemIds()`).
+ */
+export const TESTS_ID = "tests"
+
+/**
  * The stage button's key in the inbox (epic `epic-engine` P29):  Accept Overview / Accept Phases is the PAGE's mark,
  * not an item's;  markable while the page is in a stage that ends with it (`itemIds()`).
  */
@@ -1481,8 +1503,12 @@ export const UPDATE_ID = /^up\d+$/
 /** The stages a stage button ends:  every stage but `building`. */
 export const ACCEPT_STAGES = PageStages.ALL.filter(PageStages.isPlanning)
 
-/** Actions an immediate request (`now`) may carry. */
-export const NOW_ACTIONS = ["details", "revisit"] as const
+/**
+ * Actions an immediate request (`now`) may carry.
+ * - `prepare`:  the Manual tests section's Start testing (epic `epic-engine` P51), under `TESTS_ID`:  Claude checks the
+ *   open tests it can, and writes out the rest for Owen
+ */
+export const NOW_ACTIONS = ["details", "revisit", "prepare"] as const
 /** One of `NOW_ACTIONS`. */
 export type NowAction = (typeof NOW_ACTIONS)[number]
 
@@ -1531,6 +1557,12 @@ const MAX_OPTION_NOTE = 20_000
  * time, `tests/q52-20261029-1432.png`, `tests/p-choices-20261029-1432-2.png`.
  */
 export const OPTION_SHOT = /^tests\/[a-z][a-z0-9-]*-\d{8}-\d{4}(?:-\d+)?\.png$/
+
+/**
+ * A note box's picture, from the epic page's folder (`POST shot`, epic `epic-engine` P51):  the same shape as an
+ * option's, its item's id then the time, `tests/j3-20261029-1432.png`.
+ */
+export const NOTE_SHOT = OPTION_SHOT
 
 /** The highest card set position a pick may name:  a sanity bound, far above any item's count. */
 const MAX_CHOICES = 99
@@ -1719,6 +1751,17 @@ function toNewItem({ kind, title, note = "", near }: Record<string, unknown>): C
     ...(note.trim() ? { note: note.trim() } : {}),
     ...(about ? { near: about } : {})
   }
+}
+
+/**
+ * A note box's picture (`shot`, epic `epic-engine` P51), checked:  `{ shot }`, or `{}` when not given.
+ * - an `InboxError` unless it's one of the epic's `tests/` pictures (`NOTE_SHOT`)
+ */
+function toNoteShot(shot: unknown): { shot?: string } {
+  if (shot === undefined || shot === null || shot === "") return {}
+  if (typeof shot !== "string" || !NOTE_SHOT.test(shot))
+    throw new InboxError(`not a note's picture:  ${JSON.stringify(shot)} (tests/j3-20261029-1432.png)`)
+  return { shot }
 }
 
 /**

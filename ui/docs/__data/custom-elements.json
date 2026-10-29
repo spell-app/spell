@@ -16438,6 +16438,14 @@
               "fieldName": "appearance"
             },
             {
+              "name": "choose",
+              "description": "A `segmented` menu's choice:  `one` (the default) selects the item chosen and unselects the rest;  `many` makes each item a toggle, pressed in while selected (`aria-pressed`), with no sliding thumb.  One stays on:  turning off the only one on turns on the next, to its right or below (round to the first).",
+              "type": {
+                "text": "\"one\" | \"many\""
+              },
+              "fieldName": "choose"
+            },
+            {
               "name": "position",
               "description": "Sub-menu:  pushes it to the `right` / `left` end, or the `center`.  A `vertical tabular` menu:  `right` opens its tabs to the left, for a menu on the content's right (`ui right vertical tabular menu`).",
               "type": {
@@ -16669,6 +16677,13 @@
               "description": "An interactive item (a link or button) was activated.  `value` is the item's `value`, else its text.  The menu doesn't move `selected` itself, except a `segmented` one (a single-choice control), which selects the item and unselects the rest:  `preventDefault()` keeps the old choice.  Cancelable:  `preventDefault()` vetoes it.",
               "type": {
                 "text": "CustomEvent<{ value: string, item: Element, originalEvent?: Event }>"
+              }
+            },
+            {
+              "name": "ui-changed",
+              "description": "A `choose=\"many\"` menu's toggles changed:  `values` are the items now on, in order (each one's `value`, else its text).",
+              "type": {
+                "text": "CustomEvent<{ values: string[] }>"
               }
             }
           ],
@@ -17147,6 +17162,10 @@
             {
               "name": "--ui-menu-header-weight",
               "default": "var(--ui-font-weight-bold)"
+            },
+            {
+              "name": "--ui-menu-segmented-pressed-shadow",
+              "default": "inset 0 1px 3px rgb(0 0 0 / 0.28), inset 0 0 0 1px color-mix(in oklab, var(--ui-text-color) 12%, transparent)"
             }
           ]
         }
@@ -35355,9 +35374,9 @@
           "attributes": [
             {
               "name": "show",
-              "description": "Which controls to show:  `both` (the palette button, whose overlay picks the theme and light / dark), `scheme` (a light / dark button alone) or `theme` (a theme dropdown).",
+              "description": "Which controls to show:  `both` (the palette button, whose overlay picks the theme and light / dark), `scheme` (a light / dark button alone), `theme` (a theme dropdown) or `menu` (the overlay's panel alone, drawn in place:  the body of a sub-menu in another menu, which calls `focusChosen()` as it opens it).",
               "type": {
-                "text": "\"both\" | \"theme\" | \"scheme\""
+                "text": "\"both\" | \"theme\" | \"scheme\" | \"menu\""
               },
               "default": "\"both\"",
               "fieldName": "show"
@@ -35549,6 +35568,10 @@
             {
               "name": "open",
               "description": "The overlay is open."
+            },
+            {
+              "name": "menu",
+              "description": "It draws its panel in place, inside a host's menu (`show=\"menu\"`)."
             },
             {
               "name": "disabled",
@@ -36441,6 +36464,14 @@
               "fieldName": "appearance"
             },
             {
+              "name": "choose",
+              "description": "A `segmented` menu's choice:  `one` (the default) selects the item chosen and unselects the rest;  `many` makes each item a toggle, pressed in while selected (`aria-pressed`), with no sliding thumb.  One stays on:  turning off the only one on turns on the next, to its right or below (round to the first).",
+              "type": {
+                "text": "\"one\" | \"many\""
+              },
+              "fieldName": "choose"
+            },
+            {
               "name": "position",
               "description": "Sub-menu:  pushes it to the `right` / `left` end, or the `center`.  A `vertical tabular` menu:  `right` opens its tabs to the left, for a menu on the content's right (`ui right vertical tabular menu`).",
               "type": {
@@ -36672,6 +36703,13 @@
               "description": "An interactive item (a link or button) was activated.  `value` is the item's `value`, else its text.  The menu doesn't move `selected` itself, except a `segmented` one (a single-choice control), which selects the item and unselects the rest:  `preventDefault()` keeps the old choice.  Cancelable:  `preventDefault()` vetoes it.",
               "type": {
                 "text": "CustomEvent<{ value: string, item: Element, originalEvent?: Event }>"
+              }
+            },
+            {
+              "name": "ui-changed",
+              "description": "A `choose=\"many\"` menu's toggles changed:  `values` are the items now on, in order (each one's `value`, else its text).",
+              "type": {
+                "text": "CustomEvent<{ values: string[] }>"
               }
             }
           ],

@@ -394,6 +394,12 @@ export class InboxCommands {
       for (const each of now) {
         lines.push(`  - ${line(each)}`)
         if (each.action === "details") lines.push("      Add Details")
+        // the Manual tests section's Start testing (epic `epic-engine` P51):  the epic skill's "Start testing"
+        else if (each.action === "prepare")
+          lines.push(
+            "      Start testing:  check the open tests you can, write out the rest (the epic skill's 7.3, " +
+              `"Start testing");  \`epic inbox done ${name}#tests\` opens the first test on Owen's page`
+          )
         else if (each.pick)
           lines.push(`      revisit now:  ${PlanItem.pickAsks(each.pick, each.option ?? undefined, each.note)}`)
         else lines.push(`      revisit now${each.note ? `:  "${each.note}"` : ""}`)
@@ -615,6 +621,8 @@ export class InboxCommands {
         return pick ? [{ id, pick, ...ReviewInbox.pickOf(before[id]) }] : []
       })
       for (const id of keys) box.setWorking(id, null)
+      // a request done before a `wait` took it (a session that saw it another way):  no longer queued either
+      box.now = box.now.filter((each) => !keys.includes(each.id))
       box.touchListening()
     })
     if (notes.length || handled.length || picks.length)
@@ -840,9 +848,10 @@ function calmWords(calm: boolean): string {
 /** What names a phase, not an item or a comment:  `p20`, a stable id `p-one-repo`. */
 const PHASE_REF = /^p(\d+|-[a-z0-9-]+)$/
 
-/** What an agent works on for a mark:  a revisit's answer, else details. */
-function workOf(mark: { action: string } | undefined): "revisit" | "details" {
-  return mark?.action === "revisit" ? "revisit" : "details"
+/** What an agent works on for a mark:  a revisit's answer, Start testing's preparing (P51), else details. */
+function workOf(mark: { action: string } | undefined): "revisit" | "details" | "prepare" {
+  if (mark?.action === "revisit" || mark?.action === "prepare") return mark.action
+  return "details"
 }
 
 /**

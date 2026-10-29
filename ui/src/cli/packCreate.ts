@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url"
 
 import { contentFolderOf } from "spell/server/contentFolder"
 import { DataFile } from "spell/server/DataFile"
+import { kitFolders } from "spell/server/kitFolders"
 import { CLI } from "spell/cli"
 import { ComponentPack } from "spell/element-tools/ComponentPack"
 
@@ -23,13 +24,16 @@ import { buildPack, readPack } from "./packBuild"
  *   - A file already there is LEFT ALONE and listed in `skipped`, so it works on a folder that has some files.
  *   - `package.json` is MERGED:  the template's keys it lacks (`scripts`, `spellPack` ...) are added, its own kept.
  *   - `.yarnrc.yml`:  the kit's, without `yarnPath` (the yarn release is the kit's alone).
- * - The kit needs no wiring:  its `workspaces` (`spell-*`) take the new repo in at the next `yarn install`.
+ * - In the kit, beside its folders (`parser/`, `ui/` ...), and git-ignored there (its `.gitignore` names `spell-*` folders):  a repo of its own.
+ * - The kit's `workspaces` get `spell-<name>` (`joinWorkspaces()`), after its folders:
+ *   - so the next `yarn install` takes it in, and its `workspace:*` dependencies resolve
+ *   - so it's one of `kitFolders()`:  the kit's `yarn ts`, `yarn test` ... run it, and `spell pack` finds it
  * - The commands page (shared content):  the pack's yarn scripts in its rows, beside spell-brand's (`wirePack()`).
  * - NOT `repos.json5`:  the repo has no remote yet;  `nextSteps()` says what to do.
  * - Then builds the pack (`buildPack()`), unless `build: false`.
  * - Idempotent:  a second run creates nothing and changes nothing.
- * - Throws `CliError` for a bad name or prefix, a repo of the kit's that is no pack, or a prefix other than the pack's
- *   own.
+ * - Throws `CliError` for a bad name or prefix, a name of one of the kit's folders (`kitFolders()`), or a prefix
+ *   other than the pack's own.
  * - Was `spell dev pack new`, which made `packages/<name>/` in spell-app's monorepo, until epic `repo-split` P13.
  */
 export async function createPack(
@@ -40,7 +44,8 @@ export async function createPack(
   if (!PACK_NAME.test(name)) {
     throw new CLI.CliError(`pack create:  '${name}' isn't a pack name:  lowercase words joined by dashes, e.g. cards`)
   }
-  if (NOT_PACKS.includes(name)) throw new CLI.CliError(`pack create:  spell-${name} is one of the kit's own repos`)
+  const taken = kitFolderNamed(root, name)
+  if (taken) throw new CLI.CliError(`pack create:  '${name}' is one of the kit's own folders, ${taken}`)
   const dir = join(root, `spell-${name}`)
   const existing = ComponentPack.prefixOf(dir)
   const prefix = options.prefix ?? existing ?? `${name}-`
@@ -64,6 +69,7 @@ export async function createPack(
     report
   )
   writeYarnrc(root, dir, report)
+  joinWorkspaces(root, dir, report)
   wirePack(root, pack, report)
   if (options.build !== false) report.built = await buildPack(root, name)
   return report
@@ -147,12 +153,12 @@ function exportFamily(root: string, pack: ComponentPack, tag: string, report: Pa
 
 /**
  * What to do after `spell pack create <name>` made a new repo:  the kit can't do these for it.
- * - its own git repo, then `repos.json5`'s list (so `yarn ts`, `yarn test` ... run it), then the install
+ * - its own git repo (the kit git-ignores its `spell-*` folders), then the install, which takes it in (it's in `workspaces`)
+ * - NOT `repos.json5`:  that lists the repos BESIDE the kit (spell-brand), with installs of their own
  */
 export function nextSteps(name: string): string[] {
   return [
     `next:  make spell-${name}/ a git repo of its own (\`git -C spell-${name} init\`);`,
-    `  add it to the kit's repos.json5, needing spell-ui:  { name: "spell-${name}", url: "...", needs: ["spell-ui"] };`,
     `  \`yarn install\` at the kit's root;  then \`spell pack add ${name} <tag>\``
   ]
 }
@@ -194,8 +200,26 @@ const TAG_PREFIX = /^([a-z][a-z0-9]*-)+$/
 /** A custom element name we write:  lowercase words joined by dashes, at least two. */
 const CUSTOM_TAG = /^[a-z][a-z0-9]*(-[a-z0-9]+)+$/
 
-/** The kit's own repos that are never packs, by name less `spell-`:  `spell-ui` ... */
-const NOT_PACKS = ["kit", "lang", "ui", "app"]
+/**
+ * The kit's folder (`kitFolders()`, relative to `root`) that pack name `name` would clash with, if any:
+ * - its folder is `<name>/` (`ui/`)
+ * - its manifest is named `spell-<name>` (`spell-ui`), as the new repo would be
+ * - its pack is named `name` (`epic/`'s, `epics`)
+ * - NEVER the pack's own `spell-<name>/`:  a second run finds it among them
+ */
+function kitFolderNamed(root: string, name: string): string | undefined {
+  for (const folder of kitFolders(root)) {
+    if (folder === join(root, `spell-${name}`)) continue // the pack itself, made by an earlier run
+    const manifest = JSON.parse(readFileSync(join(folder, "package.json"), "utf8")) as {
+      name?: string
+      spellPack?: { name?: string }
+    }
+    const clashes =
+      folder === join(root, name) || manifest.name === `spell-${name}` || manifest.spellPack?.name === name
+    if (clashes) return `${relative(root, folder)}/`
+  }
+  return undefined
+}
 
 /**
  * What a template's `__token__`s become.
@@ -317,6 +341,23 @@ function writeYarnrc(root: string, dir: string, report: PackScaffoldReport) {
   report.created.push(relative(root, file))
 }
 
+/**
+ * Add pack repo `dir` to kit `root`'s `package.json` `workspaces`, last:  above every folder, as it uses Spell UI
+ * (the order `kitFolders()` and the lint's `spell/no-upward-import` read).
+ * - Skipped when it's listed already, or the kit lists no `workspaces` (a published `spell`).
+ */
+function joinWorkspaces(root: string, dir: string, report: PackScaffoldReport) {
+  const file = join(root, "package.json")
+  const what = `package.json (workspaces:  ${relative(root, dir)})`
+  const json = existsSync(file) ? (JSON.parse(readFileSync(file, "utf8")) as KitPackageJson) : {}
+  const folder = relative(root, dir)
+  if (!Array.isArray(json.workspaces)) return void report.skipped.push(`${what}:  the kit lists none`)
+  if (json.workspaces.includes(folder)) return void report.skipped.push(what)
+  json.workspaces.push(folder)
+  writeFileSync(file, `${JSON.stringify(json, null, 2)}\n`)
+  report.updated.push(what)
+}
+
 /** The top of a pack repo's `.yarnrc.yml`:  why it's a copy. */
 const YARNRC_HEADER = `# A copy of the kit's:  the same settings and the one catalog of tool versions.
 # - No \`yarnPath\`:  the yarn release lives once, in the kit, whose install covers this repo.
@@ -436,8 +477,8 @@ function isObject(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value)
 }
 
-/** The part of the kit's `package.json` read here. */
-type KitPackageJson = { resolutions?: Record<string, string> }
+/** The parts of the kit's `package.json` read here. */
+type KitPackageJson = { workspaces?: string[]; resolutions?: Record<string, string> }
 
 /** The parts of the commands page's JSON edited here;  its full shape:  spell-epic's `src/tools/_assets/commands.js`. */
 type CommandsJson = { families?: { rows?: { id?: string; yarn?: { names?: string | string[] } }[] }[] }

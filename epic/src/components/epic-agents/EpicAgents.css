@@ -1,7 +1,8 @@
 /*
  * `<epic-agents>` (`EpicAgents.tsx`), in `<epic-page>`'s toolbar:  what Claude is doing (epic `epic-engine` P35).
  * - the session's line:  a quiet spinner and a word or two in a grey pill, the header's step label's look, its styled
- *   tooltip (`<ui-popup>`) listing what it answers
+ *   tooltip (`<ui-popup>`) listing what it answers;  `draws="spinner"`:  the spinner alone, bare, beside the epic page
+ *   header's Send (epic `epic-engine` P53, T53)
  * - `2 🤖`, a quiet button ("2 agents running" its name and tooltip), and its popover:  a row per agent (name, status,
  *   age, task), its redirects so far, and a note box with Send, a blue plane
  * - colours:  the pack's tokens (`EpicPage.css`) and Spell UI's, each with a fallback:  light and dark alike
@@ -68,6 +69,22 @@
     border-top-color: currentColor;
     border-radius: 50%;
     animation: epic-agents-turn 1.1s linear infinite;
+  }
+  /*
+   * the BARE spinner beside an epic page header's Send (`draws="spinner"`, T53):  no pill round it (Owen, 2026-10-29:
+   * "the spinner is already round, doesn't need to be in a circular border"), the header's muted grey, a little
+   * bigger than a glyph:  `--epic-agents-spinner-size`, default 16px
+   */
+  .doing.bare {
+    display: inline-grid;
+    place-items: center;
+    color: var(--epic-agents-ink, var(--ui-text-muted, GrayText));
+    cursor: default;
+  }
+  .doing.bare .spinner {
+    width: var(--epic-agents-spinner-size, 16px);
+    height: var(--epic-agents-spinner-size, 16px);
+    border-width: 2px;
   }
   @keyframes epic-agents-turn {
     to {

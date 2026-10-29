@@ -127,7 +127,7 @@ spell lint --all @spell/examples
 </details>
 
 - A group holding one project uses it without asking.
-- `owen@spell` is your own space:  the folder `spell.spaces/@spell/owen@/` in the kit's folder, in no repo,
+- `owen@spell` is your own space:  the folder `spell.spaces/@spell/owen@/` beside the kit's folder, in no repo,
   ONE folder for the main checkout and every worktree.
   It has that name for everyone, for now:  the code fixes it.
   `spell projects` lists every group ([below](#spell-app)).

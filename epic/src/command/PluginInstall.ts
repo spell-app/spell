@@ -10,6 +10,7 @@ import {
   symlinkSync,
   writeFileSync
 } from "node:fs"
+import { createRequire } from "node:module"
 import { homedir } from "node:os"
 import { dirname, join, resolve } from "node:path"
 
@@ -48,6 +49,12 @@ import { SessionMoves } from "./SessionMoves"
  * - `--dry-run`:  says what it would do, and writes nothing;  `--json`:  the report as JSON
  * - `--kit`:  the kit's checkout to install from;  default the MAIN checkout of the repo this code is in,
  *   never a worktree's, which goes away
+ * - Run from the PUBLISHED `spell` (`npm install spell spell-epic`), the kit is that installed package, and it has no
+ *   marketplace file and no `epic/bin` (its code is built into `dist/`):
+ *   - the plugin is the `spell-epic` package beside it, its parts at its root (`pluginFolder()`);
+ *     without one, `spell`'s own `epic/`, and no `epic` on the `PATH`
+ *   - the marketplace `spell` comes from GitHub (the package's `repository`), as `/plugin marketplace add` would add it:
+ *     Claude Code fetches it itself, so `known_marketplaces.json` gets no entry for it
  * - At Publish the root marketplace's source turns to npm (`PluginPackage.sourceToNpm()`):  running this again then
  *   links the cache back to the checkout, at the new version.
  * - Claude Code's folder:  `ClaudeHome.home()` (`$CLAUDE_CONFIG_DIR`, else `~/.claude`);  the `PATH` folder:
@@ -86,6 +93,8 @@ export class PluginInstall {
   readonly codexHome: string
   /** the open skills format's own folder (`~/.agents`):  `--codex` links the skills into its `skills/` */
   readonly agentsHome: string
+  /** the plugin's folder:  the kit's `epic/`, or the published `spell-epic` package (`pluginFolder()`) */
+  readonly engine: string
 
   constructor({
     home = ClaudeHome.home(),
@@ -101,11 +110,43 @@ export class PluginInstall {
     this.now = now
     this.codexHome = codexHome
     this.agentsHome = agentsHome
+    this.engine = PluginInstall.pluginFolder(kit)
   }
 
-  /** The kit's MAIN checkout:  the repo this file is in, through a worktree too. */
+  /**
+   * The kit's MAIN checkout:  the repo this file is in, through a worktree too.
+   * - the published `spell` (`node_modules/spell`, this file in its `dist/epic/command/`):  that package's folder,
+   *   never the git repo of the project it's installed in
+   */
   static mainKit(): string {
-    return Git.mainRoot(dirname(dirname(dirname(import.meta.dirname))))
+    const here = dirname(dirname(dirname(import.meta.dirname)))
+    return existsSync(join(here, ".git")) ? Git.mainRoot(here) : here
+  }
+
+  /**
+   * Whether `kit` is the published `spell` package, not a checkout:  it has no marketplace file,
+   * `.claude-plugin/marketplace.json` (`spell publish` ships none).
+   */
+  static isPublished(kit: string): boolean {
+    return !existsSync(join(kit, ".claude-plugin", "marketplace.json"))
+  }
+
+  /**
+   * The plugin's folder for `kit`:
+   * - a checkout:  its `epic/`
+   * - the published `spell`:  the `spell-epic` package Node finds from it (the plugin, `bin/epic` included);
+   *   none installed:  `spell`'s own `epic/`, the plugin without its bin
+   */
+  static pluginFolder(kit: string): string {
+    const own = join(kit, "epic")
+    if (!PluginInstall.isPublished(kit) || !existsSync(join(kit, "package.json"))) return own
+    try {
+      const found = dirname(createRequire(join(kit, "package.json")).resolve(`${PLUGIN_PACKAGE}/package.json`))
+      // Node remembers a package it found:  one removed since is no plugin
+      return existsSync(join(found, ".claude-plugin", "plugin.json")) ? found : own
+    } catch {
+      return own
+    }
   }
 
   /** Run `epic plugin <args>`;  resolves to the exit code.  Throws `EpicCommandError` for a bad command line. */
@@ -130,9 +171,18 @@ export class PluginInstall {
     return EXIT.OK
   }
 
-  /** The plugin's folder in the kit:  `<kit>/epic`. */
-  get engine(): string {
-    return join(this.kit, "epic")
+  /**
+   * Where Claude Code finds the marketplace `spell`:
+   * - a checkout:  the checkout's own folder
+   * - the published `spell`:  its GitHub repo (`repository` in its `package.json`)
+   */
+  get marketplaceSource(): MarketplaceSource {
+    if (!PluginInstall.isPublished(this.kit)) return { source: "directory", path: this.kit }
+    const { repository } = (readJson(join(this.kit, "package.json")) ?? {}) as {
+      repository?: string | { url?: string }
+    }
+    const url = typeof repository === "string" ? repository : (repository?.url ?? "")
+    return { source: "github", repo: GITHUB.exec(url)?.[1] ?? DEFAULT_REPO }
   }
 
   /**
@@ -244,9 +294,10 @@ export class PluginInstall {
       delete markets[OLD]
       step.change(`settings.json:  marketplace ${OLD} taken out of extraKnownMarketplaces`)
     }
-    if (markets[marketplace]?.source?.path !== this.kit || markets[marketplace]?.source?.source !== "directory") {
-      markets[marketplace] = { ...markets[marketplace], source: { source: "directory", path: this.kit } }
-      step.change(`settings.json:  marketplace ${marketplace} from ${this.kit} (extraKnownMarketplaces)`)
+    const source = this.marketplaceSource
+    if (JSON.stringify(markets[marketplace]?.source) !== JSON.stringify(source)) {
+      markets[marketplace] = { ...markets[marketplace], source }
+      step.change(`settings.json:  marketplace ${marketplace} from ${sourceName(source)} (extraKnownMarketplaces)`)
     }
     for (const [kind, rules] of Object.entries(settings.permissions ?? {})) {
       if (!Array.isArray(rules)) continue
@@ -269,7 +320,14 @@ export class PluginInstall {
       step.change(`known_marketplaces.json:  ${OLD} taken out`)
     }
     const entry = known[marketplace]
-    if (entry?.source?.path !== this.kit || entry?.installLocation !== this.kit) {
+    if (PluginInstall.isPublished(this.kit)) {
+      // Claude Code fetches it from GitHub itself (settings.json):  only a checkout's folder left from before goes
+      if (entry?.source?.source === "directory") {
+        delete known[marketplace]
+        changed = true
+        step.change(`known_marketplaces.json:  ${marketplace} from ${entry.source.path} taken out`)
+      }
+    } else if (entry?.source?.path !== this.kit || entry?.installLocation !== this.kit) {
       known[marketplace] = {
         source: { source: "directory", path: this.kit },
         installLocation: this.kit,
@@ -472,10 +530,17 @@ export class PluginInstall {
     }
   }
 
-  /** Step 6:  `~/.local/bin/epic`, a link to the kit's `epic/bin/epic`. */
+  /**
+   * Step 6:  `~/.local/bin/epic`, a link to the plugin's `bin/epic`.
+   * - the published `spell` without `spell-epic`, which has none:  skipped, saying so
+   */
   private binLink(step: Step): void {
     const at = join(this.bin, "epic")
     const target = join(this.engine, "bin", "epic")
+    if (!existsSync(target)) {
+      step.change(`PATH:  ${target} doesn't exist, so no ${at};  for the epic command:  npm install ${PLUGIN_PACKAGE}`)
+      return
+    }
     if (this.link(at, target, step)) step.change(`PATH:  ${at} links to ${target}`)
   }
 
@@ -486,7 +551,8 @@ export class PluginInstall {
    */
   private link(at: string, target: string, { dryRun }: Step): boolean {
     const stat = lstatSync(at, { throwIfNoEntry: false })
-    if (stat?.isSymbolicLink() && existsSync(at) && realpathSync(at) === realpathSync(target)) return false
+    if (stat?.isSymbolicLink() && existsSync(at) && existsSync(target) && realpathSync(at) === realpathSync(target))
+      return false
     if (dryRun) return true
     if (stat) rmSync(at, { recursive: true, force: true })
     mkdirSync(dirname(at), { recursive: true })
@@ -517,7 +583,7 @@ export type PluginInstallReport = {
   plugin: string
   /** its version:  its cache folder's name */
   version: string
-  /** the folder it runs from:  the kit's `epic/` */
+  /** the folder it runs from:  the kit's `epic/`, or the published `spell-epic` package */
   from: string
   /** nothing was written */
   dryRun: boolean
@@ -550,9 +616,12 @@ type Step = { dryRun: boolean; change: (text: string) => void }
 /** The parts of Claude Code's `settings.json` this touches;  the rest is kept as it is. */
 type ClaudeSettings = Record<string, unknown> & {
   enabledPlugins?: Record<string, boolean>
-  extraKnownMarketplaces?: Record<string, { source?: { source?: string; path?: string } }>
+  extraKnownMarketplaces?: Record<string, { source?: MarketplaceSource }>
   permissions?: Record<string, unknown>
 }
+
+/** A marketplace's source, as Claude Code's settings name it:  a folder, or a GitHub repo. */
+type MarketplaceSource = { source: "directory"; path: string } | { source: "github"; repo: string }
 
 /** An entry of `known_marketplaces.json`. */
 type KnownMarketplace = { source?: { source?: string; path?: string }; installLocation?: string; lastUpdated?: string }
@@ -564,6 +633,15 @@ type InstalledPlugins = Record<string, unknown> & {
     { scope?: string; installPath?: string; version?: string; installedAt?: string; lastUpdated?: string }[]
   >
 }
+
+/** The published plugin's package:  the plugin's parts at its root, `bin/epic` among them. */
+const PLUGIN_PACKAGE = "spell-epic"
+
+/** The kit's GitHub repo, when its `package.json` names none:  where `/plugin marketplace add` finds `spell`. */
+const DEFAULT_REPO = "spell-app/spell"
+
+/** A GitHub address's `owner/repo`:  `https://github.com/spell-app/spell` => `spell-app/spell`. */
+const GITHUB = /github\.com[/:]([\w.-]+\/[\w.-]+?)(?:\.git)?\/?$/
 
 /** The old plugin's name, and its marketplace's:  `spell-epic@spell-epic` (before repo-split's P20 · One Repo). */
 const OLD = "spell-epic"
@@ -590,6 +668,11 @@ const FRONT_MATTER = /^---\n([\s\S]*?)\n---\n([\s\S]*)$/
 /** Whether `key` is the old plugin, or any plugin of its marketplace:  `spell-epic@spell-epic`. */
 function isOldPlugin(key: string): boolean {
   return key.startsWith(`${OLD}@`) || key.endsWith(`@${OLD}`)
+}
+
+/** Where `source` is, for a report line:  the folder, or `github:<repo>`. */
+function sourceName(source: MarketplaceSource): string {
+  return source.source === "directory" ? source.path : `github:${source.repo}`
 }
 
 /** JSON file `file`;  throws `EpicCommandError` when it won't parse. */

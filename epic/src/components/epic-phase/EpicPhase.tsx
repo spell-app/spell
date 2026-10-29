@@ -8,7 +8,7 @@ import { PageStages, PhaseIds } from "spell/epic/phases"
 // its view of the review inbox:  the file, not `epic-review`'s barrel (`index.ts` defines that family)
 import { ReviewState } from "spell/epic/components/epic-review/ReviewState"
 import { CHOSEN, stopIfOwn, type ReviewShows } from "spell/epic/components/epic-review/EpicReview.types"
-import { STATUS_SLOT } from "spell/epic/components/epic-item/EpicItem.types"
+import { COMMIT_TAG, COMMITS_PROPERTY, STATUS_SLOT } from "spell/epic/components/epic-item/EpicItem.types"
 // Import directly:  the fold base, not the `epic-section` barrel (which defines `<epic-section>`)
 import { EpicFold } from "spell/epic/components/epic-section/EpicFold"
 import { phaseFields } from "spell/epic/components/epic-section/PhaseFields"
@@ -57,8 +57,8 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
  *   - Done, `<epic-commit>`s, Files, Verify, To review
  *   - An older doc's `<epic-updated>` lines (its `changes` slot, P6) show at the end of its body, unboxed,
  *     until the epic tool's next write migrates them (`updates-as-epic-update`)
- *   - Files and Verify show only while the Phases title's gear says so, or its own;  commits while the page's git
- *     toggle does
+ *   - Files and Verify show only while the Phases title's gear says so, or its own;  commits while its git icon
+ *     does
  * - Its body is usually a part (`source="parts/p-epic-migrate.html"`), loaded the first time it opens.
  * - REVIEWED as an Overview sub-section is, only while the page is reviewed
  *   (epic `airplane` P2;  `<epic-review buttons="part">`):
@@ -76,6 +76,9 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
  *   - its own choice (`PhaseFields.setOwn()`), which wins over the Phases section's gear for it:  its fields' custom
  *     properties set on its own box (`foldStyle()`), over the ones they'd inherit from the section
  *   - a list of entries:  more settings for one phase come as more entries
+ * - Its GIT icon (epic `epic-engine` P53, J163), before its gear, while it lists commits (`commits`, or
+ *   `<epic-commit>` children):  shows or hides its own commits, as an item's does;  pressed while they show
+ *   - the page-wide git toggle went (the Log lists every commit, P52), so this is how a phase's own show
  * - SIDE EFFECT:  follows the review inbox while connected.
  ****************/
 export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
@@ -99,6 +102,20 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
 
   /** Its view of the review inbox, keyed by its id (`p-epic-migrate`):  is the page reviewed?  Has it a marked note? */
   readonly reviewState = new ReviewState(() => this.id)
+
+  /** Its own commits show (its git icon pressed):  `--epic-commits-display` on its box (`foldStyle()`). */
+  @E.cssState("commits")
+  @E.state
+  accessor showCommits = false
+
+  /** The git icon's glyph. */
+  readonly gitGlyph = new E.IconGlyph({ owner: this, name: () => "git" })
+
+  /** Does it list commits:  `commits` (its part's, before it loads), or `<epic-commit>` children?  Read live. */
+  get hasCommits(): boolean {
+    void this.layout
+    return !!this.commits || !!this.domElement.querySelector(`:scope > ${COMMIT_TAG}`)
+  }
 
   /** The pen of its title's mark:  its plan changed. */
   readonly changedGlyph = new E.IconGlyph({ owner: this, name: () => "pen to square" })
@@ -317,6 +334,7 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
             )}
           </Show>
           {this.reviewButtons()}
+          <Show when={this.hasCommits}>{this.gitButton()}</Show>
           <Show when={this.id}>{(id) => this.gear(id())}</Show>
         </>
       ),
@@ -351,15 +369,42 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
     })
   }
 
+  /** The git icon:  shows or hides its own commits;  pressed while they show. */
+  private gitButton(): JSX.Element {
+    const words = () => this.translationForKey(this.showCommits ? "hideCommits" : "showCommits")
+    return (
+      <button
+        type="button"
+        class={GIT}
+        part={this.partForName("git")}
+        aria-pressed={this.showCommits ? "true" : "false"}
+        aria-label={words()}
+        title={words()}
+        onClick={(event) => this.flipCommits(event)}
+      >
+        {this.gitGlyph.svg}
+      </button>
+    )
+  }
+
+  /** The git icon, clicked:  its commits shown (it opens, loading its part) or hidden again;  the row doesn't fold. */
+  @E.untracked
+  private flipCommits(event: MouseEvent) {
+    event.stopPropagation()
+    const on = !this.showCommits
+    this.showCommits = on
+    if (on) this.expand()
+  }
+
   /**
    * Its own choice of fields (`PhaseFields.ownOf()`):  each field's custom property, `block` or `none`, on its own box;
-   * a field it hasn't chosen inherits the Phases section's.
+   * a field it hasn't chosen inherits the Phases section's.  Its commits, while its git icon is pressed.
    */
   protected foldStyle(): Record<string, string> | undefined {
+    const style: Record<string, string> = this.showCommits ? { [COMMITS_PROPERTY]: "block" } : {}
     const id = this.id
-    if (!id) return undefined
+    if (!id) return style
     const own = phaseFields.ownOf(id)
-    const style: Record<string, string> = {}
     for (const it of PHASE_FIELDS)
       if (own[it.field] !== undefined) style[it.property] = own[it.field] ? "block" : "none"
     return style
@@ -498,6 +543,9 @@ const STATUS_TEXTS = {
   active: "statusActive",
   done: "statusDone"
 } as const satisfies Record<PhaseStatus, string>
+
+/** Class of its git icon (J163). */
+const GIT = "git"
 
 /** Class of its time pill (the estimate, or what it took), before its review controls. */
 const ESTIMATE = "estimate"

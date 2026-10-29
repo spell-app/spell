@@ -250,8 +250,8 @@ export const CHOSEN_SET = "epic-choices[chosen]"
 
 /**
  * The custom property `<epic-commit>` shows by (`block`):
- * the page's git toggle sets it for every commit, an item's git icon for its own
- * (`EpicPage.types.ts` `COMMITS_PROPERTY`, the same name).
+ * an item's or a phase's git icon sets it for its own commits, the Log section for all of its
+ * (epic `epic-engine` P53:  no page-wide toggle since the Log lists every commit).
  */
 export const COMMITS_PROPERTY = "--epic-commits-display"
 

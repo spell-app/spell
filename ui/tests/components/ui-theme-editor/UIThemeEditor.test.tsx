@@ -37,6 +37,13 @@ function inner<T extends Element = HTMLElement>(host: Element, selector: string)
   return host.shadowRoot!.querySelector<T>(selector)!
 }
 
+/** Press page `id`'s toggle in the bar, and wait for the bench to follow. */
+async function pressPage(host: Element, id: string): Promise<void> {
+  const item = inner(host, `.page-toggles ui-item[value="${id}"]`)
+  await userEvent.click(item.shadowRoot!.querySelector<HTMLElement>("[part~=item]")!)
+  await ElementFixture.settle()
+}
+
 /** A computed token on `<html>`. */
 function token(name: string): string {
   return getComputedStyle(document.documentElement).getPropertyValue(name).trim()
@@ -437,26 +444,26 @@ describe("<ui-theme-editor> with pages", () => {
     expect(swap.getAttribute("title")).toMatch(/^Dark light/)
   })
 
-  it("each page toggles on and off, pressed in while on, kept;  the last one on stays on;  an odd last page takes the row", async () => {
+  it("each page toggles on and off, pressed in while on, kept;  the last one off turns the next on;  an odd last page takes the row", async () => {
     const { host, component } = await withPages()
     const figure = (index: number) => host.shadowRoot!.querySelectorAll<HTMLElement>("figure.page")[index]!
     expect(figure(2).classList.contains("wide")).toBe(true)
     const other = inner(host, '.page-toggles ui-item[value="other"]')
-    expect(other.classList.contains("on")).toBe(true)
-    await userEvent.click(other.shadowRoot!.querySelector<HTMLElement>("[part~=item]")!)
-    await ElementFixture.settle()
-    expect(other.classList.contains("on")).toBe(false)
-    expect(other.hasAttribute("selected")).toBe(false)
+    expect(other.matches(":state(selected)")).toBe(true)
+    await pressPage(host, "other")
+    expect(other.matches(":state(selected)")).toBe(false)
     expect(figure(1).hidden).toBe(true)
     expect(component.shownPageIds).toEqual(["page", "app"])
     expect(figure(2).classList.contains("wide")).toBe(false)
     expect(JSON.parse(localStorage.getItem("spell-ui:theme-editor-hidden-pages")!)).toEqual(["other"])
-    component.togglePage("page")
-    component.togglePage("app")
+    await pressPage(host, "page")
     expect(component.shownPageIds).toEqual(["app"])
     expect(component.isDarkFirst("app")).toBe(false)
-    component.togglePage("other")
-    expect(component.shownPageIds).toEqual(["other", "app"])
+    // the only one on, turned off:  the next one on, round to the first
+    await pressPage(host, "app")
+    expect(component.shownPageIds).toEqual(["page"])
+    await pressPage(host, "other")
+    expect(component.shownPageIds).toEqual(["page", "other"])
   })
 
   it("a page moves by its title row:  Alt+→ / Alt+←, or a drop;  the grid and the toggles follow, kept", async () => {
@@ -502,7 +509,7 @@ describe("<ui-theme-editor> with pages", () => {
   it("its view goes in the page's address, and an address brings that view back", async () => {
     const { host, component } = await withPages()
     component.showSchemes("dark")
-    component.togglePage("other")
+    await pressPage(host, "other")
     component.device = "phone"
     await ElementFixture.settle()
     const params = new URL(location.href).searchParams

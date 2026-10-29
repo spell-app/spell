@@ -1,51 +1,35 @@
 /**
- * Check the TEST RUN (`<epic-test-run>`, epic `epic-engine` P4) in a real browser, as Owen walks it:  a run on a
- * scratch copy of an epic page, every answer read back from the copy's review inbox.
+ * Check TESTING ON THE PAGE (epic `epic-engine` P51, Q53) in a real browser, as Owen walks it:  the Manual tests
+ * section's Start testing, Claude preparing the tests, the first test opening, Next test, a screenshot pasted in a
+ * test's note, Approve closing one;  every step read back from the copy's review inbox.
+ * - P4's separate test run (`<epic-test-run>`) is gone:  this script checked it before P51, and now checks what took
+ *   its place.
  *
- * Usage (from the repo root):
+ * Usage (from the epic folder):
  *   node src/demo/check-test-run.mjs [--doc <name>] [--bundle <spell-ui.js>] [outDir]
- * - `--bundle`:  a scratch build of the docs bundle, served in place of `spell-ui.js` (a runtime change, checked before
- *   the real one is rebuilt)
+ * - `--bundle`:  a scratch build of the docs bundle, served in place of `spell-ui.js`
  * - the copy:  epic `<name>`'s page (default `epic-engine`), its skeleton and parts, NEVER its inbox or details,
- *   copied to `src/demo/shots/test-run/epics/test-run-sample/` (git-ignored), its Manual tests section REPLACED by scratch
- *   tests:
- *   - `v1`, the new shape:  Step (with an action link), Should, Example (a screenshot and a line), If not
- *   - `v2`, the new shape:  Step and Should
- *   - `v3`, an OLDER test:  prose only, shown as its Step
- *   - `v4`, older and deferred (an earlier run's Not now):  last in the order
- *   - `v5`, the new shape, failed before (`failed="i9"`)
- *   - `v6`, done:  not in the run
- *   - so the run's order is v1 v2 v3 v5 v4
- *   - and a second copy, `test-run-next`, with two open tests:  the next epic of a run across every epic
- * - the server:  a page server of its OWN (`DemoServer`) over `src/demo/shots/test-run/` as its content folder:  it
- *   wakes nobody
- *   - its `GET /api/epics/tests` reads the content folder it serves, the copies (epic `epic-engine` I45)
- * - a part's Example image is written from the PART's folder, `../tests/v1.png`:  a part's relative URLs are
- *   rewritten against it as it loads (`LoadableBody`)
+ *   copied to `src/demo/shots/test-run/epics/test-run-sample/` (git-ignored), its Manual tests section REPLACED by
+ *   scratch tests:
+ *   - `m1`, the explicit shape:  Step, Should;  `m2`, an older one, prose only;  `m3`, Step and Should
+ *   - `m4`, one Claude can check itself;  `m5`, done:  never offered
+ *   - and a second copy, `test-run-next`, every test prepared already:  the next epic of `epic test --all`
+ * - the server:  a page server of its OWN (`DemoServer`) over `src/demo/shots/test-run/`, THIS checkout's pack and
+ *   routes:  it wakes nobody
  * - the walk, at 390px (the side bar's width), light:
- *   - the Manual tests section's "Start testing · 5" starts it:  `?test=1` on the address, "1 of 5", the blocks hidden
- *   - v1:  its fields, the action button, the Example zoomed and closed (Esc closes the zoom, not the run);  P:
- *     passed, on to v2
- *   - v2:  Failed opens the failure;  a note typed, a screenshot PASTED (a PNG made in the page):  its thumbnail, the
- *     file in the copy's `tests/`, the mark carrying both
- *   - scrolling the page never takes the run's `#v2` off the address (the docs runtime's scroll-follow, J44:  needs
- *     the runtime rebuilt into `spell-ui.js`, or `--bundle`)
- *   - Next, v3 (prose as its Step):  Skip, on to v5
- *   - RELOAD mid-run:  back at v5, "4 of 5", v2's note and screenshot still there (Back to it, and forward again)
- *   - v5:  N, not now, on to v4;  → past it, the summary:  1 passed, 1 failed, 1 skipped, 1 not now, 1 not answered
- *   - Send results:  the inbox's `sent` moves, the button says so
- *   - a COMMENT on v1 (then Passed) and on v5 before its answer (the inbox's draft, back after the reload, then Not
- *     now):  each in its mark;  the summary lists the tests commented on;  after `epic inbox apply <copy>`, each is
- *     Owen's reply in its test's details
- *   - Esc:  the blocks back, `?test` off the address;  v5's line says "failed → I9" (`failed="i9"`)
- *   - a run across every epic (`?test=1&all=1`):  the summary's "Next:  test-run-next (2 tests)" opens it, in test
- *     mode, "1 of 2"
- *   - on the next epic, P and S, then Done testing at once:  both answers SENT in its copy's inbox, no Send pressed
- *     (I52), the notice line saying so
- *   - progress right throughout ("N of 5", the bar's answered count)
- * - and at 390 and 1200px, light and dark, reduced motion:  nothing wider than the window;  screenshots (outDir,
- *   default `src/demo/shots/test-run/`):  `run-<width>-<scheme>.png`, `run-failed.png`, `run-zoom.png`,
- *   `run-summary.png`, `run-start.png`, `run-button.png`, `run-failed-line.png`
+ *   - "Start testing · 4" on the Manual tests title;  a click asks Claude (`now`:  `prepare` under `tests`), the
+ *     button "Preparing tests"
+ *   - Claude's agent, played by the epic tool:  closes `m4` (checked itself), writes `m3` out with an Example
+ *     screenshot, stamps the order (`m3` `m1` `m2`), `inbox done <copy>#tests`
+ *   - the page opens `m3` (`#m3`, its details open), the button "Next test · 3 left"
+ *   - a screenshot PASTED in `m3`'s note box:  its thumbnail, the file in the copy's `tests/`, a revisit carrying it
+ *   - Next test:  `m1`;  Approve on it;  "Next test · 1 left"
+ *   - `epic inbox apply --all`:  `m1` closed (passed), `m3` left open for the session (his note)
+ *   - `?test=1&all=1` on the next copy:  every test prepared, so no request, its first test opens;  both approved,
+ *     the section's last line names no next epic (none left)
+ * - and at 1200 and 420px, light and dark:  nothing wider than the window;  screenshots (outDir, default
+ *   `src/demo/shots/test-run/`):  `tests-before-<w>-<scheme>.png`, `tests-preparing.png`, `test-open-<w>-<scheme>.png`,
+ *   `note-picture-<w>-<scheme>.png`, `note-picture-in-box.png`, `test-approved.png`, `next-epic.png`
  * - fails (exit 1) unless each shows on the page AND lands in the inbox
  * - re-runs itself under `tsx` (the page server and the tool are TypeScript)
  */
@@ -80,7 +64,6 @@ const { DemoServer } = await import("./DemoServer.ts")
 const { bundleRoutes, logInto } = await import("./demoPages.mjs")
 const { PlanDocCommands } = await import("spell/epic/tool/PlanDocCommands.ts")
 const { PlanDocFiles } = await import("spell/epic/tool/PlanDocFiles.ts")
-const JSON5 = (await import("json5")).default
 
 ////////////////
 // ## Settings
@@ -94,9 +77,9 @@ const flagged = new Set(["--doc", "--bundle"].flatMap((name) => (args.includes(n
 const out = args.find((arg, index) => !arg.startsWith("--") && !flagged.has(index)) ?? CONTENT
 const SAMPLE = "test-run-sample"
 const NEXT = "test-run-next"
-const NOTE = "check-test-run:  the card never showed"
-const PASSED_COMMENT = "It did, but the second title wrapped a beat late"
-const NOTNOW_COMMENT = "Needs main first"
+const NOTE = "The second title still ends in an ellipsis"
+/** What marks the scratch tests in a copy:  the replacement happened. */
+const SCRATCH_MARK = 'data-check="test-run"'
 const problems = []
 const summary = { from, bundle: bundle ?? null }
 
@@ -106,14 +89,18 @@ const summary = { from, bundle: bundle ?? null }
 
 rmSync(CONTENT, { recursive: true, force: true })
 mkdirSync(out, { recursive: true })
-const sampleFolder = copyEpic(SAMPLE, "A test run sample", SAMPLE_TESTS())
+const sampleFolder = copyEpic(SAMPLE, "A testing sample", SAMPLE_TESTS())
 copyEpic(NEXT, "B the next epic", NEXT_TESTS())
 // the tool links a doc's bare file names through its checkout's `packages/`:  the copies' folder has none
 mkdirSync(join(CONTENT, "packages"), { recursive: true })
-const inboxFile = join(sampleFolder, `${SAMPLE}.inbox.json5`)
+const tool = new PlanDocCommands({ files: new PlanDocFiles({ root: CONTENT, content: CONTENT }) })
+const said = []
+tool.print = (text) => void said.push(text)
+tool.warn = (text) => void said.push(`! ${text}`)
 
 const server = await DemoServer.start({ content: CONTENT })
 const pagePath = `/epics/${SAMPLE}/${SAMPLE}.plan.html`
+const nextPath = `/epics/${NEXT}/${NEXT}.plan.html`
 const url = `${server.base}${pagePath}`
 summary.url = url
 
@@ -123,13 +110,13 @@ try {
   await walk()
   await looks()
   await acrossEpics()
-  await applied()
 } catch (error) {
   problems.push(`threw:  ${error.stack ?? error}`)
 } finally {
   await browser.close()
   await server.stop()
 }
+summary.tool = said.join("\n")
 summary.wakes = server.wakes
 console.log(JSON.stringify(summary, null, 2))
 if (problems.length) {
@@ -147,229 +134,152 @@ async function walk() {
   await page.emulateMedia({ colorScheme: "light", reducedMotion: "reduce" })
   await open(page, url)
 
-  // Start testing, on the Manual tests section's title:  "Start testing · 5"
-  const start = await page.evaluate(() => {
-    const button = document.getElementById("tests").shadowRoot.querySelector("ui-button.start-testing")
-    return button && { text: button.textContent.trim(), title: button.getAttribute("title") }
-  })
-  expect("Start testing, on the Manual tests title", start?.text, "Start testing · 5")
-  await page.evaluate(() => document.getElementById("tests").scrollIntoView({ block: "center" }))
+  // Start testing, on the Manual tests section's title
+  expect("Start testing, on the Manual tests title", await page.evaluate(() => buttonText()), "Start testing · 4")
+  await page.evaluate(() => testsSection().scrollIntoView({ block: "center" }))
   await page.waitForTimeout(300)
-  await page.screenshot({ path: join(out, "run-button.png") })
-  await page.evaluate(() => document.getElementById("tests").shadowRoot.querySelector("ui-button.start-testing").click())
-  await waitForCard(page, "v1")
-  expect("Start testing puts ?test=1 on the address", new URL(page.url()).searchParams.get("test"), "1")
-  expect("the blocks hide in test mode", await page.evaluate(() => blocksShown()), false)
-  await page.screenshot({ path: join(out, "run-start.png") })
-
-  // v1:  its fields, the action button;  the Example zoomed, Esc closing only the zoom
-  expect("v1's card", await page.evaluate(() => cardFacts()), {
-    at: "1 of 5",
-    answered: 0,
-    id: "V1",
-    title: "Folded titles show in full",
-    fields: ["Step", "Should", "Example", "If not"],
-    step: "Open the scratch guide, its Judgement calls section.",
-    actions: [{ text: "Open the guide", href: "/guides/changelog.html", target: "_blank" }],
-    shots: 1,
-    labels: []
-  })
-  await page.evaluate(() => runRoot().querySelector(".example ui-button.shot").click())
-  await page.waitForFunction(() => runRoot().querySelector("ui-modal.zoom")?.hasAttribute("visible"), null, {
-    timeout: 4000
-  }).catch(() => problems.push("the Example's screenshot didn't zoom"))
-  await page.waitForTimeout(400)
-  await page.screenshot({ path: join(out, "run-zoom.png") })
-  await page.keyboard.press("Escape")
-  await page.waitForFunction(() => !runRoot().querySelector("ui-modal.zoom")?.hasAttribute("visible"), null, {
-    timeout: 4000
-  }).catch(() => problems.push("Esc didn't close the zoom"))
-  expect("Esc on the zoom leaves the run running", await page.evaluate(() => !!run()), true)
-
-  // a COMMENT on v1 (Owen, 2026-10-19:  "it did part of what you asked"), then Esc out of its box and P:  passed,
-  // the comment with it, on to v2
-  expect("every card has its comment box", await page.evaluate(() => noteField()?.placeholder), "Comment (optional)")
-  await page.evaluate(() => noteField().focus())
-  await page.keyboard.type(PASSED_COMMENT)
-  await page.keyboard.press("Escape")
-  await page.keyboard.press("p")
-  await waitForCard(page, "v2")
-  await expectMark("P on v1, with its comment", "v1", { action: "test", result: "passed", note: PASSED_COMMENT })
-  expect("on to v2:  2 of 5, 1 answered", pick(await page.evaluate(() => cardFacts()), ["at", "answered"]), {
-    at: "2 of 5",
-    answered: 1
-  })
-  // J44:  the docs runtime's scroll-follow leaves the run's `#v2` alone as the page scrolls:  it never takes the hash
-  // off (the run would put it back, so the address alone can't tell)
-  await page.evaluate(() => (window.hashesWiped = 0))
-  await page.mouse.wheel(0, 600)
-  await page.waitForTimeout(500)
-  await page.mouse.wheel(0, -300)
-  await page.waitForTimeout(500)
-  expect("scrolling keeps the run's #v2 in the address", new URL(page.url()).hash, "#v2")
-  expect("the runtime never takes the run's #id off the address", await page.evaluate(() => window.hashesWiped), 0)
-
-  // v2:  Failed, a note, a pasted screenshot
-  await page.evaluate(() => answerButton("failed").click())
-  await page.waitForFunction(() => runRoot().querySelector(".failure"), null, { timeout: 4000 })
-  await expectMark("Failed on v2", "v2", { action: "test", result: "failed" })
-  expect("Failed focuses the note box", await page.evaluate(() => noteField() === deepActive()), true)
-  await page.keyboard.type("The second title still ends in an ellipsis")
-  await pasteImage(page)
+  await page.screenshot({ path: join(out, "tests-before-390-light.png") })
+  await page.evaluate(() => testButton().click())
+  const asked = await waitFor(async () => (await readInbox()).now?.find((each) => each.id === "tests"))
+  expect("Start testing asks Claude for now", pick(asked, ["id", "action"]), { id: "tests", action: "prepare" })
   await page
-    .waitForFunction(() => runRoot().querySelector(".drop ui-button.shot img") && !runRoot().querySelector(".drop.saving"), null, { timeout: 8000 })
-    .catch(() => problems.push("the pasted screenshot never showed as a thumbnail"))
-  const v2 = await waitForMark("v2", (mark) => mark?.shot && mark?.note)
-  expect("v2's mark:  failed, the note, the screenshot", { ...v2, shot: /^tests\/v2-\d{8}-\d{4}\.png$/.test(v2?.shot ?? "") }, {
-    action: "test",
-    result: "failed",
-    note: "The second title still ends in an ellipsis",
-    shot: true,
-    at: v2?.at
-  })
-  if (v2?.shot && !existsSync(join(sampleFolder, v2.shot))) problems.push(`the screenshot isn't in the copy:  ${v2.shot}`)
-  expect("v2's failed button dashed red", await page.evaluate(() => answerFacts("failed")), {
-    fill: "dashed",
-    color: "red",
-    pressed: "true"
-  })
-  await page.screenshot({ path: join(out, "run-failed.png") })
+    .waitForFunction(() => buttonText() === "Preparing tests", null, { timeout: 6000 })
+    .catch(() => problems.push(`the button didn't say Preparing tests:  ${"" /* read below */}`))
+  await page.waitForTimeout(300)
+  await page.screenshot({ path: join(out, "tests-preparing.png") })
 
-  // Next:  v3, prose as its Step;  Skip
-  await page.evaluate(() => moveButton("next").click())
-  await waitForCard(page, "v3")
-  const v3 = await page.evaluate(() => cardFacts())
-  expect("v3, an older test:  its prose is its Step", pick(v3, ["at", "fields", "step"]), {
-    at: "3 of 5",
-    fields: ["Step"],
-    step: "Reload each tab once first. Select all highlights the page."
-  })
-  await page.evaluate(() => answerButton("skip").click())
-  await waitForCard(page, "v5")
-  await expectMark("Skip on v3", "v3", { action: "test", result: "skip" })
-  expect("v5:  failed before, 4 of 5", pick(await page.evaluate(() => cardFacts()), ["at", "answered", "labels"]), {
-    at: "4 of 5",
-    answered: 3,
-    labels: ["failed before · I9"]
-  })
-
-  // a comment on v5 BEFORE its answer:  the inbox's draft for it
-  await page.evaluate(() => noteField().focus())
-  await page.keyboard.type(NOTNOW_COMMENT)
-  await page.keyboard.press("Escape")
-  const draft = await waitFor(async () => (await readInbox()).drafts?.v5?.note)
-  expect("v5's comment, typed before an answer:  the inbox's draft", draft, NOTNOW_COMMENT)
-
-  // RELOAD mid-run:  back at v5, the answers kept, its comment too
-  expect("the address names the test", new URL(page.url()).hash, "#v5")
-  await page.reload()
-  await waitForCard(page, "v5")
-  expect("reloaded:  back at v5, 3 answered", pick(await page.evaluate(() => cardFacts()), ["at", "answered"]), {
-    at: "4 of 5",
-    answered: 3
-  })
+  // Claude's agent:  m4 checked and closed, m3 written out with an Example, the order stamped, the request done
+  await claudePrepares(SAMPLE, sampleFolder)
   await page
-    .waitForFunction((said) => noteField()?.value === said, NOTNOW_COMMENT, { timeout: 4000 })
-    .catch(() => problems.push("v5's comment didn't survive the reload"))
-  await page.keyboard.press("ArrowLeft")
-  await waitForCard(page, "v3")
-  expect("← :  v3, its Skip shown", (await page.evaluate(() => answerFacts("skip"))).pressed, "true")
-  await page.keyboard.press("ArrowLeft")
-  await waitForCard(page, "v2")
-  expect("v2 after the reload:  its note and screenshot", await page.evaluate(() => ({
-    note: noteField()?.value,
-    thumbnail: !!runRoot().querySelector(".drop ui-button.shot img")
-  })), { note: "The second title still ends in an ellipsis", thumbnail: true })
-  await page.keyboard.press("ArrowRight")
-  await waitForCard(page, "v3")
-  await page.keyboard.press("ArrowRight")
-  await waitForCard(page, "v5")
+    .waitForFunction(() => location.hash === "#m3", null, { timeout: 15_000 })
+    .catch(() => problems.push(`the first test never opened:  ${page.url()}`))
+  await page
+    .waitForFunction(() => document.getElementById("m3")?.hasAttribute("open"), null, { timeout: 6000 })
+    .catch(() => problems.push("m3 opened in the address, but not on the page"))
+  await page
+    .waitForFunction(() => buttonText() === "Next test · 3 left", null, { timeout: 6000 })
+    .catch(async () => problems.push(`the button after preparing:  ${await page.evaluate(() => buttonText())}`))
+  expect("m4, checked by Claude, is closed", await page.evaluate(() => document.getElementById("m4")?.getAttribute("status")), "done")
+  await page.waitForTimeout(600)
+  await page.screenshot({ path: join(out, "test-open-390-light.png") })
 
-  // v5:  N, not now;  v4 (deferred, last);  → the summary
-  await page.keyboard.press("n")
-  await waitForCard(page, "v4")
-  await expectMark("N on v5, its comment with it", "v5", { action: "test", result: "notnow", note: NOTNOW_COMMENT })
-  expect("the draft gone once the answer carries it", (await readInbox()).drafts?.v5, undefined)
-  expect("v4, deferred, last:  5 of 5", pick(await page.evaluate(() => cardFacts()), ["at", "answered", "labels"]), {
-    at: "5 of 5",
-    answered: 4,
-    labels: ["not now 2026-10-18"]
-  })
-  await page.keyboard.press("ArrowRight")
-  await page.waitForFunction(() => runRoot()?.querySelector(".summary"), null, { timeout: 4000 })
-  expect("the summary", await page.evaluate(() => summaryFacts()), {
-    at: "5 of 5",
-    counts: ["1 passed", "1 failed", "1 skipped", "1 not now", "1 not answered"],
-    commented: ["V1", "V2", "V5"],
-    send: "Send results"
-  })
-  await page.screenshot({ path: join(out, "run-summary.png") })
+  // a screenshot pasted in m3's note box:  a revisit carrying it, its thumbnail
+  await pasteImage(page, "m3")
+  await page
+    .waitForFunction(() => noteRoot("m3")?.querySelector(".note-picture img[src^='tests/']"), null, { timeout: 8000 })
+    .catch(() => problems.push("the pasted screenshot never showed as a thumbnail in m3's note"))
+  await page.evaluate(() => noteRoot("m3").querySelector(".note-box").scrollIntoView({ block: "center" }))
+  await page.waitForTimeout(300)
+  await page.screenshot({ path: join(out, "note-picture-in-box.png") })
+  await page.evaluate(() => noteField("m3").focus())
+  await page.keyboard.type(NOTE)
+  // leaving the box saves it at once
+  await page.evaluate(() => noteField("m3").blur())
+  const m3 = await waitForMark("m3", (mark) => mark?.shot && mark?.note === NOTE)
+  expect(
+    "m3's mark:  a revisit, his words, the screenshot",
+    { ...pick(m3, ["action", "note"]), shot: /^tests\/m3-\d{8}-\d{4}\.png$/.test(m3?.shot ?? "") },
+    { action: "revisit", note: NOTE, shot: true }
+  )
+  if (m3?.shot && !existsSync(join(sampleFolder, m3.shot))) problems.push(`the screenshot isn't in the copy:  ${m3.shot}`)
+  await page.evaluate(() => noteRoot("m3").querySelector(".note-box").scrollIntoView({ block: "center" }))
+  await page.waitForTimeout(300)
+  await page.screenshot({ path: join(out, "note-picture-390-light.png") })
 
-  // Send results:  every mark sent
-  await page.evaluate(() => runRoot().querySelector("ui-button.send").click())
-  await page.waitForFunction(() => runRoot().querySelector("ui-button.send")?.textContent.trim() === "Results sent", null, {
-    timeout: 5000
-  }).catch(() => problems.push("Send results never said the results went"))
-  const inbox = await readInbox()
-  if (!inbox.sent) problems.push("Send results:  the inbox has no `sent`")
-  summary.marks = inbox.marks
-  const onDisk = JSON5.parse(readFileSync(inboxFile, "utf8"))
-  expect("the marks, in the copy's inbox FILE", Object.fromEntries(Object.entries(onDisk.marks).map(([id, mark]) => [id, mark.result])), {
-    v1: "passed",
-    v2: "failed",
-    v3: "skip",
-    v5: "notnow"
-  })
+  // Next test:  m1;  Approve on it
+  await page.evaluate(() => testButton().click())
+  await page
+    .waitForFunction(() => location.hash === "#m1", null, { timeout: 6000 })
+    .catch(() => problems.push(`Next test didn't open m1:  ${page.url()}`))
+  await page.evaluate(() => reviewButton("m1", "approve").click())
+  await waitForMark("m1", (mark) => mark?.action === "approve")
+  await page
+    .waitForFunction(() => buttonText() === "Next test · 1 left", null, { timeout: 6000 })
+    .catch(async () => problems.push(`after Approve:  ${await page.evaluate(() => buttonText())}`))
+  await page.evaluate(() => document.getElementById("m1").scrollIntoView({ block: "start" }))
+  await page.waitForTimeout(300)
+  await page.screenshot({ path: join(out, "test-approved.png") })
 
-  // Esc:  the blocks back, `?test` off the address
-  await page.keyboard.press("Escape")
-  await page.waitForFunction(() => !run(), null, { timeout: 4000 }).catch(() => problems.push("Esc didn't leave the run"))
-  expect("left:  the blocks back", await page.evaluate(() => blocksShown()), true)
-  expect("left:  ?test off the address", new URL(page.url()).search, "")
-  // a test failed before shows it on its line:  "failed → I9", linking the issue
-  expect("v5's line:  its failed mark", await page.evaluate(() => {
-    const mark = document.getElementById("v5").shadowRoot.querySelector("ui-label.failed")
-    return mark && { text: text(mark), href: mark.getAttribute("href"), title: mark.getAttribute("title") }
-  }), { text: "failed → I9", href: "#i9", title: "Failed in your test run:  filed as I9" })
-  await page.evaluate(() => {
-    const tests = document.getElementById("tests")
-    tests.setAttribute("open", "")
-    tests.scrollIntoView({ block: "start" })
-  })
-  await page.waitForTimeout(400)
-  await page.screenshot({ path: join(out, "run-failed-line.png") })
-  summary.logs = logs
-  if (logs.length) problems.push(`page errors:  ${logs.join(" | ")}`)
+  // applied:  m1 closed as passed;  m3 left for the session (his note and screenshot)
+  await tool.run(["inbox", SAMPLE, "apply", "--all"])
+  const html = readFileSync(join(sampleFolder, `${SAMPLE}.plan.html`), "utf8")
+  expect("after apply, m1 is closed", /id="m1"[^>]*status="done"/.test(html), true)
+  expect("after apply, m3 waits for the session", /id="m3"[^>]*status="open"/.test(html), true)
+  expect("the walk's page errors", logs, [])
+  await page.close()
+}
+
+/** At 1200 and 420px, light and dark:  the section before, a prepared test open, a picture in its note. */
+async function looks() {
+  for (const width of [1200, 420]) {
+    for (const scheme of ["light", "dark"]) {
+      const page = await newPage({ width, height: 900 }, { context: { deviceScaleFactor: 2 } })
+      await page.emulateMedia({ colorScheme: scheme, reducedMotion: "reduce" })
+      await open(page, `${url}#m3`)
+      await page.waitForFunction(() => document.getElementById("m3")?.hasAttribute("open"), null, { timeout: 8000 }).catch(() => undefined)
+      await page.waitForTimeout(800)
+      const wide = await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)
+      if (wide > 0) problems.push(`${width}px ${scheme}:  the page is ${wide}px wider than the window:  ${await page.evaluate(() => widest())}`)
+      await page.screenshot({ path: join(out, `test-open-${width}-${scheme}.png`) })
+      await page.evaluate(() => noteRoot("m3")?.querySelector(".note-box")?.scrollIntoView({ block: "center" }))
+      await page.waitForTimeout(300)
+      await page.screenshot({ path: join(out, `note-picture-${width}-${scheme}.png`) })
+      await page.evaluate(() => testsSection().scrollIntoView({ block: "center" }))
+      await page.waitForTimeout(300)
+      await page.screenshot({ path: join(out, `tests-before-${width}-${scheme}.png`) })
+      await page.close()
+    }
+  }
+}
+
+/** `?test=1&all=1` on the next copy:  every test prepared, so its first opens at once;  both approved, the last line. */
+async function acrossEpics() {
+  const page = await newPage({ width: 390, height: 844 })
+  await open(page, `${server.base}${nextPath}?test=1&all=1`)
+  await page
+    .waitForFunction(() => location.hash === "#m1", null, { timeout: 8000 })
+    .catch(() => problems.push(`?test=1 on a prepared page didn't open its first test:  ${page.url()}`))
+  expect("?test= leaves the address, all=1 stays", new URL(page.url()).search, "?all=1")
+  expect("no request for a page already prepared", (await readInbox(nextPath)).now ?? [], [])
+  for (const id of ["m1", "m2"]) {
+    await page.evaluate((id) => reviewButton(id, "approve").click(), id)
+    await waitForMark(id, (mark) => mark?.action === "approve", nextPath)
+  }
+  await page
+    .waitForFunction(() => testsSection().shadowRoot.querySelector(".next-epic")?.textContent.trim(), null, { timeout: 6000 })
+    .catch(() => problems.push("the section's last line never showed, every test answered"))
+  summary.nextEpic = await page.evaluate(() => testsSection().shadowRoot.querySelector(".next-epic")?.textContent.trim())
+  await page.evaluate(() => testsSection().shadowRoot.querySelector(".next-epic")?.scrollIntoView({ block: "center" }))
+  await page.waitForTimeout(300)
+  await page.screenshot({ path: join(out, "next-epic.png") })
   await page.close()
 }
 
 /**
- * Claude's side, on the copy:  `epic inbox apply <copy>` (the tool, in this process):  each COMMENT lands on its test
- * as the person's reply (`<epic-reply from="<name>">`, no `agent`;  epic `epic-friend` P2), in its details:  the
- * passed one's and the not-now one's.
+ * Claude's agent, as the epic skill's "Start testing" says, by the epic tool on copy `name`:  `m4` checked and
+ * closed, `m3` written out with an Example, each open test stamped in order, the request done.
  */
-async function applied() {
-  const tool = new PlanDocCommands({ files: new PlanDocFiles({ root: CONTENT, content: CONTENT }) })
-  const said = []
-  tool.print = (text) => void said.push(text)
-  tool.warn = (text) => void said.push(`! ${text}`)
-  await tool.run(["inbox", SAMPLE, "apply"])
-  summary.applied = said.join("\n")
-  const parts = join(sampleFolder, "parts")
-  const files = [join(sampleFolder, `${SAMPLE}.plan.html`), ...readdirSync(parts).map((name) => join(parts, name))]
-  const html = files.map((file) => readFileSync(file, "utf8")).join("\n")
-  for (const [id, comment, re] of [
-    ["v1", PASSED_COMMENT, "test passed"],
-    ["v5", NOTNOW_COMMENT, "test not now"]
-  ]) {
-    const reply = new RegExp(
-      `<epic-reply(?![^>]*\\bagent=)[^>]*from="[^"]+"[^>]*re="${re}"[^>]*>\\s*<p>\\s*${comment.replace(/ /g, "\\s+")}\\s*</p>`
-    )
-    if (!reply.test(html)) problems.push(`after apply:  ${id}'s comment isn't its reply ("${re}")`)
+async function claudePrepares(name, folder) {
+  const run = async (...words) => {
+    const code = await tool.run(words)
+    if (code) problems.push(`epic ${words.join(" ")}:  exit ${code} ${said.at(-1)}`)
   }
+  await run("status", name, "m4", "underway", "<p>Checking it headless.</p>")
+  await run("status", name, "m4", "done", "<p>Checked by Claude:  a headless screenshot.</p>")
+  await run(
+    "details", name, "m3",
+    "--step", "1. In VS Code's side bar, open the Review tab.\n2. Fold the Judgement calls section, then open it again.",
+    "--should", "Every title wraps in full, folded or open.",
+    "--example", join(folder, "tests", "m1.png"),
+    "--prepared", "1"
+  )
+  await run("details", name, "m1", "--prepared", "2")
+  await run("details", name, "m2", "--prepared", "3")
+  await run("close", name, "m4")
+  await run("inbox", name, "done", "tests")
 }
 
-/** v1's Example:  a screenshot "Claude took", drawn and shot in the browser, into the copy's `tests/`. */
+/** The Example's screenshot "Claude took":  drawn and shot in the browser, into the copy's `tests/`. */
 async function exampleShot() {
   const page = await browser.newPage({ viewport: { width: 480, height: 200 } })
   await page.setContent(
@@ -377,94 +287,15 @@ async function exampleShot() {
       `<p style="margin: 0 0 8px"><b>J12</b> A long folded title that wraps onto a second line in full</p>` +
       `<p style="margin: 0"><b>J13</b> Another, never cut short with an ellipsis</p></div>`
   )
-  await page.locator("#shot").screenshot({ path: join(sampleFolder, "tests", "v1.png") })
+  await page.locator("#shot").screenshot({ path: join(sampleFolder, "tests", "m1.png") })
   await page.close()
-}
-
-/** The run at 390 and 1200px, light and dark, reduced motion:  nothing wider than the window;  a screenshot each. */
-async function looks() {
-  for (const width of [390, 1200])
-    for (const scheme of ["light", "dark"]) {
-      const page = await newPage({ width, height: 900 }, { context: { deviceScaleFactor: 2 } })
-      await page.emulateMedia({ colorScheme: scheme, reducedMotion: "reduce" })
-      await open(page, `${url}?test=1#v2`)
-      await waitForCard(page, "v2")
-      await page.waitForTimeout(300)
-      const wide = await page.evaluate(() => document.documentElement.scrollWidth)
-      if (wide > width) problems.push(`${width}px ${scheme}:  the page is ${wide}px wide`)
-      await page.screenshot({ path: join(out, `run-${width}-${scheme}.png`) })
-      await page.close()
-    }
-}
-
-/** A run across every epic (`?test=1&all=1`):  the summary leads to the next epic with open tests, in test mode. */
-async function acrossEpics() {
-  const page = await newPage({ width: 390, height: 844 })
-  await open(page, `${url}?test=1&all=1`)
-  // every test but v4 answered:  it starts there
-  await waitForCard(page, "v4")
-  await page.keyboard.press("ArrowRight")
-  await page.waitForFunction(() => runRoot()?.querySelector("ui-button.next-epic"), null, { timeout: 6000 })
-    .catch(() => problems.push("the summary never offered the next epic"))
-  const next = await page.evaluate(() => {
-    const button = runRoot().querySelector("ui-button.next-epic")
-    return button && { text: button.textContent.trim(), href: new URL(button.getAttribute("href")).pathname + new URL(button.getAttribute("href")).search }
-  })
-  expect("Next:  the next epic with open tests", next, {
-    text: `Next:  ${NEXT} (2 tests)`,
-    href: `/epics/${NEXT}/${NEXT}.plan.html?test=1&all=1`
-  })
-  await page.evaluate(() => runRoot().querySelector("ui-button.next-epic").click())
-  await page.waitForURL(`**/${NEXT}.plan.html?**`, { timeout: 8000 })
-  await waitForCard(page, "v1")
-  expect("the next epic, in test mode", pick(await page.evaluate(() => cardFacts()), ["at", "id"]), { at: "1 of 2", id: "V1" })
-  await leaveSends(page)
-  await page.close()
-}
-
-/**
- * I52 (Owen, 2026-10-19:  "I pressed 'Done Testing' ... and you later said 'no test results have come in'"):  on the
- * next epic's copy, two answers, then Done testing at once -- the run gone, both answers SENT in that copy's inbox
- * (no Send pressed), and the notice line saying so.
- */
-async function leaveSends(page) {
-  const nextPath = `/epics/${NEXT}/${NEXT}.plan.html`
-  await page.keyboard.press("p")
-  await waitForCard(page, "v2")
-  await page.keyboard.press("s")
-  await page.evaluate(() => runRoot().querySelector("ui-button.leave").click())
-  await page.waitForFunction(() => !run(), null, { timeout: 4000 }).catch(() => problems.push("Done testing didn't leave the run"))
-  const sentAll = await waitFor(async () => {
-    const inbox = await readInbox(nextPath)
-    const marks = Object.values(inbox.marks ?? {})
-    const sent = inbox.sent && marks.length === 2 && marks.every((mark) => Date.parse(mark.at) <= Date.parse(inbox.sent))
-    return sent ? inbox : undefined
-  })
-  if (!sentAll) problems.push("Done testing with 2 answers:  the copy's inbox doesn't show them sent")
-  else
-    expect("Done testing SENT the answers:  the copy's inbox", Object.fromEntries(Object.entries(sentAll.marks).map(([id, mark]) => [id, mark.result])), {
-      v1: "passed",
-      v2: "skip"
-    })
-  const notice = await page.evaluate(() => {
-    const line = Array.from(document.body.querySelectorAll(":scope > [role=status]")).find((each) => !each.hidden)
-    return line?.shadowRoot?.querySelector("p")?.textContent ?? ""
-  })
-  // nobody listens to the copy:  Send's own notice (saved, and the wake);  a listening session:  "2 results sent"
-  if (!/^(2 results sent to Claude|Saved\.)/.test(notice)) problems.push(`Done testing's notice:  "${notice}"`)
-  summary.leftNotice = notice
 }
 
 ////////////////
 // ## Helpers
 ////////////////
 
-/**
- * A new page at `viewport`, with the page-side helpers (`HELPERS`);  with `--bundle`, that file served as the docs
- * bundle (`spell-ui.js`).
- * - `context`:  Playwright's other options (`deviceScaleFactor`)
- * - `logs`:  its errors pushed there, as they come;  a missing file says which (`response`)
- */
+/** A new page at `viewport`, with the page-side helpers (`HELPERS`);  `logs`:  its errors pushed there. */
 async function newPage(viewport, { context, logs } = {}) {
   const page = await BrowserPage.newPage(browser, {
     viewport,
@@ -478,64 +309,34 @@ async function newPage(viewport, { context, logs } = {}) {
   return page
 }
 
-/** Page-side helpers, on every load:  the run, its parts, facts about its card. */
+/** The page-side helpers, on `window`. */
 function HELPERS() {
-  // every address written with the run's query but no `#id`:  the docs runtime's scroll-follow, before J44
-  window.hashesWiped = 0
-  const replace = history.replaceState.bind(history)
-  history.replaceState = (state, unused, url) => {
-    const next = url === undefined || url === null ? null : new URL(url, location.href)
-    if (next?.searchParams.has("test") && !next.hash) window.hashesWiped++
-    return replace(state, unused, url)
+  window.testsSection = () => document.getElementById("tests")
+  window.testButton = () => testsSection()?.shadowRoot?.querySelector("ui-button.start-testing") ?? null
+  window.buttonText = () => (testButton()?.textContent ?? "").replace(/\s+/g, " ").trim()
+  window.reviewRoots = (id) => {
+    const root = document.getElementById(id)?.shadowRoot
+    if (!root) return []
+    return [root, ...Array.from(root.querySelectorAll("epic-review"), (review) => review.shadowRoot).filter(Boolean)]
   }
-  window.run = () => document.querySelector("epic-page")?.shadowRoot?.querySelector("epic-test-run") ?? null
-  window.runRoot = () => run()?.shadowRoot ?? null
-  window.blocksShown = () => {
-    const slot = document.querySelector("epic-page").shadowRoot.querySelector("slot:not([name])")
-    return getComputedStyle(slot).display !== "none"
-  }
-  window.text = (element) => (element?.textContent ?? "").replace(/\s+/g, " ").trim()
-  window.answerButton = (result) => runRoot().querySelector(`ui-button.answer[data-result="${result}"]`)
-  window.answerFacts = (result) => {
-    const button = answerButton(result)
-    return { fill: button.dataset.fill, color: button.dataset.color, pressed: button.getAttribute("aria-pressed") }
-  }
-  window.moveButton = (which) => Array.from(runRoot().querySelectorAll(".moves ui-button")).at(which === "next" ? -1 : 0)
-  window.noteField = () => runRoot().querySelector("epic-text-box")?.shadowRoot?.querySelector("ui-textarea")?.shadowRoot?.querySelector("textarea") ?? null
-  window.deepActive = () => {
-    let active = document.activeElement
-    while (active?.shadowRoot?.activeElement) active = active.shadowRoot.activeElement
-    return active
-  }
-  window.cardFacts = () => {
-    const root = runRoot()
-    const card = root.querySelector(".card")
-    const bar = root.querySelector("ui-progress")
-    return {
-      at: text(root.querySelector(".where")),
-      answered: Number(bar.getAttribute("value")),
-      id: text(card.querySelector(".id")),
-      title: text(card.querySelector(".test-title")),
-      fields: Array.from(card.querySelectorAll(".field h3"), (h3) => text(h3)),
-      step: text(card.querySelector(".step .prose")),
-      actions: Array.from(card.querySelectorAll(".step ui-button.action"), (button) => ({
-        text: text(button),
-        href: button.getAttribute("href"),
-        target: button.getAttribute("target")
-      })),
-      shots: card.querySelectorAll(".example ui-button.shot").length,
-      labels: Array.from(card.querySelectorAll(".card-head .before"), (label) => text(label))
+  window.reviewButton = (id, action) =>
+    reviewRoots(id).map((root) => root.querySelector(`ui-button[data-action="${action}"]`)).find(Boolean) ?? null
+  window.noteRoot = (id) =>
+    document.getElementById(id)?.shadowRoot?.querySelector('epic-review[shows="note"]')?.shadowRoot ?? null
+  window.widest = () => {
+    const out = []
+    const walk = (root) => {
+      for (const element of root.querySelectorAll("*")) {
+        const box = element.getBoundingClientRect()
+        if (box.right > innerWidth + 0.5 && box.width && !element.closest("spell-site-header, .site-header"))
+          out.push(`${element.localName}.${element.className} (${Math.round(box.right)})`)
+        if (element.shadowRoot) walk(element.shadowRoot)
+      }
     }
+    walk(document)
+    return out.slice(0, 6).join(", ")
   }
-  window.summaryFacts = () => {
-    const root = runRoot()
-    return {
-      at: text(root.querySelector(".where")),
-      counts: Array.from(root.querySelectorAll(".counts li:not([data-zero])"), (li) => text(li)),
-      commented: Array.from(root.querySelectorAll(".commented li .id"), (id) => text(id)),
-      send: text(root.querySelector("ui-button.send"))
-    }
-  }
+  window.noteField = (id) => noteRoot(id)?.querySelector("ui-textarea")?.shadowRoot?.querySelector("textarea") ?? null
 }
 
 /** Load `address`, wait for the review controls and the pack. */
@@ -544,25 +345,14 @@ async function open(page, address) {
   await page
     .waitForFunction(() => document.querySelector("epic-page")?.hasAttribute("reviewing"), null, { timeout: 15_000 })
     .catch(() => problems.push(`${address}:  never reviewed (<epic-page reviewing>)`))
-}
-
-/** Wait for test `id`'s card. */
-async function waitForCard(page, id) {
   await page
-    .waitForFunction(
-      (id) => {
-        const card = runRoot()?.querySelector(".card:not(.summary)")
-        return card && card.querySelector(".id")?.textContent.trim() === id.toUpperCase() && !card.querySelector(".step .prose")?.textContent.includes("Loading")
-      },
-      id,
-      { timeout: 8000 }
-    )
-    .catch(() => problems.push(`${id}:  ${NOTE}`))
+    .waitForFunction(() => window.testButton?.(), null, { timeout: 8000 })
+    .catch(() => problems.push(`${address}:  no Start testing button`))
 }
 
-/** Paste a PNG made in the page (a canvas) into the note box, as ⌘V with a screenshot on the clipboard does. */
-async function pasteImage(page) {
-  await page.evaluate(async () => {
+/** Paste a PNG made in the page (a canvas) into test `id`'s note box, as ⌘V with a screenshot on the clipboard. */
+async function pasteImage(page, id) {
+  await page.evaluate(async (id) => {
     const canvas = document.createElement("canvas")
     canvas.width = 320
     canvas.height = 180
@@ -575,8 +365,8 @@ async function pasteImage(page) {
     const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/png"))
     const data = new DataTransfer()
     data.items.add(new File([blob], "shot.png", { type: "image/png" }))
-    noteField().dispatchEvent(new ClipboardEvent("paste", { clipboardData: data, bubbles: true, composed: true, cancelable: true }))
-  })
+    noteField(id).dispatchEvent(new ClipboardEvent("paste", { clipboardData: data, bubbles: true, composed: true, cancelable: true }))
+  }, id)
 }
 
 /** The copy's inbox (`path`:  another copy's page), as the page server answers it. */
@@ -595,20 +385,14 @@ async function waitFor(read) {
   return read()
 }
 
-/** Wait for test `id`'s mark to pass `ok`;  the mark. */
-async function waitForMark(id, ok) {
-  for (let tries = 0; tries < 40; tries++) {
-    const mark = (await readInbox()).marks?.[id]
-    if (ok(mark)) return mark
-    await new Promise((resolve) => setTimeout(resolve, 150))
-  }
-  return (await readInbox()).marks?.[id]
-}
-
-/** Test `id`'s mark, once it's there, must hold `wanted` (its time aside). */
-async function expectMark(what, id, wanted) {
-  const mark = await waitForMark(id, (mark) => mark?.result === wanted.result)
-  expect(`${what}:  the inbox`, pick(mark ?? {}, Object.keys(wanted)), wanted)
+/** Wait for item `id`'s mark to pass `ok`;  the mark. */
+async function waitForMark(id, ok, path = pagePath) {
+  const mark = await waitFor(async () => {
+    const found = (await readInbox(path)).marks?.[id]
+    return ok(found) ? found : undefined
+  })
+  if (!mark) problems.push(`${id}'s mark never came:  ${JSON.stringify((await readInbox(path)).marks?.[id])}`)
+  return mark
 }
 
 /** `object`'s `keys` only. */
@@ -642,7 +426,7 @@ function copyEpic(name, title, tests) {
     .replace(/<epic-section id="tests" kind="tests"[\s\S]*?<\/epic-section>(?=\s*<epic-section id="log")/, tests.skeleton)
     .replaceAll(`epic="${from}"`, `epic="${name}"`)
     .replace(/(<epic-page\b[^>]*?\btitle=")[^"]*"/, `$1${title}"`)
-  if (!html.includes('id="v1"')) {
+  if (!html.includes(SCRATCH_MARK)) {
     console.error(`check-test-run:  ${from}'s page has no Manual tests section to replace`)
     process.exit(2)
   }
@@ -656,48 +440,39 @@ function testItem(id, title, extra = "") {
   return `<epic-item id="${id}" title="${title}" status="open" state="open" source="parts/${id}.html"${extra}></epic-item>`
 }
 
-/** The sample's scratch tests:  the new shape, older prose-only ones, a deferred one, a done one. */
+/** The sample's scratch tests:  explicit ones, an older prose-only one, one Claude checks, a done one. */
 function SAMPLE_TESTS() {
   return {
     skeleton:
-      `<epic-section id="tests" kind="tests">` +
-      testItem("v1", "Folded titles show in full") +
-      testItem("v2", "Every folded title wraps") +
-      testItem("v3", "Both tabs come back on their page") +
-      testItem("v4", "The pane opens under the selection", ` deferred="2026-10-18"`) +
-      testItem("v5", "A thread's reply box saves as you type", ` failed="i9"`) +
-      `<epic-item id="v6" title="Already passed" status="done" state="recent"></epic-item>` +
+      `<epic-section id="tests" kind="tests" ${SCRATCH_MARK}>` +
+      testItem("m1", "Folded titles show in full") +
+      testItem("m2", "Both tabs come back on their page") +
+      testItem("m3", "Every folded title wraps") +
+      testItem("m4", "The commands page lists spell content") +
+      `<epic-item id="m5" title="Already passed" status="done" state="recent"></epic-item>` +
       `</epic-section>`,
     parts: {
-      v1:
-        `<epic-field label="Step"><p>Open the scratch guide, its Judgement calls section.</p>` +
-        `<p><a class="epic-test-action" href="/guides/changelog.html">Open the guide</a></p></epic-field>` +
-        `<epic-field label="Should"><p>Every folded title shows all its words, wrapped;  none cut with …</p></epic-field>` +
-        `<epic-field label="Example"><img src="../tests/v1.png" alt="the folded titles, wrapped"><p>Claude's screenshot, at 390px.</p></epic-field>` +
-        `<epic-field label="If not"><p>Say which title, and paste a screenshot.</p></epic-field>`,
-      v2:
-        `<epic-field label="Step"><p>Fold the Judgement calls section, then open it again.</p></epic-field>` +
-        `<epic-field label="Should"><p>Every title wraps in full, folded or open.</p></epic-field>`,
-      v3: `<p>Reload each tab once first.  Select all highlights the page.</p>`,
-      v4: `<p>The pane opens just below the selection, and the page does not scroll.</p>`,
-      v5:
-        `<epic-field label="Step"><p>Type a reply in a thread, then reload.</p></epic-field>` +
-        `<epic-field label="Should"><p>The reply is still there.</p></epic-field>`
+      m1:
+        `<epic-field label="Step"><p>Open the scratch guide, its Judgement calls section.</p></epic-field>` +
+        `<epic-field label="Should"><p>Every folded title shows all its words, wrapped;  none cut with …</p></epic-field>`,
+      m2: `<p>Reload each tab once first.  Select all highlights the page.</p>`,
+      m3: `<p>Fold the judgement calls and look at the titles.</p>`,
+      m4: `<p>The commands page lists <code>spell content</code>.</p>`
     }
   }
 }
 
-/** The next epic's scratch tests:  two open. */
+/** The next epic's scratch tests:  two open, both prepared already. */
 function NEXT_TESTS() {
   return {
     skeleton:
-      `<epic-section id="tests" kind="tests">` +
-      testItem("v1", "The next epic's first test") +
-      testItem("v2", "The next epic's second test") +
+      `<epic-section id="tests" kind="tests" ${SCRATCH_MARK}>` +
+      testItem("m1", "The next epic's first test", ` prepared="1"`) +
+      testItem("m2", "The next epic's second test", ` prepared="2"`) +
       `</epic-section>`,
     parts: {
-      v1: `<epic-field label="Step"><p>Open it.</p></epic-field><epic-field label="Should"><p>It opens.</p></epic-field>`,
-      v2: `<p>An older test.</p>`
+      m1: `<epic-field label="Step"><p>Open it.</p></epic-field><epic-field label="Should"><p>It opens.</p></epic-field>`,
+      m2: `<p>An older test.</p>`
     }
   }
 }

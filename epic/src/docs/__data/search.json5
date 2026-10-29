@@ -627,7 +627,7 @@
     {
       "path": "epic-event.html",
       "title": "<epic-event>",
-      "summary": "The <epic-event> element: one line of an epic page's log, its icon and time drawn.",
+      "summary": "The <epic-event> element: one review line of an epic page's log, written but not shown there (the Log shows commits).",
       "tag": "epic-event",
       "sections": [
         {
@@ -1681,7 +1681,7 @@
     {
       "path": "epic-send-buttons.html",
       "title": "<epic-send-buttons>",
-      "summary": "The <epic-send-buttons> element: Send: the paper plane, alone since 2026-10-25; with wand, its countdown too.",
+      "summary": "The <epic-send-buttons> element: Send, the paper plane; with countdown, Auto Send's ring round it.",
       "tag": "epic-send-buttons",
       "sections": [
         {
@@ -1951,49 +1951,6 @@
         {
           "id": "6-written-by",
           "title": "6. Written by"
-        }
-      ]
-    },
-    {
-      "path": "epic-test-run.html",
-      "title": "<epic-test-run>",
-      "summary": "The <epic-test-run> element: an epic page's open tests, one at a time, each answered on the page.",
-      "tag": "epic-test-run",
-      "sections": [
-        {
-          "id": "1-example",
-          "title": "1. Example"
-        },
-        {
-          "id": "2-markup",
-          "title": "2. Markup"
-        },
-        {
-          "id": "3-where-it-goes",
-          "title": "3. Where it goes"
-        },
-        {
-          "id": "4-attributes",
-          "title": "4. Attributes"
-        },
-        {
-          "id": "epic-test-run-answers",
-          "title": "The answers",
-          "parent": 3
-        },
-        {
-          "id": "epic-test-run-parts",
-          "title": "Parts",
-          "parent": 3
-        },
-        {
-          "id": "epic-test-run-events",
-          "title": "Events",
-          "parent": 3
-        },
-        {
-          "id": "5-how-it-looks",
-          "title": "5. How it looks"
         }
       ]
     },

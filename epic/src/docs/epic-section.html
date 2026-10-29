@@ -92,8 +92,7 @@
               <epic-item id="q3" title="Where the code lives" status="decided" state="recent">
                 <p>
                   A package of its own,
-                  <a href="/spell-epic/" target="src-spell-epic" title="spell-epic"
-                    ><code>epics</code></a
+                  <a href="/spell-epic/" target="src-spell-epic" title="spell-epic"><code>epics</code></a
                   >.
                 </p>
               </epic-item>
@@ -126,8 +125,8 @@
               </li>
               <li>
                 At the title's end, the STATE FILTER: a grey filter chip, then one round chip per state its items are in
-                (red needs Owen, yellow open, green decided). Click a chip to hide that state's items; ⌥-click (Alt-click)
-                one to show only its state.
+                (red needs Owen, yellow open, green decided). Click a chip to hide that state's items; ⌥-click
+                (Alt-click) one to show only its state.
               </li>
             </ul>
             <ui-section
@@ -144,8 +143,9 @@
               </p>
               <ul>
                 <li>
-                  They sit after the title, before its tools (the Phases section's state filter and gear, an item section's state filter, an
-                  Overview sub-section's review buttons); the fold chevron is at the row's start.
+                  They sit after the title, before its tools (the Phases section's state filter and gear, an item
+                  section's state filter, an Overview sub-section's review buttons); the fold chevron is at the row's
+                  start.
                 </li>
                 <li>
                   ⌥-click (Alt-click) on its chevron or title, or ⌥+Enter on the focused chevron, opens it and
@@ -230,9 +230,9 @@
             <ul>
               <li>
                 The page's sections have FIXED ids, one per kind: <code>phases</code>, <code>decisions</code> (Questions
-                kept its old id), <code>judgements</code>, <code>todos</code>,
-                <code>issues</code>, <code>tests</code>, <code>log</code>; a saga page's Epics, <code>epics</code>. An
-                Overview sub-section is <code>o1</code>, <code>o2</code> ...; a report has its own.
+                kept its old id), <code>judgements</code>, <code>todos</code>, <code>issues</code>, <code>tests</code>,
+                <code>log</code>; a saga page's Epics, <code>epics</code>. An Overview sub-section is <code>o1</code>,
+                <code>o2</code> ...; a report has its own.
               </li>
               <li>
                 The page's sections draw their own titles; an Overview sub-section and a report need <code>title</code>.
@@ -314,7 +314,10 @@
                       </td>
                       <td>as <code>kind="todos"</code></td>
                       <td>one at most</td>
-                      <td>5. Todo: work still to do, and limits to know about (<code>limit</code>); Caveats, <code>kind="caveats"</code>, from epic <code>epic-engine</code> P32 to P44.</td>
+                      <td>
+                        5. Todo: work still to do, and limits to know about (<code>limit</code>); Caveats,
+                        <code>kind="caveats"</code>, from epic <code>epic-engine</code> P32 to P44.
+                      </td>
                     </tr>
                     <tr>
                       <td>
@@ -361,7 +364,14 @@
               </ui-table>
             </ui-section>
 
-            <ui-section id="epic-section-children" label="Its children" sticky="stack" collapsible dividing open="false">
+            <ui-section
+              id="epic-section-children"
+              label="Its children"
+              sticky="stack"
+              collapsible
+              dividing
+              open="false"
+            >
               <p>What it takes depends on its <code>kind</code>:</p>
               <ui-table celled padding="compact" appearance="striped" unstackable>
                 <table>
@@ -433,7 +443,10 @@
                         <code>todos</code> or <code>issues</code> or <code>tests</code>
                       </td>
                       <td>any number</td>
-                      <td>The items, their id's letter the section's (<code>q</code> in Questions, <code>t</code> in Todo, <code>m</code> in Manual tests).</td>
+                      <td>
+                        The items, their id's letter the section's (<code>q</code> in Questions, <code>t</code> in Todo,
+                        <code>m</code> in Manual tests).
+                      </td>
                     </tr>
                     <tr>
                       <td>
@@ -443,7 +456,19 @@
                       </td>
                       <td>only when its <code>kind</code> is <code>log</code></td>
                       <td>any number</td>
-                      <td>The log, oldest first.</td>
+                      <td>
+                        The log's review lines, oldest first: written, never drawn (epic <code>epic-engine</code> P52).
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <a href="epic-commit.html" target="src-packages-epics-docs-epic-commit-html"
+                          ><code>&lt;epic-commit&gt;</code></a
+                        >
+                      </td>
+                      <td>only when its <code>kind</code> is <code>log</code></td>
+                      <td>any number</td>
+                      <td>The Log's entries, one per commit of the epic, in the file by time: drawn newest first.</td>
                     </tr>
                     <tr>
                       <td>
@@ -491,13 +516,14 @@
                     <td><code>kind</code></td>
                     <td>
                       <code>overview-part</code>, <code>epics</code>, <code>phases</code>, <code>questions</code>,
-                      <code>judgements</code>, <code>todos</code>, <code>issues</code>,
-                      <code>tests</code>, <code>log</code>, <code>report</code>
+                      <code>judgements</code>, <code>todos</code>, <code>issues</code>, <code>tests</code>,
+                      <code>log</code>, <code>report</code>
                     </td>
                     <td>
                       What it holds: <code>phases</code> its <code>&lt;epic-phase&gt;</code>s;
                       <code>questions</code> ... <code>tests</code> its <code>&lt;epic-item&gt;</code>s;
-                      <code>log</code> its <code>&lt;epic-event&gt;</code>s; <code>overview-part</code> and
+                      <code>log</code> its <code>&lt;epic-commit&gt;</code>s (drawn, newest first) and
+                      <code>&lt;epic-event&gt;</code>s (written, not drawn); <code>overview-part</code> and
                       <code>report</code> prose; <code>epics</code> (a saga page's) its <code>&lt;epic-cards&gt;</code>.
                     </td>
                     <td>yes</td>
@@ -633,9 +659,9 @@
                       <td><code>gear</code></td>
                       <td>
                         The Phases section's gear, last in its title row (epic <code>epic-engine</code> I166): a
-                        <code>&lt;ui-dropdown&gt;</code> menu, "Show each phase's files" and "Show each phase's
-                        checks", ticked while on. A pick shows or hides that field in every phase, forgetting each
-                        phase's own choice of it.
+                        <code>&lt;ui-dropdown&gt;</code> menu, "Show each phase's files" and "Show each phase's checks",
+                        ticked while on. A pick shows or hides that field in every phase, forgetting each phase's own
+                        choice of it.
                       </td>
                     </tr>
                     <tr>
@@ -656,7 +682,8 @@
                     <tr>
                       <td><code>review-buttons</code></td>
                       <td>
-                        The review buttons (P9): the note bubble, a pick's letter, Make Todo / Revisit / Approve. Only while the page is reviewed (served by the page server, its inbox answering).
+                        The review buttons (P9): the note bubble, a pick's letter, Make Todo / Revisit / Approve. Only
+                        while the page is reviewed (served by the page server, its inbox answering).
                       </td>
                     </tr>
                     <tr>
@@ -748,9 +775,15 @@
             <ui-icon slot="icon" name="palette"></ui-icon>
             <ul>
               <li>
-                The Manual tests section's title, while the page is reviewed and a test is open: a blue
-                <b>Start testing · 9</b> (epic <code>epic-engine</code> P4), which starts the page's test run
-                (<a href="epic-test-run.html" target="src-spell-epic-src-docs-epic-test-run-html"><code>&lt;epic-test-run&gt;</code></a>, the event <code>epic-test-opening</code>).
+                The Manual tests section's title, while the page is reviewed and a test is open (epic
+                <code>epic-engine</code> P51): a blue <b>Start testing · 9</b>, which asks Claude to prepare the tests
+                (it checks what it can itself and writes out the rest, step by step, with a screenshot);
+                <b>Preparing tests</b>, its icon turning, while it does (a click calls it off); then the first test
+                opens, and the button is <b>Next test · 3 left</b>, opening the next test not answered yet. A test is
+                answered where it is: Approve if it passed, a note (a screenshot pasted or dropped in it) for what you
+                saw, the note box's x if it no longer applies. The address's <code>?test=1</code> presses the button as
+                the page loads; with <code>&amp;all=1</code> (<code>epic test --all</code>), the section's last line
+                links the next epic with open tests once every test here is answered.
               </li>
               <li>
                 Its title: always in full, as many lines as it needs, folded or open. Everything in its title row sits
@@ -761,8 +794,8 @@
                 sub-section by its parent's (<code>1.2 Why</code>); a report not at all, so the sections after it keep
                 their numbers. The kind's icon: <code>phases</code> layers, <code>questions</code> a file with a
                 question mark, <code>judgements</code> a gavel, <code>todos</code> a list with checks,
-                <code>issues</code> a bug, <code>tests</code> a flask,
-                <code>log</code> a clock turning back, a saga page's <code>epics</code> a map.
+                <code>issues</code> a bug, <code>tests</code> a flask, <code>log</code> a clock turning back, a saga
+                page's <code>epics</code> a map.
               </li>
               <li>
                 <b>The count</b>, on the title: <code>open/all</code> of its items or phases; open means any status but
@@ -788,15 +821,15 @@
                 order, one chip per phase: red, orange, blue (working), dotted blue, green, grey"): the Phases section's
                 chips count each phase once, by the first that holds. Red: its plan waits for your Accept, or a choice
                 in it is open. Orange: changed since you looked. Blue: under way, or Claude at work on it (in the blue
-                badge). A dotted blue outline: scheduled, still to do. Green: done in the last 3 days. Grey: done before.
-                Each phase's status circle wears the same colour, and the toolbar's Phases button counts the red ones and
-                the blue ones.
+                badge). A dotted blue outline: scheduled, still to do. Green: done in the last 3 days. Grey: done
+                before. Each phase's status circle wears the same colour, and the toolbar's Phases button counts the red
+                ones and the blue ones.
               </li>
               <li>
-                <b>Phases</b>: its title ends in a gear (epic <code>epic-engine</code> I166), whose menu shows or
-                hides each phase's files and checks (its Files and Verify), remembered per page; each phase's own gear
-                chooses for that phase alone. The state chips stay before it, in the row. No box above the phases since 2026-10-11: each phase shows its own changes, in a
-                <b>Plan changes</b> box atop its body (<a
+                <b>Phases</b>: its title ends in a gear (epic <code>epic-engine</code> I166), whose menu shows or hides
+                each phase's files and checks (its Files and Verify), remembered per page; each phase's own gear chooses
+                for that phase alone. The state chips stay before it, in the row. No box above the phases since
+                2026-10-11: each phase shows its own changes, in a <b>Plan changes</b> box atop its body (<a
                   href="epic-phase.html"
                   target="src-packages-epics-docs-epic-phase-html"
                   ><code>&lt;epic-phase&gt;</code></a
@@ -820,25 +853,25 @@
             <ui-icon slot="icon" name="terminal"></ui-icon>
             <ul>
               <li>
-                <code>epic create</code>: the template's sections, each kind once, in order, with its fixed
-                id; and one Overview sub-section, <code>o1</code>.
+                <code>epic create</code>: the template's sections, each kind once, in order, with its fixed id; and one
+                Overview sub-section, <code>o1</code>.
               </li>
               <li>
-                Its children, by kind: <code>epic add-phase</code> (phases),
-                <code>epic add</code> and <code>epic decide</code> (items),
-                <code>epic log</code> and every command that logs (the log).
+                Its children, by kind: <code>epic add-phase</code> (phases), <code>epic add</code> and
+                <code>epic decide</code> (items), <code>epic log</code> and every command that logs (the log's review
+                lines), the commits backfill (the Log's commits).
               </li>
               <li>
                 An older doc's Plan changes copies (<code>slot="changes"</code>): removed by the tool on its next write,
                 which puts each phase's changes in that phase instead.
               </li>
               <li>
-                <code>epic update &lt;epic&gt;#o3 underway | done</code>: Claude's status cards on an
-                Overview sub-section.
+                <code>epic update &lt;epic&gt;#o3 underway | done</code>: Claude's status cards on an Overview
+                sub-section.
               </li>
               <li>
-                <code>epic split</code> / <code>epic join</code>: move a body into a part
-                file (<code>source</code>, <code>part-ids</code>) and back.
+                <code>epic split</code> / <code>epic join</code>: move a body into a part file (<code>source</code>,
+                <code>part-ids</code>) and back.
               </li>
               <li>An Overview sub-section's prose: by hand, by the Claude session planning the epic.</li>
             </ul>

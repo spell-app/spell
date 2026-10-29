@@ -38,6 +38,29 @@ describe("ReviewInbox marks", () => {
     expect(ReviewInbox.itemIds(page("")).has("stage")).toBe(false)
   })
 
+  // epic `epic-engine` P51
+  test("Start testing:  `prepare`, a request for now, only under `tests`;  the section is markable;  a note's picture", () => {
+    const inbox = new ReviewInbox()
+    expect(inbox.requestNow("tests", "prepare", "", M1)).toEqual({ id: "tests", action: "prepare", at: M1 })
+    expect(ReviewInbox.isImmediate(inbox.marks.tests!)).toBe(true)
+    expect(inbox.unsentMarks).toEqual([])
+    expect(() => inbox.setMark("tests", { action: "approve" })).toThrow(InboxError)
+    expect(() => inbox.requestNow("j1", "prepare")).toThrow(InboxError)
+    expect(inbox.cancelNow("tests", M2)).toEqual({ action: "prepare", at: M2, told: true })
+    const page =
+      '<epic-page epic="x"><epic-section id="tests" kind="tests"><epic-item id="m1"></epic-item></epic-section></epic-page>'
+    expect([...ReviewInbox.itemIds(page)].sort()).toEqual(["m1", "tests"])
+    const shot = "tests/j3-20261029-1432.png"
+    expect(ReviewInbox.toMark({ action: "revisit", note: "x", shot })).toEqual({
+      action: "revisit",
+      when: "soon",
+      note: "x",
+      shot
+    })
+    expect(ReviewInbox.toMark({ action: "skip", shot })).toEqual({ action: "skip", shot })
+    expect(() => ReviewInbox.toMark({ action: "revisit", shot: "../x.png" })).toThrow(InboxError)
+  })
+
   test("set, replace, remove;  ids lower-cased", () => {
     const inbox = new ReviewInbox()
     expect(inbox.setMark("J3", { action: "approve", at: "ignored" }, M1)).toEqual({ action: "approve", at: M1 })

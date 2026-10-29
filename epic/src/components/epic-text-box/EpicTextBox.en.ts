@@ -33,7 +33,7 @@ export const epicTextBoxVocabulary = {
         "What it holds:  `notes` (the page's notes for Claude, once a page), `comment` (on the section `for` " +
         "names, or an option, `q1-B`), `other` (question `for`'s Other, drawn by `<epic-ask>`), `feedback` " +
         "(a choice page's, drawn by `<epic-choices-bar>`), `note` (none of a page's answer:  read by the element " +
-        "drawing it, a test run's failure note, `<epic-test-run>`)."
+        "drawing it:  `<epic-option-form>`'s, `<epic-new-item>`'s)."
     },
     {
       name: "for",

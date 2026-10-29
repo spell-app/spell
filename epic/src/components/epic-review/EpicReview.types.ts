@@ -361,6 +361,9 @@ export const DO_IT_NOTE = "do it"
  */
 export const DO_IT_ID = /^[jt]\d+$/i
 
+/** A manual test's id (`m3`):  its note box's x says "no longer applies" (epic `epic-engine` P51). */
+export const TEST_ITEM_ID = /^m\d+$/i
+
 ////////////////
 // ## Shadow markup
 ////////////////
@@ -374,6 +377,10 @@ export const NOTE_BOX = "note-box"
 export const NOTE_TEXT = "note-text"
 export const NOTE_INPUT = "note-input"
 export const NOTE_SAVED = "note-saved"
+export const NOTE_FIELD = "note-field"
+export const NOTE_PICK = "note-pick"
+export const NOTE_PICTURE = "note-picture"
+export const SAID_PICTURE = "said-picture"
 export const NOTE_ACTIONS = "note-actions"
 export const SAID = "said"
 export const SAID_WHAT = "said-what"
@@ -587,6 +594,21 @@ export const REVIEW_TEXTS = [
     text: "Skip this:  nothing to do, marked reviewed once Claude applies it;  a note here says why",
     description: "Note box:  the x."
   },
+  {
+    key: "boxSkipTestTip",
+    text: "No longer applies:  cancel this test;  a note here says why",
+    description: "A manual test's note box:  the x (epic `epic-engine` P51, as a test run's Skip)."
+  },
+  {
+    key: "pictureAdd",
+    text: "Add a picture:  paste one (⌘V) or drop it in the box, or choose a file",
+    description: "The note box's picture button (epic `epic-engine` P51):  its tooltip."
+  },
+  { key: "pictureSaving", text: "saving…", description: "A pasted picture on its way to the page server." },
+  { key: "pictureRemove", text: "Take the picture out", description: "The ✕ on a note's picture." },
+  { key: "pictureZoom", text: "Your picture:  click to see it full size", description: "A note's picture." },
+  { key: "notImage", text: "That isn't a picture", description: "Something else dropped or pasted in the note." },
+  { key: "tooBig", text: "That picture is over 8 MB", description: "A picture too big for the page server." },
   { key: "saved", text: "Saved {time}", description: "The note box's floppy:  its draft is saved." },
   { key: "notSaved", text: "Not saved:  {why} (kept in this browser)", description: "The floppy, red:  not saved." },
   { key: "you", text: "You", description: "Who wrote a marked note." },

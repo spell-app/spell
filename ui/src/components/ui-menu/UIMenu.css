@@ -958,6 +958,8 @@
    *   - thumb:  `--ui-menu-segmented-active-background`, `-active-hover-background`,
    *     `-active-color` (also its focus ring), `-active-shadow` (`none`);
    *     `--ui-menu-thumb-duration`, how long it slides (`200ms`)
+   * - `choose="many"` (class word `toggles`):  no thumb;  each option on is filled as the thumb is, and pressed IN:
+   *   `--ui-menu-segmented-pressed-shadow` (an inset shadow), instead of `-active-shadow`
    */
   .ui.segmented.menu {
     --_ui-menu-segmented-background: var(--ui-menu-segmented-background, var(--ui-surface));
@@ -1051,6 +1053,13 @@
       transition-duration: var(--_ui-menu-thumb-duration);
       transition-timing-function: var(--ui-ease-out);
     }
+  }
+  .ui.segmented.toggles.menu {
+    --_ui-menu-active-shadow: var(
+      --ui-menu-segmented-pressed-shadow,
+      inset 0 1px 3px rgb(0 0 0 / 0.28),
+      inset 0 0 0 1px color-mix(in oklab, var(--ui-text-color) 12%, transparent)
+    );
   }
   .ui.segmented.vertical.menu {
     --_ui-menu-first-radius: var(--_menu-segmented-inner-radius) var(--_menu-segmented-inner-radius)

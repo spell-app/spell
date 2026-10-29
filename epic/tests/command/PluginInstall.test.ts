@@ -194,6 +194,76 @@ describe("install()", () => {
   })
 })
 
+describe("from the published packages (npm install spell spell-epic)", () => {
+  // as npm lays them out:  `spell` with its plugin parts in `epic/` but no `epic/bin` and no marketplace file,
+  // `spell-epic` beside it with the plugin and `bin/epic`
+  const modules = join(top, "project", "node_modules")
+  const published = join(modules, "spell")
+  const pluginPackage = join(modules, "spell-epic")
+  for (const folder of [join(published, "epic", ".claude-plugin"), join(published, "epic", "skills", "epic")])
+    mkdirSync(folder, { recursive: true })
+  writeFileSync(
+    join(published, "package.json"),
+    '{ "name": "spell", "repository": "https://github.com/spell-app/spell" }'
+  )
+  writeFileSync(join(published, "epic", ".claude-plugin", "plugin.json"), '{ "name": "epic", "version": "0.8.6" }')
+
+  function publishedInstaller(): PluginInstall {
+    return new PluginInstall({ home, kit: published, bin, now: () => NOW })
+  }
+
+  test("spell-epic beside it:  the plugin and bin/epic from there, the marketplace from GitHub", () => {
+    for (const folder of [".claude-plugin", "skills/epic", "bin", "hooks"])
+      mkdirSync(join(pluginPackage, folder), { recursive: true })
+    writeFileSync(join(pluginPackage, "package.json"), '{ "name": "spell-epic" }')
+    writeFileSync(join(pluginPackage, ".claude-plugin", "plugin.json"), '{ "name": "epic", "version": "0.8.6" }')
+    writeFileSync(join(pluginPackage, "bin", "epic"), "")
+    try {
+      const installer = publishedInstaller()
+      expect(installer.engine).toBe(pluginPackage)
+      const dry = installer.install({ dryRun: true })
+      expect(dry.changes.length).toBeGreaterThan(0)
+      expect(existsSync(join(home, "settings.json"))).toBe(false)
+
+      const report = installer.install()
+      expect(report).toMatchObject({ plugin: "epic@spell", version: "0.8.6", from: pluginPackage })
+      expect(claude("settings.json").extraKnownMarketplaces).toEqual({
+        spell: { source: { source: "github", repo: "spell-app/spell" } }
+      })
+      expect(existsSync(join(home, "plugins", "known_marketplaces.json"))).toBe(false)
+      expect(readlinkSync(join(home, "plugins", "cache", "spell", "epic", "0.8.6"))).toBe(pluginPackage)
+      expect(readlinkSync(join(home, "skills", "epic"))).toBe(join(pluginPackage, "skills", "epic"))
+      expect(readlinkSync(join(bin, "epic"))).toBe(join(pluginPackage, "bin", "epic"))
+      expect(publishedInstaller().install().changes).toEqual([])
+    } finally {
+      rmSync(pluginPackage, { recursive: true, force: true })
+    }
+  })
+
+  test("a checkout's marketplace folder left in Claude Code's list:  taken out, GitHub's added by Claude Code", () => {
+    mkdirSync(join(home, "plugins"), { recursive: true })
+    writeFileSync(
+      join(home, "plugins", "known_marketplaces.json"),
+      JSON.stringify({ spell: { source: { source: "directory", path: kit }, installLocation: kit } })
+    )
+    const report = publishedInstaller().install()
+    expect(report.changes).toContain(`known_marketplaces.json:  spell from ${kit} taken out`)
+    expect(claude("plugins/known_marketplaces.json")).toEqual({})
+  })
+
+  test("no spell-epic:  spell's own epic/, and no epic on the PATH, saying so;  a dry run never throws", () => {
+    const installer = publishedInstaller()
+    expect(installer.engine).toBe(join(published, "epic"))
+    const message = `PATH:  ${join(published, "epic", "bin", "epic")} doesn't exist, so no ${join(bin, "epic")};  `
+    expect(installer.install({ dryRun: true }).changes).toContain(
+      `${message}for the epic command:  npm install spell-epic`
+    )
+    installer.install()
+    expect(readlinkSync(join(home, "plugins", "cache", "spell", "epic", "0.8.6"))).toBe(join(published, "epic"))
+    expect(lstatSync(join(bin, "epic"), { throwIfNoEntry: false })).toBeUndefined()
+  })
+})
+
 describe("run()", () => {
   test("a verb but install:  a usage error", async () => {
     await expect(installer().run(["remove"])).rejects.toThrow(/epic plugin install/)

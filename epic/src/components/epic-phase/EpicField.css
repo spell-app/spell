@@ -84,6 +84,14 @@
     margin: 2px 0 4px;
     padding-left: 1.2em;
   }
+  /* a picture (a test's Example screenshot):  never wider than the field, so never past a phone's window (P51) */
+  ::slotted(img) {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin-top: 4px;
+    border-radius: 4px;
+  }
 
   /* ## `<epic-updated>`:  the fence -- the fold chevron, the icon, its heading;  what changed under the heading */
   .updated {

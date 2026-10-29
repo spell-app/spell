@@ -203,6 +203,7 @@ describe("migrate:  the runner", () => {
       "epic 2026-10-26 done-cards-close",
       "epic 2026-10-29 picks-in-choices",
       "epic 2026-10-29 updates-said-by-marks",
+      "epic 2026-10-29 log-commits",
       "epic 2026-10-29 agents-marked",
       expect.stringMatching(/detail,choice 2026-10-19 components-not-markup$/),
       expect.stringMatching(/goal-set 2026-10-21 engine-asset-paths$/),

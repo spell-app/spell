@@ -3,6 +3,7 @@ import { ChangesAfterGoal } from "./ChangesAfterGoal"
 import { DoneCardsClose } from "./DoneCardsClose"
 import { ItemRenames } from "./ItemRenames"
 import { LinksAgree } from "./LinksAgree"
+import { LogCommits } from "./LogCommits"
 import { MoreRequestsFirst } from "./MoreRequestsFirst"
 import { PicksInChoices } from "./PicksInChoices"
 import { RootLinks } from "./RootLinks"
@@ -48,6 +49,7 @@ export class Migrations {
     new DoneCardsClose(),
     new PicksInChoices(),
     new UpdatesSaidByMarks(),
+    new LogCommits(),
     new AgentsMarked()
   ]
 

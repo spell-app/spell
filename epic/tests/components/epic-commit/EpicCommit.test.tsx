@@ -4,6 +4,7 @@ import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import { expectAccessible } from "spell/test-helpers/A11y"
 
 import "spell/epic/components/epic-commit"
+import "spell/epic/components/epic-phase"
 
 /** Commits under a box that shows them (`--epic-commits-display`), as the page's git toggle does. */
 function shown(inner: string, repo = ""): string {
@@ -47,5 +48,43 @@ describe("<epic-commit>", () => {
     const commit = await ElementFixture.render(`<epic-commit sha="0123456789abcdef">Only</epic-commit>`)
     expect(commit.shadowRoot!.querySelector('[part~="sha"]')!.localName).toBe("code")
     expect(getComputedStyle(commit).display).toBe("none")
+  })
+
+  // epic `epic-engine` P52:  an entry of the Log
+  test("with `at` and `refs`:  its time, the sha link, its sentence, a chip per phase and item;  a gone one plain text", async () => {
+    const root = await ElementFixture.render(
+      `<epic-page epic="demo" title="Demo" repo="https://github.com/spell-app/spell">` +
+        `<epic-phase id="p-commit-log" status="active"><span slot="title">Commit Log</span></epic-phase>` +
+        `<div style="--epic-commits-display: block"><epic-commit sha="0123456789abcdef" at="2026-10-29T11:46-04:00" ` +
+        `refs="p-commit-log p-gone">built the Log</epic-commit></div></epic-page>`
+    )
+    const commit = root.querySelector("epic-commit")!
+    const shadow = commit.shadowRoot!
+    expect(shadow.querySelector('[part~="time"]')!.textContent).toBe("2026-10-29 11:46")
+    expect(getComputedStyle(shadow.querySelector('[part~="heading"]')!).display).toBe("none")
+    expect(shadow.querySelector<HTMLAnchorElement>('[part~="sha"]')!.getAttribute("href")).toBe(
+      "https://github.com/spell-app/spell/commit/0123456789abcdef"
+    )
+    const chips = Array.from(shadow.querySelectorAll<HTMLElement>('[part~="ref"]'))
+    expect(chips.map((chip) => [chip.localName, chip.textContent, chip.getAttribute("href")])).toEqual([
+      ["a", "P1", "#p-commit-log"],
+      ["span", "p-gone", null]
+    ])
+    expect(chips[0]!.title).toBe("Go to P1:  Commit Log")
+    expect(chips[1]!.title).toBe("p-gone isn't on this page any more")
+    await expectAccessible(commit)
+  })
+
+  test("an item's chip by its id;  no `at`:  as under a phase, no time and no chips", async () => {
+    const root = await ElementFixture.render(
+      `<epic-page epic="demo" title="Demo"><p id="q56">Q</p><div style="--epic-commits-display: block">` +
+        `<epic-commit sha="0123456789abcdef" at="2026-10-29T11:46-04:00" refs="q56">fixed</epic-commit>` +
+        `<epic-commit sha="fedcba9876543210">plain</epic-commit></div></epic-page>`
+    )
+    const [entry, plain] = root.querySelectorAll("epic-commit")
+    const chip = entry!.shadowRoot!.querySelector('[part~="ref"]')!
+    expect([chip.textContent, chip.getAttribute("href")]).toEqual(["Q56", "#q56"])
+    expect(plain!.shadowRoot!.querySelector('[part~="time"]')).toBeNull()
+    expect(plain!.shadowRoot!.querySelector('[part~="ref"]')).toBeNull()
   })
 })

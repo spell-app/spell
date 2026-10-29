@@ -1420,7 +1420,7 @@ describe("PlanDoc commits", () => {
       { sha: "d".repeat(40), subject: "P9:  no such phase" },
       { sha: "e".repeat(40), subject: "Merge branch 'main'" }
     ]
-    const added = plan.backfillCommits(log, { base: BASE })
+    const added = plan.backfillCommits(log, { base: BASE }).filter((entry) => !entry.log)
     expect(added.map((entry) => [entry.sha[0], entry.phase ?? entry.item])).toEqual([
       ["a", 1],
       ["b", 1],
@@ -1443,10 +1443,66 @@ describe("PlanDoc commits", () => {
       { sha: "a".repeat(40), subject: "P1 follow-up:  more" }
     ]
     const added = plan.backfillCommits(log, { epic: "demo" })
-    expect(added.map((entry) => [entry.sha[0], entry.phase])).toEqual([
+    expect(added.filter((entry) => !entry.log).map((entry) => [entry.sha[0], entry.phase])).toEqual([
       ["a", 1],
       ["b", 3]
     ])
+    // the Log:  the old P3's names the epic, so it's an entry, with no chips;  another epic's isn't
+    expect(added.filter((entry) => entry.log).map((entry) => entry.sha[0])).toEqual(["a", "b", "c"])
+  })
+
+  test("the Log (epic-engine P52):  an entry per commit, its time, refs by phase id and item;  placed by time;  once", () => {
+    const plan = freshPlan()
+    plan.addPhase("One")
+    plan.addPhase("Two")
+    plan.addItem("issue", "bug")
+    plan.log("P1 active")
+    const event = plan.findSection("log")!.lastElementChild!
+    event.setAttribute("at", "2026-10-20T12:30-04:00")
+    const PEER = "https://github.com/spell-app/spell-brand"
+    const log = [
+      { sha: "d".repeat(40), subject: "demo:  tidy, no phase", time: "2026-10-20T14:00:09-04:00" },
+      { sha: "c".repeat(40), subject: "other-epic P1:  One -- another epic's", time: "2026-10-20T13:30:00-04:00" },
+      {
+        sha: "b".repeat(40),
+        subject: "demo P2, I1:  Two -- in the brand",
+        repo: PEER,
+        time: "2026-10-20T13:00:00-04:00"
+      },
+      {
+        sha: "a".repeat(40),
+        subject: "demo P1:  One -- P1 active, the first",
+        repo: BASE,
+        time: "2026-10-20T12:00:00-04:00"
+      }
+    ]
+    const added = plan.backfillCommits(log, { base: BASE, epic: "demo" })
+    expect(added.filter((entry) => entry.log).map((entry) => entry.sha[0])).toEqual(["a", "b", "d"])
+    const section = plan.findSection("log")!
+    const lines = () =>
+      Array.from(section.children, (line) =>
+        line.localName === "epic-event"
+          ? `event ${line.getAttribute("at")}`
+          : [
+              line.getAttribute("sha")![0],
+              line.getAttribute("at"),
+              line.getAttribute("refs"),
+              line.getAttribute("repo"),
+              line.textContent
+            ].join(" | ")
+      )
+    const [one, two] = plan.phases
+    expect(lines().slice(-4)).toEqual([
+      `a | 2026-10-20T12:00-04:00 | ${one!.id} |  | P1 active, the first`,
+      "event 2026-10-20T12:30-04:00",
+      `b | 2026-10-20T13:00-04:00 | ${two!.id} i1 | ${PEER} | in the brand`,
+      "d | 2026-10-20T14:00-04:00 |  |  | tidy, no phase"
+    ])
+    expect(plan.backfillCommits(log, { base: BASE, epic: "demo" })).toEqual([])
+    expect(problems(plan)).toEqual([])
+    // `epic log` and Actual Time read the review lines alone:  a commit's sentence is never one (`activeWindow()`)
+    expect(plan.reviewLines().map((line) => line.text)).not.toContain("P1 active, the first")
+    expect(plan.reviewLines().at(-1)).toEqual({ at: "2026-10-20 12:30", text: "P1 active" })
   })
 
   test("a child repo's commit links to its own repo;  the page's links the rest", () => {
@@ -2640,6 +2696,55 @@ describe("PlanDoc test answers:  Owen's test run", () => {
     plan.applyMark({ id: "m2", action: "test", result: "failed", note: "Half of it.", at })
     expect(replyOf("m2")).toEqual(["test failed", "Half of it."])
     expect(el(plan, "i1").textContent).toContain("Owen:  Half of it.")
+    expect(problems(plan)).toEqual([])
+  })
+
+  // epic `epic-engine` P51 (Q53):  answered inline, with the page's own marks
+  test("inline:  Approve closes it;  the note box's x cancels it, his note and picture kept;  a revisit is left", () => {
+    const plan = withTests()
+    const at = new Date(2026, 9, 1, 9, 30).toISOString()
+    expect(plan.applyMark({ id: "m1", action: "approve" }).did).toBe("approved:  closed (passed)")
+    expect(
+      plan.applyMark({ id: "m3", action: "skip", note: "Moot.", shot: "tests/m3-20261029-1432.png", at }).did
+    ).toBe('canceled:  no longer applies (Owen\'s run):  "Moot."')
+    const reply = el(plan, "m3").querySelector('epic-reply[from="Owen"]')!
+    expect([
+      el(plan, "m3").getAttribute("status"),
+      reply.getAttribute("re"),
+      reply.querySelector("img")?.getAttribute("src")
+    ]).toEqual(["canceled", "test skipped", "tests/m3-20261029-1432.png"])
+    const left = plan.applyMark({
+      id: "m2",
+      action: "revisit",
+      when: "soon",
+      note: "It half worked",
+      shot: "tests/m2-20261029-1432.png",
+      at
+    })
+    expect(left.applied).toBe(false)
+    expect(el(plan, "m2").getAttribute("status")).toBe("open")
+    expect(problems(plan)).toEqual([])
+  })
+
+  test("another item's x keeps the note's picture in his reply", () => {
+    const plan = withTests()
+    plan.addItem("judgement", "a call")
+    plan.applyMark({ id: "j1", action: "skip", shot: "tests/j1-20261029-1432.png" })
+    expect(el(plan, "j1").querySelector('epic-reply[from="Owen"] img')?.getAttribute("src")).toBe(
+      "tests/j1-20261029-1432.png"
+    )
+    expect(el(plan, "j1").getAttribute("status")).toBe("open")
+  })
+
+  test("prepared (Start testing):  stamped with its place;  Owen's order puts the prepared first, by place", () => {
+    const plan = withTests()
+    plan.prepareTest("m3", 1)
+    plan.prepareTest("m1", 2)
+    expect(el(plan, "m3").getAttribute("prepared")).toBe("1")
+    expect(EpicTests.openIn(plan).map((test) => test.id)).toEqual(["M3", "M1", "M2"])
+    expect(plan.document.querySelector("#log > epic-event:last-of-type")?.textContent).toContain(
+      "M1 prepared for Owen's testing, number 2"
+    )
     expect(problems(plan)).toEqual([])
   })
 
