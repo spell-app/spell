@@ -13,6 +13,7 @@ import { ActionMenus } from "./ActionMenus"
 // Above the class:  its `elementSetup` reads it while the class is defined
 /**
  * How a view's states look.
+ * - A clickable thing (`:state(clickable)`):  the pointer cursor, unless its drawing says otherwise.
  * - A draggable thing:  the browser's grab cursor, grabbing while it's dragged,
  *   over its drawing's own `cursor` (e.g. a clickable card's pointer).
  *   And a finger drags it, rather than scrolling the page.
@@ -28,6 +29,7 @@ import { ActionMenus } from "./ActionMenus"
  *   `--spell-selected-outline` and `--spell-selected-outline-offset` change it.
  */
 const STATES_CSS = `
+  :host(:state(clickable)) { cursor: pointer; }
   :host(:state(draggable)) { touch-action: none; }
   :host(:state(draggable)), :host(:state(draggable)) * { cursor: grab !important; }
   :host(:state(dragging)), :host(:state(dragging)) * { cursor: grabbing !important; }
@@ -316,6 +318,21 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
     const list = this.ownerList
     if (!thing || !list || !SpellElement.flag(thing, "canBeDragged")) return false
     return !!this.entry?.core.canGiveUp(list, thing)
+  }
+
+  /**
+   * Does a click do something to our thing?  Its type handles a click (`- on click:`, `<on click>`), a double click,
+   * or says it `can be selected`;  it shows the pointer cursor (`STATES_CSS`), and the grab cursor once draggable.
+   * - A click its thing hands up (`pass event`) to its list isn't counted:  the list's element shows it instead.
+   */
+  @E.cssState("clickable")
+  get isClickable(): boolean {
+    const thing = this.currentThing as Record<string, unknown> | undefined
+    if (!thing) return false
+    return (
+      CLICK_HANDLERS.some((handler) => typeof thing[handler] === "function") ||
+      SpellElement.flag(thing, "canBeSelected")
+    )
   }
 
   /** Is it being dragged now?  Its cursor is grabbing meanwhile. */
@@ -869,7 +886,7 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
   }
 
   /** The `SpellElement` behind `element`, if it's a view's element. */
-  private static componentOf(element: Element): SpellElement | undefined {
+  static componentOf(element: Element): SpellElement | undefined {
     const { component } = element as Partial<E.DOMElement>
     return component instanceof SpellElement ? component : undefined
   }
@@ -1474,6 +1491,12 @@ Dragging.isDropTarget = (element) => {
   return !!Class && (Class.canBeDroppedOn === true || Class.reorderItemsAfter !== undefined)
 }
 
+// ... and takes it if its rules say so:  `can take a card if: ...`
+Dragging.takesDrop = (element) => {
+  const component = SpellElement.componentOf(element)
+  return !!component && component.takesDrag()
+}
+
 /** What a press in starts no drag:  it's the control's, e.g. typing in a task's title. */
 const CONTROL_SELECTOR = "input, textarea, select, button, [contenteditable]:not([contenteditable=false])"
 
@@ -1502,6 +1525,9 @@ const THING_EVENTS: Record<string, string> = {
   mouseenter: "mouse-enter",
   mouseleave: "mouse-leave"
 }
+
+/** The handlers that make a thing clickable:  see `SpellElement.isClickable`. */
+const CLICK_HANDLERS = ["onClick", "onDoubleClick"]
 
 /** The cores keeping up with the page's mouse and keys already:  see `SpellElement.noteInput()`. */
 const LISTENING_CORES = new WeakSet<object>()

@@ -648,6 +648,21 @@ describe("SpellElement", () => {
       done()
     })
 
+    test("a thing a click does something to shows the pointer:  its type handles a click, or can be selected", async () => {
+      /** A token with a click handler:  `- on click: ...`. */
+      class Button extends Pebble {
+        static elementTag = core.defineElement(this, "Game")
+        onClick() {}
+      }
+      core.append(trays[0]!, new Button("a"), new Pebble("b"))
+      const { root, done } = await drawTrays()
+      const button = root.querySelector("game-button") as HTMLElement
+      expect(button.matches(":state(clickable)")).toBe(true)
+      expect(getComputedStyle(button).cursor).toBe("pointer")
+      expect((root.querySelector("game-pebble") as HTMLElement).matches(":state(clickable)")).toBe(false)
+      done()
+    })
+
     test("a chip its pot won't give up can't be dragged (outline-spell P28)", async () => {
       /** A pot that never lets a chip go. */
       class Jar extends Pot {
