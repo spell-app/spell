@@ -55,7 +55,7 @@
 					<ui-pusher>
 						<ui-segment appearance="basic">
 							<button type="button" class="ui button" commandfor="sidebar-demo-left-playground" command="--toggle">Menu</>
-							<p>The default left sidebar uncovers itself from under this content, which dims.</>
+							<ui-text paragraph>The default left sidebar uncovers itself from under this content, which dims.</>
 						</>
 					</>
 				</>

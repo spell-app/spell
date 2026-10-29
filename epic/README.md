@@ -451,4 +451,4 @@ Every other repo's pages:  [the kit's index](https://github.com/spell-app/spell/
 - [The kit's README-development.md](https://github.com/spell-app/spell/blob/main/README-development.md):  one epic's worktree across the five repos,
   and merging `main` into it
 - [The kit's README-element.md](https://github.com/spell-app/spell/blob/main/README-element.md):  how `<ui-root>` loads a pack like Epic UI
-- [The five repos](https://github.com/spell-app/spell/blob/main/README.md#the-five-repos):  where spell-epic sits, and what it needs
+- [The five repos](https://github.com/spell-app/spell/blob/main/README.md#one-repo-five-parts):  where spell-epic sits, and what it needs

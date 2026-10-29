@@ -1,6 +1,6 @@
 import type { JSX } from "@solidjs/web"
 
-import { E } from "spell/ui/core"
+import { E, UIT } from "spell/ui/core"
 import { stackVocabulary } from "./UIStack.en"
 
 import stackCSS from "./UIStack.css?inline"
@@ -32,7 +32,7 @@ export class UIStack extends E.UIComponent<typeof stackVocabulary> {
   /** Its `:host` rule:  direction, wrap, spacing, alignment, width. */
   @E.derived
   protected get hostLayout(): string {
-    const rules = [`gap: ${SPACING[this.spacing as keyof typeof SPACING] ?? SPACING.md}`]
+    const rules = [`gap: ${UIT.SpaceSteps[this.spacing as UIT.SpaceStep] ?? UIT.SpaceSteps.md}`]
     if (this.isHorizontal) rules.push("flex-direction: row", "align-items: center")
     if (this.wrap) rules.push("flex-wrap: wrap")
     const align = ALIGN[this.align as keyof typeof ALIGN]
@@ -53,16 +53,6 @@ export interface UIStack extends E.AttributeValues<typeof stackVocabulary> {}
 
 /** `direction`'s row. */
 const HORIZONTAL = "horizontal"
-
-/** `spacing` => the gap, from the space tokens. */
-const SPACING = {
-  none: "0",
-  xs: "var(--ui-space-xs)",
-  sm: "var(--ui-space-s)",
-  md: "var(--ui-space-m)",
-  lg: "var(--ui-space-l)",
-  xl: "var(--ui-space-xl)"
-} as const
 
 /** `align` => `align-items`. */
 const ALIGN = {

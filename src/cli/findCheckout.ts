@@ -19,5 +19,5 @@ export function findCheckout(marker: string, from = process.cwd(), fallback = KI
   }
 }
 
-/** The kit's own file at its root, which no child repo has:  `findCheckout(KIT_MARKER)` is the nearest kit. */
+/** The kit's own file at its root, which no folder of it has:  `findCheckout(KIT_MARKER)` is the nearest kit. */
 export const KIT_MARKER = "repos.json5"

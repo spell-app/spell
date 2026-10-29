@@ -101,15 +101,13 @@
 			  Opening again tries again.
 			- `load()` fetches it now, closed or not;  `reload()` fetches it again past the cache, and replaces it.
 		</>
-		<example description="Open Chapter 2:  its content comes from `examples/chapter.html`.">
-			<html>
-				<ui-section label="Chapter 1" level="4" collapsible>
-					<p>Written in the page.</p>
-				</ui-section>
-				<ui-section label="Chapter 2" level="4" source="/components/ui/examples/chapter.html" collapsible open="false">
-					<p>Loading chapter 2…</p>
-				</ui-section>
-			</html>
+		<example "Content from a file" description="Open Chapter 2:  its content comes from `examples/chapter.html`.">
+			<section label="Chapter 1" level="4" collapsible>
+				<text paragraph>Written in the page.</text>
+			</section>
+			<section label="Chapter 2" level="4" source="/components/ui/examples/chapter.html" collapsible open="false">
+				<text paragraph>Loading chapter 2…</text>
+			</section>
 		</example>
 		<markdown>
 			```js
@@ -173,26 +171,18 @@
 	</>
 
 	<section label="Keyboard">
-		<html>
-			<ui-table celled padding="compact" unstackable>
-				<table>
-					<thead>
-						<tr>
-							<th>Key</>
-							<th>Action</>
-						</>
-					</>
-					<tbody>
-						<tr>
-							<td>Tab / Shift + Tab</>
-							<td>Move to the open / close button, then the actions, then the content</>
-						</>
-						<tr>
-							<td>Enter / Space</>
-							<td>Close or open the focused section</>
-						</>
-					</>
-				</>
+		<table celled padding="compact" unstackable>
+			<row header>
+				<cell>Key</>
+				<cell>Action</>
+			</>
+			<row>
+				<cell>Tab / Shift + Tab</>
+				<cell>Move to the open / close button, then the actions, then the content</>
+			</>
+			<row>
+				<cell>Enter / Space</>
+				<cell>Close or open the focused section</>
 			</>
 		</>
 	</>

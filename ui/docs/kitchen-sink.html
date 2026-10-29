@@ -2456,6 +2456,28 @@
               </ui-example>
             </ui-section>
 
+            <ui-section id="spell-ui-s-own-space" label="Space" sticky="stack" collapsible dividing>
+              <ui-example>
+                <p slot="description">
+                  A space is a gap between things:  a line break, a gap in a line, or the room left in a row.
+                  <a href="ui-space.html">Space page</a>
+                </p>
+                <ui-rating value="3" max-rating="5"></ui-rating>
+                <ui-space></ui-space>
+                <ui-rating value="4" max-rating="5"></ui-rating>
+              </ui-example>
+              <ui-example description="Inline">
+                <ui-label>Design</ui-label><ui-space inline width="lg"></ui-space><ui-label>Engineering</ui-label>
+              </ui-example>
+              <ui-example description="Fluid">
+                <ui-stack direction="horizontal">
+                  <ui-button>Back</ui-button>
+                  <ui-space fluid></ui-space>
+                  <ui-button color="primary">Next</ui-button>
+                </ui-stack>
+              </ui-example>
+            </ui-section>
+
             <ui-section id="spell-ui-s-own-stack" label="Stack" sticky="stack" collapsible dividing>
               <ui-example>
                 <p slot="description">
@@ -2484,7 +2506,13 @@
               </ui-example>
             </ui-section>
 
-            <ui-section id="spell-ui-s-own-table-of-contents" label="Table of contents" sticky="stack" collapsible dividing>
+            <ui-section
+              id="spell-ui-s-own-table-of-contents"
+              label="Table of contents"
+              sticky="stack"
+              collapsible
+              dividing
+            >
               <ui-example>
                 <p slot="description">
                   A table of contents lists the page&#39;s sections and examples as links, opens the one in view and follows the scroll;  each section folds, and one button opens or folds them all.
@@ -2513,7 +2541,7 @@
             <ui-section id="spell-ui-s-own-theme-editor" label="Theme Editor" sticky="stack" collapsible dividing>
               <ui-example>
                 <p slot="description">
-                  A theme editor makes a theme from an existing one:  its colours, fonts and shapes, live on real elements, then copied as a stylesheet or kept in the browser.
+                  A theme editor makes a theme from an existing one:  its colours, fonts and shapes, or any token, live on real pages, then copied as a theme file or kept in the browser.
                   <a href="ui-theme-editor.html">Theme Editor page</a>
                 </p>
                 <ui-theme-editor></ui-theme-editor>

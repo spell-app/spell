@@ -19,9 +19,9 @@
 		</>
 		<html>
 			<ui-docs-tokens family="ui-toc" playground>
-				<div class="ui-cluster ui-gap-l" style="align-items: flex-start">
+				<ui-stack style="align-items: flex-start" class="ui-cluster ui-gap-l">
 					<ui-toc for="toc-example-content-playground" heading="Button" style="width: 12em"></>
-					<section id="toc-example-content-playground" style="flex: 1">
+					<ui-section style="flex: 1" id="toc-example-content-playground">
 						<ui-header level="2" dividing>Types</>
 						<ui-example heading="Button" description="A standard button.">
 							<ui-button>Follow</>

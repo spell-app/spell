@@ -18,20 +18,20 @@
 	-->
 	<section label="Types">
 		<section label="Icon picker" sticky="stack" collapsible dividing>
-			<example description="Click the field:  a search box and a grid of every icon the page knows, in Font Awesome's categories.  Type to filter, by name or by what it shows (`mail` finds `envelope`), then click a glyph, or use the arrows and Enter.">
+			<example "Icon picker" description="Click the field:  a search box and a grid of every icon the page knows, in Font Awesome's categories.  Type to filter, by name or by what it shows (`mail` finds `envelope`), then click a glyph, or use the arrows and Enter.">
 				<icon-picker value="star" aria-label="Icon"/>
 			</example>
 		</>
 
 		<section label="None" sticky="stack" collapsible dividing>
-			<example description="With no icon chosen, the field says `none`, light and in italics;  `placeholder` says something else.  The grid's first cell, a circle with a slash, clears the choice.">
+			<example "None" description="With no icon chosen, the field says `none`, light and in italics;  `placeholder` says something else.  The grid's first cell, a circle with a slash, clears the choice.">
 				<icon-picker aria-label="Icon"/>
 				<icon-picker placeholder="Pick an icon" aria-label="Icon"/>
 			</example>
 		</>
 
 		<section label="In a form" sticky="stack" collapsible dividing>
-			<example description="A form control:  it submits the icon's name under its `name`, and `required` takes the none cell out of the grid.">
+			<example "In a form" description="A form control:  it submits the icon's name under its `name`, and `required` takes the none cell out of the grid.">
 				<form>
 					<field label="Button icon">
 						<icon-picker name="icon" value="paper plane" required/>
@@ -43,13 +43,13 @@
 
 	<section label="States">
 		<section label="Read-only" sticky="stack" collapsible dividing>
-			<example description="Shows its icon, and can be focused, but never opens.">
+			<example "Read-only" description="Shows its icon, and can be focused, but never opens.">
 				<icon-picker readonly value="bell" aria-label="Icon"/>
 			</example>
 		</>
 
 		<section label="Disabled" sticky="stack" collapsible dividing>
-			<example description="Can't be used, and is left out of its form.">
+			<example "Disabled" description="Can't be used, and is left out of its form.">
 				<icon-picker disabled value="bell" aria-label="Icon"/>
 			</example>
 		</>
@@ -57,7 +57,7 @@
 
 	<section label="Variations">
 		<section label="Size" sticky="stack" collapsible dividing>
-			<example description="`size` scales the field and its panel, `mini` ... `massive`.">
+			<example "Size" description="`size` scales the field and its panel, `mini` ... `massive`.">
 				<icon-picker size="small" value="heart" aria-label="Small"/>
 				<icon-picker value="heart" aria-label="Medium"/>
 				<icon-picker size="large" value="heart" aria-label="Large"/>
@@ -65,13 +65,13 @@
 		</>
 
 		<section label="Fluid" sticky="stack" collapsible dividing>
-			<example description="`fluid` takes its container's width;  the panel is at least as wide.">
+			<example "Fluid" description="`fluid` takes its container's width;  the panel is at least as wide.">
 				<icon-picker fluid value="house" aria-label="Icon"/>
 			</example>
 		</>
 
 		<section label="Dark" sticky="stack" collapsible dividing>
-			<example description="In a dark part of a page (`ui-dark`), the field and its panel take the dark colours.">
+			<example "Dark" description="In a dark part of a page (`ui-dark`), the field and its panel take the dark colours.">
 				<segment inverted class="ui-dark">
 					<icon-picker value="moon" aria-label="Icon"/>
 				</segment>

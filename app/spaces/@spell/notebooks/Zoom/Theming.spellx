@@ -22,7 +22,7 @@
 				<ui-zoom max-width="320px">
 					<ui-segment>
 						<ui-header level="3">Release notes</>
-						<p>Spell UI 2.4 adds a zoom, a stack and a textarea that grows with its text.</>
+						<ui-text paragraph>Spell UI 2.4 adds a zoom, a stack and a textarea that grows with its text.</>
 						<ui-button color="primary">Read more</>
 					</>
 				</>

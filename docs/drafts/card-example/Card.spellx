@@ -1,0 +1,42 @@
+<spell-view "card" draggable template="two sided view">
+	<description>
+		A playing card in a standard deck.
+		On the page each card is its own element, `<solitaire-card>`
+	</description>
+
+	<property "rank" one-of="ace, 2 ... 10, jack, queen, king" alias="is a (rank)"/>
+	<alias "is a face card">if its rank is jack, queen or king</>
+
+	<property "suit" one-of="clubs, diamonds, hearts or spades" alias="is a (suit)"/>
+	<alias "is the (rank) of (suit)" />
+
+	<property "color" one-of="red, black">
+		red if it is a diamond or it is a heart
+		black otherwise
+	</property>
+	<property "symbol">
+		"♣" if it is a club
+		"♦" if it is a diamond
+		"♥" if it is a heart
+		"♠" otherwise
+	</property>
+
+	<property "direction" one-of="down, up" alias="is face (direction)" />
+	<action "turn a card face up">set its direction to up</action>
+	<action "turn it face down">set its direction to down</action>
+	<action "turn it over">
+		if it is face down: turn it face up
+		otherwise turn it face down
+	</action>
+
+	<test "card properties">
+		get a new card whose rank is queen, suit is spades and direction is down
+		its color should be black
+		it is a face card should be yes
+		it is the queen of spades should be yes
+		its direction should be down
+		turn it over
+		its direction should be up
+	</test>
+</spell-view>
+

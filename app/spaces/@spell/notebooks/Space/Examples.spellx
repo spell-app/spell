@@ -1,0 +1,91 @@
+<spell-notebook "space examples">
+	<header level="1">
+		Space
+		<header>A space is a gap between things:  a line break, a gap in a line, or the room left in a row.</>
+	</>
+	<space-tab-bar showing="examples"/>
+	<section>
+		<menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#types">Types</>
+			<item link="#variations">Variations</>
+		</>
+	</>
+
+	<!--
+		EXAMPLES:  Fomantic's page, section by section, in its order (Types, Content, States, Variations,
+		Groups ...).  Rules, the class-grammar mappings, gaps:  epics/spell-ui-pages/PAGES.md.
+		- A section:  `<ui-section id="examples-types" label="Types" sticky="stack" collapsible dividing>` around
+		  its examples;  ids spell out the nesting (`<tab>-<section>-<example>`, lowercase kebab of the headers).
+		- An example:  its own nested section (`label` = the example's name) around
+		  `<ui-example description="...">` and the live markup;  the markup IS the code shown.  A richer
+		  description:  `<p slot="description">` (+ `<ui-message slot="description">`).  Fomantic's header-less
+		  `.another.example`:  a second `<ui-example>` in the same section.
+		- Or write it flat (`<ui-header level="2">`, `<ui-example heading>`) and run `yarn site:sections`:
+		  it nests it and writes the ids (and fixes them after a title changes).
+		- A gap:  an HTML comment `GAP I<n>:  ...` BEFORE the example's section (a comment inside the example
+		  shows in its code).
+	-->
+	<section label="Types">
+		<section label="Line break" sticky="stack" collapsible dividing>
+			<example "Line break" description="A bare space is a line break:  what follows it starts on a new line, as after a `<br>`.  A drawing has no `<br>`:  it writes `<space/>`.">
+				<rating value="3" max-rating="5"/>
+				<space/>
+				<rating value="4" max-rating="5"/>
+				<space/>
+				<rating value="5" max-rating="5"/>
+			</example>
+		</>
+
+		<section label="Inline" sticky="stack" collapsible dividing>
+			<example "Inline" description="`inline`:  a gap inside the line instead of a break, a space's width unless `width` says.">
+				<label>Design</label>
+				<space inline width="lg"/>
+				<label>Engineering</label>
+				<space inline width="40"/>
+				<label>Research</label>
+			</example>
+		</>
+
+		<section label="Fluid" sticky="stack" collapsible dividing>
+			<example "Fluid" description="`fluid`:  takes the room left in its row or column, and gives it back when there's none.  Between two buttons, it puts one left and one right.">
+				<stack direction="horizontal">
+					<button>Back</button>
+					<space fluid/>
+					<button color="primary">Next</button>
+				</stack>
+			</example>
+		</>
+	</>
+
+	<section label="Variations">
+		<section label="Height" sticky="stack" collapsible dividing>
+			<example "Height" description="`height`:  a band of blank space between lines.  A number is pixels;  `xs`, `sm`, `md`, `lg`, `xl` the theme's space steps;  anything else a CSS length (`2em`, `10%`).">
+				<text>Above</text>
+				<space height="xl"/>
+				<text>Below, 2em further down</text>
+			</example>
+		</>
+
+		<section label="Grow" sticky="stack" collapsible dividing>
+			<example "Grow" description="`grow`:  how much of the room left it takes, bare (1) or a number.  The second space takes twice the first's.">
+				<stack direction="horizontal" spacing="none">
+					<label>Start</label>
+					<space grow/>
+					<label>One third</label>
+					<space grow="2"/>
+					<label>End</label>
+				</stack>
+			</example>
+		</>
+
+		<section label="Width" sticky="stack" collapsible dividing>
+			<example "Width" description="`width` in a row:  a fixed gap between two things, where the row's own spacing is none.">
+				<stack direction="horizontal" spacing="none">
+					<button>Cut</button>
+					<space width="xl"/>
+					<button>Paste</button>
+				</stack>
+			</example>
+		</>
+	</>
+</spell-notebook>

@@ -165,9 +165,9 @@ export class SpellDeclarations {
         merge({ ...SpellDeclarations.ruleDeclaration(item), of: SpellDeclarations.ownerOf(statement) })
       }
     }
-    // a view's parts aren't scope records:  its rule notes them -- see `HasParts`
-    const declaresParts = (statement.data as { declaresParts?: SP.DeclaredParts }).declaresParts
-    if (declaresParts) merge({ of: declaresParts.of, parts: declaresParts.parts })
+    // a view's slots aren't scope records:  its rule notes them -- see `HasSlots`
+    const declaresSlots = (statement.data as { declaresSlots?: SP.DeclaredSlots }).declaresSlots
+    if (declaresSlots) merge({ of: declaresSlots.of, slots: declaresSlots.slots })
     // constants an `enumeration` declares are loaded from it
     const fromEnumeration = enumerationConstants(declaration.enumeration)
     const others = constants.filter((name) => !fromEnumeration.includes(name))
@@ -346,7 +346,7 @@ export class SpellDeclarations {
         SpellDeclarations.loadRule(scope, from, names, rule, declaration, declaredAt)
       }
       SpellDeclarations.loadMethod(scope, names, declaration, declaredAt)
-      SpellDeclarations.loadParts(scope, names, declaration)
+      SpellDeclarations.loadSlots(scope, names, declaration)
     }
   }
 
@@ -523,14 +523,14 @@ export class SpellDeclarations {
   }
 
   /**
-   * `declaration`'s parts, and the names they compile by, onto its type `of` -- if it was picked.
-   * - See `P.TypeScope.parts` and `partOutputs`.
+   * `declaration`'s slots, and the names they compile by, onto its type `of` -- if it was picked.
+   * - See `P.TypeScope.slots` and `slotOutputs`.
    */
-  private static loadParts(scope: P.RootScope, names: Set<string>, { of, parts, partOutputs }: SP.SpellDeclaration) {
+  private static loadSlots(scope: P.RootScope, names: Set<string>, { of, slots, slotOutputs }: SP.SpellDeclaration) {
     const typeScope = of && names.has(of) ? scope.types.get(of, "LOCAL_ONLY") : undefined
-    if (!typeScope || !parts) return
-    typeScope.parts = [...new Set([...(typeScope.parts ?? []), ...parts])]
-    if (partOutputs) typeScope.partOutputs = { ...typeScope.partOutputs, ...partOutputs }
+    if (!typeScope || !slots) return
+    typeScope.slots = [...new Set([...(typeScope.slots ?? []), ...slots])]
+    if (slotOutputs) typeScope.slotOutputs = { ...typeScope.slotOutputs, ...slotOutputs }
   }
 
   /**

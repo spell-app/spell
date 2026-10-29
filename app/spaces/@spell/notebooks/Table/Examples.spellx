@@ -20,40 +20,32 @@
 	-->
 	<section label="Types">
 		<section label="Table" sticky="stack" collapsible dividing>
-			<example description="A standard table:  `<ui-table>` around a native `<table>`. Rows, cells and their class words (positive, right aligned, collapsing ...) stay plain HTML.">
-				<message slot="description" state="positive" size="small"><html>Tables will automatically stack their layouts for mobile devices. To disable this behavior, use <code>unstackable</code>, or <code>stackable="tablet"</code> to allow responsive adjustments for tablet.</html></message>
-				<html>
-					<ui-table celled>
-						<table>
-							<thead>
-								<tr>
-									<th>Name</th>
-									<th>Age</th>
-									<th>Job</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr>
-									<td data-label="Name">James</td>
-									<td data-label="Age">24</td>
-									<td data-label="Job">Engineer</td>
-								</tr>
-								<tr>
-									<td data-label="Name">Jill</td>
-									<td data-label="Age">26</td>
-									<td data-label="Job">Engineer</td>
-								</tr>
-								<tr>
-									<td data-label="Name">Elyse</td>
-									<td data-label="Age">24</td>
-									<td data-label="Job">Designer</td>
-								</tr>
-							</tbody>
-						</table>
-					</ui-table>
-				</html>
+			<example "Table" description="A standard table:  `<ui-table>` around a native `<table>`. Rows, cells and their class words (positive, right aligned, collapsing ...) stay plain HTML.">
+				<table celled>
+					<row header>
+						<cell>Name</cell>
+						<cell>Age</cell>
+						<cell>Job</cell>
+					</row>
+					<row>
+						<cell data-label="Name">James</cell>
+						<cell data-label="Age">24</cell>
+						<cell data-label="Job">Engineer</cell>
+					</row>
+					<row>
+						<cell data-label="Name">Jill</cell>
+						<cell data-label="Age">26</cell>
+						<cell data-label="Job">Engineer</cell>
+					</row>
+					<row>
+						<cell data-label="Name">Elyse</cell>
+						<cell data-label="Age">24</cell>
+						<cell data-label="Job">Designer</cell>
+					</row>
+				</table>
+				<message slot="description" state="positive" size="small">Tables will automatically stack their layouts for mobile devices. To disable this behavior, use <text code>unstackable</text>, or <text code>stackable="tablet"</text> to allow responsive adjustments for tablet.</message>
 			</example>
-			<example>
+			<example "Table">
 				<html>
 					<ui-table celled padding="md">
 						<table>
@@ -75,7 +67,7 @@
 									<td>
 										<ui-rating color="yellow" value="3" max-rating="3" readonly aria-label="Efficacy"></ui-rating>
 									</td>
-									<td class="right aligned">80% <br /> <a href="#">18 studies</a></td>
+									<td class="right aligned">80% <br /> <ui-link link="#">18 studies</ui-link></td>
 									<td>Creatine supplementation is the reference compound for increasing muscular creatine levels; there is variability in this increase, however, with some nonresponders.</td>
 								</tr>
 								<tr>
@@ -86,7 +78,7 @@
 									<td>
 										<ui-rating color="yellow" value="3" max-rating="3" readonly aria-label="Efficacy"></ui-rating>
 									</td>
-									<td class="right aligned">100% <br /> <a href="#">65 studies</a></td>
+									<td class="right aligned">100% <br /> <ui-link link="#">65 studies</ui-link></td>
 									<td>Creatine is the reference compound for power improvement, with numbers from one meta-analysis to assess potency</td>
 								</tr>
 							</tbody>
@@ -112,59 +104,51 @@
 			</example>
 
 			<!-- GAP I104:  the `<ui-image>` stacks above the name instead of sitting beside it. -->
-			<example>
-				<html>
-					<ui-table appearance="very-basic" collapsing celled>
-						<table>
-							<thead>
-								<tr>
-									<th>Employee</th>
-									<th>Correct Guesses</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr>
-									<td>
-										<ui-header level="4">
-											<ui-image src="/components/ui/images/avatar2/small/lena.png" size="mini" alt="" appearance="rounded"></ui-image>
-											<ui-content>Lena <ui-header sub>Human Resources</ui-header></ui-content>
-										</ui-header>
-									</td>
-									<td>22</td>
-								</tr>
-								<tr>
-									<td>
-										<ui-header level="4">
-											<ui-image src="/components/ui/images/avatar2/small/matthew.png" size="mini" alt="" appearance="rounded"></ui-image>
-											<ui-content>Matthew <ui-header sub>Fabric Design</ui-header></ui-content>
-										</ui-header>
-									</td>
-									<td>15</td>
-								</tr>
-								<tr>
-									<td>
-										<ui-header level="4">
-											<ui-image src="/components/ui/images/avatar2/small/lindsay.png" size="mini" alt="" appearance="rounded"></ui-image>
-											<ui-content>Lindsay <ui-header sub>Entertainment</ui-header></ui-content>
-										</ui-header>
-									</td>
-									<td>12</td>
-								</tr>
-								<tr>
-									<td>
-										<ui-header level="4">
-											<ui-image src="/components/ui/images/avatar2/small/mark.png" size="mini" alt="" appearance="rounded"></ui-image>
-											<ui-content>Mark <ui-header sub>Executive</ui-header></ui-content>
-										</ui-header>
-									</td>
-									<td>11</td>
-								</tr>
-							</tbody>
-						</table>
-					</ui-table>
-				</html>
+			<example "Table">
+				<table appearance="very-basic" collapsing celled>
+					<row header>
+						<cell>Employee</cell>
+						<cell>Correct Guesses</cell>
+					</row>
+					<row>
+						<cell>
+							<header level="4">
+								<image src="/components/ui/images/avatar2/small/lena.png" size="mini" alt="" appearance="rounded"/>
+								<content>Lena <header sub>Human Resources</header></content>
+							</header>
+						</cell>
+						<cell>22</cell>
+					</row>
+					<row>
+						<cell>
+							<header level="4">
+								<image src="/components/ui/images/avatar2/small/matthew.png" size="mini" alt="" appearance="rounded"/>
+								<content>Matthew <header sub>Fabric Design</header></content>
+							</header>
+						</cell>
+						<cell>15</cell>
+					</row>
+					<row>
+						<cell>
+							<header level="4">
+								<image src="/components/ui/images/avatar2/small/lindsay.png" size="mini" alt="" appearance="rounded"/>
+								<content>Lindsay <header sub>Entertainment</header></content>
+							</header>
+						</cell>
+						<cell>12</cell>
+					</row>
+					<row>
+						<cell>
+							<header level="4">
+								<image src="/components/ui/images/avatar2/small/mark.png" size="mini" alt="" appearance="rounded"/>
+								<content>Mark <header sub>Executive</header></content>
+							</header>
+						</cell>
+						<cell>11</cell>
+					</row>
+				</table>
 			</example>
-			<example>
+			<example "Table">
 				<html>
 					<ui-table celled appearance="striped">
 						<table>
@@ -207,35 +191,27 @@
 		</>
 
 		<section label="Definition" sticky="stack" collapsible dividing>
-			<example description="A table may be formatted to emphasize a first column that defines a rows content.">
-				<message slot="description" state="info" size="small"><html>Definition tables are designed to display on a single background color. You can adjust this with the <code>--ui-table-definition-page-background</code> token, or by giving the first cell a background.</html></message>
-				<html>
-					<ui-table definition>
-						<table>
-							<thead>
-								<tr>
-									<th></th>
-									<th>Arguments</th>
-									<th>Description</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr>
-									<td>reset rating</td>
-									<td>None</td>
-									<td>Resets rating to default value</td>
-								</tr>
-								<tr>
-									<td>set rating</td>
-									<td>rating (integer)</td>
-									<td>Sets the current star rating to specified value</td>
-								</tr>
-							</tbody>
-						</table>
-					</ui-table>
-				</html>
+			<example "Definition" description="A table may be formatted to emphasize a first column that defines a rows content.">
+				<table definition>
+					<row header>
+						<cell/>
+						<cell>Arguments</cell>
+						<cell>Description</cell>
+					</row>
+					<row>
+						<cell>reset rating</cell>
+						<cell>None</cell>
+						<cell>Resets rating to default value</cell>
+					</row>
+					<row>
+						<cell>set rating</cell>
+						<cell>rating (integer)</cell>
+						<cell>Sets the current star rating to specified value</cell>
+					</row>
+				</table>
+				<message slot="description" state="info" size="small">Definition tables are designed to display on a single background color. You can adjust this with the <text code>--ui-table-definition-page-background</text> token, or by giving the first cell a background.</message>
 			</example>
-			<example>
+			<example "Definition">
 				<html>
 					<ui-table padding="compact" celled definition>
 						<table>
@@ -295,7 +271,7 @@
 					</ui-table>
 				</html>
 			</example>
-			<example>
+			<example "Definition">
 				<html>
 					<ui-table definition>
 						<table>
@@ -314,12 +290,8 @@
 		</>
 
 		<section label="Structured" sticky="stack" collapsible dividing>
-			<example description="A table can be formatted to display complex structured data">
+			<example "Structured" description="A table can be formatted to display complex structured data">
 				<html>
-					<ui-message slot="description" state="info" size="small">
-						<p>Tables use <code>border-collapse: separate</code> to allow for tables to receive styles that cannot usually be applied to tables like <code>border-radius</code>. However this can cause some cell borders to appear missing with complex layouts that use <code>rowspan</code> or <code>colspan</code> and rows with varying column count.</p>
-						<p>A <code>structured</code> table does not support some style features, but can correctly display all valid HTML table content.</p>
-					</ui-message>
 					<ui-table celled appearance="structured">
 						<table>
 							<thead>
@@ -378,13 +350,17 @@
 						</table>
 					</ui-table>
 				</html>
+				<message slot="description" state="info" size="small">
+					<text paragraph>Tables use <text code>border-collapse: separate</text> to allow for tables to receive styles that cannot usually be applied to tables like <text code>border-radius</text>. However this can cause some cell borders to appear missing with complex layouts that use <text code>rowspan</text> or <text code>colspan</text> and rows with varying column count.</text>
+					<text paragraph>A <text code>structured</text> table does not support some style features, but can correctly display all valid HTML table content.</text>
+				</message>
 			</example>
 		</>
 	</>
 
 	<section label="Content">
 		<section label="Rows and cells" sticky="stack" collapsible dividing>
-			<example description="`<ui-row>`s of `<ui-cell>`s, with no native table:  `header` on a row makes its cells the column headers, on a cell the row's name;  `footer` is a footer row;  `span` covers columns.  Click a header to sort.">
+			<example "Rows and cells" description="`<ui-row>`s of `<ui-cell>`s, with no native table:  `header` on a row makes its cells the column headers, on a cell the row's name;  `footer` is a footer row;  `span` covers columns.  Click a header to sort.">
 				<table celled appearance="striped" sortable client-sort caption="Team members">
 					<row header>
 						<cell header>Name</cell>
@@ -415,7 +391,7 @@
 		</>
 
 		<section label="Caption and row headers" sticky collapsible dividing>
-			<example description="A table keeps every native part:  a `<caption>`, and row headers (`th scope=\"row\"`).  The `full-width` class works on `thead` / `tfoot` too.">
+			<example "Caption and row headers" description="A table keeps every native part:  a `<caption>`, and row headers (`th scope=\"row\"`).  The `full-width` class works on `thead` / `tfoot` too.">
 				<html>
 					<ui-table definition padding="compact" celled>
 						<table>
@@ -454,7 +430,7 @@
 		</>
 
 		<section label="Row spanned" sticky="stack" collapsible dividing>
-			<example description="A `rowspanned` cell is a hidden stand-in for a cell spanning down from the row above, so every row keeps a full set of cells (and stacks right on phones).">
+			<example "Row spanned" description="A `rowspanned` cell is a hidden stand-in for a cell spanning down from the row above, so every row keeps a full set of cells (and stacks right on phones).">
 				<html>
 					<ui-table celled>
 						<table>
@@ -486,7 +462,7 @@
 
 	<section label="States">
 		<section label="Positive / Negative" sticky collapsible dividing>
-			<example description="A cell or row may let a user know whether a value is good or bad.">
+			<example "Positive / Negative" description="A cell or row may let a user know whether a value is good or bad.">
 				<html>
 					<ui-table celled>
 						<table>
@@ -526,7 +502,7 @@
 		</>
 
 		<section label="Error" sticky="stack" collapsible dividing>
-			<example description="A cell or row may call attention to an error or a negative value.">
+			<example "Error" description="A cell or row may call attention to an error or a negative value.">
 				<html>
 					<ui-table celled>
 						<table>
@@ -566,7 +542,7 @@
 		</>
 
 		<section label="Warning" sticky="stack" collapsible dividing>
-			<example description="A cell or row may warn a user.">
+			<example "Warning" description="A cell or row may warn a user.">
 				<html>
 					<ui-table celled>
 						<table>
@@ -606,7 +582,7 @@
 		</>
 
 		<section label="Active" sticky="stack" collapsible dividing>
-			<example description="A cell or row can be active or selected by a user.">
+			<example "Active" description="A cell or row can be active or selected by a user.">
 				<html>
 					<ui-table celled>
 						<table>
@@ -646,7 +622,7 @@
 		</>
 
 		<section label="Disabled" sticky="stack" collapsible dividing>
-			<example description="A cell can be disabled.">
+			<example "Disabled" description="A cell can be disabled.">
 				<html>
 					<ui-table celled>
 						<table>
@@ -686,7 +662,7 @@
 		</>
 
 		<section label="Colored Cells" sticky="stack" collapsible dividing>
-			<example description="A cell can be styled by the central color palette colors.">
+			<example "Colored Cells" description="A cell can be styled by the central color palette colors.">
 				<html>
 					<ui-table celled>
 						<table>
@@ -726,8 +702,7 @@
 		</>
 
 		<section label="Marked" sticky="stack" collapsible dividing>
-			<example description="A cell or row can be marked by a colored left or right border.">
-				<message slot="description" state="warning" size="small"><html>Follow the class order: first the color name, then <code>marked</code>. This is to support <a href="#examples-states-colored-and-marked">colored and marked</a> cells.</html></message>
+			<example "Marked" description="A cell or row can be marked by a colored left or right border.">
 				<html>
 					<ui-table celled>
 						<table>
@@ -763,13 +738,13 @@
 						</table>
 					</ui-table>
 				</html>
+				<message slot="description" state="warning" size="small">Follow the class order: first the color name, then <text code>marked</text>. This is to support <link link="#examples-states-colored-and-marked">colored and marked</link> cells.</message>
 			</example>
 		</>
 
 		<section label="Colored and Marked" sticky collapsible dividing id="states-colored-and-marked">
-			<example>
+			<example "Colored and Marked">
 				<html>
-					<p slot="description">If you need colored cells which are also marked at the same time in a different color, you have to follow a specific class order and add the <code>colored</code> class to the cell color.<br />For example <code>red colored right blue marked</code> .</p>
 					<ui-table celled>
 						<table>
 							<thead>
@@ -789,184 +764,151 @@
 						</table>
 					</ui-table>
 				</html>
+				<text slot="description" paragraph>
+					If you need colored cells which are also marked at the same time in a different color, you have to follow a specific class order and add the <text code>colored</text> class to the cell color.
+
+					For example <text code>red colored right blue marked</text> .
+				</text>
 			</example>
 		</>
 	</>
 
 	<section label="Variations">
 		<section label="Single Line" sticky="stack" collapsible dividing id="variations-single-line">
-			<example description="A table can specify that its cell contents should remain on a single line, and not wrap.">
-				<html>
-					<ui-table single-line>
-						<table>
-							<thead>
-								<tr>
-									<th>Name</th>
-									<th>Registration Date</th>
-									<th>E-mail address</th>
-									<th>Premium Plan</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr>
-									<td>John Lilki</td>
-									<td>September 14, 2013</td>
-									<td>jhlilk22@yahoo.com</td>
-									<td>No</td>
-								</tr>
-								<tr>
-									<td>Jamie Harington</td>
-									<td>January 11, 2014</td>
-									<td>jamieharingonton@yahoo.com</td>
-									<td>Yes</td>
-								</tr>
-								<tr>
-									<td>Jill Lewis</td>
-									<td>May 11, 2014</td>
-									<td>jilsewris22@yahoo.com</td>
-									<td>Yes</td>
-								</tr>
-							</tbody>
-						</table>
-					</ui-table>
-				</html>
+			<example "Single Line" description="A table can specify that its cell contents should remain on a single line, and not wrap.">
+				<table single-line>
+					<row header>
+						<cell>Name</cell>
+						<cell>Registration Date</cell>
+						<cell>E-mail address</cell>
+						<cell>Premium Plan</cell>
+					</row>
+					<row>
+						<cell>John Lilki</cell>
+						<cell>September 14, 2013</cell>
+						<cell>jhlilk22@yahoo.com</cell>
+						<cell>No</cell>
+					</row>
+					<row>
+						<cell>Jamie Harington</cell>
+						<cell>January 11, 2014</cell>
+						<cell>jamieharingonton@yahoo.com</cell>
+						<cell>Yes</cell>
+					</row>
+					<row>
+						<cell>Jill Lewis</cell>
+						<cell>May 11, 2014</cell>
+						<cell>jilsewris22@yahoo.com</cell>
+						<cell>Yes</cell>
+					</row>
+				</table>
 			</example>
 		</>
 
 		<section label="Fixed" sticky="stack" collapsible dividing>
-			<example>
-				<html>
-					<p slot="description">A table can use <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/table-layout"><code>table-layout: fixed</code></a>, a special faster form of table rendering that does not resize table cells based on content.</p>
-					<ui-table fixed>
-						<table>
-							<thead>
-								<tr>
-									<th>Name</th>
-									<th>Status</th>
-									<th>Description</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr>
-									<td>John</td>
-									<td>Approved</td>
-									<td>John is an interesting boy but sometimes you don't really have enough room to describe everything you'd like</td>
-								</tr>
-								<tr>
-									<td>Jamie</td>
-									<td>Approved</td>
-									<td>Jamie is a kind girl but sometimes you don't really have enough room to describe everything you'd like</td>
-								</tr>
-								<tr>
-									<td>Jill</td>
-									<td>Denied</td>
-									<td>Jill is an alright girl but sometimes you don't really have enough room to describe everything you'd like</td>
-								</tr>
-							</tbody>
-						</table>
-					</ui-table>
-				</html>
+			<example "Fixed">
+				<table fixed>
+					<row header>
+						<cell>Name</cell>
+						<cell>Status</cell>
+						<cell>Description</cell>
+					</row>
+					<row>
+						<cell>John</cell>
+						<cell>Approved</cell>
+						<cell>John is an interesting boy but sometimes you don't really have enough room to describe everything you'd like</cell>
+					</row>
+					<row>
+						<cell>Jamie</cell>
+						<cell>Approved</cell>
+						<cell>Jamie is a kind girl but sometimes you don't really have enough room to describe everything you'd like</cell>
+					</row>
+					<row>
+						<cell>Jill</cell>
+						<cell>Denied</cell>
+						<cell>Jill is an alright girl but sometimes you don't really have enough room to describe everything you'd like</cell>
+					</row>
+				</table>
+				<text slot="description" paragraph>A table can use <link link="https://developer.mozilla.org/en-US/docs/Web/CSS/table-layout"><text code>table-layout: fixed</text></link>, a special faster form of table rendering that does not resize table cells based on content.</text>
 			</example>
-			<example>
-				<message slot="description" state="info" size="small"><html>Fixed <code>single-line</code> tables will automatically ensure content that does not fit in a single line will receive "..." ellipsis</html></message>
-				<html>
-					<ui-table single-line fixed celled>
-						<table>
-							<thead>
-								<tr>
-									<th>Name</th>
-									<th>Status</th>
-									<th>Description</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr>
-									<td>John</td>
-									<td>Approved</td>
-									<td title="This is much too long to fit I'm sorry about that">This is much too long to fit I'm sorry about that</td>
-								</tr>
-								<tr>
-									<td>Jamie</td>
-									<td>Approved</td>
-									<td>Shorter description</td>
-								</tr>
-								<tr>
-									<td>Jill</td>
-									<td>Denied</td>
-									<td>Shorter description</td>
-								</tr>
-							</tbody>
-						</table>
-					</ui-table>
-				</html>
+			<example "Fixed">
+				<table single-line fixed celled>
+					<row header>
+						<cell>Name</cell>
+						<cell>Status</cell>
+						<cell>Description</cell>
+					</row>
+					<row>
+						<cell>John</cell>
+						<cell>Approved</cell>
+						<cell title="This is much too long to fit I'm sorry about that">This is much too long to fit I'm sorry about that</cell>
+					</row>
+					<row>
+						<cell>Jamie</cell>
+						<cell>Approved</cell>
+						<cell>Shorter description</cell>
+					</row>
+					<row>
+						<cell>Jill</cell>
+						<cell>Denied</cell>
+						<cell>Shorter description</cell>
+					</row>
+				</table>
+				<message slot="description" state="info" size="small">Fixed <text code>single-line</text> tables will automatically ensure content that does not fit in a single line will receive "..." ellipsis</message>
 			</example>
 		</>
 
 		<section label="Stacking" sticky="stack" collapsible dividing>
-			<example description="A table can specify how it stacks table content responsively.">
-				<html>
-					<ui-table unstackable>
-						<table>
-							<thead>
-								<tr>
-									<th>Name</th>
-									<th>Status</th>
-									<th class="right aligned">Notes</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr>
-									<td>John</td>
-									<td>Approved</td>
-									<td class="right aligned">None</td>
-								</tr>
-								<tr>
-									<td>Jamie</td>
-									<td>Approved</td>
-									<td class="right aligned">Requires call</td>
-								</tr>
-								<tr>
-									<td>Jill</td>
-									<td>Denied</td>
-									<td class="right aligned">None</td>
-								</tr>
-							</tbody>
-						</table>
-					</ui-table>
-					<ui-table stackable="tablet">
-						<table>
-							<thead>
-								<tr>
-									<th>Name</th>
-									<th>Status</th>
-									<th class="right aligned">Notes</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr>
-									<td>John</td>
-									<td>Approved</td>
-									<td class="right aligned">None</td>
-								</tr>
-								<tr>
-									<td>Jamie</td>
-									<td>Approved</td>
-									<td class="right aligned">Requires call</td>
-								</tr>
-								<tr>
-									<td>Jill</td>
-									<td>Denied</td>
-									<td class="right aligned">None</td>
-								</tr>
-							</tbody>
-						</table>
-					</ui-table>
-				</html>
+			<example "Stacking" description="A table can specify how it stacks table content responsively.">
+				<table unstackable>
+					<row header>
+						<cell>Name</cell>
+						<cell>Status</cell>
+						<cell align="right">Notes</cell>
+					</row>
+					<row>
+						<cell>John</cell>
+						<cell>Approved</cell>
+						<cell align="right">None</cell>
+					</row>
+					<row>
+						<cell>Jamie</cell>
+						<cell>Approved</cell>
+						<cell align="right">Requires call</cell>
+					</row>
+					<row>
+						<cell>Jill</cell>
+						<cell>Denied</cell>
+						<cell align="right">None</cell>
+					</row>
+				</table>
+				<table stackable="tablet">
+					<row header>
+						<cell>Name</cell>
+						<cell>Status</cell>
+						<cell align="right">Notes</cell>
+					</row>
+					<row>
+						<cell>John</cell>
+						<cell>Approved</cell>
+						<cell align="right">None</cell>
+					</row>
+					<row>
+						<cell>Jamie</cell>
+						<cell>Approved</cell>
+						<cell align="right">Requires call</cell>
+					</row>
+					<row>
+						<cell>Jill</cell>
+						<cell>Denied</cell>
+						<cell align="right">None</cell>
+					</row>
+				</table>
 			</example>
 		</>
 
 		<section label="Selectable Row" sticky="stack" collapsible dividing>
-			<example description="A table can have its rows appear selectable.">
+			<example "Selectable Row" description="A table can have its rows appear selectable.">
 				<html>
 					<ui-table selectable celled>
 						<table>
@@ -1013,43 +955,34 @@
 					</ui-table>
 				</html>
 			</example>
-			<example>
-				<html>
-					<ui-table selectable inverted>
-						<table>
-							<thead>
-								<tr>
-									<th>Name</th>
-									<th>Status</th>
-									<th class="right aligned">Notes</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr>
-									<td>John</td>
-									<td>Approved</td>
-									<td class="right aligned">None</td>
-								</tr>
-								<tr>
-									<td>Jamie</td>
-									<td>Approved</td>
-									<td class="right aligned">Requires call</td>
-								</tr>
-								<tr>
-									<td>Jill</td>
-									<td>Denied</td>
-									<td class="right aligned">None</td>
-								</tr>
-							</tbody>
-						</table>
-					</ui-table>
-				</html>
+			<example "Selectable Row">
+				<table selectable inverted>
+					<row header>
+						<cell>Name</cell>
+						<cell>Status</cell>
+						<cell align="right">Notes</cell>
+					</row>
+					<row>
+						<cell>John</cell>
+						<cell>Approved</cell>
+						<cell align="right">None</cell>
+					</row>
+					<row>
+						<cell>Jamie</cell>
+						<cell>Approved</cell>
+						<cell align="right">Requires call</cell>
+					</row>
+					<row>
+						<cell>Jill</cell>
+						<cell>Denied</cell>
+						<cell align="right">None</cell>
+					</row>
+				</table>
 			</example>
 		</>
 
 		<section label="Selectable Cell" sticky="stack" collapsible dividing>
-			<example description="A table cell can be selectable.">
-				<message slot="description" state="info" size="small"><html>Using an <code>a</code> link inside a selectable cell will automatically make the hit box the entire cell area. By default links will inherit their cell color.</html></message>
+			<example "Selectable Cell" description="A table cell can be selectable.">
 				<html>
 					<ui-table celled>
 						<table>
@@ -1065,53 +998,54 @@
 									<td>John</td>
 									<td>No Action</td>
 									<td class="selectable">
-										<a href="#">Edit</a>
+										<ui-link link="#">Edit</ui-link>
 									</td>
 								</tr>
 								<tr>
 									<td>Jamie</td>
 									<td>Approved</td>
 									<td class="selectable">
-										<a href="#">Edit</a>
+										<ui-link link="#">Edit</ui-link>
 									</td>
 								</tr>
 								<tr>
 									<td>Jill</td>
 									<td>Denied</td>
 									<td class="selectable">
-										<a href="#">Edit</a>
+										<ui-link link="#">Edit</ui-link>
 									</td>
 								</tr>
 								<tr class="warning">
 									<td>John</td>
 									<td>No Action</td>
 									<td class="selectable warning">
-										<a href="#">Requires change</a>
+										<ui-link link="#">Requires change</ui-link>
 									</td>
 								</tr>
 								<tr>
 									<td>Jamie</td>
 									<td class="positive">Approved</td>
 									<td class="selectable positive">
-										<a href="#">Approve</a>
+										<ui-link link="#">Approve</ui-link>
 									</td>
 								</tr>
 								<tr>
 									<td>Jill</td>
 									<td class="negative">Denied</td>
 									<td class="selectable negative">
-										<a href="#">Remove</a>
+										<ui-link link="#">Remove</ui-link>
 									</td>
 								</tr>
 							</tbody>
 						</table>
 					</ui-table>
 				</html>
+				<message slot="description" state="info" size="small">Using an <text code>a</text> link inside a selectable cell will automatically make the hit box the entire cell area. By default links will inherit their cell color.</message>
 			</example>
 		</>
 
 		<section label="Vertical Alignment" sticky collapsible dividing>
-			<example description="A table header, row, or cell can adjust its vertical alignment.">
+			<example "Vertical Alignment" description="A table header, row, or cell can adjust its vertical alignment.">
 				<html>
 					<ui-table appearance="striped">
 						<table>
@@ -1141,7 +1075,7 @@
 		</>
 
 		<section label="Text Alignment" sticky="stack" collapsible dividing>
-			<example description="A table header, row, or cell can adjust its text alignment.">
+			<example "Text Alignment" description="A table header, row, or cell can adjust its text alignment.">
 				<html>
 					<ui-table appearance="striped">
 						<table>
@@ -1176,187 +1110,152 @@
 		</>
 
 		<section label="Striped" sticky="stack" collapsible dividing id="variations-striped">
-			<example description="A table can stripe alternate rows of content with a darker color to increase contrast.">
-				<html>
-					<ui-table appearance="striped">
-						<table>
-							<thead>
-								<tr>
-									<th>Name</th>
-									<th>Date Joined</th>
-									<th>E-mail</th>
-									<th>Called</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr>
-									<td>John Lilki</td>
-									<td>September 14, 2013</td>
-									<td>jhlilk22@yahoo.com</td>
-									<td>No</td>
-								</tr>
-								<tr>
-									<td>Jamie Harington</td>
-									<td>January 11, 2014</td>
-									<td>jamieharingonton@yahoo.com</td>
-									<td>Yes</td>
-								</tr>
-								<tr>
-									<td>Jill Lewis</td>
-									<td>May 11, 2014</td>
-									<td>jilsewris22@yahoo.com</td>
-									<td>Yes</td>
-								</tr>
-								<tr>
-									<td>John Lilki</td>
-									<td>September 14, 2013</td>
-									<td>jhlilk22@yahoo.com</td>
-									<td>No</td>
-								</tr>
-								<tr>
-									<td>John Lilki</td>
-									<td>September 14, 2013</td>
-									<td>jhlilk22@yahoo.com</td>
-									<td>No</td>
-								</tr>
-								<tr>
-									<td>Jamie Harington</td>
-									<td>January 11, 2014</td>
-									<td>jamieharingonton@yahoo.com</td>
-									<td>Yes</td>
-								</tr>
-								<tr>
-									<td>Jill Lewis</td>
-									<td>May 11, 2014</td>
-									<td>jilsewris22@yahoo.com</td>
-									<td>Yes</td>
-								</tr>
-								<tr>
-									<td>John Lilki</td>
-									<td>September 14, 2013</td>
-									<td>jhlilk22@yahoo.com</td>
-									<td>No</td>
-								</tr>
-							</tbody>
-						</table>
-					</ui-table>
-				</html>
+			<example "Striped" description="A table can stripe alternate rows of content with a darker color to increase contrast.">
+				<table appearance="striped">
+					<row header>
+						<cell>Name</cell>
+						<cell>Date Joined</cell>
+						<cell>E-mail</cell>
+						<cell>Called</cell>
+					</row>
+					<row>
+						<cell>John Lilki</cell>
+						<cell>September 14, 2013</cell>
+						<cell>jhlilk22@yahoo.com</cell>
+						<cell>No</cell>
+					</row>
+					<row>
+						<cell>Jamie Harington</cell>
+						<cell>January 11, 2014</cell>
+						<cell>jamieharingonton@yahoo.com</cell>
+						<cell>Yes</cell>
+					</row>
+					<row>
+						<cell>Jill Lewis</cell>
+						<cell>May 11, 2014</cell>
+						<cell>jilsewris22@yahoo.com</cell>
+						<cell>Yes</cell>
+					</row>
+					<row>
+						<cell>John Lilki</cell>
+						<cell>September 14, 2013</cell>
+						<cell>jhlilk22@yahoo.com</cell>
+						<cell>No</cell>
+					</row>
+					<row>
+						<cell>John Lilki</cell>
+						<cell>September 14, 2013</cell>
+						<cell>jhlilk22@yahoo.com</cell>
+						<cell>No</cell>
+					</row>
+					<row>
+						<cell>Jamie Harington</cell>
+						<cell>January 11, 2014</cell>
+						<cell>jamieharingonton@yahoo.com</cell>
+						<cell>Yes</cell>
+					</row>
+					<row>
+						<cell>Jill Lewis</cell>
+						<cell>May 11, 2014</cell>
+						<cell>jilsewris22@yahoo.com</cell>
+						<cell>Yes</cell>
+					</row>
+					<row>
+						<cell>John Lilki</cell>
+						<cell>September 14, 2013</cell>
+						<cell>jhlilk22@yahoo.com</cell>
+						<cell>No</cell>
+					</row>
+				</table>
 			</example>
 		</>
 
 		<section label="Celled" sticky="stack" collapsible dividing>
-			<example description="A table may be divided each row into separate cells.">
-				<html>
-					<ui-table celled>
-						<table>
-							<thead>
-								<tr>
-									<th>Name</th>
-									<th>Status</th>
-									<th>Notes</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr>
-									<td>John</td>
-									<td>Approved</td>
-									<td>None</td>
-								</tr>
-								<tr>
-									<td>Jamie</td>
-									<td>Approved</td>
-									<td>Requires call</td>
-								</tr>
-								<tr>
-									<td>Jill</td>
-									<td>Denied</td>
-									<td>None</td>
-								</tr>
-							</tbody>
-							<tfoot>
-								<tr>
-									<th>3 People</th>
-									<th>2 Approved</th>
-									<th></th>
-								</tr>
-							</tfoot>
-						</table>
-					</ui-table>
-				</html>
+			<example "Celled" description="A table may be divided each row into separate cells.">
+				<table celled>
+					<row header>
+						<cell>Name</cell>
+						<cell>Status</cell>
+						<cell>Notes</cell>
+					</row>
+					<row>
+						<cell>John</cell>
+						<cell>Approved</cell>
+						<cell>None</cell>
+					</row>
+					<row>
+						<cell>Jamie</cell>
+						<cell>Approved</cell>
+						<cell>Requires call</cell>
+					</row>
+					<row>
+						<cell>Jill</cell>
+						<cell>Denied</cell>
+						<cell>None</cell>
+					</row>
+					<row footer>
+						<cell header>3 People</cell>
+						<cell header>2 Approved</cell>
+						<cell header/>
+					</row>
+				</table>
 			</example>
 		</>
 
 		<section label="Basic" sticky="stack" collapsible dividing>
-			<example description="A table can reduce its complexity to increase readability.">
-				<html>
-					<ui-table appearance="basic">
-						<table>
-							<thead>
-								<tr>
-									<th>Name</th>
-									<th>Status</th>
-									<th>Notes</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr>
-									<td>John</td>
-									<td>Approved</td>
-									<td>None</td>
-								</tr>
-								<tr>
-									<td>Jamie</td>
-									<td>Approved</td>
-									<td>Requires call</td>
-								</tr>
-								<tr>
-									<td>Jill</td>
-									<td>Denied</td>
-									<td>None</td>
-								</tr>
-							</tbody>
-						</table>
-					</ui-table>
-				</html>
+			<example "Basic" description="A table can reduce its complexity to increase readability.">
+				<table appearance="basic">
+					<row header>
+						<cell>Name</cell>
+						<cell>Status</cell>
+						<cell>Notes</cell>
+					</row>
+					<row>
+						<cell>John</cell>
+						<cell>Approved</cell>
+						<cell>None</cell>
+					</row>
+					<row>
+						<cell>Jamie</cell>
+						<cell>Approved</cell>
+						<cell>Requires call</cell>
+					</row>
+					<row>
+						<cell>Jill</cell>
+						<cell>Denied</cell>
+						<cell>None</cell>
+					</row>
+				</table>
 			</example>
-			<example>
-				<message slot="description" state="info" size="small"><html>Very basic tables have loose padding unless they are also <a href="#examples-variations-sortable"><code>sortable</code></a> or <a href="#examples-variations-striped"><code>striped</code></a>.</html></message>
-				<html>
-					<ui-table appearance="very-basic">
-						<table>
-							<thead>
-								<tr>
-									<th>Name</th>
-									<th>Status</th>
-									<th>Notes</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr>
-									<td>John</td>
-									<td>Approved</td>
-									<td>None</td>
-								</tr>
-								<tr>
-									<td>Jamie</td>
-									<td>Approved</td>
-									<td>Requires call</td>
-								</tr>
-								<tr>
-									<td>Jill</td>
-									<td>Denied</td>
-									<td>None</td>
-								</tr>
-							</tbody>
-						</table>
-					</ui-table>
-				</html>
+			<example "Basic">
+				<table appearance="very-basic">
+					<row header>
+						<cell>Name</cell>
+						<cell>Status</cell>
+						<cell>Notes</cell>
+					</row>
+					<row>
+						<cell>John</cell>
+						<cell>Approved</cell>
+						<cell>None</cell>
+					</row>
+					<row>
+						<cell>Jamie</cell>
+						<cell>Approved</cell>
+						<cell>Requires call</cell>
+					</row>
+					<row>
+						<cell>Jill</cell>
+						<cell>Denied</cell>
+						<cell>None</cell>
+					</row>
+				</table>
+				<message slot="description" state="info" size="small">Very basic tables have loose padding unless they are also <link link="#examples-variations-sortable"><text code>sortable</text></link> or <link link="#examples-variations-striped"><text code>striped</text></link>.</message>
 			</example>
 		</>
 
 		<section label="Collapsing Cell" sticky="stack" collapsible dividing>
-			<example description="A cell can be collapsing so that it only uses as much space as required.">
-				<message slot="description" state="warning" size="small" icon="warning"><html>To ensure icons don't wrap to a separate line you must either specify <code>collapsing</code> on the widest row in the collapsing column, or on all rows.</html></message>
+			<example "Collapsing Cell" description="A cell can be collapsing so that it only uses as much space as required.">
 				<html>
 					<ui-table>
 						<table>
@@ -1380,64 +1279,54 @@
 						</table>
 					</ui-table>
 				</html>
+				<message slot="description" state="warning" size="small" icon="warning">To ensure icons don't wrap to a separate line you must either specify <text code>collapsing</text> on the widest row in the collapsing column, or on all rows.</message>
 			</example>
 		</>
 
 		<section label="Column Count" sticky="stack" collapsible dividing>
-			<example description="A table can specify its column count to divide its content evenly:  `columns=\"5\"`.">
-				<html>
-					<ui-table columns="5">
-						<table>
-							<thead>
-								<tr>
-									<th>Name</th>
-									<th>Status</th>
-									<th>Age</th>
-									<th>Gender</th>
-									<th>Notes</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr>
-									<td>John</td>
-									<td>Approved</td>
-									<td>22</td>
-									<td>Male</td>
-									<td>None</td>
-								</tr>
-								<tr>
-									<td>Jamie</td>
-									<td>Approved</td>
-									<td>32</td>
-									<td>Male</td>
-									<td>Requires call</td>
-								</tr>
-								<tr>
-									<td>Jill</td>
-									<td>Denied</td>
-									<td>22</td>
-									<td>Female</td>
-									<td>None</td>
-								</tr>
-							</tbody>
-							<tfoot>
-								<tr>
-									<th>3 People</th>
-									<th>2 Approved</th>
-									<th></th>
-									<th></th>
-									<th></th>
-								</tr>
-							</tfoot>
-						</table>
-					</ui-table>
-				</html>
+			<example "Column Count" description="A table can specify its column count to divide its content evenly:  `columns=\"5\"`.">
+				<table columns="5">
+					<row header>
+						<cell>Name</cell>
+						<cell>Status</cell>
+						<cell>Age</cell>
+						<cell>Gender</cell>
+						<cell>Notes</cell>
+					</row>
+					<row>
+						<cell>John</cell>
+						<cell>Approved</cell>
+						<cell>22</cell>
+						<cell>Male</cell>
+						<cell>None</cell>
+					</row>
+					<row>
+						<cell>Jamie</cell>
+						<cell>Approved</cell>
+						<cell>32</cell>
+						<cell>Male</cell>
+						<cell>Requires call</cell>
+					</row>
+					<row>
+						<cell>Jill</cell>
+						<cell>Denied</cell>
+						<cell>22</cell>
+						<cell>Female</cell>
+						<cell>None</cell>
+					</row>
+					<row footer>
+						<cell header>3 People</cell>
+						<cell header>2 Approved</cell>
+						<cell header/>
+						<cell header/>
+						<cell header/>
+					</row>
+				</table>
 			</example>
 		</>
 
 		<section label="Column Width" sticky="stack" collapsible dividing id="variations-column-width">
-			<example description="A table can specify the width of individual columns independently.">
-				<message slot="description" state="info" size="small"><html>Tables use a 16 column grid similar to <a href="/components/ui/ui-grid.html">the grid</a>: <code>class="ten wide"</code> on a header cell.</html></message>
+			<example "Column Width" description="A table can specify the width of individual columns independently.">
 				<html>
 					<ui-table>
 						<table>
@@ -1470,659 +1359,491 @@
 						</table>
 					</ui-table>
 				</html>
+				<message slot="description" state="info" size="small">Tables use a 16 column grid similar to <link link="/components/ui/ui-grid.html">the grid</link>: <text code>class="ten wide"</text> on a header cell.</message>
 			</example>
 		</>
 
 		<section label="Collapsing" sticky="stack" collapsible dividing>
-			<example description="A table can be collapsing, taking up only as much space as its rows.">
-				<html>
-					<ui-table collapsing>
-						<table>
-							<thead>
-								<tr>
-									<th>Name</th>
-									<th>Status</th>
-									<th>Notes</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr>
-									<td>John</td>
-									<td>Approved</td>
-									<td>None</td>
-								</tr>
-								<tr>
-									<td>Jamie</td>
-									<td>Approved</td>
-									<td>Requires call</td>
-								</tr>
-								<tr>
-									<td>Jill</td>
-									<td>Denied</td>
-									<td>None</td>
-								</tr>
-							</tbody>
-							<tfoot>
-								<tr>
-									<th>3 People</th>
-									<th>2 Approved</th>
-									<th></th>
-								</tr>
-							</tfoot>
-						</table>
-					</ui-table>
-				</html>
+			<example "Collapsing" description="A table can be collapsing, taking up only as much space as its rows.">
+				<table collapsing>
+					<row header>
+						<cell>Name</cell>
+						<cell>Status</cell>
+						<cell>Notes</cell>
+					</row>
+					<row>
+						<cell>John</cell>
+						<cell>Approved</cell>
+						<cell>None</cell>
+					</row>
+					<row>
+						<cell>Jamie</cell>
+						<cell>Approved</cell>
+						<cell>Requires call</cell>
+					</row>
+					<row>
+						<cell>Jill</cell>
+						<cell>Denied</cell>
+						<cell>None</cell>
+					</row>
+					<row footer>
+						<cell header>3 People</cell>
+						<cell header>2 Approved</cell>
+						<cell header/>
+					</row>
+				</table>
 			</example>
 		</>
 
 		<section label="Colored" sticky="stack" collapsible dividing>
-			<example description="A table can be given a color to distinguish it from other tables.">
-				<html>
-					<ui-table color="red">
-						<table>
-							<thead>
-								<tr>
-									<th>Food</th>
-									<th>Calories</th>
-									<th>Protein</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr>
-									<td>Apples</td>
-									<td>200</td>
-									<td>0g</td>
-								</tr>
-								<tr>
-									<td>Tomatoes</td>
-									<td>310</td>
-									<td>0g</td>
-								</tr>
-							</tbody>
-						</table>
-					</ui-table>
-					<ui-table color="orange">
-						<table>
-							<thead>
-								<tr>
-									<th>Food</th>
-									<th>Calories</th>
-									<th>Protein</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr>
-									<td>Apples</td>
-									<td>200</td>
-									<td>0g</td>
-								</tr>
-								<tr>
-									<td>Orange</td>
-									<td>310</td>
-									<td>0g</td>
-								</tr>
-							</tbody>
-						</table>
-					</ui-table>
-					<ui-table color="yellow">
-						<table>
-							<thead>
-								<tr>
-									<th>Food</th>
-									<th>Calories</th>
-									<th>Protein</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr>
-									<td>Apples</td>
-									<td>200</td>
-									<td>0g</td>
-								</tr>
-								<tr>
-									<td>Orange</td>
-									<td>310</td>
-									<td>0g</td>
-								</tr>
-							</tbody>
-						</table>
-					</ui-table>
-					<ui-table color="olive">
-						<table>
-							<thead>
-								<tr>
-									<th>Food</th>
-									<th>Calories</th>
-									<th>Protein</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr>
-									<td>Apples</td>
-									<td>200</td>
-									<td>0g</td>
-								</tr>
-								<tr>
-									<td>Orange</td>
-									<td>310</td>
-									<td>0g</td>
-								</tr>
-							</tbody>
-						</table>
-					</ui-table>
-					<ui-table color="green">
-						<table>
-							<thead>
-								<tr>
-									<th>Food</th>
-									<th>Calories</th>
-									<th>Protein</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr>
-									<td>Apples</td>
-									<td>200</td>
-									<td>0g</td>
-								</tr>
-								<tr>
-									<td>Orange</td>
-									<td>310</td>
-									<td>0g</td>
-								</tr>
-							</tbody>
-						</table>
-					</ui-table>
-					<ui-table color="teal">
-						<table>
-							<thead>
-								<tr>
-									<th>Food</th>
-									<th>Calories</th>
-									<th>Protein</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr>
-									<td>Apples</td>
-									<td>200</td>
-									<td>0g</td>
-								</tr>
-								<tr>
-									<td>Orange</td>
-									<td>310</td>
-									<td>0g</td>
-								</tr>
-							</tbody>
-						</table>
-					</ui-table>
-					<ui-table color="blue">
-						<table>
-							<thead>
-								<tr>
-									<th>Food</th>
-									<th>Calories</th>
-									<th>Protein</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr>
-									<td>Apples</td>
-									<td>200</td>
-									<td>0g</td>
-								</tr>
-								<tr>
-									<td>Orange</td>
-									<td>310</td>
-									<td>0g</td>
-								</tr>
-							</tbody>
-						</table>
-					</ui-table>
-					<ui-table color="violet">
-						<table>
-							<thead>
-								<tr>
-									<th>Food</th>
-									<th>Calories</th>
-									<th>Protein</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr>
-									<td>Apples</td>
-									<td>200</td>
-									<td>0g</td>
-								</tr>
-								<tr>
-									<td>Orange</td>
-									<td>310</td>
-									<td>0g</td>
-								</tr>
-							</tbody>
-						</table>
-					</ui-table>
-					<ui-table color="purple">
-						<table>
-							<thead>
-								<tr>
-									<th>Food</th>
-									<th>Calories</th>
-									<th>Protein</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr>
-									<td>Apples</td>
-									<td>200</td>
-									<td>0g</td>
-								</tr>
-								<tr>
-									<td>Orange</td>
-									<td>310</td>
-									<td>0g</td>
-								</tr>
-							</tbody>
-						</table>
-					</ui-table>
-					<ui-table color="pink">
-						<table>
-							<thead>
-								<tr>
-									<th>Food</th>
-									<th>Calories</th>
-									<th>Protein</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr>
-									<td>Apples</td>
-									<td>200</td>
-									<td>0g</td>
-								</tr>
-								<tr>
-									<td>Orange</td>
-									<td>310</td>
-									<td>0g</td>
-								</tr>
-							</tbody>
-						</table>
-					</ui-table>
-					<ui-table color="grey">
-						<table>
-							<thead>
-								<tr>
-									<th>Food</th>
-									<th>Calories</th>
-									<th>Protein</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr>
-									<td>Apples</td>
-									<td>200</td>
-									<td>0g</td>
-								</tr>
-								<tr>
-									<td>Orange</td>
-									<td>310</td>
-									<td>0g</td>
-								</tr>
-							</tbody>
-						</table>
-					</ui-table>
-					<ui-table color="black">
-						<table>
-							<thead>
-								<tr>
-									<th>Food</th>
-									<th>Calories</th>
-									<th>Protein</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr>
-									<td>Apples</td>
-									<td>200</td>
-									<td>0g</td>
-								</tr>
-								<tr>
-									<td>Orange</td>
-									<td>310</td>
-									<td>0g</td>
-								</tr>
-							</tbody>
-						</table>
-					</ui-table>
-				</html>
+			<example "Colored" description="A table can be given a color to distinguish it from other tables.">
+				<table color="red">
+					<row header>
+						<cell>Food</cell>
+						<cell>Calories</cell>
+						<cell>Protein</cell>
+					</row>
+					<row>
+						<cell>Apples</cell>
+						<cell>200</cell>
+						<cell>0g</cell>
+					</row>
+					<row>
+						<cell>Tomatoes</cell>
+						<cell>310</cell>
+						<cell>0g</cell>
+					</row>
+				</table>
+				<table color="orange">
+					<row header>
+						<cell>Food</cell>
+						<cell>Calories</cell>
+						<cell>Protein</cell>
+					</row>
+					<row>
+						<cell>Apples</cell>
+						<cell>200</cell>
+						<cell>0g</cell>
+					</row>
+					<row>
+						<cell>Orange</cell>
+						<cell>310</cell>
+						<cell>0g</cell>
+					</row>
+				</table>
+				<table color="yellow">
+					<row header>
+						<cell>Food</cell>
+						<cell>Calories</cell>
+						<cell>Protein</cell>
+					</row>
+					<row>
+						<cell>Apples</cell>
+						<cell>200</cell>
+						<cell>0g</cell>
+					</row>
+					<row>
+						<cell>Orange</cell>
+						<cell>310</cell>
+						<cell>0g</cell>
+					</row>
+				</table>
+				<table color="olive">
+					<row header>
+						<cell>Food</cell>
+						<cell>Calories</cell>
+						<cell>Protein</cell>
+					</row>
+					<row>
+						<cell>Apples</cell>
+						<cell>200</cell>
+						<cell>0g</cell>
+					</row>
+					<row>
+						<cell>Orange</cell>
+						<cell>310</cell>
+						<cell>0g</cell>
+					</row>
+				</table>
+				<table color="green">
+					<row header>
+						<cell>Food</cell>
+						<cell>Calories</cell>
+						<cell>Protein</cell>
+					</row>
+					<row>
+						<cell>Apples</cell>
+						<cell>200</cell>
+						<cell>0g</cell>
+					</row>
+					<row>
+						<cell>Orange</cell>
+						<cell>310</cell>
+						<cell>0g</cell>
+					</row>
+				</table>
+				<table color="teal">
+					<row header>
+						<cell>Food</cell>
+						<cell>Calories</cell>
+						<cell>Protein</cell>
+					</row>
+					<row>
+						<cell>Apples</cell>
+						<cell>200</cell>
+						<cell>0g</cell>
+					</row>
+					<row>
+						<cell>Orange</cell>
+						<cell>310</cell>
+						<cell>0g</cell>
+					</row>
+				</table>
+				<table color="blue">
+					<row header>
+						<cell>Food</cell>
+						<cell>Calories</cell>
+						<cell>Protein</cell>
+					</row>
+					<row>
+						<cell>Apples</cell>
+						<cell>200</cell>
+						<cell>0g</cell>
+					</row>
+					<row>
+						<cell>Orange</cell>
+						<cell>310</cell>
+						<cell>0g</cell>
+					</row>
+				</table>
+				<table color="violet">
+					<row header>
+						<cell>Food</cell>
+						<cell>Calories</cell>
+						<cell>Protein</cell>
+					</row>
+					<row>
+						<cell>Apples</cell>
+						<cell>200</cell>
+						<cell>0g</cell>
+					</row>
+					<row>
+						<cell>Orange</cell>
+						<cell>310</cell>
+						<cell>0g</cell>
+					</row>
+				</table>
+				<table color="purple">
+					<row header>
+						<cell>Food</cell>
+						<cell>Calories</cell>
+						<cell>Protein</cell>
+					</row>
+					<row>
+						<cell>Apples</cell>
+						<cell>200</cell>
+						<cell>0g</cell>
+					</row>
+					<row>
+						<cell>Orange</cell>
+						<cell>310</cell>
+						<cell>0g</cell>
+					</row>
+				</table>
+				<table color="pink">
+					<row header>
+						<cell>Food</cell>
+						<cell>Calories</cell>
+						<cell>Protein</cell>
+					</row>
+					<row>
+						<cell>Apples</cell>
+						<cell>200</cell>
+						<cell>0g</cell>
+					</row>
+					<row>
+						<cell>Orange</cell>
+						<cell>310</cell>
+						<cell>0g</cell>
+					</row>
+				</table>
+				<table color="grey">
+					<row header>
+						<cell>Food</cell>
+						<cell>Calories</cell>
+						<cell>Protein</cell>
+					</row>
+					<row>
+						<cell>Apples</cell>
+						<cell>200</cell>
+						<cell>0g</cell>
+					</row>
+					<row>
+						<cell>Orange</cell>
+						<cell>310</cell>
+						<cell>0g</cell>
+					</row>
+				</table>
+				<table color="black">
+					<row header>
+						<cell>Food</cell>
+						<cell>Calories</cell>
+						<cell>Protein</cell>
+					</row>
+					<row>
+						<cell>Apples</cell>
+						<cell>200</cell>
+						<cell>0g</cell>
+					</row>
+					<row>
+						<cell>Orange</cell>
+						<cell>310</cell>
+						<cell>0g</cell>
+					</row>
+				</table>
 			</example>
 		</>
 
 		<section label="Inverted" sticky="stack" collapsible dividing>
-			<example description="A table's colors can be inverted.">
-				<html>
-					<ui-table inverted>
-						<table>
-							<thead>
-								<tr>
-									<th>Name</th>
-									<th>Status</th>
-									<th>Notes</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr>
-									<td>John</td>
-									<td>Approved</td>
-									<td>None</td>
-								</tr>
-								<tr>
-									<td>Jamie</td>
-									<td>Approved</td>
-									<td>Requires call</td>
-								</tr>
-								<tr>
-									<td>Jill</td>
-									<td>Denied</td>
-									<td>None</td>
-								</tr>
-							</tbody>
-							<tfoot>
-								<tr>
-									<th>3 People</th>
-									<th>2 Approved</th>
-									<th></th>
-								</tr>
-							</tfoot>
-						</table>
-					</ui-table>
-				</html>
+			<example "Inverted" description="A table's colors can be inverted.">
+				<table inverted>
+					<row header>
+						<cell>Name</cell>
+						<cell>Status</cell>
+						<cell>Notes</cell>
+					</row>
+					<row>
+						<cell>John</cell>
+						<cell>Approved</cell>
+						<cell>None</cell>
+					</row>
+					<row>
+						<cell>Jamie</cell>
+						<cell>Approved</cell>
+						<cell>Requires call</cell>
+					</row>
+					<row>
+						<cell>Jill</cell>
+						<cell>Denied</cell>
+						<cell>None</cell>
+					</row>
+					<row footer>
+						<cell header>3 People</cell>
+						<cell header>2 Approved</cell>
+						<cell header/>
+					</row>
+				</table>
 			</example>
-			<example>
-				<html>
-					<ui-table inverted color="red">
-						<table>
-							<thead>
-								<tr>
-									<th>Food</th>
-									<th>Calories</th>
-									<th>Protein</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr>
-									<td>Apples</td>
-									<td>200</td>
-									<td>0g</td>
-								</tr>
-								<tr>
-									<td>Orange</td>
-									<td>310</td>
-									<td>0g</td>
-								</tr>
-							</tbody>
-						</table>
-					</ui-table>
-					<ui-table inverted color="orange">
-						<table>
-							<thead>
-								<tr>
-									<th>Food</th>
-									<th>Calories</th>
-									<th>Protein</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr>
-									<td>Apples</td>
-									<td>200</td>
-									<td>0g</td>
-								</tr>
-								<tr>
-									<td>Orange</td>
-									<td>310</td>
-									<td>0g</td>
-								</tr>
-							</tbody>
-						</table>
-					</ui-table>
-					<ui-table inverted color="yellow">
-						<table>
-							<thead>
-								<tr>
-									<th>Food</th>
-									<th>Calories</th>
-									<th>Protein</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr>
-									<td>Apples</td>
-									<td>200</td>
-									<td>0g</td>
-								</tr>
-								<tr>
-									<td>Orange</td>
-									<td>310</td>
-									<td>0g</td>
-								</tr>
-							</tbody>
-						</table>
-					</ui-table>
-					<ui-table inverted color="olive">
-						<table>
-							<thead>
-								<tr>
-									<th>Food</th>
-									<th>Calories</th>
-									<th>Protein</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr>
-									<td>Apples</td>
-									<td>200</td>
-									<td>0g</td>
-								</tr>
-								<tr>
-									<td>Orange</td>
-									<td>310</td>
-									<td>0g</td>
-								</tr>
-							</tbody>
-						</table>
-					</ui-table>
-					<ui-table inverted color="green">
-						<table>
-							<thead>
-								<tr>
-									<th>Food</th>
-									<th>Calories</th>
-									<th>Protein</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr>
-									<td>Apples</td>
-									<td>200</td>
-									<td>0g</td>
-								</tr>
-								<tr>
-									<td>Orange</td>
-									<td>310</td>
-									<td>0g</td>
-								</tr>
-							</tbody>
-						</table>
-					</ui-table>
-					<ui-table inverted color="teal">
-						<table>
-							<thead>
-								<tr>
-									<th>Food</th>
-									<th>Calories</th>
-									<th>Protein</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr>
-									<td>Apples</td>
-									<td>200</td>
-									<td>0g</td>
-								</tr>
-								<tr>
-									<td>Orange</td>
-									<td>310</td>
-									<td>0g</td>
-								</tr>
-							</tbody>
-						</table>
-					</ui-table>
-					<ui-table inverted color="blue">
-						<table>
-							<thead>
-								<tr>
-									<th>Food</th>
-									<th>Calories</th>
-									<th>Protein</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr>
-									<td>Apples</td>
-									<td>200</td>
-									<td>0g</td>
-								</tr>
-								<tr>
-									<td>Orange</td>
-									<td>310</td>
-									<td>0g</td>
-								</tr>
-							</tbody>
-						</table>
-					</ui-table>
-					<ui-table inverted color="violet">
-						<table>
-							<thead>
-								<tr>
-									<th>Food</th>
-									<th>Calories</th>
-									<th>Protein</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr>
-									<td>Apples</td>
-									<td>200</td>
-									<td>0g</td>
-								</tr>
-								<tr>
-									<td>Orange</td>
-									<td>310</td>
-									<td>0g</td>
-								</tr>
-							</tbody>
-						</table>
-					</ui-table>
-					<ui-table inverted color="purple">
-						<table>
-							<thead>
-								<tr>
-									<th>Food</th>
-									<th>Calories</th>
-									<th>Protein</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr>
-									<td>Apples</td>
-									<td>200</td>
-									<td>0g</td>
-								</tr>
-								<tr>
-									<td>Orange</td>
-									<td>310</td>
-									<td>0g</td>
-								</tr>
-							</tbody>
-						</table>
-					</ui-table>
-					<ui-table inverted color="pink">
-						<table>
-							<thead>
-								<tr>
-									<th>Food</th>
-									<th>Calories</th>
-									<th>Protein</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr>
-									<td>Apples</td>
-									<td>200</td>
-									<td>0g</td>
-								</tr>
-								<tr>
-									<td>Orange</td>
-									<td>310</td>
-									<td>0g</td>
-								</tr>
-							</tbody>
-						</table>
-					</ui-table>
-					<ui-table inverted color="brown">
-						<table>
-							<thead>
-								<tr>
-									<th>Food</th>
-									<th>Calories</th>
-									<th>Protein</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr>
-									<td>Apples</td>
-									<td>200</td>
-									<td>0g</td>
-								</tr>
-								<tr>
-									<td>Orange</td>
-									<td>310</td>
-									<td>0g</td>
-								</tr>
-							</tbody>
-						</table>
-					</ui-table>
-					<ui-table inverted color="grey">
-						<table>
-							<thead>
-								<tr>
-									<th>Food</th>
-									<th>Calories</th>
-									<th>Protein</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr>
-									<td>Apples</td>
-									<td>200</td>
-									<td>0g</td>
-								</tr>
-								<tr>
-									<td>Orange</td>
-									<td>310</td>
-									<td>0g</td>
-								</tr>
-							</tbody>
-						</table>
-					</ui-table>
-				</html>
+			<example "Inverted">
+				<table inverted color="red">
+					<row header>
+						<cell>Food</cell>
+						<cell>Calories</cell>
+						<cell>Protein</cell>
+					</row>
+					<row>
+						<cell>Apples</cell>
+						<cell>200</cell>
+						<cell>0g</cell>
+					</row>
+					<row>
+						<cell>Orange</cell>
+						<cell>310</cell>
+						<cell>0g</cell>
+					</row>
+				</table>
+				<table inverted color="orange">
+					<row header>
+						<cell>Food</cell>
+						<cell>Calories</cell>
+						<cell>Protein</cell>
+					</row>
+					<row>
+						<cell>Apples</cell>
+						<cell>200</cell>
+						<cell>0g</cell>
+					</row>
+					<row>
+						<cell>Orange</cell>
+						<cell>310</cell>
+						<cell>0g</cell>
+					</row>
+				</table>
+				<table inverted color="yellow">
+					<row header>
+						<cell>Food</cell>
+						<cell>Calories</cell>
+						<cell>Protein</cell>
+					</row>
+					<row>
+						<cell>Apples</cell>
+						<cell>200</cell>
+						<cell>0g</cell>
+					</row>
+					<row>
+						<cell>Orange</cell>
+						<cell>310</cell>
+						<cell>0g</cell>
+					</row>
+				</table>
+				<table inverted color="olive">
+					<row header>
+						<cell>Food</cell>
+						<cell>Calories</cell>
+						<cell>Protein</cell>
+					</row>
+					<row>
+						<cell>Apples</cell>
+						<cell>200</cell>
+						<cell>0g</cell>
+					</row>
+					<row>
+						<cell>Orange</cell>
+						<cell>310</cell>
+						<cell>0g</cell>
+					</row>
+				</table>
+				<table inverted color="green">
+					<row header>
+						<cell>Food</cell>
+						<cell>Calories</cell>
+						<cell>Protein</cell>
+					</row>
+					<row>
+						<cell>Apples</cell>
+						<cell>200</cell>
+						<cell>0g</cell>
+					</row>
+					<row>
+						<cell>Orange</cell>
+						<cell>310</cell>
+						<cell>0g</cell>
+					</row>
+				</table>
+				<table inverted color="teal">
+					<row header>
+						<cell>Food</cell>
+						<cell>Calories</cell>
+						<cell>Protein</cell>
+					</row>
+					<row>
+						<cell>Apples</cell>
+						<cell>200</cell>
+						<cell>0g</cell>
+					</row>
+					<row>
+						<cell>Orange</cell>
+						<cell>310</cell>
+						<cell>0g</cell>
+					</row>
+				</table>
+				<table inverted color="blue">
+					<row header>
+						<cell>Food</cell>
+						<cell>Calories</cell>
+						<cell>Protein</cell>
+					</row>
+					<row>
+						<cell>Apples</cell>
+						<cell>200</cell>
+						<cell>0g</cell>
+					</row>
+					<row>
+						<cell>Orange</cell>
+						<cell>310</cell>
+						<cell>0g</cell>
+					</row>
+				</table>
+				<table inverted color="violet">
+					<row header>
+						<cell>Food</cell>
+						<cell>Calories</cell>
+						<cell>Protein</cell>
+					</row>
+					<row>
+						<cell>Apples</cell>
+						<cell>200</cell>
+						<cell>0g</cell>
+					</row>
+					<row>
+						<cell>Orange</cell>
+						<cell>310</cell>
+						<cell>0g</cell>
+					</row>
+				</table>
+				<table inverted color="purple">
+					<row header>
+						<cell>Food</cell>
+						<cell>Calories</cell>
+						<cell>Protein</cell>
+					</row>
+					<row>
+						<cell>Apples</cell>
+						<cell>200</cell>
+						<cell>0g</cell>
+					</row>
+					<row>
+						<cell>Orange</cell>
+						<cell>310</cell>
+						<cell>0g</cell>
+					</row>
+				</table>
+				<table inverted color="pink">
+					<row header>
+						<cell>Food</cell>
+						<cell>Calories</cell>
+						<cell>Protein</cell>
+					</row>
+					<row>
+						<cell>Apples</cell>
+						<cell>200</cell>
+						<cell>0g</cell>
+					</row>
+					<row>
+						<cell>Orange</cell>
+						<cell>310</cell>
+						<cell>0g</cell>
+					</row>
+				</table>
+				<table inverted color="brown">
+					<row header>
+						<cell>Food</cell>
+						<cell>Calories</cell>
+						<cell>Protein</cell>
+					</row>
+					<row>
+						<cell>Apples</cell>
+						<cell>200</cell>
+						<cell>0g</cell>
+					</row>
+					<row>
+						<cell>Orange</cell>
+						<cell>310</cell>
+						<cell>0g</cell>
+					</row>
+				</table>
+				<table inverted color="grey">
+					<row header>
+						<cell>Food</cell>
+						<cell>Calories</cell>
+						<cell>Protein</cell>
+					</row>
+					<row>
+						<cell>Apples</cell>
+						<cell>200</cell>
+						<cell>0g</cell>
+					</row>
+					<row>
+						<cell>Orange</cell>
+						<cell>310</cell>
+						<cell>0g</cell>
+					</row>
+				</table>
 			</example>
 		</>
 
 		<section label="Sortable" sticky="stack" collapsible dividing id="variations-sortable">
-			<example description="A table may allow a user to sort contents by clicking on a table header.">
-				<message slot="description" state="info" size="small"><html>No plugin needed:  a header click (or Enter / Space) fires <code>ui-sorting</code>, and marks the column with sort-column, sort-direction and aria-sort. <code>client-sort</code> also reorders the rows; click a header to try it.</html></message>
+			<example "Sortable" description="A table may allow a user to sort contents by clicking on a table header.">
 				<html>
 					<ui-table sortable celled client-sort>
 						<table>
@@ -2160,11 +1881,12 @@
 						</table>
 					</ui-table>
 				</html>
+				<message slot="description" state="info" size="small">No plugin needed:  a header click (or Enter / Space) fires <text code>ui-sorting</text>, and marks the column with sort-column, sort-direction and aria-sort. <text code>client-sort</text> also reorders the rows; click a header to try it.</message>
 			</example>
 		</>
 
 		<section label="Full-Width Header / Footer" sticky collapsible dividing>
-			<example description="A definition table can have a full width header or footer, filling in the gap left by the first column.">
+			<example "Full-Width Header / Footer" description="A definition table can have a full width header or footer, filling in the gap left by the first column.">
 				<html>
 					<ui-table padding="compact" celled definition>
 						<table>
@@ -2227,832 +1949,720 @@
 		</>
 
 		<section label="Padded" sticky="stack" collapsible dividing>
-			<example description="A table may sometimes need to be more padded for legibility.">
-				<html>
-					<ui-table padding="md">
-						<table>
-							<thead>
-								<tr>
-									<th>Name</th>
-									<th>Status</th>
-									<th>Notes</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr>
-									<td>John</td>
-									<td>Approved</td>
-									<td>He is a very nice guy and I enjoyed talking to him on the telephone. I hope we get to talk again.</td>
-								</tr>
-								<tr>
-									<td>Jamie</td>
-									<td>Approved</td>
-									<td>Jamie was not interested in purchasing our product.</td>
-								</tr>
-							</tbody>
-						</table>
-					</ui-table>
-				</html>
+			<example "Padded" description="A table may sometimes need to be more padded for legibility.">
+				<table padding="md">
+					<row header>
+						<cell>Name</cell>
+						<cell>Status</cell>
+						<cell>Notes</cell>
+					</row>
+					<row>
+						<cell>John</cell>
+						<cell>Approved</cell>
+						<cell>He is a very nice guy and I enjoyed talking to him on the telephone. I hope we get to talk again.</cell>
+					</row>
+					<row>
+						<cell>Jamie</cell>
+						<cell>Approved</cell>
+						<cell>Jamie was not interested in purchasing our product.</cell>
+					</row>
+				</table>
 			</example>
-			<example>
-				<html>
-					<ui-table padding="lg">
-						<table>
-							<thead>
-								<tr>
-									<th>Name</th>
-									<th>Status</th>
-									<th>Notes</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr>
-									<td>John</td>
-									<td>Approved</td>
-									<td>He is a very nice guy and I enjoyed talking to him on the telephone. I hope we get to talk again.</td>
-								</tr>
-								<tr>
-									<td>Jamie</td>
-									<td>Approved</td>
-									<td>Jamie was not interested in purchasing our product.</td>
-								</tr>
-							</tbody>
-						</table>
-					</ui-table>
-				</html>
+			<example "Padded">
+				<table padding="lg">
+					<row header>
+						<cell>Name</cell>
+						<cell>Status</cell>
+						<cell>Notes</cell>
+					</row>
+					<row>
+						<cell>John</cell>
+						<cell>Approved</cell>
+						<cell>He is a very nice guy and I enjoyed talking to him on the telephone. I hope we get to talk again.</cell>
+					</row>
+					<row>
+						<cell>Jamie</cell>
+						<cell>Approved</cell>
+						<cell>Jamie was not interested in purchasing our product.</cell>
+					</row>
+				</table>
 			</example>
 		</>
 
 		<section label="Compact" sticky="stack" collapsible dividing>
-			<example description="A table may sometimes need to be more compact to make more rows visible at a time.">
-				<html>
-					<ui-table padding="compact">
-						<table>
-							<thead>
-								<tr>
-									<th>Name</th>
-									<th>Status</th>
-									<th>Notes</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr>
-									<td>John</td>
-									<td>Approved</td>
-									<td>None</td>
-								</tr>
-								<tr>
-									<td>Jamie</td>
-									<td>Approved</td>
-									<td>Requires call</td>
-								</tr>
-								<tr>
-									<td>John</td>
-									<td>Approved</td>
-									<td>None</td>
-								</tr>
-								<tr>
-									<td>Jamie</td>
-									<td>Approved</td>
-									<td>Requires call</td>
-								</tr>
-								<tr>
-									<td>John</td>
-									<td>Approved</td>
-									<td>None</td>
-								</tr>
-								<tr>
-									<td>Jamie</td>
-									<td>Approved</td>
-									<td>Requires call</td>
-								</tr>
-								<tr>
-									<td>John</td>
-									<td>Approved</td>
-									<td>None</td>
-								</tr>
-								<tr>
-									<td>Jamie</td>
-									<td>Approved</td>
-									<td>Requires call</td>
-								</tr>
-							</tbody>
-						</table>
-					</ui-table>
-				</html>
+			<example "Compact" description="A table may sometimes need to be more compact to make more rows visible at a time.">
+				<table padding="compact">
+					<row header>
+						<cell>Name</cell>
+						<cell>Status</cell>
+						<cell>Notes</cell>
+					</row>
+					<row>
+						<cell>John</cell>
+						<cell>Approved</cell>
+						<cell>None</cell>
+					</row>
+					<row>
+						<cell>Jamie</cell>
+						<cell>Approved</cell>
+						<cell>Requires call</cell>
+					</row>
+					<row>
+						<cell>John</cell>
+						<cell>Approved</cell>
+						<cell>None</cell>
+					</row>
+					<row>
+						<cell>Jamie</cell>
+						<cell>Approved</cell>
+						<cell>Requires call</cell>
+					</row>
+					<row>
+						<cell>John</cell>
+						<cell>Approved</cell>
+						<cell>None</cell>
+					</row>
+					<row>
+						<cell>Jamie</cell>
+						<cell>Approved</cell>
+						<cell>Requires call</cell>
+					</row>
+					<row>
+						<cell>John</cell>
+						<cell>Approved</cell>
+						<cell>None</cell>
+					</row>
+					<row>
+						<cell>Jamie</cell>
+						<cell>Approved</cell>
+						<cell>Requires call</cell>
+					</row>
+				</table>
 			</example>
-			<example>
-				<html>
-					<ui-table padding="xs">
-						<table>
-							<thead>
-								<tr>
-									<th>Name</th>
-									<th>Status</th>
-									<th>Another Status</th>
-									<th>Notes</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr>
-									<td>John</td>
-									<td>Approved</td>
-									<td>Approved</td>
-									<td>None</td>
-								</tr>
-								<tr>
-									<td>Jamie</td>
-									<td>Approved</td>
-									<td>Approved</td>
-									<td>Requires call</td>
-								</tr>
-								<tr>
-									<td>John</td>
-									<td>Approved</td>
-									<td>Approved</td>
-									<td>None</td>
-								</tr>
-								<tr>
-									<td>Jamie</td>
-									<td>Approved</td>
-									<td>Approved</td>
-									<td>Requires call</td>
-								</tr>
-								<tr>
-									<td>John</td>
-									<td>Approved</td>
-									<td>Approved</td>
-									<td>None</td>
-								</tr>
-								<tr>
-									<td>Jamie</td>
-									<td>Approved</td>
-									<td>Approved</td>
-									<td>Requires call</td>
-								</tr>
-								<tr>
-									<td>John</td>
-									<td>Approved</td>
-									<td>Approved</td>
-									<td>None</td>
-								</tr>
-								<tr>
-									<td>Jamie</td>
-									<td>Approved</td>
-									<td>Approved</td>
-									<td>Requires call</td>
-								</tr>
-							</tbody>
-						</table>
-					</ui-table>
-				</html>
+			<example "Compact">
+				<table padding="xs">
+					<row header>
+						<cell>Name</cell>
+						<cell>Status</cell>
+						<cell>Another Status</cell>
+						<cell>Notes</cell>
+					</row>
+					<row>
+						<cell>John</cell>
+						<cell>Approved</cell>
+						<cell>Approved</cell>
+						<cell>None</cell>
+					</row>
+					<row>
+						<cell>Jamie</cell>
+						<cell>Approved</cell>
+						<cell>Approved</cell>
+						<cell>Requires call</cell>
+					</row>
+					<row>
+						<cell>John</cell>
+						<cell>Approved</cell>
+						<cell>Approved</cell>
+						<cell>None</cell>
+					</row>
+					<row>
+						<cell>Jamie</cell>
+						<cell>Approved</cell>
+						<cell>Approved</cell>
+						<cell>Requires call</cell>
+					</row>
+					<row>
+						<cell>John</cell>
+						<cell>Approved</cell>
+						<cell>Approved</cell>
+						<cell>None</cell>
+					</row>
+					<row>
+						<cell>Jamie</cell>
+						<cell>Approved</cell>
+						<cell>Approved</cell>
+						<cell>Requires call</cell>
+					</row>
+					<row>
+						<cell>John</cell>
+						<cell>Approved</cell>
+						<cell>Approved</cell>
+						<cell>None</cell>
+					</row>
+					<row>
+						<cell>Jamie</cell>
+						<cell>Approved</cell>
+						<cell>Approved</cell>
+						<cell>Requires call</cell>
+					</row>
+				</table>
 			</example>
 		</>
 
 		<section label="Attached" sticky="stack" collapsible dividing>
-			<example description="A table can be attached to other content on a page:  `attach=\"top\"`, `attach=\"both\"` (the middle) or `attach=\"bottom\"`.">
-				<html>
-					<ui-table attach="top">
-						<table>
-							<tbody>
-								<tr>
-									<td>John</td>
-									<td>Approved</td>
-									<td>None</td>
-								</tr>
-							</tbody>
-						</table>
-					</ui-table>
-					<ui-table attach="both">
-						<table>
-							<tbody>
-								<tr>
-									<td>Jamie</td>
-									<td>Approved</td>
-									<td>Requires call</td>
-								</tr>
-							</tbody>
-						</table>
-					</ui-table>
-					<ui-table attach="bottom">
-						<table>
-							<tbody>
-								<tr>
-									<td>Jill</td>
-									<td>Denied</td>
-									<td>None</td>
-								</tr>
-							</tbody>
-						</table>
-					</ui-table>
-				</html>
+			<example "Attached" description="A table can be attached to other content on a page:  `attach=\"top\"`, `attach=\"both\"` (the middle) or `attach=\"bottom\"`.">
+				<table attach="top">
+					<row>
+						<cell>John</cell>
+						<cell>Approved</cell>
+						<cell>None</cell>
+					</row>
+				</table>
+				<table attach="both">
+					<row>
+						<cell>Jamie</cell>
+						<cell>Approved</cell>
+						<cell>Requires call</cell>
+					</row>
+				</table>
+				<table attach="bottom">
+					<row>
+						<cell>Jill</cell>
+						<cell>Denied</cell>
+						<cell>None</cell>
+					</row>
+				</table>
 			</example>
 		</>
 
 		<section label="Table alignment" sticky="stack" collapsible dividing>
-			<example description="A table's cells can all share one text alignment (`align`);  `vertical-align` does the same vertically.">
-				<html>
-					<ui-table align="center" celled>
-						<table>
-							<thead>
-								<tr>
-									<th>Name</th>
-									<th>Status</th>
-									<th>Notes</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr>
-									<td>John</td>
-									<td>Approved</td>
-									<td>None</td>
-								</tr>
-								<tr>
-									<td>Jamie</td>
-									<td>Approved</td>
-									<td>Requires call</td>
-								</tr>
-							</tbody>
-						</table>
-					</ui-table>
-				</html>
+			<example "Table alignment" description="A table's cells can all share one text alignment (`align`);  `vertical-align` does the same vertically.">
+				<table align="center" celled>
+					<row header>
+						<cell>Name</cell>
+						<cell>Status</cell>
+						<cell>Notes</cell>
+					</row>
+					<row>
+						<cell>John</cell>
+						<cell>Approved</cell>
+						<cell>None</cell>
+					</row>
+					<row>
+						<cell>Jamie</cell>
+						<cell>Approved</cell>
+						<cell>Requires call</cell>
+					</row>
+				</table>
 			</example>
 		</>
 
 		<section label="Size" sticky="stack" collapsible dividing>
-			<example description="A table can also be small or large.">
-				<html>
-					<ui-table size="small">
-						<table>
-							<thead>
-								<tr>
-									<th>Name</th>
-									<th>Status</th>
-									<th>Notes</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr>
-									<td>John</td>
-									<td>Approved</td>
-									<td>None</td>
-								</tr>
-								<tr>
-									<td>Jamie</td>
-									<td>Approved</td>
-									<td>Requires call</td>
-								</tr>
-								<tr>
-									<td>Jill</td>
-									<td>Denied</td>
-									<td>None</td>
-								</tr>
-							</tbody>
-							<tfoot>
-								<tr>
-									<th>3 People</th>
-									<th>2 Approved</th>
-									<th></th>
-								</tr>
-							</tfoot>
-						</table>
-					</ui-table>
-				</html>
+			<example "Size" description="A table can also be small or large.">
+				<table size="small">
+					<row header>
+						<cell>Name</cell>
+						<cell>Status</cell>
+						<cell>Notes</cell>
+					</row>
+					<row>
+						<cell>John</cell>
+						<cell>Approved</cell>
+						<cell>None</cell>
+					</row>
+					<row>
+						<cell>Jamie</cell>
+						<cell>Approved</cell>
+						<cell>Requires call</cell>
+					</row>
+					<row>
+						<cell>Jill</cell>
+						<cell>Denied</cell>
+						<cell>None</cell>
+					</row>
+					<row footer>
+						<cell header>3 People</cell>
+						<cell header>2 Approved</cell>
+						<cell header/>
+					</row>
+				</table>
 			</example>
-			<example>
-				<html>
-					<ui-table size="large">
-						<table>
-							<thead>
-								<tr>
-									<th>Name</th>
-									<th>Status</th>
-									<th>Notes</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr>
-									<td>John</td>
-									<td>Approved</td>
-									<td>None</td>
-								</tr>
-								<tr>
-									<td>Jamie</td>
-									<td>Approved</td>
-									<td>Requires call</td>
-								</tr>
-								<tr>
-									<td>Jill</td>
-									<td>Denied</td>
-									<td>None</td>
-								</tr>
-							</tbody>
-							<tfoot>
-								<tr>
-									<th>3 People</th>
-									<th>2 Approved</th>
-									<th></th>
-								</tr>
-							</tfoot>
-						</table>
-					</ui-table>
-				</html>
+			<example "Size">
+				<table size="large">
+					<row header>
+						<cell>Name</cell>
+						<cell>Status</cell>
+						<cell>Notes</cell>
+					</row>
+					<row>
+						<cell>John</cell>
+						<cell>Approved</cell>
+						<cell>None</cell>
+					</row>
+					<row>
+						<cell>Jamie</cell>
+						<cell>Approved</cell>
+						<cell>Requires call</cell>
+					</row>
+					<row>
+						<cell>Jill</cell>
+						<cell>Denied</cell>
+						<cell>None</cell>
+					</row>
+					<row footer>
+						<cell header>3 People</cell>
+						<cell header>2 Approved</cell>
+						<cell header/>
+					</row>
+				</table>
 			</example>
 		</>
 
 		<section label="Scrolling" sticky="stack" collapsible dividing>
-			<example description="A table body can scroll vertically: `scrolling`, with the head and foot stuck.">
-				<message slot="description" state="warning" size="small"><html>Some table variants like <a href="#examples-variations-column-width">column width</a> or <a href="#examples-variations-single-line">single line</a> do not work with a scrolling table. If you need such combinations use a <a href="#examples-variations-stuck">stuck table</a> instead.</html></message>
-				<message slot="description" state="info" size="small"><html>Add <code>resizable</code> and a native resize drag handler will appear to the bottom right of the table body.</html></message>
-				<html>
-					<ui-table unstackable celled scrolling aria-label="People">
-						<table>
-							<thead>
-								<tr>
-									<th>Name</th>
-									<th>Age</th>
-									<th>Job</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr>
-									<td>James</td>
-									<td>24</td>
-									<td>Engineer</td>
-								</tr>
-								<tr>
-									<td>Jill</td>
-									<td>26</td>
-									<td>Engineer</td>
-								</tr>
-								<tr>
-									<td>Elyse</td>
-									<td>24</td>
-									<td>Designer</td>
-								</tr>
-								<tr>
-									<td>Daphne</td>
-									<td>24</td>
-									<td>Engineer</td>
-								</tr>
-								<tr>
-									<td>Zoe</td>
-									<td>26</td>
-									<td>Engineer</td>
-								</tr>
-								<tr>
-									<td>Kirk</td>
-									<td>24</td>
-									<td>Designer</td>
-								</tr>
-								<tr>
-									<td>Doug</td>
-									<td>24</td>
-									<td>Engineer</td>
-								</tr>
-								<tr>
-									<td>Francis</td>
-									<td>26</td>
-									<td>Engineer</td>
-								</tr>
-								<tr>
-									<td>Claire</td>
-									<td>24</td>
-									<td>Designer</td>
-								</tr>
-								<tr>
-									<td>Thomas</td>
-									<td>27</td>
-									<td>Engineer</td>
-								</tr>
-								<tr>
-									<td>Clint</td>
-									<td>31</td>
-									<td>Engineer</td>
-								</tr>
-								<tr>
-									<td>Alison</td>
-									<td>21</td>
-									<td>Designer</td>
-								</tr>
-								<tr>
-									<td>Rachel</td>
-									<td>19</td>
-									<td>Engineer</td>
-								</tr>
-								<tr>
-									<td>Dave</td>
-									<td>23</td>
-									<td>Engineer</td>
-								</tr>
-								<tr>
-									<td>Oliver</td>
-									<td>29</td>
-									<td>Designer</td>
-								</tr>
-								<tr>
-									<td>Sue</td>
-									<td>23</td>
-									<td>Engineer</td>
-								</tr>
-								<tr>
-									<td>Jennifer</td>
-									<td>22</td>
-									<td>Engineer</td>
-								</tr>
-								<tr>
-									<td>Zak</td>
-									<td>27</td>
-									<td>Designer</td>
-								</tr>
-							</tbody>
-							<tfoot>
-								<tr>
-									<td>18 Entries</td>
-									<td>Average age: 25</td>
-									<td>2 Job-Types</td>
-								</tr>
-							</tfoot>
-						</table>
-					</ui-table>
-				</html>
+			<example "Scrolling" description="A table body can scroll vertically: `scrolling`, with the head and foot stuck.">
+				<table unstackable celled scrolling aria-label="People">
+					<row header>
+						<cell>Name</cell>
+						<cell>Age</cell>
+						<cell>Job</cell>
+					</row>
+					<row>
+						<cell>James</cell>
+						<cell>24</cell>
+						<cell>Engineer</cell>
+					</row>
+					<row>
+						<cell>Jill</cell>
+						<cell>26</cell>
+						<cell>Engineer</cell>
+					</row>
+					<row>
+						<cell>Elyse</cell>
+						<cell>24</cell>
+						<cell>Designer</cell>
+					</row>
+					<row>
+						<cell>Daphne</cell>
+						<cell>24</cell>
+						<cell>Engineer</cell>
+					</row>
+					<row>
+						<cell>Zoe</cell>
+						<cell>26</cell>
+						<cell>Engineer</cell>
+					</row>
+					<row>
+						<cell>Kirk</cell>
+						<cell>24</cell>
+						<cell>Designer</cell>
+					</row>
+					<row>
+						<cell>Doug</cell>
+						<cell>24</cell>
+						<cell>Engineer</cell>
+					</row>
+					<row>
+						<cell>Francis</cell>
+						<cell>26</cell>
+						<cell>Engineer</cell>
+					</row>
+					<row>
+						<cell>Claire</cell>
+						<cell>24</cell>
+						<cell>Designer</cell>
+					</row>
+					<row>
+						<cell>Thomas</cell>
+						<cell>27</cell>
+						<cell>Engineer</cell>
+					</row>
+					<row>
+						<cell>Clint</cell>
+						<cell>31</cell>
+						<cell>Engineer</cell>
+					</row>
+					<row>
+						<cell>Alison</cell>
+						<cell>21</cell>
+						<cell>Designer</cell>
+					</row>
+					<row>
+						<cell>Rachel</cell>
+						<cell>19</cell>
+						<cell>Engineer</cell>
+					</row>
+					<row>
+						<cell>Dave</cell>
+						<cell>23</cell>
+						<cell>Engineer</cell>
+					</row>
+					<row>
+						<cell>Oliver</cell>
+						<cell>29</cell>
+						<cell>Designer</cell>
+					</row>
+					<row>
+						<cell>Sue</cell>
+						<cell>23</cell>
+						<cell>Engineer</cell>
+					</row>
+					<row>
+						<cell>Jennifer</cell>
+						<cell>22</cell>
+						<cell>Engineer</cell>
+					</row>
+					<row>
+						<cell>Zak</cell>
+						<cell>27</cell>
+						<cell>Designer</cell>
+					</row>
+					<row footer>
+						<cell>18 Entries</cell>
+						<cell>Average age: 25</cell>
+						<cell>2 Job-Types</cell>
+					</row>
+				</table>
+				<message slot="description" state="warning" size="small">Some table variants like <link link="#examples-variations-column-width">column width</link> or <link link="#examples-variations-single-line">single line</link> do not work with a scrolling table. If you need such combinations use a <link link="#examples-variations-stuck">stuck table</link> instead.</message>
+				<message slot="description" state="info" size="small">Add <text code>resizable</text> and a native resize drag handler will appear to the bottom right of the table body.</message>
 			</example>
-			<example description="A scrolling table optionally supports predefined heights:  `scrolling` is long, very long, short or very short.">
-				<html>
-					<ui-table scrolling="long" unstackable celled aria-label="People, long">
-						<table>
-							<thead>
-								<tr>
-									<th>Name</th>
-									<th>Age</th>
-									<th>Job</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr>
-									<td>James</td>
-									<td>24</td>
-									<td>Engineer</td>
-								</tr>
-								<tr>
-									<td>Jill</td>
-									<td>26</td>
-									<td>Engineer</td>
-								</tr>
-								<tr>
-									<td>Elyse</td>
-									<td>24</td>
-									<td>Designer</td>
-								</tr>
-								<tr>
-									<td>Daphne</td>
-									<td>24</td>
-									<td>Engineer</td>
-								</tr>
-								<tr>
-									<td>Zoe</td>
-									<td>26</td>
-									<td>Engineer</td>
-								</tr>
-								<tr>
-									<td>Kirk</td>
-									<td>24</td>
-									<td>Designer</td>
-								</tr>
-								<tr>
-									<td>Doug</td>
-									<td>24</td>
-									<td>Engineer</td>
-								</tr>
-								<tr>
-									<td>Francis</td>
-									<td>26</td>
-									<td>Engineer</td>
-								</tr>
-								<tr>
-									<td>Claire</td>
-									<td>24</td>
-									<td>Designer</td>
-								</tr>
-								<tr>
-									<td>Thomas</td>
-									<td>27</td>
-									<td>Engineer</td>
-								</tr>
-								<tr>
-									<td>Clint</td>
-									<td>31</td>
-									<td>Engineer</td>
-								</tr>
-								<tr>
-									<td>Alison</td>
-									<td>21</td>
-									<td>Designer</td>
-								</tr>
-								<tr>
-									<td>Rachel</td>
-									<td>19</td>
-									<td>Engineer</td>
-								</tr>
-								<tr>
-									<td>Dave</td>
-									<td>23</td>
-									<td>Engineer</td>
-								</tr>
-								<tr>
-									<td>Oliver</td>
-									<td>29</td>
-									<td>Designer</td>
-								</tr>
-								<tr>
-									<td>Sue</td>
-									<td>23</td>
-									<td>Engineer</td>
-								</tr>
-								<tr>
-									<td>Jennifer</td>
-									<td>22</td>
-									<td>Engineer</td>
-								</tr>
-								<tr>
-									<td>Zak</td>
-									<td>27</td>
-									<td>Designer</td>
-								</tr>
-							</tbody>
-							<tfoot>
-								<tr>
-									<td>18 Entries</td>
-									<td>Average age: 25</td>
-									<td>2 Job-Types</td>
-								</tr>
-							</tfoot>
-						</table>
-					</ui-table>
-				</html>
+			<example "Scrolling" description="A scrolling table optionally supports predefined heights:  `scrolling` is long, very long, short or very short.">
+				<table scrolling="long" unstackable celled aria-label="People, long">
+					<row header>
+						<cell>Name</cell>
+						<cell>Age</cell>
+						<cell>Job</cell>
+					</row>
+					<row>
+						<cell>James</cell>
+						<cell>24</cell>
+						<cell>Engineer</cell>
+					</row>
+					<row>
+						<cell>Jill</cell>
+						<cell>26</cell>
+						<cell>Engineer</cell>
+					</row>
+					<row>
+						<cell>Elyse</cell>
+						<cell>24</cell>
+						<cell>Designer</cell>
+					</row>
+					<row>
+						<cell>Daphne</cell>
+						<cell>24</cell>
+						<cell>Engineer</cell>
+					</row>
+					<row>
+						<cell>Zoe</cell>
+						<cell>26</cell>
+						<cell>Engineer</cell>
+					</row>
+					<row>
+						<cell>Kirk</cell>
+						<cell>24</cell>
+						<cell>Designer</cell>
+					</row>
+					<row>
+						<cell>Doug</cell>
+						<cell>24</cell>
+						<cell>Engineer</cell>
+					</row>
+					<row>
+						<cell>Francis</cell>
+						<cell>26</cell>
+						<cell>Engineer</cell>
+					</row>
+					<row>
+						<cell>Claire</cell>
+						<cell>24</cell>
+						<cell>Designer</cell>
+					</row>
+					<row>
+						<cell>Thomas</cell>
+						<cell>27</cell>
+						<cell>Engineer</cell>
+					</row>
+					<row>
+						<cell>Clint</cell>
+						<cell>31</cell>
+						<cell>Engineer</cell>
+					</row>
+					<row>
+						<cell>Alison</cell>
+						<cell>21</cell>
+						<cell>Designer</cell>
+					</row>
+					<row>
+						<cell>Rachel</cell>
+						<cell>19</cell>
+						<cell>Engineer</cell>
+					</row>
+					<row>
+						<cell>Dave</cell>
+						<cell>23</cell>
+						<cell>Engineer</cell>
+					</row>
+					<row>
+						<cell>Oliver</cell>
+						<cell>29</cell>
+						<cell>Designer</cell>
+					</row>
+					<row>
+						<cell>Sue</cell>
+						<cell>23</cell>
+						<cell>Engineer</cell>
+					</row>
+					<row>
+						<cell>Jennifer</cell>
+						<cell>22</cell>
+						<cell>Engineer</cell>
+					</row>
+					<row>
+						<cell>Zak</cell>
+						<cell>27</cell>
+						<cell>Designer</cell>
+					</row>
+					<row footer>
+						<cell>18 Entries</cell>
+						<cell>Average age: 25</cell>
+						<cell>2 Job-Types</cell>
+					</row>
+				</table>
 			</example>
 		</>
 
 		<section label="Overflowing" sticky="stack" collapsible dividing>
-			<example description="A table can scroll both ways when its content is too wide or too tall, with nothing stuck.  It takes the same height steps as `scrolling`.">
-				<html>
-					<ui-table overflowing="short" celled aria-label="Overflowing cells">
-						<table>
-							<thead>
-								<tr>
-									<th>Column 1</th>
-									<th>Column 2</th>
-									<th>Column 3</th>
-									<th>Column 4</th>
-									<th>Column 5</th>
-									<th>Column 6</th>
-									<th>Column 7</th>
-									<th>Column 8</th>
-									<th>Column 9</th>
-									<th>Column 10</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr>
-									<td>Cell 1.1</td>
-									<td>Cell 1.2</td>
-									<td>Cell 1.3</td>
-									<td>Cell 1.4</td>
-									<td>Cell 1.5</td>
-									<td>Cell 1.6</td>
-									<td>Cell 1.7</td>
-									<td>Cell 1.8</td>
-									<td>Cell 1.9</td>
-									<td>Cell 1.10</td>
-								</tr>
-								<tr>
-									<td>Cell 2.1</td>
-									<td>Cell 2.2</td>
-									<td>Cell 2.3</td>
-									<td>Cell 2.4</td>
-									<td>Cell 2.5</td>
-									<td>Cell 2.6</td>
-									<td>Cell 2.7</td>
-									<td>Cell 2.8</td>
-									<td>Cell 2.9</td>
-									<td>Cell 2.10</td>
-								</tr>
-								<tr>
-									<td>Cell 3.1</td>
-									<td>Cell 3.2</td>
-									<td>Cell 3.3</td>
-									<td>Cell 3.4</td>
-									<td>Cell 3.5</td>
-									<td>Cell 3.6</td>
-									<td>Cell 3.7</td>
-									<td>Cell 3.8</td>
-									<td>Cell 3.9</td>
-									<td>Cell 3.10</td>
-								</tr>
-								<tr>
-									<td>Cell 4.1</td>
-									<td>Cell 4.2</td>
-									<td>Cell 4.3</td>
-									<td>Cell 4.4</td>
-									<td>Cell 4.5</td>
-									<td>Cell 4.6</td>
-									<td>Cell 4.7</td>
-									<td>Cell 4.8</td>
-									<td>Cell 4.9</td>
-									<td>Cell 4.10</td>
-								</tr>
-								<tr>
-									<td>Cell 5.1</td>
-									<td>Cell 5.2</td>
-									<td>Cell 5.3</td>
-									<td>Cell 5.4</td>
-									<td>Cell 5.5</td>
-									<td>Cell 5.6</td>
-									<td>Cell 5.7</td>
-									<td>Cell 5.8</td>
-									<td>Cell 5.9</td>
-									<td>Cell 5.10</td>
-								</tr>
-								<tr>
-									<td>Cell 6.1</td>
-									<td>Cell 6.2</td>
-									<td>Cell 6.3</td>
-									<td>Cell 6.4</td>
-									<td>Cell 6.5</td>
-									<td>Cell 6.6</td>
-									<td>Cell 6.7</td>
-									<td>Cell 6.8</td>
-									<td>Cell 6.9</td>
-									<td>Cell 6.10</td>
-								</tr>
-								<tr>
-									<td>Cell 7.1</td>
-									<td>Cell 7.2</td>
-									<td>Cell 7.3</td>
-									<td>Cell 7.4</td>
-									<td>Cell 7.5</td>
-									<td>Cell 7.6</td>
-									<td>Cell 7.7</td>
-									<td>Cell 7.8</td>
-									<td>Cell 7.9</td>
-									<td>Cell 7.10</td>
-								</tr>
-								<tr>
-									<td>Cell 8.1</td>
-									<td>Cell 8.2</td>
-									<td>Cell 8.3</td>
-									<td>Cell 8.4</td>
-									<td>Cell 8.5</td>
-									<td>Cell 8.6</td>
-									<td>Cell 8.7</td>
-									<td>Cell 8.8</td>
-									<td>Cell 8.9</td>
-									<td>Cell 8.10</td>
-								</tr>
-							</tbody>
-						</table>
-					</ui-table>
-				</html>
+			<example "Overflowing" description="A table can scroll both ways when its content is too wide or too tall, with nothing stuck.  It takes the same height steps as `scrolling`.">
+				<table overflowing="short" celled aria-label="Overflowing cells">
+					<row header>
+						<cell>Column 1</cell>
+						<cell>Column 2</cell>
+						<cell>Column 3</cell>
+						<cell>Column 4</cell>
+						<cell>Column 5</cell>
+						<cell>Column 6</cell>
+						<cell>Column 7</cell>
+						<cell>Column 8</cell>
+						<cell>Column 9</cell>
+						<cell>Column 10</cell>
+					</row>
+					<row>
+						<cell>Cell 1.1</cell>
+						<cell>Cell 1.2</cell>
+						<cell>Cell 1.3</cell>
+						<cell>Cell 1.4</cell>
+						<cell>Cell 1.5</cell>
+						<cell>Cell 1.6</cell>
+						<cell>Cell 1.7</cell>
+						<cell>Cell 1.8</cell>
+						<cell>Cell 1.9</cell>
+						<cell>Cell 1.10</cell>
+					</row>
+					<row>
+						<cell>Cell 2.1</cell>
+						<cell>Cell 2.2</cell>
+						<cell>Cell 2.3</cell>
+						<cell>Cell 2.4</cell>
+						<cell>Cell 2.5</cell>
+						<cell>Cell 2.6</cell>
+						<cell>Cell 2.7</cell>
+						<cell>Cell 2.8</cell>
+						<cell>Cell 2.9</cell>
+						<cell>Cell 2.10</cell>
+					</row>
+					<row>
+						<cell>Cell 3.1</cell>
+						<cell>Cell 3.2</cell>
+						<cell>Cell 3.3</cell>
+						<cell>Cell 3.4</cell>
+						<cell>Cell 3.5</cell>
+						<cell>Cell 3.6</cell>
+						<cell>Cell 3.7</cell>
+						<cell>Cell 3.8</cell>
+						<cell>Cell 3.9</cell>
+						<cell>Cell 3.10</cell>
+					</row>
+					<row>
+						<cell>Cell 4.1</cell>
+						<cell>Cell 4.2</cell>
+						<cell>Cell 4.3</cell>
+						<cell>Cell 4.4</cell>
+						<cell>Cell 4.5</cell>
+						<cell>Cell 4.6</cell>
+						<cell>Cell 4.7</cell>
+						<cell>Cell 4.8</cell>
+						<cell>Cell 4.9</cell>
+						<cell>Cell 4.10</cell>
+					</row>
+					<row>
+						<cell>Cell 5.1</cell>
+						<cell>Cell 5.2</cell>
+						<cell>Cell 5.3</cell>
+						<cell>Cell 5.4</cell>
+						<cell>Cell 5.5</cell>
+						<cell>Cell 5.6</cell>
+						<cell>Cell 5.7</cell>
+						<cell>Cell 5.8</cell>
+						<cell>Cell 5.9</cell>
+						<cell>Cell 5.10</cell>
+					</row>
+					<row>
+						<cell>Cell 6.1</cell>
+						<cell>Cell 6.2</cell>
+						<cell>Cell 6.3</cell>
+						<cell>Cell 6.4</cell>
+						<cell>Cell 6.5</cell>
+						<cell>Cell 6.6</cell>
+						<cell>Cell 6.7</cell>
+						<cell>Cell 6.8</cell>
+						<cell>Cell 6.9</cell>
+						<cell>Cell 6.10</cell>
+					</row>
+					<row>
+						<cell>Cell 7.1</cell>
+						<cell>Cell 7.2</cell>
+						<cell>Cell 7.3</cell>
+						<cell>Cell 7.4</cell>
+						<cell>Cell 7.5</cell>
+						<cell>Cell 7.6</cell>
+						<cell>Cell 7.7</cell>
+						<cell>Cell 7.8</cell>
+						<cell>Cell 7.9</cell>
+						<cell>Cell 7.10</cell>
+					</row>
+					<row>
+						<cell>Cell 8.1</cell>
+						<cell>Cell 8.2</cell>
+						<cell>Cell 8.3</cell>
+						<cell>Cell 8.4</cell>
+						<cell>Cell 8.5</cell>
+						<cell>Cell 8.6</cell>
+						<cell>Cell 8.7</cell>
+						<cell>Cell 8.8</cell>
+						<cell>Cell 8.9</cell>
+						<cell>Cell 8.10</cell>
+					</row>
+				</table>
 			</example>
 		</>
 
 		<section label="Stuck" sticky="stack" collapsible dividing id="variations-stuck">
-			<example description="A table can scroll horizontally, with its head, foot, first or last column staying stuck (`stuck`).  You can freely stick any combination like `stuck=\"head first\"`, `\"foot first last\"`, `\"head foot first\"`, `\"first last\"`, etc.">
-				<message slot="description" state="info" size="small"><html>A stuck table possibly needs to be wrapped into an overflowing container like a <a href="/components/ui/ui-container.html">scrolling container</a> or <a href="/components/ui/ui-segment.html">scrolling segment</a>. If you don't want an extra wrapper, use <code>overflowing</code> on the table; this only works if the table's columns exceed the available width.</html></message>
-				<html>
-					<ui-container scrolling="short">
-						<ui-table stuck="head foot first last" unstackable celled aria-label="Jobs">
-							<table>
-								<thead>
-									<tr>
-										<th>Name</th>
-										<th>Age</th>
-										<th>Job</th>
-										<th>Job</th>
-										<th>Job</th>
-										<th>Job</th>
-										<th>Job</th>
-										<th>Job</th>
-										<th>Job</th>
-										<th>Job</th>
-										<th>Job</th>
-										<th>Job</th>
-										<th>Summary</th>
-									</tr>
-								</thead>
-								<tbody>
-									<tr>
-										<td>James</td>
-										<td>24</td>
-										<td>Engineer</td>
-										<td>Engineer</td>
-										<td>Engineer</td>
-										<td>Engineer</td>
-										<td>Engineer</td>
-										<td>Engineer</td>
-										<td>Engineer</td>
-										<td>Engineer</td>
-										<td>Engineer</td>
-										<td>Engineer</td>
-										<td>Accepted</td>
-									</tr>
-									<tr>
-										<td>Jill</td>
-										<td>26</td>
-										<td>Engineer</td>
-										<td>Engineer</td>
-										<td>Engineer</td>
-										<td>Engineer</td>
-										<td>Engineer</td>
-										<td>Engineer</td>
-										<td>Engineer</td>
-										<td>Engineer</td>
-										<td>Engineer</td>
-										<td>Engineer</td>
-										<td>Accepted</td>
-									</tr>
-									<tr>
-										<td>Elyse</td>
-										<td>24</td>
-										<td>Designer</td>
-										<td>Engineer</td>
-										<td>Engineer</td>
-										<td>Engineer</td>
-										<td>Engineer</td>
-										<td>Engineer</td>
-										<td>Engineer</td>
-										<td>Engineer</td>
-										<td>Engineer</td>
-										<td>Engineer</td>
-										<td>Pending</td>
-									</tr>
-									<tr>
-										<td>Daphne</td>
-										<td>24</td>
-										<td>Engineer</td>
-										<td>Engineer</td>
-										<td>Engineer</td>
-										<td>Engineer</td>
-										<td>Engineer</td>
-										<td>Engineer</td>
-										<td>Engineer</td>
-										<td>Engineer</td>
-										<td>Engineer</td>
-										<td>Engineer</td>
-										<td>Accepted</td>
-									</tr>
-									<tr>
-										<td>Zoe</td>
-										<td>26</td>
-										<td>Engineer</td>
-										<td>Engineer</td>
-										<td>Engineer</td>
-										<td>Engineer</td>
-										<td>Engineer</td>
-										<td>Engineer</td>
-										<td>Engineer</td>
-										<td>Engineer</td>
-										<td>Engineer</td>
-										<td>Engineer</td>
-										<td>Accepted</td>
-									</tr>
-									<tr>
-										<td>Kirk</td>
-										<td>24</td>
-										<td>Designer</td>
-										<td>Engineer</td>
-										<td>Engineer</td>
-										<td>Engineer</td>
-										<td>Engineer</td>
-										<td>Engineer</td>
-										<td>Engineer</td>
-										<td>Engineer</td>
-										<td>Engineer</td>
-										<td>Engineer</td>
-										<td>Pending</td>
-									</tr>
-								</tbody>
-								<tfoot>
-									<tr>
-										<td>Names:6</td>
-										<td>av.25</td>
-										<td>Jobs : 2</td>
-										<td>Jobs : 2</td>
-										<td>Jobs : 2</td>
-										<td>Jobs : 2</td>
-										<td>Jobs : 2</td>
-										<td>Jobs : 2</td>
-										<td>Jobs : 2</td>
-										<td>Jobs : 2</td>
-										<td>Jobs : 2</td>
-										<td>Jobs : 2</td>
-										<td>2 Pending</td>
-									</tr>
-								</tfoot>
-							</table>
-						</ui-table>
-					</ui-container>
-				</html>
+			<example "Stuck" description="A table can scroll horizontally, with its head, foot, first or last column staying stuck (`stuck`).  You can freely stick any combination like `stuck=\"head first\"`, `\"foot first last\"`, `\"head foot first\"`, `\"first last\"`, etc.">
+				<container scrolling="short">
+					<table stuck="head foot first last" unstackable celled aria-label="Jobs">
+						<row header>
+							<cell>Name</cell>
+							<cell>Age</cell>
+							<cell>Job</cell>
+							<cell>Job</cell>
+							<cell>Job</cell>
+							<cell>Job</cell>
+							<cell>Job</cell>
+							<cell>Job</cell>
+							<cell>Job</cell>
+							<cell>Job</cell>
+							<cell>Job</cell>
+							<cell>Job</cell>
+							<cell>Summary</cell>
+						</row>
+						<row>
+							<cell>James</cell>
+							<cell>24</cell>
+							<cell>Engineer</cell>
+							<cell>Engineer</cell>
+							<cell>Engineer</cell>
+							<cell>Engineer</cell>
+							<cell>Engineer</cell>
+							<cell>Engineer</cell>
+							<cell>Engineer</cell>
+							<cell>Engineer</cell>
+							<cell>Engineer</cell>
+							<cell>Engineer</cell>
+							<cell>Accepted</cell>
+						</row>
+						<row>
+							<cell>Jill</cell>
+							<cell>26</cell>
+							<cell>Engineer</cell>
+							<cell>Engineer</cell>
+							<cell>Engineer</cell>
+							<cell>Engineer</cell>
+							<cell>Engineer</cell>
+							<cell>Engineer</cell>
+							<cell>Engineer</cell>
+							<cell>Engineer</cell>
+							<cell>Engineer</cell>
+							<cell>Engineer</cell>
+							<cell>Accepted</cell>
+						</row>
+						<row>
+							<cell>Elyse</cell>
+							<cell>24</cell>
+							<cell>Designer</cell>
+							<cell>Engineer</cell>
+							<cell>Engineer</cell>
+							<cell>Engineer</cell>
+							<cell>Engineer</cell>
+							<cell>Engineer</cell>
+							<cell>Engineer</cell>
+							<cell>Engineer</cell>
+							<cell>Engineer</cell>
+							<cell>Engineer</cell>
+							<cell>Pending</cell>
+						</row>
+						<row>
+							<cell>Daphne</cell>
+							<cell>24</cell>
+							<cell>Engineer</cell>
+							<cell>Engineer</cell>
+							<cell>Engineer</cell>
+							<cell>Engineer</cell>
+							<cell>Engineer</cell>
+							<cell>Engineer</cell>
+							<cell>Engineer</cell>
+							<cell>Engineer</cell>
+							<cell>Engineer</cell>
+							<cell>Engineer</cell>
+							<cell>Accepted</cell>
+						</row>
+						<row>
+							<cell>Zoe</cell>
+							<cell>26</cell>
+							<cell>Engineer</cell>
+							<cell>Engineer</cell>
+							<cell>Engineer</cell>
+							<cell>Engineer</cell>
+							<cell>Engineer</cell>
+							<cell>Engineer</cell>
+							<cell>Engineer</cell>
+							<cell>Engineer</cell>
+							<cell>Engineer</cell>
+							<cell>Engineer</cell>
+							<cell>Accepted</cell>
+						</row>
+						<row>
+							<cell>Kirk</cell>
+							<cell>24</cell>
+							<cell>Designer</cell>
+							<cell>Engineer</cell>
+							<cell>Engineer</cell>
+							<cell>Engineer</cell>
+							<cell>Engineer</cell>
+							<cell>Engineer</cell>
+							<cell>Engineer</cell>
+							<cell>Engineer</cell>
+							<cell>Engineer</cell>
+							<cell>Engineer</cell>
+							<cell>Pending</cell>
+						</row>
+						<row footer>
+							<cell>Names:6</cell>
+							<cell>av.25</cell>
+							<cell>Jobs : 2</cell>
+							<cell>Jobs : 2</cell>
+							<cell>Jobs : 2</cell>
+							<cell>Jobs : 2</cell>
+							<cell>Jobs : 2</cell>
+							<cell>Jobs : 2</cell>
+							<cell>Jobs : 2</cell>
+							<cell>Jobs : 2</cell>
+							<cell>Jobs : 2</cell>
+							<cell>Jobs : 2</cell>
+							<cell>2 Pending</cell>
+						</row>
+					</table>
+				</container>
+				<message slot="description" state="info" size="small">A stuck table possibly needs to be wrapped into an overflowing container like a <link link="/components/ui/ui-container.html">scrolling container</link> or <link link="/components/ui/ui-segment.html">scrolling segment</link>. If you don't want an extra wrapper, use <text code>overflowing</text> on the table; this only works if the table's columns exceed the available width.</message>
 			</example>
 		</>
 	</>

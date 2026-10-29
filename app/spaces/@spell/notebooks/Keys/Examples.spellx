@@ -26,34 +26,26 @@
 	-->
 	<section label="Types">
 		<section label="Keys" sticky="stack" collapsible dividing>
-			<example description="`shortcut`, the keys joined by `+`.  `mod` is ⌘ on a Mac and Ctrl elsewhere:  this page shows the keys of the keyboard you're reading it on.">
-				<html>
-					<p>Save with <ui-keys shortcut="mod+S"></ui-keys>, undo with <ui-keys shortcut="mod+Z"></ui-keys>.</p>
-				</html>
+			<example "Keys" description="`shortcut`, the keys joined by `+`.  `mod` is ⌘ on a Mac and Ctrl elsewhere:  this page shows the keys of the keyboard you're reading it on.">
+				<text paragraph>Save with <keys shortcut="mod+S"/>, undo with <keys shortcut="mod+Z"/>.</text>
 			</example>
 		</>
 
 		<section label="On a Mac, and elsewhere" sticky="stack" collapsible dividing>
-			<example description="`platform=\"apple\"` or `\"other\"` draws one keyboard's keys whatever the reader has.">
-				<html>
-					<p><ui-keys shortcut="shift+mod+P" platform="apple"></ui-keys> on a Mac, <ui-keys shortcut="shift+mod+P" platform="other"></ui-keys> elsewhere.</p>
-				</html>
+			<example "On a Mac, and elsewhere" description="`platform=\"apple\"` or `\"other\"` draws one keyboard's keys whatever the reader has.">
+				<text paragraph><keys shortcut="shift+mod+P" platform="apple"/> on a Mac, <keys shortcut="shift+mod+P" platform="other"/> elsewhere.</text>
 			</example>
 		</>
 
 		<section label="Two shortcuts" sticky="stack" collapsible dividing>
-			<example description="Two shortcuts, a space apart, draw both.">
-				<html>
-					<p>Redo with <ui-keys shortcut="shift+mod+Z mod+Y"></ui-keys>.</p>
-				</html>
+			<example "Two shortcuts" description="Two shortcuts, a space apart, draw both.">
+				<text paragraph>Redo with <keys shortcut="shift+mod+Z mod+Y"/>.</text>
 			</example>
 		</>
 
 		<section label="Named keys" sticky="stack" collapsible dividing>
-			<example description="Arrows, Enter, Escape, Tab, Backspace, Delete and Space have caps of their own.">
-				<html>
-					<p><ui-keys shortcut="up"></ui-keys> <ui-keys shortcut="down"></ui-keys> to move, <ui-keys shortcut="enter"></ui-keys> to open, <ui-keys shortcut="escape"></ui-keys> to close.</p>
-				</html>
+			<example "Named keys" description="Arrows, Enter, Escape, Tab, Backspace, Delete and Space have caps of their own.">
+				<text paragraph><keys shortcut="up"/> <keys shortcut="down"/> to move, <keys shortcut="enter"/> to open, <keys shortcut="escape"/> to close.</text>
 			</example>
 		</>
 	</>

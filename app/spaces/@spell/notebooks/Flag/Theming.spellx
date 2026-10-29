@@ -26,7 +26,7 @@
 		<markdown>Edit a value below to try it.</>
 		<html>
 			<ui-docs-tokens family="ui-flag" playground>
-				<p>
+				<ui-text paragraph>
 					<ui-flag country="fr"></>
 					<ui-flag country="us"></>
 					<ui-flag country="gb"></>

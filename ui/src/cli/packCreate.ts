@@ -304,7 +304,7 @@ function mergePackageJson(root: string, file: string, template: string, report: 
 const MERGED_KEYS = ["scripts", "devDependencies", "spellPack"]
 
 /**
- * The pack repo's `.yarnrc.yml`, at `dir`:  the kit's (`root`'s), without `yarnPath`, as every child repo's is (the
+ * The pack repo's `.yarnrc.yml`, at `dir`:  the kit's (`root`'s), without `yarnPath`, as every folder's is (the
  * kit's AGENTS.md, "The kit").  Skipped when it's there, or the kit has none.
  */
 function writeYarnrc(root: string, dir: string, report: PackScaffoldReport) {

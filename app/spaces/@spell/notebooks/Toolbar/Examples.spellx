@@ -27,7 +27,7 @@
 	-->
 	<section label="Types">
 		<section label="Toolbar" sticky="stack" collapsible dividing>
-			<example description="A menu whose items don't fit scrolls sideways:  `‹` and `›` show at its ends while there's more that way.">
+			<example "Toolbar" description="A menu whose items don't fit scrolls sideways:  `‹` and `›` show at its ends while there's more that way.">
 				<toolbar appearance="secondary" aria-label="Sections" style="max-width: 360px">
 					<item link="#types" selected>Types</item>
 					<item link="#groups">Groups</item>
@@ -40,7 +40,7 @@
 		</>
 
 		<section label="Segmented" sticky="stack" collapsible dividing>
-			<example description="The segmented appearance:  a segmented control that scrolls;  its chosen thumb slides as the choice moves.">
+			<example "Segmented" description="The segmented appearance:  a segmented control that scrolls;  its chosen thumb slides as the choice moves.">
 				<toolbar appearance="segmented" aria-label="Views" style="max-width: 320px">
 					<item selected>Examples</item>
 					<item>Usage</item>
@@ -53,7 +53,7 @@
 		</>
 
 		<section label="Everything fits" sticky="stack" collapsible dividing>
-			<example description="When every item fits, no buttons show:  it's a plain menu.">
+			<example "Everything fits" description="When every item fits, no buttons show:  it's a plain menu.">
 				<toolbar appearance="secondary" aria-label="Short">
 					<item link="#one" selected>One</item>
 					<item link="#two">Two</item>
@@ -63,35 +63,31 @@
 		</>
 
 		<section label="Top bar" sticky="stack" collapsible dividing>
-			<example description="A bar's slots:  `icon` and `title` at the start, `center` taking the room left, `right` at the end.  A slot with nothing in it takes no room.">
-				<html>
-					<ui-toolbar appearance="secondary" aria-label="App">
-						<ui-button slot="icon" icon="bars" aria-label="Menu" title="Menu" appearance="basic circular"></ui-button>
-						<b slot="title">Spell UI</b>
-						<ui-item link="#guides" selected>Guides</ui-item>
-						<ui-item link="#components">Components</ui-item>
-						<ui-item link="#themes">Themes</ui-item>
-						<ui-button slot="right" icon="search" aria-label="Search" title="Search" appearance="basic circular"></ui-button>
-					</ui-toolbar>
-				</html>
+			<example "Top bar" description="A bar's slots:  `icon` and `title` at the start, `center` taking the room left, `right` at the end.  A slot with nothing in it takes no room.">
+				<toolbar appearance="secondary" aria-label="App">
+					<button slot="icon" icon="bars" aria-label="Menu" title="Menu" appearance="basic circular"/>
+					<text slot="title" bold>Spell UI</text>
+					<item link="#guides" selected>Guides</item>
+					<item link="#components">Components</item>
+					<item link="#themes">Themes</item>
+					<button slot="right" icon="search" aria-label="Search" title="Search" appearance="basic circular"/>
+				</toolbar>
 			</example>
 		</>
 	</>
 
 	<section label="Fitting titles">
 		<section label="Shrinkable" sticky="stack" collapsible dividing>
-			<example description="`shrinkable` fits the titles instead of scrolling:  drag the box's right edge narrower.  Whole, then the longest cut with `…`, then icons only, then one `…` button whose menu holds every item;  no `‹` / `›`.  The bell, an item with no words, stays at every width.">
-				<html>
-					<div style="resize: horizontal; overflow: hidden; box-sizing: border-box; width: 600px; max-width: 100%; min-width: 60px; padding: 4px; border: 1px dashed var(--ui-border-color)">
-						<ui-toolbar shrinkable appearance="secondary" label="Sections">
-							<ui-item link="#types" icon="shapes" selected>Types</ui-item>
-							<ui-item link="#content" icon="font">Content</ui-item>
-							<ui-item link="#variations" icon="sliders">Variations</ui-item>
-							<ui-item link="#group-variations">Group variations</ui-item>
-							<ui-item link="#notes" icon="bell" label="Notes"></ui-item>
-						</ui-toolbar>
-					</div>
-				</html>
+			<example "Shrinkable" description="`shrinkable` fits the titles instead of scrolling:  drag the box's right edge narrower.  Whole, then the longest cut with `…`, then icons only, then one `…` button whose menu holds every item;  no `‹` / `›`.  The bell, an item with no words, stays at every width.">
+				<stack style="resize: horizontal; overflow: hidden; box-sizing: border-box; width: 600px; max-width: 100%; min-width: 60px; padding: 4px; border: 1px dashed var(--ui-border-color)">
+					<toolbar shrinkable appearance="secondary" label="Sections">
+						<item link="#types" icon="shapes" selected>Types</item>
+						<item link="#content" icon="font">Content</item>
+						<item link="#variations" icon="sliders">Variations</item>
+						<item link="#group-variations">Group variations</item>
+						<item link="#notes" icon="bell" label="Notes"/>
+					</toolbar>
+				</stack>
 			</example>
 		</>
 	</>

@@ -99,6 +99,10 @@
   :host(:last-child) > p.ui.text {
     margin-block-end: 0;
   }
+  /* Its text read as a paragraph's (`:state(lines)`):  each blank line it held is a line break (`\n`). */
+  :host(:state(lines)) > p.ui.text {
+    white-space: pre-line;
+  }
 
   /* A link in running text (`link`), or in a paragraph:  the page's link colour, unless it has a hue;  underlined. */
   a.ui.text,

@@ -156,10 +156,10 @@ spell lint --all @spell/examples
 
 </details>
 
-## Each repo brings its own commands
+## Each folder brings its own commands
 
-The base is the kit's [src/cli/](src/cli/):  it reads the arguments, prints the help, and finds the commands.
-Each repo hands it a list, named in the repo's `package.json`:
+The base is [src/cli/](src/cli/):  it reads the arguments, prints the help, and finds the commands.
+Each folder hands it a list, named in the folder's own `package.json`:
 
 ```json
 "spell": { "commands": "./src/cli/commands.ts" }
@@ -179,13 +179,14 @@ flowchart BT
   class base,lang,ui,app repo
 ```
 
-_Each repo hands its commands to the kit's base.
-`spell-epic` adds none:  its tools are `epic`'s._
+_Each folder hands its commands to the base.
+The epic folder adds none:  its tools are `epic`'s._
 
-- The base looks in the kit `spell` runs from, then in each child repo [repos.json5](repos.json5) lists, lowest first
-  (`spellRepos()`):  at its folder in the kit (`parser/`), else installed as a package (`node_modules/spell-parser/`).
-  Only a `package.json` with a `"spell"` entry counts;  a repo that isn't cloned is simply not there.
-- `spell help` lists them in that order, one heading per repo:  `spell:`, `spell-parser:`, `spell-ui:`, `spell-app:`.
+- The base looks at the root's own `package.json`, then each folder's, lowest first (`spellRepos()`):
+  `parser/`, `ui/`, `epic/`, `app/`, the root's `workspaces`, the same list in a clone or installed from npm.
+  Only a `package.json` with a `"spell"` entry counts.
+- `spell help` lists them in that order, one heading per folder, by its folder's name:
+  `spell:` (the root's own), `parser:`, `ui:`, `app:`.
 - Names stay plain:  `spell compile`, `spell icon`.
   A word two repos both add goes under EACH one's short name, the repo's name less `spell-`,
   and the bare word, hidden from the help, only says where they went.
@@ -204,14 +205,15 @@ _Each repo hands its commands to the kit's base.
   - it runs the steps after a compile or a lint:  the property editor's pages
   - it opens a running program in your browser, for `spell run`
 
-**The unfinished part:  `spell-parser`'s commands need `spell-app` cloned.**
-Without it, each one stops with a message to clone it, and exits 2:
-`the language commands find projects the app's way for now ... Clone spell-app:  yarn clone spell-app`.
-Moving their work down into `spell-parser` is still to come ([below](#-coming)).
+**The unfinished part:  `spell-parser`'s commands need the app folder.**
+In a clone it's always there.
+Without it (an install that left it out), each one stops and exits 2:
+`the language commands find projects the app's way for now ... They come with the app folder, app/ ...`.
+Moving their work down into the parser is still to come ([below](#-coming)).
 
 ## The kit
 
-The commands every checkout has, whatever else is cloned:  the page server, its bundles, the house checks.
+The commands of the shared code under `src/`:  the page server, its bundles, the house checks.
 They load no Spell, so they answer in a fraction of a second.
 `spell pony` exists to prove exactly that.
 If a pony in a wizard hat tells you "Neigh-tive custom elements, at your service." 0.13 s later, `spell` works.
@@ -412,7 +414,7 @@ After them, 9 places still do;  46 files use the shared `Git` instead.
 The language's thirteen commands:  build a program, run it, test it, see what Spell made of what you wrote,
 and check its language packs.
 They're `spell-parser`'s, but their work is `spell-app`'s for now, through its `language` hook
-([above](#each-repo-brings-its-own-commands));  the language packs' two are the exception, `spell-parser`'s own.
+([above](#each-folder-brings-its-own-commands));  the language packs' two are the exception, `spell-parser`'s own.
 
 ### Writing and building
 

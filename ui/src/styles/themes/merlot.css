@@ -19,6 +19,10 @@
       "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji";
     --ui-font-family-heading: var(--ui-font-family);
     --ui-font-family-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+    --ui-font-family-serif: Georgia, Palatino, "Palatino Linotype", "Book Antiqua", P052, "URW Palladio L", serif;
+    --ui-font-family-sans: var(--ui-font-family);
+    --ui-font-family-typewriter: "American Typewriter", "Courier Prime", "Courier New", Courier, monospace;
+    --ui-font-family-subhead: var(--ui-font-family-heading);
     --ui-radius-s: 6px;
     --ui-radius-m: 8px;
     --ui-radius-l: 12px;

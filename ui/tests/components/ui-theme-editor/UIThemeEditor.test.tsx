@@ -9,13 +9,14 @@ import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import { SavedTheme, type DOMThemeEditorElement, type UIThemeEditor } from "spell/ui/components/ui-theme-editor"
 import type { PreviewPage } from "spell/ui/components/ui-theme-editor/UIThemeEditor.types"
 
-/** What the editor keeps in the browser:  the theme being made, the tree's folds, ⇄. */
+/** What the editor keeps in the browser:  the theme being made, the tree's folds, ⇄, the pages turned off. */
 const KEPT_KEYS = [
   "spell-ui:theme-draft",
   "spell-ui:theme-editor-folds",
   "spell-ui:theme-editor-swapped",
   "spell-ui:theme-editor-schemes",
-  "spell-ui:theme-editor-head"
+  "spell-ui:theme-editor-head",
+  "spell-ui:theme-editor-hidden-pages"
 ]
 
 /** The editor in the fixture, drawn, and its component. */
@@ -215,20 +216,6 @@ describe("<ui-theme-editor> Basics", () => {
 ////////////////
 
 describe("<ui-theme-editor> kept and copied", () => {
-  it("Use this theme keeps it;  `SavedTheme.restore()` puts it back on a page", async () => {
-    const host = await editor(`<ui-theme-editor value='{"primary": "green"}'></ui-theme-editor>`)
-    await applied(host)
-    inner(host, ".actions ui-button[color=primary]").click()
-    await ElementFixture.settle()
-    expect(SavedTheme.choices?.primary).toBe("green")
-    expect(host.matches(":state(saved)")).toBe(true)
-    host.remove()
-    await new Promise((resolve) => setTimeout(resolve, 50))
-    expect(token("--ui-primary")).not.toBe(token("--ui-green"))
-    expect(await SavedTheme.restore()).toBe(true)
-    expect(token("--ui-primary")).toBe(token("--ui-green"))
-  })
-
   it("a theme kept on a base under its old name opens on its new one:  Studio as Merlot", async () => {
     SavedTheme.save({ name: "Kept", base: "studio", primary: "teal" }, "/* kept */")
     expect(await SavedTheme.restore()).toBe(true)
@@ -411,6 +398,73 @@ describe("<ui-theme-editor> with pages", () => {
     component.filter = "segmented"
     await ElementFixture.settle()
     expect(root.querySelectorAll(".tokens ui-section[open='false']")).toHaveLength(0)
+  })
+
+  it("the bar:  Light / Dark / Both first, ⇄ beside them only under Both, then the pages;  every control has a tooltip", async () => {
+    const { host, component } = await withPages()
+    const tools = inner(host, ".bar .tools")
+    expect(tools.firstElementChild?.className).toBe("schemes-group")
+    expect(tools.children[1]?.className).toBe("page-toggles")
+    expect(inner(host, ".bar ui-theme-menu")).toBeNull()
+    expect(inner(host, ".schemes-group ui-button")).not.toBeNull()
+    component.showSchemes("light")
+    await ElementFixture.settle()
+    expect(inner(host, ".schemes-group ui-button")).toBeNull()
+    component.showSchemes("both")
+    await ElementFixture.settle()
+    const untitled = [
+      ...host.shadowRoot!.querySelectorAll(".bar ui-button, .bar ui-item, .side ui-button, .side button")
+    ]
+      .filter((control) => !control.getAttribute("title"))
+      .map((control) => control.outerHTML.slice(0, 80))
+    expect(untitled).toEqual([])
+  })
+
+  it("each page toggles on and off, kept;  the last one on stays on;  an odd last page takes the row", async () => {
+    const { host, component } = await withPages()
+    const figure = (index: number) => host.shadowRoot!.querySelectorAll<HTMLElement>("figure.page")[index]!
+    expect(figure(2).classList.contains("wide")).toBe(true)
+    inner(host, '.page-toggles ui-button[value="other"]').click()
+    await ElementFixture.settle()
+    expect(figure(1).hidden).toBe(true)
+    expect(component.shownPageIds).toEqual(["page", "app"])
+    expect(figure(2).classList.contains("wide")).toBe(false)
+    expect(JSON.parse(localStorage.getItem("spell-ui:theme-editor-hidden-pages")!)).toEqual(["other"])
+    component.togglePage("page")
+    component.togglePage("app")
+    expect(component.shownPageIds).toEqual(["app"])
+    expect(component.isDarkFirst("app")).toBe(false)
+    component.togglePage("other")
+    expect(component.shownPageIds).toEqual(["other", "app"])
+  })
+
+  it("a page's ↻ reloads its own frames, and no other page's", async () => {
+    const { host } = await withPages()
+    const frames = () => [...host.shadowRoot!.querySelectorAll<HTMLIFrameElement>("iframe")]
+    const marked = (frame: HTMLIFrameElement) => (frame.contentWindow as Window & { marked?: boolean }).marked
+    // one frame at a time, each dressed in turn:  a page with no runtime takes its 5s
+    await vi.waitFor(() => expect(frames()).toHaveLength(4), { timeout: 40000 })
+    await vi.waitFor(() =>
+      expect(frames().every((frame) => frame.contentDocument?.readyState === "complete")).toBe(true)
+    )
+    const before = frames()
+    for (const frame of before) (frame.contentWindow as Window & { marked?: boolean }).marked = true
+    const reload = inner(host, "figure.page .page-tool")
+    expect(reload.getAttribute("title")).toBe("Reload this page")
+    reload.click()
+    await vi.waitFor(() => expect(before.slice(0, 2).every((frame) => !marked(frame))).toBe(true), { timeout: 10000 })
+    expect(frames()).toEqual(before)
+    expect(before.slice(2).every((frame) => marked(frame))).toBe(true)
+  }, 60000)
+
+  it("a page's ↗ opens it in the theme it builds on and the scheme of its first frame on screen", async () => {
+    const { host, component } = await withPages()
+    component.choose({ base: "glass" })
+    await ElementFixture.settle()
+    const links = [...host.shadowRoot!.querySelectorAll<HTMLAnchorElement>("figure.page a.page-tool")]
+    const query = (link: HTMLAnchorElement) => Object.fromEntries(new URL(link.href).searchParams)
+    expect(query(links[0]!)).toEqual({ theme: "glass", scheme: "light" })
+    expect(query(links[1]!)).toEqual({ theme: "glass", scheme: "dark" })
   })
 
   it("⇄ swaps every pair's sides, kept", async () => {

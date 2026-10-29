@@ -36,9 +36,9 @@
 		<markdown>Edit a value below to try it.</>
 		<html>
 			<ui-docs-tokens family="ui-divider" playground>
-				<p>Doggie treats are good for all times of the year. Proven to be eaten by 99.9% of all dogs worldwide.</>
+				<ui-text paragraph>Doggie treats are good for all times of the year. Proven to be eaten by 99.9% of all dogs worldwide.</>
 				<ui-divider></>
-				<p>Doggie treats are good for all times of the year. Proven to be eaten by 99.9% of all dogs worldwide.</>
+				<ui-text paragraph>Doggie treats are good for all times of the year. Proven to be eaten by 99.9% of all dogs worldwide.</>
 			</>
 		</>
 	</>

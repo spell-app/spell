@@ -19,7 +19,7 @@
 	-->
 	<section label="Types">
 		<section label="Tree diagram" sticky="stack" collapsible dividing>
-			<example description="A tree diagram draws a tree top-down, from plain data:  here spell's parse tree for the first line of FizzBuzz, `if number / 15 is an integer`.">
+			<example "Tree diagram" description="A tree diagram draws a tree top-down, from plain data:  here spell's parse tree for the first line of FizzBuzz, `if number / 15 is an integer`.">
 				<html>
 					<ui-tree-diagram>
 						<script type="application/json">
@@ -61,7 +61,7 @@
 		</>
 
 		<section label="Labels only" sticky="stack" collapsible dividing>
-			<example description="Only `label` is needed:  each node is a box, joined to its children by lines.">
+			<example "Labels only" description="Only `label` is needed:  each node is a box, joined to its children by lines.">
 				<html>
 					<ui-tree-diagram>
 						<script type="application/json">{ "label": "Add", "children": [{ "label": "Number 1" }, { "label": "Number 2" }] }</script>
@@ -73,7 +73,7 @@
 
 	<section label="Content">
 		<section label="Detail" sticky="stack" collapsible dividing>
-			<example description="A node's `detail` is a second, smaller, muted line under its label, e.g. a datatype.  Every box in a row is as tall as the tallest.">
+			<example "Detail" description="A node's `detail` is a second, smaller, muted line under its label, e.g. a datatype.  Every box in a row is as tall as the tallest.">
 				<html>
 					<ui-tree-diagram>
 						<script type="application/json">
@@ -92,7 +92,7 @@
 		</>
 
 		<section label="Slot labels" sticky="stack" collapsible dividing>
-			<example description="A node's `slot` is written on the line from its parent, at its middle:  which part of the parent it fills.">
+			<example "Slot labels" description="A node's `slot` is written on the line from its parent, at its middle:  which part of the parent it fills.">
 				<html>
 					<ui-tree-diagram>
 						<script type="application/json">
@@ -111,7 +111,7 @@
 		</>
 
 		<section label="Hover text" sticky="stack" collapsible dividing>
-			<example description="A node's `title` shows when the pointer rests on its box, e.g. the source it came from.">
+			<example "Hover text" description="A node's `title` shows when the pointer rests on its box, e.g. the source it came from.">
 				<html>
 					<ui-tree-diagram>
 						<script type="application/json">
@@ -132,7 +132,7 @@
 
 	<section label="Variations">
 		<section label="Wide trees" sticky="stack" collapsible dividing>
-			<example description="A tree shrinks to fit its column, down to three quarters of its size;  a wider one scrolls sideways (on a phone, this one does).">
+			<example "Wide trees" description="A tree shrinks to fit its column, down to three quarters of its size;  a wider one scrolls sideways (on a phone, this one does).">
 				<html>
 					<ui-tree-diagram>
 						<script type="application/json">

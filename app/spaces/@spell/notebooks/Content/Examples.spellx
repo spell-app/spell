@@ -18,7 +18,7 @@
 	-->
 	<section label="Owners">
 		<section label="Card" sticky="stack" collapsible dividing>
-			<example description="A card's content blocks, divided from each other.">
+			<example "Card" description="A card's content blocks, divided from each other.">
 				<card>
 					<content>
 						<header>Elliot Fu</header>
@@ -33,38 +33,34 @@
 		</>
 
 		<section label="Item" sticky="stack" collapsible dividing>
-			<example description="An item's content is the column beside its image.">
-				<html>
-					<ui-items>
-						<ui-item image="../images/wireframe/image.png">
-							<ui-content>
-								<ui-header link="#item">Arrowhead Valley Camp</ui-header>
-								<ui-meta>
-									<span>Summer camp</span>
-								</ui-meta>
-								<ui-description>A week of hiking, canoeing and campfires.</ui-description>
-							</ui-content>
-						</ui-item>
-					</ui-items>
-				</html>
+			<example "Item" description="An item's content is the column beside its image.">
+				<items>
+					<item image="../images/wireframe/image.png">
+						<content>
+							<header link="#item">Arrowhead Valley Camp</header>
+							<meta>
+								<text>Summer camp</text>
+							</meta>
+							<description>A week of hiking, canoeing and campfires.</description>
+						</content>
+					</item>
+				</items>
 			</example>
 		</>
 
 		<section label="Message" sticky="stack" collapsible dividing>
-			<example description="A message's content is the text beside its icon.">
-				<html>
-					<ui-message icon="inbox">
-						<ui-content>
-							<ui-header>Have you heard about our mailing list?</ui-header>
-							<p>Get the best news in your e-mail every day.</p>
-						</ui-content>
-					</ui-message>
-				</html>
+			<example "Message" description="A message's content is the text beside its icon.">
+				<message icon="inbox">
+					<content>
+						<header>Have you heard about our mailing list?</header>
+						<text paragraph>Get the best news in your e-mail every day.</text>
+					</content>
+				</message>
 			</example>
 		</>
 
 		<section label="List" sticky="stack" collapsible dividing>
-			<example description="A list item's content sits beside its icon.">
+			<example "List" description="A list item's content sits beside its icon.">
 				<list spacing="lg">
 					<item icon="github">
 						<content>
@@ -77,7 +73,7 @@
 		</>
 
 		<section label="Step" sticky="stack" collapsible dividing>
-			<example description="A step's content sits beside its icon.">
+			<example "Step" description="A step's content sits beside its icon.">
 				<steps>
 					<step icon="truck">
 						<content>
@@ -90,47 +86,43 @@
 		</>
 
 		<section label="Accordion" sticky="stack" collapsible dividing>
-			<example description="An accordion's panels:  each `<ui-content>` shows while the title before it is open.">
-				<html>
-					<ui-accordion appearance="styled" open="0">
-						<ui-title>What is a dog?</ui-title>
-						<ui-content>
-							<p>A dog is a type of domesticated animal.</p>
-						</ui-content>
-						<ui-title>What kinds of dogs are there?</ui-title>
-						<ui-content>
-							<p>There are many breeds of dogs.</p>
-						</ui-content>
-					</ui-accordion>
-				</html>
+			<example "Accordion" description="An accordion's panels:  each `<ui-content>` shows while the title before it is open.">
+				<accordion appearance="styled" open="0">
+					<title>What is a dog?</title>
+					<content>
+						<text paragraph>A dog is a type of domesticated animal.</text>
+					</content>
+					<title>What kinds of dogs are there?</title>
+					<content>
+						<text paragraph>There are many breeds of dogs.</text>
+					</content>
+				</accordion>
 			</example>
 		</>
 
 		<section label="Modal" sticky="stack" collapsible dividing>
-			<example description="A modal's body:  `image` puts an image beside the description.">
+			<example "Modal" description="A modal's body:  `image` puts an image beside the description.">
 				<button commandfor="content-modal" command="--show">Show</button>
-				<html>
-					<ui-modal id="content-modal" closable>
-						<ui-header>Profile Picture</ui-header>
-						<ui-content image>
-							<ui-image size="medium" src="/components/ui/images/avatar/large/chris.jpg" alt=""></ui-image>
-							<ui-description>
-								<ui-header>We've auto-chosen a profile image for you.</ui-header>
-								<p>Is it okay to use this photo?</p>
-							</ui-description>
-						</ui-content>
-						<ui-actions>
-							<ui-button class="approve" color="primary">Use it</ui-button>
-						</ui-actions>
-					</ui-modal>
-				</html>
+				<modal id="content-modal" closable>
+					<header>Profile Picture</header>
+					<content image>
+						<image size="medium" src="/components/ui/images/avatar/large/chris.jpg" alt=""/>
+						<description>
+							<header>We've auto-chosen a profile image for you.</header>
+							<text paragraph>Is it okay to use this photo?</text>
+						</description>
+					</content>
+					<actions>
+						<button class="approve" color="primary">Use it</button>
+					</actions>
+				</modal>
 			</example>
 		</>
 	</>
 
 	<section label="Variations">
 		<section label="Text Alignment" sticky="stack" collapsible dividing>
-			<example description="In a card, `align` aligns one content block:  Fomantic's `center aligned content`.">
+			<example "Text Alignment" description="In a card, `align` aligns one content block:  Fomantic's `center aligned content`.">
 				<card>
 					<content align="center">
 						<header>Centered</header>
@@ -144,7 +136,7 @@
 		</>
 
 		<section label="Vertical Alignment" sticky collapsible dividing>
-			<example description="In an item, `vertical-align` lines the content up against the image beside it.">
+			<example "Vertical Alignment" description="In an item, `vertical-align` lines the content up against the image beside it.">
 				<items>
 					<item image="../images/wireframe/image.png">
 						<content vertical-align="middle">

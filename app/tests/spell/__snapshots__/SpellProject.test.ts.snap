@@ -148,8 +148,8 @@ export class Card extends TwoSidedView {
   } */
   draw() {
     return [
-      this.drawFront(),
-      this.drawBack()
+      h("slot", { name: "front" }, () => this.drawFront()),
+      h("slot", { name: "back" }, () => this.drawBack())
     ]
   }
 

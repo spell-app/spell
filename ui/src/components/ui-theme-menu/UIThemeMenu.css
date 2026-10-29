@@ -12,6 +12,7 @@
  *       - a `.divider`, then `.heading`
  *       - a `.menu` of `<button class="option [checked]" role="menuitemradio">` rows
  *         (`.check`, `.name`, `.description`), with `.header` / `.divider` rows
+ *       - a `.divider`, then `<a class="bench" part="bench">` (Theme bench), unless `bench="none"`
  *       - the `end` slot's rows, the page's own
  *   - `scheme`:  `<button class="scheme light|dark button" part="scheme">`,
  *     holding `.light.glyph` (sun) and `.dark.glyph` (moon), stacked;  the one matching the button's scheme shows.
@@ -177,7 +178,8 @@
     margin: 0.375em 0.5em;
     background: var(--ui-border-color);
   }
-  /* The `end` slot's rows, the page's own:  a theme's row each, the first under a divider. */
+  /* Theme bench, then the `end` slot's rows, the page's own:  a theme's row each, the first under a divider. */
+  .panel > .bench,
   .panel > slot::slotted(*) {
     /* a theme's row's columns:  its icon where a row's check is, its words where its name is */
     display: grid;
@@ -197,7 +199,7 @@
     cursor: pointer;
   }
   /* the divider above the first, as `.divider` draws one:  inset 0.5em, 0.375em from what's above and below */
-  .panel > slot::slotted(:first-child) {
+  .panel:not(:has(> .bench)) > slot::slotted(:first-child) {
     margin-block-start: 0.375em;
     padding-block-start: calc(0.5em + 0.375em);
     background-image: linear-gradient(var(--ui-border-color), var(--ui-border-color));
@@ -205,6 +207,14 @@
     background-size: calc(100% - 1em) 1px;
     background-repeat: no-repeat;
   }
+  .panel > .bench {
+    text-decoration: none;
+  }
+  .panel > .bench > ui-icon {
+    --ui-icon-width: 1.125em;
+    --ui-icon-distance: 0;
+  }
+  .panel > .bench:hover,
   .panel > slot::slotted(:hover) {
     background-color: var(--ui-surface-muted);
   }

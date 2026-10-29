@@ -41,7 +41,7 @@
 		</>
 
 		<section label="Adding a total value" sticky collapsible dividing>
-			<example description="`total` sets what `value` counts up to;  `bar-text=\"ratio\"` shows the count.">
+			<example "Adding a total value" description="`total` sets what `value` counts up to;  `bar-text=\"ratio\"` shows the count.">
 				<progress indicating value="1" total="20" bar-text="ratio" label="Adding Photos"/>
 			</example>
 		</>
@@ -64,7 +64,7 @@
 		</>
 
 		<section label="Templated label" sticky="stack" collapsible dividing>
-			<example description="`label=\"Adding {value} of {total} photos\"`, filled in as the value changes.">
+			<example "Templated label" description="`label=\"Adding {value} of {total} photos\"`, filled in as the value changes.">
 				<html>
 					<ui-progress indicating value="7" total="20" label="Adding {value} of {total} photos"></ui-progress>
 					<ui-progress value="12" total="20" label="{left} photos to go"></ui-progress>
@@ -73,13 +73,13 @@
 		</>
 
 		<section label="Translation" sticky="stack" collapsible dividing>
-			<example description="The label is yours, so write it in the page's language;  the bar texts (`45%`, `9 of 20`) are the vocabulary's `progressPercent` / `progressRatio` texts, which a translation replaces.">
+			<example "Translation" description="The label is yours, so write it in the page's language;  the bar texts (`45%`, `9 of 20`) are the vocabulary's `progressPercent` / `progressRatio` texts, which a translation replaces.">
 				<html>
 					<ui-progress value="15" total="20" label="{value} de {total}: carga de archivos"></ui-progress>
 				</html>
 			</example>
 		</>
-		<message size="small" class="site-not-ported"><html>Not ported: Fomantic's per-state label texts (text.active, text.success ...), and its automatic <code>label: 'ratio'</> switch. One <code>label</> template covers both:  swap it on <code>ui-completed</> when the finished bar should say something else.</></>
+		<message size="small" class="site-not-ported">Not ported: Fomantic's per-state label texts (text.active, text.success ...), and its automatic <text code>label: 'ratio'</> switch. One <text code>label</> template covers both:  swap it on <text code>ui-completed</> when the finished bar should say something else.</>
 	</>
 
 	<section label="Events">

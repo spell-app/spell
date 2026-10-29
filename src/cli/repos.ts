@@ -76,7 +76,7 @@ export async function hook<T>(name: string, repos = spellRepos()): Promise<T | u
 
 /**
  * What hook `name` loads (`hook()`), or a `CliError` saying `missing` when no installed repo has it:
- * e.g. "spell compile needs spell-app's projects for now:  yarn clone spell-app".
+ * e.g. "spell compile needs the app folder's projects for now".
  */
 export async function needHook<T>(name: string, missing: string): Promise<T> {
   const found = await hook<T>(name)

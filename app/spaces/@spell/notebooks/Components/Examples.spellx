@@ -26,7 +26,7 @@
 	-->
 	<section label="Types">
 		<section label="Components" sticky="stack" collapsible dividing>
-			<example description="A standard Components.">
+			<example "Components" description="A standard Components.">
 			</example>
 		</>
 	</>

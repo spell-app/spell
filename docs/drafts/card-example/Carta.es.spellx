@@ -1,0 +1,41 @@
+<encanto-vista "carta" arrastrable plantilla="vista reversible">
+	<descripción>
+		Una carta de la baraja.
+		En la página cada carta es su propio elemento, `<solitario-carta>`
+	</descripción>
+
+	<propiedad "rango" uno-de="as, 2 ... 10, jota, dama, rey" frase="es un (rango)"/>
+	<frase "es una figura">si su rango es jota, dama o rey</>
+
+	<propiedad "palo" uno-de="tréboles, diamantes, corazones o espadas" frase="es un (palo)"/>
+	<frase "es el (rango) de (palo)" />
+
+	<propiedad "color" uno-de="rojo, negro">
+		rojo si es diamantes o es corazones
+		negro de lo contrario
+	</propiedad>
+	<propiedad "símbolo">
+		"♣" si es tréboles
+		"♦" si es diamantes
+		"♥" si es corazones
+		"♠" de lo contrario
+	</propiedad>
+
+	<propiedad "dirección" uno-de="abajo, arriba" frase="está boca (dirección)" />
+	<acción "voltearla boca arriba">poner su dirección a arriba</acción>
+	<acción "voltearla boca abajo">poner su dirección a abajo</acción>
+	<acción "voltearla">
+		si está boca abajo: voltear eso boca arriba
+		de lo contrario voltear eso boca abajo
+	</acción>
+
+	<probar "propiedades de la carta">
+		obtener una nueva carta cuyo rango es dama, palo es espadas y dirección es abajo
+		su color debería ser negro
+		es una figura debería ser sí
+		es la dama de espadas debería ser sí
+		su dirección debería ser abajo
+		esperar a voltear eso
+		su dirección debería ser arriba
+	</probar>
+</encanto-vista>

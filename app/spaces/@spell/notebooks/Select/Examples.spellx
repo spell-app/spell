@@ -22,7 +22,7 @@
 	-->
 	<section label="Types">
 		<section label="Select" sticky="stack" collapsible dividing>
-			<example description="A select lets the user choose one option, in the closed look of a selection dropdown. Options are `<ui-item>`s, as in a dropdown; `placeholder` stands while nothing is chosen.">
+			<example "Select" description="A select lets the user choose one option, in the closed look of a selection dropdown. Options are `<ui-item>`s, as in a dropdown; `placeholder` stands while nothing is chosen.">
 				<select name="pet" placeholder="Pet">
 					<item value="0">Cat</item>
 					<item value="1">Dog</item>
@@ -34,7 +34,7 @@
 					<item value="7">Parrot</item>
 				</select>
 			</example>
-			<example description="Options can lead with an image (customizable select only).">
+			<example "Select" description="Options can lead with an image (customizable select only).">
 				<select fluid name="user" placeholder="Select Friend">
 					<item value="jenny" image="../images/avatar/small/jenny.jpg">Jenny Hess</item>
 					<item value="elliot" image="../images/avatar/small/elliot.jpg">Elliot Fu</item>
@@ -47,7 +47,7 @@
 		</>
 
 		<section label="Chosen value" sticky="stack" collapsible dividing>
-			<example description="`value` picks the starting option.">
+			<example "Chosen value" description="`value` picks the starting option.">
 				<select aria-label="Fruit" value="banana">
 					<item value="apple">Apple</item>
 					<item value="banana">Banana</item>
@@ -57,7 +57,7 @@
 		</>
 
 		<section label="Multiple Selection" sticky collapsible dividing>
-			<example description="A select can allow several choices: `multiple`, a native list box in every browser. `value` is a comma list.">
+			<example "Multiple Selection" description="A select can allow several choices: `multiple`, a native list box in every browser. `value` is a comma list.">
 				<select multiple name="skills" aria-label="Skills" value="angular,css">
 					<item value="angular">Angular</item>
 					<item value="css">CSS</item>
@@ -68,12 +68,12 @@
 				</select>
 			</example>
 		</>
-		<message size="small" class="site-not-ported"><html>Not ported here, on purpose: Search Selection, Clearable, labels for a multiple, user additions and every menu-only look (inline, button, pointing ...) -- a native <code>&lt;select&gt;</> can't; use <code>&lt;ui-dropdown&gt;</>.</></>
+		<message size="small" class="site-not-ported">Not ported here, on purpose: Search Selection, Clearable, labels for a multiple, user additions and every menu-only look (inline, button, pointing ...) -- a native <text code>&lt;select&gt;</> can't; use <text code>&lt;ui-dropdown&gt;</>.</>
 	</>
 
 	<section label="Content">
 		<section label="Groups and dividers" sticky collapsible dividing>
-			<example description="A `header` item starts a group of options (an `<optgroup>`);  a `divider` item draws a rule.">
+			<example "Groups and dividers" description="A `header` item starts a group of options (an `<optgroup>`);  a `divider` item draws a rule.">
 				<select placeholder="Choose food">
 					<item kind="header">Fruit</item>
 					<item value="apple">Apple</item>
@@ -87,7 +87,7 @@
 		</>
 
 		<section label="Flags, icons and descriptions" sticky collapsible dividing>
-			<example description="Options can carry a flag, an icon and a description. Browsers without the customizable select show the flag and description as text, and drop the icon.">
+			<example "Flags, icons and descriptions" description="Options can carry a flag, an icon and a description. Browsers without the customizable select show the flag and description as text, and drop the icon.">
 				<select placeholder="Select Country">
 					<item value="fr" flag="fr" description="EU">France</item>
 					<item value="gh" flag="gh" description="AU">Ghana</item>
@@ -99,13 +99,13 @@
 
 	<section label="States">
 		<section label="Error" sticky="stack" collapsible dividing>
-			<example description="An errored select can alert a user to a problem:  `state=\"error\"`.">
+			<example "Error" description="An errored select can alert a user to a problem:  `state=\"error\"`.">
 				<select state="error" placeholder="Gender">
 					<item value="male">Male</item>
 					<item value="female">Female</item>
 				</select>
 			</example>
-			<example description="The other form states tint the box too:  `info`, `success`, `warning`.">
+			<example "Error" description="The other form states tint the box too:  `info`, `success`, `warning`.">
 				<select state="info" aria-label="Info" value="a">
 					<item value="a">Info</item>
 				</select>
@@ -119,12 +119,12 @@
 		</>
 
 		<section label="Disabled" sticky="stack" collapsible dividing>
-			<example description="A disabled select does not allow user interaction, and isn't submitted.  A disabled item can't be chosen.">
+			<example "Disabled" description="A disabled select does not allow user interaction, and isn't submitted.  A disabled item can't be chosen.">
 				<select disabled placeholder="Gender">
 					<item value="male">Male</item>
 				</select>
 			</example>
-			<example>
+			<example "Disabled">
 				<select required placeholder="Size" name="size">
 					<item value="s">Small</item>
 					<item value="m" disabled>Medium (sold out)</item>
@@ -136,7 +136,7 @@
 
 	<section label="Variations">
 		<section label="Size" sticky="stack" collapsible dividing>
-			<example description="A select can have different sizes.">
+			<example "Size" description="A select can have different sizes.">
 				<select size="mini" name="gender" placeholder="Mini">
 					<item value="1">Male</item>
 					<item value="0">Female</item>
@@ -158,7 +158,7 @@
 					<item value="0">Female</item>
 				</select>
 			</example>
-			<example>
+			<example "Size">
 				<select size="big" name="gender" placeholder="Big">
 					<item value="1">Male</item>
 					<item value="0">Female</item>
@@ -175,7 +175,7 @@
 		</>
 
 		<section label="Inverted" sticky="stack" collapsible dividing>
-			<example description="A select can be inverted.">
+			<example "Inverted" description="A select can be inverted.">
 				<segment inverted>
 					<select inverted name="choices" placeholder="Select choice">
 						<item>Choice 1</item>
@@ -187,7 +187,7 @@
 		</>
 
 		<section label="Compact" sticky="stack" collapsible dividing>
-			<example description="A compact select has no minimum width:  it is as wide as its longest option.">
+			<example "Compact" description="A compact select has no minimum width:  it is as wide as its longest option.">
 				<select padding="compact" aria-label="Compact" value="a">
 					<item value="a">Or</item>
 					<item value="b">And</item>
@@ -196,7 +196,7 @@
 		</>
 
 		<section label="Fluid" sticky="stack" collapsible dividing>
-			<example description="A select can take the full width of its parent.">
+			<example "Fluid" description="A select can take the full width of its parent.">
 				<select fluid placeholder="Fills its container">
 					<item value="a">A</item>
 					<item value="b">B</item>
@@ -207,22 +207,17 @@
 
 	<section label="Examples">
 		<section label="Form" sticky="stack" collapsible dividing>
-			<example description="A select is a form control:  in a field, with a label.">
-				<html>
-					<ui-form>
-						<form>
-							<ui-field required>
-								<label for="select-form-gender">Gender</label>
-								<ui-select id="select-form-gender" required name="gender" placeholder="Gender">
-									<ui-item value="male">Male</ui-item>
-									<ui-item value="female">Female</ui-item>
-								</ui-select>
-							</ui-field>
-							<ui-button type="submit">Submit</ui-button>
-							<ui-button type="reset" appearance="basic">Reset</ui-button>
-						</form>
-					</ui-form>
-				</html>
+			<example "Form" description="A select is a form control:  in a field, with a label.">
+				<form>
+					<field label="Gender" required>
+						<select id="select-form-gender" required name="gender" placeholder="Gender">
+							<item value="male">Male</item>
+							<item value="female">Female</item>
+						</select>
+					</field>
+					<button type="submit">Submit</button>
+					<button type="reset" appearance="basic">Reset</button>
+				</form>
 			</example>
 		</>
 	</>

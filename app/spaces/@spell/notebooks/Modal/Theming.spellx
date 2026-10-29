@@ -55,8 +55,8 @@
 					<ui-header>Profile Picture</>
 					<ui-content>
 						<ui-description>
-							<p>We've found the following gravatar image associated with your e-mail address.</>
-							<p>Is it okay to use this photo?</>
+							<ui-text paragraph>We've found the following gravatar image associated with your e-mail address.</>
+							<ui-text paragraph>Is it okay to use this photo?</>
 						</>
 					</>
 					<ui-actions>

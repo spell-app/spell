@@ -1,0 +1,21 @@
+<!-- `<ui-space>`:  a line break between ratings, a gap in a line, one button left and one right. -->
+<div class="ui-stack">
+  <section>
+    <h4>Line break</h4>
+    <ui-rating value="3" max-rating="5"></ui-rating>
+    <ui-space></ui-space>
+    <ui-rating value="4" max-rating="5"></ui-rating>
+  </section>
+  <section>
+    <h4>Inline</h4>
+    <ui-label>Design</ui-label><ui-space inline width="lg"></ui-space><ui-label>Engineering</ui-label>
+  </section>
+  <section>
+    <h4>Fluid</h4>
+    <ui-stack direction="horizontal">
+      <ui-button>Back</ui-button>
+      <ui-space fluid></ui-space>
+      <ui-button color="primary">Next</ui-button>
+    </ui-stack>
+  </section>
+</div>

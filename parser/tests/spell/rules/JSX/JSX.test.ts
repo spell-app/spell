@@ -142,6 +142,12 @@ describe("a JSX text keeps its spaces, as JSX reads them", () => {
     const lines = [...GAME, "\treturn <p>", "\t\tMade  {its moves}  moves", "\t\tin   all", "\t</p>"]
     expect(drawOf(lines)).toContain(`return h("p", "Made  ", () => this.moves, "  moves in   all")`)
   })
+
+  test("is kept, as `\\n\\n`:  a paragraph's line break (`<text paragraph>`)", () => {
+    const lines = [...GAME, '\treturn <ui-text paragraph="">', "\t\tFirst line", "", "\t\tSecond line", "\t</ui-text>"]
+    expect(drawOf(lines)).toContain(`"First line\\n\\nSecond line"`)
+    expect(compiled(lines, SP.TARGETS["ts/solid"]!.writer)).toContain(`{"First line\\n\\nSecond line"}`)
+  })
 })
 
 /** `lines` as one file, compiled by `writer` (javascript by default). */

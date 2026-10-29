@@ -63,6 +63,8 @@ const MOTION_TESTS = [
   "components/ui-reveal/UIReveal.test.tsx",
   // the flips
   "components/ui-shape/UIShape.test.tsx",
+  // grows out of the picture, shrinks back, slides to the next, bounces
+  "components/ui-zoom/UIZoomMotion.test.tsx",
   // the animations themselves
   "components/ui-transition/UITransition.css.test.ts",
   "components/ui-transition/UITransition.test.tsx",

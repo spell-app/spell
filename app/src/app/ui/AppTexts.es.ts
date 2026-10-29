@@ -35,6 +35,19 @@ const APP_TEXTS_ES: AppTextPack = {
   editMode: "Editar",
   debugMode: "Depurar",
   showLineNumbers: "Mostrar los números de línea",
+  // los ajustes del panel de código, `<CodeSettingsPanel>` (épica `debut`)
+  codeSettings: "Ajustes…",
+  codeSettingsHeader: "Editor de código",
+  codeSettingsClose: "Cerrar los ajustes del editor de código",
+  codeHover: "Información al pasar el ratón",
+  codeHoverWithAlt: "Solo con ⌥ (Alt) pulsada",
+  codeHoverAlways: "Siempre",
+  codeHoverNever: "Nunca",
+  codeSuggest: "Sugerencias",
+  codeSuggestOnCtrlSpace: "Solo con Ctrl+Espacio",
+  codeSuggestAsYouType: "Mientras escribes",
+  codeSuggestDetails: "Detalles junto a las sugerencias",
+  codeParameterHints: "Pistas de los parámetros",
   // la página de un cuaderno, `<NotebookPage>` (épica `elemental-spell` P16)
   notebookPageCodeAs: "Ver el código como",
   notebookPageLock: "Bloquearlo:  mientras esté bloqueado no se guarda nada",
@@ -124,7 +137,7 @@ const APP_TEXTS_ES: AppTextPack = {
   inspectorEventsTip: "Elige una parte para ver sus eventos.",
   // the theme editor's page (`<ThemeEditorPage>`), and the palette menu's way there
   editTheme: "Editar el tema…",
-  "themePage.editor": "Editor",
+  "themePage.editor": "App",
   "themePage.epic": "Página de épica",
   "themePage.ui": "Spell UI",
   "themePage.notebook": "Cuaderno",

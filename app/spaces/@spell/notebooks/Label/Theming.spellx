@@ -42,7 +42,7 @@
 		<html>
 			<ui-docs-tokens family="ui-label" playground>
 				<ui-label icon="envelope">23</>
-				<p><kbd><ui-label>Ctrl</></> + <kbd><ui-label>Alt</></> + <kbd><ui-label>Del</></> <kbd><ui-label appearance="basic">W</></><kbd><ui-label appearance="basic">A</></><kbd><ui-label appearance="basic">S</></></>
+				<ui-text paragraph><kbd><ui-label>Ctrl</></> + <kbd><ui-label>Alt</></> + <kbd><ui-label>Del</></> <kbd><ui-label appearance="basic">W</></><kbd><ui-label appearance="basic">A</></><kbd><ui-label appearance="basic">S</></></>
 			</>
 		</>
 	</>

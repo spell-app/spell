@@ -261,7 +261,7 @@
         { name: "create_type", syntax: "(a|an) {type:quoted_type} is (a|an) {superType:type} {with_nested_statements}?" },
         { name: "draw_it", syntax: "to {alias:text} :? ({inline_expression}|{nested_expression})?" },
         { name: "draw_it", syntax: "to {phrase:draw_method} :? {statement_body}?" },
-        { name: "draw_it", syntax: "to draw its {part:member_words} :? {statement_body}?" }
+        { name: "draw_it", syntax: "to draw its {slot:member_words} :? {statement_body}?" }
       ]
     },
     {
@@ -273,7 +273,7 @@
         { name: "create_type", syntax: "(a|an) {type:quoted_type} is (a|an) {superType:type} {with_nested_statements}?" },
         { name: "draw_it", syntax: "to {alias:text} :? ({inline_expression}|{nested_expression})?" },
         { name: "draw_it", syntax: "to {phrase:draw_method} :? {statement_body}?" },
-        { name: "draw_it", syntax: "to draw its {part:member_words} :? {statement_body}?" }
+        { name: "draw_it", syntax: "to draw its {slot:member_words} :? {statement_body}?" }
       ]
     },
     {

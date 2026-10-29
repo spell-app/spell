@@ -1059,7 +1059,7 @@ A kind that says so is saved in a file of its own.
     and `(a|al)` before an argument, `mover la carta al montón`.
   - Its name says the short one (`contractedName()`):  either way of writing it makes one method.
   - ONE drawing per thing:  the front / back sides (`draw_side`) are gone (epic `spanish` P20).
-    Its PARTS are named drawings it places instead (below).
+    Its SLOTS are named drawings it places instead (below).
 - A one-line indented body (a `{nested_expression}`) parses in the statement's `nestedScope`.
   - e.g. `return` + markup, or `draw_it`'s
   - As an inline body does (`SpellStatement.parseNestedBlock()`).
@@ -1084,20 +1084,30 @@ Each tag of spellx, spell's tag-shaped form, has a twin line in code spell;  the
     the value lines as the getter's body, the bullets parsed after it in a `P.SubjectScope` of the type
     (`data.members`, compiled after the getter).  Any getter's body may have them.
   - Sentence style too (Q20):  `the color of a card is one of red, black:`.
-- PARTS (Q55, Q56):  a view's named drawings, which it places.
-  - `- it has parts "front" and "back"`:  [`has_parts`](rules/classes/HasParts.ts) =>
-    `static parts = ["front", "back"]`, and `P.TypeScope.declarePart()` (journaled;  `hasPart()` walks the chain).
-  - `- to draw its front:` / `to "draw its front":`:  `draw_it`'s part drawing => `drawFront()`, declaring the part too.
-    - Unquoted, `to draw its {part:member_words}`;  quoted, the `draw_its_part` word rule's lead (`draw its`,
+- SLOTS (Q55, Q56;  "parts" until P27):  a view's named drawings, which it places.
+  - `- it has slots "front" and "back"`:  [`has_slots`](rules/classes/HasSlots.ts) =>
+    `static slots = ["front", "back"]`, and `P.TypeScope.declareSlot()` (journaled;  `hasSlot()` walks the chain).
+    - Spanish:  `- tiene las ranuras "frente" y "dorso"`.
+    - The old word, `has parts` (`partes`), still reads:  an error over just the word, naming `slots`, whose
+      `data.replacement` `spell lint --fix` writes (the language's `retiredWords`, `SpellType.noteRetiredLiterals()`).
+  - `- to draw its front:` / `to "draw its front":`:  `draw_it`'s slot drawing => `drawFront()`, declaring the slot too.
+    - Unquoted, `to draw its {slot:member_words}`;  quoted, the `draw_its_slot` word rule's lead (`draw its`,
       `dibujar su`) then the name.
     - NOT a list's `draw its placeholder` (`draw_method`'s):  `DrawIt.readsAsDrawMethod()` steps aside, so the
       first-line pre-pass still makes it callable.
-  - `draw its front`:  [`draw_part`](rules/classes/DrawPart.ts), only in a drawing => `this.drawFront()`.
-    `Priority.specific`, over `draw_thing`;  a name that's the view's property, not a part, is left to `draw_thing`.
-  - A part's markup carries its name as a CSS part (J6):  `part="front"`, added to any it says (`DrawIt.withPart()`).
-- A DRAWN LINE (Q14):  in a drawing, a line of markup, or a part placed, IS the drawing.
+  - `draw its front`:  [`draw_slot`](rules/classes/DrawSlot.ts), only in a drawing =>
+    `<slot name="front">{this.drawFront()}</slot>`, the web's own slot holding the slot's drawing.
+    `Priority.specific`, over `draw_thing`;  a name that's the view's property, not a slot, is left to `draw_thing`.
+    - In the view's element (its shadow root), what the page puts in it, `slot="front"`, replaces the drawing for
+      that one element (P27);  unfilled, its own drawing shows, a sub-type's if it draws it again.
+  - FILLED from outside (P27):  `<card><text slot="front">Ace</text></card>`;  code spell's twin is the same markup,
+    `slot=` or spell's own `in=`.
+    - A spellx drawing's bare view, `<carta>`, names its children's slots as they compile (`SpellJSX.withSlotNames()`):
+      a Spanish two sided view's `slot="frente"` fills its `front`.
+  - A slot's markup carries its name as a CSS part (J6):  `part="front"`, added to any it says (`DrawIt.withPart()`).
+- A DRAWN LINE (Q14):  in a drawing, a line of markup, or a slot placed, IS the drawing.
   - [`drawn_markup`](rules/classes/DrawnMarkup.ts):  `{markup:jsxElement}`, `{markup:jsxFragment}` or
-    `{markup:draw_part}` => `return ...`, at `Priority.specific`.
+    `{markup:draw_slot}` => `return ...`, at `Priority.specific`.
   - Only in a drawing:  `DrawIt.drawingIn()` finds the nearest method, a `draw_it`'s, or one named `draw`.
     A loop's body counts as the drawing around it (`SpellStatement.loops`:  `for each`, `repeat`).
   - SEVERAL drawn lines (C28):  [`DrawnLines.gather()`](rules/classes/DrawnLines.ts),
@@ -1118,18 +1128,18 @@ Each tag of spellx, spell's tag-shaped form, has a twin line in code spell;  the
     - its declarations, every language's, into [builtInTemplates.generated.ts](builtInTemplates.generated.ts)
     - [builtInTemplateFiles.test.ts](../../tests/spell/node/builtInTemplateFiles.test.ts) fails while either is stale
   - Each language's root loads its declarations (`SP.loadBuiltInTemplates()`, from `Language.rootScope`):  the
-    type, its property, its phrases, its methods' rules, its parts -- as an import layer loads a project's.
+    type, its property, its phrases, its methods' rules, its slots -- as an import layer loads a project's.
     - Its datatype is still a type word (`two sided view`, `vista reversible`) and a class name
       (`P.BUILT_IN_CLASS_NAMES`), but NOT one of `P.BUILT_IN_TYPES`:  its type comes from its declarations.
     - Its rules go on the root's own clone of the language's parser.
   - So `a card is a two sided view` compiles to just the card's own members, `extends TwoSidedView`.
   - Another language's words name the ONE English class's members:  the generator pairs the twin's statements with
     the English, so `dirección` reads `.direction` (a property's `output`), `frente` draws `drawFront()`
-    (`P.TypeScope.partOutputs`) and `está boca arriba` is `isFaceDirection("up")` (a phrase's `valueOutputs`).
+    (`P.TypeScope.slotOutputs`) and `está boca arriba` is `isFaceDirection("up")` (a phrase's `valueOutputs`).
     - NOT its values as constants:  a root's constants are every program's, so a Spanish file sets a direction by
       the template's words (`voltearla boca arriba`), not `poner su dirección a arriba`.
-  - A two sided view's:  its parts front and back, `its "direction" is down or up` (a new one starts face down, J36),
-    `it "is face (direction)"`, `turn it face up / down`, `turn it over`, and `to draw it` picking a part.
+  - A two sided view's:  its slots front and back, `its "direction" is down or up` (a new one starts face down, J36),
+    `it "is face (direction)"`, `turn it face up / down`, `turn it over`, and `to draw it` picking a slot.
 
 ## Spellx:  a third style of spell (epic `elemental-spell` P6, Q69)
 
@@ -1156,7 +1166,7 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
     a body line indented less than its tag's.
     - Each goes on its token (`SP.addSpellxError()`), never thrown;  `BlockLine` reports it on its line.
   - Which tags are its own where:  every one at the top and among a template's members;  in a body, notes and
-    controls;  in a drawing, those and a placed part;  in a menu, its actions (`isTagHere()`).
+    controls;  in a drawing, those and a placed slot;  in a menu, its actions (`isTagHere()`).
   - A run of markup stops at a line a spellx tag starts (`nextElementStart()`, the parser tokenizer's hook):
     else `<toolbar />` would take the `<for each ...>` under it into one JSX fragment.
   - A `<spell>` chunk (the bare prefix, `<encanto>` in Spanish;  epic `elemental-spell` P12) is code spell as written:

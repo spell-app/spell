@@ -181,7 +181,7 @@ export const REPOS_FILE = "repos.json5"
 
 /**
  * The checkout a page server for folder `from` serves (epic `repo-split` P16):
- * - in a kit:  the kit (`kitOf()`), from any folder of it, a child repo's or the content folder's alike
+ * - in a kit:  the kit (`kitOf()`), from any folder of it, a big folder's or the content folder's alike
  * - else the git checkout `from` is in (`findRoot()`), else `from` itself
  * - So `spell server start | status | stop` mean ONE server from anywhere in the kit.
  */

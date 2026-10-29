@@ -57,14 +57,12 @@
 		</>
 
 		<section label="In a form" sticky="stack" collapsible dividing>
-			<example description="A price range, submitted as two `price` entries.  Move it, then reset the form.">
+			<example "In a form" description="A price range, submitted as two `price` entries.  Move it, then reset the form.">
 				<html>
 					<ui-form>
-						<form>
-							<label for="slider-price">Price</label>
-							<ui-slider id="slider-price" name="price" range labeled max="100" step="10" value="20" end="60"></ui-slider>
-							<ui-button type="reset" icon="undo" appearance="basic">Reset</ui-button>
-						</form>
+						<label for="slider-price">Price</label>
+						<ui-slider id="slider-price" name="price" range labeled max="100" step="10" value="20" end="60"></ui-slider>
+						<ui-button type="reset" icon="undo" appearance="basic">Reset</ui-button>
 					</ui-form>
 				</html>
 			</example>

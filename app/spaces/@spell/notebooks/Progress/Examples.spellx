@@ -20,13 +20,13 @@
 	-->
 	<section label="Types">
 		<section label="Standard" sticky="stack" collapsible dividing>
-			<example description="A standard progress bar.  `value` is a percentage unless there is a `total`.">
+			<example "Standard" description="A standard progress bar.  `value` is a percentage unless there is a `total`.">
 				<progress value="74" bar-text="percent" label="Uploading Files"/>
 			</example>
 		</>
 
 		<section label="Indicating" sticky="stack" collapsible dividing>
-			<example description="An indicating progress bar visually indicates the current level of progress of a task:  its colour runs from red to green.">
+			<example "Indicating" description="An indicating progress bar visually indicates the current level of progress of a task:  its colour runs from red to green.">
 				<html>
 					<ui-progress indicating value="12" label="{percent}% funded"></ui-progress>
 					<ui-progress indicating value="47" label="{percent}% funded"></ui-progress>
@@ -38,45 +38,45 @@
 
 	<section label="Content">
 		<section label="Bar" sticky="stack" collapsible dividing>
-			<example description="A progress element can contain a bar visually indicating progress.">
+			<example "Bar" description="A progress element can contain a bar visually indicating progress.">
 				<progress value="30" aria-label="Bar only"/>
 			</example>
 		</>
 
 		<section label="Progress" sticky="stack" collapsible dividing>
-			<example description="A progress bar can contain a text value indicating current progress:  `bar-text=\"percent\"`.">
+			<example "Progress" description="A progress bar can contain a text value indicating current progress:  `bar-text=\"percent\"`.">
 				<progress value="60" bar-text="percent" aria-label="With percent"/>
 			</example>
 		</>
 
 		<!-- GAP I29:  no centered bar text;  the percent stays at the bar's end. -->
 		<section label="Centered Progress Text" sticky collapsible dividing>
-			<example description="The text inside a progress can be centered.">
+			<example "Centered Progress Text" description="The text inside a progress can be centered.">
 				<progress value="60" bar-text="percent" aria-label="Centered text"/>
 			</example>
 		</>
 
 		<section label="Ratio" sticky="stack" collapsible dividing>
-			<example description="With a `total`, `value` counts towards it, and `bar-text=\"ratio\"` shows the count.">
+			<example "Ratio" description="With a `total`, `value` counts towards it, and `bar-text=\"ratio\"` shows the count.">
 				<progress value="9" total="20" bar-text="ratio" aria-label="With ratio"/>
 			</example>
 		</>
 
 		<section label="Label" sticky="stack" collapsible dividing>
-			<example description="A progress element can contain a label.  Slotted text is the rich version of `label`, and names the bar.">
+			<example "Label" description="A progress element can contain a label.  Slotted text is the rich version of `label`, and names the bar.">
 				<progress value="55" bar-text="percent">Uploading Files</progress>
 			</example>
 		</>
 
 		<section label="Multiple Bars" sticky="stack" collapsible dividing>
-			<example description="A progress element can have multiple bars:  `value` (or `percent`) takes a comma list, `bar-colors` a hue per bar.">
+			<example "Multiple Bars" description="A progress element can have multiple bars:  `value` (or `percent`) takes a comma list, `bar-colors` a hue per bar.">
 				<progress percent="50,0,10,20" bar-colors="blue yellow purple green" aria-label="Disk usage"/>
 			</example>
 		</>
 
 		<!-- GAP I29:  no per-bar names (`WIP`, `Review` ...) in the bar text;  each bar shows its plain percent. -->
 		<section label="Multiple Bars with Text (Proportion)" sticky collapsible dividing>
-			<example description="A progress bar can contain text values indicating current proportion:  each value is a share of the one `total`.">
+			<example "Multiple Bars with Text (Proportion)" description="A progress bar can contain text values indicating current proportion:  each value is a share of the one `total`.">
 				<progress value="60,30,20,30" total="200" bar-colors="blue yellow purple green" bar-text="percent" label="Tickets"/>
 			</example>
 		</>
@@ -84,45 +84,45 @@
 
 	<section label="States">
 		<section label="Active" sticky="stack" collapsible dividing>
-			<example description="A progress bar can show activity:  a pulse runs along the bar.">
+			<example "Active" description="A progress bar can show activity:  a pulse runs along the bar.">
 				<progress active value="42" bar-text="percent" label="Uploading Files"/>
 			</example>
 		</>
 
 		<section label="Success" sticky="stack" collapsible dividing>
-			<example description="A progress bar can show a success state.  A single bar turns `success` by itself at 100%.">
+			<example "Success" description="A progress bar can show a success state.  A single bar turns `success` by itself at 100%.">
 				<progress value="100" bar-text="percent" label="Everything worked, your file is all ready."/>
 			</example>
 		</>
 
 		<section label="Warning" sticky="stack" collapsible dividing>
-			<example description="A progress bar can show a warning state:  `state=\"warning\"`.">
+			<example "Warning" description="A progress bar can show a warning state:  `state=\"warning\"`.">
 				<progress state="warning" value="100" bar-text="percent">Your file didn't meet the minimum resolution requirements.</progress>
 			</example>
 		</>
 
 		<section label="Error" sticky="stack" collapsible dividing>
-			<example description="A progress bar can show an error state.">
+			<example "Error" description="A progress bar can show an error state.">
 				<progress state="error" value="100" bar-text="percent" label="There was an error."/>
 			</example>
 		</>
 
 		<section label="Disabled" sticky="stack" collapsible dividing>
-			<example description="A progress bar can be disabled.">
+			<example "Disabled" description="A progress bar can be disabled.">
 				<progress disabled value="80" aria-label="Disabled"/>
 			</example>
 		</>
 
 		<!-- GAP I29:  no text inside an indeterminate bar;  each bar's words are its `label` instead. -->
 		<section label="Indeterminate" sticky="stack" collapsible dividing>
-			<example description="A progress bar can be shown in different indeterminate states:  bare `indeterminate` pulses, or it takes filling, sliding or swinging.">
-				<message slot="description" state="warning" size="small"><html>The <code>indeterminate</code> progress state is not supposed to be used in combination with multiple progress bars.</html></message>
+			<example "Indeterminate" description="A progress bar can be shown in different indeterminate states:  bare `indeterminate` pulses, or it takes filling, sliding or swinging.">
 				<progress indeterminate color="blue" label="Pulsating (default)"/>
 				<progress indeterminate="filling" color="blue" label="Filling"/>
 				<progress indeterminate="sliding" color="blue" label="Sliding"/>
 				<progress indeterminate="swinging" color="blue" label="Swinging"/>
+				<message slot="description" state="warning" size="small">The <text code>indeterminate</text> progress state is not supposed to be used in combination with multiple progress bars.</message>
 			</example>
-			<example description="Indeterminate progress can also vary in speed:  `speed=\"slow\"` or `\"fast\"`.">
+			<example "Indeterminate" description="Indeterminate progress can also vary in speed:  `speed=\"slow\"` or `\"fast\"`.">
 				<progress indeterminate speed="slow" color="blue" label="Slow"/>
 				<progress indeterminate speed="fast" color="blue" label="Fast"/>
 			</example>
@@ -131,13 +131,13 @@
 
 	<section label="Variations">
 		<section label="Right aligned" sticky="stack" collapsible dividing>
-			<example description="A progress bar can be right aligned growing to the left.">
+			<example "Right aligned" description="A progress bar can be right aligned growing to the left.">
 				<progress align="right" active value="35" bar-text="percent" aria-label="Right aligned"/>
 			</example>
 		</>
 
 		<section label="Inverted" sticky="stack" collapsible dividing>
-			<example description="A progress bar can have its colors inverted.">
+			<example "Inverted" description="A progress bar can have its colors inverted.">
 				<segment inverted>
 					<progress inverted value="64" bar-text="percent" label="Uploading Files"/>
 					<progress inverted state="success" value="100" bar-text="percent" label="Success"/>
@@ -148,54 +148,50 @@
 		</>
 
 		<section label="Basic" sticky="stack" collapsible dividing>
-			<example description="A basic progress has its remaining background bar removed.">
+			<example "Basic" description="A basic progress has its remaining background bar removed.">
 				<progress appearance="basic" value="45" bar-text="percent" aria-label="Basic"/>
 			</example>
 		</>
 
 		<!-- GAP I36:  attached bars sit inside the segment's padding, not on its edges. -->
 		<section label="Attached" sticky="stack" collapsible dividing>
-			<example description="A progress bar can show progress of an element: a thin line on its `top` or `bottom` edge.">
-				<html>
-					<ui-segment>
-						<ui-progress attach="top" value="30" aria-label="Top"></ui-progress>
-						<p>La la la la</p>
-						<ui-progress attach="bottom" value="70" aria-label="Bottom"></ui-progress>
-					</ui-segment>
-				</html>
+			<example "Attached" description="A progress bar can show progress of an element: a thin line on its `top` or `bottom` edge.">
+				<segment>
+					<progress attach="top" value="30" aria-label="Top"/>
+					<text paragraph>La la la la</text>
+					<progress attach="bottom" value="70" aria-label="Bottom"/>
+				</segment>
 			</example>
-			<example>
-				<html>
-					<ui-card>
-						<img src="/components/ui/images/wireframe/image.png" alt="" />
-						<ui-content>
-							<ui-header link="#project">Project</ui-header>
-							<ui-meta>
-								<span>Started in 2014</span>
-							</ui-meta>
-						</ui-content>
-						<ui-extra>
-							<a href="#project-friends"><ui-icon name="user"></ui-icon> 22 Friends</a>
-						</ui-extra>
-						<ui-progress attach="bottom" value="40" aria-label="Project progress"></ui-progress>
-					</ui-card>
-				</html>
+			<example "Attached">
+				<card>
+					<image alt="" src="/components/ui/images/wireframe/image.png"/>
+					<content>
+						<header link="#project">Project</header>
+						<meta>
+							<text>Started in 2014</text>
+						</meta>
+					</content>
+					<extra>
+						<link link="#project-friends"><icon name="user"/> 22 Friends</link>
+					</extra>
+					<progress attach="bottom" value="40" aria-label="Project progress"/>
+				</card>
 			</example>
 		</>
 
 		<section label="Size" sticky="stack" collapsible dividing>
-			<example description="A progress bar can vary in size.">
-				<message slot="description" state="info" size="small">Some small sizes may not be able to fit an inlined label.</message>
+			<example "Size" description="A progress bar can vary in size.">
 				<progress size="tiny" value="20" label="Tiny"/>
 				<progress size="small" value="40" label="Small"/>
 				<progress value="50" label="Standard"/>
 				<progress size="large" value="60" label="Large"/>
 				<progress size="big" value="80" label="Big"/>
+				<message slot="description" state="info" size="small">Some small sizes may not be able to fit an inlined label.</message>
 			</example>
 		</>
 
 		<section label="Color" sticky="stack" collapsible dividing>
-			<example description="A progress bar can have different colors.">
+			<example "Color" description="A progress bar can have different colors.">
 				<progress color="red" value="30" aria-label="Red"/>
 				<progress color="orange" value="35" aria-label="Orange"/>
 				<progress color="yellow" value="40" aria-label="Yellow"/>
@@ -213,7 +209,7 @@
 		</>
 
 		<section label="Inverted Color" sticky="stack" collapsible dividing>
-			<example description="These colors can also be inverted for improved contrast on dark backgrounds.">
+			<example "Inverted Color" description="These colors can also be inverted for improved contrast on dark backgrounds.">
 				<segment inverted>
 					<progress inverted color="red" value="30" bar-text="percent" aria-label="Red"/>
 					<progress inverted color="orange" value="35" bar-text="percent" aria-label="Orange"/>

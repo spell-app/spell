@@ -11,7 +11,7 @@ import { Alert } from "./Alert"
 import { Confirm } from "./Confirm"
 import { CSSStyles } from "./CSSStyles"
 import { EndPrintGroup } from "./EndPrintGroup"
-import { Notify } from "./Notify"
+import { Notify, NOTIFY_KINDS, TOAST_COLORS, TOAST_POSITIONS, TOAST_PROGRESS } from "./Notify"
 import { Print } from "./Print"
 import { Prompt } from "./Prompt"
 import { Warn } from "./Warn"
@@ -27,6 +27,35 @@ UI.addRule(
     syntax: "((info:info)|(warning:warning)|(error:error)|(group:group)|(collapsed_group:collapsed group))"
   }
 )
+
+// A toast's kind, for `notify`:  `notify success "Saved!"` means `success`
+UI.addRule(Wording.specialize({ ruleName: "notify_kind", meanings: NOTIFY_KINDS }), {
+  syntax: "((info:info)|(success:success)|(warning:warning)|(error:error))"
+})
+
+// A toast's colour, for `notify ... in red`:  each meaning Spell UI's hue name
+UI.addRule(Wording.specialize({ ruleName: "toast_color", meanings: TOAST_COLORS }), {
+  syntax:
+    "((red:red)|(orange:orange)|(yellow:yellow)|(olive:olive)|(green:green)|(teal:teal)|(blue:blue)" +
+    "|(violet:violet)|(purple:purple)|(pink:pink)|(brown:brown)|(grey:grey|gray)|(black:black))"
+})
+
+// Where a toast goes, for `notify ... at the top left`:  each meaning Spell UI's `position`, `_` for its space
+UI.addRule(Wording.specialize({ ruleName: "toast_position", meanings: TOAST_POSITIONS }), {
+  syntax:
+    "((top_left:at the top left)|(top_center:at the top center|at the top centre|at the top)" +
+    "|(top_right:at the top right)|(centered:in the center|in the centre|in the middle)" +
+    "|(bottom_left:at the bottom left)|(bottom_center:at the bottom center|at the bottom centre|at the bottom)" +
+    "|(bottom_right:at the bottom right))"
+})
+
+// A toast's progress bar, for `notify ... with a progress bar at the top`:  where it goes, `_up` when it fills up
+UI.addRule(Wording.specialize({ ruleName: "toast_progress", meanings: TOAST_PROGRESS }), {
+  syntax:
+    "((top_up:with a progress bar filling up at the top)" +
+    "|(bottom_up:with a progress bar filling up|with a progress bar filling up at the bottom)" +
+    "|(top:with a progress bar at the top)|(bottom:with a progress bar|with a progress bar at the bottom))"
+})
 
 ////////////////
 // ## Statements
@@ -59,13 +88,39 @@ UI.addRule(EndPrintGroup, {
 })
 
 UI.addRule(Notify, {
-  syntax: "notify {message:expression} (with {okButton:text})?", // TODO: "with close" ?
+  syntax:
+    "notify {kind:notify_kind}? {message:expression} (titled {title:expression})?" +
+    " (in (inverted:inverted)? {color:toast_color})? {position:toast_position}?" +
+    " ((for {time:expression} {units:pause_units})|(untilClicked:until clicked))? {progress:toast_progress}?" +
+    " (sideBySide:side by side)? (keepRunning:without pausing)? (with {okButton:text})? (waits:and wait)?",
   tests: [
     {
       compileAs: "statement",
       tests: [
         [`notify "Yo!"`, `core.notify("Yo!")`],
-        [`notify "Yo!" with "gotcha"`, `core.notify("Yo!", "gotcha")`]
+        [`notify "Yo!" with "gotcha"`, `core.notify("Yo!", { button: "gotcha" })`],
+        [`notify success "Saved!"`, `core.notify("Saved!", { class: "success" })`],
+        [`notify "Hey look!" titled "Better?"`, `core.notify("Hey look!", { title: "Better?" })`],
+        [`notify "Colourful" in inverted red`, `core.notify("Colourful", { class: "inverted red" })`],
+        [`notify error "Oops" in black`, `core.notify("Oops", { class: "error black" })`],
+        [`notify "Here!" at the top left`, `core.notify("Here!", { position: "top left" })`],
+        [`notify "Here!" in the center`, `core.notify("Here!", { position: "centered" })`],
+        [`notify "Bye" for 5 seconds`, `core.notify("Bye", { time: 5, units: "seconds" })`],
+        [`notify "Stay" until clicked`, `core.notify("Stay", { time: 0 })`],
+        [`notify "Look" with a progress bar`, `core.notify("Look", { showProgress: "bottom" })`],
+        {
+          input: `notify "Look" titled "LOOK" with a progress bar filling up at the top`,
+          js: [`core.notify("Look", {`, `  title: "LOOK",`, `  showProgress: "top",`, `  progressUp: true`, `})`]
+        },
+        [
+          `notify "Next" at the top left side by side`,
+          `core.notify("Next", { position: "top left", horizontal: true })`
+        ],
+        [
+          `notify "Busy" with a progress bar at the top without pausing`,
+          `core.notify("Busy", { showProgress: "top", pauseOnHover: false })`
+        ],
+        [`notify "Gone soon" for 1 second and wait`, `await core.notify("Gone soon", { time: 1, units: "second" })`]
       ]
     }
   ]

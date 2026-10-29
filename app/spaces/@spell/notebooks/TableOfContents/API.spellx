@@ -8,6 +8,7 @@
 		<menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
 			<item link="#attributes">Attributes</>
 			<item link="#events">Events</>
+			<item link="#slots">Slots</>
 			<item link="#parts">Parts</>
 			<item link="#states">States</>
 			<item link="#texts">Texts</>
@@ -24,6 +25,12 @@
 	<section label="Events">
 		<html>
 			<ui-docs-api family="ui-toc" only="events"></>
+		</>
+	</>
+
+	<section label="Slots">
+		<html>
+			<ui-docs-api family="ui-toc" only="slots"></>
 		</>
 	</>
 

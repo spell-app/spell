@@ -50,6 +50,15 @@
             "serif": {
               "$ref": "#/definitions/value"
             },
+            "sans": {
+              "$ref": "#/definitions/value"
+            },
+            "typewriter": {
+              "$ref": "#/definitions/value"
+            },
+            "subhead": {
+              "$ref": "#/definitions/value"
+            },
             "rounded": {
               "$ref": "#/definitions/value"
             }

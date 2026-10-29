@@ -107,7 +107,7 @@
 		</>
 
 		<section label="Popup and modal" sticky collapsible dividing>
-			<example description="A button opens a popup and a modal with `commandfor` and `command`, no script.">
+			<example "Popup and modal" description="A button opens a popup and a modal with `commandfor` and `command`, no script.">
 				<button commandfor="button-invoker-popup" command="toggle-popover">Toggle popup</button>
 				<popup id="button-invoker-popup" open-on="manual" label="Toggled by the button, no script."/>
 				<button commandfor="button-invoker-modal" command="--show" color="primary">Open modal</button>

@@ -130,6 +130,7 @@ import { videoEs } from "spell/ui/components/ui-video/UIVideo.es"
 import { audioEs } from "spell/ui/components/ui-video/UIAudio.es"
 import { termsEs } from "spell/ui/components/ui-terms/UITerms.es"
 import { termEs } from "spell/ui/components/ui-terms/UITerm.es"
+import { spaceEs } from "spell/ui/components/ui-space/UISpace.es"
 import { stackEs } from "spell/ui/components/ui-stack/UIStack.es"
 import { tableEs } from "spell/ui/components/ui-table/UITable.es"
 import { cellEs } from "spell/ui/components/ui-table/UICell.es"
@@ -758,6 +759,7 @@ export const es: Dictionary = Vocabulary.dictionaryFrom(sharedEs, [
   stickyEs,
   tabEs,
   tabsEs,
+  spaceEs,
   stackEs,
   quoteEs,
   keysEs,

@@ -120,6 +120,10 @@
       "Spell Serif", Palatino, "Palatino Linotype", "Book Antiqua", P052, "TeX Gyre Pagella", "URW Palladio L", serif;
     --ui-font-family-mono:
       ui-monospace, "SF Mono", Menlo, Consolas, "Cascadia Mono", "DejaVu Sans Mono", "Liberation Mono", monospace;
+    --ui-font-family-serif: var(--ui-font-family-heading);
+    --ui-font-family-sans: var(--ui-font-family);
+    --ui-font-family-typewriter: "American Typewriter", "Courier Prime", "Courier New", Courier, monospace;
+    --ui-font-family-subhead: var(--ui-font-family);
     --ui-line-height: 1.5;
     --ui-line-height-heading: 1.25;
     --ui-size-mini: 0.625;

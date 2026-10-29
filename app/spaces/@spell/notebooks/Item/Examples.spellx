@@ -20,7 +20,7 @@
 	-->
 	<section label="Types">
 		<section label="In a dropdown" sticky="stack" collapsible dividing>
-			<example description="Inside a dropdown an item is data:  the dropdown reads its `value`, text, `icon`, `flag`, `description` and `selected`, and draws the option rows itself.">
+			<example "In a dropdown" description="Inside a dropdown an item is data:  the dropdown reads its `value`, text, `icon`, `flag`, `description` and `selected`, and draws the option rows itself.">
 				<dropdown selection placeholder="Fruit">
 					<item value="apple">Apple</item>
 					<item value="pear" selected>Pear</item>
@@ -30,7 +30,7 @@
 		</>
 
 		<section label="In a list" sticky="stack" collapsible dividing>
-			<example description="Inside a list an item is a list row.">
+			<example "In a list" description="Inside a list an item is a list row.">
 				<list divided>
 					<item icon="users">Friends</item>
 					<item icon="map marker">Worldwide</item>
@@ -40,7 +40,7 @@
 		</>
 
 		<section label="In a menu" sticky="stack" collapsible dividing>
-			<example description="Inside a menu an item is a menu item.">
+			<example "In a menu" description="Inside a menu an item is a menu item.">
 				<menu appearance="pointing" aria-label="Item in a menu demo">
 					<item link="#inbox" selected>Inbox</item>
 					<item link="#starred">Starred</item>
@@ -50,30 +50,28 @@
 		</>
 
 		<section label="In an Items view" sticky="stack" collapsible dividing>
-			<example description="Inside `<ui-items>` an item is a media object:  its `image` beside a `<ui-content>` of header, meta, description and extra.">
-				<html>
-					<ui-items>
-						<ui-item image="../images/wireframe/image.png">
-							<ui-content>
-								<ui-header>Cute Dog</ui-header>
-								<ui-meta>
-									<span>Description</span>
-								</ui-meta>
-								<ui-description>
-									<ui-image src="/components/ui/images/wireframe/short-paragraph.png" alt=""></ui-image>
-								</ui-description>
-								<ui-extra>Additional Details</ui-extra>
-							</ui-content>
-						</ui-item>
-					</ui-items>
-				</html>
+			<example "In an Items view" description="Inside `<ui-items>` an item is a media object:  its `image` beside a `<ui-content>` of header, meta, description and extra.">
+				<items>
+					<item image="../images/wireframe/image.png">
+						<content>
+							<header>Cute Dog</header>
+							<meta>
+								<text>Description</text>
+							</meta>
+							<description>
+								<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
+							</description>
+							<extra>Additional Details</extra>
+						</content>
+					</item>
+				</items>
 			</example>
 		</>
 	</>
 
 	<section label="Content">
 		<section label="Link, button or block" sticky collapsible dividing>
-			<example description="In a list or menu, `link` renders a link;  `appearance=\"link\"` (or a `selection` list, or an `appearance=\"link\"`, `pagination` or `interactive` menu) renders a button;  anything else is a plain block.">
+			<example "Link, button or block" description="In a list or menu, `link` renders a link;  `appearance=\"link\"` (or a `selection` list, or an `appearance=\"link\"`, `pagination` or `interactive` menu) renders a button;  anything else is a plain block.">
 				<list>
 					<item link="#link-button-or-block" icon="linkify">A link</item>
 					<item appearance="link" icon="hand pointer">A button</item>
@@ -83,7 +81,7 @@
 		</>
 
 		<section label="Icon and image" sticky="stack" collapsible dividing>
-			<example description="`icon` takes an icon name, the `icon` slot any glyph, and `image` a URL shown as an avatar.">
+			<example "Icon and image" description="`icon` takes an icon name, the `icon` slot any glyph, and `image` a URL shown as an avatar.">
 				<list>
 					<item icon="star">Icon attribute</item>
 					<item><icon slot="icon" name="heart" color="red"/>Icon slot</item>
@@ -93,7 +91,7 @@
 		</>
 
 		<section label="Content parts" sticky="stack" collapsible dividing>
-			<example description="An item can hold a `<ui-content>` with a `<ui-header>` and `<ui-description>`:  they take the list's look.">
+			<example "Content parts" description="An item can hold a `<ui-content>` with a `<ui-header>` and `<ui-description>`:  they take the list's look.">
 				<list spacing="lg">
 					<item icon="github">
 						<content>
@@ -112,7 +110,7 @@
 		</>
 
 		<section label="Header and divider" sticky collapsible dividing>
-			<example description="`kind` picks the row kind:  an `item`, a group `header` (dropdown, menu) or a `divider` line (dropdown).  Open the dropdown to see its header and divider.">
+			<example "Header and divider" description="`kind` picks the row kind:  an `item`, a group `header` (dropdown, menu) or a `divider` line (dropdown).  Open the dropdown to see its header and divider.">
 				<menu appearance="text" aria-label="Header item demo">
 					<item kind="header">Sort By</item>
 					<item link="#header-and-divider" selected>Closest</item>
@@ -128,7 +126,7 @@
 		</>
 
 		<section label="Nested list or menu" sticky collapsible dividing>
-			<example description="A `<ui-list>` or `<ui-menu>` inside an item is its sub list or sub menu.">
+			<example "Nested list or menu" description="A `<ui-list>` or `<ui-menu>` inside an item is its sub list or sub menu.">
 				<list bulleted>
 					<item>Benefits <list><item>Rebates</item> <item>Discounts</item></list></item>
 				</list>
@@ -141,7 +139,7 @@
 
 	<section label="States">
 		<section label="Selected" sticky="stack" collapsible dividing>
-			<example description="`selected` marks the chosen item:  the dropdown's value, or the list's or menu's current item.  Fomantic's word, `active`, works too in lists and menus.">
+			<example "Selected" description="`selected` marks the chosen item:  the dropdown's value, or the list's or menu's current item.  Fomantic's word, `active`, works too in lists and menus.">
 				<menu appearance="secondary" aria-label="Selected demo">
 					<item link="#selected" selected>selected</item>
 					<item link="#selected">Other</item>
@@ -154,7 +152,7 @@
 		</>
 
 		<section label="Disabled" sticky="stack" collapsible dividing>
-			<example description="A disabled item can't be chosen or followed.">
+			<example "Disabled" description="A disabled item can't be chosen or followed.">
 				<list appearance="link">
 					<item link="#disabled">Enabled</item>
 					<item link="#disabled" disabled>Disabled</item>
@@ -169,7 +167,7 @@
 
 	<section label="Variations">
 		<section label="Colored" sticky="stack" collapsible dividing>
-			<example description="In a menu, an item's `color` tints it while selected.">
+			<example "Colored" description="In a menu, an item's `color` tints it while selected.">
 				<menu appearance="pointing" aria-label="Colored item demo">
 					<item link="#colored" color="red" selected>Red</item>
 					<item link="#colored" color="blue">Blue</item>
@@ -179,7 +177,7 @@
 		</>
 
 		<section label="Position" sticky="stack" collapsible dividing>
-			<example description="In a menu, `position=\"right\"` pushes an item (and those after it) to the far end.">
+			<example "Position" description="In a menu, `position=\"right\"` pushes an item (and those after it) to the far end.">
 				<menu aria-label="Positioned item demo">
 					<item link="#position">Home</item>
 					<item link="#position" position="right">Logout</item>
@@ -188,7 +186,7 @@
 		</>
 
 		<section label="Fitted" sticky="stack" collapsible dividing>
-			<example description="In a menu, `padding=\"none\"` takes away an item’s padding;  `none-x` or `none-y` keeps the other axis.">
+			<example "Fitted" description="In a menu, `padding=\"none\"` takes away an item’s padding;  `none-x` or `none-y` keeps the other axis.">
 				<menu aria-label="Fitted item demo">
 					<item link="#fitted" padding="none">No padding</item>
 					<item link="#fitted" padding="none-x">No horizontal padding</item>

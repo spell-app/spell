@@ -25,7 +25,7 @@ import "./EditorTheme.css"
  *   - The theme chosen is marked by its own name:  `<html data-spell-theme="glass">`.
  *   - What's the editor's alone is keyed on that name:
  *     Glass and Fruity share the glass chrome, Merlot's panels meet edge to edge, Spell's bar has no box.
- * - A theme made with Spell UI's theme editor and kept there (Use this theme) is worn over its base,
+ * - A theme made with Spell UI's theme editor and kept in this browser (`SavedTheme`) is worn over its base,
  *   while that base is the theme chosen (`SavedTheme.follow()`, epic `debut` P6).
  * - The code's colours aren't a page theme:  Monaco's Purple follows the page's light / dark by itself
  *   (`spell/app/app/ui/monaco/themes`).
@@ -114,7 +114,7 @@ export class EditorTheme {
   }
 
   /**
-   * Wear the theme the theme editor kept (Use this theme):  its base chosen, as the menu would, and its sheet over it;
+   * Wear the theme the theme editor kept (`SavedTheme`):  its base chosen, as the menu would, and its sheet over it;
    * none kept (Stop using):  take its sheet off.
    * - NEVER throws:  a failure says so on the console.
    */
@@ -137,7 +137,7 @@ export class EditorTheme {
   private static follow(theme: string | undefined): void {
     if (theme) document.documentElement.dataset.spellTheme = theme
     else delete document.documentElement.dataset.spellTheme
-    // the theme made in Spell UI's theme editor and kept there (Use this theme), worn while its base is chosen
+    // the theme made in Spell UI's theme editor and kept in this browser (`SavedTheme`), worn while its base is chosen
     void import("spell/ui/components/ui-theme-editor/SavedTheme")
       .then(({ SavedTheme }) => SavedTheme.follow(theme))
       .catch((error: unknown) => console.error("EditorTheme:  couldn't wear the theme kept in the browser", error))
@@ -152,12 +152,13 @@ export class EditorTheme {
  *   - Until epic `debut` P17 (T34) the editor defined it itself, and drew it only then:
  *     it was a docs-only widget, which `spell-ui`'s barrel didn't carry.
  * - Picking applies at once, and the editor remembers it (`EditorTheme`).
- * - At its foot, "Edit theme...":  the theme editor's page (`<ThemeEditorPage>`, epic `debut` P6).
+ * - At its foot, the menu's Theme bench (on the page server, in development:  `SPELL_PAGE_SERVER`, set by the dev
+ *   server;  none when built), then "Edit theme...":  the theme editor's page (`<ThemeEditorPage>`, epic `debut` P6).
  ****************/
 export function ThemeMenu(): JSX.Element {
   return (
     <ui-item class="ThemeMenu">
-      <ui-theme-menu size="small">
+      <ui-theme-menu size="small" bench={import.meta.env.DEV ? String(import.meta.env.SPELL_PAGE_SERVER) : "none"}>
         <button type="button" slot="end" class="EditThemeEntry" onClick={() => editor.showThemeEditor()}>
           <ui-icon name="paint brush" />
           {appTexts.text("editTheme")}

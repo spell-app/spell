@@ -7,9 +7,9 @@ import { parseSpellProject, runSpellFiles } from "spell/parser/spell/test"
  * What code spell learned so it can say all spellx can (epic `elemental-spell` P5):  each spellx tag has a twin line.
  * - aliases indented under their property (Q13)
  * - a worked-out value from a list of its own:  `- its "color" is one of red, black:` + its value lines (o1's color)
- * - parts:  `- it has parts "front" and "back"`, `- to draw its front:`, `draw its front` (Q55, Q56;  J6)
+ * - slots:  `- it has slots "front" and "back"`, `- to draw its front:`, `draw its front` (Q55, Q56;  J6;  P27)
  * - a markup line in a drawing IS the drawing, no `return` (Q14)
- * - the two sided view's own words, its parts and its drawing (J8)
+ * - the two sided view's own words, its slots and its drawing (J8)
  * - each in English and Spanish
  */
 describe("aliases under their property (Q13)", () => {
@@ -112,27 +112,62 @@ describe("a worked-out value from a list of its own", () => {
   })
 })
 
-describe("parts (Q55, Q56)", () => {
-  test("declared, drawn and placed;  each part's markup carries its name as a CSS part (J6)", () => {
+describe("slots (Q55, Q56;  P27)", () => {
+  test("declared, drawn and placed;  each slot's markup carries its name as a CSS part (J6)", () => {
     const compiled = compile([
       'a "box" is a view where:',
-      '\t- it has parts "lid" and "base"',
+      '\t- it has slots "lid" and "base"',
       "\t- to draw it:",
       '\t\t<div class="box">{draw its lid}</div>',
       '\t- to "draw its lid": <b part="top">lid</b>',
       "\t- to draw its base:",
       "\t\t<i>base</i>"
     ])
-    expect(compiled).toContain('static parts = ["lid", "base"]')
-    expect(compiled).toContain('return h("div", { class: "box" }, () => this.drawLid())')
+    expect(compiled).toContain('static slots = ["lid", "base"]')
     expect(compiled).toContain('return h("b", { part: "top lid" }, "lid")')
     expect(compiled).toContain('return h("i", { part: "base" }, "base")')
   })
 
-  test("`has parts` in the sentence style, and with the subject left out", () => {
-    for (const line of ['a box has parts "lid", "side" and "base"', '\t- has parts "lid", "side" and "base"']) {
+  test("a slot placed is the web's own slot, holding its drawing:  what's put in it from outside replaces that", () => {
+    const compiled = compile([
+      'a "box" is a view where:',
+      '\t- it has slots "lid" and "base"',
+      "\t- to draw it:",
+      '\t\t<div class="box">{draw its lid}</div>',
+      "\t\tdraw its base",
+      '\t- to "draw its lid": <b>lid</b>',
+      '\t- to "draw its base": <i>base</i>'
+    ])
+    expect(compiled).toContain('h("div", { class: "box" }, h("slot", { name: "lid" }, () => this.drawLid()))')
+    expect(compiled).toContain('h("slot", { name: "base" }, () => this.drawBase())')
+  })
+
+  test("`has slots` in the sentence style, and with the subject left out", () => {
+    for (const line of ['a box has slots "lid", "side" and "base"', '\t- has slots "lid", "side" and "base"']) {
       const lines = line.startsWith("\t") ? ['a "box" is a view where:', line] : ['a "box" is a view', line]
-      expect(compile(lines).replace(/\s+/g, " ")).toContain('static parts = [ "lid", "side", "base" ]')
+      expect(compile(lines).replace(/\s+/g, " ")).toContain('static slots = [ "lid", "side", "base" ]')
+    }
+  })
+
+  test("the old `has parts` still reads, as an error naming `slots` over just the word (its quick fix)", () => {
+    for (const [path, lines, word, replacement] of [
+      ["/test.spell", ['a "box" is a view where:', '\t- it has parts "lid" and "base"'], "parts", "slots"],
+      [
+        "/test.es.spell",
+        ['una "caja" es una vista donde:', '\t- tiene las partes "tapa" y "base"'],
+        "partes",
+        "ranuras"
+      ]
+    ] as const) {
+      const { files } = parseSpellProject([{ path, contents: lines.join("\n") }])
+      const [file] = files
+      const contents = lines.join("\n")
+      const errors = SP.Block.getParseErrors(file!.match!) ?? []
+      expect(errors.map((error) => contents.slice(error.start, error.end))).toEqual([word])
+      expect(errors.map((error) => error.data.replacement)).toEqual([replacement])
+      expect(file!.compiled).toContain(
+        path.endsWith(".es.spell") ? 'static slots = ["tapa", "base"]' : 'static slots = ["lid", "base"]'
+      )
     }
   })
 
@@ -297,7 +332,7 @@ describe("a two sided view (J8)", () => {
     expect(compiled).toContain("drawFront() {")
     expect(compiled).toContain("drawBack() {")
     // NOT copied in:  `TwoSidedView` holds them, once
-    expect(compiled).not.toContain("static parts")
+    expect(compiled).not.toContain("static slots")
     expect(compiled).not.toContain("turnOver() {")
     expect(compiled).not.toMatch(/^\s+draw\(\) \{/m)
     const run = runSpell([

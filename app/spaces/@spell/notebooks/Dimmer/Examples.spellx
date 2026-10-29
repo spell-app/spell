@@ -21,7 +21,7 @@
 	-->
 	<section label="Types">
 		<section label="Dimmer" sticky="stack" collapsible dividing>
-			<example description="A simple dimmer displays no content:  it covers its parent, `visible` shows it, and a click on the dimmer hides it. The buttons show and hide it with `command=\"--show\"` / `\"--close\"`.">
+			<example "Dimmer" description="A simple dimmer displays no content:  it covers its parent, `visible` shows it, and a click on the dimmer hides it. The buttons show and hide it with `command=\"--show\"` / `\"--close\"`.">
 				<segment>
 					<header level="3">Overlayable Section</header>
 					<images size="small">
@@ -40,7 +40,7 @@
 		</>
 
 		<section label="Content Dimmer" sticky="stack" collapsible dividing>
-			<example description="A dimmer can display content, centred over what it dims. A dark dimmer is the dark scheme for its content, so a plain header reads light.">
+			<example "Content Dimmer" description="A dimmer can display content, centred over what it dims. A dark dimmer is the dark scheme for its content, so a plain header reads light.">
 				<segment>
 					<header level="3">Overlayable Section</header>
 					<images size="small">
@@ -61,7 +61,7 @@
 		</>
 
 		<section label="Page Dimmer" sticky="stack" collapsible dividing>
-			<example description="A dimmer can be formatted to be fixed to the page: `page` covers the whole viewport, as a modal dialog, so the page behind it can't be reached. A click anywhere, or Escape, brings the page back.">
+			<example "Page Dimmer" description="A dimmer can be formatted to be fixed to the page: `page` covers the whole viewport, as a modal dialog, so the page behind it can't be reached. A click anywhere, or Escape, brings the page back.">
 				<button icon="plus" commandfor="dimmer-page" command="--show">Show</button>
 				<dimmer id="dimmer-page" page aria-label="Page dimmer">Hello</dimmer>
 			</example>
@@ -70,7 +70,7 @@
 
 	<section label="States">
 		<section label="Active" sticky="stack" collapsible dividing>
-			<example description="An active dimmer will dim its parent container.">
+			<example "Active" description="An active dimmer will dim its parent container.">
 				<segment>
 					<dimmer visible closedby="none"/>
 					<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
@@ -80,7 +80,7 @@
 		</>
 
 		<section label="Disabled" sticky="stack" collapsible dividing>
-			<example description="A disabled dimmer cannot be activated, even while `visible`.">
+			<example "Disabled" description="A disabled dimmer cannot be activated, even while `visible`.">
 				<segment>
 					<dimmer disabled visible/>
 					<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
@@ -92,8 +92,7 @@
 
 	<section label="Variations">
 		<section label="Blurring" sticky="stack" collapsible dividing>
-			<example description="A dimmer can blur its contents: `blurring` blurs and greys what's behind it.">
-				<message slot="description" size="small" class="site-not-ported"><html>Fomantic puts <code>blurring</code> on the dimmable parent (<code>ui blurring segment</code>). Ours goes on the dimmer, which blurs through <code>backdrop-filter</code>.</html></message>
+			<example "Blurring" description="A dimmer can blur its contents: `blurring` blurs and greys what's behind it.">
 				<segment>
 					<dimmer id="dimmer-blurring" blurring/>
 					<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
@@ -103,8 +102,9 @@
 					<button icon="plus" commandfor="dimmer-blurring" command="--show" aria-label="Show"/>
 					<button icon="minus" commandfor="dimmer-blurring" command="--close" aria-label="Hide"/>
 				</buttons>
+				<message slot="description" size="small" class="site-not-ported">Fomantic puts <text code>blurring</text> on the dimmable parent (<text code>ui blurring segment</text>). Ours goes on the dimmer, which blurs through <text code>backdrop-filter</text>.</message>
 			</example>
-			<example>
+			<example "Blurring">
 				<segment>
 					<dimmer id="dimmer-blurring-inverted" blurring inverted/>
 					<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
@@ -118,7 +118,7 @@
 		</>
 
 		<section label="Vertical Alignment" sticky collapsible dividing>
-			<example description="A dimmer can have its content top or bottom aligned:  `vertical-align`.">
+			<example "Vertical Alignment" description="A dimmer can have its content top or bottom aligned:  `vertical-align`.">
 				<segment>
 					<dimmer vertical-align="top" visible closedby="none">
 						<header level="2" inverted>Title</header>
@@ -129,7 +129,7 @@
 					<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
 				</segment>
 			</example>
-			<example>
+			<example "Vertical Alignment">
 				<segment>
 					<dimmer vertical-align="bottom" visible closedby="none">
 						<header level="2" inverted>Title</header>
@@ -143,7 +143,7 @@
 		</>
 
 		<section label="Simple Dimmer" sticky="stack" collapsible dividing>
-			<example description="A dimmer can be controlled without JavaScript. On the element, `simple` looks the same: `visible` shows it.">
+			<example "Simple Dimmer" description="A dimmer can be controlled without JavaScript. On the element, `simple` looks the same: `visible` shows it.">
 				<segment>
 					<dimmer appearance="simple" visible closedby="none"/>
 					<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
@@ -153,7 +153,7 @@
 		</>
 
 		<section label="Inverted Dimmer" sticky="stack" collapsible dividing>
-			<example description="A dimmer can be formatted to have its colors inverted.">
+			<example "Inverted Dimmer" description="A dimmer can be formatted to have its colors inverted.">
 				<segment>
 					<dimmer id="dimmer-inverted" inverted/>
 					<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
@@ -167,34 +167,34 @@
 		</>
 
 		<section label="Dimmer Shades" sticky="stack" collapsible dividing>
-			<example description="A dimmer can be formatted to have a different depth of background shading: `shade` is medium, light or very light.">
-				<message slot="description" state="info" size="small"><html>Also works in combination with <code>inverted</code>.</html></message>
+			<example "Dimmer Shades" description="A dimmer can be formatted to have a different depth of background shading: `shade` is medium, light or very light.">
 				<segment>
 					<dimmer shade="medium" visible closedby="none"/>
 					<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
 				</segment>
+				<message slot="description" state="info" size="small">Also works in combination with <text code>inverted</text>.</message>
 			</example>
-			<example>
+			<example "Dimmer Shades">
 				<segment>
 					<dimmer shade="light" visible closedby="none"/>
 					<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
 				</segment>
 			</example>
-			<example>
+			<example "Dimmer Shades">
 				<segment>
 					<dimmer shade="very light" visible closedby="none"/>
 					<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
 				</segment>
 			</example>
 		</>
-		<message size="small" class="site-not-ported"><html>Not ported: Partially Dimmer (a top, center or bottom dimmer, a caption as tall as its content). It's deferred, in <code title="guides/ui/notes/status.md">the status checklist</>:  use <code>vertical-align</> on a full dimmer meanwhile.</></>
+		<message size="small" class="site-not-ported">Not ported: Partially Dimmer (a top, center or bottom dimmer, a caption as tall as its content). It's deferred, in <text title="guides/ui/notes/status.md" code>the status checklist</>:  use <text code>vertical-align</> on a full dimmer meanwhile.</>
 	</>
 
 	<section label="Examples">
 		<!-- GAP I55:  `<ui-image>` holds no children, so a dimmer can't sit in Fomantic's `ui medium image` wrapper;  a compact basic segment stands in, and the circular variant is left out. -->
 		<!-- GAP I56:  `size="medium"` is the natural size, not 300px;  `large` here. -->
 		<section label="Dimmer Events" sticky="stack" collapsible dividing>
-			<example description="A dimmer can trigger a visibility change on an event: `show-on=\"hover\"` shows it while the pointer is over its parent, or keyboard focus is inside it (Tab reaches its buttons).">
+			<example "Dimmer Events" description="A dimmer can trigger a visibility change on an event: `show-on=\"hover\"` shows it while the pointer is over its parent, or keyboard focus is inside it (Tab reaches its buttons).">
 				<segment padding="compact" appearance="basic">
 					<image size="large" src="/components/ui/images/wireframe/image.png" alt=""/>
 					<dimmer show-on="hover">
@@ -207,7 +207,7 @@
 		</>
 
 		<section label="On click" sticky="stack" collapsible dividing>
-			<example description="`show-on=\"click\"` shows the dimmer when its parent is clicked;  a click on the dimmer hides it again.">
+			<example "On click" description="`show-on=\"click\"` shows the dimmer when its parent is clicked;  a click on the dimmer hides it again.">
 				<segment>
 					<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
 					<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
@@ -220,7 +220,7 @@
 
 		<!-- GAP I43:  a dimmer doesn't show or invert its loader;  the loaders say `visible` (and `inverted` on a dark dimmer) themselves. -->
 		<section label="Loaders inside Dimmers" sticky collapsible dividing>
-			<example description="Any loader inside a dimmer will automatically use an appropriate color to match.">
+			<example "Loaders inside Dimmers" description="Any loader inside a dimmer will automatically use an appropriate color to match.">
 				<segment>
 					<dimmer id="dimmer-loader" inverted visible closedby="none">
 						<loader text visible>Loading</loader>
@@ -229,14 +229,14 @@
 					<image src="/components/ui/images/wireframe/short-paragraph.png" alt=""/>
 				</segment>
 			</example>
-			<example>
-				<message slot="description" size="small" class="site-not-ported">Not ported: Fomantic's loader settings (displayLoader, loaderVariation, loaderText). Put the loader you want inside the dimmer.</message>
+			<example "Loaders inside Dimmers">
 				<segment>
 					<dimmer visible closedby="none">
 						<loader text visible inverted speed="slow" color="orange" elastic>Wait a second, please...</loader>
 					</dimmer>
 					<image src="/components/ui/images/wireframe/image.png" size="large" alt=""/>
 				</segment>
+				<message slot="description" size="small" class="site-not-ported">Not ported: Fomantic's loader settings (displayLoader, loaderVariation, loaderText). Put the loader you want inside the dimmer.</message>
 			</example>
 		</>
 	</>

@@ -41,38 +41,30 @@
 		<html>
 			<ui-docs-tokens family="ui-table" playground>
 				<ui-table celled>
-					<table>
-						<thead>
-							<tr>
-								<th>Name</>
-								<th>Status</>
-								<th>Notes</>
-							</>
-						</>
-						<tbody>
-							<tr>
-								<td>John</>
-								<td>Approved</>
-								<td>None</>
-							</>
-							<tr>
-								<td>Jamie</>
-								<td>Approved</>
-								<td>Requires call</>
-							</>
-							<tr>
-								<td>Jill</>
-								<td>Denied</>
-								<td>None</>
-							</>
-						</>
-						<tfoot>
-							<tr>
-								<th>3 People</>
-								<th>2 Approved</>
-								<td></>
-							</>
-						</>
+					<ui-row header>
+						<ui-cell>Name</>
+						<ui-cell>Status</>
+						<ui-cell>Notes</>
+					</>
+					<ui-row>
+						<ui-cell>John</>
+						<ui-cell>Approved</>
+						<ui-cell>None</>
+					</>
+					<ui-row>
+						<ui-cell>Jamie</>
+						<ui-cell>Approved</>
+						<ui-cell>Requires call</>
+					</>
+					<ui-row>
+						<ui-cell>Jill</>
+						<ui-cell>Denied</>
+						<ui-cell>None</>
+					</>
+					<ui-row footer>
+						<ui-cell header>3 People</>
+						<ui-cell header>2 Approved</>
+						<ui-cell></>
 					</>
 				</>
 			</>

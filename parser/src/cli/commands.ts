@@ -279,7 +279,7 @@ function listOf(value: string | undefined): string[] {
 /** What a language command says when no installed repo does its work (`needHook()`). */
 const NO_HOOK =
   "the language commands find projects the app's way for now -- addresses, groups, the editor's language service.  " +
-  "Clone spell-app:  yarn clone spell-app"
+  "They come with the app folder, app/:  run spell from a checkout of the whole repo"
 
 /** How to name projects, after each project command's help. */
 const PROJECT_HELP = `

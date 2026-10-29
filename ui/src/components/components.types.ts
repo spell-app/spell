@@ -339,6 +339,27 @@ export class StackClasses {
 }
 
 ////////////////
+// ## Space
+////////////////
+
+/**
+ * The theme's space steps by the words a page writes => their token:
+ * `<ui-stack spacing="sm">`, `<ui-space width="lg">`.
+ * - `none` is no space at all.
+ */
+export const SpaceSteps = {
+  none: "0",
+  xs: "var(--ui-space-xs)",
+  sm: "var(--ui-space-s)",
+  md: "var(--ui-space-m)",
+  lg: "var(--ui-space-l)",
+  xl: "var(--ui-space-xl)"
+} as const
+
+/** One of the words of `SpaceSteps`. */
+export type SpaceStep = keyof typeof SpaceSteps
+
+////////////////
 // ## Menu appearance
 ////////////////
 
@@ -988,11 +1009,14 @@ export const NO_ANIMATION = "none"
 export const Animations = [...VisibilityAnimations, ...AttentionAnimations, NO_ANIMATION] as const
 
 /**
- * The words the shared `font` takes, several at once (`font="bold italic"`;  epic `ui-gaps` P3):  how letters look.
- * - `<ui-text>` draws each as its HTML element (`<strong>`, `<em>`, `<code>`, `<mark>`, `<sub>`, `<sup>` ...);
+ * The faces the shared `font` takes, any together (`font="bold italic"`;  epic `ui-gaps` P3):  how letters look.
+ * - `all-caps` and `title-caps` change its letters' case (Owen, 2026-10-27):
+ *   every letter a capital, or each word's first.
+ * - `<ui-text>` draws each as its HTML element (`<strong>`, `<em>`, `<code>`, `<mark>`, `<sub>`, `<sup>` ...),
+ *   and takes each as a bare attribute too (`<ui-text bold>`;  epic `elemental-spell` P26);
  *   every other element shows the look alone (`reset.css`).
  */
-export const FontWords = [
+export const FontFaces = [
   "bold",
   "italic",
   "underline",
@@ -1000,8 +1024,32 @@ export const FontWords = [
   "code",
   "highlight",
   "subscript",
-  "superscript"
+  "superscript",
+  "all-caps",
+  "title-caps"
 ] as const
+
+/** One of them. */
+export type FontFace = (typeof FontFaces)[number]
+
+/**
+ * The families the shared `font` takes, the theme's (epic `elemental-spell` P26):  `font="bold serif"`.
+ * - One at a time:  written together, the first of `code`, `headline`, `subhead`, `serif`, `sans-serif`,
+ *   `typewriter` wins.
+ * - Each is a theme token:  `--ui-font-family-heading`, `-subhead`, `-serif`, `-sans`, `-typewriter`;
+ *   `code` is a face, `<code>`'s look.
+ */
+export const FontFamilies = ["headline", "subhead", "serif", "sans-serif", "typewriter"] as const
+
+/** One of them. */
+export type FontFamily = (typeof FontFamilies)[number]
+
+/**
+ * Every word the shared `font` takes:  its faces, then its families.
+ * - And a size, not a word:  `font="14"` is 14px, `font="10/20"` 10px on 20px lines
+ *   (`UIComponent.sharedFontSize`).
+ */
+export const FontWords = [...FontFaces, ...FontFamilies] as const
 
 /** One of them. */
 export type FontWord = (typeof FontWords)[number]

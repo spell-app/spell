@@ -50,6 +50,14 @@ export const themeMenuVocabulary = {
       description:
         'With `show="theme"`:  the dropdown is an icon-only palette button, its text (`Spell theme`) its tooltip ' +
         "and name, for a masthead's row of icon buttons."
+    },
+    {
+      name: "bench",
+      kind: "string",
+      description:
+        "Where the site with the theme bench starts (`http://127.0.0.1:4747`), for its Theme bench row, which opens " +
+        "Spell UI's theme bench page there in a new window, in the theme chosen;  none given:  this page's own site;  " +
+        "`none`:  no row."
     }
   ],
   events: [
@@ -66,7 +74,7 @@ export const themeMenuVocabulary = {
     {
       name: "end",
       description:
-        "At the foot of the palette's panel, under the themes and a divider:  a row of the page's own, " +
+        "At the foot of the palette's panel, under the themes and Theme bench:  a row of the page's own, " +
         "e.g. the Spell editor's 'Edit theme...'.  Styled as a theme's row.  Not in the theme list's arrow keys."
     }
   ],
@@ -83,7 +91,8 @@ export const themeMenuVocabulary = {
     { name: "schemes", description: "The overlay's Light | Dark | Auto control (`role=radiogroup`)." },
     { name: "scheme-option", description: "One choice in it (`role=radio`):  an icon and its name." },
     { name: "tip", description: 'A button\'s tooltip, a `<ui-popup inverted size="mini">`.' },
-    { name: "theme", description: 'The theme `<ui-dropdown>` (`show="theme"`).' }
+    { name: "theme", description: 'The theme `<ui-dropdown>` (`show="theme"`).' },
+    { name: "bench", description: "The overlay's Theme bench row, a link opening it in a new window." }
   ],
   states: [
     { name: "dark", description: "The page shows the dark scheme (chosen, or the OS's while following it)." },
@@ -126,6 +135,12 @@ export const themeMenuVocabulary = {
     { key: "schemeName", text: "Light or dark", description: "Accessible name of the overlay's scheme control." },
     { key: "light", text: "Light", description: "The scheme control's light choice." },
     { key: "dark", text: "Dark", description: "The scheme control's dark choice." },
-    { key: "auto", text: "Auto", description: "The scheme control's choice that follows the device's scheme." }
+    { key: "auto", text: "Auto", description: "The scheme control's choice that follows the device's scheme." },
+    { key: "bench", text: "Theme bench", description: "The row opening the theme bench." },
+    {
+      key: "benchTip",
+      text: "Open the theme bench in a new window, in this theme",
+      description: "Its tooltip."
+    }
   ]
 } as const satisfies E.ComponentVocabulary

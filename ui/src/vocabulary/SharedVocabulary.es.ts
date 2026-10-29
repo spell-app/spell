@@ -18,5 +18,25 @@ export const sharedEs = {
     font: "letra",
     tooltip: "ayuda",
     label: "etiqueta"
+  },
+  values: {
+    // `<es-texto letra="negrita cursiva">`;  a size stays a number (`letra="14"`)
+    font: {
+      bold: "negrita",
+      italic: "cursiva",
+      underline: "subrayado",
+      strikethrough: "tachado",
+      code: "código",
+      highlight: "resaltado",
+      subscript: "subíndice",
+      superscript: "superíndice",
+      "all-caps": "mayúsculas",
+      "title-caps": "iniciales",
+      headline: "titular",
+      subhead: "subtítulo",
+      serif: "serifa",
+      "sans-serif": "sin-serifa",
+      typewriter: "máquina"
+    }
   }
 } as const satisfies SharedDictionary

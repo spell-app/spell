@@ -25,6 +25,24 @@ describe("SpellxWriter:  a .spell file as spellx", () => {
     }
   )
 
+  test("a paragraph's blank line stays:  its line break, compiled the same (Owen, 2026-10-27)", () => {
+    const lines = [
+      'a "note" is a view where:',
+      "\t- to draw:",
+      "\t\t<ui-text paragraph>",
+      "\t\t\tFirst line",
+      "",
+      "\t\t\tSecond line",
+      "\t\t</ui-text>"
+    ]
+    const spellx = converted("/Note.spell", lines)
+    expect(spellx).toContain("First line\n\n\t\t\tSecond line")
+    const spell = compiled("/Note.spell", lines.join("\n"))
+    const back = compiled("/Note.spellx", spellx)
+    expect([back.errors, back.code]).toEqual([[], spell.code])
+    expect(spell.code).toContain("First line\\n\\nSecond line")
+  })
+
   test("a template and its members, each as its tag", () => {
     const spellx = converted("/Card.spell", [
       'a "card" is a view where:',

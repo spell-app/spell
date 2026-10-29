@@ -30,8 +30,7 @@
 
 	<section label="Examples">
 		<section label="Sticking to Adjacent Context" sticky collapsible dividing>
-			<example description="Sticky content attaches itself to the viewport when it is passed, and stays fixed to the viewport until it collides with the bottom edge of its context. Additional static content can exist above sticky content without affecting its position.">
-				<message slot="description" state="info" size="small"><html>The context is the sticky's PARENT, here a stretched <code>&lt;ui-column&gt;</code> (Fomantic uses rails outside the segment, where this site keeps its own columns). Fomantic's <code>context</code> setting (any element) has no CSS equivalent, so put the sticky inside the element it belongs to.</html></message>
+			<example "Sticking to Adjacent Context" description="Sticky content attaches itself to the viewport when it is passed, and stays fixed to the viewport until it collides with the bottom edge of its context. Additional static content can exist above sticky content without affecting its position.">
 				<segment>
 					<grid>
 						<column width="4" stretched>
@@ -62,11 +61,12 @@
 						</column>
 					</grid>
 				</segment>
+				<message slot="description" state="info" size="small">The context is the sticky's PARENT, here a stretched <text code>&lt;ui-column&gt;</text> (Fomantic uses rails outside the segment, where this site keeps its own columns). Fomantic's <text code>context</text> setting (any element) has no CSS equivalent, so put the sticky inside the element it belongs to.</message>
 			</example>
 		</>
 
 		<section label="Pushing" sticky="stack" collapsible dividing>
-			<example description="With `pushing` the viewport \"pushes\" the sticky content: it sticks to the top while scrolling down past it, and waits at the bottom edge (`bottom-offset` from it) while it is still below the fold.">
+			<example "Pushing" description="With `pushing` the viewport \"pushes\" the sticky content: it sticks to the top while scrolling down past it, and waits at the bottom edge (`bottom-offset` from it) while it is still below the fold.">
 				<segment>
 					<grid>
 						<column width="4" stretched>
@@ -102,133 +102,131 @@
 
 		<!-- GAP I67:  the narrow column stacks the items, so each tiny image grows to the column width (fixed in source;  shows after the next site build). -->
 		<section label="Oversized Content" sticky collapsible dividing>
-			<example description="Sticky content that is larger than the viewport stays where the page puts it: a `position: sticky` box taller than the view scrolls with the page until its end is reached, then sticks.">
-				<message slot="description" size="small" class="site-not-ported"><html>Not ported: Fomantic's scrolling of oversized content against the scroll direction -- the browser's <code>position: sticky</code> does the sticking, with no scroll listener.</html></message>
-				<html>
-					<ui-segment>
-						<ui-grid>
-							<ui-column width="4" stretched>
-								<ui-sticky offset="64">
-									<ui-header level="3">Long Stuck Content</ui-header>
-									<ui-items divided>
-										<ui-item>
-											<ui-image src="/components/ui/images/wireframe/image.png" alt="" size="tiny"></ui-image>
-											<ui-content vertical-align="middle">
-												<ui-header link="#followup">Followup Article</ui-header>
-												<ui-meta>By <a href="#author">Author</a></ui-meta>
-											</ui-content>
-										</ui-item>
-										<ui-item>
-											<ui-image src="/components/ui/images/wireframe/image.png" alt="" size="tiny"></ui-image>
-											<ui-content vertical-align="middle">
-												<ui-header link="#followup">Followup Article</ui-header>
-												<ui-meta>By <a href="#author">Author</a></ui-meta>
-											</ui-content>
-										</ui-item>
-										<ui-item>
-											<ui-image src="/components/ui/images/wireframe/image.png" alt="" size="tiny"></ui-image>
-											<ui-content vertical-align="middle">
-												<ui-header link="#followup">Followup Article</ui-header>
-												<ui-meta>By <a href="#author">Author</a></ui-meta>
-											</ui-content>
-										</ui-item>
-										<ui-item>
-											<ui-image src="/components/ui/images/wireframe/image.png" alt="" size="tiny"></ui-image>
-											<ui-content vertical-align="middle">
-												<ui-header link="#followup">Followup Article</ui-header>
-												<ui-meta>By <a href="#author">Author</a></ui-meta>
-											</ui-content>
-										</ui-item>
-										<ui-item>
-											<ui-image src="/components/ui/images/wireframe/image.png" alt="" size="tiny"></ui-image>
-											<ui-content vertical-align="middle">
-												<ui-header link="#followup">Followup Article</ui-header>
-												<ui-meta>By <a href="#author">Author</a></ui-meta>
-											</ui-content>
-										</ui-item>
-										<ui-item>
-											<ui-image src="/components/ui/images/wireframe/image.png" alt="" size="tiny"></ui-image>
-											<ui-content vertical-align="middle">
-												<ui-header link="#followup">Followup Article</ui-header>
-												<ui-meta>By <a href="#author">Author</a></ui-meta>
-											</ui-content>
-										</ui-item>
-										<ui-item>
-											<ui-image src="/components/ui/images/wireframe/image.png" alt="" size="tiny"></ui-image>
-											<ui-content vertical-align="middle">
-												<ui-header link="#followup">Followup Article</ui-header>
-												<ui-meta>By <a href="#author">Author</a></ui-meta>
-											</ui-content>
-										</ui-item>
-										<ui-item>
-											<ui-image src="/components/ui/images/wireframe/image.png" alt="" size="tiny"></ui-image>
-											<ui-content vertical-align="middle">
-												<ui-header link="#followup">Followup Article</ui-header>
-												<ui-meta>By <a href="#author">Author</a></ui-meta>
-											</ui-content>
-										</ui-item>
-										<ui-item>
-											<ui-image src="/components/ui/images/wireframe/image.png" alt="" size="tiny"></ui-image>
-											<ui-content vertical-align="middle">
-												<ui-header link="#followup">Followup Article</ui-header>
-												<ui-meta>By <a href="#author">Author</a></ui-meta>
-											</ui-content>
-										</ui-item>
-										<ui-item>
-											<ui-image src="/components/ui/images/wireframe/image.png" alt="" size="tiny"></ui-image>
-											<ui-content vertical-align="middle">
-												<ui-header link="#followup">Followup Article</ui-header>
-												<ui-meta>By <a href="#author">Author</a></ui-meta>
-											</ui-content>
-										</ui-item>
-										<ui-item>
-											<ui-image src="/components/ui/images/wireframe/image.png" alt="" size="tiny"></ui-image>
-											<ui-content vertical-align="middle">
-												<ui-header link="#followup">Followup Article</ui-header>
-												<ui-meta>By <a href="#author">Author</a></ui-meta>
-											</ui-content>
-										</ui-item>
-										<ui-item>
-											<ui-image src="/components/ui/images/wireframe/image.png" alt="" size="tiny"></ui-image>
-											<ui-content vertical-align="middle">
-												<ui-header link="#followup">Followup Article</ui-header>
-												<ui-meta>By <a href="#author">Author</a></ui-meta>
-											</ui-content>
-										</ui-item>
-									</ui-items>
-								</ui-sticky>
-							</ui-column>
-							<ui-column width="8">
-								<ui-image src="/components/ui/images/wireframe/paragraph.png" alt=""></ui-image>
-								<ui-image src="/components/ui/images/wireframe/paragraph.png" alt=""></ui-image>
-								<ui-image src="/components/ui/images/wireframe/paragraph.png" alt=""></ui-image>
-								<ui-image src="/components/ui/images/wireframe/paragraph.png" alt=""></ui-image>
-								<ui-image src="/components/ui/images/wireframe/paragraph.png" alt=""></ui-image>
-								<ui-image src="/components/ui/images/wireframe/paragraph.png" alt=""></ui-image>
-								<ui-image src="/components/ui/images/wireframe/paragraph.png" alt=""></ui-image>
-								<ui-image src="/components/ui/images/wireframe/paragraph.png" alt=""></ui-image>
-								<ui-image src="/components/ui/images/wireframe/paragraph.png" alt=""></ui-image>
-								<ui-image src="/components/ui/images/wireframe/paragraph.png" alt=""></ui-image>
-								<ui-image src="/components/ui/images/wireframe/paragraph.png" alt=""></ui-image>
-								<ui-image src="/components/ui/images/wireframe/paragraph.png" alt=""></ui-image>
-								<ui-image src="/components/ui/images/wireframe/paragraph.png" alt=""></ui-image>
-								<ui-image src="/components/ui/images/wireframe/paragraph.png" alt=""></ui-image>
-								<ui-image src="/components/ui/images/wireframe/paragraph.png" alt=""></ui-image>
-							</ui-column>
-							<ui-column width="4" stretched>
-								<ui-sticky offset="64">
-									<ui-header level="3">Short Stuck Content</ui-header>
-									<ui-image src="/components/ui/images/wireframe/image.png" alt=""></ui-image>
-								</ui-sticky>
-							</ui-column>
-						</ui-grid>
-					</ui-segment>
-				</html>
+			<example "Oversized Content" description="Sticky content that is larger than the viewport stays where the page puts it: a `position: sticky` box taller than the view scrolls with the page until its end is reached, then sticks.">
+				<segment>
+					<grid>
+						<column width="4" stretched>
+							<sticky offset="64">
+								<header level="3">Long Stuck Content</header>
+								<items divided>
+									<item>
+										<image src="/components/ui/images/wireframe/image.png" alt="" size="tiny"/>
+										<content vertical-align="middle">
+											<header link="#followup">Followup Article</header>
+											<meta>By <link link="#author">Author</link></meta>
+										</content>
+									</item>
+									<item>
+										<image src="/components/ui/images/wireframe/image.png" alt="" size="tiny"/>
+										<content vertical-align="middle">
+											<header link="#followup">Followup Article</header>
+											<meta>By <link link="#author">Author</link></meta>
+										</content>
+									</item>
+									<item>
+										<image src="/components/ui/images/wireframe/image.png" alt="" size="tiny"/>
+										<content vertical-align="middle">
+											<header link="#followup">Followup Article</header>
+											<meta>By <link link="#author">Author</link></meta>
+										</content>
+									</item>
+									<item>
+										<image src="/components/ui/images/wireframe/image.png" alt="" size="tiny"/>
+										<content vertical-align="middle">
+											<header link="#followup">Followup Article</header>
+											<meta>By <link link="#author">Author</link></meta>
+										</content>
+									</item>
+									<item>
+										<image src="/components/ui/images/wireframe/image.png" alt="" size="tiny"/>
+										<content vertical-align="middle">
+											<header link="#followup">Followup Article</header>
+											<meta>By <link link="#author">Author</link></meta>
+										</content>
+									</item>
+									<item>
+										<image src="/components/ui/images/wireframe/image.png" alt="" size="tiny"/>
+										<content vertical-align="middle">
+											<header link="#followup">Followup Article</header>
+											<meta>By <link link="#author">Author</link></meta>
+										</content>
+									</item>
+									<item>
+										<image src="/components/ui/images/wireframe/image.png" alt="" size="tiny"/>
+										<content vertical-align="middle">
+											<header link="#followup">Followup Article</header>
+											<meta>By <link link="#author">Author</link></meta>
+										</content>
+									</item>
+									<item>
+										<image src="/components/ui/images/wireframe/image.png" alt="" size="tiny"/>
+										<content vertical-align="middle">
+											<header link="#followup">Followup Article</header>
+											<meta>By <link link="#author">Author</link></meta>
+										</content>
+									</item>
+									<item>
+										<image src="/components/ui/images/wireframe/image.png" alt="" size="tiny"/>
+										<content vertical-align="middle">
+											<header link="#followup">Followup Article</header>
+											<meta>By <link link="#author">Author</link></meta>
+										</content>
+									</item>
+									<item>
+										<image src="/components/ui/images/wireframe/image.png" alt="" size="tiny"/>
+										<content vertical-align="middle">
+											<header link="#followup">Followup Article</header>
+											<meta>By <link link="#author">Author</link></meta>
+										</content>
+									</item>
+									<item>
+										<image src="/components/ui/images/wireframe/image.png" alt="" size="tiny"/>
+										<content vertical-align="middle">
+											<header link="#followup">Followup Article</header>
+											<meta>By <link link="#author">Author</link></meta>
+										</content>
+									</item>
+									<item>
+										<image src="/components/ui/images/wireframe/image.png" alt="" size="tiny"/>
+										<content vertical-align="middle">
+											<header link="#followup">Followup Article</header>
+											<meta>By <link link="#author">Author</link></meta>
+										</content>
+									</item>
+								</items>
+							</sticky>
+						</column>
+						<column width="8">
+							<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
+							<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
+							<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
+							<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
+							<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
+							<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
+							<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
+							<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
+							<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
+							<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
+							<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
+							<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
+							<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
+							<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
+							<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
+						</column>
+						<column width="4" stretched>
+							<sticky offset="64">
+								<header level="3">Short Stuck Content</header>
+								<image src="/components/ui/images/wireframe/image.png" alt=""/>
+							</sticky>
+						</column>
+					</grid>
+				</segment>
+				<message slot="description" size="small" class="site-not-ported">Not ported: Fomantic's scrolling of oversized content against the scroll direction -- the browser's <text code>position: sticky</text> does the sticking, with no scroll listener.</message>
 			</example>
 		</>
 
 		<section label="Sticking to Own Context" sticky collapsible dividing>
-			<example description="Sticky content can also stick within the element it's in. It keeps its room while stuck, so the content after it doesn't jump: no `ui fixed sticky + p` margin fix is needed.">
+			<example "Sticking to Own Context" description="Sticky content can also stick within the element it's in. It keeps its room while stuck, so the content after it doesn't jump: no `ui fixed sticky + p` margin fix is needed.">
 				<segment>
 					<sticky offset="64">
 						<menu fluid items="3" appearance="tabular" aria-label="Tabs">

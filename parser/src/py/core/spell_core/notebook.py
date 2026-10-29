@@ -7,6 +7,7 @@
 from typing import Any
 
 from spell_core.apps import Page
+from spell_core.drawing import h
 from spell_core.things import prop
 
 
@@ -17,7 +18,7 @@ class Notebook(Page):
     its body:  markdown, drawing tags and `<example>`s.
     """
 
-    parts = ("content",)
+    slots = ("content",)
 
     # whether whoever can't write its file may change it:  a locked notebook's other readers only try things out
     # - its "lock" is unlocked or locked
@@ -26,7 +27,7 @@ class Notebook(Page):
 
     def draw(self) -> Any:
         """its content:  the editor app draws its own page around it, with the sections and the toolbar"""
-        return self.draw_content()
+        return h("slot", {"name": "content"}, self.draw_content())
 
     def draw_content(self) -> Any:
         """Its content:  nothing, until a view made from it draws it, `to draw its content:`."""

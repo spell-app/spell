@@ -27,31 +27,27 @@
 	-->
 	<section label="Types">
 		<section label="Zoom" sticky="stack" collapsible dividing>
-			<example description="Round any content:  shown at half size, laid out as it is full size.  A click (or Enter) shows it full size, over the page;  Escape, the backdrop or the close button shut it.">
-				<html>
-					<ui-zoom max-width="360px">
-						<ui-segment>
-							<ui-header level="3">Release notes</ui-header>
-							<p>Spell UI adds a zoom, a stack, and a textarea that grows with its text.</p>
-							<ui-button color="primary">Read more</ui-button>
-						</ui-segment>
-					</ui-zoom>
-				</html>
+			<example "Zoom" description="Round any content:  shown at half size, laid out as it is full size.  A click (or Enter) shows it full size, over the page;  Escape, the backdrop or the close button shut it.">
+				<zoom max-width="360px">
+					<segment>
+						<header level="3">Release notes</header>
+						<text paragraph>Spell UI adds a zoom, a stack, and a textarea that grows with its text.</text>
+						<button color="primary">Read more</button>
+					</segment>
+				</zoom>
 			</example>
 		</>
 
 		<section label="Screenshot" sticky="stack" collapsible dividing>
-			<example description="A plain `<img>` inside it:  a screenshot shown at a third of its size, then full size.">
-				<html>
-					<ui-zoom shrink="33%">
-						<img src="/components/ui/images/hello-light.png" alt="Hello, in the light theme" />
-					</ui-zoom>
-				</html>
+			<example "Screenshot" description="A plain `<img>` inside it:  a screenshot shown at a third of its size, then full size.">
+				<zoom shrink="33%">
+					<image alt="Hello, in the light theme" src="/components/ui/images/hello-light.png"/>
+				</zoom>
 			</example>
 		</>
 
 		<section label="Image" sticky="stack" collapsible dividing>
-			<example description="`<ui-image zoom>`:  the image itself is the button, and opens in the page's zoom, its alt text under it.">
+			<example "Image" description="`<ui-image zoom>`:  the image itself is the button, and opens in the page's zoom, its alt text under it.">
 				<image zoom src="/components/ui/images/hello-light.png" alt="Hello, in the light theme" style="width: 240px"/>
 			</example>
 		</>
@@ -59,28 +55,26 @@
 
 	<section label="Variations">
 		<section label="Shrink" sticky="stack" collapsible dividing>
-			<example description="`shrink`:  how big the content is in the page, as a percentage of its full size;  `50%` by default.">
-				<html>
-					<ui-stack direction="horizontal" align="start">
-						<ui-zoom shrink="25%">
-							<ui-segment style="width: 400px">
-								<ui-header level="3">25%</ui-header>
-								<p>A quarter of its size.</p>
-							</ui-segment>
-						</ui-zoom>
-						<ui-zoom shrink="50%">
-							<ui-segment style="width: 400px">
-								<ui-header level="3">50%</ui-header>
-								<p>Half its size.</p>
-							</ui-segment>
-						</ui-zoom>
-					</ui-stack>
-				</html>
+			<example "Shrink" description="`shrink`:  how big the content is in the page, as a percentage of its full size;  `50%` by default.">
+				<stack direction="horizontal" align="start">
+					<zoom shrink="25%">
+						<segment style="width: 400px">
+							<header level="3">25%</header>
+							<text paragraph>A quarter of its size.</text>
+						</segment>
+					</zoom>
+					<zoom shrink="50%">
+						<segment style="width: 400px">
+							<header level="3">50%</header>
+							<text paragraph>Half its size.</text>
+						</segment>
+					</zoom>
+				</stack>
 			</example>
 		</>
 
 		<section label="Cut off" sticky="stack" collapsible dividing>
-			<example description="`max-width` and `max-height`:  the most room it takes;  past them the content is cut off until it's shown full size.  `shrink=\"100%\"` keeps it full size, only cut off.">
+			<example "Cut off" description="`max-width` and `max-height`:  the most room it takes;  past them the content is cut off until it's shown full size.  `shrink=\"100%\"` keeps it full size, only cut off.">
 				<zoom max-height="120px" shrink="100%">
 					<list bulleted>
 						<item>Zoom</item>

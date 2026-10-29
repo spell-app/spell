@@ -17,7 +17,7 @@ import { SX } from "spell/parser/spellx"
  * twin `.spell` file does.
  * - The pairs are in `spellx/`:  each `X.spellx` beside the `X.spell` it means.
  *   - `Card`:  o1's playing card, its drawings naming components bare (`<text>`, P7), and no `pass event` (P9).
- *   - `FlipTile`:  an event, an action's details, a drawing's if-chain placing parts.
+ *   - `FlipTile`:  an event, an action's details, a drawing's if-chain placing slots.
  *   - `Deck`:  a template with nothing inside, a list template, bodies on a tag's own line.
  *   - `Scores`:  a page template, an app, a test.
  *   - `DoubleSidedView`:  o1's two sided view, renamed:  two sided view is spell's own template now (J35).
@@ -229,6 +229,108 @@ describe("spellx:  a third style of spell", () => {
     })
   })
 
+  // epic `elemental-spell` P27
+  describe("a view's slots, filled where it's drawn:  slot=", () => {
+    const card = (front: string) => [
+      '<spell-view "card">',
+      '\t<draw "front">',
+      `\t\t${front}`,
+      "\t</draw>",
+      "\t<draw>",
+      '\t\t<draw "front" />',
+      "\t</draw>",
+      "</spell-view>"
+    ]
+    const table = (cardTag: string) => [
+      '<spell-view "table">',
+      "\t<draw>",
+      `\t\t<${cardTag}><text slot="front">Ace</text></${cardTag}>`,
+      "\t</draw>",
+      "</spell-view>"
+    ]
+
+    test("a placed slot is the web's own, holding its drawing;  what's put in it with slot= takes its place", () => {
+      const { code, errors } = compiledText([...card("<text>Card</text>"), ...table("card")])
+      expect(errors).toEqual([])
+      // the card's own drawing, inside its slot:  shown unless the page fills it
+      expect(code).toContain('h("slot", { name: "front" }, () => this.drawFront())')
+      expect(code).toContain('h("ui-text", { part: "front" }, "Card")')
+      // the table fills that card's front
+      expect(code).toMatch(/h\("[a-z-]+-card", h\("ui-text", \{ slot: "front" \}, "Ace"\)\)/)
+    })
+
+    test("a card left unfilled is drawn with no children:  its slot shows its own drawing", () => {
+      const { code } = compiledText([
+        ...card("<text>Card</text>"),
+        '<spell-view "table">',
+        "\t<draw>",
+        "\t\t<card />",
+        "\t</draw>",
+        "</spell-view>"
+      ])
+      expect(code).toMatch(/h\("[a-z-]+-card"\)/)
+      expect(code).toContain('h("slot", { name: "front" }, () => this.drawFront())')
+    })
+
+    test("a view built on it draws the slot again:  its own drawing fills the slot, which slot= still takes over", () => {
+      const { code, errors } = compiledText([
+        ...card("<text>Card</text>"),
+        '<spell-view "joker" template="card">',
+        '\t<draw "front">',
+        "\t\t<text>Joker</text>",
+        "\t</draw>",
+        "</spell-view>"
+      ])
+      expect(errors).toEqual([])
+      expect(code).toMatch(
+        /class Joker extends Card \{[^}]*drawFront\(\) \{\s+return h\("ui-text", \{ part: "front" \}, "Joker"\)/
+      )
+      // the slot itself is the card's, placed in its drawing:  the joker's drawing goes in it
+      expect(code.match(/h\("slot", \{ name: "front" \}/g)).toHaveLength(1)
+    })
+
+    test("its code-spell twin is the same markup, with spell's own in= (or slot=)", () => {
+      const spellx = compiledText([...card("<text>Card</text>"), ...table("card")])
+      const tag = /h\("([a-z-]+-card)"/.exec(spellx.code)![1]!
+      const spell = compiledText(
+        [
+          'a "card" is a view where:',
+          "\t- to draw its front:",
+          "\t\t<ui-text>Card</ui-text>",
+          "\t- to draw it:",
+          "\t\tdraw its front",
+          'a "table" is a view where:',
+          "\t- to draw it:",
+          `\t\t<${tag}><ui-text in="front">Ace</ui-text></${tag}>`
+        ],
+        { path: "/test.spell" }
+      )
+      expect(spellx.errors).toEqual([])
+      expect(spell.errors).toEqual([])
+      expect(spellx.code).toBe(spell.code)
+    })
+
+    test("in Spanish, slot= names the slot in the file's words:  a two sided view's frente is its front", () => {
+      const { code, errors } = compiledText(
+        [
+          '<encanto-vista "carta" plantilla="vista reversible">',
+          '\t<dibujar "frente">',
+          "\t\t<texto>Carta</texto>",
+          "\t</dibujar>",
+          "</encanto-vista>",
+          '<encanto-vista "mesa">',
+          "\t<dibujar>",
+          '\t\t<carta><texto slot="frente">As</texto></carta>',
+          "\t</dibujar>",
+          "</encanto-vista>"
+        ],
+        { path: "/prueba.es.spellx" }
+      )
+      expect(errors).toEqual([])
+      expect(code).toMatch(/h\("[a-z-]+-carta", h\("es-texto", \{ slot: "front" \}, "As"\)\)/)
+    })
+  })
+
   describe("a mistake is an error on its own line", () => {
     test("a word spellx doesn't know, naming the closest", () => {
       const { errors } = compiledText(['<spell-view "card">', '\t<propety "suit" one-of="a, b" />', "</spell-view>"])
@@ -297,6 +399,21 @@ describe("spellx:  a third style of spell", () => {
         }
       )
       expect(unclosed.errors).toEqual(['2:1 <acción> nunca se cierra:  termínalo con "</>"'])
+    })
+
+    test("a bare `draggable`, `droppable`, `selectable` is the outline's `- it is draggable` ...", () => {
+      const { code, errors } = compiledText(['<spell-view "card" draggable selectable>', "</spell-view>"])
+      expect(errors).toEqual([])
+      expect(code).toContain("static canBeDragged = true")
+      expect(code).toContain("static canBeSelected = true")
+      expect(code).not.toContain("canBeDroppedOn")
+      const pile = compiledText(['<spell-view "pile" droppable>', "</spell-view>"])
+      expect(pile.errors).toEqual([])
+      expect(pile.code).toContain("static canBeDroppedOn = true")
+      // Spanish
+      const es = compiledText(['<encanto-vista "carta" arrastrable>', "</encanto-vista>"], { path: "Carta.es.spellx" })
+      expect(es.errors).toEqual([])
+      expect(es.code).toContain("static canBeDragged = true")
     })
 
     test("a menu:  one line naming its actions, the app's menu bar a line ending its body (P10)", () => {

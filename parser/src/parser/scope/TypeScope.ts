@@ -59,18 +59,18 @@ export class TypeScope extends BlockScope {
    */
   declare valueKind?: ValueKind
   /**
-   * A view's PARTS:  the named drawings it places, which it or a type built on it draws (epic `elemental-spell` P5),
+   * A view's SLOTS:  the named drawings it places, which it or a type built on it draws (epic `elemental-spell` P5),
    * e.g. a two sided view's `front` and `back` -- `undefined` if it has none.
-   * - Declared by spell's `- it has parts "front" and "back"`, or by a part's own drawing, `- to draw its front:`.
-   * - Journaled:  see `declarePart()`.  Read through `hasPart()`, which walks the super-type chain.
+   * - Declared by spell's `- it has slots "front" and "back"`, or by a slot's own drawing, `- to draw its front:`.
+   * - Journaled:  see `declareSlot()`.  Read through `hasSlot()`, which walks the super-type chain.
    */
-  declare parts?: string[]
+  declare slots?: string[]
   /**
-   * The name each of our parts compiles by, when it isn't its own -- e.g. a two sided view's Spanish `frente` draws
+   * The name each of our slots compiles by, when it isn't its own -- e.g. a two sided view's Spanish `frente` draws
    * with `drawFront()` (epic `elemental-spell` Q71):  a built-in template has ONE class, whatever language says it.
-   * - Read through `partOutput()`, which walks the super-type chain.
+   * - Read through `slotOutput()`, which walks the super-type chain.
    */
-  declare partOutputs?: Record<string, string>
+  declare slotOutputs?: Record<string, string>
   /**
    * Name of our class when the code runs, if not `name` -- e.g. `Card` for a type imported as `Playingcard`.
    * - Why:  runtime type checks compare class names as strings, e.g. `core.isOfType(thing, 'Card')`.
@@ -107,22 +107,22 @@ export class TypeScope extends BlockScope {
   ////////////////
 
   /**
-   * SIDE EFFECT:  `name` is one of our parts -- see `parts`.  Journaled, so incremental parsing can take it back.
-   * - Once only:  a second declaration of the same part changes nothing.
+   * SIDE EFFECT:  `name` is one of our slots -- see `slots`.  Journaled, so incremental parsing can take it back.
+   * - Once only:  a second declaration of the same slot changes nothing.
    */
-  declarePart(name: string, declaredBy: P.Match): void {
-    if (this.parts?.includes(name)) return
-    P.ParseJournal.assign(declaredBy.scope.parser?.journal, this as TypeScope, { parts: [...(this.parts ?? []), name] })
+  declareSlot(name: string, declaredBy: P.Match): void {
+    if (this.slots?.includes(name)) return
+    P.ParseJournal.assign(declaredBy.scope.parser?.journal, this as TypeScope, { slots: [...(this.slots ?? []), name] })
   }
 
-  /** Is `name` a part of ours, or of a type we're built on?  See `parts`. */
-  hasPart(name: string): boolean {
-    return this.chain().some((type) => type.parts?.includes(name))
+  /** Is `name` a slot of ours, or of a type we're built on?  See `slots`. */
+  hasSlot(name: string): boolean {
+    return this.chain().some((type) => type.slots?.includes(name))
   }
 
-  /** The name part `name` compiles by, e.g. `front` for a two sided view's `frente` -- itself if no type says.  See `partOutputs`. */
-  partOutput(name: string): string {
-    return this.chain().find((type) => type.partOutputs?.[name])?.partOutputs?.[name] ?? name
+  /** The name slot `name` compiles by, e.g. `front` for a two sided view's `frente` -- itself if no type says.  See `slotOutputs`. */
+  slotOutput(name: string): string {
+    return this.chain().find((type) => type.slotOutputs?.[name])?.slotOutputs?.[name] ?? name
   }
 
   /**

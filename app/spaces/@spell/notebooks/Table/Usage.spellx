@@ -83,46 +83,38 @@
 		</>
 
 		<section label="Client sort" sticky="stack" collapsible dividing>
-			<example description="`client-sort` reorders the rows by cell text on each `ui-sorting`.  Click a header.">
-				<html>
-					<ui-table sortable client-sort celled>
-						<table>
-							<thead>
-								<tr>
-									<th data-key="name">
-										<button type="button">Name</button>
-									</th>
-									<th data-key="calories" class="right aligned">
-										<button type="button">Calories</button>
-									</th>
-									<th data-sortable="false">Notes</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr>
-									<td>Bread</td>
-									<td class="right aligned">150</td>
-									<td>Wholemeal</td>
-								</tr>
-								<tr>
-									<td>Apples</td>
-									<td class="right aligned">95</td>
-									<td>None</td>
-								</tr>
-								<tr>
-									<td>Cheese</td>
-									<td class="right aligned">1200</td>
-									<td>Per kilo</td>
-								</tr>
-								<tr>
-									<td>Oranges</td>
-									<td class="right aligned">62</td>
-									<td>None</td>
-								</tr>
-							</tbody>
-						</table>
-					</ui-table>
-				</html>
+			<example "Client sort" description="`client-sort` reorders the rows by cell text on each `ui-sorting`.  Click a header.">
+				<table sortable client-sort celled>
+					<row header>
+						<cell data-key="name">
+							<button type="button">Name</button>
+						</cell>
+						<cell align="right" data-key="calories">
+							<button type="button">Calories</button>
+						</cell>
+						<cell data-sortable="false">Notes</cell>
+					</row>
+					<row>
+						<cell>Bread</cell>
+						<cell align="right">150</cell>
+						<cell>Wholemeal</cell>
+					</row>
+					<row>
+						<cell>Apples</cell>
+						<cell align="right">95</cell>
+						<cell>None</cell>
+					</row>
+					<row>
+						<cell>Cheese</cell>
+						<cell align="right">1200</cell>
+						<cell>Per kilo</cell>
+					</row>
+					<row>
+						<cell>Oranges</cell>
+						<cell align="right">62</cell>
+						<cell>None</cell>
+					</row>
+				</table>
 			</example>
 		</>
 	</>

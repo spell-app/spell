@@ -18,26 +18,24 @@
 	-->
 	<section label="Owners">
 		<section label="Comment" sticky="stack" collapsible dividing>
-			<example description="A comment's author, before its metadata.">
-				<html>
-					<ui-comments>
-						<ui-comment>
-							<ui-avatar src="/components/ui/images/avatar/small/matt.jpg"></ui-avatar>
-							<ui-content>
-								<ui-author link="#matt">Matt</ui-author>
-								<ui-meta>
-									<span>Today at 5:42PM</span>
-								</ui-meta>
-								<ui-description>How artistic!</ui-description>
-							</ui-content>
-						</ui-comment>
-					</ui-comments>
-				</html>
+			<example "Comment" description="A comment's author, before its metadata.">
+				<comments>
+					<comment>
+						<avatar src="/components/ui/images/avatar/small/matt.jpg"/>
+						<content>
+							<author link="#matt">Matt</author>
+							<meta>
+								<text>Today at 5:42PM</text>
+							</meta>
+							<description>How artistic!</description>
+						</content>
+					</comment>
+				</comments>
 			</example>
 		</>
 
 		<section label="Feed" sticky="stack" collapsible dividing>
-			<example description="A feed event's user, inline in its summary.">
+			<example "Feed" description="A feed event's user, inline in its summary.">
 				<feed>
 					<event>
 						<content>
@@ -51,7 +49,7 @@
 
 	<section label="Variations">
 		<section label="Link" sticky="stack" collapsible dividing>
-			<example description="With `link`, an author is a real link;  without, plain text.">
+			<example "Link" description="With `link`, an author is a real link;  without, plain text.">
 				<comments>
 					<comment>
 						<content>

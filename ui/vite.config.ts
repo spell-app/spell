@@ -71,6 +71,7 @@ export const COMPONENTS = [
   "ui-items",
   "ui-feed",
   "ui-comment",
+  "ui-space",
   "ui-stack",
   "ui-quote",
   "ui-keys",

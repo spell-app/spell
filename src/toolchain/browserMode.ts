@@ -25,7 +25,7 @@ type ReducedMotion = "reduce" | "no-preference"
  * The `browser` block of every Vitest project that runs tests in a REAL browser, in every repo:
  * Vitest browser mode, headless, through Playwright.
  * - `playwright`:  the provider, `playwright` of `vite-plus/test/browser-playwright`, as the CONFIG imports it.
- *   - Not imported here:  a child repo may find its own copy of Vitest,
+ *   - Not imported here:  a folder may find its own copy of Vitest,
  *     and a provider typed by the kit's copy doesn't fit its config's types.
  * - Animations OFF:  the page asks for reduced motion (`prefers-reduced-motion: reduce`), as a person can.
  *   - Spell UI's elements show and hide at once, and their CSS motion stops (its `reset.css`, `animations.css`).

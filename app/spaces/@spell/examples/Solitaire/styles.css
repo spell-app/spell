@@ -136,13 +136,26 @@
   }
 }
 
-/* An empty pile's placeholder:  a faint card in the page's text colour, so it shows on a dark page too */
+/* An empty pile's placeholder:  a faint card in a mid grey, so it shows on a light page and a dark one alike */
 [layout]::part(placeholder) {
-  color: var(--ui-text-color, #000);
-  opacity: 0.15;
+  color: #8a8f99;
+  opacity: 0.35;
 }
 [layout]::part(placeholder):hover {
-  opacity: 0.25;
+  opacity: 0.5;
+}
+
+/*
+ * A real deck's colours, the same in every theme and scheme (Owen:  "colors should be the same for all themes",
+ * "foundation colors too"):  each card drawn in the light scheme, so a dark theme doesn't lighten its inks,
+ * and its three inks fixed, so a theme's own red, black and blue don't reach it;  an empty pile's placeholder
+ * (above) a mid grey that shows on a light page and a dark one alike
+ */
+[layout] > * {
+  color-scheme: light;
+  --ui-red-text: #c8102e;
+  --ui-black-text: #1a1a1a;
+  --ui-blue-text: #2f6fd6;
 }
 
 /****************

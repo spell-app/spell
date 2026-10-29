@@ -290,6 +290,14 @@ describe("things inside things", () => {
     pile.name = ""
     expect(Inspector.thingLabel(pile, "#3")).toBe("Pile #3")
   })
+
+  test("a thing named in its language's own word:  Spanish's `su \"nombre\" es ...` titles it `Carta · <nombre>`", () => {
+    class Carta {}
+    const carta = Object.assign(new Carta(), { nombre: "dama de espadas" })
+    expect(Inspector.nameOf(carta, ["es"])).toBe("dama de espadas")
+    expect(Inspector.nameOf(carta, ["en"])).toBe("")
+    expect(Inspector.nameOf(Object.assign(new Carta(), { name: "queen" }), ["es", "en"])).toBe("queen")
+  })
 })
 
 /** An app area holding `html`, on the page for the test. */

@@ -23,450 +23,415 @@
 	-->
 	<section label="Types">
 		<section label="Section" sticky="stack" collapsible dividing>
-			<example description="A section is a title over its content.  The title is a real heading:  `level` picks `h1` ... `h6`.">
-				<html>
-					<ui-section label="Getting started" level="4">
-						<p>Install the package, import the families you use, and write the tags in your markup.</p>
-					</ui-section>
-				</html>
+			<example "Section" description="A section is a title over its content.  The title is a real heading:  `level` picks `h1` ... `h6`.">
+				<section label="Getting started" level="4">
+					<text paragraph>Install the package, import the families you use, and write the tags in your markup.</text>
+				</section>
 			</example>
 		</>
 
 		<section label="Collapsible" sticky="stack" collapsible dividing>
-			<example description="A `collapsible` section closes and opens when its title is activated.  `open=\"false\"` starts it closed.">
-				<html>
-					<ui-section label="Release notes" level="4" collapsible>
-						<p>Open by default: activate the title to close it.</p>
-					</ui-section>
-					<ui-section label="Older releases" level="4" collapsible open="false">
-						<p>Closed at the start: only the title shows until it is activated.</p>
-					</ui-section>
-				</html>
+			<example "Collapsible" description="A `collapsible` section closes and opens when its title is activated.  `open=\"false\"` starts it closed.">
+				<section label="Release notes" level="4" collapsible>
+					<text paragraph>Open by default: activate the title to close it.</text>
+				</section>
+				<section label="Older releases" level="4" collapsible open="false">
+					<text paragraph>Closed at the start: only the title shows until it is activated.</text>
+				</section>
 			</example>
 		</>
 
 		<section label="Sticky" sticky="stack" collapsible dividing>
-			<example description="A `sticky` section keeps its title in view while its content scrolls past.  Nested sticky titles stack below their parent's.  Scroll the box.">
-				<html>
-					<ui-segment>
-						<ui-root height="16em" aria-label="Sticky section example" display="immediately">
-							<ui-section label="Chapter 1" level="4" sticky block>
-								<p>The chapter's title sticks to the top of the box while any of the chapter is on screen.</p>
-								<ui-section label="Part A" sticky dividing>
-									<p>This title sticks just below the chapter's.</p>
-									<p>Keep scrolling: both titles stay until their sections end.</p>
-									<p>When Part A ends, Part B's title takes its place.</p>
-								</ui-section>
-								<ui-section label="Part B" sticky dividing>
-									<p>A second nested section, stuck below the same chapter title.</p>
-									<p>Its title leaves with it at the end of the chapter.</p>
-								</ui-section>
-							</ui-section>
-							<ui-section label="Chapter 2" level="4" sticky block>
-								<p>The next chapter's title pushes the first one out.</p>
-								<p>The end of the box.</p>
-							</ui-section>
-						</ui-root>
-					</ui-segment>
-				</html>
+			<example "Sticky" description="A `sticky` section keeps its title in view while its content scrolls past.  Nested sticky titles stack below their parent's.  Scroll the box.">
+				<segment>
+					<root height="16em" aria-label="Sticky section example" display="immediately">
+						<section label="Chapter 1" level="4" sticky block>
+							<text paragraph>The chapter's title sticks to the top of the box while any of the chapter is on screen.</text>
+							<section label="Part A" sticky dividing>
+								<text paragraph>This title sticks just below the chapter's.</text>
+								<text paragraph>Keep scrolling: both titles stay until their sections end.</text>
+								<text paragraph>When Part A ends, Part B's title takes its place.</text>
+							</section>
+							<section label="Part B" sticky dividing>
+								<text paragraph>A second nested section, stuck below the same chapter title.</text>
+								<text paragraph>Its title leaves with it at the end of the chapter.</text>
+							</section>
+						</section>
+						<section label="Chapter 2" level="4" sticky block>
+							<text paragraph>The next chapter's title pushes the first one out.</text>
+							<text paragraph>The end of the box.</text>
+						</section>
+					</root>
+				</segment>
+			</example>
+		</>
+
+		<section label="Stacking" sticky="stack" collapsible dividing>
+			<example "Stacking" description="`sticky=\"stack\"` draws the titles as one stack of rounded bars, as this page's own sections:  each level a step further in, a first nested title tucked under its own, closed sections one after another one group, round only at its top and bottom, and a nested title stuck under its parent's a heavy round (scroll this page).  Open Part A or Part B:  the group splits there.">
+				<segment appearance="basic" style="--ui-section-stack-reach: 12px; --ui-section-stack-step: 8px">
+					<section label="Chapter 1" level="4" sticky="stack" collapsible>
+						<section label="Part A" sticky="stack" collapsible open="false">
+							<text paragraph>Part A's title is tucked right under the chapter's:  it's the first thing in it.</text>
+						</section>
+						<section label="Part B" sticky="stack" collapsible open="false">
+							<text paragraph>Closed, Part A and Part B are one group, round only at its ends.</text>
+						</section>
+						<section label="Part C" sticky="stack" collapsible>
+							<text paragraph>An open section after closed ones starts right under them.</text>
+						</section>
+					</section>
+				</segment>
 			</example>
 		</>
 	</>
 
 	<section label="Groups">
 		<section label="Collapsing" sticky="stack" collapsible dividing>
-			<example description="`<ui-sections collapsing>`:  every section in it can close, sub-sections included, with no `collapsible` on each;  closed ones stack with no space between.  An open one sits flush under the title above and keeps its space below.  `collapsible=\"false\"` opts a section out.">
-				<html>
-					<ui-sections collapsing>
-						<ui-section label="Overview" level="4" dividing open="false">
-							<p>What the project is.</p>
-						</ui-section>
-						<ui-section label="Install" level="4" dividing open="false">
-							<p>How to get it.</p>
-						</ui-section>
-						<ui-section label="Configure" level="4" dividing>
-							<p>Open:  its sub-sections close too.</p>
-							<ui-section label="Options" open="false">
-								<p>Every option.</p>
-							</ui-section>
-							<ui-section label="Defaults" open="false">
-								<p>What you get as is.</p>
-							</ui-section>
-						</ui-section>
-						<ui-section label="Deploy" level="4" dividing open="false">
-							<p>Ship it.</p>
-						</ui-section>
-						<ui-section label="Changelog" level="4" dividing collapsible="false">
-							<p>Opted out:  never closes.</p>
-						</ui-section>
-					</ui-sections>
-				</html>
+			<example "Collapsing" description="`<ui-sections collapsing>`:  every section in it can close, sub-sections included, with no `collapsible` on each;  closed ones stack with no space between.  An open one sits flush under the title above and keeps its space below.  `collapsible=\"false\"` opts a section out.">
+				<sections collapsing>
+					<section label="Overview" level="4" dividing open="false">
+						<text paragraph>What the project is.</text>
+					</section>
+					<section label="Install" level="4" dividing open="false">
+						<text paragraph>How to get it.</text>
+					</section>
+					<section label="Configure" level="4" dividing>
+						<text paragraph>Open:  its sub-sections close too.</text>
+						<section label="Options" open="false">
+							<text paragraph>Every option.</text>
+						</section>
+						<section label="Defaults" open="false">
+							<text paragraph>What you get as is.</text>
+						</section>
+					</section>
+					<section label="Deploy" level="4" dividing open="false">
+						<text paragraph>Ship it.</text>
+					</section>
+					<section label="Changelog" level="4" dividing collapsible="false">
+						<text paragraph>Opted out:  never closes.</text>
+					</section>
+				</sections>
 			</example>
-			<example description="Styled sections in a collapsing group read as a styled accordion.">
-				<html>
-					<ui-sections collapsing>
-						<ui-section label="What is a dog?" level="4" appearance="styled" open="false">
-							<p>A domesticated carnivore.</p>
-						</ui-section>
-						<ui-section label="What kinds of dogs are there?" level="4" appearance="styled" open="false">
-							<p>Many breeds.</p>
-						</ui-section>
-						<ui-section label="How do you acquire a dog?" level="4" appearance="styled" open="false">
-							<p>Adopt one.</p>
-						</ui-section>
-					</ui-sections>
-				</html>
+			<example "Collapsing" description="Styled sections in a collapsing group read as a styled accordion.">
+				<sections collapsing>
+					<section label="What is a dog?" level="4" appearance="styled" open="false">
+						<text paragraph>A domesticated carnivore.</text>
+					</section>
+					<section label="What kinds of dogs are there?" level="4" appearance="styled" open="false">
+						<text paragraph>Many breeds.</text>
+					</section>
+					<section label="How do you acquire a dog?" level="4" appearance="styled" open="false">
+						<text paragraph>Adopt one.</text>
+					</section>
+				</sections>
 			</example>
 		</>
 
 		<section label="Plain" sticky="stack" collapsible dividing>
-			<example description="Without `collapsing`, `<ui-sections>` is just a block spaced as one section:  it changes nothing in its sections.">
-				<html>
-					<ui-sections>
-						<ui-section label="First" level="4" dividing>
-							<p>As usual.</p>
-						</ui-section>
-						<ui-section label="Second" level="4" dividing>
-							<p>The usual space between them.</p>
-						</ui-section>
-					</ui-sections>
-				</html>
+			<example "Plain" description="Without `collapsing`, `<ui-sections>` is just a block spaced as one section:  it changes nothing in its sections.">
+				<sections>
+					<section label="First" level="4" dividing>
+						<text paragraph>As usual.</text>
+					</section>
+					<section label="Second" level="4" dividing>
+						<text paragraph>The usual space between them.</text>
+					</section>
+				</sections>
 			</example>
 		</>
 
 		<section label="Flat markup" sticky="stack" collapsible dividing>
-			<example description="A section can be written outside the one it belongs in:  `parent` names that section's id (or a `<ui-sections>` group's), and it nests there, in page order.">
-				<html>
-					<ui-section id="demo-setup" label="Setup" level="4" dividing>
-						<p>The outer section's own content.</p>
-					</ui-section>
-					<ui-section parent="demo-setup" label="Install" collapsible>
-						<p>Nested under Setup.</p>
-					</ui-section>
-					<ui-section parent="demo-setup" label="Configure" collapsible open="false">
-						<p>Nested too, and closed.</p>
-					</ui-section>
-				</html>
+			<example "Flat markup" description="A section can be written outside the one it belongs in:  `parent` names that section's id (or a `<ui-sections>` group's), and it nests there, in page order.">
+				<section id="demo-setup" label="Setup" level="4" dividing>
+					<text paragraph>The outer section's own content.</text>
+				</section>
+				<section parent="demo-setup" label="Install" collapsible>
+					<text paragraph>Nested under Setup.</text>
+				</section>
+				<section parent="demo-setup" label="Configure" collapsible open="false">
+					<text paragraph>Nested too, and closed.</text>
+				</section>
 			</example>
 		</>
 	</>
 
 	<section label="Content">
 		<section label="Subhead" sticky="stack" collapsible dividing>
-			<example description="A `hint` sits under the title, in smaller text.  It scrolls away with the content:  it never sticks.">
-				<html>
-					<ui-section label="Billing" hint="Invoices, payment methods and receipts" level="4">
-						<p>Your next invoice is due on the first of the month.</p>
-					</ui-section>
-				</html>
+			<example "Subhead" description="A `hint` sits under the title, in smaller text.  It scrolls away with the content:  it never sticks.">
+				<section label="Billing" hint="Invoices, payment methods and receipts" level="4">
+					<text paragraph>Your next invoice is due on the first of the month.</text>
+				</section>
 			</example>
 		</>
 
 		<section label="Icon" sticky="stack" collapsible dividing>
-			<example description="An `icon` goes before the title;  a `slot=\"icon\"` child replaces it with any markup.">
-				<html>
-					<ui-section label="Reading list" icon="book" level="4">
-						<p>Three books, two articles.</p>
-					</ui-section>
-					<ui-section label="Inbox" level="4">
-						<ui-icon slot="icon" name="envelope" color="blue"></ui-icon>
-						<p>No new mail.</p>
-					</ui-section>
-				</html>
+			<example "Icon" description="An `icon` goes before the title;  a `slot=\"icon\"` child replaces it with any markup.">
+				<section label="Reading list" icon="book" level="4">
+					<text paragraph>Three books, two articles.</text>
+				</section>
+				<section label="Inbox" level="4">
+					<icon slot="icon" name="envelope" color="blue"/>
+					<text paragraph>No new mail.</text>
+				</section>
 			</example>
 		</>
 
 		<section label="Badge" sticky="stack" collapsible dividing>
-			<example description="A `badge` is a small pill after the title, such as a count;  `slot=\"badge\"` takes a richer one, e.g. a `<ui-label>`.">
-				<html>
-					<ui-section label="Tasks" badge="3/7" level="4">
-						<p>Three of seven done.</p>
-					</ui-section>
-					<ui-section label="Alerts" level="4">
-						<ui-label slot="badge" color="red" size="mini">2 new</ui-label>
-						<p>Two alerts need your attention.</p>
-					</ui-section>
-				</html>
+			<example "Badge" description="A `badge` is a small pill after the title, such as a count;  `slot=\"badge\"` takes a richer one, e.g. a `<ui-label>`.">
+				<section label="Tasks" badge="3/7" level="4">
+					<text paragraph>Three of seven done.</text>
+				</section>
+				<section label="Alerts" level="4">
+					<label slot="badge" color="red" size="mini">2 new</label>
+					<text paragraph>Two alerts need your attention.</text>
+				</section>
 			</example>
 		</>
 
 		<section label="Actions" sticky="stack" collapsible dividing>
-			<example description="The `actions` slot holds controls at the right of the title bar.  They are not part of the open / close button:  activating one never closes the section.">
-				<html>
-					<ui-section label="Members" level="4" collapsible dividing>
-						<ui-button slot="actions" size="mini" icon="user plus" appearance="basic">Invite</ui-button>
-						<p>Four people can edit this project.</p>
-					</ui-section>
-				</html>
+			<example "Actions" description="The `actions` slot holds controls at the right of the title bar.  They are not part of the open / close button:  activating one never closes the section.">
+				<section label="Members" level="4" collapsible dividing>
+					<button slot="actions" size="mini" icon="user plus" appearance="basic">Invite</button>
+					<text paragraph>Four people can edit this project.</text>
+				</section>
 			</example>
 		</>
 
 		<section label="End chevron" sticky="stack" collapsible dividing>
-			<example description="`fold-icon=\"end\"` moves the open / close chevron to the far end of the title bar, after the badge and actions, as an inspector draws it.  A click on it closes the section too;  the title is still the button.">
-				<html>
-					<ui-section label="Variants" level="4" collapsible fold-icon="end" dividing>
-						<ui-button slot="actions" size="mini" icon="copy" appearance="basic">Copy</ui-button>
-						<p>Seventeen shades of one colour.</p>
-					</ui-section>
-				</html>
+			<example "End chevron" description="`fold-icon=\"end\"` moves the open / close chevron to the far end of the title bar, after the badge and actions, as an inspector draws it.  A click on it closes the section too;  the title is still the button.">
+				<section label="Variants" level="4" collapsible fold-icon="end" dividing>
+					<button slot="actions" size="mini" icon="copy" appearance="basic">Copy</button>
+					<text paragraph>Seventeen shades of one colour.</text>
+				</section>
 			</example>
 		</>
 
 		<section label="Chevron turn" sticky="stack" collapsible dividing>
-			<example description="The chevron points down while open, and turns toward the title while closed.  Two tokens set the turns, as the code below shows:  `180deg` and `0deg` point it up while open and down while closed, as the Spell theme does.  Right to left, each turn is negated.">
-				<html>
-					<div style="--ui-section-fold-icon-rotate: 180deg; --ui-section-fold-icon-folded-rotate: 0deg">
-						<ui-section label="Open" level="4" collapsible fold-icon="end" dividing>
-							<p>The chevron points up.</p>
-						</ui-section>
-						<ui-section label="Closed" level="4" collapsible open="false" fold-icon="end" dividing>
-							<p>The chevron points down.</p>
-						</ui-section>
-					</div>
-				</html>
+			<example "Chevron turn" description="The chevron points down while open, and turns toward the title while closed.  Two tokens set the turns, as the code below shows:  `180deg` and `0deg` point it up while open and down while closed, as the Spell theme does.  Right to left, each turn is negated.">
+				<stack style="--ui-section-fold-icon-rotate: 180deg; --ui-section-fold-icon-folded-rotate: 0deg">
+					<section label="Open" level="4" collapsible fold-icon="end" dividing>
+						<text paragraph>The chevron points up.</text>
+					</section>
+					<section label="Closed" level="4" collapsible open="false" fold-icon="end" dividing>
+						<text paragraph>The chevron points down.</text>
+					</section>
+				</stack>
 			</example>
 		</>
 
 		<section label="Info tip" sticky="stack" collapsible dividing>
-			<example description="`description` is a tip about the section, shown under the title bar while the pointer is on the title or its open / close button has keyboard focus;  it describes the title for screen readers.  `slot=\"description\"` takes a rich one:  bold words, line breaks.">
-				<html>
-					<ui-section label="Theme" level="4" description="The look of an app:  its colours, fonts and shapes." collapsible dividing>
-						<p>Give it a name, then adjust the sections below.</p>
-					</ui-section>
-					<ui-section label="Color" level="4" dividing>
-						<span slot="description">Pick a <b>colour set</b> for each job in the app.<br />Spell chooses the right <b>shade</b> for light and dark mode.</span>
-						<p>Primary, secondary and the rest.</p>
-					</ui-section>
-				</html>
+			<example "Info tip" description="`description` is a tip about the section, shown under the title bar while the pointer is on the title or its open / close button has keyboard focus;  it describes the title for screen readers.  `slot=\"description\"` takes a rich one:  bold words, line breaks.">
+				<section label="Theme" level="4" description="The look of an app:  its colours, fonts and shapes." collapsible dividing>
+					<text paragraph>Give it a name, then adjust the sections below.</text>
+				</section>
+				<section label="Color" level="4" dividing>
+					<text slot="description">Pick a <text bold>colour set</text> for each job in the app.<space/>Spell chooses the right <text bold>shade</text> for light and dark mode.</text>
+					<text paragraph>Primary, secondary and the rest.</text>
+				</section>
 			</example>
 		</>
 
 		<section label="Rich header" sticky="stack" collapsible dividing>
-			<example description="`slot=\"label\"` is the rich version of `label`:  code, links, emphasis.">
-				<html>
-					<ui-section level="4">
-						<span slot="label">The <code>open</code> attribute</span>
-						<p>Set it to close the section from code.</p>
-					</ui-section>
-				</html>
+			<example "Rich header" description="`slot=\"label\"` is the rich version of `label`:  code, links, emphasis.">
+				<section level="4">
+					<text slot="label">The <text code>open</text> attribute</text>
+					<text paragraph>Set it to close the section from code.</text>
+				</section>
 			</example>
 		</>
 
 		<section label="Nested" sticky="stack" collapsible dividing>
-			<example description="Sections nest.  A nested section's heading is one level below its parent's, so the page outline follows the markup.">
-				<html>
-					<ui-section label="Settings" level="4">
-						<ui-section label="Profile">
-							<p>An <code>h5</code>: one below its parent.</p>
-						</ui-section>
-						<ui-section label="Notifications">
-							<p>Another <code>h5</code>.</p>
-						</ui-section>
-					</ui-section>
-				</html>
+			<example "Nested" description="Sections nest.  A nested section's heading is one level below its parent's, so the page outline follows the markup.">
+				<section label="Settings" level="4">
+					<section label="Profile">
+						<text paragraph>An <text code>h5</text>: one below its parent.</text>
+					</section>
+					<section label="Notifications">
+						<text paragraph>Another <text code>h5</text>.</text>
+					</section>
+				</section>
 			</example>
 		</>
 	</>
 
 	<section label="States">
 		<section label="Collapsed" sticky="stack" collapsible dividing>
-			<example description="A collapsed section shows only its title.  Its content stays in the page, hidden until found (see Opening and closing, on the Usage tab).">
-				<html>
-					<ui-section label="Advanced options" level="4" collapsible open="false" dividing>
-						<p>Hidden until the section opens.</p>
-					</ui-section>
-				</html>
+			<example "Collapsed" description="A collapsed section shows only its title.  Its content stays in the page, hidden until found (see Opening and closing, on the Usage tab).">
+				<section label="Advanced options" level="4" collapsible open="false" dividing>
+					<text paragraph>Hidden until the section opens.</text>
+				</section>
 			</example>
 		</>
 
 		<section label="Loading" sticky="stack" collapsible dividing>
-			<example description="A `loading` section dims its content under a spinner and is `aria-busy`.">
-				<html>
-					<ui-section label="Recent activity" level="4" appearance="bordered" loading>
-						<p>Fetching the latest events.</p>
-					</ui-section>
-				</html>
+			<example "Loading" description="A `loading` section dims its content under a spinner and is `aria-busy`.">
+				<section label="Recent activity" level="4" appearance="bordered" loading>
+					<text paragraph>Fetching the latest events.</text>
+				</section>
 			</example>
 		</>
 
 		<section label="Disabled" sticky="stack" collapsible dividing>
-			<example description="A `disabled` section is dimmed and inert, and can't be closed.">
-				<html>
-					<ui-section label="Archived" level="4" collapsible disabled>
-						<p>Nothing here can be used.</p>
-					</ui-section>
-				</html>
+			<example "Disabled" description="A `disabled` section is dimmed and inert, and can't be closed.">
+				<section label="Archived" level="4" collapsible disabled>
+					<text paragraph>Nothing here can be used.</text>
+				</section>
 			</example>
 		</>
 	</>
 
 	<section label="Variations">
 		<section label="Dividing" sticky="stack" collapsible dividing>
-			<example description="A section can have a rule under its title, like a dividing header.">
-				<html>
-					<ui-section label="Overview" level="4" dividing>
-						<p>The rule separates the title from the content.</p>
-					</ui-section>
-				</html>
+			<example "Dividing" description="A section can have a rule under its title, like a dividing header.">
+				<section label="Overview" level="4" dividing>
+					<text paragraph>The rule separates the title from the content.</text>
+				</section>
 			</example>
 		</>
 
 		<section label="Block" sticky="stack" collapsible dividing>
-			<example description="A section can put its title bar in a tinted box, like a block header.">
-				<html>
-					<ui-section label="Overview" level="4" block>
-						<p>The tinted bar stands out when sections run together.</p>
-					</ui-section>
-				</html>
+			<example "Block" description="A section can put its title bar in a tinted box, like a block header.">
+				<section label="Overview" level="4" block>
+					<text paragraph>The tinted bar stands out when sections run together.</text>
+				</section>
 			</example>
 		</>
 
 		<section label="Bordered" sticky="stack" collapsible dividing>
-			<example description="A section can sit in a box, like a segment (`appearance` `bordered`);  `raised` lifts it with a shadow.">
-				<html>
-					<ui-section label="Bordered" level="4" appearance="bordered">
-						<p>A box around title and content.</p>
-					</ui-section>
-					<ui-section label="Raised" level="4" appearance="bordered raised">
-						<p>The same box, lifted.</p>
-					</ui-section>
-				</html>
+			<example "Bordered" description="A section can sit in a box, like a segment (`appearance` `bordered`);  `raised` lifts it with a shadow.">
+				<section label="Bordered" level="4" appearance="bordered">
+					<text paragraph>A box around title and content.</text>
+				</section>
+				<section label="Raised" level="4" appearance="bordered raised">
+					<text paragraph>The same box, lifted.</text>
+				</section>
 			</example>
 		</>
 
 		<section label="Styled" sticky="stack" collapsible dividing>
-			<example description="A section can look like a styled accordion panel:  a tinted title bar over padded content.">
-				<html>
-					<ui-section label="Styled" level="4" appearance="styled" collapsible>
-						<p>Pairs well with <code>collapsible</code>.</p>
-					</ui-section>
-				</html>
+			<example "Styled" description="A section can look like a styled accordion panel:  a tinted title bar over padded content.">
+				<section label="Styled" level="4" appearance="styled" collapsible>
+					<text paragraph>Pairs well with <text code>collapsible</text>.</text>
+				</section>
+			</example>
+		</>
+
+		<section label="Drawer" sticky="stack" collapsible dividing>
+			<example "Drawer" description="`appearance=\"drawer\"`:  the title a raised bar, the content a tinted panel attached under it, which rolls open and closed, as an example's code rolls out under its demo.">
+				<section label="Settings" appearance="drawer" collapsible>
+					<text paragraph>The drawer's content, on its own tint, attached under the title.</text>
+					<text paragraph>Click the title:  it rolls closed, and the title's bottom corners round again.</text>
+				</section>
 			</example>
 		</>
 
 		<section label="Attached" sticky="stack" collapsible dividing>
-			<example description="Boxed sections can join edge to edge:  `attach=\"top\"` above, `attach=\"both\"` between, `attach=\"bottom\"` below.">
-				<html>
-					<ui-section label="Step 1" level="4" appearance="bordered" attach="top">
-						<p>Choose a plan.</p>
-					</ui-section>
-					<ui-section label="Step 2" level="4" appearance="bordered" attach="both">
-						<p>Add your details.</p>
-					</ui-section>
-					<ui-section label="Step 3" level="4" appearance="bordered" attach="bottom">
-						<p>Confirm.</p>
-					</ui-section>
-				</html>
+			<example "Attached" description="Boxed sections can join edge to edge:  `attach=\"top\"` above, `attach=\"both\"` between, `attach=\"bottom\"` below.">
+				<section label="Step 1" level="4" appearance="bordered" attach="top">
+					<text paragraph>Choose a plan.</text>
+				</section>
+				<section label="Step 2" level="4" appearance="bordered" attach="both">
+					<text paragraph>Add your details.</text>
+				</section>
+				<section label="Step 3" level="4" appearance="bordered" attach="bottom">
+					<text paragraph>Confirm.</text>
+				</section>
 			</example>
 		</>
 
 		<section label="Colored" sticky="stack" collapsible dividing>
-			<example description="A section can be colored:  the title, and the rule or box edge with it.">
-				<html>
-					<ui-section label="Red" level="4" color="red" dividing>
-						<p>Red.</p>
-					</ui-section>
-					<ui-section label="Teal" level="4" color="teal" dividing>
-						<p>Teal.</p>
-					</ui-section>
-					<ui-section label="Blue" level="4" color="blue" block>
-						<p>Blue.</p>
-					</ui-section>
-					<ui-section label="Purple" level="4" color="purple" appearance="bordered">
-						<p>Purple.</p>
-					</ui-section>
-				</html>
+			<example "Colored" description="A section can be colored:  the title, and the rule or box edge with it.">
+				<section label="Red" level="4" color="red" dividing>
+					<text paragraph>Red.</text>
+				</section>
+				<section label="Teal" level="4" color="teal" dividing>
+					<text paragraph>Teal.</text>
+				</section>
+				<section label="Blue" level="4" color="blue" block>
+					<text paragraph>Blue.</text>
+				</section>
+				<section label="Purple" level="4" color="purple" appearance="bordered">
+					<text paragraph>Purple.</text>
+				</section>
 			</example>
 		</>
 
 		<section label="Size" sticky="stack" collapsible dividing>
-			<example description="`size` scales the CONTENT only;  the title keeps its level's size.">
-				<html>
-					<ui-section label="Small content" level="4" size="small">
-						<p>This content is small.</p>
-					</ui-section>
-					<ui-section label="Large content" level="4" size="large">
-						<p>This content is large.</p>
-					</ui-section>
-				</html>
+			<example "Size" description="`size` scales the CONTENT only;  the title keeps its level's size.">
+				<section label="Small content" level="4" size="small">
+					<text paragraph>This content is small.</text>
+				</section>
+				<section label="Large content" level="4" size="large">
+					<text paragraph>This content is large.</text>
+				</section>
 			</example>
 		</>
 
 		<section label="Compact and padded" sticky collapsible dividing>
-			<example description="`padding=\"compact\"` tightens the space around the title;  `padding=\"md\"` (or `lg`) gives the content more room.">
-				<html>
-					<ui-section label="Compact" level="4" appearance="bordered" padding="compact">
-						<p>Less space around the title.</p>
-					</ui-section>
-					<ui-section label="Padded" level="4" appearance="bordered" padding="md">
-						<p>More padding in the content.</p>
-					</ui-section>
-					<ui-section label="Very padded" level="4" appearance="bordered" padding="lg">
-						<p>Even more.</p>
-					</ui-section>
-				</html>
+			<example "Compact and padded" description="`padding=\"compact\"` tightens the space around the title;  `padding=\"md\"` (or `lg`) gives the content more room.">
+				<section label="Compact" level="4" appearance="bordered" padding="compact">
+					<text paragraph>Less space around the title.</text>
+				</section>
+				<section label="Padded" level="4" appearance="bordered" padding="md">
+					<text paragraph>More padding in the content.</text>
+				</section>
+				<section label="Very padded" level="4" appearance="bordered" padding="lg">
+					<text paragraph>Even more.</text>
+				</section>
 			</example>
 		</>
 
 		<section label="Scrolling" sticky="stack" collapsible dividing>
-			<example description="A section can cap its content's height and scroll it:  `scrolling` (`short` ... `very long`, caps that grow with the viewport), or any CSS length as `height`.">
-				<html>
-					<ui-section label="Log" level="4" appearance="bordered" scrolling="very short">
-						<p>09:00 Build started</p>
-						<p>09:01 Dependencies installed</p>
-						<p>09:03 Tests passed</p>
-						<p>09:04 Bundle written</p>
-						<p>09:05 Deployed</p>
-						<p>09:06 Smoke tests passed</p>
-						<p>09:10 Traffic switched</p>
-						<p>09:15 Old version drained</p>
-						<p>09:20 Old version stopped</p>
-						<p>09:30 Done</p>
-					</ui-section>
-					<ui-section label="Six em high" level="4" appearance="bordered" height="6em">
-						<p>Any CSS length caps the content.</p>
-						<p>Line two.</p>
-						<p>Line three.</p>
-						<p>Line four.</p>
-						<p>Line five.</p>
-					</ui-section>
-				</html>
+			<example "Scrolling" description="A section can cap its content's height and scroll it:  `scrolling` (`short` ... `very long`, caps that grow with the viewport), or any CSS length as `height`.">
+				<section label="Log" level="4" appearance="bordered" scrolling="very short">
+					<text paragraph>09:00 Build started</text>
+					<text paragraph>09:01 Dependencies installed</text>
+					<text paragraph>09:03 Tests passed</text>
+					<text paragraph>09:04 Bundle written</text>
+					<text paragraph>09:05 Deployed</text>
+					<text paragraph>09:06 Smoke tests passed</text>
+					<text paragraph>09:10 Traffic switched</text>
+					<text paragraph>09:15 Old version drained</text>
+					<text paragraph>09:20 Old version stopped</text>
+					<text paragraph>09:30 Done</text>
+				</section>
+				<section label="Six em high" level="4" appearance="bordered" height="6em">
+					<text paragraph>Any CSS length caps the content.</text>
+					<text paragraph>Line two.</text>
+					<text paragraph>Line three.</text>
+					<text paragraph>Line four.</text>
+					<text paragraph>Line five.</text>
+				</section>
 			</example>
 		</>
 
 		<section label="Aligned" sticky="stack" collapsible dividing>
-			<example description="`align` aligns the title `left`, `center` or `right`.">
-				<html>
-					<ui-section label="Centered title" level="4" align="center" dividing>
-						<p>The content keeps its own alignment.</p>
-					</ui-section>
-					<ui-section label="Right title" level="4" align="right" dividing>
-						<p>The content keeps its own alignment.</p>
-					</ui-section>
-				</html>
+			<example "Aligned" description="`align` aligns the title `left`, `center` or `right`.">
+				<section label="Centered title" level="4" align="center" dividing>
+					<text paragraph>The content keeps its own alignment.</text>
+				</section>
+				<section label="Right title" level="4" align="right" dividing>
+					<text paragraph>The content keeps its own alignment.</text>
+				</section>
 			</example>
 		</>
 
 		<section label="Basic" sticky="stack" collapsible dividing>
-			<example description="The `basic` look (`appearance`) drops every box, rule and tint, whatever else is set.">
-				<html>
-					<ui-section label="Basic" level="4" appearance="bordered basic" dividing>
-						<p><code>bordered</code> and <code>dividing</code> are set, but <code>basic</code> wins.</p>
-					</ui-section>
-				</html>
+			<example "Basic" description="The `basic` look (`appearance`) drops every box, rule and tint, whatever else is set.">
+				<section label="Basic" level="4" appearance="bordered basic" dividing>
+					<text paragraph><text code>bordered</text> and <text code>dividing</text> are set, but <text code>basic</text> wins.</text>
+				</section>
 			</example>
 		</>
 
 		<section label="Inverted" sticky="stack" collapsible dividing>
-			<example description="A section can use the dark scheme, for dark backgrounds.">
-				<html>
-					<ui-section label="Inverted" level="4" appearance="bordered" inverted>
-						<p>The dark scheme.</p>
-					</ui-section>
-					<ui-section label="Inverted styled" level="4" appearance="styled" inverted collapsible>
-						<p>Styled, on dark.</p>
-					</ui-section>
-				</html>
+			<example "Inverted" description="A section can use the dark scheme, for dark backgrounds.">
+				<section label="Inverted" level="4" appearance="bordered" inverted>
+					<text paragraph>The dark scheme.</text>
+				</section>
+				<section label="Inverted styled" level="4" appearance="styled" inverted collapsible>
+					<text paragraph>Styled, on dark.</text>
+				</section>
 			</example>
 		</>
 	</>

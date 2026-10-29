@@ -89,6 +89,18 @@ describe("Spell UI in Spanish (`components.es.ts`)", () => {
     expect(names.localize("es-boton", "animation", "fade up")).toEqual({ attribute: "animacion", value: "fade up" })
   })
 
+  it("words `font`'s values in Spanish, a size left a number:  `letra=\"negrita serifa 14\"`", () => {
+    expect(names.canonicalize("es-boton", "letra", "negrita serifa 14")).toEqual({
+      attribute: "font",
+      value: "bold serif 14"
+    })
+    expect(names.localize("es-texto", "font", "all-caps headline")).toEqual({
+      attribute: "letra",
+      value: "mayúsculas titular"
+    })
+    expect(names.canonicalize("es-texto", "negrita", "")).toEqual({ attribute: "bold", value: "" })
+  })
+
   // a Spanish attribute is a property of the DOM element too (`boton.tamano`):  never one the platform has
   it("names no property the platform's elements already have", () => {
     const clashes = [...SPANISH_TAGS.values()].flatMap(({ tag, names: localized }) =>

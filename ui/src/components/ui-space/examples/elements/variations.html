@@ -1,0 +1,19 @@
+<!-- `<ui-space>` variations:  a band of space between lines, and growing by a factor. -->
+<div class="ui-stack">
+  <section>
+    <h4>Height</h4>
+    <ui-text>Above</ui-text>
+    <ui-space height="xl"></ui-space>
+    <ui-text>Below, 2em further down</ui-text>
+  </section>
+  <section>
+    <h4>Grow</h4>
+    <ui-stack direction="horizontal" spacing="none">
+      <ui-label>Start</ui-label>
+      <ui-space grow></ui-space>
+      <ui-label>One third</ui-label>
+      <ui-space grow="2"></ui-space>
+      <ui-label>End</ui-label>
+    </ui-stack>
+  </section>
+</div>

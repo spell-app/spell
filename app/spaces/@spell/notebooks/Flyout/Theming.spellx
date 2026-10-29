@@ -48,7 +48,7 @@
 				<ui-flyout id="flyout-types-standard-playground" closable>
 					<ui-header>Archive old messages</>
 					<ui-content>
-						<p>Your inbox is getting full. Would you like us to enable automatic archiving of old messages?</>
+						<ui-text paragraph>Your inbox is getting full. Would you like us to enable automatic archiving of old messages?</>
 					</>
 					<ui-actions>
 						<ui-button class="cancel" color="red">No</>

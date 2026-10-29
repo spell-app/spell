@@ -27,19 +27,19 @@
 	-->
 	<section label="Types">
 		<section label="Palette" sticky="stack" collapsible dividing>
-			<example description="One round palette button:  its panel picks light, dark or Auto, and one of Spell's themes.  The page remembers both.">
+			<example "Palette" description="One round palette button:  its panel picks light, dark or Auto, and one of Spell's themes.  The page remembers both.">
 				<theme-menu/>
 			</example>
 		</>
 
 		<section label="Theme dropdown" sticky="stack" collapsible dividing>
-			<example description="A theme dropdown, for a masthead:  `show=\"theme\"`;  `compact` makes it an icon button.">
+			<example "Theme dropdown" description="A theme dropdown, for a masthead:  `show=\"theme\"`;  `compact` makes it an icon button.">
 				<theme-menu show="theme"/>
 			</example>
 		</>
 
 		<section label="Light / dark only" sticky="stack" collapsible dividing>
-			<example description="A sun or a moon alone:  `show=\"scheme\"`.  A click flips the page between light and dark.">
+			<example "Light / dark only" description="A sun or a moon alone:  `show=\"scheme\"`.  A click flips the page between light and dark.">
 				<theme-menu show="scheme"/>
 			</example>
 		</>
@@ -47,7 +47,7 @@
 
 	<section label="Variations">
 		<section label="Inverted" sticky="stack" collapsible dividing>
-			<example description="On a dark bar:  `inverted`, here at `size=\"small\"`.">
+			<example "Inverted" description="On a dark bar:  `inverted`, here at `size=\"small\"`.">
 				<segment inverted>
 					<theme-menu inverted size="small"/>
 				</segment>

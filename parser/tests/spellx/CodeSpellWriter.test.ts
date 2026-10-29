@@ -54,6 +54,14 @@ describe("CodeSpellWriter", () => {
     expect(written).toContain("<ui-text>hi</ui-text>")
   })
 
+  test("a paragraph's blank line stays:  its line break (Owen, 2026-10-27)", () => {
+    const text = '<spell-view "note">\n\t<draw>\n\t\t<text paragraph>\n\t\t\tFirst line\n\n\t\t\tSecond line\n\t\t</>\n\t</>\n</spell-view>\n'
+    const written = SX.CodeSpellWriter.write(text, {
+      componentTag: (word) => (word === "text" ? "ui-text" : undefined)
+    })
+    expect(written).toContain("\t\t\tFirst line\n\n\t\t\tSecond line\n")
+  })
+
   test("markup alone, an example's body:  its tags, at its own indent (P18)", () => {
     const body = '<card>\n\t<content>\n\t\t<avatar src="jenny.jpg"/> Jenny Hess\n\t</>\n</card>'
     const starts: number[] = []

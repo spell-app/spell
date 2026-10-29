@@ -145,8 +145,44 @@
   :host(:state(font-italic)) {
     font-style: italic;
   }
+  /* A family, the theme's (epic `elemental-spell` P26):  one at a time, so `code`, then `headline`, `subhead`,
+     `serif`, `sans-serif`, `typewriter` win, in that order.  Its token too, so the element's own boxes, which name
+     it, follow. */
+  :host(:state(font-typewriter)) {
+    --ui-font-family: var(--ui-font-family-typewriter);
+    font-family: var(--ui-font-family-typewriter);
+  }
+  :host(:state(font-sans-serif)) {
+    --ui-font-family: var(--ui-font-family-sans);
+    font-family: var(--ui-font-family-sans);
+  }
+  :host(:state(font-serif)) {
+    --ui-font-family: var(--ui-font-family-serif);
+    font-family: var(--ui-font-family-serif);
+  }
+  :host(:state(font-subhead)) {
+    --ui-font-family: var(--ui-font-family-subhead);
+    font-family: var(--ui-font-family-subhead);
+  }
+  :host(:state(font-headline)) {
+    --ui-font-family: var(--ui-font-family-heading);
+    font-family: var(--ui-font-family-heading);
+  }
   :host(:state(font-code)) {
     font-family: var(--ui-font-family-mono);
+  }
+  /* Its letters' case:  every one a capital, or each word's first. */
+  :host(:state(font-all-caps)) {
+    text-transform: uppercase;
+  }
+  :host(:state(font-title-caps)) {
+    text-transform: capitalize;
+  }
+  /* A size, `font="14"` or `font="10/20"`:  `UIComponent` writes the element's `--ui-font-size` (and
+     `--ui-line-height`), which its own boxes are sized from;  its text, here. */
+  :host(:state(font-size)) {
+    font-size: var(--ui-font-size);
+    line-height: var(--ui-line-height);
   }
   :host(:state(font-underline)) > :not(slot) {
     text-decoration: underline 0.06em;

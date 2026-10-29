@@ -29,8 +29,8 @@ describe("addRepoCommands():  the clash rule (epic repo-split Q33)", () => {
     ])
     expect(clashes.size).toBe(0)
     expect(namesOf(program)).toEqual(["compile", "run", "projects"])
-    expect(program.commands[0]!.helpGroup()).toBe("spell-parser:")
-    expect(program.commands[2]!.helpGroup()).toBe("spell-app:")
+    expect(program.commands[0]!.helpGroup()).toBe("parser:")
+    expect(program.commands[2]!.helpGroup()).toBe("app:")
   })
 
   test("a fake clash, two repos both naming check:  both go under their repo's names, the bare word says where", () => {

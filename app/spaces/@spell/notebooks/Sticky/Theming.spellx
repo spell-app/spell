@@ -37,18 +37,18 @@
 		<markdown>Edit a value below to try it.</>
 		<html>
 			<ui-docs-tokens family="ui-sticky" playground>
-				<div style="height: 14em; overflow: auto; border: 1px solid var(--ui-border-color)" tabindex="0" role="region" aria-label="Sticky rail example">
-					<div style="display: flex; gap: 1em; padding: 0 1em">
-						<div style="flex: 1">
-							<p>Fomantic's sticky kept content in view with scroll listeners and fixed positioning. Here the browser does it: the box is <code>position: sticky</>, and the element only reports when it is stuck.</>
-							<p>Fomantic's sticky kept content in view with scroll listeners and fixed positioning. Here the browser does it: the box is <code>position: sticky</>, and the element only reports when it is stuck.</>
-							<p>Fomantic's sticky kept content in view with scroll listeners and fixed positioning. Here the browser does it: the box is <code>position: sticky</>, and the element only reports when it is stuck.</>
-							<p>Fomantic's sticky kept content in view with scroll listeners and fixed positioning. Here the browser does it: the box is <code>position: sticky</>, and the element only reports when it is stuck.</>
-							<p>Fomantic's sticky kept content in view with scroll listeners and fixed positioning. Here the browser does it: the box is <code>position: sticky</>, and the element only reports when it is stuck.</>
+				<ui-stack aria-label="Sticky rail example" role="region" tabindex="0" style="height: 14em; overflow: auto; border: 1px solid var(--ui-border-color)">
+					<ui-stack style="display: flex; gap: 1em; padding: 0 1em">
+						<ui-stack style="flex: 1">
+							<ui-text paragraph>Fomantic's sticky kept content in view with scroll listeners and fixed positioning. Here the browser does it: the box is <ui-text code>position: sticky</>, and the element only reports when it is stuck.</>
+							<ui-text paragraph>Fomantic's sticky kept content in view with scroll listeners and fixed positioning. Here the browser does it: the box is <ui-text code>position: sticky</>, and the element only reports when it is stuck.</>
+							<ui-text paragraph>Fomantic's sticky kept content in view with scroll listeners and fixed positioning. Here the browser does it: the box is <ui-text code>position: sticky</>, and the element only reports when it is stuck.</>
+							<ui-text paragraph>Fomantic's sticky kept content in view with scroll listeners and fixed positioning. Here the browser does it: the box is <ui-text code>position: sticky</>, and the element only reports when it is stuck.</>
+							<ui-text paragraph>Fomantic's sticky kept content in view with scroll listeners and fixed positioning. Here the browser does it: the box is <ui-text code>position: sticky</>, and the element only reports when it is stuck.</>
 						</>
-						<div style="width: 8em">
+						<ui-stack style="width: 8em">
 							<ui-sticky offset="8">
-								<p style="margin: 0; padding: 0.5em; background: var(--ui-surface-strong)">I stick 8px from the top</>
+								<ui-text style="margin: 0; padding: 0.5em; background: var(--ui-surface-strong)" paragraph>I stick 8px from the top</>
 							</>
 						</>
 					</>

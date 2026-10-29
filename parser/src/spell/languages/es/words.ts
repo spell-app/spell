@@ -116,6 +116,8 @@ export const spanishWords: SP.LanguageWords = {
     "lista dibujable": "lista visible",
     "lista-dibujable": "lista visible"
   },
+  /** Spell's own old words, each an error naming its new one (epic `elemental-spell` P27):  a view's parts are slots. */
+  retiredWords: { partes: "ranuras" },
 
   /**
    * Spellx's words in Spanish (epic `elemental-spell`):  see `SP.SpellxWords`.
@@ -180,6 +182,9 @@ export const spanishWords: SP.LanguageWords = {
       "barra-de-menú": "menu-bar",
       "barra-de-menu": "menu-bar",
       bloqueado: "locked",
+      arrastrable: "draggable",
+      soltable: "droppable",
+      seleccionable: "selectable",
       // la página de la que se convirtió un cuaderno (P18):  solo la lee el editor
       grupo: "group"
     },
@@ -222,14 +227,15 @@ export const spanishWords: SP.LanguageWords = {
       eventParam: "{param} como {a value} {value}",
       eventAnd: "y",
       draw: "para dibujar eso :",
-      drawPart: "para dibujar su {words} :",
-      placePart: "dibujar su {words}",
+      drawSlot: "para dibujar su {words} :",
+      placeSlot: "dibujar su {words}",
       menu: "su {name} es un menú de",
       menuAnd: "y",
       menuBar: "su barra de menú es {quoted menu-bar}",
       group: "grupo {name}",
       notebookContent: "para dibujar su contenido :",
       notebookLocked: "su candado es bloqueado",
+      viewFlags: { draggable: "es arrastrable", droppable: "es soltable", selectable: "es seleccionable" },
       start: "iniciar {words}",
       handlers: { on: "al {phrase} :", when: "cuando {phrase} :", while: "mientras {phrase} :" },
       controls: {

@@ -5,7 +5,7 @@ import { agentRulesLines, checkAgentRules } from "spell/cli/commands/wwod"
  * `spell wwod [check] [files...] [--json]`:  WWOD, the agents' rules (epic `wwod`).  The logic:  `wwod.ts`.
  * - `check` (the only verb, and the default):  every `WWOD §N › "title"` citation and backticked repo path in WWOD,
  *   `AGENTS.md`, `CLAUDE.md` and the skills;  exits 1 on a broken one
- * - Which checkout:  the nearest repo from the current folder up (its `tsconfig.base.json`):  each child repo has
+ * - Which checkout:  the nearest repo from the current folder up (its `tsconfig.base.json`):  each big folder has
  *   WWOD through its `agents` link.
  * - Throws `CliError` for another verb.
  */

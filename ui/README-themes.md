@@ -295,6 +295,11 @@ await themes.apply(undefined) // no theme:  the plain default look
 - A name it doesn't know throws a `TypeError` that lists the ones it does.
 - To let people pick:  `<ui-theme-menu>`, one palette button holding Spell's nine themes and Light, Dark or Auto,
   remembered for each viewer (`ThemePreference`);  every Spell place shows it.
+  - Its Theme bench row opens the theme bench in a new window, in the theme chosen.
+- A page's address can say its theme and scheme for that visit:  `?theme=glass&scheme=dark`.
+  - It wins over what the viewer chose there, and is never remembered:  picking from the menu still is.
+  - A name that isn't a theme, or a scheme that isn't `light` or `dark`, is ignored with a warning.
+  - `ThemePreference.addressWith(address, { theme, scheme })` writes one;  the theme bench's ↗ opens each page so.
   So does `apply("dark")`, since dark is a scheme (above):
 
   ```text
@@ -379,8 +384,8 @@ To make a look of your own, start from one of Spell UI's and change what you lik
 - What it makes is a theme FILE:  Copy changes gives its JSON5 (`extends` its base), colours in hex.
   - Its sheet (`el.css`):  the file's values on `:root`, in `@layer ui.app`.
     Apply its base first (`UI.themes.apply("fruity")`), then the sheet, and the page looks as it did in the editor.
-- Use this theme keeps it in this browser.
-  The Spell editor wears it over its base, and any page can:  `SavedTheme.restore()`.
+- A theme kept in this browser from before:  the Spell editor wears it over its base, and any page can,
+  `SavedTheme.restore()`;  Stop using forgets it.
 - It starts from the page's theme, `fruity` when there's none;  `base` and `value` start it elsewhere.
 - Its docs page, with the editor live:  `/components/ui/ui-theme-editor.html`.
 

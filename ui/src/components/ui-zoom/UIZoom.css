@@ -81,6 +81,8 @@
     overflow: visible;
     background: transparent;
     box-shadow: none;
+    /* the modal's own scale-in would shrink the picture while it measures where to grow from:  it only fades */
+    transform: none;
   }
   ui-modal::part(close) {
     position: fixed;

@@ -79,7 +79,7 @@ async function checkProject(
 
 /**
  * With `--fix`:  put each RETIRED word in `project` right -- only `file`'s, if given --
- * e.g. `a card is a drawable thing` => `a card is a view`,
+ * e.g. `a card is a drawable thing` => `a card is a view`, `- it has parts "front"` => `- it has slots "front"`,
  * and write each changed file back (epic `elemental-spell`, Q61).
  * - The parser marks each one as an error whose `data.replacement` is its new word:
  *   see `SpellType.retiredWordErrorsIn()`.

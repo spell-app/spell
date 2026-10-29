@@ -428,16 +428,16 @@ export class SpellxWriter {
     if (colon < 0) return undefined
     const lead = normal(text.slice(0, colon))
     const inline = text.slice(colon + 1).trim()
-    const part = groupText(statement, "part")
+    const slot = groupText(statement, "slot")
     const signature = groupText(statement, "signature")
     const isTest = !!groupMatch(statement, "asTest")
     let word: string
     let head: string
     let closer: string | undefined
-    if (part !== undefined) {
-      if (lead !== normal(fill(this.twins.drawPart, { words: part }))) return undefined
+    if (slot !== undefined) {
+      if (lead !== normal(fill(this.twins.drawSlot, { words: slot }))) return undefined
       word = keyFor(this.words.declarations, "draw")
-      head = `<${word} ${quoted(unquote(part)!)}`
+      head = `<${word} ${quoted(unquote(slot)!)}`
     } else if (signature !== undefined && isTest) {
       if (lead !== normal(fill(this.twins.test, { words: signature }))) return undefined
       word = keyFor(this.words.declarations, "test")

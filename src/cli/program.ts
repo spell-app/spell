@@ -10,13 +10,13 @@ import { CLI } from "spell/cli"
  *   - a name only one repo has:  at the top level, `spell compile`
  *   - a name two or more repos have:  under EACH one's short name, `spell parser check` and `spell app check`;
  *     the bare word only says where they are
- * - `spell help` lists them grouped by repo, lowest first.
+ * - `spell help` lists them grouped by folder, lowest first:  `spell:` (the kit's own), `parser:`, `ui:`, `app:`.
  */
 
 /** The `spell` program, with the flags every command takes, before any repo's commands. */
 export function spellProgram(): Command {
   return new Command("spell")
-    .description("Spell's command line:  every installed repo's commands, under one name.")
+    .description("Spell's command line:  every folder's commands, under one name.")
     .option("--all", "a group of projects, e.g. @spell/library, means ALL its projects")
     .option("--verbose", "show a command's own logging, on stderr")
     .showHelpAfterError("(spell help lists the commands)")
@@ -44,7 +44,7 @@ export function addRepoCommands(
   const clashes = new Map([...owners].filter(([, repos]) => repos.length > 1))
 
   for (const { repo, commands } of byRepo) {
-    const heading = `${repo.name}:`
+    const heading = headingFor(repo)
     for (const command of commands) {
       if (!clashes.has(command.name())) {
         program.addCommand(command.helpGroup(heading))
@@ -62,11 +62,16 @@ export function addRepoCommands(
       .helpOption(false)
       .argument("[args...]")
       .action(() => {
-        process.stderr.write(chalk.red(`"${name}" is in ${repos.length} repos:  ${spellings.join(", or ")}\n`))
+        process.stderr.write(chalk.red(`"${name}" is in ${repos.length} folders:  ${spellings.join(", or ")}\n`))
         process.exit(CLI.EXIT.USAGE)
       })
   }
   return clashes
+}
+
+/** The `spell help` heading of `repo`'s commands:  its folder's name, `parser:`;  the kit's own, `spell:`. */
+function headingFor(repo: CLI.SpellRepo): string {
+  return repo.name === "spell" ? "spell:" : `${repo.short}:`
 }
 
 /**
@@ -84,7 +89,7 @@ function groupFor(
   if (found) return found
   return program
     .command(repo.short)
-    .description(`${repo.name}'s commands whose names another repo has too`)
+    .description(`the ${repo.short} folder's commands whose names another folder has too`)
     .helpGroup(heading)
 }
 

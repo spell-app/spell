@@ -1368,6 +1368,10 @@
             "list_end",
             "before_or_after",
             "print_kind",
+            "notify_kind",
+            "toast_color",
+            "toast_position",
+            "toast_progress",
             "take_or_give_up",
             "drag_or_drop",
             "drag_moment",
@@ -1376,7 +1380,7 @@
             "at_least_or_at_most",
             "url_or_email",
             "draw_method",
-            "draw_its_part",
+            "draw_its_slot",
             "create_method",
             "create_hook_words",
             "pause_units",
@@ -1407,6 +1411,18 @@
               "syntax": "((info:información|informacion)|(warning:aviso|advertencia)|(error:error)|(group:grupo)|(collapsed_group:grupo plegado|grupo cerrado))"
             },
             {
+              "syntax": "((info:información|informacion)|(success:éxito|exito)|(warning:aviso|advertencia)|(error:error))"
+            },
+            {
+              "syntax": "((red:rojo|roja)|(orange:naranja)|(yellow:amarillo|amarilla)|(olive:verde oliva|oliva)|(teal:verde azulado|turquesa)|(green:verde)|(blue:azul)|(violet:violeta)|(purple:morado|morada|púrpura|purpura)|(pink:rosa)|(brown:marrón|marron)|(grey:gris)|(black:negro|negra))"
+            },
+            {
+              "syntax": "((top_left:arriba a la izquierda)|(top_center:arriba al centro|arriba)|(top_right:arriba a la derecha)|(centered:en el centro|en medio)|(bottom_left:abajo a la izquierda)|(bottom_center:abajo al centro|abajo)|(bottom_right:abajo a la derecha))"
+            },
+            {
+              "syntax": "((top_up:con una barra de progreso que se llena arriba)|(bottom_up:con una barra de progreso que se llena|con una barra de progreso que se llena abajo)|(top:con una barra de progreso arriba)|(bottom:con una barra de progreso|con una barra de progreso abajo))"
+            },
+            {
               "syntax": "((take:agregar|añadir|anadir|tomar)|(give_up:soltar|quitar|eliminar|ceder))"
             },
             {
@@ -1431,7 +1447,7 @@
               "syntax": "((draw:dibujarlo|dibujarla|dibujar (eso|ello))|(draw_each_item:dibujar cada elemento)|(draw_its_placeholder:dibujar su marcador))"
             },
             {
-              "syntax": "((draw_its_part:dibujar su|dibujar el|dibujar la))"
+              "syntax": "((draw_its_slot:dibujar su|dibujar el|dibujar la))"
             },
             {
               "syntax": "(create:crearlo|crearla|crearlos|crearlas|crear (eso|ello))"
@@ -3610,11 +3626,11 @@
           "ruleNames": ["notify"],
           "internal": false,
           "file": "src/spell/rules/UI/Notify.ts",
-          "line": 12,
-          "purpose": "Notify user about `message` in a non-modal (popup?) interface.",
+          "line": 24,
+          "purpose": "Tells the person something for a moment, in a toast, e.g. `notify \"Saved!\"`.",
           "syntaxes": [
             {
-              "syntax": "notificar {message:expression} (con {okButton:text})?",
+              "syntax": "notificar {kind:notify_kind}? {message:expression} (titulado {title:expression})? (en {color:toast_color} (inverted:invertido|invertida)?)? {position:toast_position}? ((durante {time:expression} {units:pause_units})|(untilClicked:hasta un clic|hasta que se haga clic))? {progress:toast_progress}? (sideBySide:uno al lado del otro|en fila)? (keepRunning:sin pausa|sin pausar)? (con {okButton:text})? (waits:y esperar)?",
               "example": "notificar \"Yo!\"",
               "outputs": {
                 "js": {
@@ -3875,15 +3891,15 @@
           "aliases": ["expression"]
         },
         {
-          "className": "DrawPart",
-          "ruleNames": ["draw_part"],
+          "className": "DrawSlot",
+          "ruleNames": ["draw_slot"],
           "internal": false,
-          "file": "src/spell/rules/classes/DrawPart.ts",
-          "line": 23,
-          "purpose": "PLACE one of a view's parts in its drawing (epic `elemental-spell` P5, Q55, Q56).",
+          "file": "src/spell/rules/classes/DrawSlot.ts",
+          "line": 29,
+          "purpose": "PLACE one of a view's slots in its drawing (epic `elemental-spell` P5, Q55, Q56; P27).",
           "syntaxes": [
             {
-              "syntax": "dibujar su {part:member_words}"
+              "syntax": "dibujar su {slot:member_words}"
             }
           ],
           "aliases": ["expression"]
@@ -5460,27 +5476,27 @@
               "syntax": "para {phrase:draw_method} :? {statement_body}?"
             },
             {
-              "syntax": "para dibujar su {part:member_words} :? {statement_body}?"
+              "syntax": "para dibujar su {slot:member_words} :? {statement_body}?"
             }
           ],
           "aliases": ["statement"]
         },
         {
-          "className": "HasParts",
-          "ruleNames": ["has_parts"],
+          "className": "HasSlots",
+          "ruleNames": ["has_slots"],
           "internal": false,
-          "file": "src/spell/rules/classes/HasParts.ts",
-          "line": 21,
-          "purpose": "A view's PARTS, the named drawings it places (epic `elemental-spell` P5, Q55, Q56).",
+          "file": "src/spell/rules/classes/HasSlots.ts",
+          "line": 25,
+          "purpose": "A view's SLOTS, the named drawings it places (epic `elemental-spell` P5, Q55, Q56; P27).",
           "syntaxes": [
             {
-              "syntax": "{type:subject_it} tiene (las)? partes [parts:{part:text} (,|y)]"
+              "syntax": "{type:subject_it} tiene (las)? (ranuras|partes) [slots:{slot:text} (,|y)]"
             },
             {
-              "syntax": "{type:subject_implied} tiene (las)? partes [parts:{part:text} (,|y)]"
+              "syntax": "{type:subject_implied} tiene (las)? (ranuras|partes) [slots:{slot:text} (,|y)]"
             },
             {
-              "syntax": "(un|una) {type:singular_type} tiene (las)? partes [parts:{part:text} (,|y)]"
+              "syntax": "(un|una) {type:singular_type} tiene (las)? (ranuras|partes) [slots:{slot:text} (,|y)]"
             }
           ],
           "aliases": ["statement"]
@@ -5506,7 +5522,7 @@
               "syntax": "{markup:jsxFragment}"
             },
             {
-              "syntax": "{markup:draw_part}"
+              "syntax": "{markup:draw_slot}"
             }
           ],
           "aliases": ["statement"]
@@ -5852,7 +5868,7 @@
           "ruleNames": ["jsxElement"],
           "internal": false,
           "file": "src/spell/rules/JSX/SpellJSX.ts",
-          "line": 51,
+          "line": 55,
           "purpose": "Match a JSX element (`<tag attr=.../>` or `<tag>...</tag>`) as an `expression`/`jsxChild`.",
           "syntaxes": [
             {

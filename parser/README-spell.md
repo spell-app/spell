@@ -357,10 +357,17 @@ export class Tableau extends Pile {
     `if it is face up`, then markup, `otherwise`, then other markup.
   - Several such lines draw all of them, in order;  so does a loop, one each time round:
     `<ui-text>Scores</ui-text>`, then `for each score in its scores` with `<ui-text>{the score}</ui-text>` under it.
-- A view can have PARTS, named drawings it places:
-  - `- it has parts "front" and "back"` names them;  `- to draw its front:` draws one, `drawFront()`
+- A view can have SLOTS, named drawings it places:
+  - `- it has slots "front" and "back"` names them;  `- to draw its front:` draws one, `drawFront()`
+    (Spanish:  `- tiene las ranuras "frente" y "dorso"`)
   - `draw its front` places it, on a line of its own or inside markup:  `<div>{draw its front}</div>`
-  - the part's element carries its name as a CSS part, `part="front"`, so a page can style it with `::part(front)`
+  - the slot's drawing carries its name for CSS, `part="front"`, so a page can style it with `::part(front)`
+  - where the view is drawn, a slot can be filled from outside, the web's way:
+    `<solitaire-card><ui-text in="front">Ace</ui-text></solitaire-card>` (`in=` is Spell's word for `slot=`;
+    spellx's `<card><text slot="front">Ace</text></card>`)
+    - that card shows the filling in place of its front;  every other card draws its own
+    - a placed slot compiles to the web's `<slot name="front">`, holding its own drawing
+  - the old `- it has parts ...` still reads, as an error naming `slots`;  `spell lint --fix` writes it
 - `a card is a two sided view` gives the card a front and a back:
   - its direction, `down` or `up` (a new one starts face down), `it is face up`, `it is face down`
   - `turn it face up`, `turn it face down`, `turn it over`

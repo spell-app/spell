@@ -18,7 +18,7 @@
 	-->
 	<section label="Owners">
 		<section label="Statistic" sticky="stack" collapsible dividing>
-			<example description="A statistic's value, above its label.">
+			<example "Statistic" description="A statistic's value, above its label.">
 				<statistics>
 					<statistic>
 						<value>40,509</value>
@@ -35,18 +35,16 @@
 
 	<section label="Variations">
 		<section label="Text Value" sticky="stack" collapsible dividing>
-			<example description="`text` makes a word value, smaller and bold.">
-				<html>
-					<ui-statistic>
-						<ui-value text>Three<br />Thousand</ui-value>
-						<ui-label>Signups</ui-label>
-					</ui-statistic>
-				</html>
+			<example "Text Value" description="`text` makes a word value, smaller and bold.">
+				<statistic>
+					<value text>Three<space/>Thousand</value>
+					<label>Signups</label>
+				</statistic>
 			</example>
 		</>
 
 		<section label="Icon and Image" sticky="stack" collapsible dividing>
-			<example description="A value can hold an icon or an image beside the number.">
+			<example "Icon and Image" description="A value can hold an icon or an image beside the number.">
 				<statistics>
 					<statistic>
 						<value><icon name="plane"/> 5</value>

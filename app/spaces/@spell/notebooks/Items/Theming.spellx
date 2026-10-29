@@ -38,27 +38,27 @@
 			<ui-docs-tokens family="ui-items" playground>
 				<ui-items>
 					<ui-item>
-						<img src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22480%22 height=%22320%22 viewBox=%220 0 30 20%22%3E%3Crect width=%2230%22 height=%2220%22 fill=%22%23cbd5e1%22/%3E%3Cpath d=%22M3 17l7-8 5 6 4-4 8 6z%22 fill=%22%2394a3b8%22/%3E%3Ccircle cx=%2222%22 cy=%226%22 r=%222%22 fill=%22%2394a3b8%22/%3E%3C/svg%3E" alt="" />
+						<ui-image alt="" src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22480%22 height=%22320%22 viewBox=%220 0 30 20%22%3E%3Crect width=%2230%22 height=%2220%22 fill=%22%23cbd5e1%22/%3E%3Cpath d=%22M3 17l7-8 5 6 4-4 8 6z%22 fill=%22%2394a3b8%22/%3E%3Ccircle cx=%2222%22 cy=%226%22 r=%222%22 fill=%22%2394a3b8%22/%3E%3C/svg%3E"></>
 						<ui-content>
 							<ui-header link="#cute-dog">Cute Dog</>
 							<ui-meta>
-								<span>Description</>
+								<ui-text>Description</>
 							</>
 							<ui-description>
-								<p>Many people also have their own barometers for what makes a cute dog.</>
+								<ui-text paragraph>Many people also have their own barometers for what makes a cute dog.</>
 							</>
 							<ui-extra>Additional details</>
 						</>
 					</>
 					<ui-item>
-						<img src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22480%22 height=%22320%22 viewBox=%220 0 30 20%22%3E%3Crect width=%2230%22 height=%2220%22 fill=%22%23cbd5e1%22/%3E%3Cpath d=%22M3 17l7-8 5 6 4-4 8 6z%22 fill=%22%2394a3b8%22/%3E%3Ccircle cx=%2222%22 cy=%226%22 r=%222%22 fill=%22%2394a3b8%22/%3E%3C/svg%3E" alt="" />
+						<ui-image alt="" src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22480%22 height=%22320%22 viewBox=%220 0 30 20%22%3E%3Crect width=%2230%22 height=%2220%22 fill=%22%23cbd5e1%22/%3E%3Cpath d=%22M3 17l7-8 5 6 4-4 8 6z%22 fill=%22%2394a3b8%22/%3E%3Ccircle cx=%2222%22 cy=%226%22 r=%222%22 fill=%22%2394a3b8%22/%3E%3C/svg%3E"></>
 						<ui-content>
 							<ui-header link="#arrowhead-valley-camp">Arrowhead Valley Camp</>
 							<ui-meta>
-								<span>$1200 1 month</>
+								<ui-text>$1200 1 month</>
 							</>
 							<ui-description>
-								<p>Ours is a life of constant reruns.</>
+								<ui-text paragraph>Ours is a life of constant reruns.</>
 							</>
 							<ui-extra>Limited availability</>
 						</>

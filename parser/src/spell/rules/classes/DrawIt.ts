@@ -41,15 +41,15 @@ import { DrawnLines } from "./DrawnLines"
  *   Spanish fuses its `it` into the verb (`dibujarlo`), so a method of those words would be `dibujarlo()`:
  *   this rule makes it `draw()`.
  * - ONE drawing per thing:  a program that wants a face-down look checks its own state inside `to draw it`.
- * - And its PARTS (epic `elemental-spell` P5, Q55, Q56):  a named drawing it places, `to draw its front:`
- *   => `drawFront()`, which `draw its front` places -- see `draw_part`.
+ * - And its SLOTS (epic `elemental-spell` P5, Q55, Q56):  a named drawing it places, `to draw its front:`
+ *   => `drawFront()`, which `draw its front` places -- see `draw_slot`.
  *   - Spanish:  `para dibujar su frente:`.  Quoted too, its body markup:  `to "draw its front": <div>...</div>`.
- *   - SIDE EFFECT:  the part is one of its type's (`P.TypeScope.declarePart()`).
- *   - Its markup carries the part's name as a CSS part (J6):  `part="front"`, so `::part(front)` styles it --
+ *   - SIDE EFFECT:  the slot is one of its type's (`P.TypeScope.declareSlot()`).
+ *   - Its markup carries the slot's name as a CSS part (J6):  `part="front"`, so `::part(front)` styles it --
  *     see `withPart()`.
  * - In a drawing's body, a line of markup IS what it draws, no `return` -- see `drawn_markup`.
  */
-export class DrawIt extends SpellStatement<"alias?|body?|phrase?|part?", DrawItMatchData> {
+export class DrawIt extends SpellStatement<"alias?|body?|phrase?|slot?", DrawItMatchData> {
   @proto static priority = Priority.declaration
   @proto static alias = "statement"
 
@@ -58,14 +58,14 @@ export class DrawIt extends SpellStatement<"alias?|body?|phrase?|part?", DrawItM
     const match = super.parse(scope, tokens) as P.MatchFor<this> | undefined
     const type = P.SubjectScope.of(scope)?.subjectType
     if (!match || !type) return undefined
-    // `to draw its placeholder` is a list's own drawing, `draw_method`'s, never a part called `placeholder`
-    if (match.groups.part && DrawIt.readsAsDrawMethod(scope, tokens, match.groups.part)) return undefined
+    // `to draw its placeholder` is a list's own drawing, `draw_method`'s, never a slot called `placeholder`
+    if (match.groups.slot && DrawIt.readsAsDrawMethod(scope, tokens, match.groups.slot)) return undefined
     const drawing = DrawIt.drawingOf(match)
     if (!drawing) return undefined
-    // a part by the name it compiles by:  a two sided view's Spanish `frente` draws its `front` (`P.TypeScope.partOutputs`)
-    if (match.data.part) match.data.part = type.partOutput(match.data.part)
-    // only a list draws each item, or a placeholder while it's empty;  any type draws its parts
-    if (drawing !== "draw" && drawing !== "draw_its_part" && !type.isA("list")) return undefined
+    // a slot by the name it compiles by:  a two sided view's Spanish `frente` draws its `front` (`P.TypeScope.slotOutputs`)
+    if (match.data.slot) match.data.slot = type.slotOutput(match.data.slot)
+    // only a list draws each item, or a placeholder while it's empty;  any type draws its slots
+    if (drawing !== "draw" && drawing !== "draw_its_slot" && !type.isA("list")) return undefined
     // English's `to draw it:` is `to_do_something`'s:  `draw()`, as for any `to <verb> it:`
     const { phrase } = match.groups
     if (phrase && drawing === "draw" && DrawIt.endsWithIt(scope, phrase.inputText)) return undefined
@@ -78,51 +78,51 @@ export class DrawIt extends SpellStatement<"alias?|body?|phrase?|part?", DrawItM
    */
   private static drawingOf(match: P.MatchFor<DrawIt>): Drawing | undefined {
     if (match.data.drawing) return match.data.drawing
-    const { alias, phrase, part } = match.groups
-    if (part) {
-      match.data.part = DrawIt.partName(`${part.value}`)
-      return (match.data.drawing = "draw_its_part")
+    const { alias, phrase, slot } = match.groups
+    if (slot) {
+      match.data.slot = DrawIt.slotName(`${slot.value}`)
+      return (match.data.drawing = "draw_its_slot")
     }
     const words = alias && `${alias.value}`.replace(/^["']|["']$/g, "")
     const meaning = words
       ? DRAWINGS.find((each) => Wording.reads(match.scope, "draw_method", words, each))
       : DRAWINGS.find((each) => each === Wording.meaningOf(phrase))
     if (meaning || !words) return (match.data.drawing = meaning)
-    // quoted, a part:  `"draw its front"`
-    const quotedPart = DrawIt.quotedPartOf(match.scope, words)
-    if (!quotedPart) return undefined
-    match.data.part = quotedPart
-    return (match.data.drawing = "draw_its_part")
+    // quoted, a slot:  `"draw its front"`
+    const quotedSlot = DrawIt.quotedSlotOf(match.scope, words)
+    if (!quotedSlot) return undefined
+    match.data.slot = quotedSlot
+    return (match.data.drawing = "draw_its_slot")
   }
 
-  /** Do `tokens` up to `part`, after their first word (`to`), read as one of `draw_method`'s drawings? */
-  private static readsAsDrawMethod(scope: P.Scope, tokens: P.Token[], part: P.Match): boolean {
-    const end = part.end ?? Infinity
+  /** Do `tokens` up to `slot`, after their first word (`to`), read as one of `draw_method`'s drawings? */
+  private static readsAsDrawMethod(scope: P.Scope, tokens: P.Token[], slot: P.Match): boolean {
+    const end = slot.end ?? Infinity
     const phrase = tokens.slice(1).filter((token) => token.start < end)
     const words = phrase.join("").trim()
     return DRAWINGS.some((each) => Wording.reads(scope, "draw_method", words, each))
   }
 
   /**
-   * The part `words` draws, quoted, e.g. `front` for `draw its front` -- `undefined` if they don't draw one.
-   * - Its first words are the language's own, the `draw_its_part` word rule (`draw its`, Spanish's `dibujar su`);
-   *   the rest are the part's name.
+   * The slot `words` draws, quoted, e.g. `front` for `draw its front` -- `undefined` if they don't draw one.
+   * - Its first words are the language's own, the `draw_its_slot` word rule (`draw its`, Spanish's `dibujar su`);
+   *   the rest are the slot's name.
    */
-  private static quotedPartOf(scope: P.Scope, words: string): string | undefined {
+  private static quotedSlotOf(scope: P.Scope, words: string): string | undefined {
     const tokens = scope.parser?.tokenize(words)
-    const lead = tokens && scope.parser?.rules.draw_its_part?.parse(scope, tokens)
+    const lead = tokens && scope.parser?.rules.draw_its_slot?.parse(scope, tokens)
     if (!lead) return undefined
     const name = tokens.slice(lead.length).join("").trim()
-    return PART_NAME.test(name) ? DrawIt.partName(name) : undefined
+    return SLOT_NAME.test(name) ? DrawIt.slotName(name) : undefined
   }
 
-  /** A part's name as its type keeps it, from the words it was written with:  `front`, `back cover` => `back_cover`. */
-  static partName(words: string): string {
+  /** A slot's name as its type keeps it, from the words it was written with:  `front`, `back cover` => `back_cover`. */
+  static slotName(words: string): string {
     return snakeCase(words.trim())
   }
 
-  /** The method that draws part `name`, e.g. `drawFront` for `front`, `drawBackCover` for `back_cover`. */
-  static partMethodName(name: string): string {
+  /** The method that draws slot `name`, e.g. `drawFront` for `front`, `drawBackCover` for `back_cover`. */
+  static slotMethodName(name: string): string {
     return `draw${name
       .split(/[_\s-]+/)
       .map(upperFirst)
@@ -130,28 +130,28 @@ export class DrawIt extends SpellStatement<"alias?|body?|phrase?|part?", DrawItM
   }
 
   /**
-   * SIDE EFFECT:  a part's drawing makes the part its type's -- see `P.TypeScope.declarePart()`.
+   * SIDE EFFECT:  a slot's drawing makes the slot its type's -- see `P.TypeScope.declareSlot()`.
    */
   mutateScope(match: P.MatchFor<this>) {
-    const { part } = match.data
-    if (part) P.SubjectScope.of(match.scope)!.subjectType!.declarePart(part, match)
+    const { slot } = match.data
+    if (slot) P.SubjectScope.of(match.scope)!.subjectType!.declareSlot(slot, match)
   }
 
   /**
-   * What drawing `scope` is in:  `{ drawing, part }` for a `draw_it`'s body (`part` for a part's),
+   * What drawing `scope` is in:  `{ drawing, slot }` for a `draw_it`'s body (`slot` for a slot's),
    * `{ drawing: "draw" }` for a method named `draw` (English's `to draw it:`) -- `undefined` anywhere else.
    * - Its nearest method's, so a line inside an `if` in a drawing is in the drawing.
    * - A loop's body is a method of its own (`core.map(list, (card) => ...)`), but it runs inside the drawing:
    *   so a line in `for each card in its cards` is in the drawing too (`SpellStatement.loops`, C28).
    */
-  static drawingIn(scope: P.Scope): { drawing: Drawing; part?: string } | undefined {
+  static drawingIn(scope: P.Scope): { drawing: Drawing; slot?: string } | undefined {
     let current: P.Scope | undefined = scope
     while (current && !(current instanceof P.MethodScope && !DrawIt.isLoop(current))) current = current.parentScope
     const declaredBy = (current as P.MethodScope | undefined)?.declaredBy
     if (!declaredBy) return undefined
     if (declaredBy.is(DrawIt)) {
-      const { drawing = "draw", part } = declaredBy.data as DrawItMatchData
-      return { drawing, part }
+      const { drawing = "draw", slot } = declaredBy.data as DrawItMatchData
+      return { drawing, slot }
     }
     const method = (
       declaredBy.rule as { getSignature?: (match: P.Match) => { methodName?: string } | undefined }
@@ -165,12 +165,14 @@ export class DrawIt extends SpellStatement<"alias?|body?|phrase?|part?", DrawItM
   }
 
   /**
-   * `element`, carrying part `name` as a CSS part (J6):  `part="front"`, or added to the part names it says already,
+   * `element`, carrying slot `name` as a CSS part (J6):  `part="front"`, or added to the part names it says already,
    * `part="face front"`.
-   * - A fragment has no element to carry it:  as it is.  So is an element whose `part` is worked out (`part={...}`).
+   * - A fragment has no element to carry it:  as it is.  Nor does a slot placed here (`draw_slot`).  So is an element whose `part` is worked out (`part={...}`).
    */
   static withPart(element: P.ASTExpression, name: string): P.ASTExpression {
     if (!(element instanceof P.ASTJSXElement) || element instanceof P.ASTJSXFragment) return element
+    // another slot placed:  its own drawing carries its own name
+    if (element.tagName === "slot") return element
     const attrs = [...(element.attrs ?? [])]
     const index = attrs.findIndex((attr) => attr.name === "part")
     const said = index < 0 ? undefined : attrs[index]!.value
@@ -226,17 +228,17 @@ export class DrawIt extends SpellStatement<"alias?|body?|phrase?|part?", DrawItM
   }
 
   /**
-   * `draw() { ... }`, `drawEachItem(item) { ... }`, `drawItsPlaceholder() { ... }` or a part's, `drawFront() { ... }`,
+   * `draw() { ... }`, `drawEachItem(item) { ... }`, `drawItsPlaceholder() { ... }` or a slot's, `drawFront() { ... }`,
    * on its type.
-   * - A quoted part's markup carries the part's name (`withPart()`);  a statement body's markup lines do it
+   * - A quoted slot's markup carries the slot's name (`withPart()`);  a statement body's markup lines do it
    *   themselves (`drawn_markup`).
    */
   getAST(match: P.MatchFor<this>): P.ASTPropertyDefinition {
     const drawing = match.data.drawing ?? "draw"
     const isEachItem = drawing === "draw_each_item"
-    const { part } = match.data
+    const { slot } = match.data
     let body = P.matchAST<MethodBody>(this.getBody(match))
-    if (part && body instanceof P.ASTExpression) body = DrawIt.withPart(body, part) as MethodBody
+    if (slot && body instanceof P.ASTExpression) body = DrawIt.withPart(body, slot) as MethodBody
     const method = new P.ASTMethodDefinition(match, {
       args: isEachItem ? [new P.ASTVariableExpression(match, { name: ITEM, datatype: match.data.itemType })] : [],
       body
@@ -245,7 +247,7 @@ export class DrawIt extends SpellStatement<"alias?|body?|phrase?|part?", DrawItM
     if (method.body.statements) method.body.statements = DrawnLines.gather(method.body.statements)
     return new P.ASTPropertyDefinition(match, {
       type: P.SubjectScope.of(match.scope)!.subject,
-      property: part ? DrawIt.partMethodName(part) : drawing,
+      property: slot ? DrawIt.slotMethodName(slot) : drawing,
       method
     })
   }
@@ -253,16 +255,16 @@ export class DrawIt extends SpellStatement<"alias?|body?|phrase?|part?", DrawItM
 
 /** What `draw_it` stashes in `match.data`. */
 type DrawItMatchData = {
-  /** Which drawing it is, by what its words mean -- see `DRAWINGS`;  `draw_its_part` for a part's. */
+  /** Which drawing it is, by what its words mean -- see `DRAWINGS`;  `draw_its_slot` for a slot's. */
   drawing?: Drawing
-  /** A part's name, for a part's drawing, e.g. `front` -- see `DrawIt.partName()`. */
-  part?: string
+  /** A slot's name, for a slot's drawing, e.g. `front` -- see `DrawIt.slotName()`. */
+  slot?: string
   /** What `to draw each item`'s item is:  its list's item type, e.g. `Card`. */
   itemType?: string
 }
 
-/** The drawings a type may write:  the `draw_method` word rule's meanings, and a part's, `draw_its_part`. */
-type Drawing = (typeof DRAWINGS)[number] | "draw_its_part"
+/** The drawings a type may write:  the `draw_method` word rule's meanings, and a slot's, `draw_its_slot`. */
+type Drawing = (typeof DRAWINGS)[number] | "draw_its_slot"
 
 /** See `Drawing`. */
 const DRAWINGS = ["draw", "draw_each_item", "draw_its_placeholder"] as const
@@ -270,5 +272,5 @@ const DRAWINGS = ["draw", "draw_each_item", "draw_its_placeholder"] as const
 /** The name `to draw each item` calls its item, in every language:  `drawEachItem(item)`. */
 const ITEM = "item"
 
-/** A part's name, after `draw its`:  one or more words, e.g. `front`, `back cover`. */
-const PART_NAME = /^\p{L}[\p{L}\p{M}\d_-]*(?: \p{L}[\p{L}\p{M}\d_-]*)*$/iu
+/** A slot's name, after `draw its`:  one or more words, e.g. `front`, `back cover`. */
+const SLOT_NAME = /^\p{L}[\p{L}\p{M}\d_-]*(?: \p{L}[\p{L}\p{M}\d_-]*)*$/iu

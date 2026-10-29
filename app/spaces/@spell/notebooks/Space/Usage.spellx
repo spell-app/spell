@@ -1,0 +1,38 @@
+<spell-notebook "space usage">
+	<header level="1">
+		Space
+		<header>A space is a gap between things:  a line break, a gap in a line, or the room left in a row.</>
+	</>
+	<space-tab-bar showing="usage"/>
+	<section>
+		<menu class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
+			<item link="#using-it">Using it</>
+			<item link="#accessibility">Accessibility</>
+		</>
+	</>
+
+	<!-- USAGE:  how to use it (attributes in practice, events, framework snippets), keyboard, accessibility. -->
+	<section label="Using it">
+		<markdown>
+			`<ui-space>` is an empty box with no look of its own:  a gap between things.
+
+			- Bare, it is a line break:  what follows starts on a new line.
+			- `inline` makes it a gap inside the line instead.
+			- `width` and `height` size it:  a number is pixels, `xs` ... `xl` the theme's space steps, anything
+			  else a CSS length.
+			- In a row or a column (`<ui-stack>`, a flex box):
+			  - `fluid` takes the room left, and gives it back when there's none
+			  - `grow` and `shrink` do each half on their own, bare (1) or by a number (`grow="2"`)
+			- In a stack, the stack's own spacing still falls either side of it.
+
+			In plain HTML a `<br>` or a margin does the same.
+			The tag is for where there's no `<br>`:  a drawing, which writes `<space/>`.
+		</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			A space has no role and no text:  screen readers pass over it, as over a `<br>`.
+		</>
+	</>
+</spell-notebook>

@@ -434,6 +434,14 @@ export type LanguageWords = {
    */
   retiredTypeWords?: Record<string, string>
   /**
+   * Spell's own words, outside its type words, the language no longer takes, each with the word that replaced it:
+   * English's `{ parts: "slots" }` (epic `elemental-spell` P27).
+   * - Still read where a rule spells it, so the line keeps its meaning;  but each is a parse error naming its
+   *   replacement, which `spell lint --fix` puts in its place -- see `SpellType.noteRetiredLiterals()`.
+   * - None:  nothing retired.
+   */
+  retiredWords?: Record<string, string>
+  /**
    * Its words for spellx, the tag-shaped form of a spell file (epic `elemental-spell`):  see `SpellxWords`.
    * - None:  a spellx file in this language reads English's.
    */
@@ -539,10 +547,10 @@ export type SpellxTwinWords = {
   eventAnd: string
   /** A drawing:  `to draw it :`. */
   draw: string
-  /** A part's drawing:  `to draw its {words} :`. */
-  drawPart: string
-  /** A part placed in a drawing:  `draw its {words}`. */
-  placePart: string
+  /** A slot's drawing:  `to draw its {words} :`. */
+  drawSlot: string
+  /** A slot placed in a drawing:  `draw its {words}`. */
+  placeSlot: string
   /**
    * A menu, its `<action>`s quoted after it (epic `elemental-spell` P10):
    * `its {name} is a menu of`, then `"deal" , "-" and "undo"`.
@@ -559,11 +567,16 @@ export type SpellxTwinWords = {
   group: string
   /**
    * A notebook's body, a drawing of prose, markup and examples (epic `elemental-spell` P16):
-   * its part's drawing, `to draw its content :`.
+   * its slot's drawing, `to draw its content :`.
    */
   notebookContent: string
   /** A notebook's `locked`:  a line in its body, `its lock is locked`. */
   notebookLocked: string
+  /**
+   * A template's bare `draggable`, `droppable`, `selectable`:  a line in its body, by the attribute's English name,
+   * the same line `- it is draggable` writes (`DragAndDrop`), so the class gets the same `canBeDragged` flag.
+   */
+  viewFlags: Record<string, string>
   /** What starts a notebook, after it:  `start {words}`, as an app's file says `start the game`. */
   start: string
   /** A handler, by its kind:  `{ on: "on {phrase} :" }`. */

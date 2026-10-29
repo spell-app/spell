@@ -40,13 +40,13 @@
 				<button type="button" class="ui button" commandfor="shape-demo-plain-playground" command="--next">Flip left</>
 				<ui-shape id="shape-demo-plain-playground">
 					<ui-side>
-						<p>This side starts visible.</>
+						<ui-text paragraph>This side starts visible.</>
 					</>
 					<ui-side>
-						<p>This is yet another side.</>
+						<ui-text paragraph>This is yet another side.</>
 					</>
 					<ui-side>
-						<p>This is the last side.</>
+						<ui-text paragraph>This is the last side.</>
 					</>
 				</>
 			</>

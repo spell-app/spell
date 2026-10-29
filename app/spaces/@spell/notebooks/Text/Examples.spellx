@@ -18,17 +18,17 @@
 	-->
 	<section label="Types">
 		<section label="Text" sticky="stack" collapsible dividing>
-			<example description="A text is always used inline and uses one color from the palette.">
-				<message slot="description" state="info" size="small"><html>Fomantic limits <code>ui text</code> to <code>&lt;span&gt;</code> tags, so it can't clash with other colourable elements. <code>&lt;ui-text&gt;</code> is its own tag, so there is nothing to clash with.</html></message>
+			<example "Text" description="A text is always used inline and uses one color from the palette.">
 				<segment>This is <text color="red">red</text> inline text and this is <text color="blue">blue</text> inline text and this is <text color="purple">purple</text> inline text</segment>
 				<segment inverted>This is <text inverted color="red">red</text> inline text and this is <text inverted color="blue">blue</text> inline text and this is <text inverted color="purple">purple</text> inline text</segment>
 				<segment>This is <text state="info">info</text> inline text and this is <text state="success">success</text> inline text and this is <text state="warning">warning</text> inline text and this is <text state="error">error</text> inline text</segment>
 				<segment inverted>This is <text state="info">info</text> inline text and this is <text state="success">success</text> inline text and this is <text state="warning">warning</text> inline text and this is <text state="error">error</text> inline text</segment>
+				<message slot="description" state="info" size="small">Fomantic limits <text code>ui text</text> to <text code>&lt;span&gt;</text> tags, so it can't clash with other colourable elements. <text code>&lt;ui-text&gt;</text> is its own tag, so there is nothing to clash with.</message>
 			</example>
 		</>
 
 		<section label="Colored" sticky="stack" collapsible dividing>
-			<example description="A text can take any colour of the palette, plus `primary` and `secondary`.">
+			<example "Colored" description="A text can take any colour of the palette, plus `primary` and `secondary`.">
 				<segment>
 					<text color="primary">Primary</text>
 					<text color="secondary">Secondary</text>
@@ -50,36 +50,66 @@
 		</>
 
 		<section label="Link" sticky="stack" collapsible dividing id="types-link">
-			<example description="A text with a `link` is a link in running text:  a real link, which the keyboard reaches.  `target` opens it elsewhere, as a link's does.">
+			<example "Link" description="A text with a `link` is a link in running text:  a real link, which the keyboard reaches.  `target` opens it elsewhere, as a link's does.">
 				<segment>Read <text link="#examples-types-link">the guide</text> first, or open <text link="https://fomantic-ui.com" target="_blank">Fomantic's docs</text> in a new tab.</segment>
 			</example>
 		</>
 
 		<section label="Link tag" sticky="stack" collapsible dividing id="types-link-tag">
-			<example description="`<ui-link>` is the same link as a tag of its own, for a drawing's sentence.  `disabled` fades it, and it's no longer a link.">
+			<example "Link tag" description="`<ui-link>` is the same link as a tag of its own, for a drawing's sentence.  `disabled` fades it, and it's no longer a link.">
 				<segment>See <link link="#examples-types-link-tag">the pricing</link>, or the <link link="#examples-types-link-tag" disabled>archived pricing</link>.</segment>
 			</example>
 		</>
 
 		<section label="Paragraph" sticky="stack" collapsible dividing>
-			<example description="`paragraph` makes a text a paragraph (`<p>`):  a block, with the body's line height and a line's space under it.  `font` and `link` still work inside it.">
+			<example "Paragraph" description="`paragraph` makes a text a paragraph (`<p>`):  a block, with the body's line height and a line's space under it.  Its letter styles and `link` still work inside it.">
 				<segment>
 					<text paragraph>A paragraph holds a few sentences about one thing. It wraps at the edge of its box, and the next paragraph starts a line's space below it.</text>
-					<text paragraph font="italic">This one is in italics, as a pull-out or a caption might be.</text>
+					<text paragraph italic>This one is in italics, as a pull-out or a caption might be.</text>
 				</segment>
 			</example>
 		</>
 
 		<section label="Letter styles" sticky="stack" collapsible dividing>
-			<example description="`font` says how the letters look, several words at once:  each is drawn as its HTML element, so screen readers hear it.">
-				<segment>It's <text font="bold">free</text>, <text font="italic">today</text> only. Run <text font="code">yarn review</text> first; <text font="highlight">nothing is saved</text> until then. <text font="strikethrough">Was 10</text> now 5. H<text font="subscript">2</text>O, E = mc<text font="superscript">2</text>, <text font="bold italic underline">all three</text>.</segment>
+			<example "Letter styles" description="Its faces are bare attributes, any together (`bold italic`), and so is its case (`all-caps`, `title-caps`):  each is drawn as its HTML element, so screen readers hear it.  `font` says the same (`font=\"bold italic\"`), as it does on every other element.">
+				<segment>It's <text bold>free</text>, <text italic>today</text> only. Run <text code>yarn review</text> first; <text highlight>nothing is saved</text> until then. <text strikethrough>Was 10</text> now 5. H<text subscript>2</text>O, E = mc<text superscript>2</text>, <text bold italic underline>all three</text>. <text all-caps>An eyebrow in capitals</text>, <text title-caps>a title in title case</text>.</segment>
+			</example>
+		</>
+
+		<section label="Families" sticky="stack" collapsible dividing>
+			<example "Families" description="`headline`, `subhead`, `serif`, `sans-serif` and `typewriter` pick a family from the theme, one at a time;  `code` is inline code, in the look `<code>` has in prose.  Pick another theme in the header to see each theme's.">
+				<segment>
+					<text paragraph headline>A headline, in the theme's headings' face.</text>
+					<text paragraph subhead>A subhead, under a heading.</text>
+					<text paragraph serif>A serif, for reading:  the theme's book face.</text>
+					<text paragraph sans-serif>A sans-serif, plain and even.</text>
+					<text paragraph typewriter>A typewriter's letters, every one as wide.</text>
+					<text paragraph>And <text code>code</text>, inside a sentence.</text>
+				</segment>
+			</example>
+		</>
+
+		<section label="Font size" sticky="stack" collapsible dividing>
+			<example "Font size" description="A number in `font` is a size in pixels (`font=\"14\"`);  with a slash, its line height too:  `font=\"10/20\"` is 10px letters on 20px lines.  `font` takes it on every element.">
+				<segment>
+					<text paragraph font="20">Twenty pixels.</text>
+					<text paragraph font="bold serif 13/26">Thirteen-pixel serif on twenty-six-pixel lines, so a long sentence breathes as it wraps across the box.</text>
+				</segment>
+			</example>
+		</>
+
+		<section label="Line breaks" sticky="stack" collapsible dividing>
+			<example "Line breaks" description="In a paragraph, a blank line in its text is a line break, and a single line break a space, as in Markdown.">
+				<segment>
+					<text paragraph>Jenny Hess and Elliot Fu 12 Main Street</text>
+				</segment>
 			</example>
 		</>
 	</>
 
 	<section label="States">
 		<section label="Disabled" sticky="stack" collapsible dividing>
-			<example description="A text can show that it is disabled.">
+			<example "Disabled" description="A text can show that it is disabled.">
 				<segment>This is <text disabled>disabled inline text</text> and <text color="red" disabled>disabled red inline text</text>.</segment>
 			</example>
 		</>
@@ -87,24 +117,22 @@
 
 	<section label="Variations">
 		<section label="Size" sticky="stack" collapsible dividing>
-			<example description="Text can vary in the same sizes as icons, relative to the text around it.">
-				<html>
-					<ui-segment>
-						<p>Starting with <ui-text size="mini" color="red">mini</ui-text> text</p>
-						<p>which turns into <ui-text size="tiny" color="red">tiny</ui-text> text</p>
-						<p>changing to <ui-text size="small" color="red">small</ui-text> text until it is</p>
-						<p>the default <ui-text size="medium" color="red">medium</ui-text> text</p>
-						<p>and could be <ui-text size="large" color="red">large</ui-text> text</p>
-						<p>to turn into <ui-text size="big" color="red">big</ui-text> text</p>
-						<p>then growing to <ui-text size="huge" color="red">huge</ui-text> text</p>
-						<p>to finally become <ui-text size="massive" color="red">massive</ui-text> text</p>
-					</ui-segment>
-				</html>
+			<example "Size" description="Text can vary in the same sizes as icons, relative to the text around it.">
+				<segment>
+					<text paragraph>Starting with <text size="mini" color="red">mini</text> text</text>
+					<text paragraph>which turns into <text size="tiny" color="red">tiny</text> text</text>
+					<text paragraph>changing to <text size="small" color="red">small</text> text until it is</text>
+					<text paragraph>the default <text size="medium" color="red">medium</text> text</text>
+					<text paragraph>and could be <text size="large" color="red">large</text> text</text>
+					<text paragraph>to turn into <text size="big" color="red">big</text> text</text>
+					<text paragraph>then growing to <text size="huge" color="red">huge</text> text</text>
+					<text paragraph>to finally become <text size="massive" color="red">massive</text> text</text>
+				</segment>
 			</example>
 		</>
 
 		<section label="Inverted" sticky="stack" collapsible dividing>
-			<example description="A text can be formatted to appear on dark backgrounds.">
+			<example "Inverted" description="A text can be formatted to appear on dark backgrounds.">
 				<segment inverted>
 					<text inverted color="red">Red</text>
 					<text inverted color="orange">Orange</text>

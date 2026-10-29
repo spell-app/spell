@@ -18,7 +18,7 @@
 	-->
 	<section label="Types">
 		<section label="From a schema" sticky="stack" collapsible dividing>
-			<example description="An empty editor draws one property per attribute of its `schema`, each with the control its type calls for, bound to `value`.  Type, tick, and watch the Bound object box.">
+			<example "From a schema" description="An empty editor draws one property per attribute of its `schema`, each with the control its type calls for, bound to `value`.  Type, tick, and watch the Bound object box.">
 				<html>
 					<ui-property-editor debug style="max-width: 360px" schema="{\"name\": \"Theme\", \"attributes\": \[
                       {\"name\": \"title\", \"kind\": \"string\", \"type\": \"text\", \"description\": \"\", \"tip\": \"Shown in the theme list.\"},
@@ -30,7 +30,7 @@
 		</>
 
 		<section label="Laid out" sticky="stack" collapsible dividing>
-			<example description="Lay it out with `<ui-property-group>`s and `<ui-property>`s.  Groups open and close, `as` picks a control, and `hint` goes under it;  a dotted `name` reaches into a nested thing.  The title is `label`, which draws a section around it.">
+			<example "Laid out" description="Lay it out with `<ui-property-group>`s and `<ui-property>`s.  Groups open and close, `as` picks a control, and `hint` goes under it;  a dotted `name` reaches into a nested thing.  The title is `label`, which draws a section around it.">
 				<html>
 					<ui-property-editor label="Theme" style="max-width: 360px" schema="{\"name\": \"Theme\", \"attributes\": \[
                       {\"name\": \"title\", \"kind\": \"string\", \"type\": \"text\", \"description\": \"\"},
@@ -52,7 +52,7 @@
 		</>
 
 		<section label="Rules" sticky="stack" collapsible dividing>
-			<example description="A schema's `rules` are checked as you leave each field (`validate=\"on leave\"`), each with its own message when it has one.  A spell type's rules arrive in this shape:  `- its version must match \"^\\d+\\.\\d+\\.\\d+$\", with suggestion \"Write it like 1.2.3\"`.  Clear the name, or type a letter into the version.">
+			<example "Rules" description="A schema's `rules` are checked as you leave each field (`validate=\"on leave\"`), each with its own message when it has one.  A spell type's rules arrive in this shape:  `- its version must match \"^\\d+\\.\\d+\\.\\d+$\", with suggestion \"Write it like 1.2.3\"`.  Clear the name, or type a letter into the version.">
 				<html>
 					<ui-property-editor label="Release" validate="on leave" style="max-width: 360px" schema="{\"name\": \"Release\", \"attributes\": \[
                       {\"name\": \"name\", \"kind\": \"string\", \"type\": \"text\", \"description\": \"\", \"rules\": \[{\"type\": \"empty\"}]},
@@ -68,7 +68,7 @@
 
 	<section label="Pages">
 		<section label="From a page" sticky="stack" collapsible dividing>
-			<example description="`source` loads the layout from a saved page, `Theme.editor.html`:  plain markup, its groups and properties, which the page holds instead of the editor.  `select` would take only part of it.">
+			<example "From a page" description="`source` loads the layout from a saved page, `Theme.editor.html`:  plain markup, its groups and properties, which the page holds instead of the editor.  `select` would take only part of it.">
 				<html>
 					<ui-property-editor source="/components/ui/examples/Theme.editor.html" style="max-width: 360px" schema="{\"name\": \"Theme\", \"attributes\": \[
                       {\"name\": \"title\", \"kind\": \"string\", \"type\": \"text\", \"description\": \"\"},
@@ -82,7 +82,7 @@
 
 	<section label="Binding">
 		<section label="Save and Cancel" sticky="stack" collapsible dividing>
-			<example description="`apply=\"on save\"` holds every edit until Save;  Cancel drops them.  A property holding an edit has `:state(changed)`.">
+			<example "Save and Cancel" description="`apply=\"on save\"` holds every edit until Save;  Cancel drops them.  A property holding an edit has `:state(changed)`.">
 				<html>
 					<ui-property-editor label="Project" apply="on save" debug style="max-width: 360px" schema="{\"name\": \"Project\", \"attributes\": \[
                       {\"name\": \"title\", \"kind\": \"string\", \"type\": \"text\", \"description\": \"\"},
@@ -93,7 +93,7 @@
 		</>
 
 		<section label="Many things" sticky="stack" collapsible dividing>
-			<example description="A list as `value` edits every thing in it:  a property shows the value they agree on, else blank and Mixed.  A write sets all of them.">
+			<example "Many things" description="A list as `value` edits every thing in it:  a property shows the value they agree on, else blank and Mixed.  A write sets all of them.">
 				<html>
 					<ui-property-editor debug style="max-width: 360px" schema="{\"name\": \"Theme\", \"attributes\": \[
                       {\"name\": \"size\", \"kind\": \"string\", \"type\": \"text\", \"description\": \"\"},

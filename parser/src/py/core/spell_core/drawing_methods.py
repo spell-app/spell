@@ -196,7 +196,8 @@ def element_of(tag: str, drawing: object, children: list[object]) -> Element:
     - What the JavaScript run's fake page prints (`withShadowsInPlace()`, `runProject.ts`):
       - each `<slot>` replaced by the children it takes:
         the unnamed one those with no `slot` attribute, and text;  `<slot name="header">` those with `slot="header"`
-      - a child goes in the FIRST slot that takes it, as a browser puts it;  a slot with none shows nothing
+      - a child goes in the FIRST slot that takes it, as a browser puts it;  a slot with none shows its own content,
+        e.g. a view's `<slot name="front">` its front (epic `elemental-spell` P27)
     - A view inside `drawing` is already drawn so (`core.draw_thing()`):
       its slots are gone, so only `drawing`'s own are filled here.
     """
@@ -212,7 +213,8 @@ def element_of(tag: str, drawing: object, children: list[object]) -> Element:
                 name = node.attributes.get("name")
                 taken = [child for child in unplaced if slot_of(child) == name]
                 unplaced[:] = [child for child in unplaced if slot_of(child) != name]
-                result.extend(taken)
+                # nothing put in it:  its own content shows, as a browser shows it (a view's slot drawing itself)
+                result.extend(taken if taken else filled(node.children))
             else:
                 node.children[:] = filled(node.children)
                 result.append(node)

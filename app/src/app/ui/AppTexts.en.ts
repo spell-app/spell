@@ -30,6 +30,19 @@ export const APP_TEXTS = {
   editMode: "Edit",
   debugMode: "Debug",
   showLineNumbers: "Show line numbers",
+  // the code pane's settings, `<CodeSettingsPanel>` (epic `debut`)
+  codeSettings: "Settings…",
+  codeSettingsHeader: "Code editor",
+  codeSettingsClose: "Close the code editor's settings",
+  codeHover: "Hover info",
+  codeHoverWithAlt: "Only with ⌥ (Alt) held",
+  codeHoverAlways: "Always",
+  codeHoverNever: "Never",
+  codeSuggest: "Suggestions",
+  codeSuggestOnCtrlSpace: "Only on Ctrl+Space",
+  codeSuggestAsYouType: "As you type",
+  codeSuggestDetails: "Details beside suggestions",
+  codeParameterHints: "Parameter hints",
   // a notebook's page, `<NotebookPage>` (epic `elemental-spell` P16)
   notebookPageCodeAs: "Show code as",
   notebookPageLock: "Lock it:  nothing is saved while it's locked",
@@ -279,7 +292,7 @@ export const APP_TEXTS = {
   // the theme editor's page (`<ThemeEditorPage>`), and the palette menu's way there
   editTheme: "Edit theme…",
   // the pages it previews while it's worked on (`BenchPages`, in development)
-  "themePage.editor": "Editor",
+  "themePage.editor": "App",
   "themePage.epic": "Epic page",
   "themePage.ui": "Spell UI",
   "themePage.notebook": "Notebook",

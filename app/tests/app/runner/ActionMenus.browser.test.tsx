@@ -189,6 +189,36 @@ describe("ActionMenus:  a Solitaire's game menu", () => {
     expect(game.card.faceUp).toBe(true)
   })
 
+  test("a shortcut leaves keys typed into the code pane alone:  Monaco types through an EditContext, not a field", async () => {
+    const { game, card } = await mountedGame()
+    card.dispatchEvent(new MouseEvent("mouseenter"))
+    game.card.faceUp = true
+    // the code pane:  a plain <div> with an EditContext, as Monaco's `native-edit-context` is
+    const codePane = document.createElement("div")
+    codePane.tabIndex = 0
+    ;(codePane as unknown as { editContext: unknown }).editContext = new (
+      globalThis as unknown as { EditContext: new () => unknown }
+    ).EditContext()
+    document.body.append(codePane)
+    try {
+      codePane.focus()
+      const isMac = /mac/i.test(navigator.platform || navigator.userAgent)
+      const typed = new KeyboardEvent("keydown", {
+        key: "d",
+        metaKey: isMac,
+        ctrlKey: !isMac,
+        bubbles: true,
+        composed: true,
+        cancelable: true
+      })
+      codePane.dispatchEvent(typed)
+      expect(typed.defaultPrevented).toBe(false)
+      expect(game.card.faceUp).toBe(true)
+    } finally {
+      codePane.remove()
+    }
+  })
+
   test("a shortcut draws as the key it presses:  spell's `meta+D` is Spell UI's `mod+D`, ⌘ D on a Mac, Ctrl D elsewhere", async () => {
     const { app } = await mountedGame()
     const menuBar = app.shadowRoot!.querySelector("[part~=menu-bar]")!

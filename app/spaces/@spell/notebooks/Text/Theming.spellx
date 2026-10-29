@@ -39,8 +39,8 @@
 		<markdown>Edit a value below to try it.</>
 		<html>
 			<ui-docs-tokens family="ui-text" playground>
-				<p>This is <ui-text color="red">red inline text</> and <ui-text color="blue">this is blue inline text</> and <ui-text color="purple">this is purple inline text</>.</>
-				<p>
+				<ui-text paragraph>This is <ui-text color="red">red inline text</> and <ui-text color="blue">this is blue inline text</> and <ui-text color="purple">this is purple inline text</>.</>
+				<ui-text paragraph>
 					<ui-text color="primary">Primary</>
 					<ui-text color="secondary">Secondary</>
 					<ui-text color="orange">Orange</>

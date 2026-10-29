@@ -44,7 +44,7 @@
 		<markdown>Edit a value below to try it.</>
 		<html>
 			<ui-docs-tokens family="ui-rail" playground>
-				<div style="margin-inline: 20em">
+				<ui-stack style="margin-inline: 20em">
 					<ui-segment>
 						<ui-rail position="left">
 							<ui-segment>Left rail content</>
@@ -52,7 +52,7 @@
 						<ui-rail position="right">
 							<ui-segment>Right rail content</>
 						</>
-						<p>Main content. Te eum doming eirmod, nominati pertinacia argumentum ad his.</>
+						<ui-text paragraph>Main content. Te eum doming eirmod, nominati pertinacia argumentum ad his.</>
 					</>
 				</>
 			</>

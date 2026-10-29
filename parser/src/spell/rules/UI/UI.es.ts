@@ -13,7 +13,7 @@ import { Alert } from "./Alert"
 import { Confirm } from "./Confirm"
 import { CSSStyles } from "./CSSStyles"
 import { EndPrintGroup } from "./EndPrintGroup"
-import { Notify } from "./Notify"
+import { Notify, NOTIFY_KINDS, TOAST_COLORS, TOAST_POSITIONS, TOAST_PROGRESS } from "./Notify"
 import { Print } from "./Print"
 import { Prompt } from "./Prompt"
 import { Warn } from "./Warn"
@@ -34,6 +34,35 @@ UIEs.addRule(
       "|(collapsed_group:grupo plegado|grupo cerrado))"
   }
 )
+
+// A toast's kind, for `notificar`:  `notificar éxito "¡Guardado!"` means `success`
+UIEs.addRule(Wording.specialize({ ruleName: "notify_kind", meanings: NOTIFY_KINDS }), {
+  syntax: "((info:información|informacion)|(success:éxito|exito)|(warning:aviso|advertencia)|(error:error))"
+})
+
+// A toast's colour, for `notificar ... en rojo`:  each meaning Spell UI's hue name
+UIEs.addRule(Wording.specialize({ ruleName: "toast_color", meanings: TOAST_COLORS }), {
+  syntax:
+    "((red:rojo|roja)|(orange:naranja)|(yellow:amarillo|amarilla)|(olive:verde oliva|oliva)" +
+    "|(teal:verde azulado|turquesa)|(green:verde)|(blue:azul)|(violet:violeta)" +
+    "|(purple:morado|morada|púrpura|purpura)|(pink:rosa)|(brown:marrón|marron)|(grey:gris)|(black:negro|negra))"
+})
+
+// Where a toast goes, for `notificar ... arriba a la izquierda`:  each meaning Spell UI's `position`
+UIEs.addRule(Wording.specialize({ ruleName: "toast_position", meanings: TOAST_POSITIONS }), {
+  syntax:
+    "((top_left:arriba a la izquierda)|(top_center:arriba al centro|arriba)|(top_right:arriba a la derecha)" +
+    "|(centered:en el centro|en medio)|(bottom_left:abajo a la izquierda)|(bottom_center:abajo al centro|abajo)" +
+    "|(bottom_right:abajo a la derecha))"
+})
+
+// A toast's progress bar, for `notificar ... con una barra de progreso arriba`:  where it goes, `_up` when it fills
+UIEs.addRule(Wording.specialize({ ruleName: "toast_progress", meanings: TOAST_PROGRESS }), {
+  syntax:
+    "((top_up:con una barra de progreso que se llena arriba)" +
+    "|(bottom_up:con una barra de progreso que se llena|con una barra de progreso que se llena abajo)" +
+    "|(top:con una barra de progreso arriba)|(bottom:con una barra de progreso|con una barra de progreso abajo))"
+})
 
 ////////////////
 // ## Statements
@@ -71,13 +100,40 @@ UIEs.addRule(EndPrintGroup, {
 })
 
 UIEs.addRule(Notify, {
-  syntax: "notificar {message:expression} (con {okButton:text})?",
+  syntax:
+    "notificar {kind:notify_kind}? {message:expression} (titulado {title:expression})?" +
+    " (en {color:toast_color} (inverted:invertido|invertida)?)? {position:toast_position}?" +
+    " ((durante {time:expression} {units:pause_units})|(untilClicked:hasta un clic|hasta que se haga clic))?" +
+    " {progress:toast_progress}? (sideBySide:uno al lado del otro|en fila)? (keepRunning:sin pausa|sin pausar)?" +
+    " (con {okButton:text})? (waits:y esperar)?",
   tests: [
     {
       compileAs: "statement",
       tests: [
         [`notificar "Yo!"`, `core.notify("Yo!")`],
-        [`notificar "Yo!" con "entendido"`, `core.notify("Yo!", "entendido")`]
+        [`notificar "Yo!" con "entendido"`, `core.notify("Yo!", { button: "entendido" })`],
+        [`notificar éxito "¡Guardado!"`, `core.notify("¡Guardado!", { class: "success" })`],
+        [`notificar "¡Mira!" titulado "¿Mejor?"`, `core.notify("¡Mira!", { title: "¿Mejor?" })`],
+        [`notificar "De colores" en rojo invertido`, `core.notify("De colores", { class: "inverted red" })`],
+        [`notificar error "Ups" en negro`, `core.notify("Ups", { class: "error black" })`],
+        [`notificar "¡Aquí!" arriba a la izquierda`, `core.notify("¡Aquí!", { position: "top left" })`],
+        [`notificar "¡Aquí!" en el centro`, `core.notify("¡Aquí!", { position: "centered" })`],
+        [`notificar "Adiós" durante 5 segundos`, `core.notify("Adiós", { time: 5, units: "seconds" })`],
+        [`notificar "Me quedo" hasta un clic`, `core.notify("Me quedo", { time: 0 })`],
+        [`notificar "Mira" con una barra de progreso`, `core.notify("Mira", { showProgress: "bottom" })`],
+        {
+          input: `notificar "Mira" titulado "MIRA" con una barra de progreso que se llena arriba`,
+          js: [`core.notify("Mira", {`, `  title: "MIRA",`, `  showProgress: "top",`, `  progressUp: true`, `})`]
+        },
+        [
+          `notificar "Siguiente" arriba a la izquierda uno al lado del otro`,
+          `core.notify("Siguiente", { position: "top left", horizontal: true })`
+        ],
+        [
+          `notificar "Ocupado" con una barra de progreso arriba sin pausa`,
+          `core.notify("Ocupado", { showProgress: "top", pauseOnHover: false })`
+        ],
+        [`notificar "Me voy" durante 1 segundo y esperar`, `await core.notify("Me voy", { time: 1, units: "second" })`]
       ]
     }
   ]

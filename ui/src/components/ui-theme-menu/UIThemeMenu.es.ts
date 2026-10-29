@@ -45,6 +45,8 @@ export const themeMenuEs = {
     schemeName: "Claro u oscuro",
     light: "Claro",
     dark: "Oscuro",
-    auto: "Auto"
+    auto: "Auto",
+    bench: "Banco de temas",
+    benchTip: "Abrir el banco de temas en una ventana nueva, con este tema"
   }
 } as const satisfies E.TagDictionary

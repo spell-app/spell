@@ -2,7 +2,7 @@
 // Built into spell (epic `elemental-spell` Q71):  compiled once, into the core's `TwoSidedView`.
 // A view made from it says what each side looks like, with `to draw its front:` and `to draw its back:`.
 a "two sided view" is a view where:
-	- it has parts "front" and "back"
+	- it has slots "front" and "back"
 	// which way it faces:  a new one starts face down
 	- its "direction" is down or up
 	- it "is face (direction)"

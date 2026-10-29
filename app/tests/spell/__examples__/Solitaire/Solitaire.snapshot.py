@@ -82,7 +82,10 @@ class Card(TwoSidedView):
 
     def draw(self) -> list:
         """Both its sides, one over the other:  styles.css shows the one it's turned to, and flips it over as it turns"""
-        return [self.draw_front(), self.draw_back()]
+        return [
+            h("slot", {"name": "front"}, self.draw_front()),
+            h("slot", {"name": "back"}, self.draw_back()),
+        ]
 
     @property
     def picture(self) -> str | None:
@@ -982,13 +985,26 @@ core.install_styles(None, """/* File styles.css:  how the board looks -- each ca
   }
 }
 
-/* An empty pile's placeholder:  a faint card in the page's text colour, so it shows on a dark page too */
+/* An empty pile's placeholder:  a faint card in a mid grey, so it shows on a light page and a dark one alike */
 [layout]::part(placeholder) {
-  color: var(--ui-text-color, #000);
-  opacity: 0.15;
+  color: #8a8f99;
+  opacity: 0.35;
 }
 [layout]::part(placeholder):hover {
-  opacity: 0.25;
+  opacity: 0.5;
+}
+
+/*
+ * A real deck's colours, the same in every theme and scheme (Owen:  "colors should be the same for all themes",
+ * "foundation colors too"):  each card drawn in the light scheme, so a dark theme doesn't lighten its inks,
+ * and its three inks fixed, so a theme's own red, black and blue don't reach it;  an empty pile's placeholder
+ * (above) a mid grey that shows on a light page and a dark one alike
+ */
+[layout] > * {
+  color-scheme: light;
+  --ui-red-text: #c8102e;
+  --ui-black-text: #1a1a1a;
+  --ui-blue-text: #2f6fd6;
 }
 
 /****************

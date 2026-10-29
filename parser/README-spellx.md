@@ -119,8 +119,10 @@ reversible:`, and reads to the same tree as the English card.
 - **Prose is markdown, headings included**, read as comments:  the lines just above a member are its docstring.
 - **A comment, `<!-- ... -->`, is one anywhere**, never drawn:  each of its lines reads as a `//` line.
   A `description=`, or a `<description>` first in a tag, is that tag's docstring too.
-- **A drawing's body is markup**, as plain Spell's is:  `<if>` chains and `<draw "front" />` placing a part are
+- **A drawing's body is markup**, as plain Spell's is:  `<if>` chains and `<draw "front" />` placing a slot are
   tags of their own between its elements.
+- **A view's slots are filled where it's drawn**, with the web's `slot=`:  `<card><text slot="front">Ace</text></card>`.
+  That card shows "Ace" in place of its front;  a slot nothing fills shows its own `<draw "front">`.
 - **Closers:**  `</>` closes the innermost open tag;  `</property>` does too, and checks it's a property;
   `/>` ends a tag with nothing inside.
   - A `<markdown>` block's text is read as written, so there `</>` closes it only at a line's end:
@@ -186,7 +188,7 @@ for (const { node, depth } of file.walk()) ...
 | `text`, `hole` | markup text;  a `{spell expression}` | -- |
 | `choice`, `branch` | an `<if>` chain and its branches | each branch's markup |
 | `loop` | `<for each ...>` | markup |
-| `place` | `<draw "front" />`, where a part goes | -- |
+| `place` | `<draw "front" />`, where a slot goes | -- |
 
 </details>
 

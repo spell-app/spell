@@ -18,7 +18,7 @@
 	-->
 	<section label="Owners">
 		<section label="Feed" sticky="stack" collapsible dividing>
-			<example description="A date above an event's summary, and one inline at its end.">
+			<example "Feed" description="A date above an event's summary, and one inline at its end.">
 				<feed>
 					<event>
 						<content>
@@ -38,7 +38,7 @@
 
 	<section label="Content">
 		<section label="Machine-readable date" sticky collapsible dividing>
-			<example description="`datetime` renders a `<time datetime>`;  the text stays what readers see.">
+			<example "Machine-readable date" description="`datetime` renders a `<time datetime>`;  the text stays what readers see.">
 				<feed>
 					<event>
 						<content>

@@ -1270,6 +1270,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
     ],
     formControl: true
   },
+  "ui-space": { folder: "ui-space", attributes: ["inline", "width", "height", "fluid", "grow", "shrink"] },
   "ui-stack": { folder: "ui-stack", attributes: ["direction", "wrap", "spacing", "align", "justify", "fluid"] },
   "ui-statistic": {
     folder: "ui-statistic",
@@ -1400,7 +1401,32 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
   },
   "ui-term": { folder: "ui-terms", attributes: ["label", "value"] },
   "ui-terms": { folder: "ui-terms", attributes: ["direction", "spacing"] },
-  "ui-text": { folder: "ui-text", attributes: ["size", "color", "state", "inverted", "paragraph", "disabled"] },
+  "ui-text": {
+    folder: "ui-text",
+    attributes: [
+      "size",
+      "color",
+      "state",
+      "inverted",
+      "paragraph",
+      "bold",
+      "italic",
+      "underline",
+      "strikethrough",
+      "highlight",
+      "subscript",
+      "superscript",
+      "all-caps",
+      "title-caps",
+      "headline",
+      "subhead",
+      "serif",
+      "sans-serif",
+      "typewriter",
+      "code",
+      "disabled"
+    ]
+  },
   "ui-textarea": {
     folder: "ui-input",
     skeleton: { width: "20em", height: "6em" },
@@ -1434,7 +1460,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
   "ui-theme-menu": {
     folder: "ui-theme-menu",
     skeleton: { display: "inline", width: "5em", height: "2.25em" },
-    attributes: ["show", "size", "inverted", "compact"]
+    attributes: ["show", "size", "inverted", "compact", "bench"]
   },
   "ui-theme-token": { folder: "ui-theme-editor", skeleton: { height: "2em" }, attributes: ["row"] },
   "ui-title": { folder: "ui-parts", attributes: ["link"] },

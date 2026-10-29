@@ -16,7 +16,7 @@
 	-->
 	<section label="Types">
 		<section label="Theme editor" sticky="stack" collapsible dividing>
-			<example description="It starts from the page's theme (Fruity where there's none), or the theme you kept with Use this theme.  Pick a colour, a font or a corner, or set any token:  this whole page follows, and the sample app shows it in light and dark.  Copy changes copies the theme file.">
+			<example "Theme editor" description="It starts from the page's theme (Fruity where there's none), or the theme you kept with Use this theme.  Pick a colour, a font or a corner, or set any token:  this whole page follows, and the sample app shows it in light and dark.  Copy changes copies the theme file.">
 				<theme-editor/>
 			</example>
 		</>

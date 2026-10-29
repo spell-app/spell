@@ -26,41 +26,37 @@
 	-->
 	<section label="Types">
 		<section label="Page" sticky="stack" collapsible dividing>
-			<example description="A whole page:  the header across the top, the folders and a tip either side of the messages, the footer at the bottom.  Drag the box's corner narrower:  on a phone's width the regions stack.  Here it's shrunk into a box (`--ui-page-min-height: 0`);  on its own it fills the window.">
-				<html>
-					<div style="resize: both; overflow: auto; border: 1px dashed currentColor; max-width: 100%">
-						<ui-page style="--ui-page-min-height: 0; --ui-page-nav-width: 9em; --ui-page-aside-width: 9em">
-							<ui-header slot="header" level="2">Inbox</ui-header>
-							<ui-menu slot="nav" direction="vertical" fluid aria-label="Folders">
-								<ui-item selected>Inbox</ui-item>
-								<ui-item>Sent</ui-item>
-								<ui-item>Drafts</ui-item>
-							</ui-menu>
-							<ui-text paragraph>Three new messages since this morning.</ui-text>
-							<ui-segment slot="aside">Tip:  press <ui-keys shortcut="mod+K"></ui-keys> to search.</ui-segment>
-							<ui-text slot="footer" color="grey">© 2026 Inbox</ui-text>
-						</ui-page>
-					</div>
-				</html>
+			<example "Page" description="A whole page:  the header across the top, the folders and a tip either side of the messages, the footer at the bottom.  Drag the box's corner narrower:  on a phone's width the regions stack.  Here it's shrunk into a box (`--ui-page-min-height: 0`);  on its own it fills the window.">
+				<stack style="resize: both; overflow: auto; border: 1px dashed currentColor; max-width: 100%">
+					<page style="--ui-page-min-height: 0; --ui-page-nav-width: 9em; --ui-page-aside-width: 9em">
+						<header slot="header" level="2">Inbox</header>
+						<menu slot="nav" direction="vertical" fluid aria-label="Folders">
+							<item selected>Inbox</item>
+							<item>Sent</item>
+							<item>Drafts</item>
+						</menu>
+						<text paragraph>Three new messages since this morning.</text>
+						<segment slot="aside">Tip:  press <keys shortcut="mod+K"/> to search.</segment>
+						<text slot="footer" color="grey">© 2026 Inbox</text>
+					</page>
+				</stack>
 			</example>
 		</>
 
 		<section label="On a phone" sticky="stack" collapsible dividing>
-			<example description="At a phone's width every region stacks, in reading order:  header, nav, content, aside, footer.">
-				<html>
-					<div style="width: 22em; max-width: 100%; border: 1px dashed currentColor">
-						<ui-page style="--ui-page-min-height: 0">
-							<ui-header slot="header" level="3">Inbox</ui-header>
-							<ui-menu slot="nav" fluid aria-label="Folders">
-								<ui-item selected>Inbox</ui-item>
-								<ui-item>Sent</ui-item>
-							</ui-menu>
-							<ui-text paragraph>Three new messages since this morning.</ui-text>
-							<ui-segment slot="aside">A tip, under the messages.</ui-segment>
-							<ui-text slot="footer" color="grey">© 2026 Inbox</ui-text>
-						</ui-page>
-					</div>
-				</html>
+			<example "On a phone" description="At a phone's width every region stacks, in reading order:  header, nav, content, aside, footer.">
+				<stack style="width: 22em; max-width: 100%; border: 1px dashed currentColor">
+					<page style="--ui-page-min-height: 0">
+						<header slot="header" level="3">Inbox</header>
+						<menu slot="nav" fluid aria-label="Folders">
+							<item selected>Inbox</item>
+							<item>Sent</item>
+						</menu>
+						<text paragraph>Three new messages since this morning.</text>
+						<segment slot="aside">A tip, under the messages.</segment>
+						<text slot="footer" color="grey">© 2026 Inbox</text>
+					</page>
+				</stack>
 			</example>
 		</>
 	</>

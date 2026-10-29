@@ -39,7 +39,7 @@
 			frame at once; here the placeholder is a real `<button>`, and only a click (or **Enter** / **Space**) loads the
 			`<iframe>`. YouTube videos play from `youtube-nocookie.com`.
 		</>
-		<message size="small" class="site-not-ported"><html>Not ported: custom sources (<code>$.fn.embed.settings.sources</>), and Fomantic's per-source hd and color settings. Give any other player its <code>url</>, and its options through <code>parameters</>.</></>
+		<message size="small" class="site-not-ported">Not ported: custom sources (<text code>$.fn.embed.settings.sources</>), and Fomantic's per-source hd and color settings. Give any other player its <text code>url</>, and its options through <text code>parameters</>.</>
 	</>
 
 	<section label="Events">

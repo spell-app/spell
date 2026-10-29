@@ -131,10 +131,10 @@ describe("spell help", () => {
   })
 })
 
-describe("every repo's commands, under one name (epic repo-split P13)", () => {
-  test("help lists each installed repo's commands under its name:  the language's, and the app's under app", () => {
+describe("every folder's commands, under one name (epic repo-split P13)", () => {
+  test("help lists each folder's commands under its name:  the language's, and the app's under app", () => {
     const { stdout } = spell(["help"])
-    for (const repo of ["spell", "spell-parser", "spell-app"]) expect(stdout).toMatch(new RegExp(`^${repo}:$`, "m"))
+    for (const folder of ["spell", "parser", "app"]) expect(stdout).toMatch(new RegExp(`^${folder}:$`, "m"))
     for (const command of ["lint", "speedtest", "app", "projects"])
       expect(stdout).toMatch(new RegExp(`^ {2}${command} `, "m"))
     expect(spell(["help", "app"]).stdout).toMatch(/^ {2}create \[options\] <name>/m)
@@ -341,9 +341,10 @@ describe("spell lint", () => {
   })
 })
 
-describe("spell lint:  retired words (epic elemental-spell, Q61)", () => {
+describe("spell lint:  retired words (epic elemental-spell, Q61;  P27's parts)", () => {
   const SOURCE =
-    'a "card" is a drawable thing where:\n\t- its "rank" is a number\na "pile" is a drawable list of cards\n'
+    'a "card" is a drawable thing where:\n\t- its "rank" is a number\n\t- it has parts "front" and "back"\n' +
+    'a "pile" is a drawable list of cards\n'
 
   test("each one is an error naming its new word, exit 1;  writes nothing", () => {
     const retired = tempProject("Retired", SOURCE)
@@ -351,7 +352,8 @@ describe("spell lint:  retired words (epic elemental-spell, Q61)", () => {
     expect(stdout).toBe(
       [
         'Retired.spell:1:15  "drawable thing" is now "view":  say "view" instead',
-        'Retired.spell:3:15  "drawable list" is now "viewable list":  say "viewable list" instead',
+        'Retired.spell:3:11  "parts" is now "slots":  say "slots" instead',
+        'Retired.spell:4:15  "drawable list" is now "viewable list":  say "viewable list" instead',
         ""
       ].join("\n")
     )
@@ -365,13 +367,15 @@ describe("spell lint:  retired words (epic elemental-spell, Q61)", () => {
     expect(stdout).toBe(
       [
         'Fixing.spell:1:15  fixed:  "drawable thing" is now "view"',
-        'Fixing.spell:3:15  fixed:  "drawable list" is now "viewable list"',
+        'Fixing.spell:3:11  fixed:  "parts" is now "slots"',
+        'Fixing.spell:4:15  fixed:  "drawable list" is now "viewable list"',
         ""
       ].join("\n")
     )
     expect(status).toBe(0)
     expect(readFileSync(resolve(fixing, "Fixing.spell"), "utf8")).toBe(
-      'a "card" is a view where:\n\t- its "rank" is a number\na "pile" is a viewable list of cards\n'
+      'a "card" is a view where:\n\t- its "rank" is a number\n\t- it has slots "front" and "back"\n' +
+        'a "pile" is a viewable list of cards\n'
     )
     expect(spell(["lint", "."], fixing).status).toBe(0)
   }, 30_000)

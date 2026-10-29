@@ -20,38 +20,36 @@
 	-->
 	<section label="Types">
 		<section label="List" sticky="stack" collapsible dividing>
-			<example description="A list groups related content:  its items are `<ui-item>`s.">
+			<example "List" description="A list groups related content:  its items are `<ui-item>`s.">
 				<list>
 					<item>Apples</item>
 					<item>Pears</item>
 					<item>Oranges</item>
 				</list>
 			</example>
-			<example>
-				<html>
-					<ui-list>
-						<ui-item icon="users">
-							<ui-content>Fomantic UI</ui-content>
-						</ui-item>
-						<ui-item icon="location dot">
-							<ui-content>Worldwide</ui-content>
-						</ui-item>
-						<ui-item icon="mail">
-							<ui-content>
-								<a href="mailto:contact@fomantic-ui.com">contact@fomantic-ui.com</a>
-							</ui-content>
-						</ui-item>
-						<ui-item icon="linkify">
-							<ui-content>
-								<a href="https://fomantic-ui.com">fomantic-ui.com</a>
-							</ui-content>
-						</ui-item>
-					</ui-list>
-				</html>
+			<example "List">
+				<list>
+					<item icon="users">
+						<content>Fomantic UI</content>
+					</item>
+					<item icon="location dot">
+						<content>Worldwide</content>
+					</item>
+					<item icon="mail">
+						<content>
+							<link link="mailto:contact@fomantic-ui.com">contact@fomantic-ui.com</link>
+						</content>
+					</item>
+					<item icon="linkify">
+						<content>
+							<link link="https://fomantic-ui.com">fomantic-ui.com</link>
+						</content>
+					</item>
+				</list>
 			</example>
 
 			<!-- GAP I89:  linked headers (`<ui-header link>`) in list items draw underlined, as on the rest of this page. -->
-			<example>
+			<example "List">
 				<list spacing="lg" divided vertical-align="middle">
 					<item>
 						<icon slot="icon" name="github" size="large"/>
@@ -76,7 +74,7 @@
 					</item>
 				</list>
 			</example>
-			<example>
+			<example "List">
 				<list>
 					<item icon="folder">
 						<content>
@@ -143,7 +141,7 @@
 		</>
 
 		<section label="Bulleted" sticky="stack" collapsible dividing>
-			<example description="A list can mark items with a bullet.">
+			<example "Bulleted" description="A list can mark items with a bullet.">
 				<list bulleted>
 					<item>Gaining Access</item>
 					<item>Inviting Friends</item>
@@ -152,8 +150,8 @@
 				</list>
 			</example>
 		</>
-		<message size="small" class="site-not-ported"><html>Not ported: Fomantic's plain <code>&lt;ul class="ui list"&gt;</> / <code>&lt;ol class="ui list"&gt;</> markup. <code>&lt;ui-list bulleted&gt;</> / <code>&lt;ui-list ordered&gt;</> render a real ul / ol in their shadow root.</></>
-		<example>
+		<message size="small" class="site-not-ported">Not ported: Fomantic's plain <text code>&lt;ul class="ui list"&gt;</> / <text code>&lt;ol class="ui list"&gt;</> markup. <text code>&lt;ui-list bulleted&gt;</> / <text code>&lt;ui-list ordered&gt;</> render a real ul / ol in their shadow root.</>
+		<example "Types">
 			<list direction="horizontal" bulleted>
 				<item link="#list">About Us</item>
 				<item link="#list">Sitemap</item>
@@ -162,24 +160,22 @@
 		</example>
 
 		<section label="Ordered" sticky="stack" collapsible dividing>
-			<example description="A list can be ordered numerically.  Sub lists continue the numbering (`3.1`).">
-				<html>
-					<ui-list ordered>
-						<ui-item link="#list">Getting Started</ui-item>
-						<ui-item link="#list">Introduction</ui-item>
-						<ui-item>
-							<a href="#list">Languages</a>
-							<ui-list>
-								<ui-item link="#list">HTML</ui-item>
-								<ui-item link="#list">Javascript</ui-item>
-								<ui-item link="#list">CSS</ui-item>
-							</ui-list>
-						</ui-item>
-						<ui-item link="#list">Review</ui-item>
-					</ui-list>
-				</html>
+			<example "Ordered" description="A list can be ordered numerically.  Sub lists continue the numbering (`3.1`).">
+				<list ordered>
+					<item link="#list">Getting Started</item>
+					<item link="#list">Introduction</item>
+					<item>
+						<link link="#list">Languages</link>
+						<list>
+							<item link="#list">HTML</item>
+							<item link="#list">Javascript</item>
+							<item link="#list">CSS</item>
+						</list>
+					</item>
+					<item link="#list">Review</item>
+				</list>
 			</example>
-			<example description="`suffixed`:  a dot follows each number (`1.`).">
+			<example "Ordered" description="`suffixed`:  a dot follows each number (`1.`).">
 				<list ordered suffixed>
 					<item>Signing Up</item>
 					<item>User Benefits</item>
@@ -187,7 +183,7 @@
 					<item>Deleting Your Account</item>
 				</list>
 			</example>
-			<example description="An item's `value` replaces its number.">
+			<example "Ordered" description="An item's `value` replaces its number.">
 				<list ordered>
 					<item value="*">Signing Up</item>
 					<item value="*">User Benefits</item>
@@ -198,7 +194,7 @@
 		</>
 
 		<section label="Link" sticky="stack" collapsible dividing>
-			<example description="A list can be specially formatted for navigation links:  the `selected` (or `active`) item is the current page.">
+			<example "Link" description="A list can be specially formatted for navigation links:  the `selected` (or `active`) item is the current page.">
 				<list appearance="link">
 					<item active>Home</item>
 					<item link="#list">About</item>
@@ -211,7 +207,7 @@
 
 	<section label="Content">
 		<section label="Item" sticky="stack" collapsible dividing>
-			<example description="A list item can contain a set of items.">
+			<example "Item" description="A list item can contain a set of items.">
 				<list>
 					<item>1</item>
 					<item>2</item>
@@ -221,7 +217,7 @@
 		</>
 
 		<section label="Icon" sticky="stack" collapsible dividing>
-			<example description="A list item can contain an icon.">
+			<example "Icon" description="A list item can contain an icon.">
 				<list>
 					<item link="#list" icon="help">
 						<content>
@@ -241,70 +237,66 @@
 		</>
 
 		<section label="Image" sticky="stack" collapsible dividing>
-			<example description="A list item can contain an image:  `image` takes its URL and shows it as an avatar.">
-				<html>
-					<ui-list>
-						<ui-item image="../images/avatar2/small/rachel.png">
-							<ui-content>
-								<ui-header link="#list">Rachel</ui-header>
-								<ui-description>Last seen watching <a href="#list"><b>Arrested Development</b></a> just now.</ui-description>
-							</ui-content>
-						</ui-item>
-						<ui-item image="../images/avatar2/small/lindsay.png">
-							<ui-content>
-								<ui-header link="#list">Lindsay</ui-header>
-								<ui-description>Last seen watching <a href="#list"><b>Bob's Burgers</b></a> 10 hours ago.</ui-description>
-							</ui-content>
-						</ui-item>
-						<ui-item image="../images/avatar2/small/matthew.png">
-							<ui-content>
-								<ui-header link="#list">Matthew</ui-header>
-								<ui-description>Last seen watching <a href="#list"><b>The Godfather Part 2</b></a> yesterday.</ui-description>
-							</ui-content>
-						</ui-item>
-						<ui-item image="../images/avatar/small/jenny.jpg">
-							<ui-content>
-								<ui-header link="#list">Jenny Hess</ui-header>
-								<ui-description>Last seen watching <a href="#list"><b>Twin Peaks</b></a> 3 days ago.</ui-description>
-							</ui-content>
-						</ui-item>
-						<ui-item image="../images/avatar/small/veronika.jpg">
-							<ui-content>
-								<ui-header link="#list">Veronika Ossi</ui-header>
-								<ui-description>Has not watched anything recently</ui-description>
-							</ui-content>
-						</ui-item>
-					</ui-list>
-				</html>
+			<example "Image" description="A list item can contain an image:  `image` takes its URL and shows it as an avatar.">
+				<list>
+					<item image="../images/avatar2/small/rachel.png">
+						<content>
+							<header link="#list">Rachel</header>
+							<description>Last seen watching <link link="#list"><text bold>Arrested Development</text></link> just now.</description>
+						</content>
+					</item>
+					<item image="../images/avatar2/small/lindsay.png">
+						<content>
+							<header link="#list">Lindsay</header>
+							<description>Last seen watching <link link="#list"><text bold>Bob's Burgers</text></link> 10 hours ago.</description>
+						</content>
+					</item>
+					<item image="../images/avatar2/small/matthew.png">
+						<content>
+							<header link="#list">Matthew</header>
+							<description>Last seen watching <link link="#list"><text bold>The Godfather Part 2</text></link> yesterday.</description>
+						</content>
+					</item>
+					<item image="../images/avatar/small/jenny.jpg">
+						<content>
+							<header link="#list">Jenny Hess</header>
+							<description>Last seen watching <link link="#list"><text bold>Twin Peaks</text></link> 3 days ago.</description>
+						</content>
+					</item>
+					<item image="../images/avatar/small/veronika.jpg">
+						<content>
+							<header link="#list">Veronika Ossi</header>
+							<description>Has not watched anything recently</description>
+						</content>
+					</item>
+				</list>
 			</example>
 		</>
 
 		<section label="Link" sticky="stack" collapsible dividing>
-			<example description="A list can contain links:  with a `link` an item renders a real link.">
+			<example "Link" description="A list can contain links:  with a `link` an item renders a real link.">
 				<list>
 					<item link="#list">What is a FAQ?</item>
 					<item link="#list">Who is our user?</item>
 					<item link="#list">Where is our office located?</item>
 				</list>
 			</example>
-			<example>
-				<html>
-					<ui-list>
-						<ui-item>
-							<ui-header link="#list">Header</ui-header>
-							<ui-description>Click a link in our <a href="#list">description</a>.</ui-description>
-						</ui-item>
-						<ui-item>
-							<ui-header link="#list">Learn More</ui-header>
-							<ui-description>Learn more about this site on <a href="#list">our FAQ page</a>.</ui-description>
-						</ui-item>
-					</ui-list>
-				</html>
+			<example "Link">
+				<list>
+					<item>
+						<header link="#list">Header</header>
+						<description>Click a link in our <link link="#list">description</link>.</description>
+					</item>
+					<item>
+						<header link="#list">Learn More</header>
+						<description>Learn more about this site on <link link="#list">our FAQ page</link>.</description>
+					</item>
+				</list>
 			</example>
 		</>
 
 		<section label="Header" sticky="stack" collapsible dividing>
-			<example description="A list item can contain a header.">
+			<example "Header" description="A list item can contain a header.">
 				<list>
 					<item><header>New York City</header> A lovely city</item>
 					<item><header>Chicago</header> Also quite a lovely city</item>
@@ -315,7 +307,7 @@
 		</>
 
 		<section label="Description" sticky="stack" collapsible dividing>
-			<example description="A list item can contain a description.">
+			<example "Description" description="A list item can contain a description.">
 				<list>
 					<item icon="map marker">
 						<content>
@@ -348,7 +340,7 @@
 
 	<section label="States">
 		<section label="Active" sticky="stack" collapsible dividing>
-			<example description="A list item can be active:  `selected` is the attribute;  Fomantic's `active` works too.">
+			<example "Active" description="A list item can be active:  `selected` is the attribute;  Fomantic's `active` works too.">
 				<list appearance="link">
 					<item link="#list">Home</item>
 					<item selected link="#list">About</item>
@@ -358,7 +350,7 @@
 		</>
 
 		<section label="Disabled" sticky="stack" collapsible dividing>
-			<example description="A list item can be disabled:  it can't be followed or chosen.">
+			<example "Disabled" description="A list item can be disabled:  it can't be followed or chosen.">
 				<list direction="horizontal">
 					<item disabled link="#list">Disabled</item>
 					<item link="#list">Terms</item>
@@ -370,7 +362,7 @@
 
 	<section label="Variations">
 		<section label="Horizontal" sticky="stack" collapsible dividing>
-			<example description="A list can be formatted to have items appear horizontally.">
+			<example "Horizontal" description="A list can be formatted to have items appear horizontally.">
 				<list direction="horizontal">
 					<item image="../images/avatar/small/tom.jpg">
 						<content><header>Tom</header> Top Contributor</content>
@@ -383,7 +375,7 @@
 					</item>
 				</list>
 			</example>
-			<example>
+			<example "Horizontal">
 				<list ordered direction="horizontal">
 					<item image="../images/avatar/small/tom.jpg">
 						<content><header>Steve Jobes</header> 50 Points</content>
@@ -396,7 +388,7 @@
 					</item>
 				</list>
 			</example>
-			<example>
+			<example "Horizontal">
 				<list direction="horizontal" bulleted appearance="link">
 					<item link="#list">Terms and Conditions</item>
 					<item link="#list">Privacy Policy</item>
@@ -406,7 +398,7 @@
 		</>
 
 		<section label="Inverted" sticky="stack" collapsible dividing>
-			<example description="A list can be inverted to appear on a dark background.">
+			<example "Inverted" description="A list can be inverted to appear on a dark background.">
 				<segment inverted>
 					<list inverted spacing="lg" divided>
 						<item>
@@ -424,7 +416,7 @@
 		</>
 
 		<section label="Selection" sticky="stack" collapsible dividing>
-			<example description="A selection list formats list items as possible choices:  each item is a button, and activating one fires `ui-select`.">
+			<example "Selection" description="A selection list formats list items as possible choices:  each item is a button, and activating one fires `ui-select`.">
 				<list selection vertical-align="middle">
 					<item value="helen" image="../images/avatar/small/helen.jpg">
 						<content>
@@ -443,7 +435,7 @@
 					</item>
 				</list>
 			</example>
-			<example description="`padding=\"none\"` drops the items' side padding, so the hover background reaches past the list's edges.">
+			<example "Selection" description="`padding=\"none\"` drops the items' side padding, so the hover background reaches past the list's edges.">
 				<list padding="none" selection>
 					<item>Inbox</item>
 					<item>Starred</item>
@@ -453,8 +445,7 @@
 		</>
 
 		<section label="Animated" sticky="stack" collapsible dividing>
-			<example description="A list can animate to set the current item apart from the list.">
-				<message slot="description" state="info" size="small">Be sure content can fit on one line when using the animated variation, otherwise text content will reflow when hovered.</message>
+			<example "Animated" description="A list can animate to set the current item apart from the list.">
 				<list hover="indent" vertical-align="middle">
 					<item image="../images/avatar/small/helen.jpg">
 						<content>
@@ -472,35 +463,34 @@
 						</content>
 					</item>
 				</list>
+				<message slot="description" state="info" size="small">Be sure content can fit on one line when using the animated variation, otherwise text content will reflow when hovered.</message>
 			</example>
 		</>
 
 		<section label="Relaxed" sticky="stack" collapsible dividing>
-			<example description="A list can relax its padding to provide more negative space:  `spacing=\"lg\"`, or `spacing=\"xl\"`.">
-				<html>
-					<ui-list spacing="lg">
-						<ui-item image="../images/avatar/small/daniel.jpg">
-							<ui-content>
-								<ui-header link="#list">Daniel Louise</ui-header>
-								<ui-description>Last seen watching <a href="#list"><b>Arrested Development</b></a> just now.</ui-description>
-							</ui-content>
-						</ui-item>
-						<ui-item image="../images/avatar/small/stevie.jpg">
-							<ui-content>
-								<ui-header link="#list">Stevie Feliciano</ui-header>
-								<ui-description>Last seen watching <a href="#list"><b>Bob's Burgers</b></a> 10 hours ago.</ui-description>
-							</ui-content>
-						</ui-item>
-						<ui-item image="../images/avatar/small/elliot.jpg">
-							<ui-content>
-								<ui-header link="#list">Elliot Fu</ui-header>
-								<ui-description>Last seen watching <a href="#list"><b>The Godfather Part 2</b></a> yesterday.</ui-description>
-							</ui-content>
-						</ui-item>
-					</ui-list>
-				</html>
+			<example "Relaxed" description="A list can relax its padding to provide more negative space:  `spacing=\"lg\"`, or `spacing=\"xl\"`.">
+				<list spacing="lg">
+					<item image="../images/avatar/small/daniel.jpg">
+						<content>
+							<header link="#list">Daniel Louise</header>
+							<description>Last seen watching <link link="#list"><text bold>Arrested Development</text></link> just now.</description>
+						</content>
+					</item>
+					<item image="../images/avatar/small/stevie.jpg">
+						<content>
+							<header link="#list">Stevie Feliciano</header>
+							<description>Last seen watching <link link="#list"><text bold>Bob's Burgers</text></link> 10 hours ago.</description>
+						</content>
+					</item>
+					<item image="../images/avatar/small/elliot.jpg">
+						<content>
+							<header link="#list">Elliot Fu</header>
+							<description>Last seen watching <link link="#list"><text bold>The Godfather Part 2</text></link> yesterday.</description>
+						</content>
+					</item>
+				</list>
 			</example>
-			<example>
+			<example "Relaxed">
 				<list spacing="lg" direction="horizontal">
 					<item image="../images/avatar/small/daniel.jpg">
 						<content>
@@ -519,31 +509,29 @@
 					</item>
 				</list>
 			</example>
-			<example>
-				<html>
-					<ui-list spacing="xl">
-						<ui-item image="../images/avatar/small/daniel.jpg">
-							<ui-content>
-								<ui-header link="#list">Daniel Louise</ui-header>
-								<ui-description>Last seen watching <a href="#list"><b>Arrested Development</b></a> just now.</ui-description>
-							</ui-content>
-						</ui-item>
-						<ui-item image="../images/avatar/small/stevie.jpg">
-							<ui-content>
-								<ui-header link="#list">Stevie Feliciano</ui-header>
-								<ui-description>Last seen watching <a href="#list"><b>Bob's Burgers</b></a> 10 hours ago.</ui-description>
-							</ui-content>
-						</ui-item>
-						<ui-item image="../images/avatar/small/elliot.jpg">
-							<ui-content>
-								<ui-header link="#list">Elliot Fu</ui-header>
-								<ui-description>Last seen watching <a href="#list"><b>The Godfather Part 2</b></a> yesterday.</ui-description>
-							</ui-content>
-						</ui-item>
-					</ui-list>
-				</html>
+			<example "Relaxed">
+				<list spacing="xl">
+					<item image="../images/avatar/small/daniel.jpg">
+						<content>
+							<header link="#list">Daniel Louise</header>
+							<description>Last seen watching <link link="#list"><text bold>Arrested Development</text></link> just now.</description>
+						</content>
+					</item>
+					<item image="../images/avatar/small/stevie.jpg">
+						<content>
+							<header link="#list">Stevie Feliciano</header>
+							<description>Last seen watching <link link="#list"><text bold>Bob's Burgers</text></link> 10 hours ago.</description>
+						</content>
+					</item>
+					<item image="../images/avatar/small/elliot.jpg">
+						<content>
+							<header link="#list">Elliot Fu</header>
+							<description>Last seen watching <link link="#list"><text bold>The Godfather Part 2</text></link> yesterday.</description>
+						</content>
+					</item>
+				</list>
 			</example>
-			<example>
+			<example "Relaxed">
 				<list spacing="xl" direction="horizontal">
 					<item image="../images/avatar/small/daniel.jpg">
 						<content>
@@ -565,7 +553,7 @@
 		</>
 
 		<section label="Divided" sticky="stack" collapsible dividing>
-			<example description="A list can show divisions between content.">
+			<example "Divided" description="A list can show divisions between content.">
 				<list divided vertical-align="middle">
 					<item image="../images/avatar/small/daniel.jpg">
 						<content>
@@ -587,7 +575,7 @@
 		</>
 
 		<section label="Celled" sticky="stack" collapsible dividing>
-			<example description="A list can divide its items into cells.">
+			<example "Celled" description="A list can divide its items into cells.">
 				<list celled>
 					<item image="../images/avatar/small/helen.jpg">
 						<content><header>Snickerdoodle</header> An excellent companion</content>
@@ -600,14 +588,14 @@
 					</item>
 				</list>
 			</example>
-			<example>
+			<example "Celled">
 				<list celled ordered>
 					<item>Cats</item>
 					<item>Horses</item>
 					<item>Dogs <list><item>Labradoodles</item> <item>Shiba Inu</item> <item>Mastiff</item></list></item>
 				</list>
 			</example>
-			<example>
+			<example "Celled">
 				<list celled direction="horizontal">
 					<item>About Us</item>
 					<item>Contact</item>
@@ -617,7 +605,7 @@
 		</>
 
 		<section label="Size" sticky="stack" collapsible dividing>
-			<example description="A list can vary in size.">
+			<example "Size" description="A list can vary in size.">
 				<list size="mini" direction="horizontal" divided>
 					<item image="../images/avatar/small/helen.jpg">
 						<content>
@@ -636,7 +624,7 @@
 					</item>
 				</list>
 			</example>
-			<example>
+			<example "Size">
 				<list size="tiny" direction="horizontal">
 					<item image="../images/avatar/small/helen.jpg">
 						<content>
@@ -655,7 +643,7 @@
 					</item>
 				</list>
 			</example>
-			<example>
+			<example "Size">
 				<list size="small" direction="horizontal">
 					<item image="../images/avatar/small/helen.jpg">
 						<content>
@@ -674,7 +662,7 @@
 					</item>
 				</list>
 			</example>
-			<example>
+			<example "Size">
 				<list size="large" direction="horizontal" divided>
 					<item image="../images/avatar/small/helen.jpg">
 						<content>
@@ -693,7 +681,7 @@
 					</item>
 				</list>
 			</example>
-			<example>
+			<example "Size">
 				<list size="big" direction="horizontal" divided>
 					<item image="../images/avatar/small/helen.jpg">
 						<content>
@@ -712,7 +700,7 @@
 					</item>
 				</list>
 			</example>
-			<example>
+			<example "Size">
 				<list size="huge" direction="horizontal" divided>
 					<item image="../images/avatar/small/helen.jpg">
 						<content>
@@ -731,7 +719,7 @@
 					</item>
 				</list>
 			</example>
-			<example>
+			<example "Size">
 				<list size="massive" direction="horizontal" divided>
 					<item image="../images/avatar/small/helen.jpg">
 						<content>
@@ -755,7 +743,7 @@
 
 	<section label="Content Variations">
 		<section label="Vertically Aligned" sticky collapsible dividing>
-			<example description="An element inside a list can be vertically aligned:  `vertical-align` on a `<ui-content>` (or on the whole list).">
+			<example "Vertically Aligned" description="An element inside a list can be vertically aligned:  `vertical-align` on a `<ui-content>` (or on the whole list).">
 				<list direction="horizontal">
 					<item image="../images/avatar/small/helen.jpg">
 						<content vertical-align="top">Top Aligned</content>
@@ -771,49 +759,47 @@
 		</>
 
 		<section label="Left and Right" sticky="stack" collapsible dividing>
-			<example description="A list has no `floated` any more:  a `<ui-stack>` puts a button at the right of an item, or one list at the left and one at the right.">
-				<html>
-					<ui-list divided vertical-align="middle">
-						<ui-item>
-							<ui-stack direction="horizontal" justify="between">
-								<ui-stack direction="horizontal" spacing="sm">
-									<ui-image avatar src="/components/ui/images/avatar2/small/lena.png" alt=""></ui-image>
-									<span>Lena</span>
-								</ui-stack>
-								<ui-button>Add</ui-button>
-							</ui-stack>
-						</ui-item>
-						<ui-item>
-							<ui-stack direction="horizontal" justify="between">
-								<ui-stack direction="horizontal" spacing="sm">
-									<ui-image avatar src="/components/ui/images/avatar2/small/lindsay.png" alt=""></ui-image>
-									<span>Lindsay</span>
-								</ui-stack>
-								<ui-button>Add</ui-button>
-							</ui-stack>
-						</ui-item>
-						<ui-item>
-							<ui-stack direction="horizontal" justify="between">
-								<ui-stack direction="horizontal" spacing="sm">
-									<ui-image avatar src="/components/ui/images/avatar2/small/mark.png" alt=""></ui-image>
-									<span>Mark</span>
-								</ui-stack>
-								<ui-button>Add</ui-button>
-							</ui-stack>
-						</ui-item>
-						<ui-item>
-							<ui-stack direction="horizontal" justify="between">
-								<ui-stack direction="horizontal" spacing="sm">
-									<ui-image avatar src="/components/ui/images/avatar2/small/molly.png" alt=""></ui-image>
-									<span>Molly</span>
-								</ui-stack>
-								<ui-button>Add</ui-button>
-							</ui-stack>
-						</ui-item>
-					</ui-list>
-				</html>
+			<example "Left and Right" description="A list has no `floated` any more:  a `<ui-stack>` puts a button at the right of an item, or one list at the left and one at the right.">
+				<list divided vertical-align="middle">
+					<item>
+						<stack direction="horizontal" justify="between">
+							<stack direction="horizontal" spacing="sm">
+								<image avatar src="/components/ui/images/avatar2/small/lena.png" alt=""/>
+								<text>Lena</text>
+							</stack>
+							<button>Add</button>
+						</stack>
+					</item>
+					<item>
+						<stack direction="horizontal" justify="between">
+							<stack direction="horizontal" spacing="sm">
+								<image avatar src="/components/ui/images/avatar2/small/lindsay.png" alt=""/>
+								<text>Lindsay</text>
+							</stack>
+							<button>Add</button>
+						</stack>
+					</item>
+					<item>
+						<stack direction="horizontal" justify="between">
+							<stack direction="horizontal" spacing="sm">
+								<image avatar src="/components/ui/images/avatar2/small/mark.png" alt=""/>
+								<text>Mark</text>
+							</stack>
+							<button>Add</button>
+						</stack>
+					</item>
+					<item>
+						<stack direction="horizontal" justify="between">
+							<stack direction="horizontal" spacing="sm">
+								<image avatar src="/components/ui/images/avatar2/small/molly.png" alt=""/>
+								<text>Molly</text>
+							</stack>
+							<button>Add</button>
+						</stack>
+					</item>
+				</list>
 			</example>
-			<example>
+			<example "Left and Right">
 				<stack direction="horizontal" justify="between" wrap>
 					<list direction="horizontal">
 						<item link="#list">About Us</item>

@@ -9,7 +9,7 @@ import { fileURLToPath } from "node:url"
  *   before Vite+ (`vp lint`, `vp fmt`, `vp check`) folded them into `vite.config.ts`.
  * - Plain objects, spread by each repo's root `vite.config.ts` and each package's:
  *   - the kit:  its root's block is `rootLint()`
- *   - every child repo is ONE package (epic `repo-split` P11):  `packageLint()` at its root
+ *   - a standalone repo (spell-brand) is ONE package (epic `repo-split` P11):  `packageLint()` at its root
  *   `lint.extends` only takes FILE paths, and the files are gone.
  * - NOTE: a package's `lint` block does NOT inherit the root's:
  *   oxlint reads the nearest config only, so each package spreads `packageLint()`.
@@ -246,7 +246,7 @@ const KIT_REACT_FOLDERS = ["cli", "util"]
 
 /**
  * The kit's root `lint` block:  `lintBase` everywhere, `reactLint` on top in `KIT_REACT_FOLDERS` and their tests.
- * - Every child repo is one package:  `packageLint()` at its root.
+ * - A standalone repo (spell-brand) is one package:  `packageLint()` at its root.
  */
 export function rootLint() {
   return {

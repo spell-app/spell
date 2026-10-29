@@ -20,257 +20,211 @@
 	-->
 	<section label="Types">
 		<section label="Message" sticky="stack" collapsible dividing>
-			<example description="A basic message.">
-				<html>
-					<ui-message>
-						<ui-header>Changes in Service</ui-header>
-						<p>We just updated our privacy policy here to better service our customers. We recommend reviewing the changes.</p>
-					</ui-message>
-				</html>
+			<example "Message" description="A basic message.">
+				<message>
+					<header>Changes in Service</header>
+					<text paragraph>We just updated our privacy policy here to better service our customers. We recommend reviewing the changes.</text>
+				</message>
 			</example>
 		</>
 
 		<section label="List Message" sticky="stack" collapsible dividing>
-			<example description="A message with a list.  `heading` is the shorthand for a header.">
-				<html>
-					<ui-message heading="New Site Features">
-						<ul>
-							<li>You can now have cover images on blog pages</li>
-							<li>Drafts will now auto-save while writing</li>
-						</ul>
-					</ui-message>
-				</html>
+			<example "List Message" description="A message with a list.  `heading` is the shorthand for a header.">
+				<message heading="New Site Features">
+					<list bulleted>
+						<item>You can now have cover images on blog pages</item>
+						<item>Drafts will now auto-save while writing</item>
+					</list>
+				</message>
 			</example>
 		</>
 
 		<section label="Icon Message" sticky="stack" collapsible dividing>
-			<example description="A message can contain an icon:  the `icon` attribute takes a name, the `icon` slot any markup.">
-				<html>
-					<ui-message icon="inbox" heading="Have you heard about our mailing list?">
-						<p>Get the best news in your e-mail every day.</p>
-					</ui-message>
-				</html>
+			<example "Icon Message" description="A message can contain an icon:  the `icon` attribute takes a name, the `icon` slot any markup.">
+				<message icon="inbox" heading="Have you heard about our mailing list?">
+					<text paragraph>Get the best news in your e-mail every day.</text>
+				</message>
 			</example>
-			<example>
-				<html>
-					<ui-message heading="Just one second">
-						<ui-icon slot="icon" name="circle notch" loading></ui-icon>
-						<p>We're fetching that content for you.</p>
-					</ui-message>
-				</html>
+			<example "Icon Message">
+				<message heading="Just one second">
+					<icon slot="icon" name="circle notch" loading/>
+					<text paragraph>We're fetching that content for you.</text>
+				</message>
 			</example>
 		</>
 
 		<section label="Dismissable Block" sticky="stack" collapsible dividing>
-			<example description="A message that the user can choose to hide: `dismissible` adds a close button.">
-				<message slot="description" state="info" size="small"><html>Unlike Fomantic's, the close button works by itself: it fires the cancelable <code>ui-closing</code>, then the message sets <code>hidden</code> on itself (see the Usage tab). Reload the page to bring it back.</html></message>
-				<html>
-					<ui-message dismissible heading="Welcome back!">
-						<p>This is a special notification which you can dismiss if you're bored with it.</p>
-					</ui-message>
-				</html>
+			<example "Dismissable Block" description="A message that the user can choose to hide: `dismissible` adds a close button.">
+				<message dismissible heading="Welcome back!">
+					<text paragraph>This is a special notification which you can dismiss if you're bored with it.</text>
+				</message>
+				<message slot="description" state="info" size="small">Unlike Fomantic's, the close button works by itself: it fires the cancelable <text code>ui-closing</text>, then the message sets <text code>hidden</text> on itself (see the Usage tab). Reload the page to bring it back.</message>
 			</example>
 		</>
 	</>
 
 	<section label="Content">
 		<section label="Header" sticky="stack" collapsible dividing>
-			<example description="A message can contain a header:  a slotted `<ui-header>`.">
-				<html>
-					<ui-message>
-						<ui-header>Email Confirmed</ui-header>
-						<p>You're all signed up for the newsletter</p>
-					</ui-message>
-				</html>
+			<example "Header" description="A message can contain a header:  a slotted `<ui-header>`.">
+				<message>
+					<header>Email Confirmed</header>
+					<text paragraph>You're all signed up for the newsletter</text>
+				</message>
 			</example>
 		</>
 
 		<section label="List" sticky="stack" collapsible dividing>
-			<example description="A message can contain a list of items:  a plain `<ul>`.">
-				<html>
-					<ui-message>
-						<ul>
-							<li>No header, just a list</li>
-							<li>It is a list of items</li>
-						</ul>
-					</ui-message>
-				</html>
+			<example "List" description="A message can contain a list of items:  a plain `<ul>`.">
+				<message>
+					<list bulleted>
+						<item>No header, just a list</item>
+						<item>It is a list of items</item>
+					</list>
+				</message>
 			</example>
 		</>
 	</>
 
 	<section label="States">
 		<section label="Hidden" sticky="stack" collapsible dividing>
-			<example description="A message can be hidden:  the standard `hidden` attribute.  The message below is in the example, unseen.">
-				<html>
-					<ui-message hidden>
-						<p>You can't see me</p>
-					</ui-message>
-				</html>
+			<example "Hidden" description="A message can be hidden:  the standard `hidden` attribute.  The message below is in the example, unseen.">
+				<message hidden>
+					<text paragraph>You can't see me</text>
+				</message>
 			</example>
 		</>
 
 		<section label="Visible" sticky="stack" collapsible dividing>
-			<example description="A message can be set to visible to force itself to be shown.">
-				<message size="small" slot="description" class="site-not-ported"><html>Not ported: the <code>visible</code> class -- a message without <code>hidden</code> is always shown.</html></message>
-				<html>
-					<ui-message>
-						<p>You can always see me</p>
-					</ui-message>
-				</html>
+			<example "Visible" description="A message can be set to visible to force itself to be shown.">
+				<message>
+					<text paragraph>You can always see me</text>
+				</message>
+				<message size="small" slot="description" class="site-not-ported">Not ported: the <text code>visible</text> class -- a message without <text code>hidden</text> is always shown.</message>
 			</example>
 		</>
 	</>
 
 	<section label="Variations">
 		<section label="Center Aligned" sticky="stack" collapsible dividing>
-			<example description="A message can be displayed center aligned:  `text-align=\"center\"`.">
-				<html>
-					<ui-message align="center" heading="New Version is available!">
-						<p>When are you going to update?</p>
-					</ui-message>
-				</html>
+			<example "Center Aligned" description="A message can be displayed center aligned:  `text-align=\"center\"`.">
+				<message align="center" heading="New Version is available!">
+					<text paragraph>When are you going to update?</text>
+				</message>
 			</example>
 		</>
 
 		<section label="Right Aligned" sticky="stack" collapsible dividing>
-			<example description="A message can be displayed right aligned:  `text-align=\"right\"`.">
-				<html>
-					<ui-message align="right" heading="New Version is available!">
-						<p>When are you going to update?</p>
-					</ui-message>
-				</html>
+			<example "Right Aligned" description="A message can be displayed right aligned:  `text-align=\"right\"`.">
+				<message align="right" heading="New Version is available!">
+					<text paragraph>When are you going to update?</text>
+				</message>
 			</example>
 		</>
 
 		<section label="Centered" sticky="stack" collapsible dividing>
-			<example description="`centered` centres the text and an icon together with the content;  `align` aligns the text alone.">
-				<html>
-					<ui-message centered icon="envelope" heading="Centered icon">
-						<p>Icon and content centred together.</p>
-					</ui-message>
-				</html>
+			<example "Centered" description="`centered` centres the text and an icon together with the content;  `align` aligns the text alone.">
+				<message centered icon="envelope" heading="Centered icon">
+					<text paragraph>Icon and content centred together.</text>
+				</message>
 			</example>
 		</>
 
 		<section label="Floating" sticky="stack" collapsible dividing>
-			<example description="A message can float above content that it is related to.">
-				<html>
-					<ui-message floating>
-						<p>Way to go!</p>
-					</ui-message>
-				</html>
+			<example "Floating" description="A message can float above content that it is related to.">
+				<message floating>
+					<text paragraph>Way to go!</text>
+				</message>
 			</example>
 		</>
 
 		<section label="Compact" sticky="stack" collapsible dividing>
-			<example description="A message can only take up the width of its content.">
-				<html>
-					<ui-message padding="compact">
-						<p>Get all the best inventions in your e-mail every day. Sign up now!</p>
-					</ui-message>
-				</html>
+			<example "Compact" description="A message can only take up the width of its content.">
+				<message padding="compact">
+					<text paragraph>Get all the best inventions in your e-mail every day. Sign up now!</text>
+				</message>
 			</example>
 		</>
 
 		<section label="Attached" sticky="stack" collapsible dividing>
-			<example description="A message can be formatted to attach itself to other content:  `attach=\"both\"` or `attach=\"top\"` joins the content below, `attach=\"bottom\"` the content above.">
-				<html>
-					<ui-message attach="both" heading="Welcome to our site!">
-						<p>Fill out the form below to sign-up for a new account</p>
-					</ui-message>
-					<ui-segment attach="both">
-						<ui-form>
-							<form>
-								<ui-fields widths="2">
-									<ui-field>
-										<label for="message-attached-first">First Name</label>
-										<ui-input id="message-attached-first" placeholder="First Name"></ui-input>
-									</ui-field>
-									<ui-field>
-										<label for="message-attached-last">Last Name</label>
-										<ui-input id="message-attached-last" placeholder="Last Name"></ui-input>
-									</ui-field>
-								</ui-fields>
-								<ui-field>
-									<label for="message-attached-user">Username</label>
-									<ui-input id="message-attached-user" placeholder="Username"></ui-input>
-								</ui-field>
-								<ui-field>
-									<label for="message-attached-password">Password</label>
-									<ui-input id="message-attached-password" type="password"></ui-input>
-								</ui-field>
-								<ui-field inline>
-									<ui-checkbox name="terms">I agree to the terms and conditions</ui-checkbox>
-								</ui-field>
-								<ui-button color="blue" type="submit">Submit</ui-button>
-							</form>
-						</ui-form>
-					</ui-segment>
-				</html>
-				<message attach="bottom" state="warning" icon="help"><html>Already signed up? <a href="#login">Login here</a> instead.</html></message>
+			<example "Attached" description="A message can be formatted to attach itself to other content:  `attach=\"both\"` or `attach=\"top\"` joins the content below, `attach=\"bottom\"` the content above.">
+				<message attach="both" heading="Welcome to our site!">
+					<text paragraph>Fill out the form below to sign-up for a new account</text>
+				</message>
+				<segment attach="both">
+					<form>
+						<fields widths="2">
+							<field label="First Name">
+								<input id="message-attached-first" placeholder="First Name"/>
+							</field>
+							<field label="Last Name">
+								<input id="message-attached-last" placeholder="Last Name"/>
+							</field>
+						</fields>
+						<field label="Username">
+							<input id="message-attached-user" placeholder="Username"/>
+						</field>
+						<field label="Password">
+							<input id="message-attached-password" type="password"/>
+						</field>
+						<field inline>
+							<checkbox name="terms">I agree to the terms and conditions</checkbox>
+						</field>
+						<button color="blue" type="submit">Submit</button>
+					</form>
+				</segment>
+				<message attach="bottom" state="warning" icon="help">Already signed up? <link link="#login">Login here</link> instead.</message>
 			</example>
 		</>
 
 		<section label="Warning" sticky="stack" collapsible dividing>
-			<example description="A message may be formatted to display warning messages:  `state=\"warning\"`.">
+			<example "Warning" description="A message may be formatted to display warning messages:  `state=\"warning\"`.">
 				<message state="warning" dismissible heading="You must register before you can do that!">Visit our registration page, then try again</message>
 			</example>
 		</>
 
 		<section label="Info" sticky="stack" collapsible dividing>
-			<example description="A message may be formatted to display information.">
-				<html>
-					<ui-message state="info" dismissible heading="Was this what you wanted?">
-						<ul>
-							<li>It's good to see you again.</li>
-							<li>Did you know it's been a while?</li>
-						</ul>
-					</ui-message>
-				</html>
+			<example "Info" description="A message may be formatted to display information.">
+				<message state="info" dismissible heading="Was this what you wanted?">
+					<list bulleted>
+						<item>It's good to see you again.</item>
+						<item>Did you know it's been a while?</item>
+					</list>
+				</message>
 			</example>
 		</>
 
 		<section label="Positive / Success" sticky collapsible dividing>
-			<example description="A message may be formatted to display a positive message.">
+			<example "Positive / Success" description="A message may be formatted to display a positive message.">
+				<message state="positive" dismissible heading="You are eligible for a reward">
+					<text paragraph>Go to your <text bold>special offers</text> page to see now.</text>
+				</message>
 				<message slot="description" state="info" size="small" icon="attention">Positive / success and negative / error messages use the same colours by default, but each has its own colour token that a theme can tell apart.</message>
-				<html>
-					<ui-message state="positive" dismissible heading="You are eligible for a reward">
-						<p>Go to your <b>special offers</b> page to see now.</p>
-					</ui-message>
-				</html>
 			</example>
-			<example>
-				<html>
-					<ui-message state="success" dismissible heading="Your user registration was successful.">
-						<p>You may now log-in with the username you have chosen</p>
-					</ui-message>
-				</html>
+			<example "Positive / Success">
+				<message state="success" dismissible heading="Your user registration was successful.">
+					<text paragraph>You may now log-in with the username you have chosen</text>
+				</message>
 			</example>
 		</>
 
 		<section label="Negative / Error" sticky="stack" collapsible dividing>
-			<example description="A message may be formatted to display a negative message.">
-				<html>
-					<ui-message state="negative" dismissible heading="We're sorry we can't apply that discount">
-						<p>That offer has expired</p>
-					</ui-message>
-				</html>
+			<example "Negative / Error" description="A message may be formatted to display a negative message.">
+				<message state="negative" dismissible heading="We're sorry we can't apply that discount">
+					<text paragraph>That offer has expired</text>
+				</message>
 			</example>
-			<example>
-				<html>
-					<ui-message state="error" dismissible heading="There were some errors with your submission">
-						<ul>
-							<li>You must include both a upper and lower case letters in your password.</li>
-							<li>You need to select your home country.</li>
-						</ul>
-					</ui-message>
-				</html>
+			<example "Negative / Error">
+				<message state="error" dismissible heading="There were some errors with your submission">
+					<list bulleted>
+						<item>You must include both a upper and lower case letters in your password.</item>
+						<item>You need to select your home country.</item>
+					</list>
+				</message>
 			</example>
 		</>
 
 		<section label="Colored" sticky="stack" collapsible dividing>
-			<example description="A message can be formatted to be different colors.">
+			<example "Colored" description="A message can be formatted to be different colors.">
 				<message color="red">Red</message>
 				<message color="orange">Orange</message>
 				<message color="yellow">Yellow</message>
@@ -287,7 +241,7 @@
 		</>
 
 		<section label="Size" sticky="stack" collapsible dividing>
-			<example description="A message can have different sizes.">
+			<example "Size" description="A message can have different sizes.">
 				<message size="mini">This is a mini message.</message>
 				<message size="tiny">This is a tiny message.</message>
 				<message size="small">This is a small message.</message>
@@ -299,18 +253,16 @@
 		</>
 
 		<section label="Inverted" sticky="stack" collapsible dividing>
-			<example description="A message can use the dark scheme;  a coloured one keeps its hue in the text.">
-				<html>
-					<ui-message inverted heading="Inverted">
-						<p>The dark scheme.</p>
-					</ui-message>
-					<ui-message color="red" inverted heading="Inverted red">
-						<p>Keeps its hue in the text.</p>
-					</ui-message>
-					<ui-message state="positive" inverted icon="envelope" heading="Inverted positive">
-						<p>With an icon.</p>
-					</ui-message>
-				</html>
+			<example "Inverted" description="A message can use the dark scheme;  a coloured one keeps its hue in the text.">
+				<message inverted heading="Inverted">
+					<text paragraph>The dark scheme.</text>
+				</message>
+				<message color="red" inverted heading="Inverted red">
+					<text paragraph>Keeps its hue in the text.</text>
+				</message>
+				<message state="positive" inverted icon="envelope" heading="Inverted positive">
+					<text paragraph>With an icon.</text>
+				</message>
 			</example>
 		</>
 	</>

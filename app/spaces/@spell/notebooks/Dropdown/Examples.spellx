@@ -28,7 +28,7 @@
 	<section label="Types">
 		<!-- GAP I53:  no nested sub-menu (`Publish To Web`);  left out. -->
 		<section label="Dropdown" sticky="stack" collapsible dividing>
-			<example description="A dropdown, its items `<ui-item>`s. An item's `description` sits at the end of its row, and its `icon` before the text.">
+			<example "Dropdown" description="A dropdown, its items `<ui-item>`s. An item's `description` sits at the end of its row, and its `icon` before the text.">
 				<dropdown label="File">
 					<item>New</item>
 					<item description="ctrl + o">Open...</item>
@@ -45,8 +45,7 @@
 		</>
 
 		<section label="Selection" sticky="stack" collapsible dividing>
-			<example description="A dropdown can be used to select between choices in a form:  `selection`, with a name and a placeholder.">
-				<message slot="description" size="small" class="site-not-ported"><html>Not ported: initializing on a native <code>&lt;select&gt;</code> (write the items instead:  the native fallback IS a select), and <code>scrollhint</code> (a touch-only scroll animation).</html></message>
+			<example "Selection" description="A dropdown can be used to select between choices in a form:  `selection`, with a name and a placeholder.">
 				<dropdown selection name="pet" placeholder="Pet">
 					<item value="0">Cat</item>
 					<item value="1">Dog</item>
@@ -57,8 +56,9 @@
 					<item value="6">Turtle</item>
 					<item value="7">Parrot</item>
 				</dropdown>
+				<message slot="description" size="small" class="site-not-ported">Not ported: initializing on a native <text code>&lt;select&gt;</text> (write the items instead:  the native fallback IS a select), and <text code>scrollhint</text> (a touch-only scroll animation).</message>
 			</example>
-			<example description="Items can lead with an image:  `image`.">
+			<example "Selection" description="Items can lead with an image:  `image`.">
 				<dropdown fluid selection name="user" placeholder="Select Friend">
 					<item value="jenny" image="../images/avatar/small/jenny.jpg">Jenny Hess</item>
 					<item value="elliot" image="../images/avatar/small/elliot.jpg">Elliot Fu</item>
@@ -71,7 +71,7 @@
 		</>
 
 		<section label="Search Selection" sticky="stack" collapsible dividing>
-			<example description="A selection dropdown can allow a user to search through a large list of choices:  `search`.">
+			<example "Search Selection" description="A selection dropdown can allow a user to search through a large list of choices:  `search`.">
 				<dropdown fluid search selection name="country" placeholder="Select Country">
 					<item value="af" flag="af">Afghanistan</item>
 					<item value="ax" flag="ax">Aland Islands</item>
@@ -95,7 +95,7 @@
 					<item value="by" flag="by">Belarus</item>
 				</dropdown>
 			</example>
-			<example>
+			<example "Search Selection">
 				<dropdown search selection placeholder="State">
 					<item value="AL">Alabama</item>
 					<item value="AK">Alaska</item>
@@ -154,7 +154,7 @@
 
 		<!-- GAP I106:  no unfilterable items. -->
 		<section label="Unfilterable items in Search Selection" sticky collapsible dividing>
-			<example description="Fomantic can keep some items listed whatever the search (`unfilterable` items). Ours filters every item; the example shows the list without the extra rule.">
+			<example "Unfilterable items in Search Selection" description="Fomantic can keep some items listed whatever the search (`unfilterable` items). Ours filters every item; the example shows the list without the extra rule.">
 				<dropdown search selection name="states" placeholder="States">
 					<item value="AL">Alabama (unfilterable)</item>
 					<item value="AK">Alaska</item>
@@ -169,7 +169,7 @@
 
 		<!-- GAP I106:  no ignore-diacritics setting on the element (MenuOptions has one). -->
 		<section label="Search ignoring Diacritics" sticky collapsible dividing>
-			<example description="Fomantic can ignore diacritics while searching (`ignoreDiacritics`). Ours matches them as typed:  type `cafe`, and only `cafetería` matches, not café.">
+			<example "Search ignoring Diacritics" description="Fomantic can ignore diacritics while searching (`ignoreDiacritics`). Ours matches them as typed:  type `cafe`, and only `cafetería` matches, not café.">
 				<dropdown search selection name="diacritics" placeholder="Search diacritics by only typing usual vowels">
 					<item>André</item>
 					<item>Bokmål</item>
@@ -191,7 +191,7 @@
 		</>
 
 		<section label="Highlight search matches" sticky collapsible dividing>
-			<example description="The matching strings inside the search results are highlighted: always on, no setting.">
+			<example "Highlight search matches" description="The matching strings inside the search results are highlighted: always on, no setting.">
 				<dropdown fluid multiple search selection placeholder="State">
 					<item value="AL">Alabama</item>
 					<item value="AK">Alaska</item>
@@ -249,7 +249,7 @@
 		</>
 
 		<section label="Clearable Selection" sticky collapsible dividing>
-			<example description="A clearable selection dropdown can allow a user to cancel a previous selection:  `clearable`.">
+			<example "Clearable Selection" description="A clearable selection dropdown can allow a user to cancel a previous selection:  `clearable`.">
 				<dropdown clearable selection name="language" value="English" placeholder="Select Language">
 					<item>Arabic</item>
 					<item>Chinese</item>
@@ -274,7 +274,7 @@
 					<item>Vietnamese</item>
 				</dropdown>
 			</example>
-			<example>
+			<example "Clearable Selection">
 				<dropdown clearable multiple selection name="languages" value="Dutch,English,French" placeholder="Select Languages">
 					<item>Arabic</item>
 					<item>Chinese</item>
@@ -302,7 +302,7 @@
 		</>
 
 		<section label="Multiple Selection" sticky collapsible dividing>
-			<example description="A selection dropdown can allow multiple selections:  `multiple`.  `value` is a comma-separated list.">
+			<example "Multiple Selection" description="A selection dropdown can allow multiple selections:  `multiple`.  `value` is a comma-separated list.">
 				<dropdown fluid multiple selection name="skills" placeholder="Skills">
 					<item value="angular">Angular</item>
 					<item value="css">CSS</item>
@@ -327,7 +327,7 @@
 		</>
 
 		<section label="Multiple Search Selection" sticky collapsible dividing>
-			<example description="A selection dropdown can allow multiple search selections.">
+			<example "Multiple Search Selection" description="A selection dropdown can allow multiple search selections.">
 				<dropdown fluid multiple search selection placeholder="State">
 					<item value="AL">Alabama</item>
 					<item value="AK">Alaska</item>
@@ -384,7 +384,7 @@
 			</example>
 
 			<!-- GAP I106:  no keep-search-term (the query clears on each choice). -->
-			<example description="Fomantic can keep the search term after a choice (`keepSearchTerm`) so the menu stays filtered; ours clears it.">
+			<example "Multiple Search Selection" description="Fomantic can keep the search term after a choice (`keepSearchTerm`) so the menu stays filtered; ours clears it.">
 				<dropdown fluid multiple search selection placeholder="State">
 					<item value="AL">Alabama</item>
 					<item value="AK">Alaska</item>
@@ -439,7 +439,7 @@
 					<item value="WY">Wyoming</item>
 				</dropdown>
 			</example>
-			<example description="Items can hold content a native `<option>` can't, such as flags.">
+			<example "Multiple Search Selection" description="Items can hold content a native `<option>` can't, such as flags.">
 				<dropdown fluid multiple search selection name="country" placeholder="Select Country">
 					<item value="af" flag="af">Afghanistan</item>
 					<item value="ax" flag="ax">Aland Islands</item>
@@ -467,7 +467,7 @@
 
 		<!-- GAP I11:  no basic button look. -->
 		<section label="Search Dropdown" sticky="stack" collapsible dividing>
-			<example description="A dropdown can be searchable, on a labeled icon button too.">
+			<example "Search Dropdown" description="A dropdown can be searchable, on a labeled icon button too.">
 				<dropdown floating labeled button search icon="world" placeholder="Select Language">
 					<item>Arabic</item>
 					<item>Chinese</item>
@@ -496,7 +496,7 @@
 
 		<!-- GAP I106:  an input in the menu doesn't filter it (Fomantic's search in-menu);  the header slot just shows it. -->
 		<section label="Search In-Menu" sticky="stack" collapsible dividing>
-			<example description="A dropdown can include content at the top of its menu: the `header` slot. Fomantic's in-menu search input also filters the items; ours is only shown, so use `search` to filter.">
+			<example "Search In-Menu" description="A dropdown can include content at the top of its menu: the `header` slot. Fomantic's in-menu search input also filters the items; ours is only shown, so use `search` to filter.">
 				<dropdown floating labeled button scrolling icon="filter" label="Filter Posts">
 					<input slot="header" icon="search" placeholder="Search tags..." aria-label="Search tags"/>
 					<item kind="divider"/>
@@ -512,7 +512,7 @@
 					<item value="discussion"><label color="green" empty appearance="circular"/>Discussion</item>
 				</dropdown>
 			</example>
-			<example>
+			<example "Search In-Menu">
 				<dropdown multiple scrolling name="filters" placeholder="Filter Posts">
 					<item value="important"><label color="red" empty appearance="circular"/>Important</item>
 					<item value="announcement"><label color="blue" empty appearance="circular"/>Announcement</item>
@@ -528,19 +528,17 @@
 		</>
 
 		<section label="Inline" sticky="stack" collapsible dividing>
-			<example description="A dropdown can be formatted to appear inline in other content.">
-				<html>
-					<p>Show me posts by <ui-dropdown inline value="jenny"><ui-item value="jenny" image="../images/avatar/small/jenny.jpg">Jenny Hess</ui-item> <ui-item value="elliot" image="../images/avatar/small/elliot.jpg">Elliot Fu</ui-item> <ui-item value="stevie" image="../images/avatar/small/stevie.jpg">Stevie Feliciano</ui-item> <ui-item value="christian" image="../images/avatar/small/christian.jpg">Christian</ui-item> <ui-item value="matt" image="../images/avatar/small/matt.jpg">Matt</ui-item> <ui-item value="justen" image="../images/avatar/small/justen.jpg">Justen Kitsune</ui-item></ui-dropdown></p>
-				</html>
+			<example "Inline" description="A dropdown can be formatted to appear inline in other content.">
+				<text paragraph>Show me posts by <dropdown inline value="jenny"><item value="jenny" image="../images/avatar/small/jenny.jpg">Jenny Hess</item> <item value="elliot" image="../images/avatar/small/elliot.jpg">Elliot Fu</item> <item value="stevie" image="../images/avatar/small/stevie.jpg">Stevie Feliciano</item> <item value="christian" image="../images/avatar/small/christian.jpg">Christian</item> <item value="matt" image="../images/avatar/small/matt.jpg">Matt</item> <item value="justen" image="../images/avatar/small/justen.jpg">Justen Kitsune</item></dropdown></text>
 			</example>
-			<example>
+			<example "Inline">
 				<header level="4"><icon name="trophy"/> Trending repos <dropdown inline value="today"><item kind="header">Adjust time span</item> <item value="today" label="today">Today</item> <item value="this week" label="this week">This Week</item> <item value="this month" label="this month">This Month</item></dropdown></header>
 			</example>
 		</>
 
 		<!-- GAP I53:  no dropdown menu item, no nested sub-menus;  the menu examples keep a dropdown inside an item. -->
 		<section label="Pointing" sticky="stack" collapsible dividing>
-			<example description="A dropdown can be formatted so that its menu is pointing: `pointing`, with a value for where the menu's arrow sits.">
+			<example "Pointing" description="A dropdown can be formatted so that its menu is pointing: `pointing`, with a value for where the menu's arrow sits.">
 				<dropdown pointing label="Shopping">
 					<item kind="header">Categories</item>
 					<item>Clothing</item>
@@ -552,7 +550,7 @@
 					<item>Cancellations</item>
 				</dropdown>
 			</example>
-			<example>
+			<example "Pointing">
 				<dropdown pointing="left" label="Messages">
 					<item>Inbox</item>
 					<item>Starred</item>
@@ -563,7 +561,7 @@
 					<item>Trash</item>
 				</dropdown>
 			</example>
-			<example>
+			<example "Pointing">
 				<dropdown button pointing="top left" aria-label="Settings">
 					<icon slot="trigger" name="wrench"/>
 					<item kind="header">Display Density</item>
@@ -578,7 +576,7 @@
 					<item>Help</item>
 				</dropdown>
 			</example>
-			<example>
+			<example "Pointing">
 				<dropdown button pointing="bottom left" aria-label="File">
 					<icon slot="trigger" name="wrench"/>
 					<item>New</item>
@@ -597,7 +595,7 @@
 					<item>Save As...</item>
 				</dropdown>
 			</example>
-			<example>
+			<example "Pointing">
 				<dropdown labeled button pointing="top left" icon="filter" label="Filter Posts">
 					<item kind="header" icon="tags">Filter by tag</item>
 					<item value="important"><label color="red" empty appearance="circular"/>Important</item>
@@ -610,7 +608,7 @@
 					<item><icon name="circle" color="orange"/>This Year</item>
 				</dropdown>
 			</example>
-			<example>
+			<example "Pointing">
 				<dropdown button pointing="right" aria-label="Settings">
 					<icon slot="trigger" name="cog"/>
 					<item kind="header">Filter by tag</item>
@@ -629,7 +627,7 @@
 		</>
 
 		<section label="Floating" sticky="stack" collapsible dividing>
-			<example description="A dropdown menu can appear to be floating below an element.">
+			<example "Floating" description="A dropdown menu can appear to be floating below an element.">
 				<buttons color="teal">
 					<button>Save</button>
 					<dropdown floating button color="teal" aria-label="More actions">
@@ -642,7 +640,7 @@
 		</>
 
 		<section label="Simple" sticky="stack" collapsible dividing>
-			<example description="A simple dropdown can open without JavaScript:  on hover and focus, with no popover.">
+			<example "Simple" description="A simple dropdown can open without JavaScript:  on hover and focus, with no popover.">
 				<dropdown appearance="simple" label="Dropdown">
 					<item>Choice 1</item>
 					<item>Choice 2</item>
@@ -655,7 +653,7 @@
 	<section label="Content">
 		<!-- GAP I107:  a header item's `icon` draws nothing;  slotted labels are tiny dots touching the text. -->
 		<section label="Header" sticky="stack" collapsible dividing>
-			<example description="A dropdown menu can contain a header:  `type=\"header\"`.">
+			<example "Header" description="A dropdown menu can contain a header:  `type=\"header\"`.">
 				<dropdown floating labeled button icon="filter" label="Filter">
 					<item kind="header" icon="tags">Filter by tag</item>
 					<item>Important</item>
@@ -666,7 +664,7 @@
 		</>
 
 		<section label="Divider" sticky="stack" collapsible dividing>
-			<example description="A dropdown menu can contain dividers to separate related content:  `type=\"divider\"`.">
+			<example "Divider" description="A dropdown menu can contain dividers to separate related content:  `type=\"divider\"`.">
 				<dropdown floating labeled button icon="filter" label="Filter">
 					<item kind="header" icon="tags">Filter by tag</item>
 					<item kind="divider"/>
@@ -678,7 +676,7 @@
 		</>
 
 		<section label="Icon" sticky="stack" collapsible dividing>
-			<example description="A dropdown menu can contain an icon:  `icon`.">
+			<example "Icon" description="A dropdown menu can contain an icon:  `icon`.">
 				<dropdown floating labeled button icon="filter" label="Filter">
 					<item kind="header" icon="tags">Filter by tag</item>
 					<item kind="divider"/>
@@ -690,7 +688,7 @@
 		</>
 
 		<section label="Description" sticky="stack" collapsible dividing>
-			<example description="A dropdown menu can contain a description:  `description`.">
+			<example "Description" description="A dropdown menu can contain a description:  `description`.">
 				<dropdown floating labeled button icon="filter" label="Filter Tags">
 					<item kind="header">Filter by tag</item>
 					<item kind="divider"/>
@@ -702,10 +700,10 @@
 		</>
 
 		<!-- GAP I107:  no vertical item (the description under the text). -->
-		<message size="small" class="site-not-ported"><html>Fomantic's <code>vertical item</> (the description underneath the entry) has no attribute yet (plan issue I107).</></>
+		<message size="small" class="site-not-ported">Fomantic's <text code>vertical item</> (the description underneath the entry) has no attribute yet (plan issue I107).</>
 
 		<section label="Label" sticky="stack" collapsible dividing>
-			<example description="A dropdown menu can contain a label:  any markup inside an item is projected into its row.">
+			<example "Label" description="A dropdown menu can contain a label:  any markup inside an item is projected into its row.">
 				<dropdown floating labeled button icon="filter" label="Filter">
 					<item kind="header">Search Issues</item>
 					<item kind="header" icon="tags">Filter by tag</item>
@@ -718,12 +716,12 @@
 
 		<!-- GAP I107:  the header slot is unpadded, and an item-less menu adds "No results found." under the message. -->
 		<section label="Message" sticky="stack" collapsible dividing>
-			<example description="A dropdown menu can contain a message:  the `header` slot holds any markup.">
+			<example "Message" description="A dropdown menu can contain a message:  the `header` slot holds any markup.">
 				<dropdown floating labeled button icon="filter" label="Login">
 					<message slot="header" state="error" heading="Error">You must log-in to see all categories</message>
 				</dropdown>
 			</example>
-			<example description="A search that matches nothing shows the translated `noResults` text, or `no-results-text`.">
+			<example "Message" description="A search that matches nothing shows the translated `noResults` text, or `no-results-text`.">
 				<dropdown search selection no-results-text="No country by that name." placeholder="Select Country">
 					<item value="af" flag="af">Afghanistan</item>
 					<item value="ax" flag="ax">Aland Islands</item>
@@ -751,7 +749,7 @@
 
 		<!-- GAP I107:  no floated content in an item (`right floated icon`). -->
 		<section label="Content at the End" sticky="stack" collapsible dividing>
-			<example description="A dropdown item can have content at the end of its row: its `description`. An icon can't go at the end yet.">
+			<example "Content at the End" description="A dropdown item can have content at the end of its row: its `description`. An icon can't go at the end yet.">
 				<dropdown fluid selection placeholder="Select Type">
 					<item description="!">Important</item>
 					<item icon="comment">Announcement</item>
@@ -761,7 +759,7 @@
 		</>
 
 		<section label="Input" sticky="stack" collapsible dividing>
-			<example description="A dropdown menu can contain an input, in the `header` slot. It doesn't filter the items: use `search` for that.">
+			<example "Input" description="A dropdown menu can contain an input, in the `header` slot. It doesn't filter the items: use `search` for that.">
 				<dropdown floating labeled button icon="filter" label="Filter">
 					<input slot="header" icon="search" icon-position="left" placeholder="Search..." aria-label="Search"/>
 					<item kind="header" icon="tags">Filter by tag</item>
@@ -774,7 +772,7 @@
 		</>
 
 		<section label="Image" sticky="stack" collapsible dividing>
-			<example description="A dropdown menu can contain an image:  `image`.">
+			<example "Image" description="A dropdown menu can contain an image:  `image`.">
 				<dropdown floating labeled button icon="user plus" label="Add User">
 					<item kind="header">People You Might Know</item>
 					<item image="../images/avatar/small/jenny.jpg">Jenny Hess</item>
@@ -786,7 +784,7 @@
 					<item image="../images/avatar/small/justen.jpg">Justen Kitsune</item>
 				</dropdown>
 			</example>
-			<example description="Or a flag:  `flag`.">
+			<example "Image" description="Or a flag:  `flag`.">
 				<dropdown selection value="fr" placeholder="Country">
 					<item value="fr" flag="fr">France</item>
 					<item value="de" flag="de">Germany</item>
@@ -796,12 +794,12 @@
 		</>
 
 		<!-- GAP I53:  no actionable items (an item that runs a callback instead of being chosen). -->
-		<message size="small" class="site-not-ported"><html>Actionable (an item that runs a callback instead of being chosen) can't be built yet: every item is an option (plan issue I53). Listen for <code>ui-changed</> and set the value back.</></>
+		<message size="small" class="site-not-ported">Actionable (an item that runs a callback instead of being chosen) can't be built yet: every item is an option (plan issue I53). Listen for <text code>ui-changed</> and set the value back.</>
 	</>
 
 	<section label="States">
 		<section label="Loading" sticky="stack" collapsible dividing>
-			<example description="A dropdown can show that it is currently loading data.">
+			<example "Loading" description="A dropdown can show that it is currently loading data.">
 				<dropdown loading label="Dropdown">
 					<item>Choice 1</item>
 					<item>Choice 2</item>
@@ -810,14 +808,14 @@
 			</example>
 
 			<!-- GAP I108:  no slow / double / elastic loader;  the colour tints the box, not the loader. -->
-			<example>
+			<example "Loading">
 				<dropdown loading color="red" fluid multiple search selection value="kp" placeholder="Search...">
 					<item>Choice 1</item>
 					<item>Choice 2</item>
 					<item>Choice 3</item>
 				</dropdown>
 			</example>
-			<example>
+			<example "Loading">
 				<dropdown loading color="teal" selection label="Dropdown">
 					<item>Choice 1</item>
 					<item>Choice 2</item>
@@ -827,14 +825,14 @@
 		</>
 
 		<section label="Error" sticky="stack" collapsible dividing>
-			<example description="An errored dropdown can alert a user to a problem:  `state=\"error\"`.">
+			<example "Error" description="An errored dropdown can alert a user to a problem:  `state=\"error\"`.">
 				<dropdown floating state="error" label="Dropdown">
 					<item>Choice 1</item>
 					<item>Choice 2</item>
 					<item>Choice 3</item>
 				</dropdown>
 			</example>
-			<example>
+			<example "Error">
 				<dropdown selection state="error" label="Dropdown">
 					<item>Choice 1</item>
 					<item>Choice 2</item>
@@ -844,7 +842,7 @@
 		</>
 
 		<section label="Form states" sticky="stack" collapsible dividing>
-			<example description="`state` also takes `info`, `success` and `warning`:  it tints the box, the text and the menu.">
+			<example "Form states" description="`state` also takes `info`, `success` and `warning`:  it tints the box, the text and the menu.">
 				<dropdown state="info" selection label="Info">
 					<item>One</item>
 				</dropdown>
@@ -859,7 +857,7 @@
 		</>
 
 		<section label="Active" sticky="stack" collapsible dividing>
-			<example description="An active dropdown has its menu open: `open`. Setting it fires no event.">
+			<example "Active" description="An active dropdown has its menu open: `open`. Setting it fires no event.">
 				<dropdown open label="Dropdown">
 					<item>Choice 1</item>
 					<item>Choice 2</item>
@@ -868,14 +866,14 @@
 		</>
 
 		<section label="Disabled" sticky="stack" collapsible dividing>
-			<example description="A disabled dropdown menu or item does not allow user interaction.  A disabled dropdown isn't submitted.">
+			<example "Disabled" description="A disabled dropdown menu or item does not allow user interaction.  A disabled dropdown isn't submitted.">
 				<dropdown disabled label="Dropdown">
 					<item>Choice 1</item>
 					<item>Choice 2</item>
 					<item>Choice 3</item>
 				</dropdown>
 			</example>
-			<example>
+			<example "Disabled">
 				<dropdown label="Disabled Item">
 					<item>Choice 1</item>
 					<item disabled>Disabled</item>
@@ -885,7 +883,7 @@
 		</>
 
 		<section label="Read-Only" sticky="stack" collapsible dividing>
-			<example description="A dropdown can be read-only and does not allow user interaction, but still submits with a form.">
+			<example "Read-Only" description="A dropdown can be read-only and does not allow user interaction, but still submits with a form.">
 				<dropdown readonly label="Dropdown">
 					<item>Choice 1</item>
 					<item>Choice 2</item>
@@ -897,7 +895,7 @@
 
 	<section label="Variations">
 		<section label="Size" sticky="stack" collapsible dividing>
-			<example description="A dropdown can have different sizes.">
+			<example "Size" description="A dropdown can have different sizes.">
 				<dropdown size="mini" selection name="gender" placeholder="Mini">
 					<item value="1">Male</item>
 					<item value="0">Female</item>
@@ -919,7 +917,7 @@
 					<item value="0">Female</item>
 				</dropdown>
 			</example>
-			<example>
+			<example "Size">
 				<dropdown size="big" selection name="gender" placeholder="Big">
 					<item value="1">Male</item>
 					<item value="0">Female</item>
@@ -936,7 +934,7 @@
 		</>
 
 		<section label="Scrolling" sticky="stack" collapsible dividing>
-			<example description="A dropdown can have its menu scroll: `scrolling`; add `resizable` for a native resize handle at the bottom of the menu.">
+			<example "Scrolling" description="A dropdown can have its menu scroll: `scrolling`; add `resizable` for a native resize handle at the bottom of the menu.">
 				<dropdown scrolling name="choice" placeholder="Select choice">
 					<item>Choice 1</item>
 					<item>Choice 2</item>
@@ -967,7 +965,7 @@
 					<item>Choice 10</item>
 				</dropdown>
 			</example>
-			<example>
+			<example "Scrolling">
 				<dropdown scrolling label="Filter Posts">
 					<item kind="header" icon="tags">Tag Label</item>
 					<item value="important"><label color="red" empty appearance="circular"/>Important</item>
@@ -984,7 +982,7 @@
 		</>
 
 		<section label="Inverted" sticky="stack" collapsible dividing>
-			<example description="A dropdown can be inverted.">
+			<example "Inverted" description="A dropdown can be inverted.">
 				<segment inverted>
 					<dropdown inverted selection name="choices" placeholder="Select choice">
 						<item>Choice 1</item>
@@ -996,10 +994,10 @@
 		</>
 
 		<!-- GAP I107:  no inverted menu on a plain dropdown. -->
-		<message size="small" class="site-not-ported"><html>Fomantic can invert only the menu of a non-inverted dropdown (<code>inverted menu</>); ours inverts the whole dropdown (plan issue I107).</></>
+		<message size="small" class="site-not-ported">Fomantic can invert only the menu of a non-inverted dropdown (<text code>inverted menu</>); ours inverts the whole dropdown (plan issue I107).</>
 
 		<section label="Compact" sticky="stack" collapsible dividing>
-			<example description="A compact dropdown has no minimum width:  `padding=\"compact\"`.">
+			<example "Compact" description="A compact dropdown has no minimum width:  `padding=\"compact\"`.">
 				<dropdown padding="compact" selection label="Compact">
 					<item>A</item>
 					<item>B</item>
@@ -1013,7 +1011,7 @@
 		</>
 
 		<section label="Fluid" sticky="stack" collapsible dividing>
-			<example description="A dropdown can take the full width of its parent:  `fluid`.">
+			<example "Fluid" description="A dropdown can take the full width of its parent:  `fluid`.">
 				<menu direction="vertical">
 					<item link="#link-1">Link 1</item>
 					<item link="#link-2">Link 2</item>
@@ -1030,7 +1028,7 @@
 		</>
 
 		<section label="Height" sticky="stack" collapsible dividing>
-			<example description="A selection dropdown can be `long` (2x of default height) so that more items can be glanced.">
+			<example "Height" description="A selection dropdown can be `long` (2x of default height) so that more items can be glanced.">
 				<dropdown length="long" multiple search selection placeholder="State">
 					<item value="AL">Alabama</item>
 					<item value="AK">Alaska</item>
@@ -1085,7 +1083,7 @@
 					<item value="WY">Wyoming</item>
 				</dropdown>
 			</example>
-			<example description="Very long:  3x of default height (`length=\"very-long\"`).  `short` and `very-short` go the other way.">
+			<example "Height" description="Very long:  3x of default height (`length=\"very-long\"`).  `short` and `very-short` go the other way.">
 				<dropdown length="very-long" multiple search selection placeholder="State">
 					<item value="AL">Alabama</item>
 					<item value="AK">Alaska</item>
@@ -1140,7 +1138,7 @@
 					<item value="WY">Wyoming</item>
 				</dropdown>
 			</example>
-			<example description="Unlimited: no scrollbar and no height limitation (`unlimited`), especially with `pointing`, to keep the arrow displayed.">
+			<example "Height" description="Unlimited: no scrollbar and no height limitation (`unlimited`), especially with `pointing`, to keep the arrow displayed.">
 				<dropdown limit="none" pointing multiple search selection placeholder="State">
 					<item value="AL">Alabama</item>
 					<item value="AK">Alaska</item>
@@ -1198,7 +1196,7 @@
 		</>
 
 		<section label="Menu Direction" sticky="stack" collapsible dividing>
-			<example description="A dropdown menu can specify the direction it should open: `direction=\"left\"` right-aligns it, so it extends toward the start; `upward` opens it above.">
+			<example "Menu Direction" description="A dropdown menu can specify the direction it should open: `direction=\"left\"` right-aligns it, so it extends toward the start; `upward` opens it above.">
 				<dropdown floating labeled button icon="caret down" direction="left" label="Menu">
 					<item>Left</item>
 					<item>Still Left</item>
@@ -1215,7 +1213,7 @@
 		</>
 
 		<section label="Columnar Menu" sticky="stack" collapsible dividing>
-			<example description="A selection dropdown can allow its menu to be equally divided so that more items can be glanced: `columnar=\"2\"` ... `\"5\"`.">
+			<example "Columnar Menu" description="A selection dropdown can allow its menu to be equally divided so that more items can be glanced: `columnar=\"2\"` ... `\"5\"`.">
 				<dropdown columnar="2" multiple selection placeholder="Two columns">
 					<item value="1">one</item>
 					<item value="2">two</item>
@@ -1230,7 +1228,7 @@
 					<item value="0">zero</item>
 				</dropdown>
 			</example>
-			<example description="Three columns.">
+			<example "Columnar Menu" description="Three columns.">
 				<dropdown columnar="3" fluid multiple search selection placeholder="State">
 					<item value="AL">Alabama</item>
 					<item value="AK">Alaska</item>
@@ -1285,7 +1283,7 @@
 					<item value="WY">Wyoming</item>
 				</dropdown>
 			</example>
-			<example description="Four columns.">
+			<example "Columnar Menu" description="Four columns.">
 				<dropdown columnar="4" fluid multiple search selection placeholder="State">
 					<item value="AL">Alabama</item>
 					<item value="AK">Alaska</item>
@@ -1340,7 +1338,7 @@
 					<item value="WY">Wyoming</item>
 				</dropdown>
 			</example>
-			<example description="Five columns.">
+			<example "Columnar Menu" description="Five columns.">
 				<dropdown columnar="5" fluid multiple search selection placeholder="State">
 					<item value="AL">Alabama</item>
 					<item value="AK">Alaska</item>
@@ -1398,7 +1396,7 @@
 		</>
 
 		<section label="Colored" sticky="stack" collapsible dividing>
-			<example description="`color` accents the focus border and the labels of a multiple selection, and fills a button dropdown.">
+			<example "Colored" description="`color` accents the focus border and the labels of a multiple selection, and fills a button dropdown.">
 				<dropdown color="red" multiple selection placeholder="Colors" value="red">
 					<item value="red">Red</item>
 					<item value="blue">Blue</item>
@@ -1413,7 +1411,7 @@
 
 	<section label="Selection Dropdowns">
 		<section label="Clearable" sticky="stack" collapsible dividing>
-			<example description="`clearable` lets users remove their selection from a dropdown.">
+			<example "Clearable" description="`clearable` lets users remove their selection from a dropdown.">
 				<dropdown clearable fluid search selection name="country" placeholder="Select Country">
 					<item value="af" flag="af">Afghanistan</item>
 					<item value="ax" flag="ax">Aland Islands</item>
@@ -1443,7 +1441,7 @@
 
 		<!-- GAP I106:  no `useLabels: false` (a count instead of labels). -->
 		<section label="Maximum Selections" sticky collapsible dividing>
-			<example description="`max-selections` forces a maximum number of selections. Form validation can also set a minimum and a maximum for multi-selects inside forms.">
+			<example "Maximum Selections" description="`max-selections` forces a maximum number of selections. Form validation can also set a minimum and a maximum for multi-selects inside forms.">
 				<header level="5">Selection</header>
 				<dropdown max-selections="3" fluid multiple selection name="skills" placeholder="Skills">
 					<item value="angular">Angular</item>
@@ -1492,7 +1490,7 @@
 		</>
 
 		<section label="Tagging and User Additions" sticky collapsible dividing>
-			<example description="`allow-additions` gives users the ability to add their own options. This can work with either single or multiple search selection dropdowns; `addition-text` words the add item.">
+			<example "Tagging and User Additions" description="`allow-additions` gives users the ability to add their own options. This can work with either single or multiple search selection dropdowns; `addition-text` words the add item.">
 				<header level="5">Single</header>
 				<dropdown allow-additions fluid search selection name="skills" placeholder="Skills">
 					<item value="angular">Angular</item>
@@ -1537,11 +1535,11 @@
 				</dropdown>
 			</example>
 		</>
-		<message size="small" class="site-not-ported"><html>Not ported: Stuck User Additions (<code>hideAdditions: false</> + <code>stuck</>) -- our add item is the first row of the filtered menu, so it is always in view.</></>
-		<message size="small" class="site-not-ported"><html>Text Labels (<code>useLabels: false</>: a "3 selected" count instead of labels) can't be set yet (plan issue I106).</></>
+		<message size="small" class="site-not-ported">Not ported: Stuck User Additions (<text code>hideAdditions: false</> + <text code>stuck</>) -- our add item is the first row of the filtered menu, so it is always in view.</>
+		<message size="small" class="site-not-ported">Text Labels (<text code>useLabels: false</>: a "3 selected" count instead of labels) can't be set yet (plan issue I106).</>
 
 		<section label="Clearing Dropdown" sticky collapsible dividing>
-			<example description="You can reset a dropdown to its placeholder: set its `value` to `\"\"` (see Usage, \"Values\"). Here a `clearable` dropdown's own clear button does it.">
+			<example "Clearing Dropdown" description="You can reset a dropdown to its placeholder: set its `value` to `\"\"` (see Usage, \"Values\"). Here a `clearable` dropdown's own clear button does it.">
 				<dropdown clearable multiple selection name="gender" value="0,1" placeholder="Default">
 					<item value="1">Male</item>
 					<item value="0">Female</item>
@@ -1554,34 +1552,30 @@
 		</>
 
 		<section label="Restoring Defaults" sticky collapsible dividing>
-			<example description="A form reset restores a dropdown to its `value` attribute (Fomantic's `restore defaults`). Change them, then reset.">
-				<html>
-					<ui-form>
-						<form>
-							<ui-field>
-								<ui-dropdown multiple selection name="defaults" value="default,default2" placeholder="Default">
-									<ui-item value="default">Default</ui-item>
-									<ui-item value="default2">Another Default</ui-item>
-									<ui-item value="1">Male</ui-item>
-									<ui-item value="0">Female</ui-item>
-								</ui-dropdown>
-							</ui-field>
-							<ui-field>
-								<ui-dropdown selection name="default" value="default" placeholder="Select a value">
-									<ui-item value="default">Default Value</ui-item>
-									<ui-item value="1">Male</ui-item>
-									<ui-item value="0">Female</ui-item>
-								</ui-dropdown>
-							</ui-field>
-							<ui-button type="reset" color="primary">Restore All Dropdowns</ui-button>
-						</form>
-					</ui-form>
-				</html>
+			<example "Restoring Defaults" description="A form reset restores a dropdown to its `value` attribute (Fomantic's `restore defaults`). Change them, then reset.">
+				<form>
+					<field>
+						<dropdown multiple selection name="defaults" value="default,default2" placeholder="Default">
+							<item value="default">Default</item>
+							<item value="default2">Another Default</item>
+							<item value="1">Male</item>
+							<item value="0">Female</item>
+						</dropdown>
+					</field>
+					<field>
+						<dropdown selection name="default" value="default" placeholder="Select a value">
+							<item value="default">Default Value</item>
+							<item value="1">Male</item>
+							<item value="0">Female</item>
+						</dropdown>
+					</field>
+					<button type="reset" color="primary">Restore All Dropdowns</button>
+				</form>
 			</example>
 		</>
 
 		<section label="Upward" sticky="stack" collapsible dividing>
-			<example description="A dropdown menu will automatically change which direction it opens if it can't fit on screen. To open in a specific direction, use `upward`.">
+			<example "Upward" description="A dropdown menu will automatically change which direction it opens if it can't fit on screen. To open in a specific direction, use `upward`.">
 				<segment attach="top">
 					<image src="/components/ui/images/wireframe/paragraph.png" alt=""/>
 				</segment>
@@ -1605,15 +1599,15 @@
 	</>
 
 	<section label="Remote Content">
-		<message size="small" class="site-not-ported"><html>Not ported: Fomantic's API settings (<code>apiSettings</>, <code>filterRemoteData</>, response mapping). Fetch the data yourself on <code>ui-search</>, and set the <code>options</> property (Usage tab, "Rich data").</></>
+		<message size="small" class="site-not-ported">Not ported: Fomantic's API settings (<text code>apiSettings</>, <text code>filterRemoteData</>, response mapping). Fetch the data yourself on <text code>ui-search</>, and set the <text code>options</> property (Usage tab, "Rich data").</>
 	</>
 
 	<section label="Menus">
-		<message size="small" class="site-not-ported"><html>Not ported: Changing Transitions (<code>transition</>) -- the menu fades through CSS; restyle it with <code>::part(menu)</>.</></>
-		<message size="small" class="site-not-ported"><html>Multiple Levels and Category Selection (sub-menus inside the menu, <code>allowCategorySelection</>) can't be built: the menu is one listbox deep (plan issue I53).</></>
+		<message size="small" class="site-not-ported">Not ported: Changing Transitions (<text code>transition</>) -- the menu fades through CSS; restyle it with <text code>::part(menu)</>.</>
+		<message size="small" class="site-not-ported">Multiple Levels and Category Selection (sub-menus inside the menu, <text code>allowCategorySelection</>) can't be built: the menu is one listbox deep (plan issue I53).</>
 
 		<section label="Preserving User Selections" sticky collapsible dividing>
-			<example description="A dropdown shows the item whose value is its `value` on page load. `text` shows a text before the items (or `options`) arrive.">
+			<example "Preserving User Selections" description="A dropdown shows the item whose value is its `value` on page load. `text` shows a text before the items (or `options`) arrive.">
 				<dropdown selection value="trash" placeholder="Folder">
 					<item value="inbox">Inbox</item>
 					<item value="drafts">Drafts</item>
@@ -1623,7 +1617,7 @@
 		</>
 
 		<section label="Dropdown Dividers / Headers" sticky collapsible dividing>
-			<example description="A dropdown menu can contain dividers and headers to separate related content. While searching, they hide and only the matching items show (Fomantic's `hideDividers`).">
+			<example "Dropdown Dividers / Headers" description="A dropdown menu can contain dividers and headers to separate related content. While searching, they hide and only the matching items show (Fomantic's `hideDividers`).">
 				<dropdown labeled button search pointing="top left" icon="filter" placeholder="Filter Posts">
 					<item kind="header" icon="tags">Filter by tag</item>
 					<item value="important"><label color="red" empty appearance="circular"/>Important</item>
@@ -1640,13 +1634,13 @@
 	</>
 
 	<section label="Adjusting Actions">
-		<message size="small" class="site-not-ported"><html>Combo Dropdowns and Link Dropdowns (<code>action: "combo" | "nothing" | "hide"</>: an item that changes a button, or a menu of links) can't be built yet: every dropdown is a select with a value (plan issue I53).</></>
+		<message size="small" class="site-not-ported">Combo Dropdowns and Link Dropdowns (<text code>action: "combo" | "nothing" | "hide"</>: an item that changes a button, or a menu of links) can't be built yet: every dropdown is a select with a value (plan issue I53).</>
 	</>
 
 	<section label="Coupling">
 		<!-- GAP I11:  no basic look, so the button group's dropdowns are filled. -->
 		<section label="Button Group" sticky="stack" collapsible dividing>
-			<example description="A button group can be formatted to show additional content as a dropdown.">
+			<example "Button Group" description="A button group can be formatted to show additional content as a dropdown.">
 				<buttons>
 					<dropdown button pointing="top left" label="Visit">
 						<item>Home</item>
@@ -1666,7 +1660,7 @@
 
 		<!-- GAP I53:  no dropdown that IS a menu item;  a dropdown sits inside an item. -->
 		<section label="Menu" sticky="stack" collapsible dividing>
-			<example description="A menu can contain a dropdown, inside an item. Fomantic's dropdown that IS the item (`ui dropdown item`) isn't there yet.">
+			<example "Menu" description="A menu can contain a dropdown, inside an item. Fomantic's dropdown that IS the item (`ui dropdown item`) isn't there yet.">
 				<menu>
 					<item link="#home">Home</item>
 					<item>
@@ -1681,25 +1675,20 @@
 		</>
 
 		<section label="Form" sticky="stack" collapsible dividing>
-			<example description="A dropdown can be formatted to allow selection inside a form:  it is a form control.">
-				<html>
-					<ui-form>
-						<form>
-							<ui-field>
-								<label for="dropdown-form-gender">Gender</label>
-								<ui-dropdown id="dropdown-form-gender" selection name="gender" placeholder="Gender">
-									<ui-item value="male">Male</ui-item>
-									<ui-item value="female">Female</ui-item>
-								</ui-dropdown>
-							</ui-field>
-						</form>
-					</ui-form>
-				</html>
+			<example "Form" description="A dropdown can be formatted to allow selection inside a form:  it is a form control.">
+				<form>
+					<field label="Gender">
+						<dropdown id="dropdown-form-gender" selection name="gender" placeholder="Gender">
+							<item value="male">Male</item>
+							<item value="female">Female</item>
+						</dropdown>
+					</field>
+				</form>
 			</example>
 		</>
 
 		<section label="Invoker commands" sticky="stack" collapsible dividing>
-			<example description="Buttons drive a dropdown with no script:  `commandfor` + `command=\"--show\"`, `--close` or `--toggle`.">
+			<example "Invoker commands" description="Buttons drive a dropdown with no script:  `commandfor` + `command=\"--show\"`, `--close` or `--toggle`.">
 				<button commandfor="dropdown-invoker" command="--show">Open the menu</button>
 				<button commandfor="dropdown-invoker" command="--close">Close it</button>
 				<dropdown id="dropdown-invoker" selection placeholder="Pick one">

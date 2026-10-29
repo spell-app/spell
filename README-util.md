@@ -138,7 +138,7 @@ new WithProto()        // statement:  the default is on the prototype, there bef
 - Nothing is copied per instance:  `Object.keys()` of a `WithProto` is `[]`, of a `WithField`, `["alias"]`.
 - Spell's parser is built on it.
   The [`print` rule](https://github.com/spell-app/spell/blob/main/parser/src/spell/rules/UI/Print.ts) starts `@proto static alias = "statement"`,
-  and the five repos' code says `@proto static` over 400 times.
+  and Spell's code says `@proto static` over 400 times.
 - The edge:  a `static` field only.
   On an instance field it throws `@proto x: only works on 'static' fields.`
   And the name must be one instances already `declare`, so a typo is a compile error.
@@ -656,4 +656,4 @@ server running (`spell server start`, then the URL it prints):
   where the same write-then-read happens in English
 - [README-toolchain.md](README-toolchain.md):  the decorator pre-pass every decorator on this page goes through
 - [README-server.md](README-server.md):  the page server, whose data files are written through the JSON5 helper
-- [README.md](README.md):  the kit, and the five repos it holds
+- [README.md](README.md):  the repo, and the five parts it holds

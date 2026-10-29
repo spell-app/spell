@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" width="800" height="400" role="img" aria-labelledby="title desc">
+  <title id="title">Languages in, targets out</title>
+  <desc id="desc">Human languages read into one Spell tree, and each target writes out of it.  In:  English and Spanish, today, each file by its name, Card.spell or Carta.es.spell;  French coming, and your language, if you help translate.  Out:  JavaScript on Solid, TypeScript on Solid or as a library, and Python today;  C++, Java, Swift and more coming.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#6550CA"/>
+    </marker>
+    <marker id="arrow-later" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#7BA05B"/>
+    </marker>
+  </defs>
+  <style>
+    text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; fill: #1A1C27; }
+    .title { font-size: 21px; font-weight: 700; fill: #6550CA; }
+    .sub { font-size: 13px; fill: #5B5E6E; }
+    .head { font-size: 12px; font-weight: 700; letter-spacing: 0.12em; fill: #6550CA; text-anchor: middle; }
+    .name { font-size: 15px; font-weight: 700; text-anchor: middle; }
+    .what { font-size: 12.5px; fill: #4A4D5C; text-anchor: middle; }
+    .soon { font-size: 15px; font-weight: 700; text-anchor: middle; fill: #3D5A2A; }
+    .soonwhat { font-size: 12.5px; fill: #4F7037; text-anchor: middle; font-style: italic; }
+    .tree { font-size: 30px; font-weight: 700; text-anchor: middle; fill: #FFFFFF; }
+    .box { fill: #EFECFB; stroke: #6550CA; stroke-width: 2; }
+    .coming { fill: #F2F7EE; stroke: #7BA05B; stroke-width: 2; stroke-dasharray: 6 4; }
+    .edge { fill: none; stroke: #6550CA; stroke-width: 1.8; }
+    .later { fill: none; stroke: #7BA05B; stroke-width: 1.8; stroke-dasharray: 6 5; }
+  </style>
+
+  <text class="title" x="40" y="44">Human language in ⇒ Application out — both in multiple languages.</text>
+
+  <text class="head" x="145" y="104">HUMAN LANGUAGE</text>
+  <text class="head" x="655" y="104">PROGRAMMING LANGUAGE</text>
+
+  <!-- edges -->
+  <path class="edge" d="M240,140 C268,140 284,192 320,206" marker-end="url(#arrow)"/>
+  <path class="edge" d="M240,198 C266,198 280,221 317,226" marker-end="url(#arrow)"/>
+  <path class="later" d="M240,256 C266,256 280,251 317,246" marker-end="url(#arrow-later)"/>
+  <path class="later" d="M240,314 C268,314 284,280 320,266" marker-end="url(#arrow-later)"/>
+  <path class="edge" d="M466,195 C492,179 514,140 556,140" marker-end="url(#arrow)"/>
+  <path class="edge" d="M480,228 C520,214 524,200 556,200" marker-end="url(#arrow)"/>
+  <path class="edge" d="M480,244 C520,256 524,260 556,260" marker-end="url(#arrow)"/>
+  <path class="later" d="M466,277 C492,293 514,320 556,320" marker-end="url(#arrow-later)"/>
+
+  <!-- in -->
+  <rect class="box" x="50" y="116" width="190" height="48" rx="12"/>
+  <text class="name" x="145" y="137">English</text>
+  <text class="what" x="145" y="154">Card.spell</text>
+  <rect class="box" x="50" y="174" width="190" height="48" rx="12"/>
+  <text class="name" x="145" y="195">Spanish</text>
+  <text class="what" x="145" y="212">Carta.es.spell</text>
+  <rect class="coming" x="50" y="232" width="190" height="48" rx="12"/>
+  <text class="soon" x="145" y="253">French</text>
+  <text class="soonwhat" x="145" y="270">coming soon</text>
+  <rect class="coming" x="50" y="290" width="190" height="48" rx="12"/>
+  <text class="soon" x="145" y="311">Your language</text>
+  <text class="soonwhat" x="145" y="328">help us translate</text>
+
+  <!-- the tree -->
+  <circle cx="400" cy="236" r="78" fill="#6550CA" stroke="#4A3AA0" stroke-width="2.5"/>
+  <text class="tree" x="400" y="246">Spell</text>
+
+  <!-- out -->
+  <rect class="box" x="560" y="116" width="200" height="48" rx="12"/>
+  <text class="name" x="660" y="137">JavaScript</text>
+  <text class="what" x="660" y="154">on Solid</text>
+  <rect class="box" x="560" y="176" width="200" height="48" rx="12"/>
+  <text class="name" x="660" y="197">TypeScript</text>
+  <text class="what" x="660" y="214">on Solid, or a library</text>
+  <rect class="box" x="560" y="236" width="200" height="48" rx="12"/>
+  <text class="name" x="660" y="257">Python</text>
+  <text class="what" x="660" y="274">.py program or website</text>
+  <rect class="coming" x="560" y="296" width="200" height="48" rx="12"/>
+  <text class="soon" x="660" y="317">C++, Java, Swift...</text>
+  <text class="soonwhat" x="660" y="334">coming</text>
+
+</svg>

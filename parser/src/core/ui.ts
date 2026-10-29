@@ -54,16 +54,23 @@ export const uiMethods = defineCoreModule({
 
   /**
    * Show `message` for a moment, in a toast -- compiled from `notify "Saved!"`.
-   * - `closeText`:  `notify "..." with "Got it"` -- the toast stays until it's closed.
-   * - Shown once Spell UI's runtime has loaded:  NOT awaited, as `notify` isn't.
+   * - `options`, from the clauses written after the message:  `NotifyOptions`
+   *   - e.g. `notify success "Saved!" at the top right for 5 seconds` =>
+   *     `core.notify("Saved!", { class: "success", position: "top right", time: 5, units: "seconds" })`
+   * - Shown once Spell UI's runtime has loaded.
+   * - Returns a promise of the toast being gone:  `notify "..." and wait` waits for it, plain `notify` doesn't.
+   * - No Spell UI:  printed on the console, and gone at once.
+   * - NEVER throws:  a toast that can't show says so on the console.
    */
-  notify(message: unknown, closeText?: string): void {
+  async notify(message: unknown, options: NotifyOptions = {}): Promise<void> {
     const ui = pageUI()
     if (!ui) return core.console.info(String(message))
-    void ui
-      .load()
-      .then((loaded) => loaded.toast({ message: String(message), displayTime: closeText ? 0 : "auto" }))
-      .catch((error) => core.console.error("notify:  can't show a toast", error))
+    try {
+      const toast = (await ui.load()).toast(toastOptionsFor(String(message), options))
+      await toast.closed
+    } catch (error) {
+      core.console.error("notify:  can't show a toast", error)
+    }
   },
 
   /** Show `message` in a dialog, and wait until it's closed -- compiled from `alert "Yo!"` (`await`ed). */
@@ -200,8 +207,8 @@ function isTypedIn(target: EventTarget | undefined): boolean {
 type PageUI = {
   /** resolves with the runtime once its services are in:  `UI.load()` */
   load(): Promise<PageUI>
-  /** a toast:  `UI.toast()` */
-  toast(options: { message: string; displayTime?: number | "auto" }): unknown
+  /** a toast:  `UI.toast()`, its options the ones `notify` uses (Spell UI's `ToastOptions`) */
+  toast(options: PageToastOptions): { closed: Promise<void> }
   /** dialogs that answer with a promise:  `UI.modals` */
   modals: {
     alert(options: { message: string; okText?: string }): Promise<void>
@@ -212,6 +219,47 @@ type PageUI = {
   keyboard: {
     register(registration: { chord: string; handler: (event: KeyboardEvent) => boolean }): () => void
   }
+}
+
+/**
+ * What `notify` takes after its message, one option per clause of `notify` (`rules/UI/Notify.ts`).
+ * - Named as Spell UI's toast options are (`ToastOptions`), but for `time`, `units` and `button`.
+ */
+export type NotifyOptions = {
+  /** bold first line:  `titled "Better?"` */
+  title?: string
+  /** its kind and colour words:  `"success"`, `"inverted red"` */
+  class?: string
+  /** where on the screen:  `"top left"`, `"centered"`, `"bottom right"` (Spell UI's default) */
+  position?: string
+  /** how long it shows, in `units`:  `for 5 seconds`;  `0`, `until clicked`;  none, as long as reading it takes */
+  time?: number
+  /** `time`'s unit, a key of `core.TIME_UNITS_MAP`;  default `"seconds"` */
+  units?: string
+  /** a bar counting the time down:  `with a progress bar at the top` */
+  showProgress?: "top" | "bottom"
+  /** the bar fills up instead of emptying:  `... filling up` */
+  progressUp?: boolean
+  /** toasts at its position line up side by side */
+  horizontal?: boolean
+  /** `false`:  the countdown keeps running under the pointer, `without pausing` */
+  pauseOnHover?: boolean
+  /** a button that closes it:  `with "Got it"`;  it stays until it's closed */
+  button?: string
+}
+
+/** What core hands Spell UI's `UI.toast()`:  a copy of the part of its `ToastOptions` that `notify` uses. */
+type PageToastOptions = Omit<NotifyOptions, "time" | "units" | "button"> & {
+  message: string
+  displayTime?: number | "auto"
+  actions?: { text: string }[]
+}
+
+/** `notify`'s message and options as Spell UI's toast options:  its time in milliseconds, its button an action. */
+function toastOptionsFor(message: string, options: NotifyOptions): PageToastOptions {
+  const { time, units = "seconds", button, ...toastOptions } = options
+  const displayTime = button ? 0 : time === undefined ? "auto" : Math.round(time * (core.TIME_UNITS_MAP[units] ?? 1000))
+  return { ...toastOptions, message, displayTime, ...(button ? { actions: [{ text: button }] } : {}) }
 }
 
 /**

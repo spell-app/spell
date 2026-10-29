@@ -26,13 +26,13 @@
 	-->
 	<section label="Types">
 		<section label="Audio" sticky="stack" collapsible dividing>
-			<example description="A sound file in the browser's own player (`controls`).">
+			<example "Audio" description="A sound file in the browser's own player (`controls`).">
 				<audio src="/components/ui/examples/media/chime.wav" controls label="A chime"/>
 			</example>
 		</>
 
 		<section label="A sound the page plays" sticky="stack" collapsible dividing>
-			<example description="Without `controls`, nothing shows:  the page plays it, here from a button's click (a game's sounds).">
+			<example "A sound the page plays" description="Without `controls`, nothing shows:  the page plays it, here from a button's click (a game's sounds).">
 				<audio id="chime" src="/components/ui/examples/media/chime.wav"/>
 				<button icon="bell" onclick="document.getElementById('chime').play()">Ring</button>
 			</example>

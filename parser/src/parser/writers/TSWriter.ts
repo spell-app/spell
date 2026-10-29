@@ -1061,6 +1061,7 @@ export class TSWriter extends JSWriter {
     "onFormDisabled",
     "onFormReset",
     "onFormStateRestore",
+    "onFontSizeChanged",
     "onMount",
     "onPlacingLeft",
     "onPointerDown",
@@ -1100,6 +1101,7 @@ export class TSWriter extends JSWriter {
     "runWhile",
     "secondsBeforeMoving",
     "send",
+    "sharedFontSize",
     "sharedLabel",
     "sharedLink",
     "sharedTarget",
@@ -1312,13 +1314,15 @@ export class TSWriter extends JSWriter {
   }
 
   /**
-   * One child of an element:  text as is (`{"..."}` when it has `{`, `<` ...), an expression in braces, an element.
+   * One child of an element:  text as is (`{"..."}` when it has `{`, `<`, a line break ...),
+   * an expression in braces, an element.
    * - `""` for nothing to write.
    */
   jsxChild(child: P.ASTExpression): string {
     if (child instanceof P.ASTJSXText) {
       if (!child.value) return ""
-      return /[{}<>]/.test(child.value) ? `{${JSON.stringify(child.value)}}` : child.value
+      // a paragraph's line break (`\n\n`) in a string, or the JSX compiler would read it as a space
+      return /[{}<>\n]/.test(child.value) ? `{${JSON.stringify(child.value)}}` : child.value
     }
     if (child instanceof P.ASTJSXElement) return this.write(child)
     const expression = child instanceof P.ASTJSXExpression ? child.output : child

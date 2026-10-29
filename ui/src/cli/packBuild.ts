@@ -49,7 +49,7 @@ export function readPack(root: string, name: string): ComponentPack {
 }
 
 /**
- * Every component pack's folder in kit `root`, sorted:  the kit's child repos (`spell-*`) whose `package.json` has a
+ * Every component pack's folder in kit `root`, sorted:  the kit's folders (and peers `spell-*`) whose `package.json` has a
  * `spellPack` (spell-brand, spell-epic, one `spell pack create` made);  and `root` itself, when it's a pack (a pack
  * repo checked out on its own).
  */

@@ -32,7 +32,9 @@ import themeMenuCSS from "./UIThemeMenu.css?inline"
  *         the scheme the viewer CHOSE, Auto while it follows the OS
  *       - the theme list (`role=menu` of `menuitemradio`s, the chosen one checked):
  *         Spell's own themes (`UI.themes.own`), each with its one-line description (`ThemeMenu`)
- *       - the `end` slot's rows, the page's own, under a divider (the Spell editor's "Edit theme...")
+ *       - under a divider, "Theme bench" (`<a part="bench">`):  the theme bench, in a new window, in the theme
+ *         chosen (`bench`;  Owen:  "Add \"theme bench\" link to theme dropdown, opens in new window")
+ *       - the `end` slot's rows, the page's own (the Spell editor's "Edit theme...")
  *     - its tooltip, `<ui-popup part="tip" inverted size="mini">` (hidden while the overlay is open)
  *     - Until epic `debut` (Owen, 2026-10-23:  "Merge day/night buttons into the theme picker") a sun / moon
  *       button stood beside it, and the overlay had a "Match system" switch.
@@ -42,6 +44,10 @@ import themeMenuCSS from "./UIThemeMenu.css?inline"
  *     - The icons cross-fade:  the new one grows from a quarter, un-blurring;  the old one the reverse.
  *   - `theme`:  a theme `<ui-dropdown part="theme" floating scrolling button>`, for a page's masthead.
  *     - Its rows are `<ui-item>` children;  its text goes in its `trigger` slot.
+ *     - Its last, under a divider:  Theme bench, opening it as the palette's row does (not a theme:  never chosen).
+ * - The theme bench is Spell UI's docs page, on the site `bench` names (the Spell editor:  the page server's
+ *   address), else this page's own (a worktree's pages:  the worktree's bench);  `bench="none"`:  no row.  It's opened with the theme chosen in
+ *   its address (`ThemePreference.addressWith()`), so it opens as this page shows.
  * - The theme and scheme themselves are `ThemePreference`'s
  *   (one pair per page, remembered per viewer, the scheme shared with every Spell site's header).
  *   - Picking calls `ThemePreference.setTheme()` / `setScheme()` / `flipScheme()`,
@@ -139,6 +145,25 @@ export class UIThemeMenu extends E.UIComponent<ThemeMenuVocabulary> {
     if (scheme === ThemePreference.chosen.scheme) return
     ThemePreference.setScheme(scheme)
     this.emitChange(event)
+  }
+
+  ////////////////
+  // ## The theme bench
+  ////////////////
+
+  /** The theme bench's address, with the theme chosen in it;  `undefined`:  no row (`bench="none"`, or a server). */
+  get benchAddress(): string | undefined {
+    const given = this.bench as string | undefined
+    if (given === NO_BENCH || isServer) return undefined
+    const site = given?.replace(/\/$/, "") ?? WORKTREE_ROOT.exec(location.pathname)?.[0] ?? ""
+    const address = site + BENCH_PATH
+    return ThemePreference.addressWith(address, { theme: this.chosenTheme })
+  }
+
+  /** Open the theme bench in a new window. */
+  openBench(): void {
+    const address = this.benchAddress
+    if (address) window.open(address, BENCH_TARGET, "noopener")
   }
 
   /** Fire `ui-changed` with the theme and scheme now. */
@@ -267,6 +292,20 @@ export class UIThemeMenu extends E.UIComponent<ThemeMenuVocabulary> {
             >
               <For each={this.themeMenu.entries}>{(entry) => this.entry(entry)}</For>
             </div>
+            <Show when={this.benchAddress}>
+              <div class={DIVIDER_CLASS} role="separator" />
+              <a
+                class={BENCH_CLASS}
+                part={this.partForName("bench")}
+                href={this.benchAddress}
+                target={BENCH_TARGET}
+                rel="noopener"
+                title={this.translationForKey("benchTip")}
+              >
+                <ui-icon name={BENCH_ICON} aria-hidden="true" padding="none" />
+                <span class={NAME_CLASS}>{this.translationForKey("bench")}</span>
+              </a>
+            </Show>
             <slot name={this.slotForName("end")} />
           </div>
         </ui-popup>
@@ -405,15 +444,26 @@ export class UIThemeMenu extends E.UIComponent<ThemeMenuVocabulary> {
             )
           }
         </For>
+        <Show when={this.benchAddress}>
+          <ui-item kind="divider"></ui-item>
+          <ui-item value={BENCH_VALUE} icon={BENCH_ICON} title={this.translationForKey("benchTip")}>
+            {this.translationForKey("bench")}
+          </ui-item>
+        </Show>
       </ui-dropdown>
     )
   }
 
-  /** The dropdown's `ui-changed`:  stop it (the DOM element fires its own), and choose its value. */
+  /**
+   * The dropdown's `ui-changed`:  stop it (the DOM element fires its own), and choose its value;
+   * Theme bench:  open it, and show the theme chosen again.
+   */
   private onDropdownChange(event: Event): void {
     event.stopPropagation()
     const { value } = (event as CustomEvent<{ value: string }>).detail
-    void this.chooseTheme(value, event)
+    if (value !== BENCH_VALUE) return void this.chooseTheme(value, event)
+    this.openBench()
+    ;(event.currentTarget as HTMLElement & { value: string }).value = this.chosenTheme
   }
 
   ////////////////
@@ -503,6 +553,27 @@ const SCHEME_TEXTS = { light: "light", dark: "dark", system: "auto" } as const s
 
 /** Icon of the button opening the overlay (`fomantic` pack). */
 const PALETTE_ICON = "palette"
+
+/** The theme bench's page, from a site's root:  Spell UI's docs page (`ui/docs/theme-bench.html`). */
+const BENCH_PATH = "/components/ui/theme-bench.html"
+
+/** A worktree's site on the page server:  `/worktrees/<name>`, where its pages start. */
+const WORKTREE_ROOT = /^\/worktrees\/[^/]+/
+
+/** `bench`'s value for no Theme bench row. */
+const NO_BENCH = "none"
+
+/** Where the theme bench opens:  a new window. */
+const BENCH_TARGET = "_blank"
+
+/** The dropdown's Theme bench row's value:  never a theme's name. */
+const BENCH_VALUE = "theme bench"
+
+/** Icon of the Theme bench row (`fomantic` pack). */
+const BENCH_ICON = "external alternate"
+
+/** Class word of the overlay's Theme bench row. */
+const BENCH_CLASS = "bench"
 
 /** Icon marking the chosen theme in the overlay's list (`fomantic` pack). */
 const CHECK_ICON = "check"

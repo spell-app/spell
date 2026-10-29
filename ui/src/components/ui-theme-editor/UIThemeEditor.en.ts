@@ -74,14 +74,18 @@ export const themeEditorVocabulary = {
       name: "ui-saved",
       detail: "{ value?: ThemeChoices, css: string }",
       description:
-        "Use this theme kept it in the browser, for the Spell editor and any page that calls `SavedTheme.restore()`;  " +
-        "no `value`:  Stop using forgot it."
+        "Stop using forgot the theme kept in this browser (`SavedTheme`), which the Spell editor wore over its base;  " +
+        "`value` is never sent now."
     }
   ],
   slots: [],
   parts: [
     { name: "editor", description: "The whole editor:  the bar, the preview, and the side column." },
-    { name: "bar", description: "The top bar, one line:  its title, the theme, which pages, how they show." },
+    {
+      name: "bar",
+      description:
+        "The top bar, one line:  its title, Light / Dark / Both, the pages on or off, the theme, how they show."
+    },
     { name: "basics", description: "The Basics:  the theme's name and base, and its big choices." },
     { name: "tokens", description: "Every token, in the theme file's groups." },
     { name: "token", description: "One token's row:  its name, which pages read it, its control." },
@@ -90,10 +94,7 @@ export const themeEditorVocabulary = {
     { name: "preview", description: "The sample app, light and dark, when no pages are given." },
     { name: "changes", description: "The theme file's text, with Copy changes." }
   ],
-  states: [
-    { name: "saved", description: "The theme it shows is the one kept in this browser (Use this theme)." },
-    { name: "changed", description: "Something is changed:  a Basic, or a token set by hand." }
-  ],
+  states: [{ name: "changed", description: "Something is changed:  a Basic, or a token set by hand." }],
   texts: [
     { key: "label", text: "Theme editor", description: "The bar's title, and the editor's accessible name." },
     {
@@ -192,24 +193,34 @@ export const themeEditorVocabulary = {
     { key: "clear", text: "Clear", description: "A glass choice." },
     { key: "frosted", text: "Frosted", description: "A glass choice." },
     { key: "solid", text: "Solid", description: "A glass choice." },
-    { key: "use", text: "Use this theme", description: "The button that keeps the theme in the browser." },
+    { key: "forget", text: "Stop using", description: "The button that forgets the kept theme." },
     {
-      key: "useTip",
-      text: "Keep it in this browser:  the Spell editor starts in it.",
+      key: "forgetTip",
+      text: "Forget the theme kept in this browser:  the Spell editor stops wearing it",
       description: "Its tooltip."
     },
-    { key: "inUse", text: "In use", description: "The use button, while the theme shown is the one kept." },
-    { key: "forget", text: "Stop using", description: "The button that forgets the kept theme." },
     { key: "startOver", text: "Start over", description: "The button that drops every change." },
-    { key: "layout", text: "Show", description: "Accessible name of the pages' menu." },
-    { key: "grid", text: "All", description: "The pages' menu:  every page, two by two." },
+    {
+      key: "startOverTip",
+      text: "Drop every change but the name and the theme it builds on",
+      description: "Its tooltip."
+    },
+    { key: "pages", text: "Pages", description: "Accessible name of the bar's page toggles." },
+    { key: "showPageTip", text: "Show {page}", description: "A page's toggle, while it's off." },
+    { key: "hidePageTip", text: "Hide {page}", description: "A page's toggle, while it's on." },
+    { key: "themeTip", text: "Build on {theme}", description: "Each theme in the bar's theme row:  its tooltip." },
     { key: "titles", text: "Section titles", description: "Accessible name of the titles' scroll menu." },
     { key: "rest", text: "At rest", description: "Scroll each page to its top, its titles at rest." },
+    { key: "restTip", text: "Scroll each page to its top, its section titles at rest", description: "Its tooltip." },
     { key: "stuck", text: "Stuck", description: "Scroll each page so its section titles stick." },
+    { key: "stuckTip", text: "Scroll each page so its section titles stick", description: "Its tooltip." },
     { key: "schemes", text: "Schemes", description: "Accessible name of the schemes' menu." },
     { key: "both", text: "Both", description: "Light and dark side by side:  pages, samples and token values." },
+    { key: "bothTip", text: "Light and dark side by side", description: "Its tooltip." },
     { key: "light", text: "Light", description: "Light alone;  the light half of a pair;  the light sample's label." },
+    { key: "lightTip", text: "Light only", description: "Its tooltip." },
     { key: "dark", text: "Dark", description: "Dark alone;  the dark half of a pair;  the dark sample's label." },
+    { key: "darkTip", text: "Dark only", description: "Its tooltip." },
     { key: "phone", text: "Phone", description: "The bar's toggle:  every page at a phone's width." },
     {
       key: "phoneTip",
@@ -219,7 +230,12 @@ export const themeEditorVocabulary = {
     {
       key: "swap",
       text: "Swap light and dark",
-      description: "The bar's button:  every pair's light and dark sides change places."
+      description: "The bar's button, beside Both:  every pair's light and dark sides change places."
+    },
+    {
+      key: "swapTip",
+      text: "Swap light and dark:  each page's pair changes sides",
+      description: "Its tooltip."
     },
     {
       key: "scrollBack",
@@ -228,7 +244,13 @@ export const themeEditorVocabulary = {
     },
     { key: "scrollOn", text: "Scroll on", description: "The bar's ›, while some of its row is out of sight after." },
     { key: "reload", text: "Reload", description: "Reload one page's frames (its title row's icon)." },
+    { key: "reloadTip", text: "Reload this page", description: "Its tooltip:  the other pages stay as they are." },
     { key: "open", text: "Open in a tab", description: "Open a page in a tab of its own." },
+    {
+      key: "openTip",
+      text: "Open this page in a tab of its own, in the theme and scheme shown",
+      description: "Its tooltip."
+    },
     {
       key: "loadingPage",
       text: "Loading the page…",

@@ -61,14 +61,12 @@
 		</>
 
 		<section label="In a form" sticky="stack" collapsible dividing>
-			<example description="A required rating, submitted as `food`.  Rate, then reset the form to put back the starting value.">
+			<example "In a form" description="A required rating, submitted as `food`.  Rate, then reset the form to put back the starting value.">
 				<html>
 					<ui-form>
-						<form>
-							<label for="rating-food">Food</label>
-							<ui-rating id="rating-food" name="food" color="yellow" value="2" max-rating="5" required></ui-rating>
-							<ui-button type="reset" icon="undo" appearance="basic">Reset</ui-button>
-						</form>
+						<label for="rating-food">Food</label>
+						<ui-rating id="rating-food" name="food" color="yellow" value="2" max-rating="5" required></ui-rating>
+						<ui-button type="reset" icon="undo" appearance="basic">Reset</ui-button>
 					</ui-form>
 				</html>
 			</example>

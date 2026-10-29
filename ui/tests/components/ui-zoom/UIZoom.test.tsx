@@ -8,6 +8,7 @@ import { expectAccessible } from "spell/test-helpers/A11y"
 import "spell/ui/components/ui-zoom"
 import "spell/ui/components/ui-image"
 import { ImageZoom } from "spell/ui/components/ui-zoom"
+import { png, page, theZoom } from "./ZoomPage"
 
 /** Element-markup examples, by path. */
 const EXAMPLES = import.meta.glob<string>("/src/components/ui-zoom/examples/elements/*.html", {
@@ -15,33 +16,6 @@ const EXAMPLES = import.meta.glob<string>("/src/components/ui-zoom/examples/elem
   import: "default",
   eager: true
 })
-
-/** A `width` x `height` PNG, drawn on a canvas. */
-function png(width: number, height: number): string {
-  const canvas = document.createElement("canvas")
-  Object.assign(canvas, { width, height })
-  canvas.getContext("2d")!.fillRect(0, 0, width, height)
-  return canvas.toDataURL("image/png")
-}
-
-/** `markup` on the page, its first image decoded. */
-async function page(markup: string): Promise<HTMLImageElement> {
-  const host = document.createElement("main")
-  host.innerHTML = markup
-  document.body.append(host)
-  const image = host.querySelector("img")!
-  await image.decode()
-  return image
-}
-
-/** The page's zoom, once `ImageZoom.show()` made it, drawn. */
-async function theZoom(): Promise<E.DOMElement> {
-  const zoom = document.querySelector<E.DOMElement>("body > ui-zoom")!
-  await zoom.ready
-  await zoom.shadowRoot!.querySelector<E.DOMElement>("ui-modal")!.ready
-  await ElementFixture.tick()
-  return zoom
-}
 
 /** `zoom`'s shadow part `name`. */
 function part<T extends Element = HTMLElement>(zoom: Element, name: string): T | null {
@@ -202,6 +176,68 @@ describe("<ui-zoom> round content", () => {
     const host = await ElementFixture.render<HTMLElement>(html)
     await ElementFixture.settle()
     await expectAccessible(host)
+  })
+})
+
+describe("<ui-zoom>:  the arrow keys", () => {
+  test("step to the next zoomable in document order and back, stopping at either end;  Escape closes", async () => {
+    const first = png(800, 400)
+    const second = png(640, 320)
+    const host = document.createElement("main")
+    host.innerHTML =
+      `<img src="${first}" alt="First" style="width: 200px">` +
+      `<ui-zoom><p>Middle</p></ui-zoom>` +
+      `<img src="${second}" alt="Last" style="width: 200px">`
+    document.body.append(host)
+    await Promise.all([...host.querySelectorAll("img")].map((image) => image.decode()))
+    const content = host.querySelector<E.DOMElement>("ui-zoom")!
+    await content.ready
+    await ElementFixture.settle()
+    ImageZoom.show(host.querySelector("img")!)
+    const zoom = await theZoom()
+    expect(zoom.getAttribute("src")).toBe(first)
+    // next:  the content zoom (the page's picture goes, the content opens)
+    await userEvent.keyboard("{ArrowRight}")
+    await vi.waitFor(() => expect(content.hasAttribute("open")).toBe(true))
+    expect(zoom.hasAttribute("src")).toBe(false)
+    // next:  the last picture, in the page's zoom;  the content closes
+    await userEvent.keyboard("{ArrowDown}")
+    await vi.waitFor(() => expect(zoom.getAttribute("src")).toBe(second))
+    expect(content.hasAttribute("open")).toBe(false)
+    // next on the last stays on it (no wrap);  back to the first, previous on it stays
+    await userEvent.keyboard("{ArrowRight}")
+    await ElementFixture.tick()
+    expect(zoom.getAttribute("src")).toBe(second)
+    await userEvent.keyboard("{ArrowLeft}{ArrowLeft}")
+    await vi.waitFor(() => expect(zoom.getAttribute("src")).toBe(first))
+    await userEvent.keyboard("{ArrowLeft}")
+    await ElementFixture.tick()
+    expect(zoom.getAttribute("src")).toBe(first)
+    expect(content.hasAttribute("open")).toBe(false)
+    await userEvent.keyboard("{Escape}")
+    await vi.waitFor(() => expect(zoom.hasAttribute("src")).toBe(false))
+  })
+})
+
+// the browser project asks for reduced motion:  UIZoomMotion.test.tsx has the motion
+describe("<ui-zoom>:  reduced motion", () => {
+  test("nothing moves:  it opens, pages and closes at once (a picture's `src` goes with Escape, no shrinking first)", async () => {
+    const first = png(800, 400)
+    const second = png(640, 320)
+    const host = document.createElement("main")
+    host.innerHTML = `<img src="${first}" alt="First" style="width: 200px"><img src="${second}" alt="Last" style="width: 200px">`
+    document.body.append(host)
+    await Promise.all([...host.querySelectorAll("img")].map((image) => image.decode()))
+    ImageZoom.show(host.querySelector("img")!)
+    const zoom = await theZoom()
+    const figures = () => zoom.shadowRoot!.querySelectorAll("figure")
+    await userEvent.keyboard("{ArrowDown}")
+    await vi.waitFor(() => expect(zoom.getAttribute("src")).toBe(second))
+    expect([figures().length, figures()[0].getAnimations().length]).toEqual([1, 0])
+    await userEvent.keyboard("{ArrowDown}")
+    expect(figures()[0].getAnimations()).toHaveLength(0)
+    await userEvent.keyboard("{Escape}")
+    await vi.waitFor(() => expect(zoom.hasAttribute("src")).toBe(false))
   })
 })
 
