@@ -12,6 +12,9 @@ import { PrefStore } from "./PrefStore"
 /** The query parameter a page's address says its scheme in:  `?scheme=dark`. */
 const ADDRESS_PARAM = "scheme"
 
+/** The theme bench's `?scheme=both`:  no scheme of the page's own, and no warning. */
+const BOTH = "both"
+
 /** `ColorScheme.addressed` before the address is read. */
 const NOT_READ = Symbol("not read")
 
@@ -24,7 +27,8 @@ const NOT_READ = Symbol("not read")
  *   AND as inline `color-scheme`:  for pages without Spell UI's sheets, and `light-dark()`.
  * - Followed:  the OS switching, and another tab choosing (`watch()`).
  * - A page's ADDRESS can say it for one visit:  `?scheme=light` or `?scheme=dark` wins over the one kept, and is never
- *   kept;  choosing one (`choose()`) drops it.  Any other value is ignored, with a warning.
+ *   kept;  choosing one (`choose()`) drops it.  Any other value is ignored, with a warning (`both`, the theme bench's,
+ *   silently).
  *   - So every Spell page opens in the scheme a link asks for (the theme bench's ↗;  Spell UI's `ThemePreference`
  *     reads `?theme=` beside it).
  * - Its users:
@@ -79,7 +83,8 @@ export class ColorScheme {
     const search = globalThis.location?.search ?? ""
     const value = new URLSearchParams(search).get(ADDRESS_PARAM) || undefined
     const scheme = schemeOf(value)
-    if (value && !scheme)
+    // `both`:  the theme bench's light and dark side by side (its `BenchAddress`), no one scheme for the page
+    if (value && !scheme && value !== BOTH)
       console.warn(`ColorScheme:  the address's scheme \`${value}\` is neither light nor dark;  ignored`)
     return (ColorScheme.addressed = scheme)
   }

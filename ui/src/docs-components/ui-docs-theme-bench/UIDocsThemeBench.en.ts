@@ -31,7 +31,7 @@ export const docsThemeBenchVocabulary = {
     { key: "epic", text: "Epic page", description: "The epic page's title." },
     { key: "ui", text: "Spell UI", description: "Spell UI's docs page's title." },
     { key: "notebook", text: "Notebook", description: "The notebook's title." },
-    { key: "editor", text: "App", description: "The Spell editor app's title (Owen renamed it from Editor)." },
+    { key: "app", text: "App", description: "The Spell editor app's title (Owen renamed it from Editor)." },
     {
       key: "noEditor",
       text: "The editor isn't running:  it starts with the page server.",

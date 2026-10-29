@@ -33694,6 +33694,16 @@ export interface UIThemeMenuAttributes {
    */
   "prop:bench"?: string
   /**
+   * Which of the theme bench's pages it opens showing alone (`app`, `epic`, `ui`, `notebook`):  the place this menu is on;  none given:  read from the page's address, else `app`.
+   * - takes:  text
+   */
+  "bench-page"?: string
+  /**
+   * `bench-page`, as the DOM element's property.
+   * @deprecated write `bench-page` -- `prop:` stays only for compiled spell
+   */
+  "prop:benchPage"?: string
+  /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
    */

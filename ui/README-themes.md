@@ -381,6 +381,8 @@ To make a look of your own, start from one of Spell UI's and change what you lik
   a token set there wins over the Basics.
 - The whole page wears the theme as you change it, and a sample app shows it in light and dark side by side.
   - Hand it `pages` (real pages, each in a frame) and it previews those instead, its own look staying put.
+  - With pages, its view is in the page's address (`?theme=midnight&scheme=both&swap=1&pages=notebook,app&phone=1`):
+    copy the link, and it opens the same.  A page is moved by dragging its title row, or Alt+← / Alt+→.
 - What it makes is a theme FILE:  Copy changes gives its JSON5 (`extends` its base), colours in hex.
   - Its sheet (`el.css`):  the file's values on `:root`, in `@layer ui.app`.
     Apply its base first (`UI.themes.apply("fruity")`), then the sheet, and the page looks as it did in the editor.

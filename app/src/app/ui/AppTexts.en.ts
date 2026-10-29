@@ -292,7 +292,7 @@ export const APP_TEXTS = {
   // the theme editor's page (`<ThemeEditorPage>`), and the palette menu's way there
   editTheme: "Edit theme…",
   // the pages it previews while it's worked on (`BenchPages`, in development)
-  "themePage.editor": "App",
+  "themePage.app": "App",
   "themePage.epic": "Epic page",
   "themePage.ui": "Spell UI",
   "themePage.notebook": "Notebook",

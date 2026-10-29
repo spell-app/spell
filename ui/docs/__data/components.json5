@@ -33799,31 +33799,6 @@
           "description": "Each theme in the bar's theme row:  its tooltip."
         },
         {
-          "key": "titles",
-          "text": "Section titles",
-          "description": "Accessible name of the titles' scroll menu."
-        },
-        {
-          "key": "rest",
-          "text": "At rest",
-          "description": "Scroll each page to its top, its titles at rest."
-        },
-        {
-          "key": "restTip",
-          "text": "Scroll each page to its top, its section titles at rest",
-          "description": "Its tooltip."
-        },
-        {
-          "key": "stuck",
-          "text": "Stuck",
-          "description": "Scroll each page so its section titles stick."
-        },
-        {
-          "key": "stuckTip",
-          "text": "Scroll each page so its section titles stick",
-          "description": "Its tooltip."
-        },
-        {
           "key": "schemes",
           "text": "Schemes",
           "description": "Accessible name of the schemes' menu."
@@ -33875,8 +33850,18 @@
         },
         {
           "key": "swapTip",
-          "text": "Swap light and dark:  each page's pair changes sides",
-          "description": "Its tooltip."
+          "text": "Light dark · dark light:  the darks side by side.  Press to put the lights side by side",
+          "description": "Its tooltip, while not swapped."
+        },
+        {
+          "key": "swappedTip",
+          "text": "Dark light · light dark:  the lights side by side.  Press to put the darks side by side",
+          "description": "Its tooltip, while swapped."
+        },
+        {
+          "key": "moveTip",
+          "text": "Drag to move this page;  or Alt+← / Alt+→",
+          "description": "A page's title row's tooltip:  how to move it in the grid."
         },
         {
           "key": "scrollBack",
@@ -34365,6 +34350,11 @@
           "name": "bench",
           "kind": "string",
           "description": "Where the site with the theme bench starts (`http://127.0.0.1:4747`), for its Theme bench row, which opens Spell UI's theme bench page there in a new window, in the theme chosen;  none given:  this page's own site;  `none`:  no row."
+        },
+        {
+          "name": "bench-page",
+          "kind": "string",
+          "description": "Which of the theme bench's pages it opens showing alone (`app`, `epic`, `ui`, `notebook`):  the place this menu is on;  none given:  read from the page's address, else `app`."
         },
         {
           "name": "disabled",
@@ -39497,7 +39487,7 @@
           "description": "The notebook's title."
         },
         {
-          "key": "editor",
+          "key": "app",
           "text": "App",
           "description": "The Spell editor app's title (Owen renamed it from Editor)."
         },

@@ -1,7 +1,7 @@
 /*
  * The style sheet of `<ui-theme-editor>`:  a one-line bar, then the preview beside the side column.
- * - `.bar`:  ONE line (Owen:  "dont' wrap"):  the title, then the tools from the left (Light / Dark / Both and ⇄, the
- *   pages' toggles, the themes, the titles, Phone), which scroll sideways when there's no room.
+ * - `.bar`:  ONE line (Owen:  "dont' wrap"):  the title, then the tools from the left (the themes, Light / Dark / Both
+ *   with ⇄ in it), and at the far right the pages' toggles and Phone;  they scroll sideways when there's no room.
  * - `.body`:  the preview (the pages' grid, or the sample app) beside the side column, 440px;
  *   stacked when the element is narrow (a container query on the host, so it fits a side panel as well as a page).
  * - `.side`:  the actions, the Basics, the token tree, the changes;  the Basics' and the tree's heads (`.side-head`)
@@ -114,22 +114,24 @@
   }
   /* each keeps its width:  the row scrolls, never squeezes a menu under its neighbour */
   .tools > *,
-  .schemes-group > *,
-  .page-toggles > * {
-    flex: none;
-  }
-  /* Light / Dark / Both, and ⇄ beside them while Both shows */
-  .schemes-group {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-  }
-  /* the pages, each a toggle with its icon and name */
+  /* the pages' toggles, then Phone:  at the far right (Owen:  "Put visible panes then \"mobile\" button to the far
+     right") */
   .page-toggles {
-    display: flex;
-    align-items: center;
-    gap: 2px;
-    --ui-button-margin-inline: 0;
+    margin-inline-start: auto;
+  }
+  /*
+   * A toggle segment in a pill group (the pages, ⇄):  pressed IN while on, an inset well (Owen:  "feel like the other
+   * pills, but with a \"depressed\" aesthetic"), flat and quieter while off;  never the raised thumb of a choice
+   */
+  .toggle::part(item) {
+    color: var(--ui-text-muted);
+  }
+  .toggle.on::part(item) {
+    color: var(--ui-text-color);
+    background: color-mix(in oklab, var(--ui-text-color) 9%, transparent);
+    box-shadow:
+      inset 0 1px 3px rgb(0 0 0 / 0.28),
+      inset 0 0 0 1px color-mix(in oklab, var(--ui-text-color) 12%, transparent);
   }
 
   .more-start .tools {
@@ -167,17 +169,13 @@
     --ui-icon-width: auto;
     margin: 0;
   }
-  /* Phone, ⇄ and the pages:  plain;  pressed, the segmented menus' chosen fill, in a pill */
+  /* Phone:  plain;  pressed, the segmented menus' chosen fill, in a pill */
   .bar-toggle {
     --ui-button-radius: 9999px;
     --ui-button-background: transparent;
   }
   .bar-toggle[aria-pressed="true"] {
     --ui-button-background: var(--ui-menu-segmented-active-background, var(--ui-surface-strong));
-  }
-  /* a page turned off:  faded, so the ones on read at a glance */
-  .page-toggle[aria-pressed="false"] {
-    opacity: 0.45;
   }
 
   /* ## The pages */
@@ -222,12 +220,43 @@
       display: none;
     }
   }
+  /* its title row:  what a page is dragged by (or moved with Alt+arrows, focused) */
   .page-head {
     display: flex;
     align-items: center;
     gap: 8px;
     padding: 2px 6px;
     min-width: 0;
+    border-radius: calc(var(--ui-radius-l, 12px) - 6px);
+    cursor: grab;
+  }
+  .page-head:focus-visible {
+    outline: 2px solid var(--ui-focus-color, var(--ui-primary));
+    outline-offset: 1px;
+  }
+  /* while a page is dragged:  the frames let the drag through, so each cell hears it */
+  .pages.dragging iframe {
+    pointer-events: none;
+  }
+  /* where it would drop:  a bar in the gap on that side of the page */
+  .page {
+    position: relative;
+  }
+  .page.drop-before::after,
+  .page.drop-after::after {
+    content: "";
+    position: absolute;
+    inset-block: 0;
+    width: 4px;
+    border-radius: 2px;
+    background: var(--ui-primary);
+    pointer-events: none;
+  }
+  .page.drop-before::after {
+    inset-inline-start: calc(-1 * var(--_ui-theme-editor-gap) / 2 - 2px);
+  }
+  .page.drop-after::after {
+    inset-inline-end: calc(-1 * var(--_ui-theme-editor-gap) / 2 - 2px);
   }
   .page-icon {
     --ui-icon-width: auto;

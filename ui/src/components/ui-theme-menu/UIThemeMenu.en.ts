@@ -58,6 +58,13 @@ export const themeMenuVocabulary = {
         "Where the site with the theme bench starts (`http://127.0.0.1:4747`), for its Theme bench row, which opens " +
         "Spell UI's theme bench page there in a new window, in the theme chosen;  none given:  this page's own site;  " +
         "`none`:  no row."
+    },
+    {
+      name: "bench-page",
+      kind: "string",
+      description:
+        "Which of the theme bench's pages it opens showing alone (`app`, `epic`, `ui`, `notebook`):  the place " +
+        "this menu is on;  none given:  read from the page's address, else `app`."
     }
   ],
   events: [
