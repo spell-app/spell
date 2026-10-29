@@ -15,7 +15,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - the WORK behind spell-parser's commands (`spell compile`, `lint`, `run`, `test` ...),
     through spell-app's `"language"` hook:
     they find projects the app's way, so their work is here until spell-parser can (epic `repo-split` P13)
-  - [The kit's README-cli.md](../../../README-cli.md) has every command, its options and caveats, and what's coming.
+  - [The kit's README/cli.md](../../../README/cli.md) has every command, its options and caveats, and what's coming.
 - The program itself is NOT here any more:  arguments, help, finding commands, `spell dev` and its pass-throughs
   are the kit's, or gone (epic `repo-split` P13).
   - Spell UI's commands (`spell icon`, `ssr`, `pack`, `design`) are spell-ui's `src/cli/`.

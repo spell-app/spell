@@ -221,7 +221,7 @@ The two catches:
 ## Two you build, the rest from the Marketplace
 
 You need the kit set up ([setup from zero](README.md#setup-from-zero))
-and `spell` on your `PATH` ([README-cli.md](README-cli.md#setting-it-up), "Setting it up").
+and `spell` on your `PATH` ([README/cli.md](README/cli.md#setting-it-up), "Setting it up").
 
 1. Put VS Code's `code` command on your `PATH`, from the command palette:
    "Shell Command:  Install 'code' command in PATH".  Both installs below use it.
@@ -266,7 +266,7 @@ Neither of Spell's two is on the Marketplace:  like the rest of Spell today, the
 | Vitest | run or debug one test from the gutter |
 | Markdown Preview Mermaid Support | draws the READMEs' pictures in VS Code's Markdown preview |
 | Python and Ruff | the two uv projects:  spell-parser's Python runtime, `spell-core`, and spell-app's Python web server, `spell-quart` |
-| Claude Code | the agent, and its panel of sessions:  [README-agents.md](README-agents.md) |
+| Claude Code | the agent, and its panel of sessions:  [README/agents.md](README/agents.md) |
 | GitLens or Git Graph | five repos' histories side by side |
 
 Turn OFF Prettier and ESLint in these folders.
@@ -383,7 +383,7 @@ Spell UI's `<ui-*>` tags, and any set that ships a Custom Elements Manifest.
   - It reads the manifests of the file's own checkout, so an epic's worktree gets the worktree's.
   - The editor's own TypeScript stays TypeScript 7:  nothing to switch.
   - The checks, and where they learn the tags:
-    [README-element.md](README-element.md#the-elements-help--slots-parts-and-dashed-attributes-in-jsx).
+    [README/element.md](README/element.md#the-elements-help--slots-parts-and-dashed-attributes-in-jsx).
 - **In `.html` files:**  autocomplete and hover docs for every `<ui-*>` tag, attribute and value.
 - **In `.css` files:**  every custom property (`--ui-button-padding-block`), part (`::part(icon)`)
   and custom state (`:state(open)`), with hover docs.
@@ -542,7 +542,7 @@ and `epic window close <name>` closes it and deletes its file.
 A window the session stayed in gets its title and colours back (`epic window stay --end`).
 
 - Every `epic window` verb:  [spell-epic's README-cli.md](https://github.com/spell-app/spell/blob/main/epic/README-cli.md).
-- The skills and hooks behind the moves:  [README-agents.md](README-agents.md), "Skills and hooks".
+- The skills and hooks behind the moves:  [README/agents.md](README/agents.md), "Skills and hooks".
 
 <details>
 <summary>Airplane mode, in three lines</summary>
@@ -591,7 +591,7 @@ an epic's worktree runs both for you (`extraInstalls`, in the epic settings).
 ## 🌱 Coming
 
 - `spell lsp`:  a command that starts the language server, so the extension runs `spell` rather than a `tsx` path.
-  Where it stands:  on the command line's roadmap ([README-cli.md](README-cli.md)), not started.
+  Where it stands:  on the command line's roadmap ([README/cli.md](README/cli.md)), not started.
 
 ## See also
 
@@ -599,9 +599,9 @@ an epic's worktree runs both for you (`extraInstalls`, in the epic settings).
   every feature it answers
 - [spell-epic's README-vscode.md](https://github.com/spell-app/spell/blob/main/epic/README-vscode.md):  Spell Epic in full,
   its servers and the window bridge
-- [README-development.md](README-development.md):  worktrees and the checks, day to day
-- [README-agents.md](README-agents.md):  Claude Code, and the skills and hooks that move sessions between windows
-- [README-cli.md](README-cli.md):  `spell app vscode`, beside every other command
+- [README/development.md](README/development.md):  worktrees and the checks, day to day
+- [README/agents.md](README/agents.md):  Claude Code, and the skills and hooks that move sessions between windows
+- [README/cli.md](README/cli.md):  `spell app vscode`, beside every other command
 
 <details>
 <summary>More in the docs site</summary>

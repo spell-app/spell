@@ -209,7 +209,7 @@ All of this runs now, on your own machine.
 
   What else it takes, and what it costs:  [four elements, for any page](README-app.md#four-elements-for-any-page).
 - **Run it from a terminal**, the window where you type commands:
-  `spell run @spell/examples/fizzbuzz`, or `spell app serve` to open the editor ([the command line](https://github.com/spell-app/spell/blob/main/README-cli.md#spell-app)).
+  `spell run @spell/examples/fizzbuzz`, or `spell app serve` to open the editor ([the command line](https://github.com/spell-app/spell/blob/main/README/cli.md#spell-app)).
 - **Build it as plain files**, a public preview anyone can try with nothing installed:
   `spell app preview build`, then `spell app preview serve` to see it as a web host would
   ([the public preview](README-app.md#the-public-preview--the-editor-as-plain-files)).
@@ -322,7 +322,7 @@ It's the same name inside spell-app as from any other repo.
 | [README-examples.md](README-examples.md) | [spaces/@spell/](spaces/@spell/):  data, not code | <ul><li>eleven apps, simplest first, each running</li><li>twelve guides, programs that read as prose</li><li>the four parts of every app, and why the Calculator's wording counts</li><li>FizzBuzz, Task List and the two solitaires, line by line</li><li>ideas for your own;  the frozen test projects</li></ul> |
 | [README-lsp.md](README-lsp.md) | [src/lsp/](src/lsp/), `spell/app/lsp` | <ul><li>one service in three places:  the browser, VS Code, the command line</li><li>it reads the parse the compiler already made;  one queue</li><li>what it answers, request by request</li><li>scope packs;  where it stops</li></ul> |
 | [README-page-server.md](README-page-server.md) | its part of the kit's page server, in [package.json](package.json);  its route module is in spaces | <ul><li>the three settings spell-app adds to the kit's page server</li><li>what its route module serves:  the editor, its API, `/element/`</li><li>the editor's record;  running it</li></ul> |
-| [the kit's README-cli.md](https://github.com/spell-app/spell/blob/main/README-cli.md#spell-app) | [src/cli/](src/cli/), `spell/app/cli` | <ul><li>spell-app's commands:  `spell app create \| serve \| preview \| vscode`, `spell projects`</li><li>the work behind spell-parser's commands, which find projects the app's way</li></ul> |
+| [the kit's README/cli.md](https://github.com/spell-app/spell/blob/main/README/cli.md#spell-app) | [src/cli/](src/cli/), `spell/app/cli` | <ul><li>spell-app's commands:  `spell app create \| serve \| preview \| vscode`, `spell projects`</li><li>the work behind spell-parser's commands, which find projects the app's way</li></ul> |
 | [the kit's README-vscode.md](https://github.com/spell-app/spell/blob/main/README-vscode.md) | [vscode/](vscode/):  the extension `spell-language`, a yarn project of its own | <ul><li>the Spell language for VS Code:  colours, the language server, Run Project</li><li>custom elements in JSX, HTML and CSS files:  slot, part and attribute help, and Spell UI's HTML and CSS data</li></ul> |
 
 Beside them:  [app/](app/), the editor's build folder (its Vite configs, `index.html`, App UI's docs pages and its
@@ -411,12 +411,12 @@ _The editor is a Vite dev server;  everything it saves or loads goes to the page
   its log in `.spell-server.editor.log`.
   The page server starts it, as its child ([the servers](README-spaces.md#the-servers--an-api-that-nothing-starts)).
 - The page server:  the kit's, one per kit, started from its root, on port 4747 if it's free
-  ([what spell-app adds to it](README-page-server.md), [the kit's](https://github.com/spell-app/spell/blob/main/README-server.md)).
+  ([what spell-app adds to it](README-page-server.md), [the kit's](https://github.com/spell-app/spell/blob/main/README/server.md)).
 
 </details>
 
 Then, once, the Spell extension for VS Code.
-It needs `spell` on your PATH, the kit's `yarn cli:install` ([Setting it up](https://github.com/spell-app/spell/blob/main/README-cli.md#setting-it-up)),
+It needs `spell` on your PATH, the kit's `yarn cli:install` ([Setting it up](https://github.com/spell-app/spell/blob/main/README/cli.md#setting-it-up)),
 and VS Code's `code` command ([README-vscode.md](https://github.com/spell-app/spell/blob/main/README-vscode.md)):
 
 ```sh
@@ -453,7 +453,7 @@ yarn ts    yarn lint    yarn format    yarn test    yarn review
   The app's browser tests (`*.browser.test.tsx`, and `.ts`) run in headless Chromium.
 - App UI, the docs pages of the app's components, is at `http://127.0.0.1:4747/components/app/`
   while the page server runs:  one page per component, with live examples and pictures.
-- Where to change what, across every repo:  [the kit's development page](https://github.com/spell-app/spell/blob/main/README-development.md).
+- Where to change what, across every repo:  [the kit's development page](https://github.com/spell-app/spell/blob/main/README/development.md).
 - The house style every repo shares is WWOD, introduced on [the kit's front page](https://github.com/spell-app/spell/blob/main/README.md#wwod-the-house-style):
   its rules in [agents/wwod/](agents/wwod/WWOD.md), and the three logs beside them in [agents/](agents/),
   papercuts, suspected bugs and code debt.
@@ -499,7 +499,7 @@ Where a page says more, the row links it.
 - [spell-parser](https://github.com/spell-app/spell/blob/main/parser/README.md):  the language the editor runs, and the three it compiles to
 - [Spell UI](https://github.com/spell-app/spell/blob/main/ui/README.md):  the components every Spell app draws with
 - [The kit's front page](https://github.com/spell-app/spell/blob/main/README.md#every-readme):  the five repos, setup from zero, and every page of each
-- [Working on Spell](https://github.com/spell-app/spell/blob/main/README-development.md):  a change across repos, from a branch to merged
+- [Working on Spell](https://github.com/spell-app/spell/blob/main/README/development.md):  a change across repos, from a branch to merged
 
 <details>
 <summary>More in the docs site</summary>

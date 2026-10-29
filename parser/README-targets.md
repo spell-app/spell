@@ -414,7 +414,7 @@ What it says when you ask for what isn't there:
 | a program that draws, as `ts/lib` | `'Solitaire' draws a UI, which target 'ts/lib' can't.` |
 | `spell run --target ts/lib` | `` "ts/lib" doesn't run:  it's compiled for other code to import (`spell compile`) `` |
 
-Every option of `spell compile` and `spell run`:  [the command line](https://github.com/spell-app/spell/blob/main/README-cli.md#spell-parser).
+Every option of `spell compile` and `spell run`:  [the command line](https://github.com/spell-app/spell/blob/main/README/cli.md#spell-parser).
 
 ## 🌱 Coming
 
@@ -458,4 +458,4 @@ These guides need a checkout with the content folder beside it, and the page ser
 - [README-core](README-core.md):  the runtime JavaScript and TypeScript import, and how `spell_core` keeps in step
 - [README-spell](README-spell.md#the-frozen-test-projects):  the test projects, and the two examples, whose snapshots pin every target
 - [the `py` folder's AGENTS.md](src/py/AGENTS.md):  the rules for working on Python's writers and `spell_core`
-- [The command line](https://github.com/spell-app/spell/blob/main/README-cli.md#spell-parser):  `spell compile`, `spell run` and the rest of the language's commands
+- [The command line](https://github.com/spell-app/spell/blob/main/README/cli.md#spell-parser):  `spell compile`, `spell run` and the rest of the language's commands

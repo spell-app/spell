@@ -667,8 +667,8 @@ than just being able to move on").
     The index is shared too:  `epic` keeps the epic's own card current from any checkout.
 - The READMEs:  bring every README the epic made untrue up to date, in the voice the repo gives READMEs
   (`epic voice --for readme`).
-  - Which:  in every repo the epic touched (the kit and each child repo it committed to), every `README.md` and
-    `README-*.md` that names something the epic added, changed, renamed or removed:
+  - Which:  in every repo the epic touched (the kit and each child repo it committed to), every `README.md`,
+    `README-*.md` and `README/*.md` that names something the epic added, changed, renamed or removed:
     - the README files its commits changed (`epic docs <name>`, its `wrote` list)
     - and, by grep, every page naming one of its commands, flags, files, folders, settings or elements, old name or new
   - Each one:  the facts first (what's binding:  the `/docs-check` skill's rules), then the voice:

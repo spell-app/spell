@@ -210,7 +210,7 @@ and `skeleton` is the grey box `<ui-root>` draws in its place while it loads.
     a Custom Elements Manifest and VS Code's HTML custom data, written by `yarn site:data` and committed
   - the cards of Spell's design system on claude.ai (`spell design build`)
 - From code, `UIButton.describe()` returns the whole of it:  `UIButton.describe().topics`.
-- How the kit's element framework reads a vocabulary:  [README-element.md](https://github.com/spell-app/spell/blob/main/README-element.md).
+- How the kit's element framework reads a vocabulary:  [README/element.md](https://github.com/spell-app/spell/blob/main/README/element.md).
 
 Its Spanish is a file beside it, `UIButton.es.ts`, with what only that tag says:
 
@@ -316,7 +316,7 @@ each asks `UI.icons` for a name, and it decides which file to fetch.
 - For a part of the page, `<ui-root icons="fa7-brands, fomantic">`, over the outer root's packs;
   for the whole page, `UI.icons.use()`.
 - `spell icon <query>` finds an icon by name, alias or keyword, and `--open` shows them as pictures to click and copy:
-  every option on [the command line's page](https://github.com/spell-app/spell/blob/main/README-cli.md#spell-ui).
+  every option on [the command line's page](https://github.com/spell-app/spell/blob/main/README/cli.md#spell-ui).
 
 Icons cost nothing until the first one draws, then its pack's index (about 14 kB for `fa7-free`) and one small file
 per icon.
@@ -531,7 +531,7 @@ _Rendered once, ahead of time:  what the server sends is files._
   It holds the families its pages use, and grows as more pages are rendered:  rendering one page again never drops
   another's styles.
 - `-o`, `--css`, `--inline-css` and `--no-minify` choose where the output goes:
-  every option, and how the render works inside, on [the command line's page](https://github.com/spell-app/spell/blob/main/README-cli.md#spell-ui).
+  every option, and how the render works inside, on [the command line's page](https://github.com/spell-app/spell/blob/main/README/cli.md#spell-ui).
 
 The cost is the stylesheet, and most of it is the foundation:
 a page with one button gets 143 kB minified (20 kB gzipped), and the six tags above 259 kB (33 kB).
@@ -606,7 +606,7 @@ Today the render runs ahead of time, from the command line.
 ## Spell UI's half of the element core
 
 The element framework itself (the DOM element and the component behind every tag, the decorators, the lifecycle)
-is the kit's:  [README-element.md](https://github.com/spell-app/spell/blob/main/README-element.md).
+is the kit's:  [README/element.md](https://github.com/spell-app/spell/blob/main/README/element.md).
 Spell UI adds what its families need on top, in [`src/elements/`](src/elements/),
 and hands the framework its runtime, words and styles as its core loads.
 
@@ -650,8 +650,8 @@ so they need a checkout with the content folder and the page server running ([RE
 ## See also
 
 - [README-themes.md](README-themes.md):  the four ways your CSS gets inside a component, and the themes
-- [README-element.md](https://github.com/spell-app/spell/blob/main/README-element.md):  the kit's element framework, which every family is written on
+- [README/element.md](https://github.com/spell-app/spell/blob/main/README/element.md):  the kit's element framework, which every family is written on
 - [README-site.md](README-site.md#the-tools--the-librarys-own-checks-beside-the-sites):
   `yarn measure` and `yarn smoke`, which made this page's numbers and checks
-- [The command line's page](https://github.com/spell-app/spell/blob/main/README-cli.md#spell-ui):  every option of `spell icon` and `spell ssr`
+- [The command line's page](https://github.com/spell-app/spell/blob/main/README/cli.md#spell-ui):  every option of `spell icon` and `spell ssr`
 - [Spell UI's front page](README.md):  `<ui-root>`, how a page loads its families, and what a whole page weighs

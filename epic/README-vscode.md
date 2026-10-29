@@ -239,7 +239,7 @@ it has live reload and the engine's own files, but none of the `/api/` routes yo
 
 - The epic server, by its pid file:  `~/.spell-epic/server.json` (`SPELL_EPIC_HOME` moves the folder).
 - A page server, by the `.spell-server.json` at its root:  in a Spell kit, the kit's root, since the page server
-  is the kit's ([the kit's README-server.md](https://github.com/spell-app/spell/blob/main/README-server.md)).
+  is the kit's ([the kit's README/server.md](https://github.com/spell-app/spell/blob/main/README/server.md)).
 - The fallback, one per checkout, live-reloads the docs folders (`epics`, `guides`, `pages`, `templates`, `sagas`),
   else the whole checkout.
   The engine's files it serves (`/_epic/assets/`, `/_epic/pack/`, `/templates/`) come from the checkout the extension

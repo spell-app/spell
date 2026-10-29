@@ -303,7 +303,7 @@ The rename is the hook's `sessionTitle` output, which Claude Code doesn't docume
 A plugin's skills are named after the plugin:  `/spell-epic:epic`, `/spell-epic:isolate`.
 The bare `/epic` you've seen on these pages comes from a link per skill in your own skills folder,
 which the third of the plugin's four install commands makes
-([the kit's README-agents.md](https://github.com/spell-app/spell/blob/main/README-agents.md#the-epic-plugin) has all four, `epic` on your `PATH` among them).
+([the kit's README/agents.md](https://github.com/spell-app/spell/blob/main/README/agents.md#the-epic-plugin) has all four, `epic` on your `PATH` among them).
 Both names then run the same skill, from the plugin's one folder.
 
 - A skill's new text reaches a running session after `/reload-plugins`;
@@ -318,7 +318,7 @@ Both names then run the same skill, from the plugin's one folder.
 - [README-pages.md](README-pages.md):  the page `/epic review` and `/details` work on, its marks and its colours
 - [README-cli.md](README-cli.md):  the `epic` verbs every skill runs, for when you want one by hand
 - [README-vscode.md](README-vscode.md):  the Review tab, and the windows the handoff hook moves sessions between
-- [The kit's README-agents.md](https://github.com/spell-app/spell/blob/main/README-agents.md):  what an agent reads before any skill runs
+- [The kit's README/agents.md](https://github.com/spell-app/spell/blob/main/README/agents.md):  what an agent reads before any skill runs
 
 <details>
 <summary>More in the docs site</summary>

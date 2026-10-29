@@ -75,6 +75,46 @@ describe("ReadmeCheck", () => {
   })
 })
 
+describe("ReadmeCheck:  the kit's README/ folder", () => {
+  /** a temporary kit:  its front page, the two root pages that stay, a topic page left behind, and README/cli.md */
+  function kitWithTopics(): string {
+    const root = join(mkdtempSync(join(tmpdir(), "readme-check-")), "kit")
+    mkdirSync(join(root, "README"), { recursive: true })
+    for (const page of ["README.md", "README-epics.md", "README-vscode.md", "README-cli.md", "README/cli.md"])
+      writeFileSync(join(root, page), "# A page\n")
+    return root
+  }
+
+  test("lists the topic pages in README/ beside the root's", () => {
+    const root = kitWithTopics()
+    expect(new ReadmeCheck(root).pages().map((page) => page.slice(root.length + 1))).toEqual([
+      "README-cli.md",
+      "README-epics.md",
+      "README-vscode.md",
+      "README.md",
+      "README/cli.md"
+    ])
+  })
+
+  test("fails a topic page left at the kit's root, but not the three that stay there, nor README/cli.md", () => {
+    const root = kitWithTopics()
+    const check = new ReadmeCheck(root)
+    const findings = check.pages().flatMap((page) => check.checkPage(page))
+    expect(findings.map(({ page, line, rule, message }) => `${page}:${line} ${rule}  ${message}`)).toEqual([
+      "README-cli.md:1 root-page  README-cli.md is a topic page:  move it to README/cli.md"
+    ])
+  })
+
+  test("leaves a big folder's own topic pages alone:  only the kit's root is checked for them", () => {
+    const root = kitWithTopics()
+    mkdirSync(join(root, "ui"))
+    writeFileSync(join(root, "package.json"), JSON.stringify({ name: "spell", workspaces: ["ui"] }))
+    writeFileSync(join(root, "ui", "package.json"), JSON.stringify({ name: "spell-ui" }))
+    writeFileSync(join(root, "ui", "README-themes.md"), "# Themes\n")
+    expect(new ReadmeCheck(root).checkPage(join(root, "ui", "README-themes.md"))).toEqual([])
+  })
+})
+
 describe("ReadmeCheck.checkPage():  brand", () => {
   test("flags the word in every form and every place:  prose, code, tables, links and Mermaid", () => {
     const lines = [

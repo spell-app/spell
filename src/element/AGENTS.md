@@ -98,7 +98,7 @@ then [ui's AGENTS.md](../../ui/AGENTS.md), "Solid authoring":  how an element is
     `spliceGenerated()` puts a block between two markers of a hand-kept page;  plain `node` loads it
   - [jsx-help/](../element-tools/jsx-help/):
     the elements help, which completes and checks slot, part and dashed-attribute names in JSX
-    (epic `intellisense` P5, P7;  [README-element.md](../../README-element.md), "The elements help")
+    (epic `intellisense` P5, P7;  [README/element.md](../../README/element.md), "The elements help")
     - [JsxElementHelp](../element-tools/jsx-help/JsxElementHelp.ts):
       the completions and warnings for one file, as plain data;  reads the JSX with TypeScript 6's API
     - [ElementCatalog](../element-tools/jsx-help/ElementCatalog.ts):

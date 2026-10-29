@@ -13,7 +13,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - It reads the command line, prints help, and finds every installed repo's commands.
   - Each repo adds its own commands;  the kit adds a few of its own.
   - It was spell-app's `cli/` until epic `repo-split` P13 (decisions Q33, Q42).
-  - [README-cli.md](../../README-cli.md), "How a command is built", says how it works, and how to add a command.
+  - [README/cli.md](../../README/cli.md), "How a command is built", says how it works, and how to add a command.
 - What's in it:
   - [the `spell` bin](../../bin/spell.mjs) -- starts it:  `tsx` with the kit's node settings, then [main.ts](main.ts)
   - [main.ts](main.ts) -- the process entry:  every repo's commands, then the command line.
@@ -39,13 +39,13 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   (epic `coherence` P1):
   - the code map runs graphify, an optional Python install (`Graphify`), in each repo, then merges and links them
     (`CodeMap`);  the docs map is ours, read by structure (`DocsMap`)
-  - [README-cli.md](../../README-cli.md), "Asking the map", says how to use it
+  - [README/cli.md](../../README/cli.md), "Asking the map", says how to use it
 - `spell coherence score`'s work is a folder of its own too, [coherence/](coherence/) (`spell/cli/coherence`),
   with its own barrel (epic `coherence` P15):
   - it reads the catalog's **Score:** lines (`agents/coherence/`), counts each mechanism's copies with `git grep`
     over every repo's `src/`, and its users from the code map (`CoherenceScore`)
   - its snapshots go to the shared content folder (`ScoreSnapshots`)
-  - [README-cli.md](../../README-cli.md), "Scoring coherence", says how to use it
+  - [README/cli.md](../../README/cli.md), "Scoring coherence", says how to use it
 - The barrel MUST stay lean:  node built-ins, commander and chalk.
   - Every repo's command list imports it, and `spell help` loads them all.
   - So it never exports a command's work:  [commands.ts](commands.ts) imports each one's file when it runs.

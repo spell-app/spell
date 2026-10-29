@@ -48,7 +48,7 @@ a shared config package, published, then bumped in each repo.
 Here there's nothing to publish and no version to bump:
 change a rule here, and the next `yarn lint` in every folder runs it.
 The catch:  no folder is checked on its own, outside the repo:  CI checks them all together
-([README-development.md](README-development.md#ci-checks-every-folder-on-every-pull-request)).
+([README/development.md](development.md#ci-checks-every-folder-on-every-pull-request)).
 
 ```mermaid
 %%{init: {"theme":"base","themeVariables":{"fontFamily":"-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif","fontSize":"15px","primaryColor":"#EFECFB","primaryBorderColor":"#6550CA","primaryTextColor":"#1A1C27","secondaryColor":"#F4F1E9","tertiaryColor":"#F7F6FC","lineColor":"#7F6FD6","textColor":"#7F6FD6","clusterBkg":"#F7F6FC","clusterBorder":"#B9B0E8","titleColor":"#1A1C27","edgeLabelBackground":"#F7F6FC","actorBkg":"#EFECFB","actorBorder":"#6550CA","actorTextColor":"#1A1C27","actorLineColor":"#9C90DE","signalColor":"#7F6FD6","signalTextColor":"#7F6FD6","labelBoxBkgColor":"#EFECFB","labelBoxBorderColor":"#6550CA","labelTextColor":"#1A1C27","loopTextColor":"#7F6FD6","noteBkgColor":"#F1E7D4","noteBorderColor":"#C9B48A","noteTextColor":"#1A1C27","activationBkgColor":"#DCD6F7","activationBorderColor":"#6550CA","sequenceNumberColor":"#FFFFFF"},"flowchart":{"curve":"basis","padding":12,"nodeSpacing":40,"rankSpacing":44}}}%%
@@ -67,8 +67,8 @@ flowchart BT
 
 _Every folder's `vite.config.ts` and `tsconfig.json` start from the same files, the root's own included._
 
-The code is in [src/toolchain/](src/toolchain/), its command `spell-types` in [bin/](bin/),
-and its tests in [tests/toolchain/](tests/toolchain/).
+The code is in [src/toolchain/](../src/toolchain/), its command `spell-types` in [bin/](../bin/),
+and its tests in [tests/toolchain/](../tests/toolchain/).
 
 ## One dependency pins every tool
 
@@ -105,7 +105,7 @@ Tools:
   On Spell UI's source, about 81,000 lines, oxlint lints its 682 files with 105 rules, type-aware,
   in about 0.9 seconds;  oxfmt checks its 1,197 files in about 0.6 (18 threads, by the tools' own count).
 - The type checker isn't in the set:  every repo names TypeScript 7, the native compiler (`typescript ^7.0.2`).
-- The versions live in one place, the catalog in the kit's [.yarnrc.yml](.yarnrc.yml);
+- The versions live in one place, the catalog in the kit's [.yarnrc.yml](../.yarnrc.yml);
   every repo's `package.json` says `catalog:` for each of them it uses.
 - To bump them:  `vite-plus` and every catalog entry together, at the root, never one tool on its own.
 
@@ -145,7 +145,7 @@ export default defineConfig({
 })
 ```
 
-`spell/toolchain/lint` is [lint.ts](src/toolchain/lint.ts), read where it sits in the kit.
+`spell/toolchain/lint` is [lint.ts](../src/toolchain/lint.ts), read where it sits in the kit.
 Every repo has one lint block like this one, in its root `vite.config.ts`, and here's what it holds:
 - **Formatting**, oxfmt's:  120 columns, 2 spaces, no semicolons, double quotes, no trailing commas,
   `package.json` keys sorted.
@@ -197,7 +197,7 @@ Off on purpose, each for a reason:
 
 ### The house's own lint rules
 
-Six `spell-ui/*` rules ([lint.patterns.ts](src/toolchain/lint.patterns.ts)) hold component files to the element
+Six `spell-ui/*` rules ([lint.patterns.ts](../src/toolchain/lint.patterns.ts)) hold component files to the element
 framework's way of doing things.
 Each flags what a component does BY HAND that a decorator or a helper does for it,
 and its message names the replacement.
@@ -215,14 +215,14 @@ and its message names the replacement.
   app's own elements in spell-app's `src/app/components/`.
 - Not in tests, not in the element framework itself (it's where the decorators come from),
   and not in the app's function components.
-- The decorators they point at:  [README-element.md](README-element.md).
+- The decorators they point at:  [README/element.md](element.md).
 
 One more house rule runs on every file of every repo, not only components:  `spell/no-parent-import`
-([lint.imports.ts](src/toolchain/lint.imports.ts)).
+([lint.imports.ts](../src/toolchain/lint.imports.ts)).
 It fails a `../` that climbs into a package's `src/`, and its message is the fix:
 `` `../util/string` climbs into spell's `src/`:  import it by its package name, `spell/util/string` ``.
 A same-folder `./Peer` doesn't climb, and neither does a config reaching `../vite.config.ts`;  why the rule exists:
-[README-development.md](README-development.md#one-name-per-file-from-every-folder).
+[README/development.md](development.md#one-name-per-file-from-every-folder).
 
 A use that has to stay says why, after `--`, on the line above.
 Spell UI's `<ui-form>` keeps one, because its observer must stop when the form leaves the page:
@@ -238,13 +238,13 @@ and a new one fails it until it's added there:  every exception is seen in revie
 Not yet elsewhere:  spell-epic's three exceptions get only the report of an unused one, and spell-app has none.
 
 Even this page is linted, and its examples run, by four scripts at the kit's root:
-- `yarn readme:check` ([readme-check.ts](tools/readme-check.ts)) follows every link to its file and heading,
+- `yarn readme:check` ([readme-check.ts](../tools/readme-check.ts)) follows every link to its file and heading,
   wants an italic caption under every picture, and fails stale names.
-- `yarn readme:test` ([readme-test.ts](tools/readme-test.ts)) runs every command a page shows with its output,
+- `yarn readme:test` ([readme-test.ts](../tools/readme-test.ts)) runs every command a page shows with its output,
   and fails one that prints something else.
-- `yarn mermaid:pretty` ([mermaid-pretty.ts](tools/mermaid-pretty.ts)) gives every Mermaid picture the Spell look,
+- `yarn mermaid:pretty` ([mermaid-pretty.ts](../tools/mermaid-pretty.ts)) gives every Mermaid picture the Spell look,
   in place;  the check fails a picture it hasn't styled.
-- `yarn readme:pictures` ([readme-pictures.ts](tools/readme-pictures.ts)) draws every `html example` block,
+- `yarn readme:pictures` ([readme-pictures.ts](../tools/readme-pictures.ts)) draws every `html example` block,
   headlessly in light and dark, and writes the picture under it:  GitHub runs no custom elements, so it shows that.
   The check fails a picture older than its markup.
 - Three of them are `spell readme check`, `spell readme test` and `spell readme pictures` too;
@@ -315,9 +315,9 @@ _One name, three readers:  only the app's node type check reads declarations._
 
 A program's `tsc` takes `spell-source` because its tsconfig asks for it, in `customConditions`,
 and Vite, Vitest and `tsx` add the `.ts` that `default` leaves off.
-How an import names a file in the first place:  [README-development.md](README-development.md).
+How an import names a file in the first place:  [README/development.md](development.md).
 
-`spell-types` ([declarations.ts](src/toolchain/declarations.ts)) builds the declarations,
+`spell-types` ([declarations.ts](../src/toolchain/declarations.ts)) builds the declarations,
 and it IS a repo's type check:  its `yarn ts` runs it where a bare `tsc` would run.
 
 ```sh
@@ -360,9 +360,9 @@ The edges:
 | Runner | What it runs | What it needs |
 | --- | --- | --- |
 | plain `node` | `spell-types`, the kit's glue tools | Node 24 strips the types itself, so this code writes only TypeScript that erases (no `enum`, no parameter properties) and writes `.ts` on its imports:  node adds no extension.  The bin imports its file by path, so it runs in any repo before anything is linked. |
-| `tsx` | what needs more:  decorators, JSX ([the `spell` command](README-cli.md), the page server) | every import is a package name plus a path under `src/`, which it finds through node's own package resolution, from any repo.  It reads one tsconfig for every file it runs:  where the kit starts it, the kit's node settings. |
+| `tsx` | what needs more:  decorators, JSX ([the `spell` command](cli.md), the page server) | every import is a package name plus a path under `src/`, which it finds through node's own package resolution, from any repo.  It reads one tsconfig for every file it runs:  where the kit starts it, the kit's node settings. |
 | Vite, Vitest | the browser code, the tests | the `default` condition;  `standardDecorators()` (below) |
-| esbuild, called directly | spell-epic's extension and docs bundle, Spell UI's bundle measure and static server, spell-parser's library test | `sourceNames()` ([sourceNames.ts](src/toolchain/sourceNames.ts)):  esbuild reads `exports` as node does, adding no extension and no folder `index`, so this plugin finds `spell/server` as `src/server/index.ts` |
+| esbuild, called directly | spell-epic's extension and docs bundle, Spell UI's bundle measure and static server, spell-parser's library test | `sourceNames()` ([sourceNames.ts](../src/toolchain/sourceNames.ts)):  esbuild reads `exports` as node does, adding no extension and no folder `index`, so this plugin finds `spell/server` as `src/server/index.ts` |
 
 </details>
 
@@ -370,13 +370,13 @@ The edges:
 
 If you've written decorators for Angular or NestJS, they were TypeScript's experimental kind.
 Spell writes the standard (TC39) kind everywhere:
-`@proto` and `@prop` from [util](README-util.md), `@E.state` from [the element framework](README-element.md).
+`@proto` and `@prop` from [util](util.md), `@E.state` from [the element framework](element.md).
 Nothing runs those natively yet:  not node, not the browsers,
 and Vite's own compiler, oxc, lowers only the experimental kind (`oxc-project/oxc#9170`).
 
-So `standardDecorators()` ([decorators.ts](src/toolchain/decorators.ts)), a Vite plugin, lowers them with esbuild
+So `standardDecorators()` ([decorators.ts](../src/toolchain/decorators.ts)), a Vite plugin, lowers them with esbuild
 before anything else sees the code.
-From the kit's [vitest.config.ts](vitest.config.ts):
+From the kit's [vitest.config.ts](../vitest.config.ts):
 
 ```ts
 plugins: [standardDecorators(), solid()],
@@ -415,14 +415,14 @@ and a rule changed here reaches every repo's next run.
 - At the kit's root, the bare names run every repo, the kit first and then lowest first,
   so each type check finds the declarations below it already fresh.
 - What each check runs, how to run one folder or one file, and what CI checks:
-  [README-development.md](README-development.md#the-checks--four-of-them-and-review).
+  [README/development.md](development.md#the-checks--four-of-them-and-review).
 
 ## The files, and the settings they hold
 
 <details>
 <summary>The shared TypeScript settings, in words</summary>
 
-[tsconfig.base.json](src/toolchain/tsconfig.base.json), which every repo's programs extend:
+[tsconfig.base.json](../src/toolchain/tsconfig.base.json), which every repo's programs extend:
 `"extends": "spell/toolchain/tsconfig.base.json"` (the kit's own, by its path).
 
 - modern modules, resolved the way a bundler does;  `.ts` extensions allowed in imports;  JSON modules
@@ -440,20 +440,20 @@ and a rule changed here reaches every repo's next run.
 <details>
 <summary>The global types and the version stamp</summary>
 
-- `spell/toolchain/types` ([types/index.d.ts](src/toolchain/types/index.d.ts)), named in a program's `"types"`:
+- `spell/toolchain/types` ([types/index.d.ts](../src/toolchain/types/index.d.ts)), named in a program's `"types"`:
   - `__PACKAGE_VERSION__`
   - `Class<T>`;  `AbstractClass<T>`, for `instanceof`, never `new`
   - `Prettify<T>`, which makes an editor's hover of a complex type readable
   - `SplitString<List, Delimiter>`
   - the `global` module, for code written for a bundler that provided it
   - Vite's client types:  `import.meta.env`, `?inline` imports
-- `browserMode()` ([browserMode.ts](src/toolchain/browserMode.ts)):  the `browser` block of every repo's browser test
+- `browserMode()` ([browserMode.ts](../src/toolchain/browserMode.ts)):  the `browser` block of every repo's browser test
   projects, headless Playwright, with animations OFF.
   - The page asks for reduced motion, so nothing waits on an animation, and a slow CI runner can't stretch one past
     a test's timeout.
   - A file of tests of motion itself runs in a project of its own with animations on (`animations: "on"`),
     since a project's test files share one page, and reduced motion is the page's setting.
-- `packageVersion()` ([packageVersion.ts](src/toolchain/packageVersion.ts)), a Vite plugin, so a build knows its own
+- `packageVersion()` ([packageVersion.ts](../src/toolchain/packageVersion.ts)), a Vite plugin, so a build knows its own
   version:  it defines `__PACKAGE_VERSION__` from the nearest `package.json` at or above the folder it's given
   (`packageVersion(import.meta.dirname)`).
   - Code reads it as `PACKAGE_VERSION`, from `spell/util`:  `"unknown"` when nothing defined it.
@@ -467,17 +467,17 @@ and a rule changed here reaches every repo's next run.
 
 | File | Imported as | What it is |
 | --- | --- | --- |
-| [lint.ts](src/toolchain/lint.ts) | `spell/toolchain/lint` | the lint and format settings:  `packageLint()`, `rootLint()`, `patternLintIn()`, `fmtConfig` |
-| [lint.patterns.ts](src/toolchain/lint.patterns.ts) | `spell/toolchain/lint/patterns` | the six `spell-ui/*` component rules |
-| [lint.imports.ts](src/toolchain/lint.imports.ts) | `spell/toolchain/lint/imports` | `spell/no-parent-import`, on every file |
-| [decorators.ts](src/toolchain/decorators.ts) | `spell/toolchain/decorators` | `standardDecorators()`, the decorator pre-pass |
-| [browserMode.ts](src/toolchain/browserMode.ts) | `spell/toolchain/browserMode` | `browserMode()`:  every browser test project's Vitest browser mode, animations off (reduced motion) |
-| [packageVersion.ts](src/toolchain/packageVersion.ts) | `spell/toolchain/packageVersion` | `packageVersion()`:  `__PACKAGE_VERSION__` |
-| [sourceNames.ts](src/toolchain/sourceNames.ts) | `spell/toolchain/sourceNames` | `sourceNames()` for esbuild, and the lookups under it:  `sourceFileFor()`, `packageRootFor()`, `resolvedFile()` |
-| [declarations.ts](src/toolchain/declarations.ts), [bin/spell-types.ts](bin/spell-types.ts) | `spell/toolchain/declarations`;  the bin `spell-types` | the declarations build |
-| [tsconfig.base.json](src/toolchain/tsconfig.base.json) | `spell/toolchain/tsconfig.base.json` | the shared TypeScript settings |
-| [types/index.d.ts](src/toolchain/types/index.d.ts) | `spell/toolchain/types` | the global types |
-| [AGENTS.md](src/toolchain/AGENTS.md) | | the rules for working on the toolchain |
+| [lint.ts](../src/toolchain/lint.ts) | `spell/toolchain/lint` | the lint and format settings:  `packageLint()`, `rootLint()`, `patternLintIn()`, `fmtConfig` |
+| [lint.patterns.ts](../src/toolchain/lint.patterns.ts) | `spell/toolchain/lint/patterns` | the six `spell-ui/*` component rules |
+| [lint.imports.ts](../src/toolchain/lint.imports.ts) | `spell/toolchain/lint/imports` | `spell/no-parent-import`, on every file |
+| [decorators.ts](../src/toolchain/decorators.ts) | `spell/toolchain/decorators` | `standardDecorators()`, the decorator pre-pass |
+| [browserMode.ts](../src/toolchain/browserMode.ts) | `spell/toolchain/browserMode` | `browserMode()`:  every browser test project's Vitest browser mode, animations off (reduced motion) |
+| [packageVersion.ts](../src/toolchain/packageVersion.ts) | `spell/toolchain/packageVersion` | `packageVersion()`:  `__PACKAGE_VERSION__` |
+| [sourceNames.ts](../src/toolchain/sourceNames.ts) | `spell/toolchain/sourceNames` | `sourceNames()` for esbuild, and the lookups under it:  `sourceFileFor()`, `packageRootFor()`, `resolvedFile()` |
+| [declarations.ts](../src/toolchain/declarations.ts), [bin/spell-types.ts](../bin/spell-types.ts) | `spell/toolchain/declarations`;  the bin `spell-types` | the declarations build |
+| [tsconfig.base.json](../src/toolchain/tsconfig.base.json) | `spell/toolchain/tsconfig.base.json` | the shared TypeScript settings |
+| [types/index.d.ts](../src/toolchain/types/index.d.ts) | `spell/toolchain/types` | the global types |
+| [AGENTS.md](../src/toolchain/AGENTS.md) | | the rules for working on the toolchain |
 
 </details>
 
@@ -485,7 +485,7 @@ and a rule changed here reaches every repo's next run.
 <summary>More in the docs site</summary>
 
 The docs site needs a checkout with the content folder beside it,
-and the page server running ([README-server.md](README-server.md)).
+and the page server running ([README/server.md](server.md)).
 
 - Vite+, how it's set up and its limits:  `/guides/vite-plus.html`
 - Commands, every command and script:  `/guides/dev/commands/commands.html`
@@ -494,8 +494,8 @@ and the page server running ([README-server.md](README-server.md)).
 
 ## See also
 
-- [README-development.md](README-development.md):  running these checks day to day, and how an import names a file
+- [README/development.md](development.md):  running these checks day to day, and how an import names a file
   in another repo
-- [README-element.md](README-element.md):  the decorators and helpers the component rules point you to
-- [toolchain's AGENTS.md](src/toolchain/AGENTS.md):  the rules for changing the toolchain itself
-- [README.md](README.md#setup-from-zero):  setup from zero, before any of this runs
+- [README/element.md](element.md):  the decorators and helpers the component rules point you to
+- [toolchain's AGENTS.md](../src/toolchain/AGENTS.md):  the rules for changing the toolchain itself
+- [README.md](../README.md#setup-from-zero):  setup from zero, before any of this runs

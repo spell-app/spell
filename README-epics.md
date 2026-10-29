@@ -130,7 +130,7 @@ Then, once per machine, from that clone:
 node epic/bin/epic plugin install
 ```
 
-[README-agents.md](README-agents.md#the-epic-plugin) says what each of its steps does.
+[README/agents.md](README/agents.md#the-epic-plugin) says what each of its steps does.
 - It installs the plugin for the whole machine as `epic@spell`, straight from the clone's `epic/` folder.
 - It links its skills in, for a bare `/epic`.
 - It puts `epic` on your terminal's `PATH`.

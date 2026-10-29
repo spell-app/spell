@@ -35,7 +35,7 @@ no `npm link`, no version bump, no prerelease for the folder above to install.
 Every folder runs the others' SOURCE through one install,
 so the folders above your change are running it already, and step 3 checks them.
 
-Not set up yet?  Start at [the front page](README.md#setup-from-zero), "Setup from zero".
+Not set up yet?  Start at [the front page](../README.md#setup-from-zero), "Setup from zero".
 
 ## Workspaces, with two differences
 
@@ -45,7 +45,7 @@ Spell keeps all of that, and changes two things.
 ### A folder is a workspace, but not a package
 
 The root is the one npm package, `spell`;  its four folders, `parser/`, `ui/`, `epic/` and `app/`, are its workspaces
-([the front page](README.md#one-repo-five-parts), "One repo, five parts").
+([the front page](../README.md#one-repo-five-parts), "One repo, five parts").
 Each keeps a `package.json`, but it's a folder manifest, not a package of its own:
 - its scripts, so `cd ui && yarn test` works
 - its settings:  the `spell` commands it adds, its part of the page server's settings
@@ -112,7 +112,7 @@ Every folder answers to the same script names, so `yarn test` means the same thi
   - uv, which runs the parser's and the app's Python:  without it, their `test` and `lint` fail at the Python step
 - Not to be confused with `spell lint` and `spell format`, which check and tidy `.spell` programs, not TypeScript.
   🌱 The repo checks as `spell` commands too, under a group of their own:  planned, not started
-  ([README-cli.md](README-cli.md#-coming)).
+  ([README/cli.md](cli.md#-coming)).
 
 Run them as wide or as narrow as the change:
 
@@ -144,14 +144,14 @@ Spell UI and the epic folder split theirs by where the tests run instead.
 ## Done means the finishing pass
 
 A change is done when three things are true, and they're the same for a person and for a coding agent
-(whose rules start at [AGENTS.md](AGENTS.md)).
+(whose rules start at [AGENTS.md](../AGENTS.md)).
 
 1. `yarn review` passed, at the root:
    it checks every folder, so it catches a change that broke a folder above the one you changed.
 2. You read your own diff for the bugs a fast draft leaves:
    an inverted guard, a `return promise` inside a `try` with no `await`,
    copy-paste residue from the file you copied.
-   WWOD lists them all:  [WWOD.md](agents/wwod/WWOD.md), §1, "Finishing pass for fast-drafted code".
+   WWOD lists them all:  [WWOD.md](../agents/wwod/WWOD.md), §1, "Finishing pass for fast-drafted code".
 3. You reported it with numbers:  the test count and how it moved, with the reason;
    and what was broken before you came, called pre-existing.
 
@@ -160,7 +160,7 @@ A change is done when three things are true, and they're the same for a person a
 
 If you keep `Button.test.tsx` beside `Button.tsx`, drop the habit here.
 Each folder's tests are in `tests/` beside its `src/`, at the same paths as the code under `src/`:
-[Router.test.ts](tests/server/Router.test.ts) tests [Router.ts](src/server/Router.ts).
+[Router.test.ts](../tests/server/Router.test.ts) tests [Router.ts](../src/server/Router.ts).
 Swap the first folder, and you've found it.
 The cost is the mirror's:  move or rename a file, and its test moves too, in the other tree.
 
@@ -180,7 +180,7 @@ Where a test runs is decided by its folder and its name, so a new file needs no 
   the parser's Python runtime, the app's Python web apps.
 - Shared helpers:
   - the shared ones under `src/`, for every set of elements:  `spell/test-helpers/ElementFixture`, `Fixture`, `A11y`, `Viewport` ...
-    ([README-element.md](README-element.md))
+    ([README/element.md](element.md))
   - Spell UI's setup, `spell/ui/test-helpers/setup.ts`, which the app's and the epic folder's browser tests run first
 
 Tests reach DOWN only, as code does:
@@ -205,15 +205,15 @@ import { camelCase, kebabCase } from "spell/util/string"
 import partsCSS from "spell/ui/components/ui-parts/UIParts.css?inline"
 ```
 
-_Real lines, from [the router's test](tests/server/Router.test.ts),
-[the tag names for views](src/util/spell/view.ts)
+_Real lines, from [the router's test](../tests/server/Router.test.ts),
+[the tag names for views](../src/util/spell/view.ts)
 and [Spell UI's label](https://github.com/spell-app/spell/blob/main/ui/src/components/ui-label/UILabel.tsx)._
 
 - The folders' files go the same way:  `spell/ui/components/ui-button` is `ui/src/components/ui-button/`,
   `spell/parser/spell` is `parser/src/spell/`.
 - No path aliases and no `../`;  a same-folder peer stays `./Peer`.
   Lint holds it:  `spell/no-parent-import` fails a `../` that climbs into a package's `src/`,
-  and its message names the import to write ([README-toolchain.md](README-toolchain.md#the-houses-own-lint-rules)).
+  and its message names the import to write ([README/toolchain.md](toolchain.md#the-houses-own-lint-rules)).
 - Every arrow points down:  a folder imports only `src/` and the folders below it, never one above.
   Lint holds that too:  `spell/no-upward-import` fails an import that climbs, in the order `src/`, `parser/`, `ui/`,
   `epic/`, `app/`.
@@ -221,7 +221,7 @@ and [Spell UI's label](https://github.com/spell-app/spell/blob/main/ui/src/compo
   (`spell/package.json`, then the folder), never by a path into that folder.
 - Under the hood, TypeScript reads every folder's source, and so do Vite, Vitest, `tsx` and lint;
   the one exception is the app's terminal screens, whose type check reads built declarations
-  ([README-toolchain.md](README-toolchain.md#every-tool-reads-source-but-one), "Every tool reads source, but one").
+  ([README/toolchain.md](toolchain.md#every-tool-reads-source-but-one), "Every tool reads source, but one").
 
 The cost:  a file's path IS its name, so moving one renames it in every folder that imports it.
 Search the whole repo before you move anything.
@@ -287,7 +287,7 @@ While you're in it:
 - The `spell` on your `PATH` still runs your main checkout's code, on the worktree's files.
   So to try your change to a command, or to the compiler under one, run `yarn spell <command>`:  the worktree's own.
 - It opens in its own VS Code window, `⎇ <name>`, where `git.detectWorktrees` shows the worktree in Source Control.
-  Never `code --add`, never `code -r`:  [README-vscode.md](README-vscode.md), "Windows and worktrees", says why.
+  Never `code --add`, never `code -r`:  [README-vscode.md](../README-vscode.md), "Windows and worktrees", says why.
 - `epic` is the epic folder's command, on every Claude Code session's `PATH` while the plugin is on:
   every verb in [the epic folder's README-cli.md](https://github.com/spell-app/spell/blob/main/epic/README-cli.md);
   epic pages, the review loop and the skills in [its README](https://github.com/spell-app/spell/blob/main/epic/README.md).
@@ -336,7 +336,7 @@ so a branch that adds a generated file also teaches its own merge to rebuild it.
 
 ## CI checks every folder, on every pull request
 
-ONE GitHub Actions workflow, [checks.yml](.github/workflows/checks.yml), checks the whole repo:
+ONE GitHub Actions workflow, [checks.yml](../.github/workflows/checks.yml), checks the whole repo:
 on a push to `main`, a pull request, or by hand from the Actions tab.
 It runs `yarn ts`, `yarn lint` and `yarn test` at the root, so every folder, bottom up, the same as your machine.
 
@@ -374,17 +374,17 @@ Find the row for what you want to change, then read the page beside it before yo
 | the editor's screens and behaviour | spell-app's [`src/app/`](https://github.com/spell-app/spell/tree/main/app/src/app):  [`solid/`](https://github.com/spell-app/spell/tree/main/app/src/app/solid), [`pages/`](https://github.com/spell-app/spell/tree/main/app/src/app/pages), [`editor.ts`](https://github.com/spell-app/spell/blob/main/app/src/app/editor.ts);  [README-app.md](https://github.com/spell-app/spell/blob/main/app/README-app.md) |
 | how programs run in a page | spell-app's [runner](https://github.com/spell-app/spell/tree/main/app/src/app/runner) |
 | `<spell-viewer>`, `<spell-editor>`, `<spell-code>`, `<spell-markdown>` | spell-app's [`src/app/components/`](https://github.com/spell-app/spell/tree/main/app/src/app/components);  build with `yarn build:element`;  demos in `app/demo/` |
-| VS Code language features, Run Project | spell-app's [`vscode/src/`](https://github.com/spell-app/spell/tree/main/app/vscode/src):  [README-vscode.md](README-vscode.md) |
+| VS Code language features, Run Project | spell-app's [`vscode/src/`](https://github.com/spell-app/spell/tree/main/app/vscode/src):  [README-vscode.md](../README-vscode.md) |
 | projects on disk, addresses, the editor's API | spell-app's [spaces](https://github.com/spell-app/spell/tree/main/app/src/spaces/server/node):  [README-spaces.md](https://github.com/spell-app/spell/blob/main/app/README-spaces.md) |
 | the example projects | spell-app's [`spaces/@spell/examples/`](https://github.com/spell-app/spell/tree/main/app/spaces/@spell/examples) and `library/`:  [README-examples.md](https://github.com/spell-app/spell/blob/main/app/README-examples.md) |
 | Python web apps | spell-app's [`spell_quart`](https://github.com/spell-app/spell/tree/main/app/src/spaces/server/py) |
-| a `spell` command | its folder's `src/cli/`:  [README-cli.md](README-cli.md) |
-| the page server | the shared [server](src/server/page/) ([README-server.md](README-server.md));  what a folder adds to it, in that folder's own `package.json` (`"pageServer"`):  the app's, [its README-page-server.md](https://github.com/spell-app/spell/blob/main/app/README-page-server.md);  the header's tabs and the writable folders, in the content repo's `page-server.json5` |
+| a `spell` command | its folder's `src/cli/`:  [README/cli.md](cli.md) |
+| the page server | the shared [server](../src/server/page/) ([README/server.md](server.md));  what a folder adds to it, in that folder's own `package.json` (`"pageServer"`):  the app's, [its README-page-server.md](https://github.com/spell-app/spell/blob/main/app/README-page-server.md);  the header's tabs and the writable folders, in the content repo's `page-server.json5` |
 | a Spell UI element | [spell-ui](https://github.com/spell-app/spell/blob/main/ui/README.md) |
-| the element framework under every set | the shared [element](src/element/):  [README-element.md](README-element.md) |
+| the element framework under every set | the shared [element](../src/element/):  [README/element.md](element.md) |
 | epic pages, review, windows, hooks, skills | [spell-epic](https://github.com/spell-app/spell/blob/main/epic/README.md), with its own checks;  `/reload-plugins` for a skill's new text |
 | the Review tab and Epic Docs | spell-epic's [`vscode/`](https://github.com/spell-app/spell/tree/main/epic/vscode) |
-| the house style | [`agents/wwod/`](agents/wwod/), then `spell wwod check` |
+| the house style | [`agents/wwod/`](../agents/wwod/), then `spell wwod check` |
 
 ## When something's wrong, read the papercuts first
 
@@ -392,8 +392,8 @@ Tooling failing for no reason you can see?
 Check `PAPERCUTS.md` FIRST:  it's where anything that slowed development down is written up, with its fix,
 and someone has often lost the same hour before you.
 
-- It's one of three logs in the [`agents/`](agents/) folder, beside `SUSPECTED-BUGS.md` and `CODE-DEBT.md`.
-- What goes in each, and how to add to them:  [README-agents.md](README-agents.md), "The three logs".
+- It's one of three logs in the [`agents/`](../agents/) folder, beside `SUSPECTED-BUGS.md` and `CODE-DEBT.md`.
+- What goes in each, and how to add to them:  [README/agents.md](agents.md), "The three logs".
 
 Two that nearly everyone meets once:
 - "Cannot find module" in the app's terminal screens' type check, on a fresh clone:
@@ -401,7 +401,7 @@ Two that nearly everyone meets once:
   `yarn ts` at the root builds them.
 - `spell` not found, or running an old checkout's code:  it's a link to one checkout's `bin/spell.mjs`.
   `yarn cli:install` at the root links it to this one;  run it again after moving the checkout
-  ([README-cli.md](README-cli.md#setting-it-up)).
+  ([README/cli.md](cli.md#setting-it-up)).
 
 ## Every script, folder by folder
 
@@ -460,23 +460,23 @@ The root (`~/www/spell`)
 <details>
 <summary>The tools underneath</summary>
 
-- Node and yarn, and how to install them:  [the front page](README.md#setup-from-zero), "Setup from zero".
+- Node and yarn, and how to install them:  [the front page](../README.md#setup-from-zero), "Setup from zero".
   The repo runs its own `.ts` tools with plain `node`, which needs Node 24's built-in type stripping.
 - Vite+ (`vite-plus`, the `vp` command) pins Vite, Vitest, oxlint, oxfmt and tsgolint together, at the versions in
   the root's `catalog:`;  how they're bumped:
-  [README-toolchain.md](README-toolchain.md#one-dependency-pins-every-tool), "One dependency pins every tool".
+  [README/toolchain.md](toolchain.md#one-dependency-pins-every-tool), "One dependency pins every tool".
 - TypeScript 7;  Solid 2.0.0-rc.17 for every folder;  Playwright 1.63.0 for the browser tests.
 
 </details>
 
 ## See also
 
-- [README-toolchain.md](README-toolchain.md):  what the checks run on, and how a type check reads another folder
+- [README/toolchain.md](toolchain.md):  what the checks run on, and how a type check reads another folder
 - [the epic folder's README](https://github.com/spell-app/spell/blob/main/epic/README.md):  epic pages, the review loop, and the skills behind `/epic` and
   `/isolate`
-- [README-vscode.md](README-vscode.md):  the extensions, and how windows and worktrees are laid out
-- [README-agents.md](README-agents.md):  how a coding agent finds the rules, and the three logs
-- [README-cli.md](README-cli.md):  every `spell` command, and `epic`
+- [README-vscode.md](../README-vscode.md):  the extensions, and how windows and worktrees are laid out
+- [README/agents.md](agents.md):  how a coding agent finds the rules, and the three logs
+- [README/cli.md](cli.md):  every `spell` command, and `epic`
 
 <details>
 <summary>More in the docs site</summary>

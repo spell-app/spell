@@ -222,7 +222,7 @@ declared in Card.spell:2
 _The hover from the top of the page, in a terminal:  the same method, over the line that declares `suit`._
 
 - The commands are spell-parser's, but their work is spell-app's for now, through a hook:
-  [the command line's page](https://github.com/spell-app/spell/blob/main/README-cli.md#spell-parser) has each one.
+  [the command line's page](https://github.com/spell-app/spell/blob/main/README/cli.md#spell-parser) has each one.
 
 ## It reads the parse the compiler already made
 
@@ -451,7 +451,7 @@ its `path` saying where it sits in the tree._
 
 `spell lint` and `spell describe` are spell-parser's commands, but their work, and this service, live in spell-app
 today:  without spell-app, those commands say so and stop.
-Two of [the command line's plans](https://github.com/spell-app/spell/blob/main/README-cli.md#-coming) change that, neither started:
+Two of [the command line's plans](https://github.com/spell-app/spell/blob/main/README/cli.md#-coming) change that, neither started:
 the service moving down into spell-parser with the commands, one by one,
 and `spell lsp`, a command VS Code would start the server by instead of a `tsx` path.
 
@@ -498,5 +498,5 @@ yarn vp test run --project lsp                           # its tests:  149, in s
 - [The kit's VS Code page](https://github.com/spell-app/spell/blob/main/README-vscode.md):  installing the extension, its commands and settings,
   and which checkout's server a window runs
 - [spell-parser's parser page](https://github.com/spell-app/spell/blob/main/parser/README-parser.md):  the parse every answer here is read from
-- [The command line](https://github.com/spell-app/spell/blob/main/README-cli.md#spell-parser):  the commands that share the service
+- [The command line](https://github.com/spell-app/spell/blob/main/README/cli.md#spell-parser):  the commands that share the service
 - [Spaces](README-spaces.md):  where the disk workspace finds projects, and what an address is

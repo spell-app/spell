@@ -379,7 +379,7 @@ same
   ([the Python half](README-targets.md#the-python-half)).
 - `spell compile try/fizzbuzz --stdout --target py` prints the Python at the top of this page.
 - A project outside every group is named for its folders, `@local/try/fizzbuzz`
-  ([naming projects](https://github.com/spell-app/spell/blob/main/README-cli.md#naming-projects--a-path-an-address-or-a-group)).
+  ([naming projects](https://github.com/spell-app/spell/blob/main/README/cli.md#naming-projects--a-path-an-address-or-a-group)).
 - The copy brings the test's snapshot files with it:  harmless, or delete the `*snapshot*` files.
 
 **Then break it.**
@@ -417,7 +417,7 @@ and `translate speedtest` times a translation.
 [commands.ts](src/cli/commands.ts) lists them, and spell-parser's `package.json` names that file,
 `"spell": { "commands" }`.
 What each does, every option, with examples:
-[the command line's page](https://github.com/spell-app/spell/blob/main/README-cli.md#spell-parser), or `spell help <command>`.
+[the command line's page](https://github.com/spell-app/spell/blob/main/README/cli.md#spell-parser), or `spell help <command>`.
 
 **Their work is spell-app's, for now.**
 The names live here, and each command hands its work to spell-app's `language` hook
@@ -484,7 +484,7 @@ The name is the same inside this repo as from every other, so there's no alias t
 | [spell/languages/](src/spell/languages/) | `spell/parser/spell` (`SP.Language`) | the language packs, English's and Spanish's:  each one's words, plurals, articles and messages | [README-spanish](README-spanish.md) <ul><li>a Spanish program beside its English twin, Solitario and Solitaire</li><li>a file's name says its language;  mixing languages in a project</li><li>what works:  the grammar, the packs check, article warnings, messages, Spell UI, the editor</li><li>translating an English project into Spanish, names first, then lines, then fix-ups</li><li>one set of rules, two sets of words;  the edges</li></ul> |
 | [core/](src/core/) | `spell/parser/core` | the runtime compiled JavaScript calls, as `@spell/core` | [README-core](README-core.md) <ul><li>one import, for what JavaScript has no word for</li><li>a template is a class, and the class is the core's;  its pieces</li><li>three things a reader trips on:  reactivity, positions from 1, the Python twin</li><li>a run keeps an undo history, and what the person chose last time</li><li>who may import it:  one copy per running app</li></ul> |
 | [py/](src/py/) | `spell/parser/py` | Python:  the writers that write it, and `spell_core`, what it runs on | [README-targets](README-targets.md) <ul><li>four targets, and what each one costs</li><li>one tree, a writer per language;  the card, line by line</li><li>TypeScript as Solid developers write it, a library, Python in its own words</li><li>choosing a target;  🌱 WebAssembly, and a program on node</li></ul> |
-| [cli/](src/cli/) | `spell/parser/cli` | the language's thirteen `spell` commands, and the `language` hook's shape | [above](#the-language-commands), and every option on [the command line's page](https://github.com/spell-app/spell/blob/main/README-cli.md#spell-parser) |
+| [cli/](src/cli/) | `spell/parser/cli` | the language's thirteen `spell` commands, and the `language` hook's shape | [above](#the-language-commands), and every option on [the command line's page](https://github.com/spell-app/spell/blob/main/README/cli.md#spell-parser) |
 
 - It stands only on [the kit](https://github.com/spell-app/spell/blob/main/README.md):  its shared helpers, `spell/util`, and its toolchain.
 - Inside, the arrows point one way:
@@ -507,7 +507,7 @@ and the command line's base is the kit's:
 | the language server, and the VS Code extension that runs it | spell-app's [src/lsp/](https://github.com/spell-app/spell/tree/main/app/src/lsp) and [vscode/](https://github.com/spell-app/spell/tree/main/app/vscode), [README-lsp](https://github.com/spell-app/spell/blob/main/app/README-lsp.md) |
 | projects on disk, their addresses and groups, the editor's server | spell-app's [src/spaces/](https://github.com/spell-app/spell/tree/main/app/src/spaces), [README-spaces](https://github.com/spell-app/spell/blob/main/app/README-spaces.md) |
 | the example projects people open and edit | spell-app's [spaces/@spell/examples/](https://github.com/spell-app/spell/tree/main/app/spaces/@spell/examples), [README-examples](https://github.com/spell-app/spell/blob/main/app/README-examples.md) |
-| the `spell` command's base:  arguments, help, finding each repo's commands | the kit's [src/cli/](https://github.com/spell-app/spell/tree/main/src/cli), [README-cli](https://github.com/spell-app/spell/blob/main/README-cli.md#each-folder-brings-its-own-commands) |
+| the `spell` command's base:  arguments, help, finding each repo's commands | the kit's [src/cli/](https://github.com/spell-app/spell/tree/main/src/cli), [README-cli](https://github.com/spell-app/spell/blob/main/README/cli.md#each-folder-brings-its-own-commands) |
 
 The language's own commands are this repo's (above):  the command line finds them here.
 
@@ -573,7 +573,7 @@ Where it stands:  an idea, not started.
 
 `spell-parser` is a child repo of [the kit](https://github.com/spell-app/spell/blob/main/README.md):  cloned inside it, with the one install every repo shares.
 Setting that up, and how the checks, tests and worktrees work across repos:
-[README-development](https://github.com/spell-app/spell/blob/main/README-development.md).
+[README-development](https://github.com/spell-app/spell/blob/main/README/development.md).
 
 At spell-parser's root, each check runs over the whole repo:
 

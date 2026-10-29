@@ -6,7 +6,7 @@
  *   (and util's standalone `spell/util/string.ts`), `import type` for types, no `enum` or parameter property.
  *
  * ```sh
- * yarn readme:check               # every page:  README.md and README-*.md at the root of the kit and each big folder
+ * yarn readme:check               # every page:  the kit's README.md, README-*.md and README/*.md, and each big folder's
  * yarn readme:check README.md     # only those pages (paths from the kit's root)
  * ```
  *
@@ -15,7 +15,7 @@
  */
 import { createHash } from "node:crypto"
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs"
-import { dirname, join, relative, resolve } from "node:path"
+import { basename, dirname, join, relative, resolve } from "node:path"
 
 import { kitFolders } from "spell/server/kitFolders"
 import { slug } from "spell/util/string.ts"
@@ -53,7 +53,9 @@ export class ReadmeCheck {
     picture:
       "an `html example` block without its picture under it, or with one older than its markup:  run `spell readme pictures`",
     output:
-      "an sh block ending in `#` lines after its command:  its output, which goes in an Output fold after the block, so `yarn readme:test` runs it"
+      "an sh block ending in `#` lines after its command:  its output, which goes in an Output fold after the block, so `yarn readme:test` runs it",
+    "root-page":
+      "a topic page at the kit's root:  only README.md, README-epics.md and README-vscode.md stay there;  the rest go in README/ (README/cli.md)"
   } as const
 
   /**
@@ -70,7 +72,11 @@ export class ReadmeCheck {
     this.folders = [".", ...kitFolders(root).map((dir) => relative(root, dir))]
   }
 
-  /** Every page:  `README.md` and `README-*.md` at the root of the kit and each of its folders, sorted. */
+  /**
+   * Every page, sorted:
+   * - `README.md` and `README-*.md` at the root of the kit and each of its folders
+   * - the kit's topic pages, in its `README/` folder (`README/cli.md`;  epic `epic-friend` P8)
+   */
   pages(): string[] {
     const pages: string[] = []
     for (const repo of this.folders) {
@@ -78,6 +84,8 @@ export class ReadmeCheck {
       if (!existsSync(folder)) continue
       for (const name of readdir(folder)) if (PAGE_NAME.test(name)) pages.push(join(folder, name))
     }
+    const topics = join(this.root, TOPIC_FOLDER)
+    if (existsSync(topics)) for (const name of readdir(topics)) if (name.endsWith(".md")) pages.push(join(topics, name))
     return pages.sort()
   }
 
@@ -87,6 +95,12 @@ export class ReadmeCheck {
     const findings: Finding[] = []
     const add = (line: number, rule: Rule, message: string) => findings.push({ page, line, rule, message })
     const lines = text.split("\n")
+    if (dirname(path) === this.root && PAGE_NAME.test(basename(path)) && !ROOT_PAGES.includes(basename(path)))
+      add(
+        1,
+        "root-page",
+        `${basename(path)} is a topic page:  move it to ${TOPIC_FOLDER}/${topicOf(basename(path))}.md`
+      )
 
     //////
     // Line by line:  folds, fences, captions, See also, words
@@ -356,8 +370,17 @@ type Fold = {
 // ## Rules
 ////////////////
 
-/** a page's file name:  `README.md`, `README-cli.md` */
+/** a page's file name at a folder's root:  `README.md`, `README-epics.md` */
 const PAGE_NAME = /^README(-[\w-]+)?\.md$/
+
+/** the kit's folder of topic pages:  `README/cli.md` ... */
+const TOPIC_FOLDER = "README"
+
+/**
+ * the pages that stay at the kit's root;  every other topic page is in `README/` (`root-page`)
+ * - the front page, and the two a reader outside Spell comes for:  epics in their own repo, and the VS Code extension
+ */
+const ROOT_PAGES = ["README.md", "README-epics.md", "README-vscode.md"]
 
 /** An example's opening fence:  ```` ```html example ````. */
 const EXAMPLE_FENCE = /^\s*(`{3,}|~{3,})\s*html\s+example\s*$/
@@ -507,6 +530,11 @@ const WORDS: Array<{ pattern: RegExp; rule: Rule; message: string }> = [
 ////////////////
 // ## Helpers
 ////////////////
+
+/** A root page's topic:  `README-cli.md` => `cli`. */
+function topicOf(name: string): string {
+  return name.replace(/^README-|\.md$/g, "")
+}
 
 /** The names in `folder`;  none when it isn't a folder. */
 function readdir(folder: string): string[] {

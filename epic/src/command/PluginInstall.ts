@@ -25,7 +25,7 @@ import { SessionMoves } from "./SessionMoves"
  * `epic plugin install [--kit <folder>] [--dry-run] [--json]`:  the epic plugin installed for Claude Code as
  * `epic@spell`, run in place from the kit's `epic/` folder (epic `epic-engine` P49, Q45).
  *
- * It does what the kit's README-agents.md once listed as five commands to type, in order, each step skipped when it's
+ * It does what the kit's README/agents.md once listed as five commands to type, in order, each step skipped when it's
  * done already, so it's safe to run again:
  * 1. Claude Code's settings (`<claude>/settings.json`):
  *    - the old plugin, `spell-epic@spell-epic`, and its marketplace taken out of `enabledPlugins` and

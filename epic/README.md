@@ -160,7 +160,7 @@ So three can run at once without touching each other, and your main checkout isn
 - Each phase is committed on its own, in every repo it touched, under one subject (`P1:  Name -- summary`).
   Then the agent stops, and asks before it starts the next.
 - In Spell, an epic's worktree holds every repo, each on the epic's branch:
-  [the kit's README-development.md](https://github.com/spell-app/spell/blob/main/README-development.md) follows a change across repos.
+  [the kit's README/development.md](https://github.com/spell-app/spell/blob/main/README/development.md) follows a change across repos.
 - And when it merges, it leaves a GUIDE behind for the next reader, and a changelog entry.
 
 Every worktree is another checkout, with an install of its own:  that's the price of three at once.
@@ -171,7 +171,7 @@ You need, once:
 - a Spell checkout ([setup from zero](https://github.com/spell-app/spell/blob/main/README.md#setup-from-zero), on the kit's front page)
 - the plugin, and `epic` on your terminal's `PATH`:  one command from the kit's checkout,
   `node epic/bin/epic plugin install`
-  ([the kit's README-agents.md](https://github.com/spell-app/spell/blob/main/README-agents.md#the-epic-plugin) says
+  ([the kit's README/agents.md](https://github.com/spell-app/spell/blob/main/README/agents.md#the-epic-plugin) says
   what it does)
   - outside Spell:  `/plugin marketplace add spell-app/spell`, then `/plugin install epic@spell`
 - Spell Epic, the VS Code extension, for the Review tab ([README-vscode.md](README-vscode.md))
@@ -446,9 +446,9 @@ Every other repo's pages:  [the kit's index](https://github.com/spell-app/spell/
 ## See also
 
 - [README-pages.md](README-pages.md):  the next step, an epic page section by section and a review round on it
-- [The kit's README-agents.md](https://github.com/spell-app/spell/blob/main/README-agents.md#the-epic-plugin):  installing the plugin,
+- [The kit's README/agents.md](https://github.com/spell-app/spell/blob/main/README/agents.md#the-epic-plugin):  installing the plugin,
   and what every session reads before your first prompt
-- [The kit's README-development.md](https://github.com/spell-app/spell/blob/main/README-development.md):  one epic's worktree across the five repos,
+- [The kit's README/development.md](https://github.com/spell-app/spell/blob/main/README/development.md):  one epic's worktree across the five repos,
   and merging `main` into it
-- [The kit's README-element.md](https://github.com/spell-app/spell/blob/main/README-element.md):  how `<ui-root>` loads a pack like Epic UI
+- [The kit's README/element.md](https://github.com/spell-app/spell/blob/main/README/element.md):  how `<ui-root>` loads a pack like Epic UI
 - [The five repos](https://github.com/spell-app/spell/blob/main/README.md#one-repo-five-parts):  where spell-epic sits, and what it needs

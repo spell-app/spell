@@ -76,11 +76,11 @@ written on it:  Spell UI's `<ui-*>`, spell-epic's `<epic-*>`, the app's `<spell-
 and the element a Spell program draws each view in, like `<solitaire-card>`.
 Its build tools and the test helpers every set's tests use sit beside it, on this page too.
 
-- Code:  [src/element/](src/element/)
-  - its tools in [src/element-tools/](src/element-tools/)
-  - its test helpers in [src/test-helpers/](src/test-helpers/)
-  - their tests in [tests/element/](tests/element/) and [tests/element-tools/](tests/element-tools/)
-- Rules for working on it:  [element's AGENTS.md](src/element/AGENTS.md).
+- Code:  [src/element/](../src/element/)
+  - its tools in [src/element-tools/](../src/element-tools/)
+  - its test helpers in [src/test-helpers/](../src/test-helpers/)
+  - their tests in [tests/element/](../tests/element/) and [tests/element-tools/](../tests/element-tools/)
+- Rules for working on it:  [element's AGENTS.md](../src/element/AGENTS.md).
 - The reactivity underneath is Solid's:  [Solid's docs](https://docs.solidjs.com).
 
 ## If you know React, here's the map
@@ -404,7 +404,7 @@ every `<ui-*>` tag inside it, now or added later, imports its family once, the f
 Which family defines a tag comes from a generated catalog, never from guessing at the name:
 `<ui-actions>` lives in the `ui-parts` family.
 
-![A page loading its elements in eight numbered steps, between the page, its ui-root and the element families](docs/images/element-loading.svg)
+![A page loading its elements in eight numbered steps, between the page, its ui-root and the element families](../docs/images/element-loading.svg)
 
 _The root loads what the page uses, and only when the page uses it._
 
@@ -486,10 +486,10 @@ The set's docs data comes after;  `spell-pack check` exits 1 while any of it is 
   `spell/element` on the page is Spell UI's core, which carries all of this framework.
 - A pack that fails or times out is logged, and the root still gets ready.
 
-The check, run in spell-epic, when the pack is current:
+The check, run in the epic folder, when the pack is current:
 
 ```sh
-cd spell-epic          # from the kit's root
+cd epic                # from the kit's root
 yarn pack:check
 ```
 
@@ -547,7 +547,7 @@ its rules go in `ui.app`, the last layer, as below.
 
 | Before | After |
 | --- | --- |
-| ![Spell UI's buttons, rounded, and a card with a soft shadow](docs/images/app-stylesheet-before.png) | ![The same buttons square, the primary one purple, and the card flat with a grey border](docs/images/app-stylesheet-after.png) |
+| ![Spell UI's buttons, rounded, and a card with a soft shadow](../docs/images/app-stylesheet-before.png) | ![The same buttons square, the primary one purple, and the card flat with a grey border](../docs/images/app-stylesheet-after.png) |
 
 - `.ui.button { border-radius: 0 }` squares every button on the site;
   `.ui.card { box-shadow: none }` flattens every card.
@@ -587,7 +587,7 @@ _From [EpicQuestion.test.tsx](https://github.com/spell-app/spell/blob/main/epic/
 so the test asserts on the drawn element, not after a guessed number of ticks.
 `expectAccessible()` runs axe through the shadow roots, and fails with a list of what to fix.
 The cost is a real browser to run them in:
-Playwright's Chromium, installed once in [Setup from zero](README.md#setup-from-zero).
+Playwright's Chromium, installed once in [Setup from zero](../README.md#setup-from-zero).
 
 | Test helper | What |
 | --- | --- |
@@ -612,7 +612,7 @@ These close the gap, for every set, in node:
 | Tool | What |
 | --- | --- |
 | `spell-pack build \| check [<folder>]` | a pack's build, or whether it's current:  exits 0 built or current, 1 stale or failed, 2 bad arguments |
-| `ComponentPack` | what `spell-pack` runs;  the command line's [`spell pack`](README-cli.md#spell-ui) too |
+| `ComponentPack` | what `spell-pack` runs;  the command line's [`spell pack`](cli.md#spell-ui) too |
 | `RootCatalog`, `VocabularyFiles` | what `<ui-root>` needs of each tag, read from every vocabulary in a folder of families |
 | `elementBaseConfig()` | the Vite settings every set's elements compile with:  the decorator pre-pass before Solid, Solid's JSX, Lightning CSS |
 | `HotElements` | the Vite plugin for hot reload in `yarn dev` |
@@ -652,10 +652,10 @@ named by the package's `"customElements"` field (Spell UI's, from its `yarn site
 
 How it works:
 
-- The checks are the kit's, in [jsx-help/](src/element-tools/jsx-help/):
-  - [`JsxElementHelp`](src/element-tools/jsx-help/JsxElementHelp.ts) finds the completions and warnings,
+- The checks are the kit's, in [jsx-help/](../src/element-tools/jsx-help/):
+  - [`JsxElementHelp`](../src/element-tools/jsx-help/JsxElementHelp.ts) finds the completions and warnings,
     as plain data for any editor
-  - [`ElementCatalog`](src/element-tools/jsx-help/ElementCatalog.ts) reads the manifests
+  - [`ElementCatalog`](../src/element-tools/jsx-help/ElementCatalog.ts) reads the manifests
 - The app's VS Code extension shows them ([`ElementsHelp`](https://github.com/spell-app/spell/blob/main/app/vscode/src/ElementsHelp.ts)):
   completions as you type `"`, warnings in the Problems list as you edit.
   - Its log, the manifests it found and anything that failed:  the "Spell Elements" output.
@@ -695,7 +695,7 @@ What it costs you, writing one:
 - **Solid 2 is a release candidate:**  `solid-js` 2.0.0-rc.17, pinned to one copy across every repo.
 - **A component is a class.**
   No function components, and no hand-written Solid effects in a component file:
-  the lint guard flags them, and names the decorator to use ([README-toolchain.md](README-toolchain.md)).
+  the lint guard flags them, and names the decorator to use ([README/toolchain.md](toolchain.md)).
 - **A build step,** for the standard decorators, lowered before Solid's compiler reads the JSX
   (`elementBaseConfig()`).
 - **Shadow DOM everywhere,** with semantic markup inside and never the light DOM:
@@ -730,7 +730,7 @@ What it won't do:
 | `@E.proto static vocabulary` | the class's vocabulary, on its prototype |
 | `@E.protoMerged static elementSetup` | the class's settings, merged down the chain:  `styleSheets`, `Fallback`, `isAFormControl`, `delegatesFocus`, `disabled`, `loading` ... |
 
-- The generic decorators (`@proto`, `@lazy` ...) and the reactive engine's:  [README-util.md](README-util.md).
+- The generic decorators (`@proto`, `@lazy` ...) and the reactive engine's:  [README/util.md](util.md).
 
 </details>
 
@@ -765,26 +765,26 @@ so the runtime hands its settings over as it loads (`SpellSolid.install(settings
 
 | File | What |
 | --- | --- |
-| [index.ts](src/element/index.ts) | the barrel, `E` |
-| [UIComponent.tsx](src/element/UIComponent.tsx) | the component base |
-| [DOMElement.ts](src/element/DOMElement.ts) | the DOM element base |
-| [ElementDefinition.ts](src/element/ElementDefinition.ts) | a vocabulary turned into a tag's attributes, events and slots |
-| [Reactive.ts](src/element/Reactive.ts) | the reactive members' decorators |
-| [Cell.ts](src/element/Cell.ts), [SlotContent.ts](src/element/SlotContent.ts) | a reactive cell;  slotted content |
-| [Disclosure.ts](src/element/Disclosure.ts) | one open / closed state for anything that shows and hides a box:  its request and events, `aria-expanded`, find-in-page |
-| [OwnControls.ts](src/element/OwnControls.ts) | did a click land on a control inside an element (a button, a link, a field), not on the element itself? |
-| [ParentLink.ts](src/element/ParentLink.ts) | the `parent` attribute:  an element written apart on the page joins the container with that id |
-| [PartContext.ts](src/element/PartContext.ts), [OwnerContext.ts](src/element/OwnerContext.ts) | generic content parts, and the element they belong to |
-| [ShadowEvents.ts](src/element/ShadowEvents.ts) | Solid's delegated events kept from leaking out of shadow roots |
-| [RichAttributes.ts](src/element/RichAttributes.ts) | a function or object given to an element's attribute, as Solid hands a plain JSX prop:  `on-ui-change={f}` listens, `options={[...]}` sets the property;  `<ui-root pure>` turns its page-wide patch off |
-| [HotDefinitions.ts](src/element/HotDefinitions.ts) | hot reload, in development only (its own entry) |
+| [index.ts](../src/element/index.ts) | the barrel, `E` |
+| [UIComponent.tsx](../src/element/UIComponent.tsx) | the component base |
+| [DOMElement.ts](../src/element/DOMElement.ts) | the DOM element base |
+| [ElementDefinition.ts](../src/element/ElementDefinition.ts) | a vocabulary turned into a tag's attributes, events and slots |
+| [Reactive.ts](../src/element/Reactive.ts) | the reactive members' decorators |
+| [Cell.ts](../src/element/Cell.ts), [SlotContent.ts](../src/element/SlotContent.ts) | a reactive cell;  slotted content |
+| [Disclosure.ts](../src/element/Disclosure.ts) | one open / closed state for anything that shows and hides a box:  its request and events, `aria-expanded`, find-in-page |
+| [OwnControls.ts](../src/element/OwnControls.ts) | did a click land on a control inside an element (a button, a link, a field), not on the element itself? |
+| [ParentLink.ts](../src/element/ParentLink.ts) | the `parent` attribute:  an element written apart on the page joins the container with that id |
+| [PartContext.ts](../src/element/PartContext.ts), [OwnerContext.ts](../src/element/OwnerContext.ts) | generic content parts, and the element they belong to |
+| [ShadowEvents.ts](../src/element/ShadowEvents.ts) | Solid's delegated events kept from leaking out of shadow roots |
+| [RichAttributes.ts](../src/element/RichAttributes.ts) | a function or object given to an element's attribute, as Solid hands a plain JSX prop:  `on-ui-change={f}` listens, `options={[...]}` sets the property;  `<ui-root pure>` turns its page-wide patch off |
+| [HotDefinitions.ts](../src/element/HotDefinitions.ts) | hot reload, in development only (its own entry) |
 | timing.ts | *(none -- `spell/util/timing`, re-exported by the barrel)*:  when to run something |
-| [SkeletonText.ts](src/element/SkeletonText.ts) | a vocabulary's one-line skeleton, parsed (node too;  its own entry) |
-| [SpellSolid.ts](src/element/SpellSolid.ts) | the settings the page's runtime installs |
-| [elements.types.ts](src/element/elements.types.ts), [vocabulary.types.ts](src/element/vocabulary.types.ts) | the types:  `ElementSetup`, `AttributeValues`, the settings;  `ComponentVocabulary`, `Dictionary` |
-| [src/element-tools/](src/element-tools/) | the build tools (node):  `ComponentPack`, `packModules`, `RootCatalog`, `VocabularyFiles`, `elementConfig`, `HotElements`, `DevServer`, `Terminal`, `NodePackage`, `generatedFiles` (`writeOrCheck()`, `spliceGenerated()`);  their shapes and their error, `tools.types`;  the elements help for JSX, `jsx-help/` (`JsxElementHelp`, `ElementCatalog`, and its tests' fixture package, `test/jsxFixture`) |
-| [src/test-helpers/](src/test-helpers/) | `Fixture`, `ElementFixture`, `A11y`, `Viewport`, `TestSettings` |
-| [bin/spell-pack.mjs](bin/spell-pack.mjs) | `spell-pack build \| check` |
+| [SkeletonText.ts](../src/element/SkeletonText.ts) | a vocabulary's one-line skeleton, parsed (node too;  its own entry) |
+| [SpellSolid.ts](../src/element/SpellSolid.ts) | the settings the page's runtime installs |
+| [elements.types.ts](../src/element/elements.types.ts), [vocabulary.types.ts](../src/element/vocabulary.types.ts) | the types:  `ElementSetup`, `AttributeValues`, the settings;  `ComponentVocabulary`, `Dictionary` |
+| [src/element-tools/](../src/element-tools/) | the build tools (node):  `ComponentPack`, `packModules`, `RootCatalog`, `VocabularyFiles`, `elementConfig`, `HotElements`, `DevServer`, `Terminal`, `NodePackage`, `generatedFiles` (`writeOrCheck()`, `spliceGenerated()`);  their shapes and their error, `tools.types`;  the elements help for JSX, `jsx-help/` (`JsxElementHelp`, `ElementCatalog`, and its tests' fixture package, `test/jsxFixture`) |
+| [src/test-helpers/](../src/test-helpers/) | `Fixture`, `ElementFixture`, `A11y`, `Viewport`, `TestSettings` |
+| [bin/spell-pack.mjs](../bin/spell-pack.mjs) | `spell-pack build \| check` |
 
 - Its own entries, besides the barrel:
   `spell/element/elements.types` and `/vocabulary.types` (for node code that mustn't load the framework),
@@ -800,7 +800,7 @@ so the runtime hands its settings over as it loads (`SpellSolid.install(settings
 <summary>More in the docs site</summary>
 
 The docs site needs a checkout with the content folder beside it,
-and the page server running ([README-server.md](README-server.md)).
+and the page server running ([README/server.md](server.md)).
 
 - Custom Elements in Spell (two objects per tag, `<ui-counter>` built step by step, every decorator):
   `/guides/custom-elements/custom-elements.html`
@@ -814,6 +814,6 @@ and the page server running ([README-server.md](README-server.md)).
 - [spell-ui's README](https://github.com/spell-app/spell/blob/main/ui/README.md):  the elements built on this, and the runtime they need
 - [spell-ui's README-runtime.md](https://github.com/spell-app/spell/blob/main/ui/README-runtime.md):  the runtime's half of every element, from words to
   the static render
-- [README-util.md](README-util.md):  the generic helpers and the reactive engine underneath
-- [README-toolchain.md](README-toolchain.md):  the decorator pre-pass and the lint guard
-- [README.md](README.md):  the kit's front page, and every page of every repo
+- [README/util.md](util.md):  the generic helpers and the reactive engine underneath
+- [README/toolchain.md](toolchain.md):  the decorator pre-pass and the lint guard
+- [README.md](../README.md):  the kit's front page, and every page of every repo

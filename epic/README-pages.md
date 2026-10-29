@@ -579,7 +579,7 @@ _A page loads two scripts:  Spell UI's docs bundle, then the pack, which borrows
 ### Working on the elements
 
 The elements are written exactly like Spell UI's own families,
-on [the kit's element framework](https://github.com/spell-app/spell/blob/main/README-element.md) and Spell UI's core.
+on [the kit's element framework](https://github.com/spell-app/spell/blob/main/README/element.md) and Spell UI's core.
 
 If you find yourself writing a second copy of any of these, stop and reuse:
 
@@ -632,7 +632,7 @@ Adding a new element:
 - [README-skills.md](README-skills.md):  `/epic review`, `/details` and the other skills that open these pages
 - [README-cli.md](README-cli.md):  `epic inbox`, `epic test` and every other verb that writes a page
 - [README-vscode.md](README-vscode.md):  the Review tab the pages show in, and how a session reaches its window
-- [The kit's README-element.md](https://github.com/spell-app/spell/blob/main/README-element.md):  how packs and elements work, before you write an `epic-*` one
+- [The kit's README/element.md](https://github.com/spell-app/spell/blob/main/README/element.md):  how packs and elements work, before you write an `epic-*` one
 
 <details>
 <summary>More in the docs site</summary>

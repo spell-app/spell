@@ -32,11 +32,11 @@ edit a file, and the next `spell` runs your edit.
 It loads projects the way the language server does, so `spell lint` and the editor report the same errors.
 
 - `epic`, the other command you'll type, is `spell-epic`'s:  epic pages, worktrees and reviews ([below](#epic)).
-- `yarn` runs each repo's own scripts ([README-development.md](README-development.md)).
+- `yarn` runs each repo's own scripts ([README/development.md](development.md)).
 
 ## Setting it up
 
-You need the kit and its one install first:  [Setup from zero](README.md#setup-from-zero), on the kit's front page.
+You need the kit and its one install first:  [Setup from zero](../README.md#setup-from-zero), on the kit's front page.
 Then one command, in the kit's folder, puts `spell` on your `PATH`:
 
 ```sh
@@ -46,7 +46,7 @@ yarn cli:install
 spell --version
 ```
 
-It's a link, not a copy:  `spell` runs [bin/spell.mjs](bin/spell.mjs) in this checkout, so a `git pull` is an upgrade.
+It's a link, not a copy:  `spell` runs [bin/spell.mjs](../bin/spell.mjs) in this checkout, so a `git pull` is an upgrade.
 
 | If | Then |
 | --- | --- |
@@ -158,7 +158,7 @@ spell lint --all @spell/examples
 
 ## Each folder brings its own commands
 
-The base is [src/cli/](src/cli/):  it reads the arguments, prints the help, and finds the commands.
+The base is [src/cli/](../src/cli/):  it reads the arguments, prints the help, and finds the commands.
 Each folder hands it a list, named in the folder's own `package.json`:
 
 ```json
@@ -256,7 +256,7 @@ run from any folder of an epic's worktree, `spell server start` starts that work
   the editor gets a row only where they run `spell-app`'s routes (it's installed);
   Spell UI's site, only where they name its component set.
 - The kit's `yarn server` runs the same command line;  `epic server` runs it for the caller's kit.
-- What the page server serves, and how:  [README-server.md](README-server.md).
+- What the page server serves, and how:  [README/server.md](server.md).
 
 | Option | What it does |
 | --- | --- |
@@ -300,7 +300,7 @@ run from any folder of an epic's worktree, `spell server start` starts that work
     and a scratch project outside the checkout:  a node import, a Vite page that draws a `<ui-button>`,
     `npx spell help`, `npx epic --help`.
   - Without `--dry-run`, and only when every check passed:  `npm publish --tag <tag>` for each, lowest first.
-    `npm login` first.
+  - Logging in with a token, the tags, and what trips people up:  [Publishing to npm](npm.md).
   - The tag is `next` unless you say otherwise:  `npm install spell@next` gets the new version,
     while `latest` stays where it was.
     Only `--tag latest` moves `latest`;  or, for a version already out under `next`,
@@ -518,7 +518,7 @@ The compile line went to stderr, and so would any warning, each one a fix writte
 | `spell run --browser` | opens it in a browser even if it shows no UI |
 | `spell run --no-browser` | never opens one:  skips whatever needs it |
 | `spell run --seed <n>`, `spell test --seed <n>` | starts its random numbers from `n` (1 to 2147483646), so every run deals the same |
-| `spell run --target ts`, `--target py` | runs it as that target compiles it;  a Python program that draws is served as a web app, on Quart ([README-server.md](README-server.md)) |
+| `spell run --target ts`, `--target py` | runs it as that target compiles it;  a Python program that draws is served as a web app, on Quart ([README/server.md](server.md)) |
 | `spell test --name <text>` | only tests whose names contain it, e.g. `"deck creation"` |
 | `spell test --watch` | runs them again whenever a project changes:  `spell watch --test` |
 | `spell test --verbose` | shows every check;  without it, `print` inside a test is hidden |
@@ -591,7 +591,7 @@ Spell
 </details>
 
 Two more in action, a whole match tree from `spell parse` and FizzBuzz under `spell run`, are on
-[the kit's front page](README.md).
+[the kit's front page](../README.md).
 
 <details>
 <summary>Every option of parse, repl, explain and describe</summary>
@@ -941,7 +941,7 @@ How the static render works:
   then `spell pack add`.
 - Making a pack or an element builds it too, unless `--no-build`;  every pack verb takes `--json`.
 - `build` and `check` run the kit's pack tooling, as each pack's own `yarn pack:build` and `yarn pack:check` do.
-  What a pack is:  [README-element.md](README-element.md).
+  What a pack is:  [README/element.md](element.md).
 - **The catch:  a `design` verb's `--help` isn't help.**
   Everything after the verb goes to its tool as typed, so `spell design pushed --help` records a push.
   `spell design --help` lists the verbs safely, and `spell help design pushed` prints one verb's usage.
@@ -1000,7 +1000,7 @@ owen@spell       Projects       ...
 
 `app serve`
 - Two servers:
-  - the page server, the kit's ([README-server.md](README-server.md)), on port 4747, else any free one:
+  - the page server, the kit's ([README/server.md](server.md)), on port 4747, else any free one:
     the app's `/api`, which saves files to disk, plus the docs, the epic pages and Spell UI's docs
   - the editor, the Spell app's Vite with hot reload, passing `/api` on to the page server:
     the page server's own child, which it starts once it listens and stops with itself,
@@ -1018,7 +1018,7 @@ owen@spell       Projects       ...
 
 `app vscode`
 - `spell-app`'s root scripts do the same:  `yarn vscode` (both), `yarn vscode:build`, `yarn vscode:install`.
-- The extension itself:  [README-vscode.md](README-vscode.md).
+- The extension itself:  [README-vscode.md](../README-vscode.md).
 
 </details>
 
@@ -1031,7 +1031,7 @@ its phases and items, the requests between sessions, the worktrees, windows and 
 
 It loads no Spell:  `epic --version` answers in 0.2 s, and `epic summary` in about 0.4.
 Claude Code sessions get it from the plugin;  your own terminal needs one link
-([README-epics.md](README-epics.md)).
+([README-epics.md](../README-epics.md)).
 
 A verb names what it acts on with an address after it:
 
@@ -1071,8 +1071,8 @@ You'll rarely type either:  the yarn scripts do.
 
 | Program | What it does |
 | --- | --- |
-| `spell-types [--below] [--clean]` | builds a package's TypeScript declarations, for the repos above it;  `--below` rebuilds the lower repos' stale ones first, and `--clean` deletes its `dist-types/` first, for a full build ([README-toolchain.md](README-toolchain.md)) |
-| `spell-pack build \| check [<folder>]` | builds a component pack, or checks it's current;  `<folder>` is the pack's, default the current one;  exits 0 built or current, 1 stale or failed, 2 for bad arguments.  `spell-epic`'s `yarn pack:build` uses it ([README-element.md](README-element.md)) |
+| `spell-types [--below] [--clean]` | builds a package's TypeScript declarations, for the repos above it;  `--below` rebuilds the lower repos' stale ones first, and `--clean` deletes its `dist-types/` first, for a full build ([README/toolchain.md](toolchain.md)) |
+| `spell-pack build \| check [<folder>]` | builds a component pack, or checks it's current;  `<folder>` is the pack's, default the current one;  exits 0 built or current, 1 stale or failed, 2 for bad arguments.  `spell-epic`'s `yarn pack:build` uses it ([README/element.md](element.md)) |
 
 ## Output, exit codes, and what writes files
 
@@ -1217,35 +1217,35 @@ If you find yourself writing a second copy of any of these, stop and reuse.
 
 | Path | What |
 | --- | --- |
-| [bin/spell.mjs](bin/spell.mjs) | the `spell` bin:  `tsx` with the kit's node settings, then `main.ts` |
-| [scripts/install-cli.mjs](scripts/install-cli.mjs) | `yarn cli:install`:  links `spell` onto your `PATH` |
-| [main.ts](src/cli/main.ts) | the process entry:  every repo's commands, then the command line |
-| [commands.ts](src/cli/commands.ts) | the kit's own command list (its `package.json`'s `"spell": { "commands" }`) |
-| [program.ts](src/cli/program.ts) | `spellProgram()`, `addRepoCommands()` (the clash rule), `addHelp()` |
-| [repos.ts](src/cli/repos.ts) | `spellRepos()`, `commandLists()`, `hook()`, `needHook()` |
-| [run.ts](src/cli/run.ts) | `runCommand()`, `rawArgsAfter()`, `out()`, `err()`, `relativePath()` |
-| [tools.ts](src/cli/tools.ts) | `runTool()`, `runChild()`, `epicBin()`, `runEpic()` |
-| [findCheckout.ts](src/cli/findCheckout.ts) | `findCheckout()`, `KIT_ROOT`, `KIT_MARKER` |
-| [cli.types.ts](src/cli/cli.types.ts) | `EXIT`, `CliError`, the flags' types, `CommandList`, `HookList`, `SpellRepo`, `ToolSpec` |
-| [commands/serverCommand.ts](src/cli/commands/serverCommand.ts) | `spell server`:  the page server's command line, `start all`, `stop` |
-| [commands/bundleCommand.ts](src/cli/commands/bundleCommand.ts) | `spell bundle`, `spell bundle check` |
-| [commands/commandsCommand.ts](src/cli/commands/commandsCommand.ts) | `spell commands`:  every command against the commands page |
-| [commands/wwodCommand.ts](src/cli/commands/wwodCommand.ts) | `spell wwod`;  the check itself is [wwod.ts](src/cli/commands/wwod.ts) |
-| [commands/publishCommand.ts](src/cli/commands/publishCommand.ts) | `spell publish`:  which repos, the version, the order, the publish |
-| [publish/PackageBuild.ts](src/cli/publish/PackageBuild.ts) | one repo's `src/` built into the JavaScript its package ships |
-| [publish/PublishedPackage.ts](src/cli/publish/PublishedPackage.ts) | one package's staging folder, its published `package.json`, `npm pack`, the checks |
-| [publish/ScratchInstall.ts](src/cli/publish/ScratchInstall.ts) | the packed packages installed in a scratch project, and its three checks |
-| [publish/publish.types.ts](src/cli/publish/publish.types.ts) | `"spellPublish"`'s shape, the reports, the folders |
-| [commands/ponyCommand.ts](src/cli/commands/ponyCommand.ts) | `spell pony` |
-| [tsconfig.node.json](tsconfig.node.json) | the kit's node settings, and its node type check |
-| [tsconfig.tsx.json](tsconfig.tsx.json) | the settings `tsx` runs every repo's commands under:  `tsconfig.node.json`'s, over every repo's files |
+| [bin/spell.mjs](../bin/spell.mjs) | the `spell` bin:  `tsx` with the kit's node settings, then `main.ts` |
+| [scripts/install-cli.mjs](../scripts/install-cli.mjs) | `yarn cli:install`:  links `spell` onto your `PATH` |
+| [main.ts](../src/cli/main.ts) | the process entry:  every repo's commands, then the command line |
+| [commands.ts](../src/cli/commands.ts) | the kit's own command list (its `package.json`'s `"spell": { "commands" }`) |
+| [program.ts](../src/cli/program.ts) | `spellProgram()`, `addRepoCommands()` (the clash rule), `addHelp()` |
+| [repos.ts](../src/cli/repos.ts) | `spellRepos()`, `commandLists()`, `hook()`, `needHook()` |
+| [run.ts](../src/cli/run.ts) | `runCommand()`, `rawArgsAfter()`, `out()`, `err()`, `relativePath()` |
+| [tools.ts](../src/cli/tools.ts) | `runTool()`, `runChild()`, `epicBin()`, `runEpic()` |
+| [findCheckout.ts](../src/cli/findCheckout.ts) | `findCheckout()`, `KIT_ROOT`, `KIT_MARKER` |
+| [cli.types.ts](../src/cli/cli.types.ts) | `EXIT`, `CliError`, the flags' types, `CommandList`, `HookList`, `SpellRepo`, `ToolSpec` |
+| [commands/serverCommand.ts](../src/cli/commands/serverCommand.ts) | `spell server`:  the page server's command line, `start all`, `stop` |
+| [commands/bundleCommand.ts](../src/cli/commands/bundleCommand.ts) | `spell bundle`, `spell bundle check` |
+| [commands/commandsCommand.ts](../src/cli/commands/commandsCommand.ts) | `spell commands`:  every command against the commands page |
+| [commands/wwodCommand.ts](../src/cli/commands/wwodCommand.ts) | `spell wwod`;  the check itself is [wwod.ts](../src/cli/commands/wwod.ts) |
+| [commands/publishCommand.ts](../src/cli/commands/publishCommand.ts) | `spell publish`:  which repos, the version, the order, the publish |
+| [publish/PackageBuild.ts](../src/cli/publish/PackageBuild.ts) | one repo's `src/` built into the JavaScript its package ships |
+| [publish/PublishedPackage.ts](../src/cli/publish/PublishedPackage.ts) | one package's staging folder, its published `package.json`, `npm pack`, the checks |
+| [publish/ScratchInstall.ts](../src/cli/publish/ScratchInstall.ts) | the packed packages installed in a scratch project, and its three checks |
+| [publish/publish.types.ts](../src/cli/publish/publish.types.ts) | `"spellPublish"`'s shape, the reports, the folders |
+| [commands/ponyCommand.ts](../src/cli/commands/ponyCommand.ts) | `spell pony` |
+| [tsconfig.node.json](../tsconfig.node.json) | the kit's node settings, and its node type check |
+| [tsconfig.tsx.json](../tsconfig.tsx.json) | the settings `tsx` runs every repo's commands under:  `tsconfig.node.json`'s, over every repo's files |
 
 - `tsx` takes one settings file for every file it runs, so this one holds what every repo's commands need:
   JSX for `spell-app`'s Ink screens, and standard decorators lowered for `spell-parser`.
 - It applies those settings only to the files the settings file includes.
   So `spell` runs under `tsconfig.tsx.json`, which includes every repo:
   under `tsconfig.node.json` alone, `spell-app`'s screens crashed in a terminal with `React is not defined`.
-- The tests:  the kit's in [tests/cli/](tests/cli/), each repo's commands' in that repo's `tests/cli/`.
+- The tests:  the kit's in [tests/cli/](../tests/cli/), each repo's commands' in that repo's `tests/cli/`.
   - The kit's run the real `spell` as separate processes, so a broken command list in any repo fails them.
   - `spell-app`'s include end-to-end runs of every language command, through the kit's bin.
 - The other repos' lists:  [spell-parser's](https://github.com/spell-app/spell/blob/main/parser/src/cli/commands.ts)
@@ -1268,7 +1268,7 @@ If you find yourself writing a second copy of any of these, stop and reuse.
 - One thing the command line needs IN Spell:  `SpellProject.compile(parentScope, { save })`.
   `save: false` skips writing `<Project>.spell.js`;
   without it, `compile --stdout`, `run` and `test` would write into the project.
-- A suspected bug found along the way, in the suspected-bugs log ([README-agents.md](README-agents.md)):
+- A suspected bug found along the way, in the suspected-bugs log ([README/agents.md](agents.md)):
   `SpellDiskWorkspace.diskChanged(uri, "created")` keeps a loaded file's old text.
 - `serve.ts` has twins in `spell-app` (`spell run`'s browser page) and Spell UI (`spell icon --open`):
   one home in the kit's `src/cli/` would do for both.
@@ -1292,11 +1292,12 @@ They're named in the command line's goals and the commands page's roadmap.
 
 ## See also
 
-- [README.md](README.md):  setup from zero, and the index of every page
-- [README-server.md](README-server.md):  what `spell server` and `spell app serve` start
+- [README.md](../README.md):  setup from zero, and the index of every page
+- [README/server.md](server.md):  what `spell server` and `spell app serve` start
 - [spell-epic's README-cli.md](https://github.com/spell-app/spell/blob/main/epic/README-cli.md):  every `epic` verb, in full
 - [spell-parser's README](https://github.com/spell-app/spell/blob/main/parser/README.md):  the language these commands read
-- [README-development.md](README-development.md):  the checks, the tests and the worktrees around them
+- [README/development.md](development.md):  the checks, the tests and the worktrees around them
+- [README/npm.md](npm.md):  publishing to npm, from logging in to moving `latest`
 
 <details>
 <summary>More in the docs site</summary>

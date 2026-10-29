@@ -60,13 +60,13 @@ a notebook per tab, linked by the page's tab bar, written from the page by `spel
 ### Opening one
 
 With Spell set up ([setup from zero](https://github.com/spell-app/spell/blob/main/README.md#setup-from-zero)) and `spell` on your PATH
-([setting it up](https://github.com/spell-app/spell/blob/main/README-cli.md#setting-it-up)), one command opens the editor on an example:
+([setting it up](https://github.com/spell-app/spell/blob/main/README/cli.md#setting-it-up)), one command opens the editor on an example:
 
 ```sh
 spell app serve @spell/examples/calculator
 ```
 
-- It opens your browser on the example, until Ctrl-C ([its options](https://github.com/spell-app/spell/blob/main/README-cli.md#spell-app)).
+- It opens your browser on the example, until Ctrl-C ([its options](https://github.com/spell-app/spell/blob/main/README/cli.md#spell-app)).
 - In the editor, **Home** (the house icon in the top bar) lists every project, these among them.
 - `/run/` in place of `/edit/` shows the app alone, full size, with its console
   ([the editor's routes](README-app.md#the-editor--one-object-behind-every-pane)).
@@ -772,7 +772,7 @@ even `spell format` leaves the test projects alone.
 - [Spaces](README-spaces.md):  addresses, your own space, and importing a library into a project
 - [The language, sentence by sentence](https://github.com/spell-app/spell/blob/main/parser/README-spell.md):  every kind of sentence these examples use,
   and how the frozen test projects are checked
-- [spell-app's commands](https://github.com/spell-app/spell/blob/main/README-cli.md#spell-app):  `spell app create`, `spell app serve` and `spell projects`,
+- [spell-app's commands](https://github.com/spell-app/spell/blob/main/README/cli.md#spell-app):  `spell app create`, `spell app serve` and `spell projects`,
   in full
 - [Spell UI's components](https://github.com/spell-app/spell/blob/main/ui/README-components.md):
   the `<ui-*>` elements Task List and Solitaire draw with
