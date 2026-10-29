@@ -7,6 +7,7 @@ import { Git } from "spell/server/Git"
 import { RealPath } from "spell/server/RealPath"
 import { CLI } from "spell/cli"
 import { EpicConfig } from "spell/epic/config/EpicConfig"
+import { EpicHome } from "spell/epic/config/EpicHome"
 import { EpicRepo } from "spell/epic/config/EpicRepo"
 import { SessionFolders } from "spell/epic/config/SessionFolders"
 import { URGENT_STATES } from "spell/epic/list/EpicState"
@@ -295,7 +296,7 @@ export class Worktrees {
     if (!removed.ok && !leftover) throw new EpicCommandError(`git worktree remove ${path} failed:  ${removed.err}`)
     const lines = [`removed ${path}`]
     if (leftover) {
-      const cleared = LeftoverFolders.clear(path, { home: CheckoutServers.homeFolder() })
+      const cleared = LeftoverFolders.clear(path, { home: EpicHome.folder() })
       Git.run(["worktree", "prune"], main)
       const said = LeftoverFolders.said(path, cleared)
       if (said) lines.push(said)

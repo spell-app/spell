@@ -1,9 +1,8 @@
 import { cpSync, existsSync, mkdirSync, rmSync } from "node:fs"
-import { homedir } from "node:os"
 import { dirname, join, matchesGlob } from "node:path"
 
 import { Git } from "spell/server/Git"
-import { HOME_ENV, HOME_FOLDER } from "spell/epic/server/server.types"
+import { EpicHome } from "spell/epic/config/EpicHome"
 
 import { EpicCommandError, type Generator } from "./command.types"
 import { LinesOfCode } from "./LinesOfCode"
@@ -149,11 +148,11 @@ export class StrayFiles {
   static readonly ASK_LIMIT = 3
 
   /**
-   * Where ditched files go:  `ditched/` in spell-epic's home folder (`$SPELL_EPIC_HOME`, else `~/.spell-epic`).
+   * Where ditched files go:  `ditched/` in the epic home (`EpicHome`).
    * - read on every call, for tests
    */
   static ditchedFolder(): string {
-    return join(process.env[HOME_ENV] || join(homedir(), HOME_FOLDER), StrayFiles.FOLDER)
+    return EpicHome.subfolder(StrayFiles.FOLDER)
   }
 
   /**

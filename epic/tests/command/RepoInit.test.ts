@@ -11,18 +11,30 @@ import {
 } from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
-import { afterAll, describe, expect, test } from "vite-plus/test"
+import { afterAll, describe, expect, test, vi } from "vite-plus/test"
 
 import { Git } from "spell/server/Git"
 import { EpicCheckout } from "spell/epic/command/EpicCheckout"
 import { RepoInit } from "spell/epic/command/RepoInit"
 import { EpicConfig } from "spell/epic/config/EpicConfig"
+import { EpicHome } from "spell/epic/config/EpicHome"
 
 /** A throwaway repo `try` on branch `trunk`:  a README, nothing set up for epics yet. */
 const TEMP = realpathSync(mkdtempSync(join(tmpdir(), "repo-init-")))
 const MAIN = join(TEMP, "try")
 const CONTENT = join(TEMP, "try.epics")
-afterAll(() => rmSync(TEMP, { recursive: true, force: true }))
+/** the person's name goes to a scratch epic home, git's from a scratch config:  never the machine's */
+const before = { ...process.env }
+process.env.SPELL_EPIC_HOME = join(TEMP, "epic-home")
+process.env.GIT_CONFIG_GLOBAL = join(TEMP, "gitconfig")
+process.env.GIT_CONFIG_NOSYSTEM = "1"
+writeFileSync(join(TEMP, "gitconfig"), "[user]\n  name = Ana Lima\n")
+afterAll(() => {
+  for (const key of ["SPELL_EPIC_HOME", "GIT_CONFIG_GLOBAL", "GIT_CONFIG_NOSYSTEM"])
+    if (before[key] === undefined) delete process.env[key]
+    else process.env[key] = before[key]
+  rmSync(TEMP, { recursive: true, force: true })
+})
 
 mkdirSync(MAIN)
 git(MAIN, "init", "-q", "-b", "trunk")
@@ -109,6 +121,39 @@ describe("epic init", () => {
     expect(EpicCheckout.isEpicRepo(MAIN)).toBe(true)
     expect(EpicCheckout.nearest({ from: join(MAIN, "src") })).toBe(MAIN)
     expect(EpicCheckout.isEpicRepo(TEMP)).toBe(false)
+  })
+})
+
+describe("epic init:  the person's name", () => {
+  test("--dry-run:  git's name would be kept;  nothing written", () => {
+    rmSync(EpicHome.folder(), { recursive: true, force: true })
+    const report = new RepoInit({ main: MAIN }).init({ dryRun: true })
+    expect(report.person).toEqual({ name: "Ana Lima", action: "would keep" })
+    expect(existsSync(EpicHome.personFile())).toBe(false)
+  })
+
+  test("no name given, none kept:  git's name kept;  run again, kept already", () => {
+    expect(new RepoInit({ main: MAIN }).init().person).toEqual({ name: "Ana Lima", action: "kept" })
+    const again = new RepoInit({ main: MAIN }).init()
+    expect(again.person).toEqual({ name: "Ana Lima", action: "already" })
+    expect(RepoInit.lines(again)).toContain(`you:  Ana Lima, kept in ${EpicHome.personFile()} already`)
+  })
+
+  test("--name:  kept over what was kept", async () => {
+    const out = vi.spyOn(process.stdout, "write").mockImplementation(() => true)
+    try {
+      expect(await new RepoInit({ main: MAIN }).run(["--name", "Ana", "--json"])).toBe(0)
+    } finally {
+      out.mockRestore()
+    }
+    expect(EpicHome.person()).toEqual({ name: "Ana", source: "kept" })
+  })
+
+  test("no terminal to ask in:  git's name, asking nothing", async () => {
+    rmSync(EpicHome.folder(), { recursive: true, force: true })
+    expect(await RepoInit.askName()).toBe("Ana Lima")
+    EpicHome.keepPerson("Ana")
+    expect(await RepoInit.askName()).toBeUndefined()
   })
 })
 

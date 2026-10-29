@@ -43,6 +43,7 @@ import { fileURLToPath } from "node:url"
 import { clockTime } from "spell/util/time"
 import { RealPath } from "spell/server/RealPath"
 import { EpicConfig } from "spell/epic/config/EpicConfig"
+import { EpicHome } from "spell/epic/config/EpicHome"
 
 import { AirplaneMode } from "spell/epic/tools/AirplaneMode"
 
@@ -422,12 +423,12 @@ export class ReviewStart {
 
   /**
    * The window bridges' registry folders, as `src/window.mjs` reads them (`Window.registries`, epic `epic-eject`
-   * P7):  spell-epic's extension's (`$SPELL_EPIC_WINDOWS_DIR`, else `~/.spell-epic/windows`), then the spell language
+   * P7):  spell-epic's extension's (`$SPELL_EPIC_WINDOWS_DIR`, else the epic home's `windows/`), then the spell language
    * extension's (`$SPELL_WINDOWS_DIR`, else `~/.spell/windows`)
    */
   static get windowsDirs(): string[] {
     return [
-      process.env.SPELL_EPIC_WINDOWS_DIR || join(homedir(), ".spell-epic", "windows"),
+      process.env.SPELL_EPIC_WINDOWS_DIR || EpicHome.subfolder("windows"),
       process.env.SPELL_WINDOWS_DIR || join(homedir(), ".spell", "windows")
     ]
   }

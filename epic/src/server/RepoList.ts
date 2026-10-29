@@ -1,15 +1,13 @@
 import { existsSync, mkdirSync } from "node:fs"
-import { homedir } from "node:os"
 import { basename, dirname, isAbsolute, join, relative, resolve, sep } from "node:path"
 
 import { RealPath } from "spell/server/RealPath"
 import { EpicConfig } from "spell/epic/config/EpicConfig"
+import { EpicHome } from "spell/epic/config/EpicHome"
 import { DataFile } from "spell/epic/data/DataFile"
 
 import {
   encodedPath,
-  HOME_ENV,
-  HOME_FOLDER,
   REPO_NAME,
   repoPrefixFor,
   REPOS_FILE,
@@ -45,18 +43,10 @@ export class RepoList {
   /** the list's file, `<home>/repos.json5` */
   readonly file: string
 
-  /** - `home`:  default `RepoList.homeFolder()` */
-  constructor({ home = RepoList.homeFolder() }: { home?: string } = {}) {
+  /** - `home`:  default the epic home (`EpicHome.folder()`) */
+  constructor({ home = EpicHome.folder() }: { home?: string } = {}) {
     this.home = resolve(home)
     this.file = join(this.home, REPOS_FILE)
-  }
-
-  /**
-   * spell-epic's home folder:  `$SPELL_EPIC_HOME`, else `~/.spell-epic`.
-   * - read on every call, for tests
-   */
-  static homeFolder(): string {
-    return process.env[HOME_ENV] || join(homedir(), HOME_FOLDER)
   }
 
   ////////////////

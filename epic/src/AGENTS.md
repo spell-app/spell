@@ -306,6 +306,12 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         one session's (`transcriptOf()`), the titles' queue (`titlesFolder()`)
       - `Sessions`, `SessionFolders`, `RunningEpics`, the window script, `ReviewBackfill`, the prompt gate and the
         hooks all ask it;  plain `node` loads it
+    - `EpicHome` (epic `epic-friend` P1):  the epic tools' own folder, the ONE reader of where it is:
+      `$SPELL_EPIC_HOME` (tests set it), else `~/.spell-epic`;  `folder()`, `subfolder(name)`
+      - and who is at the keyboard:  `person()`, the name kept in its `person.json5`, else git's `user.name`;
+        `keepPerson(name)` (`epic whoami <name>`, `epic init`).  The name is the identity:  no id beside it.
+      - the repo list, the ask listeners, the worktree guard, ditched files, the server prune and the window registry
+        all ask it;  plain `node` loads it
     - `Transcript`:  one transcript, read one way:  a line (`parseLine()`), a message's blocks (`blocksOf()`), its
       titles, the end first (`titles()`), its end (`tail()`), the question waiting (`pendingQuestion()`);  plain
       `node` loads it (the handoff hook)
@@ -339,6 +345,10 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - `Sessions` (`session`), `Parking` (`park`), `Stock` (`status`, taking stock)
       - `Shared` (`shared`), with `SharedMigration` (`shared migrate`)
       - `RepoInit` (`init`):  a repo set up for epics (epic `epic-eject` P9)
+        - and the person's name kept (`--name`, else asked in a terminal with `CLI.ask()`, else git's;  epic
+          `epic-friend` P1)
+      - `PersonCommands` (`whoami`, `whois`;  epic `epic-friend` P1):  the person's name and where it came from, and
+        what the content folder's pages and data files say about someone (`from="<name>"`, `"by": "<name>"`)
       - `LinesOfCode` (`loc [--print] [--json]`):  how big each repo of the checkout is (epic `epic-engine` I122)
         - the repo it runs in, plus, in a multi-repo top, every child repo cloned in it (`EpicConfig.top`)
         - the files git tracks, by the settings file `guides/loc/loc.json5` in the content folder (`DataFile`, written

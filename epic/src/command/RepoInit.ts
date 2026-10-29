@@ -4,13 +4,14 @@ import { basename, dirname, join, relative } from "node:path"
 import { Git } from "spell/server/Git"
 import { CLI } from "spell/cli"
 import { EpicConfig, type EpicSettings } from "spell/epic/config/EpicConfig"
+import { EpicHome } from "spell/epic/config/EpicHome"
 
-import { EXIT, EpicCommandError, parseVerbArgs } from "./command.types"
+import { EXIT, EpicCommandError, parseVerbArgs, stringFlag } from "./command.types"
 import { Shared } from "./Shared"
 
 /****************
  * ### `RepoInit`
- * `epic init [--dry-run] [--json]`:  set a repo up for epics (epic `epic-eject` P9),
+ * `epic init [--name <name>] [--dry-run] [--json]`:  set a repo up for epics (epic `epic-eject` P9),
  * in its main checkout or any worktree of it.
  *
  * In order, each step skipped when it's done already, so it's safe to run again:
@@ -27,6 +28,10 @@ import { Shared } from "./Shared"
  * 4. lists in the repo's `.gitignore`, between `# shared:start` and `# shared:end`:  the links
  *    - not the window files (`epic window`:  each machine's own):
  *      they're in the content folder since epic `epic-eject` P13, whose `.gitignore` takes them (`Shared.init()`)
+ * 5. keeps the name this machine's person goes by on the epics (`EpicHome.keepPerson()`;  epic `epic-friend` P1)
+ *    - `--name <name>`;  else, with no name kept yet, asks "What do you want to be called?" in a terminal,
+ *      suggesting git's `user.name` (`CLI.ask()`);  with no terminal (a skill, a Claude session), git's name
+ *    - a name kept already stays, unless `--name` gives another
  *
  * - `--dry-run`:  says what it would do, and writes nothing
  * - `--json`:  the report as JSON
@@ -45,7 +50,10 @@ export class RepoInit {
   /** Run `epic init <args>`;  resolves to the exit code.  Throws `EpicCommandError` outside a git repo. */
   async run(args: string[]): Promise<number> {
     const { flags } = parseVerbArgs(args, ["dryRun", "json"])
-    const report = this.init({ dryRun: flags.dryRun === true })
+    const dryRun = flags.dryRun === true
+    // asked only when it'd be kept, and never into JSON's output
+    const name = stringFlag(flags.name) ?? (dryRun || flags.json ? undefined : await RepoInit.askName())
+    const report = this.init({ dryRun, name })
     if (flags.json) CLI.out(JSON.stringify(report, null, 2))
     else for (const line of RepoInit.lines(report)) CLI.out(line)
     return EXIT.OK
@@ -53,9 +61,11 @@ export class RepoInit {
 
   /**
    * Set the repo up (the class's steps);  what it did, or would do with `dryRun`.
-   * - SIDE EFFECT (not `dryRun`):  writes the config and `.gitignore`, makes the content repo and the links
+   * - `name`:  the name to keep for this machine's person (`EpicHome`);  none:  git's, when no name is kept yet
+   * - SIDE EFFECT (not `dryRun`):  writes the config and `.gitignore`, makes the content repo and the links, keeps
+   *   the person's name in the epic home
    */
-  init({ dryRun = false }: { dryRun?: boolean } = {}): InitReport {
+  init({ dryRun = false, name }: { dryRun?: boolean; name?: string } = {}): InitReport {
     const { main } = this
     const configFile = join(main, EpicConfig.FILE)
     const hadConfig = existsSync(configFile)
@@ -72,7 +82,8 @@ export class RepoInit {
       config: { file: configFile, action: hadConfig ? "kept" : "written", settings },
       content: { folder: content, action: "exists", made: [] },
       links: [],
-      gitignore: { file: join(main, ".gitignore"), action: "ok" }
+      gitignore: { file: join(main, ".gitignore"), action: "ok" },
+      person: RepoInit.personStep({ dryRun, name })
     }
     // the content repo, and any of its folders missing
     const isRepo = existsSync(join(content, ".git"))
@@ -118,6 +129,31 @@ export class RepoInit {
     if (!Git.run(["rev-parse", "--git-dir"], cwd).ok)
       throw new EpicCommandError("epic init:  not in a git repo.  Run it in the repo's checkout (git init first)")
     return Git.mainRoot(cwd)
+  }
+
+  /**
+   * The init's last step:  the person's name kept (`EpicHome`), or what's kept already.
+   * - `name`:  the one to keep;  none:  the name kept stays, else git's is kept
+   * - SIDE EFFECT (not `dryRun`):  writes the epic home's `person.json5`
+   */
+  static personStep({ dryRun, name }: { dryRun: boolean; name?: string }): InitReport["person"] {
+    const now = EpicHome.person()
+    const wanted = name?.trim() || (now.source === "kept" ? undefined : now.name)
+    if (!wanted) return { name: now.name, action: now.source === "kept" ? "already" : "none" }
+    if (now.source === "kept" && now.name === wanted) return { name: wanted, action: "already" }
+    if (dryRun) return { name: wanted, action: "would keep" }
+    return { name: EpicHome.keepPerson(wanted).name, action: "kept" }
+  }
+
+  /**
+   * The name to keep, asked in a terminal:  "What do you want to be called?", suggesting git's `user.name`.
+   * - `undefined` when a name is kept already (it stays), or nothing was said and git has no name
+   * - no terminal:  git's name, asking nothing (`CLI.ask()`)
+   */
+  static async askName(): Promise<string | undefined> {
+    const now = EpicHome.person()
+    if (now.source === "kept") return undefined
+    return (await CLI.ask(NAME_QUESTION, { suggestion: now.name ?? "" })) || undefined
   }
 
   /**
@@ -285,7 +321,8 @@ export class RepoInit {
           ? `${content.folder}:  ${report.dryRun ? "would add" : "added"} ${content.made.join(", ")}`
           : `${content.folder}:  ${report.dryRun ? "would make it" : "made"}, a git repo with ${content.made.join(", ")}`,
       ...report.links.map(({ path, action }) => `${join(report.main, path)}:  ${action}`),
-      `${report.gitignore.file}:  ${report.gitignore.action === "ok" ? "lists the links already" : `${would}${report.gitignore.action}`}`
+      `${report.gitignore.file}:  ${report.gitignore.action === "ok" ? "lists the links already" : `${would}${report.gitignore.action}`}`,
+      personLineFor(report.person)
     ]
     if (report.dryRun) return [...lines, "dry run:  nothing changed"]
     const toCommit = [
@@ -303,6 +340,14 @@ export class RepoInit {
   }
 }
 
+/** What `epic init` says about the person's name. */
+function personLineFor(person: InitReport["person"]): string {
+  const file = EpicHome.personFile()
+  if (person.action === "none") return "you:  no name yet (git has no user.name):  epic whoami <name> keeps one"
+  if (person.action === "already") return `you:  ${person.name}, kept in ${file} already`
+  return `you:  ${person.name}, ${person.action === "kept" ? "kept" : "would be kept"} in ${file}`
+}
+
 /** What `epic init` did, or would do:  `RepoInit.init()`. */
 export type InitReport = {
   main: string
@@ -311,7 +356,12 @@ export type InitReport = {
   content: { folder: string; action: "created" | "added" | "exists"; made: string[] }
   links: { path: string; action: string }[]
   gitignore: { file: string; action: "ok" | "updated" | "written" }
+  /** the name this machine's person goes by:  `kept` now, kept `already`, `would keep` (a dry run), or `none` */
+  person: { name: string | undefined; action: "kept" | "already" | "would keep" | "none" }
 }
+
+/** What `epic init` asks, in a terminal, when no name is kept. */
+const NAME_QUESTION = "What do you want to be called?"
 
 /**
  * The content repo's folders for a new repo:  what the epic tooling reads and writes.

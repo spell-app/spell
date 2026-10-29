@@ -28,7 +28,8 @@ try {
     if (stopped.length) console.error(`server-prune hook:  ${CheckoutServers.said(stopped)}, their checkouts gone`)
     // removed worktrees' folders moved aside while their windows still wrote into them (r22)
     const { LeftoverFolders } = await import("spell/epic/command/LeftoverFolders.ts")
-    const swept = LeftoverFolders.sweep({ home: CheckoutServers.homeFolder() })
+    const { EpicHome } = await import("spell/epic/config/EpicHome.ts")
+    const swept = LeftoverFolders.sweep({ home: EpicHome.folder() })
     if (swept) console.error(`server-prune hook:  deleted ${swept} leftover worktree folder(s)`)
   }
 } catch (error) {

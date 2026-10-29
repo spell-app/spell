@@ -1,12 +1,11 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs"
-import { homedir } from "node:os"
 import { basename, join } from "node:path"
 
 import { RealPath } from "spell/server/RealPath"
 // By relative path, `.ts` and all:  the `SessionStart` hook loads this file with plain `node` (types stripped)
 import { EpicConfig } from "spell/epic/config/EpicConfig.ts"
+import { EpicHome } from "spell/epic/config/EpicHome.ts"
 import { EpicRepo } from "spell/epic/config/EpicRepo.ts"
-import { HOME_ENV, HOME_FOLDER } from "spell/epic/server/server.types.ts"
 
 /****************
  * ### `WorktreeGuard`
@@ -111,9 +110,9 @@ export class WorktreeGuard {
     }
   }
 
-  /** Where the guard's records go:  `$SPELL_EPIC_HOME`, else `~/.spell-epic`, then `session-worktrees/`. */
+  /** Where the guard's records go:  `session-worktrees/` in the epic home (`EpicHome`). */
   static recordsFolder(): string {
-    return join(process.env[HOME_ENV] || join(homedir(), HOME_FOLDER), "session-worktrees")
+    return EpicHome.subfolder("session-worktrees")
   }
 
   /** Session `id`'s record file;  the id's own characters only, so it can't name another folder. */

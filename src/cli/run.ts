@@ -1,5 +1,6 @@
 import chalk from "chalk"
 import { relative } from "node:path"
+import { createInterface } from "node:readline/promises"
 
 import { CLI } from "spell/cli"
 
@@ -49,6 +50,41 @@ export function out(text: string): void {
 /** Write `text` to stderr, on its own line. */
 export function err(text: string): void {
   process.stderr.write(text.endsWith("\n") ? text : `${text}\n`)
+}
+
+/**
+ * Ask the person at the terminal `question`;  their answer, else `suggestion`.
+ * - asks only in a real terminal (stdin AND stdout a TTY):  a skill, a Claude session, a pipe or CI has none,
+ *   so it answers `suggestion` at once, asking nothing
+ * - the suggestion shows after the question (`What do you want to be called? (Ana Lima) `);
+ *   Enter alone, or only spaces, takes it
+ * - `input` / `output`:  the streams, `process.stdin` / `process.stdout` by default (tests hand their own)
+ * - NEVER throws:  a closed terminal (Ctrl+D) answers `suggestion`
+ */
+export async function ask(
+  question: string,
+  { suggestion = "", input = process.stdin, output = process.stdout }: AskOptions = {}
+): Promise<string> {
+  if (!input.isTTY || !output.isTTY) return suggestion
+  const terminal = createInterface({ input, output })
+  try {
+    const answer = await terminal.question(suggestion ? `${question} (${suggestion}) ` : `${question} `)
+    return answer.trim() || suggestion
+  } catch {
+    return suggestion
+  } finally {
+    terminal.close()
+  }
+}
+
+/** `ask()`'s options. */
+export type AskOptions = {
+  /** the answer when they just press Enter, or when there's no terminal to ask in;  default `""` */
+  suggestion?: string
+  /** where the answer is read from;  default `process.stdin` */
+  input?: NodeJS.ReadableStream & { isTTY?: boolean }
+  /** where the question is written;  default `process.stdout` */
+  output?: NodeJS.WritableStream & { isTTY?: boolean }
 }
 
 /** `path` relative to the current folder, when it's under it;  else as given. */

@@ -62,6 +62,11 @@ export type ServerConfig = {
    * (epics' `AirplaneMode`, told by its route module)
    */
   airplane?: boolean
+  /**
+   * the name the person at this machine's keyboard goes by on the epics;  absent when nobody said and git has none
+   * (epics' `EpicHome.person()`, told by its route module)
+   */
+  person?: string
   editPage?: (edit: PageEdit) => Promise<PageEditResult>
   saveFile?: (save: FileSave) => Promise<PageEditResult>
   readPage?: () => Promise<PageSource>

@@ -76,7 +76,8 @@
       "src/list/runningRoutes.ts",
       "src/tools/agentRoutes.ts",
       "src/tools/showRoutes.ts",
-      "src/tools/airplaneRoutes.ts"
+      "src/tools/airplaneRoutes.ts",
+      "src/tools/personRoutes.ts"
     ],
     "watch": [
       "src/tools/_assets",

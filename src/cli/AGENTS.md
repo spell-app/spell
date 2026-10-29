@@ -20,7 +20,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     NOT in the barrel:  importing it runs the command line.
   - [program.ts](program.ts) -- `spellProgram()`, `addRepoCommands()` (the clash rule), `addHelp()`
   - [repos.ts](repos.ts) -- `spellRepos()`, `commandLists()`, `hook()` / `needHook()`
-  - [run.ts](run.ts) -- `runCommand()`, `rawArgsAfter()`, `out()` / `err()`, `relativePath()`
+  - [run.ts](run.ts) -- `runCommand()`, `rawArgsAfter()`, `out()` / `err()`, `relativePath()`;
+    `ask()`, a question asked only in a real terminal
   - [tools.ts](tools.ts) -- `runTool()`, `runChild()`, `epicBin()` / `runEpic()`
   - [findCheckout.ts](findCheckout.ts) -- `findCheckout()`, `KIT_ROOT`, `KIT_MARKER`
   - [cli.types.ts](cli.types.ts) -- `EXIT`, `CliError`, the flags' types, `CommandList`, `HookList`, `SpellRepo`

@@ -10,6 +10,7 @@ import { EpicTools, type EpicToolName } from "spell/epic/command/EpicTools"
 import { Hub } from "spell/epic/command/Hub"
 import { LinesOfCode } from "spell/epic/command/LinesOfCode"
 import { Parking } from "spell/epic/command/Parking"
+import { PersonCommands } from "spell/epic/command/PersonCommands"
 import { PluginInstall } from "spell/epic/command/PluginInstall"
 import { RepoInit } from "spell/epic/command/RepoInit"
 import { Repos } from "spell/epic/command/Repos"
@@ -555,7 +556,7 @@ export class EpicProgram {
   // ## The repo's settings
   ////////////////
 
-  /** `config`, `voice`, `init`, `plugin`. */
+  /** `config`, `voice`, `init`, `whoami`, `whois`, `plugin`. */
   private addSettingsVerbs(): void {
     const epic = this.epic
     epic.commandsGroup("The repo's settings:")
@@ -577,8 +578,21 @@ export class EpicProgram {
         "set this repo up for epics:  its .epic/config.json5, the content repo beside it, the links and their " +
           ".gitignore lines;  safe to run again"
       )
-      .usage("[--dry-run] [--json]")
+      .usage("[--name <name>] [--dry-run] [--json]")
       .addHelpText("after", INIT_HELP)
+
+    this.verb(epic.command("whoami"), (args) => new PersonCommands().whoami(args))
+      .description(
+        "who you are on the epics:  your name and where it came from (kept, else git's user.name);  " +
+          "with a name, keeps it"
+      )
+      .usage("[<name>] [--json]")
+      .addHelpText("after", WHOAMI_HELP)
+
+    this.verb(epic.command("whois"), (args) => new PersonCommands().whois(args))
+      .description("what the epics know about someone:  the replies and comments naming them, by place, and when last")
+      .usage("<name> [--json]")
+      .addHelpText("after", example("epic whois Owen"))
 
     this.group(
       epic.command("plugin"),
@@ -1003,9 +1017,21 @@ In the repo's main checkout (or any worktree of it), each step skipped when it's
   .gitignore           the links listed between # shared:start and # shared:end
 Then commit .epic/config.json5 and .gitignore on the base branch.
 
+--name <name> is the name you go by on the epics, kept in ~/.spell-epic/person.json5 (epic whoami);
+without it, epic init asks in a terminal, suggesting git's user.name, and takes git's name anywhere else.
+
 Examples:
   epic init --dry-run
+  epic init --name Ana
   epic init`
+
+const WHOAMI_HELP = `
+Your name is who you are on the epics:  kept in ~/.spell-epic/person.json5 ($SPELL_EPIC_HOME), else git's user.name.
+epic init asks for it too.
+
+Examples:
+  epic whoami
+  epic whoami Ana`
 
 /** After `epic file --help`. */
 const FILE_HELP = `

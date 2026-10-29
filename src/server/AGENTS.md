@@ -231,7 +231,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - Live reload reports a change in one at its route.
     - Route modules add to every page's `window.SPELL_SERVER`:  `addPageConfig()`.
       - e.g. epics' airplane mode ([airplaneRoutes.ts](../../epic/src/tools/airplaneRoutes.ts)),
-        whose switch, `AirplaneMode`, moved to epics in `epic-eject` P4.
+        whose switch, `AirplaneMode`, moved to epics in `epic-eject` P4;
+        and who is at the keyboard, `person` ([personRoutes.ts](../../epic/src/tools/personRoutes.ts), epic
+        `epic-friend` P1)
     - Tests set a route module up by hand with `server.routeContext()`.
     - Every call is under `/api/`, one prefix per package that answers it.
       The old paths answer "not found" (no redirects, Q30 of `people-and-orgs`).

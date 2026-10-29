@@ -1,6 +1,7 @@
 import { resolve } from "node:path"
 
 import { CLI } from "spell/cli"
+import { EpicHome } from "spell/epic/config/EpicHome"
 import { RepoList } from "spell/epic/server/RepoList"
 import { DEFAULT_EPIC_PORT, PID_FILE } from "spell/epic/server/server.types"
 
@@ -29,8 +30,8 @@ export class Hub {
   /** spell-epic's home folder:  the repo list, the pid file, the log */
   readonly home: string
 
-  /** - `home`:  default `RepoList.homeFolder()` (`~/.spell-epic`, or `SPELL_EPIC_HOME`) */
-  constructor({ home = RepoList.homeFolder() }: { home?: string } = {}) {
+  /** - `home`:  default the epic home (`EpicHome.folder()`:  `~/.spell-epic`, or `SPELL_EPIC_HOME`) */
+  constructor({ home = EpicHome.folder() }: { home?: string } = {}) {
     this.home = resolve(home)
   }
 
