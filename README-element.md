@@ -486,10 +486,10 @@ The set's docs data comes after;  `spell-pack check` exits 1 while any of it is 
   `spell/element` on the page is Spell UI's core, which carries all of this framework.
 - A pack that fails or times out is logged, and the root still gets ready.
 
-The check, run in spell-epic, when the pack is current:
+The check, run in the epic folder, when the pack is current:
 
 ```sh
-cd spell-epic          # from the kit's root
+cd epic                # from the kit's root
 yarn pack:check
 ```
 
@@ -710,7 +710,7 @@ What it won't do:
 - **Bind to a framework:**  the elements are plain custom elements, used the same from plain HTML or any framework.
 - **Fall back, except in a form:**  only form controls get a plain-HTML fallback;
   any other element that fails shows its children.
-- 🌱 Not on npm yet:  today it runs from a checkout of the kit, like every Spell repo.
+- On npm inside `spell`:  `npm install spell@next`, then `import { E } from "spell/element"` (`@next` until the first release).
 
 <details>
 <summary>Every reactive decorator, one line each</summary>

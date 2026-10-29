@@ -109,7 +109,7 @@ plantilla Carta, subplantilla de View
 La carta dice cuáles son sus palos, rangos y colores:  un mazo, una pila o un juego solo los leen.
 Una vista:  cada carta es un elemento propio en la página, p. ej. <solitario-carta>.
 
-propiedades:  rango, valor, palo, color, nombre, dirección, imagen, símbolo, estado, pila
+propiedades:  rango, valor, palo, color, nombre, dirección, imagen, cara, símbolo, estado, pila
 enumeraciones:  Rangos, Palos, Direcciones
 declarado en Carta.es.spell:4
 

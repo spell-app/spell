@@ -240,7 +240,7 @@ await themes.apply("classic")
 Fomantic's `default` look is `classic` here, the base every theme sits on.
 Its other themes were ported too (24 of its 25 looks), and are archived now, kept only to copy from:
 a page picks one of Spell's own four instead,
-as [README-themes.md](README-themes.md#the-themes--spells-own-four-on-classic) says.
+as [README-themes.md](README-themes.md#the-themes--spells-own-nine-on-classic) says.
 
 ### jQuery calls become properties and events
 

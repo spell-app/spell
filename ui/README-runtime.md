@@ -291,10 +291,11 @@ spell icon rocket
 <summary>Output</summary>
 
 ```text
-rocket      fa7-free
-rocket      fomantic
-rocketchat  fa7-brands
-rocketchat  fomantic
+rocket         fa7-free
+rocket         fomantic
+rocketchat     fa7-brands
+rocketchat     fomantic
+space awesome  fa7-brands
 ```
 
 </details>

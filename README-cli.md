@@ -8,15 +8,15 @@ spell --version
 <summary>Output</summary>
 
 ```text
-spell 0.8.0
-spell-parser 0.8.0
-spell-ui 0.8.0
-spell-app 0.8.0
+spell 0.8...
+spell-parser 0.8...
+spell-ui 0.8...
+spell-app 0.8...
 ```
 
 </details>
 
-_Every repo that adds commands to `spell` answers for itself, the kit's first:  four lines, in about 0.1 s._
+_Every folder that adds commands to `spell` answers for itself, the kit's first:  four lines, in about 0.1 s._
 
 One command over every Spell repo.
 If you've used `git`, `gh` or `cargo`, you know the shape:  one program, a verb after it, `--help` on everything.
@@ -972,11 +972,12 @@ spell projects
 <summary>Output</summary>
 
 ```text
-owen@spell       Projects       ...
-@spell/examples  Examples       10 projects
-@spell/guides    Guides         12 projects
-@spell/library   Libraries      1 project
-@spell/test      Test fixtures  7 projects
+owen@spell        Projects       ...
+@spell/examples   Examples       ... projects
+@spell/guides     Guides         ... projects
+@spell/notebooks  Notebooks      ... projects
+@spell/library    Libraries      1 project
+@spell/test       Test fixtures  ... projects
 ```
 
 </details>
@@ -1281,8 +1282,9 @@ Planned, and none of it started:
 - The language commands' work, moved down from `spell/app` into `spell-parser` command by command,
   so they run with `spell-parser` alone.
 - `spell lsp`, which starts the language server, so the VS Code extension runs it rather than a `tsx` path.
-- A bundled `spell` on npm, which installs and runs with no checkout at all.
-  It needs `keepNames` (rules register by class name), the version stamp, and the projects folder found some other
+- A BUNDLED `spell` on npm, one file.
+  Today's `npm install spell@next` already runs `npx spell help` with no checkout, from the built folders.
+  A bundle needs `keepNames` (rules register by class name), the version stamp, and the projects folder found some other
   way than next to `src/`.
 - The repo-wide checks as commands, `ts`, `lint`, `format`, `test` and `review` over every repo,
   under a group of their own, since `lint`, `test` and `format` are the language's words.
