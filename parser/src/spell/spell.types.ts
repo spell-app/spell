@@ -22,7 +22,7 @@ export type AnySpellFile = SpellFile | SpellJSFile | SpellCSSFile
 export type CompilableSpellFile = SpellFile | SpellCSSFile
 
 /**
- * The FORM a spell file is written in:  code spell (`Card.spell`), or spellx, its tag-shaped form (`Card.spellx`).
+ * The FORM a spell file is written in:  code spell (`Card.spell`), or spellx, its tag-shaped form (`Card.spellml`).
  * - Both read by the same rules, to the same program:  see `SP.SpellParser.form`.
  */
 export type SpellForm = "spell" | "spellx"
@@ -56,16 +56,42 @@ export function isProjectFile(name: string): boolean {
 /** End of a code spell file's name:  `Card.spell`, `Carta.es.spell`. */
 export const SPELL_SUFFIX = ".spell"
 
-/** End of a spellx file's name, spell's tag-shaped form (epic `elemental-spell`):  `Card.spellx`, `Carta.es.spellx`. */
-export const SPELLX_SUFFIX = ".spellx"
+/**
+ * End of a markup file's name, spell's tag-shaped form (epic `elemental-spell`):  `Card.spellml`, `Carta.es.spellml`.
+ * - The name new files get, and the one docs and help say (Owen, 2026-10-27, epic `repo-split` P21).
+ */
+export const SPELLML_SUFFIX = ".spellml"
 
 /**
- * Is `name` (a file's name or path) a spell SOURCE file's:  code spell or spellx, in any language?
- * - `Card.spell`, `Carta.es.spell`, `Card.spellx`, `Carta.es.spellx`
+ * The markup files' OLD ending, `Card.spellx`:  still read everywhere a `.spellml` file is, never written.
+ * - Owen, 2026-10-27:  "support both for now".
+ */
+export const OLD_SPELLML_SUFFIX = ".spellx"
+
+/** Every ending a markup file may have:  `.spellml`, then the old `.spellx`. */
+export const SPELLML_SUFFIXES = [SPELLML_SUFFIX, OLD_SPELLML_SUFFIX] as const
+
+/**
+ * Is `name` (a file's name or path) a MARKUP file's, spell's tag-shaped form, in any language?
+ * - `Card.spellml`, `Carta.es.spellml`, and the old `Card.spellx`
+ * - The ONE check:  every place that tells a markup file from code spell by its name asks this.
+ */
+export function isSpellmlName(name: string | undefined): boolean {
+  return !!name && SPELLML_SUFFIXES.some((suffix) => name.endsWith(suffix))
+}
+
+/** The form a spell file is written in, by its name:  markup (`isSpellmlName()`), else code spell. */
+export function formOfName(name: string | undefined): SpellForm {
+  return isSpellmlName(name) ? "spellx" : "spell"
+}
+
+/**
+ * Is `name` (a file's name or path) a spell SOURCE file's:  code spell or markup, in any language?
+ * - `Card.spell`, `Carta.es.spell`, `Card.spellml`, `Carta.es.spellml`, the old `Card.spellx`
  * - NOT a project's built output, `Solitaire.spell.js`.
  */
 export function isSpellSourceName(name: string | undefined): boolean {
-  return !!name && (name.endsWith(SPELL_SUFFIX) || name.endsWith(SPELLX_SUFFIX))
+  return !!name && (name.endsWith(SPELL_SUFFIX) || isSpellmlName(name))
 }
 
 /**

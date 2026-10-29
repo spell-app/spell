@@ -120,7 +120,7 @@ At the kit's root, the kit's own checks:
 yarn kit:ts           # the declarations (spell-types:  both programs, the type check), then the tests' tsc
 yarn kit:test         # every Vitest project;  one:  yarn vp test run --project server
 yarn kit:lint         # oxlint over src, tests, bin, scripts, tools;  kit:lint:fix fixes what it can
-yarn kit:format       # oxfmt;  kit:format:check only checks
+yarn kit:format       # oxfmt over the kit's own files only;  kit:format:check only checks
 yarn kit:review       # the finishing pass:  ts, lint:fix, format, test
 ```
 
@@ -204,6 +204,15 @@ yarn kit:review       # the finishing pass:  ts, lint:fix, format, test
   yarn vp test
   yarn vp check
   ```
+
+  - EXCEPT `vp fmt` / `vp check` at the KIT's root:  they reach every big folder, with only the root's ignore list,
+    and rewrite what each folder's own leaves alone (vendored CSS, test fixtures, drafts:  408 files once, epic
+    `epic-engine` I156).
+    Format the kit with `yarn kit:format`, a folder with its own `yarn format`, one file with `yarn vp fmt <file>`.
+- Each `format` covers only its own files, through its own `fmt` ignores:
+  - the kit's `kit:format` names its own paths, as `kit:lint` does
+  - each big folder's runs in its folder, so it reads that folder's `vite.config.ts`
+  - a flag goes AFTER the paths (`vp fmt src tests --check`):  before them, oxfmt can match no file at all
 
 - `yarn review` is the finishing pass (WWOD §1):  a folder's, over its one `src/`;  the root's, over everything.
   - It's about the same (`~==`) as all four of these (the kit's own:  `yarn kit:review`):

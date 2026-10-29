@@ -85,7 +85,9 @@ export default defineConfig({
   },
   define: {
     global: {},
-    "process.env": {}
+    "process.env": {},
+    // the page server's address, as this dev server reaches it (`proxy`):  the theme menu's Theme bench opens there
+    "import.meta.env.SPELL_PAGE_SERVER": JSON.stringify(`http://${environment.api_server}:${environment.expressPort}`)
   }
 })
 

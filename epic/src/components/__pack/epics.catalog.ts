@@ -1,5 +1,5 @@
 /* GENERATED -- do not edit:  `spell pack build epics`, from every vocabulary, `<Name>.en.ts` */
-// sources:  9b4efd6886b88ae4
+// sources:  4bef527e6b745c5d
 
 import type { RootCatalogEntry } from "spell/ui"
 
@@ -12,10 +12,10 @@ export const CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
   "epic-ask": {"folder":"epic-ask","skeleton":{"height":"6em"},"attributes":["name","multiple","select-all","filter","more-details"]},
   "epic-card": {"folder":"epic-list","skeleton":{"parts":[{"shape":"header"},{"shape":"paragraph","lines":2}]},"attributes":["epic","phases","updated","urgent","future","standing","running","active","worked","saga","saga-title","saga-purpose","favorite"]},
   "epic-cards": {"folder":"epic-cards","skeleton":{"height":"2em"},"attributes":["saga"]},
-  "epic-change": {"folder":"epic-change","attributes":["id","item","at","answer","accepted"]},
+  "epic-change": {"folder":"epic-change","attributes":["id","item","at","answer","was","accepted"]},
   "epic-choice-row": {"folder":"epic-choice-rows","attributes":["name","file","line","purpose","note","current","recommended"]},
   "epic-choice-rows": {"folder":"epic-choice-rows","skeleton":{"height":"8em"},"attributes":["stacked","no-file","blank","noun","reorder"]},
-  "epic-choices": {"folder":"epic-choices","attributes":["chosen"]},
+  "epic-choices": {"folder":"epic-choices","attributes":["chosen","chosen-on","chosen-note"]},
   "epic-choices-bar": {"folder":"epic-choices-bar","skeleton":{"height":"3em"},"attributes":[]},
   "epic-code": {"folder":"epic-code","attributes":["title","language","open"]},
   "epic-comment-pane": {"folder":"epic-comment-pane","attributes":["headline","about","saved","failed","deletable","near"]},

@@ -1803,7 +1803,7 @@
         "editors"
       ],
       "aka": [],
-      "description": "Toolbar above `<InputEditor>`:  the file dropdown;  Save, Reload and New File as icons with tooltips; then a \"...\" menu:  the file's actions (`Actions.FILE_DROPDOWN_ACTIONS`), and \"Show line numbers\".",
+      "description": "Toolbar above `<InputEditor>`:  the file dropdown;  Save, Reload and New File as icons with tooltips; then a \"...\" menu:  the file's actions (`Actions.FILE_DROPDOWN_ACTIONS`), \"Show line numbers\", and \"Settings…\" (`<CodeSettingsPanel>`:  the code editor's popups).",
       "noun": "InputToolbar",
       "attributes": [],
       "slots": [],

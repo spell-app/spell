@@ -3,6 +3,7 @@ import { lazy, type Component } from "solid-js"
 import { editor } from "spell/app/app/editor"
 import { appTexts } from "spell/app/app/ui/AppTexts"
 import type { FileEditorProps, MonacoEditorProps } from "spell/app/app/solid/monaco"
+import { CodeSettings } from "./CodeSettings"
 
 /**
  * The app's Solid Monaco editor components, loaded on first use:
@@ -13,6 +14,7 @@ import type { FileEditorProps, MonacoEditorProps } from "spell/app/app/solid/mon
  *   and "go to definition" in another file shows that file.
  * - SIDE EFFECT, once loaded:  hands the editor a scope explorer on its language service, for the Types tab
  *   (`editor.setScopeExplorer()`).
+ * - SIDE EFFECT, once loaded:  every Monaco editor on the page takes the code pane's settings (`CodeSettings`).
  * - SIDE EFFECT, once loaded:  puts `SpellMonaco` / `monaco` on `globalThis` for console debugging,
  *   as `debug.ts` does for everything else.
  * - NOTE: `spell/app/app/solid/monaco` is NOT in the `spell/app/app/solid` barrel:
@@ -40,6 +42,7 @@ let loading: Promise<typeof import("spell/app/app/solid/monaco")> | undefined
 /** Load `spell/app/app/solid/monaco` once, and connect it -- see `LazyMonaco`. */
 function loadMonaco(): Promise<typeof import("spell/app/app/solid/monaco")> {
   loading ??= import("spell/app/app/solid/monaco").then(async (module) => {
+    CodeSettings.follow(module.monaco)
     module.SpellMonaco.onEdit((file) => editor.onFileEdited(file))
     // the Types tab's tree, from the same language service:  `spell/app/lsp` is already in Monaco's chunk
     const { LSP } = await import("spell/app/lsp")

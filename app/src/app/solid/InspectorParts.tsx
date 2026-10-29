@@ -214,6 +214,7 @@ const VIEW_PREF = "inspector:view"
  * The running app's parts as a tree (epic `debut` P13, C22):  a row each, its icon and title, nested as they are
  * in the app.
  * - A part is a drawn thing or a Spell UI element (`Inspector.isPart()`);  the elements between them are skipped.
+ * - Each row's title in the text's colour, which one it is (`· discards`) and its icons muted.
  * - Clicking a row picks that part;  the picked one is highlighted.
  * - A part with parts inside folds:  its caret;  what's folded is remembered with the project.
  * - Its icons are stubs (`Inspector.iconFor()`):  one for drawn things, one for Spell UI elements.
@@ -244,7 +245,10 @@ function PartsTree(props: { rows: readonly PartRow[] }): JSX.Element {
                 />
               </Show>
               <ui-icon name={Inspector.iconFor(row.element)} />
-              <span>{Inspector.labelFor(row.element)}</span>
+              <span class="InspectorTreeTitle">{Inspector.labelPartsFor(row.element).title}</span>
+              <Show when={Inspector.labelPartsFor(row.element).which}>
+                {(which) => <span class="InspectorTreeWhich">{which()}</span>}
+              </Show>
             </li>
           )}
         </For>

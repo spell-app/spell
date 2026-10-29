@@ -60,9 +60,9 @@ export const epicAnswerVocabulary = {
         "item's thread, or nothing without one."
     },
     { name: "unneeded", description: "Redundant, with no body:  not drawn." },
-    { name: "in-thread", description: "Redundant, with a body:  first in its item's thread's brown block." },
-    { name: "thread-start", description: "First in the thread's block." },
-    { name: "thread-end", description: "Last in the thread's block." }
+    { name: "in-thread", description: "Redundant, with a body:  first in its item's thread, inside its one frame." },
+    { name: "thread-start", description: "First in the thread:  the frame's top edge and corners." },
+    { name: "thread-end", description: "Last in the thread:  the frame's bottom edge and corners." }
   ],
   texts: [
     { key: "foldTip", text: "Fold the answer", description: "Tooltip of its fold button while open." },

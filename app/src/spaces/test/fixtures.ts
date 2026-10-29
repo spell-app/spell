@@ -241,7 +241,7 @@ function compileFixture(
   const { scope, files } = parseSpellProject(sources, { parentScope })
   const errors = files.flatMap(({ path, errors }) => errors.map((error) => `// PARSE ERROR ${path}:${error}\n`))
   const parts = imports
-    .filter(({ path, active }) => active !== false && /\.(spell|spellx|css)$/.test(path))
+    .filter(({ path, active }) => active !== false && /\.(spell|spellml|spellx|css)$/.test(path))
     .map(({ path }) => {
       if (path.endsWith(".css")) return compiledCSS(readFileSync(resolve(projectDir, `.${path}`), "utf8"))
       const file = files.find((it) => it.path === path)!
@@ -281,7 +281,7 @@ export function fixtureImports(projectName: string): Record<string, string> {
 function projectImportsIn(folder: string): Record<string, string> {
   const imported: Record<string, string> = {}
   for (const { path, active } of readProjectFile(folder).imports) {
-    if (active === false || /\.(spell|spellx|css)$/.test(path)) continue
+    if (active === false || /\.(spell|spellml|spellx|css)$/.test(path)) continue
     const projectId = SP.SpellProject.projectIdForImport(path)
     const projectName = projectId.split("/").at(-1)!
     if (fixtureProjectId(projectName) !== projectId)
@@ -343,7 +343,7 @@ function moduleFor(projectId: string): string {
 export function loadFixtureProject(projectName: string): SpellSourceFile[] {
   const projectDir = fixtureFolder(projectName)
   return readProjectFile(projectDir)
-    .imports.filter(({ path, active }) => active !== false && /\.spellx?$/.test(path))
+    .imports.filter(({ path, active }) => active !== false && SP.isSpellSourceName(path))
     .map(({ path }) => ({ path, contents: readFileSync(resolve(projectDir, `.${path}`), "utf8") }))
 }
 
@@ -361,8 +361,8 @@ export const CODE_SPELL_TWINS_DIR = resolve(environment.repoDir, "tests", "spell
  */
 export function loadCodeSpellTwin(projectName: string): SpellSourceFile[] {
   return loadFixtureProject(projectName).map((file) => {
-    if (!file.path.endsWith(".spellml")) return file
-    const path = file.path.slice(0, -1)
+    if (!SP.isSpellmlName(file.path)) return file
+    const path = file.path.replace(/(ml|x)$/, "")
     return { path, contents: readFileSync(resolve(CODE_SPELL_TWINS_DIR, projectName, `.${path}`), "utf8") }
   })
 }

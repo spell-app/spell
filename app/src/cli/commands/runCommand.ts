@@ -1,5 +1,5 @@
 import { spawn, type ChildProcess } from "child_process"
-import { mkdtempSync, rmSync, writeFileSync } from "fs"
+import { existsSync, mkdtempSync, rmSync, writeFileSync } from "fs"
 import { tmpdir } from "os"
 import { delimiter, dirname, resolve } from "path"
 import { fileURLToPath, pathToFileURL } from "url"
@@ -249,7 +249,7 @@ export async function runCode(
       name,
       entry: pathToFileURL(entry).href,
       projects,
-      core: pathToFileURL(resolve(environment.coreDir, "index.ts")).href,
+      core: pathToFileURL(sourceOrBuilt(resolve(environment.coreDir, "index.ts"))).href,
       verbose: options.verbose,
       filter: options.name,
       dom,
@@ -314,18 +314,28 @@ function runChild(spec: CLI.RunSpec, capture: boolean): Promise<ChildResult> {
     import.meta.resolve("tsx/esm"),
     "--import",
     pathToFileURL(resolve(runner, "hooks.mjs")).href,
-    resolve(runner, "runProject.ts")
+    sourceOrBuilt(resolve(runner, "runProject.ts"))
   ]
+  // the checkout's settings;  the published package has none, and nothing to compile but the project
+  const tsconfig = resolve(CLI_SRC_DIR, "..", "..", "tsconfig.node.json")
   const env = {
     ...process.env,
     SPELL_RUN: JSON.stringify(spec),
-    TSX_TSCONFIG_PATH: resolve(CLI_SRC_DIR, "..", "..", "tsconfig.node.json")
+    ...(existsSync(tsconfig) && { TSX_TSCONFIG_PATH: tsconfig })
   }
   const stdio: ("ignore" | "pipe" | "inherit" | "ipc")[] = capture
     ? ["ignore", "pipe", "pipe"]
     : ["inherit", "inherit", "inherit"]
   if (spec.mode === "run" || spec.reports) stdio.push("ipc")
   return collected(spawn(process.execPath, args, { stdio, env }))
+}
+
+/**
+ * `file` (a `.ts` source) as it is in the checkout, else its built `.js`:  the published `spell` ships only that
+ * (`dist/app/cli/runner/runProject.js`;  epic `repo-split` P22).
+ */
+function sourceOrBuilt(file: string): string {
+  return existsSync(file) ? file : file.replace(/\.ts$/, ".js")
 }
 
 /** What `child` writes -- see `ChildResult` -- once it exits;  what it skipped, if it says (`CLI.RunReport`). */

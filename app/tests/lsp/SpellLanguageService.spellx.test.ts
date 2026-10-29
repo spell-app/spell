@@ -41,6 +41,22 @@ describe("SpellLanguageService, spellx", () => {
     expect(service.diagnostics(tile).map((it) => it.message)).toEqual([])
   })
 
+  // epic `repo-split` P21:  the old ending, `.spellx`, still reads as a `.spellml` file does
+  test("the same file with the old ending parses, colours and outlines the same as its .spellml", async () => {
+    const oldFolder = resolve(dir, "OldTiles")
+    const oldName = `FlipTile${SP.OLD_SPELLML_SUFFIX}`
+    mkdirSync(oldFolder)
+    writeFileSync(resolve(oldFolder, oldName), tileText)
+    writeFileSync(resolve(oldFolder, SP.PROJECT_FILE), `{ imports: [{ path: "/${oldName}", active: true }] }\n`)
+    const oldUri = pathToFileURL(resolve(oldFolder, oldName)).href
+    await workspace.update(oldUri, tileText)
+    const old = workspace.fileFor(oldUri)!
+    expect(old.form).toBe("spellx")
+    expect(service.diagnostics(old)).toEqual([])
+    expect(describeTokens(old)).toEqual(describeTokens(tile))
+    expect(service.documentSymbols(old)).toEqual(service.documentSymbols(tile))
+  })
+
   test("its tags' words, attribute names and closers are coloured as written;  a twin's own words never are (C24)", () => {
     const tokens = describeTokens(tile)
     expect(tokens).toContain(`4:1 "<property" keyword`)

@@ -227,14 +227,21 @@ export class PlanDocCommands {
         if (planning) this.inbox.setWorking(file, planning.id, planning.on)
         return undefined
       }
-      case "updated":
-        return this.edit(file, (plan) =>
-          plan.addPhaseUpdate(
-            plan.phasePlace(need(rest[0], "a phase")),
-            flags.file ? readFileSync(flags.file as string, "utf8") : need(rest[1], "what changed (html)"),
-            { summary: stringFlag(flags.summary) }
-          )
-        )
+      case "updated": {
+        // An answer's change shows as its change marks alone:  no block when they say it (epic `epic-engine` I159)
+        const forIds =
+          flags.for === undefined ? undefined : need(stringFlag(flags.for), "--for <item ids>").split(/[\s,]+/)
+        const said = await this.edit(file, (plan) => {
+          const n = plan.phasePlace(need(rest[0], "a phase"))
+          const html = flags.file ? readFileSync(flags.file as string, "utf8") : need(rest[1], "what changed (html)")
+          const ids = plan.marksSay(n, html, forIds?.filter(Boolean))
+          if (ids.length) return `${plan.phaseLabel(n)}:  no Update block, the change marks say it (${ids.join(", ")})`
+          plan.addPhaseUpdate(n, html, { summary: stringFlag(flags.summary) })
+          return undefined
+        })
+        if (said) this.print(said)
+        return undefined
+      }
       case "stage":
         return this.edit(file, (plan) => {
           const stage = need(rest[0], `a stage (${PageStages.ALL.join(" | ")})`)
@@ -1261,11 +1268,14 @@ export const USAGE = `usage:  yarn plan-doc <command> <name> ...    (doc:  epics
                                                    before it, the Doc Review moving down one, back to do
   phase-body <name> <N> [--symptom html] [--changes html] [--goal html] [--files html] [--verify html]
                                                    set (or "" removes) a phase's body fields
-  updated <name> <N> "html" | --file path [--summary "..."]
+  updated <name> <N> "html" | --file path [--summary "..."] [--for <item ids>]
                                                    a change to phase N's plan:  an <epic-update> block at the
                                                    end of its description, "Update: <summary>" and the date
                                                    (summary:  the html's first sentence unless given);  kept;
-                                                   while N isn't done, its folded title says it changed
+                                                   while N isn't done, its folded title says it changed;
+                                                   NOT for an answer's change:  --for q53 (or the ids the html
+                                                   names, marked this pass) with change marks in the phase
+                                                   writes nothing, "the change marks say it"
   rename <name> <P6 | id> "New title" [--html]     retitle a phase or an item (a phase keeps its id);  links to
                                                    it that say the old title ("P6 · Old", "Old") say the new
                                                    one;  logged;  then
@@ -1281,7 +1291,8 @@ export const USAGE = `usage:  yarn plan-doc <command> <name> ...    (doc:  epics
                                                    Questions and Todos;  phases:  the Phases too;  building:
                                                    everything);  no stage reads as building;  logged
   change <name> [--for <item id>]                  stamp the change marks written by hand (<epic-change item>:
-                                                   id, time, answer;  every edit does too), list them, new first;
+                                                   id, time, answer, the words replaced;  every edit does
+                                                   too), list them, new first;
                                                    --for:  the item of the marks that name none
   standing <name> [on|off]                         a standing epic:  open for good, each phase merging on its own,
                                                    never done (epic epic-workflow)
@@ -1325,7 +1336,7 @@ export const USAGE = `usage:  yarn plan-doc <command> <name> ...    (doc:  epics
                                                    an option you settled IN CONVERSATION, on any item, as the
                                                    page's pick records it:  chosen on the item's latest card
                                                    set (--set N:  the Nth);  a question answered, a judgement
-                                                   call closed, any item reviewed;  a Noted card (the outcome)
+                                                   call closed, any item reviewed;  the outcome in its Choices
   close <name> <id>  /  reopen <name> <id>         close an item (done) / open it again
   cancel <name> <id> ["why"]                       an item made moot by another decision:  struck through;
                                                    reopen undoes it

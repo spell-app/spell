@@ -296,12 +296,15 @@
 }
 
 /* the views tree:  a row a part, indented by its depth, tight (Owen:  "tighten up spacing ... line to line and icon
-   to label");  a part with parts inside, its caret first */
+   to label");  a part with parts inside, its caret first.
+   Plain text in every theme (Owen:  "and inspector tree"):  each title the text's colour, which one it is
+   (`· discards`) and the icons muted, the picked row the theme's picked fill */
 .InspectorTree {
   /* rows run the card's width:  its padding taken back, then given to each row */
   margin: -4px -14px 0;
   padding: 0;
   list-style: none;
+  color: var(--ui-text-color);
 
   & li {
     display: flex;
@@ -320,12 +323,23 @@
       background: var(--ui-primary-background);
       color: var(--ui-primary-text, var(--ui-text-color));
     }
-    & > span {
+    & > .InspectorTreeTitle {
+      flex: 0 1 auto;
+      min-width: 0;
       overflow: hidden;
       text-overflow: ellipsis;
     }
+    /* which one it is:  shortened before the title is */
+    & > .InspectorTreeWhich {
+      flex: 0 10 auto;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: var(--ui-text-muted);
+    }
     & > ui-icon {
       margin: 0;
+      color: var(--ui-text-muted);
       /* the glyph's own width, not the usual 1.18em box:  the label close by */
       --ui-icon-width: 1em;
       --ui-icon-distance: 0;

@@ -1214,7 +1214,8 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
   },
   updated: {
     "--file <file>": "the change, as HTML, from a file",
-    "--summary <text>": "its one-line summary (default its first sentence)"
+    "--summary <text>": "its one-line summary (default its first sentence)",
+    "--for <ids>": "the items it's for, comma-separated:  nothing written when each has a change mark in the phase"
   },
   phase: {
     "--done <html>": "done:  what was built, a <ul>",

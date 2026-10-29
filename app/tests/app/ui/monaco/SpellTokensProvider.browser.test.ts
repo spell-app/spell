@@ -1,5 +1,6 @@
 import { describe, test, expect, beforeAll } from "vite-plus/test"
 
+import { SP } from "spell/parser/spell"
 import { monaco } from "spell/app/app/ui/monaco/monaco"
 import { SpellMonaco } from "spell/app/app/ui/monaco/SpellMonaco"
 import { SpellTokensProvider } from "spell/app/app/ui/monaco/SpellTokensProvider"
@@ -78,8 +79,9 @@ describe("SpellTokensProvider.forSpellx()", () => {
     })
   }
 
-  test("a .spellml file is Monaco's spellx language;  a .spell file stays spell", () => {
+  test("a .spellml file (or the old .spellx) is Monaco's spellx language;  a .spell file stays spell", () => {
     expect(SpellMonaco.languageForPath("/@spell/examples/Solitaire/Card.spellml")).toBe("spellx")
+    expect(SpellMonaco.languageForPath(`/@spell/examples/Solitaire/Card${SP.OLD_SPELLML_SUFFIX}`)).toBe("spellx")
     expect(SpellMonaco.languageForPath("/@spell/examples/Solitaire/Card.spell")).toBe("spell")
   })
 

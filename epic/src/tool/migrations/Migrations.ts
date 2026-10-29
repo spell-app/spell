@@ -4,10 +4,12 @@ import { DoneCardsClose } from "./DoneCardsClose"
 import { ItemRenames } from "./ItemRenames"
 import { LinksAgree } from "./LinksAgree"
 import { MoreRequestsFirst } from "./MoreRequestsFirst"
+import { PicksInChoices } from "./PicksInChoices"
 import { RootLinks } from "./RootLinks"
 import { TakenInPhase } from "./TakenInPhase"
 import { ToReviewMarks } from "./ToReviewMarks"
 import { TookAsMinutes } from "./TookAsMinutes"
+import { UpdatesSaidByMarks } from "./UpdatesSaidByMarks"
 import { WholePhaseNumbers } from "./WholePhaseNumbers"
 import type { Migration, MigrationContext } from "./migrations.types"
 
@@ -44,6 +46,8 @@ export class Migrations {
     new ItemRenames(),
     new RootLinks(),
     new DoneCardsClose(),
+    new PicksInChoices(),
+    new UpdatesSaidByMarks(),
     new AgentsMarked()
   ]
 

@@ -28,7 +28,7 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
  *   - folded, the answer is `hidden="until-found"`
  * - REDUNDANT in an item whose Choices say "Chosen: X" already (`<epic-choices chosen>`;  epic `epic-engine` P27,
  *   Owen:  "the answer block is not necessary"):  no band
- *   - with a body (the why):  the body alone, first in the item's thread's brown block
+ *   - with a body (the why):  the body alone, first in the item's thread's section (one frame round it and the replies)
  *   - without one:  not drawn at all
  *   - an answer with no chosen option (an issue's, a call's) keeps its card:  nothing else says it
  ****************/
@@ -66,19 +66,19 @@ export class EpicAnswer extends E.UIComponent<typeof epicAnswerVocabulary> {
     return this.isRedundant && !this.hasBody
   }
 
-  /** In its item's thread (redundant, with a body):  one of the brown block. */
+  /** In its item's thread (redundant, with a body):  inside the thread's one frame. */
   @E.cssState("in-thread")
   get isInThread(): boolean {
     return !!this.link.thread()?.placeOf(this.domElement)
   }
 
-  /** First in the thread's block. */
+  /** First in the thread's section:  the frame's top. */
   @E.cssState("thread-start")
   get startsThread(): boolean {
     return !!this.link.thread()?.placeOf(this.domElement)?.start
   }
 
-  /** Last in the thread's block. */
+  /** Last in the thread's section:  the frame's bottom. */
   @E.cssState("thread-end")
   get endsThread(): boolean {
     return !!this.link.thread()?.placeOf(this.domElement)?.end

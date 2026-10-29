@@ -43,6 +43,8 @@
  *   - ids:  as the inbox keys them, `c1`, `c2` ... (shown `C1`;  an older inbox's `m1` or `cm1` read as `c1`);  an `id` asked may be `C3`, `c3` or `cm3`
  *     (`CommentList.idOf()`)
  *   - `add` `{ anchor, kind, label, excerpt, quote?, offset?, text }`:  a new comment;  answers its `id`
+ *     - on an epic page, in an item's, a phase's or an Overview part's text:  presses its Revisit (`revisitFor()`,
+ *       epic `epic-engine` I158);  `delete`, `clear` let go of it
  *   - `edit` `{ id, text }`, `delete` `{ id }`:  only while the comment is `new` (else 409)
  *   - `clear` `{ id }`:  gone, whatever its status (`CommentList.clear()`)
  *   - `restore` `{ id, comment }`:  a comment deleted or cleared a moment ago, back as the GET gave it
@@ -189,7 +191,11 @@ const commentsRoutes: RouteModule = {
     router.post(API, guard.writeCheck, SRV.parseBodies({ limit: MAX_BODY }), async (request, reply) => {
       const change = toChange(request.body)
       const file = commentsPage(web.files, change.page)
-      const id = await changeComments(file, (comments) => changeComment(comments, change)).catch((error: unknown) => {
+      const id = await changeComments(
+        file,
+        (comments) => changeComment(comments, change),
+        (inbox, changed) => revisitFor(inbox, change, changed, file)
+      ).catch((error: unknown) => {
         throw error instanceof CommentsError ? new SRV.HttpError(error.status, error.message) : error
       })
       reply.json({ ok: true, id, comments: shown(commentsOf(file)), ...sendOf(root, change.page as string, file) })
@@ -291,13 +297,36 @@ export function commentsOf(file: string): CommentList {
 /**
  * Change the comments of the page at `file` with `change`, in its inbox, under the inbox's lock;
  * resolves to what `change` returned.
+ * - `then`:  an epic page's only, under the same lock:  what the change does to the inbox's marks (`revisitFor()`)
  * - SIDE EFFECT:  writes the inbox file
  */
-export async function changeComments<T>(file: string, change: (comments: CommentList) => T): Promise<T> {
+export async function changeComments<T>(
+  file: string,
+  change: (comments: CommentList) => T,
+  then?: (inbox: ReviewInbox, result: T) => void
+): Promise<T> {
   if (!PLAN_DOC.test(file)) return GuideInbox.updateAsync(GuideInbox.fileFor(file), change)
   let result: T | undefined
-  await ReviewInbox.updateAsync(ReviewInbox.pathFor(file), (inbox) => (result = change(inbox.commentList)))
+  await ReviewInbox.updateAsync(ReviewInbox.pathFor(file), (inbox) => {
+    result = change(inbox.commentList)
+    then?.(inbox, result)
+  })
   return result as T
+}
+
+/**
+ * What a comment's change does to the epic page's marks (epic `epic-engine` I158):
+ * - a new comment, or one put back (Undo), in the text of an item, a phase or an Overview part presses its Revisit
+ *   (`ReviewInbox.noteComment()`)
+ * - one deleted or cleared leaves every revisit naming it (`ReviewInbox.dropComment()`)
+ * - `id`:  the comment's, as the file keys it;  `file`:  the epic page, read for what takes a mark (`itemIds()`)
+ * - here, not in each element:  the docs runtime writes comments through this route, so the review client never sees
+ *   one saved;  the page's review inbox follows the file's change, and the pill shows pressed
+ */
+function revisitFor(inbox: ReviewInbox, change: CommentChange, id: string, file: string): void {
+  if (change.action === "add" || change.action === "restore")
+    inbox.noteComment(id, ReviewInbox.itemIds(readFileSync(file, "utf8")))
+  else if (change.action === "delete" || change.action === "clear") inbox.dropComment(id)
 }
 
 /** Make `change` in `comments`;  returns the comment's id, as the file keys it (`c3`, asked as `C3` or the old `cm3` too). */

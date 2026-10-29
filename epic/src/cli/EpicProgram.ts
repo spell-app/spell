@@ -184,8 +184,8 @@ export class EpicProgram {
     ).usage("<epic> overview | phases | building")
     this.page(
       epic.command("change"),
-      'stamp the change marks written by hand (<epic-change item="q13">words</epic-change>:  their id, time and ' +
-        "answer), then list the ones waiting for your Accept;  --for:  the item of the marks that name none " +
+      'stamp the change marks written by hand (<epic-change item="q13">words</epic-change>:  their id, time, ' +
+        "answer and the words they replaced), then list them;  --for:  the item of the marks that name none " +
         "(any epic edit stamps them too)",
       "epic change seo --for q13"
     ).usage("<epic> [--for <item id>]")
@@ -267,9 +267,10 @@ export class EpicProgram {
       .addHelpText("after", UPDATE_HELP)
     this.page(
       epic.command("updated"),
-      "a change to a phase's plan:  an Update block at the end of its description",
+      "a change to a phase's plan no item caused:  an Update block at the end of its description;  an answer's " +
+        "change is its change marks alone (--for q3:  nothing written when the phase has marks for every one)",
       'epic updated seo#P3 "<p>Split in two:  the sitemap first.</p>" --summary "split in two"'
-    ).usage('<epic>#P3 "<html>" | --file <file> [--summary "..."]')
+    ).usage('<epic>#P3 "<html>" | --file <file> [--summary "..."] [--for <item ids>]')
     this.page(
       epic.command("phase"),
       "set a phase's status;  done:  --done writes what was built, and the time Claude took (took, from the " +

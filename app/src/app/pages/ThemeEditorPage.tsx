@@ -15,8 +15,8 @@ import "./ThemeEditorPage.css"
  * - While developing, it previews the same four real pages as the docs' theme bench (`BenchPages`):
  *   the editor and a notebook on this address, the epic page and Spell UI's on the page server's, through the
  *   dev server (`app/vite.config.ts` passes them through);  built, it shows the element's sample app.
- * - Use this theme (`ui-saved`):  the editor wears it at once (`EditorTheme.wearKept()`), and goes back to the page it
- *   came from, else the landing page.  Stop using:  the same, taking it off.
+ * - Stop using (`ui-saved`), which forgets a theme kept in this browser from before:  the editor takes it off at once
+ *   (`EditorTheme.wearKept()`), and goes back to the page it came from, else the landing page.
  * - Its element loads with the page, a chunk of its own:  no other page of the editor carries it.
  ****************/
 export function ThemeEditorPage() {
@@ -44,7 +44,7 @@ function previewPages() {
   })
 }
 
-/** Wear the theme just kept (or taken off), then go back where the editor came from. */
+/** Take off the theme just forgotten (`EditorTheme.wearKept()`), then go back where the editor came from. */
 async function wearAndGoBack(): Promise<void> {
   await EditorTheme.wearKept()
   if (history.length > 1) history.back()

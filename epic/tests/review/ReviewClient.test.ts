@@ -428,6 +428,31 @@ describe("ReviewClient writes", () => {
     expect(notices).toEqual(["Sent 1 mark, 1 comment to Claude", "Sent 1 comment to Claude"])
   })
 
+  // epic `epic-engine` I158 (Owen, 2026-10-29):  "When I add a comment to a phase, it should show as `revisit`
+  // automatically" -- the comments route presses it (`ReviewInbox.noteComment()`);  the page draws what it reads
+  test("a comment saved in a part's text shows its Revisit pressed;  Send counts one mark and the comment", async () => {
+    const { client, server } = await started()
+    const id = server.inbox.commentList.add({ anchor: "o1#prose-1", kind: "prose" }, "why this order?")
+    server.inbox.noteComment(id, ITEMS)
+    await client.refresh()
+    expect(client.markOf("o1")).toMatchObject({ action: "revisit", note: "see my comments in its text:  C1" })
+    expect([client.unsentMarkCount, client.unsentCommentCount]).toEqual([1, 1])
+    expect(client.commentsIn("o1")).toEqual([id])
+    // pressed again:  let go, as any revisit is
+    client.press("o1", "revisit")
+    await vi.waitFor(() => expect(server.inbox.marks.o1).toBeUndefined())
+    // a pick takes the comment with it, and is a pick again once it's deleted
+    await client.choose("q1", "B")
+    const other = server.inbox.commentList.add({ anchor: "q1", kind: "item" }, "but shorter")
+    server.inbox.noteComment(other, ITEMS)
+    await client.refresh()
+    expect(client.markOf("q1")).toMatchObject({ action: "revisit", pick: "B", comments: [other] })
+    server.inbox.commentList.remove(other)
+    server.inbox.dropComment(other)
+    await client.refresh()
+    expect(client.markOf("q1")).toMatchObject({ action: "pick", pick: "B" })
+  })
+
   test("send() with ONLY comments sends;  Review Now too", async () => {
     const { client, server } = await started()
     server.inbox.commentList.add({ anchor: "q1", kind: "item" }, "is this hooked up?")

@@ -13,9 +13,11 @@
  *   generic CSS, using sibling selectors ... rather than with explicit ids");  before P45 the section wrote a
  *   `::slotted(#q1, ...)` rule per item.
  * - Only the lines SHOWING count:  one its own `hidden` hides, or the filter (`data-epic-filtered`, which the
- *   section writes on the items it hides, and the live patch keeps), is stepped over.
- *   - NOTE: CSS can't step over any number of them:  up to 8 hidden lines between an unfolded line and the next one
- *     showing (2 phases or Overview parts);  past that, the next line's top stays square.
+ *   section writes on the items and phases it hides, and the live patch keeps), is stepped over.
+ *   - NOTE: sibling chains step over a fixed number of them:  up to 8 hidden lines between an unfolded line and the
+ *     next one showing (2 Overview parts);  past that, the next line's top stays square.
+ *   - The phases step over ANY number, by place among those showing, up to the 64th phase showing (epic
+ *     `epic-engine` I157:  "only undone" hides 49 done phases in a row).
  * - The item sections are `ITEM_KINDS` (`EpicSection.types.ts`), written out here.
  * - The items round their lines by their own tokens (`--epic-item-top-radius` ...);  the size is the section's
  *   (`--_epic-run-radius`, inherited from its shadow root).
@@ -108,22 +110,158 @@
     --epic-item-bottom-radius: var(--_epic-run-radius);
   }
 
+  /* ## the phases the state filter hides (epic `epic-engine` I157) */
+  epic-section[kind="phases"] > epic-phase[data-epic-filtered] {
+    display: none;
+  }
+
   /* ## the Phases section's runs:  a phase rounds its title row by its own tokens */
-  epic-section[kind="phases"] > epic-phase:not([hidden]):nth-child(1 of epic-phase:not([hidden])),
-  epic-section[kind="phases"] > epic-phase:not([hidden])[open] + epic-phase:not([hidden]),
   epic-section[kind="phases"]
-    > epic-phase:not([hidden])[open]
-    + :is([hidden], :not(epic-phase))
-    + epic-phase:not([hidden]),
+    > epic-phase:not([hidden], [data-epic-filtered]):nth-child(1 of epic-phase:not([hidden], [data-epic-filtered])),
   epic-section[kind="phases"]
-    > epic-phase:not([hidden])[open]
-    + :is([hidden], :not(epic-phase))
-    + :is([hidden], :not(epic-phase))
-    + epic-phase:not([hidden]) {
+    > epic-phase:not([hidden], [data-epic-filtered])[open]
+    + epic-phase:not([hidden], [data-epic-filtered]) {
     --epic-phase-top-radius: var(--_epic-run-radius);
   }
-  epic-section[kind="phases"] > epic-phase:not([hidden])[open],
-  epic-section[kind="phases"] > epic-phase:not([hidden]):nth-last-child(1 of epic-phase:not([hidden])) {
+  /*
+   * the k-th phase showing, right after an unfolded (k-1)-th, ANY number hidden between (I157:  "only undone" hides
+   * 49 done phases in a row):  by place among the phases showing, one line per place, up to the 64th
+   */
+  epic-section[kind="phases"] {
+    > [open]:nth-child(1 of epic-phase:not([hidden], [data-epic-filtered]))
+      ~ :nth-child(2 of epic-phase:not([hidden], [data-epic-filtered])),
+    > [open]:nth-child(2 of epic-phase:not([hidden], [data-epic-filtered]))
+      ~ :nth-child(3 of epic-phase:not([hidden], [data-epic-filtered])),
+    > [open]:nth-child(3 of epic-phase:not([hidden], [data-epic-filtered]))
+      ~ :nth-child(4 of epic-phase:not([hidden], [data-epic-filtered])),
+    > [open]:nth-child(4 of epic-phase:not([hidden], [data-epic-filtered]))
+      ~ :nth-child(5 of epic-phase:not([hidden], [data-epic-filtered])),
+    > [open]:nth-child(5 of epic-phase:not([hidden], [data-epic-filtered]))
+      ~ :nth-child(6 of epic-phase:not([hidden], [data-epic-filtered])),
+    > [open]:nth-child(6 of epic-phase:not([hidden], [data-epic-filtered]))
+      ~ :nth-child(7 of epic-phase:not([hidden], [data-epic-filtered])),
+    > [open]:nth-child(7 of epic-phase:not([hidden], [data-epic-filtered]))
+      ~ :nth-child(8 of epic-phase:not([hidden], [data-epic-filtered])),
+    > [open]:nth-child(8 of epic-phase:not([hidden], [data-epic-filtered]))
+      ~ :nth-child(9 of epic-phase:not([hidden], [data-epic-filtered])),
+    > [open]:nth-child(9 of epic-phase:not([hidden], [data-epic-filtered]))
+      ~ :nth-child(10 of epic-phase:not([hidden], [data-epic-filtered])),
+    > [open]:nth-child(10 of epic-phase:not([hidden], [data-epic-filtered]))
+      ~ :nth-child(11 of epic-phase:not([hidden], [data-epic-filtered])),
+    > [open]:nth-child(11 of epic-phase:not([hidden], [data-epic-filtered]))
+      ~ :nth-child(12 of epic-phase:not([hidden], [data-epic-filtered])),
+    > [open]:nth-child(12 of epic-phase:not([hidden], [data-epic-filtered]))
+      ~ :nth-child(13 of epic-phase:not([hidden], [data-epic-filtered])),
+    > [open]:nth-child(13 of epic-phase:not([hidden], [data-epic-filtered]))
+      ~ :nth-child(14 of epic-phase:not([hidden], [data-epic-filtered])),
+    > [open]:nth-child(14 of epic-phase:not([hidden], [data-epic-filtered]))
+      ~ :nth-child(15 of epic-phase:not([hidden], [data-epic-filtered])),
+    > [open]:nth-child(15 of epic-phase:not([hidden], [data-epic-filtered]))
+      ~ :nth-child(16 of epic-phase:not([hidden], [data-epic-filtered])),
+    > [open]:nth-child(16 of epic-phase:not([hidden], [data-epic-filtered]))
+      ~ :nth-child(17 of epic-phase:not([hidden], [data-epic-filtered])),
+    > [open]:nth-child(17 of epic-phase:not([hidden], [data-epic-filtered]))
+      ~ :nth-child(18 of epic-phase:not([hidden], [data-epic-filtered])),
+    > [open]:nth-child(18 of epic-phase:not([hidden], [data-epic-filtered]))
+      ~ :nth-child(19 of epic-phase:not([hidden], [data-epic-filtered])),
+    > [open]:nth-child(19 of epic-phase:not([hidden], [data-epic-filtered]))
+      ~ :nth-child(20 of epic-phase:not([hidden], [data-epic-filtered])),
+    > [open]:nth-child(20 of epic-phase:not([hidden], [data-epic-filtered]))
+      ~ :nth-child(21 of epic-phase:not([hidden], [data-epic-filtered])),
+    > [open]:nth-child(21 of epic-phase:not([hidden], [data-epic-filtered]))
+      ~ :nth-child(22 of epic-phase:not([hidden], [data-epic-filtered])),
+    > [open]:nth-child(22 of epic-phase:not([hidden], [data-epic-filtered]))
+      ~ :nth-child(23 of epic-phase:not([hidden], [data-epic-filtered])),
+    > [open]:nth-child(23 of epic-phase:not([hidden], [data-epic-filtered]))
+      ~ :nth-child(24 of epic-phase:not([hidden], [data-epic-filtered])),
+    > [open]:nth-child(24 of epic-phase:not([hidden], [data-epic-filtered]))
+      ~ :nth-child(25 of epic-phase:not([hidden], [data-epic-filtered])),
+    > [open]:nth-child(25 of epic-phase:not([hidden], [data-epic-filtered]))
+      ~ :nth-child(26 of epic-phase:not([hidden], [data-epic-filtered])),
+    > [open]:nth-child(26 of epic-phase:not([hidden], [data-epic-filtered]))
+      ~ :nth-child(27 of epic-phase:not([hidden], [data-epic-filtered])),
+    > [open]:nth-child(27 of epic-phase:not([hidden], [data-epic-filtered]))
+      ~ :nth-child(28 of epic-phase:not([hidden], [data-epic-filtered])),
+    > [open]:nth-child(28 of epic-phase:not([hidden], [data-epic-filtered]))
+      ~ :nth-child(29 of epic-phase:not([hidden], [data-epic-filtered])),
+    > [open]:nth-child(29 of epic-phase:not([hidden], [data-epic-filtered]))
+      ~ :nth-child(30 of epic-phase:not([hidden], [data-epic-filtered])),
+    > [open]:nth-child(30 of epic-phase:not([hidden], [data-epic-filtered]))
+      ~ :nth-child(31 of epic-phase:not([hidden], [data-epic-filtered])),
+    > [open]:nth-child(31 of epic-phase:not([hidden], [data-epic-filtered]))
+      ~ :nth-child(32 of epic-phase:not([hidden], [data-epic-filtered])),
+    > [open]:nth-child(32 of epic-phase:not([hidden], [data-epic-filtered]))
+      ~ :nth-child(33 of epic-phase:not([hidden], [data-epic-filtered])),
+    > [open]:nth-child(33 of epic-phase:not([hidden], [data-epic-filtered]))
+      ~ :nth-child(34 of epic-phase:not([hidden], [data-epic-filtered])),
+    > [open]:nth-child(34 of epic-phase:not([hidden], [data-epic-filtered]))
+      ~ :nth-child(35 of epic-phase:not([hidden], [data-epic-filtered])),
+    > [open]:nth-child(35 of epic-phase:not([hidden], [data-epic-filtered]))
+      ~ :nth-child(36 of epic-phase:not([hidden], [data-epic-filtered])),
+    > [open]:nth-child(36 of epic-phase:not([hidden], [data-epic-filtered]))
+      ~ :nth-child(37 of epic-phase:not([hidden], [data-epic-filtered])),
+    > [open]:nth-child(37 of epic-phase:not([hidden], [data-epic-filtered]))
+      ~ :nth-child(38 of epic-phase:not([hidden], [data-epic-filtered])),
+    > [open]:nth-child(38 of epic-phase:not([hidden], [data-epic-filtered]))
+      ~ :nth-child(39 of epic-phase:not([hidden], [data-epic-filtered])),
+    > [open]:nth-child(39 of epic-phase:not([hidden], [data-epic-filtered]))
+      ~ :nth-child(40 of epic-phase:not([hidden], [data-epic-filtered])),
+    > [open]:nth-child(40 of epic-phase:not([hidden], [data-epic-filtered]))
+      ~ :nth-child(41 of epic-phase:not([hidden], [data-epic-filtered])),
+    > [open]:nth-child(41 of epic-phase:not([hidden], [data-epic-filtered]))
+      ~ :nth-child(42 of epic-phase:not([hidden], [data-epic-filtered])),
+    > [open]:nth-child(42 of epic-phase:not([hidden], [data-epic-filtered]))
+      ~ :nth-child(43 of epic-phase:not([hidden], [data-epic-filtered])),
+    > [open]:nth-child(43 of epic-phase:not([hidden], [data-epic-filtered]))
+      ~ :nth-child(44 of epic-phase:not([hidden], [data-epic-filtered])),
+    > [open]:nth-child(44 of epic-phase:not([hidden], [data-epic-filtered]))
+      ~ :nth-child(45 of epic-phase:not([hidden], [data-epic-filtered])),
+    > [open]:nth-child(45 of epic-phase:not([hidden], [data-epic-filtered]))
+      ~ :nth-child(46 of epic-phase:not([hidden], [data-epic-filtered])),
+    > [open]:nth-child(46 of epic-phase:not([hidden], [data-epic-filtered]))
+      ~ :nth-child(47 of epic-phase:not([hidden], [data-epic-filtered])),
+    > [open]:nth-child(47 of epic-phase:not([hidden], [data-epic-filtered]))
+      ~ :nth-child(48 of epic-phase:not([hidden], [data-epic-filtered])),
+    > [open]:nth-child(48 of epic-phase:not([hidden], [data-epic-filtered]))
+      ~ :nth-child(49 of epic-phase:not([hidden], [data-epic-filtered])),
+    > [open]:nth-child(49 of epic-phase:not([hidden], [data-epic-filtered]))
+      ~ :nth-child(50 of epic-phase:not([hidden], [data-epic-filtered])),
+    > [open]:nth-child(50 of epic-phase:not([hidden], [data-epic-filtered]))
+      ~ :nth-child(51 of epic-phase:not([hidden], [data-epic-filtered])),
+    > [open]:nth-child(51 of epic-phase:not([hidden], [data-epic-filtered]))
+      ~ :nth-child(52 of epic-phase:not([hidden], [data-epic-filtered])),
+    > [open]:nth-child(52 of epic-phase:not([hidden], [data-epic-filtered]))
+      ~ :nth-child(53 of epic-phase:not([hidden], [data-epic-filtered])),
+    > [open]:nth-child(53 of epic-phase:not([hidden], [data-epic-filtered]))
+      ~ :nth-child(54 of epic-phase:not([hidden], [data-epic-filtered])),
+    > [open]:nth-child(54 of epic-phase:not([hidden], [data-epic-filtered]))
+      ~ :nth-child(55 of epic-phase:not([hidden], [data-epic-filtered])),
+    > [open]:nth-child(55 of epic-phase:not([hidden], [data-epic-filtered]))
+      ~ :nth-child(56 of epic-phase:not([hidden], [data-epic-filtered])),
+    > [open]:nth-child(56 of epic-phase:not([hidden], [data-epic-filtered]))
+      ~ :nth-child(57 of epic-phase:not([hidden], [data-epic-filtered])),
+    > [open]:nth-child(57 of epic-phase:not([hidden], [data-epic-filtered]))
+      ~ :nth-child(58 of epic-phase:not([hidden], [data-epic-filtered])),
+    > [open]:nth-child(58 of epic-phase:not([hidden], [data-epic-filtered]))
+      ~ :nth-child(59 of epic-phase:not([hidden], [data-epic-filtered])),
+    > [open]:nth-child(59 of epic-phase:not([hidden], [data-epic-filtered]))
+      ~ :nth-child(60 of epic-phase:not([hidden], [data-epic-filtered])),
+    > [open]:nth-child(60 of epic-phase:not([hidden], [data-epic-filtered]))
+      ~ :nth-child(61 of epic-phase:not([hidden], [data-epic-filtered])),
+    > [open]:nth-child(61 of epic-phase:not([hidden], [data-epic-filtered]))
+      ~ :nth-child(62 of epic-phase:not([hidden], [data-epic-filtered])),
+    > [open]:nth-child(62 of epic-phase:not([hidden], [data-epic-filtered]))
+      ~ :nth-child(63 of epic-phase:not([hidden], [data-epic-filtered])),
+    > [open]:nth-child(63 of epic-phase:not([hidden], [data-epic-filtered]))
+      ~ :nth-child(64 of epic-phase:not([hidden], [data-epic-filtered])) {
+      --epic-phase-top-radius: var(--_epic-run-radius);
+    }
+  }
+  epic-section[kind="phases"] > epic-phase:not([hidden], [data-epic-filtered])[open],
+  epic-section[kind="phases"]
+    > epic-phase:not([hidden], [data-epic-filtered]):nth-last-child(
+      1 of epic-phase:not([hidden], [data-epic-filtered])
+    ) {
     --epic-phase-bottom-radius: var(--_epic-run-radius);
     border-bottom: none;
   }
@@ -157,12 +295,15 @@
   /*
    * top-level sections in a RUN (Owen, 2026-10-26:  "top of group 7 shouldn't be square, bottom of 7 & top of 8 should
    * be square"):  a FOLDED section touches the one after it, so its bottom and that one's top are square;  the run's
-   * free ends stay round (`EpicSection.css` reads the two)
+   * free ends stay round (`EpicFold.css` reads the two);  the Overview is the first of them (r42)
    */
-  epic-section:not([kind="overview-part"], [hidden], [open]):has(+ epic-section:not([kind="overview-part"], [hidden])) {
+  :is(epic-overview, epic-section:not([kind="overview-part"])):not([hidden], [open]):has(
+      + epic-section:not([kind="overview-part"], [hidden])
+    ) {
     --epic-section-bottom-radius: 0px;
   }
-  epic-section:not([kind="overview-part"], [hidden], [open]) + epic-section:not([kind="overview-part"], [hidden]) {
+  :is(epic-overview, epic-section:not([kind="overview-part"])):not([hidden], [open])
+    + epic-section:not([kind="overview-part"], [hidden]) {
     --epic-section-top-radius: 0px;
   }
 }

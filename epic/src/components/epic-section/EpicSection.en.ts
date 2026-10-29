@@ -140,15 +140,19 @@ export const epicSectionVocabulary = {
       name: "tools",
       description:
         "At the title's end:  the page's own buttons (the `actions` slot), then the Phases section's Files / " +
-        "Verify toggles;  an item section's state filter;  an Overview sub-section's review buttons."
+        "Verify toggles and its state filter;  an item section's state filter;  an Overview sub-section's review buttons."
     },
     {
       name: "filter",
       description:
         "An item section's state filter:  one chip per state its items are in, with how many, solid while that " +
-        "state's items show, outlined while hidden."
+        "state's items show, outlined while hidden.  The Phases section's the same, by a phase's state:  undone, " +
+        "updated (a plan waiting for Owen's Accept, or changed), complete (epic `epic-engine` I157)."
     },
-    { name: "hidden-note", description: 'Under a filtered list:  "3 hidden · show all", an `<epic-hidden-note>`.' },
+    {
+      name: "hidden-note",
+      description: 'Under a filtered list (items or phases):  "3 hidden · show all", an `<epic-hidden-note>`.'
+    },
     { name: "empty", description: 'An item section with no items:  "None yet".' },
     ...REVIEW_PARTS,
     {
@@ -192,7 +196,6 @@ export const epicSectionVocabulary = {
     { key: "hideFiles", text: "Hide each phase's Files", description: "The Files toggle, on." },
     { key: "showVerify", text: "Show each phase's Verify", description: "The Phases title's Verify toggle, off." },
     { key: "hideVerify", text: "Hide each phase's Verify", description: "The Verify toggle, on." },
-    { key: "count", text: "{open} open of {total}", description: "The count badge's tooltip:  `3/7` in words." },
     {
       key: "addNew",
       text: "New {kind}",

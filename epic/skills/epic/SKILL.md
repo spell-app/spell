@@ -344,6 +344,7 @@ The phases go to a background agent, `<name>-plan-doc`, as if the person had typ
       down a number.
 - A decided question a phase carries out:  write it into that phase's text with a change mark,
   `<epic-change item="q<n>">...</epic-change>`, then `epic change <name>`.
+  The marks ARE the record:  NO `epic updated` block saying it again (epic `epic-engine` I159).
   The question is then HANDLED in that phase (P31):  grey, out of the lists.
   Prefer this to leaving one more decided item.
 - Per item:  `epic add <name>#D|#T|#I|#M|#Q "title" [--details "<p>...</p>"]`.
@@ -405,6 +406,9 @@ than just being able to move on").
   ONE press, I125), or Accept Phase on each (once building:  the header's Send is ringed (2px #666) while any waits, its tooltip naming them);  one Send.  Or they say "go"
   in chat:  every waiting plan accepted.
   - Revisit on one:  rewrite that plan (a new `--plan` waits again);  the accepted ones stay accepted.
+  - A plan rewritten from an ANSWER (a question decided, a revisit's pick):  the changed words marked
+    (`<epic-change item="q<n>">`, then `epic change`), and NO `epic updated` block (epic `epic-engine` I159;  Owen,
+    2026-10-29, on P51's orange Update under its Q53 marks:  "Do we still need the orange update section like this?").
   - Defer Phase on one (beside Accept Phase):  `inbox apply` moves it after the other phases, still to do.
 - Then "5. Each phase", from the first, straight through.
 - A phase ADDED later ("10. Add a phase", a request):  its plan written as it's added, accepted the same way.
@@ -419,6 +423,7 @@ than just being able to move on").
    - Earlier phases, answers and requests may have moved things since it was written.  Adjust, and go on:
      - a SMALL change (a file moved, a step folded into an earlier phase, a name changed):  say what and why with
        `epic updated <name>#P<N> "<p>...</p>" --summary "Plan adjusted:  ..."`;  the plan stays accepted.  NO stop.
+       - a change an answer caused:  its change marks alone, no block (step 2, "An ANSWER rewrote ...")
      - a BIG one the person would want a say in (scope, a choice they made, much more work):  write the plan again
        (`--plan`, it waits), with the coherence review over it ("4b. Build plans"), listen, and END THE TURN with the
        phase's link pair:  "P<N>'s plan changed:  ...".  Only then a stop.
@@ -432,7 +437,7 @@ than just being able to move on").
    - The person settles an item's options IN WORDS (a reply, the chat:  "require the parens"), not with the page's pick:
      `choose <name>#<id> <letter> "<outcome>"` right away, before or with building it.
      - It records it as their pick would:  that card set's `chosen`, the item green (a question answered, a call
-       closed;  an issue or todo only reviewed), a Noted card with the outcome.
+       closed;  an issue or todo only reviewed), the outcome on the set, shown in its Choices (no Noted card, I153).
      - Skipped, the item stays red with nothing chosen, though the work is built (`outline-spell` J9, 2026-10-19).
    - A choice made WITHOUT the person (they're away, or an agent decided):  `add <name>#J`.
      - Ids `J1` ...;  see `/bedtime`.
@@ -483,20 +488,29 @@ than just being able to move on").
      It's struck through:  the one struck status (J16 of `review-review`).
    - An item talked through with the person (they answered, accepted, or said leave it):
      `review <name>#<id> "outcome"`, so the next `/epic review` doesn't bring it up again ("7. Review").
-   - Changed a phase's PLAN (the person's feedback, or something found while building):
+   - Changed a phase's PLAN, for a reason NO ITEM is (something found while building, a file moved, a comment):
      - `updated <name>#P<N> "<p>what changed, and why</p>" --summary "..."`:
        an `<epic-update>` block at the end of the phase's description, after Goal:  **Update**: <summary>, dated.
        Never an "Updated" word in the text.
+     - NEVER for a change an answer caused:  its change marks say it (next bullet;  epic `epic-engine` I159, Owen,
+       2026-10-29:  an Update block "only when no mark says it").
+       - `updated` itself writes nothing then:  `--for q53` (or, without it, the item ids its text names, marked in
+         the phase this pass) with marks in the phase prints "no Update block, the change marks say it".
+       - Something the marks can't say (a file moved, why a step went):  its own block, `--for` left off.
      - ALWAYS pass `--summary`:  5-10 words saying WHAT changed (Owen, 2026-10-11).
        - Never who or when ("From Owen's comment CM2 ...", "Owen, 2026-10-11:"):
          the text says who, the block shows when.
        - E.g. `--summary "Tab labelled App/UI, right after App"`.
      - Then `update <name>#P<N> --changes ...` (or `--goal` ...), to make the fields say the new plan.
    - An ANSWER rewrote the Overview's or a phase's words (epic `epic-engine` P30;  Q13, B):  mark the changed words
-     themselves, `<epic-change item="q16">the new words</epic-change>`, as you rewrite them (no `<epic-update>`).
+     themselves, `<epic-change item="q16">the new words</epic-change>`, as you rewrite them.
+     NO `<epic-update>`, and no `epic updated` after `epic change` (I159):  the marks are the whole record.
      - The words, not the block:  one mark per change, the question's id alone.
      - Then `epic change <name>`:  it stamps each (id `ch3`, time, the answer in short) and lists them;
        `epic lint` fails one not stamped, or naming no item.
+     - The words a mark replaced (`was`, the popup's "Originally") are found by the tool as it stamps, from the page
+       as it was (on disk, else its last commits):  write nothing more (I160).  Run `epic change` in the same turn
+       you wrote the marks:  the content repo's turn-end commit is what it compares with.
      - No approval:  orange for 3 days, then quiet, the `Q16` chip for good.  The person reopens its question if they
        disagree;  `inbox apply` reopens it.  Rules:  `plan-doc.md`, "Change marks".
      - In a PHASE's text, the mark marks its item handled in that phase (P31):  grey, out of the lists.
@@ -809,8 +823,8 @@ Every card you finish says what REALLY happened, one of three
 2026-10-26, epic `epic-engine` I148:  a fixed issue with two Done cards stayed red):
 - `status ... underway "<reading>"`:  you're on it.
 - `status ... noted "<what;  what happens next>"`:  a STEP done, the item NOT finished.
-  - their choice recorded ("B it is";  a todo made;  "do it next phase"):
-    `"Chose B · Bananas:  recorded as the answer;  waiting for the next phase, P9 · Build"`
+  - their choice recorded (a todo made;  "do it next phase"):  `"Queued for P9 · Build"`
+    - NOT a pick:  `choose` / `apply` record it inside the item's Choices, no card (I153)
   - an answer or reply written, details added, the item condensed:  `"Answered their note:  options A and B"`
   - called off:  `"Called off on the page:  nothing written."`
   - An underway card turns noted.
@@ -891,8 +905,8 @@ want you to just do it").
        issue linking the test
    - A pick works on ANY item's cards, a reply's too (I8 of `epic-components`):
      a question is answered with it, any other item approved with it.
-   - `apply` itself gives each pick, todo made and todo queued its outlined NOTED card;  an approval gets none (Q19):
-     - "Chose B · ...:  recorded ...;  waiting for ..."
+   - `apply` itself gives each todo made and todo queued its outlined NOTED card;  an approval gets none (Q19):
+     - a pick gets none either:  its line ("recorded ...;  waiting for ...") goes inside the item's Choices (I153)
      - "Made todo T23 ..."
      - "Queued for P10 · ..."
    - Then each "to talk over" (revisit soon), one at a time:
@@ -916,8 +930,8 @@ want you to just do it").
      - `status ... underway`, then answer the note about B.
      - Once they agree (in words, a reply or the chat), record it yourself, on any item:
        `epic choose <name>#<id> B "<their name>, <date>:  '<their words>'"`.
-     - Then `status ... noted "Chose B · ...:  recorded after the talk"`.
-     - `inbox clear` / `done` KEEP their pick as that set's `chosen` (with a Noted card), unless you decided otherwise.
+     - No Noted card for it:  `choose` writes the pick's line inside the item's Choices (I153).
+     - `inbox clear` / `done` KEEP their pick as that set's `chosen` (with its line), unless you decided otherwise.
        Once they picked, the card says Chosen.
    - The page counts this session as gone once its heartbeat is 90s old.
      - `wait` stamps it every 30s.
@@ -1175,6 +1189,8 @@ The person adds a phase to the epic under way, from items it already has, or fro
        - symptom (one line), changes (two or three)
        - goal:  a bullet per outcome, the person's input in it, each antecedent linked (`<a href="#j1">J1</a>`)
        - files, verify, estimate
+       - an antecedent's answer it carries out:  its words marked (`<epic-change item="q<n>">`, `epic change`), no
+         `epic updated` block (I159)
     3. where (it prints the new number):
        - every number is WHOLE (epic `epic-engine` I126):  a new phase renumbers the to-do phases after it, and
          items, links and `P5 · Name` text follow;  never a decimal (P11.1)
@@ -1257,7 +1273,8 @@ A REQUEST is something the person asked for in another session, sent here instea
         `--plan` (step 4b's) ends it
       - its goal gets a bullet, the person's ask in short, linked:  `<a href="requests/r3/request.md">r3</a>`
         - `update <epic>#P<N> --goal ...`, the old bullets kept
-      - `updated <epic>#P<N> "<p>r3 joined:  ...</p>"`
+      - `updated <epic>#P<N> "<p>r3 joined:  ...</p>"`:  a request is no item, so its block stays;  words an
+        answer changed in the same pass are marked instead, and left out of the block (I159)
    3. else a NEW phase, drafted as "10. Add a phase" drafts one, their words as the person's input, marked `planning` as
       soon as it's added, as there
       - where "10. Add a phase" puts one:  `add-phase` with no place goes before a last Doc Review by itself, the
@@ -1334,7 +1351,8 @@ add-phase <name> "Short Name" --symptom .. --changes .. [--goal ..] [--files ..]
                                                     PN;  either way the to-do phases after it move down a number
 update <name>#P<N> [--symptom ..] [--changes ..] [--goal ..] [--files ..] [--verify ..]   set ("" removes) fields
 update <name>#P<N> --plan "<ol>..</ol>"             Claude's build plan:  waits for the person's Accept plan (5., step 1)
-updated <name>#P<N> "<p>what changed</p>" [--summary ".."]   phase N's plan changed:  <epic-update>, after Goal
+updated <name>#P<N> "<p>what changed</p>" [--summary ".."] [--for <ids>]   phase N's plan changed, no item the
+                                                    cause:  <epic-update>, after Goal;  nothing when marks say it
 file <name>#P<N> <rN>                               a request into phase N's Requests field, marked filed there
 file <name> <rN> "where it went"                    a request with no phase:  only marked, saying where it went
 update <name>#P<N> --estimate "1-2h"                change a phase's estimate;  the Overview's total follows

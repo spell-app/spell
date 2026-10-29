@@ -169,19 +169,19 @@ export const BUILT_IN_TEMPLATE_DECLARATIONS: Record<string, Record<string, SP.Sp
         {
           type: "Notebook",
           superType: "Page",
-          defined: "/Notebook.spell:335-668"
+          defined: "/Notebook.spell:336-669"
         },
         {
           of: "Notebook",
           slots: ["content"],
-          defined: "/Notebook.spell:368-390"
+          defined: "/Notebook.spell:369-391"
         },
         {
           property: "lock",
           classVariable: "Locks",
           of: "Notebook",
           enumeration: ["unlocked", "locked"],
-          defined: "/Notebook.spell:505-537"
+          defined: "/Notebook.spell:506-538"
         },
         {
           syntax: "draw {thisArg:expression}",
@@ -191,7 +191,7 @@ export const BUILT_IN_TEMPLATE_DECLARATIONS: Record<string, Record<string, SP.Sp
           alias: ["statement", "expression"],
           kind: "method",
           name: "draw it",
-          defined: "/Notebook.spell:638-668"
+          defined: "/Notebook.spell:639-669"
         }
       ],
       codeLines: [10, 13, 16, 23]
@@ -205,12 +205,12 @@ export const BUILT_IN_TEMPLATE_DECLARATIONS: Record<string, Record<string, SP.Sp
           type: "Notebook",
           superType: "Page",
           gender: "masculine",
-          defined: "/Notebook.es.spell:367-745"
+          defined: "/Notebook.es.spell:368-746"
         },
         {
           of: "Notebook",
           slots: ["contenido"],
-          defined: "/Notebook.es.spell:405-434",
+          defined: "/Notebook.es.spell:406-435",
           slotOutputs: {
             contenido: "content"
           }
@@ -220,7 +220,7 @@ export const BUILT_IN_TEMPLATE_DECLARATIONS: Record<string, Record<string, SP.Sp
           classVariable: "Candados",
           of: "Notebook",
           enumeration: ["desbloqueado", "bloqueado"],
-          defined: "/Notebook.es.spell:555-595",
+          defined: "/Notebook.es.spell:556-596",
           output: "lock"
         }
       ],

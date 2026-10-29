@@ -59,6 +59,7 @@ import {
 } from "./planDoc.types"
 
 import { AuthorWords } from "./AuthorWords"
+import { ChangeOriginals } from "./ChangeOriginals"
 import { IncomingHtml } from "./IncomingHtml"
 import { PhaseTakes } from "./PhaseTakes"
 import { PhaseNumbers } from "./PhaseNumbers"
@@ -67,6 +68,7 @@ import { PlanItem } from "./PlanItem"
 import { PlanMarkup } from "./PlanMarkup"
 import { PlanReader } from "./PlanReader"
 import { PlanTime } from "./PlanTime"
+import { UpdateMarks } from "./UpdateMarks"
 import { UpdateSummary } from "./UpdateSummary"
 import { Migrations } from "./migrations"
 import { CHANGE_ID, STAGE_ID, SUMMARY_ID } from "./ReviewInbox"
@@ -557,6 +559,26 @@ export class PlanDoc extends PlanReader {
   }
 
   /**
+   * The items whose CHANGE MARKS in phase `n` already say what an Update block `html` would, upper case;  `[]`:  write
+   * the block (epic `epic-engine` I159;  Owen, 2026-10-29:  an Update block only when no mark says it).
+   * - `forIds` (`updated --for q53,j3`):  the items the change is for;  said when EVERY one has a mark in the phase
+   * - none given:  the item ids `html` names, said when every one has a mark of this pass (`UpdateMarks`:  stamped
+   *   within `SAME_PASS_MINUTES`, or not stamped yet) and `html` names no file (a move the marks can't say)
+   * - names no item:  `[]`, a change no item caused
+   */
+  marksSay(n: number, html: string, forIds?: readonly string[]): string[] {
+    const phase = this.phase(n)
+    const given = forIds?.map((id) => id.toLowerCase())
+    const text = this.incoming(html)
+      .map((node) => node.textContent ?? "")
+      .join(" ")
+    if (!given && UpdateMarks.namesFile(text)) return []
+    const ids = given ?? UpdateMarks.idsIn(text)
+    const marked = UpdateMarks.marked(phase, ids, given ? undefined : this.now)
+    return ids.length && marked.length === ids.length ? ids.map((id) => id.toUpperCase()) : []
+  }
+
+  /**
    * A change to phase `n`'s plan, `html` (what changed, and why), as one `<epic-update at summary>` block at the END of
    * the phase's description (Owen, 2026-10-11:  "The updated blocks themselves go at the end of the phase
    * description"), after the ones before it.
@@ -567,6 +589,7 @@ export class PlanDoc extends PlanReader {
    * - it STAYS when a phase is done (unlike the UPDATE markers);  the phase's `changes` counts it
    *   (`writeChangeCounts()`, every edit)
    * - old prose shapes in `html` (a Net effect paragraph, a code accordion ...) become elements (`IncomingHtml`)
+   * - NOT for a change an answer caused, which its change marks say:  `marksSay()` first (`updated` asks it)
    * - SIDE EFFECT:  logs it
    */
   addPhaseUpdate(n: number, html: string, { summary }: { summary?: string } = {}): void {
@@ -1074,7 +1097,7 @@ export class PlanDoc extends PlanReader {
    * - `pick`, from any of the item's card sets (`choices`, by position;  none, its own:  I8) (`pickOption()`):
    *   - that set's option chosen
    *   - a question answered with it (its title the answer), any other item APPROVED with it (as approve)
-   *   - reviewed, a Noted card `Chose B · <title>:  recorded ...;  waiting for the next phase, P9 · <name>`
+   *   - reviewed;  the set says when, and what happens next (`chosen-on`, `chosen-note`), in its Choices (I153)
    * - `todo`:  a new todo, "Follow up:  <title>", linking back;  the item reviewed;  a Noted card `Made todo T23 ...`
    * - `next`, a todo's plane (Owen, 2026-10-09):  queued into the NEXT phase, the first still to do
    *   (`queue()`, its work `P10 · <name>`;  none:  "the next phase"), a Noted card `Queued for P10 · <name>`
@@ -1298,8 +1321,9 @@ export class PlanDoc extends PlanReader {
    * its text, a reply, More Details.
    * - a question:  answered with it (`answerWith()`)
    * - any other kind:  APPROVED with it (`approve()`:  an open judgement call closed, accepted;  reviewed)
-   * - either way, a Noted status card, `Chose B · <title>:  <what was recorded>;  <what happens next>` (Q19;
-   *   Noted, not Done:  Owen, 2026-10-10), and the option in the log line
+   * - either way, the set records it (`notePick()`):  `chosen-on` today, `chosen-note` `<what was recorded>;  <what
+   *   happens next>`, drawn inside its folded Choices;  NO Noted card (I153;  Owen, 2026-10-29:  "should be part of
+   *   the collapsed 'chosen' section");  and the option in the log line
    *   - `outcome` (`choose()`'s, a choice settled in conversation):  in place of what happens next
    * - left for Claude when the item has no such set, or the set no such option
    */
@@ -1331,7 +1355,7 @@ export class PlanDoc extends PlanReader {
       const closed = /\((\w+)\)/.exec(approved)?.[1]
       recorded = closed ? `recorded, the ${kind === "judgement" ? "call" : kind} ${closed}` : "recorded"
     }
-    this.noteStatus(item.id, pickedWords(option, `${recorded};  ${outcome ?? this.nextStepWords()}`))
+    this.notePick(item, set, option, `${recorded};  ${outcome ?? this.nextStepWords()}`)
     return { applied: true, did }
   }
 
@@ -1367,7 +1391,7 @@ export class PlanDoc extends PlanReader {
   /**
    * Record Owen's pick from a mark Claude finished without applying it
    * (`inbox done | clear`:  a revisit carrying a pick, "pick B, but ...", talked over or answered by an agent):
-   * that set's `chosen` (`chooseOption()`), so his pick stays marked on the page, and a Noted card.
+   * that set's `chosen` (`chooseOption()`), so his pick stays marked on the page, with its line (`notePick()`).
    * Returns what it did, for the log;  `undefined` when there was nothing to record.
    * - only while the set has NO `chosen` yet:  a `decide --option` after the talk had the last word
    * - never answers or closes the item:  the talk may have changed what happens (Claude's `decide` does that)
@@ -1380,8 +1404,19 @@ export class PlanDoc extends PlanReader {
     const option = PlanItem.optionsIn(set).find((card) => card.letter === pick)
     if (!option) return undefined
     this.chooseOption(item, option.letter, choices)
-    this.noteStatus(item.id, pickedWords(option, `recorded after the talk;  ${this.nextStepWords()}`))
+    this.notePick(item, set, option, `recorded after the talk;  ${this.nextStepWords()}`)
     return `${AuthorWords.picked(this.person, option.letter)}:  ${option.title} (kept from the revisit)`
+  }
+
+  /**
+   * Record Owen's pick ON its card set, not in a Noted card (I153):  `chosen-on` today, `chosen-note` `what`
+   * (`recorded as the answer;  waiting for a phase to take it up`), drawn inside the set's folded Choices.
+   * - the item's underway card, if any, still turns Noted with the pick's words (`Chose B · <title>:  <what>`):
+   *   a spinner is never left running
+   */
+  private notePick(item: Element, set: Element, option: OptionCard, what: string) {
+    Markup.set<"epic-choices">(set, { chosenOn: this.today, chosenNote: what })
+    if (this.underwayCard(this.statusHost(item.id))) this.noteStatus(item.id, pickedWords(option, what))
   }
 
   /**
@@ -2376,6 +2411,8 @@ export class PlanDoc extends PlanReader {
    *   - `at`:  now
    *   - `answer`:  its question's answer, in short (its `<epic-answer title>`), once it has one:  the chip shows it
    *     months later, whatever the question says by then
+   *   - `was`:  the words it replaced, found in the doc's earlier versions (`earlierVersions`, `ChangeOriginals`;
+   *     epic `epic-engine` I160), when first stamped;  none for new words, or when no version tells
    *   - inside a PHASE's text, the item it names is HANDLED IN that phase (`handled`, epic `epic-engine` P31;
    *     Q17, A):  grey, quiet in the lists, its line linking the phase;  logged.  Only when first stamped:  a Reopen
    *     takes it off (`applyChange()`), and the mark rewritten after the next answer puts it back
@@ -2393,6 +2430,8 @@ export class PlanDoc extends PlanReader {
       const data: Partial<EpicData<"epic-change">> = {}
       if (!CHANGE_ID.test(change.id)) {
         data.id = `ch${next++}`
+        const was = change.hasAttribute("was") ? undefined : ChangeOriginals.find(change, this.earlierVersions)
+        if (was) data.was = was
         if (this.markHandled(change)) changed++
       }
       if (!change.hasAttribute("at")) data.at = now

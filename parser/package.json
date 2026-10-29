@@ -1,6 +1,6 @@
 {
   "name": "spell-parser",
-  "version": "0.8.0",
+  "version": "0.8.5",
   "private": true,
   "description": "The spell language:  the rule-based parser, markdown, the core runtime, Python's writers and spell itself",
   "license": "MIT",

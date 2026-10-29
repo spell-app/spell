@@ -179,7 +179,8 @@ export const PLAN_BUTTONS: readonly ReviewButtonSpec[] = [
 ]
 
 /**
- * A change mark's button (`<epic-change>`, epic `epic-engine` P30;  Q13, B), in a tooltip on its words while it's new:
+ * A change mark's button (`<epic-change>`, epic `epic-engine` P30;  Q13, B), in the popup a click on its words opens
+ * (I160), while it's new:
  * - Reopen (`reopen`, blue:  an ask of Claude):  its question opens again;  `inbox apply` reopens it
  * - no Accept (Owen, 2026-10-25:  "i shouldn't have to approve those -- I already answered the question")
  */

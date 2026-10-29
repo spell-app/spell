@@ -251,7 +251,9 @@ As `plan-doc.md`, "Ids":
     each screenshot.
   - Filing a request again replaces its block.
 - Plan changes:  `<epic-update at summary>` blocks, one per change to the phase's plan, oldest first (see "Updates").
-  - Written by `updated <name>#<N> "<html>" [--summary "..."]`.
+  - Written by `updated <name>#<N> "<html>" [--summary "..."] [--for <item ids>]`.
+  - Only for a change NO ITEM caused (a plan adjusted while building, a file moved):  an answer's change is its
+    change marks alone ("Change marks";  epic `epic-engine` I159).
   - At the END of the phase's description (Owen, 2026-10-11:  "The updated blocks themselves go at the end of the
     phase description"):  after Goal (and Owen's kept notes), before Done, the commits, Files, Verify, To review.
   - `phase`:  the phase active then.
@@ -453,12 +455,15 @@ As `plan-doc.md`, "Ids":
   - A question is answered with the option:  no other set stays chosen.
   - Any other item is APPROVED with it:  an open judgement call closed, accepted;  reviewed.
   - Either way:
-    - a Noted card:  `Chose B · <title>:  <what was recorded>;  <what happens next>`
-    - e.g. `recorded as the answer;  waiting for the next phase, P9 · <name>`
+    - the set records the pick, drawn inside its folded Choices (I153):
+      `<epic-choices chosen="B" chosen-on="2026-10-29" chosen-note="recorded as the answer;  waiting for ...">`
+      - `chosen-note`:  `<what was recorded>;  <what happens next>`
+      - NO Noted card:  it said again what the Choices header says (Owen, 2026-10-29:  "should be part of the
+        collapsed 'chosen' section");  only an underway card on the item still turns Noted, `Chose B · ...`
     - and the option in the log line
   - A pick riding on a revisit ("pick B, but ..."):  left for the talk.
     - Claude finishes the mark (`inbox done | clear`) without a `decide --option`:
-      the pick is still written as that set's `chosen`, with a Noted card (`keepPick()`).
+      the pick is still written as that set's `chosen`, with its line (`keepPick()`):  `recorded after the talk;  ...`.
     - Once Owen picked, the card says Chosen (Owen, 2026-10-10).
 - The way in (`IncomingHtml`):  agents may still write the OLD shapes.
   - Every command taking HTML turns them into elements on the way in, so a doc never holds them.
@@ -572,7 +577,7 @@ Two kinds of finished card, so a card for one STEP never reads as the item finis
 | card             | when                                                                  | says, in one line                                   |
 | ---------------- | --------------------------------------------------------------------- | --------------------------------------------------- |
 | `Claude • Underway` | Claude is on it                                                     | what Claude took the task to be                     |
-| `Claude • Noted` | a STEP done, the item not finished:  Owen's choice RECORDED (a pick, a todo made or queued, a new item made, a choice talked over), an answer or reply written, details added, the item condensed, a request called off | what was done, and what happens next:  `Chose B · Bananas:  recorded as the answer;  waiting for the next phase, P9 · Build` |
+| `Claude • Noted` | a STEP done, the item not finished:  Owen's choice RECORDED (a todo made or queued, a new item made, a choice talked over;  a pick goes in its Choices, I153), an answer or reply written, details added, the item condensed, a request called off | what was done, and what happens next:  `Made todo T23 to follow this up.` |
 | `Claude • Done`  | the item's WORK is finished:  an issue fixed, a todo built;  an open issue or todo CLOSES with it | the reading kept, a summary when worth saying     |
 
 ```html
@@ -584,7 +589,7 @@ Two kinds of finished card, so a card for one STEP never reads as the item finis
   <p slot="summary">Recommended a file each:  JSON would need every template escaped.</p>
 </epic-status>
 <epic-status slot="status" state="noted" at="2026-10-08 15:02">
-  <p>Chose B · Keep one file per template:  recorded as the answer;  waiting for the next phase, P9 · Build</p>
+  <p>Queued for P9 · Build</p>
 </epic-status>
 ```
 
@@ -622,14 +627,12 @@ Two kinds of finished card, so a card for one STEP never reads as the item finis
     - Spinner off.
     - `done --filed "<what>"`, the older spelling, writes the same Noted card.
   - `inbox apply`:  a card born NOTED for each of these (none for an approval):
-    - each pick and todo it files (Q19):
-      - a pick:  `Chose B · <option>:  recorded ...;  waiting for ...`
-      - a todo:  `Made todo T23 to follow this up.`
+    - each todo it files (Q19):  `Made todo T23 to follow this up.`
+      - a pick has none since I153:  its set's `chosen-on` and `chosen-note`, drawn in its Choices
     - each todo it queues:  `Queued for P10 · <name>`
     - each new item it makes:  `Made from the page:  Owen's new todo, ...`
-  - `inbox done | clear` of a mark carrying a pick:  a Noted card with the pick kept,
-    `Chose B · ...:  recorded after the talk;  ...`.
-    Unless a `decide --option` already chose in that set.
+  - `inbox done | clear` of a mark carrying a pick:  the pick kept on its set, `chosen-note` `recorded after the
+    talk;  ...`.  Unless a `decide --option` already chose in that set.
   - The reading and summary are HTML, as `updated` takes:
     - inline runs go in a `<p>`;  blocks stay
     - plain text works as it is (`&lt;` for a `<`)
@@ -743,7 +746,7 @@ easily"), `components/epic-update/`:
   - `at`:  `YYYY-MM-DD HH:MM` (any form `PlanDates` reads).  `summary`:  one line, plain text.
     The tool's `updated` without `--summary`:  the first sentence of what changed (`UpdateSummary`).
   - Where it goes:
-    - a PLAN CHANGE:  at the end of its phase's description (`updated`;  "Phases")
+    - a PLAN CHANGE no item caused:  at the end of its phase's description (`updated`;  "Phases")
     - an update to PROSE (an agent's, by hand):  right AFTER the block it changed (Owen, 2026-10-11:  "or after the
       section which they updated"):  after the paragraph, list or code block, inside its item, field or Overview
       sub-section;  an update to a whole Overview sub-section goes last inside it
@@ -773,6 +776,14 @@ text itself, where an `<epic-update>` only said a block changed.
   - `id`:  the next free `ch<N>`, never reused;  its inbox key, and a link's target (`#ch3`)
   - `at`:  now;  `answer`:  the item's answer in short (its `<epic-answer title>`, 160 characters at most), once it
     has one, so the chip still says why months later
+  - `was`:  the words it REPLACED, plain text, 300 characters at most (epic `epic-engine` I160;  Owen, 2026-10-29:
+    "Should say original text for comparison"), when first stamped (`ChangeOriginals`):
+    - found by the tool, never written by hand:  the mark's block (its nearest ancestor with an id) lined up word by
+      word with the same block in the doc as it was, and what lay between the words around the mark
+    - as it was:  the files on disk before this edit (a command handed the new markup), else the epic folder's last 3
+      commits in the content repo (a mark written by hand into a part file);  git only reads there
+    - none:  new words, words the mark only wrapped, or no version tells;  a `was` written by hand is kept
+    - marks from before I160 have none, and keep none:  no migration step, the attribute is optional
   - `change <name> [--for q16]`:  an edit that does only that, after a hand edit of a part, then lists the marks;
     `--for`:  the marks with no `item` take that one.  `check` fails one not stamped yet.
 - Each body host (an Overview sub-section, a phase, an item, the log) lists the marks inside it not `accepted`, in the
@@ -781,11 +792,23 @@ text itself, where an `<epic-update>` only said a block changed.
 - On the page:  the words on an orange ground, a folded chip naming the item (`Q16`;  unfolded, its title and the
   answer).  NO approval (Owen, 2026-10-25:  "i shouldn't have to approve those -- I already answered the question"):
   orange for 3 days after `at`, then quiet (`isNewChange()`;  `<epic-change>`'s `isQuiet`).
-  - while new and reviewed:  Reopen, in a tooltip on the words (`<epic-review buttons="change">`):
+  - a click on the words (or Enter / Space) opens a popup under them (I160;  never a hover):  "Changed by Q16
+    (10/24/26 15:10)", then "Originally:" and `was`, when it has one;  a click elsewhere or Escape closes it
+  - while new and reviewed:  Reopen, in that popup (`<epic-review buttons="change">`):
     `{ action: "reopen" }`;  `inbox apply` reopens the item (an answered question back to open, red;  its answer
     kept):  answered again, Claude rewrites the words with a new mark
   - an Accept mark from before (`{ action: "accept" }`) still applies:  `accepted="2026-10-24 19:02"`, quiet
-- The `<epic-update>` blocks written before stay as they are.  No migration step:  a new element, nothing old changes.
+- The marks are the WHOLE record of an answer's change:  no `<epic-update>` block beside them (epic `epic-engine`
+  I159;  Owen, 2026-10-29, on P51's orange "Update:  No answer buttons ..." under its Q53 marks:  "Do we still need
+  the orange update section like this?", then picked "only when no mark says it").
+  - `updated` writes nothing when the marks say it (`PlanDoc.marksSay()`, `UpdateMarks`), printing
+    `P51:  no Update block, the change marks say it (Q53)`:
+    - `--for q53,j3`:  every item given has a mark in the phase
+    - without it:  every item id its text names has a mark in the phase stamped this pass (within 15 minutes, or not
+      stamped yet), and it names no file
+  - a change no item caused still gets its block:  a plan adjusted while building, a file moved
+  - the blocks written before beside their marks:  the migration `updates-said-by-marks` drops those the marks say
+    ("Migrations")
 
 ### Handled in a phase
 
@@ -925,6 +948,22 @@ Named, dated, idempotent steps that bring an older page's markup up to today's, 
     - each one a note in the report, with its card's time and title:  an older page's Done card may have meant only
       "this step done" (an answer written), Noted today, so read the dry run's list before running it
     - idempotent:  a closed item is left
+  - `picks-in-choices` (2026-10-29, on command;  epic `epic-engine` I153):  each pick's Noted card moves into its
+    item's Choices (`PicksInChoices`), where a pick is recorded since
+    - which:  an item's Noted card whose whole text is `Chose B · ...`, the item having a set with `chosen="B"`;
+      a card with a summary (underway first) says more:  left
+    - the set takes the card's day (`chosen-on`) and what it recorded, from `recorded ...` on (`chosen-note`);  the card
+      goes;  ONE log line names the items (`Picks' Noted cards moved into their Choices:  J3, Q5`)
+    - idempotent:  a moved card is gone
+  - `updates-said-by-marks` (2026-10-29, on command;  epic `epic-engine` I159):  a phase's Update block written in
+    the same pass as its change marks goes (`UpdatesSaidByMarks`):  the marks say it ("Change marks")
+    - which:  a phase's own dated `<epic-update>`, stamped within 15 minutes of a change mark in that phase
+      (`UpdateMarks.SAME_PASS_MINUTES`), naming an item one of those marks names
+    - kept:  a block holding marks itself, naming a file or folder, or an estimate;  a phase whose marks are from
+      another time (the backfill's);  ONE log line names the phases
+    - its first dry run (2026-10-29):  only epic-engine's P51 · Tests Inline, Owen's case;  epic-friend's three hold
+      their marks, debut's P23 and epic-engine's P48 say an estimate
+    - idempotent:  a dropped block is gone
   - `agents-marked` (2026-10-29, every edit;  epic `epic-friend` P2, Q9):  Claude's old replies marked his,
     `<epic-reply from="Claude" agent="claude">` (`AgentsMarked`), so a reply's name never says who wrote it
     - which:  no `agent`, `from` "Claude" (any case), dated before `ThreadFacts.AGENTS_MARKED` (or undated);

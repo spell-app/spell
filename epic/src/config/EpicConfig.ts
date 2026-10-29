@@ -1,4 +1,4 @@
-import { existsSync, readdirSync, readFileSync } from "node:fs"
+import { existsSync, readdirSync, readFileSync, statSync } from "node:fs"
 import { basename, dirname, isAbsolute, join, resolve, sep } from "node:path"
 
 import JSON5 from "json5"
@@ -89,7 +89,9 @@ export class EpicConfig {
     pageVoices: { readme: "readme", guide: "readme", code: "code", "epic-page": "code" },
     checkoutPatches: [],
     promptAck: true,
-    renamedRepos: {}
+    renamedRepos: {},
+    top: "",
+    oldLayout: { carryOn: "", commitMaps: "", oldClones: "" }
   }
 
   /**
@@ -140,6 +142,12 @@ export class EpicConfig {
 
   /** `top`'s answer, once asked:  `null` for none */
   private topFound: EpicConfig | null | undefined
+
+  /** `peers`' answer, once asked */
+  private peersFound: EpicPeer[] | undefined
+
+  /** `kit`'s answer, once asked:  `null` for none */
+  private kitFound: EpicConfig | null | undefined
 
   /**
    * The config of the repo whose MAIN checkout is `main`.
@@ -236,7 +244,8 @@ export class EpicConfig {
 
   /** the shared content repo (epics, guides, sagas ...):  `contentFolder`, from the main checkout */
   get contentFolder(): string {
-    return this.folderFor("contentFolder", this.settings.contentFolder)
+    const kit = this.kitFor("contentFolder")
+    return kit ? kit.contentFolder : this.folderFor("contentFolder", this.settings.contentFolder)
   }
 
   /** the branch worktrees start from and merge into */
@@ -257,7 +266,10 @@ export class EpicConfig {
 
   /** `worktreesFolder` as this repo's own file has it, from its main checkout:  a child repo's place before its top's */
   private get ownWorktreesFolder(): string {
-    return this.folderFor("worktreesFolder", this.settings.worktreesFolder)
+    // a PEER of a kit (`kit`):  its own, beside it, `../<repo>.worktrees` (repo-split's P20 arrangement, Q51 A)
+    const written =
+      this.kit && !this.named.has("worktreesFolder") ? `../${this.repoName}.worktrees` : this.settings.worktreesFolder
+    return this.folderFor("worktreesFolder", written)
   }
 
   /**
@@ -293,6 +305,8 @@ export class EpicConfig {
         const data = EpicConfig.parse(readFileSync(file, "utf8"), file) as { repos?: unknown } | unknown[]
         const list = Array.isArray(data) ? data : (data as { repos?: unknown }).repos
         names = (Array.isArray(list) ? list : [])
+          // a PEER (`"peer": true`) is a repo BESIDE the kit, never inside its worktree (`peers`, Q48 A)
+          .filter((each) => (each as { peer?: unknown })?.peer !== true)
           .map((each) => (typeof each === "string" ? each : (each as { name?: unknown })?.name))
           .filter((name): name is string => typeof name === "string" && /^[\w.-]+$/.test(name))
       } catch (error) {
@@ -332,6 +346,85 @@ export class EpicConfig {
     return found
   }
 
+  /**
+   * The repos BESIDE this one that its repos file lists as PEERS (epic-engine's P49, Q48 A):
+   * `{ "name": "spell-brand", "path": "../spell-brand", "peer": true }` in the kit's `repos.json5`.
+   * - each one's MAIN checkout:  `path` (else `../<name>`), from this repo's main checkout
+   * - a project of its own, with its own install and its own worktrees (`<name>.worktrees/` beside it, Q50 D):
+   *   never part of an epic's worktree of this repo (`repos` and `repoCheckouts()` leave it out)
+   * - `[]` with no repos file, or one that won't read
+   */
+  get peers(): EpicPeer[] {
+    if (this.peersFound) return this.peersFound
+    const written = this.settings.repos
+    let peers: EpicPeer[] = []
+    if (typeof written === "string" && written) {
+      try {
+        const file = resolve(this.main, written)
+        const data = EpicConfig.parse(readFileSync(file, "utf8"), file) as { repos?: unknown } | unknown[]
+        const list = Array.isArray(data) ? data : (data as { repos?: unknown }).repos
+        peers = (Array.isArray(list) ? list : []).flatMap((each) => {
+          const entry = (each ?? {}) as { name?: unknown; path?: unknown; peer?: unknown }
+          if (entry.peer !== true || typeof entry.name !== "string" || !/^[\w.-]+$/.test(entry.name)) return []
+          const path = typeof entry.path === "string" && entry.path ? entry.path : `../${entry.name}`
+          return [{ name: entry.name, main: resolve(this.main, path) }]
+        })
+      } catch {
+        // `repos` says it already
+      }
+    }
+    this.peersFound = peers
+    return peers
+  }
+
+  /**
+   * The KIT this repo is a peer of (epic-engine's P49, Q51 A):  the config of the folder its own file names as
+   * `"top"` (`{ "top": "../spell" }`, spell-brand's), from its main checkout;  `undefined` without one.
+   * - a peer takes its kit's content folder, windows, window names, shared folders, session-folder links, engine and
+   *   voices, for each key its own file leaves out (`kitFor()`);  its worktrees stay its OWN, `../<repo>.worktrees`
+   *   beside it, and so do its install, base branch and app
+   * - when the kit's repos file doesn't list this repo as a peer:  said once on stderr, and still used
+   * - NOT a multi-repo `top`:  a peer's epic worktree is its own alone (Q50 D)
+   */
+  get kit(): EpicConfig | undefined {
+    if (this.kitFound !== undefined) return this.kitFound ?? undefined
+    let found: EpicConfig | undefined
+    const written = this.settings.top
+    if (written) {
+      const folder = resolve(this.main, written)
+      try {
+        if (!existsSync(join(folder, EpicConfig.FILE)))
+          warnOnce(`top ${written} has no ${EpicConfig.FILE} (${folder}):  ${this.file} is read alone`)
+        else {
+          found = new EpicConfig(folder)
+          if (!found.peers.some((peer) => RealPath.same(peer.main, this.main)))
+            warnOnce(
+              `${this.repoName} names ${found.main} as its top, but that repo's list doesn't name it a peer ` +
+                `("peer": true in its ${found.settings.repos || "repos file"})`
+            )
+        }
+      } catch (error) {
+        warnOnce(`top ${written} won't read (${(error as Error).message}):  ${this.file} is read alone`)
+        found = undefined
+      }
+    }
+    this.kitFound = found ?? null
+    return found
+  }
+
+  /** The kit (`kit`) a key this repo's own file leaves out comes from;  `undefined`:  this repo's own value. */
+  private kitFor(key: string): EpicConfig | undefined {
+    return this.named.has(key) ? undefined : this.kit
+  }
+
+  /**
+   * How this repo meets an epic worktree cut BEFORE it absorbed child repos (epic-engine's P49, repo-split's P20
+   * · One Repo, Q40 changed):  `oldLayout` in its file.  All `""` (the default):  nothing to carry across.
+   */
+  get oldLayout(): EpicOldLayout {
+    return this.settings.oldLayout
+  }
+
   /** The repo's folder name:  its main checkout's (`spell-epic`) */
   get repoName(): string {
     return basename(this.main)
@@ -346,15 +439,136 @@ export class EpicConfig {
    */
   repoCheckouts(name: string): RepoCheckout[] {
     const top = this.top
-    if (!top) return [{ repo: this.repoName, main: this.main, worktree: this.worktreeFolder(name), top: true }]
+    if (!top) {
+      const worktree = this.worktreeFolder(name)
+      return [{ repo: this.repoName, main: this.main, worktree, top: true }, ...this.foundCheckouts(worktree, [])]
+    }
     const folder = join(top.worktreesFolder, name)
-    return [
+    const listed: RepoCheckout[] = [
       { repo: top.repoName, main: top.main, worktree: folder, top: true },
       ...top.repos.flatMap((repo) => {
         const found = EpicConfig.childCheckout(join(top.main, repo), join(folder, repo), folder)
         return found ? [{ repo, ...found, top: false }] : []
       })
     ]
+    return [...listed, ...top.foundCheckouts(folder, listed)]
+  }
+
+  /**
+   * The child-repo checkouts FOUND inside epic worktree `worktree` that `listed` doesn't hold (epic-engine's P49,
+   * Q40 changed):  an OLD-LAYOUT worktree's, cut before repo-split's P20 · One Repo made the child repos folders of
+   * the kit, still holding a worktree of each old clone (`spell-ui/` ...).
+   * - each folder right inside `worktree` whose `.git` is a FILE (a git worktree) of ANOTHER repo:  paired with that
+   *   repo's main checkout by git (`checkoutOf()`, which `git worktree repair` keeps true after Q41's move to
+   *   `~/www/spell.old/`);  a broken one (its git folder gone) is left out
+   * - `found: true`;  `peer: true` when its main checkout is one of `peers` (spell-brand's, before it moved out)
+   * - in folder-name order;  none when `worktree` isn't there
+   * - why:  every walker of an epic's checkouts (merge-main, the merge, removal, status, `epic loc`, the checkout
+   *   patches) then sees them with no change of its own;  each decides what an old one needs (`isCrossed()`)
+   */
+  foundCheckouts(worktree: string, listed: RepoCheckout[]): RepoCheckout[] {
+    let names: string[]
+    try {
+      names = readdirSync(worktree, { withFileTypes: true })
+        .filter((entry) => entry.isDirectory())
+        .map((entry) => entry.name)
+        .sort()
+    } catch {
+      return []
+    }
+    const own = RealPath.of(this.main)
+    return names.flatMap((name) => {
+      const path = join(worktree, name)
+      if (listed.some((each) => RealPath.same(each.worktree, path))) return []
+      try {
+        if (!statSync(join(path, ".git")).isFile()) return []
+      } catch {
+        return []
+      }
+      const found = checkoutOf(path)
+      if (!found || found.missingGitDir || RealPath.same(found.main, own)) return []
+      const peer = this.peers.some((each) => RealPath.same(each.main, found.main))
+      return [{ repo: name, main: found.main, worktree: path, top: false, found: true, ...(peer ? { peer } : {}) }]
+    })
+  }
+
+  /**
+   * Whether found checkout `checkout` (`foundCheckouts()`) has CROSSED into this repo already:  its branch's tip is
+   * an old id in one of the commit maps (`oldLayout.commitMaps`) of epic worktree `worktree`, or of the main checkout
+   * - a map lists every commit repo-split's P20 · One Repo rewrote:  `main`'s (`commit-map-ui.txt`), and each
+   *   branch its carry-on command crossed (`commit-map-ui-<branch>.txt`), so a tip there is in this repo's history
+   * - a branch with no commits of its own has crossed with `main`'s map alone
+   * - a peer's (`peer`), or a repo with no `commitMaps`:  never;  its work is only in its own repo
+   */
+  isCrossed(checkout: RepoCheckout, worktree: string): boolean {
+    const folder = this.oldLayout.commitMaps
+    if (!folder || checkout.peer) return false
+    const tip = Git.out(["rev-parse", "HEAD"], checkout.worktree)
+    if (!tip) return false
+    return [worktree, this.main].some((root) => {
+      const maps = join(root, folder)
+      try {
+        return readdirSync(maps)
+          .filter((file) => /^commit-map-.*\.txt$/.test(file))
+          .some((file) => readFileSync(join(maps, file), "utf8").includes(`${tip} `))
+      } catch {
+        return false
+      }
+    })
+  }
+
+  /**
+   * The OLD-LAYOUT child checkouts inside epic worktree `worktree`:  `foundCheckouts()`, less the child repos a
+   * multi-repo top lists (`repos`);  `[]` for a repo with no `oldLayout` (one that never absorbed child repos)
+   */
+  oldCheckouts(worktree: string): RepoCheckout[] {
+    const { carryOn, commitMaps, oldClones } = this.oldLayout
+    if (!carryOn && !commitMaps && !oldClones) return []
+    const listed = (this.top ?? this).repos
+    return this.foundCheckouts(worktree, []).filter(({ repo }) => !listed.includes(repo))
+  }
+
+  /**
+   * The found checkouts (`foundCheckouts()`) inside epic worktree `worktree` that still hold work of their own
+   * (epic-engine's P49, Q40 changed):  not crossed (`isCrossed()`), and with commits their main checkout's base
+   * branch lacks.
+   * - what removing the worktree refuses for, even forced, and what `epic merge` refuses for:  that work is in the old
+   *   clone's branch alone until the carry-on command (`oldLayout.carryOn`) crosses it, or its own repo merges it
+   *   (a peer's)
+   * - NEVER throws:  a checkout git can't read counts as holding work
+   */
+  leftBehind(worktree: string): RepoCheckout[] {
+    return this.oldCheckouts(worktree).filter((checkout) => {
+      if (this.isCrossed(checkout, worktree)) return false
+      let base = "main"
+      try {
+        base = new EpicConfig(checkout.main).baseBranch
+      } catch {
+        // an old clone whose settings won't read:  its `main`
+      }
+      const ahead = Git.out(["rev-list", "--count", `${base}..HEAD`], checkout.worktree)
+      return ahead === undefined || Number(ahead) > 0
+    })
+  }
+
+  /**
+   * What to say of `leftBehind()`'s `checkouts`, in worktree `worktree`:  one line, naming each and what crosses it.
+   * - `""` for none
+   */
+  leftBehindSaid(worktree: string, checkouts: RepoCheckout[]): string {
+    if (!checkouts.length) return ""
+    const names = checkouts.map(({ repo }) => repo).join(", ")
+    const old = checkouts.filter((each) => !each.peer)
+    const peers = checkouts.filter((each) => each.peer)
+    const fixes = [
+      ...(old.length
+        ? [
+            `cross ${old.map(({ repo }) => repo).join(", ")} over:  \`epic worktree merge-main\` in ${worktree} (it runs \`${this.oldLayout.carryOn || "the carry-on command"}\`)`
+          ]
+        : []),
+      ...(peers.length ? [`merge ${peers.map(({ repo }) => repo).join(", ")} in its own repo`] : [])
+    ]
+    return `${names} inside ${worktree} still ${checkouts.length > 1 ? "hold" : "holds"} commits of ${checkouts.length > 1 ? "their" : "its"} own:  ${fixes.join(";  ")}`
   }
 
   /**
@@ -433,12 +647,12 @@ export class EpicConfig {
 
   /** the window names:  the default window, and the folder names a window shows */
   get windows(): EpicWindows {
-    return this.settings.windows
+    return this.kitFor("windows")?.windows ?? this.settings.windows
   }
 
   /** whether each worktree's saved-session folder is linked to the main checkout's */
   get linkSessionFolders(): boolean {
-    return this.settings.linkSessionFolders
+    return this.kitFor("linkSessionFolders")?.linkSessionFolders ?? this.settings.linkSessionFolders
   }
 
   /**
@@ -447,7 +661,7 @@ export class EpicConfig {
    *   existed (`Shared.configOf()`)
    */
   get sharedFolders(): string[] {
-    return this.settings.sharedFolders
+    return this.kitFor("sharedFolders")?.sharedFolders ?? this.settings.sharedFolders
   }
 
   /**
@@ -456,6 +670,8 @@ export class EpicConfig {
    * - `epic shared link` makes the link, only in a checkout whose `.gitignore` ignores it (`Shared.linkEngine()`)
    */
   get engineFolder(): string | undefined {
+    const kit = this.kitFor("engineFolder")
+    if (kit) return kit.engineFolder
     return this.settings.engineFolder ? this.folderFor("engineFolder", this.settings.engineFolder) : undefined
   }
 
@@ -490,6 +706,8 @@ export class EpicConfig {
    * - repos sharing a content folder each need their own:  spell-epic's config keeps its `workspaces/`
    */
   get newWindowsFolder(): string {
+    const kit = this.kitFor("windowsFolder")
+    if (kit) return kit.newWindowsFolder
     const written = this.settings.windowsFolder
     return written ? this.folderFor("windowsFolder", written) : join(this.contentFolder, "windows")
   }
@@ -702,7 +920,12 @@ export class EpicConfig {
       ),
       checkoutPatches: this.checkoutPatches.map((patch) => patch.id).join(","),
       promptAck: this.promptAck,
-      renamedRepos: JSON.stringify(this.renamedRepos)
+      renamedRepos: JSON.stringify(this.renamedRepos),
+      peers: this.peers.map((peer) => `${peer.name}=${peer.main}`).join(","),
+      kit: this.kit?.main ?? "",
+      "oldLayout.carryOn": this.oldLayout.carryOn,
+      "oldLayout.commitMaps": this.oldLayout.commitMaps,
+      "oldLayout.oldClones": this.oldLayout.oldClones && resolve(this.main, this.oldLayout.oldClones)
     }
   }
 
@@ -721,7 +944,7 @@ export class EpicConfig {
   voiceFile(name: string): string | undefined {
     const own = this.settings.voices[name]
     if (own) return resolve(this.main, own)
-    const top = this.top
+    const top = this.top ?? this.kit
     const topsOwn = top && top.main !== this.main ? top.settings.voices[name] : undefined
     if (topsOwn) return resolve(top!.main, topsOwn)
     const shipped = join(EpicConfig.ENGINE_VOICES, `${name}.md`)
@@ -743,7 +966,8 @@ export class EpicConfig {
           .filter((name) => name.endsWith(".md"))
           .map((name) => name.slice(0, -3))
       : []
-    const tops = this.top && this.top.main !== this.main ? Object.keys(this.top.settings.voices) : []
+    const above = this.top ?? this.kit
+    const tops = above && above.main !== this.main ? Object.keys(above.settings.voices) : []
     return [...new Set([...Object.keys(this.settings.voices), ...tops, ...shipped])].sort()
   }
 
@@ -866,6 +1090,8 @@ export class EpicConfig {
       checkoutPatches: patchesOf(given, defaults.checkoutPatches, file),
       promptAck: valueOf(given, "promptAck", defaults.promptAck, file),
       renamedRepos: urlsTo(given, "renamedRepos", defaults.renamedRepos, file),
+      top: valueOf(given, "top", defaults.top, file, "", { empty: true }),
+      oldLayout: oldLayoutOf(given, defaults.oldLayout, file),
       app: {
         path: valueOf(app, "path", defaults.app.path, file, "app."),
         url: valueOf(app, "url", defaults.app.url, file, "app.", { empty: true }),
@@ -907,7 +1133,32 @@ export class EpicConfig {
  * One repo's checkout in an epic's worktree (`EpicConfig.repoCheckouts()`):  the repo's folder name, its MAIN
  * checkout, its worktree for the epic (made or not), and whether it's the top (or the single repo)
  */
-export type RepoCheckout = { repo: string; main: string; worktree: string; top: boolean }
+export type RepoCheckout = {
+  repo: string
+  main: string
+  worktree: string
+  top: boolean
+  /** an OLD-LAYOUT child checkout found inside the epic's worktree, not one the repo lists (`foundCheckouts()`) */
+  found?: boolean
+  /** a found checkout of one of the repo's `peers` (spell-brand's, in an old-layout worktree) */
+  peer?: boolean
+}
+
+/** One of `EpicConfig.peers`:  a repo beside this one (`spell-brand`), and its MAIN checkout, absolute. */
+export type EpicPeer = { name: string; main: string }
+
+/**
+ * `EpicSettings.oldLayout`:  how a repo that ABSORBED its child repos (repo-split's P20 · One Repo) meets an epic
+ * worktree cut before, with a worktree of each old clone still inside it (epic-engine's P49, Q40 changed).
+ * - `carryOn`:  the command, run from the worktree's root once `main` is merged in, that crosses its child-repo
+ *   branches into the merged folders (`node bin/spell.mjs rename branches`):  `epic worktree merge-main` runs it
+ * - `commitMaps`:  the folder of the history rewrite's commit maps, from a checkout's root (`tools/one-repo`):
+ *   a found checkout whose tip is in one has crossed (`EpicConfig.isCrossed()`)
+ * - `oldClones`:  where the main checkout's old clones went (`../spell.old`, Q41 B), from the main checkout:
+ *   the worktree hook, reusing an old branch, names those that still hold it
+ * - all `""` (the default):  a repo that never absorbed one;  found checkouts are walked as any other repo
+ */
+export type EpicOldLayout = { carryOn: string; commitMaps: string; oldClones: string }
 
 /**
  * What `.epic/config.json5` holds:  where a repo keeps its epic things.
@@ -990,6 +1241,12 @@ export type RepoCheckout = { repo: string; main: string; worktree: string; top: 
  *   - GitHub redirects an old name, but an epic page records the address its repo had when it started:
  *     `EpicRepo` reads both as one repo, offline, so the page needs no rewrite
  *   - read from every repo of a multi-repo top, and from the checkout an address is looked for in (`EpicRepo.renamesOf()`)
+ * - `top`:  the KIT this repo is a PEER of, a folder from the main checkout (`"../spell"`, spell-brand's;
+ *   epic-engine's P49, Q51 A);  `""` (the default):  none
+ *   - each key this file leaves out that a peer shares (the content folder, windows ...) is the kit's (`kit`);
+ *     its worktrees are its own, `../<repo>.worktrees` unless it says otherwise
+ *   - the kit's repos file lists it with `"peer": true` (`peers`);  `epic config` warns when it doesn't
+ * - `oldLayout`:  carrying an old-layout epic worktree across (`EpicOldLayout`), `{ carryOn, commitMaps, oldClones }`
  */
 export type EpicSettings = {
   contentFolder: string
@@ -1013,6 +1270,8 @@ export type EpicSettings = {
   checkoutPatches: CheckoutPatch[]
   promptAck: boolean
   renamedRepos: Record<string, string>
+  top: string
+  oldLayout: EpicOldLayout
 }
 
 /** The keys whose value comes from the repo itself, when a file leaves them out (`EpicConfig.defaultsFor()`). */
@@ -1250,4 +1509,18 @@ function urlsTo(
       `EpicConfig:  ${file}'s "${key}" must be an object of old repo addresses to new ones, { "https://github.com/o/old": "https://github.com/o/new" }, not ${JSON.stringify(value)}`
     )
   return value as Record<string, string>
+}
+
+/**
+ * `given.oldLayout`:  `{ carryOn, commitMaps, oldClones }`, each text;  a key left out, `fallback`'s.
+ * - throws `TypeError` naming the file for anything else
+ */
+function oldLayoutOf(given: Record<string, unknown>, fallback: EpicOldLayout, file: string): EpicOldLayout {
+  const value = given.oldLayout
+  if (value === undefined) return fallback
+  if (typeof value !== "object" || value === null || Array.isArray(value))
+    throw new TypeError(`EpicConfig:  ${file}'s "oldLayout" must be an object, { "carryOn": ..., "commitMaps": ... }`)
+  const layout = value as Record<string, unknown>
+  const text = (key: keyof EpicOldLayout) => valueOf(layout, key, fallback[key], file, "oldLayout.", { empty: true })
+  return { carryOn: text("carryOn"), commitMaps: text("commitMaps"), oldClones: text("oldClones") }
 }

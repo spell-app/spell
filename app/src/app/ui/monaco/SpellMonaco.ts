@@ -1,6 +1,7 @@
 import { SP } from "spell/parser/spell"
 import { LSP } from "spell/app/lsp"
 import type * as UIT from "spell/app/app/ui/ui.types"
+import { CODE_POPUP_DEFAULTS, monacoOptionsFor } from "spell/app/app/ui/codePopups"
 import { CodeThemes } from "spell/app/app/ui/monaco/themes/CodeThemes"
 import { monaco } from "./monaco"
 import { AppAddresses } from "./AppAddresses"
@@ -39,6 +40,8 @@ export class SpellMonaco {
    * - Formats as you type:  a Spanish keyword typed without its accent gets it back (`SpellLanguageFeatures`).
    * - Large text (`fontSize`), and no line numbers:  the app's code editor turns them on from its `...` menu.
    * - No border or cursor mark down the scrollbar:  a hard line beside the pane's soft edge.
+   * - Popups at their defaults (`monacoOptionsFor()`):  hover info only with ⌥ held, suggestions only on Ctrl+Space,
+   *   no details beside them.  The app's code pane changes them from its `...` menu (`CodeSettings`).
    */
   static OPTIONS: monaco.editor.IStandaloneEditorConstructionOptions = {
     automaticLayout: true,
@@ -53,7 +56,8 @@ export class SpellMonaco {
     overviewRulerBorder: false,
     hideCursorInOverviewRuler: true,
     "semanticHighlighting.enabled": true,
-    formatOnType: true
+    formatOnType: true,
+    ...monacoOptionsFor(CODE_POPUP_DEFAULTS)
   }
 
   /**
@@ -136,7 +140,11 @@ export class SpellMonaco {
     CodeThemes.register()
     SpellHeadings.watch(LANGUAGES)
     monaco.languages.register({ id: LANGUAGE, extensions: [".spell"], mimetypes: ["text/spell", "text/x-spell"] })
-    monaco.languages.register({ id: SPELLX_LANGUAGE, extensions: [".spellml"], mimetypes: ["text/x-spellx"] })
+    monaco.languages.register({
+      id: SPELLX_LANGUAGE,
+      extensions: [...SP.SPELLML_SUFFIXES],
+      mimetypes: ["text/x-spellx"]
+    })
     const colourEach = () => {
       monaco.languages.setTokensProvider(LANGUAGE, new SpellTokensProvider())
       monaco.languages.setTokensProvider(SPELLX_LANGUAGE, SpellTokensProvider.forSpellx())
@@ -168,7 +176,7 @@ export class SpellMonaco {
   /** Monaco language id for a file named `path`, by its extension. */
   static languageForPath(path: string | undefined): string {
     const extension = path?.match(/\.[^./]+$/)?.[0]
-    if (extension === ".spellml") return SpellMonaco.SPELLX_LANGUAGE
+    if (SP.isSpellmlName(extension)) return SpellMonaco.SPELLX_LANGUAGE
     if (SP.isSpellSourceName(extension)) return SpellMonaco.LANGUAGE
     if (extension === ".js" || extension === ".jsx") return "javascript"
     if (extension === ".css") return "css"

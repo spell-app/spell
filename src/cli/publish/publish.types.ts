@@ -21,6 +21,9 @@
  *   (Spell UI's short names, `"./ui-*": "components/ui-*\/index"`, for outside the repos)
  * - `bin`:  each command the package puts on the `PATH`, by the module under `src/` it runs (`cli/main`):
  *   its published bin imports that module's build, which runs when imported
+ * - `sideEffects`:  more files under `src/` the PUBLISHED package lists as side effects, beyond the checkout's own
+ *   list (`core.ts`:  Spell UI's settings install as it loads, so one family alone, `spell/ui/ui-button`, works
+ *   in a bundle;  the checkout leaves it out, as it re-chunks the app's build)
  */
 export type PublishSettings = {
   exclude?: string[]
@@ -29,6 +32,7 @@ export type PublishSettings = {
   files?: string[]
   exports?: Record<string, string>
   bin?: Record<string, string>
+  sideEffects?: string[]
 }
 
 /**

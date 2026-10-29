@@ -54,6 +54,7 @@ export * from "./TypeExplorer"
 export * from "./ThingExplorer"
 export * from "./LazyMonaco"
 export * from "./InputEditor"
+export * from "./CodeSettings"
 export * from "./OutputEditor"
 export * from "./FileDropdown"
 

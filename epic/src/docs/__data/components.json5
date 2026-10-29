@@ -159,15 +159,15 @@
         },
         {
           "name": "in-thread",
-          "description": "Redundant, with a body:  first in its item's thread's brown block."
+          "description": "Redundant, with a body:  first in its item's thread, inside its one frame."
         },
         {
           "name": "thread-start",
-          "description": "First in the thread's block."
+          "description": "First in the thread:  the frame's top edge and corners."
         },
         {
           "name": "thread-end",
-          "description": "Last in the thread's block."
+          "description": "Last in the thread:  the frame's bottom edge and corners."
         }
       ],
       "texts": [
@@ -714,7 +714,7 @@
         "tracked change",
         "Q&A chip"
       ],
-      "description": "Words an answer changed or added, marked where they are (epic `epic-engine` P30):  `<epic-change item=\"q16\">todos fold into it</epic-change>`.  They show on an orange ground, our colour for \"changed since you looked\", with a small folded chip naming the question (`Q16`);  unfolded, the question and its answer in a line.  While the page is reviewed, Accept and Reopen show on hover or focus.  Accept clears the orange and the chip stays for good (Q13, B);  Reopen opens the question again, and the words stay orange.  Claude writes the element with `item` alone;  the epic tool gives it its id, time and answer.",
+      "description": "Words an answer changed or added, marked where they are (epic `epic-engine` P30):  `<epic-change item=\"q16\">todos fold into it</epic-change>`.  They show on an orange ground, our colour for \"changed since you looked\", with a small folded chip naming the question (`Q16`);  unfolded, the question and its answer in a line.  A click on the words (or Enter) opens a popup:  which answer changed them and when, the words they replaced (`was`), and, while the page is reviewed and the change new, Reopen, which opens the question again.  Claude writes the element with `item` alone;  the epic tool gives it its id, time, answer and the words it replaced.",
       "noun": "change mark",
       "attributes": [
         {
@@ -739,6 +739,11 @@
           "description": "Its item's answer in short, as it was when the words changed:  the tool copies it from the item's `<epic-answer title>`, so the chip still says why months later."
         },
         {
+          "name": "was",
+          "kind": "string",
+          "description": "The words it replaced, as plain text (epic `epic-engine` I160):  the popup's \"Originally\".  The epic tool finds them as it stamps the mark, in the page as it was before (on disk, else its last commits);  none:  new words, or a mark from before I160."
+        },
+        {
           "name": "accepted",
           "kind": "string",
           "description": "When you accepted it (`2026-10-24 19:02`), on a page from before changes needed no approval:  quiet, no orange;  an old Accept mark still writes it.  None:  orange while new (`at`, 3 days)."
@@ -758,7 +763,7 @@
         },
         {
           "name": "words",
-          "description": "The changed words, a `<mark>`:  orange while new (3 days)."
+          "description": "The changed words, a `<mark>`:  orange while new (3 days);  a click, Enter or Space opens the popup."
         },
         {
           "name": "chip",
@@ -769,8 +774,8 @@
           "description": "The question's title and its answer, in a line, after the chip;  hidden while folded."
         },
         {
-          "name": "buttons",
-          "description": "Accept and Reopen (an `<epic-review buttons=change>`), under the chip on hover or focus, while the page is reviewed and the change waits."
+          "name": "popup",
+          "description": "The words' popup (a `<ui-popup>`), opened by a click on them:  which answer changed them and when, \"Originally\" and the words they replaced, and Reopen (an `<epic-review buttons=change>`) while the page is reviewed and the change is new.  A click elsewhere or Escape closes it."
         }
       ],
       "states": [
@@ -785,14 +790,14 @@
       ],
       "texts": [
         {
-          "key": "newTip",
-          "text": "Changed by {item}'s answer{when}:  Reopen to talk it over again",
-          "description": "The words' tooltip while the change is new and the page reviewed;  `when`, ` on 10/24/26 15:10`."
+          "key": "changedBy",
+          "text": "Changed by {item}{when}",
+          "description": "The popup's first line;  `when`, ` (10/24/26 15:10)`."
         },
         {
-          "key": "changedTip",
-          "text": "Changed by {item}'s answer{when}",
-          "description": "The words' tooltip otherwise."
+          "key": "originally",
+          "text": "Originally:",
+          "description": "The popup's second line, before the words replaced."
         },
         {
           "key": "unfoldTip",
@@ -1143,6 +1148,16 @@
           "name": "chosen",
           "kind": "string",
           "description": "The chosen option's `letter`, once answered;  absent while the question is open."
+        },
+        {
+          "name": "chosen-on",
+          "kind": "string",
+          "description": "The day Owen's pick was recorded (`epic inbox apply`, `epic choose`, a revisit's pick kept);  shown inside the unfolded Choices, with `chosen-note`."
+        },
+        {
+          "name": "chosen-note",
+          "kind": "string",
+          "description": "What recording the pick did, and what happens next:  `recorded as the answer;  waiting for a phase to take it up`.  Shown inside the unfolded Choices, so a pick needs no Noted card of its own (I153)."
         }
       ],
       "slots": [
@@ -1168,6 +1183,10 @@
         {
           "name": "panels",
           "description": "Answered:  the box of option panels, hidden while folded."
+        },
+        {
+          "name": "note",
+          "description": "Answered, with `chosen-on` or `chosen-note`:  the pick's line atop the panels, `Chosen 10/29/26:  ...`."
         }
       ],
       "states": [
@@ -1204,6 +1223,21 @@
           "key": "chosen",
           "text": "Chosen:  {name}",
           "description": "After the heading:  the chosen option, `{name}` its letter and title (`B · Bananas`)."
+        },
+        {
+          "key": "chosenNote",
+          "text": "Chosen {date}:  {note}",
+          "description": "Atop the unfolded panels:  when the pick was recorded, `{date}`, and what happens next, `{note}`."
+        },
+        {
+          "key": "chosenOn",
+          "text": "Chosen {date}",
+          "description": "Atop the unfolded panels:  a pick with a day, no note."
+        },
+        {
+          "key": "chosenNoteOnly",
+          "text": "Chosen:  {note}",
+          "description": "Atop the unfolded panels:  a pick with a note, no day."
         }
       ]
     },
@@ -4499,7 +4533,7 @@
         "response",
         "note"
       ],
-      "description": "A reply on an item, after its answer:  `<from> · re: <re>` is drawn, the date at the right;  the reply is its children.  In an item, one of its thread's brown block;  Claude's newest wears an orange edge and NEW until you've seen it.",
+      "description": "A reply on an item, after its answer:  `<from> · re: <re>` is drawn, the date at the right;  the reply is its children.  In an item, one of its thread's section, one frame round them all, the first reply's fold folding the whole thread;  Claude's newest wears an orange edge and NEW until you've seen it.",
       "noun": "reply",
       "attributes": [
         {
@@ -4567,15 +4601,19 @@
         },
         {
           "name": "in-thread",
-          "description": "In its item's thread:  one of its brown block (`AnswerThread`)."
+          "description": "In its item's thread:  inside the thread's one frame (`AnswerThread`)."
         },
         {
           "name": "thread-start",
-          "description": "First in the thread's block:  its top corners rounded."
+          "description": "First in the thread:  the frame's top edge and corners."
         },
         {
           "name": "thread-end",
-          "description": "Last in the thread's block:  its bottom corners rounded."
+          "description": "Last in the thread, or its folded head:  the frame's bottom edge and corners."
+        },
+        {
+          "name": "thread-hidden",
+          "description": "After the thread's head, which is folded:  hidden with it."
         },
         {
           "name": "new",
@@ -5176,15 +5214,15 @@
         },
         {
           "name": "tools",
-          "description": "At the title's end:  the page's own buttons (the `actions` slot), then the Phases section's Files / Verify toggles;  an item section's state filter;  an Overview sub-section's review buttons."
+          "description": "At the title's end:  the page's own buttons (the `actions` slot), then the Phases section's Files / Verify toggles and its state filter;  an item section's state filter;  an Overview sub-section's review buttons."
         },
         {
           "name": "filter",
-          "description": "An item section's state filter:  one chip per state its items are in, with how many, solid while that state's items show, outlined while hidden."
+          "description": "An item section's state filter:  one chip per state its items are in, with how many, solid while that state's items show, outlined while hidden.  The Phases section's the same, by a phase's state:  undone, updated (a plan waiting for Owen's Accept, or changed), complete (epic `epic-engine` I157)."
         },
         {
           "name": "hidden-note",
-          "description": "Under a filtered list:  \"3 hidden · show all\", an `<epic-hidden-note>`."
+          "description": "Under a filtered list (items or phases):  \"3 hidden · show all\", an `<epic-hidden-note>`."
         },
         {
           "name": "empty",
@@ -5314,11 +5352,6 @@
           "key": "hideVerify",
           "text": "Hide each phase's Verify",
           "description": "The Verify toggle, on."
-        },
-        {
-          "key": "count",
-          "text": "{open} open of {total}",
-          "description": "The count badge's tooltip:  `3/7` in words."
         },
         {
           "key": "addNew",
@@ -5700,13 +5733,13 @@
         "chips",
         "filter by state"
       ],
-      "description": "The state filter's chips (epic `epic-engine` P3:  ONE copy, drawn wherever items are filtered by state):  a pill per state the items are in, in the state's colour, with how many;  solid while that state's items show, outlined while hidden.  A click asks its owner to filter (`epic-state-changed`), which sets `shown`:  an item section's title (`<epic-section>`), an epic page's toolbar (`<epic-page>`), and the docs runtime's lists (the Epics page).  What a click does, by the one rule (`StateFilter.nextShown()`), is each chip's tooltip.  The items marked in this pass (`marked`) count in a solid blue badge (Send's blue) first, whatever the filter.",
+      "description": "The state filter's chips (epic `epic-engine` P3:  ONE copy, drawn wherever items, or phases, are filtered by state):  a pill per state the items are in, in the state's colour, with how many;  solid while that state's items show, outlined while hidden.  A click asks its owner to filter (`epic-state-changed`), which sets `shown`:  an item section's title (`<epic-section>`), an epic page's toolbar (`<epic-page>`), and the docs runtime's lists (the Epics page).  What a click does, by the one rule (`StateFilter.nextShown()`), is each chip's tooltip.  The items marked in this pass (`marked`) count in a solid blue badge (Send's blue) first, whatever the filter.",
       "noun": "state-filter",
       "attributes": [
         {
           "name": "counts",
           "kind": "string",
-          "description": "How many items are in each state, `state:count` pairs:  `attention:2 open:5 recent:3`.  A chip per state with any, in the filter's order (`FILTER_STATES`):  progress, attention, replied, open, recent, old."
+          "description": "How many items are in each state, `state:count` pairs:  `attention:2 open:5 recent:3`.  A chip per state with any, in the filter's order (`FILTER_STATES`):  progress, attention, replied, open, recent, old.  The Phases section's, a phase's states (`PHASE_FILTER_STATES`, epic `epic-engine` I157):  undone, updated, complete."
         },
         {
           "name": "marked",
@@ -5812,6 +5845,21 @@
           "key": "stateOld",
           "text": "no longer relevant",
           "description": "A state chip's words:  `old` (grey)."
+        },
+        {
+          "key": "phaseUndone",
+          "text": "still to do",
+          "description": "A Phases chip's words:  `undone` (yellow:  to do or under way, nothing new for Owen)."
+        },
+        {
+          "key": "phaseUpdated",
+          "text": "with news for you (a plan to accept, or changed)",
+          "description": "A Phases chip's words:  `updated` (orange:  not done, and its build plan waits for Owen's Accept, or its plan changed, the orange pen)."
+        },
+        {
+          "key": "phaseComplete",
+          "text": "done",
+          "description": "A Phases chip's words:  `complete` (green)."
         }
       ]
     },
@@ -5944,11 +5992,15 @@
         },
         {
           "name": "in-thread",
-          "description": "Its line in the item's thread's brown block, after the replies."
+          "description": "Its line in the item's thread, after the replies:  inside the thread's one frame."
         },
         {
           "name": "thread-end",
-          "description": "Last in the thread's block:  its bottom corners rounded."
+          "description": "Last in the thread:  the frame's bottom edge and corners."
+        },
+        {
+          "name": "thread-hidden",
+          "description": "The thread's head is folded:  hidden with the rest of the thread."
         }
       ],
       "texts": [
@@ -7174,7 +7226,7 @@
       "folder": "epic-change",
       "mainTag": "epic-change",
       "title": "<epic-change>",
-      "summary": "The <epic-change> element: words an answer changed, marked in the text, on an orange ground, with the question's folded Q&A chip, Accept and Reopen.",
+      "summary": "The <epic-change> element: words an answer changed, marked in the text, on an orange ground, with the question's folded Q&A chip; a click on the words opens a popup: which answer, when, the words it replaced, Reopen.",
       "status": "done",
       "docs": false,
       "tags": [

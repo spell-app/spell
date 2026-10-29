@@ -6,8 +6,11 @@ import { reactiveObject } from "spell/util"
 import type { SP } from "spell/parser/spell"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import { editor, type EditorStore } from "spell/app/app/editor"
+import { editorPrefs } from "spell/app/app/editorPrefs"
+import { CODE_POPUP_DEFAULTS, type CodePopupChoices } from "spell/app/app/ui/codePopups"
 import type * as UIT from "spell/app/app/ui/ui.types"
 import { uiReady } from "spell/app/app/solid"
+import { CodeSettings } from "spell/app/app/solid/CodeSettings"
 import { FileDropdown } from "spell/app/app/solid/FileDropdown"
 import { InputEditor, InputRoot } from "spell/app/app/solid/InputEditor"
 import { LazyMonaco } from "spell/app/app/solid/LazyMonaco"
@@ -183,9 +186,95 @@ describe("<InputRoot>", () => {
   })
 })
 
+describe("CodeSettings", () => {
+  test("a new editor starts on the defaults:  hover only with ⌥, suggestions only on Ctrl+Space, no details", async () => {
+    setEditor("file", fakeFile("test-project/one.js", "one\n"))
+    const host = await mount(() => <InputEditor />)
+    const inputEditor = await waitForInputEditor(host)
+    const { monaco } = await import("spell/app/app/solid/monaco")
+    const option = monaco.editor.EditorOption
+    expect(CodeSettings.choices).toEqual(CODE_POPUP_DEFAULTS)
+    expect(inputEditor.getOption(option.hover).enabled).toBe("onKeyboardModifier")
+    // ⌘ / Ctrl adds cursors, so ⌥ is the hover's key
+    expect(inputEditor.getOption(option.multiCursorModifier)).not.toBe("altKey")
+    expect(inputEditor.getOption(option.quickSuggestions)).toEqual({ other: "off", comments: "off", strings: "off" })
+    expect(inputEditor.getOption(option.suggestOnTriggerCharacters)).toBe(false)
+    expect(inputEditor.getOption(option.suggest).showInlineDetails).toBe(false)
+    expect(inputEditor.getOption(option.parameterHints).enabled).toBe(true)
+    expect(inputEditor.getContainerDomNode().classList.contains("suggest-details-hidden")).toBe(true)
+  })
+
+  test("a choice applies at once to every editor, and is remembered", async () => {
+    setEditor("file", fakeFile("test-project/one.js", "one\n"))
+    const host = await mount(() => <InputEditor />)
+    const inputEditor = await waitForInputEditor(host)
+    const { monaco } = await import("spell/app/app/solid/monaco")
+    const option = monaco.editor.EditorOption
+    choose("hover", "always")
+    choose("suggest", "asYouType")
+    choose("suggestDetails", true)
+    choose("parameterHints", false)
+    expect(inputEditor.getOption(option.hover).enabled).toBe("on")
+    expect(inputEditor.getOption(option.multiCursorModifier)).toBe("altKey")
+    expect(inputEditor.getOption(option.quickSuggestions)).toEqual({ other: "on", comments: "off", strings: "off" })
+    expect(inputEditor.getOption(option.suggestOnTriggerCharacters)).toBe(true)
+    expect(inputEditor.getOption(option.suggest).showInlineDetails).toBe(true)
+    expect(inputEditor.getOption(option.parameterHints).enabled).toBe(false)
+    expect(inputEditor.getContainerDomNode().classList.contains("suggest-details-hidden")).toBe(false)
+    expect(editorPrefs.get("codeHover")).toBe("always")
+    expect(editorPrefs.get("codeSuggestDetails")).toBe(true)
+
+    // a new editor takes them too
+    const other = monaco.editor.create(document.createElement("div"))
+    expect(other.getOption(option.hover).enabled).toBe("on")
+    other.dispose()
+  })
+
+  test("the code pane's '...' menu shows the settings panel;  its controls choose", async () => {
+    setEditor("file", fakeFile("test-project/one.js", "one\n"))
+    const host = await mount(() => <InputRoot />)
+    await waitForInputEditor(host)
+    expect(host.querySelector(".CodeSettingsPanel")).toBeNull()
+    host.querySelector<HTMLElement>(".FileMoreMenu ui-item[value=codeSettings]")!.click()
+    cleanups.push(() => CodeSettings.toggleShowing(false))
+    flush()
+    await ElementFixture.settle(host)
+    const panel = host.querySelector(".InputEditor .CodeSettingsPanel")!
+    expect(panel).not.toBeNull()
+    const hover = panel.querySelector<HTMLElement & { value: string }>("ui-select#CodeSettings-hover")!
+    expect(hover.value).toBe("withAlt")
+    expect([...hover.querySelectorAll("ui-item")].map(text)).toEqual(["Only with ⌥ (Alt) held", "Always", "Never"])
+
+    cleanups.push(forgetChoices)
+    hover.dispatchEvent(new CustomEvent("ui-changed", { detail: { value: "never" } }))
+    const details = panel.querySelector("ui-checkbox[name=suggestDetails]")!
+    details.dispatchEvent(new CustomEvent("ui-changed", { detail: { selected: true, value: "on" } }))
+    flush()
+    expect(CodeSettings.choices).toMatchObject({ hover: "never", suggestDetails: true })
+
+    panel.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }))
+    flush()
+    expect(host.querySelector(".CodeSettingsPanel")).toBeNull()
+  })
+})
+
 ////////////////
 // ## Helpers
 ////////////////
+
+/** `CodeSettings.choose()`, put back to the defaults and forgotten after the test. */
+function choose<K extends keyof CodePopupChoices>(key: K, value: CodePopupChoices[K]) {
+  CodeSettings.choose(key, value)
+  cleanups.push(forgetChoices)
+}
+
+/** Put every code setting back to its default, and forget the prefs. */
+function forgetChoices() {
+  for (const [key, value] of Object.entries(CODE_POPUP_DEFAULTS)) {
+    CodeSettings.choose(key as keyof CodePopupChoices, value as never)
+  }
+  for (const pref of ["codeHover", "codeSuggest", "codeSuggestDetails", "codeParameterHints"]) editorPrefs.forget(pref)
+}
 
 /** A fake file of a fake loaded project, as spell cells (`reactiveObject()`), with the other file `two.js`. */
 function fakeFile(path: string, contents: string): FakeFile {

@@ -20,7 +20,7 @@ import {
 } from "spell/cli/publish"
 
 /**
- * `spell publish [--dry-run] [--no-scratch] [--json]`:  the packages built, packed and checked, then published to
+ * `spell publish [--dry-run] [--no-scratch] [--json] [--tag <tag>]`:  the packages built, packed and checked, then published to
  * npm (epic `repo-split` P19;  three packages since P20, One Repo, Q65).
  * - `spell`:  the ONE package (Q62), the kit's `src/` and every folder's (`dist/ui/...`, `dist/parser/...`), with
  *   every name the checkout has (`spell/ui/core`), its commands, and every folder's runtime dependency.
@@ -35,9 +35,13 @@ import {
  *   a Vite page with a `<ui-button>`, `npx spell help`, `npx epic --help`.  `--no-scratch` skips it (it needs the
  *   network).
  * - `--dry-run`:  stops there;  publishes nothing.
- *   Without it, and only when every check passed:  `npm publish <tgz>` for each.
- *   - `spell-epic` published:  the root marketplace's `epic` entry turns from `./epic` to it
- *     (`PluginPackage.sourceToNpm()`, epic `epic-engine` P49), to commit
+ *   Without it, and only when every check passed:  `npm publish <tgz> --tag <tag>` for each.
+ *   - `--tag`:  the npm dist-tag, `next` when not given (`CLI.PUBLISH_TAG`;  Owen, 2026-10-29, epic `repo-split`
+ *     P22):  `npm install spell@next` gets it, and `latest` stays on the coming-soon placeholder.
+ *     Only `--tag latest` moves `latest`.
+ *   - `spell-epic` published under `latest`:  the root marketplace's `epic` entry turns from `./epic` to it
+ *     (`PluginPackage.sourceToNpm()`, epic `epic-engine` P49), to commit;  under `next` it stays `./epic`, as
+ *     Claude Code installs an npm plugin's `latest`
  *   NOTE: `npm login` first;  npm asks for a one-time password itself when the account has one.
  * - Which kit:  the nearest from the current folder (`findCheckout(KIT_MARKER)`).
  * - Exits 1 when a check fails or a publish does.
@@ -46,6 +50,7 @@ export async function publishCommand(options: CLI.PublishOptions = {}): Promise<
   const kit = CLI.findCheckout(CLI.KIT_MARKER)
   const { kit: kitRepo, folders } = publishedRepos(kit)
   const version = kitRepo.manifest.version
+  const tag = options.tag ?? CLI.PUBLISH_TAG
   const packsDir = join(kit, PACKS_FOLDER)
   rmSync(packsDir, { recursive: true, force: true })
   mkdirSync(join(packsDir, STAGE_FOLDER), { recursive: true })
@@ -62,7 +67,11 @@ export async function publishCommand(options: CLI.PublishOptions = {}): Promise<
     ...(ui ? [new UIBundle({ ...ui, name: BUNDLED }, stage(BUNDLED), version, {}, catalog)] : []),
     ...(plugin ? [new PluginPackage({ ...plugin, name: PLUGIN }, stage(PLUGIN), version, {}, catalog)] : [])
   ]
-  say(chalk.bold(`spell publish${options.dryRun ? " --dry-run" : ""}:  ${packages.length} packages at ${version}`))
+  say(
+    chalk.bold(
+      `spell publish${options.dryRun ? " --dry-run" : ""}:  ${packages.length} packages at ${version}, tag ${tag}`
+    )
+  )
   for (const repo of [kitRepo, ...folders]) buildDeclarations(kit, repo)
 
   for (const pkg of packages) {
@@ -86,27 +95,28 @@ export async function publishCommand(options: CLI.PublishOptions = {}): Promise<
   const published: string[] = []
   if (!options.dryRun && !failed.length) {
     for (const pkg of packed) {
-      say(chalk.bold(`npm publish ${CLI.relativePath(pkg.tgz)}`))
-      const code = await CLI.runChild("npm", ["publish", pkg.tgz, "--access", "public"])
+      say(chalk.bold(`npm publish ${CLI.relativePath(pkg.tgz)} --tag ${tag}`))
+      const code = await CLI.runChild("npm", ["publish", pkg.tgz, "--access", "public", "--tag", tag])
       if (code !== CLI.EXIT.OK) {
         failed.push({ pkg: pkg.name, check: "npm publish", ok: false, detail: `exit ${code}` })
         break
       }
       published.push(`${pkg.name}@${pkg.version}`)
     }
-    // the plugin out on npm:  the root marketplace's `epic` names it, no longer the checkout's `./epic`
-    if (published.some((name) => name.startsWith(`${PLUGIN}@`)) && PluginPackage.sourceToNpm(kit, PLUGIN))
+    // the plugin out on npm as `latest`:  the root marketplace's `epic` names it, no longer the checkout's `./epic`
+    const pluginOut = published.some((name) => name.startsWith(`${PLUGIN}@`))
+    if (tag === "latest" && pluginOut && PluginPackage.sourceToNpm(kit, PLUGIN))
       say(`.claude-plugin/marketplace.json:  epic's source is npm's ${PLUGIN} now;  commit it`)
   }
 
-  if (options.json) CLI.out(JSON.stringify({ version, packed, checks, published }, null, 2))
+  if (options.json) CLI.out(JSON.stringify({ version, tag, packed, checks, published }, null, 2))
   else if (failed.length)
     say(chalk.red(`${failed.length} check(s) failed${options.dryRun ? "" : ":  nothing more published"}`))
   else
     say(
       options.dryRun
         ? chalk.green("dry run:  every check passed;  nothing published")
-        : `published ${published.join(", ")}`
+        : `published ${published.join(", ")} under the tag ${tag}`
     )
   return failed.length ? CLI.EXIT.ERRORS : CLI.EXIT.OK
 }

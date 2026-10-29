@@ -84,6 +84,12 @@ export class MainMerge {
   readonly kitRoot: string | undefined
 
   /**
+   * the carry-on command, as words (`oldLayout.carryOn`):  crosses an OLD-LAYOUT worktree's child-repo branches into
+   * the kit's folders once `main` is in (`carryOn()`);  `[]`:  none
+   */
+  readonly carryOnCommand: string[]
+
+  /**
    * - `root`:  the checkout (a worktree, usually)
    * - `generators`:  default the checkout's own list (`generatorsOf()`)
    * - `snapshotUpdate`:  default `yarn vp test run <tests> --update`
@@ -98,7 +104,8 @@ export class MainMerge {
     snapshotUpdate = SNAPSHOT_UPDATE,
     install,
     rename = RENAME,
-    kitRoot
+    kitRoot,
+    carryOn
   }: MainMergeProps) {
     this.root = root
     this.generators = generators ?? MainMerge.generatorsOf(root)
@@ -106,6 +113,7 @@ export class MainMerge {
     this.install = install ?? EpicConfig.of(root).installCommand.split(/\s+/).filter(Boolean)
     this.rename = rename
     this.kitRoot = kitRoot ?? MainMerge.kitRootOf(root)
+    this.carryOnCommand = carryOn ?? EpicConfig.of(root).oldLayout.carryOn.split(/\s+/).filter(Boolean)
   }
 
   /**
@@ -280,9 +288,14 @@ export class MainMerge {
     if (!top || !epic) {
       const merge = make(root)
       const report = merge.run(mode)
-      return [report.result === "merged" ? { ...report, ...merge.renameOldNames() } : report]
+      if (report.result === "conflicts") return [report]
+      const renamed = report.result === "merged" ? merge.renameOldNames() : {}
+      return [{ ...report, ...renamed, ...merge.carryOn() }]
     }
-    const checkouts = top.repoCheckouts(epic).filter(({ worktree }) => existsSync(join(worktree, ".git")))
+    // an old-layout child checkout found inside (`found`) isn't merged:  it crosses over instead (`carryOn()`)
+    const checkouts = top
+      .repoCheckouts(epic)
+      .filter(({ worktree, found }) => !found && existsSync(join(worktree, ".git")))
     const merged: { merge: MainMerge; report: MergeMainReport }[] = []
     for (const { repo, worktree } of [...checkouts.slice(1), ...checkouts.slice(0, 1)]) {
       if (mode === "continue" && !Git.run(["rev-parse", "-q", "--verify", "MERGE_HEAD"], worktree).ok) continue
@@ -347,6 +360,33 @@ export class MainMerge {
     } catch (error) {
       return { renameSkipped: `\`${command}\` failed, nothing renamed:  ${(error as Error).message}` }
     }
+  }
+
+  /**
+   * Cross an OLD-LAYOUT worktree over, once `main` is merged in (epic-engine's P49, Q40 changed):  run the carry-on
+   * command (`oldLayout.carryOn`, `spell rename branches`) from `root`, when a child-repo checkout found inside it
+   * still holds work of its own (`EpicConfig.leftBehind()`, a peer's left out:  its own repo merges that).
+   * - why after the merge:  the command merges each child branch, rewritten as repo-split's P20 history was, into the
+   *   folder `main` brought (`ui/` ...);  it refuses before `main` is in
+   * - `{}` with nothing to cross, or no command;  its output goes to stderr, as it runs
+   * - NEVER throws:  the merge stands;  `carriedOn.ok` says whether it worked (a conflict it left says what to do)
+   */
+  carryOn(): Pick<MergeMainReport, "carriedOn"> {
+    const { root, carryOnCommand } = this
+    if (!carryOnCommand.length) return {}
+    let repos: string[]
+    try {
+      repos = EpicConfig.of(root)
+        .leftBehind(root)
+        .filter((checkout) => !checkout.peer)
+        .map(({ repo }) => repo)
+    } catch {
+      return {}
+    }
+    if (!repos.length) return {}
+    const command = carryOnCommand.join(" ")
+    const run = spawnSync(carryOnCommand[0]!, carryOnCommand.slice(1), { cwd: root, stdio: ["ignore", 2, 2] })
+    return { carriedOn: { command, repos, ok: run.status === 0 } }
   }
 
   /**
@@ -478,6 +518,7 @@ export type MainMergeProps = {
   install?: string[]
   rename?: string[]
   kitRoot?: string
+  carryOn?: string[]
 }
 
 /**

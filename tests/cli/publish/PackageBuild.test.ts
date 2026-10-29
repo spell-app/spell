@@ -117,6 +117,23 @@ describe("expandGlobs()", () => {
       ].join("\n")
     )
   })
+
+  test("a comment among its arguments, with an apostrophe:  skipped, not read as a string (epic repo-split P22)", () => {
+    const file = join(REPO.root, "src/things/x.ts")
+    const code = [
+      "const all = import.meta.glob([",
+      '  "./*.css",',
+      "  // the thing's own file is left out",
+      '  "!./skip.css"',
+      "])"
+    ].join("\n")
+    expect(expandGlobs(code, file)).toBe('const all = { "./thing.css": () => import("./thing.css") }')
+  })
+
+  test("a string that never closes is an error, not a hang", () => {
+    const file = join(REPO.root, "src/things/x.ts")
+    expect(() => expandGlobs('import.meta.glob("./*.css)', file)).toThrow(/never closes/)
+  })
 })
 
 /** Write `content` to `path` in the made-up repo, making its folders. */

@@ -8,9 +8,9 @@ import { StateFilter } from "spell/epic/components/epic-section/StateFilter"
 import {
   CHIP,
   CHIP_CLICK_KEYS,
+  CHIP_STATES,
   FILTER,
-  FILTER_STATES,
-  type FilterState
+  type ChipState
 } from "spell/epic/components/epic-section/EpicSection.types"
 
 import { epicStateFilterVocabulary } from "./EpicStateFilter.en"
@@ -23,6 +23,8 @@ import filterCSS from "./EpicStateFilter.css?inline"
  * ### `<epic-state-filter>`
  * The state filter's CHIPS (epic `airplane` P8, ONE element since epic `epic-engine` P3):  a pill per state the items
  * are in, in the state's colour, with how many (Owen, 2026-10-10:  no filter icon).
+ * - the Phases section's phases the same, by a phase's three states:  undone, updated, complete (epic `epic-engine`
+ *   I157)
  * - SOLID while that state's items show, OUTLINED while hidden (`shown`)
  * - a click asks the owner to filter:  `epic-state-changed`, with the clicked state and what should show next, by the one
  *   rule (`StateFilter.nextShown()`:  everything showing, only that state;  else a hidden state shows too and a shown
@@ -60,10 +62,14 @@ export class EpicStateFilter extends E.UIComponent<typeof epicStateFilterVocabul
     return counts
   }
 
-  /** The states with items, in the filter's order:  a chip each. */
-  get present(): FilterState[] {
+  /**
+   * The states with items (or phases), in the filter's order:  a chip each.
+   * - an item's states (`FILTER_STATES`) or a phase's (`PHASE_FILTER_STATES`, the Phases section's:  epic
+   *   `epic-engine` I157), whichever `counts` names
+   */
+  get present(): ChipState[] {
     const counts = this.stateCounts
-    return FILTER_STATES.filter((it) => counts.has(it.state))
+    return CHIP_STATES.filter((it) => counts.has(it.state))
   }
 
   /**
@@ -87,7 +93,7 @@ export class EpicStateFilter extends E.UIComponent<typeof epicStateFilterVocabul
   }
 
   /** The chips drawn:  every state present but `progress`, which counts in the blue badge. */
-  get chips(): readonly FilterState[] {
+  get chips(): readonly ChipState[] {
     return this.present.filter((it) => it.state !== SUBMITTED_STATE)
   }
 
@@ -146,7 +152,7 @@ export class EpicStateFilter extends E.UIComponent<typeof epicStateFilterVocabul
   }
 
   /** A chip's name and tooltip:  how many, which state, and what its click does (`StateFilter.clickDoes()`). */
-  private chipWords(state: FilterState): string {
+  private chipWords(state: ChipState): string {
     const words = this.translationForKey(state.words)
     const count = this.stateCounts.get(state.state) ?? 0
     const present = this.present.map((it) => it.state as string)

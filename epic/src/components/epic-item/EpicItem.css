@@ -348,12 +348,11 @@
   /*
    * a COLUMN (epic `epic-engine` P27):  the light details in their own block (`.flow`, where prose margins collapse),
    * so a drive-by's status line can go first, above the Choices (its `order`)
-   * - `--epic-thread-fill`:  the ground of its thread's brown block, read by its cards (`AnswerThread`):  a shade
-   *   deeper than Owen's ivory cards, so his reply still reads as a card on it
+   * - `--epic-thread-rule`:  the frame of its thread's section and the rules between its cards, read by its cards
+   *   (`AnswerThread`;  I152:  one section, no grey ground)
    */
   .details {
-    /* faint grey, no brown (Owen, 2026-10-25:  calmer cards):  white cards stand on it */
-    --epic-thread-fill: color-mix(in oklab, var(--ui-text-color, #1d1d22) 4%, transparent);
+    --epic-thread-rule: var(--epic-rule, var(--ui-border-color, light-dark(#e6e3ef, #34343b)));
     display: flex;
     flex-direction: column;
     padding: 6px 6px 10px var(--_epic-item-indent);
@@ -363,15 +362,20 @@
   .flow {
     min-width: 0;
   }
-  /* Owen's marked note, in the thread after the replies:  on the block's ground */
+  /* Owen's marked note, in the thread after the replies:  inside its frame, a thin rule above it */
   .details > .in-thread {
-    padding: 3px 6px;
-    background: var(--epic-thread-fill);
+    border: 1px solid var(--epic-thread-rule);
+    border-block-end: none;
   }
   .details > .thread-end {
-    padding-bottom: 6px;
-    border-end-start-radius: 12px;
-    border-end-end-radius: 12px;
+    overflow: hidden;
+    border-block-end: 1px solid var(--epic-thread-rule);
+    border-end-start-radius: 10px;
+    border-end-end-radius: 10px;
+  }
+  /* the thread's head folded:  the whole thread folds with it */
+  .details > .thread-hidden {
+    display: none;
   }
   .details[hidden] {
     display: none;

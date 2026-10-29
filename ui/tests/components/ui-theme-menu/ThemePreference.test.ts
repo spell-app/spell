@@ -188,3 +188,77 @@ describe("ThemePreference.wear()", () => {
     expect(UI.themes.current).toBe("merlot")
   })
 })
+
+describe("ThemePreference:  the address's ?theme= and ?scheme=", () => {
+  /** Load this page at `search`, as a page opened at an address with it, until the test ends. */
+  function at(search: string) {
+    const before = location.href
+    history.replaceState(null, "", `${location.pathname}${search}`)
+    ThemePreference.reset()
+    return () => history.replaceState(null, "", before)
+  }
+
+  test("the address wins over the stored choice, and is never stored", async () => {
+    localStorage.setItem(THEME_KEYS.theme, "merlot")
+    localStorage.setItem(THEME_KEYS.scheme, "light")
+    const back = at("?theme=glass&scheme=dark")
+    try {
+      expect(ThemePreference.chosen).toEqual({ theme: "glass", scheme: "dark" })
+      await ThemePreference.restore()
+      expect(UI.themes.current).toBe("glass")
+      expect(document.documentElement.classList.contains("ui-dark")).toBe(true)
+      expect(localStorage.getItem(THEME_KEYS.theme)).toBe("merlot")
+      expect(localStorage.getItem(THEME_KEYS.scheme)).toBe("light")
+      // a pick from the menu is stored as ever
+      await ThemePreference.setTheme("paper")
+      expect(localStorage.getItem(THEME_KEYS.theme)).toBe("paper")
+    } finally {
+      back()
+    }
+  })
+
+  test("an unknown theme or scheme is ignored, with a warning:  the stored one shows, and stays stored", async () => {
+    localStorage.setItem(THEME_KEYS.theme, "merlot")
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined)
+    const back = at("?theme=no-such-theme&scheme=sepia")
+    try {
+      expect(ThemePreference.chosen.scheme).toBe("system")
+      await ThemePreference.restore()
+      expect(UI.themes.current).toBe("merlot")
+      expect(ThemePreference.chosen.theme).toBe("merlot")
+      expect(localStorage.getItem(THEME_KEYS.theme)).toBe("merlot")
+      expect(warn.mock.calls.flat().join(" ")).toMatch(/sepia[\s\S]*no-such-theme|no-such-theme[\s\S]*sepia/)
+    } finally {
+      back()
+    }
+  })
+
+  test("an old theme name in the address shows as its new one, unstored", async () => {
+    const back = at("?theme=studio")
+    try {
+      await ThemePreference.restore()
+      expect(UI.themes.current).toBe("merlot")
+      expect(localStorage.getItem(THEME_KEYS.theme)).toBeNull()
+    } finally {
+      back()
+    }
+  })
+
+  test("addressWith() writes them into an address, relative or full", () => {
+    expect(ThemePreference.addressWith("https://example.com/a.html?x=1", { theme: "glass", scheme: "dark" })).toBe(
+      "https://example.com/a.html?x=1&theme=glass&scheme=dark"
+    )
+    expect(ThemePreference.addressWith("/b.html", { theme: "pop" })).toBe(`${location.origin}/b.html?theme=pop`)
+  })
+
+  test("the head script shows the address's scheme before first paint", () => {
+    const back = at("?scheme=dark")
+    try {
+      document.documentElement.classList.remove("ui-dark", "ui-light")
+      runHeadScript()
+      expect(document.documentElement.classList.contains("ui-dark")).toBe(true)
+    } finally {
+      back()
+    }
+  })
+})

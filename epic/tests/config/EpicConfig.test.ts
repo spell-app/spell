@@ -70,7 +70,12 @@ describe("EpicConfig", () => {
       "pageVoices.epic-page": "code",
       checkoutPatches: "",
       promptAck: true,
-      renamedRepos: "{}"
+      renamedRepos: "{}",
+      peers: "",
+      kit: "",
+      "oldLayout.carryOn": "",
+      "oldLayout.commitMaps": "",
+      "oldLayout.oldClones": ""
     })
     // no app declared
     expect(config.app).toBeUndefined()
@@ -249,7 +254,7 @@ describe("EpicConfig", () => {
     const settings = EpicConfig.settingsFrom('{ "installCommand": "", "sharedFolders": ["epics", "sagas"] }')
     expect(settings.installCommand).toBe("")
     expect(settings.sharedFolders).toEqual(["epics", "sagas"])
-    // `""`, the default:  no engine link
+    // `""` (the default since epic-engine P49:  the engine is the kit's `epic/`):  no engine link
     expect(new EpicConfig(MAIN).engineFolder).toBeUndefined()
     expect(EpicConfig.settingsFrom('{ "engineFolder": "../spell-epic" }').engineFolder).toBe("../spell-epic")
     // epic-eject T11:  the repo's own templates, none by default;  a folder from each checkout's root, as written

@@ -534,7 +534,7 @@ export class InboxCommands {
    *   - an immediate one (Do Now:  Add Details, revisit now) as `now`
    *   - a revisit talked over as `revisit`
    * - a mark leaving with Owen's PICK on it ("pick B, but ..."):
-   *   the pick is kept too, as that card set's `chosen` with a Noted card (`PlanDoc.keepPick()`)
+   *   the pick is kept too, as that card set's `chosen`, with its line (`PlanDoc.keepPick()`)
    *   - unless the set has a `chosen` already (a `decide --option` after the talk)
    *   - once Owen picked, the card shows Chosen (Owen, 2026-10-10, epic `airplane` P8)
    */

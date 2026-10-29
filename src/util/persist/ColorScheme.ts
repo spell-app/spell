@@ -9,6 +9,15 @@ import {
 } from "./persist.types"
 import { PrefStore } from "./PrefStore"
 
+/** The query parameter a page's address says its scheme in:  `?scheme=dark`. */
+const ADDRESS_PARAM = "scheme"
+
+/** The theme bench's `?scheme=both`:  no scheme of the page's own, and no warning. */
+const BOTH = "both"
+
+/** `ColorScheme.addressed` before the address is read. */
+const NOT_READ = Symbol("not read")
+
 /****************
  * ### `ColorScheme`
  * The light / dark choice a person makes once, for every Spell site:  remembered, shown on the page, and followed.
@@ -17,6 +26,11 @@ import { PrefStore } from "./PrefStore"
  * - Shown as `ui-light` / `ui-dark` on `<html>` (`COLOR_SCHEME_CLASSES`:  Spell UI's tokens follow them)
  *   AND as inline `color-scheme`:  for pages without Spell UI's sheets, and `light-dark()`.
  * - Followed:  the OS switching, and another tab choosing (`watch()`).
+ * - A page's ADDRESS can say it for one visit:  `?scheme=light` or `?scheme=dark` wins over the one kept, and is never
+ *   kept;  choosing one (`choose()`) drops it.  Any other value is ignored, with a warning (`both`, the theme bench's,
+ *   silently).
+ *   - So every Spell page opens in the scheme a link asks for (the theme bench's ↗;  Spell UI's `ThemePreference`
+ *     reads `?theme=` beside it).
  * - Its users:
  *   - the site header on the docs, epic pages and saga pages (the kit's `SiteHeader`), a sun / moon button
  *   - Spell UI's `ThemePreference`, which keeps a theme beside it and calls following the OS `system`
@@ -28,14 +42,16 @@ import { PrefStore } from "./PrefStore"
 export class ColorScheme {
   /**
    * The scheme chosen, or `undefined`:  follow the OS.
+   * - The address's (`?scheme=dark`) first, for this visit, until one is chosen here.
    * - SIDE EFFECT:  while nothing's kept, moves an old key's scheme over, once (`OLD_COLOR_SCHEME_KEYS`).
    */
   static chosen(): ColorSchemeName | undefined {
-    return schemeOf(PrefStore.getAt(COLOR_SCHEME_KEY)) ?? ColorScheme.moveOldKeys()
+    return ColorScheme.fromAddress() ?? schemeOf(PrefStore.getAt(COLOR_SCHEME_KEY)) ?? ColorScheme.moveOldKeys()
   }
 
   /** Remember `scheme` (`undefined`:  follow the OS again), and show it on the page (`apply()`). */
   static choose(scheme: ColorSchemeName | undefined): void {
+    ColorScheme.addressed = undefined
     PrefStore.setAt(COLOR_SCHEME_KEY, scheme)
     ColorScheme.apply(scheme)
   }
@@ -51,6 +67,26 @@ export class ColorScheme {
     root.classList.toggle(COLOR_SCHEME_CLASSES.dark, scheme === "dark")
     if (scheme) root.style.colorScheme = scheme
     else root.style.removeProperty("color-scheme")
+  }
+
+  /** Read the address's `?scheme=` again, next time it's asked for (tests, and `ThemePreference.reset()`). */
+  static rereadAddress(): void {
+    ColorScheme.addressed = NOT_READ
+  }
+
+  /** The address's scheme for this visit (`?scheme=`);  `NOT_READ` until first asked, `undefined`:  none, or chosen since. */
+  private static addressed: ColorSchemeName | undefined | typeof NOT_READ = NOT_READ
+
+  /** The address's scheme (`addressed`), read on first use;  a value that's neither scheme is ignored, warned. */
+  private static fromAddress(): ColorSchemeName | undefined {
+    if (ColorScheme.addressed !== NOT_READ) return ColorScheme.addressed
+    const search = globalThis.location?.search ?? ""
+    const value = new URLSearchParams(search).get(ADDRESS_PARAM) || undefined
+    const scheme = schemeOf(value)
+    // `both`:  the theme bench's light and dark side by side (its `BenchAddress`), no one scheme for the page
+    if (value && !scheme && value !== BOTH)
+      console.warn(`ColorScheme:  the address's scheme \`${value}\` is neither light nor dark;  ignored`)
+    return (ColorScheme.addressed = scheme)
   }
 
   /** The scheme the OS asks for (`DARK_QUERY`);  `light` where there's no `matchMedia` (a server). */

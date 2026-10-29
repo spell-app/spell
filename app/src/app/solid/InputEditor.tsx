@@ -6,6 +6,7 @@ import { appTexts } from "spell/app/app/ui/AppTexts"
 import type { monaco } from "spell/app/app/solid/monaco"
 import { Actions, ErrorBoundary, MoreMenu, PanelMenu, Submenu, tracked } from "spell/app/app/solid"
 import { isStaticBuild } from "spell/app/app/static/staticBuild"
+import { CodeSettings, CodeSettingsPanel } from "./CodeSettings"
 import { FileDropdown } from "./FileDropdown"
 import { LazyMonaco } from "./LazyMonaco"
 
@@ -35,8 +36,9 @@ export type InputRootProps = {
 /****************
  * ### `<InputToolbar>`
  * Toolbar above `<InputEditor>`:  the file dropdown;  Save, Reload and New File as icons with tooltips;
- * then a "..." menu:  the file's actions (`Actions.FILE_DROPDOWN_ACTIONS`), and "Show line numbers".
- * - The static build has no file actions, so its menu holds only the line numbers.
+ * then a "..." menu:  the file's actions (`Actions.FILE_DROPDOWN_ACTIONS`), "Show line numbers",
+ *   and "Settings…" (`<CodeSettingsPanel>`:  the code editor's popups).
+ * - The static build has no file actions, so its menu holds only the line numbers and the settings.
  * - No Compile:  the editor compiles as you type, and on ⌘↵.
  ****************/
 export function InputToolbar() {
@@ -60,6 +62,9 @@ export function InputToolbar() {
             onClick={() => LineNumbers.toggle()}
           >
             {appTexts.text("showLineNumbers")}
+          </ui-item>
+          <ui-item value="codeSettings" icon="cog" onClick={() => CodeSettings.toggleShowing()}>
+            {appTexts.text("codeSettings")}
           </ui-item>
         </MoreMenu>
       </Submenu>
@@ -106,6 +111,7 @@ const [areShowing, setShowing] = createSignal(editorPrefs.get(LINE_NUMBERS_PREF)
  * - `editor.onInputDidMount()` wires save/reload/compile keys, and cursor/scroll events back into `editor`.
  * - `editor.onInputEffect()` (scroll to and select `file.initialSelection`) runs once the editor's made,
  *   and again whenever `editor.file`, its `isLoaded` or its `initialSelection` change.
+ * - Over it, while showing, the code editor's settings (`<CodeSettingsPanel>`, from the toolbar's "..." menu).
  * - On an error:  `showError()` is told, and a plain-text `<FallbackEditor>` takes over.
  *   It heals by itself when what threw changes (see `<ErrorBoundary>`).
  * - NOTE: React's `match` prop (never passed, it reset the error on change) is gone:  the boundary heals itself.
@@ -117,6 +123,9 @@ export function InputEditor(props: InputEditorProps) {
       <ErrorBoundary onError={(error) => props.showError?.(error)} fallback={() => <FallbackEditor />}>
         <FileInputEditor />
       </ErrorBoundary>
+      <Show when={CodeSettings.isShowing}>
+        <CodeSettingsPanel />
+      </Show>
     </div>
   )
 }

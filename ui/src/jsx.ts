@@ -33403,7 +33403,7 @@ export interface UIThemeEditorEventMap {
    */
   "ui-copied": CustomEvent<{ text: string }>
   /**
-   * `ui-saved`:  Use this theme kept it in the browser, for the Spell editor and any page that calls `SavedTheme.restore()`;  no `value`:  Stop using forgot it.
+   * `ui-saved`:  Stop using forgot the theme kept in this browser (`SavedTheme`), which the Spell editor wore over its base;  `value` is never sent now.
    * - `event.detail`:  `{ value?: ThemeChoices, css: string }`
    */
   "ui-saved": CustomEvent<{ value?: UIT.ThemeChoices; css: string }>
@@ -33614,7 +33614,7 @@ export interface UIThemeEditorAttributes {
    */
   "on-ui-copied"?: (event: UIThemeEditorEventMap["ui-copied"]) => void
   /**
-   * `ui-saved`:  Use this theme kept it in the browser, for the Spell editor and any page that calls `SavedTheme.restore()`;  no `value`:  Stop using forgot it.
+   * `ui-saved`:  Stop using forgot the theme kept in this browser (`SavedTheme`), which the Spell editor wore over its base;  `value` is never sent now.
    * - `event.detail`:  `{ value?: ThemeChoices, css: string }`
    */
   "on-ui-saved"?: (event: UIThemeEditorEventMap["ui-saved"]) => void
@@ -33683,6 +33683,26 @@ export interface UIThemeMenuAttributes {
    * @deprecated write `compact` -- `prop:` stays only for compiled spell
    */
   "prop:compact"?: boolean | ""
+  /**
+   * Where the site with the theme bench starts (`http://127.0.0.1:4747`), for its Theme bench row, which opens Spell UI's theme bench page there in a new window, in the theme chosen;  none given:  this page's own site;  `none`:  no row.
+   * - takes:  text
+   */
+  bench?: string
+  /**
+   * `bench`, as the DOM element's property.
+   * @deprecated write `bench` -- `prop:` stays only for compiled spell
+   */
+  "prop:bench"?: string
+  /**
+   * Which of the theme bench's pages it opens showing alone (`app`, `epic`, `ui`, `notebook`):  the place this menu is on;  none given:  read from the page's address, else `app`.
+   * - takes:  text
+   */
+  "bench-page"?: string
+  /**
+   * `bench-page`, as the DOM element's property.
+   * @deprecated write `bench-page` -- `prop:` stays only for compiled spell
+   */
+  "prop:benchPage"?: string
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
@@ -37718,7 +37738,7 @@ declare module "@solidjs/web/types/jsx.js" {
        * `<ui-theme-menu>`:  A theme menu switches the page between light and dark, and picks its theme from Spell's own, and remembers both for the next page.
        * - also known as:  theme picker, theme switcher, dark mode toggle, colour scheme, appearance, skin
        * - slots:
-       *   - `end`:  At the foot of the palette's panel, under the themes and a divider:  a row of the page's own, e.g. the Spell editor's 'Edit theme...'.  Styled as a theme's row.  Not in the theme list's arrow keys.
+       *   - `end`:  At the foot of the palette's panel, under the themes and Theme bench:  a row of the page's own, e.g. the Spell editor's 'Edit theme...'.  Styled as a theme's row.  Not in the theme list's arrow keys.
        * - events:  `ui-changed`
        */
       "ui-theme-menu": UIThemeMenuJSXAttributes

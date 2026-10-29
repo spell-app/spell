@@ -5,7 +5,7 @@ import type { AnswerThread } from "./AnswerThread"
 /****************
  * ### `ItemLink`
  * A card's link to the `<epic-item>` it's in, for the item's `AnswerThread`:  where an answer, a reply or a status
- * card goes, and how it draws there (epic `epic-engine` P27).
+ * card goes, and how it draws there (epic `epic-engine` P27);  and the thread's fold, which its head sets (I152).
  * - Its item:  the card's parent, when that's an `<epic-item>`;  none on an Overview sub-section, or in a test alone.
  * - Waits for the item's `ready`:  a card can connect before its item has its component (a family that loads first),
  *   so `thread()` follows the item once it's there.
@@ -19,6 +19,14 @@ export class ItemLink {
 
   /** The item's thread:  tracked;  `undefined` outside an item. */
   readonly thread = (): AnswerThread | undefined => this.owner?.thread()
+
+  /** Is the item's thread folded by its head (its first reply)?  Tracked;  `false` outside an item. */
+  readonly threadFolded = (): boolean => !!this.owner?.threadFolded
+
+  /** The thread's head was folded or opened:  the item keeps it, for the rest of the thread (page state). */
+  foldThread(folded: boolean) {
+    if (this.owner) this.owner.threadFolded = folded
+  }
 
   /** Is it in an item at all (its parent an `<epic-item>`)?  Plain DOM:  not tracked. */
   get inItem(): boolean {
@@ -45,9 +53,11 @@ export class ItemLink {
   }
 }
 
-/** What a card needs of its item:  `EpicItem`'s `thread()`. */
+/** What a card needs of its item:  `EpicItem`'s `thread()`, and whether its thread is folded. */
 export type ThreadOwner = {
   thread(): AnswerThread
+  /** the thread's head is folded:  the rest of the thread hides;  tracked, page state */
+  threadFolded: boolean
 }
 
 /** An `<epic-item>` as a card sees it:  a DOM element with a component and a `ready` promise. */

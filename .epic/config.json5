@@ -12,6 +12,24 @@
   // No "repos":  ONE repo since epic `repo-split` P20, so an epic's worktree is ONE worktree of `spell` (spell-epic's
   // single-repo mode).  Until then it named `repos.json5`, the child repos, each with a worktree inside the kit's.
   // - spell-brand, a project beside the kit, gets its own worktrees:  epic `epic-engine` P49 (its Q49).
+  // The repos BESIDE the kit, its PEERS (epic `epic-engine` P49, Q48 A):  `repos.json5`'s `"peer": true` entries
+  // (spell-brand), each at `path` from here.  A peer is never part of an epic's worktree:  this list holds no other
+  // repo, so an epic's worktree is still the kit's alone (`epic config peers`).
+  "repos": "repos.json5",
+
+  // Worktrees cut before epic `repo-split` P20, with a worktree of each old child repo still inside (`spell-ui/` ...;
+  // epic `epic-engine` P49, Q40 changed):
+  // - "carryOn":  what `epic worktree merge-main` runs in one, once `main` is merged in, to cross those branches into
+  //   the folders (`spell rename branches`)
+  // - "commitMaps":  the history rewrite's commit maps, from a checkout's root:  a child branch whose tip is in one
+  //   has crossed
+  // - "oldClones":  where the main checkout's old child repos went (Q41 B):  the worktree hook, reusing an old branch,
+  //   names those that still hold it
+  "oldLayout": {
+    "carryOn": "node bin/spell.mjs rename branches",
+    "commitMaps": "tools/one-repo",
+    "oldClones": "../spell.old"
+  },
 
   // The shared content repo:  epics, guides, sagas, pages, brand, and the three logs (the kit's `agents/` links them).
   // - In this repo, git-ignored (epic `repo-split` J5):  `~/www/spell/spell.epics`, a folder of its own in the main

@@ -387,7 +387,7 @@ describe("spell lint:  a spellx file's HTML habits (epic elemental-spell P8)", (
     "\t<draw>\n\t\t<ui-button>Go</ui-button>\n\t\t<ui-text on-click={flip it}>face</>\n\t</>\n</spell-view>\n"
 
   test("--fix names each component bare, its closer with it;  an on-click= is an error it leaves", () => {
-    const habits = tempProject("Habits", SOURCE, SP.SPELLX_SUFFIX)
+    const habits = tempProject("Habits", SOURCE, SP.SPELLML_SUFFIX)
     const { status, stdout } = spell(["lint", ".", "--fix"], habits)
     expect(stdout).toBe(
       [
@@ -914,7 +914,7 @@ describe("a project of a .spellml file alone, no .spell copy", () => {
     "<spell>\n\tshow a new card\n</spell>\n"
 
   test("loads, parses, compiles and runs", () => {
-    const folder = tempProject("Hand", SOURCE, SP.SPELLX_SUFFIX)
+    const folder = tempProject("Hand", SOURCE, SP.SPELLML_SUFFIX)
     const compiled = spell(["compile", ".", "--stdout"], folder)
     expect(compiled.status).toBe(0)
     expect(compiled.stdout).toContain("export class Card extends Thing {")

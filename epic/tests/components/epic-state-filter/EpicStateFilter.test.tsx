@@ -37,6 +37,22 @@ describe("<epic-state-filter>", () => {
     await expectAccessible(host)
   })
 
+  // epic `epic-engine` I157 (Owen, 2026-10-29:  "badges for 'undone|updated|complete'")
+  test("a phase's states:  undone yellow, updated orange, complete green, in that order, their own words", async () => {
+    const host = await ElementFixture.render(
+      `<epic-state-filter counts="complete:49 undone:1 updated:3" shown="undone updated"></epic-state-filter>`
+    )
+    expect(chips(host)).toEqual(["undone:1+", "updated:3+", "complete:49"])
+    expect(["undone", "updated", "complete"].map((state) => chip(host, state).dataset.color)).toEqual([
+      "yellow",
+      "orange",
+      "green"
+    ])
+    expect(chip(host, "updated").title).toBe("3 with news for you (a plan to accept, or changed):  hide these")
+    expect(chip(host, "complete").title).toBe("49 done:  show everything")
+    await expectAccessible(host)
+  })
+
   test('`shown` presses those;  `""` presses none;  no counts, nothing drawn', async () => {
     const host = await ElementFixture.render(
       `<epic-state-filter counts="open:2 recent:1" shown="recent"></epic-state-filter>`

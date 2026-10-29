@@ -95,6 +95,7 @@ import {
   growField,
   noteToast,
   readJSON,
+  restoreEpicFolds,
   titleInside,
   writeJSON
 } from "./spell-doc-helpers.js"
@@ -293,7 +294,10 @@ async function start() {
   // an epic page:  its saved folds before its blocks first draw (so nothing animates), then the blocks, which the
   // outline reads (their labels, icons and counts)
   if (main.querySelector("epic-page")) {
-    restoreEpicFolds(main, kept)
+    restoreEpicFolds(main.querySelectorAll(kept ? EPIC_OPENERS : EPIC_FOLDS), {
+      saved: readJSON(`${FOLD_KEY_PREFIX}${location.pathname}`),
+      kept
+    })
     await epicsDrawn(main)
   }
   const outline = outlineOf(main)
@@ -2069,6 +2073,7 @@ function buildToolbar(page, outline, counts) {
  *     - a link to an id inside still lands (`reveal()` unfolds around it)
  *     - its `<epic-*>` blocks start folded by themselves;
  *       the ones the reader left open open again (`restoreEpicFolds()`, before they draw),
+ *       but the Log, which starts folded on every load (`STAYS_FOLDED`),
  *       and their toggles are saved as a section's
  * - HEADINGS:  a chevron button starts each h2 / h3,
  *   and a click anywhere on the heading (not on a link or button in it) toggles it too;
@@ -2320,21 +2325,6 @@ function wireFolds(main, outline, kept) {
       unfolded = true
     }
     return unfolded
-  }
-}
-
-/**
- * An epic page's blocks the reader left open on this page (saved folds, `spell-folds:<path>`):
- * open again, before they first draw (their `open` attribute), so nothing animates;
- * the rest start folded, as the blocks do.
- * - `kept`:  after a live reload, every block AND item open before it (`takeKeptFolds()`), whoever opened it
- */
-function restoreEpicFolds(main, kept) {
-  const saved = readJSON(`${FOLD_KEY_PREFIX}${location.pathname}`)
-  for (const block of main.querySelectorAll(kept ? EPIC_OPENERS : EPIC_FOLDS)) {
-    if (!block.id) continue
-    if (kept && block.id in kept) block.toggleAttribute("open", kept[block.id])
-    else if (saved[block.id] === false) block.setAttribute("open", "")
   }
 }
 

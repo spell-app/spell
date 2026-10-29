@@ -18,8 +18,8 @@ export const epicReplyVocabulary = {
   ui: false,
   description:
     "A reply on an item, after its answer:  `<from> · re: <re>` is drawn, the date at the right;  the reply is its " +
-    "children.  In an item, one of its thread's brown block;  Claude's newest wears an orange edge and NEW until " +
-    "you've seen it.",
+    "children.  In an item, one of its thread's section, one frame round them all, the first reply's fold folding " +
+    "the whole thread;  Claude's newest wears an orange edge and NEW until you've seen it.",
   attributes: [
     {
       name: "from",
@@ -68,9 +68,10 @@ export const epicReplyVocabulary = {
   ],
   states: [
     { name: "open", description: "Unfolded:  it starts so (page state, never written)." },
-    { name: "in-thread", description: "In its item's thread:  one of its brown block (`AnswerThread`)." },
-    { name: "thread-start", description: "First in the thread's block:  its top corners rounded." },
-    { name: "thread-end", description: "Last in the thread's block:  its bottom corners rounded." },
+    { name: "in-thread", description: "In its item's thread:  inside the thread's one frame (`AnswerThread`)." },
+    { name: "thread-start", description: "First in the thread:  the frame's top edge and corners." },
+    { name: "thread-end", description: "Last in the thread, or its folded head:  the frame's bottom edge and corners." },
+    { name: "thread-hidden", description: "After the thread's head, which is folded:  hidden with it." },
     {
       name: "new",
       description:
