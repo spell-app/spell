@@ -11,7 +11,7 @@ import { loadFixtureProject } from "spell/app/spaces/test"
  *   `BENCH=1 yarn vp test run tests/spell/SpellProject.test.ts --reporter=verbose --silent=false`
  */
 describe("Solitaire project", () => {
-  const files = loadFixtureProject("Solitaire")
+  const files = loadFixtureProject("@spell/examples/Solitaire")
 
   test("loads files in import order", () => {
     expect(files.map(({ path }) => path)).toEqual([

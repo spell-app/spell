@@ -180,14 +180,14 @@ export class InboxMonitor {
   /** The one line that tells the session work is waiting on epic `name`'s page, and how to take it. */
   static notice(name: string): string {
     return (
-      `📬 ${name}:  Owen sent work from the epic page (marks, comments or Do Now).  ` +
+      `📬 ${name}:  the person sent work from the epic page (marks, comments or Do Now).  ` +
       `Take it:  \`epic inbox wait ${name} --timeout 5\`, then the /epic skill's "7.3 Woken".`
     )
   }
 
-  /** The one line that tells the session Owen asked for a review from epic `name`'s page (I144). */
+  /** The one line that tells the session the person asked for a review from epic `name`'s page (I144). */
   static askNotice(name: string): string {
-    return `📬 ${name}:  Owen pressed "start review" on the epic page.  Start it:  the /epic skill, \`/epic review ${name}\`.`
+    return `📬 ${name}:  the person pressed "start review" on the epic page.  Start it:  the /epic skill, \`/epic review ${name}\`.`
   }
 }
 

@@ -6,6 +6,7 @@ import {
   REVIEW_API,
   REVISIT_KEY_PREFIX,
   NOBODY_LISTENING,
+  STAGE_COUNTDOWN_MS,
   SUMMARY_ID,
   TESTS_API,
   TESTS_ID,
@@ -15,6 +16,7 @@ import {
   inboxOf,
   inlineCommentsNote,
   isAnchoredIn,
+  isHeld,
   isImmediate,
   isSent,
   pickOf,
@@ -188,12 +190,18 @@ export class ReviewClient extends PageStore {
    * Keep the inbox fresh on `window`'s page;  returns the undo.
    * - a poll every `REVIEW_POLL_MS` while visible
    * - a read when it becomes visible
-   * - one when the page server says the inbox file changed (`spell-server:changed`, the page's live client:
+   * - one when the page server says the inbox file, or a person's comments file beside it, changed
+   *   (`spell-server:changed`, the page's live client:
    *   never a connection of our own, each holds one of Chrome's 6 per host)
    */
   watch(window: Window): () => void {
     const inboxFile = this.link.file.replace(/(?:\.plan|\.saga)?\.html$/, ".inbox.json5")
-    return ServerLink.watch(window, inboxFile, () => void this.refresh())
+    // and each person's comments file beside it (epic `epic-friend` P9):  a comment saved changes only that one
+    const base = inboxFile.replace(/\.inbox\.json5$/, ".comments.")
+    const inboxFiles = ServerLink.dataFileNames(inboxFile)
+    const isOurs = (path: string) =>
+      inboxFiles.includes(path) || (path.startsWith(base) && /^[^/.]+\.json5$/.test(path.slice(base.length)))
+    return ServerLink.watch(window, isOurs, () => void this.refresh())
   }
 
   ////////////////
@@ -669,7 +677,9 @@ export class ReviewClient extends PageStore {
   async save(id: string, mark: MarkInput | null, options: WriteOptions = {}): Promise<boolean> {
     // Owen marked it again:  what Claude took before is no longer his latest word
     this.taken.delete(id)
-    if (mark) this.inbox.marks[id] = { ...mark, at: new Date().toISOString() }
+    // a stage accept's countdown (I181):  held from the first frame, as the server dates it
+    const at = Date.now() + (mark?.countdown ? STAGE_COUNTDOWN_MS : 0)
+    if (mark) this.inbox.marks[id] = { ...mark, at: new Date(at).toISOString() }
     else delete this.inbox.marks[id]
     this.changed()
     return this.write("mark", { id, mark }, options)
@@ -763,7 +773,8 @@ export class ReviewClient extends PageStore {
    * - nobody listening:  the page server wakes the epic (epic `epic-workflow` P16), and the notice says how
    */
   async send({ now = false }: { now?: boolean } = {}): Promise<boolean> {
-    const marks = Object.values(this.inbox.marks)
+    // a stage accept counting down goes at its time, never with a Send (I181)
+    const marks = Object.values(this.inbox.marks).filter((mark) => !isHeld(mark))
     const waiting = [
       ...(now ? marks.filter((mark) => !isImmediate(mark)) : this.unsentMarks()),
       ...this.unsentUrgency()
@@ -877,9 +888,10 @@ export class ReviewClient extends PageStore {
   // ## Helpers
   ////////////////
 
-  /** The marks not sent yet. */
+  /** The marks not sent yet, and not held for their time (a stage accept counting down:  `isHeld()`, I181). */
   private unsentMarks(): InboxMark[] {
-    return Object.values(this.inbox.marks).filter((mark) => !this.isSent(mark))
+    const now = Date.now()
+    return Object.values(this.inbox.marks).filter((mark) => !this.isSent(mark) && !isHeld(mark, now))
   }
 
   /** The urgencies not sent yet:  set after the last send. */

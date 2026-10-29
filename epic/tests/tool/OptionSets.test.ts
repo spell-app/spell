@@ -26,11 +26,11 @@ const OPTIONS =
   '<epic-option letter="C" title="Both"><p>c</p></epic-option>'
 
 /**
- * A fresh epic page:  Q1 with a pick-any set, Q2 with a pick-one set, J1 with a pick-one set, phase P1 with a set
- * in its Choices field.
+ * A fresh epic page, its person Owen:
+ * Q1 with a pick-any set, Q2 with a pick-one set, J1 with a pick-one set, phase P1 with a set in its Choices field.
  */
 function plan() {
-  const doc = PlanDoc.parse(readFileSync(join(FIXTURES, "epic-plan.html"), "utf8"), NOW)
+  const doc = PlanDoc.parse(readFileSync(join(FIXTURES, "epic-plan.html"), "utf8"), NOW, { person: "Owen" })
   doc.addItem("question", "which?", { details: `<p>why</p><epic-choices multiple>${OPTIONS}</epic-choices>` })
   doc.addItem("question", "one?", { details: `<p>why</p><epic-choices>${OPTIONS}</epic-choices>` })
   doc.addItem("judgement", "chose X", { details: `<p>why</p><epic-choices>${OPTIONS}</epic-choices>` })
@@ -180,7 +180,7 @@ describe("apply (`PlanDoc.applyMark()`)", () => {
     expect(setOf(doc, "q2").hasAttribute("multiple")).toBe(true)
     expect(doc.findItem("q2")!.getAttribute("status")).toBe("open")
     expect(doc.applyMark({ id: "j1", action: "pick", pick: "A C" }).did).toBe(
-      "picked C:  Both;  approved:  closed (accepted)"
+      "Owen picked C:  Both;  approved:  closed (accepted)"
     )
     expect(setOf(doc, "j1").getAttribute("chosen")).toBe("C")
   })
@@ -248,7 +248,7 @@ describe("the commands (`OptionSets`)", () => {
     expect(sets.choose("Q1", ["A", "C"], { outcome: "settled" })).toBe("picked A · Keep folds, C · Both")
     expect(setOf(doc, "q1").getAttribute("chosen")).toBe("A C")
     expect(() => sets.choose("Q2", ["A", "B"])).toThrow(PlanDocError)
-    expect(sets.choose("Q2", ["A"])).toBe("picked A:  Keep folds")
+    expect(sets.choose("Q2", ["A"])).toBe("Owen picked A:  Keep folds")
     expect(sets.choose("P1", ["C"], { outcome: "built" })).toBe("P1's choices:  picked C · Both")
     expect(setOf(doc, "P1").getAttribute("chosen-note")).toBe("recorded;  built")
   })

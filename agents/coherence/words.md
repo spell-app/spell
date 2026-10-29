@@ -48,13 +48,55 @@ The coherence agent reads it too, and flags a second word for the same idea (epi
 ### viewer
 
 - **Say:**  viewer, for the person reading a page (a docs page, an epic page, a components page).
-- **Not:**  reader, person.
+- **Not:**  reader.
+  - NOT "person" either in Spell UI's docs code, where "viewer" was chosen first;  "person" is the epics' code word
+    for who wrote something (below).
 - **Score:**  `\b(reader|person)\b` · in `ui/src/docs-components/`
 - **Decided:**  Owen, 2026-10-25, epic `coherence` Q9.
   - Sweep 1 found Spell UI's docs code saying "viewer" 51 times, "reader" 18, "person" 10;
     P14 made them "viewer" (Spell UI's docs components).
 - **Not the same word:**  WWOD §6's "reader", the person reading any text we write (a docstring, a README, a page):
   it's about writing, not the code's name for who looks at a page, so it stays.
+
+### person
+
+- **Say:**  person, in code, for whoever is at the keyboard and writes on a page:  a turn of `person` | `agent`,
+  `EpicHome.person()`, `NEEDS_PERSON`;  "the person", in the skills, where a step is about whoever reviews.
+- **Not:**  Owen (or any one person's name), user, reviewer.
+  - "Owen" stays in quotes, dated rules and history:  `(Owen, 2026-10-25:  "...")`.
+  - `ActiveTime`'s `ASKS_OWEN` and `ReviewBackfill`'s `NOT_OWEN` read a session's own transcripts:  whoever typed
+    there, not a page's person;  their docstrings say so.
+- **Decided:**  Owen, 2026-10-29, epic `epic-friend` Q7 (A:  "you" on pages, "person" in code).
+
+### you
+
+- **Say:**  you, your, on a page, to whoever is looking:  "waiting on you", "your test run", "You" on your own reply;
+  the epic help (`epic --help`) says it too.  Another person's words show their name, an agent's "Claude (Ana)".
+- **Not:**  Owen, the user, the reviewer.
+- **Score:**  `\bOwen\b(?!(,\s+\d{4}-\d\d-\d\d|:\s+"))` · in `epic/src/components/**.en.ts`
+  - a dated quote (`Owen, 2026-10-25:  "..."`) is history, and doesn't count
+- **Decided:**  Owen, 2026-10-29, epic `epic-friend` Q7 (A).
+  - P3 made the components' English text, the epic help and the skills say it;  their test,
+    `epic/tests/definitions/VocabularyWords.test.ts`, fails on a new one.
+
+### from / by
+
+- **Say:**  `from` in a page's markup (`<epic-reply from>`, `<epic-status from>`), `by` in data (a comment's reply,
+  `{ by }`):  ONE idea, who wrote it, or whose session did.
+- **Not:**  `role` (the browser's accessibility attribute), `author`.
+- An agent's words say so by `agent` (`agent="claude"`), never by the name:  a person may be called "Claude".
+- **Decided:**  Owen, 2026-10-29, epic `epic-friend` Q9 (A, the marker generalized to `agent`).
+
+### agent
+
+- **Say:**  agent, in code and on pages, for whatever AI writes on a page for a person (Claude, Codex ...):  a turn of
+  `agent`, `agent="codex"`, `EpicHome.agent()`, `latestAgentAt()`, `markAgents()`;  the agent's own name only where
+  that one agent is meant ("Codex (Bob)" on a reply, Claude Code's `CLAUDECODE`).
+- **Not:**  Claude, for the idea:  a person may run Codex, or both (Owen, 2026-10-29:  "bob uses codex and I use
+  claude?").
+  - Old words read, for one release:  a turn of `claude` (`ThreadFacts.asTurn()`);  `CLAUDE_NAME` stays only for the
+    old rule that reads replies written before the marker.
+- **Decided:**  Owen, 2026-10-29, epic `epic-friend` Q13 (A) and P10.
 
 ### Booleans on an element
 
@@ -120,6 +162,52 @@ One word for each idea about how a page looks (epic `debut` P17, Q29;  Owen, 202
   `<ui-action>` follows (P17).
 - **Not the same word:**  spell's own `meta`, in a spell program, is Command-or-Control (epic `elemental-spell` Q31):
   it's the language's word, not Spell UI's attribute.
+
+## Spell's own projects
+
+The `@spell` space's built-in projects, and the tests that read them (epic `content` P2, its T3).
+
+### fixture
+
+- **Say:**  fixture, ONLY for a frozen test project:  the `@spell/test` group, tests' own, never edited to follow
+  anything (`FIXTURES_DIR`, `FIXTURES_GROUP`).
+  - The examples and Spell guides are "test projects tested in place" (`EXAMPLE_PROJECTS`, `GUIDE_PROJECTS`):
+    read where people edit them, their snapshots beside the tests.
+  - "Test project" is any of the three;  a test names one by its group and name (`TestProjectName`):
+    `fizzbuzz` is the fixture, `@spell/examples/fizzbuzz` the example.
+- **Not:**  fixture for an example, a Spell guide, or the hand-kept spellx twins (those are "twins").
+  - The helpers that read any test project keep their old names for now (`compiledFixture()`,
+    `loadFixtureProject()`, `PYTHON_FIXTURES`):  a rename of their own.
+- **Decided:**  epic `content` P2 (T3).
+
+### the @spell space
+
+- **Say:**  the `@spell` space, for Spell's own built-in projects (`spaces/@spell/` in the app folder):
+  its groups `@spell/examples`, `@spell/notebooks`, `@spell/guides`, `@spell/library`, `@spell/test`.
+- **Not:**  the `@spell` package, `@spell/` packages.
+  - "Package" is the npm package (`spell`, `spell-ui`, `spell-epic`).
+- **Decided:**  epic `content` P2 (T3).
+
+### guide / Spell guide
+
+- **Say:**
+  - guide:  a docs page, the epic's lasting page (the kit's `AGENTS.md`, "Words")
+  - Spell guide:  a `@spell/guides` project, a spell file that reads as prose with a working program inside
+    ("A first spell", "How Solitaire works")
+- **Not:**  a bare "guide" for a `@spell/guides` project, where a docs page could be meant.
+- **Decided:**  epic `content` P2 (T3).
+
+### content / epic repo
+
+- **Say:**
+  - content:  the `@spell` space's examples, notebooks and Spell guides:  what `spell content check | update`
+    and the epic `content` work on
+  - epic repo:  `spell.epics`, the repo of epic pages, guides and logs every checkout shares
+- **Not:**  "the shared content", "the content repo" for `spell.epics`.
+  - Its setting, `contentFolder`, and `epic shared ...` keep their names until they're renamed:
+    epic `epic-engine`'s r47.
+- **Decided:**  Owen, 2026-10-29, epic `content` Q7 (B:  keep `spell content`;  "the shared content repo is the
+  epic repo from now on").
 
 ## Open
 

@@ -1,6 +1,6 @@
 {
   "title": "Menu",
-  "description": "Spell UI's Menu page as notebooks:  its Examples, Usage, API and Theming tabs, each a notebook of its own, linked by the page's tab bar (written by `spell app notebook convert`)",
+  "description": "Spell UI's Menu page as notebooks:  its Examples, Usage, API and Theming tabs, each a notebook of its own, linked by the page's tab bar",
   "imports": [
     {
       "path": "/Examples.spellml",

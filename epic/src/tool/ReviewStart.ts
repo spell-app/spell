@@ -34,15 +34,17 @@
  * - Any page kind wakes its epic the same way:  a guide's or saga page's Send calls `wakeFor()` with the epic page of
  *   the epic it belongs to, so the epic page and its guides share one wake record.
  */
-import { spawn, spawnSync } from "node:child_process"
+import { spawn } from "node:child_process"
 import { existsSync, mkdirSync, openSync, readdirSync, readFileSync } from "node:fs"
 import { homedir } from "node:os"
 import { join, sep } from "node:path"
 import { fileURLToPath } from "node:url"
 
 import { clockTime } from "spell/util/time"
+import { Processes } from "spell/server/Processes"
 import { RealPath } from "spell/server/RealPath"
 import { EpicConfig } from "spell/epic/config/EpicConfig"
+import { EpicHome } from "spell/epic/config/EpicHome"
 
 import { AirplaneMode } from "spell/epic/tools/AirplaneMode"
 
@@ -353,7 +355,7 @@ export class ReviewStart {
   windowOf(pid: number): WindowEntry | undefined {
     const entries = ReviewStart.windows()
     if (!entries.size) return undefined
-    const parents = ReviewStart.parentPids()
+    const parents = Processes.parents()
     const seen = new Set<number>()
     for (let at = pid; at > 1 && !seen.has(at); at = parents.get(at) ?? 0) {
       const entry = entries.get(at)
@@ -422,26 +424,16 @@ export class ReviewStart {
 
   /**
    * The window bridges' registry folders, as `src/window.mjs` reads them (`Window.registries`, epic `epic-eject`
-   * P7):  spell-epic's extension's (`$SPELL_EPIC_WINDOWS_DIR`, else `~/.spell-epic/windows`), then the spell language
+   * P7):  spell-epic's extension's (`$SPELL_EPIC_WINDOWS_DIR`, else the epic home's `windows/`), then the spell language
    * extension's (`$SPELL_WINDOWS_DIR`, else `~/.spell/windows`)
    */
   static get windowsDirs(): string[] {
     return [
-      process.env.SPELL_EPIC_WINDOWS_DIR || join(homedir(), ".spell-epic", "windows"),
+      process.env.SPELL_EPIC_WINDOWS_DIR || EpicHome.subfolder("windows"),
       process.env.SPELL_WINDOWS_DIR || join(homedir(), ".spell", "windows")
     ]
   }
 
-  /** Every process's parent, by pid:  one `ps` call;  empty if it fails. */
-  static parentPids(): Map<number, number> {
-    const parents = new Map<number, number>()
-    const run = spawnSync("ps", ["-axo", "pid=,ppid="], { encoding: "utf8" })
-    for (const line of (run.stdout ?? "").split("\n")) {
-      const match = /^\s*(\d+)\s+(\d+)/.exec(line)
-      if (match) parents.set(Number(match[1]), Number(match[2]))
-    }
-    return parents
-  }
 
   /** Ask `window`'s bridge to run `op` with `body`;  its answer, or throws saying what went wrong. */
   static async request(window: WindowEntry, op: string, body: object): Promise<BridgeReply> {

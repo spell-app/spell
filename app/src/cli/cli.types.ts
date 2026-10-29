@@ -82,6 +82,14 @@ export type ProjectsOptions = GlobalOptions & {
 }
 
 /**
+ * `spell content check` flags.
+ * - `bless`:  rewrite every content snapshot instead of checking against it
+ */
+export type ContentCheckOptions = GlobalOptions & {
+  bless?: boolean
+}
+
+/**
  * `spell app preview serve` flags.
  * - `port`:  where to serve the static build -- default 4848 (`PREVIEW_PORT`), else any free one
  * - `headless`:  don't open a browser
@@ -89,14 +97,6 @@ export type ProjectsOptions = GlobalOptions & {
 export type PreviewOptions = GlobalOptions & {
   port?: number
   headless?: boolean
-}
-
-/**
- * `spell app notebook convert` flags.
- * - `dryRun`:  write nothing;  print each notebook file instead
- */
-export type NotebookConvertOptions = GlobalOptions & {
-  dryRun?: boolean
 }
 
 /**

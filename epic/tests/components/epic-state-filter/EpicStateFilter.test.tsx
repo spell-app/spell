@@ -62,12 +62,13 @@ describe("<epic-state-filter>", () => {
     expect(chip(host, "scheduled").title).toBe("5 scheduled, not running yet:  hide these\n⌥-click:  show only these")
     expect(chip(host, "recent").title).toBe("2 done in the last 3 days:  show these too\n⌥-click:  show only these")
     expect(chip(host, "old").title).toBe("40 done a while ago:  show these too\n⌥-click:  show only these")
-    // the dotted chip:  its outline dotted, never filled, its count in its blue
+    // the dotted chip, shown:  filled blue as every chip that's on, its outline dotted, its count white (Owen,
+    // 2026-10-29:  "blue dotted ring but not filled in is confusing.  Looks like it is turned off")
     const dotted = getComputedStyle(chip(host, "scheduled"))
-    expect([dotted.borderTopStyle, dotted.backgroundColor, dotted.color === dotted.borderTopColor]).toEqual([
+    expect([dotted.borderTopStyle, dotted.backgroundColor === "rgba(0, 0, 0, 0)", dotted.color]).toEqual([
       "dotted",
-      "rgba(0, 0, 0, 0)",
-      true
+      false,
+      "rgb(255, 255, 255)"
     ])
     // without `phases`, the same names are an item's:  its own words, no dotted chip
     const items = await ElementFixture.render(`<epic-state-filter counts="attention:1 recent:2"></epic-state-filter>`)

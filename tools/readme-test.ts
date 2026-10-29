@@ -40,7 +40,7 @@
 import { spawnSync } from "node:child_process"
 import { mkdtempSync, readFileSync, writeFileSync, chmodSync } from "node:fs"
 import { tmpdir } from "node:os"
-import { dirname, join, relative, resolve } from "node:path"
+import { join, relative, resolve } from "node:path"
 
 import { escapeRegExp, indented } from "spell/util/string.ts"
 
@@ -62,9 +62,14 @@ export class ReadmeTest {
     this.root = root
   }
 
-  /** The pages `ReadmeCheck` checks:  every repo's `README.md` and `README-*.md`. */
+  /** The pages `ReadmeCheck` checks:  every folder's `README.md` and `README-*.md`, and the kit's `README/*.md`. */
   pages(): string[] {
     return new ReadmeCheck(this.root).pages()
+  }
+
+  /** The root of the folder the page at `path` is in:  `parser/`, else the kit's (`README/cli.md` runs there too). */
+  repoRootOf(path: string): string {
+    return join(this.root, new ReadmeCheck(this.root).repoOf(path))
   }
 
   /** The examples on the page at `path` (absolute);  `text` its content, read from disk when not given. */
@@ -89,7 +94,7 @@ export class ReadmeTest {
         found.push({
           page: relative(this.root, path),
           line: index + 1,
-          folder: dirname(path),
+          folder: this.repoRootOf(path),
           commands: dedent(lines.slice(index + 1, close), opening[1]),
           expected: output.text
         })

@@ -147,9 +147,9 @@ so you can decide from the page alone, when you have time.
 - A revisit's answer is written INTO its item, by a background agent the page lists while it runs,
   so a slow answer never holds up the rest.
 
-One reviewer is assumed, though:
-a few of the pages' own words still name the person who reviews Spell's
-([README-adopting.md](README-adopting.md#whats-still-spell-shaped) lists that with the other rough edges).
+A team reviews the same pages:
+each reply carries its writer's name, and the plans sync through a shared repo every turn
+([README-epics.md](https://github.com/spell-app/spell/blob/main/README-epics.md#working-with-others));  a comment reaches the others once it's answered.
 
 ### Every epic gets its own branch, worktree and window
 
@@ -160,7 +160,7 @@ So three can run at once without touching each other, and your main checkout isn
 - Each phase is committed on its own, in every repo it touched, under one subject (`P1:  Name -- summary`).
   Then the agent stops, and asks before it starts the next.
 - In Spell, an epic's worktree is one worktree of the whole kit, every folder on the epic's branch:
-  [the kit's README-development.md](https://github.com/spell-app/spell/blob/main/README-development.md) follows a change across its folders.
+  [the kit's README/development.md](https://github.com/spell-app/spell/blob/main/README/development.md) follows a change across its folders.
 - And when it merges, it leaves a GUIDE behind for the next reader, and a changelog entry.
 
 Every worktree is another checkout, with an install of its own:  that's the price of three at once.
@@ -171,7 +171,7 @@ You need, once:
 - a Spell checkout ([setup from zero](https://github.com/spell-app/spell/blob/main/README.md#setup-from-zero), on the kit's front page)
 - the plugin, and `epic` on your terminal's `PATH`:  one command from the kit's checkout,
   `node epic/bin/epic plugin install`
-  ([the kit's README-agents.md](https://github.com/spell-app/spell/blob/main/README-agents.md#the-epic-plugin) says
+  ([the kit's README/agents.md](https://github.com/spell-app/spell/blob/main/README/agents.md#the-epic-plugin) says
   what it does)
   - outside Spell:  `/plugin marketplace add spell-app/spell`, then `/plugin install epic@spell`
 - Spell Epic, the VS Code extension, for the Review tab ([README-vscode.md](README-vscode.md))
@@ -352,10 +352,11 @@ Another project needs the plugin and `epic`, the VS Code extension,
 and what `epic init` makes:  one config file in the repo, `.epic/config.json5`, and a content folder beside it
 for the pages.
 
-It has run end to end once outside Spell, in a throwaway repo, and its rough edges are listed, not hidden.
-The first is the biggest:  it installs only inside a Spell checkout, since it runs on Spell UI and the kit
-from their one install.
-The steps, every setting and the rest of the edges:  [README-adopting.md](README-adopting.md).
+It has run end to end outside Spell, in throwaway repos, and its rough edges are listed, not hidden.
+One command sets a project up:  `npx spell@next epic init` installs the plugin, asks your name and colour, and starts
+the epic server.
+Until a `spell@next` with `spell epic` is published, run it from a clone of Spell (`node <clone>/bin/spell.mjs epic init`).
+The steps, sharing with a team, every setting and the rest of the edges:  [README-epics.md](https://github.com/spell-app/spell/blob/main/README-epics.md).
 
 ## Working on it
 
@@ -425,9 +426,10 @@ yarn vscode:package     # the extension's bundle and spell-epic.vsix:  NOT insta
 
 - **Other agents:**  the same workflow driven from Codex and other coding agents:
   planning on the page, worktrees, the review loop.
-  The pages, the `epic` command and the content folder are plain files and programs any agent can use;
-  the skills and hooks around them are Claude Code's.
-  Where it stands:  planned;  Claude Code only for now.
+  The pages, the `epic` command and the content folder are plain files and programs any agent can use.
+  Where it stands:  any agent follows `epic guide` and ends its turns with `epic turn end`;  Codex has the
+  end-of-turn hooks and fifteen of the skills, from the same files;  Send doesn't wake it yet
+  ([README-epics.md](https://github.com/spell-app/spell/blob/main/README-epics.md#with-codex)), untried with a real Codex yet.
 - **Installing from npm:**  a repo that isn't Spell installs the plugin alone, from npm.
   Where it stands:  `spell-epic`, `spell-ui` and `spell` are published, under the `next` tag until Spell's first release
   (planned for December 1, 2026);  the plugin still installs only inside a Spell checkout.
@@ -441,16 +443,16 @@ yarn vscode:package     # the extension's bundle and spell-epic.vsix:  NOT insta
 | [README-skills.md](README-skills.md) | <ul><li>nineteen skills you type, nine hooks that run by themselves</li><li>planning and review;  worktrees and sessions;  background and offline</li><li>the hooks, and the prompt gate that reads first</li><li>two names for every skill</li></ul> |
 | [README-cli.md](README-cli.md) | <ul><li>the six commands you'll actually type</li><li>an address is a page and an id:  `seo#J3`</li><li>one copy of the code;  how a `wait` wakes a session</li><li>every verb, by group;  where it stops</li></ul> |
 | [README-vscode.md](README-vscode.md) | <ul><li>the Spell Epic extension:  three commands and a reload</li><li>two views, each a page that stays;  which server answers</li><li>the window bridge, and how a session moves</li><li>working on it</li></ul> |
-| [README-adopting.md](README-adopting.md) | <ul><li>epics in your own repo:  three steps and an extension</li><li>the content folder, the config file, worktrees, your `AGENTS.md`</li><li>one epic server for the machine</li><li>what's still Spell-shaped</li></ul> |
+| [README-epics.md](https://github.com/spell-app/spell/blob/main/README-epics.md), at the kit's root | <ul><li>epics in your own repo:  four steps and an extension</li><li>working with others:  joining, who you are, every turn syncs, two people on one page</li><li>the content folder, the config file, worktrees, your `AGENTS.md`</li><li>one epic server for the machine;  what's still Spell-shaped</li></ul> |
 
 Every other folder's pages:  [the kit's index](https://github.com/spell-app/spell/blob/main/README.md#every-readme).
 
 ## See also
 
 - [README-pages.md](README-pages.md):  the next step, an epic page section by section and a review round on it
-- [The kit's README-agents.md](https://github.com/spell-app/spell/blob/main/README-agents.md#the-epic-plugin):  installing the plugin,
+- [The kit's README/agents.md](https://github.com/spell-app/spell/blob/main/README/agents.md#the-epic-plugin):  installing the plugin,
   and what every session reads before your first prompt
-- [The kit's README-development.md](https://github.com/spell-app/spell/blob/main/README-development.md):  one epic's worktree of the whole kit,
+- [The kit's README/development.md](https://github.com/spell-app/spell/blob/main/README/development.md):  one epic's worktree of the whole kit,
   and merging `main` into it
-- [The kit's README-element.md](https://github.com/spell-app/spell/blob/main/README-element.md):  how `<ui-root>` loads a pack like Epic UI
+- [The kit's README/element.md](https://github.com/spell-app/spell/blob/main/README/element.md):  how `<ui-root>` loads a pack like Epic UI
 - [One repo, five parts](https://github.com/spell-app/spell/blob/main/README.md#one-repo-five-parts):  where the epic folder sits, and what it needs

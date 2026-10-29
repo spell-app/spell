@@ -1,14 +1,14 @@
 ---
 name: epics
-description: List the open epics -- every epic page (`epics/<name>/`, shared by `main` and every worktree) with phases left, still planning, or done but not merged -- with each one's phase, worktree, session, what's waiting on Owen, and links to its epic page.  List only:  changes nothing.  Use for `/epics` (open ones), `/epics all` (finished ones too), or when Owen asks "what epics are open?", "which plans are running?", "where are my epics at?".  Everything else open (sessions, worktrees, clean-up):  `/worktrees`.
+description: List the open epics -- every epic page (`epics/<name>/`, shared by `main` and every worktree) with phases left, still planning, or done but not merged -- with each one's phase, worktree, session, what's waiting on the person, and links to its epic page.  List only:  changes nothing.  Use for `/epics` (open ones), `/epics all` (finished ones too), or when the person asks "what epics are open?", "which plans are running?", "where are my epics at?".  Everything else open (sessions, worktrees, clean-up):  `/worktrees`.
 argument-hint: "[all]"
 ---
 
 # /epics
 
-Owen runs several epics at once:  one screen saying where each stands.
-- Read-only:  it lists, Owen acts.
-- His next steps:  `/wtf <name>`, `/epic <name>`, `/unpark <name>`, `/worktrees` to clean up.
+The person runs several epics at once:  one screen saying where each stands.
+- Read-only:  it lists, the person acts.
+- Their next steps:  `/wtf <name>`, `/epic <name>`, `/unpark <name>`, `/worktrees` to clean up.
 
 - Every epic page is shared content:  ONE copy, in the content folder (`epic config contentFolder`),
   read from there by every checkout (epic `epic-eject` P12), never through a link.
@@ -76,7 +76,7 @@ Owen runs several epics at once:  one screen saying where each stands.
        - open questions, judgement calls, tests (issues only when nothing else)
        - and `notReviewed` / `total`
        - parked, or a `/bedtime` run still going
-   - then one line per epic worth acting on, numbered (Owen refers to them by number), with the command for it:
+   - then one line per epic worth acting on, numbered (the person refers to them by number), with the command for it:
      - a `stalled` one:  `/wtf <name>`, or `/epic <name>` in a new session to pick it up
      - questions or judgement calls waiting:  its session (`/session <id>`), or `/wtf <name>?` to answer here
      - many items not reviewed:  `/epic review <name>`
@@ -85,7 +85,7 @@ Owen runs several epics at once:  one screen saying where each stands.
    - then "Done, but still waiting on you":
      each `done` epic with open questions, judgement calls or tests, one line each
 6. Stop there.
-   Don't act on any of it unless Owen asks.
+   Don't act on any of it unless the person asks.
 
 ## Notes
 

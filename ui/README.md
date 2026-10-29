@@ -318,7 +318,7 @@ it loads what's inside on demand, gives it a theme and a size, and decides what 
 | `fixed` | present or not | fills the viewport and stays there:  the page never scrolls, the root does;  on iOS the keyboard can cover fields near the bottom |
 | `stack-with` | `container`, `page` | what stacking layouts inside measure (`stackable`, `doubling` ...):  each element's own width, or the screen's, as in Fomantic;  sets `--ui-stack-with`, and an element's own `stack-with` wins |
 | `assets` | a folder | where the built-in icon packs load from, relative to the page;  by default, beside the library |
-| `disabled`, `visible`, `animation` | | the states every element shares ([the kit's README-element.md](https://github.com/spell-app/spell/blob/main/README-element.md#what-every-element-gets-without-asking)) |
+| `disabled`, `visible`, `animation` | | the states every element shares ([the kit's README/element.md](https://github.com/spell-app/spell/blob/main/README/element.md#what-every-element-gets-without-asking)) |
 
 - Two events:
   - `ui-ready`, once everything's in:  its `detail.failed` lists what didn't load, `[{ tag, reason, error?, source? }]`,
@@ -368,8 +368,8 @@ It borrows the page's, so the page still has one Solid, and the pack's elements 
 - A pack that fails or times out logs an error naming its `source`, and the root still gets ready.
 - A pack's elements are written exactly like a Spell UI family.
   How one is built (`spell pack build`), and what it costs:
-  [the kit's README-element.md](https://github.com/spell-app/spell/blob/main/README-element.md#packs-and-ui-root);
-  the `spell pack` commands that make one:  [the kit's README-cli.md](https://github.com/spell-app/spell/blob/main/README-cli.md#spell-ui).
+  [the kit's README/element.md](https://github.com/spell-app/spell/blob/main/README/element.md#packs-and-ui-root);
+  the `spell pack` commands that make one:  [the kit's README/cli.md](https://github.com/spell-app/spell/blob/main/README/cli.md#spell-ui).
 
 ## The families:  76, in Fomantic UI's groups
 
@@ -470,7 +470,7 @@ each example's plain class markup on the left, the same example as elements on t
 - The rules for working here (how a component is written, imports, the lint guard):  [AGENTS.md](AGENTS.md).
 - The docs site, the tools, their environment variables, and Spell UI's `spell` commands:
   [README-site.md](README-site.md).
-- The framework every family is written on, the kit's:  [README-element.md](https://github.com/spell-app/spell/blob/main/README-element.md).
+- The framework every family is written on, the kit's:  [README/element.md](https://github.com/spell-app/spell/blob/main/README/element.md).
 
 <details>
 <summary>Every yarn script, one line each</summary>
@@ -620,5 +620,5 @@ Every other repo's pages:  [the kit's index](https://github.com/spell-app/spell/
 - [README-frameworks.md](README-frameworks.md):  next, if your page is a React, Vue or Solid app
 - [README-components.md](README-components.md):  next, to find the family you need by any name you know
 - [README-themes.md](README-themes.md):  next, if the default look isn't yours
-- [The kit's README-element.md](https://github.com/spell-app/spell/blob/main/README-element.md):  the framework under every element, before you write one
+- [The kit's README/element.md](https://github.com/spell-app/spell/blob/main/README/element.md):  the framework under every element, before you write one
 - [AGENTS.md](AGENTS.md):  the rules for working here, before you change a line

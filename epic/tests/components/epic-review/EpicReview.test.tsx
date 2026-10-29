@@ -37,6 +37,7 @@ class FakeRoutes {
     now: [],
     working: {},
     listening: null,
+    lastListener: null,
     unsentComments: [],
     waitingComments: [],
     woken: null,
@@ -768,10 +769,14 @@ describe("<epic-section kind=overview-part> review controls (Q14)", () => {
 
 // epic `airplane` P2:  notes on the phases and the summary
 describe("<epic-phase> and <epic-overview> review controls", () => {
-  test("a phase:  Make Todo, Revisit in its title;  a note box at its body's end;  Make Todo marks it", async () => {
+  // Do this, the thumbs up (epic `epic-engine` I181;  Owen, 2026-10-29:  "it's already a phase, you wouldn't make it a
+  // todo"):  the same `todo` mark;  an Overview part keeps Make Todo
+  test("a phase:  Do this (a thumbs up), Revisit in its title;  a note box at its body's end;  Do this marks it `todo`", async () => {
     await adoptClient()
     const host = await render(`<epic-phase id="p2" title="Plan-Doc Notes" status="todo" open></epic-phase>`)
     expect(actions(host)).toEqual(["todo", "revisit"])
+    expect(button(host, "todo").getAttribute("icon")).toBe("thumbs up")
+    expect(button(host, "todo").title).toBe("Do this:  Yes:  build this phase")
     expect(deep(host).querySelector("[part~='note-box'] >>> ui-textarea >>> textarea")).not.toBeNull()
     expect(noteButtons(host)).toEqual(["soon", "skip"])
     button(host, "todo").click()
@@ -781,7 +786,8 @@ describe("<epic-phase> and <epic-overview> review controls", () => {
   })
 
   // epic `epic-engine` I140 (Owen, 2026-10-26:  "Accepted-but-unstarted phases should show checkmark pill green")
-  test("a to-do phase whose plan is accepted:  a green check first, then Revisit, Make Todo (a waiting plan's slots), a state, never a mark", async () => {
+  // a thumbs up since I181 (Owen, 2026-10-29:  the thumbs up "when it means 'accept this' rather than 'make this a todo'")
+  test("a to-do phase whose plan is accepted:  a green thumbs up first, then Revisit, Do this (a waiting plan's slots), a state, never a mark", async () => {
     await adoptClient()
     const host = await render(`<epic-phase id="p2" title="Themes as Data" status="todo" plan="accepted"></epic-phase>`)
     expect(actions(host)).toEqual(["revisit", "todo"])
@@ -789,7 +795,7 @@ describe("<epic-phase> and <epic-overview> review controls", () => {
     // first in its group, in a waiting plan's Accept slot (Owen:  "checkmark on the wrong side")
     expect(check.parentElement!.firstElementChild).toBe(check)
     expect(check.dataset).toMatchObject({ color: "green", fill: "outline" })
-    expect(check.getAttribute("icon")).toBe("check")
+    expect(check.getAttribute("icon")).toBe("thumbs up")
     expect(check.title).toBe("Plan accepted:  ready to build:  you accepted Claude's plan for this phase")
     // the ring is a WAITING plan's alone
     expect(deep(host).querySelector(".review-group")!.hasAttribute("data-asks")).toBe(false)
@@ -805,6 +811,8 @@ describe("<epic-phase> and <epic-overview> review controls", () => {
     const active = await render(`<epic-phase id="p3" title="Busy" status="active" plan="accepted"></epic-phase>`)
     expect(deep(active).querySelector('ui-button[data-state="accepted"]')).toBeNull()
     const waiting = await render(`<epic-phase id="p4" title="Asks" status="todo" plan="waiting"></epic-phase>`)
+    // its Accept plan a thumbs up too (I181):  it means "accept this"
+    expect(button(waiting, "approve").getAttribute("icon")).toBe("thumbs up")
     expect(deep(waiting).querySelector('ui-button[data-state="accepted"]')).toBeNull()
     await expectAccessible(host)
   })

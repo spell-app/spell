@@ -91,7 +91,7 @@ export const epicSectionVocabulary = {
       kind: "string",
       format: "ids",
       description:
-        "The change marks inside it still waiting for Owen's Accept (`ch3 ch5`), written by the epic tool on every " +
+        "The change marks inside it still waiting for your Accept (`ch3 ch5`), written by the epic tool on every " +
         "edit (epic `epic-engine` P30):  the page counts and finds them while its body, a part, isn't loaded."
     },
     {
@@ -143,8 +143,8 @@ export const epicSectionVocabulary = {
     {
       name: "tools",
       description:
-        "At the title's end:  the page's own buttons (the `actions` slot), then the Phases section's state filter " +
-        "and its gear;  an item section's state filter;  an Overview sub-section's review buttons."
+        "At the title's end:  the page's own buttons (the `actions` slot), then the Phases section's state filter, " +
+        "its Accept Phases while the phases are agreed, and its gear;  an item section's state filter;  an Overview sub-section's review buttons."
     },
     {
       name: "gear",
@@ -154,12 +154,19 @@ export const epicSectionVocabulary = {
         "while on.  A pick shows or hides that field in every phase, forgetting each phase's own choice of it."
     },
     {
+      name: "stage-button",
+      description:
+        'Its "Accept Phases" (an `<epic-stage-button>`, epic `epic-engine` I180), the Phases section only, before its gear:  ' +
+        'only while the page is reviewed and agrees its phases (`<epic-page stage="phases">`).  A press accepts the ' +
+        "phases and every build plan waiting, and sends;  outlined green until the session moves the page on."
+    },
+    {
       name: "filter",
       description:
         "An item section's state filter:  one chip per state its items are in, with how many, solid while that " +
         "state's items show, outlined while hidden.  The Phases section's the same, by a phase's state, the first " +
-        "that holds (epic `epic-engine` I157, I170):  red needs Owen (a plan to accept, a choice open), orange " +
-        "changed since he looked, blue under way (in the blue badge), dotted blue scheduled, green done in the last " +
+        "that holds (epic `epic-engine` I157, I170):  red needs you (a plan to accept, a choice open), orange " +
+        "changed since you looked, blue under way (in the blue badge), dotted blue scheduled, green done in the last " +
         "3 days, grey done before."
     },
     {
@@ -189,7 +196,7 @@ export const epicSectionVocabulary = {
         "The Manual tests section's button on its title (epic `epic-engine` P51), only while the page is reviewed and " +
         'a test is open:  "Start testing · 9" asks Claude to prepare the tests (a request for now:  it checks what it ' +
         'can, writes out the rest), "Preparing tests" while it does, then "Next test · 3 left", which opens the next ' +
-        "test Owen hasn't answered.  The address's `?test=1` presses it as the page loads."
+        "test you haven't answered.  The address's `?test=1` presses it as the page loads."
     },
     {
       name: "next-epic",
@@ -276,8 +283,7 @@ export const epicSectionVocabulary = {
     {
       key: "testsReady",
       text: "Tests ready:  Next test opens the first",
-      description:
-        "The notice when the tests are prepared while Owen is typing:  the first test doesn't open under him."
+      description: "The notice when the tests are prepared while you type:  the first test doesn't open under you."
     },
     {
       key: "nextEpic",

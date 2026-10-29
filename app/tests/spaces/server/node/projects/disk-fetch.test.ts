@@ -24,7 +24,7 @@ import { serverPathForRoot } from "spell/app/spaces/server/node/projects/project
  */
 describe("diskFetch", () => {
   beforeAll(installDiskFetch)
-  const solitaire = fixtureProjectId("Solitaire")
+  const solitaire = fixtureProjectId("@spell/examples/Solitaire")
 
   test("a SpellProject loads, parses and compiles from disk the same as the headless reference", async () => {
     const project = new SP.SpellProject(solitaire)
@@ -38,8 +38,8 @@ describe("diskFetch", () => {
     ])
 
     await project.parse()
-    const reference = parseSpellProject(loadFixtureProject("Solitaire"), {
-      parentScope: fixtureImportScope("Solitaire")
+    const reference = parseSpellProject(loadFixtureProject("@spell/examples/Solitaire"), {
+      parentScope: fixtureImportScope("@spell/examples/Solitaire")
     })
     spellFiles.forEach((file, index) => {
       expect(file.match, file.path).toBeDefined()
@@ -57,7 +57,9 @@ describe("diskFetch", () => {
   test("it answers a file's URL, split by its group and project:  `/spaces/<project>/<file>`", async () => {
     const url = SP.SpellUrls.fileUrl(`${solitaire}/Solitaire.spellml`)
     expect(url).toBe("/spaces/@spell/examples/Solitaire/Solitaire.spellml")
-    expect(await diskFetch({ url })).toBe(readFileSync(fixtureFolder("Solitaire", "Solitaire.spellml"), "utf8"))
+    expect(await diskFetch({ url })).toBe(
+      readFileSync(fixtureFolder("@spell/examples/Solitaire", "Solitaire.spellml"), "utf8")
+    )
     expect(await diskFetch({ url: SP.SpellUrls.indexUrl(solitaire) })).toHaveProperty("imports")
     // each project with its title and description, from its project file
     expect(await diskFetch({ url: SP.SpellUrls.listUrl("@spell/examples") })).toContainEqual({
@@ -77,7 +79,7 @@ describe("diskFetch", () => {
 
   describe("locationForDiskPath", () => {
     test("a file under a known root's folder maps onto that root", () => {
-      expect(locationForDiskPath(fixtureFolder("Solitaire", "Solitaire.spellml"))?.path).toBe(
+      expect(locationForDiskPath(fixtureFolder("@spell/examples/Solitaire", "Solitaire.spellml"))?.path).toBe(
         `${solitaire}/Solitaire.spellml`
       )
     })

@@ -3,9 +3,10 @@ import { join, relative } from "node:path"
 
 import { EpicConfig } from "spell/epic/config/EpicConfig"
 import { DataFile } from "spell/epic/data/DataFile"
-import { CommentList, type Comment, type IdentifiedComment } from "spell/epic/tool/CommentList"
+import { CommentList, type IdentifiedComment } from "spell/epic/tool/CommentList"
 import { FROM_PAGE } from "spell/epic/tool/epicRoutes"
 import { GuideInbox } from "spell/epic/tool/GuideInbox"
+import { ReviewInbox } from "spell/epic/tool/ReviewInbox"
 import { SeeAlso } from "spell/epic/tool/SeeAlso"
 
 import { answerFile, readAnswer, listPages } from "./details.js"
@@ -177,7 +178,7 @@ function guideCommentsWaiting(root: string): GuideCommentWaiting[] {
   return changes.inboxFiles().flatMap((file) => {
     const page = changes.pageOf(file)
     const epic = owners.ownerOf(page)
-    return GuideInbox.read(file).commentList.waiting.map((comment) => ({ page, ...comment, ...(epic && { epic }) }))
+    return GuideInbox.read(file).commentList.ownWaiting.map((comment) => ({ page, ...comment, ...(epic && { epic }) }))
   })
 }
 
@@ -187,36 +188,23 @@ export type DetailsAnswered = { page: string; answered: string }
 /** A goals thought waiting to be digested. */
 export type ThoughtWaiting = { page: string; id: string; for: string; text: string; date: string }
 
-/** Each epic with anything in its inbox file, by name. */
+/** Each epic with anything in its inbox, by name:  its inbox file, or a comment of this person's in a comments file. */
 function epicsWaiting(content: string): EpicWaiting[] {
   const epics = join(content, "epics")
   if (!existsSync(epics)) return []
   return readdirSync(epics)
     .sort()
     .flatMap((name) => {
-      const inbox = DataFile.read<InboxFile>(join(epics, name, `${name}.inbox${DataFile.SUFFIX}`))
-      if (!inbox) return []
+      const inbox = ReviewInbox.read(join(epics, name, `${name}.inbox${DataFile.SUFFIX}`))
       const sent = inbox.sent ? Date.parse(inbox.sent) : 0
-      const marks = Object.entries(inbox.marks ?? {}).map(([id, mark]) => ({
-        id,
-        ...mark,
-        sent: Date.parse(String(mark.at)) <= sent
-      }))
-      const drafts = Object.entries(inbox.drafts ?? {}).map(([id, draft]) => ({ id, ...draft }))
-      const now = inbox.now ?? []
-      const comments = new CommentList(inbox.comments ?? {}).waiting
+      const marks = inbox.markList.map((mark) => ({ ...mark, sent: Date.parse(mark.at) <= sent }))
+      const drafts = Object.entries(inbox.drafts).map(([id, draft]) => ({ id, ...draft }))
+      const now = inbox.now
+      // this person's own:  another person's waits for their agent (epic `epic-friend` P9)
+      const comments = inbox.commentList.ownWaiting
       if (!marks.length && !drafts.length && !now.length && !comments.length) return []
       return [{ name, doc: `epics/${name}/${name}.plan.html`, marks, drafts, now, comments }]
     })
-}
-
-/** An inbox file's parts read here:  the rest is `ReviewInbox`'s. */
-type InboxFile = {
-  marks?: Record<string, { action: string; at: string } & Record<string, unknown>>
-  drafts?: Record<string, { note: string } & Record<string, unknown>>
-  now?: Record<string, unknown>[]
-  sent?: string | null
-  comments?: Record<string, Comment>
 }
 
 /** Details pages whose answer was saved after `since` (ms). */

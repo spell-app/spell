@@ -25,7 +25,7 @@ import "./ProjectChooser.css"
  * - No empty columns:  a group with nothing in it says so in one quiet card;  "create" buttons sit in their
  *   group's header.
  * - In dev, also the test fixtures (`@spell/test`) -- open one to look at it, edit it, then
- *   `yarn spell:test:fixtures:bless`.  No "create" for those:  copy a project into `spaces/@spell/test/`.
+ *   `spell content check --bless`.  No "create" for those:  copy a project into `spaces/@spell/test/`.
  * - A guide opens in the editor, as an example does:  its prose is the comments in its spell file (epic `debut` Q18).
  * - Every route the others don't take (`routes.tsx`).
  * - Its look follows the editor's theme:  the hero and cards are tokens (`ProjectChooser.css`).

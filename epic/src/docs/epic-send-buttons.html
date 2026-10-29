@@ -71,14 +71,12 @@
   <epic-send-buttons state="idle" send-tip="Nothing to send"></epic-send-buttons>
   <epic-send-buttons state="unsent" count="2" send-tip="Send 2 comments"></epic-send-buttons>
   <epic-send-buttons state="sent" send-tip="Sent:  waiting for Claude"></epic-send-buttons>
-  <epic-send-buttons accept="Accept Overview" send-tip="The Overview is agreed:  Claude writes the phases next"></epic-send-buttons>
-  <epic-send-buttons accept="Accept Phases" accepted send-tip="Phases accepted:  waiting for Claude"></epic-send-buttons>
   <epic-send-buttons state="idle" asks="waiting" send-tip="2 build plans wait for your Accept:  P43, P44 · Nothing to send"></epic-send-buttons>
   <epic-send-buttons state="unsent" asks="taken" count="1" send-tip="2 build plans wait for your Accept:  P43, P44 · Send 1 mark"></epic-send-buttons>
   <epic-send-buttons countdown state="unsent" count="3" send-tip="Send 3 marks"></epic-send-buttons>
 </p>
             <ui-accordion class="spell-code" appearance="styled">
-              <ui-title>The example above · 8 lines</ui-title>
+              <ui-title>The example above · 6 lines</ui-title>
               <ui-content>
                 <ui-code language="html"
                   ><script type="text/plain">
@@ -86,8 +84,6 @@
                       <epic-send-buttons state="idle" send-tip="Nothing to send"></epic-send-buttons>
                       <epic-send-buttons state="unsent" count="2" send-tip="Send 2 comments"></epic-send-buttons>
                       <epic-send-buttons state="sent" send-tip="Sent:  waiting for Claude"></epic-send-buttons>
-                      <epic-send-buttons accept="Accept Overview" send-tip="The Overview is agreed:  Claude writes the phases next"></epic-send-buttons>
-                      <epic-send-buttons accept="Accept Phases" accepted send-tip="Phases accepted:  waiting for Claude"></epic-send-buttons>
                       <epic-send-buttons state="idle" asks="waiting" send-tip="2 build plans wait for your Accept:  P43, P44 · Nothing to send"></epic-send-buttons>
                       <epic-send-buttons state="unsent" asks="taken" count="1" send-tip="2 build plans wait for your Accept:  P43, P44 · Send 1 mark"></epic-send-buttons>
                       <epic-send-buttons countdown state="unsent" count="3" send-tip="Send 3 marks"></epic-send-buttons>
@@ -97,8 +93,8 @@
               </ui-content>
             </ui-accordion>
             <ul>
-              <li>Nothing to send, something waiting, all of it sent;  the two stage buttons;  then waiting on you, ringed 2px #666, and dotted once you've pressed what it waits for.</li>
-              <li>The first seven have no <code>countdown</code>: the one with something waiting is filled blue, for a press.</li>
+              <li>Nothing to send, something waiting, all of it sent;  then waiting on you, ringed 2px #666, and dotted once you've pressed what it waits for.</li>
+              <li>The first five have no <code>countdown</code>: the one with something waiting is filled blue, for a press.</li>
               <li>
                 The last one has it: a ring round its plane drains, clockwise from the top, while you leave this page
                 alone. Any key, click or scroll fills it again; its tooltip says how long is left.
@@ -166,7 +162,7 @@
                   <li>It runs whether or not a session listens: with nobody listening, the page server wakes the epic,
                     at most once per epic in 10 minutes, never in airplane mode (Q59, B).</li>
                   <li>An epic page's countdown send asks every revisit now (decision Q7).</li>
-                  <li>On a stage button it only sends the marks, never accepts the stage (J143).</li>
+                  <li>It only ever sends the marks, never accepts a stage:  an epic page's Accept Overview and Accept Phases are on their sections' title rows (<code>&lt;epic-stage-button&gt;</code>, epic <code>epic-engine</code> I180;  in the plane's place before, P29).  A pressed Accept counts down five minutes of its own, its mark held:  no Send, a press or the countdown, carries it before then (I181).  The ring is the same ring, <code>CountdownRing</code>, green there.</li>
                 </ul>
               </li>
               <li>
@@ -188,8 +184,6 @@
                   <tr><td><code>send-tip</code></td><td>The plane's tooltip and name: what a press sends. Default <code>Send</code>.</td></tr>
                   <tr><td><code>count</code></td><td>How many things a press sends: a badge on the plane. None at 0.</td></tr>
                   <tr><td><code>busy</code></td><td>A send on its way: the plane spins, and a press does nothing.</td></tr>
-                  <tr><td><code>accept</code></td><td>A STAGE BUTTON in the plane's place, drawn by an epic page's header while the page is in a stage (epic <code>epic-engine</code> P29): a check and these words (<code>Accept Overview</code>), green. A press asks the owner as the plane's does;  the countdown's ring goes round its check, and its end only sends, never accepts (J143).</td></tr>
-                  <tr><td><code>accepted</code></td><td>The stage button pressed: the pill outlined green, waiting for the session to move the page on.</td></tr>
                   <tr><td><code>asks</code></td><td>The pill WAITS ON YOU (Owen, 2026-10-25): <code>waiting</code>, the pill's own border 2px #666, darker than its hairline, solid; <code>taken</code>, dotted once you've pressed what it waits for. An epic page's header sets it while Claude's build plans wait for your Accept on their phases: still the plane, never green.</td></tr>
                   <tr><td><code>countdown</code></td><td>Auto Send: counts down to Send by itself, a ring round the plane (section 3). Off by default: only an epic page's header sets it, as only it has the gear that chooses the wait (J142). <code>wand</code> before P53, which drew the wand too.</td></tr>
                 </tbody>
@@ -206,7 +200,7 @@
                   <tr><td><code>base</code></td><td>The pill round the plane.</td></tr>
                   <tr><td><code>send</code></td><td>The paper plane, a <code>&lt;button&gt;</code>.</td></tr>
                   <tr><td><code>count</code></td><td>The badge on the plane.</td></tr>
-                  <tr><td><code>ring</code></td><td>The countdown's ring round the plane (the stage button's check), its ends round, draining clockwise;  only while it counts.</td></tr>
+                  <tr><td><code>ring</code></td><td>The countdown's ring round the plane, its ends round, draining clockwise;  only while it counts.</td></tr>
                 </tbody>
               </table>
             </ui-table>
@@ -222,7 +216,6 @@
                   <tr><td><code>countdown</code></td><td>Auto Send is on, and this Send counts down (<code>countdown</code>).</td></tr>
                   <tr><td><code>counting</code></td><td>The countdown runs with a wait (not Immediately): the ring drains.</td></tr>
                   <tr><td><code>waiting</code></td><td>Auto Send is off, or no <code>countdown</code>, and something isn't sent: the plane is filled blue.</td></tr>
-                  <tr><td><code>stage</code></td><td>The plane's place holds the stage button (<code>accept</code>).</td></tr>
                 </tbody>
               </table>
             </ui-table>
@@ -255,7 +248,6 @@
                   <li>what's left of the wait, draining clockwise from the top, eased over each second</li>
                   <li>the pill's own outline goes while it counts, so ring and button never read as one border</li>
                   <li>room kept for it on both sides whenever <code>countdown</code> is set: nothing beside it moves as it comes and goes</li>
-                  <li>the stage button's: round its check, inside the pill, green</li>
                 </ul>
               </li>
               <li>Auto Send off (or no <code>countdown</code>) with something waiting: the plane filled blue, its icon white.</li>

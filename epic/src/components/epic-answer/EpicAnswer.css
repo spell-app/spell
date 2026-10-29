@@ -4,11 +4,13 @@
  * ONE card shape (a heading line, then the slotted body), calm (Owen, 2026-10-25:  "answer/reply cards are really
  * ugly, try to spiff them up"):  a white card, a 1px rule and one line of shadow, on the drawer's light body
  * - the answer:  a quiet line, no card (I111)
- * - a reply:  who said it first, as a small round mark and their name (right after the fold chevron);
+ * - a reply:  who said it first, as an id chip with their initial, and their name (right after the fold chevron);
  *   the date quiet at the right (`.dated`)
  * - in an item's thread, every card is one of ONE section's frame (below, "The THREAD")
- *   - Claude's:  white, its mark Claude's terracotta
- *   - Owen's (`.owen`):  his violet, faint, as his comment box;  its mark violet
+ *   - an agent's (Claude's):  white, its mark Claude's terracotta
+ *   - a person's (`.person`, everyone's alike):  violet, faint, as the comment box;  its mark violet
+ *   - both the page's theme tokens, `--epic-voice-*` (`EpicPage.css`), read here through the private aliases
+ *   - the mark's letter:  the name's initial, from the heading's `data-initial` (`EpicReply.initial`)
  * - More Details:  plain, its heading a small muted eyebrow that folds it
  * - every card folds, the folded box `hidden="until-found"`:
  *   - the answer, a reply and a status card by their band, the chevron first
@@ -152,7 +154,7 @@
     white-space: nowrap;
   }
   /* who said it:  their initial before their name, drawn as an item's id chip (`T1`, I165:  "(c) should be same
-     styling as a T1 etc, no?"), in the speaker's colour (`--_epic-who-mark`, `--_epic-who-initial`)
+     styling as a T1 etc, no?"), in the speaker's colour (`--_epic-who-mark`, the heading's `data-initial`)
      - the item chip's shared tokens (`--epic-chip-height`, `--epic-chip-font-size`, `EpicItem.css`):
        a pill, mono 600, its letters trimmed to the capitals and centred both ways
      - the band's type is smaller than an item line's (11.5px to 13.8px, measured in an item's details):
@@ -160,7 +162,7 @@
   .reply .who::before {
     --_epic-who-chip-size: calc(var(--epic-chip-font-size, 0.8em) * 1.2);
     --_epic-who-chip-height: var(--epic-chip-height, 1.6em);
-    content: var(--_epic-who-initial, "C");
+    content: attr(data-initial);
     display: inline-block;
     box-sizing: border-box;
     min-width: 3.1em;
@@ -284,23 +286,43 @@
 }
 
 @layer ui.components.epic-answer.variations {
-  /* Claude's:  white, its name and mark Claude's terracotta */
+  /*
+   * ## Voices:  the page's theme tokens (`--epic-voice-*`, `<epic-page>`'s `:host`:  tweak them there), today's
+   * values as the fallbacks
+   * - an agent's (Claude's):  white, its name and mark Claude's terracotta
+   * - the speaker's OWN colour first, when the repo gives them one (epic `epic-friend` P10):  `--_epic-voice`, set on
+   *   the card by `EpicReply.voice` (`var(--epic-voice-agent-codex, <its colour>)`);  unset, it falls through to
+   *   the shared voice, so a card looks as before
+   */
   .reply {
-    --_epic-who-mark: light-dark(#c96442, #d97757);
-    --_epic-card-accent: light-dark(#a8502f, #e59a7c);
+    --_epic-who-mark: var(--_epic-voice, var(--epic-voice-agent, light-dark(#c96442, #d97757)));
+    --_epic-card-accent: var(--_epic-voice, var(--epic-voice-agent-text, light-dark(#a8502f, #e59a7c)));
   }
-  /* Owen's voice:  his violet, faint, as his comment box (I111) */
-  .reply.owen {
-    --_epic-who-initial: "O";
-    --_epic-who-mark: var(--ui-violet, #6550ca);
+  /*
+   * a person's voice:  violet, faint, as the comment box (I111);  every person's alike (epic `epic-friend` P2), unless
+   * the repo gives them their own (P10):  its fill and rule mixed from it, as the shared ones are from violet
+   * - `--_epic-voice-fill` / `-rule` are unset when `--_epic-voice` is (a `var()` of nothing):  the shared ones then
+   */
+  .reply.person {
+    --_epic-who-mark: var(--_epic-voice, var(--epic-voice-person, var(--ui-violet, #6550ca)));
     /* faint on the page's own dark, not black:  `Canvas` is the browser's, near-black under every theme */
-    --_epic-card-fill: color-mix(
-      in oklab,
-      var(--ui-violet, #6550ca) 5%,
-      light-dark(#fff, var(--ui-background, Canvas))
+    --_epic-voice-fill: color-mix(in oklab, var(--_epic-voice) 5%, light-dark(#fff, var(--ui-background, Canvas)));
+    --_epic-voice-rule: color-mix(in oklab, var(--_epic-voice) 26%, transparent);
+    --_epic-card-fill: var(
+      --_epic-voice-fill,
+      var(
+        --epic-voice-person-fill,
+        color-mix(in oklab, var(--ui-violet, #6550ca) 5%, light-dark(#fff, var(--ui-background, Canvas)))
+      )
     );
-    --_epic-card-rule: color-mix(in oklab, var(--ui-violet, #6550ca) 26%, transparent);
-    --_epic-card-accent: var(--ui-violet-text, var(--ui-violet, #6550ca));
+    --_epic-card-rule: var(
+      --_epic-voice-rule,
+      var(--epic-voice-person-rule, color-mix(in oklab, var(--ui-violet, #6550ca) 26%, transparent))
+    );
+    --_epic-card-accent: var(
+      --_epic-voice,
+      var(--epic-voice-person-text, var(--ui-violet-text, var(--ui-violet, #6550ca)))
+    );
   }
   .more {
     --_epic-card-rule: var(--epic-rule, var(--ui-border-color, light-dark(#e6e3ef, #34343b)));

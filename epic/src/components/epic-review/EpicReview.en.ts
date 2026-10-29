@@ -10,7 +10,7 @@ import { REVIEW_KINDS, REVIEW_NAME_TEXTS, REVIEW_SHOWS, REVIEW_TEXTS } from "./E
 
 /****************
  * ### `<epic-review>`
- * The review controls (P9):  what Owen does with an item, an Overview sub-section, a phase or the summary
+ * The review controls (P9):  what you do with an item, an Overview sub-section, a phase or the summary
  * while the page is reviewed.
  ****************/
 export const epicReviewVocabulary = {
@@ -48,12 +48,13 @@ export const epicReviewVocabulary = {
       default: "item",
       description:
         "Whose:  `item` (Make Todo, Revisit, Approve), `todo` (the plane, Revisit, the x;  its note box the " +
-        "plane, Revisit Later, the x), `part` (an Overview sub-section, a phase, the summary:  no Approve);  a " +
+        "plane, Revisit Later, the x), `part` (an Overview sub-section, the summary:  no Approve), `phase` (a phase still to do:  Do this, " +
+        "Revisit);  a " +
         "comment thread's answer, drawn by `<epic-thread>` with no inbox behind it:  `thread` (That's good, Reply, " +
         "Skip it), `closed` (Reopen);  `proposal` (an open phase while the page's phases are agreed:  Looks good, " +
         "Defer);  `change` (a change mark, `<epic-change>`:  Reopen);  `update` (a new update block, `<epic-update>`:  Seen);  `plan` (a phase whose build plan waits:  " +
-        "Accept plan, Revisit);  `accepted` (a to-do phase whose plan is accepted:  Make Todo, Revisit, then a green " +
-        "check, a state, not a button)."
+        "Accept plan, Revisit);  `accepted` (a to-do phase whose plan is accepted:  Do this, Revisit, then a green " +
+        "thumbs up, a state, not a button)."
     },
     {
       name: "label",
@@ -95,8 +96,8 @@ export const epicReviewVocabulary = {
       name: "epic-chosen",
       detail: "{ of: string }",
       description:
-        "Owen chose an action with it:  a review button that chose one (not one clearing a mark or calling a request " +
-        "off), or a note box button.  An `<epic-item>` folds, so he moves on to the next."
+        "You chose an action with it:  a review button that chose one (not one clearing a mark or calling a request " +
+        "off), or a note box button.  An `<epic-item>` folds, so you move on to the next."
     }
   ],
   slots: [],

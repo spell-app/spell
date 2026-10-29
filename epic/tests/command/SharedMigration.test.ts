@@ -25,6 +25,8 @@ git(MAIN, "init", "-q", "-b", "main")
 // the cutover's manifest (before the reorg, claude-design P4):  one docs link, `packages/docs/content`
 put(MAIN, "package.json", JSON.stringify({ shared: { links: ["packages/docs/content", "goals", "agents"] } }))
 put(MAIN, ".gitignore", "/.claude/worktrees\n")
+// spell-app's old layout, written out:  a key left out would be the repo's own (epic `epic-friend` P6)
+put(MAIN, ".epic/config.json5", '{ "contentFolder": "../spell-app-dev", "worktreesFolder": ".claude/worktrees" }\n')
 put(MAIN, "packages/docs/tools/relocate.js", "// the move\n")
 put(MAIN, "packages/docs/content/index.html", "<h1>Docs</h1>\n")
 put(MAIN, "packages/docs/content/guide.html", "<p>guide</p>\n")
@@ -90,7 +92,7 @@ describe("migrateWorktree()", () => {
       "Migrate feat to shared content:  untrack packages/docs/content, goals, agents"
     )
     expect(git(FEAT, "ls-tree", "-r", "--name-only", "HEAD")).toBe(
-      ".gitignore\npackage.json\npackages/docs/tools/relocate.js\nsrc/app.ts"
+      ".epic/config.json5\n.gitignore\npackage.json\npackages/docs/tools/relocate.js\nsrc/app.ts"
     )
   })
 

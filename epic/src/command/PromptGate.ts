@@ -341,7 +341,7 @@ function launchNote(other: string, name: string, text: string, fresh = false, co
   // another command than `/epic <name>` (`/epic resume <name>`) is typed into the epic's window as it is
   const prompt = command === `/epic ${name}` ? "" : ` --prompt ${JSON.stringify(command)}`
   const note =
-    `This session works in worktree \`${other}\`:  \`${command}\` must NOT run here.  Owen means "open a new ` +
+    `This session works in worktree \`${other}\`:  \`${command}\` must NOT run here.  the person means "open a new ` +
     `window for epic \`${name}\`".${saved}  Follow the /epic skill's "From another worktree":  launch it now, ` +
     `without asking` +
     (prompt ? `:  \`epic window launch ${name}${prompt}\`.` : ".") +
@@ -367,7 +367,7 @@ function elsewhereNote(home: EpicHome, { skill, name, text }: GateCommand): Gate
   const launch = `epic window launch ${name} --prompt ${JSON.stringify(typed)}`
   const note =
     `${EpicRepo.refusal(home)}${saved}  So \`${typed}\` must NOT run here:  no EnterWorktree, no worktree ` +
-    `${name} in this repo, no session rename.  Ask Owen (AskUserQuestion) whether to open ${name}'s own window, ` +
+    `${name} in this repo, no session rename.  Ask the person (AskUserQuestion) whether to open ${name}'s own window, ` +
     `then run \`${launch}\`;  if it fails, say so in one line.`
   return {
     hookSpecificOutput: { hookEventName: "UserPromptSubmit", additionalContext: note },

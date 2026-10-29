@@ -73,6 +73,16 @@
       "types": "./dist-types/src/server/RealPath.d.ts",
       "default": "./src/server/RealPath.ts"
     },
+    "./server/Processes": {
+      "spell-source": "./src/server/Processes.ts",
+      "types": "./dist-types/src/server/Processes.d.ts",
+      "default": "./src/server/Processes.ts"
+    },
+    "./server/Links": {
+      "spell-source": "./src/server/Links.ts",
+      "types": "./dist-types/src/server/Links.d.ts",
+      "default": "./src/server/Links.ts"
+    },
     "./server/FileLock": {
       "spell-source": "./src/server/FileLock.ts",
       "types": "./dist-types/src/server/FileLock.d.ts",
@@ -1051,6 +1061,7 @@
       "default": "./epic/src/*.ts"
     },
     "./epic/vscode/src/docUrls.ts": "./epic/vscode/src/docUrls.ts",
+    "./epic/vscode/src/ClipboardImage.ts": "./epic/vscode/src/ClipboardImage.ts",
     "./app/app": {
       "spell-source": "./app/src/app/index.tsx",
       "types": "./app/src/app/index.tsx",

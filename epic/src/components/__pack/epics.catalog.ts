@@ -1,5 +1,5 @@
 /* GENERATED -- do not edit:  `spell pack build epics`, from every vocabulary, `<Name>.en.ts` */
-// sources:  caa0500573ed4a1c
+// sources:  bf14205d3ce597e6
 
 import type { RootCatalogEntry } from "spell/ui"
 
@@ -40,20 +40,21 @@ export const CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
   "epic-phase": {"folder":"epic-phase","attributes":["id","number","title","status","estimate","took","source","part-ids","commits","to-accept","to-see","choices-open","plan","done-at","changes","open"]},
   "epic-prompt": {"folder":"epic-prompt","attributes":[]},
   "epic-question": {"folder":"epic-question","attributes":[]},
-  "epic-reply": {"folder":"epic-answer","attributes":["from","at","re"]},
+  "epic-reply": {"folder":"epic-answer","attributes":["from","agent","at","re"]},
   "epic-review": {"folder":"epic-review","skeleton":{"display":"inline","width":"6em","height":"1.5em"},"attributes":["of","shows","buttons","label","tip","under-line"]},
   "epic-run": {"folder":"epic-run","skeleton":{"height":"4em"},"attributes":["run"]},
   "epic-run-row": {"folder":"epic-run-row","attributes":["row","columns","answer","answer-label","taken"]},
   "epic-section": {"folder":"epic-section","attributes":["id","kind","title","source","part-ids","to-accept","to-see","open"]},
   "epic-send": {"folder":"epic-send","skeleton":{"display":"inline","width":"12em","height":"2em"},"attributes":[]},
-  "epic-send-buttons": {"folder":"epic-send-buttons","skeleton":{"display":"inline","width":"4em","height":"1.6em"},"attributes":["state","send-tip","count","busy","accept","accepted","asks","countdown"]},
+  "epic-send-buttons": {"folder":"epic-send-buttons","skeleton":{"display":"inline","width":"4em","height":"1.6em"},"attributes":["state","send-tip","count","busy","asks","countdown"]},
   "epic-sort": {"folder":"epic-list","skeleton":{"display":"inline","width":"6em","height":"1.5em"},"attributes":[]},
+  "epic-stage-button": {"folder":"epic-review","skeleton":{"display":"inline","width":"8em","height":"1.6em"},"attributes":["stage","open"]},
   "epic-state-filter": {"folder":"epic-state-filter","skeleton":{"display":"inline","width":"4em","height":"1.2em"},"attributes":["counts","marked","phases","shown"]},
-  "epic-status": {"folder":"epic-status","attributes":["state","at","done-at"]},
+  "epic-status": {"folder":"epic-status","attributes":["state","at","done-at","from","agent"]},
   "epic-summary": {"folder":"epic-summary","attributes":[]},
   "epic-text-box": {"folder":"epic-text-box","skeleton":{"height":"2em"},"attributes":["type","for","placeholder","label","max-height"]},
   "epic-thread": {"folder":"epic-thread","attributes":["comment","open","unseen","moved","boxed","saved","failed"]},
-  "epic-thread-message": {"folder":"epic-thread","attributes":["by","at","stamp","older","latest"]},
+  "epic-thread-message": {"folder":"epic-thread","attributes":["by","person","agent","mine","at","stamp","older","latest"]},
   "epic-threads": {"folder":"epic-thread","attributes":[]},
   "epic-update": {"folder":"epic-update","attributes":["id","at","summary","phase","seen"]},
   "epic-updated": {"folder":"epic-phase","attributes":["at","phase","of"]},

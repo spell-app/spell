@@ -762,6 +762,15 @@
                 </ul>
               </li>
               <li>
+                <b>Another agent listening</b> (epic <code>epic-friend</code> P11): a Codex session waiting on the
+                inbox (<code>epic inbox wait &lt;name&gt;</code>) is named after the review line, a green dot before it:
+                "Your Codex is listening", or "Bob's Codex is listening" for someone else's.
+                <ul>
+                  <li>Claude listening says nothing, as before.</li>
+                  <li>
+                    Send never wakes another agent (Q14): with nobody listening and a Codex the last to listen, the
+                    orange pill says "Your Codex isn't listening: ask it to run <code>epic inbox wait &lt;name&gt;</code>",
+                    and a click only copies that command.
                 <b>The gear</b> (epic <code>epic-engine</code> P53), last in the header: a menu of two rows.
                 <ul>
                   <li>
@@ -779,8 +788,8 @@
                 </ul>
               </li>
               <li>
-                <b>No git toggle</b> since P53: the Log lists every commit (P52, comment C6), and each item or phase that
-                lists some has its own git icon.
+                <b>No git toggle</b> since P53: the Log lists every commit (P52, comment C6), an item that lists some has
+                its own git icon, and a phase offers its own in its gear.
               </li>
               <li>
                 <b>Agents running</b> (<code>&lt;epic-agents&gt;</code>, epic <code>epic-engine</code> P35), while any
@@ -924,7 +933,7 @@
                   <tr>
                     <th>Stage</th>
                     <th>What shows</th>
-                    <th>The header's button</th>
+                    <th>Its Accept</th>
                     <th>An open phase's pills</th>
                   </tr>
                 </thead>
@@ -932,20 +941,20 @@
                   <tr>
                     <td><code>overview</code></td>
                     <td>the Overview, Questions, Todos</td>
-                    <td>Accept Overview</td>
+                    <td>Accept Overview, on the Overview's title row</td>
                     <td>(no phases show)</td>
                   </tr>
                   <tr>
                     <td><code>phases</code></td>
                     <td>the Phases too</td>
-                    <td>Accept Phases</td>
+                    <td>Accept Phases, on the Phases section's title row</td>
                     <td>Looks good, Defer</td>
                   </tr>
                   <tr>
                     <td><code>building</code>, or none</td>
                     <td>everything</td>
-                    <td>Send (the paper plane)</td>
-                    <td>Make Todo, Revisit</td>
+                    <td>none:  each phase's plan is accepted on its row</td>
+                    <td>Do this, Revisit</td>
                   </tr>
                 </tbody>
               </table>
@@ -956,13 +965,20 @@
                 sections are numbered as they show (<code>2. Questions</code> while the Overview is agreed).
               </li>
               <li>
-                The button sits where Send's paper plane does. Its tooltip counts the open questions ("2 questions open"): a reminder, never a lock.
-                Auto Send's ring goes round its check, but the countdown's end only sends the marks, never accepts (J143).
+                The header's Send is the paper plane in every stage (epic <code>epic-engine</code> I180;  Owen, 2026-10-29:
+                "This should just be normal paper plane"):  the Accept is on the title row of the work it accepts, a
+                green thumbs up and its words (<code>&lt;epic-stage-button&gt;</code>), there while the section is folded.
+                Its tooltip counts the open questions ("2 questions open"): a reminder, never a lock.
+                Before I180 it took the plane's place;  Auto Send's countdown only ever sends the marks, never accepts (J143).
               </li>
               <li>
-                A press sends what's unsent with an accept mark. The session's <code>epic inbox apply</code> moves the
+                A press of Accept starts a FIVE-MINUTE countdown (epic <code>epic-engine</code> I181;  Owen, 2026-10-29:  "make
+                'accept overview' and 'accept phases' 5 minute countdown"):  a green ring fills in round its thumbs up, its tooltip
+                says how long is left, and a second press calls it off.  Its accept mark waits in the inbox, held till then:
+                no Send before then carries it, and a reload carries on where it was.  When it runs out, the page sends it with
+                what's unsent, waking the epic when nobody listens.  Nothing typed on the page starts it again. The session's <code>epic inbox apply</code> moves the
                 page on a stage, then writes the phases (after the Overview) or starts building (after the phases).
-                Pressed, the button is outlined green until then.
+                Pressed, Accept is outlined green until then.
               </li>
               <li>
                 Building, while Claude's build plan for a phase waits for Owen's Accept, the header keeps Send,

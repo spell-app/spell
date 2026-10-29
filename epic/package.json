@@ -77,7 +77,8 @@
       "src/list/runningRoutes.ts",
       "src/tools/agentRoutes.ts",
       "src/tools/showRoutes.ts",
-      "src/tools/airplaneRoutes.ts"
+      "src/tools/airplaneRoutes.ts",
+      "src/tools/personRoutes.ts"
     ],
     "watch": [
       "src/tools/_assets",
@@ -115,8 +116,11 @@
       "hooks",
       "monitors",
       ".claude-plugin",
+      ".codex-plugin",
       "src/AGENTS.md",
-      "src/tool/PLAN-DOC.md"
+      "src/tool/PLAN-DOC.md",
+      "vscode/package.json",
+      "vscode/spell-epic.vsix"
     ],
     "bin": {
       "epic": "cli/epicMain"

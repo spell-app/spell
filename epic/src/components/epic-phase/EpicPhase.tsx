@@ -57,28 +57,29 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
  *   - Done, `<epic-commit>`s, Files, Verify, To review
  *   - An older doc's `<epic-updated>` lines (its `changes` slot, P6) show at the end of its body, unboxed,
  *     until the epic tool's next write migrates them (`updates-as-epic-update`)
- *   - Files and Verify show only while the Phases title's gear says so, or its own;  commits while its git icon
- *     does
+ *   - Files and Verify show only while the Phases title's gear says so, or its own;  commits while its gear says so
  * - Its body is usually a part (`source="parts/p-epic-migrate.html"`), loaded the first time it opens.
  * - REVIEWED as an Overview sub-section is, only while the page is reviewed
- *   (epic `airplane` P2;  `<epic-review buttons="part">`):
- *   - Make Todo, Revisit at its title's end (no Approve:  notes on the plan, not sign-off)
+ *   (epic `airplane` P2;  `<epic-review buttons="phase">`):
+ *   - Do this, Revisit at its title's end (no Approve:  notes on the plan, not sign-off)
+ *     - Do this, a thumbs up, was Make Todo until epic `epic-engine` I181 (Owen, 2026-10-29:  "it's already a phase,
+ *       you wouldn't make it a todo"):  the same `todo` mark, which `inbox apply` takes as a go-ahead on a phase
  *   - a marked note at the top of its body
  *   - its note box at the end, Claude's status cards (`slot="status"`) just above it
  *   - Revisit and Edit unfold it (`epic-note-showing`)
  *   - while the page's phases are agreed (`<epic-page stage="phases">`, epic `epic-engine` P29), an open phase's are
  *     Looks good and Defer instead (`buttons="proposal"`;  Owen, 2026-10-24);  the usual ones once building starts
  *   - while Claude's build plan for it waits (`plan="waiting"`, P33):  Accept plan and Revisit (`buttons="plan"`)
- *   - still to do, its plan accepted (`plan="accepted"`, I140):  Make Todo, Revisit and a green check, a state saying
+ *   - still to do, its plan accepted (`plan="accepted"`, I140):  Do this, Revisit and a green thumbs up, a state saying
  *     it's good to go (`buttons="accepted"`;  Owen, 2026-10-26:  "so I can see they are good to go")
  * - Its GEAR (epic `epic-engine` I166;  `EpicFold.renderGear()`), last on its title row, with an `id`:
  *   "Show this phase's files" and "Show this phase's checks", ticked while it shows them
  *   - its own choice (`PhaseFields.setOwn()`), which wins over the Phases section's gear for it:  its fields' custom
  *     properties set on its own box (`foldStyle()`), over the ones they'd inherit from the section
  *   - a list of entries:  more settings for one phase come as more entries
- * - Its GIT icon (epic `epic-engine` P53, J163), before its gear, while it lists commits (`commits`, or
- *   `<epic-commit>` children):  shows or hides its own commits, as an item's does;  pressed while they show
- *   - the page-wide git toggle went (the Log lists every commit, P52), so this is how a phase's own show
+ * - Its commits (`commits`, or `<epic-commit>` children):  "Show this phase's commits" in its gear, ticked while they
+ *   show (a git icon on its row from P53's J163 until I183;  Owen, 2026-10-29:  "Shouldn't have 'show git' icon
+ *   anymore");  the Log lists every commit (P52)
  * - SIDE EFFECT:  follows the review inbox while connected.
  ****************/
 export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
@@ -103,13 +104,10 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
   /** Its view of the review inbox, keyed by its id (`p-epic-migrate`):  is the page reviewed?  Has it a marked note? */
   readonly reviewState = new ReviewState(() => this.id)
 
-  /** Its own commits show (its git icon pressed):  `--epic-commits-display` on its box (`foldStyle()`). */
+  /** Its own commits show (its gear's entry ticked):  `--epic-commits-display` on its box (`foldStyle()`). */
   @E.cssState("commits")
   @E.state
   accessor showCommits = false
-
-  /** The git icon's glyph. */
-  readonly gitGlyph = new E.IconGlyph({ owner: this, name: () => "git" })
 
   /** Does it list commits:  `commits` (its part's, before it loads), or `<epic-commit>` children?  Read live. */
   get hasCommits(): boolean {
@@ -250,10 +248,10 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
   }
 
   /** Which review controls it draws, by where it stands (`<epic-review buttons>`). */
-  get reviewKind(): "proposal" | "plan" | "accepted" | "part" {
+  get reviewKind(): "proposal" | "plan" | "accepted" | "phase" {
     if (this.isProposed) return "proposal"
     if (this.isPlanWaiting) return "plan"
-    return this.isPlanAccepted ? "accepted" : "part"
+    return this.isPlanAccepted ? "accepted" : "phase"
   }
 
   /**
@@ -343,7 +341,6 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
             )}
           </Show>
           {this.reviewButtons()}
-          <Show when={this.hasCommits}>{this.gitButton()}</Show>
           <Show when={this.id}>{(id) => this.gear(id())}</Show>
         </>
       ),
@@ -364,42 +361,33 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
   // ## Its gear (I166)
   ////////////////
 
-  /** Its gear:  "Show this phase's files" and "... checks", ticked while it shows them. */
+  /**
+   * Its gear:  "Show this phase's files" and "... checks", ticked while it shows them;  and "Show this phase's commits"
+   * while it has any (its git icon until I183;  Owen, 2026-10-29:  "Shouldn't have 'show git' icon anymore").
+   */
   private gear(id: string): JSX.Element {
     return this.renderGear({
       title: () => this.translationForKey("gearTip"),
-      entries: () =>
-        PHASE_FIELDS.map((it) => ({
+      entries: () => [
+        ...PHASE_FIELDS.map((it) => ({
           value: it.field,
           text: this.translationForKey(it.one),
           isOn: phaseFields.shows(id, it.field)
         })),
-      pick: (field) => phaseFields.setOwn(id, field as PhaseFieldName, !phaseFields.shows(id, field as PhaseFieldName))
+        ...(this.hasCommits
+          ? [{ value: COMMITS_ENTRY, text: this.translationForKey("showCommits"), isOn: this.showCommits }]
+          : [])
+      ],
+      pick: (value) => {
+        if (value === COMMITS_ENTRY) this.flipCommits()
+        else phaseFields.setOwn(id, value as PhaseFieldName, !phaseFields.shows(id, value as PhaseFieldName))
+      }
     })
   }
 
-  /** The git icon:  shows or hides its own commits;  pressed while they show. */
-  private gitButton(): JSX.Element {
-    const words = () => this.translationForKey(this.showCommits ? "hideCommits" : "showCommits")
-    return (
-      <button
-        type="button"
-        class={GIT}
-        part={this.partForName("git")}
-        aria-pressed={this.showCommits ? "true" : "false"}
-        aria-label={words()}
-        title={words()}
-        onClick={(event) => this.flipCommits(event)}
-      >
-        {this.gitGlyph.svg}
-      </button>
-    )
-  }
-
-  /** The git icon, clicked:  its commits shown (it opens, loading its part) or hidden again;  the row doesn't fold. */
+  /** Its commits shown (it opens, loading its part) or hidden again, from its gear. */
   @E.untracked
-  private flipCommits(event: MouseEvent) {
-    event.stopPropagation()
+  private flipCommits() {
     const on = !this.showCommits
     this.showCommits = on
     if (on) this.expand()
@@ -407,7 +395,7 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
 
   /**
    * Its own choice of fields (`PhaseFields.ownOf()`):  each field's custom property, `block` or `none`, on its own box;
-   * a field it hasn't chosen inherits the Phases section's.  Its commits, while its git icon is pressed.
+   * a field it hasn't chosen inherits the Phases section's.  Its commits, while its gear shows them.
    */
   protected foldStyle(): Record<string, string> | undefined {
     const style: Record<string, string> = this.showCommits ? { [COMMITS_PROPERTY]: "block" } : {}
@@ -487,7 +475,7 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
   // ## Review
   ////////////////
 
-  /** The review buttons at the title's end:  Make Todo, Revisit;  proposed, Looks good and Defer. */
+  /** The review buttons at the title's end:  Do this, Revisit;  proposed, Looks good and Defer. */
   private reviewButtons(): JSX.Element {
     return <Show when={this.reviewState.reviewing()}>{this.reviewControl("buttons", "review-buttons")}</Show>
   }
@@ -553,8 +541,8 @@ const STATUS_TEXTS = {
   done: "statusDone"
 } as const satisfies Record<PhaseStatus, string>
 
-/** Class of its git icon (J163). */
-const GIT = "git"
+/** Its gear's entry for its commits. */
+const COMMITS_ENTRY = "commits"
 
 /** Class of its time pill (the estimate, or what it took), before its review controls. */
 const ESTIMATE = "estimate"

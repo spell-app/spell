@@ -55,18 +55,18 @@ They're two groups in Spell's own space:
 Every example but Counter has a guide that takes it apart:  [guides](#guides--programs-that-read-as-prose), below.
 Counter has a notebook instead, `@spell/notebooks/Counter`, which imports its counter and tries it out.
 Every Spell UI component page is a notebook project too, `@spell/notebooks/Button` and the rest:
-a notebook per tab, linked by the page's tab bar, written from the page by `spell app notebook convert`.
+a notebook per tab, linked by the page's tab bar, converted from the page once, and edited by hand since.
 
 ### Opening one
 
 With Spell set up ([setup from zero](https://github.com/spell-app/spell/blob/main/README.md#setup-from-zero)) and `spell` on your PATH
-([setting it up](https://github.com/spell-app/spell/blob/main/README-cli.md#setting-it-up)), one command opens the editor on an example:
+([setting it up](https://github.com/spell-app/spell/blob/main/README/cli.md#setting-it-up)), one command opens the editor on an example:
 
 ```sh
 spell app serve @spell/examples/calculator
 ```
 
-- It opens your browser on the example, until Ctrl-C ([its options](https://github.com/spell-app/spell/blob/main/README-cli.md#spell-app)).
+- It opens your browser on the example, until Ctrl-C ([its options](https://github.com/spell-app/spell/blob/main/README/cli.md#spell-app)).
 - In the editor, **Home** (the house icon in the top bar) lists every project, these among them.
 - `/run/` in place of `/edit/` shows the app alone, full size, with its console
   ([the editor's routes](README-app.md#the-editor--one-object-behind-every-pane)).
@@ -79,16 +79,17 @@ spell app serve @spell/examples/calculator
 
 The table and its pictures come from the example projects, so a new example shows up by running one command.
 Everything else on this page is written by hand.
+A new example is tested as soon as its folder is there:  no list to add it to.
 
 1. Make the project in `spaces/@spell/examples/<name>/`:  a `__project.json5` and its `.spell` or `.spellml` files.
    `spell app create <name> --in spaces/@spell/examples` writes a first one.
 2. Give its project file a `"description"`:  one line of what it shows.
    - Without one, the table takes the first comment of its first Spell file.
    - A `"title"` names it, when its folder's name can't (`ListaDeTareas` is "Lista de tareas").
-3. Add its name to the learning order at the top of [the script](scripts/examples-readme.ts), where it fits;
-   one not listed comes after the listed ones, by name.
-4. Start the editor, `yarn start` in spell-app, and leave it running.
-5. In spell-app's folder, `yarn examples:readme`:
+   - Its place in the table:  the learning order at the top of [the script](scripts/examples-readme.ts);
+     one not listed there comes after the listed ones, by name.
+3. Start the editor, `yarn start` in spell-app, and leave it running.
+4. In spell-app's folder, `yarn examples:readme`:
    it opens each example in the editor, headless, in a window 1280 by 800,
    gives it 5 seconds after the page goes quiet to compile, run and draw,
    saves a picture of it into [the pictures folder](docs/images/examples/),
@@ -100,6 +101,10 @@ Everything else on this page is written by hand.
    ...
    README-examples.md:  7 projects
    ```
+
+5. `spell content check --bless`, then read the diff:
+   it writes the new example's snapshots (its compiled output, and what it prints on every target)
+   and runs every other check of the examples, notebooks and Spell guides, this page's table among them.
 
 - `yarn examples:readme --no-pictures` rewrites only the table, without a browser;
   `yarn examples:readme calculator` takes only that example's picture.
@@ -763,7 +768,7 @@ even `spell format` leaves the test projects alone.
 - [Spaces](README-spaces.md):  addresses, your own space, and importing a library into a project
 - [The language, sentence by sentence](https://github.com/spell-app/spell/blob/main/parser/README-spell.md):  every kind of sentence these examples use,
   and how the frozen test projects are checked
-- [spell-app's commands](https://github.com/spell-app/spell/blob/main/README-cli.md#spell-app):  `spell app create`, `spell app serve` and `spell projects`,
+- [spell-app's commands](https://github.com/spell-app/spell/blob/main/README/cli.md#spell-app):  `spell app create`, `spell app serve` and `spell projects`,
   in full
 - [Spell UI's components](https://github.com/spell-app/spell/blob/main/ui/README-components.md):
   the `<ui-*>` elements Task List and Solitaire draw with

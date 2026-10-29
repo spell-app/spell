@@ -1,27 +1,31 @@
 ---
 name: comment
-description: Let Owen review files by commenting inline, in the editor tab Claude Code's plan mode opens for a plan -- one file per round:  Claude copies the file into the plan, Owen comments or approves, Claude applies the comments and shows it again until he approves, then writes it back.  Use for `/comment <file> [<file> ...]` (globs OK), or when Owen says "let me comment on <file>", "show me <file> so I can comment", "review these in the plan tab".
+description: Let the person review files by commenting inline, in the editor tab Claude Code's plan mode opens for a plan -- one file per round:  Claude copies the file into the plan, the person comments or approves, Claude applies the comments and shows it again until they approve, then writes it back.  Use for `/comment <file> [<file> ...]` (globs OK), or when the person says "let me comment on <file>", "show me <file> so I can comment", "review these in the plan tab".
 argument-hint: "<file> [<file> ...]"
 ---
 
 # /comment
 
+In Codex:  Claude Code only (its plan mode's comment tab);
+in Codex, show the file and take the person's notes in the chat,
+or open it as a guide with comments (`epic pages link <page> --show`).
+
 Review any file through PLAN MODE's comment tab.
 - The plan Claude asks to approve opens in an editor tab,
-  where Owen comments inline before approving or sending feedback.
+  where the person comments inline before approving or sending feedback.
 - That tab only ever shows the harness's ONE plan file, so each file gets its own ROUND:
-  its text goes into the plan file, Owen comments, Claude revises the copy, until he approves.
+  its text goes into the plan file, the person comments, Claude revises the copy, until they approve.
 
-- Why plan mode:  it's the only place Owen can leave comments ON the text, line by line, without editing the file.
+- Why plan mode:  it's the only place the person can leave comments ON the text, line by line, without editing the file.
 - The plan file is a COPY.
-  The real file changes only once Owen approves its round (step 5).
+  The real file changes only once the person approves its round (step 5).
 
 ## Steps
 
 1. Files:  `$ARGUMENTS`, in order;  expand globs;  each path relative to the repo root (or absolute).
    - None:  ask which, in AskUserQuestion.
    - Say the round count in one line ("10 files, one round each").
-2. `EnterPlanMode` (Owen approves entering).
+2. `EnterPlanMode` (the person approves entering).
    The harness names the plan file:  every round writes THAT file.
    - Already in plan mode:  carry on with it.
 3. Write the plan file for this file (Write tool, whole file):
@@ -54,14 +58,14 @@ Review any file through PLAN MODE's comment tab.
      - the repo's own (a house-style file ...):  the check its docs name
 6. Next file:  step 2.
    - After the last:  one line per file ("`<path>`:  N rounds, M comments applied", or "approved as is").
-   - Stage the changes;  commit only when Owen says.
+   - Stage the changes;  commit only when the person says.
 
 ## Notes
 
 - An epic running:
   - log each file's round count in its epic page (`epic log <name> "..."`)
   - a comment that changes a decision becomes a question born answered (`epic add <name>#D "..."`)
-- NEVER apply Owen's comments to the real file while still in plan mode (it can't be edited there).
+- NEVER apply the person's comments to the real file while still in plan mode (it can't be edited there).
   And never skip write-back:  the plan file is overwritten by the next round.
-- Comments arrive as quoted lines + Owen's text, or as general feedback:  map each to the line it quotes.
+- Comments arrive as quoted lines + the person's text, or as general feedback:  map each to the line it quotes.
   Unsure which line:  ask in the next round's header;  don't guess.

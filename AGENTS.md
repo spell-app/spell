@@ -23,6 +23,9 @@ ONE repo, its own `src/` and its folders `parser/`, `ui/`, `epic/` and `app/` (e
 READ [the commands guide](spell.epics/guides/dev/commands/commands.md) FIRST,**
 and suggest where it belongs before building it (below, "Commands").
 
+**Working an epic without Claude Code's skills (Codex, or any other agent):  run `epic guide`, and follow it;**
+end every turn with `epic turn end` ([the epic folder's AGENTS.md](epic/AGENTS.md);  epic `epic-friend` P11).
+
 ## The kit
 
 - ONE git repo since epic `repo-split` P20.  It holds:
@@ -142,7 +145,7 @@ yarn kit:review       # the finishing pass:  ts, lint:fix, format, test
 - The kit's other scripts:  `yarn server` (`spell server`:  the page server), `yarn favicon` (server's icons),
   `yarn cli:install` (puts `spell` on your `PATH`).
 - The `spell` command:  the kit's `src/cli/` (its [AGENTS.md](src/cli/AGENTS.md)), run by [its bin](bin/spell.mjs);
-  every command, every repo's:  [README-cli.md](README-cli.md).
+  every command, every repo's:  [README/cli.md](README/cli.md).
   - Every big folder adds its own commands to it, named in its `package.json`'s `"spell": { "commands" }`;
     `spell help` lists them, grouped by folder.
   - A word two folders both want goes under each one's short name (`spell parser check`, `spell app check`).
@@ -155,13 +158,15 @@ yarn kit:review       # the finishing pass:  ts, lint:fix, format, test
     plugin `epic` (`/plugin install epic@spell`), its source `./epic` until `spell publish` turns it to `spell-epic`.
     Owen's machine loads the plugin in place, from the kit's `epic/`:  `epic plugin install` sets it up
     (epic `epic-engine`'s P49).
-- The READMEs (the root's and every big folder's `README.md` and `README-*.md`):
+- The READMEs (every big folder's `README.md` and `README-*.md`;  the kit's `README.md`, `README-epics.md`,
+  `README-vscode.md`, and its topic pages in `README/`, `README/cli.md` ...;  epic `epic-friend` P8):
+  - `yarn readme:check` fails any other topic page left at the kit's root (its `root-page` rule)
   - `yarn readme:check` (`spell readme check`) checks them
   - `yarn readme:test` (`spell readme test [page...]`) runs every example they print with an Output fold, and
     compares what it prints (epic `readme` P16;  WWOD §6)
   - `yarn readme:pictures` (`spell readme pictures [page...]`) draws each `html example` block they show, light and
     dark, into a picture under it;  the check fails a stale one (epic `ui-gaps` P14, from epic `epic-engine` Q28)
-  - `yarn mermaid:pretty` styles their Mermaid pictures ([README-toolchain.md](README-toolchain.md))
+  - `yarn mermaid:pretty` styles their Mermaid pictures ([README/toolchain.md](README/toolchain.md))
 - Three ways to make the repo do something:  the `spell` CLI, Claude skills, yarn scripts.
   - Their map, one row per operation:  [the commands page](spell.epics/guides/dev/commands/commands.html).
     - Its data:  `commands.json5` beside it.
@@ -595,6 +600,8 @@ Lowest first, each using only the ones above it in this table (the lint's `spell
 
 - The shared repo is committed by itself after every Claude turn.
   - The `Stop` hook, [shared-commit.mjs](epic/hooks/shared-commit.mjs), runs `epic shared commit`.
+  - A repo whose `.epic/config.json5` names `contentRemote` also syncs it then, pulling and pushing (epic `epic-friend`
+    P5):  the kit's names `spell-app/spell-app.epics` (J18), so `spell.epics` is pulled and pushed every turn too.
   - Nobody commits those files by hand.
 - One commit per place the files live:
   - `auto: epic <name>`

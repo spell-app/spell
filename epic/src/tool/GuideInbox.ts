@@ -1,8 +1,11 @@
 import { SRV } from "spell/server"
 
+import { ThreadFacts } from "spell/epic/comments"
+import { EpicHome } from "spell/epic/config/EpicHome"
 import { DataFile } from "spell/epic/data/DataFile"
 
 import { CommentList, CommentsError, type Comment, type IdentifiedComment } from "./CommentList"
+import { SharedComments } from "./SharedComments"
 
 /** The inbox file's shape version. */
 const INBOX_VERSION = 1
@@ -14,6 +17,10 @@ const INBOX_VERSION = 1
  * page's INBOX FILE.
  * - the file:  `<page>.inbox.json5` beside `<page>.html` (`fileFor()`);  absent until the first comment, deleted
  *   once the last is deleted;  git-ignored in the shared repo, as the epics' review inboxes
+ *   - its COMMENTS shared through the content repo (epic `epic-friend` P9):  one file per person beside it,
+ *     `<page>.comments.<person>.json5` (`SharedComments`);  the inbox file keeps only this machine's Send
+ *     (`sent`, `handedOver`).  One from before P9 still holds its comments:  read as this machine's, moved by the next
+ *     write
  *   - JSON5, saved keeping any comment added by hand (`DataFile`, epic `epic-workflow` P21);  its old name,
  *     `<page>.inbox.json5`, is read while there's no `.json5`, and removed by the next write
  * - its comments, and every change to them:  `CommentList`, the shape an epic page's review inbox holds its comments in
@@ -35,7 +42,10 @@ export class GuideInbox {
   /** the file's shape version */
   version = INBOX_VERSION
 
-  /** every comment, by id (`c1` ...;  `m1` or `cm1` in an older file;  shown `C1`:  `CommentList.label()`), in the order written */
+  /**
+   * every person's comments, by id (`c1` ...;  `m1` or `cm1` in an older file;  shown `C1`:  `CommentList.label()`), in
+   * the order written;  kept in their comments files, never the inbox file (`SharedComments`)
+   */
   comments: Record<string, Comment> = {}
 
   /** ISO time of Owen's last Send on the page, else `null` */
@@ -50,9 +60,13 @@ export class GuideInbox {
     CommentList.migrate(this.comments)
   }
 
-  /** The comments, to read or change (in place). */
+  /**
+   * The comments, to read or change (in place).
+   * - what's written through it names this machine's person (`EpicHome.personName()`, read when something's written),
+   *   and an answer the agent running `epic` (`EpicHome.agentName()`, epic `epic-friend` P10)
+   */
   get commentList(): CommentList {
-    return new CommentList(this.comments)
+    return new CommentList(this.comments, { person: () => EpicHome.personName(), agent: () => EpicHome.agentName() })
   }
 
   ////////////////
@@ -91,7 +105,7 @@ export class GuideInbox {
   takeSent(): GuideSend | null {
     if (!this.hasNewSend) return null
     const before = this.handedOver ? Date.parse(this.handedOver) : -Infinity
-    const comments = this.sentComments.filter((comment) => Date.parse(CommentList.lastWordsAt(comment)) > before)
+    const comments = this.sentComments.filter((comment) => Date.parse(ThreadFacts.lastWordsAt(comment)) > before)
     this.handedOver = this.sent
     return comments.length ? { at: this.sent!, comments } : null
   }
@@ -112,22 +126,33 @@ export class GuideInbox {
    */
   static read(file: string): GuideInbox {
     let raw: Partial<GuideInbox> | undefined
+    let shared: SharedComments
     try {
       raw = DataFile.read<Partial<GuideInbox>>(file)
     } catch (error) {
       throw new CommentsError(`${file} is not JSON5:  ${(error as Error).message}`, { cause: { status: 500 } })
     }
-    if (!raw) return new GuideInbox()
-    return new GuideInbox({
-      version: raw.version ?? INBOX_VERSION,
-      comments: raw.comments ?? {},
-      sent: raw.sent ?? null,
-      handedOver: raw.handedOver ?? null
+    try {
+      shared = SharedComments.read(file)
+    } catch (error) {
+      throw new CommentsError((error as Error).message, { cause: { status: 500 } })
+    }
+    const inbox = new GuideInbox({
+      version: raw?.version ?? INBOX_VERSION,
+      comments: shared.merged(raw?.comments ?? {}),
+      sent: raw?.sent ?? null,
+      handedOver: raw?.handedOver ?? null
     })
+    Object.defineProperty(inbox, "shared", { value: shared, enumerable: false, writable: true })
+    return inbox
   }
 
+  /** This inbox's comments files, as `read()` found them (`SharedComments`):  not a field of the file. */
+  declare private shared: SharedComments | undefined
+
   /**
-   * Write this inbox to `file`, atomically;  delete the file instead when it holds no comment.
+   * Write this inbox to `file`, atomically;  delete the file instead when no person's file holds a comment.
+   * - its comments into this machine's person's comments file instead (`SharedComments`, epic `epic-friend` P9)
    * - `sent` and `handedOver` alone don't count:  they only date comments, and there are none
    * - a temp file renamed over it:  a reader (the page, `epic comments`) never sees half of it
    * - a comment added to the file by hand stays (`DataFile.write()`);  its old `.json` goes
@@ -135,8 +160,10 @@ export class GuideInbox {
    * - SIDE EFFECT:  writes or removes `file`
    */
   writeTo(file: string): void {
+    const shared = this.shared?.inbox === file ? this.shared : SharedComments.read(file)
+    shared.write(this.comments, EpicHome.personName())
     if (!Object.keys(this.comments).length) return DataFile.remove(file)
-    DataFile.write(file, this)
+    DataFile.write(file, { version: this.version, sent: this.sent, handedOver: this.handedOver })
   }
 
   /**

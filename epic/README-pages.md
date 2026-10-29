@@ -20,12 +20,13 @@ built are ONE page, and the agent keeps it true as it works.
 You review on the page, item by item, when you have time;  the answers come back INTO the items, not into a chat.
 
 - The page is plain HTML in the content folder, a git repo of its own beside the code
-  ([README-adopting.md](README-adopting.md) says what it holds).
+  ([README-epics.md](https://github.com/spell-app/spell/blob/main/README-epics.md#the-content-folder--your-plans-in-a-repo-of-their-own) says what it holds).
   The page server serves it live:  an edit the agent makes shows in place,
   and your scroll, your folds and your half-typed notes stay where they were.
 - You read it in VS Code's side bar, the Review tab ([README-vscode.md](README-vscode.md)), or in any browser.
-- **Claude Code only, today:**  any browser draws the page, but the session that takes your marks is a Claude Code
-  session, running `spell-epic`'s skills ([README-skills.md](README-skills.md)).
+- **Claude Code first:**  any browser draws the page, and the session that takes your marks is a Claude Code
+  session running `spell-epic`'s skills ([README-skills.md](README-skills.md)), or a Codex one running the same skills,
+  which hears your Send only while it waits (`epic inbox wait`):  Send wakes only Claude Code.
 - The rules the agent follows when it writes one:  [the epic-page writing rules](templates/epics/plan-doc.md).
 
 ## Your first review, in four moves
@@ -581,7 +582,7 @@ _A page loads two scripts:  Spell UI's docs bundle, then the pack, which borrows
 ### Working on the elements
 
 The elements are written exactly like Spell UI's own families,
-on [the kit's element framework](https://github.com/spell-app/spell/blob/main/README-element.md) and Spell UI's core.
+on [the kit's element framework](https://github.com/spell-app/spell/blob/main/README/element.md) and Spell UI's core.
 
 If you find yourself writing a second copy of any of these, stop and reuse:
 
@@ -634,7 +635,7 @@ Adding a new element:
 - [README-skills.md](README-skills.md):  `/epic review`, `/details` and the other skills that open these pages
 - [README-cli.md](README-cli.md):  `epic inbox`, `epic test` and every other verb that writes a page
 - [README-vscode.md](README-vscode.md):  the Review tab the pages show in, and how a session reaches its window
-- [The kit's README-element.md](https://github.com/spell-app/spell/blob/main/README-element.md):  how packs and elements work, before you write an `epic-*` one
+- [The kit's README/element.md](https://github.com/spell-app/spell/blob/main/README/element.md):  how packs and elements work, before you write an `epic-*` one
 
 <details>
 <summary>More in the docs site</summary>

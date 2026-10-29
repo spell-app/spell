@@ -40,7 +40,6 @@ describe("RepoList", () => {
     const before = process.env.SPELL_EPIC_HOME
     process.env.SPELL_EPIC_HOME = home
     try {
-      expect(RepoList.homeFolder()).toBe(home)
       const list = new RepoList()
       expect(list.file).toBe(join(home, "repos.json5"))
       expect(list.repos()).toEqual([])

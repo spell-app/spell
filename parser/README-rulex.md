@@ -494,5 +494,5 @@ These guides need a checkout with the content folder beside it, and the page ser
 - [README-parser](README-parser.md):  the rule classes Rulex builds, and how to make them by hand
 - [README-markdown](README-markdown.md):  a second language's lines in Rulex, and the parts written in code
 - [README-spell](README-spell.md):  Spell's twenty rule modules, and the aliases a program declares
-- [The command line](https://github.com/spell-app/spell/blob/main/README-cli.md#spell-parser):  `spell parse`, `spell explain` and the other language commands
+- [The command line](https://github.com/spell-app/spell/blob/main/README/cli.md#spell-parser):  `spell parse`, `spell explain` and the other language commands
 - [spell-parser's front page](README.md):  where Rulex sits in the pipeline, from a line of English to running code

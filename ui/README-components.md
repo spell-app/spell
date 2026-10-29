@@ -415,7 +415,7 @@ Seven steps, run from `spell/ui/`;  four of them have a test that fails until th
 <summary>How an element is written, in more depth</summary>
 
 - The two objects behind every tag (the DOM element and the component), the decorators and the lifecycle:
-  the kit's element framework, [README-element.md](https://github.com/spell-app/spell/blob/main/README-element.md).
+  the kit's element framework, [README/element.md](https://github.com/spell-app/spell/blob/main/README/element.md).
 - What's under every element (the shared runtime, vocabularies, icons, styles):  [README-runtime.md](README-runtime.md).
 - The rules for writing one (house style, imports, the lint guard):
   [AGENTS.md](AGENTS.md), "A family's files" and "Solid authoring".

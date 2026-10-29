@@ -5,7 +5,9 @@
 //   tooling) are what read it here.
 // - Folders are relative to the MAIN checkout of this repo:  `~/www/spell`.
 // - Written in P7 for P9:  the folders are this layout's;  the keys marked GUESS are P9's to settle.
-// - A key left out takes its default (`EpicConfig.DEFAULTS`);  `epic config [key]` prints what's in force.
+// - A key left out reads as `epic init` would write it for this repo (`EpicConfig.defaultsFor()`, epic `epic-friend`
+//   P6), never another repo's:  so every value Spell's layout needs is spelled out below.
+//   `epic config [key]` prints what's in force.
 {
   // No "repos":  ONE repo since epic `repo-split` P20, so an epic's worktree is ONE worktree of `spell` (spell-epic's
   // single-repo mode).  Until then it named `repos.json5`, the child repos, each with a worktree inside the kit's.
@@ -33,6 +35,10 @@
   // - In this repo, git-ignored (epic `repo-split` J5):  `~/www/spell/spell.epics`, a folder of its own in the main
   //   checkout, a link to it in an epic's worktree.
   "contentFolder": "spell.epics",
+
+  // Its shared copy on GitHub:  every turn's commit pulls from it and pushes to it (epic `epic-friend` P5;  Owen's
+  // "do it", J18, 2026-10-29).  NEVER public:  it holds every epic page, guide and comment.
+  "contentRemote": "https://github.com/spell-app/spell-app.epics.git",
 
   // The branch worktrees start from and merge into.
   "baseBranch": "main",

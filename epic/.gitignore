@@ -8,6 +8,8 @@ __screenshots__/
 
 # Epic UI's waiting comments (`<page>.inbox.json5` beside a page, and its lock):  per machine, never the record
 /src/docs/**/*.inbox.json*
+# and their comments files (`<page>.comments.<person>.json5`, epic epic-friend P9):  shared only in the content repo
+/src/docs/**/*.comments.*.json5
 
 # a checkout's running agents when it has no epic (`epic agents`)
 /.spell-agents.json5

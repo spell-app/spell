@@ -45,7 +45,7 @@ async function gearOf(host: Element): Promise<E.DOMElement> {
 function gearEntries(gear: Element): string[] {
   return Array.from(
     gear.querySelectorAll("ui-item"),
-    (item) => `${item.textContent!.trim()}:  ${item.getAttribute("icon") === "square check" ? "on" : "off"}`
+    (item) => `${item.textContent!.trim()}:  ${item.getAttribute("icon") === "check" ? "on" : "off"}`
   )
 }
 
@@ -214,10 +214,30 @@ describe("<epic-section>", () => {
     expect(gear.title).toBe("Settings for every phase")
     expect(gear.closest('[part~="tools"]')!.lastElementChild).toBe(gear)
     expect(gearEntries(gear)).toEqual(["Show each phase's files:  off", "Show each phase's checks:  off"])
+    // nothing ticked:  the check's column still kept (Owen, 2026-10-29:  "Menu should have space in the left where the
+    // check should go, even if nothing checked")
+    gear.shadowRoot!.querySelector<HTMLElement>('[part~="trigger"]')!.click()
+    await ElementFixture.tick()
+    const firstRow = gear.shadowRoot!.querySelector<HTMLElement>('[part~="item"]')!
+    const indent = firstRow.querySelector(".text")!.getBoundingClientRect().left - firstRow.getBoundingClientRect().left
+    expect(indent).toBeGreaterThan(30)
+    gear.shadowRoot!.querySelector<HTMLElement>('[part~="trigger"]')!.click()
+    await ElementFixture.tick()
     expect(base.style.getPropertyValue("--epic-files-display")).toBe("")
     await pickGear(gear, "Show each phase's files")
     expect(base.style.getPropertyValue("--epic-files-display")).toBe("block")
     expect(gearEntries(gear)).toEqual(["Show each phase's files:  on", "Show each phase's checks:  off"])
+    // a check when on, blank when off, the words lined up (Owen, 2026-10-29:  "Should be blank when off, checkmark
+    // when on")
+    gear.shadowRoot!.querySelector<HTMLElement>('[part~="trigger"]')!.click()
+    await ElementFixture.tick()
+    const rows = Array.from(gear.shadowRoot!.querySelectorAll<HTMLElement>('[part~="item"]'))
+    await vi.waitFor(() => expect(rows[0]!.querySelector(".icon svg")).not.toBeNull())
+    expect(rows[1]!.querySelector(".icon")).toBeNull()
+    const lefts = rows.map((row) => Math.round(row.querySelector(".text")!.getBoundingClientRect().left))
+    expect(lefts[0]).toBe(lefts[1])
+    gear.shadowRoot!.querySelector<HTMLElement>('[part~="trigger"]')!.click()
+    await ElementFixture.tick()
     // the toggles' old key:  a choice made with them holds
     expect(JSON.parse(localStorage.getItem(`epic-phase-fields:${location.pathname}`)!)).toEqual({ files: true })
     // picked again (the dropdown keeps no value):  off
@@ -706,7 +726,8 @@ describe("<epic-section kind=phases> state chips", () => {
     const colorOf = (state: string) => getComputedStyle(chip(host, state)).borderTopColor
     expect(getComputedStyle(circle("p6")).color).toBe(colorOf("attention"))
     expect(getComputedStyle(circle("p9")).color).toBe(colorOf("updated"))
-    expect(getComputedStyle(circle("p12")).color).toBe(colorOf("scheduled"))
+    // the scheduled chip is filled, its dots lighter:  the circle wears its fill
+    expect(getComputedStyle(circle("p12")).color).toBe(getComputedStyle(chip(host, "scheduled")).backgroundColor)
     expect(getComputedStyle(circle("p1")).color).toBe(colorOf("recent"))
     expect(getComputedStyle(circle("p2")).color).toBe(colorOf("old"))
     // scheduled:  a dotted circle, as its chip's outline

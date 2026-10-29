@@ -10,7 +10,7 @@ The coherence agent reads it too, for every sweep and plan review (epic `coheren
   - **Copies:**  the copies known today, still to move onto it
     - `--`:  none known yet.  A flag finds more than its copies:  the first sweep reads what each one finds.
   - **Score:**  the search `spell coherence score` counts copies by, exact where the **Flag:** is broad
-    (epic `coherence` P15;  [README-cli.md](../../README-cli.md), "Scoring coherence"):
+    (epic `coherence` P15;  [README/cli.md](../../README/cli.md), "Scoring coherence"):
 
     ```text
     - **Score:**  `<regex>` · in `<path>` · home `<path>`, `<path>` · not `<path>`, `<path>`
@@ -24,7 +24,7 @@ The coherence agent reads it too, for every sweep and plan review (epic `coheren
     - each one is checked by reading its hits once:  it finds copies only.  No **Score:**, no count:  "Logging"
       has none (`console.log()` is noise for a score), nor an entry without a **Flag:**
 - Ask the code map for more than this list holds:  `spell map uses <name>`, `spell map explain <name>`
-  ([README-cli.md](../../README-cli.md), "Asking the map").
+  ([README/cli.md](../../README/cli.md), "Asking the map").
 - A mechanism that doesn't exist YET, but should (several copies, no shared one):  under "Wanted", with its copies.
 - Grown by each sweep, and by Owen's verdicts on its findings.
   - Sweep 1 (2026-10-25):  its five reports, with every place, are in the coherence epic's folder of the shared

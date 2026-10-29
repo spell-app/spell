@@ -96,12 +96,23 @@
                 A re-fetch counted as "on its way" again, so an open item hid its details until the new part arrived.
               </p>
               <epic-reply from="Owen" at="2026-10-07 10:44" re="revisit soon"><p>fix it</p></epic-reply>
-              <epic-reply from="Claude" at="2026-10-07 10:56" re='"fix it"'
+              <epic-reply from="Owen" agent="claude" at="2026-10-07 10:56" re='"fix it"'
                 ><p>
                   Fixed at the source, <code>SourceBody</code> in Spell UI, so every element that loads a part gets it.
                 </p></epic-reply
               >
             </epic-item>
+            <p>
+              Any agent, in any person's session (epic <code>epic-friend</code> P10): Bob's Codex reads
+              <code>Codex (Bob)</code>, in the agent's colour. Ana has a colour of her own here, the theme token
+              <code>--epic-voice-person-ana</code> (a repo sets it with <code>colors</code> in its epic settings).
+            </p>
+            <div style="--epic-voice-person-ana: #2f9e6e">
+              <epic-reply from="Ana" at="2026-11-02 10:00" re="revisit soon"><p>Can it skip the empty ones?</p></epic-reply>
+              <epic-reply from="Bob" agent="codex" at="2026-11-02 10:12" re='"skip the empty ones"'
+                ><p>Done: an empty part is left out of the list.</p></epic-reply
+              >
+            </div>
           </ui-section>
 
           <ui-section id="2-markup" label="2. Markup" sticky="stack" collapsible dividing open="false">
@@ -190,7 +201,22 @@
                   <tr>
                     <td><code>from</code></td>
                     <td>text</td>
-                    <td>Who wrote it (<code>Claude</code>, <code>Owen</code>).</td>
+                    <td>
+                      Who wrote it, a person's name (<code>Ana</code>); on an agent's reply, whose session wrote it.
+                      Drawn <code>You</code> when it's the reader's own; before epic <code>epic-friend</code> P2,
+                      Claude's said <code>Claude</code>.
+                    </td>
+                    <td></td>
+                  </tr>
+                  <tr>
+                    <td><code>agent</code></td>
+                    <td>text</td>
+                    <td>
+                      The agent that wrote it (<code>claude</code>), else none: the person in <code>from</code> did.
+                      Drawn <code>Claude (Ana)</code>, or <code>Claude</code> for the reader's own session. An old
+                      reply without it is Claude's when <code>from</code> says <code>Claude</code>; the migration
+                      <code>agents-marked</code> adds it.
+                    </td>
                     <td></td>
                   </tr>
                   <tr>
@@ -340,8 +366,21 @@
             </p>
             <ul>
               <li>
-                Violet when <code>from="Claude"</code> (Claude's voice), ivory when <code>from="Owen"</code> (Owen's, as
-                his answer cards and note box).
+                WHO wrote it (epic <code>epic-friend</code> P2): a person's reply (no <code>agent</code>) says
+                <code>You</code> when it's yours (the name the page server gives the page), else their name, every
+                person's in the one person's look; an agent's (<code>agent="claude"</code>) says
+                <code>Claude (Ana)</code> for another person's session, plain <code>Claude</code> for your own or an
+                old one, in Claude's look. A round mark of the name's initial comes first.
+              </li>
+              <li>
+                Any agent by its name (epic <code>epic-friend</code> P10): <code>agent="codex"</code> says
+                <code>Codex (Bob)</code>, or <code>Codex</code>; one epic doesn't know, its id capitalised.
+              </li>
+              <li>
+                A colour of their own: a person or an agent the repo gives a colour (<code>colors</code> in its
+                epic settings) draws in it, through their own theme token (<code>--epic-voice-person-ana</code>,
+                <code>--epic-voice-agent-codex</code>); an agent's words take the agent's. Anyone else keeps the
+                shared voice.
               </li>
               <li>
                 The band: <code>Claude · re: as built (Doc Review)</code> on the left, free to wrap; the date (<code
@@ -380,8 +419,9 @@
               </li>
               <li>
                 <code>epic inbox done &lt;name&gt;</code> or <code>clear</code>, on a mark with a note: Owen's note
-                is kept as his own reply (<code>from="Owen"</code>, <code>re="revisit soon"</code> ...), placed before
-                Claude's answer to it
+                is kept as the person's own reply (<code>from="Ana"</code>, <code>re="revisit soon"</code> ...), placed
+                before Claude's answer to it;  an agent's own replies handed in are marked its on the way
+                (<code>from="Ana" agent="codex"</code>, the agent running the command:  <code>IncomingHtml</code>)
               </li>
               <li>older docs: the converter, from <code>div.plan-reply</code></li>
             </ul>

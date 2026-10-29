@@ -55,7 +55,7 @@ describe.skipIf(!SPELL_APP || !existsSync(resolve(EpicConfig.contentOf(SPELL_APP
       const { status, stdout } = epic(["--help"])
       expect(status).toBe(0)
       expect(stdout).toMatch(/^Usage: epic <verb> <epic>\[#<id>\] \[arguments\]\n/)
-      for (const heading of ["Requests from other sessions:", "Epic page:  items:", "Pages Owen answers on"])
+      for (const heading of ["Requests from other sessions:", "Epic page:  items:", "Pages you answer on"])
         expect(stdout).toContain(heading)
       expect(stdout).toMatch(/^ {2}update +set a phase's or an item's fields/m)
       expect(stdout).toMatch(/^ {2}seo#J3 +an item/m)

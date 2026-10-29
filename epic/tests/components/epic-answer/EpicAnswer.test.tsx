@@ -10,6 +10,18 @@ function part(element: Element, name: string): HTMLElement | null {
   return element.shadowRoot!.querySelector<HTMLElement>(`[part~='${name}']`)
 }
 
+/** The page server's word on who's reading (`window.SPELL_SERVER.person`):  set for `run`, then put back. */
+async function asViewer<T>(person: string, run: () => Promise<T>): Promise<T> {
+  const holder = globalThis as { SPELL_SERVER?: unknown }
+  const before = holder.SPELL_SERVER
+  holder.SPELL_SERVER = { person }
+  try {
+    return await run()
+  } finally {
+    holder.SPELL_SERVER = before
+  }
+}
+
 describe("<epic-answer>", () => {
   test("a card headed `Answer · <title>`, its body slotted;  passes axe", async () => {
     const host = await ElementFixture.render(`<epic-answer title="Named palette"><p>Why</p></epic-answer>`)
@@ -41,7 +53,7 @@ describe("<epic-answer>", () => {
 })
 
 describe("<epic-reply>", () => {
-  test("headed `<from> · re: <re>`, the date `10/6/26 23:55` at the right;  Owen's ivory (his voice, Q20), anyone else's violet;  both pass axe", async () => {
+  test("headed `<from> · re: <re>`, the date `10/6/26 23:55` at the right;  a person's in the person look (`person`), an agent's apart;  both pass axe", async () => {
     const claude = await ElementFixture.render(
       `<epic-reply from="Claude" at="2026-10-06 23:55" re="as built"><p>Done</p></epic-reply>`
     )
@@ -51,7 +63,7 @@ describe("<epic-reply>", () => {
       ["Owen", "10/6/26 10:42"]
     ])
     expect(part(claude, "date")!.getAttribute("datetime")).toBe("2026-10-06 23:55")
-    expect([part(claude, "base")!.className, part(owen, "base")!.className]).toEqual(["reply", "owen reply"])
+    expect([part(claude, "base")!.className, part(owen, "base")!.className]).toEqual(["reply", "person reply"])
     await expectAccessible(claude)
     await expectAccessible(owen)
   })
@@ -98,6 +110,117 @@ describe("<epic-reply>", () => {
       part(host, "date")!.textContent,
       part(host, "toggle")!.getAttribute("aria-expanded")
     ]).toEqual(["until-found", "Owen · re: revisit soon", "10/7/26 10:42", "false"])
+  })
+  test("WHO wrote it, to a reader named Ana:  her own `You`, Ben's `Ben`, her Claude `Claude`, Ben's `Claude (Ben)`, an old one `Claude`;  a person named Claude after the marker is a PERSON", async () => {
+    const replies = [
+      `<epic-reply from="Ana" at="2026-11-02 10:00"><p>a</p></epic-reply>`,
+      `<epic-reply from="Ben" at="2026-11-02 10:01"><p>b</p></epic-reply>`,
+      `<epic-reply from="Ana" agent="claude" at="2026-11-02 10:02"><p>c</p></epic-reply>`,
+      `<epic-reply from="Ben" agent="claude" at="2026-11-02 10:03"><p>d</p></epic-reply>`,
+      `<epic-reply from="Claude" at="2026-10-06 23:55"><p>e</p></epic-reply>`,
+      `<epic-reply from="Claude" at="2026-11-05 10:00"><p>f</p></epic-reply>`
+    ]
+    const drawn = await asViewer("Ana", async () => {
+      const hosts = []
+      for (const html of replies) hosts.push(await ElementFixture.render(html))
+      return hosts.map((host) => [
+        part(host, "who")!.textContent,
+        part(host, "who")!.dataset.initial,
+        part(host, "base")!.classList.contains("person")
+      ])
+    })
+    expect(drawn).toEqual([
+      ["You", "A", true],
+      ["Ben", "B", true],
+      ["Claude", "C", false],
+      ["Claude (Ben)", "C", false],
+      ["Claude", "C", false],
+      ["Claude", "C", true]
+    ])
+  })
+
+  test("any agent by its name (epic `epic-friend` P10):  Bob's Codex `Codex (Bob)`, Ana's own `Codex`, one `from` Codex itself `Codex`", async () => {
+    const replies = [
+      `<epic-reply from="Bob" agent="codex" at="2026-11-02 10:00"><p>a</p></epic-reply>`,
+      `<epic-reply from="Ana" agent="codex" at="2026-11-02 10:01"><p>b</p></epic-reply>`,
+      `<epic-reply from="Codex" agent="codex" at="2026-11-02 10:02"><p>c</p></epic-reply>`
+    ]
+    const drawn = await asViewer("Ana", async () => {
+      const hosts = []
+      for (const html of replies) hosts.push(await ElementFixture.render(html))
+      return hosts.map((host) => [part(host, "who")!.textContent, part(host, "who")!.dataset.initial])
+    })
+    expect(drawn).toEqual([
+      ["Codex (Bob)", "C"],
+      ["Codex", "C"],
+      ["Codex", "C"]
+    ])
+  })
+})
+
+describe("<epic-reply>'s voices (epic `epic-friend` T11)", () => {
+  /** The colour of a reply's round mark, before its name (`.who::before`). */
+  function markOf(reply: Element): string {
+    return getComputedStyle(part(reply, "who")!, "::before").backgroundColor
+  }
+
+  test("the theme's `--epic-voice-*` tokens colour them:  the agent's mark, the person's mark and card;  none set:  today's terracotta and violet", async () => {
+    const replies = `<epic-reply from="Claude" agent="claude"><p>Done</p></epic-reply><epic-reply from="Ana"><p>Why?</p></epic-reply>`
+    const plain = await ElementFixture.render(`<div>${replies}</div>`)
+    const [claude, ana] = Array.from(plain.children)
+    expect(markOf(claude)).toBe("rgb(201, 100, 66)")
+    expect(markOf(ana)).not.toBe(markOf(claude))
+
+    const themed = await ElementFixture.render(
+      `<div style="--epic-voice-agent: rgb(0, 128, 128); --epic-voice-person: rgb(10, 20, 30); --epic-voice-person-fill: rgb(1, 2, 3)">${replies}</div>`
+    )
+    const [agent, person] = Array.from(themed.children)
+    expect([markOf(agent), markOf(person), getComputedStyle(part(person, "base")!).backgroundColor]).toEqual([
+      "rgb(0, 128, 128)",
+      "rgb(10, 20, 30)",
+      "rgb(1, 2, 3)"
+    ])
+  })
+
+  test("a colour per person and per agent from the repo's settings (`SPELL_SERVER.colors`, epic `epic-friend` P10):  Ana's mark and card in hers, Codex's mark in its;  anyone else as before", async () => {
+    const replies =
+      `<epic-reply from="Ana"><p>Why?</p></epic-reply>` +
+      `<epic-reply from="Bob" agent="codex"><p>Done</p></epic-reply>` +
+      `<epic-reply from="Ben"><p>Hm</p></epic-reply>` +
+      `<epic-reply from="Ana" agent="claude"><p>So</p></epic-reply>`
+    // the shared person voice, as a reply with no colour of its own draws it
+    const shared = markOf(
+      (await ElementFixture.render(`<div><epic-reply from="Ben"><p>Hm</p></epic-reply></div>`)).children[0]!
+    )
+    const holder = globalThis as { SPELL_SERVER?: unknown }
+    const before = holder.SPELL_SERVER
+    holder.SPELL_SERVER = { colors: { people: { ana: "rgb(0, 128, 0)" }, agents: { codex: "rgb(0, 0, 255)" } } }
+    try {
+      const page = await ElementFixture.render(`<div>${replies}</div>`)
+      const [ana, codex, ben, claude] = Array.from(page.children)
+      expect([
+        markOf(ana),
+        getComputedStyle(part(ana, "base")!).backgroundColor,
+        markOf(codex),
+        markOf(ben),
+        markOf(claude)
+      ]).toEqual([
+        "rgb(0, 128, 0)",
+        expect.stringMatching(/^(oklab|color|rgb)/),
+        "rgb(0, 0, 255)",
+        shared,
+        "rgb(201, 100, 66)"
+      ])
+      // Ana's card fill mixed from her green, not the shared violet's
+      expect(getComputedStyle(part(ana, "base")!).backgroundColor).not.toBe(
+        getComputedStyle(part(ben, "base")!).backgroundColor
+      )
+      // a theme may still set the token over the settings' colour
+      ;(page as HTMLElement).style.setProperty("--epic-voice-agent-codex", "rgb(9, 9, 9)")
+      expect(markOf(codex)).toBe("rgb(9, 9, 9)")
+    } finally {
+      holder.SPELL_SERVER = before
+    }
   })
 })
 

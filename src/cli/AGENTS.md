@@ -14,21 +14,22 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     the kit's, then each folder of its `workspaces` whose `package.json` has a `"spell"` entry (`spellRepos()`).
   - Each big folder adds its own commands;  the kit adds a few of its own.
   - It was spell-app's `cli/` until epic `repo-split` P13 (decisions Q33, Q42).
-  - [README-cli.md](../../README-cli.md), "How a command is built", says how it works, and how to add a command.
+  - [README/cli.md](../../README/cli.md), "How a command is built", says how it works, and how to add a command.
 - What's in it:
   - [the `spell` bin](../../bin/spell.mjs) -- starts it:  `tsx` with the kit's node settings, then [main.ts](main.ts)
   - [main.ts](main.ts) -- the process entry:  every folder's commands, then the command line.
     NOT in the barrel:  importing it runs the command line.
   - [program.ts](program.ts) -- `spellProgram()`, `addRepoCommands()` (the clash rule), `addHelp()`
   - [repos.ts](repos.ts) -- `spellRepos()`, `commandLists()`, `hook()` / `needHook()`
-  - [run.ts](run.ts) -- `runCommand()`, `rawArgsAfter()`, `out()` / `err()`, `relativePath()`
-  - [tools.ts](tools.ts) -- `runTool()`, `runChild()`, `epicBin()` / `runEpic()`
+  - [run.ts](run.ts) -- `runCommand()`, `rawArgsAfter()`, `out()` / `err()`, `relativePath()`;
+    `ask()`, a question asked only in a real terminal
+  - [tools.ts](tools.ts) -- `runTool()`, `runChild()`, `epicBin()` / `runEpic()`, `runSpellEpic()` (`spell epic`)
   - [findCheckout.ts](findCheckout.ts) -- `findCheckout()`, `KIT_ROOT`, `KIT_MARKER`
   - [cli.types.ts](cli.types.ts) -- `EXIT`, `CliError`, the flags' types, `CommandList`, `HookList`, `SpellRepo`
 - The kit's own commands:  [commands.ts](commands.ts) is their list, [commands/](commands/) their work.
 
   ```
-  server  bundle  commands  wwod  readme  map  coherence  publish  pony        (help is the program's own)
+  server  bundle  commands  wwod  readme  map  coherence  publish  epic  pony  (help is the program's own)
   ```
 
 - `spell publish`'s work is a folder of its own, [publish/](publish/) (`spell/cli/publish`), with its own barrel:
@@ -39,13 +40,13 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   (epic `coherence` P1):
   - the code map runs graphify, an optional Python install (`Graphify`), in each repo, then merges and links them
     (`CodeMap`);  the docs map is ours, read by structure (`DocsMap`)
-  - [README-cli.md](../../README-cli.md), "Asking the map", says how to use it
+  - [README/cli.md](../../README/cli.md), "Asking the map", says how to use it
 - `spell coherence score`'s work is a folder of its own too, [coherence/](coherence/) (`spell/cli/coherence`),
   with its own barrel (epic `coherence` P15):
   - it reads the catalog's **Score:** lines (`agents/coherence/`), counts each mechanism's copies with `git grep`
     over every repo's `src/`, and its users from the code map (`CoherenceScore`)
   - its snapshots go to the shared content folder (`ScoreSnapshots`)
-  - [README-cli.md](../../README-cli.md), "Scoring coherence", says how to use it
+  - [README/cli.md](../../README/cli.md), "Scoring coherence", says how to use it
 - The barrel MUST stay lean:  node built-ins, commander and chalk.
   - Every folder's command list imports it, and `spell help` loads them all.
   - So it never exports a command's work:  [commands.ts](commands.ts) imports each one's file when it runs.

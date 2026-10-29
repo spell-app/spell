@@ -11,7 +11,7 @@ import { NOBODY_LISTENING, SUMMARY_ID, type NewItem, type NewKind, type TestsEnt
 import { ReviewState } from "spell/epic/components/epic-review/ReviewState"
 import type { ReviewShows } from "spell/epic/components/epic-review/EpicReview.types"
 import { NEW_KIND_LOOKS } from "spell/epic/components/epic-new-item/EpicNewItem.types"
-import { DrawnState, NEEDS_OWEN, STATUS_SLOT } from "spell/epic/components/epic-item/EpicItem.types"
+import { DrawnState, NEEDS_PERSON, STATUS_SLOT } from "spell/epic/components/epic-item/EpicItem.types"
 import {
   SHOW_ALL,
   STATE_PICK,
@@ -158,6 +158,9 @@ export class DOMEpicSectionElement extends DOMEpicFoldElement {
  *     choice of it), through `--epic-files-display` / `--epic-verify-display`, which the fields read
  *   - a phase's own gear chooses for it alone (`<epic-phase>`)
  *   - remembered per page, under the toggles' old key
+ * - While the page agrees its phases (`<epic-page stage="phases">`, reviewed), "Accept Phases" before the gear
+ *   (`<epic-stage-button>`, `EpicFold.renderStageButton()`;  epic `epic-engine` I180):  the header's green pill in
+ *   Send's place before (P29)
  * - No Plan changes box above the phases any more (Owen, 2026-10-11):  each phase draws its own (`<epic-phase>`).
  *   An older doc's copies (`<epic-updated slot="changes">`, T14) have no slot to show in;  the tool removes them.
  * - An item section with no items says "None yet".
@@ -466,6 +469,8 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
           ? () => (
               <>
                 {this.filter()}
+                {/* Accept Phases, before the gear, while the phases are agreed (I180) */}
+                {this.renderStageButton("phases", this.reviewState.reviewing)}
                 {this.gear()}
               </>
             )
@@ -1073,7 +1078,7 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
   /**
    * The count of `children` (items, or phases);  none without any.
    * - `open`:  any status but `CLOSED_STATUSES`'
-   * - `attention`:  those that need Owen (`NEEDS_OWEN`:  red, or orange, his turn to pick), an item by its state AS
+   * - `attention`:  those that need the person (`NEEDS_PERSON`:  red, or orange, their turn to pick), an item by its state AS
    *   DRAWN (`drawnStateOf()`), as its section's chips count it (Owen, 2026-10-26:  "badges don't match up"):
    *   - one being worked on is blue, not red
    *   - one Owen marked in this pass is with Claude (the blue badge), in neither
@@ -1098,7 +1103,7 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
             ? "marked"
             : this.drawnStateOf(child)
     )
-    const attention = states.filter((state) => NEEDS_OWEN.has(state)).length
+    const attention = states.filter((state) => NEEDS_PERSON.has(state)).length
     const replied = states.filter((state) => state === "replied").length
     // a phase drawn blue (I170):  under way or worked on, and neither red nor orange first
     const running = children.filter((child, at) => child.localName === "epic-phase" && states[at] === "progress").length

@@ -448,10 +448,11 @@ export function docLinksRun(args) {
 }
 
 /**
- * Opens a doc in VS Code's doc preview, through spell-epic's extension's URI handler.
+ * Opens a doc in the editor's doc preview, through spell-epic's extension's URI handler:  the path after the scheme
+ * (`vscode://`, `cursor://`:  `Editor.url()`, epic `epic-friend` P16).
  * - `vscode/src/DocPreview.ts`, its id `spell-app.spell-epic` (epic `epic-eject` P7)
  */
-const VSCODE_PREVIEW = "vscode://spell-app.spell-epic/doc-preview"
+const DOC_PREVIEW = "spell-app.spell-epic/doc-preview"
 
 /** The kit's page server command line (`spell/server`'s), from the kit's root:  `ensurePageServer()` runs it. */
 const PAGE_SERVER_CLI = "src/server/page/cli.ts"
@@ -604,8 +605,10 @@ export function componentSetAddress(file) {
  * - no bridge (extension not reloaded, or not run from a VS Code window), or it failed:  the `vscode://` URI
  * - a command run's folder (`runPagePath()`):  straight to the `vscode://` URI, with its page's URL:  the bridge shows
    only a file, and a run's page is no file
- * - `open` can't fail (macOS):  without the extension, VS Code says it can't handle the URI
- * - `open` itself failed (not macOS):  falls back to Chrome
+ * - the URI through the editor's own command, `code --open-url` or `cursor --open-url` (`Editor`, epic
+ *   `epic-friend` P16):  every system, where macOS's `open` was;  without the extension, the editor says it can't
+ *   handle the URI
+ * - the command itself failed (none on the `PATH`):  falls back to Chrome
  * - async for the bridge's http request;  never rejects
  */
 export async function openInVSCode(file, { hash, query, view = "docs" } = {}) {
@@ -626,9 +629,11 @@ export async function openInVSCode(file, { hash, query, view = "docs" } = {}) {
   }
   const url = served && `${serverUrl(served.base, path)}${query ? `?${query}` : ""}${hash ? `#${hash}` : ""}`
   const params = new URLSearchParams({ ...(url && { url }), file: path, ...(review && { view: "review" }) })
-  const run = spawnSync("open", [`${VSCODE_PREVIEW}?${params}`], { encoding: "utf8" })
-  if (run.status === 0) return console.log(`opened ${path} in VS Code`)
-  console.error(`VS Code via \`open\` failed (${(run.stderr ?? String(run.error)).trim()}):  falling back to Chrome`)
+  const editor = EpicConfig.of(ROOT).editor
+  const run = editor.run(["--open-url", `${editor.url(DOC_PREVIEW)}?${params}`])
+  if (run.status === 0) return console.log(`opened ${path} in ${editor.name}`)
+  const why = (run.stderr || String(run.error ?? `exit ${run.status}`)).trim()
+  console.error(`${editor.name} via \`${editor.command} --open-url\` failed (${why}):  falling back to Chrome`)
   openInChrome(file)
 }
 

@@ -9,8 +9,9 @@
  *   (a toast goes through the page's `window.SpellUI`)
  * - What they keep in the browser goes through the kit's `PrefStore` (generic:  no Spell UI either)
  */
+import { copyText } from "spell/util/dom"
 import { PrefStore } from "spell/util/persist/PrefStore"
-import { ServerLink } from "spell/epic/review"
+import { PageNotices, ServerLink } from "spell/epic/review"
 
 /** What types or picks:  a key pressed in one is the field's (paging, the jump key). */
 export const FIELDS = "input, textarea, select, ui-input, ui-select, ui-dropdown"
@@ -190,31 +191,67 @@ export function growField(field) {
 }
 
 /**
- * A toast through `UI.toast()`;  the console when toasts aren't there.
- * - `displayTime`:  ms, 3s unless given;  `actions`:  its buttons (`ToastAction`s:  `{ text, icon, click }`)
- * - a toast with buttons looks like one without (epic `epic-engine` P20):
- *   each button on the toast's own line, at its end, on its colour (`TOAST_ACTIONS`), never a second band under it
- *   - Owen, 2026-10-22:  "make the 'comment deleted' toast not ugly, matching the styles of the other toasts"
+ * A notice at the bottom of the window, in the page's ONE stack with an epic page's ("Sent 2 marks to Claude"):
+ * `PageNotices` (Owen, 2026-10-29:  "Make the latter look like the former, but green, and put it in the same toast
+ * stack";  Spell UI's `UI.toast()`, at the top, before).
+ * - `type`:  `success` green, `error` red, `warning` orange;  none:  the plain one
+ * - `displayTime`:  ms, 3s unless given;  `actions`:  its buttons (`{ text, icon, click }`), at its end
+ * - NEVER throws
  */
 export function noteToast(message, type, { displayTime = 3000, actions } = {}) {
-  const buttons = actions?.map((action) => ({ class: TOAST_ACTION_CLASS, ...action }))
-  try {
-    window.SpellUI.UI.toast({
-      message,
-      type,
-      displayTime,
-      ...(buttons && { actions: buttons, classActions: TOAST_ACTIONS })
-    })
-  } catch {
-    console.info(message)
+  PageNotices.show(message, { tone: type ?? "plain", ms: displayTime, actions })
+}
+
+////////////////
+// ## Code blocks
+////////////////
+
+/**
+ * A copy button at the LEFT of every code block's first line in `root`:  a `<pre><code>` written in a page
+ * (Owen, 2026-10-29, epic `epic-engine` I182:  "this should have a copy icon on the left").
+ * - the button is the pre's first child (`.spell-code-copy`, `data-spell-added` so a live patch steps around it);
+ *   `spell-doc.css` makes the pre a row, the button then the code, and the CODE the part that scrolls,
+ *   so the button stays put while a long line scrolls
+ * - a click puts the code's text on the clipboard (`copyText()`), and says "Copied" in the page's notice stack
+ * - never twice:  a block that has one keeps it;  safe to call again after every live update
+ * - NOT `<epic-code>` and `<ui-code>`:  Spell UI's `<ui-code copy>` draws their own button
+ * - NOT a `<pre>` with no `<code>` in it (a drawing in text):  nothing to run or paste
+ */
+export function addCodeCopies(root) {
+  for (const code of root.querySelectorAll("pre > code")) {
+    const pre = code.parentElement
+    const hasOne = Array.from(pre.children).some((child) => child.classList.contains(CODE_COPY))
+    if (hasOne || pre.closest(OWN_COPY) || !code.textContent.trim()) continue
+    pre.prepend(codeCopyButton(code))
   }
 }
 
-/** A toast's buttons:  a column at its end, no bar of their own (Spell UI's `classActions`). */
-const TOAST_ACTIONS = "basic vertical"
+/** The copy button of `code`'s block (`addCodeCopies()`). */
+function codeCopyButton(code) {
+  const button = el("ui-button", {
+    class: CODE_COPY,
+    appearance: "circular basic",
+    size: "mini",
+    icon: "copy",
+    title: COPY_LABEL,
+    "aria-label": COPY_LABEL,
+    "data-spell-added": true
+  })
+  button.addEventListener("click", async () => {
+    if (await copyText(code.textContent)) noteToast("Copied")
+    else noteToast("Couldn't copy:  the browser said no", "error")
+  })
+  return button
+}
 
-/** Each toast button's look:  an outline on the toast's own colour, as short as the toast's line. */
-const TOAST_ACTION_CLASS = "basic inverted compact"
+/** Class of a code block's copy button. */
+const CODE_COPY = "spell-code-copy"
+
+/** The copy button's name and tooltip. */
+const COPY_LABEL = "Copy"
+
+/** Code blocks that draw their own copy button. */
+const OWN_COPY = "epic-code, ui-code"
 
 ////////////////
 // ## Data pages

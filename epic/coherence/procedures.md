@@ -44,7 +44,7 @@ Each finding, in this order:
 ## The score
 
 `spell coherence score` counts what the catalog's **Score:** lines find (epic `coherence` P15;  the kit's
-README-cli.md, "Scoring coherence"):  each mechanism's copies left and its users, scored 0-100.
+README/cli.md, "Scoring coherence"):  each mechanism's copies left and its users, scored 0-100.
 
 - **A sweep** ends with `spell coherence score --compare last --save`:
   its report says the score's change since the last snapshot, and names the new copies it lists.

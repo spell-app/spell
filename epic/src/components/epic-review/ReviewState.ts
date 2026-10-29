@@ -4,6 +4,7 @@ import { E } from "spell/element"
 
 import {
   NOTICE_MS,
+  PageNotices,
   ReviewClient,
   isImmediate,
   isSent,
@@ -35,7 +36,7 @@ import { PAGE_TAG, REVIEWING, type ReviewFill } from "./EpicReview.types"
  *   the client is plain code, and a kept-alive element that's gone must stop listening
  * - the page's side, once per page (`watchPage()`):
  *   - `<epic-page reviewing>` while reviewed
- *   - the notice line at the bottom of the window (`ReviewNotice`),
+ *   - the notice at the bottom of the window, in the page's one stack (`PageNotices`),
  *     for what can't be said on an item (a failed save, nobody listening)
  * - MUST be created under the element's owner (a field initializer):  it creates a signal
  * - Server render:  no client, never reviewing
@@ -76,9 +77,15 @@ export class ReviewState {
    * Has item `itemId` a mark in the inbox, sent or not (epic `epic-engine` P43:  marked in this pass)?
    * - until Claude's `epic inbox apply` takes it off;  a draft being typed, or a comment, isn't a mark
    * - the page's inbox, so any element reads it for any item:  a section counts its items with it
+   * - NOT a set change that picks nothing (the pick-one / pick-any switch, an option added or edited):  no answer
+   *   yet, so the item keeps its colour and its count (Owen, 2026-10-29:  "Switched 'pick many' and Q4 thinks it was
+   *   decided, even though I didn't pick one")
    */
   readonly isMarked = (itemId: string): boolean =>
-    this.readPage((client) => !!itemId && !!client.markOf(itemId.toLowerCase())) ?? false
+    this.readPage((client) => {
+      const mark = itemId ? client.markOf(itemId.toLowerCase()) : undefined
+      return !!mark && !(mark.action === "pick" && !mark.pick)
+    }) ?? false
 
   /**
    * Item `itemId`'s mark, if any:  the page's inbox, so any element reads any id's (a phase its update blocks' Seen,
@@ -132,6 +139,9 @@ export class ReviewState {
   /** Has its mark gone to Claude? */
   readonly isSent = (): boolean =>
     this.read((client, id) => !!client.markOf(id) && client.isSent(client.markOf(id)!)) ?? false
+
+  /** How many marks, urgencies and comments wait for Send (`ReviewClient.unsentCount`).  The page's. */
+  readonly unsentCount = (): number => this.readPage((client) => client.unsentCount) ?? 0
 
   /** Is a Claude session listening?  The page's, so read with or without an id. */
   readonly listening = (): boolean => this.readPage((client) => client.listening) ?? false
@@ -240,7 +250,7 @@ export class ReviewState {
   /**
    * The page's side of `client`, once:  `<epic-page reviewing>` while it's reviewed, and the notice line.
    * - SIDE EFFECT:  sets the attribute on every `<epic-page>`;
-   *   adds the notice line to `document.body` on the first notice
+   *   the notices go to the page's one stack (`PageNotices`)
    */
   private static watchPage(client: ReviewClient) {
     if (ReviewState.watched.has(client)) return
@@ -250,53 +260,6 @@ export class ReviewState {
     }
     mark()
     client.subscribe(mark)
-    const notice = new ReviewNotice()
-    client.onNotice((message) => notice.show(message))
+    client.onNotice((message) => PageNotices.show(message, { ms: NOTICE_MS }))
   }
 }
-
-/****************
- * ### `ReviewNotice`
- * The line at the bottom of the window saying what can't be said on an item:
- * a failed save, nobody listening, a request called off.
- * - one per page
- * - drawn in a shadow root of its own, so it needs no page stylesheet
- * - `role="status"`:  read out as it changes
- * - SIDE EFFECT:  adds its host to `document.body` on the first `show()`
- ****************/
-class ReviewNotice {
-  /** The timer hiding it. */
-  private timer?: E.CancelablePromise<unknown>
-
-  /** Say `message` for a few seconds (`NOTICE_MS`). */
-  show(message: string) {
-    const { line } = this
-    line.shadowRoot!.querySelector("p")!.textContent = message
-    line.hidden = false
-    this.timer?.cancel()
-    this.timer = E.after(NOTICE_MS / 1000, () => (line.hidden = true))
-  }
-
-  /**
-   * The host:  fixed at the bottom of the window, ink on paper reversed.
-   * - SIDE EFFECT:  built and added to `document.body` on first read (the first `show()`).
-   */
-  @E.lazy private get line(): HTMLElement {
-    const line = document.createElement("div")
-    line.setAttribute("role", "status")
-    line.hidden = true
-    line.attachShadow({ mode: "open" }).innerHTML = `<style>${NOTICE_CSS}</style><p></p>`
-    document.body.append(line)
-    return line
-  }
-}
-
-/** The notice line's look:  the page's ink and paper, swapped. */
-const NOTICE_CSS = `
-:host { position: fixed; z-index: 1000; inset-inline: 12px; inset-block-end: 12px; display: block; }
-:host([hidden]) { display: none; }
-p {
-  box-sizing: border-box; max-width: 520px; margin: 0 auto; padding: 8px 12px; border-radius: 8px;
-  background: var(--ui-text-color, CanvasText); color: var(--ui-background, Canvas);
-  box-shadow: 0 6px 20px rgb(0 0 0 / 0.2); font: 14px/1.4 var(--ui-font-family, system-ui, sans-serif);
-}`

@@ -199,7 +199,7 @@ export const LISTS = [
     has: () => false,
     none: 'No sagas yet:  epic saga create <id> "Title" --purpose "...".',
     description: "Every saga, an epic of epics:  the larger aims the epics serve, most exciting first.",
-    lede: "Every saga, an epic of epics:  the larger aims the epics serve, in Owen's order, most exciting first.",
+    lede: "Every saga, an epic of epics:  the larger aims the epics serve, in your order, most exciting first.",
     get extra() {
       return sagaNotes()
     }
@@ -534,8 +534,7 @@ export function areaCards(pages, favorites = readFavorites(), sagas = readSagas(
       icon: "bullseye",
       href: "/sagas/index.html",
       count: plural(sagas.length, "saga"),
-      description:
-        "Each saga an epic of epics:  the larger aims the epics serve, in Owen's order, most exciting first.",
+      description: "Each saga an epic of epics:  the larger aims the epics serve, in your order, most exciting first.",
       meta: existsSync(GOALS) ? `and ${plural(goalSets(), "parked saga set")}, read only` : undefined
     },
     {

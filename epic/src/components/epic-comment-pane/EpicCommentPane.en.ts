@@ -9,7 +9,7 @@ import type { EpicVocabulary } from "spell/epic/definitions"
 
 /****************
  * ### `<epic-comment-pane>`
- * The small floating pane Owen writes a NEW comment in:  the bullhorn's, or ⌘ / Ctrl I's on selected text.
+ * The small floating pane you write a NEW comment in:  the bullhorn's, or ⌘ / Ctrl I's on selected text.
  ****************/
 export const epicCommentPaneVocabulary = {
   tag: "epic-comment-pane",
@@ -18,18 +18,18 @@ export const epicCommentPaneVocabulary = {
   noun: "comment pane",
   ui: false,
   description:
-    'The small floating pane Owen writes a NEW comment in (epic `airplane` P11;  Owen, 2026-10-10:  "a little ' +
+    'The small floating pane you write a NEW comment in (epic `airplane` P11;  Owen, 2026-10-10:  "a little ' +
     "floating pane below the selected text that I can move around -- don't scroll the page and lose context!\"), " +
-    "drawn by the docs runtime's comments when he clicks a bullhorn or comments on selected text.  Fixed on the " +
-    "screen just under what he clicked (`near`), above it when there's no room below;  he drags it by its header.  " +
+    "drawn by the docs runtime's comments when you click a bullhorn or comments on selected text.  Fixed on the " +
+    "screen just under what you clicked (`near`), above it when there's no room below;  you drag it by its header.  " +
     "Ivory, 8px inside on every side, no buttons below its text.  Its header:  the bullhorn, the first words it's on " +
     "(its tooltip the block in full), the floppy once saved, the trash once saved, and ×.  Its field is slotted:  " +
-    "the comments' code saves it as he types.",
+    "the comments' code saves it as you type.",
   attributes: [
     {
       name: "headline",
       kind: "string",
-      description: "The first words it's on, in quotes (`“Owen leaves a comment …”`), or `This page`."
+      description: "The first words it's on, in quotes (`“Leave a comment …”`), or `This page`."
     },
     {
       name: "about",
@@ -51,7 +51,7 @@ export const epicCommentPaneVocabulary = {
       name: "near",
       kind: "json",
       description:
-        "Where to open:  the box of what Owen clicked or selected, `{ left, top, bottom }` in the window's pixels.  " +
+        "Where to open:  the box of what you clicked or selected, `{ left, top, bottom }` in the window's pixels.  " +
         "It goes 8px under it, above it when there's no room below, never past the window's edges, 8px in.  A " +
         "property;  none:  centred near the top."
     }
@@ -64,7 +64,7 @@ export const epicCommentPaneVocabulary = {
       description: "The trash pressed:  delete the comment at once (Undo in the toast that follows)."
     }
   ],
-  slots: [{ name: "", description: "Owen's field (a `<ui-textarea>`), under the header." }],
+  slots: [{ name: "", description: "Your field (a `<ui-textarea>`), under the header." }],
   parts: [
     { name: "base", description: "The pane:  ivory, an outline, rounded, lifted off the page by a shadow." },
     { name: "header", description: "Its header:  the bullhorn, the first words, the floppy, the trash, ×;  drags it." }

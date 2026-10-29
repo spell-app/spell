@@ -18,7 +18,8 @@ import { DOC_FILES, PublishedPackage, type BuildReport, type PackedPackage, type
  * The `spell-epic` package (epic `repo-split` Q64, epic `epic-engine` Q43):  the epic plugin for Claude Code, its parts
  * at the package's root, its code in the `spell` it depends on.
  * - What ships:  the plugin's manifest (`.claude-plugin/plugin.json`, named `epic`:  installed as `epic@spell`,
- *   Q58), its skills, hooks, monitors and agents, the templates and voices, the docs the skills read, and `bin/epic`.
+ *   Q58), and Codex's beside it (`.codex-plugin/plugin.json`, epic `epic-friend` P12:  the same skills folder, and
+ *   Codex's own hooks file), both at the package's version;  its skills, hooks, monitors and agents, the templates and voices, the docs the skills read, and `bin/epic`.
  *   - and every file its skills, hooks, monitors and agents name by `${CLAUDE_PLUGIN_ROOT}/...` (`namedFiles()`):
  *     the designer's and coherence's rules, `src/AGENTS.md`, `README-vscode.md` ...
  *   - a skill names the plugin's own CODE by its GitHub address instead (`https://github.com/spell-app/spell/...`),
@@ -43,9 +44,13 @@ export class PluginPackage extends PublishedPackage {
       cpSync(from, join(this.stageDir, path), { recursive: true })
       copied++
     }
-    const pluginFile = join(this.stageDir, ".claude-plugin", "plugin.json")
-    const plugin = JSON.parse(readFileSync(pluginFile, "utf8")) as Record<string, unknown>
-    writeFileSync(pluginFile, `${JSON.stringify({ ...plugin, name: PLUGIN_NAME, version: this.version }, null, 2)}\n`)
+    // both manifests, Claude Code's and Codex's, named and versioned as the package
+    for (const folder of MANIFEST_FOLDERS) {
+      const pluginFile = join(this.stageDir, folder, "plugin.json")
+      if (!existsSync(pluginFile)) continue
+      const plugin = JSON.parse(readFileSync(pluginFile, "utf8")) as Record<string, unknown>
+      writeFileSync(pluginFile, `${JSON.stringify({ ...plugin, name: PLUGIN_NAME, version: this.version }, null, 2)}\n`)
+    }
     const bin = join(this.stageDir, "bin", "epic")
     mkdirSync(dirname(bin), { recursive: true })
     writeFileSync(
@@ -55,7 +60,11 @@ export class PluginPackage extends PublishedPackage {
     )
     chmodSync(bin, 0o755)
     writeFileSync(join(this.stageDir, "package.json"), `${JSON.stringify(this.manifest(), null, 2)}\n`)
-    this.built = { compiled: 0, modules: 0, copied, declarations: 0, warnings: [] }
+    // the VS Code extension `epic plugin install` installs (epic `epic-friend` P15):  built beforehand, never here
+    const warnings = existsSync(join(this.stageDir, VSIX))
+      ? []
+      : [`no ${VSIX}:  \`yarn vscode:package\` in epic/ first, or epic plugin install can't install the extension`]
+    this.built = { compiled: 0, modules: 0, copied, declarations: 0, warnings }
     return this.built
   }
 
@@ -84,6 +93,7 @@ export class PluginPackage extends PublishedPackage {
       name?: string
     }
     const code = packed.files.filter((file) => /\.(tsx?|jsx?)$/.test(file) && !file.startsWith("skills/"))
+    const codexProblems = PluginPackage.codexManifestProblems(this.stageDir)
     const unpacked = PluginPackage.namedFiles(this.repo.root).filter(
       (path) => !packed.files.some((file) => file === path || file.startsWith(`${path.replace(/\/$/, "")}/`))
     )
@@ -94,6 +104,12 @@ export class PluginPackage extends PublishedPackage {
         check: `its plugin manifest names it ${PLUGIN_NAME} (/plugin install ${PLUGIN_NAME}@spell)`,
         ok: plugin.name === PLUGIN_NAME,
         ...(plugin.name !== PLUGIN_NAME && { detail: String(plugin.name) })
+      },
+      {
+        pkg: this.name,
+        check: `its Codex manifest ships, named ${PLUGIN_NAME}, its skills and hooks there`,
+        ok: codexProblems.length === 0,
+        ...(codexProblems.length && { detail: codexProblems.join(", ") })
       },
       {
         pkg: this.name,
@@ -108,6 +124,22 @@ export class PluginPackage extends PublishedPackage {
         ...(unpacked.length && { detail: unpacked.slice(0, 5).join(", ") })
       }
     ]
+  }
+
+  /**
+   * What's wrong with the Codex manifest in `root` (`.codex-plugin/plugin.json`):  missing, not named `epic`, or a
+   * `skills` / `hooks` path that isn't there;  none, `[]`.
+   */
+  static codexManifestProblems(root: string): string[] {
+    const file = join(root, ".codex-plugin", "plugin.json")
+    if (!existsSync(file)) return [".codex-plugin/plugin.json missing"]
+    const manifest = JSON.parse(readFileSync(file, "utf8")) as { name?: string; skills?: string; hooks?: string }
+    const problems = manifest.name === PLUGIN_NAME ? [] : [`named ${String(manifest.name)}`]
+    for (const key of ["skills", "hooks"] as const) {
+      const path = manifest[key]
+      if (!path || !existsSync(join(root, path))) problems.push(`its ${key} (${String(path)}) isn't there`)
+    }
+    return problems
   }
 
   /**
@@ -178,3 +210,9 @@ function filesUnder(folder: string): string[] {
 
 /** The plugin's name in Claude Code:  `/plugin install epic@spell` (Owen, 2026-10-26, Q58). */
 export const PLUGIN_NAME = "epic"
+
+/** The epic VS Code extension's package, as the plugin ships it (`PluginInstall`'s step 7). */
+const VSIX = "vscode/spell-epic.vsix"
+
+/** The plugin manifests' folders:  Claude Code's, and Codex's (epic `epic-friend` P12). */
+const MANIFEST_FOLDERS = [".claude-plugin", ".codex-plugin"]

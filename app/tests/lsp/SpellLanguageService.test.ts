@@ -1331,7 +1331,7 @@ function copySolitaireAsCodeSpell(dir: string): void {
   mkdirSync(dir, { recursive: true })
   const files = ["Card.spell", "Deck.spell", "Pile.spell", "Solitaire.spell"]
   for (const file of files) copyFileSync(resolve(SOLITAIRE_CODE_SPELL, file), resolve(dir, file))
-  copyFileSync(fixtureFolder("Solitaire", "styles.css"), resolve(dir, "styles.css"))
+  copyFileSync(fixtureFolder("@spell/examples/Solitaire", "styles.css"), resolve(dir, "styles.css"))
   const imports = [...files, "styles.css"].map((file) => ({ path: `/${file}`, active: true }))
   writeFileSync(resolve(dir, SP.PROJECT_FILE), JSON.stringify({ title: "Solitaire", imports }))
 }

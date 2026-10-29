@@ -49,7 +49,7 @@
     },
     {
       "id": "answering",
-      "title": "Pages Owen answers on",
+      "title": "Pages you answer on",
       "tags": [
         "epic-ask",
         "epic-text-box",
@@ -73,7 +73,14 @@
       "tags": ["epic-threads", "epic-thread", "epic-comment-pane", "epic-page-note-head"]
     }
   ],
-  "drawnOnly": ["epic-review", "epic-new-item", "epic-option-form", "epic-agents", "epic-thread-message"],
+  "drawnOnly": [
+    "epic-review",
+    "epic-stage-button",
+    "epic-new-item",
+    "epic-option-form",
+    "epic-agents",
+    "epic-thread-message"
+  ],
   "nav": {
     "start": [{ "id": "index", "file": "index.html", "label": "The Epic Elements", "icon": "layer group" }],
     "foundation": [

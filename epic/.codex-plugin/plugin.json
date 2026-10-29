@@ -1,0 +1,12 @@
+{
+  "name": "epic",
+  "version": "0.8.0",
+  "description": "Epics for Codex:  the epic skills ($epic review, $wtf, $details ...), the end-of-turn commit and sync of the shared plans, and the session-start notices, for any repo with an .epic/config.json5",
+  "author": {
+    "name": "Owen Williams"
+  },
+  "license": "MIT",
+  "keywords": ["epics", "planning", "worktrees", "review"],
+  "skills": "./skills/",
+  "hooks": "./hooks/codex-hooks.json"
+}

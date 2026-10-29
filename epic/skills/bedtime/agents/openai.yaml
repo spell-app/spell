@@ -1,0 +1,7 @@
+# Codex's settings for this skill (epic epic-friend P12):  Claude Code only, so Codex never picks it by itself;
+# $bedtime still calls it, and its first line says what to do instead.  SEE:  https://learn.chatgpt.com/docs/build-skills
+interface:
+  display_name: "Bedtime (Claude Code only)"
+  short_description: "Build an epic's phases overnight in Claude Code"
+policy:
+  allow_implicit_invocation: false

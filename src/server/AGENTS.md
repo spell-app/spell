@@ -144,6 +144,12 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     `run()` (never throws), `out()`, `lines()`, `mustRun()` (throws a `GitError`), `mainRoot()`
   - `RealPath` -- comparing paths by where they really are, links followed (`of()`, `same()`, `isIn()`, `from()`;
     from spell-epic, epic `coherence` P7)
+  - `Processes` -- what's running, asked the same way on macOS, Linux and Windows (epic `epic-friend` P15):
+    `table()` (pid => parent and command), `parents()`, `folderOf()`, `portsOf()`, `openFiles()`, and `run()` /
+    `call()`, which start a bare command name (`code`, `npx`) through the shell on Windows;  `ps` and `lsof`, Linux's
+    `/proc`, PowerShell's `Win32_Process`;  never throws, "can't tell" an empty answer;  its parsers pure, for tests
+  - `Links` -- a link made the same way everywhere:  `folder()` (a junction on Windows), `file()` (a `LinkError`
+    naming Developer Mode on Windows without it)
   - [checkout.ts](checkout.ts) -- `checkoutOf()`:  the git checkout a path is in, and its MAIN checkout.
     - Read from the disk as git finds them (a worktree's `.git` file, git's common dir), with no `git` run.
     - Plain `node` loads it by path (epics' `EpicConfig`, for the hooks), so node built-ins only.
@@ -255,7 +261,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - Live reload reports a change in one at its route.
     - Route modules add to every page's `window.SPELL_SERVER`:  `addPageConfig()`.
       - e.g. epics' airplane mode ([airplaneRoutes.ts](../../epic/src/tools/airplaneRoutes.ts)),
-        whose switch, `AirplaneMode`, moved to epics in `epic-eject` P4.
+        whose switch, `AirplaneMode`, moved to epics in `epic-eject` P4;
+        and who is at the keyboard, `person` ([personRoutes.ts](../../epic/src/tools/personRoutes.ts), epic
+        `epic-friend` P1)
     - Tests set a route module up by hand with `server.routeContext()`.
     - Every call is under `/api/`, one prefix per package that answers it.
       The old paths answer "not found" (no redirects, Q30 of `people-and-orgs`).
@@ -459,10 +467,10 @@ As WWOD §8, plus our self-namespace:
 - `SRV` ~== `spell/server`
 - Every file by its package name and path under `src/` (epic `repo-split` P14), the kit's own included:
   `spell/server`, `/page`, `/site`, `/site/site.types`, `/test/serve`.
-  - Nine that plain `node` loads have entries of their own in the kit's `exports`, each pointing at its `.ts`:
-    `/checkout`, `/Git`, `/RealPath`, `/FileLock`, `/open`, `/page/settings`, `/page/prune`, `/DataFile`,
-    `/contentFolder` (node's modules, `json5`, type imports and each other only).
+  - Eleven that plain `node` loads have entries of their own in the kit's `exports`, each pointing at its `.ts`:
+    `/checkout`, `/Git`, `/RealPath`, `/Processes`, `/Links`, `/FileLock`, `/open`, `/page/settings`, `/page/prune`,
+    `/DataFile`, `/contentFolder` (node's modules, `json5`, type imports and each other only).
     - Those import their peers WITH `.ts` (`./Git.ts`, `./server.types.ts`), and `server.types.ts` stays strip-safe:
       no `enum`, no parameter property.
-    - Nine, not one barrel:  spell-epic's hooks and `.mjs` scripts load them before a worktree's install, and the
+    - Eleven, not one barrel:  spell-epic's hooks and `.mjs` scripts load them before a worktree's install, and the
       `spell` command loads `RealPath` and `Git` by file to stay clear of linkedom.

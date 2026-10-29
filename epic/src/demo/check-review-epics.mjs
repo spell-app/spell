@@ -480,7 +480,8 @@ async function run() {
         reviewAs: item.getAttribute("review-as"),
         status: item.getAttribute("status"),
         // the doc squeezes runs of spaces
-        note: item.querySelector('epic-reply[from="Owen"][re="skip"]')?.textContent.replace(/\s+/g, " ") ?? null,
+        // the person's reply (no `agent`), whatever their name (epic `epic-friend` P2)
+        note: item.querySelector('epic-reply[re="skip"]:not([agent])')?.textContent.replace(/\s+/g, " ") ?? null,
         chip: rootOf(id).querySelector("[part~='id']").dataset.fill ?? null
       }
     }, withDetails),

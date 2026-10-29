@@ -103,7 +103,8 @@ writeFileSync(
     sharedFolders: [],
     engineFolder: "",
     windowsFolder: "../spell.epics/windows",
-    windows: { default: "spell", repoName: "spell", contentName: "spell.epics" }
+    // the main top checkout in an epic's window:  a key left out would be `epic init`'s, worktree-only (epic-friend P6)
+    windows: { default: "spell", repoName: "spell", contentName: "spell.epics", worktreeOnly: false }
   })
 )
 commit(TOP, "the top")
@@ -136,11 +137,15 @@ describe("EpicConfig in a multi-repo top", () => {
     const ui = new EpicConfig(join(TOP, "spell-ui"))
     expect(ui.repos).toEqual([])
     expect(ui.top?.main).toBe(TOP)
-    // a repo outside any top:  as before
+    // a repo outside any top:  its own worktrees, beside it;  not set up, with no file of its own
     const lone = join(TEMP, "lone")
     mkdirSync(lone)
     expect(new EpicConfig(lone).top).toBeUndefined()
-    expect(new EpicConfig(lone).newWorktreeFolder("seo")).toBe(join(lone, ".claude", "worktrees", "seo"))
+    expect(new EpicConfig(lone).newWorktreeFolder("seo")).toBe(join(TEMP, "lone.worktrees", "seo"))
+    expect(new EpicConfig(lone).isSetUp).toBe(false)
+    // a child repo with no file of its own is set up through its top
+    expect(ui.isSetUp).toBe(true)
+    expect(EpicConfig.ofSetUp(join(TOP, "spell-ui"))?.main).toBe(join(TOP, "spell-ui"))
   })
 
   test("every repo's checkout in an epic's worktree, the top first;  a child's own worktree inside it", () => {

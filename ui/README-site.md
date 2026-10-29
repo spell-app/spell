@@ -74,7 +74,7 @@ When the bundle is stale, the page server rebuilds it as it starts, and a page t
 
 - The docs site is served by the kit's page server, because Spell UI's own part of its settings names the set and
   its bundle (`"pageServer"`, in [package.json](package.json):
-  [the kit's README-server.md](https://github.com/spell-app/spell/blob/main/README-server.md#settings-and-route-modules--each-repo-brings-its-own)).
+  [the kit's README/server.md](https://github.com/spell-app/spell/blob/main/README/server.md#settings-and-route-modules--each-repo-brings-its-own)).
   - So it needs only a checkout of the kit, Spell UI's folder with it
     ([setup](https://github.com/spell-app/spell/blob/main/README.md#setup-from-zero)).
   - `start all` and `spell server start` both find the kit from any folder of it.
@@ -223,7 +223,7 @@ with the bullhorns, threads and Send of `spell-epic`'s review tools ([its README
 | `site/_assets/` | GENERATED, NOT committed:  the bundle (`site.js`, `site.css`, a lazy chunk per family);  `.bundle.json`, its sources' hash, so the page server doesn't build it again;  `icon-packs`, a link to `../../src/icons/icon-packs` (2,167 SVGs, 8.7 MB:  committed once, never copied).  NEVER edit |
 
 - Git-ignored because its hashed chunk names churned every diff;
-  how the page server builds bundles on demand:  [the kit's README-server.md](https://github.com/spell-app/spell/blob/main/README-server.md).
+  how the page server builds bundles on demand:  [the kit's README/server.md](https://github.com/spell-app/spell/blob/main/README/server.md).
 - EVERY component set's pages load this one bundle:
   Spell UI's, Epic UI's at `/components/epics/`, App UI's at `/components/app/`.
   Each takes the folder above its `_assets/` as the site's root, for its layout and its data.
@@ -559,12 +559,12 @@ Ours start `SPELL_UI_`;  `CI` and `INIT_CWD` are other tools' names, read as the
 ## Spell UI's `spell` commands
 
 Spell UI adds four commands to `spell`:  `spell icon`, `spell ssr`, `spell pack` and `spell design`.
-What each one does, with every option and real output, is on [the kit's README-cli.md](https://github.com/spell-app/spell/blob/main/README-cli.md#spell-ui);
+What each one does, with every option and real output, is on [the kit's README/cli.md](https://github.com/spell-app/spell/blob/main/README/cli.md#spell-ui);
 this is their code.
 
 - The kit's `spell` finds them through Spell UI's `package.json`:  `"spell": { "commands": "./src/cli/commands.ts" }`.
 - Each action imports its command's file only when it runs, so `spell help` stays fast.
-- Adding one:  the kit's recipe, "How a command is built" in [README-cli.md](https://github.com/spell-app/spell/blob/main/README-cli.md#how-a-command-is-built);
+- Adding one:  the kit's recipe, "How a command is built" in [README/cli.md](https://github.com/spell-app/spell/blob/main/README/cli.md#how-a-command-is-built);
   the rules for writing one here, [src/cli/AGENTS.md](src/cli/AGENTS.md).
 
 <details>
@@ -614,6 +614,6 @@ so they need a checkout with the content folder and the page server running (abo
 
 - [README.md](README.md):  Spell UI's front page, for what the elements are before the pages about them
 - [README-components.md](README-components.md):  every family with a picture, the catalogue `yarn readme:components` writes
-- [The kit's README-server.md](https://github.com/spell-app/spell/blob/main/README-server.md):  the page server the site runs on, its addresses and its live reload
+- [The kit's README/server.md](https://github.com/spell-app/spell/blob/main/README/server.md):  the page server the site runs on, its addresses and its live reload
 - [README-frameworks.md](README-frameworks.md):  the framework pages `yarn smoke` runs
 - [AGENTS.md](AGENTS.md):  the rules for working here, "The docs site" and "Commands" among them

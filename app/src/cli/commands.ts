@@ -3,9 +3,10 @@
  * - `spell app create <name>`:  a new spell project, in your space
  * - `spell app serve [project]`:  the editor and its page server, opened in a browser
  * - `spell app preview build | serve`:  the editor's static build, the public preview -- written, then shown as a host would
- * - `spell app notebook convert <page>`:  a Spell UI component page as notebooks, one per tab
  * - `spell app vscode [build|install]`:  the VS Code extension
  * - `spell projects [group]`:  the project groups, or one group's projects
+ * - `spell content check [--bless]`:  every check of the `@spell` space's content, its examples, notebooks and
+ *   Spell guides (epic `content` P2)
  * - Under `app` on purpose (Owen's names, 2026-10-21), not only on a clash as Q33 has it.
  * - The language commands are spell-parser's list;  their work comes from here, through `hooks.ts`.
  * - Loads fast:  nothing of spell until a command runs.
@@ -74,20 +75,6 @@ export default function appCommands(spell: Command): void {
       CLI.runCommand(async () => (await loadApp()).appCommands.preview(["serve"], command.optsWithGlobals()))
     )
 
-  const notebook = app.command("notebook").description("Spell UI's component pages as notebooks")
-
-  notebook
-    .command("convert")
-    .description(
-      "write a component page as notebooks, one per tab, in @spell/notebooks/<Title>/:  its sections, examples in " +
-        "spellx's bare names, prose and API tables;  what it can't write as the page has it, on stderr"
-    )
-    .argument("<page>", "the page's file, e.g. ui/docs/ui-button.html")
-    .option("--dry-run", "write nothing:  print each file instead")
-    .action((page: string, _options, command: Command) =>
-      CLI.runCommand(async () => (await loadApp()).appCommands.notebook([page], command.optsWithGlobals()))
-    )
-
   const vscode = app
     .command("vscode")
     .description("the VS Code extension:  build its .vsix, install it into VS Code -- no verb does both")
@@ -116,6 +103,23 @@ export default function appCommands(spell: Command): void {
         (await loadApp()).appCommands.projects(group ? [group] : [], command.optsWithGlobals())
       )
     )
+
+  const content = spell
+    .command("content")
+    .description("the @spell space's content:  its examples, notebooks and Spell guides")
+
+  content
+    .command("check")
+    .description("run every content check:  snapshots, every target's run, spellx, notebooks, README-examples")
+    .option("--bless", "rewrite every content snapshot instead, then read the diff")
+    .action((_options, command: Command) => contentCheckCommand(command.optsWithGlobals()))
+}
+
+/** `spell content check`:  loads no spell, its tests load their own (`contentCheckCommand.ts`). */
+function contentCheckCommand(options: { bless?: boolean }): Promise<never> {
+  return CLI.runCommand(async () =>
+    (await import("spell/app/cli/commands/contentCheckCommand")).contentCheckCommand(options)
+  )
 }
 
 /** `spell app vscode [verb]`:  loads no spell (`vscodeCommand.ts`). */

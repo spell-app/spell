@@ -38,6 +38,8 @@ Read the spoke(s) for what you're touching BEFORE writing code or text:
   - small inconsistency fixes in touched files
   - fix obviously incorrect comments
   - A drive-by fix SHIPS even when the refactor that surfaced it is parked.
+  - EXCEPT a fix to the built-in projects (app's `spaces/@spell/`) another epic didn't cause:
+    SEE:  the kit's `CLAUDE.md`, "Content requests".
 - **Grep the whole repo BEFORE renaming or moving anything**, and record what you found:
   - "nothing outside `Run.ts` reads `run.index`" is what makes a rename a contained change
     rather than a hopeful one.
@@ -541,7 +543,10 @@ Their long before / afters are in `agents/wwod/writing.md`.
   - `` // oxlint-disable-next-line import/default -- `?worker` is Vite's, typed by `vite/client`, which oxlint
     can't see `` (`packages/app/src/ui/monaco/monaco.ts`).
 - **A front page per repo, `README.md`, and a `README-<folder>.md` beside it per major folder**, REQUIRED;
-  NO README inside a folder.  Structure:
+  NO README inside a folder, but the kit's one `README/` (below).  Structure:
+  - the kit, with too many pages for its root, keeps its topic pages in `README/` (`README/cli.md`), beside
+    `README.md` and the two a reader outside Spell comes for, `README-epics.md` and `README-vscode.md`
+    (epic `epic-friend` P8);  `yarn readme:check` fails a topic page left at its root
   - the front page:  what the repo is, a picture, its folders, setup, things to try, a link to every page beside it
   - a `README-<folder>.md` goes deep on one folder or topic, and holds what an in-folder README used to:
     - "The DRY rule (one of each)", with "If you find yourself writing a second copy of any

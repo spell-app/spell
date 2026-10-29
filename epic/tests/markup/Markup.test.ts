@@ -96,6 +96,7 @@ const SAMPLES: { [T in EpicTag]: EpicData<T> } = {
   "epic-actions": { headRow: true },
   "epic-change": { id: "ch3", item: "q16", at: "2026-10-24 15:10", answer: "One list", accepted: "2026-10-24 19:02" },
   "epic-review": { of: "q7", shows: "note", buttons: "todo", label: "Q7", tip: "reviewed 10/7/26", underLine: true },
+  "epic-stage-button": { stage: "phases", open: 2 },
   "epic-new-item": { open: true, adds: "question", near: "p3", editing: "new1" },
   "epic-option-form": {
     heading: "New choice",
@@ -160,7 +161,7 @@ const SAMPLES: { [T in EpicTag]: EpicData<T> } = {
     failed: true
   },
   "epic-thread-message": {
-    by: "claude",
+    by: "agent",
     at: "2026-10-18T08:05:00.000Z",
     stamp: "10/18 08:05",
     older: true,

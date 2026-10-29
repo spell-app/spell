@@ -1,10 +1,13 @@
 ---
 name: park
-description: Park this session's work so it can be picked up quickly later -- commit it as a WIP commit in its own worktree `<name>` and leave a PARKED note saying where it stopped and what's next;  `/park <other>` tells another running session to park itself.  Holds the shared "Resume" steps `/unpark` and `/wait-for` use.  Use for `/park [<name>]`, or when Owen says "park this" / "park <name>" / "shelve this until <x> is done".
+description: Park this session's work so it can be picked up quickly later -- commit it as a WIP commit in its own worktree `<name>` and leave a PARKED note saying where it stopped and what's next;  `/park <other>` tells another running session to park itself.  Holds the shared "Resume" steps `/unpark` and `/wait-for` use.  Use for `/park [<name>]`, or when the person says "park this" / "park <name>" / "shelve this until <x> is done".
 argument-hint: "[<name>]"
 ---
 
 # /park
+
+In Codex:  each step that needs a Claude Code tool says what Codex does instead, in a line like this one
+(the long form:  `epic guide claude-only-tools`).
 
 Get this session's work out of the way, e.g. while another session restructures packages,
 and make it cheap to pick back up.
@@ -22,7 +25,7 @@ and make it cheap to pick back up.
 - Status, from the repo root or a worktree (`spell help dev`):
   - `epic worktree status <name>`:  JSON, where a worktree / branch / plan / session stands
   - `epic park list|candidates|wait`
-- Running `/park` IS Owen's go-ahead to commit the WIP commit:  no "stage, then ask".
+- Running `/park` IS the person's go-ahead to commit the WIP commit:  no "stage, then ask".
   Nothing else gets committed.
 - Style:  caveman lite, as in `/epic`.
 
@@ -34,14 +37,17 @@ What `$ARGUMENTS` means:
   "Park another session" below
 - matches nothing:  it's the name to park this session under
 
-0. In plan mode:  ask Owen to leave it (shift+tab) first,
+0. In plan mode:  ask the person to leave it (shift+tab) first,
    as in [the isolate skill](../isolate/SKILL.md), "Start", step 0.
+   - In Codex:  no plan mode:  skip this step.
 1. `<name>`:
    - in a worktree:  that worktree's name
      - the session's folder is a worktree's:  in `.claude/worktrees/`, or beside the repo
    - else `$ARGUMENTS`, lower-kebab-cased
    - none:  propose one from the work so far, in AskUserQuestion
+     - In Codex:  propose it in the chat;  the person types another if they like.
    - Then rename the session `<name>` at once, before step 2:  `epic session title "🚧 <name>"`.
+     - In Codex:  no session title:  skip the rename.
      - Not done by the prompt hook:  `/park <name>` may name ANOTHER session.
 2. In the MAIN checkout:  move the work into worktree `<name>`,
    following [the isolate skill](../isolate/SKILL.md), "Start", with these changes:
@@ -50,6 +56,7 @@ What `$ARGUMENTS` means:
      - `git status --short`.
      - Any file this session didn't touch:
        AskUserQuestion, multiSelect, "Which of these are this session's?" (preselect none).
+       - In Codex:  ask in the chat, the files numbered.
      - Then stash them, tagged, and apply the stash in the worktree after step 3 (then drop that entry):
 
        ```sh
@@ -99,7 +106,7 @@ What `$ARGUMENTS` means:
    2. ...
 
    ## Open questions
-   1. <anything waiting on Owen;  "none">
+   1. <anything waiting on the person;  "none">
 
    ## Waiting for
    <filled in by /wait-for;  "nothing">
@@ -117,6 +124,7 @@ What `$ARGUMENTS` means:
 1. `epic worktree status <other>`:  its `sessions`.
 2. One running (`running: true`):  `SendMessage` to it:
    "Run `/park` now (asked by session `<this session's title or id>`).  Reply when parked, with the worktree name."
+   - In Codex:  Codex can't message another session:  print that line for the person to type into it.
    - Several running:  AskUserQuestion, which.
 3. None running:  say so in one line, and offer `/session <other>` to reopen it, then `/park` there.
    - NEVER park another session's files from here:  only that session knows which edits are its own.
@@ -146,15 +154,16 @@ Used by `/unpark` (after its window check), and by `/wait-for` when the wait end
      - there's no `node_modules/`
    - the checks of each package this branch touches (its `AGENTS.md` says which;  spell-app's `yarn ts`, `yarn test`)
      - those packages:  `git diff --name-only main...HEAD`
-4. Can't resolve a conflict (keeping both sides needs Owen's call), or checks fail on this branch's code:
+4. Can't resolve a conflict (keeping both sides needs the person's call), or checks fail on this branch's code:
    - `git merge --abort` if still merging
    - then AskUserQuestion, listing each file and why
+     - In Codex:  list them in the chat, and ask what to do with each.
    - Stop there.
 5. Otherwise:
    - set line 1 to `<!-- park: resumed -->`
    - add `Resumed <YYYY-MM-DD HH:MM>, merged main at <hash>` under "Where it stopped"
    - log it in the epic page, as in step 5 above
    - carry on with "Next steps"
-   - Leave the WIP commit as it is (a merge sits on top now):  squash later if Owen wants.
+   - Leave the WIP commit as it is (a merge sits on top now):  squash later if the person wants.
 6. One line:  "resumed `<name>`:  merged main (<n> conflicts fixed), checks <pass/fail>;  now on:  <next step>".
    Then do it.

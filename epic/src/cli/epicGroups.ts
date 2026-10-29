@@ -36,7 +36,7 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
       usage: '<page> [--title "..."] [--description "..."] [--from <questions.json5>]',
       description:
         "ask the same question again:  the ONE page rewritten in place (from --from, else left to edit), the round " +
-        "before folded at its bottom with what Owen sent;  never a second page (create refuses one)",
+        "before folded at its bottom with what you sent;  never a second page (create refuses one)",
       example: "epic ask round seo/pick-layout --from round2.json5",
       flags: {
         "--title <title>": "the page's title",
@@ -58,7 +58,7 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
       name: "wait",
       usage: "<page> [--timeout 8h]",
       description:
-        "wait until Owen sends an answer, print it and exit 0 (timeout:  exit 2);  run it in the background:  " +
+        "wait until you send an answer, print it and exit 0 (timeout:  exit 2);  run it in the background:  " +
         "its exit wakes the session",
       example: "epic ask wait seo/pick-layout",
       flags: {
@@ -68,7 +68,7 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
     {
       name: "answer",
       usage: "<page> [--round <n>]",
-      description: "print the answer Owen already sent (exit 1 if none);  --round:  an earlier round's, as sent",
+      description: "print the answer you already sent (exit 1 if none);  --round:  an earlier round's, as sent",
       example: "epic ask answer seo/pick-layout",
       flags: {
         "--round <n>": "an earlier round's answer, as it was sent"
@@ -78,7 +78,7 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
       name: "draft",
       usage: "<page>",
       description:
-        "print what Owen typed on the page and hasn't sent (exit 1 if nothing);  run it before rewriting a page " +
+        "print what you typed on the page and hasn't sent (exit 1 if nothing);  run it before rewriting a page " +
         "he may have open",
       example: "epic ask draft seo/pick-layout",
       flags: {}
@@ -116,7 +116,7 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
       name: "create",
       usage: '<slug> --rows <rows.json5> [--title "..."] [--epic <epic>] [--description "..."]',
       description:
-        "make a choice page from its rows (a table of names Claude recommends, Owen's call on each), and print its path",
+        "make a choice page from its rows (a table of names Claude recommends, your call on each), and print its path",
       example: "epic choices create boolean-names --rows rows.json5 --epic seo",
       flags: {
         "--rows <rows.json5>": "the rows (required)",
@@ -130,7 +130,7 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
       usage: '<page> --rows <rows.json5> [--title "..."] [--description "..."]',
       description:
         "ask the same question again:  the ONE page rewritten with the new rows, the round before folded at its " +
-        "bottom with what Owen sent;  never a second page (create refuses one)",
+        "bottom with what you sent;  never a second page (create refuses one)",
       example: "epic choices round seo/boolean-names --rows round2.json5",
       flags: {
         "--rows <rows.json5>": "the new round's rows (required)",
@@ -152,7 +152,7 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
       name: "wait",
       usage: "<page> [--timeout 8h]",
       description:
-        'wait until Owen presses "Do it", print his answer and exit 0 (timeout:  exit 2);  run it in the background',
+        'wait until you press "Do it", print your answer and exit 0 (timeout:  exit 2);  run it in the background',
       example: "epic choices wait seo/boolean-names",
       flags: {
         "--timeout <time>": "how long to wait:  8h (the default), 30m, 1h30m, or seconds"
@@ -161,7 +161,7 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
     {
       name: "answer",
       usage: "<page> [--round <n>]",
-      description: "print the answer Owen already sent (exit 1 if none);  --round:  an earlier round's, as sent",
+      description: "print the answer you already sent (exit 1 if none);  --round:  an earlier round's, as sent",
       example: "epic choices answer seo/boolean-names",
       flags: {
         "--round <n>": "an earlier round's answer, as it was sent"
@@ -180,7 +180,7 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
       name: "list",
       usage: "[<epic>] [--all] [--json]",
       description:
-        "every comment Owen left on a docs page, still waiting for Claude;  with an epic, only that epic's;  " +
+        "every comment you left on a docs page, still waiting for Claude;  with an epic, only that epic's;  " +
         "--all:  taken and answered ones too",
       example: "epic comments list seo",
       flags: {
@@ -233,7 +233,7 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
       name: "list",
       usage: "[<epic>] [--all] [--json]",
       description:
-        "every new page note Owen left on a docs page;  with an epic, only on the pages it owns;  --all:  answered " +
+        "every new page note you left on a docs page;  with an epic, only on the pages it owns;  --all:  answered " +
         "and done ones too",
       example: "epic notes list seo",
       flags: {
@@ -304,7 +304,7 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
       name: "wait",
       usage: "[--every <s>] [--max <s>] [--json]",
       description:
-        "wait until Owen sends an agent a note from the epic page (exit 0, printing it), or none is left running " +
+        "wait until you send an agent a note from the epic page (exit 0, printing it), or none is left running " +
         "(exit 3);  run it in the background",
       example: "epic agents wait",
       flags: {
@@ -317,7 +317,7 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
     {
       name: "told",
       usage: "<name>",
-      description: "Owen's notes to the agent were passed on:  the page shows them told",
+      description: "your notes to the agent were passed on:  the page shows them told",
       example: "epic agents told docstrings",
       flags: {
         "--epic <epic>": "that epic's list (default this checkout's)"
@@ -337,7 +337,7 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
     {
       name: "on",
       usage: "",
-      description: "turn airplane mode on:  everything Owen leaves on the pages waits for /airplane land",
+      description: "turn airplane mode on:  everything you leave on the pages waits for /airplane land",
       example: "epic airplane on",
       flags: {
         "--json": "print the state as JSON"
@@ -365,7 +365,7 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
     {
       name: "inbox",
       usage: "[--since <iso>] [--json]",
-      description: "everything Owen left while flying, by place:  what /airplane land works through",
+      description: "everything you left while flying, by place:  what /airplane land works through",
       example: "epic airplane inbox",
       flags: {
         "--since <iso>": "since then (default:  since airplane mode went on)",
@@ -393,6 +393,16 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
       usage: "<name>",
       description: "JSON:  where a worktree, branch, epic page or session of that name stands",
       example: "epic worktree status seo",
+      flags: {}
+    },
+    {
+      name: "create",
+      usage: "<name>",
+      description:
+        "make worktree <name> on branch <name>, from the local base branch, as Claude Code's EnterWorktree does " +
+        "through the worktree hook, and print its folder:  for Codex or any agent with no worktree hook;  reused when " +
+        "there already",
+      example: "epic worktree create seo",
       flags: {}
     },
     {
@@ -607,8 +617,22 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
     {
       name: "commit",
       usage: "[--session <id>] [--quiet]",
-      description: "commit whatever changed in the shared repo, one commit per epic, guide or folder (every turn)",
+      description:
+        "commit whatever changed in the shared repo, one commit per epic, guide or folder (every turn);  then sync, " +
+        "when the config names the content repo's remote (contentRemote)",
       example: "epic shared commit --quiet",
+      flags: {
+        "--session <id>": "the session whose turn swept them up",
+        "--quiet": "print nothing"
+      }
+    },
+    {
+      name: "sync",
+      usage: "[--session <id>] [--quiet]",
+      description:
+        "commit, then pull (rebasing), give ids two people both made the next free number on this side, and push:  " +
+        "what every turn does, by hand;  needs contentRemote in .epic/config.json5",
+      example: "epic shared sync",
       flags: {
         "--session <id>": "the session whose turn swept them up",
         "--quiet": "print nothing"
@@ -935,17 +959,45 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
       flags: {}
     }
   ],
+  turn: [
+    {
+      name: "end",
+      usage: "[--session <id>] [--quiet]",
+      description:
+        "end an agent's turn:  commit the shared plans, then sync them with the team's content repo (contentRemote);  " +
+        "what Claude's and Codex's end-of-turn hooks run, for any agent to run by hand;  quiet with nothing to do",
+      example: "epic turn end",
+      flags: {
+        "--session <id>": "the session whose turn it was (a commit trailer)",
+        "--quiet": "print nothing"
+      }
+    }
+  ],
+  skills: [
+    {
+      name: "check",
+      usage: "[--json]",
+      description:
+        "check the epic plugin's skills hold for Claude Code and Codex alike:  each step naming a Claude-only tool " +
+        "(the question modal, background agents, the worktree tools ...) has an In Codex: line beside it, each " +
+        "Claude-only skill its agents/openai.yaml, and the descriptions fit Codex's list;  exits 1 on a problem",
+      example: "epic skills check",
+      flags: { "--json": "print the report as JSON" }
+    }
+  ],
   plugin: [
     {
       name: "install",
-      usage: "[--kit <folder>] [--dry-run] [--json]",
+      usage: "[--codex] [--kit <folder>] [--dry-run] [--json]",
       description:
         "install the epic plugin in Claude Code as epic@spell, run in place from the kit's epic/ (from npm:  the " +
         "spell-epic package beside spell, its marketplace from GitHub):  the old " +
         "spell-epic@spell-epic taken out, the marketplace spell added, the cache, skill and epic links made;  " +
-        "safe to run again",
-      example: "epic plugin install --dry-run",
+        "--codex:  for Codex instead, its hooks in ~/.codex/hooks.json, its skills linked in ~/.agents/skills, " +
+        "the designer and coherence as Codex agents (~/.codex/agents) and epic on your PATH;  safe to run again",
+      example: "epic plugin install --codex --dry-run",
       flags: {
+        "--codex": "set it up for Codex:  the end-of-turn and session-start hooks, the skills and the custom agents",
         "--kit <folder>": "the kit's checkout to install from (default this code's main checkout, ~/www/spell)",
         "--dry-run": "only say what it would change",
         "--json": "print the report as JSON"
@@ -1074,7 +1126,8 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
  * - a docs tool or script passed through:
  *   `ask`, `choices`, `comments`, `notes`, `agents`, `airplane`, `window`, `server`
  * - a class of this folder:  `worktree` (`Worktrees`), `session` (`Sessions`), `park` (`Parking`), `shared` (`Shared`),
- *   `hub` (`Hub`), `repo` (`Repos`), `plugin` (`PluginInstall`)
+ *   `hub` (`Hub`), `repo` (`Repos`), `turn` (`TurnEnd`), `skills` (`SkillsCheck`),
+ *   `plugin` (`PluginInstall`)
  * - the docs pages' tools:  `pages` (`EpicTools.runPages()`)
  */
 export type GroupName =
@@ -1092,6 +1145,8 @@ export type GroupName =
   | "server"
   | "hub"
   | "repo"
+  | "turn"
+  | "skills"
   | "plugin"
   | "pages"
 
@@ -1101,7 +1156,7 @@ export type GroupVerb = {
   name: string
   /** its arguments:  `<slug> [--epic <epic>]` */
   usage: string
-  /** what it does, for Owen */
+  /** what it does, for the person running it */
   description: string
   /** a whole command line:  `epic ask create pick-layout --epic seo` */
   example: string
@@ -1130,7 +1185,7 @@ const TIME = "8h, 30m, 1h30m, or seconds"
 export const VERB_FLAGS: Record<string, VerbFlags> = {
   // requests from other sessions (`Requests`)
   send: {
-    "--text <words>": "Owen's words, verbatim",
+    "--text <words>": "your words, verbatim",
     "--file <file>": "his words, from a file",
     "--images <n>": "how many of the images he pasted last to keep (default none)",
     "--context <text>": "what he was looking at:  a page, a file, an item",
@@ -1143,7 +1198,7 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
     "--from <who>": "who sent it, with --file"
   },
   home: {},
-  merge: { "--ditch": "move up to 3 hand-made stray files aside too, once Owen says so" },
+  merge: { "--ditch": "move up to 3 hand-made stray files aside too, once you say so" },
 
   // an epic page:  making and reading (the `epic` tool's)
   create: {
@@ -1176,7 +1231,7 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
     "--symptom <html>": "what's wrong:  one line",
     "--changes <html>": "what changes:  two or three lines",
     "--goal <html>": "its goal",
-    "--plan <html>": "Claude's build plan, which waits for Owen's Accept",
+    "--plan <html>": "Claude's build plan, which waits for your Accept",
     "--files <html>": "the files it touches",
     "--verify <html>": "how it's checked",
     "--estimate <time>": "its estimate, e.g. 1-2h",
@@ -1187,9 +1242,9 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
     "--symptom <html>": "a phase's symptom",
     "--changes <html>": "a phase's changes",
     "--goal <html>": "a phase's goal",
-    "--plan <html>": "a phase's build plan, waiting for Owen's Accept",
+    "--plan <html>": "a phase's build plan, waiting for your Accept",
     "--choices <html>": "a phase's own option sets, <epic-choices> (its Choices field)",
-    "--accepted": "with --plan:  written accepted, Owen's comments on his Accept folded in (no second Accept)",
+    "--accepted": "with --plan:  written accepted, your comments on your Accept folded in (no second Accept)",
     "--files <html>": "a phase's files",
     "--verify <html>": "how a phase is checked",
     "--estimate <time>": "a phase's estimate, e.g. 1-2h",
@@ -1224,7 +1279,7 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
   // an epic page:  items
   add: {
     "--details <html>": "its details",
-    "--calm": "not urgent (yellow):  a judgement or issue that wouldn't surprise Owen",
+    "--calm": "not urgent (yellow):  a judgement or issue that wouldn't surprise you",
     "--limit": "a todo:  a limit to know about, not work",
     "--step <html>": "a manual test:  exactly what to do",
     "--should <html>": "a manual test:  what should happen",
@@ -1270,7 +1325,7 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
   // an epic page:  the review inbox
   inbox: {
     "--json": "print it as JSON",
-    "--session <id>": "watch:  the session that waits (default this one)",
+    "--session <id>": "watch, wait:  the session that waits (default this one)",
     "--timeout <time>": `wait:  how long (default 3300):  ${TIME}`,
     "--all": "apply:  the marks sent or not",
     "--clear": "status:  nothing being done",
@@ -1314,5 +1369,28 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
   loc: { "--print": "the by-repo table only;  the page is left as it is", "--json": "the numbers, as JSON" },
   config: { "--json": "print it as JSON" },
   voice: { "--for <kind>": "the voice that kind of page is written in", "--json": "print it as JSON" },
-  init: { "--dry-run": "only say what it would do", "--json": "print what it did as JSON" }
+  init: {
+    "--name <name>": "the name you go by on the epics (else asked, or git's)",
+    "--color <colour>": "the colour of your words:  a free Spell UI colour name (else asked), or a CSS colour",
+    "--content-repo <name>": "the shared repo's name on GitHub (else asked, or <repo>-epics)",
+    "--remote <address>": "use this shared repo, made already",
+    "--no-remote": "make no shared repo:  the plans stay on this machine",
+    "--public": "make the shared repo public, without asking (else asked, or private)",
+    "--no-plugin": "don't install the epic plugin for Claude Code",
+    "--no-commit": "don't commit .epic/config.json5 and .gitignore on the base branch",
+    "--no-server": "don't start the epic server",
+    "--dry-run": "only say what it would do",
+    "--json": "print what it did as JSON"
+  },
+  whoami: {
+    "--rename": "keep the name, and write it over your old one wherever it says who wrote something",
+    "--dry-run": "with --rename:  only say what it would change",
+    "--json": "print it as JSON"
+  },
+  whois: { "--json": "print it as JSON" },
+  guide: {
+    "--list": "the topics, a line each",
+    "--path": "the guide's file, for an agent to read",
+    "--root": "the epic plugin's folder:  what a skill's ${CLAUDE_PLUGIN_ROOT} names"
+  }
 }

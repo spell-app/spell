@@ -112,7 +112,9 @@ The page's STAGE (`<epic-page stage>`, epic `epic-engine` P29): how far planning
   hidden section is still in the file: it's only a view
 - `epic create` starts every new epic (future ones too) in `overview` (Q15); a page made before stages reads as
   `building`; `epic stage <name> overview|phases|building` sets it by hand
-- meanwhile the header's paper plane is the STAGE BUTTON, "Accept Overview", then "Accept Phases" (Q14): a press
+- meanwhile the STAGE BUTTON ends it, on the title row of the work it accepts (Q14;  epic `epic-engine` I180):
+  "Accept Overview" on the Overview's, then "Accept Phases" on the Phases section's, before its gear (the header's Send
+  stays the paper plane;  the button took its place before I180).  A press
   sends what's unsent with an accept mark; `epic inbox apply` moves the page on a stage, and the session then
   writes the phases, or starts building. Its tooltip counts the open questions: a reminder, never a lock
 - while `phases`, an open phase's pills are Looks good and Defer (later: after the other phases, still to do)
@@ -324,10 +326,18 @@ element takes its colour from this table, never a colour that means something el
 | blue   | do it now, or Claude is working on it       | Revisit, Send (everywhere: the page header, the agents panel, details pages); the Underway status card; an item Claude is working on (its chip, the spinner); a phase under way or worked on; a phase SCHEDULED, still to do (a DOTTED blue outline); an epic in progress; a goals topic "building" |
 | green  | decided or done (however long ago)          | Approve, Make Todo, a todo's "next phase" plane; a pick, the chosen option (a details page's chosen card); a phase done in the last 3 days, the Done status card (filled: the item's work finished), the Noted status card (outlined: a step done, your choice recorded or an answer written, the item not finished); an item decided, done, or approved as it stands, for good; an epic done; a goals topic "agreed", "shipped" |
 | orange | ONLY changed since you looked, and warnings; an item Claude answered with options, waiting for your pick (Owen, 2026-10-09) | UPDATE labels, `<epic-update>` blocks, a phase's changed pen, a phase changed since you looked (its chip and circle); "nobody is listening" (inverted, to stand out); a `replied` item's chip (DARK text on it)                                         |
-| violet | Claude's voice                              | his reply cards; "recommended" (a thumbs-up, no word)                                                                                                                                                               |
-| ivory  | Owen's voice (the brand's brown tint)       | his note box, a marked note, his reply cards, the answer card; the toolbar                                                                                                                  |
+| violet | a person's voice (you, everyone alike): `--epic-voice-person`, `-text`, `-fill`, `-rule` | a person's reply cards (their mark, name, faint fill and rule); the note box; "recommended" (a thumbs-up, no word) |
+| terracotta | an agent's voice (Claude's, Codex's ...): `--epic-voice-agent`, `-text` | an agent's reply cards: their round mark, and their name (the card stays white); an agent's comment-thread messages (their light box) and its "thinking…" stub; a page note's Claude replies and its "answered" chip; a comment's quote while it waits for an agent (epic `epic-friend` P10, Q16: violet before) |
+| ivory  | the page's own warm ground (the brand's brown tint) | the answer card; a marked note (what you said, once marked); the toolbar; a comment thread's ground, where a person's words sit plain |
 | grey   | no longer relevant, inactive, not chosen    | a canceled item (made moot); a todo's "drop it" x; the note box's "skip this" x; buttons at rest, and once Claude has handled them; a phase done longer ago; a future epic; a paused epic (phases left, untouched for 3 days); a goals topic "draft"                                                                                 |
 
+- The voices are theme tokens (epic `epic-friend` T11): tweak them in `<epic-page>`'s theme block (`EpicPage.css`,
+  "Voices"), or on a page with `epic-page { --epic-voice-agent: ... }`; the docs pages' copies are `spell-doc.css`'s
+  `--spell-voice-*` (change both).
+- A colour per person and per agent (epic `epic-friend` P10, Q16): the repo's epic settings, `colors` in
+  `.epic/config.json5` (`{ people: { ana: "#2f9e6e" }, agents: { codex: "#0f8b8d" } }`), become each one's own token,
+  `--epic-voice-person-ana`, `--epic-voice-agent-codex`; a reply or thread message draws in its speaker's, an agent's
+  words in the agent's. Anyone without one keeps the shared voice.
 - No light blue, no light green: one shade per meaning.
 - Colour-blind readers tell red and green apart least: the chip's id, the icons and the words keep them readable.
 - A PHASE takes ONE of these, the first that holds (epic `epic-engine` I170; Owen, 2026-10-29: "The order, one chip
@@ -406,6 +416,11 @@ On an item's line, ONE group, in this order:
 (Owen, 2026-10-25:  "`todo` is first, then `revisit`, then `check`".)  No Do Now (the wand) since that day:  "In
 practice, I'm never using the wand";  the inbox still takes an older page's request for now. An item Claude has
 answered or done keeps the three-button group, so Owen can still approve it.
+
+A phase still to do has Do this (thumbs up), green, then Revisit:  "yes, build this phase", the same `todo` mark,
+which `inbox apply` takes as a go-ahead, never a new todo (epic `epic-engine` I181;  Owen, 2026-10-29:  "it's already a
+phase, you wouldn't make it a todo").  Every button that means "accept this" is a thumbs up:  Accept plan, a plan
+accepted's state, Accept Overview / Accept Phases, Looks good.
 
 The NOTE BOX (every one but a work todo's:  an item's, an Overview sub-section's, a phase's, the summary's) has two
 buttons:  Revisit Later (history), blue, and Skip This (x), grey (Owen, 2026-10-09:  the x replaced the box's Make
@@ -623,7 +638,8 @@ by itself, as a press would. A press still sends at once.
 - That send hands over every mark AND turns each revisit waiting (unsent, or sent and still to talk over) into a
   request for now (`POST send { now: true }`, `ReviewInbox.reviewNow()`), as Review Now did:  the listening session
   answers them all at once, by background agents, into the items.
-- On a stage button (Accept Overview, Accept Phases) it only sends the marks, never accepts.
+- It only ever sends the marks, never accepts a stage:  Accept Overview and Accept Phases are their sections' own
+  buttons (`<epic-stage-button>`, epic `epic-engine` I180).
 - Only an epic page's header counts down:  a details page's or a guide's Send waits for a press.
 - The wand that turned the countdown on and off (P20) is gone for good.
 
@@ -731,7 +747,9 @@ server types `/epic review` into it, above):
    is Owen's to close, but a test Claude checked itself it closes with `close`, Q58). The card's markup: `PLAN-DOC.md` "Status cards".
 5. `wait` again. On leaving: `inbox ignore <name>`.
 
-A reply to Owen's revisit note (`details --append`), dated, quoting the note:
+A reply to Owen's revisit note (`details --append`), dated, quoting the note.
+Write `from="Claude"`:  the tool marks it yours on the way in, `agent="claude"`, its `from` whose session wrote it
+(epic `epic-friend` P2), so the page draws "Claude (Ana)" to everyone but Ana.
 
 ```html
 <epic-reply from="Claude" at="2026-10-04 17:20" re="why not reuse the details route?">

@@ -32,9 +32,9 @@ export const epicPhaseVocabulary = {
   ui: false,
   description:
     "One phase of the plan:  its status icon and estimate (once done, what it took) in its title line;  its fields (Symptom, " +
-    "Requests, Goal, Changes), Owen's kept notes, its plan changes (`<epic-update>` blocks, at the end of its " +
+    "Requests, Goal, Changes), your kept notes, its plan changes (`<epic-update>` blocks, at the end of its " +
     "description), then Done, commits, Files, Verify and To review, as children in that order.  " +
-    "While the page is reviewed, it takes review notes as an Overview sub-section does:  Make Todo, Revisit.",
+    "While the page is reviewed, it takes review notes as an Overview sub-section does:  Do this (a thumbs up:  build it), Revisit.",
   attributes: [
     {
       name: "id",
@@ -74,7 +74,7 @@ export const epicPhaseVocabulary = {
       name: "estimate",
       kind: "string",
       description:
-        "Wall-clock time for Claude to do it, agents included, Owen's review not:  `30m`, `2h`, `1h30m`, `1-2h`."
+        "Wall-clock time for Claude to do it, agents included, your review not:  `30m`, `2h`, `1h30m`, `1-2h`."
     },
     {
       name: "took",
@@ -82,7 +82,7 @@ export const epicPhaseVocabulary = {
       description:
         "How long Claude really worked on it, written by the epic tool when it's done (`epic phase … done`, or " +
         "`… took` later;  epic `epic-engine` P41):  `21m`, `1h 30m`.  Its agents' and sessions' working time, " +
-        "side by side counted once, never the time waiting on Owen.  A done phase shows it in place of its " +
+        "side by side counted once, never the time waiting on you.  A done phase shows it in place of its " +
         "estimate, the estimate in its tooltip (`~3-4h`)."
     },
     {
@@ -96,13 +96,13 @@ export const epicPhaseVocabulary = {
       format: "ids",
       description: "The ids inside its part file:  a link to one loads the body first, then lands."
     },
-    { name: "commits", kind: "boolean", description: "Its body lists commits:  its git icon shows." },
+    { name: "commits", kind: "boolean", description: "Its body lists commits:  its gear offers to show them." },
     {
       name: "to-accept",
       kind: "string",
       format: "ids",
       description:
-        "The change marks inside it still waiting for Owen's Accept (`ch3 ch5`), written by the epic tool on every " +
+        "The change marks inside it still waiting for your Accept (`ch3 ch5`), written by the epic tool on every " +
         "edit (epic `epic-engine` P30):  the page counts and finds them while its body, a part, isn't loaded."
     },
     {
@@ -126,7 +126,7 @@ export const epicPhaseVocabulary = {
       kind: "enum",
       values: ["waiting", "accepted"],
       description:
-        "Claude's build plan (its `plan` field, epic `epic-engine` P33):  `waiting` for Owen's Accept (its review " +
+        "Claude's build plan (its `plan` field, epic `epic-engine` P33):  `waiting` for your Accept (its review " +
         "buttons Accept plan and Revisit), or `accepted` (still to do, its review group ends in a green check:  " +
         "good to go, epic `epic-engine` I140);  written by the epic tool, so the title row knows with its body not " +
         "loaded."
@@ -150,7 +150,7 @@ export const epicPhaseVocabulary = {
   ],
   events: [...FOLD_EVENTS],
   slots: [
-    { name: "", description: "Its fields, Owen's kept notes, its plan changes and commits." },
+    { name: "", description: "Its fields, your kept notes, its plan changes and commits." },
     { name: "title", description: "A title with markup, in place of `title`." },
     ACTIONS_SLOT_SPEC,
     {
@@ -162,18 +162,12 @@ export const epicPhaseVocabulary = {
     {
       name: "status",
       description:
-        "Claude's status cards on Owen's marks (`<epic-status slot=\"status\">`, P13):  at the end of its body, " +
+        'Claude\'s status cards on your marks (`<epic-status slot="status">`, P13):  at the end of its body, ' +
         "above the note box."
     }
   ],
   parts: [
     ...FOLD_PARTS,
-    {
-      name: "git",
-      description:
-        "Its git icon (epic `epic-engine` P53), before its gear, while it lists commits:  shows or hides its own " +
-        "commits;  pressed while they show."
-    },
     {
       name: "status",
       description:
@@ -182,7 +176,7 @@ export const epicPhaseVocabulary = {
     },
     {
       name: "choices-open",
-      description: "In its title (P50):  `1 choice open`, red, while a set in its body waits for Owen's pick."
+      description: "In its title (P50):  `1 choice open`, red, while a set in its body waits for your pick."
     },
     {
       name: "changed",
@@ -219,7 +213,7 @@ export const epicPhaseVocabulary = {
   ],
   states: [
     ...FOLD_STATES,
-    { name: "commits", description: "Its own commits show:  its git icon pressed." },
+    { name: "commits", description: "Its own commits show:  ticked in its gear." },
     {
       name: "movable",
       description:
@@ -249,11 +243,10 @@ export const epicPhaseVocabulary = {
       description: "Its spinner while Claude is at work on it, its plan accepted or the phase under way."
     },
     { key: "gearTip", text: "Settings for this phase", description: "Its gear's tooltip and name (I166)." },
-    { key: "showCommits", text: "Show this phase's commits", description: "The git icon's tooltip (P53, J163)." },
     {
-      key: "hideCommits",
-      text: "Hide this phase's commits",
-      description: "The git icon's tooltip, its commits shown."
+      key: "showCommits",
+      text: "Show this phase's commits",
+      description: "Its gear menu:  its own commits, ticked while they show, while it has any (I183)."
     },
     {
       key: "showPhaseFiles",
@@ -268,17 +261,17 @@ export const epicPhaseVocabulary = {
     {
       key: "tookTip",
       text: "~{estimate}",
-      description: "A done phase's time pill:  its tooltip, the estimate it had (`~3-4h`;  Owen, M3 on P41)."
+      description: "A done phase's time pill:  its tooltip, the estimate it had (`~3-4h`;  M3 on P41)."
     },
     {
       key: "choiceOpen",
       text: "1 choice open",
-      description: "After its title (P50):  a set in its body waits for Owen's pick."
+      description: "After its title (P50):  a set in its body waits for your pick."
     },
     {
       key: "choicesOpenCount",
       text: "{count} choices open",
-      description: "After its title (P50):  sets in its body wait for Owen's picks."
+      description: "After its title (P50):  sets in its body wait for your picks."
     },
     {
       key: "changedTip",
@@ -320,18 +313,18 @@ export const epicPhaseVocabulary = {
       where: { attribute: "name", values: ["requests"] },
       max: 1,
       description:
-        "Requests:  what Owen sent this phase from other sessions (epic `epic-workflow`), one labelled block each:  " +
-        "his words, the sender, his screenshots (`epic file`)."
+        "Requests:  what you sent this phase from other sessions (epic `epic-workflow`), one labelled block each:  " +
+        "your words, the sender, your screenshots (`epic file`)."
     },
     {
       tag: "epic-reply",
       description:
-        "Owen's notes on the phase from the page, kept once Claude took them (`inbox done | clear`), oldest first."
+        "Your notes on the phase from the page, kept once Claude took them (`inbox done | clear`), oldest first."
     },
     {
       tag: "epic-status",
       slot: "status",
-      description: "Claude's status cards on Owen's marks, oldest first (`plan-doc status`;  a todo filed:  born done)."
+      description: "Claude's status cards on your marks, oldest first (`plan-doc status`;  a todo filed:  born done)."
     },
     {
       tag: "epic-field",
@@ -344,8 +337,8 @@ export const epicPhaseVocabulary = {
       where: { attribute: "name", values: ["changes"] },
       max: 1,
       description:
-        "Changes:  what changes, two or three lines;  after Goal, next to the plan (epic `epic-engine` P45;  Owen, " +
-        '2026-10-25:  "Move `changes` below `goal` so it\'s next to the plan").'
+        "Changes:  what changes, two or three lines;  after Goal, next to the plan (epic `epic-engine` P45;  " +
+        'Owen, 2026-10-25:  "Move `changes` below `goal` so it\'s next to the plan").'
     },
     {
       tag: "epic-field",
@@ -366,7 +359,7 @@ export const epicPhaseVocabulary = {
       where: { attribute: "name", values: ["plan"] },
       max: 1,
       description:
-        "Claude's plan:  how Claude will build it, for Owen to accept first (epic `epic-engine` P33;  `--plan`)."
+        "Claude's plan:  how Claude will build it, for you to accept first (epic `epic-engine` P33;  `--plan`)."
     },
     {
       tag: "epic-field",

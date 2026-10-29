@@ -276,7 +276,7 @@ describe("PlanDocCommands choose:  an option Owen settled in conversation, on an
     await owner.run(["details", "x", "j1", "--append", "--file", join(root, "reply.html")])
     printed = []
     expect(await owner.run(["choose", "x", "J1", "c", "Owen:  'C, please';  built"])).toBe(0)
-    expect(printed).toEqual(["J1 picked C:  Way C (a reply's options);  approved:  closed (accepted)"])
+    expect(printed).toEqual(["J1 Owen picked C:  Way C (a reply's options);  approved:  closed (accepted)"])
     const plan = FILES.read(file)
     const sets = Array.from(plan.item("j1").querySelectorAll("epic-choices"), (set) => set.getAttribute("chosen"))
     expect([plan.item("j1").getAttribute("status"), sets]).toEqual(["done", [null, "C"]])

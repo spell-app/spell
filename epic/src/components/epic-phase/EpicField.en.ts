@@ -35,7 +35,7 @@ export const epicFieldVocabulary = {
       values: ["symptom", "changes", "requests", "goal", "choices", "plan", "done", "files", "verify", "to-review"],
       description:
         "A phase's field (every field in a phase has one):  `symptom` (one line), `changes` (two or three), `goal` " +
-        "(a bullet per outcome), `plan` (Claude's build plan, for Owen to accept before the build:  epic `epic-engine` P33), `requests` (what Owen sent it from other sessions:  `epic file`), `done` (what was built), `files`, `verify` (both hidden until the Phases title's " +
+        "(a bullet per outcome), `plan` (Claude's build plan, for you to accept before the build:  epic `epic-engine` P33), `requests` (what you sent it from other sessions:  `epic file`), `done` (what was built), `files`, `verify` (both hidden until the Phases title's " +
         "toggles), `choices` (its own option sets, `<epic-choices>`, epic `epic-engine` P50), `to-review` (the script's:  an `<epic-mark item link>` per item, epic `epic-engine` P45)."
     },
     {
@@ -43,7 +43,7 @@ export const epicFieldVocabulary = {
       kind: "string",
       format: "time",
       description:
-        "A `plan` field:  when Owen accepted it (`YYYY-MM-DD HH:MM`), the build's go-ahead;  none:  waiting for him."
+        "A `plan` field:  when you accepted it (`YYYY-MM-DD HH:MM`), the build's go-ahead;  none:  waiting for you."
     },
     {
       name: "label",
@@ -91,8 +91,8 @@ export const epicFieldVocabulary = {
     { key: "requests", text: "Requests:" },
     { key: "goal", text: "Goal:" },
     { key: "choices", text: "Choices:", description: "A phase's own option sets (P50)." },
-    { key: "plan", text: "Claude's plan:", description: "A phase's build plan, waiting for Owen's Accept." },
-    { key: "planAccepted", text: "Claude's plan, accepted:", description: "A phase's build plan Owen accepted." },
+    { key: "plan", text: "Claude's plan:", description: "A phase's build plan, waiting for your Accept." },
+    { key: "planAccepted", text: "Claude's plan, accepted:", description: "A phase's build plan you accepted." },
     { key: "done", text: "Done:" },
     { key: "files", text: "Files:" },
     { key: "verify", text: "Verify:" },

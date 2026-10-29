@@ -31,6 +31,9 @@ const { baseConfig } = (await import(UI_CONFIG)) as { baseConfig: () => UserConf
 /** The tests live in tests/, at the same paths as the code in src/. */
 const TESTS = resolve(import.meta.dirname, "tests")
 
+/** Every node test file's scratch epic home (`tests/setup/epicHome.ts`). */
+const EPIC_HOME_SETUP = resolve(TESTS, "setup/epicHome.ts")
+
 /** Spell UI's test setup (`spell/ui/test-helpers/setup.ts`), by Node's resolver:  wherever the install put spell-ui. */
 const UI_SETUP = fileURLToPath(import.meta.resolve("spell/ui/test-helpers/setup.ts"))
 
@@ -59,7 +62,9 @@ export function epicsProjects({
         dir: TESTS,
         environment: "node",
         include: ["**/*.test.{js,ts}"],
-        exclude: ["**/node_modules/**", "components/**", "vscode/**"]
+        exclude: ["**/node_modules/**", "components/**", "vscode/**"],
+        // a scratch epic home, its person "Owen":  what the tools write never names whoever runs the tests
+        setupFiles: [EPIC_HOME_SETUP]
       }
     },
     browserProject({ name: `${prefix}browser`, root, animations: "off" }),

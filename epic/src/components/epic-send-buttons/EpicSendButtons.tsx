@@ -7,8 +7,10 @@ import { SendCountdown } from "spell/epic/review"
 
 import { epicSendButtonsVocabulary } from "./EpicSendButtons.en"
 import { SEND_ASKED, type SendAskedDetail } from "./EpicSendButtons.types"
+import { CountdownRing } from "./CountdownRing"
 
 import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
+import ringCSS from "./CountdownRing.css?inline"
 import sendButtonsCSS from "./EpicSendButtons.css?inline"
 
 /****************
@@ -22,7 +24,8 @@ import sendButtonsCSS from "./EpicSendButtons.css?inline"
  *     plane in this mode");  grey with something not sent, blue once sent;  never dashed (Owen, 2026-10-22)
  *   - Auto Send off (or no `countdown`) with something not sent:  FILLED blue, so it plainly waits for a press
  *     (`:state(waiting)`)
- * - the RING (`countdown`, the page's Auto Send on, something not sent):  round the plane, set apart from it, with
+ * - the RING (`countdown`, the page's Auto Send on, something not sent;  `CountdownRing`, a stage button's too):
+ *   round the plane, set apart from it, with
  *   rounded ends, filling in blue clockwise over a light grey track as the wait runs
  *   (Owen's comment C10:  "Prettier ring, with pill edges, not just border.  Should look distinct from the button
  *   itself";  2026-10-29:  "Start out light grey and fill in blue")
@@ -31,10 +34,8 @@ import sendButtonsCSS from "./EpicSendButtons.css?inline"
  *   - at the end the owner is asked to send (`auto` true), as a press would, waking the epic when nobody listens
  *   - Auto Send Immediately:  no ring;  each change goes as it's finished
  *   - the choice is the page header's gear's (`SendCountdown.choose()`), never this element's
- * - a STAGE BUTTON in the plane's place (`accept`, epic `epic-engine` P29):  a check and its words ("Accept
- *   Overview"), green;  a press asks its owner as the plane's does, and the owner accepts the stage
- *   - outlined green once pressed (`accepted`), waiting for the session to move the page on
- *   - the ring goes round its check;  the countdown's end only ever sends marks, never accepts (J143)
+ * - the plane in every stage of an epic page:  the stage's Accept is on the title row of what it accepts
+ *   (`<epic-stage-button>`, epic `epic-engine` I180;  the stage button took the plane's place here before, P29)
  * - WAITING ON OWEN (`asks`;  Owen, 2026-10-25:  "try the thicker border if you are waiting on me"):  the pill
  *   its own border 2px #666, darker than its hairline, solid, dotted once he's pressed what it waits for (`taken`)
  *   - an epic page's header, while Claude's build plans wait for his Accept on their phases
@@ -46,7 +47,7 @@ import sendButtonsCSS from "./EpicSendButtons.css?inline"
 export class EpicSendButtons extends E.UIComponent<typeof epicSendButtonsVocabulary> {
   @E.proto static vocabulary = epicSendButtonsVocabulary
   @E.protoMerged static elementSetup = {
-    styleSheets: { "epic-tooltip": tooltipCSS, "epic-send-buttons": sendButtonsCSS },
+    styleSheets: { "epic-tooltip": tooltipCSS, "epic-countdown-ring": ringCSS, "epic-send-buttons": sendButtonsCSS },
     delegatesFocus: false
   } satisfies Partial<E.ElementSetup>
 
@@ -75,16 +76,10 @@ export class EpicSendButtons extends E.UIComponent<typeof epicSendButtonsVocabul
     return !this.isManual && !!this.pageCountdown?.hasRing
   }
 
-  /** Auto Send off, something not sent:  the plane is filled, waiting for a press;  never the stage button. */
+  /** Auto Send off, something not sent:  the plane is filled, waiting for a press. */
   @E.cssState("waiting")
   get isWaiting(): boolean {
-    return !this.accept && !this.isCountdownOn && this.isUnsent
-  }
-
-  /** The plane's place holds the stage button (`accept`):  its words, not the plane. */
-  @E.cssState("stage")
-  get isStageButton(): boolean {
-    return !!this.accept
+    return !this.isCountdownOn && this.isUnsent
   }
 
   /** No `countdown`:  only a press sends, and the page's countdown never hears of this Send (J142). */
@@ -143,7 +138,7 @@ export class EpicSendButtons extends E.UIComponent<typeof epicSendButtonsVocabul
       >
         <button
           type="button"
-          class={[SEND, { [ACCEPT]: !!this.accept }]}
+          class={SEND}
           part={this.partForName("send")}
           data-state={this.groupState}
           aria-busy={this.busy ? "true" : undefined}
@@ -152,16 +147,10 @@ export class EpicSendButtons extends E.UIComponent<typeof epicSendButtonsVocabul
           onClick={() => this.askToSend(false)}
         >
           <span class={GLYPH}>
-            <ui-icon
-              name={this.busy ? "circle notch" : this.accept ? "circle check" : "paper plane"}
-              loading={this.busy ? "" : undefined}
-            />
-            <Show when={this.isCounting}>{this.ring()}</Show>
+            <ui-icon name={this.busy ? "circle notch" : "paper plane"} loading={this.busy ? "" : undefined} />
+            <Show when={this.isCounting}>{CountdownRing.draw(() => this.fractionLeft, this.partForName("ring"))}</Show>
           </span>
-          <Show when={this.accept}>
-            <span class={ACCEPT_WORDS}>{this.accept}</span>
-          </Show>
-          <Show when={!this.accept && (this.count ?? 0) > 0}>
+          <Show when={(this.count ?? 0) > 0}>
             <span class={COUNT} part={this.partForName("count")}>
               {this.count}
             </span>
@@ -171,50 +160,22 @@ export class EpicSendButtons extends E.UIComponent<typeof epicSendButtonsVocabul
     )
   }
 
-  /**
-   * The countdown's ring round the plane (or the stage button's check):  a light grey track, and over it how
-   * much of the wait has gone, its ends round, filling in clockwise from the top.
-   */
-  private ring(): JSX.Element {
-    const done = () => (1 - this.fractionLeft) * 100
-    return (
-      <svg class={RING} part={this.partForName("ring")} viewBox="0 0 28 28" aria-hidden="true">
-        <circle class={TRACK} cx="14" cy="14" r="11.5" pathLength="100" />
-        <circle
-          class={[DONE, { [EMPTY]: done() < 0.5 }]}
-          cx="14"
-          cy="14"
-          r="11.5"
-          pathLength="100"
-          // 5% past the circle's start, turned back 18deg so it still starts at the top:  Chrome cuts a round cap off where
-          // it crosses a closed path's start point
-          transform="rotate(-18 14 14)"
-          style={{ "stroke-dasharray": `${done()} 100`, "stroke-dashoffset": "-5" }}
-        />
-      </svg>
-    )
-  }
-
-  /**
-   * The group's `data-state`, its outline and the plane's colour:  `state`;  the stage button's own,
-   * `accepted` once pressed, else `idle`.
-   */
+  /** The group's `data-state`, its outline and the plane's colour:  `state`, `idle` for none. */
   get groupState(): string {
-    if (this.accept) return this.accepted ? "accepted" : "idle"
     return this.state ?? "idle"
   }
 
   /**
-   * The plane's tooltip and name:  what a press sends (`send-tip`, the stage button's words), then, while the ring
+   * The plane's tooltip and name:  what a press sends (`send-tip`), then, while the ring
    * counts, how long is left and that a click sends now.
    */
   get sendTitle(): string {
-    const words = this.sendTip || this.accept || this.translationForKey("send")
+    const words = this.sendTip || this.translationForKey("send")
     if (!this.isCounting) return words
     const countdown = this.pageCountdown!
     const when = countdown.isHeld
       ? this.translationForKey("held")
-      : this.translationForKey("counting", { time: minutesAndSeconds(countdown.msLeft) })
+      : this.translationForKey("counting", { time: CountdownRing.timeLeft(countdown.msLeft) })
     return `${words} · ${when}`
   }
 
@@ -232,17 +193,5 @@ export interface EpicSendButtons extends E.AttributeValues<typeof epicSendButton
 /** Classes of the shadow markup. */
 const GROUP = "group"
 const SEND = "send"
-const ACCEPT = "accept"
-const ACCEPT_WORDS = "accept-words"
 const COUNT = "count"
 const GLYPH = "glyph"
-const RING = "ring"
-const TRACK = "track"
-const DONE = "done"
-const EMPTY = "empty"
-
-/** `ms` as minutes and seconds, rounded up:  `1:42`, `0:05`. */
-function minutesAndSeconds(ms: number): string {
-  const seconds = Math.ceil(ms / 1000)
-  return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`
-}

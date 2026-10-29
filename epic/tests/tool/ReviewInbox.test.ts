@@ -16,6 +16,7 @@ import {
   WAKE_COOLDOWN_MS,
   isoTime
 } from "spell/epic/tool/ReviewInbox"
+import { STAGE_COUNTDOWN_MS } from "spell/epic/review"
 
 const M1 = "2026-10-04T15:00:00-04:00"
 const M2 = "2026-10-04T15:01:00-04:00"
@@ -373,6 +374,9 @@ describe("ReviewInbox.reviewNow() (windows-and-review P4)", () => {
   })
 })
 
+/** Who every test's listener is:  the test home's person, and the agent the tests name (`tests/setup/epicHome.ts`). */
+const WHO = { person: "Owen", agent: "claude" }
+
 describe("ReviewInbox, Claude's side", () => {
   test("working and listening, set and cleared", () => {
     const inbox = new ReviewInbox()
@@ -380,7 +384,7 @@ describe("ReviewInbox, Claude's side", () => {
     expect(inbox.working).toEqual({ i2: { action: "details", since: M1 } })
     inbox.setWorking("i2", null)
     expect(inbox.working).toEqual({})
-    expect(inbox.setListening("abc", M1)).toEqual({ session: "abc", since: M1, seen: M1 })
+    expect(inbox.setListening("abc", M1)).toEqual({ session: "abc", since: M1, seen: M1, ...WHO })
     expect(inbox.setListening(null)).toBeNull()
   })
 
@@ -389,7 +393,7 @@ describe("ReviewInbox, Claude's side", () => {
     expect(inbox.touchListening(M2)).toBeNull()
     expect(inbox.listening).toBeNull()
     inbox.setListening("abc", M1)
-    expect(inbox.touchListening(M2)).toEqual({ session: "abc", since: M1, seen: M2 })
+    expect(inbox.touchListening(M2)).toEqual({ session: "abc", since: M1, seen: M2, ...WHO })
   })
 
   test("liveListener:  stale once seen is older than LISTEN_STALE_MS;  an old file's since counts", () => {
@@ -412,7 +416,8 @@ describe("ReviewInbox, Claude's side", () => {
       session: "abc",
       since: M1,
       seen: M1,
-      pid: process.pid
+      pid: process.pid,
+      ...WHO
     })
     const seen = Date.parse(M1)
     expect(inbox.liveListener(seen + 10 * LISTEN_STALE_MS)).toEqual(inbox.listening)
@@ -425,9 +430,37 @@ describe("ReviewInbox, Claude's side", () => {
     inbox.setMark("j1", { action: "approve" }, M1)
     inbox.setListening("abc", M1)
     const late = inbox.forPage(Date.parse(M1) + LISTEN_STALE_MS + 1)
-    expect(late).toEqual({ ...inbox.toRecord(), listening: null, unsentComments: [], waitingComments: [] })
+    expect(late).toEqual({
+      ...inbox.toRecord(),
+      listening: null,
+      lastListener: inbox.listening,
+      unsentComments: [],
+      waitingComments: []
+    })
     expect(inbox.listening!.session).toBe("abc")
-    expect(inbox.forPage(Date.parse(M1)).listening!.session).toBe("abc")
+    expect(inbox.forPage(Date.parse(M1))).toMatchObject({ listening: { session: "abc" }, lastListener: null })
+  })
+
+  // epic `epic-friend` P11:  the page says whose agent listens ("Your Codex is listening"), and, gone, how to wake it
+  test("setListening():  stamps WHO listens, the machine's person and the agent running epic;  forPage() keeps the last", () => {
+    const before = process.env.SPELL_EPIC_AGENT
+    process.env.SPELL_EPIC_AGENT = "codex"
+    try {
+      const inbox = new ReviewInbox()
+      expect(inbox.setListening("thread-1", M1, 999_999)).toEqual({
+        session: "thread-1",
+        since: M1,
+        seen: M1,
+        pid: 999_999,
+        person: "Owen",
+        agent: "codex"
+      })
+      // its process gone:  nobody listens, and the page is told who did last
+      expect(inbox.forPage()).toMatchObject({ listening: null, lastListener: { agent: "codex", person: "Owen" } })
+      expect(new ReviewInbox().forPage().lastListener).toBeNull()
+    } finally {
+      process.env.SPELL_EPIC_AGENT = before
+    }
   })
 
   test("finishMarks:  immediate marks go;  one Owen changed meanwhile stays", () => {
@@ -443,6 +476,26 @@ describe("ReviewInbox, Claude's side", () => {
 })
 
 describe("ReviewInbox.takeWork()", () => {
+  // epic `epic-engine` I181 (Owen, 2026-10-29:  "make 'accept overview' and 'accept phases' 5 minute countdown")
+  test("a stage button's accept (`countdown`) is dated 5 minutes ahead, HELD:  no send before then carries it", () => {
+    const inbox = new ReviewInbox()
+    const pressed = new Date()
+    const mark = inbox.setMark("stage", { action: "accept", stage: "phases", countdown: true }, isoTime(pressed))!
+    expect(Date.parse(mark.at) - pressed.getTime()).toBe(STAGE_COUNTDOWN_MS)
+    expect(mark).toMatchObject({ action: "accept", stage: "phases", countdown: true })
+    inbox.setMark("j1", { action: "approve" }, isoTime(pressed))
+    expect(inbox.heldMarks.map((each) => each.id)).toEqual(["stage"])
+    expect(inbox.unsentMarks.map((each) => each.id)).toEqual(["j1"])
+    // a Send (a press, Auto Send, Review Now) a minute in:  the approve goes, the accept waits
+    inbox.markSent(isoTime(new Date(pressed.getTime() + 60_000)))
+    expect(inbox.sentMarks.map((each) => each.id)).toEqual(["j1"])
+    // the page's send once the 5 minutes are up:  the accept goes
+    inbox.markSent(isoTime(new Date(pressed.getTime() + STAGE_COUNTDOWN_MS + 1000)))
+    expect(inbox.sentMarks.map((each) => each.id)).toEqual(["j1", "stage"])
+    // without `countdown` (the CLI, an older page):  stamped as it's made
+    expect(inbox.setMark("stage", { action: "accept", stage: "phases" }, M1)!.at).toBe(M1)
+  })
+
   test("sentMarks:  at or before the send, never an immediate one;  none before a send", () => {
     const inbox = new ReviewInbox()
     inbox.setMark("j1", { action: "approve" }, M1)

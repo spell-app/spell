@@ -122,11 +122,16 @@ one saga's page, `sagas/<id>/<id>.saga.html`, in the same markup, so the tool ed
 ## Ids
 
 As `plan-doc.md`, "Ids":
+- A new id is the next number of its letter, so two people can both make `T22`:  the content repo's sync gives THIS
+  machine's the next free number before it rebases (`Renumber`, `SharedSync`;  epic `epic-friend` P5), every reference
+  following, and the log says so (`Renumbered as the plans synced:  T22 → T23`).
+  Change marks (`ch12`) and requests (`r3`) too;  and comments (`c4`), each person's in their own comments file
+  beside the page (`Renumber.comments()`, epic `epic-friend` P9, T15), with no log line:  a comment isn't on the page.
 - The letters:
   - `q` question (an answered one is a decision)
   - `j` judgement call, `t` todo (work still to do, or with `limit` a limit to know about)
   - `i` issue, `m` manual test
-  - a comment is `c` (`C3`), in the inbox, never an item
+  - a comment is `c` (`C3`), in its writer's comments file (`SharedComments`), never an item
   - before epic `epic-engine` P44:  `c` caveat (the todos), `t` test, and comments `m` ("M" for mark);  the migration
     `item-renames` renamed them, every number kept ("Migrations", below)
   - before epic `epic-engine` P32:  `t` todo and `v` test;  the migration `caveats-and-tests` renumbered them (retired)
@@ -249,8 +254,11 @@ As `plan-doc.md`, "Ids":
   - None (every page made before P29):  `building`, so it looks as it did.  No migration step:  an optional attribute.
   - `create` writes `overview` (Q15:  new and future epics;  the default since P33, `--stage` for another);
     `stage <name> <stage>` sets it by hand, logged.
-  - The header's stage button (Accept Overview, Accept Phases) leaves the inbox mark `stage`,
-    `{ action: "accept", stage }`;  `inbox apply` moves the page on a stage and logs it
+  - The stage button (`<epic-stage-button>`:  Accept Overview on the Overview's title row, Accept Phases on the Phases
+    section's;  the page header's before epic `epic-engine` I180) leaves the inbox mark `stage`,
+    `{ action: "accept", stage, countdown: true }`, HELD five minutes (epic `epic-engine` I181):  dated when it goes, so
+    no Send carries it early, and the page sends it as its countdown runs out;  `epic inbox` prints it `held` till
+    then.  `inbox apply` moves the page on a stage and logs it
     (`STAGE accepted overview:  stage phases, write the phases`).
   - While `phases`, an open phase's Defer pill leaves `{ action: "defer" }`:  `inbox apply` moves it after the other
     phases, still to do (its number changes, its id never);  its Looks good is an approve, noted.
@@ -564,8 +572,11 @@ As `plan-doc.md`, "Ids":
   - Make Todo makes a todo linking `#o3`
   - a kept note is a paragraph at its end
 - So do a phase and the summary (epic `airplane` P2):  Make Todo and Revisit on the page;  no Approve.
+  - A phase's first button is Do this, a thumbs up (epic `epic-engine` I181;  Owen, 2026-10-29:  "it's already a phase,
+    you wouldn't make it a todo"):  the same `todo` mark, applied as a go-ahead (below)
   - A phase (keyed by its id, `p-epic-migrate`;  a mark keyed `p3` from before `stable-phase-ids`:  the 3rd phase):
-    - Make Todo makes `Follow up:  P3 · <title>`, linking `#p-epic-migrate`, and a Noted status card on the phase
+    - Do this (its `todo` mark) makes NO todo:  a Noted status card on the phase, "Go ahead:  Owen wants this phase
+      built", his note kept;  Claude builds it (`go ahead:  build it`).  It made `Follow up:  P3 · <title>` before I181
     - a kept note is Owen's `<epic-reply>` in the phase, after Requests (its plan changes come after Goal)
   - The summary, keyed `summary` in the inbox (it has no id):
     - Make Todo makes `Follow up:  the summary`, linking `#overview`, and a Noted status card under the lede
@@ -812,6 +823,19 @@ easily"), `components/epic-update/`:
   - Quiet:  grey, folded to its title row (its date and summary), out of the pen;  kept, as the record.
     - seen:  `seen="<time>"` on the block, written by `epic inbox apply` from its Seen mark (below), for everyone
     - or old:  3 days after `at`, the change marks' rule (`PlanDates.isQuiet()`, one copy for both)
+  - NEVER NEW:  a block carrying out OWEN'S OWN ANSWER is no news for him (epic `epic-engine` I179;  Owen, 2026-10-29,
+    on debut's P21 and P22 orange for his own picks on Q39 and Q41:  "If its 'accepting the update' I shouldn't have to
+    do that if you are doing what I said")
+    - written `seen="<its at>"`, never in `to-see`:  no orange, no pen count, no Seen to press
+    - Owen's:  every item it names (its words, summary or `#q39` links) is one he answered (`answered`, `decided`, a
+      `chosen` set, `taken-in`, `handled`) or a comment of his (`C3`);  and it names no file (a move) and no estimate
+      (a scope change)
+      - or `updated --for <ids>`:  every item it's for is his, whatever the words name
+    - the rule:  `UpdateMarks.owensAnswer()`;  the write:  `PlanDoc.seenAsOwens()`, from `addPhaseUpdate()` (`updated`
+      prints "P21:  Update block is Owen's own answer (Q39):  no Seen needed", logged too) and from every write's
+      `updateUpdates()` (a block written by hand)
+    - a change Claude made on its own (a plan adjusted while building, a file moved, a scope change) stays new
+    - the pages nothing has written since:  the migration `owens-answers-seen` (below)
   - `id`:  each block's `up3`, given by the tool on every write (`updateUpdates()`), after the highest in the doc;
     its Seen mark's inbox key.  A bare label never has one.
   - SEEN, a review mark (`{ action: "seen" }` under the block's id):
@@ -829,6 +853,7 @@ easily"), `components/epic-update/`:
       until then the pen shows `changes`
   - No migration step:  `seen` is new and optional, an older block goes quiet by age, and every write stamps the ids
     and `to-see`.
+    - Except Owen's own answers (I179):  `owens-answers-seen` stamps the new ones seen and takes them out of `to-see`.
   - Why a review mark, not a write at once:  the review routes never write the page (only `inbox apply` does, under
     its lock), and Reopen, the other button that changes a mark's look, already goes this way.
 
@@ -1096,6 +1121,15 @@ Named, dated, idempotent steps that bring an older page's markup up to today's, 
     - its first dry run (2026-10-29):  only epic-engine's P51 · Tests Inline, Owen's case;  epic-friend's three hold
       their marks, debut's P23 and epic-engine's P48 say an estimate
     - idempotent:  a dropped block is gone
+  - `agents-marked` (2026-10-29, every edit;  epic `epic-friend` P2, Q9):  Claude's old replies marked his,
+    `<epic-reply from="Claude" agent="claude">` (`AgentsMarked`), so a reply's name never says who wrote it
+    - which:  no `agent`, `from` "Claude" (any case), dated before `ThreadFacts.AGENTS_MARKED` (or undated);
+      a person's reply and one written since (a person who calls themselves Claude) are left
+    - the inboxes' comment replies the same way, on every read (`CommentList.markAgents()`)
+    - a reply an agent hands in (`details --file`, `add --details`) is marked on the way in instead, its `from` the
+      session's person, its `agent` the one running the command (`IncomingHtml.markAgents()`, any agent since epic
+      `epic-friend` P10):  `<epic-reply from="Ana" agent="codex">`, drawn "Codex (Ana)" to anyone but Ana
+    - idempotent:  a marked reply is left
   - `engine-links` (2026-10-19, epic `epic-engine` I27) went in epic `repo-split` P14, once the content rewrite left
     no epic page linking the engine's old places in spell-app;  its code is in git history
   - `log-commits` (2026-10-29, on command;  epic `epic-engine` P52, J151):  the Log gets an entry per commit of the

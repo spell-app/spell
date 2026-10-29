@@ -15,7 +15,7 @@ import { compiledSpellProject } from "spell/parser/spell/test"
 import { copyFixtureProject, fixtureFolder, lineOf, loadFixtureProject } from "spell/app/spaces/test"
 
 /** The Solitaire example's Card.spellml:  the tests name its lines by what they say (`lineOf()`), as it changes. */
-const CARD_TEXT = readFileSync(fixtureFolder("Solitaire", "Card.spellml"), "utf8")
+const CARD_TEXT = readFileSync(fixtureFolder("@spell/examples/Solitaire", "Card.spellml"), "utf8")
 /** Its line declaring the card's type. */
 const CARD_TYPE = '<spell-view "card"'
 /** Its line declaring the card's suit, whose node is `suit`. */
@@ -31,7 +31,7 @@ const PLAYING_HEADING = "Playing a card"
  */
 describe("ScopeExplorer", () => {
   const dir = mkdtempSync(resolve(tmpdir(), "spell-scopes-"))
-  copyFixtureProject("Solitaire", resolve(dir, "Solitaire"))
+  copyFixtureProject("@spell/examples/Solitaire", resolve(dir, "Solitaire"))
   const cardPath = resolve(dir, "Solitaire/Card.spellml")
   const cardUri = pathToFileURL(cardPath).href
   const workspace = new SpellDiskWorkspace()
@@ -238,7 +238,7 @@ describe("ScopeExplorer `descriptionEdits()`", () => {
  *   `lib`, a copy of its cards, deck and piles, and `app`, its game.
  */
 describe("ScopeExplorer of a project importing another, compiled", () => {
-  const solitaire = fixtureFolder("Solitaire")
+  const solitaire = fixtureFolder("@spell/examples/Solitaire")
   const workspace = mkdtempSync(resolve(tmpdir(), "spell-scopes-imports-"))
   const disk = new SpellDiskWorkspace()
   const explorer = new LSP.ScopeExplorer(new LSP.SpellLanguageService(disk))
@@ -343,7 +343,7 @@ describe("ScopeExplorer of a project importing another, compiled", () => {
 /** Scope packs:  what `<spell-viewer>` shows of a project, with no parser -- see `LSP.ScopePack`. */
 describe("ScopeExplorer scope packs", () => {
   const dir = mkdtempSync(resolve(tmpdir(), "spell-scope-packs-"))
-  copyFixtureProject("Solitaire", resolve(dir, "Solitaire"))
+  copyFixtureProject("@spell/examples/Solitaire", resolve(dir, "Solitaire"))
   const cardPath = resolve(dir, "Solitaire/Card.spellml")
   const cardUri = pathToFileURL(cardPath).href
   const workspace = new SpellDiskWorkspace()
@@ -398,7 +398,9 @@ describe("ScopeExplorer scope packs", () => {
 
   test("a page with NO sources finds each entry's compiled code by its declarations -- all but variables", async () => {
     // the project the pack is of:  Solitaire's files, compiled as one
-    const { code, declarations: compiledDeclarations } = compiledSpellProject(loadFixtureProject("Solitaire"))
+    const { code, declarations: compiledDeclarations } = compiledSpellProject(
+      loadFixtureProject("@spell/examples/Solitaire")
+    )
     const scopes = scopesFromPacks([builtIns, pack], {
       loadCompiled: async () => code,
       loadDeclarations: async () => compiledDeclarations
@@ -462,7 +464,7 @@ describe("ScopeExplorer scope packs", () => {
 /** Built-in types' docs, from `SP.BUILT_IN_TYPE_TABLE` -- what VS Code's Type Explorer shows. */
 describe("ScopeExplorer built-in types", () => {
   const dir = mkdtempSync(resolve(tmpdir(), "spell-scope-built-ins-"))
-  copyFixtureProject("Solitaire", resolve(dir, "Solitaire"))
+  copyFixtureProject("@spell/examples/Solitaire", resolve(dir, "Solitaire"))
   const cardPath = resolve(dir, "Solitaire/Card.spellml")
   const cardUri = pathToFileURL(cardPath).href
   const workspace = new SpellDiskWorkspace()
@@ -512,7 +514,7 @@ describe("ScopeExplorer built-in types", () => {
 /** The scope tree of a project written in Spanish:  a temp copy of the Solitario example. */
 describe("ScopeExplorer in Spanish", () => {
   const dir = mkdtempSync(resolve(tmpdir(), "spell-scopes-es-"))
-  cpSync(fixtureFolder("Solitario"), resolve(dir, "Solitario"), { recursive: true })
+  cpSync(fixtureFolder("@spell/examples/Solitario"), resolve(dir, "Solitario"), { recursive: true })
   const cartaPath = resolve(dir, "Solitario/Carta.es.spell")
   const cartaUri = pathToFileURL(cartaPath).href
   const workspace = new SpellDiskWorkspace()

@@ -140,7 +140,7 @@
             <ui-section id="epic-update-seen" label="New, seen, quiet" sticky collapsible dividing open="false">
               <ui-icon slot="icon" name="check"></ui-icon>
               <p>
-                Owen, 2026-10-29: "How do I clear these 'update' marks?" Two ways, both kept (epic
+                Owen, 2026-10-29: "How do I clear these 'update' marks?" Three ways (epic
                 <code>epic-engine</code> I168):
               </p>
               <ul>
@@ -153,6 +153,14 @@
                 <li>
                   By itself: a block not marked seen goes quiet 3 days after its date, as a change mark does (one rule,
                   <code>PlanDates.isQuiet()</code>).
+                </li>
+                <li>
+                  Never new: a block that carries out Owen's own answer is no news for him (I179; Owen, 2026-10-29:
+                  "If its 'accepting the update' I shouldn't have to do that if you are doing what I said"). The epic tool
+                  writes it already seen, at its own date, and never lists it for the pen: every item it names (a
+                  question he answered or decided, a pick, his comment <code>C3</code>), or the items
+                  <code>epic updated --for</code> names, are his, and it names no file and no estimate. A change Claude
+                  made on its own stays new.
                 </li>
                 <li>
                   A phase's pen (<code>&lt;epic-phase&gt;</code>) counts only the new ones, and has a ✓ of its own for all of
@@ -348,7 +356,7 @@
                     <td>a time (<code>2026-10-29 14:30</code>)</td>
                     <td>
                       When Owen marked it seen, written by <code>epic inbox apply</code> (I168): quiet for everyone. New
-                      and optional: an older block without it goes quiet 3 days after <code>at</code>.
+                      and optional: an older block without it goes quiet 3 days after <code>at</code>. Or its own <code>at</code>, written by the tool: a block carrying out Owen's own answer (I179).
                     </td>
                     <td>no</td>
                   </tr>

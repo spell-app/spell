@@ -18,7 +18,7 @@ describe("a writer's naming map", () => {
   /** Solitaire and its cards, compiled by `writer` (javascript's or TypeScript's) with its types in `typeCase`. */
   function typedIn(typeCase: P.NameCase, writer: P.JSWriter): string {
     writer.naming = new P.Naming({ ...P.Naming.JAVASCRIPT, type: typeCase })
-    const { scope, files } = parseSpellProject(loadFixtureProject("Solitaire"))
+    const { scope, files } = parseSpellProject(loadFixtureProject("@spell/examples/Solitaire"))
     const parts = files.map(({ match, compiled }) => (match?.AST instanceof P.ASTStatementGroup ? match.AST : compiled))
     const importLines = SP.SpellProject.importHeaderFor(scope, writer)
     return scope.parser!.inPlay(() => SP.SpellProject.combineCompiled(parts, writer, importLines, scope))

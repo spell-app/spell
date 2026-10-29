@@ -1,38 +1,34 @@
 #!/usr/bin/env node
 /**
- * Claude Code's `Stop` hook (the plugin's `hooks/hooks.json`):
- * after every turn, commit whatever changed in the shared content repo (epic `shared-content`).
- * - It runs `epic shared commit` in the session's checkout.
- * - stdin `{ session_id, cwd, ... }`.
- * - Only in a repo that uses epics (it has `.epic/config.json5`), and whose content repo exists (`contentFolder`):
- *   the plugin's hooks run in every repo.  Else exits at once.
- * - The commit runs DETACHED, its output appended to `<shared repo>/.git/spell-shared.log`:
+ * The end-of-turn hook, Claude Code's `Stop` ([hooks.json](hooks.json)) and Codex's ([codex-hooks.json](codex-hooks.json)):
+ * after every turn, commit whatever changed in the shared content repo, then sync it.
+ * - It starts `epic turn end` in the session's folder (`TurnEnd.inBackground()`):  the SAME step any other agent runs
+ *   by hand (epic `epic-friend` P11), so there's one path.
+ * - That commits, one commit per epic, guide or folder, then SYNCS when the repo's config names the content repo's
+ *   remote (`contentRemote`;  epic `epic-friend` P5):  pull (rebasing), renumber ids two people both made, push.
+ *   Offline, the commits wait for the next turn's push;  a conflict it can't settle is undone, and the next session's
+ *   start says so ([sync-notice.mjs](sync-notice.mjs)).
+ * - stdin `{ session_id, cwd, ... }`:  Claude Code's and Codex's alike.
+ * - Only in a repo set up for epics (`EpicConfig.ofSetUp()`:  it has `.epic/config.json5`),
+ *   and whose content repo exists (`contentFolder`):  the plugin's hooks run in every repo.  Else exits at once.
+ * - DETACHED, its output appended to `<shared repo>/.git/spell-shared.log`:
  *   - the turn never waits for git
  *   - a failed commit never shows as a failed hook
  *   - the next turn's commit picks up anything left
- * - The `epic` it runs is this plugin's own (`bin/epic`), with its packages installed.
+ * - Prints nothing:  Codex takes a `Stop` hook's output as JSON, and plain text as a mistake.
  * - Always exits 0.
+ * - Run by the Codex PLUGIN (`--codex-plugin`) while Codex's own hooks file runs it too:  nothing (`CodexHome`, J37).
  */
-import { spawn } from "node:child_process"
-import { existsSync, openSync, readFileSync } from "node:fs"
-import { dirname, join } from "node:path"
-
-/** This plugin's `bin/epic`:  `hooks/` is beside `bin/`. */
-const EPIC = join(dirname(import.meta.dirname), "bin", "epic")
+import { readFileSync } from "node:fs"
 
 try {
-  const { session_id: session, cwd } = JSON.parse(readFileSync(0, "utf8") || "{}")
-  // the MAIN checkout's config, from the session's folder:  the shared repo is its `contentFolder`.
-  // Loaded in here, so a config that won't read never fails the hook
-  const { EpicConfig } = await import("spell/epic/config/EpicConfig.ts")
-  const config = cwd && EpicConfig.of(cwd)
-  const dir = config && existsSync(config.file) && config.contentFolder
-  if (dir && existsSync(join(dir, ".git"))) {
-    const log = openSync(join(dir, ".git", "spell-shared.log"), "a")
-    const args = [EPIC, "shared", "commit", "--quiet"]
-    if (session) args.push("--session", session)
-    spawn(process.execPath, args, { cwd, detached: true, stdio: ["ignore", log, log] }).unref()
-  }
+  // the plugin started it (--codex-plugin) while Codex's user hooks file runs it too:  one route, never both
+  const { CodexHome } = await import("spell/epic/config/CodexHome.ts")
+  if (CodexHome.skipPluginHook()) process.exit(0)
+  const input = JSON.parse(readFileSync(0, "utf8") || "{}")
+  // loaded in here, so a config that won't read never fails the hook
+  const { TurnEnd } = await import("spell/epic/command/TurnEnd.ts")
+  TurnEnd.inBackground(input)
 } catch {
   // never block a turn
 }
