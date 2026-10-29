@@ -251,8 +251,9 @@ export const COUNTED = ":scope > epic-item, :scope > epic-phase"
 /**
  * The attributes of a counted child that change its count or its state:  a change re-counts.
  * - an item's drawn state reads them all (`DrawnState.fieldsOf()`, `STATE_ATTRIBUTES`)
+ * - a phase's chip state reads `status`, `plan` and `changes` (`PhaseState.of()`)
  */
-export const COUNT_ATTRIBUTES = ["status", "state", "changed", "reviewed", "queued", "working"]
+export const COUNT_ATTRIBUTES = ["status", "state", "changed", "reviewed", "queued", "working", "plan", "changes"]
 
 /*
  * Its runs (the item lines and phase title rows drawn as rounded cards) are the page sheet's since epic `epic-engine`
@@ -274,6 +275,24 @@ export const FILTER_STATES = [
   { state: "handled", color: "grey", words: "stateHandled" },
   { state: "old", color: "grey", words: "stateOld" }
 ] as const
+
+/**
+ * Where a PHASE stands, for the Phases section's chips (epic `epic-engine` I157), in the filter's order:
+ * its state, its chip's colour (the epic page's, `plan-doc.md` "Colours"), its texts' keys.
+ * - Owen, 2026-10-29:  "In phases header, would be cool to have badges for 'undone|updated|complete' -- e.g. 49
+ *   phases in this plan are a lot to scroll past"
+ * - ONE state per phase (`PhaseState.of()`):  news wins, so an updated phase still to do counts as `updated` only
+ * - `undone` yellow, as an open todo's chip ("to do");  `updated` orange, a changed phase's pen;  `complete`
+ *   green, a done phase's icon
+ */
+export const PHASE_FILTER_STATES = [
+  { state: "undone", color: "yellow", words: "phaseUndone" },
+  { state: "updated", color: "orange", words: "phaseUpdated" },
+  { state: "complete", color: "green", words: "phaseComplete" }
+] as const
+
+/** Every state a chip can stand for:  an item's (`FILTER_STATES`), then a phase's (`PHASE_FILTER_STATES`). */
+export const CHIP_STATES = [...FILTER_STATES, ...PHASE_FILTER_STATES] as const
 
 /**
  * The state filter's texts:  `<epic-state-filter>`'s vocabulary, the one element that draws its chips (for
@@ -314,7 +333,20 @@ export const FILTER_TEXTS = [
     text: "handled in a phase",
     description: "A state chip's words:  `handled` (grey:  its answer is in a phase's text now)."
   },
-  { key: "stateOld", text: "no longer relevant", description: "A state chip's words:  `old` (grey)." }
+  { key: "stateOld", text: "no longer relevant", description: "A state chip's words:  `old` (grey)." },
+  {
+    key: "phaseUndone",
+    text: "still to do",
+    description: "A Phases chip's words:  `undone` (yellow:  to do or under way, nothing new for Owen)."
+  },
+  {
+    key: "phaseUpdated",
+    text: "with news for you (a plan to accept, or changed)",
+    description:
+      "A Phases chip's words:  `updated` (orange:  not done, and its build plan waits for Owen's Accept, or its " +
+      "plan changed, the orange pen)."
+  },
+  { key: "phaseComplete", text: "done", description: "A Phases chip's words:  `complete` (green)." }
 ] as const
 
 /** Each chip click (`StateFilter.clickDoes()`) => its words' text key. */
@@ -325,6 +357,66 @@ export type FilterState = (typeof FILTER_STATES)[number]
 
 /** One of `FILTER_STATES`' state names. */
 export type ItemStateName = FilterState["state"]
+
+/** One of `CHIP_STATES`:  an item's state, or a phase's. */
+export type ChipState = (typeof CHIP_STATES)[number]
+
+/** One of `CHIP_STATES`' state names. */
+export type ChipStateName = ChipState["state"]
+
+/** One of `PHASE_FILTER_STATES`' state names. */
+export type PhaseStateName = (typeof PHASE_FILTER_STATES)[number]["state"]
+
+/**
+ * A phase's title that never asks for a plan's Accept:  the doc pass (Owen, 2026-10-25:  "I shouldn't have to accept
+ * `doc review` phase").
+ */
+export const DOC_REVIEW = /^doc review$/i
+
+/**
+ * Where a phase stands, as its Phases chip counts it (epic `epic-engine` I157):  ONE state, the first that holds.
+ * - `complete`:  done
+ * - `updated`:  news for Owen, as the phase itself draws it:
+ *   - its build plan waits for his Accept (`plan="waiting"`, but the doc pass:  `EpicPhase.isPlanWaiting`)
+ *   - or its plan changed (`changes`, the orange pen:  `EpicPhase.changedCount`)
+ * - `undone`:  any other, to do or under way
+ * - NEVER reads the page:  the caller hands it the fields (`fieldsOf()`)
+ */
+export class PhaseState {
+  /** `fields`' state. */
+  static of({ status, plan, changes, title }: PhaseFields): PhaseStateName {
+    if (status === "done") return "complete"
+    const isPlanWaiting = plan === "waiting" && !DOC_REVIEW.test(title)
+    return isPlanWaiting || Number(changes) > 0 ? "updated" : "undone"
+  }
+
+  /**
+   * The fields of `phase`, an `<epic-phase>`, off its attributes as they are now, and its title as `title` (the
+   * attribute, else `slot="title"`'s text).
+   * - a section re-counts when any of them changes (`COUNT_ATTRIBUTES`)
+   */
+  static fieldsOf(phase: Element): PhaseFields {
+    const slotted = phase.querySelector(':scope > [slot="title"]')?.textContent
+    return {
+      status: phase.getAttribute("status"),
+      plan: phase.getAttribute("plan"),
+      changes: phase.getAttribute("changes"),
+      title: (slotted ?? phase.getAttribute("title") ?? "").replace(/\s+/g, " ").trim()
+    }
+  }
+}
+
+/** What `PhaseState.of()` reads of a phase. */
+export type PhaseFields = {
+  /** `todo`, `active`, `done` */
+  status: string | null
+  /** its build plan:  `waiting` for Owen, `accepted` */
+  plan: string | null
+  /** how many plan changes it holds (the orange pen) */
+  changes: string | null
+  /** its title, as text */
+  title: string
+}
 
 /**
  * `localStorage` key prefix of the state filters, per page path:  `{ [section id]: [states shown] }`.

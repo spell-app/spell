@@ -5189,15 +5189,15 @@
         },
         {
           "name": "tools",
-          "description": "At the title's end:  the page's own buttons (the `actions` slot), then the Phases section's Files / Verify toggles;  an item section's state filter;  an Overview sub-section's review buttons."
+          "description": "At the title's end:  the page's own buttons (the `actions` slot), then the Phases section's Files / Verify toggles and its state filter;  an item section's state filter;  an Overview sub-section's review buttons."
         },
         {
           "name": "filter",
-          "description": "An item section's state filter:  one chip per state its items are in, with how many, solid while that state's items show, outlined while hidden."
+          "description": "An item section's state filter:  one chip per state its items are in, with how many, solid while that state's items show, outlined while hidden.  The Phases section's the same, by a phase's state:  undone, updated (a plan waiting for Owen's Accept, or changed), complete (epic `epic-engine` I157)."
         },
         {
           "name": "hidden-note",
-          "description": "Under a filtered list:  \"3 hidden · show all\", an `<epic-hidden-note>`."
+          "description": "Under a filtered list (items or phases):  \"3 hidden · show all\", an `<epic-hidden-note>`."
         },
         {
           "name": "empty",
@@ -5327,11 +5327,6 @@
           "key": "hideVerify",
           "text": "Hide each phase's Verify",
           "description": "The Verify toggle, on."
-        },
-        {
-          "key": "count",
-          "text": "{open} open of {total}",
-          "description": "The count badge's tooltip:  `3/7` in words."
         },
         {
           "key": "addNew",
@@ -5713,13 +5708,13 @@
         "chips",
         "filter by state"
       ],
-      "description": "The state filter's chips (epic `epic-engine` P3:  ONE copy, drawn wherever items are filtered by state):  a pill per state the items are in, in the state's colour, with how many;  solid while that state's items show, outlined while hidden.  A click asks its owner to filter (`epic-state-changed`), which sets `shown`:  an item section's title (`<epic-section>`), an epic page's toolbar (`<epic-page>`), and the docs runtime's lists (the Epics page).  What a click does, by the one rule (`StateFilter.nextShown()`), is each chip's tooltip.  The items marked in this pass (`marked`) count in a solid blue badge (Send's blue) first, whatever the filter.",
+      "description": "The state filter's chips (epic `epic-engine` P3:  ONE copy, drawn wherever items, or phases, are filtered by state):  a pill per state the items are in, in the state's colour, with how many;  solid while that state's items show, outlined while hidden.  A click asks its owner to filter (`epic-state-changed`), which sets `shown`:  an item section's title (`<epic-section>`), an epic page's toolbar (`<epic-page>`), and the docs runtime's lists (the Epics page).  What a click does, by the one rule (`StateFilter.nextShown()`), is each chip's tooltip.  The items marked in this pass (`marked`) count in a solid blue badge (Send's blue) first, whatever the filter.",
       "noun": "state-filter",
       "attributes": [
         {
           "name": "counts",
           "kind": "string",
-          "description": "How many items are in each state, `state:count` pairs:  `attention:2 open:5 recent:3`.  A chip per state with any, in the filter's order (`FILTER_STATES`):  progress, attention, replied, open, recent, old."
+          "description": "How many items are in each state, `state:count` pairs:  `attention:2 open:5 recent:3`.  A chip per state with any, in the filter's order (`FILTER_STATES`):  progress, attention, replied, open, recent, old.  The Phases section's, a phase's states (`PHASE_FILTER_STATES`, epic `epic-engine` I157):  undone, updated, complete."
         },
         {
           "name": "marked",
@@ -5825,6 +5820,21 @@
           "key": "stateOld",
           "text": "no longer relevant",
           "description": "A state chip's words:  `old` (grey)."
+        },
+        {
+          "key": "phaseUndone",
+          "text": "still to do",
+          "description": "A Phases chip's words:  `undone` (yellow:  to do or under way, nothing new for Owen)."
+        },
+        {
+          "key": "phaseUpdated",
+          "text": "with news for you (a plan to accept, or changed)",
+          "description": "A Phases chip's words:  `updated` (orange:  not done, and its build plan waits for Owen's Accept, or its plan changed, the orange pen)."
+        },
+        {
+          "key": "phaseComplete",
+          "text": "done",
+          "description": "A Phases chip's words:  `complete` (green)."
         }
       ]
     },

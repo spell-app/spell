@@ -11,7 +11,7 @@ import { CHOSEN, stopIfOwn, type ReviewShows } from "spell/epic/components/epic-
 import { STATUS_SLOT } from "spell/epic/components/epic-item/EpicItem.types"
 // Import directly:  the fold base, not the `epic-section` barrel (which defines `<epic-section>`)
 import { EpicFold } from "spell/epic/components/epic-section/EpicFold"
-import type { ContentsEntry } from "spell/epic/components/epic-section/EpicSection.types"
+import { DOC_REVIEW, type ContentsEntry } from "spell/epic/components/epic-section/EpicSection.types"
 
 import { epicPhaseVocabulary } from "./EpicPhase.en"
 import { ICON } from "./EpicPhase.types"
@@ -377,9 +377,6 @@ const STATUS_COLORS = {
   active: "blue",
   done: "green"
 } as const satisfies Record<PhaseStatus, string>
-
-/** The doc pass's title:  its build plan never waits for an Accept (`isPlanWaiting`). */
-const DOC_REVIEW = /^doc review$/i
 
 /** Class of its time pill (the estimate, or what it took), before its review controls. */
 const ESTIMATE = "estimate"

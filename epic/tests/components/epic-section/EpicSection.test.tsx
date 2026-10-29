@@ -301,7 +301,8 @@ describe("<epic-section> counts and state filter", () => {
     expect((part as FoldHost & { contentsEntry?: unknown }).contentsEntry).toEqual({ label: "1.1 Why" })
   })
 
-  test("phases count too (open:  not done);  the log and an empty section have no badge", async () => {
+  // the Phases section's `1/2` went with its chips (epic `epic-engine` I157):  they say the numbers
+  test("phases count too (open:  not done), for the rail;  no section has a badge", async () => {
     const host = await render(
       `<div><epic-section id="phases" kind="phases">` +
         `<epic-phase id="p1" title="One" status="done"></epic-phase>` +
@@ -310,8 +311,10 @@ describe("<epic-section> counts and state filter", () => {
         `<epic-section id="log" kind="log"></epic-section></div>`
     )
     const sections = host.parentElement!.querySelectorAll("epic-section")
-    expect(Array.from(sections, (section) => inner(section).getAttribute("badge"))).toEqual(["1/2", null, null])
-    expect(host.shadowRoot!.querySelector('[part~="filter"]')).toBeNull()
+    expect(Array.from(sections, (section) => inner(section).getAttribute("badge"))).toEqual([null, null, null])
+    const entry = (host as FoldHost & { contentsEntry?: { count?: unknown } }).contentsEntry
+    expect(entry?.count).toMatchObject({ open: 1, total: 2, running: 1 })
+    expect(chips(host)).toEqual({ undone: true, complete: true })
   })
 
   test("a chip per state its items are in, with how many, all solid;  no filter icon;  passes axe", async () => {
@@ -517,6 +520,106 @@ function roundedEnds(host: Element): Record<string, string> {
 }
 
 // Owen, 2026-10-24:  "With lists like this, tops and bottoms should always be rounded"
+// epic `epic-engine` I157 (Owen, 2026-10-29):  "In phases header, would be cool to have badges for
+// 'undone|updated|complete' -- e.g. 49 phases in this plan are a lot to scroll past"
+describe("<epic-section kind=phases> state chips", () => {
+  afterEach(() => {
+    localStorage.removeItem(`spell-item-state:${location.pathname}`)
+  })
+
+  /** Phases `p1`, `p2` ... by `specs`:  each its attributes (`status="done"`, `plan="waiting"` ...). */
+  function phases(specs: string[], open: number[] = []): string {
+    const each = specs.map(
+      (spec, at) =>
+        `<epic-phase id="p${at + 1}" title="Phase ${at + 1}" ${spec}${open.includes(at + 1) ? " open" : ""}><p>Body ${at + 1}.</p></epic-phase>`
+    )
+    return `<epic-section id="phases" kind="phases" open>${each.join("")}</epic-section>`
+  }
+
+  /** The ids of `host`'s phases that show. */
+  function shownPhases(host: Element): string[] {
+    return Array.from(host.querySelectorAll("epic-phase"))
+      .filter((phase) => getComputedStyle(phase).display !== "none")
+      .map((phase) => phase.id)
+  }
+
+  test("a chip per state:  done complete;  a plan waiting or changes updated (news wins over undone);  else undone", async () => {
+    const host = await render(
+      phases([
+        `status="done"`,
+        // done:  its old changes are no news (the pen shows only while it isn't done)
+        `status="done" changes="2"`,
+        `status="active"`,
+        `status="todo" plan="waiting"`,
+        `status="todo" plan="accepted" changes="1"`,
+        `status="todo" plan="accepted"`
+      ])
+    )
+    expect(chips(host)).toEqual({ undone: true, updated: true, complete: true })
+    expect(chipButtons(host).map((button) => button.textContent)).toEqual(["2", "2", "2"])
+    expect(chip(host, "updated").getAttribute("data-color")).toBe("orange")
+    // the doc pass never asks for an Accept, as its own buttons don't
+    const docs = await render(
+      `<epic-section id="phases" kind="phases"><epic-phase id="p1" title="Doc Review" status="todo" plan="waiting"></epic-phase></epic-section>`
+    )
+    expect(chips(docs)).toEqual({ undone: true })
+    await expectAccessible(host)
+  })
+
+  test("Owen's rule filters the phases:  only undone hides the rest, says so, marks them, and is remembered", async () => {
+    const host = await render(phases([`status="done"`, `status="done"`, `status="todo"`, `status="todo" changes="1"`]))
+    chip(host, "undone").click()
+    await ElementFixture.tick()
+    await ElementFixture.tick()
+    expect(chips(host)).toEqual({ undone: true, updated: false, complete: false })
+    expect(shownPhases(host)).toEqual(["p3"])
+    expect(hiddenNote(host).textContent).toBe("3 hidden · show all")
+    expect(Array.from(host.querySelectorAll("[data-epic-filtered]"), (phase) => phase.id)).toEqual(["p1", "p2", "p4"])
+    expect(JSON.parse(localStorage.getItem(`spell-item-state:${location.pathname}`)!)).toEqual({ phases: ["undone"] })
+    // a phase finished:  it leaves the filter's view as it changes state
+    host.querySelector("#p3")!.setAttribute("status", "done")
+    await ElementFixture.tick()
+    await ElementFixture.tick()
+    expect(shownPhases(host)).toEqual([])
+    hiddenNote(host).click()
+    await ElementFixture.tick()
+    await ElementFixture.tick()
+    expect(shownPhases(host)).toEqual(["p1", "p2", "p3", "p4"])
+    expect(host.querySelectorAll("[data-epic-filtered]").length).toBe(0)
+  })
+
+  test("not the page toolbar's:  its `stateFilter` is none, so the toolbar's chips stay the items'", async () => {
+    const host = await render(phases([`status="done"`, `status="todo"`]))
+    expect((host as FoldHost & { stateFilter?: unknown }).stateFilter).toBeUndefined()
+    expect((host as FoldHost & { chipCounts?: string }).chipCounts).toBe("complete:1 undone:1")
+  })
+
+  // EpicSection.runs.css used to step over 2 hidden phases at most
+  test("runs stay right with 40 done phases hidden in a row:  the next one showing after an open one is rounded on top", async () => {
+    const specs = [
+      `status="todo"`,
+      ...Array.from({ length: 40 }, () => `status="done"`),
+      `status="todo"`,
+      `status="todo"`
+    ]
+    const host = await render(phases(specs, [1]))
+    chip(host, "undone").click()
+    await ElementFixture.tick()
+    await ElementFixture.tick()
+    expect(shownPhases(host)).toEqual(["p1", "p42", "p43"])
+    const ends: Record<string, string> = {}
+    for (const id of ["p1", "p42", "p43"]) {
+      const phase = host.querySelector(`#${id}`)!
+      const section = phase.shadowRoot!.querySelector("ui-section")!
+      const title = getComputedStyle(section.shadowRoot!.querySelector("[part~='title']")!)
+      const top = parseFloat(title.borderTopLeftRadius) > 0
+      const bottom = parseFloat(title.borderBottomLeftRadius) > 0
+      ends[id] = [top && "top", bottom && "bottom"].filter(Boolean).join(" ")
+    }
+    expect(ends).toEqual({ p1: "top bottom", p42: "top", p43: "bottom" })
+  })
+})
+
 describe("<epic-section> runs of item lines, rounded at their ends", () => {
   afterEach(() => {
     localStorage.removeItem(`spell-item-state:${location.pathname}`)
