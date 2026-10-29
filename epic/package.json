@@ -1,6 +1,6 @@
 {
   "name": "spell-epic",
-  "version": "0.9.0",
+  "version": "0.8.5",
   "private": true,
   "description": "spell-epic:  the epic tooling -- epic pages and their <epic-*> component pack, the epic command, worktrees and windows, the review loop, and every docs page's tooling -- as a Claude Code plugin, loaded in place",
   "license": "MIT",
