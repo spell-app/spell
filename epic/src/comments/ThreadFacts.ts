@@ -1,4 +1,5 @@
 import { clockTime, localDate } from "spell/util/time"
+import { VoiceColor } from "spell/epic/config/VoiceColor"
 import type { Comment, CommentPlace, CommentReply, TakenInto, Turn } from "spell/epic/tool/CommentList"
 
 /****************
@@ -110,6 +111,7 @@ export class ThreadFacts {
    * `epic-friend` P10, Q16);  `undefined` for one with neither a person nor an agent.
    * - its OWN theme token, the repo's colour for it (`colors()`) the token's fallback:
    *   `var(--epic-voice-agent-codex, #0f8b8d)`, `var(--epic-voice-person-ana)`
+   * - a Spell UI colour name is the theme's colour (`VoiceColor.cssOf()`):  `var(--epic-voice-person-ana, var(--ui-green))`
    * - an agent's words take the AGENT's colour, whoever's session wrote them:  the agent wrote the words
    * - no colour of its own:  the token alone, which is unset, so the reader falls back to the shared one
    *   (`--epic-voice-agent`, `--epic-voice-person`):  every page looks as before until the settings say otherwise
@@ -123,7 +125,7 @@ export class ThreadFacts {
       : (["person", person, colorFor(colors.people, person)] as const)
     const slug = slugOf(who)
     if (!slug) return undefined
-    return `var(--epic-voice-${kind}-${slug}${own ? `, ${own}` : ""})`
+    return `var(--epic-voice-${kind}-${slug}${own ? `, ${VoiceColor.cssOf(own)}` : ""})`
   }
 
   /**
@@ -135,10 +137,6 @@ export class ThreadFacts {
     return { people: colorsIn(said?.people), agents: colorsIn(said?.agents) }
   }
 
-  /** Is `value` a colour the settings may give:  CSS colour words only, nothing that ends a declaration? */
-  static isColor(value: unknown): value is string {
-    return typeof value === "string" && COLOR.test(value.trim())
-  }
 
   /** Are `a` and `b` the same person's name:  the same words, any case, spaces trimmed? */
   static sameName(this: void, a: string | undefined, b: string | undefined): boolean {
@@ -426,8 +424,6 @@ const OLD_PERSON_TURN = "owen"
 /** What a page server from before epic `epic-friend` P10 calls an agent's turn:  read for one release (`asTurn()`). */
 const OLD_AGENT_TURN = "claude"
 
-/** A colour, as the settings may give one:  `#2f9e6e`, `teal`, `oklch(60% 0.1 180)`;  no `;`, braces or quotes. */
-const COLOR = /^[#\w][\w\s#%.,()/+-]{0,60}$/
 
 /** A typed comment id:  `C3`, `c3`, the old `cm3`, a `#` before it (`M3` is a manual test's:  epic `epic-engine` P44). */
 const TYPED_ID = /^#?cm?(\d+)$/i
@@ -460,12 +456,12 @@ function colorFor(colors: Record<string, string>, name: string | undefined): str
   return key === undefined ? undefined : colors[key]
 }
 
-/** `said`'s names and colours, the colours trimmed;  any that isn't a colour (`ThreadFacts.isColor()`) left out. */
+/** `said`'s names and colours, the colours trimmed;  any that isn't a colour (`VoiceColor.isColor()`) left out. */
 function colorsIn(said: unknown): Record<string, string> {
   if (!said || typeof said !== "object" || Array.isArray(said)) return {}
   return Object.fromEntries(
     Object.entries(said)
-      .filter(([, color]) => ThreadFacts.isColor(color))
+      .filter(([, color]) => VoiceColor.isColor(color))
       .map(([name, color]) => [name, (color as string).trim()])
   )
 }

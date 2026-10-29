@@ -10,6 +10,7 @@ import JSON5 from "json5"
 import { checkoutOf } from "spell/server/checkout"
 import { Git } from "spell/server/Git"
 import { RealPath } from "spell/server/RealPath"
+import { VoiceColor } from "./VoiceColor.ts"
 
 /****************
  * ### `EpicConfig`
@@ -1538,8 +1539,9 @@ function urlsTo(
 /**
  * `given.colors`:  `{ people: { <name>: <colour> }, agents: { <id>: <colour> } }`, each half optional;  left out,
  * `fallback`.
- * - a colour:  CSS colour words only (`#2f9e6e`, `teal`, `oklch(60% 0.1 180)`), nothing that ends a declaration:
- *   it goes into a page's style.  The page checks again as it reads them (`ThreadFacts.isColor()`).
+ * - a colour:  a Spell UI colour name (`green`, `teal` ...:  `VoiceColor.NAMES`, drawn from the theme), or CSS colour
+ *   words (`#2f9e6e`, `oklch(60% 0.1 180)`), nothing that ends a declaration:  it goes into a page's style.
+ *   ONE check, `VoiceColor.isColor()`, here and as the page reads them.
  * - throws `TypeError` naming the file for anything else
  */
 function colorsOf(given: Record<string, unknown>, fallback: EpicColors, file: string): EpicColors {
@@ -1551,20 +1553,17 @@ function colorsOf(given: Record<string, unknown>, fallback: EpicColors, file: st
       half !== null &&
       !Array.isArray(half) &&
       Object.entries(half).every(
-        ([name, color]) => name.trim() && typeof color === "string" && COLOR.test(color.trim())
+        ([name, color]) => name.trim() && VoiceColor.isColor(color)
       ))
   const { people, agents } = (value ?? {}) as Record<string, unknown>
   const ok = typeof value === "object" && value !== null && !Array.isArray(value) && isNames(people) && isNames(agents)
   if (!ok)
     throw new TypeError(
-      `EpicConfig:  ${file}'s "colors" must be { "people": { "ana": "#2f9e6e" }, "agents": { "codex": "#0f8b8d" } }, ` +
-        `each a CSS colour, not ${JSON.stringify(value)}`
+      `EpicConfig:  ${file}'s "colors" must be { "people": { "ana": "green" }, "agents": { "codex": "#0f8b8d" } }, ` +
+        `each a Spell UI colour name (${VoiceColor.NAMES.join(", ")}) or a CSS colour, not ${JSON.stringify(value)}`
     )
   return { people: { ...(people as Record<string, string>) }, agents: { ...(agents as Record<string, string>) } }
 }
-
-/** A colour the settings may give (`colorsOf()`):  CSS colour words only;  the same rule as `ThreadFacts.isColor()`. */
-const COLOR = /^[#\w][\w\s#%.,()/+-]{0,60}$/
 
 /**
  * `given.oldLayout`:  `{ carryOn, commitMaps, oldClones }`, each text;  a key left out, `fallback`'s.

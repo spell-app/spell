@@ -161,6 +161,19 @@ describe("ThreadFacts:  any agent's words (epic `epic-friend` P10)", () => {
     ])
   })
 
+  test("voiceOf():  a Spell UI colour name, any case, is the theme's colour;  any other colour as it is (P14)", () => {
+    const colors = { people: { ana: "Green", bob: "#3b7dd8" }, agents: { codex: " teal " } }
+    expect([
+      ThreadFacts.voiceOf({ person: "ana", agent: undefined }, colors),
+      ThreadFacts.voiceOf({ person: "bob", agent: undefined }, colors),
+      ThreadFacts.voiceOf({ person: "Bob", agent: "codex" }, ThreadFacts.colors({ SPELL_SERVER: { colors } }))
+    ]).toEqual([
+      "var(--epic-voice-person-ana, var(--ui-green))",
+      "var(--epic-voice-person-bob, #3b7dd8)",
+      "var(--epic-voice-agent-codex, var(--ui-teal))"
+    ])
+  })
+
   test("colors():  the page server's, anything not a colour left out;  none:  empty", () => {
     const said = { people: { ana: " teal ", bob: "red; } body { x", ben: 3 }, agents: { codex: "oklch(60% 0.1 180)" } }
     expect(ThreadFacts.colors({ SPELL_SERVER: { colors: said } })).toEqual({

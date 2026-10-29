@@ -356,7 +356,7 @@ describe("EpicConfig", () => {
     })
     expect(EpicConfig.settingsFrom("").colors).toEqual({ people: {}, agents: {} })
     expect(() => EpicConfig.settingsFrom('{ colors: { people: { ana: "red; } body { x" } } }', "x.json5")).toThrow(
-      /x\.json5's "colors" must be/
+      /x\.json5's "colors" must be .* each a Spell UI colour name \(red, orange, .*black\) or a CSS colour/
     )
     expect(() => EpicConfig.settingsFrom('{ colors: ["teal"] }', "x.json5")).toThrow(TypeError)
   })

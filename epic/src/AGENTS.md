@@ -1580,6 +1580,10 @@ In `tools/`:
         epic project settings"):  `colors` in `.epic/config.json5` (`EpicConfig.colors`), told every page as
         `SPELL_SERVER.colors` (`personRoutes`);  a reply or a thread message sets its speaker's own token,
         `var(--epic-voice-agent-codex, <colour>)` (`ThreadFacts.voiceOf()`), falling back to the shared one
+      - a colour is a Spell UI colour name, drawn from the theme (`var(--ui-green)`), or any CSS colour (P14, Owen's C7:
+        "would be cool if color names worked here from our 'standard' color set"):  `VoiceColor`
+        (`spell/epic/config/VoiceColor`), the ONE check and drawing, which `EpicConfig` and `ThreadFacts` share;  it
+        imports nothing, so plain `node` and the pages' bundle both load it
     - ivory:  the page's warm ground (the answer card, a marked note, the toolbar, a comment thread)
     - grey:  older
   - And the fill:  grey outline available, dashed pressed but not sent, outline sent, solid done.
