@@ -9,6 +9,7 @@
  *   (a toast goes through the page's `window.SpellUI`)
  * - What they keep in the browser goes through the kit's `PrefStore` (generic:  no Spell UI either)
  */
+import { copyText } from "spell/util/dom"
 import { PrefStore } from "spell/util/persist/PrefStore"
 import { PageNotices, ServerLink } from "spell/epic/review"
 
@@ -200,6 +201,57 @@ export function growField(field) {
 export function noteToast(message, type, { displayTime = 3000, actions } = {}) {
   PageNotices.show(message, { tone: type ?? "plain", ms: displayTime, actions })
 }
+
+////////////////
+// ## Code blocks
+////////////////
+
+/**
+ * A copy button at the LEFT of every code block's first line in `root`:  a `<pre><code>` written in a page
+ * (Owen, 2026-10-29, epic `epic-engine` I182:  "this should have a copy icon on the left").
+ * - the button is the pre's first child (`.spell-code-copy`, `data-spell-added` so a live patch steps around it);
+ *   `spell-doc.css` makes the pre a row, the button then the code, and the CODE the part that scrolls,
+ *   so the button stays put while a long line scrolls
+ * - a click puts the code's text on the clipboard (`copyText()`), and says "Copied" in the page's notice stack
+ * - never twice:  a block that has one keeps it;  safe to call again after every live update
+ * - NOT `<epic-code>` and `<ui-code>`:  Spell UI's `<ui-code copy>` draws their own button
+ * - NOT a `<pre>` with no `<code>` in it (a drawing in text):  nothing to run or paste
+ */
+export function addCodeCopies(root) {
+  for (const code of root.querySelectorAll("pre > code")) {
+    const pre = code.parentElement
+    const hasOne = Array.from(pre.children).some((child) => child.classList.contains(CODE_COPY))
+    if (hasOne || pre.closest(OWN_COPY) || !code.textContent.trim()) continue
+    pre.prepend(codeCopyButton(code))
+  }
+}
+
+/** The copy button of `code`'s block (`addCodeCopies()`). */
+function codeCopyButton(code) {
+  const button = el("ui-button", {
+    class: CODE_COPY,
+    appearance: "circular basic",
+    size: "mini",
+    icon: "copy",
+    title: COPY_LABEL,
+    "aria-label": COPY_LABEL,
+    "data-spell-added": true
+  })
+  button.addEventListener("click", async () => {
+    if (await copyText(code.textContent)) noteToast("Copied")
+    else noteToast("Couldn't copy:  the browser said no", "error")
+  })
+  return button
+}
+
+/** Class of a code block's copy button. */
+const CODE_COPY = "spell-code-copy"
+
+/** The copy button's name and tooltip. */
+const COPY_LABEL = "Copy"
+
+/** Code blocks that draw their own copy button. */
+const OWN_COPY = "epic-code, ui-code"
 
 ////////////////
 // ## Data pages

@@ -1394,6 +1394,10 @@ In `tools/`:
     - Each body that loads re-runs the outline, the toolbar, counts, item filters and code colors.
     - A link to an id inside an unloaded body loads it first.
       The ids are in its host's `data-part-ids`, or an `<epic-*>` host's `part-ids`.
+  - Copy buttons (epic `epic-engine` I182;  Owen, 2026-10-29:  "this should have a copy icon on the left"):
+    every `<pre><code>` gets a `<ui-button appearance="circular basic" size="mini" icon="copy">` first in it, centred
+    on its first line, "Copied" in the page's notices (`addCodeCopies()`, at start and after every body or patch);
+    the code scrolls, the button stays.  Not `<epic-code>` / `<ui-code copy>`:  they draw their own, at the right.
   - Code colors:  highlight.js (`highlight.min.js`, in `_assets/`), committed so pages load offline.
     - Older pages still name cdnjs:  the page servers swap that tag for the local copy, by spell-epic's settings'
       `"localCopies"` (the kit's `withLocalCopies()`;  `HIGHLIGHT_JS` in `server.types.ts` names the same two URLs).
