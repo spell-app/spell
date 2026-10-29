@@ -218,7 +218,7 @@ export class PlanDocCommands {
       case "phase-body": {
         const planning = await this.edit(file, (plan) => {
           const n = plan.phasePlace(need(rest[0], "a phase"))
-          const set = plan.setPhaseFields(n, flags)
+          const set = plan.setPhaseFields(n, flags, { accepted: flags.accepted === true })
           if (!set.length)
             throw new PlanDocError(`phase-body what?  --symptom / --changes / --goal / --files / --verify`)
           plan.log(`${plan.phaseLabel(n)} ${set.join(", ")} set`)
@@ -1266,8 +1266,11 @@ export const USAGE = `usage:  yarn plan-doc <command> <name> ...    (doc:  epics
                                                    items, links and "P5 · Name" text following, then
                                                    links-agree (stderr says);  neither, with a Doc Review last:
                                                    before it, the Doc Review moving down one, back to do
-  phase-body <name> <N> [--symptom html] [--changes html] [--goal html] [--files html] [--verify html]
-                                                   set (or "" removes) a phase's body fields
+  phase-body <name> <N> [--symptom html] [--changes html] [--goal html] [--plan html [--accepted]]
+            [--files html] [--verify html]
+                                                   set (or "" removes) a phase's body fields;  --plan waits
+                                                   for Owen's Accept, unless --accepted:  he accepted it with
+                                                   comments, folded in now
   updated <name> <N> "html" | --file path [--summary "..."] [--for <item ids>]
                                                    a change to phase N's plan:  an <epic-update> block at the
                                                    end of its description, "Update: <summary>" and the date

@@ -497,7 +497,7 @@ test("a NEW comment in a phase's, an item's or an Overview part's text presses i
   expect(marks()["p-build"]).toBeUndefined()
 })
 
-test("a comment joins a revisit Owen wrote;  a pick stays a pick;  Approve is left alone", async () => {
+test("a comment joins a revisit Owen wrote;  a pick stays a pick;  Approve stays Approve, carrying it (I163)", async () => {
   const page = "/epics/marks/marks.plan.html"
   const file = join(root, "epics/marks/marks.inbox.json5")
   ReviewInbox.update(file, (inbox) => {
@@ -507,8 +507,7 @@ test("a comment joins a revisit Owen wrote;  a pick stays a pick;  Approve is le
   })
   const on = async (anchor: string) =>
     (await post({ page, action: "add", ...ON_TABLE, anchor, kind: "list", text: "hm" })).answer.id as string
-  const [onT1, onQ2] = [await on("t1#list-1"), await on("q2")]
-  await on("t3#list-1")
+  const [onT1, onQ2, onT3] = [await on("t1#list-1"), await on("q2"), await on("t3#list-1")]
   const { marks } = inboxOf("epics/marks/marks.html")
   const label = (id: string) => id.toUpperCase()
   expect(marks.t1).toMatchObject({
@@ -517,12 +516,13 @@ test("a comment joins a revisit Owen wrote;  a pick stays a pick;  Approve is le
     comments: [onT1]
   })
   expect(marks.q2).toMatchObject({ action: "revisit", pick: "B", choices: 1, comments: [onQ2] })
-  expect(marks.t3).toMatchObject({ action: "approve" })
-  expect(marks.t3.comments).toBeUndefined()
+  expect(marks.t3).toMatchObject({ action: "approve", comments: [onT3] })
   // deleted:  Owen's words stay;  the pick goes back to the plain pick
   await post({ page, action: "delete", id: onT1 })
   await post({ page, action: "delete", id: onQ2 })
+  await post({ page, action: "delete", id: onT3 })
   const after = inboxOf("epics/marks/marks.html").marks
+  expect(after.t3).toEqual({ action: "approve", at: after.t3.at })
   expect(after.t1).toEqual({ action: "revisit", when: "soon", note: "too big", at: after.t1.at })
   expect(after.q2).toEqual({ action: "pick", pick: "B", choices: 1, at: after.q2.at })
 })

@@ -316,8 +316,8 @@ export async function changeComments<T>(
 /**
  * What a comment's change does to the epic page's marks (epic `epic-engine` I158):
  * - a new comment, or one put back (Undo), in the text of an item, a phase or an Overview part presses its Revisit
- *   (`ReviewInbox.noteComment()`)
- * - one deleted or cleared leaves every revisit naming it (`ReviewInbox.dropComment()`)
+ *   (`ReviewInbox.noteComment()`);  on a part already approved, the approve carries it, to fold in (I163)
+ * - one deleted or cleared leaves every revisit or approve naming it (`ReviewInbox.dropComment()`)
  * - `id`:  the comment's, as the file keys it;  `file`:  the epic page, read for what takes a mark (`itemIds()`)
  * - here, not in each element:  the docs runtime writes comments through this route, so the review client never sees
  *   one saved;  the page's review inbox follows the file's change, and the pill shows pressed

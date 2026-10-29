@@ -604,10 +604,53 @@ describe("ReviewInbox comments and Send", () => {
     expect(inbox.marks["p-build"]).toMatchObject({ note: "see my comments in its text:  C4", comments: [c4] })
     inbox.dropComment(c4)
     expect(inbox.marks["p-build"]).toBeUndefined()
-    // Approve stays Approve
+    // Approve stays Approve, the comment carried to fold in (I163)
     inbox.setMark("t1", { action: "approve" })
-    inbox.noteComment(at("t1", "hm"), parts)
-    expect(inbox.marks.t1).toMatchObject({ action: "approve" })
+    const hm = at("t1", "hm")
+    inbox.noteComment(hm, parts)
+    expect(inbox.marks.t1).toMatchObject({ action: "approve", comments: [hm] })
+    // Make Todo is left alone
+    inbox.setMark("t1", { action: "todo" })
+    inbox.noteComment(hm, parts)
+    expect(inbox.marks.t1).toEqual({ action: "todo", at: expect.any(String) })
+  })
+
+  // epic `epic-engine` I163 (Owen, 2026-10-29):  "When I approve a phase to which I have just added comments, you
+  // should just incorporate the feedback and auto-approve rather than asking me again"
+  test("an approve carrying his comments:  checked, kept by a new comment, let go by a deleted one, handed over", () => {
+    const inbox = new ReviewInbox()
+    const parts = new Set(["p-build"])
+    const at = (anchor: string, text: string) => inbox.commentList.add({ ...PLACE, anchor }, text, new Date(M1))
+    expect(ReviewInbox.toMark({ action: "approve", note: "see C1", comments: ["C1"] })).toEqual({
+      action: "approve",
+      note: "see C1",
+      comments: ["c1"]
+    })
+    // a note alone, no comments:  a plain approve, as before
+    expect(ReviewInbox.toMark({ action: "approve", note: "stray" })).toEqual({ action: "approve" })
+    const c1 = at("p-build#field-1", "shorter steps")
+    inbox.setMark("p-build", { action: "approve", note: "see my comments in its text:  C1", comments: [c1] }, M2)
+    // the reverse order:  a comment saved on a phase already approved joins it, still approved
+    const c2 = at("p-build", "and test it")
+    expect(inbox.noteComment(c2, parts, M2)).toBe("p-build")
+    expect(inbox.marks["p-build"]).toEqual({
+      action: "approve",
+      note: "see my comments in its text:  C1, C2",
+      comments: [c1, c2],
+      at: M2
+    })
+    inbox.markSent(M3)
+    const sent = inbox.takeWork(M3)!.sent!
+    expect(sent.marks.map((mark) => [mark.action, mark.inlineComments?.map((each) => each.id)])).toEqual([
+      ["approve", [c1, c2]]
+    ])
+    // carried, never on their own too
+    expect(sent.comments).toEqual([])
+    // deleted:  out of the approve;  the last one gone, a plain approve
+    expect(inbox.dropComment(c1)).toEqual(["p-build"])
+    expect(inbox.marks["p-build"]).toMatchObject({ action: "approve", comments: [c2] })
+    inbox.dropComment(c2)
+    expect(inbox.marks["p-build"]).toEqual({ action: "approve", at: expect.any(String) })
   })
 
   test("a send with ONLY comments wakes a waiting session, and hands them over once", () => {

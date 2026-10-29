@@ -49,6 +49,9 @@ import { CommentList, type Comment, type IdentifiedComment } from "./CommentList
  *       `{ action: "revisit", when, note, comments: ["c1", "c3"] }`, the note pointing at them;
  *       `takeWork()` hands the comments over with it (`inlineComments`)
  *     - pressed by itself when Owen saves a comment in that text (`noteComment()`, `dropComment()`;  I158)
+ *     - an Approve / Accept plan pressed on such a revisit keeps them (epic `epic-engine` I163):
+ *       `{ action: "approve", note, comments }`, approved, the comments to fold into the plan;  `takeWork()` hands
+ *       them over with it too
  *     - a TEST's answer from the page's test run (epic `epic-engine` P4), on a test item (`m3`) only:
  *       `{ action: "test", result, note?, shot? }`
  *       - `result`:  `passed`, `failed`, `skip` (no longer applies), `notnow` (can't do it yet):  `TEST_RESULTS`
@@ -690,7 +693,9 @@ export class ReviewInbox {
    *   `{ action: "revisit", when: "soon", note: "see my comments in its text:  C4", comments: ["c4"] }`
    * - a revisit waiting or being talked over:  the comment joins its `comments`, and its note names it
    * - a pick:  that revisit, carrying the pick ("pick B, but ...")
-   * - any other mark (Approve, Make Todo, a revisit asked now ...):  left as it is
+   * - an Approve / Accept plan (epic `epic-engine` I163):  still approved, the comment joining its `comments`, to fold
+   *   in as the plan is written (`{ action: "approve", note, comments }`)
+   * - any other mark (Make Todo, a revisit asked now ...):  left as it is
    * - only while the comment waits for Claude (`CommentList.waiting`)
    * - SIDE EFFECT:  the mark is stamped `at`, so it waits for the next Send
    */
@@ -699,10 +704,12 @@ export class ReviewInbox {
     const part = comment && partOf(comment.anchor)
     if (!part || !parts.has(part) || !isMarkKey(part)) return null
     const mark = this.marks[part]
-    if (mark && mark.action !== "pick" && !(mark.action === "revisit" && !ReviewInbox.isImmediate(mark))) return null
+    const takes = !mark || mark.action === "pick" || mark.action === "approve" || mark.action === "revisit"
+    if (!takes || (mark && ReviewInbox.isImmediate(mark))) return null
     const comments = [...new Set([...(mark?.comments ?? []), commentId])]
     const note = withInlineComments(mark?.note ?? "", comments)
-    this.setMark(part, { action: "revisit", when: "soon", note, comments, ...ReviewInbox.pickOf(mark) }, at)
+    if (mark?.action === "approve") this.setMark(part, { action: "approve", note, comments }, at)
+    else this.setMark(part, { action: "revisit", when: "soon", note, comments, ...ReviewInbox.pickOf(mark) }, at)
     return part
   }
 
@@ -711,14 +718,21 @@ export class ReviewInbox {
    * returns the ids of the marks changed.
    * - its note names the rest, else only Owen's own words
    * - nothing left in it (no comment, no words):  a pick goes back to the plain pick, else the mark goes
+   * - an Approve carrying it (epic `epic-engine` I163):  still approved, with the rest, or plain
    * - SIDE EFFECT:  a mark kept is stamped `at`
    */
   dropComment(commentId: string, at = isoTime()): string[] {
     const changed: string[] = []
     for (const [id, mark] of Object.entries(this.marks)) {
-      if (mark.action !== "revisit" || !mark.comments?.includes(commentId)) continue
+      if (!mark.comments?.includes(commentId)) continue
       const comments = mark.comments.filter((each) => each !== commentId)
       const note = withInlineComments(mark.note ?? "", comments)
+      if (mark.action === "approve") {
+        this.setMark(id, comments.length ? { action: "approve", note, comments } : { action: "approve" }, at)
+        changed.push(id)
+        continue
+      }
+      if (mark.action !== "revisit") continue
       const pick = ReviewInbox.pickOf(mark)
       if (comments.length || note) {
         const left = { action: "revisit", when: mark.when, note, ...(comments.length && { comments }), ...pick }
@@ -958,6 +972,13 @@ export class ReviewInbox {
       }
     }
     if (action === "pick") return { action, pick: toLetter(pick), ...toChoices(choices) }
+    // an Approve / Accept plan that keeps Owen's comments in the part's text (epic `epic-engine` I163):  approved,
+    // the comments to fold in
+    if (action === "approve") {
+      const inline = toCommentIds((mark as Record<string, unknown>).comments)
+      if (!inline.comments || typeof note !== "string" || !note.trim()) return { action, ...inline }
+      return { action, note: note.trim(), ...inline }
+    }
     if (action === "accept") {
       const { stage } = mark as Record<string, unknown>
       // a change mark's Accept (epic `epic-engine` P30):  no stage
@@ -1117,7 +1138,8 @@ export type InboxMark = CheckedMark & { at: string }
  * - `result`, `shot`:  a test answer's (`action: "test"`, epic `epic-engine` P4)
  * - `stage`:  the stage a stage button ends (`action: "accept"`, epic `epic-engine` P29)
  * - `to`:  a dragged phase's new place (`action: "move"`, epic `epic-engine` P34)
- * - `comments`:  a revisit's content, Owen's comments in its part's text (`c1` ...;  epic `epic-engine` I140)
+ * - `comments`:  a revisit's content, Owen's comments in its part's text (`c1` ...;  epic `epic-engine` I140);
+ *   an approve's too, to fold in (I163)
  */
 export type CheckedMark = {
   action: MarkAction
@@ -1210,7 +1232,7 @@ export type TakenWork = {
   now: NowRequest[]
   sent: {
     at: string
-    /** `inlineComments`:  a revisit's comments (its `comments`), as the inbox holds them (I140) */
+    /** `inlineComments`:  a revisit's or an approve's comments (its `comments`), as the inbox holds them (I140, I163) */
     marks: (ListedMark & { again: boolean; inlineComments?: IdentifiedComment[] })[]
     urgency: ListedUrgency[]
     comments: IdentifiedComment[]

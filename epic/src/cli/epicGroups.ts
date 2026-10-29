@@ -1187,6 +1187,7 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
     "--changes <html>": "a phase's changes",
     "--goal <html>": "a phase's goal",
     "--plan <html>": "a phase's build plan, waiting for Owen's Accept",
+    "--accepted": "with --plan:  written accepted, Owen's comments on his Accept folded in (no second Accept)",
     "--files <html>": "a phase's files",
     "--verify <html>": "how a phase is checked",
     "--estimate <time>": "a phase's estimate, e.g. 1-2h",

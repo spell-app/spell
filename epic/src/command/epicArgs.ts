@@ -202,6 +202,7 @@ export function phaseRanges(text: string): string {
  * (Owen, 2026-10-12);  the tool's commands it takes, run in order.
  * - a phase (`seo#P3`):
  *   - `--symptom`, `--changes`, `--goal`, `--files`, `--verify` (`phase-body`;  `""` removes one)
+ *   - `--plan` [`--accepted`:  written accepted, his comments folded in;  epic `epic-engine` I163]
  *   - `--estimate` (`estimate`), `--title` [`--html`] (`rename`)
  * - an item (`seo#J3`):  `--title` [`--html`] (`rename`), `--calm` / `--loud` (`calm`)
  * - the page (`seo`):  `--standing` [`on` | `off`], `--no-standing` (`standing`)
@@ -241,6 +242,9 @@ function updateArgs(args: string[], at: number, target: EpicTarget | undefined):
     }
   } else if (phase !== undefined) {
     const body = PHASE_BODY.filter((key) => key in flags).flatMap((key) => [`--${key}`, value(key)])
+    // a plan Owen accepted with his comments, folded in and written accepted (epic `epic-engine` I163)
+    if (flags.accepted && !("plan" in flags)) throw new EpicCommandError("update:  --accepted goes with --plan")
+    if (flags.accepted) body.push("--accepted")
     if (body.length) runs.push(["phase-body", epic, phase, ...body])
     if ("estimate" in flags) runs.push(["estimate", epic, phase, value("estimate")])
     rename(phaseLabel(phase))
@@ -481,7 +485,7 @@ const CARD_EXAMPLES: Record<string, string> = {
 }
 
 /** What `update` sets on a phase. */
-const PHASE_FIELDS = [...PHASE_BODY, "estimate", "title", "html"]
+const PHASE_FIELDS = [...PHASE_BODY, "accepted", "estimate", "title", "html"]
 
 /** What `update` sets on an item. */
 const ITEM_FIELDS = ["title", "html", "calm", "loud"]

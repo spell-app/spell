@@ -352,6 +352,9 @@ export class ReviewClient extends PageStore {
    *   a revisit carrying a pick keeps the pick ("pick B, but ..." without the "but")
    * - else:
    *   - Approve and Make Todo mark it
+   *   - Approve (Accept plan) on a revisit made of his comments in its text KEEPS them (epic `epic-engine` I163;
+   *     Owen, 2026-10-29:  "just incorporate the feedback and auto-approve rather than asking me again"):
+   *     `{ action: "approve", note, comments }`;  clicked again, it's that revisit again
    *   - Revisit opens the note box;  but on a part with Owen's comments in its text (`commentsIn()`) and nothing
    *     typed, it marks the revisit at once, its note pointing at them, its `comments` naming them:  the inline
    *     comments ARE his note (Owen, 2026-10-26, epic `epic-engine` I140:  "don't make me type in the comment section")
@@ -370,6 +373,9 @@ export class ReviewClient extends PageStore {
       return "chosen"
     }
     if (mark?.action === action && !isImmediate(mark)) {
+      // an Approve that kept his comments goes back to the revisit they made (I163):  never lost by a click
+      if (action === "approve" && mark.comments?.length)
+        return void this.save(id, { action: "revisit", when: "soon", note: mark.note ?? "", ...commentsOf(mark) })
       const pick = action === "revisit" ? pickOf(mark) : {}
       return void this.save(id, pick.pick ? { action: "pick", ...pick } : null)
     }
@@ -391,6 +397,11 @@ export class ReviewClient extends PageStore {
         void this.useNote(id, action, note)
         return "chosen"
       }
+    }
+    // Approve on a revisit of his comments in its text keeps them (I163):  approved, the comments folded in
+    if (action === "approve" && mark?.action === "revisit" && !isImmediate(mark) && mark.comments?.length) {
+      void this.save(id, { action, ...(mark.note && { note: mark.note }), ...commentsOf(mark) })
+      return "chosen"
     }
     void this.save(id, { action })
     return "chosen"

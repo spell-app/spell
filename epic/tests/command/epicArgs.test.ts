@@ -231,6 +231,14 @@ describe("planDocArgs():  update", () => {
     ])
   })
 
+  // epic `epic-engine` I163:  a plan Owen accepted with comments, folded in and written accepted
+  test("a phase:  --plan ... --accepted goes to phase-body;  --accepted alone is refused", () => {
+    expect(planDocArgs("update", ["seo#P3", "--plan", "<ol></ol>", "--accepted"])).toEqual([
+      ["phase-body", "seo", "3", "--plan", "<ol></ol>", "--accepted"]
+    ])
+    expect(() => planDocArgs("update", ["seo#P3", "--accepted"])).toThrow("--accepted goes with --plan")
+  })
+
   test("an item:  --title renames it, --calm / --loud", () => {
     expect(planDocArgs("update", ["seo#J3", "--title", "<b>T</b>", "--html"])).toEqual([
       ["rename", "seo", "J3", "<b>T</b>", "--html"]

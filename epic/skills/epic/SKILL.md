@@ -406,6 +406,14 @@ than just being able to move on").
   ONE press, I125), or Accept Phase on each (once building:  the header's Send is ringed (2px #666) while any waits, its tooltip naming them);  one Send.  Or he says "go"
   in chat:  every waiting plan accepted.
   - Revisit on one:  rewrite that plan (a new `--plan` waits again);  the accepted ones stay accepted.
+  - Accept Phase on one he has just COMMENTED in (its Revisit pressed by itself, I158):  the Accept keeps his comments
+    (epic `epic-engine` I163;  Owen, 2026-10-29:  "just incorporate the feedback and auto-approve rather than asking
+    me again").  `wait` prints "accepted, with comments to fold in:  C4, C5";  `inbox apply` accepts the plan as usual.
+    - Fold them into the plan and KEEP it accepted:  `epic update <name>#P<N> --plan "<ol>...</ol>" --accepted`
+      (no `waiting`, no spinner), then answer each comment on its thread
+      (`epic inbox done <name>#C4 --file <answer.html>`:  what changed in the plan).  NO new Accept, no stop.
+    - Only a comment that goes against something he decided, or changes the scope a lot, becomes a Q item instead
+      (`epic add <name>#Q`, its thread answered with the link);  the rest are still folded in.
   - A plan rewritten from an ANSWER (a question decided, a revisit's pick):  the changed words marked
     (`<epic-change item="q<n>">`, then `epic change`), and NO `epic updated` block (epic `epic-engine` I159;  Owen,
     2026-10-29, on P51's orange Update under its Q53 marks:  "Do we still need the orange update section like this?").
@@ -428,6 +436,8 @@ than just being able to move on").
        (`--plan`, it waits), with the coherence review over it ("4b. Build plans"), listen, and END THE TURN with the
        phase's link pair:  "P<N>'s plan changed:  ...".  Only then a stop.
    - No accepted plan (a phase from before I117, or added without one):  write it now, as "4b. Build plans", and wait.
+   - Accepted WITH his comments ("accepted, with comments to fold in", epic `epic-engine` I163):  fold them in as
+     "4b. Build plans" says, `--plan ... --accepted`, answer each comment, and go on.  NO stop.
    - No plan at all only when Owen said to start the phase without one ("just do it"), or in bedtime mode.
 2. Do the work.
    Record as you go, not at the end:
@@ -888,6 +898,11 @@ want you to just do it").
    - Up to 5 agents at once (root rules);  more:  the rest after.
 3. SENT marks:  `epic inbox apply <name>`.
    - Approvals, picks and todos made or queued land in the doc;  it prints each.
+   - An Accept that carries his comments in its text ("accepted, with comments to fold in:  C4, C5";  epic
+     `epic-engine` I163):  `apply` accepts the plan and leaves the comments.  Fold them into the plan, keeping it
+     accepted (`epic update <name>#P<N> --plan "..." --accepted`), then answer each (`epic inbox done <name>#C4
+     --file <answer.html>`).  No new Accept.  Only a comment against something he decided, or a big change of
+     scope, becomes a Q item instead ("4b. Build plans").
    - TEST RESULTS from Owen's test run (epic `epic-engine` P4):  `wait` prints them under
      "test, Owen's test run", each test with its result (`passed`, `FAILED`, `skip`, `not now`), his COMMENT and his
      screenshot's path.  `apply` applies them all:
@@ -1351,6 +1366,7 @@ add-phase <name> "Short Name" --symptom .. --changes .. [--goal ..] [--files ..]
                                                     PN;  either way the to-do phases after it move down a number
 update <name>#P<N> [--symptom ..] [--changes ..] [--goal ..] [--files ..] [--verify ..]   set ("" removes) fields
 update <name>#P<N> --plan "<ol>..</ol>"             Claude's build plan:  waits for Owen's Accept plan (5., step 1)
+update <name>#P<N> --plan "<ol>..</ol>" --accepted  his Accept carried comments:  folded in, stays accepted (4b.)
 updated <name>#P<N> "<p>what changed</p>" [--summary ".."] [--for <ids>]   phase N's plan changed, no item the
                                                     cause:  <epic-update>, after Goal;  nothing when marks say it
 file <name>#P<N> <rN>                               a request into phase N's Requests field, marked filed there

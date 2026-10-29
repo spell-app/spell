@@ -191,6 +191,15 @@ As `plan-doc.md`, "Ids":
     (`<epic-review buttons="plan">`).
   - Accept plan is the inbox mark `approve` on the phase;  `inbox apply` writes the field's `accepted` (now) and
     `plan="accepted"` (`PlanDoc.acceptPlan()`):  "plan accepted:  build it".
+  - Accept plan pressed on a phase whose text holds Owen's comments (its auto revisit, I158) KEEPS them (epic
+    `epic-engine` I163):  the mark `{ action: "approve", note, comments: ["c4", "c5"] }`;  a comment saved on a phase
+    already approved joins it, still approved (`ReviewInbox.noteComment()`).
+    - `wait` prints "accepted, with comments to fold in:  C4, C5", each comment under it;  `inbox apply` accepts the
+      plan as usual ("plan accepted:  build it, with comments to fold in:  C4, C5") and leaves the comments waiting.
+    - Claude folds them in and keeps it accepted:  `update <name>#P3 --plan "..." --accepted` writes the plan
+      `accepted` (logged `P3 plan written:  accepted, Owen's comments folded in`), no `waiting`, no spinner;  then
+      answers each comment.  Without `--accepted`, `--plan` waits as before.
+    - Only a comment against something he decided, or changing the scope a lot, becomes a Q item instead.
 - Children in that order, always (the vocabulary's `childOrder: "listed"`):
   the tool puts each where it belongs.
   - Owen's kept notes (`<epic-reply>`) after Requests, before Goal;  slotted children (status cards) at the end.
