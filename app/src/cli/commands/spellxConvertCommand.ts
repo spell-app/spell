@@ -59,5 +59,5 @@ export async function spellxConvertCommand(
 
 /** Where `path`'s spellx goes:  `Card.spell` => `Card.spellx`, `Carta.es.spell` => `Carta.es.spellx`. */
 export function spellxPathFor(path: string): string {
-  return path.replace(/\.spell$/, ".spellx")
+  return path.replace(/\.spell$/, SP.SPELLML_SUFFIX)
 }
