@@ -478,12 +478,11 @@ class PageComments {
   /**
    * The page header's SEND (epic `epic-workflow` P13):  a docs page's comments go to the session of the epic the page
    * belongs to, as an epic page's do with its Send.
-   * - Send and its countdown, the epics pack's `<epic-send-buttons>` (epic `epic-engine` P20), as an epic page's header
+   * - Send, the epics pack's `<epic-send-buttons>` (epic `epic-engine` P20), as an epic page's header
    *   draws it:  the paper plane with how many comments wait for it, blue by the fill rule (`templates/epics/
    *   plan-doc.md`, "Colours"):  grey outline with nothing waiting, dashed while some aren't sent, outlined once sent
-   *   - the wand:  countdown mode;  on, the comments go by themselves 2 minutes after Owen stops typing, clicking and
-   *     scrolling;  off, the plane is filled blue until he presses it
-   *   - drawn anew with the comments, the countdown kept:  it's the page's, not the element's
+   *   - no countdown (epic `epic-engine` P53, J142:  only an epic page's header has Auto Send):  the plane is filled
+   *     blue until he presses it
    * - beside it, who is listening:  "python-target is listening", or nobody (then Send wakes the epic's session);
    *   a page no epic owns:  the standing epic `feedback`'s (epic `epic-engine` T9), "feedback is listening", or
    *   "nobody is listening:  Send wakes feedback" (`whoLabel()`)

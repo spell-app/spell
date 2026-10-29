@@ -203,7 +203,8 @@ describe("<ui-theme-menu> markup", () => {
   it.each([
     ["both", ["palette", "overlay", "schemes"], ["scheme", "theme"]],
     ["theme", ["theme"], ["palette", "overlay", "schemes", "scheme"]],
-    ["scheme", ["scheme"], ["palette", "overlay", "schemes", "theme"]]
+    ["scheme", ["scheme"], ["palette", "overlay", "schemes", "theme"]],
+    ["menu", ["schemes", "menu"], ["palette", "overlay", "scheme", "theme", "tip"]]
   ])("show=%s", async (show, present, absent) => {
     const host = await render(`<ui-theme-menu show="${show}"></ui-theme-menu>`)
     for (const name of present) expect(part(host, name), name).not.toBeNull()
@@ -292,6 +293,73 @@ describe("<ui-theme-menu> overlay", () => {
     // picking it again changes nothing
     row(host, "merlot").click()
     expect(changes).toHaveLength(1)
+  })
+})
+
+describe("<ui-theme-menu> menu (show=menu)", () => {
+  it("draws the panel in place:  Light | Dark | Auto and the theme rows, no palette button, no overlay, no tooltip", async () => {
+    const host = await render(`<ui-theme-menu show="menu"></ui-theme-menu>`)
+    expect(host.matches(":state(menu)")).toBe(true)
+    expect(getComputedStyle(host).display).toBe("block")
+    for (const name of ["palette", "overlay", "tip", "scheme", "theme"]) expect(part(host, name), name).toBeNull()
+    expect(host.shadowRoot!.querySelector("ui-popup")).toBeNull()
+    expect(part(host, "schemes").getAttribute("role")).toBe("radiogroup")
+    expect(choices(host).map(([value]) => value)).toEqual(["light", "dark", "system"])
+    expect(part(host, "menu").getAttribute("role")).toBe("menu")
+    expect(rows(host).map(([value]) => value)).toEqual([...UI.themes.own])
+    expect(row(host, "spell").getAttribute("aria-checked")).toBe("true")
+    expect(part(host, "bench")).not.toBeNull()
+    await expectAccessible(host)
+  })
+
+  it("bench=none leaves out the Theme bench row", async () => {
+    const host = await render(`<ui-theme-menu show="menu" bench="none"></ui-theme-menu>`)
+    expect(part(host, "bench")).toBeNull()
+    expect(rows(host)).not.toHaveLength(0)
+  })
+
+  it("a row click chooses the theme and ticks it;  chosenTheme follows", async () => {
+    const host = await render(`<ui-theme-menu show="menu"></ui-theme-menu>`)
+    const changes: ThemeMenuChange[] = []
+    host.addEventListener("ui-changed", (event) => changes.push((event as CustomEvent<ThemeMenuChange>).detail))
+    row(host, "paper").click()
+    await vi.waitFor(() => expect(UI.themes.current).toBe("paper"))
+    await ElementFixture.settle()
+    expect(ThemePreference.chosen.theme).toBe("paper")
+    expect(changes).toMatchObject([{ theme: "paper" }])
+    expect(row(host, "paper").getAttribute("aria-checked")).toBe("true")
+    expect(row(host, "paper").classList.contains("checked")).toBe(true)
+    expect(row(host, "spell").getAttribute("aria-checked")).toBe("false")
+    expect((host as HTMLElement & { component: { chosenTheme: string } }).component.chosenTheme).toBe("paper")
+  })
+
+  it("focusChosen() focuses the chosen row;  arrows move;  ArrowLeft, ArrowRight and Escape are left to the host", async () => {
+    const host = await render(`<ui-theme-menu show="menu" bench="none"></ui-theme-menu>`)
+    row(host, "merlot").click()
+    await vi.waitFor(() => expect(UI.themes.current).toBe("merlot"))
+    await ElementFixture.settle()
+    const focused = () => host.shadowRoot!.activeElement
+    ;(host as HTMLElement & { component: { focusChosen(): void } }).component.focusChosen()
+    expect(focused()).toBe(row(host, "merlot"))
+    const index = UI.themes.own.indexOf("merlot")
+    await userEvent.keyboard("{ArrowDown}")
+    expect(focused()).toBe(row(host, UI.themes.own[index + 1]!))
+    await userEvent.keyboard("{Home}")
+    expect(focused()).toBe(row(host, "spell"))
+    const seen: [string, boolean][] = []
+    const listener = (event: KeyboardEvent) => seen.push([event.key, event.defaultPrevented])
+    document.addEventListener("keydown", listener)
+    try {
+      await userEvent.keyboard("{ArrowLeft}{ArrowRight}{Escape}")
+    } finally {
+      document.removeEventListener("keydown", listener)
+    }
+    expect(seen).toEqual([
+      ["ArrowLeft", false],
+      ["ArrowRight", false],
+      ["Escape", false]
+    ])
+    expect(focused()).toBe(row(host, "spell"))
   })
 })
 

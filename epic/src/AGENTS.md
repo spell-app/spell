@@ -191,10 +191,11 @@ The epic folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
       - The controls show while `<epic-page reviewing>` is set.
     - `AgentsClient`, one per page:  the epic's running agents, and Owen's redirects.
       - Served at `/api/epics/agents`, by [agentRoutes.ts](tools/agentRoutes.ts), in the docs tools.
-      - `<epic-page>` draws them in its header and toolbar (epic `epic-engine` P35):  `<epic-agents>`, in its shadow
-        root, `2 🤖` (its name "2 agents running"), a button whose popover holds their rows;  and the session's line
-        ("Responding", `epic inbox status`, the inbox's `doing`), a grey pill whose styled tooltip lists what it's
-        answering.
+      - `<epic-page>` draws them in its header (epic `epic-engine` P35, P53):  `<epic-agents>`, in its shadow root,
+        - in the header's pill:  `2 🤖` (its name "2 agents running"), a button whose popover holds their rows
+        - beside Send, in the header's middle:  the session's line ("Responding", `epic inbox status`, the inbox's
+          `doing`), a bare spinner (`draws="spinner"`, T53), its words the tooltip;  answering items, a styled
+          tooltip lists them
       - Both clients POST and watch through the same code, a `ServerLink` each:
         the token, its one refresh on a 403, the poll and `spell-server:changed`.
     - `ServerLink`:  EVERY epic-page and docs-page read, write and poll goes through it (epic `coherence` C9)
@@ -613,6 +614,9 @@ The epic folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
       ```text
       spell-epics:sort    spell-epics:sagas    spell-epics:new-epic-draft    spell-epics:send-countdown
       ```
+
+    - `spell-epics:send-countdown` is read no more since epic `epic-engine` P53 (J147):
+      Auto Send's choice is a NEW key, `spell-epics:auto-send`, so everyone starts at 2 minutes.
 
     - A page-named filter is under `spell-filter:` too.
   - Stays raw:
@@ -1313,8 +1317,18 @@ In `tools/`:
       Remembered per page.
   - An EPIC PAGE:  `<epic-page>` markup, drawn by the `epics` pack (see "Overview").
     - Its elements draw themselves, in their shadow roots:
-      - the page header and its toolbar's tools:
-        Send while reviewed (`<epic-send-buttons>`;  no wand or countdown since 2026-10-25), the step label, git
+      - the page header, three columns (epic `epic-engine` P53):
+        - the h1, one line, cut short when narrow (its full name first in its tooltip)
+        - in the exact middle (Owen's comment C7):  Send while reviewed (`<epic-send-buttons countdown>`), and beside it
+          what the session is doing, a bare spinner;  narrow, they follow the title, never over it
+        - at the right:  the step label, then the GEAR, where the git toggle was
+          - its menu:  "Auto Send · 2 minutes" (Immediately, 2 minutes, 5 minutes, Off;  `SendCountdown.choose()`)
+            and "Theme · Paper" (Spell UI's `<ui-theme-menu show="menu" bench="none">`)
+          - each sub-menu to the left of its row, under it when narrow;  the arrow keys, Enter, Space and Escape
+            move through them
+        - no page-wide git toggle since P53:  the Log lists every commit (P52), and each phase and item its own (a
+          git icon)
+      - the toolbar's tools
       - the review line, and the nobody-listening pill under it
       - the sections, phases and items, their counts and state filters, commits, item folds
       - every review control on the page's ONE review client
@@ -1329,9 +1343,10 @@ In `tools/`:
     - Running agents (epic `skillz` P3):  `<epic-page>`'s header pill has `2 🤖` ("2 agents running"),
       a button opening their rows in a popover (epic `epic-engine` P35;  the panel above its first section before).
       - It shows while any agent of the epic runs, after the step label, the pill grey (Owen, 2026-10-25).
-      - In the toolbar, the session's line (P35):  "Responding", "Building P35" (`epic inbox status`), gone when idle or
-        nobody listens;  a grey pill like the step label, a spinner for its icon;  hovered, a styled tooltip of what
-        it's answering.
+      - Beside Send, in the header's middle, the session's line (P35, P53's T53):  "Responding", "Building P35"
+        (`epic inbox status`), gone when idle or nobody listens;  a bare spinner, no pill or border (Owen, 2026-10-29:
+        "the spinner is already round, doesn't need to be in a circular border"), its words the tooltip;  hovered, a
+        styled tooltip of what it's answering.  The toolbar no longer has it.
       - Each agent has a note box that redirects it (see "Overview").
   - Links to any id in `main` land below the stuck titles.
     They unfold what hides the target, and open its panel.
@@ -1768,8 +1783,8 @@ Each kind of page has ONE name, written everywhere a person reads it.
       - revisit now keeps the item's pick
       - `prepare` under `tests`:  Start testing (epic `epic-engine` P51)
     - `POST cancel { page, id }`:  "nevermind"
-    - `POST send { page, now? }`:  `now: true` is the countdown's send (Review Now's, before epic `epic-engine` P20;  no page draws the wand since 2026-10-25),
-      every revisit waiting asked now too (`reviewNow()`)
+    - `POST send { page, now? }`:  `now: true` is Auto Send's send, when its countdown runs out (Review Now's, before
+      epic `epic-engine` P20;  the header's ring since P53), every revisit waiting asked now too (`reviewNow()`)
     - `send` and `now` answer `wake` too:  what waking the epic did (`WakeResult`), `null` while a session listens
     - `POST start { page }`:  the pill's click (`StartResult`):  the epic's session asked through its inbox poller
       (`asked`), else `/epic review <epic>` typed into its tab (`sent`);  its tab open already, VS Code would refuse
@@ -2532,7 +2547,7 @@ In this order, from the epic folder, `epic/` (a page by its path in the checkout
   - An entry leaves when its agent finishes (`done`).
     Empty, the file goes.
   - Every write is under the file's lock (`SRV.FileLock`) and atomic, as the review inbox's.
-  - REDIRECTS (P3):  an epic page's agents popover (`<epic-page>`'s toolbar, spell-epic) shows an epic's list,
+  - REDIRECTS (P3):  an epic page's agents popover (`<epic-page>`'s header pill, spell-epic) shows an epic's list,
     with a note box per agent.
     - Owen's note goes through [agentRoutes.ts](tools/agentRoutes.ts), guarded as the review routes are:
       - `GET /api/epics/agents?page=`

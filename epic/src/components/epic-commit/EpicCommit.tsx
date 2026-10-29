@@ -16,8 +16,8 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
  * made from its own `repo`, a child repo's, else the page's `<epic-page repo>`), then what it did (its children).
  * - The first of a run of commits carries the run's heading, `Commits:` with the git icon (`:host(:first-of-type)`
  *   in its sheet);  the lines sit under the heading's text.
- * - Hidden until the page's git toggle shows every commit (`--epic-commits-display`, from `<epic-page>`), or an
- *   item shows its own (the item sets the same property).
+ * - Hidden until its item's or phase's git icon shows it (`--epic-commits-display`, which they set), or it's in
+ *   the Log, which shows every one (epic `epic-engine` P53:  the page-wide git toggle went, the Log lists them all).
  * - The repo is read as it connects:  a commit moved under another page takes that page's.
  * - An entry of the LOG (epic `epic-engine` P52, Owen's comment C5:  the Log is the epic's change log):
  *   - with `at`, its time first, the git icon in the icon column, and no `Commits:` heading

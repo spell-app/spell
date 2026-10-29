@@ -47,6 +47,12 @@ import themeMenuCSS from "./UIThemeMenu.css?inline"
  *   - `theme`:  a theme `<ui-dropdown part="theme" floating scrolling button>`, for a page's masthead.
  *     - Its rows are `<ui-item>` children;  its text goes in its `trigger` slot.
  *     - Its last, under a divider:  Theme bench, opening it as the palette's row does (not a theme:  never chosen).
+ *   - `menu`:  the overlay's panel alone, drawn in place, for a sub-menu of another menu (an epic page's gear menu).
+ *     - Light | Dark | Auto, the theme list, Theme bench (unless `bench="none"`) and the `end` slot, as in the overlay
+ *     - No palette button, no overlay, no tooltip:  the host's menu gives the box, its border and shadow.
+ *     - The host calls `focusChosen()` as it opens the sub-menu.
+ *     - ArrowLeft / ArrowRight / Escape in the list are left to the host (closing its sub-menu).
+ *     - `:state(menu)`;  the rows take the host's text size.
  * - The theme bench is Spell UI's docs page, on the site `bench` names (the Spell editor:  the page server's
  *   address), else this page's own (a worktree's pages:  the worktree's bench);  `bench="none"`:  no row.
  *   - It's opened with the theme chosen in its address (`ThemePreference.addressWith()`), so it opens as this page
@@ -233,8 +239,15 @@ export class UIThemeMenu extends E.UIComponent<ThemeMenuVocabulary> {
         <Show when={this.shownControls === "theme"}>{this.dropdown()}</Show>
         <Show when={this.shownControls === "both"}>{this.palette()}</Show>
         <Show when={this.shownControls === "scheme"}>{this.schemeButton()}</Show>
+        <Show when={this.isMenu}>{this.panel()}</Show>
       </div>
     )
+  }
+
+  /** It draws its panel in place, in a host's menu (`show="menu"`):  `:state(menu)`. */
+  @E.cssState("menu")
+  get isMenu(): boolean {
+    return this.shownControls === "menu"
   }
 
   /** The sun / moon button and its tooltip. */
@@ -298,37 +311,7 @@ export class UIThemeMenu extends E.UIComponent<ThemeMenuVocabulary> {
           aria-label={this.translationForKey("overlayName")}
           ref={(popup: HTMLElement) => this.wireOverlay(popup)}
         >
-          <div class={PANEL_CLASS}>
-            {this.schemes()}
-            <div class={DIVIDER_CLASS} role="separator" />
-            <div class={HEADING_CLASS} id={IDS.heading}>
-              {this.translationForKey("themeName")}
-            </div>
-            <div
-              class={MENU_CLASS}
-              part={this.partForName("menu")}
-              role={MENU_ROLES.menu}
-              aria-labelledby={IDS.heading}
-              onKeyDown={(event) => this.onMenuKey(event)}
-            >
-              <For each={this.themeMenu.entries}>{(entry) => this.entry(entry)}</For>
-            </div>
-            <Show when={this.benchAddress}>
-              <div class={DIVIDER_CLASS} role="separator" />
-              <a
-                class={BENCH_CLASS}
-                part={this.partForName("bench")}
-                href={this.benchAddress}
-                target={BENCH_TARGET}
-                rel="noopener"
-                title={this.translationForKey("benchTip")}
-              >
-                <ui-icon name={BENCH_ICON} aria-hidden="true" padding="none" />
-                <span class={NAME_CLASS}>{this.translationForKey("bench")}</span>
-              </a>
-            </Show>
-            <slot name={this.slotForName("end")} />
-          </div>
+          {this.panel()}
         </ui-popup>
         <ui-popup
           part={this.partForName("tip")}
@@ -341,6 +324,46 @@ export class UIThemeMenu extends E.UIComponent<ThemeMenuVocabulary> {
           {label()}
         </ui-popup>
       </>
+    )
+  }
+
+  /**
+   * The panel:  Light | Dark | Auto, the theme list, Theme bench and the `end` slot.
+   * - The overlay's content (`both`), or drawn in place in a host's menu (`menu`).
+   */
+  private panel(): JSX.Element {
+    return (
+      <div class={PANEL_CLASS}>
+        {this.schemes()}
+        <div class={DIVIDER_CLASS} role="separator" />
+        <div class={HEADING_CLASS} id={IDS.heading}>
+          {this.translationForKey("themeName")}
+        </div>
+        <div
+          class={MENU_CLASS}
+          part={this.partForName("menu")}
+          role={MENU_ROLES.menu}
+          aria-labelledby={IDS.heading}
+          onKeyDown={(event) => this.onMenuKey(event)}
+        >
+          <For each={this.themeMenu.entries}>{(entry) => this.entry(entry)}</For>
+        </div>
+        <Show when={this.benchAddress}>
+          <div class={DIVIDER_CLASS} role="separator" />
+          <a
+            class={BENCH_CLASS}
+            part={this.partForName("bench")}
+            href={this.benchAddress}
+            target={BENCH_TARGET}
+            rel="noopener"
+            title={this.translationForKey("benchTip")}
+          >
+            <ui-icon name={BENCH_ICON} aria-hidden="true" padding="none" />
+            <span class={NAME_CLASS}>{this.translationForKey("bench")}</span>
+          </a>
+        </Show>
+        <slot name={this.slotForName("end")} />
+      </div>
     )
   }
 
@@ -542,11 +565,19 @@ export class UIThemeMenu extends E.UIComponent<ThemeMenuVocabulary> {
       if (!event.defaultPrevented) this.isOpen = false
     })
     popup.addEventListener("toggle", (event) => {
-      if ((event as ToggleEvent).newState !== "open") return
-      this.tabStopTheme = undefined
-      const row = this.rows().find((each) => each.value === this.chosenTheme) ?? this.rows()[0]
-      row?.focus()
+      if ((event as ToggleEvent).newState === "open") this.focusChosen()
     })
+  }
+
+  /**
+   * Focus the chosen theme's row (else the first), the list's tab stop reset to it.
+   * - The overlay calls it as it opens;  a host's menu as it opens its sub-menu (`show="menu"`).
+   */
+  @E.untracked
+  focusChosen(): void {
+    this.tabStopTheme = undefined
+    const rows = this.rows()
+    ;(rows.find((each) => each.value === this.chosenTheme) ?? rows[0])?.focus()
   }
 }
 

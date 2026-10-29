@@ -1681,7 +1681,7 @@
     {
       "path": "epic-send-buttons.html",
       "title": "<epic-send-buttons>",
-      "summary": "The <epic-send-buttons> element: Send: the paper plane, alone since 2026-10-25; with wand, its countdown too.",
+      "summary": "The <epic-send-buttons> element: Send, the paper plane; with countdown, Auto Send's ring round it.",
       "tag": "epic-send-buttons",
       "sections": [
         {

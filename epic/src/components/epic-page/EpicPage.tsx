@@ -1,15 +1,23 @@
 import { For, Show, createMemo } from "solid-js"
 import { isServer, type JSX } from "@solidjs/web"
 
-// Import directly:  the persist barrel would bring the database and server places too
-import { PrefStore } from "spell/util/persist/PrefStore"
-import { E, UI } from "spell/ui/core"
+import { E, UI, UIT } from "spell/ui/core"
 // The file itself (`list/` has no barrel):  it has no imports, so the pack bundles it as is
 import { URGENT_SELECTOR, epicStateFor, type EpicState } from "spell/epic/list/EpicState"
 
 import { PlanDates } from "spell/epic/dates"
 import { PageStages, PhaseIds, type PageStage } from "spell/epic/phases"
-import { NOBODY_LISTENING, SAGA_PREFIX, STAGE_ID, ServerLink, isAirplane, isImmediate } from "spell/epic/review"
+import {
+  AUTO_SEND_CHOICES,
+  NOBODY_LISTENING,
+  SAGA_PREFIX,
+  STAGE_ID,
+  SendCountdown,
+  ServerLink,
+  isAirplane,
+  isImmediate,
+  type AutoSend
+} from "spell/epic/review"
 // the page's view of the review inbox, as the review controls':  its file, not `epic-review`'s barrel
 import { ReviewState } from "spell/epic/components/epic-review/ReviewState"
 // the fold and filter pieces the blocks share:  their files, not their families' barrels (which would define them here)
@@ -23,8 +31,6 @@ import { epicPageVocabulary } from "./EpicPage.en"
 import {
   ACTIVE,
   BAR,
-  COMMITS_KEY,
-  COMMITS_PROPERTY,
   CRUMB_LINKS,
   CRUMBS,
   DONE,
@@ -36,8 +42,13 @@ import {
   sagaHref,
   COPIED_TOAST_MS,
   FLASH_MS,
-  GIT,
-  HAS_COMMITS,
+  CENTRE,
+  GEAR,
+  GEAR_MENU,
+  GEAR_ROW,
+  GEAR_ROWS,
+  GEAR_SUB,
+  GEAR_VALUE,
   HEAD,
   HEAD_PROPERTY,
   HEADING,
@@ -83,9 +94,11 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
  *     - no `DOCS / EPICS /` while the doc still holds its old `.spell-crumbs` before the page, nor narrow, 720px or
  *       less, where the side bar is too narrow for them (`Crumbs.css`)
  *     - the epic's title isn't drawn:  the name says it (the page's `<title>` and the Epics list still show it)
- *     at its right, while reviewed, Send;  then the bedtime label, the step label (the state's icon in
- *     it) and the git toggle (Owen, 2026-10-10:  "Right items:  (=>P14) (whatever the half-filled circle is) (git
- *     icon, but bigger)";  then the state went into the step label:  "Into the pill")
+ *     - one line, cut short with its full name as the tooltip when the header is too narrow (epic `epic-engine` P53)
+ *     in its MIDDLE, while reviewed, Send, and beside it the session's spinner (P53;  Owen's comment C7, T53);
+ *     at its right the bedtime label, the step label (the state's icon in it) and the gear (P53, where the git toggle
+ *     was;  Owen, 2026-10-10:  "Right items:  (=>P14) (whatever the half-filled circle is) (git icon, but bigger)";
+ *     then the state went into the step label:  "Into the pill")
  *   - the toolbar's bar, sticky again, right below the header (`--epic-head-h`):  the new item form, the toolbar
  *   - the review line, and the pill under it while it shows
  *   - the meta lines (branch, worktree, dates, the saga it serves, the guide's link from `slot="durable"`)
@@ -108,8 +121,9 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
  *     a session listening to the review counts as running
  * - The review line under the header:  "To review this doc, type `/epic review <name>`", copied on click (it flashes)
  *   - on every epic page, as today:  it's how a review starts;  airplane mode:  `/airplane land`
- * - SEND, `<epic-send-buttons>`, at the header's right, before its labels
- *   (epic `epic-engine` P20, in place of P10's Send and Review Now)
+ * - SEND, `<epic-send-buttons countdown>`, at the header's middle (epic `epic-engine` P53;  P20 put it at the right,
+ *   before the labels, in place of P10's Send and Review Now)
+ *   - centred while the title fits beside it;  narrower, right after the title, never over it (J161)
  *   - there whenever the page is reviewed (served with a token, its inbox answering:
  *     `ReviewClient`, through a `ReviewState` of its own), so it's always in the same place
  *   - Owen, 2026-10-10:  "The send + do now icons in bottom-right is too hidden.  Move back to the page header,
@@ -118,9 +132,10 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
  *     - grey with nothing to send, blue with marks not sent, outlined blue once sent
  *     - Owen's comments too (Owen, 2026-10-10, he keeps Send as the way they reach Claude):
  *       a new comment, or his reply on a thread, makes it blue;  its tooltip counts both ("2 marks, 1 comment")
- *   - NO wand since Owen, 2026-10-25 ("remove the wand EVERYWHERE ...  We may bring the wand back later"):  the
- *     countdown it turned on (2026-10-22) never runs, and the plane is filled blue until he presses it
- *     - `<epic-send-buttons wand>` brings it back;  a countdown's send still asks every revisit now (`onSendAsked()`)
+ *   - AUTO SEND (P53;  Owen, 2026-10-29:  "Send works on a 2-minute no interaction timer ... Pressing it sends
+ *     immediately"):  a ring round the plane drains over the wait the gear chose, and at its end the plane sends by
+ *     itself, waking the epic when nobody listens (Q59, B);  a countdown's send asks every revisit now (Q7)
+ *     - no wand (gone 2026-10-25):  the gear's Auto Send turns it off, and the plane is then filled blue until pressed
  *   - nobody listening:  the plane's tooltip says so (`NOBODY_LISTENING`)
  *   - what a send did goes to the notice line at the window's bottom (`ReviewState`'s)
  * - THE STAGE (`stage`, epic `epic-engine` P29;  `PageStages`):  how far planning has got
@@ -162,13 +177,14 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
  *     page in the epic's folder changes (`spell-server:changed`):  a page made or linked a moment ago shows
  *   - none, or not served (`file://`):  no box
  *   - open, folding (a `<details>`):  short, and it's how to get to them
- * - WHAT CLAUDE IS DOING (epic `epic-engine` P35), in its toolbar:  the session's line and the running agents (epic
- *   `skillz` P3) in a popover (`<epic-agents>`);  no "Agents running" panel above its blocks any more.
+ * - WHAT CLAUDE IS DOING (epic `epic-engine` P35):  the session's line, a bare spinner beside Send, its words the
+ *   tooltip (P53, T53);  the running agents (epic `skillz` P3) in the step label's pill, a popover
+ *   (`<epic-agents>`);  no "Agents running" panel above its blocks any more.
  *   - only while the page is served with a token, the epic's list answers (`AgentsClient`) and an agent runs
  *   - each row a note box that redirects that agent
  *   - in the shadow root:  not a section, so the rail and counts never see it
- * - The git toggle (only when the doc lists commits) shows or hides every `<epic-commit>` below,
- *   through `--epic-commits-display`;  remembered per page (`localStorage`), as today's.
+ * - THE GEAR (epic `epic-engine` P53, `gear()`), at the header's right:  Auto Send and Theme, each a sub-menu.
+ *   No page-wide git toggle since:  the Log lists every commit (P52), each phase and item shows its own.
  * - The page-wide signals its blocks read (`signalsOf()`):
  *   - `layout`
  *   - `top`, where top-level titles stick:
@@ -219,11 +235,6 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
   /** Light-DOM slot occupancy:  the guide's link. */
   readonly slots = new E.SlotContent(this.domElement)
 
-  /** Every commit shows. */
-  @E.cssState("commits")
-  @E.state
-  accessor showCommits = EpicPage.savedCommits()
-
   /** The page-wide signals. */
   readonly signals = EpicPage.signalsOf(this.domElement)
 
@@ -249,7 +260,7 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
     calendar: new E.IconGlyph({ owner: this, name: () => "calendar" }),
     book: new E.IconGlyph({ owner: this, name: () => "book" }),
     saga: new E.IconGlyph({ owner: this, name: () => "bullseye" }),
-    git: new E.IconGlyph({ owner: this, name: () => "git" }),
+    gear: new E.IconGlyph({ owner: this, name: () => "gear" }),
     chevron: new E.IconGlyph({ owner: this, name: () => "chevron right" }),
     copy: new E.IconGlyph({ owner: this, name: () => "copy" })
   }
@@ -328,12 +339,6 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
           .trim()
       )
       .join("\n\n")
-  })
-
-  /** Does the doc list commits?  Then the git toggle shows. */
-  readonly hasCommits = createMemo(() => {
-    this.signals.layout.get()
-    return !!this.domElement.querySelector(HAS_COMMITS)
   })
 
   /**
@@ -703,14 +708,21 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
             <button
               type="button"
               class={HEADING_COPY}
-              title={this.translationForKey("copyHeading", { command: this.headingCommand() })}
+              title={this.translationForKey("copyHeading", {
+                name: this.isSaga ? (this.saga ?? "") : (this.epic ?? ""),
+                command: this.headingCommand()
+              })}
               onClick={() => this.copyHeading()}
             >
               {this.isSaga ? this.saga : this.epic}
             </button>
           </h1>
-          <span class={STATUS} part={this.partForName("status")}>
+          {/* the header's middle (Owen's comment C7):  Send, then what the session is doing, a bare spinner (T53) */}
+          <span class={CENTRE} part={this.partForName("centre")}>
             <Show when={this.marks()}>{(marks) => this.sendButtons(marks)}</Show>
+            {this.isSaga ? undefined : <epic-agents draws="spinner" part={this.partForName("spinner")} />}
+          </span>
+          <span class={STATUS} part={this.partForName("status")}>
             <Show when={this.bedtime}>
               {(phases) => (
                 <ui-label
@@ -751,7 +763,7 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
               {/* the agents running, its third part (Owen, 2026-10-25:  "belongs in the top bar with pencil | P36") */}
               {this.isSaga ? undefined : <epic-agents draws="agents" part={this.partForName("agents-pill")} />}
             </span>
-            <Show when={this.hasCommits()}>{this.gitToggle()}</Show>
+            {this.gear()}
           </span>
         </header>
         <div ref={(element) => (this.bar = element)} class={BAR} part={this.partForName("bar")}>
@@ -911,9 +923,8 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
   /**
    * The sticky bar's last row, the TOOLBAR (epic `airplane` P8), in its order:
    * - the docs runtime's section buttons (`slot="toolbar"`)
-   * - at the right:
-   *   - what Claude is doing and the agents running (`<epic-agents>`, epic `epic-engine` P35)
-   *   - the page's state filter (`pageFilter()`), then expand-all and collapse-all
+   * - at the right:  the page's state filter (`pageFilter()`), then expand-all and collapse-all
+   *   - what Claude is doing went up to the header, a spinner beside Send (epic `epic-engine` P53, T53)
    * - no new item button:  each item section has its own, on its title
    *   (Owen, 2026-10-13:  "Remove "comment" icon from top header -- add it to question/todo/issue/test headers")
    */
@@ -922,8 +933,6 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
       <div class={TOOLBAR} part={this.partForName("toolbar")}>
         <slot name={this.slotForName("toolbar")} />
         <span class={TOOLBAR_TOOLS}>
-          {/* what Claude is doing, and the agents running (P35);  a saga has no session or agents of its own */}
-          {this.isSaga ? undefined : <epic-agents draws="doing" part={this.partForName("agents")} />}
           {this.pageFilter()}
           {/* ONE toggle (Owen, 2026-10-25):  open everything, then fold everything */}
           {Fold.toggleAllButton({
@@ -982,9 +991,9 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
   }
 
   /**
-   * Send (`<epic-send-buttons>`), at the header's right, before its labels.
+   * Send (`<epic-send-buttons countdown>`), at the header's middle, with Auto Send's ring.
    * - the plane by the fill rule (Q20), its tooltip what a press sends, or why it sends nothing
-   * - a press (or, with the wand back, the countdown running out):  `onSendAsked()`
+   * - a press, or the countdown running out:  `onSendAsked()`
    */
   private sendButtons(marks: () => HeaderMarks): JSX.Element {
     const stage = () => this.stageButton()
@@ -998,6 +1007,7 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
         class={SEND}
         part={this.partForName("send")}
         state={marks().send}
+        countdown=""
         accept={stage()?.label}
         accepted={stage()?.accepted ? "" : undefined}
         asks={plans()?.asks}
@@ -1143,21 +1153,238 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
     return this.kind === SAGA_KIND
   }
 
-  /** The git toggle:  a round icon button, pressed while every commit shows. */
-  private gitToggle(): JSX.Element {
+  ////////////////
+  // ## The gear (epic `epic-engine` P53)
+  ////////////////
+
+  /**
+   * The header's GEAR, where the git toggle was (Owen, 2026-10-29:  "Turning it off could be from a gear menu in the
+   * epic page header which replaces this"):  a round icon button opening a small menu of SETTINGS, two rows, each
+   * opening a sub-menu beside it
+   * - Auto Send · 2 minutes (Owen's comment C8, J160):  Immediately, 2 minutes, 5 minutes, then Off under a divider;
+   *   the chosen one ticked (`SendCountdown.choose()`, remembered in this browser for every page)
+   * - Theme · Paper (Owen's comment C9, J162):  Spell UI's own theme menu in its menu mode (`<ui-theme-menu
+   *   show="menu" bench="none">`):  Light / Dark / Auto and the themes, no Theme bench, no Edit theme;  the site
+   *   header's palette keeps the same choice
+   * - a sub-menu opens on a click, Enter, Space or the right arrow;  the left arrow or Escape closes it, back to its
+   *   row;  up and down move between rows
+   * - beside the rows, to their left;  where the window is too narrow for both, under them
+   * - no "Show commits":  every commit is in the Log (P52), and each phase and item has its own git button (J163)
+   */
+  private gear(): JSX.Element {
+    return (
+      <>
+        <button
+          type="button"
+          id={GEAR_ID}
+          class={GEAR}
+          part={this.partForName("gear")}
+          aria-label={this.translationForKey("gearTip")}
+          title={this.translationForKey("gearTip")}
+        >
+          {this.icon(this.icons.gear)}
+        </button>
+        <ui-popup
+          for={GEAR_ID}
+          class={GEAR_MENU}
+          part={this.partForName("gear-menu")}
+          open-on="click"
+          appearance="basic"
+          position="bottom right"
+          aria-label={this.translationForKey("gearTip")}
+          ref={(popup: HTMLElement) => this.wireGear(popup)}
+        >
+          <div class="gear-panel">
+            <div class={GEAR_ROWS} role="menu" aria-label={this.translationForKey("gearTip")} onKeyDown={this.onRowKey}>
+              {this.gearRow("autoSend", this.translationForKey("autoSend"), this.autoSendWords(this.autoSend))}
+              {this.gearRow("theme", this.translationForKey("theme"), this.themeTitle)}
+            </div>
+            <div
+              class={[GEAR_SUB, "auto-send"]}
+              part={this.partForName("auto-send")}
+              role="menu"
+              aria-label={this.translationForKey("autoSend")}
+              hidden={this.subMenu !== "autoSend"}
+              onKeyDown={this.onSubKey}
+            >
+              <For each={AUTO_SEND_CHOICES}>
+                {(choice) => (
+                  <>
+                    <Show when={choice === "off"}>
+                      <div class="divider" role="separator" />
+                    </Show>
+                    <button
+                      type="button"
+                      class={["choice", { checked: this.autoSend === choice }]}
+                      role="menuitemradio"
+                      value={choice}
+                      aria-checked={this.autoSend === choice ? "true" : "false"}
+                      tabindex="-1"
+                      onClick={() => this.chooseAutoSend(choice)}
+                    >
+                      <ui-icon name="check" class="tick" aria-hidden="true" padding="none" />
+                      <span>{this.autoSendWords(choice)}</span>
+                    </button>
+                  </>
+                )}
+              </For>
+            </div>
+            {/* always drawn (hidden while closed):  the Theme row reads its choice */}
+            <div
+              class={[GEAR_SUB, "theme"]}
+              part={this.partForName("theme-menu")}
+              role="group"
+              aria-label={this.translationForKey("theme")}
+              hidden={this.subMenu !== "theme"}
+              onKeyDown={this.onSubKey}
+            >
+              <ui-theme-menu show="menu" bench="none" ref={(menu: HTMLElement) => this.adoptThemeMenu(menu)} />
+            </div>
+          </div>
+        </ui-popup>
+      </>
+    )
+  }
+
+  /** One of the gear's rows:  `Auto Send · 2 minutes`, a chevron;  opens its sub-menu. */
+  private gearRow(sub: GearSub, name: string, value: string): JSX.Element {
     return (
       <button
         type="button"
-        class={GIT}
-        part={this.partForName("git")}
-        aria-pressed={this.showCommits ? "true" : "false"}
-        aria-label={this.translationForKey(this.showCommits ? "hideCommits" : "showCommits")}
-        title={this.translationForKey(this.showCommits ? "hideCommits" : "showCommits")}
-        onClick={this.toggleCommits}
+        class={[GEAR_ROW, { open: this.subMenu === sub }]}
+        part={this.partForName("gear-row")}
+        role="menuitem"
+        value={sub}
+        aria-haspopup="menu"
+        aria-expanded={this.subMenu === sub ? "true" : "false"}
+        tabindex="-1"
+        onClick={() => this.openSub(sub)}
       >
-        {this.icon(this.icons.git)}
+        <span class="name">{name}</span>
+        <Show when={value}>
+          <span class={GEAR_VALUE}>
+            {" · "}
+            {value}
+          </span>
+        </Show>
+        <ui-icon name="chevron right" class="chevron" aria-hidden="true" padding="none" />
       </button>
     )
+  }
+
+  /** Auto Send's choice in words:  `Immediately`, `2 minutes` ... */
+  private autoSendWords(choice: AutoSend): string {
+    return this.translationForKey(AUTO_SEND_TEXTS[choice])
+  }
+
+  /** The page's countdown:  the gear chooses its Auto Send;  none in a server render. */
+  readonly countdown = isServer ? undefined : SendCountdown.forPage()
+
+  /** Auto Send as chosen, a copy of the countdown's (`followCountdown()`):  the gear's row and ticks read it. */
+  @E.state accessor autoSend: AutoSend = this.countdown?.choice ?? "2m"
+
+  /** The gear's sub-menu open:  `autoSend`, `theme`, or none. */
+  @E.state accessor subMenu: GearSub | undefined = undefined
+
+  /** The theme sub-menu's element, once drawn;  its component ready (`themeMenuReady`):  the Theme row reads it. */
+  private themeMenu: ThemeMenuElement | undefined
+
+  /** The theme sub-menu's component is ready:  `themeTitle` reads its choice from then on. */
+  @E.state accessor themeMenuReady = false
+
+  /** The page's theme, its title (`Paper`), from the theme menu (which follows every menu on the page). */
+  get themeTitle(): string {
+    void this.themeMenuReady
+    const theme = this.themeMenu?.component?.chosenTheme ?? (isServer ? undefined : UI.themes?.current)
+    return theme ? UIT.ThemeNames.titleOf(theme) : ""
+  }
+
+  /** While connected:  follow the countdown's choice (another page, or this page's gear);  returns the undo. */
+  @E.whileConnected
+  protected followCountdown() {
+    const countdown = this.countdown
+    if (!countdown) return undefined
+    this.autoSend = countdown.choice
+    return countdown.subscribe(() => (this.autoSend = countdown.choice))
+  }
+
+  /** The theme sub-menu drawn:  keep it, and hear when its component is ready. */
+  private adoptThemeMenu(menu: HTMLElement) {
+    this.themeMenu = menu as ThemeMenuElement
+    void customElements
+      .whenDefined(menu.localName)
+      .then(() => this.themeMenu?.ready)
+      .then(() => (this.themeMenuReady = true))
+      .catch((failure: unknown) => console.error("EpicPage:  the gear's theme menu didn't load", failure))
+  }
+
+  /** The gear's menu:  on opening, every sub-menu closed and the first row focused;  on closing, the sub-menus too. */
+  private wireGear(popup: HTMLElement) {
+    popup.addEventListener("toggle", (event) => {
+      this.subMenu = undefined
+      if ((event as ToggleEvent).newState === "open") this.rows(popup)[0]?.focus()
+    })
+  }
+
+  /** The gear's rows, in order. */
+  private rows(root: ParentNode): HTMLButtonElement[] {
+    return [...root.querySelectorAll<HTMLButtonElement>(`.${GEAR_ROW}`)]
+  }
+
+  /** Open sub-menu `sub` beside its row, and focus its choice. */
+  @E.untracked
+  private openSub(sub: GearSub) {
+    this.subMenu = sub
+    E.afterSolidUpdate(() => {
+      if (sub === "theme") return this.themeMenu?.component?.focusChosen()
+      const box = this.domElement.shadowRoot?.querySelector<HTMLElement>(`.${GEAR_SUB}.auto-send`)
+      box?.querySelector<HTMLElement>('[aria-checked="true"]')?.focus()
+    })
+  }
+
+  /** Close the sub-menu open, back to its row. */
+  @E.untracked
+  private closeSub() {
+    const sub = this.subMenu
+    if (!sub) return
+    this.subMenu = undefined
+    this.domElement.shadowRoot?.querySelector<HTMLElement>(`.${GEAR_ROW}[value="${sub}"]`)?.focus()
+  }
+
+  /** Auto Send `choice` picked:  the countdown takes it (and remembers it);  back to its row. */
+  @E.untracked
+  private chooseAutoSend(choice: AutoSend) {
+    this.countdown?.choose(choice)
+    this.closeSub()
+  }
+
+  /** A key on the gear's rows:  up and down move;  the right arrow opens a row's sub-menu (Enter and Space click). */
+  private readonly onRowKey = (event: KeyboardEvent) => {
+    if (event.defaultPrevented) return
+    const row = (event.target as Element).closest?.(`.${GEAR_ROW}`) as HTMLButtonElement | null
+    if (!row) return
+    if (event.key === "ArrowRight") {
+      event.preventDefault()
+      return this.openSub(row.value as GearSub)
+    }
+    if (moveFocus(event, this.rows(row.parentElement!))) event.preventDefault()
+  }
+
+  /**
+   * A key in a sub-menu:  the left arrow or Escape closes it (Escape never reaches the menu's own, which would close
+   * it all);  up and down move between Auto Send's choices.
+   * - a key the theme menu took (its Light / Dark / Auto arrows) is left alone
+   */
+  private readonly onSubKey = (event: KeyboardEvent) => {
+    if (event.defaultPrevented) return
+    if (event.key === "ArrowLeft" || event.key === "Escape") {
+      event.preventDefault()
+      event.stopPropagation()
+      return this.closeSub()
+    }
+    const box = event.currentTarget as HTMLElement
+    if (!box.classList.contains("auto-send")) return
+    if (moveFocus(event, [...box.querySelectorAll<HTMLButtonElement>("button")])) event.preventDefault()
   }
 
   /** A doc still planning:  the folded `Plan hung?` aside -- how to restart the session, and the prompt to copy. */
@@ -1216,28 +1443,18 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
    * The wrapper's inline style, for everything below:
    * - the sticky stack below this header and its bar (`--epic-stack`)
    * - where the bar sticks (`--epic-head-h`)
-   * - every commit shown while the toggle is on
    */
   private pageStyle(): Record<string, string> {
     const style: Record<string, string> = {
       [STACK_PROPERTY]: `${this.signals.top.get()}px`,
       [HEAD_PROPERTY]: `${this.headHeight}px`
     }
-    if (this.showCommits) style[COMMITS_PROPERTY] = "block"
     return style
   }
 
   ////////////////
   // ## Behaviour
   ////////////////
-
-  /** The git toggle, clicked:  show or hide every commit, and remember it. */
-  private readonly toggleCommits = () => {
-    const on = !this.showCommits
-    this.showCommits = on
-    // storage blocked:  the choice lasts the visit
-    PrefStore.setAt(COMMITS_KEY + location.pathname, on ? COMMITS_ON : undefined)
-  }
 
   /**
    * A toolbar chip, clicked:  every section filtered at once, by the sections' own rule (`StateFilter.nextShown()`);
@@ -1389,15 +1606,45 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
     }
     return text
   }
-
-  /** Is the git toggle on for this page, as last left?  `false` without storage. */
-  private static savedCommits(): boolean {
-    return PrefStore.getAt(COMMITS_KEY + location.pathname) === COMMITS_ON
-  }
 }
 
-/** The commits toggle on, as kept:  `1`, as it always was. */
-const COMMITS_ON = 1
+/** The gear's sub-menus. */
+type GearSub = "autoSend" | "theme"
+
+/** The theme sub-menu's DOM element, as the gear reads it:  its component, once ready. */
+type ThemeMenuElement = HTMLElement & {
+  /** resolves once its component has drawn */
+  ready?: Promise<void>
+  /** `UIThemeMenu`:  its choice (reactive), and focusing it */
+  component?: { readonly chosenTheme: string; focusChosen(): void }
+}
+
+/** The gear button's id:  its menu's `for`. */
+const GEAR_ID = "gear"
+
+/** Each Auto Send choice's text key. */
+const AUTO_SEND_TEXTS = {
+  now: "autoSendNow",
+  "2m": "autoSend2",
+  "5m": "autoSend5",
+  off: "autoSendOff"
+} as const satisfies Record<AutoSend, string>
+
+/**
+ * Up / Down / Home / End among `items`, wrapping:  focus moves to the next;  true when it was such a key.
+ * - the gear's rows and Auto Send's choices:  a short fixed list, each `tabindex=-1`, so no roving tab stop
+ */
+function moveFocus(event: KeyboardEvent, items: readonly HTMLElement[]): boolean {
+  const steps: Record<string, number> = { ArrowDown: 1, ArrowUp: -1 }
+  const at = items.findIndex((it) => it === (event.target as Element).closest?.("button"))
+  let next: number
+  if (event.key in steps) next = (at + steps[event.key]! + items.length) % items.length
+  else if (event.key === "Home") next = 0
+  else if (event.key === "End") next = items.length - 1
+  else return false
+  items[next]?.focus()
+  return true
+}
 
 /** The vocabulary's attribute getters, typed (see "Attributes" in `UIComponent`). */
 export interface EpicPage extends E.AttributeValues<EpicPageVocabulary> {}

@@ -81,8 +81,8 @@
             <p>Two real commits of this epic's P14.</p>
             <ul>
               <li>
-                Commits are hidden until something shows them: here a <code>div</code> shows them, as the page's git
-                toggle does (<code>--epic-commits-display: block</code>).
+                Commits are hidden until something shows them: here a <code>div</code> shows them, as an item's or a
+                phase's git icon does (<code>--epic-commits-display: block</code>).
               </li>
               <li>Outside an <code>&lt;epic-page repo&gt;</code>, the sha is plain code, not a link.</li>
             </ul>
@@ -304,8 +304,9 @@
             <ui-icon slot="icon" name="palette"></ui-icon>
             <ul>
               <li>
-                Hidden until shown: the page header's git toggle shows every commit, an item's git icon its own. Both
-                set <code>--epic-commits-display</code>.
+                Hidden until shown: an item's or a phase's git icon shows its own, and the Log shows every one.
+                They set <code>--epic-commits-display</code>. No page-wide git toggle since epic
+                <code>epic-engine</code> P53: the Log lists every commit.
               </li>
               <li>
                 The sha: a small chip on the code-well background, in mono, the link colour. Without a

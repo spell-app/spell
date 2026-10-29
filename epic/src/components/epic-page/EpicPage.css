@@ -136,18 +136,23 @@
   }
 
   /*
-   * ## The sticky header:  the h1, then its labels and controls at the right, each centred on the row.  The epic's
-   * title under it is NOT sticky (Owen, 2026-10-10):  it scrolls away under the header, and the toolbar's bar sticks
-   * right below the header (`--epic-head-h`, measured)
+   * ## The sticky header:  the h1, Send in its middle, its labels and the gear at the right, each centred on the row.
+   * The epic's title under it is NOT sticky (Owen, 2026-10-10):  it scrolls away under the header, and the toolbar's
+   * bar sticks right below the header (`--epic-head-h`, measured)
+   * - three columns (epic `epic-engine` P53, Owen's comment C7:  "Center this button in the epic doc page header"):
+   *   the h1's takes what's left, the right side's never less than its own width, so Send sits at the exact middle
+   *   while the title fits beside it;  narrower, the h1 is cut short and Send follows it, never over it (J161)
+   * - 6px above and below:  room for Send's countdown ring, 5px past its pill
    */
   .head {
     position: sticky;
     z-index: 6;
     top: var(--spell-site-header-height, 0px);
-    display: flex;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(max-content, 1fr);
     align-items: center;
     gap: 6px 10px;
-    padding: 4px var(--epic-inset);
+    padding: 6px var(--epic-inset);
     /* a slight shadow under it, over the toolbar, which it touches:  no gap (Owen, 2026-10-24) */
     box-shadow: var(--epic-bar-shadow);
     /* the toolbar's fill, laid over the page:  opaque, so nothing shows through it as the page scrolls under */
@@ -159,12 +164,12 @@
    * "same font and style / all caps, 1/2 the size, vertical align center, less vertical padding")
    */
   .heading {
-    flex: 1 1 12em;
     min-width: 0;
     min-height: var(--epic-control-size, 28px);
     display: flex;
-    flex-wrap: wrap;
     align-items: center;
+    overflow: hidden;
+    white-space: nowrap;
     gap: 0 6px;
     margin: 0;
     color: var(--epic-heading-ink);
@@ -183,8 +188,37 @@
     letter-spacing: inherit;
     text-transform: inherit;
     text-align: start;
-    overflow-wrap: anywhere;
+    /* one line, cut short with an ellipsis:  its tooltip has the whole name */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
     cursor: pointer;
+  }
+  /* the crumbs give way first, then the name */
+  .heading .crumbs {
+    flex: 0 1000 auto;
+    min-width: 0;
+    overflow: hidden;
+  }
+  /*
+   * the header's middle:  Send, then the session's bare spinner (T53);  while the spinner shows, as much room before
+   * Send as it takes after, so the plane stays at the exact middle
+   */
+  .centre {
+    display: inline-flex;
+    align-items: center;
+    justify-self: center;
+    gap: 8px;
+  }
+  .centre:empty {
+    display: none;
+  }
+  .centre:has(epic-agents:state(doing)) {
+    padding-inline-start: calc(16px + 8px);
+  }
+  .centre epic-agents {
+    --epic-agents-ink: var(--epic-muted);
+    --epic-agents-spinner-size: 16px;
   }
   .heading-copy:hover {
     color: var(--epic-accent);
@@ -204,10 +238,9 @@
    */
   .status {
     display: inline-flex;
-    flex: none;
     align-items: center;
+    justify-self: end;
     gap: 6px;
-    margin-inline-start: auto;
   }
   .status:empty {
     display: none;
@@ -361,15 +394,13 @@
     --epic-send-buttons-size: var(--epic-control-size);
     --epic-send-buttons-rule: var(--epic-rule);
     --epic-send-buttons-muted: var(--epic-muted);
-    /* a little more room after it:  the review's controls, then the epic's labels */
-    margin-inline-end: 6px;
   }
 
   /*
-   * the git toggle:  icon only, the accent while pressed;  its mark as big as the step label's icon looks (Owen,
-   * 2026-10-10:  "git icon, but bigger"):  the git diamond fills less of its em than a circle
+   * the GEAR (epic `epic-engine` P53), where the git toggle was:  icon only, no circle (Owen, 2026-10-08), muted, the
+   * accent on hover and while its menu is open
    */
-  .git {
+  .gear {
     display: inline-grid;
     flex: none;
     place-items: center;
@@ -377,27 +408,135 @@
     width: var(--epic-control-size);
     height: var(--epic-control-size);
     padding: 0;
-    font-size: 22px;
-    /* the icon alone, no circle (Owen, 2026-10-08) */
+    font-size: 18px;
     border: none;
     border-radius: 4px;
     background: none;
     color: var(--epic-muted);
     cursor: pointer;
   }
-  .git .icon {
+  .gear .icon {
     height: auto;
     color: inherit;
   }
-  .git:hover {
+  .gear:hover,
+  .gear[aria-expanded="true"] {
     color: var(--epic-accent);
   }
-  .git[aria-pressed="true"] {
-    color: var(--epic-accent);
-  }
-  .git:focus-visible {
+  .gear:focus-visible {
     outline: 2px solid var(--ui-focus-color, var(--epic-accent));
     outline-offset: 1px;
+  }
+  /*
+   * its menu:  the rows, and the sub-menu open beside them, on their left (the gear is at the window's right);  where
+   * the window is too narrow for both side by side, the sub-menu wraps under the rows
+   */
+  .gear-menu {
+    --ui-popup-max-width: calc(100vw - 16px);
+  }
+  .gear-menu::part(popup) {
+    padding: 4px;
+  }
+  .gear-panel {
+    display: flex;
+    flex-flow: row-reverse wrap;
+    align-items: flex-start;
+    gap: 4px;
+    font: 13px/1.3 var(--epic-sans);
+  }
+  .gear-rows,
+  .gear-sub {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+  .gear-rows {
+    width: 15em;
+  }
+  .gear-sub {
+    box-sizing: border-box;
+    width: 17em;
+    max-width: 100%;
+    padding-inline-end: 4px;
+    border-inline-end: 1px solid var(--epic-rule);
+  }
+  .gear-sub.auto-send {
+    width: 10em;
+  }
+  .gear-sub[hidden] {
+    display: none;
+  }
+  .gear-row,
+  .gear-sub .choice {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 30px;
+    padding: 4px 8px;
+    border: none;
+    border-radius: 4px;
+    background: none;
+    color: var(--epic-ink);
+    font: inherit;
+    text-align: start;
+    cursor: pointer;
+  }
+  .gear-row:is(:hover, :focus-visible, .open),
+  .gear-sub .choice:is(:hover, :focus-visible) {
+    background: var(--epic-accent-soft);
+    outline: none;
+  }
+  .gear-row .name {
+    flex: none;
+  }
+  /* the row's choice, quieter, cut short when it must be */
+  .gear-row .value {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    color: var(--epic-muted);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .gear-row .chevron {
+    flex: none;
+    margin-inline-start: auto;
+    color: var(--epic-muted);
+    font-size: 11px;
+  }
+  /* the chosen Auto Send:  ticked;  the others keep the tick's room */
+  .gear-sub .tick {
+    flex: none;
+    width: 1em;
+    color: var(--epic-accent);
+    visibility: hidden;
+  }
+  .gear-sub .choice.checked .tick {
+    visibility: visible;
+  }
+  .gear-sub .divider {
+    margin: 4px 8px;
+    border-top: 1px solid var(--epic-rule);
+  }
+  /* narrow:  the sub-menu UNDER the rows, a rule above it instead of beside it;  the menu only as wide as them */
+  @container epic-page (max-width: 480px) {
+    .gear-panel {
+      flex-direction: column;
+      align-items: stretch;
+      width: 15em;
+    }
+    .gear-rows {
+      width: auto;
+    }
+    .gear-sub,
+    .gear-sub.auto-send {
+      width: auto;
+      padding: 4px 0 0;
+      border-inline-end: none;
+      border-top: 1px solid var(--epic-rule);
+    }
   }
 
   /*
@@ -644,20 +783,9 @@
     .toolbar-tools {
       --epic-title-end: 9.5px;
     }
-    /* the h1 shares its row with the labels while they fit (no row of their own:  the stuck header stays short) */
-    .heading {
-      flex-basis: 100%;
-    }
-    /* the labels stay at the row's right, over the h1's end:  the header's own ground under them, fading left */
-    .status {
-      position: absolute;
-      top: 4px;
-      inset-inline-end: var(--epic-inset);
-      height: var(--epic-control-size, 28px);
-      padding-inline-start: 6px;
-      background: var(--epic-toolbar-fill);
-      /* the fade into it:  the header's own ground (the docs' old ivory rail drew a peach band on a phone) */
-      box-shadow: -10px 0 8px -2px var(--epic-toolbar-fill);
+    /* the header's columns closer:  the right side keeps its width, the h1 gives way (P53) */
+    .head {
+      column-gap: 6px;
     }
     .meta {
       font-size: 14px;

@@ -124,7 +124,7 @@
                 ONE line of crumbs, <code>DOCS / EPICS / SEO</code>, the epic's name in their type, twice their size and
                 bold: the h1 (a click on the name copies <code>/epic resume seo</code>, and a toast says so), and at the
                 header's right the step label: <code>P2</code>, the
-                phase under way, outlined grey
+                phase under way, outlined grey, then the gear (Auto Send, Theme)
               </li>
               <li>
                 under the header, the review line (<code>To review this doc, type /epic review seo</code>), then the
@@ -551,33 +551,71 @@
                     </tr>
                     <tr>
                       <td><code>header</code></td>
-                      <td>The sticky page header: the h1, then the tools and labels at its right.</td>
+                      <td>
+                        The sticky page header, three columns (epic <code>epic-engine</code> P53): the h1;  Send in the
+                        exact middle (while reviewed), with what Claude is doing beside it;  then at its right the
+                        bedtime label, the step label and the gear.
+                      </td>
                     </tr>
                     <tr>
                       <td><code>heading</code></td>
                       <td>
                         The h1: the crumbs, then the epic's name in their type, twice their size and bold; a click on
                         the name copies
-                        <code>/epic resume &lt;name&gt;</code>.
+                        <code>/epic resume &lt;name&gt;</code>. One line, cut short when narrow: its tooltip gives the
+                        full name first (<code>&lt;name&gt;: click to copy /epic resume &lt;name&gt;</code>).
                       </td>
                     </tr>
                     <tr>
-                      <td><code>actions</code></td>
+                      <td><code>centre</code></td>
                       <td>
-                        While the page is reviewed: Send (<a href="epic-send-buttons.html" target="src-spell-epic-src-docs-epic-send-buttons-html"><code>&lt;epic-send-buttons&gt;</code></a>:
-                        the paper plane grey, blue with unsent marks, outlined once sent;  no wand since 2026-10-25).
+                        The header's middle (epic <code>epic-engine</code> P53, Owen's comment C7): Send, then what the
+                        session is doing. Centred on the header while the title fits beside it;  narrower, right after
+                        the title, never over it.
                       </td>
                     </tr>
                     <tr>
                       <td><code>send</code></td>
                       <td>
-                        Send, an <code>&lt;epic-send-buttons&gt;</code>: every unsent mark and comment to Claude, on a
-                        press (epic <code>epic-engine</code> P20; its wand and countdown gone since Owen, 2026-10-25).
+                        Send, an <a href="epic-send-buttons.html" target="src-spell-epic-src-docs-epic-send-buttons-html"><code>&lt;epic-send-buttons countdown&gt;</code></a>, while the page is reviewed:
+                        every unsent mark and comment to Claude (epic <code>epic-engine</code> P20, P53). A press sends at
+                        once;  Auto Send sends by itself once the page is left alone, a ring round the plane counting
+                        down.
                       </td>
                     </tr>
                     <tr>
-                      <td><code>git</code></td>
-                      <td>The git toggle: shows or hides every commit (only when the doc has some).</td>
+                      <td><code>spinner</code></td>
+                      <td>
+                        What the session is doing, beside Send (<code>&lt;epic-agents draws="spinner"&gt;</code>, T53): a
+                        bare turning spinner, its words (<code>Building P53</code>) the tooltip;  nothing while it's
+                        idle.
+                      </td>
+                    </tr>
+                    <tr>
+                      <td><code>gear</code></td>
+                      <td>
+                        The header's gear, last in it (epic <code>epic-engine</code> P53, where the git toggle was): opens
+                        its menu of settings.
+                      </td>
+                    </tr>
+                    <tr>
+                      <td><code>gear-menu</code></td>
+                      <td>The gear's menu, a <code>&lt;ui-popup&gt;</code>: its two rows, and the sub-menu open beside them.</td>
+                    </tr>
+                    <tr>
+                      <td><code>gear-row</code></td>
+                      <td>A row of the gear's menu: <code>Auto Send · 2 minutes</code>, <code>Theme · Paper</code>.</td>
+                    </tr>
+                    <tr>
+                      <td><code>auto-send</code></td>
+                      <td>Auto Send's sub-menu: Immediately, 2 minutes, 5 minutes, then Off;  the chosen one ticked.</td>
+                    </tr>
+                    <tr>
+                      <td><code>theme-menu</code></td>
+                      <td>
+                        The Theme sub-menu: Spell UI's <code>&lt;ui-theme-menu show="menu" bench="none"&gt;</code>, Light /
+                        Dark / Auto and the themes.
+                      </td>
                     </tr>
                     <tr>
                       <td><code>status</code></td>
@@ -650,10 +688,6 @@
                       <td><code>:state(future)</code></td>
                       <td>A future epic.</td>
                     </tr>
-                    <tr>
-                      <td><code>:state(commits)</code></td>
-                      <td>Every commit shows (the git toggle is on).</td>
-                    </tr>
                   </tbody>
                 </table>
               </ui-table>
@@ -696,13 +730,18 @@
                 fill rule (<a href="epic-send-buttons.html" target="src-spell-epic-src-docs-epic-send-buttons-html"><code>&lt;epic-send-buttons&gt;</code></a>, epic <code>epic-engine</code> P20).
                 <ul>
                   <li>
+                    In the header's exact middle (Owen's comment C7), with what Claude is doing, a bare spinner, beside
+                    it
+                  </li>
+                  <li>
                     The paper plane: a grey outline with nothing to send; DASHED blue with marks not sent yet;
                     OUTLINED blue once sent
                   </li>
                   <li>
-                    No wand since Owen, 2026-10-25 ("remove the wand EVERYWHERE ... We may bring the wand back
-                    later"): the countdown it turned on never runs, and the plane is filled blue until he presses it.
+                    A press sends at once. AUTO SEND sends by itself: a ring round the plane drains while the page is
+                    left alone, 2 minutes by default, and starts again at every key, click or scroll
                   </li>
+                  <li>Auto Send off: the plane is filled blue until he presses it</li>
                 </ul>
               </li>
               <li>
@@ -723,8 +762,25 @@
                 </ul>
               </li>
               <li>
-                <b>The git toggle:</b> a bare icon, only when the doc lists commits. It shows or hides every commit,
-                remembered per page.
+                <b>The gear</b> (epic <code>epic-engine</code> P53), last in the header: a menu of two rows.
+                <ul>
+                  <li>
+                    <code>Auto Send · 2 minutes</code> (J160, comment C8): Immediately, 2 minutes, 5 minutes, then Off,
+                    the chosen one ticked;  remembered in this browser for every page
+                  </li>
+                  <li>
+                    <code>Theme · Paper</code> (J162, comment C9): Spell UI's theme menu, Light / Dark / Auto and the
+                    themes
+                  </li>
+                  <li>
+                    each row's sub-menu opens to its left, under it when narrow;  a click, Enter, Space or the right
+                    arrow opens it, the left arrow or Escape closes it back to its row, up and down move
+                  </li>
+                </ul>
+              </li>
+              <li>
+                <b>No git toggle</b> since P53: the Log lists every commit (P52, comment C6), and each item or phase that
+                lists some has its own git icon.
               </li>
               <li>
                 <b>Agents running</b> (<code>&lt;epic-agents&gt;</code>, epic <code>epic-engine</code> P35), while any
@@ -740,8 +796,9 @@
                     that redirects it, sent by a blue plane in a circle, no word
                   </li>
                   <li>
-                    in the toolbar, the session's line (<code>Building P35</code>): a grey pill like the step label,
-                    a turning spinner where the label has its icon
+                    beside Send, what the session is doing (<code>Building P35</code>): a bare turning spinner, no pill
+                    or border, its words the tooltip (T53, Owen, 2026-10-29: "the spinner is already round, doesn't need
+                    to be in a circular border");  the toolbar no longer has it
                   </li>
                 </ul>
               </li>
@@ -900,6 +957,7 @@
               </li>
               <li>
                 The button sits where Send's paper plane does. Its tooltip counts the open questions ("2 questions open"): a reminder, never a lock.
+                Auto Send's ring goes round its check, but the countdown's end only sends the marks, never accepts (J143).
               </li>
               <li>
                 A press sends what's unsent with an accept mark. The session's <code>epic inbox apply</code> moves the

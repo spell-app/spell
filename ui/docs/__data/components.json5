@@ -34315,10 +34315,11 @@
           "values": [
             "both",
             "theme",
-            "scheme"
+            "scheme",
+            "menu"
           ],
           "default": "both",
-          "description": "Which controls to show:  `both` (the palette button, whose overlay picks the theme and light / dark), `scheme` (a light / dark button alone) or `theme` (a theme dropdown)."
+          "description": "Which controls to show:  `both` (the palette button, whose overlay picks the theme and light / dark), `scheme` (a light / dark button alone), `theme` (a theme dropdown) or `menu` (the overlay's panel alone, drawn in place:  the body of a sub-menu in another menu, which calls `focusChosen()` as it opens it)."
         },
         {
           "name": "size",
@@ -34536,6 +34537,10 @@
         {
           "name": "open",
           "description": "The overlay is open."
+        },
+        {
+          "name": "menu",
+          "description": "It draws its panel in place, inside a host's menu (`show=\"menu\"`)."
         },
         {
           "name": "disabled",

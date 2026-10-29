@@ -728,7 +728,7 @@ than just being able to move on").
 ## 7. Review:  `/epic review [<name>]`
 
 Owen reviews ON THE PAGE:  the epic page in the side bar's Review tab, where he marks items.
-- Each item's buttons:  one group, Make Todo, Revisit, Approve (no wand anywhere since 2026-10-25).
+- Each item's buttons:  one group, Make Todo, Revisit, Approve (no wand on them since 2026-10-25).
 - A todo that's WORK (no `limit`) has these instead:
   the plane, "do it in the next phase" (`next`);  Revisit;  the x, "drop it" (`drop`).
   `inbox apply` applies both.
@@ -738,7 +738,9 @@ Owen reviews ON THE PAGE:  the epic page in the side bar's Review tab, where he 
 - A to-do PHASE dragged by its title to another place (epic `epic-engine` P34):  its move arrives as a mark
   (`{ action: "move", to }`);  `inbox apply` moves it, the numbers and every link and "P5 · Name" following.
 - Their colours and fills:  `plan-doc.md`, "Colours".
-- He sends them with the page header's paper plane,
+- He sends them with the page header's paper plane, or AUTO SEND sends them by itself (epic `epic-engine` P53):
+  a ring round the plane drains once he leaves the page alone (2 minutes by default, set in the header's gear),
+  whether or not this session listens;  with nobody listening, the page server wakes the epic.
 - A running revisit now clicked again is "nevermind" (`canceled`, 7.3).
 
 This session LISTENS:  it waits on the doc's review inbox, and acts on what arrives.

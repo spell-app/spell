@@ -1,6 +1,6 @@
 /*
  * `<epic-commit>` (EpicCommit.tsx):  one commit -- the run's heading on the first, then the sha chip and its sentence.
- * - Hidden until shown:  `--epic-commits-display` (`block`), from the page's git toggle or an item's own.
+ * - Hidden until shown:  `--epic-commits-display` (`block`), from an item's or a phase's git icon, or the Log.
  * - The heading and lines share the phase fields' icon column (`EpicField.css`):  1.25em + 8px.
  * - Public tokens (`--epic-commit-*`) are never declared here:  read through private aliases.
  */

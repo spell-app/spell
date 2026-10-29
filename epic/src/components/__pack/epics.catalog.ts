@@ -1,5 +1,5 @@
 /* GENERATED -- do not edit:  `spell pack build epics`, from every vocabulary, `<Name>.en.ts` */
-// sources:  a0cabc25774c322e
+// sources:  6accadf530327878
 
 import type { RootCatalogEntry } from "spell/ui"
 
@@ -46,7 +46,7 @@ export const CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
   "epic-run-row": {"folder":"epic-run-row","attributes":["row","columns","answer","answer-label","taken"]},
   "epic-section": {"folder":"epic-section","attributes":["id","kind","title","source","part-ids","to-accept","to-see","open"]},
   "epic-send": {"folder":"epic-send","skeleton":{"display":"inline","width":"12em","height":"2em"},"attributes":[]},
-  "epic-send-buttons": {"folder":"epic-send-buttons","skeleton":{"display":"inline","width":"4em","height":"1.6em"},"attributes":["state","send-tip","count","busy","accept","accepted","asks","wand"]},
+  "epic-send-buttons": {"folder":"epic-send-buttons","skeleton":{"display":"inline","width":"4em","height":"1.6em"},"attributes":["state","send-tip","count","busy","accept","accepted","asks","countdown"]},
   "epic-sort": {"folder":"epic-list","skeleton":{"display":"inline","width":"6em","height":"1.5em"},"attributes":[]},
   "epic-state-filter": {"folder":"epic-state-filter","skeleton":{"display":"inline","width":"4em","height":"1.2em"},"attributes":["counts","marked","phases","shown"]},
   "epic-status": {"folder":"epic-status","attributes":["state","at","done-at"]},

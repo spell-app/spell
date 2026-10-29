@@ -71,8 +71,9 @@ How to write and update `epics/<name>/<name>.plan.html`, the live doc behind a `
 ## Page header
 
 `<epic-page>` draws the whole header from its attributes: the h1, the meta lines, the step label (the active phase,
-else `DONE` once every phase is, else the next phase, or `FUTURE`), the bedtime label, and the review line ("To
-review this doc, type `/epic review <name>`"). None of it is written by hand.
+else `DONE` once every phase is, else the next phase, or `FUTURE`), the bedtime label, the gear (Auto Send and
+Theme), Send in the middle while reviewed, and the review line ("To review this doc, type `/epic review <name>`").
+None of it is written by hand.
 
 - The `<title>` reads `Epic: <Title>`; `<epic-page title>` holds the title alone (`new` writes both). Scripts
   reading the title drop the `Epic: ` (`TITLE_PREFIX`).
@@ -610,13 +611,23 @@ START TESTING, the Manual tests section's button (on its title, while reviewed a
 An OLD `{ action: "test", result, note?, shot? }` mark (sent from the test run before P51) still applies (the
 `test ...` rows below), so nothing sent before is lost.
 
-COUNTDOWN MODE (the page header's wand, beside Send; epic `epic-engine` P20, in place of `windows-and-review` P4's
-Review Now) is NOT DRAWN since Owen, 2026-10-25 ("remove the wand EVERYWHERE ...  We may bring the wand back
-later"):  Send alone, the plane filled blue until he presses it;  `<epic-send-buttons wand>` brings it back.  It was on by default, it sends 2 minutes after Owen stops typing, clicking and scrolling, a ring draining round
-the wand. That send hands over every mark AND turns each revisit waiting (unsent, or sent and still to talk over) into
-a request for now (`POST send { now: true }`, `ReviewInbox.reviewNow()`), as Review Now did: the listening session
-answers them all at once, by background agents, into the items. Off, the paper plane is filled blue until he presses
-it. Typing in a note box turns its Revisit on at the first key (`ReviewClient.saveTyped()`), the box staying open.
+AUTO SEND (the page header's Send; epic `epic-engine` P20, P53, in place of `windows-and-review` P4's Review Now):
+with something unsent, a ring round the paper plane drains while Owen leaves the page alone, and at its end Send goes
+by itself, as a press would. A press still sends at once.
+
+- How long:  the header's gear, "Auto Send":  Immediately (each change as it's finished, no ring), 2 minutes (the
+  default), 5 minutes, or Off (the plane filled blue until he presses it). Remembered in his browser for every page
+  (`spell-epics:auto-send`).
+- Every key, click or scroll starts the wait again;  a note box with words in it and the focus holds the ring full.
+- It runs whether or not a session listens:  with nobody listening, its send wakes the epic (below).
+- That send hands over every mark AND turns each revisit waiting (unsent, or sent and still to talk over) into a
+  request for now (`POST send { now: true }`, `ReviewInbox.reviewNow()`), as Review Now did:  the listening session
+  answers them all at once, by background agents, into the items.
+- On a stage button (Accept Overview, Accept Phases) it only sends the marks, never accepts.
+- Only an epic page's header counts down:  a details page's or a guide's Send waits for a press.
+- The wand that turned the countdown on and off (P20) is gone for good.
+
+Typing in a note box turns its Revisit on at the first key (`ReviewClient.saveTyped()`), the box staying open.
 
 WAKING the epic (epic `epic-workflow` P16): Send while NO session listens makes the page
 server wake the epic, inside that request (no process runs while Owen isn't working; `ReviewStart.changeAndWake()`):

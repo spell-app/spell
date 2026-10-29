@@ -91,20 +91,11 @@ export const LAYOUT_ATTRIBUTES = [
   "plan"
 ]
 
-/** `localStorage` key prefix of the commits toggle, per page path. */
-export const COMMITS_KEY = "epic-commits:"
-
-/** The custom property the commits toggle sets for every `<epic-commit>` below:  `block` shows them. */
-export const COMMITS_PROPERTY = "--epic-commits-display"
-
 /** The custom property of the sticky stack's bottom, px from the viewport top (`EpicFold` sets it too). */
 export const STACK_PROPERTY = "--epic-stack"
 
 /** The sticky header's height (the h1's row), px:  the toolbar's bar sticks right below it. */
 export const HEAD_PROPERTY = "--epic-head-h"
-
-/** What shows the git toggle:  a commit, or a block whose part lists some. */
-export const HAS_COMMITS = "epic-commit, [commits]"
 
 /** Classes of the shadow markup. */
 export const HEAD = "head"
@@ -155,7 +146,14 @@ export const SEE_ALSO_KINDS: Record<SeeAlsoKind, { icon: string; key: E.TextKey<
   choices: { icon: "table columns", key: "seeAlsoChoices" }
 }
 export const STATUS = "status"
-export const GIT = "git"
+/** The header's middle (Send, the spinner) and its gear:  the button, its menu, the rows, a sub-menu, a row's value. */
+export const CENTRE = "centre"
+export const GEAR = "gear"
+export const GEAR_MENU = "gear-menu"
+export const GEAR_ROWS = "gear-rows"
+export const GEAR_ROW = "gear-row"
+export const GEAR_SUB = "gear-sub"
+export const GEAR_VALUE = "value"
 export const NOTICE = "notice"
 export const HUNG = "hung"
 

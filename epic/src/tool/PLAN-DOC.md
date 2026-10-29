@@ -51,6 +51,9 @@ once an epic page is in the `<epic-*>` markup (epic `epic-components`, P8).
   - the crumbs (`Docs › Epics › <title>`), the h1, the meta lines
   - the step label:  active phase, DONE, next, FUTURE
   - the bedtime label
+  - while reviewed, Send in the header's exact middle, with what the session is doing (a bare spinner) beside it
+  - the gear, last in the header:  Auto Send (Immediately, 2 minutes, 5 minutes, Off) and Theme (epic `epic-engine`
+    P53, where the git toggle was:  the Log lists every commit)
   - the "Plan hung?" notice (while there's no phase), and a future epic's notice
 - The page runs edge to edge by itself.
   It links `spell-doc.css` alone (no `plan-doc.css`:  P14).
@@ -768,7 +771,9 @@ EVERYTHING boxed in a section folds (Owen, 2026-10-08):  every card with a headi
 
 The review buttons, at every step:  Make Todo, Revisit, Approve in one group.
 - No Do Now (the wand) since Owen, 2026-10-25:  "In practice, I'm never using the wand";  nor the header's wand, the
-  same day:  Send alone.
+  same day.
+  - The header's Send counts down by itself instead (Auto Send, epic `epic-engine` P53):  a ring round the plane,
+    2 minutes by default, chosen in the header's gear;  a press still sends at once.
   - The inbox still takes a `details` request (an old mark, an older page):  only the button went.
 - The note box's:  Revisit Later, then the x (skip this).
 

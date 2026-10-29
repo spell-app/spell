@@ -33643,16 +33643,16 @@ export interface UIThemeMenuEventMap {
 /** `<ui-theme-menu>`'s own attributes, from its vocabulary. */
 export interface UIThemeMenuAttributes {
   /**
-   * Which controls to show:  `both` (the palette button, whose overlay picks the theme and light / dark), `scheme` (a light / dark button alone) or `theme` (a theme dropdown).
-   * - takes:  `both` · `theme` · `scheme`
+   * Which controls to show:  `both` (the palette button, whose overlay picks the theme and light / dark), `scheme` (a light / dark button alone), `theme` (a theme dropdown) or `menu` (the overlay's panel alone, drawn in place:  the body of a sub-menu in another menu, which calls `focusChosen()` as it opens it).
+   * - takes:  `both` · `theme` · `scheme` · `menu`
    * - default:  `both`
    */
-  show?: "both" | "theme" | "scheme"
+  show?: "both" | "theme" | "scheme" | "menu"
   /**
    * `show`, as the DOM element's property.
    * @deprecated write `show` -- `prop:` stays only for compiled spell
    */
-  "prop:show"?: "both" | "theme" | "scheme"
+  "prop:show"?: "both" | "theme" | "scheme" | "menu"
   /**
    * Size of the buttons (or the dropdown), `mini` ... `massive`;  `medium` is the default.
    * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
