@@ -1,6 +1,8 @@
 import { resolve } from "node:path"
 
 import { CLI } from "spell/cli"
+import { RealPath } from "spell/server/RealPath"
+import { EpicConfig } from "spell/epic/config/EpicConfig"
 import { EpicHome } from "spell/epic/config/EpicHome"
 import { RepoList } from "spell/epic/server/RepoList"
 import { DEFAULT_EPIC_PORT, PID_FILE } from "spell/epic/server/server.types"
@@ -22,7 +24,8 @@ import { EXIT, EpicCommandError, parseVerbArgs } from "./command.types"
  * - `status`:  JSON, exit 1 when it isn't running
  * - `url <file>`:  ensure it runs, then print the URL that serves `<file>` (a page in a registered repo's content)
  *
- * - Its repos:  `epic repo` (`Repos`).
+ * - Its repos:  `epic repo` (`Repos`);  `epic server <verb>` in a repo `epic init` set up registers that one first
+ *   (`registerHere()`)
  * - Its files:  `~/.spell-epic/` (`server.json`, `server.log`).
  * - The server's code loads on first use (a dynamic `import()`):  the other verbs don't pay for it.
  ****************/
@@ -63,6 +66,23 @@ export class Hub {
       default:
         throw new EpicCommandError(`unknown verb '${verb ?? ""}':  serve, start, ensure, stop, status or url`)
     }
+  }
+
+  /**
+   * Register the repo `cwd` is in, when `epic init` set it up and the epic server doesn't serve it yet;
+   * returns its name then, else `undefined`.
+   * - for `epic server <verb>` in such a repo (`EpicProgram`):  its first `start` serves it, no `epic repo add` first
+   * - says so on stderr:  stdout stays the verb's JSON
+   * - SIDE EFFECT:  writes the repo list
+   */
+  registerHere(cwd = process.cwd()): string | undefined {
+    if (!EpicConfig.ofSetUp(cwd)) return undefined
+    const list = new RepoList({ home: this.home })
+    const main = EpicConfig.mainOf(cwd)
+    if (list.repos().some((repo) => RealPath.same(repo.checkout, main))) return undefined
+    const repo = list.add(main)
+    process.stderr.write(`epic server:  now serves ${repo.name} (${main});  epic repo list\n`)
+    return repo.name
   }
 
   /**

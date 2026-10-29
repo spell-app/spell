@@ -508,6 +508,16 @@ export class EpicProgram {
     return { cwd: home.checkout }
   }
 
+  /**
+   * `epic server <args>` in a repo with no page server of its own (one `epic init` set up):  the machine's epic
+   * server (`Hub`), this repo registered with it first, for the verbs that serve (`start`, `ensure`, `url`).
+   */
+  static hubHere(args: string[], cwd = process.cwd()): Promise<number> {
+    const hub = new Hub()
+    if (["start", "ensure", "url"].includes(args[0] ?? "")) hub.registerHere(cwd)
+    return hub.run(args)
+  }
+
   /** `window`, `server`:  scripts passed through;  `hub`, `repo`:  the machine's epic server (`Hub`, `Repos`). */
   private addWindowVerbs(): void {
     const epic = this.epic
@@ -522,9 +532,10 @@ export class EpicProgram {
       epic.command("server"),
       "this checkout's page server;  start --all:  every web server (page server, editor, Spell UI)",
       (args) =>
-        // a repo without its own page server (one `epic init` set up):  the machine's epic server, same verbs
+        // a repo without its own page server (one `epic init` set up):  the machine's epic server, same verbs,
+        // serving this repo from the first time
         !EpicTools.hasPageServer()
-          ? new Hub().run(args)
+          ? EpicProgram.hubHere(args)
           : args[0] === "start" && args.includes("--all")
             ? EpicTools.run("serve", ["server", "start", "all", ...args.slice(1).filter((arg) => arg !== "--all")])
             : EpicTools.run("server", args)
