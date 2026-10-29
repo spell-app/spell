@@ -147,7 +147,7 @@ export const epicSectionVocabulary = {
       description:
         "An item section's state filter:  one chip per state its items are in, with how many, solid while that " +
         "state's items show, outlined while hidden.  The Phases section's the same, by a phase's state:  undone, " +
-        "updated (a plan waiting for Owen's Accept, or changed), complete (epic `epic-engine` I157)."
+        "updated (a plan waiting for your Accept, or changed), complete (epic `epic-engine` I157)."
     },
     {
       name: "hidden-note",

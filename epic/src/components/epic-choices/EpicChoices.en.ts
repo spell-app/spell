@@ -32,7 +32,7 @@ export const epicChoicesVocabulary = {
       kind: "string",
       format: "date",
       description:
-        "The day Owen's pick was recorded (`epic inbox apply`, `epic choose`, a revisit's pick kept);  shown " +
+        "The day your pick was recorded (`epic inbox apply`, `epic choose`, a revisit's pick kept);  shown " +
         "inside the unfolded Choices, with `chosen-note`."
     },
     {

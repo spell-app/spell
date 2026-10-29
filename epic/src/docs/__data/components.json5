@@ -1152,7 +1152,7 @@
         {
           "name": "chosen-on",
           "kind": "string",
-          "description": "The day Owen's pick was recorded (`epic inbox apply`, `epic choose`, a revisit's pick kept);  shown inside the unfolded Choices, with `chosen-note`."
+          "description": "The day your pick was recorded (`epic inbox apply`, `epic choose`, a revisit's pick kept);  shown inside the unfolded Choices, with `chosen-note`."
         },
         {
           "name": "chosen-note",
@@ -5218,7 +5218,7 @@
         },
         {
           "name": "filter",
-          "description": "An item section's state filter:  one chip per state its items are in, with how many, solid while that state's items show, outlined while hidden.  The Phases section's the same, by a phase's state:  undone, updated (a plan waiting for Owen's Accept, or changed), complete (epic `epic-engine` I157)."
+          "description": "An item section's state filter:  one chip per state its items are in, with how many, solid while that state's items show, outlined while hidden.  The Phases section's the same, by a phase's state:  undone, updated (a plan waiting for your Accept, or changed), complete (epic `epic-engine` I157)."
         },
         {
           "name": "hidden-note",
