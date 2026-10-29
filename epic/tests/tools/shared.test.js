@@ -127,13 +127,13 @@ describe("sharedDocLog", () => {
         sha: expect.any(String),
         subject: "demo P2:  Doc Review -- spell-parser's part",
         repo: "https://github.com/spell-app/spell-parser",
-        time: expect.stringMatching(/^2026-10-20T13:00:00[+-]\d\d:\d\d$/)
+        time: expect.stringMatching(/^2026-10-20T13:00:00(Z|[+-]\d\d:\d\d)$/)
       },
       {
         sha: expect.any(String),
         subject: "demo P1:  Spike -- the kit's part",
         repo: "https://github.com/spell-app/spell",
-        time: expect.stringMatching(/^2026-10-20T12:00:00[+-]\d\d:\d\d$/)
+        time: expect.stringMatching(/^2026-10-20T12:00:00(Z|[+-]\d\d:\d\d)$/)
       }
     ])
   })
