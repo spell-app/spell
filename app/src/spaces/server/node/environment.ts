@@ -1,6 +1,6 @@
 import { readFileSync } from "fs"
 import { fileURLToPath } from "url"
-import { dirname, join, resolve } from "path"
+import { basename, dirname, join, resolve } from "path"
 
 // The server's checkout finder, node built-ins only:  the main checkout from any worktree.
 // By the server package's npm name, as every import is (WWOD §4).
@@ -9,12 +9,16 @@ import { checkoutOf } from "spell/server/checkout"
 
 /** spaces' folder, `src/spaces/`:  this file is in `src/spaces/server/node/`. */
 const spacesSrcDir = resolve(fileURLToPath(import.meta.url), "..", "..", "..")
+/** The app folder's code:  `app/src/` in a checkout, `dist/app/` in the published `spell`. */
+const codeDir = resolve(spacesSrcDir, "..")
 /**
  * This checkout's root:  the main one, or a worktree's.
  * - spell-app's code is in its one `src/`, a folder each (`src/app/`, `src/spaces/` ...), since epic `repo-split` P14
  *   (folders at the root since P8, `packages/` before).
+ * - In the published `spell` the code is built into `dist/app/`, and the rest (`spaces/`) is in its `app/`:
+ *   so the root is that `app/` (epic `repo-split` P22).
  */
-const repoDir = resolve(spacesSrcDir, "..", "..")
+const repoDir = basename(codeDir) === "src" ? dirname(codeDir) : join(dirname(dirname(codeDir)), basename(codeDir))
 /**
  * Where the app's build folder (`app/`) and the `@spell` space's projects (`spaces/`) are:  the repo's root
  * (`packagesDir` kept its name from when they were in `packages/`).
@@ -43,6 +47,7 @@ function entryFolder(name: string): string {
  * a package (`spell/parser/py`), that folder in its `src/`:  a sub-path names a path under `src/`, as every import name
  * does (epic `repo-split` P14, Q47).
  * - e.g. `spell/parser/py` => the parser folder's `src/py/`, whose `core/` is the Python core;  `spell` => its root
+ * - in the published `spell`, its `dist/`:  `spell/parser/py` => `dist/parser/py/`
  * - Unscoped names only, as all of ours are.
  */
 function packageFolder(name: string): string {
@@ -51,8 +56,14 @@ function packageFolder(name: string): string {
   if (!path.length) return root
   // a folder of the ONE package (its `workspaces`, epic `repo-split` P20):  `spell/parser/py` => `parser/src/py`
   const [folder = "", ...rest] = path
-  const { workspaces = [] } = JSON.parse(readFileSync(join(root, "package.json"), "utf8")) as { workspaces?: string[] }
-  return workspaces.includes(folder) ? join(root, folder, "src", ...rest) : join(root, "src", ...path)
+  const manifest = JSON.parse(readFileSync(join(root, "package.json"), "utf8")) as {
+    workspaces?: string[]
+    spell?: { folders?: string[] }
+  }
+  if (manifest.workspaces?.includes(folder)) return join(root, folder, "src", ...rest)
+  // the published `spell`:  every folder's code built into `dist/<folder>/`, the kit's into `dist/` (P22)
+  if (manifest.spell?.folders) return join(root, "dist", ...path)
+  return join(root, "src", ...path)
 }
 /** `spell`'s `src/` (spell-parser's). */
 const srcDir = entryFolder("spell/parser/spell")

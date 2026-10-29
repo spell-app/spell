@@ -225,7 +225,7 @@ If a pony in a wizard hat tells you "Neigh-tive custom elements, at your service
 | `spell bundle check [names...]` | says which bundles are out of date, and why;  exit 1 if any are |
 | `spell commands [list \| check]` | every yarn script, `spell` command, `epic` verb and skill, against the commands page;  `check` exits 1 on a gap |
 | `spell wwod [check] [files...]` | checks every WWOD citation and repo path in WWOD, every `AGENTS.md` and `CLAUDE.md`, and the skills |
-| `spell publish [--dry-run]` | builds, packs and checks every repo's npm package, installs them in a scratch project, then publishes them, lowest first;  `--dry-run` stops before publishing |
+| `spell publish [--dry-run] [--tag <tag>]` | builds, packs and checks the npm packages, installs them in a scratch project, then publishes them under the tag `next`, lowest first;  `--dry-run` stops before publishing |
 | `spell map <verb>` | a map of every repo's code, and one of the docs:  what already does this, what uses it, which pages name it ([below](#asking-the-map)) |
 | `spell coherence score` | how coherent the code is:  each mechanism's copies left and its users, scored 0-100, and saved so it trends ([below](#scoring-coherence)) |
 | `spell pony [words...]` | a pony in Spell's wizard hat says your words, or one of its own |
@@ -272,6 +272,7 @@ run from any folder of an epic's worktree, `spell server start` starts that work
 | `spell publish --dry-run` | everything but the publish:  build, pack, check, scratch install |
 | `spell publish --no-scratch` | skips the scratch install, which needs the network |
 | `spell publish --json` | the packed packages and every check as JSON |
+| `spell publish --tag <tag>` | the npm dist-tag to publish under, `next` when not given;  only `--tag latest` moves `latest` |
 | `spell pony --gallop` | her legs gallop:  in place in a terminal, else one stride's frames |
 
 - Which bundles there are:  the `"bundles"` in the kit's page server settings, every installed repo's merged.
@@ -285,17 +286,25 @@ run from any folder of an epic's worktree, `spell server start` starts that work
     and that every backticked repo path exists.
   - Where:  WWOD, every `AGENTS.md` and `CLAUDE.md`, the Solid 2 rules, and the skills (citations only).
   - Exits 1 on a broken one.
-- `spell publish`:  five packages, `spell` first, each repo that has a `"spellPublish"` in its `package.json`.
-  - Each is built to JavaScript, one file per source file, so every name its `exports` gives still finds its file;
+- `spell publish`:  three packages, `spell` first (epic `repo-split` Q65).
+  - `spell`:  the ONE package, the kit's `src/` and every folder's, built into `dist/<folder>/`
+    (`spell/ui/core` is `dist/ui/core.js`).
+  - `spell-ui`:  Spell UI on its own, its Vite library build, with the element code inside.
+  - `spell-epic`:  the epic plugin for Claude Code, its parts at its root, its code `spell`'s.
+  - The code is built to JavaScript, one file per source file, so every name its `exports` gives still finds its file;
     types stripped, standard decorators lowered, Solid's JSX compiled.
   - Each is staged in the kit's `dist-packs/stage/<name>/` (git-ignored) with a `package.json` made for npm:
     no `private`, `workspaces`, scripts or dev dependencies;  the checkout's own never changes.
-  - One version for all, the kit's, and the published `spell` depends on every other package:
-    one install brings them all.
-  - Then `npm pack`, the checks (built code only, every `exports` file packed, one `DOMElement`),
-    and a scratch project outside the checkout:  a node import, a Vite page that draws a `<ui-button>`, `npx spell help`.
-  - Without `--dry-run`, and only when every check passed:  `npm publish` for each, lowest first.
+  - One version for all, the kit's `package.json` `version`.
+  - Then `npm pack` into `dist-packs/`, the checks (built code only, every `exports` file packed, one `DOMElement`),
+    and a scratch project outside the checkout:  a node import, a Vite page that draws a `<ui-button>`,
+    `npx spell help`, `npx epic --help`.
+  - Without `--dry-run`, and only when every check passed:  `npm publish --tag <tag>` for each, lowest first.
     `npm login` first.
+  - The tag is `next` unless you say otherwise:  `npm install spell@next` gets the new version,
+    while `latest` stays where it was.
+    Only `--tag latest` moves `latest`;  or, for a version already out under `next`,
+    `npm dist-tag add spell@<version> latest`.
 
 </details>
 

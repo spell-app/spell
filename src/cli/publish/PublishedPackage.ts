@@ -139,16 +139,33 @@ export class PublishedPackage {
     if (bins.length) out.bin = Object.fromEntries(bins.map((name) => [name, `./${this.binPath(name)}`]))
     out.files = this.stagedEntries()
     const sideEffects = source.sideEffects
-    if (Array.isArray(sideEffects)) out.sideEffects = sideEffects.flatMap((entry: string) => builtPathOrNone(entry))
+    const folderNames = this.folders.map((folder) => basename(folder.root))
+    if (Array.isArray(sideEffects))
+      out.sideEffects = [
+        ...sideEffects.flatMap((entry: string) => builtPathOrNone(entry, folderNames)),
+        ...this.publishedSideEffects()
+      ]
     else if (sideEffects !== undefined) out.sideEffects = sideEffects
     out.dependencies = this.dependencies()
     if (source.spell) out.spell = this.shippedSpellEntry(source.spell as Record<string, string>)
-    if (this.folders.length) out.spell = { ...(out.spell as object), folders: this.folders.map((f) => basename(f.root)) }
+    if (this.folders.length)
+      out.spell = { ...(out.spell as object), folders: this.folders.map((f) => basename(f.root)) }
     if (source.pageServer) out.pageServer = mapStrings(source.pageServer, builtPath)
     for (const field of ["peerDependencies", "optionalDependencies"] as const) {
       if (out[field]) out[field] = this.resolvedVersions(out[field] as Record<string, string>)
     }
     return out
+  }
+
+  /** The files `"spellPublish": { "sideEffects" }` adds, the package's own and each folder's, at their built paths. */
+  private publishedSideEffects(): string[] {
+    const own = (this.repo.settings.sideEffects ?? []).map((file) => builtPath(`./src/${file}`))
+    const folders = this.folders.flatMap((folder) =>
+      (folder.settings.sideEffects ?? []).map((file) =>
+        builtPath(`./src/${file}`).replace(/^\.\/dist\//, `./${DIST}/${basename(folder.root)}/`)
+      )
+    )
+    return [...own, ...folders]
   }
 
   /**
@@ -347,10 +364,20 @@ export function builtPath(path: string): string {
   return `${match[1] ?? ""}${DIST}/${rest.replace(/\.(mts|mjs)$/, ".mjs").replace(/\.(tsx?|jsx?)$/, ".js")}`
 }
 
-/** A `sideEffects` entry, published:  a `src/` path made a `dist/` one, a bare glob kept, any other path dropped. */
-function builtPathOrNone(entry: string): string[] {
+/**
+ * A `sideEffects` entry, published:  a `src/` path made a `dist/` one, a bare glob kept, any other path dropped.
+ * - A folder's `src/` too, into its `dist/<folder>/`:  `./ui/src/index.ts` => `./dist/ui/index.js`,
+ *   and a whole folder (`./epic/**`) => `./dist/epic/**`.
+ *   Without them a bundler dropped `import "spell/ui"` as a no-op, and no element was defined (epic `repo-split` P22).
+ */
+export function builtPathOrNone(entry: string, folders: string[] = []): string[] {
   if (!entry.startsWith("./")) return [entry]
-  return entry.startsWith("./src/") ? [builtPath(entry)] : []
+  if (entry.startsWith("./src/")) return [builtPath(entry)]
+  const [, folder, rest] = /^\.\/([^/]+)\/(.*)$/.exec(entry) ?? []
+  if (!folder || !folders.includes(folder)) return []
+  if (rest === "**") return [`./${DIST}/${folder}/**`]
+  if (!rest?.startsWith("src/")) return []
+  return [builtPath(`./${rest}`).replace(/^\.\/dist\//, `./${DIST}/${folder}/`)]
 }
 
 /** `value` with `map` applied to every string in it, however deep. */

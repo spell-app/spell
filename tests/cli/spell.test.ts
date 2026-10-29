@@ -42,6 +42,10 @@ describe("spell help", () => {
     expect(spell(["help", "server", "stop"]).stdout).toMatch(/^Usage: spell server stop \[options\] \[which\]\n/)
   })
 
+  test("spell publish's tag is next unless told otherwise:  a plain publish never moves latest (epic repo-split P22)", () => {
+    expect(spell(["help", "publish"]).stdout).toMatch(/--tag <tag>\s+the npm dist-tag[^\n]*\n[^(]*\(default: "next"\)/)
+  })
+
   test("an unknown command", () => {
     const { status, stderr } = spell(["help", "nope"])
     expect(status).toBe(2)

@@ -3,7 +3,7 @@ import { tmpdir } from "node:os"
 import { dirname, join } from "node:path"
 import { afterAll, beforeAll, describe, expect, test, vi } from "vite-plus/test"
 
-import { PublishedPackage, builtPath, type PackedPackage, type PublishedRepo } from "spell/cli/publish"
+import { PublishedPackage, builtPath, builtPathOrNone, type PackedPackage, type PublishedRepo } from "spell/cli/publish"
 
 /**
  * `PublishedPackage` on a made-up repo, `spell-fake`:  its staging folder, the published `package.json`, `npm pack`
@@ -32,7 +32,7 @@ const MANIFEST = {
   devDependencies: { typescript: "^7.0.2" },
   sideEffects: ["./src/things/index.ts", "**/*.css", "./site/x.ts"],
   spell: { commands: "./src/cli/commands.ts", hooks: "./src/cli/hooks.ts" },
-  spellPublish: { bin: { fake: "cli/main" }, files: ["templates"] }
+  spellPublish: { bin: { fake: "cli/main" }, files: ["templates"], sideEffects: ["things/setup.ts"] }
 }
 
 const REPO: PublishedRepo = {
@@ -86,10 +86,19 @@ describe("PublishedPackage.manifest()", () => {
   test("bins, files, sideEffects and the spell entry at their published paths", () => {
     expect(manifest.bin).toEqual({ fake: "./bin/fake.js" })
     expect(manifest.files).toEqual(["README.md", "bin", "dist", "templates"])
-    expect(manifest.sideEffects).toEqual(["./dist/things/index.js", "**/*.css"])
+    expect(manifest.sideEffects).toEqual(["./dist/things/index.js", "**/*.css", "./dist/things/setup.js"])
     // `hooks` names a file that isn't there:  dropped
     expect(manifest.spell).toEqual({ commands: "./dist/cli/commands.js" })
     expect(readFileSync(join(ROOT, "stage", "bin", "fake.js"), "utf8")).toMatch('await import("../dist/cli/main.js")')
+  })
+
+  test("a folder's sideEffects go to its dist/<folder>/:  import \"spell/ui\" isn't dropped (epic repo-split P22)", () => {
+    const folders = ["ui", "epic"]
+    expect(builtPathOrNone("./ui/src/index.ts", folders)).toEqual(["./dist/ui/index.js"])
+    expect(builtPathOrNone("./ui/src/components/*/index.ts", folders)).toEqual(["./dist/ui/components/*/index.js"])
+    expect(builtPathOrNone("./epic/**", folders)).toEqual(["./dist/epic/**"])
+    expect(builtPathOrNone("./ui/site/_src/site.ts", folders)).toEqual([])
+    expect(builtPathOrNone("./app/**", folders)).toEqual([])
   })
 })
 
