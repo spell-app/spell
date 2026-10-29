@@ -266,9 +266,10 @@ export class EpicProgram {
       .addHelpText("after", UPDATE_HELP)
     this.page(
       epic.command("updated"),
-      "a change to a phase's plan:  an Update block at the end of its description",
+      "a change to a phase's plan no item caused:  an Update block at the end of its description;  an answer's " +
+        "change is its change marks alone (--for q3:  nothing written when the phase has marks for every one)",
       'epic updated seo#P3 "<p>Split in two:  the sitemap first.</p>" --summary "split in two"'
-    ).usage('<epic>#P3 "<html>" | --file <file> [--summary "..."]')
+    ).usage('<epic>#P3 "<html>" | --file <file> [--summary "..."] [--for <item ids>]')
     this.page(
       epic.command("phase"),
       "set a phase's status;  done:  --done writes what was built, and the time Claude took (took, from the " +

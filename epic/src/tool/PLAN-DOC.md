@@ -247,7 +247,9 @@ As `plan-doc.md`, "Ids":
     each screenshot.
   - Filing a request again replaces its block.
 - Plan changes:  `<epic-update at summary>` blocks, one per change to the phase's plan, oldest first (see "Updates").
-  - Written by `updated <name>#<N> "<html>" [--summary "..."]`.
+  - Written by `updated <name>#<N> "<html>" [--summary "..."] [--for <item ids>]`.
+  - Only for a change NO ITEM caused (a plan adjusted while building, a file moved):  an answer's change is its
+    change marks alone ("Change marks";  epic `epic-engine` I159).
   - At the END of the phase's description (Owen, 2026-10-11:  "The updated blocks themselves go at the end of the
     phase description"):  after Goal (and Owen's kept notes), before Done, the commits, Files, Verify, To review.
   - `phase`:  the phase active then.
@@ -740,7 +742,7 @@ easily"), `components/epic-update/`:
   - `at`:  `YYYY-MM-DD HH:MM` (any form `PlanDates` reads).  `summary`:  one line, plain text.
     The tool's `updated` without `--summary`:  the first sentence of what changed (`UpdateSummary`).
   - Where it goes:
-    - a PLAN CHANGE:  at the end of its phase's description (`updated`;  "Phases")
+    - a PLAN CHANGE no item caused:  at the end of its phase's description (`updated`;  "Phases")
     - an update to PROSE (an agent's, by hand):  right AFTER the block it changed (Owen, 2026-10-11:  "or after the
       section which they updated"):  after the paragraph, list or code block, inside its item, field or Overview
       sub-section;  an update to a whole Overview sub-section goes last inside it
@@ -782,7 +784,17 @@ text itself, where an `<epic-update>` only said a block changed.
     `{ action: "reopen" }`;  `inbox apply` reopens the item (an answered question back to open, red;  its answer
     kept):  answered again, Claude rewrites the words with a new mark
   - an Accept mark from before (`{ action: "accept" }`) still applies:  `accepted="2026-10-24 19:02"`, quiet
-- The `<epic-update>` blocks written before stay as they are.  No migration step:  a new element, nothing old changes.
+- The marks are the WHOLE record of an answer's change:  no `<epic-update>` block beside them (epic `epic-engine`
+  I159;  Owen, 2026-10-29, on P51's orange "Update:  No answer buttons ..." under its Q53 marks:  "Do we still need
+  the orange update section like this?", then picked "only when no mark says it").
+  - `updated` writes nothing when the marks say it (`PlanDoc.marksSay()`, `UpdateMarks`), printing
+    `P51:  no Update block, the change marks say it (Q53)`:
+    - `--for q53,j3`:  every item given has a mark in the phase
+    - without it:  every item id its text names has a mark in the phase stamped this pass (within 15 minutes, or not
+      stamped yet), and it names no file
+  - a change no item caused still gets its block:  a plan adjusted while building, a file moved
+  - the blocks written before beside their marks:  the migration `updates-said-by-marks` drops those the marks say
+    ("Migrations")
 
 ### Handled in a phase
 
@@ -929,6 +941,15 @@ Named, dated, idempotent steps that bring an older page's markup up to today's, 
     - the set takes the card's day (`chosen-on`) and what it recorded, from `recorded ...` on (`chosen-note`);  the card
       goes;  ONE log line names the items (`Picks' Noted cards moved into their Choices:  J3, Q5`)
     - idempotent:  a moved card is gone
+  - `updates-said-by-marks` (2026-10-29, on command;  epic `epic-engine` I159):  a phase's Update block written in
+    the same pass as its change marks goes (`UpdatesSaidByMarks`):  the marks say it ("Change marks")
+    - which:  a phase's own dated `<epic-update>`, stamped within 15 minutes of a change mark in that phase
+      (`UpdateMarks.SAME_PASS_MINUTES`), naming an item one of those marks names
+    - kept:  a block holding marks itself, naming a file or folder, or an estimate;  a phase whose marks are from
+      another time (the backfill's);  ONE log line names the phases
+    - its first dry run (2026-10-29):  only epic-engine's P51 · Tests Inline, Owen's case;  epic-friend's three hold
+      their marks, debut's P23 and epic-engine's P48 say an estimate
+    - idempotent:  a dropped block is gone
   - `engine-links` (2026-10-19, epic `epic-engine` I27) went in epic `repo-split` P14, once the content rewrite left
     no epic page linking the engine's old places in spell-app;  its code is in git history
 - A new step:  a class implementing `Migration` in `migrations/`, its instance added LAST to `Migrations.all`, in the

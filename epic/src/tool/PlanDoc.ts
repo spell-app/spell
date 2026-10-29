@@ -65,6 +65,7 @@ import { PlanItem } from "./PlanItem"
 import { PlanMarkup } from "./PlanMarkup"
 import { PlanReader } from "./PlanReader"
 import { PlanTime } from "./PlanTime"
+import { UpdateMarks } from "./UpdateMarks"
 import { UpdateSummary } from "./UpdateSummary"
 import { Migrations } from "./migrations"
 import { CHANGE_ID, STAGE_ID, SUMMARY_ID } from "./ReviewInbox"
@@ -555,6 +556,26 @@ export class PlanDoc extends PlanReader {
   }
 
   /**
+   * The items whose CHANGE MARKS in phase `n` already say what an Update block `html` would, upper case;  `[]`:  write
+   * the block (epic `epic-engine` I159;  Owen, 2026-10-29:  an Update block only when no mark says it).
+   * - `forIds` (`updated --for q53,j3`):  the items the change is for;  said when EVERY one has a mark in the phase
+   * - none given:  the item ids `html` names, said when every one has a mark of this pass (`UpdateMarks`:  stamped
+   *   within `SAME_PASS_MINUTES`, or not stamped yet) and `html` names no file (a move the marks can't say)
+   * - names no item:  `[]`, a change no item caused
+   */
+  marksSay(n: number, html: string, forIds?: readonly string[]): string[] {
+    const phase = this.phase(n)
+    const given = forIds?.map((id) => id.toLowerCase())
+    const text = this.incoming(html)
+      .map((node) => node.textContent ?? "")
+      .join(" ")
+    if (!given && UpdateMarks.namesFile(text)) return []
+    const ids = given ?? UpdateMarks.idsIn(text)
+    const marked = UpdateMarks.marked(phase, ids, given ? undefined : this.now)
+    return ids.length && marked.length === ids.length ? ids.map((id) => id.toUpperCase()) : []
+  }
+
+  /**
    * A change to phase `n`'s plan, `html` (what changed, and why), as one `<epic-update at summary>` block at the END of
    * the phase's description (Owen, 2026-10-11:  "The updated blocks themselves go at the end of the phase
    * description"), after the ones before it.
@@ -565,6 +586,7 @@ export class PlanDoc extends PlanReader {
    * - it STAYS when a phase is done (unlike the UPDATE markers);  the phase's `changes` counts it
    *   (`writeChangeCounts()`, every edit)
    * - old prose shapes in `html` (a Net effect paragraph, a code accordion ...) become elements (`IncomingHtml`)
+   * - NOT for a change an answer caused, which its change marks say:  `marksSay()` first (`updated` asks it)
    * - SIDE EFFECT:  logs it
    */
   addPhaseUpdate(n: number, html: string, { summary }: { summary?: string } = {}): void {
