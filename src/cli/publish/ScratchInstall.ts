@@ -12,7 +12,7 @@ import type { PackedPackage, PublishCheck } from "spell/cli/publish"
  * The packed packages, installed the way someone outside would:  a project in the system's temp folder, far from any
  * checkout, `npm install`s every `.tgz`, then three checks run there (epic `repo-split` P19's Verify):
  * 1. node imports `spell/util` and `spell/parser/parser`
- * 2. a page Vite builds, importing `spell-ui` and `spell/element`, draws a `<ui-button>` in headless Chromium,
+ * 2. a page Vite builds, importing `spell/ui/ui-button` and `spell/element`, draws a `<ui-button>` in headless Chromium,
  *    with ONE element base:  the button's class extends the page's own `E.DOMElement`, and the built page holds one
  *    `class DOMElement`
  * 3. `npx spell help` runs;  and `npx epic --help`, when `spell-epic` is among them
@@ -190,10 +190,12 @@ const PAGE_HTML = `<!doctype html>
 `
 
 /**
- * The scratch page's script:  `spell-ui` (every family) and `spell/element`, then whether the button is defined, its
- * class extends the page's `E.DOMElement`, and it drew something in its shadow root.
+ * The scratch page's script:  ONE family, `spell/ui/ui-button`, and `spell/element`, then whether the button is
+ * defined, its class extends the page's `E.DOMElement`, and it drew something in its shadow root.
+ * - One family, not all of `spell/ui`:  a bundler drops Spell UI's settings unless `core` is a side effect, and only
+ *   a family alone showed it (epic `repo-split` P22).
  */
-const PAGE_SCRIPT = `import "spell/ui"
+const PAGE_SCRIPT = `import "spell/ui/ui-button"
 import { E } from "spell/element"
 
 const report = (result) => (window.scratchResult = result)

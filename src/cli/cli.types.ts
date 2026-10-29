@@ -79,12 +79,21 @@ export type WwodOptions = GlobalOptions & {
  * - `dryRun`:  build, pack and check every package, then install them in a scratch project;  publish nothing
  * - `scratch`:  `false` (`--no-scratch`) skips the scratch install, which needs the network
  * - `json`:  print the packed packages and every check as JSON
+ * - `tag`:  the npm dist-tag every package publishes under;  `next` when not given (`PUBLISH_TAG`), so a plain
+ *   publish never moves `latest`, which only `--tag latest` does (Owen, 2026-10-29, epic `repo-split` P22)
  */
 export type PublishOptions = GlobalOptions & {
   dryRun?: boolean
   scratch?: boolean
   json?: boolean
+  tag?: string
 }
+
+/**
+ * The npm dist-tag `spell publish` uses when it isn't given one:  `next`, so `npm install spell@next` gets the new
+ * version while `latest` stays where it is (the coming-soon placeholder, until Owen moves it).
+ */
+export const PUBLISH_TAG = "next"
 
 /**
  * `spell rename imports` flags.

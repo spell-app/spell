@@ -12,8 +12,8 @@
  *   docs, asked through graphify (epic `coherence` P1)
  * - `spell coherence score [--json] [--save] [--compare <snapshot | last>] [--at <revision>]`:  how coherent the
  *   code is, from the catalog's searches (epic `coherence` P15)
- * - `spell publish [--dry-run]`:  every repo's npm package, built, packed and checked, then published, lowest first
- *   (epic `repo-split` P19)
+ * - `spell publish [--dry-run] [--tag <tag>]`:  the npm packages (`spell`, `spell-ui`, `spell-epic`), built, packed and
+ *   checked, then published under the tag `next` unless told otherwise (epic `repo-split` P19, P22)
  * - `spell rename imports [--dry-run] [repos...]`:  the import rename of epic `repo-split` P20 (`spell-ui/x` =>
  *   `spell/ui/x` ...), kept for branches open when it landed
  * - `spell rename spellml [--dry-run] [checkouts...]`:  Spell's markup files, `.spellx` => `.spellml` (epic
@@ -238,10 +238,11 @@ export default function kitCommands(spell: Command): void {
 
   spell
     .command("publish")
-    .description("build, pack and check every repo's npm package, install them in a scratch project, then publish")
+    .description("build, pack and check spell, spell-ui and spell-epic, try them in a scratch project, then publish")
     .option("--dry-run", "stop before publishing:  build, pack, check, scratch install")
     .option("--no-scratch", "skip the scratch install (it needs the network)")
     .option("--json", "print the packed packages and every check as JSON")
+    .option("--tag <tag>", "the npm dist-tag to publish under;  only `--tag latest` moves latest", CLI.PUBLISH_TAG)
     .action((options: CLI.PublishOptions) =>
       CLI.runCommand(async () => (await import("spell/cli/commands/publishCommand")).publishCommand(options))
     )
