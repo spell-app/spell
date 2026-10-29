@@ -424,15 +424,16 @@ and React 18 needs a `ref` for both properties and events ([README-frameworks.md
 ## Moving a page today, by hand
 
 There's no migration tool yet (below), so today a page moves family by family, with two pages open beside it.
-And Spell UI isn't on npm yet, so all of it runs from a checkout of the kit.
+Your page loads Spell UI from npm (`npm install spell-ui@next`) or a CDN, as
+[the front page's thirty seconds](README.md#thirty-seconds-three-ways) show;
+the side-by-side demo runs from a checkout of the kit.
 
-1. Set up the kit and bring Spell UI in, as
-   [the front page's thirty seconds](README.md#thirty-seconds-two-ways) do:
-   the kit's [setup from zero](https://github.com/spell-app/spell/blob/main/README.md#setup-from-zero), then `yarn clone spell-ui`.
+1. Set up the kit:  its [setup from zero](https://github.com/spell-app/spell/blob/main/README.md#setup-from-zero),
+   which clones it with Spell UI inside, in `ui/`.
 2. See every example in both forms:
 
    ```sh
-   cd ~/www/spell/spell-ui
+   cd ~/www/spell/ui
    yarn dev
    ```
 

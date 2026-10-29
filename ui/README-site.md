@@ -75,10 +75,10 @@ When the bundle is stale, the page server rebuilds it as it starts, and a page t
 - The docs site is served by the kit's page server, because Spell UI's own part of its settings names the set and
   its bundle (`"pageServer"`, in [package.json](package.json):
   [the kit's README-server.md](https://github.com/spell-app/spell/blob/main/README-server.md#settings-and-route-modules--each-repo-brings-its-own)).
-  - So it needs only the kit and `spell-ui`:  `yarn clone spell-ui`
+  - So it needs only a checkout of the kit, Spell UI's folder with it
     ([setup](https://github.com/spell-app/spell/blob/main/README.md#setup-from-zero)).
   - `start all` and `spell server start` both find the kit from any folder of it.
-- `start all` brings up the editor too, where spell-app is cloned.
+- `start all` brings up the editor too, from the app's folder.
   For the page server alone, `spell server start`.
 - An open page reloads when the page, its layout, its data or the bundle changes.
 - `spell server stop all` stops them both.

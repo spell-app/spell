@@ -499,8 +499,9 @@ Lost track?  `epic status`.
     `REVIEW <file>:  neither side had these values`:  new behaviour nobody has looked at yet.
   - Any other conflict stops it mid-merge, and it exits 1 listing the files:
     resolve them, `git add` them, then `epic worktree merge-main --continue` finishes the merge.
-  - In an epic's worktree of several repos, it merges every repo, the child repos lowest first,
-    the top one (the kit, in Spell) last;  a repo that can't merge says FAILED, and the others go on.
+  - In an epic's worktree of several repos (a checkout whose settings list child repos), it merges every repo,
+    the child repos lowest first, the top one last;  a repo that can't merge says FAILED, and the others go on.
+    Spell's kit is one repo, so there it's one merge.
   - In a Spell kit, it then rewrites the old Spell UI names the branch's own files still write
     (`spell ui rename --write`, from the kit's root), commits them on their own in each repo, and lists them
     under `renamed old names in N file(s)`.

@@ -322,7 +322,7 @@ and it IS a repo's type check:  its `yarn ts` runs it where a bare `tsc` would r
 
 ```sh
 spell-types            # this package:  type-check it, write dist-types/
-spell-types --below    # first, the packages of the lower repos this repo uses, lowest first, rebuilt where stale
+spell-types --below    # first, the declarations of the folders below this one, lowest first, rebuilt where stale
 spell-types --clean    # dist-types/ deleted first:  a full build
 ```
 
