@@ -226,7 +226,7 @@ describe("epic init:  the shared repo (epic-friend P4)", () => {
     const gh = stubGh(app)
     const report = await withGh(gh, () => new RepoInit({ main: app }).init())
     const bare = join(gh.repos, "ana", "first-epics.git")
-    expect(report.remote).toEqual({ action: "made", repo: "ana/first-epics", address: bare })
+    expect(report.remote).toEqual({ action: "made", repo: "ana/first-epics", address: bare, visibility: "private" })
     expect(readFileSync(gh.log, "utf8")).toMatch(/^repo create ana\/first-epics --private --description /m)
     // the content repo's commit is there
     expect(git(bare, "log", "--format=%s").trim()).toBe("Shared content:  empty")
@@ -296,8 +296,50 @@ describe("epic init:  the shared repo (epic-friend P4)", () => {
     const app = codeRepo("dry")
     const gh = stubGh(app)
     const report = await withGh(gh, () => new RepoInit({ main: app }).init({ dryRun: true, contentRepo: "dry-x" }))
-    expect(report.remote).toEqual({ action: "would make", repo: "ana/dry-x" })
+    expect(report.remote).toEqual({ action: "would make", repo: "ana/dry-x", visibility: "private" })
     expect(existsSync(gh.log) && readFileSync(gh.log, "utf8")).not.toMatch(/repo create/)
+  })
+
+  test("private by default:  no terminal asks nothing, and gh is told --private", async () => {
+    const app = codeRepo("shy")
+    const gh = stubGh(app)
+    const report = await withGh(gh, () => new RepoInit({ main: app }).init({ ask: true }))
+    expect(report.remote).toMatchObject({ action: "made", repo: "ana/shy-epics", visibility: "private" })
+    expect(readFileSync(gh.log, "utf8")).toMatch(/^repo create ana\/shy-epics --private /m)
+    expect(RepoInit.lines(report).join("\n")).not.toMatch(/PUBLIC/)
+  })
+
+  test("--public:  gh is told --public;  one line warns that the plans are public", async () => {
+    const app = codeRepo("open")
+    const gh = stubGh(app)
+    const out = vi.spyOn(process.stdout, "write").mockImplementation(() => true)
+    let printed = ""
+    try {
+      expect(await withGh(gh, () => new RepoInit({ main: app }).run(["--public"]))).toBe(0)
+      printed = out.mock.calls.map(([text]) => String(text)).join("")
+    } finally {
+      out.mockRestore()
+    }
+    expect(readFileSync(gh.log, "utf8")).toMatch(/^repo create ana\/open-epics --public /m)
+    expect(printed).toContain("shared repo:  made ana/open-epics on GitHub, public, and pushed")
+    expect(printed).toContain(
+      "  NOTE:  it's PUBLIC:  everything in the plans (epic pages, guides, comments) can be read by anyone"
+    )
+    // --dry-run says which it would make
+    const dry = await withGh(stubGh(codeRepo("open-dry")), () =>
+      new RepoInit({ main: join(TEMP, "open-dry", "open-dry") }).init({ dryRun: true, visibility: "public" })
+    )
+    expect(dry.remote).toEqual({ action: "would make", repo: "ana/open-dry-epics", visibility: "public" })
+    expect(RepoInit.lines(dry)).toContain(
+      "shared repo:  would make ana/open-dry-epics on GitHub, public, push to it, and write its address in " +
+        ".epic/config.json5 (contentRemote)"
+    )
+  })
+
+  test("Private or public?:  p, private or public, any case;  anything else isn't an answer", () => {
+    expect(
+      ["p", "P", "private", " Private ", "public", "PUBLIC", "pub", "yes", ""].map(RepoInit.visibilityFor)
+    ).toEqual(["private", "private", "private", "private", "public", "public", undefined, undefined, undefined])
   })
 
   test("--content-repo, --remote and --no-remote:  one at a time;  a repo name GitHub takes", async () => {

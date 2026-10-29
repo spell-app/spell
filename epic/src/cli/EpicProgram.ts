@@ -1030,8 +1030,9 @@ In the repo's main checkout (or any worktree of it), each step skipped when it's
   ../<repo>.epics      the content repo, a git repo of its own:  epics/, sagas/, guides/, pages/;
                        cloned instead, when the config names the team's (contentRemote) and it isn't here
   the shared repo      the content repo on GitHub, so the team shares the plans:  asks what to call it
-                       (<repo>-epics), makes it private, pushes, and writes its address in the config
-                       (contentRemote);  needs GitHub's command, gh, logged in:  without it, says how to get it
+                       (<repo>-epics) and "Private or public?" (private), makes it, pushes, and writes its
+                       address in the config (contentRemote);  needs GitHub's command, gh, logged in:  without
+                       it, says how to get it
   the links            each of those folders linked in at the checkout's root
   .gitignore           the links listed between # shared:start and # shared:end
 Then commit .epic/config.json5 and .gitignore on the base branch, and push it:  a teammate's epic init then
@@ -1039,6 +1040,8 @@ clones the plans.
 
 --content-repo <name> names the shared repo without asking;  --remote <address> uses one made already;
 --no-remote makes none, and the plans stay on this machine.
+--public makes the shared repo public without asking;  with no terminal to ask in, it's private unless --public.
+A public one shows everything in the plans (epic pages, guides, comments) to anyone.
 
 --name <name> is the name you go by on the epics, kept in ~/.spell-epic/person.json5 (epic whoami);
 without it, epic init asks in a terminal, suggesting your GitHub login (else git's user.name), and takes that

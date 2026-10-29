@@ -83,7 +83,10 @@ export class GitHub {
    * - throws an `Error` with gh's own words when it can't (a name taken, no right to make one there)
    * - SIDE EFFECT:  a new repo on GitHub
    */
-  static createRepo(fullName: string, { visibility = "private", description = "" } = {}): void {
+  static createRepo(
+    fullName: string,
+    { visibility = "private", description = "" }: { visibility?: RepoVisibility; description?: string } = {}
+  ): void {
     const run = GitHub.run(["repo", "create", fullName, `--${visibility}`, "--description", description], {
       timeout: CREATE_TIMEOUT_MS
     })
@@ -127,6 +130,9 @@ const HOST = "github.com"
 
 /** How long a `gh` call waits, ms:  it may be offline. */
 const TIMEOUT_MS = 5000
+
+/** Who can see a GitHub repo `GitHub.createRepo()` makes:  `gh repo create`'s `--private` / `--public`. */
+export type RepoVisibility = "private" | "public"
 
 /** How long `gh repo create` waits, ms. */
 const CREATE_TIMEOUT_MS = 30_000

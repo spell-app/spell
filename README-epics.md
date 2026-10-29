@@ -205,6 +205,10 @@ In a terminal, it asks two things first:
   `--name Ana` answers it.
 - **What should the shared repo be called?**  Suggesting `<repo>-epics`, here `my-app-epics`.
   `--content-repo <name>` answers it.
+- **Private or public?**  Suggesting private:  `p`, `private` or `public`, in any case.
+  `--public` answers it;  with no terminal to ask in, it's private unless you say `--public`.
+  A public repo shows everything in the plans to anyone:  epic pages, guides, comments.
+  `epic init` says so in a line of its own.
 
 Then, in order, it:
 1. Writes `.epic/config.json5`, every key with a comment on each, valued for THIS repo
@@ -212,7 +216,8 @@ Then, in order, it:
    A file already there is kept as it is.
 2. Makes the content folder, `../<repo>.epics`, a git repo of its own.
    It holds the four folders, a README, and a `.gitignore` for what's never committed.
-3. Makes the shared repo on GitHub:  PRIVATE, under your account, or under the organization your code repo is on.
+3. Makes the shared repo on GitHub:  private unless you said public, under your account,
+   or under the organization your code repo is on.
    It pushes the content repo there, and writes its address in the config, `contentRemote`.
 4. Links each of the four folders in at the checkout's root;  every new worktree gets the same links.
 5. Lists the links in a block of your `.gitignore`.
@@ -224,6 +229,7 @@ Then, in order, it:
 - Each step is skipped when it's done, so it's safe to run again:  a second run ends `set up already`.
 - `--remote <address>` uses a shared repo you made already (on GitHub or anywhere else git reaches).
 - `--no-remote` makes none:  the plans stay on this machine, as they did before sharing existed.
+- `--public` makes the shared repo public, without asking.
 
 Try it first in a throwaway repo:  `--dry-run` says what it would do, and writes nothing.
 
@@ -345,7 +351,7 @@ epic server start
 ```
 
 - What it printed:  the top of this page.
-- The shared repo is private:  the first person adds each teammate to it on GitHub,
+- The shared repo is private, unless the first person chose public:  they add each teammate to it on GitHub,
   with write access, since every turn pushes.
 - Joining needs no `gh`:  plain git clones the shared repo.
   With `gh` logged in, though, your short name defaults to your GitHub login.

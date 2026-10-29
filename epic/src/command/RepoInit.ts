@@ -6,14 +6,15 @@ import { Git } from "spell/server/Git"
 import { CLI } from "spell/cli"
 import { EpicConfig, type EpicSettings } from "spell/epic/config/EpicConfig"
 import { EpicHome } from "spell/epic/config/EpicHome"
-import { GitHub } from "spell/epic/config/GitHub"
+import { GitHub, type RepoVisibility } from "spell/epic/config/GitHub"
 
 import { EXIT, EpicCommandError, parseVerbArgs, stringFlag } from "./command.types"
 import { Shared } from "./Shared"
 
 /****************
  * ### `RepoInit`
- * `epic init [--name <name>] [--content-repo <name> | --remote <address> | --no-remote] [--dry-run] [--json]`:
+ * `epic init [--name <name>] [--content-repo <name> | --remote <address> | --no-remote] [--public] [--dry-run]
+ * [--json]`:
  * set a repo up for epics (epic `epic-eject` P9), in its main checkout or any worktree of it.
  *
  * In order, each step skipped when it's done already, so it's safe to run again:
@@ -30,8 +31,10 @@ import { Shared } from "./Shared"
  *      (`Shared.clone()`, plain git;  epic `epic-friend` P4)
  * 2b. gives the content repo its REMOTE, so a team shares the plans (`remoteStep()`, epic `epic-friend` P4, Q1):
  *    - the FIRST person:  asks what to call it (`CLI.ask()`, suggesting `<repo>-epics`;  `--content-repo`
- *      answers), makes it on GitHub, private (`GitHub.createRepo()`), pushes, and writes its address into the
- *      config (`contentRemote`)
+ *      answers), and whether it's private or public (private suggested;  `--public` answers;  epic `epic-friend`
+ *      T19), makes it on GitHub (`GitHub.createRepo()`), pushes, and writes its address into the config
+ *      (`contentRemote`)
+ *      - no terminal to ask in:  private, unless `--public`;  public says, in one line, that the plans will be too
  *      - its owner:  the code repo's when that's an organization, else the person's own GitHub account
  *      - GitHub only, for now:  without `gh`, or logged out, it says how to get it, and carries on without
  *    - `--remote <address>`:  a repo made already;  `--no-remote`:  none, the plans stay on this machine
@@ -62,7 +65,7 @@ export class RepoInit {
 
   /** Run `epic init <args>`;  resolves to the exit code.  Throws `EpicCommandError` outside a git repo. */
   async run(args: string[]): Promise<number> {
-    const { flags } = parseVerbArgs(args, ["dryRun", "json", "noRemote"])
+    const { flags } = parseVerbArgs(args, ["dryRun", "json", "noRemote", "public"])
     const dryRun = flags.dryRun === true
     const remote = stringFlag(flags.remote)
     const contentRepo = stringFlag(flags.contentRepo)
@@ -76,7 +79,8 @@ export class RepoInit {
     // asked only when it'd be kept, and never into JSON's output
     const ask = !dryRun && !flags.json
     const name = stringFlag(flags.name) ?? (ask ? await RepoInit.askName() : undefined)
-    const report = await this.init({ dryRun, name, remote, contentRepo, noRemote, ask })
+    const visibility: RepoVisibility | undefined = flags.public === true ? "public" : undefined
+    const report = await this.init({ dryRun, name, remote, contentRepo, visibility, noRemote, ask })
     if (flags.json) CLI.out(JSON.stringify(report, null, 2))
     else for (const line of RepoInit.lines(report)) CLI.out(line)
     return EXIT.OK
@@ -93,6 +97,7 @@ export class RepoInit {
     name,
     remote,
     contentRepo,
+    visibility,
     noRemote = false,
     ask = false
   }: InitOptions = {}): Promise<InitReport> {
@@ -146,7 +151,16 @@ export class RepoInit {
     }
     // its remote:  made, added or found, unless it was just cloned (or couldn't be)
     if (!["cloned", "would clone", "clone failed"].includes(report.remote.action))
-      report.remote = await this.remoteStep({ shared, settings, dryRun, remote, contentRepo, noRemote, ask })
+      report.remote = await this.remoteStep({
+        shared,
+        settings,
+        dryRun,
+        remote,
+        contentRepo,
+        visibility,
+        noRemote,
+        ask
+      })
     // the address written:  the report's settings say so too
     if (REMOTE_WRITTEN.has(report.remote.action) && report.remote.address)
       report.config.settings = { ...report.config.settings, contentRemote: report.remote.address }
@@ -179,6 +193,7 @@ export class RepoInit {
    * - else made on GitHub (`made`), when `gh` is there and logged in (`no gh`, `logged out`);  `failed` with gh's
    *   words when GitHub said no
    *   - its name:  `contentRepo`, else asked when `ask` (in a terminal), else `<repo>-epics`
+   *   - private or public:  `visibility`, else asked when `ask` (`askVisibility()`), else private
    * - a push that failed is in `error`:  the repo and its address stand
    * - SIDE EFFECT (not `dryRun`):  the repo on GitHub, the remote, the push, `contentRemote` in the config
    */
@@ -188,6 +203,7 @@ export class RepoInit {
     dryRun,
     remote,
     contentRepo,
+    visibility,
     noRemote,
     ask
   }: RemoteStepOptions): Promise<RemoteReport> {
@@ -221,17 +237,21 @@ export class RepoInit {
     if (!REPO_NAME.test(repoName))
       return { action: "failed", repo: `${owner}/${repoName}`, error: 'letters, digits, ".", "-" and "_" only' }
     const repo = `${owner}/${repoName}`
-    if (dryRun) return { action: "would make", repo }
+    const seenBy = visibility ?? (ask ? await RepoInit.askVisibility() : "private")
+    if (dryRun) return { action: "would make", repo, visibility: seenBy }
     let address: string
     try {
-      GitHub.createRepo(repo, { description: `The epic pages of ${basename(this.main)}:  plans, guides and sagas` })
+      GitHub.createRepo(repo, {
+        visibility: seenBy,
+        description: `The epic pages of ${basename(this.main)}:  plans, guides and sagas`
+      })
       address = GitHub.addressOf(repo)
     } catch (error) {
-      return { action: "failed", repo, error: (error as Error).message }
+      return { action: "failed", repo, visibility: seenBy, error: (error as Error).message }
     }
     const error = shared.publish(address)
     RepoInit.keepRemote(configFile, address)
-    return { action: "made", repo, address, ...(error && { error }) }
+    return { action: "made", repo, address, visibility: seenBy, ...(error && { error }) }
   }
 
   ////////////////
@@ -291,6 +311,29 @@ export class RepoInit {
     if (now.source === "kept" && now.name === wanted) return { name: wanted, action: "already" }
     if (dryRun) return { name: wanted, action: "would keep" }
     return { name: EpicHome.keepPerson(wanted).name, action: "kept" }
+  }
+
+  /**
+   * Whether the shared repo is private or public, asked in a terminal:  "Private or public?", private suggested.
+   * - takes `p`, `private` or `public`, any case (`visibilityFor()`);  anything else asks again, twice at most,
+   *   then private
+   * - no terminal:  private, asking nothing (`CLI.ask()`)
+   */
+  static async askVisibility(): Promise<RepoVisibility> {
+    for (let tries = 0; tries < 3; tries++) {
+      const visibility = RepoInit.visibilityFor(await CLI.ask(VISIBILITY_QUESTION, { suggestion: "private" }))
+      if (visibility) return visibility
+      CLI.err('  "private" or "public", please (p is private)')
+    }
+    return "private"
+  }
+
+  /** The visibility an answer to "Private or public?" means:  `p` / `private`, `public`, any case;  else `undefined`. */
+  static visibilityFor(answer: string): RepoVisibility | undefined {
+    const word = answer.trim().toLowerCase()
+    if (word === "p" || word === "private") return "private"
+    if (word === "public") return "public"
+    return undefined
   }
 
   /**
@@ -458,7 +501,7 @@ function contentLineFor({ content, remote, dryRun }: InitReport): string {
 
 /** What `epic init` says about the content repo's remote:  none for a clone (the content line says it). */
 function remoteLinesFor({ remote, content, main }: InitReport): string[] {
-  const { address, repo, error } = remote
+  const { address, repo, error, visibility = "private" } = remote
   const pushByHand = `  push it by hand:  git -C ${content.folder} push -u origin HEAD`
   const pushed = (what: string) =>
     error ? [`shared repo:  ${what};  the push failed:  ${error}`, pushByHand] : [`shared repo:  ${what}, and pushed`]
@@ -470,9 +513,16 @@ function remoteLinesFor({ remote, content, main }: InitReport): string[] {
     case "clone failed":
       return [`  check you can reach it (git clone ${address} ${content.folder}), then run epic init again`]
     case "made":
-      return [...pushed(`made ${repo} on GitHub, private`), `  its address, ${address}, is in ${inConfig}`]
+      return [
+        ...pushed(`made ${repo} on GitHub, ${visibility}`),
+        ...publicWarning(visibility),
+        `  its address, ${address}, is in ${inConfig}`
+      ]
     case "would make":
-      return [`shared repo:  would make ${repo} on GitHub, private, push to it, and write its address in ${inConfig}`]
+      return [
+        `shared repo:  would make ${repo} on GitHub, ${visibility}, push to it, and write its address in ${inConfig}`,
+        ...publicWarning(visibility)
+      ]
     case "added":
       return [...pushed(`${address}, the content repo's remote now`), `  its address is in ${inConfig}`]
     case "would add":
@@ -501,6 +551,13 @@ function remoteLinesFor({ remote, content, main }: InitReport): string[] {
       ]
     }
   }
+}
+
+/** The one line `epic init` warns with when the shared repo is public;  none when it's private. */
+function publicWarning(visibility: RepoVisibility): string[] {
+  return visibility === "public"
+    ? ["  NOTE:  it's PUBLIC:  everything in the plans (epic pages, guides, comments) can be read by anyone"]
+    : []
 }
 
 /** What `epic init` says about the person's name. */
@@ -552,6 +609,8 @@ export type RemoteReport = {
   address?: string
   /** the GitHub repo made, or that would be:  `owner/name` */
   repo?: string
+  /** who can see that repo:  `private` or `public` (`made`, `would make`, `failed`) */
+  visibility?: RepoVisibility
   /** git's or gh's words, when something failed */
   error?: string
 }
@@ -583,14 +642,19 @@ export type InitOptions = {
   remote?: string
   /** the name to give the shared repo on GitHub (`--content-repo`);  none:  asked, else `<repo>-epics` */
   contentRepo?: string
+  /** whether the shared repo made on GitHub is private or public (`--public`);  none:  asked, else private */
+  visibility?: RepoVisibility
   /** no remote, no shared repo (`--no-remote`):  the plans stay on this machine;  default `false` */
   noRemote?: boolean
-  /** whether to ask the shared repo's name in a terminal (`CLI.ask()`);  default `false`:  the suggestion */
+  /**
+   * whether to ask the shared repo's name, and private or public, in a terminal (`CLI.ask()`);
+   * default `false`:  the suggestions
+   */
   ask?: boolean
 }
 
 /** What `RepoInit.remoteStep()` takes:  `init()`'s options, the content repo and the settings in force. */
-export type RemoteStepOptions = Pick<InitOptions, "remote" | "contentRepo"> & {
+export type RemoteStepOptions = Pick<InitOptions, "remote" | "contentRepo" | "visibility"> & {
   shared: Shared
   settings: EpicSettings
   dryRun: boolean
@@ -603,6 +667,9 @@ const NAME_QUESTION = "What do you want to be called?"
 
 /** What `epic init` asks, in a terminal, before it makes the shared repo on GitHub. */
 const REPO_QUESTION = "What should the shared epics repo be called?"
+
+/** What `epic init` asks, in a terminal, before it makes the shared repo on GitHub:  who can see it. */
+const VISIBILITY_QUESTION = "Private or public?"
 
 /** A GitHub repo name:  letters, digits, `.`, `-` and `_`, at most 100. */
 const REPO_NAME = /^[\w.-]{1,100}$/
