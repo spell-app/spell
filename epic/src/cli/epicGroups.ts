@@ -1377,6 +1377,7 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
     "--no-remote": "make no shared repo:  the plans stay on this machine",
     "--public": "make the shared repo public, without asking (else asked, or private)",
     "--no-plugin": "don't install the epic plugin for Claude Code",
+    "--no-commit": "don't commit .epic/config.json5 and .gitignore on the base branch",
     "--no-server": "don't start the epic server",
     "--dry-run": "only say what it would do",
     "--json": "print what it did as JSON"

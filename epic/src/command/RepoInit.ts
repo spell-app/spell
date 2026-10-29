@@ -1,6 +1,8 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs"
 import { basename, dirname, join, relative } from "node:path"
 
+import chalk from "chalk"
+
 import { DataFile } from "spell/server/DataFile"
 import { Git } from "spell/server/Git"
 import { CLI } from "spell/cli"
@@ -66,8 +68,11 @@ import { Shared } from "./Shared"
  * - `--dry-run`:  says what it would do, and writes nothing (it asks `gh` whether it could make the shared repo)
  * - `--json`:  the report as JSON
  * - a failed plugin install or server start is one line, and init carries on
- * - it commits nothing in the repo:  it says which files to commit (the config and `.gitignore`),
- *   since every new worktree branches from the base branch and needs the `.gitignore` to leave the links alone
+ * - it commits the files it wrote in the repo (the config and `.gitignore`) on the base branch, asking first in a
+ *   terminal (`commitStep()`;  `--no-commit`):  every new worktree branches from there, and needs the `.gitignore` to
+ *   leave the links alone;  on another branch it says so, and commits nothing
+ * - it starts with "Initializing Epic for repo <main>" and ends with "Epics initialized!", in colour;  the settings it
+ *   wrote are in the file, not printed (Owen, 2026-10-29)
  ****************/
 export class RepoInit {
   /** the repo's main checkout:  where the config goes, and the folders are relative to */
@@ -89,7 +94,7 @@ export class RepoInit {
 
   /** Run `epic init <args>`;  resolves to the exit code.  Throws `EpicCommandError` outside a git repo. */
   async run(args: string[]): Promise<number> {
-    const { flags } = parseVerbArgs(args, ["dryRun", "json", "noRemote", "public", "noPlugin", "noServer"])
+    const { flags } = parseVerbArgs(args, ["dryRun", "json", "noRemote", "public", "noPlugin", "noServer", "noCommit"])
     const dryRun = flags.dryRun === true
     const remote = stringFlag(flags.remote)
     const contentRepo = stringFlag(flags.contentRepo)
@@ -102,6 +107,7 @@ export class RepoInit {
       )
     // asked only when it'd be kept, and never into JSON's output
     const ask = !dryRun && !flags.json
+    if (!flags.json) CLI.out(chalk.cyan.bold(`Initializing Epic for repo ${this.main}`))
     const name = stringFlag(flags.name) ?? (ask ? await RepoInit.askName() : undefined)
     const visibility: RepoVisibility | undefined = flags.public === true ? "public" : undefined
     const color = stringFlag(flags.color)
@@ -119,10 +125,14 @@ export class RepoInit {
       ask,
       color,
       plugin: flags.noPlugin !== true,
-      server: flags.noServer !== true
+      server: flags.noServer !== true,
+      commit: flags.noCommit !== true
     })
     if (flags.json) CLI.out(JSON.stringify(report, null, 2))
-    else for (const line of RepoInit.lines(report)) CLI.out(line)
+    else {
+      for (const line of RepoInit.lines(report)) CLI.out(line)
+      if (!dryRun && report.content.action !== "missing") CLI.out(chalk.green.bold(DONE))
+    }
     return EXIT.OK
   }
 
@@ -142,7 +152,8 @@ export class RepoInit {
     ask = false,
     color,
     plugin = false,
-    server = false
+    server = false,
+    commit = false
   }: InitOptions = {}): Promise<InitReport> {
     const { main } = this
     // the plugin first:  the machine's, whatever happens to the repo
@@ -227,6 +238,8 @@ export class RepoInit {
     const after = RepoInit.withIgnoreBlock(before, ignored, relative(main, content))
     report.gitignore.action = after === before ? "ok" : before ? "updated" : "written"
     if (!dryRun && after !== before) writeFileSync(ignoreFile, after)
+    // the files it wrote in the repo, committed on the base branch
+    if (commit) report.commit = await RepoInit.commitStep({ report, ask })
     // their colour, kept with the plans
     if (report.content.action !== "missing" && report.content.action !== "would clone")
       report.color = await RepoInit.colorStep({
@@ -243,6 +256,34 @@ export class RepoInit {
     // the server last:  its address is what to open next
     if (server && report.content.action !== "missing") report.server = await this.serverStep({ dryRun })
     return report
+  }
+
+  /**
+   * The files `epic init` wrote in the repo (the config, `.gitignore`) committed on its base branch;  what it did.
+   * - asks first in a terminal ("Commit ... on main?", yes suggested);  with no terminal, yes
+   * - only those files, whatever else is staged (`git commit -- <files>`);  none changed:  `none`
+   * - on another branch:  `other branch`, nothing committed (a worktree branches from the base branch)
+   * - NEVER throws:  a failed commit is `failed`, with git's words
+   * - SIDE EFFECT (not `dryRun`):  a commit in the repo
+   */
+  static async commitStep({ report, ask }: { report: InitReport; ask: boolean }): Promise<CommitReport> {
+    const { main, dryRun } = report
+    const base = report.config.settings.baseBranch
+    const files = [EpicConfig.FILE, ".gitignore"].filter((file) =>
+      Git.out(["status", "--porcelain", "--", file], main)
+    )
+    if (!files.length) return { action: "none", files, branch: base }
+    const branch = Git.out(["rev-parse", "--abbrev-ref", "HEAD"], main) ?? ""
+    if (branch !== base) return { action: "other branch", files, branch }
+    if (dryRun) return { action: "would commit", files, branch }
+    const question = `Commit ${files.join(" and ")} on ${branch}?`
+    const answer = ask ? await CLI.ask(question, { suggestion: "yes" }) : "yes"
+    if (/^n/i.test(answer.trim())) return { action: "declined", files, branch }
+    const added = Git.run(["add", "--", ...files], main)
+    const done = added.ok ? Git.run(["commit", "-m", COMMIT_MESSAGE, "--", ...files], main) : added
+    return done.ok
+      ? { action: "committed", files, branch }
+      : { action: "failed", files, branch, error: done.err || `git exited ${done.code}` }
   }
 
   /**
@@ -603,11 +644,6 @@ export class RepoInit {
     const content = report.content
     const lines = [
       `${config.file}:  ${config.action === "kept" ? "kept as it is" : `${would}written`}`,
-      ...(config.action === "kept"
-        ? []
-        : Object.entries({ ...config.settings, ...prefixed("windows.", config.settings.windows) })
-            .filter(([key]) => key !== "windows")
-            .map(([key, value]) => `  ${key}:  ${JSON.stringify(value)}`)),
       contentLineFor(report),
       ...remoteLinesFor(report),
       ...report.links.map(({ path, action }) => `${join(report.main, path)}:  ${action}`),
@@ -624,7 +660,10 @@ export class RepoInit {
       ...(configChanged ? [EpicConfig.FILE] : []),
       ...(report.gitignore.action === "ok" ? [] : [".gitignore"])
     ]
-    const next = toCommit.length
+    const pushLine = remote.address && configChanged ? [`next:  push ${report.config.settings.baseBranch}:  then a teammate's epic init clones the plans`] : []
+    const next = report.commit
+      ? [...commitLinesFor(report.commit), ...(report.commit.action === "committed" ? pushLine : [])]
+      : toCommit.length
       ? [
           `next:  commit ${toCommit.join(" and ")} on the base branch, so every new worktree starts with ${toCommit.length > 1 ? "them" : "it"}` +
             (remote.address && configChanged ? ", and push it:  then a teammate's epic init clones the plans" : "")
@@ -636,6 +675,25 @@ export class RepoInit {
           : []
     const more = SHOW_README.has(remote.action) ? [`more on sharing the epics:  ${README_EPICS}`] : []
     return [...lines, ...next, ...more]
+  }
+}
+
+/** What `epic init` says about committing the files it wrote in the repo (`RepoInit.commitStep()`). */
+function commitLinesFor({ action, files, branch, error }: CommitReport): string[] {
+  const named = files.join(" and ")
+  switch (action) {
+    case "committed":
+      return [`committed ${named} on ${branch}`]
+    case "would commit":
+      return [`would commit ${named} on ${branch}`]
+    case "declined":
+      return [`next:  commit ${named} on ${branch}, so every new worktree starts with them`]
+    case "other branch":
+      return [`not committed:  you're on ${branch};  commit ${named} on the base branch, so every new worktree starts with them`]
+    case "failed":
+      return [`couldn't commit ${named} on ${branch}:  ${error}`, `  commit them by hand:  git commit -- ${files.join(" ")}`]
+    default:
+      /* case "none" */ return []
   }
 }
 
@@ -804,6 +862,23 @@ export type InitReport = {
   color?: ColorReport
   /** the epic server (`serverStep()`);  none with `--no-server` */
   server?: ServerReport
+  /** the files it wrote in the repo, committed (`commitStep()`);  none with `--no-commit` */
+  commit?: CommitReport
+}
+
+/**
+ * What `epic init` did about committing the files it wrote in the repo (`RepoInit.commitStep()`):
+ * `committed`, `would commit`, `declined` (asked, and no), `other branch` (not the base branch), `failed`,
+ * `none` (nothing to commit)
+ */
+export type CommitReport = {
+  action: "committed" | "would commit" | "declined" | "other branch" | "failed" | "none"
+  /** the files, from the repo's root:  the config, `.gitignore` */
+  files: string[]
+  /** the branch the repo is on (the base branch, unless `other branch`) */
+  branch: string
+  /** why it failed */
+  error?: string
 }
 
 /** What `epic init` did about the epic plugin:  `installed` (and how many `changes`), `already`, ... */
@@ -934,6 +1009,8 @@ export type InitOptions = {
   plugin?: boolean
   /** start the epic server, serving the repo, last (`--no-server` turns it off);  default `false` */
   server?: boolean
+  /** commit the files it wrote in the repo on the base branch (`--no-commit` turns it off);  default `false` */
+  commit?: boolean
 }
 
 /** What `RepoInit.remoteStep()` takes:  `init()`'s options, the content repo and the settings in force. */
@@ -977,11 +1054,12 @@ const SHOW_README: ReadonlySet<RemoteAction> = new Set([
 /** The epics README, on GitHub (it's the kit's `README-epics.md`):  how a team shares the epics. */
 const README_EPICS = "https://github.com/spell-app/spell/blob/main/README-epics.md"
 
+/** `epic init`'s last line, in colour, once the repo is set up. */
+const DONE = "Epics initialized!"
+
+/** The message of the commit `epic init` makes in the repo (`RepoInit.commitStep()`). */
+const COMMIT_MESSAGE = "epic init:  set up epics (.epic/config.json5, .gitignore)"
+
 /** The `.gitignore` block's first and last lines, as spell-app's own `.gitignore` has them. */
 const BLOCK_START = "# shared:start"
 const BLOCK_END = "# shared:end"
-
-/** `values` with each key after `prefix`:  `{ default: "x" }` => `{ "windows.default": "x" }`. */
-function prefixed(prefix: string, values: object): Record<string, unknown> {
-  return Object.fromEntries(Object.entries(values).map(([key, value]) => [`${prefix}${key}`, value]))
-}

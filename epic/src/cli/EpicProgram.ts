@@ -633,7 +633,7 @@ export class EpicProgram {
       )
       .usage(
         "[--name <name>] [--color <colour>] [--content-repo <name> | --remote <address> | --no-remote] [--public] " +
-          "[--no-plugin] [--no-server] [--dry-run] [--json]"
+          "[--no-plugin] [--no-commit] [--no-server] [--dry-run] [--json]"
       )
       .addHelpText("after", INIT_HELP)
 
@@ -1085,9 +1085,10 @@ From any folder of the repo (a worktree's too), each step skipped when it's done
   your name            "What do you want to be called?" (--name), kept in ~/.spell-epic/person.json5
   your colour          "Which colour should your words be?", from the colour names nobody has (--color), kept
                        with the plans, in the content repo's people/
-  the epic server      started, serving this repo:  its address the last line;  --no-server skips it
-Then commit .epic/config.json5 and .gitignore on the base branch, and push it:  a teammate's epic init then
-clones the plans.
+  the commit           .epic/config.json5 and .gitignore committed on the base branch ("Commit ... on main?",
+                       yes suggested);  on another branch it says so;  --no-commit skips it
+  the epic server      started, serving this repo:  its address printed;  --no-server skips it
+Then push the base branch:  a teammate's epic init then clones the plans.
 
 --content-repo <name> names the shared repo without asking;  --remote <address> uses one made already;
 --no-remote makes none, and the plans stay on this machine.

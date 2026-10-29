@@ -1,5 +1,5 @@
 /* GENERATED -- do not edit:  `spell pack build epics`, from every vocabulary, `<Name>.en.ts` */
-// sources:  f4589817e624bb7d
+// sources:  bdd1238619d75671
 
 import type { RootCatalogEntry } from "spell/ui"
 

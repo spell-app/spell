@@ -32,7 +32,7 @@ const before = { ...process.env }
 process.env.SPELL_EPIC_HOME = join(TEMP, "epic-home")
 process.env.GIT_CONFIG_GLOBAL = join(TEMP, "gitconfig")
 process.env.GIT_CONFIG_NOSYSTEM = "1"
-writeFileSync(join(TEMP, "gitconfig"), "[user]\n  name = Ana Lima\n")
+writeFileSync(join(TEMP, "gitconfig"), "[user]\n  name = Ana Lima\n  email = ana@example.com\n[commit]\n  gpgsign = false\n")
 afterAll(() => {
   for (const key of ["SPELL_EPIC_HOME", "GIT_CONFIG_GLOBAL", "GIT_CONFIG_NOSYSTEM"])
     if (before[key] === undefined) delete process.env[key]
@@ -319,6 +319,35 @@ describe("epic init:  one command (epic-friend P13)", () => {
   })
 })
 
+describe("epic init:  its words and its commit (Owen, 2026-10-29)", () => {
+  test("says which repo first and that it's done last;  prints no settings;  commits the two files on the base branch", async () => {
+    const app = codeRepo("words")
+    const said = await printed(() => offline(app).run(["--name", "Bo", "--no-remote", "--no-server"]))
+    expect(said[0]).toBe(`Initializing Epic for repo ${app}`)
+    expect(said.at(-1)).toBe("Epics initialized!")
+    expect(said.some((line) => line.startsWith("  contentFolder:"))).toBe(false)
+    expect(said).toContain("committed .epic/config.json5 and .gitignore on main")
+    expect(git(app, "log", "-1", "--format=%s").trim()).toBe("epic init:  set up epics (.epic/config.json5, .gitignore)")
+    expect(git(app, "status", "--porcelain")).toBe("")
+    // run again:  nothing left to commit, nothing said about it
+    const again = await printed(() => offline(app).run(["--no-remote", "--no-server"]))
+    expect(again.some((line) => /commit/.test(line))).toBe(false)
+  })
+
+  test("on another branch:  nothing committed, and it says so;  a dry run would commit;  --no-commit leaves them", async () => {
+    const app = codeRepo("branchy")
+    git(app, "checkout", "-q", "-b", "work")
+    const report = await offline(app).init({ name: "Bo", noRemote: true, commit: true })
+    expect(report.commit).toEqual({ action: "other branch", files: [".epic/config.json5", ".gitignore"], branch: "work" })
+    expect(RepoInit.lines(report).join("\n")).toMatch(/not committed:  you're on work/)
+    git(app, "checkout", "-q", "main")
+    const dry = await offline(app).init({ dryRun: true, noRemote: true, commit: true })
+    expect(dry.commit?.action).toBe("would commit")
+    await printed(() => offline(app).run(["--no-remote", "--no-server", "--no-commit"]))
+    expect(git(app, "status", "--porcelain")).toMatch(/\.gitignore/)
+  })
+})
+
 describe("epic init:  the shared repo (epic-friend P4)", () => {
   test("gh missing:  nothing made;  says how to get gh, and the README;  the rest of init done", async () => {
     const app = codeRepo("no-gh")
@@ -534,6 +563,21 @@ function stubHub({ fails }: { fails?: string } = {}) {
  * `RepoInit` for the repo at `main`, its plugin installed and its server a stand-in:  a test's `run()` never touches
  * the machine's Claude Code or starts a server (`run()` installs the plugin and starts the server unless told not to).
  */
+/** What `work` printed, line by line (stdout caught, never shown). */
+async function printed(work: () => Promise<unknown>): Promise<string[]> {
+  const lines: string[] = []
+  const out = vi.spyOn(process.stdout, "write").mockImplementation((text) => {
+    lines.push(...String(text).replace(/\n$/, "").split("\n"))
+    return true
+  })
+  try {
+    await work()
+  } finally {
+    out.mockRestore()
+  }
+  return lines
+}
+
 function offline(main: string): RepoInit {
   return new RepoInit({ main, plugin: stubPlugin({ installed: true }).make, hub: stubHub().make })
 }

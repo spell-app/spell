@@ -9,6 +9,7 @@ npx spell@next epic init --name Ben
 <summary>What it printed</summary>
 
 ```text
+Initializing Epic for repo ~/www/my-app
 plugin:  epic installed for Claude Code (7 changes):  /reload-plugins in a running session
 ~/www/my-app/.epic/config.json5:  kept as it is
 joined git@github.com:ana/my-app-epics.git:  the plans cloned into ~/www/my-app.epics
@@ -21,6 +22,7 @@ you:  Ben, kept in ~/.spell-epic/person.json5
 your colour:  red, kept in ~/www/my-app.epics/people/ben.json5, and pushed:  the team sees it
 open:  http://127.0.0.1:4848/
 more on sharing the epics:  https://github.com/spell-app/spell/blob/main/README-epics.md
+Epics initialized!
 ```
 
 </details>
@@ -131,22 +133,16 @@ From any folder of your repo, a git repo with at least one commit:
 ```sh
 cd ~/www/my-app
 npx spell@next epic init
-git add .epic/config.json5 .gitignore && git commit -m "epic init" && git push
+git push
 ```
 
 <details>
 <summary>What it printed</summary>
 
 ```text
+Initializing Epic for repo ~/www/my-app
 plugin:  epic installed for Claude Code (7 changes):  /reload-plugins in a running session
 ~/www/my-app/.epic/config.json5:  written
-  contentRemote:  "git@github.com:ana/my-app-epics.git"
-  ...
-  contentFolder:  "../my-app.epics"
-  baseBranch:  "main"
-  worktreesFolder:  "../my-app.worktrees"
-  installCommand:  ""
-  ...
 ~/www/my-app.epics:  made, a git repo with epics, sagas, guides, pages
 shared repo:  made ana/my-app-epics on GitHub, private, and pushed
   its address, git@github.com:ana/my-app-epics.git, is in .epic/config.json5 (contentRemote)
@@ -158,15 +154,17 @@ shared repo:  made ana/my-app-epics on GitHub, private, and pushed
 you:  Ana, kept in ~/.spell-epic/person.json5
 your colour:  green, kept in ~/www/my-app.epics/people/ana.json5, and pushed:  the team sees it
 open:  http://127.0.0.1:4848/
-next:  commit .epic/config.json5 and .gitignore on the base branch, so every new worktree starts with them, and push it:  then a teammate's epic init clones the plans
+committed .epic/config.json5 and .gitignore on main
+next:  push main:  then a teammate's epic init clones the plans
 more on sharing the epics:  https://github.com/spell-app/spell/blob/main/README-epics.md
+Epics initialized!
 ```
 
 </details>
 
 _Ana's first `epic init`, against the same stand-in for GitHub as the top of this page, answered with
-`--name Ana --color green`.
-Trimmed:  it prints every setting, 27 in all;  the `...` lines stand for the rest._
+`--name Ana --color green`, and yes to its commit.
+The first and last lines are in colour in a terminal;  the settings it wrote are in the file, not printed._
 
 - `npx spell@next epic init` fetches Spell's package and runs its `spell epic`, which runs the epic tool:
   the one installed beside it, else `spell-epic` fetched at the same version.
@@ -174,7 +172,7 @@ Trimmed:  it prints every setting, 27 in all;  the `...` lines stand for the res
 - 🌱 `spell epic` is new:  until the next `spell@next` is published, run it from a clone of Spell
   ([Setup from zero](README.md#setup-from-zero)):  `node ~/www/spell/bin/spell.mjs epic init`.
 
-In a terminal, it asks four things first:
+In a terminal, it asks five things:
 - **What do you want to be called?**  Your short name on the pages, suggesting your GitHub login.
   `--name Ana` answers it.
 - **Which colour should your words be?**  The colour your replies and comments are drawn in, on every page.
@@ -186,6 +184,8 @@ In a terminal, it asks four things first:
   `--public` answers it;  with no terminal to ask in, it's private unless you say `--public`.
   A public repo shows everything in the plans to anyone:  epic pages, guides, comments.
   `epic init` says so in a line of its own.
+- **Commit .epic/config.json5 and .gitignore on main?**  Suggesting yes;  with no terminal to ask in, yes.
+  `--no-commit` leaves them for you.
 
 Then, in order, it:
 1. Installs the epic plugin for Claude Code, when it isn't there yet:  once per machine.
@@ -206,13 +206,14 @@ Then, in order, it:
 6. Lists the links in a block of your `.gitignore`.
    The block starts `# shared:start` and ends `# shared:end`.
 7. Keeps your name, in `~/.spell-epic/person.json5`.
-8. Keeps your colour WITH THE PLANS, `people/<name>.json5` in the content repo, and pushes it:
+8. Commits `.epic/config.json5` and `.gitignore` on the base branch, only those two files:  every new worktree
+   branches from there.  On another branch it commits nothing, and says so.
+9. Keeps your colour WITH THE PLANS, `people/<name>.json5` in the content repo, and pushes it:
    your teammates see it, and nobody commits anything in the code repo for it.
-9. Starts the epic server, serving your repo, and prints its address:  open it ("One epic server", below).
-   `--no-server` skips it.
+10. Starts the epic server, serving your repo, and prints its address:  open it ("One epic server", below).
+    `--no-server` skips it.
 
-- Commit both files on the base branch, and push:  every new worktree branches from it,
-  and a teammate's `epic init` reads the shared repo's address from it.
+- Then push the base branch:  a teammate's `epic init` reads the shared repo's address from it.
 - Each step is skipped when it's done, so it's safe to run again:  a second run ends `set up already`.
 - `--remote <address>` uses a shared repo you made already (on GitHub or anywhere else git reaches).
 - `--no-remote` makes none:  the plans stay on this machine, as they did before sharing existed.
