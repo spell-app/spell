@@ -305,7 +305,7 @@ Progress here is a number you can read:  670 of 670, section by section, and a t
 From spell-parser's root, in a checkout set up as [the kit's README](https://github.com/spell-app/spell/blob/main/README.md#setup-from-zero) says:
 
 ```sh
-cd ~/www/spell/spell-parser
+cd ~/www/spell/parser
 yarn vp test run --project markdown        # markdown's tests:  7 files, 34 tests
 yarn tsx scripts/markdown/spec-report.mts  # the spec, section by section;  name a section to see its failures
 ```
@@ -342,7 +342,7 @@ The spec report, trimmed:
   [gfm-spec.json](src/markdown/spec/gfm-spec.json):
 
   ```sh
-  cd ~/www/spell/spell-parser
+  cd ~/www/spell/parser
   yarn markdown:spec:update <path to spec.txt>
   ```
 

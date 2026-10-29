@@ -578,7 +578,7 @@ Setting that up, and how the checks, tests and worktrees work across repos:
 At spell-parser's root, each check runs over the whole repo:
 
 ```sh
-cd ~/www/spell/spell-parser
+cd ~/www/spell/parser
 yarn ts               # the declarations (the kit's, then this repo's two programs), then the tests' tsc
 yarn test             # Vitest, a project per folder, then spell_core's pytest
 yarn lint             # oxlint, then ruff on spell_core;  lint:fix fixes what it can

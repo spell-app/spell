@@ -12,7 +12,7 @@
 ```
 
 ```sh
-cd ~/www/spell/spell-ui
+cd ~/www/spell/ui
 yarn vp lint src
 ```
 

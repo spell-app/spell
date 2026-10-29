@@ -366,7 +366,7 @@ yarn clone spell-app
 Start the editor, in spell-app's folder:
 
 ```sh
-cd ~/www/spell/spell-app
+cd ~/www/spell/app
 yarn start
 ```
 
@@ -420,7 +420,7 @@ It needs `spell` on your PATH, the kit's `yarn cli:install` ([Setting it up](htt
 and VS Code's `code` command ([README-vscode.md](https://github.com/spell-app/spell/blob/main/README-vscode.md)):
 
 ```sh
-cd ~/www/spell/spell-app
+cd ~/www/spell/app
 spell app vscode    # builds the Spell extension for VS Code, and installs it
 ```
 

@@ -762,7 +762,7 @@ It's 31 pages in seven groups, from the four web components through the panes an
   node tests, and `*.browser.test.tsx` in headless Chromium.
 
   ```sh
-  cd ~/www/spell/spell-app
+  cd ~/www/spell/app
   yarn vp test run --project app:node --project app:browser
   ```
 
