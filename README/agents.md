@@ -440,15 +440,16 @@ the seven in the first minute, above, and two that run on the way out.
 
 ## What's Claude-specific
 
-The rules are for any agent;  the tooling around them is Claude Code's today.
+The rules are for any agent;  most of the tooling around them is Claude Code's, and Codex runs the epic plugin's
+skills and end-of-turn hooks too.
 
-| Works with any agent | Claude Code only, today |
-| --- | --- |
-| the `AGENTS.md` files | `CLAUDE.md`'s `@` imports |
-| WWOD | the skills, and their `/slash` workflows |
-| the three logs | the plugin and its hooks:  worktrees, window moves, the turn-end commit |
-| `spell` and `epic`:  plain command lines | the worktree tools, the question modal, `/details` side-bar pages, `/bg` agents |
-| the checks (`yarn review`) | the VS Code Claude panel's session list:  why every worktree's session folder is a link to the main checkout's |
+| Works with any agent | Claude Code and Codex | Claude Code only, today |
+| --- | --- | --- |
+| the `AGENTS.md` files | the epic plugin's skills, one copy (`/epic` in Claude Code, `$epic` in Codex), all but `bg`, `bedtime`, `comment`, `session`, `title` | `CLAUDE.md`'s `@` imports |
+| WWOD | the turn-end commit and sync, and the session-start notices (`epic plugin install --codex`) | the worktree hook, window moves, and Send waking a session |
+| the three logs | the designer and coherence reviewers, as Codex custom agents | the question modal, `/bg` agents (each skill says the plain way:  `epic guide claude-only-tools`) |
+| `spell` and `epic`:  plain command lines;  `epic guide`, the workflow in plain steps | | |
+| the checks (`yarn review`) | | the VS Code Claude panel's session list:  why every worktree's session folder is a link to the main checkout's |
 
 ## 🌱 Coming:  other agents
 
@@ -456,7 +457,10 @@ The same setup for agents other than Claude:
 the plugin's worktrees, review loop and skills, driven from Codex and others the way Claude Code drives them today.
 Codex already reads every `AGENTS.md`, and WWOD and both command lines are plain files and programs any agent can use.
 
-Where it stands:  planned;  the plugin, skills and hooks are Claude Code's for now.
+Where it stands:  Codex runs fifteen of the epic plugin's skills and its end-of-turn hooks, from the same files
+([README-epics.md](../README-epics.md#with-codex)), untried with a real Codex yet;
+any other agent follows `epic guide`.
+Waking a session from the page, the worktree hook and window moves are still Claude Code's.
 
 ## See also
 

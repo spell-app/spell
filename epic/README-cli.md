@@ -525,7 +525,8 @@ They live in the content folder, a git repo of its own beside the checkout, whic
 (a repo whose config names `sharedFolders` links those in too):
 that's why `main` and each worktree edit ONE page.
 
-You'll rarely type these:  the turn-end hook runs `epic turn end`, which is `epic shared commit`, after every turn.
+You'll rarely type these:  the turn-end hook runs `epic turn end` after every turn.
+That's `epic shared commit`, or `epic shared sync` with a shared repo.
 
 | Verb | What it does |
 | --- | --- |
@@ -533,6 +534,7 @@ You'll rarely type these:  the turn-end hook runs `epic turn end`, which is `epi
 | `epic shared init` | creates the content folder's repo;  `--import` copies this checkout's folders in |
 | `epic shared link` | links this checkout's shared folders in, the ones its config names (`sharedFolders`);  `--all`:  every checkout's |
 | `epic shared commit` | commits whatever changed in the content folder, one commit per epic, guide or folder;  `--quiet`, `--session <id>` |
+| `epic shared sync` | the same commit, then, when `.epic/config.json5` names the team's shared repo (`contentRemote`), a pull (rebasing), ids both sides made given the next free number on this side, and a push:  what every turn does, by hand;  `--quiet`, `--session <id>` |
 | `epic shared migrate <worktree>` | moves a worktree cut before the content folder existed onto it;  `--dry-run` |
 
 ### Any agent:  the workflow, and each turn's end
@@ -607,13 +609,18 @@ And the docs pages they serve:  the home page, the guides, and the pages made fr
 
 ### The repo's settings
 
-Two verbs:  `init` sets a repo up, and `config` says what it set;  `plugin install` sets Claude Code up, or Codex.
+- `init` sets a repo up, and `config` says what it set.
+- `whoami` and `whois` say who is who on the pages.
+- `plugin install` sets Claude Code up, or Codex.
+
 Every key of the config file, and what `epic init` writes:  [README-epics.md](https://github.com/spell-app/spell/blob/main/README-epics.md#the-config-file).
 
 | Verb | What it does |
 | --- | --- |
 | `epic config [<key>]` | prints where this repo keeps its epic things, from `.epic/config.json5`:  one value, or all of them (`--json`);  folders print absolute |
-| `epic init` | sets a repo up for epics:  its config file, the content folder beside it, the links and their `.gitignore` lines;  `--dry-run` first;  safe to run again |
+| `epic init` | sets a repo up for epics:  its config file, the content folder beside it, the team's shared repo on GitHub (made, private unless `--public`, or cloned when the config names one), the links and their `.gitignore` lines, and your name;  `--name <name>`, `--content-repo <name>`, `--remote <address>`, `--no-remote`;  `--dry-run` first;  safe to run again |
+| `epic whoami [<name>]` | prints who you are on the epics:  your short name (kept, else your GitHub login, else git's `user.name`), your full name, and the agent running it;  with a name, keeps it;  `--rename [--dry-run]` also writes it over your old one on every page, part and comments file, wherever it says who wrote something;  `--json` |
+| `epic whois <name>` | what the pages say about someone:  their replies and comments, by place, and when last;  `--json` |
 | `epic plugin install` | installs the epic plugin in Claude Code as `epic@spell`, run in place from the kit's `epic/`:  the old `spell-epic@spell-epic` taken out, the marketplace `spell` added from the kit's main checkout, the cache, every skill and `~/.local/bin/epic` linked to it;  `--dry-run` first;  safe to run again, then `/reload-plugins`.  `--codex`:  for Codex instead, its end-of-turn and session-start hooks in `~/.codex/hooks.json` (`$CODEX_HOME`), your own hooks there kept, every skill linked in `~/.agents/skills/`, the designer and coherence as Codex agents in `~/.codex/agents/`, and `epic` on your `PATH`;  then trust them in Codex's `/hooks` |
 | `epic voice [<name> \| --for <kind>]` | prints a VOICE's file, the rules a kind of page is written to:  `epic voice readme`, or the voice a kind of page takes, `epic voice --for guide`;  no argument lists every voice and the kinds that use it.  A repo names its own in `.epic/config.json5` (`"voices"`, `"pageVoices"`);  spell-epic ships four, which `epic voice` lists |
 
@@ -664,9 +671,9 @@ An agent's full name starts with the epic's name, else the worktree's, else `mai
 ## Where it stops
 
 - **🌱 Other coding agents.**
-  The page verbs are plain file edits, which Codex or any other agent could run as they are;
-  the skills and the wake-up loop are what's Claude Code's.
-  Driving it all from other agents is planned ([README.md](README.md#-coming)).
+  The page verbs are plain file edits, which Codex or any other agent runs as they are,
+  and Codex runs the skills too ("Any agent", above);  the wake-up loop is still Claude Code's.
+  Where that stands:  [README.md](README.md#-coming).
 - **Fast to start, not always to finish.**
   `epic` starts fast, but a verb that reads every page reads every page:
   `epic list` took 4.8 s here, over 50 epics.

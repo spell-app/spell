@@ -24,8 +24,9 @@ You review on the page, item by item, when you have time;  the answers come back
   The page server serves it live:  an edit the agent makes shows in place,
   and your scroll, your folds and your half-typed notes stay where they were.
 - You read it in VS Code's side bar, the Review tab ([README-vscode.md](README-vscode.md)), or in any browser.
-- **Claude Code only, today:**  any browser draws the page, but the session that takes your marks is a Claude Code
-  session, running `spell-epic`'s skills ([README-skills.md](README-skills.md)).
+- **Claude Code first:**  any browser draws the page, and the session that takes your marks is a Claude Code
+  session running `spell-epic`'s skills ([README-skills.md](README-skills.md)), or a Codex one running the same skills,
+  which hears your Send only while it waits (`epic inbox wait`):  Send wakes only Claude Code.
 - The rules the agent follows when it writes one:  [the epic-page writing rules](templates/epics/plan-doc.md).
 
 ## Your first review, in four moves

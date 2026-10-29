@@ -27,7 +27,7 @@ _Ben joins Ana's repo:  two commands, and every plan the team has written is on 
 Real output, with a stand-in for GitHub (local repos at GitHub's addresses), the home folder shortened to `~`._
 
 One config file and a block in `.gitignore` are all `epic init` leaves in your repo.
-The plans live next door, in `my-app.epics`, a git repo of their own, which every Claude turn pulls and pushes.
+The plans live next door, in `my-app.epics`, a git repo of their own, which every agent's turn pulls and pushes.
 
 An issue tracker keeps the plan away from the code, a chat scrollback loses it by morning,
 and a pull request reviews the diff, not the decisions behind it.
@@ -42,10 +42,10 @@ Three things to know before you start:
   `epic init` makes the team's shared repo with GitHub's command, `gh`.
   GitLab, Bitbucket or a bare git server work too, but you make the repo by hand and pass its address
   (`epic init --remote <address>`).
-- **Claude Code first.**
-  The skills and the moves between worktrees and windows are Claude Code's,
-  and the window moves assume VS Code on macOS.
-  Codex, or any other agent, works an epic from `epic guide` and its own end-of-turn step:
+- **Claude Code first, Codex beside it.**
+  The skills run in both, from one copy;  the moves between worktrees and windows are Claude Code's,
+  and they assume VS Code on macOS.
+  Any other agent works an epic from `epic guide` and its own end-of-turn step:
   [With Codex](#with-codex).
 - **It has run end to end outside Spell once**, in a throwaway repo:
   `epic init`, a saga, an epic page with a phase, a round through the review inbox, the pages on the epic server,
@@ -402,7 +402,7 @@ so you can tell your Claude at work from his.
 
 ### Every turn syncs
 
-At the end of every Claude turn, a hook commits the content repo, one commit per epic, guide or folder.
+At the end of every turn, Claude Code's or Codex's, a hook commits the content repo, one commit per epic, guide or folder.
 With a shared repo named in the config (`contentRemote`), the same hook then syncs it:
 1. pulls, rebasing this machine's commits on top of the others'
 2. renumbers any id both sides made (below)
@@ -430,7 +430,6 @@ _Ben's sync, after Ana and he each added a todo to the same epic page:  hers kep
 - Offline, the commits stay here, and the next sync pushes them.
 - A repo whose config names no `contentRemote` only commits, every turn, and never pulls or pushes,
   even when its content repo has a remote of its own.
-  Spell's own content repo is one of those, for now.
 
 ### When two people edit one page
 
@@ -446,27 +445,27 @@ Most of it merges by itself, because a page is many small files:
 
 Anything else, the same words changed two ways, is a real conflict:
 - the sync undoes its rebase, keeps your commits here unpushed, and stops
-- your next Claude session starts by saying which files clash, and how to settle them
+- your next session starts by saying which files clash, and how to settle them
 - to settle it:  in the content repo, `git pull --rebase`, keep both people's words in each file, `git add` it,
   `git rebase --continue`, then `epic shared sync`
 
-### Everyone sees every comment;  your Claude answers yours
+### Everyone sees every comment;  your agent answers yours
 
 A comment you leave on a page is shared with the plans, the moment the turn's sync runs, answered or not.
 - It's kept in a file of YOUR comments beside the page, `<page>.comments.<you>.json5`:
   only your machine writes it, so two people commenting never clash.
 - A teammate's sync brings your thread to their page.
   They can reply on it;  their reply goes in their own file, and your sync brings it back.
-- **Each person's Claude answers that person's threads.**
-  Your Send hands your session only yours;  a teammate's waits for theirs.
-  The thread says whose Claude took it:  "Claude (Ana): thinking…".
+- **Each person's agent answers that person's threads**, their Claude or their Codex.
+  - Your Send hands your session only yours;  a teammate's waits for theirs.
+  - The thread says whose agent took it:  "Claude (Ana): thinking…".
 - Only the comment's writer edits, deletes or clears it.
 - Two people adding a comment between syncs may both make `C4`:  the sync gives yours the next free number.
 - `epic whoami --rename` moves your comments file to your new name, in one commit.
 
 **Still on your machine:**  your marks (the pills you press on items), your Send, and who's listening,
 in the page's review inbox, a file never committed.
-What Claude makes of a mark lands in the epic page, under your name, which everyone shares.
+What your agent makes of a mark lands in the epic page, under your name, which everyone shares.
 
 ## <a id="with-codex"></a>With Codex (or another agent)
 
@@ -579,7 +578,7 @@ Every page the agent writes lands in one of four folders, each linked into your 
 | `pages/` | the docs' home page, `pages/index.html` (`epic pages index` writes a card per area), and scratch details pages, `pages/details/` |
 
 - **Committed by itself.**
-  A hook commits the content folder at the end of every Claude turn (`epic shared commit`),
+  A hook commits the content folder at the end of every turn (`epic turn end`),
   one commit per epic, guide or folder:  the plans keep a history of their own, off your branches.
   With a shared repo, the same hook syncs it ("Every turn syncs", above).
 - **Never committed:**  review and comment inboxes, locks, the running-agents lists, scratch details pages,
@@ -782,7 +781,8 @@ What you'd trip on today, roughly in the order you'd meet it.
    - Saved prompts go to `~/.spell/prompts/`.
    - `epic worktree merge-main` updates Vitest snapshots with Spell's own command, `yarn vp test run --update`.
 6. **Claude Code first.**
-   The skills are Claude Code's;  Codex follows `epic guide`, with its end-of-turn hooks ([With Codex](#with-codex)).
+   The skills run in Codex too, but five stay Claude Code's, and so do waking a session from the page, session
+   titles and window moves ([With Codex](#with-codex));  any other agent follows `epic guide`.
    The prompt gate renames sessions through a hook output Claude Code doesn't document yet.
 7. **VS Code and macOS.**
    The window bridge finds a session's window through its parent processes;
@@ -808,10 +808,10 @@ What you'd trip on today, roughly in the order you'd meet it.
 
 **Real today:**  a repo that isn't Spell, set up in four steps, its plans shared by a team through GitHub,
 its epics planned, built in worktrees and reviewed on their pages, each reply and comment under its writer's name,
-every comment seen by the team and answered by its writer's own Claude.
+every comment seen by the team and answered by its writer's own agent, Claude Code or Codex.
 **Not yet:**
 - `epic plugin install` from the npm package, without a clone of Spell (the package is out under `next`, above)
-- the skills under an agent other than Claude Code, and Send waking one
+- Send waking an agent other than Claude Code, and the Codex side tried with a real Codex
 - a host other than GitHub, without making the shared repo by hand
 - two repos reviewed from one server
 - the keys added since the first outside run, tried anywhere but Spell's own repos:
@@ -821,7 +821,7 @@ every comment seen by the team and answered by its writer's own Claude.
   - `windows.settings`
 
 🌱 Two are planned:  the plugin from Claude Code's plugin marketplace, with no clone,
-and the skills themselves under Codex and other agents
+and Send waking Codex and other agents
 ([the epic engine's front page](epic/README.md#-coming) says where each stands).
 
 ## See also

@@ -1372,6 +1372,7 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
     "--content-repo <name>": "the shared repo's name on GitHub (else asked, or <repo>-epics)",
     "--remote <address>": "use this shared repo, made already",
     "--no-remote": "make no shared repo:  the plans stay on this machine",
+    "--public": "make the shared repo public, without asking (else asked, or private)",
     "--dry-run": "only say what it would do",
     "--json": "print what it did as JSON"
   },

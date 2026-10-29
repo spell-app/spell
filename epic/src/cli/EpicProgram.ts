@@ -628,7 +628,9 @@ export class EpicProgram {
         "set this repo up for epics:  its .epic/config.json5, the content repo beside it (made, or cloned from the " +
           "team's), shared on GitHub, the links and their .gitignore lines;  safe to run again"
       )
-      .usage("[--name <name>] [--content-repo <name> | --remote <address> | --no-remote] [--dry-run] [--json]")
+      .usage(
+        "[--name <name>] [--content-repo <name> | --remote <address> | --no-remote] [--public] [--dry-run] [--json]"
+      )
       .addHelpText("after", INIT_HELP)
 
     this.verb(epic.command("whoami"), (args) => new PersonCommands().whoami(args))

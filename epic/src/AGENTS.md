@@ -297,7 +297,14 @@ The epic folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
         the base branch, the worktrees' folder, the install command, the window names,
         whether session folders are linked;  and the repo's app (`app`, epic `epic-engine` I49), which the epic
         server's `/editor/` opens, starting it when it's down (`RepoApp`, in `server/`)
-      - each one's default is spell-app's layout before the file existed;  `app`'s:  none
+      - a key the file leaves out reads as `epic init` would write it for THIS repo, never Spell's
+        (epic `epic-friend` P6):  `defaultsFor()`, from its name, lock file and branches
+        - `DEFAULTS` keeps only the keys no repo changes;  `app`'s default:  none
+      - `colors` (epic `epic-friend` P10):  a colour per person and per agent on the pages (see "Colours")
+    - `ofSetUp()`, `isSetUp`:  the ONE "is this repo set up for epics?" check (epic `epic-friend` P6)
+      - every hook and `WorktreeGuard` ask it, and do nothing in a repo `epic init` never set up
+      - there, the worktree hook makes the plain worktree Claude Code would make by itself:
+        `.claude/worktrees/<name>`, on branch `worktree-<name>`
     - the MAIN checkout's file, found through git's common dir (`SRV.checkoutOf()`), so every worktree reads the same
       - a BROKEN worktree too, one git no longer knows (its `.git` names `<main>/.git/worktrees/<id>`, gone):
         the main checkout from that path (epic `epic-engine` P26, r20:  solid-17's settings came out inside solid-17)
@@ -416,8 +423,8 @@ The epic folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
       - `Sessions` (`session`), `Parking` (`park`), `Stock` (`status`, taking stock)
       - `Shared` (`shared`), with `SharedMigration` (`shared migrate`)
         - and `SharedSync` (epic `epic-friend` P5, Q5 and Q6):  every turn's `shared commit` (and `shared sync` by
-          hand) pulls, rebasing, and pushes, ONLY when `.epic/config.json5` names `contentRemote` (Spell's doesn't:
-          its content repo's `origin` is never pushed by it)
+          hand) pulls, rebasing, and pushes, ONLY when `.epic/config.json5` names `contentRemote` (Spell's does since
+          J18:  `spell-app/spell-app.epics`)
           - before the rebase, ids this machine made that the remote has too (`t22`, `ch12`, `r3`) get the next free
             number here, links, parts, inbox and request folders following (`Renumber`, `epic migrate`'s too), a log
             line saying so;  this machine's unpushed commits are then made again, one per group

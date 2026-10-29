@@ -600,7 +600,7 @@ Lowest first, each using only the ones above it in this table (the lint's `spell
 - The shared repo is committed by itself after every Claude turn.
   - The `Stop` hook, [shared-commit.mjs](epic/hooks/shared-commit.mjs), runs `epic shared commit`.
   - A repo whose `.epic/config.json5` names `contentRemote` also syncs it then, pulling and pushing (epic `epic-friend`
-    P5):  the kit's names none, so `spell.epics` is committed here, never pushed by the hook.
+    P5):  the kit's names `spell-app/spell-app.epics` (J18), so `spell.epics` is pulled and pushed every turn too.
   - Nobody commits those files by hand.
 - One commit per place the files live:
   - `auto: epic <name>`
