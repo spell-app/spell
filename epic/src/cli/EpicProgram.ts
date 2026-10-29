@@ -411,9 +411,11 @@ export class EpicProgram {
 
     epic.commandsGroup("Epic page:  log and upkeep:")
 
-    this.page(epic.command("log"), "a timestamped line in the page's log", 'epic log seo "P3 started"').usage(
-      '<epic> "text"'
-    )
+    this.page(
+      epic.command("log"),
+      "a timestamped review line in the page's log;  no text:  print the newest (the page shows only its commits)",
+      'epic log seo "P3 started"'
+    ).usage('<epic> ["text"]  |  <epic> --last <n>')
     this.page(
       epic.command("prompt"),
       'set the prompt that started the epic ("" removes it)',

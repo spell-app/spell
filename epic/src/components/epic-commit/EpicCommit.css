@@ -71,3 +71,83 @@
     outline-offset: 1px;
   }
 }
+
+/*
+ * ## A Log entry (with `at`;  epic `epic-engine` P52):  a row like a log line's
+ * - the git icon in the icon column, centred on the first line;  the time in mono, muted;  then the sha, the sentence
+ *   and the chips, wrapping beside the icon;  a hairline between entries
+ * - no `Commits:` heading;  whether it shows is the Log's (`EpicSection.css`), never this sheet's
+ */
+@layer ui.components.epic-commit.content {
+  .entry-icon {
+    display: none;
+  }
+  :host([at]) {
+    margin: 0;
+  }
+  :host([at]) .heading {
+    display: none;
+  }
+  :host([at]) .line {
+    display: grid;
+    grid-template-columns: 1.25em minmax(0, 1fr);
+    column-gap: 8px;
+    margin: 0;
+    padding: 3px 0;
+    line-height: 1.5;
+  }
+  /* a rule under each but the oldest:  the Log draws newest first, so the first in the file is the bottom one */
+  :host([at]:not(:first-of-type)) .line {
+    border-bottom: 1px solid color-mix(in srgb, var(--epic-rule, var(--ui-border-color)) 60%, transparent);
+  }
+  :host([at]) .entry-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 1lh;
+    color: var(--epic-muted, var(--ui-text-muted));
+  }
+  .entry-icon svg {
+    display: block;
+    width: auto;
+    height: 0.9em;
+    fill: currentColor;
+  }
+  .text {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+  .time {
+    margin-right: 6px;
+    color: var(--epic-muted, var(--ui-text-muted));
+    font: 0.92em var(--epic-mono, var(--ui-font-family-mono));
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  /* a phase or item it names:  a chip, the page's link colour on the code well, like the sha */
+  .ref {
+    display: inline-flex;
+    align-items: center;
+    box-sizing: border-box;
+    height: var(--epic-chip-height, 1.6em);
+    padding: 0 6px;
+    border-radius: 999px;
+    border: 1px solid color-mix(in srgb, var(--epic-accent, var(--ui-link)) 35%, transparent);
+    color: var(--epic-accent, var(--ui-link));
+    font: 600 var(--epic-chip-font-size, 0.8em)/1 var(--epic-mono, var(--ui-font-family-mono));
+    text-decoration: none;
+    vertical-align: middle;
+    white-space: nowrap;
+  }
+  a.ref:hover {
+    text-decoration: underline;
+  }
+  a.ref:focus-visible {
+    outline: 2px solid var(--ui-focus-color, var(--epic-accent));
+    outline-offset: 1px;
+  }
+  .ref.gone {
+    border-color: color-mix(in srgb, var(--epic-muted, var(--ui-text-muted)) 40%, transparent);
+    color: var(--epic-muted, var(--ui-text-muted));
+  }
+}

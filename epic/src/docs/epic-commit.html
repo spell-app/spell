@@ -96,6 +96,25 @@
               >
             </div>
             <p class="meta">Live: the real element, drawn by the epics pack this page loads.</p>
+            <p>
+              In the Log, the epic's change log (epic <code>epic-engine</code> P52): with its time (<code>at</code>) and
+              a chip for each phase and item it names (<code>refs</code>). The Log shows them always, newest first; here
+              a <code>div</code> shows them. A ref this page doesn't have is plain text.
+            </p>
+            <div style="--epic-commits-display: block">
+              <epic-commit
+                sha="f3f554068c0ffee0000000000000000000000000"
+                at="2026-10-29T10:56-04:00"
+                refs="p-choices-questions q55"
+                >an option set works anywhere and answers any way</epic-commit
+              >
+              <epic-commit
+                sha="e75a0e081c0ffee0000000000000000000000000"
+                at="2026-10-29T11:46-04:00"
+                refs="p-tests-inline"
+                >a manual test is answered where it is, in the epic page's Manual tests section</epic-commit
+              >
+            </div>
             <p class="meta">
               The second commit's Plan changes box sat above the phases then; since 2026-10-11 (epic
               <code>epic-workflow</code> P6) each phase has its own, atop its body.
@@ -143,6 +162,12 @@
                   ><code>&lt;epic-item&gt;</code></a
                 >: the commits that fixed or built it, oldest first, last in the item
               </li>
+              <li>
+                <a href="epic-section.html" target="src-packages-epics-docs-epic-section-html"
+                  ><code>&lt;epic-section kind="log"&gt;</code></a
+                >: the Log, one per commit of the epic, with <code>at</code> and <code>refs</code>, among the review
+                lines by time (epic <code>epic-engine</code> P52); drawn newest first
+              </li>
             </ul>
             <p><b>Its children:</b></p>
             <ul>
@@ -150,8 +175,8 @@
             </ul>
             <p>
               Its link comes from its own <code>repo</code> (a child repo's commit), else the nearest
-              <code>&lt;epic-page repo&gt;</code>:
-              <code>&lt;repo&gt;/commit/&lt;sha&gt;</code>, opening in one shared GitHub tab.
+              <code>&lt;epic-page repo&gt;</code>: <code>&lt;repo&gt;/commit/&lt;sha&gt;</code>, opening in one shared
+              GitHub tab.
             </p>
           </ui-section>
 
@@ -177,7 +202,25 @@
                   <tr>
                     <td><code>repo</code></td>
                     <td>a GitHub page (<code>https://github.com/spell-app/spell-parser</code>)</td>
-                    <td>The repo the commit is in, when it isn't the page's: a child repo's commit links there.</td>
+                    <td>
+                      The repo the commit is in, when it isn't the page's: a child repo's or a peer's commit links
+                      there.
+                    </td>
+                    <td>no</td>
+                  </tr>
+                  <tr>
+                    <td><code>at</code></td>
+                    <td>a time with its offset (<code>2026-10-29T11:46-04:00</code>)</td>
+                    <td>When it went in, git's commit time: drawn first, <code>2026-10-29 11:46</code>. The Log's.</td>
+                    <td>no</td>
+                  </tr>
+                  <tr>
+                    <td><code>refs</code></td>
+                    <td>ids, space-separated (<code>p-commit-log q56</code>)</td>
+                    <td>
+                      The phases (by lasting id) and items its subject names: a chip each, a phase's showing its number
+                      today (<code>P52</code>), landing there. The Log's.
+                    </td>
                     <td>no</td>
                   </tr>
                 </tbody>
@@ -236,8 +279,20 @@
                       <td><code>Commits:</code> with its icon, over the first of a run of commits.</td>
                     </tr>
                     <tr>
+                      <td><code>line</code></td>
+                      <td>Its line: the time (with <code>at</code>), the sha, its sentence, the chips.</td>
+                    </tr>
+                    <tr>
+                      <td><code>time</code></td>
+                      <td>With <code>at</code>: its time, to the minute.</td>
+                    </tr>
+                    <tr>
                       <td><code>sha</code></td>
                       <td>The short sha: a link when the page has a <code>repo</code>.</td>
+                    </tr>
+                    <tr>
+                      <td><code>ref</code></td>
+                      <td>With <code>refs</code>: a chip per phase or item it names.</td>
                     </tr>
                   </tbody>
                 </table>
@@ -260,6 +315,11 @@
                 The first of a run carries <code>Commits:</code> and a code-branch icon; the lines sit under the
                 heading's text.
               </li>
+              <li>
+                With <code>at</code> (a Log entry): a row like a log line's, the code-branch icon in its column, the
+                time muted in mono, then the sha, its sentence and the chips; no heading, a hairline between entries.
+              </li>
+              <li>A chip: a rounded outline in the link colour; one the page no longer has, muted.</li>
               <li>No state colour, and it doesn't fold.</li>
             </ul>
           </ui-section>
@@ -268,16 +328,20 @@
             <ui-icon slot="icon" name="terminal"></ui-icon>
             <ul>
               <li>
-                <code
-                  >epic commit &lt;epic&gt;#&lt;id&gt; &lt;sha&gt;
-                  "&lt;sentence&gt;"</code
-                >: lists one, replacing the entry already there for that sha.
+                <code>epic commit &lt;epic&gt;#&lt;id&gt; &lt;sha&gt; "&lt;sentence&gt;"</code>: lists one, replacing
+                the entry already there for that sha.
               </li>
               <li>
-                <code>epic commits &lt;epic&gt; --backfill</code>: every phase and item commit in the
-                doc's git history not listed yet, read from subjects (<code>P3: Name -- summary</code>,
+                <code>epic commits &lt;epic&gt; --backfill</code>: every phase and item commit in the doc's git history
+                not listed yet, read from subjects (<code>P3: Name -- summary</code>,
                 <code>&lt;epic&gt; I3: ...</code>). It reads the kit and every child repo, and files a phase commit by
                 the phase's name, not its number alone: a phase renumbered since, or another epic's P3, is left out.
+              </li>
+              <li>
+                The backfill (<code>commits --backfill</code>, <code>epic phase ... done</code>,
+                <code>epic merge</code>) also adds each commit to the Log, with its time and refs; it reads the kit, its
+                child repos and its peers, merge commits left out. The migration <code>log-commits</code> filled every
+                page's Log from its history once.
               </li>
               <li>
                 Both write <code>&lt;epic-page repo&gt;</code> from the checkout's <code>origin</code> remote, when it's
@@ -292,7 +356,7 @@
 
           <footer class="site-page-footer">
             <ui-divider></ui-divider>
-            <p class="meta">Last checked 2026-10-11 against branch <code>epic-workflow</code>.</p>
+            <p class="meta">Last checked 2026-10-29 against branch <code>epic-engine</code>.</p>
           </footer>
         </article>
       </ui-container>

@@ -588,8 +588,10 @@ than just being able to move on").
        It MUST carry the epic's name:  `commits --backfill` ignores a bare `Fix I3:`, since it can't tell which epic.
    - A multi-repo top:  one commit in EACH repo the phase changed, all with the same subject, each in the repo's
      folder (`epic worktree repos` lists what's uncommitted where);  the lowest repo first (`repos.json5`'s order).
-   - The commits reach the epic page BY THEMSELVES (epic `epic-engine` I135), found by subject, in the kit and every
-     child repo (a child repo's commit links to that repo on GitHub):
+   - The commits reach the epic page BY THEMSELVES (epic `epic-engine` I135), found by subject, in the kit, every
+     child repo and every peer (spell-brand;  a commit there links to that repo on GitHub):
+     - under its phases and items, and as an entry in the page's LOG, the epic's change log (epic `epic-engine` P52):
+       its time, its sha, its sentence, a chip per phase and item it names;  `<epic>:  ...` with no phase gets one too
      - `epic phase <name>#P<n> done` lists the branch's so far
      - `epic merge <name>` lists every commit it just brought onto `main`
      - by hand, any time:  `epic commits <name> --backfill`;  none is listed twice
@@ -1162,7 +1164,8 @@ A NEW session picks up an epic whose own session is gone (closed, crashed, compa
 4. Catch up, in the checkout:
    - What's done, what's half done:
      - `epic summary <name>`
-     - the active phase's part file, and the log's last lines
+     - the active phase's part file, and the newest review lines:  `epic log <name> --last 20`
+       (the page's Log shows only commits since epic `epic-engine` P52)
      - `git status --short` and `git log --oneline -5`
    - Behind `main` (`git log --oneline HEAD..main` not empty):
      `epic worktree merge-main`, as [the park skill](../park/SKILL.md)'s "Resume", steps 2-4.
@@ -1461,7 +1464,7 @@ close <name>#<id>  /  reopen <name>#<id>            close (done) / open again, n
 cancel <name>#<id> ["why"]                          made moot by another decision:  struck;  reopen undoes it
 change <name> [--for <item id>]                     stamp the <epic-change item> marks written by hand, list them,
                                                     new first;  --for:  the item of marks naming none
-log <name> "text"                                   timestamped line in the doc's log
+log <name> ["text"] [--last <n>]                    timestamped review line in the log;  no text:  print the newest
 bedtime <name> start "P3-P6" | done "summary"       bedtime mode on / off:  the run's changes stay green (`/bedtime`)
 prompt <name> "text" | --file f                     set the prompt quoted in the Overview
 migrate [<kind>] [<name>... | --all] [--file f] [--step s] [--dry-run] [--notify] [--list]

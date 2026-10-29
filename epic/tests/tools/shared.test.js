@@ -69,7 +69,7 @@ describe("sharedDocLog", () => {
     ])
   })
 
-  it("reads every repo given, newest first, each commit with its repo's page;  a phase's name in the TITLE only, no other epic's (r17)", () => {
+  it("reads every repo given, newest first, each commit with its repo's page and time;  a phase's name in the TITLE only, no other epic's (r17);  no merge commits (epic-engine P52)", () => {
     const repo = (folder, remote, subjects) => {
       const checkout = join(temp, folder)
       mkdirSync(checkout, { recursive: true })
@@ -92,6 +92,28 @@ describe("sharedDocLog", () => {
       ["other P2:  Doc Review -- another epic's, naming its own", "2026-10-20T11:00:00"],
       ["demo P1:  Spike -- the kit's part", "2026-10-20T12:00:00"]
     ])
+    // a merge commit naming the epic:  no change of its own (J145)
+    const kitGit = (...args) =>
+      execFileSync("git", args, {
+        cwd: kit,
+        encoding: "utf8",
+        env: { ...process.env, GIT_COMMITTER_DATE: "2026-10-20T14:00:00", GIT_AUTHOR_DATE: "2026-10-20T14:00:00" }
+      }).trim()
+    const merge = kitGit(
+      "-c",
+      "user.name=t",
+      "-c",
+      "user.email=t@t",
+      "commit-tree",
+      "HEAD^{tree}",
+      "-p",
+      "HEAD",
+      "-p",
+      "HEAD~1",
+      "-m",
+      "demo P1:  Spike -- merged"
+    )
+    kitGit("update-ref", "HEAD", merge)
     const lang = repo("kit/spell-parser", "git@github.com:spell-app/spell-parser.git", [
       ["demo P2:  Doc Review -- spell-parser's part", "2026-10-20T13:00:00"]
     ])
@@ -104,12 +126,14 @@ describe("sharedDocLog", () => {
       {
         sha: expect.any(String),
         subject: "demo P2:  Doc Review -- spell-parser's part",
-        repo: "https://github.com/spell-app/spell-parser"
+        repo: "https://github.com/spell-app/spell-parser",
+        time: expect.stringMatching(/^2026-10-20T13:00:00[+-]\d\d:\d\d$/)
       },
       {
         sha: expect.any(String),
         subject: "demo P1:  Spike -- the kit's part",
-        repo: "https://github.com/spell-app/spell"
+        repo: "https://github.com/spell-app/spell",
+        time: expect.stringMatching(/^2026-10-20T12:00:00[+-]\d\d:\d\d$/)
       }
     ])
   })

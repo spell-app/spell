@@ -1417,7 +1417,7 @@ describe("PlanDoc commits", () => {
       { sha: "d".repeat(40), subject: "P9:  no such phase" },
       { sha: "e".repeat(40), subject: "Merge branch 'main'" }
     ]
-    const added = plan.backfillCommits(log, { base: BASE })
+    const added = plan.backfillCommits(log, { base: BASE }).filter((entry) => !entry.log)
     expect(added.map((entry) => [entry.sha[0], entry.phase ?? entry.item])).toEqual([
       ["a", 1],
       ["b", 1],
@@ -1440,10 +1440,66 @@ describe("PlanDoc commits", () => {
       { sha: "a".repeat(40), subject: "P1 follow-up:  more" }
     ]
     const added = plan.backfillCommits(log, { epic: "demo" })
-    expect(added.map((entry) => [entry.sha[0], entry.phase])).toEqual([
+    expect(added.filter((entry) => !entry.log).map((entry) => [entry.sha[0], entry.phase])).toEqual([
       ["a", 1],
       ["b", 3]
     ])
+    // the Log:  the old P3's names the epic, so it's an entry, with no chips;  another epic's isn't
+    expect(added.filter((entry) => entry.log).map((entry) => entry.sha[0])).toEqual(["a", "b", "c"])
+  })
+
+  test("the Log (epic-engine P52):  an entry per commit, its time, refs by phase id and item;  placed by time;  once", () => {
+    const plan = freshPlan()
+    plan.addPhase("One")
+    plan.addPhase("Two")
+    plan.addItem("issue", "bug")
+    plan.log("P1 active")
+    const event = plan.findSection("log")!.lastElementChild!
+    event.setAttribute("at", "2026-10-20T12:30-04:00")
+    const PEER = "https://github.com/spell-app/spell-brand"
+    const log = [
+      { sha: "d".repeat(40), subject: "demo:  tidy, no phase", time: "2026-10-20T14:00:09-04:00" },
+      { sha: "c".repeat(40), subject: "other-epic P1:  One -- another epic's", time: "2026-10-20T13:30:00-04:00" },
+      {
+        sha: "b".repeat(40),
+        subject: "demo P2, I1:  Two -- in the brand",
+        repo: PEER,
+        time: "2026-10-20T13:00:00-04:00"
+      },
+      {
+        sha: "a".repeat(40),
+        subject: "demo P1:  One -- P1 active, the first",
+        repo: BASE,
+        time: "2026-10-20T12:00:00-04:00"
+      }
+    ]
+    const added = plan.backfillCommits(log, { base: BASE, epic: "demo" })
+    expect(added.filter((entry) => entry.log).map((entry) => entry.sha[0])).toEqual(["a", "b", "d"])
+    const section = plan.findSection("log")!
+    const lines = () =>
+      Array.from(section.children, (line) =>
+        line.localName === "epic-event"
+          ? `event ${line.getAttribute("at")}`
+          : [
+              line.getAttribute("sha")![0],
+              line.getAttribute("at"),
+              line.getAttribute("refs"),
+              line.getAttribute("repo"),
+              line.textContent
+            ].join(" | ")
+      )
+    const [one, two] = plan.phases
+    expect(lines().slice(-4)).toEqual([
+      `a | 2026-10-20T12:00-04:00 | ${one!.id} |  | P1 active, the first`,
+      "event 2026-10-20T12:30-04:00",
+      `b | 2026-10-20T13:00-04:00 | ${two!.id} i1 | ${PEER} | in the brand`,
+      "d | 2026-10-20T14:00-04:00 |  |  | tidy, no phase"
+    ])
+    expect(plan.backfillCommits(log, { base: BASE, epic: "demo" })).toEqual([])
+    expect(problems(plan)).toEqual([])
+    // `epic log` and Actual Time read the review lines alone:  a commit's sentence is never one (`activeWindow()`)
+    expect(plan.reviewLines().map((line) => line.text)).not.toContain("P1 active, the first")
+    expect(plan.reviewLines().at(-1)).toEqual({ at: "2026-10-20 12:30", text: "P1 active" })
   })
 
   test("a child repo's commit links to its own repo;  the page's links the rest", () => {

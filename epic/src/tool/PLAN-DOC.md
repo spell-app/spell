@@ -70,7 +70,8 @@ once an epic page is in the `<epic-*>` markup (epic `epic-components`, P8).
   - `bedtime="P3-P6"`:  a `/bedtime` run is on (`bedtime <name> start | done`).
   - `repo`:  the GitHub page every `<epic-commit sha>` links through.
     Written by `commit`, and by `commits --backfill`.
-- Its `<epic-commit>`s land by themselves (epic `epic-engine` I135):
+- Its `<epic-commit>`s land by themselves (epic `epic-engine` I135), under their phases and items AND in the Log
+  (epic `epic-engine` P52, "Log"):
   - `phase <name> <N> done`:  every commit in the history not listed yet, as `commits --backfill`
   - `epic merge <name>`:  the commits it just fast-forwarded onto `main`, every repo's (`commits --backfill --merged`)
   - neither lists one twice, nor fails its command when it can't:  it says so in one line
@@ -1092,6 +1093,13 @@ Named, dated, idempotent steps that bring an older page's markup up to today's, 
     - idempotent:  a dropped block is gone
   - `engine-links` (2026-10-19, epic `epic-engine` I27) went in epic `repo-split` P14, once the content rewrite left
     no epic page linking the engine's old places in spell-app;  its code is in git history
+  - `log-commits` (2026-10-29, on command;  epic `epic-engine` P52, J151):  the Log gets an entry per commit of the
+    epic's history (`LogCommits`), as the backfill writes them;  the Log ONLY (`logOnly`):  an older page's phase and
+    item lists hold their commits by the shas from before epic `repo-split` P20 merged the repos, so they'd list each
+    twice
+    - the history handed in by the runner (`MigrationContext.history`, `PlanDocFiles.epicHistory()`):  git, so never
+      on an edit
+    - idempotent:  a commit already in the Log is skipped
 - A new step:  a class implementing `Migration` in `migrations/`, its instance added LAST to `Migrations.all`, in the
   SAME commit as the markup change it follows (epics' `AGENTS.md`, "Rules").  Another kind's:  an entry in the docs
   tool's `STEPS`, last.  Either way:  idempotent, every word kept, and a test (a before page becomes the after page,
@@ -1099,9 +1107,32 @@ Named, dated, idempotent steps that bring an older page's markup up to today's, 
 
 ## Log
 
-`<epic-event at="2026-10-06T08:12-04:00">P2 active</epic-event>`
-- `at`:  local time with offset, to the minute.
-- `icon` only when it isn't `pen to square`.
+The epic's CHANGE LOG (epic `epic-engine` P52;  Owen, 2026-10-29:  "a log of what changes went in when, not when I
+answered a question"):  one entry per commit, drawn newest first.
+
+```html
+<epic-commit sha="e75a0e081..." at="2026-10-29T11:46-04:00" refs="p-tests-inline q53">the sentence</epic-commit>
+<epic-event at="2026-10-06T08:12-04:00">P2 active</epic-event>
+```
+
+- A COMMIT entry, `<epic-commit>`, the element a phase's Commits list uses (Owen's comment C5):
+  - `sha`, the full sha;  `repo` when it isn't the page's (a peer's, spell-brand;  the kit's, on an older page whose
+    `repo` is an old child repo's)
+  - `at`:  git's commit time, to the minute, with its offset
+  - `refs`:  the phases (by their lasting id) and items its subject names, space-separated;  the page draws a chip
+    per ref, a phase's showing its number today (`P52`), one the page no longer has as plain text
+  - its text:  the subject's sentence (after ` -- `, else after the colon)
+  - written by the backfill (`PlanDoc.backfillCommits()`, `logCommit()`;  Q57 A), never read from git as the page is
+    served:  `phase <name> <N> done`, `epic merge`, `commits <name> --backfill`
+  - which commits:  the history's (`PlanDocFiles.epicHistory()`:  the kit, its child repos and its peers;  merge commits
+    left out;  none another epic's page lists) naming a phase or item here, or naming the epic first with none
+    (`epic-engine:  ...`:  no chips)
+  - placed among the lines by its time, so the file stays oldest first;  one already there (same sha) is skipped
+- A REVIEW LINE, `<epic-event>`:  "Q53 answered", "P49 active" ... (`PlanDoc.log()`, `epic log <name> "text"`)
+  - `at`:  local time with offset, to the minute;  `icon` only when it isn't `pen to square`
+  - written, NEVER drawn (Q56 C):  Actual Time (`activeWindow()`), `done-at` and "last worked on" read them;
+    `epic log <name> [--last <n>]` prints the newest (20), newest last
+- "Last worked on" (`eventTimesIn()`) takes the newest time of either kind.
 
 ## Parts
 

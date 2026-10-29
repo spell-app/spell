@@ -100,6 +100,17 @@ describe("last worked", () => {
     expect(lastWorked(["2026-10-09", ...eventTimesIn(log), undefined])).toEqual(new Date("2026-10-10T02:08:00Z"))
     expect(lastWorked([null, "x"])).toBeUndefined()
   })
+
+  test("the Log's commits count too (epic-engine P52);  an older commit added later never moves it back", () => {
+    const log =
+      `<epic-event at="2026-10-09T22:08-04:00">b</epic-event>\n` +
+      `<epic-commit sha="abcdef1" at="2026-10-08T10:00-04:00">old</epic-commit>\n` +
+      `<epic-commit sha="abcdef2" at="2026-10-10T09:00-04:00" refs="p-x">new</epic-commit>\n` +
+      `<epic-commit sha="abcdef3">a phase's, no time</epic-commit>`
+    expect(eventTimesIn(log)).toEqual(["2026-10-09T22:08-04:00", "2026-10-08T10:00-04:00", "2026-10-10T09:00-04:00"])
+    expect(lastWorked(eventTimesIn(log))).toEqual(new Date("2026-10-10T13:00:00Z"))
+    expect(lastWorked(eventTimesIn(log).slice(0, 2))).toEqual(new Date("2026-10-10T02:08:00Z"))
+  })
 })
 
 test("favoritesIn():  a list of names;  anything else is none", () => {

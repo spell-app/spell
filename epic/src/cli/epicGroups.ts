@@ -1285,7 +1285,7 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
   },
 
   // an epic page:  log and upkeep
-  log: {},
+  log: { "--last <n>": "with no text:  how many of the newest review lines to print (default 20)" },
   prompt: { "--file <file>": "the prompt, from a file" },
   bedtime: {},
   backfill: { "--all": "every epic", "--apply": "mark them:  a dry run without it" },

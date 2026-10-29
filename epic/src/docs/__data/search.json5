@@ -627,7 +627,7 @@
     {
       "path": "epic-event.html",
       "title": "<epic-event>",
-      "summary": "The <epic-event> element: one line of an epic page's log, its icon and time drawn.",
+      "summary": "The <epic-event> element: one review line of an epic page's log, written but not shown there (the Log shows commits).",
       "tag": "epic-event",
       "sections": [
         {

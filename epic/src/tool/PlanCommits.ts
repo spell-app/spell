@@ -63,6 +63,30 @@ export class PlanCommits {
     })
   }
 
+  /**
+   * Does `subject` name epic `epic` first, though it names no phase or item (`epic-engine:  ...`,
+   * `epic-engine merge-main:  ...`)?  The Log takes it, with no chips (epic `epic-engine` P52).
+   * - static:  pure
+   */
+  static namesEpic(subject: string, epic: string): boolean {
+    return subject.startsWith(`${epic}:`) || subject.startsWith(`${epic} `)
+  }
+
+  /** What such a subject says it did:  after the epic's name and its colon (`epic-engine:  tidy` -> `tidy`). */
+  static afterEpic(subject: string, epic: string): string {
+    const rest = PlanCommits.namesEpic(subject, epic) ? subject.slice(epic.length) : subject
+    return rest.replace(/^\s*:\s*/, "").trim()
+  }
+
+  /**
+   * Git's commit time (`%cI`, `2026-10-29T11:46:12-04:00`) to the minute, its offset kept:  `2026-10-29T11:46-04:00`,
+   * as the log's lines are stamped.
+   * - static:  pure
+   */
+  static minutesOf(time: string): string {
+    return time.replace(/^(\d{4}-\d\d-\d\dT\d\d:\d\d):\d\d(?:\.\d+)?/, "$1")
+  }
+
   ////////////////
   // ## Subjects
   ////////////////

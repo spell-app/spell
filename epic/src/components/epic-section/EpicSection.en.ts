@@ -63,7 +63,8 @@ export const epicSectionVocabulary = {
       required: true,
       description:
         "What it holds:  `phases` its `<epic-phase>`s;  `questions` ... `tests` its `<epic-item>`s;  `log` its " +
-        "`<epic-event>`s;  `overview-part` and `report` prose;  `epics` (a saga page's) its `<epic-cards>`."
+        "`<epic-commit>`s (drawn, newest first) and `<epic-event>`s (written, not drawn);  `overview-part` and " +
+        "`report` prose;  `epics` (a saga page's) its `<epic-cards>`."
     },
     {
       name: "title",
@@ -330,7 +331,20 @@ export const epicSectionVocabulary = {
       when: { attribute: "kind", values: ["questions", "judgements", "todos", "issues", "tests"] },
       description: "The items, their id's letter the section's (`q` in Questions)."
     },
-    { tag: "epic-event", when: { attribute: "kind", values: ["log"] }, description: "The log, oldest first." },
+    {
+      tag: "epic-event",
+      when: { attribute: "kind", values: ["log"] },
+      description:
+        "The log's review lines (answered, reviewed, active ...), oldest first:  written, never drawn (epic " +
+        "`epic-engine` P52, Q56 C);  Actual Time and `epic log` read them."
+    },
+    {
+      tag: "epic-commit",
+      when: { attribute: "kind", values: ["log"] },
+      description:
+        "The Log's entries, one per commit of the epic (`<epic-commit at refs>`), in the file by time, oldest first:  " +
+        "drawn newest first."
+    },
     {
       tag: "epic-cards",
       when: { attribute: "kind", values: ["epics"] },

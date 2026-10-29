@@ -1790,7 +1790,7 @@
         "change",
         "git"
       ],
-      "description": "One commit that built a phase or fixed an item:  its short sha is drawn, linked through its `repo`, else `<epic-page repo>`;  its sentence is its children.",
+      "description": "One commit:  under a phase or an item, one that built it or fixed it, hidden until the git toggle shows it;  in the Log (`<epic-section kind=\"log\">`), one entry of the epic's change log, always shown, newest first.  Its short sha is drawn, linked through its `repo`, else `<epic-page repo>`;  with `at`, its time first, and with `refs`, a chip after its sentence for each phase and item it names.  Its sentence is its children.",
       "noun": "commit",
       "attributes": [
         {
@@ -1801,7 +1801,17 @@
         {
           "name": "repo",
           "kind": "string",
-          "description": "The GitHub page of the repo it's in, when that isn't the page's `repo`:  a child repo's commit (`https://github.com/spell-app/spell-parser`)."
+          "description": "The GitHub page of the repo it's in, when that isn't the page's `repo`:  a child repo's commit (`https://github.com/spell-app/spell-parser`), a peer's (spell-brand)."
+        },
+        {
+          "name": "at",
+          "kind": "string",
+          "description": "When it went in:  git's commit time, to the minute, with its offset (`2026-10-29T11:46-04:00`);  shown as `2026-10-29 11:46`.  The Log's entries carry it (epic `epic-engine` P52)."
+        },
+        {
+          "name": "refs",
+          "kind": "string",
+          "description": "The phases (by their lasting id, `p-commit-log`) and items (`q56`) its subject names, space-separated:  a chip for each, a phase showing its number today (`P52`), each a link landing there;  one the page no longer has is plain text.  The Log's entries carry it."
         }
       ],
       "slots": [
@@ -1815,6 +1825,18 @@
         {
           "name": "base",
           "description": "The commit:  its heading (the first commit only), then its line."
+        },
+        {
+          "name": "line",
+          "description": "Its line:  the time (with `at`), the sha, its sentence, the chips (with `refs`)."
+        },
+        {
+          "name": "time",
+          "description": "With `at`:  its time, to the minute, before the sha."
+        },
+        {
+          "name": "ref",
+          "description": "With `refs`:  a chip per phase or item it names, after its sentence."
         },
         {
           "name": "heading",
@@ -1836,6 +1858,16 @@
           "key": "open",
           "text": "Open {sha} on GitHub",
           "description": "The sha link's tooltip."
+        },
+        {
+          "key": "refTip",
+          "text": "Go to {ref}:  {title}",
+          "description": "A chip's tooltip:  where it lands, and its title."
+        },
+        {
+          "key": "refGone",
+          "text": "{ref} isn't on this page any more",
+          "description": "A chip whose phase or item is gone."
         }
       ]
     },
@@ -1856,7 +1888,7 @@
         "history",
         "changelog entry"
       ],
-      "description": "One line of the log (`<epic-section kind=\"log\">`):  its time and icon are drawn;  its text is its children.",
+      "description": "One review line of the log (`<epic-section kind=\"log\">`):  \"Q53 answered\", \"P49 active\" ...;  its time and icon are drawn, its text is its children.  The Log hides them (epic `epic-engine` P52):  it shows the epic's commits (`<epic-commit>`);  Actual Time reads them, and `epic log <epic>` prints them.",
       "noun": "event",
       "attributes": [
         {
@@ -5466,7 +5498,7 @@
             "log",
             "report"
           ],
-          "description": "What it holds:  `phases` its `<epic-phase>`s;  `questions` ... `tests` its `<epic-item>`s;  `log` its `<epic-event>`s;  `overview-part` and `report` prose;  `epics` (a saga page's) its `<epic-cards>`."
+          "description": "What it holds:  `phases` its `<epic-phase>`s;  `questions` ... `tests` its `<epic-item>`s;  `log` its `<epic-commit>`s (drawn, newest first) and `<epic-event>`s (written, not drawn);  `overview-part` and `report` prose;  `epics` (a saga page's) its `<epic-cards>`."
         },
         {
           "name": "title",
@@ -7403,7 +7435,7 @@
       "folder": "epic-event",
       "mainTag": "epic-event",
       "title": "<epic-event>",
-      "summary": "The <epic-event> element: one line of an epic page's log, its icon and time drawn.",
+      "summary": "The <epic-event> element: one review line of an epic page's log, written but not shown there (the Log shows commits).",
       "status": "done",
       "docs": false,
       "tags": [
