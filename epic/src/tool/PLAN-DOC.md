@@ -118,6 +118,10 @@ one saga's page, `sagas/<id>/<id>.saga.html`, in the same markup, so the tool ed
 ## Ids
 
 As `plan-doc.md`, "Ids":
+- A new id is the next number of its letter, so two people can both make `T22`:  the content repo's sync gives THIS
+  machine's the next free number before it rebases (`Renumber`, `SharedSync`;  epic `epic-friend` P5), every reference
+  following, and the log says so (`Renumbered as the plans synced:  T22 → T23`).
+  Change marks (`ch12`) and requests (`r3`) too;  comments stay in the local inbox, so they never meet.
 - The letters:
   - `q` question (an answered one is a decision)
   - `j` judgement call, `t` todo (work still to do, or with `limit` a limit to know about)

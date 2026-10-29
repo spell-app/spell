@@ -32,6 +32,7 @@ import {
 } from "./command.types"
 import { EpicCheckout } from "./EpicCheckout"
 import { SharedMigration } from "./SharedMigration"
+import { SharedSync, type SyncReport } from "./SharedSync"
 
 /****************
  * ### `Shared`
@@ -53,7 +54,11 @@ import { SharedMigration } from "./SharedMigration"
  *     - a link to a shared folder the manifest no longer names is removed (`unlinkDropped()`)
  *     - and, worktrees beside the repo, ONE link in their folder to the content folder (`linkContentBeside()`)
  *   - `commit [--session <id>] [--quiet]`:  commit whatever changed in the shared repo (the `Stop` hook, every turn)
- *     - one commit per epic / guide / folder (`commit()`)
+ *     - one commit per epic / guide / folder (`commitPending()`)
+ *     - then, when the repo's config names the content repo's remote (`contentRemote`), SYNC with it:  pull
+ *       (rebasing), renumber ids two people both made, push (`sync()`, `SharedSync`;  epic `epic-friend` P5)
+ *   - `sync [--session <id>] [--quiet]`:  the same, by hand;  refused without a `contentRemote`
+ * - the content repo's own `.gitignore` and `.gitattributes`:  a marked block each, kept current (`keepRepoFiles()`)
  *   - `migrate <worktree> [--dry-run]`:  move a worktree cut before the cutover onto the shared content
  *     (`SharedMigration`);  stops, writing nothing, on a conflict
  *   - NOT `rename` and `repair` (epic `repo-split` Q45):  the content folder's one rename (epic `epic-eject` P8) and
@@ -108,11 +113,16 @@ export class Shared {
         const reports = this.linkAll(flags.all ? this.checkouts() : [checkout])
         return reports.some((report) => report.action === "diverged") ? EXIT.ERRORS : EXIT.OK
       }
-      case "commit": {
+      case "commit":
+      case "sync": {
         const session = stringFlag(flags.session)
-        const shas = this.commit({ session, checkout })
-        if (!flags.quiet) CLI.out(shas.length ? `committed ${shas.join(", ")}` : "nothing to commit")
-        return EXIT.OK
+        if (verb === "sync" && !this.syncsWith)
+          throw new EpicCommandError(
+            `sync:  nothing to sync with:  ${EpicConfig.FILE} names no contentRemote (the content repo's remote)`
+          )
+        const { commits, sync } = await this.sync({ session, checkout })
+        if (!flags.quiet) for (const line of syncLines(commits, sync)) CLI.out(line)
+        return sync?.result === "conflict" ? EXIT.ERRORS : EXIT.OK
       }
       case "migrate": {
         if (!name) throw new EpicCommandError("migrate:  which worktree?")
@@ -127,7 +137,7 @@ export class Shared {
         return report.conflicts.length ? EXIT.ERRORS : EXIT.OK
       }
       default:
-        throw new EpicCommandError(`unknown verb '${verb}':  status, init, link, commit or migrate`)
+        throw new EpicCommandError(`unknown verb '${verb}':  status, init, link, commit, sync or migrate`)
     }
   }
 
@@ -349,14 +359,14 @@ export class Shared {
    * - already a git repo:  `exists`, nothing done
    * - `importFrom` (a checkout):  copies its folders for every link in, and commits `Import from spell-app <sha>`
    * - else an empty repo with the link folders, so a fresh clone can link and start
-   * - always:  `.gitignore` (locks, temp files, scratch details pages, the window files) and a `README.md`
+   * - always:  its `.gitignore` and `.gitattributes` (`keepRepoFiles()`) and a `README.md`
    */
   init({ importFrom }: { importFrom?: string } = {}): string {
     const { config } = this
     if (existsSync(join(config.dir, ".git"))) return "exists"
     mkdirSync(config.dir, { recursive: true })
     gitOrThrow(["init", "-q"], config.dir)
-    writeFileSync(join(config.dir, ".gitignore"), GITIGNORE)
+    this.keepRepoFiles()
     writeFileSync(join(config.dir, "README.md"), readme(config))
     for (const path of config.links) {
       const from = importFrom && join(importFrom, path)
@@ -411,50 +421,135 @@ export class Shared {
   }
 
   /**
-   * Commit whatever changed in the shared repo:  `epic shared commit`, run by the `Stop` hook after every turn.
+   * Commit whatever changed in the shared repo, under its lock (`commitPending()`):  the new commits' short shas.
+   * - one at a time:  `<dir>/.git/spell-shared-commit.lock`, waited for up to 30s
+   *   (never skipped:  the other session's changes would sit uncommitted until someone's next turn)
+   * - the repo's own files kept current first (`keepRepoFiles()`)
+   * - SIDE EFFECT:  as `commitPending()`
+   */
+  commit({ session, checkout }: CommitOptions = {}): string[] {
+    const { config } = this
+    if (!existsSync(join(config.dir, ".git"))) return []
+    return FileLock.run(
+      this.lockFile,
+      () => {
+        this.keepRepoFiles()
+        return this.commitPending({ session, checkout })
+      },
+      { wait: LOCK_WAIT, stale: STALE }
+    )
+  }
+
+  /**
+   * Commit, then SYNC with the content repo's remote when it has one (`syncsWith`):  `epic shared commit`, run by
+   * the `Stop` hook after every turn, and `epic shared sync` (epic `epic-friend` P5, Q5).
+   * - under `commit()`'s lock, held through the sync:  one session's sync at a time, no commit in the middle of one
+   * - the sync:  `SharedSync` (fetch, renumber, rebase, push);  none without a remote:  `sync` is `undefined`
+   * - SIDE EFFECT:  as `commit()`, then the sync's
+   */
+  async sync({ session, checkout }: CommitOptions = {}): Promise<{ commits: string[]; sync?: SyncReport }> {
+    const { config } = this
+    if (!existsSync(join(config.dir, ".git"))) return { commits: [] }
+    return FileLock.runAsync(
+      this.lockFile,
+      async () => {
+        this.keepRepoFiles()
+        const commits = this.commitPending({ session, checkout })
+        if (!this.syncsWith) return { commits }
+        return { commits, sync: await new SharedSync(this).run({ session, checkout }) }
+      },
+      { wait: LOCK_WAIT, stale: STALE }
+    )
+  }
+
+  /**
+   * The remote the content repo syncs with:  its `origin`, ONLY when the repo's config names the content repo's
+   * remote (`contentRemote`, which `epic init` writes);  `""` for none.
+   * - why the config too:  a content repo may have an `origin` nobody chose to sync with (Spell's own had one before
+   *   epic `epic-friend` P5), and pushing it every turn must be a choice the repo makes
+   */
+  get syncsWith(): string {
+    if (!new EpicConfig(this.config.main).contentRemote) return ""
+    return this.remote
+  }
+
+  /**
+   * Commit whatever changed in the shared repo, the caller holding its lock (`commit()`, `sync()`, `SharedSync`).
    * - ONE commit per group of files (`Shared.group()`)
    *   - any session's turn sweeps up every session's pending edits,
    *     so the message says WHAT changed (`auto: epic seo`), never whose turn it was
    * - returns the new commits' short shas, in order;  `[]` when nothing changed
-   * - one at a time:  `<dir>/.git/spell-shared-commit.lock`, waited for up to 30s
-   *   (never skipped:  the other session's changes would sit uncommitted until someone's next turn)
    * - a git `index.lock` older than 2 minutes is a crashed git's:  removed
    * - the index is reset first (nobody stages here by hand;  a crashed run may have left some),
    *   then ONE `git status` pass
    *   - a rename is two paths:  the new one in its group, the deletion in the old one's
-   * - message `auto: <group>`, trailers `Turn-end:` and `Session:`
+   * - message `auto: <group>`, trailers `Turn-end:`, `Session:` and `Renumbered:` (the sync's, `renumbered`)
    *   - `Turn-end:`  the checkout whose turn ended, `main` or the worktree's name:  NOT the author
    * - SIDE EFFECT:  `git add` / `git commit` in the shared repo, by pathspec (never `-A`)
    */
-  commit({ session, checkout }: { session?: string; checkout?: string } = {}): string[] {
+  commitPending({ session, checkout, renumbered }: CommitOptions & { renumbered?: string } = {}): string[] {
     const { config } = this
-    if (!existsSync(join(config.dir, ".git"))) return []
-    const lock = join(config.dir, ".git", "spell-shared-commit")
-    return FileLock.run(
-      lock,
-      () => {
-        const indexLock = join(config.dir, ".git", "index.lock")
-        if (existsSync(indexLock) && Date.now() - statSync(indexLock).mtimeMs > STALE)
-          rmSync(indexLock, { force: true })
-        gitOrThrow(["reset", "-q"], config.dir)
-        // `Object.groupBy()` needs lib `es2024`;  ours is older
-        const groups: Record<string, string[]> = {}
-        for (const path of pendingPaths(config.dir)) (groups[Shared.group(path)] ??= []).push(path)
-        const trailers = [checkout && `Turn-end: ${checkoutName(config, checkout)}`, session && `Session: ${session}`]
-        const footer = trailers.filter(Boolean).join("\n")
-        return Object.keys(groups)
-          .sort()
-          .map((group) => {
-            gitOrThrow(["--literal-pathspecs", "add", "--pathspec-from-file=-", "--pathspec-file-nul"], config.dir, {
-              input: groups[group]!.join("\0")
-            })
-            const message = `auto: ${group}${footer ? `\n\n${footer}` : ""}`
-            gitOrThrow(["-c", "commit.gpgsign=false", "commit", "-q", "-m", message], config.dir)
-            return Git.run(["rev-parse", "--short", "HEAD"], config.dir).out
-          })
-      },
-      { wait: LOCK_WAIT, stale: STALE }
-    )
+    const indexLock = join(config.dir, ".git", "index.lock")
+    if (existsSync(indexLock) && Date.now() - statSync(indexLock).mtimeMs > STALE) rmSync(indexLock, { force: true })
+    gitOrThrow(["reset", "-q"], config.dir)
+    // `Object.groupBy()` needs lib `es2024`;  ours is older
+    const groups: Record<string, string[]> = {}
+    for (const path of pendingPaths(config.dir)) (groups[Shared.group(path)] ??= []).push(path)
+    const trailers = [
+      checkout && `Turn-end: ${checkoutName(config, checkout)}`,
+      session && `Session: ${session}`,
+      renumbered && `Renumbered: ${renumbered}`
+    ]
+    const footer = trailers.filter(Boolean).join("\n")
+    return Object.keys(groups)
+      .sort()
+      .map((group) => {
+        gitOrThrow(["--literal-pathspecs", "add", "--pathspec-from-file=-", "--pathspec-file-nul"], config.dir, {
+          input: groups[group]!.join("\0")
+        })
+        const message = `auto: ${group}${footer ? `\n\n${footer}` : ""}`
+        gitOrThrow(["-c", "commit.gpgsign=false", "commit", "-q", "-m", message], config.dir)
+        return Git.run(["rev-parse", "--short", "HEAD"], config.dir).out
+      })
+  }
+
+  /**
+   * Keep the content repo's own `.gitignore` and `.gitattributes` current:  each holds ONE marked block of ours
+   * (`# epic:start` ... `# epic:end`), written on every init, commit and sync (epic `epic-friend` P5);  anything
+   * outside the markers is the team's.
+   * - `.gitignore`:  locks, temp files, scratch details pages, review inboxes, running agents, the window files
+   * - `.gitattributes`:  every page's log merged by `union` (both people's lines kept;  the sync re-sorts them)
+   * - a file without the markers that was wholly ours (it starts `# written by ... shared init`, the old unmarked
+   *   copy):  replaced by the block;  else the block is added at its end
+   * - which files changed
+   * - SIDE EFFECT:  writes them
+   */
+  keepRepoFiles(): string[] {
+    const written: string[] = []
+    for (const [name, lines] of Object.entries(REPO_FILES)) {
+      const file = join(this.config.dir, name)
+      const before = existsSync(file) ? readFileSync(file, "utf8") : ""
+      const after = Shared.withBlock(before, lines)
+      if (after === before) continue
+      writeFileSync(file, after)
+      written.push(name)
+    }
+    return written
+  }
+
+  /** `text` with its marked block holding `lines`, as `keepRepoFiles()` writes it. */
+  static withBlock(text: string, lines: readonly string[]): string {
+    const block = [BLOCK_START, ...lines, BLOCK_END].join("\n")
+    const start = text.indexOf(BLOCK_START)
+    const end = text.indexOf(BLOCK_END, start)
+    if (start >= 0 && end >= 0) return text.slice(0, start) + block + text.slice(end + BLOCK_END.length)
+    if (OLD_UNMARKED.test(text)) return `${block}\n`
+    return `${text}${text && !text.endsWith("\n") ? "\n" : ""}${text ? "\n" : ""}${block}\n`
+  }
+
+  /** `commit()`'s and `sync()`'s lock:  `<dir>/.git/spell-shared-commit`. */
+  private get lockFile(): string {
+    return join(this.config.dir, ".git", "spell-shared-commit")
   }
 
   ////////////////
@@ -513,6 +608,9 @@ export class Shared {
 /** What `new Shared()` takes:  see its constructor. */
 export type SharedProps = { checkout?: string; config?: SharedConfig }
 
+/** What `commit()` and `sync()` take:  their commits' trailers. */
+export type CommitOptions = { session?: string; checkout?: string }
+
 /** The flags of `epic shared` that take no value. */
 const SWITCHES = ["json", "import", "all", "quiet", "dryRun"]
 
@@ -528,8 +626,8 @@ const LITTER = new Set([".DS_Store"])
 /** How long `commit()` waits for another session's commit, ms. */
 const LOCK_WAIT = 30_000
 
-/** A lock or git index lock older than this is a crashed holder's, ms. */
-const STALE = 120_000
+/** A lock or git index lock older than this is a crashed holder's, ms:  past a sync's fetch and push. */
+const STALE = 300_000
 
 /** How long one git command may take in the shared repo, ms. */
 const GIT_WAIT = 30_000
@@ -540,29 +638,41 @@ const NETWORK_WAIT = 120_000
 /** Shared folders committed as one group each (`Shared.group()`). */
 const WHOLE_FOLDERS = new Set(["pages", "templates", "ui", "brand", "agents"])
 
-/** The shared repo's `.gitignore`. */
-const GITIGNORE = `# written by \`epic shared init\`
-*.lock
-*.tmp
-.DS_Store
-.server.json
-.server.log
-# /details scratch pages and their answers:  never committed
-pages/details/
-# /epic review inboxes:  a review's pending marks, never committed
-epics/*/*.inbox.json*
-# comments on docs pages (\`<page>.inbox.json5\`, epic airplane P11):  waiting work, never committed
-guides/**/*.inbox.json*
-pages/**/*.inbox.json*
-epics/**/*.inbox.json*
-# a saga page's review inbox (\`sagas/<id>/<id>.inbox.json5\`, epic epic-workflow P15)
-sagas/**/*.inbox.json*
-# an epic's running agents (\`epic agents\`):  what's running now, never committed;  \`.json\` before P21
-epics/*/agents.json
-epics/*/agents.json5
-# VS Code's window files (\`epic window\`, epic epic-eject P13):  each machine's own, never committed
-/windows/
-`
+/** The marks around the content repo's own lines in its `.gitignore` and `.gitattributes` (`keepRepoFiles()`). */
+const BLOCK_START =
+  "# epic:start  (written by epic shared:  kept current on every init, commit and sync;  add yours outside)"
+const BLOCK_END = "# epic:end"
+
+/** An old unmarked file `epic shared init` (or `spell dev shared init`) wrote whole:  replaced by the block. */
+const OLD_UNMARKED = /^# written by `(spell dev|epic) shared init`\n/
+
+/** The content repo's own lines, by file (`keepRepoFiles()`). */
+const REPO_FILES = {
+  ".gitignore": [
+    "*.lock",
+    "*.tmp",
+    ".DS_Store",
+    ".server.json",
+    ".server.log",
+    "# /details scratch pages and their answers:  never committed",
+    "pages/details/",
+    "# review inboxes, an epic page's, a saga page's, a docs page's (epic airplane P11):  waiting work, never committed",
+    "epics/**/*.inbox.json*",
+    "sagas/**/*.inbox.json*",
+    "guides/**/*.inbox.json*",
+    "pages/**/*.inbox.json*",
+    "# an epic's running agents (`epic agents`):  what's running now, never committed;  `.json` before P21",
+    "epics/*/agents.json",
+    "epics/*/agents.json5",
+    "# VS Code's window files (`epic window`, epic epic-eject P13):  each machine's own, never committed",
+    "/windows/"
+  ],
+  ".gitattributes": [
+    "# a page's log:  both people's lines kept (git's union merge);  the sync then sorts them by time (epic epic-friend P5)",
+    "epics/**/parts/log.html merge=union",
+    "sagas/**/parts/log.html merge=union"
+  ]
+} as const
 
 /** The `"shared"` field of checkout `root`'s `package.json`;  `{}` without one. */
 function manifest(root: string): Partial<{ links: string[] }> {
@@ -599,6 +709,21 @@ function statusLines(status: SharedStatus): string[] {
       ({ checkout, links }) => `${checkout.padEnd(40)} ${links.map((link) => `${link.path} ${link.state}`).join(" · ")}`
     )
   ]
+}
+
+/** `commit`'s and `sync`'s lines:  what was committed, then what the sync came to. */
+function syncLines(commits: string[], sync?: SyncReport): string[] {
+  const lines = [commits.length ? `committed ${commits.join(", ")}` : "nothing to commit"]
+  if (!sync) return lines
+  for (const { epic, renames } of sync.renumbered ?? [])
+    lines.push(
+      `renumbered in ${epic}:  ${Object.entries(renames)
+        .map(([from, to]) => `${from.toUpperCase()} → ${to.toUpperCase()}`)
+        .join(", ")}`
+    )
+  const why = sync.files?.length ? `:  ${sync.files.join(", ")}` : sync.error ? `:  ${sync.error}` : ""
+  lines.push(`sync:  ${sync.result}${why}`)
+  return lines
 }
 
 /**

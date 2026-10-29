@@ -135,11 +135,14 @@ export class RepoInit {
     if (report.remote.action === "clone failed") report.content = { folder: content, action: "missing", made: [] }
     if (!dryRun && report.content.action !== "missing") {
       if (!isRepo) shared.init()
-      else
+      else {
         for (const folder of missing) {
           mkdirSync(join(content, folder), { recursive: true })
           writeFileSync(join(content, folder, ".gitkeep"), "")
         }
+        // its own `.gitignore` and `.gitattributes` brought up to date (epic `epic-friend` P5)
+        shared.keepRepoFiles()
+      }
     }
     // its remote:  made, added or found, unless it was just cloned (or couldn't be)
     if (!["cloned", "would clone", "clone failed"].includes(report.remote.action))

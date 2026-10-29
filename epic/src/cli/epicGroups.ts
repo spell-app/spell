@@ -607,8 +607,22 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
     {
       name: "commit",
       usage: "[--session <id>] [--quiet]",
-      description: "commit whatever changed in the shared repo, one commit per epic, guide or folder (every turn)",
+      description:
+        "commit whatever changed in the shared repo, one commit per epic, guide or folder (every turn);  then sync, " +
+        "when the config names the content repo's remote (contentRemote)",
       example: "epic shared commit --quiet",
+      flags: {
+        "--session <id>": "the session whose turn swept them up",
+        "--quiet": "print nothing"
+      }
+    },
+    {
+      name: "sync",
+      usage: "[--session <id>] [--quiet]",
+      description:
+        "commit, then pull (rebasing), give ids two people both made the next free number on this side, and push:  " +
+        "what every turn does, by hand;  needs contentRemote in .epic/config.json5",
+      example: "epic shared sync",
       flags: {
         "--session <id>": "the session whose turn swept them up",
         "--quiet": "print nothing"

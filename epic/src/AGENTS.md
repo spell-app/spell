@@ -367,6 +367,19 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         - a snapshot or generated output by itself, a few others with `--ditch`
       - `Sessions` (`session`), `Parking` (`park`), `Stock` (`status`, taking stock)
       - `Shared` (`shared`), with `SharedMigration` (`shared migrate`)
+        - and `SharedSync` (epic `epic-friend` P5, Q5 and Q6):  every turn's `shared commit` (and `shared sync` by
+          hand) pulls, rebasing, and pushes, ONLY when `.epic/config.json5` names `contentRemote` (Spell's doesn't:
+          its content repo's `origin` is never pushed by it)
+          - before the rebase, ids this machine made that the remote has too (`t22`, `ch12`, `r3`) get the next free
+            number here, links, parts, inbox and request folders following (`Renumber`, `epic migrate`'s too), a log
+            line saying so;  this machine's unpushed commits are then made again, one per group
+          - what stops the rebase:  `ContentMerge` settles two adds at one place and a later date;  anything else
+            undoes it, kept in `SyncState` (the content repo's `.git/spell-shared-sync.json5`), which the
+            `SessionStart` hook [sync-notice.mjs](../hooks/sync-notice.mjs) says to the person and Claude
+          - after it:  the logs both sides wrote (`merge=union`) re-sorted by time, a phase's field added twice joined
+          - offline or refused:  the commits wait, the next sync pushes
+        - the content repo's own `.gitignore` and `.gitattributes`:  a marked block each (`# epic:start`), kept current
+          on every init, commit and sync (`keepRepoFiles()`)
       - `RepoInit` (`init`):  a repo set up for epics (epic `epic-eject` P9)
         - and the person's name kept (`--name`, else asked in a terminal with `CLI.ask()`, else git's;  epic
           `epic-friend` P1)

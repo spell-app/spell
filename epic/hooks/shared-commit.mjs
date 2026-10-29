@@ -1,8 +1,12 @@
 #!/usr/bin/env node
 /**
  * Claude Code's `Stop` hook (the plugin's `hooks/hooks.json`):
- * after every turn, commit whatever changed in the shared content repo (epic `shared-content`).
+ * after every turn, commit whatever changed in the shared content repo (epic `shared-content`), then sync it.
  * - It runs `epic shared commit` in the session's checkout.
+ * - That SYNCS too when the repo's config names the content repo's remote (`contentRemote`;  epic `epic-friend` P5):
+ *   pull (rebasing), renumber ids two people both made, push (`Shared.sync()`).
+ *   Offline, the commits wait for the next turn's push;  a conflict it can't settle is undone, and the next session's
+ *   start says so ([sync-notice.mjs](sync-notice.mjs)).
  * - stdin `{ session_id, cwd, ... }`.
  * - Only in a repo that uses epics (it has `.epic/config.json5`), and whose content repo exists (`contentFolder`):
  *   the plugin's hooks run in every repo.  Else exits at once.
