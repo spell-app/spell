@@ -155,12 +155,18 @@ export class ActionMenus {
     return undefined
   }
 
-  /** Is `target` somewhere people type:  a text field, a text area, a select, editable text?  Its keys are its own. */
+  /**
+   * Is `target` somewhere people type:  a text field, a text area, a select, editable text?  Its keys are its own.
+   * - An element with an `EditContext` too:  the editor's code pane (Monaco) types through one,
+   *   on a plain `<div>` that is neither an input nor contenteditable.
+   *   Missed, Solitaire's `A` (auto play) took every `a` typed into the code (epic `debut` I79).
+   */
   private static isTypedIn(target: EventTarget | undefined): boolean {
     if (!(target instanceof HTMLElement)) return false
     if (target.isContentEditable || target instanceof HTMLTextAreaElement || target instanceof HTMLSelectElement) {
       return true
     }
+    if ((target as { editContext?: unknown }).editContext) return true
     return target instanceof HTMLInputElement && !NOT_TYPED_IN.has(target.type)
   }
 }
