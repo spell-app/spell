@@ -1031,7 +1031,7 @@ its phases and items, the requests between sessions, the worktrees, windows and 
 
 It loads no Spell:  `epic --version` answers in 0.2 s, and `epic summary` in about 0.4.
 Claude Code sessions get it from the plugin;  your own terminal needs one link
-([spell-epic's README-adopting.md](https://github.com/spell-app/spell/blob/main/epic/README-adopting.md)).
+([README-epics.md](README-epics.md)).
 
 A verb names what it acts on with an address after it:
 

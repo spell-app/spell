@@ -20,7 +20,7 @@ built are ONE page, and the agent keeps it true as it works.
 You review on the page, item by item, when you have time;  the answers come back INTO the items, not into a chat.
 
 - The page is plain HTML in the content folder, a git repo of its own beside the code
-  ([README-adopting.md](README-adopting.md) says what it holds).
+  ([README-epics.md](https://github.com/spell-app/spell/blob/main/README-epics.md#the-content-folder--your-plans-in-a-repo-of-their-own) says what it holds).
   The page server serves it live:  an edit the agent makes shows in place,
   and your scroll, your folds and your half-typed notes stay where they were.
 - You read it in VS Code's side bar, the Review tab ([README-vscode.md](README-vscode.md)), or in any browser.

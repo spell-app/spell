@@ -236,7 +236,7 @@ In the checkout:
 | Do | Not | Where it lives |
 | --- | --- | --- |
 | run `yarn install` at the root | in a folder:  there's one `yarn.lock`, the root's | [the root's AGENTS.md](AGENTS.md), "The kit" |
-| enter a worktree with Claude Code's own worktree tool | start a session in the worktree's folder:  only the tool brings the session back there when it's reopened | [spell-epic's README-adopting.md](https://github.com/spell-app/spell/blob/main/epic/README-adopting.md) |
+| enter a worktree with Claude Code's own worktree tool | start a session in the worktree's folder:  only the tool brings the session back there when it's reopened | [README-epics.md](README-epics.md) |
 | merge `main` in with `epic worktree merge-main` | a bare `git merge main`:  it line-merges the generated files the command rebuilds from the merged source | [README-development.md](README-development.md#working-on-a-branch--one-epic-one-worktree) |
 | remove a worktree with `epic worktree remove <name>` | a bare `git worktree remove`:  it leaves the worktree's servers running | [spell-epic's AGENTS.md](https://github.com/spell-app/spell/blob/main/epic/AGENTS.md) |
 | leave the content folder's commits to the turn-end hook | `git add`, `git checkout --` or `git restore` on its files | [the kit's AGENTS.md](AGENTS.md#shared-content), "Shared content" |
@@ -366,7 +366,7 @@ In order, each step skipped when it's done already:
 - To try it in ONE session first, with nothing installed:  `claude --plugin-dir ~/www/spell/epic`.
 - For the Review tab and window moves, install its VS Code extension too:
   [README-vscode.md](README-vscode.md#spell-epic--the-pages-beside-your-code).
-- Using it in a repo that isn't Spell:  [spell-epic's README-adopting.md](https://github.com/spell-app/spell/blob/main/epic/README-adopting.md).
+- Using it in a repo that isn't Spell, with a team:  [README-epics.md](README-epics.md).
 - The cost:  it installs only inside the kit for now, since it runs on the kit and Spell UI from the one install.
 
 <details>
@@ -391,8 +391,8 @@ The kit's [.epic/config.json5](.epic/config.json5), key by key:
 
 - The keys it leaves out (`installTimeout`, `repoTemplates`, `app`) take their defaults.
 - `epic config [key]` prints what's in force;  `epic init` writes every key, with a comment each.
-- Every key and its default, in spell-epic's README-adopting.md:
-  [The config file](https://github.com/spell-app/spell/blob/main/epic/README-adopting.md#the-config-file--one-per-repo-read-from-the-main-checkout).
+- Every key and its default, in README-epics.md:
+  [The config file](README-epics.md#the-config-file).
 
 </details>
 

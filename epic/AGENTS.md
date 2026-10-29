@@ -11,8 +11,8 @@
 This file guides AI coding agents (Claude Code, Codex, and others) working in spell-epic.
 
 - spell-epic is the epic tooling, lifted out of spell-app (epic `epic-eject` P6).
-  [The README](README.md) says what it is and how it's laid out;  [README-adopting.md](README-adopting.md), how it's
-  installed.
+  [The README](README.md) says what it is and how it's laid out;  [README-epics.md](../README-epics.md), at the kit's
+  root, how it's installed in another repo, and shared by a team.
 - The house style is Spell's, WWOD:  **READ it FIRST**, from the kit around this repo:
   [WWOD](../agents/wwod/WWOD.md).
   - No `agents/` link at the root (epic `epic-eject` I23):  Claude Code reads a plugin's root `agents/` as agent types.

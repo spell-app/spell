@@ -310,7 +310,7 @@ Both names then run the same skill, from the plugin's one folder.
   `epic` and the hook scripts are live at once, since each is run fresh every time.
 - A repo that kept its own copy of a skill (`.claude/skills/epic/`) should delete it:
   Claude Code runs your own skills folder's over a project's of the same name, so the copy only goes stale.
-- Outside Spell, the same install, and what else a repo needs:  [README-adopting.md](README-adopting.md).
+- Outside Spell, the same install, and what else a repo needs:  [README-epics.md](https://github.com/spell-app/spell/blob/main/README-epics.md).
 
 ## See also
 

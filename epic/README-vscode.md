@@ -232,7 +232,7 @@ it has live reload and the engine's own files, but none of the `/api/` routes yo
 - A checkout's server, and the fallback, serve from the checkout's ROOT, not the page's folder:
   docs link to source files all over the repo.
 - What the epic server serves, and how a repo registers with it:
-  [README-adopting.md](README-adopting.md), "The epic server".
+  [README-epics.md](https://github.com/spell-app/spell/blob/main/README-epics.md), "One epic server for the machine".
 
 <details>
 <summary>How it finds the servers, and what Restart Page Server runs</summary>
@@ -454,7 +454,7 @@ yarn test:vscode
 - [README-pages.md](README-pages.md):  what the two views show, and how a review round runs on them
 - [README-skills.md](README-skills.md):  the skills that open pages and move sessions, and the hook that finishes a move
 - [README-cli.md](README-cli.md#windows-and-the-page-server):  every `epic window`, `epic hub` and `epic pages` verb
-- [README-adopting.md](README-adopting.md):  the extension as one step of setting up a repo that isn't Spell, and the
+- [README-epics.md](https://github.com/spell-app/spell/blob/main/README-epics.md):  the extension as one step of setting up a repo that isn't Spell, and the
   epic server in full
 - [The kit's README-vscode.md](https://github.com/spell-app/spell/blob/main/README-vscode.md):  Spell's language extension beside this one, and how window files
   and worktrees are laid out

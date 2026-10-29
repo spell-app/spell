@@ -147,9 +147,9 @@ so you can decide from the page alone, when you have time.
 - A revisit's answer is written INTO its item, by a background agent the page lists while it runs,
   so a slow answer never holds up the rest.
 
-One reviewer is assumed, though:
-a few of the pages' own words still name the person who reviews Spell's
-([README-adopting.md](README-adopting.md#whats-still-spell-shaped) lists that with the other rough edges).
+A team reviews the same pages:
+each reply carries its writer's name, and the plans sync through a shared repo every turn
+([README-epics.md](https://github.com/spell-app/spell/blob/main/README-epics.md#working-with-others));  a comment reaches the others once it's answered.
 
 ### Every epic gets its own branch, worktree and window
 
@@ -353,9 +353,9 @@ and what `epic init` makes:  one config file in the repo, `.epic/config.json5`, 
 for the pages.
 
 It has run end to end once outside Spell, in a throwaway repo, and its rough edges are listed, not hidden.
-The first is the biggest:  it installs only inside a Spell checkout, since it runs on Spell UI and the kit
+The first is the biggest:  it installs from a clone of Spell, since it runs on Spell UI and the kit
 from their one install.
-The steps, every setting and the rest of the edges:  [README-adopting.md](README-adopting.md).
+The steps, sharing with a team, every setting and the rest of the edges:  [README-epics.md](https://github.com/spell-app/spell/blob/main/README-epics.md).
 
 ## Working on it
 
@@ -439,7 +439,7 @@ yarn vscode:package     # the extension's bundle and spell-epic.vsix:  NOT insta
 | [README-skills.md](README-skills.md) | <ul><li>nineteen skills you type, nine hooks that run by themselves</li><li>planning and review;  worktrees and sessions;  background and offline</li><li>the hooks, and the prompt gate that reads first</li><li>two names for every skill</li></ul> |
 | [README-cli.md](README-cli.md) | <ul><li>the six commands you'll actually type</li><li>an address is a page and an id:  `seo#J3`</li><li>one copy of the code;  how a `wait` wakes a session</li><li>every verb, by group;  where it stops</li></ul> |
 | [README-vscode.md](README-vscode.md) | <ul><li>the Spell Epic extension:  three commands and a reload</li><li>two views, each a page that stays;  which server answers</li><li>the window bridge, and how a session moves</li><li>working on it</li></ul> |
-| [README-adopting.md](README-adopting.md) | <ul><li>epics in your own repo:  three steps and an extension</li><li>the content folder, the config file, worktrees, your `AGENTS.md`</li><li>one epic server for the machine</li><li>what's still Spell-shaped</li></ul> |
+| [README-epics.md](https://github.com/spell-app/spell/blob/main/README-epics.md), at the kit's root | <ul><li>epics in your own repo:  four steps and an extension</li><li>working with others:  joining, who you are, every turn syncs, two people on one page</li><li>the content folder, the config file, worktrees, your `AGENTS.md`</li><li>one epic server for the machine;  what's still Spell-shaped</li></ul> |
 
 Every other repo's pages:  [the kit's index](https://github.com/spell-app/spell/blob/main/README.md#every-readme).
 

@@ -494,7 +494,7 @@ Lost track?  `epic status`.
 - Never a bare `git merge main` either.
   A bundle or a snapshot is made from BOTH sides' source, so no line merge of the two is right:
   `merge-main` runs its generator on the merged source instead
-  (the snapshots' update, and any generator the repo lists:  [README-adopting.md](README-adopting.md#the-config-file)).
+  (the snapshots' update, and any generator the repo lists:  [README-epics.md](https://github.com/spell-app/spell/blob/main/README-epics.md#the-config-file)).
   - It prints what it regenerated, then each snapshot entry neither side had, under
     `REVIEW <file>:  neither side had these values`:  new behaviour nobody has looked at yet.
   - Any other conflict stops it mid-merge, and it exits 1 listing the files:
@@ -510,7 +510,7 @@ Lost track?  `epic status`.
 
 - A fix to how a checkout is SET UP (a VS Code file like `.ignore`, a command to run once) reaches every checkout at once
   through `checkoutPatches`, not when each branch merges `main`
-  ([README-adopting.md](README-adopting.md#the-config-file)).
+  ([README-epics.md](https://github.com/spell-app/spell/blob/main/README-epics.md#the-config-file)).
   - Add the fix on `main`, list it there, then `epic worktree patch --all`;  new and reopened sessions catch up by
     themselves.
   - A copied file is git-excluded, so `git status` stays clean, and the branch's merge of `main` replaces it with
@@ -561,7 +561,7 @@ Without the extension, the window verbs exit 1, and say so.
 | `epic window move` | carries the window files, once, from the main checkout's old `workspaces/` folder to the windows folder (`windowsFolder`), the old files kept;  `--dry-run` |
 
 Two kinds of server serve the pages:  each checkout's own page server, and ONE epic server for the machine,
-which serves every repo that uses spell-epic (its address and routes:  [README-adopting.md](README-adopting.md)).
+which serves every repo that uses spell-epic (its address and routes:  [README-epics.md](https://github.com/spell-app/spell/blob/main/README-epics.md#one-epic-server-for-the-machine)).
 
 | Verb | What it does |
 | --- | --- |
@@ -596,7 +596,7 @@ And the docs pages they serve:  the home page, the guides, and the pages made fr
 ### The repo's settings
 
 Two verbs:  `init` sets a repo up, and `config` says what it set;  `plugin install` sets Claude Code up.
-Every key of the config file, and what `epic init` writes:  [README-adopting.md](README-adopting.md).
+Every key of the config file, and what `epic init` writes:  [README-epics.md](https://github.com/spell-app/spell/blob/main/README-epics.md#the-config-file).
 
 | Verb | What it does |
 | --- | --- |
@@ -662,14 +662,15 @@ An agent's full name starts with the epic's name, else the worktree's, else `mai
   Each verb writes at once.
   The undo is git:  the content folder commits after every turn,
   and `epic restore` puts an item's old text back from a file you took from it.
-- **Written for one reviewer.**
-  Where you'd expect "you", its help text and the pages' own strings name the one person it was built for.
-  [README-adopting.md](README-adopting.md) lists that with the other edges a repo that isn't Spell would meet.
+- **Shared plans, local comments.**
+  A team shares the epic pages through the content repo, every turn, each reply under its writer's name;
+  but marks and comments wait on your own machine until they're answered.
+  [README-epics.md](https://github.com/spell-app/spell/blob/main/README-epics.md#working-with-others) says so, with the other edges a repo that isn't Spell would meet.
 
 ## See also
 
 - [README-skills.md](README-skills.md):  the skills that run these verbs for you, and when to reach for which
 - [README-pages.md](README-pages.md):  what the verbs write, and a review round as you see it on the page
-- [README-adopting.md](README-adopting.md):  `epic init` in a repo of your own, every config key, the epic server
+- [README-epics.md](https://github.com/spell-app/spell/blob/main/README-epics.md):  `epic init` in a repo of your own, with a team;  every config key, the epic server
 - [The kit's README-cli.md](https://github.com/spell-app/spell/blob/main/README-cli.md#epic):  `epic` beside `spell`, and the rest of the command line
 - [README.md](README.md):  what an epic is, its words and its life, if this page assumed too much
