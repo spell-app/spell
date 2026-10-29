@@ -202,7 +202,7 @@ export class Carta extends View {
     return 0
   }
 
-  static canBeDragged = true
+  static draggable = true
 
   get pila() {
     return Pila.ownerOf(this)
@@ -473,7 +473,7 @@ export class Pila extends ViewableList {
     carta.ponerEnPila(this)
   }
 
-  static canBeDroppedOn = true
+  static droppable = true
 
   static exclusive = true
 }
@@ -579,6 +579,8 @@ export class PilaDeDescartes extends Pila {
   canGiveUp(carta) {
     return carta === this.lastItem
   }
+
+  static itemsDraggable = true
 }
 
 /** una fundación:  donde se arma un palo, del as al rey */
@@ -598,12 +600,6 @@ export class Fundación extends Pila {
     return false
   }
 
-  /** una carta a la vez:  la última de su pila */
-  canTake(carta) {
-    if (carta !== carta.pila.lastItem) return false
-    return this.palo === carta.palo && this.valor + 1 === carta.valor
-  }
-
   // vacía:  un as gris claro de su palo, boca arriba
   drawItsPlaceholder() {
     return h("div", { part: "marcador" },
@@ -614,6 +610,13 @@ export class Fundación extends Pila {
       })).imagen
     )
   }
+
+  canTake(carta) {
+    if (carta !== carta.pila.lastItem) return false
+    return this.palo === carta.palo && this.valor + 1 === carta.valor
+  }
+
+  static droppable = true
 }
 
 /** una columna:  se arma hacia abajo, del rey al as, rojo y negro alternados */
@@ -628,10 +631,14 @@ export class Columna extends Pila {
     return carta.estáBocaDirección("arriba")
   }
 
+  static itemsDraggable = true
+
   canTake(carta) {
     if (this.isEmpty) return carta.esUnRango("rey")
     return this.color !== carta.color && this.valor === carta.valor + 1
   }
+
+  static droppable = true
 }
 
 /** El solitario:  sus pilas, sus movimientos, el juego solo y su dibujo */
@@ -919,6 +926,8 @@ core.heading("Las pilas:  cada tipo, qué puede tomar o soltar, y cómo están s
 // Cada pila es una lista visible:  un elemento propio, p. ej. `<solitario-columna>`, alrededor de los elementos de sus cartas.
 // Cómo están sus cartas es su disposición:  styles.css dibuja cada una.
 // Mientras está vacía, muestra su marcador, si tiene uno.
+
+/** una carta a la vez:  la última de su pila */
 
 core.heading("Pruebas")
 /** Pruebas */

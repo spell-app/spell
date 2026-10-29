@@ -256,7 +256,9 @@ As `plan-doc.md`, "Ids":
     `stage <name> <stage>` sets it by hand, logged.
   - The stage button (`<epic-stage-button>`:  Accept Overview on the Overview's title row, Accept Phases on the Phases
     section's;  the page header's before epic `epic-engine` I180) leaves the inbox mark `stage`,
-    `{ action: "accept", stage }`;  `inbox apply` moves the page on a stage and logs it
+    `{ action: "accept", stage, countdown: true }`, HELD five minutes (epic `epic-engine` I181):  dated when it goes, so
+    no Send carries it early, and the page sends it as its countdown runs out;  `epic inbox` prints it `held` till
+    then.  `inbox apply` moves the page on a stage and logs it
     (`STAGE accepted overview:  stage phases, write the phases`).
   - While `phases`, an open phase's Defer pill leaves `{ action: "defer" }`:  `inbox apply` moves it after the other
     phases, still to do (its number changes, its id never);  its Looks good is an approve, noted.
@@ -570,8 +572,11 @@ As `plan-doc.md`, "Ids":
   - Make Todo makes a todo linking `#o3`
   - a kept note is a paragraph at its end
 - So do a phase and the summary (epic `airplane` P2):  Make Todo and Revisit on the page;  no Approve.
+  - A phase's first button is Do this, a thumbs up (epic `epic-engine` I181;  Owen, 2026-10-29:  "it's already a phase,
+    you wouldn't make it a todo"):  the same `todo` mark, applied as a go-ahead (below)
   - A phase (keyed by its id, `p-epic-migrate`;  a mark keyed `p3` from before `stable-phase-ids`:  the 3rd phase):
-    - Make Todo makes `Follow up:  P3 · <title>`, linking `#p-epic-migrate`, and a Noted status card on the phase
+    - Do this (its `todo` mark) makes NO todo:  a Noted status card on the phase, "Go ahead:  Owen wants this phase
+      built", his note kept;  Claude builds it (`go ahead:  build it`).  It made `Follow up:  P3 · <title>` before I181
     - a kept note is Owen's `<epic-reply>` in the phase, after Requests (its plan changes come after Goal)
   - The summary, keyed `summary` in the inbox (it has no id):
     - Make Todo makes `Follow up:  the summary`, linking `#overview`, and a Noted status card under the lede

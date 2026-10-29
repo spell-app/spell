@@ -1948,6 +1948,13 @@
       }
     },
     {
+      "name": "--ui-dropdown-icon-column",
+      "description": {
+        "kind": "markdown",
+        "value": "1: every row keeps an icon's room before its words, whether it has one or not (a menu of ticks, as an app's menus are); 0: only when another row has an icon\n\n`<ui-dropdown>`'s token.  Default:  `0`"
+      }
+    },
+    {
       "name": "--ui-dropdown-header-color",
       "description": {
         "kind": "markdown",

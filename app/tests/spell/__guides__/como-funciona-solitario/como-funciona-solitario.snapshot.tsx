@@ -114,7 +114,7 @@ core.useElement(Pila, PilaElement)
 
 /**
  * La regla que lo hace Solitario:  una columna toma una carta uno menos que su última, del otro color.
- * - "puede tomar una carta si" es una pregunta de sí o no que la pila contesta para cada carta
+ * - "puede tomar una carta cuando" es una pregunta de sí o no que la pila contesta para cada carta
  * - "devolver" da la respuesta
  */
 export class Columna extends Pila {

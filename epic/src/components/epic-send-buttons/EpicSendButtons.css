@@ -160,46 +160,9 @@
   :host(:state(counting)) .group {
     border-color: transparent;
   }
-  .ring {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: var(--_ring);
-    height: var(--_ring);
-    /* wider than the glyph it's centred on:  never held to its box */
-    max-width: none;
-    max-height: none;
-    translate: -50% -50%;
-    rotate: -90deg;
-    overflow: visible;
-    pointer-events: none;
-  }
-  .ring circle {
-    fill: none;
-    /* 5px at the plane's size (the 28-unit box drawn 28px wide);  its outer edge the box's */
-    stroke-width: 5;
-  }
-  /* a light grey track:  the whole wait */
-  .ring .track {
-    stroke: var(--_rule);
-  }
-  /* how much has gone:  blue, its ends round (pill-shaped) */
-  .ring .done {
-    stroke: var(--_tint);
-    stroke-linecap: round;
-    transition: stroke-dasharray 1s linear;
-  }
-  /* started again:  it UNWINDS to empty (Owen, 2026-10-29:  "lost 'unwind' on ring when scrolled, it jumped back to
-     0"), then hides, so a round end's dot never shows at nothing */
-  .ring .done.empty {
-    visibility: hidden;
-    transition:
-      stroke-dasharray 0.3s ease-out,
-      visibility 0s 0.3s;
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .ring .done {
-      transition: none;
-    }
+  /* the ring itself:  `CountdownRing.css`, Send's and a stage button's;  its colours and size here */
+  :host {
+    --_ring-tint: var(--_tint);
+    --_ring-track: var(--_rule);
   }
 }

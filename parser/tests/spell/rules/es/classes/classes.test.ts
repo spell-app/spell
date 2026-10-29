@@ -81,8 +81,8 @@ describe("testing spell module classes, in Spanish", () => {
       ])
       expect(errors).toEqual([])
       // a flag on the class:  in it, or after it, as the writer places it
-      expect(code).toMatch(/canBeDragged = true/)
-      expect(code).toMatch(/canBeDroppedOn = true/)
+      expect(code).toMatch(/draggable = true/)
+      expect(code).toMatch(/droppable = true/)
     })
 
     test("`es arrastrable`, `no es soltable`:  the same flags, as adjectives (outline-spell P28)", () => {
@@ -93,8 +93,8 @@ describe("testing spell module classes, in Spanish", () => {
         "\t- no es soltable"
       ])
       expect(errors).toEqual([])
-      expect(code).toMatch(/canBeDragged = true/)
-      expect(code).toMatch(/canBeDroppedOn = false/)
+      expect(code).toMatch(/draggable = true/)
+      expect(code).toMatch(/droppable = false/)
     })
 
     test("`cuando una carta se suelta sobre ella`:  English's `when a card is dropped on it` (outline-spell P28)", () => {

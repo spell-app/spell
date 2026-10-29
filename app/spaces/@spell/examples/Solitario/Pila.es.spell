@@ -8,7 +8,7 @@ una "pila" es una lista visible de cartas donde:
 	// o en abanico, como se sostiene una mano -- styles.css
 	- su "disposición" es una de apilada, vertical, horizontal o abanico
 	// en la página, se le puede soltar una carta encima:  brilla cuando la tomaría, según sus propias reglas
-	- se puede soltar encima
+	- es soltable
 	// el color y el valor de su última carta:  sobre qué va la siguiente carta
 	- su "color" es:
 		"ninguno" si está vacía

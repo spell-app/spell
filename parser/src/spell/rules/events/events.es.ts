@@ -7,7 +7,7 @@
  */
 import { P } from "spell/parser/parser"
 import { SpellParser } from "spell/parser/spell/SpellParser"
-import { Synonyms } from "spell/parser/spell/rules/expressions"
+import { Synonyms, Wording } from "spell/parser/spell/rules/expressions"
 
 import { DeclareEvent } from "./DeclareEvent"
 import { EventWords } from "./EventWords"
@@ -188,6 +188,64 @@ eventsEs.addRule(On, {
         ],
         // never the last word:  `al clic en` is event `clic`, then a word it can't read
         ["al clic en", ['on("clic")', '/* PARSE ERROR: No entiendo "en" */']]
+      ]
+    }
+  ]
+})
+
+// un `cuando` pasivo, sobre la cosa misma (épica `debut` P27, Q47):  `cuando se pulsa` es `al clic`
+eventsEs.addRule(
+  Wording.specialize({
+    ruleName: "passive_event",
+    meanings: ["click", "double_click", "right_click", "drag", "drag_cancelled"]
+  }),
+  {
+    syntax:
+      "((click:se pulsa)|(double_click:se pulsa dos veces)|(right_click:se pulsa con el botón derecho)|(drag:se arrastra)|(drag_cancelled:se cancela el arrastre|se cancela su arrastre))"
+  }
+)
+eventsEs.addRule(On, {
+  syntax: "cuando {passive:passive_event} :? {statement_body}?",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        {
+          input: ["una carta es una vista donde:", "\t- cuando se pulsa dos veces imprimir 1"],
+          js: [
+            "export class Carta extends View {",
+            '  static elementTag = core.defineElement(this, "test_events")',
+            "",
+            "  onDoubleClick(event) {",
+            "    return core.console.log(1)",
+            "  }",
+            "}"
+          ],
+          ts: [
+            "export class Carta extends View {",
+            '  static elementTag = core.defineElement(this, "test_events")',
+            "",
+            "  onDoubleClick(event: any /* spell: type unknown */) {",
+            "    return core.console.log(1)",
+            "  }",
+            "}",
+            "",
+            "/**",
+            " * `<test-events-carta>`:  a carta, drawn in its own element, e.g. by `draw the carta`.",
+            " * - The page defines its tag with this class:  `core.useElement()`, below.",
+            " * - Its attributes are its carta's properties;  its methods call its carta's.",
+            " * - What every view's element does, e.g. drawing its carta, is `SpellElement`'s.",
+            " */",
+            "export class CartaElement extends SpellElement<Carta> {",
+            '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-events-carta", "carta", [])',
+            "",
+            "  onDoubleClick(event: any /* spell: type unknown */) {",
+            "    return this.currentThing?.onDoubleClick(event)",
+            "  }",
+            "}",
+            "core.useElement(Carta, CartaElement)"
+          ]
+        }
       ]
     }
   ]

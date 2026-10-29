@@ -5,6 +5,8 @@ import { core, List, App, View, ViewableList, h, sendCall } from "@spell/core"
 ////////////
 // Something to do:  its title, its priority, and whether it's done.
 // Each task is its own element on the page, `<task-list-task>`.
+// A click selects it, shift and command (ctrl) more, for the property editor (`selectable`);
+// its grip drags it, the selected ones with it (`draggable`).
 
 export class Task extends View {
   static elementTag = core.defineElement(this, "test-project")
@@ -57,20 +59,19 @@ export class Task extends View {
     )
   }
 
-  static canBeSelected = true
+  static draggable = true
 
-  static canBeDragged = true
+  static selectable = true
 
   get checklist() {
     return Checklist.ownerOf(this)
   }
 }
 
-// A click selects it, shift and command (ctrl) more, for the property editor;  its grip drags it, the selected ones with it
-
 export function testCheckingOneOff(...args) {
   return sendCall("test_checking_one_off", args)
 }
+
 // -----------
 ///////////////
 // ## Task List

@@ -214,6 +214,15 @@ describe("<epic-section>", () => {
     expect(gear.title).toBe("Settings for every phase")
     expect(gear.closest('[part~="tools"]')!.lastElementChild).toBe(gear)
     expect(gearEntries(gear)).toEqual(["Show each phase's files:  off", "Show each phase's checks:  off"])
+    // nothing ticked:  the check's column still kept (Owen, 2026-10-29:  "Menu should have space in the left where the
+    // check should go, even if nothing checked")
+    gear.shadowRoot!.querySelector<HTMLElement>('[part~="trigger"]')!.click()
+    await ElementFixture.tick()
+    const firstRow = gear.shadowRoot!.querySelector<HTMLElement>('[part~="item"]')!
+    const indent = firstRow.querySelector(".text")!.getBoundingClientRect().left - firstRow.getBoundingClientRect().left
+    expect(indent).toBeGreaterThan(30)
+    gear.shadowRoot!.querySelector<HTMLElement>('[part~="trigger"]')!.click()
+    await ElementFixture.tick()
     expect(base.style.getPropertyValue("--epic-files-display")).toBe("")
     await pickGear(gear, "Show each phase's files")
     expect(base.style.getPropertyValue("--epic-files-display")).toBe("block")

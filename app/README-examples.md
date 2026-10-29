@@ -4,8 +4,8 @@
 <spell-view "tableau" template="pile" description="A column, built down from king to ace, red and black in turn">
 	<property "layout">vertical</>
 	<spell>
-		- it can give up a card if: the card is face up
-		- it can take a card if:
+		- its cards are draggable when the card is face up
+		- droppable when:
 			if it is empty
 				return the card is a king
 			return its color is not the color of the card and its value is the value of the card + 1
@@ -311,31 +311,22 @@ with Markdown around them for a person to read
 First, what a task IS:
 
 ```html
-<spell-view "task">
+<spell-view "task" selectable draggable>
 	<property "title" description="What to do">text</>
 	<property "notes" description="Anything else about it">text</>
 	<property "priority" one-of="low, normal or high" />
 	<property "done">yes or no</>
 	<alias "is done">if its done is yes</>
 	<alias "is active">if it is not done</>
-
-	<group "on the page"
-		description="A click selects it, shift and command (ctrl) more, for the property editor;  its grip drags it, the selected ones with it"
-	/>
-	<spell>
-		- it can be selected
-		- it can be dragged
-	</spell>
 ```
 
-- `<spell-view "task">` declares a new template;  each `<property>` gives it a property, with its kind.
-- `<group "on the page">` is a heading over the members after it, its `description=` what they're for.
+- `<spell-view "task" selectable draggable>` declares a new template, and what people may do to a task on the page:
+  - `selectable`:  a click selects a task, and shift or command (ctrl) selects more.
+  - `draggable`:  by its grip, to another place in its list (below).
+- Each `<property>` gives it a property, with its kind.
 - `one-of="low, normal or high"` is a choice of three values.
 - The aliases are new ways to talk about a task:  later lines can say `where it is active`.
 - A view makes each task an element of its own on the page, `<task-list-task>`.
-- A `<spell>` block holds plain Spell, here two outline bullets:
-  - `it can be selected`:  a click selects a task, and shift or command (ctrl) selects more.
-  - `it can be dragged`:  by its grip, to another place in its list (below).
 
 Then how a task draws, with [Spell UI](https://github.com/spell-app/spell/blob/main/ui/README.md)'s elements:
 a form of its own, bound to the task.

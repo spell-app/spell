@@ -202,7 +202,7 @@ export class Carta extends View {
     return 0
   }
 
-  static canBeDragged = true
+  static draggable = true
 
   get pila() {
     return Pila.ownerOf(this)!
@@ -543,7 +543,7 @@ export class Pila extends ViewableList<Carta> {
     carta.ponerEnPila(this)
   }
 
-  static canBeDroppedOn = true
+  static droppable = true
 
   static exclusive = true
 }
@@ -699,6 +699,8 @@ export class PilaDeDescartes extends Pila {
   canGiveUp(carta: Carta) {
     return carta === this.lastItem
   }
+
+  static itemsDraggable = true
 }
 
 /**
@@ -736,12 +738,6 @@ export class Fundación extends Pila {
     return false
   }
 
-  /** una carta a la vez:  la última de su pila */
-  canTake(carta: Carta) {
-    if (carta !== carta.pila.lastItem) return false
-    return this.palo === carta.palo && this.valor + 1 === carta.valor
-  }
-
   // vacía:  un as gris claro de su palo, boca arriba
   drawItsPlaceholder() {
     return (
@@ -754,6 +750,13 @@ export class Fundación extends Pila {
       </div>
     )
   }
+
+  canTake(carta: Carta) {
+    if (carta !== carta.pila.lastItem) return false
+    return this.palo === carta.palo && this.valor + 1 === carta.valor
+  }
+
+  static droppable = true
 }
 
 /**
@@ -771,12 +774,12 @@ export class FundaciónElement extends SpellElement<Fundación> {
     return this.currentThing?.canGiveUp(carta)
   }
 
-  canTake(carta: Carta) {
-    return this.currentThing?.canTake(carta)
-  }
-
   drawItsPlaceholder() {
     return this.currentThing?.drawItsPlaceholder()
+  }
+
+  canTake(carta: Carta) {
+    return this.currentThing?.canTake(carta)
   }
 }
 core.useElement(Fundación, FundaciónElement)
@@ -793,10 +796,14 @@ export class Columna extends Pila {
     return carta.estáBocaDirección("arriba")
   }
 
+  static itemsDraggable = true
+
   canTake(carta: Carta) {
     if (this.isEmpty) return carta.esUnRango("rey")
     return this.color !== carta.color && this.valor === carta.valor + 1
   }
+
+  static droppable = true
 }
 
 /**
@@ -1139,6 +1146,8 @@ core.heading("Las pilas:  cada tipo, qué puede tomar o soltar, y cómo están s
 // Cada pila es una lista visible:  un elemento propio, p. ej. `<solitario-columna>`, alrededor de los elementos de sus cartas.
 // Cómo están sus cartas es su disposición:  styles.css dibuja cada una.
 // Mientras está vacía, muestra su marcador, si tiene uno.
+
+/** una carta a la vez:  la última de su pila */
 
 core.heading("Pruebas")
 /** Pruebas */

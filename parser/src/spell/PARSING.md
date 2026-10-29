@@ -582,12 +582,16 @@ A kind that says so is saved in a file of its own.
   - The warning is noted with `SpellWarnings.noteIf()`:  asked again once the whole project has parsed,
     so a reference written above the things it names warns too.
 
-## Guards:  `a tableau can take a card if: ...`
+## Guards:  `a tableau can take a card when: ...`
 
 - [`list_guard`](rules/classes/ListGuard.ts):
   what a list type takes, or gives up, when something MOVES (epic page Q23 - Q25).
-  - `a tableau can (add|take) a card if: ...`
-  - `a stock-pile can (release|remove|give up|let go of) a card if: ...`
+  - `a tableau can (add|take) a card when: ...`
+  - `a stock-pile can (release|remove|give up|let go of) a card when: ...`
+  - the old `if:` still reads one release, with a warning (epic `debut` P27, Q42)
+  - its short forms (Q47), each also giving its ability:
+    `- its cards are draggable when the card is face up` (`itemsDraggable`),
+    `- droppable when ...` (`droppable`, the card the list's own item)
   - `a foundation can never (release|remove|give up|let go of) a card`:  always no
   - Its body answers yes or no, inline or indented.
   - In the body:
@@ -752,7 +756,7 @@ A kind that says so is saved in a file of its own.
   - A syntax ending `{with_nested_statements}?` takes the body.
     - That's `where:`, `with:`, `:`, or `where` alone.
     - Or nothing at all (P10):  the indented block under a type's heading is its body anyway.
-      - e.g. `a stock-pile is a pile`, then `- can give up a card if: ...` under it
+      - e.g. `a stock-pile is a pile`, then `- can give up a card when: ...` under it
       - `TypeDeclaration.takesNestedBody()`
   - With nothing indented under it, the same syntax declares the type alone.
   - The body's scope is a [`P.SubjectScope`](../parser/scope/SubjectScope.ts):
@@ -780,7 +784,7 @@ A kind that says so is saved in a file of its own.
     - `define_property_has`, `property_value_getter`, `belongs_to_one`
     - `quoted_type_expression`, `quoted_property_formula`
     - `its_quoted_property` (a `type_property` for `property_value_either`)
-    - `saved_inline`, `saved_in_file`, and `list_guard`'s three (`- it can take a card if: ...`)
+    - `saved_inline`, `saved_in_file`, and `list_guard`'s three (`- it can take a card when: ...`)
 - A property's RULES (epic `property-editor` P9):  what its value must be, beyond its type.
   - The words after `must`:  [`must_rule`](rules/classes/MustRule.ts).
     - e.g. `not be empty`, `match "^\d+$"`, `be between 1 and 5`
@@ -1477,6 +1481,10 @@ each tag line reads as its code-spell twin line, so it compiles to exactly what 
     the same event as `card-click`.
     - A linking word may sit between two of its words (word rule `event_name_link`, epic `spanish` I11):
       `al clic en carta con una carta` is `clic-en-carta`, its name ending at `con`.
+    - A one-line event with no colon (epic `debut` P27, Q47):  `on drag cancelled show "Not there"`.
+      Its name is the FEWEST words whose rest parses as a whole statement, read in a throwaway handler scope
+      (`it` the thing);  a line with a colon keeps the longest name, as before.
+    - A passive `when` names the thing's own event by meaning (`passive_event`):  `when clicked` is `on click`.
 - `getAST()` NEVER changes scope or looks it up.
   - ASTs are built lazily, e.g. at compile, when scope may have moved on.
   - What an AST needs from scope is looked up WHILE PARSING, into `match.data`:

@@ -41962,6 +41962,12 @@
           "type": "length"
         },
         {
+          "name": "--ui-dropdown-icon-column",
+          "default": "0",
+          "description": "1: every row keeps an icon's room before its words, whether it has one or not (a menu of ticks, as an app's menus are); 0: only when another row has an icon",
+          "type": "length"
+        },
+        {
           "name": "--ui-dropdown-header-color",
           "default": "var(--ui-text-dark)",
           "type": "color"

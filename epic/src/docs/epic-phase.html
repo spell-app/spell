@@ -592,7 +592,7 @@
                   <tr>
                     <td><code>commits</code></td>
                     <td>boolean: there or not</td>
-                    <td>Its body lists commits: its git icon shows.</td>
+                    <td>Its body lists commits: its gear offers to show them.</td>
                     <td></td>
                   </tr>
                   <tr>
@@ -601,7 +601,8 @@
                     <td>
                       Claude's build plan, written by the epic tool: <code>waiting</code> for Owen's Accept (its review
                       buttons Accept, Revisit and Defer, the group ringed), or <code>accepted</code>. Still to do and
-                      accepted, its review group ends in a green check: good to go (epic <code>epic-engine</code> I140).
+                      accepted, its review group ends in a green thumbs up: good to go (epic <code>epic-engine</code> I140; a check before
+                      I181). Accept on a waiting plan is a thumbs up too: it means "accept this".
                     </td>
                     <td></td>
                   </tr>
@@ -701,21 +702,12 @@
                       <td><code>tools</code></td>
                       <td>
                         At the title's end: the page's own buttons (the <code>actions</code> slot), then its estimate
-                        (once done and timed, what it took), then its review buttons, while the page is reviewed: Make Todo, Revisit; while the page's phases are
+                        (once done and timed, what it took), then its review buttons, while the page is reviewed: Do this (a thumbs up: yes, build this phase; Make Todo before epic <code>epic-engine</code> I181), Revisit; while the page's phases are
                         agreed (<code>&lt;epic-page stage="phases"&gt;</code>, epic <code>epic-engine</code> P29), an
                         open phase's are Looks good and Defer (after the others, still to do); while its build plan waits, Accept,
-                        Revisit and Defer; still to do with its plan accepted, Make Todo, Revisit and a green check, a
+                        Revisit and Defer; still to do with its plan accepted, Do this, Revisit and a green thumbs up, a
                         state saying it's ready to build. Revisit on a phase with your comments in its text marks it at
-                        once: those comments are its note. Its git icon (while it lists commits), then its gear, come
-                        last.
-                      </td>
-                    </tr>
-                    <tr>
-                      <td><code>git</code></td>
-                      <td>
-                        Its git icon, before its gear, while it lists commits (<code>commits</code>, or
-                        <code>&lt;epic-commit&gt;</code> children;  epic <code>epic-engine</code> P53, J163): shows or
-                        hides its own commits, as an item's does;  pressed while they show.
+                        once: those comments are its note. Its gear comes last.
                       </td>
                     </tr>
                     <tr>
@@ -785,7 +777,7 @@
                     </tr>
                     <tr>
                       <td><code>:state(commits)</code></td>
-                      <td>Its own commits show: its git icon pressed.</td>
+                      <td>Its own commits show: ticked in its gear.</td>
                     </tr>
                   </tbody>
                 </table>
@@ -870,8 +862,8 @@
               <li>
                 <b>Files and Verify</b> stay hidden until a gear shows them: the Phases section's, for every phase, or
                 the phase's own, last in its title row, which wins for it (epic <code>epic-engine</code> I166). Commits
-                stay hidden until its git icon, before its gear, shows them (epic <code>epic-engine</code> P53, J163);
-                the Log lists them all.
+                stay hidden until "Show this phase's commits" in its gear shows them (epic <code>epic-engine</code>
+                I183; a git icon on its row before); the Log lists them all.
               </li>
               <li>
                 <b>Folding:</b> a click on the title folds it; on an epic page it starts folded. With

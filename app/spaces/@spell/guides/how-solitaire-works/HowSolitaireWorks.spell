@@ -35,10 +35,10 @@ a "pile" is a viewable list of cards
 a card belongs to one pile
 
 // The rule that makes it Solitaire:  a column takes a card one lower than its last, in the other color.
-// - "can take a card if" is a yes-or-no question the pile answers for each card
+// - "can take a card when" is a yes-or-no question the pile answers for each card
 // - "return" gives the answer:  the first line that returns, wins
 a "column" is a pile where:
-	- it can take a card if:
+	- it can take a card when:
 		if it is empty
 			return the rank of the card is king
 		return the color of its last card is not the color of the card and the value of its last card is the value of the card + 1

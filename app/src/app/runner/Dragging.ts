@@ -23,6 +23,8 @@ import { E } from "spell/ui/core"
  * - What happens on the drop is its owner's to say (`onDrop`), e.g. `SpellElement`'s:
  *   the pile's `when a card is dropped on it`, else the program's `card-drop`.
  *   - What still sits where it was dragged from afterwards, a drop nobody took, slides back.
+ * - Escape cancels it (epic `debut` P27, Q47):  everything slides back, and its owner hears `onCancel`,
+ *   as it does for a drag the browser takes away.
  *   - What moved is drawn again in its new list, and glides there from where it was dropped (`Glides`).
  * - Plain DOM:  no Solid, no core.  Its owner hands it the element and what to do.
  ****************/
@@ -44,6 +46,7 @@ export class Dragging {
     window.addEventListener("pointermove", this.onMove, listening)
     window.addEventListener("pointerup", this.onUp, listening)
     window.addEventListener("pointercancel", this.onCancel, listening)
+    window.addEventListener("keydown", this.onKey, { ...listening, capture: true })
   }
 
   /** Where the press started. */
@@ -149,9 +152,26 @@ export class Dragging {
   /** The browser took the pointer away (a scroll, a system gesture):  put everything back. */
   private readonly onCancel = (event: PointerEvent) => {
     if (event.pointerId !== this.pointerId) return
+    this.cancel(event)
+  }
+
+  /** Escape, during a drag:  put everything back, and swallow the key. */
+  private readonly onKey = (event: KeyboardEvent) => {
+    if (event.key !== "Escape" || !this.moving.length) return
+    event.preventDefault()
+    event.stopPropagation()
+    Dragging.swallowNextClick()
+    this.cancel(event)
+  }
+
+  /** The drag is cancelled:  it leaves the list it's over, slides back, and its owner hears so (`onCancel`). */
+  private cancel(event: PointerEvent | KeyboardEvent) {
     this.listening.abort()
+    const wasDragging = this.moving.length > 0
     if (this.over) Dragging.send(this.over, "dragleave", event)
+    this.over = undefined
     this.settle()
+    if (wasDragging) this.options.onCancel?.()
   }
 
   /** What's still where it was dragged from slides back, and takes the pointer again. */
@@ -180,8 +200,8 @@ export class Dragging {
   }
 
   /** Send drag event `type` to `target`, where `event`'s pointer is:  a `DragEvent`, as the browser's own. */
-  private static send(target: HTMLElement, type: string, event: PointerEvent) {
-    const { clientX, clientY } = event
+  private static send(target: HTMLElement, type: string, event: PointerEvent | KeyboardEvent) {
+    const { clientX, clientY } = "clientX" in event ? event : { clientX: 0, clientY: 0 }
     target.dispatchEvent(new DragEvent(type, { bubbles: true, composed: true, cancelable: true, clientX, clientY }))
   }
 
@@ -262,6 +282,8 @@ export class Dragging {
 export type DragOptions = {
   /** What happens on the drop, on `target`, the list under the pointer -- `undefined` for none. */
   onDrop(target: HTMLElement | undefined): void
+  /** The drag was cancelled before any drop:  Escape, or the browser took the pointer away. */
+  onCancel?(): void
   /** What's carried, the dragged element first;  default the element and its list's items after it. */
   carried?: HTMLElement[]
   /** Does what's carried follow the pointer?  Default yes;  `false`:  it stays where it is, dimmed by its owner. */

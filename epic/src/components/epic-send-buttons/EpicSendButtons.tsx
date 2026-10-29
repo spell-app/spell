@@ -7,8 +7,10 @@ import { SendCountdown } from "spell/epic/review"
 
 import { epicSendButtonsVocabulary } from "./EpicSendButtons.en"
 import { SEND_ASKED, type SendAskedDetail } from "./EpicSendButtons.types"
+import { CountdownRing } from "./CountdownRing"
 
 import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
+import ringCSS from "./CountdownRing.css?inline"
 import sendButtonsCSS from "./EpicSendButtons.css?inline"
 
 /****************
@@ -22,7 +24,8 @@ import sendButtonsCSS from "./EpicSendButtons.css?inline"
  *     plane in this mode");  grey with something not sent, blue once sent;  never dashed (Owen, 2026-10-22)
  *   - Auto Send off (or no `countdown`) with something not sent:  FILLED blue, so it plainly waits for a press
  *     (`:state(waiting)`)
- * - the RING (`countdown`, the page's Auto Send on, something not sent):  round the plane, set apart from it, with
+ * - the RING (`countdown`, the page's Auto Send on, something not sent;  `CountdownRing`, a stage button's too):
+ *   round the plane, set apart from it, with
  *   rounded ends, filling in blue clockwise over a light grey track as the wait runs
  *   (Owen's comment C10:  "Prettier ring, with pill edges, not just border.  Should look distinct from the button
  *   itself";  2026-10-29:  "Start out light grey and fill in blue")
@@ -44,7 +47,7 @@ import sendButtonsCSS from "./EpicSendButtons.css?inline"
 export class EpicSendButtons extends E.UIComponent<typeof epicSendButtonsVocabulary> {
   @E.proto static vocabulary = epicSendButtonsVocabulary
   @E.protoMerged static elementSetup = {
-    styleSheets: { "epic-tooltip": tooltipCSS, "epic-send-buttons": sendButtonsCSS },
+    styleSheets: { "epic-tooltip": tooltipCSS, "epic-countdown-ring": ringCSS, "epic-send-buttons": sendButtonsCSS },
     delegatesFocus: false
   } satisfies Partial<E.ElementSetup>
 
@@ -145,7 +148,7 @@ export class EpicSendButtons extends E.UIComponent<typeof epicSendButtonsVocabul
         >
           <span class={GLYPH}>
             <ui-icon name={this.busy ? "circle notch" : "paper plane"} loading={this.busy ? "" : undefined} />
-            <Show when={this.isCounting}>{this.ring()}</Show>
+            <Show when={this.isCounting}>{CountdownRing.draw(() => this.fractionLeft, this.partForName("ring"))}</Show>
           </span>
           <Show when={(this.count ?? 0) > 0}>
             <span class={COUNT} part={this.partForName("count")}>
@@ -154,30 +157,6 @@ export class EpicSendButtons extends E.UIComponent<typeof epicSendButtonsVocabul
           </Show>
         </button>
       </span>
-    )
-  }
-
-  /**
-   * The countdown's ring round the plane:  a light grey track, and over it how
-   * much of the wait has gone, its ends round, filling in clockwise from the top.
-   */
-  private ring(): JSX.Element {
-    const done = () => (1 - this.fractionLeft) * 100
-    return (
-      <svg class={RING} part={this.partForName("ring")} viewBox="0 0 28 28" aria-hidden="true">
-        <circle class={TRACK} cx="14" cy="14" r="11.5" pathLength="100" />
-        <circle
-          class={[DONE, { [EMPTY]: done() < 0.5 }]}
-          cx="14"
-          cy="14"
-          r="11.5"
-          pathLength="100"
-          // 5% past the circle's start, turned back 18deg so it still starts at the top:  Chrome cuts a round cap off where
-          // it crosses a closed path's start point
-          transform="rotate(-18 14 14)"
-          style={{ "stroke-dasharray": `${done()} 100`, "stroke-dashoffset": "-5" }}
-        />
-      </svg>
     )
   }
 
@@ -196,7 +175,7 @@ export class EpicSendButtons extends E.UIComponent<typeof epicSendButtonsVocabul
     const countdown = this.pageCountdown!
     const when = countdown.isHeld
       ? this.translationForKey("held")
-      : this.translationForKey("counting", { time: minutesAndSeconds(countdown.msLeft) })
+      : this.translationForKey("counting", { time: CountdownRing.timeLeft(countdown.msLeft) })
     return `${words} · ${when}`
   }
 
@@ -216,13 +195,3 @@ const GROUP = "group"
 const SEND = "send"
 const COUNT = "count"
 const GLYPH = "glyph"
-const RING = "ring"
-const TRACK = "track"
-const DONE = "done"
-const EMPTY = "empty"
-
-/** `ms` as minutes and seconds, rounded up:  `1:42`, `0:05`. */
-function minutesAndSeconds(ms: number): string {
-  const seconds = Math.ceil(ms / 1000)
-  return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`
-}
