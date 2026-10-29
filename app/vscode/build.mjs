@@ -10,13 +10,14 @@
  *   bundles with (esbuild alone finds neither a name without its extension nor a folder's `index.ts`).
  * - Copies Spell UI's and Spell Brand's HTML and CSS data into `out/data/`, where `package.json` names them
  *   (`contributes.html.customData`, `contributes.css.customData`).
- *   - From the repos beside this one:  each one's `docs/__data/`, written by its `yarn site:data`.
+ *   - Each set's `docs/__data/`, written by its `yarn site:data`:  Spell UI's in the kit's `ui/` folder,
+ *     the brand's in spell-brand, beside the kit (an empty set without it).
  *   - So a vocabulary change shows in the editor after the next build and install (`yarn vscode`).
  * - Fails unless our `version` matches `spell`'s -- the two are pinned together.
  * - SIDE EFFECT: also builds `app`'s runner bundle, `dist-runner/`, for "Run Project".
  */
 import { execSync } from "child_process"
-import { copyFileSync, mkdirSync, readFileSync } from "fs"
+import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "fs"
 import { resolve } from "path"
 
 import { buildExtension } from "spell/toolchain/buildExtension"
@@ -34,13 +35,20 @@ if (version !== parserVersion) {
 // "Run Project"'s webview code lives in `app` -- see `RunnerPanel.ts`.
 execSync("yarn build:runner", { cwd: resolve(here, "../app"), stdio: "inherit" })
 
-// The HTML and CSS data, each set's, as `out/data/<repo>.<file>`.
-const DATA_REPOS = ["spell-ui", "spell-brand"]
+// The HTML and CSS data, each set's, as `out/data/<set>.<file>`:
+// - Spell UI's from the kit's `ui/` folder
+// - the brand's from spell-brand, a project BESIDE the kit;  without it (CI, someone else's checkout), an empty set
+const DATA_SETS = {
+  "spell-ui": resolve(here, "../../ui/docs/__data"),
+  "spell-brand": resolve(here, "../../../spell-brand/docs/__data")
+}
 const DATA_FILES = ["html-custom-data.json", "css-custom-data.json"]
 mkdirSync(resolve(here, "out/data"), { recursive: true })
-for (const repo of DATA_REPOS) {
+for (const [set, folder] of Object.entries(DATA_SETS)) {
   for (const file of DATA_FILES) {
-    copyFileSync(resolve(here, "../..", repo, "docs/__data", file), resolve(here, "out/data", `${repo}.${file}`))
+    const to = resolve(here, "out/data", `${set}.${file}`)
+    if (existsSync(resolve(folder, file))) copyFileSync(resolve(folder, file), to)
+    else writeFileSync(to, JSON.stringify({ version: 1.1 }))
   }
 }
 
