@@ -36,6 +36,10 @@
   //   checkout, a link to it in an epic's worktree.
   "contentFolder": "spell.epics",
 
+  // Its shared copy on GitHub:  every turn's commit pulls from it and pushes to it (epic `epic-friend` P5;  Owen's
+  // "do it", J18, 2026-10-29).  NEVER public:  it holds every epic page, guide and comment.
+  "contentRemote": "https://github.com/spell-app/spell-app.epics.git",
+
   // The branch worktrees start from and merge into.
   "baseBranch": "main",
 
