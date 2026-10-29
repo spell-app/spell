@@ -108,7 +108,7 @@ describe("<epic-send-buttons>", () => {
       expect(ring.getBoundingClientRect().width).toBeGreaterThan(part(group, "send")!.getBoundingClientRect().width + 6)
       vi.advanceTimersByTime(COUNTDOWN_MS / 2)
       await ElementFixture.settle()
-      const left = ring.querySelector<SVGCircleElement>(".left")!
+      const left = ring.querySelector<SVGCircleElement>(".done")!
       expect(parseFloat(left.style.strokeDasharray)).toBeCloseTo(50, 0)
       expect(getComputedStyle(left).strokeLinecap).toBe("round")
       expect(part(group, "send")!.title).toBe("Send 1 mark · sends by itself in 1:00;  click to send now")
@@ -174,7 +174,7 @@ describe("<epic-send-buttons>", () => {
       const second = await ElementFixture.render(`<epic-send-buttons state="unsent" countdown></epic-send-buttons>`)
       await ElementFixture.settle()
       const heard = asks(second)
-      const left = part(second, "ring")!.querySelector<SVGCircleElement>(".left")!
+      const left = part(second, "ring")!.querySelector<SVGCircleElement>(".done")!
       expect(parseFloat(left.style.strokeDasharray)).toBeCloseTo(50, 0)
       vi.advanceTimersByTime(COUNTDOWN_MS / 2)
       expect(heard).toEqual([true])

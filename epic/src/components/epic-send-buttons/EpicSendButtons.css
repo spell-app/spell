@@ -10,8 +10,8 @@
  * - Auto Send off with something not sent (`:state(waiting)`):  the plane FILLED blue, its icon white.
  * - The COUNTDOWN's ring (`countdown`, `:state(counting)`;  epic `epic-engine` P53, Owen's comment C10:  "Prettier ring,
  *   with pill edges, not just border.  Should look distinct from the button itself"):
- *   - round the plane, OUTSIDE its pill:  a 3px gap, then a 3px stroke over a faint track, its ends round
- *   - what's left of the wait, draining clockwise from the top (`stroke-dasharray` / `-dashoffset`, set each second
+ *   - round the plane, OUTSIDE its pill:  a 1px gap, then a 5px stroke over a light grey track, its ends round (Owen, 2026-10-29:  "ring can be tighter on the button", "make ring 2px thicker")
+ *   - how much of the wait has gone, filling in blue clockwise from the top (`stroke-dasharray`, set each second
  *     by the element, eased over the second)
  *   - the pill's own outline goes while it counts:  ring and button never read as one border
  *   - room kept for it on both sides whenever `countdown` is set, so nothing beside it moves as it comes and goes;
@@ -160,9 +160,9 @@
     padding-inline: var(--_ring-room);
   }
   :host {
-    /* the ring's diameter round the plane:  its round end, a 3px gap and a 3px stroke on each side */
-    --_ring: calc(var(--_size) + 10px);
-    --_ring-room: 5px;
+    /* the ring's diameter round the plane:  its round end, a 1px gap and a 5px stroke on each side */
+    --_ring: calc(var(--_size) + 12px);
+    --_ring-room: 6px;
   }
   /* while it counts, the pill's own outline goes:  the ring is the only border */
   :host(:state(counting)) .group:not([data-asks]) {
@@ -188,36 +188,34 @@
   }
   .ring circle {
     fill: none;
-    /* 3px at the plane's size (the 38-unit box drawn 38px wide) */
-    stroke-width: 3;
+    /* 5px at the plane's size (the 40-unit box drawn 40px wide);  its outer edge the box's */
+    stroke-width: 5;
   }
   .accept .ring circle {
     stroke-width: 4;
   }
-  /* a faint track:  the whole wait */
+  /* a light grey track:  the whole wait */
   .ring .track {
-    stroke: color-mix(in oklab, var(--_tint) 16%, transparent);
+    stroke: var(--_rule);
   }
-  /* what's left of it:  blue, its ends round (pill-shaped) */
-  .ring .left {
+  /* how much has gone:  blue, its ends round (pill-shaped) */
+  .ring .done {
     stroke: var(--_tint);
     stroke-linecap: round;
-    transition:
-      stroke-dasharray 1s linear,
-      stroke-dashoffset 1s linear;
+    transition: stroke-dasharray 1s linear;
   }
-  .accept .ring .left,
+  .accept .ring .done,
   .accept .ring .track {
     stroke: var(--_green);
   }
   .accept .ring .track {
     opacity: 0.25;
   }
-  .ring .left.empty {
+  .ring .done.empty {
     visibility: hidden;
   }
   @media (prefers-reduced-motion: reduce) {
-    .ring .left {
+    .ring .done {
       transition: none;
     }
   }

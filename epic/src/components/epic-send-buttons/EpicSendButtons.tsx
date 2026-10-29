@@ -23,8 +23,9 @@ import sendButtonsCSS from "./EpicSendButtons.css?inline"
  *   - Auto Send off (or no `countdown`) with something not sent:  FILLED blue, so it plainly waits for a press
  *     (`:state(waiting)`)
  * - the RING (`countdown`, the page's Auto Send on, something not sent):  round the plane, set apart from it, with
- *   rounded ends, draining clockwise over the wait (Owen's comment C10:  "Prettier ring, with pill edges, not just
- *   border.  Should look distinct from the button itself")
+ *   rounded ends, filling in blue clockwise over a light grey track as the wait runs
+ *   (Owen's comment C10:  "Prettier ring, with pill edges, not just border.  Should look distinct from the button
+ *   itself";  2026-10-29:  "Start out light grey and fill in blue")
  *   - every key, click or scroll on the page fills it again;  a note box being typed in holds it full
  *   - the plane's tooltip says how long is left, and that a click sends now
  *   - at the end the owner is asked to send (`auto` true), as a press would, waking the epic when nobody listens
@@ -171,21 +172,21 @@ export class EpicSendButtons extends E.UIComponent<typeof epicSendButtonsVocabul
   }
 
   /**
-   * The countdown's ring round the plane (or the stage button's check):  a faint track, and over it what's left of the
-   * wait, its ends round, draining clockwise from the top.
+   * The countdown's ring round the plane (or the stage button's check):  a light grey track, and over it how
+   * much of the wait has gone, its ends round, filling in clockwise from the top.
    */
   private ring(): JSX.Element {
-    const left = () => this.fractionLeft * 100
+    const done = () => (1 - this.fractionLeft) * 100
     return (
-      <svg class={RING} part={this.partForName("ring")} viewBox="0 0 38 38" aria-hidden="true">
-        <circle class={TRACK} cx="19" cy="19" r="17" pathLength="100" />
+      <svg class={RING} part={this.partForName("ring")} viewBox="0 0 40 40" aria-hidden="true">
+        <circle class={TRACK} cx="20" cy="20" r="17.5" pathLength="100" />
         <circle
-          class={[LEFT, { [EMPTY]: left() < 0.5 }]}
-          cx="19"
-          cy="19"
-          r="17"
+          class={[DONE, { [EMPTY]: done() < 0.5 }]}
+          cx="20"
+          cy="20"
+          r="17.5"
           pathLength="100"
-          style={{ "stroke-dasharray": `${left()} 100`, "stroke-dashoffset": `${left() - 100}` }}
+          style={{ "stroke-dasharray": `${done()} 100` }}
         />
       </svg>
     )
@@ -234,7 +235,7 @@ const COUNT = "count"
 const GLYPH = "glyph"
 const RING = "ring"
 const TRACK = "track"
-const LEFT = "left"
+const DONE = "done"
 const EMPTY = "empty"
 
 /** `ms` as minutes and seconds, rounded up:  `1:42`, `0:05`. */
