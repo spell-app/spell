@@ -460,6 +460,8 @@ The epic folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
     - `PluginInstall`:  `epic plugin install`, the plugin installed in Claude Code as `epic@spell`, in place from the
       kit's `epic/` (epic `epic-engine` P49, Q45):  Claude Code's three lists, the cache link, the skill links,
       `~/.local/bin/epic`, the old `spell-epic@spell-epic` taken out;  writes the files itself, safe to run again
+      - run from the published `spell` (no marketplace file, no `epic/bin`):  the plugin is the `spell-epic` package
+        beside it (`pluginFolder()`), the marketplace `spell` from GitHub
     - `EpicCheckout`:  the checkouts the verbs work with:  the caller's (`nearest()`), the one this code is in
       (`CODE_ROOT`);  `mustGit()`, a git run whose failure is the verb's own error
       - running git is the kit's `Git` (`spell/server/Git`), a checkout's main checkout without a git run its

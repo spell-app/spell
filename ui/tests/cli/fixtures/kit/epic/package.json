@@ -1,0 +1,9 @@
+{
+  "name": "spell-epic",
+  "private": true,
+  "spellPack": {
+    "name": "epics",
+    "prefix": "epic-",
+    "dir": "src"
+  }
+}

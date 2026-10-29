@@ -104,11 +104,11 @@ describe("<epic-send-buttons>", () => {
       expect(group.matches(":state(counting)")).toBe(true)
       // the pill's own outline goes while it counts:  ring and button never one border
       expect(getComputedStyle(part(group, "base")!).borderTopColor).toBe("rgba(0, 0, 0, 0)")
-      // set apart from the plane:  wider than its round end
-      expect(ring.getBoundingClientRect().width).toBeGreaterThan(part(group, "send")!.getBoundingClientRect().width + 6)
+      // never over the element's edge
+      expect(ring.getBoundingClientRect().height).toBeLessThanOrEqual(group.getBoundingClientRect().height + 0.5)
       vi.advanceTimersByTime(COUNTDOWN_MS / 2)
       await ElementFixture.settle()
-      const left = ring.querySelector<SVGCircleElement>(".left")!
+      const left = ring.querySelector<SVGCircleElement>(".done")!
       expect(parseFloat(left.style.strokeDasharray)).toBeCloseTo(50, 0)
       expect(getComputedStyle(left).strokeLinecap).toBe("round")
       expect(part(group, "send")!.title).toBe("Send 1 mark · sends by itself in 1:00;  click to send now")
@@ -174,7 +174,7 @@ describe("<epic-send-buttons>", () => {
       const second = await ElementFixture.render(`<epic-send-buttons state="unsent" countdown></epic-send-buttons>`)
       await ElementFixture.settle()
       const heard = asks(second)
-      const left = part(second, "ring")!.querySelector<SVGCircleElement>(".left")!
+      const left = part(second, "ring")!.querySelector<SVGCircleElement>(".done")!
       expect(parseFloat(left.style.strokeDasharray)).toBeCloseTo(50, 0)
       vi.advanceTimersByTime(COUNTDOWN_MS / 2)
       expect(heard).toEqual([true])

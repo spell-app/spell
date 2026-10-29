@@ -44,7 +44,7 @@ flowchart LR
     guides["@spell/guides"]
     tests["@spell/test, frozen"]
   end
-  subgraph yours["spell.spaces/, in the kit's folder:  in no repo"]
+  subgraph yours["spell.spaces/, beside the kit's folder:  in no repo"]
     own["owen@spell, your own"]
   end
   server --> app
@@ -90,7 +90,7 @@ The groups, and where each one's folder is:
 
 | Group | In the editor | Its folder | What's in it |
 | --- | --- | --- | --- |
-| `owen@spell` | Projects | `spell.spaces/@spell/owen@/`, in the kit's folder, in no repo | your own projects:  where `spell app create` makes one |
+| `owen@spell` | Projects | `spell.spaces/@spell/owen@/`, beside the kit's folder, in no repo | your own projects:  where `spell app create` makes one |
 | `@spell/examples` | Examples | [spaces/@spell/examples/](spaces/@spell/examples/), committed | the eleven example apps ([README-examples.md](README-examples.md)) |
 | `@spell/library` | Libraries | [spaces/@spell/library/](spaces/@spell/library/), committed | projects other projects import:  people |
 | `@spell/guides` | Guides | [spaces/@spell/guides/](spaces/@spell/guides/), committed | twelve guides, each a Spell program that reads as prose:  a first walkthrough, A tour of Spell, and how each example works ([README-examples.md](README-examples.md#guides--programs-that-read-as-prose)) |
@@ -110,7 +110,7 @@ Your own projects live in `owen@spell`, the editor's "Projects" list, and that's
 
 ## Setting up spaces for your own project
 
-Your spaces folder is `spell.spaces`, in the kit's folder and ignored by git:  `~/www/spell/spell.spaces/`.
+Your spaces folder is `spell.spaces`, beside the kit's folder:  `~/www/spell.spaces/`.
 It's ONE folder for the main checkout and every worktree, and it's in no git repo.
 A new checkout doesn't have one, and nothing makes it for you, so that's the first step.
 
@@ -122,7 +122,7 @@ What each printed on a real run is under it.
 
    ```sh
    cd ~/www/spell
-   mkdir -p spell.spaces/@spell/owen@
+   mkdir -p ../spell.spaces/@spell/owen@
    ```
 
    - It prints nothing.
@@ -139,8 +139,8 @@ What each printed on a real run is under it.
    <summary>What it printed</summary>
 
    ```text
-   spell.spaces/@spell/owen@/hello
-   Made hello:  try  spell run spell.spaces/@spell/owen@/hello
+   ../spell.spaces/@spell/owen@/hello
+   Made hello:  try  spell run ../spell.spaces/@spell/owen@/hello
    ```
 
    </details>
@@ -175,7 +175,7 @@ What each printed on a real run is under it.
 
    </details>
 
-   Its folder works too, `spell run spell.spaces/@spell/owen@/hello`, and so does `spell run` alone, inside it:
+   Its folder works too, `spell run ../spell.spaces/@spell/owen@/hello`, and so does `spell run` alone, inside it:
    each one says `Compiling owen@spell/hello`.
 
 4. Open it in the editor.
@@ -203,7 +203,7 @@ What each printed on a real run is under it.
 5. Add a file:  "New File" in the editor, or any file you make in the project's folder.
 
    ```sh
-   echo 'print "and more"' > spell.spaces/@spell/owen@/hello/more.spell
+   echo 'print "and more"' > ../spell.spaces/@spell/owen@/hello/more.spell
    spell run owen@spell/hello
    ```
 

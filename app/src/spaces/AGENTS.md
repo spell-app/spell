@@ -83,7 +83,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   | `@spell/test` | `spaces/@spell/test/`, committed and frozen (spell-parser's `tests/spaces/` until epic `spanish` P18) |
   | `owen@spell` | spell.spaces' `@spell/owen@/`, outside git |
 
-  - spell.spaces:  in the kit `spell`, at its main checkout's root (`~/www/spell/spell.spaces`):
+  - spell.spaces:  beside the kit's main checkout (`~/www/spell.spaces`):
     ONE folder for main and every worktree.
     - It was `../spell-spaces` before epic `repo-split` P8.
     - `SPELL_SPACES_DIR` sets it.
@@ -101,7 +101,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   | Name | Folder | Tests set it with |
   | --- | --- | --- |
   | `spaceFolders.builtins` | `spaces/`:  the built-in groups and the test projects, `testFilesRoot` | `SPELL_BUILTINS_DIR` |
-  | `spaceFolders.spaces`, `spellSpacesDir` | spell.spaces, at the kit's main checkout's root | `SPELL_SPACES_DIR` |
+  | `spaceFolders.spaces`, `spellSpacesDir` | spell.spaces, beside the kit's main checkout | `SPELL_SPACES_DIR` |
   | `buildDir` | `build/` at the app folder's root | `SPELL_BUILD_DIR` |
   | `repoDir`, `packagesDir` | the app folder's root, `app/` (its `src/`, `spaces/` and build folder are there) | |
   | `srcDir`, `coreDir`, `packageFolder()` | the parser folder's folders, found by package through `node_modules` | |

@@ -1,6 +1,6 @@
 /**
  * Check the epic page HEADER of epic `epic-engine` P53 (Send Countdown) in a real browser:  Send at the header's
- * middle with Auto Send's ring part-drained round the plane, the session's bare spinner beside it, the gear's menu with
+ * middle with Auto Send's ring part-filled round the plane, the session's bare spinner beside it, the gear's menu with
  * each sub-menu open (Auto Send, Theme), and a stage's Accept with its ring.
  *
  * Usage (from the epic folder):
@@ -9,7 +9,7 @@
  *   `src/demo/shots/send-header/epics/send-header/` (git-ignored);  its inbox written here:  a session listening and
  *   "Building P53" (so the spinner shows), one item marked and not sent (so the ring counts)
  * - the server:  a page server of its OWN (`DemoServer`), THIS checkout's pack and routes;  it wakes nobody
- * - the browser's clock is Playwright's:  45 seconds on, the ring is part-drained
+ * - the browser's clock is Playwright's:  45 seconds on, the ring is part-filled
  * - at 1200px and 400px (VS Code's side bar), light and dark;  measures:
  *   - the plane at the header's exact middle (1px), or narrow:  after the h1, before the right side, never over either
  *   - the ring round the plane, inside the header;  the spinner and the gear on the plane's middle line (1px)
@@ -92,7 +92,7 @@ if (problems.length) {
 // ## The header
 ////////////////
 
-/** The header at `width`, in `scheme`:  the ring part-drained, the spinner, the gear and its sub-menus. */
+/** The header at `width`, in `scheme`:  the ring part-filled, the spinner, the gear and its sub-menus. */
 async function header(width, scheme) {
   const tag = `${width}-${scheme}`
   writeInbox(NAME)
@@ -113,8 +113,8 @@ async function header(width, scheme) {
   if (measured.ring.right > measured.status.left + 0.5) problems.push(`${tag}:  the ring runs into the right side`)
   if (measured.ring.top < measured.header.top - 0.5 || measured.ring.bottom > measured.header.bottom + 0.5)
     problems.push(`${tag}:  the ring leaves the header (${JSON.stringify(measured.ring)})`)
-  if (!(measured.left > 0.5 && measured.left < 0.85))
-    problems.push(`${tag}:  the ring isn't part-drained (${measured.left})`)
+  if (!(measured.done > 0.15 && measured.done < 0.5))
+    problems.push(`${tag}:  the ring isn't part-filled (${measured.done})`)
   for (const name of ["spinner", "gear"])
     if (Math.abs(measured[name].centre - measured.plane.centre) > 1)
       problems.push(
@@ -230,14 +230,14 @@ function HELPERS() {
         centre: round(rect.top + rect.height / 2)
       }
     }
-    const left = sendRoot()?.querySelector(".ring .left")
+    const done = sendRoot()?.querySelector(".ring .done")
     return {
       header: box(page_().querySelector('[part~="header"]')),
       heading: box(page_().querySelector('[part~="heading"]')),
       status: box(page_().querySelector('[part~="status"]')),
       plane: box(sendRoot().querySelector('[part~="send"] .glyph')),
       ring: sendRoot().querySelector('[part~="ring"]') ? box(sendRoot().querySelector('[part~="ring"]')) : null,
-      left: left ? parseFloat(left.style.strokeDasharray) / 100 : null,
+      done: done ? parseFloat(done.style.strokeDasharray) / 100 : null,
       spinner: spinner() ? box(spinner()) : null,
       gear: box(gearButton())
     }
