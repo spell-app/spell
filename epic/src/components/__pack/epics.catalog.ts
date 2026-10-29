@@ -1,5 +1,5 @@
 /* GENERATED -- do not edit:  `spell pack build epics`, from every vocabulary, `<Name>.en.ts` */
-// sources:  57f425d584a5f358
+// sources:  53721c8e09d51a6d
 
 import type { RootCatalogEntry } from "spell/ui"
 
@@ -15,7 +15,7 @@ export const CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
   "epic-change": {"folder":"epic-change","attributes":["id","item","at","answer","accepted"]},
   "epic-choice-row": {"folder":"epic-choice-rows","attributes":["name","file","line","purpose","note","current","recommended"]},
   "epic-choice-rows": {"folder":"epic-choice-rows","skeleton":{"height":"8em"},"attributes":["stacked","no-file","blank","noun","reorder"]},
-  "epic-choices": {"folder":"epic-choices","attributes":["chosen"]},
+  "epic-choices": {"folder":"epic-choices","attributes":["chosen","chosen-on","chosen-note"]},
   "epic-choices-bar": {"folder":"epic-choices-bar","skeleton":{"height":"3em"},"attributes":[]},
   "epic-code": {"folder":"epic-code","attributes":["title","language","open"]},
   "epic-comment-pane": {"folder":"epic-comment-pane","attributes":["headline","about","saved","failed","deletable","near"]},

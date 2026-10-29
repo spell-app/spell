@@ -4,7 +4,9 @@
  * ONE card shape (a heading line, then the slotted body), calm (Owen, 2026-10-25:  "answer/reply cards are really
  * ugly, try to spiff them up"):  a white card, a 1px rule and one line of shadow, on the drawer's light body
  * - the answer:  a quiet line, no card (I111)
- * - a reply:  who said it first, as a small round mark and their name;  the date quiet at the right (`.dated`)
+ * - a reply:  who said it first, as a small round mark and their name (right after the fold chevron);
+ *   the date quiet at the right (`.dated`)
+ * - in an item's thread, every card is one of ONE section's frame (below, "The THREAD")
  *   - Claude's:  white, its mark Claude's terracotta
  *   - Owen's (`.owen`):  his violet, faint, as his comment box;  its mark violet
  * - More Details:  plain, its heading a small muted eyebrow that folds it
@@ -35,41 +37,55 @@
   }
 
   /*
-   * The THREAD (epic `epic-engine` P27, Owen's layout A):  an item's replies, a redundant answer's body and its
-   * status lines are ONE brown block, in the order said.  Each card in it carries the block's ground and padding,
-   * no gap between them;  the first rounds the top, the last the bottom (`AnswerThread`'s places, as `:state()`s).
-   * - its ground:  `--epic-thread-fill`, which the item's details set (inherited through the slot), else the same mix
+   * The THREAD (epic `epic-engine` P27;  ONE section since I152, Owen:  "This should read as one comment and its
+   * reply ... make them one section"):  an item's replies, a redundant answer's body and its status lines,
+   * in the order said, inside ONE card frame (`AnswerThread`'s places, as `:state()`s).
+   * - each card keeps its fill;  the frame's rule is the item's `--epic-thread-rule`, a thin rule between cards
+   * - no card corners, gaps or shadows of their own:  the frame's corners round at the thread's start and end
+   * - its head (the first reply):  its band is the section's header;  folded, the rest hides (`thread-hidden`) and
+   *   the head ends the frame
    */
   :host(:state(in-thread)) {
-    --_epic-thread-fill: var(--epic-thread-fill, color-mix(in oklab, var(--ui-text-color, #1d1d22) 4%, transparent));
+    --_epic-thread-rule: var(--epic-thread-rule, var(--epic-rule, var(--ui-border-color, light-dark(#e6e3ef, #34343b))));
     margin-top: 0;
-    padding: 4px 6px;
-    background: var(--_epic-thread-fill);
   }
   :host(:state(thread-start)) {
     margin-top: var(--epic-part-gap, 8px);
-    padding-top: 6px;
-    border-start-start-radius: 12px;
-    border-start-end-radius: 12px;
   }
-  :host(:state(thread-end)) {
-    padding-bottom: 6px;
-    border-end-start-radius: 12px;
-    border-end-end-radius: 12px;
+  :host(:state(thread-hidden)) {
+    display: none;
   }
-  /* a redundant answer's body, in the thread:  Owen's words on the block's ground, no card of their own */
-  :host(:state(redundant)) .answer {
-    border-color: transparent;
-    background: transparent;
+  :host(:state(in-thread)) :is(.answer, .reply) {
+    border: 1px solid var(--_epic-thread-rule);
+    border-block-end: none;
+    border-radius: 0;
+    box-shadow: none;
+  }
+  :host(:state(thread-start)) :is(.answer, .reply) {
+    border-start-start-radius: 10px;
+    border-start-end-radius: 10px;
+  }
+  :host(:state(thread-end)) :is(.answer, .reply) {
+    border-block-end: 1px solid var(--_epic-thread-rule);
+    border-end-start-radius: 10px;
+    border-end-end-radius: 10px;
+  }
+  /* a redundant answer's body, in the thread:  Owen's words on a card's fill, no band */
+  :host(:state(redundant):state(in-thread)) .answer {
+    background: var(--_epic-card-fill);
   }
   :host(:state(redundant)) .body {
-    padding: 2px 4px;
+    padding: 6px 10px;
   }
 
   /* Claude's newest reply, not seen yet:  an orange rule (changed since you looked), and NEW by its name */
   .reply.new {
     border-color: color-mix(in oklab, var(--ui-orange, #f2711c) 55%, transparent);
     box-shadow: 0 0 0 1px color-mix(in oklab, var(--ui-orange, #f2711c) 25%, transparent);
+  }
+  :host(:state(in-thread)) .reply.new {
+    border-color: var(--_epic-thread-rule);
+    box-shadow: inset 3px 0 0 color-mix(in oklab, var(--ui-orange, #f2711c) 70%, transparent);
   }
   .reply.new .who {
     flex: 0 1 auto;
@@ -147,6 +163,16 @@
     font-weight: 700;
     line-height: 1;
     vertical-align: 1px;
+  }
+  /* the fold chevron close to the avatar (I152:  "Too much space between collapse arrow and O avatar"):
+     back over the band's 12px column gap (kept for the date), so the chevron's stroke sits ~6px from the mark */
+  .reply .fold-button {
+    margin-inline-end: -10px;
+    padding-inline-end: 0;
+  }
+  /* folded:  the band alone, as much room under its words as over them */
+  :host(:not(:state(open))) .reply > .header {
+    padding-bottom: 6px;
   }
   .header[hidden] {
     display: none;

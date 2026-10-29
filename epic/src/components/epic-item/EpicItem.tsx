@@ -301,6 +301,12 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
     return AnswerThread.of(this.domElement, { said: this.saidShows() })
   })
 
+  /**
+   * Its thread folded by its head, the first reply (I152):  the rest of the thread hides, the said note too.
+   * - set by the head's fold (`ItemLink.foldThread()`);  page state, never written
+   */
+  @E.state accessor threadFolded = false
+
   /** Unfolded. */
   readonly isOpen = createMemo(() => !!this.isMarkedOpen && this.hasDetails())
 
@@ -651,8 +657,8 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
 
   /**
    * A marked note, its box closed:  just above the note box;  nothing without one.
-   * - in the item's thread, after its replies:  on the block's ground (`in-thread`;  `thread-end` when no status
-   *   line follows it)
+   * - in the item's thread, after its replies:  inside the thread's frame (`in-thread`;  `thread-end` when no status
+   *   line follows it), hidden while the thread's head is folded (`thread-hidden`)
    */
   private saidNote(): JSX.Element {
     return <Show when={this.reviewState.noted()}>{this.reviewControl("said", "said")}</Show>
@@ -678,7 +684,13 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
         under-line={shows === "note" && !this.hasDetails() ? "" : undefined}
         part={this.partForName(part)}
         class={
-          shows === "said" ? { [IN_THREAD]: !!this.thread().said, [THREAD_END]: !!this.thread().said?.end } : undefined
+          shows === "said"
+            ? {
+                [IN_THREAD]: !!this.thread().said,
+                [THREAD_END]: !!this.thread().said?.end,
+                [THREAD_HIDDEN]: !!this.thread().said && this.threadFolded
+              }
+            : undefined
         }
       />
     )
@@ -945,6 +957,7 @@ export interface EpicItem extends E.AttributeValues<EpicItemVocabulary> {}
 const FLOW = "flow"
 const IN_THREAD = "in-thread"
 const THREAD_END = "thread-end"
+const THREAD_HIDDEN = "thread-hidden"
 
 /** `EpicItem.scanChildren()`'s answer. */
 type ChildScan = {

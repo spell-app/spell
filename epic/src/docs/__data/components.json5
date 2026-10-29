@@ -159,15 +159,15 @@
         },
         {
           "name": "in-thread",
-          "description": "Redundant, with a body:  first in its item's thread's brown block."
+          "description": "Redundant, with a body:  first in its item's thread, inside its one frame."
         },
         {
           "name": "thread-start",
-          "description": "First in the thread's block."
+          "description": "First in the thread:  the frame's top edge and corners."
         },
         {
           "name": "thread-end",
-          "description": "Last in the thread's block."
+          "description": "Last in the thread:  the frame's bottom edge and corners."
         }
       ],
       "texts": [
@@ -1143,6 +1143,16 @@
           "name": "chosen",
           "kind": "string",
           "description": "The chosen option's `letter`, once answered;  absent while the question is open."
+        },
+        {
+          "name": "chosen-on",
+          "kind": "string",
+          "description": "The day Owen's pick was recorded (`epic inbox apply`, `epic choose`, a revisit's pick kept);  shown inside the unfolded Choices, with `chosen-note`."
+        },
+        {
+          "name": "chosen-note",
+          "kind": "string",
+          "description": "What recording the pick did, and what happens next:  `recorded as the answer;  waiting for a phase to take it up`.  Shown inside the unfolded Choices, so a pick needs no Noted card of its own (I153)."
         }
       ],
       "slots": [
@@ -1168,6 +1178,10 @@
         {
           "name": "panels",
           "description": "Answered:  the box of option panels, hidden while folded."
+        },
+        {
+          "name": "note",
+          "description": "Answered, with `chosen-on` or `chosen-note`:  the pick's line atop the panels, `Chosen 2026-10-29:  ...`."
         }
       ],
       "states": [
@@ -1204,6 +1218,21 @@
           "key": "chosen",
           "text": "Chosen:  {name}",
           "description": "After the heading:  the chosen option, `{name}` its letter and title (`B · Bananas`)."
+        },
+        {
+          "key": "chosenNote",
+          "text": "Chosen {date}:  {note}",
+          "description": "Atop the unfolded panels:  when the pick was recorded, `{date}`, and what happens next, `{note}`."
+        },
+        {
+          "key": "chosenOn",
+          "text": "Chosen {date}",
+          "description": "Atop the unfolded panels:  a pick with a day, no note."
+        },
+        {
+          "key": "chosenNoteOnly",
+          "text": "Chosen:  {note}",
+          "description": "Atop the unfolded panels:  a pick with a note, no day."
         }
       ]
     },
@@ -4499,7 +4528,7 @@
         "response",
         "note"
       ],
-      "description": "A reply on an item, after its answer:  `<from> · re: <re>` is drawn, the date at the right;  the reply is its children.  In an item, one of its thread's brown block;  Claude's newest wears an orange edge and NEW until Owen has seen it.",
+      "description": "A reply on an item, after its answer:  `<from> · re: <re>` is drawn, the date at the right;  the reply is its children.  In an item, one of its thread's section, one frame round them all, the first reply's fold folding the whole thread;  Claude's newest wears an orange edge and NEW until Owen has seen it.",
       "noun": "reply",
       "attributes": [
         {
@@ -4562,15 +4591,19 @@
         },
         {
           "name": "in-thread",
-          "description": "In its item's thread:  one of its brown block (`AnswerThread`)."
+          "description": "In its item's thread:  inside the thread's one frame (`AnswerThread`)."
         },
         {
           "name": "thread-start",
-          "description": "First in the thread's block:  its top corners rounded."
+          "description": "First in the thread:  the frame's top edge and corners."
         },
         {
           "name": "thread-end",
-          "description": "Last in the thread's block:  its bottom corners rounded."
+          "description": "Last in the thread, or its folded head:  the frame's bottom edge and corners."
+        },
+        {
+          "name": "thread-hidden",
+          "description": "After the thread's head, which is folded:  hidden with it."
         },
         {
           "name": "new",
@@ -5919,11 +5952,15 @@
         },
         {
           "name": "in-thread",
-          "description": "Its line in the item's thread's brown block, after the replies."
+          "description": "Its line in the item's thread, after the replies:  inside the thread's one frame."
         },
         {
           "name": "thread-end",
-          "description": "Last in the thread's block:  its bottom corners rounded."
+          "description": "Last in the thread:  the frame's bottom edge and corners."
+        },
+        {
+          "name": "thread-hidden",
+          "description": "The thread's head is folded:  hidden with the rest of the thread."
         }
       ],
       "texts": [
