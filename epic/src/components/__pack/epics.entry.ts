@@ -15,7 +15,7 @@ SpellUI.registerPack({
   catalog: CATALOG,
   families: {
     "epic-actions": "ddd7cd7f0e1e56e0",
-    "epic-agents": "a38e24f5ce892636",
+    "epic-agents": "76fbd2994d63a528",
     "epic-answer": "86baa98709e5fc1c",
     "epic-aside": "33b76a7a87a18cbe",
     "epic-ask": "7498e64dd50ca74c",
@@ -38,7 +38,7 @@ SpellUI.registerPack({
     "epic-option-form": "38fa7415d65a5e46",
     "epic-original": "011e4978d56b74b0",
     "epic-overview": "9ef7aa8ef2763ab6",
-    "epic-page": "faebde9204fe6878",
+    "epic-page": "bbc3345a2a1cfe96",
     "epic-page-note-head": "b521d8d69af75c68",
     "epic-phase": "03eaa1e4c9b682c3",
     "epic-prompt": "42cfbcee84d40a0e",

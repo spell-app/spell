@@ -1137,6 +1137,8 @@ describe("<epic-page> Agents running", () => {
     expect(agentsRoot(host).querySelector(".agents-pop")!.getAttribute("aria-label")).toBe("Agents running")
     // no panel above the blocks any more:  the button is the header's pill's last part (Owen, 2026-10-25)
     expect(host.shadowRoot!.querySelector('epic-agents[draws="agents"]')!.closest('[part~="step-pill"]')).not.toBeNull()
+    // ONCE:  the spinner beside Send draws no second button (Owen, 2026-10-29:  "agent pill appears twice?")
+    expect(agentsRoot(host, "spinner").querySelector(".agents-button")).toBeNull()
     expect(agentRows(host)).toEqual([
       ["demo-aaa", "active", "blue", "2h 5m", "Port the parser", []],
       [
