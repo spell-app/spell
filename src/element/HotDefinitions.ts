@@ -21,9 +21,14 @@ import { E } from "spell/element"
  * - The platform can't define a tag twice, so each tag's DOM element class STAYS,
  *   and what it reads is swapped in place (`redefine()`):
  *   its definition, its properties, how it builds its component.
- *   - Only when nothing the platform read once at definition changed
- *     (observed attributes, DOM API `formAssociated`, the base class, shadow root options);
- *     else `update()` reloads the page.
+ *   - What the platform read once at definition, and how a new version gets round it
+ *     (epic `epic-engine` I171:  every epic page reloaded at a merge that added attributes):
+ *     - observed attributes:  one it doesn't observe is watched on each element instead (`watchAttributes()`);
+ *       one dropped is still reported, and ignored
+ *     - a new version of the family's DOM element class (its pack ran again):  laid under the tag's class in place
+ *       of the old one, when the platform's lifecycle callbacks stay the same
+ *   - Anything else it read (DOM API `formAssociated`, another base class, a lifecycle callback, shadow root
+ *     options):  `update()` reloads the page.
  * - Then the barrel's `import.meta.hot.accept()` calls `update()`,
  *   which re-renders every live element of the swapped classes.
  *   - Their component-internal state (a query, an open menu) resets;  their attributes and properties don't.
@@ -121,47 +126,69 @@ export class HotDefinitions {
   static redefine(TagClass: E.DOMElementClass, Next: E.UIComponentClass, definition: E.ElementDefinition) {
     E.UIComponent.register.call(Next, definition)
     const next = E.UIComponent.tagSetupFor(Next, definition)
-    const reason = HotDefinitions.changeOf(TagClass, Next.prototype.elementSetup.DOMElement, next)
+    const Base = Next.prototype.elementSetup.DOMElement
+    const reason = HotDefinitions.changeOf(TagClass, Base, next)
     if (reason) {
       HotDefinitions.pending.refused.push({ tag: definition.tag, reason })
       return
     }
-    // dry run on a stand-in with the same chain:  a clash throws BEFORE anything changed
-    const Base = Object.getPrototypeOf(TagClass) as E.AnyDOMElementClass
+    // dry run on a stand-in with the new chain:  a clash throws BEFORE anything changed
     const Probe = class extends Base {} as unknown as E.DOMElementClass
     Probe.tagSetup = next
     E.DOMElement.defineProperties(Probe)
     const previous = TagClass.tagSetup.elementDefinition
     E.DOMElement.removeProperties(TagClass)
+    // a new version of the family's DOM class:  the tag's class (and so every live element) inherits from it now
+    if (Object.getPrototypeOf(TagClass) !== Base) {
+      Object.setPrototypeOf(TagClass, Base)
+      Object.setPrototypeOf(TagClass.prototype, Base.prototype)
+    }
     TagClass.tagSetup = next
     E.DOMElement.defineProperties(TagClass)
     for (const domElement of HotDefinitions.liveElements(TagClass)) {
       HotDefinitions.migrate(domElement, previous, definition)
+      HotDefinitions.watchAttributes(domElement)
     }
     HotDefinitions.pending.swapped.add(TagClass)
   }
 
   /**
    * Why `TagClass` can't take `next`, or `undefined` if it can.
-   * - All of these are read ONCE,
-   *   by DOM API `customElements.define()` or by the constructor of elements that already exist.
+   * - The platform read these ONCE, by DOM API `customElements.define()` or by the constructor of elements that
+   *   already exist.
+   * - Observed attributes changing is fine:  `watchAttributes()` hears the new ones.
+   * - `Base`, the DOM element class `next` names:  the tag's own base, or a NEW VERSION of it (`isNewVersionOf()`)
    */
   static changeOf(TagClass: E.DOMElementClass, Base: E.AnyDOMElementClass, next: E.TagSetup): string | undefined {
-    const before = TagClass.observedAttributes
-    const after = E.DOMElement.observedAttributesFor(next.elementDefinition)
-    const added = after.filter((name) => !before.includes(name))
-    const removed = before.filter((name) => !after.includes(name))
-    if (added.length || removed.length) {
-      const diff = [...added.map((name) => `+${name}`), ...removed.map((name) => `-${name}`)].join(" ")
-      return `observed attributes changed (${diff})`
-    }
-    if (Object.getPrototypeOf(TagClass) !== Base) return "DOM element class changed"
+    HotDefinitions.observedByPlatform(TagClass)
+    const Previous = Object.getPrototypeOf(TagClass) as E.AnyDOMElementClass
+    if (Previous !== Base && !HotDefinitions.isNewVersionOf(Base, Previous)) return "DOM element class changed"
     const formAssociated = !!(TagClass as unknown as { formAssociated?: boolean }).formAssociated
     if (formAssociated !== next.isAFormControl) return "formAssociated changed"
     if (JSON.stringify(TagClass.tagSetup.shadowRootInit) !== JSON.stringify(next.shadowRootInit)) {
       return "shadow root options changed"
     }
     return undefined
+  }
+
+  /**
+   * Is `Next` a new version of DOM element class `Previous`, which a tag's class can inherit from instead?
+   * - the same names, class by class, down to a class both share (`E.DOMElement`):  their module ran again
+   *   (a component pack swapped in)
+   * - and every DOM API lifecycle callback the same function:  the platform kept the ones it found at definition,
+   *   so a new one would never run
+   */
+  static isNewVersionOf(Next: E.AnyDOMElementClass, Previous: E.AnyDOMElementClass): boolean {
+    let next: Function | null = Next
+    let previous: Function | null = Previous
+    while (next !== previous) {
+      if (!next || !previous || next === E.DOMElement || next.name !== previous.name) return false
+      next = Object.getPrototypeOf(next) as Function | null
+      previous = Object.getPrototypeOf(previous) as Function | null
+    }
+    const nextPrototype = Next.prototype as unknown as Record<string, unknown>
+    const previousPrototype = Previous.prototype as unknown as Record<string, unknown>
+    return LIFECYCLE_CALLBACKS.every((name) => nextPrototype[name] === previousPrototype[name])
   }
 
   /**
@@ -220,12 +247,66 @@ export class HotDefinitions {
   // ## Live elements
   ////////////////
 
-  /** Remember `domElement` as a live element of its class;  weak, so tracking never keeps an element alive. */
+  /**
+   * Remember `domElement` as a live element of its class;  weak, so tracking never keeps an element alive.
+   * - an element made after its tag took a new attribute the platform doesn't observe hears it too
+   *   (`watchAttributes()`)
+   */
   static track(domElement: E.DOMElement) {
     const TagClass = domElement.constructor as E.DOMElementClass
     let refs = HotDefinitions.live.get(TagClass)
     if (!refs) HotDefinitions.live.set(TagClass, (refs = new Set()))
     refs.add(new WeakRef(domElement))
+    if (HotDefinitions.unobserved(TagClass).length) HotDefinitions.watchAttributes(domElement, "replay")
+  }
+
+  /**
+   * The attributes the platform observes for `TagClass`:  fixed when it was defined.
+   * - read the first time a new version comes (`changeOf()`), before its definition changes:
+   *   `observedAttributes` reads the CURRENT definition (`DOMElement`), not what the platform took
+   */
+  static observedByPlatform(TagClass: E.DOMElementClass): string[] {
+    let names = HotDefinitions.platformObserved.get(TagClass)
+    if (!names) HotDefinitions.platformObserved.set(TagClass, (names = [...TagClass.observedAttributes]))
+    return names
+  }
+
+  /** The attributes `TagClass`'s current definition observes and the platform doesn't (`watchAttributes()`). */
+  static unobserved(TagClass: E.DOMElementClass): string[] {
+    const platform = HotDefinitions.platformObserved.get(TagClass)
+    if (!platform || !TagClass.tagSetup) return []
+    return E.DOMElement.observedAttributesFor(TagClass.tagSetup.elementDefinition).filter(
+      (name) => !platform.includes(name)
+    )
+  }
+
+  /**
+   * Hear the attributes `domElement`'s tag observes now and the platform doesn't (a new version added them), as
+   * DOM API `attributeChangedCallback()` would:  a `MutationObserver` on the element calls it.
+   * - after the platform's reports:  a mutation observer's callback runs in a microtask
+   * - `replay`:  report the ones it has already too (an element made after the swap, its markup's attributes)
+   * - none left:  stops listening
+   */
+  static watchAttributes(domElement: E.DOMElement, replay?: "replay") {
+    const names = HotDefinitions.unobserved(domElement.constructor as E.DOMElementClass)
+    HotDefinitions.watchers.get(domElement)?.disconnect()
+    HotDefinitions.watchers.delete(domElement)
+    if (!names.length) return
+    const watcher = new MutationObserver((records) => {
+      for (const { attributeName, oldValue } of records) {
+        if (attributeName)
+          domElement.attributeChangedCallback(attributeName, oldValue, domElement.getAttribute(attributeName))
+      }
+    })
+    watcher.observe(domElement, { attributes: true, attributeFilter: names, attributeOldValue: true })
+    HotDefinitions.watchers.set(domElement, watcher)
+    if (!replay) return
+    queueMicrotask(() => {
+      for (const name of names) {
+        const text = domElement.getAttribute(name)
+        if (text !== null) domElement.attributeChangedCallback(name, null, text)
+      }
+    })
   }
 
   /** Every element of `TagClass` still in memory, connected or not. */
@@ -258,6 +339,7 @@ export class HotDefinitions {
    * Carry `domElement`'s values over to the `next` definition.
    * - Last written as a PROPERTY:  kept as is (a framework's rich data, a controlled value).
    * - Last written by its ATTRIBUTE:  converted again (a vocabulary that learned a value).
+   * - New, and the element has its attribute:  converted from it.
    * - Never written:  the new starting value.
    * - Attributes the new definition dropped are dropped.
    */
@@ -272,7 +354,7 @@ export class HotDefinitions {
       if (attribute.key === "visible" && next.takesShared("visible")) {
         kept[attribute.key] = !domElement.hasAttribute("hidden")
       } else if (source === "property") kept[attribute.key] = values[attribute.key]
-      else if (source === "attribute") {
+      else if (source === "attribute" || (!isKnown && domElement.hasAttribute(attribute.attribute))) {
         kept[attribute.key] = next.convert(attribute, domElement.getAttribute(attribute.attribute))
       } else kept[attribute.key] = next.startingValue(attribute)
     }
@@ -318,6 +400,12 @@ export class HotDefinitions {
   /** Where each element's attribute values last came from, by key:  `migrate()` reads it. */
   private static readonly sources = new WeakMap<E.DOMElement, Record<string, E.ValueSource>>()
 
+  /** The attributes the platform observes, per tag class, as it defined it (`observedByPlatform()`). */
+  private static readonly platformObserved = new WeakMap<E.DOMElementClass, string[]>()
+
+  /** Each element's watcher of the attributes the platform doesn't observe (`watchAttributes()`). */
+  private static readonly watchers = new WeakMap<E.DOMElement, MutationObserver>()
+
   /** Swaps and refusals since the last `update()`. */
   private static readonly pending = {
     swapped: new Set<E.DOMElementClass>(),
@@ -327,6 +415,19 @@ export class HotDefinitions {
   /** `UIComponent.define` as declared, once `install()` has run. */
   private static original?: typeof E.UIComponent.define
 }
+
+/** DOM API:  the lifecycle callbacks the platform reads once, as it defines a tag (`isNewVersionOf()`). */
+const LIFECYCLE_CALLBACKS = [
+  "connectedCallback",
+  "disconnectedCallback",
+  "adoptedCallback",
+  "connectedMoveCallback",
+  "attributeChangedCallback",
+  "formAssociatedCallback",
+  "formResetCallback",
+  "formDisabledCallback",
+  "formStateRestoreCallback"
+]
 
 /** What defined one tag:  enough to define it again with a new version of the class. */
 type HotTag = {

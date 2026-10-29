@@ -37,21 +37,41 @@ describe("<epic-state-filter>", () => {
     await expectAccessible(host)
   })
 
-  // epic `epic-engine` I157 (Owen, 2026-10-29:  "badges for 'undone|updated|complete'")
-  test("a phase's states:  undone yellow, updated orange, complete green, in that order, their own words", async () => {
+  // epic `epic-engine` I157, recoloured in I170 (Owen, 2026-10-29:  "this doesn't match our other colors")
+  test("a phase's states (`phases`):  Owen's order and colours, scheduled dotted, working in the blue badge", async () => {
     const host = await ElementFixture.render(
-      `<epic-state-filter counts="complete:49 undone:1 updated:3" shown="undone updated"></epic-state-filter>`
+      `<epic-state-filter phases counts="old:40 recent:2 scheduled:5 progress:1 updated:3 attention:1" ` +
+        `shown="attention updated scheduled progress"></epic-state-filter>`
     )
-    expect(chips(host)).toEqual(["undone:1+", "updated:3+", "complete:49"])
-    expect(["undone", "updated", "complete"].map((state) => chip(host, state).dataset.color)).toEqual([
-      "yellow",
-      "orange",
-      "green"
+    expect(chips(host)).toEqual(["attention:1+", "updated:3+", "scheduled:5+", "recent:2", "old:40"])
+    const looks = ["attention", "updated", "scheduled", "recent", "old"].map(
+      (state) =>
+        `${chip(host, state).dataset.color}${chip(host, state).dataset.fill ? ` ${chip(host, state).dataset.fill}` : ""}`
+    )
+    expect(looks).toEqual(["red", "orange", "blue dotted", "green", "grey"])
+    // working counts in the one blue badge, as an item's `progress`
+    const badge = host.shadowRoot!.querySelector<HTMLElement>(".marked")!
+    expect([badge.textContent, badge.title]).toEqual([
+      "1",
+      "1 with Claude:  under way, being worked on, or marked in this pass"
     ])
-    expect(chip(host, "updated").title).toBe(
-      "3 with news for you (a plan to accept, or changed):  hide these\n⌥-click:  show only these"
+    expect(chip(host, "attention").title).toBe(
+      "1 need you:  a plan to accept, or a choice open:  hide these\n⌥-click:  show only these"
     )
-    expect(chip(host, "complete").title).toBe("49 done:  show everything\n⌥-click:  show only these")
+    expect(chip(host, "updated").title).toBe("3 changed since you looked:  hide these\n⌥-click:  show only these")
+    expect(chip(host, "scheduled").title).toBe("5 scheduled, not running yet:  hide these\n⌥-click:  show only these")
+    expect(chip(host, "recent").title).toBe("2 done in the last 3 days:  show these too\n⌥-click:  show only these")
+    expect(chip(host, "old").title).toBe("40 done a while ago:  show these too\n⌥-click:  show only these")
+    // the dotted chip:  its outline dotted, never filled, its count in its blue
+    const dotted = getComputedStyle(chip(host, "scheduled"))
+    expect([dotted.borderTopStyle, dotted.backgroundColor, dotted.color === dotted.borderTopColor]).toEqual([
+      "dotted",
+      "rgba(0, 0, 0, 0)",
+      true
+    ])
+    // without `phases`, the same names are an item's:  its own words, no dotted chip
+    const items = await ElementFixture.render(`<epic-state-filter counts="attention:1 recent:2"></epic-state-filter>`)
+    expect(chip(items, "attention").title).toBe("1 needs attention:  show only these\n⌥-click:  show only these")
     await expectAccessible(host)
   })
 

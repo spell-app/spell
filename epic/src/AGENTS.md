@@ -1223,9 +1223,11 @@ In `tools/`:
     - Badges count the block's items waiting on Owen, by each item's state AS DRAWN (`DrawnState`, `EpicItem.types.ts`:
       the one rule its id chip, its section's chips and blue badge and the toolbar share;  an item being worked on is
       blue, never red;  Owen, 2026-10-26:  "badges don't match up")
-      - red:  urgent (`state="attention"`)
+      - red:  urgent (`state="attention"`);  on the Phases button, the phases drawn red (a plan waiting for his
+        Accept, a choice open:  `PhaseState`, epic `epic-engine` I170)
       - orange:  Claude replied with options for him to pick (`state="replied"`)
-      - blue, on the Phases button:  phases under way, or being worked on
+      - blue, on the Phases button:  phases under way, or being worked on, and drawn blue:  one changed since he looked
+        is orange first, and not counted (I170)
       - a block's count changing with the inbox alone fires `epic-count-changed`;  the runtime counts them again
       - both kinds, both badges;  none, none
       - over the icon's top right, a third of a badge on the icon
@@ -1288,6 +1290,18 @@ In `tools/`:
       - everything showing:  only that state
       - else a hidden one shows too, and a shown one hides
       - the only one showing:  everything again
+    - The PHASES section's chips (`<epic-state-filter phases>`, epic `epic-engine` I157;  recoloured in I170, Owen,
+      2026-10-29:  "this doesn't match our other colors"):  ONE state per phase, the first that holds (`PhaseState`,
+      `epic-section/PhaseState.ts`, the one rule its chips, counts, toolbar badges and each phase's status circle use)
+      - red (`attention`):  its plan waits for his Accept (not the doc pass), or a choice set in it is open
+        (`choices-open`, P50)
+      - orange (`updated`):  changed since he looked:  `to-see` updates neither Seen nor quiet (3 days, I168)
+      - blue (`progress`):  under way, or Claude at work on it;  counted in the blue badge, as an item's
+      - DOTTED blue (`scheduled`):  still to do, nothing above;  the chip a dotted outline, never filled, faded while
+        hidden;  the circle dotted too
+      - green (`recent`):  done in the last 3 days (`done-at`, which the tool stamps, and takes from the log for an
+        older done phase);  grey (`old`):  done before, or no `done-at`
+      - each phase's status circle wears its chip's colour and fill (`data-state`), its shape still its status
     - An ⌥-click (Alt-click) on ANY chip, every list's and an epic page's alike:  only that state, whatever showed
       (epic `epic-engine` I166;  Owen, 2026-10-29:  "if I option-click on one of those badges, turn just that one on").
       - the element sends it as `how: "only"` (`StateFilter.nextShown(..., "only")`);  each chip's tooltip says so
@@ -1755,9 +1769,9 @@ Each kind of page has ONE name, written everywhere a person reads it.
     - A revisit with a pick is left, "to talk over".
   - `<name>#<id> working on|off`:  an item, a comment, or a PHASE by number or id (`P20`, `p-one-repo`;  epic
     `epic-engine` I147), kept under its stable id
-    - a phase worked on (not done):  its status icon a blue turning spinner, the header's, its tooltip "Claude is
-      writing this phase's plan" (to do, plan not accepted) or "Claude is working on it";  counted in the Phases
-      section's blue badge and the toolbar's
+    - a phase worked on (not done):  its status icon a turning spinner, the header's, its tooltip "Claude is
+      writing this phase's plan" (to do, plan not accepted) or "Claude is working on it";  blue, and counted in the
+      Phases section's blue badge and the toolbar's, unless it's red or orange first (`PhaseState`, I170)
     - Claude writing a phase's plan:  `epic phase <name>#P20 planning [off]`;  `update #P20 --goal ...` on a phase
       whose plan isn't accepted sets it by itself, and `--plan` (now waiting for Owen) ends it
   - `<name>#<id> done`:  keeps a mark Owen changed meanwhile
@@ -2110,8 +2124,11 @@ Each kind of page has ONE name, written everywhere a person reads it.
             one taken before:  "<epic> P<n>", at `#p<n>`
       - A green Done line once closed:  a check, "That's good." or "Skipped", the commit Claude named.
         A faint green ring, the same way.
-      - While Claude THINKS about it (the comment's `working`):  "Claude: thinking…" last, in Claude's box.
-        - its words violet and italic, a turning `circle notch`, its time when he started
+      - While Claude THINKS about it (the comment's `working`):  "Claude: thinking…" last, in a box of its own.
+        - the page's BLUE, Claude at work on it (the Underway card's, a phase's spinner;  epic `epic-engine` I169;
+          Owen, 2026-10-29:  "Seems like this should be blue?"):  a light blue box, a faint blue ring, its words blue and
+          italic, "Claude:" in the ink;  violet before, his voice's colour
+        - a turning `circle notch`, its time when he started
         - His answer takes its place.
         - Owen, 2026-10-10:
           "What does it look like when you're thinking?  You could put in a stub and replace that when you've thought".
