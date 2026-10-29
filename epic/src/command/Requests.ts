@@ -468,6 +468,11 @@ export class Requests {
     if (!Git.run(["rev-parse", "--verify", "--quiet", `refs/heads/${epic}`], main).ok) {
       throw new EpicCommandError(`merge:  no branch '${epic}'`)
     }
+    // an OLD-LAYOUT worktree (epic-engine's P49):  its child-repo branches' work isn't in the branch until it crosses
+    const config = new EpicConfig(main)
+    const worktree = config.worktreeFolder(epic)
+    const said = config.leftBehindSaid(worktree, config.leftBehind(worktree))
+    if (said) throw new EpicCommandError(`merge:  ${said};  nothing merged`)
     if (!Git.run(["merge-base", "--is-ancestor", base, epic], main).ok) {
       throw new EpicCommandError(
         `merge:  ${label}'s ${base} has moved since ${epic} last took it:  in its worktree, epic worktree merge-main, ` +
@@ -491,7 +496,9 @@ export class Requests {
     const main = Git.mainRoot(cwd)
     const top = new EpicConfig(main).top
     if (!top) return [Requests.merge(epic, cwd, { ditch })]
-    const repos = top.repoCheckouts(epic).flatMap(({ repo, main: checkout }) => {
+    // an old-layout child checkout found inside (`found`):  `mergeCheck()` refuses it until it crosses over
+    const repos = top.repoCheckouts(epic).flatMap(({ repo, main: checkout, found }) => {
+      if (found) return []
       const base = new EpicConfig(checkout).baseBranch
       if (!Git.run(["rev-parse", "--verify", "--quiet", `refs/heads/${epic}`], checkout).ok) return []
       const ahead = Number(Git.run(["rev-list", "--count", `${base}..${epic}`], checkout).out || 0)

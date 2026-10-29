@@ -79,6 +79,19 @@
  *     (once, for the whole folder), each child's worktree and branch go, then the top's
  * - A single repo (no `repos`, other people's setups):  everything above, as before.
  *
+ * ## The kit after repo-split's P20 · One Repo (epic-engine's P49)
+ * - ONE repo:  its `repos` file lists only PEERS (`"peer": true`, spell-brand), so an epic's worktree is the kit's
+ *   alone, made as a single repo's;  a peer is never part of it (Q50 D).
+ * - Run in a PEER (spell-brand, whose settings say `{ "top": "../spell" }`):  its lone worktree, in its own
+ *   `../spell-brand.worktrees/<name>/`, then its own install;  the content folder and windows are the kit's.
+ * - `create` copies the main checkout's `page-server.local.json5` (the outside projects the page server serves,
+ *   spell-brand's Brand tab) into a new worktree, its paths made absolute:  it's git-ignored, so a worktree lacks it.
+ * - `create` reusing a branch cut BEFORE P20:  the kit's worktree only;  an old clone (`oldLayout.oldClones`,
+ *   `~/www/spell.old/`) that still has the branch is named, with how to cross it over.
+ * - `remove` of an OLD-LAYOUT worktree (a worktree of an old child repo still inside, `spell-ui/` ...:
+ *   `EpicConfig.foundCheckouts()`):  KEPT while one holds commits of its own, not crossed over
+ *   (`EpicConfig.leftBehind()`);  else each is removed first, from its old clone.
+ *
  * ## remove
  * - stdin `{ worktree_path, cwd, ... }`.
  * - Runs on `ExitWorktree` `remove` (only with `discard_changes: true`), at session exit, and when an agent finishes.
@@ -92,7 +105,17 @@
  * - Then removes the worktree's saved-session link, if it IS a link to the main checkout's folder.
  */
 import { execFileSync, spawnSync } from "node:child_process"
-import { existsSync, lstatSync, mkdirSync, readFileSync, readlinkSync, realpathSync, symlinkSync } from "node:fs"
+import {
+  existsSync,
+  lstatSync,
+  mkdirSync,
+  readdirSync,
+  readFileSync,
+  readlinkSync,
+  realpathSync,
+  symlinkSync,
+  writeFileSync
+} from "node:fs"
 import { basename, dirname, isAbsolute, join, relative, resolve } from "node:path"
 
 import { Git } from "spell/server/Git"
@@ -104,6 +127,9 @@ import { SessionFolders } from "spell/epic/config/SessionFolders.ts"
 
 /** This plugin's `bin/epic`:  `hooks/` is beside `bin/`. */
 const EPIC = join(dirname(import.meta.dirname), "bin", "epic")
+
+/** The main checkout's git-ignored page server settings, copied into a new worktree (`copyLocalServer()`). */
+const LOCAL_SERVER = "page-server.local.json5"
 
 /** Allowed worktree / branch names. */
 const NAME = /^[A-Za-z0-9][A-Za-z0-9._-]*$/
@@ -191,6 +217,8 @@ class Worktree {
     Worktree.git(root, "worktree", "add", "--quiet", ...args)
     Worktree.patch(path, reused)
     Worktree.linkOutside(path, root)
+    Worktree.copyLocalServer(path, root)
+    if (reused) Worktree.sayOldClones(name, config)
     Worktree.linkShared(path, config)
     if (config.linkSessionFolders) Worktree.linkSessions(path, root)
     // `installCommand: ""`:  a repo with nothing to install
@@ -231,6 +259,60 @@ class Worktree {
     if (top.linkSessionFolders) for (const each of made) Worktree.linkSessions(each, top.main)
     if (top.installOnCreate && top.installCommand) Worktree.installAll(path, top)
     return path
+  }
+
+  /**
+   * Copy main checkout `root`'s `page-server.local.json5` into new worktree `path`, its `projects` made absolute
+   * (epic-engine's P49):  the outside projects the page server serves (spell-brand's Brand tab, Q49), which a
+   * worktree lacks, the file being git-ignored.
+   * - nothing when main has none, or the worktree has one already;  a file that won't read or write is a warning
+   */
+  static copyLocalServer(path, root) {
+    const from = join(root, LOCAL_SERVER)
+    const to = join(path, LOCAL_SERVER)
+    if (!existsSync(from) || existsSync(to)) return
+    try {
+      const data = EpicConfig.parse(readFileSync(from, "utf8"), from)
+      const projects = Array.isArray(data?.projects) ? data.projects : []
+      const absolute = {
+        ...data,
+        projects: projects.map((each) => (typeof each === "string" ? resolve(root, each) : each))
+      }
+      const said = `// Copied from ${from} by the worktree hook, its projects made absolute:  the main checkout's own.\n`
+      writeFileSync(to, `${said}${JSON.stringify(absolute, null, 2)}\n`)
+      console.error(`worktree hook:  ${LOCAL_SERVER} copied from the main checkout`)
+    } catch (error) {
+      console.error(`worktree hook:  ${LOCAL_SERVER} not copied (${error.message})`)
+    }
+  }
+
+  /**
+   * Reusing branch `name` in a repo that absorbed its child repos (repo-split's P20 · One Repo, `oldLayout`):
+   * say which old clones (`oldLayout.oldClones`) still have a branch `name`, and how to cross it over.
+   * - their work isn't in the kit's branch until it crosses;  the hook makes the kit's worktree alone, never theirs
+   */
+  static sayOldClones(name, config) {
+    const { oldClones, carryOn } = config.oldLayout
+    if (!oldClones) return
+    const folder = resolve(config.main, oldClones)
+    let clones = []
+    try {
+      clones = readdirSync(folder).filter((repo) => existsSync(join(folder, repo, ".git")))
+    } catch {
+      return
+    }
+    const holding = clones.filter(
+      (repo) =>
+        spawnSync("git", ["rev-parse", "--verify", "--quiet", `refs/heads/${name}`], { cwd: join(folder, repo) })
+          .status === 0
+    )
+    if (!holding.length) return
+    console.error(
+      `worktree hook:  branch ${name} was cut before the one repo:  ${holding.join(", ")} in ${folder} still ` +
+        `${holding.length > 1 ? "have" : "has"} a branch ${name}.  To cross it over, check each out inside the worktree ` +
+        `(\`git -C ${join(folder, holding[0])} worktree add <worktree>/${holding[0]} ${name}\`), then ` +
+        `\`epic worktree merge-main\` there (it runs \`${carryOn || "the carry-on command"}\`)`
+    )
   }
 
   /**
@@ -407,12 +489,21 @@ class Worktree {
     const base = config.baseBranch
     const branch = Worktree.git(path, "branch", "--show-current")
     if (Worktree.git(path, "status", "--porcelain")) throw new Error(`kept ${path}:  it has uncommitted changes`)
+    // an OLD-LAYOUT worktree (epic-engine's P49):  a child checkout inside still holding work of its own keeps it
+    const said = config.leftBehindSaid(path, config.leftBehind(path))
+    if (said) throw new Error(`kept ${path}:  ${said}`)
+    const found = config.oldCheckouts(path)
+    for (const each of found)
+      if (Worktree.git(each.worktree, "status", "--porcelain"))
+        throw new Error(`kept ${path}:  ${each.repo} (${each.worktree}) has uncommitted changes`)
     const into = branch && Worktree.mergedInto(root, branch)
     if (branch && !into) {
       const owner = branch.match(OWNED_AGENT)?.[1]
       throw new Error(`kept ${path}:  branch ${branch} has commits ${owner ?? base} doesn't;  merge it first`)
     }
     const servers = Worktree.stopServers(path)
+    // the old child checkouts first:  they're inside it
+    for (const each of found) Worktree.git(each.main, "worktree", "remove", each.worktree)
     Worktree.git(root, "worktree", "remove", path)
     // `-d` checks against the base branch only:  in its owner's branch alone (checked above) needs `-D`
     if (branch) Worktree.git(root, "branch", into === base ? "-d" : "-D", branch)

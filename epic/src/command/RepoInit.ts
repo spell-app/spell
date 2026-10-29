@@ -139,6 +139,7 @@ export class RepoInit {
    * - `checkoutPatches`:  none (`[]`);  the file shows one, in a comment
    * - `promptAck`:  on, the default
    * - `renamedRepos`:  none (`{}`);  the file shows one, in a comment
+   * - `top`, `oldLayout`:  none, the defaults (a peer of a kit, or a repo that absorbed others, says so by hand)
    * - static:  needs no instance
    */
   static settingsFor(main: string): EpicSettings {
@@ -164,7 +165,9 @@ export class RepoInit {
       pageVoices: { ...EpicConfig.DEFAULTS.pageVoices },
       checkoutPatches: [],
       promptAck: true,
-      renamedRepos: {}
+      renamedRepos: {},
+      top: "",
+      oldLayout: { ...EpicConfig.DEFAULTS.oldLayout }
     }
   }
 
